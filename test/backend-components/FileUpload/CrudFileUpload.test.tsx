@@ -199,6 +199,7 @@ const renderUpload = (
 		/** What the file is shown as, relative to the server: added, removed or nothing */
 		changeOf: (name: string) => labelOf(name).getAttribute("data-cc-change"),
 		hasRestore: (name: string) => !!iconOf(name, "RestoreFromTrashIcon"),
+		hasRemove: (name: string) => !!iconOf(name, "CancelOutlinedIcon"),
 		remove: (name: string) =>
 			click(iconOf(name, "CancelOutlinedIcon"), `remove button for ${name}`),
 		restore: (name: string) =>
@@ -609,9 +610,9 @@ describe("CrudFileUpload", () => {
 		expect(connector.creates).toBe(1);
 	});
 
-	it("leaves read-only additional files alone", async () => {
-		const backend = new RecordingConnector(SERVER_FILES);
-		const additionalFiles: FileData<FileMeta>[] = [
+	describe("additional files", () => {
+		// an extra built by hand, which is all FileData<FileMeta> promises
+		const PLAIN_EXTRA: FileData<FileMeta>[] = [
 			{
 				file: {
 					name: "terms.txt",
@@ -622,15 +623,83 @@ describe("CrudFileUpload", () => {
 				delete: false,
 			},
 		];
-		const ui = renderUpload({ connector: lazyOver(backend), additionalFiles });
-		await loaded(ui);
-		expect(ui.names()).toContain("terms.txt");
+		// ...and one loaded from another model's backend and put through the same
+		// deserializer, so it carries an id and is shaped exactly like one of ours.
+		// FileData<BackendFileMeta> is assignable to FileData<FileMeta>, so nothing
+		// warns about it.
+		const BACKEND_EXTRA: FileData<BackendFileMeta>[] = [
+			{
+				file: {
+					name: "manual.pdf",
+					type: "application/pdf",
+					downloadLink: "#manual",
+					id: "99",
+				},
+				canBeUploaded: false,
+				delete: false,
+			},
+		];
 
-		await ui.remove("document.pdf");
+		it("leaves them alone when a real file changes", async () => {
+			const backend = new RecordingConnector(SERVER_FILES);
+			const ui = renderUpload({
+				connector: lazyOver(backend),
+				additionalFiles: PLAIN_EXTRA,
+			});
+			await loaded(ui);
+			expect(ui.names()).toContain("terms.txt");
 
-		// they belong to whoever passed them, so a change to the real files neither
-		// drops nor duplicates them
-		await waitFor(() => expect(ui.changeOf("document.pdf")).toBe("removed"));
-		expect(ui.names().filter((name) => name === "terms.txt")).toHaveLength(1);
+			await ui.remove("document.pdf");
+
+			// they belong to whoever passed them, so a change to the real files neither
+			// drops nor duplicates them
+			await waitFor(() => expect(ui.changeOf("document.pdf")).toBe("removed"));
+			expect(ui.names().filter((name) => name === "terms.txt")).toHaveLength(1);
+		});
+
+		it("keeps one that carries an id out of its own files", async () => {
+			const backend = new RecordingConnector(SERVER_FILES);
+			const ui = renderUpload({
+				connector: lazyOver(backend),
+				additionalFiles: BACKEND_EXTRA,
+			});
+			await loaded(ui);
+			expect(ui.names()).toEqual(["document.pdf", "image.png", "manual.pdf"]);
+
+			await ui.addFile(pick("notes.txt"));
+
+			// the control is handed back its own list with the extras in it, and has to
+			// hand them back out again: an extra taken into state is listed twice, once
+			// from each
+			await waitFor(() => expect(ui.names()).toContain("notes.txt"));
+			expect(ui.names()).toEqual([
+				"document.pdf",
+				"image.png",
+				"notes.txt",
+				"manual.pdf",
+			]);
+
+			// ...and every further change folds the list into itself again
+			await ui.addFile(pick("second.txt"));
+			await waitFor(() => expect(ui.names()).toContain("second.txt"));
+			expect(ui.names()).toHaveLength(5);
+			expect(ui.names().filter((name) => name === "manual.pdf")).toHaveLength(
+				1,
+			);
+		});
+
+		it("offers no remove button for them", async () => {
+			const backend = new RecordingConnector(SERVER_FILES);
+			const ui = renderUpload({
+				connector: lazyOver(backend),
+				additionalFiles: BACKEND_EXTRA,
+			});
+			await loaded(ui);
+
+			// read-only, and not this control's records: removing one would send a
+			// delete for id 99 against a backend where 99 is something else entirely
+			expect(ui.hasRemove("manual.pdf")).toBe(false);
+			expect(ui.hasRemove("document.pdf")).toBe(true);
+		});
 	});
 });
