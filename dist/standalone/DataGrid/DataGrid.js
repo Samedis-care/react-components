@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, } from "react";
+import React, { useCallback, useContext, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, } from "react";
 import { Box, Collapse, Divider, Grid, IconButton, ListItem, Paper, styled, Typography, useTheme, useThemeProps, } from "@mui/material";
 import { Apps as AppsIcon, Search as SearchIcon } from "@mui/icons-material";
 import Header from "./Header";
@@ -10,7 +10,7 @@ import debounce from "../../utils/debounce";
 import isObjectEmpty from "../../utils/isObjectEmpty";
 import measureText from "../../utils/measureText";
 import shallowCompareArray from "../../utils/shallowCompareArray";
-import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
+import { dataGridApplyRowUpdate, dataGridPrepareFiltersAndSorts, } from "./CallbackUtil";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
 import CustomFilterDialog from "./CustomFilterDialog";
 import StatePersistence, { DataGridPersistentStateContext, } from "./StatePersistence";
@@ -404,7 +404,7 @@ export const getDefaultColumnWidths = (columns, theme) => {
     });
     return widthData;
 };
-const DataGrid = (inProps) => {
+const DataGrid = (inProps, ref) => {
     const props = useThemeProps({ props: inProps, name: "CcDataGrid" });
     const { columns, loadData, getAdditionalFilters, forceRefreshToken, defaultCustomData, overrideCustomData, onSelectionChange, defaultSort, defaultFilter, disableFooter, disableSelection, headerHeight, selection, overrideFilter, globalScrollListener, className, classes, persist, } = props;
     const rowsPerPage = props.rowsPerPage || 25;
@@ -601,6 +601,10 @@ const DataGrid = (inProps) => {
         resetView();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [resetView, search, columnStateHash, customData, forceRefreshToken]);
+    // manual row updates
+    useImperativeHandle(ref, () => ({
+        updateRow: (id, update) => setState((prevState) => dataGridApplyRowUpdate(prevState, id, update)),
+    }), [setState]);
     // selection change event
     useEffect(() => {
         // don't trigger selection update event when triggered by prop update
@@ -619,4 +623,4 @@ const DataGrid = (inProps) => {
                                             ? { display: "none" }
                                             : undefined, children: _jsx(Footer, {}) }))] }) }) }) }) }) }) }));
 };
-export default React.memo(DataGrid);
+export default React.memo(React.forwardRef(DataGrid));

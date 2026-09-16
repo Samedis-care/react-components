@@ -1,4 +1,5 @@
 export { default as DataGrid } from "./DataGrid";
+export type { DataGridDispatch, DataGridRowUpdate } from "./DataGrid";
 export { default as DataGridLocalStoragePersist } from "./LocalStoragePersist";
 export { default as DataGridStorageManagerPersist } from "./StorageManagerPersist";
 export { default as DataGridNoPersist } from "./NoPersist";

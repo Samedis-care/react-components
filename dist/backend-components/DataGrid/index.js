@@ -176,7 +176,7 @@ export const renderDataGridRecordUsingModel = (model, refreshGrid) => (entry) =>
     ];
 })
     .flat());
-const BackendDataGrid = (props) => {
+const BackendDataGrid = (props, ref) => {
     const { model } = props;
     const [refreshToken, setRefreshToken] = useState("");
     const refreshGrid = useCallback(() => setRefreshToken(new Date().getTime().toString()), []);
@@ -190,6 +190,6 @@ const BackendDataGrid = (props) => {
     }, [model, refreshGrid]);
     const addNewButtons = useBackendDataGridAddNewButtons(props);
     const handleDelete = useBackendDataGridDeleteHandler(props, refreshGrid);
-    return (_jsx(DataGrid, { ...props, onAddNew: addNewButtons, onDelete: handleDelete, loadData: loadData, columns: useMemo(() => model.toDataGridColumnDefinition(), [model]), forceRefreshToken: `${props.forceRefreshToken || "undefined"}${refreshToken}`, exporters: props.disableExport ? undefined : model.connector.dataGridExporters }));
+    return (_jsx(DataGrid, { ...props, ref: ref, onAddNew: addNewButtons, onDelete: handleDelete, loadData: loadData, columns: useMemo(() => model.toDataGridColumnDefinition(), [model]), forceRefreshToken: `${props.forceRefreshToken || "undefined"}${refreshToken}`, exporters: props.disableExport ? undefined : model.connector.dataGridExporters }));
 };
-export default React.memo(BackendDataGrid);
+export default React.memo(React.forwardRef(BackendDataGrid));

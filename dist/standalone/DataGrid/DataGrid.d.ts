@@ -422,6 +422,23 @@ export type DataGridRowData = {
     toString: () => string;
 } | React.ReactElement | null>;
 export type DataGridCustomDataType = Record<string, unknown>;
+/**
+ * The fields of a row to change, or a function which gets the current row data
+ * and returns the fields to change
+ * @remarks The fields are merged into the row, so anything left out stays as it is
+ */
+export type DataGridRowUpdate = Partial<Omit<DataGridRowData, "id">> | ((row: DataGridRowData) => Partial<Omit<DataGridRowData, "id">>);
+export interface DataGridDispatch {
+    /**
+     * Update the data of a loaded row, without asking loadData for it again
+     * @param id The ID of the row to update
+     * @param update The fields to change, or a function returning them
+     * @remarks Does nothing if the row isn't currently loaded. The change lives in
+     *          the grid only: the next refresh (pagination, filters, sorting,
+     *          forceRefreshToken) loads the row from loadData again and overwrites it.
+     */
+    updateRow: (id: string, update: DataGridRowUpdate) => void;
+}
 export interface IDataGridState {
     /**
      * The current search (quick filter) string
@@ -575,5 +592,5 @@ export type DataGridClassKey = "root" | "header" | "content" | "footer" | "conte
 export declare const isDataGridColumnPinned: (column: IDataGridColumnDef, columnPinned: Record<string, boolean>) => boolean;
 export declare const getActiveDataGridColumns: (columns: IDataGridColumnDef[], columnHidden: Record<string, boolean>, columnPinned: Record<string, boolean>) => IDataGridColumnDef[];
 export declare const getDefaultColumnWidths: (columns: IDataGridColumnDef[], theme: Theme) => Record<string, number>;
-declare const _default: React.MemoExoticComponent<(inProps: DataGridProps) => React.JSX.Element>;
+declare const _default: React.NamedExoticComponent<DataGridProps & React.RefAttributes<DataGridDispatch>>;
 export default _default;
