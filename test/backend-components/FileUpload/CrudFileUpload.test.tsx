@@ -1,0 +1,636 @@
+import { describe, it, expect, afterEach, beforeAll, vi } from "vitest";
+import React from "react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	waitFor,
+} from "@testing-library/react";
+import { Framework } from "../../../src/framework";
+import CrudFileUpload, {
+	BackendFileMeta,
+	CrudFileUploadProps,
+} from "../../../src/backend-components/FileUpload/CrudFileUpload";
+import DefaultErrorComponent from "../../../src/backend-components/Form/DefaultErrorComponent";
+import LazyConnector from "../../../src/backend-integration/Connector/LazyConnector";
+import MockConnector from "../../../src/stories/test-utils/MockConnector";
+import type ApiConnector from "../../../src/backend-integration/Connector/ApiConnector";
+import type { PageVisibility } from "../../../src/backend-integration";
+import type {
+	FileData,
+	FileMeta,
+	FileUploadDispatch,
+} from "../../../src/standalone/FileUpload/Generic";
+
+// jsdom does not implement matchMedia, which the Framework's ThemeProvider needs.
+beforeAll(() => {
+	if (!window.matchMedia) {
+		window.matchMedia = (query: string) => ({
+			matches: false,
+			media: query,
+			onchange: null,
+			addListener: () => {},
+			removeListener: () => {},
+			addEventListener: () => {},
+			removeEventListener: () => {},
+			dispatchEvent: () => false,
+		});
+	}
+});
+
+afterEach(cleanup);
+
+const SERVER_FILES = [
+	{
+		id: "1",
+		name: "document.pdf",
+		type: "application/pdf",
+		downloadLink: "#document",
+	},
+	{
+		id: "2",
+		name: "image.png",
+		type: "image/png",
+		downloadLink: "#image",
+	},
+];
+
+const serialize = (
+	data: FileData<File>,
+	id: string | null,
+): Record<string, unknown> => ({
+	...(id ? { id } : {}),
+	name: data.file.name,
+	type: data.file.type,
+	// what makes it an existing file to the standalone control, which only marks a file
+	// for removal if it has one — a picked file it just drops
+	downloadLink: `#${data.file.name}`,
+});
+
+const deserialize = (
+	data: Record<string, unknown>,
+): FileData<BackendFileMeta> => ({
+	file: {
+		name: data.name as string,
+		type: data.type as string,
+		downloadLink: data.downloadLink as string,
+		id: data.id as string,
+	},
+	canBeUploaded: false,
+	delete: false,
+});
+
+const pick = (name: string, type = "text/plain") =>
+	new File(["content"], name, { type });
+
+/**
+ * A backend which remembers what it was actually asked to do
+ * @remarks The whole point of a LazyConnector is that a queued write has not happened
+ *          yet, which the control's own state cannot show — only the backend can.
+ */
+class RecordingConnector extends MockConnector {
+	public creates: Record<string, unknown>[] = [];
+	public deletes: string[] = [];
+
+	create(data: Record<string, unknown>) {
+		this.creates.push(data);
+		return super.create(data);
+	}
+
+	delete(id: string) {
+		this.deletes.push(id);
+		super.delete(id);
+	}
+}
+
+/**
+ * A backend whose uploads only finish when the test says so, to hold open the window in
+ * which a picked file has been handed over but not yet heard back about
+ */
+class GatedConnector extends MockConnector {
+	public creates = 0;
+	private release: (() => void) | null = null;
+	private readonly gate = new Promise<void>((resolve) => {
+		this.release = resolve;
+	});
+
+	async create(data: Record<string, unknown>) {
+		this.creates++;
+		await this.gate;
+		return super.create(data);
+	}
+
+	finish() {
+		this.release?.();
+	}
+}
+
+const lazyOver = (connector: MockConnector) =>
+	// fakeReads false is what a form uses for an existing record: reads go to the
+	// backend, writes are queued
+	new LazyConnector<string, PageVisibility, unknown>(
+		connector as unknown as ApiConnector<string, PageVisibility, unknown>,
+		false,
+	);
+
+type Harness = ReturnType<typeof renderUpload>;
+
+const renderUpload = (
+	props: Partial<CrudFileUploadProps> & Pick<CrudFileUploadProps, "connector">,
+) => {
+	const ref = React.createRef<FileUploadDispatch>();
+	const { container, unmount } = render(
+		<Framework>
+			<CrudFileUpload
+				ref={ref}
+				errorComponent={DefaultErrorComponent}
+				serialize={serialize}
+				deserialize={deserialize}
+				previewSize={24}
+				label={"Attachments"}
+				{...props}
+			/>
+		</Framework>,
+	);
+
+	const labels = () =>
+		// emotion folds the slot into one generated class ("css-hash-CcFile-label")
+		Array.from(
+			container.querySelectorAll<HTMLElement>('[class*="CcFile-label"]'),
+		);
+	const names = () => labels().map((label) => label.textContent ?? "");
+	const labelOf = (name: string) => {
+		const label = labels().find((label) => label.textContent === name);
+		if (!label)
+			throw new Error(`no file named ${name} in [${names().join(", ")}]`);
+		return label;
+	};
+	/**
+	 * The entry a file is rendered in: the widest ancestor that still holds only this
+	 * one file, so that a lookup inside it cannot reach another file's buttons
+	 */
+	const rowOf = (name: string) => {
+		let el: HTMLElement = labelOf(name);
+		while (
+			el.parentElement &&
+			el.parentElement.querySelectorAll('[class*="CcFile-label"]').length === 1
+		)
+			el = el.parentElement;
+		return el;
+	};
+	const iconOf = (name: string, testId: string) =>
+		rowOf(name).querySelector(`[data-testid="${testId}"]`);
+	const click = async (icon: Element | null, what: string) => {
+		if (!icon) throw new Error(`no ${what} to click`);
+		await act(async () => {
+			fireEvent.click(icon);
+			// let the change the click started reach the connector: the control applies
+			// changes one after the other, so it takes a turn of the microtask queue
+			await Promise.resolve();
+		});
+	};
+
+	return {
+		ref,
+		container,
+		unmount,
+		names,
+		/** What the file is shown as, relative to the server: added, removed or nothing */
+		changeOf: (name: string) => labelOf(name).getAttribute("data-cc-change"),
+		hasRestore: (name: string) => !!iconOf(name, "RestoreFromTrashIcon"),
+		remove: (name: string) =>
+			click(iconOf(name, "CancelOutlinedIcon"), `remove button for ${name}`),
+		restore: (name: string) =>
+			click(iconOf(name, "RestoreFromTrashIcon"), `restore button for ${name}`),
+		addFile: async (file: File) => {
+			await act(async () => {
+				await ref.current?.addFile(file);
+			});
+		},
+		/** The dot the label carries while the field is marked as modified */
+		dirtyMarker: () =>
+			!!container.querySelector('[class*="CcDirtyMarker-root"]'),
+	};
+};
+
+const loaded = async (ui: Harness) => {
+	await waitFor(() => expect(ui.names()).toContain("document.pdf"));
+};
+
+describe("CrudFileUpload", () => {
+	describe("without a LazyConnector", () => {
+		it("lists what the connector has, with nothing marked", async () => {
+			const connector = new RecordingConnector(SERVER_FILES);
+			const ui = renderUpload({ connector });
+			await loaded(ui);
+
+			expect(ui.names()).toEqual(["document.pdf", "image.png"]);
+			expect(ui.changeOf("document.pdf")).toBe(null);
+			expect(ui.hasRestore("document.pdf")).toBe(false);
+		});
+
+		it("uploads a picked file right away and lists it unmarked", async () => {
+			const connector = new RecordingConnector(SERVER_FILES);
+			const ui = renderUpload({ connector });
+			await loaded(ui);
+
+			await ui.addFile(pick("notes.txt"));
+
+			await waitFor(() => expect(ui.names()).toContain("notes.txt"));
+			// the two it started with, plus the picked one, each listed once
+			expect(ui.names()).toEqual(["document.pdf", "image.png", "notes.txt"]);
+			// it is on the server, so there is no pending change to show
+			expect(connector.creates).toHaveLength(1);
+			expect(ui.changeOf("notes.txt")).toBe(null);
+		});
+
+		it("deletes a removed file right away and drops it from the list", async () => {
+			const connector = new RecordingConnector(SERVER_FILES);
+			const ui = renderUpload({ connector });
+			await loaded(ui);
+
+			await ui.remove("document.pdf");
+
+			await waitFor(() => expect(ui.names()).toEqual(["image.png"]));
+			// nothing to undo: the file is gone from the server
+			expect(connector.deletes).toEqual(["1"]);
+		});
+
+		it("shows no marker for showDirtyState, since nothing is ever pending", async () => {
+			const connector = new RecordingConnector(SERVER_FILES);
+			const onDirtyChange = vi.fn();
+			const ui = renderUpload({
+				connector,
+				showDirtyState: true,
+				onDirtyChange,
+			});
+			await loaded(ui);
+
+			await ui.addFile(pick("notes.txt"));
+			await waitFor(() => expect(ui.names()).toContain("notes.txt"));
+			await ui.remove("document.pdf");
+			await waitFor(() => expect(ui.names()).not.toContain("document.pdf"));
+
+			expect(ui.dirtyMarker()).toBe(false);
+			expect(onDirtyChange.mock.calls.flat()).not.toContain(true);
+		});
+
+		it("shows the marker when the application sets dirty itself", async () => {
+			const connector = new RecordingConnector(SERVER_FILES);
+			const ui = renderUpload({ connector, dirty: true });
+			await loaded(ui);
+
+			expect(ui.dirtyMarker()).toBe(true);
+		});
+	});
+
+	describe("with a LazyConnector", () => {
+		it("queues a picked file and marks it as added", async () => {
+			const backend = new RecordingConnector(SERVER_FILES);
+			const lazy = lazyOver(backend);
+			const onDirtyChange = vi.fn();
+			const ui = renderUpload({ connector: lazy, onDirtyChange });
+			await loaded(ui);
+
+			await ui.addFile(pick("notes.txt"));
+
+			await waitFor(() => expect(ui.changeOf("notes.txt")).toBe("added"));
+			// the two it started with, plus the picked one, each listed once
+			expect(ui.names()).toEqual(["document.pdf", "image.png", "notes.txt"]);
+			// queued, not sent
+			expect(backend.creates).toHaveLength(0);
+			expect(lazy.isQueueEmpty()).toBe(false);
+			await waitFor(() => expect(onDirtyChange).toHaveBeenLastCalledWith(true));
+		});
+
+		it("removing a queued upload cancels it and takes it off the list", async () => {
+			const backend = new RecordingConnector(SERVER_FILES);
+			const lazy = lazyOver(backend);
+			const onDirtyChange = vi.fn();
+			const ui = renderUpload({ connector: lazy, onDirtyChange });
+			await loaded(ui);
+			await ui.addFile(pick("notes.txt"));
+			await waitFor(() => expect(ui.changeOf("notes.txt")).toBe("added"));
+
+			await ui.remove("notes.txt");
+
+			// nothing on the server to restore it from, so it leaves rather than being
+			// shown as removed
+			await waitFor(() => expect(ui.names()).not.toContain("notes.txt"));
+			expect(lazy.isQueueEmpty()).toBe(true);
+			expect(backend.creates).toHaveLength(0);
+			expect(backend.deletes).toHaveLength(0);
+			await waitFor(() =>
+				expect(onDirtyChange).toHaveBeenLastCalledWith(false),
+			);
+		});
+
+		it("queues a removal, keeps the file listed and offers a restore", async () => {
+			const backend = new RecordingConnector(SERVER_FILES);
+			const lazy = lazyOver(backend);
+			const ui = renderUpload({ connector: lazy });
+			await loaded(ui);
+
+			await ui.remove("document.pdf");
+
+			await waitFor(() => expect(ui.changeOf("document.pdf")).toBe("removed"));
+			expect(ui.hasRestore("document.pdf")).toBe(true);
+			expect(backend.deletes).toHaveLength(0);
+			expect(lazy.getQueuedOperation("1")).toBe("delete");
+		});
+
+		it("restoring drops the queued delete", async () => {
+			const backend = new RecordingConnector(SERVER_FILES);
+			const lazy = lazyOver(backend);
+			const onDirtyChange = vi.fn();
+			const ui = renderUpload({ connector: lazy, onDirtyChange });
+			await loaded(ui);
+			await ui.remove("document.pdf");
+			await waitFor(() => expect(ui.changeOf("document.pdf")).toBe("removed"));
+
+			await ui.restore("document.pdf");
+
+			await waitFor(() => expect(ui.changeOf("document.pdf")).toBe(null));
+			expect(ui.hasRestore("document.pdf")).toBe(false);
+			expect(lazy.isQueueEmpty()).toBe(true);
+			expect(lazy.getQueuedOperation("1")).toBe(null);
+			await waitFor(() =>
+				expect(onDirtyChange).toHaveBeenLastCalledWith(false),
+			);
+		});
+
+		it("keeps the other removal when one of two is restored", async () => {
+			const backend = new RecordingConnector(SERVER_FILES);
+			const lazy = lazyOver(backend);
+			const ui = renderUpload({ connector: lazy });
+			await loaded(ui);
+
+			await ui.remove("document.pdf");
+			await waitFor(() => expect(ui.changeOf("document.pdf")).toBe("removed"));
+			await ui.remove("image.png");
+			await waitFor(() => expect(ui.changeOf("image.png")).toBe("removed"));
+
+			await ui.restore("document.pdf");
+
+			await waitFor(() => expect(ui.changeOf("document.pdf")).toBe(null));
+			expect(ui.changeOf("image.png")).toBe("removed");
+			expect(lazy.getQueuedOperation("1")).toBe(null);
+			expect(lazy.getQueuedOperation("2")).toBe("delete");
+		});
+
+		it("takes an upload and a removal at the same time", async () => {
+			const backend = new RecordingConnector(SERVER_FILES);
+			const lazy = lazyOver(backend);
+			const ui = renderUpload({ connector: lazy });
+			await loaded(ui);
+
+			await ui.addFile(pick("notes.txt"));
+			await waitFor(() => expect(ui.changeOf("notes.txt")).toBe("added"));
+			await ui.remove("document.pdf");
+
+			await waitFor(() => expect(ui.changeOf("document.pdf")).toBe("removed"));
+			// the queued upload keeps its own mark, and nothing has left the list: the
+			// removal is pending, not done
+			expect(ui.changeOf("notes.txt")).toBe("added");
+			expect(ui.names()).toHaveLength(3);
+			expect(ui.names().filter((name) => name === "notes.txt")).toHaveLength(1);
+		});
+
+		describe("dirty state", () => {
+			it("marks the field while changes are queued, when asked to", async () => {
+				const backend = new RecordingConnector(SERVER_FILES);
+				const ui = renderUpload({
+					connector: lazyOver(backend),
+					showDirtyState: true,
+				});
+				await loaded(ui);
+				expect(ui.dirtyMarker()).toBe(false);
+
+				await ui.remove("document.pdf");
+				await waitFor(() => expect(ui.dirtyMarker()).toBe(true));
+
+				await ui.restore("document.pdf");
+				await waitFor(() => expect(ui.dirtyMarker()).toBe(false));
+			});
+
+			it("reports pending changes even when they are not shown", async () => {
+				const backend = new RecordingConnector(SERVER_FILES);
+				const onDirtyChange = vi.fn();
+				const ui = renderUpload({
+					connector: lazyOver(backend),
+					onDirtyChange,
+				});
+				await loaded(ui);
+				expect(onDirtyChange).toHaveBeenLastCalledWith(false);
+
+				await ui.remove("document.pdf");
+
+				await waitFor(() =>
+					expect(onDirtyChange).toHaveBeenLastCalledWith(true),
+				);
+				// state, not display: the field itself stays unmarked...
+				expect(ui.dirtyMarker()).toBe(false);
+				// ...while the file still shows what is pending for it, which is the only
+				// way to offer the restore
+				expect(ui.changeOf("document.pdf")).toBe("removed");
+			});
+
+			it("lets an explicit dirty prop win over the queue", async () => {
+				const backend = new RecordingConnector(SERVER_FILES);
+				const ui = renderUpload({
+					connector: lazyOver(backend),
+					showDirtyState: true,
+					dirty: false,
+				});
+				await loaded(ui);
+
+				await ui.remove("document.pdf");
+
+				await waitFor(() =>
+					expect(ui.changeOf("document.pdf")).toBe("removed"),
+				);
+				expect(ui.dirtyMarker()).toBe(false);
+			});
+		});
+
+		it("reads its pending marks back off the connector after a remount", async () => {
+			const backend = new RecordingConnector(SERVER_FILES);
+			const lazy = lazyOver(backend);
+			const first = renderUpload({ connector: lazy });
+			await loaded(first);
+			await first.addFile(pick("notes.txt"));
+			await waitFor(() => expect(first.changeOf("notes.txt")).toBe("added"));
+			await first.remove("document.pdf");
+			await waitFor(() =>
+				expect(first.changeOf("document.pdf")).toBe("removed"),
+			);
+
+			first.unmount();
+			const second = renderUpload({ connector: lazy });
+			await loaded(second);
+
+			// the queue outlives the control, so the marks do too — and so does the
+			// file count: one existing, one queued upload, one queued removal
+			expect(second.names()).toHaveLength(3);
+			expect(second.changeOf("document.pdf")).toBe("removed");
+			expect(second.hasRestore("document.pdf")).toBe(true);
+			expect(second.changeOf("notes.txt")).toBe("added");
+			expect(
+				second.names().filter((name) => name === "notes.txt"),
+			).toHaveLength(1);
+			expect(
+				second.names().filter((name) => name === "document.pdf"),
+			).toHaveLength(1);
+		});
+
+		it("restores after a remount, against the connector rather than the copy it lost", async () => {
+			const backend = new RecordingConnector(SERVER_FILES);
+			const lazy = lazyOver(backend);
+			const first = renderUpload({ connector: lazy });
+			await loaded(first);
+			await first.remove("document.pdf");
+			await waitFor(() =>
+				expect(first.changeOf("document.pdf")).toBe("removed"),
+			);
+
+			first.unmount();
+			const second = renderUpload({ connector: lazy });
+			await loaded(second);
+			await second.restore("document.pdf");
+
+			await waitFor(() => expect(second.changeOf("document.pdf")).toBe(null));
+			expect(lazy.isQueueEmpty()).toBe(true);
+		});
+
+		it("clears the marks and drops removed files once the queue is worked", async () => {
+			const backend = new RecordingConnector(SERVER_FILES);
+			const lazy = lazyOver(backend);
+			const onDirtyChange = vi.fn();
+			const ui = renderUpload({
+				connector: lazy,
+				showDirtyState: true,
+				onDirtyChange,
+			});
+			await loaded(ui);
+			await ui.addFile(pick("notes.txt"));
+			await waitFor(() => expect(ui.changeOf("notes.txt")).toBe("added"));
+			await ui.remove("document.pdf");
+			await waitFor(() => expect(ui.changeOf("document.pdf")).toBe("removed"));
+
+			await act(async () => {
+				await lazy.workQueue();
+			});
+
+			// what was pending has happened: the upload is a file like any other, and the
+			// removed one is gone from the server, so it goes from the list as well
+			await waitFor(() => expect(ui.changeOf("notes.txt")).toBe(null));
+			expect(ui.names()).not.toContain("document.pdf");
+			expect(ui.dirtyMarker()).toBe(false);
+			expect(backend.creates).toHaveLength(1);
+			expect(backend.deletes).toEqual(["1"]);
+			await waitFor(() =>
+				expect(onDirtyChange).toHaveBeenLastCalledWith(false),
+			);
+		});
+
+		it("does not send a delete twice when more files are removed after a submit", async () => {
+			const backend = new RecordingConnector(SERVER_FILES);
+			const lazy = lazyOver(backend);
+			const ui = renderUpload({ connector: lazy });
+			await loaded(ui);
+
+			await ui.remove("document.pdf");
+			await waitFor(() => expect(ui.changeOf("document.pdf")).toBe("removed"));
+			await act(async () => {
+				await lazy.workQueue();
+			});
+			await waitFor(() => expect(ui.names()).toEqual(["image.png"]));
+
+			await ui.remove("image.png");
+			await waitFor(() => expect(ui.changeOf("image.png")).toBe("removed"));
+			await act(async () => {
+				await lazy.workQueue();
+			});
+
+			// the first file left the list when it was written, so the second removal
+			// cannot hand its id back and delete it against a backend that has forgotten it
+			await waitFor(() => expect(ui.names()).toEqual([]));
+			expect(backend.deletes).toEqual(["1", "2"]);
+		});
+
+		it("survives a remount after the submit without bringing the file back", async () => {
+			const backend = new RecordingConnector(SERVER_FILES);
+			const lazy = lazyOver(backend);
+			const first = renderUpload({ connector: lazy });
+			await loaded(first);
+			await first.remove("document.pdf");
+			await waitFor(() =>
+				expect(first.changeOf("document.pdf")).toBe("removed"),
+			);
+			await act(async () => {
+				await lazy.workQueue();
+			});
+
+			first.unmount();
+			const second = renderUpload({ connector: lazy });
+
+			await waitFor(() => expect(second.names()).toEqual(["image.png"]));
+			expect(lazy.getQueuedDeleteRecords()).toEqual([]);
+		});
+	});
+
+	it("uploads a picked file once when another is removed while it is in flight", async () => {
+		const connector = new GatedConnector(SERVER_FILES);
+		const ui = renderUpload({ connector });
+		await loaded(ui);
+
+		// the upload starts and hangs
+		let uploading: Promise<void> | undefined;
+		await act(async () => {
+			// deliberately not awaited: the upload is meant to still be in flight
+			uploading = ui.ref.current?.addFile(pick("race.txt"));
+			await Promise.resolve();
+		});
+		await waitFor(() => expect(ui.names()).toContain("race.txt"));
+
+		// removing another file in the meantime hands the picked file back untouched
+		await ui.remove("document.pdf");
+
+		await act(async () => {
+			connector.finish();
+			await uploading;
+		});
+
+		await waitFor(() => expect(ui.names()).not.toContain("document.pdf"));
+		// one upload, one row: the list cannot show a second copy on the server, so the
+		// count has to come from the backend
+		expect(ui.names().filter((name) => name === "race.txt")).toHaveLength(1);
+		expect(connector.creates).toBe(1);
+	});
+
+	it("leaves read-only additional files alone", async () => {
+		const backend = new RecordingConnector(SERVER_FILES);
+		const additionalFiles: FileData<FileMeta>[] = [
+			{
+				file: {
+					name: "terms.txt",
+					type: "text/plain",
+					downloadLink: "#terms",
+				},
+				canBeUploaded: false,
+				delete: false,
+			},
+		];
+		const ui = renderUpload({ connector: lazyOver(backend), additionalFiles });
+		await loaded(ui);
+		expect(ui.names()).toContain("terms.txt");
+
+		await ui.remove("document.pdf");
+
+		// they belong to whoever passed them, so a change to the real files neither
+		// drops nor duplicates them
+		await waitFor(() => expect(ui.changeOf("document.pdf")).toBe("removed"));
+		expect(ui.names().filter((name) => name === "terms.txt")).toHaveLength(1);
+	});
+});
