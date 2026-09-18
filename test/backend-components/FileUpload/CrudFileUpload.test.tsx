@@ -12,7 +12,7 @@ import CrudFileUpload, {
 	BackendFileMeta,
 	CrudFileUploadProps,
 } from "../../../src/backend-components/FileUpload/CrudFileUpload";
-import DefaultErrorComponent from "../../../src/backend-components/Form/DefaultErrorComponent";
+import type { ErrorComponentProps } from "../../../src/backend-components/Form";
 import LazyConnector from "../../../src/backend-integration/Connector/LazyConnector";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import type ApiConnector from "../../../src/backend-integration/Connector/ApiConnector";
@@ -85,6 +85,14 @@ const pick = (name: string, type = "text/plain") =>
 	new File(["content"], name, { type });
 
 /**
+ * What the control could not write, where a test can read it
+ * @remarks DefaultErrorComponent pushes a dialog and renders nothing.
+ */
+const ErrorSink = (props: ErrorComponentProps) => (
+	<span data-testid={"error"}>{props.error.message}</span>
+);
+
+/**
  * A backend which remembers what it was actually asked to do
  * @remarks The whole point of a LazyConnector is that a queued write has not happened
  *          yet, which the control's own state cannot show — only the backend can.
@@ -100,6 +108,28 @@ class RecordingConnector extends MockConnector {
 
 	delete(id: string) {
 		this.deletes.push(id);
+		super.delete(id);
+	}
+}
+
+/**
+ * A backend which refuses the writes it is told to refuse
+ * @remarks It records only what it did, so `creates` and `deletes` are what actually
+ *          reached the server.
+ */
+class RejectingConnector extends RecordingConnector {
+	public rejectCreates = new Set<string>();
+	public rejectDeletes = new Set<string>();
+
+	create(data: Record<string, unknown>) {
+		const name = data.name as string;
+		if (this.rejectCreates.has(name))
+			throw new Error(`upload of ${name} refused`);
+		return super.create(data);
+	}
+
+	delete(id: string) {
+		if (this.rejectDeletes.has(id)) throw new Error(`delete of ${id} refused`);
 		super.delete(id);
 	}
 }
@@ -144,7 +174,7 @@ const renderUpload = (
 		<Framework>
 			<CrudFileUpload
 				ref={ref}
-				errorComponent={DefaultErrorComponent}
+				errorComponent={ErrorSink}
 				serialize={serialize}
 				deserialize={deserialize}
 				previewSize={24}
@@ -209,6 +239,9 @@ const renderUpload = (
 				await ref.current?.addFile(file);
 			});
 		},
+		/** What the control reports it could not write, if anything */
+		errorText: () =>
+			container.querySelector('[data-testid="error"]')?.textContent ?? null,
 		/** The dot the label carries while the field is marked as modified */
 		dirtyMarker: () =>
 			!!container.querySelector('[class*="CcDirtyMarker-root"]'),
@@ -608,6 +641,202 @@ describe("CrudFileUpload", () => {
 		// count has to come from the backend
 		expect(ui.names().filter((name) => name === "race.txt")).toHaveLength(1);
 		expect(connector.creates).toBe(1);
+	});
+
+	describe("when the server refuses a write", () => {
+		const namesCreated = (backend: RejectingConnector) =>
+			backend.creates.map((data) => data.name as string);
+
+		it("reports a refused upload and drops the file", async () => {
+			const connector = new RejectingConnector(SERVER_FILES);
+			connector.rejectCreates.add("bad.txt");
+			const ui = renderUpload({ connector });
+			await loaded(ui);
+
+			await ui.addFile(pick("bad.txt"));
+
+			await waitFor(() => expect(ui.errorText()).toContain("refused"));
+			// the list is what the server has: a file it would not take is not in it,
+			// and a file left in it would be uploaded again by the next change
+			expect(namesCreated(connector)).toEqual([]);
+			await waitFor(() =>
+				expect(ui.names()).toEqual(["document.pdf", "image.png"]),
+			);
+		});
+
+		it("does not upload a file twice when another upload in the same change is refused", async () => {
+			const connector = new RejectingConnector(SERVER_FILES);
+			connector.rejectCreates.add("bad.txt");
+			const ui = renderUpload({ connector });
+			await loaded(ui);
+
+			// the refused file is still in the list the control is handed back, so the
+			// next pick is sent together with it — and goes through although it does not
+			await ui.addFile(pick("bad.txt"));
+			await waitFor(() => expect(ui.errorText()).toContain("refused"));
+			await ui.addFile(pick("good.txt"));
+			await waitFor(() =>
+				expect(namesCreated(connector)).toContain("good.txt"),
+			);
+
+			await ui.addFile(pick("third.txt"));
+
+			// a file the server already has must not be sent again because something
+			// else in the same change was refused
+			await waitFor(() =>
+				expect(namesCreated(connector)).toContain("third.txt"),
+			);
+			expect(
+				namesCreated(connector).filter((name) => name === "good.txt"),
+			).toHaveLength(1);
+			expect(ui.names()).toEqual([
+				"document.pdf",
+				"image.png",
+				"good.txt",
+				"third.txt",
+			]);
+		});
+
+		it("keeps a file the server refused to delete, listed once", async () => {
+			const connector = new RejectingConnector(SERVER_FILES);
+			connector.rejectDeletes.add("1");
+			const ui = renderUpload({ connector });
+			await loaded(ui);
+
+			await ui.remove("document.pdf");
+
+			await waitFor(() => expect(ui.errorText()).toContain("refused"));
+			// it is still on the server, so it is still in the list — once
+			expect(connector.deletes).toEqual([]);
+			expect(ui.names()).toEqual(["document.pdf", "image.png"]);
+		});
+
+		it("does not upload a file twice when the delete alongside it is refused", async () => {
+			const connector = new RejectingConnector(SERVER_FILES);
+			connector.rejectDeletes.add("1");
+			const ui = renderUpload({ connector });
+			await loaded(ui);
+			await ui.remove("document.pdf");
+			await waitFor(() => expect(ui.errorText()).toContain("refused"));
+
+			// the file is still marked for deletion, so this change carries the retry of
+			// that delete as well as the upload
+			await ui.addFile(pick("notes.txt"));
+			await waitFor(() =>
+				expect(namesCreated(connector)).toContain("notes.txt"),
+			);
+
+			await ui.addFile(pick("second.txt"));
+
+			await waitFor(() =>
+				expect(namesCreated(connector)).toContain("second.txt"),
+			);
+			expect(
+				namesCreated(connector).filter((name) => name === "notes.txt"),
+			).toHaveLength(1);
+			expect(ui.names().filter((name) => name === "notes.txt")).toHaveLength(1);
+		});
+
+		it("does not create a file twice when a later write in the same submit is refused", async () => {
+			const backend = new RejectingConnector(SERVER_FILES);
+			backend.rejectCreates.add("bad.txt");
+			const lazy = lazyOver(backend);
+			const ui = renderUpload({ connector: lazy, showDirtyState: true });
+			await loaded(ui);
+			await ui.addFile(pick("good.txt"));
+			await waitFor(() => expect(ui.changeOf("good.txt")).toBe("added"));
+			await ui.addFile(pick("bad.txt"));
+			await waitFor(() => expect(ui.changeOf("bad.txt")).toBe("added"));
+
+			// the submit stops at the write the server refuses
+			await act(async () => {
+				await expect(lazy.workQueue()).rejects.toThrow("refused");
+			});
+			expect(namesCreated(backend)).toEqual(["good.txt"]);
+			// what is left is still pending, and still marked as such
+			expect(lazy.isQueueEmpty()).toBe(false);
+			expect(ui.changeOf("bad.txt")).toBe("added");
+			expect(ui.dirtyMarker()).toBe(true);
+
+			// submitting again sends what is left, not what already went through
+			backend.rejectCreates.clear();
+			await act(async () => {
+				await lazy.workQueue();
+			});
+
+			expect(namesCreated(backend)).toEqual(["good.txt", "bad.txt"]);
+			await waitFor(() => expect(ui.changeOf("good.txt")).toBe(null));
+			expect(ui.names()).toEqual([
+				"document.pdf",
+				"image.png",
+				"good.txt",
+				"bad.txt",
+			]);
+		});
+
+		it("lets the user correct a refused upload and submit again", async () => {
+			const backend = new RejectingConnector(SERVER_FILES);
+			backend.rejectCreates.add("bad.txt");
+			const lazy = lazyOver(backend);
+			const ui = renderUpload({ connector: lazy, showDirtyState: true });
+			await loaded(ui);
+			await ui.addFile(pick("good.txt"));
+			await waitFor(() => expect(ui.changeOf("good.txt")).toBe("added"));
+			await ui.addFile(pick("bad.txt"));
+			await waitFor(() => expect(ui.changeOf("bad.txt")).toBe("added"));
+
+			await act(async () => {
+				await expect(lazy.workQueue()).rejects.toThrow("refused");
+			});
+
+			// the submit stopped where it failed, and the control still shows what is
+			// left for the user to put right
+			expect(ui.changeOf("bad.txt")).toBe("added");
+			expect(ui.dirtyMarker()).toBe(true);
+
+			// which they do by dropping the file the server would not take
+			await ui.remove("bad.txt");
+
+			// nothing is pending any more: what went through is on the server and is
+			// shown as an ordinary file, and the rest was never sent
+			await waitFor(() => expect(ui.names()).not.toContain("bad.txt"));
+			expect(lazy.isQueueEmpty()).toBe(true);
+			await waitFor(() => expect(ui.changeOf("good.txt")).toBe(null));
+			expect(ui.dirtyMarker()).toBe(false);
+
+			// so submitting again sends nothing at all
+			const sentSoFar = namesCreated(backend);
+			await act(async () => {
+				await lazy.workQueue();
+			});
+
+			expect(namesCreated(backend)).toEqual(sentSoFar);
+			expect(ui.names()).toEqual(["document.pdf", "image.png", "good.txt"]);
+		});
+
+		it("carries on with the submit when a delete is refused", async () => {
+			const backend = new RejectingConnector(SERVER_FILES);
+			backend.rejectDeletes.add("1");
+			const lazy = lazyOver(backend);
+			const ui = renderUpload({ connector: lazy });
+			await loaded(ui);
+			await ui.remove("document.pdf");
+			await waitFor(() => expect(ui.changeOf("document.pdf")).toBe("removed"));
+			await ui.addFile(pick("notes.txt"));
+			await waitFor(() => expect(ui.changeOf("notes.txt")).toBe("added"));
+
+			await act(async () => {
+				await lazy.workQueue();
+			});
+
+			// a refused delete is not retried — the form is done with that record — and
+			// does not stop the upload queued behind it, which happens once
+			expect(namesCreated(backend)).toEqual(["notes.txt"]);
+			expect(lazy.isQueueEmpty()).toBe(true);
+			await waitFor(() =>
+				expect(ui.names()).toEqual(["image.png", "notes.txt"]),
+			);
+		});
 	});
 
 	describe("additional files", () => {

@@ -252,3 +252,89 @@ describe("LazyConnector.cancelQueuedOperation", () => {
 		expect(onQueueChange.mock.calls[0][0]).toEqual([]);
 	});
 });
+
+describe("LazyConnector workQueue", () => {
+	/**
+	 * A connector whose writes fail for whatever it is told to refuse
+	 */
+	const makeRefusingConnector = (refused: string[]) => {
+		const { connector, calls } = makeRealConnector();
+		const real = connector as unknown as {
+			create: (data: Record<string, unknown>) => Promise<unknown>;
+			delete: (id: string) => Promise<unknown>;
+		};
+		real.create = vi.fn((data: Record<string, unknown>) => {
+			const name = String(data.name);
+			calls.push(`create:${name}`);
+			return refused.includes(name)
+				? Promise.reject(new Error(`create of ${name} refused`))
+				: Promise.resolve([{ id: `real-${name}` }, {}]);
+		});
+		real.delete = vi.fn((id: string) => {
+			calls.push(`delete:${id}`);
+			return refused.includes(id)
+				? Promise.reject(new Error(`delete of ${id} refused`))
+				: Promise.resolve();
+		});
+		return {
+			lazy: new LazyConnector<string, PageVisibility, unknown>(connector, true),
+			calls,
+		};
+	};
+
+	it("keeps what it could not send, and only that", async () => {
+		const { lazy, calls } = makeRefusingConnector(["b"]);
+		lazy.create({ name: "a" }, undefined);
+		lazy.create({ name: "b" }, undefined);
+		lazy.create({ name: "c" }, undefined);
+
+		await expect(lazy.workQueue()).rejects.toThrow("refused");
+
+		// it stops at the one that failed, which stays queued with everything behind it
+		expect(calls).toStrictEqual(["create:a", "create:b"]);
+		expect(lazy.isQueueEmpty()).toBe(false);
+		expect(lazy.getQueuedOperation("fake-id-0")).toBe(null);
+		expect(lazy.getQueuedOperation("fake-id-1")).toBe("create");
+		expect(lazy.getQueuedOperation("fake-id-2")).toBe("create");
+	});
+
+	it("does not write the same record twice when the submit is retried", async () => {
+		const { lazy, calls } = makeRefusingConnector(["b"]);
+		lazy.create({ name: "a" }, undefined);
+		lazy.create({ name: "b" }, undefined);
+		await expect(lazy.workQueue()).rejects.toThrow("refused");
+		calls.length = 0;
+
+		await expect(lazy.workQueue()).rejects.toThrow("refused");
+
+		// a caller which fixes the problem and submits again would otherwise create a
+		// second record for everything the first attempt got through
+		expect(calls).toStrictEqual(["create:b"]);
+	});
+
+	it("announces the queue it is left with, failure or not", async () => {
+		const { lazy } = makeRefusingConnector(["b"]);
+		const listener = vi.fn();
+		lazy.create({ name: "a" }, undefined);
+		lazy.create({ name: "b" }, undefined);
+		lazy.addQueueChangeListener(listener);
+
+		await expect(lazy.workQueue()).rejects.toThrow("refused");
+
+		// anything rendering from the queue has to hear that half of it is gone
+		expect(listener).toHaveBeenCalledTimes(1);
+		expect(listener.mock.calls[0][0]).toHaveLength(1);
+	});
+
+	it("ignores a refused delete and carries on with the rest", async () => {
+		const { lazy, calls } = makeRefusingConnector(["gone"]);
+		lazy.delete("gone", undefined);
+		lazy.create({ name: "a" }, undefined);
+
+		await lazy.workQueue();
+
+		// deleting what the backend no longer has is not a reason to stop
+		expect(calls).toStrictEqual(["delete:gone", "create:a"]);
+		expect(lazy.isQueueEmpty()).toBe(true);
+	});
+});

@@ -430,25 +430,34 @@ class LazyConnector<
 	}
 
 	public workQueue = async (): Promise<void> => {
-		for (const entry of this.queue) {
-			try {
-				const res: unknown = await entry.func();
-				if (entry.type === "create") {
-					const realId = (
-						res as [Record<"id", string>, Record<never, unknown>]
-					)[0].id;
-					this.fakeIdMapping[entry.id as string] = realId;
-					this.fakeIdMappingRev[realId] = entry.id as string;
+		const sent = new Set<QueuedFunction>();
+		try {
+			for (const entry of [...this.queue]) {
+				try {
+					const res: unknown = await entry.func();
+					if (entry.type === "create") {
+						const realId = (
+							res as [Record<"id", string>, Record<never, unknown>]
+						)[0].id;
+						this.fakeIdMapping[entry.id as string] = realId;
+						this.fakeIdMappingRev[realId] = entry.id as string;
+					}
+				} catch (e) {
+					// we ignore failed deletes
+					if (entry.type !== "delete") {
+						throw e;
+					}
 				}
-			} catch (e) {
-				// we ignore failed deletes
-				if (entry.type !== "delete") {
-					throw e;
-				}
+				sent.add(entry);
 			}
+		} finally {
+			// What has been sent leaves the queue even when something after it threw, so
+			// that a caller which fixes the problem and submits again does not write the
+			// same records a second time. The entry which threw stays queued, and so does
+			// anything queued while this was running.
+			this.queue = this.queue.filter((entry) => !sent.has(entry));
+			this.onAfterOperation();
 		}
-		this.queue = [];
-		this.onAfterOperation();
 	};
 
 	/**
