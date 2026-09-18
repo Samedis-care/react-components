@@ -293,24 +293,34 @@ class LazyConnector extends Connector {
         this.queueListeners.forEach((listener) => listener(this.queue));
     }
     workQueue = async () => {
-        for (const entry of this.queue) {
-            try {
-                const res = await entry.func();
-                if (entry.type === "create") {
-                    const realId = res[0].id;
-                    this.fakeIdMapping[entry.id] = realId;
-                    this.fakeIdMappingRev[realId] = entry.id;
+        const sent = new Set();
+        try {
+            for (const entry of [...this.queue]) {
+                try {
+                    const res = await entry.func();
+                    if (entry.type === "create") {
+                        const realId = res[0].id;
+                        this.fakeIdMapping[entry.id] = realId;
+                        this.fakeIdMappingRev[realId] = entry.id;
+                    }
                 }
-            }
-            catch (e) {
-                // we ignore failed deletes
-                if (entry.type !== "delete") {
-                    throw e;
+                catch (e) {
+                    // we ignore failed deletes
+                    if (entry.type !== "delete") {
+                        throw e;
+                    }
                 }
+                sent.add(entry);
             }
         }
-        this.queue = [];
-        this.onAfterOperation();
+        finally {
+            // What has been sent leaves the queue even when something after it threw, so
+            // that a caller which fixes the problem and submits again does not write the
+            // same records a second time. The entry which threw stays queued, and so does
+            // anything queued while this was running.
+            this.queue = this.queue.filter((entry) => !sent.has(entry));
+            this.onAfterOperation();
+        }
     };
     /**
      * Maps a potentially fake ID to a real ID

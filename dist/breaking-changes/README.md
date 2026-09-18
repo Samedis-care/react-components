@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-09-17 | [A refused write no longer takes the ones beside it](2026-09-17-refused-writes-keep-what-went-through.md) | behavior |
 | 2026-09-16 | [CrudFileUpload keeps additional files out of its own](2026-09-16-additional-files-stay-read-only.md) | behavior |
 | 2026-09-16 | [DataGrid takes a ref and updates single rows through it](2026-09-16-data-grid-imperative-handle.md) | behavior, type |
 | 2026-09-14 | [Queued deletes stay deleted, and pending file changes survive a remount](2026-09-14-queued-deletes-stay-deleted.md) | behavior |

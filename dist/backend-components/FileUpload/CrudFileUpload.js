@@ -71,7 +71,7 @@ const CrudFileUpload = (props, ref) => {
             : null) ?? file);
         // upload new/changed files
         const picked = newFiles.filter((file) => file.canBeUploaded);
-        const uploadPromise = Promise.all(picked
+        const uploads = Promise.allSettled(picked
             .map(async (file) => {
             // check if we have to replace a file (update)
             if (allowDuplicates) {
@@ -95,46 +95,69 @@ const CrudFileUpload = (props, ref) => {
             .map((file) => file.file.id));
         // delete deleted files
         const deletePromise = connector.deleteMultiple(deletedIds);
-        try {
-            // wait for response
-            // deletePromise may be undefined or a promise
-            await deletePromise;
-            const uploadedFiles = await uploadPromise;
-            picked.forEach((file, index) => 
+        // Every write is accounted for on its own, rather than the first failure
+        // taking the rest with it. The list comes back from the standalone control
+        // with the picked files still in it, so an upload which went through but was
+        // not recorded here is sent again by the next change, leaving a second copy
+        // on the server.
+        let error = null;
+        // deletePromise may be undefined or a promise
+        const deleted = await Promise.resolve(deletePromise).then(() => true, (e) => {
+            error = e;
+            return false;
+        });
+        // What the connector queue says is pending for a file, rather than what the
+        // list this change started with said. A change is applied a moment after it
+        // was made, and the queue may have moved on in between — a change which
+        // cancels the last queued write lands after the state which cleared the
+        // marks, and would otherwise put the stale one back.
+        const markOf = (id) => {
+            const queued = lazyConnector?.getQueuedOperation(id);
+            return queued === "create"
+                ? "added"
+                : queued === "delete"
+                    ? "removed"
+                    : undefined;
+        };
+        const uploadedFiles = [];
+        (await uploads).forEach((result, index) => {
+            if (result.status === "rejected") {
+                error = error ?? result.reason;
+                return;
+            }
             // canBeUploaded is what makes it a File, per FileData's own contract
-            uploadedPicks.current.set(file.file, uploadedFiles[index]));
-            const kept = newFiles.filter((file) => !file.canBeUploaded &&
-                // the list handed back includes what was only passed through for
-                // display, which this control neither stores nor writes
-                !isAdditionalFile(file) &&
-                "id" in file.file &&
-                (!file.delete ||
-                    (!!lazyConnector &&
-                        !cancelledUploads.has(file.file.id))));
-            const finalFiles = kept
-                .map((file) => file.delete
-                ? {
-                    ...file,
-                    // the delete has been handed to the connector, so the flag
-                    // is spent — leaving it set would queue the same delete
-                    // again on the next change. What is pending is recorded as
-                    // a change instead, and only where it can still be undone.
-                    delete: false,
-                    changeState: lazyConnector ? "removed" : undefined,
-                }
-                : file)
-                .concat(lazyConnector
-                ? uploadedFiles.map((file) => ({
-                    ...file,
-                    changeState: "added",
-                }))
-                : uploadedFiles);
-            // update state
-            setFiles(finalFiles);
-        }
-        catch (e) {
-            setError(e);
-        }
+            uploadedPicks.current.set(picked[index].file, result.value);
+            uploadedFiles.push(result.value);
+        });
+        if (error)
+            setError(error);
+        const kept = newFiles.filter((file) => !file.canBeUploaded &&
+            // the list handed back includes what was only passed through for
+            // display, which this control neither stores nor writes
+            !isAdditionalFile(file) &&
+            "id" in file.file &&
+            // a delete the server refused has not happened: the file stays in the
+            // list, still marked, for the next change to try again
+            (!file.delete ||
+                !deleted ||
+                (!!lazyConnector &&
+                    !cancelledUploads.has(file.file.id))));
+        const finalFiles = kept
+            .map((file) => ({
+            ...file,
+            // the delete has been handed to the connector, so the flag is spent —
+            // leaving it set would queue the same delete again on the next change.
+            // One the server refused has not happened, and stays set so that the
+            // next change tries it again.
+            delete: !!file.delete && !deleted,
+            changeState: markOf(file.file.id),
+        }))
+            .concat(uploadedFiles.map((file) => ({
+            ...file,
+            changeState: markOf(file.file.id),
+        })));
+        // update state
+        setFiles(finalFiles);
     }, [allowDuplicates, connector, deserialize, files, lazyConnector, serialize]);
     /**
      * Applies one change from the control, after every change before it
