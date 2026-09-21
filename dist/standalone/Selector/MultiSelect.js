@@ -31,11 +31,13 @@ const StyledBaseSelector = styled(BaseSelector, {
 })); // tradeoff: remove ownerState from type config, but keep generics
 const MultiSelect = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiSelect" });
-    const { onLoad, onSelect, selected, enableIcons, selectedEntryRenderer, disabled, getIdOfData, displaySwitch, switchLabel, defaultSwitchValue, selectedSort, confirmDelete, className, classes, } = props;
+    const { onLoad, onSelect, selected, enableIcons, selectedEntryRenderer, disabled, getIdOfData, displaySwitch, switchLabel, defaultSwitchValue, selectedSort, confirmDelete, className, classes, filterIds, refreshToken, } = props;
     const { t } = useCCTranslations();
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
     const selectedIds = useMemo(() => selected.map(getId), [getId, selected]);
+    // the selected entries are filtered out of the options on top of whatever the caller wants filtered
+    const combinedFilterIds = useMemo(() => [...(filterIds ?? []), ...selectedIds], [filterIds, selectedIds]);
     const EntryRender = selectedEntryRenderer || MultiSelectEntry;
     const multiSelectHandler = useCallback((data) => {
         if (!data)
@@ -97,7 +99,7 @@ const MultiSelect = (inProps) => {
     }, [getId, onSelect, selected]);
     return (_jsxs(Root, { size: "grow", container: true, className: combineClassNames([className, classes?.root]), children: [_jsx(Grid, { size: 12, children: _jsx(StyledBaseSelector, { ...props, 
                     // @ts-expect-error removed owner state from props to preserve generics
-                    ownerState: { selected: selected.length > 0 }, className: classes?.selector, onLoad: multiSelectLoadHandler, selected: null, onSelect: multiSelectHandler, refreshToken: selectedIds.join(","), displaySwitch: displaySwitch, switchLabel: switchLabel, defaultSwitchValue: defaultSwitchValue, filterIds: selectedIds }) }), props.selected.length > 0 && (_jsx(SelectedEntry, { size: 12, className: classes?.selectedEntry, children: _jsx(Paper, { elevation: 0, children: (selectedSort
+                    ownerState: { selected: selected.length > 0 }, className: classes?.selector, onLoad: multiSelectLoadHandler, selected: null, onSelect: multiSelectHandler, refreshToken: (refreshToken ?? "") + selectedIds.join(","), displaySwitch: displaySwitch, switchLabel: switchLabel, defaultSwitchValue: defaultSwitchValue, filterIds: combinedFilterIds }) }), props.selected.length > 0 && (_jsx(SelectedEntry, { size: 12, className: classes?.selectedEntry, children: _jsx(Paper, { elevation: 0, children: (selectedSort
                         ? props.selected.sort(selectedSort)
                         : props.selected).map((data, index) => (_jsx(EntryRender, { enableDivider: props.selected.length === index - 1, enableIcons: enableIcons, handleDelete: disabled || data.noDelete ? undefined : handleDelete, data: data, setData: handleSetData, iconSize: props.iconSize }, getId(data) || index.toString(16)))) }) }))] }));
 };
