@@ -60,7 +60,11 @@ const MultiImage = (inProps) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [currentImage, setCurrentImage] = useState(getPrimaryImageIndex);
     const fileUpload = useRef(null);
-    const openDialog = useCallback(() => {
+    const openDialog = useCallback((evt) => {
+        // the edit label is an anchor for looks and keyboard focus only. Letting
+        // its href through navigates to "#", which pushes a history entry with a
+        // null state and breaks every FrameworkHistory.block guard on the page.
+        evt.preventDefault();
         setDialogOpen(true);
     }, []);
     const closeDialog = useCallback(() => {
