@@ -106,6 +106,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 		sortCompareFn,
 		classes,
 		className,
+		filterIds,
 		...otherProps
 	} = props;
 	const { t } = useCCTranslations();
@@ -115,6 +116,12 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 	const getId = getIdOfData ?? getIdDefault;
 
 	const selectedIds = useMemo(() => selected.map(getId), [selected, getId]);
+
+	// the selected entries are filtered out of the options on top of whatever the caller wants filtered
+	const combinedFilterIds = useMemo(
+		() => [...(filterIds ?? []), ...selectedIds],
+		[filterIds, selectedIds],
+	);
 
 	useEffect(() => {
 		selected.map((selectedOption) => {
@@ -195,7 +202,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 				startAdornment={<SearchIcon color={"primary"} />}
 				freeSolo={true}
 				displaySwitch={false}
-				filterIds={selected.map(getId)}
+				filterIds={combinedFilterIds}
 			/>
 			<StyledInlineSwitch
 				visible={!!props.displaySwitch}

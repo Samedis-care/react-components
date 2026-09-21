@@ -170,6 +170,7 @@ const MultiSelectWithTags = <
 		sortCompareFn,
 		className,
 		classes,
+		filterIds,
 	} = props;
 
 	const defaultSwitchValue = props.displaySwitch
@@ -306,6 +307,7 @@ const MultiSelectWithTags = <
 					startTypingToSearchText={startTypingToSearchText}
 					lru={lruData}
 					sortCompareFn={sortCompareFn}
+					filterIds={filterIds}
 				/>
 			</Box>
 		</Root>

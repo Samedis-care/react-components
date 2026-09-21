@@ -118,6 +118,8 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 		confirmDelete,
 		className,
 		classes,
+		filterIds,
+		refreshToken,
 	} = props;
 	const { t } = useCCTranslations();
 
@@ -125,6 +127,12 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 	const getId = getIdOfData ?? getIdDefault;
 
 	const selectedIds = useMemo(() => selected.map(getId), [getId, selected]);
+
+	// the selected entries are filtered out of the options on top of whatever the caller wants filtered
+	const combinedFilterIds = useMemo(
+		() => [...(filterIds ?? []), ...selectedIds],
+		[filterIds, selectedIds],
+	);
 
 	const EntryRender: React.ComponentType<MultiSelectEntryProps<DataT>> =
 		selectedEntryRenderer || MultiSelectEntry;
@@ -231,11 +239,11 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 					onLoad={multiSelectLoadHandler}
 					selected={null}
 					onSelect={multiSelectHandler}
-					refreshToken={selectedIds.join(",")}
+					refreshToken={(refreshToken ?? "") + selectedIds.join(",")}
 					displaySwitch={displaySwitch}
 					switchLabel={switchLabel}
 					defaultSwitchValue={defaultSwitchValue}
-					filterIds={selectedIds}
+					filterIds={combinedFilterIds}
 				/>
 			</Grid>
 			{props.selected.length > 0 && (

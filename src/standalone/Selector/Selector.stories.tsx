@@ -41,6 +41,9 @@ const FRUITS: MultiSelectorData[] = [
 	{ value: "cherry", label: "Cherry", group: "Drupe" },
 ];
 
+// ids a caller wants kept out of the options, regardless of what is selected
+const FILTERED_FRUIT_IDS = ["mango"];
+
 const CATEGORIES: BaseSelectorData[] = [
 	{ value: "pome", label: "Pome fruits" },
 	{ value: "tropical", label: "Tropical fruits" },
@@ -227,6 +230,50 @@ export const MultiSelectDisabled: StoryObj = {
 	},
 };
 
+export const MultiSelectFilterIds: StoryObj = {
+	name: "MultiSelect — filterIds on top of the selection",
+	render: () => {
+		const [selected, setSelected] = useState<MultiSelectorData[]>([
+			FRUITS.find((f) => f.value === "apple"),
+		]);
+		const onLoad = selectorLocalLoadHandler(FRUITS);
+		return (
+			<div style={{ width: 350 }}>
+				<MultiSelect<MultiSelectorData>
+					label="Fruits"
+					selected={selected}
+					onSelect={(v) => {
+						setSelected(v);
+					}}
+					onLoad={onLoad}
+					filterIds={FILTERED_FRUIT_IDS}
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const body = within(document.body);
+		const input = await canvas.findByRole("combobox");
+		await userEvent.click(input);
+		await expect(await body.findByText("Pear")).toBeVisible();
+		// the caller supplied id is hidden...
+		await expect(optionTexts()).not.toContain("Mango");
+		// ...and so is the already selected entry
+		await expect(optionTexts()).not.toContain("Apple");
+		await expect(optionTexts()).toHaveLength(FRUITS.length - 2);
+		// picking one reloads the options, and both filters still apply
+		await userEvent.click(await body.findByText("Pear"));
+		await waitFor(() => expect(canvas.getAllByText("Pear")).toHaveLength(1));
+		await userEvent.click(canvas.getByRole("button", { name: /open/i }));
+		await waitFor(async () => {
+			await expect(optionTexts()).toHaveLength(FRUITS.length - 3);
+		});
+		await expect(optionTexts()).not.toContain("Pear");
+		await expect(optionTexts()).not.toContain("Mango");
+		await expect(optionTexts()).not.toContain("Apple");
+	},
+};
+
 // ---------------------------------------------------------------------------
 // MultiSelectWithoutGroup stories
 // ---------------------------------------------------------------------------
@@ -271,6 +318,38 @@ export const MultiSelectWithoutGroupWithValues: StoryObj = {
 				/>
 			</div>
 		);
+	},
+};
+
+export const MultiSelectWithoutGroupFilterIds: StoryObj = {
+	name: "MultiSelectWithoutGroup — filterIds on top of the selection",
+	render: () => {
+		const [selected, setSelected] = useState<MultiSelectorData[]>([
+			FRUITS.find((f) => f.value === "apple"),
+		]);
+		const loadDataOptions = selectorLocalLoadHandler(FRUITS);
+		return (
+			<div style={{ width: 350 }}>
+				<MultiSelectWithoutGroup<MultiSelectorData>
+					label="Search fruits"
+					selected={selected}
+					onSelect={(v) => {
+						setSelected(v);
+					}}
+					loadDataOptions={loadDataOptions}
+					filterIds={FILTERED_FRUIT_IDS}
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const body = within(document.body);
+		const input = await canvas.findByRole("combobox");
+		await userEvent.click(input);
+		await expect(await body.findByText("Pear")).toBeVisible();
+		await expect(optionTexts()).not.toContain("Mango");
+		await expect(optionTexts()).not.toContain("Apple");
+		await expect(optionTexts()).toHaveLength(FRUITS.length - 2);
 	},
 };
 
