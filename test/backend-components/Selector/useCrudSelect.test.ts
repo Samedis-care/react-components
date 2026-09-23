@@ -5,6 +5,7 @@ import useCrudSelect, {
 } from "../../../src/backend-components/Selector/useCrudSelect";
 import { Connector, PageVisibility } from "../../../src/backend-integration";
 import { BaseSelectorData } from "../../../src/standalone";
+import CrudSelectError from "../../../src/backend-components/Selector/CrudSelectError";
 
 afterEach(cleanup);
 
@@ -70,12 +71,10 @@ const renderCrudSelect = (
 describe("useCrudSelect prepareNewEntry", () => {
 	it("augments a new entry before it is serialized/created", async () => {
 		const { connector, create } = makeConnector();
-		const serialize = vi.fn(
-			(data: JoinData): Record<string, unknown> => ({
-				source_id: data.value,
-				note: data.note,
-			}),
-		);
+		const serialize = vi.fn((data: JoinData): Record<string, unknown> => ({
+			source_id: data.value,
+			note: data.note,
+		}));
 		const prepareNewEntry = vi.fn((entry: JoinData) =>
 			Promise.resolve({ ...entry, note: "2026-06-19" }),
 		);
@@ -264,7 +263,135 @@ describe("useCrudSelect prepareNewEntry", () => {
 
 		expect(create).not.toHaveBeenCalled();
 		expect(result.current.error).toBeInstanceOf(Error);
-		expect(result.current.error?.message).toBe("collection failed");
+		expect(result.current.error?.message).toBe("Alpha: collection failed");
 		expect(result.current.selected).toHaveLength(0);
+	});
+});
+
+describe("useCrudSelect partial failures", () => {
+	const rejectFor =
+		(badSourceIds: string[]) =>
+		(connector: ReturnType<typeof makeConnector>) => {
+			const original = connector.create.getMockImplementation()!;
+			connector.create.mockImplementation((data: Record<string, unknown>) =>
+				badSourceIds.includes(data.source_id as string)
+					? Promise.reject(new Error("duplicate_key_error"))
+					: original(data),
+			);
+		};
+
+	it("keeps every create which went through when another one fails", async () => {
+		const mock = makeConnector();
+		rejectFor(["b"])(mock);
+
+		const { result } = renderCrudSelect(baseParams(mock.connector, {}));
+		await waitFor(() => expect(result.current.loading).toBe(false));
+
+		await act(async () => {
+			await result.current.handleSelect(
+				["a", "b", "c"],
+				[
+					{ value: "a", label: "Alpha" },
+					{ value: "b", label: "Beta" },
+					{ value: "c", label: "Gamma" },
+				],
+			);
+		});
+
+		expect(mock.create).toHaveBeenCalledTimes(3);
+		expect(result.current.selected).toHaveLength(2);
+		expect(result.current.initialRawData).toHaveLength(2);
+		const error = result.current.error as CrudSelectError;
+		expect(error).toBeInstanceOf(CrudSelectError);
+		expect(error.failures).toHaveLength(1);
+		expect(error.failures[0].action).toBe("create");
+		expect(error.failures[0].entry.value).toBe("b");
+		expect(error.message).toBe("Beta: duplicate_key_error");
+	});
+
+	it("reflects removals which went through when a create in the same change fails", async () => {
+		const mock = makeConnector([{ id: "1" }, { id: "2" }]);
+		rejectFor(["a"])(mock);
+
+		const { result } = renderCrudSelect(baseParams(mock.connector, {}));
+		await waitFor(() => expect(result.current.selected).toHaveLength(2));
+
+		await act(async () => {
+			await result.current.handleSelect(
+				["2", "a"],
+				[
+					{ value: "2", label: "L2" },
+					{ value: "a", label: "Alpha" },
+				],
+			);
+		});
+
+		expect(mock.delete).toHaveBeenCalledTimes(1);
+		expect(result.current.selected.map((entry) => entry.value)).toEqual(["2"]);
+		expect(result.current.error?.message).toBe("Alpha: duplicate_key_error");
+	});
+
+	it("keeps an entry selected when its removal is refused", async () => {
+		const mock = makeConnector([{ id: "1" }, { id: "2" }]);
+		mock.delete.mockImplementation(((id: string) =>
+			id === "1"
+				? Promise.reject(new Error("in use"))
+				: Promise.resolve(undefined)) as () => Promise<undefined>);
+
+		const { result } = renderCrudSelect(
+			baseParams(mock.connector, {
+				serialize: (data) => ({ id: data.value }),
+			}),
+		);
+		await waitFor(() => expect(result.current.selected).toHaveLength(2));
+
+		await act(async () => {
+			await result.current.handleSelect([], []);
+		});
+
+		expect(mock.delete).toHaveBeenCalledTimes(2);
+		expect(result.current.selected.map((entry) => entry.value)).toEqual(["1"]);
+		const error = result.current.error as CrudSelectError;
+		expect(error.failures.map((failure) => failure.action)).toEqual(["delete"]);
+	});
+
+	it("keeps the previous entry when its update is refused", async () => {
+		const mock = makeConnector([{ id: "1", note: "initial" }]);
+		mock.update.mockImplementation(() => Promise.reject(new Error("locked")));
+
+		const { result } = renderCrudSelect(baseParams(mock.connector, {}));
+		await waitFor(() => expect(result.current.selected).toHaveLength(1));
+
+		await act(async () => {
+			await result.current.handleSelect(
+				["1"],
+				[{ value: "1", label: "L1", note: "changed" }],
+			);
+		});
+
+		expect(result.current.selected[0].note).toBe("initial");
+		expect(result.current.error?.message).toBe("L1: locked");
+	});
+
+	it("clears the error once a later change goes through", async () => {
+		const mock = makeConnector();
+		rejectFor(["b"])(mock);
+
+		const { result } = renderCrudSelect(baseParams(mock.connector, {}));
+		await waitFor(() => expect(result.current.loading).toBe(false));
+
+		await act(async () => {
+			await result.current.handleSelect(["b"], [{ value: "b", label: "Beta" }]);
+		});
+		expect(result.current.error).not.toBeNull();
+
+		await act(async () => {
+			await result.current.handleSelect(
+				["a"],
+				[{ value: "a", label: "Alpha" }],
+			);
+		});
+		expect(result.current.error).toBeNull();
+		expect(result.current.selected).toHaveLength(1);
 	});
 });
