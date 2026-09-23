@@ -4,3 +4,4 @@ export { default as BackendMultiSelectWithTags } from "./BackendMultiSelectWithT
 export { default as BackendSingleSelect } from "./BackendSingleSelect";
 export { default as CrudMultiSelect } from "./CrudMultiSelect";
 export { default as CrudMultiSelectWithGroups } from "./CrudMultiSelectWithGroups";
+export { default as CrudSelectError, isCrudSelectError, } from "./CrudSelectError";

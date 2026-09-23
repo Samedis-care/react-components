@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useImperativeHandle, useRef, useState, } from "react";
 import shallowCompare from "../../utils/shallowCompare";
 import { FormContext } from "../Form";
+import CrudSelectError from "./CrudSelectError";
 let ticketCounter = 0;
 const nextTicket = () => {
     ticketCounter = (ticketCounter + 1) % Number.MAX_SAFE_INTEGER;
@@ -106,46 +107,74 @@ const useCrudSelect = (params, ref) => {
             return !shallowCompare(normalize(entry), normalize(oldEntry));
         });
         const deletedEntries = selected.filter((entry) => !newSelected.find((selEntry) => selEntry.value === entry.value));
+        // Every write settles on its own, rather than the first failure taking the
+        // rest with it: the backend keeps what went through either way, so the
+        // selection has to as well. Otherwise a record which was created is not
+        // shown, and picking it again creates it a second time.
+        const failures = [];
+        const settle = async (action, entries, write) => {
+            const results = await Promise.allSettled(entries.map(write));
+            results.forEach((result, index) => {
+                if (result.status === "rejected")
+                    failures.push({
+                        entry: entries[index],
+                        action,
+                        error: result.reason,
+                    });
+            });
+            return results;
+        };
         // call backend (updates/removals are independent of prepareNewEntry, fire eagerly)
-        const updatePromise = Promise.all(changedEntries
-            .map((entry) => serialize(entry))
-            .map(async (serializedEntry) => connector.update(await serializedEntry)));
-        const deletePromise = Promise.all(deletedEntries
-            .map((entry) => serialize(entry))
-            .map(async (serializedEntry) => connector.delete((await serializedEntry).id)));
-        try {
-            // prepare new entries (collect extra join-record data / allow cancel).
-            // run sequentially so simultaneous adds don't stack dialogs.
-            let entriesToCreate = newEntries;
-            if (prepareNewEntry) {
-                entriesToCreate = [];
-                for (const entry of newEntries) {
-                    const prepared = await prepareNewEntry(entry);
-                    // null/undefined => cancel this addition cleanly (no create, no error)
-                    if (prepared == null)
-                        continue;
-                    entriesToCreate.push(prepared);
-                }
+        const updatePromise = settle("update", changedEntries, async (entry) => connector.update(await serialize(entry)));
+        const deletePromise = settle("delete", deletedEntries, async (entry) => connector.delete((await serialize(entry)).id));
+        // prepare new entries (collect extra join-record data / allow cancel).
+        // run sequentially so simultaneous adds don't stack dialogs.
+        const entriesToCreate = [];
+        for (const entry of newEntries) {
+            if (!prepareNewEntry) {
+                entriesToCreate.push(entry);
+                continue;
             }
-            // wait for response
-            const created = (await Promise.all(entriesToCreate
-                .map((entry) => serialize(entry))
-                .map(async (serializedEntry) => connector.create(await serializedEntry)))).map((e) => e[0]);
-            await updatePromise;
-            await deletePromise;
-            // create final values
-            const finalSelected = [
-                ...newSelected,
-                ...(await Promise.all(created.map((entry) => Promise.resolve(deserialize(entry))))),
-            ];
-            // reflect changes
-            setInitialRawData((oldRawData) => [...oldRawData, ...created]);
-            currentSelected.current = finalSelected;
-            setSelected(currentSelected.current);
+            try {
+                const prepared = await prepareNewEntry(entry);
+                // null/undefined => cancel this addition cleanly (no create, no error)
+                if (prepared == null)
+                    continue;
+                entriesToCreate.push(prepared);
+            }
+            catch (e) {
+                failures.push({ entry, action: "create", error: e });
+            }
         }
-        catch (e) {
-            setError(e);
-        }
+        // wait for response
+        const created = (await settle("create", entriesToCreate, async (entry) => {
+            const record = (await connector.create(await serialize(entry)))[0];
+            return [record, await deserialize(record)];
+        }))
+            .filter((result) => result.status === "fulfilled")
+            .map((result) => result.value);
+        const updated = await updatePromise;
+        const deleted = await deletePromise;
+        // create final values: a refused update keeps the entry as it was, a
+        // refused removal keeps the entry selected
+        const finalSelected = [
+            ...newSelected.map((entry) => {
+                const index = changedEntries.indexOf(entry);
+                if (index === -1 || updated[index].status === "fulfilled")
+                    return entry;
+                return (selected.find((selEntry) => selEntry.value === entry.value) ?? entry);
+            }),
+            ...deletedEntries.filter((_entry, index) => deleted[index].status === "rejected"),
+            ...created.map(([, entry]) => entry),
+        ];
+        // reflect changes
+        setInitialRawData((oldRawData) => [
+            ...oldRawData,
+            ...created.map(([record]) => record),
+        ]);
+        currentSelected.current = finalSelected;
+        setSelected(currentSelected.current);
+        setError(failures.length > 0 ? new CrudSelectError(failures) : null);
     }, [connector, deserialize, prepareNewEntry, selected, serialize]);
     const modelToSelectorData = useCallback(async (data) => {
         if (initialRawData.includes(data))

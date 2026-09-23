@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-09-23 | [CrudSelect keeps what went through when part of a change fails](2026-09-23-crud-select-keeps-what-went-through.md) | behavior, type |
 | 2026-09-21 | [MultiImage's edit label no longer navigates](2026-09-21-multi-image-edit-does-not-navigate.md) | behavior |
 | 2026-09-21 | [Multi selects honor filterIds and refreshToken](2026-09-21-multi-select-honors-filter-ids.md) | behavior |
 | 2026-09-17 | [A refused write no longer takes the ones beside it](2026-09-17-refused-writes-keep-what-went-through.md) | behavior |
