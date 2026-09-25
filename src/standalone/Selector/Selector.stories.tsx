@@ -662,6 +662,86 @@ export const SingleSelectLruAdditionalOptions: StoryObj = {
 };
 
 // ---------------------------------------------------------------------------
+// lru mode "prepend": recently used on top of the full list
+// ---------------------------------------------------------------------------
+
+const LRU_PREPEND_STORAGE_KEY = "cc-story-lru-prepend";
+const LRU_PREPEND: SelectorLruOptions<BaseSelectorData> = {
+	mode: "prepend",
+	count: 3,
+	storageKey: LRU_PREPEND_STORAGE_KEY,
+	forceQuery: false,
+	// unknown ids are skipped (and kept), not shown as raw ids
+	loadData: (id) => COUNTRIES.find((entry) => entry.value === id),
+};
+const loadCountries = selectorLocalLoadHandler(COUNTRIES);
+
+export const SingleSelectLruPrepend: StoryObj = {
+	name: "SingleSelect — lru mode prepend",
+	render: () => {
+		const [selected, setSelected] = useState<BaseSelectorData | null>(null);
+		return (
+			<div style={{ width: 300 }}>
+				<SingleSelect
+					label="Country"
+					selected={selected}
+					onSelect={setSelected}
+					onLoad={loadCountries}
+					lru={LRU_PREPEND}
+				/>
+			</div>
+		);
+	},
+	beforeEach: () => {
+		// "xx" is unknown to the data set and must not cost one of the 3 slots
+		localStorage.setItem(
+			LRU_PREPEND_STORAGE_KEY,
+			JSON.stringify(["xx", "jp", "fr", "de"]),
+		);
+		return () => localStorage.removeItem(LRU_PREPEND_STORAGE_KEY);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const body = within(document.body);
+		const input = await canvas.findByRole("combobox");
+		await userEvent.click(input);
+		// empty query: label, the 3 most recent, divider, then the rest without repeats
+		await waitFor(() =>
+			expect(optionTexts()).toEqual([
+				"Last recently used",
+				"Japan",
+				"France",
+				"Germany",
+				"",
+				"United Kingdom",
+				"United States",
+				"Australia",
+				"Canada",
+				"Brazil",
+			]),
+		);
+		// a query filters both parts
+		await userEvent.type(input, "an");
+		await waitFor(() =>
+			expect(optionTexts()).toEqual([
+				"Last recently used",
+				"Japan",
+				"France",
+				"Germany",
+				"",
+				"Canada",
+			]),
+		);
+		// selecting moves the entry to the front of the LRU, capped at count
+		await userEvent.click(await body.findByText("Canada"));
+		await waitFor(() =>
+			expect(
+				JSON.parse(localStorage.getItem(LRU_PREPEND_STORAGE_KEY) ?? "[]"),
+			).toEqual(["ca", "xx", "jp"]),
+		);
+	},
+};
+
+// ---------------------------------------------------------------------------
 // multi select (BaseSelector multiple) keeps the search query
 // ---------------------------------------------------------------------------
 

@@ -188,9 +188,11 @@ export interface SelectorLruOptions<DataT extends BaseSelectorData> {
 	/**
 	 * The function to load the data associated with a LRU cache entry
 	 * @param id The ID of the data (value in DataT)
+	 * @returns The data, or undefined to skip the entry (it stays in the LRU cache,
+	 * e.g. because it belongs to a data set not loaded right now)
 	 * @remarks The return value is not cached
 	 */
-	loadData: (id: string) => Promise<DataT> | DataT;
+	loadData: (id: string) => Promise<DataT | undefined> | DataT | undefined;
 	/**
 	 * The LRU storage key
 	 */
@@ -199,7 +201,22 @@ export interface SelectorLruOptions<DataT extends BaseSelectorData> {
 	 * Do not load selector items if no search query is present
 	 */
 	forceQuery: boolean;
+	/**
+	 * How LRU entries are shown
+	 * - "exclusive": while the search query is empty only the LRU entries are shown,
+	 *   the data source (onLoad) is queried once the user types
+	 * - "prepend": the LRU entries are shown on top of the data source's options,
+	 *   followed by a divider and the remaining options (LRU entries are not repeated).
+	 *   A search query filters the LRU entries by label, like selectorLocalLoadHandler
+	 * @default "exclusive"
+	 */
+	mode?: SelectorLruMode;
 }
+
+/**
+ * @see SelectorLruOptions.mode
+ */
+export type SelectorLruMode = "exclusive" | "prepend";
 
 export interface BaseSelectorSingle<DataT extends BaseSelectorData> {
 	multiple?: false;
@@ -916,8 +933,42 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 			const filteredLruIds = filterIds
 				? lruIds.filter((id) => !filterIds.includes(id))
 				: lruIds;
+			const lruPrepend = lru?.mode === "prepend";
+			// resolves the LRU ids to their data, tagged with the LRU css class
+			const loadLruEntries = async (
+				lru: SelectorLruOptions<DataT>,
+			): Promise<DataT[]> =>
+				(
+					(
+						await Promise.all(
+							filteredLruIds.map((id) =>
+								(async (id: string) => lru.loadData(id))(id).catch((e) => {
+									// remove IDs from LRU on backend error
+									if (
+										e instanceof Error &&
+										(e.name === "BackendError" ||
+											e.name === "RequestBatchingError")
+									) {
+										setLruIds((ids) => ids.filter((oId) => oId !== id));
+									}
+									return undefined;
+								}),
+							),
+						)
+					).filter((e) => !!e) as DataT[]
+				).map((entry) => ({
+					...entry,
+					className: combineClassNames([
+						BaseSelectorLruOptionCssClassName,
+						entry.className,
+					]),
+				}));
+			// prepend mode: LRU block (label, entries, divider) placed in front of the
+			// data source's options once those are sorted
+			let lruEntries: DataT[] = [];
 			if (
 				lru &&
+				!lruPrepend &&
 				query === "" &&
 				(filteredLruIds.length > 0 || lru.forceQuery)
 			) {
@@ -937,36 +988,10 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 								isSmallLabel: true,
 							} as DataT)
 						: undefined,
-					...(
-						(
-							await Promise.all(
-								filteredLruIds.map((id) =>
-									(async (id: string): Promise<DataT> => lru.loadData(id))(
-										id,
-									).catch((e) => {
-										// remove IDs from LRU on backend error
-										if (
-											e instanceof Error &&
-											(e.name === "BackendError" ||
-												e.name === "RequestBatchingError")
-										) {
-											setLruIds((ids) => ids.filter((oId) => oId !== id));
-										}
-										return undefined;
-									}),
-								),
-							)
-						).filter((e) => !!e) as DataT[]
-					).map((entry) => ({
-						...entry,
-						className: combineClassNames([
-							BaseSelectorLruOptionCssClassName,
-							entry.className,
-						]),
-					})),
+					...(await loadLruEntries(lru)),
 				].filter((entry) => entry) as DataT[];
 			} else {
-				if (query === "" && forceQuery) {
+				if (query === "" && (forceQuery || (lruPrepend && lru?.forceQuery))) {
 					results = [];
 				} else {
 					const loadResult = await onLoad(query, switchValue);
@@ -991,8 +1016,22 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 						} as DataT);
 					}
 				}
+				if (lru && lruPrepend && filteredLruIds.length > 0) {
+					const lowerQuery = query.toLowerCase();
+					// cap after resolving, so skipped ids don't cost a slot
+					lruEntries = (await loadLruEntries(lru))
+						.filter((entry) => !entry.hidden)
+						.slice(0, lru.count)
+						.filter((entry) =>
+							getStringLabel(entry).toLowerCase().includes(lowerQuery),
+						);
+					const lruEntryIds = lruEntries.map(getId);
+					results = results.filter(
+						(entry) => !lruEntryIds.includes(getId(entry)),
+					);
+				}
 				if (onAddNew) {
-					if (results.length + leadingEntries.length > 0) {
+					if (results.length + leadingEntries.length + lruEntries.length > 0) {
 						trailingEntries.push({
 							label: "",
 							value: "lru-divider",
@@ -1017,7 +1056,24 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 							)),
 				);
 			}
-			results = leadingEntries.concat(results, trailingEntries);
+			if (lruEntries.length > 0) {
+				lruEntries = [
+					{
+						label: t("standalone.selector.base-selector.lru-label"),
+						value: "lru-label",
+						isSmallLabel: true,
+					} as DataT,
+					...lruEntries,
+				];
+				if (results.length > 0) {
+					lruEntries.push({
+						label: "",
+						value: "lru-divider-prepend",
+						isDivider: true,
+					} as DataT);
+				}
+			}
+			results = leadingEntries.concat(lruEntries, results, trailingEntries);
 			setLoading((prev) => {
 				// if another load was started while completing this skip update
 				if (prev != loadTicket) return prev;
