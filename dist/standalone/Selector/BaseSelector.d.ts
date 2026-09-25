@@ -103,9 +103,12 @@ export interface SelectorLruOptions<DataT extends BaseSelectorData> {
     /**
      * The function to load the data associated with a LRU cache entry
      * @param id The ID of the data (value in DataT)
+     * @returns The data, or undefined to skip the entry, e.g. because it belongs to a
+     * data set not loaded right now. A skipped entry stays in the LRU cache and keeps
+     * its slot (count).
      * @remarks The return value is not cached
      */
-    loadData: (id: string) => Promise<DataT> | DataT;
+    loadData: (id: string) => Promise<DataT | undefined> | DataT | undefined;
     /**
      * The LRU storage key
      */
@@ -114,7 +117,22 @@ export interface SelectorLruOptions<DataT extends BaseSelectorData> {
      * Do not load selector items if no search query is present
      */
     forceQuery: boolean;
+    /**
+     * How LRU entries are shown
+     * - "exclusive": while the search query is empty only the LRU entries are shown,
+     *   the data source (onLoad) is queried once the user types, or if none of the LRU
+     *   entries resolve
+     * - "prepend": the LRU entries are shown on top of the data source's options,
+     *   followed by a divider and the remaining options (LRU entries are not repeated).
+     *   A search query filters the LRU entries by label, like selectorLocalLoadHandler
+     * @default "exclusive"
+     */
+    mode?: SelectorLruMode;
 }
+/**
+ * @see SelectorLruOptions.mode
+ */
+export type SelectorLruMode = "exclusive" | "prepend";
 export interface BaseSelectorSingle<DataT extends BaseSelectorData> {
     multiple?: false;
     /**

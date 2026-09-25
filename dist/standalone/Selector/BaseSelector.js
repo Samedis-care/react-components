@@ -274,56 +274,78 @@ const BaseSelector = (inProps) => {
         // trailing entries (truncation notice, add new), appended after sorting so they
         // always stay at the bottom of the list
         const trailingEntries = [];
+        const lowerQuery = query.toLowerCase();
+        const matchesQuery = (entry) => getStringLabel(entry).toLowerCase().includes(lowerQuery);
         // additional options don't come from the data source, so they must not depend on
         // onLoad running - lru and forceQuery both skip it on an empty query
         const leadingEntries = (additionalOptions ?? []).filter((entry) => !entry.hidden &&
             !filterIds?.includes(getId(entry)) &&
-            getStringLabel(entry).toLowerCase().includes(query.toLowerCase()));
-        const filteredLruIds = filterIds
-            ? lruIds.filter((id) => !filterIds.includes(id))
-            : lruIds;
+            matchesQuery(entry));
+        const lruPrepend = lru?.mode === "prepend";
+        // resolves the LRU ids to their data, tagged with the LRU css class.
+        // entries loadData skips stay in the LRU, but are not shown
+        const loadLruEntries = async () => {
+            if (!lru)
+                return [];
+            const filteredLruIds = filterIds
+                ? lruIds.filter((id) => !filterIds.includes(id))
+                : lruIds;
+            const entries = await Promise.all(filteredLruIds.map((id) => (async (id) => lru.loadData(id))(id).catch((e) => {
+                // remove IDs from LRU on backend error
+                if (e instanceof Error &&
+                    (e.name === "BackendError" || e.name === "RequestBatchingError")) {
+                    setLruIds((ids) => ids.filter((oId) => oId !== id));
+                }
+                return undefined;
+            })));
+            return entries.filter((entry) => entry && !entry.hidden).map((entry) => ({
+                ...entry,
+                className: combineClassNames([
+                    BaseSelectorLruOptionCssClassName,
+                    entry.className,
+                ]),
+            }));
+        };
+        // exclusive mode: resolved before deciding, so an LRU where nothing resolves
+        // falls back to the data source instead of showing a bare label
+        const exclusiveLruEntries = lru && !lruPrepend && query === "" ? await loadLruEntries() : [];
+        // prepend mode: LRU block (label, entries, divider) placed in front of the
+        // data source's options once those are sorted
+        let lruEntries = [];
         if (lru &&
+            !lruPrepend &&
             query === "" &&
-            (filteredLruIds.length > 0 || lru.forceQuery)) {
+            (exclusiveLruEntries.length > 0 || lru.forceQuery)) {
             results = [
                 onAddNew ? addNewEntry : undefined,
-                filteredLruIds.length > 0 && onAddNew
+                exclusiveLruEntries.length > 0 && onAddNew
                     ? {
                         label: "",
                         value: "lru-divider",
                         isDivider: true,
                     }
                     : undefined,
-                filteredLruIds.length > 0
+                exclusiveLruEntries.length > 0
                     ? {
                         label: t("standalone.selector.base-selector.lru-label"),
                         value: "lru-label",
                         isSmallLabel: true,
                     }
                     : undefined,
-                ...(await Promise.all(filteredLruIds.map((id) => (async (id) => lru.loadData(id))(id).catch((e) => {
-                    // remove IDs from LRU on backend error
-                    if (e instanceof Error &&
-                        (e.name === "BackendError" ||
-                            e.name === "RequestBatchingError")) {
-                        setLruIds((ids) => ids.filter((oId) => oId !== id));
-                    }
-                    return undefined;
-                })))).filter((e) => !!e).map((entry) => ({
-                    ...entry,
-                    className: combineClassNames([
-                        BaseSelectorLruOptionCssClassName,
-                        entry.className,
-                    ]),
-                })),
+                ...exclusiveLruEntries,
             ].filter((entry) => entry);
         }
         else {
-            if (query === "" && forceQuery) {
+            const skipLoad = query === "" && (forceQuery || (lruPrepend && lru?.forceQuery));
+            // independent of each other, so they load side by side
+            const [loadResult, prependLruEntries] = await Promise.all([
+                skipLoad ? null : onLoad(query, switchValue),
+                lruPrepend ? loadLruEntries() : [],
+            ]);
+            if (!loadResult) {
                 results = [];
             }
             else {
-                const loadResult = await onLoad(query, switchValue);
                 results = [...loadResult.options];
                 // count what the source returned, before hidden/filterIds are applied below
                 const loaded = loadResult.options.length;
@@ -343,8 +365,14 @@ const BaseSelector = (inProps) => {
                     });
                 }
             }
+            // LRU entries matching the query go on top and are not repeated below
+            lruEntries = prependLruEntries.filter(matchesQuery);
+            if (lruEntries.length > 0) {
+                const lruEntryIds = lruEntries.map(getId);
+                results = results.filter((entry) => !lruEntryIds.includes(getId(entry)));
+            }
             if (onAddNew) {
-                if (results.length + leadingEntries.length > 0) {
+                if (results.length + leadingEntries.length + lruEntries.length > 0) {
                     trailingEntries.push({
                         label: "",
                         value: "lru-divider",
@@ -363,7 +391,24 @@ const BaseSelector = (inProps) => {
             results.sort(groupSorter ??
                 ((a, b) => -(b.group ?? noGroupLabel ?? "").localeCompare(a.group ?? noGroupLabel ?? "")));
         }
-        results = leadingEntries.concat(results, trailingEntries);
+        if (lruEntries.length > 0) {
+            lruEntries = [
+                {
+                    label: t("standalone.selector.base-selector.lru-label"),
+                    value: "lru-label",
+                    isSmallLabel: true,
+                },
+                ...lruEntries,
+            ];
+            if (results.length > 0) {
+                lruEntries.push({
+                    label: "",
+                    value: "lru-divider-prepend",
+                    isDivider: true,
+                });
+            }
+        }
+        results = leadingEntries.concat(lruEntries, results, trailingEntries);
         setLoading((prev) => {
             // if another load was started while completing this skip update
             if (prev != loadTicket)
