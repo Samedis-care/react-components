@@ -662,6 +662,130 @@ export const SingleSelectLruAdditionalOptions: StoryObj = {
 };
 
 // ---------------------------------------------------------------------------
+// lru mode "prepend": recently used on top of the full list
+// ---------------------------------------------------------------------------
+
+const LRU_PREPEND_STORAGE_KEY = "cc-story-lru-prepend";
+const LRU_PREPEND: SelectorLruOptions<BaseSelectorData> = {
+	mode: "prepend",
+	count: 3,
+	storageKey: LRU_PREPEND_STORAGE_KEY,
+	forceQuery: false,
+	// unknown ids are skipped (and kept), not shown as raw ids
+	loadData: (id) => COUNTRIES.find((entry) => entry.value === id),
+};
+const loadCountries = selectorLocalLoadHandler(COUNTRIES);
+
+export const SingleSelectLruPrepend: StoryObj = {
+	name: "SingleSelect — lru mode prepend",
+	render: () => {
+		const [selected, setSelected] = useState<BaseSelectorData | null>(null);
+		return (
+			<div style={{ width: 300 }}>
+				<SingleSelect
+					label="Country"
+					selected={selected}
+					onSelect={setSelected}
+					onLoad={loadCountries}
+					lru={LRU_PREPEND}
+				/>
+			</div>
+		);
+	},
+	beforeEach: () => {
+		// "xx" is unknown to the data set, so loadData skips it
+		localStorage.setItem(
+			LRU_PREPEND_STORAGE_KEY,
+			JSON.stringify(["jp", "xx", "fr"]),
+		);
+		return () => localStorage.removeItem(LRU_PREPEND_STORAGE_KEY);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const body = within(document.body);
+		const input = await canvas.findByRole("combobox");
+		await userEvent.click(input);
+		// empty query: label, the resolved LRU entries, divider, then the rest without repeats
+		await waitFor(() =>
+			expect(optionTexts()).toEqual([
+				"Last recently used",
+				"Japan",
+				"France",
+				"",
+				"Germany",
+				"United Kingdom",
+				"United States",
+				"Australia",
+				"Canada",
+				"Brazil",
+			]),
+		);
+		// a query filters both parts
+		await userEvent.type(input, "an");
+		await waitFor(() =>
+			expect(optionTexts()).toEqual([
+				"Last recently used",
+				"Japan",
+				"France",
+				"",
+				"Germany",
+				"Canada",
+			]),
+		);
+		// selecting moves the entry to the front of the LRU, capped at count; the skipped
+		// id keeps its slot
+		await userEvent.click(await body.findByText("Canada"));
+		await waitFor(() =>
+			expect(
+				JSON.parse(localStorage.getItem(LRU_PREPEND_STORAGE_KEY) ?? "[]"),
+			).toEqual(["ca", "jp", "xx"]),
+		);
+	},
+};
+
+const LRU_SKIPPED_STORAGE_KEY = "cc-story-lru-skipped";
+const LRU_SKIPPED: SelectorLruOptions<BaseSelectorData> = {
+	count: 3,
+	storageKey: LRU_SKIPPED_STORAGE_KEY,
+	forceQuery: false,
+	loadData: (id) => COUNTRIES.find((entry) => entry.value === id),
+};
+
+export const SingleSelectLruNothingResolved: StoryObj = {
+	name: "SingleSelect — lru falls back to the list when nothing resolves",
+	render: () => {
+		const [selected, setSelected] = useState<BaseSelectorData | null>(null);
+		return (
+			<div style={{ width: 300 }}>
+				<SingleSelect
+					label="Country"
+					selected={selected}
+					onSelect={setSelected}
+					onLoad={loadCountries}
+					lru={LRU_SKIPPED}
+				/>
+			</div>
+		);
+	},
+	beforeEach: () => {
+		// both ids are unknown to the data set, so loadData skips them
+		localStorage.setItem(LRU_SKIPPED_STORAGE_KEY, JSON.stringify(["xx", "yy"]));
+		return () => localStorage.removeItem(LRU_SKIPPED_STORAGE_KEY);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const input = await canvas.findByRole("combobox");
+		await userEvent.click(input);
+		// no bare LRU label: the data source is shown as if there was no LRU
+		await waitFor(() =>
+			expect(optionTexts()).toEqual(COUNTRIES.map((entry) => entry.label)),
+		);
+		// the skipped ids stay in the LRU
+		await expect(
+			JSON.parse(localStorage.getItem(LRU_SKIPPED_STORAGE_KEY) ?? "[]"),
+		).toEqual(["xx", "yy"]);
+	},
+};
+
+// ---------------------------------------------------------------------------
 // multi select (BaseSelector multiple) keeps the search query
 // ---------------------------------------------------------------------------
 
