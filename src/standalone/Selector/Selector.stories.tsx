@@ -693,10 +693,10 @@ export const SingleSelectLruPrepend: StoryObj = {
 		);
 	},
 	beforeEach: () => {
-		// "xx" is unknown to the data set and must not cost one of the 3 slots
+		// "xx" is unknown to the data set, so loadData skips it
 		localStorage.setItem(
 			LRU_PREPEND_STORAGE_KEY,
-			JSON.stringify(["xx", "jp", "fr", "de"]),
+			JSON.stringify(["jp", "xx", "fr"]),
 		);
 		return () => localStorage.removeItem(LRU_PREPEND_STORAGE_KEY);
 	},
@@ -704,14 +704,14 @@ export const SingleSelectLruPrepend: StoryObj = {
 		const body = within(document.body);
 		const input = await canvas.findByRole("combobox");
 		await userEvent.click(input);
-		// empty query: label, the 3 most recent, divider, then the rest without repeats
+		// empty query: label, the resolved LRU entries, divider, then the rest without repeats
 		await waitFor(() =>
 			expect(optionTexts()).toEqual([
 				"Last recently used",
 				"Japan",
 				"France",
-				"Germany",
 				"",
+				"Germany",
 				"United Kingdom",
 				"United States",
 				"Australia",
@@ -726,18 +726,62 @@ export const SingleSelectLruPrepend: StoryObj = {
 				"Last recently used",
 				"Japan",
 				"France",
-				"Germany",
 				"",
+				"Germany",
 				"Canada",
 			]),
 		);
-		// selecting moves the entry to the front of the LRU, capped at count
+		// selecting moves the entry to the front of the LRU, capped at count; the skipped
+		// id keeps its slot
 		await userEvent.click(await body.findByText("Canada"));
 		await waitFor(() =>
 			expect(
 				JSON.parse(localStorage.getItem(LRU_PREPEND_STORAGE_KEY) ?? "[]"),
-			).toEqual(["ca", "xx", "jp"]),
+			).toEqual(["ca", "jp", "xx"]),
 		);
+	},
+};
+
+const LRU_SKIPPED_STORAGE_KEY = "cc-story-lru-skipped";
+const LRU_SKIPPED: SelectorLruOptions<BaseSelectorData> = {
+	count: 3,
+	storageKey: LRU_SKIPPED_STORAGE_KEY,
+	forceQuery: false,
+	loadData: (id) => COUNTRIES.find((entry) => entry.value === id),
+};
+
+export const SingleSelectLruNothingResolved: StoryObj = {
+	name: "SingleSelect — lru falls back to the list when nothing resolves",
+	render: () => {
+		const [selected, setSelected] = useState<BaseSelectorData | null>(null);
+		return (
+			<div style={{ width: 300 }}>
+				<SingleSelect
+					label="Country"
+					selected={selected}
+					onSelect={setSelected}
+					onLoad={loadCountries}
+					lru={LRU_SKIPPED}
+				/>
+			</div>
+		);
+	},
+	beforeEach: () => {
+		// both ids are unknown to the data set, so loadData skips them
+		localStorage.setItem(LRU_SKIPPED_STORAGE_KEY, JSON.stringify(["xx", "yy"]));
+		return () => localStorage.removeItem(LRU_SKIPPED_STORAGE_KEY);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const input = await canvas.findByRole("combobox");
+		await userEvent.click(input);
+		// no bare LRU label: the data source is shown as if there was no LRU
+		await waitFor(() =>
+			expect(optionTexts()).toEqual(COUNTRIES.map((entry) => entry.label)),
+		);
+		// the skipped ids stay in the LRU
+		await expect(
+			JSON.parse(localStorage.getItem(LRU_SKIPPED_STORAGE_KEY) ?? "[]"),
+		).toEqual(["xx", "yy"]);
 	},
 };
 

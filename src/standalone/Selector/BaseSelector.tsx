@@ -188,8 +188,9 @@ export interface SelectorLruOptions<DataT extends BaseSelectorData> {
 	/**
 	 * The function to load the data associated with a LRU cache entry
 	 * @param id The ID of the data (value in DataT)
-	 * @returns The data, or undefined to skip the entry (it stays in the LRU cache,
-	 * e.g. because it belongs to a data set not loaded right now)
+	 * @returns The data, or undefined to skip the entry, e.g. because it belongs to a
+	 * data set not loaded right now. A skipped entry stays in the LRU cache and keeps
+	 * its slot (count).
 	 * @remarks The return value is not cached
 	 */
 	loadData: (id: string) => Promise<DataT | undefined> | DataT | undefined;
@@ -204,7 +205,8 @@ export interface SelectorLruOptions<DataT extends BaseSelectorData> {
 	/**
 	 * How LRU entries are shown
 	 * - "exclusive": while the search query is empty only the LRU entries are shown,
-	 *   the data source (onLoad) is queried once the user types
+	 *   the data source (onLoad) is queried once the user types, or if none of the LRU
+	 *   entries resolve
 	 * - "prepend": the LRU entries are shown on top of the data source's options,
 	 *   followed by a divider and the remaining options (LRU entries are not repeated).
 	 *   A search query filters the LRU entries by label, like selectorLocalLoadHandler
@@ -922,40 +924,41 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 			// trailing entries (truncation notice, add new), appended after sorting so they
 			// always stay at the bottom of the list
 			const trailingEntries: DataT[] = [];
+			const lowerQuery = query.toLowerCase();
+			const matchesQuery = (entry: DataT) =>
+				getStringLabel(entry).toLowerCase().includes(lowerQuery);
 			// additional options don't come from the data source, so they must not depend on
 			// onLoad running - lru and forceQuery both skip it on an empty query
 			const leadingEntries: DataT[] = (additionalOptions ?? []).filter(
 				(entry) =>
 					!entry.hidden &&
 					!filterIds?.includes(getId(entry)) &&
-					getStringLabel(entry).toLowerCase().includes(query.toLowerCase()),
+					matchesQuery(entry),
 			);
-			const filteredLruIds = filterIds
-				? lruIds.filter((id) => !filterIds.includes(id))
-				: lruIds;
 			const lruPrepend = lru?.mode === "prepend";
-			// resolves the LRU ids to their data, tagged with the LRU css class
-			const loadLruEntries = async (
-				lru: SelectorLruOptions<DataT>,
-			): Promise<DataT[]> =>
-				(
-					(
-						await Promise.all(
-							filteredLruIds.map((id) =>
-								(async (id: string) => lru.loadData(id))(id).catch((e) => {
-									// remove IDs from LRU on backend error
-									if (
-										e instanceof Error &&
-										(e.name === "BackendError" ||
-											e.name === "RequestBatchingError")
-									) {
-										setLruIds((ids) => ids.filter((oId) => oId !== id));
-									}
-									return undefined;
-								}),
-							),
-						)
-					).filter((e) => !!e) as DataT[]
+			// resolves the LRU ids to their data, tagged with the LRU css class.
+			// entries loadData skips stay in the LRU, but are not shown
+			const loadLruEntries = async (): Promise<DataT[]> => {
+				if (!lru) return [];
+				const filteredLruIds = filterIds
+					? lruIds.filter((id) => !filterIds.includes(id))
+					: lruIds;
+				const entries = await Promise.all(
+					filteredLruIds.map((id) =>
+						(async (id: string) => lru.loadData(id))(id).catch((e) => {
+							// remove IDs from LRU on backend error
+							if (
+								e instanceof Error &&
+								(e.name === "BackendError" || e.name === "RequestBatchingError")
+							) {
+								setLruIds((ids) => ids.filter((oId) => oId !== id));
+							}
+							return undefined;
+						}),
+					),
+				);
+				return (
+					entries.filter((entry) => entry && !entry.hidden) as DataT[]
 				).map((entry) => ({
 					...entry,
 					className: combineClassNames([
@@ -963,6 +966,11 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 						entry.className,
 					]),
 				}));
+			};
+			// exclusive mode: resolved before deciding, so an LRU where nothing resolves
+			// falls back to the data source instead of showing a bare label
+			const exclusiveLruEntries =
+				lru && !lruPrepend && query === "" ? await loadLruEntries() : [];
 			// prepend mode: LRU block (label, entries, divider) placed in front of the
 			// data source's options once those are sorted
 			let lruEntries: DataT[] = [];
@@ -970,31 +978,37 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 				lru &&
 				!lruPrepend &&
 				query === "" &&
-				(filteredLruIds.length > 0 || lru.forceQuery)
+				(exclusiveLruEntries.length > 0 || lru.forceQuery)
 			) {
 				results = [
 					onAddNew ? addNewEntry : undefined,
-					filteredLruIds.length > 0 && onAddNew
+					exclusiveLruEntries.length > 0 && onAddNew
 						? ({
 								label: "",
 								value: "lru-divider",
 								isDivider: true,
 							} as DataT)
 						: undefined,
-					filteredLruIds.length > 0
+					exclusiveLruEntries.length > 0
 						? ({
 								label: t("standalone.selector.base-selector.lru-label"),
 								value: "lru-label",
 								isSmallLabel: true,
 							} as DataT)
 						: undefined,
-					...(await loadLruEntries(lru)),
+					...exclusiveLruEntries,
 				].filter((entry) => entry) as DataT[];
 			} else {
-				if (query === "" && (forceQuery || (lruPrepend && lru?.forceQuery))) {
+				const skipLoad =
+					query === "" && (forceQuery || (lruPrepend && lru?.forceQuery));
+				// independent of each other, so they load side by side
+				const [loadResult, prependLruEntries] = await Promise.all([
+					skipLoad ? null : onLoad(query, switchValue),
+					lruPrepend ? loadLruEntries() : [],
+				]);
+				if (!loadResult) {
 					results = [];
 				} else {
-					const loadResult = await onLoad(query, switchValue);
 					results = [...loadResult.options];
 					// count what the source returned, before hidden/filterIds are applied below
 					const loaded = loadResult.options.length;
@@ -1016,15 +1030,9 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 						} as DataT);
 					}
 				}
-				if (lru && lruPrepend && filteredLruIds.length > 0) {
-					const lowerQuery = query.toLowerCase();
-					// cap after resolving, so skipped ids don't cost a slot
-					lruEntries = (await loadLruEntries(lru))
-						.filter((entry) => !entry.hidden)
-						.slice(0, lru.count)
-						.filter((entry) =>
-							getStringLabel(entry).toLowerCase().includes(lowerQuery),
-						);
+				// LRU entries matching the query go on top and are not repeated below
+				lruEntries = prependLruEntries.filter(matchesQuery);
+				if (lruEntries.length > 0) {
 					const lruEntryIds = lruEntries.map(getId);
 					results = results.filter(
 						(entry) => !lruEntryIds.includes(getId(entry)),
