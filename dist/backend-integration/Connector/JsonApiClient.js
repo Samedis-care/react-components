@@ -88,6 +88,9 @@ class JsonApiClient {
      * @param body The JSON body to pass
      * @param auth The authentication mode to use
      * @param options Abort signal and upload progress
+     * @throws NetworkError if no response arrived, BackendError with the response's
+     *         `status` and `headers` if the response isn't JSON (the response processor
+     *         isn't called then), and whatever the response processor throws
      */
     async request(method, url, args, body, auth, options = {}) {
         const { signal, onUploadProgress } = options;
@@ -150,9 +153,9 @@ class JsonApiClient {
                 // JSON parse error
                 console.error("[JsonApiClient] Failed JSON parsing", e, responseText);
                 throw new BackendError(ccI18n.t("backend-integration.connector.json-api-client.parse-error", {
-                    STATUS_CODE: response.status,
-                    STATUS_TEXT: response.statusText,
-                }));
+                    // HTTP/2 has no status text
+                    STATUS: `${response.status} ${response.statusText}`.trim(),
+                }), undefined, undefined, response);
             }
             return (await this.handleResponse(response, responseData, method, url, args, body, auth, options));
         }

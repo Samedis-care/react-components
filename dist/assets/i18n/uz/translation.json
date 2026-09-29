@@ -222,7 +222,7 @@
 		"connector": {
 			"json-api-client": {
 				"network-error": "Tarmoqda xatolik yuz berdi.",
-				"parse-error": "Sinxni bajarib bo'lmadi (JSON yaroqsiz). Server {{STATUS_CODE}} {{STATUS_TEXT}} holatini qaytardi."
+				"parse-error": "Javobni tahlil qilib bo'lmadi (JSON yaroqsiz). Server {{STATUS}} holatini qaytardi."
 			}
 		},
 		"model": {

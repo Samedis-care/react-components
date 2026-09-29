@@ -119,6 +119,9 @@ declare class JsonApiClient {
      * @param body The JSON body to pass
      * @param auth The authentication mode to use
      * @param options Abort signal and upload progress
+     * @throws NetworkError if no response arrived, BackendError with the response's
+     *         `status` and `headers` if the response isn't JSON (the response processor
+     *         isn't called then), and whatever the response processor throws
      */
     request<T>(method: string, url: string, args: GetParams, body: unknown | null, auth: AuthMode, options?: RequestOptions): Promise<T>;
 }
