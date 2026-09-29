@@ -15,7 +15,7 @@ import {
 } from "../../../../backend-components/Selector/FormSelectors";
 
 type OmitProperties =
-	"selected" | "onSelect" | "disabled" | "model" | "initialData";
+	"selected" | "onSelect" | "disabled" | "model" | "initialData" | "autoFocus";
 
 export type RendererBackendSingleSelectProps<
 	KeyT extends ModelFieldName,
@@ -79,6 +79,7 @@ class RendererBackendSingleSelect<
 			errorMsg,
 			warningMsg,
 			dirty,
+			autoFocus,
 			relationData,
 			relationModel,
 		} = params;
@@ -135,6 +136,7 @@ class RendererBackendSingleSelect<
 						initialData={relationData}
 						{...this.props}
 						dirty={dirty}
+						autoFocus={autoFocus}
 						modelFetch={modelFetch}
 						refreshToken={
 							JSON.stringify(relationModel.getReactQueryKeyFetchAll()) +

@@ -4,6 +4,7 @@ import React, {
 	useEffect,
 	useMemo,
 	useRef,
+	useState,
 } from "react";
 import { useFormContext } from "./Form";
 import {
@@ -42,6 +43,14 @@ interface FieldProps {
 				ModelFieldDefinition<unknown, string, PageVisibility, never>,
 				NonOverridableProps
 		  >);
+	/**
+	 * Focus the field's control when it mounts, e.g. the field a form should start in
+	 * @remarks Like the `autoFocus` attribute: it applies when the control mounts, so
+	 *          turning it on for a control that is already shown does not move the
+	 *          focus. Only editable controls with a keyboard input take it; file and
+	 *          image uploads, the signature pad and the data grid multi select ignore it.
+	 */
+	autoFocus?: boolean;
 }
 
 export interface FormFieldContextType<T> extends ModelRenderParams<T> {
@@ -137,6 +146,11 @@ const Field = (props: FieldProps): React.ReactElement => {
 		return () => markFieldMounted(props.name, false);
 	}, [markFieldMounted, props.name]);
 
+	// only while the field mounts: a control that remounts its input later (a
+	// selector refreshing its options) must not pull the focus back to itself
+	const [autoFocus, setAutoFocus] = useState(!!props.autoFocus);
+	useEffect(() => setAutoFocus(false), []);
+
 	const { name } = props;
 	const value = getValueByDot(name, values);
 	const initialValue = initialValues[name];
@@ -170,6 +184,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 				value: value,
 				touched: touch,
 				dirty: dirty,
+				autoFocus: autoFocus,
 				initialValue: initialValue,
 				visibility: readOnly ? { ...visibility, readOnly: true } : visibility,
 				handleChange: setFieldValueHookWrapper,
@@ -207,6 +222,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 			initialValue,
 			touch,
 			dirty,
+			autoFocus,
 			relationModel,
 			relationData,
 			readOnly,

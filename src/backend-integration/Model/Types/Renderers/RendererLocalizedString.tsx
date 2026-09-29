@@ -36,6 +36,7 @@ export type ModelDataTypeLocalizedStringRendererParams = Omit<
 	| "onChange"
 	| "onBlur"
 	| "error"
+	| "autoFocus"
 	| "warning"
 > &
 	ModelDataTypeLocalizedStringRendererParamsExtra;
@@ -80,6 +81,7 @@ class RendererLocalizedString extends TypeLocalizedString {
 			errorMsg,
 			warningMsg,
 			dirty,
+			autoFocus,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -117,6 +119,7 @@ class RendererLocalizedString extends TypeLocalizedString {
 						error={!!errorMsg}
 						warning={!!warningMsg}
 						dirty={dirty}
+						autoFocus={autoFocus}
 					/>
 					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
 						{errorMsg || warningMsg}

@@ -19,6 +19,7 @@ export type ModelDataTypeDecimalRendererCCParams = Omit<
 	| "onChange"
 	| "onBlur"
 	| "error"
+	| "autoFocus"
 	| "multiline"
 > &
 	Omit<DecimalInputFieldProps, "warning" | "value" | "onChange">;
@@ -46,6 +47,7 @@ class RendererDecimal extends TypeNumber {
 			errorMsg,
 			warningMsg,
 			dirty,
+			autoFocus,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -83,6 +85,7 @@ class RendererDecimal extends TypeNumber {
 						error={!!errorMsg}
 						warning={!!warningMsg}
 						dirty={dirty}
+						autoFocus={autoFocus}
 					/>
 					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
 						{errorMsg || warningMsg}

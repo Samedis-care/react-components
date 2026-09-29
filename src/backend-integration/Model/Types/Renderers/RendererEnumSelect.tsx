@@ -14,7 +14,7 @@ import uniqueArray from "../../../../utils/uniqueArray";
 
 export type RendererEnumSelectProps = Omit<
 	BaseSelectorProps<BaseSelectorData, false>,
-	"selected" | "onLoad" | "onSelect" | "disabled"
+	"selected" | "onLoad" | "onSelect" | "disabled" | "autoFocus"
 >;
 
 export type AdvancedEnumValue = Omit<BaseSelectorData, "label"> &
@@ -46,6 +46,7 @@ class RendererEnumSelect extends TypeEnum {
 			errorMsg,
 			warningMsg,
 			dirty,
+			autoFocus,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -104,6 +105,7 @@ class RendererEnumSelect extends TypeEnum {
 						disabled={visibility.readOnly}
 						required={visibility.required}
 						dirty={dirty}
+						autoFocus={autoFocus}
 					/>
 					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
 				</FormControlFieldsetCC>

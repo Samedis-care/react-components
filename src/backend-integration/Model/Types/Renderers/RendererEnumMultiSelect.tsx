@@ -15,7 +15,7 @@ import uniqueArray from "../../../../utils/uniqueArray";
 
 export type RendererEnumMultiSelectProps = Omit<
 	MultiSelectProps<MultiSelectorData>,
-	"label" | "selected" | "onLoad" | "onSelect" | "disabled"
+	"label" | "selected" | "onLoad" | "onSelect" | "disabled" | "autoFocus"
 >;
 
 /**
@@ -42,6 +42,7 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 			errorMsg,
 			warningMsg,
 			dirty,
+			autoFocus,
 			value,
 		} = params;
 
@@ -105,6 +106,7 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 						disabled={visibility.readOnly}
 						{...this.props}
 						dirty={dirty}
+						autoFocus={autoFocus}
 					/>
 					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
 				</FormControlFieldsetCC>

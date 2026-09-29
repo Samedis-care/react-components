@@ -18,6 +18,7 @@ export type RendererDateNullableProps = Omit<
 	| "onChange"
 	| "onBlur"
 	| "error"
+	| "autoFocus"
 	| "onError"
 	| "fullWidth"
 	| "clearable"
@@ -47,6 +48,7 @@ class RendererDateNullable extends TypeDateNullable {
 			errorMsg,
 			warningMsg,
 			dirty,
+			autoFocus,
 			setFieldTouched,
 		} = params;
 
@@ -79,6 +81,7 @@ class RendererDateNullable extends TypeDateNullable {
 						error={!!errorMsg}
 						warning={!!warningMsg}
 						dirty={dirty}
+						autoFocus={autoFocus}
 						onError={(error: React.ReactNode) => {
 							this.error = error
 								? ccI18n.t(

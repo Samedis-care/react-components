@@ -17,6 +17,7 @@ export type ModelDataTypeStringRendererMUIParams = Omit<
 	| "onChange"
 	| "onBlur"
 	| "error"
+	| "autoFocus"
 >;
 
 /**
@@ -42,6 +43,7 @@ class RendererString extends TypeString {
 			errorMsg,
 			warningMsg,
 			dirty,
+			autoFocus,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -77,6 +79,7 @@ class RendererString extends TypeString {
 						error={!!errorMsg}
 						warning={!!warningMsg}
 						dirty={dirty}
+						autoFocus={autoFocus}
 					/>
 					<FormHelperTextCC warning={!!warningMsg} error={!!errorMsg}>
 						{errorMsg || warningMsg}

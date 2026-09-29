@@ -32,6 +32,7 @@ class RendererDate extends TypeDate {
 			setFieldTouched,
 			warningMsg,
 			dirty,
+			autoFocus,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -77,6 +78,7 @@ class RendererDate extends TypeDate {
 						error={!!errorMsg}
 						warning={!!warningMsg}
 						dirty={dirty}
+						autoFocus={autoFocus}
 						onError={(error: React.ReactNode) => {
 							this.error = error
 								? ccI18n.t(

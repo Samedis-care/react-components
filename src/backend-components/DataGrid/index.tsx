@@ -256,6 +256,7 @@ export const renderDataGridRecordUsingModel =
 										touched: false,
 										// grid cells render server data, there is nothing to diff against
 										dirty: false,
+										autoFocus: false,
 										initialValue: value,
 										label: field.getLabel(),
 										visibility: Object.assign({}, field.visibility.overview, {

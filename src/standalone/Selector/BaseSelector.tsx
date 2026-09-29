@@ -317,6 +317,10 @@ export type BaseSelectorProps<
 		 */
 		dirty?: boolean;
 		/**
+		 * Focus the search input when the selector mounts
+		 */
+		autoFocus?: boolean;
+		/**
 		 * String used for the Autocomplete component
 		 */
 		autocompleteId?: string;
@@ -663,6 +667,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 		error,
 		warning,
 		dirty,
+		autoFocus,
 		disableSearch,
 		placeholder,
 		autocompleteId,
@@ -1380,6 +1385,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 									error={error}
 									warning={warning}
 									dirty={dirty}
+									autoFocus={autoFocus}
 								/>
 							);
 						}}

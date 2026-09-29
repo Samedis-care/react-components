@@ -30,6 +30,7 @@ class RendererYourType extends ModelDataTypeYourType {
 			handleBlur,
 			errorMsg,
 			dirty,
+			autoFocus,
 		} = params;
 
 		// if the visibility is disabled you should not render anything, so return <></> (empty React.Fragment)
@@ -62,6 +63,7 @@ class RendererYourType extends ModelDataTypeYourType {
 						onBlur={handleBlur}
 						error={!!errorMsg}
 						dirty={dirty}
+						autoFocus={autoFocus}
 						fullWidth
 					/>
 					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
@@ -89,5 +91,12 @@ for the marker, so a renderer can always forward it. Hand it to any control buil
 its own. A control that labels itself some other way should render `DirtyMarker` next to its
 label instead. See
 [Showing dirty state](../../../../../docs/FormEngine.md#showing-dirty-state).
+
+`autoFocus` is true while the field mounts if the form should start in it
+(`FormField autoFocus`), and false right after. Hand it to the control's own `autoFocus`,
+after any options you spread, so the form's value wins, and render that input right away.
+A control with several inputs gives it to the one where typing starts, such as the empty
+entry at the end of a list; a control with nothing to type into can ignore it. See
+[Starting in a field](../../../../../docs/FormEngine.md#starting-in-a-field).
 
 If you implement an editable grid control you need to make sure that handleChange is only called when needed. Calling handleChange will send a update request to the backend and refresh the grid.

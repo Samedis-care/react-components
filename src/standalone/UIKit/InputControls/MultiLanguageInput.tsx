@@ -307,6 +307,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 		ignoreI18nLocale,
 		warning,
 		dirty,
+		autoFocus,
 		...textFieldProps
 	} = props;
 	const { t } = useCCLanguagesTranslations();
@@ -370,11 +371,15 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 		[],
 	);
 
-	const renderLanguage = (lang: MultiLanguageInputSupportedLanguages) => (
+	const renderLanguage = (
+		lang: MultiLanguageInputSupportedLanguages,
+		focus: boolean,
+	) => (
 		<TextFieldCC
 			{...textFieldProps}
 			warning={warning}
 			dirty={dirty}
+			autoFocus={focus}
 			fullWidth
 			label={
 				textFieldProps.multiline ? (
@@ -458,6 +463,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 			<Grid size={12}>
 				{renderLanguage(
 					textFieldProps.multiline ? activeLanguage : defaultLanguage,
+					!!autoFocus,
 				)}
 			</Grid>
 			{expanded &&
@@ -466,7 +472,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 					.filter((lang) => lang !== defaultLanguage)
 					.map((lang) => (
 						<Grid key={lang} size={12}>
-							{renderLanguage(lang)}
+							{renderLanguage(lang, false)}
 						</Grid>
 					))}
 		</Grid>

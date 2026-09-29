@@ -26,6 +26,7 @@ class RendererEnumSelect extends TypeEnum {
 			errorMsg,
 			warningMsg,
 			dirty,
+			autoFocus,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -57,6 +58,7 @@ class RendererEnumSelect extends TypeEnum {
 						disabled={visibility.readOnly}
 						onChange={(evt) => handleChange(field, evt.target.value)}
 						onBlur={handleBlur}
+						autoFocus={autoFocus}
 					>
 						{this.values.map((entry) => (
 							<MenuItem

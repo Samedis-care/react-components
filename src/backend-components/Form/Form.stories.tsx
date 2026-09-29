@@ -30,6 +30,10 @@ export default meta;
 
 interface FormCustomProps {
 	goBack: () => void;
+	/**
+	 * The field the form starts in
+	 */
+	autoFocus?: ModelFieldName;
 }
 
 const FormContent = (props: PageProps<ModelFieldName, FormCustomProps>) => {
@@ -127,13 +131,13 @@ const FIELD_SIZES: Partial<Record<ModelFieldName, number>> = { notes: 12 };
  * @remarks The form engine wraps fields in nothing of its own, so the story marks its
  *          cells to have something to assert against.
  */
-const FieldCell = (props: { name: ModelFieldName }) => (
+const FieldCell = (props: { name: ModelFieldName; autoFocus?: boolean }) => (
 	<Grid
 		size={{ xs: FIELD_SIZES[props.name] ?? 6 }}
 		data-field={props.name}
 		key={props.name}
 	>
-		<FormField name={props.name} />
+		<FormField name={props.name} autoFocus={props.autoFocus} />
 	</Grid>
 );
 
@@ -168,7 +172,11 @@ const MixedFormContent = (
 		>
 			<Grid container spacing={2}>
 				{MIXED_FIELDS.map((name) => (
-					<FieldCell name={name} key={name} />
+					<FieldCell
+						name={name}
+						autoFocus={name === props.customProps.autoFocus}
+						key={name}
+					/>
 				))}
 			</Grid>
 		</DefaultFormPage>
@@ -196,8 +204,9 @@ const ProposedChangesFormContent = (
 	</DirtyStateProvider>
 );
 
-const DirtyStateFormStory = (props: {
+const MixedFormStory = (props: {
 	showDirtyState?: boolean;
+	autoFocus?: ModelFieldName;
 	content?: React.ComponentType<PageProps<ModelFieldName, FormCustomProps>>;
 }) => {
 	const model = useMemo(createMixedControlModel, []);
@@ -210,7 +219,7 @@ const DirtyStateFormStory = (props: {
 			model={model}
 			id="1"
 			errorComponent={DefaultErrorComponent}
-			customProps={{ goBack }}
+			customProps={{ goBack, autoFocus: props.autoFocus }}
 			showDirtyState={props.showDirtyState}
 			disableRouting
 		>
@@ -227,7 +236,7 @@ const hasMarker = (el: Element | null | undefined) =>
 	!!el && getComputedStyle(el, "::after").content !== "none";
 
 export const DirtyState: StoryObj = {
-	render: () => <DirtyStateFormStory showDirtyState />,
+	render: () => <MixedFormStory showDirtyState />,
 	play: async ({ canvas, canvasElement, userEvent }) => {
 		const input = await canvas.findByDisplayValue("Alice", undefined, {
 			timeout: 10000,
@@ -300,7 +309,7 @@ export const DirtyState: StoryObj = {
  * Without `showDirtyState` nothing is marked, however dirty the form gets.
  */
 export const DirtyStateHidden: StoryObj = {
-	render: () => <DirtyStateFormStory />,
+	render: () => <MixedFormStory />,
 	play: async ({ canvas, canvasElement, userEvent }) => {
 		const input = await canvas.findByDisplayValue("Alice", undefined, {
 			timeout: 10000,
@@ -327,7 +336,7 @@ export const DirtyStateHidden: StoryObj = {
  * dirty — and still marked, and the form's own dirty state is merged in on top.
  */
 export const DirtyStateProvided: StoryObj = {
-	render: () => <DirtyStateFormStory content={ProposedChangesFormContent} />,
+	render: () => <MixedFormStory content={ProposedChangesFormContent} />,
 	play: async ({ canvas, canvasElement, userEvent }) => {
 		const input = await canvas.findByDisplayValue("Alice", undefined, {
 			timeout: 10000,
@@ -349,5 +358,28 @@ export const DirtyStateProvided: StoryObj = {
 			await expect(hasMarker(label("first_name"))).toBe(true);
 		});
 		await expect(hasMarker(label("notes"))).toBe(true);
+	},
+};
+
+/**
+ * `FormField autoFocus` puts the cursor in the field a form should start in, whichever
+ * control it is. It applies when the field mounts, so picking another field here
+ * reopens the form.
+ */
+export const AutoFocus: StoryObj<{ field: ModelFieldName }> = {
+	args: { field: "start_date" },
+	argTypes: {
+		field: {
+			control: "select",
+			options: MIXED_FIELDS.filter((name) => name !== "avatar"),
+		},
+	},
+	render: (args) => <MixedFormStory autoFocus={args.field} key={args.field} />,
+	play: async ({ canvas, canvasElement, args }) => {
+		await canvas.findByDisplayValue("Alice", undefined, { timeout: 10000 });
+		const cell = canvasElement.querySelector(`[data-field="${args.field}"]`);
+		await waitFor(async () => {
+			await expect(cell?.contains(document.activeElement)).toBe(true);
+		});
 	},
 };

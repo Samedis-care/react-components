@@ -56,6 +56,10 @@ export interface MultiSelectWithTagsProps<
 	 */
 	dirty?: boolean;
 	/**
+	 * Focus the group selector, the first input, when the control mounts
+	 */
+	autoFocus?: boolean;
+	/**
 	 * Label above search bar
 	 */
 	searchInputLabel?: string;
@@ -147,6 +151,7 @@ const MultiSelectWithTags = <
 	const {
 		title,
 		dirty,
+		autoFocus,
 		searchInputLabel,
 		selected,
 		disabled,
@@ -285,6 +290,7 @@ const MultiSelectWithTags = <
 				forceQuery={forceQuery}
 				startTypingToSearchText={startTypingToSearchText}
 				lru={lruGroup}
+				autoFocus={autoFocus}
 			/>
 			<Box sx={{ pt: 3 }}>
 				<MultiSelectWithoutGroup<DataT>

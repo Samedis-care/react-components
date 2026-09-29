@@ -47,6 +47,7 @@ class RendererEnumRadio extends TypeEnum {
 			errorMsg,
 			warningMsg,
 			dirty,
+			autoFocus,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -63,6 +64,15 @@ class RendererEnumRadio extends TypeEnum {
 		}
 		if (visibility.editable) {
 			if (visibility.grid) throw new Error("Not supported");
+
+			// where tabbing into the group lands: the checked option, else the first one
+			const focusable = this.values.filter(
+				(entry) => !entry.invisible && !entry.disabled,
+			);
+			const focusValue = autoFocus
+				? (focusable.find((entry) => entry.value === value) ?? focusable[0])
+						?.value
+				: undefined;
 
 			return (
 				<FormControlFieldsetCC
@@ -89,7 +99,7 @@ class RendererEnumRadio extends TypeEnum {
 									<FormControlLabel
 										key={entry.value}
 										value={entry.value}
-										control={<Radio />}
+										control={<Radio autoFocus={entry.value === focusValue} />}
 										label={entry.getLabel()}
 										disabled={visibility.readOnly || entry.disabled}
 									/>,

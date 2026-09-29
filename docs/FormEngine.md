@@ -433,6 +433,30 @@ those resolve to `true`. Stick with `submit` when you need the error object itse
 in nested forms (`nestedFormName`) too: those don't render an error component of their own, and rely
 on the error propagating to the parent form.
 
+### Starting in a field
+
+`FormField` takes `autoFocus` to put the cursor in the field a form should start in:
+
+```tsx
+<FormField name={"serial_number"} autoFocus />
+```
+
+It works like the `autoFocus` attribute: it applies when the field mounts. Turning it on for a
+field that is already shown does not move the focus, and a control that replaces its input
+later, such as a selector refreshing its options, does not take the focus back. Give it to one
+field.
+
+Every control with a keyboard input takes it: text and number fields, dates, selectors,
+checkboxes, switches and enum selects. A radio group starts on the checked option, or on the
+first one when none is checked. A control with several inputs focuses the one where typing
+starts: the default language of a localized string, the empty entry at the end of a string array
+(for a new value), the group selector of a multi select with tags. File and image uploads, the signature pad and the data grid multi select ignore
+it.
+
+A custom renderer receives it as `RenderParams.autoFocus`, see
+[the renderer remarks](../src/backend-integration/Model/Types/Renderers/README.md#remarks). The
+`Backend-Components/Form` story `AutoFocus` starts the form in any of its fields.
+
 ### Showing dirty state
 
 A field can be marked as modified with a small blue dot after its label. Nothing is marked

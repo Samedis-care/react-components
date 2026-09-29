@@ -21,6 +21,7 @@ export interface ModelDataTypeDecimalCurrencyRendererCCParams
 			| "onChange"
 			| "onBlur"
 			| "error"
+			| "autoFocus"
 			| "multiline"
 		> {
 	/**
@@ -59,6 +60,7 @@ class RendererDecimalCurrency extends TypeNumber {
 			errorMsg,
 			warningMsg,
 			dirty,
+			autoFocus,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -99,6 +101,7 @@ class RendererDecimalCurrency extends TypeNumber {
 						error={!!errorMsg}
 						warning={!!warningMsg}
 						dirty={dirty}
+						autoFocus={autoFocus}
 					/>
 					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
 						{errorMsg || warningMsg}

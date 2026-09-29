@@ -46,6 +46,7 @@ class RendererEnumRadio extends TypeEnumMulti {
 			errorMsg,
 			warningMsg,
 			dirty,
+			autoFocus,
 			value,
 		} = params;
 
@@ -63,6 +64,11 @@ class RendererEnumRadio extends TypeEnumMulti {
 		}
 		if (visibility.editable) {
 			if (visibility.grid) throw new Error("Not supported");
+
+			const focusValue = autoFocus
+				? this.values.find((entry) => !entry.invisible && !entry.disabled)
+						?.value
+				: undefined;
 
 			return (
 				<FormControlFieldsetCC
@@ -89,6 +95,7 @@ class RendererEnumRadio extends TypeEnumMulti {
 										control={
 											<Checkbox
 												checked={value.includes(entry.value)}
+												autoFocus={entry.value === focusValue}
 												name={entry.value}
 												onChange={(evt) =>
 													handleChange(

@@ -15,6 +15,7 @@ export type ModelDataTypeStringRendererCCParams = Omit<
 	| "onChange"
 	| "onBlur"
 	| "error"
+	| "autoFocus"
 > &
 	Omit<TextFieldWithHelpProps, "warning">;
 
@@ -41,6 +42,7 @@ class RendererString extends TypeString {
 			errorMsg,
 			warningMsg,
 			dirty,
+			autoFocus,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -76,6 +78,7 @@ class RendererString extends TypeString {
 						error={!!errorMsg}
 						warning={!!warningMsg}
 						dirty={dirty}
+						autoFocus={autoFocus}
 					/>
 					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
 						{errorMsg || warningMsg}

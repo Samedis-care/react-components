@@ -29,6 +29,7 @@ class RendererBooleanCheckbox extends TypeBoolean {
 			errorMsg,
 			warningMsg,
 			dirty,
+			autoFocus,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -57,6 +58,7 @@ class RendererBooleanCheckbox extends TypeBoolean {
 					}}
 					onBlur={handleBlur}
 					data-name={field}
+					autoFocus={autoFocus}
 				/>
 			);
 

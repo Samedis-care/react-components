@@ -14,7 +14,7 @@ import { FormControlFieldsetCC } from "../../../../../standalone/UIKit/MuiFieldS
 export interface ModelDataTypeBooleanSwitchRendererMUIProps {
 	switchProps: Omit<
 		SwitchProps,
-		"name" | "checked" | "disabled" | "onChange" | "onBlur"
+		"name" | "checked" | "disabled" | "onChange" | "onBlur" | "autoFocus"
 	>;
 }
 
@@ -46,6 +46,7 @@ class RendererBooleanSwitch extends TypeBoolean {
 			errorMsg,
 			warningMsg,
 			dirty,
+			autoFocus,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -89,6 +90,7 @@ class RendererBooleanSwitch extends TypeBoolean {
 								}}
 								onBlur={handleBlur}
 								data-name={field}
+								autoFocus={autoFocus}
 							/>
 						}
 						label={label}

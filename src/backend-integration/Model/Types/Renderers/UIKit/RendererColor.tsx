@@ -15,6 +15,7 @@ export type ModelDataTypeColorRenderer = Omit<
 	| "onChange"
 	| "onBlur"
 	| "error"
+	| "autoFocus"
 	| "warning"
 >;
 
@@ -41,6 +42,7 @@ class RendererColor extends TypeColor {
 			errorMsg,
 			warningMsg,
 			dirty,
+			autoFocus,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -75,6 +77,7 @@ class RendererColor extends TypeColor {
 						error={!!errorMsg}
 						warning={!!warningMsg}
 						dirty={dirty}
+						autoFocus={autoFocus}
 					/>
 					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
 						{errorMsg || warningMsg}

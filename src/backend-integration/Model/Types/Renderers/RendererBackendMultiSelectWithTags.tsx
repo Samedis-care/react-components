@@ -13,7 +13,13 @@ import {
 import TypeIds from "../TypeIds";
 
 type OmitProperties =
-	"selected" | "onSelect" | "disabled" | "dataModel" | "initialData" | "title";
+	| "selected"
+	| "onSelect"
+	| "disabled"
+	| "dataModel"
+	| "initialData"
+	| "title"
+	| "autoFocus";
 
 /**
  * Renders TypeEnum as drop-down selector (with search)
@@ -81,6 +87,7 @@ class RendererBackendMultiSelectWithTags<
 			errorMsg,
 			warningMsg,
 			dirty,
+			autoFocus,
 			relationData,
 			relationModel,
 			value,
@@ -127,6 +134,7 @@ class RendererBackendMultiSelectWithTags<
 						title={label}
 						{...this.props}
 						dirty={dirty}
+						autoFocus={autoFocus}
 					/>
 					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
 				</FormControlFieldsetCC>

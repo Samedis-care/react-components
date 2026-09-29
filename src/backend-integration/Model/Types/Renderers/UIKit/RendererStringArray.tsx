@@ -22,6 +22,7 @@ export type ModelDataTypeStringArrayRendererCCParams = Omit<
 	| "onChange"
 	| "onBlur"
 	| "error"
+	| "autoFocus"
 > &
 	Omit<TextFieldWithHelpProps, "warning">;
 
@@ -82,6 +83,7 @@ const RendererStringArrayComponent = (
 		errorMsg,
 		warningMsg,
 		dirty,
+		autoFocus,
 	} = props;
 
 	useMountLogging(RendererStringArrayComponent);
@@ -107,6 +109,8 @@ const RendererStringArrayComponent = (
 			error={!!errorMsg}
 			warning={!!warningMsg}
 			dirty={dirty}
+			// the empty entry at the end, where a new value goes
+			autoFocus={autoFocus && idx === value.length}
 		/>
 	);
 
