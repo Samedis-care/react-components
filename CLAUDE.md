@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 pnpm run build           # Compile TypeScript to dist/ and copy assets
-pnpm run lint            # Lint src/ with ESLint
+pnpm run lint            # Lint src/ and test/ with ESLint
 pnpm run lint-fix        # Auto-fix lint issues
 pnpm run storybook       # Start Storybook dev server (port 6006)
 pnpm run test            # Run all tests (unit + stories)

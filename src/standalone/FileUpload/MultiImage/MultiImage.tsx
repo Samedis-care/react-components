@@ -33,9 +33,9 @@ export interface MultiImageImage {
 	 */
 	id: string;
 	/**
-	 * The URL/Data-URI of the image
+	 * The image: its URL (or data URI), or the image the user picked
 	 */
-	image: string;
+	image: string | Blob;
 	/**
 	 * The file name of the image
 	 */
@@ -49,7 +49,7 @@ export interface MultiImageImage {
 export type MultiImageManipulationCallback = (
 	images: MultiImageImage[],
 ) => MultiImageImage[];
-export type MultiImageProcessFile = (file: File) => Promise<string>;
+export type MultiImageProcessFile = (file: File) => Promise<File>;
 
 export interface MultiImageProps {
 	/**
@@ -285,7 +285,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 	}, [readOnly, capture]);
 
 	const processFile = useCallback(
-		(file: File): Promise<string> =>
+		(file: File): Promise<File> =>
 			processImage(file, convertImagesTo, downscale),
 		[convertImagesTo, downscale],
 	);

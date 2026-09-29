@@ -217,8 +217,9 @@ export interface FileData<T = File | FileMeta> {
 	canBeUploaded?: boolean;
 	/**
 	 * The processed image, if present: should be uploaded instead of file.
+	 * @remarks A URL for a file from the server, a Blob for an image the user picked
 	 */
-	preview?: string;
+	preview?: string | Blob;
 	/**
 	 * Set to true if the file should be deleted from the server, only true if canBeUploaded is false
 	 */
@@ -416,7 +417,7 @@ const FileUpload = (
 
 				const isImage = file.type.startsWith("image/");
 				if (isImage && processImages) {
-					let preview: string;
+					let preview: File;
 					try {
 						preview = await processImage(
 							file,

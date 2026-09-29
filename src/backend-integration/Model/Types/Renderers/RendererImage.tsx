@@ -5,12 +5,13 @@ import ImageSelector from "../../../../standalone/FileUpload/Image/ImageSelector
 import ccI18n from "../../../../i18n";
 import TypeImage from "../TypeImage";
 import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiFieldState";
+import ObjectUrlImage from "../../../../standalone/FileUpload/Image/ObjectUrlImage";
 
 /**
  * Renders an image selector
  */
 class RendererImage extends TypeImage {
-	render(params: ModelRenderParams<string>): React.ReactElement {
+	render(params: ModelRenderParams<string | Blob>): React.ReactElement {
 		const {
 			visibility,
 			field,
@@ -29,7 +30,7 @@ class RendererImage extends TypeImage {
 				<input
 					type="hidden"
 					name={field}
-					value={value}
+					value={typeof value === "string" ? value : ""}
 					readOnly
 					aria-hidden={"true"}
 				/>
@@ -67,9 +68,9 @@ class RendererImage extends TypeImage {
 
 		const content =
 			value || this.params?.placeholder ? (
-				<img
+				<ObjectUrlImage
 					src={value || (this.params?.placeholder ?? "")}
-					alt={label}
+					alt={label ?? ""}
 					style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
 				/>
 			) : (

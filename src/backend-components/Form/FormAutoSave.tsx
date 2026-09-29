@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { useFormContext } from "./Form";
 import debounce from "../../utils/debounce";
+import toComparisonJson from "../../utils/toComparisonJson";
 
 export interface FormAutoSaveProps {
 	debounceTime?: number;
@@ -16,7 +17,7 @@ const useFormAutoSave = (debounceTime = 5000) => {
 		() => (debounceTime == 0 ? safeSubmit : debounce(safeSubmit, debounceTime)),
 		[safeSubmit, debounceTime],
 	);
-	const dataStr = JSON.stringify(values);
+	const dataStr = toComparisonJson(values);
 	useEffect(() => {
 		if (!dirty || submitting) return;
 		void debounceSubmit();

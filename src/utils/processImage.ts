@@ -1,5 +1,5 @@
-import fileToData from "./fileToData";
-import processImageB64 from "./processImageB64";
+import { drawImage, loadImage, skipsCanvas } from "./imageCanvas";
+import replaceFileExt from "./replaceFileExt";
 
 export interface IDownscaleProps {
 	/**
@@ -21,28 +21,51 @@ export interface IDownscaleProps {
  * @param file The image file
  * @param convertImagesTo MimeType to convert the image to (e.g. image/png or image/jpg)
  * @param downscale Settings to downscale an image
+ * @returns The processed image. A File stays a File, with its extension following a
+ *          changed type.
  * @throws ImageLoadError if the browser cannot decode the image
+ * @remarks The image is never read into a base64 string. A browser that cannot encode the
+ *          requested type encodes PNG, the returned image's type tells.
  */
-const processImage = async (
+function processImage(
 	file: File,
 	convertImagesTo?: string,
 	downscale?: IDownscaleProps,
-): Promise<string> => {
+): Promise<File>;
+function processImage(
+	file: Blob,
+	convertImagesTo?: string,
+	downscale?: IDownscaleProps,
+): Promise<Blob>;
+async function processImage(
+	file: Blob,
+	convertImagesTo?: string,
+	downscale?: IDownscaleProps,
+): Promise<Blob> {
 	const imageFormatTarget = convertImagesTo || file.type;
+	if (skipsCanvas(file.type, imageFormatTarget, downscale)) return file;
 
-	// file -> data url
-	const imageData: string = await fileToData(file);
+	const url = URL.createObjectURL(file);
+	let processed: Blob | null;
+	try {
+		const image = await loadImage(url, file.type || null);
+		const canvas = drawImage(image, downscale);
+		processed = await new Promise<Blob | null>((resolve) =>
+			canvas.toBlob(resolve, imageFormatTarget),
+		);
+	} finally {
+		URL.revokeObjectURL(url);
+	}
+	if (!processed) throw new Error("Failed encoding the image");
 
-	// skip this if we're not doing anything except resize and it's a svg
-	if (
-		convertImagesTo === "image/svg+xml" ||
-		(!convertImagesTo &&
-			(!downscale || downscale.keepRatio) &&
-			file.type === "image/svg+xml")
-	)
-		return imageData;
-
-	return processImageB64(imageData, imageFormatTarget, downscale);
-};
+	if (!(file instanceof File)) return processed;
+	return new File(
+		[processed],
+		processed.type === file.type
+			? file.name
+			: replaceFileExt(file.name, processed.type),
+		{ type: processed.type, lastModified: file.lastModified },
+	);
+}
 
 export default processImage;

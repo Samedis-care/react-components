@@ -25,12 +25,13 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 import { useDebounce } from "../../../utils/useDebounce";
 import ImageDots, { ImageDotsProps } from "./ImageDots";
 import useImageZoomPan from "../../../utils/useImageZoomPan";
+import useObjectUrl from "../../../utils/useObjectUrl";
 
 export interface ImageBoxProps {
 	/**
-	 * The Image to display (URL/Data-URI)
+	 * The Image to display: its URL (or data URI), or an image the user picked
 	 */
-	image: string;
+	image: string | Blob;
 	/**
 	 * The image file name
 	 */
@@ -335,6 +336,7 @@ const ImageBox = (inProps: ImageBoxProps) => {
 		className,
 		classes,
 	} = props;
+	const src = useObjectUrl(image);
 	const { handleDragOver, handleDrop, dragging } = useDropZone(onFilesDropped);
 	const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -440,7 +442,7 @@ const ImageBox = (inProps: ImageBoxProps) => {
 						disableFocusListener={!fileName}
 					>
 						<StyledImage
-							src={image}
+							src={src}
 							alt={""}
 							ownerState={{
 								swipeLeft: !!onPrevImage,
@@ -469,7 +471,7 @@ const ImageBox = (inProps: ImageBoxProps) => {
 								>
 									<StyledImage
 										ref={zoomImgRef}
-										src={image}
+										src={src}
 										alt={""}
 										draggable={false}
 										ownerState={{

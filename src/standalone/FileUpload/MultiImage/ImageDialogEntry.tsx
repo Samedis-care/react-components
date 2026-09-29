@@ -116,7 +116,7 @@ const ImageDialogEntry = (inProps: ImageDialogEntryProps) => {
 		async (files: FileList) => {
 			const file = files.item(0);
 			if (!file) return;
-			let imageData: string;
+			let imageData: File;
 			try {
 				imageData = await processFile(file);
 			} catch (e) {

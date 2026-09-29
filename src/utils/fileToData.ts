@@ -1,9 +1,9 @@
 /**
  * Converts a file to a base64 data uri
  * @param file The file to convert
- * @param includeName Include the file name in the base64 data uri as name parameter?
+ * @param includeName Include the file name in the base64 data uri as name parameter? Only a File has one
  */
-const fileToData = async (file: File, includeName = false): Promise<string> => {
+const fileToData = async (file: Blob, includeName = false): Promise<string> => {
 	// file -> data url
 	const reader = new FileReader();
 	return new Promise((resolve, reject) => {
@@ -15,7 +15,7 @@ const fileToData = async (file: File, includeName = false): Promise<string> => {
 				dataUri = "data:application/octet-stream;base64,";
 			}
 			resolve(
-				includeName
+				includeName && file instanceof File
 					? dataUri.replace(
 							";base64,",
 							`;name=${encodeURIComponent(file.name)};base64,`,

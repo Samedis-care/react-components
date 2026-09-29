@@ -7,6 +7,7 @@ import FileUpload, {
 } from "../../../../standalone/FileUpload/Generic";
 import GroupBox from "../../../../standalone/GroupBox";
 import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiFieldState";
+import ObjectUrlImage from "../../../../standalone/FileUpload/Image/ObjectUrlImage";
 
 /**
  * Renders a file selector
@@ -79,7 +80,7 @@ class RendererFiles extends TypeFiles {
 					{value.map((entry, index) => (
 						<li key={index}>
 							{entry.preview && (
-								<img src={entry.preview} alt={entry.file.name} />
+								<ObjectUrlImage src={entry.preview} alt={entry.file.name} />
 							)}
 							{!entry.preview && "downloadLink" in entry.file && (
 								<a href={entry.file.downloadLink}>{entry.file.name}</a>

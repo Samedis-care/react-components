@@ -23,6 +23,7 @@ import { dotToObject, getValueByDot } from "../../utils/dotUtils";
 import deepAssign from "../../utils/deepAssign";
 import throwError from "../../utils/throwError";
 import RequestBatching from "./RequestBatching";
+import { blobsToDataUris } from "../Connector/bodyFiles";
 
 // optional import
 let captureException: ((e: Error) => void) | null = null;
@@ -1200,6 +1201,7 @@ class Model<
 	 * Serializes the given values into a JSON string
 	 * @param values The values to serialize
 	 * @param visibility The visibility of the field to check. Field will be dropped if visibility has disabled == true.
+	 * @remarks A file (Blob) is written as data URI, as JSON cannot carry it
 	 */
 	public async serialize(
 		values: Record<string, unknown>,
@@ -1210,7 +1212,7 @@ class Model<
 			"serialize",
 			visibility,
 		);
-		return JSON.stringify(serializable);
+		return JSON.stringify(await blobsToDataUris(serializable));
 	}
 
 	/**

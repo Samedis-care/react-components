@@ -18,19 +18,24 @@ import {
 	CameraAlt as CameraIcon,
 } from "@mui/icons-material";
 import ImagePreviewDialog from "./ImagePreviewDialog";
-import processImageB64 from "../../../utils/processImageB64";
 import combineClassNames from "../../../utils/combineClassNames";
-import { IDownscaleProps } from "../../../utils/processImage";
+import processImage, { IDownscaleProps } from "../../../utils/processImage";
 import GroupBox from "../../GroupBox";
 import { labelWithDirtyMarker } from "../../UIKit/MuiFieldState";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { ImageFileIcon } from "../FileIcons";
-import fileToData from "../../../utils/fileToData";
+import replaceFileExt from "../../../utils/replaceFileExt";
+import useObjectUrl from "../../../utils/useObjectUrl";
 import getCanImageCapture from "../../../utils/getCanImageCapture";
 import useImageError, { ImageErrorHandler } from "../useImageError";
 
-// resolve to edited image to continue change, or reject to cancel
-export type PostImageEditCallback = (image: string) => Promise<string>;
+/**
+ * Edits an image the user picked, before it is processed
+ * @param image The picked image
+ * @returns The edited image (resolve to continue the change, reject to cancel it). A Blob
+ *          that is not a File gets the picked file's name.
+ */
+export type PostImageEditCallback = (image: File) => Promise<Blob>;
 
 export interface ImageSelectorProps {
 	/**
@@ -38,9 +43,9 @@ export interface ImageSelectorProps {
 	 */
 	name: string;
 	/**
-	 * The current value of the input
+	 * The current value of the input: the image's URL, or the image the user picked
 	 */
-	value: string;
+	value: string | Blob;
 	/**
 	 * Allow capture?
 	 * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/capture
@@ -66,9 +71,9 @@ export interface ImageSelectorProps {
 	/**
 	 * The change handler of the input
 	 * @param name The field name
-	 * @param value The new value (data uri of selected image or empty string)
+	 * @param value The selected image, processed (converted and down-scaled)
 	 */
-	onChange?: (name: string, value: string) => void;
+	onChange?: (name: string, value: File) => void;
 	/**
 	 * The blur event handler of the input
 	 */
@@ -113,7 +118,6 @@ export interface ImageSelectorProps {
 	variant?: "normal" | "modern" | "profile_picture";
 	/**
 	 * Post upload image editing callback
-	 * @param image The data uri image
 	 */
 	postEditCallback?: PostImageEditCallback;
 	/**
@@ -304,6 +308,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 	} = props;
 	const variant = props.variant ?? "normal";
 	const fileRef = useRef<HTMLInputElement>(null);
+	const src = useObjectUrl(value);
 	const { t } = useCCTranslations();
 	const handleImageError = useImageError("ImageSelector.processFile", onError);
 
@@ -311,32 +316,34 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 		async (file: File) => {
 			if (!onChange) return;
 
-			let processedImage: string;
+			let processedImage: File;
 			try {
-				const imageB64 = await fileToData(file);
-				let finalImage: string;
-				let fileType = file.type;
-				try {
-					finalImage = postEditCallback
-						? await postEditCallback(imageB64)
-						: imageB64;
-					if (finalImage.startsWith("data:image/")) {
-						fileType = finalImage.substring(5, finalImage.indexOf(";"));
+				let image = file;
+				if (postEditCallback) {
+					let edited: Blob;
+					try {
+						edited = await postEditCallback(file);
+					} catch (e) {
+						// probably user cancel
+						// eslint-disable-next-line no-console
+						console.error(
+							"[Components-Care] [ImageSelector] Post edit callback with error (or cancellation)",
+							e,
+						);
+						return;
 					}
-				} catch (e) {
-					// probably user cancel
-					// eslint-disable-next-line no-console
-					console.error(
-						"[Components-Care] [ImageSelector] Post edit callback with error (or cancellation)",
-						e,
-					);
-					return;
+					image =
+						edited instanceof File
+							? edited
+							: new File(
+									[edited],
+									edited.type === file.type
+										? file.name
+										: replaceFileExt(file.name, edited.type),
+									{ type: edited.type },
+								);
 				}
-				processedImage = await processImageB64(
-					finalImage,
-					convertImagesTo || fileType,
-					downscale,
-				);
+				processedImage = await processImage(image, convertImagesTo, downscale);
 			} catch (e) {
 				// the image couldn't be read or the browser couldn't decode it
 				handleImageError(e);
@@ -414,7 +421,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 
 	const previewDialog = variant === "modern" && (
 		<ImagePreviewDialog
-			src={value}
+			src={src ?? ""}
 			alt={props.alt}
 			open={showPreviewDialog}
 			onClose={handlePreviewDialogClose}
@@ -488,7 +495,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 					>
 						{value && (
 							<PreviewClassic
-								src={value}
+								src={src}
 								alt={props.alt}
 								className={classes?.previewClassic}
 							/>
@@ -546,7 +553,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 										}
 									>
 										<PreviewModern
-											src={value}
+											src={src}
 											alt={props.alt}
 											onClick={handlePreviewDialog}
 											className={classes?.previewModern}
@@ -646,7 +653,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 		);
 	} else if (variant === "profile_picture") {
 		const image = value ? (
-			<PfpImage src={value} className={classes?.pfpImg} alt={props.label} />
+			<PfpImage src={src} className={classes?.pfpImg} alt={props.label} />
 		) : (
 			<PfpImagePlaceholder className={classes?.pfpImgPlaceholder} />
 		);

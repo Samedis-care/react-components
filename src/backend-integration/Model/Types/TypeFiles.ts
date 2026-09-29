@@ -7,7 +7,6 @@ import {
 	FileMeta,
 	FileUploadProps,
 } from "../../../standalone/FileUpload/Generic";
-import fileToData from "../../../utils/fileToData";
 
 export interface TypeFilesParams extends Partial<
 	Pick<
@@ -32,9 +31,9 @@ export interface TypeFilesParams extends Partial<
 
 interface FileWithData extends FileData<FileMeta> {
 	/**
-	 * The raw file data
+	 * The raw file
 	 */
-	data?: string;
+	data?: File;
 }
 
 /**
@@ -61,23 +60,24 @@ abstract class TypeFiles implements Type<FileData[]> {
 		return [];
 	}
 
-	serialize = async (files: FileData[]): Promise<FileWithData[]> => {
-		return await Promise.all(
-			files.map(async (file) => ({
-				...file,
-				file: {
-					name: file.file.name,
-					type: file.file.type,
-				},
-				preview: file.preview,
-				data:
-					file.canBeUploaded &&
-					(this.params?.alwaysSendRawData || !file.preview)
-						? await fileToData(file.file as File)
-						: undefined,
-			})),
-		);
-	};
+	/**
+	 * @remarks The files stay Blobs, the API client decides how to send them. An array of
+	 *          objects cannot be sent as Rails multipart, so RailsApiClient sends this as
+	 *          JSON with the files as data URIs.
+	 */
+	serialize = (files: FileData[]): FileWithData[] =>
+		files.map((file) => ({
+			...file,
+			file: {
+				name: file.file.name,
+				type: file.file.type,
+			},
+			preview: file.preview,
+			data:
+				file.canBeUploaded && (this.params?.alwaysSendRawData || !file.preview)
+					? (file.file as File)
+					: undefined,
+		}));
 
 	stringify(values: FileData[]): string {
 		return values.map((value) => value.file.name).join(", ");

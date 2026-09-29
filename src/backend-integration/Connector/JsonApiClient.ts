@@ -6,8 +6,35 @@ import addGetParams from "../../utils/addGetParams";
 import BackendError from "./BackendError";
 import NetworkError from "./NetworkError";
 import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
+import fetchWithUploadProgress, {
+	RequestUploadProgress,
+} from "./fetchWithUploadProgress";
+import { blobsToDataUris } from "./bodyFiles";
+
+export type { RequestUploadProgress };
 
 export type GetParams = Record<string, unknown> | null;
+
+/**
+ * Options for a single request
+ */
+export interface RequestOptions {
+	/**
+	 * Aborts the request
+	 * @remarks The request then rejects with the signal's reason (an `AbortError`
+	 *          DOMException unless the signal was aborted with a reason of its own)
+	 *          instead of a NetworkError, and the exception hook is not called: an abort
+	 *          is asked for, it is not a failure.
+	 */
+	signal?: AbortSignal;
+	/**
+	 * Called as the request body is uploaded
+	 * @remarks fetch reports no upload progress, so a request with a body and this
+	 *          callback is sent with XMLHttpRequest instead. Listening to upload progress
+	 *          makes a cross-origin request preflighted.
+	 */
+	onUploadProgress?: (progress: RequestUploadProgress) => void;
+}
 /**
  * The authentication handler callback has to provide and/or obtain the authentication
  * @returns The Authentication header value
@@ -23,6 +50,7 @@ export type AuthenticationHandlerCallback = (
  * @param args The query parameters of the request
  * @param body The JSON body of the request
  * @param auth The authentication mode of the request
+ * @param options The options of the request
  */
 export type RequestHook = (
 	method: string,
@@ -30,6 +58,7 @@ export type RequestHook = (
 	args: GetParams,
 	body: unknown | null,
 	auth: AuthMode,
+	options: RequestOptions,
 ) => Promise<void> | void;
 /**
  * The response processor throws if the response is erroneous
@@ -38,6 +67,7 @@ export type RequestHook = (
  * @param args The query parameters of the request
  * @param body The JSON body of the request
  * @param auth The authentication mode of the request
+ * @param options The options of the request. Pass them on when retrying the request.
  * @param response The HTTP response
  * @param responseData The JSON response data
  */
@@ -49,6 +79,7 @@ export type ResponseProcessor = (
 	args: GetParams,
 	body: unknown | null,
 	auth: AuthMode,
+	options: RequestOptions,
 ) => Promise<unknown> | unknown;
 
 /**
@@ -59,6 +90,7 @@ export type ResponseProcessor = (
  * @param headers The request headers
  * @param body The JSON body of the request
  * @param auth The authentication mode of the request
+ * @param options The options of the request
  * @returns Response if successfully handled or undefined if fallback handler (fetch) should be used instead
  * @throws Can throw exception (like fetch)
  * @remarks Body conversion and query params are not applied here! You have to do that manually
@@ -70,6 +102,7 @@ export type CustomRequestPerformer = (
 	headers: Record<string, string>,
 	body: unknown | null,
 	auth: AuthMode,
+	options: RequestOptions,
 ) => Promise<Response> | Response | undefined;
 
 /**
@@ -78,6 +111,16 @@ export type CustomRequestPerformer = (
  * @remarks This cannot be used to handle errors generically! Also treat these errors as unhandled
  */
 export type ExceptionHook = (error: Error) => void;
+
+/**
+ * Did the request fail because it was aborted?
+ * @param error What the request failed with
+ * @param signal The request's signal
+ */
+const isAbort = (error: unknown, signal: AbortSignal | undefined): boolean =>
+	!!signal?.aborted &&
+	(error === signal.reason ||
+		(error instanceof DOMException && error.name === "AbortError"));
 
 // noinspection ExceptionCaughtLocallyJS
 /**
@@ -114,8 +157,9 @@ class JsonApiClient {
 		url: string,
 		args: GetParams,
 		auth: AuthMode = AuthMode.On,
+		options?: RequestOptions,
 	): Promise<T> {
-		return this.request<T>("GET", url, args, null, auth);
+		return this.request<T>("GET", url, args, null, auth, options);
 	}
 
 	/**
@@ -126,8 +170,9 @@ class JsonApiClient {
 		args: GetParams,
 		body: Record<string, unknown>,
 		auth: AuthMode = AuthMode.On,
+		options?: RequestOptions,
 	): Promise<T> {
-		return this.request<T>("POST", url, args, body, auth);
+		return this.request<T>("POST", url, args, body, auth, options);
 	}
 
 	/**
@@ -138,8 +183,9 @@ class JsonApiClient {
 		args: GetParams,
 		body: Record<string, unknown>,
 		auth: AuthMode = AuthMode.On,
+		options?: RequestOptions,
 	): Promise<T> {
-		return this.request<T>("PUT", url, args, body, auth);
+		return this.request<T>("PUT", url, args, body, auth, options);
 	}
 
 	/**
@@ -150,8 +196,9 @@ class JsonApiClient {
 		args: GetParams,
 		body: Record<string, unknown>,
 		auth: AuthMode = AuthMode.On,
+		options?: RequestOptions,
 	): Promise<T> {
-		return this.request<T>("PATCH", url, args, body, auth);
+		return this.request<T>("PATCH", url, args, body, auth, options);
 	}
 
 	/**
@@ -161,8 +208,9 @@ class JsonApiClient {
 		url: string,
 		args: GetParams,
 		auth: AuthMode = AuthMode.On,
+		options?: RequestOptions,
 	): Promise<T> {
-		return this.request<T>("DELETE", url, args, null, auth);
+		return this.request<T>("DELETE", url, args, null, auth, options);
 	}
 
 	/**
@@ -170,15 +218,17 @@ class JsonApiClient {
 	 * @param body The body data
 	 * @param headers The headers (can be modified to add/remove headers)
 	 * @return The body data passed to fetch
+	 * @remarks JSON cannot carry a file, so a Blob in the body is sent as a data URI (a
+	 *          File with its name as the `name` parameter)
 	 * @protected
 	 */
-	public convertBody(
+	public async convertBody(
 		body: unknown | null,
 		headers: Record<string, string>,
-	): string | FormData | null {
+	): Promise<string | FormData | null> {
 		if (!body) return null;
 		headers["Content-Type"] = "application/json";
-		return JSON.stringify(body);
+		return JSON.stringify(await blobsToDataUris(body));
 	}
 
 	/**
@@ -188,6 +238,7 @@ class JsonApiClient {
 	 * @param args The query parameters to pass
 	 * @param body The JSON body to pass
 	 * @param auth The authentication mode to use
+	 * @param options Abort signal and upload progress
 	 */
 	public async request<T>(
 		method: string,
@@ -195,12 +246,24 @@ class JsonApiClient {
 		args: GetParams,
 		body: unknown | null,
 		auth: AuthMode,
+		options: RequestOptions = {},
 	): Promise<T> {
+		const { signal, onUploadProgress } = options;
+		// no longer wanted, so don't start it (and don't run the hooks)
+		signal?.throwIfAborted();
+
 		const safeToLeave =
 			method !== "GET" ? UnsafeToLeaveDispatch.lock(method + "-request") : null;
 
 		if (this.handlePreRequest) {
-			void (await this.handlePreRequest(method, url, args, body, auth));
+			void (await this.handlePreRequest(
+				method,
+				url,
+				args,
+				body,
+				auth,
+				options,
+			));
 		}
 
 		try {
@@ -224,21 +287,27 @@ class JsonApiClient {
 					headers,
 					body,
 					auth,
+					options,
 				);
 			}
 			if (!response) {
 				// Handle URL GET arguments
 				const urlWithArgs = addGetParams(url, args);
 				// Handle POST data
-				const convertedBody = this.convertBody(body, headers);
+				const convertedBody = await this.convertBody(body, headers);
 				// Perform request
 				try {
-					response = await fetch(urlWithArgs, {
-						body: convertedBody as FormData | string,
-						headers,
-						method,
-					});
+					const init = { body: convertedBody, headers, method, signal };
+					response =
+						onUploadProgress && convertedBody != null
+							? await fetchWithUploadProgress(
+									urlWithArgs,
+									init,
+									onUploadProgress,
+								)
+							: await fetch(urlWithArgs, init);
 				} catch (e) {
+					if (isAbort(e, signal)) throw e;
 					// Network error
 					console.error("Failed fetch", e);
 					throw new NetworkError(
@@ -254,6 +323,7 @@ class JsonApiClient {
 			try {
 				responseText = await response.text();
 			} catch (e) {
+				if (isAbort(e, signal)) throw e;
 				console.error("[JsonApiClient] Failed reading response", e);
 				throw new NetworkError(
 					ccI18n.t(
@@ -289,15 +359,23 @@ class JsonApiClient {
 				args,
 				body,
 				auth,
+				options,
 			)) as T;
 		} catch (e) {
-			if (this.exceptionHook) {
+			if (this.exceptionHook && !isAbort(e, signal)) {
 				this.exceptionHook(e as Error);
 			}
 			throw e;
 		} finally {
 			if (this.handlePostRequest) {
-				void (await this.handlePostRequest(method, url, args, body, auth));
+				void (await this.handlePostRequest(
+					method,
+					url,
+					args,
+					body,
+					auth,
+					options,
+				));
 			}
 			if (safeToLeave) {
 				safeToLeave();

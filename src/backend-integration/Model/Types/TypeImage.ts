@@ -24,8 +24,11 @@ export type TypeImageParams = Partial<
 
 /**
  * A type to handle images
+ * @remarks The value is the image's URL (or data URI), empty for no image, or an image the
+ *          user picked as Blob (a File). The Blob is sent as it is: RailsApiClient uploads it
+ *          as a file.
  */
-abstract class TypeImage implements Type<string> {
+abstract class TypeImage implements Type<string | Blob> {
 	protected params?: TypeImageParams;
 
 	constructor(params?: TypeImageParams) {
@@ -36,7 +39,7 @@ abstract class TypeImage implements Type<string> {
 		return this.params ?? {};
 	}
 
-	abstract render(params: ModelRenderParams<string>): React.ReactElement;
+	abstract render(params: ModelRenderParams<string | Blob>): React.ReactElement;
 
 	validate(): string | null {
 		return null;
@@ -46,11 +49,11 @@ abstract class TypeImage implements Type<string> {
 		return null;
 	}
 
-	getDefaultValue(): string {
+	getDefaultValue(): string | Blob {
 		return "";
 	}
 
-	stringify(value: string): string {
+	stringify(value: string | Blob): string {
 		return value
 			? ccI18n.t("backend-integration.model.types.image.set")
 			: ccI18n.t("backend-integration.model.types.image.not-set");

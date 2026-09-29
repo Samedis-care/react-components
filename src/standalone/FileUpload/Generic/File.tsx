@@ -31,6 +31,7 @@ import {
 import dataToFile from "../../../utils/dataToFile";
 import combineClassNames from "../../../utils/combineClassNames";
 import getFileExt from "../../../utils/getFileExt";
+import useObjectUrl from "../../../utils/useObjectUrl";
 
 /**
  * A file's pending change relative to the server side state
@@ -76,9 +77,9 @@ export interface FileProps {
 	 */
 	size: number;
 	/**
-	 * The preview to show instead of the file icon
+	 * The preview to show instead of the file icon: a URL, or an image the user picked
 	 */
-	preview?: string;
+	preview?: string | Blob;
 	/**
 	 * Display grayed-out (marked as deleted)
 	 */
@@ -489,6 +490,7 @@ const File = (inProps: FileProps) => {
 	const { name, downloadLink, variant, className, classes, onClick } = props;
 
 	const FileIcon = getFileIconOrDefault(props.name, props.mimeType);
+	const previewSrc = useObjectUrl(props.preview);
 
 	const openDownload = useCallback(async () => {
 		if (downloadLink) {
@@ -522,7 +524,7 @@ const File = (inProps: FileProps) => {
 			>
 				{props.preview ? (
 					<img
-						src={props.preview}
+						src={previewSrc}
 						alt={props.name}
 						onClick={openDownload}
 						style={{ height: props.size }}

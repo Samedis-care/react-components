@@ -20,6 +20,12 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-09-28 | [Picked images stay files instead of becoming data URIs](2026-09-28-picked-images-are-blobs.md) | type, behavior |
+| 2026-09-28 | [postEditCallback takes and returns a Blob](2026-09-28-post-edit-callback-takes-blobs.md) | type |
+| 2026-09-28 | [TypeFiles serializes the file itself](2026-09-28-type-files-serializes-files.md) | type, behavior |
+| 2026-09-28 | [The API clients send Blobs](2026-09-28-api-clients-send-blobs.md) | behavior, type |
+| 2026-09-28 | [Form values compare files by identity](2026-09-28-form-values-compare-files-by-identity.md) | behavior |
+| 2026-09-28 | [Down-scaling without keeping the ratio no longer stretches the height](2026-09-28-downscale-without-ratio-keeps-height.md) | behavior |
 | 2026-09-25 | [An LRU with nothing to show no longer hides a selector's options](2026-09-25-selector-lru-falls-back-when-nothing-resolves.md) | behavior |
 | 2026-09-23 | [CrudSelect keeps what went through when part of a change fails](2026-09-23-crud-select-keeps-what-went-through.md) | behavior, type |
 | 2026-09-21 | [MultiImage's edit label no longer navigates](2026-09-21-multi-image-edit-does-not-navigate.md) | behavior |

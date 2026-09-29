@@ -44,6 +44,7 @@ import TypedEventTarget from "../../utils/TypedEventTarget";
 import { FormEvents, FormEventTarget } from "./FormEvents";
 import { DirtyStateContext, NO_DIRTY_STATE } from "./DirtyStateContext";
 import deepEqual from "../../utils/deepEqual";
+import toComparisonJson from "../../utils/toComparisonJson";
 import { captureError } from "../../framework/ErrorReporting";
 
 export type ValidationResult = Record<string, string>;
@@ -1292,7 +1293,7 @@ const Form = <
 			initialValuesState && defaultRecord
 				? (() => {
 						const [local, remote] = getNormalizedData(values);
-						return JSON.stringify(local) !== JSON.stringify(remote);
+						return toComparisonJson(local) !== toComparisonJson(remote);
 					})()
 				: false,
 		[initialValuesState, defaultRecord, getNormalizedData],
@@ -1320,8 +1321,8 @@ const Form = <
 			return Object.fromEntries(
 				Object.keys(model.fields).map((field) => [
 					field,
-					JSON.stringify(getValueByDot(field, localData)) !==
-						JSON.stringify(getValueByDot(field, remoteData)),
+					toComparisonJson(getValueByDot(field, localData)) !==
+						toComparisonJson(getValueByDot(field, remoteData)),
 				]),
 			);
 		},
@@ -1423,8 +1424,8 @@ const Form = <
 				fieldsToValidate = fieldsToValidate.filter(
 					(field) =>
 						alwaysWarnFields.includes(field) ||
-						JSON.stringify(getValueByDot(field, localData)) !==
-							JSON.stringify(getValueByDot(field, remoteData)),
+						toComparisonJson(getValueByDot(field, localData)) !==
+							toComparisonJson(getValueByDot(field, remoteData)),
 				);
 			}
 
@@ -2149,11 +2150,11 @@ const Form = <
 			console.log("Form Dirty Flag State:");
 			console.log(
 				"Form Dirty State (exact):",
-				JSON.stringify(localData) !== JSON.stringify(remoteData),
+				toComparisonJson(localData) !== toComparisonJson(remoteData),
 			);
 			console.log(
 				"Form Dirty State:",
-				JSON.stringify(localData) !== JSON.stringify(remoteData),
+				toComparisonJson(localData) !== toComparisonJson(remoteData),
 			);
 			console.log("Custom Dirty State:", getCustomDirtyFields().length > 0);
 			console.log("Custom Dirty Fields:", getCustomDirtyFields());

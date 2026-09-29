@@ -13,8 +13,7 @@ beforeAll(() => {
 			void _callback;
 		}
 	}
-	global.ResizeObserver =
-		ResizeObserverStub as unknown as typeof ResizeObserver;
+	vi.stubGlobal("ResizeObserver", ResizeObserverStub);
 });
 
 describe("InfiniteScroll", () => {
