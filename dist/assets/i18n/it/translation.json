@@ -199,6 +199,9 @@
 				"signature": "Firma"
 			},
 			"sign-here": "Firmato digitalmente qui"
+		},
+		"toast": {
+			"close": "Chiudi"
 		}
 	},
 	"framework": {

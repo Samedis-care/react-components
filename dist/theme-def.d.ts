@@ -44,6 +44,7 @@ import { LocaleSelectorEntryClassKey, LocaleSelectorEntryProps } from "./non-sta
 import { SignPadClassKey, SignPadProps } from "./standalone/SignPad";
 import { FormDialogClassKey, FormDialogProps } from "./backend-components/Form/FormDialog";
 import { NotificationsClassKey, NotificationsProps } from "./standalone/Notifications";
+import { ToastClassKey, ToastProps } from "./standalone/Toast";
 import { DayContentsClassKey, DayContentsProps } from "./standalone/Schedule/Common/DayContents";
 import { WeekViewDayClassKey, WeekViewDayProps } from "./standalone/Schedule/Weekly/WeekViewDay";
 import { ScrollableScheduleClassKey, ScrollableScheduleProps } from "./standalone/Schedule/Scrollable";
@@ -127,6 +128,7 @@ declare module "@mui/material/styles" {
         CcPopupMenu: PopupMenuClassKey;
         CcPortalLayout: PortalLayoutClassKey;
         CcNotifications: NotificationsClassKey;
+        CcToast: ToastClassKey;
         CcMultiSelectWithTags: MultiSelectWithTagsClassKey;
         CcMultiSelectWithoutGroup: MultiSelectWithoutGroupClassKey;
         CcDayContents: DayContentsClassKey;
@@ -200,6 +202,7 @@ declare module "@mui/material/styles" {
         CcFormDialog: Partial<FormDialogProps>;
         CcPortalLayout: Partial<PortalLayoutProps>;
         CcNotifications: Partial<NotificationsProps>;
+        CcToast: Partial<ToastProps>;
         CcMultiSelectWithTags: Partial<MultiSelectWithTagsProps<MultiSelectorData, BaseSelectorData>>;
         CcMultiSelectWithoutGroup: Partial<MultiSelectWithoutGroupProps<BaseSelectorData>>;
         CcDayContents: Partial<DayContentsProps>;
@@ -485,6 +488,11 @@ declare module "@mui/material/styles" {
             defaultProps?: ComponentsPropsList["CcNotifications"];
             styleOverrides?: ComponentsOverrides<Theme>["CcNotifications"];
             variants?: ComponentsVariants["CcNotifications"];
+        };
+        CcToast?: {
+            defaultProps?: ComponentsPropsList["CcToast"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcToast"];
+            variants?: ComponentsVariants["CcToast"];
         };
         CcMultiSelectWithTags?: {
             defaultProps?: ComponentsPropsList["CcMultiSelectWithTags"];

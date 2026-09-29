@@ -199,6 +199,9 @@
 				"signature": "Signature"
 			},
 			"sign-here": "Digitally signed here"
+		},
+		"toast": {
+			"close": "Close"
 		}
 	},
 	"framework": {

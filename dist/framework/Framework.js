@@ -2,6 +2,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { Suspense } from "react";
 import Loader from "../standalone/Loader";
 import DialogContextProvider from "./DialogContextProvider";
+import ToastContextProvider from "./ToastContextProvider";
 import { FrameworkHistory } from "./History";
 import CCI18nProvider from "./CCI18nProvider";
 import ThemeProvider, { getStandardTheme, } from "./ThemeProvider";
@@ -19,6 +20,7 @@ const loaderComponent = _jsx(Loader, {});
  * Provides:
  * - react-router instance
  * - dialog context
+ * - toast context (non-blocking notices)
  * - i18n context (for components-care)
  * - react-query cache
  * - theme provider
@@ -30,6 +32,6 @@ const loaderComponent = _jsx(Loader, {});
  * - drag & drop default prevention (prevents unloading page)
  */
 const ComponentsCareFramework = (props) => {
-    return (_jsxs(Suspense, { fallback: loaderComponent, children: [!props.disableMobileScalingFix && (_jsx(MobileScalingFix, { ...props.mobileScalingFixProps })), !props.disableDragAndDropPrevention && _jsx(DragAndDropPrevention, {}), _jsx(CCI18nProvider, { disableHtmlLanguageAttributeSetter: props.disableHtmlLanguageAttributeSetter, children: _jsx(MuiPickerUtils, { disable: props.disableMuiPickerUtils, children: _jsx(StyledEngineProvider, { injectFirst: true, children: _jsx(ThemeProvider, { defaultTheme: props.defaultTheme || getStandardTheme, children: _jsx(QueryClientProvider, { client: ModelDataStore, children: _jsx(PermissionContextProvider, { children: _jsx(UnsafeToLeave, { disable: props.disableUnsafeToLeave, children: _jsx(HistoryRouter, { history: FrameworkHistory, children: _jsx(DialogContextProvider, { children: props.children }) }) }) }) }) }) }) }) })] }));
+    return (_jsxs(Suspense, { fallback: loaderComponent, children: [!props.disableMobileScalingFix && (_jsx(MobileScalingFix, { ...props.mobileScalingFixProps })), !props.disableDragAndDropPrevention && _jsx(DragAndDropPrevention, {}), _jsx(CCI18nProvider, { disableHtmlLanguageAttributeSetter: props.disableHtmlLanguageAttributeSetter, children: _jsx(MuiPickerUtils, { disable: props.disableMuiPickerUtils, children: _jsx(StyledEngineProvider, { injectFirst: true, children: _jsx(ThemeProvider, { defaultTheme: props.defaultTheme || getStandardTheme, children: _jsx(QueryClientProvider, { client: ModelDataStore, children: _jsx(PermissionContextProvider, { children: _jsx(UnsafeToLeave, { disable: props.disableUnsafeToLeave, children: _jsx(HistoryRouter, { history: FrameworkHistory, children: _jsx(ToastContextProvider, { children: _jsx(DialogContextProvider, { children: props.children }) }) }) }) }) }) }) }) }) })] }));
 };
 export default React.memo(ComponentsCareFramework);

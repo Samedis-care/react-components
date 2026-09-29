@@ -199,6 +199,9 @@
 		"signal-portlet": {
 			"last-updated": "Laatste vernieuwing: {{AGE}}",
 			"refresh": "Vernieuwen"
+		},
+		"toast": {
+			"close": "Sluiten"
 		}
 	},
 	"framework": {
