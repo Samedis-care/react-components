@@ -202,10 +202,11 @@ export interface CacheOptions {
 	 */
 	staleTime?: number;
 	/**
-	 * Time to keep data cached after it's no longer in use
+	 * Time to keep data cached after it's no longer in use in milliseconds
+	 * (react-query's gcTime), 0 to drop it at once
 	 * @default 5m
 	 */
-	cacheTime?: number;
+	gcTime?: number;
 }
 
 export interface ModelGetOptions {
@@ -224,7 +225,7 @@ export interface ModelGetOptions {
  * React-Query's useQuery for the given model and record ID
  * @param model The model ID to load
  * @param id The record ID (or null to get default values on create)
- * @param options Extra options to pass to useQuery (defaults are provided for retry, staleTime and cacheTime (last two only if configured in model))
+ * @param options Extra options to pass to useQuery (defaults are provided for retry, staleTime and gcTime (last two only if configured in model))
  */
 export const useModelGet = <
 	KeyT extends ModelFieldName,
