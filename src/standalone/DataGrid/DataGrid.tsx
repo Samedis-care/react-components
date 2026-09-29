@@ -39,6 +39,7 @@ import measureText from "../../utils/measureText";
 import shallowCompareArray from "../../utils/shallowCompareArray";
 import {
 	dataGridApplyRowUpdate,
+	dataGridGetFilterParameters,
 	dataGridPrepareFiltersAndSorts,
 } from "./CallbackUtil";
 import {
@@ -123,11 +124,42 @@ export interface DataGridCustomDataActionButton {
 	 */
 	isDisabled: (numSelected: 0 | 1 | 2) => boolean;
 	/**
-	 * The click handler
-	 * @param invert Is the selection inverted? (if true => ids = everything except ids)
-	 * @param ids The ids
+	 * Does onClick handle an inverted selection (select all, see
+	 * DataGridProps.enableSelectAll)? Otherwise the button is disabled while
+	 * everything is selected.
 	 */
-	onClick: (invert: boolean, ids: string[]) => void;
+	supportsSelectAll?: boolean;
+	/**
+	 * The click handler
+	 * @param invert Is the selection inverted? (if true => everything matching
+	 *               details.filter except ids)
+	 * @param ids The ids
+	 * @param details What the selection applies to
+	 */
+	onClick: (
+		invert: boolean,
+		ids: string[],
+		details: DataGridSelectionDetails,
+	) => void;
+}
+
+/**
+ * What a selection applies to, besides its ids
+ */
+export interface DataGridSelectionDetails {
+	/**
+	 * The filter the grid shows, as loadData gets it
+	 */
+	filter: DataGridFilterParameters;
+	/**
+	 * How many rows are selected
+	 */
+	count: number;
+	/**
+	 * The selected rows the grid has loaded, as loadData returned them
+	 * @remarks An inverted selection also covers rows the grid hasn't loaded
+	 */
+	rows: DataGridRowData[];
 }
 
 export interface IDataGridLoadDataParameters {
@@ -157,6 +189,14 @@ export interface IDataGridLoadDataParameters {
 	sort: DataGridSortSetting[];
 }
 
+/**
+ * The filter parts of the load data parameters: which rows the grid shows
+ */
+export type DataGridFilterParameters = Pick<
+	IDataGridLoadDataParameters,
+	"quickFilter" | "additionalFilters" | "fieldFilter"
+>;
+
 export interface IDataGridCallbacks {
 	/**
 	 * Loads data for the grid
@@ -178,6 +218,7 @@ export interface IDataGridCallbacks {
 	/**
 	 * Extracts additional filters from the provided custom data
 	 * @param customData The custom user-defined state-stored data
+	 * @remarks If not set, the custom data are the additional filters
 	 */
 	getAdditionalFilters?: (
 		customData: DataGridCustomDataType,
@@ -307,18 +348,26 @@ export interface IDataGridColumnProps {
 	onDelete?: (
 		invert: boolean,
 		ids: string[],
-		filter?: Pick<
-			IDataGridLoadDataParameters,
-			"quickFilter" | "additionalFilters" | "fieldFilter"
-		>,
+		filter?: DataGridFilterParameters,
 	) => Promise<void> | unknown;
 	/**
 	 * Reason why delete is disabled
 	 */
 	disableDeleteHint?: string;
 	/**
-	 * Do we support and enable the delete all functionality?
-	 * If not set select all will only select all ids on the current page
+	 * Show the select all checkbox. It selects every row matching the filter,
+	 * including the rows not loaded yet: the selection is inverted then
+	 * (everything except the ids), and the ids are the rows unselected again.
+	 * @remarks Delete handles this only with enableDeleteAll, a custom data
+	 *          action button only with its supportsSelectAll. They are disabled
+	 *          while everything is selected otherwise.
+	 */
+	enableSelectAll?: boolean;
+	/**
+	 * Does onDelete handle an inverted selection (select all), deleting
+	 * everything matching its filter except the ids? Otherwise delete is
+	 * disabled while everything is selected.
+	 * @see enableSelectAll
 	 */
 	enableDeleteAll?: boolean;
 	/**
@@ -332,7 +381,7 @@ export interface IDataGridColumnProps {
 	 */
 	sortLimit?: number;
 	/**
-	 * Disable selecting multiple entries (disables select all & delete all)
+	 * Disable selecting multiple entries (disables select all)
 	 */
 	prohibitMultiSelect?: boolean;
 	/**
@@ -1306,7 +1355,12 @@ const DataGrid = (
 			return;
 		}
 
-		const [sorts, fieldFilter] = dataGridPrepareFiltersAndSorts(columnsState);
+		const [sorts] = dataGridPrepareFiltersAndSorts(columnsState);
+		const filter = dataGridGetFilterParameters(
+			state,
+			columnsState,
+			getAdditionalFilters,
+		);
 
 		void (async () => {
 			for (let pageIndex = pages[0]; pageIndex <= pages[1]; pageIndex++) {
@@ -1319,11 +1373,7 @@ const DataGrid = (
 					const data = await loadData({
 						page: pageIndex + 1,
 						rows: rowsPerPage,
-						quickFilter: search,
-						additionalFilters: getAdditionalFilters
-							? getAdditionalFilters(state.customData)
-							: state.customData,
-						fieldFilter: fieldFilter,
+						...filter,
 						sort: sorts,
 					});
 					const dataRowsTotal = data.rowsFiltered ?? data.rowsTotal;

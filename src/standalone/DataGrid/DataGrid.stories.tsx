@@ -1,14 +1,19 @@
 import React, { useCallback, useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, userEvent, waitFor, within } from "storybook/test";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { Box, Button, Dialog, DialogContent } from "@mui/material";
+import {
+	Mail as MailIcon,
+	PlaylistAdd as PlaylistAddIcon,
+} from "@mui/icons-material";
 import {
 	DataGrid,
 	DataGridLocalStoragePersist,
 	DataGridNoPersist,
 } from "./index";
 import type {
+	DataGridCustomDataActionButton,
 	DataGridData,
 	DataGridDispatch,
 	IDataGridColumnDef,
@@ -44,10 +49,15 @@ function makeLoadData(source: Person[] = PEOPLE) {
 		page,
 		rows,
 		quickFilter,
+		additionalFilters,
 		sort,
 	}: IDataGridLoadDataParameters): Promise<DataGridData> => {
 		/* eslint-enable @typescript-eslint/require-await */
 		let data = [...source];
+
+		if (additionalFilters.role) {
+			data = data.filter((r) => r.role === additionalFilters.role);
+		}
 
 		if (quickFilter) {
 			const q = quickFilter.toLowerCase();
@@ -199,6 +209,99 @@ export const WithActions: Story = {
 		onAddNew: () => alert("Add new"),
 		onEdit: (id) => alert(`Edit ${id}`),
 		onDelete: (_invert, ids) => alert(`Delete ${ids.join(", ")}`),
+	},
+};
+
+const makeSelectAllButtons = (): DataGridCustomDataActionButton[] => [
+	{
+		icon: <PlaylistAddIcon />,
+		label: "Add to list",
+		isDisabled: (numSelected) => numSelected === 0,
+		supportsSelectAll: true,
+		onClick: fn(),
+	},
+	{
+		icon: <MailIcon />,
+		label: "Invite",
+		isDisabled: (numSelected) => numSelected === 0,
+		onClick: fn(),
+	},
+];
+
+/**
+ * Select all selects every row the grid shows (here: the users, through custom
+ * data), loaded or not. "Add to list" supports it and gets the inverted
+ * selection with the filter, the count and the loaded rows. "Invite" doesn't,
+ * and delete without enableDeleteAll doesn't either: both are disabled while
+ * everything is selected.
+ */
+export const WithSelectAll: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: makeLoadData(),
+		defaultCustomData: { role: "user" },
+		enableSelectAll: true,
+		onDelete: fn(),
+		customDataActionButtons: makeSelectAllButtons(),
+	},
+	play: async ({ args, canvas }) => {
+		const body = within(document.body);
+		await expect(await canvas.findByText("Bob Smith")).toBeVisible();
+		await expect(canvas.queryByText("Alice Müller")).not.toBeInTheDocument();
+
+		await userEvent.click(canvas.getByRole("checkbox", { name: "All" }));
+		// unselects Bob again
+		await userEvent.click(canvas.getByText("Bob Smith"));
+		await expect(canvas.getByRole("button", { name: "Delete" })).toBeDisabled();
+
+		// on xs the custom buttons are in the "More" menu
+		const more = canvas.queryByRole("button", { name: "More" });
+		if (more) await userEvent.click(more);
+		const actionRole = more ? "menuitem" : "button";
+		const isDisabled = (element: HTMLElement) =>
+			element.matches(":disabled") ||
+			element.getAttribute("aria-disabled") === "true";
+		await expect(
+			isDisabled(await body.findByRole(actionRole, { name: "Invite" })),
+		).toBe(true);
+		const add = body.getByRole(actionRole, { name: "Add to list" });
+		await expect(isDisabled(add)).toBe(false);
+
+		await userEvent.click(add);
+		const onAdd = args.customDataActionButtons?.[0].onClick;
+		await expect(onAdd).toHaveBeenCalledTimes(1);
+		await expect(onAdd).toHaveBeenCalledWith(true, ["2"], {
+			filter: {
+				quickFilter: "",
+				additionalFilters: { role: "user" },
+				fieldFilter: {},
+			},
+			// of the 5 users, not of all 10 people
+			count: 4,
+			rows: ["4", "7", "8", "10"].map((id) =>
+				PEOPLE.find((person) => person.id === id),
+			),
+		});
+		await expect(args.onDelete).not.toHaveBeenCalled();
+	},
+};
+
+/**
+ * The same on a phone, where the custom buttons are in the "More" menu
+ */
+export const WithSelectAllOnPhone: Story = {
+	...WithSelectAll,
+	args: {
+		...WithSelectAll.args,
+		onDelete: fn(),
+		customDataActionButtons: makeSelectAllButtons(),
+	},
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	play: async (context) => {
+		await expect(
+			await context.canvas.findByRole("button", { name: "More" }),
+		).toBeVisible();
+		await WithSelectAll.play?.(context);
 	},
 };
 

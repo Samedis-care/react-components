@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import DataGrid, {
 	DataGridData,
 	DataGridDispatch,
+	DataGridFilterParameters,
 	IDataGridLoadDataParameters,
 	DataGridProps,
 	IDataGridAddButton,
@@ -47,10 +48,7 @@ export interface BackendDataGridProps<
 	customDeleteConfirm?: (
 		inverted: boolean,
 		ids: string[],
-		filter?: Pick<
-			IDataGridLoadDataParameters,
-			"quickFilter" | "additionalFilters" | "fieldFilter"
-		>,
+		filter?: DataGridFilterParameters,
 	) => Promise<void> | void;
 	/**
 	 * Additional buttons next to new button
@@ -139,10 +137,7 @@ export const useBackendDataGridDeleteHandler = <
 		async (
 			invert: boolean,
 			ids: string[],
-			filter?: Pick<
-				IDataGridLoadDataParameters,
-				"quickFilter" | "additionalFilters" | "fieldFilter"
-			>,
+			filter?: DataGridFilterParameters,
 		): Promise<void> => {
 			try {
 				if (customDeleteConfirm) {

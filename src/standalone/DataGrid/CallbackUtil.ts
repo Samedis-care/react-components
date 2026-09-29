@@ -1,6 +1,9 @@
 import {
+	DataGridCustomDataActionButton,
+	DataGridFilterParameters,
 	DataGridRowUpdate,
 	DataGridSortSetting,
+	IDataGridCallbacks,
 	IDataGridColumnsState,
 	IDataGridColumnState,
 	IDataGridFieldFilter,
@@ -40,6 +43,38 @@ export const dataGridPrepareFiltersAndSorts = (
 
 	return [sorts, fieldFilter];
 };
+
+/**
+ * The filter the grid shows, as loadData gets it
+ * @param state The grid state (its search and custom data)
+ * @param columnsState The column state (its filters)
+ * @param getAdditionalFilters The grid's getAdditionalFilters
+ * @remarks Without getAdditionalFilters, the custom data are the additional filters
+ */
+export const dataGridGetFilterParameters = (
+	state: Pick<IDataGridState, "search" | "customData">,
+	columnsState: IDataGridColumnsState,
+	getAdditionalFilters: IDataGridCallbacks["getAdditionalFilters"],
+): DataGridFilterParameters => ({
+	quickFilter: state.search,
+	additionalFilters: getAdditionalFilters
+		? getAdditionalFilters(state.customData)
+		: state.customData,
+	fieldFilter: dataGridPrepareFiltersAndSorts(columnsState)[1],
+});
+
+/**
+ * Is a custom data action button disabled?
+ * @param button The button
+ * @param numSelected The amount of selected rows (0 none, 1 one, 2 multiple)
+ * @param selectAll Is everything selected (the selection inverted)?
+ */
+export const dataGridIsCustomDataActionDisabled = (
+	button: DataGridCustomDataActionButton,
+	numSelected: 0 | 1 | 2,
+	selectAll: boolean,
+): boolean =>
+	(selectAll && !button.supportsSelectAll) || button.isDisabled(numSelected);
 
 /**
  * Applies a manual row update to the grid state

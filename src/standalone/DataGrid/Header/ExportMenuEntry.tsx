@@ -12,7 +12,10 @@ import {
 	Done as DoneIcon,
 	Error as ErrorIcon,
 } from "@mui/icons-material";
-import { dataGridPrepareFiltersAndSorts } from "../CallbackUtil";
+import {
+	dataGridGetFilterParameters,
+	dataGridPrepareFiltersAndSorts,
+} from "../CallbackUtil";
 import {
 	getActiveDataGridColumns,
 	useDataGridColumnState,
@@ -77,11 +80,16 @@ const ExportMenuEntry = React.forwardRef(
 		const startExport = useCallback(async () => {
 			setStatus(DataGridExportStatus.Working);
 			try {
-				const [sorts, fieldFilter] =
-					dataGridPrepareFiltersAndSorts(columnsState);
+				const [sorts] = dataGridPrepareFiltersAndSorts(columnsState);
+				const { quickFilter, additionalFilters, fieldFilter } =
+					dataGridGetFilterParameters(
+						{ search, customData },
+						columnsState,
+						getAdditionalFilters,
+					);
 				const data = await onRequest(
-					search,
-					getAdditionalFilters ? getAdditionalFilters(customData) : {},
+					quickFilter,
+					additionalFilters,
 					fieldFilter,
 					sorts,
 					getActiveDataGridColumns(columns, columnHidden, columnPinned),

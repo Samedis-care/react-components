@@ -16,6 +16,7 @@ import {
 	DataGridCustomFilterData,
 	DataGridIdFilterData,
 	IDataGridColumnDef,
+	DataGridFilterParameters,
 	IDataGridLoadDataParameters,
 } from "../../standalone/DataGrid/DataGrid";
 import ModelDataStore from "../Store";
@@ -191,10 +192,7 @@ export type ModelFetchAllParams = Partial<
 export type AdvancedDeleteRequest = [
 	invert: boolean,
 	ids: string[],
-	filter?: Pick<
-		IDataGridLoadDataParameters,
-		"quickFilter" | "additionalFilters" | "fieldFilter"
-	>,
+	filter?: DataGridFilterParameters,
 ];
 
 export interface CacheOptions {

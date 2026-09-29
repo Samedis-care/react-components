@@ -1,10 +1,13 @@
 import { describe, it, expect } from "vitest";
 import {
 	dataGridApplyRowUpdate,
+	dataGridGetFilterParameters,
+	dataGridIsCustomDataActionDisabled,
 	dataGridPrepareFiltersAndSorts,
 } from "../../src/standalone/DataGrid/CallbackUtil";
 import {
 	getDataGridDefaultState,
+	type DataGridCustomDataActionButton,
 	type IDataGridColumnsState,
 	type IDataGridState,
 } from "../../src/standalone/DataGrid/DataGrid";
@@ -146,5 +149,68 @@ describe("dataGridApplyRowUpdate", () => {
 	it("returns the state unchanged if the row isn't loaded", () => {
 		const state = makeState();
 		expect(dataGridApplyRowUpdate(state, "404", { role: "user" })).toBe(state);
+	});
+});
+
+describe("dataGridGetFilterParameters", () => {
+	const columnsState: IDataGridColumnsState = {
+		name: { sort: 1, sortOrder: 0, filter: makeFilter("contains", "ali") },
+		role: { sort: 0 },
+	};
+	const state = { search: "müller", customData: { "filter[active]": true } };
+
+	it("returns the search, the column filters and the additional filters", () => {
+		expect(
+			dataGridGetFilterParameters(state, columnsState, (customData) => ({
+				active: customData["filter[active]"],
+			})),
+		).toEqual({
+			quickFilter: "müller",
+			fieldFilter: { name: makeFilter("contains", "ali") },
+			additionalFilters: { active: true },
+		});
+	});
+
+	it("uses the custom data as additional filters without getAdditionalFilters, like loadData", () => {
+		expect(
+			dataGridGetFilterParameters(state, columnsState, undefined)
+				.additionalFilters,
+		).toEqual({ "filter[active]": true });
+	});
+});
+
+describe("dataGridIsCustomDataActionDisabled", () => {
+	const makeButton = (
+		supportsSelectAll?: boolean,
+	): DataGridCustomDataActionButton => ({
+		icon: null,
+		label: "Act",
+		isDisabled: (numSelected) => numSelected === 0,
+		supportsSelectAll,
+		onClick: () => {},
+	});
+
+	it("asks isDisabled while the selection isn't inverted", () => {
+		expect(dataGridIsCustomDataActionDisabled(makeButton(), 0, false)).toBe(
+			true,
+		);
+		expect(dataGridIsCustomDataActionDisabled(makeButton(), 2, false)).toBe(
+			false,
+		);
+	});
+
+	it("disables a button without supportsSelectAll while everything is selected", () => {
+		expect(dataGridIsCustomDataActionDisabled(makeButton(), 2, true)).toBe(
+			true,
+		);
+	});
+
+	it("asks isDisabled of a button with supportsSelectAll while everything is selected", () => {
+		expect(dataGridIsCustomDataActionDisabled(makeButton(true), 2, true)).toBe(
+			false,
+		);
+		expect(dataGridIsCustomDataActionDisabled(makeButton(true), 0, true)).toBe(
+			true,
+		);
 	});
 });

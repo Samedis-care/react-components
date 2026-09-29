@@ -7,12 +7,14 @@ import {
 } from "@mui/material";
 import PopupMenu from "../../PopupMenu";
 import { DataGridProps } from "../DataGrid";
+import { dataGridIsCustomDataActionDisabled } from "../CallbackUtil";
 
 export interface DataActionBarMenuProps {
 	anchorEl: MenuProps["anchorEl"];
 	customButtons: NonNullable<DataGridProps["customDataActionButtons"]>;
 	onClose: () => void;
 	numSelected: 0 | 1 | 2;
+	selectAll: boolean;
 	handleCustomButtonClick: (label: string) => void;
 }
 
@@ -32,6 +34,7 @@ const DataActionBarMenu = (props: DataActionBarMenuProps) => {
 		onClose,
 		customButtons,
 		numSelected,
+		selectAll,
 		handleCustomButtonClick,
 	} = props;
 	return (
@@ -47,7 +50,11 @@ const DataActionBarMenu = (props: DataActionBarMenuProps) => {
 			{customButtons.map((entry) => (
 				<MenuItem
 					key={entry.label}
-					disabled={entry.isDisabled(numSelected)}
+					disabled={dataGridIsCustomDataActionDisabled(
+						entry,
+						numSelected,
+						selectAll,
+					)}
 					onClick={() => {
 						handleCustomButtonClick(entry.label);
 						onClose();

@@ -22,6 +22,7 @@ import {
 } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import DataActionBarMenu from "./DataActionBarMenu";
+import { dataGridIsCustomDataActionDisabled } from "../CallbackUtil";
 
 export interface DataActionBarViewProps {
 	/**
@@ -29,6 +30,10 @@ export interface DataActionBarViewProps {
 	 * Values: 0 (none), 1 (one) or 2 (multiple)
 	 */
 	numSelected: 0 | 1 | 2;
+	/**
+	 * Is everything selected (the selection inverted)?
+	 */
+	selectAll: boolean;
 	/**
 	 * Callback for edit button.
 	 * If not defined: Disables edit button
@@ -39,6 +44,11 @@ export interface DataActionBarViewProps {
 	 * If not defined: Disables delete button
 	 */
 	handleDelete?: React.MouseEventHandler;
+	/**
+	 * Does handleDelete handle an inverted selection? Otherwise the delete button
+	 * is disabled while everything is selected
+	 */
+	enableDeleteAll: boolean;
 	/**
 	 * Disable delete button reason
 	 */
@@ -76,12 +86,16 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 		setExtendedMenuAnchor(undefined);
 	}, []);
 
+	const deleteDisabled =
+		props.numSelected === 0 ||
+		!props.handleDelete ||
+		(props.selectAll && !props.enableDeleteAll);
 	const deleteBtn = (
 		<ComponentWithLabel
 			control={
 				<SmallestIconButton
 					color={"primary"}
-					disabled={props.numSelected === 0 || !props.handleDelete}
+					disabled={deleteDisabled}
 					onClick={props.handleDelete}
 					aria-label={t("standalone.data-grid.footer.delete")}
 				>
@@ -90,8 +104,16 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 			}
 			labelText={t("standalone.data-grid.footer.delete")}
 			labelPlacement={"bottom"}
-			disabled={props.numSelected === 0 || !props.handleDelete}
+			disabled={deleteDisabled}
 		/>
+	);
+
+	const allCustomButtonsDisabled = !!props.customButtons?.every((entry) =>
+		dataGridIsCustomDataActionDisabled(
+			entry,
+			props.numSelected,
+			props.selectAll,
+		),
 	);
 
 	return (
@@ -159,11 +181,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 							control={
 								<SmallestIconButton
 									color={"primary"}
-									disabled={
-										!props.customButtons.find(
-											(entry) => !entry.isDisabled(props.numSelected),
-										)
-									}
+									disabled={allCustomButtonsDisabled}
 									onClick={handleExtendedMenuOpen}
 									aria-label={t("standalone.data-grid.footer.more")}
 								>
@@ -172,15 +190,12 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 							}
 							labelText={t("standalone.data-grid.footer.more")}
 							labelPlacement={"bottom"}
-							disabled={
-								!props.customButtons.find(
-									(entry) => !entry.isDisabled(props.numSelected),
-								)
-							}
+							disabled={allCustomButtonsDisabled}
 						/>
 					</Grid>
 					<DataActionBarMenu
 						numSelected={props.numSelected}
+						selectAll={props.selectAll}
 						anchorEl={extendedMenuAnchor}
 						onClose={handleExtendedMenuClose}
 						customButtons={props.customButtons}
@@ -188,32 +203,39 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 					/>
 				</React.Fragment>
 			) : (
-				props.customButtons?.map((entry) => (
-					<React.Fragment key={entry.label}>
-						<Grid>
-							<VerticalDivider />
-						</Grid>
-						<Grid>
-							<ComponentWithLabel
-								control={
-									<SmallestIconButton
-										color={"primary"}
-										disabled={entry.isDisabled(props.numSelected)}
-										onClick={() => {
-											props.handleCustomButtonClick(entry.label);
-										}}
-										aria-label={entry.label}
-									>
-										{entry.icon}
-									</SmallestIconButton>
-								}
-								labelText={entry.label}
-								labelPlacement={"bottom"}
-								disabled={entry.isDisabled(props.numSelected)}
-							/>
-						</Grid>
-					</React.Fragment>
-				))
+				props.customButtons?.map((entry) => {
+					const disabled = dataGridIsCustomDataActionDisabled(
+						entry,
+						props.numSelected,
+						props.selectAll,
+					);
+					return (
+						<React.Fragment key={entry.label}>
+							<Grid>
+								<VerticalDivider />
+							</Grid>
+							<Grid>
+								<ComponentWithLabel
+									control={
+										<SmallestIconButton
+											color={"primary"}
+											disabled={disabled}
+											onClick={() => {
+												props.handleCustomButtonClick(entry.label);
+											}}
+											aria-label={entry.label}
+										>
+											{entry.icon}
+										</SmallestIconButton>
+									}
+									labelText={entry.label}
+									labelPlacement={"bottom"}
+									disabled={disabled}
+								/>
+							</Grid>
+						</React.Fragment>
+					);
+				})
 			)}
 		</Grid>
 	);

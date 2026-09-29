@@ -3,7 +3,7 @@ import { useDataGridProps, useDataGridState } from "../DataGrid";
 import SelectAllView from "./SelectAllView";
 
 const SelectAll = () => {
-	const { enableDeleteAll, prohibitMultiSelect } = useDataGridProps();
+	const { enableSelectAll, prohibitMultiSelect } = useDataGridProps();
 	const [state, setState] = useDataGridState();
 
 	const onSelect = useCallback(
@@ -19,7 +19,7 @@ const SelectAll = () => {
 
 	return (
 		<SelectAllView
-			disabled={!enableDeleteAll || !!prohibitMultiSelect}
+			disabled={!enableSelectAll || !!prohibitMultiSelect}
 			checked={state.selectAll}
 			onSelect={onSelect}
 		/>
