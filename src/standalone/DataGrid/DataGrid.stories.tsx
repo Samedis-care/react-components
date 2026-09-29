@@ -249,10 +249,17 @@ export const WithSelectAll: Story = {
 		await expect(await canvas.findByText("Bob Smith")).toBeVisible();
 		await expect(canvas.queryByText("Alice Müller")).not.toBeInTheDocument();
 
-		await userEvent.click(canvas.getByRole("checkbox", { name: "All" }));
+		const all = canvas.getByRole("checkbox", { name: "All" });
+		const deleteButton = canvas.getByRole("button", { name: "Delete" });
+		// a row ticked before doesn't carry over: select all selects everything
+		await userEvent.click(canvas.getByText("Dave Brown"));
+		await expect(all).toBePartiallyChecked();
+		await userEvent.click(all);
+		await expect(all).toBeChecked();
 		// unselects Bob again
 		await userEvent.click(canvas.getByText("Bob Smith"));
-		await expect(canvas.getByRole("button", { name: "Delete" })).toBeDisabled();
+		await expect(all).toBePartiallyChecked();
+		await expect(deleteButton).toBeDisabled();
 
 		// on xs the custom buttons are in the "More" menu
 		const more = canvas.queryByRole("button", { name: "More" });
@@ -283,6 +290,14 @@ export const WithSelectAll: Story = {
 			),
 		});
 		await expect(args.onDelete).not.toHaveBeenCalled();
+
+		// a click on the partial selection selects everything, the next one nothing
+		await userEvent.click(all);
+		await expect(all).toBeChecked();
+		await userEvent.click(all);
+		await expect(all).not.toBeChecked();
+		await expect(all).not.toBePartiallyChecked();
+		await expect(deleteButton).toBeDisabled();
 	},
 };
 
