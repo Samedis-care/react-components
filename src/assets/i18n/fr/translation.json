@@ -171,7 +171,9 @@
 			"upload-modern-btn-capture": {
 				"image": "Cliquez pour prendre une photo"
 			},
-			"close": "Fermer"
+			"close": "Fermer",
+			"rotate-left": "Pivoter à gauche",
+			"rotate-right": "Pivoter à droite"
 		},
 		"phone-number": {
 			"invalid": "Entrez le numéro de téléphone correct"

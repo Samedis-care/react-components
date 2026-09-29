@@ -139,6 +139,10 @@ export interface MultiImageProps {
 	 */
 	downscale?: IDownscaleProps;
 	/**
+	 * Hide the rotate buttons of the full-screen previews
+	 */
+	disableRotation?: boolean;
+	/**
 	 * Additional dialog content (e.g. how-to-box)
 	 */
 	additionalDialogContent?: React.ReactNode[];
@@ -215,6 +219,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 		subClasses,
 		onDelete,
 		onError,
+		disableRotation,
 		className,
 		classes,
 	} = props;
@@ -401,6 +406,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 								images[currentImage] ? undefined : readOnly ? null : startUpload
 							}
 							classes={subClasses?.imageBox}
+							disableRotation={disableRotation}
 							imageDots={{
 								total: images.length,
 								active: currentImage,
@@ -480,6 +486,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 										changeImages={manipulateImages}
 										changePrimary={changePrimary}
 										onDelete={onDelete}
+										disableRotation={disableRotation}
 										key={`img-${i}`}
 										classes={subClasses?.imageDialogEntry}
 										subClasses={subClasses?.imageDialogEntrySubClasses}

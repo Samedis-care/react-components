@@ -117,6 +117,11 @@ export interface ImageSelectorProps {
 	 */
 	variant?: "normal" | "modern" | "profile_picture";
 	/**
+	 * Hide the rotate buttons of the preview dialog
+	 * Modern variant only
+	 */
+	disableRotation?: boolean;
+	/**
 	 * Post upload image editing callback
 	 */
 	postEditCallback?: PostImageEditCallback;
@@ -303,6 +308,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 		onChange,
 		postEditCallback,
 		onError,
+		disableRotation,
 		classes,
 		className,
 	} = props;
@@ -425,6 +431,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 			alt={props.alt}
 			open={showPreviewDialog}
 			onClose={handlePreviewDialogClose}
+			disableRotation={disableRotation}
 		/>
 	);
 

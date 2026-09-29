@@ -511,6 +511,89 @@ export const MultiImageWheelDoesNotSwitchImage: StoryObj = {
 	},
 };
 
+export const MultiImageRotationResetsOnNextImage: StoryObj = {
+	name: "MultiImage — rotation resets on the next image",
+	render: () => {
+		const redImage = makeColorImage("#e53935", "#ffcdd2");
+		const greenImage = makeColorImage("#43a047", "#c8e6c9");
+		const images: MultiImageImage[] = [
+			{ id: "img-1", image: redImage, name: "red.png" },
+			{ id: "img-2", image: greenImage, name: "green.png" },
+		];
+		return (
+			<div style={{ width: 300, height: 300 }}>
+				<MultiImage
+					label="Rotation test"
+					images={images}
+					primary={"img-1"}
+					uploadImage={redImage}
+					captureImage={redImage}
+					readOnly
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvasElement, userEvent }) => {
+		const previewImage = canvasElement.querySelector("img");
+		if (!previewImage) throw new Error("preview img not found");
+		await userEvent.click(previewImage);
+
+		const dialogElement = await within(document.body).findByRole("dialog");
+		const dialog = within(dialogElement);
+		const dialogImg = dialogElement.querySelector("img");
+		if (!dialogImg) throw new Error("dialog img not found");
+		const firstSrc = dialogImg.getAttribute("src");
+
+		await userEvent.click(dialog.getByRole("button", { name: "Rotate right" }));
+		await expect(dialogImg.style.transform).toContain("rotate(90deg)");
+
+		await userEvent.click(dialog.getByRole("button", { name: "Next image" }));
+		await waitFor(() =>
+			expect(dialogImg.getAttribute("src")).not.toBe(firstSrc),
+		);
+		await expect(dialogImg.style.transform).toContain("rotate(0deg)");
+	},
+};
+
+export const MultiImageWithoutRotation: StoryObj = {
+	name: "MultiImage — disableRotation hides the rotate buttons",
+	render: () => {
+		const redImage = makeColorImage("#e53935", "#ffcdd2");
+		const images: MultiImageImage[] = [
+			{ id: "img-1", image: redImage, name: "red.png" },
+		];
+		return (
+			<div style={{ width: 300, height: 300 }}>
+				<MultiImage
+					label="Without rotation"
+					images={images}
+					primary={"img-1"}
+					uploadImage={redImage}
+					captureImage={redImage}
+					readOnly
+					disableRotation
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvasElement, userEvent }) => {
+		const previewImage = canvasElement.querySelector("img");
+		if (!previewImage) throw new Error("preview img not found");
+		await userEvent.click(previewImage);
+
+		const dialog = within(await within(document.body).findByRole("dialog"));
+		await expect(
+			dialog.getByRole("button", { name: "Close" }),
+		).toBeInTheDocument();
+		await expect(
+			dialog.queryByRole("button", { name: "Rotate left" }),
+		).not.toBeInTheDocument();
+		await expect(
+			dialog.queryByRole("button", { name: "Rotate right" }),
+		).not.toBeInTheDocument();
+	},
+};
+
 // ---------------------------------------------------------------------------
 // FileIcons gallery
 // ---------------------------------------------------------------------------

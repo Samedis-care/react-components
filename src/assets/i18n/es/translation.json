@@ -144,6 +144,8 @@
 		},
 		"file-upload": {
 			"close": "Cerrar",
+			"rotate-left": "Girar a la izquierda",
+			"rotate-right": "Girar a la derecha",
 			"upload": "Subir",
 			"restore": "Restaurar",
 			"upload-capture": {

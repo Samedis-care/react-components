@@ -171,7 +171,9 @@
 			"upload-modern-btn-capture": {
 				"image": "Нажмите, чтобы сделать фото"
 			},
-			"close": "Закрыть"
+			"close": "Закрыть",
+			"rotate-left": "Повернуть влево",
+			"rotate-right": "Повернуть вправо"
 		},
 		"phone-number": {
 			"invalid": "Введите правильный номер телефона"

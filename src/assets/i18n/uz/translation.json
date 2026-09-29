@@ -171,7 +171,9 @@
 			"upload-modern-btn-capture": {
 				"image": "Rasmga olish uchun bosing"
 			},
-			"close": "Yoping"
+			"close": "Yoping",
+			"rotate-left": "Chapga burish",
+			"rotate-right": "O'ngga burish"
 		},
 		"phone-number": {
 			"invalid": "To'g'ri telefon raqamini kiriting"

@@ -19,6 +19,8 @@ import {
 	ArrowForward as NextIcon,
 	Close as CloseIcon,
 	Delete as DeleteIcon,
+	RotateLeft as RotateLeftIcon,
+	RotateRight as RotateRightIcon,
 } from "@mui/icons-material";
 import combineClassNames from "../../../utils/combineClassNames";
 import useCCTranslations from "../../../utils/useCCTranslations";
@@ -71,6 +73,10 @@ export interface ImageBoxProps {
 	 * Disable background color?
 	 */
 	disableBackground?: boolean;
+	/**
+	 * Hide the rotate buttons of the full-screen preview
+	 */
+	disableRotation?: boolean;
 	/**
 	 * Custom CSS styles to apply to root
 	 */
@@ -142,6 +148,30 @@ const NextButton = styled(IconButton, { name: "CcImageBox", slot: "nextBtn" })({
 	right: 0,
 	transform: "translateY(-50%)",
 });
+
+const FullScreenRotateButtons = styled("div", {
+	name: "CcImageBox",
+	slot: "fullScreenRotateButtons",
+})({
+	position: "absolute",
+	top: 0,
+	left: 0,
+	display: "flex",
+});
+
+const RotateLeftButton = styled(IconButton, {
+	name: "CcImageBox",
+	slot: "rotateLeftBtn",
+})(({ theme }) => ({
+	padding: theme.spacing(1),
+}));
+
+const RotateRightButton = styled(IconButton, {
+	name: "CcImageBox",
+	slot: "rotateRightBtn",
+})(({ theme }) => ({
+	padding: theme.spacing(1),
+}));
 
 const SwipeListener = styled("div", {
 	name: "CcImageBox",
@@ -250,6 +280,9 @@ export type ImageBoxClassKey =
 	| "removeBtn"
 	| "prevBtn"
 	| "nextBtn"
+	| "fullScreenRotateButtons"
+	| "rotateLeftBtn"
+	| "rotateRightBtn"
 	| "swipeListener"
 	| "image"
 	| "fullScreenDialog"
@@ -331,6 +364,7 @@ const ImageBox = (inProps: ImageBoxProps) => {
 		onNextImage,
 		onPrevImage,
 		disableBackground,
+		disableRotation,
 		fileName,
 		imageDots,
 		className,
@@ -383,7 +417,9 @@ const ImageBox = (inProps: ImageBoxProps) => {
 		imgRef: zoomImgRef,
 		containerRef: zoomContainerRef,
 		containerProps: zoomContainerProps,
-	} = useImageZoomPan(dialogOpen);
+		rotateLeft,
+		rotateRight,
+	} = useImageZoomPan(dialogOpen, src);
 
 	return (
 		<>
@@ -491,6 +527,28 @@ const ImageBox = (inProps: ImageBoxProps) => {
 							>
 								<CloseIcon />
 							</RemoveButton>
+							{!disableRotation && (
+								<FullScreenRotateButtons
+									className={classes?.fullScreenRotateButtons}
+								>
+									<RotateLeftButton
+										onClick={rotateLeft}
+										className={classes?.rotateLeftBtn}
+										size="large"
+										aria-label={t("standalone.file-upload.rotate-left")}
+									>
+										<RotateLeftIcon />
+									</RotateLeftButton>
+									<RotateRightButton
+										onClick={rotateRight}
+										className={classes?.rotateRightBtn}
+										size="large"
+										aria-label={t("standalone.file-upload.rotate-right")}
+									>
+										<RotateRightIcon />
+									</RotateRightButton>
+								</FullScreenRotateButtons>
+							)}
 							{onPrevImage && (
 								<PrevButton
 									onClick={handlePrevImage}

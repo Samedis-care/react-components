@@ -1,6 +1,10 @@
 import React from "react";
 import { Dialog, IconButton, styled, useThemeProps } from "@mui/material";
-import { Close as CloseIcon } from "@mui/icons-material";
+import {
+	Close as CloseIcon,
+	RotateLeft as RotateLeftIcon,
+	RotateRight as RotateRightIcon,
+} from "@mui/icons-material";
 import useImageZoomPan from "../../../utils/useImageZoomPan";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
@@ -22,6 +26,10 @@ export interface ImagePreviewDialogProps {
 	 */
 	onClose: () => void;
 	/**
+	 * Hide the rotate buttons
+	 */
+	disableRotation?: boolean;
+	/**
 	 * Custom styles
 	 */
 	classes?: Partial<Record<ImagePreviewDialogClassKey, string>>;
@@ -41,6 +49,27 @@ const CloseButton = styled(IconButton, {
 	right: theme.spacing(2),
 	zIndex: 1,
 }));
+
+const RotateButtons = styled("div", {
+	name: "CcImagePreviewDialog",
+	slot: "rotateButtons",
+})(({ theme }) => ({
+	position: "absolute",
+	top: theme.spacing(2),
+	left: theme.spacing(2),
+	zIndex: 1,
+	display: "flex",
+}));
+
+const RotateLeftButton = styled(IconButton, {
+	name: "CcImagePreviewDialog",
+	slot: "rotateLeftButton",
+})({});
+
+const RotateRightButton = styled(IconButton, {
+	name: "CcImagePreviewDialog",
+	slot: "rotateRightButton",
+})({});
 
 const Container = styled("div", {
 	name: "CcImagePreviewDialog",
@@ -70,16 +99,23 @@ const PreviewImage = styled("img", {
 });
 
 export type ImagePreviewDialogClassKey =
-	"root" | "closeButton" | "container" | "image";
+	| "root"
+	| "closeButton"
+	| "rotateButtons"
+	| "rotateLeftButton"
+	| "rotateRightButton"
+	| "container"
+	| "image";
 
 const ImagePreviewDialog = (inProps: ImagePreviewDialogProps) => {
 	const props = useThemeProps({
 		props: inProps,
 		name: "CcImagePreviewDialog",
 	});
-	const { src, alt, open, onClose, classes } = props;
+	const { src, alt, open, onClose, disableRotation, classes } = props;
 	const { t } = useCCTranslations();
-	const { imgRef, containerRef, containerProps } = useImageZoomPan(open);
+	const { imgRef, containerRef, containerProps, rotateLeft, rotateRight } =
+		useImageZoomPan(open, src);
 
 	return (
 		<Root open={open} fullScreen onClose={onClose} className={classes?.root}>
@@ -90,6 +126,24 @@ const ImagePreviewDialog = (inProps: ImagePreviewDialogProps) => {
 			>
 				<CloseIcon />
 			</CloseButton>
+			{!disableRotation && (
+				<RotateButtons className={classes?.rotateButtons}>
+					<RotateLeftButton
+						onClick={rotateLeft}
+						aria-label={t("standalone.file-upload.rotate-left")}
+						className={classes?.rotateLeftButton}
+					>
+						<RotateLeftIcon />
+					</RotateLeftButton>
+					<RotateRightButton
+						onClick={rotateRight}
+						aria-label={t("standalone.file-upload.rotate-right")}
+						className={classes?.rotateRightButton}
+					>
+						<RotateRightIcon />
+					</RotateRightButton>
+				</RotateButtons>
+			)}
 			<Container
 				ref={containerRef}
 				{...containerProps}

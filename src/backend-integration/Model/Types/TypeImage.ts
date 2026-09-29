@@ -14,6 +14,7 @@ export type TypeImageParams = Partial<
 		| "capture"
 		| "variant"
 		| "postEditCallback"
+		| "disableRotation"
 	>
 > & {
 	/**

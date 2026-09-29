@@ -17,7 +17,7 @@ import { ImageErrorReporter } from "../useImageError";
 
 export interface ImageDialogEntryProps extends Pick<
 	MultiImageProps,
-	"previewSize"
+	"previewSize" | "disableRotation"
 > {
 	/**
 	 * The image
@@ -90,6 +90,7 @@ const ImageDialogEntry = (inProps: ImageDialogEntryProps) => {
 		onImageError,
 		subClasses,
 		onDelete,
+		disableRotation,
 		className,
 		classes,
 	} = props;
@@ -150,6 +151,7 @@ const ImageDialogEntry = (inProps: ImageDialogEntryProps) => {
 					onRemove={img.readOnly ? undefined : removeImage}
 					onFilesDropped={img.readOnly ? undefined : replaceImage}
 					classes={subClasses?.imageBox}
+					disableRotation={disableRotation}
 				/>
 			</div>
 			<Box sx={{ mt: 1 }}>
