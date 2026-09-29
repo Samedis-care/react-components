@@ -140,7 +140,7 @@ const ModernUploadControlUpload = styled(IconButton, {
 const ImageSelector = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcImageSelector" });
     const boxLabel = labelWithDirtyMarker(props.label, props.dirty);
-    const { convertImagesTo, downscale, name, value, readOnly, capture, onChange, postEditCallback, onError, classes, className, } = props;
+    const { convertImagesTo, downscale, name, value, readOnly, capture, onChange, postEditCallback, onError, disableRotation, classes, className, } = props;
     const variant = props.variant ?? "normal";
     const fileRef = useRef(null);
     const src = useObjectUrl(value);
@@ -232,7 +232,7 @@ const ImageSelector = (inProps) => {
     const handlePreviewDialogClose = useCallback(() => {
         setShowPreviewDialog(false);
     }, []);
-    const previewDialog = variant === "modern" && (_jsx(ImagePreviewDialog, { src: src ?? "", alt: props.alt, open: showPreviewDialog, onClose: handlePreviewDialogClose }));
+    const previewDialog = variant === "modern" && (_jsx(ImagePreviewDialog, { src: src ?? "", alt: props.alt, open: showPreviewDialog, onClose: handlePreviewDialogClose, disableRotation: disableRotation }));
     // render component
     if (variant === "normal") {
         return (_jsx(GroupBox, { label: boxLabel, smallLabel: props.smallLabel, className: className, children: _jsxs(RootClassic, { container: true, spacing: 2, sx: {

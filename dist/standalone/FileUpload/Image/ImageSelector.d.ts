@@ -88,6 +88,11 @@ export interface ImageSelectorProps {
      */
     variant?: "normal" | "modern" | "profile_picture";
     /**
+     * Hide the rotate buttons of the preview dialog
+     * Modern variant only
+     */
+    disableRotation?: boolean;
+    /**
      * Post upload image editing callback
      */
     postEditCallback?: PostImageEditCallback;

@@ -171,7 +171,9 @@
 			"upload-modern-btn-capture": {
 				"image": "Klik om een foto te maken"
 			},
-			"close": "Sluiten"
+			"close": "Sluiten",
+			"rotate-left": "Naar links draaien",
+			"rotate-right": "Naar rechts draaien"
 		},
 		"phone-number": {
 			"invalid": "Voer het juiste telefoonnummer in"

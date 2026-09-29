@@ -21,7 +21,7 @@ class RendererImage extends TypeImage {
                 throw new Error("Not supported");
             return (_jsxs(_Fragment, { children: [_jsx(ImageSelector, { name: field, value: value || (this.params?.placeholder ?? ""), label: label, dirty: dirty, readOnly: visibility.readOnly, onChange: (name, value) => {
                             handleChange(name, value);
-                        }, onBlur: handleBlur, alt: label, capture: this.params?.capture ?? false, uploadLabel: this.params?.uploadLabel, convertImagesTo: this.params?.convertImagesTo, downscale: this.params?.downscale, variant: this.params?.variant, postEditCallback: this.params?.postEditCallback }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
+                        }, onBlur: handleBlur, alt: label, capture: this.params?.capture ?? false, uploadLabel: this.params?.uploadLabel, convertImagesTo: this.params?.convertImagesTo, downscale: this.params?.downscale, variant: this.params?.variant, postEditCallback: this.params?.postEditCallback, disableRotation: this.params?.disableRotation }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
         }
         const content = value || this.params?.placeholder ? (_jsx(ObjectUrlImage, { src: value || (this.params?.placeholder ?? ""), alt: label ?? "", style: { maxWidth: "100%", maxHeight: "100%", objectFit: "contain" } })) : (_jsx(_Fragment, { children: ccI18n.t("backend-integration.model.types.renderers.image.not-set") }));
         return visibility.grid ? (content) : (_jsxs(FormControl, { children: [_jsx(FormLabel, { children: label }), content] }));

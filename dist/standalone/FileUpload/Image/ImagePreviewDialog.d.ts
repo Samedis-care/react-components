@@ -17,10 +17,14 @@ export interface ImagePreviewDialogProps {
      */
     onClose: () => void;
     /**
+     * Hide the rotate buttons
+     */
+    disableRotation?: boolean;
+    /**
      * Custom styles
      */
     classes?: Partial<Record<ImagePreviewDialogClassKey, string>>;
 }
-export type ImagePreviewDialogClassKey = "root" | "closeButton" | "container" | "image";
+export type ImagePreviewDialogClassKey = "root" | "closeButton" | "rotateButtons" | "rotateLeftButton" | "rotateRightButton" | "container" | "image";
 declare const _default: React.MemoExoticComponent<(inProps: ImagePreviewDialogProps) => React.JSX.Element>;
 export default _default;

@@ -144,6 +144,8 @@
 		},
 		"file-upload": {
 			"close": "Close",
+			"rotate-left": "Rotate left",
+			"rotate-right": "Rotate right",
 			"upload": "Upload",
 			"restore": "Restore",
 			"upload-capture": {

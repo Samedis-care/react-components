@@ -171,7 +171,9 @@
 			"upload-modern-btn-capture": {
 				"image": "Klicke um ein Foto zu machen"
 			},
-			"close": "Schliessen"
+			"close": "Schliessen",
+			"rotate-left": "Nach links drehen",
+			"rotate-right": "Nach rechts drehen"
 		},
 		"phone-number": {
 			"invalid": "Korrekte Rufnummer eingeben"

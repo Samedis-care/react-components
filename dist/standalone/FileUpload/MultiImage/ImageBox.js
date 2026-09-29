@@ -2,7 +2,7 @@ import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-run
 import React, { useCallback, useEffect, useRef, useState, } from "react";
 import useDropZone from "../../../utils/useDropZone";
 import { Dialog, DialogContent, IconButton, styled, Tooltip, useThemeProps, } from "@mui/material";
-import { ArrowBack as PrevIcon, ArrowForward as NextIcon, Close as CloseIcon, Delete as DeleteIcon, } from "@mui/icons-material";
+import { ArrowBack as PrevIcon, ArrowForward as NextIcon, Close as CloseIcon, Delete as DeleteIcon, RotateLeft as RotateLeftIcon, RotateRight as RotateRightIcon, } from "@mui/icons-material";
 import combineClassNames from "../../../utils/combineClassNames";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { useDebounce } from "../../../utils/useDebounce";
@@ -55,6 +55,27 @@ const NextButton = styled(IconButton, { name: "CcImageBox", slot: "nextBtn" })({
     right: 0,
     transform: "translateY(-50%)",
 });
+const FullScreenRotateButtons = styled("div", {
+    name: "CcImageBox",
+    slot: "fullScreenRotateButtons",
+})({
+    position: "absolute",
+    top: 0,
+    left: 0,
+    display: "flex",
+});
+const RotateLeftButton = styled(IconButton, {
+    name: "CcImageBox",
+    slot: "rotateLeftBtn",
+})(({ theme }) => ({
+    padding: theme.spacing(1),
+}));
+const RotateRightButton = styled(IconButton, {
+    name: "CcImageBox",
+    slot: "rotateRightBtn",
+})(({ theme }) => ({
+    padding: theme.spacing(1),
+}));
 const SwipeListener = styled("div", {
     name: "CcImageBox",
     slot: "swipeListener",
@@ -194,7 +215,7 @@ const useScrollSwipe = (params) => {
 const ImageBox = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcImageBox" });
     const { t } = useCCTranslations();
-    const { image, width, height, onClick, onFilesDropped, onRemove, onNextImage, onPrevImage, disableBackground, fileName, imageDots, className, classes, } = props;
+    const { image, width, height, onClick, onFilesDropped, onRemove, onNextImage, onPrevImage, disableBackground, disableRotation, fileName, imageDots, className, classes, } = props;
     const src = useObjectUrl(image);
     const { handleDragOver, handleDrop, dragging } = useDropZone(onFilesDropped);
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -221,7 +242,7 @@ const ImageBox = (inProps) => {
     }, [onNextImage]);
     const { containerRef: containerRefImage, handleScroll: handleScrollImage, handleTouchEnd: handleTouchEndImage, } = useScrollSwipe(props);
     const { containerRef: containerRefFS, handleScroll: handleScrollFS, handleTouchEnd: handleTouchEndFS, } = useScrollSwipe(props);
-    const { imgRef: zoomImgRef, containerRef: zoomContainerRef, containerProps: zoomContainerProps, } = useImageZoomPan(dialogOpen);
+    const { imgRef: zoomImgRef, containerRef: zoomContainerRef, containerProps: zoomContainerProps, rotateLeft, rotateRight, } = useImageZoomPan(dialogOpen, src);
     return (_jsxs(_Fragment, { children: [_jsxs(Root, { onClick: onClick === null ? undefined : (onClick ?? openDialog), onDragOver: handleDragOver, onDrop: handleDrop, style: { width, height }, ownerState: {
                     clickable: !!onClick,
                     dragging,
@@ -234,7 +255,7 @@ const ImageBox = (inProps) => {
                                             swipeLeft: !!onPrevImage,
                                             swipeRight: !!onNextImage,
                                             imageDots: !imageDots,
-                                        }, className: classes?.image }) }) }), _jsx(RemoveButton, { onClick: closeDialog, className: classes?.removeBtn, size: "large", "aria-label": t("standalone.file-upload.close"), children: _jsx(CloseIcon, {}) }), onPrevImage && (_jsx(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.prev-image"), children: _jsx(PrevIcon, {}) })), onNextImage && (_jsx(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.next-image"), children: _jsx(NextIcon, {}) })), imageDots && (_jsx(ImageDotsWrapper, { className: classes?.imageDotsWrapper, children: _jsx(StyledImageDots, { ...imageDots, className: combineClassNames([
+                                        }, className: classes?.image }) }) }), _jsx(RemoveButton, { onClick: closeDialog, className: classes?.removeBtn, size: "large", "aria-label": t("standalone.file-upload.close"), children: _jsx(CloseIcon, {}) }), !disableRotation && (_jsxs(FullScreenRotateButtons, { className: classes?.fullScreenRotateButtons, children: [_jsx(RotateLeftButton, { onClick: rotateLeft, className: classes?.rotateLeftBtn, size: "large", "aria-label": t("standalone.file-upload.rotate-left"), children: _jsx(RotateLeftIcon, {}) }), _jsx(RotateRightButton, { onClick: rotateRight, className: classes?.rotateRightBtn, size: "large", "aria-label": t("standalone.file-upload.rotate-right"), children: _jsx(RotateRightIcon, {}) })] })), onPrevImage && (_jsx(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.prev-image"), children: _jsx(PrevIcon, {}) })), onNextImage && (_jsx(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.next-image"), children: _jsx(NextIcon, {}) })), imageDots && (_jsx(ImageDotsWrapper, { className: classes?.imageDotsWrapper, children: _jsx(StyledImageDots, { ...imageDots, className: combineClassNames([
                                         classes?.imageDots,
                                         imageDots.className,
                                     ]) }) }))] }) }) }))] }));

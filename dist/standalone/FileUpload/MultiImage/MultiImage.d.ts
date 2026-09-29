@@ -111,6 +111,10 @@ export interface MultiImageProps {
      */
     downscale?: IDownscaleProps;
     /**
+     * Hide the rotate buttons of the full-screen previews
+     */
+    disableRotation?: boolean;
+    /**
      * Additional dialog content (e.g. how-to-box)
      */
     additionalDialogContent?: React.ReactNode[];

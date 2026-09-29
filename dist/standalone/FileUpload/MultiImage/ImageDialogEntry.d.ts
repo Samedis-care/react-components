@@ -2,7 +2,7 @@ import React from "react";
 import { ImageBoxProps } from "./ImageBox";
 import { MultiImageImage, MultiImageManipulationCallback, MultiImageProcessFile, MultiImageProps } from "./MultiImage";
 import { ImageErrorReporter } from "../useImageError";
-export interface ImageDialogEntryProps extends Pick<MultiImageProps, "previewSize"> {
+export interface ImageDialogEntryProps extends Pick<MultiImageProps, "previewSize" | "disableRotation"> {
     /**
      * The image
      */

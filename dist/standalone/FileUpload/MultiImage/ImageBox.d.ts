@@ -46,6 +46,10 @@ export interface ImageBoxProps {
      */
     disableBackground?: boolean;
     /**
+     * Hide the rotate buttons of the full-screen preview
+     */
+    disableRotation?: boolean;
+    /**
      * Custom CSS styles to apply to root
      */
     className?: string;
@@ -68,6 +72,6 @@ export interface ImageBoxStyledImageOwnerState {
     swipeRight: boolean;
     imageDots: boolean;
 }
-export type ImageBoxClassKey = "root" | "removeBtn" | "prevBtn" | "nextBtn" | "swipeListener" | "image" | "fullScreenDialog" | "fullScreenImageWrapper" | "fullScreenZoomContainer" | "imageDotsWrapper" | "imageDots";
+export type ImageBoxClassKey = "root" | "removeBtn" | "prevBtn" | "nextBtn" | "fullScreenRotateButtons" | "rotateLeftBtn" | "rotateRightBtn" | "swipeListener" | "image" | "fullScreenDialog" | "fullScreenImageWrapper" | "fullScreenZoomContainer" | "imageDotsWrapper" | "imageDots";
 declare const _default: React.MemoExoticComponent<(inProps: ImageBoxProps) => React.JSX.Element>;
 export default _default;

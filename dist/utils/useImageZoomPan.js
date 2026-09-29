@@ -1,29 +1,53 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 10;
-const applyTransform = (img, zoom, panX, panY) => {
+/**
+ * The scale that fits the image back into its box after a quarter turn.
+ * Expects the image to fill its box with `object-fit: contain`.
+ */
+const getQuarterTurnFit = (img) => {
+    // the layout size, which the transform does not change
+    const boxWidth = img.offsetWidth;
+    const boxHeight = img.offsetHeight;
+    const { naturalWidth, naturalHeight } = img;
+    if (!boxWidth || !boxHeight || !naturalWidth || !naturalHeight)
+        return 1;
+    const contain = Math.min(boxWidth / naturalWidth, boxHeight / naturalHeight);
+    // turned, the picture's width runs along the box's height and vice versa
+    return Math.min(boxWidth / (naturalHeight * contain), boxHeight / (naturalWidth * contain));
+};
+const getFit = (img, rotation) => img && rotation % 180 !== 0 ? getQuarterTurnFit(img) : 1;
+const applyTransform = (img, zoom, panX, panY, rotation) => {
     if (!img)
         return;
-    img.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+    const scale = zoom * getFit(img, rotation);
+    img.style.transform = `translate(${panX}px, ${panY}px) scale(${scale}) rotate(${rotation}deg)`;
 };
 /**
- * Hook providing zoom (mouse wheel / pinch) and pan (drag) behavior
- * for an image element inside a container. Updates are imperative (ref-based)
- * so no React re-renders occur during interaction.
+ * Hook providing zoom (mouse wheel / pinch), pan (drag) and rotation (quarter
+ * turns) for an image element inside a container. Updates are imperative
+ * (ref-based) so no React re-renders occur during interaction.
  *
  * At zoom 1x, single-finger touch and single-pointer drag events are not
  * intercepted, allowing parent scroll-based interactions (e.g. swipe
  * navigation) to work normally. Pinch gestures and mouse wheel zoom always
  * work regardless of zoom level.
  *
- * @param open Whether the zoomable view is currently active. Resets zoom/pan when transitioning to true.
+ * A turned image is scaled to fit its box again, so the image is expected to
+ * fill its box with `object-fit: contain`.
+ *
+ * @param open Whether the zoomable view is currently active. Resets zoom, pan and rotation when transitioning to true.
+ * @param src The image shown. Resets zoom, pan and rotation when it changes while open, so the next image starts unzoomed and upright.
  */
-const useImageZoomPan = (open) => {
+const useImageZoomPan = (open, src) => {
     const imgElRef = useRef(null);
+    const imgCleanupRef = useRef(null);
     const containerElRef = useRef(null);
     const wheelCleanupRef = useRef(null);
     const zoomRef = useRef(1);
     const panRef = useRef({ x: 0, y: 0 });
+    // clockwise, in degrees: 0, 90, 180 or 270
+    const rotationRef = useRef(0);
     const isPanning = useRef(false);
     const lastPointer = useRef({ x: 0, y: 0 });
     const lastPinchDist = useRef(null);
@@ -34,20 +58,41 @@ const useImageZoomPan = (open) => {
             return;
         el.style.touchAction = zoomRef.current > 1 ? "none" : "";
     }, []);
-    const imgRef = useCallback((node) => {
-        imgElRef.current = node;
-        if (node) {
-            applyTransform(node, zoomRef.current, panRef.current.x, panRef.current.y);
-        }
+    const render = useCallback(() => {
+        applyTransform(imgElRef.current, zoomRef.current, panRef.current.x, panRef.current.y, rotationRef.current);
     }, []);
-    useEffect(() => {
+    // Callback ref for the image. The fit of a turned image depends on the
+    // image's size and on its box, so it is recomputed once the image has
+    // loaded and whenever the box resizes.
+    const imgRef = useCallback((node) => {
+        if (imgCleanupRef.current) {
+            imgCleanupRef.current();
+            imgCleanupRef.current = null;
+        }
+        imgElRef.current = node;
+        if (!node)
+            return;
+        render();
+        node.addEventListener("load", render);
+        const resizeObserver = typeof ResizeObserver === "undefined"
+            ? null
+            : new ResizeObserver(render);
+        resizeObserver?.observe(node);
+        imgCleanupRef.current = () => {
+            node.removeEventListener("load", render);
+            resizeObserver?.disconnect();
+        };
+    }, [render]);
+    // before paint, so a new image never shows with the previous one's zoom
+    useLayoutEffect(() => {
         if (open) {
             zoomRef.current = 1;
             panRef.current = { x: 0, y: 0 };
-            applyTransform(imgElRef.current, 1, 0, 0);
+            rotationRef.current = 0;
+            render();
             syncContainerStyle();
         }
-    }, [open, syncContainerStyle]);
+    }, [open, src, render, syncContainerStyle]);
     const clampPan = useCallback((x, y, currentZoom) => {
         if (currentZoom <= 1)
             return { x: 0, y: 0 };
@@ -66,9 +111,21 @@ const useImageZoomPan = (open) => {
         const clamped = clampPan(nextPanX, nextPanY, nextZoom);
         zoomRef.current = nextZoom;
         panRef.current = clamped;
-        applyTransform(imgElRef.current, nextZoom, clamped.x, clamped.y);
+        render();
         syncContainerStyle();
-    }, [clampPan, syncContainerStyle]);
+    }, [clampPan, render, syncContainerStyle]);
+    const rotate = useCallback((quarterTurns) => {
+        const img = imgElRef.current;
+        const prevFit = getFit(img, rotationRef.current);
+        rotationRef.current =
+            (rotationRef.current + quarterTurns * 90 + 360) % 360;
+        const ratio = getFit(img, rotationRef.current) / prevFit;
+        // turn the pan with the image, so the part in view stays in view
+        const { x, y } = panRef.current;
+        update(zoomRef.current, -y * quarterTurns * ratio, x * quarterTurns * ratio);
+    }, [update]);
+    const rotateLeft = useCallback(() => rotate(-1), [rotate]);
+    const rotateRight = useCallback(() => rotate(1), [rotate]);
     // Callback ref for the container — attaches a native wheel listener with
     // { passive: false } so preventDefault actually stops the parent
     // ScrollListener from scrolling. React registers onWheel as passive,
@@ -204,6 +261,6 @@ const useImageZoomPan = (open) => {
         handleTouchEnd,
         handleDoubleClick,
     ]);
-    return { imgRef, containerRef, containerProps };
+    return { imgRef, containerRef, containerProps, rotateLeft, rotateRight };
 };
 export default useImageZoomPan;
