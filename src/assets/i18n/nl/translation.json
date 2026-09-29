@@ -222,7 +222,7 @@
 		"connector": {
 			"json-api-client": {
 				"network-error": "Er is een netwerkfout opgetreden.",
-				"parse-error": "Parseerreactie mislukt (ongeldige JSON). Server heeft status {{STATUS_CODE}} {{STATUS_TEXT}} geretourneerd."
+				"parse-error": "Kan het antwoord niet verwerken (ongeldige JSON). De server gaf status {{STATUS}} terug."
 			}
 		},
 		"model": {

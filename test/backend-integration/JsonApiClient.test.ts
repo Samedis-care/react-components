@@ -4,6 +4,7 @@ import JsonApiClient, {
 } from "../../src/backend-integration/Connector/JsonApiClient";
 import AuthMode from "../../src/backend-integration/Connector/AuthMode";
 import NetworkError from "../../src/backend-integration/Connector/NetworkError";
+import BackendError from "../../src/backend-integration/Connector/BackendError";
 
 /**
  * Stands in for XMLHttpRequest: records the request, the test answers it
@@ -48,9 +49,12 @@ class FakeXhr extends EventTarget {
 		);
 	}
 	respond(status: number, data: unknown) {
+		this.respondText(status, "OK", JSON.stringify(data));
+	}
+	respondText(status: number, statusText: string, text: string) {
 		this.status = status;
-		this.statusText = "OK";
-		this.response = new TextEncoder().encode(JSON.stringify(data)).buffer;
+		this.statusText = statusText;
+		this.response = new TextEncoder().encode(text).buffer;
 		this.dispatchEvent(new Event("load"));
 	}
 }
@@ -96,6 +100,7 @@ beforeEach(() => {
 
 afterEach(() => {
 	vi.unstubAllGlobals();
+	vi.restoreAllMocks();
 });
 
 describe("JsonApiClient.request", () => {
@@ -237,6 +242,58 @@ describe("JsonApiClient.request", () => {
 
 		await expect(result).rejects.toBeInstanceOf(NetworkError);
 		expect(exceptionHook).toHaveBeenCalled();
+	});
+
+	it("rejects a response that isn't JSON with a BackendError carrying its status and headers", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn().mockResolvedValue(
+				new Response("<html>503 Service Temporarily Unavailable</html>", {
+					status: 503,
+					statusText: "Service Temporarily Unavailable",
+					headers: { "Content-Type": "text/html", "Retry-After": "30" },
+				}),
+			),
+		);
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const { client, responseProcessor, exceptionHook } = makeClient();
+
+		const error = await client
+			.post("/api/x", null, { a: 1 })
+			.catch((e: unknown) => e);
+
+		expect(error).toBeInstanceOf(BackendError);
+		expect(error).toMatchObject({
+			status: 503,
+			code: undefined,
+			message: expect.stringContaining(
+				"status 503 Service Temporarily Unavailable.",
+			) as string,
+		});
+		expect((error as BackendError).headers?.get("Retry-After")).toBe("30");
+		expect(responseProcessor).not.toHaveBeenCalled();
+		expect(exceptionHook).toHaveBeenCalledWith(error);
+	});
+
+	it("rejects an upload whose response isn't JSON the same way, without status text as over HTTP/2", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const { client } = makeClient();
+
+		const result = client
+			.post("/api/x", null, { a: 1 }, AuthMode.On, {
+				onUploadProgress: vi.fn(),
+			})
+			.catch((e: unknown) => e);
+		await vi.waitFor(() => expect(FakeXhr.instances).toHaveLength(1));
+		FakeXhr.instances[0].respondText(413, "", "<html>413</html>");
+		const error = await result;
+
+		expect(error).toBeInstanceOf(BackendError);
+		expect(error).toMatchObject({
+			status: 413,
+			message: expect.stringContaining("status 413.") as string,
+		});
+		expect((error as BackendError).headers?.get("x-request-id")).toBe("42");
 	});
 });
 

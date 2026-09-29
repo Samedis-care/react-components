@@ -56,10 +56,27 @@ describe("BackendError", () => {
 		expect(error.meta).toEqual(meta);
 	});
 
-	it("has undefined code and meta when not provided", () => {
+	it("takes status and headers from the optional response", () => {
+		const response = new Response(null, {
+			status: 503,
+			headers: { "Retry-After": "30" },
+		});
+		const error = new BackendError(
+			"Unavailable",
+			undefined,
+			undefined,
+			response,
+		);
+		expect(error.status).toBe(503);
+		expect(error.headers?.get("Retry-After")).toBe("30");
+	});
+
+	it("has undefined code, meta, status and headers when not provided", () => {
 		const error = new BackendError("simple error");
 		expect(error.code).toBeUndefined();
 		expect(error.meta).toBeUndefined();
+		expect(error.status).toBeUndefined();
+		expect(error.headers).toBeUndefined();
 	});
 
 	it("supports any type as meta", () => {

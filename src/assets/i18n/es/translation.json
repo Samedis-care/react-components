@@ -222,7 +222,7 @@
 		"connector": {
 			"json-api-client": {
 				"network-error": "Se ha producido un error de red.",
-				"parse-error": "Error al analizar la respuesta (JSON no válido). El servidor devolvió el estado {{STATUS_CODE}} {{STATUS_TEXT}}."
+				"parse-error": "Error al analizar la respuesta (JSON no válido). El servidor devolvió el estado {{STATUS}}."
 			}
 		},
 		"model": {

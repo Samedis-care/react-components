@@ -222,7 +222,7 @@
 		"connector": {
 			"json-api-client": {
 				"network-error": "Si è verificato un errore di rete.",
-				"parse-error": "Impossibile analizzare la risposta (JSON non valido). Il server ha restituito lo stato {{STATUS_CODE}} {{STATUS_TEXT}}."
+				"parse-error": "Impossibile analizzare la risposta (JSON non valido). Il server ha restituito lo stato {{STATUS}}."
 			}
 		},
 		"model": {
