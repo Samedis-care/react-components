@@ -126,3 +126,60 @@ export const FromADialog: StoryObj = {
 		);
 	},
 };
+
+const TOP_CENTER = { vertical: "top", horizontal: "center" } as const;
+
+const PlacedDemo = () => {
+	const [showToast] = useToastContext();
+	const showAtTop = useCallback(
+		() =>
+			showToast({
+				message: "Label scanned.",
+				anchorOrigin: TOP_CENTER,
+			}),
+		[showToast],
+	);
+	const showDefault = useCallback(
+		() => showToast({ message: "Saved." }),
+		[showToast],
+	);
+	return (
+		<Stack direction={"row"} spacing={2}>
+			<Button variant={"contained"} onClick={showAtTop}>
+				Show at the top
+			</Button>
+			<Button variant={"outlined"} onClick={showDefault}>
+				Show where the theme says
+			</Button>
+		</Stack>
+	);
+};
+
+/**
+ * A toast can be placed where it doesn't cover the page's controls, e.g. at the
+ * top of a screen whose controls sit at the bottom. The next toast without a
+ * placement of its own is shown where the theme says again.
+ */
+export const Placed: StoryObj = {
+	render: () => <PlacedDemo />,
+	play: async ({ canvas, userEvent }) => {
+		const snackbarOf = (element: HTMLElement) =>
+			element.closest(".MuiSnackbar-root");
+
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Show at the top" }),
+		);
+		const top = snackbarOf(await body.findByRole("status"));
+		await expect(top).toHaveClass("MuiSnackbar-anchorOriginTopCenter");
+
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Show where the theme says" }),
+		);
+		await waitFor(() =>
+			expect(body.getByRole("status")).toHaveTextContent("Saved."),
+		);
+		await expect(snackbarOf(body.getByRole("status"))).toHaveClass(
+			"MuiSnackbar-anchorOriginBottomRight",
+		);
+	},
+};

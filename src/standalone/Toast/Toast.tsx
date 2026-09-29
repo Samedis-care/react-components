@@ -45,8 +45,10 @@ export interface ToastProps {
 	 */
 	autoHideDurations?: Partial<Record<AlertColor, number | null>>;
 	/**
-	 * Where the toast is shown
+	 * Where the toast is shown, e.g. at the top where the bottom of the screen
+	 * holds controls the toast must not cover
 	 * @default { vertical: "bottom", horizontal: "right" }
+	 * @remarks The theme's default props set it app-wide, this per toast
 	 */
 	anchorOrigin?: SnackbarOrigin;
 	/**

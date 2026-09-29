@@ -58,6 +58,7 @@ const ToastContextProvider = (props: ToastContextProviderProps) => {
 					title={state.current.title}
 					message={state.current.message}
 					autoHideDuration={state.current.autoHideDuration}
+					anchorOrigin={state.current.anchorOrigin}
 					onClose={closeToast}
 					onExited={handleExited}
 				/>
