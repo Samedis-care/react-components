@@ -182,6 +182,7 @@ import {
 	NotificationsClassKey,
 	NotificationsProps,
 } from "./standalone/Notifications";
+import { ToastClassKey, ToastProps } from "./standalone/Toast";
 import {
 	DayContentsClassKey,
 	DayContentsProps,
@@ -303,6 +304,7 @@ declare module "@mui/material/styles" {
 		CcPopupMenu: PopupMenuClassKey;
 		CcPortalLayout: PortalLayoutClassKey;
 		CcNotifications: NotificationsClassKey;
+		CcToast: ToastClassKey;
 		CcMultiSelectWithTags: MultiSelectWithTagsClassKey;
 		CcMultiSelectWithoutGroup: MultiSelectWithoutGroupClassKey;
 		CcDayContents: DayContentsClassKey;
@@ -377,6 +379,7 @@ declare module "@mui/material/styles" {
 		CcFormDialog: Partial<FormDialogProps>;
 		CcPortalLayout: Partial<PortalLayoutProps>;
 		CcNotifications: Partial<NotificationsProps>;
+		CcToast: Partial<ToastProps>;
 		CcMultiSelectWithTags: Partial<
 			MultiSelectWithTagsProps<MultiSelectorData, BaseSelectorData>
 		>;
@@ -680,6 +683,11 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcNotifications"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcNotifications"];
 			variants?: ComponentsVariants["CcNotifications"];
+		};
+		CcToast?: {
+			defaultProps?: ComponentsPropsList["CcToast"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcToast"];
+			variants?: ComponentsVariants["CcToast"];
 		};
 		CcMultiSelectWithTags?: {
 			defaultProps?: ComponentsPropsList["CcMultiSelectWithTags"];

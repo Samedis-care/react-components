@@ -21,3 +21,4 @@ export * from "./Routes";
 export { default as CountryFlags } from "./CountryFlags";
 export * from "./Tree";
 export * from "./Matrix";
+export * from "./Toast";

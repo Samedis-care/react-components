@@ -199,6 +199,9 @@
 		"signal-portlet": {
 			"last-updated": "Oxirgi yangilanish: {{AGE}}",
 			"refresh": "Yangilash"
+		},
+		"toast": {
+			"close": "Yoping"
 		}
 	},
 	"framework": {

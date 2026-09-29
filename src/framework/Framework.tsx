@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import Loader from "../standalone/Loader";
 import DialogContextProvider from "./DialogContextProvider";
+import ToastContextProvider from "./ToastContextProvider";
 import { FrameworkHistory } from "./History";
 import CCI18nProvider from "./CCI18nProvider";
 import ThemeProvider, {
@@ -68,6 +69,7 @@ const loaderComponent = <Loader />;
  * Provides:
  * - react-router instance
  * - dialog context
+ * - toast context (non-blocking notices)
  * - i18n context (for components-care)
  * - react-query cache
  * - theme provider
@@ -99,9 +101,11 @@ const ComponentsCareFramework = (props: ICompleteFrameworkProps) => {
 								<PermissionContextProvider>
 									<UnsafeToLeave disable={props.disableUnsafeToLeave}>
 										<HistoryRouter history={FrameworkHistory}>
-											<DialogContextProvider>
-												{props.children}
-											</DialogContextProvider>
+											<ToastContextProvider>
+												<DialogContextProvider>
+													{props.children}
+												</DialogContextProvider>
+											</ToastContextProvider>
 										</HistoryRouter>
 									</UnsafeToLeave>
 								</PermissionContextProvider>

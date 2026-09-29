@@ -1,5 +1,7 @@
 export { default as DialogContextProvider } from "./DialogContextProvider";
 export * from "./DialogContextProvider";
+export { default as ToastContextProvider } from "./ToastContextProvider";
+export * from "./ToastContextProvider";
 export * from "./ThemeProvider";
 export * from "./History";
 export { default as PermissionContextProvider } from "./PermissionContextProvider";
