@@ -10,7 +10,7 @@ import debounce from "../../utils/debounce";
 import isObjectEmpty from "../../utils/isObjectEmpty";
 import measureText from "../../utils/measureText";
 import shallowCompareArray from "../../utils/shallowCompareArray";
-import { dataGridApplyRowUpdate, dataGridPrepareFiltersAndSorts, } from "./CallbackUtil";
+import { dataGridApplyRowUpdate, dataGridGetFilterParameters, dataGridPrepareFiltersAndSorts, } from "./CallbackUtil";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
 import CustomFilterDialog from "./CustomFilterDialog";
 import StatePersistence, { DataGridPersistentStateContext, } from "./StatePersistence";
@@ -472,7 +472,8 @@ const DataGrid = (inProps, ref) => {
         if (refreshData !== 1 && !skippedFirstRefresh) {
             return;
         }
-        const [sorts, fieldFilter] = dataGridPrepareFiltersAndSorts(columnsState);
+        const [sorts] = dataGridPrepareFiltersAndSorts(columnsState);
+        const filter = dataGridGetFilterParameters(state, columnsState, getAdditionalFilters);
         void (async () => {
             for (let pageIndex = pages[0]; pageIndex <= pages[1]; pageIndex++) {
                 // check if page was already loaded
@@ -483,11 +484,7 @@ const DataGrid = (inProps, ref) => {
                     const data = await loadData({
                         page: pageIndex + 1,
                         rows: rowsPerPage,
-                        quickFilter: search,
-                        additionalFilters: getAdditionalFilters
-                            ? getAdditionalFilters(state.customData)
-                            : state.customData,
-                        fieldFilter: fieldFilter,
+                        ...filter,
                         sort: sorts,
                     });
                     const dataRowsTotal = data.rowsFiltered ?? data.rowsTotal;

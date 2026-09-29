@@ -7,6 +7,10 @@ export interface DataActionBarViewProps {
      */
     numSelected: 0 | 1 | 2;
     /**
+     * Is everything selected (the selection inverted)?
+     */
+    selectAll: boolean;
+    /**
      * Callback for edit button.
      * If not defined: Disables edit button
      */
@@ -16,6 +20,11 @@ export interface DataActionBarViewProps {
      * If not defined: Disables delete button
      */
     handleDelete?: React.MouseEventHandler;
+    /**
+     * Does handleDelete handle an inverted selection? Otherwise the delete button
+     * is disabled while everything is selected
+     */
+    enableDeleteAll: boolean;
     /**
      * Disable delete button reason
      */

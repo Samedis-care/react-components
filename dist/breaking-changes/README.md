@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-09-29 | [DataGrid select all works without delete all](2026-09-29-data-grid-select-all.md) | behavior, type |
 | 2026-09-29 | [The image viewers rotate](2026-09-29-image-viewers-rotate.md) | behavior |
 | 2026-09-28 | [Picked images stay files instead of becoming data URIs](2026-09-28-picked-images-are-blobs.md) | type, behavior |
 | 2026-09-28 | [postEditCallback takes and returns a Blob](2026-09-28-post-edit-callback-takes-blobs.md) | type |

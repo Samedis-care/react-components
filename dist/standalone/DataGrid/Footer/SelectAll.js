@@ -3,7 +3,7 @@ import React, { useCallback } from "react";
 import { useDataGridProps, useDataGridState } from "../DataGrid";
 import SelectAllView from "./SelectAllView";
 const SelectAll = () => {
-    const { enableDeleteAll, prohibitMultiSelect } = useDataGridProps();
+    const { enableSelectAll, prohibitMultiSelect } = useDataGridProps();
     const [state, setState] = useDataGridState();
     const onSelect = useCallback((_evt, newChecked) => {
         setState((prevState) => ({
@@ -12,6 +12,6 @@ const SelectAll = () => {
             selectionUpdatedByProps: false,
         }));
     }, [setState]);
-    return (_jsx(SelectAllView, { disabled: !enableDeleteAll || !!prohibitMultiSelect, checked: state.selectAll, onSelect: onSelect }));
+    return (_jsx(SelectAllView, { disabled: !enableSelectAll || !!prohibitMultiSelect, checked: state.selectAll, onSelect: onSelect }));
 };
 export default React.memo(SelectAll);

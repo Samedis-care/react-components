@@ -2,7 +2,7 @@ import Type from "./Type";
 import Visibility, { VisibilityCallback } from "./Visibility";
 import Connector, { ConnectorIndex2Params, ResponseMeta } from "../Connector/Connector";
 import { QueryKey, UseMutationResult, UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
-import { DataGridCustomFilterData, DataGridIdFilterData, IDataGridColumnDef, IDataGridLoadDataParameters } from "../../standalone/DataGrid/DataGrid";
+import { DataGridCustomFilterData, DataGridIdFilterData, IDataGridColumnDef, DataGridFilterParameters, IDataGridLoadDataParameters } from "../../standalone/DataGrid/DataGrid";
 export interface PageVisibility {
     overview: Visibility;
     edit: VisibilityCallback;
@@ -110,7 +110,7 @@ export type ModelFetchAllParams = Partial<Omit<IDataGridLoadDataParameters, "row
 export type AdvancedDeleteRequest = [
     invert: boolean,
     ids: string[],
-    filter?: Pick<IDataGridLoadDataParameters, "quickFilter" | "additionalFilters" | "fieldFilter">
+    filter?: DataGridFilterParameters
 ];
 export interface CacheOptions {
     /**

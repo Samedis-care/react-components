@@ -6,6 +6,7 @@ export interface DataActionBarMenuProps {
     customButtons: NonNullable<DataGridProps["customDataActionButtons"]>;
     onClose: () => void;
     numSelected: 0 | 1 | 2;
+    selectAll: boolean;
     handleCustomButtonClick: (label: string) => void;
 }
 declare const _default: React.MemoExoticComponent<(props: DataActionBarMenuProps) => React.JSX.Element>;

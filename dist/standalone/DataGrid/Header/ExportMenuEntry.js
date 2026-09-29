@@ -2,7 +2,7 @@ import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-run
 import React, { useCallback, useContext, useState } from "react";
 import { CircularProgress, ListItemIcon, ListItemText, MenuItem, } from "@mui/material";
 import { Description as ExportIcon, Done as DoneIcon, Error as ErrorIcon, } from "@mui/icons-material";
-import { dataGridPrepareFiltersAndSorts } from "../CallbackUtil";
+import { dataGridGetFilterParameters, dataGridPrepareFiltersAndSorts, } from "../CallbackUtil";
 import { getActiveDataGridColumns, useDataGridColumnState, useDataGridProps, useDataGridState, } from "../DataGrid";
 import { DialogContext } from "../../../framework";
 export var DataGridExportStatus;
@@ -39,8 +39,9 @@ const ExportMenuEntry = React.forwardRef((props, ref) => {
     const startExport = useCallback(async () => {
         setStatus(DataGridExportStatus.Working);
         try {
-            const [sorts, fieldFilter] = dataGridPrepareFiltersAndSorts(columnsState);
-            const data = await onRequest(search, getAdditionalFilters ? getAdditionalFilters(customData) : {}, fieldFilter, sorts, getActiveDataGridColumns(columns, columnHidden, columnPinned));
+            const [sorts] = dataGridPrepareFiltersAndSorts(columnsState);
+            const { quickFilter, additionalFilters, fieldFilter } = dataGridGetFilterParameters({ search, customData }, columnsState, getAdditionalFilters);
+            const data = await onRequest(quickFilter, additionalFilters, fieldFilter, sorts, getActiveDataGridColumns(columns, columnHidden, columnPinned));
             setExportData(data);
             setStatus(DataGridExportStatus.Ready);
             if (autoDownload)
