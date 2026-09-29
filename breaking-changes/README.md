@@ -20,6 +20,8 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-09-29 | [useLocalStorageState follows what localStorage holds](2026-09-29-local-storage-state-follows-storage.md) | behavior |
+| 2026-09-29 | [React 18 or 19 is required](2026-09-29-react-18-required.md) | type |
 | 2026-09-29 | [DataGrid select all works without delete all](2026-09-29-data-grid-select-all.md) | behavior, type |
 | 2026-09-29 | [The image viewers rotate](2026-09-29-image-viewers-rotate.md) | behavior |
 | 2026-09-28 | [Picked images stay files instead of becoming data URIs](2026-09-28-picked-images-are-blobs.md) | type, behavior |

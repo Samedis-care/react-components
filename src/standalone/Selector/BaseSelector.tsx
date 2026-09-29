@@ -39,7 +39,10 @@ import {
 	SmallListItemIcon,
 } from "../../standalone/Small";
 import combineClassNames from "../../utils/combineClassNames";
-import { useLocalStorageState } from "../../utils/useStorageState";
+import {
+	setLocalStorageState,
+	useLocalStorageState,
+} from "../../utils/useStorageState";
 import {
 	AutocompleteRenderInputParams,
 	AutocompleteRenderOptionState,
@@ -196,6 +199,8 @@ export interface SelectorLruOptions<DataT extends BaseSelectorData> {
 	loadData: (id: string) => Promise<DataT | undefined> | DataT | undefined;
 	/**
 	 * The LRU storage key
+	 * @remarks Selectors with the same key share the LRU cache, also across
+	 *          browser tabs. updateSelectorLru changes it from outside.
 	 */
 	storageKey: string;
 	/**
@@ -219,6 +224,21 @@ export interface SelectorLruOptions<DataT extends BaseSelectorData> {
  * @see SelectorLruOptions.mode
  */
 export type SelectorLruMode = "exclusive" | "prepend";
+
+const EMPTY_LRU: string[] = [];
+const isLruIds = (data: unknown): data is string[] =>
+	Array.isArray(data) && data.every((entry) => typeof entry === "string");
+
+/**
+ * Update the IDs in an LRU cache, e.g. to replace an ID that changed
+ * @param storageKey The LRU storage key (SelectorLruOptions.storageKey)
+ * @param update Returns the new IDs (most recent first) from the current ones
+ * @remarks The mounted selectors using the key show the change at once
+ */
+export const updateSelectorLru = (
+	storageKey: string,
+	update: (ids: string[]) => string[],
+): void => setLocalStorageState(storageKey, EMPTY_LRU, isLruIds, update);
 
 export interface BaseSelectorSingle<DataT extends BaseSelectorData> {
 	multiple?: false;
@@ -695,12 +715,10 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 	const [loading, setLoading] = useState<string | null>(null);
 	const [query, setQuery] = useState("");
 
-	const [lruIds, setLruIds] = useLocalStorageState<string[]>(
+	const [lruIds, setLruIds] = useLocalStorageState(
 		lru?.storageKey,
-		[],
-		(ret): ret is string[] =>
-			Array.isArray(ret) &&
-			!(ret as unknown[]).find((entry) => typeof entry !== "string"),
+		EMPTY_LRU,
+		isLruIds,
 	);
 
 	const renderIcon = useCallback(
