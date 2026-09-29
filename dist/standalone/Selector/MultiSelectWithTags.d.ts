@@ -13,6 +13,10 @@ export interface MultiSelectWithTagsProps<DataT extends MultiSelectorData, Group
      */
     dirty?: boolean;
     /**
+     * Focus the group selector, the first input, when the control mounts
+     */
+    autoFocus?: boolean;
+    /**
      * Label above search bar
      */
     searchInputLabel?: string;

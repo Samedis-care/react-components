@@ -3,7 +3,7 @@ import { TextFieldProps } from "@mui/material";
 import ModelRenderParams from "../../../RenderParams";
 import { TextFieldWithHelpProps } from "../../../../../standalone/UIKit/TextFieldWithHelp";
 import TypeStringArray from "../../TypeStringArray";
-export type ModelDataTypeStringArrayRendererCCParams = Omit<TextFieldProps, "name" | "value" | "label" | "multiline" | "placeholder" | "disabled" | "required" | "onChange" | "onBlur" | "error"> & Omit<TextFieldWithHelpProps, "warning">;
+export type ModelDataTypeStringArrayRendererCCParams = Omit<TextFieldProps, "name" | "value" | "label" | "multiline" | "placeholder" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "autoFocus"> & Omit<TextFieldWithHelpProps, "warning">;
 /**
  * Renders text fields inside a group box
  */

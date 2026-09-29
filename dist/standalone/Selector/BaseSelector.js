@@ -148,7 +148,7 @@ const autocompleteSlots = { popper: GrowPopper };
 export const BaseSelectorContext = React.createContext(null);
 const BaseSelector = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcBaseSelector" });
-    const { variant, refreshToken, onSelect, multiple, selected, label, disabled, required, error, warning, dirty, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, additionalOptions, enableIcons, noOptionsText, loadingText, startTypingToSearchText, disableTruncationNotice, truncatedLabel, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, forceQuery, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, iconSize, classes, className, } = props;
+    const { variant, refreshToken, onSelect, multiple, selected, label, disabled, required, error, warning, dirty, autoFocus, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, additionalOptions, enableIcons, noOptionsText, loadingText, startTypingToSearchText, disableTruncationNotice, truncatedLabel, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, forceQuery, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, iconSize, classes, className, } = props;
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
     const defaultSwitchValue = !!(props.displaySwitch && props.defaultSwitchValue);
@@ -553,7 +553,7 @@ const BaseSelector = (inProps) => {
                                                 ?.endAdornment).props.children, infoBtn, endAdornment)) : (_jsxs(InputAdornment, { position: "end", children: [endAdornmentLeft, infoBtn, endAdornment] }))) : (paramSlotProps.input?.endAdornment);
                                         })(),
                                     },
-                                }, placeholder: placeholder, required: required, error: error, warning: warning, dirty: dirty }));
+                                }, placeholder: placeholder, required: required, error: error, warning: warning, dirty: dirty, autoFocus: autoFocus }));
                         } }, `${refreshToken || "no-refresh-token"} ${onAddNew
                         ? `add-new${actualAddNewLabel || "no-add-new-label"}`
                         : "no-add-new"}`) })] }) }));

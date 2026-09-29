@@ -2,7 +2,7 @@ import React from "react";
 import ModelRenderParams from "../../../RenderParams";
 import { ColorInputProps } from "../../../../../standalone/UIKit/InputControls/ColorInput";
 import TypeColor from "../../TypeColor";
-export type ModelDataTypeColorRenderer = Omit<ColorInputProps, "name" | "value" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "warning">;
+export type ModelDataTypeColorRenderer = Omit<ColorInputProps, "name" | "value" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "autoFocus" | "warning">;
 /**
  * Renders a text field
  */

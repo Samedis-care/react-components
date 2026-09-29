@@ -41,6 +41,7 @@ const GenericDataPreview = (props) => {
                                     warningMsg: null,
                                     touched: false,
                                     dirty: false,
+                                    autoFocus: false,
                                     setError: () => throwError("not supported"),
                                     setFieldValue: () => throwError("not supported"),
                                     handleBlur: () => throwError("not supported"),

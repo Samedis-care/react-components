@@ -4,7 +4,7 @@ import ModelRenderParams from "../../RenderParams";
 import { BackendMultiSelectWithTagsProps } from "../../../../backend-components/Selector/BackendMultiSelectWithTags";
 import { BaseSelectorData, MultiSelectorData } from "../../../../standalone";
 import TypeIds from "../TypeIds";
-type OmitProperties = "selected" | "onSelect" | "disabled" | "dataModel" | "initialData" | "title";
+type OmitProperties = "selected" | "onSelect" | "disabled" | "dataModel" | "initialData" | "title" | "autoFocus";
 /**
  * Renders TypeEnum as drop-down selector (with search)
  */

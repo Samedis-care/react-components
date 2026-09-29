@@ -11,6 +11,14 @@ interface FieldProps {
      * Overrides for the model information
      */
     overrides?: Partial<Omit<ModelFieldDefinition<unknown, string, PageVisibility, never>, NonOverridableProps>> | ((original: ModelFieldDefinition<unknown, string, PageVisibility, never>) => Omit<ModelFieldDefinition<unknown, string, PageVisibility, never>, NonOverridableProps>);
+    /**
+     * Focus the field's control when it mounts, e.g. the field a form should start in
+     * @remarks Like the `autoFocus` attribute: it applies when the control mounts, so
+     *          turning it on for a control that is already shown does not move the
+     *          focus. Only editable controls with a keyboard input take it; file and
+     *          image uploads, the signature pad and the data grid multi select ignore it.
+     */
+    autoFocus?: boolean;
 }
 export interface FormFieldContextType<T> extends ModelRenderParams<T> {
     type: Type<T>;

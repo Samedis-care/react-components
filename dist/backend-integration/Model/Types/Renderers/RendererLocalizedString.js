@@ -23,7 +23,7 @@ class RendererLocalizedString extends TypeLocalizedString {
         };
     }
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, } = params;
+        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -34,7 +34,7 @@ class RendererLocalizedString extends TypeLocalizedString {
                 throw new Error("Not supported");
             return (_jsxs(_Fragment, { children: [_jsx(MultiLanguageInput, { ...this.props, name: field, values: value ?? {}, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (newValues) => {
                             handleChange(field, newValues);
-                        }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
+                        }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, autoFocus: autoFocus }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
         }
         return (_jsxs(Typography, { noWrap: visibility.grid, children: [!visibility.grid && `${label}: `, this.stringify(value) ||
                     (this.extra.getFallbackLabel

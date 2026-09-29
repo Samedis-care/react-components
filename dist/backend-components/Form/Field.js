@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useCallback, useContext, useEffect, useMemo, useRef, } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState, } from "react";
 import { useFormContext } from "./Form";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
 import { dotsToObject, getValueByDot } from "../../utils/dotUtils";
@@ -57,6 +57,10 @@ const Field = (props) => {
         markFieldMounted(props.name, true);
         return () => markFieldMounted(props.name, false);
     }, [markFieldMounted, props.name]);
+    // only while the field mounts: a control that remounts its input later (a
+    // selector refreshing its options) must not pull the focus back to itself
+    const [autoFocus, setAutoFocus] = useState(!!props.autoFocus);
+    useEffect(() => setAutoFocus(false), []);
     const { name } = props;
     const value = getValueByDot(name, values);
     const initialValue = initialValues[name];
@@ -78,6 +82,7 @@ const Field = (props) => {
             value: value,
             touched: touch,
             dirty: dirty,
+            autoFocus: autoFocus,
             initialValue: initialValue,
             visibility: readOnly ? { ...visibility, readOnly: true } : visibility,
             handleChange: setFieldValueHookWrapper,
@@ -111,6 +116,7 @@ const Field = (props) => {
         initialValue,
         touch,
         dirty,
+        autoFocus,
         relationModel,
         relationData,
         readOnly,

@@ -13,7 +13,7 @@ import moment from "moment";
  */
 class RendererDate extends TypeDate {
     render(params) {
-        const { visibility, field, value, touched, label, handleChange, handleBlur, errorMsg, setFieldTouched, warningMsg, dirty, } = params;
+        const { visibility, field, value, touched, label, handleChange, handleBlur, errorMsg, setFieldTouched, warningMsg, dirty, autoFocus, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -35,7 +35,7 @@ class RendererDate extends TypeDate {
                             }
                             this.error = "";
                             handleChange(field, normalizeDate(date.toDate()));
-                        }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, onError: (error) => {
+                        }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, autoFocus: autoFocus, onError: (error) => {
                             this.error = error
                                 ? ccI18n.t("backend-integration.model.types.renderers.date.validation-error")
                                 : "";

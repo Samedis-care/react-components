@@ -13,7 +13,7 @@ import moment from "moment";
  */
 class RendererDateNullable extends TypeDateNullable {
     render(params) {
-        const { visibility, field, value, touched, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, setFieldTouched, } = params;
+        const { visibility, field, value, touched, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, setFieldTouched, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -22,7 +22,7 @@ class RendererDateNullable extends TypeDateNullable {
         if (visibility.editable) {
             if (visibility.grid)
                 throw new Error("Not supported");
-            return (_jsxs(_Fragment, { children: [_jsx(LocalizedKeyboardDatePicker, { name: field, value: value ? moment(denormalizeDate(value)) : null, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (date) => handleChange(field, date ? normalizeDate(date.toDate()) : null), onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, onError: (error) => {
+            return (_jsxs(_Fragment, { children: [_jsx(LocalizedKeyboardDatePicker, { name: field, value: value ? moment(denormalizeDate(value)) : null, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (date) => handleChange(field, date ? normalizeDate(date.toDate()) : null), onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, autoFocus: autoFocus, onError: (error) => {
                             this.error = error
                                 ? ccI18n.t("backend-integration.model.types.renderers.date.validation-error")
                                 : "";

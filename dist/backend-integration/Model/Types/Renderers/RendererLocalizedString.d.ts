@@ -15,7 +15,7 @@ export interface ModelDataTypeLocalizedStringRendererParamsExtra {
      */
     getFallbackLabelValues?: string[];
 }
-export type ModelDataTypeLocalizedStringRendererParams = Omit<MultiLanguageInputProps, "name" | "values" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "warning"> & ModelDataTypeLocalizedStringRendererParamsExtra;
+export type ModelDataTypeLocalizedStringRendererParams = Omit<MultiLanguageInputProps, "name" | "values" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "autoFocus" | "warning"> & ModelDataTypeLocalizedStringRendererParamsExtra;
 /**
  * Renders a text field
  */

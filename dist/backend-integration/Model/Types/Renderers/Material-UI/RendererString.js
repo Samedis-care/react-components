@@ -12,7 +12,7 @@ class RendererString extends TypeString {
         this.props = props;
     }
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, } = params;
+        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -23,7 +23,7 @@ class RendererString extends TypeString {
                 throw new Error("Not supported");
             return (_jsxs(_Fragment, { children: [_jsx(TextFieldCC, { variant: this.multiline ? "outlined" : undefined, fullWidth: true, ...this.props, name: field, value: value ?? "", label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (evt) => {
                             handleChange(evt.target.name, evt.target.value);
-                        }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty }), _jsx(FormHelperTextCC, { warning: !!warningMsg, error: !!errorMsg, children: errorMsg || warningMsg })] }));
+                        }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, autoFocus: autoFocus }), _jsx(FormHelperTextCC, { warning: !!warningMsg, error: !!errorMsg, children: errorMsg || warningMsg })] }));
         }
         return (_jsxs(Typography, { noWrap: visibility.grid, children: [!visibility.grid && `${label}: `, value] }));
     }

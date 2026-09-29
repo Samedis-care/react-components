@@ -15,7 +15,7 @@ class RendererEnumRadio extends TypeEnum {
         this.wrapButton = wrapButton;
     }
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, } = params;
+        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -24,9 +24,15 @@ class RendererEnumRadio extends TypeEnum {
         if (visibility.editable) {
             if (visibility.grid)
                 throw new Error("Not supported");
+            // where tabbing into the group lands: the checked option, else the first one
+            const focusable = this.values.filter((entry) => !entry.invisible && !entry.disabled);
+            const focusValue = autoFocus
+                ? (focusable.find((entry) => entry.value === value) ?? focusable[0])
+                    ?.value
+                : undefined;
             return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, children: [_jsx(FormLabel, { component: "legend", children: label }), _jsx(RadioGroup, { name: field, value: value, onChange: (evt) => handleChange(evt.target.name, evt.target.value), onBlur: handleBlur, "data-name": field, row: this.horizontal, children: this.values
                             .filter((value) => !value.invisible)
-                            .map((entry) => this.wrapButton(_jsx(FormControlLabel, { value: entry.value, control: _jsx(Radio, {}), label: entry.getLabel(), disabled: visibility.readOnly || entry.disabled }, entry.value), entry)) }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
+                            .map((entry) => this.wrapButton(_jsx(FormControlLabel, { value: entry.value, control: _jsx(Radio, { autoFocus: entry.value === focusValue }), label: entry.getLabel(), disabled: visibility.readOnly || entry.disabled }, entry.value), entry)) }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
         }
         const valueInfo = this.values.find((entry) => entry.value === value);
         return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, valueInfo

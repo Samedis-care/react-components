@@ -36,6 +36,18 @@ export interface RenderParams<T> {
      */
     dirty: boolean;
     /**
+     * Should the control take the focus as it mounts?
+     * @remarks Set by `FormField`'s `autoFocus` prop, and true only while the field
+     *          mounts: it turns false right after, so a control that remounts its input
+     *          later does not take the focus again. Hand it to the control's own
+     *          `autoFocus` in the editable branch, after any spread options, and render
+     *          that input right away. A control with several inputs gives it to the one
+     *          where typing starts, e.g. the empty entry at the end of a list. Always
+     *          false where there is no form behind the control (data grid cells, import
+     *          previews).
+     */
+    autoFocus: boolean;
+    /**
      * The visibility to render the value at
      */
     visibility: Visibility;

@@ -3,7 +3,7 @@ import { SwitchProps } from "@mui/material";
 import ModelRenderParams from "../../../RenderParams";
 import TypeBoolean from "../../TypeBoolean";
 export interface ModelDataTypeBooleanSwitchRendererMUIProps {
-    switchProps: Omit<SwitchProps, "name" | "checked" | "disabled" | "onChange" | "onBlur">;
+    switchProps: Omit<SwitchProps, "name" | "checked" | "disabled" | "onChange" | "onBlur" | "autoFocus">;
 }
 /**
  * Renders a TypeBoolean field as Switch

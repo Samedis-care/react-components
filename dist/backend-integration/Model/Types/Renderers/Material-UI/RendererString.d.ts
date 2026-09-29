@@ -2,7 +2,7 @@ import React from "react";
 import TypeString from "../../TypeString";
 import { TextFieldProps } from "@mui/material";
 import ModelRenderParams from "../../../RenderParams";
-export type ModelDataTypeStringRendererMUIParams = Omit<TextFieldProps, "name" | "value" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error">;
+export type ModelDataTypeStringRendererMUIParams = Omit<TextFieldProps, "name" | "value" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "autoFocus">;
 /**
  * Renders a text field
  */

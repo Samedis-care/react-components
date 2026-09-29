@@ -3,7 +3,7 @@ import { TextFieldProps } from "@mui/material";
 import ModelRenderParams from "../../../RenderParams";
 import TypeNumber from "../../TypeNumber";
 import { IntegerInputFieldProps } from "../../../../../standalone/UIKit/InputControls/IntegerInputField";
-export type ModelDataTypeIntegerRendererCCParams = Omit<TextFieldProps, "name" | "value" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "multiline"> & Omit<IntegerInputFieldProps, "warning" | "onChange" | "value">;
+export type ModelDataTypeIntegerRendererCCParams = Omit<TextFieldProps, "name" | "value" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "autoFocus" | "multiline"> & Omit<IntegerInputFieldProps, "warning" | "onChange" | "value">;
 /**
  * Renders a text field
  */

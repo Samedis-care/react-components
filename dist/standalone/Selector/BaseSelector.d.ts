@@ -205,6 +205,10 @@ export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends bool
      */
     dirty?: boolean;
     /**
+     * Focus the search input when the selector mounts
+     */
+    autoFocus?: boolean;
+    /**
      * String used for the Autocomplete component
      */
     autocompleteId?: string;
