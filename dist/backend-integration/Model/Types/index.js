@@ -12,4 +12,5 @@ export { default as ModelDataTypeDateTimeNullable } from "./TypeDateTimeNullable
 export { default as ModelDataTypeBoolean } from "./TypeBoolean";
 export { default as ModelDataTypeFiles } from "./TypeFiles";
 export { default as ModelDataTypeImages } from "./TypeImage";
+export { default as ModelDataTypeSignature } from "./TypeSignature";
 export * from "./Renderers";

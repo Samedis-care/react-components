@@ -6,6 +6,7 @@ import { ArchiveFileIcon, AudioFileIcon, CodeFileIcon, CsvFileIcon, ExcelFileIco
 import dataToFile from "../../../utils/dataToFile";
 import combineClassNames from "../../../utils/combineClassNames";
 import getFileExt from "../../../utils/getFileExt";
+import useObjectUrl from "../../../utils/useObjectUrl";
 const CompactListWrapper = styled(Grid, {
     name: "CcFile",
     slot: "compactListWrapper",
@@ -342,6 +343,7 @@ const File = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcFile" });
     const { name, downloadLink, variant, className, classes, onClick } = props;
     const FileIcon = getFileIconOrDefault(props.name, props.mimeType);
+    const previewSrc = useObjectUrl(props.preview);
     const openDownload = useCallback(async () => {
         if (downloadLink) {
             if (downloadLink.startsWith("data:")) {
@@ -370,7 +372,7 @@ const File = (inProps) => {
                 isList ? classes?.iconWrapperList : classes?.iconWrapper,
                 props.disabled && "Mui-disabled",
                 downloadLink && "Mui-active",
-            ]), children: props.preview ? (_jsx("img", { src: props.preview, alt: props.name, onClick: openDownload, style: { height: props.size } })) : (_jsx(FileIcon, { onClick: openDownload, style: { height: props.size } })) }));
+            ]), children: props.preview ? (_jsx("img", { src: previewSrc, alt: props.name, onClick: openDownload, style: { height: props.size } })) : (_jsx(FileIcon, { onClick: openDownload, style: { height: props.size } })) }));
     };
     const renderName = () => {
         const TypographyComp = variant === "list" ? StyledLabelList : StyledLabel;

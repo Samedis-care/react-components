@@ -5,6 +5,6 @@ import TypeImage from "../TypeImage";
  * Renders an image selector
  */
 declare class RendererImage extends TypeImage {
-    render(params: ModelRenderParams<string>): React.ReactElement;
+    render(params: ModelRenderParams<string | Blob>): React.ReactElement;
 }
 export default RendererImage;

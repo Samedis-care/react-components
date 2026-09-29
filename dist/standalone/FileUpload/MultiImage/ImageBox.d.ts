@@ -3,9 +3,9 @@ import { UseDropZoneParams } from "../../../utils/useDropZone";
 import { ImageDotsProps } from "./ImageDots";
 export interface ImageBoxProps {
     /**
-     * The Image to display (URL/Data-URI)
+     * The Image to display: its URL (or data URI), or an image the user picked
      */
-    image: string;
+    image: string | Blob;
     /**
      * The image file name
      */

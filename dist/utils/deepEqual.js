@@ -16,6 +16,9 @@ const deepEqual = (a, b, unsupportedHandling = "error") => {
         // check if unix timestamp matches as instance comparison does not work
         return a.getTime() === b.getTime();
     }
+    // special handling blob (a File included): immutable, so the same file is the same blob
+    if (a instanceof Blob || b instanceof Blob)
+        return a === b;
     // special handling array
     if (Array.isArray(a)) {
         // ensure data types

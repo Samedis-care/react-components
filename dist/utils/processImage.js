@@ -1,22 +1,25 @@
-import fileToData from "./fileToData";
-import processImageB64 from "./processImageB64";
-/**
- * Processes an image file
- * @param file The image file
- * @param convertImagesTo MimeType to convert the image to (e.g. image/png or image/jpg)
- * @param downscale Settings to downscale an image
- * @throws ImageLoadError if the browser cannot decode the image
- */
-const processImage = async (file, convertImagesTo, downscale) => {
+import { drawImage, loadImage, skipsCanvas } from "./imageCanvas";
+import replaceFileExt from "./replaceFileExt";
+async function processImage(file, convertImagesTo, downscale) {
     const imageFormatTarget = convertImagesTo || file.type;
-    // file -> data url
-    const imageData = await fileToData(file);
-    // skip this if we're not doing anything except resize and it's a svg
-    if (convertImagesTo === "image/svg+xml" ||
-        (!convertImagesTo &&
-            (!downscale || downscale.keepRatio) &&
-            file.type === "image/svg+xml"))
-        return imageData;
-    return processImageB64(imageData, imageFormatTarget, downscale);
-};
+    if (skipsCanvas(file.type, imageFormatTarget, downscale))
+        return file;
+    const url = URL.createObjectURL(file);
+    let processed;
+    try {
+        const image = await loadImage(url, file.type || null);
+        const canvas = drawImage(image, downscale);
+        processed = await new Promise((resolve) => canvas.toBlob(resolve, imageFormatTarget));
+    }
+    finally {
+        URL.revokeObjectURL(url);
+    }
+    if (!processed)
+        throw new Error("Failed encoding the image");
+    if (!(file instanceof File))
+        return processed;
+    return new File([processed], processed.type === file.type
+        ? file.name
+        : replaceFileExt(file.name, processed.type), { type: processed.type, lastModified: file.lastModified });
+}
 export default processImage;

@@ -1,98 +1,97 @@
 import JsonApiClient from "./JsonApiClient";
 import dataToFile from "../../utils/dataToFile";
-const objectContainsBlob = (obj) => {
-    for (const key in obj) {
-        if (!Object.prototype.hasOwnProperty.call(obj, key))
-            continue;
-        const value = obj[key];
-        if (typeof value === "object") {
-            if (objectContainsBlob(value))
-                return true;
-        }
-        else if (typeof value === "string") {
-            if (value.startsWith("data:"))
-                return true;
-        }
-    }
+import isPlainObject from "../../utils/isPlainObject";
+/**
+ * Is the value a file: a Blob, or a data URI standing for one?
+ * @remarks A data URI still counts as a file, so a body built with fileToData, or
+ *          stored before files were kept as Blobs, still uploads its files as files
+ */
+const isFile = (value) => value instanceof Blob ||
+    (typeof value === "string" && value.startsWith("data:"));
+const containsFile = (value) => {
+    if (isFile(value))
+        return true;
+    if (Array.isArray(value))
+        return value.some(containsFile);
+    if (isPlainObject(value))
+        return Object.values(value).some(containsFile);
     return false;
 };
-const objectContainsArrayOfObjects = (obj) => {
-    if (Array.isArray(obj)) {
-        if (obj.find((entry) => typeof entry === "object") !== undefined)
-            return true;
-    }
-    for (const key in obj) {
-        if (!Object.prototype.hasOwnProperty.call(obj, key))
-            continue;
-        const value = obj[key];
-        if (typeof value === "object") {
-            if (objectContainsArrayOfObjects(value))
-                return true;
-        }
-    }
-    return false;
+/**
+ * Can Rails' multipart keys express the value without losing anything?
+ * @remarks An array element that is an object cannot be told apart from its neighbours
+ *          once it is flattened into `key[][field]` keys: Rack starts a new element only
+ *          when a field repeats, so elements with optional fields merge. A body with
+ *          such an array is sent as JSON instead. Files are the exception, they are
+ *          single values.
+ */
+const isMultipartSafe = (value) => {
+    if (Array.isArray(value))
+        return value.every((entry) => entry instanceof Blob || typeof entry !== "object");
+    if (isPlainObject(value))
+        return Object.values(value).every(isMultipartSafe);
+    return true;
 };
-const convertDataToFormData = (data) => {
-    if (typeof data === "number")
-        return data.toString();
-    if (typeof data === "boolean")
-        return data ? "true" : "false";
-    if (data === null)
-        return "null";
-    if (typeof data !== "string") {
+const toFormValue = (value) => {
+    if (value instanceof Blob)
+        return value;
+    if (typeof value === "number")
+        return value.toString();
+    if (typeof value === "boolean")
+        return value ? "true" : "false";
+    if (typeof value !== "string") {
         // eslint-disable-next-line no-console
-        console.log("[Components-Care] [RailsApiClient] [convertDataToFormData] unsupported data", data);
-        throw new Error("unsupported data " + JSON.stringify(data));
+        console.log("[Components-Care] [RailsApiClient] [toFormValue] unsupported data", value);
+        throw new Error("unsupported data " + JSON.stringify(value));
     }
-    if (data.startsWith("data:")) {
-        return dataToFile(data);
-    }
-    return data;
+    if (value.startsWith("data:"))
+        return dataToFile(value);
+    return value;
 };
-const objectToRails = (obj) => {
-    const ret = [];
-    for (const key in obj) {
-        if (!Object.prototype.hasOwnProperty.call(obj, key))
-            continue;
-        const value = obj[key];
-        if (Array.isArray(value)) {
-            ret.push(...value.map((val) => [key + "[]", convertDataToFormData(val)]));
-        }
-        else if (typeof value === "object") {
-            const dots = objectToRails(value);
-            dots.forEach(([dot, nestedValue]) => {
-                const [dotKey, ...suffix] = dot.split("[");
-                ret.push([
-                    key +
-                        "[" +
-                        dotKey +
-                        "]" +
-                        (suffix.length > 0 ? "[" + suffix.join("[") : ""),
-                    nestedValue,
-                ]);
-            });
-        }
-        else if (value !== undefined) {
-            ret.push([key, convertDataToFormData(value)]);
-        }
+/**
+ * Flattens a value into Rails-style multipart keys: `data[image]`, `data[tags][]`
+ * @param entries The entries to append to
+ * @param key The key of the value
+ * @param value The value
+ * @remarks Multipart has no null, so a null or undefined value leaves its key out, and
+ *          so does an empty array or object
+ */
+const appendRails = (entries, key, value) => {
+    if (value == null)
+        return;
+    if (Array.isArray(value)) {
+        value.forEach((entry) => entries.push([key + "[]", toFormValue(entry)]));
     }
-    return ret;
+    else if (isPlainObject(value)) {
+        Object.entries(value).forEach(([nestedKey, nestedValue]) => appendRails(entries, `${key}[${nestedKey}]`, nestedValue));
+    }
+    else if (!(value instanceof Blob) &&
+        typeof value === "object" &&
+        typeof value.toJSON === "function") {
+        // e.g. a Date: what JSON would have sent
+        appendRails(entries, key, value.toJSON());
+    }
+    else {
+        entries.push([key, toFormValue(value)]);
+    }
 };
 class RailsApiClient extends JsonApiClient {
-    convertBody(body, headers) {
-        if (objectContainsBlob(body) &&
-            !objectContainsArrayOfObjects(body) // too sketchy, does not work with omitted/optional keys
-        ) {
+    /**
+     * @remarks A body with a file (a Blob, or a data URI) is sent as multipart, with its
+     *          files as file parts, as long as Rails' keys can express it. A Blob that is
+     *          not a File is named `blob`, pass a File to name it.
+     * @see JsonApiClient.convertBody
+     */
+    async convertBody(body, headers) {
+        if (isPlainObject(body) && containsFile(body) && isMultipartSafe(body)) {
+            const entries = [];
+            Object.entries(body).forEach(([key, value]) => appendRails(entries, key, value));
             const formBody = new FormData();
-            objectToRails(body).forEach(([key, value]) => {
-                formBody.append(key, value);
-            });
+            entries.forEach(([key, value]) => formBody.append(key, value));
             return formBody;
         }
-        else {
-            // Use JSON
-            return super.convertBody(body, headers);
-        }
+        // JSON, with its Blobs as data URIs
+        return super.convertBody(body, headers);
     }
 }
 export default RailsApiClient;

@@ -1,7 +1,7 @@
 /**
  * Converts a file to a base64 data uri
  * @param file The file to convert
- * @param includeName Include the file name in the base64 data uri as name parameter?
+ * @param includeName Include the file name in the base64 data uri as name parameter? Only a File has one
  */
 const fileToData = async (file, includeName = false) => {
     // file -> data url
@@ -14,7 +14,7 @@ const fileToData = async (file, includeName = false) => {
                 // empty data uri in firefox
                 dataUri = "data:application/octet-stream;base64,";
             }
-            resolve(includeName
+            resolve(includeName && file instanceof File
                 ? dataUri.replace(";base64,", `;name=${encodeURIComponent(file.name)};base64,`)
                 : dataUri);
         });

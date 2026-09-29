@@ -4,6 +4,7 @@ import TypeFiles from "../TypeFiles";
 import FileUpload from "../../../../standalone/FileUpload/Generic";
 import GroupBox from "../../../../standalone/GroupBox";
 import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiFieldState";
+import ObjectUrlImage from "../../../../standalone/FileUpload/Image/ObjectUrlImage";
 /**
  * Renders a file selector
  */
@@ -22,7 +23,7 @@ class RendererFiles extends TypeFiles {
                                 handleChange(field, files);
                             }, onBlur: handleBlur, handleError: (_, msg) => setError(new Error(msg)), maxFiles: this.params?.maxFiles, accept: this.params?.accept, acceptLabel: this.params?.acceptLabel, imageDownscaleOptions: this.params?.imageDownscaleOptions, convertImagesTo: this.params?.convertImagesTo, previewSize: this.params?.previewSize || 96, previewImages: this.params?.previewImages, allowDuplicates: this.params?.allowDuplicates, smallLabel: this.params?.smallLabel }) }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
         }
-        const content = (_jsxs(_Fragment, { children: [_jsx("ul", { children: value.map((entry, index) => (_jsxs("li", { children: [entry.preview && (_jsx("img", { src: entry.preview, alt: entry.file.name })), !entry.preview && "downloadLink" in entry.file && (_jsx("a", { href: entry.file.downloadLink, children: entry.file.name }))] }, index))) }), value.length === 0 &&
+        const content = (_jsxs(_Fragment, { children: [_jsx("ul", { children: value.map((entry, index) => (_jsxs("li", { children: [entry.preview && (_jsx(ObjectUrlImage, { src: entry.preview, alt: entry.file.name })), !entry.preview && "downloadLink" in entry.file && (_jsx("a", { href: entry.file.downloadLink, children: entry.file.name }))] }, index))) }), value.length === 0 &&
                     ccI18n.t("backend-integration.model.types.renderers.files.no-file")] }));
         return visibility.grid ? (content) : (_jsx(GroupBox, { label: label, children: content }));
     }

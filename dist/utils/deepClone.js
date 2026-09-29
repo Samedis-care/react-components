@@ -17,11 +17,9 @@ const deepClone = (item) => {
             result = type(item);
         }
     });
-    if (item instanceof File) {
-        result = new File([item], item.name, {
-            type: item.type,
-            lastModified: item.lastModified,
-        });
+    // immutable, and a file picked by the user is told apart from another by identity
+    if (item instanceof Blob) {
+        result = item;
     }
     if (typeof result == "undefined") {
         if (Array.isArray(item)) {

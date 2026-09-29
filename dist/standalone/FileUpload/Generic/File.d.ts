@@ -43,9 +43,9 @@ export interface FileProps {
      */
     size: number;
     /**
-     * The preview to show instead of the file icon
+     * The preview to show instead of the file icon: a URL, or an image the user picked
      */
-    preview?: string;
+    preview?: string | Blob;
     /**
      * Display grayed-out (marked as deleted)
      */

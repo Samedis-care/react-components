@@ -2,7 +2,7 @@ import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-run
 import React from "react";
 import { FormControl, FormHelperText, FormLabel } from "@mui/material";
 import ccI18n from "../../../../i18n";
-import TypeImage from "../TypeImage";
+import TypeSignature from "../TypeSignature";
 import { FormControlCC } from "../../../../standalone/UIKit/MuiFieldState";
 import SignaturePad from "../../../../non-standalone/SignaturePad/SignaturePad";
 export const SignatureNameContext = React.createContext(null);
@@ -10,7 +10,7 @@ export const SignatureNameContext = React.createContext(null);
  * Renders a signature field (for electronic signing)
  * Wrap FormField with SignatureNameContext.Provider for name context
  */
-class RendererSignature extends TypeImage {
+class RendererSignature extends TypeSignature {
     render(params) {
         const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, } = params;
         if (visibility.disabled)

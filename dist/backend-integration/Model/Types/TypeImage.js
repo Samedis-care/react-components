@@ -1,6 +1,9 @@
 import ccI18n from "../../../i18n";
 /**
  * A type to handle images
+ * @remarks The value is the image's URL (or data URI), empty for no image, or an image the
+ *          user picked as Blob (a File). The Blob is sent as it is: RailsApiClient uploads it
+ *          as a file.
  */
 class TypeImage {
     params;

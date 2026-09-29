@@ -406,6 +406,7 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
      * Serializes the given values into a JSON string
      * @param values The values to serialize
      * @param visibility The visibility of the field to check. Field will be dropped if visibility has disabled == true.
+     * @remarks A file (Blob) is written as data URI, as JSON cannot carry it
      */
     serialize(values: Record<string, unknown>, visibility: keyof PageVisibility): Promise<string>;
     /**

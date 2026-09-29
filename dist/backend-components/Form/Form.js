@@ -19,6 +19,7 @@ import ValidationError from "./ValidationError";
 import TypedEventTarget from "../../utils/TypedEventTarget";
 import { DirtyStateContext, NO_DIRTY_STATE } from "./DirtyStateContext";
 import deepEqual from "../../utils/deepEqual";
+import toComparisonJson from "../../utils/toComparisonJson";
 import { captureError } from "../../framework/ErrorReporting";
 export var OnlySubmitMountedBehaviour;
 (function (OnlySubmitMountedBehaviour) {
@@ -355,7 +356,7 @@ const Form = (props) => {
     initialValuesState && defaultRecord
         ? (() => {
             const [local, remote] = getNormalizedData(values);
-            return JSON.stringify(local) !== JSON.stringify(remote);
+            return toComparisonJson(local) !== toComparisonJson(remote);
         })()
         : false, [initialValuesState, defaultRecord, getNormalizedData]);
     /**
@@ -374,8 +375,8 @@ const Form = (props) => {
         const [localData, remoteData] = getNormalizedData(values, initialValues);
         return Object.fromEntries(Object.keys(model.fields).map((field) => [
             field,
-            JSON.stringify(getValueByDot(field, localData)) !==
-                JSON.stringify(getValueByDot(field, remoteData)),
+            toComparisonJson(getValueByDot(field, localData)) !==
+                toComparisonJson(getValueByDot(field, remoteData)),
         ]));
     }, [getNormalizedData, getInitialValues, defaultRecord, model.fields]);
     const formDirty = useMemo(() => getFormDirty(values), [getFormDirty, values]);
@@ -450,8 +451,8 @@ const Form = (props) => {
         if (mode === "hint" && onlyWarnChanged) {
             const [localData, remoteData] = getNormalizedData(values);
             fieldsToValidate = fieldsToValidate.filter((field) => alwaysWarnFields.includes(field) ||
-                JSON.stringify(getValueByDot(field, localData)) !==
-                    JSON.stringify(getValueByDot(field, remoteData)));
+                toComparisonJson(getValueByDot(field, localData)) !==
+                    toComparisonJson(getValueByDot(field, remoteData)));
         }
         const errors = await model.validate(values, id ? "edit" : "create", fieldsToValidate, mode);
         await Promise.all(Object.entries(mode === "normal"
@@ -996,8 +997,8 @@ const Form = (props) => {
         // normalize data
         const [localData, remoteData] = getNormalizedData();
         console.log("Form Dirty Flag State:");
-        console.log("Form Dirty State (exact):", JSON.stringify(localData) !== JSON.stringify(remoteData));
-        console.log("Form Dirty State:", JSON.stringify(localData) !== JSON.stringify(remoteData));
+        console.log("Form Dirty State (exact):", toComparisonJson(localData) !== toComparisonJson(remoteData));
+        console.log("Form Dirty State:", toComparisonJson(localData) !== toComparisonJson(remoteData));
         console.log("Custom Dirty State:", getCustomDirtyFields().length > 0);
         console.log("Custom Dirty Fields:", getCustomDirtyFields());
         console.log("Server Data:", remoteData);

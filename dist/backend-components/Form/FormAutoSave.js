@@ -2,6 +2,7 @@ import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useEffect, useMemo } from "react";
 import { useFormContext } from "./Form";
 import debounce from "../../utils/debounce";
+import toComparisonJson from "../../utils/toComparisonJson";
 /**
  * Helper to implement auto save in forms
  * @param debounceTime The debounce time (time between changes for save to trigger)
@@ -9,7 +10,7 @@ import debounce from "../../utils/debounce";
 const useFormAutoSave = (debounceTime = 5000) => {
     const { safeSubmit, submitting, dirty, values } = useFormContext();
     const debounceSubmit = useMemo(() => (debounceTime == 0 ? safeSubmit : debounce(safeSubmit, debounceTime)), [safeSubmit, debounceTime]);
-    const dataStr = JSON.stringify(values);
+    const dataStr = toComparisonJson(values);
     useEffect(() => {
         if (!dirty || submitting)
             return;

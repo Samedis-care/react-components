@@ -1,5 +1,27 @@
 import AuthMode from "./AuthMode";
+import { RequestUploadProgress } from "./fetchWithUploadProgress";
+export type { RequestUploadProgress };
 export type GetParams = Record<string, unknown> | null;
+/**
+ * Options for a single request
+ */
+export interface RequestOptions {
+    /**
+     * Aborts the request
+     * @remarks The request then rejects with the signal's reason (an `AbortError`
+     *          DOMException unless the signal was aborted with a reason of its own)
+     *          instead of a NetworkError, and the exception hook is not called: an abort
+     *          is asked for, it is not a failure.
+     */
+    signal?: AbortSignal;
+    /**
+     * Called as the request body is uploaded
+     * @remarks fetch reports no upload progress, so a request with a body and this
+     *          callback is sent with XMLHttpRequest instead. Listening to upload progress
+     *          makes a cross-origin request preflighted.
+     */
+    onUploadProgress?: (progress: RequestUploadProgress) => void;
+}
 /**
  * The authentication handler callback has to provide and/or obtain the authentication
  * @returns The Authentication header value
@@ -13,8 +35,9 @@ export type AuthenticationHandlerCallback = (authMode: AuthMode) => Promise<stri
  * @param args The query parameters of the request
  * @param body The JSON body of the request
  * @param auth The authentication mode of the request
+ * @param options The options of the request
  */
-export type RequestHook = (method: string, url: string, args: GetParams, body: unknown | null, auth: AuthMode) => Promise<void> | void;
+export type RequestHook = (method: string, url: string, args: GetParams, body: unknown | null, auth: AuthMode, options: RequestOptions) => Promise<void> | void;
 /**
  * The response processor throws if the response is erroneous
  * @param method The HTTP Verb
@@ -22,10 +45,11 @@ export type RequestHook = (method: string, url: string, args: GetParams, body: u
  * @param args The query parameters of the request
  * @param body The JSON body of the request
  * @param auth The authentication mode of the request
+ * @param options The options of the request. Pass them on when retrying the request.
  * @param response The HTTP response
  * @param responseData The JSON response data
  */
-export type ResponseProcessor = (response: Response, responseData: unknown, method: string, url: string, args: GetParams, body: unknown | null, auth: AuthMode) => Promise<unknown> | unknown;
+export type ResponseProcessor = (response: Response, responseData: unknown, method: string, url: string, args: GetParams, body: unknown | null, auth: AuthMode, options: RequestOptions) => Promise<unknown> | unknown;
 /**
  * Custom handler for requests (if not enabled defaults to fetch)
  * @param method The HTTP Verb
@@ -34,11 +58,12 @@ export type ResponseProcessor = (response: Response, responseData: unknown, meth
  * @param headers The request headers
  * @param body The JSON body of the request
  * @param auth The authentication mode of the request
+ * @param options The options of the request
  * @returns Response if successfully handled or undefined if fallback handler (fetch) should be used instead
  * @throws Can throw exception (like fetch)
  * @remarks Body conversion and query params are not applied here! You have to do that manually
  */
-export type CustomRequestPerformer = (method: string, url: string, args: GetParams, headers: Record<string, string>, body: unknown | null, auth: AuthMode) => Promise<Response> | Response | undefined;
+export type CustomRequestPerformer = (method: string, url: string, args: GetParams, headers: Record<string, string>, body: unknown | null, auth: AuthMode, options: RequestOptions) => Promise<Response> | Response | undefined;
 /**
  * Hook for exception handling (can be used to report to e.g. Sentry)
  * @param error The error which has happened
@@ -59,31 +84,33 @@ declare class JsonApiClient {
     /**
      * @see request
      */
-    get<T>(url: string, args: GetParams, auth?: AuthMode): Promise<T>;
+    get<T>(url: string, args: GetParams, auth?: AuthMode, options?: RequestOptions): Promise<T>;
     /**
      * @see request
      */
-    post<T>(url: string, args: GetParams, body: Record<string, unknown>, auth?: AuthMode): Promise<T>;
+    post<T>(url: string, args: GetParams, body: Record<string, unknown>, auth?: AuthMode, options?: RequestOptions): Promise<T>;
     /**
      * @see request
      */
-    put<T>(url: string, args: GetParams, body: Record<string, unknown>, auth?: AuthMode): Promise<T>;
+    put<T>(url: string, args: GetParams, body: Record<string, unknown>, auth?: AuthMode, options?: RequestOptions): Promise<T>;
     /**
      * @see request
      */
-    patch<T>(url: string, args: GetParams, body: Record<string, unknown>, auth?: AuthMode): Promise<T>;
+    patch<T>(url: string, args: GetParams, body: Record<string, unknown>, auth?: AuthMode, options?: RequestOptions): Promise<T>;
     /**
      * @see request
      */
-    delete<T>(url: string, args: GetParams, auth?: AuthMode): Promise<T>;
+    delete<T>(url: string, args: GetParams, auth?: AuthMode, options?: RequestOptions): Promise<T>;
     /**
      * Convert request body
      * @param body The body data
      * @param headers The headers (can be modified to add/remove headers)
      * @return The body data passed to fetch
+     * @remarks JSON cannot carry a file, so a Blob in the body is sent as a data URI (a
+     *          File with its name as the `name` parameter)
      * @protected
      */
-    convertBody(body: unknown | null, headers: Record<string, string>): string | FormData | null;
+    convertBody(body: unknown | null, headers: Record<string, string>): Promise<string | FormData | null>;
     /**
      * Performs an HTTP request with automatic authorization if desired
      * @param method The HTTP Verb
@@ -91,7 +118,8 @@ declare class JsonApiClient {
      * @param args The query parameters to pass
      * @param body The JSON body to pass
      * @param auth The authentication mode to use
+     * @param options Abort signal and upload progress
      */
-    request<T>(method: string, url: string, args: GetParams, body: unknown | null, auth: AuthMode): Promise<T>;
+    request<T>(method: string, url: string, args: GetParams, body: unknown | null, auth: AuthMode, options?: RequestOptions): Promise<T>;
 }
 export default JsonApiClient;

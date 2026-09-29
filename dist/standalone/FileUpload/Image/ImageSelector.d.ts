@@ -1,16 +1,22 @@
 import React from "react";
 import { IDownscaleProps } from "../../../utils/processImage";
 import { ImageErrorHandler } from "../useImageError";
-export type PostImageEditCallback = (image: string) => Promise<string>;
+/**
+ * Edits an image the user picked, before it is processed
+ * @param image The picked image
+ * @returns The edited image (resolve to continue the change, reject to cancel it). A Blob
+ *          that is not a File gets the picked file's name.
+ */
+export type PostImageEditCallback = (image: File) => Promise<Blob>;
 export interface ImageSelectorProps {
     /**
      * The name of the input
      */
     name: string;
     /**
-     * The current value of the input
+     * The current value of the input: the image's URL, or the image the user picked
      */
-    value: string;
+    value: string | Blob;
     /**
      * Allow capture?
      * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/capture
@@ -36,9 +42,9 @@ export interface ImageSelectorProps {
     /**
      * The change handler of the input
      * @param name The field name
-     * @param value The new value (data uri of selected image or empty string)
+     * @param value The selected image, processed (converted and down-scaled)
      */
-    onChange?: (name: string, value: string) => void;
+    onChange?: (name: string, value: File) => void;
     /**
      * The blur event handler of the input
      */
@@ -83,7 +89,6 @@ export interface ImageSelectorProps {
     variant?: "normal" | "modern" | "profile_picture";
     /**
      * Post upload image editing callback
-     * @param image The data uri image
      */
     postEditCallback?: PostImageEditCallback;
     /**

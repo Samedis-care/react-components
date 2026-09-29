@@ -5,6 +5,7 @@ import { dotToObject, getValueByDot } from "../../utils/dotUtils";
 import deepAssign from "../../utils/deepAssign";
 import throwError from "../../utils/throwError";
 import RequestBatching from "./RequestBatching";
+import { blobsToDataUris } from "../Connector/bodyFiles";
 // optional import
 let captureException = null;
 import("@sentry/react")
@@ -677,10 +678,11 @@ class Model {
      * Serializes the given values into a JSON string
      * @param values The values to serialize
      * @param visibility The visibility of the field to check. Field will be dropped if visibility has disabled == true.
+     * @remarks A file (Blob) is written as data URI, as JSON cannot carry it
      */
     async serialize(values, visibility) {
         const serializable = await this.applySerialization(values, "serialize", visibility);
-        return JSON.stringify(serializable);
+        return JSON.stringify(await blobsToDataUris(serializable));
     }
     /**
      * Deserializes the given JSON data back into a data record

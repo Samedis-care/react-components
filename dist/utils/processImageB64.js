@@ -1,51 +1,19 @@
 import getDataUriMime from "./getDataUriMime";
-import ImageLoadError from "./ImageLoadError";
+import { drawImage, loadImage, skipsCanvas } from "./imageCanvas";
 /**
- * Processes an image file
+ * Processes an image given as data URI
  * @param imageData The image (as data uri)
  * @param convertImagesTo MimeType to convert the image to (e.g. image/png or image/jpg)
  * @param downscale Settings to downscale an image
  * @throws ImageLoadError if the browser cannot decode the image
+ * @remarks For an image the user picked, prefer processImage: it never turns the file into
+ *          a base64 string
  */
 const processImageB64 = async (imageData, convertImagesTo, downscale) => {
-    // skip this if we're dealing with svg
-    if (convertImagesTo === "image/svg+xml" ||
-        ((!downscale || downscale.keepRatio) &&
-            getDataUriMime(imageData) === "image/svg+xml"))
+    const mimeType = getDataUriMime(imageData);
+    if (skipsCanvas(mimeType, convertImagesTo, downscale))
         return imageData;
-    // data url -> image
-    const image = new Image();
-    await new Promise((resolve, reject) => {
-        image.addEventListener("load", () => resolve(image));
-        // the error event carries no information about the failure, so don't try to read one off it
-        image.addEventListener("error", () => reject(new ImageLoadError(getDataUriMime(imageData))));
-        image.src = imageData;
-    });
-    // calculate new size for down-scaling
-    let newWidth = image.width;
-    let newHeight = image.height;
-    if (downscale &&
-        (image.width > downscale.width || image.height > downscale.height)) {
-        if (!downscale.keepRatio) {
-            newWidth = image.width <= downscale.width ? image.width : downscale.width;
-            newHeight =
-                image.width <= downscale.height ? image.height : downscale.height;
-        }
-        else {
-            const downscaleRatio = Math.max(image.width / downscale.width, image.height / downscale.height);
-            newWidth = image.width / downscaleRatio;
-            newHeight = image.height / downscaleRatio;
-        }
-    }
-    // render image in canvas with new size
-    const canvas = document.createElement("canvas");
-    canvas.width = newWidth;
-    canvas.height = newHeight;
-    const ctx = canvas.getContext("2d");
-    if (!ctx)
-        throw new Error("Failed getting Canvas 2D Context");
-    ctx.drawImage(image, 0, 0, newWidth, newHeight);
-    // and export it using the specified data format
-    return canvas.toDataURL(convertImagesTo);
+    const image = await loadImage(imageData, mimeType);
+    return drawImage(image, downscale).toDataURL(convertImagesTo);
 };
 export default processImageB64;

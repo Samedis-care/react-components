@@ -8,6 +8,7 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 import { useDebounce } from "../../../utils/useDebounce";
 import ImageDots from "./ImageDots";
 import useImageZoomPan from "../../../utils/useImageZoomPan";
+import useObjectUrl from "../../../utils/useObjectUrl";
 const swipeWidth = 30;
 const Root = styled("div", { name: "CcImageBox", slot: "root" })(({ theme, ownerState: { background, dragging, clickable } }) => ({
     borderRadius: theme.shape.borderRadius,
@@ -194,6 +195,7 @@ const ImageBox = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcImageBox" });
     const { t } = useCCTranslations();
     const { image, width, height, onClick, onFilesDropped, onRemove, onNextImage, onPrevImage, disableBackground, fileName, imageDots, className, classes, } = props;
+    const src = useObjectUrl(image);
     const { handleDragOver, handleDrop, dragging } = useDropZone(onFilesDropped);
     const [dialogOpen, setDialogOpen] = useState(false);
     const openDialog = useCallback(() => {
@@ -224,11 +226,11 @@ const ImageBox = (inProps) => {
                     clickable: !!onClick,
                     dragging,
                     background: !disableBackground,
-                }, className: combineClassNames([className, classes?.root]), children: [onRemove && (_jsx(RemoveButton, { onClick: handleRemove, className: classes?.removeBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.remove"), children: _jsx(DeleteIcon, {}) })), onPrevImage && (_jsx(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.prev-image"), children: _jsx(PrevIcon, {}) })), onNextImage && (_jsx(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.next-image"), children: _jsx(NextIcon, {}) })), _jsx(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollImage, ref: containerRefImage, onTouchEnd: handleTouchEndImage, children: _jsx(Tooltip, { title: fileName ?? "", disableTouchListener: !fileName, disableHoverListener: !fileName, disableFocusListener: !fileName, children: _jsx(StyledImage, { src: image, alt: "", ownerState: {
+                }, className: combineClassNames([className, classes?.root]), children: [onRemove && (_jsx(RemoveButton, { onClick: handleRemove, className: classes?.removeBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.remove"), children: _jsx(DeleteIcon, {}) })), onPrevImage && (_jsx(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.prev-image"), children: _jsx(PrevIcon, {}) })), onNextImage && (_jsx(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.next-image"), children: _jsx(NextIcon, {}) })), _jsx(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollImage, ref: containerRefImage, onTouchEnd: handleTouchEndImage, children: _jsx(Tooltip, { title: fileName ?? "", disableTouchListener: !fileName, disableHoverListener: !fileName, disableFocusListener: !fileName, children: _jsx(StyledImage, { src: src, alt: "", ownerState: {
                                     swipeLeft: !!onPrevImage,
                                     swipeRight: !!onNextImage,
                                     imageDots: false,
-                                }, className: classes?.image }) }) })] }), !onClick && (_jsx(StyledDialog, { open: dialogOpen, fullScreen: true, onClose: closeDialog, children: _jsx(DialogContent, { children: _jsxs(FullScreenImageWrapper, { className: classes?.fullScreenImageWrapper, children: [_jsx(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollFS, ref: containerRefFS, onTouchEnd: handleTouchEndFS, children: _jsx(FullScreenZoomContainer, { ref: zoomContainerRef, ...zoomContainerProps, className: classes?.fullScreenZoomContainer, children: _jsx(StyledImage, { ref: zoomImgRef, src: image, alt: "", draggable: false, ownerState: {
+                                }, className: classes?.image }) }) })] }), !onClick && (_jsx(StyledDialog, { open: dialogOpen, fullScreen: true, onClose: closeDialog, children: _jsx(DialogContent, { children: _jsxs(FullScreenImageWrapper, { className: classes?.fullScreenImageWrapper, children: [_jsx(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollFS, ref: containerRefFS, onTouchEnd: handleTouchEndFS, children: _jsx(FullScreenZoomContainer, { ref: zoomContainerRef, ...zoomContainerProps, className: classes?.fullScreenZoomContainer, children: _jsx(StyledImage, { ref: zoomImgRef, src: src, alt: "", draggable: false, ownerState: {
                                             swipeLeft: !!onPrevImage,
                                             swipeRight: !!onNextImage,
                                             imageDots: !imageDots,

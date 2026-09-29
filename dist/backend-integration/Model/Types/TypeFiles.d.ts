@@ -11,9 +11,9 @@ export interface TypeFilesParams extends Partial<Pick<FileUploadProps, "maxFiles
 }
 interface FileWithData extends FileData<FileMeta> {
     /**
-     * The raw file data
+     * The raw file
      */
-    data?: string;
+    data?: File;
 }
 /**
  * A type to handle files
@@ -25,7 +25,12 @@ declare abstract class TypeFiles implements Type<FileData[]> {
     validate(): string | null;
     getFilterType(): FilterType;
     getDefaultValue(): FileData[];
-    serialize: (files: FileData[]) => Promise<FileWithData[]>;
+    /**
+     * @remarks The files stay Blobs, the API client decides how to send them. An array of
+     *          objects cannot be sent as Rails multipart, so RailsApiClient sends this as
+     *          JSON with the files as data URIs.
+     */
+    serialize: (files: FileData[]) => FileWithData[];
     stringify(values: FileData[]): string;
 }
 export default TypeFiles;
