@@ -32,9 +32,21 @@ export interface BackendDataGridProps<KeyT extends ModelFieldName, VisibilityT e
      * @remarks Usually shows an error dialog for the user
      */
     customDeleteErrorHandler?: (error: Error) => Promise<void> | void;
+    /**
+     * Called once a delete has run, whether it succeeded or failed, e.g. to
+     * refresh data outside the grid that the delete changed
+     * @param inverted IDs inverted? (all except ids)
+     * @param ids The IDs deleted (or not deleted)
+     * @param filter Complex filter (see DataGridProps.onDelete)
+     * @param error Why the delete failed, undefined if it succeeded
+     * @remarks A failed delete may still have deleted some records. Called after
+     *          the grid refreshes and before the error is shown, not when the
+     *          user cancels the confirmation.
+     */
+    onDeleteSettled?: (inverted: boolean, ids: string[], filter: DataGridFilterParameters | undefined, error: Error | undefined) => void;
 }
 export declare const useBackendDataGridAddNewButtons: (props: Pick<BackendDataGridProps<never, never, never>, "onAddNew" | "additionalNewButtons">) => string | IDataGridAddButton[] | (() => void) | undefined;
-export declare const useBackendDataGridDeleteHandler: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: Pick<BackendDataGridProps<KeyT, VisibilityT, CustomT>, "model" | "enableDelete" | "enableDeleteAll" | "customDeleteConfirm" | "customDeleteErrorHandler">, refreshGrid: () => void) => ((invert: boolean, ids: string[], filter?: DataGridFilterParameters) => Promise<void>) | undefined;
+export declare const useBackendDataGridDeleteHandler: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: Pick<BackendDataGridProps<KeyT, VisibilityT, CustomT>, "model" | "enableDelete" | "enableDeleteAll" | "customDeleteConfirm" | "customDeleteErrorHandler" | "onDeleteSettled">, refreshGrid: () => void) => ((invert: boolean, ids: string[], filter?: DataGridFilterParameters) => Promise<void>) | undefined;
 export declare const renderDataGridRecordUsingModel: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, refreshGrid: () => void) => (entry: Record<string, unknown>) => {
     id: string;
 } & Record<string, string | null>;

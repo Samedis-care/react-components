@@ -3,6 +3,6 @@ import React from "react";
 import { DataGridSelectAllCheckbox, useDataGridProps } from "../DataGrid";
 const SelectAllView = (props) => {
     const { classes } = useDataGridProps();
-    return (_jsx(DataGridSelectAllCheckbox, { className: classes?.selectAllCheckbox, checked: props.checked, onChange: props.onSelect, disabled: props.disabled }));
+    return (_jsx(DataGridSelectAllCheckbox, { className: classes?.selectAllCheckbox, checked: props.checked, indeterminate: props.indeterminate, onChange: props.onSelect, disabled: props.disabled }));
 };
 export default React.memo(SelectAllView);

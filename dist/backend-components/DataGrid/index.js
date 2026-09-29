@@ -43,7 +43,7 @@ export const useBackendDataGridAddNewButtons = (props) => {
     return addNewButtons;
 };
 export const useBackendDataGridDeleteHandler = (props, refreshGrid) => {
-    const { model, enableDelete, enableDeleteAll, customDeleteConfirm, customDeleteErrorHandler, } = props;
+    const { model, enableDelete, enableDeleteAll, customDeleteConfirm, customDeleteErrorHandler, onDeleteSettled, } = props;
     const { t } = useCCTranslations();
     const [pushDialog] = useDialogContext();
     if (enableDeleteAll && !model.doesSupportAdvancedDeletion()) {
@@ -72,6 +72,7 @@ export const useBackendDataGridDeleteHandler = (props, refreshGrid) => {
             console.error(e);
             return;
         }
+        let error;
         try {
             if (enableDeleteAll) {
                 await deleteAdvanced([invert, ids, filter]);
@@ -79,24 +80,28 @@ export const useBackendDataGridDeleteHandler = (props, refreshGrid) => {
             else {
                 await deleteMultiple(ids);
             }
-            refreshGrid();
         }
         catch (e) {
-            refreshGrid();
-            if (customDeleteErrorHandler) {
-                await customDeleteErrorHandler(e);
-            }
-            else {
-                pushDialog(_jsx(ErrorDialog, { title: t("backend-components.data-grid.delete.error-dialog.title"), message: t("backend-components.data-grid.delete.error-dialog.message", { ERROR: e.message }), buttons: [
-                        {
-                            text: t("backend-components.data-grid.delete.error-dialog.buttons.okay"),
-                        },
-                    ] }));
-            }
+            error = e;
+        }
+        refreshGrid();
+        onDeleteSettled?.(invert, ids, filter, error);
+        if (!error)
+            return;
+        if (customDeleteErrorHandler) {
+            await customDeleteErrorHandler(error);
+        }
+        else {
+            pushDialog(_jsx(ErrorDialog, { title: t("backend-components.data-grid.delete.error-dialog.title"), message: t("backend-components.data-grid.delete.error-dialog.message", { ERROR: error.message }), buttons: [
+                    {
+                        text: t("backend-components.data-grid.delete.error-dialog.buttons.okay"),
+                    },
+                ] }));
         }
     }, [
         customDeleteConfirm,
         customDeleteErrorHandler,
+        onDeleteSettled,
         pushDialog,
         t,
         enableDeleteAll,

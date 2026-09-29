@@ -1,9 +1,13 @@
 import React from "react";
 export interface IDataGridContentSelectAllViewProps {
     /**
-     * Is currently checked
+     * Is currently checked (everything selected)
      */
     checked: boolean;
+    /**
+     * Is part of the rows selected? Shown as a dash, a click selects everything
+     */
+    indeterminate: boolean;
     /**
      * Is the select all button disabled?
      */

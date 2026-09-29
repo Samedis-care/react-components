@@ -20,6 +20,8 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-09-29 | [DataGrid select all selects everything or nothing](2026-09-29-data-grid-select-all-is-all-or-nothing.md) | behavior |
+| 2026-09-29 | [Model cacheOptions: cacheTime is gcTime](2026-09-29-cache-options-gc-time.md) | type |
 | 2026-09-29 | [FormField can start the form in a field](2026-09-29-form-field-auto-focus.md) | type, behavior |
 | 2026-09-29 | [useLocalStorageState follows what localStorage holds](2026-09-29-local-storage-state-follows-storage.md) | behavior |
 | 2026-09-29 | [React 18 or 19 is required](2026-09-29-react-18-required.md) | type |
