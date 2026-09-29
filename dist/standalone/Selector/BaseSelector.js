@@ -6,7 +6,7 @@ import { Add as AddIcon, ExpandMore, Info as InfoIcon, } from "@mui/icons-materi
 import TextFieldWithHelp from "../UIKit/TextFieldWithHelp";
 import { SelectorSmallListItemButton, SmallListItemIcon, } from "../../standalone/Small";
 import combineClassNames from "../../utils/combineClassNames";
-import { useLocalStorageState } from "../../utils/useStorageState";
+import { setLocalStorageState, useLocalStorageState, } from "../../utils/useStorageState";
 import InlineSwitch from "../InlineSwitch";
 import useCCTranslations from "../../utils/useCCTranslations";
 import uniqueArray from "../../utils/uniqueArray";
@@ -36,6 +36,15 @@ export const selectorLocalLoadHandler = (data) => (query) => {
         ]),
     };
 };
+const EMPTY_LRU = [];
+const isLruIds = (data) => Array.isArray(data) && data.every((entry) => typeof entry === "string");
+/**
+ * Update the IDs in an LRU cache, e.g. to replace an ID that changed
+ * @param storageKey The LRU storage key (SelectorLruOptions.storageKey)
+ * @param update Returns the new IDs (most recent first) from the current ones
+ * @remarks The mounted selectors using the key show the change at once
+ */
+export const updateSelectorLru = (storageKey, update) => setLocalStorageState(storageKey, EMPTY_LRU, isLruIds, update);
 const StyledAutocomplete = styled(Autocomplete, {
     name: "CcBaseSelector",
     slot: "autocomplete",
@@ -150,8 +159,7 @@ const BaseSelector = (inProps) => {
     const [selectorOptions, setSelectorOptions] = useState([]);
     const [loading, setLoading] = useState(null);
     const [query, setQuery] = useState("");
-    const [lruIds, setLruIds] = useLocalStorageState(lru?.storageKey, [], (ret) => Array.isArray(ret) &&
-        !ret.find((entry) => typeof entry !== "string"));
+    const [lruIds, setLruIds] = useLocalStorageState(lru?.storageKey, EMPTY_LRU, isLruIds);
     const renderIcon = useCallback((icon) => typeof icon === "string" ? (_jsx(StyledIcon, { src: icon, alt: "", ownerState: { iconSize }, className: classes?.icon })) : (icon), [iconSize, classes?.icon]);
     const defaultRenderer = useCallback((props, data, state) => {
         const { selected } = state;

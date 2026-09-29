@@ -1,74 +1,78 @@
-import { useCallback, useEffect, useState, } from "react";
+import { useCallback, useMemo, useSyncExternalStore, } from "react";
 /**
- * map storageKey -> setState calls
+ * map storageKey -> change listeners of the mounted hooks using it
  */
-const stateUpdateListeners = {};
+const keyListeners = {};
+const subscribe = (storageKey, onChange) => {
+    (keyListeners[storageKey] ??= new Set()).add(onChange);
+    // written in another tab (null: storage cleared)
+    const handleStorage = (evt) => {
+        if (evt.key === storageKey || evt.key === null)
+            onChange();
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => {
+        keyListeners[storageKey].delete(onChange);
+        if (keyListeners[storageKey].size === 0)
+            delete keyListeners[storageKey];
+        window.removeEventListener("storage", handleStorage);
+    };
+};
+const noSubscription = () => () => { };
+const parse = (value, defaultValue, validateData) => {
+    if (!value)
+        return defaultValue;
+    try {
+        const data = JSON.parse(value);
+        if (validateData(data))
+            return data;
+        return defaultValue;
+    }
+    catch {
+        return defaultValue;
+    }
+};
+/**
+ * Set a useLocalStorageState value from outside the components using it
+ * @param storageKey The share/persist key
+ * @param defaultValue The current value if no data is found or data is invalid
+ * @param validateData The function to check if the data that is persisted is valid
+ * @param update The new value, or a function returning it from the current value
+ * @remarks The mounted components using the key show the new value at once. A
+ *          value written to localStorage directly only shows once they render
+ *          again.
+ */
+export const setLocalStorageState = (storageKey, defaultValue, validateData, update) => {
+    const value = typeof update === "function"
+        ? update(parse(localStorage.getItem(storageKey), defaultValue, validateData))
+        : update;
+    localStorage.setItem(storageKey, JSON.stringify(value));
+    keyListeners[storageKey]?.forEach((listener) => listener());
+};
 /**
  * use persisted & shared state
  * @param storageKey The share/persist key or null to disable this and always return default value
  * @param defaultValue The default value if no data is found or data is invalid
  * @param validateData The function to check if the data that is persisted is valid
+ * @remarks The state is what localStorage holds, so it is shared with every
+ *          other component and browser tab using the key. A functional update
+ *          gets the stored value.
+ * @see setLocalStorageState
  */
 export const useLocalStorageState = (storageKey, defaultValue, validateData) => {
-    const [state, setState] = useState(() => {
-        if (!storageKey)
-            return defaultValue;
-        // load persisted data
-        const value = localStorage.getItem(storageKey);
-        if (!value)
-            return defaultValue;
-        try {
-            const data = JSON.parse(value);
-            if (validateData(data))
-                return data;
-            return defaultValue;
-        }
-        catch {
-            return defaultValue;
-        }
-    });
-    // register global state update listeners
-    useEffect(() => {
+    const subscribeToKey = useCallback((onChange) => storageKey ? subscribe(storageKey, onChange) : noSubscription(), [storageKey]);
+    const stored = useSyncExternalStore(subscribeToKey, () => storageKey ? localStorage.getItem(storageKey) : null);
+    // defaultValue and validateData only apply when the stored value changes, so
+    // callers can pass them inline
+    const state = useMemo(() => parse(stored, defaultValue, validateData), 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [stored, storageKey]);
+    const setState = useCallback((update) => {
         if (!storageKey)
             return;
-        if (!(storageKey in stateUpdateListeners)) {
-            stateUpdateListeners[storageKey] = [
-                setState,
-            ];
-        }
-        else {
-            stateUpdateListeners[storageKey].push(setState);
-        }
-        return () => {
-            stateUpdateListeners[storageKey] = stateUpdateListeners[storageKey].filter((entry) => entry !== setState);
-            if (stateUpdateListeners[storageKey].length === 0) {
-                delete stateUpdateListeners[storageKey];
-            }
-        };
-    }, [setState, storageKey]);
-    // hook setState to call global state update listeners and to persist in localStorage
-    const setStateHook = useCallback((newValue) => {
-        if (!storageKey)
-            return;
-        setState((prev) => {
-            let updatedValue;
-            if (typeof newValue === "function") {
-                updatedValue = newValue(prev);
-            }
-            else {
-                updatedValue = newValue;
-            }
-            localStorage.setItem(storageKey, JSON.stringify(updatedValue));
-            return updatedValue;
-        });
-        if (storageKey in stateUpdateListeners) {
-            // storageKey may not be in stateUpdateListeners when the component is unmounted but a reference to this callback is still held
-            stateUpdateListeners[storageKey].forEach((hook) => {
-                if (hook === setState)
-                    return;
-                hook(newValue);
-            });
-        }
-    }, [storageKey]);
-    return [state, setStateHook];
+        setLocalStorageState(storageKey, defaultValue, validateData, update);
+    }, 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [storageKey]);
+    return [state, setState];
 };

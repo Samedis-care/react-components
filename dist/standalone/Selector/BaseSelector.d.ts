@@ -111,6 +111,8 @@ export interface SelectorLruOptions<DataT extends BaseSelectorData> {
     loadData: (id: string) => Promise<DataT | undefined> | DataT | undefined;
     /**
      * The LRU storage key
+     * @remarks Selectors with the same key share the LRU cache, also across
+     *          browser tabs. updateSelectorLru changes it from outside.
      */
     storageKey: string;
     /**
@@ -133,6 +135,13 @@ export interface SelectorLruOptions<DataT extends BaseSelectorData> {
  * @see SelectorLruOptions.mode
  */
 export type SelectorLruMode = "exclusive" | "prepend";
+/**
+ * Update the IDs in an LRU cache, e.g. to replace an ID that changed
+ * @param storageKey The LRU storage key (SelectorLruOptions.storageKey)
+ * @param update Returns the new IDs (most recent first) from the current ones
+ * @remarks The mounted selectors using the key show the change at once
+ */
+export declare const updateSelectorLru: (storageKey: string, update: (ids: string[]) => string[]) => void;
 export interface BaseSelectorSingle<DataT extends BaseSelectorData> {
     multiple?: false;
     /**
