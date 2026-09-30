@@ -153,6 +153,28 @@ export declare const useModelGet: <KeyT extends ModelFieldName, VisibilityT exte
  */
 export declare const useModelFetchAll: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, params?: ModelFetchAllParams, options?: Omit<UseQueryOptions<ModelIndexResponse, Error, ModelIndexResponse>, "queryFn" | "queryKey">) => UseQueryResult<ModelIndexResponse, Error>;
 /**
+ * React-Query's useQuery for one page of the given model's index
+ * @param model The model to load
+ * @param params The params to pass to index, rows: 0 to only count the records (if the connector supports it)
+ * @param options The useQuery options
+ * @returns ModelIndexResponse of that page
+ * @remarks Mutations don't invalidate it (as with useModelFetchAll), invalidate [model.modelId, "index"] for every page of the model
+ * @see Model.index
+ * @see Model.getReactQueryKeyIndex
+ */
+export declare const useModelIndex: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, params?: Partial<IDataGridLoadDataParameters>, options?: Omit<UseQueryOptions<ModelIndexResponse, Error, ModelIndexResponse>, "queryFn" | "queryKey">) => UseQueryResult<ModelIndexResponse, Error>;
+/**
+ * React-Query's useQuery for a range of the given model's index (by offset)
+ * @param model The model to load
+ * @param params The params to pass to index2
+ * @param options The useQuery options
+ * @returns ModelIndexResponse of that range
+ * @remarks Mutations don't invalidate it (as with useModelFetchAll), invalidate [model.modelId, "index2"] for every range of the model
+ * @see Model.index2
+ * @see Model.getReactQueryKeyIndex2
+ */
+export declare const useModelIndex2: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, params: ConnectorIndex2Params, options?: Omit<UseQueryOptions<ModelIndexResponse, Error, ModelIndexResponse>, "queryFn" | "queryKey">) => UseQueryResult<ModelIndexResponse, Error>;
+/**
  * React-Query's useMutation to update/create a new record on backend
  * @param model The model
  * @see model.createOrUpdateRecordRaw
@@ -307,6 +329,18 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
      * @param params The fetch all params
      */
     getReactQueryKeyFetchAll(params?: ModelFetchAllParams): QueryKey;
+    /**
+     * Gets the react-query cache key for this model (for one index page)
+     * @param params The index params
+     * @see useModelIndex
+     */
+    getReactQueryKeyIndex(params?: Partial<IDataGridLoadDataParameters>): QueryKey;
+    /**
+     * Gets the react-query cache key for this model (for an index2 range)
+     * @param params The index2 params
+     * @see useModelIndex2
+     */
+    getReactQueryKeyIndex2(params: ConnectorIndex2Params): QueryKey;
     /**
      * Invalidates the cached data for record ID
      * @param id The record ID

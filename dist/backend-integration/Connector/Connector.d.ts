@@ -21,7 +21,7 @@ export type ConnectorIndex2Params = Partial<Omit<IDataGridLoadDataParameters, "p
 declare abstract class Connector<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> {
     /**
      * Lists all available data entries
-     * @param params Filter, Sorting and Pagination parameters
+     * @param params Filter, Sorting and Pagination parameters. Don't modify them, the model's cache keys hold them (useModelIndex, useModelFetchAll)
      * @param model The model requesting the data (if any)
      * @returns Array An array with all data entries as well as some meta data.
      * 								The third element in the array is user-defined
@@ -29,6 +29,8 @@ declare abstract class Connector<KeyT extends ModelFieldName, VisibilityT extend
     abstract index(params?: Partial<IDataGridLoadDataParameters>, model?: Model<KeyT, VisibilityT, CustomT>): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]>;
     /**
      * Index function, which works with offsets, rather than pages
+     * @param params Filter, Sorting and offset parameters. Don't modify them, the model's cache keys hold them (useModelIndex2)
+     * @param model The model requesting the data (if any)
      * @see index
      * @remarks This should be implemented by application developers if possible, it allows for increased efficiency.
      *          This function should be avoided if you are developing Components-Care components, prefer the normal index function.

@@ -4,6 +4,8 @@
 class Connector {
     /**
      * Index function, which works with offsets, rather than pages
+     * @param params Filter, Sorting and offset parameters. Don't modify them, the model's cache keys hold them (useModelIndex2)
+     * @param model The model requesting the data (if any)
      * @see index
      * @remarks This should be implemented by application developers if possible, it allows for increased efficiency.
      *          This function should be avoided if you are developing Components-Care components, prefer the normal index function.
