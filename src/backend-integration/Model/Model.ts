@@ -284,6 +284,70 @@ export const useModelFetchAll = <
 };
 
 /**
+ * React-Query's useQuery for one page of the given model's index
+ * @param model The model to load
+ * @param params The params to pass to index, rows: 0 to only count the records (if the connector supports it)
+ * @param options The useQuery options
+ * @returns ModelIndexResponse of that page
+ * @remarks Mutations don't invalidate it (as with useModelFetchAll), invalidate [model.modelId, "index"] for every page of the model
+ * @see Model.index
+ * @see Model.getReactQueryKeyIndex
+ */
+export const useModelIndex = <
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT,
+>(
+	model: Model<KeyT, VisibilityT, CustomT>,
+	params?: Partial<IDataGridLoadDataParameters>,
+	options?: Omit<
+		UseQueryOptions<ModelIndexResponse, Error, ModelIndexResponse>,
+		"queryFn" | "queryKey"
+	>,
+): UseQueryResult<ModelIndexResponse, Error> => {
+	return useQuery({
+		queryKey: model.getReactQueryKeyIndex(params),
+		queryFn: () => model.index(params),
+		// 3 retries if we get network error
+		retry: (count, err: Error) => err.name === "NetworkError" && count < 3,
+		...model.cacheOptions,
+		...options,
+	});
+};
+
+/**
+ * React-Query's useQuery for a range of the given model's index (by offset)
+ * @param model The model to load
+ * @param params The params to pass to index2
+ * @param options The useQuery options
+ * @returns ModelIndexResponse of that range
+ * @remarks Mutations don't invalidate it (as with useModelFetchAll), invalidate [model.modelId, "index2"] for every range of the model
+ * @see Model.index2
+ * @see Model.getReactQueryKeyIndex2
+ */
+export const useModelIndex2 = <
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT,
+>(
+	model: Model<KeyT, VisibilityT, CustomT>,
+	params: ConnectorIndex2Params,
+	options?: Omit<
+		UseQueryOptions<ModelIndexResponse, Error, ModelIndexResponse>,
+		"queryFn" | "queryKey"
+	>,
+): UseQueryResult<ModelIndexResponse, Error> => {
+	return useQuery({
+		queryKey: model.getReactQueryKeyIndex2(params),
+		queryFn: () => model.index2(params),
+		// 3 retries if we get network error
+		retry: (count, err: Error) => err.name === "NetworkError" && count < 3,
+		...model.cacheOptions,
+		...options,
+	});
+};
+
+/**
  * React-Query's useMutation to update/create a new record on backend
  * @param model The model
  * @see model.createOrUpdateRecordRaw
@@ -405,9 +469,11 @@ export const useModelDeleteAdvanced = <
 				// delete everything from this model, unless ID matches
 				ModelDataStore.removeQueries({
 					predicate: (query): boolean => {
+						// only record keys hold an id there, lists hold their params (maybe none)
+						const id = (query.queryKey[1] as { id?: string } | undefined)?.id;
 						return (
 							query.queryKey[0] === model.modelId &&
-							!ids.includes((query.queryKey[1] as { id: string }).id)
+							(id === undefined || !ids.includes(id))
 						);
 					},
 				});
@@ -692,6 +758,33 @@ class Model<
 	 */
 	public getReactQueryKeyFetchAll(params?: ModelFetchAllParams): QueryKey {
 		return [this.modelId, params, this.cacheKeys, this.cacheKeysIndex];
+	}
+
+	/**
+	 * Gets the react-query cache key for this model (for one index page)
+	 * @param params The index params
+	 * @see useModelIndex
+	 */
+	public getReactQueryKeyIndex(
+		params?: Partial<IDataGridLoadDataParameters>,
+	): QueryKey {
+		// the marker keeps a page apart from a fetch all with the same filters
+		return [this.modelId, "index", params, this.cacheKeys, this.cacheKeysIndex];
+	}
+
+	/**
+	 * Gets the react-query cache key for this model (for an index2 range)
+	 * @param params The index2 params
+	 * @see useModelIndex2
+	 */
+	public getReactQueryKeyIndex2(params: ConnectorIndex2Params): QueryKey {
+		return [
+			this.modelId,
+			"index2",
+			params,
+			this.cacheKeys,
+			this.cacheKeysIndex,
+		];
 	}
 
 	/**
