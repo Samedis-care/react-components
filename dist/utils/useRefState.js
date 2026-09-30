@@ -4,10 +4,9 @@ import { useCallback, useRef, useState } from "react";
  * @param initialValue The initial value (like useState)
  */
 const useRefState = (initialValue) => {
-    const ref = useRef(typeof initialValue === "function"
-        ? initialValue()
-        : initialValue);
+    // the state runs a lazy initializer once, the ref starts with its result
     const [state, setState] = useState(initialValue);
+    const ref = useRef(state);
     const handleSet = useCallback((newValue) => {
         ref.current =
             typeof newValue === "function"
