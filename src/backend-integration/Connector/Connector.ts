@@ -7,6 +7,7 @@ import {
 } from "../Model";
 import { IDataGridLoadDataParameters } from "../../standalone/DataGrid/DataGrid";
 import { IDataGridExporter } from "../../standalone/DataGrid/Header";
+import deepClone from "../../utils/deepClone";
 
 export interface ResponseMeta {
 	/**
@@ -36,7 +37,7 @@ abstract class Connector<
 > {
 	/**
 	 * Lists all available data entries
-	 * @param params Filter, Sorting and Pagination parameters. Don't modify them, the model's cache keys hold them (useModelIndex, useModelFetchAll)
+	 * @param params Filter, Sorting and Pagination parameters. Model.index passes a copy, so changes to them stay with the connector
 	 * @param model The model requesting the data (if any)
 	 * @returns Array An array with all data entries as well as some meta data.
 	 * 								The third element in the array is user-defined
@@ -48,7 +49,7 @@ abstract class Connector<
 
 	/**
 	 * Index function, which works with offsets, rather than pages
-	 * @param params Filter, Sorting and offset parameters. Don't modify them, the model's cache keys hold them (useModelIndex2)
+	 * @param params Filter, Sorting and offset parameters. Model.index2 passes a copy, so changes to them stay with the connector
 	 * @param model The model requesting the data (if any)
 	 * @see index
 	 * @remarks This should be implemented by application developers if possible, it allows for increased efficiency.
@@ -65,13 +66,13 @@ abstract class Connector<
 			throw new Error("This function may only be called with params.rows >= 0");
 		let page = (params.offset / pageSize) | 0;
 		let offset = page * pageSize;
-		let rows = params.rows;
 		const mergedResultSet = [];
 		let lastMeta: ResponseMeta | null;
 
 		do {
+			// each call gets its own copy, what index changes doesn't reach the next page
 			const [resultSet, meta] = await this.index(
-				Object.assign({}, params, { page: page + 1, rows: pageSize }),
+				Object.assign(deepClone(params), { page: page + 1, rows: pageSize }),
 				model,
 			);
 			lastMeta = meta;
@@ -91,8 +92,7 @@ abstract class Connector<
 			// update vars
 			page++;
 			offset += pageSize;
-			rows -= pageSize;
-		} while (rows > 0);
+		} while (offset < params.offset + params.rows); // the range goes on in the next page
 
 		if (lastMeta == null) throw new Error("No metadata recorded");
 		return [mergedResultSet, lastMeta];

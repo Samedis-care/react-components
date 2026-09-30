@@ -13,6 +13,12 @@ import {
 } from "../../src/backend-integration";
 import ModelDataStore from "../../src/backend-integration/Store";
 import MockConnector from "../../src/stories/test-utils/MockConnector";
+import type { ConnectorIndex2Params } from "../../src/backend-integration/Connector/Connector";
+import type {
+	IDataGridFieldFilter,
+	IDataGridLoadDataParameters,
+} from "../../src/standalone/DataGrid/DataGrid";
+import type { IFilterDef } from "../../src/standalone/DataGrid/Content/FilterEntry";
 
 afterEach(() => {
 	cleanup();
@@ -26,7 +32,15 @@ class DeleteAdvancedConnector extends MockConnector {
 	deleteAdvanced = () => Promise.resolve();
 }
 
-const createModel = () =>
+const RECORDS = [
+	{ id: "1", title: "One" },
+	{ id: "2", title: "Two" },
+	{ id: "3", title: "Three" },
+];
+
+const createModel = (
+	connector: MockConnector = new DeleteAdvancedConnector(RECORDS),
+) =>
 	new Model(
 		"index-hooks-" + Math.random().toString(16),
 		{
@@ -41,11 +55,7 @@ const createModel = () =>
 				customData: null,
 			},
 		},
-		new DeleteAdvancedConnector([
-			{ id: "1", title: "One" },
-			{ id: "2", title: "Two" },
-			{ id: "3", title: "Three" },
-		]),
+		connector,
 		undefined,
 		{ cacheOptions: { staleTime: 60000, gcTime: 1234 } },
 	);
@@ -209,5 +219,118 @@ describe("useModelDeleteAdvanced", () => {
 		expect(
 			cache.find({ queryKey: model.getReactQueryKey("1", false), exact: true }),
 		).toBeDefined();
+	});
+});
+
+const THIRTY_RECORDS = Array.from({ length: 30 }, (_, i) => ({
+	id: String(i + 1),
+	title: "Record " + (i + 1),
+}));
+
+const FORCED: IFilterDef = { type: "equals", value1: "forced", value2: "" };
+const createFilter = (): IDataGridFieldFilter => ({
+	title: { type: "contains", value1: "t", value2: "" },
+});
+
+/**
+ * Chains its own filter into the given ones, as a connector forcing a filter does
+ * @param params The params the connector got
+ * @param received Collects the field filters as they arrived
+ */
+const forceFilter = (
+	params: { fieldFilter?: IDataGridFieldFilter } | undefined,
+	received: string[],
+) => {
+	received.push(JSON.stringify(params?.fieldFilter));
+	if (!params) return;
+	params.fieldFilter ??= {};
+	if (params.fieldFilter.title) params.fieldFilter.title.nextFilter = FORCED;
+	else params.fieldFilter.title = FORCED;
+};
+
+class ForcingConnector extends MockConnector {
+	received: string[] = [];
+	index(params?: Partial<IDataGridLoadDataParameters>) {
+		forceFilter(params, this.received);
+		return super.index(params);
+	}
+}
+
+/** Implements index2 itself, as the app connectors do */
+class ForcingIndex2Connector extends MockConnector {
+	received: string[] = [];
+	index2(params: ConnectorIndex2Params) {
+		forceFilter(params, this.received);
+		return super.index({ page: 1, rows: params.rows });
+	}
+}
+
+describe("index params", () => {
+	it("reach the connector's index as a copy", async () => {
+		const connector = new ForcingConnector(RECORDS);
+		const model = createModel(connector);
+		const params = { fieldFilter: createFilter() };
+		const { result } = renderHook(
+			() => ({
+				page: useModelIndex(model, params),
+				all: useModelFetchAll(model, params),
+			}),
+			{ wrapper },
+		);
+
+		await waitFor(() => expect(result.current.page.isSuccess).toBe(true));
+		await waitFor(() => expect(result.current.all.isSuccess).toBe(true));
+		await act(() => result.current.page.refetch());
+		expect(params).toEqual({ fieldFilter: createFilter() });
+		expect(
+			ModelDataStore.getQueryCache().find({
+				queryKey: model.getReactQueryKeyIndex({ fieldFilter: createFilter() }),
+				exact: true,
+			}),
+		).toBeDefined();
+		// no call saw what an earlier one chained in
+		expect(connector.received).toHaveLength(3);
+		expect(new Set(connector.received)).toEqual(
+			new Set([JSON.stringify(createFilter())]),
+		);
+	});
+
+	it("reach the connector's index2 as a copy", async () => {
+		const connector = new ForcingIndex2Connector(RECORDS);
+		const model = createModel(connector);
+		const params = { offset: 0, rows: 2, fieldFilter: createFilter() };
+		const { result } = renderHook(() => useModelIndex2(model, params), {
+			wrapper,
+		});
+
+		await waitFor(() => expect(result.current.isSuccess).toBe(true));
+		await act(() => result.current.refetch());
+		expect(params).toEqual({ offset: 0, rows: 2, fieldFilter: createFilter() });
+		expect(new Set(connector.received)).toEqual(
+			new Set([JSON.stringify(createFilter())]),
+		);
+	});
+
+	it("reach every index call of the index2 polyfill as their own copy", async () => {
+		const connector = new ForcingConnector(THIRTY_RECORDS);
+		const model = createModel(connector);
+
+		// spans the polyfill's first two pages
+		await model.index2({ offset: 20, rows: 10, fieldFilter: createFilter() });
+		expect(connector.received).toEqual([
+			JSON.stringify(createFilter()),
+			JSON.stringify(createFilter()),
+		]);
+	});
+});
+
+describe("index2 polyfill", () => {
+	it("loads the whole range when it doesn't start on a page", async () => {
+		const model = createModel(new MockConnector(THIRTY_RECORDS));
+
+		const [records] = await model.index2({ offset: 20, rows: 10 });
+		expect(records.map((record) => record.title)).toEqual(
+			THIRTY_RECORDS.slice(20).map((record) => record.title),
+		);
 	});
 });

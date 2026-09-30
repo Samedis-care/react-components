@@ -22,6 +22,7 @@ import {
 import ModelDataStore from "../Store";
 import { dotToObject, getValueByDot } from "../../utils/dotUtils";
 import deepAssign from "../../utils/deepAssign";
+import deepClone from "../../utils/deepClone";
 import throwError from "../../utils/throwError";
 import RequestBatching from "./RequestBatching";
 import { blobsToDataUris } from "../Connector/bodyFiles";
@@ -609,14 +610,15 @@ class Model<
 
 	/**
 	 * Loads a list of data entries by the given search params
-	 * @param params The search params
+	 * @param params The search params, the connector gets a copy of them
 	 */
 	public async index(
 		params: Partial<IDataGridLoadDataParameters> | undefined,
 	): Promise<ModelIndexResponse> {
 		try {
+			// a copy, so what the connector changes doesn't reach the caller's params (or the cache keys holding them)
 			const [rawData, meta, userData] = await this.connector.index(
-				params,
+				deepClone(params),
 				this,
 			);
 			return [
@@ -644,12 +646,16 @@ class Model<
 
 	/**
 	 * Loads a list of data entries by the given search params. Works with offsets rather than pages
-	 * @param params The search params
+	 * @param params The search params, the connector gets a copy of them
+	 * @see index
 	 */
 	public async index2(
 		params: ConnectorIndex2Params,
 	): Promise<ModelIndexResponse> {
-		const [rawData, meta, userData] = await this.connector.index2(params, this);
+		const [rawData, meta, userData] = await this.connector.index2(
+			deepClone(params),
+			this,
+		);
 		return [
 			this.cacheIndexRecords(
 				await Promise.all(
