@@ -290,12 +290,13 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
     constructor(name: string, model: ModelField<KeyT, VisibilityT, CustomT>, connector: Connector<KeyT, VisibilityT, CustomT>, cacheKeys?: unknown, options?: ModelOptions<KeyT>);
     /**
      * Loads a list of data entries by the given search params
-     * @param params The search params
+     * @param params The search params, the connector gets a copy of them
      */
     index(params: Partial<IDataGridLoadDataParameters> | undefined): Promise<ModelIndexResponse>;
     /**
      * Loads a list of data entries by the given search params. Works with offsets rather than pages
-     * @param params The search params
+     * @param params The search params, the connector gets a copy of them
+     * @see index
      */
     index2(params: ConnectorIndex2Params): Promise<ModelIndexResponse>;
     /**

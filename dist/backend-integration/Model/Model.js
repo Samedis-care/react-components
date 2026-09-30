@@ -3,6 +3,7 @@ import { useMutation, useQuery, } from "@tanstack/react-query";
 import ModelDataStore from "../Store";
 import { dotToObject, getValueByDot } from "../../utils/dotUtils";
 import deepAssign from "../../utils/deepAssign";
+import deepClone from "../../utils/deepClone";
 import throwError from "../../utils/throwError";
 import RequestBatching from "./RequestBatching";
 import { blobsToDataUris } from "../Connector/bodyFiles";
@@ -254,11 +255,12 @@ class Model {
     }
     /**
      * Loads a list of data entries by the given search params
-     * @param params The search params
+     * @param params The search params, the connector gets a copy of them
      */
     async index(params) {
         try {
-            const [rawData, meta, userData] = await this.connector.index(params, this);
+            // a copy, so what the connector changes doesn't reach the caller's params (or the cache keys holding them)
+            const [rawData, meta, userData] = await this.connector.index(deepClone(params), this);
             return [
                 this.cacheIndexRecords(await Promise.all(rawData.map((data) => this.applySerialization(data, "deserialize", "overview")))),
                 meta,
@@ -276,10 +278,11 @@ class Model {
     }
     /**
      * Loads a list of data entries by the given search params. Works with offsets rather than pages
-     * @param params The search params
+     * @param params The search params, the connector gets a copy of them
+     * @see index
      */
     async index2(params) {
-        const [rawData, meta, userData] = await this.connector.index2(params, this);
+        const [rawData, meta, userData] = await this.connector.index2(deepClone(params), this);
         return [
             this.cacheIndexRecords(await Promise.all(rawData.map((data) => this.applySerialization(data, "deserialize", "overview")))),
             meta,
