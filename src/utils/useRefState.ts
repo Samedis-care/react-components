@@ -20,12 +20,9 @@ interface UseRefStateResult<T> {
  * @param initialValue The initial value (like useState)
  */
 const useRefState = <T>(initialValue: T | (() => T)): UseRefStateResult<T> => {
-	const ref = useRef<T>(
-		typeof initialValue === "function"
-			? (initialValue as () => T)()
-			: initialValue,
-	);
+	// the state runs a lazy initializer once, the ref starts with its result
 	const [state, setState] = useState<T>(initialValue);
+	const ref = useRef<T>(state);
 	const handleSet = useCallback((newValue: T | ((prev: T) => T)) => {
 		ref.current =
 			typeof newValue === "function"
