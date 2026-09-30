@@ -738,7 +738,11 @@ class Model {
                 // leads to broken validations
                 throw new Error("defaultValue is undefined: " + this.modelId + ":" + field);
             }
-            deepAssign(data, dotToObject(field, defaultValue));
+            // the fields inside an object field are merged into the object assigned for it (see applySerialization),
+            // so each record needs its own and not the one getDefaultValue may hand out every time
+            deepAssign(data, dotToObject(field, isPlainObject(defaultValue)
+                ? deepClone(defaultValue)
+                : defaultValue));
         });
         await Promise.all(promises);
         return data;
