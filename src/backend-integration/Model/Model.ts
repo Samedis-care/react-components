@@ -23,6 +23,7 @@ import ModelDataStore from "../Store";
 import { dotToObject, getValueByDot } from "../../utils/dotUtils";
 import deepAssign from "../../utils/deepAssign";
 import deepClone from "../../utils/deepClone";
+import isPlainObject from "../../utils/isPlainObject";
 import throwError from "../../utils/throwError";
 import RequestBatching from "./RequestBatching";
 import { blobsToDataUris } from "../Connector/bodyFiles";
@@ -1384,7 +1385,12 @@ class Model<
 			} else {
 				result = value;
 			}
-			deepAssign(copy, dotToObject(key, result));
+			// deepAssign merges the fields inside an object field (result.found_at) into the object it
+			// assigned for it, so that object has to be the copy's own and not the one in values
+			deepAssign(
+				copy,
+				dotToObject(key, isPlainObject(result) ? deepClone(result) : result),
+			);
 		}
 
 		return copy;
