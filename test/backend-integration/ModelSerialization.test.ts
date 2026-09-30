@@ -14,7 +14,10 @@ const VISIBILITY = {
 };
 
 // an opaque object field, and a field inside it with its own type
-const createModel = () =>
+const createModel = (defaults?: {
+	result: () => Record<string, unknown>;
+	foundAt: () => Date;
+}) =>
 	new Model(
 		"serialization-" + Math.random().toString(16),
 		{
@@ -27,12 +30,14 @@ const createModel = () =>
 			result: {
 				type: new ModelDataTypeAny<Record<string, unknown>>(),
 				getLabel: () => "Result",
+				getDefaultValue: defaults?.result,
 				visibility: VISIBILITY,
 				customData: null,
 			},
 			"result.found_at": {
 				type: new ModelDataTypeDateNullableRendererCC(),
 				getLabel: () => "Found at",
+				getDefaultValue: defaults?.foundAt,
 				visibility: VISIBILITY,
 				customData: null,
 			},
@@ -75,5 +80,22 @@ describe("Model.applySerialization", () => {
 			found_at: "2026-09-30T00:00:00.000Z",
 			note: "a",
 		});
+	});
+});
+
+describe("Model default values", () => {
+	it("fill a field inside an object field without changing the object field's default", async () => {
+		const RESULT = { note: "a" };
+		let calls = 0;
+		const model = createModel({
+			result: () => RESULT,
+			foundAt: () => new Date(++calls),
+		});
+
+		const [first] = await model.getRaw(null);
+		const [second] = await model.getRaw(null);
+		expect(first.result).toEqual({ note: "a", found_at: new Date(1) });
+		expect(second.result).toEqual({ note: "a", found_at: new Date(2) });
+		expect(RESULT).toEqual({ note: "a" });
 	});
 });
