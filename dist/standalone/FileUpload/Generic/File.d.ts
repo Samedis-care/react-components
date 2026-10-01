@@ -51,9 +51,11 @@ export interface FileProps {
      */
     disabled: boolean;
     /**
-     * The download link to open if the file is clicked
+     * The download link to open if the file is clicked: a URL, or the file itself
+     * @remarks A Blob is opened through an object URL, revoked once the link changes or
+     *          the file unmounts
      */
-    downloadLink?: string;
+    downloadLink?: string | Blob;
     /**
      * CSS class to apply to root element
      */
@@ -73,7 +75,8 @@ export interface FileProps {
     /**
      * custom onClick handler
      * @param name The file name including extension
-     * @param url The file URL
+     * @param url The file URL. For a Blob or data URI link an object URL, which stays
+     *            valid at least until the handler has resolved
      */
     onClick?: (name: string, url: string) => Promise<void> | void;
 }

@@ -344,10 +344,11 @@ const File = (inProps) => {
     const { name, downloadLink, variant, className, classes, onClick } = props;
     const FileIcon = getFileIconOrDefault(props.name, props.mimeType);
     const previewSrc = useObjectUrl(props.preview);
+    const downloadUrl = useObjectUrl(downloadLink);
     const openDownload = useCallback(async () => {
-        if (downloadLink) {
-            if (downloadLink.startsWith("data:")) {
-                const url = URL.createObjectURL(dataToFile(downloadLink));
+        if (downloadUrl) {
+            if (downloadUrl.startsWith("data:")) {
+                const url = URL.createObjectURL(dataToFile(downloadUrl));
                 if (onClick)
                     await onClick(name, url);
                 else
@@ -356,12 +357,12 @@ const File = (inProps) => {
             }
             else {
                 if (onClick)
-                    await onClick(name, downloadLink);
+                    await onClick(name, downloadUrl);
                 else
-                    window.open(downloadLink, "_blank");
+                    window.open(downloadUrl, "_blank");
             }
         }
-    }, [downloadLink, name, onClick]);
+    }, [downloadUrl, name, onClick]);
     const handleListClick = useCallback((evt) => {
         evt.stopPropagation();
     }, []);

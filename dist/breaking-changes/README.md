@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-10-01 | [File download links take Blobs](2026-10-01-file-download-links-take-blobs.md) | type |
 | 2026-09-30 | [Connectors get a copy of the index params](2026-09-30-index-params-reach-connectors-as-a-copy.md) | behavior |
 | 2026-09-29 | [DataGrid select all selects everything or nothing](2026-09-29-data-grid-select-all-is-all-or-nothing.md) | behavior |
 | 2026-09-29 | [Model cacheOptions: cacheTime is gcTime](2026-09-29-cache-options-gc-time.md) | type |
