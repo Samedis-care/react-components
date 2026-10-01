@@ -5,6 +5,7 @@ import Connector, {
 	ResponseMeta,
 } from "../Connector/Connector";
 import {
+	hashKey,
 	QueryKey,
 	useMutation,
 	UseMutationResult,
@@ -291,9 +292,10 @@ export const useModelFetchAll = <
  * @param params The params to pass to index, rows: 0 to only count the records (if the connector supports it)
  * @param options The useQuery options
  * @returns ModelIndexResponse of that page
- * @remarks Mutations don't invalidate it (as with useModelFetchAll), invalidate [model.modelId, "index"] for every page of the model
+ * @remarks Mutations don't invalidate it (as with useModelFetchAll), Model.invalidateIndexQueries does for every page of the model
  * @see Model.index
  * @see Model.getReactQueryKeyIndex
+ * @see Model.invalidateIndexQueries
  */
 export const useModelIndex = <
 	KeyT extends ModelFieldName,
@@ -323,9 +325,10 @@ export const useModelIndex = <
  * @param params The params to pass to index2
  * @param options The useQuery options
  * @returns ModelIndexResponse of that range
- * @remarks Mutations don't invalidate it (as with useModelFetchAll), invalidate [model.modelId, "index2"] for every range of the model
+ * @remarks Mutations don't invalidate it (as with useModelFetchAll), Model.invalidateIndex2Queries does for every range of the model
  * @see Model.index2
  * @see Model.getReactQueryKeyIndex2
+ * @see Model.invalidateIndex2Queries
  */
 export const useModelIndex2 = <
 	KeyT extends ModelFieldName,
@@ -804,6 +807,62 @@ class Model<
 			queryKey: [this.modelId, { id: id }],
 			exact: false,
 		});
+	}
+
+	/**
+	 * Invalidates all of this model's queries (records, batched or not, fetch all, index pages and
+	 * index2 ranges): any params and cacheKeysIndex, this model's cacheKeys
+	 * @see invalidateCacheForId
+	 */
+	public invalidateQueries(): Promise<void> {
+		return this.invalidateQueriesUnder([this.modelId]);
+	}
+
+	/**
+	 * Invalidates every page of this model's index (useModelIndex): any params and cacheKeysIndex,
+	 * this model's cacheKeys
+	 * @see getReactQueryKeyIndex
+	 */
+	public invalidateIndexQueries(): Promise<void> {
+		return this.invalidateQueriesUnder([this.modelId, "index"]);
+	}
+
+	/**
+	 * Invalidates every range of this model's index2 (useModelIndex2): any params and
+	 * cacheKeysIndex, this model's cacheKeys
+	 * @see getReactQueryKeyIndex2
+	 */
+	public invalidateIndex2Queries(): Promise<void> {
+		return this.invalidateQueriesUnder([this.modelId, "index2"]);
+	}
+
+	/**
+	 * Invalidates this model's queries under the key prefix which have this model's cacheKeys
+	 * @param prefix The query key prefix, starting with the modelId
+	 */
+	private invalidateQueriesUnder(prefix: QueryKey): Promise<void> {
+		const cacheKeys = hashKey([this.cacheKeys]);
+		return ModelDataStore.invalidateQueries({
+			queryKey: prefix,
+			// the params or the record id come before the cacheKeys, so the prefix can't hold them
+			predicate: ({ queryKey }) =>
+				hashKey([Model.getCacheKeysOf(queryKey)]) === cacheKeys,
+		});
+	}
+
+	/**
+	 * Gets the cacheKeys out of a query key of a model
+	 * @param queryKey The query key, as getReactQueryKey* build them
+	 */
+	private static getCacheKeysOf(queryKey: QueryKey): unknown {
+		const marker = queryKey[1];
+		// a fetch all key has its params (no id) where the others have their marker or record id
+		const fetchAll = !(
+			marker === "index" ||
+			marker === "index2" ||
+			(isPlainObject(marker) && "id" in marker)
+		);
+		return queryKey[fetchAll ? 2 : 3];
 	}
 
 	/**

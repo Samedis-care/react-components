@@ -40,9 +40,10 @@ const RECORDS = [
 
 const createModel = (
 	connector: MockConnector = new DeleteAdvancedConnector(RECORDS),
+	cache?: { name: string; cacheKeys: unknown; cacheKeysIndex?: unknown },
 ) =>
 	new Model(
-		"index-hooks-" + Math.random().toString(16),
+		cache?.name ?? "index-hooks-" + Math.random().toString(16),
 		{
 			title: {
 				type: new ModelDataTypeStringRendererMUI(),
@@ -56,8 +57,11 @@ const createModel = (
 			},
 		},
 		connector,
-		undefined,
-		{ cacheOptions: { staleTime: 60000, gcTime: 1234 } },
+		cache?.cacheKeys,
+		{
+			cacheOptions: { staleTime: 60000, gcTime: 1234 },
+			cacheKeysIndex: cache?.cacheKeysIndex,
+		},
 	);
 
 const isInvalidated = (queryKey: readonly unknown[]) =>
@@ -138,8 +142,17 @@ describe("useModelIndex2", () => {
 	});
 });
 
-describe("index query keys", () => {
-	const loadAll = async (model: ReturnType<typeof createModel>) => {
+describe("model query invalidation", () => {
+	type TestModel = ReturnType<typeof createModel>;
+
+	const loadAll = async (model: TestModel) => {
+		await model.getCached("1", { batch: false });
+		// set, the mock connector's index can't answer a batched request (by id)
+		ModelDataStore.setQueryData(model.getReactQueryKey("2", true), [
+			RECORDS[1],
+			{},
+		]);
+		await model.fetchAllCached({ quickFilter: "" });
 		await ModelDataStore.fetchQuery({
 			queryKey: model.getReactQueryKeyIndex({ rows: 1 }),
 			queryFn: () => model.index({ rows: 1 }),
@@ -148,48 +161,74 @@ describe("index query keys", () => {
 			queryKey: model.getReactQueryKeyIndex2({ offset: 0, rows: 1 }),
 			queryFn: () => model.index2({ offset: 0, rows: 1 }),
 		});
-		await model.fetchAllCached({ quickFilter: "" });
 	};
 
-	it("are reached by invalidating the model", async () => {
+	const invalidatedOf = (model: TestModel) => ({
+		record: isInvalidated(model.getReactQueryKey("1", false)),
+		batched: isInvalidated(model.getReactQueryKey("2", true)),
+		fetchAll: isInvalidated(
+			model.getReactQueryKeyFetchAll({ quickFilter: "" }),
+		),
+		index: isInvalidated(model.getReactQueryKeyIndex({ rows: 1 })),
+		index2: isInvalidated(model.getReactQueryKeyIndex2({ offset: 0, rows: 1 })),
+	});
+
+	const NONE = {
+		record: false,
+		batched: false,
+		fetchAll: false,
+		index: false,
+		index2: false,
+	};
+	const INVALIDATES = {
+		invalidateQueries: {
+			record: true,
+			batched: true,
+			fetchAll: true,
+			index: true,
+			index2: true,
+		},
+		invalidateIndexQueries: { ...NONE, index: true },
+		invalidateIndex2Queries: { ...NONE, index2: true },
+	};
+	const METHODS = Object.keys(INVALIDATES) as (keyof typeof INVALIDATES)[];
+
+	it.each(METHODS)("%s reaches its queries, not the others", async (method) => {
 		const model = createModel();
 		await loadAll(model);
 
-		await ModelDataStore.invalidateQueries({ queryKey: [model.modelId] });
-		expect(isInvalidated(model.getReactQueryKeyIndex({ rows: 1 }))).toBe(true);
-		expect(
-			isInvalidated(model.getReactQueryKeyIndex2({ offset: 0, rows: 1 })),
-		).toBe(true);
-		expect(
-			isInvalidated(model.getReactQueryKeyFetchAll({ quickFilter: "" })),
-		).toBe(true);
+		await model[method]();
+		expect(invalidatedOf(model)).toEqual(INVALIDATES[method]);
 	});
 
-	it("are reached by their marker without the others", async () => {
-		const model = createModel();
-		await loadAll(model);
+	it.each(METHODS)(
+		"%s reaches the model's cacheKeys, with any cacheKeysIndex",
+		async (method) => {
+			// one model, opened for two projects, one of them also filtered
+			const name = "index-hooks-" + Math.random().toString(16);
+			const projectA = createModel(undefined, { name, cacheKeys: ["t", "a"] });
+			const projectAOpen = createModel(undefined, {
+				name,
+				cacheKeys: ["t", "a"],
+				cacheKeysIndex: [{ status: "open" }],
+			});
+			const projectB = createModel(undefined, { name, cacheKeys: ["t", "b"] });
+			for (const model of [projectA, projectAOpen, projectB])
+				await loadAll(model);
 
-		await ModelDataStore.invalidateQueries({
-			queryKey: [model.modelId, "index"],
-		});
-		expect(isInvalidated(model.getReactQueryKeyIndex({ rows: 1 }))).toBe(true);
-		expect(
-			isInvalidated(model.getReactQueryKeyIndex2({ offset: 0, rows: 1 })),
-		).toBe(false);
-		expect(
-			isInvalidated(model.getReactQueryKeyFetchAll({ quickFilter: "" })),
-		).toBe(false);
-	});
+			await projectA[method]();
+			expect(invalidatedOf(projectA)).toEqual(INVALIDATES[method]);
+			expect(invalidatedOf(projectAOpen)).toEqual(INVALIDATES[method]);
+			expect(invalidatedOf(projectB)).toEqual(NONE);
+		},
+	);
 
-	it("are not reached by invalidating a record", async () => {
+	it("invalidateCacheForId reaches the record, not the lists", async () => {
 		const model = createModel();
 		await loadAll(model);
 
 		model.invalidateCacheForId("1");
-		expect(isInvalidated(model.getReactQueryKeyIndex({ rows: 1 }))).toBe(false);
-		expect(
-			isInvalidated(model.getReactQueryKeyIndex2({ offset: 0, rows: 1 })),
-		).toBe(false);
+		expect(invalidatedOf(model)).toEqual({ ...NONE, record: true });
 	});
 });
 
