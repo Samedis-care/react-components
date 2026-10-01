@@ -85,9 +85,11 @@ export interface FileProps {
 	 */
 	disabled: boolean;
 	/**
-	 * The download link to open if the file is clicked
+	 * The download link to open if the file is clicked: a URL, or the file itself
+	 * @remarks A Blob is opened through an object URL, revoked once the link changes or
+	 *          the file unmounts
 	 */
-	downloadLink?: string;
+	downloadLink?: string | Blob;
 	/**
 	 * CSS class to apply to root element
 	 */
@@ -107,7 +109,8 @@ export interface FileProps {
 	/**
 	 * custom onClick handler
 	 * @param name The file name including extension
-	 * @param url The file URL
+	 * @param url The file URL. For a Blob or data URI link an object URL, which stays
+	 *            valid at least until the handler has resolved
 	 */
 	onClick?: (name: string, url: string) => Promise<void> | void;
 }
@@ -491,20 +494,21 @@ const File = (inProps: FileProps) => {
 
 	const FileIcon = getFileIconOrDefault(props.name, props.mimeType);
 	const previewSrc = useObjectUrl(props.preview);
+	const downloadUrl = useObjectUrl(downloadLink);
 
 	const openDownload = useCallback(async () => {
-		if (downloadLink) {
-			if (downloadLink.startsWith("data:")) {
-				const url = URL.createObjectURL(dataToFile(downloadLink));
+		if (downloadUrl) {
+			if (downloadUrl.startsWith("data:")) {
+				const url = URL.createObjectURL(dataToFile(downloadUrl));
 				if (onClick) await onClick(name, url);
 				else window.open(url, "_blank");
 				URL.revokeObjectURL(url);
 			} else {
-				if (onClick) await onClick(name, downloadLink);
-				else window.open(downloadLink, "_blank");
+				if (onClick) await onClick(name, downloadUrl);
+				else window.open(downloadUrl, "_blank");
 			}
 		}
-	}, [downloadLink, name, onClick]);
+	}, [downloadUrl, name, onClick]);
 
 	const handleListClick = useCallback((evt: React.MouseEvent) => {
 		evt.stopPropagation();

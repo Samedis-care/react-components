@@ -197,8 +197,10 @@ export interface FileMeta {
 	type: string;
 	/**
 	 * The download link for the file
+	 * @remarks A URL, or the file itself while it is only held locally (e.g. a file whose
+	 *          upload is queued)
 	 */
-	downloadLink?: string;
+	downloadLink?: string | Blob;
 }
 
 export interface FileData<T = File | FileMeta> {
