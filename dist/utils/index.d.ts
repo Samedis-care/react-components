@@ -59,6 +59,7 @@ export { default as dataToFile } from "./dataToFile";
 export { default as sortByLocaleRelevance } from "./sortByLocaleRelevance";
 export { default as timestampToAge } from "./timestampToAge";
 export * from "./useDebounce";
+export { default as useDebouncedValue } from "./useDebouncedValue";
 export { default as deepSort } from "./deepSort";
 export { default as useMemoDebug } from "./useMemoDebug";
 export { default as useCallbackDebug } from "./useCallbackDebug";
