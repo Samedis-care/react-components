@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import { useFormContext } from "./Form";
 import debounce from "../../utils/debounce";
 import toComparisonJson from "../../utils/toComparisonJson";
+import { ModelUnknown } from "../../backend-integration";
 
 export interface FormAutoSaveProps {
 	debounceTime?: number;
@@ -12,7 +13,8 @@ export interface FormAutoSaveProps {
  * @param debounceTime The debounce time (time between changes for save to trigger)
  */
 const useFormAutoSave = (debounceTime = 5000) => {
-	const { safeSubmit, submitting, dirty, values } = useFormContext();
+	const { safeSubmit, submitting, dirty, values } =
+		useFormContext<ModelUnknown>();
 	const debounceSubmit = useMemo(
 		() => (debounceTime == 0 ? safeSubmit : debounce(safeSubmit, debounceTime)),
 		[safeSubmit, debounceTime],

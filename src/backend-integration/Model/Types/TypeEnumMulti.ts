@@ -5,22 +5,25 @@ import FilterType from "../FilterType";
 import { EnumValue } from "./TypeEnum";
 import { MultiSelectorData } from "../../../standalone";
 
-export type AdvancedMultiEnumValue = Omit<MultiSelectorData, "label"> &
-	Pick<EnumValue, "getLabel" | "invisible">;
+export type AdvancedMultiEnumValue<T extends string = string> = Omit<
+	MultiSelectorData,
+	"label" | "value"
+> &
+	Pick<EnumValue<T>, "value" | "getLabel" | "invisible">;
 
 /**
  * Enum type with multi-select capability
  */
-abstract class TypeMultiEnum implements Type<string[]> {
-	protected values: EnumValue[];
+abstract class TypeMultiEnum<T extends string = string> implements Type<T[]> {
+	protected values: EnumValue<T>[];
 
-	constructor(values: EnumValue[]) {
+	constructor(values: EnumValue<T>[]) {
 		this.values = values;
 	}
 
-	abstract render(params: ModelRenderParams<string[]>): React.ReactElement;
+	abstract render(params: ModelRenderParams<T[]>): React.ReactElement;
 
-	validate(values: string[]): string | null {
+	validate(values: T[]): string | null {
 		if (values.length === 0) return null;
 
 		return values.find((value) =>
@@ -34,11 +37,11 @@ abstract class TypeMultiEnum implements Type<string[]> {
 		return "enum";
 	}
 
-	getDefaultValue(): string[] {
+	getDefaultValue(): T[] {
 		return [];
 	}
 
-	stringify(values: string[]): string {
+	stringify(values: T[]): string {
 		return values
 			.map(
 				(value) =>
@@ -48,9 +51,10 @@ abstract class TypeMultiEnum implements Type<string[]> {
 			.join(", ");
 	}
 
-	getEnumValues = (): EnumValue[] => this.values;
+	getEnumValues = (): EnumValue<T>[] => this.values;
 
-	deserialize = (value: unknown): string[] => (value as string[]) ?? [];
+	// the server's values are some of the values
+	deserialize = (value: unknown): T[] => (value as T[] | null) ?? [];
 }
 
 export default TypeMultiEnum;

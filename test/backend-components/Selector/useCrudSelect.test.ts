@@ -3,7 +3,7 @@ import { renderHook, act, waitFor, cleanup } from "@testing-library/react";
 import useCrudSelect, {
 	UseCrudSelectParams,
 } from "../../../src/backend-components/Selector/useCrudSelect";
-import { Connector, PageVisibility } from "../../../src/backend-integration";
+import { Connector, ModelUnknown } from "../../../src/backend-integration";
 import { BaseSelectorData } from "../../../src/standalone";
 import CrudSelectError from "../../../src/backend-components/Selector/CrudSelectError";
 
@@ -39,16 +39,14 @@ const makeConnector = (initial: Record<string, unknown>[] = []) => {
 		create,
 		update,
 		delete: del,
-	} as unknown as Connector<string, PageVisibility, null>;
+	} as unknown as Connector;
 	return { connector, create, update, delete: del, index };
 };
 
 const baseParams = (
-	connector: Connector<string, PageVisibility, null>,
-	overrides: Partial<
-		UseCrudSelectParams<string, PageVisibility, null, JoinData>
-	>,
-): UseCrudSelectParams<string, PageVisibility, null, JoinData> => ({
+	connector: Connector,
+	overrides: Partial<UseCrudSelectParams<ModelUnknown, JoinData>>,
+): UseCrudSelectParams<ModelUnknown, JoinData> => ({
 	connector,
 	serialize: (data) => ({ source_id: data.value, note: data.note }),
 	deserialize: (record) => ({
@@ -65,7 +63,7 @@ const baseParams = (
 });
 
 const renderCrudSelect = (
-	params: UseCrudSelectParams<string, PageVisibility, null, JoinData>,
+	params: UseCrudSelectParams<ModelUnknown, JoinData>,
 ) => renderHook(() => useCrudSelect(params, { current: null }));
 
 describe("useCrudSelect prepareNewEntry", () => {

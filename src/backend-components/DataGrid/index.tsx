@@ -7,9 +7,10 @@ import DataGrid, {
 	DataGridProps,
 	IDataGridAddButton,
 } from "../../standalone/DataGrid/DataGrid";
-import Model, {
+import {
 	ModelFieldName,
-	PageVisibility,
+	ModelRecord,
+	ModelUnknown,
 	useModelDeleteAdvanced,
 	useModelDeleteMultiple,
 } from "../../backend-integration/Model/Model";
@@ -18,18 +19,14 @@ import { ErrorDialog, showConfirmDialog } from "../../non-standalone/Dialog";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { dotToObject, getValueByDot } from "../../utils/dotUtils";
 
-export interface BackendDataGridProps<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomDataT,
-> extends Omit<
+export interface BackendDataGridProps<M extends ModelUnknown> extends Omit<
 	DataGridProps,
 	"loadData" | "columns" | "exporters" | "onDelete"
 > {
 	/**
 	 * The model to use
 	 */
-	model: Model<KeyT, VisibilityT, CustomDataT>;
+	model: M;
 	/**
 	 * Enable deletion?
 	 */
@@ -81,7 +78,7 @@ export interface BackendDataGridProps<
 
 export const useBackendDataGridAddNewButtons = (
 	props: Pick<
-		BackendDataGridProps<never, never, never>,
+		BackendDataGridProps<ModelUnknown>,
 		"onAddNew" | "additionalNewButtons"
 	>,
 ) => {
@@ -117,13 +114,9 @@ export const useBackendDataGridAddNewButtons = (
 	return addNewButtons;
 };
 
-export const useBackendDataGridDeleteHandler = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
->(
+export const useBackendDataGridDeleteHandler = <M extends ModelUnknown>(
 	props: Pick<
-		BackendDataGridProps<KeyT, VisibilityT, CustomT>,
+		BackendDataGridProps<M>,
 		| "model"
 		| "enableDelete"
 		| "enableDeleteAll"
@@ -237,12 +230,9 @@ export const useBackendDataGridDeleteHandler = <
 };
 
 export const renderDataGridRecordUsingModel =
-	<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(
-		model: Model<KeyT, VisibilityT, CustomT>,
-		refreshGrid: () => void,
-	) =>
+	(model: ModelUnknown, refreshGrid: () => void) =>
 	(
-		entry: Record<string, unknown>,
+		entry: ModelRecord<ModelUnknown>,
 	): { id: string } & Record<string, string | null> =>
 		Object.fromEntries(
 			Object.keys(model.fields)
@@ -256,7 +246,7 @@ export const renderDataGridRecordUsingModel =
 						];
 					}
 
-					const field = model.fields[key as KeyT];
+					const field = model.fields[key];
 					const { id } = entry as Record<"id", string>;
 
 					// no need to render disabled fields
@@ -328,12 +318,8 @@ export const renderDataGridRecordUsingModel =
 				.flat(),
 		) as { id: string } & Record<string, string | null>;
 
-const BackendDataGrid = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomDataT,
->(
-	props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT>,
+const BackendDataGrid = <M extends ModelUnknown>(
+	props: BackendDataGridProps<M>,
 	ref: React.Ref<DataGridDispatch>,
 ) => {
 	const { model } = props;
@@ -378,13 +364,8 @@ const BackendDataGrid = <
 	);
 };
 
-export type BackendDataGridType = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomDataT,
->(
-	props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT> &
-		React.RefAttributes<DataGridDispatch>,
+export type BackendDataGridType = <M extends ModelUnknown>(
+	props: BackendDataGridProps<M> & React.RefAttributes<DataGridDispatch>,
 ) => React.ReactElement | null;
 
 export default React.memo(

@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useFormContext } from "./Form";
+import { ModelUnknown } from "../../backend-integration";
 
 /**
  * useState, but persisted in the form state so it survives remounts
@@ -12,7 +13,7 @@ const useFormState = <S>(
 	name: string,
 	initialState: S | (() => S),
 ): [S, Dispatch<SetStateAction<S>>] => {
-	const { getCustomState, setCustomState } = useFormContext();
+	const { getCustomState, setCustomState } = useFormContext<ModelUnknown>();
 	const statePack = useState<S>(
 		() =>
 			getCustomState<S>(name) ??

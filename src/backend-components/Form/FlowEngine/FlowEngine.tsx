@@ -1,21 +1,22 @@
 import React, { useCallback, useContext, useMemo, useState } from "react";
 import { PageProps, useFormContextLite } from "../Form";
+import { ModelUnknown } from "../../../backend-integration";
 
 export interface FlowEngineFormProps {
 	buttons: React.ReactNode;
 }
 
-export type FlowFormProps<KeyT extends string, CustomPropsT> = PageProps<
-	KeyT,
+export type FlowFormProps<M extends ModelUnknown, CustomPropsT> = PageProps<
+	M,
 	FlowEngineFormProps & CustomPropsT
 >;
 
 export interface FlowStageProps<
-	KeyT extends string,
+	M extends ModelUnknown,
 	StageT extends string,
 	CustomPropsT,
 > extends FlowStageContextType<StageT> {
-	formProps: PageProps<KeyT, CustomPropsT>;
+	formProps: PageProps<M, CustomPropsT>;
 }
 
 export interface FlowStageContextType<StageT extends string> {
@@ -56,24 +57,28 @@ export const useFlowStageContext = <StageT extends string>() => {
 };
 
 export interface FlowEngineProps<
-	KeyT extends string,
+	M extends ModelUnknown,
 	StageT extends string,
 	CustomPropsT,
 > {
 	defaultStage: StageT;
-	formProps: PageProps<KeyT, CustomPropsT>;
+	formProps: PageProps<M, CustomPropsT>;
 	children: Record<
 		StageT,
-		React.ComponentType<FlowStageProps<KeyT, StageT, CustomPropsT>>
+		React.ComponentType<FlowStageProps<M, StageT, CustomPropsT>>
 	>;
 }
 
-const FlowEngine = <KeyT extends string, StageT extends string, CustomPropsT>(
-	props: FlowEngineProps<KeyT, StageT, CustomPropsT>,
+const FlowEngine = <
+	M extends ModelUnknown,
+	StageT extends string,
+	CustomPropsT,
+>(
+	props: FlowEngineProps<M, StageT, CustomPropsT>,
 ) => {
 	const { defaultStage, formProps, children } = props;
 	const [stage, setStage] = useState(defaultStage);
-	const { flowEngine, submit } = useFormContextLite();
+	const { flowEngine, submit } = useFormContextLite<ModelUnknown>();
 	if (!flowEngine) throw new Error("Form not configured for flowEngine");
 
 	const goToStage = useCallback(
@@ -107,7 +112,7 @@ const FlowEngine = <KeyT extends string, StageT extends string, CustomPropsT>(
 	);
 
 	const StageComp: React.ComponentType<
-		FlowStageProps<KeyT, StageT, CustomPropsT>
+		FlowStageProps<M, StageT, CustomPropsT>
 	> = children[stage];
 	return (
 		<FlowStageContext.Provider

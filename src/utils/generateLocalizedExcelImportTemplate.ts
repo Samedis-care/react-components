@@ -1,5 +1,5 @@
 import XLSX from "xlsx";
-import { Model, ModelFieldName, PageVisibility } from "../backend-integration";
+import { ModelFieldNames, ModelUnknown } from "../backend-integration";
 
 /**
  * Generate a localized excel import template for use with CRUD importer
@@ -7,13 +7,9 @@ import { Model, ModelFieldName, PageVisibility } from "../backend-integration";
  * @param fields The fields that are importable
  * @param fileName The download file name (xlsx)
  */
-const generateLocalizedExcelImportTemplate = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
->(
-	model: Model<KeyT, VisibilityT, CustomT>,
-	fields: KeyT[],
+const generateLocalizedExcelImportTemplate = <M extends ModelUnknown>(
+	model: M,
+	fields: ModelFieldNames<M>[],
 	fileName: string,
 ) => {
 	const book = XLSX.utils.book_new();

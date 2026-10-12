@@ -159,7 +159,7 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 			const newSignature = trimCanvas(copy).toDataURL("image/png");
 			if (setSignature) setSignature(newSignature);
 		} else {
-			if (setSignature) setSignature(resetCanvas ? signature : "");
+			if (setSignature) setSignature(resetCanvas ? (signature ?? "") : "");
 		}
 		hiddenRef.current?.focus();
 		hiddenRef.current?.blur();
@@ -244,7 +244,7 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 				) : (
 					<ImageDiv className={classes?.imageDiv}>
 						<SignatureImage
-							src={signature}
+							src={signature ?? undefined}
 							alt={t("standalone.signature-pad.dialog.signature")}
 						/>
 					</ImageDiv>

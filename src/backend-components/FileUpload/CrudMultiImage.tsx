@@ -4,7 +4,7 @@ import {
 	MultiImageNewIdPrefix,
 	MultiImageProps,
 } from "../../standalone/FileUpload/MultiImage/MultiImage";
-import { Connector, PageVisibility } from "../../backend-integration";
+import { Connector } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import { Loader, MultiImage } from "../../standalone";
 
@@ -25,7 +25,7 @@ export interface CrudMultiImageProps extends Omit<
 	/**
 	 * The backend connector used as CRUD interface
 	 */
-	connector: Connector<string, PageVisibility, unknown>;
+	connector: Connector;
 	/**
 	 * The error component that is used to display errors
 	 */

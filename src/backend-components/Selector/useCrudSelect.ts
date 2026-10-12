@@ -1,7 +1,7 @@
 import {
 	Connector,
-	ModelFieldName,
-	PageVisibility,
+	ModelRecord,
+	ModelUnknown,
 } from "../../backend-integration";
 import { BaseSelectorData } from "../../standalone";
 import {
@@ -19,15 +19,13 @@ import { BackendMultiSelectProps } from "./BackendMultiSelect";
 import CrudSelectError, { CrudSelectFailure } from "./CrudSelectError";
 
 export interface UseCrudSelectParams<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
+	M extends ModelUnknown,
 	DataT extends BaseSelectorData,
 > {
 	/**
 	 * The backend connector used as CRUD interface
 	 */
-	connector: Connector<KeyT, VisibilityT, CustomT>;
+	connector: Connector;
 	/**
 	 * Callback for serializing data before passing it to the backend connector
 	 * @param data The selector data to serialize
@@ -57,7 +55,7 @@ export interface UseCrudSelectParams<
 	 *   data on add.
 	 */
 	deserializeModel: (
-		data: Record<string, unknown>,
+		data: ModelRecord<M>,
 	) => Promise<Omit<DataT, "value">> | Omit<DataT, "value">;
 	/**
 	 * Called once per newly-added entry, before it is serialized/created.
@@ -95,14 +93,11 @@ export interface UseCrudSelectParams<
 	/**
 	 * Get ID of data
 	 */
-	getIdOfData: NonNullable<
-		BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>["getIdOfData"]
-	>;
+	getIdOfData: NonNullable<BackendMultiSelectProps<M, DataT>["getIdOfData"]>;
 }
 
 export interface UseCrudSelectResult<
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	KeyT extends ModelFieldName,
+	M extends ModelUnknown,
 	DataT extends BaseSelectorData,
 > {
 	/**
@@ -135,7 +130,7 @@ export interface UseCrudSelectResult<
 	 * Conversion function for model data to selection data (handles special case when data comes from CRUD controller)
 	 * @param data The model data
 	 */
-	modelToSelectorData: (data: Record<string, unknown>) => Promise<DataT>;
+	modelToSelectorData: (data: ModelRecord<M>) => Promise<DataT>;
 }
 
 export interface CrudSelectDispatch<DataT extends BaseSelectorData> {
@@ -153,15 +148,10 @@ const nextTicket = () => {
 	return ticketCounter;
 };
 
-const useCrudSelect = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
-	DataT extends BaseSelectorData,
->(
-	params: UseCrudSelectParams<KeyT, VisibilityT, CustomT, DataT>,
+const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
+	params: UseCrudSelectParams<M, DataT>,
 	ref: ForwardedRef<CrudSelectDispatch<DataT>>,
-): UseCrudSelectResult<KeyT, DataT> => {
+): UseCrudSelectResult<M, DataT> => {
 	const {
 		connector,
 		serialize,
@@ -385,7 +375,7 @@ const useCrudSelect = <
 	);
 
 	const modelToSelectorData = useCallback(
-		async (data: Record<string, unknown>): Promise<DataT> => {
+		async (data: ModelRecord<M>): Promise<DataT> => {
 			if (initialRawData.includes(data)) return deserialize(data);
 			const deserialized = (await deserializeModel(data)) as DataT;
 			// Use a stable value derived from the record id (not Math.random()),

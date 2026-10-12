@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import LazyConnector from "../../src/backend-integration/Connector/LazyConnector";
 import type ApiConnector from "../../src/backend-integration/Connector/ApiConnector";
-import type { PageVisibility } from "../../src/backend-integration/Model/Model";
 
 /**
  * The subset of the real connector the queue ever calls, so that a test can see exactly
@@ -28,14 +27,14 @@ const makeRealConnector = () => {
 		read: vi.fn(),
 		update: vi.fn(),
 		setApiEndpoint: vi.fn(),
-	} as unknown as ApiConnector<string, PageVisibility, unknown>;
+	} as unknown as ApiConnector;
 	return { connector, calls };
 };
 
 const makeLazy = () => {
 	const { connector, calls } = makeRealConnector();
 	return {
-		lazy: new LazyConnector<string, PageVisibility, unknown>(connector, true),
+		lazy: new LazyConnector(connector, true),
 		calls,
 	};
 };
@@ -55,7 +54,7 @@ const makeLazyOver = (rows: Record<string, unknown>[]) => {
 			]),
 	);
 	return {
-		lazy: new LazyConnector<string, PageVisibility, unknown>(connector, false),
+		lazy: new LazyConnector(connector, false),
 		calls,
 	};
 };
@@ -236,11 +235,7 @@ describe("LazyConnector.cancelQueuedOperation", () => {
 	it("notifies the queue change handler when it cancels, and only then", () => {
 		const { connector } = makeRealConnector();
 		const onQueueChange = vi.fn();
-		const lazy = new LazyConnector<string, PageVisibility, unknown>(
-			connector,
-			true,
-			onQueueChange,
-		);
+		const lazy = new LazyConnector(connector, true, onQueueChange);
 		lazy.delete("solo", undefined);
 		onQueueChange.mockClear();
 
@@ -277,7 +272,7 @@ describe("LazyConnector workQueue", () => {
 				: Promise.resolve();
 		});
 		return {
-			lazy: new LazyConnector<string, PageVisibility, unknown>(connector, true),
+			lazy: new LazyConnector(connector, true),
 			calls,
 		};
 	};

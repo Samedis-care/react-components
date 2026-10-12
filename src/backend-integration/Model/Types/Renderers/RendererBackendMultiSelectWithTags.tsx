@@ -1,6 +1,6 @@
 import React from "react";
 import { FormHelperText } from "@mui/material";
-import { ModelFieldName, ModelIdFilterData, PageVisibility } from "../../Model";
+import { ModelIdFilterData, ModelRecord, ModelUnknown } from "../../Model";
 import ModelRenderParams from "../../RenderParams";
 import BackendMultiSelectWithTags, {
 	BackendMultiSelectWithTagsProps,
@@ -25,24 +25,16 @@ type OmitProperties =
  * Renders TypeEnum as drop-down selector (with search)
  */
 class RendererBackendMultiSelectWithTags<
-	GroupKeyT extends ModelFieldName,
-	DataKeyT extends ModelFieldName,
-	GroupVisibilityT extends PageVisibility,
-	DataVisibilityT extends PageVisibility,
-	GroupCustomT,
-	DataCustomT,
+	GroupModelT extends ModelUnknown,
+	DataModelT extends ModelUnknown,
 	GroupDataT extends BaseSelectorData,
 	DataDataT extends MultiSelectorData,
 > extends TypeIds {
 	idFilter?: ModelIdFilterData;
 	private readonly props: Omit<
 		BackendMultiSelectWithTagsProps<
-			GroupKeyT,
-			DataKeyT,
-			GroupVisibilityT,
-			DataVisibilityT,
-			GroupCustomT,
-			DataCustomT,
+			GroupModelT,
+			DataModelT,
 			GroupDataT,
 			DataDataT
 		>,
@@ -52,12 +44,8 @@ class RendererBackendMultiSelectWithTags<
 	constructor(
 		props: Omit<
 			BackendMultiSelectWithTagsProps<
-				GroupKeyT,
-				DataKeyT,
-				GroupVisibilityT,
-				DataVisibilityT,
-				GroupCustomT,
-				DataCustomT,
+				GroupModelT,
+				DataModelT,
 				GroupDataT,
 				DataDataT
 			>,
@@ -66,6 +54,7 @@ class RendererBackendMultiSelectWithTags<
 	) {
 		super();
 		this.props = props;
+		// the grid's ID filter selects records of the same relation model
 		this.idFilter = {
 			...props,
 			groupSorter: undefined,
@@ -74,7 +63,7 @@ class RendererBackendMultiSelectWithTags<
 			sort: props.dataSort,
 			lru: undefined,
 			endAdornment: undefined,
-		};
+		} as unknown as ModelIdFilterData;
 	}
 
 	render(params: ModelRenderParams<string[]>): React.ReactElement {
@@ -129,8 +118,9 @@ class RendererBackendMultiSelectWithTags<
 						onChange={(value) => handleChange(field, value)}
 						disabled={visibility.readOnly}
 						required={visibility.required}
-						dataModel={relationModel}
-						initialData={relationData}
+						dataModel={relationModel as DataModelT}
+						// the form's relations hold deserialized records of the relation model
+						initialData={relationData as ModelRecord<DataModelT>[] | undefined}
 						title={label}
 						{...this.props}
 						dirty={dirty}

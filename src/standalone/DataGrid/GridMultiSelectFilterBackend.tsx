@@ -9,17 +9,12 @@ import BackendMultipleSelect, {
 	BackendMultipleSelectProps,
 } from "../../backend-components/Selector/BackendMultipleSelect";
 import BackendMultiSelect from "../../backend-components/Selector/BackendMultiSelect";
-import { ModelFieldName, PageVisibility } from "../../backend-integration";
+import { ModelUnknown } from "../../backend-integration";
 
 export interface GridMultiSelectFilterBackendProps<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
+	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
-> extends Omit<
-	BackendMultipleSelectProps<KeyT, VisibilityT, CustomT, DataT>,
-	"classes"
-> {
+> extends Omit<BackendMultipleSelectProps<M, DataT>, "classes"> {
 	/**
 	 * Is the grid filter rendered in a dialog?
 	 */
@@ -64,12 +59,10 @@ export type GridMultiSelectFilterBackendClassKey = "dialogRoot" | "barRoot";
 
 const EMPTY_STRING_ARRAY: string[] = [];
 const GridMultiSelectFilterBackend = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
+	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
 >(
-	inProps: GridMultiSelectFilterBackendProps<KeyT, VisibilityT, CustomT, DataT>,
+	inProps: GridMultiSelectFilterBackendProps<M, DataT>,
 ) => {
 	const props = useThemeProps({
 		props: inProps,

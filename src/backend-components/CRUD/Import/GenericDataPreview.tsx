@@ -10,10 +10,8 @@ import uniqueArray from "../../../utils/uniqueArray";
 import { DataGrid, DataGridNoPersist } from "../../../standalone";
 import throwError from "../../../utils/throwError";
 import {
-	Model,
-	ModelFieldName,
+	ModelUnknown,
 	ModelVisibilityGridView,
-	PageVisibility,
 } from "../../../backend-integration";
 
 export type GenericDataType = string | number | Date | null;
@@ -22,7 +20,7 @@ export interface GenericDataPreviewProps {
 	/**
 	 * The model to render data with
 	 */
-	model?: Model<ModelFieldName, PageVisibility, unknown>;
+	model?: ModelUnknown;
 	/**
 	 * The generic data, should be a Record<string, GenericDataType>
 	 */

@@ -162,9 +162,9 @@ export interface IDialogConfigSign {
 	 */
 	penColor?: string;
 	/**
-	 * The base64 string of signature
+	 * The base64 string of signature, null while unsigned
 	 */
-	signature: string;
+	signature: string | null;
 	/**
 	 * Callback method which returns signature base64 string
 	 */

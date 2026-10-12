@@ -13,7 +13,7 @@ import FileUpload, {
 	FileUploadDispatch,
 	FileUploadProps,
 } from "../../standalone/FileUpload/Generic";
-import { Connector, PageVisibility } from "../../backend-integration";
+import { Connector } from "../../backend-integration";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
 import { ErrorComponentProps } from "../Form";
 import { Loader } from "../../standalone";
@@ -27,7 +27,7 @@ export interface CrudFileUploadProps extends Omit<
 	 * The backend connector used as CRUD interface
 	 * @remarks Passing null will render an readOnly control
 	 */
-	connector: Connector<string, PageVisibility, unknown> | null;
+	connector: Connector | null;
 	/**
 	 * The error component that is used to display errors
 	 */

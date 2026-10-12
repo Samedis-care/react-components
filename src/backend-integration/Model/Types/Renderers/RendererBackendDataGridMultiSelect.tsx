@@ -1,6 +1,6 @@
 import React from "react";
 import { FormControl } from "@mui/material";
-import { ModelFieldName, PageVisibility } from "../../Model";
+import { ModelUnknown } from "../../Model";
 import ModelRenderParams from "../../RenderParams";
 import BackendDataGridMultiSelect, {
 	BackendDataGridMultiSelectProps,
@@ -14,20 +14,15 @@ type OmitProperties = "selected" | "onChange" | "readOnly" | "model";
  * Renders TypeEnum as drop-down selector (with search)
  */
 class RendererBackendDataGridMultiSelect<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
+	M extends ModelUnknown,
 > extends TypeIds {
 	private readonly props?: Omit<
-		BackendDataGridMultiSelectProps<KeyT, VisibilityT, CustomT>,
+		BackendDataGridMultiSelectProps<M>,
 		OmitProperties
 	>;
 
 	constructor(
-		props?: Omit<
-			BackendDataGridMultiSelectProps<KeyT, VisibilityT, CustomT>,
-			OmitProperties
-		>,
+		props?: Omit<BackendDataGridMultiSelectProps<M>, OmitProperties>,
 	) {
 		super();
 		this.props = props;

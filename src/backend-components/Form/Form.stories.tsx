@@ -10,10 +10,13 @@ import DefaultFormPage from "./DefaultFormPage";
 import DefaultErrorComponent from "./DefaultErrorComponent";
 import createTestModel from "../../stories/test-utils/TestModel";
 import createMixedControlModel from "../../stories/test-utils/MixedControlModel";
-import { ModelFieldName, PageVisibility } from "../../backend-integration";
+import { ModelFieldName } from "../../backend-integration";
 import { PageProps } from "./Form";
 import DirtyStateProvider from "./DirtyStateProvider";
 import { DirtyStateMarks } from "./DirtyStateContext";
+
+type TestModel = ReturnType<typeof createTestModel>;
+type MixedControlModel = ReturnType<typeof createMixedControlModel>;
 
 const FrameworkDecorator = (Story: React.ComponentType) => (
 	<Framework>
@@ -36,7 +39,7 @@ interface FormCustomProps {
 	autoFocus?: ModelFieldName;
 }
 
-const FormContent = (props: PageProps<ModelFieldName, FormCustomProps>) => {
+const FormContent = (props: PageProps<TestModel, FormCustomProps>) => {
 	const handleGoBack = useCallback(() => {
 		props.customProps.goBack();
 	}, [props.customProps]);
@@ -77,7 +80,7 @@ const CreateFormStory = () => {
 		console.log("Go back");
 	}, []);
 	return (
-		<Form<ModelFieldName, PageVisibility, null, FormCustomProps>
+		<Form
 			model={model}
 			id={null}
 			errorComponent={DefaultErrorComponent}
@@ -100,7 +103,7 @@ const EditFormStory = () => {
 		console.log("Go back");
 	}, []);
 	return (
-		<Form<ModelFieldName, PageVisibility, null, FormCustomProps>
+		<Form
 			model={model}
 			id="1"
 			errorComponent={DefaultErrorComponent}
@@ -153,7 +156,7 @@ const MIXED_FIELDS: ModelFieldName[] = [
 ];
 
 const MixedFormContent = (
-	props: PageProps<ModelFieldName, FormCustomProps>,
+	props: PageProps<MixedControlModel, FormCustomProps>,
 ) => {
 	const handleGoBack = useCallback(() => {
 		props.customProps.goBack();
@@ -197,7 +200,7 @@ const mergeProposedChanges = (
 ): DirtyStateMarks => ({ ...formDirtyFields, ...PROPOSED_CHANGES });
 
 const ProposedChangesFormContent = (
-	props: PageProps<ModelFieldName, FormCustomProps>,
+	props: PageProps<MixedControlModel, FormCustomProps>,
 ) => (
 	<DirtyStateProvider marks={mergeProposedChanges}>
 		<MixedFormContent {...props} />
@@ -207,7 +210,7 @@ const ProposedChangesFormContent = (
 const MixedFormStory = (props: {
 	showDirtyState?: boolean;
 	autoFocus?: ModelFieldName;
-	content?: React.ComponentType<PageProps<ModelFieldName, FormCustomProps>>;
+	content?: React.ComponentType<PageProps<MixedControlModel, FormCustomProps>>;
 }) => {
 	const model = useMemo(createMixedControlModel, []);
 	const goBack = useCallback(() => {
@@ -215,7 +218,7 @@ const MixedFormStory = (props: {
 		console.log("Go back");
 	}, []);
 	return (
-		<Form<ModelFieldName, PageVisibility, null, FormCustomProps>
+		<Form
 			model={model}
 			id="1"
 			errorComponent={DefaultErrorComponent}

@@ -5,7 +5,7 @@ import { expect, waitFor } from "storybook/test";
 import { Button } from "@mui/material";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
 import type ApiConnector from "../../backend-integration/Connector/ApiConnector";
-import type { PageVisibility } from "../../backend-integration";
+
 import type { FileUploadDispatch } from "../../standalone/FileUpload/Generic";
 import { Framework } from "../../framework";
 import CrudFileUpload, { BackendFileMeta } from "./CrudFileUpload";
@@ -115,10 +115,7 @@ const LazyFileUploadStory = () => {
 		// fakeReads false is what a form uses for an existing record: reads go to the
 		// backend, writes are queued. MockConnector stands in for the API connector,
 		// whose endpoint handling only matters once the queue is worked.
-		return new LazyConnector<string, PageVisibility, unknown>(
-			mock as unknown as ApiConnector<string, PageVisibility, unknown>,
-			false,
-		);
+		return new LazyConnector(mock as unknown as ApiConnector, false);
 	}, []);
 	const dispatch = useRef<FileUploadDispatch>(null);
 	// stands in for the form submitting: the queue is worked, and something re-renders

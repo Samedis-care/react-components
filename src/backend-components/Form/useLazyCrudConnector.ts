@@ -1,19 +1,11 @@
 import { useCallback, useEffect, useRef } from "react";
 import DefaultConnector from "../../backend-integration/Connector/DefaultConnector";
-import {
-	ModelFieldName,
-	PageVisibility,
-} from "../../backend-integration/Model/Model";
+import { ModelUnknown } from "../../backend-integration/Model/Model";
 import ApiConnector from "../../backend-integration/Connector/ApiConnector";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
 import { useFormContext } from "./Form";
 
-export interface UseLazyCrudConnectorParams<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
-	ExtraT = undefined,
-> {
+export interface UseLazyCrudConnectorParams<ExtraT = undefined> {
 	/**
 	 * The custom field name (must not be in model)
 	 */
@@ -39,39 +31,30 @@ export interface UseLazyCrudConnectorParams<
 	getConnector?: (
 		initialEndpoint: string,
 		extraParams: ExtraT | undefined,
-	) => ApiConnector<KeyT, VisibilityT, CustomT>;
+	) => ApiConnector;
 	/**
 	 * Callback to configure the connector after it got created by getConnector
 	 * @param connector The connector which was created by getConnector
 	 */
-	configureConnector?: (
-		connector: ApiConnector<KeyT, VisibilityT, CustomT>,
-	) => void;
+	configureConnector?: (connector: ApiConnector) => void;
 	/**
 	 * The initial ID to use for getEndpoint
 	 */
 	initialId: string | null;
 }
 
-export interface UseLazyCrudConnectorResult<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
-> {
-	connector: LazyConnector<KeyT, VisibilityT, CustomT>;
+export interface UseLazyCrudConnectorResult {
+	connector: LazyConnector;
 }
 
 export const extractLazyCrudConnectorParams = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
 	ExtraT,
-	T extends UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>,
+	T extends UseLazyCrudConnectorParams<ExtraT>,
 >(
 	data: T,
 ): [
-	UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>,
-	Omit<T, keyof UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>>,
+	UseLazyCrudConnectorParams<ExtraT>,
+	Omit<T, keyof UseLazyCrudConnectorParams<ExtraT>>,
 ] => {
 	const {
 		getEndpoint,
@@ -83,27 +66,21 @@ export const extractLazyCrudConnectorParams = <
 		field,
 		...otherProps
 	} = data;
-	const params: UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT> =
-		{
-			getEndpoint,
-			initialId,
-			getConnector,
-			configureConnector,
-			onParentIdChange,
-			extraParams,
-			field,
-		};
+	const params: UseLazyCrudConnectorParams<ExtraT> = {
+		getEndpoint,
+		initialId,
+		getConnector,
+		configureConnector,
+		onParentIdChange,
+		extraParams,
+		field,
+	};
 	return [params, otherProps];
 };
 
-const useLazyCrudConnector = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
-	ExtraT = undefined,
->(
-	params: UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>,
-): UseLazyCrudConnectorResult<KeyT, VisibilityT, CustomT> => {
+const useLazyCrudConnector = <ExtraT = undefined>(
+	params: UseLazyCrudConnectorParams<ExtraT>,
+): UseLazyCrudConnectorResult => {
 	// when updating params, also update extractLazyCrudConnectorParams
 	const {
 		getEndpoint,
@@ -121,7 +98,7 @@ const useLazyCrudConnector = <
 		getCustomState,
 		setCustomState,
 		onlySubmitMounted,
-	} = useFormContext();
+	} = useFormContext<ModelUnknown>();
 
 	const getEndpointWrap = useCallback(
 		(currentId: string) => {
@@ -135,7 +112,7 @@ const useLazyCrudConnector = <
 		| ((
 				initialEndpoint: string,
 				extraParams: ExtraT | undefined,
-		  ) => ApiConnector<KeyT, VisibilityT, CustomT>)
+		  ) => ApiConnector)
 		| null;
 	if (!getConnector) throw new Error("No default connector set");
 
@@ -148,10 +125,10 @@ const useLazyCrudConnector = <
 		[getConnector, configureConnector],
 	);
 
-	const uploadConnector = useRef<LazyConnector<KeyT, VisibilityT, CustomT>>(
-		getCustomState<LazyConnector<KeyT, VisibilityT, CustomT>>(field) ??
-			((): LazyConnector<KeyT, VisibilityT, CustomT> => {
-				return new LazyConnector<KeyT, VisibilityT, CustomT>(
+	const uploadConnector = useRef<LazyConnector>(
+		getCustomState<LazyConnector>(field) ??
+			((): LazyConnector => {
+				return new LazyConnector(
 					getConnectorWrap(getEndpointWrap(initialId ?? "null"), extraParams),
 					initialId === null,
 					(queue) => {
@@ -170,10 +147,7 @@ const useLazyCrudConnector = <
 	// set post submit handler for lazy connector
 	useEffect(() => {
 		const connector = uploadConnector.current;
-		setCustomState<LazyConnector<KeyT, VisibilityT, CustomT>>(
-			field,
-			() => connector,
-		);
+		setCustomState<LazyConnector>(field, () => connector);
 
 		const submitHandler = async (id: string) => {
 			// update API endpoint and disable fakeReads, then send requests

@@ -13,9 +13,9 @@ import {
 	SelectorLruOptions,
 	SingleSelect,
 } from "../../standalone";
-import Model, {
-	ModelFieldName,
-	PageVisibility,
+import {
+	ModelRecord,
+	ModelUnknown,
 } from "../../backend-integration/Model/Model";
 import debouncePromise from "../../utils/debouncePromise";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -24,22 +24,18 @@ import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 export type BackendSingleSelectLruOptions<DataT extends BaseSelectorData> =
 	Omit<SelectorLruOptions<DataT>, "loadData">;
 
-export interface BackendSingleSelectProps<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
-> extends Omit<
+export interface BackendSingleSelectProps<M extends ModelUnknown> extends Omit<
 	BaseSelectorProps<BaseSelectorData, false>,
 	"onLoad" | "selected" | "onSelect" | "lru"
 > {
 	/**
 	 * The model to use
 	 */
-	model: Model<KeyT, VisibilityT, CustomT>;
+	model: M;
 	/**
 	 * The model to use for fetch requests (to enable request batching)
 	 */
-	modelFetch?: Model<KeyT, VisibilityT, CustomT>;
+	modelFetch?: M;
 	/**
 	 * The debounce time for search in ms
 	 * @default 500
@@ -50,7 +46,7 @@ export interface BackendSingleSelectProps<
 	 * @param modelData The model data
 	 */
 	modelToSelectorData: (
-		modelData: Record<string, unknown>,
+		modelData: ModelRecord<M>,
 	) => Promise<BaseSelectorData> | BaseSelectorData;
 	/**
 	 * The amount of search results to load (defaults to 25)
@@ -72,7 +68,7 @@ export interface BackendSingleSelectProps<
 	/**
 	 * Initial data (model format) used for selected cache
 	 */
-	initialData?: Record<string, unknown>[];
+	initialData?: ModelRecord<M>[];
 	/**
 	 * LRU settings
 	 */
@@ -104,7 +100,7 @@ export interface BackendSingleSelectProps<
  * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)
  */
 export type BackendSingleSelectThemeProps = Omit<
-	BackendSingleSelectProps<ModelFieldName, PageVisibility, unknown>,
+	BackendSingleSelectProps<ModelUnknown>,
 	| "model"
 	| "modelFetch"
 	| "modelToSelectorData"
@@ -116,12 +112,8 @@ export type BackendSingleSelectThemeProps = Omit<
 	| "onSelectFreeSolo"
 >;
 
-const BackendSingleSelect = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
->(
-	inProps: BackendSingleSelectProps<KeyT, VisibilityT, CustomT>,
+const BackendSingleSelect = <M extends ModelUnknown>(
+	inProps: BackendSingleSelectProps<M>,
 ) => {
 	const props = useThemeProps({
 		props: inProps,

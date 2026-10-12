@@ -16,7 +16,7 @@ import type { ErrorComponentProps } from "../../../src/backend-components/Form";
 import LazyConnector from "../../../src/backend-integration/Connector/LazyConnector";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import type ApiConnector from "../../../src/backend-integration/Connector/ApiConnector";
-import type { PageVisibility } from "../../../src/backend-integration";
+
 import type {
 	FileData,
 	FileMeta,
@@ -159,10 +159,7 @@ class GatedConnector extends MockConnector {
 const lazyOver = (connector: MockConnector) =>
 	// fakeReads false is what a form uses for an existing record: reads go to the
 	// backend, writes are queued
-	new LazyConnector<string, PageVisibility, unknown>(
-		connector as unknown as ApiConnector<string, PageVisibility, unknown>,
-		false,
-	);
+	new LazyConnector(connector as unknown as ApiConnector, false);
 
 type Harness = ReturnType<typeof renderUpload>;
 

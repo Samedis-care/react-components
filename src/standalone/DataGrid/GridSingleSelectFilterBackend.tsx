@@ -7,14 +7,12 @@ import { Breakpoint } from "@mui/material/styles";
 import BackendSingleSelect, {
 	BackendSingleSelectProps,
 } from "../../backend-components/Selector/BackendSingleSelect";
-import { ModelFieldName, PageVisibility } from "../../backend-integration";
+import { ModelUnknown } from "../../backend-integration";
 
 export interface GridSingleSelectFilterBackendProps<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
+	M extends ModelUnknown,
 > extends Omit<
-	BackendSingleSelectProps<KeyT, VisibilityT, CustomT>,
+	BackendSingleSelectProps<M>,
 	"classes" | "className" | "disableClearable"
 > {
 	/**
@@ -24,9 +22,7 @@ export interface GridSingleSelectFilterBackendProps<
 	/**
 	 * Non-optional selection handler
 	 */
-	onSelect: NonNullable<
-		BackendSingleSelectProps<KeyT, VisibilityT, CustomT>["onSelect"]
-	>;
+	onSelect: NonNullable<BackendSingleSelectProps<M>["onSelect"]>;
 	/**
 	 * Is the grid filter rendered in a dialog?
 	 */
@@ -73,12 +69,8 @@ export const DataGridCustomFilterSingleBackend = styled(BackendSingleSelect, {
 	},
 })) as typeof BackendSingleSelect;
 
-const GridSingleSelectFilterBackend = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
->(
-	inProps: GridSingleSelectFilterBackendProps<KeyT, VisibilityT, CustomT>,
+const GridSingleSelectFilterBackend = <M extends ModelUnknown>(
+	inProps: GridSingleSelectFilterBackendProps<M>,
 ) => {
 	const props = useThemeProps({
 		props: inProps,

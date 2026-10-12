@@ -1,10 +1,6 @@
 import React from "react";
 import { FormHelperText } from "@mui/material";
-import Model, {
-	ModelFieldName,
-	ModelIdFilterData,
-	PageVisibility,
-} from "../../Model";
+import { ModelIdFilterData, ModelRecord, ModelUnknown } from "../../Model";
 import ModelRenderParams from "../../RenderParams";
 import TypeId from "../TypeId";
 import { BackendSingleSelectProps } from "../../../../backend-components/Selector/BackendSingleSelect";
@@ -17,54 +13,37 @@ import {
 type OmitProperties =
 	"selected" | "onSelect" | "disabled" | "model" | "initialData" | "autoFocus";
 
-export type RendererBackendSingleSelectProps<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
-> = Omit<
-	FormBackendSingleSelectProps<KeyT, VisibilityT, CustomT>,
+export type RendererBackendSingleSelectProps<M extends ModelUnknown> = Omit<
+	FormBackendSingleSelectProps<M>,
 	OmitProperties | "modelFetch"
 > & {
 	// model fetch with callback for current values, works similar to ModelFieldDefinition getRelationModel
 	modelFetch?:
-		| BackendSingleSelectProps<KeyT, VisibilityT, CustomT>["modelFetch"]
+		| BackendSingleSelectProps<M>["modelFetch"]
 		| ((
 				data: Record<string, unknown>,
-		  ) => BackendSingleSelectProps<KeyT, VisibilityT, CustomT>["modelFetch"]);
+		  ) => BackendSingleSelectProps<M>["modelFetch"]);
 };
 
 /**
  * Renders TypeEnum as drop-down selector (with search)
  */
-class RendererBackendSingleSelect<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
-> extends TypeId {
+class RendererBackendSingleSelect<M extends ModelUnknown> extends TypeId {
 	idFilter?: ModelIdFilterData;
-	private readonly props: RendererBackendSingleSelectProps<
-		KeyT,
-		VisibilityT,
-		CustomT
-	>;
+	private readonly props: RendererBackendSingleSelectProps<M>;
 
-	constructor(
-		props: RendererBackendSingleSelectProps<KeyT, VisibilityT, CustomT>,
-	) {
+	constructor(props: RendererBackendSingleSelectProps<M>) {
 		super();
 		this.props = props;
+		// the grid's ID filter selects records of the same relation model
 		this.idFilter = {
 			...props,
 			lru: undefined,
 			onAddNew: undefined,
 			classes: undefined,
 			endAdornment: undefined,
-			modelFetch: props.modelFetch as unknown as Model<
-				ModelFieldName,
-				PageVisibility,
-				unknown
-			>,
-		};
+			modelFetch: props.modelFetch as unknown as ModelUnknown,
+		} as ModelIdFilterData;
 	}
 
 	render(params: ModelRenderParams<string | null>): React.ReactElement {
@@ -109,11 +88,7 @@ class RendererBackendSingleSelect<
 					? this.props.modelFetch(values)
 					: this.props.modelFetch;
 
-			const typedRelationModel = relationModel as unknown as Model<
-				KeyT,
-				VisibilityT,
-				CustomT
-			>;
+			const typedRelationModel = relationModel as unknown as M;
 
 			return (
 				<FormControlFieldsetCC
@@ -126,14 +101,15 @@ class RendererBackendSingleSelect<
 					onBlur={handleBlur}
 					name={field}
 				>
-					<FormBackendSingleSelect<KeyT, VisibilityT, CustomT>
+					<FormBackendSingleSelect<M>
 						selected={value}
 						label={label}
 						onSelect={(value) => handleChange(field, value)}
 						disabled={visibility.readOnly}
 						required={visibility.required}
 						model={typedRelationModel}
-						initialData={relationData}
+						// the form's relations hold deserialized records of the relation model
+						initialData={relationData as ModelRecord<M>[] | undefined}
 						{...this.props}
 						dirty={dirty}
 						autoFocus={autoFocus}

@@ -17,25 +17,32 @@ export type RendererEnumSelectProps = Omit<
 	"selected" | "onLoad" | "onSelect" | "disabled" | "autoFocus"
 >;
 
-export type AdvancedEnumValue = Omit<BaseSelectorData, "label"> &
-	Pick<EnumValue, "getLabel" | "invisible" | "invisibleInGridFilter">;
+export type AdvancedEnumValue<T extends string = string> = Omit<
+	BaseSelectorData,
+	"label" | "value"
+> &
+	Pick<
+		EnumValue<T>,
+		"value" | "getLabel" | "invisible" | "invisibleInGridFilter"
+	>;
 
 /**
  * Renders TypeEnum as drop-down selector (with search)
  */
-class RendererEnumSelect extends TypeEnum {
+class RendererEnumSelect<T extends string = string> extends TypeEnum<T> {
 	private props?: RendererEnumSelectProps;
 
 	constructor(
-		values: AdvancedEnumValue[],
+		values: AdvancedEnumValue<T>[],
+		defaultValue: NoInfer<T>,
 		props?: RendererEnumSelectProps,
 		numericMode = false,
 	) {
-		super(values, numericMode);
+		super(values, defaultValue, numericMode);
 		this.props = props;
 	}
 
-	render(params: ModelRenderParams<string>): React.ReactElement {
+	render(params: ModelRenderParams<T>): React.ReactElement {
 		const {
 			visibility,
 			field,
@@ -97,11 +104,19 @@ class RendererEnumSelect extends TypeEnum {
 				>
 					<SingleSelect
 						refreshToken={this.values.map((e) => e.value).join(",")}
+						// only an enum that starts empty can be emptied
+						disableClearable={this.defaultValue !== ""}
 						{...this.props}
 						label={label}
 						selected={selected}
 						onLoad={onLoad}
-						onSelect={(value) => handleChange(field, value ? value.value : "")}
+						// the options are the enum's values
+						onSelect={(value) =>
+							handleChange(
+								field,
+								value ? (value.value as T) : this.defaultValue,
+							)
+						}
 						disabled={visibility.readOnly}
 						required={visibility.required}
 						dirty={dirty}

@@ -3,6 +3,7 @@ import React from "react";
 import { act, cleanup, render, waitFor } from "@testing-library/react";
 import { Framework } from "../../../src/framework";
 import Form, {
+	FormContextData,
 	useFormContext,
 } from "../../../src/backend-components/Form/Form";
 import FormAutoSave from "../../../src/backend-components/Form/FormAutoSave";
@@ -11,10 +12,11 @@ import {
 	Model,
 	ModelDataTypeImageRenderer,
 	ModelDataTypeStringRendererMUI,
+	ModelUnknown,
+	ModelVisibilityDisabled,
 	ModelVisibilityEdit,
 	ModelVisibilityGridView,
 	ModelVisibilityHidden,
-	ModelVisibilityDisabled,
 } from "../../../src/backend-integration";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 
@@ -68,10 +70,10 @@ const createImageModel = () => {
 	return { model, update };
 };
 
-const renderForm = (model: Model<string, never, unknown>, autoSave = false) => {
-	const sink: { ctx?: ReturnType<typeof useFormContext> } = {};
+const renderForm = (model: ModelUnknown, autoSave = false) => {
+	const sink: { ctx?: FormContextData<ModelUnknown> } = {};
 	const Children = () => {
-		sink.ctx = useFormContext();
+		sink.ctx = useFormContext<ModelUnknown>();
 		return autoSave ? <FormAutoSave debounceTime={0} /> : null;
 	};
 	render(
@@ -89,7 +91,7 @@ const png = (name: string) => new File(["png"], name, { type: "image/png" });
 describe("Form with a picked image (Blob) as value", () => {
 	it("is dirty for a picked image, and submits the File itself", async () => {
 		const { model, update } = createImageModel();
-		const sink = renderForm(model as never);
+		const sink = renderForm(model);
 		await waitFor(() => expect(sink.ctx?.values.id).toBe("1"));
 
 		const image = png("a.png");
@@ -104,7 +106,7 @@ describe("Form with a picked image (Blob) as value", () => {
 
 	it("saves a second picked image automatically, though it looks like the first in JSON", async () => {
 		const { model, update } = createImageModel();
-		const sink = renderForm(model as never, true);
+		const sink = renderForm(model, true);
 		await waitFor(() => expect(sink.ctx?.values.id).toBe("1"));
 
 		const first = png("a.png");

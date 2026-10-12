@@ -12,7 +12,7 @@ import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
 import { FrameworkHistory } from "../../framework/History";
 import { useDialogContext } from "../../framework/DialogContextProvider";
 import { captureError } from "../../framework/ErrorReporting";
-import { ModelFieldName } from "../../backend-integration/Model/Model";
+import { ModelUnknown } from "../../backend-integration/Model/Model";
 import {
 	showConfirmDialog,
 	showConfirmDialogBool,
@@ -30,7 +30,7 @@ import { useThemeProps } from "@mui/material";
 import { CrudFormProps } from "../CRUD";
 
 export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<
-	PageProps<ModelFieldName, CustomPropsT>,
+	PageProps<ModelUnknown, CustomPropsT>,
 	"submit" | "safeSubmit" | "dirty"
 > {
 	/**
@@ -55,7 +55,7 @@ export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<
 	/**
 	 * Optional read-only reasons
 	 */
-	readOnlyReasons: FormContextData["readOnlyReasons"];
+	readOnlyReasons: FormContextData<ModelUnknown>["readOnlyReasons"];
 	/**
 	 * Show back button only when not enough permission
 	 */
@@ -94,7 +94,7 @@ export type EnhancedCustomProps<T> =
 export interface BasicFormPageProps<
 	RendererPropsT,
 	CustomPropsT,
-> extends PageProps<ModelFieldName, CustomPropsT> {
+> extends PageProps<ModelUnknown, CustomPropsT> {
 	/**
 	 * Called after submit successfully completed
 	 */
@@ -149,7 +149,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	} = props;
 	const { t } = useCCTranslations();
 	const { readOnly, readOnlyReasons, addEventListener, removeEventListener } =
-		useFormContextLite();
+		useFormContextLite<ModelUnknown>();
 	// the dirty prop is one render behind the form engine, which breaks "submit, then
 	// navigate away": the record is saved, but the guards below still see a dirty form.
 	// The dirty event fires as soon as the form engine sees the change, so this ref is

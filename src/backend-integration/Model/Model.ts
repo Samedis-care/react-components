@@ -97,20 +97,20 @@ export interface ModelFieldDefinition<
 	 * @param values All field values
 	 * @param field This field
 	 */
-	validate?: (
+	validate?(
 		value: TypeT,
 		values: Record<string, unknown>,
 		field: ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>,
-	) => Promise<string | null> | string | null;
+	): Promise<string | null> | string | null;
 	/**
 	 * Callback to validate field to provide optional hints
+	 * @see validate
 	 */
-	validateHint?: ModelFieldDefinition<
-		TypeT,
-		KeyT,
-		VisibilityT,
-		CustomT
-	>["validate"];
+	validateHint?(
+		value: TypeT,
+		values: Record<string, unknown>,
+		field: ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>,
+	): Promise<string | null> | string | null;
 	/**
 	 * User-defined data
 	 */
@@ -123,62 +123,235 @@ export interface ModelFieldDefinition<
 	 * @param getFieldValue Allow getting another field value
 	 * @returns The updated value (can be modified by this handler)
 	 */
-	onChange?: (
+	onChange?(
 		value: TypeT,
-		model: Model<KeyT, VisibilityT, CustomT>,
-		setFieldValue: (
-			field: KeyT,
-			value: unknown,
-			shouldValidate?: boolean,
-			triggerOnChange?: boolean,
-		) => void,
-		getFieldValue: (field: KeyT) => unknown,
-	) => TypeT;
+		model: ModelUnknown,
+		setFieldValue: ModelSetFieldValue<KeyT>,
+		getFieldValue: ModelGetFieldValue<KeyT>,
+	): TypeT;
 	/**
 	 * The referenced model for backend connected data types.
-	 * If TypeScript complains cast the return value to `Model<ModelFieldName, PageVisibility, unknown>`
 	 * @param id The current record ID
 	 * @param values Subset of the current record (select relevant data with getRelationModelValues)
 	 */
 	getRelationModel?: (
 		id: string | null,
 		values: Record<string, unknown>,
-	) => Model<ModelFieldName, PageVisibility, unknown>;
-	// TypeScript doesn't like the following definition (it would save you the cast):
-	//getRelationModel?: <
-	//	SubKeyT extends ModelFieldName,
-	//	SubVisibilityT extends PageVisibility,
-	//	SubCustomT
-	//>() => Model<SubKeyT, SubVisibilityT, SubCustomT>;
-	getRelationModelValues?: string[]; // actually KeyT[], but TypeScript doesn't like it
+	) => ModelUnknown;
+	/**
+	 * The fields of this model getRelationModel gets in its values
+	 */
+	getRelationModelValues?: KeyT[];
 }
 
-export type ModelField<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-> = Record<KeyT, ModelFieldDefinition<any, KeyT, VisibilityT, CustomT>>;
 export type ModelFieldName = "id" | string;
 
-export type ModelGetResponseRelations<KeyT extends ModelFieldName> = Partial<
-	Record<KeyT, Record<ModelFieldName, unknown>[]>
+/**
+ * Sets another field's value, as onChange gets it
+ * @remarks a method signature, so a model typed with other field names still fits
+ */
+export type ModelSetFieldValue<KeyT extends ModelFieldName> = {
+	set(
+		field: KeyT,
+		value: unknown,
+		shouldValidate?: boolean,
+		triggerOnChange?: boolean,
+	): void;
+}["set"];
+/**
+ * Gets another field's value, as onChange gets it
+ * @see ModelSetFieldValue
+ */
+export type ModelGetFieldValue<KeyT extends ModelFieldName> = {
+	get(field: KeyT): unknown;
+}["get"];
+
+/**
+ * A field definition of any model
+ */
+export type ModelFieldDefinitionUnknown = ModelFieldDefinition<
+	// any: Type<T> is invariant in T (RenderParams), so no other value type takes every field
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	any,
+	ModelFieldName,
+	PageVisibility,
+	unknown
+>;
+/**
+ * The field definitions of a model, by field name
+ */
+export type ModelFields = Record<ModelFieldName, ModelFieldDefinitionUnknown>;
+
+/**
+ * Rejects keys a field definition doesn't know (typos), which inferring the field definitions
+ * would accept
+ */
+export type ModelFieldsNoExtraKeys<FieldsT> = {
+	[K in keyof FieldsT]: string extends keyof FieldsT[K]
+		? unknown // not an object literal, its keys are not known
+		: {
+				[
+					P in Exclude<keyof FieldsT[K], keyof ModelFieldDefinitionUnknown>
+				]: never;
+			};
+};
+
+/**
+ * Requires a field's getDefaultValue to return what its type holds, which the field definitions'
+ * inference doesn't check. undefined falls back to the type's default value.
+ */
+export type ModelFieldsDefaultsMatchType<FieldsT> = {
+	[K in keyof FieldsT]: {
+		getDefaultValue?: () =>
+			| Promise<ModelFieldValue<FieldsT[K]> | undefined>
+			| ModelFieldValue<FieldsT[K]>
+			| undefined;
+	};
+};
+
+/**
+ * Any model
+ */
+
+export type ModelUnknown = Model;
+
+/**
+ * What the type helpers need of a model: its field definitions
+ */
+export interface ModelLike {
+	readonly fields: ModelFields;
+}
+
+/**
+ * The field names of a model
+ */
+export type ModelFieldNames<M extends ModelLike> = keyof M["fields"] & string;
+
+type IsAny<T> = 0 extends 1 & T ? true : false;
+
+/**
+ * The value type of a field definition
+ */
+export type ModelFieldValue<FieldT> = FieldT extends {
+	type: Type<infer T>;
+}
+	? IsAny<T> extends true
+		? unknown
+		: T
+	: never;
+
+/**
+ * The values of a model by field name (dot notation), as setFieldValue and getFieldValue see them
+ */
+export type ModelFieldValues<M extends ModelLike> =
+	string extends keyof M["fields"]
+		? Record<string, unknown>
+		: {
+				[K in ModelFieldNames<M>]: ModelFieldValue<M["fields"][K]>;
+			};
+
+type DotHead<K extends string> = K extends `${infer H}.${string}` ? H : K;
+
+/**
+ * A parent field's value merged with its child fields' object
+ * @remarks a parent that may be null (or undefined) stays so: deserializing assigns it over the
+ * child fields when it comes after them in the model
+ */
+type MergeParent<P, C> = unknown extends C
+	? P
+	: (NonNullable<P> & C) | Extract<P, null | undefined>;
+
+/**
+ * Turns dot notation keys into nested objects, the way Model and Form build records
+ */
+type DotsToNested<T> = {
+	[H in DotHead<keyof T & string>]: MergeParent<
+		H extends keyof T ? T[H] : unknown,
+		[Extract<keyof T, `${H}.${string}`>] extends [never]
+			? unknown
+			: DotsToNested<{
+					[
+						P in keyof T & string as P extends `${H}.${infer R}` ? R : never
+					]: T[P];
+				}>
+	>;
+};
+
+type Flatten<T> = T extends Date | Blob | readonly unknown[]
+	? T
+	: T extends object
+		? { [K in keyof T]: Flatten<T[K]> }
+		: T;
+
+type DeepPartial<T> = T extends Date | Blob | readonly unknown[]
+	? T
+	: T extends object
+		? { [K in keyof T]?: DeepPartial<T[K]> }
+		: T;
+
+/**
+ * A record of a model: the deserialized data and the form values, fields in dot notation nested
+ * @remarks a parent field (`a`) and its child fields (`a.b`) are merged into one object
+ */
+export type ModelRecord<M extends ModelLike> = string extends keyof M["fields"]
+	? Record<string, unknown>
+	: Flatten<DotsToNested<ModelFieldValues<M>>>;
+
+/**
+ * Some fields of a record of a model, as saving takes them: fields left out are not sent, and
+ * an id of null (or none) creates a new record
+ */
+export type ModelRecordPartial<M extends ModelLike> = Omit<
+	DeepPartial<ModelRecord<M>>,
+	"id"
+> & { id?: string | null };
+
+/**
+ * The custom data of a model's fields, a union over all fields
+ */
+export type ModelCustomData<M extends ModelLike> =
+	M["fields"][keyof M["fields"]]["customData"];
+
+/**
+ * Any model whose fields all carry custom data of type CustomT
+ */
+export type ModelWithCustomData<CustomT> = Model<
+	Record<
+		ModelFieldName,
+		ModelFieldDefinition<
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			any,
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			any,
+			PageVisibility,
+			CustomT
+		>
+	>
 >;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export type ModelData<KeyT extends ModelFieldName> = Record<string, unknown>;
+/**
+ * The related records of a record, by field name (records of the related models)
+ */
+export type ModelGetResponseRelations<M extends ModelLike> = Partial<
+	Record<ModelFieldNames<M>, Record<ModelFieldName, unknown>[]>
+>;
 
 /**
  * Response for GET single data entry
+ * @remarks Connectors return it for ModelUnknown: their data is not deserialized yet
  */
-export type ModelGetResponse<KeyT extends ModelFieldName> = [
-	ModelData<KeyT>, // the main data entry
-	ModelGetResponseRelations<KeyT>, // data in relations
+export type ModelGetResponse<M extends ModelLike> = [
+	ModelRecord<M>, // the main data entry
+	ModelGetResponseRelations<M>, // data in relations
 	unknown?, // optional user-defined data
 ];
 
-export type ModelIndexResponse = [
-	records: Record<string, unknown>[],
+/**
+ * Response for an index request
+ * @remarks The records only hold the fields visible in the overview
+ */
+export type ModelIndexResponse<M extends ModelLike> = [
+	records: ModelRecord<M>[],
 	meta: ResponseMeta,
 	userMeta?: unknown,
 ];
@@ -230,19 +403,15 @@ export interface ModelGetOptions {
  * @param id The record ID (or null to get default values on create)
  * @param options Extra options to pass to useQuery (defaults are provided for retry, staleTime and gcTime (last two only if configured in model))
  */
-export const useModelGet = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
->(
-	model: Model<KeyT, VisibilityT, CustomT>,
+export const useModelGet = <M extends ModelUnknown>(
+	model: M,
 	id: string | null,
 	options?: Omit<
-		UseQueryOptions<ModelGetResponse<KeyT>, Error, ModelGetResponse<KeyT>>,
+		UseQueryOptions<ModelGetResponse<M>, Error, ModelGetResponse<M>>,
 		"queryKey" | "queryFn"
 	> &
 		ModelGetOptions,
-): UseQueryResult<ModelGetResponse<KeyT>, Error> => {
+): UseQueryResult<ModelGetResponse<M>, Error> => {
 	return useQuery({
 		queryKey: model.getReactQueryKey(
 			id,
@@ -264,18 +433,14 @@ export const useModelGet = <
  * @returns ModelIndexResponse where userMeta and meta is taken from the last call
  * @see Model.fetchAll
  */
-export const useModelFetchAll = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
->(
-	model: Model<KeyT, VisibilityT, CustomT>,
+export const useModelFetchAll = <M extends ModelUnknown>(
+	model: M,
 	params?: ModelFetchAllParams,
 	options?: Omit<
-		UseQueryOptions<ModelIndexResponse, Error, ModelIndexResponse>,
+		UseQueryOptions<ModelIndexResponse<M>, Error, ModelIndexResponse<M>>,
 		"queryFn" | "queryKey"
 	>,
-): UseQueryResult<ModelIndexResponse, Error> => {
+): UseQueryResult<ModelIndexResponse<M>, Error> => {
 	return useQuery({
 		queryKey: model.getReactQueryKeyFetchAll(params),
 		queryFn: () => model.fetchAll(params),
@@ -297,18 +462,14 @@ export const useModelFetchAll = <
  * @see Model.getReactQueryKeyIndex
  * @see Model.invalidateIndexQueries
  */
-export const useModelIndex = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
->(
-	model: Model<KeyT, VisibilityT, CustomT>,
+export const useModelIndex = <M extends ModelUnknown>(
+	model: M,
 	params?: Partial<IDataGridLoadDataParameters>,
 	options?: Omit<
-		UseQueryOptions<ModelIndexResponse, Error, ModelIndexResponse>,
+		UseQueryOptions<ModelIndexResponse<M>, Error, ModelIndexResponse<M>>,
 		"queryFn" | "queryKey"
 	>,
-): UseQueryResult<ModelIndexResponse, Error> => {
+): UseQueryResult<ModelIndexResponse<M>, Error> => {
 	return useQuery({
 		queryKey: model.getReactQueryKeyIndex(params),
 		queryFn: () => model.index(params),
@@ -330,18 +491,14 @@ export const useModelIndex = <
  * @see Model.getReactQueryKeyIndex2
  * @see Model.invalidateIndex2Queries
  */
-export const useModelIndex2 = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
->(
-	model: Model<KeyT, VisibilityT, CustomT>,
+export const useModelIndex2 = <M extends ModelUnknown>(
+	model: M,
 	params: ConnectorIndex2Params,
 	options?: Omit<
-		UseQueryOptions<ModelIndexResponse, Error, ModelIndexResponse>,
+		UseQueryOptions<ModelIndexResponse<M>, Error, ModelIndexResponse<M>>,
 		"queryFn" | "queryKey"
 	>,
-): UseQueryResult<ModelIndexResponse, Error> => {
+): UseQueryResult<ModelIndexResponse<M>, Error> => {
 	return useQuery({
 		queryKey: model.getReactQueryKeyIndex2(params),
 		queryFn: () => model.index2(params),
@@ -357,23 +514,18 @@ export const useModelIndex2 = <
  * @param model The model
  * @see model.createOrUpdateRecordRaw
  */
-export const useModelMutation = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
-	TContext = unknown,
->(
-	model: Model<KeyT, VisibilityT, CustomT>,
+export const useModelMutation = <M extends ModelUnknown, TContext = unknown>(
+	model: M,
 ): UseMutationResult<
-	ModelGetResponse<KeyT>,
+	ModelGetResponse<M>,
 	Error,
-	Record<string, unknown>,
+	ModelRecordPartial<M>,
 	TContext
 > => {
 	return useMutation({
 		mutationKey: [model.modelId, "create-or-update"],
 		mutationFn: model.createOrUpdateRecordRaw.bind(model),
-		onSuccess: (responseData: ModelGetResponse<KeyT>, inputData) => {
+		onSuccess: (responseData: ModelGetResponse<M>, inputData) => {
 			const inputId = (inputData as { id: string | null }).id;
 			const id = (responseData[0] as Record<"id", string>).id;
 			if (!id) {
@@ -404,7 +556,7 @@ export const useModelMutation = <
 					updateForId(inputId);
 				}
 			}
-			model.triggerMutationEvent(!inputData.id, responseData);
+			model.triggerMutationEvent(!inputId, responseData);
 		},
 	});
 };
@@ -413,13 +565,8 @@ export const useModelMutation = <
  * React-Query's useMutation to delete a single record on backend
  * @param model The model
  */
-export const useModelDelete = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
-	TContext = unknown,
->(
-	model: Model<KeyT, VisibilityT, CustomT>,
+export const useModelDelete = <TContext = unknown>(
+	model: ModelUnknown,
 ): UseMutationResult<void, Error, string, TContext> => {
 	return useMutation({
 		mutationKey: [model.modelId, "delete"],
@@ -432,13 +579,8 @@ export const useModelDelete = <
  * React-Query's useMutation to delete multiple records by ID on backend
  * @param model The model
  */
-export const useModelDeleteMultiple = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
-	TContext = unknown,
->(
-	model: Model<KeyT, VisibilityT, CustomT>,
+export const useModelDeleteMultiple = <TContext = unknown>(
+	model: ModelUnknown,
 ): UseMutationResult<void, Error, string[], TContext> => {
 	return useMutation({
 		mutationKey: [model.modelId, "delete-multi"],
@@ -454,13 +596,8 @@ export const useModelDeleteMultiple = <
  * @param model The model
  * @see model.deleteAdvancedRaw
  */
-export const useModelDeleteAdvanced = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
-	TContext = unknown,
->(
-	model: Model<KeyT, VisibilityT, CustomT>,
+export const useModelDeleteAdvanced = <TContext = unknown>(
+	model: ModelUnknown,
 ): UseMutationResult<void, Error, AdvancedDeleteRequest, TContext> => {
 	return useMutation({
 		mutationKey: [model.modelId, "delete-adv"],
@@ -491,19 +628,19 @@ export const useModelDeleteAdvanced = <
  * Mutation event handler
  * @param data The response data
  */
-export type ModelEventMutation = <KeyT extends ModelFieldName>(
-	data: ModelGetResponse<KeyT>,
+export type ModelEventMutation<M extends ModelLike> = (
+	data: ModelGetResponse<M>,
 ) => void;
 
-export interface ModelHooks<KeyT extends ModelFieldName> {
+export interface ModelHooks {
 	/**
 	 * Hook fired on useModelMutation success
 	 * @param data The updated record
 	 */
-	onCreateOrUpdate?: (data: ModelGetResponse<KeyT>) => void;
+	onCreateOrUpdate?: (data: ModelGetResponse<ModelUnknown>) => void;
 }
 
-export interface ModelOptions<KeyT extends ModelFieldName> {
+export interface ModelOptions {
 	/**
 	 * Cache options
 	 */
@@ -511,7 +648,7 @@ export interface ModelOptions<KeyT extends ModelFieldName> {
 	/**
 	 * Hooks
 	 */
-	hooks?: ModelHooks<KeyT>;
+	hooks?: ModelHooks;
 	/**
 	 * Enable request batching: uses index requests instead of show requests using field filter for ID inSet to reduce the number of GET requests
 	 * Uses overview visibility settings, can be toggled for single requests using options there. This is the default value if not specified there
@@ -525,10 +662,14 @@ export interface ModelOptions<KeyT extends ModelFieldName> {
 	cacheKeysIndex?: unknown;
 }
 
+/**
+ * A data model: its fields and the connector to load and save them
+ * @typeParam FieldsT The field definitions, inferred by the constructor
+ * @typeParam KeyT The field names, follow from FieldsT
+ */
 class Model<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
+	FieldsT extends ModelFields = ModelFields,
+	KeyT extends ModelFieldName = keyof FieldsT & string,
 > {
 	/**
 	 * A unique model identifier, used for caching
@@ -537,11 +678,11 @@ class Model<
 	/**
 	 * The actual model definition
 	 */
-	public readonly fields: ModelField<KeyT, VisibilityT, CustomT>;
+	public readonly fields: FieldsT;
 	/**
 	 * The backend connector providing a CRUD interface for the model
 	 */
-	public connector: Connector<KeyT, VisibilityT, CustomT>;
+	public connector: Connector;
 	/**
 	 * Optional additional cache keys
 	 */
@@ -557,7 +698,7 @@ class Model<
 	/**
 	 * Hooks
 	 */
-	public readonly hooks: ModelHooks<KeyT>;
+	public readonly hooks: ModelHooks;
 	/**
 	 * @see ModelOptions.enableRequestBatching
 	 */
@@ -566,7 +707,7 @@ class Model<
 	 * The options passed in the constructor
 	 * @readonly
 	 */
-	public readonly options?: Readonly<ModelOptions<KeyT>>;
+	public readonly options?: Readonly<ModelOptions>;
 
 	/**
 	 * Global toggle to trigger auto validation of UX when constructor is called
@@ -582,6 +723,35 @@ class Model<
 	public static printDevWarnings = process.env.NODE_ENV === "development";
 
 	/**
+	 * The fields, by any field name
+	 */
+	private get fieldsByName(): ModelFields {
+		return this.fields;
+	}
+
+	/**
+	 * This model, as connectors and the event handlers of every model take it
+	 */
+	private get asModelUnknown(): ModelUnknown {
+		return this as unknown as ModelUnknown;
+	}
+
+	/**
+	 * Types deserialized data as records of this model: applySerialization and getDefaultValues
+	 * build them from the field definitions
+	 */
+	private asRecords(data: Record<string, unknown>[]): ModelRecord<this>[] {
+		return data as ModelRecord<this>[];
+	}
+
+	/**
+	 * @see asRecords
+	 */
+	private asRecord(data: Record<string, unknown>): ModelRecord<this> {
+		return data as ModelRecord<this>;
+	}
+
+	/**
 	 * Creates a new model
 	 * @param name A unique name for the model (modelId)
 	 * @param model The actual model definition
@@ -591,10 +761,23 @@ class Model<
 	 */
 	constructor(
 		name: string,
-		model: ModelField<KeyT, VisibilityT, CustomT>,
-		connector: Connector<KeyT, VisibilityT, CustomT>,
+		// KeyT comes from the keys alone: the onChange callbacks are typed with it before FieldsT is known
+		model: FieldsT &
+			Record<
+				KeyT,
+				ModelFieldDefinition<
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					any,
+					NoInfer<KeyT>,
+					PageVisibility,
+					unknown
+				>
+			> &
+			ModelFieldsNoExtraKeys<NoInfer<FieldsT>> &
+			ModelFieldsDefaultsMatchType<NoInfer<FieldsT>>,
+		connector: Connector,
 		cacheKeys?: unknown,
-		options?: ModelOptions<KeyT>,
+		options?: ModelOptions,
 	) {
 		this.modelId = name;
 		this.fields = model;
@@ -618,12 +801,12 @@ class Model<
 	 */
 	public async index(
 		params: Partial<IDataGridLoadDataParameters> | undefined,
-	): Promise<ModelIndexResponse> {
+	): Promise<ModelIndexResponse<this>> {
 		try {
 			// a copy, so what the connector changes doesn't reach the caller's params (or the cache keys holding them)
 			const [rawData, meta, userData] = await this.connector.index(
 				deepClone(params),
-				this,
+				this.asModelUnknown,
 			);
 			return [
 				this.cacheIndexRecords(
@@ -655,10 +838,10 @@ class Model<
 	 */
 	public async index2(
 		params: ConnectorIndex2Params,
-	): Promise<ModelIndexResponse> {
+	): Promise<ModelIndexResponse<this>> {
 		const [rawData, meta, userData] = await this.connector.index2(
 			deepClone(params),
-			this,
+			this.asModelUnknown,
 		);
 		return [
 			this.cacheIndexRecords(
@@ -679,7 +862,9 @@ class Model<
 	 * @returns records Same as input
 	 * @private
 	 */
-	private cacheIndexRecords(records: Record<string, unknown>[]) {
+	private cacheIndexRecords(
+		records: Record<string, unknown>[],
+	): ModelRecord<this>[] {
 		// cache records for batching
 		records.forEach((record) => {
 			ModelDataStore.setQueryData(
@@ -688,7 +873,7 @@ class Model<
 			);
 		});
 
-		return records;
+		return this.asRecords(records);
 	}
 
 	/**
@@ -698,7 +883,7 @@ class Model<
 	 */
 	public async fetchAll(
 		params?: ModelFetchAllParams,
-	): Promise<ModelIndexResponse> {
+	): Promise<ModelIndexResponse<this>> {
 		let page = 1;
 		let perPage = 1000;
 		let perPageDefault = true;
@@ -729,7 +914,7 @@ class Model<
 			if (records.length >= totalRows || tRecords.length === 0) break;
 		}
 
-		return [records, meta, userMeta];
+		return [this.asRecords(records), meta, userMeta];
 	}
 
 	/**
@@ -740,7 +925,7 @@ class Model<
 	 */
 	public async fetchAllCached(
 		params?: ModelFetchAllParams,
-	): Promise<ModelIndexResponse> {
+	): Promise<ModelIndexResponse<this>> {
 		return ModelDataStore.fetchQuery({
 			queryKey: this.getReactQueryKeyFetchAll(params),
 			queryFn: () => this.fetchAll(params),
@@ -870,7 +1055,7 @@ class Model<
 	 * @param id The data record id
 	 * @deprecated Use useModelGet(model, id) instead
 	 */
-	public get(id: string | null): UseQueryResult<ModelGetResponse<KeyT>, Error> {
+	public get(id: string | null): UseQueryResult<ModelGetResponse<this>, Error> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useModelGet(this, id);
 	}
@@ -883,7 +1068,7 @@ class Model<
 	public getCached(
 		id: string | null,
 		options?: ModelGetOptions,
-	): Promise<ModelGetResponse<KeyT>> {
+	): Promise<ModelGetResponse<this>> {
 		return ModelDataStore.fetchQuery({
 			queryKey: this.getReactQueryKey(
 				id,
@@ -902,17 +1087,17 @@ class Model<
 	public async getRaw(
 		id: string | null,
 		options?: ModelGetOptions,
-	): Promise<ModelGetResponse<KeyT>> {
+	): Promise<ModelGetResponse<this>> {
 		try {
-			if (!id) return [await this.getDefaultValues(), {}];
+			if (!id) return [this.asRecord(await this.getDefaultValues()), {}];
 
 			const batch = options?.batch ?? this.requestBatchingEnabled;
 
 			if (batch) {
-				const rawData = await RequestBatching.get(id, this);
-				return [rawData, {}];
+				const rawData = await RequestBatching.get(id, this.asModelUnknown);
+				return [this.asRecord(rawData), {}];
 			} else {
-				const rawData = await this.connector.read(id, this);
+				const rawData = await this.connector.read(id, this.asModelUnknown);
 				return this.deserializeResponse(rawData);
 			}
 		} catch (err) {
@@ -937,21 +1122,21 @@ class Model<
 	 * @private
 	 */
 	private async deserializeResponse(
-		rawData: ModelGetResponse<KeyT>,
-	): Promise<ModelGetResponse<KeyT>> {
+		rawData: ModelGetResponse<ModelUnknown>,
+	): Promise<ModelGetResponse<this>> {
 		const deserialized = await this.applySerialization(
 			rawData[0],
 			"deserialize",
 			"edit",
 		);
 		return [
-			deserialized,
+			this.asRecord(deserialized),
 			Object.fromEntries(
 				await Promise.all(
 					Object.entries(rawData[1]).map(async (keyValue) => {
 						const fieldName = keyValue[0];
 						const values = keyValue[1] as Record<string, unknown>[];
-						const refModel = this.fields[fieldName as KeyT]?.getRelationModel;
+						const refModel = this.fieldsByName[fieldName]?.getRelationModel;
 
 						if (!refModel) {
 							// eslint-disable-next-line no-console
@@ -986,9 +1171,9 @@ class Model<
 	 * @deprecated Use useModelMutation(model) instead
 	 */
 	public createOrUpdate<TContext = unknown>(): UseMutationResult<
-		ModelGetResponse<KeyT>,
+		ModelGetResponse<this>,
 		Error,
-		Record<string, unknown>,
+		ModelRecordPartial<this>,
 		TContext
 	> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
@@ -1000,8 +1185,8 @@ class Model<
 	 * @param values The new values (set id field to update)
 	 */
 	public async createOrUpdateRecordRaw(
-		values: Record<string, unknown>,
-	): Promise<ModelGetResponse<KeyT>> {
+		values: ModelRecordPartial<this>,
+	): Promise<ModelGetResponse<this>> {
 		const update = !!("id" in values && values.id);
 		const serializedValues = await this.applySerialization(
 			values,
@@ -1010,12 +1195,12 @@ class Model<
 		);
 		if (update) {
 			return this.deserializeResponse(
-				await this.connector.update(serializedValues, this),
+				await this.connector.update(serializedValues, this.asModelUnknown),
 			);
 		} else {
-			delete serializedValues["id" as KeyT];
+			delete serializedValues.id;
 			return this.deserializeResponse(
-				await this.connector.create(serializedValues, this),
+				await this.connector.create(serializedValues, this.asModelUnknown),
 			);
 		}
 	}
@@ -1031,7 +1216,7 @@ class Model<
 		TContext
 	> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
-		return useModelDelete(this);
+		return useModelDelete(this.asModelUnknown);
 	}
 
 	/**
@@ -1039,7 +1224,7 @@ class Model<
 	 * @param id The ID to delete
 	 */
 	public async deleteRaw(id: string): Promise<void> {
-		return this.connector.delete(id, this);
+		return this.connector.delete(id, this.asModelUnknown);
 	}
 
 	/**
@@ -1053,7 +1238,7 @@ class Model<
 		TContext
 	> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
-		return useModelDeleteMultiple(this);
+		return useModelDeleteMultiple(this.asModelUnknown);
 	}
 
 	/**
@@ -1061,7 +1246,7 @@ class Model<
 	 * @param ids The IDs to delete
 	 */
 	public async deleteMultipleRaw(ids: string[]): Promise<void> {
-		return this.connector.deleteMultiple(ids, this);
+		return this.connector.deleteMultiple(ids, this.asModelUnknown);
 	}
 
 	/**
@@ -1082,7 +1267,7 @@ class Model<
 		TContext
 	> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
-		return useModelDeleteAdvanced(this);
+		return useModelDeleteAdvanced(this.asModelUnknown);
 	}
 
 	/**
@@ -1093,7 +1278,7 @@ class Model<
 		if (!this.connector.deleteAdvanced) {
 			throw new Error("Connector doesn't support advanced deletion");
 		}
-		return this.connector.deleteAdvanced(req, this);
+		return this.connector.deleteAdvanced(req, this.asModelUnknown);
 	}
 
 	/**
@@ -1105,11 +1290,11 @@ class Model<
 	public updateStoredData(
 		id: string,
 		batch: boolean,
-		updater: (old: Record<string, unknown>) => Record<string, unknown>,
+		updater: (old: ModelRecord<this>) => ModelRecord<this>,
 	): void {
 		ModelDataStore.setQueryData(
 			this.getReactQueryKey(id, batch),
-			(data: ModelGetResponse<KeyT> | undefined): ModelGetResponse<KeyT> => {
+			(data: ModelGetResponse<this> | undefined): ModelGetResponse<this> => {
 				if (!data) throw new Error("Data not set");
 				const [record, ...other] = data;
 				return [updater(record), ...other];
@@ -1126,25 +1311,12 @@ class Model<
 		return (
 			!includeHidden
 				? Object.entries(this.fields).filter(
-						(entry) =>
-							!(
-								entry[1] as ModelFieldDefinition<
-									unknown,
-									KeyT,
-									VisibilityT,
-									CustomT
-								>
-							).visibility.overview.disabled,
+						(entry) => !entry[1].visibility.overview.disabled,
 					)
 				: Object.entries(this.fields)
 		).map((entry) => {
 			const key = entry[0];
-			const value = entry[1] as ModelFieldDefinition<
-				unknown,
-				KeyT,
-				VisibilityT,
-				CustomT
-			>;
+			const value = entry[1];
 
 			let filterData: IDataGridColumnDef["filterData"] = undefined;
 			if (value.type.getFilterType() === "enum") {
@@ -1244,7 +1416,7 @@ class Model<
 				if (value === undefined) return;
 
 				try {
-					const fieldDef = this.fields[field as KeyT];
+					const fieldDef = this.fieldsByName[field];
 					if (
 						view &&
 						getVisibility(fieldDef.visibility[view], values, values).disabled
@@ -1260,15 +1432,9 @@ class Model<
 							fieldDef.type,
 						);
 						error = validate
-							? await validate(
-									value,
-									fieldDef as unknown as ModelFieldDefinition<
-										unknown,
-										string,
-										PageVisibility,
-										unknown
-									>,
-								)
+							? // a field's type takes the definition of that field
+
+								await validate(value, fieldDef)
 							: null;
 					} catch (e) {
 						// eslint-disable-next-line
@@ -1322,7 +1488,7 @@ class Model<
 			.filter(([field]) => {
 				try {
 					return !getVisibility(
-						this.fields[field as KeyT].visibility.create,
+						this.fieldsByName[field].visibility.create,
 						{},
 						{},
 					).disabled;
@@ -1331,10 +1497,7 @@ class Model<
 				}
 			})
 			.map(async (entry) => {
-				const [field, def] = entry as [
-					KeyT,
-					ModelFieldDefinition<unknown, KeyT, VisibilityT, CustomT>,
-				];
+				const [field, def] = entry as [KeyT, ModelFieldDefinitionUnknown];
 				let defaultValue: unknown;
 				if (def.getDefaultValue) {
 					defaultValue = await def.getDefaultValue();
@@ -1478,12 +1641,7 @@ class Model<
 		// iterate over the whole definition
 		Object.entries(this.fields).forEach((kv) => {
 			const field = kv[0];
-			const def = kv[1] as ModelFieldDefinition<
-				unknown,
-				KeyT,
-				VisibilityT,
-				CustomT
-			>;
+			const def = kv[1];
 
 			// fields that are visibile in grid
 			if (def.visibility.overview.grid) {
@@ -1504,12 +1662,7 @@ class Model<
 		const fieldsNotInOverview = Object.entries(this.fields)
 			.filter(([field, def]) => {
 				if (field === "id") return false;
-				const fieldDef = def as ModelFieldDefinition<
-					unknown,
-					KeyT,
-					VisibilityT,
-					CustomT
-				>;
+				const fieldDef = def;
 				const edit = getVisibility(fieldDef.visibility.edit, {}, {});
 				const overview = getVisibility(fieldDef.visibility.overview, {}, {});
 				const enabled = (vis: Visibility) => !vis.disabled || vis.readOnly;
@@ -1533,7 +1686,7 @@ class Model<
 	 * @private
 	 */
 	private static eventHandlers: {
-		mutate: Record<string, ModelEventMutation[]>;
+		mutate: Record<string, ModelEventMutation<ModelUnknown>[]>;
 	} = {
 		mutate: {},
 	};
@@ -1548,16 +1701,18 @@ class Model<
 	 */
 	public addEventHandler(
 		evt: "mutate",
-		handler: ModelEventMutation,
+		handler: ModelEventMutation<this>,
 		idFilter?: string | null,
 	) {
 		const handlerKey = JSON.stringify(
 			this.getReactQueryKey(idFilter === undefined ? "any" : idFilter, false),
 		);
+		// the registry holds the handlers of every model, each only gets this model's records
+		const anyHandler = handler as ModelEventMutation<ModelUnknown>;
 		if (!(handlerKey in Model.eventHandlers[evt])) {
-			Model.eventHandlers[evt][handlerKey] = [handler];
+			Model.eventHandlers[evt][handlerKey] = [anyHandler];
 		} else {
-			Model.eventHandlers[evt][handlerKey].push(handler);
+			Model.eventHandlers[evt][handlerKey].push(anyHandler);
 		}
 	}
 
@@ -1571,7 +1726,7 @@ class Model<
 	 */
 	public removeEventHandler(
 		evt: "mutate",
-		handler: ModelEventMutation,
+		handler: ModelEventMutation<this>,
 		idFilter?: string | null,
 	) {
 		const handlerKey = JSON.stringify(
@@ -1597,7 +1752,7 @@ class Model<
 	 * @param data The response data
 	 * @remarks used internally, usually not called by library using code
 	 */
-	public triggerMutationEvent(isCreate: boolean, data: ModelGetResponse<KeyT>) {
+	public triggerMutationEvent(isCreate: boolean, data: ModelGetResponse<this>) {
 		const handlers = Model.eventHandlers.mutate;
 		const id = (data[0] as Record<"id", string>).id;
 

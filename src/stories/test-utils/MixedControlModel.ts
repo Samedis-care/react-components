@@ -101,7 +101,7 @@ const createMixedControlModel = () =>
 				customData: null,
 			},
 			department: {
-				type: new ModelDataTypeEnumSelectRenderer(departments),
+				type: new ModelDataTypeEnumSelectRenderer(departments, ""),
 				getLabel: () => "Department",
 				visibility: {
 					overview: ModelVisibilityDisabled,
@@ -111,7 +111,7 @@ const createMixedControlModel = () =>
 				customData: null,
 			},
 			priority: {
-				type: new ModelDataTypeEnumRadioRendererMUI(priorities),
+				type: new ModelDataTypeEnumRadioRendererMUI(priorities, ""),
 				getLabel: () => "Priority",
 				visibility: {
 					overview: ModelVisibilityDisabled,

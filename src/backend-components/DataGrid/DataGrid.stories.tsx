@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import BackendDataGrid from "./index";
 import { Framework } from "../../framework";
 import createTestModel from "../../stories/test-utils/TestModel";
-import { ModelFieldName, PageVisibility } from "../../backend-integration";
+import { ModelUnknown } from "../../backend-integration";
 
 const FrameworkDecorator = (Story: React.ComponentType) => (
 	<Framework>
@@ -45,12 +45,7 @@ const WithEditDataGridStory = () => {
 		// eslint-disable-next-line no-console
 		console.log("Edit record:", id);
 	};
-	return (
-		<BackendDataGrid<ModelFieldName, PageVisibility, null>
-			model={model}
-			onEdit={handleEdit}
-		/>
-	);
+	return <BackendDataGrid<ModelUnknown> model={model} onEdit={handleEdit} />;
 };
 
 export const WithEdit: StoryObj = {

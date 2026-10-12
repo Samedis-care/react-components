@@ -4,7 +4,7 @@ import React, {
 	RefAttributes,
 	useContext,
 } from "react";
-import { ModelFieldName, PageVisibility } from "../../backend-integration";
+import { ModelRecord, ModelUnknown } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import { Loader, MultiSelectorData } from "../../standalone";
 import BackendMultiSelect, {
@@ -18,21 +18,19 @@ import useCrudSelect, {
 import DialogContextProvider from "../../framework/DialogContextProvider";
 
 export interface CrudMultiSelectProps<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
+	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
 >
 	extends
 		Omit<
-			BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
+			BackendMultiSelectProps<M, DataT>,
 			| "modelToSelectorData"
 			| "initialData"
 			| "selected"
 			| "onSelect"
 			| "getIdOfData"
 		>,
-		UseCrudSelectParams<KeyT, VisibilityT, CustomT, DataT> {
+		UseCrudSelectParams<M, DataT> {
 	/**
 	 * The error component that is used to display errors
 	 */
@@ -40,10 +38,10 @@ export interface CrudMultiSelectProps<
 }
 
 export const CrudSelectContext = React.createContext<
-	UseCrudSelectResult<ModelFieldName, MultiSelectorData> | undefined
+	UseCrudSelectResult<ModelUnknown, MultiSelectorData> | undefined
 >(undefined);
 export const useCrudSelectContext = (): UseCrudSelectResult<
-	ModelFieldName,
+	ModelUnknown,
 	MultiSelectorData
 > => {
 	const ctx = useContext(CrudSelectContext);
@@ -52,12 +50,10 @@ export const useCrudSelectContext = (): UseCrudSelectResult<
 };
 
 const CrudMultiSelect = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
+	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
 >(
-	props: CrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT> &
+	props: CrudMultiSelectProps<M, DataT> &
 		RefAttributes<CrudSelectDispatch<DataT>>,
 	ref: ForwardedRef<CrudSelectDispatch<DataT>>,
 ) => {
@@ -81,7 +77,7 @@ const CrudMultiSelect = <
 		<CrudSelectContext.Provider
 			value={
 				crudSelect as unknown as UseCrudSelectResult<
-					ModelFieldName,
+					ModelUnknown,
 					MultiSelectorData
 				>
 			}
@@ -95,7 +91,8 @@ const CrudMultiSelect = <
 					selected={selected.map((entry) => entry.value)}
 					onSelect={handleSelect}
 					modelToSelectorData={modelToSelectorData}
-					initialData={initialRawData}
+					// the connector's records seed the selected cache: modelToSelectorData tells them apart
+					initialData={initialRawData as ModelRecord<M>[]}
 				/>
 			</DialogContextProvider>
 		</CrudSelectContext.Provider>
@@ -103,12 +100,10 @@ const CrudMultiSelect = <
 };
 
 const ForwardedCrudMultiSelect = forwardRef(CrudMultiSelect) as <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
+	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
 >(
-	props: CrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT> &
+	props: CrudMultiSelectProps<M, DataT> &
 		RefAttributes<CrudSelectDispatch<DataT>>,
 ) => React.ReactElement;
 

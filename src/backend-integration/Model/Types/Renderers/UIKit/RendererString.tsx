@@ -1,9 +1,9 @@
 import React from "react";
 import TypeString from "../../TypeString";
-import { TextFieldProps, Typography } from "@mui/material";
+import { TextFieldProps } from "@mui/material";
 import ModelRenderParams from "../../../RenderParams";
-import { FormHelperTextCC, TextFieldWithHelp } from "../../../../../standalone";
 import { TextFieldWithHelpProps } from "../../../../../standalone/UIKit/TextFieldWithHelp";
+import RendererStringNullable from "./RendererStringNullable";
 
 export type ModelDataTypeStringRendererCCParams = Omit<
 	TextFieldProps,
@@ -24,74 +24,18 @@ export type ModelDataTypeStringRendererCCParams = Omit<
  */
 class RendererString extends TypeString {
 	props?: ModelDataTypeStringRendererCCParams;
+	// renders the same text field, a string is never null
+	protected nullableRenderer: RendererStringNullable;
 
 	constructor(props?: ModelDataTypeStringRendererCCParams) {
 		super(props?.multiline);
 
 		this.props = props;
+		this.nullableRenderer = new RendererStringNullable(props);
 	}
 
 	render(params: ModelRenderParams<string>): React.ReactElement {
-		const {
-			visibility,
-			field,
-			value,
-			label,
-			handleChange,
-			handleBlur,
-			errorMsg,
-			warningMsg,
-			dirty,
-			autoFocus,
-		} = params;
-
-		if (visibility.disabled) return <></>;
-		if (visibility.hidden) {
-			return (
-				<input
-					type="hidden"
-					name={field}
-					value={value ?? ""}
-					readOnly
-					aria-hidden={"true"}
-				/>
-			);
-		}
-		if (visibility.editable) {
-			if (visibility.grid) throw new Error("Not supported");
-
-			return (
-				<>
-					<TextFieldWithHelp
-						variant={this.multiline ? "outlined" : undefined}
-						fullWidth
-						{...this.props}
-						name={field}
-						value={value ?? ""}
-						label={label}
-						disabled={visibility.readOnly}
-						required={visibility.required}
-						onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-							handleChange(evt.target.name, evt.target.value);
-						}}
-						onBlur={handleBlur}
-						error={!!errorMsg}
-						warning={!!warningMsg}
-						dirty={dirty}
-						autoFocus={autoFocus}
-					/>
-					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
-						{errorMsg || warningMsg}
-					</FormHelperTextCC>
-				</>
-			);
-		}
-		return (
-			<Typography noWrap={visibility.grid}>
-				{!visibility.grid && `${label}: `}
-				{value}
-			</Typography>
-		);
+		return this.nullableRenderer.render(params);
 	}
 }
 

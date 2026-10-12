@@ -9,10 +9,9 @@ import {
 	SelectorLruOptions,
 } from "../../standalone";
 import {
-	Model,
-	ModelFieldName,
 	ModelGetResponse,
-	PageVisibility,
+	ModelRecord,
+	ModelUnknown,
 } from "../../backend-integration";
 import {
 	BackendMultiSelectLruOptions,
@@ -23,12 +22,8 @@ import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 import { BackendSingleSelectLruOptions } from "./BackendSingleSelect";
 
 export interface BackendMultiSelectWithTagsProps<
-	GroupKeyT extends ModelFieldName,
-	DataKeyT extends ModelFieldName,
-	GroupVisibilityT extends PageVisibility,
-	DataVisibilityT extends PageVisibility,
-	GroupCustomT,
-	DataCustomT,
+	GroupModelT extends ModelUnknown,
+	DataModelT extends ModelUnknown,
 	GroupDataT extends BaseSelectorData,
 	DataDataT extends MultiSelectorData,
 > extends Omit<
@@ -54,11 +49,11 @@ export interface BackendMultiSelectWithTagsProps<
 	/**
 	 * Initial data (model format) used for selected cache
 	 */
-	initialData?: Record<DataKeyT, unknown>[];
+	initialData?: ModelRecord<DataModelT>[];
 	/**
 	 * The data source for groups
 	 */
-	groupModel: Model<GroupKeyT, GroupVisibilityT, GroupCustomT>;
+	groupModel: GroupModelT;
 	/**
 	 * Callback that converts a model entry to a base selector entry
 	 * @param data The record data (overview)
@@ -66,7 +61,7 @@ export interface BackendMultiSelectWithTagsProps<
 	 * @remarks Selector data value must be set to ID
 	 */
 	convGroup: (
-		data: Record<string, unknown>,
+		data: ModelRecord<GroupModelT>,
 	) => Promise<GroupDataT> | GroupDataT;
 	/**
 	 * Callback that gets the group entries for a given group record
@@ -75,19 +70,19 @@ export interface BackendMultiSelectWithTagsProps<
 	 * @remarks Selector data value must be set to ID of data record
 	 */
 	getGroupDataEntries: (
-		data: ModelGetResponse<GroupKeyT>,
+		data: ModelGetResponse<GroupModelT>,
 	) => Promise<DataDataT[]> | DataDataT[];
 	/**
 	 * The data source for data entries
 	 */
-	dataModel: Model<DataKeyT, DataVisibilityT, DataCustomT>;
+	dataModel: DataModelT;
 	/**
 	 * Callback that converts a model entry to a multi selector entry
 	 * @param data The record data (overview)
 	 * @returns Selector data
 	 * @remarks Selector data value must be set to ID
 	 */
-	convData: (data: Record<string, unknown>) => Promise<DataDataT> | DataDataT;
+	convData: (data: ModelRecord<DataModelT>) => Promise<DataDataT> | DataDataT;
 	/**
 	 * Name of the switch filter for groups or undefined if disabled
 	 */
@@ -130,12 +125,8 @@ export interface BackendMultiSelectWithTagsProps<
  */
 export type BackendMultiSelectWithTagsThemeProps = Omit<
 	BackendMultiSelectWithTagsProps<
-		ModelFieldName,
-		ModelFieldName,
-		PageVisibility,
-		PageVisibility,
-		unknown,
-		unknown,
+		ModelUnknown,
+		ModelUnknown,
 		BaseSelectorData,
 		MultiSelectorData
 	>,
@@ -157,22 +148,14 @@ export type BackendMultiSelectWithTagsThemeProps = Omit<
  * @constructor
  */
 const BackendMultiSelectWithTags = <
-	GroupKeyT extends ModelFieldName,
-	DataKeyT extends ModelFieldName,
-	GroupVisibilityT extends PageVisibility,
-	DataVisibilityT extends PageVisibility,
-	GroupCustomT,
-	DataCustomT,
+	GroupModelT extends ModelUnknown,
+	DataModelT extends ModelUnknown,
 	GroupDataT extends BaseSelectorData,
 	DataDataT extends MultiSelectorData,
 >(
 	inProps: BackendMultiSelectWithTagsProps<
-		GroupKeyT,
-		DataKeyT,
-		GroupVisibilityT,
-		DataVisibilityT,
-		GroupCustomT,
-		DataCustomT,
+		GroupModelT,
+		DataModelT,
 		GroupDataT,
 		DataDataT
 	>,

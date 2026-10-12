@@ -1,8 +1,4 @@
-import Model, {
-	ModelFieldName,
-	ModelIndexResponse,
-	PageVisibility,
-} from "./Model";
+import { ModelIndexResponse, ModelUnknown } from "./Model";
 import sleep from "../../utils/sleep";
 import RequestBatchingError from "../Connector/RequestBatchingError";
 
@@ -21,22 +17,20 @@ class RequestBatching {
 	 */
 	public static MAX_BATCH_REQUESTS = 100;
 
-	private static batchPromises: Record<string, Promise<ModelIndexResponse>> =
-		{};
+	private static batchPromises: Record<
+		string,
+		Promise<ModelIndexResponse<ModelUnknown>>
+	> = {};
 	private static batchNonce: Record<string, string> = {};
 	private static batchRequestIds: Record<string, string[]> = {};
 	private static batchLastAdded: Record<string, number> = {};
 
-	public static async get<
-		KeyT extends ModelFieldName,
-		VisibilityT extends PageVisibility,
-		CustomT,
-	>(
+	public static async get(
 		id: string,
-		model: Model<KeyT, VisibilityT, CustomT>,
+		model: ModelUnknown,
 	): Promise<Record<string, unknown>> {
 		const batchKey = JSON.stringify(model.getReactQueryKey(null, true));
-		let promise: Promise<ModelIndexResponse>;
+		let promise: Promise<ModelIndexResponse<ModelUnknown>>;
 		if (
 			batchKey in this.batchPromises &&
 			this.batchRequestIds[batchKey].length < this.MAX_BATCH_REQUESTS

@@ -21,18 +21,20 @@ export type RendererEnumMultiSelectProps = Omit<
 /**
  * Renders TypeEnumMulti as selector
  */
-class RendererEnumMultiSelect extends TypeEnumMulti {
+class RendererEnumMultiSelect<
+	T extends string = string,
+> extends TypeEnumMulti<T> {
 	props?: RendererEnumMultiSelectProps;
 
 	constructor(
-		values: AdvancedMultiEnumValue[],
+		values: AdvancedMultiEnumValue<T>[],
 		props?: RendererEnumMultiSelectProps,
 	) {
 		super(values);
 		this.props = props;
 	}
 
-	render(params: ModelRenderParams<string[]>): React.ReactElement {
+	render(params: ModelRenderParams<T[]>): React.ReactElement {
 		const {
 			visibility,
 			field,
@@ -68,7 +70,8 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 					label: entry.getLabel(),
 					disabled: entry.invisible,
 				}));
-			const selected = data.filter((entry) => value.includes(entry.value));
+			// the options are the enum's values
+			const selected = data.filter((entry) => value.includes(entry.value as T));
 
 			const onLoad = (query: string) => ({
 				options: uniqueArray([
@@ -100,7 +103,7 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 						onSelect={(selected) =>
 							handleChange(
 								field,
-								selected.map((entry) => entry.value),
+								selected.map((entry) => entry.value as T),
 							)
 						}
 						disabled={visibility.readOnly}

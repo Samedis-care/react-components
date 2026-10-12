@@ -20,23 +20,24 @@ export type WrapButtonFunc = (
 /**
  * Renders TypeEnum as radio buttons
  */
-class RendererEnumRadio extends TypeEnum {
+class RendererEnumRadio<T extends string = string> extends TypeEnum<T> {
 	protected horizontal: boolean;
 	protected wrapButton: WrapButtonFunc;
 
 	constructor(
-		values: EnumValue[],
+		values: EnumValue<T>[],
+		defaultValue: NoInfer<T>,
 		horizontal = false,
 		wrapButton: WrapButtonFunc = (btn: React.ReactElement) => btn,
 		numericMode = false,
 	) {
-		super(values, numericMode);
+		super(values, defaultValue, numericMode);
 
 		this.horizontal = horizontal;
 		this.wrapButton = wrapButton;
 	}
 
-	render(params: ModelRenderParams<string>): React.ReactElement {
+	render(params: ModelRenderParams<T>): React.ReactElement {
 		const {
 			visibility,
 			field,
@@ -87,7 +88,10 @@ class RendererEnumRadio extends TypeEnum {
 					<RadioGroup
 						name={field}
 						value={value}
-						onChange={(evt) => handleChange(evt.target.name, evt.target.value)}
+						// the radios are the enum's values
+						onChange={(evt) =>
+							handleChange(evt.target.name, evt.target.value as T)
+						}
 						onBlur={handleBlur}
 						data-name={field}
 						row={this.horizontal}

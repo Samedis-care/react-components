@@ -6,6 +6,7 @@ import { CrudFormProps } from "../../CRUD";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { IsInFormDialogContext } from "../FormDialog";
 import { EnhancedCustomProps } from "../BasicFormPage";
+import { ModelUnknown } from "../../../backend-integration";
 
 export interface FlowEngineBackButtonProps extends Omit<
 	ActionButtonProps,
@@ -15,7 +16,7 @@ export interface FlowEngineBackButtonProps extends Omit<
 }
 
 export const useShouldRenderFlowEngineBackButton = () => {
-	const { customProps } = useFormContextLite();
+	const { customProps } = useFormContextLite<ModelUnknown>();
 	const custProps = customProps as
 		EnhancedCustomProps<CrudFormProps> | undefined;
 	const isInDialog = useContext(IsInFormDialogContext);
@@ -30,7 +31,7 @@ export const useShouldRenderFlowEngineBackButton = () => {
  * @param props The props
  */
 const FlowEngineBackButton = (props: FlowEngineBackButtonProps) => {
-	const { customProps, submitting } = useFormContextLite();
+	const { customProps, submitting } = useFormContextLite<ModelUnknown>();
 	const custProps = customProps as
 		EnhancedCustomProps<CrudFormProps> | undefined;
 	const isInDialog = useContext(IsInFormDialogContext);

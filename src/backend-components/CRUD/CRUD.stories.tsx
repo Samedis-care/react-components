@@ -6,7 +6,7 @@ import CRUD, { CrudFormProps } from "./index";
 import FormField from "../Form/Field";
 import DefaultErrorComponent from "../Form/DefaultErrorComponent";
 import createTestModel from "../../stories/test-utils/TestModel";
-import { ModelFieldName } from "../../backend-integration";
+import { ModelUnknown } from "../../backend-integration";
 import type { PageProps } from "../Form/Form";
 
 const FrameworkDecorator = (Story: React.ComponentType) => (
@@ -26,7 +26,7 @@ const meta: Meta = {
 export default meta;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const CrudFormContent = (_props: PageProps<ModelFieldName, CrudFormProps>) => (
+const CrudFormContent = (_props: PageProps<ModelUnknown, CrudFormProps>) => (
 	<Grid container spacing={2}>
 		<Grid size={{ xs: 6 }}>
 			<FormField name="first_name" />

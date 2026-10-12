@@ -3,9 +3,8 @@ import Connector, {
 } from "../../backend-integration/Connector/Connector";
 import { IDataGridLoadDataParameters } from "../../standalone/DataGrid/DataGrid";
 import {
-	ModelFieldName,
 	ModelGetResponse,
-	PageVisibility,
+	ModelUnknown,
 } from "../../backend-integration/Model";
 
 /**
@@ -13,11 +12,7 @@ import {
  * Stores data in a Map and supports index (with pagination/filtering/sorting),
  * create, read, update, and delete operations.
  */
-class MockConnector<
-	KeyT extends ModelFieldName = ModelFieldName,
-	VisibilityT extends PageVisibility = PageVisibility,
-	CustomT = null,
-> extends Connector<KeyT, VisibilityT, CustomT> {
+class MockConnector extends Connector {
 	private data: Map<string, Record<string, unknown>>;
 	private nextId: number;
 
@@ -77,14 +72,14 @@ class MockConnector<
 		return [rows.slice(start, end), { totalRows, filteredRows }];
 	}
 
-	create(data: Record<string, unknown>): ModelGetResponse<KeyT> {
+	create(data: Record<string, unknown>): ModelGetResponse<ModelUnknown> {
 		const id = String(this.nextId++);
 		const record = { ...data, id };
 		this.data.set(id, record);
 		return [record, {}];
 	}
 
-	read(id: string): ModelGetResponse<KeyT> {
+	read(id: string): ModelGetResponse<ModelUnknown> {
 		const record = this.data.get(id);
 		if (!record) {
 			throw new Error(`Record with id "${id}" not found`);
@@ -92,8 +87,8 @@ class MockConnector<
 		return [{ ...record }, {}];
 	}
 
-	update(data: Record<KeyT, unknown>): ModelGetResponse<KeyT> {
-		const id = (data as Record<string, unknown>).id as string;
+	update(data: Record<string, unknown>): ModelGetResponse<ModelUnknown> {
+		const id = data.id as string;
 		const existing = this.data.get(id);
 		if (!existing) {
 			throw new Error(`Record with id "${id}" not found`);

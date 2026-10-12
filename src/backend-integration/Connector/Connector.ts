@@ -1,9 +1,8 @@
 import {
-	Model,
 	AdvancedDeleteRequest,
 	ModelFieldName,
-	PageVisibility,
 	ModelGetResponse,
+	ModelUnknown,
 } from "../Model";
 import { IDataGridLoadDataParameters } from "../../standalone/DataGrid/DataGrid";
 import { IDataGridExporter } from "../../standalone/DataGrid/Header";
@@ -30,11 +29,7 @@ export type ConnectorIndex2Params = Partial<
 /**
  * A generic backend connector which provides a basic CRUD interface for data
  */
-abstract class Connector<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
-> {
+abstract class Connector {
 	/**
 	 * Lists all available data entries
 	 * @param params Filter, Sorting and Pagination parameters. Model.index passes a copy, so changes to them stay with the connector
@@ -44,7 +39,7 @@ abstract class Connector<
 	 */
 	abstract index(
 		params?: Partial<IDataGridLoadDataParameters>,
-		model?: Model<KeyT, VisibilityT, CustomT>,
+		model?: ModelUnknown,
 	): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]>;
 
 	/**
@@ -59,7 +54,7 @@ abstract class Connector<
 	 */
 	public async index2(
 		params: ConnectorIndex2Params,
-		model?: Model<KeyT, VisibilityT, CustomT>,
+		model?: ModelUnknown,
 	): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]> {
 		const pageSize = 25; // we call the main index function with this page size
 		if (params.rows < 0)
@@ -106,8 +101,8 @@ abstract class Connector<
 	 */
 	abstract create(
 		data: Record<string, unknown>,
-		model?: Model<KeyT, VisibilityT, CustomT>,
-	): Promise<ModelGetResponse<KeyT>> | ModelGetResponse<KeyT>;
+		model?: ModelUnknown,
+	): Promise<ModelGetResponse<ModelUnknown>> | ModelGetResponse<ModelUnknown>;
 
 	/**
 	 * Loads an existing data entry
@@ -117,8 +112,8 @@ abstract class Connector<
 	 */
 	abstract read(
 		id: string,
-		model?: Model<KeyT, VisibilityT, CustomT>,
-	): Promise<ModelGetResponse<KeyT>> | ModelGetResponse<KeyT>;
+		model?: ModelUnknown,
+	): Promise<ModelGetResponse<ModelUnknown>> | ModelGetResponse<ModelUnknown>;
 
 	/**
 	 * Updates an already existing data entry
@@ -128,32 +123,23 @@ abstract class Connector<
 	 */
 	abstract update(
 		data: Record<ModelFieldName, unknown>,
-		model?: Model<KeyT, VisibilityT, CustomT>,
-	): Promise<ModelGetResponse<KeyT>> | ModelGetResponse<KeyT>;
+		model?: ModelUnknown,
+	): Promise<ModelGetResponse<ModelUnknown>> | ModelGetResponse<ModelUnknown>;
 
 	/**
 	 * Deletes a specific data entry
 	 * @param id The ID of the data entry to delete
 	 * @param model The model performing the request
 	 */
-	abstract delete(
-		id: string,
-		model?: Model<KeyT, VisibilityT, CustomT>,
-	): Promise<void> | void;
+	abstract delete(id: string, model?: ModelUnknown): Promise<void> | void;
 
 	/**
 	 * Deletes multiple data entries at once. Should be overwritten if implemented by your backend.
 	 * @param ids The IDs of the data entries to delete
 	 * @param model The model performing the request
 	 */
-	deleteMultiple(
-		ids: string[],
-		model?: Model<KeyT, VisibilityT, CustomT>,
-	): Promise<void> | void;
-	async deleteMultiple(
-		ids: string[],
-		model?: Model<KeyT, VisibilityT, CustomT>,
-	): Promise<void> {
+	deleteMultiple(ids: string[], model?: ModelUnknown): Promise<void> | void;
+	async deleteMultiple(ids: string[], model?: ModelUnknown): Promise<void> {
 		await Promise.all(ids.map((id) => Promise.resolve(this.delete(id, model))));
 	}
 
@@ -164,7 +150,7 @@ abstract class Connector<
 	 */
 	public deleteAdvanced?: (
 		req: AdvancedDeleteRequest,
-		model?: Model<KeyT, VisibilityT, CustomT>,
+		model?: ModelUnknown,
 	) => Promise<void> | void;
 
 	/**

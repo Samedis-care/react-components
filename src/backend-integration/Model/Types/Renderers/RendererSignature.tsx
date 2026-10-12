@@ -13,7 +13,7 @@ export const SignatureNameContext = React.createContext<string | null>(null);
  * Wrap FormField with SignatureNameContext.Provider for name context
  */
 class RendererSignature extends TypeSignature {
-	render(params: ModelRenderParams<string>): React.ReactElement {
+	render(params: ModelRenderParams<string | null>): React.ReactElement {
 		const {
 			visibility,
 			field,
@@ -32,7 +32,7 @@ class RendererSignature extends TypeSignature {
 				<input
 					type="hidden"
 					name={field}
-					value={value}
+					value={value ?? ""}
 					readOnly
 					aria-hidden={"true"}
 				/>

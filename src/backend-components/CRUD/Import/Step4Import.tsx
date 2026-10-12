@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { CrudImporterStepProps, isFieldImportable } from "./index";
 import { Grid, TextField, Typography } from "@mui/material";
 import Model, {
-	PageVisibility,
 	useModelMutation,
 } from "../../../backend-integration/Model/Model";
 import ModelVisibilityHidden from "../../../backend-integration/Model/Visibilities/VisibilityHidden";
@@ -22,7 +21,7 @@ export const useImportStep4Logic = (props: CrudImporterStepProps) => {
 		props;
 
 	// model which can write to all fields
-	const customModel = new Model<string, PageVisibility, unknown>(
+	const customModel = new Model(
 		model.modelId,
 		Object.fromEntries(
 			Object.entries(model.fields).map(([key, field]) => [

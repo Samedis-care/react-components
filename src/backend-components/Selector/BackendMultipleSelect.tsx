@@ -6,10 +6,7 @@ import {
 	MultiSelectorData,
 	SelectorLruOptions,
 } from "../../standalone";
-import {
-	ModelFieldName,
-	PageVisibility,
-} from "../../backend-integration/Model/Model";
+import { ModelUnknown } from "../../backend-integration/Model/Model";
 import debouncePromise from "../../utils/debouncePromise";
 import {
 	BackendMultiSelectProps,
@@ -18,14 +15,9 @@ import {
 import BaseSelector from "../../standalone/Selector/BaseSelector";
 
 export type BackendMultipleSelectProps<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
+	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
-> = Omit<
-	BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
-	"classes"
-> &
+> = Omit<BackendMultiSelectProps<M, DataT>, "classes"> &
 	Pick<BaseSelectorProps<DataT, true>, "classes">;
 
 /**
@@ -33,12 +25,7 @@ export type BackendMultipleSelectProps<
  * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)
  */
 export type BackendMultipleSelectThemeProps = Omit<
-	BackendMultipleSelectProps<
-		ModelFieldName,
-		PageVisibility,
-		unknown,
-		MultiSelectorData
-	>,
+	BackendMultipleSelectProps<ModelUnknown, MultiSelectorData>,
 	| "model"
 	| "modelFetch"
 	| "modelToSelectorData"
@@ -53,12 +40,10 @@ export type BackendMultipleSelectThemeProps = Omit<
  * @constructor
  */
 const BackendMultipleSelect = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
+	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
 >(
-	inProps: BackendMultipleSelectProps<KeyT, VisibilityT, CustomT, DataT>,
+	inProps: BackendMultipleSelectProps<M, DataT>,
 ) => {
 	const props = useThemeProps({
 		props: inProps,

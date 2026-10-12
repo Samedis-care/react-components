@@ -14,8 +14,8 @@ import { FormControlFieldsetCC } from "../../../../../standalone";
 /**
  * Renders TypeEnum as drop-down selector (without search)
  */
-class RendererEnumSelect extends TypeEnum {
-	render(params: ModelRenderParams<string>): React.ReactElement {
+class RendererEnumSelect<T extends string = string> extends TypeEnum<T> {
+	render(params: ModelRenderParams<T>): React.ReactElement {
 		const {
 			visibility,
 			field,
@@ -56,7 +56,8 @@ class RendererEnumSelect extends TypeEnum {
 						name={field}
 						value={value}
 						disabled={visibility.readOnly}
-						onChange={(evt) => handleChange(field, evt.target.value)}
+						// the options are the enum's values
+						onChange={(evt) => handleChange(field, evt.target.value as T)}
 						onBlur={handleBlur}
 						autoFocus={autoFocus}
 					>

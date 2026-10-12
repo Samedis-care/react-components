@@ -42,11 +42,7 @@ import {
 	dataGridGetFilterParameters,
 	dataGridPrepareFiltersAndSorts,
 } from "./CallbackUtil";
-import {
-	ModelFieldName,
-	ModelFilterType,
-	PageVisibility,
-} from "../../backend-integration/Model";
+import { ModelFilterType, ModelUnknown } from "../../backend-integration/Model";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
 import CustomFilterDialog from "./CustomFilterDialog";
 import StatePersistence, {
@@ -436,12 +432,7 @@ export interface DataGridSetFilterDataEntry {
 
 export type DataGridSetFilterData = DataGridSetFilterDataEntry[];
 export type DataGridIdFilterData = Omit<
-	BackendMultiSelectProps<
-		ModelFieldName,
-		PageVisibility,
-		unknown,
-		MultiSelectorData
-	>,
+	BackendMultiSelectProps<ModelUnknown, MultiSelectorData>,
 	"selected" | "onSelect"
 >;
 

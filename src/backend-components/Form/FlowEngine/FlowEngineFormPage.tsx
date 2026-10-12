@@ -2,11 +2,11 @@ import React from "react";
 import BasicFormPage from "../BasicFormPage";
 import FlowEngineFormPageButtons from "./FlowEngineFormPageButtons";
 import { PageProps } from "../Form";
-import { ModelFieldName } from "../../../backend-integration";
+import { ModelUnknown } from "../../../backend-integration";
 import { FlowEngineFormProps } from "./FlowEngine";
 
 export interface FlowEngineFormPageProps<CustomPropsT> extends PageProps<
-	ModelFieldName,
+	ModelUnknown,
 	FlowEngineFormProps & CustomPropsT
 > {
 	/**

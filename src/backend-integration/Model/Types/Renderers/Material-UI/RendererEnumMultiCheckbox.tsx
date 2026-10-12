@@ -21,12 +21,12 @@ export type WrapButtonFunc = (
 /**
  * Renders TypeEnumMulti as checkboxes
  */
-class RendererEnumRadio extends TypeEnumMulti {
+class RendererEnumRadio<T extends string = string> extends TypeEnumMulti<T> {
 	protected horizontal: boolean;
 	protected wrapButton: WrapButtonFunc;
 
 	constructor(
-		values: EnumValue[],
+		values: EnumValue<T>[],
 		horizontal = false,
 		wrapButton: WrapButtonFunc = (btn: React.ReactElement) => btn,
 	) {
@@ -36,7 +36,7 @@ class RendererEnumRadio extends TypeEnumMulti {
 		this.wrapButton = wrapButton;
 	}
 
-	render(params: ModelRenderParams<string[]>): React.ReactElement {
+	render(params: ModelRenderParams<T[]>): React.ReactElement {
 		const {
 			visibility,
 			field,

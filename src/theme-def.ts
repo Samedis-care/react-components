@@ -227,7 +227,7 @@ import {
 	GridSingleSelectFilterBackendClassKey,
 	GridSingleSelectFilterBackendProps,
 } from "./standalone/DataGrid/GridSingleSelectFilterBackend";
-import { ModelFieldName, PageVisibility } from "./backend-integration";
+import { ModelUnknown } from "./backend-integration";
 import {
 	GridMultiSelectFilterBackendClassKey,
 	GridMultiSelectFilterBackendProps,
@@ -394,20 +394,11 @@ declare module "@mui/material/styles" {
 		CcDataGrid: Partial<DataGridProps>;
 		CcGridMultiSelectFilter: Partial<GridMultiSelectFilterProps>;
 		CcGridMultiSelectFilterBackend: Partial<
-			GridMultiSelectFilterBackendProps<
-				ModelFieldName,
-				PageVisibility,
-				unknown,
-				MultiSelectorData
-			>
+			GridMultiSelectFilterBackendProps<ModelUnknown, MultiSelectorData>
 		>;
 		CcGridSingleSelectFilter: Partial<GridSingleSelectFilterProps>;
 		CcGridSingleSelectFilterBackend: Partial<
-			GridSingleSelectFilterBackendProps<
-				ModelFieldName,
-				PageVisibility,
-				unknown
-			>
+			GridSingleSelectFilterBackendProps<ModelUnknown>
 		>;
 		CcBasicFormPage: Partial<BasicFormPageProps<never, never>>;
 	}

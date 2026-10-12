@@ -7,9 +7,9 @@ import {
 	MultiSelectorData,
 	SelectorLruOptions,
 } from "../../standalone";
-import Model, {
-	ModelFieldName,
-	PageVisibility,
+import {
+	ModelRecord,
+	ModelUnknown,
 } from "../../backend-integration/Model/Model";
 import debouncePromise from "../../utils/debouncePromise";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -19,9 +19,7 @@ export type BackendMultiSelectLruOptions<DataT extends MultiSelectorData> =
 	Omit<SelectorLruOptions<DataT>, "loadData">;
 
 export interface BackendMultiSelectProps<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
+	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
 > extends Omit<
 	MultiSelectProps<DataT>,
@@ -30,11 +28,11 @@ export interface BackendMultiSelectProps<
 	/**
 	 * The model to use
 	 */
-	model: Model<KeyT, VisibilityT, CustomT>;
+	model: M;
 	/**
 	 * The model to use for fetch requests (to enable request batching)
 	 */
-	modelFetch?: Model<KeyT, VisibilityT, CustomT>;
+	modelFetch?: M;
 	/**
 	 * Disable the use of request batching
 	 */
@@ -48,9 +46,7 @@ export interface BackendMultiSelectProps<
 	 * Callback that converts the model data to the actual data displayed in the selector
 	 * @param modelData The model data
 	 */
-	modelToSelectorData: (
-		modelData: Record<string, unknown>,
-	) => Promise<DataT> | DataT;
+	modelToSelectorData: (modelData: ModelRecord<M>) => Promise<DataT> | DataT;
 	/**
 	 * The amount of search results to load (defaults to 25)
 	 */
@@ -68,7 +64,7 @@ export interface BackendMultiSelectProps<
 	/**
 	 * Initial data (model format) used for selected cache
 	 */
-	initialData?: Record<string, unknown>[];
+	initialData?: ModelRecord<M>[];
 	/**
 	 * Sort settings
 	 */
@@ -102,13 +98,11 @@ interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
 }
 
 export const useSelectedCache = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
+	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
 >(
 	props: Pick<
-		BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
+		BackendMultiSelectProps<M, DataT>,
 		| "model"
 		| "modelFetch"
 		| "disableRequestBatching"
@@ -240,12 +234,7 @@ export const useSelectedCache = <
  * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)
  */
 export type BackendMultiSelectThemeProps = Omit<
-	BackendMultiSelectProps<
-		ModelFieldName,
-		PageVisibility,
-		unknown,
-		MultiSelectorData
-	>,
+	BackendMultiSelectProps<ModelUnknown, MultiSelectorData>,
 	| "model"
 	| "modelFetch"
 	| "modelToSelectorData"
@@ -261,12 +250,10 @@ export type BackendMultiSelectThemeProps = Omit<
  * @constructor
  */
 const BackendMultiSelect = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
+	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
 >(
-	inProps: BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
+	inProps: BackendMultiSelectProps<M, DataT>,
 ) => {
 	const props = useThemeProps({
 		props: inProps,

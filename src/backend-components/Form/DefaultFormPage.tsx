@@ -3,10 +3,10 @@ import BasicFormPage from "./BasicFormPage";
 import DefaultFormPageButtons from "./DefaultFormPageButtons";
 import { PageProps } from "./Form";
 import { CrudFormProps } from "../CRUD";
-import { ModelFieldName } from "../../backend-integration";
+import { ModelUnknown } from "../../backend-integration";
 
 export interface DefaultFormPageProps extends PageProps<
-	ModelFieldName,
+	ModelUnknown,
 	CrudFormProps
 > {
 	/**

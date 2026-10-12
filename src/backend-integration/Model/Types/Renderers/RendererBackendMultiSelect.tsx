@@ -1,10 +1,6 @@
 import React from "react";
 import { FormHelperText } from "@mui/material";
-import Model, {
-	ModelFieldName,
-	ModelIdFilterData,
-	PageVisibility,
-} from "../../Model";
+import { ModelIdFilterData, ModelRecord, ModelUnknown } from "../../Model";
 import ModelRenderParams from "../../RenderParams";
 import {
 	FormControlFieldsetCC,
@@ -22,42 +18,30 @@ type OmitProperties =
 /**
  * Renders TypeEnum as drop-down selector (with search)
  */
-class RendererBackendMultiSelect<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
-> extends TypeIds {
+class RendererBackendMultiSelect<M extends ModelUnknown> extends TypeIds {
 	idFilter?: ModelIdFilterData;
 	private readonly props: Omit<
-		FormBackendMultiSelectProps<KeyT, VisibilityT, CustomT, MultiSelectorData>,
+		FormBackendMultiSelectProps<M, MultiSelectorData>,
 		OmitProperties
 	>;
 
 	constructor(
 		props: Omit<
-			FormBackendMultiSelectProps<
-				KeyT,
-				VisibilityT,
-				CustomT,
-				MultiSelectorData
-			>,
+			FormBackendMultiSelectProps<M, MultiSelectorData>,
 			OmitProperties
 		>,
 	) {
 		super();
 		this.props = props;
+		// the grid's ID filter selects records of the same relation model
 		this.idFilter = {
 			...props,
 			lru: undefined,
 			onAddNew: undefined,
 			classes: undefined,
 			endAdornment: undefined,
-			modelFetch: props.modelFetch as unknown as Model<
-				ModelFieldName,
-				PageVisibility,
-				unknown
-			>,
-		};
+			modelFetch: props.modelFetch,
+		} as ModelIdFilterData;
 	}
 
 	render(params: ModelRenderParams<string[]>): React.ReactElement {
@@ -96,11 +80,7 @@ class RendererBackendMultiSelect<
 					"Type BackendMultiSelect requires relation model: " + field,
 				);
 
-			const typedRelationModel = relationModel as unknown as Model<
-				KeyT,
-				VisibilityT,
-				CustomT
-			>;
+			const typedRelationModel = relationModel as unknown as M;
 
 			return (
 				<FormControlFieldsetCC
@@ -113,14 +93,15 @@ class RendererBackendMultiSelect<
 					onBlur={handleBlur}
 					name={field}
 				>
-					<FormBackendMultiSelect<KeyT, VisibilityT, CustomT, MultiSelectorData>
+					<FormBackendMultiSelect<M, MultiSelectorData>
 						selected={value}
 						label={label}
 						onSelect={(value) => handleChange(field, value)}
 						disabled={visibility.readOnly}
 						required={visibility.required}
 						model={typedRelationModel}
-						initialData={relationData}
+						// the form's relations hold deserialized records of the relation model
+						initialData={relationData as ModelRecord<M>[] | undefined}
 						{...this.props}
 						dirty={dirty}
 						autoFocus={autoFocus}

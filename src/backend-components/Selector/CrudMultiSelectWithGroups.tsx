@@ -1,5 +1,5 @@
 import React, { ForwardedRef, RefAttributes } from "react";
-import { ModelFieldName, PageVisibility } from "../../backend-integration";
+import { ModelRecord, ModelUnknown } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import { BaseSelectorData, Loader, MultiSelectorData } from "../../standalone";
 import BackendMultiSelectWithTags, {
@@ -11,30 +11,22 @@ import useCrudSelect, {
 } from "./useCrudSelect";
 
 export interface CrudMultiSelectWithGroupsProps<
-	GroupKeyT extends ModelFieldName,
-	DataKeyT extends ModelFieldName,
-	GroupVisibilityT extends PageVisibility,
-	DataVisibilityT extends PageVisibility,
-	GroupCustomT,
-	DataCustomT,
+	GroupModelT extends ModelUnknown,
+	DataModelT extends ModelUnknown,
 	GroupDataT extends BaseSelectorData,
 	DataDataT extends MultiSelectorData,
 >
 	extends
 		Omit<
 			BackendMultiSelectWithTagsProps<
-				GroupKeyT,
-				DataKeyT,
-				GroupVisibilityT,
-				DataVisibilityT,
-				GroupCustomT,
-				DataCustomT,
+				GroupModelT,
+				DataModelT,
 				GroupDataT,
 				DataDataT
 			>,
 			"selected" | "onChange" | "convData" | "initialData" | "getIdOfData"
 		>,
-		UseCrudSelectParams<DataKeyT, DataVisibilityT, DataCustomT, DataDataT> {
+		UseCrudSelectParams<DataModelT, DataDataT> {
 	/**
 	 * The error component that is used to display errors
 	 */
@@ -44,12 +36,8 @@ export interface CrudMultiSelectWithGroupsProps<
 	 */
 	getIdOfData: NonNullable<
 		BackendMultiSelectWithTagsProps<
-			GroupKeyT,
-			DataKeyT,
-			GroupVisibilityT,
-			DataVisibilityT,
-			GroupCustomT,
-			DataCustomT,
+			GroupModelT,
+			DataModelT,
 			GroupDataT,
 			DataDataT
 		>["getIdOfData"]
@@ -57,22 +45,14 @@ export interface CrudMultiSelectWithGroupsProps<
 }
 
 const CrudMultiSelectWithGroups = <
-	GroupKeyT extends ModelFieldName,
-	DataKeyT extends ModelFieldName,
-	GroupVisibilityT extends PageVisibility,
-	DataVisibilityT extends PageVisibility,
-	GroupCustomT,
-	DataCustomT,
+	GroupModelT extends ModelUnknown,
+	DataModelT extends ModelUnknown,
 	GroupDataT extends BaseSelectorData,
 	DataDataT extends MultiSelectorData,
 >(
 	props: CrudMultiSelectWithGroupsProps<
-		GroupKeyT,
-		DataKeyT,
-		GroupVisibilityT,
-		DataVisibilityT,
-		GroupCustomT,
-		DataCustomT,
+		GroupModelT,
+		DataModelT,
 		GroupDataT,
 		DataDataT
 	> &
@@ -98,12 +78,8 @@ const CrudMultiSelectWithGroups = <
 		<>
 			{error && <ErrorComponent error={error} />}
 			<BackendMultiSelectWithTags<
-				GroupKeyT,
-				DataKeyT,
-				GroupVisibilityT,
-				DataVisibilityT,
-				GroupCustomT,
-				DataCustomT,
+				GroupModelT,
+				DataModelT,
 				GroupDataT,
 				DataDataT
 			>
@@ -111,7 +87,8 @@ const CrudMultiSelectWithGroups = <
 				selected={selected.map((entry) => entry.value)}
 				onChange={handleSelect}
 				convData={modelToSelectorData}
-				initialData={initialRawData}
+				// the connector's records seed the selected cache: modelToSelectorData tells them apart
+				initialData={initialRawData as ModelRecord<DataModelT>[]}
 			/>
 		</>
 	);
@@ -120,22 +97,14 @@ const CrudMultiSelectWithGroups = <
 const ForwardedCrudMultiSelectWithGroups = React.forwardRef(
 	CrudMultiSelectWithGroups,
 ) as <
-	GroupKeyT extends ModelFieldName,
-	DataKeyT extends ModelFieldName,
-	GroupVisibilityT extends PageVisibility,
-	DataVisibilityT extends PageVisibility,
-	GroupCustomT,
-	DataCustomT,
+	GroupModelT extends ModelUnknown,
+	DataModelT extends ModelUnknown,
 	GroupDataT extends BaseSelectorData,
 	DataDataT extends MultiSelectorData,
 >(
 	props: CrudMultiSelectWithGroupsProps<
-		GroupKeyT,
-		DataKeyT,
-		GroupVisibilityT,
-		DataVisibilityT,
-		GroupCustomT,
-		DataCustomT,
+		GroupModelT,
+		DataModelT,
 		GroupDataT,
 		DataDataT
 	> &

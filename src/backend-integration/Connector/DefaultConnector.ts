@@ -1,4 +1,3 @@
-import { ModelFieldName, PageVisibility } from "../Model";
 import Connector from "./Connector";
 import ApiConnector from "./ApiConnector";
 
@@ -16,15 +15,11 @@ export interface DefaultConnectors {
 	/**
 	 * The default "normal" backend connector
 	 */
-	getNormal: ConnectorCallback<
-		Connector<ModelFieldName, PageVisibility, unknown>
-	> | null;
+	getNormal: ConnectorCallback<Connector> | null;
 	/**
 	 * The default API backend connector
 	 */
-	getApi: ConnectorCallback<
-		ApiConnector<ModelFieldName, PageVisibility, unknown>
-	> | null;
+	getApi: ConnectorCallback<ApiConnector> | null;
 }
 
 const DefaultConnector: DefaultConnectors = {
@@ -37,7 +32,7 @@ const DefaultConnector: DefaultConnectors = {
  * @param def The new default
  */
 export const setDefaultConnectorNormal = (
-	def: ConnectorCallback<Connector<ModelFieldName, PageVisibility, unknown>>,
+	def: ConnectorCallback<Connector>,
 ): void => {
 	DefaultConnector.getNormal = def;
 };
@@ -47,7 +42,7 @@ export const setDefaultConnectorNormal = (
  * @param def The new default
  */
 export const setDefaultConnectorAPI = (
-	def: ConnectorCallback<ApiConnector<ModelFieldName, PageVisibility, unknown>>,
+	def: ConnectorCallback<ApiConnector>,
 ): void => {
 	DefaultConnector.getApi = def;
 	DefaultConnector.getNormal = def;

@@ -1,20 +1,16 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { ModelFieldName, PageVisibility } from "../../backend-integration";
+import { ModelUnknown } from "../../backend-integration";
 import DataGrid, {
 	DataGridData,
 	DataGridProps,
-	DataGridRowData,
 	IDataGridLoadDataParameters,
 } from "../../standalone/DataGrid/DataGrid";
-import Model from "../../backend-integration/Model/Model";
 import Connector from "../../backend-integration/Connector/Connector";
 import { renderDataGridRecordUsingModel } from "../DataGrid";
 import { DataGridNoPersist } from "../../standalone";
 
 export interface BackendDataGridMultiSelectProps<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
+	M extends ModelUnknown,
 > extends Omit<
 	DataGridProps,
 	| "columns"
@@ -28,7 +24,7 @@ export interface BackendDataGridMultiSelectProps<
 	/**
 	 * The model to load data from
 	 */
-	model: Model<KeyT, VisibilityT, CustomT>;
+	model: M;
 	/**
 	 * Selection read only?
 	 */
@@ -45,12 +41,8 @@ export interface BackendDataGridMultiSelectProps<
 	onChange: (selected: string[]) => void;
 }
 
-const BackendDataGridMultiSelect = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
->(
-	props: BackendDataGridMultiSelectProps<KeyT, VisibilityT, CustomT>,
+const BackendDataGridMultiSelect = <M extends ModelUnknown>(
+	props: BackendDataGridMultiSelectProps<M>,
 ) => {
 	const { model, readOnly, selected, onChange, ...gridProps } = props;
 	const [refreshToken, setRefreshToken] = useState("");
@@ -137,9 +129,9 @@ const BackendDataGridMultiSelect = <
 							dataMeta.filteredRows != null
 								? relationshipRecordFilteredCount + dataMeta.totalRows
 								: undefined,
-						rows: relationshipRecordsFiltered
-							.concat(dataRecords as DataGridRowData[])
-							.map(renderDataGridRecordUsingModel(model, refreshGrid)),
+						rows: [...relationshipRecordsFiltered, ...dataRecords].map(
+							renderDataGridRecordUsingModel(model, refreshGrid),
+						),
 					};
 				}}
 			/>

@@ -8,9 +8,9 @@ import React, {
 } from "react";
 import { useFormContext } from "./Form";
 import {
-	ModelFieldDefinition,
+	ModelFieldDefinitionUnknown,
 	ModelRenderParams,
-	PageVisibility,
+	ModelUnknown,
 } from "../../backend-integration";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
 import { dotsToObject, getValueByDot } from "../../utils/dotUtils";
@@ -31,18 +31,10 @@ interface FieldProps {
 	 * Overrides for the model information
 	 */
 	overrides?:
-		| Partial<
-				Omit<
-					ModelFieldDefinition<unknown, string, PageVisibility, never>,
-					NonOverridableProps
-				>
-		  >
+		| Partial<Omit<ModelFieldDefinitionUnknown, NonOverridableProps>>
 		| ((
-				original: ModelFieldDefinition<unknown, string, PageVisibility, never>,
-		  ) => Omit<
-				ModelFieldDefinition<unknown, string, PageVisibility, never>,
-				NonOverridableProps
-		  >);
+				original: ModelFieldDefinitionUnknown,
+		  ) => Omit<ModelFieldDefinitionUnknown, NonOverridableProps>);
 	/**
 	 * Focus the field's control when it mounts, e.g. the field a form should start in
 	 * @remarks Like the `autoFocus` attribute: it applies when the control mounts, so
@@ -66,9 +58,9 @@ export const useFormFieldContext = <T,>(): FormFieldContextType<T> => {
 };
 
 export const useFieldRelationModel = (
-	fieldDef: ModelFieldDefinition<unknown, string, PageVisibility, never>,
+	fieldDef: ModelFieldDefinitionUnknown,
 ) => {
-	const { values } = useFormContext();
+	const { values } = useFormContext<ModelUnknown>();
 	const { getRelationModel, getRelationModelValues } = fieldDef;
 	const hasId = "id" in values && (values["id"] as string | null);
 	// cache these, so we don't trigger useless re-renders every time a value changes
@@ -111,10 +103,9 @@ const Field = (props: FieldProps): React.ReactElement => {
 		markFieldMounted,
 		relations,
 		readOnly,
-	} = useFormContext();
+	} = useFormContext<ModelUnknown>();
 
-	let fieldDef: ModelFieldDefinition<unknown, string, PageVisibility, never> =
-		model.fields[props.name];
+	let fieldDef: ModelFieldDefinitionUnknown = model.fields[props.name];
 
 	if (!fieldDef) throw new Error("Invalid field name specified: " + props.name);
 	if (props.overrides) {

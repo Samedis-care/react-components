@@ -10,10 +10,13 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import Model, {
-	ModelFieldName,
+import {
+	ModelFieldNames,
+	ModelFieldValues,
 	ModelGetResponseRelations,
-	PageVisibility,
+	ModelRecord,
+	ModelRecordPartial,
+	ModelUnknown,
 	useModelDelete,
 	useModelGet,
 	useModelMutation,
@@ -85,15 +88,15 @@ export enum OnlySubmitMountedBehaviour {
 	NULL = "null",
 }
 
-export interface PreSubmitParams {
+export interface PreSubmitParams<M extends ModelUnknown> {
 	/**
 	 * The remote data
 	 */
-	readonly serverData: Record<string, unknown>;
+	readonly serverData: ModelRecord<M>;
 	/**
 	 * The local data
 	 */
-	readonly formData: Record<string, unknown>;
+	readonly formData: ModelRecord<M>;
 	/**
 	 * submit options
 	 */
@@ -101,7 +104,7 @@ export interface PreSubmitParams {
 	// select form props follow, @see docs in interface FormProps
 	readonly deleteOnSubmit: boolean;
 	// select helpers follow, @see docs in interface FormContextData
-	readonly setFieldValue: FormContextData["setFieldValue"];
+	readonly setFieldValue: FormContextData<M>["setFieldValue"];
 }
 
 export interface ErrorComponentProps {
@@ -123,8 +126,7 @@ export type FormSubmitOptions = Partial<{
 	ignoreDirtyCheck: boolean;
 }>;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
+export interface PageProps<M extends ModelUnknown, CustomPropsT> {
 	/**
 	 * Indicates if the form is currently being submitted.
 	 * All submit buttons should be disabled if "isSubmitting" is true.
@@ -143,7 +145,7 @@ export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
 	 * The values of the form, can be used for conditional rendering.
 	 * Only present if renderConditionally is set to true in FormProps
 	 */
-	values?: Record<string, unknown>;
+	values?: ModelRecord<M>;
 	/**
 	 * Function to trigger form submit
 	 */
@@ -170,16 +172,11 @@ export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
 	customProps: CustomPropsT;
 }
 
-export interface FormProps<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
-	CustomPropsT,
-> {
+export interface FormProps<M extends ModelUnknown, CustomPropsT> {
 	/**
 	 * The data model this form follows
 	 */
-	model: Model<KeyT, VisibilityT, CustomT>;
+	model: M;
 	/**
 	 * The current data entry id
 	 */
@@ -188,7 +185,7 @@ export interface FormProps<
 	 * Initial record to use (instead of defaults from model)
 	 * @remarks Only loaded if ID is null
 	 */
-	initialRecord?: Record<string, unknown>;
+	initialRecord?: ModelRecordPartial<M>;
 	/**
 	 * The error component that is used to display errors
 	 */
@@ -196,7 +193,7 @@ export interface FormProps<
 	/**
 	 * The form contents
 	 */
-	children: React.ComponentType<PageProps<KeyT, CustomPropsT>>;
+	children: React.ComponentType<PageProps<M, CustomPropsT>>;
 	/**
 	 * Rerender page props if values changes
 	 */
@@ -206,7 +203,7 @@ export interface FormProps<
 	 * @param params The params provided
 	 * @return should cancel? false for continue, true for cancel
 	 */
-	preSubmit?: (params: PreSubmitParams) => Promise<boolean> | boolean;
+	preSubmit?: (params: PreSubmitParams<M>) => Promise<boolean> | boolean;
 	/**
 	 * Called upon successful submit
 	 * Contains data from server response
@@ -215,9 +212,9 @@ export interface FormProps<
 	 * @param previousData The data previously provided by the server
 	 */
 	onSubmit?: (
-		dataFromServer: Record<string, unknown>,
-		submittedData: Record<string, unknown>,
-		previousData: Record<string, unknown>,
+		dataFromServer: ModelRecord<M>,
+		submittedData: ModelRecord<M>,
+		previousData: ModelRecord<M>,
 	) => Promise<void> | void;
 	/**
 	 * Disable busy state while onSubmit is running. Required if you want to show a dialog for example
@@ -225,9 +222,9 @@ export interface FormProps<
 	onSubmitUserInteractive?:
 		| boolean
 		| ((
-				dataFromServer: Record<string, unknown>,
-				submittedData: Record<string, unknown>,
-				previousData: Record<string, unknown>,
+				dataFromServer: ModelRecord<M>,
+				submittedData: ModelRecord<M>,
+				previousData: ModelRecord<M>,
 		  ) => boolean);
 	/**
 	 * Delete the record on submit rather than save it?
@@ -256,11 +253,11 @@ export interface FormProps<
 	/**
 	 * Fields to always be included during submit, regardless of onlySubmitMounted
 	 */
-	alwaysSubmitFields?: string[];
+	alwaysSubmitFields?: ModelFieldNames<M>[];
 	/**
 	 * List of fields which will always trigger validation warning even if onlyWarnChanged is enabled
 	 */
-	alwaysWarnFields?: string[];
+	alwaysWarnFields?: ModelFieldNames<M>[];
 	/**
 	 * Only validate mounted fields
 	 */
@@ -325,9 +322,9 @@ export interface FormProps<
 	 */
 	nestedFormPreSubmitHandler?: (
 		id: string | null,
-		model: Model<ModelFieldName, PageVisibility, unknown>,
-		getFieldValue: FormContextData["getFieldValue"],
-		setFieldValueLite: FormContextData["setFieldValueLite"],
+		model: M,
+		getFieldValue: FormContextData<M>["getFieldValue"],
+		setFieldValueLite: FormContextData<M>["setFieldValueLite"],
 	) => Promise<void> | void;
 	/**
 	 * CSS class for form styles
@@ -378,7 +375,15 @@ export interface FormErrorRendererProps<CustomPropsT> {
 
 export const FormRenderAsDivContext = React.createContext(false);
 
-export interface FormContextData {
+/**
+ * The context of a form, typed by the form's model
+ * @typeParam M The model of the form, ModelUnknown for code that works with any form
+ * @typeParam CustomPropsT The custom props of the form
+ */
+export interface FormContextData<
+	M extends ModelUnknown,
+	CustomPropsT = unknown,
+> {
 	/**
 	 * The ID of the currently opened record
 	 */
@@ -386,7 +391,7 @@ export interface FormContextData {
 	/**
 	 * The data model of this form
 	 */
-	model: Model<ModelFieldName, PageVisibility, never>;
+	model: M;
 	/**
 	 * The error component of this form
 	 */
@@ -394,7 +399,7 @@ export interface FormContextData {
 	/**
 	 * Relations of the model
 	 */
-	relations: ModelGetResponseRelations<ModelFieldName>;
+	relations: ModelGetResponseRelations<M>;
 	/**
 	 * Helper function to display errors
 	 * @param error The error to display
@@ -517,7 +522,7 @@ export interface FormContextData {
 	 *          An entry is the same flag a type renderer receives as
 	 *          `RenderParams.dirty`.
 	 */
-	dirtyFields: Record<string, boolean>;
+	dirtyFields: Record<ModelFieldNames<M>, boolean>;
 	/**
 	 * Was the form asked to mark its modified fields?
 	 * @remarks Whether a given field *is* marked is a different question, which a
@@ -627,11 +632,11 @@ export interface FormContextData {
 	/**
 	 * The current form values
 	 */
-	values: Record<string, unknown>;
+	values: ModelRecord<M>;
 	/**
 	 * The initial form values
 	 */
-	initialValues: Record<string, unknown>;
+	initialValues: ModelRecord<M>;
 	/**
 	 * The current validation errors
 	 */
@@ -647,9 +652,9 @@ export interface FormContextData {
 	/**
 	 * Sets a field value
 	 */
-	setFieldValue: (
-		field: string,
-		value: unknown,
+	setFieldValue: <FieldT extends ModelFieldNames<M>>(
+		field: FieldT,
+		value: ModelFieldValues<M>[FieldT],
 		validate?: boolean,
 		triggerOnChange?: boolean,
 	) => void;
@@ -659,16 +664,21 @@ export interface FormContextData {
 	 * @param value The value
 	 * @see setFieldValue
 	 */
-	setFieldValueLite: (field: string, value: unknown) => void;
+	setFieldValueLite: <FieldT extends ModelFieldNames<M>>(
+		field: FieldT,
+		value: ModelFieldValues<M>[FieldT],
+	) => void;
 	/**
 	 * Get a field value
 	 * @param field The field name
 	 */
-	getFieldValue: (field: string) => unknown;
+	getFieldValue: <FieldT extends ModelFieldNames<M>>(
+		field: FieldT,
+	) => ModelFieldValues<M>[FieldT];
 	/**
 	 * Gets all current values
 	 */
-	getFieldValues: () => Record<string, unknown>;
+	getFieldValues: () => ModelRecord<M>;
 	/**
 	 * Handle input blur events
 	 */
@@ -680,7 +690,7 @@ export interface FormContextData {
 	 * @param validate Should revalidate?
 	 */
 	setFieldTouched: (
-		field: string,
+		field: ModelFieldNames<M>,
 		touched?: boolean,
 		validate?: boolean,
 	) => void;
@@ -690,7 +700,7 @@ export interface FormContextData {
 	 * @param touched The new touched state
 	 * @see setFieldTouched
 	 */
-	setFieldTouchedLite: (field: string, touched?: boolean) => void;
+	setFieldTouchedLite: (field: ModelFieldNames<M>, touched?: boolean) => void;
 	/**
 	 * Resets the form to server values
 	 */
@@ -709,11 +719,11 @@ export interface FormContextData {
 	/**
 	 * Parent form context (if present and FormProps.nestedFormName is set)
 	 */
-	parentFormContext: FormContextData | null;
+	parentFormContext: FormContextData<ModelUnknown> | null;
 	/**
 	 * Custom props passed in props
 	 */
-	customProps: unknown;
+	customProps: CustomPropsT;
 	/**
 	 * Flow engine mode enabled?
 	 */
@@ -727,15 +737,39 @@ export interface FormContextData {
 /**
  * Context which stores information about the current form so it can be used by fields
  */
-export const FormContext = React.createContext<FormContextData | null>(null);
-export const useFormContext = (): FormContextData => {
+export const FormContext =
+	React.createContext<FormContextData<ModelUnknown> | null>(null);
+
+/**
+ * Requires the model type argument of the form context hooks: a call without one doesn't compile
+ */
+export type FormContextModelTypeRequired<M> = [M] extends [never]
+	? [modelTypeArgumentRequired: never]
+	: [];
+
+/**
+ * The context of the form this component is rendered in
+ * @typeParam M The model of the form (required), ModelUnknown for code that works with any form
+ * @typeParam CustomPropsT The custom props of the form
+ * @remarks M is not checked against the model the form actually uses
+ */
+export const useFormContext = <
+	M extends ModelUnknown = never,
+	CustomPropsT = unknown,
+>(
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- only there to require M
+	..._modelTypeRequired: FormContextModelTypeRequired<M>
+): FormContextData<M, CustomPropsT> => {
 	const ctx = useContext(FormContext);
 	if (!ctx) throw new Error("Form Context not set. Not using form engine?");
-	return ctx;
+	return ctx as unknown as FormContextData<M, CustomPropsT>;
 };
 
-export type FormContextDataLite = Pick<
-	FormContextData,
+export type FormContextDataLite<
+	M extends ModelUnknown,
+	CustomPropsT = unknown,
+> = Pick<
+	FormContextData<M, CustomPropsT>,
 	| "id"
 	| "model"
 	| "customProps"
@@ -765,14 +799,24 @@ export type FormContextDataLite = Pick<
 	| "flowEngineConfig"
 	| "refetchForm"
 >;
-export const FormContextLite = React.createContext<FormContextDataLite | null>(
-	null,
-);
-export const useFormContextLite = (): FormContextDataLite => {
+export const FormContextLite =
+	React.createContext<FormContextDataLite<ModelUnknown> | null>(null);
+
+/**
+ * The lite context of the form this component is rendered in
+ * @see useFormContext
+ */
+export const useFormContextLite = <
+	M extends ModelUnknown = never,
+	CustomPropsT = unknown,
+>(
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- only there to require M
+	..._modelTypeRequired: FormContextModelTypeRequired<M>
+): FormContextDataLite<M, CustomPropsT> => {
 	const ctx = useContext(FormContextLite);
 	if (!ctx)
 		throw new Error("Form Context (Lite) not set. Not using form engine?");
-	return ctx;
+	return ctx as unknown as FormContextDataLite<M, CustomPropsT>;
 };
 
 export interface FormNestedState {
@@ -794,7 +838,7 @@ export type FormFlowEngineStageConfig = Partial<{
 export const useFormFlowEngineStageConfig = (
 	config: FormFlowEngineStageConfig,
 ) => {
-	const { flowEngineConfig } = useFormContextLite();
+	const { flowEngineConfig } = useFormContextLite<ModelUnknown>();
 	useEffect(() => {
 		flowEngineConfig.current = config;
 		return () => {
@@ -817,7 +861,7 @@ interface DirtyDetectionConfig {
 	/**
 	 * The model
 	 */
-	model: Model<string, PageVisibility, unknown>;
+	model: ModelUnknown;
 	/**
 	 * only submit mounted config
 	 */
@@ -833,7 +877,7 @@ interface DirtyDetectionConfig {
 
 const getUpdateData = (
 	values: Record<string, unknown>,
-	model: Model<string, PageVisibility, unknown>,
+	model: ModelUnknown,
 	onlySubmitMounted: boolean,
 	onlySubmitMountedBehaviour: OnlySubmitMountedBehaviour,
 	alwaysSubmitFields: string[],
@@ -935,16 +979,18 @@ const StyledFormDiv = styled("div", { name: "CcForm", slot: "root" })({});
 
 export type FormClassKey = "root";
 
-const Form = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
-	CustomPropsT,
->(
-	props: FormProps<KeyT, VisibilityT, CustomT, CustomPropsT>,
+/**
+ * Types data of the form engine as a record of the form's model: the deserialized server data
+ * and the values built from it
+ */
+const asModelRecord = <M extends ModelUnknown>(data: Record<string, unknown>) =>
+	data as ModelRecord<M>;
+
+const Form = <M extends ModelUnknown, CustomPropsT>(
+	props: FormProps<M, CustomPropsT>,
 ) => {
 	const {
-		model,
+		model: formModel,
 		id,
 		children,
 		onSubmit,
@@ -971,6 +1017,8 @@ const Form = <
 		renderFormAsDiv: renderFormAsDivProp,
 		errorRenderer: ErrorRenderer,
 	} = props;
+	// the form engine itself works with any model, the typing is for the props and the context
+	const model: ModelUnknown = formModel;
 	const renderFormAsDiv =
 		useContext(FormRenderAsDivContext) || renderFormAsDivProp;
 	// flow engine mode defaults
@@ -1207,7 +1255,7 @@ const Form = <
 		),
 	);
 	const markFieldMounted = useCallback((field: string, mounted: boolean) => {
-		setMountedFields((prev) => ({ ...prev, [field as KeyT]: mounted }));
+		setMountedFields((prev) => ({ ...prev, [field]: mounted }));
 	}, []);
 
 	// main form handling - dirty state
@@ -1255,7 +1303,7 @@ const Form = <
 			}
 			const localData = normalizeValues(values ?? valuesRef.current, {
 				ignoreFields: dirtyIgnoreFields,
-				model: model as unknown as Model<string, PageVisibility, unknown>,
+				model,
 				defaultRecord: defaultRecord[0],
 				onlySubmitMountedBehaviour,
 				onlySubmitMounted: onlySubmitMounted ?? false,
@@ -1265,7 +1313,7 @@ const Form = <
 
 			const remoteData = normalizeValues(initialValues, {
 				ignoreFields: dirtyIgnoreFields,
-				model: model as unknown as Model<string, PageVisibility, unknown>,
+				model,
 				defaultRecord: defaultRecord[0],
 				onlySubmitMountedBehaviour,
 				onlySubmitMounted: onlySubmitMounted ?? false,
@@ -1411,7 +1459,7 @@ const Form = <
 			const values = valuesOverride ?? valuesRef.current;
 			if (disableValidation) return {};
 
-			let fieldsToValidate: KeyT[] = Object.keys(model.fields) as KeyT[];
+			let fieldsToValidate: string[] = Object.keys(model.fields);
 			if (onlyValidateMounted || (mode === "hint" && onlyWarnMounted)) {
 				fieldsToValidate = fieldsToValidate.filter(
 					(field) =>
@@ -1508,9 +1556,9 @@ const Form = <
 			triggerOnChange = false, // default false to prevent recursion
 		) => {
 			if (triggerOnChange) {
-				const onChange = model.fields[field as KeyT].onChange;
-				if (onChange) {
-					value = onChange(value, model, setFieldValue, getFieldValue);
+				const fieldDef = model.fields[field];
+				if (fieldDef.onChange) {
+					value = fieldDef.onChange(value, model, setFieldValue, getFieldValue);
 					if (value === undefined && process.env.NODE_ENV === "development") {
 						// eslint-disable-next-line no-console
 						console.error(
@@ -1667,8 +1715,10 @@ const Form = <
 				let cancelSubmit: boolean;
 				try {
 					cancelSubmit = await preSubmit({
-						serverData: (serverData && serverData[0]) ?? valuesRef.current,
-						formData: valuesRef.current,
+						serverData: asModelRecord<M>(
+							(serverData && serverData[0]) ?? valuesRef.current,
+						),
+						formData: asModelRecord<M>(valuesRef.current),
 						submitOptions: params,
 						deleteOnSubmit: !!deleteOnSubmit,
 						setFieldValue,
@@ -1776,7 +1826,7 @@ const Form = <
 					// flow engine staged submit
 					const updateData = getUpdateData(
 						valuesRef.current,
-						model as unknown as Model<string, PageVisibility, unknown>,
+						model,
 						flowEngineConfig.current.onlySubmitMounted ?? true,
 						flowEngineConfig.current.onlySubmitMountedBehaviour ??
 							OnlySubmitMountedBehaviour.OMIT,
@@ -1822,7 +1872,7 @@ const Form = <
 					const result = await updateData(
 						getUpdateData(
 							flowEngine ? valuesStagedRef.current : valuesRef.current,
-							model as unknown as Model<string, PageVisibility, unknown>,
+							model,
 							flowEngine && id === null ? false : (onlySubmitMounted ?? false),
 							onlySubmitMountedBehaviour,
 							alwaysSubmitFields,
@@ -1865,10 +1915,18 @@ const Form = <
 					if (onSubmit) {
 						const interactive =
 							typeof onSubmitUserInteractive === "function"
-								? onSubmitUserInteractive(newValues, submitValues, oldValues)
+								? onSubmitUserInteractive(
+										asModelRecord<M>(newValues),
+										asModelRecord<M>(submitValues),
+										asModelRecord<M>(oldValues),
+									)
 								: onSubmitUserInteractive;
 						if (interactive) setSubmittingForm(false);
-						await onSubmit(newValues, submitValues, oldValues);
+						await onSubmit(
+							asModelRecord<M>(newValues),
+							asModelRecord<M>(submitValues),
+							asModelRecord<M>(oldValues),
+						);
 						// setSubmittingForm(true); // disabled because this is the last thing that happens in this handler
 					}
 				}
@@ -2066,8 +2124,8 @@ const Form = <
 			if (nestedFormPreSubmitHandler) {
 				await nestedFormPreSubmitHandler(
 					id,
-					model as unknown as Model<ModelFieldName, PageVisibility, unknown>,
-					getFieldValue,
+					formModel,
+					getFieldValue as FormContextData<M>["getFieldValue"],
 					setFieldValueLite,
 				);
 			}
@@ -2206,10 +2264,10 @@ const Form = <
 		[setUpdateError],
 	);
 
-	const formContextData: FormContextData = useMemo(
+	const formContextData: FormContextData<ModelUnknown> = useMemo(
 		() => ({
 			id,
-			model: model as unknown as Model<ModelFieldName, PageVisibility, never>,
+			model,
 			errorComponent: ErrorComponent,
 			relations: serverData && serverData[1] ? serverData[1] : {},
 			setError,
@@ -2329,10 +2387,10 @@ const Form = <
 		],
 	);
 
-	const formContextDataLite: FormContextDataLite = useMemo(
+	const formContextDataLite: FormContextDataLite<ModelUnknown> = useMemo(
 		() => ({
 			id,
-			model: model as unknown as Model<ModelFieldName, PageVisibility, never>,
+			model,
 			customProps,
 			errorComponent: ErrorComponent,
 			onlySubmitMounted: !!onlySubmitMounted,
@@ -2426,7 +2484,9 @@ const Form = <
 			) : (
 				<Children
 					isSubmitting={submitting}
-					values={props.renderConditionally ? values : undefined}
+					values={
+						props.renderConditionally ? asModelRecord<M>(values) : undefined
+					}
 					submit={submitForm}
 					safeSubmit={safeSubmitForm}
 					reset={resetForm}

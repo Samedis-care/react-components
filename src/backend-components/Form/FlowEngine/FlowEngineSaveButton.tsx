@@ -4,6 +4,7 @@ import ActionButton, {
 } from "../../../standalone/UIKit/ActionButton";
 import { useFormContext } from "../Form";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import { ModelUnknown } from "../../../backend-integration";
 
 export interface FlowEngineSaveButtonProps extends Omit<
 	ActionButtonProps,
@@ -14,7 +15,8 @@ export interface FlowEngineSaveButtonProps extends Omit<
 
 const FlowEngineSaveButton = (props: FlowEngineSaveButtonProps) => {
 	const { t } = useCCTranslations();
-	const { dirty, submitting, readOnly, safeSubmit } = useFormContext();
+	const { dirty, submitting, readOnly, safeSubmit } =
+		useFormContext<ModelUnknown>();
 	const disabled = !dirty || submitting || readOnly;
 
 	const handleClick = useCallback(() => {

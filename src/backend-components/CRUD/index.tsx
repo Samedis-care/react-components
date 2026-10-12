@@ -8,9 +8,9 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import Model, {
-	ModelFieldName,
-	PageVisibility,
+import {
+	ModelRecord,
+	ModelUnknown,
 } from "../../backend-integration/Model/Model";
 import BackendDataGrid, { BackendDataGridProps } from "../DataGrid";
 import { Form, FormProps } from "../Form";
@@ -61,20 +61,16 @@ export interface GridWrapperProps {
 	children: React.ReactNode;
 }
 
-export interface CrudProps<
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
-> {
+export interface CrudProps<M extends ModelUnknown> {
 	/**
 	 * The model to use
 	 */
-	model: Model<KeyT, VisibilityT, CustomT>;
+	model: M;
 	/**
 	 * The properties to pass to form
 	 */
 	formProps: Omit<
-		FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>,
+		FormProps<M, CrudFormProps>,
 		| "id"
 		| "model"
 		| "children"
@@ -86,26 +82,19 @@ export interface CrudProps<
 		/**
 		 * override for default form custom props passed in by CRUD component
 		 */
-		customProps?: FormProps<
-			KeyT,
-			VisibilityT,
-			CustomT,
-			CrudFormProps
-		>["customProps"];
+		customProps?: FormProps<M, CrudFormProps>["customProps"];
 	};
 	/**
 	 * The renderer function which returns the form component
 	 * @remarks Can be set to undefined to only render the Grid
 	 */
-	children:
-		| FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>["children"]
-		| undefined;
+	children: FormProps<M, CrudFormProps>["children"] | undefined;
 	/**
 	 * The properties to pass to grid
 	 * @remarks onAddNew can be used to overCrudImportTypewrite the new button action
 	 */
 	gridProps: Omit<
-		BackendDataGridProps<KeyT, VisibilityT, CustomT>,
+		BackendDataGridProps<M>,
 		| "model"
 		| "enableDelete"
 		| "disableExport"
@@ -113,7 +102,7 @@ export interface CrudProps<
 		| "forceRefreshToken"
 		| "onAddNew"
 	> &
-		Pick<Partial<BackendDataGridProps<KeyT, VisibilityT, CustomT>>, never> & {
+		Pick<Partial<BackendDataGridProps<M>>, never> & {
 			onAddNew?:
 				| ((showNew: () => void) => void)
 				| string
@@ -121,11 +110,7 @@ export interface CrudProps<
 						onClick: ((showNew: () => void) => void) | undefined;
 				  })[];
 			// forced version of addNew, is directly passed along
-			forceAddNew?: BackendDataGridProps<
-				KeyT,
-				VisibilityT,
-				CustomT
-			>["onAddNew"];
+			forceAddNew?: BackendDataGridProps<M>["onAddNew"];
 		};
 	/**
 	 * Component wrapping the DataGrid
@@ -134,9 +119,7 @@ export interface CrudProps<
 	/**
 	 * Custom BackendDataGrid component
 	 */
-	gridComponent?: React.ComponentType<
-		BackendDataGridProps<KeyT, VisibilityT, CustomT>
-	>;
+	gridComponent?: React.ComponentType<BackendDataGridProps<M>>;
 	/**
 	 * The record delete permission
 	 */
@@ -199,31 +182,27 @@ export interface CrudProps<
 	/**
 	 * Import config (should be set if enableUserImport set)
 	 */
-	importConfig?: CrudImportProps<KeyT, VisibilityT, CustomT>["importConfig"];
+	importConfig?: CrudImportProps<M>["importConfig"];
 	/**
 	 * Import update key (primary key substitute)
 	 */
-	importUpdateKey?: CrudImportProps<KeyT, VisibilityT, CustomT>["updateKey"];
+	importUpdateKey?: CrudImportProps<M>["updateKey"];
 	/**
 	 * Additional filters to be sent when doing update key index requests
 	 */
-	importUpdateKeyAdditionalFilters?: CrudImportProps<
-		KeyT,
-		VisibilityT,
-		CustomT
-	>["updateKeyAdditionalFilters"];
+	importUpdateKeyAdditionalFilters?: CrudImportProps<M>["updateKeyAdditionalFilters"];
 	/**
 	 * How-to information for the import
 	 */
-	importHowTo?: CrudImportProps<KeyT, VisibilityT, CustomT>["howTo"];
+	importHowTo?: CrudImportProps<M>["howTo"];
 	/**
 	 * Additional record validation for imported records
 	 */
-	importValidate?: CrudImportProps<KeyT, VisibilityT, CustomT>["validate"];
+	importValidate?: CrudImportProps<M>["validate"];
 	/**
 	 * Custom Import UI
 	 */
-	importUI?: React.ComponentType<CrudImportProps<KeyT, VisibilityT, CustomT>>;
+	importUI?: React.ComponentType<CrudImportProps<M>>;
 	/**
 	 * Callback called when goBack is called in form (returning from form to data grid)
 	 */
@@ -278,16 +257,16 @@ export const useCrudDispatchContext = (): CrudDispatch => {
 
 export const CrudSpecialIds = ["import", "devimport", "new"];
 
-interface FormPageWrapperProps {
-	children: CrudProps<ModelFieldName, PageVisibility, unknown>["children"];
+interface FormPageWrapperProps<M extends ModelUnknown> {
+	children: CrudProps<M>["children"];
 	form: (
 		id: string,
-		children: NonNullable<
-			CrudProps<ModelFieldName, PageVisibility, unknown>["children"]
-		>,
+		children: NonNullable<CrudProps<M>["children"]>,
 	) => React.ReactElement;
 }
-const FormPageWrapper = (props: FormPageWrapperProps) => {
+const FormPageWrapper = <M extends ModelUnknown>(
+	props: FormPageWrapperProps<M>,
+) => {
 	const params = useParams();
 	if (!props.children) return <></>;
 	return (
@@ -297,12 +276,8 @@ const FormPageWrapper = (props: FormPageWrapperProps) => {
 	);
 };
 
-const CRUD = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
->(
-	props: CrudProps<KeyT, VisibilityT, CustomT>,
+const CRUD = <M extends ModelUnknown>(
+	props: CrudProps<M>,
 	ref: React.Ref<CrudDispatch>,
 ) => {
 	const { t } = useCCTranslations();
@@ -387,9 +362,9 @@ const CRUD = <
 
 	const handleSubmit = useCallback(
 		async (
-			data: Record<string, unknown>,
-			submit: Record<string, unknown>,
-			old: Record<string, unknown>,
+			data: ModelRecord<M>,
+			submit: ModelRecord<M>,
+			old: ModelRecord<M>,
 		) => {
 			// redirect to edit page
 			const { id } = data as Record<"id", string>;
@@ -636,13 +611,8 @@ const CRUD = <
 	);
 };
 
-export type CrudType = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT,
->(
-	props: CrudProps<KeyT, VisibilityT, CustomT> &
-		React.RefAttributes<CrudDispatch>,
+export type CrudType = <M extends ModelUnknown>(
+	props: CrudProps<M> & React.RefAttributes<CrudDispatch>,
 ) => React.ReactElement | null;
 
 export default React.memo(React.forwardRef(CRUD)) as CrudType;

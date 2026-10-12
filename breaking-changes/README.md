@@ -20,6 +20,12 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-10-12 | [Enum types are typed by their values](2026-10-12-enum-types-generic.md) | type, behavior |
+| 2026-10-12 | [Signature values can be null](2026-10-12-signature-values-nullable.md) | type |
+| 2026-10-02 | [Models are typed by their fields](2026-10-02-models-typed-by-their-fields.md) | type |
+| 2026-10-02 | [Connectors have no type parameters](2026-10-02-connectors-not-generic.md) | type |
+| 2026-10-02 | [The form is typed by its model](2026-10-02-form-typed-by-model.md) | type |
+| 2026-10-02 | [Selectors, DataGrid and CRUD are typed by their model](2026-10-02-model-components-typed-by-model.md) | type |
 | 2026-10-01 | [File download links take Blobs](2026-10-01-file-download-links-take-blobs.md) | type |
 | 2026-09-30 | [Connectors get a copy of the index params](2026-09-30-index-params-reach-connectors-as-a-copy.md) | behavior |
 | 2026-09-29 | [DataGrid select all selects everything or nothing](2026-09-29-data-grid-select-all-is-all-or-nothing.md) | behavior |
