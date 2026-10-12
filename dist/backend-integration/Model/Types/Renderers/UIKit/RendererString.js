@@ -1,31 +1,19 @@
-import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import TypeString from "../../TypeString";
-import { Typography } from "@mui/material";
-import { FormHelperTextCC, TextFieldWithHelp } from "../../../../../standalone";
+import RendererStringNullable from "./RendererStringNullable";
 /**
  * Renders a text field
  */
 class RendererString extends TypeString {
     props;
+    // renders the same text field, a string is never null
+    nullableRenderer;
     constructor(props) {
         super(props?.multiline);
         this.props = props;
+        this.nullableRenderer = new RendererStringNullable(props);
     }
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, } = params;
-        if (visibility.disabled)
-            return _jsx(_Fragment, {});
-        if (visibility.hidden) {
-            return (_jsx("input", { type: "hidden", name: field, value: value ?? "", readOnly: true, "aria-hidden": "true" }));
-        }
-        if (visibility.editable) {
-            if (visibility.grid)
-                throw new Error("Not supported");
-            return (_jsxs(_Fragment, { children: [_jsx(TextFieldWithHelp, { variant: this.multiline ? "outlined" : undefined, fullWidth: true, ...this.props, name: field, value: value ?? "", label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (evt) => {
-                            handleChange(evt.target.name, evt.target.value);
-                        }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, autoFocus: autoFocus }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
-        }
-        return (_jsxs(Typography, { noWrap: visibility.grid, children: [!visibility.grid && `${label}: `, value] }));
+        return this.nullableRenderer.render(params);
     }
 }
 export default RendererString;

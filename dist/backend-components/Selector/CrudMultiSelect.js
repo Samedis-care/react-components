@@ -21,7 +21,9 @@ const CrudMultiSelect = (props, ref) => {
         return _jsx("span", { children: loadError.message });
     return (_jsx(CrudSelectContext.Provider, { value: crudSelect, children: _jsxs(DialogContextProvider
         // for creating dialogs inside end adornment of selector with access to selector data
-        , { children: [error && _jsx(ErrorComponent, { error: error }), _jsx(BackendMultiSelect, { ...props, selected: selected.map((entry) => entry.value), onSelect: handleSelect, modelToSelectorData: modelToSelectorData, initialData: initialRawData })] }) }));
+        , { children: [error && _jsx(ErrorComponent, { error: error }), _jsx(BackendMultiSelect, { ...props, selected: selected.map((entry) => entry.value), onSelect: handleSelect, modelToSelectorData: modelToSelectorData, 
+                    // the connector's records seed the selected cache: modelToSelectorData tells them apart
+                    initialData: initialRawData })] }) }));
 };
 const ForwardedCrudMultiSelect = forwardRef(CrudMultiSelect);
 const MemoizedCrudMultiSelect = React.memo(ForwardedCrudMultiSelect);

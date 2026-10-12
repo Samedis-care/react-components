@@ -4,19 +4,19 @@ import { ModelRenderParams } from "../index";
 import FilterType from "../FilterType";
 import { EnumValue } from "./TypeEnum";
 import { MultiSelectorData } from "../../../standalone";
-export type AdvancedMultiEnumValue = Omit<MultiSelectorData, "label"> & Pick<EnumValue, "getLabel" | "invisible">;
+export type AdvancedMultiEnumValue<T extends string = string> = Omit<MultiSelectorData, "label" | "value"> & Pick<EnumValue<T>, "value" | "getLabel" | "invisible">;
 /**
  * Enum type with multi-select capability
  */
-declare abstract class TypeMultiEnum implements Type<string[]> {
-    protected values: EnumValue[];
-    constructor(values: EnumValue[]);
-    abstract render(params: ModelRenderParams<string[]>): React.ReactElement;
-    validate(values: string[]): string | null;
+declare abstract class TypeMultiEnum<T extends string = string> implements Type<T[]> {
+    protected values: EnumValue<T>[];
+    constructor(values: EnumValue<T>[]);
+    abstract render(params: ModelRenderParams<T[]>): React.ReactElement;
+    validate(values: T[]): string | null;
     getFilterType(): FilterType;
-    getDefaultValue(): string[];
-    stringify(values: string[]): string;
-    getEnumValues: () => EnumValue[];
-    deserialize: (value: unknown) => string[];
+    getDefaultValue(): T[];
+    stringify(values: T[]): string;
+    getEnumValues: () => EnumValue<T>[];
+    deserialize: (value: unknown) => T[];
 }
 export default TypeMultiEnum;

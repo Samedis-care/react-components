@@ -1,4 +1,4 @@
-import Model, { ModelFieldName, PageVisibility } from "./Model";
+import { ModelUnknown } from "./Model";
 declare class RequestBatching {
     /**
      * Time in milliseconds in which no new request shall be added to the batch for the batch to be processed (debounce timer)
@@ -17,6 +17,6 @@ declare class RequestBatching {
     private static batchNonce;
     private static batchRequestIds;
     private static batchLastAdded;
-    static get<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(id: string, model: Model<KeyT, VisibilityT, CustomT>): Promise<Record<string, unknown>>;
+    static get(id: string, model: ModelUnknown): Promise<Record<string, unknown>>;
 }
 export default RequestBatching;

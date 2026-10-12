@@ -1,7 +1,7 @@
 import React from "react";
-import { ModelFieldName } from "../../backend-integration";
+import { ModelUnknown } from "../../backend-integration";
 import { PageProps } from "./Form";
-export interface EditOnlyFormPageProps extends PageProps<ModelFieldName, undefined> {
+export interface EditOnlyFormPageProps extends PageProps<ModelUnknown, undefined> {
     /**
      * The actual form contents
      */

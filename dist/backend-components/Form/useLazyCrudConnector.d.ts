@@ -1,7 +1,6 @@
-import { ModelFieldName, PageVisibility } from "../../backend-integration/Model/Model";
 import ApiConnector from "../../backend-integration/Connector/ApiConnector";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
-export interface UseLazyCrudConnectorParams<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, ExtraT = undefined> {
+export interface UseLazyCrudConnectorParams<ExtraT = undefined> {
     /**
      * The custom field name (must not be in model)
      */
@@ -24,20 +23,20 @@ export interface UseLazyCrudConnectorParams<KeyT extends ModelFieldName, Visibil
      * @param initialEndpoint The initial endpoint to use
      * @default defaults to DefaultConnector.api; will throw if not provided and this prop is not provided
      */
-    getConnector?: (initialEndpoint: string, extraParams: ExtraT | undefined) => ApiConnector<KeyT, VisibilityT, CustomT>;
+    getConnector?: (initialEndpoint: string, extraParams: ExtraT | undefined) => ApiConnector;
     /**
      * Callback to configure the connector after it got created by getConnector
      * @param connector The connector which was created by getConnector
      */
-    configureConnector?: (connector: ApiConnector<KeyT, VisibilityT, CustomT>) => void;
+    configureConnector?: (connector: ApiConnector) => void;
     /**
      * The initial ID to use for getEndpoint
      */
     initialId: string | null;
 }
-export interface UseLazyCrudConnectorResult<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> {
-    connector: LazyConnector<KeyT, VisibilityT, CustomT>;
+export interface UseLazyCrudConnectorResult {
+    connector: LazyConnector;
 }
-export declare const extractLazyCrudConnectorParams: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, ExtraT, T extends UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>>(data: T) => [UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>, Omit<T, keyof UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>>];
-declare const useLazyCrudConnector: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, ExtraT = undefined>(params: UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>) => UseLazyCrudConnectorResult<KeyT, VisibilityT, CustomT>;
+export declare const extractLazyCrudConnectorParams: <ExtraT, T extends UseLazyCrudConnectorParams<ExtraT>>(data: T) => [UseLazyCrudConnectorParams<ExtraT>, Omit<T, keyof UseLazyCrudConnectorParams<ExtraT>>];
+declare const useLazyCrudConnector: <ExtraT = undefined>(params: UseLazyCrudConnectorParams<ExtraT>) => UseLazyCrudConnectorResult;
 export default useLazyCrudConnector;

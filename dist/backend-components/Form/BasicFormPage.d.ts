@@ -1,9 +1,9 @@
 import React from "react";
 import { FormContextData, PageProps } from "../Form";
-import { ModelFieldName } from "../../backend-integration/Model/Model";
+import { ModelUnknown } from "../../backend-integration/Model/Model";
 import { FormPageLayoutProps } from "../../standalone/Form/FormPageLayout";
 import { CrudFormProps } from "../CRUD";
-export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<PageProps<ModelFieldName, CustomPropsT>, "submit" | "safeSubmit" | "dirty"> {
+export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<PageProps<ModelUnknown, CustomPropsT>, "submit" | "safeSubmit" | "dirty"> {
     /**
      * Function to submit everything
      * @remarks throws if submitting fails
@@ -26,7 +26,7 @@ export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<PageProps
     /**
      * Optional read-only reasons
      */
-    readOnlyReasons: FormContextData["readOnlyReasons"];
+    readOnlyReasons: FormContextData<ModelUnknown>["readOnlyReasons"];
     /**
      * Show back button only when not enough permission
      */
@@ -54,7 +54,7 @@ export type EnhancedGoBackType = {
     goBack: (forceRefresh?: boolean, forceNavigate?: boolean) => Promise<void> | void;
 };
 export type EnhancedCustomProps<T> = T extends Pick<CrudFormProps, "goBack"> ? Omit<T, "goBack"> & EnhancedGoBackType : T;
-export interface BasicFormPageProps<RendererPropsT, CustomPropsT> extends PageProps<ModelFieldName, CustomPropsT> {
+export interface BasicFormPageProps<RendererPropsT, CustomPropsT> extends PageProps<ModelUnknown, CustomPropsT> {
     /**
      * Called after submit successfully completed
      */

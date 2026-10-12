@@ -1,24 +1,24 @@
 import React, { Dispatch, SetStateAction } from "react";
-import { Model, ModelFieldDefinition, ModelFieldName, PageVisibility } from "../../../backend-integration";
+import { ModelFieldDefinitionUnknown, ModelFieldNames, ModelUnknown } from "../../../backend-integration";
 import { FileData } from "../../../standalone/FileUpload/Generic";
 import { ValidationResult } from "../../Form";
 export type ConversionScriptFn = (record: Record<string, unknown>) => unknown;
-export interface CrudImportProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> {
+export interface CrudImportProps<M extends ModelUnknown> {
     /**
      * The model to import for
      */
-    model: Model<KeyT, VisibilityT, CustomT>;
+    model: M;
     /**
      * The importer config
      * Record<Field, JavaScript>
      * @remarks Disables step 2
      */
-    importConfig?: Partial<Record<KeyT, ConversionScriptFn>>;
+    importConfig?: Partial<Record<ModelFieldNames<M>, ConversionScriptFn>>;
     /**
      * The field used to determine an ID of an existing record for purpose of updating that existing record
      * instead of creating a new record.
      */
-    updateKey?: KeyT;
+    updateKey?: ModelFieldNames<M>;
     /**
      * Additional filter parameter for backend index calls
      */
@@ -53,7 +53,7 @@ export interface CrudImporterState {
     importDone: boolean;
 }
 export interface CrudImporterStepProps {
-    model: Model<ModelFieldName, PageVisibility, unknown>;
+    model: ModelUnknown;
     updateKey: string | undefined;
     additionalUpdateKeyFilters: Record<string, unknown> | undefined;
     hasImportConfig: boolean;
@@ -61,9 +61,9 @@ export interface CrudImporterStepProps {
     state: CrudImporterState;
     setState: Dispatch<SetStateAction<CrudImporterState>>;
 }
-export declare const isFieldImportable: (name: string, field: ModelFieldDefinition<unknown, string, PageVisibility, unknown>) => boolean;
-export declare const useCrudImportLogic: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: CrudImportProps<KeyT, VisibilityT, CustomT>) => {
-    guided: false | Partial<Record<KeyT, ConversionScriptFn>> | undefined;
+export declare const isFieldImportable: (name: string, field: ModelFieldDefinitionUnknown) => boolean;
+export declare const useCrudImportLogic: <M extends ModelUnknown>(props: CrudImportProps<M>) => {
+    guided: false | Partial<Record<ModelFieldNames<M>, ConversionScriptFn>> | undefined;
     activeStep: number;
     state: CrudImporterState;
     setState: React.Dispatch<React.SetStateAction<CrudImporterState>>;
@@ -72,7 +72,7 @@ export declare const useCrudImportLogic: <KeyT extends ModelFieldName, Visibilit
     prev: () => void;
     finish: () => void;
 };
-declare const CrudImport: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: CrudImportProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
+declare const CrudImport: <M extends ModelUnknown>(props: CrudImportProps<M>) => React.JSX.Element;
 declare const _default: typeof CrudImport;
 export default _default;
 export type CrudImportType = typeof CrudImport;

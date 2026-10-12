@@ -1,4 +1,4 @@
-import Model, { AdvancedDeleteRequest, ModelFieldName, ModelGetResponse, PageVisibility } from "../../backend-integration/Model/Model";
+import { AdvancedDeleteRequest, ModelFieldName, ModelGetResponse, ModelUnknown } from "../../backend-integration/Model/Model";
 import type { IDataGridLoadDataParameters } from "../../standalone/DataGrid/DataGrid";
 import Connector, { ResponseMeta } from "./Connector";
 import ApiConnector from "./ApiConnector";
@@ -6,7 +6,7 @@ interface QueuedFunction {
     type: "create" | "update" | "delete";
     id: string | null;
     func: () => unknown;
-    result: ModelGetResponse<string> | null;
+    result: ModelGetResponse<ModelUnknown> | null;
     /**
      * For a delete: the ids it covers
      * @remarks Separate from id, which joins them for display, so that a single id can
@@ -47,8 +47,8 @@ export declare enum IndexEnhancementLevel {
  * Forwards all read calls (index, read) to the real connector directly but queues all writing calls (create, update, delete) which can be fired at once
  * @remarks Does not support relations, enhances read/index calls with locally updated data
  */
-declare class LazyConnector<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> extends Connector<KeyT, VisibilityT, CustomT> {
-    realConnector: ApiConnector<KeyT, VisibilityT, CustomT>;
+declare class LazyConnector extends Connector {
+    realConnector: ApiConnector;
     fakeReads: boolean;
     indexEnhancement: IndexEnhancementLevel;
     private queue;
@@ -58,14 +58,14 @@ declare class LazyConnector<KeyT extends ModelFieldName, VisibilityT extends Pag
     private fakeIdCounter;
     private fakeIdMapping;
     private fakeIdMappingRev;
-    constructor(connector: ApiConnector<KeyT, VisibilityT, CustomT>, fakeReads: boolean, onQueueChange?: QueueChangeHandler);
-    create(data: Record<string, unknown>, model: Model<KeyT, VisibilityT, CustomT> | undefined): ModelGetResponse<KeyT>;
-    delete(id: string, model: Model<KeyT, VisibilityT, CustomT> | undefined): void;
-    index(params: Partial<IDataGridLoadDataParameters> | undefined, model: Model<KeyT, VisibilityT, CustomT> | undefined): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]>;
-    read(id: string, model: Model<KeyT, VisibilityT, CustomT> | undefined): Promise<ModelGetResponse<KeyT>> | ModelGetResponse<KeyT>;
-    update(data: Record<ModelFieldName, unknown>, model: Model<KeyT, VisibilityT, CustomT> | undefined): Promise<ModelGetResponse<KeyT>> | ModelGetResponse<KeyT>;
-    deleteMultiple(ids: string[], model?: Model<KeyT, VisibilityT, CustomT>): void;
-    handleAdvancedDelete: (req: AdvancedDeleteRequest, model?: Model<KeyT, VisibilityT, CustomT>) => void;
+    constructor(connector: ApiConnector, fakeReads: boolean, onQueueChange?: QueueChangeHandler);
+    create(data: Record<string, unknown>, model: ModelUnknown | undefined): ModelGetResponse<ModelUnknown>;
+    delete(id: string, model: ModelUnknown | undefined): void;
+    index(params: Partial<IDataGridLoadDataParameters> | undefined, model: ModelUnknown | undefined): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]>;
+    read(id: string, model: ModelUnknown | undefined): Promise<ModelGetResponse<ModelUnknown>> | ModelGetResponse<ModelUnknown>;
+    update(data: Record<ModelFieldName, unknown>, model: ModelUnknown | undefined): Promise<ModelGetResponse<ModelUnknown>> | ModelGetResponse<ModelUnknown>;
+    deleteMultiple(ids: string[], model?: ModelUnknown): void;
+    handleAdvancedDelete: (req: AdvancedDeleteRequest, model?: ModelUnknown) => void;
     /**
      * The write operation queued for a record, if any
      * @param id The record id — potentially a fake one. A queue only exists before

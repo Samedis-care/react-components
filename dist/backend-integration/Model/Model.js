@@ -124,7 +124,7 @@ export const useModelMutation = (model) => {
                     updateForId(inputId);
                 }
             }
-            model.triggerMutationEvent(!inputData.id, responseData);
+            model.triggerMutationEvent(!inputId, responseData);
         },
     });
 };
@@ -181,6 +181,11 @@ export const useModelDeleteAdvanced = (model) => {
         },
     });
 };
+/**
+ * A data model: its fields and the connector to load and save them
+ * @typeParam FieldsT The field definitions, inferred by the constructor
+ * @typeParam KeyT The field names, follow from FieldsT
+ */
 class Model {
     /**
      * A unique model identifier, used for caching
@@ -232,6 +237,31 @@ class Model {
      */
     static printDevWarnings = process.env.NODE_ENV === "development";
     /**
+     * The fields, by any field name
+     */
+    get fieldsByName() {
+        return this.fields;
+    }
+    /**
+     * This model, as connectors and the event handlers of every model take it
+     */
+    get asModelUnknown() {
+        return this;
+    }
+    /**
+     * Types deserialized data as records of this model: applySerialization and getDefaultValues
+     * build them from the field definitions
+     */
+    asRecords(data) {
+        return data;
+    }
+    /**
+     * @see asRecords
+     */
+    asRecord(data) {
+        return data;
+    }
+    /**
      * Creates a new model
      * @param name A unique name for the model (modelId)
      * @param model The actual model definition
@@ -239,7 +269,9 @@ class Model {
      * @param cacheKeys The cache keys
      * @param options Model options
      */
-    constructor(name, model, connector, cacheKeys, options) {
+    constructor(name, 
+    // KeyT comes from the keys alone: the onChange callbacks are typed with it before FieldsT is known
+    model, connector, cacheKeys, options) {
         this.modelId = name;
         this.fields = model;
         this.connector = connector;
@@ -263,7 +295,7 @@ class Model {
     async index(params) {
         try {
             // a copy, so what the connector changes doesn't reach the caller's params (or the cache keys holding them)
-            const [rawData, meta, userData] = await this.connector.index(deepClone(params), this);
+            const [rawData, meta, userData] = await this.connector.index(deepClone(params), this.asModelUnknown);
             return [
                 this.cacheIndexRecords(await Promise.all(rawData.map((data) => this.applySerialization(data, "deserialize", "overview")))),
                 meta,
@@ -285,7 +317,7 @@ class Model {
      * @see index
      */
     async index2(params) {
-        const [rawData, meta, userData] = await this.connector.index2(deepClone(params), this);
+        const [rawData, meta, userData] = await this.connector.index2(deepClone(params), this.asModelUnknown);
         return [
             this.cacheIndexRecords(await Promise.all(rawData.map((data) => this.applySerialization(data, "deserialize", "overview")))),
             meta,
@@ -303,7 +335,7 @@ class Model {
         records.forEach((record) => {
             ModelDataStore.setQueryData(this.getReactQueryKey(record.id, true), [record, {}]);
         });
-        return records;
+        return this.asRecords(records);
     }
     /**
      * Fetches all records using index calls
@@ -338,7 +370,7 @@ class Model {
             if (records.length >= totalRows || tRecords.length === 0)
                 break;
         }
-        return [records, meta, userMeta];
+        return [this.asRecords(records), meta, userMeta];
     }
     /**
      * Fetches all records using index calls and caches the result
@@ -484,14 +516,14 @@ class Model {
     async getRaw(id, options) {
         try {
             if (!id)
-                return [await this.getDefaultValues(), {}];
+                return [this.asRecord(await this.getDefaultValues()), {}];
             const batch = options?.batch ?? this.requestBatchingEnabled;
             if (batch) {
-                const rawData = await RequestBatching.get(id, this);
-                return [rawData, {}];
+                const rawData = await RequestBatching.get(id, this.asModelUnknown);
+                return [this.asRecord(rawData), {}];
             }
             else {
-                const rawData = await this.connector.read(id, this);
+                const rawData = await this.connector.read(id, this.asModelUnknown);
                 return this.deserializeResponse(rawData);
             }
         }
@@ -514,11 +546,11 @@ class Model {
     async deserializeResponse(rawData) {
         const deserialized = await this.applySerialization(rawData[0], "deserialize", "edit");
         return [
-            deserialized,
+            this.asRecord(deserialized),
             Object.fromEntries(await Promise.all(Object.entries(rawData[1]).map(async (keyValue) => {
                 const fieldName = keyValue[0];
                 const values = keyValue[1];
-                const refModel = this.fields[fieldName]?.getRelationModel;
+                const refModel = this.fieldsByName[fieldName]?.getRelationModel;
                 if (!refModel) {
                     // eslint-disable-next-line no-console
                     console.warn("[Components-Care] [Model] Backend connector supplied related data, but no model is defined for this relationship (relationship name = " +
@@ -550,11 +582,11 @@ class Model {
         const update = !!("id" in values && values.id);
         const serializedValues = await this.applySerialization(values, "serialize", update ? "edit" : "create");
         if (update) {
-            return this.deserializeResponse(await this.connector.update(serializedValues, this));
+            return this.deserializeResponse(await this.connector.update(serializedValues, this.asModelUnknown));
         }
         else {
-            delete serializedValues["id"];
-            return this.deserializeResponse(await this.connector.create(serializedValues, this));
+            delete serializedValues.id;
+            return this.deserializeResponse(await this.connector.create(serializedValues, this.asModelUnknown));
         }
     }
     /**
@@ -563,14 +595,14 @@ class Model {
      */
     delete() {
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        return useModelDelete(this);
+        return useModelDelete(this.asModelUnknown);
     }
     /**
      * Delete a single record in backend (does not affect local cache)
      * @param id The ID to delete
      */
     async deleteRaw(id) {
-        return this.connector.delete(id, this);
+        return this.connector.delete(id, this.asModelUnknown);
     }
     /**
      * Provides a react hook to delete multiple records at once
@@ -578,14 +610,14 @@ class Model {
      */
     deleteMultiple() {
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        return useModelDeleteMultiple(this);
+        return useModelDeleteMultiple(this.asModelUnknown);
     }
     /**
      * Deletes multiple record at once (does not affect local cache)
      * @param ids The IDs to delete
      */
     async deleteMultipleRaw(ids) {
-        return this.connector.deleteMultiple(ids, this);
+        return this.connector.deleteMultiple(ids, this.asModelUnknown);
     }
     /**
      * Does the connector support delete all functionality?
@@ -599,7 +631,7 @@ class Model {
      */
     deleteAdvanced() {
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        return useModelDeleteAdvanced(this);
+        return useModelDeleteAdvanced(this.asModelUnknown);
     }
     /**
      * Raw request to mass-delete data (does not affect local cache)
@@ -609,7 +641,7 @@ class Model {
         if (!this.connector.deleteAdvanced) {
             throw new Error("Connector doesn't support advanced deletion");
         }
-        return this.connector.deleteAdvanced(req, this);
+        return this.connector.deleteAdvanced(req, this.asModelUnknown);
     }
     /**
      * Updates stored data (not relations)
@@ -713,7 +745,7 @@ class Model {
             if (value === undefined)
                 return;
             try {
-                const fieldDef = this.fields[field];
+                const fieldDef = this.fieldsByName[field];
                 if (view &&
                     getVisibility(fieldDef.visibility[view], values, values).disabled)
                     return;
@@ -724,7 +756,8 @@ class Model {
                 try {
                     const validate = fieldDef.type[validationFunction]?.bind(fieldDef.type);
                     error = validate
-                        ? await validate(value, fieldDef)
+                        ? // a field's type takes the definition of that field
+                            await validate(value, fieldDef)
                         : null;
                 }
                 catch (e) {
@@ -768,7 +801,7 @@ class Model {
         const promises = Object.entries(this.fields)
             .filter(([field]) => {
             try {
-                return !getVisibility(this.fields[field].visibility.create, {}, {}).disabled;
+                return !getVisibility(this.fieldsByName[field].visibility.create, {}, {}).disabled;
             }
             catch {
                 return true;
@@ -921,11 +954,13 @@ class Model {
      */
     addEventHandler(evt, handler, idFilter) {
         const handlerKey = JSON.stringify(this.getReactQueryKey(idFilter === undefined ? "any" : idFilter, false));
+        // the registry holds the handlers of every model, each only gets this model's records
+        const anyHandler = handler;
         if (!(handlerKey in Model.eventHandlers[evt])) {
-            Model.eventHandlers[evt][handlerKey] = [handler];
+            Model.eventHandlers[evt][handlerKey] = [anyHandler];
         }
         else {
-            Model.eventHandlers[evt][handlerKey].push(handler);
+            Model.eventHandlers[evt][handlerKey].push(anyHandler);
         }
     }
     /**

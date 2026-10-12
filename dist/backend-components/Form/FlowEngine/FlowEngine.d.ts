@@ -1,11 +1,12 @@
 import React from "react";
 import { PageProps } from "../Form";
+import { ModelUnknown } from "../../../backend-integration";
 export interface FlowEngineFormProps {
     buttons: React.ReactNode;
 }
-export type FlowFormProps<KeyT extends string, CustomPropsT> = PageProps<KeyT, FlowEngineFormProps & CustomPropsT>;
-export interface FlowStageProps<KeyT extends string, StageT extends string, CustomPropsT> extends FlowStageContextType<StageT> {
-    formProps: PageProps<KeyT, CustomPropsT>;
+export type FlowFormProps<M extends ModelUnknown, CustomPropsT> = PageProps<M, FlowEngineFormProps & CustomPropsT>;
+export interface FlowStageProps<M extends ModelUnknown, StageT extends string, CustomPropsT> extends FlowStageContextType<StageT> {
+    formProps: PageProps<M, CustomPropsT>;
 }
 export interface FlowStageContextType<StageT extends string> {
     /**
@@ -34,11 +35,11 @@ export interface FlowStageContextType<StageT extends string> {
 }
 export declare const FlowStageContext: React.Context<FlowStageContextType<string> | null>;
 export declare const useFlowStageContext: <StageT extends string>() => FlowStageContextType<StageT>;
-export interface FlowEngineProps<KeyT extends string, StageT extends string, CustomPropsT> {
+export interface FlowEngineProps<M extends ModelUnknown, StageT extends string, CustomPropsT> {
     defaultStage: StageT;
-    formProps: PageProps<KeyT, CustomPropsT>;
-    children: Record<StageT, React.ComponentType<FlowStageProps<KeyT, StageT, CustomPropsT>>>;
+    formProps: PageProps<M, CustomPropsT>;
+    children: Record<StageT, React.ComponentType<FlowStageProps<M, StageT, CustomPropsT>>>;
 }
-declare const FlowEngine: <KeyT extends string, StageT extends string, CustomPropsT>(props: FlowEngineProps<KeyT, StageT, CustomPropsT>) => React.JSX.Element;
+declare const FlowEngine: <M extends ModelUnknown, StageT extends string, CustomPropsT>(props: FlowEngineProps<M, StageT, CustomPropsT>) => React.JSX.Element;
 declare const _default: typeof FlowEngine;
 export default _default;

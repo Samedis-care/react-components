@@ -31,6 +31,7 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
                 label: entry.getLabel(),
                 disabled: entry.invisible,
             }));
+            // the options are the enum's values
             const selected = data.filter((entry) => value.includes(entry.value));
             const onLoad = (query) => ({
                 options: uniqueArray([

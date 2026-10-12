@@ -26,6 +26,7 @@ class TypeMultiEnum {
             .join(", ");
     }
     getEnumValues = () => this.values;
+    // the server's values are some of the values
     deserialize = (value) => value ?? [];
 }
 export default TypeMultiEnum;

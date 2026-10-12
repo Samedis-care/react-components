@@ -7,6 +7,6 @@ export declare const SignatureNameContext: React.Context<string | null>;
  * Wrap FormField with SignatureNameContext.Provider for name context
  */
 declare class RendererSignature extends TypeSignature {
-    render(params: ModelRenderParams<string>): React.ReactElement;
+    render(params: ModelRenderParams<string | null>): React.ReactElement;
 }
 export default RendererSignature;

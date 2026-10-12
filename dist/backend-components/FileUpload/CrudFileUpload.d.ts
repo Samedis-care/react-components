@@ -1,13 +1,13 @@
 import React from "react";
 import { FileData, FileMeta, FileUploadDispatch, FileUploadProps } from "../../standalone/FileUpload/Generic";
-import { Connector, PageVisibility } from "../../backend-integration";
+import { Connector } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 export interface CrudFileUploadProps extends Omit<FileUploadProps, "files" | "handleError"> {
     /**
      * The backend connector used as CRUD interface
      * @remarks Passing null will render an readOnly control
      */
-    connector: Connector<string, PageVisibility, unknown> | null;
+    connector: Connector | null;
     /**
      * The error component that is used to display errors
      */

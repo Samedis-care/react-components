@@ -57,11 +57,12 @@ export interface ModelFieldDefinition<TypeT, KeyT extends ModelFieldName, Visibi
      * @param values All field values
      * @param field This field
      */
-    validate?: (value: TypeT, values: Record<string, unknown>, field: ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>) => Promise<string | null> | string | null;
+    validate?(value: TypeT, values: Record<string, unknown>, field: ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>): Promise<string | null> | string | null;
     /**
      * Callback to validate field to provide optional hints
+     * @see validate
      */
-    validateHint?: ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>["validate"];
+    validateHint?(value: TypeT, values: Record<string, unknown>, field: ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>): Promise<string | null> | string | null;
     /**
      * User-defined data
      */
@@ -74,30 +75,148 @@ export interface ModelFieldDefinition<TypeT, KeyT extends ModelFieldName, Visibi
      * @param getFieldValue Allow getting another field value
      * @returns The updated value (can be modified by this handler)
      */
-    onChange?: (value: TypeT, model: Model<KeyT, VisibilityT, CustomT>, setFieldValue: (field: KeyT, value: unknown, shouldValidate?: boolean, triggerOnChange?: boolean) => void, getFieldValue: (field: KeyT) => unknown) => TypeT;
+    onChange?(value: TypeT, model: ModelUnknown, setFieldValue: ModelSetFieldValue<KeyT>, getFieldValue: ModelGetFieldValue<KeyT>): TypeT;
     /**
      * The referenced model for backend connected data types.
-     * If TypeScript complains cast the return value to `Model<ModelFieldName, PageVisibility, unknown>`
      * @param id The current record ID
      * @param values Subset of the current record (select relevant data with getRelationModelValues)
      */
-    getRelationModel?: (id: string | null, values: Record<string, unknown>) => Model<ModelFieldName, PageVisibility, unknown>;
-    getRelationModelValues?: string[];
+    getRelationModel?: (id: string | null, values: Record<string, unknown>) => ModelUnknown;
+    /**
+     * The fields of this model getRelationModel gets in its values
+     */
+    getRelationModelValues?: KeyT[];
 }
-export type ModelField<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> = Record<KeyT, ModelFieldDefinition<any, KeyT, VisibilityT, CustomT>>;
 export type ModelFieldName = "id" | string;
-export type ModelGetResponseRelations<KeyT extends ModelFieldName> = Partial<Record<KeyT, Record<ModelFieldName, unknown>[]>>;
-export type ModelData<KeyT extends ModelFieldName> = Record<string, unknown>;
+/**
+ * Sets another field's value, as onChange gets it
+ * @remarks a method signature, so a model typed with other field names still fits
+ */
+export type ModelSetFieldValue<KeyT extends ModelFieldName> = {
+    set(field: KeyT, value: unknown, shouldValidate?: boolean, triggerOnChange?: boolean): void;
+}["set"];
+/**
+ * Gets another field's value, as onChange gets it
+ * @see ModelSetFieldValue
+ */
+export type ModelGetFieldValue<KeyT extends ModelFieldName> = {
+    get(field: KeyT): unknown;
+}["get"];
+/**
+ * A field definition of any model
+ */
+export type ModelFieldDefinitionUnknown = ModelFieldDefinition<any, ModelFieldName, PageVisibility, unknown>;
+/**
+ * The field definitions of a model, by field name
+ */
+export type ModelFields = Record<ModelFieldName, ModelFieldDefinitionUnknown>;
+/**
+ * Rejects keys a field definition doesn't know (typos), which inferring the field definitions
+ * would accept
+ */
+export type ModelFieldsNoExtraKeys<FieldsT> = {
+    [K in keyof FieldsT]: string extends keyof FieldsT[K] ? unknown : {
+        [P in Exclude<keyof FieldsT[K], keyof ModelFieldDefinitionUnknown>]: never;
+    };
+};
+/**
+ * Requires a field's getDefaultValue to return what its type holds, which the field definitions'
+ * inference doesn't check. undefined falls back to the type's default value.
+ */
+export type ModelFieldsDefaultsMatchType<FieldsT> = {
+    [K in keyof FieldsT]: {
+        getDefaultValue?: () => Promise<ModelFieldValue<FieldsT[K]> | undefined> | ModelFieldValue<FieldsT[K]> | undefined;
+    };
+};
+/**
+ * Any model
+ */
+export type ModelUnknown = Model;
+/**
+ * What the type helpers need of a model: its field definitions
+ */
+export interface ModelLike {
+    readonly fields: ModelFields;
+}
+/**
+ * The field names of a model
+ */
+export type ModelFieldNames<M extends ModelLike> = keyof M["fields"] & string;
+type IsAny<T> = 0 extends 1 & T ? true : false;
+/**
+ * The value type of a field definition
+ */
+export type ModelFieldValue<FieldT> = FieldT extends {
+    type: Type<infer T>;
+} ? IsAny<T> extends true ? unknown : T : never;
+/**
+ * The values of a model by field name (dot notation), as setFieldValue and getFieldValue see them
+ */
+export type ModelFieldValues<M extends ModelLike> = string extends keyof M["fields"] ? Record<string, unknown> : {
+    [K in ModelFieldNames<M>]: ModelFieldValue<M["fields"][K]>;
+};
+type DotHead<K extends string> = K extends `${infer H}.${string}` ? H : K;
+/**
+ * A parent field's value merged with its child fields' object
+ * @remarks a parent that may be null (or undefined) stays so: deserializing assigns it over the
+ * child fields when it comes after them in the model
+ */
+type MergeParent<P, C> = unknown extends C ? P : (NonNullable<P> & C) | Extract<P, null | undefined>;
+/**
+ * Turns dot notation keys into nested objects, the way Model and Form build records
+ */
+type DotsToNested<T> = {
+    [H in DotHead<keyof T & string>]: MergeParent<H extends keyof T ? T[H] : unknown, [
+        Extract<keyof T, `${H}.${string}`>
+    ] extends [never] ? unknown : DotsToNested<{
+        [P in keyof T & string as P extends `${H}.${infer R}` ? R : never]: T[P];
+    }>>;
+};
+type Flatten<T> = T extends Date | Blob | readonly unknown[] ? T : T extends object ? {
+    [K in keyof T]: Flatten<T[K]>;
+} : T;
+type DeepPartial<T> = T extends Date | Blob | readonly unknown[] ? T : T extends object ? {
+    [K in keyof T]?: DeepPartial<T[K]>;
+} : T;
+/**
+ * A record of a model: the deserialized data and the form values, fields in dot notation nested
+ * @remarks a parent field (`a`) and its child fields (`a.b`) are merged into one object
+ */
+export type ModelRecord<M extends ModelLike> = string extends keyof M["fields"] ? Record<string, unknown> : Flatten<DotsToNested<ModelFieldValues<M>>>;
+/**
+ * Some fields of a record of a model, as saving takes them: fields left out are not sent, and
+ * an id of null (or none) creates a new record
+ */
+export type ModelRecordPartial<M extends ModelLike> = Omit<DeepPartial<ModelRecord<M>>, "id"> & {
+    id?: string | null;
+};
+/**
+ * The custom data of a model's fields, a union over all fields
+ */
+export type ModelCustomData<M extends ModelLike> = M["fields"][keyof M["fields"]]["customData"];
+/**
+ * Any model whose fields all carry custom data of type CustomT
+ */
+export type ModelWithCustomData<CustomT> = Model<Record<ModelFieldName, ModelFieldDefinition<any, any, PageVisibility, CustomT>>>;
+/**
+ * The related records of a record, by field name (records of the related models)
+ */
+export type ModelGetResponseRelations<M extends ModelLike> = Partial<Record<ModelFieldNames<M>, Record<ModelFieldName, unknown>[]>>;
 /**
  * Response for GET single data entry
+ * @remarks Connectors return it for ModelUnknown: their data is not deserialized yet
  */
-export type ModelGetResponse<KeyT extends ModelFieldName> = [
-    ModelData<KeyT>,
-    ModelGetResponseRelations<KeyT>,
+export type ModelGetResponse<M extends ModelLike> = [
+    ModelRecord<M>,
+    ModelGetResponseRelations<M>,
     unknown?
 ];
-export type ModelIndexResponse = [
-    records: Record<string, unknown>[],
+/**
+ * Response for an index request
+ * @remarks The records only hold the fields visible in the overview
+ */
+export type ModelIndexResponse<M extends ModelLike> = [
+    records: ModelRecord<M>[],
     meta: ResponseMeta,
     userMeta?: unknown
 ];
@@ -142,7 +261,7 @@ export interface ModelGetOptions {
  * @param id The record ID (or null to get default values on create)
  * @param options Extra options to pass to useQuery (defaults are provided for retry, staleTime and gcTime (last two only if configured in model))
  */
-export declare const useModelGet: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, id: string | null, options?: Omit<UseQueryOptions<ModelGetResponse<KeyT>, Error, ModelGetResponse<KeyT>>, "queryKey" | "queryFn"> & ModelGetOptions) => UseQueryResult<ModelGetResponse<KeyT>, Error>;
+export declare const useModelGet: <M extends ModelUnknown>(model: M, id: string | null, options?: Omit<UseQueryOptions<ModelGetResponse<M>, Error, ModelGetResponse<M>>, "queryKey" | "queryFn"> & ModelGetOptions) => UseQueryResult<ModelGetResponse<M>, Error>;
 /**
  * React-Query's useQuery for the given model and index params
  * @param model The model ID to load
@@ -151,7 +270,7 @@ export declare const useModelGet: <KeyT extends ModelFieldName, VisibilityT exte
  * @returns ModelIndexResponse where userMeta and meta is taken from the last call
  * @see Model.fetchAll
  */
-export declare const useModelFetchAll: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, params?: ModelFetchAllParams, options?: Omit<UseQueryOptions<ModelIndexResponse, Error, ModelIndexResponse>, "queryFn" | "queryKey">) => UseQueryResult<ModelIndexResponse, Error>;
+export declare const useModelFetchAll: <M extends ModelUnknown>(model: M, params?: ModelFetchAllParams, options?: Omit<UseQueryOptions<ModelIndexResponse<M>, Error, ModelIndexResponse<M>>, "queryFn" | "queryKey">) => UseQueryResult<ModelIndexResponse<M>, Error>;
 /**
  * React-Query's useQuery for one page of the given model's index
  * @param model The model to load
@@ -163,7 +282,7 @@ export declare const useModelFetchAll: <KeyT extends ModelFieldName, VisibilityT
  * @see Model.getReactQueryKeyIndex
  * @see Model.invalidateIndexQueries
  */
-export declare const useModelIndex: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, params?: Partial<IDataGridLoadDataParameters>, options?: Omit<UseQueryOptions<ModelIndexResponse, Error, ModelIndexResponse>, "queryFn" | "queryKey">) => UseQueryResult<ModelIndexResponse, Error>;
+export declare const useModelIndex: <M extends ModelUnknown>(model: M, params?: Partial<IDataGridLoadDataParameters>, options?: Omit<UseQueryOptions<ModelIndexResponse<M>, Error, ModelIndexResponse<M>>, "queryFn" | "queryKey">) => UseQueryResult<ModelIndexResponse<M>, Error>;
 /**
  * React-Query's useQuery for a range of the given model's index (by offset)
  * @param model The model to load
@@ -175,42 +294,42 @@ export declare const useModelIndex: <KeyT extends ModelFieldName, VisibilityT ex
  * @see Model.getReactQueryKeyIndex2
  * @see Model.invalidateIndex2Queries
  */
-export declare const useModelIndex2: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, params: ConnectorIndex2Params, options?: Omit<UseQueryOptions<ModelIndexResponse, Error, ModelIndexResponse>, "queryFn" | "queryKey">) => UseQueryResult<ModelIndexResponse, Error>;
+export declare const useModelIndex2: <M extends ModelUnknown>(model: M, params: ConnectorIndex2Params, options?: Omit<UseQueryOptions<ModelIndexResponse<M>, Error, ModelIndexResponse<M>>, "queryFn" | "queryKey">) => UseQueryResult<ModelIndexResponse<M>, Error>;
 /**
  * React-Query's useMutation to update/create a new record on backend
  * @param model The model
  * @see model.createOrUpdateRecordRaw
  */
-export declare const useModelMutation: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, TContext = unknown>(model: Model<KeyT, VisibilityT, CustomT>) => UseMutationResult<ModelGetResponse<KeyT>, Error, Record<string, unknown>, TContext>;
+export declare const useModelMutation: <M extends ModelUnknown, TContext = unknown>(model: M) => UseMutationResult<ModelGetResponse<M>, Error, ModelRecordPartial<M>, TContext>;
 /**
  * React-Query's useMutation to delete a single record on backend
  * @param model The model
  */
-export declare const useModelDelete: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, TContext = unknown>(model: Model<KeyT, VisibilityT, CustomT>) => UseMutationResult<void, Error, string, TContext>;
+export declare const useModelDelete: <TContext = unknown>(model: ModelUnknown) => UseMutationResult<void, Error, string, TContext>;
 /**
  * React-Query's useMutation to delete multiple records by ID on backend
  * @param model The model
  */
-export declare const useModelDeleteMultiple: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, TContext = unknown>(model: Model<KeyT, VisibilityT, CustomT>) => UseMutationResult<void, Error, string[], TContext>;
+export declare const useModelDeleteMultiple: <TContext = unknown>(model: ModelUnknown) => UseMutationResult<void, Error, string[], TContext>;
 /**
  * React-Query's useMutation to delete records using advanced filters on backend
  * @param model The model
  * @see model.deleteAdvancedRaw
  */
-export declare const useModelDeleteAdvanced: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, TContext = unknown>(model: Model<KeyT, VisibilityT, CustomT>) => UseMutationResult<void, Error, AdvancedDeleteRequest, TContext>;
+export declare const useModelDeleteAdvanced: <TContext = unknown>(model: ModelUnknown) => UseMutationResult<void, Error, AdvancedDeleteRequest, TContext>;
 /**
  * Mutation event handler
  * @param data The response data
  */
-export type ModelEventMutation = <KeyT extends ModelFieldName>(data: ModelGetResponse<KeyT>) => void;
-export interface ModelHooks<KeyT extends ModelFieldName> {
+export type ModelEventMutation<M extends ModelLike> = (data: ModelGetResponse<M>) => void;
+export interface ModelHooks {
     /**
      * Hook fired on useModelMutation success
      * @param data The updated record
      */
-    onCreateOrUpdate?: (data: ModelGetResponse<KeyT>) => void;
+    onCreateOrUpdate?: (data: ModelGetResponse<ModelUnknown>) => void;
 }
-export interface ModelOptions<KeyT extends ModelFieldName> {
+export interface ModelOptions {
     /**
      * Cache options
      */
@@ -218,7 +337,7 @@ export interface ModelOptions<KeyT extends ModelFieldName> {
     /**
      * Hooks
      */
-    hooks?: ModelHooks<KeyT>;
+    hooks?: ModelHooks;
     /**
      * Enable request batching: uses index requests instead of show requests using field filter for ID inSet to reduce the number of GET requests
      * Uses overview visibility settings, can be toggled for single requests using options there. This is the default value if not specified there
@@ -231,7 +350,12 @@ export interface ModelOptions<KeyT extends ModelFieldName> {
      */
     cacheKeysIndex?: unknown;
 }
-declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> {
+/**
+ * A data model: its fields and the connector to load and save them
+ * @typeParam FieldsT The field definitions, inferred by the constructor
+ * @typeParam KeyT The field names, follow from FieldsT
+ */
+declare class Model<FieldsT extends ModelFields = ModelFields, KeyT extends ModelFieldName = keyof FieldsT & string> {
     /**
      * A unique model identifier, used for caching
      */
@@ -239,11 +363,11 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
     /**
      * The actual model definition
      */
-    readonly fields: ModelField<KeyT, VisibilityT, CustomT>;
+    readonly fields: FieldsT;
     /**
      * The backend connector providing a CRUD interface for the model
      */
-    connector: Connector<KeyT, VisibilityT, CustomT>;
+    connector: Connector;
     /**
      * Optional additional cache keys
      */
@@ -259,7 +383,7 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
     /**
      * Hooks
      */
-    readonly hooks: ModelHooks<KeyT>;
+    readonly hooks: ModelHooks;
     /**
      * @see ModelOptions.enableRequestBatching
      */
@@ -268,7 +392,7 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
      * The options passed in the constructor
      * @readonly
      */
-    readonly options?: Readonly<ModelOptions<KeyT>>;
+    readonly options?: Readonly<ModelOptions>;
     /**
      * Global toggle to trigger auto validation of UX when constructor is called
      */
@@ -282,6 +406,23 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
      */
     static printDevWarnings: boolean;
     /**
+     * The fields, by any field name
+     */
+    private get fieldsByName();
+    /**
+     * This model, as connectors and the event handlers of every model take it
+     */
+    private get asModelUnknown();
+    /**
+     * Types deserialized data as records of this model: applySerialization and getDefaultValues
+     * build them from the field definitions
+     */
+    private asRecords;
+    /**
+     * @see asRecords
+     */
+    private asRecord;
+    /**
      * Creates a new model
      * @param name A unique name for the model (modelId)
      * @param model The actual model definition
@@ -289,18 +430,18 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
      * @param cacheKeys The cache keys
      * @param options Model options
      */
-    constructor(name: string, model: ModelField<KeyT, VisibilityT, CustomT>, connector: Connector<KeyT, VisibilityT, CustomT>, cacheKeys?: unknown, options?: ModelOptions<KeyT>);
+    constructor(name: string, model: FieldsT & Record<KeyT, ModelFieldDefinition<any, NoInfer<KeyT>, PageVisibility, unknown>> & ModelFieldsNoExtraKeys<NoInfer<FieldsT>> & ModelFieldsDefaultsMatchType<NoInfer<FieldsT>>, connector: Connector, cacheKeys?: unknown, options?: ModelOptions);
     /**
      * Loads a list of data entries by the given search params
      * @param params The search params, the connector gets a copy of them
      */
-    index(params: Partial<IDataGridLoadDataParameters> | undefined): Promise<ModelIndexResponse>;
+    index(params: Partial<IDataGridLoadDataParameters> | undefined): Promise<ModelIndexResponse<this>>;
     /**
      * Loads a list of data entries by the given search params. Works with offsets rather than pages
      * @param params The search params, the connector gets a copy of them
      * @see index
      */
-    index2(params: ConnectorIndex2Params): Promise<ModelIndexResponse>;
+    index2(params: ConnectorIndex2Params): Promise<ModelIndexResponse<this>>;
     /**
      * Cache index records for batched requests
      * @param records The records to cache (from index response)
@@ -313,14 +454,14 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
      * @param params The params to pass to index
      * @returns ModelIndexResponse where userMeta and meta is taken from the last call
      */
-    fetchAll(params?: ModelFetchAllParams): Promise<ModelIndexResponse>;
+    fetchAll(params?: ModelFetchAllParams): Promise<ModelIndexResponse<this>>;
     /**
      * Fetches all records using index calls and caches the result
      * @param params The params to pass to index
      * @returns ModelIndexResponse where userMeta and meta is taken from the last call
      * @see fetchAll
      */
-    fetchAllCached(params?: ModelFetchAllParams): Promise<ModelIndexResponse>;
+    fetchAllCached(params?: ModelFetchAllParams): Promise<ModelIndexResponse<this>>;
     /**
      * Gets the react-query cache key for this model
      * @param id The record id
@@ -382,19 +523,19 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
      * @param id The data record id
      * @deprecated Use useModelGet(model, id) instead
      */
-    get(id: string | null): UseQueryResult<ModelGetResponse<KeyT>, Error>;
+    get(id: string | null): UseQueryResult<ModelGetResponse<this>, Error>;
     /**
      * Provides cached access for the given data id
      * @param id The data record id or null to obtain the default values
      * @param options Request options
      */
-    getCached(id: string | null, options?: ModelGetOptions): Promise<ModelGetResponse<KeyT>>;
+    getCached(id: string | null, options?: ModelGetOptions): Promise<ModelGetResponse<this>>;
     /**
      * Provides uncached access for the given data id
      * @param id The data record id or null to obtain the default values
      * @param options Request options
      */
-    getRaw(id: string | null, options?: ModelGetOptions): Promise<ModelGetResponse<KeyT>>;
+    getRaw(id: string | null, options?: ModelGetOptions): Promise<ModelGetResponse<this>>;
     /**
      * Deserializes the given ModelGetResponse
      * @param rawData The data to deserialize
@@ -405,12 +546,12 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
      * Provides a react-query useMutation hook for creation or updates to an data entry
      * @deprecated Use useModelMutation(model) instead
      */
-    createOrUpdate<TContext = unknown>(): UseMutationResult<ModelGetResponse<KeyT>, Error, Record<string, unknown>, TContext>;
+    createOrUpdate<TContext = unknown>(): UseMutationResult<ModelGetResponse<this>, Error, ModelRecordPartial<this>, TContext>;
     /**
      * Updates a single record on backend (doesn't update local cache)
      * @param values The new values (set id field to update)
      */
-    createOrUpdateRecordRaw(values: Record<string, unknown>): Promise<ModelGetResponse<KeyT>>;
+    createOrUpdateRecordRaw(values: ModelRecordPartial<this>): Promise<ModelGetResponse<this>>;
     /**
      * Provides a react hook to delete a given record id
      * @deprecated Use useModelDelete(model)
@@ -451,7 +592,7 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
      * @param batch Data from index response?
      * @param updater The function which updates the data
      */
-    updateStoredData(id: string, batch: boolean, updater: (old: Record<string, unknown>) => Record<string, unknown>): void;
+    updateStoredData(id: string, batch: boolean, updater: (old: ModelRecord<this>) => ModelRecord<this>): void;
     /**
      * Returns a data grid compatible column definition
      */
@@ -513,7 +654,7 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
      * @remarks Remove handler with removeEventHandler when done
      * @see removeEventHandler
      */
-    addEventHandler(evt: "mutate", handler: ModelEventMutation, idFilter?: string | null): void;
+    addEventHandler(evt: "mutate", handler: ModelEventMutation<this>, idFilter?: string | null): void;
     /**
      * Removes an event handler
      * @param evt The event to unsubscribe from
@@ -522,13 +663,13 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
      * @remarks Removes handler added by addEventHandler
      * @see addEventHandler
      */
-    removeEventHandler(evt: "mutate", handler: ModelEventMutation, idFilter?: string | null): void;
+    removeEventHandler(evt: "mutate", handler: ModelEventMutation<this>, idFilter?: string | null): void;
     /**
      * Trigger the mutation event and call event listeners
      * @param isCreate Is the record just created
      * @param data The response data
      * @remarks used internally, usually not called by library using code
      */
-    triggerMutationEvent(isCreate: boolean, data: ModelGetResponse<KeyT>): void;
+    triggerMutationEvent(isCreate: boolean, data: ModelGetResponse<this>): void;
 }
 export default Model;

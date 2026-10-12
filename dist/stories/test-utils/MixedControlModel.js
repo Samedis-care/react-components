@@ -80,7 +80,7 @@ const createMixedControlModel = () => new Model("mixed-control-model-" + Date.no
         customData: null,
     },
     department: {
-        type: new ModelDataTypeEnumSelectRenderer(departments),
+        type: new ModelDataTypeEnumSelectRenderer(departments, ""),
         getLabel: () => "Department",
         visibility: {
             overview: ModelVisibilityDisabled,
@@ -90,7 +90,7 @@ const createMixedControlModel = () => new Model("mixed-control-model-" + Date.no
         customData: null,
     },
     priority: {
-        type: new ModelDataTypeEnumRadioRendererMUI(priorities),
+        type: new ModelDataTypeEnumRadioRendererMUI(priorities, ""),
         getLabel: () => "Priority",
         visibility: {
             overview: ModelVisibilityDisabled,

@@ -5,9 +5,9 @@ export interface SignPadProps {
      */
     disabled?: boolean;
     /**
-     * The base64 string of signature
+     * The base64 string of signature, null while unsigned
      */
-    signature: string;
+    signature: string | null;
     /**
      * Name of the signer
      */

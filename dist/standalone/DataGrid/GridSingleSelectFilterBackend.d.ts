@@ -2,8 +2,8 @@ import React from "react";
 import { GridSize } from "@mui/material/Grid";
 import { Breakpoint } from "@mui/material/styles";
 import BackendSingleSelect, { BackendSingleSelectProps } from "../../backend-components/Selector/BackendSingleSelect";
-import { ModelFieldName, PageVisibility } from "../../backend-integration";
-export interface GridSingleSelectFilterBackendProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> extends Omit<BackendSingleSelectProps<KeyT, VisibilityT, CustomT>, "classes" | "className" | "disableClearable"> {
+import { ModelUnknown } from "../../backend-integration";
+export interface GridSingleSelectFilterBackendProps<M extends ModelUnknown> extends Omit<BackendSingleSelectProps<M>, "classes" | "className" | "disableClearable"> {
     /**
      * Optional label for the filter
      */
@@ -11,7 +11,7 @@ export interface GridSingleSelectFilterBackendProps<KeyT extends ModelFieldName,
     /**
      * Non-optional selection handler
      */
-    onSelect: NonNullable<BackendSingleSelectProps<KeyT, VisibilityT, CustomT>["onSelect"]>;
+    onSelect: NonNullable<BackendSingleSelectProps<M>["onSelect"]>;
     /**
      * Is the grid filter rendered in a dialog?
      */
@@ -31,6 +31,6 @@ export interface GridSingleSelectFilterBackendProps<KeyT extends ModelFieldName,
 }
 export type GridSingleSelectFilterBackendClassKey = "dialogRoot" | "barRoot";
 export declare const DataGridCustomFilterSingleBackend: typeof BackendSingleSelect;
-declare const GridSingleSelectFilterBackend: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(inProps: GridSingleSelectFilterBackendProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
+declare const GridSingleSelectFilterBackend: <M extends ModelUnknown>(inProps: GridSingleSelectFilterBackendProps<M>) => React.JSX.Element;
 declare const _default: typeof GridSingleSelectFilterBackend;
 export default _default;

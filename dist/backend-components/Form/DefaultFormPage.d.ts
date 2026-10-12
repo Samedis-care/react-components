@@ -1,8 +1,8 @@
 import React from "react";
 import { PageProps } from "./Form";
 import { CrudFormProps } from "../CRUD";
-import { ModelFieldName } from "../../backend-integration";
-export interface DefaultFormPageProps extends PageProps<ModelFieldName, CrudFormProps> {
+import { ModelUnknown } from "../../backend-integration";
+export interface DefaultFormPageProps extends PageProps<ModelUnknown, CrudFormProps> {
     /**
      * The actual form contents
      */

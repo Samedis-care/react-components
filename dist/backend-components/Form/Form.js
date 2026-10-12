@@ -41,14 +41,28 @@ export const FormRenderAsDivContext = React.createContext(false);
  * Context which stores information about the current form so it can be used by fields
  */
 export const FormContext = React.createContext(null);
-export const useFormContext = () => {
+/**
+ * The context of the form this component is rendered in
+ * @typeParam M The model of the form (required), ModelUnknown for code that works with any form
+ * @typeParam CustomPropsT The custom props of the form
+ * @remarks M is not checked against the model the form actually uses
+ */
+export const useFormContext = (
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- only there to require M
+..._modelTypeRequired) => {
     const ctx = useContext(FormContext);
     if (!ctx)
         throw new Error("Form Context not set. Not using form engine?");
     return ctx;
 };
 export const FormContextLite = React.createContext(null);
-export const useFormContextLite = () => {
+/**
+ * The lite context of the form this component is rendered in
+ * @see useFormContext
+ */
+export const useFormContextLite = (
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- only there to require M
+..._modelTypeRequired) => {
     const ctx = useContext(FormContextLite);
     if (!ctx)
         throw new Error("Form Context (Lite) not set. Not using form engine?");
@@ -128,8 +142,15 @@ const normalizeValues = (data, config) => {
 const setAllTouched = (touched, set) => Object.fromEntries(Object.keys(touched).map((field) => [field, set]));
 const StyledForm = styled("form", { name: "CcForm", slot: "root" })({});
 const StyledFormDiv = styled("div", { name: "CcForm", slot: "root" })({});
+/**
+ * Types data of the form engine as a record of the form's model: the deserialized server data
+ * and the values built from it
+ */
+const asModelRecord = (data) => data;
 const Form = (props) => {
-    const { model, id, children, onSubmit, onSubmitUserInteractive, customProps, onlyWarnMounted, onlyWarnChanged, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedSubmitBeforeParent, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, formClass, preSubmit, dirtyIgnoreFields, showDirtyState, flowEngine, renderFormAsDiv: renderFormAsDivProp, errorRenderer: ErrorRenderer, } = props;
+    const { model: formModel, id, children, onSubmit, onSubmitUserInteractive, customProps, onlyWarnMounted, onlyWarnChanged, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedSubmitBeforeParent, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, formClass, preSubmit, dirtyIgnoreFields, showDirtyState, flowEngine, renderFormAsDiv: renderFormAsDivProp, errorRenderer: ErrorRenderer, } = props;
+    // the form engine itself works with any model, the typing is for the props and the context
+    const model = formModel;
     const renderFormAsDiv = useContext(FormRenderAsDivContext) || renderFormAsDivProp;
     // flow engine mode defaults
     const flowEngineConfig = useRef({});
@@ -323,7 +344,7 @@ const Form = (props) => {
         }
         const localData = normalizeValues(values ?? valuesRef.current, {
             ignoreFields: dirtyIgnoreFields,
-            model: model,
+            model,
             defaultRecord: defaultRecord[0],
             onlySubmitMountedBehaviour,
             onlySubmitMounted: onlySubmitMounted ?? false,
@@ -332,7 +353,7 @@ const Form = (props) => {
         });
         const remoteData = normalizeValues(initialValues, {
             ignoreFields: dirtyIgnoreFields,
-            model: model,
+            model,
             defaultRecord: defaultRecord[0],
             onlySubmitMountedBehaviour,
             onlySubmitMounted: onlySubmitMounted ?? false,
@@ -506,9 +527,9 @@ const Form = (props) => {
     }, []);
     const setFieldValue = useCallback((field, value, validate = true, triggerOnChange = false) => {
         if (triggerOnChange) {
-            const onChange = model.fields[field].onChange;
-            if (onChange) {
-                value = onChange(value, model, setFieldValue, getFieldValue);
+            const fieldDef = model.fields[field];
+            if (fieldDef.onChange) {
+                value = fieldDef.onChange(value, model, setFieldValue, getFieldValue);
                 if (value === undefined && process.env.NODE_ENV === "development") {
                     // eslint-disable-next-line no-console
                     console.error(`[Components-Care] [Form] onChange handler for field '${field}' returned undefined. Missing return?`);
@@ -628,8 +649,8 @@ const Form = (props) => {
             let cancelSubmit;
             try {
                 cancelSubmit = await preSubmit({
-                    serverData: (serverData && serverData[0]) ?? valuesRef.current,
-                    formData: valuesRef.current,
+                    serverData: asModelRecord((serverData && serverData[0]) ?? valuesRef.current),
+                    formData: asModelRecord(valuesRef.current),
                     submitOptions: params,
                     deleteOnSubmit: !!deleteOnSubmit,
                     setFieldValue,
@@ -755,11 +776,11 @@ const Form = (props) => {
                 syncDirtyState();
                 if (onSubmit) {
                     const interactive = typeof onSubmitUserInteractive === "function"
-                        ? onSubmitUserInteractive(newValues, submitValues, oldValues)
+                        ? onSubmitUserInteractive(asModelRecord(newValues), asModelRecord(submitValues), asModelRecord(oldValues))
                         : onSubmitUserInteractive;
                     if (interactive)
                         setSubmittingForm(false);
-                    await onSubmit(newValues, submitValues, oldValues);
+                    await onSubmit(asModelRecord(newValues), asModelRecord(submitValues), asModelRecord(oldValues));
                     // setSubmittingForm(true); // disabled because this is the last thing that happens in this handler
                 }
             }
@@ -933,7 +954,7 @@ const Form = (props) => {
         };
         const submitNestedForm = async (id, params) => {
             if (nestedFormPreSubmitHandler) {
-                await nestedFormPreSubmitHandler(id, model, getFieldValue, setFieldValueLite);
+                await nestedFormPreSubmitHandler(id, formModel, getFieldValue, setFieldValueLite);
             }
             await submitForm(params);
             parentFormContext.setCustomFieldDirty(nestedFormName, false);
@@ -1030,7 +1051,7 @@ const Form = (props) => {
     }, [setUpdateError]);
     const formContextData = useMemo(() => ({
         id,
-        model: model,
+        model,
         errorComponent: ErrorComponent,
         relations: serverData && serverData[1] ? serverData[1] : {},
         setError,
@@ -1149,7 +1170,7 @@ const Form = (props) => {
     ]);
     const formContextDataLite = useMemo(() => ({
         id,
-        model: model,
+        model,
         customProps,
         errorComponent: ErrorComponent,
         onlySubmitMounted: !!onlySubmitMounted,
@@ -1217,7 +1238,7 @@ const Form = (props) => {
         console.error("[Components-Care] [FormEngine] Data is faulty", serverData ? JSON.stringify(serverData, undefined, 4) : null);
         throw new Error("Data is not present, this should never happen");
     }
-    const innerForm = () => (_jsxs(DirtyStateContext.Provider, { value: showDirtyState ? dirtyFields : NO_DIRTY_STATE, children: [displayError && !nestedFormName && (_jsx(ErrorComponent, { error: displayError })), isLoading ? (_jsx("div", { style: loaderContainerStyles, children: _jsx(Loader, {}) })) : (_jsx(Children, { isSubmitting: submitting, values: props.renderConditionally ? values : undefined, submit: submitForm, safeSubmit: safeSubmitForm, reset: resetForm, dirty: dirty, id: id, customProps: customProps, disableRouting: !!props.disableRouting }))] }));
+    const innerForm = () => (_jsxs(DirtyStateContext.Provider, { value: showDirtyState ? dirtyFields : NO_DIRTY_STATE, children: [displayError && !nestedFormName && (_jsx(ErrorComponent, { error: displayError })), isLoading ? (_jsx("div", { style: loaderContainerStyles, children: _jsx(Loader, {}) })) : (_jsx(Children, { isSubmitting: submitting, values: props.renderConditionally ? asModelRecord(values) : undefined, submit: submitForm, safeSubmit: safeSubmitForm, reset: resetForm, dirty: dirty, id: id, customProps: customProps, disableRouting: !!props.disableRouting }))] }));
     return (_jsx(FormContextLite.Provider, { value: formContextDataLite, children: _jsx(FormContext.Provider, { value: formContextData, children: !parentFormContext && !renderFormAsDiv ? (_jsx(StyledForm, { onSubmit: handleSubmit, className: formClass, "data-form-submitting": submitting, "data-form-dirty": dirty, "data-form-recordid": id, "data-form-modelid": model.modelId, children: innerForm() })) : (_jsx(StyledFormDiv, { className: formClass, "data-form-submitting": submitting, "data-form-dirty": dirty, "data-form-recordid": id, "data-form-modelid": model.modelId, children: innerForm() })) }) }));
 };
 export default React.memo(Form);

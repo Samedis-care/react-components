@@ -1,13 +1,13 @@
-import { Connector, ModelFieldName, PageVisibility } from "../../backend-integration";
+import { Connector, ModelRecord, ModelUnknown } from "../../backend-integration";
 import { BaseSelectorData } from "../../standalone";
 import { ForwardedRef } from "react";
 import { ValidationResult } from "../Form";
 import { BackendMultiSelectProps } from "./BackendMultiSelect";
-export interface UseCrudSelectParams<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends BaseSelectorData> {
+export interface UseCrudSelectParams<M extends ModelUnknown, DataT extends BaseSelectorData> {
     /**
      * The backend connector used as CRUD interface
      */
-    connector: Connector<KeyT, VisibilityT, CustomT>;
+    connector: Connector;
     /**
      * Callback for serializing data before passing it to the backend connector
      * @param data The selector data to serialize
@@ -32,7 +32,7 @@ export interface UseCrudSelectParams<KeyT extends ModelFieldName, VisibilityT ex
      *   for every dropdown option. Use {@link prepareNewEntry} to collect extra
      *   data on add.
      */
-    deserializeModel: (data: Record<string, unknown>) => Promise<Omit<DataT, "value">> | Omit<DataT, "value">;
+    deserializeModel: (data: ModelRecord<M>) => Promise<Omit<DataT, "value">> | Omit<DataT, "value">;
     /**
      * Called once per newly-added entry, before it is serialized/created.
      * Use it to collect extra join-record data (e.g. via a dialog) or to
@@ -69,9 +69,9 @@ export interface UseCrudSelectParams<KeyT extends ModelFieldName, VisibilityT ex
     /**
      * Get ID of data
      */
-    getIdOfData: NonNullable<BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>["getIdOfData"]>;
+    getIdOfData: NonNullable<BackendMultiSelectProps<M, DataT>["getIdOfData"]>;
 }
-export interface UseCrudSelectResult<KeyT extends ModelFieldName, DataT extends BaseSelectorData> {
+export interface UseCrudSelectResult<M extends ModelUnknown, DataT extends BaseSelectorData> {
     /**
      * Fetching initial data?
      */
@@ -102,7 +102,7 @@ export interface UseCrudSelectResult<KeyT extends ModelFieldName, DataT extends 
      * Conversion function for model data to selection data (handles special case when data comes from CRUD controller)
      * @param data The model data
      */
-    modelToSelectorData: (data: Record<string, unknown>) => Promise<DataT>;
+    modelToSelectorData: (data: ModelRecord<M>) => Promise<DataT>;
 }
 export interface CrudSelectDispatch<DataT extends BaseSelectorData> {
     /**
@@ -112,5 +112,5 @@ export interface CrudSelectDispatch<DataT extends BaseSelectorData> {
      */
     addToSelection: (entry: DataT) => Promise<void>;
 }
-declare const useCrudSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends BaseSelectorData>(params: UseCrudSelectParams<KeyT, VisibilityT, CustomT, DataT>, ref: ForwardedRef<CrudSelectDispatch<DataT>>) => UseCrudSelectResult<KeyT, DataT>;
+declare const useCrudSelect: <M extends ModelUnknown, DataT extends BaseSelectorData>(params: UseCrudSelectParams<M, DataT>, ref: ForwardedRef<CrudSelectDispatch<DataT>>) => UseCrudSelectResult<M, DataT>;
 export default useCrudSelect;

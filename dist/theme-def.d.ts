@@ -62,7 +62,7 @@ import { BackendMultiSelectThemeProps } from "./backend-components/Selector/Back
 import { BackendMultipleSelectThemeProps } from "./backend-components/Selector/BackendMultipleSelect";
 import { BackendMultiSelectWithTagsThemeProps } from "./backend-components/Selector/BackendMultiSelectWithTags";
 import { GridSingleSelectFilterBackendClassKey, GridSingleSelectFilterBackendProps } from "./standalone/DataGrid/GridSingleSelectFilterBackend";
-import { ModelFieldName, PageVisibility } from "./backend-integration";
+import { ModelUnknown } from "./backend-integration";
 import { GridMultiSelectFilterBackendClassKey, GridMultiSelectFilterBackendProps } from "./standalone/DataGrid/GridMultiSelectFilterBackend";
 export interface ComponentsCareTheme {
 }
@@ -212,9 +212,9 @@ declare module "@mui/material/styles" {
         CcWeekView: Partial<WeekViewProps>;
         CcDataGrid: Partial<DataGridProps>;
         CcGridMultiSelectFilter: Partial<GridMultiSelectFilterProps>;
-        CcGridMultiSelectFilterBackend: Partial<GridMultiSelectFilterBackendProps<ModelFieldName, PageVisibility, unknown, MultiSelectorData>>;
+        CcGridMultiSelectFilterBackend: Partial<GridMultiSelectFilterBackendProps<ModelUnknown, MultiSelectorData>>;
         CcGridSingleSelectFilter: Partial<GridSingleSelectFilterProps>;
-        CcGridSingleSelectFilterBackend: Partial<GridSingleSelectFilterBackendProps<ModelFieldName, PageVisibility, unknown>>;
+        CcGridSingleSelectFilterBackend: Partial<GridSingleSelectFilterBackendProps<ModelUnknown>>;
         CcBasicFormPage: Partial<BasicFormPageProps<never, never>>;
     }
     interface Components {

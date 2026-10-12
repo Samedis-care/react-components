@@ -1,9 +1,8 @@
-import { ModelFieldName, PageVisibility } from "../Model";
 import Connector from "./Connector";
 /**
  * Backend connector for APIs
  */
-declare abstract class ApiConnector<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> extends Connector<KeyT, VisibilityT, CustomT> {
+declare abstract class ApiConnector extends Connector {
     /**
      * Updates the API endpoint
      * @param url The API endpoint

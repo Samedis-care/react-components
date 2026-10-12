@@ -1,11 +1,11 @@
 import React from "react";
 import { DataGridDispatch, DataGridFilterParameters, DataGridProps, IDataGridAddButton } from "../../standalone/DataGrid/DataGrid";
-import Model, { ModelFieldName, PageVisibility } from "../../backend-integration/Model/Model";
-export interface BackendDataGridProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomDataT> extends Omit<DataGridProps, "loadData" | "columns" | "exporters" | "onDelete"> {
+import { ModelRecord, ModelUnknown } from "../../backend-integration/Model/Model";
+export interface BackendDataGridProps<M extends ModelUnknown> extends Omit<DataGridProps, "loadData" | "columns" | "exporters" | "onDelete"> {
     /**
      * The model to use
      */
-    model: Model<KeyT, VisibilityT, CustomDataT>;
+    model: M;
     /**
      * Enable deletion?
      */
@@ -45,11 +45,11 @@ export interface BackendDataGridProps<KeyT extends ModelFieldName, VisibilityT e
      */
     onDeleteSettled?: (inverted: boolean, ids: string[], filter: DataGridFilterParameters | undefined, error: Error | undefined) => void;
 }
-export declare const useBackendDataGridAddNewButtons: (props: Pick<BackendDataGridProps<never, never, never>, "onAddNew" | "additionalNewButtons">) => string | IDataGridAddButton[] | (() => void) | undefined;
-export declare const useBackendDataGridDeleteHandler: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: Pick<BackendDataGridProps<KeyT, VisibilityT, CustomT>, "model" | "enableDelete" | "enableDeleteAll" | "customDeleteConfirm" | "customDeleteErrorHandler" | "onDeleteSettled">, refreshGrid: () => void) => ((invert: boolean, ids: string[], filter?: DataGridFilterParameters) => Promise<void>) | undefined;
-export declare const renderDataGridRecordUsingModel: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, refreshGrid: () => void) => (entry: Record<string, unknown>) => {
+export declare const useBackendDataGridAddNewButtons: (props: Pick<BackendDataGridProps<ModelUnknown>, "onAddNew" | "additionalNewButtons">) => string | IDataGridAddButton[] | (() => void) | undefined;
+export declare const useBackendDataGridDeleteHandler: <M extends ModelUnknown>(props: Pick<BackendDataGridProps<M>, "model" | "enableDelete" | "enableDeleteAll" | "customDeleteConfirm" | "customDeleteErrorHandler" | "onDeleteSettled">, refreshGrid: () => void) => ((invert: boolean, ids: string[], filter?: DataGridFilterParameters) => Promise<void>) | undefined;
+export declare const renderDataGridRecordUsingModel: (model: ModelUnknown, refreshGrid: () => void) => (entry: ModelRecord<ModelUnknown>) => {
     id: string;
 } & Record<string, string | null>;
-export type BackendDataGridType = <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomDataT>(props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT> & React.RefAttributes<DataGridDispatch>) => React.ReactElement | null;
+export type BackendDataGridType = <M extends ModelUnknown>(props: BackendDataGridProps<M> & React.RefAttributes<DataGridDispatch>) => React.ReactElement | null;
 declare const _default: BackendDataGridType;
 export default _default;

@@ -3,7 +3,7 @@ import { Box, Collapse, Divider, Grid, IconButton, ListItem, Paper, SvgIconProps
 import { Apps as AppsIcon, Search as SearchIcon } from "@mui/icons-material";
 import { IDataGridHeaderProps } from "./Header";
 import { FilterType, IFilterDef } from "./Content/FilterEntry";
-import { ModelFieldName, ModelFilterType, PageVisibility } from "../../backend-integration/Model";
+import { ModelFilterType, ModelUnknown } from "../../backend-integration/Model";
 import { IDataGridContentSelectRowViewProps } from "./Content/SelectRowView";
 import Checkbox from "../UIKit/Checkbox";
 import ComponentWithLabel from "../UIKit/ComponentWithLabel";
@@ -357,7 +357,7 @@ export interface DataGridSetFilterDataEntry {
     isDivider?: boolean;
 }
 export type DataGridSetFilterData = DataGridSetFilterDataEntry[];
-export type DataGridIdFilterData = Omit<BackendMultiSelectProps<ModelFieldName, PageVisibility, unknown, MultiSelectorData>, "selected" | "onSelect">;
+export type DataGridIdFilterData = Omit<BackendMultiSelectProps<ModelUnknown, MultiSelectorData>, "selected" | "onSelect">;
 export interface DataGridCustomFilterDataComponentProps<T = unknown> {
     /**
      * custom filter data

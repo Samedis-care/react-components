@@ -111,7 +111,7 @@ const SignPadDialog = (inProps) => {
         }
         else {
             if (setSignature)
-                setSignature(resetCanvas ? signature : "");
+                setSignature(resetCanvas ? (signature ?? "") : "");
         }
         hiddenRef.current?.focus();
         hiddenRef.current?.blur();
@@ -146,6 +146,6 @@ const SignPadDialog = (inProps) => {
                         })
                         : t("standalone.signature-pad.dialog.title"), _jsx(StyledCloseButton, { "aria-label": t("standalone.signature-pad.dialog.close"), className: classes?.closeButton, onClick: closeCanvasBtn, size: "large", children: _jsx(Close, {}) })] }), _jsxs(SignDiv, { className: classes?.signDiv, ref: setCanvasWrapperRef, "data-name": name, onBlur: onBlur, children: [!resetCanvas ? (_jsx(SignaturePad, { ref: signCanvas, options: {
                             penColor: penColor || "blue",
-                        }, width: canvasSize[0], height: canvasSize[1] })) : (_jsx(ImageDiv, { className: classes?.imageDiv, children: _jsx(SignatureImage, { src: signature, alt: t("standalone.signature-pad.dialog.signature") }) })), _jsx(HiddenDiv, { className: classes?.hiddenDiv, children: _jsx("input", { type: "text", value: signature ?? "", readOnly: true, ref: hiddenRef, name: name, onBlur: onBlur }) })] }), _jsxs(DialogActions, { children: [_jsx(Button, { onClick: saveCanvas, color: "primary", children: t("standalone.signature-pad.dialog.save-changes") }), _jsx(Button, { onClick: clearCanvas, color: "error", children: t("standalone.signature-pad.dialog.reset") })] })] }));
+                        }, width: canvasSize[0], height: canvasSize[1] })) : (_jsx(ImageDiv, { className: classes?.imageDiv, children: _jsx(SignatureImage, { src: signature ?? undefined, alt: t("standalone.signature-pad.dialog.signature") }) })), _jsx(HiddenDiv, { className: classes?.hiddenDiv, children: _jsx("input", { type: "text", value: signature ?? "", readOnly: true, ref: hiddenRef, name: name, onBlur: onBlur }) })] }), _jsxs(DialogActions, { children: [_jsx(Button, { onClick: saveCanvas, color: "primary", children: t("standalone.signature-pad.dialog.save-changes") }), _jsx(Button, { onClick: clearCanvas, color: "error", children: t("standalone.signature-pad.dialog.reset") })] })] }));
 };
 export const SignDialog = React.memo(SignPadDialog);

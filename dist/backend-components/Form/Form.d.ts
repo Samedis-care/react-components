@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction } from "react";
-import Model, { ModelFieldName, ModelGetResponseRelations, PageVisibility } from "../../backend-integration/Model/Model";
+import { ModelFieldNames, ModelFieldValues, ModelGetResponseRelations, ModelRecord, ModelRecordPartial, ModelUnknown } from "../../backend-integration/Model/Model";
 import { QueryObserverBaseResult } from "@tanstack/react-query";
 import ValidationError from "./ValidationError";
 import { FormEventTarget } from "./FormEvents";
@@ -32,21 +32,21 @@ export declare enum OnlySubmitMountedBehaviour {
      */
     NULL = "null"
 }
-export interface PreSubmitParams {
+export interface PreSubmitParams<M extends ModelUnknown> {
     /**
      * The remote data
      */
-    readonly serverData: Record<string, unknown>;
+    readonly serverData: ModelRecord<M>;
     /**
      * The local data
      */
-    readonly formData: Record<string, unknown>;
+    readonly formData: ModelRecord<M>;
     /**
      * submit options
      */
     readonly submitOptions: FormSubmitOptions;
     readonly deleteOnSubmit: boolean;
-    readonly setFieldValue: FormContextData["setFieldValue"];
+    readonly setFieldValue: FormContextData<M>["setFieldValue"];
 }
 export interface ErrorComponentProps {
     /**
@@ -65,7 +65,7 @@ export type FormSubmitOptions = Partial<{
      */
     ignoreDirtyCheck: boolean;
 }>;
-export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
+export interface PageProps<M extends ModelUnknown, CustomPropsT> {
     /**
      * Indicates if the form is currently being submitted.
      * All submit buttons should be disabled if "isSubmitting" is true.
@@ -84,7 +84,7 @@ export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
      * The values of the form, can be used for conditional rendering.
      * Only present if renderConditionally is set to true in FormProps
      */
-    values?: Record<string, unknown>;
+    values?: ModelRecord<M>;
     /**
      * Function to trigger form submit
      */
@@ -108,11 +108,11 @@ export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
      */
     customProps: CustomPropsT;
 }
-export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, CustomPropsT> {
+export interface FormProps<M extends ModelUnknown, CustomPropsT> {
     /**
      * The data model this form follows
      */
-    model: Model<KeyT, VisibilityT, CustomT>;
+    model: M;
     /**
      * The current data entry id
      */
@@ -121,7 +121,7 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
      * Initial record to use (instead of defaults from model)
      * @remarks Only loaded if ID is null
      */
-    initialRecord?: Record<string, unknown>;
+    initialRecord?: ModelRecordPartial<M>;
     /**
      * The error component that is used to display errors
      */
@@ -129,7 +129,7 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
     /**
      * The form contents
      */
-    children: React.ComponentType<PageProps<KeyT, CustomPropsT>>;
+    children: React.ComponentType<PageProps<M, CustomPropsT>>;
     /**
      * Rerender page props if values changes
      */
@@ -139,7 +139,7 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
      * @param params The params provided
      * @return should cancel? false for continue, true for cancel
      */
-    preSubmit?: (params: PreSubmitParams) => Promise<boolean> | boolean;
+    preSubmit?: (params: PreSubmitParams<M>) => Promise<boolean> | boolean;
     /**
      * Called upon successful submit
      * Contains data from server response
@@ -147,11 +147,11 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
      * @param submittedData The data submitted by the form
      * @param previousData The data previously provided by the server
      */
-    onSubmit?: (dataFromServer: Record<string, unknown>, submittedData: Record<string, unknown>, previousData: Record<string, unknown>) => Promise<void> | void;
+    onSubmit?: (dataFromServer: ModelRecord<M>, submittedData: ModelRecord<M>, previousData: ModelRecord<M>) => Promise<void> | void;
     /**
      * Disable busy state while onSubmit is running. Required if you want to show a dialog for example
      */
-    onSubmitUserInteractive?: boolean | ((dataFromServer: Record<string, unknown>, submittedData: Record<string, unknown>, previousData: Record<string, unknown>) => boolean);
+    onSubmitUserInteractive?: boolean | ((dataFromServer: ModelRecord<M>, submittedData: ModelRecord<M>, previousData: ModelRecord<M>) => boolean);
     /**
      * Delete the record on submit rather than save it?
      */
@@ -179,11 +179,11 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
     /**
      * Fields to always be included during submit, regardless of onlySubmitMounted
      */
-    alwaysSubmitFields?: string[];
+    alwaysSubmitFields?: ModelFieldNames<M>[];
     /**
      * List of fields which will always trigger validation warning even if onlyWarnChanged is enabled
      */
-    alwaysWarnFields?: string[];
+    alwaysWarnFields?: ModelFieldNames<M>[];
     /**
      * Only validate mounted fields
      */
@@ -246,7 +246,7 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
      * @param getFieldValue getFieldValue of this form
      * @param setFieldValueLite setFieldValueLite of this form
      */
-    nestedFormPreSubmitHandler?: (id: string | null, model: Model<ModelFieldName, PageVisibility, unknown>, getFieldValue: FormContextData["getFieldValue"], setFieldValueLite: FormContextData["setFieldValueLite"]) => Promise<void> | void;
+    nestedFormPreSubmitHandler?: (id: string | null, model: M, getFieldValue: FormContextData<M>["getFieldValue"], setFieldValueLite: FormContextData<M>["setFieldValueLite"]) => Promise<void> | void;
     /**
      * CSS class for form styles
      */
@@ -293,7 +293,12 @@ export interface FormErrorRendererProps<CustomPropsT> {
     error: Error;
 }
 export declare const FormRenderAsDivContext: React.Context<boolean>;
-export interface FormContextData {
+/**
+ * The context of a form, typed by the form's model
+ * @typeParam M The model of the form, ModelUnknown for code that works with any form
+ * @typeParam CustomPropsT The custom props of the form
+ */
+export interface FormContextData<M extends ModelUnknown, CustomPropsT = unknown> {
     /**
      * The ID of the currently opened record
      */
@@ -301,7 +306,7 @@ export interface FormContextData {
     /**
      * The data model of this form
      */
-    model: Model<ModelFieldName, PageVisibility, never>;
+    model: M;
     /**
      * The error component of this form
      */
@@ -309,7 +314,7 @@ export interface FormContextData {
     /**
      * Relations of the model
      */
-    relations: ModelGetResponseRelations<ModelFieldName>;
+    relations: ModelGetResponseRelations<M>;
     /**
      * Helper function to display errors
      * @param error The error to display
@@ -423,7 +428,7 @@ export interface FormContextData {
      *          An entry is the same flag a type renderer receives as
      *          `RenderParams.dirty`.
      */
-    dirtyFields: Record<string, boolean>;
+    dirtyFields: Record<ModelFieldNames<M>, boolean>;
     /**
      * Was the form asked to mark its modified fields?
      * @remarks Whether a given field *is* marked is a different question, which a
@@ -531,11 +536,11 @@ export interface FormContextData {
     /**
      * The current form values
      */
-    values: Record<string, unknown>;
+    values: ModelRecord<M>;
     /**
      * The initial form values
      */
-    initialValues: Record<string, unknown>;
+    initialValues: ModelRecord<M>;
     /**
      * The current validation errors
      */
@@ -551,23 +556,23 @@ export interface FormContextData {
     /**
      * Sets a field value
      */
-    setFieldValue: (field: string, value: unknown, validate?: boolean, triggerOnChange?: boolean) => void;
+    setFieldValue: <FieldT extends ModelFieldNames<M>>(field: FieldT, value: ModelFieldValues<M>[FieldT], validate?: boolean, triggerOnChange?: boolean) => void;
     /**
      * Like setFieldValue but doesn't trigger validation
      * @param field The field
      * @param value The value
      * @see setFieldValue
      */
-    setFieldValueLite: (field: string, value: unknown) => void;
+    setFieldValueLite: <FieldT extends ModelFieldNames<M>>(field: FieldT, value: ModelFieldValues<M>[FieldT]) => void;
     /**
      * Get a field value
      * @param field The field name
      */
-    getFieldValue: (field: string) => unknown;
+    getFieldValue: <FieldT extends ModelFieldNames<M>>(field: FieldT) => ModelFieldValues<M>[FieldT];
     /**
      * Gets all current values
      */
-    getFieldValues: () => Record<string, unknown>;
+    getFieldValues: () => ModelRecord<M>;
     /**
      * Handle input blur events
      */
@@ -578,14 +583,14 @@ export interface FormContextData {
      * @param touched The new touched state
      * @param validate Should revalidate?
      */
-    setFieldTouched: (field: string, touched?: boolean, validate?: boolean) => void;
+    setFieldTouched: (field: ModelFieldNames<M>, touched?: boolean, validate?: boolean) => void;
     /**
      * Like setFieldTouched but doesn't trigger validation
      * @param field The field name
      * @param touched The new touched state
      * @see setFieldTouched
      */
-    setFieldTouchedLite: (field: string, touched?: boolean) => void;
+    setFieldTouchedLite: (field: ModelFieldNames<M>, touched?: boolean) => void;
     /**
      * Resets the form to server values
      */
@@ -602,11 +607,11 @@ export interface FormContextData {
     /**
      * Parent form context (if present and FormProps.nestedFormName is set)
      */
-    parentFormContext: FormContextData | null;
+    parentFormContext: FormContextData<ModelUnknown> | null;
     /**
      * Custom props passed in props
      */
-    customProps: unknown;
+    customProps: CustomPropsT;
     /**
      * Flow engine mode enabled?
      */
@@ -619,11 +624,25 @@ export interface FormContextData {
 /**
  * Context which stores information about the current form so it can be used by fields
  */
-export declare const FormContext: React.Context<FormContextData | null>;
-export declare const useFormContext: () => FormContextData;
-export type FormContextDataLite = Pick<FormContextData, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "initialValues" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly" | "removeCustomReadOnly" | "addEventListener" | "removeEventListener" | "flowEngine" | "submit" | "safeSubmit" | "submitting" | "dirty" | "showDirtyState" | "flowEngineConfig" | "refetchForm">;
-export declare const FormContextLite: React.Context<FormContextDataLite | null>;
-export declare const useFormContextLite: () => FormContextDataLite;
+export declare const FormContext: React.Context<FormContextData<ModelUnknown, unknown> | null>;
+/**
+ * Requires the model type argument of the form context hooks: a call without one doesn't compile
+ */
+export type FormContextModelTypeRequired<M> = [M] extends [never] ? [modelTypeArgumentRequired: never] : [];
+/**
+ * The context of the form this component is rendered in
+ * @typeParam M The model of the form (required), ModelUnknown for code that works with any form
+ * @typeParam CustomPropsT The custom props of the form
+ * @remarks M is not checked against the model the form actually uses
+ */
+export declare const useFormContext: <M extends ModelUnknown = never, CustomPropsT = unknown>(..._modelTypeRequired: FormContextModelTypeRequired<M>) => FormContextData<M, CustomPropsT>;
+export type FormContextDataLite<M extends ModelUnknown, CustomPropsT = unknown> = Pick<FormContextData<M, CustomPropsT>, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "initialValues" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly" | "removeCustomReadOnly" | "addEventListener" | "removeEventListener" | "flowEngine" | "submit" | "safeSubmit" | "submitting" | "dirty" | "showDirtyState" | "flowEngineConfig" | "refetchForm">;
+export declare const FormContextLite: React.Context<FormContextDataLite<ModelUnknown, unknown> | null>;
+/**
+ * The lite context of the form this component is rendered in
+ * @see useFormContext
+ */
+export declare const useFormContextLite: <M extends ModelUnknown = never, CustomPropsT = unknown>(..._modelTypeRequired: FormContextModelTypeRequired<M>) => FormContextDataLite<M, CustomPropsT>;
 export interface FormNestedState {
     valuesStaged: Record<string, unknown>;
     valuesStagedModified: Record<string, boolean>;
@@ -640,6 +659,6 @@ export type FormFlowEngineStageConfig = Partial<{
 }>;
 export declare const useFormFlowEngineStageConfig: (config: FormFlowEngineStageConfig) => void;
 export type FormClassKey = "root";
-declare const Form: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, CustomPropsT>(props: FormProps<KeyT, VisibilityT, CustomT, CustomPropsT>) => React.JSX.Element;
+declare const Form: <M extends ModelUnknown, CustomPropsT>(props: FormProps<M, CustomPropsT>) => React.JSX.Element;
 declare const _default: typeof Form;
 export default _default;

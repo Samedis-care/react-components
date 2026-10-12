@@ -16,7 +16,7 @@ class RendererSignature extends TypeSignature {
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
-            return (_jsx("input", { type: "hidden", name: field, value: value, readOnly: true, "aria-hidden": "true" }));
+            return (_jsx("input", { type: "hidden", name: field, value: value ?? "", readOnly: true, "aria-hidden": "true" }));
         }
         if (visibility.editable) {
             if (visibility.grid)

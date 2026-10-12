@@ -12,6 +12,7 @@ class RendererBackendMultiSelectWithTags extends TypeIds {
     constructor(props) {
         super();
         this.props = props;
+        // the grid's ID filter selects records of the same relation model
         this.idFilter = {
             ...props,
             groupSorter: undefined,
@@ -34,7 +35,9 @@ class RendererBackendMultiSelectWithTags extends TypeIds {
                 throw new Error("Not supported");
             if (!relationModel)
                 throw new Error("Type BackendMultiSelect requires relation model: " + field);
-            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, onBlur: handleBlur, name: field, children: [_jsx(BackendMultiSelectWithTags, { selected: value, onChange: (value) => handleChange(field, value), disabled: visibility.readOnly, required: visibility.required, dataModel: relationModel, initialData: relationData, title: label, ...this.props, dirty: dirty, autoFocus: autoFocus }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
+            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, onBlur: handleBlur, name: field, children: [_jsx(BackendMultiSelectWithTags, { selected: value, onChange: (value) => handleChange(field, value), disabled: visibility.readOnly, required: visibility.required, dataModel: relationModel, 
+                        // the form's relations hold deserialized records of the relation model
+                        initialData: relationData, title: label, ...this.props, dirty: dirty, autoFocus: autoFocus }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
         }
         throw new Error("view-only rendering not supported");
     }

@@ -41,7 +41,7 @@ class LazyConnector extends Connector {
         const returnData = [
             {
                 ...data,
-                ["id"]: fakeId,
+                id: fakeId,
             },
             {},
         ];

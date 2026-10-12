@@ -1,5 +1,5 @@
 import React from "react";
-import { ModelFieldDefinition, ModelRenderParams, PageVisibility } from "../../backend-integration";
+import { ModelFieldDefinitionUnknown, ModelRenderParams, ModelUnknown } from "../../backend-integration";
 import Type from "../../backend-integration/Model/Type";
 type NonOverridableProps = "getDefaultValue" | "validate" | "filterable" | "sortable" | "columnWidth";
 interface FieldProps {
@@ -10,7 +10,7 @@ interface FieldProps {
     /**
      * Overrides for the model information
      */
-    overrides?: Partial<Omit<ModelFieldDefinition<unknown, string, PageVisibility, never>, NonOverridableProps>> | ((original: ModelFieldDefinition<unknown, string, PageVisibility, never>) => Omit<ModelFieldDefinition<unknown, string, PageVisibility, never>, NonOverridableProps>);
+    overrides?: Partial<Omit<ModelFieldDefinitionUnknown, NonOverridableProps>> | ((original: ModelFieldDefinitionUnknown) => Omit<ModelFieldDefinitionUnknown, NonOverridableProps>);
     /**
      * Focus the field's control when it mounts, e.g. the field a form should start in
      * @remarks Like the `autoFocus` attribute: it applies when the control mounts, so
@@ -25,6 +25,6 @@ export interface FormFieldContextType<T> extends ModelRenderParams<T> {
 }
 export declare const FormFieldContext: React.Context<FormFieldContextType<unknown> | null>;
 export declare const useFormFieldContext: <T>() => FormFieldContextType<T>;
-export declare const useFieldRelationModel: (fieldDef: ModelFieldDefinition<unknown, string, PageVisibility, never>) => import("../..").Model<string, PageVisibility, unknown> | undefined;
+export declare const useFieldRelationModel: (fieldDef: ModelFieldDefinitionUnknown) => ModelUnknown | undefined;
 declare const _default: React.MemoExoticComponent<(props: FieldProps) => React.ReactElement>;
 export default _default;

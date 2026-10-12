@@ -1,6 +1,6 @@
 import React from "react";
 import { MultiImageImage, MultiImageProps } from "../../standalone/FileUpload/MultiImage/MultiImage";
-import { Connector, PageVisibility } from "../../backend-integration";
+import { Connector } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 export interface CrudMultiImageProps extends Omit<MultiImageProps, "images" | "onChange"> {
     /**
@@ -16,7 +16,7 @@ export interface CrudMultiImageProps extends Omit<MultiImageProps, "images" | "o
     /**
      * The backend connector used as CRUD interface
      */
-    connector: Connector<string, PageVisibility, unknown>;
+    connector: Connector;
     /**
      * The error component that is used to display errors
      */

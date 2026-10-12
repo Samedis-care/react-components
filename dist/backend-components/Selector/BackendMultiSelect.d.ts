@@ -1,17 +1,17 @@
 import React from "react";
 import { MultiSelectProps, MultiSelectorData, SelectorLruOptions } from "../../standalone";
-import Model, { ModelFieldName, PageVisibility } from "../../backend-integration/Model/Model";
+import { ModelRecord, ModelUnknown } from "../../backend-integration/Model/Model";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 export type BackendMultiSelectLruOptions<DataT extends MultiSelectorData> = Omit<SelectorLruOptions<DataT>, "loadData">;
-export interface BackendMultiSelectProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData> extends Omit<MultiSelectProps<DataT>, "onLoad" | "selected" | "onSelect" | "lru"> {
+export interface BackendMultiSelectProps<M extends ModelUnknown, DataT extends MultiSelectorData> extends Omit<MultiSelectProps<DataT>, "onLoad" | "selected" | "onSelect" | "lru"> {
     /**
      * The model to use
      */
-    model: Model<KeyT, VisibilityT, CustomT>;
+    model: M;
     /**
      * The model to use for fetch requests (to enable request batching)
      */
-    modelFetch?: Model<KeyT, VisibilityT, CustomT>;
+    modelFetch?: M;
     /**
      * Disable the use of request batching
      */
@@ -25,7 +25,7 @@ export interface BackendMultiSelectProps<KeyT extends ModelFieldName, Visibility
      * Callback that converts the model data to the actual data displayed in the selector
      * @param modelData The model data
      */
-    modelToSelectorData: (modelData: Record<string, unknown>) => Promise<DataT> | DataT;
+    modelToSelectorData: (modelData: ModelRecord<M>) => Promise<DataT> | DataT;
     /**
      * The amount of search results to load (defaults to 25)
      */
@@ -43,7 +43,7 @@ export interface BackendMultiSelectProps<KeyT extends ModelFieldName, Visibility
     /**
      * Initial data (model format) used for selected cache
      */
-    initialData?: Record<string, unknown>[];
+    initialData?: ModelRecord<M>[];
     /**
      * Sort settings
      */
@@ -74,17 +74,17 @@ interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
      */
     handleSelect: (selected: DataT[]) => void;
 }
-export declare const useSelectedCache: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: Pick<BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>, "model" | "modelFetch" | "disableRequestBatching" | "modelToSelectorData" | "onSelect" | "selected" | "initialData" | "onLoadError">) => UseSelectedCacheResult<DataT>;
+export declare const useSelectedCache: <M extends ModelUnknown, DataT extends MultiSelectorData>(props: Pick<BackendMultiSelectProps<M, DataT>, "model" | "modelFetch" | "disableRequestBatching" | "modelToSelectorData" | "onSelect" | "selected" | "initialData" | "onLoadError">) => UseSelectedCacheResult<DataT>;
 /**
  * Themable subset of BackendMultiSelectProps (used for theme defaultProps)
  * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)
  */
-export type BackendMultiSelectThemeProps = Omit<BackendMultiSelectProps<ModelFieldName, PageVisibility, unknown, MultiSelectorData>, "model" | "modelFetch" | "modelToSelectorData" | "selected" | "onSelect" | "initialData" | "lru">;
+export type BackendMultiSelectThemeProps = Omit<BackendMultiSelectProps<ModelUnknown, MultiSelectorData>, "model" | "modelFetch" | "modelToSelectorData" | "selected" | "onSelect" | "initialData" | "lru">;
 /**
  * Backend connected MultiSelect
  * @remarks Doesn't support custom data
  * @constructor
  */
-declare const BackendMultiSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(inProps: BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>) => React.JSX.Element;
+declare const BackendMultiSelect: <M extends ModelUnknown, DataT extends MultiSelectorData>(inProps: BackendMultiSelectProps<M, DataT>) => React.JSX.Element;
 declare const _default: typeof BackendMultiSelect;
 export default _default;

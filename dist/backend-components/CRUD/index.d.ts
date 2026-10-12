@@ -1,5 +1,5 @@
 import React from "react";
-import Model, { ModelFieldName, PageVisibility } from "../../backend-integration/Model/Model";
+import { ModelUnknown } from "../../backend-integration/Model/Model";
 import { BackendDataGridProps } from "../DataGrid";
 import { FormProps } from "../Form";
 import { Permission } from "../../framework";
@@ -27,34 +27,34 @@ export interface CrudFormProps {
 export interface GridWrapperProps {
     children: React.ReactNode;
 }
-export interface CrudProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> {
+export interface CrudProps<M extends ModelUnknown> {
     /**
      * The model to use
      */
-    model: Model<KeyT, VisibilityT, CustomT>;
+    model: M;
     /**
      * The properties to pass to form
      */
-    formProps: Omit<FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>, "id" | "model" | "children" | "customProps" | "disableRouting" | "readOnly" | "readOnlyReason"> & {
+    formProps: Omit<FormProps<M, CrudFormProps>, "id" | "model" | "children" | "customProps" | "disableRouting" | "readOnly" | "readOnlyReason"> & {
         /**
          * override for default form custom props passed in by CRUD component
          */
-        customProps?: FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>["customProps"];
+        customProps?: FormProps<M, CrudFormProps>["customProps"];
     };
     /**
      * The renderer function which returns the form component
      * @remarks Can be set to undefined to only render the Grid
      */
-    children: FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>["children"] | undefined;
+    children: FormProps<M, CrudFormProps>["children"] | undefined;
     /**
      * The properties to pass to grid
      * @remarks onAddNew can be used to overCrudImportTypewrite the new button action
      */
-    gridProps: Omit<BackendDataGridProps<KeyT, VisibilityT, CustomT>, "model" | "enableDelete" | "disableExport" | "onEdit" | "forceRefreshToken" | "onAddNew"> & Pick<Partial<BackendDataGridProps<KeyT, VisibilityT, CustomT>>, never> & {
+    gridProps: Omit<BackendDataGridProps<M>, "model" | "enableDelete" | "disableExport" | "onEdit" | "forceRefreshToken" | "onAddNew"> & Pick<Partial<BackendDataGridProps<M>>, never> & {
         onAddNew?: ((showNew: () => void) => void) | string | (Omit<IDataGridAddButton, "onClick"> & {
             onClick: ((showNew: () => void) => void) | undefined;
         })[];
-        forceAddNew?: BackendDataGridProps<KeyT, VisibilityT, CustomT>["onAddNew"];
+        forceAddNew?: BackendDataGridProps<M>["onAddNew"];
     };
     /**
      * Component wrapping the DataGrid
@@ -63,7 +63,7 @@ export interface CrudProps<KeyT extends ModelFieldName, VisibilityT extends Page
     /**
      * Custom BackendDataGrid component
      */
-    gridComponent?: React.ComponentType<BackendDataGridProps<KeyT, VisibilityT, CustomT>>;
+    gridComponent?: React.ComponentType<BackendDataGridProps<M>>;
     /**
      * The record delete permission
      */
@@ -126,27 +126,27 @@ export interface CrudProps<KeyT extends ModelFieldName, VisibilityT extends Page
     /**
      * Import config (should be set if enableUserImport set)
      */
-    importConfig?: CrudImportProps<KeyT, VisibilityT, CustomT>["importConfig"];
+    importConfig?: CrudImportProps<M>["importConfig"];
     /**
      * Import update key (primary key substitute)
      */
-    importUpdateKey?: CrudImportProps<KeyT, VisibilityT, CustomT>["updateKey"];
+    importUpdateKey?: CrudImportProps<M>["updateKey"];
     /**
      * Additional filters to be sent when doing update key index requests
      */
-    importUpdateKeyAdditionalFilters?: CrudImportProps<KeyT, VisibilityT, CustomT>["updateKeyAdditionalFilters"];
+    importUpdateKeyAdditionalFilters?: CrudImportProps<M>["updateKeyAdditionalFilters"];
     /**
      * How-to information for the import
      */
-    importHowTo?: CrudImportProps<KeyT, VisibilityT, CustomT>["howTo"];
+    importHowTo?: CrudImportProps<M>["howTo"];
     /**
      * Additional record validation for imported records
      */
-    importValidate?: CrudImportProps<KeyT, VisibilityT, CustomT>["validate"];
+    importValidate?: CrudImportProps<M>["validate"];
     /**
      * Custom Import UI
      */
-    importUI?: React.ComponentType<CrudImportProps<KeyT, VisibilityT, CustomT>>;
+    importUI?: React.ComponentType<CrudImportProps<M>>;
     /**
      * Callback called when goBack is called in form (returning from form to data grid)
      */
@@ -175,6 +175,6 @@ export interface CrudDispatch {
 }
 export declare const useCrudDispatchContext: () => CrudDispatch;
 export declare const CrudSpecialIds: string[];
-export type CrudType = <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: CrudProps<KeyT, VisibilityT, CustomT> & React.RefAttributes<CrudDispatch>) => React.ReactElement | null;
+export type CrudType = <M extends ModelUnknown>(props: CrudProps<M> & React.RefAttributes<CrudDispatch>) => React.ReactElement | null;
 declare const _default: CrudType;
 export default _default;

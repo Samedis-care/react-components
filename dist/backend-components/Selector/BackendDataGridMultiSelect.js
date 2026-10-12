@@ -60,9 +60,7 @@ const BackendDataGridMultiSelect = (props) => {
                     rowsFiltered: dataMeta.filteredRows != null
                         ? relationshipRecordFilteredCount + dataMeta.totalRows
                         : undefined,
-                    rows: relationshipRecordsFiltered
-                        .concat(dataRecords)
-                        .map(renderDataGridRecordUsingModel(model, refreshGrid)),
+                    rows: [...relationshipRecordsFiltered, ...dataRecords].map(renderDataGridRecordUsingModel(model, refreshGrid)),
                 };
             } }) }));
 };

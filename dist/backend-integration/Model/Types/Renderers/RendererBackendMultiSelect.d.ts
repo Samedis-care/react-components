@@ -1,5 +1,5 @@
 import React from "react";
-import { ModelFieldName, ModelIdFilterData, PageVisibility } from "../../Model";
+import { ModelIdFilterData, ModelUnknown } from "../../Model";
 import ModelRenderParams from "../../RenderParams";
 import { MultiSelectorData } from "../../../../standalone";
 import { FormBackendMultiSelectProps } from "../../../../backend-components/Selector/FormSelectors";
@@ -8,10 +8,10 @@ type OmitProperties = "selected" | "onSelect" | "disabled" | "model" | "initialD
 /**
  * Renders TypeEnum as drop-down selector (with search)
  */
-declare class RendererBackendMultiSelect<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> extends TypeIds {
+declare class RendererBackendMultiSelect<M extends ModelUnknown> extends TypeIds {
     idFilter?: ModelIdFilterData;
     private readonly props;
-    constructor(props: Omit<FormBackendMultiSelectProps<KeyT, VisibilityT, CustomT, MultiSelectorData>, OmitProperties>);
+    constructor(props: Omit<FormBackendMultiSelectProps<M, MultiSelectorData>, OmitProperties>);
     render(params: ModelRenderParams<string[]>): React.ReactElement;
 }
 export default RendererBackendMultiSelect;

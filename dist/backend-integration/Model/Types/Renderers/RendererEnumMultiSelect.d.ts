@@ -6,9 +6,9 @@ export type RendererEnumMultiSelectProps = Omit<MultiSelectProps<MultiSelectorDa
 /**
  * Renders TypeEnumMulti as selector
  */
-declare class RendererEnumMultiSelect extends TypeEnumMulti {
+declare class RendererEnumMultiSelect<T extends string = string> extends TypeEnumMulti<T> {
     props?: RendererEnumMultiSelectProps;
-    constructor(values: AdvancedMultiEnumValue[], props?: RendererEnumMultiSelectProps);
-    render(params: ModelRenderParams<string[]>): React.ReactElement;
+    constructor(values: AdvancedMultiEnumValue<T>[], props?: RendererEnumMultiSelectProps);
+    render(params: ModelRenderParams<T[]>): React.ReactElement;
 }
 export default RendererEnumMultiSelect;

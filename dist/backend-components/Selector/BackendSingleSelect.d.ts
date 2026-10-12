@@ -1,17 +1,17 @@
 import React from "react";
 import { BaseSelectorData, BaseSelectorProps, SelectorLruOptions } from "../../standalone";
-import Model, { ModelFieldName, PageVisibility } from "../../backend-integration/Model/Model";
+import { ModelRecord, ModelUnknown } from "../../backend-integration/Model/Model";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 export type BackendSingleSelectLruOptions<DataT extends BaseSelectorData> = Omit<SelectorLruOptions<DataT>, "loadData">;
-export interface BackendSingleSelectProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> extends Omit<BaseSelectorProps<BaseSelectorData, false>, "onLoad" | "selected" | "onSelect" | "lru"> {
+export interface BackendSingleSelectProps<M extends ModelUnknown> extends Omit<BaseSelectorProps<BaseSelectorData, false>, "onLoad" | "selected" | "onSelect" | "lru"> {
     /**
      * The model to use
      */
-    model: Model<KeyT, VisibilityT, CustomT>;
+    model: M;
     /**
      * The model to use for fetch requests (to enable request batching)
      */
-    modelFetch?: Model<KeyT, VisibilityT, CustomT>;
+    modelFetch?: M;
     /**
      * The debounce time for search in ms
      * @default 500
@@ -21,7 +21,7 @@ export interface BackendSingleSelectProps<KeyT extends ModelFieldName, Visibilit
      * Callback that converts the model data to the actual data displayed in the selector
      * @param modelData The model data
      */
-    modelToSelectorData: (modelData: Record<string, unknown>) => Promise<BaseSelectorData> | BaseSelectorData;
+    modelToSelectorData: (modelData: ModelRecord<M>) => Promise<BaseSelectorData> | BaseSelectorData;
     /**
      * The amount of search results to load (defaults to 25)
      */
@@ -42,7 +42,7 @@ export interface BackendSingleSelectProps<KeyT extends ModelFieldName, Visibilit
     /**
      * Initial data (model format) used for selected cache
      */
-    initialData?: Record<string, unknown>[];
+    initialData?: ModelRecord<M>[];
     /**
      * LRU settings
      */
@@ -72,7 +72,7 @@ export interface BackendSingleSelectProps<KeyT extends ModelFieldName, Visibilit
  * Themable subset of BackendSingleSelectProps (used for theme defaultProps)
  * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)
  */
-export type BackendSingleSelectThemeProps = Omit<BackendSingleSelectProps<ModelFieldName, PageVisibility, unknown>, "model" | "modelFetch" | "modelToSelectorData" | "selected" | "onSelect" | "initialData" | "lru" | "selectedFreeSolo" | "onSelectFreeSolo">;
-declare const BackendSingleSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(inProps: BackendSingleSelectProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
+export type BackendSingleSelectThemeProps = Omit<BackendSingleSelectProps<ModelUnknown>, "model" | "modelFetch" | "modelToSelectorData" | "selected" | "onSelect" | "initialData" | "lru" | "selectedFreeSolo" | "onSelectFreeSolo">;
+declare const BackendSingleSelect: <M extends ModelUnknown>(inProps: BackendSingleSelectProps<M>) => React.JSX.Element;
 declare const _default: typeof BackendSingleSelect;
 export default _default;

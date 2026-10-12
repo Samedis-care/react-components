@@ -1,12 +1,11 @@
 import React from "react";
-import { ModelFieldName, PageVisibility } from "../../backend-integration";
+import { ModelUnknown } from "../../backend-integration";
 import { DataGridProps } from "../../standalone/DataGrid/DataGrid";
-import Model from "../../backend-integration/Model/Model";
-export interface BackendDataGridMultiSelectProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> extends Omit<DataGridProps, "columns" | "loadData" | "disableSelection" | "prohibitMultiSelect" | "customSelectionControl" | "onSelectionChange" | "selection"> {
+export interface BackendDataGridMultiSelectProps<M extends ModelUnknown> extends Omit<DataGridProps, "columns" | "loadData" | "disableSelection" | "prohibitMultiSelect" | "customSelectionControl" | "onSelectionChange" | "selection"> {
     /**
      * The model to load data from
      */
-    model: Model<KeyT, VisibilityT, CustomT>;
+    model: M;
     /**
      * Selection read only?
      */
@@ -22,6 +21,6 @@ export interface BackendDataGridMultiSelectProps<KeyT extends ModelFieldName, Vi
      */
     onChange: (selected: string[]) => void;
 }
-declare const BackendDataGridMultiSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: BackendDataGridMultiSelectProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
+declare const BackendDataGridMultiSelect: <M extends ModelUnknown>(props: BackendDataGridMultiSelectProps<M>) => React.JSX.Element;
 declare const _default: typeof BackendDataGridMultiSelect;
 export default _default;

@@ -10,7 +10,9 @@ const CrudMultiSelectWithGroups = (props, ref) => {
         return _jsx(Loader, {});
     if (loadError)
         return _jsx("span", { children: loadError.message });
-    return (_jsxs(_Fragment, { children: [error && _jsx(ErrorComponent, { error: error }), _jsx(BackendMultiSelectWithTags, { ...props, selected: selected.map((entry) => entry.value), onChange: handleSelect, convData: modelToSelectorData, initialData: initialRawData })] }));
+    return (_jsxs(_Fragment, { children: [error && _jsx(ErrorComponent, { error: error }), _jsx(BackendMultiSelectWithTags, { ...props, selected: selected.map((entry) => entry.value), onChange: handleSelect, convData: modelToSelectorData, 
+                // the connector's records seed the selected cache: modelToSelectorData tells them apart
+                initialData: initialRawData })] }));
 };
 const ForwardedCrudMultiSelectWithGroups = React.forwardRef(CrudMultiSelectWithGroups);
 export default React.memo(ForwardedCrudMultiSelectWithGroups);
