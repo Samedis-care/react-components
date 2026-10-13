@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
 	DataGridPersistedData,
 	DataGridPersistentState,
@@ -35,12 +35,23 @@ export const DATA_GRID_STORAGE_KEY_FILTERS =
  * A persistence provider for DataGrid.
  * Uses storage manager for storage.
  * Wrap around DataGrid component to archive persistence
+ * @remarks The data it provides is what was written last, so a grid mounted
+ *          later (or anything else reading the context) starts from the
+ *          current state, not from the state loaded on mount
  */
 const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 	const { storageKeys, children } = props;
+	const storageKeysJson = JSON.stringify(storageKeys);
+
+	// the storage is only read once per storage keys, so what was written since
+	// is kept here, together with the keys it was written for
+	const [written, setWritten] = useState<
+		[string, DataGridPersistentState] | null
+	>(null);
 
 	const setData = useCallback(
 		async (data: DataGridPersistentState) => {
+			setWritten([storageKeysJson, data]);
 			const [sizing, rest] = splitPersistedState(data);
 			await Promise.all([
 				Promise.resolve(
@@ -60,7 +71,7 @@ const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 			]);
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[JSON.stringify(storageKeys)],
+		[storageKeysJson],
 	);
 
 	// wrapped in a tuple so "loaded, but nothing stored" stays distinguishable
@@ -92,11 +103,16 @@ const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 			),
 		);
 		return [mergePersistedState(resultObjects)];
-	}, [JSON.stringify(storageKeys)]);
+	}, [storageKeysJson]);
 
-	const persistCtx = useMemo(() => {
-		return [data?.[0], setData] as DataGridPersistentStateContextType;
-	}, [data, setData]);
+	const persistCtx = useMemo(
+		() =>
+			[
+				written?.[0] === storageKeysJson ? written[1] : data?.[0],
+				setData,
+			] as DataGridPersistentStateContextType,
+		[written, storageKeysJson, data, setData],
+	);
 
 	if (!data) return <Loader />;
 	return (

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
 	DataGridPersistedData,
 	DataGridPersistentState,
@@ -21,12 +21,22 @@ export interface LocalStoragePersistProps {
  * A persistence provider for DataGrid.
  * Uses localStorage for storage.
  * Wrap around DataGrid component to archive persistence
+ * @remarks The data it provides is what was written last, so a grid mounted
+ *          later (or anything else reading the context) starts from the
+ *          current state, not from the state loaded on mount
  */
 const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 	const { storageKey, children } = props;
 
+	// localStorage is only read once per storage key, so what was written since
+	// is kept here, together with the key it was written for
+	const [written, setWritten] = useState<
+		[string, DataGridPersistentState] | null
+	>(null);
+
 	const setData = useCallback(
 		(data: DataGridPersistentState) => {
+			setWritten([storageKey, data]);
 			try {
 				localStorage?.setItem(storageKey, JSON.stringify(data));
 			} catch (e) {
@@ -41,7 +51,7 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 		[storageKey],
 	);
 
-	const persistCtx = useMemo(() => {
+	const stored = useMemo(() => {
 		const dataStr = localStorage?.getItem(storageKey);
 		let data: DataGridPersistedData | undefined;
 		if (dataStr) {
@@ -58,8 +68,17 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 				localStorage?.removeItem(storageKey);
 			}
 		}
-		return [data, setData] as DataGridPersistentStateContextType;
-	}, [setData, storageKey]);
+		return data;
+	}, [storageKey]);
+
+	const persistCtx = useMemo(
+		() =>
+			[
+				written?.[0] === storageKey ? written[1] : stored,
+				setData,
+			] as DataGridPersistentStateContextType,
+		[written, storageKey, stored, setData],
+	);
 
 	return (
 		<DataGridPersistentStateContext.Provider value={persistCtx}>

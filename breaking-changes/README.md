@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-10-13 | [DataGrid persistence provides the latest state](2026-10-13-data-grid-persist-provides-latest-state.md) | behavior |
 | 2026-10-13 | [The checkbox box reaches 3:1](2026-10-13-checkbox-box-reaches-3-to-1.md) | behavior |
 | 2026-10-12 | [Enum types are typed by their values](2026-10-12-enum-types-generic.md) | type, behavior |
 | 2026-10-12 | [Signature values can be null](2026-10-12-signature-values-nullable.md) | type |
