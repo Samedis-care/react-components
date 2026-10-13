@@ -5,6 +5,7 @@
  * @param executor The executor function
  * @param progressCb Optional progress callback, will be called after each item done, make sure it's fast.
  * @return A promise with a tuple of results (first element) and errors (second element).
+ * Every record is executed, an executor error does not reject the promise but ends up in the errors array.
  * The result and error arrays may contain undefined elements, but for the same index one of them will be defined.
  * Example:
  * results: [result1, undefined, result3]
