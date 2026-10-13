@@ -14,9 +14,17 @@ const StyledCheckbox = styled(MuiCheckbox, {
 	"& > svg": {
 		borderWidth: "1px",
 		borderStyle: "solid",
-		borderColor: theme.palette.divider,
-		borderRadius: "2px",
+		// the colour of MUI's input underline: the least contrast (3:1) a
+		// control's boundary needs against a white paper
+		borderColor:
+			theme.palette.mode === "dark"
+				? "rgba(255, 255, 255, 0.7)"
+				: "rgba(0, 0, 0, 0.42)",
+		borderRadius: theme.shape.borderRadius,
 		backgroundColor: theme.palette.background.paper,
+	},
+	"&.Mui-disabled > svg": {
+		borderColor: theme.palette.action.disabled,
 	},
 }));
 

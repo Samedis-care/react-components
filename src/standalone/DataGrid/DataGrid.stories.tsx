@@ -200,6 +200,21 @@ export const WithSelection: Story = {
 			/>
 		);
 	},
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		// the cell hides its children's overflow, so the checkbox root clips
+		// the row's box: a round root would cut it down to a circle, and one
+		// rounder than the box would cut through the box's border
+		const root = canvasElement.querySelector(
+			".CcDataGrid-dataCell .MuiCheckbox-root",
+		);
+		await expect(getComputedStyle(root).overflow).toBe("hidden");
+		// the theme's shape radius (4px) instead of MUI's round root
+		await expect(getComputedStyle(root).borderTopLeftRadius).toBe("4px");
+		await expect(
+			getComputedStyle(root.querySelector(":scope > svg")).borderTopLeftRadius,
+		).toBe("4px");
+	},
 };
 
 export const WithActions: Story = {

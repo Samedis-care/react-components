@@ -17,7 +17,7 @@ import NumberFormatter from "./NumberFormatter";
 import CenteredTypography from "./CenteredTypography";
 import Checkbox from "./Checkbox";
 import { TextFieldCC } from "./MuiFieldState";
-import { Button } from "@mui/material";
+import { Button, decomposeColor, getContrastRatio } from "@mui/material";
 
 // ---- ActionButton ----
 
@@ -211,12 +211,37 @@ export const CenteredTypographyStory: ActionButtonStory = {
 	),
 };
 
+// an enabled box's border reaches WCAG 1.4.11's 3:1 against the box
+const expectBoxBoundaryContrast: ActionButtonStory["play"] = async ({
+	canvas,
+}) => {
+	const root = canvas.getByRole("checkbox").parentElement;
+	const { borderTopColor, backgroundColor } = getComputedStyle(
+		root.querySelector(":scope > svg"),
+	);
+	const [r, g, b, a = 1] = decomposeColor(borderTopColor).values;
+	const background = decomposeColor(backgroundColor).values;
+	const over = (channel: number, i: number) =>
+		Math.round(channel * a + background[i] * (1 - a));
+	const border = `rgb(${over(r, 0)}, ${over(g, 1)}, ${over(b, 2)})`;
+	await expect(
+		getContrastRatio(border, backgroundColor),
+	).toBeGreaterThanOrEqual(3);
+};
+
 export const CheckboxUnchecked: ActionButtonStory = {
 	render: () => <Checkbox />,
+	play: expectBoxBoundaryContrast,
 };
 
 export const CheckboxChecked: ActionButtonStory = {
 	render: () => <Checkbox checked />,
+	play: expectBoxBoundaryContrast,
+};
+
+export const CheckboxIndeterminate: ActionButtonStory = {
+	render: () => <Checkbox indeterminate />,
+	play: expectBoxBoundaryContrast,
 };
 
 export const CheckboxDisabled: ActionButtonStory = {

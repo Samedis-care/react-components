@@ -872,9 +872,13 @@ export const DataGridCustomFilterContainer = styled(Grid, {
 export const DataGridSelectCheckbox = styled(Checkbox, {
 	name: "CcDataGrid",
 	slot: "selectCheckbox",
-})({
+})(({ theme }) => ({
 	padding: 0,
-}) as unknown as typeof Checkbox;
+	// without padding the root is the box, and the data cell hides its
+	// children's overflow: the root clips the box, so it takes the box's
+	// corners (a round root would clip the box to a circle)
+	borderRadius: theme.shape.borderRadius,
+})) as unknown as typeof Checkbox;
 
 export const DataGridSelectAllCheckbox = styled(Checkbox, {
 	name: "CcDataGrid",
