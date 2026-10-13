@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { DataGridPersistentStateContext, } from "./StatePersistence";
 import { mergePersistedState, splitPersistedState } from "./PersistFormat";
 import { StorageManager } from "../../framework/Storage";
@@ -14,10 +14,18 @@ export const DATA_GRID_STORAGE_KEY_FILTERS = DATA_GRID_STORAGE_KEY_BASE + "filte
  * A persistence provider for DataGrid.
  * Uses storage manager for storage.
  * Wrap around DataGrid component to archive persistence
+ * @remarks The data it provides is what was written last, so a grid mounted
+ *          later (or anything else reading the context) starts from the
+ *          current state, not from the state loaded on mount
  */
 const StorageManagerPersist = (props) => {
     const { storageKeys, children } = props;
+    const storageKeysJson = JSON.stringify(storageKeys);
+    // the storage is only read once per storage keys, so what was written since
+    // is kept here, together with the keys it was written for
+    const [written, setWritten] = useState(null);
     const setData = useCallback(async (data) => {
+        setWritten([storageKeysJson, data]);
         const [sizing, rest] = splitPersistedState(data);
         await Promise.all([
             Promise.resolve(StorageManager.setItem(DATA_GRID_STORAGE_KEY_COLUMN_SIZING, storageKeys, JSON.stringify(sizing))),
@@ -25,7 +33,7 @@ const StorageManagerPersist = (props) => {
         ]);
     }, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify(storageKeys)]);
+    [storageKeysJson]);
     // wrapped in a tuple so "loaded, but nothing stored" stays distinguishable
     // from "still loading" (useAsyncMemo yields null while it runs)
     const data = useAsyncMemo(async () => {
@@ -45,10 +53,11 @@ const StorageManagerPersist = (props) => {
             }
         }));
         return [mergePersistedState(resultObjects)];
-    }, [JSON.stringify(storageKeys)]);
-    const persistCtx = useMemo(() => {
-        return [data?.[0], setData];
-    }, [data, setData]);
+    }, [storageKeysJson]);
+    const persistCtx = useMemo(() => [
+        written?.[0] === storageKeysJson ? written[1] : data?.[0],
+        setData,
+    ], [written, storageKeysJson, data, setData]);
     if (!data)
         return _jsx(Loader, {});
     return (_jsx(DataGridPersistentStateContext.Provider, { value: persistCtx, children: children }));
