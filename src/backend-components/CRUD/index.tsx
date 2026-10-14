@@ -22,7 +22,11 @@ import {
 import { CrudImportProps, CrudImportType } from "./Import";
 import Loader from "../../standalone/Loader";
 import throwError from "../../utils/throwError";
-import { IDataGridAddButton } from "../../standalone/DataGrid/DataGrid";
+import {
+	DataGridDispatch,
+	DataGridQuery,
+	IDataGridAddButton,
+} from "../../standalone/DataGrid/DataGrid";
 import useNavigate from "../../standalone/Routes/useNavigate";
 import Route, { RouteContext, RouteProps } from "../../standalone/Routes/Route";
 import useLocation from "../../standalone/Routes/useLocation";
@@ -118,8 +122,12 @@ export interface CrudProps<M extends ModelUnknown> {
 	gridWrapper?: React.ComponentType<GridWrapperProps>;
 	/**
 	 * Custom BackendDataGrid component
+	 * @remarks It gets a ref, which it has to pass on to BackendDataGrid for
+	 *          CrudDispatch.getGridQuery
 	 */
-	gridComponent?: React.ComponentType<BackendDataGridProps<M>>;
+	gridComponent?: React.ComponentType<
+		BackendDataGridProps<M> & React.RefAttributes<DataGridDispatch>
+	>;
 	/**
 	 * The record delete permission
 	 */
@@ -244,6 +252,13 @@ export interface CrudDispatch {
 		id: "import" | "devimport" | "new" | string,
 		forceRefresh?: boolean,
 	) => void;
+	/**
+	 * The query the grid currently shows
+	 * @returns The query, see DataGridDispatch.getQuery, or undefined while the
+	 *          grid isn't mounted (disableBackgroundGrid with a form open) or
+	 *          if the gridComponent doesn't pass its ref on
+	 */
+	getGridQuery: () => DataGridQuery | undefined;
 }
 
 const CrudDispatchContext = React.createContext<CrudDispatch | undefined>(
@@ -335,6 +350,9 @@ const CRUD = <M extends ModelUnknown>(
 		setGridRefreshToken(new Date().getTime().toString());
 	}, []);
 
+	const gridRef = useRef<DataGridDispatch>(null);
+	const getGridQuery = useCallback(() => gridRef.current?.getQuery(), []);
+
 	const showOverview = useCallback(
 		(forceRefresh?: boolean) => {
 			if (goBackCallback) goBackCallback();
@@ -408,6 +426,7 @@ const CRUD = <M extends ModelUnknown>(
 		<Suspense fallback={<Loader />}>
 			<GridWrapper>
 				<MyBackendDataGrid
+					ref={gridRef}
 					enableDelete={hasPermission(perms, props.deletePermission)}
 					disableDeleteHint={props.deletePermissionHint}
 					disableExport={!hasPermission(perms, props.exportPermission)}
@@ -524,8 +543,9 @@ const CRUD = <M extends ModelUnknown>(
 			refreshGrid,
 			openView,
 			showOverview,
+			getGridQuery,
 		}),
-		[refreshGrid, openView, showOverview],
+		[refreshGrid, openView, showOverview, getGridQuery],
 	);
 
 	useImperativeHandle(ref, () => dispatch, [dispatch]);

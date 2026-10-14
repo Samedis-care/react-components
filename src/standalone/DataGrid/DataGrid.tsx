@@ -37,11 +37,7 @@ import debounce from "../../utils/debounce";
 import isObjectEmpty from "../../utils/isObjectEmpty";
 import measureText from "../../utils/measureText";
 import shallowCompareArray from "../../utils/shallowCompareArray";
-import {
-	dataGridApplyRowUpdate,
-	dataGridGetFilterParameters,
-	dataGridPrepareFiltersAndSorts,
-} from "./CallbackUtil";
+import { dataGridApplyRowUpdate, dataGridGetQuery } from "./CallbackUtil";
 import { ModelFilterType, ModelUnknown } from "../../backend-integration/Model";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
 import CustomFilterDialog from "./CustomFilterDialog";
@@ -95,7 +91,9 @@ export interface DataGridProps
 	 *   user has already seen (columns added later start out with the hidden and
 	 *   pinned state from their definition)
 	 * - sort: sorting state
-	 * - filters: customData, search, column filter
+	 * - filters: customData, search, column filter. What an override
+	 *   (overrideCustomData, overrideFilter) replaced stays persisted as it was
+	 *   stored until the filters are reset.
 	 * @default ["columns", "sort", "filters"]
 	 */
 	persist?: ("columns" | "sort" | "filters")[];
@@ -193,6 +191,12 @@ export type DataGridFilterParameters = Pick<
 	"quickFilter" | "additionalFilters" | "fieldFilter"
 >;
 
+/**
+ * Which rows the grid shows and in which order: the load data parameters
+ * without the paging
+ */
+export type DataGridQuery = Omit<IDataGridLoadDataParameters, "page" | "rows">;
+
 export interface IDataGridCallbacks {
 	/**
 	 * Loads data for the grid
@@ -225,6 +229,8 @@ export interface IDataGridCallbacks {
 	defaultCustomData?: Record<string, unknown>;
 	/**
 	 * Forced initial values for custom data (overwrites persisted custom data)
+	 * @remarks They are not persisted: until the user resets the filters, the
+	 *          grid keeps persisting the custom data which was stored
 	 */
 	overrideCustomData?: Record<string, unknown>;
 	/**
@@ -394,6 +400,8 @@ export interface IDataGridColumnProps {
 	defaultFilter?: DataGridFilterSetting[];
 	/**
 	 * The column filter settings override (disables all filters if set)
+	 * @remarks It is not persisted: until the user resets the filters, the
+	 *          grid keeps persisting the column filters which were stored
 	 */
 	overrideFilter?: DataGridFilterSetting[];
 	/**
@@ -567,6 +575,14 @@ export interface DataGridDispatch {
 	 *          forceRefreshToken) loads the row from loadData again and overwrites it.
 	 */
 	updateRow: (id: string, update: DataGridRowUpdate) => void;
+	/**
+	 * The query the grid currently shows, as loadData gets it (without the
+	 * paging), including what an override set
+	 * @remarks Use this to work with the rows the user sees: the persisted
+	 *          state (DataGridPersistentStateContext) is what the grid restores
+	 *          next time, which doesn't include an override
+	 */
+	getQuery: () => DataGridQuery;
 }
 
 export interface IDataGridState {
@@ -651,6 +667,13 @@ export interface IDataGridState {
 	 * Initially resized?
 	 */
 	initialResize: boolean;
+	/**
+	 * Was the grid opened with an override (DataGridProps.overrideFilter,
+	 * overrideCustomData), and have its filters not been reset since? The parts
+	 * an override replaced then belong to this visit, so the persisted state
+	 * keeps what was stored for them.
+	 */
+	filtersOverridden: boolean;
 }
 
 export const DataGridStateContext = React.createContext<
@@ -758,6 +781,7 @@ export const getDataGridDefaultState = (
 	refreshShouldWipeRows: false,
 	customData: defaultCustomData ?? {},
 	initialResize: false,
+	filtersOverridden: false,
 });
 
 export const getDataGridDefaultColumnsState = (
@@ -1274,6 +1298,7 @@ const DataGrid = (
 			persisted.state.customData ??
 			defaultCustomData ??
 			{},
+		filtersOverridden: overrideFilter != null || overrideCustomData != null,
 	}));
 	const [state, setState] = statePack;
 	const {
@@ -1350,12 +1375,7 @@ const DataGrid = (
 			return;
 		}
 
-		const [sorts] = dataGridPrepareFiltersAndSorts(columnsState);
-		const filter = dataGridGetFilterParameters(
-			state,
-			columnsState,
-			getAdditionalFilters,
-		);
+		const query = dataGridGetQuery(state, columnsState, getAdditionalFilters);
 
 		void (async () => {
 			for (let pageIndex = pages[0]; pageIndex <= pages[1]; pageIndex++) {
@@ -1368,8 +1388,7 @@ const DataGrid = (
 					const data = await loadData({
 						page: pageIndex + 1,
 						rows: rowsPerPage,
-						...filter,
-						sort: sorts,
+						...query,
 					});
 					const dataRowsTotal = data.rowsFiltered ?? data.rowsTotal;
 
@@ -1516,14 +1535,20 @@ const DataGrid = (
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [resetView, search, columnStateHash, customData, forceRefreshToken]);
 
-	// manual row updates
+	// manual row updates, reading the query
 	useImperativeHandle<DataGridDispatch, DataGridDispatch>(
 		ref,
 		() => ({
 			updateRow: (id, update) =>
 				setState((prevState) => dataGridApplyRowUpdate(prevState, id, update)),
+			getQuery: () =>
+				dataGridGetQuery(
+					{ search, customData },
+					columnsState,
+					getAdditionalFilters,
+				),
 		}),
-		[setState],
+		[setState, search, customData, columnsState, getAdditionalFilters],
 	);
 
 	// selection change event

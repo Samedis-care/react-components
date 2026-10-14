@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
 	dataGridApplyRowUpdate,
 	dataGridGetFilterParameters,
+	dataGridGetQuery,
 	dataGridIsCustomDataActionDisabled,
 	dataGridPrepareFiltersAndSorts,
 } from "../../src/standalone/DataGrid/CallbackUtil";
@@ -176,6 +177,31 @@ describe("dataGridGetFilterParameters", () => {
 			dataGridGetFilterParameters(state, columnsState, undefined)
 				.additionalFilters,
 		).toEqual({ "filter[active]": true });
+	});
+});
+
+describe("dataGridGetQuery", () => {
+	const columnsState: IDataGridColumnsState = {
+		name: { sort: 0, filter: makeFilter("contains", "ali") },
+		age: { sort: -1, sortOrder: 2 },
+		role: { sort: 1, sortOrder: 1 },
+	};
+	const state = { search: "müller", customData: { "filter[active]": true } };
+
+	it("returns the filter parameters and the sorts in their order, like loadData gets them", () => {
+		expect(
+			dataGridGetQuery(state, columnsState, (customData) => ({
+				active: customData["filter[active]"],
+			})),
+		).toEqual({
+			quickFilter: "müller",
+			fieldFilter: { name: makeFilter("contains", "ali") },
+			additionalFilters: { active: true },
+			sort: [
+				{ field: "role", direction: 1 },
+				{ field: "age", direction: -1 },
+			],
+		});
 	});
 });
 

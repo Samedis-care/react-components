@@ -1,14 +1,18 @@
-import React, { useContext, useEffect, useMemo, useRef } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
+	DataGridCustomDataType,
 	getDataGridDefaultColumnsState,
+	IDataGridColumnsState,
 	useDataGridColumnState,
 	useDataGridColumnsWidthState,
 	useDataGridProps,
 	useDataGridState,
 } from "./DataGrid";
+import type { IFilterDef } from "./Content/FilterEntry";
 import {
 	DataGridPersistedData,
 	DataGridPersistentState,
+	decodePersistedState,
 	encodePersistedState,
 } from "./PersistFormat";
 
@@ -23,6 +27,10 @@ export type DataGridPersistentStateContextType = [
 	/**
 	 * The persisted data, in whichever format it was written: what the setter
 	 * got last, or what was stored before
+	 * @remarks This is the state a grid restores, not necessarily the one it
+	 *          shows: an override (DataGridProps.overrideFilter,
+	 *          overrideCustomData) isn't persisted. What a grid shows comes
+	 *          from DataGridDispatch.getQuery.
 	 */
 	DataGridPersistedData | undefined,
 	/**
@@ -33,6 +41,39 @@ export type DataGridPersistentStateContextType = [
 export const DataGridPersistentStateContext = React.createContext<
 	DataGridPersistentStateContextType | undefined
 >(undefined);
+
+/**
+ * What the overrides replaced when the grid opened: the stored values, which
+ * are persisted in their place
+ * @see IDataGridState.filtersOverridden
+ */
+interface ReplacedFilters {
+	/**
+	 * The stored custom data, if overrideCustomData replaced it
+	 */
+	customData?: DataGridCustomDataType;
+	/**
+	 * The stored column filters (field -> filter), if overrideFilter replaced
+	 * them
+	 */
+	columnFilter?: Record<string, IFilterDef | undefined>;
+}
+
+/**
+ * The column state with the given column filters in place of its own
+ * @param columnState The column state
+ * @param columnFilter The column filters (field -> filter)
+ */
+const withColumnFilter = (
+	columnState: IDataGridColumnsState,
+	columnFilter: Record<string, IFilterDef | undefined>,
+): IDataGridColumnsState =>
+	Object.fromEntries(
+		Object.entries(columnState).map(([field, entry]) => [
+			field,
+			{ ...entry, filter: columnFilter[field] },
+		]),
+	);
 
 /**
  * Logical component which takes care of optional state persistence for the data grid
@@ -49,12 +90,43 @@ const StatePersistence = () => {
 		columns,
 		defaultSort,
 		defaultFilter,
+		defaultCustomData,
+		overrideFilter,
+		overrideCustomData,
 	} = useDataGridProps();
 
 	const defaultColumnState = useMemo(
 		() => getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter),
 		[columns, defaultSort, defaultFilter],
 	);
+
+	// the grid only applies the overrides when it opens, so this is the moment
+	// to keep what they replaced: what a plain visit would have started with
+	const [replaced] = useState((): ReplacedFilters | null => {
+		if (!setPersisted) return null;
+		if (overrideFilter == null && overrideCustomData == null) return null;
+		const stored = decodePersistedState(
+			persistedContext?.[0],
+			columns,
+			defaultColumnState,
+			config,
+		);
+		return {
+			customData:
+				overrideCustomData != null
+					? (stored.state.customData ?? defaultCustomData ?? {})
+					: undefined,
+			columnFilter:
+				overrideFilter != null
+					? Object.fromEntries(
+							Object.entries(stored.columnState).map(([field, entry]) => [
+								field,
+								entry.filter,
+							]),
+						)
+					: undefined,
+		};
+	});
 
 	// the grid state changes on every page of data loaded, so compare what we'd
 	// write before writing it - persistence may well be a request to a server
@@ -64,9 +136,12 @@ const StatePersistence = () => {
 	useEffect(() => {
 		if (!setPersisted) return;
 
+		const kept = state.filtersOverridden ? replaced : null;
 		const data = encodePersistedState(
-			state,
-			columnState,
+			kept?.customData ? { ...state, customData: kept.customData } : state,
+			kept?.columnFilter
+				? withColumnFilter(columnState, kept.columnFilter)
+				: columnState,
 			columnWidthState,
 			defaultColumnState,
 			columns,
@@ -85,6 +160,7 @@ const StatePersistence = () => {
 		defaultColumnState,
 		columns,
 		config,
+		replaced,
 	]);
 
 	return <></>;

@@ -16,9 +16,11 @@ import type {
 	DataGridCustomDataActionButton,
 	DataGridData,
 	DataGridDispatch,
+	DataGridFilterSetting,
 	IDataGridColumnDef,
 	IDataGridLoadDataParameters,
 } from "./DataGrid";
+import type { DataGridPersistentState } from "./PersistFormat";
 
 // ─── Sample data ────────────────────────────────────────────────────────────
 
@@ -578,5 +580,110 @@ export const NewColumnUsesDefaults: Story = {
 			await expect(stored.shown).toEqual(["name", "age", "active"]);
 			await expect(stored.hidden).toEqual(["role", "internal_note"]);
 		});
+	},
+};
+
+const OVERRIDE_STORAGE_KEY = "cc-storybook-data-grid-override";
+// what the link opening the grid sets: admins only, no column filters
+const OVERRIDE_CUSTOM_DATA = { role: "admin" };
+const OVERRIDE_FILTER: DataGridFilterSetting[] = [];
+
+/**
+ * Opened through a link which shows the admins (overrideCustomData) and clears
+ * the column filters (overrideFilter). The user has saved users only, with a
+ * name filter, and a plain visit still restores that: the grid persists what
+ * was stored in place of the overrides, while the search and everything else
+ * are persisted as usual. "Show query" reads what the grid shows from its ref.
+ * Once the user resets the filters, they are persisted again.
+ */
+export const OverrideIsNotPersisted: Story = {
+	beforeEach: () => {
+		localStorage.setItem(
+			OVERRIDE_STORAGE_KEY,
+			JSON.stringify({
+				v: 2,
+				filter: { name: { type: "contains", value1: "a", value2: "" } },
+				customData: { role: "user" },
+			}),
+		);
+		return () => localStorage.removeItem(OVERRIDE_STORAGE_KEY);
+	},
+	render: () => {
+		const gridRef = useRef<DataGridDispatch>(null);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		const loadData = useCallback(makeLoadData(), []);
+		const [query, setQuery] = useState("");
+		const showQuery = useCallback(
+			() => setQuery(JSON.stringify(gridRef.current?.getQuery())),
+			[],
+		);
+		return (
+			<Box
+				sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+				gap={1}
+			>
+				<Button onClick={showQuery} variant={"contained"}>
+					Show query
+				</Button>
+				<Box component={"pre"} data-testid={"query"} sx={{ m: 0 }}>
+					{query}
+				</Box>
+				<Box sx={{ flexGrow: 1, minHeight: 0 }}>
+					<DataGridLocalStoragePersist storageKey={OVERRIDE_STORAGE_KEY}>
+						<DataGrid
+							ref={gridRef}
+							columns={COLUMNS}
+							loadData={loadData}
+							searchPlaceholder={"Search people"}
+							overrideCustomData={OVERRIDE_CUSTOM_DATA}
+							overrideFilter={OVERRIDE_FILTER}
+						/>
+					</DataGridLocalStoragePersist>
+				</Box>
+			</Box>
+		);
+	},
+	play: async ({ canvas }) => {
+		const stored = () =>
+			JSON.parse(
+				localStorage.getItem(OVERRIDE_STORAGE_KEY) ?? "{}",
+			) as DataGridPersistentState;
+
+		// the link's view: admins, no name filter
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		await expect(canvas.queryByText("Bob Smith")).not.toBeInTheDocument();
+		await userEvent.click(canvas.getByRole("button", { name: "Show query" }));
+		await expect(
+			JSON.parse(canvas.getByTestId("query").textContent ?? "") as unknown,
+		).toEqual({
+			quickFilter: "",
+			additionalFilters: { role: "admin" },
+			fieldFilter: {},
+			sort: [],
+		});
+
+		// the grid has written (widths are new), keeping the user's filters
+		await waitFor(() => expect(stored().width).toBeDefined());
+		await expect(stored().customData).toEqual({ role: "user" });
+		await expect(stored().filter).toEqual({
+			name: { type: "contains", value1: "a", value2: "" },
+		});
+
+		// no override touches the search, so it is the user's own
+		await userEvent.type(canvas.getByPlaceholderText("Search people"), "e");
+		await waitFor(() => expect(stored().search).toBe("e"));
+		await expect(stored().customData).toEqual({ role: "user" });
+
+		// after a reset the filters are the user's own again
+		await userEvent.click(canvas.getByRole("button", { name: "Reset" }));
+		await userEvent.click(
+			await within(document.body).findByRole("menuitem", {
+				name: "Reset filter",
+			}),
+		);
+		await waitFor(() => expect(stored().customData).toEqual({}));
+		await expect(stored().filter).toBeUndefined();
+		await expect(stored().search).toBeUndefined();
+		await expect(await canvas.findByText("Bob Smith")).toBeVisible();
 	},
 };
