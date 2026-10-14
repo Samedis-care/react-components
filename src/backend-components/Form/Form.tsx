@@ -184,6 +184,7 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
 	/**
 	 * Initial record to use (instead of defaults from model)
 	 * @remarks Only loaded if ID is null
+	 * @remarks Read when the record loads, later changes are ignored
 	 */
 	initialRecord?: ModelRecordPartial<M>;
 	/**
@@ -1267,10 +1268,19 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 	// single source of truth for a record's initial form values: the server data
 	// plus initialRecord for new records (records without an id). Used both for the
 	// dirty baseline and to seed the form data, so the two can never diverge.
+	// initialRecord is applied when the server data loads, not when it changes: the
+	// form data was seeded from it then, and after a save the baseline is the saved
+	// record, which a re-rendered initialRecord must not replace
+	const initialRecordRef = useRef(initialRecord);
+	initialRecordRef.current = initialRecord;
 	const buildInitialValues = useCallback(
 		(data: Record<string, unknown>): Record<string, unknown> =>
-			deepAssign({}, data, data.id || !initialRecord ? {} : initialRecord),
-		[initialRecord],
+			deepAssign(
+				{},
+				data,
+				data.id || !initialRecordRef.current ? {} : initialRecordRef.current,
+			),
+		[],
 	);
 	useEffect(() => {
 		setInitialValues(
