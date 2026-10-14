@@ -92,6 +92,7 @@ import {
 	DefaultFormPageButtonsProps,
 } from "./backend-components/Form/DefaultFormPageButtons";
 import { InfoBoxClassKey, InfoBoxProps } from "./standalone/InfoBox";
+import { StatTileClassKey, StatTileProps } from "./standalone/StatTile";
 import {
 	SignalPortletItemClassKey,
 	SignalPortletItemProps,
@@ -268,6 +269,7 @@ declare module "@mui/material/styles" {
 		CcMatrixCellTile: MatrixCellTileClassKey;
 		CcHowToBox: HowToBoxClassKey;
 		CcInfoBox: InfoBoxClassKey;
+		CcStatTile: StatTileClassKey;
 		CcFormPageLayout: FormPageLayoutClassKey;
 		CcInlineSwitch: InlineSwitchClassKey;
 		CcBaseSelector: BaseSelectorClassKey;
@@ -340,6 +342,7 @@ declare module "@mui/material/styles" {
 		CcMatrixCellTile: Partial<MatrixCellTileProps>;
 		CcHowToBox: Partial<HowToBoxProps>;
 		CcInfoBox: Partial<InfoBoxProps>;
+		CcStatTile: Partial<StatTileProps>;
 		CcFormPageLayout: Partial<FormPageLayoutProps>;
 		CcInlineSwitch: Partial<InlineSwitchProps>;
 		CcBaseSelector: Partial<BaseSelectorThemeProps>;
@@ -483,6 +486,11 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcInfoBox"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcInfoBox"];
 			variants?: ComponentsVariants["CcInfoBox"];
+		};
+		CcStatTile?: {
+			defaultProps?: ComponentsPropsList["CcStatTile"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcStatTile"];
+			variants?: ComponentsVariants["CcStatTile"];
 		};
 		CcFormPageLayout?: {
 			defaultProps?: ComponentsPropsList["CcFormPageLayout"];
