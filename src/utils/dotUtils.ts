@@ -21,6 +21,9 @@ utils come in handy. You can simply access the number by calling `getValueByDot(
 The following utils are for the conversion of nested objects to dot-notation based records and vice versa
  */
 
+import isObjectEmpty from "./isObjectEmpty";
+import isPlainObject from "./isPlainObject";
+
 export const dotToObject = (
 	field: string,
 	value: unknown,
@@ -60,6 +63,12 @@ export const dotInObject = (
 	return value !== undefined;
 };
 
+/**
+ * Flatten nested plain objects into a dot-notation record.
+ * Everything else is a leaf and kept as it is: null, undefined, arrays,
+ * empty objects and class instances (Date, Blob, ...).
+ * @param obj The object to flatten
+ */
 export const objectToDots = (
 	obj: Record<string, unknown>,
 ): Record<string, unknown> => {
@@ -68,8 +77,8 @@ export const objectToDots = (
 		if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
 
 		const value = obj[key];
-		if (typeof value === "object") {
-			const dots = objectToDots(value as Record<string, unknown>);
+		if (isPlainObject(value) && !isObjectEmpty(value)) {
+			const dots = objectToDots(value);
 			Object.entries(dots).forEach(([dot, nestedValue]) => {
 				ret[key + "." + dot] = nestedValue;
 			});

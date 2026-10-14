@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-10-14 | [objectToDots keeps null, arrays and empty objects as values](2026-10-14-object-to-dots-keeps-leaves.md) | behavior |
 | 2026-10-14 | [CrudFileUpload only creates files, and serialize takes no id](2026-10-14-crud-file-upload-creates-only.md) | behavior, type |
 | 2026-10-14 | [Replacing a file by name removes the old one like the remove button](2026-10-14-file-upload-replacing-removes-old-file.md) | behavior |
 | 2026-10-14 | [A nested form with disableNestedSubmit doesn't make its parent dirty](2026-10-14-nested-form-without-submit-not-dirty.md) | behavior |
