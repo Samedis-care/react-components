@@ -41,6 +41,9 @@ export interface FileUploadProps {
     previewImages?: boolean;
     /**
      * Should file duplicates be allowed? If not files with the same file name will be replaced
+     * @remarks The replaced file is removed as the remove button removes it: one that exists
+     *          on the server stays listed with `delete` set. A file with `preventDelete` is
+     *          not replaced, and the new one is listed next to it.
      */
     allowDuplicates?: boolean;
     /**

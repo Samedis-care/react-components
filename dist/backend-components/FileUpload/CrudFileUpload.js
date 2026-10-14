@@ -19,7 +19,6 @@ const ADDITIONAL_FILE = Symbol("CcCrudFileUpload.additionalFile");
 const isAdditionalFile = (file) => ADDITIONAL_FILE in file;
 const CrudFileUpload = (props, ref) => {
     const { connector, serialize, deserialize, onChange, additionalFiles, showDirtyState, onDirtyChange, ...otherProps } = props;
-    const { allowDuplicates } = otherProps;
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [loadError, setLoadError] = useState(null);
@@ -54,35 +53,61 @@ const CrudFileUpload = (props, ref) => {
                 .map((file) => file.changeState ? { ...file, changeState: undefined } : file)
             : prev);
     }, [queueEmpty]);
-    // What each picked file became once it was uploaded. The list handed to handleChange
-    // comes from the standalone control, which keeps its own copy of a picked file until
-    // our result reaches it — so a change made before that, removing another file while
-    // the upload is still running, hands the picked file back unchanged. Uploading it
-    // again would put a second copy on the server.
-    const uploadedPicks = useRef(new WeakMap());
+    // What each picked file became once it was uploaded, until the control lists that
+    // instead. The list handed to handleChange comes from the standalone control, which
+    // keeps its own copy of a picked file until our result reaches it — so a change made
+    // before that, removing another file while the upload is still running, hands the
+    // picked file back unchanged. Uploading it again would put a second copy on the
+    // server. And a change which drops the picked file in that time, removing it or
+    // picking another of the same name, drops an upload the control never listed, so
+    // nothing marks that upload for deletion.
+    const uploadedPicks = useRef(new Map());
     // ...which only helps if the upload that fills it has finished, so changes are
     // applied one after the other rather than side by side
     const pendingChange = useRef(Promise.resolve());
     const applyChange = useCallback(async (newFiles) => {
         if (!connector)
             return;
-        newFiles = newFiles.map((file) => (file.canBeUploaded
+        // What the connector queue says is pending for a file, rather than what the
+        // list this change started with said. A change is applied a moment after it
+        // was made, and the queue may have moved on in between — a change which
+        // cancels the last queued write lands after the state which cleared the
+        // marks, and would otherwise put the stale one back.
+        const markOf = (id) => {
+            const queued = lazyConnector?.getQueuedOperation(id);
+            return queued === "create"
+                ? "added"
+                : queued === "delete"
+                    ? "removed"
+                    : undefined;
+        };
+        const listedFiles = new Set(newFiles.map((file) => file.file));
+        const listedIds = new Set(newFiles.map((file) => file.file.id));
+        const droppedUploads = [];
+        uploadedPicks.current.forEach((uploaded, pick) => {
+            // still listed as the picked file, which is swapped for the upload below
+            if (listedFiles.has(pick))
+                return;
+            uploadedPicks.current.delete(pick);
+            // listed as itself, so from here on it is a file like any other
+            if (listedIds.has(uploaded.file.id))
+                return;
+            // dropped before it was ever listed, so it is removed as if it had been
+            droppedUploads.push({
+                ...uploaded,
+                delete: true,
+                changeState: markOf(uploaded.file.id),
+            });
+        });
+        newFiles = newFiles
+            .map((file) => (file.canBeUploaded
             ? uploadedPicks.current.get(file.file)
-            : null) ?? file);
-        // upload new/changed files
+            : null) ?? file)
+            .concat(droppedUploads);
+        // upload new files
         const picked = newFiles.filter((file) => file.canBeUploaded);
         const uploads = Promise.allSettled(picked
-            .map(async (file) => {
-            // check if we have to replace a file (update)
-            if (allowDuplicates) {
-                const oldFile = files.find((oldFile) => oldFile.file.name === file.file.name);
-                if (oldFile) {
-                    return connector.update(await serialize(file, oldFile.file.id));
-                }
-            }
-            // or create new
-            return connector.create(await serialize(file, null));
-        })
+            .map(async (file) => connector.create(await serialize(file)))
             .map(async (request) => deserialize((await request)[0])));
         const deletedIds = newFiles
             .filter((file) => file.delete)
@@ -106,19 +131,6 @@ const CrudFileUpload = (props, ref) => {
             error = e;
             return false;
         });
-        // What the connector queue says is pending for a file, rather than what the
-        // list this change started with said. A change is applied a moment after it
-        // was made, and the queue may have moved on in between — a change which
-        // cancels the last queued write lands after the state which cleared the
-        // marks, and would otherwise put the stale one back.
-        const markOf = (id) => {
-            const queued = lazyConnector?.getQueuedOperation(id);
-            return queued === "create"
-                ? "added"
-                : queued === "delete"
-                    ? "removed"
-                    : undefined;
-        };
         const uploadedFiles = [];
         (await uploads).forEach((result, index) => {
             if (result.status === "rejected") {
@@ -158,7 +170,7 @@ const CrudFileUpload = (props, ref) => {
         })));
         // update state
         setFiles(finalFiles);
-    }, [allowDuplicates, connector, deserialize, files, lazyConnector, serialize]);
+    }, [connector, deserialize, lazyConnector, serialize]);
     /**
      * Applies one change from the control, after every change before it
      * @remarks The standalone control fires a change per interaction, without waiting for

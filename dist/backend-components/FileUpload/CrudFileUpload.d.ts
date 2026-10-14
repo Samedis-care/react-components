@@ -13,12 +13,11 @@ export interface CrudFileUploadProps extends Omit<FileUploadProps, "files" | "ha
      */
     errorComponent: React.ComponentType<ErrorComponentProps>;
     /**
-     * Callback for serializing data before passing it to the backend connector
+     * Callback for serializing a picked file before passing it to the backend connector
      * @param data The file data to serialize
-     * @param id The file id or null if upload new
-     * @returns Data to be passed to the backend connector
+     * @returns Data to be passed to the backend connector's create
      */
-    serialize: (data: FileData<File>, id: string | null) => Promise<Record<string, unknown>> | Record<string, unknown>;
+    serialize: (data: FileData<File>) => Promise<Record<string, unknown>> | Record<string, unknown>;
     /**
      * Callback for deserializing data after getting it from the backend connector
      * @param data The data from the backend connector (index function)

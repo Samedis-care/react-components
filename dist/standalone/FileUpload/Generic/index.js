@@ -24,6 +24,19 @@ import { captureError } from "../../../framework/ErrorReporting";
  */
 const getChangeState = (file) => file.changeState ??
     (file.delete ? "removed" : file.canBeUploaded ? "added" : undefined);
+/**
+ * Removes files from the list as the user's remove does
+ * @param files The list
+ * @param isRemoved Selects the files to remove
+ * @remarks A file that exists on the server is only marked, so that the removal can be
+ *          undone and so that the submit knows to delete it. A file the user just picked
+ *          has nothing to delete server side, so it goes.
+ */
+const removeFiles = (files, isRemoved) => files.flatMap((file) => !isRemoved(file)
+    ? [file]
+    : "downloadLink" in file.file
+        ? [{ ...file, delete: true }]
+        : []);
 const StyledGroupBox = styled(GroupBox, { name: "CcFileUpload", slot: "root" })({});
 const Dropzone = styled(Grid, { name: "CcFileUpload", slot: "dropzone" })(({ theme }) => ({
     "&.Mui-active": {
@@ -149,17 +162,17 @@ const FileUpload = (inProps, ref) => {
                 return;
             }
         }
+        const newNames = new Set(newFiles.map((newFile) => newFile.file.name));
         setFiles((prev) => {
-            const newValue = allowDuplicates
-                ? [...prev, ...newFiles]
-                : [
-                    ...prev.filter(
-                    // check for file name duplicates and replace
-                    (file) => !newFiles
-                        .map((newFile) => newFile.file.name)
-                        .includes(file.file.name)),
-                    ...newFiles,
-                ];
+            const newValue = [
+                ...(allowDuplicates
+                    ? prev
+                    : // a file of the same name is replaced, which is a removal like any
+                        // other: one on the server stays listed for the submit to delete. One
+                        // that cannot be removed is not replaced.
+                        removeFiles(prev, (file) => !file.preventDelete && newNames.has(file.file.name))),
+                ...newFiles,
+            ];
             if (onChange)
                 onChange(newValue);
             return newValue;
@@ -212,20 +225,8 @@ const FileUpload = (inProps, ref) => {
         return processFiles(files);
     }, [processFiles]);
     const removeFile = useCallback((file) => {
-        // a file that exists on the server is only marked, so that the removal can be
-        // undone and so that the submit knows to delete it
-        if ("downloadLink" in file.file) {
-            setFiles((prev) => {
-                const newValue = prev.map((f) => f === file ? { ...f, delete: true } : f);
-                if (onChange)
-                    onChange(newValue);
-                return newValue;
-            });
-            return;
-        }
-        // a file the user just picked has nothing to delete server side, so it goes
         setFiles((prev) => {
-            const newValue = prev.filter((f) => f !== file);
+            const newValue = removeFiles(prev, (f) => f === file);
             if (onChange)
                 onChange(newValue);
             return newValue;
