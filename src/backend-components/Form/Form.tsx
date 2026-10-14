@@ -298,6 +298,8 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
 	nestedFormName?: string;
 	/**
 	 * Disables form submission
+	 * @remarks The parent form neither validates nor submits this form then, and its
+	 *          changes don't make the parent dirty
 	 */
 	disableNestedSubmit?: boolean;
 	/**
@@ -2084,7 +2086,11 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 	// nested forms - dirty state
 	useEffect(() => {
 		if (!parentFormContext || !nestedFormName) return;
-		parentFormContext.setCustomFieldDirty(nestedFormName, dirty);
+		// a nested form the parent doesn't submit has nothing the parent's save could save
+		parentFormContext.setCustomFieldDirty(
+			nestedFormName,
+			dirty && !disableNestedSubmit,
+		);
 		return () => {
 			if (
 				disableNestedSubmit ||
