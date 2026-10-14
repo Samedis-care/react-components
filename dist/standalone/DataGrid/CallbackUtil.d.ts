@@ -1,4 +1,4 @@
-import { DataGridCustomDataActionButton, DataGridFilterParameters, DataGridRowUpdate, DataGridSortSetting, IDataGridCallbacks, IDataGridColumnsState, IDataGridFieldFilter, IDataGridState } from "./DataGrid";
+import { DataGridCustomDataActionButton, DataGridFilterParameters, DataGridQuery, DataGridRowUpdate, DataGridSortSetting, IDataGridCallbacks, IDataGridColumnsState, IDataGridFieldFilter, IDataGridState } from "./DataGrid";
 export declare const dataGridPrepareFiltersAndSorts: (columnsState: IDataGridColumnsState) => [DataGridSortSetting[], IDataGridFieldFilter];
 /**
  * The filter the grid shows, as loadData gets it
@@ -8,6 +8,14 @@ export declare const dataGridPrepareFiltersAndSorts: (columnsState: IDataGridCol
  * @remarks Without getAdditionalFilters, the custom data are the additional filters
  */
 export declare const dataGridGetFilterParameters: (state: Pick<IDataGridState, "search" | "customData">, columnsState: IDataGridColumnsState, getAdditionalFilters: IDataGridCallbacks["getAdditionalFilters"]) => DataGridFilterParameters;
+/**
+ * The query the grid shows, as loadData gets it (without the paging)
+ * @param state The grid state (its search and custom data)
+ * @param columnsState The column state (its filters and sorts)
+ * @param getAdditionalFilters The grid's getAdditionalFilters
+ * @see dataGridGetFilterParameters
+ */
+export declare const dataGridGetQuery: (state: Pick<IDataGridState, "search" | "customData">, columnsState: IDataGridColumnsState, getAdditionalFilters: IDataGridCallbacks["getAdditionalFilters"]) => DataGridQuery;
 /**
  * Is a custom data action button disabled?
  * @param button The button

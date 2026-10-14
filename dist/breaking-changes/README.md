@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-10-13 | [DataGrid overrides are not persisted](2026-10-13-data-grid-overrides-not-persisted.md) | behavior, type |
 | 2026-10-13 | [semaphoreExec returns executor errors instead of rejecting](2026-10-13-semaphore-exec-returns-errors.md) | behavior |
 | 2026-10-13 | [DataGrid persistence provides the latest state](2026-10-13-data-grid-persist-provides-latest-state.md) | behavior |
 | 2026-10-13 | [The checkbox box reaches 3:1](2026-10-13-checkbox-box-reaches-3-to-1.md) | behavior |

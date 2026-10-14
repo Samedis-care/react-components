@@ -32,6 +32,8 @@ export const useDataGridResetFilters = () => {
             ...state,
             search: defaultState.search,
             customData: defaultState.customData,
+            // the filters are the user's own again, see filtersOverridden
+            filtersOverridden: defaultState.filtersOverridden,
         }));
         setColumnState((colState) => Object.fromEntries(Object.entries(colState).map(([field, def]) => [
             field,

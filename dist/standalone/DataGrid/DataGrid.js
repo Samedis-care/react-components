@@ -10,7 +10,7 @@ import debounce from "../../utils/debounce";
 import isObjectEmpty from "../../utils/isObjectEmpty";
 import measureText from "../../utils/measureText";
 import shallowCompareArray from "../../utils/shallowCompareArray";
-import { dataGridApplyRowUpdate, dataGridGetFilterParameters, dataGridPrepareFiltersAndSorts, } from "./CallbackUtil";
+import { dataGridApplyRowUpdate, dataGridGetQuery } from "./CallbackUtil";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
 import CustomFilterDialog from "./CustomFilterDialog";
 import StatePersistence, { DataGridPersistentStateContext, } from "./StatePersistence";
@@ -76,6 +76,7 @@ export const getDataGridDefaultState = (columns, defaultCustomData) => ({
     refreshShouldWipeRows: false,
     customData: defaultCustomData ?? {},
     initialResize: false,
+    filtersOverridden: false,
 });
 export const getDataGridDefaultColumnsState = (columns, defaultSort, defaultFilter) => {
     const data = {};
@@ -423,6 +424,7 @@ const DataGrid = (inProps, ref) => {
             persisted.state.customData ??
             defaultCustomData ??
             {},
+        filtersOverridden: overrideFilter != null || overrideCustomData != null,
     }));
     const [state, setState] = statePack;
     const { search, rows, pages, columnHidden, columnPinned, refreshDataInstance, refreshData, customData, selectAll, selectedRows, selectionUpdatedByProps, } = state;
@@ -476,8 +478,7 @@ const DataGrid = (inProps, ref) => {
         if (refreshData !== 1 && !skippedFirstRefresh) {
             return;
         }
-        const [sorts] = dataGridPrepareFiltersAndSorts(columnsState);
-        const filter = dataGridGetFilterParameters(state, columnsState, getAdditionalFilters);
+        const query = dataGridGetQuery(state, columnsState, getAdditionalFilters);
         void (async () => {
             for (let pageIndex = pages[0]; pageIndex <= pages[1]; pageIndex++) {
                 // check if page was already loaded
@@ -488,8 +489,7 @@ const DataGrid = (inProps, ref) => {
                     const data = await loadData({
                         page: pageIndex + 1,
                         rows: rowsPerPage,
-                        ...filter,
-                        sort: sorts,
+                        ...query,
                     });
                     const dataRowsTotal = data.rowsFiltered ?? data.rowsTotal;
                     // check if we are on an invalid page
@@ -602,10 +602,11 @@ const DataGrid = (inProps, ref) => {
         resetView();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [resetView, search, columnStateHash, customData, forceRefreshToken]);
-    // manual row updates
+    // manual row updates, reading the query
     useImperativeHandle(ref, () => ({
         updateRow: (id, update) => setState((prevState) => dataGridApplyRowUpdate(prevState, id, update)),
-    }), [setState]);
+        getQuery: () => dataGridGetQuery({ search, customData }, columnsState, getAdditionalFilters),
+    }), [setState, search, customData, columnsState, getAdditionalFilters]);
     // selection change event
     useEffect(() => {
         // don't trigger selection update event when triggered by prop update

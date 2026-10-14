@@ -35,6 +35,17 @@ export const dataGridGetFilterParameters = (state, columnsState, getAdditionalFi
     fieldFilter: dataGridPrepareFiltersAndSorts(columnsState)[1],
 });
 /**
+ * The query the grid shows, as loadData gets it (without the paging)
+ * @param state The grid state (its search and custom data)
+ * @param columnsState The column state (its filters and sorts)
+ * @param getAdditionalFilters The grid's getAdditionalFilters
+ * @see dataGridGetFilterParameters
+ */
+export const dataGridGetQuery = (state, columnsState, getAdditionalFilters) => ({
+    ...dataGridGetFilterParameters(state, columnsState, getAdditionalFilters),
+    sort: dataGridPrepareFiltersAndSorts(columnsState)[0],
+});
+/**
  * Is a custom data action button disabled?
  * @param button The button
  * @param numSelected The amount of selected rows (0 none, 1 one, 2 multiple)

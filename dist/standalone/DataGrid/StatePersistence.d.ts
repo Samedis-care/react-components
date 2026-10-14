@@ -5,6 +5,10 @@ export type DataGridPersistentStateContextType = [
     /**
      * The persisted data, in whichever format it was written: what the setter
      * got last, or what was stored before
+     * @remarks This is the state a grid restores, not necessarily the one it
+     *          shows: an override (DataGridProps.overrideFilter,
+     *          overrideCustomData) isn't persisted. What a grid shows comes
+     *          from DataGridDispatch.getQuery.
      */
     DataGridPersistedData | undefined,
     /**

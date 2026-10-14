@@ -43,7 +43,9 @@ export interface DataGridProps extends IDataGridHeaderProps, IDataGridColumnProp
      *   user has already seen (columns added later start out with the hidden and
      *   pinned state from their definition)
      * - sort: sorting state
-     * - filters: customData, search, column filter
+     * - filters: customData, search, column filter. What an override
+     *   (overrideCustomData, overrideFilter) replaced stays persisted as it was
+     *   stored until the filters are reset.
      * @default ["columns", "sort", "filters"]
      */
     persist?: ("columns" | "sort" | "filters")[];
@@ -129,6 +131,11 @@ export interface IDataGridLoadDataParameters {
  * The filter parts of the load data parameters: which rows the grid shows
  */
 export type DataGridFilterParameters = Pick<IDataGridLoadDataParameters, "quickFilter" | "additionalFilters" | "fieldFilter">;
+/**
+ * Which rows the grid shows and in which order: the load data parameters
+ * without the paging
+ */
+export type DataGridQuery = Omit<IDataGridLoadDataParameters, "page" | "rows">;
 export interface IDataGridCallbacks {
     /**
      * Loads data for the grid
@@ -157,6 +164,8 @@ export interface IDataGridCallbacks {
     defaultCustomData?: Record<string, unknown>;
     /**
      * Forced initial values for custom data (overwrites persisted custom data)
+     * @remarks They are not persisted: until the user resets the filters, the
+     *          grid keeps persisting the custom data which was stored
      */
     overrideCustomData?: Record<string, unknown>;
     /**
@@ -321,6 +330,8 @@ export interface IDataGridColumnProps {
     defaultFilter?: DataGridFilterSetting[];
     /**
      * The column filter settings override (disables all filters if set)
+     * @remarks It is not persisted: until the user resets the filters, the
+     *          grid keeps persisting the column filters which were stored
      */
     overrideFilter?: DataGridFilterSetting[];
     /**
@@ -480,6 +491,14 @@ export interface DataGridDispatch {
      *          forceRefreshToken) loads the row from loadData again and overwrites it.
      */
     updateRow: (id: string, update: DataGridRowUpdate) => void;
+    /**
+     * The query the grid currently shows, as loadData gets it (without the
+     * paging), including what an override set
+     * @remarks Use this to work with the rows the user sees: the persisted
+     *          state (DataGridPersistentStateContext) is what the grid restores
+     *          next time, which doesn't include an override
+     */
+    getQuery: () => DataGridQuery;
 }
 export interface IDataGridState {
     /**
@@ -563,6 +582,13 @@ export interface IDataGridState {
      * Initially resized?
      */
     initialResize: boolean;
+    /**
+     * Was the grid opened with an override (DataGridProps.overrideFilter,
+     * overrideCustomData), and have its filters not been reset since? The parts
+     * an override replaced then belong to this visit, so the persisted state
+     * keeps what was stored for them.
+     */
+    filtersOverridden: boolean;
 }
 export declare const DataGridStateContext: React.Context<[IDataGridState, React.Dispatch<React.SetStateAction<IDataGridState>>] | undefined>;
 export declare const useDataGridState: () => [IDataGridState, Dispatch<SetStateAction<IDataGridState>>];

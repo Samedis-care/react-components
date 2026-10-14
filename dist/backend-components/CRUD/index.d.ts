@@ -4,7 +4,7 @@ import { BackendDataGridProps } from "../DataGrid";
 import { FormProps } from "../Form";
 import { Permission } from "../../framework";
 import { CrudImportProps } from "./Import";
-import { IDataGridAddButton } from "../../standalone/DataGrid/DataGrid";
+import { DataGridDispatch, DataGridQuery, IDataGridAddButton } from "../../standalone/DataGrid/DataGrid";
 import { RouteProps } from "../../standalone/Routes/Route";
 export interface CrudFormProps {
     /**
@@ -62,8 +62,10 @@ export interface CrudProps<M extends ModelUnknown> {
     gridWrapper?: React.ComponentType<GridWrapperProps>;
     /**
      * Custom BackendDataGrid component
+     * @remarks It gets a ref, which it has to pass on to BackendDataGrid for
+     *          CrudDispatch.getGridQuery
      */
-    gridComponent?: React.ComponentType<BackendDataGridProps<M>>;
+    gridComponent?: React.ComponentType<BackendDataGridProps<M> & React.RefAttributes<DataGridDispatch>>;
     /**
      * The record delete permission
      */
@@ -172,6 +174,13 @@ export interface CrudDispatch {
      * @param forceRefresh force refresh grid, default false
      */
     openView: (id: "import" | "devimport" | "new" | string, forceRefresh?: boolean) => void;
+    /**
+     * The query the grid currently shows
+     * @returns The query, see DataGridDispatch.getQuery, or undefined while the
+     *          grid isn't mounted (disableBackgroundGrid with a form open) or
+     *          if the gridComponent doesn't pass its ref on
+     */
+    getGridQuery: () => DataGridQuery | undefined;
 }
 export declare const useCrudDispatchContext: () => CrudDispatch;
 export declare const CrudSpecialIds: string[];

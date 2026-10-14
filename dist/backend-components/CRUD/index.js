@@ -77,6 +77,8 @@ const CRUD = (props, ref) => {
     const refreshGrid = useCallback(() => {
         setGridRefreshToken(new Date().getTime().toString());
     }, []);
+    const gridRef = useRef(null);
+    const getGridQuery = useCallback(() => gridRef.current?.getQuery(), []);
     const showOverview = useCallback((forceRefresh) => {
         if (goBackCallback)
             goBackCallback();
@@ -131,7 +133,7 @@ const CRUD = (props, ref) => {
         }
     }, [disableRouting, navigate, routeUrl]);
     const MyBackendDataGrid = props.gridComponent ?? BackendDataGrid;
-    const grid = (globalScrollListener) => (_jsx(Suspense, { fallback: _jsx(Loader, {}), children: _jsx(GridWrapper, { children: _jsx(MyBackendDataGrid, { enableDelete: hasPermission(perms, props.deletePermission), disableDeleteHint: props.deletePermissionHint, disableExport: !hasPermission(perms, props.exportPermission), ...props.gridProps, model: props.model, forceRefreshToken: gridRefreshToken, onEdit: (hasPermission(perms, props.readPermission) ||
+    const grid = (globalScrollListener) => (_jsx(Suspense, { fallback: _jsx(Loader, {}), children: _jsx(GridWrapper, { children: _jsx(MyBackendDataGrid, { ref: gridRef, enableDelete: hasPermission(perms, props.deletePermission), disableDeleteHint: props.deletePermissionHint, disableExport: !hasPermission(perms, props.exportPermission), ...props.gridProps, model: props.model, forceRefreshToken: gridRefreshToken, onEdit: (hasPermission(perms, props.readPermission) ||
                     hasPermission(perms, props.editPermission)) &&
                     props.children
                     ? showEditPage
@@ -181,7 +183,8 @@ const CRUD = (props, ref) => {
         refreshGrid,
         openView,
         showOverview,
-    }), [refreshGrid, openView, showOverview]);
+        getGridQuery,
+    }), [refreshGrid, openView, showOverview, getGridQuery]);
     useImperativeHandle(ref, () => dispatch, [dispatch]);
     const showGrid = disableRouting
         ? id === null
