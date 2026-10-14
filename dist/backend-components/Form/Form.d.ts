@@ -120,6 +120,7 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
     /**
      * Initial record to use (instead of defaults from model)
      * @remarks Only loaded if ID is null
+     * @remarks Read when the record loads, later changes are ignored
      */
     initialRecord?: ModelRecordPartial<M>;
     /**

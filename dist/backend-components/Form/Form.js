@@ -324,7 +324,12 @@ const Form = (props) => {
     // single source of truth for a record's initial form values: the server data
     // plus initialRecord for new records (records without an id). Used both for the
     // dirty baseline and to seed the form data, so the two can never diverge.
-    const buildInitialValues = useCallback((data) => deepAssign({}, data, data.id || !initialRecord ? {} : initialRecord), [initialRecord]);
+    // initialRecord is applied when the server data loads, not when it changes: the
+    // form data was seeded from it then, and after a save the baseline is the saved
+    // record, which a re-rendered initialRecord must not replace
+    const initialRecordRef = useRef(initialRecord);
+    initialRecordRef.current = initialRecord;
+    const buildInitialValues = useCallback((data) => deepAssign({}, data, data.id || !initialRecordRef.current ? {} : initialRecordRef.current), []);
     useEffect(() => {
         setInitialValues(serverData ? buildInitialValues(serverData[0]) : undefined);
     }, [serverData, buildInitialValues, setInitialValues]);
