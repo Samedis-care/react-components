@@ -224,6 +224,8 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
     nestedFormName?: string;
     /**
      * Disables form submission
+     * @remarks The parent form neither validates nor submits this form then, and its
+     *          changes don't make the parent dirty
      */
     disableNestedSubmit?: boolean;
     /**

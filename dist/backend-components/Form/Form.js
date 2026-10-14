@@ -917,7 +917,8 @@ const Form = (props) => {
     useEffect(() => {
         if (!parentFormContext || !nestedFormName)
             return;
-        parentFormContext.setCustomFieldDirty(nestedFormName, dirty);
+        // a nested form the parent doesn't submit has nothing the parent's save could save
+        parentFormContext.setCustomFieldDirty(nestedFormName, dirty && !disableNestedSubmit);
         return () => {
             if (disableNestedSubmit ||
                 onlySubmitNestedIfMounted ||
