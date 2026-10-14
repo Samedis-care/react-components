@@ -43,11 +43,7 @@ const fileConnectorData = [
 	},
 ];
 
-const serialize = (
-	data: FileData<File>,
-	id: string | null,
-): Record<string, unknown> => ({
-	...(id ? { id } : {}),
+const serialize = (data: FileData<File>): Record<string, unknown> => ({
 	name: data.file.name,
 	type: data.file.type,
 	downloadLink: URL.createObjectURL(data.file),

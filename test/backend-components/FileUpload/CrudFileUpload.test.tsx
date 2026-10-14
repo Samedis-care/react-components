@@ -56,11 +56,7 @@ const SERVER_FILES = [
 	},
 ];
 
-const serialize = (
-	data: FileData<File>,
-	id: string | null,
-): Record<string, unknown> => ({
-	...(id ? { id } : {}),
+const serialize = (data: FileData<File>): Record<string, unknown> => ({
 	name: data.file.name,
 	type: data.file.type,
 	// what makes it an existing file to the standalone control, which only marks a file
@@ -99,11 +95,17 @@ const ErrorSink = (props: ErrorComponentProps) => (
  */
 class RecordingConnector extends MockConnector {
 	public creates: Record<string, unknown>[] = [];
+	public updates: Record<string, unknown>[] = [];
 	public deletes: string[] = [];
 
 	create(data: Record<string, unknown>) {
 		this.creates.push(data);
 		return super.create(data);
+	}
+
+	update(data: Record<string, unknown>) {
+		this.updates.push(data);
+		return super.update(data);
 	}
 
 	delete(id: string) {
@@ -155,6 +157,12 @@ class GatedConnector extends MockConnector {
 		this.release?.();
 	}
 }
+
+/** The names of the files the backend holds, in the order it lists them */
+const onServer = async (connector: MockConnector) =>
+	(await connector.index({ rows: Number.MAX_SAFE_INTEGER }))[0].map(
+		(record) => record.name as string,
+	);
 
 const lazyOver = (connector: MockConnector) =>
 	// fakeReads false is what a form uses for an existing record: reads go to the
@@ -225,6 +233,11 @@ const renderUpload = (
 		names,
 		/** What the file is shown as, relative to the server: added, removed or nothing */
 		changeOf: (name: string) => labelOf(name).getAttribute("data-cc-change"),
+		/** What every file of that name is shown as, in list order */
+		changesOf: (name: string) =>
+			labels()
+				.filter((label) => label.textContent === name)
+				.map((label) => label.getAttribute("data-cc-change")),
 		hasRestore: (name: string) => !!iconOf(name, "RestoreFromTrashIcon"),
 		hasRemove: (name: string) => !!iconOf(name, "CancelOutlinedIcon"),
 		remove: (name: string) =>
@@ -234,6 +247,12 @@ const renderUpload = (
 		addFile: async (file: File) => {
 			await act(async () => {
 				await ref.current?.addFile(file);
+			});
+		},
+		/** Lets a change the control is applying run to its end */
+		settle: async () => {
+			await act(async () => {
+				await new Promise((resolve) => setTimeout(resolve, 0));
 			});
 		},
 		/** What the control reports it could not write, if anything */
@@ -640,6 +659,212 @@ describe("CrudFileUpload", () => {
 		expect(connector.creates).toBe(1);
 	});
 
+	describe("picking a file with the name of one already listed", () => {
+		it("deletes the stored file it replaces", async () => {
+			const connector = new RecordingConnector(SERVER_FILES);
+			const ui = renderUpload({ connector });
+			await loaded(ui);
+
+			await ui.addFile(pick("document.pdf", "application/pdf"));
+
+			await waitFor(() => expect(connector.creates).toHaveLength(1));
+			await waitFor(() => expect(connector.deletes).toEqual(["1"]));
+			// the list is what the server has: the replacement, and no trace of the old one
+			await waitFor(() =>
+				expect(ui.names()).toEqual(["image.png", "document.pdf"]),
+			);
+			expect(await onServer(connector)).toEqual(["image.png", "document.pdf"]);
+		});
+
+		it("deletes an upload it replaces", async () => {
+			const connector = new RecordingConnector(SERVER_FILES);
+			const ui = renderUpload({ connector });
+			await loaded(ui);
+			await ui.addFile(pick("notes.txt"));
+			await waitFor(() => expect(connector.creates).toHaveLength(1));
+			await ui.settle();
+
+			await ui.addFile(pick("notes.txt"));
+
+			await waitFor(() => expect(connector.creates).toHaveLength(2));
+			await waitFor(() => expect(connector.deletes).toEqual(["3"]));
+			expect(ui.names()).toEqual(["document.pdf", "image.png", "notes.txt"]);
+			expect(await onServer(connector)).toEqual([
+				"document.pdf",
+				"image.png",
+				"notes.txt",
+			]);
+		});
+
+		it("queues the delete of the stored file it replaces, which stays listed as removed", async () => {
+			const backend = new RecordingConnector(SERVER_FILES);
+			const lazy = lazyOver(backend);
+			const ui = renderUpload({ connector: lazy });
+			await loaded(ui);
+
+			await ui.addFile(pick("document.pdf", "application/pdf"));
+
+			// the replacement is a removal and an upload, each pending and each shown
+			await waitFor(() => expect(lazy.getQueuedOperation("1")).toBe("delete"));
+			await waitFor(() =>
+				expect(ui.changesOf("document.pdf")).toEqual(["removed", "added"]),
+			);
+			expect(ui.hasRestore("document.pdf")).toBe(true);
+			expect(backend.creates).toHaveLength(0);
+			expect(backend.deletes).toHaveLength(0);
+
+			await act(async () => {
+				await lazy.workQueue();
+			});
+
+			await waitFor(() =>
+				expect(ui.names()).toEqual(["image.png", "document.pdf"]),
+			);
+			expect(ui.changeOf("document.pdf")).toBe(null);
+			expect(backend.deletes).toEqual(["1"]);
+			expect(await onServer(backend)).toEqual(["image.png", "document.pdf"]);
+		});
+
+		it("keeps both when the replaced file is restored", async () => {
+			const backend = new RecordingConnector(SERVER_FILES);
+			const lazy = lazyOver(backend);
+			const ui = renderUpload({ connector: lazy });
+			await loaded(ui);
+			await ui.addFile(pick("document.pdf", "application/pdf"));
+			await waitFor(() =>
+				expect(ui.changesOf("document.pdf")).toEqual(["removed", "added"]),
+			);
+
+			// the first of the two is the one being replaced
+			await ui.restore("document.pdf");
+
+			await waitFor(() =>
+				expect(ui.changesOf("document.pdf")).toEqual([null, "added"]),
+			);
+			await act(async () => {
+				await lazy.workQueue();
+			});
+
+			expect(backend.deletes).toEqual([]);
+			expect(await onServer(backend)).toEqual([
+				"document.pdf",
+				"image.png",
+				"document.pdf",
+			]);
+		});
+
+		it("cancels a queued upload it replaces", async () => {
+			const backend = new RecordingConnector(SERVER_FILES);
+			const lazy = lazyOver(backend);
+			const queued = vi.spyOn(lazy, "create");
+			const ui = renderUpload({ connector: lazy });
+			await loaded(ui);
+			await ui.addFile(pick("notes.txt"));
+			await waitFor(() => expect(ui.changeOf("notes.txt")).toBe("added"));
+			const firstId = (
+				queued.mock.results[0].value as [Record<string, unknown>, unknown]
+			)[0].id as string;
+
+			await ui.addFile(pick("notes.txt"));
+
+			await waitFor(() => expect(queued).toHaveBeenCalledTimes(2));
+			// nothing of the first is on the server, so it leaves without a trace
+			await waitFor(() => expect(lazy.getQueuedOperation(firstId)).toBe(null));
+			expect(ui.names()).toEqual(["document.pdf", "image.png", "notes.txt"]);
+			expect(ui.changeOf("notes.txt")).toBe("added");
+
+			await act(async () => {
+				await lazy.workQueue();
+			});
+
+			expect(backend.creates).toHaveLength(1);
+			expect(backend.deletes).toEqual([]);
+			expect(await onServer(backend)).toEqual([
+				"document.pdf",
+				"image.png",
+				"notes.txt",
+			]);
+		});
+
+		it("keeps both with allowDuplicates, each its own record", async () => {
+			const connector = new RecordingConnector(SERVER_FILES);
+			const ui = renderUpload({ connector, allowDuplicates: true });
+			await loaded(ui);
+
+			await ui.addFile(pick("document.pdf", "application/pdf"));
+
+			await waitFor(() =>
+				expect(ui.names()).toEqual([
+					"document.pdf",
+					"image.png",
+					"document.pdf",
+				]),
+			);
+			await ui.settle();
+			expect(connector.updates).toEqual([]);
+			expect(await onServer(connector)).toEqual([
+				"document.pdf",
+				"image.png",
+				"document.pdf",
+			]);
+
+			// two rows are two records: removing one leaves the other on the server
+			await ui.remove("document.pdf");
+
+			await waitFor(() =>
+				expect(ui.names()).toEqual(["image.png", "document.pdf"]),
+			);
+			expect(await onServer(connector)).toEqual(["image.png", "document.pdf"]);
+		});
+	});
+
+	describe("dropping a file while its upload is in flight", () => {
+		/** Picks a file, whose upload then hangs until the connector is told to finish */
+		const startUpload = async (ui: Harness, name: string) => {
+			await act(async () => {
+				// not awaited: addFile settles once the file is listed, the upload later
+				void ui.ref.current?.addFile(pick(name));
+				await Promise.resolve();
+			});
+			await waitFor(() => expect(ui.names()).toContain(name));
+		};
+		const finishUploads = async (ui: Harness, connector: GatedConnector) => {
+			act(() => connector.finish());
+			await ui.settle();
+		};
+
+		it("deletes the upload once it lands when its file was removed", async () => {
+			const connector = new GatedConnector(SERVER_FILES);
+			const ui = renderUpload({ connector });
+			await loaded(ui);
+			await startUpload(ui, "race.txt");
+
+			await ui.remove("race.txt");
+			await finishUploads(ui, connector);
+
+			// the control never listed the upload, but the server has it until told not to
+			expect(ui.names()).toEqual(["document.pdf", "image.png"]);
+			expect(await onServer(connector)).toEqual(["document.pdf", "image.png"]);
+		});
+
+		it("keeps one copy when its file was replaced by name", async () => {
+			const connector = new GatedConnector(SERVER_FILES);
+			const ui = renderUpload({ connector });
+			await loaded(ui);
+			await startUpload(ui, "race.txt");
+
+			await startUpload(ui, "race.txt");
+			await finishUploads(ui, connector);
+
+			expect(ui.names()).toEqual(["document.pdf", "image.png", "race.txt"]);
+			expect(await onServer(connector)).toEqual([
+				"document.pdf",
+				"image.png",
+				"race.txt",
+			]);
+		});
+	});
+
 	describe("when the server refuses a write", () => {
 		const namesCreated = (backend: RejectingConnector) =>
 			backend.creates.map((data) => data.name as string);
@@ -912,6 +1137,29 @@ describe("CrudFileUpload", () => {
 			expect(ui.names().filter((name) => name === "manual.pdf")).toHaveLength(
 				1,
 			);
+		});
+
+		it("is not replaced by a picked file of the same name", async () => {
+			const connector = new RecordingConnector(SERVER_FILES);
+			const ui = renderUpload({
+				connector,
+				additionalFiles: BACKEND_EXTRA,
+			});
+			await loaded(ui);
+
+			await ui.addFile(pick("manual.pdf", "application/pdf"));
+
+			// it is read-only and not this control's record: deleting id 99 would hit
+			// whatever 99 is to this connector
+			await waitFor(() => expect(connector.creates).toHaveLength(1));
+			await ui.settle();
+			expect(connector.deletes).toEqual([]);
+			expect(ui.names()).toEqual([
+				"document.pdf",
+				"image.png",
+				"manual.pdf",
+				"manual.pdf",
+			]);
 		});
 
 		it("offers no remove button for them", async () => {

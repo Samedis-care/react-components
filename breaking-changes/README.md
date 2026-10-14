@@ -20,6 +20,8 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-10-14 | [CrudFileUpload only creates files, and serialize takes no id](2026-10-14-crud-file-upload-creates-only.md) | behavior, type |
+| 2026-10-14 | [Replacing a file by name removes the old one like the remove button](2026-10-14-file-upload-replacing-removes-old-file.md) | behavior |
 | 2026-10-14 | [A nested form with disableNestedSubmit doesn't make its parent dirty](2026-10-14-nested-form-without-submit-not-dirty.md) | behavior |
 | 2026-10-14 | [Form reads initialRecord when the record loads](2026-10-14-form-initial-record-read-on-load.md) | behavior |
 | 2026-10-13 | [DataGrid overrides are not persisted](2026-10-13-data-grid-overrides-not-persisted.md) | behavior, type |

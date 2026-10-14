@@ -33,14 +33,12 @@ export interface CrudFileUploadProps extends Omit<
 	 */
 	errorComponent: React.ComponentType<ErrorComponentProps>;
 	/**
-	 * Callback for serializing data before passing it to the backend connector
+	 * Callback for serializing a picked file before passing it to the backend connector
 	 * @param data The file data to serialize
-	 * @param id The file id or null if upload new
-	 * @returns Data to be passed to the backend connector
+	 * @returns Data to be passed to the backend connector's create
 	 */
 	serialize: (
 		data: FileData<File>,
-		id: string | null,
 	) => Promise<Record<string, unknown>> | Record<string, unknown>;
 	/**
 	 * Callback for deserializing data after getting it from the backend connector
@@ -110,7 +108,6 @@ const CrudFileUpload = (
 		onDirtyChange,
 		...otherProps
 	} = props;
-	const { allowDuplicates } = otherProps;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
 	const [loadError, setLoadError] = useState<Error | null>(null);
@@ -151,12 +148,15 @@ const CrudFileUpload = (
 		);
 	}, [queueEmpty]);
 
-	// What each picked file became once it was uploaded. The list handed to handleChange
-	// comes from the standalone control, which keeps its own copy of a picked file until
-	// our result reaches it — so a change made before that, removing another file while
-	// the upload is still running, hands the picked file back unchanged. Uploading it
-	// again would put a second copy on the server.
-	const uploadedPicks = useRef(new WeakMap<File, FileData<BackendFileMeta>>());
+	// What each picked file became once it was uploaded, until the control lists that
+	// instead. The list handed to handleChange comes from the standalone control, which
+	// keeps its own copy of a picked file until our result reaches it — so a change made
+	// before that, removing another file while the upload is still running, hands the
+	// picked file back unchanged. Uploading it again would put a second copy on the
+	// server. And a change which drops the picked file in that time, removing it or
+	// picking another of the same name, drops an upload the control never listed, so
+	// nothing marks that upload for deletion.
+	const uploadedPicks = useRef(new Map<File, FileData<BackendFileMeta>>());
 	// ...which only helps if the upload that fills it has finished, so changes are
 	// applied one after the other rather than side by side
 	const pendingChange = useRef<Promise<unknown>>(Promise.resolve());
@@ -164,34 +164,54 @@ const CrudFileUpload = (
 	const applyChange = useCallback(
 		async (newFiles: FileData<File | FileMeta | BackendFileMeta>[]) => {
 			if (!connector) return;
-			newFiles = newFiles.map(
-				(file) =>
-					(file.canBeUploaded
-						? uploadedPicks.current.get(file.file as File)
-						: null) ?? file,
-			);
+			// What the connector queue says is pending for a file, rather than what the
+			// list this change started with said. A change is applied a moment after it
+			// was made, and the queue may have moved on in between — a change which
+			// cancels the last queued write lands after the state which cleared the
+			// marks, and would otherwise put the stale one back.
+			const markOf = (id: string) => {
+				const queued = lazyConnector?.getQueuedOperation(id);
+				return queued === "create"
+					? ("added" as const)
+					: queued === "delete"
+						? ("removed" as const)
+						: undefined;
+			};
 
-			// upload new/changed files
+			const listedFiles = new Set(newFiles.map((file) => file.file));
+			const listedIds = new Set(
+				newFiles.map((file) => (file.file as Partial<BackendFileMeta>).id),
+			);
+			const droppedUploads: FileData<BackendFileMeta>[] = [];
+			uploadedPicks.current.forEach((uploaded, pick) => {
+				// still listed as the picked file, which is swapped for the upload below
+				if (listedFiles.has(pick)) return;
+				uploadedPicks.current.delete(pick);
+				// listed as itself, so from here on it is a file like any other
+				if (listedIds.has(uploaded.file.id)) return;
+				// dropped before it was ever listed, so it is removed as if it had been
+				droppedUploads.push({
+					...uploaded,
+					delete: true,
+					changeState: markOf(uploaded.file.id),
+				});
+			});
+			newFiles = newFiles
+				.map(
+					(file) =>
+						(file.canBeUploaded
+							? uploadedPicks.current.get(file.file as File)
+							: null) ?? file,
+				)
+				.concat(droppedUploads);
+
+			// upload new files
 			const picked = newFiles.filter((file) => file.canBeUploaded);
 			const uploads = Promise.allSettled(
 				picked
-					.map(async (file) => {
-						// check if we have to replace a file (update)
-						if (allowDuplicates) {
-							const oldFile = files.find(
-								(oldFile) => oldFile.file.name === file.file.name,
-							);
-							if (oldFile) {
-								return connector.update(
-									await serialize(file as FileData<File>, oldFile.file.id),
-								);
-							}
-						}
-						// or create new
-						return connector.create(
-							await serialize(file as FileData<File>, null),
-						);
-					})
+					.map(async (file) =>
+						connector.create(await serialize(file as FileData<File>)),
+					)
 					.map(async (request) => deserialize((await request)[0])),
 			);
 			const deletedIds = newFiles
@@ -222,19 +242,6 @@ const CrudFileUpload = (
 					return false;
 				},
 			);
-			// What the connector queue says is pending for a file, rather than what the
-			// list this change started with said. A change is applied a moment after it
-			// was made, and the queue may have moved on in between — a change which
-			// cancels the last queued write lands after the state which cleared the
-			// marks, and would otherwise put the stale one back.
-			const markOf = (id: string) => {
-				const queued = lazyConnector?.getQueuedOperation(id);
-				return queued === "create"
-					? ("added" as const)
-					: queued === "delete"
-						? ("removed" as const)
-						: undefined;
-			};
 			const uploadedFiles: FileData<BackendFileMeta>[] = [];
 			(await uploads).forEach((result, index) => {
 				if (result.status === "rejected") {
@@ -282,7 +289,7 @@ const CrudFileUpload = (
 			// update state
 			setFiles(finalFiles);
 		},
-		[allowDuplicates, connector, deserialize, files, lazyConnector, serialize],
+		[connector, deserialize, lazyConnector, serialize],
 	);
 
 	/**
