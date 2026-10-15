@@ -12,6 +12,9 @@ import NumberFormatter from "../../src/standalone/UIKit/NumberFormatter";
 import CenteredTypography from "../../src/standalone/UIKit/CenteredTypography";
 import Checkbox from "../../src/standalone/UIKit/Checkbox";
 import { TextFieldCC } from "../../src/standalone/UIKit/MuiFieldState";
+import DecimalInputField from "../../src/standalone/UIKit/InputControls/DecimalInputField";
+import CurrencyInput from "../../src/standalone/UIKit/InputControls/CurrencyInput";
+import IntegerInputField from "../../src/standalone/UIKit/InputControls/IntegerInputField";
 
 const theme = createTheme();
 const wrap = (ui: React.ReactNode) =>
@@ -304,6 +307,34 @@ describe("UIKit", () => {
 			wrap(<TextFieldCC label="Ref" ref={ref} />);
 			expect(ref.current).toBeInstanceOf(HTMLElement);
 			expect(ref.current!.contains(screen.getByLabelText("Ref"))).toBe(true);
+		});
+	});
+
+	describe("number inputs", () => {
+		// touch keyboards pick their keypad by inputmode: "numeric" has digits only,
+		// "decimal" adds the decimal separator
+		it("asks DecimalInputField's keypad for a decimal separator", () => {
+			wrap(<DecimalInputField label="Hours" value={7.5} />);
+			expect(screen.getByLabelText("Hours")).toHaveAttribute(
+				"inputmode",
+				"decimal",
+			);
+		});
+
+		it("asks CurrencyInput's keypad for a decimal separator", () => {
+			wrap(<CurrencyInput label="Price" currency="EUR" value={19.99} />);
+			expect(screen.getByLabelText("Price")).toHaveAttribute(
+				"inputmode",
+				"decimal",
+			);
+		});
+
+		it("keeps IntegerInputField's keypad to digits", () => {
+			wrap(<IntegerInputField label="Count" value={3} />);
+			expect(screen.getByLabelText("Count")).toHaveAttribute(
+				"inputmode",
+				"numeric",
+			);
 		});
 	});
 });

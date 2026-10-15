@@ -65,10 +65,10 @@ const DecimalInputField = (
 				...muiProps.slotProps,
 				htmlInput: {
 					...muiProps.slotProps?.htmlInput,
-					inputMode: "numeric",
+					inputMode: "decimal",
 				},
 			}}
-			inputMode={"numeric"}
+			inputMode={"decimal"}
 		/>
 	);
 };
