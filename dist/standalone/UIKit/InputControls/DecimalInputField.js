@@ -24,8 +24,8 @@ const DecimalInputField = (props) => {
             ...muiProps.slotProps,
             htmlInput: {
                 ...muiProps.slotProps?.htmlInput,
-                inputMode: "numeric",
+                inputMode: "decimal",
             },
-        }, inputMode: "numeric" }));
+        }, inputMode: "decimal" }));
 };
 export default React.memo(DecimalInputField);
