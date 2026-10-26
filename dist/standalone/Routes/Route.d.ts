@@ -18,6 +18,10 @@ interface RouteContextType {
      * The full route URL (with params)
      */
     url: string;
+    /**
+     * How many routes this route is nested in, 0 for a top-level route
+     */
+    depth: number;
 }
 export declare const RouteContext: React.Context<RouteContextType | null>;
 /**

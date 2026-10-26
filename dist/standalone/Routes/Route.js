@@ -22,18 +22,23 @@ export const useRoutePrefix = () => {
 };
 const Route = (props) => {
     const { path, element } = props;
-    const { pathname } = useLocation();
+    const location = useLocation();
+    const { pathname } = location;
     const routePrefix = useRoutePrefix();
+    const parentCtx = useContext(RouteContext);
+    const depth = parentCtx ? parentCtx.depth + 1 : 0;
     const ctx = useMemo(() => {
         const finalPath = normalizePath(routePrefix + path);
         const match = matchPath({ path: finalPath }, pathname);
         if (!match)
             return null; // this one is about to be unmounted
-        return { url: match.url, path: finalPath };
-    }, [path, pathname, routePrefix]);
+        return { url: match.url, path: finalPath, depth };
+    }, [path, pathname, routePrefix, depth]);
+    // every location, not only every route change: a navigation within this route needs its name too
     useEffect(() => {
-        sentrySetRoutePath(normalizePath(routePrefix + path));
-    }, [routePrefix, path]);
+        if (ctx)
+            sentrySetRoutePath(ctx.path, ctx.depth, location);
+    }, [ctx, location]);
     if (!ctx)
         return _jsx(React.Fragment, {});
     return _jsx(RouteContext.Provider, { value: ctx, children: element });

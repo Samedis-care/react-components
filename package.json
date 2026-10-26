@@ -30,7 +30,7 @@
 	"peerDependencies": {
 		"@emotion/react": "^11.5.0",
 		"@emotion/styled": "^11.3.0",
-		"@sentry/react": "^9 || ^10",
+		"@sentry/react": "^11",
 		"@types/react": "^18 || ^19",
 		"@types/react-dom": "^18 || ^19",
 		"react": "^18 || ^19",
@@ -51,7 +51,7 @@
 		}
 	},
 	"scripts": {
-		"docgen": "typedoc --exclude 'node_modules/**/*.*' --out typedoc --entryPoints src/index.ts",
+		"docgen": "typedoc --exclude 'node_modules/**/*.*' --out typedoc --entryPoints src/index.ts --entryPoints src/sentry.ts",
 		"start": "pnpm run storybook",
 		"prestart": "husky install",
 		"build": "tsc && cpx 'src/assets/**/*' dist/assets && cpx 'breaking-changes/**/*' dist/breaking-changes --clean",
@@ -91,7 +91,7 @@
 		"@chromatic-com/storybook": "^5.6.0",
 		"@eslint/compat": "^2.1.1",
 		"@eslint/js": "^10.0.1",
-		"@sentry/react": "^10.76.2",
+		"@sentry/react": "^11.9.0",
 		"@storybook/addon-a11y": "^10.6.3",
 		"@storybook/addon-docs": "^10.6.3",
 		"@storybook/addon-onboarding": "^10.6.3",
