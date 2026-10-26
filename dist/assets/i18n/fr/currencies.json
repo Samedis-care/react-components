@@ -8,6 +8,7 @@
 	},
 	"AED": {
 		"displayName": "dirham des Émirats arabes unis",
+		"symbol-alt-variant": "⃃",
 		"symbol": "AED",
 		"displayName_one": "dirham des Émirats arabes unis",
 		"displayName_many": "dirhams des Émirats arabes unis",
@@ -391,6 +392,7 @@
 	"CHF": {
 		"displayName": "franc suisse",
 		"symbol": "CHF",
+		"symbol-alt-narrow": "fr.",
 		"displayName_one": "franc suisse",
 		"displayName_many": "francs suisses",
 		"displayName_other": "francs suisses"
@@ -1180,6 +1182,7 @@
 	},
 	"MVR": {
 		"displayName": "rufiyaa maldivienne",
+		"symbol-alt-variant": "⃂",
 		"symbol": "MVR",
 		"displayName_one": "rufiyaa maldivienne",
 		"displayName_many": "rufiyaas maldiviennes",
@@ -1307,6 +1310,7 @@
 	},
 	"OMR": {
 		"displayName": "riyal omanais",
+		"symbol-alt-variant": "⃄",
 		"symbol": "OMR",
 		"displayName_one": "riyal omanais",
 		"displayName_many": "riyals omanis",

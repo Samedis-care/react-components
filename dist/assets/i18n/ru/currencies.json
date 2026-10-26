@@ -9,6 +9,7 @@
 	},
 	"AED": {
 		"displayName": "дирхам ОАЭ",
+		"symbol-alt-variant": "⃃",
 		"symbol": "AED",
 		"displayName_one": "дирхам ОАЭ",
 		"displayName_few": "дирхама ОАЭ",
@@ -436,6 +437,7 @@
 	"CHF": {
 		"displayName": "швейцарский франк",
 		"symbol": "CHF",
+		"symbol-alt-narrow": "Fr.",
 		"displayName_one": "швейцарский франк",
 		"displayName_few": "швейцарских франка",
 		"displayName_many": "швейцарских франков",
@@ -1331,6 +1333,7 @@
 	},
 	"MVR": {
 		"displayName": "мальдивская руфия",
+		"symbol-alt-variant": "⃂",
 		"symbol": "MVR",
 		"displayName_one": "мальдивская руфия",
 		"displayName_few": "мальдивские руфии",
@@ -1475,6 +1478,7 @@
 	},
 	"OMR": {
 		"displayName": "оманский риал",
+		"symbol-alt-variant": "⃄",
 		"symbol": "OMR",
 		"displayName_one": "оманский риал",
 		"displayName_few": "оманских риала",

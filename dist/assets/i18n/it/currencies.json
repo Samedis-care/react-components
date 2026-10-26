@@ -8,6 +8,7 @@
 	},
 	"AED": {
 		"displayName": "dirham degli Emirati Arabi Uniti",
+		"symbol-alt-variant": "⃃",
 		"symbol": "AED",
 		"displayName_one": "dirham degli EAU",
 		"displayName_many": "dirham degli EAU",
@@ -377,6 +378,7 @@
 	"CHF": {
 		"displayName": "franco svizzero",
 		"symbol": "CHF",
+		"symbol-alt-narrow": "Fr.",
 		"displayName_one": "franco svizzero",
 		"displayName_many": "franchi svizzeri",
 		"displayName_other": "franchi svizzeri"
@@ -397,11 +399,11 @@
 		"displayName_other": "pesos cileni"
 	},
 	"CNH": {
-		"displayName": "renmimbi cinese offshore",
+		"displayName": "yuan cinese offshore",
 		"symbol": "CNH",
-		"displayName_one": "renmimbi cinese offshore",
-		"displayName_many": "renmimbi cinesi offshore",
-		"displayName_other": "renmimbi cinesi offshore"
+		"displayName_one": "yuan cinese offshore",
+		"displayName_many": "yuan cinesi offshore",
+		"displayName_other": "yuan cinesi offshore"
 	},
 	"CNY": {
 		"displayName": "yuan cinese",
@@ -1162,6 +1164,7 @@
 	},
 	"MVR": {
 		"displayName": "rufiyaa delle Maldive",
+		"symbol-alt-variant": "⃂",
 		"symbol": "MVR",
 		"displayName_one": "rufiyaa delle Maldive",
 		"displayName_many": "rufiyaa delle Maldive",
@@ -1282,6 +1285,7 @@
 	},
 	"OMR": {
 		"displayName": "rial omanita",
+		"symbol-alt-variant": "⃄",
 		"symbol": "OMR",
 		"displayName_one": "rial omanita",
 		"displayName_many": "rial omaniti",

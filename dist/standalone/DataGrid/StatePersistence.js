@@ -22,14 +22,16 @@ const StatePersistence = () => {
     const [state] = useDataGridState();
     const [columnState] = useDataGridColumnState();
     const [columnWidthState] = useDataGridColumnsWidthState();
-    const { persist: config, columns, defaultSort, defaultFilter, defaultCustomData, overrideFilter, overrideCustomData, } = useDataGridProps();
+    const { persist: config, columns, defaultSort, defaultFilter, defaultCustomData, overrideFilter, overrideCustomData, overrideSearch, } = useDataGridProps();
     const defaultColumnState = useMemo(() => getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter), [columns, defaultSort, defaultFilter]);
     // the grid only applies the overrides when it opens, so this is the moment
     // to keep what they replaced: what a plain visit would have started with
     const [replaced] = useState(() => {
         if (!setPersisted)
             return null;
-        if (overrideFilter == null && overrideCustomData == null)
+        if (overrideFilter == null &&
+            overrideCustomData == null &&
+            overrideSearch == null)
             return null;
         const stored = decodePersistedState(persistedContext?.[0], columns, defaultColumnState, config);
         return {
@@ -42,6 +44,7 @@ const StatePersistence = () => {
                     entry.filter,
                 ]))
                 : undefined,
+            search: overrideSearch != null ? (stored.state.search ?? "") : undefined,
         };
     });
     // the grid state changes on every page of data loaded, so compare what we'd
@@ -52,7 +55,13 @@ const StatePersistence = () => {
         if (!setPersisted)
             return;
         const kept = state.filtersOverridden ? replaced : null;
-        const data = encodePersistedState(kept?.customData ? { ...state, customData: kept.customData } : state, kept?.columnFilter
+        const data = encodePersistedState(kept
+            ? {
+                ...state,
+                customData: kept.customData ?? state.customData,
+                search: kept.search ?? state.search,
+            }
+            : state, kept?.columnFilter
             ? withColumnFilter(columnState, kept.columnFilter)
             : columnState, columnWidthState, defaultColumnState, columns, config);
         const serialized = JSON.stringify(data);

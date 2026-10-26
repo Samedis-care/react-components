@@ -7,6 +7,7 @@
 	},
 	"AED": {
 		"displayName": "VAE-Dirham",
+		"symbol-alt-variant": "⃃",
 		"symbol": "AED",
 		"displayName_one": "VAE-Dirham",
 		"displayName_other": "VAE-Dirham"
@@ -380,6 +381,7 @@
 	"CHF": {
 		"displayName": "Schweizer Franken",
 		"symbol": "CHF",
+		"symbol-alt-narrow": "Fr.",
 		"displayName_one": "Schweizer Franken",
 		"displayName_other": "Schweizer Franken"
 	},
@@ -413,12 +415,6 @@
 		"symbol": "CNH",
 		"displayName_one": "Renminbi-Yuan (Offshore)",
 		"displayName_other": "Renminbi-Yuan (Offshore)"
-	},
-	"CNX": {
-		"displayName": "Dollar der Chinesischen Volksbank",
-		"symbol": "CNX",
-		"displayName_one": "Dollar der Chinesischen Volksbank",
-		"displayName_other": "Dollar der Chinesischen Volksbank"
 	},
 	"CNY": {
 		"displayName": "Renminbi Yuan",
@@ -1123,6 +1119,7 @@
 	},
 	"MVR": {
 		"displayName": "Malediven-Rufiyaa",
+		"symbol-alt-variant": "⃂",
 		"symbol": "MVR",
 		"displayName_one": "Malediven-Rufiyaa",
 		"displayName_other": "Malediven-Rufiyaa"
@@ -1233,6 +1230,7 @@
 	},
 	"OMR": {
 		"displayName": "Omanischer Rial",
+		"symbol-alt-variant": "⃄",
 		"symbol": "OMR",
 		"displayName_one": "Omanischer Rial",
 		"displayName_other": "Omanische Rials"

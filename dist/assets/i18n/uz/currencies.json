@@ -1,6 +1,7 @@
 {
 	"AED": {
 		"displayName": "Birlashgan Arab Amirliklari dirhami",
+		"symbol-alt-variant": "⃃",
 		"symbol": "AED",
 		"displayName_one": "BAA dirhami",
 		"displayName_other": "BAA dirhami"
@@ -188,6 +189,7 @@
 	"CHF": {
 		"displayName": "Shveytsariya franki",
 		"symbol": "CHF",
+		"symbol-alt-narrow": "Fr.",
 		"displayName_one": "Shveytsariya franki",
 		"displayName_other": "Shveytsariya franki"
 	},
@@ -652,6 +654,7 @@
 	},
 	"MVR": {
 		"displayName": "Maldiv rupiyasi",
+		"symbol-alt-variant": "⃂",
 		"symbol": "MVR",
 		"displayName_one": "Maldiv rupiyasi",
 		"displayName_other": "Maldiv rupiyasi"
@@ -726,6 +729,7 @@
 	},
 	"OMR": {
 		"displayName": "Ummon riyoli",
+		"symbol-alt-variant": "⃄",
 		"symbol": "OMR",
 		"displayName_one": "Ummon riyoli",
 		"displayName_other": "Ummon riyoli"

@@ -411,7 +411,7 @@ export const getDefaultColumnWidths = (columns, theme) => {
 };
 const DataGrid = (inProps, ref) => {
     const props = useThemeProps({ props: inProps, name: "CcDataGrid" });
-    const { columns, loadData, getAdditionalFilters, forceRefreshToken, defaultCustomData, overrideCustomData, onSelectionChange, defaultSort, defaultFilter, disableFooter, disableSelection, headerHeight, selection, overrideFilter, globalScrollListener, className, classes, persist, } = props;
+    const { columns, loadData, getAdditionalFilters, forceRefreshToken, defaultCustomData, overrideCustomData, onSelectionChange, defaultSort, defaultFilter, disableFooter, disableSelection, headerHeight, selection, overrideFilter, overrideSearch, globalScrollListener, className, classes, persist, } = props;
     const rowsPerPage = props.rowsPerPage || 25;
     const theme = useTheme();
     const persistedContext = useContext(DataGridPersistentStateContext);
@@ -420,11 +420,14 @@ const DataGrid = (inProps, ref) => {
     const statePack = useState(() => ({
         ...getDataGridDefaultState(columns, undefined),
         ...persisted.state,
+        search: overrideSearch ?? persisted.state.search ?? "",
         customData: overrideCustomData ??
             persisted.state.customData ??
             defaultCustomData ??
             {},
-        filtersOverridden: overrideFilter != null || overrideCustomData != null,
+        filtersOverridden: overrideFilter != null ||
+            overrideCustomData != null ||
+            overrideSearch != null,
     }));
     const [state, setState] = statePack;
     const { search, rows, pages, columnHidden, columnPinned, refreshDataInstance, refreshData, customData, selectAll, selectedRows, selectionUpdatedByProps, } = state;
