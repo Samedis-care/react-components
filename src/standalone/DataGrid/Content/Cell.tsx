@@ -14,6 +14,7 @@ import React, {
 import { CellComponentProps } from "react-window";
 import ColumnHeader from "./ColumnHeader";
 import SelectRow, { isSelected } from "./SelectRow";
+import SelectAllHeader from "./SelectAllHeader";
 import { Skeleton } from "@mui/material";
 import combineClassNames from "../../../utils/combineClassNames";
 
@@ -46,6 +47,7 @@ const Cell = (props: CellComponentProps): React.ReactElement => {
 		disableSelection,
 		isSelected: isSelectedHook,
 		canSelectRow,
+		enableSelectAll,
 		classes,
 	} = useDataGridProps();
 	const [state, setState] = useDataGridState();
@@ -78,7 +80,7 @@ const Cell = (props: CellComponentProps): React.ReactElement => {
 
 	let content: React.ReactNode = null;
 	if (rowIndex === 0 && columnIndex === 0 && !disableSelection) {
-		// empty
+		if (enableSelectAll) content = <SelectAllHeader />;
 	} else if (columnIndex === columns.length + (disableSelection ? 0 : 1)) {
 		content = <React.Fragment />; // remaining width filler
 	} else if (rowIndex === 0) {

@@ -3,6 +3,7 @@ import { Grid } from "@mui/material";
 import {
 	useDataGridColumnState,
 	useDataGridProps,
+	useDataGridSelectAll,
 	useDataGridState,
 } from "../DataGrid";
 import DataActionBarView from "./DataActionBarView";
@@ -23,6 +24,7 @@ const DataActionBar = () => {
 	} = useDataGridProps();
 	const { selectAll, selectedRows } = state;
 	const { onEdit, onDelete } = useDataGridProps();
+	const { label: selectAllLabel } = useDataGridSelectAll();
 
 	const numSelected = selectAll
 		? (state.rowsFiltered ?? state.rowsTotal) - selectedRows.length
@@ -122,6 +124,7 @@ const DataActionBar = () => {
 				customButtons={customDataActionButtons}
 				handleCustomButtonClick={handleCustomButtonCLick}
 				disableSelection={disableSelection || !enableSelectAll}
+				selectAllLabel={selectAllLabel}
 			/>
 		</Grid>
 	);

@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-10-26 | [DataGrid shows select all in the selection column header too](2026-10-26-data-grid-select-all-in-column-header.md) | behavior |
 | 2026-10-26 | [componentsCareBrowserTracingIntegration is imported from components-care/dist/sentry](2026-10-26-sentry-integration-own-entry-point.md) | type |
 | 2026-10-26 | [Sentry 11 is required](2026-10-26-sentry-11-required.md) | type, behavior |
 | 2026-10-26 | [Routes name spans after the deepest matched route, on every location](2026-10-26-routes-name-spans-after-deepest-route.md) | behavior, type |

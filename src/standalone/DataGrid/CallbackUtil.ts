@@ -2,6 +2,7 @@ import {
 	DataGridCustomDataActionButton,
 	DataGridFilterParameters,
 	DataGridQuery,
+	DataGridRowData,
 	DataGridRowUpdate,
 	DataGridSortSetting,
 	IDataGridCallbacks,
@@ -79,6 +80,68 @@ export const dataGridGetQuery = (
 	...dataGridGetFilterParameters(state, columnsState, getAdditionalFilters),
 	sort: dataGridPrepareFiltersAndSorts(columnsState)[0],
 });
+
+export interface DataGridFirstRows {
+	/**
+	 * The first selectable rows, in the grid's order, at most the limit
+	 */
+	rows: DataGridRowData[];
+	/**
+	 * The rows of the pages which were loaded for them (row index -> row), in
+	 * the grid's rows format
+	 */
+	loadedRows: Record<number, DataGridRowData>;
+}
+
+/**
+ * The first rows the query matches which can be selected, as the limited
+ * select all selects them (DataGridProps.limitSelectAll)
+ * @param loadData The grid's loadData, loads the pages the grid hasn't loaded
+ * @param query The query the grid shows
+ * @param rowsPerPage The grid's page size
+ * @param rows The rows the grid has loaded (row index -> row)
+ * @param limit How many rows to return at most
+ * @param canSelectRow The grid's canSelectRow: the rows it refuses are skipped
+ * @returns The rows and the pages loaded for them, rejects if loadData rejects
+ * @remarks Loads one page after the other, until the limit is reached or a
+ *          page with less than rowsPerPage rows (the last one) was read
+ */
+export const dataGridLoadFirstRows = async (
+	loadData: IDataGridCallbacks["loadData"],
+	query: DataGridQuery,
+	rowsPerPage: number,
+	rows: Record<number, DataGridRowData>,
+	limit: number,
+	canSelectRow: IDataGridCallbacks["canSelectRow"],
+): Promise<DataGridFirstRows> => {
+	const selectable: DataGridRowData[] = [];
+	const loadedRows: Record<number, DataGridRowData> = {};
+	for (let page = 0; selectable.length < limit; page++) {
+		const start = page * rowsPerPage;
+		let pageRows: DataGridRowData[];
+		if (start in rows) {
+			// the grid stores whole pages
+			pageRows = [];
+			const end = start + rowsPerPage;
+			for (let index = start; index < end && index in rows; index++) {
+				pageRows.push(rows[index]);
+			}
+		} else {
+			pageRows = (
+				await loadData({ page: page + 1, rows: rowsPerPage, ...query })
+			).rows;
+			pageRows.forEach((row, offset) => {
+				loadedRows[start + offset] = row;
+			});
+		}
+		for (const row of pageRows) {
+			if (selectable.length >= limit) break;
+			if (!canSelectRow || canSelectRow(row)) selectable.push(row);
+		}
+		if (pageRows.length < rowsPerPage) break;
+	}
+	return { rows: selectable, loadedRows };
+};
 
 /**
  * Is a custom data action button disabled?

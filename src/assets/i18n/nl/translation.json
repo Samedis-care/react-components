@@ -106,6 +106,7 @@
 				"delete": "Verwijderen",
 				"more": "Meer",
 				"select-all": "Allen",
+				"select-first": "Eerste {{NUM}}",
 				"first-page": "Eerste pagina",
 				"last-page": "Laatste pagina",
 				"next-page": "Volgende pagina",

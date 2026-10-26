@@ -1,15 +1,19 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
 	dataGridApplyRowUpdate,
 	dataGridGetFilterParameters,
 	dataGridGetQuery,
 	dataGridIsCustomDataActionDisabled,
+	dataGridLoadFirstRows,
 	dataGridPrepareFiltersAndSorts,
 } from "../../src/standalone/DataGrid/CallbackUtil";
 import {
 	getDataGridDefaultState,
 	type DataGridCustomDataActionButton,
+	type DataGridQuery,
+	type DataGridRowData,
 	type IDataGridColumnsState,
+	type IDataGridLoadDataParameters,
 	type IDataGridState,
 } from "../../src/standalone/DataGrid/DataGrid";
 import type { FilterType } from "../../src/standalone/DataGrid/Content/FilterEntry";
@@ -238,5 +242,144 @@ describe("dataGridIsCustomDataActionDisabled", () => {
 		expect(dataGridIsCustomDataActionDisabled(makeButton(true), 0, true)).toBe(
 			true,
 		);
+	});
+});
+
+describe("dataGridLoadFirstRows", () => {
+	const ROWS: DataGridRowData[] = Array.from({ length: 12 }, (_, index) => ({
+		id: String(index + 1),
+		locked: index % 2 === 0 ? "yes" : "no",
+	}));
+	const QUERY: DataGridQuery = {
+		quickFilter: "q",
+		additionalFilters: { a: 1 },
+		fieldFilter: {},
+		sort: [{ field: "id", direction: 1 }],
+	};
+	const makeLoadData = (source = ROWS) =>
+		vi.fn((params: IDataGridLoadDataParameters) => ({
+			rowsTotal: source.length,
+			rows: source.slice(
+				(params.page - 1) * params.rows,
+				params.page * params.rows,
+			),
+		}));
+	/** the grid's rows of the given pages (page size 5) */
+	const loaded = (...pages: number[]): Record<number, DataGridRowData> =>
+		Object.fromEntries(
+			pages.flatMap((page) =>
+				ROWS.slice(page * 5, page * 5 + 5).map((row, offset) => [
+					page * 5 + offset,
+					row,
+				]),
+			),
+		);
+	const ids = (rows: DataGridRowData[]) => rows.map((row) => row.id);
+
+	it("takes the loaded pages and loads only the missing ones, with the grid's query", async () => {
+		const loadData = makeLoadData();
+		const result = await dataGridLoadFirstRows(
+			loadData,
+			QUERY,
+			5,
+			loaded(0),
+			8,
+			undefined,
+		);
+		expect(ids(result.rows)).toEqual(["1", "2", "3", "4", "5", "6", "7", "8"]);
+		expect(loadData).toHaveBeenCalledTimes(1);
+		expect(loadData).toHaveBeenCalledWith({ page: 2, rows: 5, ...QUERY });
+		// the whole page, in the grid's format
+		expect(result.loadedRows).toEqual(
+			Object.fromEntries(ROWS.slice(5, 10).map((row, i) => [5 + i, row])),
+		);
+	});
+
+	it("loads nothing if the grid has loaded the rows", async () => {
+		const loadData = makeLoadData();
+		const result = await dataGridLoadFirstRows(
+			loadData,
+			QUERY,
+			5,
+			loaded(0, 1),
+			10,
+			undefined,
+		);
+		expect(ids(result.rows)).toHaveLength(10);
+		expect(loadData).not.toHaveBeenCalled();
+		expect(result.loadedRows).toEqual({});
+	});
+
+	it("stops at the last page if fewer rows match than the limit", async () => {
+		const loadData = makeLoadData();
+		const result = await dataGridLoadFirstRows(
+			loadData,
+			QUERY,
+			5,
+			loaded(0),
+			50,
+			undefined,
+		);
+		expect(ids(result.rows)).toEqual(ids(ROWS));
+		// pages 2 and 3, page 3 is short
+		expect(loadData).toHaveBeenCalledTimes(2);
+	});
+
+	it("stops after a full last page at the empty page behind it", async () => {
+		const loadData = makeLoadData(ROWS.slice(0, 10));
+		const result = await dataGridLoadFirstRows(
+			loadData,
+			QUERY,
+			5,
+			{},
+			50,
+			undefined,
+		);
+		expect(ids(result.rows)).toHaveLength(10);
+		expect(loadData.mock.calls.map(([params]) => params.page)).toEqual([
+			1, 2, 3,
+		]);
+	});
+
+	it("skips the rows canSelectRow refuses and reads on to fill the limit", async () => {
+		const loadData = makeLoadData();
+		const result = await dataGridLoadFirstRows(
+			loadData,
+			QUERY,
+			5,
+			loaded(0),
+			4,
+			(record) => record.locked === "no",
+		);
+		expect(ids(result.rows)).toEqual(["2", "4", "6", "8"]);
+		expect(loadData).toHaveBeenCalledTimes(1);
+	});
+
+	it("selects and loads nothing with a limit of 0", async () => {
+		const loadData = makeLoadData();
+		const result = await dataGridLoadFirstRows(
+			loadData,
+			QUERY,
+			5,
+			{},
+			0,
+			undefined,
+		);
+		expect(result.rows).toEqual([]);
+		expect(loadData).not.toHaveBeenCalled();
+	});
+
+	it("rejects if loadData rejects", async () => {
+		const error = new Error("offline");
+		await expect(
+			dataGridLoadFirstRows(
+				() => Promise.reject(error),
+				QUERY,
+				5,
+				loaded(0),
+				8,
+				undefined,
+			),
+		).rejects.toBe(error);
 	});
 });

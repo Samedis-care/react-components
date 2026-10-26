@@ -106,6 +106,7 @@
 				"delete": "O'chirish",
 				"more": "Ko'proq",
 				"select-all": "Hammasi",
+				"select-first": "Ilk {{NUM}} ta",
 				"first-page": "Birinchi sahifa",
 				"last-page": "Oxirgi sahifa",
 				"next-page": "Keyingi sahifa",

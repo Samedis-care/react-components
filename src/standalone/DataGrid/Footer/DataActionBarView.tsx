@@ -66,6 +66,11 @@ export interface DataActionBarViewProps {
 	 * Disable select all button
 	 */
 	disableSelection: boolean;
+	/**
+	 * The select all label: "All", or "First" and the limit while the limited
+	 * select all selects only part of the rows matching the filter
+	 */
+	selectAllLabel: string;
 }
 
 const DataActionBarView = (props: DataActionBarViewProps) => {
@@ -121,7 +126,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 			<Grid key={"select-all"}>
 				<DataGridSelectAllWrapper
 					control={<SelectAll />}
-					labelText={t("standalone.data-grid.footer.select-all")}
+					labelText={props.selectAllLabel}
 					labelPlacement={"bottom"}
 					className={classes?.selectAllWrapper}
 					style={

@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useMemo } from "react";
+import { CheckboxProps } from "@mui/material";
 import { DataGridSelectAllCheckbox, useDataGridProps } from "../DataGrid";
 
 export interface IDataGridContentSelectAllViewProps {
@@ -15,6 +16,15 @@ export interface IDataGridContentSelectAllViewProps {
 	 */
 	disabled: boolean;
 	/**
+	 * Is the selection still being loaded? (limited select all, see
+	 * DataGridProps.limitSelectAll)
+	 */
+	busy: boolean;
+	/**
+	 * The accessible name, for a checkbox without a visible label
+	 */
+	label?: string;
+	/**
 	 * Update checked
 	 * @param evt The change event, ignored
 	 * @param newChecked New checked state
@@ -24,6 +34,14 @@ export interface IDataGridContentSelectAllViewProps {
 
 const SelectAllView = (props: IDataGridContentSelectAllViewProps) => {
 	const { classes } = useDataGridProps();
+	const { busy, label } = props;
+	const slotProps = useMemo(
+		(): CheckboxProps["slotProps"] =>
+			busy || label
+				? { input: { "aria-busy": busy || undefined, "aria-label": label } }
+				: undefined,
+		[busy, label],
+	);
 
 	return (
 		<DataGridSelectAllCheckbox
@@ -32,6 +50,7 @@ const SelectAllView = (props: IDataGridContentSelectAllViewProps) => {
 			indeterminate={props.indeterminate}
 			onChange={props.onSelect}
 			disabled={props.disabled}
+			slotProps={slotProps}
 		/>
 	);
 };

@@ -110,6 +110,7 @@
 				"delete": "Elimina",
 				"more": "Altro",
 				"select-all": "Tutti",
+				"select-first": "Primi {{NUM}}",
 				"first-page": "Prima pagina",
 				"last-page": "Ultima pagina",
 				"next-page": "Pagina successiva",

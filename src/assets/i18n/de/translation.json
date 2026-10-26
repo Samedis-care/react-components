@@ -106,6 +106,7 @@
 				"delete": "Löschen",
 				"more": "Mehr",
 				"select-all": "Alle",
+				"select-first": "Erste {{NUM}}",
 				"first-page": "Erste Seite",
 				"last-page": "Letzte Seite",
 				"next-page": "Nächste Seite",

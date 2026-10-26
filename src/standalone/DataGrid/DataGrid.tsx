@@ -41,6 +41,7 @@ import { dataGridApplyRowUpdate, dataGridGetQuery } from "./CallbackUtil";
 import { ModelFilterType, ModelUnknown } from "../../backend-integration/Model";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
 import CustomFilterDialog from "./CustomFilterDialog";
+import SelectAllProvider from "./SelectAllProvider";
 import StatePersistence, {
 	DataGridPersistentStateContext,
 } from "./StatePersistence";
@@ -357,14 +358,28 @@ export interface IDataGridColumnProps {
 	 */
 	disableDeleteHint?: string;
 	/**
-	 * Show the select all checkbox. It selects every row matching the filter,
-	 * including the rows not loaded yet: the selection is inverted then
-	 * (everything except the ids), and the ids are the rows unselected again.
+	 * Show the select all checkbox, in the footer and in the header of the
+	 * selection column. It selects every row matching the filter, including
+	 * the rows not loaded yet: the selection is inverted then (everything
+	 * except the ids), and the ids are the rows unselected again.
 	 * @remarks Delete handles this only with enableDeleteAll, a custom data
 	 *          action button only with its supportsSelectAll. They are disabled
-	 *          while everything is selected otherwise.
+	 *          while everything is selected otherwise. limitSelectAll selects
+	 *          the first rows by their ids instead.
 	 */
 	enableSelectAll?: boolean;
+	/**
+	 * Make the select all checkbox (enableSelectAll) select only this many rows
+	 * (a positive integer): the first ones matching the filter, in the grid's
+	 * sort order. They are selected by their ids, as if the user had ticked
+	 * them: the selection isn't inverted, so delete and every custom data action
+	 * button handle it. loadData loads the pages of them the grid hasn't loaded
+	 * yet, and rows canSelectRow refuses are skipped.
+	 * @remarks While more rows match the filter than the limit, the checkbox is
+	 *          labelled "First" and the limit instead of "All"
+	 * @default undefined (select all selects every row)
+	 */
+	limitSelectAll?: number;
 	/**
 	 * Does onDelete handle an inverted selection (select all), deleting
 	 * everything matching its filter except the ids? Otherwise delete is
@@ -642,6 +657,12 @@ export interface IDataGridState {
 	 */
 	selectedRows: string[];
 	/**
+	 * The ids the last limited select all (DataGridProps.limitSelectAll)
+	 * selected. While selectedRows holds exactly these ids (in any order), the
+	 * select all checkbox is checked.
+	 */
+	limitedSelectAll: string[] | null;
+	/**
 	 * Was the selection updated by DataGrid props
 	 */
 	selectionUpdatedByProps: boolean;
@@ -761,6 +782,55 @@ export const useDataGridRootRef =
 		return ctx;
 	};
 
+export interface DataGridSelectAll {
+	/**
+	 * Is the select all checkbox checked?
+	 */
+	checked: boolean;
+	/**
+	 * Is part of the rows selected? Shown as a dash, a click selects everything
+	 */
+	indeterminate: boolean;
+	/**
+	 * Is the selection still being loaded? (DataGridProps.limitSelectAll)
+	 */
+	busy: boolean;
+	/**
+	 * Is the select all checkbox disabled?
+	 */
+	disabled: boolean;
+	/**
+	 * The label: "All", or "First" and the limit while the limited select all
+	 * selects only part of the rows matching the filter
+	 */
+	label: string;
+	/**
+	 * Checks or unchecks select all
+	 * @param evt The change event, ignored
+	 * @param newChecked New checked state
+	 */
+	onSelect: (evt: React.ChangeEvent, newChecked: boolean) => void;
+}
+
+/**
+ * The select all checkbox state, shared by the checkbox in the footer and the
+ * one in the selection column header
+ */
+export const DataGridSelectAllContext = React.createContext<
+	DataGridSelectAll | undefined
+>(undefined);
+
+export const useDataGridSelectAll = (): DataGridSelectAll => {
+	const ctx = useContext(DataGridSelectAllContext);
+	if (!ctx) throw new Error("Select all context not set");
+	return ctx;
+};
+
+/**
+ * The page size when DataGridProps.rowsPerPage isn't set
+ */
+export const DATA_GRID_DEFAULT_ROWS_PER_PAGE = 25;
+
 export const getDataGridDefaultState = (
 	columns: IDataGridColumnDef[],
 	defaultCustomData: Record<string, unknown> | undefined,
@@ -780,6 +850,7 @@ export const getDataGridDefaultState = (
 	),
 	selectAll: false,
 	selectedRows: [],
+	limitedSelectAll: null,
 	selectionUpdatedByProps: false,
 	rows: {},
 	dataLoadError: null,
@@ -917,6 +988,16 @@ export const DataGridSelectAllCheckbox = styled(Checkbox, {
 })({
 	padding: 0,
 }) as unknown as typeof Checkbox;
+
+export const DataGridSelectAllHeader: React.ComponentType<
+	React.HTMLAttributes<HTMLDivElement>
+> = styled("div", {
+	name: "CcDataGrid",
+	slot: "selectAllHeader",
+})({
+	// at the top, like the column header labels
+	display: "flex",
+});
 
 export const DataGridSelectAllWrapper = styled(ComponentWithLabel, {
 	name: "CcDataGrid",
@@ -1158,6 +1239,7 @@ export type DataGridClassKey =
 	| "customFilterContainer"
 	| "selectCheckbox"
 	| "selectAllCheckbox"
+	| "selectAllHeader"
 	| "selectAllWrapper"
 	| "paginationText"
 	| "setFilterListDivider"
@@ -1279,7 +1361,7 @@ const DataGrid = (
 		classes,
 		persist,
 	} = props;
-	const rowsPerPage = props.rowsPerPage || 25;
+	const rowsPerPage = props.rowsPerPage || DATA_GRID_DEFAULT_ROWS_PER_PAGE;
 
 	const theme = useTheme();
 	const persistedContext = useContext(DataGridPersistentStateContext);
@@ -1595,38 +1677,40 @@ const DataGrid = (
 								<CustomFilterActiveContext.Provider
 									value={activeCustomFiltersPack}
 								>
-									<StatePersistence />
-									<HeaderWrapper
-										className={classes?.header}
-										sx={
-											state.showFilterDialog ? { display: "none" } : undefined
-										}
-									>
-										<Header />
-									</HeaderWrapper>
-									<ContentWrapper size={"grow"} className={classes?.content}>
-										<Settings columns={columns} />
-										<CustomFilterDialog />
-										<Content
-											columns={visibleColumns}
-											rowsPerPage={rowsPerPage}
-											disableSelection={disableSelection}
-											headerHeight={headerHeight}
-											globalScrollListener={globalScrollListener}
-										/>
-									</ContentWrapper>
-									{!disableFooter && (
-										<FooterWrapper
-											className={classes?.footer}
+									<SelectAllProvider>
+										<StatePersistence />
+										<HeaderWrapper
+											className={classes?.header}
 											sx={
-												state.showSettings || state.showFilterDialog
-													? { display: "none" }
-													: undefined
+												state.showFilterDialog ? { display: "none" } : undefined
 											}
 										>
-											<Footer />
-										</FooterWrapper>
-									)}
+											<Header />
+										</HeaderWrapper>
+										<ContentWrapper size={"grow"} className={classes?.content}>
+											<Settings columns={columns} />
+											<CustomFilterDialog />
+											<Content
+												columns={visibleColumns}
+												rowsPerPage={rowsPerPage}
+												disableSelection={disableSelection}
+												headerHeight={headerHeight}
+												globalScrollListener={globalScrollListener}
+											/>
+										</ContentWrapper>
+										{!disableFooter && (
+											<FooterWrapper
+												className={classes?.footer}
+												sx={
+													state.showSettings || state.showFilterDialog
+														? { display: "none" }
+														: undefined
+												}
+											>
+												<Footer />
+											</FooterWrapper>
+										)}
+									</SelectAllProvider>
 								</CustomFilterActiveContext.Provider>
 							</DataGridColumnsWidthStateContext.Provider>
 						</DataGridColumnsStateContext.Provider>

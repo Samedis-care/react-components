@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, fn, userEvent, waitFor, within } from "storybook/test";
+import { expect, fn, mocked, userEvent, waitFor, within } from "storybook/test";
 import { Box, Button, Dialog, DialogContent } from "@mui/material";
 import {
 	Mail as MailIcon,
@@ -247,7 +247,8 @@ const makeSelectAllButtons = (): DataGridCustomDataActionButton[] => [
 
 /**
  * Select all selects every row the grid shows (here: the users, through custom
- * data), loaded or not. "Add to list" supports it and gets the inverted
+ * data), loaded or not. Its checkbox is in the footer and in the header of the
+ * selection column. "Add to list" supports it and gets the inverted
  * selection with the filter, the count and the loaded rows. "Invite" doesn't,
  * and delete without enableDeleteAll doesn't either: both are disabled while
  * everything is selected.
@@ -266,16 +267,20 @@ export const WithSelectAll: Story = {
 		await expect(await canvas.findByText("Bob Smith")).toBeVisible();
 		await expect(canvas.queryByText("Alice Müller")).not.toBeInTheDocument();
 
-		const all = canvas.getByRole("checkbox", { name: "All" });
+		const [header, all] = canvas.getAllByRole("checkbox", { name: "All" });
+		await expect(header.closest(".CcDataGrid-headerCell")).not.toBeNull();
 		const deleteButton = canvas.getByRole("button", { name: "Delete" });
 		// a row ticked before doesn't carry over: select all selects everything
 		await userEvent.click(canvas.getByText("Dave Brown"));
 		await expect(all).toBePartiallyChecked();
+		await expect(header).toBePartiallyChecked();
 		await userEvent.click(all);
 		await expect(all).toBeChecked();
+		await expect(header).toBeChecked();
 		// unselects Bob again
 		await userEvent.click(canvas.getByText("Bob Smith"));
 		await expect(all).toBePartiallyChecked();
+		await expect(header).toBePartiallyChecked();
 		await expect(deleteButton).toBeDisabled();
 
 		// on xs the custom buttons are in the "More" menu
@@ -315,6 +320,16 @@ export const WithSelectAll: Story = {
 		await expect(all).not.toBeChecked();
 		await expect(all).not.toBePartiallyChecked();
 		await expect(deleteButton).toBeDisabled();
+
+		// the header checkbox is the same control, by keyboard too
+		header.focus();
+		await userEvent.keyboard(" ");
+		await expect(header).toBeChecked();
+		await expect(all).toBeChecked();
+		await expect(deleteButton).toBeDisabled();
+		await userEvent.keyboard(" ");
+		await expect(header).not.toBeChecked();
+		await expect(all).not.toBeChecked();
 	},
 };
 
@@ -334,6 +349,198 @@ export const WithSelectAllOnPhone: Story = {
 			await context.canvas.findByRole("button", { name: "More" }),
 		).toBeVisible();
 		await WithSelectAll.play?.(context);
+	},
+};
+
+const MANY_PEOPLE: Person[] = Array.from({ length: 120 }, (_, index) => ({
+	id: String(index + 1),
+	name: `Person ${index + 1}`,
+	age: 20 + (index % 50),
+	role: ["admin", "manager", "user"][index % 3],
+	active: index % 2 === 0,
+}));
+const FIRST_50_IDS = MANY_PEOPLE.slice(0, 50).map((person) => person.id);
+
+/**
+ * With limitSelectAll 50, select all selects the first 50 of the 120 rows by
+ * their ids. The grid has loaded the first page (25 rows), so it
+ * loads the second one. The selection isn't inverted: delete and "Invite",
+ * which doesn't support select all, work with it.
+ */
+export const WithLimitedSelectAll: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: fn(makeLoadData(MANY_PEOPLE)),
+		searchPlaceholder: "Search",
+		enableSelectAll: true,
+		limitSelectAll: 50,
+		onSelectionChange: fn(),
+		onDelete: fn(),
+		customDataActionButtons: makeSelectAllButtons(),
+	},
+	play: async ({ args, canvas }) => {
+		await expect(await canvas.findByText("Person 1")).toBeVisible();
+		const loadData = mocked(args.loadData);
+		await expect(loadData).toHaveBeenCalledTimes(1);
+
+		// more rows match than the limit
+		const [header, first] = canvas.getAllByRole("checkbox", {
+			name: "First 50",
+		});
+		await expect(header.closest(".CcDataGrid-headerCell")).not.toBeNull();
+		await userEvent.click(header);
+		await waitFor(() =>
+			expect(args.onSelectionChange).toHaveBeenLastCalledWith(
+				false,
+				FIRST_50_IDS,
+			),
+		);
+		await expect(header).toBeChecked();
+		await expect(first).toBeChecked();
+		await expect(loadData).toHaveBeenCalledTimes(2);
+		await expect(loadData).toHaveBeenLastCalledWith(
+			expect.objectContaining({ page: 2, rows: 25 }),
+		);
+
+		await expect(canvas.getByRole("button", { name: "Delete" })).toBeEnabled();
+		const invite = canvas.getByRole("button", { name: "Invite" });
+		await expect(invite).toBeEnabled();
+		await userEvent.click(invite);
+		await expect(
+			args.customDataActionButtons?.[1].onClick,
+		).toHaveBeenCalledWith(false, FIRST_50_IDS, {
+			filter: { quickFilter: "", additionalFilters: {}, fieldFilter: {} },
+			count: 50,
+			// the grid keeps the page loaded for select all
+			rows: MANY_PEOPLE.slice(0, 50),
+		});
+
+		// a row unticked and ticked again: the same 50 rows are selected
+		await userEvent.click(canvas.getByText("Person 3"));
+		await expect(first).toBePartiallyChecked();
+		await expect(header).toBePartiallyChecked();
+		await userEvent.click(canvas.getByText("Person 3"));
+		await expect(args.onSelectionChange).toHaveBeenLastCalledWith(false, [
+			...FIRST_50_IDS.filter((id) => id !== "3"),
+			"3",
+		]);
+		await expect(first).toBeChecked();
+		await expect(header).toBeChecked();
+
+		// a click on the selection clears it
+		await userEvent.click(first);
+		await expect(first).not.toBeChecked();
+		await expect(first).not.toBePartiallyChecked();
+		await expect(args.onSelectionChange).toHaveBeenLastCalledWith(false, []);
+
+		// all of them if no more match than the limit
+		await userEvent.type(canvas.getByPlaceholderText("Search"), "Person 1");
+		await expect(
+			await canvas.findByText("Filtered: 32 Total: 120", {}, { timeout: 3000 }),
+		).toBeVisible();
+		await userEvent.click(canvas.getAllByRole("checkbox", { name: "All" })[1]);
+		await waitFor(() =>
+			expect(args.onSelectionChange).toHaveBeenLastCalledWith(
+				false,
+				MANY_PEOPLE.filter((person) => person.name.includes("Person 1")).map(
+					(person) => person.id,
+				),
+			),
+		);
+		for (const all of canvas.getAllByRole("checkbox", { name: "All" }))
+			await expect(all).toBeChecked();
+
+		// nothing matches: there is nothing to select, so it doesn't stay ticked
+		const all = canvas.getAllByRole("checkbox", { name: "All" })[1];
+		await userEvent.click(all);
+		await userEvent.type(canvas.getByPlaceholderText("Search"), "x");
+		await expect(
+			await canvas.findByText("Filtered: 0 Total: 120", {}, { timeout: 3000 }),
+		).toBeVisible();
+		const loads = loadData.mock.calls.length;
+		await userEvent.click(all);
+		await waitFor(() => expect(loadData).toHaveBeenCalledTimes(loads + 1));
+		await waitFor(() => expect(all).not.toHaveAttribute("aria-busy"));
+		await expect(all).not.toBeChecked();
+	},
+};
+
+/**
+ * The rows the limited select all loads arrive after the click. A click
+ * meanwhile, in the footer or the header, unticks it again, a row ticked meanwhile stays the selection, and
+ * a failed load leaves the selection as it was and reports the error.
+ */
+export const LimitedSelectAllWhileLoading: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: fn(makeLoadData(MANY_PEOPLE)),
+		enableSelectAll: true,
+		limitSelectAll: 50,
+		onSelectionChange: fn(),
+		onError: fn(),
+	},
+	play: async ({ args, canvas }) => {
+		await expect(await canvas.findByText("Person 1")).toBeVisible();
+		const loadData = mocked(args.loadData);
+		const onSelectionChange = mocked(args.onSelectionChange);
+		const [header, first] = canvas.getAllByRole("checkbox", {
+			name: "First 50",
+		});
+		let release = () => {};
+		const holdSecondPage = () =>
+			new Promise<DataGridData>((resolve) => {
+				release = () =>
+					resolve({
+						rowsTotal: 120,
+						rowsFiltered: 120,
+						rows: MANY_PEOPLE.slice(25, 50),
+					});
+			});
+
+		// checked and busy while the second page loads, a click unticks it
+		loadData.mockImplementationOnce(holdSecondPage);
+		await userEvent.click(first);
+		await expect(first).toBeChecked();
+		await expect(first).toHaveAttribute("aria-busy", "true");
+		await expect(header).toBeChecked();
+		await expect(header).toHaveAttribute("aria-busy", "true");
+		await userEvent.click(header);
+		for (const checkbox of [header, first]) {
+			await expect(checkbox).not.toBeChecked();
+			await expect(checkbox).not.toHaveAttribute("aria-busy");
+		}
+		release();
+
+		const error = new Error("offline");
+		loadData.mockRejectedValueOnce(error);
+		await userEvent.click(first);
+		await waitFor(() => expect(args.onError).toHaveBeenCalledWith(error));
+		await expect(first).not.toBeChecked();
+		await expect(first).not.toHaveAttribute("aria-busy");
+
+		// the click on the row comes later than the one on select all
+		loadData.mockImplementationOnce(holdSecondPage);
+		await userEvent.click(first);
+		await userEvent.click(canvas.getByText("Person 3"));
+		await expect(first).toBePartiallyChecked();
+		await expect(first).not.toHaveAttribute("aria-busy");
+		await expect(onSelectionChange).toHaveBeenLastCalledWith(false, ["3"]);
+		release();
+
+		// select all reads the second page the dropped one left in the grid, so
+		// it has arrived before this click, and the row stayed selected
+		const calls = loadData.mock.calls.length;
+		await userEvent.click(first);
+		await waitFor(() => expect(first).toBeChecked());
+		await expect(loadData).toHaveBeenCalledTimes(calls);
+		await expect(onSelectionChange.mock.calls.slice(-2)).toEqual([
+			[false, ["3"]],
+			[false, FIRST_50_IDS],
+		]);
+		// the unticked and the failed select all selected nothing
+		await expect(
+			onSelectionChange.mock.calls.filter(([, ids]) => ids.length === 50),
+		).toHaveLength(1);
 	},
 };
 
