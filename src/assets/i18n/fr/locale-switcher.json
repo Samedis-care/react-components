@@ -641,12 +641,6 @@
 		"native_country": "Curaçao",
 		"native_language": "Nederlands"
 	},
-	"pap-CW": {
-		"country": "Curaçao",
-		"language": "papiamento",
-		"native_country": "Kòrsou",
-		"native_language": "Papiamentu"
-	},
 	"en-CX": {
 		"country": "Île Christmas",
 		"language": "anglais",
@@ -1211,12 +1205,6 @@
 		"native_country": "Хрватска",
 		"native_language": "српски"
 	},
-	"ht-HT": {
-		"country": "Haïti",
-		"language": "créole haïtien",
-		"native_country": "Haïti",
-		"native_language": "Kreyòl Ayisyen"
-	},
 	"fr-HT": {
 		"country": "Haïti",
 		"language": "français",
@@ -1250,7 +1238,7 @@
 	"jv-ID": {
 		"country": "Indonésie",
 		"language": "javanais",
-		"native_country": "Indonésia",
+		"native_country": "Indonesia",
 		"native_language": "Jawa"
 	},
 	"en-IE": {
@@ -2265,7 +2253,7 @@
 		"country": "Nigeria",
 		"language": "igbo",
 		"native_country": "Naịjịrịa",
-		"native_language": "Igbo"
+		"native_language": "Asụsụ Igbo"
 	},
 	"ff-NG": {
 		"country": "Nigeria",
@@ -2416,12 +2404,6 @@
 		"language": "anglais",
 		"native_country": "Papua New Guinea",
 		"native_language": "English"
-	},
-	"tpi-PG": {
-		"country": "Papouasie-Nouvelle-Guinée",
-		"language": "tok pisin",
-		"native_country": "Papua Niugini",
-		"native_language": "Tok Pisin"
 	},
 	"en-PH": {
 		"country": "Philippines",
@@ -2603,6 +2585,12 @@
 		"native_country": "Россия",
 		"native_language": "татар"
 	},
+	"ady-RU": {
+		"country": "Russie",
+		"language": "adyguéen",
+		"native_country": "Урысые",
+		"native_language": "адыгабзэ"
+	},
 	"ce-RU": {
 		"country": "Russie",
 		"language": "tchétchène",
@@ -2632,6 +2620,12 @@
 		"language": "bachkir",
 		"native_country": "Рәсәй",
 		"native_language": "башҡорт"
+	},
+	"kbd-RU": {
+		"country": "Russie",
+		"language": "kabarde",
+		"native_country": "Урысей",
+		"native_language": "къэбэрдеибзэ"
 	},
 	"sah-RU": {
 		"country": "Russie",
@@ -2750,7 +2744,7 @@
 	"en-SH": {
 		"country": "Sainte-Hélène",
 		"language": "anglais",
-		"native_country": "St Helena",
+		"native_country": "St Helena, Ascension & Tristan da Cunha",
 		"native_language": "English"
 	},
 	"sl-SI": {
@@ -2908,12 +2902,6 @@
 		"language": "anglais",
 		"native_country": "Eswatini",
 		"native_language": "English"
-	},
-	"ss-SZ": {
-		"country": "Eswatini",
-		"language": "swati",
-		"native_country": "eSwatini",
-		"native_language": "siSwati"
 	},
 	"en-TC": {
 		"country": "Îles Turques-et-Caïques",

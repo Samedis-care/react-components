@@ -137,7 +137,7 @@ def get_currencies_alive() -> list[str]:
                     continue
                 if "_to" not in currencyData:
                     alive_currencies.add(currency)
-    return list(alive_currencies)
+    return sorted(alive_currencies) # set order changes per run
 
 # currency formatting data. currency OR "DEFAULT" -> {_rounding: string, _digits: string, _cashRounding?: string, _cashDigits?: string}
 def get_currency_formatting() -> dict[str, dict[str, str]]:

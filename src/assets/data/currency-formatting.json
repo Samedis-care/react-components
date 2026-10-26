@@ -263,10 +263,6 @@
 		"rounding": 0,
 		"digits": 2
 	},
-	"CNX": {
-		"rounding": 0,
-		"digits": 2
-	},
 	"CNY": {
 		"rounding": 0,
 		"digits": 2
@@ -801,7 +797,7 @@
 	},
 	"PKR": {
 		"rounding": 0,
-		"digits": 0
+		"digits": 2
 	},
 	"PLN": {
 		"rounding": 0,

@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-10-26 | [Locale and currency data come from CLDR 49](2026-10-26-locale-data-cldr-49.md) | behavior |
 | 2026-10-15 | [Localized numbers take either . or , as decimal separator](2026-10-15-localized-numbers-take-either-decimal-separator.md) | behavior |
 | 2026-10-15 | [getNumberSeparator finds the decimal separator with any format options](2026-10-15-number-separators-with-any-options.md) | behavior |
 | 2026-10-15 | [Decimal and currency inputs open a keypad with a decimal separator](2026-10-15-decimal-inputs-decimal-keypad.md) | behavior |
