@@ -56,6 +56,10 @@ export default defineConfig({
 				],
 				test: {
 					name: "storybook",
+					// Under a full run the first story of a file can wait seconds for its
+					// imports and the browser, so the 15s browser default is a coin flip
+					// there too (a story that takes 0.6s alone has timed out).
+					testTimeout: 30000,
 					browser: {
 						enabled: true,
 						headless: true,

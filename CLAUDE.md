@@ -38,6 +38,13 @@ All exports are aggregated in `src/index.ts`. Theme slot overrides for all compo
 - `@ts-ignore` requires an explanatory comment.
 - Style names follow `Cc<ComponentName>` to avoid collisions in MUI theme.
 - All `IconButton` elements must have an `aria-label` attribute for accessibility.
+- Every new component and every change is held to the **review checklist in
+  [`CONTRIBUTING.md`](CONTRIBUTING.md#review-checklist)**: correctness (edge cases, prop
+  changes after mount, effect cleanup, latest callbacks, async races, no unhandled
+  rejections), structure (DataGrid as the reference, no `ownerState`, applied `classes`,
+  root exports, `forwardRef`), accessibility (WCAG 2.2 AA: names, keyboard, visible focus,
+  focus never lost, announcements, 320 px reflow, translated labels), JSDoc on every prop,
+  and tests. Go through it before calling a change done.
 
 ## Adding a New Component
 
@@ -45,13 +52,17 @@ All exports are aggregated in `src/index.ts`. Theme slot overrides for all compo
 2. Create a folder under the appropriate `src/<tier>/` directory with its own `index.ts`.
 3. Export it from the parent tier's `index.ts`.
 4. Register theme overrides in `src/theme-def.ts`.
-5. Add a Storybook story capturing all props via controls/actions.
+5. Add a Storybook story capturing all props via controls/actions, with `play` functions and axe in error mode.
+6. Write JSDoc for the component, its props interface and every prop, and go through the review checklist in `CONTRIBUTING.md`.
 
 ## Testing
 
 - **Unit tests** live in `test/standalone/` — run with `pnpm run test:unit`
 - **Story tests** use Storybook's Vitest addon with Playwright browser mode — run with `pnpm run test:stories`
 - Stories support `play` functions for interaction tests (click, type, assert). Import `fn`/`expect` from `storybook/test`. Use `fn()` only in `args`, never inside render functions.
+- Stories run axe in error mode: `parameters: { a11y: { test: "error" } }` (the global default in `.storybook/preview.ts` is `"todo"`, which only reports). Disable a single rule only with a comment saying why.
+- Pick the level that can observe the behavior: jsdom for logic, rendering and ARIA; a story for layout, focus, keyboard and real events; `globals: { viewport: { value: "mobile1", isRotated: false } }` for xs-only UI.
+- Check every new assertion once by breaking it (flip the expectation, see it fail). No whole-tree snapshots, no real sleeps, no timers left pending when a file ends. A bug fix comes with a test that failed before it.
 - `preview.ts` wraps all stories in MUI `ThemeProvider` via `createElement`
 
 ## CI/CD

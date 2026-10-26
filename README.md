@@ -39,6 +39,12 @@ Used Libraries:
 - react-window (Used for DOM virtualization)
 - [Sentry](https://sentry.io) (optional integration)
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md): the rules for new components and the review
+checklist (correctness, structure, accessibility, documentation and tests) that every
+change is held to.
+
 ## Developer Setup
 
 ### Running the developer environment (Storybook)
