@@ -29,8 +29,8 @@ export type DataGridPersistentStateContextType = [
 	 * got last, or what was stored before
 	 * @remarks This is the state a grid restores, not necessarily the one it
 	 *          shows: an override (DataGridProps.overrideFilter,
-	 *          overrideCustomData) isn't persisted. What a grid shows comes
-	 *          from DataGridDispatch.getQuery.
+	 *          overrideCustomData, overrideSearch) isn't persisted. What a
+	 *          grid shows comes from DataGridDispatch.getQuery.
 	 */
 	DataGridPersistedData | undefined,
 	/**
@@ -57,6 +57,10 @@ interface ReplacedFilters {
 	 * them
 	 */
 	columnFilter?: Record<string, IFilterDef | undefined>;
+	/**
+	 * The stored search, if overrideSearch replaced it
+	 */
+	search?: string;
 }
 
 /**
@@ -93,6 +97,7 @@ const StatePersistence = () => {
 		defaultCustomData,
 		overrideFilter,
 		overrideCustomData,
+		overrideSearch,
 	} = useDataGridProps();
 
 	const defaultColumnState = useMemo(
@@ -104,7 +109,12 @@ const StatePersistence = () => {
 	// to keep what they replaced: what a plain visit would have started with
 	const [replaced] = useState((): ReplacedFilters | null => {
 		if (!setPersisted) return null;
-		if (overrideFilter == null && overrideCustomData == null) return null;
+		if (
+			overrideFilter == null &&
+			overrideCustomData == null &&
+			overrideSearch == null
+		)
+			return null;
 		const stored = decodePersistedState(
 			persistedContext?.[0],
 			columns,
@@ -125,6 +135,7 @@ const StatePersistence = () => {
 							]),
 						)
 					: undefined,
+			search: overrideSearch != null ? (stored.state.search ?? "") : undefined,
 		};
 	});
 
@@ -138,7 +149,13 @@ const StatePersistence = () => {
 
 		const kept = state.filtersOverridden ? replaced : null;
 		const data = encodePersistedState(
-			kept?.customData ? { ...state, customData: kept.customData } : state,
+			kept
+				? {
+						...state,
+						customData: kept.customData ?? state.customData,
+						search: kept.search ?? state.search,
+					}
+				: state,
 			kept?.columnFilter
 				? withColumnFilter(columnState, kept.columnFilter)
 				: columnState,

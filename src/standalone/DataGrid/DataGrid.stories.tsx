@@ -687,3 +687,72 @@ export const OverrideIsNotPersisted: Story = {
 		await expect(await canvas.findByText("Bob Smith")).toBeVisible();
 	},
 };
+
+const OVERRIDE_SEARCH_STORAGE_KEY = "cc-storybook-data-grid-override-search";
+// what the link opening the grid sets: no search
+const OVERRIDE_SEARCH = "";
+
+/**
+ * Opened through a link which clears the search (overrideSearch). The user
+ * left "Bob" in the search box, and a plain visit still restores it: the grid
+ * persists the stored search in place of the override, also while the user
+ * searches for something else. Once the user resets the filters, the search is
+ * persisted again.
+ */
+export const OverrideSearchIsNotPersisted: Story = {
+	beforeEach: () => {
+		localStorage.setItem(
+			OVERRIDE_SEARCH_STORAGE_KEY,
+			JSON.stringify({ v: 2, search: "Bob" }),
+		);
+		return () => localStorage.removeItem(OVERRIDE_SEARCH_STORAGE_KEY);
+	},
+	render: () => {
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		const loadData = useCallback(makeLoadData(), []);
+		return (
+			<DataGridLocalStoragePersist storageKey={OVERRIDE_SEARCH_STORAGE_KEY}>
+				<DataGrid
+					columns={COLUMNS}
+					loadData={loadData}
+					searchPlaceholder={"Search people"}
+					overrideSearch={OVERRIDE_SEARCH}
+				/>
+			</DataGridLocalStoragePersist>
+		);
+	},
+	play: async ({ canvas }) => {
+		const stored = () =>
+			JSON.parse(
+				localStorage.getItem(OVERRIDE_SEARCH_STORAGE_KEY) ?? "{}",
+			) as DataGridPersistentState;
+
+		// the link's view: everyone, an empty search box
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		await expect(canvas.getByText("Bob Smith")).toBeVisible();
+		const searchBox = canvas.getByPlaceholderText("Search people");
+		await expect(searchBox).toHaveValue("");
+
+		// the grid has written (widths are new), keeping the user's search
+		await waitFor(() => expect(stored().width).toBeDefined());
+		await expect(stored().search).toBe("Bob");
+
+		// a search during the visit isn't persisted either
+		await userEvent.type(searchBox, "Carol");
+		await waitFor(() =>
+			expect(canvas.queryByText("Alice Müller")).not.toBeInTheDocument(),
+		);
+		await expect(stored().search).toBe("Bob");
+
+		// after a reset the search is the user's own again
+		await userEvent.click(canvas.getByRole("button", { name: "Reset" }));
+		await userEvent.click(
+			await within(document.body).findByRole("menuitem", {
+				name: "Reset filter",
+			}),
+		);
+		await waitFor(() => expect(stored().search).toBeUndefined());
+		await userEvent.type(searchBox, "Dave");
+		await waitFor(() => expect(stored().search).toBe("Dave"));
+	},
+};

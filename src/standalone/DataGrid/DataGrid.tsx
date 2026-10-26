@@ -92,8 +92,8 @@ export interface DataGridProps
 	 *   pinned state from their definition)
 	 * - sort: sorting state
 	 * - filters: customData, search, column filter. What an override
-	 *   (overrideCustomData, overrideFilter) replaced stays persisted as it was
-	 *   stored until the filters are reset.
+	 *   (overrideCustomData, overrideFilter, overrideSearch) replaced stays
+	 *   persisted as it was stored until the filters are reset.
 	 * @default ["columns", "sort", "filters"]
 	 */
 	persist?: ("columns" | "sort" | "filters")[];
@@ -405,6 +405,13 @@ export interface IDataGridColumnProps {
 	 */
 	overrideFilter?: DataGridFilterSetting[];
 	/**
+	 * Forced initial search (quick filter), overwrites the persisted search.
+	 * Pass "" to open the grid without the search the user left in it.
+	 * @remarks It is not persisted: until the user resets the filters, the
+	 *          grid keeps persisting the search which was stored
+	 */
+	overrideSearch?: string;
+	/**
 	 * Header height override (in px)
 	 * @default 32
 	 */
@@ -669,9 +676,9 @@ export interface IDataGridState {
 	initialResize: boolean;
 	/**
 	 * Was the grid opened with an override (DataGridProps.overrideFilter,
-	 * overrideCustomData), and have its filters not been reset since? The parts
-	 * an override replaced then belong to this visit, so the persisted state
-	 * keeps what was stored for them.
+	 * overrideCustomData, overrideSearch), and have its filters not been reset
+	 * since? The parts an override replaced then belong to this visit, so the
+	 * persisted state keeps what was stored for them.
 	 */
 	filtersOverridden: boolean;
 }
@@ -1266,6 +1273,7 @@ const DataGrid = (
 		headerHeight,
 		selection,
 		overrideFilter,
+		overrideSearch,
 		globalScrollListener,
 		className,
 		classes,
@@ -1293,12 +1301,16 @@ const DataGrid = (
 	const statePack = useState<IDataGridState>(() => ({
 		...getDataGridDefaultState(columns, undefined),
 		...persisted.state,
+		search: overrideSearch ?? persisted.state.search ?? "",
 		customData:
 			overrideCustomData ??
 			persisted.state.customData ??
 			defaultCustomData ??
 			{},
-		filtersOverridden: overrideFilter != null || overrideCustomData != null,
+		filtersOverridden:
+			overrideFilter != null ||
+			overrideCustomData != null ||
+			overrideSearch != null,
 	}));
 	const [state, setState] = statePack;
 	const {
