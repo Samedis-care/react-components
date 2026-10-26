@@ -47,7 +47,7 @@ describe("MultiImage", () => {
 	it("opens the edit dialog when the edit label is clicked", async () => {
 		renderMultiImage();
 		fireEvent.click(screen.getByRole("link", { name: "Edit" }));
-		await expect(screen.findByRole("dialog")).resolves.toBeInTheDocument();
+		expect(await screen.findByRole("dialog")).toBeInTheDocument();
 	});
 
 	/**

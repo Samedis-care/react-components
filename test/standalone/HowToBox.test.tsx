@@ -24,23 +24,21 @@ describe("HowToBox", () => {
 
 	it("renders a single string label as a list item", async () => {
 		renderHowToBox(<HowToBox labels="Single step" />);
-		await expect(screen.findByText("Single step")).resolves.toBeInTheDocument();
+		expect(await screen.findByText("Single step")).toBeInTheDocument();
 	});
 
 	it("renders an array of strings as separate list items", async () => {
 		renderHowToBox(
 			<HowToBox labels={["Step one", "Step two", "Step three"]} />,
 		);
-		await expect(screen.findByText("Step one")).resolves.toBeInTheDocument();
-		await expect(screen.findByText("Step two")).resolves.toBeInTheDocument();
-		await expect(screen.findByText("Step three")).resolves.toBeInTheDocument();
+		expect(await screen.findByText("Step one")).toBeInTheDocument();
+		expect(await screen.findByText("Step two")).toBeInTheDocument();
+		expect(await screen.findByText("Step three")).toBeInTheDocument();
 	});
 
 	it("renders the custom titleLabel", async () => {
 		renderHowToBox(<HowToBox titleLabel="Instructions" labels={["Do this"]} />);
-		await expect(
-			screen.findByText("Instructions"),
-		).resolves.toBeInTheDocument();
+		expect(await screen.findByText("Instructions")).toBeInTheDocument();
 	});
 
 	it("renders ReactNode items inside the list", async () => {
@@ -53,6 +51,6 @@ describe("HowToBox", () => {
 				]}
 			/>,
 		);
-		await expect(screen.findByTestId("node-item")).resolves.toBeInTheDocument();
+		expect(await screen.findByTestId("node-item")).toBeInTheDocument();
 	});
 });
