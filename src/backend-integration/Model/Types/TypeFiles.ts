@@ -12,6 +12,9 @@ export interface TypeFilesParams extends Partial<
 	Pick<
 		FileUploadProps,
 		| "maxFiles"
+		| "minFileSize"
+		| "maxFileSize"
+		| "maxTotalFileSize"
 		| "accept"
 		| "acceptLabel"
 		| "imageDownscaleOptions"

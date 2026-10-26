@@ -150,7 +150,10 @@
 				"limit-reached": "Maximaal aantal toegestane bestanden",
 				"invalid-type": "Niet-ondersteund bestandstype geselecteerd",
 				"image-load-failed": "De afbeelding kon niet worden geladen. De indeling wordt niet ondersteund door uw browser of het bestand is beschadigd",
-				"image-process-failed": "De afbeelding kon niet worden verwerkt"
+				"image-process-failed": "De afbeelding kon niet worden verwerkt",
+				"too-small": "‘{{NAME}}’ is te klein. Elk bestand moet minimaal {{SIZE}} groot zijn",
+				"too-large": "‘{{NAME}}’ is te groot. Elk bestand mag maximaal {{SIZE}} groot zijn",
+				"total-too-large": "De geselecteerde bestanden zouden de groottelimiet overschrijden. Alle bestanden samen mogen maximaal {{SIZE}} groot zijn"
 			},
 			"format": {
 				"any": "Elk",

@@ -26,6 +26,8 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 import isTouchDevice from "../../../utils/isTouchDevice";
 import combineClassNames from "../../../utils/combineClassNames";
 import getFileExt from "../../../utils/getFileExt";
+import formatFileSize from "../../../utils/formatFileSize";
+import useCurrentLocale from "../../../utils/useCurrentLocale";
 import matchMime from "../../../utils/matchMime";
 import useDropZone from "../../../utils/useDropZone";
 import useRefState from "../../../utils/useRefState";
@@ -41,6 +43,30 @@ export interface FileUploadProps {
 	 * Maximum amount of files allowed
 	 */
 	maxFiles?: number;
+	/**
+	 * Smallest size a picked file may have, in bytes
+	 * @remarks Checked against what is uploaded: the processed image where the control
+	 *          makes one (`FileData.preview`, see `convertImagesTo`,
+	 *          `imageDownscaleOptions` and `previewImages`), otherwise the file. A
+	 *          selection with a smaller file is refused as a whole
+	 *          (`files.size.too-small`). Unset means no minimum.
+	 */
+	minFileSize?: number;
+	/**
+	 * Largest size a picked file may have, in bytes
+	 * @remarks Checked like `minFileSize`, so a photo counts at its processed size. A
+	 *          selection with a larger file is refused as a whole
+	 *          (`files.size.too-large`). Unset means no maximum.
+	 */
+	maxFileSize?: number;
+	/**
+	 * Largest size all listed files may have together, in bytes
+	 * @remarks Counts every listed file that is not removed: a picked one at its upload
+	 *          size (see `minFileSize`), any other at its `FileMeta.size`, which counts as
+	 *          0 bytes where it is unset. A selection that would go over the limit is
+	 *          refused as a whole (`files.selector.too-large`). Unset means no maximum.
+	 */
+	maxTotalFileSize?: number;
 	/**
 	 * Filter for allowed mime types and file extensions (see <input accept="VALUE">)
 	 */
@@ -204,6 +230,12 @@ export interface FileMeta {
 	 *          upload is queued)
 	 */
 	downloadLink?: string | Blob;
+	/**
+	 * The file size in bytes, if known
+	 * @remarks Counts towards `FileUploadProps.maxTotalFileSize`, where a file without it
+	 *          counts as 0 bytes
+	 */
+	size?: number;
 }
 
 export interface FileData<T = File | FileMeta> {
@@ -275,6 +307,27 @@ const removeFiles = (
 			: "downloadLink" in file.file
 				? [{ ...file, delete: true }]
 				: [],
+	);
+
+/**
+ * The size of what a file uploads, in bytes
+ * @param file The file
+ * @remarks A picked file uploads its processed image if the control made one. Any other
+ *          file has the size it was listed with, if it was listed with one.
+ */
+const getUploadSize = (file: FileData): number =>
+	file.file instanceof Blob
+		? (file.preview instanceof Blob ? file.preview : file.file).size
+		: (file.file.size ?? 0);
+
+/**
+ * The size of all files that are not removed, in bytes
+ * @param files The list
+ */
+const getTotalSize = (files: FileData[]): number =>
+	files.reduce(
+		(total, file) => (file.delete ? total : total + getUploadSize(file)),
+		0,
 	);
 
 export interface FileUploadDispatch {
@@ -368,6 +421,9 @@ const FileUpload = (
 		previewImages,
 		previewSize,
 		maxFiles,
+		minFileSize,
+		maxFileSize,
+		maxTotalFileSize,
 		handleError,
 		accept,
 		acceptLabel,
@@ -391,10 +447,14 @@ const FileUpload = (
 			delete: false,
 			...meta,
 		}));
-	const { state: files, set: setFiles } =
-		useRefState<FileData[]>(loadInitialFiles);
+	const {
+		state: files,
+		get: getFiles,
+		set: setFiles,
+	} = useRefState<FileData[]>(loadInitialFiles);
 	const inputRef = useRef<HTMLInputElement | null>(null);
 	const { t } = useCCTranslations();
+	const locale = useCurrentLocale();
 
 	const getRemainingFileCount = useCallback(() => {
 		if (!maxFiles)
@@ -504,20 +564,67 @@ const FileUpload = (
 				}
 			}
 
+			if (minFileSize !== undefined) {
+				const tooSmall = newFiles.find(
+					(file) => getUploadSize(file) < minFileSize,
+				);
+				if (tooSmall) {
+					handleError(
+						"files.size.too-small",
+						t("standalone.file-upload.error.too-small", {
+							NAME: tooSmall.file.name,
+							SIZE: formatFileSize(minFileSize, locale),
+						}),
+					);
+					return;
+				}
+			}
+			if (maxFileSize !== undefined) {
+				const tooLarge = newFiles.find(
+					(file) => getUploadSize(file) > maxFileSize,
+				);
+				if (tooLarge) {
+					handleError(
+						"files.size.too-large",
+						t("standalone.file-upload.error.too-large", {
+							NAME: tooLarge.file.name,
+							SIZE: formatFileSize(maxFileSize, locale),
+						}),
+					);
+					return;
+				}
+			}
+
 			const newNames = new Set(newFiles.map((newFile) => newFile.file.name));
+			const addNewFiles = (prev: FileData[]): FileData[] => [
+				...(allowDuplicates
+					? prev
+					: // a file of the same name is replaced, which is a removal like any
+						// other: one on the server stays listed for the submit to delete. One
+						// that cannot be removed is not replaced.
+						removeFiles(
+							prev,
+							(file) => !file.preventDelete && newNames.has(file.file.name),
+						)),
+				...newFiles,
+			];
+
+			// on the list as it would be, so a file that replaces another counts once
+			if (
+				maxTotalFileSize !== undefined &&
+				getTotalSize(addNewFiles(getFiles())) > maxTotalFileSize
+			) {
+				handleError(
+					"files.selector.too-large",
+					t("standalone.file-upload.error.total-too-large", {
+						SIZE: formatFileSize(maxTotalFileSize, locale),
+					}),
+				);
+				return;
+			}
+
 			setFiles((prev) => {
-				const newValue: FileData[] = [
-					...(allowDuplicates
-						? prev
-						: // a file of the same name is replaced, which is a removal like any
-							// other: one on the server stays listed for the submit to delete. One
-							// that cannot be removed is not replaced.
-							removeFiles(
-								prev,
-								(file) => !file.preventDelete && newNames.has(file.file.name),
-							)),
-					...newFiles,
-				];
+				const newValue = addNewFiles(prev);
 				if (onChange) onChange(newValue);
 				return newValue;
 			});
@@ -526,10 +633,15 @@ const FileUpload = (
 			accept,
 			allowDuplicates,
 			convertImagesTo,
+			getFiles,
 			getRemainingFileCount,
 			handleError,
 			imageDownscaleOptions,
+			locale,
+			maxFileSize,
 			maxFiles,
+			maxTotalFileSize,
+			minFileSize,
 			onChange,
 			previewImages,
 			setFiles,

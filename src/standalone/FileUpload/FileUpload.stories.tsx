@@ -127,6 +127,88 @@ export const ReadOnly: FUGStory = {
 	},
 };
 
+/**
+ * A PNG of random pixels, which PNG cannot compress, so it is far larger than the same
+ * picture down-scaled
+ */
+const makeNoisePhoto = async (name: string, size = 400): Promise<File> => {
+	const canvas = document.createElement("canvas");
+	canvas.width = size;
+	canvas.height = size;
+	const ctx = canvas.getContext("2d");
+	const pixels = ctx.createImageData(size, size);
+	for (let i = 0; i < pixels.data.length; i++) {
+		pixels.data[i] = i % 4 === 3 ? 255 : Math.floor(Math.random() * 256);
+	}
+	ctx.putImageData(pixels, 0, 0);
+	const blob = await new Promise<Blob>((resolve, reject) =>
+		canvas.toBlob(
+			(result) => (result ? resolve(result) : reject(new Error("toBlob"))),
+			"image/png",
+		),
+	);
+	return new File([blob], name, { type: "image/png" });
+};
+
+/**
+ * Size limits per file and for all files together. A selection outside them is refused
+ * as a whole, with a message naming the file and the limit. A photo counts at the size
+ * it is uploaded with, after down-scaling.
+ */
+export const SizeLimits: FUGStory = {
+	name: "FileUploadGeneric — size limits",
+	args: {
+		minFileSize: 1024,
+		maxFileSize: 100 * 1024,
+		maxTotalFileSize: 150 * 1024,
+	},
+	parameters: { a11y: { test: "error" } },
+	render: (args) => {
+		const [files, setFiles] = useState<FileData[]>([]);
+		const [error, setError] = useState("");
+		return (
+			<div style={{ width: 480 }}>
+				<FileUploadGeneric
+					{...args}
+					files={files}
+					onChange={(f) => {
+						setFiles(f);
+						setError("");
+					}}
+					label="Attachments"
+					previewSize={64}
+					previewImages
+					imageDownscaleOptions={{ width: 32, height: 32, keepRatio: true }}
+					handleError={(_err, message) => setError(message)}
+				/>
+				<div role="alert">{error}</div>
+			</div>
+		);
+	},
+	play: async ({ canvas, canvasElement }) => {
+		const input =
+			canvasElement.querySelector<HTMLInputElement>('input[type="file"]');
+
+		const photo = await makeNoisePhoto("photo.png");
+		await expect(photo.size).toBeGreaterThan(100 * 1024);
+		await userEvent.upload(input, photo);
+		// listed: what is uploaded is the 32 px version
+		await expect(await canvas.findByText("photo.png")).toBeInTheDocument();
+		await expect(canvas.getByRole("alert").textContent).toBe("");
+
+		await userEvent.upload(
+			input,
+			new File(["x".repeat(100 * 1024 + 1)], "big.txt", { type: "text/plain" }),
+		);
+		await waitFor(() =>
+			expect(canvas.getByRole("alert").textContent).toBe(
+				'"big.txt" is too large. Each file may be at most 100\u00a0kB',
+			),
+		);
+		await expect(canvas.queryByText("big.txt")).toBe(null);
+	},
+};
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

@@ -165,7 +165,10 @@
 				"limit-reached": "Numero massimo di file consentiti raggiunto",
 				"invalid-type": "Tipo di file selezionato non supportato",
 				"image-load-failed": "Non è stato possibile caricare l'immagine. Il formato non è supportato dal browser o il file è danneggiato",
-				"image-process-failed": "Non è stato possibile elaborare l'immagine"
+				"image-process-failed": "Non è stato possibile elaborare l'immagine",
+				"too-small": "«{{NAME}}» è troppo piccolo. Ogni file deve essere di almeno {{SIZE}}",
+				"too-large": "«{{NAME}}» è troppo grande. Ogni file può essere al massimo di {{SIZE}}",
+				"total-too-large": "I file selezionati supererebbero il limite di dimensione. Tutti i file insieme possono essere al massimo di {{SIZE}}"
 			},
 			"format": {
 				"any": "Tutti",

@@ -150,7 +150,10 @@
 				"limit-reached": "Ruxsat berilgan fayllarning maksimal miqdori",
 				"invalid-type": "Qo'llab-quvvatlanmaydigan fayl turi tanlandi",
 				"image-load-failed": "Rasmni yuklab bo‘lmadi. Format brauzeringiz tomonidan qo‘llab-quvvatlanmaydi yoki fayl buzilgan",
-				"image-process-failed": "Rasmni qayta ishlab bo‘lmadi"
+				"image-process-failed": "Rasmni qayta ishlab bo‘lmadi",
+				"too-small": "«{{NAME}}» juda kichik. Har bir fayl kamida {{SIZE}} bo‘lishi kerak",
+				"too-large": "«{{NAME}}» juda katta. Har bir fayl ko‘pi bilan {{SIZE}} bo‘lishi mumkin",
+				"total-too-large": "Tanlangan fayllar hajm chegarasidan oshib ketadi. Barcha fayllar birgalikda ko‘pi bilan {{SIZE}} bo‘lishi mumkin"
 			},
 			"format": {
 				"any": "Har qanday",

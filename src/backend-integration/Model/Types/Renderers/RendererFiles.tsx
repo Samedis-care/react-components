@@ -58,6 +58,9 @@ class RendererFiles extends TypeFiles {
 							onBlur={handleBlur}
 							handleError={(_, msg) => setError(new Error(msg))}
 							maxFiles={this.params?.maxFiles}
+							minFileSize={this.params?.minFileSize}
+							maxFileSize={this.params?.maxFileSize}
+							maxTotalFileSize={this.params?.maxTotalFileSize}
 							accept={this.params?.accept}
 							acceptLabel={this.params?.acceptLabel}
 							imageDownscaleOptions={this.params?.imageDownscaleOptions}
