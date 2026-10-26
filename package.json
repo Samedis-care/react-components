@@ -51,7 +51,7 @@
 		}
 	},
 	"scripts": {
-		"docgen": "typedoc --exclude 'node_modules/**/*.*' --out typedoc --entryPoints src/index.ts",
+		"docgen": "typedoc --exclude 'node_modules/**/*.*' --out typedoc --entryPoints src/index.ts --entryPoints src/sentry.ts",
 		"start": "pnpm run storybook",
 		"prestart": "husky install",
 		"build": "tsc && cpx 'src/assets/**/*' dist/assets && cpx 'breaking-changes/**/*' dist/breaking-changes --clean",

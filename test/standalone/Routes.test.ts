@@ -121,10 +121,10 @@ describe("matchPath – case sensitivity", () => {
 });
 
 describe("SentryRoutingInstrumentation exports", () => {
-	it("exports componentsCareBrowserTracingIntegration without crashing at import time", async () => {
+	it("exports the routing hooks without crashing at import time", async () => {
 		const mod =
 			await import("../../src/standalone/Routes/SentryRoutingInstrumentation");
-		expect(typeof mod.componentsCareBrowserTracingIntegration).toBe("function");
+		expect(typeof mod.setRoutingInstrumentation).toBe("function");
 		expect(typeof mod.sentryHandleNavigation).toBe("function");
 		expect(typeof mod.sentrySetRoutePath).toBe("function");
 	});

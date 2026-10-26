@@ -5,47 +5,29 @@ import { createMemoryHistory } from "history";
 
 afterEach(cleanup);
 
+const SENTRY_MODULES = [
+	"@sentry/react",
+	"@sentry/browser",
+	"@sentry/core",
+	"@sentry/conventions/attributes",
+];
+
 const notInstalled = () => {
 	throw new Error("not installed");
 };
 
-// Sentry is an optional peer dependency (version 11), the app may have none or an older one
-describe.each([
-	[
-		"without Sentry",
-		() => {
-			vi.doMock("@sentry/browser", notInstalled);
-			vi.doMock("@sentry/core", notInstalled);
-			vi.doMock("@sentry/conventions/attributes", notInstalled);
-		},
-	],
-	[
-		"with Sentry 10",
-		() => {
-			vi.doMock(
-				"@sentry/conventions/attributes",
-				async (importOriginal: () => Promise<Record<string, unknown>>) => {
-					// eslint-disable-next-line @typescript-eslint/no-unused-vars -- not in Sentry 10's conventions
-					const { SENTRY_SEGMENT_NAME_SOURCE, ...sentry10 } =
-						await importOriginal();
-					return sentry10;
-				},
-			);
-		},
-	],
-])("Routes %s", (_, mockSentry) => {
+// Sentry is an optional peer dependency, the app may not have it installed
+describe("without Sentry", () => {
 	beforeEach(() => {
 		vi.resetModules();
-		mockSentry();
+		for (const id of SENTRY_MODULES) vi.doMock(id, notInstalled);
 	});
 
 	afterEach(() => {
-		vi.doUnmock("@sentry/browser");
-		vi.doUnmock("@sentry/core");
-		vi.doUnmock("@sentry/conventions/attributes");
+		for (const id of SENTRY_MODULES) vi.doUnmock(id);
 	});
 
-	it("render and navigate", async () => {
+	it("Routes render and navigate", async () => {
 		const { HistoryRouter, Route, Routes } =
 			await import("../../src/standalone/Routes");
 		const history = createMemoryHistory({ initialEntries: ["/a/1"] });
@@ -61,10 +43,28 @@ describe.each([
 		act(() => history.push("/b"));
 		expect(screen.getByText("route b")).toBeInTheDocument();
 	});
+});
 
-	it("refuse to set up the tracing integration", async () => {
+describe("with Sentry 10", () => {
+	beforeEach(() => {
+		vi.resetModules();
+		// a bundler that tolerates missing exports leaves Sentry 11's undefined
+		vi.doMock(
+			"@sentry/conventions/attributes",
+			async (importOriginal: () => Promise<Record<string, unknown>>) => ({
+				...(await importOriginal()),
+				SENTRY_SEGMENT_NAME_SOURCE: undefined,
+			}),
+		);
+	});
+
+	afterEach(() => {
+		vi.doUnmock("@sentry/conventions/attributes");
+	});
+
+	it("the tracing integration refuses to set up", async () => {
 		const { componentsCareBrowserTracingIntegration } =
-			await import("../../src/standalone/Routes");
+			await import("../../src/sentry");
 		expect(() => componentsCareBrowserTracingIntegration()).toThrow(
 			"componentsCareBrowserTracingIntegration requires @sentry/react 11",
 		);

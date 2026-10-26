@@ -72,5 +72,24 @@ export default [
 			],
 		},
 	},
+	{
+		files: ["src/**/*.{ts,tsx}"],
+		ignores: ["src/standalone/Routes/SentryBrowserTracingIntegration.ts"],
+		rules: {
+			"@typescript-eslint/no-restricted-imports": [
+				"error",
+				{
+					patterns: [
+						{
+							group: ["@sentry/*"],
+							message:
+								"Sentry is an optional peer dependency: load it with import(), or use it in the Sentry integration (components-care/dist/sentry)",
+							allowTypeImports: true,
+						},
+					],
+				},
+			],
+		},
+	},
 	...storybook.configs["flat/recommended"],
 ];

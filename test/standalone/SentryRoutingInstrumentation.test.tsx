@@ -3,12 +3,8 @@ import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
 import { render, act, cleanup } from "@testing-library/react";
 import * as Sentry from "@sentry/react";
 import { createBrowserHistory, History } from "history";
-import {
-	HistoryRouter,
-	Route,
-	Routes,
-	componentsCareBrowserTracingIntegration,
-} from "../../src/standalone/Routes";
+import { HistoryRouter, Route, Routes } from "../../src/standalone/Routes";
+import { componentsCareBrowserTracingIntegration } from "../../src/sentry";
 
 afterEach(cleanup);
 
