@@ -3,7 +3,7 @@ import Type from "../Type";
 import { ModelRenderParams } from "../index";
 import FilterType from "../FilterType";
 import { FileData, FileMeta, FileUploadProps } from "../../../standalone/FileUpload/Generic";
-export interface TypeFilesParams extends Partial<Pick<FileUploadProps, "maxFiles" | "accept" | "acceptLabel" | "imageDownscaleOptions" | "convertImagesTo" | "previewSize" | "previewImages" | "allowDuplicates" | "smallLabel" | "variant">> {
+export interface TypeFilesParams extends Partial<Pick<FileUploadProps, "maxFiles" | "minFileSize" | "maxFileSize" | "maxTotalFileSize" | "accept" | "acceptLabel" | "imageDownscaleOptions" | "convertImagesTo" | "previewSize" | "previewImages" | "allowDuplicates" | "smallLabel" | "variant">> {
     /**
      * Should we always send the raw file even if there is a preview? Defaults to false
      */

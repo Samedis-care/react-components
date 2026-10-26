@@ -3,6 +3,7 @@ import { DataGridCell, useDataGridProps, useDataGridState, } from "../DataGrid";
 import React, { useCallback, useContext, } from "react";
 import ColumnHeader from "./ColumnHeader";
 import SelectRow, { isSelected } from "./SelectRow";
+import SelectAllHeader from "./SelectAllHeader";
 import { Skeleton } from "@mui/material";
 import combineClassNames from "../../../utils/combineClassNames";
 export const CellContext = React.createContext(undefined);
@@ -15,7 +16,7 @@ export const useCellContext = () => {
 const Cell = (props) => {
     const { columnIndex, rowIndex } = props;
     const { columns, hoverState } = useCellContext();
-    const { onEdit, prohibitMultiSelect, onRowDoubleClick, disableSelection, isSelected: isSelectedHook, canSelectRow, classes, } = useDataGridProps();
+    const { onEdit, prohibitMultiSelect, onRowDoubleClick, disableSelection, isSelected: isSelectedHook, canSelectRow, enableSelectAll, classes, } = useDataGridProps();
     const [state, setState] = useDataGridState();
     const [hover, setHover] = hoverState;
     const record = state.rows[props.rowIndex - 1];
@@ -45,7 +46,8 @@ const Cell = (props) => {
     const column = columns[columnIndex - (disableSelection ? 0 : 1)];
     let content = null;
     if (rowIndex === 0 && columnIndex === 0 && !disableSelection) {
-        // empty
+        if (enableSelectAll)
+            content = _jsx(SelectAllHeader, {});
     }
     else if (columnIndex === columns.length + (disableSelection ? 0 : 1)) {
         content = _jsx(React.Fragment, {}); // remaining width filler

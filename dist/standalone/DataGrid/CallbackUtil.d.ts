@@ -1,4 +1,4 @@
-import { DataGridCustomDataActionButton, DataGridFilterParameters, DataGridQuery, DataGridRowUpdate, DataGridSortSetting, IDataGridCallbacks, IDataGridColumnsState, IDataGridFieldFilter, IDataGridState } from "./DataGrid";
+import { DataGridCustomDataActionButton, DataGridFilterParameters, DataGridQuery, DataGridRowData, DataGridRowUpdate, DataGridSortSetting, IDataGridCallbacks, IDataGridColumnsState, IDataGridFieldFilter, IDataGridState } from "./DataGrid";
 export declare const dataGridPrepareFiltersAndSorts: (columnsState: IDataGridColumnsState) => [DataGridSortSetting[], IDataGridFieldFilter];
 /**
  * The filter the grid shows, as loadData gets it
@@ -16,6 +16,31 @@ export declare const dataGridGetFilterParameters: (state: Pick<IDataGridState, "
  * @see dataGridGetFilterParameters
  */
 export declare const dataGridGetQuery: (state: Pick<IDataGridState, "search" | "customData">, columnsState: IDataGridColumnsState, getAdditionalFilters: IDataGridCallbacks["getAdditionalFilters"]) => DataGridQuery;
+export interface DataGridFirstRows {
+    /**
+     * The first selectable rows, in the grid's order, at most the limit
+     */
+    rows: DataGridRowData[];
+    /**
+     * The rows of the pages which were loaded for them (row index -> row), in
+     * the grid's rows format
+     */
+    loadedRows: Record<number, DataGridRowData>;
+}
+/**
+ * The first rows the query matches which can be selected, as the limited
+ * select all selects them (DataGridProps.limitSelectAll)
+ * @param loadData The grid's loadData, loads the pages the grid hasn't loaded
+ * @param query The query the grid shows
+ * @param rowsPerPage The grid's page size
+ * @param rows The rows the grid has loaded (row index -> row)
+ * @param limit How many rows to return at most
+ * @param canSelectRow The grid's canSelectRow: the rows it refuses are skipped
+ * @returns The rows and the pages loaded for them, rejects if loadData rejects
+ * @remarks Loads one page after the other, until the limit is reached or a
+ *          page with less than rowsPerPage rows (the last one) was read
+ */
+export declare const dataGridLoadFirstRows: (loadData: IDataGridCallbacks["loadData"], query: DataGridQuery, rowsPerPage: number, rows: Record<number, DataGridRowData>, limit: number, canSelectRow: IDataGridCallbacks["canSelectRow"]) => Promise<DataGridFirstRows>;
 /**
  * Is a custom data action button disabled?
  * @param button The button

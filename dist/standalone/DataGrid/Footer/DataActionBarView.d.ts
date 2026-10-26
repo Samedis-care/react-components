@@ -42,6 +42,11 @@ export interface DataActionBarViewProps {
      * Disable select all button
      */
     disableSelection: boolean;
+    /**
+     * The select all label: "All", or "First" and the limit while the limited
+     * select all selects only part of the rows matching the filter
+     */
+    selectAllLabel: string;
 }
 declare const _default: React.MemoExoticComponent<(props: DataActionBarViewProps) => React.JSX.Element>;
 export default _default;

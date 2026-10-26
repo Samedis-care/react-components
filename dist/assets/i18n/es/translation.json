@@ -110,6 +110,7 @@
 				"delete": "Eliminar",
 				"more": "Más",
 				"select-all": "Todos",
+				"select-first": "Primeros {{NUM}}",
 				"first-page": "Primera página",
 				"last-page": "Última página",
 				"next-page": "Página siguiente",
@@ -165,7 +166,10 @@
 				"limit-reached": "Se ha alcanzado el número máximo de archivos permitidos",
 				"invalid-type": "Se ha seleccionado un tipo de archivo no admitido",
 				"image-load-failed": "No se ha podido cargar la imagen. Su navegador no admite el formato o el archivo está dañado",
-				"image-process-failed": "No se ha podido procesar la imagen"
+				"image-process-failed": "No se ha podido procesar la imagen",
+				"too-small": "«{{NAME}}» es demasiado pequeño. Cada archivo debe ocupar al menos {{SIZE}}",
+				"too-large": "«{{NAME}}» es demasiado grande. Cada archivo puede ocupar como máximo {{SIZE}}",
+				"total-too-large": "Los archivos seleccionados superarían el límite de tamaño. Todos los archivos juntos pueden ocupar como máximo {{SIZE}}"
 			},
 			"format": {
 				"any": "Todos",

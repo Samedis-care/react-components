@@ -12,6 +12,30 @@ export interface FileUploadProps {
      */
     maxFiles?: number;
     /**
+     * Smallest size a picked file may have, in bytes
+     * @remarks Checked against what is uploaded: the processed image where the control
+     *          makes one (`FileData.preview`, see `convertImagesTo`,
+     *          `imageDownscaleOptions` and `previewImages`), otherwise the file. A
+     *          selection with a smaller file is refused as a whole
+     *          (`files.size.too-small`). Unset means no minimum.
+     */
+    minFileSize?: number;
+    /**
+     * Largest size a picked file may have, in bytes
+     * @remarks Checked like `minFileSize`, so a photo counts at its processed size. A
+     *          selection with a larger file is refused as a whole
+     *          (`files.size.too-large`). Unset means no maximum.
+     */
+    maxFileSize?: number;
+    /**
+     * Largest size all listed files may have together, in bytes
+     * @remarks Counts every listed file that is not removed: a picked one at its upload
+     *          size (see `minFileSize`), any other at its `FileMeta.size`, which counts as
+     *          0 bytes where it is unset. A selection that would go over the limit is
+     *          refused as a whole (`files.selector.too-large`). Unset means no maximum.
+     */
+    maxTotalFileSize?: number;
+    /**
      * Filter for allowed mime types and file extensions (see <input accept="VALUE">)
      */
     accept?: string;
@@ -169,6 +193,12 @@ export interface FileMeta {
      *          upload is queued)
      */
     downloadLink?: string | Blob;
+    /**
+     * The file size in bytes, if known
+     * @remarks Counts towards `FileUploadProps.maxTotalFileSize`, where a file without it
+     *          counts as 0 bytes
+     */
+    size?: number;
 }
 export interface FileData<T = File | FileMeta> {
     /**

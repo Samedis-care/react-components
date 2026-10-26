@@ -106,6 +106,7 @@
 				"delete": "Effacer",
 				"more": "Plus",
 				"select-all": "Tout",
+				"select-first": "{{NUM}} premiers",
 				"first-page": "Première page",
 				"last-page": "Dernière page",
 				"next-page": "Page suivante",
@@ -150,7 +151,10 @@
 				"limit-reached": "Nombre maximum de dossiers autorisés atteint",
 				"invalid-type": "Type de fichier non supporté sélectionné",
 				"image-load-failed": "L'image n'a pas pu être chargée. Le format n'est pas pris en charge par votre navigateur ou le fichier est endommagé",
-				"image-process-failed": "L'image n'a pas pu être traitée"
+				"image-process-failed": "L'image n'a pas pu être traitée",
+				"too-small": "« {{NAME}} » est trop petit. Chaque fichier doit faire au moins {{SIZE}}",
+				"too-large": "« {{NAME}} » est trop volumineux. Chaque fichier peut faire au maximum {{SIZE}}",
+				"total-too-large": "Les fichiers sélectionnés dépasseraient la limite de taille. L'ensemble des fichiers ne peut pas dépasser {{SIZE}}"
 			},
 			"format": {
 				"any": "Tout",

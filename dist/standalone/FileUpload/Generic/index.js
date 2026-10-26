@@ -10,6 +10,8 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 import isTouchDevice from "../../../utils/isTouchDevice";
 import combineClassNames from "../../../utils/combineClassNames";
 import getFileExt from "../../../utils/getFileExt";
+import formatFileSize from "../../../utils/formatFileSize";
+import useCurrentLocale from "../../../utils/useCurrentLocale";
 import matchMime from "../../../utils/matchMime";
 import useDropZone from "../../../utils/useDropZone";
 import useRefState from "../../../utils/useRefState";
@@ -37,6 +39,20 @@ const removeFiles = (files, isRemoved) => files.flatMap((file) => !isRemoved(fil
     : "downloadLink" in file.file
         ? [{ ...file, delete: true }]
         : []);
+/**
+ * The size of what a file uploads, in bytes
+ * @param file The file
+ * @remarks A picked file uploads its processed image if the control made one. Any other
+ *          file has the size it was listed with, if it was listed with one.
+ */
+const getUploadSize = (file) => file.file instanceof Blob
+    ? (file.preview instanceof Blob ? file.preview : file.file).size
+    : (file.file.size ?? 0);
+/**
+ * The size of all files that are not removed, in bytes
+ * @param files The list
+ */
+const getTotalSize = (files) => files.reduce((total, file) => (file.delete ? total : total + getUploadSize(file)), 0);
 const StyledGroupBox = styled(GroupBox, { name: "CcFileUpload", slot: "root" })({});
 const Dropzone = styled(Grid, { name: "CcFileUpload", slot: "dropzone" })(({ theme }) => ({
     "&.Mui-active": {
@@ -79,7 +95,7 @@ const ModernUploadLabel = styled("span", {
 }));
 const FileUpload = (inProps, ref) => {
     const props = useThemeProps({ props: inProps, name: "CcFileUpload" });
-    const { name, convertImagesTo, imageDownscaleOptions, previewImages, previewSize, maxFiles, handleError, accept, acceptLabel, onChange, onRestoreFile, label, dirty, smallLabel, readOnly, onBlur, uploadLabel, allowDuplicates, className, classes, } = props;
+    const { name, convertImagesTo, imageDownscaleOptions, previewImages, previewSize, maxFiles, minFileSize, maxFileSize, maxTotalFileSize, handleError, accept, acceptLabel, onChange, onRestoreFile, label, dirty, smallLabel, readOnly, onBlur, uploadLabel, allowDuplicates, className, classes, } = props;
     const variant = props.variant ?? "classic";
     const boxLabel = labelWithDirtyMarker(label, dirty);
     const loadInitialFiles = () => (props.files || props.defaultFiles || []).map((meta) => ({
@@ -87,9 +103,10 @@ const FileUpload = (inProps, ref) => {
         delete: false,
         ...meta,
     }));
-    const { state: files, set: setFiles } = useRefState(loadInitialFiles);
+    const { state: files, get: getFiles, set: setFiles, } = useRefState(loadInitialFiles);
     const inputRef = useRef(null);
     const { t } = useCCTranslations();
+    const locale = useCurrentLocale();
     const getRemainingFileCount = useCallback(() => {
         if (!maxFiles)
             throw new Error("max files isn't set, this function shouldn't be called");
@@ -162,17 +179,46 @@ const FileUpload = (inProps, ref) => {
                 return;
             }
         }
+        if (minFileSize !== undefined) {
+            const tooSmall = newFiles.find((file) => getUploadSize(file) < minFileSize);
+            if (tooSmall) {
+                handleError("files.size.too-small", t("standalone.file-upload.error.too-small", {
+                    NAME: tooSmall.file.name,
+                    SIZE: formatFileSize(minFileSize, locale),
+                }));
+                return;
+            }
+        }
+        if (maxFileSize !== undefined) {
+            const tooLarge = newFiles.find((file) => getUploadSize(file) > maxFileSize);
+            if (tooLarge) {
+                handleError("files.size.too-large", t("standalone.file-upload.error.too-large", {
+                    NAME: tooLarge.file.name,
+                    SIZE: formatFileSize(maxFileSize, locale),
+                }));
+                return;
+            }
+        }
         const newNames = new Set(newFiles.map((newFile) => newFile.file.name));
+        const addNewFiles = (prev) => [
+            ...(allowDuplicates
+                ? prev
+                : // a file of the same name is replaced, which is a removal like any
+                    // other: one on the server stays listed for the submit to delete. One
+                    // that cannot be removed is not replaced.
+                    removeFiles(prev, (file) => !file.preventDelete && newNames.has(file.file.name))),
+            ...newFiles,
+        ];
+        // on the list as it would be, so a file that replaces another counts once
+        if (maxTotalFileSize !== undefined &&
+            getTotalSize(addNewFiles(getFiles())) > maxTotalFileSize) {
+            handleError("files.selector.too-large", t("standalone.file-upload.error.total-too-large", {
+                SIZE: formatFileSize(maxTotalFileSize, locale),
+            }));
+            return;
+        }
         setFiles((prev) => {
-            const newValue = [
-                ...(allowDuplicates
-                    ? prev
-                    : // a file of the same name is replaced, which is a removal like any
-                        // other: one on the server stays listed for the submit to delete. One
-                        // that cannot be removed is not replaced.
-                        removeFiles(prev, (file) => !file.preventDelete && newNames.has(file.file.name))),
-                ...newFiles,
-            ];
+            const newValue = addNewFiles(prev);
             if (onChange)
                 onChange(newValue);
             return newValue;
@@ -181,10 +227,15 @@ const FileUpload = (inProps, ref) => {
         accept,
         allowDuplicates,
         convertImagesTo,
+        getFiles,
         getRemainingFileCount,
         handleError,
         imageDownscaleOptions,
+        locale,
+        maxFileSize,
         maxFiles,
+        maxTotalFileSize,
+        minFileSize,
         onChange,
         previewImages,
         setFiles,

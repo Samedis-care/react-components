@@ -1,7 +1,7 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { Grid } from "@mui/material";
-import { useDataGridColumnState, useDataGridProps, useDataGridState, } from "../DataGrid";
+import { useDataGridColumnState, useDataGridProps, useDataGridSelectAll, useDataGridState, } from "../DataGrid";
 import DataActionBarView from "./DataActionBarView";
 import { dataGridGetFilterParameters } from "../CallbackUtil";
 import { isSelected } from "../Content/SelectRow";
@@ -12,6 +12,7 @@ const DataActionBar = () => {
     const { getAdditionalFilters, customDataActionButtons, disableSelection, enableSelectAll, enableDeleteAll, disableDeleteHint, } = useDataGridProps();
     const { selectAll, selectedRows } = state;
     const { onEdit, onDelete } = useDataGridProps();
+    const { label: selectAllLabel } = useDataGridSelectAll();
     const numSelected = selectAll
         ? (state.rowsFiltered ?? state.rowsTotal) - selectedRows.length
         : selectedRows.length;
@@ -80,6 +81,6 @@ const DataActionBar = () => {
         numSelected,
         rows,
     ]);
-    return (_jsx(Grid, { container: true, children: _jsx(DataActionBarView, { numSelected: Math.min(numSelected, 2), selectAll: selectAll, handleEdit: onEdit ? handleEdit : undefined, handleDelete: onDelete ? handleDelete : undefined, enableDeleteAll: !!enableDeleteAll, disableDeleteHint: disableDeleteHint, customButtons: customDataActionButtons, handleCustomButtonClick: handleCustomButtonCLick, disableSelection: disableSelection || !enableSelectAll }) }));
+    return (_jsx(Grid, { container: true, children: _jsx(DataActionBarView, { numSelected: Math.min(numSelected, 2), selectAll: selectAll, handleEdit: onEdit ? handleEdit : undefined, handleDelete: onDelete ? handleDelete : undefined, enableDeleteAll: !!enableDeleteAll, disableDeleteHint: disableDeleteHint, customButtons: customDataActionButtons, handleCustomButtonClick: handleCustomButtonCLick, disableSelection: disableSelection || !enableSelectAll, selectAllLabel: selectAllLabel }) }));
 };
 export default React.memo(DataActionBar);

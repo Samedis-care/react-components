@@ -46,6 +46,50 @@ export const dataGridGetQuery = (state, columnsState, getAdditionalFilters) => (
     sort: dataGridPrepareFiltersAndSorts(columnsState)[0],
 });
 /**
+ * The first rows the query matches which can be selected, as the limited
+ * select all selects them (DataGridProps.limitSelectAll)
+ * @param loadData The grid's loadData, loads the pages the grid hasn't loaded
+ * @param query The query the grid shows
+ * @param rowsPerPage The grid's page size
+ * @param rows The rows the grid has loaded (row index -> row)
+ * @param limit How many rows to return at most
+ * @param canSelectRow The grid's canSelectRow: the rows it refuses are skipped
+ * @returns The rows and the pages loaded for them, rejects if loadData rejects
+ * @remarks Loads one page after the other, until the limit is reached or a
+ *          page with less than rowsPerPage rows (the last one) was read
+ */
+export const dataGridLoadFirstRows = async (loadData, query, rowsPerPage, rows, limit, canSelectRow) => {
+    const selectable = [];
+    const loadedRows = {};
+    for (let page = 0; selectable.length < limit; page++) {
+        const start = page * rowsPerPage;
+        let pageRows;
+        if (start in rows) {
+            // the grid stores whole pages
+            pageRows = [];
+            const end = start + rowsPerPage;
+            for (let index = start; index < end && index in rows; index++) {
+                pageRows.push(rows[index]);
+            }
+        }
+        else {
+            pageRows = (await loadData({ page: page + 1, rows: rowsPerPage, ...query })).rows;
+            pageRows.forEach((row, offset) => {
+                loadedRows[start + offset] = row;
+            });
+        }
+        for (const row of pageRows) {
+            if (selectable.length >= limit)
+                break;
+            if (!canSelectRow || canSelectRow(row))
+                selectable.push(row);
+        }
+        if (pageRows.length < rowsPerPage)
+            break;
+    }
+    return { rows: selectable, loadedRows };
+};
+/**
  * Is a custom data action button disabled?
  * @param button The button
  * @param numSelected The amount of selected rows (0 none, 1 one, 2 multiple)

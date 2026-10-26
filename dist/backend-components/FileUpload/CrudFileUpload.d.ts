@@ -22,6 +22,9 @@ export interface CrudFileUploadProps extends Omit<FileUploadProps, "files" | "ha
      * Callback for deserializing data after getting it from the backend connector
      * @param data The data from the backend connector (index function)
      * @returns The file data which can be used by the control
+     * @remarks With `maxTotalFileSize`, set `file.size`: every file the control lists
+     *          comes from here, a picked one too once its upload is created, and one
+     *          without a size counts as 0 bytes.
      */
     deserialize: (data: Record<string, unknown>) => Promise<FileData<BackendFileMeta>> | FileData<BackendFileMeta>;
     /**

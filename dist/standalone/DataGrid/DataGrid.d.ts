@@ -287,14 +287,28 @@ export interface IDataGridColumnProps {
      */
     disableDeleteHint?: string;
     /**
-     * Show the select all checkbox. It selects every row matching the filter,
-     * including the rows not loaded yet: the selection is inverted then
-     * (everything except the ids), and the ids are the rows unselected again.
+     * Show the select all checkbox, in the footer and in the header of the
+     * selection column. It selects every row matching the filter, including
+     * the rows not loaded yet: the selection is inverted then (everything
+     * except the ids), and the ids are the rows unselected again.
      * @remarks Delete handles this only with enableDeleteAll, a custom data
      *          action button only with its supportsSelectAll. They are disabled
-     *          while everything is selected otherwise.
+     *          while everything is selected otherwise. limitSelectAll selects
+     *          the first rows by their ids instead.
      */
     enableSelectAll?: boolean;
+    /**
+     * Make the select all checkbox (enableSelectAll) select only this many rows
+     * (a positive integer): the first ones matching the filter, in the grid's
+     * sort order. They are selected by their ids, as if the user had ticked
+     * them: the selection isn't inverted, so delete and every custom data action
+     * button handle it. loadData loads the pages of them the grid hasn't loaded
+     * yet, and rows canSelectRow refuses are skipped.
+     * @remarks While more rows match the filter than the limit, the checkbox is
+     *          labelled "First" and the limit instead of "All"
+     * @default undefined (select all selects every row)
+     */
+    limitSelectAll?: number;
     /**
      * Does onDelete handle an inverted selection (select all), deleting
      * everything matching its filter except the ids? Otherwise delete is
@@ -557,6 +571,12 @@ export interface IDataGridState {
      */
     selectedRows: string[];
     /**
+     * The ids the last limited select all (DataGridProps.limitSelectAll)
+     * selected. While selectedRows holds exactly these ids (in any order), the
+     * select all checkbox is checked.
+     */
+    limitedSelectAll: string[] | null;
+    /**
      * Was the selection updated by DataGrid props
      */
     selectionUpdatedByProps: boolean;
@@ -630,6 +650,45 @@ export declare const DataGridColumnsWidthStateContext: React.Context<DataGridCol
 export declare const useDataGridColumnsWidthState: () => DataGridColumnsWidthState;
 export declare const DataGridRootRefContext: React.Context<React.RefObject<HTMLDivElement | null> | undefined>;
 export declare const useDataGridRootRef: () => React.RefObject<HTMLDivElement | null>;
+export interface DataGridSelectAll {
+    /**
+     * Is the select all checkbox checked?
+     */
+    checked: boolean;
+    /**
+     * Is part of the rows selected? Shown as a dash, a click selects everything
+     */
+    indeterminate: boolean;
+    /**
+     * Is the selection still being loaded? (DataGridProps.limitSelectAll)
+     */
+    busy: boolean;
+    /**
+     * Is the select all checkbox disabled?
+     */
+    disabled: boolean;
+    /**
+     * The label: "All", or "First" and the limit while the limited select all
+     * selects only part of the rows matching the filter
+     */
+    label: string;
+    /**
+     * Checks or unchecks select all
+     * @param evt The change event, ignored
+     * @param newChecked New checked state
+     */
+    onSelect: (evt: React.ChangeEvent, newChecked: boolean) => void;
+}
+/**
+ * The select all checkbox state, shared by the checkbox in the footer and the
+ * one in the selection column header
+ */
+export declare const DataGridSelectAllContext: React.Context<DataGridSelectAll | undefined>;
+export declare const useDataGridSelectAll: () => DataGridSelectAll;
+/**
+ * The page size when DataGridProps.rowsPerPage isn't set
+ */
+export declare const DATA_GRID_DEFAULT_ROWS_PER_PAGE = 25;
 export declare const getDataGridDefaultState: (columns: IDataGridColumnDef[], defaultCustomData: Record<string, unknown> | undefined) => IDataGridState;
 export declare const getDataGridDefaultColumnsState: (columns: IDataGridColumnDef[], defaultSort: DataGridSortSetting[] | undefined, defaultFilter: DataGridFilterSetting[] | undefined) => IDataGridColumnsState;
 export declare const DataGridContentOverlayCollapse: typeof Collapse;
@@ -639,6 +698,7 @@ export declare const DataGridCustomFilterDialogTitle: typeof Typography;
 export declare const DataGridCustomFilterContainer: typeof Grid;
 export declare const DataGridSelectCheckbox: typeof Checkbox;
 export declare const DataGridSelectAllCheckbox: typeof Checkbox;
+export declare const DataGridSelectAllHeader: React.ComponentType<React.HTMLAttributes<HTMLDivElement>>;
 export declare const DataGridSelectAllWrapper: typeof ComponentWithLabel;
 export declare const DataGridPaginationText: typeof Typography;
 export declare const DataGridSetFilterListDivider: typeof Divider;
@@ -663,7 +723,7 @@ export declare const DataGridColumnHeaderFilterActiveIcon: typeof FilterIcon;
 export declare const DataGridColumnHeaderFilterButton: typeof IconButton;
 export declare const DataGridQuickFilterIcon: typeof SearchIcon;
 export declare const DataGridCustomFilterIcon: typeof AppsIcon;
-export type DataGridClassKey = "root" | "header" | "content" | "footer" | "contentOverlayCollapse" | "contentOverlayPaper" | "contentOverlayClosed" | "customFilterContainer" | "selectCheckbox" | "selectAllCheckbox" | "selectAllWrapper" | "paginationText" | "setFilterListDivider" | "setFilterListItemDivider" | "setFilterListItem" | "setFilterContainer" | "idFilterContainer" | "filterBarGrid" | "filterBarBox" | "filterClearBtn" | "columnHeaderLabel" | "columnHeaderResizer" | "columnHeaderSortIcon" | "columnHeaderContentWrapper" | "cell" | "columnHeaderFilterPopup" | "columnHeaderFilterPopupEnum" | "columnHeaderFilterPopupId" | "columnHeaderFilterPopupDateTime" | "columnHeaderFilterIcon" | "columnHeaderFilterActiveIcon" | "columnHeaderFilterButton" | "quickFilterIcon" | "customFilterIcon" | "customFilterMulti" | "customFilterMultiBackend" | "customFilterSingle" | "customFilterSingleBackend" | "centeredStickyTypography" | "settingsTableCell" | "settingsTable" | "settingsTableRow" | "settingsTableHead" | "settingsTableBody" | "customFilterContainerHeader" | "search";
+export type DataGridClassKey = "root" | "header" | "content" | "footer" | "contentOverlayCollapse" | "contentOverlayPaper" | "contentOverlayClosed" | "customFilterContainer" | "selectCheckbox" | "selectAllCheckbox" | "selectAllHeader" | "selectAllWrapper" | "paginationText" | "setFilterListDivider" | "setFilterListItemDivider" | "setFilterListItem" | "setFilterContainer" | "idFilterContainer" | "filterBarGrid" | "filterBarBox" | "filterClearBtn" | "columnHeaderLabel" | "columnHeaderResizer" | "columnHeaderSortIcon" | "columnHeaderContentWrapper" | "cell" | "columnHeaderFilterPopup" | "columnHeaderFilterPopupEnum" | "columnHeaderFilterPopupId" | "columnHeaderFilterPopupDateTime" | "columnHeaderFilterIcon" | "columnHeaderFilterActiveIcon" | "columnHeaderFilterButton" | "quickFilterIcon" | "customFilterIcon" | "customFilterMulti" | "customFilterMultiBackend" | "customFilterSingle" | "customFilterSingleBackend" | "centeredStickyTypography" | "settingsTableCell" | "settingsTable" | "settingsTableRow" | "settingsTableHead" | "settingsTableBody" | "customFilterContainerHeader" | "search";
 export declare const isDataGridColumnPinned: (column: IDataGridColumnDef, columnPinned: Record<string, boolean>) => boolean;
 export declare const getActiveDataGridColumns: (columns: IDataGridColumnDef[], columnHidden: Record<string, boolean>, columnPinned: Record<string, boolean>) => IDataGridColumnDef[];
 export declare const getDefaultColumnWidths: (columns: IDataGridColumnDef[], theme: Theme) => Record<string, number>;
