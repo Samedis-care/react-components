@@ -20,6 +20,8 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-10-26 | [Sentry 11 is required](2026-10-26-sentry-11-required.md) | type, behavior |
+| 2026-10-26 | [Routes name spans after the deepest matched route, on every location](2026-10-26-routes-name-spans-after-deepest-route.md) | behavior, type |
 | 2026-10-26 | [Locale and currency data come from CLDR 49](2026-10-26-locale-data-cldr-49.md) | behavior |
 | 2026-10-15 | [Localized numbers take either . or , as decimal separator](2026-10-15-localized-numbers-take-either-decimal-separator.md) | behavior |
 | 2026-10-15 | [getNumberSeparator finds the decimal separator with any format options](2026-10-15-number-separators-with-any-options.md) | behavior |
