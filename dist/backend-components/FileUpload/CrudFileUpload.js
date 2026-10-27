@@ -2,6 +2,7 @@ import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-run
 import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
 import FileUpload from "../../standalone/FileUpload/Generic";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
+import PartialDeleteError from "../../backend-integration/Connector/PartialDeleteError";
 import { Loader } from "../../standalone";
 /**
  * Marks an entry as one of `additionalFiles` rather than one of this control's own
@@ -65,6 +66,11 @@ const CrudFileUpload = (props, ref) => {
     // ...which only helps if the upload that fills it has finished, so changes are
     // applied one after the other rather than side by side
     const pendingChange = useRef(Promise.resolve());
+    // The ids a direct connector deleted. A change made while a delete was running hands
+    // the file back as the standalone control still lists it: marked for deletion, or
+    // restored if the user clicked restore meanwhile. Either way it is gone from the
+    // server, and deleting it again would be refused.
+    const goneIds = useRef(new Set());
     const applyChange = useCallback(async (newFiles) => {
         if (!connector)
             return;
@@ -81,6 +87,11 @@ const CrudFileUpload = (props, ref) => {
                     ? "removed"
                     : undefined;
         };
+        // gone from the server, whatever the list handed back says
+        newFiles = newFiles.filter((file) => {
+            const id = file.file.id;
+            return !id || !goneIds.current.has(id);
+        });
         const listedFiles = new Set(newFiles.map((file) => file.file));
         const listedIds = new Set(newFiles.map((file) => file.file.id));
         const droppedUploads = [];
@@ -106,33 +117,60 @@ const CrudFileUpload = (props, ref) => {
             .concat(droppedUploads);
         // upload new files
         const picked = newFiles.filter((file) => file.canBeUploaded);
-        const uploads = Promise.allSettled(picked
-            .map(async (file) => connector.create(await serialize(file)))
-            .map(async (request) => deserialize((await request)[0])));
+        // the names of the picks the connector took, whether or not their response
+        // could then be read
+        const storedNames = new Set();
+        const uploads = await Promise.allSettled(picked.map(async (file) => {
+            const response = await connector.create(await serialize(file));
+            storedNames.add(file.file.name);
+            return deserialize(response[0]);
+        }));
+        // A pick replaces the listed file of the same name, which comes marked for
+        // deletion beside it. That file may only go once its replacement is stored,
+        // which is why the deletes wait for the uploads: deleting it alongside an
+        // upload the server refuses loses both versions. A LazyConnector gets the
+        // delete queued behind the upload, so a save stopped by the upload has not
+        // sent it either.
+        const pickedNames = new Set(picked.map((file) => file.file.name));
+        newFiles = newFiles.map((file) => file.delete &&
+            pickedNames.has(file.file.name) &&
+            !storedNames.has(file.file.name)
+            ? { ...file, delete: false }
+            : file);
         const deletedIds = newFiles
             .filter((file) => file.delete)
-            .map((file) => file.file.id);
+            .map((file) => file.file.id)
+            // a queued removal stays marked, see below, and is queued once
+            .filter((id) => lazyConnector?.getQueuedOperation(id) !== "delete");
         // A file whose upload is only queued has nothing on the server: removing it
         // cancels that upload, so it leaves the list rather than being shown as
         // removed.
         const cancelledUploads = new Set(newFiles
             .filter((file) => file.delete && file.changeState === "added")
             .map((file) => file.file.id));
-        // delete deleted files
-        const deletePromise = connector.deleteMultiple(deletedIds);
         // Every write is accounted for on its own, rather than the first failure
         // taking the rest with it. The list comes back from the standalone control
         // with the picked files still in it, so an upload which went through but was
         // not recorded here is sent again by the next change, leaving a second copy
         // on the server.
         let error = null;
-        // deletePromise may be undefined or a promise
-        const deleted = await Promise.resolve(deletePromise).then(() => true, (e) => {
+        // the ids whose delete was refused: those files are still on the server
+        let refusedIds = new Set();
+        try {
+            await connector.deleteMultiple(deletedIds);
+        }
+        catch (e) {
             error = e;
-            return false;
-        });
+            // only a PartialDeleteError says which ids went through
+            refusedIds = new Set(e instanceof PartialDeleteError ? e.failedIds : deletedIds);
+        }
+        // a queued delete can still be cancelled, a sent one cannot
+        if (!lazyConnector)
+            deletedIds
+                .filter((id) => !refusedIds.has(id))
+                .forEach((id) => goneIds.current.add(id));
         const uploadedFiles = [];
-        (await uploads).forEach((result, index) => {
+        uploads.forEach((result, index) => {
             if (result.status === "rejected") {
                 error = error ?? result.reason;
                 return;
@@ -151,19 +189,23 @@ const CrudFileUpload = (props, ref) => {
             // a delete the server refused has not happened: the file stays in the
             // list, still marked, for the next change to try again
             (!file.delete ||
-                !deleted ||
+                refusedIds.has(file.file.id) ||
                 (!!lazyConnector &&
                     !cancelledUploads.has(file.file.id))));
         const finalFiles = kept
-            .map((file) => ({
-            ...file,
-            // the delete has been handed to the connector, so the flag is spent —
-            // leaving it set would queue the same delete again on the next change.
-            // One the server refused has not happened, and stays set so that the
-            // next change tries it again.
-            delete: !!file.delete && !deleted,
-            changeState: markOf(file.file.id),
-        }))
+            .map((file) => {
+            const changeState = markOf(file.file.id);
+            return {
+                ...file,
+                // A delete a direct connector made has happened, so the flag is
+                // spent. One the server refused has not, and stays set so that the
+                // next change tries it again. A queued one stays set as well: the
+                // file is gone once the queue is worked, which is what the flag
+                // tells whoever counts the files, maxFiles included.
+                delete: changeState === "removed" || refusedIds.has(file.file.id),
+                changeState,
+            };
+        })
             .concat(uploadedFiles.map((file) => ({
             ...file,
             changeState: markOf(file.file.id),
@@ -202,7 +244,9 @@ const CrudFileUpload = (props, ref) => {
         const id = file.file.id;
         lazyConnector.cancelQueuedOperation(id);
         // by id, not by identity: the control keeps its own copies of the entries
-        setFiles((prev) => prev.map((entry) => entry.file.id === id ? { ...entry, changeState: undefined } : entry));
+        setFiles((prev) => prev.map((entry) => entry.file.id === id
+            ? { ...entry, delete: false, changeState: undefined }
+            : entry));
     }, [lazyConnector]);
     const handleError = useCallback((_, msg) => {
         setError(new Error(msg));
@@ -235,6 +279,7 @@ const CrudFileUpload = (props, ref) => {
                     // hands back carries no position
                     ...removedFiles.map((file) => ({
                         ...file,
+                        delete: true,
                         changeState: "removed",
                     })),
                 ]);

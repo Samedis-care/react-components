@@ -1,4 +1,5 @@
 import deepClone from "../../utils/deepClone";
+import PartialDeleteError from "./PartialDeleteError";
 /**
  * A generic backend connector which provides a basic CRUD interface for data
  */
@@ -41,7 +42,16 @@ class Connector {
         return [mergedResultSet, lastMeta];
     }
     async deleteMultiple(ids, model) {
-        await Promise.all(ids.map((id) => Promise.resolve(this.delete(id, model))));
+        const results = await Promise.allSettled(ids.map(async (id) => this.delete(id, model)));
+        const failedIds = ids.filter((_, index) => results[index].status === "rejected");
+        const failure = results.find((result) => result.status === "rejected");
+        if (!failure)
+            return;
+        if (failedIds.length === ids.length)
+            throw failure.reason;
+        throw new PartialDeleteError(failure.reason instanceof Error
+            ? failure.reason.message
+            : String(failure.reason), failedIds, failure.reason);
     }
     /**
      * Advanced deletion handler which supports delete all
