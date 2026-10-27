@@ -70,8 +70,9 @@ declare abstract class Connector {
      * @param ids The IDs of the data entries to delete
      * @param model The model performing the request
      * @throws PartialDeleteError if some of the entries were deleted and others were not.
-     *         An override throws it too where the backend says which entries it could not
-     *         delete: any other error leaves the caller to assume none was deleted.
+     *         An override must throw it too if its backend can delete some of the
+     *         entries of one call and refuse others: any other error leaves the caller
+     *         to assume none was deleted.
      * @remarks The default deletes each entry through delete and waits for all of them.
      *          If every delete fails, it rejects with the error of the first.
      */

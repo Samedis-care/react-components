@@ -28,10 +28,9 @@ const CrudFileUpload = (props, ref) => {
     // already created or deleted the file by the time this returns, so there is nothing
     // to mark and a restore button would be a lie.
     const lazyConnector = connector instanceof LazyConnector ? connector : null;
-    // Whether anything is still waiting to be written. The queue is not React state, so
-    // working it at submit or cancelling an entry changes nothing React watches — this
-    // is the one thing worth mirroring out of it, and it drives both the dirty flag and
-    // the clearing of the per-file marks below.
+    // Whether anything is still waiting to be written, for the dirty flag. The queue is
+    // not React state, so working it at submit or cancelling an entry changes nothing
+    // React watches; the listener below mirrors it.
     const [queueEmpty, setQueueEmpty] = useState(() => lazyConnector?.isQueueEmpty() ?? true);
     useEffect(() => {
         if (!lazyConnector)
@@ -39,21 +38,33 @@ const CrudFileUpload = (props, ref) => {
         setQueueEmpty(lazyConnector.isQueueEmpty());
         return lazyConnector.addQueueChangeListener((queue) => {
             setQueueEmpty(queue.length === 0);
+            // A write that left the queue was sent, also when the submit stopped at a
+            // later one: a removed file is gone from the server, so it leaves the list
+            // rather than losing its mark, and an added one is now simply a file. Left in
+            // place, a removed file reads as an existing one, and removing it again sends
+            // the same delete against an id the backend no longer knows. The writes this
+            // control cancels itself were not sent: a cancelled upload never gets a server
+            // id, and a restore clears the mark before it cancels the delete.
+            setFiles((prev) => {
+                let changed = false;
+                const next = prev.flatMap((file) => {
+                    const id = file.file.id;
+                    if (file.changeState === "removed" &&
+                        lazyConnector.getQueuedOperation(id) !== "delete") {
+                        changed = true;
+                        return [];
+                    }
+                    if (file.changeState === "added" && lazyConnector.mapId(id) !== id) {
+                        changed = true;
+                        return [{ ...file, changeState: undefined }];
+                    }
+                    return [file];
+                });
+                // a new list replaces the one the standalone control holds
+                return changed ? next : prev;
+            });
         });
     }, [lazyConnector]);
-    // Everything pending has been written: an added file is now simply a file, and a
-    // removed one is gone from the server, so it leaves the list rather than losing its
-    // mark. Left in place it reads as an existing file, and removing it a second time
-    // sends the same delete against an id the backend no longer knows.
-    useEffect(() => {
-        if (!queueEmpty)
-            return;
-        setFiles((prev) => prev.some((file) => file.changeState)
-            ? prev
-                .filter((file) => file.changeState !== "removed")
-                .map((file) => file.changeState ? { ...file, changeState: undefined } : file)
-            : prev);
-    }, [queueEmpty]);
     // What each picked file became once it was uploaded, until the control lists that
     // instead. The list handed to handleChange comes from the standalone control, which
     // keeps its own copy of a picked file until our result reaches it — so a change made
@@ -242,11 +253,13 @@ const CrudFileUpload = (props, ref) => {
         if (!lazyConnector)
             return;
         const id = file.file.id;
-        lazyConnector.cancelQueuedOperation(id);
-        // by id, not by identity: the control keeps its own copies of the entries
+        // by id, not by identity: the control keeps its own copies of the entries.
+        // Before the cancel, which the queue listener would otherwise take for the
+        // delete having been sent.
         setFiles((prev) => prev.map((entry) => entry.file.id === id
             ? { ...entry, delete: false, changeState: undefined }
             : entry));
+        lazyConnector.cancelQueuedOperation(id);
     }, [lazyConnector]);
     const handleError = useCallback((_, msg) => {
         setError(new Error(msg));
