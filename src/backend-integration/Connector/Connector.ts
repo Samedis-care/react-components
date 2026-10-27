@@ -7,6 +7,7 @@ import {
 import { IDataGridLoadDataParameters } from "../../standalone/DataGrid/DataGrid";
 import { IDataGridExporter } from "../../standalone/DataGrid/Header";
 import deepClone from "../../utils/deepClone";
+import PartialDeleteError from "./PartialDeleteError";
 
 export interface ResponseMeta {
 	/**
@@ -137,10 +138,32 @@ abstract class Connector {
 	 * Deletes multiple data entries at once. Should be overwritten if implemented by your backend.
 	 * @param ids The IDs of the data entries to delete
 	 * @param model The model performing the request
+	 * @throws PartialDeleteError if some of the entries were deleted and others were not.
+	 *         An override throws it too where the backend says which entries it could not
+	 *         delete: any other error leaves the caller to assume none was deleted.
+	 * @remarks The default deletes each entry through delete and waits for all of them.
+	 *          If every delete fails, it rejects with the error of the first.
 	 */
 	deleteMultiple(ids: string[], model?: ModelUnknown): Promise<void> | void;
 	async deleteMultiple(ids: string[], model?: ModelUnknown): Promise<void> {
-		await Promise.all(ids.map((id) => Promise.resolve(this.delete(id, model))));
+		const results = await Promise.allSettled(
+			ids.map(async (id) => this.delete(id, model)),
+		);
+		const failedIds = ids.filter(
+			(_, index) => results[index].status === "rejected",
+		);
+		const failure = results.find(
+			(result): result is PromiseRejectedResult => result.status === "rejected",
+		);
+		if (!failure) return;
+		if (failedIds.length === ids.length) throw failure.reason;
+		throw new PartialDeleteError(
+			failure.reason instanceof Error
+				? failure.reason.message
+				: String(failure.reason),
+			failedIds,
+			failure.reason,
+		);
 	}
 
 	/**

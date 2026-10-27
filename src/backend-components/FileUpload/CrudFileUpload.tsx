@@ -15,6 +15,7 @@ import FileUpload, {
 } from "../../standalone/FileUpload/Generic";
 import { Connector } from "../../backend-integration";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
+import PartialDeleteError from "../../backend-integration/Connector/PartialDeleteError";
 import { ErrorComponentProps } from "../Form";
 import { Loader } from "../../standalone";
 import { FileSelectorError } from "../../standalone/FileUpload/Generic/Errors";
@@ -163,6 +164,11 @@ const CrudFileUpload = (
 	// ...which only helps if the upload that fills it has finished, so changes are
 	// applied one after the other rather than side by side
 	const pendingChange = useRef<Promise<unknown>>(Promise.resolve());
+	// The ids a direct connector deleted. A change made while a delete was running hands
+	// the file back as the standalone control still lists it: marked for deletion, or
+	// restored if the user clicked restore meanwhile. Either way it is gone from the
+	// server, and deleting it again would be refused.
+	const goneIds = useRef(new Set<string>());
 
 	const applyChange = useCallback(
 		async (newFiles: FileData<File | FileMeta | BackendFileMeta>[]) => {
@@ -181,6 +187,11 @@ const CrudFileUpload = (
 						: undefined;
 			};
 
+			// gone from the server, whatever the list handed back says
+			newFiles = newFiles.filter((file) => {
+				const id = (file.file as Partial<BackendFileMeta>).id;
+				return !id || !goneIds.current.has(id);
+			});
 			const listedFiles = new Set(newFiles.map((file) => file.file));
 			const listedIds = new Set(
 				newFiles.map((file) => (file.file as Partial<BackendFileMeta>).id),
@@ -249,23 +260,28 @@ const CrudFileUpload = (
 					.filter((file) => file.delete && file.changeState === "added")
 					.map((file) => (file.file as BackendFileMeta).id),
 			);
-			// delete deleted files
-			const deletePromise = connector.deleteMultiple(deletedIds);
-
 			// Every write is accounted for on its own, rather than the first failure
 			// taking the rest with it. The list comes back from the standalone control
 			// with the picked files still in it, so an upload which went through but was
 			// not recorded here is sent again by the next change, leaving a second copy
 			// on the server.
 			let error: Error | null = null;
-			// deletePromise may be undefined or a promise
-			const deleted = await Promise.resolve(deletePromise).then(
-				() => true,
-				(e: Error) => {
-					error = e;
-					return false;
-				},
-			);
+			// the ids whose delete was refused: those files are still on the server
+			let refusedIds = new Set<string>();
+			try {
+				await connector.deleteMultiple(deletedIds);
+			} catch (e) {
+				error = e as Error;
+				// only a PartialDeleteError says which ids went through
+				refusedIds = new Set(
+					e instanceof PartialDeleteError ? e.failedIds : deletedIds,
+				);
+			}
+			// a queued delete can still be cancelled, a sent one cannot
+			if (!lazyConnector)
+				deletedIds
+					.filter((id) => !refusedIds.has(id))
+					.forEach((id) => goneIds.current.add(id));
 			const uploadedFiles: FileData<BackendFileMeta>[] = [];
 			uploads.forEach((result, index) => {
 				if (result.status === "rejected") {
@@ -288,7 +304,7 @@ const CrudFileUpload = (
 					// a delete the server refused has not happened: the file stays in the
 					// list, still marked, for the next change to try again
 					(!file.delete ||
-						!deleted ||
+						refusedIds.has((file.file as BackendFileMeta).id) ||
 						(!!lazyConnector &&
 							!cancelledUploads.has((file.file as BackendFileMeta).id))),
 			) as FileData<BackendFileMeta>[];
@@ -303,7 +319,7 @@ const CrudFileUpload = (
 						// next change tries it again. A queued one stays set as well: the
 						// file is gone once the queue is worked, which is what the flag
 						// tells whoever counts the files, maxFiles included.
-						delete: changeState === "removed" || (!!file.delete && !deleted),
+						delete: changeState === "removed" || refusedIds.has(file.file.id),
 						changeState,
 					};
 				})

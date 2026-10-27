@@ -1431,4 +1431,60 @@ describe("CrudFileUpload: bugs", () => {
 			last.filter((file) => !file.delete).map((file) => file.file.name),
 		).toEqual(["image.png"]);
 	});
+
+	it("[ISSUE-3511-ITEM-3] a change made while a delete is in flight does not send that delete again", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		const ui = renderUpload({ connector });
+		await loaded(ui);
+		const deleting = gate();
+		connector.deleteGate = deleting.promise;
+
+		await ui.remove("document.pdf");
+		await ui.remove("image.png");
+		await act(async () => {
+			deleting.release();
+			await new Promise((resolve) => setTimeout(resolve, 10));
+		});
+		await ui.settle();
+
+		expect(connector.deleteCalls).toEqual(["1", "2"]);
+		expect(ui.errorText()).toBe(null);
+		expect(ui.names()).toEqual([]);
+	});
+
+	it("[ISSUE-3511-ITEM-3] a deleteMultiple refused for one id drops the files whose delete went through", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		connector.rejectDeletes.add("1");
+		const ui = renderUpload({ connector });
+		await loaded(ui);
+		await ui.remove("document.pdf");
+		await waitFor(() => expect(ui.errorText()).toContain("refused"));
+
+		// the change carries the retry of 1 (refused again) and the delete of 2 (done)
+		await ui.remove("image.png");
+		await ui.settle();
+
+		expect(await onServer(connector)).toEqual(["document.pdf"]);
+		expect(ui.names()).toEqual(["document.pdf"]);
+		expect(ui.changeOf("document.pdf")).toBe("removed");
+	});
+
+	it("[ISSUE-3511-ITEM-3] a restore during an in-flight delete leaves the list and the server in agreement", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		const ui = renderUpload({ connector });
+		await loaded(ui);
+		const deleting = gate();
+		connector.deleteGate = deleting.promise;
+
+		await ui.remove("document.pdf");
+		// either no restore is offered while the delete runs, or using it works
+		if (ui.hasRestore("document.pdf")) await ui.restore("document.pdf");
+		await act(async () => {
+			deleting.release();
+			await new Promise((resolve) => setTimeout(resolve, 10));
+		});
+		await ui.settle();
+
+		expect(ui.names()).toEqual(await onServer(connector));
+	});
 });
