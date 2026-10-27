@@ -15,6 +15,7 @@ import CrudFileUpload, {
 import type { ErrorComponentProps } from "../../../src/backend-components/Form";
 import LazyConnector from "../../../src/backend-integration/Connector/LazyConnector";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
+import Connector from "../../../src/backend-integration/Connector/Connector";
 import type ApiConnector from "../../../src/backend-integration/Connector/ApiConnector";
 
 import type {
@@ -159,12 +160,12 @@ class GatedConnector extends MockConnector {
 }
 
 /** The names of the files the backend holds, in the order it lists them */
-const onServer = async (connector: MockConnector) =>
+const onServer = async (connector: Connector) =>
 	(await connector.index({ rows: Number.MAX_SAFE_INTEGER }))[0].map(
 		(record) => record.name as string,
 	);
 
-const lazyOver = (connector: MockConnector) =>
+const lazyOver = (connector: Connector) =>
 	// fakeReads false is what a form uses for an existing record: reads go to the
 	// backend, writes are queued
 	new LazyConnector(connector as unknown as ApiConnector, false);
@@ -1175,5 +1176,170 @@ describe("CrudFileUpload", () => {
 			expect(ui.hasRemove("manual.pdf")).toBe(false);
 			expect(ui.hasRemove("document.pdf")).toBe(true);
 		});
+	});
+});
+
+/**
+ * A backend like a real one: it refuses to delete an id it does not hold (a 404), and it
+ * records every attempt, refused or not, so that a test can see a write sent twice
+ * @remarks MockConnector accepts any delete silently, which hides a repeated or a
+ *          foreign one; it only stores the records here. Every gate holds the matching
+ *          requests until it is released.
+ */
+class StrictConnector extends Connector {
+	/** The names of every create attempt, refused or not */
+	public createCalls: string[] = [];
+	/** The ids of every delete attempt, refused or not */
+	public deleteCalls: string[] = [];
+	/** The params of every index call */
+	public indexParams: unknown[] = [];
+	public rejectCreates = new Set<string>();
+	public rejectDeletes = new Set<string>();
+	/** The message a refused create throws */
+	public refusal = (name: string) => `upload of ${name} refused`;
+	public indexGate: Promise<void> | null = null;
+	public indexError: Error | null = null;
+	public createGate: Promise<void> | null = null;
+	public deleteGate: Promise<void> | null = null;
+	private readonly records = new Set<string>();
+	private readonly store: MockConnector;
+
+	constructor(data: Record<string, unknown>[]) {
+		super();
+		this.store = new MockConnector(data);
+		data.forEach((record) => this.records.add(record.id as string));
+	}
+
+	async index(params?: Parameters<MockConnector["index"]>[0]) {
+		this.indexParams.push(params);
+		if (this.indexGate) await this.indexGate;
+		if (this.indexError) throw this.indexError;
+		return this.store.index(params);
+	}
+
+	async create(data: Record<string, unknown>) {
+		const name = data.name as string;
+		this.createCalls.push(name);
+		if (this.createGate) await this.createGate;
+		if (this.rejectCreates.has(name)) throw new Error(this.refusal(name));
+		const result = this.store.create(data);
+		this.records.add(result[0].id as string);
+		return result;
+	}
+
+	read(id: string) {
+		return this.store.read(id);
+	}
+
+	update(data: Record<string, unknown>) {
+		return this.store.update(data);
+	}
+
+	async delete(id: string) {
+		this.deleteCalls.push(id);
+		if (this.deleteGate) await this.deleteGate;
+		if (this.rejectDeletes.has(id)) throw new Error(`delete of ${id} refused`);
+		if (!this.records.has(id)) throw new Error(`404 record ${id} not found`);
+		this.records.delete(id);
+		this.store.delete(id);
+	}
+}
+
+/** A promise the test resolves when it wants to */
+const gate = () => {
+	let release!: () => void;
+	const promise = new Promise<void>((resolve) => {
+		release = resolve;
+	});
+	return { promise, release };
+};
+
+/** Picks a file whose upload may hang, without waiting for it */
+const startPick = async (ui: Harness, file: File) => {
+	await act(async () => {
+		// not awaited: addFile settles once the file is listed, the upload later
+		void ui.ref.current?.addFile(file);
+		await Promise.resolve();
+	});
+	await waitFor(() => expect(ui.names()).toContain(file.name));
+};
+
+describe("CrudFileUpload: bugs", () => {
+	it("[ISSUE-3511-ITEM-1] a same-name replacement the server refuses leaves the original stored (direct connector)", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		connector.rejectCreates.add("document.pdf");
+		const ui = renderUpload({ connector });
+		await loaded(ui);
+
+		await ui.addFile(pick("document.pdf", "application/pdf"));
+		await ui.settle();
+
+		await waitFor(() => expect(ui.errorText()).toContain("refused"));
+		expect(await onServer(connector)).toEqual(["document.pdf", "image.png"]);
+		expect(ui.names()).toEqual(["document.pdf", "image.png"]);
+	});
+
+	it("[ISSUE-3511-ITEM-1] a same-name replacement refused at the save leaves the original stored (LazyConnector)", async () => {
+		const backend = new StrictConnector(SERVER_FILES);
+		backend.rejectCreates.add("document.pdf");
+		const lazy = lazyOver(backend);
+		const ui = renderUpload({ connector: lazy });
+		await loaded(ui);
+		await ui.addFile(pick("document.pdf", "application/pdf"));
+		await waitFor(() =>
+			expect(ui.changesOf("document.pdf")).toEqual(["removed", "added"]),
+		);
+
+		await act(async () => {
+			await expect(lazy.workQueue()).rejects.toThrow("refused");
+		});
+
+		// the replaced file may only go once its replacement is stored
+		expect(await onServer(backend)).toEqual(["document.pdf", "image.png"]);
+	});
+
+	it("[ISSUE-3511-ITEM-1] the original of a refused replacement is listed unmarked, and the next change keeps it", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		connector.rejectCreates.add("document.pdf");
+		const ui = renderUpload({ connector });
+		await loaded(ui);
+		await ui.addFile(pick("document.pdf", "application/pdf"));
+		await waitFor(() => expect(ui.errorText()).toContain("refused"));
+
+		// a stored file like before, not a removal waiting for the next change
+		await waitFor(() => expect(ui.changesOf("document.pdf")).toEqual([null]));
+
+		await ui.addFile(pick("notes.txt"));
+		await waitFor(() => expect(ui.names()).toContain("notes.txt"));
+
+		expect(connector.deleteCalls).toEqual([]);
+		expect(await onServer(connector)).toEqual([
+			"document.pdf",
+			"image.png",
+			"notes.txt",
+		]);
+	});
+
+	it("[ISSUE-3511-ITEM-1] the file a pick replaces is deleted only once the pick is stored (direct connector)", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		const upload = gate();
+		connector.createGate = upload.promise;
+		const ui = renderUpload({ connector });
+		await loaded(ui);
+
+		await startPick(ui, pick("document.pdf", "application/pdf"));
+		await waitFor(() =>
+			expect(connector.createCalls).toEqual(["document.pdf"]),
+		);
+		await ui.settle();
+		expect(connector.deleteCalls).toEqual([]);
+
+		act(() => upload.release());
+
+		await waitFor(() => expect(connector.deleteCalls).toEqual(["1"]));
+		await waitFor(() =>
+			expect(ui.names()).toEqual(["image.png", "document.pdf"]),
+		);
+		expect(await onServer(connector)).toEqual(["image.png", "document.pdf"]);
 	});
 });

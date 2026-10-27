@@ -210,12 +210,31 @@ const CrudFileUpload = (
 
 			// upload new files
 			const picked = newFiles.filter((file) => file.canBeUploaded);
-			const uploads = Promise.allSettled(
-				picked
-					.map(async (file) =>
-						connector.create(await serialize(file as FileData<File>)),
-					)
-					.map(async (request) => deserialize((await request)[0])),
+			// the names of the picks the connector took, whether or not their response
+			// could then be read
+			const storedNames = new Set<string>();
+			const uploads = await Promise.allSettled(
+				picked.map(async (file) => {
+					const response = await connector.create(
+						await serialize(file as FileData<File>),
+					);
+					storedNames.add(file.file.name);
+					return deserialize(response[0]);
+				}),
+			);
+			// A pick replaces the listed file of the same name, which comes marked for
+			// deletion beside it. That file may only go once its replacement is stored,
+			// which is why the deletes wait for the uploads: deleting it alongside an
+			// upload the server refuses loses both versions. A LazyConnector gets the
+			// delete queued behind the upload, so a save stopped by the upload has not
+			// sent it either.
+			const pickedNames = new Set(picked.map((file) => file.file.name));
+			newFiles = newFiles.map((file) =>
+				file.delete &&
+				pickedNames.has(file.file.name) &&
+				!storedNames.has(file.file.name)
+					? { ...file, delete: false }
+					: file,
 			);
 			const deletedIds = newFiles
 				.filter((file) => file.delete)
@@ -246,7 +265,7 @@ const CrudFileUpload = (
 				},
 			);
 			const uploadedFiles: FileData<BackendFileMeta>[] = [];
-			(await uploads).forEach((result, index) => {
+			uploads.forEach((result, index) => {
 				if (result.status === "rejected") {
 					error = error ?? (result.reason as Error);
 					return;
