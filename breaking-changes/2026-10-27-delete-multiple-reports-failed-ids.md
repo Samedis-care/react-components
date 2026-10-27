@@ -36,10 +36,32 @@ deletes again, which a backend refuses for records it no longer has.
 
 ## Migration
 
+**Required for a connector that overrides `deleteMultiple` whose backend can delete some of
+the records of one call and refuse others.** Its `deleteMultiple` has to throw a
+`PartialDeleteError` with the ids the backend did not delete. Without it, `CrudFileUpload`
+treats the failed call as having deleted nothing. The deleted files stay listed as pending
+removals, and the next change sends their deletes again, which the backend refuses for
+records it no longer has.
+
+```ts
+import { PartialDeleteError } from "components-care";
+
+async deleteMultiple(ids: string[]): Promise<void> {
+	try {
+		await sendDeleteRequest(ids);
+	} catch (e) {
+		// however the backend's error names the records it did not delete
+		const failedIds = getNotDeletedIds(e);
+		if (failedIds) throw new PartialDeleteError((e as Error).message, failedIds, e);
+		throw e;
+	}
+}
+```
+
+The same applies to an override that splits the ids over several requests: if some of
+the requests went through, throw a `PartialDeleteError` with the ids of the requests that
+failed. A connector that keeps `Connector`'s default `deleteMultiple` needs no change.
+
 Code that checks the type of an error from the default `deleteMultiple` gets a
 `PartialDeleteError` when only some of the deletes failed. The original error is its
 `cause`.
-
-A connector that overrides `deleteMultiple` can throw a `PartialDeleteError` where its
-backend reports which records it could not delete. Until it does, `CrudFileUpload` treats
-a failed call as having deleted nothing.

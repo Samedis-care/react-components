@@ -1487,4 +1487,84 @@ describe("CrudFileUpload: bugs", () => {
 
 		expect(ui.names()).toEqual(await onServer(connector));
 	});
+
+	it("[ISSUE-3511-ITEM-4] after a submit that failed partway, the marks follow what is still queued", async () => {
+		const backend = new StrictConnector(SERVER_FILES);
+		backend.rejectCreates.add("bad.txt");
+		const lazy = lazyOver(backend);
+		const ui = renderUpload({ connector: lazy });
+		await loaded(ui);
+		await ui.remove("document.pdf");
+		await waitFor(() => expect(ui.changeOf("document.pdf")).toBe("removed"));
+		await ui.addFile(pick("good.txt"));
+		await waitFor(() => expect(ui.changeOf("good.txt")).toBe("added"));
+		await ui.addFile(pick("bad.txt"));
+		await waitFor(() => expect(ui.changeOf("bad.txt")).toBe("added"));
+
+		await act(async () => {
+			await expect(lazy.workQueue()).rejects.toThrow("refused");
+		});
+		await ui.settle();
+
+		// the delete and good.txt were sent, bad.txt is still queued
+		expect(await onServer(backend)).toEqual(["image.png", "good.txt"]);
+		expect(ui.names()).not.toContain("document.pdf");
+		expect(ui.changeOf("good.txt")).toBe(null);
+		expect(ui.changeOf("bad.txt")).toBe("added");
+	});
+
+	it("[ISSUE-3511-ITEM-4] removing a queued upload never reports it as stored", async () => {
+		const onChange = vi.fn();
+		const lazy = lazyOver(new StrictConnector(SERVER_FILES));
+		const ui = renderUpload({ connector: lazy, onChange });
+		await loaded(ui);
+		await ui.addFile(pick("notes.txt"));
+		await waitFor(() => expect(ui.changeOf("notes.txt")).toBe("added"));
+		onChange.mockClear();
+
+		await ui.remove("notes.txt");
+		await waitFor(() => expect(ui.names()).not.toContain("notes.txt"));
+		await ui.settle();
+
+		// its upload was cancelled, not sent, so no list may show it as on the server
+		const reported = onChange.mock.calls.flatMap(
+			([files]) => files as FileData<BackendFileMeta>[],
+		);
+		expect(
+			reported.filter(
+				(file) => file.file.name === "notes.txt" && !file.changeState,
+			),
+		).toEqual([]);
+	});
+
+	it("[ISSUE-3511-ITEM-4] removing an upload a submit sent before it failed queues its delete", async () => {
+		const backend = new StrictConnector(SERVER_FILES);
+		backend.rejectCreates.add("bad.txt");
+		const lazy = lazyOver(backend);
+		const ui = renderUpload({ connector: lazy });
+		await loaded(ui);
+		await ui.addFile(pick("good.txt"));
+		await waitFor(() => expect(ui.changeOf("good.txt")).toBe("added"));
+		await ui.addFile(pick("bad.txt"));
+		await waitFor(() => expect(ui.changeOf("bad.txt")).toBe("added"));
+		await act(async () => {
+			await expect(lazy.workQueue()).rejects.toThrow("refused");
+		});
+		await waitFor(() => expect(ui.changeOf("good.txt")).toBe(null));
+
+		await ui.remove("good.txt");
+
+		// it is on the server, so its removal is pending like any other
+		await waitFor(() => expect(ui.changeOf("good.txt")).toBe("removed"));
+		expect(ui.hasRestore("good.txt")).toBe(true);
+		backend.rejectCreates.clear();
+		await act(async () => {
+			await lazy.workQueue();
+		});
+		expect(await onServer(backend)).toEqual([
+			"document.pdf",
+			"image.png",
+			"bad.txt",
+		]);
+	});
 });

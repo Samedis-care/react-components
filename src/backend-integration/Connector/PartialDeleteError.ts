@@ -3,7 +3,8 @@
  * were not
  * @remarks Any other error from deleteMultiple leaves open which records were deleted, so
  *          a caller has to assume none was. A connector that overrides deleteMultiple
- *          throws this where its backend reports which records it could not delete.
+ *          must throw this if its backend can delete some of the records of one call
+ *          and refuse others.
  */
 class PartialDeleteError extends Error {
 	/**
