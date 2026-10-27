@@ -1264,6 +1264,17 @@ const startPick = async (ui: Harness, file: File) => {
 	await waitFor(() => expect(ui.names()).toContain(file.name));
 };
 
+/** Picks several files through the file input, as one selection */
+const pickFiles = async (ui: Harness, files: File[]) => {
+	const input =
+		ui.container.querySelector<HTMLInputElement>('input[type="file"]');
+	if (!input) throw new Error("no file input");
+	await act(async () => {
+		fireEvent.change(input, { target: { files } });
+		await Promise.resolve();
+	});
+};
+
 describe("CrudFileUpload: bugs", () => {
 	it("[ISSUE-3511-ITEM-1] a same-name replacement the server refuses leaves the original stored (direct connector)", async () => {
 		const connector = new StrictConnector(SERVER_FILES);
@@ -1341,5 +1352,83 @@ describe("CrudFileUpload: bugs", () => {
 			expect(ui.names()).toEqual(["image.png", "document.pdf"]),
 		);
 		expect(await onServer(connector)).toEqual(["image.png", "document.pdf"]);
+	});
+
+	it("[ISSUE-3511-ITEM-2] a file whose removal is queued frees its maxFiles slot", async () => {
+		const lazy = lazyOver(new StrictConnector(SERVER_FILES));
+		const ui = renderUpload({ connector: lazy, maxFiles: 2 });
+		await loaded(ui);
+		await ui.remove("document.pdf");
+		await waitFor(() => expect(ui.changeOf("document.pdf")).toBe("removed"));
+
+		await ui.addFile(pick("replacement.pdf", "application/pdf"));
+		await ui.settle();
+
+		expect(ui.errorText()).toBe(null);
+		expect(ui.names()).toContain("replacement.pdf");
+	});
+
+	it("[ISSUE-3511-ITEM-2] onChange reports a queued removal with delete set, as FileUpload's contract says", async () => {
+		const onChange = vi.fn();
+		const lazy = lazyOver(new StrictConnector(SERVER_FILES));
+		const ui = renderUpload({ connector: lazy, onChange });
+		await loaded(ui);
+
+		await ui.remove("document.pdf");
+		await waitFor(() => expect(ui.changeOf("document.pdf")).toBe("removed"));
+
+		// "the files that exist after saving are the entries without delete"
+		const last = onChange.mock.calls.at(-1)![0] as FileData<BackendFileMeta>[];
+		expect(
+			last.filter((file) => !file.delete).map((file) => file.file.name),
+		).toEqual(["image.png"]);
+	});
+
+	it("[ISSUE-3511-ITEM-2] a later change does not queue a queued removal again", async () => {
+		const backend = new StrictConnector(SERVER_FILES);
+		const lazy = lazyOver(backend);
+		const ui = renderUpload({ connector: lazy });
+		await loaded(ui);
+		// one selection replacing both: their deletes are queued as one request
+		await pickFiles(ui, [
+			pick("document.pdf", "application/pdf"),
+			pick("image.png", "image/png"),
+		]);
+		await waitFor(() =>
+			expect(ui.changesOf("image.png")).toEqual(["removed", "added"]),
+		);
+
+		// the next change hands both back still marked for deletion
+		await ui.addFile(pick("notes.txt"));
+		await waitFor(() => expect(ui.changeOf("notes.txt")).toBe("added"));
+		await act(async () => {
+			await lazy.workQueue();
+		});
+
+		expect(backend.deleteCalls).toEqual(["1", "2"]);
+		expect(await onServer(backend)).toEqual([
+			"document.pdf",
+			"image.png",
+			"notes.txt",
+		]);
+	});
+
+	it("[ISSUE-3511-ITEM-2] a queued removal read back after a remount is reported with delete set", async () => {
+		const lazy = lazyOver(new StrictConnector(SERVER_FILES));
+		const first = renderUpload({ connector: lazy });
+		await loaded(first);
+		await first.remove("document.pdf");
+		await waitFor(() => expect(lazy.getQueuedOperation("1")).toBe("delete"));
+		first.unmount();
+
+		const onChange = vi.fn();
+		const ui = renderUpload({ connector: lazy, onChange });
+		await loaded(ui);
+		await waitFor(() => expect(ui.changeOf("document.pdf")).toBe("removed"));
+
+		const last = onChange.mock.calls.at(-1)![0] as FileData<BackendFileMeta>[];
+		expect(
+			last.filter((file) => !file.delete).map((file) => file.file.name),
+		).toEqual(["image.png"]);
 	});
 });

@@ -238,7 +238,9 @@ const CrudFileUpload = (
 			);
 			const deletedIds = newFiles
 				.filter((file) => file.delete)
-				.map((file) => (file.file as BackendFileMeta).id);
+				.map((file) => (file.file as BackendFileMeta).id)
+				// a queued removal stays marked, see below, and is queued once
+				.filter((id) => lazyConnector?.getQueuedOperation(id) !== "delete");
 			// A file whose upload is only queued has nothing on the server: removing it
 			// cancels that upload, so it leaves the list rather than being shown as
 			// removed.
@@ -292,15 +294,19 @@ const CrudFileUpload = (
 			) as FileData<BackendFileMeta>[];
 
 			const finalFiles = kept
-				.map((file): FileData<BackendFileMeta> => ({
-					...file,
-					// the delete has been handed to the connector, so the flag is spent —
-					// leaving it set would queue the same delete again on the next change.
-					// One the server refused has not happened, and stays set so that the
-					// next change tries it again.
-					delete: !!file.delete && !deleted,
-					changeState: markOf(file.file.id),
-				}))
+				.map((file): FileData<BackendFileMeta> => {
+					const changeState = markOf(file.file.id);
+					return {
+						...file,
+						// A delete a direct connector made has happened, so the flag is
+						// spent. One the server refused has not, and stays set so that the
+						// next change tries it again. A queued one stays set as well: the
+						// file is gone once the queue is worked, which is what the flag
+						// tells whoever counts the files, maxFiles included.
+						delete: changeState === "removed" || (!!file.delete && !deleted),
+						changeState,
+					};
+				})
 				.concat(
 					uploadedFiles.map((file) => ({
 						...file,
@@ -352,7 +358,9 @@ const CrudFileUpload = (
 			// by id, not by identity: the control keeps its own copies of the entries
 			setFiles((prev) =>
 				prev.map((entry) =>
-					entry.file.id === id ? { ...entry, changeState: undefined } : entry,
+					entry.file.id === id
+						? { ...entry, delete: false, changeState: undefined }
+						: entry,
 				),
 			);
 		},
@@ -397,6 +405,7 @@ const CrudFileUpload = (
 					// hands back carries no position
 					...removedFiles.map((file) => ({
 						...file,
+						delete: true,
 						changeState: "removed" as const,
 					})),
 				]);

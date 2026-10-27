@@ -267,13 +267,12 @@ export interface FileData<T = File | FileMeta> {
 	 *          which is all a plain FileUpload needs: a picked file has `canBeUploaded`,
 	 *          a file marked for removal has `delete`.
 	 *
-	 *          It exists for CrudFileUpload, where handing a write to the connector
-	 *          destroys both of those signals on purpose: the picked File is replaced by
-	 *          the `deserialize`d backend representation, so it is no longer a Blob and
-	 *          must not keep `canBeUploaded` or it would upload twice; and `delete` is
-	 *          cleared once the removal is queued, or the next change would queue it
-	 *          again. With a LazyConnector the write is only queued, so a pending change
-	 *          then looks exactly like a file that was always on the server.
+	 *          It exists for CrudFileUpload, where handing an upload to the connector
+	 *          destroys that signal on purpose: the picked File is replaced by the
+	 *          `deserialize`d backend representation, so it is no longer a Blob and must
+	 *          not keep `canBeUploaded` or it would upload twice. With a LazyConnector the
+	 *          upload is only queued, so it then looks exactly like a file that was
+	 *          always on the server. A queued removal keeps `delete`.
 	 */
 	changeState?: FileChangeState;
 }
