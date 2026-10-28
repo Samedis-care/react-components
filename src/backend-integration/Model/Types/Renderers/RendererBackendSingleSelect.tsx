@@ -40,6 +40,7 @@ class RendererBackendSingleSelect<M extends ModelUnknown> extends TypeId {
 			...props,
 			lru: undefined,
 			onAddNew: undefined,
+			defaultQuery: undefined,
 			classes: undefined,
 			endAdornment: undefined,
 			modelFetch: props.modelFetch as unknown as ModelUnknown,

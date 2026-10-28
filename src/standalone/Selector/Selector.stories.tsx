@@ -546,6 +546,52 @@ export const SingleSelectComplete: StoryObj = {
 	},
 };
 
+export const SingleSelectDefaultQuery: StoryObj = {
+	name: "SingleSelect — opens with a default query",
+	render: () => {
+		const [selected, setSelected] = useState<BaseSelectorData | null>(null);
+		const onLoad = selectorLocalLoadHandler(COUNTRIES);
+		return (
+			<div style={{ width: 300 }}>
+				<SingleSelect
+					label="Country"
+					selected={selected}
+					onSelect={(v) => {
+						setSelected(v);
+					}}
+					onLoad={onLoad}
+					defaultQuery="United"
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const body = within(document.body);
+		const input = await canvas.findByRole("combobox");
+		await expect(input).toHaveValue("");
+		await userEvent.click(input);
+		// opening searches with the default query...
+		await expect(input).toHaveValue("United");
+		await waitFor(() =>
+			expect(optionTexts()).toEqual(["United Kingdom", "United States"]),
+		);
+		// ...without selecting anything
+		await expect(body.queryByRole("option", { selected: true })).toBeNull();
+		// it is selected text, so typing replaces it
+		await userEvent.keyboard("Ger");
+		await expect(input).toHaveValue("Ger");
+		await waitFor(() => expect(optionTexts()).toEqual(["Germany"]));
+		// leaving clears the search like typed text
+		await userEvent.click(document.body);
+		await expect(input).toHaveValue("");
+		// typing opens the selector too, and then the typed text wins
+		input.focus();
+		await userEvent.keyboard("Fra");
+		await expect(input).toHaveValue("Fra");
+		await waitFor(() => expect(optionTexts()).toEqual(["France"]));
+	},
+};
+
 export const SingleSelectTruncatedWithAddNew: StoryObj = {
 	name: "SingleSelect — truncation entry sits above add new",
 	render: () => {

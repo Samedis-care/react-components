@@ -457,6 +457,14 @@ export type BaseSelectorProps<
 		 */
 		forceQuery?: boolean;
 		/**
+		 * Search text the selector opens with while nothing is selected and nothing
+		 * has been typed, e.g. a name from imported data the user still has to find
+		 * the matching record for. It only searches, it never selects anything.
+		 * @remarks Ignored with disableSearch. The user edits or clears it like typed
+		 * text, and it comes back whenever the selector opens empty again.
+		 */
+		defaultQuery?: string;
+		/**
 		 * Enable freeSolo. Allows user to enter any content. Selected option will be { value: USER_INPUT, label: USER_INPUT }
 		 */
 		freeSolo?: boolean;
@@ -696,6 +704,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 		endAdornment,
 		endAdornmentLeft,
 		forceQuery,
+		defaultQuery,
 		freeSolo,
 		getIdOfData,
 		filterIds,
@@ -1161,6 +1170,22 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 		[multiple, selected],
 	);
 
+	const handleOpen = useCallback(
+		(evt: React.SyntheticEvent) => {
+			setOpen(true);
+			const nothingSelected = Array.isArray(selected)
+				? selected.length === 0
+				: !selected;
+			if (!defaultQuery || disableSearch || !nothingSelected) return;
+			// MUI resets the text of an input without focus, and a click on the input
+			// opens the popup on mousedown, before the input receives focus
+			if (evt.target instanceof HTMLInputElement) evt.target.focus();
+			// typing opens the popup after updating the query, so what was typed wins
+			setQuery((prev) => prev || defaultQuery);
+		},
+		[defaultQuery, disableSearch, selected],
+	);
+
 	// search handler
 	useEffect(() => {
 		if (!open) return;
@@ -1213,9 +1238,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 						multiple={multiple}
 						disableCloseOnSelect={multiple}
 						open={open}
-						onOpen={() => {
-							setOpen(true);
-						}}
+						onOpen={handleOpen}
 						onClose={() => {
 							setOpen(false);
 						}}
