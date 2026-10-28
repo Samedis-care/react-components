@@ -82,6 +82,13 @@ const CrudFileUpload = (props, ref) => {
     // restored if the user clicked restore meanwhile. Either way it is gone from the
     // server, and deleting it again would be refused.
     const goneIds = useRef(new Set());
+    // The picks the user has made that no change has uploaded or refused yet. The
+    // standalone control holds a pick in its own list only, until the upload reaches
+    // `files`, and every new list handed down replaces that list: new additionalFiles,
+    // or a restore while an upload runs, would drop the pick from view, and the next
+    // change would then delete its upload as dropped by the user. So the list handed
+    // down carries them.
+    const pendingPicks = useRef([]);
     const applyChange = useCallback(async (newFiles) => {
         if (!connector)
             return;
@@ -221,6 +228,9 @@ const CrudFileUpload = (props, ref) => {
             ...file,
             changeState: markOf(file.file.id),
         })));
+        // uploaded or refused, so no longer a pick to carry
+        const settledPicks = new Set(picked.map((file) => file.file));
+        pendingPicks.current = pendingPicks.current.filter((file) => !settledPicks.has(file.file));
         // update state
         setFiles(finalFiles);
     }, [connector, deserialize, lazyConnector, serialize]);
@@ -231,6 +241,8 @@ const CrudFileUpload = (props, ref) => {
      *          uploads the ones before it made.
      */
     const handleChange = useCallback((newFiles) => {
+        // the picks the user has now, whichever change uploads them
+        pendingPicks.current = newFiles.filter((file) => file.canBeUploaded);
         const change = pendingChange.current.then(() => applyChange(newFiles));
         // a failed change must not stop the ones after it
         pendingChange.current = change.catch(() => undefined);
@@ -310,19 +322,20 @@ const CrudFileUpload = (props, ref) => {
         if (onChange)
             onChange(files);
     }, [files, onChange]);
-    const finalFiles = useMemo(() => additionalFiles
-        ? [
-            ...files,
-            ...additionalFiles.map((file) => ({
-                ...file,
-                // read-only as documented: they are not this control's records,
-                // so a remove would send a delete for an id which means
-                // something else entirely to this connector
-                preventDelete: true,
-                [ADDITIONAL_FILE]: true,
-            })),
-        ]
-        : files, [files, additionalFiles]);
+    // The picks are read only when the list changes for another reason: that is when the
+    // standalone control would lose them. Until then it lists them itself.
+    const finalFiles = useMemo(() => [
+        ...files,
+        ...(additionalFiles ?? []).map((file) => ({
+            ...file,
+            // read-only as documented: they are not this control's records, so a
+            // remove would send a delete for an id which means something else
+            // entirely to this connector
+            preventDelete: true,
+            [ADDITIONAL_FILE]: true,
+        })),
+        ...pendingPicks.current,
+    ], [files, additionalFiles]);
     if (loading)
         return _jsx(Loader, {});
     if (loadError)
