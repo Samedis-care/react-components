@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import {
 	MultiImageImage,
 	MultiImageNewIdPrefix,
@@ -14,7 +20,9 @@ export interface CrudMultiImageProps extends Omit<
 	"images" | "onChange"
 > {
 	/**
-	 * Optional additional images to display
+	 * Images of someone else, listed before this control's own
+	 * @remarks Read-only whatever their `readOnly` says: never removed, replaced or
+	 *          written through `connector`.
 	 */
 	additionalImages?: MultiImageImage[];
 	/**
@@ -211,6 +219,14 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 		[commitImages, connector, deserialize, name, onPrimaryChange, serialize],
 	);
 
+	// Read-only whatever the caller passed: they are someone else's, so this control
+	// neither removes nor replaces them. A change recognises them as these objects.
+	const extras = useMemo(
+		(): MultiImageImage[] | undefined =>
+			additionalImages?.map((img) => ({ ...img, readOnly: true })),
+		[additionalImages],
+	);
+
 	/**
 	 * Applies one change from the control, after every change before it
 	 * @remarks MultiImage builds a change from the images it shows, which an earlier change
@@ -224,8 +240,8 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 			_name: string | undefined,
 			newImages: (MultiImageImage | BackendMultiImageImage)[],
 		) => {
-			const own = additionalImages
-				? newImages.filter((img) => !additionalImages.includes(img))
+			const own = extras
+				? newImages.filter((img) => !extras.includes(img))
 				: newImages;
 			const listedIds = new Set(own.map((img) => img.id));
 			const shown = new Map(images.map((img) => [img.id, img]));
@@ -245,7 +261,11 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 			pendingChange.current = applied.catch(() => undefined);
 			return applied;
 		},
-		[additionalImages, applyChange, images],
+		[applyChange, extras, images],
+	);
+	const listedImages = useMemo(
+		() => (extras ? extras.concat(images) : images),
+		[extras, images],
 	);
 
 	useEffect(() => {
@@ -287,7 +307,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 			{error && <ErrorComponent error={error} />}
 			<MultiImage
 				{...otherProps}
-				images={additionalImages ? additionalImages.concat(images) : images}
+				images={listedImages}
 				onChange={handleChange}
 			/>
 		</>

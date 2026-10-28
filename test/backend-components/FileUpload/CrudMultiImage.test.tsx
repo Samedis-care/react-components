@@ -822,4 +822,36 @@ describe("CrudMultiImage: bugs", () => {
 		);
 		expect(srcs(dialog)).toEqual(["a.png", "b.png"]);
 	});
+
+	it("[ISSUE-3511-ITEM-16] replacing an additional image that is not marked read-only creates no copy here", async () => {
+		usePassThroughImages();
+		const backend = new Backend(OWN);
+		const extras = [{ id: "x1", name: "x1", image: "x1.png" }];
+		const { container } = renderMI({
+			connector: backend,
+			additionalImages: extras,
+		});
+		await ready(container);
+		const dialog = openEdit();
+
+		await dropOn(entries(dialog)[0], [png("new.png")]);
+		await settle();
+
+		expect(backend.creates).toEqual([]);
+		expect(await onServer(backend)).toEqual(["a", "b"]);
+	});
+
+	it("[ISSUE-3511-ITEM-16] an additional image that is not marked read-only offers no Remove", async () => {
+		const { container } = renderMI({
+			connector: new Backend(OWN),
+			additionalImages: [{ id: "x1", name: "x1", image: "x1.png" }],
+		});
+		await ready(container);
+		const dialog = openEdit();
+		const remove = t("standalone.file-upload.multi-image.remove");
+
+		// the additional images come first
+		expect(within(entries(dialog)[0]).queryByLabelText(remove)).toBe(null);
+		expect(within(entries(dialog)[1]).queryByLabelText(remove)).not.toBe(null);
+	});
 });
