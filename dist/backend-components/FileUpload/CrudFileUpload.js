@@ -200,9 +200,6 @@ const CrudFileUpload = (props, ref) => {
         if (error)
             setError(error);
         const kept = newFiles.filter((file) => !file.canBeUploaded &&
-            // the list handed back includes what was only passed through for
-            // display, which this control neither stores nor writes
-            !isAdditionalFile(file) &&
             "id" in file.file &&
             // a delete the server refused has not happened: the file stays in the
             // list, still marked, for the next change to try again
@@ -241,9 +238,14 @@ const CrudFileUpload = (props, ref) => {
      *          uploads the ones before it made.
      */
     const handleChange = useCallback((newFiles) => {
+        // The list handed back includes what was only passed through for display,
+        // which this control neither stores nor writes, whatever flags it carries: a
+        // `delete` or `canBeUploaded` of another control's list means nothing to this
+        // connector, where its id may even be a different record.
+        const ownFiles = newFiles.filter((file) => !isAdditionalFile(file));
         // the picks the user has now, whichever change uploads them
-        pendingPicks.current = newFiles.filter((file) => file.canBeUploaded);
-        const change = pendingChange.current.then(() => applyChange(newFiles));
+        pendingPicks.current = ownFiles.filter((file) => file.canBeUploaded);
+        const change = pendingChange.current.then(() => applyChange(ownFiles));
         // a failed change must not stop the ones after it
         pendingChange.current = change.catch(() => undefined);
         return change;
@@ -336,7 +338,8 @@ const CrudFileUpload = (props, ref) => {
         })),
         ...pendingPicks.current,
     ], [files, additionalFiles]);
-    if (loading)
+    // without a connector there is nothing to load, only additionalFiles to list
+    if (connector && loading)
         return _jsx(Loader, {});
     if (loadError)
         return _jsx("span", { children: loadError.message });

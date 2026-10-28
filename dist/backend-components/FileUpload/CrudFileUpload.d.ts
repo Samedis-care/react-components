@@ -5,7 +5,8 @@ import { ErrorComponentProps } from "../Form";
 export interface CrudFileUploadProps extends Omit<FileUploadProps, "files" | "handleError"> {
     /**
      * The backend connector used as CRUD interface
-     * @remarks Passing null will render an readOnly control
+     * @remarks Null renders a read-only control that lists `additionalFiles`. A connector
+     *          passed later is loaded.
      */
     connector: Connector | null;
     /**
@@ -28,7 +29,9 @@ export interface CrudFileUploadProps extends Omit<FileUploadProps, "files" | "ha
      */
     deserialize: (data: Record<string, unknown>) => Promise<FileData<BackendFileMeta>> | FileData<BackendFileMeta>;
     /**
-     * additional read-only files
+     * Files of someone else, listed after this control's own files, read-only
+     * @remarks Never written through `connector`, whatever flags they carry: a `delete` or
+     *          `canBeUploaded` only changes how they are shown.
      */
     additionalFiles?: FileData<FileMeta>[];
     /**
