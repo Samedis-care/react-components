@@ -1732,4 +1732,34 @@ describe("CrudFileUpload: bugs", () => {
 		expect(connector.createCalls).toEqual(["notes.txt"]);
 		expect(ui.names().filter((name) => name === "foreign.txt")).toHaveLength(1);
 	});
+
+	it("[ISSUE-3511-ITEM-8] a theme default of readOnly for CcFileUpload applies", async () => {
+		const ui = renderUpload(
+			{ connector: new StrictConnector(SERVER_FILES) },
+			{
+				theme: () => ({
+					components: { CcFileUpload: { defaultProps: { readOnly: true } } },
+				}),
+			},
+		);
+		await loaded(ui);
+
+		expect(ui.container.querySelector('input[type="file"]')).toBe(null);
+		expect(ui.hasRemove("document.pdf")).toBe(false);
+	});
+
+	it("[ISSUE-3511-ITEM-8] an explicit readOnly false wins over the theme default", async () => {
+		const ui = renderUpload(
+			{ connector: new StrictConnector(SERVER_FILES), readOnly: false },
+			{
+				theme: () => ({
+					components: { CcFileUpload: { defaultProps: { readOnly: true } } },
+				}),
+			},
+		);
+		await loaded(ui);
+
+		expect(ui.container.querySelector('input[type="file"]')).not.toBe(null);
+		expect(ui.hasRemove("document.pdf")).toBe(true);
+	});
 });

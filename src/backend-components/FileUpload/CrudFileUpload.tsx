@@ -506,7 +506,8 @@ const CrudFileUpload = (
 				onChange={handleChange}
 				onRestoreFile={lazyConnector ? handleRestore : undefined}
 				handleError={handleError}
-				readOnly={otherProps.readOnly || connector == null}
+				// undefined unless set, so that the theme's default applies
+				readOnly={connector == null ? true : otherProps.readOnly}
 			/>
 		</>
 	);
