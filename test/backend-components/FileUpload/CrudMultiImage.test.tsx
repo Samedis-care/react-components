@@ -702,4 +702,124 @@ describe("CrudMultiImage: bugs", () => {
 		// which image is shown as primary then is ISSUE-3491-ITEM-40
 		expect(log.reported[before]).toBe(null);
 	});
+
+	it("[ISSUE-3511-ITEM-13] two removals in a row both leave the list", async () => {
+		const backend = new Backend([
+			...OWN,
+			{ id: "3", name: "c", image_url: "c.png" },
+		]);
+		const deleting = gate();
+		backend.deleteGate = deleting.promise;
+		const { container } = renderMI({ connector: backend });
+		await ready(container);
+		const dialog = openEdit();
+
+		await removeEntry(dialog, 0);
+		// the first removal is still being written, so a is still listed first
+		await removeEntry(dialog, 1);
+		await act(async () => {
+			deleting.release();
+			await tick();
+		});
+		await settle();
+
+		expect(await onServer(backend)).toEqual(["c"]);
+		expect(srcs(dialog)).toEqual(["c.png"]);
+	});
+
+	it("[ISSUE-3511-ITEM-13] two picks in a row are both listed", async () => {
+		usePassThroughImages();
+		const backend = new Backend(OWN);
+		const uploading = gate();
+		backend.createGates.push(uploading.promise);
+		const { container } = renderMI({ connector: backend });
+		await ready(container);
+
+		await pick(container, [png("c.png")]);
+		await pick(container, [png("d.png")]);
+		await act(async () => {
+			uploading.release();
+			await tick();
+		});
+		await waitFor(() => expect(backend.creates).toHaveLength(2));
+		await settle();
+
+		expect(srcs(openEdit())).toEqual([
+			"a.png",
+			"b.png",
+			"c.png.url",
+			"d.png.url",
+		]);
+	});
+
+	it("[ISSUE-3511-ITEM-14] the uploads of a selection that went through are listed when another is refused", async () => {
+		usePassThroughImages();
+		const backend = new Backend(OWN);
+		backend.rejectCreates.add("bad.png");
+		const { container } = renderMI({ connector: backend });
+		await ready(container);
+
+		await pick(container, [png("good.png"), png("bad.png")]);
+		await waitFor(() =>
+			expect(screen.getByTestId("error")).toBeInTheDocument(),
+		);
+		await settle();
+
+		expect(await onServer(backend)).toEqual(["a", "b", "good.png"]);
+		expect(srcs(openEdit())).toEqual(["a.png", "b.png", "good.png.url"]);
+	});
+
+	it("[ISSUE-3511-ITEM-15] a removal does not serialize the images it leaves untouched", async () => {
+		const backend = new Backend(OWN);
+		const { container } = renderMI({ connector: backend });
+		await ready(container);
+		const dialog = openEdit();
+
+		await removeEntry(dialog, 0);
+		await waitFor(() => expect(backend.deleteCalls).toEqual(["1"]));
+		await settle();
+
+		expect(serialize).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3511-ITEM-13] replacing an image an earlier change removed writes nothing", async () => {
+		usePassThroughImages();
+		const backend = new Backend(OWN);
+		const deleting = gate();
+		backend.deleteGate = deleting.promise;
+		const { container } = renderMI({ connector: backend });
+		await ready(container);
+		const dialog = openEdit();
+
+		await removeEntry(dialog, 0);
+		// the removal is still being written, so a is still listed and takes a drop
+		await dropOn(entries(dialog)[0], [png("new.png")]);
+		await act(async () => {
+			deleting.release();
+			await tick();
+		});
+		await settle();
+
+		expect(backend.updates).toEqual([]);
+		expect(backend.creates).toEqual([]);
+		expect(await onServer(backend)).toEqual(["b"]);
+		expect(srcs(dialog)).toEqual(["b.png"]);
+	});
+
+	it("[ISSUE-3511-ITEM-14] a refused removal keeps the image listed", async () => {
+		const backend = new Backend(OWN);
+		backend.rejectDeletes.add("1");
+		const { container } = renderMI({ connector: backend });
+		await ready(container);
+		const dialog = openEdit();
+
+		await removeEntry(dialog, 0);
+		await waitFor(() => expect(backend.deleteCalls).toEqual(["1"]));
+		await settle();
+
+		expect(screen.getByTestId("error")).toHaveTextContent(
+			"delete of 1 refused",
+		);
+		expect(srcs(dialog)).toEqual(["a.png", "b.png"]);
+	});
 });
