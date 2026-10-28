@@ -26,7 +26,8 @@ export interface CrudFileUploadProps extends Omit<
 > {
 	/**
 	 * The backend connector used as CRUD interface
-	 * @remarks Passing null will render an readOnly control
+	 * @remarks Null renders a read-only control that lists `additionalFiles`. A connector
+	 *          passed later is loaded.
 	 */
 	connector: Connector | null;
 	/**
@@ -484,7 +485,8 @@ const CrudFileUpload = (
 		[files, additionalFiles],
 	);
 
-	if (loading) return <Loader />;
+	// without a connector there is nothing to load, only additionalFiles to list
+	if (connector && loading) return <Loader />;
 	if (loadError) return <span>{loadError.message}</span>;
 
 	const ErrorComponent = props.errorComponent;

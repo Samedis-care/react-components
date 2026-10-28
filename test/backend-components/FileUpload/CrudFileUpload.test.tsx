@@ -5,6 +5,7 @@ import {
 	cleanup,
 	fireEvent,
 	render,
+	screen,
 	waitFor,
 } from "@testing-library/react";
 import { Framework } from "../../../src/framework";
@@ -1655,5 +1656,31 @@ describe("CrudFileUpload: bugs", () => {
 
 		expect(await onServer(connector)).toEqual(["image.png", "race.txt"]);
 		expect(ui.names()).toEqual(["image.png", "race.txt", "terms.txt"]);
+	});
+
+	it("[ISSUE-3511-ITEM-6] connector null renders a read-only control with the additional files", async () => {
+		const ui = renderUpload({
+			connector: null,
+			additionalFiles: [
+				{ file: { name: "terms.txt", type: "text/plain", downloadLink: "#t" } },
+			],
+		});
+
+		await waitFor(() => expect(ui.names()).toEqual(["terms.txt"]));
+		expect(screen.queryByRole("progressbar")).toBe(null);
+		expect(ui.container.querySelector('input[type="file"]')).toBe(null);
+	});
+
+	it("[ISSUE-3511-ITEM-6] a connector passed after null is loaded", async () => {
+		const ui = renderUpload({ connector: null });
+		await waitFor(() => expect(screen.queryByRole("progressbar")).toBe(null));
+		expect(ui.container.querySelector('input[type="file"]')).toBe(null);
+
+		ui.rerender({ connector: new StrictConnector(SERVER_FILES) });
+
+		await waitFor(() =>
+			expect(ui.names()).toEqual(["document.pdf", "image.png"]),
+		);
+		expect(ui.container.querySelector('input[type="file"]')).not.toBe(null);
 	});
 });
