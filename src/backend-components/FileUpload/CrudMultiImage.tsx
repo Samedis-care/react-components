@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
 	MultiImageImage,
 	MultiImageNewIdPrefix,
@@ -24,6 +24,9 @@ export interface CrudMultiImageProps extends Omit<
 	additionalImagesLoading?: boolean;
 	/**
 	 * The backend connector used as CRUD interface
+	 * @remarks Read once: the first connector is listed and written for as long as the
+	 *          control is mounted, and a later one is ignored. To show another collection,
+	 *          remount the control, e.g. with a `key` per record.
 	 */
 	connector: Connector;
 	/**
@@ -64,7 +67,7 @@ export interface BackendMultiImageImage extends MultiImageImage {
 
 const CrudMultiImage = (props: CrudMultiImageProps) => {
 	const {
-		connector,
+		connector: connectorProp,
 		errorComponent: ErrorComponent,
 		serialize,
 		deserialize,
@@ -75,6 +78,11 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 	} = props;
 	const { name, primary, onPrimaryChange } = otherProps;
 
+	// Read once: the first connector is the collection this control lists and writes for
+	// as long as it is mounted, and a later one is ignored. Its list, changes and uploads
+	// in flight all belong to the first, so another collection takes a remount (a
+	// `key` per record).
+	const connector = useRef(connectorProp).current;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
 	const [loadError, setLoadError] = useState<Error | null>(null);

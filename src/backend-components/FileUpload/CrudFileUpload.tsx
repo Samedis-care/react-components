@@ -26,8 +26,10 @@ export interface CrudFileUploadProps extends Omit<
 > {
 	/**
 	 * The backend connector used as CRUD interface
-	 * @remarks Null renders a read-only control that lists `additionalFiles`. A connector
-	 *          passed later is loaded.
+	 * @remarks Null renders a read-only control that lists `additionalFiles`. Read once:
+	 *          the first connector passed (after null, if any) is listed and written for
+	 *          as long as the control is mounted, and a later one is ignored. To show
+	 *          another collection, remount the control, e.g. with a `key` per record.
 	 */
 	connector: Connector | null;
 	/**
@@ -106,7 +108,7 @@ const CrudFileUpload = (
 	ref: ForwardedRef<FileUploadDispatch>,
 ) => {
 	const {
-		connector,
+		connector: connectorProp,
 		serialize,
 		deserialize,
 		onChange,
@@ -115,6 +117,13 @@ const CrudFileUpload = (
 		onDirtyChange,
 		...otherProps
 	} = props;
+	// Read once: the first connector is the collection this control lists and writes for
+	// as long as it is mounted, and a later one is ignored. Its list, pending changes and
+	// uploads in flight all belong to the first, so another collection takes a remount (a
+	// `key` per record).
+	const pinnedConnector = useRef(connectorProp);
+	pinnedConnector.current ??= connectorProp;
+	const connector = pinnedConnector.current;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
 	const [loadError, setLoadError] = useState<Error | null>(null);

@@ -1762,4 +1762,46 @@ describe("CrudFileUpload: bugs", () => {
 		expect(ui.container.querySelector('input[type="file"]')).not.toBe(null);
 		expect(ui.hasRemove("document.pdf")).toBe(true);
 	});
+
+	it("[ISSUE-3511-ITEM-9] a later connector changes neither the list nor where writes go", async () => {
+		const first = new StrictConnector(SERVER_FILES);
+		const second = new StrictConnector([
+			{ id: "1", name: "other.txt", type: "text/plain", downloadLink: "#o" },
+		]);
+		const ui = renderUpload({ connector: first });
+		await loaded(ui);
+
+		ui.rerender({ connector: second });
+		await ui.settle();
+		await ui.remove("document.pdf");
+		await ui.settle();
+
+		expect(ui.names()).toEqual(["image.png"]);
+		expect(first.deleteCalls).toEqual(["1"]);
+		expect(second.deleteCalls).toEqual([]);
+		expect(second.indexParams).toEqual([]);
+	});
+
+	it("[ISSUE-3511-ITEM-9] a key per record shows another record's files", async () => {
+		const first = new StrictConnector(SERVER_FILES);
+		const second = new StrictConnector([
+			{ id: "1", name: "other.txt", type: "text/plain", downloadLink: "#o" },
+		]);
+		let showSecond!: () => void;
+		const Owner = ({ upload }: { upload: RenderControl }) => {
+			const [record, setRecord] = React.useState({ id: "A", connector: first });
+			showSecond = () => setRecord({ id: "B", connector: second });
+			return (
+				<React.Fragment key={record.id}>
+					{upload({ connector: record.connector })}
+				</React.Fragment>
+			);
+		};
+		const ui = renderUpload({ connector: first }, { Owner });
+		await loaded(ui);
+
+		act(() => showSecond());
+
+		await waitFor(() => expect(ui.names()).toEqual(["other.txt"]));
+	});
 });
