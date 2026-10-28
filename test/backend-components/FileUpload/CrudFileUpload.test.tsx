@@ -1880,4 +1880,35 @@ describe("CrudFileUpload: bugs", () => {
 
 		expect(onChange).not.toHaveBeenCalled();
 	});
+
+	it("[ISSUE-3511-ITEM-11] an error is cleared by a later change that goes through", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		connector.rejectCreates.add("bad.txt");
+		const ui = renderUpload({ connector });
+		await loaded(ui);
+		await ui.addFile(pick("bad.txt"));
+		await waitFor(() => expect(ui.errorText()).toContain("refused"));
+
+		await ui.addFile(pick("good.txt"));
+		await waitFor(() => expect(ui.names()).toContain("good.txt"));
+		await ui.settle();
+
+		expect(ui.errorText()).toBe(null);
+	});
+
+	it("[ISSUE-3511-ITEM-11] a refused selection's error is cleared by a later change that goes through", async () => {
+		const ui = renderUpload({
+			connector: new StrictConnector(SERVER_FILES),
+			accept: "text/plain",
+		});
+		await loaded(ui);
+		await ui.addFile(pick("manual.pdf", "application/pdf"));
+		await waitFor(() => expect(ui.errorText()).not.toBe(null));
+
+		await ui.addFile(pick("notes.txt"));
+		await waitFor(() => expect(ui.names()).toContain("notes.txt"));
+		await ui.settle();
+
+		expect(ui.errorText()).toBe(null);
+	});
 });

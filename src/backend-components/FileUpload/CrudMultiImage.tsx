@@ -183,6 +183,8 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 
 				// update state
 				setImages(finalImages);
+				// it went through, so an earlier error no longer applies
+				setError(null);
 				if (onPrimaryChange)
 					onPrimaryChange(
 						name,

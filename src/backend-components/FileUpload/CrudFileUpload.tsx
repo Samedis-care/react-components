@@ -320,7 +320,8 @@ const CrudFileUpload = (
 				uploadedPicks.current.set(picked[index].file as File, result.value);
 				uploadedFiles.push(result.value);
 			});
-			if (error) setError(error);
+			// the outcome of this change: one that went through clears an earlier error
+			setError(error);
 
 			const kept = newFiles.filter(
 				(file) =>

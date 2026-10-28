@@ -564,4 +564,22 @@ describe("CrudMultiImage: bugs", () => {
 
 		expect(calls).toHaveLength(before);
 	});
+
+	it("[ISSUE-3511-ITEM-11] an error is cleared by a later change that goes through", async () => {
+		usePassThroughImages();
+		const backend = new Backend(OWN);
+		backend.rejectCreates.add("bad.png");
+		const { container } = renderMI({ connector: backend });
+		await ready(container);
+		await pick(container, [png("bad.png")]);
+		await waitFor(() =>
+			expect(screen.getByTestId("error")).toBeInTheDocument(),
+		);
+
+		await pick(container, [png("ok.png")]);
+		await waitFor(() => expect(backend.creates).toHaveLength(1));
+		await settle();
+
+		expect(screen.queryByTestId("error")).toBe(null);
+	});
 });
