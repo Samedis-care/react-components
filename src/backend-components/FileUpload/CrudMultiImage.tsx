@@ -224,9 +224,16 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
+	// Reported when the list changes, to the handler passed last: a new handler alone is no
+	// change, and an inline one that stores a derived list would otherwise render forever.
+	const onChangeRef = useRef(onChange);
+	onChangeRef.current = onChange;
 	useEffect(() => {
-		if (onChange) onChange(name, images);
-	}, [images, name, onChange]);
+		// The list is the server's only once loaded: before that, a field that has images
+		// would report none, and after a failed load nothing is known.
+		if (loading || loadError) return;
+		onChangeRef.current?.(name, images);
+	}, [images, loadError, loading, name]);
 
 	if (loading || additionalImagesLoading) return <Loader />;
 	if (loadError) return <span>{loadError.message}</span>;

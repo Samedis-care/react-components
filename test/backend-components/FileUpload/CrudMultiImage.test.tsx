@@ -516,4 +516,52 @@ describe("CrudMultiImage: bugs", () => {
 		expect(second.deleteCalls).toEqual([]);
 		expect(second.indexParams).toEqual([]);
 	});
+
+	it("[ISSUE-3511-ITEM-10] onChange never reports an empty list for a field that has images", async () => {
+		const onChange = vi.fn();
+		const { container } = renderMI({ connector: new Backend(OWN), onChange });
+		await ready(container);
+		await waitFor(() => expect(onChange).toHaveBeenCalled());
+
+		expect(
+			onChange.mock.calls.map(([, images]) => (images as unknown[]).length),
+		).not.toContain(0);
+	});
+
+	it("[ISSUE-3511-ITEM-10] onChange is not called again when only the handler changes", async () => {
+		const calls: number[] = [];
+		let rerenderOwner!: () => void;
+		const InlineOwner = () => {
+			const [, setCount] = React.useState(0);
+			rerenderOwner = () => setCount((count) => count + 1);
+			return (
+				<CrudMultiImage
+					label={"Images"}
+					uploadImage={"upload.png"}
+					captureImage={"capture.png"}
+					errorComponent={ErrorSink}
+					serialize={serialize}
+					deserialize={deserialize}
+					primary={"1"}
+					connector={backend}
+					// inline, so a new function on every render
+					onChange={(_name, images) => calls.push(images.length)}
+				/>
+			);
+		};
+		const backend = new Backend(OWN);
+		const { container } = render(
+			<Framework>
+				<InlineOwner />
+			</Framework>,
+		);
+		await ready(container);
+		await waitFor(() => expect(calls).toContain(2));
+		const before = calls.length;
+
+		act(() => rerenderOwner());
+		act(() => rerenderOwner());
+
+		expect(calls).toHaveLength(before);
+	});
 });

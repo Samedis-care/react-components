@@ -1804,4 +1804,80 @@ describe("CrudFileUpload: bugs", () => {
 
 		await waitFor(() => expect(ui.names()).toEqual(["other.txt"]));
 	});
+
+	it("[ISSUE-3511-ITEM-10] onChange never reports an empty list for a field that has files", async () => {
+		const onChange = vi.fn();
+		const ui = renderUpload({
+			connector: new StrictConnector(SERVER_FILES),
+			onChange,
+		});
+		await loaded(ui);
+		await waitFor(() => expect(onChange).toHaveBeenCalled());
+
+		expect(
+			onChange.mock.calls.map(([files]) => (files as FileData[]).length),
+		).not.toContain(0);
+	});
+
+	it("[ISSUE-3511-ITEM-10] onChange is not called again when only the handler changes", async () => {
+		const calls: number[] = [];
+		let rerenderOwner!: () => void;
+		const Owner = ({ upload }: { upload: RenderControl }) => {
+			const [, setCount] = React.useState(0);
+			rerenderOwner = () => setCount((count) => count + 1);
+			// inline, so a new function on every render
+			return upload({ onChange: (files) => calls.push(files.length) });
+		};
+		const ui = renderUpload(
+			{ connector: new StrictConnector(SERVER_FILES) },
+			{ Owner },
+		);
+		await loaded(ui);
+		await waitFor(() => expect(calls).toContain(2));
+		const before = calls.length;
+
+		act(() => rerenderOwner());
+		act(() => rerenderOwner());
+
+		expect(calls).toHaveLength(before);
+	});
+
+	it("[ISSUE-3511-ITEM-10] a change reports to the handler passed last", async () => {
+		const first = vi.fn();
+		const second = vi.fn();
+		const ui = renderUpload({
+			connector: new StrictConnector(SERVER_FILES),
+			onChange: first,
+		});
+		await loaded(ui);
+		await waitFor(() => expect(first).toHaveBeenCalled());
+		ui.rerender({ onChange: second });
+		first.mockClear();
+
+		await ui.addFile(pick("notes.txt"));
+		await waitFor(() => expect(ui.names()).toContain("notes.txt"));
+
+		expect(first).not.toHaveBeenCalled();
+		await waitFor(() =>
+			expect(
+				(second.mock.calls.at(-1)![0] as FileData[]).map(
+					(file) => file.file.name,
+				),
+			).toEqual(["document.pdf", "image.png", "notes.txt"]),
+		);
+	});
+
+	it("[ISSUE-3511-ITEM-10] a failed load reports nothing", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		connector.indexError = new Error("index refused");
+		const onChange = vi.fn();
+		const ui = renderUpload({ connector, onChange });
+
+		await waitFor(() =>
+			expect(ui.container.textContent).toContain("index refused"),
+		);
+		await ui.settle();
+
+		expect(onChange).not.toHaveBeenCalled();
+	});
 });

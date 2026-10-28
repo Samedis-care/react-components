@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-10-28 | [CrudFileUpload and CrudMultiImage call onChange only when their list changes](2026-10-28-crud-upload-onchange-only-on-list-changes.md) | behavior |
 | 2026-10-28 | [CrudFileUpload and CrudMultiImage keep the first connector, also for writes](2026-10-28-crud-upload-reads-connector-once.md) | behavior |
 | 2026-10-27 | [Connector.deleteMultiple reports which records it could not delete](2026-10-27-delete-multiple-reports-failed-ids.md) | behavior, type |
 | 2026-10-27 | [CrudFileUpload reports a queued removal with `delete: true`](2026-10-27-crud-file-upload-queued-removal-keeps-delete.md) | behavior |

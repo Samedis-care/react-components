@@ -476,9 +476,16 @@ const CrudFileUpload = (
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [connector]);
 
+	// Reported when the list changes, to the handler passed last: a new handler alone is no
+	// change, and an inline one that stores a derived list would otherwise render forever.
+	const onChangeRef = useRef(onChange);
+	onChangeRef.current = onChange;
 	useEffect(() => {
-		if (onChange) onChange(files);
-	}, [files, onChange]);
+		// The list is the server's only once loaded: before that, a field that has files
+		// would report none, and after a failed load nothing is known.
+		if ((connector && loading) || loadError) return;
+		onChangeRef.current?.(files);
+	}, [connector, files, loadError, loading]);
 
 	// The picks are read only when the list changes for another reason: that is when the
 	// standalone control would lose them. Until then it lists them itself.
