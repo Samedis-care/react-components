@@ -87,6 +87,9 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 	const [error, setError] = useState<Error | null>(null);
 	const [loadError, setLoadError] = useState<Error | null>(null);
 	const [images, setImages] = useState<BackendMultiImageImage[]>([]);
+	// the primary when a change is done, which may have moved on since it started
+	const primaryRef = useRef(primary);
+	primaryRef.current = primary;
 
 	const handleChange = useCallback(
 		async (
@@ -147,18 +150,17 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 					}),
 			);
 			// delete deleted files
-			const deletePromise = connector.deleteMultiple(
-				images
-					.filter(
-						(img) =>
-							!newImages.find(
-								(other) =>
-									!other.id.startsWith(MultiImageNewIdPrefix) &&
-									other.id === img.id,
-							),
-					)
-					.map((img) => img.id),
-			);
+			const removedIds = images
+				.filter(
+					(img) =>
+						!newImages.find(
+							(other) =>
+								!other.id.startsWith(MultiImageNewIdPrefix) &&
+								other.id === img.id,
+						),
+				)
+				.map((img) => img.id);
+			const deletePromise = connector.deleteMultiple(removedIds);
 
 			try {
 				// wait for response
@@ -185,11 +187,13 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 				setImages(finalImages);
 				// it went through, so an earlier error no longer applies
 				setError(null);
-				if (onPrimaryChange)
-					onPrimaryChange(
-						name,
-						finalImages.find((img) => img.primary)?.id ?? "",
-					);
+				// The primary is the owner's, and only reported when this change moved it:
+				// removing the primary image leaves none. Any other primary stays as it is,
+				// whether it is one of these images, an additional one, or an id that is no
+				// longer listed at all (an image deleted elsewhere).
+				const current = primaryRef.current;
+				if (onPrimaryChange && current && removedIds.includes(current))
+					onPrimaryChange(name, null);
 			} catch (e) {
 				setError(e as Error);
 			}

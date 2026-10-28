@@ -70,6 +70,15 @@ const settle = () =>
 		await tick();
 	});
 
+/** A promise the test resolves when it wants to */
+const gate = () => {
+	let release!: () => void;
+	const promise = new Promise<void>((resolve) => {
+		release = resolve;
+	});
+	return { promise, release };
+};
+
 /** serialize as SCF writes it (`serializeImageData`): async, a Blob or a URL */
 const serialize = vi.fn(async (data: MultiImageImage, id: string | null) => {
 	await Promise.resolve();
@@ -318,6 +327,16 @@ const removeEntry = (dialog: HTMLElement, index: number) =>
 			),
 		);
 		await tick();
+		await tick();
+	});
+// the "make primary" row has no role (ISSUE-3491-ITEM-1, ISSUE-3491-ITEM-10)
+const makePrimary = (dialog: HTMLElement, index: number) =>
+	act(async () => {
+		fireEvent.click(
+			entries(dialog)[index].querySelector<HTMLElement>(
+				'[class*="CcImageDialogEntry-makePrimary"]',
+			)!,
+		);
 		await tick();
 	});
 const usePassThroughImages = () =>
@@ -581,5 +600,106 @@ describe("CrudMultiImage: bugs", () => {
 		await settle();
 
 		expect(screen.queryByTestId("error")).toBe(null);
+	});
+
+	it("[ISSUE-3511-ITEM-12] a primary among the additional images stays primary when an own image is added", async () => {
+		usePassThroughImages();
+		const backend = new Backend(OWN);
+		const extras = [
+			{ id: "x1", name: "x1", image: "x1.png", readOnly: true },
+			{ id: "x2", name: "x2", image: "x2.png", readOnly: true },
+		];
+		const { container, log } = renderOwner({
+			connector: backend,
+			additionalImages: extras,
+			initialPrimary: "x2",
+		});
+		await ready(container);
+
+		await pick(container, [png("c.png")]);
+		await waitFor(() => expect(backend.creates).toHaveLength(1));
+		await settle();
+
+		expect(log.current).toBe("x2");
+	});
+
+	it("[ISSUE-3511-ITEM-12] a primary chosen while an upload runs is not reverted when it lands", async () => {
+		usePassThroughImages();
+		const backend = new Backend(OWN);
+		const uploading = gate();
+		backend.createGates.push(uploading.promise);
+		const { container, log } = renderOwner({
+			connector: backend,
+			initialPrimary: "2",
+		});
+		await ready(container);
+		await pick(container, [png("c.png")]);
+
+		await makePrimary(openEdit(), 0);
+		expect(log.current).toBe("1");
+		await act(async () => {
+			uploading.release();
+			await tick();
+		});
+		await waitFor(() => expect(backend.creates).toHaveLength(1));
+		await settle();
+
+		expect(log.current).toBe("1");
+	});
+
+	it("[ISSUE-3511-ITEM-12] no primary is reported as null, never as an empty id", async () => {
+		usePassThroughImages();
+		const backend = new Backend([]);
+		const { container, log } = renderOwner({
+			connector: backend,
+			initialPrimary: null,
+		});
+		await ready(container);
+
+		await pick(container, [png("c.png")]);
+		await waitFor(() => expect(backend.creates).toHaveLength(1));
+		await settle();
+
+		expect(log.reported).not.toContain("");
+	});
+
+	it("[ISSUE-3511-ITEM-12] a primary that is no longer listed (an image deleted elsewhere) is left alone by a change", async () => {
+		usePassThroughImages();
+		const backend = new Backend(OWN);
+		const { container, log } = renderOwner({
+			connector: backend,
+			additionalImages: [
+				{ id: "x1", name: "x1", image: "x1.png", readOnly: true },
+			],
+			initialPrimary: "x9",
+		});
+		await ready(container);
+		await settle();
+		// what MultiImage itself makes of the unknown id is ISSUE-3491-ITEM-6
+		const before = log.reported.length;
+
+		await pick(container, [png("c.png")]);
+		await waitFor(() => expect(backend.creates).toHaveLength(1));
+		await settle();
+
+		expect(log.reported.slice(before)).toEqual([]);
+	});
+
+	it("[ISSUE-3511-ITEM-12] removing the primary image reports no primary, as null", async () => {
+		const backend = new Backend(OWN);
+		const { container, log } = renderOwner({
+			connector: backend,
+			initialPrimary: "2",
+		});
+		await ready(container);
+		await settle();
+		const before = log.reported.length;
+
+		await removeEntry(openEdit(), 1);
+		await waitFor(() => expect(backend.deleteCalls).toEqual(["2"]));
+		await settle();
+
+		// which image is shown as primary then is ISSUE-3491-ITEM-40
+		expect(log.reported[before]).toBe(null);
 	});
 });
