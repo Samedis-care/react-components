@@ -54,7 +54,9 @@ export interface CrudFileUploadProps extends Omit<
 		data: Record<string, unknown>,
 	) => Promise<FileData<BackendFileMeta>> | FileData<BackendFileMeta>;
 	/**
-	 * additional read-only files
+	 * Files of someone else, listed after this control's own files, read-only
+	 * @remarks Never written through `connector`, whatever flags they carry: a `delete` or
+	 *          `canBeUploaded` only changes how they are shown.
 	 */
 	additionalFiles?: FileData<FileMeta>[];
 	/**
@@ -314,9 +316,6 @@ const CrudFileUpload = (
 			const kept = newFiles.filter(
 				(file) =>
 					!file.canBeUploaded &&
-					// the list handed back includes what was only passed through for
-					// display, which this control neither stores nor writes
-					!isAdditionalFile(file) &&
 					"id" in (file.file as FileMeta | BackendFileMeta) &&
 					// a delete the server refused has not happened: the file stays in the
 					// list, still marked, for the next change to try again
@@ -367,11 +366,16 @@ const CrudFileUpload = (
 	 */
 	const handleChange = useCallback(
 		(newFiles: FileData<File | FileMeta | BackendFileMeta>[]) => {
+			// The list handed back includes what was only passed through for display,
+			// which this control neither stores nor writes, whatever flags it carries: a
+			// `delete` or `canBeUploaded` of another control's list means nothing to this
+			// connector, where its id may even be a different record.
+			const ownFiles = newFiles.filter((file) => !isAdditionalFile(file));
 			// the picks the user has now, whichever change uploads them
-			pendingPicks.current = newFiles.filter(
+			pendingPicks.current = ownFiles.filter(
 				(file) => file.canBeUploaded,
 			) as FileData<File>[];
-			const change = pendingChange.current.then(() => applyChange(newFiles));
+			const change = pendingChange.current.then(() => applyChange(ownFiles));
 			// a failed change must not stop the ones after it
 			pendingChange.current = change.catch(() => undefined);
 			return change;

@@ -1683,4 +1683,53 @@ describe("CrudFileUpload: bugs", () => {
 		);
 		expect(ui.container.querySelector('input[type="file"]')).not.toBe(null);
 	});
+
+	it("[ISSUE-3511-ITEM-7] an additional file marked for deletion is not deleted through this control's connector", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		const ui = renderUpload({
+			connector,
+			additionalFiles: [
+				{
+					// another control's entry, removed there; id 2 means image.png here
+					file: {
+						name: "foreign.pdf",
+						type: "application/pdf",
+						downloadLink: "#f",
+						id: "2",
+					} as FileMeta,
+					delete: true,
+				},
+			],
+		});
+		await loaded(ui);
+
+		await ui.addFile(pick("notes.txt"));
+		await ui.settle();
+
+		expect(connector.deleteCalls).toEqual([]);
+		expect(await onServer(connector)).toEqual([
+			"document.pdf",
+			"image.png",
+			"notes.txt",
+		]);
+	});
+
+	it("[ISSUE-3511-ITEM-7] an additional file marked as a pick is neither uploaded here nor listed twice", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		const ui = renderUpload({
+			connector,
+			additionalFiles: [
+				// another control's pick, which that control uploads
+				{ file: pick("foreign.txt"), canBeUploaded: true },
+			],
+		});
+		await loaded(ui);
+
+		await ui.addFile(pick("notes.txt"));
+		await waitFor(() => expect(ui.names()).toContain("notes.txt"));
+		await ui.settle();
+
+		expect(connector.createCalls).toEqual(["notes.txt"]);
+		expect(ui.names().filter((name) => name === "foreign.txt")).toHaveLength(1);
+	});
 });
