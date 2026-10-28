@@ -8,6 +8,7 @@ import {
 	waitFor,
 } from "@testing-library/react";
 import { Framework } from "../../../src/framework";
+import type { GetDefaultThemeCallback } from "../../../src/framework/ThemeProvider";
 import CrudFileUpload, {
 	BackendFileMeta,
 	CrudFileUploadProps,
@@ -172,23 +173,42 @@ const lazyOver = (connector: Connector) =>
 
 type Harness = ReturnType<typeof renderUpload>;
 
+/** Renders the control with the given extra props, for an owner around it */
+type RenderControl = (
+	extra?: Partial<CrudFileUploadProps>,
+) => React.ReactElement;
+
+interface RenderOptions {
+	/** An owner that renders the control itself, e.g. to re-render it or pass inline props */
+	Owner?: React.ComponentType<{ upload: RenderControl }>;
+	/** The Framework's theme */
+	theme?: GetDefaultThemeCallback;
+}
+
 const renderUpload = (
 	props: Partial<CrudFileUploadProps> & Pick<CrudFileUploadProps, "connector">,
+	options: RenderOptions = {},
 ) => {
 	const ref = React.createRef<FileUploadDispatch>();
-	const { container, unmount } = render(
-		<Framework>
-			<CrudFileUpload
-				ref={ref}
-				errorComponent={ErrorSink}
-				serialize={serialize}
-				deserialize={deserialize}
-				previewSize={24}
-				label={"Attachments"}
-				{...props}
-			/>
-		</Framework>,
+	const { Owner, theme } = options;
+	const upload: RenderControl = (extra) => (
+		<CrudFileUpload
+			ref={ref}
+			errorComponent={ErrorSink}
+			serialize={serialize}
+			deserialize={deserialize}
+			previewSize={24}
+			label={"Attachments"}
+			{...props}
+			{...extra}
+		/>
 	);
+	const tree = (extra?: Partial<CrudFileUploadProps>) => (
+		<Framework defaultTheme={theme}>
+			{Owner ? <Owner upload={upload} /> : upload(extra)}
+		</Framework>
+	);
+	const { container, unmount, rerender } = render(tree());
 
 	const labels = () =>
 		// emotion folds the slot into one generated class ("css-hash-CcFile-label")
@@ -231,6 +251,8 @@ const renderUpload = (
 		ref,
 		container,
 		unmount,
+		/** Renders the same control again with these props changed */
+		rerender: (extra: Partial<CrudFileUploadProps>) => rerender(tree(extra)),
 		names,
 		/** What the file is shown as, relative to the server: added, removed or nothing */
 		changeOf: (name: string) => labelOf(name).getAttribute("data-cc-change"),
@@ -1566,5 +1588,72 @@ describe("CrudFileUpload: bugs", () => {
 			"image.png",
 			"bad.txt",
 		]);
+	});
+
+	it("[ISSUE-3511-ITEM-5] an inline additionalFiles array neither hides nor deletes a file still uploading", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		const uploading = gate();
+		connector.createGate = uploading.promise;
+		let rerenderOwner!: () => void;
+		const Owner = ({ upload }: { upload: RenderControl }) => {
+			const [, setCount] = React.useState(0);
+			rerenderOwner = () => setCount((count) => count + 1);
+			// a new, equal array on every render, as an inline prop is
+			return upload({
+				additionalFiles: [
+					{
+						file: { name: "terms.txt", type: "text/plain", downloadLink: "#t" },
+					},
+				],
+			});
+		};
+		const ui = renderUpload({ connector }, { Owner });
+		await loaded(ui);
+		await startPick(ui, pick("race.txt"));
+
+		act(() => rerenderOwner());
+		await ui.remove("document.pdf");
+		await act(async () => {
+			uploading.release();
+			await new Promise((resolve) => setTimeout(resolve, 10));
+		});
+		await ui.settle();
+
+		expect(await onServer(connector)).toEqual(["image.png", "race.txt"]);
+		expect(ui.names()).toEqual(["image.png", "race.txt", "terms.txt"]);
+	});
+
+	it("[ISSUE-3511-ITEM-5] additional files that arrive while a file is uploading neither hide nor delete it", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		const uploading = gate();
+		connector.createGate = uploading.promise;
+		let loadExtras!: () => void;
+		const Owner = ({ upload }: { upload: RenderControl }) => {
+			const [extras, setExtras] = React.useState<FileData<FileMeta>[]>([]);
+			loadExtras = () =>
+				setExtras([
+					{
+						file: { name: "terms.txt", type: "text/plain", downloadLink: "#t" },
+					},
+				]);
+			return upload({ additionalFiles: extras });
+		};
+		const ui = renderUpload({ connector }, { Owner });
+		await loaded(ui);
+		await startPick(ui, pick("race.txt"));
+
+		// the owner's extras finish loading
+		act(() => loadExtras());
+		await waitFor(() => expect(ui.names()).toContain("terms.txt"));
+		expect(ui.names()).toContain("race.txt");
+		await ui.remove("document.pdf");
+		await act(async () => {
+			uploading.release();
+			await new Promise((resolve) => setTimeout(resolve, 10));
+		});
+		await ui.settle();
+
+		expect(await onServer(connector)).toEqual(["image.png", "race.txt"]);
+		expect(ui.names()).toEqual(["image.png", "race.txt", "terms.txt"]);
 	});
 });
