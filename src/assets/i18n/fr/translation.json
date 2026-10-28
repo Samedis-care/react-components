@@ -364,7 +364,7 @@
 			"hours": "heures",
 			"day": "journée",
 			"days": "journées",
-			"str": "Il y a {{MONTANT}} {{UNIT}}"
+			"str": "Il y a {{AMOUNT}} {{UNIT}}"
 		}
 	},
 	"common": {
