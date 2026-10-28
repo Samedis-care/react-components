@@ -17,6 +17,7 @@ class RendererBackendSingleSelect extends TypeId {
             ...props,
             lru: undefined,
             onAddNew: undefined,
+            defaultQuery: undefined,
             classes: undefined,
             endAdornment: undefined,
             modelFetch: props.modelFetch,

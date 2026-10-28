@@ -19,7 +19,14 @@ import { Loader } from "../../standalone";
 const ADDITIONAL_FILE = Symbol("CcCrudFileUpload.additionalFile");
 const isAdditionalFile = (file) => ADDITIONAL_FILE in file;
 const CrudFileUpload = (props, ref) => {
-    const { connector, serialize, deserialize, onChange, additionalFiles, showDirtyState, onDirtyChange, ...otherProps } = props;
+    const { connector: connectorProp, serialize, deserialize, onChange, additionalFiles, showDirtyState, onDirtyChange, ...otherProps } = props;
+    // Read once: the first connector is the collection this control lists and writes for
+    // as long as it is mounted, and a later one is ignored. Its list, pending changes and
+    // uploads in flight all belong to the first, so another collection takes a remount (a
+    // `key` per record).
+    const pinnedConnector = useRef(connectorProp);
+    pinnedConnector.current ??= connectorProp;
+    const connector = pinnedConnector.current;
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [loadError, setLoadError] = useState(null);
@@ -320,10 +327,17 @@ const CrudFileUpload = (props, ref) => {
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [connector]);
+    // Reported when the list changes, to the handler passed last: a new handler alone is no
+    // change, and an inline one that stores a derived list would otherwise render forever.
+    const onChangeRef = useRef(onChange);
+    onChangeRef.current = onChange;
     useEffect(() => {
-        if (onChange)
-            onChange(files);
-    }, [files, onChange]);
+        // The list is the server's only once loaded: before that, a field that has files
+        // would report none, and after a failed load nothing is known.
+        if ((connector && loading) || loadError)
+            return;
+        onChangeRef.current?.(files);
+    }, [connector, files, loadError, loading]);
     // The picks are read only when the list changes for another reason: that is when the
     // standalone control would lose them. Until then it lists them itself.
     const finalFiles = useMemo(() => [
@@ -344,6 +358,8 @@ const CrudFileUpload = (props, ref) => {
     if (loadError)
         return _jsx("span", { children: loadError.message });
     const ErrorComponent = props.errorComponent;
-    return (_jsxs(_Fragment, { children: [error && _jsx(ErrorComponent, { error: error }), _jsx(FileUpload, { ...otherProps, ref: ref, files: finalFiles, dirty: dirty, onChange: handleChange, onRestoreFile: lazyConnector ? handleRestore : undefined, handleError: handleError, readOnly: otherProps.readOnly || connector == null })] }));
+    return (_jsxs(_Fragment, { children: [error && _jsx(ErrorComponent, { error: error }), _jsx(FileUpload, { ...otherProps, ref: ref, files: finalFiles, dirty: dirty, onChange: handleChange, onRestoreFile: lazyConnector ? handleRestore : undefined, handleError: handleError, 
+                // undefined unless set, so that the theme's default applies
+                readOnly: connector == null ? true : otherProps.readOnly })] }));
 };
 export default React.memo(React.forwardRef(CrudFileUpload));

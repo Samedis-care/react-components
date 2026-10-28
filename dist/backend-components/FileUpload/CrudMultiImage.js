@@ -1,10 +1,15 @@
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { MultiImageNewIdPrefix, } from "../../standalone/FileUpload/MultiImage/MultiImage";
 import { Loader, MultiImage } from "../../standalone";
 const CrudMultiImage = (props) => {
-    const { connector, errorComponent: ErrorComponent, serialize, deserialize, onChange, additionalImages, additionalImagesLoading, ...otherProps } = props;
+    const { connector: connectorProp, errorComponent: ErrorComponent, serialize, deserialize, onChange, additionalImages, additionalImagesLoading, ...otherProps } = props;
     const { name, primary, onPrimaryChange } = otherProps;
+    // Read once: the first connector is the collection this control lists and writes for
+    // as long as it is mounted, and a later one is ignored. Its list, changes and uploads
+    // in flight all belong to the first, so another collection takes a remount (a
+    // `key` per record).
+    const connector = useRef(connectorProp).current;
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [loadError, setLoadError] = useState(null);
@@ -106,10 +111,17 @@ const CrudMultiImage = (props) => {
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+    // Reported when the list changes, to the handler passed last: a new handler alone is no
+    // change, and an inline one that stores a derived list would otherwise render forever.
+    const onChangeRef = useRef(onChange);
+    onChangeRef.current = onChange;
     useEffect(() => {
-        if (onChange)
-            onChange(name, images);
-    }, [images, name, onChange]);
+        // The list is the server's only once loaded: before that, a field that has images
+        // would report none, and after a failed load nothing is known.
+        if (loading || loadError)
+            return;
+        onChangeRef.current?.(name, images);
+    }, [images, loadError, loading, name]);
     if (loading || additionalImagesLoading)
         return _jsx(Loader, {});
     if (loadError)

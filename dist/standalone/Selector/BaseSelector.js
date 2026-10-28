@@ -148,7 +148,7 @@ const autocompleteSlots = { popper: GrowPopper };
 export const BaseSelectorContext = React.createContext(null);
 const BaseSelector = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcBaseSelector" });
-    const { variant, refreshToken, onSelect, multiple, selected, label, disabled, required, error, warning, dirty, autoFocus, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, additionalOptions, enableIcons, noOptionsText, loadingText, startTypingToSearchText, disableTruncationNotice, truncatedLabel, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, forceQuery, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, iconSize, classes, className, } = props;
+    const { variant, refreshToken, onSelect, multiple, selected, label, disabled, required, error, warning, dirty, autoFocus, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, additionalOptions, enableIcons, noOptionsText, loadingText, startTypingToSearchText, disableTruncationNotice, truncatedLabel, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, forceQuery, defaultQuery, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, iconSize, classes, className, } = props;
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
     const defaultSwitchValue = !!(props.displaySwitch && props.defaultSwitchValue);
@@ -461,6 +461,20 @@ const BaseSelector = (inProps) => {
         }
         setQuery(newQuery);
     }, [multiple, selected]);
+    const handleOpen = useCallback((evt) => {
+        setOpen(true);
+        const nothingSelected = Array.isArray(selected)
+            ? selected.length === 0
+            : !selected;
+        if (!defaultQuery || disableSearch || !nothingSelected)
+            return;
+        // MUI resets the text of an input without focus, and a click on the input
+        // opens the popup on mousedown, before the input receives focus
+        if (evt.target instanceof HTMLInputElement)
+            evt.target.focus();
+        // typing opens the popup after updating the query, so what was typed wins
+        setQuery((prev) => prev || defaultQuery);
+    }, [defaultQuery, disableSearch, selected]);
     // search handler
     useEffect(() => {
         if (!open)
@@ -482,9 +496,7 @@ const BaseSelector = (inProps) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lruIds.join(",")]);
     const filterOptions = useCallback((options) => options, []);
-    return (_jsx(StyledInlineSwitch, { visible: !!props.displaySwitch, value: switchValue, onChange: setSwitchValue, label: switchLabel, className: combineClassNames([className, classes?.inlineSwitch]), children: _jsxs(BaseSelectorContext.Provider, { value: context, children: [label && (_jsx(StyledLabel, { shrink: true, disableAnimation: true, disabled: disabled, className: classes?.label, required: !!required, error: !!error, dirty: dirty, children: label })), _jsx(Wrapper, { elevation: 0, className: classes?.wrapper, children: _jsx(StyledAutocomplete, { id: autocompleteId, className: classes?.autocomplete, multiple: multiple, disableCloseOnSelect: multiple, open: open, onOpen: () => {
-                            setOpen(true);
-                        }, onClose: () => {
+    return (_jsx(StyledInlineSwitch, { visible: !!props.displaySwitch, value: switchValue, onChange: setSwitchValue, label: switchLabel, className: combineClassNames([className, classes?.inlineSwitch]), children: _jsxs(BaseSelectorContext.Provider, { value: context, children: [label && (_jsx(StyledLabel, { shrink: true, disableAnimation: true, disabled: disabled, className: classes?.label, required: !!required, error: !!error, dirty: dirty, children: label })), _jsx(Wrapper, { elevation: 0, className: classes?.wrapper, children: _jsx(StyledAutocomplete, { id: autocompleteId, className: classes?.autocomplete, multiple: multiple, disableCloseOnSelect: multiple, open: open, onOpen: handleOpen, onClose: () => {
                             setOpen(false);
                         }, disableClearable: disableClearable, loading: !!loading, loadingText: loadingText ?? t("standalone.selector.base-selector.loading-text"), autoComplete: true, disabled: disabled, selectOnFocus: !disableSearch, options: (() => {
                             let options = [];

@@ -341,6 +341,14 @@ export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends bool
      */
     forceQuery?: boolean;
     /**
+     * Search text the selector opens with while nothing is selected and nothing
+     * has been typed, e.g. a name from imported data the user still has to find
+     * the matching record for. It only searches, it never selects anything.
+     * @remarks Ignored with disableSearch. The user edits or clears it like typed
+     * text, and it comes back whenever the selector opens empty again.
+     */
+    defaultQuery?: string;
+    /**
      * Enable freeSolo. Allows user to enter any content. Selected option will be { value: USER_INPUT, label: USER_INPUT }
      */
     freeSolo?: boolean;

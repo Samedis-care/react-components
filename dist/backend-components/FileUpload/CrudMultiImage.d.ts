@@ -15,6 +15,9 @@ export interface CrudMultiImageProps extends Omit<MultiImageProps, "images" | "o
     additionalImagesLoading?: boolean;
     /**
      * The backend connector used as CRUD interface
+     * @remarks Read once: the first connector is listed and written for as long as the
+     *          control is mounted, and a later one is ignored. To show another collection,
+     *          remount the control, e.g. with a `key` per record.
      */
     connector: Connector;
     /**

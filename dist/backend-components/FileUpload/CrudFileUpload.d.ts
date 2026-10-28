@@ -5,8 +5,10 @@ import { ErrorComponentProps } from "../Form";
 export interface CrudFileUploadProps extends Omit<FileUploadProps, "files" | "handleError"> {
     /**
      * The backend connector used as CRUD interface
-     * @remarks Null renders a read-only control that lists `additionalFiles`. A connector
-     *          passed later is loaded.
+     * @remarks Null renders a read-only control that lists `additionalFiles`. Read once:
+     *          the first connector passed (after null, if any) is listed and written for
+     *          as long as the control is mounted, and a later one is ignored. To show
+     *          another collection, remount the control, e.g. with a `key` per record.
      */
     connector: Connector | null;
     /**
