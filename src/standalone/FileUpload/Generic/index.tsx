@@ -151,6 +151,12 @@ export interface FileUploadProps {
 	 */
 	dirty?: boolean;
 	/**
+	 * Is the field busy, e.g. writing its changes?
+	 * @remarks Sets `aria-busy` on the field. A custom variant gets it as well.
+	 * @default false
+	 */
+	busy?: boolean;
+	/**
 	 * CSS class to apply to root
 	 */
 	className?: string;
@@ -430,6 +436,7 @@ const FileUpload = (
 		onRestoreFile,
 		label,
 		dirty,
+		busy,
 		smallLabel,
 		readOnly,
 		onBlur,
@@ -755,6 +762,7 @@ const FileUpload = (
 			<StyledGroupBox
 				label={boxLabel}
 				smallLabel={smallLabel}
+				busy={busy}
 				className={combineClassNames([className, classes?.root])}
 			>
 				<Dropzone
@@ -857,6 +865,7 @@ const FileUpload = (
 			<StyledGroupBox
 				label={boxLabel}
 				smallLabel={smallLabel}
+				busy={busy}
 				className={combineClassNames([className, classes?.root])}
 			>
 				<Grid

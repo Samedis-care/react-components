@@ -22,7 +22,7 @@ import { FileSelectorError } from "../../standalone/FileUpload/Generic/Errors";
 
 export interface CrudFileUploadProps extends Omit<
 	FileUploadProps,
-	"files" | "handleError"
+	"files" | "handleError" | "busy"
 > {
 	/**
 	 * The backend connector used as CRUD interface
@@ -185,6 +185,9 @@ const CrudFileUpload = (
 	// ...which only helps if the upload that fills it has finished, so changes are
 	// applied one after the other rather than side by side
 	const pendingChange = useRef<Promise<unknown>>(Promise.resolve());
+	// the changes handed in that have not settled yet: while there are any, the field is
+	// busy
+	const [writing, setWriting] = useState(0);
 	// The ids a direct connector deleted. A change made while a delete was running hands
 	// the file back as the standalone control still lists it: marked for deletion, or
 	// restored if the user clicked restore meanwhile. Either way it is gone from the
@@ -385,9 +388,12 @@ const CrudFileUpload = (
 			pendingPicks.current = ownFiles.filter(
 				(file) => file.canBeUploaded,
 			) as FileData<File>[];
+			setWriting((count) => count + 1);
 			const change = pendingChange.current.then(() => applyChange(ownFiles));
 			// a failed change must not stop the ones after it
-			pendingChange.current = change.catch(() => undefined);
+			pendingChange.current = change
+				.catch(() => undefined)
+				.finally(() => setWriting((count) => count - 1));
 			return change;
 		},
 		[applyChange],
@@ -528,6 +534,7 @@ const CrudFileUpload = (
 				ref={ref}
 				files={finalFiles}
 				dirty={dirty}
+				busy={writing > 0}
 				onChange={handleChange}
 				onRestoreFile={lazyConnector ? handleRestore : undefined}
 				handleError={handleError}

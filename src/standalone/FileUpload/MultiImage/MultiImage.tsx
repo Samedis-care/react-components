@@ -131,6 +131,12 @@ export interface MultiImageProps {
 	 */
 	readOnly?: boolean;
 	/**
+	 * Is the field busy, e.g. writing its changes?
+	 * @remarks Sets `aria-busy` on the field.
+	 * @default false
+	 */
+	busy?: boolean;
+	/**
 	 * MimeType to convert the image to (e.g. image/png or image/jpg)
 	 */
 	convertImagesTo?: string;
@@ -224,6 +230,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 		uploadImage,
 		captureImage,
 		readOnly,
+		busy,
 		maxImages,
 		capture,
 		convertImagesTo,
@@ -412,7 +419,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 
 	return (
 		<Root className={combineClassNames([className, classes?.root])}>
-			<GroupBox label={label}>
+			<GroupBox label={label} busy={busy}>
 				<RootContainer container spacing={1} className={classes?.rootContainer}>
 					<ImageItem size={12} className={classes?.imageItem}>
 						<ImageBox

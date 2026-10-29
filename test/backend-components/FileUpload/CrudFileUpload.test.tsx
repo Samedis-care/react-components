@@ -1950,4 +1950,40 @@ describe("CrudFileUpload: accessibility bugs", () => {
 		expect(alert).toHaveTextContent("The attachments could not be loaded");
 		expect(alert).toHaveTextContent("forbidden_error");
 	});
+
+	it("[ISSUE-3511-ITEM-19] marks the field busy while an upload is being written", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		connector.createGate = new Promise(() => undefined);
+		const ui = renderUpload({ connector });
+		await loaded(ui);
+
+		await startPick(ui, pick("big.pdf", "application/pdf"));
+		await waitFor(() => expect(connector.createCalls).toEqual(["big.pdf"]));
+
+		expect(screen.getByRole("group", { name: "Attachments" })).toHaveAttribute(
+			"aria-busy",
+			"true",
+		);
+	});
+
+	it("[ISSUE-3511-ITEM-19] is no longer busy once the write settled, also when it was refused", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		connector.rejectCreates.add("big.pdf");
+		const uploading = gate();
+		connector.createGate = uploading.promise;
+		const ui = renderUpload({ connector });
+		await loaded(ui);
+		const field = screen.getByRole("group", { name: "Attachments" });
+		expect(field).not.toHaveAttribute("aria-busy");
+
+		await startPick(ui, pick("big.pdf", "application/pdf"));
+		await waitFor(() => expect(field).toHaveAttribute("aria-busy", "true"));
+		await act(async () => {
+			uploading.release();
+			await Promise.resolve();
+		});
+
+		await waitFor(() => expect(field).not.toHaveAttribute("aria-busy"));
+		expect(ui.errorText()).toContain("upload of big.pdf refused");
+	});
 });

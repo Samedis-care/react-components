@@ -1008,4 +1008,44 @@ describe("CrudMultiImage: accessibility bugs", () => {
 		expect(entries(document.body)).not.toHaveLength(0);
 		expect(errorDialogs()).toHaveLength(0);
 	});
+
+	it("[ISSUE-3511-ITEM-19] a second Remove while the first removal is being written sends no second delete", async () => {
+		const backend = new Backend(OWN);
+		const deleting = gate();
+		backend.deleteGate = deleting.promise;
+		const { container } = renderMI({ connector: backend });
+		await ready(container);
+		const dialog = openEdit();
+
+		await removeEntry(dialog, 1);
+		// still listed, and nothing says the removal is under way
+		if (entries(dialog).length > 1) await removeEntry(dialog, 1);
+		await act(async () => {
+			deleting.release();
+			await tick();
+		});
+		await settle();
+
+		expect(backend.deleteCalls).toEqual(["2"]);
+	});
+
+	it("[ISSUE-3511-ITEM-19] marks the field busy while a removal is being written", async () => {
+		const backend = new Backend(OWN);
+		const deleting = gate();
+		backend.deleteGate = deleting.promise;
+		const { container } = renderMI({ connector: backend });
+		await ready(container);
+		const field = screen.getByRole("group", { name: "Images" });
+		expect(field).not.toHaveAttribute("aria-busy");
+
+		await removeEntry(openEdit(), 1);
+		expect(field).toHaveAttribute("aria-busy", "true");
+		await act(async () => {
+			deleting.release();
+			await tick();
+		});
+		await settle();
+
+		expect(field).not.toHaveAttribute("aria-busy");
+	});
 });

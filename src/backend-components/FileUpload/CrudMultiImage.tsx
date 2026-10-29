@@ -18,7 +18,7 @@ import CrudLoadStatus from "./CrudLoadStatus";
 
 export interface CrudMultiImageProps extends Omit<
 	MultiImageProps,
-	"images" | "onChange" | "dialogMessage" | "onDialogOpenChange"
+	"images" | "onChange" | "dialogMessage" | "onDialogOpenChange" | "busy"
 > {
 	/**
 	 * Images of someone else, listed before this control's own
@@ -151,6 +151,9 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 		setImages(next);
 	}, []);
 	const pendingChange = useRef<Promise<unknown>>(Promise.resolve());
+	// the changes handed in that have not settled yet: while there are any, the field is
+	// busy
+	const [writing, setWriting] = useState(0);
 
 	const applyChange = useCallback(
 		async ({ removed, replaced, added }: ImageChange) => {
@@ -280,9 +283,12 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 				}),
 				added: own.filter((img) => img.id.startsWith(MultiImageNewIdPrefix)),
 			};
+			setWriting((count) => count + 1);
 			const applied = pendingChange.current.then(() => applyChange(change));
 			// a failed change must not stop the ones after it
-			pendingChange.current = applied.catch(() => undefined);
+			pendingChange.current = applied
+				.catch(() => undefined)
+				.finally(() => setWriting((count) => count - 1));
 			return applied;
 		},
 		[applyChange, extras, images],
@@ -343,6 +349,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 			<MultiImage
 				{...otherProps}
 				images={listedImages}
+				busy={writing > 0}
 				dialogMessage={dialogError}
 				onDialogOpenChange={handleDialogOpenChange}
 				onChange={handleChange}
