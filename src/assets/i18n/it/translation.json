@@ -346,6 +346,13 @@
 			"grid": {
 				"view": "Visualizza"
 			}
+		},
+		"file-upload": {
+			"loading": "Caricamento…",
+			"load-failed": {
+				"files": "Non è stato possibile caricare gli allegati",
+				"images": "Non è stato possibile caricare le immagini"
+			}
 		}
 	},
 	"utils": {

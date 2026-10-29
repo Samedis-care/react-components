@@ -1,5 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+// eslint-disable-next-line import/no-unresolved
+import { expect } from "storybook/test";
 import GroupBox from "./index";
 
 const meta: Meta<typeof GroupBox> = {
@@ -45,5 +47,19 @@ export const ReactNodeLabel: Story = {
 	args: {
 		label: <strong>Rich Label</strong>,
 		children: <p style={{ margin: 0 }}>Content with a ReactNode label.</p>,
+	},
+};
+
+export const Busy: Story = {
+	args: {
+		label: "Attachments",
+		busy: true,
+		children: <p style={{ margin: 0 }}>Loading…</p>,
+	},
+	parameters: { a11y: { test: "error" } },
+	play: async ({ canvas }) => {
+		await expect(
+			canvas.getByRole("group", { name: "Attachments" }),
+		).toHaveAttribute("aria-busy", "true");
 	},
 };

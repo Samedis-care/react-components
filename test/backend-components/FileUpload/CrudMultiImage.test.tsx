@@ -855,3 +855,39 @@ describe("CrudMultiImage: bugs", () => {
 		expect(within(entries(dialog)[1]).queryByLabelText(remove)).not.toBe(null);
 	});
 });
+
+describe("CrudMultiImage: accessibility bugs", () => {
+	it("[ISSUE-3511-ITEM-17] keeps the field's label and marks it busy while it loads", async () => {
+		const backend = new Backend(OWN);
+		backend.indexGate = new Promise(() => undefined);
+		renderMI({ connector: backend });
+		await act(tick);
+
+		const group = screen.queryByRole("group", { name: "Images" });
+		expect(group).not.toBe(null);
+		expect(group).toHaveAttribute("aria-busy", "true");
+	});
+
+	it("[ISSUE-3511-ITEM-17] keeps the field's label after a failed load and announces a translated message", async () => {
+		const backend = new Backend(OWN);
+		backend.indexError = new Error("Failed to fetch");
+		renderMI({ connector: backend });
+		await waitFor(() => expect(screen.queryByRole("progressbar")).toBe(null));
+
+		expect(screen.queryByRole("group", { name: "Images" })).not.toBe(null);
+		const alert = screen.getByRole("alert");
+		expect(alert.textContent).not.toBe("");
+		expect(alert.textContent).not.toBe("Failed to fetch");
+	});
+
+	it("[ISSUE-3511-ITEM-17] a failed load says so in the user's language, with the error's message", async () => {
+		const backend = new Backend(OWN);
+		backend.indexError = new Error("Failed to fetch");
+		renderMI({ connector: backend });
+
+		const alert = await screen.findByRole("alert");
+
+		expect(alert).toHaveTextContent("The images could not be loaded");
+		expect(alert).toHaveTextContent("Failed to fetch");
+	});
+});

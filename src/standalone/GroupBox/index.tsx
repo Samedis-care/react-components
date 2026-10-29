@@ -55,6 +55,12 @@ export interface GroupBoxProps {
 	 */
 	children?: React.ReactNode;
 	/**
+	 * Are the contents still being loaded or updated?
+	 * @remarks Sets `aria-busy`, so that assistive technology waits for the contents
+	 *          rather than announcing what is there in the meantime.
+	 */
+	busy?: boolean;
+	/**
 	 * CSS class to apply to fieldset
 	 */
 	className?: string;
@@ -66,10 +72,11 @@ export interface GroupBoxProps {
 
 const GroupBox = (inProps: GroupBoxProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcGroupBox" });
-	const { id, label, children, smallLabel, className, classes } = props;
+	const { id, label, children, smallLabel, busy, className, classes } = props;
 	return (
 		<GroupBoxRoot
 			id={id}
+			aria-busy={busy || undefined}
 			className={combineClassNames([className, classes?.root])}
 		>
 			{label && (

@@ -346,6 +346,13 @@
 			"grid": {
 				"view": "Ko'rish"
 			}
+		},
+		"file-upload": {
+			"loading": "Yuklanmoqda…",
+			"load-failed": {
+				"files": "Qo'shimchalarni yuklab bo‘lmadi",
+				"images": "Rasmlarni yuklab bo‘lmadi"
+			}
 		}
 	},
 	"utils": {

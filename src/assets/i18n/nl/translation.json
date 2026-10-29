@@ -346,6 +346,13 @@
 			"grid": {
 				"view": "Bekijken"
 			}
+		},
+		"file-upload": {
+			"loading": "Laadt…",
+			"load-failed": {
+				"files": "De bijlagen konden niet worden geladen",
+				"images": "De afbeeldingen konden niet worden geladen"
+			}
 		}
 	},
 	"utils": {

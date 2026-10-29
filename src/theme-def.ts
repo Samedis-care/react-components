@@ -219,6 +219,10 @@ import {
 	FieldStateClassKey,
 } from "./standalone/UIKit/MuiFieldState";
 import { CrudClassKey } from "./backend-components/CRUD";
+import {
+	CrudLoadStatusClassKey,
+	CrudLoadStatusProps,
+} from "./backend-components/FileUpload/CrudLoadStatus";
 import { BackendSingleSelectThemeProps } from "./backend-components/Selector/BackendSingleSelect";
 import { BackendMultiSelectThemeProps } from "./backend-components/Selector/BackendMultiSelect";
 import { BackendMultipleSelectThemeProps } from "./backend-components/Selector/BackendMultipleSelect";
@@ -286,6 +290,7 @@ declare module "@mui/material/styles" {
 		CcFile: FileClassKey;
 		CcDialogTitle: DialogTitleClassKey;
 		CcFileUpload: FileUploadClassKey;
+		CcCrudLoadStatus: CrudLoadStatusClassKey;
 		CcImageSelector: ImageSelectorClassKey;
 		CcImagePreviewDialog: ImagePreviewDialogClassKey;
 		CcPortalMenu: PortalMenuClassKey;
@@ -362,6 +367,7 @@ declare module "@mui/material/styles" {
 		CcFile: Partial<FileProps>;
 		CcDialogTitle: Partial<DialogTitleProps>;
 		CcFileUpload: Partial<FileUploadProps>;
+		CcCrudLoadStatus: Partial<CrudLoadStatusProps>;
 		CcImageSelector: Partial<ImageSelectorProps>;
 		CcImagePreviewDialog: Partial<ImagePreviewDialogProps>;
 		CcPortalMenu: Partial<PortalMenuProps>;
@@ -585,6 +591,11 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcFileUpload"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcFileUpload"];
 			variants?: ComponentsVariants["CcFileUpload"];
+		};
+		CcCrudLoadStatus?: {
+			defaultProps?: ComponentsPropsList["CcCrudLoadStatus"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcCrudLoadStatus"];
+			variants?: ComponentsVariants["CcCrudLoadStatus"];
 		};
 		CcImageSelector?: {
 			defaultProps?: ComponentsPropsList["CcImageSelector"];

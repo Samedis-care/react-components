@@ -383,3 +383,74 @@ export const LazyPendingChanges: StoryObj = {
 		});
 	},
 };
+
+const AXE_GATE = { a11y: { test: "error" } } as const;
+
+/** A connector whose index never answers, which holds the field in its loading state */
+class NeverLoadingConnector extends MockConnector {
+	index(): Promise<never> {
+		return new Promise<never>(() => undefined);
+	}
+}
+
+/** A connector whose index is refused */
+class FailingConnector extends MockConnector {
+	index(): Promise<never> {
+		return Promise.reject(new Error("forbidden_error"));
+	}
+}
+
+const LoadStateFileUploadStory = (props: { failing?: boolean }) => {
+	const { failing } = props;
+	const connector = useMemo(
+		() => (failing ? new FailingConnector() : new NeverLoadingConnector()),
+		[failing],
+	);
+	return (
+		<CrudFileUpload
+			connector={connector}
+			errorComponent={DefaultErrorComponent}
+			serialize={serialize}
+			deserialize={deserialize}
+			accept="*/*"
+			previewSize={64}
+			label={"Attachments"}
+		/>
+	);
+};
+
+/**
+ * ISSUE-3511-ITEM-17: while the files load, the field keeps its label and is marked busy, with a
+ * named spinner in it
+ */
+export const Issue3511Item17LoadingKeepsFieldLabel: StoryObj = {
+	name: "CrudFileUpload — ISSUE-3511-ITEM-17: the field keeps its label while it loads",
+	parameters: AXE_GATE,
+	render: () => <LoadStateFileUploadStory />,
+	play: async ({ canvas }) => {
+		await canvas.findByRole("progressbar");
+		const field = canvas.queryByRole("group", { name: "Attachments" });
+		await expect(field).not.toBeNull();
+		await expect(field).toHaveAttribute("aria-busy", "true");
+	},
+};
+
+/**
+ * ISSUE-3511-ITEM-17: a failed load keeps the field and its label, and says so in an alert, with
+ * the error's message
+ */
+export const Issue3511Item17FailedLoadKeepsFieldLabel: StoryObj = {
+	name: "CrudFileUpload — ISSUE-3511-ITEM-17: a failed load keeps the field and announces it",
+	parameters: AXE_GATE,
+	render: () => <LoadStateFileUploadStory failing />,
+	play: async ({ canvas }) => {
+		const alert = await canvas.findByRole("alert");
+		await expect(alert).toHaveTextContent(
+			"The attachments could not be loaded",
+		);
+		await expect(alert).toHaveTextContent("forbidden_error");
+		const field = canvas.getByRole("group", { name: "Attachments" });
+		await expect(field).toContainElement(alert);
+		await expect(field).not.toHaveAttribute("aria-busy");
+	},
+};

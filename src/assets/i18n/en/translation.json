@@ -346,6 +346,13 @@
 			"grid": {
 				"view": "View"
 			}
+		},
+		"file-upload": {
+			"loading": "Loading…",
+			"load-failed": {
+				"files": "The attachments could not be loaded",
+				"images": "The images could not be loaded"
+			}
 		}
 	},
 	"utils": {

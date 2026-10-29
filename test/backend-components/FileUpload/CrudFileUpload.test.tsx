@@ -10,6 +10,7 @@ import {
 } from "@testing-library/react";
 import { Framework } from "../../../src/framework";
 import type { GetDefaultThemeCallback } from "../../../src/framework/ThemeProvider";
+import ccI18n from "../../../src/i18n";
 import CrudFileUpload, {
 	BackendFileMeta,
 	CrudFileUploadProps,
@@ -27,7 +28,9 @@ import type {
 } from "../../../src/standalone/FileUpload/Generic";
 
 // jsdom does not implement matchMedia, which the Framework's ThemeProvider needs.
-beforeAll(() => {
+beforeAll(async () => {
+	// the messages a test compares against are the library's translations
+	await ccI18n.init();
 	if (!window.matchMedia) {
 		window.matchMedia = (query: string) => ({
 			matches: false,
@@ -1873,9 +1876,7 @@ describe("CrudFileUpload: bugs", () => {
 		const onChange = vi.fn();
 		const ui = renderUpload({ connector, onChange });
 
-		await waitFor(() =>
-			expect(ui.container.textContent).toContain("index refused"),
-		);
+		await screen.findByRole("alert");
 		await ui.settle();
 
 		expect(onChange).not.toHaveBeenCalled();
@@ -1910,5 +1911,43 @@ describe("CrudFileUpload: bugs", () => {
 		await ui.settle();
 
 		expect(ui.errorText()).toBe(null);
+	});
+});
+
+describe("CrudFileUpload: accessibility bugs", () => {
+	it("[ISSUE-3511-ITEM-17] keeps the field's label and marks it busy while it loads", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		connector.indexGate = new Promise(() => undefined);
+		renderUpload({ connector });
+		await act(async () => {
+			await new Promise((resolve) => setTimeout(resolve, 0));
+		});
+
+		const group = screen.queryByRole("group", { name: "Attachments" });
+		expect(group).not.toBe(null);
+		expect(group).toHaveAttribute("aria-busy", "true");
+	});
+
+	it("[ISSUE-3511-ITEM-17] keeps the field's label after a failed load and announces a translated message", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		connector.indexError = new Error("forbidden_error");
+		renderUpload({ connector });
+		await waitFor(() => expect(screen.queryByRole("progressbar")).toBe(null));
+
+		expect(screen.queryByRole("group", { name: "Attachments" })).not.toBe(null);
+		const alert = screen.getByRole("alert");
+		expect(alert.textContent).not.toBe("");
+		expect(alert.textContent).not.toBe("forbidden_error");
+	});
+
+	it("[ISSUE-3511-ITEM-17] a failed load says so in the user's language, with the error's message", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		connector.indexError = new Error("forbidden_error");
+		renderUpload({ connector });
+
+		const alert = await screen.findByRole("alert");
+
+		expect(alert).toHaveTextContent("The attachments could not be loaded");
+		expect(alert).toHaveTextContent("forbidden_error");
 	});
 });

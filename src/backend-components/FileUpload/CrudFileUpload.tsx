@@ -17,7 +17,7 @@ import { Connector } from "../../backend-integration";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
 import PartialDeleteError from "../../backend-integration/Connector/PartialDeleteError";
 import { ErrorComponentProps } from "../Form";
-import { Loader } from "../../standalone";
+import CrudLoadStatus from "./CrudLoadStatus";
 import { FileSelectorError } from "../../standalone/FileUpload/Generic/Errors";
 
 export interface CrudFileUploadProps extends Omit<
@@ -507,8 +507,16 @@ const CrudFileUpload = (
 	);
 
 	// without a connector there is nothing to load, only additionalFiles to list
-	if (connector && loading) return <Loader />;
-	if (loadError) return <span>{loadError.message}</span>;
+	if ((connector && loading) || loadError)
+		return (
+			<CrudLoadStatus
+				label={otherProps.label}
+				smallLabel={otherProps.smallLabel}
+				className={otherProps.className}
+				kind={"files"}
+				error={loadError}
+			/>
+		);
 
 	const ErrorComponent = props.errorComponent;
 

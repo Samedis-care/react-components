@@ -13,7 +13,8 @@ import {
 import { Connector } from "../../backend-integration";
 import PartialDeleteError from "../../backend-integration/Connector/PartialDeleteError";
 import { ErrorComponentProps } from "../Form";
-import { Loader, MultiImage } from "../../standalone";
+import { MultiImage } from "../../standalone";
+import CrudLoadStatus from "./CrudLoadStatus";
 
 export interface CrudMultiImageProps extends Omit<
 	MultiImageProps,
@@ -299,8 +300,15 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 		onChangeRef.current?.(name, images);
 	}, [images, loadError, loading, name]);
 
-	if (loading || additionalImagesLoading) return <Loader />;
-	if (loadError) return <span>{loadError.message}</span>;
+	if (loading || additionalImagesLoading || loadError)
+		return (
+			<CrudLoadStatus
+				label={otherProps.label}
+				className={otherProps.className}
+				kind={"images"}
+				error={loadError}
+			/>
+		);
 
 	return (
 		<>
