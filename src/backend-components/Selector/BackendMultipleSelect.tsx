@@ -7,12 +7,12 @@ import {
 	SelectorLruOptions,
 } from "../../standalone";
 import { ModelUnknown } from "../../backend-integration/Model/Model";
-import debouncePromise from "../../utils/debouncePromise";
 import {
 	BackendMultiSelectProps,
 	useSelectedCache,
 } from "./BackendMultiSelect";
 import BaseSelector from "../../standalone/Selector/BaseSelector";
+import useDebouncedLoad from "./useDebouncedLoad";
 
 export type BackendMultipleSelectProps<
 	M extends ModelUnknown,
@@ -116,10 +116,7 @@ const BackendMultipleSelect = <
 		[lru, handleLoadLruRecord],
 	);
 
-	const debouncedLoad = useMemo(
-		() => debouncePromise(handleLoad, searchDebounceTime ?? 500),
-		[searchDebounceTime, handleLoad],
-	);
+	const debouncedLoad = useDebouncedLoad(handleLoad, searchDebounceTime ?? 500);
 	return (
 		<BaseSelector<DataT, true>
 			multiple={true}

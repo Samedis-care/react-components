@@ -59,4 +59,46 @@ describe("debouncePromise", () => {
 		expect(results).toEqual(["c", "c"]);
 		expect(func).toHaveBeenCalledTimes(2);
 	});
+
+	it("drops the waiting calls on cancel, and debounces later calls as before", async () => {
+		vi.useFakeTimers();
+		try {
+			const func = vi.fn((value: string) => Promise.resolve(value));
+			const debounced = debouncePromise(func, 20);
+			const settled = vi.fn();
+
+			debounced("a").then(settled, settled);
+			debounced.cancel();
+			await vi.advanceTimersByTimeAsync(100);
+
+			expect(func).not.toHaveBeenCalled();
+			expect(settled).not.toHaveBeenCalled();
+
+			const later = debounced("b");
+			await vi.advanceTimersByTimeAsync(20);
+			expect(await later).toBe("b");
+			expect(func).toHaveBeenCalledTimes(1);
+			expect(settled).not.toHaveBeenCalled();
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it("reads a timeout getter at each call", async () => {
+		vi.useFakeTimers();
+		try {
+			const func = vi.fn((value: string) => Promise.resolve(value));
+			let timeout = 20;
+			const debounced = debouncePromise(func, () => timeout);
+
+			timeout = 100;
+			void debounced("a");
+			await vi.advanceTimersByTimeAsync(99);
+			expect(func).not.toHaveBeenCalled();
+			await vi.advanceTimersByTimeAsync(1);
+			expect(func).toHaveBeenCalledWith("a");
+		} finally {
+			vi.useRealTimers();
+		}
+	});
 });

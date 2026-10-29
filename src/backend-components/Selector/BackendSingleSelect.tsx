@@ -17,10 +17,10 @@ import {
 	ModelRecord,
 	ModelUnknown,
 } from "../../backend-integration/Model/Model";
-import debouncePromise from "../../utils/debouncePromise";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 import getSelectedLoadErrorLabel from "./getSelectedLoadErrorLabel";
+import useDebouncedLoad from "./useDebouncedLoad";
 
 export type BackendSingleSelectLruOptions<DataT extends BaseSelectorData> =
 	Omit<SelectorLruOptions<DataT>, "loadData">;
@@ -276,10 +276,7 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selected]);
 
-	const debouncedLoad = useMemo(
-		() => debouncePromise(handleLoad, searchDebounceTime ?? 500),
-		[handleLoad, searchDebounceTime],
-	);
+	const debouncedLoad = useDebouncedLoad(handleLoad, searchDebounceTime ?? 500);
 
 	return (
 		<SingleSelect

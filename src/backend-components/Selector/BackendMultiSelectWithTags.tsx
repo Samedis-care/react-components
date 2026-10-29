@@ -17,9 +17,9 @@ import {
 	BackendMultiSelectLruOptions,
 	useSelectedCache,
 } from "./BackendMultiSelect";
-import debouncePromise from "../../utils/debouncePromise";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 import { BackendSingleSelectLruOptions } from "./BackendSingleSelect";
+import useDebouncedLoad from "./useDebouncedLoad";
 
 export interface BackendMultiSelectWithTagsProps<
 	GroupModelT extends ModelUnknown,
@@ -281,13 +281,13 @@ const BackendMultiSelectWithTags = <
 		[lruData, handleLoadDataRecord],
 	);
 
-	const debouncedGroupLoad = useMemo(
-		() => debouncePromise(loadGroupOptions, groupSearchDebounceTime ?? 500),
-		[groupSearchDebounceTime, loadGroupOptions],
+	const debouncedGroupLoad = useDebouncedLoad(
+		loadGroupOptions,
+		groupSearchDebounceTime ?? 500,
 	);
-	const debouncedDataLoad = useMemo(
-		() => debouncePromise(loadDataOptions, dataSearchDebounceTime ?? 500),
-		[dataSearchDebounceTime, loadDataOptions],
+	const debouncedDataLoad = useDebouncedLoad(
+		loadDataOptions,
+		dataSearchDebounceTime ?? 500,
 	);
 
 	return (
