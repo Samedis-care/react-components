@@ -1,11 +1,12 @@
 import React from "react";
-import { describe, it, expect, beforeAll, afterEach } from "vitest";
+import { describe, it, expect, beforeAll, afterEach, vi } from "vitest";
 import {
 	cleanup,
 	createEvent,
 	fireEvent,
 	render,
 	screen,
+	within,
 } from "@testing-library/react";
 import { ThemeProvider, createTheme } from "@mui/material";
 import MultiImage, {
@@ -76,5 +77,60 @@ describe("MultiImage", () => {
 	it("does not render the edit label when read-only", () => {
 		renderMultiImage({ readOnly: true });
 		expect(screen.queryByRole("link")).not.toBeInTheDocument();
+	});
+
+	it("[ISSUE-3511-ITEM-18] shows dialogMessage in the edit dialog only", async () => {
+		renderMultiImage({ dialogMessage: <div role={"alert"}>Refused</div> });
+		expect(screen.queryByRole("alert")).toBe(null);
+
+		fireEvent.click(screen.getByRole("link", { name: "Edit" }));
+		const dialog = await screen.findByRole("dialog");
+
+		expect(within(dialog).getByRole("alert")).toHaveTextContent("Refused");
+	});
+
+	it("[ISSUE-3511-ITEM-18] reports the edit dialog opening and closing", async () => {
+		const onDialogOpenChange = vi.fn();
+		renderMultiImage({ onDialogOpenChange });
+		expect(onDialogOpenChange).not.toHaveBeenCalled();
+
+		fireEvent.click(screen.getByRole("link", { name: "Edit" }));
+		await screen.findByRole("dialog");
+		expect(onDialogOpenChange.mock.calls).toEqual([[true]]);
+
+		fireEvent.click(screen.getByRole("button", { name: "Close" }));
+		expect(onDialogOpenChange.mock.calls).toEqual([[true], [false]]);
+	});
+
+	it("[ISSUE-3511-ITEM-18] reports the edit dialog closed when the control becomes read-only or unmounts with it open", async () => {
+		const onDialogOpenChange = vi.fn();
+		const element = (readOnly: boolean) => (
+			<ThemeProvider theme={theme}>
+				<MultiImage
+					label={"Images"}
+					uploadImage={PIXEL}
+					captureImage={PIXEL}
+					images={[{ id: "img-1", image: PIXEL, name: "one.gif" }]}
+					primary={"img-1"}
+					onDialogOpenChange={onDialogOpenChange}
+					readOnly={readOnly}
+				/>
+			</ThemeProvider>
+		);
+		const { rerender, unmount } = render(element(false));
+		fireEvent.click(screen.getByRole("link", { name: "Edit" }));
+		await screen.findByRole("dialog");
+
+		rerender(element(true));
+		expect(onDialogOpenChange.mock.calls).toEqual([[true], [false]]);
+		rerender(element(false));
+		expect(onDialogOpenChange.mock.calls).toEqual([[true], [false], [true]]);
+		unmount();
+		expect(onDialogOpenChange.mock.calls).toEqual([
+			[true],
+			[false],
+			[true],
+			[false],
+		]);
 	});
 });

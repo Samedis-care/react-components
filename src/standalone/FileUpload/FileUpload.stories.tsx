@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, userEvent, waitFor, within } from "storybook/test";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { FileUploadGeneric, ImageSelector } from "./index";
 import type { FileData, FileMeta } from "./Generic";
-import type { MultiImageImage } from "./MultiImage/MultiImage";
+import type { MultiImageImage, MultiImageProps } from "./MultiImage/MultiImage";
 import { MultiImage } from "./MultiImage";
 import {
 	ArchiveFileIcon,
@@ -19,7 +19,7 @@ import {
 	VideoFileIcon,
 	WordFileIcon,
 } from "./FileIcons";
-import { Grid, Typography } from "@mui/material";
+import { Alert, Grid, Typography } from "@mui/material";
 import { getFileType, getFileIconOrDefault } from "./Generic/File";
 
 // ---------------------------------------------------------------------------
@@ -673,6 +673,69 @@ export const MultiImageWithoutRotation: StoryObj = {
 		await expect(
 			dialog.queryByRole("button", { name: "Rotate right" }),
 		).not.toBeInTheDocument();
+	},
+};
+
+const MULTI_IMAGE_DIALOG_MESSAGE = (
+	<Alert severity={"error"}>The image could not be removed</Alert>
+);
+
+/**
+ * dialogMessage is shown at the top of the edit dialog, where the modal dialog does not hide
+ * it from assistive technology, and onDialogOpenChange reports the dialog opening and closing
+ */
+export const MultiImageDialogMessage: StoryObj<
+	Pick<MultiImageProps, "onDialogOpenChange">
+> = {
+	name: "MultiImage — a message at the top of the edit dialog",
+	args: { onDialogOpenChange: fn() },
+	parameters: {
+		a11y: {
+			test: "error",
+			config: {
+				// every image is alt="" and named by its tooltip (ISSUE-3491-ITEM-27)
+				rules: [{ id: "presentation-role-conflict", enabled: false }],
+			},
+		},
+	},
+	render: (args) => {
+		const redImage = makeColorImage("#e53935", "#ffcdd2");
+		const greenImage = makeColorImage("#43a047", "#c8e6c9");
+		const images: MultiImageImage[] = [
+			{ id: "img-1", image: redImage, name: "red.png" },
+			{ id: "img-2", image: greenImage, name: "green.png" },
+		];
+		return (
+			<div style={{ width: 300 }}>
+				<MultiImage
+					label="Product images"
+					images={images}
+					primary={"img-1"}
+					uploadImage={redImage}
+					captureImage={redImage}
+					dialogMessage={MULTI_IMAGE_DIALOG_MESSAGE}
+					onDialogOpenChange={args.onDialogOpenChange}
+				/>
+			</div>
+		);
+	},
+	play: async ({ args, canvas, userEvent }) => {
+		await expect(canvas.queryByRole("alert")).toBeNull();
+
+		await userEvent.click(canvas.getByText("Edit"));
+		const dialog = await within(document.body).findByRole("dialog");
+		await expect(within(dialog).getByRole("alert")).toHaveTextContent(
+			"The image could not be removed",
+		);
+		await expect(args.onDialogOpenChange).toHaveBeenLastCalledWith(true);
+
+		await userEvent.click(
+			within(dialog).getByRole("button", { name: "Close" }),
+		);
+		await expect(args.onDialogOpenChange).toHaveBeenLastCalledWith(false);
+		await waitFor(() =>
+			expect(within(document.body).queryByRole("dialog")).toBeNull(),
+		);
 	},
 };
 

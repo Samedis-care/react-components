@@ -18,7 +18,7 @@ import CrudLoadStatus from "./CrudLoadStatus";
 
 export interface CrudMultiImageProps extends Omit<
 	MultiImageProps,
-	"images" | "onChange"
+	"images" | "onChange" | "dialogMessage" | "onDialogOpenChange"
 > {
 	/**
 	 * Images of someone else, listed before this control's own
@@ -40,7 +40,10 @@ export interface CrudMultiImageProps extends Omit<
 	 */
 	connector: Connector;
 	/**
-	 * The error component that is used to display errors
+	 * Renders the error of a refused create, update or delete, where the user is when it
+	 * arrives: at the top of the edit dialog while that is open, above the field otherwise
+	 * @remarks An error shown in the dialog is dismissed when the dialog closes. One shown
+	 *          above the field stays there while the dialog is open.
 	 */
 	errorComponent: React.ComponentType<ErrorComponentProps>;
 	/**
@@ -73,6 +76,17 @@ export interface CrudMultiImageProps extends Omit<
 export interface BackendMultiImageImage extends MultiImageImage {
 	primary?: boolean;
 	index?: number;
+}
+
+/**
+ * The error of the last change, and where it is shown
+ */
+interface WriteError {
+	error: Error;
+	/**
+	 * Arrived while the edit dialog was open, so it is shown in it
+	 */
+	inDialog: boolean;
 }
 
 /**
@@ -112,7 +126,16 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 	// `key` per record).
 	const connector = useRef(connectorProp).current;
 	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<Error | null>(null);
+	const [error, setError] = useState<WriteError | null>(null);
+	// The edit dialog is modal and hides the rest of the page, so an error that arrives
+	// while it is open is shown in it. It is not moved out when the dialog closes, but
+	// dismissed: moved, it would be mounted again, and an error component that shows a
+	// dialog of its own (DefaultErrorComponent) would show it twice.
+	const dialogOpen = useRef(false);
+	const handleDialogOpenChange = useCallback((open: boolean) => {
+		dialogOpen.current = open;
+		if (!open) setError((prev) => (prev?.inDialog ? null : prev));
+	}, []);
 	const [loadError, setLoadError] = useState<Error | null>(null);
 	const [images, setImages] = useState<BackendMultiImageImage[]>([]);
 	// the primary when a change is done, which may have moved on since it started
@@ -208,7 +231,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 				}),
 			]);
 			// the outcome of this change: one that went through clears an earlier error
-			setError(error);
+			setError(error && { error, inDialog: dialogOpen.current });
 			// The primary is the owner's, and only reported when this change moved it:
 			// removing the primary image leaves none. Any other primary stays as it is,
 			// whether it is one of these images, an additional one, or an id that is no
@@ -268,6 +291,10 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 		() => (extras ? extras.concat(images) : images),
 		[extras, images],
 	);
+	const dialogError = useMemo(
+		() => error?.inDialog && <ErrorComponent error={error.error} />,
+		[ErrorComponent, error],
+	);
 
 	useEffect(() => {
 		void (async () => {
@@ -312,10 +339,12 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 
 	return (
 		<>
-			{error && <ErrorComponent error={error} />}
+			{error && !error.inDialog && <ErrorComponent error={error.error} />}
 			<MultiImage
 				{...otherProps}
 				images={listedImages}
+				dialogMessage={dialogError}
+				onDialogOpenChange={handleDialogOpenChange}
 				onChange={handleChange}
 			/>
 		</>

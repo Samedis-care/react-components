@@ -17,6 +17,7 @@ import CrudMultiImage, {
 } from "../../../src/backend-components/FileUpload/CrudMultiImage";
 import type { MultiImageImage } from "../../../src/standalone/FileUpload/MultiImage/MultiImage";
 import type { ErrorComponentProps } from "../../../src/backend-components/Form";
+import DefaultErrorComponent from "../../../src/backend-components/Form/DefaultErrorComponent";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import Connector from "../../../src/backend-integration/Connector/Connector";
 import LazyConnector from "../../../src/backend-integration/Connector/LazyConnector";
@@ -889,5 +890,122 @@ describe("CrudMultiImage: accessibility bugs", () => {
 
 		expect(alert).toHaveTextContent("The images could not be loaded");
 		expect(alert).toHaveTextContent("Failed to fetch");
+	});
+
+	it("[ISSUE-3511-ITEM-18] a write that fails while the edit dialog is open is reported where assistive technology can reach it", async () => {
+		const backend = new Backend(OWN);
+		backend.rejectDeletes.add("2");
+		const { container } = renderMI({ connector: backend });
+		await ready(container);
+		const dialog = openEdit();
+
+		await removeEntry(dialog, 1);
+		await waitFor(() => expect(backend.deleteCalls).toEqual(["2"]));
+		await settle();
+
+		// getByRole skips what is aria-hidden, as the modal makes the rest of the page
+		expect(screen.getByRole("dialog")).toBe(dialog);
+		expect(screen.getByRole("alert")).toHaveTextContent("delete of 2 refused");
+	});
+
+	it("[ISSUE-3511-ITEM-18] an error shown in the edit dialog is dismissed with it, and not shown again when it reopens", async () => {
+		const backend = new Backend(OWN);
+		backend.rejectDeletes.add("2");
+		const { container } = renderMI({ connector: backend });
+		await ready(container);
+		const dialog = openEdit();
+		await removeEntry(dialog, 1);
+		await waitFor(() => expect(backend.deleteCalls).toEqual(["2"]));
+		await settle();
+
+		fireEvent.click(
+			within(dialog).getByLabelText(t("standalone.file-upload.close")),
+		);
+		await waitFor(() => expect(screen.queryByRole("dialog")).toBe(null));
+		expect(screen.queryByTestId("error")).toBe(null);
+
+		openEdit();
+		await settle();
+		expect(screen.queryByTestId("error")).toBe(null);
+	});
+
+	it("[ISSUE-3511-ITEM-18] an error that arrives while the dialog is closed is shown with the field, and stays when the dialog opens and closes", async () => {
+		usePassThroughImages();
+		const backend = new Backend(OWN);
+		backend.rejectCreates.add("bad.png");
+		const { container } = renderMI({ connector: backend });
+		await ready(container);
+		await pick(container, [png("bad.png")]);
+		await waitFor(() =>
+			expect(screen.getByTestId("error")).toHaveTextContent(
+				"upload of bad.png refused",
+			),
+		);
+		expect(container).toContainElement(screen.getByTestId("error"));
+
+		const dialog = openEdit();
+		fireEvent.click(
+			within(dialog).getByLabelText(t("standalone.file-upload.close")),
+		);
+		await waitFor(() => expect(screen.queryByRole("dialog")).toBe(null));
+
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			"upload of bad.png refused",
+		);
+	});
+
+	it("[ISSUE-3511-ITEM-18] an error after the field was reloaded with the dialog open is shown with the field", async () => {
+		usePassThroughImages();
+		const backend = new Backend(OWN);
+		backend.rejectCreates.add("bad.png");
+		const { container, update } = renderMI({ connector: backend });
+		await ready(container);
+		openEdit();
+		// replaces the field, and with it the open dialog
+		update({ additionalImagesLoading: true });
+		update({ additionalImagesLoading: false });
+		await ready(container);
+
+		await pick(container, [png("bad.png")]);
+
+		await waitFor(() =>
+			expect(screen.getByRole("alert")).toHaveTextContent(
+				"upload of bad.png refused",
+			),
+		);
+	});
+
+	it("[ISSUE-3511-ITEM-18] DefaultErrorComponent shows the error once, however often the edit dialog opens and closes", async () => {
+		const backend = new Backend(OWN);
+		backend.rejectDeletes.add("2");
+		const { container } = renderMI({
+			connector: backend,
+			errorComponent: DefaultErrorComponent,
+		});
+		await ready(container);
+		const dialog = openEdit();
+		await removeEntry(dialog, 1);
+		await waitFor(() => expect(backend.deleteCalls).toEqual(["2"]));
+		await settle();
+		// it renders nothing in place: each occurrence is an error dialog
+		const errorDialogs = () => screen.queryAllByText("delete of 2 refused");
+		expect(errorDialogs()).toHaveLength(1);
+		fireEvent.click(
+			screen.getByRole("button", { name: t("common.buttons.ok") }),
+		);
+		await waitFor(() => expect(errorDialogs()).toHaveLength(0));
+
+		// closed and opened again, by the edit dialog's own controls
+		fireEvent.click(
+			within(dialog).getByLabelText(t("standalone.file-upload.close")),
+		);
+		await waitFor(() => expect(entries(document.body)).toHaveLength(0));
+		fireEvent.click(
+			screen.getByText(t("standalone.file-upload.multi-image.edit")),
+		);
+		await settle();
+
+		expect(entries(document.body)).not.toHaveLength(0);
+		expect(errorDialogs()).toHaveLength(0);
 	});
 });

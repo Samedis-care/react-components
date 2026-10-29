@@ -147,6 +147,18 @@ export interface MultiImageProps {
 	 */
 	additionalDialogContent?: React.ReactNode[];
 	/**
+	 * Shown at the top of the edit dialog while that is open, e.g. the outcome of a change
+	 * made in it: the modal dialog hides the rest of the page from assistive technology
+	 * @remarks Memoize it, or every render of the owner renders MultiImage again.
+	 */
+	dialogMessage?: React.ReactNode;
+	/**
+	 * Called when the edit dialog opens, and when it closes: by the user, because the
+	 * control became read-only, or because the control unmounts
+	 * @param open Whether the dialog is open now
+	 */
+	onDialogOpenChange?: (open: boolean) => void;
+	/**
 	 * custom CSS class to apply to root
 	 */
 	className?: string;
@@ -204,6 +216,8 @@ const MultiImage = (inProps: MultiImageProps) => {
 		name,
 		editLabel,
 		additionalDialogContent,
+		dialogMessage,
+		onDialogOpenChange,
 		images,
 		primary,
 		placeholderImage,
@@ -263,6 +277,15 @@ const MultiImage = (inProps: MultiImageProps) => {
 	const closeDialog = useCallback(() => {
 		setDialogOpen(false);
 	}, []);
+	// read-only, the dialog is not rendered
+	const dialogShown = dialogOpen && !readOnly;
+	const onDialogOpenChangeRef = useRef(onDialogOpenChange);
+	onDialogOpenChangeRef.current = onDialogOpenChange;
+	useEffect(() => {
+		if (!dialogShown) return;
+		onDialogOpenChangeRef.current?.(true);
+		return () => onDialogOpenChangeRef.current?.(false);
+	}, [dialogShown]);
 
 	const remainingFiles = useMemo(
 		() =>
@@ -475,6 +498,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 							</Grid>
 						</DialogTitle>
 						<DialogContent>
+							{dialogMessage}
 							<Grid container spacing={2}>
 								{images.map((img, i) => (
 									<ImageDialogEntry

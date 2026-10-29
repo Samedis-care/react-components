@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-10-29 | [CrudMultiImage shows a write error in the edit dialog while that is open](2026-10-29-crud-multi-image-error-in-edit-dialog.md) | behavior |
 | 2026-10-29 | [Backend selectors keep one search debounce while mounted](2026-10-29-backend-select-one-search-debounce.md)                  | behavior |
 | 2026-10-29 | [Backend selectors label a selected record that fails to load with a translated text](2026-10-29-backend-select-load-error-labels.md) | behavior |
 | 2026-10-28 | [CrudFileUpload and CrudMultiImage keep their field while loading and after a failed load](2026-10-28-crud-upload-load-states-keep-field.md) | behavior |
