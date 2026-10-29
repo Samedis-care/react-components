@@ -310,7 +310,8 @@
 		},
 		"selector": {
 			"loading": "Загружается…",
-			"loading-error": "Ошибка при получении данных"
+			"loading-error": "Ошибка при получении данных",
+			"unknown-entry": "Неизвестная запись"
 		},
 		"crud": {
 			"import": {

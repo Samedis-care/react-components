@@ -310,7 +310,8 @@
 		},
 		"selector": {
 			"loading": "Chargement…",
-			"loading-error": "Erreur lors de la récupération des données"
+			"loading-error": "Erreur lors de la récupération des données",
+			"unknown-entry": "Entrée inconnue"
 		},
 		"crud": {
 			"import": {

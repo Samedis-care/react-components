@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-10-29 | [Backend selectors label a selected record that fails to load with a translated text](2026-10-29-backend-select-load-error-labels.md) | behavior |
 | 2026-10-28 | [CrudFileUpload and CrudMultiImage keep their field while loading and after a failed load](2026-10-28-crud-upload-load-states-keep-field.md) | behavior |
 | 2026-10-28 | [CrudFileUpload and CrudMultiImage call onChange only when their list changes](2026-10-28-crud-upload-onchange-only-on-list-changes.md) | behavior |
 | 2026-10-28 | [CrudFileUpload and CrudMultiImage keep the first connector, also for writes](2026-10-28-crud-upload-reads-connector-once.md) | behavior |

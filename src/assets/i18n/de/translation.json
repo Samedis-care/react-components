@@ -310,7 +310,8 @@
 		},
 		"selector": {
 			"loading": "Lädt…",
-			"loading-error": "Fehler beim Abrufen der Daten"
+			"loading-error": "Fehler beim Abrufen der Daten",
+			"unknown-entry": "Unbekannter Eintrag"
 		},
 		"crud": {
 			"import": {

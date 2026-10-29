@@ -310,7 +310,8 @@
 		},
 		"selector": {
 			"loading": "Cargando…",
-			"loading-error": "Error al obtener los datos"
+			"loading-error": "Error al obtener los datos",
+			"unknown-entry": "Entrada desconocida"
 		},
 		"crud": {
 			"import": {

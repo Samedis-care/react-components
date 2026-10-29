@@ -20,6 +20,7 @@ import {
 import debouncePromise from "../../utils/debouncePromise";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
+import getSelectedLoadErrorLabel from "./getSelectedLoadErrorLabel";
 
 export type BackendSingleSelectLruOptions<DataT extends BaseSelectorData> =
 	Omit<SelectorLruOptions<DataT>, "loadData">;
@@ -78,6 +79,8 @@ export interface BackendSingleSelectProps<M extends ModelUnknown> extends Omit<
 	 * @param error The error that has been raised while loading
 	 * @return string Label for entry which failed loading
 	 * @return null To remove entry from selected entries
+	 * @remarks Without it, the entry is labelled "Unknown entry" if the backend did not
+	 *          return its record, else "Error while fetching data".
 	 */
 	onLoadError?: (error: Error) => string | null;
 	/**
@@ -249,23 +252,22 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 					});
 					newCache = await modelToSelectorData(data[0]);
 				} catch (e) {
-					const err = e as Error;
-					let errorMsg =
-						err.message ?? t("backend-components.selector.loading-error");
-					if (onLoadError) {
-						const result = onLoadError(err);
-						// if we should drop the record...
-						if (!result) {
-							// unselect it
-							if (onSelect) onSelect(null);
-							newCache = null;
-							return;
-						}
-						errorMsg = result;
+					const label = getSelectedLoadErrorLabel(
+						selected,
+						e as Error,
+						onLoadError,
+						t,
+					);
+					// if we should drop the record...
+					if (!label) {
+						// unselect it
+						if (onSelect) onSelect(null);
+						newCache = null;
+						return;
 					}
 					newCache = {
 						value: selected,
-						label: errorMsg,
+						label,
 					};
 				}
 			}

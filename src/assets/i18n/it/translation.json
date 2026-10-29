@@ -310,7 +310,8 @@
 		},
 		"selector": {
 			"loading": "Caricamento…",
-			"loading-error": "Errore durante il recupero dei dati"
+			"loading-error": "Errore durante il recupero dei dati",
+			"unknown-entry": "Voce sconosciuta"
 		},
 		"crud": {
 			"import": {

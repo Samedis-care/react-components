@@ -310,7 +310,8 @@
 		},
 		"selector": {
 			"loading": "Laadt…",
-			"loading-error": "Fout bij het ophalen van gegevens"
+			"loading-error": "Fout bij het ophalen van gegevens",
+			"unknown-entry": "Onbekend item"
 		},
 		"crud": {
 			"import": {

@@ -310,7 +310,8 @@
 		},
 		"selector": {
 			"loading": "Yuklanmoqda…",
-			"loading-error": "Ma'lumotlarni olishda xatolik yuz berdi"
+			"loading-error": "Ma'lumotlarni olishda xatolik yuz berdi",
+			"unknown-entry": "Noma'lum yozuv"
 		},
 		"crud": {
 			"import": {
