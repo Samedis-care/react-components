@@ -52,6 +52,8 @@ export interface BackendSingleSelectProps<M extends ModelUnknown> extends Omit<B
      * @param error The error that has been raised while loading
      * @return string Label for entry which failed loading
      * @return null To remove entry from selected entries
+     * @remarks Without it, the entry is labelled "Unknown entry" if the backend did not
+     *          return its record, else "Error while fetching data".
      */
     onLoadError?: (error: Error) => string | null;
     /**

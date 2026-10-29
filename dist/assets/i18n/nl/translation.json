@@ -310,7 +310,8 @@
 		},
 		"selector": {
 			"loading": "Laadt…",
-			"loading-error": "Fout bij het ophalen van gegevens"
+			"loading-error": "Fout bij het ophalen van gegevens",
+			"unknown-entry": "Onbekend item"
 		},
 		"crud": {
 			"import": {
@@ -345,6 +346,13 @@
 			},
 			"grid": {
 				"view": "Bekijken"
+			}
+		},
+		"file-upload": {
+			"loading": "Laadt…",
+			"load-failed": {
+				"files": "De bijlagen konden niet worden geladen",
+				"images": "De afbeeldingen konden niet worden geladen"
 			}
 		}
 	},

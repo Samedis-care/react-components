@@ -1,7 +1,9 @@
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
 import { MultiImageNewIdPrefix, } from "../../standalone/FileUpload/MultiImage/MultiImage";
-import { Loader, MultiImage } from "../../standalone";
+import PartialDeleteError from "../../backend-integration/Connector/PartialDeleteError";
+import { MultiImage } from "../../standalone";
+import CrudLoadStatus from "./CrudLoadStatus";
 const CrudMultiImage = (props) => {
     const { connector: connectorProp, errorComponent: ErrorComponent, serialize, deserialize, onChange, additionalImages, additionalImagesLoading, ...otherProps } = props;
     const { name, primary, onPrimaryChange } = otherProps;
@@ -14,84 +16,134 @@ const CrudMultiImage = (props) => {
     const [error, setError] = useState(null);
     const [loadError, setLoadError] = useState(null);
     const [images, setImages] = useState([]);
-    const handleChange = useCallback(async (_name, newImages) => {
-        if (additionalImages)
-            newImages = newImages.filter((img) => !additionalImages.includes(img));
-        newImages = newImages.map((img, n) => ({
-            ...img,
-            index: n,
-            primary: primary === img.id,
-        }));
-        // upload new/changed files
-        const uploadPromise = Promise.all(newImages
-            .filter((img) => img.id.startsWith(MultiImageNewIdPrefix) || !images.includes(img))
-            .map(async (img) => {
-            // check if we have to replace a file (update)
-            const oldImg = !img.id.startsWith(MultiImageNewIdPrefix) &&
-                images.find((oldImg) => oldImg.id === img.id);
-            if (oldImg) {
-                if (oldImg.image === img.image && oldImg.name === img.name) {
-                    // no changes to image or file name, so we don't cause a PUT here
-                    return {
-                        response: [await serialize(img, oldImg.id)],
-                        index: img.index,
-                        primary: img.primary,
-                    };
-                }
-                return {
-                    response: await connector.update(await serialize(img, oldImg.id)),
-                    index: img.index,
-                    primary: img.primary,
-                };
-            }
-            // or create new
-            return {
-                response: await connector.create(await serialize(img, null)),
-                index: img.index,
-                primary: img.primary,
-            };
+    // the primary when a change is done, which may have moved on since it started
+    const primaryRef = useRef(primary);
+    primaryRef.current = primary;
+    // The images as last written, for the change that comes next to start from. Changes
+    // are applied one after the other, and a change applied in the meantime has not been
+    // rendered yet.
+    const imagesRef = useRef([]);
+    const commitImages = useCallback((next) => {
+        imagesRef.current = next;
+        setImages(next);
+    }, []);
+    const pendingChange = useRef(Promise.resolve());
+    const applyChange = useCallback(async ({ removed, replaced, added }) => {
+        const latest = imagesRef.current;
+        const latestById = new Map(latest.map((img) => [img.id, img]));
+        // what an earlier change removed is gone: there is nothing left to remove or
+        // replace
+        const removedIds = removed.filter((id) => latestById.has(id));
+        const replacements = new Map(replaced
+            .filter((img) => {
+            const old = latestById.get(img.id);
+            return !!old && (old.image !== img.image || old.name !== img.name);
         })
-            .map(async (request) => {
-            const result = await request;
-            return {
-                ...(await deserialize(result.response[0])),
-                index: result.index,
-                primary: result.primary,
-            };
-        }));
-        // delete deleted files
-        const deletePromise = connector.deleteMultiple(images
-            .filter((img) => !newImages.find((other) => !other.id.startsWith(MultiImageNewIdPrefix) &&
-            other.id === img.id))
-            .map((img) => img.id));
-        try {
-            // wait for response
-            // deletePromise may be undefined or a promise
-            await deletePromise;
-            const uploadedImages = await uploadPromise;
-            const finalImages = [];
-            newImages.filter((img) => !img.id.startsWith(MultiImageNewIdPrefix) && images.includes(img)).forEach((img) => {
-                finalImages[img.index] = img;
-            });
-            uploadedImages.forEach((img) => (finalImages[img.index] = img));
-            // update state
-            setImages(finalImages);
-            if (onPrimaryChange)
-                onPrimaryChange(name, finalImages.find((img) => img.primary)?.id ?? "");
+            .map((img) => [img.id, img]));
+        // written at the position each will have in the list
+        const writes = [
+            ...latest
+                .filter((img) => !removedIds.includes(img.id))
+                .map((img) => replacements.get(img.id) ?? img),
+            ...added,
+        ].flatMap((img, index) => replacements.has(img.id) || added.includes(img) ? [{ img, index }] : []);
+        // Every write is accounted for on its own: what went through is listed, what
+        // was refused is reported, rather than one refusal hiding the rest.
+        const [deleteResult, ...uploadResults] = await Promise.allSettled([
+            (async () => connector.deleteMultiple(removedIds))(),
+            ...writes.map(async ({ img, index }) => {
+                const data = {
+                    ...img,
+                    index,
+                    primary: primaryRef.current === img.id,
+                };
+                const isNew = img.id.startsWith(MultiImageNewIdPrefix);
+                const response = isNew
+                    ? await connector.create(await serialize(data, null))
+                    : await connector.update(await serialize(data, img.id));
+                return {
+                    ...(await deserialize(response[0])),
+                    index,
+                    primary: data.primary,
+                };
+            }),
+        ]);
+        let error = null;
+        let refusedIds = [];
+        if (deleteResult.status === "rejected") {
+            error = deleteResult.reason;
+            // only a PartialDeleteError says which ids went through
+            refusedIds =
+                deleteResult.reason instanceof PartialDeleteError
+                    ? deleteResult.reason.failedIds
+                    : removedIds;
         }
-        catch (e) {
-            setError(e);
-        }
-    }, [
-        additionalImages,
-        connector,
-        deserialize,
-        images,
-        primary,
-        onPrimaryChange,
-        name,
-        serialize,
-    ]);
+        const written = new Map();
+        uploadResults.forEach((result, i) => {
+            if (result.status === "fulfilled")
+                written.set(writes[i].img, result.value);
+            else
+                error = error ?? result.reason;
+        });
+        const deletedIds = removedIds.filter((id) => !refusedIds.includes(id));
+        commitImages([
+            // a refused replacement keeps the image it was to replace
+            ...latest
+                .filter((img) => !deletedIds.includes(img.id))
+                .map((img) => {
+                const replacement = replacements.get(img.id);
+                return (replacement && written.get(replacement)) ?? img;
+            }),
+            // a refused upload leaves
+            ...added.flatMap((img) => {
+                const image = written.get(img);
+                return image ? [image] : [];
+            }),
+        ]);
+        // the outcome of this change: one that went through clears an earlier error
+        setError(error);
+        // The primary is the owner's, and only reported when this change moved it:
+        // removing the primary image leaves none. Any other primary stays as it is,
+        // whether it is one of these images, an additional one, or an id that is no
+        // longer listed at all (an image deleted elsewhere).
+        const current = primaryRef.current;
+        if (onPrimaryChange && current && deletedIds.includes(current))
+            onPrimaryChange(name, null);
+    }, [commitImages, connector, deserialize, name, onPrimaryChange, serialize]);
+    // Read-only whatever the caller passed: they are someone else's, so this control
+    // neither removes nor replaces them. A change recognises them as these objects.
+    const extras = useMemo(() => additionalImages?.map((img) => ({ ...img, readOnly: true })), [additionalImages]);
+    /**
+     * Applies one change from the control, after every change before it
+     * @remarks MultiImage builds a change from the images it shows, which an earlier change
+     *          still being written has not updated yet. So the change is taken as what the
+     *          user did to those images, and applied to the images as the changes before it
+     *          left them: applied as a list, it would bring back what an earlier change
+     *          removed and drop what one added.
+     */
+    const handleChange = useCallback((_name, newImages) => {
+        const own = extras
+            ? newImages.filter((img) => !extras.includes(img))
+            : newImages;
+        const listedIds = new Set(own.map((img) => img.id));
+        const shown = new Map(images.map((img) => [img.id, img]));
+        const change = {
+            removed: images
+                .filter((img) => !listedIds.has(img.id))
+                .map((img) => img.id),
+            // an entry the control did not hand out itself: its image was replaced
+            replaced: own.filter((img) => {
+                const before = shown.get(img.id);
+                return !!before && before !== img;
+            }),
+            added: own.filter((img) => img.id.startsWith(MultiImageNewIdPrefix)),
+        };
+        const applied = pendingChange.current.then(() => applyChange(change));
+        // a failed change must not stop the ones after it
+        pendingChange.current = applied.catch(() => undefined);
+        return applied;
+    }, [applyChange, extras, images]);
+    const listedImages = useMemo(() => (extras ? extras.concat(images) : images), [extras, images]);
     useEffect(() => {
         void (async () => {
             try {
@@ -100,7 +152,7 @@ const CrudMultiImage = (props) => {
                     rows: Number.MAX_SAFE_INTEGER,
                 });
                 const initialFiles = await Promise.all(initialData[0].map((value) => Promise.resolve(deserialize(value))));
-                setImages(initialFiles);
+                commitImages(initialFiles);
             }
             catch (e) {
                 setLoadError(e);
@@ -122,10 +174,8 @@ const CrudMultiImage = (props) => {
             return;
         onChangeRef.current?.(name, images);
     }, [images, loadError, loading, name]);
-    if (loading || additionalImagesLoading)
-        return _jsx(Loader, {});
-    if (loadError)
-        return _jsx("span", { children: loadError.message });
-    return (_jsxs(_Fragment, { children: [error && _jsx(ErrorComponent, { error: error }), _jsx(MultiImage, { ...otherProps, images: additionalImages ? additionalImages.concat(images) : images, onChange: handleChange })] }));
+    if (loading || additionalImagesLoading || loadError)
+        return (_jsx(CrudLoadStatus, { label: otherProps.label, className: otherProps.className, kind: "images", error: loadError }));
+    return (_jsxs(_Fragment, { children: [error && _jsx(ErrorComponent, { error: error }), _jsx(MultiImage, { ...otherProps, images: listedImages, onChange: handleChange })] }));
 };
 export default React.memo(CrudMultiImage);

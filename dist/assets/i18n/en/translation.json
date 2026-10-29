@@ -310,7 +310,8 @@
 		},
 		"selector": {
 			"loading": "Loading…",
-			"loading-error": "Error while fetching data"
+			"loading-error": "Error while fetching data",
+			"unknown-entry": "Unknown entry"
 		},
 		"crud": {
 			"import": {
@@ -345,6 +346,13 @@
 			},
 			"grid": {
 				"view": "View"
+			}
+		},
+		"file-upload": {
+			"loading": "Loading…",
+			"load-failed": {
+				"files": "The attachments could not be loaded",
+				"images": "The images could not be loaded"
 			}
 		}
 	},

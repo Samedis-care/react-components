@@ -310,7 +310,8 @@
 		},
 		"selector": {
 			"loading": "Lädt…",
-			"loading-error": "Fehler beim Abrufen der Daten"
+			"loading-error": "Fehler beim Abrufen der Daten",
+			"unknown-entry": "Unbekannter Eintrag"
 		},
 		"crud": {
 			"import": {
@@ -345,6 +346,13 @@
 			},
 			"grid": {
 				"view": "Anzeigen"
+			}
+		},
+		"file-upload": {
+			"loading": "Lädt…",
+			"load-failed": {
+				"files": "Die Anhänge konnten nicht geladen werden",
+				"images": "Die Bilder konnten nicht geladen werden"
 			}
 		}
 	},

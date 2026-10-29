@@ -4,6 +4,7 @@ import { useThemeProps } from "@mui/material";
 import { SingleSelect, } from "../../standalone";
 import debouncePromise from "../../utils/debouncePromise";
 import useCCTranslations from "../../utils/useCCTranslations";
+import getSelectedLoadErrorLabel from "./getSelectedLoadErrorLabel";
 const BackendSingleSelect = (inProps) => {
     const props = useThemeProps({
         props: inProps,
@@ -88,23 +89,18 @@ const BackendSingleSelect = (inProps) => {
                     newCache = await modelToSelectorData(data[0]);
                 }
                 catch (e) {
-                    const err = e;
-                    let errorMsg = err.message ?? t("backend-components.selector.loading-error");
-                    if (onLoadError) {
-                        const result = onLoadError(err);
-                        // if we should drop the record...
-                        if (!result) {
-                            // unselect it
-                            if (onSelect)
-                                onSelect(null);
-                            newCache = null;
-                            return;
-                        }
-                        errorMsg = result;
+                    const label = getSelectedLoadErrorLabel(selected, e, onLoadError, t);
+                    // if we should drop the record...
+                    if (!label) {
+                        // unselect it
+                        if (onSelect)
+                            onSelect(null);
+                        newCache = null;
+                        return;
                     }
                     newCache = {
                         value: selected,
-                        label: errorMsg,
+                        label,
                     };
                 }
             }

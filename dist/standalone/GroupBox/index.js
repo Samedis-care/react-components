@@ -28,7 +28,7 @@ const GroupBoxLegend = styled("legend", {
 }));
 const GroupBox = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcGroupBox" });
-    const { id, label, children, smallLabel, className, classes } = props;
-    return (_jsxs(GroupBoxRoot, { id: id, className: combineClassNames([className, classes?.root]), children: [label && (_jsx(GroupBoxLegend, { ownerState: { smallLabel: !!smallLabel }, children: label })), children] }));
+    const { id, label, children, smallLabel, busy, className, classes } = props;
+    return (_jsxs(GroupBoxRoot, { id: id, "aria-busy": busy || undefined, className: combineClassNames([className, classes?.root]), children: [label && (_jsx(GroupBoxLegend, { ownerState: { smallLabel: !!smallLabel }, children: label })), children] }));
 };
 export default React.memo(GroupBox);

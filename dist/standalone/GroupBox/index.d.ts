@@ -21,6 +21,12 @@ export interface GroupBoxProps {
      */
     children?: React.ReactNode;
     /**
+     * Are the contents still being loaded or updated?
+     * @remarks Sets `aria-busy`, so that assistive technology waits for the contents
+     *          rather than announcing what is there in the meantime.
+     */
+    busy?: boolean;
+    /**
      * CSS class to apply to fieldset
      */
     className?: string;

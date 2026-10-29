@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react
 import FileUpload from "../../standalone/FileUpload/Generic";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
 import PartialDeleteError from "../../backend-integration/Connector/PartialDeleteError";
-import { Loader } from "../../standalone";
+import CrudLoadStatus from "./CrudLoadStatus";
 /**
  * Marks an entry as one of `additionalFiles` rather than one of this control's own
  * @remarks Shape cannot tell the two apart. `FileData<BackendFileMeta>` is assignable to
@@ -204,8 +204,8 @@ const CrudFileUpload = (props, ref) => {
             uploadedPicks.current.set(picked[index].file, result.value);
             uploadedFiles.push(result.value);
         });
-        if (error)
-            setError(error);
+        // the outcome of this change: one that went through clears an earlier error
+        setError(error);
         const kept = newFiles.filter((file) => !file.canBeUploaded &&
             "id" in file.file &&
             // a delete the server refused has not happened: the file stays in the
@@ -353,10 +353,8 @@ const CrudFileUpload = (props, ref) => {
         ...pendingPicks.current,
     ], [files, additionalFiles]);
     // without a connector there is nothing to load, only additionalFiles to list
-    if (connector && loading)
-        return _jsx(Loader, {});
-    if (loadError)
-        return _jsx("span", { children: loadError.message });
+    if ((connector && loading) || loadError)
+        return (_jsx(CrudLoadStatus, { label: otherProps.label, smallLabel: otherProps.smallLabel, className: otherProps.className, kind: "files", error: loadError }));
     const ErrorComponent = props.errorComponent;
     return (_jsxs(_Fragment, { children: [error && _jsx(ErrorComponent, { error: error }), _jsx(FileUpload, { ...otherProps, ref: ref, files: finalFiles, dirty: dirty, onChange: handleChange, onRestoreFile: lazyConnector ? handleRestore : undefined, handleError: handleError, 
                 // undefined unless set, so that the theme's default applies

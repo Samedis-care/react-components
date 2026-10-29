@@ -4,6 +4,7 @@ import { useThemeProps } from "@mui/material";
 import { MultiSelect, } from "../../standalone";
 import debouncePromise from "../../utils/debouncePromise";
 import useCCTranslations from "../../utils/useCCTranslations";
+import getSelectedLoadErrorLabel from "./getSelectedLoadErrorLabel";
 export const useSelectedCache = (props) => {
     const { model, disableRequestBatching, modelToSelectorData, onSelect, selected, initialData, onLoadError, } = props;
     const modelFetch = props.modelFetch ?? model;
@@ -39,19 +40,14 @@ export const useSelectedCache = (props) => {
                     newCache[value] = await modelToSelectorData(data[0]);
                 }
                 catch (e) {
-                    const err = e;
-                    let errorMsg = err.message ?? t("backend-components.selector.loading-error");
-                    if (onLoadError) {
-                        const result = onLoadError(err);
-                        // if we should drop the record return here and don't create a record in cache
-                        if (!result) {
-                            return;
-                        }
-                        errorMsg = result;
+                    const label = getSelectedLoadErrorLabel(value, e, onLoadError, t);
+                    // if we should drop the record return here and don't create a record in cache
+                    if (!label) {
+                        return;
                     }
                     newCache[value] = {
                         value,
-                        label: errorMsg,
+                        label,
                     };
                 }
             }));

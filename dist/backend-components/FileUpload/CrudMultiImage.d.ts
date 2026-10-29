@@ -4,7 +4,9 @@ import { Connector } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 export interface CrudMultiImageProps extends Omit<MultiImageProps, "images" | "onChange"> {
     /**
-     * Optional additional images to display
+     * Images of someone else, listed before this control's own
+     * @remarks Read-only whatever their `readOnly` says: never removed, replaced or
+     *          written through `connector`.
      */
     additionalImages?: MultiImageImage[];
     /**
