@@ -37,11 +37,18 @@ const GroupBoxLegend = styled("legend", {
 
 export type GroupBoxClassKey = "root" | "legend";
 
-export interface GroupBoxProps {
-	/**
-	 * The HTML id of the fieldset
-	 */
-	id?: string;
+/**
+ * The HTML attributes of the GroupBox's fieldset, e.g. `aria-busy` or `aria-describedby`
+ */
+export type GroupBoxHTMLProps = Omit<
+	React.ComponentPropsWithoutRef<"fieldset">,
+	"children"
+>;
+
+/**
+ * @remarks Every HTML attribute the box does not take itself is set on its fieldset.
+ */
+export interface GroupBoxProps extends GroupBoxHTMLProps {
 	/**
 	 * The label of the box
 	 */
@@ -55,12 +62,6 @@ export interface GroupBoxProps {
 	 */
 	children?: React.ReactNode;
 	/**
-	 * Are the contents still being loaded or updated?
-	 * @remarks Sets `aria-busy`, so that assistive technology waits for the contents
-	 *          rather than announcing what is there in the meantime.
-	 */
-	busy?: boolean;
-	/**
 	 * CSS class to apply to fieldset
 	 */
 	className?: string;
@@ -72,11 +73,11 @@ export interface GroupBoxProps {
 
 const GroupBox = (inProps: GroupBoxProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcGroupBox" });
-	const { id, label, children, smallLabel, busy, className, classes } = props;
+	const { label, children, smallLabel, className, classes, ...fieldsetProps } =
+		props;
 	return (
 		<GroupBoxRoot
-			id={id}
-			aria-busy={busy || undefined}
+			{...fieldsetProps}
 			className={combineClassNames([className, classes?.root])}
 		>
 			{label && (

@@ -65,7 +65,7 @@ const CrudLoadStatus = (inProps: CrudLoadStatusProps) => {
 			label={label}
 			smallLabel={smallLabel}
 			className={className}
-			busy={!error}
+			aria-busy={!error || undefined}
 		>
 			{error ? (
 				<div role={"alert"}>

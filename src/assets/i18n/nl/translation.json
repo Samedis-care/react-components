@@ -353,6 +353,11 @@
 			"load-failed": {
 				"files": "De bijlagen konden niet worden geladen",
 				"images": "De afbeeldingen konden niet worden geladen"
+			},
+			"write-failed": {
+				"create": "{{name}} kon niet worden geüpload: {{reason}}",
+				"update": "{{name}} kon niet worden vervangen: {{reason}}",
+				"delete": "{{name}} kon niet worden verwijderd: {{reason}}"
 			}
 		}
 	},

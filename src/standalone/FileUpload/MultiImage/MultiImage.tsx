@@ -6,7 +6,7 @@ import React, {
 	useState,
 } from "react";
 import ImageBox, { ImageBoxProps } from "./ImageBox";
-import GroupBox from "../../GroupBox";
+import GroupBox, { GroupBoxHTMLProps } from "../../GroupBox";
 import {
 	Dialog,
 	DialogContent,
@@ -132,10 +132,21 @@ export interface MultiImageProps {
 	readOnly?: boolean;
 	/**
 	 * Is the field busy, e.g. writing its changes?
-	 * @remarks Sets `aria-busy` on the field.
+	 * @remarks Sets `aria-busy` on the field. While it is false, the `aria-busy` of
+	 *          `slotProps.groupBox` applies.
 	 * @default false
 	 */
 	busy?: boolean;
+	/**
+	 * Props for the parts of the control
+	 */
+	slotProps?: {
+		/**
+		 * HTML attributes for the field's frame (`GroupBox`), e.g. `aria-describedby` for an
+		 * error shown next to it
+		 */
+		groupBox?: GroupBoxHTMLProps;
+	};
 	/**
 	 * MimeType to convert the image to (e.g. image/png or image/jpg)
 	 */
@@ -231,6 +242,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 		captureImage,
 		readOnly,
 		busy,
+		slotProps,
 		maxImages,
 		capture,
 		convertImagesTo,
@@ -419,7 +431,11 @@ const MultiImage = (inProps: MultiImageProps) => {
 
 	return (
 		<Root className={combineClassNames([className, classes?.root])}>
-			<GroupBox label={label} busy={busy}>
+			<GroupBox
+				{...slotProps?.groupBox}
+				aria-busy={busy || slotProps?.groupBox?.["aria-busy"]}
+				label={label}
+			>
 				<RootContainer container spacing={1} className={classes?.rootContainer}>
 					<ImageItem size={12} className={classes?.imageItem}>
 						<ImageBox

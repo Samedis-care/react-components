@@ -1,6 +1,7 @@
 import React, {
 	useCallback,
 	useEffect,
+	useId,
 	useMemo,
 	useRef,
 	useState,
@@ -12,6 +13,11 @@ import {
 } from "../../standalone/FileUpload/MultiImage/MultiImage";
 import { Connector } from "../../backend-integration";
 import PartialDeleteError from "../../backend-integration/Connector/PartialDeleteError";
+import PartialApplyError, {
+	PartialApplyFailure,
+} from "../Form/PartialApplyError";
+import describeWriteFailures from "./describeWriteFailures";
+import describeFrameBy from "./describeFrameBy";
 import { ErrorComponentProps } from "../Form";
 import { MultiImage } from "../../standalone";
 import CrudLoadStatus from "./CrudLoadStatus";
@@ -127,6 +133,8 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 	const connector = useRef(connectorProp).current;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<WriteError | null>(null);
+	// for the field to reference the error while it is shown with it
+	const errorId = useId();
 	// The edit dialog is modal and hides the rest of the page, so an error that arrives
 	// while it is open is shown in it. It is not moved out when the dialog closes, but
 	// dismissed: moved, it would be mounted again, and an error component that shows a
@@ -201,21 +209,37 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 					};
 				}),
 			]);
-			let error: Error | null = null;
+			// every write that did not go through, reported together
+			const failures: PartialApplyFailure<MultiImageImage>[] = [];
 			let refusedIds: string[] = [];
 			if (deleteResult.status === "rejected") {
-				error = deleteResult.reason as Error;
-				// only a PartialDeleteError says which ids went through
-				refusedIds =
-					deleteResult.reason instanceof PartialDeleteError
-						? deleteResult.reason.failedIds
-						: removedIds;
+				const e = deleteResult.reason as unknown;
+				// only a PartialDeleteError says which ids went through, and its cause why
+				refusedIds = e instanceof PartialDeleteError ? e.failedIds : removedIds;
+				const reason =
+					e instanceof PartialDeleteError && e.cause instanceof Error
+						? e.cause
+						: (e as Error);
+				refusedIds.forEach((id) => {
+					const img = latestById.get(id);
+					if (img)
+						failures.push({ entry: img, action: "delete", error: reason });
+				});
 			}
 			const written = new Map<MultiImageImage, BackendMultiImageImage>();
 			uploadResults.forEach((result, i) => {
-				if (result.status === "fulfilled")
+				if (result.status === "fulfilled") {
 					written.set(writes[i].img, result.value);
-				else error = error ?? (result.reason as Error);
+					return;
+				}
+				const { img } = writes[i];
+				const isNew = img.id.startsWith(MultiImageNewIdPrefix);
+				failures.push({
+					// a replacement is reported as the image it was to replace
+					entry: isNew ? img : (latestById.get(img.id) ?? img),
+					action: isNew ? "create" : "update",
+					error: result.reason as Error,
+				});
 			});
 
 			const deletedIds = removedIds.filter((id) => !refusedIds.includes(id));
@@ -234,6 +258,13 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 				}),
 			]);
 			// the outcome of this change: one that went through clears an earlier error
+			const error =
+				failures.length > 0
+					? new PartialApplyError(
+							describeWriteFailures(failures, (img) => img.name),
+							failures,
+						)
+					: null;
 			setError(error && { error, inDialog: dialogOpen.current });
 			// The primary is the owner's, and only reported when this change moved it:
 			// removing the primary image leaves none. Any other primary stays as it is,
@@ -298,8 +329,19 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 		[extras, images],
 	);
 	const dialogError = useMemo(
-		() => error?.inDialog && <ErrorComponent error={error.error} />,
-		[ErrorComponent, error],
+		() =>
+			error?.inDialog && <ErrorComponent error={error.error} id={errorId} />,
+		[ErrorComponent, error, errorId],
+	);
+	// the field is hidden behind the edit dialog while that shows the error
+	const describedBy = error && !error.inDialog ? errorId : undefined;
+	const { slotProps } = otherProps;
+	const multiImageSlotProps = useMemo(
+		(): MultiImageProps["slotProps"] => ({
+			...slotProps,
+			groupBox: describeFrameBy(slotProps?.groupBox, describedBy),
+		}),
+		[slotProps, describedBy],
 	);
 
 	useEffect(() => {
@@ -345,11 +387,14 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 
 	return (
 		<>
-			{error && !error.inDialog && <ErrorComponent error={error.error} />}
+			{error && !error.inDialog && (
+				<ErrorComponent error={error.error} id={errorId} />
+			)}
 			<MultiImage
 				{...otherProps}
 				images={listedImages}
 				busy={writing > 0}
+				slotProps={multiImageSlotProps}
 				dialogMessage={dialogError}
 				onDialogOpenChange={handleDialogOpenChange}
 				onChange={handleChange}

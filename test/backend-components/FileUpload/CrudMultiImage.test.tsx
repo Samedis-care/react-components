@@ -18,6 +18,7 @@ import CrudMultiImage, {
 import type { MultiImageImage } from "../../../src/standalone/FileUpload/MultiImage/MultiImage";
 import type { ErrorComponentProps } from "../../../src/backend-components/Form";
 import DefaultErrorComponent from "../../../src/backend-components/Form/DefaultErrorComponent";
+import type PartialApplyError from "../../../src/backend-components/Form/PartialApplyError";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import Connector from "../../../src/backend-integration/Connector/Connector";
 import LazyConnector from "../../../src/backend-integration/Connector/LazyConnector";
@@ -115,6 +116,8 @@ class Backend extends Connector {
 	public indexParams: unknown[] = [];
 	public rejectCreates = new Set<string>();
 	public rejectDeletes = new Set<string>();
+	/** the ids whose update is refused */
+	public rejectUpdates = new Set<string>();
 	public indexGate: Promise<void> | null = null;
 	public indexError: Error | null = null;
 	/** one gate per create call, in order; a call without one goes through at once */
@@ -154,6 +157,8 @@ class Backend extends Connector {
 
 	async update(data: Record<string, unknown>) {
 		await Promise.resolve();
+		const id = data.id as string;
+		if (this.rejectUpdates.has(id)) throw new Error(`update of ${id} refused`);
 		this.updates.push(data);
 		return this.store.update({
 			...data,
@@ -187,7 +192,7 @@ const OWN = [
  *          pushes a dialog and renders nothing.
  */
 const ErrorSink = (props: ErrorComponentProps) => (
-	<div role={"alert"} data-testid={"error"}>
+	<div id={props.id} role={"alert"} data-testid={"error"}>
 		{props.error.message}
 	</div>
 );
@@ -492,7 +497,7 @@ describe("CrudMultiImage", () => {
 
 		await waitFor(() =>
 			expect(screen.getByTestId("error").textContent).toBe(
-				"upload of bad.png refused",
+				"Could not upload bad.png: upload of bad.png refused.",
 			),
 		);
 		expect(await onServer(backend)).toEqual(["a", "b"]);
@@ -988,7 +993,8 @@ describe("CrudMultiImage: accessibility bugs", () => {
 		await waitFor(() => expect(backend.deleteCalls).toEqual(["2"]));
 		await settle();
 		// it renders nothing in place: each occurrence is an error dialog
-		const errorDialogs = () => screen.queryAllByText("delete of 2 refused");
+		const errorDialogs = () =>
+			screen.queryAllByText("Could not remove b: delete of 2 refused.");
 		expect(errorDialogs()).toHaveLength(1);
 		fireEvent.click(
 			screen.getByRole("button", { name: t("common.buttons.ok") }),
@@ -1047,5 +1053,106 @@ describe("CrudMultiImage: accessibility bugs", () => {
 		await settle();
 
 		expect(field).not.toHaveAttribute("aria-busy");
+	});
+
+	it("[ISSUE-3511-ITEM-20] a refused replacement is reported as the image it was to replace", async () => {
+		usePassThroughImages();
+		const reported: Error[] = [];
+		const Capture = (props: ErrorComponentProps) => {
+			reported.push(props.error);
+			return <ErrorSink {...props} />;
+		};
+		const backend = new Backend(OWN);
+		backend.rejectUpdates.add("1");
+		const { container } = renderMI({
+			connector: backend,
+			errorComponent: Capture,
+		});
+		await ready(container);
+		const dialog = openEdit();
+
+		await dropOn(entries(dialog)[0], [png("new.png")]);
+		await settle();
+
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			"Could not replace a: update of 1 refused.",
+		);
+		const error = reported[
+			reported.length - 1
+		] as PartialApplyError<BackendMultiImageImage>;
+		// the listed image, not the replacement that was refused
+		expect(
+			error.failures.map((failure) => [
+				failure.action,
+				failure.entry.id,
+				failure.entry.image,
+			]),
+		).toEqual([["update", "1", "a.png"]]);
+	});
+
+	it("[ISSUE-3511-ITEM-20] the field is described by an error shown with it", async () => {
+		usePassThroughImages();
+		const backend = new Backend(OWN);
+		backend.rejectCreates.add("bad.png");
+		const { container } = renderMI({ connector: backend });
+		await ready(container);
+
+		await pick(container, [png("bad.png")]);
+
+		await waitFor(() =>
+			expect(
+				screen.getByRole("group", { name: "Images" }),
+			).toHaveAccessibleDescription(
+				"Could not upload bad.png: upload of bad.png refused.",
+			),
+		);
+	});
+
+	it("[ISSUE-3511-ITEM-20] keeps the attributes passed for the field's frame, and adds the error to their description", async () => {
+		usePassThroughImages();
+		const backend = new Backend(OWN);
+		backend.rejectCreates.add("bad.png");
+		const { container } = renderMI({
+			connector: backend,
+			slotProps: {
+				groupBox: { id: "images-field", "aria-describedby": "hint" },
+			},
+		});
+		await ready(container);
+		const field = screen.getByRole("group", { name: "Images" });
+		expect(field).toHaveAttribute("id", "images-field");
+		expect(field).toHaveAttribute("aria-describedby", "hint");
+
+		await pick(container, [png("bad.png")]);
+		await waitFor(() =>
+			expect(field.getAttribute("aria-describedby")).toMatch(/^hint \S+$/),
+		);
+		const errorId = field.getAttribute("aria-describedby")!.split(" ")[1];
+		expect(document.getElementById(errorId)).toHaveTextContent(
+			"Could not upload bad.png",
+		);
+	});
+
+	it("[ISSUE-3511-ITEM-20] a write marks the field busy over the aria-busy passed for its frame, which applies otherwise", async () => {
+		const backend = new Backend(OWN);
+		const deleting = gate();
+		backend.deleteGate = deleting.promise;
+		const { container } = renderMI({
+			connector: backend,
+			slotProps: { groupBox: { "aria-busy": false } },
+		});
+		await ready(container);
+		const field = screen.getByRole("group", { name: "Images" });
+		expect(field).toHaveAttribute("aria-busy", "false");
+
+		await removeEntry(openEdit(), 1);
+		expect(field).toHaveAttribute("aria-busy", "true");
+		await act(async () => {
+			deleting.release();
+			await tick();
+		});
+		await settle();
+
+		expect(field).toHaveAttribute("aria-busy", "false");
 	});
 });

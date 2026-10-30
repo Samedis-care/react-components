@@ -353,6 +353,11 @@
 			"load-failed": {
 				"files": "Les pièces jointes n'ont pas pu être chargées",
 				"images": "Les images n'ont pas pu être chargées"
+			},
+			"write-failed": {
+				"create": "Impossible de télécharger {{name}} : {{reason}}",
+				"update": "Impossible de remplacer {{name}} : {{reason}}",
+				"delete": "Impossible de supprimer {{name}} : {{reason}}"
 			}
 		}
 	},

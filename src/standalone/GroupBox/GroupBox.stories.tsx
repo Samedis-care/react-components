@@ -53,7 +53,7 @@ export const ReactNodeLabel: Story = {
 export const Busy: Story = {
 	args: {
 		label: "Attachments",
-		busy: true,
+		"aria-busy": true,
 		children: <p style={{ margin: 0 }}>Loading…</p>,
 	},
 	parameters: { a11y: { test: "error" } },

@@ -16,7 +16,9 @@ import {
 import shallowCompare from "../../utils/shallowCompare";
 import { FormContext, ValidationResult } from "../Form";
 import { BackendMultiSelectProps } from "./BackendMultiSelect";
-import CrudSelectError, { CrudSelectFailure } from "./CrudSelectError";
+import PartialApplyError, {
+	PartialApplyFailure,
+} from "../Form/PartialApplyError";
 
 export interface UseCrudSelectParams<
 	M extends ModelUnknown,
@@ -141,6 +143,10 @@ export interface CrudSelectDispatch<DataT extends BaseSelectorData> {
 	 */
 	addToSelection: (entry: DataT) => Promise<void>;
 }
+
+// the entry as the field names it, for the message of a write that failed
+const labelOf = (entry: BaseSelectorData): string =>
+	typeof entry.label === "string" ? entry.label : entry.label[0];
 
 let ticketCounter = 0;
 const nextTicket = () => {
@@ -289,9 +295,9 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 			// rest with it: the backend keeps what went through either way, so the
 			// selection has to as well. Otherwise a record which was created is not
 			// shown, and picking it again creates it a second time.
-			const failures: CrudSelectFailure<DataT>[] = [];
+			const failures: PartialApplyFailure<DataT>[] = [];
 			const settle = async <T>(
-				action: CrudSelectFailure<DataT>["action"],
+				action: PartialApplyFailure<DataT>["action"],
 				entries: DataT[],
 				write: (entry: DataT) => Promise<T>,
 			): Promise<PromiseSettledResult<T>[]> => {
@@ -369,7 +375,19 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 			]);
 			currentSelected.current = finalSelected;
 			setSelected(currentSelected.current);
-			setError(failures.length > 0 ? new CrudSelectError(failures) : null);
+			setError(
+				failures.length > 0
+					? new PartialApplyError(
+							failures
+								.map(
+									(failure) =>
+										`${labelOf(failure.entry)}: ${failure.error.message}`,
+								)
+								.join("; "),
+							failures,
+						)
+					: null,
+			);
 		},
 		[connector, deserialize, prepareNewEntry, selected, serialize],
 	);

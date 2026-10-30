@@ -353,6 +353,11 @@
 			"load-failed": {
 				"files": "No se han podido cargar los archivos adjuntos",
 				"images": "No se han podido cargar las imágenes"
+			},
+			"write-failed": {
+				"create": "No se ha podido subir {{name}}: {{reason}}",
+				"update": "No se ha podido reemplazar {{name}}: {{reason}}",
+				"delete": "No se ha podido quitar {{name}}: {{reason}}"
 			}
 		}
 	},

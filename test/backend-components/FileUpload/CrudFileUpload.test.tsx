@@ -16,6 +16,9 @@ import CrudFileUpload, {
 	CrudFileUploadProps,
 } from "../../../src/backend-components/FileUpload/CrudFileUpload";
 import type { ErrorComponentProps } from "../../../src/backend-components/Form";
+import PartialApplyError, {
+	isPartialApplyError,
+} from "../../../src/backend-components/Form/PartialApplyError";
 import LazyConnector from "../../../src/backend-integration/Connector/LazyConnector";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import Connector from "../../../src/backend-integration/Connector/Connector";
@@ -91,7 +94,9 @@ const pick = (name: string, type = "text/plain") =>
  * @remarks DefaultErrorComponent pushes a dialog and renders nothing.
  */
 const ErrorSink = (props: ErrorComponentProps) => (
-	<span data-testid={"error"}>{props.error.message}</span>
+	<span id={props.id} data-testid={"error"}>
+		{props.error.message}
+	</span>
 );
 
 /**
@@ -1985,5 +1990,144 @@ describe("CrudFileUpload: accessibility bugs", () => {
 
 		await waitFor(() => expect(field).not.toHaveAttribute("aria-busy"));
 		expect(ui.errorText()).toContain("upload of big.pdf refused");
+	});
+
+	it("[ISSUE-3511-ITEM-20] a refused upload says which file failed, for every refusal of a change", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		// what a backend says: a reason, not the file
+		connector.refusal = () => "File too large";
+		connector.rejectCreates.add("bad1.txt");
+		connector.rejectCreates.add("bad2.txt");
+		const ui = renderUpload({ connector });
+		await loaded(ui);
+
+		await pickFiles(ui, [pick("bad1.txt"), pick("good.txt"), pick("bad2.txt")]);
+		await waitFor(() => expect(ui.names()).toContain("good.txt"));
+		await ui.settle();
+
+		expect(ui.errorText()).toContain("bad1.txt");
+		expect(ui.errorText()).toContain("bad2.txt");
+	});
+
+	it("[ISSUE-3511-ITEM-20] a refused removal is reported beside the refused uploads of the same change, one sentence each", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		connector.rejectDeletes.add("1");
+		connector.rejectCreates.add("bad.txt");
+		const ui = renderUpload({ connector });
+		await loaded(ui);
+
+		// a pick of a listed name replaces it: the old document.pdf is removed
+		await pickFiles(ui, [
+			pick("document.pdf", "application/pdf"),
+			pick("bad.txt"),
+		]);
+		await waitFor(() => expect(connector.deleteCalls).toEqual(["1"]));
+		await ui.settle();
+
+		expect(ui.errorText()).toBe(
+			"Could not remove document.pdf: delete of 1 refused. Could not upload bad.txt: upload of bad.txt refused.",
+		);
+	});
+
+	it("[ISSUE-3511-ITEM-20] errorComponent gets every failed write as a PartialApplyError", async () => {
+		const reported: Error[] = [];
+		const Capture = (props: ErrorComponentProps) => {
+			reported.push(props.error);
+			return null;
+		};
+		const connector = new StrictConnector(SERVER_FILES);
+		connector.rejectCreates.add("bad1.txt");
+		connector.rejectCreates.add("bad2.txt");
+		const ui = renderUpload({ connector, errorComponent: Capture });
+		await loaded(ui);
+
+		await pickFiles(ui, [pick("bad1.txt"), pick("good.txt"), pick("bad2.txt")]);
+		await waitFor(() => expect(reported).not.toHaveLength(0));
+
+		const error = reported[reported.length - 1];
+		expect(isPartialApplyError(error)).toBe(true);
+		expect(
+			(error as PartialApplyError<FileData>).failures.map((failure) => [
+				failure.action,
+				failure.entry.file.name,
+				failure.error.message,
+			]),
+		).toEqual([
+			["create", "bad1.txt", "upload of bad1.txt refused"],
+			["create", "bad2.txt", "upload of bad2.txt refused"],
+		]);
+	});
+
+	it("[ISSUE-3511-ITEM-20] the field is described by the error while it is shown", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		connector.rejectCreates.add("bad.txt");
+		const ui = renderUpload({ connector });
+		await loaded(ui);
+		const field = screen.getByRole("group", { name: "Attachments" });
+
+		await pickFiles(ui, [pick("bad.txt")]);
+		await waitFor(() =>
+			expect(field).toHaveAccessibleDescription(
+				"Could not upload bad.txt: upload of bad.txt refused.",
+			),
+		);
+
+		// a change that goes through clears the error, and with it the description
+		await pickFiles(ui, [pick("good.txt")]);
+		await waitFor(() => expect(ui.names()).toContain("good.txt"));
+		await ui.settle();
+		expect(field).not.toHaveAttribute("aria-describedby");
+	});
+
+	it("[ISSUE-3511-ITEM-20] keeps the attributes passed for the field's frame, and adds the error to their description", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		connector.rejectCreates.add("bad.txt");
+		const ui = renderUpload({
+			connector,
+			className: "own-class",
+			slotProps: {
+				root: {
+					id: "attachments-field",
+					className: "frame-class",
+					"aria-describedby": "hint",
+				},
+			},
+		});
+		await loaded(ui);
+		const field = screen.getByRole("group", { name: "Attachments" });
+		expect(field).toHaveAttribute("id", "attachments-field");
+		expect(field).toHaveClass("own-class", "frame-class");
+		expect(field).toHaveAttribute("aria-describedby", "hint");
+
+		await pickFiles(ui, [pick("bad.txt")]);
+		await waitFor(() =>
+			expect(field.getAttribute("aria-describedby")).toMatch(/^hint \S+$/),
+		);
+		const errorId = field.getAttribute("aria-describedby")!.split(" ")[1];
+		expect(document.getElementById(errorId)).toHaveTextContent(
+			"Could not upload bad.txt",
+		);
+	});
+
+	it("[ISSUE-3511-ITEM-20] a write marks the field busy over the aria-busy passed for its frame, which applies otherwise", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		const uploading = gate();
+		connector.createGate = uploading.promise;
+		const ui = renderUpload({
+			connector,
+			slotProps: { root: { "aria-busy": false } },
+		});
+		await loaded(ui);
+		const field = screen.getByRole("group", { name: "Attachments" });
+		expect(field).toHaveAttribute("aria-busy", "false");
+
+		await startPick(ui, pick("big.pdf", "application/pdf"));
+		await waitFor(() => expect(field).toHaveAttribute("aria-busy", "true"));
+		await act(async () => {
+			uploading.release();
+			await Promise.resolve();
+		});
+
+		await waitFor(() => expect(field).toHaveAttribute("aria-busy", "false"));
 	});
 });

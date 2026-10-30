@@ -20,6 +20,8 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-10-30 | [GroupBox takes any fieldset attribute; FileUpload and MultiImage pass them on through slotProps](2026-10-30-group-box-html-attributes.md) | type |
+| 2026-10-30 | [CRUD controls report failed writes as a PartialApplyError; the file controls name each file](2026-10-30-partial-apply-error.md) | type, behavior |
 | 2026-10-29 | [CrudMultiImage shows a write error in the edit dialog while that is open](2026-10-29-crud-multi-image-error-in-edit-dialog.md) | behavior |
 | 2026-10-29 | [Backend selectors keep one search debounce while mounted](2026-10-29-backend-select-one-search-debounce.md)                  | behavior |
 | 2026-10-29 | [Backend selectors label a selected record that fails to load with a translated text](2026-10-29-backend-select-load-error-labels.md) | behavior |

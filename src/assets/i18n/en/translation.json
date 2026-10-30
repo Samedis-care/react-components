@@ -353,6 +353,11 @@
 			"load-failed": {
 				"files": "The attachments could not be loaded",
 				"images": "The images could not be loaded"
+			},
+			"write-failed": {
+				"create": "Could not upload {{name}}: {{reason}}",
+				"update": "Could not replace {{name}}: {{reason}}",
+				"delete": "Could not remove {{name}}: {{reason}}"
 			}
 		}
 	},

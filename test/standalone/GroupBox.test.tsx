@@ -58,4 +58,21 @@ describe("GroupBox", () => {
 		);
 		expect(screen.getByTestId("rich-label")).toBeInTheDocument();
 	});
+
+	it("[ISSUE-3511-ITEM-20] sets every other HTML attribute on the fieldset", () => {
+		renderGroupBox(
+			<GroupBox
+				label="Files"
+				aria-busy
+				aria-describedby="hint"
+				title="Your files"
+				data-testid="box"
+			/>,
+		);
+		const box = screen.getByRole("group", { name: "Files" });
+		expect(box).toHaveAttribute("aria-busy", "true");
+		expect(box).toHaveAttribute("aria-describedby", "hint");
+		expect(box).toHaveAttribute("title", "Your files");
+		expect(box).toHaveAttribute("data-testid", "box");
+	});
 });

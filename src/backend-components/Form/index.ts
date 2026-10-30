@@ -23,3 +23,5 @@ export { default as UnsetFormContext } from "./UnsetFormContext";
 export * from "./FormEvents";
 export * from "./ValidationError";
 export { default as ValidationError } from "./ValidationError";
+export * from "./PartialApplyError";
+export { default as PartialApplyError } from "./PartialApplyError";

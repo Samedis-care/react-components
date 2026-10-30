@@ -5,7 +5,7 @@ import useCrudSelect, {
 } from "../../../src/backend-components/Selector/useCrudSelect";
 import { Connector, ModelUnknown } from "../../../src/backend-integration";
 import { BaseSelectorData } from "../../../src/standalone";
-import CrudSelectError from "../../../src/backend-components/Selector/CrudSelectError";
+import PartialApplyError from "../../../src/backend-components/Form/PartialApplyError";
 
 afterEach(cleanup);
 
@@ -299,8 +299,8 @@ describe("useCrudSelect partial failures", () => {
 		expect(mock.create).toHaveBeenCalledTimes(3);
 		expect(result.current.selected).toHaveLength(2);
 		expect(result.current.initialRawData).toHaveLength(2);
-		const error = result.current.error as CrudSelectError;
-		expect(error).toBeInstanceOf(CrudSelectError);
+		const error = result.current.error as PartialApplyError<JoinData>;
+		expect(error).toBeInstanceOf(PartialApplyError);
 		expect(error.failures).toHaveLength(1);
 		expect(error.failures[0].action).toBe("create");
 		expect(error.failures[0].entry.value).toBe("b");
@@ -349,7 +349,7 @@ describe("useCrudSelect partial failures", () => {
 
 		expect(mock.delete).toHaveBeenCalledTimes(2);
 		expect(result.current.selected.map((entry) => entry.value)).toEqual(["1"]);
-		const error = result.current.error as CrudSelectError;
+		const error = result.current.error as PartialApplyError<JoinData>;
 		expect(error.failures.map((failure) => failure.action)).toEqual(["delete"]);
 	});
 

@@ -353,6 +353,11 @@
 			"load-failed": {
 				"files": "Die Anhänge konnten nicht geladen werden",
 				"images": "Die Bilder konnten nicht geladen werden"
+			},
+			"write-failed": {
+				"create": "{{name}} konnte nicht hochgeladen werden: {{reason}}",
+				"update": "{{name}} konnte nicht ersetzt werden: {{reason}}",
+				"delete": "{{name}} konnte nicht entfernt werden: {{reason}}"
 			}
 		}
 	},

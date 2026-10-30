@@ -20,7 +20,7 @@ import { AttachFile } from "@mui/icons-material";
 import FilePreview, { FileChangeState, getFileIconOrDefault } from "./File";
 import { FileSelectorError } from "./Errors";
 import processImage, { IDownscaleProps } from "../../../utils/processImage";
-import GroupBox from "../../GroupBox";
+import GroupBox, { GroupBoxHTMLProps } from "../../GroupBox";
 import { labelWithDirtyMarker } from "../../UIKit/MuiFieldState";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import isTouchDevice from "../../../utils/isTouchDevice";
@@ -152,10 +152,23 @@ export interface FileUploadProps {
 	dirty?: boolean;
 	/**
 	 * Is the field busy, e.g. writing its changes?
-	 * @remarks Sets `aria-busy` on the field. A custom variant gets it as well.
+	 * @remarks Sets `aria-busy` on the field. While it is false, the `aria-busy` of
+	 *          `slotProps.root` applies. A custom variant gets it as well.
 	 * @default false
 	 */
 	busy?: boolean;
+	/**
+	 * Props for the parts of the control
+	 * @remarks A custom variant gets them as well.
+	 */
+	slotProps?: {
+		/**
+		 * HTML attributes for the field's frame (`GroupBox`), e.g. `aria-describedby` for an
+		 * error shown next to it
+		 * @remarks `className` is added to the frame's own.
+		 */
+		root?: GroupBoxHTMLProps;
+	};
 	/**
 	 * CSS class to apply to root
 	 */
@@ -437,6 +450,7 @@ const FileUpload = (
 		label,
 		dirty,
 		busy,
+		slotProps,
 		smallLabel,
 		readOnly,
 		onBlur,
@@ -760,10 +774,15 @@ const FileUpload = (
 	} else if (variant === "classic") {
 		return (
 			<StyledGroupBox
+				{...slotProps?.root}
+				aria-busy={busy || slotProps?.root?.["aria-busy"]}
 				label={boxLabel}
 				smallLabel={smallLabel}
-				busy={busy}
-				className={combineClassNames([className, classes?.root])}
+				className={combineClassNames([
+					className,
+					classes?.root,
+					slotProps?.root?.className,
+				])}
 			>
 				<Dropzone
 					container
@@ -863,10 +882,15 @@ const FileUpload = (
 		const acceptFiles = accept ? accept.split(",") : [];
 		return (
 			<StyledGroupBox
+				{...slotProps?.root}
+				aria-busy={busy || slotProps?.root?.["aria-busy"]}
 				label={boxLabel}
 				smallLabel={smallLabel}
-				busy={busy}
-				className={combineClassNames([className, classes?.root])}
+				className={combineClassNames([
+					className,
+					classes?.root,
+					slotProps?.root?.className,
+				])}
 			>
 				<Grid
 					container

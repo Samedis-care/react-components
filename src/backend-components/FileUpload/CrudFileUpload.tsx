@@ -3,6 +3,7 @@ import React, {
 	RefAttributes,
 	useCallback,
 	useEffect,
+	useId,
 	useMemo,
 	useRef,
 	useState,
@@ -16,6 +17,11 @@ import FileUpload, {
 import { Connector } from "../../backend-integration";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
 import PartialDeleteError from "../../backend-integration/Connector/PartialDeleteError";
+import PartialApplyError, {
+	PartialApplyFailure,
+} from "../Form/PartialApplyError";
+import describeWriteFailures from "./describeWriteFailures";
+import describeFrameBy from "./describeFrameBy";
 import { ErrorComponentProps } from "../Form";
 import CrudLoadStatus from "./CrudLoadStatus";
 import { FileSelectorError } from "../../standalone/FileUpload/Generic/Errors";
@@ -126,6 +132,8 @@ const CrudFileUpload = (
 	const connector = pinnedConnector.current;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
+	// for the field to reference the error while it is shown
+	const errorId = useId();
 	const [loadError, setLoadError] = useState<Error | null>(null);
 	const [files, setFiles] = useState<FileData<BackendFileMeta>[]>([]);
 	// Only a queued write can be shown as pending and undone. A direct connector has
@@ -296,17 +304,27 @@ const CrudFileUpload = (
 			// with the picked files still in it, so an upload which went through but was
 			// not recorded here is sent again by the next change, leaving a second copy
 			// on the server.
-			let error: Error | null = null;
+			// every write that did not go through, reported together
+			const failures: PartialApplyFailure<
+				FileData<File | FileMeta | BackendFileMeta>
+			>[] = [];
 			// the ids whose delete was refused: those files are still on the server
 			let refusedIds = new Set<string>();
 			try {
 				await connector.deleteMultiple(deletedIds);
 			} catch (e) {
-				error = e as Error;
-				// only a PartialDeleteError says which ids went through
+				// only a PartialDeleteError says which ids went through, and its cause why
 				refusedIds = new Set(
 					e instanceof PartialDeleteError ? e.failedIds : deletedIds,
 				);
+				const reason =
+					e instanceof PartialDeleteError && e.cause instanceof Error
+						? e.cause
+						: (e as Error);
+				newFiles.forEach((file) => {
+					if (file.delete && refusedIds.has((file.file as BackendFileMeta).id))
+						failures.push({ entry: file, action: "delete", error: reason });
+				});
 			}
 			// a queued delete can still be cancelled, a sent one cannot
 			if (!lazyConnector)
@@ -316,7 +334,11 @@ const CrudFileUpload = (
 			const uploadedFiles: FileData<BackendFileMeta>[] = [];
 			uploads.forEach((result, index) => {
 				if (result.status === "rejected") {
-					error = error ?? (result.reason as Error);
+					failures.push({
+						entry: picked[index],
+						action: "create",
+						error: result.reason as Error,
+					});
 					return;
 				}
 				// canBeUploaded is what makes it a File, per FileData's own contract
@@ -324,7 +346,14 @@ const CrudFileUpload = (
 				uploadedFiles.push(result.value);
 			});
 			// the outcome of this change: one that went through clears an earlier error
-			setError(error);
+			setError(
+				failures.length > 0
+					? new PartialApplyError(
+							describeWriteFailures(failures, (file) => file.file.name),
+							failures,
+						)
+					: null,
+			);
 
 			const kept = newFiles.filter(
 				(file) =>
@@ -512,6 +541,16 @@ const CrudFileUpload = (
 		[files, additionalFiles],
 	);
 
+	const describedBy = error ? errorId : undefined;
+	const { slotProps } = otherProps;
+	const fileUploadSlotProps = useMemo(
+		(): FileUploadProps["slotProps"] => ({
+			...slotProps,
+			root: describeFrameBy(slotProps?.root, describedBy),
+		}),
+		[slotProps, describedBy],
+	);
+
 	// without a connector there is nothing to load, only additionalFiles to list
 	if ((connector && loading) || loadError)
 		return (
@@ -528,13 +567,14 @@ const CrudFileUpload = (
 
 	return (
 		<>
-			{error && <ErrorComponent error={error} />}
+			{error && <ErrorComponent error={error} id={errorId} />}
 			<FileUpload
 				{...otherProps}
 				ref={ref}
 				files={finalFiles}
 				dirty={dirty}
 				busy={writing > 0}
+				slotProps={fileUploadSlotProps}
 				onChange={handleChange}
 				onRestoreFile={lazyConnector ? handleRestore : undefined}
 				handleError={handleError}
