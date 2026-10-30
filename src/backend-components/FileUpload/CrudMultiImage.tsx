@@ -33,9 +33,11 @@ export interface CrudMultiImageProps extends Omit<
 	 */
 	additionalImages?: MultiImageImage[];
 	/**
-	 * Optional additional images loading flag
-	 * Should be set to true while additionalImages is null to prevent
-	 * it loosing primary status
+	 * Set while `additionalImages` is still loading
+	 * @remarks Until they have arrived once, the field shows that it is loading. A later
+	 *          reload leaves the field as it is: it keeps listing the additional images
+	 *          passed last, and is marked busy until the new ones arrive. Listed without
+	 *          them, a primary that is one of them would fall back to the first own image.
 	 */
 	additionalImagesLoading?: boolean;
 	/**
@@ -277,12 +279,25 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 		[commitImages, connector, deserialize, name, onPrimaryChange, serialize],
 	);
 
+	// The additional images last passed while they were not loading, null until then. A
+	// reload keeps them listed rather than taking down the field, and with it an open edit
+	// dialog and the focus in it.
+	const [shownAdditional, setShownAdditional] = useState<{
+		images: MultiImageImage[] | undefined;
+	} | null>(() =>
+		additionalImagesLoading ? null : { images: additionalImages },
+	);
+	if (
+		!additionalImagesLoading &&
+		(shownAdditional === null || shownAdditional.images !== additionalImages)
+	)
+		setShownAdditional({ images: additionalImages });
 	// Read-only whatever the caller passed: they are someone else's, so this control
 	// neither removes nor replaces them. A change recognises them as these objects.
 	const extras = useMemo(
 		(): MultiImageImage[] | undefined =>
-			additionalImages?.map((img) => ({ ...img, readOnly: true })),
-		[additionalImages],
+			shownAdditional?.images?.map((img) => ({ ...img, readOnly: true })),
+		[shownAdditional],
 	);
 
 	/**
@@ -375,7 +390,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 		onChangeRef.current?.(name, images);
 	}, [images, loadError, loading, name]);
 
-	if (loading || additionalImagesLoading || loadError)
+	if (loading || loadError || !shownAdditional)
 		return (
 			<CrudLoadStatus
 				label={otherProps.label}
@@ -393,7 +408,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 			<MultiImage
 				{...otherProps}
 				images={listedImages}
-				busy={writing > 0}
+				busy={writing > 0 || !!additionalImagesLoading}
 				slotProps={multiImageSlotProps}
 				dialogMessage={dialogError}
 				onDialogOpenChange={handleDialogOpenChange}

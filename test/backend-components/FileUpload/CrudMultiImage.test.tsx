@@ -959,23 +959,27 @@ describe("CrudMultiImage: accessibility bugs", () => {
 		);
 	});
 
-	it("[ISSUE-3511-ITEM-18] an error after the field was reloaded with the dialog open is shown with the field", async () => {
-		usePassThroughImages();
+	it("[ISSUE-3511-ITEM-18] an error after the field turned read-only with the dialog open is shown with the field", async () => {
 		const backend = new Backend(OWN);
-		backend.rejectCreates.add("bad.png");
+		backend.rejectDeletes.add("2");
+		const deleting = gate();
+		backend.deleteGate = deleting.promise;
 		const { container, update } = renderMI({ connector: backend });
 		await ready(container);
-		openEdit();
-		// replaces the field, and with it the open dialog
-		update({ additionalImagesLoading: true });
-		update({ additionalImagesLoading: false });
-		await ready(container);
+		const dialog = openEdit();
+		await removeEntry(dialog, 1);
 
-		await pick(container, [png("bad.png")]);
+		// closes the dialog, while the removal is still being written
+		update({ readOnly: true });
+		await waitFor(() => expect(screen.queryByRole("dialog")).toBe(null));
+		await act(async () => {
+			deleting.release();
+			await tick();
+		});
 
 		await waitFor(() =>
 			expect(screen.getByRole("alert")).toHaveTextContent(
-				"upload of bad.png refused",
+				"delete of 2 refused",
 			),
 		);
 	});
@@ -1131,6 +1135,78 @@ describe("CrudMultiImage: accessibility bugs", () => {
 		expect(document.getElementById(errorId)).toHaveTextContent(
 			"Could not upload bad.png",
 		);
+	});
+
+	it("[ISSUE-3511-ITEM-21] the edit dialog stays open while additional images reload", async () => {
+		const { container, update } = renderMI({ connector: new Backend(OWN) });
+		await ready(container);
+		openEdit();
+
+		update({ additionalImagesLoading: true });
+		update({ additionalImagesLoading: false });
+		await settle();
+
+		expect(screen.queryByRole("dialog")).not.toBe(null);
+	});
+
+	it("[ISSUE-3511-ITEM-21] while additional images reload, the field keeps listing the ones it had, so a primary among them stays, and is busy", async () => {
+		const extras = [{ id: "x1", name: "x1", image: "x1.png", readOnly: true }];
+		const props = {
+			connector: new Backend(OWN),
+			additionalImages: extras,
+			initialPrimary: "x1",
+		};
+		const { container, log, rerender } = renderOwner(props);
+		await ready(container);
+		await settle();
+		const before = log.reported.length;
+		const dialog = openEdit();
+		const field = screen.getByRole("group", { name: "Images", hidden: true });
+
+		// the owner passes what it has while loading: here, none of them
+		rerender(
+			<Framework>
+				<Owner
+					log={log}
+					{...props}
+					additionalImages={[]}
+					additionalImagesLoading
+				/>
+			</Framework>,
+		);
+		await settle();
+		expect(srcs(dialog)).toEqual(["x1.png", "a.png", "b.png"]);
+		expect(field).toHaveAttribute("aria-busy", "true");
+		expect(dialog).toContainElement(document.activeElement as HTMLElement);
+
+		rerender(
+			<Framework>
+				<Owner log={log} {...props} />
+			</Framework>,
+		);
+		await settle();
+		expect(field).not.toHaveAttribute("aria-busy");
+		expect(log.reported.slice(before)).toEqual([]);
+	});
+
+	it("[ISSUE-3511-ITEM-21] shows that the field is loading until the additional images have arrived once", async () => {
+		const { container, update } = renderMI({
+			connector: new Backend(OWN),
+			additionalImagesLoading: true,
+		});
+		await settle();
+		expect(container.querySelector('input[type="file"]')).toBe(null);
+		expect(screen.getByRole("group", { name: "Images" })).toHaveAttribute(
+			"aria-busy",
+			"true",
+		);
+
+		update({
+			additionalImagesLoading: false,
+			additionalImages: [{ id: "x1", name: "x1", image: "x1.png" }],
+		});
+
+		await ready(container);
 	});
 
 	it("[ISSUE-3511-ITEM-20] a write marks the field busy over the aria-busy passed for its frame, which applies otherwise", async () => {
