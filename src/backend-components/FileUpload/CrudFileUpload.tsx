@@ -43,6 +43,14 @@ export interface CrudFileUploadProps extends Omit<
 	 */
 	errorComponent: React.ComponentType<ErrorComponentProps>;
 	/**
+	 * Callback for delete confirmation, asked before a file is removed with its remove button
+	 * @remarks Without a LazyConnector the removal deletes the file on the server at once,
+	 *          with no undo. With one it is only queued, and can be restored until the
+	 *          queue is written.
+	 * @see FileUploadProps.onDelete
+	 */
+	onDelete?: FileUploadProps["onDelete"];
+	/**
 	 * Callback for serializing a picked file before passing it to the backend connector
 	 * @param data The file data to serialize
 	 * @returns Data to be passed to the backend connector's create

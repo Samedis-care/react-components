@@ -1231,4 +1231,27 @@ describe("CrudMultiImage: accessibility bugs", () => {
 
 		expect(field).toHaveAttribute("aria-busy", "false");
 	});
+
+	it("[ISSUE-3511-ITEM-22] a removal onDelete declines deletes nothing, and one it confirms is deleted", async () => {
+		const backend = new Backend(OWN);
+		const onDelete = vi.fn<(image: MultiImageImage) => boolean>(
+			(image) => image.id === "2",
+		);
+		const { container } = renderMI({ connector: backend, onDelete });
+		await ready(container);
+		const dialog = openEdit();
+
+		await removeEntry(dialog, 0);
+		await settle();
+		expect(onDelete).toHaveBeenLastCalledWith(
+			expect.objectContaining({ id: "1" }),
+		);
+		expect(backend.deleteCalls).toEqual([]);
+		expect(srcs(dialog)).toEqual(["a.png", "b.png"]);
+
+		await removeEntry(dialog, 1);
+		await settle();
+		expect(backend.deleteCalls).toEqual(["2"]);
+		expect(srcs(dialog)).toEqual(["a.png"]);
+	});
 });

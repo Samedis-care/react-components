@@ -1285,6 +1285,22 @@ const gate = () => {
 	return { promise, release };
 };
 
+/** An onDelete that waits for the test's answer */
+const askUser = () => {
+	const answers: ((confirmed: boolean) => void)[] = [];
+	return {
+		onDelete: vi.fn<(file: FileData) => Promise<boolean>>(
+			() => new Promise((resolve) => answers.push(resolve)),
+		),
+		/** Answers the first question asked */
+		answer: (confirmed: boolean) =>
+			act(async () => {
+				answers[0](confirmed);
+				await Promise.resolve();
+			}),
+	};
+};
+
 /** Picks a file whose upload may hang, without waiting for it */
 const startPick = async (ui: Harness, file: File) => {
 	await act(async () => {
@@ -2129,5 +2145,60 @@ describe("CrudFileUpload: accessibility bugs", () => {
 		});
 
 		await waitFor(() => expect(field).toHaveAttribute("aria-busy", "false"));
+	});
+
+	it("[ISSUE-3511-ITEM-22] a removal through a direct connector waits for onDelete, and one it declines deletes nothing", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		const ask = askUser();
+		const ui = renderUpload({ connector, onDelete: ask.onDelete });
+		await loaded(ui);
+
+		await ui.remove("document.pdf");
+		expect(ask.onDelete.mock.calls.map(([file]) => file.file.name)).toEqual([
+			"document.pdf",
+		]);
+		expect(connector.deleteCalls).toEqual([]);
+		await ask.answer(false);
+		await ui.settle();
+
+		expect(connector.deleteCalls).toEqual([]);
+		expect(ui.names()).toEqual(["document.pdf", "image.png"]);
+	});
+
+	it("[ISSUE-3511-ITEM-22] a removal onDelete confirms is deleted on the server", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		const ask = askUser();
+		const ui = renderUpload({ connector, onDelete: ask.onDelete });
+		await loaded(ui);
+
+		await ui.remove("document.pdf");
+		await ask.answer(true);
+
+		await waitFor(() => expect(ui.names()).toEqual(["image.png"]));
+		expect(connector.deleteCalls).toEqual(["1"]);
+	});
+
+	it("[ISSUE-3511-ITEM-22] a removal confirmed after an upload settled meanwhile is deleted on the server", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		const uploading = gate();
+		connector.createGate = uploading.promise;
+		const ask = askUser();
+		const ui = renderUpload({ connector, onDelete: ask.onDelete });
+		await loaded(ui);
+		await startPick(ui, pick("notes.txt"));
+		const field = screen.getByRole("group", { name: "Attachments" });
+		await waitFor(() => expect(field).toHaveAttribute("aria-busy", "true"));
+
+		await ui.remove("document.pdf");
+		await act(async () => {
+			uploading.release();
+			await Promise.resolve();
+		});
+		// written, so the control lists its files anew
+		await waitFor(() => expect(field).not.toHaveAttribute("aria-busy"));
+		await ask.answer(true);
+
+		await waitFor(() => expect(ui.names()).toEqual(["image.png", "notes.txt"]));
+		expect(connector.deleteCalls).toEqual(["1"]);
 	});
 });

@@ -55,6 +55,13 @@ export interface CrudMultiImageProps extends Omit<
 	 */
 	errorComponent: React.ComponentType<ErrorComponentProps>;
 	/**
+	 * Callback for delete confirmation, asked before an image is removed
+	 * @remarks The field has no undo for a removal: without a LazyConnector it deletes the
+	 *          image on the server at once, with one it is queued until the queue is written.
+	 * @see MultiImageProps.onDelete
+	 */
+	onDelete?: MultiImageProps["onDelete"];
+	/**
 	 * Callback for serializing data before passing it to the backend connector
 	 * @param data The image data to serialize
 	 * @param id The id of the image data or null for new

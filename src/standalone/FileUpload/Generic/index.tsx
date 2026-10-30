@@ -122,6 +122,14 @@ export interface FileUploadProps {
 	 */
 	onChange?: (files: FileData[]) => void;
 	/**
+	 * Callback for delete confirmation, asked before a file is removed with its remove button
+	 * @param file The file that the user wants to remove
+	 * @returns Should the file be removed?
+	 * @remarks The file stays if it returns false, and if it throws or rejects, which is
+	 *          reported. A file replaced by picking one of the same name is not asked about.
+	 */
+	onDelete?: (file: FileData) => Promise<boolean> | boolean;
+	/**
 	 * Called instead of the built-in restore when a pending removal is undone
 	 * @remarks The built-in restore just clears the `delete` flag, which is all that is
 	 *          needed while the removal is only a flag on the file. Where it has already
@@ -446,6 +454,7 @@ const FileUpload = (
 		accept,
 		acceptLabel,
 		onChange,
+		onDelete,
 		onRestoreFile,
 		label,
 		dirty,
@@ -712,15 +721,53 @@ const FileUpload = (
 		[processFiles],
 	);
 
+	// A removal that waits for onDelete applies to the field as it is by then: it may have
+	// been unmounted, made read-only or been given a new handler meanwhile.
+	const afterConfirmRef = useRef({ mounted: false, readOnly, onChange });
+	afterConfirmRef.current.readOnly = readOnly;
+	afterConfirmRef.current.onChange = onChange;
+	useEffect(() => {
+		const afterConfirm = afterConfirmRef.current;
+		afterConfirm.mounted = true;
+		return () => {
+			afterConfirm.mounted = false;
+		};
+	}, []);
+
 	const removeFile = useCallback(
 		(file: FileData) => {
-			setFiles((prev) => {
-				const newValue = removeFiles(prev, (f) => f === file);
-				if (onChange) onChange(newValue);
-				return newValue;
-			});
+			if (!onDelete) {
+				setFiles((prev) => {
+					const newValue = removeFiles(prev, (f) => f === file);
+					if (onChange) onChange(newValue);
+					return newValue;
+				});
+				return;
+			}
+			void (async () => {
+				let confirmed: boolean;
+				try {
+					confirmed = await onDelete(file);
+				} catch (e) {
+					captureError(e, { source: "FileUpload.onDelete" });
+					confirmed = false;
+				}
+				const afterConfirm = afterConfirmRef.current;
+				if (!confirmed || !afterConfirm.mounted || afterConfirm.readOnly)
+					return;
+				// by what it holds, not by identity: files passed in again meanwhile are
+				// listed as new entries
+				const isRemoved = (f: FileData) =>
+					f.file === file.file && !f.delete && !f.preventDelete;
+				if (!getFiles().some(isRemoved)) return;
+				setFiles((prev) => {
+					const newValue = removeFiles(prev, isRemoved);
+					afterConfirm.onChange?.(newValue);
+					return newValue;
+				});
+			})();
 		},
-		[onChange, setFiles],
+		[getFiles, onChange, onDelete, setFiles],
 	);
 
 	const restoreFile = useCallback(
