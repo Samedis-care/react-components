@@ -580,6 +580,51 @@ own diff across a text field, an outlined multiline one, a searchable select, a 
 image selector, a radio group, a checkbox and a switch; `DirtyStateHidden` is the default;
 `DirtyStateProvided` supplies its own marks.
 
+### Collections that belong to the record
+
+Files, images and other records that belong to the form's record but live at an endpoint of
+their own (`records/42/attachments`) are edited by controls that write to that endpoint
+themselves: `FormCrudFileUpload`, `FormCrudMultiImage` and `FormCrudMultiSelect`. They are
+custom fields, not fields of the model.
+
+```tsx
+<FormCrudFileUpload
+	field={"attachments"}
+	initialId={id}
+	getEndpoint={(id) => `v1/records/${id}/attachments`}
+	serialize={serializeAttachment}
+	deserialize={deserializeAttachment}
+	label={t("attachments")}
+/>
+```
+
+Each builds a `LazyConnector` with `useLazyCrudConnector`, from `field`, `initialId`,
+`getEndpoint` and the hook's other params. Reads go to the endpoint, writes are queued, and the
+queue is sent after the form saved the record, so a new record gets its files too. While
+anything is queued the form is dirty. The connector is kept as the form's custom state of
+`field`.
+
+They take the form's `readOnly` on top of their own, and its `errorComponent`.
+`FormCrudFileUpload` also follows the form's `showDirtyState` unless its own prop is set.
+Outside a form, use `CrudFileUpload` and `CrudMultiImage` with a connector of your own: they
+do not read the form.
+
+Things to know about the queue:
+
+- `FormCrudFileUpload` marks a queued upload as added and a queued removal as struck through,
+  with a restore. `FormCrudMultiImage` shows queued changes as if they were saved: there are
+  no marks, no restore and no dirty marker.
+- An entry created through the queue has a client-side id (`fake-id-N`). It keeps it in
+  `onChange`, and in the multi image's `onPrimaryChange`, also after the save;
+  `LazyConnector.mapId` gives the server's id once the queue is sent. The record is saved
+  before the queue is sent, so storing a new primary image with the record takes a second save
+  with the mapped id.
+- `deserialize` gets a queued entry as `serialize` returned it, with that client-side id: a
+  picked file where the backend would send a URL.
+
+The `Backend-Components/FileUpload` stories `InForm` and `InReadOnlyForm` show both file
+controls in a form.
+
 ### Error reporting
 
 Independently of what your error component displays, Components-Care forwards unexpected errors to an

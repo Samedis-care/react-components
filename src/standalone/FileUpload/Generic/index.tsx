@@ -41,6 +41,8 @@ export interface FileUploadProps {
 	name?: string;
 	/**
 	 * Maximum amount of files allowed
+	 * @remarks Counts every listed file that is not removed, except one with
+	 *          `excludeFromLimits`.
 	 */
 	maxFiles?: number;
 	/**
@@ -61,10 +63,11 @@ export interface FileUploadProps {
 	maxFileSize?: number;
 	/**
 	 * Largest size all listed files may have together, in bytes
-	 * @remarks Counts every listed file that is not removed: a picked one at its upload
-	 *          size (see `minFileSize`), any other at its `FileMeta.size`, which counts as
-	 *          0 bytes where it is unset. A selection that would go over the limit is
-	 *          refused as a whole (`files.selector.too-large`). Unset means no maximum.
+	 * @remarks Counts every listed file that is not removed, except one with
+	 *          `excludeFromLimits`: a picked one at its upload size (see `minFileSize`),
+	 *          any other at its `FileMeta.size`, which counts as 0 bytes where it is
+	 *          unset. A selection that would go over the limit is refused as a whole
+	 *          (`files.selector.too-large`). Unset means no maximum.
 	 */
 	maxTotalFileSize?: number;
 	/**
@@ -275,6 +278,12 @@ export interface FileData<T = File | FileMeta> {
 	 */
 	preventDelete?: boolean;
 	/**
+	 * Leave the file out of `maxFiles` and `maxTotalFileSize`
+	 * @remarks For a file that is listed but not part of what the limits are about, like
+	 *          CrudFileUpload's `additionalFiles`.
+	 */
+	excludeFromLimits?: boolean;
+	/**
 	 * The file can be uploaded? (has it been selected by the user?)
 	 * If canBeUploaded is true T is File, otherwise T is FileMeta
 	 */
@@ -352,7 +361,10 @@ const getUploadSize = (file: FileData): number =>
  */
 const getTotalSize = (files: FileData[]): number =>
 	files.reduce(
-		(total, file) => (file.delete ? total : total + getUploadSize(file)),
+		(total, file) =>
+			file.delete || file.excludeFromLimits
+				? total
+				: total + getUploadSize(file),
 		0,
 	);
 
@@ -489,7 +501,10 @@ const FileUpload = (
 		if (!maxFiles)
 			throw new Error("max files isn't set, this function shouldn't be called");
 
-		return maxFiles - files.filter((file) => !file.delete).length;
+		return (
+			maxFiles -
+			files.filter((file) => !file.delete && !file.excludeFromLimits).length
+		);
 	}, [maxFiles, files]);
 
 	const processFiles = useCallback(

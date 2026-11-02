@@ -2202,3 +2202,49 @@ describe("CrudFileUpload: accessibility bugs", () => {
 		expect(connector.deleteCalls).toEqual(["1"]);
 	});
 });
+
+describe("CrudFileUpload: API traps", () => {
+	it("[ISSUE-3511-ITEM-23] additional files do not count toward maxFiles", async () => {
+		const connector = new StrictConnector([]);
+		const ui = renderUpload({
+			connector,
+			maxFiles: 1,
+			additionalFiles: [
+				{ file: { name: "terms.txt", type: "text/plain", downloadLink: "#t" } },
+			],
+		});
+		await waitFor(() => expect(ui.names()).toEqual(["terms.txt"]));
+
+		await pickFiles(ui, [pick("notes.txt")]);
+		await ui.settle();
+
+		expect(ui.errorText()).toBe(null);
+		expect(connector.createCalls).toEqual(["notes.txt"]);
+	});
+
+	it("[ISSUE-3511-ITEM-23] additional files do not count toward maxTotalFileSize", async () => {
+		const connector = new StrictConnector([]);
+		const ui = renderUpload({
+			connector,
+			// "content" is 7 bytes
+			maxTotalFileSize: 10,
+			additionalFiles: [
+				{
+					file: {
+						name: "terms.txt",
+						type: "text/plain",
+						downloadLink: "#t",
+						size: 8,
+					},
+				},
+			],
+		});
+		await waitFor(() => expect(ui.names()).toEqual(["terms.txt"]));
+
+		await pickFiles(ui, [pick("notes.txt")]);
+		await ui.settle();
+
+		expect(ui.errorText()).toBe(null);
+		expect(connector.createCalls).toEqual(["notes.txt"]);
+	});
+});

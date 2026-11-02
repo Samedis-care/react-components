@@ -1255,3 +1255,34 @@ describe("CrudMultiImage: accessibility bugs", () => {
 		expect(srcs(dialog)).toEqual(["a.png"]);
 	});
 });
+
+describe("CrudMultiImage: API traps", () => {
+	const edit = () =>
+		screen.queryByText(t("standalone.file-upload.multi-image.edit"));
+
+	it("[ISSUE-3511-ITEM-23] connector null renders a read-only control with the additional images", () => {
+		const { container } = renderMI({
+			connector: null,
+			additionalImages: [{ id: "x1", name: "x1", image: "x1.png" }],
+		});
+
+		expect(screen.queryByRole("progressbar")).toBe(null);
+		expect(
+			Array.from(container.querySelectorAll("img")).map((img) =>
+				img.getAttribute("src"),
+			),
+		).toContain("x1.png");
+		expect(edit()).toBe(null);
+	});
+
+	it("[ISSUE-3511-ITEM-23] a connector passed after null is loaded", async () => {
+		const backend = new Backend(OWN);
+		const { update } = renderMI({ connector: null });
+		expect(edit()).toBe(null);
+
+		update({ connector: backend });
+
+		await waitFor(() => expect(edit()).not.toBe(null));
+		expect(srcs(openEdit())).toEqual(["a.png", "b.png"]);
+	});
+});

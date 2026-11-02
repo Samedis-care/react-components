@@ -28,11 +28,16 @@ import { FileSelectorError } from "../../standalone/FileUpload/Generic/Errors";
 
 export interface CrudFileUploadProps extends Omit<
 	FileUploadProps,
-	"files" | "handleError" | "busy"
+	"files" | "defaultFiles" | "handleError" | "busy" | "onRestoreFile"
 > {
 	/**
 	 * The backend connector used as CRUD interface
-	 * @remarks Null renders a read-only control that lists `additionalFiles`. Read once:
+	 * @remarks A LazyConnector queues every write until its queue is written, which a Form
+	 *          does after saving. Any other connector is written at once. The control tells
+	 *          the two apart with `instanceof LazyConnector`, so a connector that wraps a
+	 *          LazyConnector counts as written at once.
+	 *
+	 *          Null renders a read-only control that lists `additionalFiles`. Read once:
 	 *          the first connector passed (after null, if any) is listed and written for
 	 *          as long as the control is mounted, and a later one is ignored. To show
 	 *          another collection, remount the control, e.g. with a `key` per record.
@@ -60,7 +65,11 @@ export interface CrudFileUploadProps extends Omit<
 	) => Promise<Record<string, unknown>> | Record<string, unknown>;
 	/**
 	 * Callback for deserializing data after getting it from the backend connector
-	 * @param data The data from the backend connector (index function)
+	 * @param data A record from the connector: a row of `index` or what `create` returned.
+	 *             From a LazyConnector, a queued upload is what `serialize` returned, with
+	 *             a client-side `id` (`fake-id-N`), so it holds the picked file where the
+	 *             backend would send a URL. It is listed that way by `index` too, until the
+	 *             queue is written.
 	 * @returns The file data which can be used by the control
 	 * @remarks With `maxTotalFileSize`, set `file.size`: every file the control lists
 	 *          comes from here, a picked one too once its upload is created, and one
@@ -72,9 +81,22 @@ export interface CrudFileUploadProps extends Omit<
 	/**
 	 * Files of someone else, listed after this control's own files, read-only
 	 * @remarks Never written through `connector`, whatever flags they carry: a `delete` or
-	 *          `canBeUploaded` only changes how they are shown.
+	 *          `canBeUploaded` only changes how they are shown. They do not count toward
+	 *          `maxFiles` and `maxTotalFileSize`.
 	 */
 	additionalFiles?: FileData<FileMeta>[];
+	/**
+	 * Called with this control's own files whenever they change: once they are loaded, and
+	 * after each change was written or queued
+	 * @param files Neither `additionalFiles` nor a picked file that is still being
+	 *              uploaded. A queued removal is listed with `delete` set. With a
+	 *              LazyConnector, a file uploaded through it keeps its client-side id,
+	 *              also after the queue was written: `LazyConnector.mapId` gives the
+	 *              server's.
+	 * @remarks Not called before the files are loaded, after a failed load, or for a new
+	 *          handler alone.
+	 */
+	onChange?: FileUploadProps["onChange"];
 	/**
 	 * Mark the control as modified while file changes are queued
 	 * @remarks Off by default, like `FormProps.showDirtyState`. An explicit `dirty` prop
@@ -117,6 +139,27 @@ export interface BackendFileMeta extends FileMeta {
 	id: string;
 }
 
+/**
+ * A FileUpload over a collection of file records behind `connector`, one record per file
+ * @remarks It lists `connector.index` through `deserialize`, and writes each change of the
+ *          user after the one before it: a picked file goes through `serialize`,
+ *          `connector.create` and `deserialize`, and a removed file, or a stored one that
+ *          a pick of the same name replaces, goes to `connector.deleteMultiple`.
+ *
+ *          With a LazyConnector the writes are queued: a queued upload is marked added, a
+ *          queued removal stays listed struck through and can be restored, and
+ *          `showDirtyState` and `onDirtyChange` follow the queue. With any other
+ *          connector a removal deletes the file at once and cannot be undone; `onDelete`
+ *          can ask first.
+ *
+ *          It does not read the Form it is in: in a Form, use FormCrudFileUpload, which
+ *          builds the LazyConnector and takes the Form's `readOnly`, `errorComponent`
+ *          and `showDirtyState`.
+ *
+ *          Through the ref, `addFile` resolves once the file is listed, before it is
+ *          uploaded or queued: what became of it arrives through `onChange` and
+ *          `errorComponent`. The ref is null while the files load and after a failed load.
+ */
 const CrudFileUpload = (
 	props: CrudFileUploadProps & RefAttributes<FileUploadDispatch>,
 	ref: ForwardedRef<FileUploadDispatch>,
@@ -542,6 +585,8 @@ const CrudFileUpload = (
 				// remove would send a delete for an id which means something else
 				// entirely to this connector
 				preventDelete: true,
+				// and not this control's files to limit
+				excludeFromLimits: true,
 				[ADDITIONAL_FILE]: true,
 			})),
 			...pendingPicks.current,

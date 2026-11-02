@@ -12,6 +12,12 @@ import CrudFileUpload, { BackendFileMeta } from "./CrudFileUpload";
 import MockConnector from "../../stories/test-utils/MockConnector";
 import { FileData } from "../../standalone/FileUpload/Generic";
 import DefaultErrorComponent from "../Form/DefaultErrorComponent";
+import Form, { PageProps } from "../Form/Form";
+import FormCrudFileUpload from "../Form/CrudControls/FormCrudFileUpload";
+import FormCrudMultiImage from "../Form/CrudControls/FormCrudMultiImage";
+import createTestModel from "../../stories/test-utils/TestModel";
+import type { BackendMultiImageImage } from "./CrudMultiImage";
+import type { MultiImageImage } from "../../standalone/FileUpload/MultiImage/MultiImage";
 
 const FrameworkDecorator = (Story: React.ComponentType) => (
 	<Framework>
@@ -452,5 +458,162 @@ export const Issue3511Item17FailedLoadKeepsFieldLabel: StoryObj = {
 		const field = canvas.getByRole("group", { name: "Attachments" });
 		await expect(field).toContainElement(alert);
 		await expect(field).not.toHaveAttribute("aria-busy");
+	},
+};
+
+/**
+ * The API a LazyConnector writes to once the form saved: MockConnector holds the records,
+ * and the endpoint it is pointed at only matters to a real backend
+ */
+class CollectionApi extends MockConnector {
+	setApiEndpoint() {}
+}
+
+const swatch = (color: string) =>
+	`data:image/svg+xml,${encodeURIComponent(
+		`<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" fill="${color}"/></svg>`,
+	)}`;
+
+const serializeImage = (data: MultiImageImage): Record<string, unknown> => ({
+	name: data.name,
+	image_url: data.image,
+});
+
+const deserializeImage = (
+	data: Record<string, unknown>,
+): BackendMultiImageImage => ({
+	id: data.id as string,
+	name: data.name as string,
+	image: data.image_url as string,
+});
+
+interface CollectionApis {
+	files: CollectionApi;
+	images: CollectionApi;
+}
+
+const CollectionsPage = (props: PageProps<never, CollectionApis>) => {
+	const { files, images } = props.customProps;
+	const getFilesApi = useCallback(
+		() => files as unknown as ApiConnector,
+		[files],
+	);
+	const getImagesApi = useCallback(
+		() => images as unknown as ApiConnector,
+		[images],
+	);
+	return (
+		<>
+			<FormCrudFileUpload
+				field={"attachments"}
+				initialId={"1"}
+				getEndpoint={(id) => `records/${id}/attachments`}
+				getConnector={getFilesApi}
+				serialize={serialize}
+				deserialize={deserialize}
+				accept="*/*"
+				previewSize={24}
+				label={"Attachments"}
+			/>
+			<FormCrudMultiImage
+				field={"photos"}
+				initialId={"1"}
+				getEndpoint={(id) => `records/${id}/photos`}
+				getConnector={getImagesApi}
+				serialize={serializeImage}
+				deserialize={deserializeImage}
+				primary={null}
+				uploadImage={swatch("#ccc")}
+				captureImage={swatch("#ccc")}
+				label={"Photos"}
+			/>
+		</>
+	);
+};
+
+interface InFormArgs {
+	/** The Form's readOnly, which both controls follow */
+	readOnly: boolean;
+	/** The Form's showDirtyState, which FormCrudFileUpload follows */
+	showDirtyState: boolean;
+}
+
+const InFormStory = (props: InFormArgs) => {
+	const model = useMemo(createTestModel, []);
+	const apis = useMemo(
+		(): CollectionApis => ({
+			files: new CollectionApi(fileConnectorData),
+			images: new CollectionApi([
+				{ id: "1", name: "blue.svg", image_url: swatch("#1e88e5") },
+			]),
+		}),
+		[],
+	);
+	return (
+		<Form
+			model={model}
+			id={"1"}
+			errorComponent={DefaultErrorComponent}
+			customProps={apis}
+			disableRouting
+			readOnly={props.readOnly}
+			showDirtyState={props.showDirtyState}
+		>
+			{CollectionsPage}
+		</Form>
+	);
+};
+
+const IN_FORM_AXE = {
+	a11y: {
+		test: "error",
+		config: {
+			// every image is alt="" and named by its tooltip (ISSUE-3491-ITEM-27)
+			rules: [{ id: "presentation-role-conflict", enabled: false }],
+		},
+	},
+} as const;
+
+/**
+ * FormCrudFileUpload and FormCrudMultiImage in a Form: their writes are queued until the
+ * Form saves, and they follow the Form's readOnly (and FormCrudFileUpload its
+ * showDirtyState)
+ */
+export const InForm: StoryObj<InFormArgs> = {
+	name: "FormCrudFileUpload and FormCrudMultiImage — in a Form",
+	parameters: IN_FORM_AXE,
+	args: { readOnly: false, showDirtyState: true },
+	render: (args) => <InFormStory {...args} />,
+	play: async ({ canvas }) => {
+		await canvas.findByText("document.pdf");
+		const attachments = canvas.getByRole("group", { name: "Attachments" });
+		await expect(
+			attachments.querySelector('input[type="file"]'),
+		).not.toBeNull();
+		await expect(await canvas.findByText("Edit")).toBeVisible();
+	},
+};
+
+/**
+ * The same Form read-only: neither control offers a change
+ */
+export const InReadOnlyForm: StoryObj<InFormArgs> = {
+	name: "FormCrudFileUpload and FormCrudMultiImage — in a read-only Form",
+	parameters: IN_FORM_AXE,
+	args: { readOnly: true, showDirtyState: true },
+	render: (args) => <InFormStory {...args} />,
+	play: async ({ canvas }) => {
+		await canvas.findByText("document.pdf");
+		const attachments = canvas.getByRole("group", { name: "Attachments" });
+		await expect(attachments.querySelector('input[type="file"]')).toBeNull();
+		await expect(
+			attachments.querySelector('[data-testid="CancelOutlinedIcon"]'),
+		).toBeNull();
+		await waitFor(() =>
+			expect(
+				canvas.getByRole("group", { name: "Photos" }).querySelector("img"),
+			).not.toBeNull(),
+		);
+		await expect(canvas.queryByText("Edit")).toBeNull();
 	},
 };

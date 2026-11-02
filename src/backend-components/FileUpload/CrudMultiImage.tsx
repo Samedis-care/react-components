@@ -42,11 +42,16 @@ export interface CrudMultiImageProps extends Omit<
 	additionalImagesLoading?: boolean;
 	/**
 	 * The backend connector used as CRUD interface
-	 * @remarks Read once: the first connector is listed and written for as long as the
-	 *          control is mounted, and a later one is ignored. To show another collection,
-	 *          remount the control, e.g. with a `key` per record.
+	 * @remarks A LazyConnector queues every write until its queue is written, which a Form
+	 *          does after saving. Any other connector is written at once. The field looks
+	 *          the same either way.
+	 *
+	 *          Null renders a read-only control that lists `additionalImages`. Read once:
+	 *          the first connector passed (after null, if any) is listed and written for
+	 *          as long as the control is mounted, and a later one is ignored. To show
+	 *          another collection, remount the control, e.g. with a `key` per record.
 	 */
-	connector: Connector;
+	connector: Connector | null;
 	/**
 	 * Renders the error of a refused create, update or delete, where the user is when it
 	 * arrives: at the top of the edit dialog while that is open, above the field otherwise
@@ -73,14 +78,25 @@ export interface CrudMultiImageProps extends Omit<
 	) => Promise<Record<string, unknown>> | Record<string, unknown>;
 	/**
 	 * Callback for deserializing data after getting it from the backend connector
-	 * @param data The data from the backend connector (index function)
+	 * @param data A record from the connector: a row of `index`, or what `create` or
+	 *             `update` returned. From a LazyConnector, a queued write is what
+	 *             `serialize` returned, a new image with a client-side `id`
+	 *             (`fake-id-N`). It is listed that way by `index` too, until the queue is
+	 *             written.
 	 * @returns The image data which can be used by the control
 	 */
 	deserialize: (
 		data: Record<string, unknown>,
 	) => Promise<BackendMultiImageImage> | BackendMultiImageImage;
 	/**
-	 * @see MultiImageProps.onChange
+	 * Called with this control's own images whenever they change: once they are loaded,
+	 * and after each change was written or queued
+	 * @param name The name of this field
+	 * @param newImages Without `additionalImages`. With a LazyConnector, an image created
+	 *                  through it keeps its client-side id, also after the queue was
+	 *                  written: `LazyConnector.mapId` gives the server's.
+	 * @remarks Not called before the images are loaded, after a failed load, or for a new
+	 *          handler alone.
 	 */
 	onChange?: (
 		name: string | undefined,
@@ -89,7 +105,15 @@ export interface CrudMultiImageProps extends Omit<
 }
 
 export interface BackendMultiImageImage extends MultiImageImage {
+	/**
+	 * Was the image the primary one when it was last written?
+	 * @remarks Set for `serialize` when the image is created or replaced. The primary
+	 *          itself is the owner's (`primary`, `onPrimaryChange`).
+	 */
 	primary?: boolean;
+	/**
+	 * The image's position in the list, set for `serialize` when it is created or replaced
+	 */
 	index?: number;
 }
 
@@ -122,6 +146,27 @@ interface ImageChange {
 	added: MultiImageImage[];
 }
 
+/**
+ * A MultiImage over a collection of image records behind `connector`, one record per image
+ * @remarks It lists `connector.index` through `deserialize`, and writes each change of the
+ *          user after the one before it: an added image is created, a replaced one
+ *          updated, each through `serialize` and `deserialize`, and a removed one goes to
+ *          `connector.deleteMultiple`. What went through is listed, what was refused is
+ *          reported through `errorComponent`.
+ *
+ *          With a LazyConnector the writes are queued, but nothing marks them: there are
+ *          no pending marks, no restore and no dirty marker. With any other connector a
+ *          removal deletes the image at once; `onDelete` can ask first.
+ *
+ *          It does not read the Form it is in: in a Form, use FormCrudMultiImage, which
+ *          builds the LazyConnector and takes the Form's `readOnly` and
+ *          `errorComponent`. The primary image is the owner's to store, e.g. with the
+ *          parent record. With a LazyConnector, the parent record is saved before the
+ *          queue is written, so a new image's id is still client-side then.
+ *
+ *          An image the browser cannot decode is refused by MultiImage, through `onError`
+ *          or its own dialog, not through `errorComponent`.
+ */
 const CrudMultiImage = (props: CrudMultiImageProps) => {
 	const {
 		connector: connectorProp,
@@ -139,7 +184,9 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 	// as long as it is mounted, and a later one is ignored. Its list, changes and uploads
 	// in flight all belong to the first, so another collection takes a remount (a
 	// `key` per record).
-	const connector = useRef(connectorProp).current;
+	const pinnedConnector = useRef(connectorProp);
+	pinnedConnector.current ??= connectorProp;
+	const connector = pinnedConnector.current;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<WriteError | null>(null);
 	// for the field to reference the error while it is shown with it
@@ -174,6 +221,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 
 	const applyChange = useCallback(
 		async ({ removed, replaced, added }: ImageChange) => {
+			if (!connector) return;
 			const latest = imagesRef.current;
 			const latestById = new Map(latest.map((img) => [img.id, img]));
 			// what an earlier change removed is gone: there is nothing left to remove or
@@ -367,6 +415,8 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 	);
 
 	useEffect(() => {
+		// without a connector there is nothing to load, only additionalImages to list
+		if (!connector || !loading) return;
 		void (async () => {
 			try {
 				const initialData = await connector.index({
@@ -384,7 +434,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 			}
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [connector]);
 
 	// Reported when the list changes, to the handler passed last: a new handler alone is no
 	// change, and an inline one that stores a derived list would otherwise render forever.
@@ -393,11 +443,11 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 	useEffect(() => {
 		// The list is the server's only once loaded: before that, a field that has images
 		// would report none, and after a failed load nothing is known.
-		if (loading || loadError) return;
+		if ((connector && loading) || loadError) return;
 		onChangeRef.current?.(name, images);
-	}, [images, loadError, loading, name]);
+	}, [connector, images, loadError, loading, name]);
 
-	if (loading || loadError || !shownAdditional)
+	if ((connector && loading) || loadError || !shownAdditional)
 		return (
 			<CrudLoadStatus
 				label={otherProps.label}
@@ -420,6 +470,8 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 				dialogMessage={dialogError}
 				onDialogOpenChange={handleDialogOpenChange}
 				onChange={handleChange}
+				// undefined unless set, so that the theme's default applies
+				readOnly={connector == null ? true : otherProps.readOnly}
 			/>
 		</>
 	);

@@ -20,6 +20,8 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-02 | [CrudFileUpload's additionalFiles no longer count toward its limits](2026-11-02-crud-file-upload-extras-outside-limits.md) | behavior |
+| 2026-11-02 | [CrudFileUpload no longer takes defaultFiles and onRestoreFile](2026-11-02-crud-file-upload-drops-no-op-props.md) | type |
 | 2026-10-30 | [CrudMultiImage keeps its field while additional images reload](2026-10-30-crud-multi-image-keeps-field-on-reload.md) | behavior |
 | 2026-10-30 | [GroupBox takes any fieldset attribute; FileUpload and MultiImage pass them on through slotProps](2026-10-30-group-box-html-attributes.md) | type |
 | 2026-10-30 | [CRUD controls report failed writes as a PartialApplyError; the file controls name each file](2026-10-30-partial-apply-error.md) | type, behavior |
