@@ -497,17 +497,26 @@ const CrudFileUpload = (
 		(file: FileData) => {
 			if (!lazyConnector) return;
 			const id = (file.file as BackendFileMeta).id;
-			// by id, not by identity: the control keeps its own copies of the entries.
-			// Before the cancel, which the queue listener would otherwise take for the
-			// delete having been sent.
-			setFiles((prev) =>
-				prev.map((entry) =>
-					entry.file.id === id
-						? { ...entry, delete: false, changeState: undefined }
-						: entry,
-				),
-			);
-			lazyConnector.cancelQueuedOperation(id);
+			// by id, not by identity: the control keeps its own copies of the entries
+			const unmark = () =>
+				setFiles((prev) =>
+					prev.map((entry) =>
+						entry.file.id === id
+							? { ...entry, delete: false, changeState: undefined }
+							: entry,
+					),
+				);
+			// Shown restored at once, and cancelled after the changes made before it: they
+			// were made while the file was removed, so one still being applied queues its
+			// delete again. Unmarked once more before the cancel, which the queue listener
+			// would otherwise take for the delete having been sent.
+			unmark();
+			const restore = pendingChange.current.then(() => {
+				unmark();
+				lazyConnector.cancelQueuedOperation(id);
+			});
+			// a failed restore must not stop the changes after it
+			pendingChange.current = restore.catch(() => undefined);
 		},
 		[lazyConnector],
 	);

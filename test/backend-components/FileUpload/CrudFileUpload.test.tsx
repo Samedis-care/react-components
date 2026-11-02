@@ -1933,6 +1933,76 @@ describe("CrudFileUpload: bugs", () => {
 
 		expect(ui.errorText()).toBe(null);
 	});
+
+	it("[ISSUE-3511-ITEM-25] a restore made while an earlier change is still being applied stays, and the save deletes nothing", async () => {
+		const backend = new StrictConnector(SERVER_FILES);
+		const lazy = lazyOver(backend);
+		const serializing = gate();
+		const ui = renderUpload({
+			connector: lazy,
+			serialize: async (data) => {
+				await serializing.promise;
+				return serialize(data);
+			},
+		});
+		await loaded(ui);
+		await ui.remove("document.pdf");
+		await waitFor(() => expect(ui.changeOf("document.pdf")).toBe("removed"));
+
+		// a pick whose serialize is still running when the removal is restored
+		await startPick(ui, pick("notes.txt"));
+		await ui.restore("document.pdf");
+		expect(ui.changeOf("document.pdf")).toBe(null);
+		await act(async () => {
+			serializing.release();
+			await Promise.resolve();
+		});
+		await ui.settle();
+
+		expect(ui.changeOf("document.pdf")).toBe(null);
+		expect(lazy.getQueuedOperation("1")).toBe(null);
+		await act(async () => {
+			await lazy.workQueue();
+		});
+		expect(backend.deleteCalls).toEqual([]);
+		expect(await onServer(backend)).toEqual([
+			"document.pdf",
+			"image.png",
+			"notes.txt",
+		]);
+	});
+
+	it("[ISSUE-3511-ITEM-25] a removal made after the restore, while that earlier change is applied, still deletes the file", async () => {
+		const backend = new StrictConnector(SERVER_FILES);
+		const lazy = lazyOver(backend);
+		const serializing = gate();
+		const ui = renderUpload({
+			connector: lazy,
+			serialize: async (data) => {
+				await serializing.promise;
+				return serialize(data);
+			},
+		});
+		await loaded(ui);
+		await ui.remove("document.pdf");
+		await waitFor(() => expect(ui.changeOf("document.pdf")).toBe("removed"));
+
+		await startPick(ui, pick("notes.txt"));
+		await ui.restore("document.pdf");
+		await ui.remove("document.pdf");
+		await act(async () => {
+			serializing.release();
+			await Promise.resolve();
+		});
+		await ui.settle();
+
+		expect(ui.changeOf("document.pdf")).toBe("removed");
+		await act(async () => {
+			await lazy.workQueue();
+		});
+		expect(backend.deleteCalls).toEqual(["1"]);
+		expect(await onServer(backend)).toEqual(["image.png", "notes.txt"]);
+	});
 });
 
 describe("CrudFileUpload: accessibility bugs", () => {
