@@ -575,10 +575,20 @@ const Form = (props) => {
         }
         setFieldTouched(fieldName);
     }, [setFieldTouched]);
-    // init data structs after first load
+    // whether the form data was initialized from the current load. React may run the
+    // init effect again without a new load and with all state kept (StrictMode when a
+    // Suspense boundary shows the form again, Activity when it shows a hidden subtree):
+    // that must keep what was entered, only the next load initializes again
+    const initializedRef = useRef(false);
+    // init data structs after a load
     useEffect(() => {
-        if (isLoading || !serverData || !serverData[0])
+        if (isLoading) {
+            initializedRef.current = false;
             return;
+        }
+        if (initializedRef.current || !serverData || !serverData[0])
+            return;
+        initializedRef.current = true;
         valuesRef.current = deepClone(buildInitialValues(serverData[0]));
         setValues(valuesRef.current);
         touchedRef.current = getDefaultTouched();
@@ -589,10 +599,17 @@ const Form = (props) => {
         setValuesStagedModified(valuesStagedModifiedRef.current);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading]);
+    // the server data the form data was last updated from. A re-run of the effect below
+    // with the same data (see initializedRef) has nothing to apply, and must not take
+    // fields of a flow engine stage that is no longer mounted for unmodified ones
+    const appliedServerDataRef = useRef(undefined);
     // update data struct after background fetch
     useEffect(() => {
         if (isLoading || !serverData || !serverData[0])
             return;
+        if (appliedServerDataRef.current === serverData)
+            return;
+        appliedServerDataRef.current = serverData;
         const serverRecord = deepClone(serverData[0]);
         // the very first load is fully handled by the init effect above (including
         // initialRecord); only record the baseline so later refetches can diff
