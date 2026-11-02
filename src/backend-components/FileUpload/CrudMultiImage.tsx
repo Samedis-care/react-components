@@ -22,6 +22,9 @@ import { ErrorComponentProps } from "../Form";
 import { MultiImage } from "../../standalone";
 import CrudLoadStatus from "./CrudLoadStatus";
 
+/**
+ * Props of CrudMultiImage: those of MultiImage, with the images loaded from `connector`
+ */
 export interface CrudMultiImageProps extends Omit<
 	MultiImageProps,
 	"images" | "onChange" | "dialogMessage" | "onDialogOpenChange" | "busy"
@@ -29,7 +32,8 @@ export interface CrudMultiImageProps extends Omit<
 	/**
 	 * Images of someone else, listed before this control's own
 	 * @remarks Read-only whatever their `readOnly` says: never removed, replaced or
-	 *          written through `connector`.
+	 *          written through `connector`. They are told apart from the own images by
+	 *          identity, so pass a stable array (module level or useMemo).
 	 */
 	additionalImages?: MultiImageImage[];
 	/**
@@ -68,9 +72,12 @@ export interface CrudMultiImageProps extends Omit<
 	onDelete?: MultiImageProps["onDelete"];
 	/**
 	 * Callback for serializing data before passing it to the backend connector
-	 * @param data The image data to serialize
-	 * @param id The id of the image data or null for new
-	 * @returns Data to be passed to the backend connector
+	 * @param data The image to write: `data.image` is what the user picked or dropped for
+	 *             an added or replaced image, the stored URL otherwise. `index` and
+	 *             `primary` are set.
+	 * @param id The id of the image to update, or null to create one
+	 * @returns Data to be passed to the backend connector's create or update
+	 * @remarks Called only for an image that is created or replaced.
 	 */
 	serialize: (
 		data: MultiImageImage,
@@ -102,17 +109,33 @@ export interface CrudMultiImageProps extends Omit<
 		name: string | undefined,
 		newImages: BackendMultiImageImage[],
 	) => void;
+	/**
+	 * Called with the new primary image's id, which the owner stores, e.g. with the parent
+	 * record
+	 * @remarks Called when the user makes an image primary or drops images on the page
+	 *          preview, when the primary is not listed (with the first image, or null when
+	 *          there is none), and with null when a change removed the primary image. With
+	 *          a LazyConnector, a new image's id is client-side, also after the queue was
+	 *          written: `LazyConnector.mapId` gives the server's.
+	 */
+	onPrimaryChange?: MultiImageProps["onPrimaryChange"];
 }
 
+/**
+ * An image stored behind CrudMultiImage's connector
+ */
 export interface BackendMultiImageImage extends MultiImageImage {
 	/**
 	 * Was the image the primary one when it was last written?
-	 * @remarks Set for `serialize` when the image is created or replaced. The primary
-	 *          itself is the owner's (`primary`, `onPrimaryChange`).
+	 * @remarks Set for `serialize` when the image is created or replaced, so a change of
+	 *          the primary alone writes nothing. The primary itself is the owner's
+	 *          (`primary`, `onPrimaryChange`).
 	 */
 	primary?: boolean;
 	/**
 	 * The image's position in the list, set for `serialize` when it is created or replaced
+	 * @remarks An untouched image is not written, so its new position after a removal
+	 *          before it is not sent.
 	 */
 	index?: number;
 }

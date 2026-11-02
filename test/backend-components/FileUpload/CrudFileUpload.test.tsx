@@ -1322,6 +1322,257 @@ const pickFiles = async (ui: Harness, files: File[]) => {
 	});
 };
 
+const t = (key: string) => ccI18n.t(key);
+
+describe("CrudFileUpload: loading, props and contracts", () => {
+	it("lists every record in one request rather than one backend page", async () => {
+		const many = Array.from({ length: 30 }, (_, i) => ({
+			id: String(i + 1),
+			name: `f${i + 1}.txt`,
+			type: "text/plain",
+			downloadLink: "#",
+		}));
+		const connector = new StrictConnector(many);
+		const ui = renderUpload({ connector });
+
+		await waitFor(() => expect(ui.names()).toHaveLength(30));
+		// MockConnector's page size is 25, like a backend's default
+		expect(connector.indexParams).toEqual([
+			{ page: 1, rows: Number.MAX_SAFE_INTEGER },
+		]);
+		expect(ui.names()[29]).toBe("f30.txt");
+	});
+
+	it("is a group named by its label, with an Upload button", async () => {
+		const ui = renderUpload({ connector: new StrictConnector(SERVER_FILES) });
+		await loaded(ui);
+
+		const group = screen.getByRole("group", { name: "Attachments" });
+		expect(group).toContainElement(
+			screen.getByRole("button", { name: t("standalone.file-upload.upload") }),
+		);
+	});
+
+	it("offers no way to add or remove a file when read-only", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		const ui = renderUpload({ connector, readOnly: true });
+		await loaded(ui);
+
+		expect(ui.container.querySelector('input[type="file"]')).toBe(null);
+		expect(
+			screen.queryByRole("button", {
+				name: t("standalone.file-upload.upload"),
+			}),
+		).toBe(null);
+		expect(ui.hasRemove("document.pdf")).toBe(false);
+		expect(ui.hasRemove("image.png")).toBe(false);
+	});
+
+	it("says there are no attachments when read-only and empty", async () => {
+		renderUpload({ connector: new StrictConnector([]), readOnly: true });
+
+		expect(
+			await screen.findByText(t("standalone.file-upload.no-files")),
+		).toBeInTheDocument();
+	});
+
+	it("reports its own files through onChange after each write: no extras, no picked File", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		const onChange = vi.fn();
+		const ui = renderUpload({
+			connector,
+			onChange,
+			additionalFiles: [
+				{ file: { name: "terms.txt", type: "text/plain", downloadLink: "#t" } },
+			],
+		});
+		await loaded(ui);
+		const lastList = () =>
+			onChange.mock.calls.at(-1)![0] as FileData<BackendFileMeta>[];
+		const lastNames = () => lastList().map((file) => file.file.name);
+
+		await waitFor(() =>
+			expect(lastNames()).toEqual(["document.pdf", "image.png"]),
+		);
+
+		await ui.addFile(pick("notes.txt"));
+
+		await waitFor(() =>
+			expect(lastNames()).toEqual(["document.pdf", "image.png", "notes.txt"]),
+		);
+		// the stored record, as deserialize made it, not the picked file
+		expect(lastList()[2].file).not.toBeInstanceOf(File);
+		expect(lastList()[2].file.id).toBe("3");
+	});
+
+	it("reports a refused selection through errorComponent and writes nothing", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		const ui = renderUpload({ connector, accept: "image/*" });
+		await loaded(ui);
+
+		await ui.addFile(pick("notes.txt"));
+
+		await waitFor(() =>
+			expect(ui.errorText()).toBe(
+				t("standalone.file-upload.error.invalid-type"),
+			),
+		);
+		expect(connector.createCalls).toEqual([]);
+		expect(ui.names()).toEqual(["document.pdf", "image.png"]);
+	});
+
+	it("keeps a refused delete marked and sends it again with the next change", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		connector.rejectDeletes.add("1");
+		const ui = renderUpload({ connector });
+		await loaded(ui);
+
+		await ui.remove("document.pdf");
+		await waitFor(() => expect(ui.errorText()).toContain("refused"));
+		expect(ui.changeOf("document.pdf")).toBe("removed");
+
+		connector.rejectDeletes.clear();
+		await ui.addFile(pick("notes.txt"));
+		await ui.settle();
+
+		expect(connector.deleteCalls).toEqual(["1", "1"]);
+		await waitFor(() => expect(ui.names()).toEqual(["image.png", "notes.txt"]));
+		expect(await onServer(connector)).toEqual(["image.png", "notes.txt"]);
+	});
+
+	it("restoring a refused delete clears the mark, and the next change sends no delete", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		connector.rejectDeletes.add("1");
+		const ui = renderUpload({ connector });
+		await loaded(ui);
+		await ui.remove("document.pdf");
+		await waitFor(() => expect(ui.changeOf("document.pdf")).toBe("removed"));
+
+		await ui.restore("document.pdf");
+		await ui.settle();
+		expect(ui.changeOf("document.pdf")).toBe(null);
+
+		await ui.addFile(pick("notes.txt"));
+		await ui.settle();
+
+		expect(connector.deleteCalls).toEqual(["1"]);
+		await waitFor(() => expect(ui.names()).toContain("notes.txt"));
+		expect(ui.names()).toContain("document.pdf");
+	});
+
+	it("goes on applying changes after one of them threw", async () => {
+		class ThrowingConnector extends StrictConnector {
+			public throwOnce = true;
+			deleteMultiple(ids: string[]) {
+				if (this.throwOnce && ids.length) {
+					this.throwOnce = false;
+					throw new Error("thrown synchronously");
+				}
+				return super.deleteMultiple(ids);
+			}
+		}
+		const connector = new ThrowingConnector(SERVER_FILES);
+		const ui = renderUpload({ connector });
+		await loaded(ui);
+		await ui.remove("document.pdf");
+		await ui.settle();
+
+		await ui.addFile(pick("notes.txt"));
+		await ui.settle();
+
+		expect(connector.createCalls).toEqual(["notes.txt"]);
+		await waitFor(() => expect(ui.names()).toContain("notes.txt"));
+	});
+
+	it("works with an async serialize and deserialize", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		const ui = renderUpload({
+			connector,
+			serialize: async (data) => {
+				await new Promise((resolve) => setTimeout(resolve, 5));
+				return serialize(data);
+			},
+			deserialize: async (data) => {
+				await Promise.resolve();
+				return deserialize(data);
+			},
+		});
+		await loaded(ui);
+
+		await ui.addFile(pick("notes.txt"));
+
+		// the picked file is listed at once, the upload follows the slow serialize
+		await waitFor(() => expect(connector.createCalls).toEqual(["notes.txt"]));
+		await ui.settle();
+		expect(connector.createCalls).toEqual(["notes.txt"]);
+		expect(ui.names()).toEqual(["document.pdf", "image.png", "notes.txt"]);
+	});
+
+	it("lists nothing for a new record, and uploads a queued pick once the queue is worked", async () => {
+		const backend = new StrictConnector(SERVER_FILES);
+		// fakeReads is what useLazyCrudConnector uses for a record that does not exist yet
+		const lazy = new LazyConnector(backend as unknown as ApiConnector, true);
+		const ui = renderUpload({ connector: lazy });
+		await waitFor(() =>
+			expect(ui.container.querySelector('input[type="file"]')).not.toBe(null),
+		);
+		expect(ui.names()).toEqual([]);
+		expect(backend.indexParams).toEqual([]);
+
+		await ui.addFile(pick("notes.txt"));
+		await waitFor(() => expect(ui.changeOf("notes.txt")).toBe("added"));
+		expect(backend.createCalls).toEqual([]);
+
+		lazy.fakeReads = false;
+		await act(async () => {
+			await lazy.workQueue();
+		});
+
+		await waitFor(() => expect(ui.changeOf("notes.txt")).toBe(null));
+		expect(backend.createCalls).toEqual(["notes.txt"]);
+	});
+
+	it("reports pending changes at once when mounted over a non-empty queue", async () => {
+		const lazy = lazyOver(new StrictConnector(SERVER_FILES));
+		const first = renderUpload({ connector: lazy });
+		await loaded(first);
+		await first.remove("document.pdf");
+		await waitFor(() => expect(first.changeOf("document.pdf")).toBe("removed"));
+		first.unmount();
+
+		const onDirtyChange = vi.fn();
+		const second = renderUpload({
+			connector: lazy,
+			onDirtyChange,
+			showDirtyState: true,
+		});
+
+		expect(onDirtyChange.mock.calls[0]).toEqual([true]);
+		await loaded(second);
+		expect(second.dirtyMarker()).toBe(true);
+	});
+
+	it("stops listening to the connector queue when unmounted", async () => {
+		const lazy = lazyOver(new StrictConnector(SERVER_FILES));
+		const disposed = vi.fn();
+		const addListener = lazy.addQueueChangeListener.bind(lazy);
+		vi.spyOn(lazy, "addQueueChangeListener").mockImplementation((listener) => {
+			const dispose = addListener(listener);
+			return () => {
+				disposed();
+				dispose();
+			};
+		});
+		const ui = renderUpload({ connector: lazy });
+		await loaded(ui);
+		expect(disposed).not.toHaveBeenCalled();
+
+		ui.unmount();
+
+		expect(disposed).toHaveBeenCalledTimes(1);
+	});
+});
+
 describe("CrudFileUpload: bugs", () => {
 	it("[ISSUE-3511-ITEM-1] a same-name replacement the server refuses leaves the original stored (direct connector)", async () => {
 		const connector = new StrictConnector(SERVER_FILES);
