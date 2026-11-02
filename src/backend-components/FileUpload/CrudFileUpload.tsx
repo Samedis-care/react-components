@@ -516,9 +516,14 @@ const CrudFileUpload = (
 		setError(new Error(msg));
 	}, []);
 
+	// the deserializer passed last, for a load that is already running
+	const deserializeRef = useRef(deserialize);
+	deserializeRef.current = deserialize;
 	useEffect(() => {
-		if (!connector || !loading) return;
-
+		if (!connector) return;
+		// set once the control unmounts, or StrictMode runs the effect again: this load's
+		// result is then dropped
+		let cancelled = false;
 		void (async () => {
 			try {
 				const initialData = await connector.index({
@@ -526,7 +531,9 @@ const CrudFileUpload = (
 					rows: Number.MAX_SAFE_INTEGER,
 				});
 				const initialFiles = await Promise.all(
-					initialData[0].map((value) => Promise.resolve(deserialize(value))),
+					initialData[0].map((value) =>
+						Promise.resolve(deserializeRef.current(value)),
+					),
 				);
 				// A pending change outlives this control: the queue sits on the connector,
 				// so a control which was unmounted and mounted again — a language switch,
@@ -537,9 +544,10 @@ const CrudFileUpload = (
 					? await Promise.all(
 							lazyConnector
 								.getQueuedDeleteRecords()
-								.map((value) => Promise.resolve(deserialize(value))),
+								.map((value) => Promise.resolve(deserializeRef.current(value))),
 						)
 					: [];
+				if (cancelled) return;
 				setFiles([
 					...initialFiles.map((file) =>
 						lazyConnector?.getQueuedOperation(file.file.id) === "create"
@@ -555,13 +563,15 @@ const CrudFileUpload = (
 					})),
 				]);
 			} catch (e) {
-				setLoadError(e as Error);
+				if (!cancelled) setLoadError(e as Error);
 			} finally {
-				setLoading(false);
+				if (!cancelled) setLoading(false);
 			}
 		})();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [connector]);
+		return () => {
+			cancelled = true;
+		};
+	}, [connector, lazyConnector]);
 
 	// Reported when the list changes, to the handler passed last: a new handler alone is no
 	// change, and an inline one that stores a derived list would otherwise render forever.

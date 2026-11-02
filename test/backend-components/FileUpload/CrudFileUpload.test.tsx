@@ -2248,3 +2248,91 @@ describe("CrudFileUpload: API traps", () => {
 		expect(connector.createCalls).toEqual(["notes.txt"]);
 	});
 });
+
+/**
+ * A backend whose index answers each call with its own list, once the test releases that
+ * call
+ */
+class SequencedConnector extends MockConnector {
+	public lists: Record<string, unknown>[][] = [];
+	public gates: Promise<void>[] = [];
+	public indexCalls = 0;
+
+	async index(): Promise<
+		[Record<string, unknown>[], { totalRows: number; filteredRows: number }]
+	> {
+		const call = this.indexCalls++;
+		await this.gates[call];
+		const list = this.lists[call];
+		return [list, { totalRows: list.length, filteredRows: list.length }];
+	}
+}
+
+describe("CrudFileUpload: conventions", () => {
+	it("[ISSUE-3511-ITEM-24] lists the load of the effect run that stays, when StrictMode runs it twice", async () => {
+		const connector = new SequencedConnector();
+		const first = gate();
+		const second = gate();
+		connector.gates = [first.promise, second.promise];
+		connector.lists = [[SERVER_FILES[0]], [SERVER_FILES[1]]];
+		const { container } = render(
+			<React.StrictMode>
+				<Framework>
+					<CrudFileUpload
+						connector={connector}
+						errorComponent={ErrorSink}
+						serialize={serialize}
+						deserialize={deserialize}
+						previewSize={24}
+						label={"Attachments"}
+					/>
+				</Framework>
+			</React.StrictMode>,
+		);
+		await waitFor(() => expect(connector.indexCalls).toBe(2));
+		const names = () =>
+			Array.from(container.querySelectorAll('[class*="CcFile-label"]')).map(
+				(label) => label.textContent,
+			);
+
+		// the first run's load answers last
+		await act(async () => {
+			second.release();
+			await Promise.resolve();
+		});
+		await waitFor(() => expect(names()).toEqual(["image.png"]));
+		await act(async () => {
+			first.release();
+			await new Promise((resolve) => setTimeout(resolve, 0));
+		});
+
+		expect(names()).toEqual(["image.png"]);
+	});
+
+	it("[ISSUE-3511-ITEM-24] a load uses the deserialize passed last, without loading again", async () => {
+		const connector = new StrictConnector(SERVER_FILES);
+		const loading = gate();
+		connector.indexGate = loading.promise;
+		const ui = renderUpload({ connector });
+		await waitFor(() => expect(connector.indexParams).toHaveLength(1));
+
+		ui.rerender({
+			deserialize: (data) => {
+				const file = deserialize(data);
+				return {
+					...file,
+					file: { ...file.file, name: `new ${file.file.name}` },
+				};
+			},
+		});
+		await act(async () => {
+			loading.release();
+			await Promise.resolve();
+		});
+
+		await waitFor(() =>
+			expect(ui.names()).toEqual(["new document.pdf", "new image.png"]),
+		);
+		expect(connector.indexParams).toHaveLength(1);
+	});
+});

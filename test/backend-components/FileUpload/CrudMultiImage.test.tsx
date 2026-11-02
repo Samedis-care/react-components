@@ -1286,3 +1286,89 @@ describe("CrudMultiImage: API traps", () => {
 		expect(srcs(openEdit())).toEqual(["a.png", "b.png"]);
 	});
 });
+
+/**
+ * An image backend whose index answers each call with its own list, once the test
+ * releases that call
+ */
+class SequencedBackend extends MockConnector {
+	public lists: Record<string, unknown>[][] = [];
+	public gates: Promise<void>[] = [];
+	public indexCalls = 0;
+
+	async index(): Promise<
+		[Record<string, unknown>[], { totalRows: number; filteredRows: number }]
+	> {
+		const call = this.indexCalls++;
+		await this.gates[call];
+		const list = this.lists[call];
+		return [list, { totalRows: list.length, filteredRows: list.length }];
+	}
+}
+
+describe("CrudMultiImage: conventions", () => {
+	it("[ISSUE-3511-ITEM-24] lists the load of the effect run that stays, when StrictMode runs it twice", async () => {
+		const backend = new SequencedBackend();
+		const first = gate();
+		const second = gate();
+		backend.gates = [first.promise, second.promise];
+		backend.lists = [[OWN[0]], [OWN[1]]];
+		render(
+			<React.StrictMode>
+				<Framework>
+					<CrudMultiImage
+						connector={backend}
+						label={"Images"}
+						uploadImage={"upload.png"}
+						captureImage={"capture.png"}
+						errorComponent={ErrorSink}
+						serialize={serialize}
+						deserialize={deserialize}
+						primary={null}
+					/>
+				</Framework>
+			</React.StrictMode>,
+		);
+		await waitFor(() => expect(backend.indexCalls).toBe(2));
+
+		// the first run's load answers last
+		await act(async () => {
+			second.release();
+			await tick();
+		});
+		await waitFor(() =>
+			expect(
+				screen.queryByText(t("standalone.file-upload.multi-image.edit")),
+			).not.toBe(null),
+		);
+		await act(async () => {
+			first.release();
+			await tick();
+		});
+
+		expect(srcs(openEdit())).toEqual(["b.png"]);
+	});
+
+	it("[ISSUE-3511-ITEM-24] a load uses the deserialize passed last, without loading again", async () => {
+		const backend = new Backend(OWN);
+		const loading = gate();
+		backend.indexGate = loading.promise;
+		const { container, update } = renderMI({ connector: backend });
+		await waitFor(() => expect(backend.indexParams).toHaveLength(1));
+
+		update({
+			deserialize: (data) => ({
+				...deserialize(data),
+				image: `new-${data.image_url as string}`,
+			}),
+		});
+		await act(async () => {
+			loading.release();
+			await tick();
+		});
+		await ready(container);
+
+		expect(srcs(openEdit())).toEqual(["new-a.png", "new-b.png"]);
+		expect(backend.indexParams).toHaveLength(1);
+	});
+});

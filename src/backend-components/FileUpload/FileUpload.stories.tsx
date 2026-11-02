@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, waitFor } from "storybook/test";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Button } from "@mui/material";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
 import type ApiConnector from "../../backend-integration/Connector/ApiConnector";
@@ -9,6 +9,7 @@ import type ApiConnector from "../../backend-integration/Connector/ApiConnector"
 import type { FileUploadDispatch } from "../../standalone/FileUpload/Generic";
 import { Framework } from "../../framework";
 import CrudFileUpload, { BackendFileMeta } from "./CrudFileUpload";
+import CrudMultiImage, { BackendMultiImageImage } from "./CrudMultiImage";
 import MockConnector from "../../stories/test-utils/MockConnector";
 import { FileData } from "../../standalone/FileUpload/Generic";
 import DefaultErrorComponent from "../Form/DefaultErrorComponent";
@@ -16,7 +17,6 @@ import Form, { PageProps } from "../Form/Form";
 import FormCrudFileUpload from "../Form/CrudControls/FormCrudFileUpload";
 import FormCrudMultiImage from "../Form/CrudControls/FormCrudMultiImage";
 import createTestModel from "../../stories/test-utils/TestModel";
-import type { BackendMultiImageImage } from "./CrudMultiImage";
 import type { MultiImageImage } from "../../standalone/FileUpload/MultiImage/MultiImage";
 
 const FrameworkDecorator = (Story: React.ComponentType) => (
@@ -68,6 +68,21 @@ const deserialize = (
 	delete: false,
 });
 
+// The classic variant passes axe; the modern one does not yet (ISSUE-3489-ITEM-10, ISSUE-3489-ITEM-11), so the
+// modern stories below stay at the global "todo".
+const AXE_GATE = { a11y: { test: "error" } } as const;
+
+/** Finds the field once it has loaded: the loader stands in for it until then */
+const findField = (
+	canvasElement: HTMLElement,
+	label = "Attachments",
+): Promise<HTMLElement> =>
+	within(canvasElement).findByRole(
+		"group",
+		{ name: label },
+		{ timeout: 10000 },
+	);
+
 const FileUploadStory = () => {
 	const connector = useMemo(() => new MockConnector(fileConnectorData), []);
 	return (
@@ -78,12 +93,24 @@ const FileUploadStory = () => {
 			deserialize={deserialize}
 			accept="*/*"
 			previewSize={64}
+			label={"Attachments"}
 		/>
 	);
 };
 
+/**
+ * The files of a record, behind a connector that writes at once: a pick is uploaded, a
+ * remove deletes the file on the server, and there is no restore.
+ */
 export const Basic: StoryObj = {
+	parameters: AXE_GATE,
 	render: () => <FileUploadStory />,
+	play: async ({ canvasElement }) => {
+		const field = within(await findField(canvasElement));
+		await field.findByText("document.pdf");
+		await expect(field.getByText("image.png")).toBeTruthy();
+		await expect(field.getByRole("button", { name: "Upload" })).toBeTruthy();
+	},
 };
 
 const ReadOnlyFileUploadStory = () => {
@@ -96,13 +123,89 @@ const ReadOnlyFileUploadStory = () => {
 			deserialize={deserialize}
 			accept="*/*"
 			previewSize={64}
+			label={"Attachments"}
 			readOnly
 		/>
 	);
 };
 
+/** Read-only: the files are listed, with no way to add or remove one */
 export const ReadOnly: StoryObj = {
+	parameters: AXE_GATE,
 	render: () => <ReadOnlyFileUploadStory />,
+	play: async ({ canvasElement }) => {
+		const field = within(await findField(canvasElement));
+		await field.findByText("document.pdf");
+		await expect(field.queryByRole("button", { name: "Upload" })).toBeNull();
+		await expect(canvasElement.querySelector('input[type="file"]')).toBeNull();
+	},
+};
+
+/**
+ * A file the field does not accept is refused before anything is uploaded, and the
+ * refusal goes to errorComponent. With DefaultErrorComponent that is an error dialog,
+ * which takes the focus and gives it back to Upload when it closes.
+ */
+const RefusedTypeStory = () => {
+	const connector = useMemo(() => new MockConnector(fileConnectorData), []);
+	return (
+		<>
+			<Button>Before</Button>
+			<CrudFileUpload
+				connector={connector}
+				errorComponent={DefaultErrorComponent}
+				serialize={serialize}
+				deserialize={deserialize}
+				accept=".pdf"
+				previewSize={64}
+				label={"Attachments"}
+			/>
+		</>
+	);
+};
+
+export const RefusedFileType: StoryObj = {
+	name: "CrudFileUpload — a refused file type, by keyboard",
+	parameters: AXE_GATE,
+	render: () => <RefusedTypeStory />,
+	play: async ({ canvas, canvasElement }) => {
+		const field = within(await findField(canvasElement));
+		await field.findByText("document.pdf");
+		canvas.getByRole("button", { name: "Before" }).focus();
+		await userEvent.tab();
+		const upload = field.getByRole("button", { name: "Upload" });
+		await expect(upload).toHaveFocus();
+
+		// what the browser hands over once the user chose a file in its dialog
+		const input =
+			canvasElement.querySelector<HTMLInputElement>('input[type="file"]');
+		if (!input) throw new Error("no file input");
+		const chosen = new DataTransfer();
+		chosen.items.add(new File(["x"], "notes.txt", { type: "text/plain" }));
+		input.files = chosen.files;
+		input.dispatchEvent(new Event("change", { bubbles: true }));
+
+		const dialog = await within(document.body).findByRole("dialog", {
+			name: "An error occurred",
+		});
+		await expect(
+			within(dialog).getByText("Unsupported file type selected"),
+		).toBeTruthy();
+		await waitFor(async () => {
+			await expect(
+				within(dialog).getByRole("button", { name: "OK" }),
+			).toHaveFocus();
+		});
+		await userEvent.keyboard("{Escape}");
+		await waitFor(async () => {
+			await expect(within(document.body).queryByRole("dialog")).toBeNull();
+		});
+		await waitFor(async () => {
+			await expect(upload).toHaveFocus();
+		});
+		// nothing was listed or uploaded
+		await expect(field.queryByText("notes.txt")).toBeNull();
+	},
 };
 
 /**
@@ -390,8 +493,6 @@ export const LazyPendingChanges: StoryObj = {
 	},
 };
 
-const AXE_GATE = { a11y: { test: "error" } } as const;
-
 /** A connector whose index never answers, which holds the field in its loading state */
 class NeverLoadingConnector extends MockConnector {
 	index(): Promise<never> {
@@ -461,22 +562,41 @@ export const Issue3511Item17FailedLoadKeepsFieldLabel: StoryObj = {
 	},
 };
 
-/**
- * The API a LazyConnector writes to once the form saved: MockConnector holds the records,
- * and the endpoint it is pointed at only matters to a real backend
- */
-class CollectionApi extends MockConnector {
-	setApiEndpoint() {}
-}
+// ---------------------------------------------------------------------------
+// CrudMultiImage
+// ---------------------------------------------------------------------------
 
-const swatch = (color: string) =>
-	`data:image/svg+xml,${encodeURIComponent(
-		`<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" fill="${color}"/></svg>`,
-	)}`;
+const svgImage = (body: string, size = 160) =>
+	"data:image/svg+xml;base64," +
+	btoa(
+		`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">${body}</svg>`,
+	);
+const solidImage = (color: string) =>
+	svgImage(`<rect width="160" height="160" fill="${color}"/>`);
+// graphics of the add and camera tiles: the library ships none, apps pass their own
+const ADD_TILE = svgImage(
+	'<rect width="64" height="64" fill="#eeeeee"/><path d="M32 16v32M16 32h32" stroke="#616161" stroke-width="6"/>',
+	64,
+);
+const CAMERA_TILE = svgImage(
+	'<rect width="64" height="64" fill="#eeeeee"/><circle cx="32" cy="34" r="12" fill="#616161"/>',
+	64,
+);
 
-const serializeImage = (data: MultiImageImage): Record<string, unknown> => ({
+const imageConnectorData = [
+	{ id: "1", name: "front.png", image_url: solidImage("#e53935") },
+	{ id: "2", name: "back.png", image_url: solidImage("#1e88e5") },
+];
+
+/** The record an image is stored as: a URL to show, or the picked file to upload */
+const serializeImage = (
+	data: MultiImageImage,
+	id: string | null,
+): Record<string, unknown> => ({
+	id: id ?? undefined,
 	name: data.name,
-	image_url: data.image,
+	image_url:
+		data.image instanceof Blob ? URL.createObjectURL(data.image) : data.image,
 });
 
 const deserializeImage = (
@@ -486,6 +606,172 @@ const deserializeImage = (
 	name: data.name as string,
 	image: data.image_url as string,
 });
+
+/** A PNG the browser can decode, as a user would pick it */
+const pngFile = (name: string, color: string) =>
+	new Promise<File>((resolve, reject) => {
+		const canvas = document.createElement("canvas");
+		canvas.width = 32;
+		canvas.height = 32;
+		const context = canvas.getContext("2d");
+		if (!context) throw new Error("no 2d context");
+		context.fillStyle = color;
+		context.fillRect(0, 0, 32, 32);
+		canvas.toBlob((blob) => {
+			if (blob) resolve(new File([blob], name, { type: "image/png" }));
+			else reject(new Error("the canvas gave no PNG"));
+		}, "image/png");
+	});
+
+// Every MultiImage image is alt="" with an aria-label from its file-name Tooltip, which axe
+// reports as presentation-role-conflict (ISSUE-3491-ITEM-27). The other rules gate these stories.
+const MULTI_IMAGE_AXE_GATE = {
+	a11y: {
+		test: "error",
+		config: { rules: [{ id: "presentation-role-conflict", enabled: false }] },
+	},
+} as const;
+
+/**
+ * The images of a record behind a connector that writes at once. The owner keeps the
+ * primary image, and counts the images through onChange.
+ */
+const CrudMultiImageStory = () => {
+	const connector = useMemo(() => new MockConnector(imageConnectorData), []);
+	const [primary, setPrimary] = useState<string | null>("1");
+	const [count, setCount] = useState(0);
+	const handleChange = useCallback(
+		(_name: string | undefined, images: BackendMultiImageImage[]) =>
+			setCount(images.length),
+		[],
+	);
+	const handlePrimaryChange = useCallback(
+		(_name: string | undefined, id: string | null) => setPrimary(id),
+		[],
+	);
+	return (
+		<>
+			<span data-testid={"count"}>{count}</span>
+			<div style={{ width: 300 }}>
+				<CrudMultiImage
+					connector={connector}
+					errorComponent={DefaultErrorComponent}
+					serialize={serializeImage}
+					deserialize={deserializeImage}
+					label={"Device images"}
+					uploadImage={ADD_TILE}
+					captureImage={CAMERA_TILE}
+					primary={primary}
+					onPrimaryChange={handlePrimaryChange}
+					onChange={handleChange}
+				/>
+			</div>
+		</>
+	);
+};
+
+export const MultiImageBasic: StoryObj = {
+	name: "CrudMultiImage — editable",
+	parameters: MULTI_IMAGE_AXE_GATE,
+	render: () => <CrudMultiImageStory />,
+	play: async ({ canvas, canvasElement }) => {
+		const field = await findField(canvasElement, "Device images");
+		await waitFor(async () => {
+			await expect(canvas.getByTestId("count").textContent).toBe("2");
+		});
+
+		// a real PNG through the real image pipeline, which jsdom cannot run
+		const input =
+			canvasElement.querySelector<HTMLInputElement>('input[type="file"]');
+		if (!input) throw new Error("no file input");
+		await userEvent.upload(input, await pngFile("new.png", "#43a047"));
+		await waitFor(
+			async () => {
+				await expect(canvas.getByTestId("count").textContent).toBe("3");
+			},
+			{ timeout: 5000 },
+		);
+
+		// the edit dialog by keyboard: Enter on Edit opens it, Escape gives focus back. Found
+		// by its text: the link becomes a button with the fix of ISSUE-3491-ITEM-28
+		const edit = within(field).getByText("Edit");
+		edit.focus();
+		await userEvent.keyboard("{Enter}");
+		const dialog = await within(document.body).findByRole("dialog");
+		await expect(
+			dialog.querySelectorAll('[class*="CcImageDialogEntry-root"]'),
+		).toHaveLength(3);
+		await userEvent.keyboard("{Escape}");
+		await waitFor(async () => {
+			await expect(within(document.body).queryByRole("dialog")).toBeNull();
+		});
+		await expect(edit).toHaveFocus();
+	},
+};
+
+// an image of the parent record, shown first and never written (module level: the
+// control matches additional images by identity)
+const TYPE_PLATE: MultiImageImage[] = [
+	{
+		id: "plate",
+		name: "type-plate.png",
+		image: solidImage("#fdd835"),
+		readOnly: true,
+	},
+];
+
+const ReadOnlyCrudMultiImageStory = () => {
+	const connector = useMemo(() => new MockConnector(imageConnectorData), []);
+	return (
+		<div style={{ width: 300 }}>
+			<CrudMultiImage
+				connector={connector}
+				errorComponent={DefaultErrorComponent}
+				serialize={serializeImage}
+				deserialize={deserializeImage}
+				label={"Inventory images"}
+				uploadImage={ADD_TILE}
+				captureImage={CAMERA_TILE}
+				additionalImages={TYPE_PLATE}
+				primary={"plate"}
+				readOnly
+			/>
+		</div>
+	);
+};
+
+/**
+ * Read-only, with an image of the parent record (a device model's type plate) listed
+ * first and shown as the primary image
+ */
+export const MultiImageReadOnlyWithAdditionalImages: StoryObj = {
+	name: "CrudMultiImage — read-only, with additional images",
+	parameters: MULTI_IMAGE_AXE_GATE,
+	render: () => <ReadOnlyCrudMultiImageStory />,
+	play: async ({ canvasElement }) => {
+		const field = await findField(canvasElement, "Inventory images");
+		// no Edit control, whatever its role (ISSUE-3491-ITEM-28)
+		await expect(within(field).queryByText("Edit")).toBeNull();
+		// the page shows the primary image, which is the additional one
+		await expect(
+			canvasElement
+				.querySelector('[class*="CcMultiImage-root"] img')
+				?.getAttribute("src"),
+		).toBe(TYPE_PLATE[0].image);
+	},
+};
+
+// ---------------------------------------------------------------------------
+// In a Form
+// ---------------------------------------------------------------------------
+
+/**
+ * The API a LazyConnector writes to once the form saved: MockConnector holds the records,
+ * and the endpoint it is pointed at only matters to a real backend
+ */
+class CollectionApi extends MockConnector {
+	setApiEndpoint() {}
+}
 
 interface CollectionApis {
 	files: CollectionApi;
@@ -523,8 +809,8 @@ const CollectionsPage = (props: PageProps<never, CollectionApis>) => {
 				serialize={serializeImage}
 				deserialize={deserializeImage}
 				primary={null}
-				uploadImage={swatch("#ccc")}
-				captureImage={swatch("#ccc")}
+				uploadImage={ADD_TILE}
+				captureImage={CAMERA_TILE}
 				label={"Photos"}
 			/>
 		</>
@@ -544,7 +830,7 @@ const InFormStory = (props: InFormArgs) => {
 		(): CollectionApis => ({
 			files: new CollectionApi(fileConnectorData),
 			images: new CollectionApi([
-				{ id: "1", name: "blue.svg", image_url: swatch("#1e88e5") },
+				{ id: "1", name: "blue.svg", image_url: solidImage("#1e88e5") },
 			]),
 		}),
 		[],
@@ -564,16 +850,6 @@ const InFormStory = (props: InFormArgs) => {
 	);
 };
 
-const IN_FORM_AXE = {
-	a11y: {
-		test: "error",
-		config: {
-			// every image is alt="" and named by its tooltip (ISSUE-3491-ITEM-27)
-			rules: [{ id: "presentation-role-conflict", enabled: false }],
-		},
-	},
-} as const;
-
 /**
  * FormCrudFileUpload and FormCrudMultiImage in a Form: their writes are queued until the
  * Form saves, and they follow the Form's readOnly (and FormCrudFileUpload its
@@ -581,7 +857,7 @@ const IN_FORM_AXE = {
  */
 export const InForm: StoryObj<InFormArgs> = {
 	name: "FormCrudFileUpload and FormCrudMultiImage — in a Form",
-	parameters: IN_FORM_AXE,
+	parameters: MULTI_IMAGE_AXE_GATE,
 	args: { readOnly: false, showDirtyState: true },
 	render: (args) => <InFormStory {...args} />,
 	play: async ({ canvas }) => {
@@ -599,7 +875,7 @@ export const InForm: StoryObj<InFormArgs> = {
  */
 export const InReadOnlyForm: StoryObj<InFormArgs> = {
 	name: "FormCrudFileUpload and FormCrudMultiImage — in a read-only Form",
-	parameters: IN_FORM_AXE,
+	parameters: MULTI_IMAGE_AXE_GATE,
 	args: { readOnly: true, showDirtyState: true },
 	render: (args) => <InFormStory {...args} />,
 	play: async ({ canvas }) => {
