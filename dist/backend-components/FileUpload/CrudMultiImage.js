@@ -1,9 +1,33 @@
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState, } from "react";
 import { MultiImageNewIdPrefix, } from "../../standalone/FileUpload/MultiImage/MultiImage";
 import PartialDeleteError from "../../backend-integration/Connector/PartialDeleteError";
+import PartialApplyError from "../Form/PartialApplyError";
+import describeWriteFailures from "./describeWriteFailures";
+import describeFrameBy from "./describeFrameBy";
 import { MultiImage } from "../../standalone";
 import CrudLoadStatus from "./CrudLoadStatus";
+/**
+ * A MultiImage over a collection of image records behind `connector`, one record per image
+ * @remarks It lists `connector.index` through `deserialize`, and writes each change of the
+ *          user after the one before it: an added image is created, a replaced one
+ *          updated, each through `serialize` and `deserialize`, and a removed one goes to
+ *          `connector.deleteMultiple`. What went through is listed, what was refused is
+ *          reported through `errorComponent`.
+ *
+ *          With a LazyConnector the writes are queued, but nothing marks them: there are
+ *          no pending marks, no restore and no dirty marker. With any other connector a
+ *          removal deletes the image at once; `onDelete` can ask first.
+ *
+ *          It does not read the Form it is in: in a Form, use FormCrudMultiImage, which
+ *          builds the LazyConnector and takes the Form's `readOnly` and
+ *          `errorComponent`. The primary image is the owner's to store, e.g. with the
+ *          parent record. With a LazyConnector, the parent record is saved before the
+ *          queue is written, so a new image's id is still client-side then.
+ *
+ *          An image the browser cannot decode is refused by MultiImage, through `onError`
+ *          or its own dialog, not through `errorComponent`.
+ */
 const CrudMultiImage = (props) => {
     const { connector: connectorProp, errorComponent: ErrorComponent, serialize, deserialize, onChange, additionalImages, additionalImagesLoading, ...otherProps } = props;
     const { name, primary, onPrimaryChange } = otherProps;
@@ -11,9 +35,23 @@ const CrudMultiImage = (props) => {
     // as long as it is mounted, and a later one is ignored. Its list, changes and uploads
     // in flight all belong to the first, so another collection takes a remount (a
     // `key` per record).
-    const connector = useRef(connectorProp).current;
+    const pinnedConnector = useRef(connectorProp);
+    pinnedConnector.current ??= connectorProp;
+    const connector = pinnedConnector.current;
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    // for the field to reference the error while it is shown with it
+    const errorId = useId();
+    // The edit dialog is modal and hides the rest of the page, so an error that arrives
+    // while it is open is shown in it. It is not moved out when the dialog closes, but
+    // dismissed: moved, it would be mounted again, and an error component that shows a
+    // dialog of its own (DefaultErrorComponent) would show it twice.
+    const dialogOpen = useRef(false);
+    const handleDialogOpenChange = useCallback((open) => {
+        dialogOpen.current = open;
+        if (!open)
+            setError((prev) => (prev?.inDialog ? null : prev));
+    }, []);
     const [loadError, setLoadError] = useState(null);
     const [images, setImages] = useState([]);
     // the primary when a change is done, which may have moved on since it started
@@ -28,7 +66,12 @@ const CrudMultiImage = (props) => {
         setImages(next);
     }, []);
     const pendingChange = useRef(Promise.resolve());
+    // the changes handed in that have not settled yet: while there are any, the field is
+    // busy
+    const [writing, setWriting] = useState(0);
     const applyChange = useCallback(async ({ removed, replaced, added }) => {
+        if (!connector)
+            return;
         const latest = imagesRef.current;
         const latestById = new Map(latest.map((img) => [img.id, img]));
         // what an earlier change removed is gone: there is nothing left to remove or
@@ -68,22 +111,36 @@ const CrudMultiImage = (props) => {
                 };
             }),
         ]);
-        let error = null;
+        // every write that did not go through, reported together
+        const failures = [];
         let refusedIds = [];
         if (deleteResult.status === "rejected") {
-            error = deleteResult.reason;
-            // only a PartialDeleteError says which ids went through
-            refusedIds =
-                deleteResult.reason instanceof PartialDeleteError
-                    ? deleteResult.reason.failedIds
-                    : removedIds;
+            const e = deleteResult.reason;
+            // only a PartialDeleteError says which ids went through, and its cause why
+            refusedIds = e instanceof PartialDeleteError ? e.failedIds : removedIds;
+            const reason = e instanceof PartialDeleteError && e.cause instanceof Error
+                ? e.cause
+                : e;
+            refusedIds.forEach((id) => {
+                const img = latestById.get(id);
+                if (img)
+                    failures.push({ entry: img, action: "delete", error: reason });
+            });
         }
         const written = new Map();
         uploadResults.forEach((result, i) => {
-            if (result.status === "fulfilled")
+            if (result.status === "fulfilled") {
                 written.set(writes[i].img, result.value);
-            else
-                error = error ?? result.reason;
+                return;
+            }
+            const { img } = writes[i];
+            const isNew = img.id.startsWith(MultiImageNewIdPrefix);
+            failures.push({
+                // a replacement is reported as the image it was to replace
+                entry: isNew ? img : (latestById.get(img.id) ?? img),
+                action: isNew ? "create" : "update",
+                error: result.reason,
+            });
         });
         const deletedIds = removedIds.filter((id) => !refusedIds.includes(id));
         commitImages([
@@ -101,7 +158,10 @@ const CrudMultiImage = (props) => {
             }),
         ]);
         // the outcome of this change: one that went through clears an earlier error
-        setError(error);
+        const error = failures.length > 0
+            ? new PartialApplyError(describeWriteFailures(failures, (img) => img.name), failures)
+            : null;
+        setError(error && { error, inDialog: dialogOpen.current });
         // The primary is the owner's, and only reported when this change moved it:
         // removing the primary image leaves none. Any other primary stays as it is,
         // whether it is one of these images, an additional one, or an id that is no
@@ -110,9 +170,16 @@ const CrudMultiImage = (props) => {
         if (onPrimaryChange && current && deletedIds.includes(current))
             onPrimaryChange(name, null);
     }, [commitImages, connector, deserialize, name, onPrimaryChange, serialize]);
+    // The additional images last passed while they were not loading, null until then. A
+    // reload keeps them listed rather than taking down the field, and with it an open edit
+    // dialog and the focus in it.
+    const [shownAdditional, setShownAdditional] = useState(() => additionalImagesLoading ? null : { images: additionalImages });
+    if (!additionalImagesLoading &&
+        (shownAdditional === null || shownAdditional.images !== additionalImages))
+        setShownAdditional({ images: additionalImages });
     // Read-only whatever the caller passed: they are someone else's, so this control
     // neither removes nor replaces them. A change recognises them as these objects.
-    const extras = useMemo(() => additionalImages?.map((img) => ({ ...img, readOnly: true })), [additionalImages]);
+    const extras = useMemo(() => shownAdditional?.images?.map((img) => ({ ...img, readOnly: true })), [shownAdditional]);
     /**
      * Applies one change from the control, after every change before it
      * @remarks MultiImage builds a change from the images it shows, which an earlier change
@@ -138,13 +205,27 @@ const CrudMultiImage = (props) => {
             }),
             added: own.filter((img) => img.id.startsWith(MultiImageNewIdPrefix)),
         };
+        setWriting((count) => count + 1);
         const applied = pendingChange.current.then(() => applyChange(change));
         // a failed change must not stop the ones after it
-        pendingChange.current = applied.catch(() => undefined);
+        pendingChange.current = applied
+            .catch(() => undefined)
+            .finally(() => setWriting((count) => count - 1));
         return applied;
     }, [applyChange, extras, images]);
     const listedImages = useMemo(() => (extras ? extras.concat(images) : images), [extras, images]);
+    const dialogError = useMemo(() => error?.inDialog && _jsx(ErrorComponent, { error: error.error, id: errorId }), [ErrorComponent, error, errorId]);
+    // the field is hidden behind the edit dialog while that shows the error
+    const describedBy = error && !error.inDialog ? errorId : undefined;
+    const { slotProps } = otherProps;
+    const multiImageSlotProps = useMemo(() => ({
+        ...slotProps,
+        groupBox: describeFrameBy(slotProps?.groupBox, describedBy),
+    }), [slotProps, describedBy]);
     useEffect(() => {
+        // without a connector there is nothing to load, only additionalImages to list
+        if (!connector || !loading)
+            return;
         void (async () => {
             try {
                 const initialData = await connector.index({
@@ -162,7 +243,7 @@ const CrudMultiImage = (props) => {
             }
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [connector]);
     // Reported when the list changes, to the handler passed last: a new handler alone is no
     // change, and an inline one that stores a derived list would otherwise render forever.
     const onChangeRef = useRef(onChange);
@@ -170,12 +251,14 @@ const CrudMultiImage = (props) => {
     useEffect(() => {
         // The list is the server's only once loaded: before that, a field that has images
         // would report none, and after a failed load nothing is known.
-        if (loading || loadError)
+        if ((connector && loading) || loadError)
             return;
         onChangeRef.current?.(name, images);
-    }, [images, loadError, loading, name]);
-    if (loading || additionalImagesLoading || loadError)
+    }, [connector, images, loadError, loading, name]);
+    if ((connector && loading) || loadError || !shownAdditional)
         return (_jsx(CrudLoadStatus, { label: otherProps.label, className: otherProps.className, kind: "images", error: loadError }));
-    return (_jsxs(_Fragment, { children: [error && _jsx(ErrorComponent, { error: error }), _jsx(MultiImage, { ...otherProps, images: listedImages, onChange: handleChange })] }));
+    return (_jsxs(_Fragment, { children: [error && !error.inDialog && (_jsx(ErrorComponent, { error: error.error, id: errorId })), _jsx(MultiImage, { ...otherProps, images: listedImages, busy: writing > 0 || !!additionalImagesLoading, slotProps: multiImageSlotProps, dialogMessage: dialogError, onDialogOpenChange: handleDialogOpenChange, onChange: handleChange, 
+                // undefined unless set, so that the theme's default applies
+                readOnly: connector == null ? true : otherProps.readOnly })] }));
 };
 export default React.memo(CrudMultiImage);

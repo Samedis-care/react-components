@@ -37,7 +37,7 @@ const EditLabel = styled(Typography, {
 export const MultiImageNewIdPrefix = "MultiImage-New-";
 const MultiImage = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiImage" });
-    const { label, name, editLabel, additionalDialogContent, images, primary, placeholderImage, uploadImage, captureImage, readOnly, maxImages, capture, convertImagesTo, downscale, onChange, onPrimaryChange, subClasses, onDelete, onError, disableRotation, className, classes, } = props;
+    const { label, name, editLabel, additionalDialogContent, dialogMessage, onDialogOpenChange, images, primary, placeholderImage, uploadImage, captureImage, readOnly, busy, slotProps, maxImages, capture, convertImagesTo, downscale, onChange, onPrimaryChange, subClasses, onDelete, onError, disableRotation, className, classes, } = props;
     const previewSize = props.previewSize ?? 256;
     const { t } = useCCTranslations();
     const handleImageError = useImageError("MultiImage.processFiles", onError);
@@ -70,6 +70,16 @@ const MultiImage = (inProps) => {
     const closeDialog = useCallback(() => {
         setDialogOpen(false);
     }, []);
+    // read-only, the dialog is not rendered
+    const dialogShown = dialogOpen && !readOnly;
+    const onDialogOpenChangeRef = useRef(onDialogOpenChange);
+    onDialogOpenChangeRef.current = onDialogOpenChange;
+    useEffect(() => {
+        if (!dialogShown)
+            return;
+        onDialogOpenChangeRef.current?.(true);
+        return () => onDialogOpenChangeRef.current?.(false);
+    }, [dialogShown]);
     const remainingFiles = useMemo(() => maxImages
         ? Math.max(images.length - maxImages, 0)
         : Number.MAX_SAFE_INTEGER, [maxImages, images]);
@@ -163,22 +173,22 @@ const MultiImage = (inProps) => {
             return;
         onPrimaryChange(name, id);
     }, [onPrimaryChange, name]);
-    return (_jsxs(Root, { className: combineClassNames([className, classes?.root]), children: [_jsx(GroupBox, { label: label, children: _jsxs(RootContainer, { container: true, spacing: 1, className: classes?.rootContainer, children: [_jsx(ImageItem, { size: 12, className: classes?.imageItem, children: _jsx(ImageBox, { image: images[currentImage]?.image ?? placeholderImage ?? uploadImage, fileName: images[currentImage]?.name, onPrevImage: currentImage <= 0 ? undefined : showPrevImage, onNextImage: currentImage < images.length - 1 ? showNextImage : undefined, onFilesDropped: readOnly ? undefined : handlePreviewDrop, onClick: images[currentImage] ? undefined : readOnly ? null : startUpload, classes: subClasses?.imageBox, disableRotation: disableRotation, imageDots: {
+    return (_jsxs(Root, { className: combineClassNames([className, classes?.root]), children: [_jsx(GroupBox, { ...slotProps?.groupBox, "aria-busy": busy || slotProps?.groupBox?.["aria-busy"], label: label, children: _jsxs(RootContainer, { container: true, spacing: 1, className: classes?.rootContainer, children: [_jsx(ImageItem, { size: 12, className: classes?.imageItem, children: _jsx(ImageBox, { image: images[currentImage]?.image ?? placeholderImage ?? uploadImage, fileName: images[currentImage]?.name, onPrevImage: currentImage <= 0 ? undefined : showPrevImage, onNextImage: currentImage < images.length - 1 ? showNextImage : undefined, onFilesDropped: readOnly ? undefined : handlePreviewDrop, onClick: images[currentImage] ? undefined : readOnly ? null : startUpload, classes: subClasses?.imageBox, disableRotation: disableRotation, imageDots: {
                                     total: images.length,
                                     active: currentImage,
                                     setActive: setCurrentImage,
-                                }, disableBackground: true }) }), _jsxs(Grid, { container: true, sx: { alignContent: "space-between" }, wrap: "nowrap", spacing: 1, size: 12, children: [_jsx(Grid, { size: "grow", children: _jsx(ImageDots, { total: images.length, active: currentImage, setActive: setCurrentImage }) }), !readOnly && (_jsx(Grid, { children: _jsx(EditLabel, { component: Link, variant: "body2", onClick: openDialog, href: "#", children: editLabel ?? t("standalone.file-upload.multi-image.edit") }) }))] })] }) }), _jsx(UploadInput, { type: "file", multiple: remainingFiles > 1, accept: "image/*", capture: capture, ref: fileUpload, onChange: handleUpload, className: classes?.uploadInput }), !readOnly && (_jsx(_Fragment, { children: _jsxs(Dialog, { open: dialogOpen, onClose: closeDialog, maxWidth: "lg", fullWidth: !previewSize, children: [_jsx(DialogTitle, { children: _jsx(Grid, { container: true, sx: { justifyContent: "flex-end" }, children: _jsx(Grid, { children: _jsx(IconButton, { onClick: closeDialog, size: "large", "aria-label": t("standalone.file-upload.close"), children: _jsx(CloseIcon, {}) }) }) }) }), _jsx(DialogContent, { children: _jsxs(Grid, { container: true, spacing: 2, children: [images.map((img, i) => (_jsx(ImageDialogEntry, { img: img, previewSize: previewSize, isPrimary: img === primaryImg, processFile: processFile, onImageError: handleImageError, changeImages: manipulateImages, changePrimary: changePrimary, onDelete: onDelete, disableRotation: disableRotation, classes: subClasses?.imageDialogEntry, subClasses: subClasses?.imageDialogEntrySubClasses }, `img-${i}`))), !readOnly && remainingFiles > 0 && (_jsxs(_Fragment, { children: [_jsx(Grid, { size: {
-                                                    xs: previewSize ? undefined : 12,
-                                                    md: previewSize ? undefined : 6,
-                                                    lg: previewSize ? undefined : 3,
-                                                }, children: _jsx(ImageBox, { width: previewSize, height: previewSize, image: uploadImage, onClick: startUpload, onFilesDropped: handleUploadViaDrop, classes: subClasses?.imageBox }) }), enableCapture && (_jsx(Grid, { size: {
-                                                    xs: previewSize ? undefined : 12,
-                                                    md: previewSize ? undefined : 6,
-                                                    lg: previewSize ? undefined : 3,
-                                                }, children: _jsx(ImageBox, { width: previewSize, height: previewSize, image: captureImage, onClick: startUploadCapture, onFilesDropped: handleUploadViaDrop, classes: subClasses?.imageBox }) }))] })), additionalDialogContent?.map((elem, i) => (_jsx(Grid, { style: previewSize ? { width: previewSize } : undefined, size: {
-                                            xs: previewSize ? undefined : 12,
-                                            md: previewSize ? undefined : 6,
-                                            lg: previewSize ? undefined : 3,
-                                        }, children: elem }, `add-${i}`)))] }) })] }) }))] }));
+                                }, disableBackground: true }) }), _jsxs(Grid, { container: true, sx: { alignContent: "space-between" }, wrap: "nowrap", spacing: 1, size: 12, children: [_jsx(Grid, { size: "grow", children: _jsx(ImageDots, { total: images.length, active: currentImage, setActive: setCurrentImage }) }), !readOnly && (_jsx(Grid, { children: _jsx(EditLabel, { component: Link, variant: "body2", onClick: openDialog, href: "#", children: editLabel ?? t("standalone.file-upload.multi-image.edit") }) }))] })] }) }), _jsx(UploadInput, { type: "file", multiple: remainingFiles > 1, accept: "image/*", capture: capture, ref: fileUpload, onChange: handleUpload, className: classes?.uploadInput }), !readOnly && (_jsx(_Fragment, { children: _jsxs(Dialog, { open: dialogOpen, onClose: closeDialog, maxWidth: "lg", fullWidth: !previewSize, children: [_jsx(DialogTitle, { children: _jsx(Grid, { container: true, sx: { justifyContent: "flex-end" }, children: _jsx(Grid, { children: _jsx(IconButton, { onClick: closeDialog, size: "large", "aria-label": t("standalone.file-upload.close"), children: _jsx(CloseIcon, {}) }) }) }) }), _jsxs(DialogContent, { children: [dialogMessage, _jsxs(Grid, { container: true, spacing: 2, children: [images.map((img, i) => (_jsx(ImageDialogEntry, { img: img, previewSize: previewSize, isPrimary: img === primaryImg, processFile: processFile, onImageError: handleImageError, changeImages: manipulateImages, changePrimary: changePrimary, onDelete: onDelete, disableRotation: disableRotation, classes: subClasses?.imageDialogEntry, subClasses: subClasses?.imageDialogEntrySubClasses }, `img-${i}`))), !readOnly && remainingFiles > 0 && (_jsxs(_Fragment, { children: [_jsx(Grid, { size: {
+                                                        xs: previewSize ? undefined : 12,
+                                                        md: previewSize ? undefined : 6,
+                                                        lg: previewSize ? undefined : 3,
+                                                    }, children: _jsx(ImageBox, { width: previewSize, height: previewSize, image: uploadImage, onClick: startUpload, onFilesDropped: handleUploadViaDrop, classes: subClasses?.imageBox }) }), enableCapture && (_jsx(Grid, { size: {
+                                                        xs: previewSize ? undefined : 12,
+                                                        md: previewSize ? undefined : 6,
+                                                        lg: previewSize ? undefined : 3,
+                                                    }, children: _jsx(ImageBox, { width: previewSize, height: previewSize, image: captureImage, onClick: startUploadCapture, onFilesDropped: handleUploadViaDrop, classes: subClasses?.imageBox }) }))] })), additionalDialogContent?.map((elem, i) => (_jsx(Grid, { style: previewSize ? { width: previewSize } : undefined, size: {
+                                                xs: previewSize ? undefined : 12,
+                                                md: previewSize ? undefined : 6,
+                                                lg: previewSize ? undefined : 3,
+                                            }, children: elem }, `add-${i}`)))] })] })] }) }))] }));
 };
 export default React.memo(MultiImage);

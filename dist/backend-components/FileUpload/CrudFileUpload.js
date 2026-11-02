@@ -1,8 +1,11 @@
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState, } from "react";
 import FileUpload from "../../standalone/FileUpload/Generic";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
 import PartialDeleteError from "../../backend-integration/Connector/PartialDeleteError";
+import PartialApplyError from "../Form/PartialApplyError";
+import describeWriteFailures from "./describeWriteFailures";
+import describeFrameBy from "./describeFrameBy";
 import CrudLoadStatus from "./CrudLoadStatus";
 /**
  * Marks an entry as one of `additionalFiles` rather than one of this control's own
@@ -18,6 +21,27 @@ import CrudLoadStatus from "./CrudLoadStatus";
  */
 const ADDITIONAL_FILE = Symbol("CcCrudFileUpload.additionalFile");
 const isAdditionalFile = (file) => ADDITIONAL_FILE in file;
+/**
+ * A FileUpload over a collection of file records behind `connector`, one record per file
+ * @remarks It lists `connector.index` through `deserialize`, and writes each change of the
+ *          user after the one before it: a picked file goes through `serialize`,
+ *          `connector.create` and `deserialize`, and a removed file, or a stored one that
+ *          a pick of the same name replaces, goes to `connector.deleteMultiple`.
+ *
+ *          With a LazyConnector the writes are queued: a queued upload is marked added, a
+ *          queued removal stays listed struck through and can be restored, and
+ *          `showDirtyState` and `onDirtyChange` follow the queue. With any other
+ *          connector a removal deletes the file at once and cannot be undone; `onDelete`
+ *          can ask first.
+ *
+ *          It does not read the Form it is in: in a Form, use FormCrudFileUpload, which
+ *          builds the LazyConnector and takes the Form's `readOnly`, `errorComponent`
+ *          and `showDirtyState`.
+ *
+ *          Through the ref, `addFile` resolves once the file is listed, before it is
+ *          uploaded or queued: what became of it arrives through `onChange` and
+ *          `errorComponent`. The ref is null while the files load and after a failed load.
+ */
 const CrudFileUpload = (props, ref) => {
     const { connector: connectorProp, serialize, deserialize, onChange, additionalFiles, showDirtyState, onDirtyChange, ...otherProps } = props;
     // Read once: the first connector is the collection this control lists and writes for
@@ -29,6 +53,8 @@ const CrudFileUpload = (props, ref) => {
     const connector = pinnedConnector.current;
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    // for the field to reference the error while it is shown
+    const errorId = useId();
     const [loadError, setLoadError] = useState(null);
     const [files, setFiles] = useState([]);
     // Only a queued write can be shown as pending and undone. A direct connector has
@@ -84,6 +110,9 @@ const CrudFileUpload = (props, ref) => {
     // ...which only helps if the upload that fills it has finished, so changes are
     // applied one after the other rather than side by side
     const pendingChange = useRef(Promise.resolve());
+    // the changes handed in that have not settled yet: while there are any, the field is
+    // busy
+    const [writing, setWriting] = useState(0);
     // The ids a direct connector deleted. A change made while a delete was running hands
     // the file back as the standalone control still lists it: marked for deletion, or
     // restored if the user clicked restore meanwhile. Either way it is gone from the
@@ -178,16 +207,23 @@ const CrudFileUpload = (props, ref) => {
         // with the picked files still in it, so an upload which went through but was
         // not recorded here is sent again by the next change, leaving a second copy
         // on the server.
-        let error = null;
+        // every write that did not go through, reported together
+        const failures = [];
         // the ids whose delete was refused: those files are still on the server
         let refusedIds = new Set();
         try {
             await connector.deleteMultiple(deletedIds);
         }
         catch (e) {
-            error = e;
-            // only a PartialDeleteError says which ids went through
+            // only a PartialDeleteError says which ids went through, and its cause why
             refusedIds = new Set(e instanceof PartialDeleteError ? e.failedIds : deletedIds);
+            const reason = e instanceof PartialDeleteError && e.cause instanceof Error
+                ? e.cause
+                : e;
+            newFiles.forEach((file) => {
+                if (file.delete && refusedIds.has(file.file.id))
+                    failures.push({ entry: file, action: "delete", error: reason });
+            });
         }
         // a queued delete can still be cancelled, a sent one cannot
         if (!lazyConnector)
@@ -197,7 +233,11 @@ const CrudFileUpload = (props, ref) => {
         const uploadedFiles = [];
         uploads.forEach((result, index) => {
             if (result.status === "rejected") {
-                error = error ?? result.reason;
+                failures.push({
+                    entry: picked[index],
+                    action: "create",
+                    error: result.reason,
+                });
                 return;
             }
             // canBeUploaded is what makes it a File, per FileData's own contract
@@ -205,7 +245,9 @@ const CrudFileUpload = (props, ref) => {
             uploadedFiles.push(result.value);
         });
         // the outcome of this change: one that went through clears an earlier error
-        setError(error);
+        setError(failures.length > 0
+            ? new PartialApplyError(describeWriteFailures(failures, (file) => file.file.name), failures)
+            : null);
         const kept = newFiles.filter((file) => !file.canBeUploaded &&
             "id" in file.file &&
             // a delete the server refused has not happened: the file stays in the
@@ -252,9 +294,12 @@ const CrudFileUpload = (props, ref) => {
         const ownFiles = newFiles.filter((file) => !isAdditionalFile(file));
         // the picks the user has now, whichever change uploads them
         pendingPicks.current = ownFiles.filter((file) => file.canBeUploaded);
+        setWriting((count) => count + 1);
         const change = pendingChange.current.then(() => applyChange(ownFiles));
         // a failed change must not stop the ones after it
-        pendingChange.current = change.catch(() => undefined);
+        pendingChange.current = change
+            .catch(() => undefined)
+            .finally(() => setWriting((count) => count - 1));
         return change;
     }, [applyChange]);
     // A CrudFileUpload is a custom form field: it is not in the model, so the form has no
@@ -348,15 +393,23 @@ const CrudFileUpload = (props, ref) => {
             // remove would send a delete for an id which means something else
             // entirely to this connector
             preventDelete: true,
+            // and not this control's files to limit
+            excludeFromLimits: true,
             [ADDITIONAL_FILE]: true,
         })),
         ...pendingPicks.current,
     ], [files, additionalFiles]);
+    const describedBy = error ? errorId : undefined;
+    const { slotProps } = otherProps;
+    const fileUploadSlotProps = useMemo(() => ({
+        ...slotProps,
+        root: describeFrameBy(slotProps?.root, describedBy),
+    }), [slotProps, describedBy]);
     // without a connector there is nothing to load, only additionalFiles to list
     if ((connector && loading) || loadError)
         return (_jsx(CrudLoadStatus, { label: otherProps.label, smallLabel: otherProps.smallLabel, className: otherProps.className, kind: "files", error: loadError }));
     const ErrorComponent = props.errorComponent;
-    return (_jsxs(_Fragment, { children: [error && _jsx(ErrorComponent, { error: error }), _jsx(FileUpload, { ...otherProps, ref: ref, files: finalFiles, dirty: dirty, onChange: handleChange, onRestoreFile: lazyConnector ? handleRestore : undefined, handleError: handleError, 
+    return (_jsxs(_Fragment, { children: [error && _jsx(ErrorComponent, { error: error, id: errorId }), _jsx(FileUpload, { ...otherProps, ref: ref, files: finalFiles, dirty: dirty, busy: writing > 0, slotProps: fileUploadSlotProps, onChange: handleChange, onRestoreFile: lazyConnector ? handleRestore : undefined, handleError: handleError, 
                 // undefined unless set, so that the theme's default applies
                 readOnly: connector == null ? true : otherProps.readOnly })] }));
 };

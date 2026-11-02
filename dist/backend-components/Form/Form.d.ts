@@ -53,6 +53,13 @@ export interface ErrorComponentProps {
      * The last error that happened
      */
     error: Error | ValidationError;
+    /**
+     * The id for the element that shows the error
+     * @remarks Set by a control whose field references the error (`aria-describedby`)
+     *          while it is shown. A component that shows the error elsewhere, like
+     *          DefaultErrorComponent in a dialog, has no such element and ignores it.
+     */
+    id?: string;
 }
 export type FormSubmitOptions = Partial<{
     ignoreWarnings: boolean;

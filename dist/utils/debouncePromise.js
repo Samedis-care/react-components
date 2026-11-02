@@ -1,10 +1,17 @@
+/**
+ * Debounces an async function: calls within the timeout invoke it once, with the arguments
+ * of the last call, and each of them gets that invocation's result
+ * @param func The function to debounce
+ * @param timeout The time in ms to wait after the last call, or a getter that is read at
+ *        each call
+ */
 export default function debouncePromise(func, timeout) {
     let debounceState = 0;
     // noinspection JSMismatchedCollectionQueryUpdate
     let resolves = [];
     // noinspection JSMismatchedCollectionQueryUpdate
     let rejects = [];
-    return (...args) => {
+    const debounced = (...args) => {
         return new Promise((resolve, reject) => {
             if (debounceState !== 0) {
                 window.clearTimeout(debounceState);
@@ -27,7 +34,16 @@ export default function debouncePromise(func, timeout) {
                     .catch((value) => {
                     invocationRejects.forEach((cb) => cb(value));
                 });
-            }, timeout);
+            }, typeof timeout === "function" ? timeout() : timeout);
         });
     };
+    debounced.cancel = () => {
+        if (debounceState !== 0) {
+            window.clearTimeout(debounceState);
+            debounceState = 0;
+        }
+        resolves = [];
+        rejects = [];
+    };
+    return debounced;
 }

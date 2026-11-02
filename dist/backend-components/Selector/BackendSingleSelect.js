@@ -2,9 +2,9 @@ import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
 import { useThemeProps } from "@mui/material";
 import { SingleSelect, } from "../../standalone";
-import debouncePromise from "../../utils/debouncePromise";
 import useCCTranslations from "../../utils/useCCTranslations";
 import getSelectedLoadErrorLabel from "./getSelectedLoadErrorLabel";
+import useDebouncedLoad from "./useDebouncedLoad";
 const BackendSingleSelect = (inProps) => {
     const props = useThemeProps({
         props: inProps,
@@ -108,7 +108,7 @@ const BackendSingleSelect = (inProps) => {
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selected]);
-    const debouncedLoad = useMemo(() => debouncePromise(handleLoad, searchDebounceTime ?? 500), [handleLoad, searchDebounceTime]);
+    const debouncedLoad = useDebouncedLoad(handleLoad, searchDebounceTime ?? 500);
     return (_jsx(SingleSelect, { ...otherProps, freeSolo: freeSolo, onLoad: debouncedLoad, additionalOptions: additionalOptions, onSelect: handleSelect, selected: selectedFreeSolo
             ? { value: selectedFreeSolo, label: selectedFreeSolo, freeSolo: true }
             : selected != null

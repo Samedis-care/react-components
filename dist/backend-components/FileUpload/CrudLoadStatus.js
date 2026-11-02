@@ -24,6 +24,6 @@ const CrudLoadStatus = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcCrudLoadStatus" });
     const { label, smallLabel, className, kind, error, classes } = props;
     const { t } = useCCTranslations();
-    return (_jsx(GroupBox, { label: label, smallLabel: smallLabel, className: className, busy: !error, children: error ? (_jsxs("div", { role: "alert", children: [_jsx(Message, { className: classes?.message, children: t(`backend-components.file-upload.load-failed.${kind}`) }), error.message && (_jsx(Detail, { variant: "body2", color: "textSecondary", className: classes?.detail, children: error.message }))] })) : (_jsx(CircularProgress, { "aria-label": t("backend-components.file-upload.loading") })) }));
+    return (_jsx(GroupBox, { label: label, smallLabel: smallLabel, className: className, "aria-busy": !error || undefined, children: error ? (_jsxs("div", { role: "alert", children: [_jsx(Message, { className: classes?.message, children: t(`backend-components.file-upload.load-failed.${kind}`) }), error.message && (_jsx(Detail, { variant: "body2", color: "textSecondary", className: classes?.detail, children: error.message }))] })) : (_jsx(CircularProgress, { "aria-label": t("backend-components.file-upload.loading") })) }));
 };
 export default React.memo(CrudLoadStatus);

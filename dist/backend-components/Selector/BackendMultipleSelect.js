@@ -1,9 +1,9 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useMemo } from "react";
 import { useThemeProps } from "@mui/material";
-import debouncePromise from "../../utils/debouncePromise";
 import { useSelectedCache, } from "./BackendMultiSelect";
 import BaseSelector from "../../standalone/Selector/BaseSelector";
+import useDebouncedLoad from "./useDebouncedLoad";
 /**
  * Backend connected BaseSelector with multiple=true
  * @constructor
@@ -50,7 +50,7 @@ const BackendMultipleSelect = (inProps) => {
             loadData: handleLoadLruRecord,
         }
         : undefined, [lru, handleLoadLruRecord]);
-    const debouncedLoad = useMemo(() => debouncePromise(handleLoad, searchDebounceTime ?? 500), [searchDebounceTime, handleLoad]);
+    const debouncedLoad = useDebouncedLoad(handleLoad, searchDebounceTime ?? 500);
     return (_jsx(BaseSelector, { multiple: true, ...otherProps, onLoad: debouncedLoad, onSelect: handleSelect, selected: selected, displaySwitch: !!switchFilterName, lru: lruConfig }));
 };
 export default React.memo(BackendMultipleSelect);

@@ -2,6 +2,7 @@ import React from "react";
 import { FileChangeState } from "./File";
 import { FileSelectorError } from "./Errors";
 import { IDownscaleProps } from "../../../utils/processImage";
+import { GroupBoxHTMLProps } from "../../GroupBox";
 export interface FileUploadProps {
     /**
      * The HTML name attribute on the upload button
@@ -9,6 +10,8 @@ export interface FileUploadProps {
     name?: string;
     /**
      * Maximum amount of files allowed
+     * @remarks Counts every listed file that is not removed, except one with
+     *          `excludeFromLimits`.
      */
     maxFiles?: number;
     /**
@@ -29,10 +32,11 @@ export interface FileUploadProps {
     maxFileSize?: number;
     /**
      * Largest size all listed files may have together, in bytes
-     * @remarks Counts every listed file that is not removed: a picked one at its upload
-     *          size (see `minFileSize`), any other at its `FileMeta.size`, which counts as
-     *          0 bytes where it is unset. A selection that would go over the limit is
-     *          refused as a whole (`files.selector.too-large`). Unset means no maximum.
+     * @remarks Counts every listed file that is not removed, except one with
+     *          `excludeFromLimits`: a picked one at its upload size (see `minFileSize`),
+     *          any other at its `FileMeta.size`, which counts as 0 bytes where it is
+     *          unset. A selection that would go over the limit is refused as a whole
+     *          (`files.selector.too-large`). Unset means no maximum.
      */
     maxTotalFileSize?: number;
     /**
@@ -90,6 +94,14 @@ export interface FileUploadProps {
      */
     onChange?: (files: FileData[]) => void;
     /**
+     * Callback for delete confirmation, asked before a file is removed with its remove button
+     * @param file The file that the user wants to remove
+     * @returns Should the file be removed?
+     * @remarks The file stays if it returns false, and if it throws or rejects, which is
+     *          reported. A file replaced by picking one of the same name is not asked about.
+     */
+    onDelete?: (file: FileData) => Promise<boolean> | boolean;
+    /**
      * Called instead of the built-in restore when a pending removal is undone
      * @remarks The built-in restore just clears the `delete` flag, which is all that is
      *          needed while the removal is only a flag on the file. Where it has already
@@ -118,6 +130,25 @@ export interface FileUploadProps {
      * @remarks Marks the label. Set by the form engine from `RenderParams.dirty`.
      */
     dirty?: boolean;
+    /**
+     * Is the field busy, e.g. writing its changes?
+     * @remarks Sets `aria-busy` on the field. While it is false, the `aria-busy` of
+     *          `slotProps.root` applies. A custom variant gets it as well.
+     * @default false
+     */
+    busy?: boolean;
+    /**
+     * Props for the parts of the control
+     * @remarks A custom variant gets them as well.
+     */
+    slotProps?: {
+        /**
+         * HTML attributes for the field's frame (`GroupBox`), e.g. `aria-describedby` for an
+         * error shown next to it
+         * @remarks `className` is added to the frame's own.
+         */
+        root?: GroupBoxHTMLProps;
+    };
     /**
      * CSS class to apply to root
      */
@@ -209,6 +240,12 @@ export interface FileData<T = File | FileMeta> {
      * Prevent the file from getting deleted
      */
     preventDelete?: boolean;
+    /**
+     * Leave the file out of `maxFiles` and `maxTotalFileSize`
+     * @remarks For a file that is listed but not part of what the limits are about, like
+     *          CrudFileUpload's `additionalFiles`.
+     */
+    excludeFromLimits?: boolean;
     /**
      * The file can be uploaded? (has it been selected by the user?)
      * If canBeUploaded is true T is File, otherwise T is FileMeta

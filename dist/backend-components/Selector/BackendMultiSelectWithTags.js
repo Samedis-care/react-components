@@ -3,7 +3,7 @@ import React, { useCallback, useMemo } from "react";
 import { useThemeProps } from "@mui/material";
 import { MultiSelectWithTags, } from "../../standalone";
 import { useSelectedCache, } from "./BackendMultiSelect";
-import debouncePromise from "../../utils/debouncePromise";
+import useDebouncedLoad from "./useDebouncedLoad";
 /**
  * Backend connected MultiSelectWithTags
  * @remarks Doesn't support custom data
@@ -73,8 +73,8 @@ const BackendMultiSelectWithTags = (inProps) => {
             loadData: handleLoadDataRecord,
         }
         : undefined, [lruData, handleLoadDataRecord]);
-    const debouncedGroupLoad = useMemo(() => debouncePromise(loadGroupOptions, groupSearchDebounceTime ?? 500), [groupSearchDebounceTime, loadGroupOptions]);
-    const debouncedDataLoad = useMemo(() => debouncePromise(loadDataOptions, dataSearchDebounceTime ?? 500), [dataSearchDebounceTime, loadDataOptions]);
+    const debouncedGroupLoad = useDebouncedLoad(loadGroupOptions, groupSearchDebounceTime ?? 500);
+    const debouncedDataLoad = useDebouncedLoad(loadDataOptions, dataSearchDebounceTime ?? 500);
     return (_jsx(MultiSelectWithTags, { ...selectorProps, onChange: handleSelect, selected: selected, loadGroupEntries: loadGroupEntries, loadDataOptions: debouncedDataLoad, loadGroupOptions: debouncedGroupLoad, displaySwitch: !!(switchFilterNameGroup || switchFilterNameData), lruGroup: lruGroupConfig, lruData: lruDataConfig }));
 };
 export default React.memo(BackendMultiSelectWithTags);

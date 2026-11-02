@@ -52,7 +52,9 @@ const getUploadSize = (file) => file.file instanceof Blob
  * The size of all files that are not removed, in bytes
  * @param files The list
  */
-const getTotalSize = (files) => files.reduce((total, file) => (file.delete ? total : total + getUploadSize(file)), 0);
+const getTotalSize = (files) => files.reduce((total, file) => file.delete || file.excludeFromLimits
+    ? total
+    : total + getUploadSize(file), 0);
 const StyledGroupBox = styled(GroupBox, { name: "CcFileUpload", slot: "root" })({});
 const Dropzone = styled(Grid, { name: "CcFileUpload", slot: "dropzone" })(({ theme }) => ({
     "&.Mui-active": {
@@ -95,7 +97,7 @@ const ModernUploadLabel = styled("span", {
 }));
 const FileUpload = (inProps, ref) => {
     const props = useThemeProps({ props: inProps, name: "CcFileUpload" });
-    const { name, convertImagesTo, imageDownscaleOptions, previewImages, previewSize, maxFiles, minFileSize, maxFileSize, maxTotalFileSize, handleError, accept, acceptLabel, onChange, onRestoreFile, label, dirty, smallLabel, readOnly, onBlur, uploadLabel, allowDuplicates, className, classes, } = props;
+    const { name, convertImagesTo, imageDownscaleOptions, previewImages, previewSize, maxFiles, minFileSize, maxFileSize, maxTotalFileSize, handleError, accept, acceptLabel, onChange, onDelete, onRestoreFile, label, dirty, busy, slotProps, smallLabel, readOnly, onBlur, uploadLabel, allowDuplicates, className, classes, } = props;
     const variant = props.variant ?? "classic";
     const boxLabel = labelWithDirtyMarker(label, dirty);
     const loadInitialFiles = () => (props.files || props.defaultFiles || []).map((meta) => ({
@@ -110,7 +112,8 @@ const FileUpload = (inProps, ref) => {
     const getRemainingFileCount = useCallback(() => {
         if (!maxFiles)
             throw new Error("max files isn't set, this function shouldn't be called");
-        return maxFiles - files.filter((file) => !file.delete).length;
+        return (maxFiles -
+            files.filter((file) => !file.delete && !file.excludeFromLimits).length);
     }, [maxFiles, files]);
     const processFiles = useCallback(async (files) => {
         const processImages = !!(convertImagesTo ||
@@ -275,14 +278,52 @@ const FileUpload = (inProps, ref) => {
             return;
         return processFiles(files);
     }, [processFiles]);
+    // A removal that waits for onDelete applies to the field as it is by then: it may have
+    // been unmounted, made read-only or been given a new handler meanwhile.
+    const afterConfirmRef = useRef({ mounted: false, readOnly, onChange });
+    afterConfirmRef.current.readOnly = readOnly;
+    afterConfirmRef.current.onChange = onChange;
+    useEffect(() => {
+        const afterConfirm = afterConfirmRef.current;
+        afterConfirm.mounted = true;
+        return () => {
+            afterConfirm.mounted = false;
+        };
+    }, []);
     const removeFile = useCallback((file) => {
-        setFiles((prev) => {
-            const newValue = removeFiles(prev, (f) => f === file);
-            if (onChange)
-                onChange(newValue);
-            return newValue;
-        });
-    }, [onChange, setFiles]);
+        if (!onDelete) {
+            setFiles((prev) => {
+                const newValue = removeFiles(prev, (f) => f === file);
+                if (onChange)
+                    onChange(newValue);
+                return newValue;
+            });
+            return;
+        }
+        void (async () => {
+            let confirmed;
+            try {
+                confirmed = await onDelete(file);
+            }
+            catch (e) {
+                captureError(e, { source: "FileUpload.onDelete" });
+                confirmed = false;
+            }
+            const afterConfirm = afterConfirmRef.current;
+            if (!confirmed || !afterConfirm.mounted || afterConfirm.readOnly)
+                return;
+            // by what it holds, not by identity: files passed in again meanwhile are
+            // listed as new entries
+            const isRemoved = (f) => f.file === file.file && !f.delete && !f.preventDelete;
+            if (!getFiles().some(isRemoved))
+                return;
+            setFiles((prev) => {
+                const newValue = removeFiles(prev, isRemoved);
+                afterConfirm.onChange?.(newValue);
+                return newValue;
+            });
+        })();
+    }, [getFiles, onChange, onDelete, setFiles]);
     const restoreFile = useCallback((file) => {
         if (onRestoreFile) {
             onRestoreFile(file);
@@ -324,7 +365,11 @@ const FileUpload = (inProps, ref) => {
         });
     }
     else if (variant === "classic") {
-        return (_jsx(StyledGroupBox, { label: boxLabel, smallLabel: smallLabel, className: combineClassNames([className, classes?.root]), children: _jsxs(Dropzone, { container: true, spacing: 2, sx: { alignContent: "space-between" }, onDragOver: handleDragOver, onDrop: handleDrop, className: combineClassNames([
+        return (_jsx(StyledGroupBox, { ...slotProps?.root, "aria-busy": busy || slotProps?.root?.["aria-busy"], label: boxLabel, smallLabel: smallLabel, className: combineClassNames([
+                className,
+                classes?.root,
+                slotProps?.root?.className,
+            ]), children: _jsxs(Dropzone, { container: true, spacing: 2, sx: { alignContent: "space-between" }, onDragOver: handleDragOver, onDrop: handleDrop, className: combineClassNames([
                     "components-care-dropzone",
                     classes?.dropzone,
                     dragging && "Mui-active",
@@ -340,7 +385,11 @@ const FileUpload = (inProps, ref) => {
     }
     else if (variant === "modern") {
         const acceptFiles = accept ? accept.split(",") : [];
-        return (_jsx(StyledGroupBox, { label: boxLabel, smallLabel: smallLabel, className: combineClassNames([className, classes?.root]), children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignContent: "space-between" }, onDragOver: handleDragOver, onDrop: handleDrop, onClick: () => handleUpload(), className: combineClassNames([
+        return (_jsx(StyledGroupBox, { ...slotProps?.root, "aria-busy": busy || slotProps?.root?.["aria-busy"], label: boxLabel, smallLabel: smallLabel, className: combineClassNames([
+                className,
+                classes?.root,
+                slotProps?.root?.className,
+            ]), children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignContent: "space-between" }, onDragOver: handleDragOver, onDrop: handleDrop, onClick: () => handleUpload(), className: combineClassNames([
                     classes?.dropzone,
                     "components-care-dropzone",
                     dragging && "Mui-active",

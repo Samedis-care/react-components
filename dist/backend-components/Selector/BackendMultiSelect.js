@@ -2,9 +2,9 @@ import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useThemeProps } from "@mui/material";
 import { MultiSelect, } from "../../standalone";
-import debouncePromise from "../../utils/debouncePromise";
 import useCCTranslations from "../../utils/useCCTranslations";
 import getSelectedLoadErrorLabel from "./getSelectedLoadErrorLabel";
+import useDebouncedLoad from "./useDebouncedLoad";
 export const useSelectedCache = (props) => {
     const { model, disableRequestBatching, modelToSelectorData, onSelect, selected, initialData, onLoadError, } = props;
     const modelFetch = props.modelFetch ?? model;
@@ -120,7 +120,7 @@ const BackendMultiSelect = (inProps) => {
             loadData: handleLoadLruRecord,
         }
         : undefined, [lru, handleLoadLruRecord]);
-    const debouncedLoad = useMemo(() => debouncePromise(handleLoad, searchDebounceTime ?? 500), [searchDebounceTime, handleLoad]);
+    const debouncedLoad = useDebouncedLoad(handleLoad, searchDebounceTime ?? 500);
     return (_jsx(MultiSelect, { ...otherProps, onLoad: debouncedLoad, onSelect: handleSelect, selected: selected, displaySwitch: !!switchFilterName, lru: lruConfig }));
 };
 export default React.memo(BackendMultiSelect);

@@ -1,7 +1,9 @@
 import { useCallback, useContext, useEffect, useImperativeHandle, useRef, useState, } from "react";
 import shallowCompare from "../../utils/shallowCompare";
 import { FormContext } from "../Form";
-import CrudSelectError from "./CrudSelectError";
+import PartialApplyError from "../Form/PartialApplyError";
+// the entry as the field names it, for the message of a write that failed
+const labelOf = (entry) => typeof entry.label === "string" ? entry.label : entry.label[0];
 let ticketCounter = 0;
 const nextTicket = () => {
     ticketCounter = (ticketCounter + 1) % Number.MAX_SAFE_INTEGER;
@@ -174,7 +176,11 @@ const useCrudSelect = (params, ref) => {
         ]);
         currentSelected.current = finalSelected;
         setSelected(currentSelected.current);
-        setError(failures.length > 0 ? new CrudSelectError(failures) : null);
+        setError(failures.length > 0
+            ? new PartialApplyError(failures
+                .map((failure) => `${labelOf(failure.entry)}: ${failure.error.message}`)
+                .join("; "), failures)
+            : null);
     }, [connector, deserialize, prepareNewEntry, selected, serialize]);
     const modelToSelectorData = useCallback(async (data) => {
         if (initialRawData.includes(data))

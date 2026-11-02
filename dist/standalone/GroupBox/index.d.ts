@@ -3,11 +3,14 @@ export interface GroupBoxLegendOwnerState {
     smallLabel: boolean;
 }
 export type GroupBoxClassKey = "root" | "legend";
-export interface GroupBoxProps {
-    /**
-     * The HTML id of the fieldset
-     */
-    id?: string;
+/**
+ * The HTML attributes of the GroupBox's fieldset, e.g. `aria-busy` or `aria-describedby`
+ */
+export type GroupBoxHTMLProps = Omit<React.ComponentPropsWithoutRef<"fieldset">, "children">;
+/**
+ * @remarks Every HTML attribute the box does not take itself is set on its fieldset.
+ */
+export interface GroupBoxProps extends GroupBoxHTMLProps {
     /**
      * The label of the box
      */
@@ -20,12 +23,6 @@ export interface GroupBoxProps {
      * Box contents
      */
     children?: React.ReactNode;
-    /**
-     * Are the contents still being loaded or updated?
-     * @remarks Sets `aria-busy`, so that assistive technology waits for the contents
-     *          rather than announcing what is there in the meantime.
-     */
-    busy?: boolean;
     /**
      * CSS class to apply to fieldset
      */

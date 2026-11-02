@@ -1,5 +1,6 @@
 import React from "react";
 import { ImageBoxProps } from "./ImageBox";
+import { GroupBoxHTMLProps } from "../../GroupBox";
 import { IDownscaleProps } from "../../../utils/processImage";
 import { ImageDialogEntryProps } from "./ImageDialogEntry";
 import { ImageErrorHandler } from "../useImageError";
@@ -103,6 +104,23 @@ export interface MultiImageProps {
      */
     readOnly?: boolean;
     /**
+     * Is the field busy, e.g. writing its changes?
+     * @remarks Sets `aria-busy` on the field. While it is false, the `aria-busy` of
+     *          `slotProps.groupBox` applies.
+     * @default false
+     */
+    busy?: boolean;
+    /**
+     * Props for the parts of the control
+     */
+    slotProps?: {
+        /**
+         * HTML attributes for the field's frame (`GroupBox`), e.g. `aria-describedby` for an
+         * error shown next to it
+         */
+        groupBox?: GroupBoxHTMLProps;
+    };
+    /**
      * MimeType to convert the image to (e.g. image/png or image/jpg)
      */
     convertImagesTo?: string;
@@ -118,6 +136,18 @@ export interface MultiImageProps {
      * Additional dialog content (e.g. how-to-box)
      */
     additionalDialogContent?: React.ReactNode[];
+    /**
+     * Shown at the top of the edit dialog while that is open, e.g. the outcome of a change
+     * made in it: the modal dialog hides the rest of the page from assistive technology
+     * @remarks Memoize it, or every render of the owner renders MultiImage again.
+     */
+    dialogMessage?: React.ReactNode;
+    /**
+     * Called when the edit dialog opens, and when it closes: by the user, because the
+     * control became read-only, or because the control unmounts
+     * @param open Whether the dialog is open now
+     */
+    onDialogOpenChange?: (open: boolean) => void;
     /**
      * custom CSS class to apply to root
      */
