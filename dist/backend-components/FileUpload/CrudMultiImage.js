@@ -222,28 +222,40 @@ const CrudMultiImage = (props) => {
         ...slotProps,
         groupBox: describeFrameBy(slotProps?.groupBox, describedBy),
     }), [slotProps, describedBy]);
+    // the deserializer passed last, for a load that is already running
+    const deserializeRef = useRef(deserialize);
+    deserializeRef.current = deserialize;
     useEffect(() => {
         // without a connector there is nothing to load, only additionalImages to list
-        if (!connector || !loading)
+        if (!connector)
             return;
+        // set once the control unmounts, or StrictMode runs the effect again: this load's
+        // result is then dropped
+        let cancelled = false;
         void (async () => {
             try {
                 const initialData = await connector.index({
                     page: 1,
                     rows: Number.MAX_SAFE_INTEGER,
                 });
-                const initialFiles = await Promise.all(initialData[0].map((value) => Promise.resolve(deserialize(value))));
+                const initialFiles = await Promise.all(initialData[0].map((value) => Promise.resolve(deserializeRef.current(value))));
+                if (cancelled)
+                    return;
                 commitImages(initialFiles);
             }
             catch (e) {
-                setLoadError(e);
+                if (!cancelled)
+                    setLoadError(e);
             }
             finally {
-                setLoading(false);
+                if (!cancelled)
+                    setLoading(false);
             }
         })();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [connector]);
+        return () => {
+            cancelled = true;
+        };
+    }, [commitImages, connector]);
     // Reported when the list changes, to the handler passed last: a new handler alone is no
     // change, and an inline one that stores a derived list would otherwise render forever.
     const onChangeRef = useRef(onChange);

@@ -2,6 +2,11 @@ import React from "react";
 import { FileData, FileMeta, FileUploadDispatch, FileUploadProps } from "../../standalone/FileUpload/Generic";
 import { Connector } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
+/**
+ * Props of CrudFileUpload: those of FileUpload, with the files loaded from `connector`
+ * @remarks `readOnly` stops the pick dialog, drops and the remove buttons, but not
+ *          `addFile` through the ref, which with a direct connector uploads at once.
+ */
 export interface CrudFileUploadProps extends Omit<FileUploadProps, "files" | "defaultFiles" | "handleError" | "busy" | "onRestoreFile"> {
     /**
      * The backend connector used as CRUD interface
@@ -17,7 +22,11 @@ export interface CrudFileUploadProps extends Omit<FileUploadProps, "files" | "de
      */
     connector: Connector | null;
     /**
-     * The error component that is used to display errors
+     * Renders the error of the last change above the field
+     * @remarks Writes the connector refused come as a PartialApplyError that names each
+     *          failed file, a refused selection (wrong type, too many or too large files,
+     *          an image that cannot be read) as an Error with the translated message. The
+     *          outcome of the next change replaces it: one that goes through clears it.
      */
     errorComponent: React.ComponentType<ErrorComponentProps>;
     /**
@@ -30,8 +39,13 @@ export interface CrudFileUploadProps extends Omit<FileUploadProps, "files" | "de
     onDelete?: FileUploadProps["onDelete"];
     /**
      * Callback for serializing a picked file before passing it to the backend connector
-     * @param data The file data to serialize
+     * @param data The picked file: `data.file` is the File as picked. With
+     *             `convertImagesTo`, `imageDownscaleOptions` or `previewImages`, the
+     *             processed image is `data.preview`, whose type and name may differ from
+     *             `data.file`'s, so upload `data.preview ?? data.file`.
      * @returns Data to be passed to the backend connector's create
+     * @remarks With a LazyConnector the result waits in the queue, and comes back to
+     *          `deserialize` with a client-side id.
      */
     serialize: (data: FileData<File>) => Promise<Record<string, unknown>> | Record<string, unknown>;
     /**
@@ -40,8 +54,11 @@ export interface CrudFileUploadProps extends Omit<FileUploadProps, "files" | "de
      *             From a LazyConnector, a queued upload is what `serialize` returned, with
      *             a client-side `id` (`fake-id-N`), so it holds the picked file where the
      *             backend would send a URL. It is listed that way by `index` too, until the
-     *             queue is written.
-     * @returns The file data which can be used by the control
+     *             queue is written. A control mounted again over a queued removal also gets
+     *             the record of that removal.
+     * @returns The file data which can be used by the control. Set `file.id`, and the
+     *          `file.downloadLink` key even where it is undefined: a removal drops an
+     *          entry without that key from the list instead of deleting its record.
      * @remarks With `maxTotalFileSize`, set `file.size`: every file the control lists
      *          comes from here, a picked one too once its upload is created, and one
      *          without a size counts as 0 bytes.
@@ -50,8 +67,9 @@ export interface CrudFileUploadProps extends Omit<FileUploadProps, "files" | "de
     /**
      * Files of someone else, listed after this control's own files, read-only
      * @remarks Never written through `connector`, whatever flags they carry: a `delete` or
-     *          `canBeUploaded` only changes how they are shown. They do not count toward
-     *          `maxFiles` and `maxTotalFileSize`.
+     *          `canBeUploaded` only changes how they are shown. A pick of the same name does
+     *          not replace them, and they do not count toward `maxFiles` and
+     *          `maxTotalFileSize`.
      */
     additionalFiles?: FileData<FileMeta>[];
     /**
@@ -82,9 +100,15 @@ export interface CrudFileUploadProps extends Omit<FileUploadProps, "files" | "de
      */
     onDirtyChange?: (dirty: boolean) => void;
 }
+/**
+ * A file stored behind CrudFileUpload's connector
+ */
 export interface BackendFileMeta extends FileMeta {
     /**
-     * The ID of the file in backend
+     * The record's id
+     * @remarks For a file uploaded through a LazyConnector this is the client-side id
+     *          (`fake-id-N`), also after the queue was written: `LazyConnector.mapId`
+     *          gives the server's.
      */
     id: string;
 }
