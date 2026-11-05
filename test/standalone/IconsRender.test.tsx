@@ -44,6 +44,25 @@ describe.each(ALL_NAMES)("%s", (name) => {
 	});
 });
 
+describe("viewBox", () => {
+	it("[ISSUE-3460-ITEM-2] AppsIcon's viewBox covers both rows of squares", () => {
+		const { svg } = renderIcon(<Icons.AppsIcon />);
+		const [, , , viewBoxHeight] = (svg.getAttribute("viewBox") ?? "")
+			.split(" ")
+			.map(Number);
+		const glyphBottom = Math.max(
+			...Array.from(
+				svg.querySelectorAll("rect"),
+				(rect) =>
+					Number(rect.getAttribute("y") ?? 0) +
+					Number(rect.getAttribute("height")),
+			),
+		);
+		expect(glyphBottom).toBeCloseTo(26.54);
+		expect(viewBoxHeight).toBeGreaterThanOrEqual(glyphBottom);
+	});
+});
+
 describe("fill", () => {
 	it("[ISSUE-3460-ITEM-4] SignIcon hard-codes no fill and passes a caller's fill through", () => {
 		const { svg } = renderIcon(<Icons.SignIcon />);
