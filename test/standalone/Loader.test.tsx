@@ -1,8 +1,9 @@
 import React from "react";
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect, afterEach, vi, assertType } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { ThemeProvider, createTheme, Theme } from "@mui/material";
 import Loader from "../../src/standalone/Loader";
+import type { LoaderClassKey, LoaderProps } from "../../src";
 
 afterEach(() => {
 	cleanup();
@@ -145,5 +146,13 @@ describe("Loader", () => {
 	it('[ISSUE-3461-ITEM-10] takes "inherit" as typographyVariant, as Typography does', () => {
 		renderLoader(<Loader text={"Loading"} typographyVariant={"inherit"} />);
 		expect(screen.getByText("Loading")).toHaveClass("MuiTypography-inherit");
+	});
+
+	it("[ISSUE-3461-ITEM-11] exports LoaderProps and LoaderClassKey from the package root", () => {
+		// A type test: vitest does not type-check, tsc does
+		// (node_modules/.bin/tsc -p tsconfig-test.json --noEmit). While the package
+		// root lacks these types, the import above does not compile.
+		assertType<LoaderProps>({ text: "Loading", typographyVariant: "caption" });
+		assertType<LoaderClassKey>("root");
 	});
 });
