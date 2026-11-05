@@ -20,9 +20,8 @@ beforeAll(async () => {
 	await ccI18n.init();
 	// jsdom has no layout, so it ships no Element.scrollTo — ImageBox centers its
 	// swipe pane with one on mount.
-	if (!("scrollTo" in Element.prototype)) {
-		Element.prototype.scrollTo = () => undefined;
-	}
+	(Element.prototype as unknown as { scrollTo: unknown }).scrollTo ??= () =>
+		undefined;
 });
 
 const theme = createTheme();

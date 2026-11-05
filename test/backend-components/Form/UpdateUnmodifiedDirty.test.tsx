@@ -36,7 +36,7 @@ const makeCapture = (sink: { ctx?: ReturnType<typeof useFormContext> }) => {
 		sink.ctx = useFormContext();
 		return null;
 	};
-	return Capture as unknown as React.ComponentType<never>;
+	return Capture;
 };
 
 const renderForm = (opts?: {
@@ -53,6 +53,7 @@ const renderForm = (opts?: {
 				id={opts && "id" in opts ? (opts.id ?? null) : "1"}
 				initialRecord={opts?.initialRecord}
 				errorComponent={DefaultErrorComponent}
+				customProps={undefined}
 			>
 				{makeCapture(sink)}
 			</Form>

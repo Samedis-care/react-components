@@ -778,7 +778,9 @@ interface CollectionApis {
 	images: CollectionApi;
 }
 
-const CollectionsPage = (props: PageProps<never, CollectionApis>) => {
+const CollectionsPage = (
+	props: PageProps<ReturnType<typeof createTestModel>, CollectionApis>,
+) => {
 	const { files, images } = props.customProps;
 	const getFilesApi = useCallback(
 		() => files as unknown as ApiConnector,

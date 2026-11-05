@@ -390,9 +390,9 @@ export const CenteredTypographyStory: ActionButtonStory = {
 const expectBoxBoundaryContrast: ActionButtonStory["play"] = async ({
 	canvas,
 }) => {
-	const root = canvas.getByRole("checkbox").parentElement;
+	const root = canvas.getByRole("checkbox").parentElement!;
 	const { borderTopColor, backgroundColor } = getComputedStyle(
-		root.querySelector(":scope > svg"),
+		root.querySelector(":scope > svg")!,
 	);
 	const [r, g, b, a = 1] = decomposeColor(borderTopColor).values;
 	const background = decomposeColor(backgroundColor).values;

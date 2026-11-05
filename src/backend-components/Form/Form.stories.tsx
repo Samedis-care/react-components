@@ -280,7 +280,7 @@ export const DirtyState: StoryObj = {
 
 		// a selector renders its label as a sibling of the autocomplete rather than
 		// inside the text field, so it is marked from BaseSelector's own label
-		await userEvent.click(find(`${field("department")} input`));
+		await userEvent.click(find(`${field("department")} input`)!);
 		await userEvent.click(await within(document.body).findByText("Sales"));
 		await waitFor(async () => {
 			await expect(
@@ -292,7 +292,7 @@ export const DirtyState: StoryObj = {
 
 		// the outlined variant marks the label inside the notch, which has to widen for
 		// the dot or the two overlap
-		await userEvent.type(find(`${field("notes")} textarea`), "x");
+		await userEvent.type(find(`${field("notes")} textarea`)!, "x");
 		await waitFor(async () => {
 			await expect(
 				hasMarker(find(`${field("notes")} .MuiFormLabel-root`)),

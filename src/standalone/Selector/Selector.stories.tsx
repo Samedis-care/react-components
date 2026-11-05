@@ -190,8 +190,8 @@ export const MultiSelectWithInitialValues: StoryObj = {
 	name: "MultiSelect — pre-selected values",
 	render: () => {
 		const [selected, setSelected] = useState<MultiSelectorData[]>([
-			FRUITS.find((f) => f.value === "apple"),
-			FRUITS.find((f) => f.value === "banana"),
+			FRUITS.find((f) => f.value === "apple")!,
+			FRUITS.find((f) => f.value === "banana")!,
 		]);
 		const onLoad = selectorLocalLoadHandler(FRUITS);
 		return (
@@ -213,7 +213,7 @@ export const MultiSelectDisabled: StoryObj = {
 	name: "MultiSelect — disabled",
 	render: () => {
 		const selected: MultiSelectorData[] = [
-			FRUITS.find((f) => f.value === "cherry"),
+			FRUITS.find((f) => f.value === "cherry")!,
 		];
 		const onLoad = selectorLocalLoadHandler(FRUITS);
 		return (
@@ -234,7 +234,7 @@ export const MultiSelectFilterIds: StoryObj = {
 	name: "MultiSelect — filterIds on top of the selection",
 	render: () => {
 		const [selected, setSelected] = useState<MultiSelectorData[]>([
-			FRUITS.find((f) => f.value === "apple"),
+			FRUITS.find((f) => f.value === "apple")!,
 		]);
 		const onLoad = selectorLocalLoadHandler(FRUITS);
 		return (
@@ -302,8 +302,8 @@ export const MultiSelectWithoutGroupWithValues: StoryObj = {
 	name: "MultiSelectWithoutGroup — with values",
 	render: () => {
 		const [selected, setSelected] = useState<MultiSelectorData[]>([
-			FRUITS.find((f) => f.value === "strawberry"),
-			FRUITS.find((f) => f.value === "blueberry"),
+			FRUITS.find((f) => f.value === "strawberry")!,
+			FRUITS.find((f) => f.value === "blueberry")!,
 		]);
 		const loadDataOptions = selectorLocalLoadHandler(FRUITS);
 		return (
@@ -325,7 +325,7 @@ export const MultiSelectWithoutGroupFilterIds: StoryObj = {
 	name: "MultiSelectWithoutGroup — filterIds on top of the selection",
 	render: () => {
 		const [selected, setSelected] = useState<MultiSelectorData[]>([
-			FRUITS.find((f) => f.value === "apple"),
+			FRUITS.find((f) => f.value === "apple")!,
 		]);
 		const loadDataOptions = selectorLocalLoadHandler(FRUITS);
 		return (
@@ -418,7 +418,9 @@ export const MultiSelectWithTagsDirty: StoryObj = {
 		);
 	},
 	play: async ({ canvas }) => {
-		const marker = canvas.getByText("Fruits by category").querySelector("span");
+		const marker = canvas
+			.getByText("Fruits by category")
+			.querySelector("span")!;
 		await expect(marker).not.toBe(null);
 		await expect(getComputedStyle(marker).width).toBe("6px");
 	},
@@ -428,8 +430,8 @@ export const MultiSelectWithTagsWithInitialValues: StoryObj = {
 	name: "MultiSelectWithTags — pre-selected values",
 	render: () => {
 		const [selected, setSelected] = useState<MultiSelectorData[]>([
-			FRUITS.find((f) => f.value === "mango"),
-			FRUITS.find((f) => f.value === "banana"),
+			FRUITS.find((f) => f.value === "mango")!,
+			FRUITS.find((f) => f.value === "banana")!,
 		]);
 
 		const loadGroupOptions = selectorLocalLoadHandler(CATEGORIES);

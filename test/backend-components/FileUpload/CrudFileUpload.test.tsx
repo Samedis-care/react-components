@@ -1253,7 +1253,7 @@ class StrictConnector extends Connector {
 		this.createCalls.push(name);
 		if (this.createGate) await this.createGate;
 		if (this.rejectCreates.has(name)) throw new Error(this.refusal(name));
-		const result = this.store.create(data);
+		const result = await this.store.create(data);
 		this.records.add(result[0].id as string);
 		return result;
 	}

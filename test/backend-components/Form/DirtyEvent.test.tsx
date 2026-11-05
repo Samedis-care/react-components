@@ -8,6 +8,7 @@ import Form, {
 import DefaultErrorComponent from "../../../src/backend-components/Form/DefaultErrorComponent";
 import createTestModel from "../../../src/stories/test-utils/TestModel";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
+import { ModelUnknown } from "../../../src/backend-integration/Model/Model";
 
 // jsdom does not implement matchMedia, which the Framework's ThemeProvider needs.
 beforeAll(() => {
@@ -36,7 +37,7 @@ const makeCapture = (sink: {
 	events: boolean[];
 }) => {
 	const Capture = () => {
-		const ctx = useFormContext();
+		const ctx = useFormContext<ModelUnknown>();
 		sink.ctx = ctx;
 		const { addEventListener, removeEventListener } = ctx;
 		React.useEffect(() => {
@@ -47,7 +48,7 @@ const makeCapture = (sink: {
 		}, [addEventListener, removeEventListener]);
 		return null;
 	};
-	return Capture as unknown as React.ComponentType<never>;
+	return Capture;
 };
 
 const renderForm = () => {
@@ -59,7 +60,12 @@ const renderForm = () => {
 	} = { events: [] };
 	render(
 		<Framework>
-			<Form model={model} id={"1"} errorComponent={DefaultErrorComponent}>
+			<Form
+				model={model}
+				id={"1"}
+				errorComponent={DefaultErrorComponent}
+				customProps={undefined}
+			>
 				{makeCapture(sink)}
 			</Form>
 		</Framework>,

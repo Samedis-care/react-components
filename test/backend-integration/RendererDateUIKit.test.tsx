@@ -39,6 +39,8 @@ const renderParams = (
 	initialValue: value,
 	label: "Due",
 	touched: false,
+	dirty: false,
+	autoFocus: false,
 	visibility: {
 		disabled: false,
 		hidden: false,

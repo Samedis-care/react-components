@@ -28,7 +28,6 @@ describe("GroupBox", () => {
 
 	it("does not render a legend when label is falsy", () => {
 		const { container } = renderGroupBox(
-			// @ts-expect-error testing falsy label edge case
 			<GroupBox label="">
 				<span>Content</span>
 			</GroupBox>,

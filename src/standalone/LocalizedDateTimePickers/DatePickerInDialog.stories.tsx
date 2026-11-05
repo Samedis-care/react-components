@@ -32,11 +32,13 @@ const meta: Meta = {
 };
 export default meta;
 
+type Story = StoryObj<{ onChange: (value: Moment | null) => void }>;
+
 // ---------------------------------------------------------------------------
 // Standalone — Enter key should work
 // ---------------------------------------------------------------------------
 
-export const EnterKeyStandalone: StoryObj = {
+export const EnterKeyStandalone: Story = {
 	name: "Enter key selects date (standalone)",
 	args: {
 		onChange: fn(),
@@ -49,7 +51,7 @@ export const EnterKeyStandalone: StoryObj = {
 				value={value}
 				onChange={(v) => {
 					setValue(v);
-					(args.onChange as (v: Moment | null) => void)(v);
+					args.onChange(v);
 				}}
 			/>
 		);
@@ -78,7 +80,7 @@ export const EnterKeyStandalone: StoryObj = {
 // Inside Dialog — Enter key should also work
 // ---------------------------------------------------------------------------
 
-export const EnterKeyInDialog: StoryObj = {
+export const EnterKeyInDialog: Story = {
 	name: "Enter key selects date (inside Dialog)",
 	args: {
 		onChange: fn(),
@@ -93,7 +95,7 @@ export const EnterKeyInDialog: StoryObj = {
 						value={value}
 						onChange={(v) => {
 							setValue(v);
-							(args.onChange as (v: Moment | null) => void)(v);
+							args.onChange(v);
 						}}
 					/>
 				</DialogContent>

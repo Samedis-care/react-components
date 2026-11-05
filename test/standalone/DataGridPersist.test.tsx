@@ -95,7 +95,10 @@ let write: ((data: DataGridPersistentState) => Promise<void> | void) | null =
 const Probe = (props: { testId: string }) => {
 	const ctx = useContext(DataGridPersistentStateContext);
 	write = ctx?.[1] ?? null;
-	return <span data-testid={props.testId}>{ctx?.[0]?.search ?? "none"}</span>;
+	const data = ctx?.[0];
+	// the tests store the current format only, a legacy one keeps its search in state
+	const search = data?.v == null ? undefined : data.search;
+	return <span data-testid={props.testId}>{search ?? "none"}</span>;
 };
 
 beforeEach(() => {

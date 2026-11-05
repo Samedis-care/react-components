@@ -33,7 +33,7 @@ describe("dataGridPrepareFiltersAndSorts", () => {
 
 	it("extracts a single ascending sort", () => {
 		const state: IDataGridColumnsState = {
-			name: { sort: 1, sortOrder: 0 },
+			name: { sort: 1, sortOrder: 0, filter: undefined },
 		};
 		const [sorts] = dataGridPrepareFiltersAndSorts(state);
 		expect(sorts).toEqual([{ field: "name", direction: 1 }]);
@@ -41,7 +41,7 @@ describe("dataGridPrepareFiltersAndSorts", () => {
 
 	it("extracts a single descending sort", () => {
 		const state: IDataGridColumnsState = {
-			age: { sort: -1, sortOrder: 0 },
+			age: { sort: -1, sortOrder: 0, filter: undefined },
 		};
 		const [sorts] = dataGridPrepareFiltersAndSorts(state);
 		expect(sorts).toEqual([{ field: "age", direction: -1 }]);
@@ -49,9 +49,9 @@ describe("dataGridPrepareFiltersAndSorts", () => {
 
 	it("orders multiple sorts by sortOrder ascending", () => {
 		const state: IDataGridColumnsState = {
-			age: { sort: 1, sortOrder: 2 },
-			name: { sort: -1, sortOrder: 1 },
-			role: { sort: 1, sortOrder: 0 },
+			age: { sort: 1, sortOrder: 2, filter: undefined },
+			name: { sort: -1, sortOrder: 1, filter: undefined },
+			role: { sort: 1, sortOrder: 0, filter: undefined },
 		};
 		const [sorts] = dataGridPrepareFiltersAndSorts(state);
 		expect(sorts.map((s) => s.field)).toEqual(["role", "name", "age"]);
@@ -59,8 +59,8 @@ describe("dataGridPrepareFiltersAndSorts", () => {
 
 	it("ignores columns with sort = 0", () => {
 		const state: IDataGridColumnsState = {
-			name: { sort: 0, sortOrder: 0 },
-			age: { sort: 1, sortOrder: 0 },
+			name: { sort: 0, sortOrder: 0, filter: undefined },
+			age: { sort: 1, sortOrder: 0, filter: undefined },
 		};
 		const [sorts] = dataGridPrepareFiltersAndSorts(state);
 		expect(sorts).toHaveLength(1);
@@ -86,7 +86,7 @@ describe("dataGridPrepareFiltersAndSorts", () => {
 
 	it("omits columns without a filter set", () => {
 		const state: IDataGridColumnsState = {
-			name: { sort: 0, sortOrder: 0 },
+			name: { sort: 0, sortOrder: 0, filter: undefined },
 		};
 		const [, filters] = dataGridPrepareFiltersAndSorts(state);
 		expect(filters).toEqual({});
@@ -95,7 +95,7 @@ describe("dataGridPrepareFiltersAndSorts", () => {
 	it("returns both sorts and filters together", () => {
 		const filter = makeFilter("equals", "admin");
 		const state: IDataGridColumnsState = {
-			name: { sort: 1, sortOrder: 0 },
+			name: { sort: 1, sortOrder: 0, filter: undefined },
 			role: { sort: 0, sortOrder: 0, filter },
 		};
 		const [sorts, filters] = dataGridPrepareFiltersAndSorts(state);
@@ -188,7 +188,7 @@ describe("dataGridApplyRowUpdate", () => {
 describe("dataGridGetFilterParameters", () => {
 	const columnsState: IDataGridColumnsState = {
 		name: { sort: 1, sortOrder: 0, filter: makeFilter("contains", "ali") },
-		role: { sort: 0 },
+		role: { sort: 0, filter: undefined },
 	};
 	const state = { search: "müller", customData: { "filter[active]": true } };
 
@@ -215,8 +215,8 @@ describe("dataGridGetFilterParameters", () => {
 describe("dataGridGetQuery", () => {
 	const columnsState: IDataGridColumnsState = {
 		name: { sort: 0, filter: makeFilter("contains", "ali") },
-		age: { sort: -1, sortOrder: 2 },
-		role: { sort: 1, sortOrder: 1 },
+		age: { sort: -1, sortOrder: 2, filter: undefined },
+		role: { sort: 1, sortOrder: 1, filter: undefined },
 	};
 	const state = { search: "müller", customData: { "filter[active]": true } };
 

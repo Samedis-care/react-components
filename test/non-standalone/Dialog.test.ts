@@ -1,5 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, import/first */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+/* eslint-disable import/first */
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
+import type React from "react";
+import type { DialogContextType } from "../../src/framework/DialogContextProvider";
+import type {
+	IDialogConfigConfirm,
+	IDialogConfigInput,
+	IDialogConfigSimple,
+} from "../../src/non-standalone/Dialog/Types";
 
 // Mock i18n so the helper functions can call t()
 vi.mock("../../src/i18n", () => ({
@@ -22,10 +29,12 @@ import {
 } from "../../src/non-standalone/Dialog/Utils";
 
 describe("Dialog Utils", () => {
-	let pushDialog: ReturnType<typeof vi.fn>;
+	let pushDialog: Mock<DialogContextType[0]>;
+	/** The dialog element the helper pushed, with the props of that dialog */
+	const pushed = <P>() => pushDialog.mock.calls[0][0] as React.ReactElement<P>;
 
 	beforeEach(() => {
-		pushDialog = vi.fn();
+		pushDialog = vi.fn<DialogContextType[0]>();
 	});
 
 	describe("showConfirmDialog", () => {
@@ -39,7 +48,7 @@ describe("Dialog Utils", () => {
 			// Don't await - the promise won't resolve until the user clicks
 			void showConfirmDialog(pushDialog, props);
 			expect(pushDialog).toHaveBeenCalledTimes(1);
-			const element = pushDialog.mock.calls[0][0];
+			const element = pushed<IDialogConfigConfirm>();
 			expect(element).toBeTruthy();
 			expect(element.props.title).toBe("Confirm");
 			expect(element.props.message).toBe("Are you sure?");
@@ -55,7 +64,7 @@ describe("Dialog Utils", () => {
 				textButtonNo: "No",
 			};
 			const promise = showConfirmDialog(pushDialog, props);
-			const element = pushDialog.mock.calls[0][0];
+			const element = pushed<IDialogConfigConfirm>();
 			// Simulate user clicking yes
 			element.props.handlerButtonYes();
 			await expect(promise).resolves.toBeUndefined();
@@ -69,7 +78,7 @@ describe("Dialog Utils", () => {
 				textButtonNo: "No",
 			};
 			const promise = showConfirmDialog(pushDialog, props);
-			const element = pushDialog.mock.calls[0][0];
+			const element = pushed<IDialogConfigConfirm>();
 			element.props.handlerButtonNo();
 			await expect(promise).rejects.toBeUndefined();
 		});
@@ -82,8 +91,8 @@ describe("Dialog Utils", () => {
 				textButtonNo: "No",
 			};
 			const promise = showConfirmDialog(pushDialog, props);
-			const element = pushDialog.mock.calls[0][0];
-			element.props.onClose();
+			const element = pushed<IDialogConfigConfirm>();
+			element.props.onClose!();
 			await expect(promise).rejects.toBeUndefined();
 		});
 	});
@@ -108,7 +117,7 @@ describe("Dialog Utils", () => {
 				textButtonNo: "No",
 			};
 			const promise = showConfirmDialogBool(pushDialog, props);
-			const element = pushDialog.mock.calls[0][0];
+			const element = pushed<IDialogConfigConfirm>();
 			element.props.handlerButtonYes();
 			await expect(promise).resolves.toBe(true);
 		});
@@ -121,7 +130,7 @@ describe("Dialog Utils", () => {
 				textButtonNo: "No",
 			};
 			const promise = showConfirmDialogBool(pushDialog, props);
-			const element = pushDialog.mock.calls[0][0];
+			const element = pushed<IDialogConfigConfirm>();
 			element.props.handlerButtonNo();
 			await expect(promise).resolves.toBe(false);
 		});
@@ -134,8 +143,8 @@ describe("Dialog Utils", () => {
 				textButtonNo: "No",
 			};
 			const promise = showConfirmDialogBool(pushDialog, props);
-			const element = pushDialog.mock.calls[0][0];
-			element.props.onClose();
+			const element = pushed<IDialogConfigConfirm>();
+			element.props.onClose!();
 			await expect(promise).resolves.toBe(false);
 		});
 	});
@@ -152,7 +161,7 @@ describe("Dialog Utils", () => {
 			};
 			void showInputDialog(pushDialog, props);
 			expect(pushDialog).toHaveBeenCalledTimes(1);
-			const element = pushDialog.mock.calls[0][0];
+			const element = pushed<IDialogConfigInput>();
 			expect(element.props.title).toBe("Input");
 			expect(element.props.textFieldLabel).toBe("Value");
 		});
@@ -167,7 +176,7 @@ describe("Dialog Utils", () => {
 				textFieldValidator: (v: string) => v.length > 0,
 			};
 			const promise = showInputDialog(pushDialog, props);
-			const element = pushDialog.mock.calls[0][0];
+			const element = pushed<IDialogConfigInput>();
 			element.props.handlerButtonYes("test-value");
 			await expect(promise).resolves.toBe("test-value");
 		});
@@ -182,7 +191,7 @@ describe("Dialog Utils", () => {
 				textFieldValidator: (v: string) => v.length > 0,
 			};
 			const promise = showInputDialog(pushDialog, props);
-			const element = pushDialog.mock.calls[0][0];
+			const element = pushed<IDialogConfigInput>();
 			element.props.handlerButtonNo();
 			await expect(promise).rejects.toBeUndefined();
 		});
@@ -195,7 +204,7 @@ describe("Dialog Utils", () => {
 				message: "Something happened",
 			});
 			expect(pushDialog).toHaveBeenCalledTimes(1);
-			const element = pushDialog.mock.calls[0][0];
+			const element = pushed<IDialogConfigSimple>();
 			expect(element.props.title).toBe("Info");
 			expect(element.props.message).toBe("Something happened");
 		});
@@ -205,7 +214,7 @@ describe("Dialog Utils", () => {
 				title: "Info",
 				message: "Hello",
 			});
-			const element = pushDialog.mock.calls[0][0];
+			const element = pushed<IDialogConfigSimple>();
 			expect(element.props.buttons).toHaveLength(1);
 			expect(element.props.buttons[0].autoFocus).toBe(true);
 		});
@@ -220,7 +229,7 @@ describe("Dialog Utils", () => {
 				message: "Hello",
 				buttons: customButtons,
 			});
-			const element = pushDialog.mock.calls[0][0];
+			const element = pushed<IDialogConfigSimple>();
 			expect(element.props.buttons).toEqual(customButtons);
 		});
 
@@ -229,8 +238,8 @@ describe("Dialog Utils", () => {
 				title: "Info",
 				message: "Hello",
 			});
-			const element = pushDialog.mock.calls[0][0];
-			element.props.onClose();
+			const element = pushed<IDialogConfigSimple>();
+			element.props.onClose!();
 			await expect(promise).resolves.toBeUndefined();
 		});
 	});
@@ -240,7 +249,7 @@ describe("Dialog Utils", () => {
 			const error = new Error("Network failure");
 			void showErrorDialog(pushDialog, error);
 			expect(pushDialog).toHaveBeenCalledTimes(1);
-			const element = pushDialog.mock.calls[0][0];
+			const element = pushed<IDialogConfigSimple>();
 			expect(element.props.title).toBe("common.dialogs.error-title");
 			expect(element.props.message).toBe("Network failure");
 		});
@@ -248,7 +257,7 @@ describe("Dialog Utils", () => {
 		it("handles string error", () => {
 			void showErrorDialog(pushDialog, "Something broke");
 			expect(pushDialog).toHaveBeenCalledTimes(1);
-			const element = pushDialog.mock.calls[0][0];
+			const element = pushed<IDialogConfigSimple>();
 			expect(element.props.title).toBe("common.dialogs.error-title");
 			expect(element.props.message).toBe("Something broke");
 		});
@@ -260,26 +269,26 @@ describe("Dialog Utils", () => {
 			};
 			void showErrorDialog(pushDialog, validationResult);
 			expect(pushDialog).toHaveBeenCalledTimes(1);
-			const element = pushDialog.mock.calls[0][0];
+			const element = pushed<IDialogConfigSimple>();
 			expect(element.props.title).toBe("common.dialogs.validation-error-title");
 		});
 
 		it("handles ValidationError (Error with CcValidationError name)", () => {
 			const error = new Error("Validation failed");
 			error.name = "CcValidationError";
-			(error as Record<string, unknown>).result = {
+			(error as Error & { result: Record<string, string> }).result = {
 				field1: "Field 1 error",
 			};
 			void showErrorDialog(pushDialog, error);
 			expect(pushDialog).toHaveBeenCalledTimes(1);
-			const element = pushDialog.mock.calls[0][0];
+			const element = pushed<IDialogConfigSimple>();
 			expect(element.props.title).toBe("common.dialogs.validation-error-title");
 		});
 
 		it("resolves when onClose is called", async () => {
 			const promise = showErrorDialog(pushDialog, "oops");
-			const element = pushDialog.mock.calls[0][0];
-			element.props.onClose();
+			const element = pushed<IDialogConfigSimple>();
+			element.props.onClose!();
 			await expect(promise).resolves.toBeUndefined();
 		});
 	});

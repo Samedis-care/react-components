@@ -78,8 +78,13 @@ const renderForm = (model: ModelUnknown, autoSave = false) => {
 	};
 	render(
 		<Framework>
-			<Form model={model} id={"1"} errorComponent={DefaultErrorComponent}>
-				{Children as unknown as React.ComponentType<never>}
+			<Form
+				model={model}
+				id={"1"}
+				errorComponent={DefaultErrorComponent}
+				customProps={undefined}
+			>
+				{Children}
 			</Form>
 		</Framework>,
 	);

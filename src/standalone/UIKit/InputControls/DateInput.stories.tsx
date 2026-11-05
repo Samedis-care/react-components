@@ -203,7 +203,7 @@ export const DateTimeInputFieldProps: StoryObj<{
 	play: async ({ args, canvasElement, userEvent }) => {
 		// the picker builds the text field's props itself, so these four only arrive
 		// if DateTimeInput hands them to the picker rather than to the slot
-		const field = canvasElement.querySelector(".MuiPickersTextField-root");
+		const field = canvasElement.querySelector(".MuiPickersTextField-root")!;
 		await expect(field).not.toBeNull();
 		await expect(field).toHaveClass("MuiFormControl-fullWidth");
 		await expect(field.getBoundingClientRect().width).toBe(400);

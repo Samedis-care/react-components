@@ -65,9 +65,10 @@ const renderForm = (
 				model={createTestModel()}
 				id={"1"}
 				errorComponent={DefaultErrorComponent}
+				customProps={undefined}
 				showDirtyState={showDirtyState}
 			>
-				{Children as unknown as React.ComponentType<never>}
+				{Children}
 			</Form>
 		</Framework>,
 	);

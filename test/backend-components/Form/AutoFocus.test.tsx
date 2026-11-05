@@ -70,9 +70,10 @@ const renderMixedForm = (autoFocus: string | null) => {
 				model={createMixedControlModel()}
 				id={"1"}
 				errorComponent={DefaultErrorComponent}
+				customProps={undefined}
 				disableRouting
 			>
-				{Content as unknown as React.ComponentType<never>}
+				{Content}
 			</Form>
 		</Framework>,
 	);
@@ -196,9 +197,10 @@ describe("FormField autoFocus only applies while the field mounts", () => {
 					model={createRemountModel()}
 					id={"1"}
 					errorComponent={DefaultErrorComponent}
+					customProps={undefined}
 					disableRouting
 				>
-					{Content as unknown as React.ComponentType<never>}
+					{Content}
 				</Form>
 			</Framework>,
 		);
@@ -230,9 +232,10 @@ describe("FormField autoFocus only applies while the field mounts", () => {
 					model={createRemountModel()}
 					id={"1"}
 					errorComponent={DefaultErrorComponent}
+					customProps={undefined}
 					disableRouting
 				>
-					{Content as unknown as React.ComponentType<never>}
+					{Content}
 				</Form>
 			</Framework>,
 		);
@@ -255,9 +258,10 @@ describe("string array autoFocus", () => {
 					model={createRemountModel()}
 					id={"1"}
 					errorComponent={DefaultErrorComponent}
+					customProps={undefined}
 					disableRouting
 				>
-					{Content as unknown as React.ComponentType<never>}
+					{Content}
 				</Form>
 			</Framework>,
 		);

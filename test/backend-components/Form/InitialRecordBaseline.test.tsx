@@ -40,7 +40,7 @@ const makeCapture = (sink: { ctx?: FormContext }) => {
 		sink.ctx = useFormContext();
 		return null;
 	};
-	return Capture as unknown as React.ComponentType<never>;
+	return Capture;
 };
 
 describe("Form initialRecord", () => {
@@ -58,6 +58,7 @@ describe("Form initialRecord", () => {
 					// a new object on every render, as written inline
 					initialRecord={{ first_name: "Jane" }}
 					errorComponent={DefaultErrorComponent}
+					customProps={undefined}
 				>
 					{Capture}
 				</Form>
@@ -98,6 +99,7 @@ describe("Form initialRecord", () => {
 					id={null}
 					initialRecord={{ first_name: firstName }}
 					errorComponent={DefaultErrorComponent}
+					customProps={undefined}
 				>
 					{Capture}
 				</Form>
@@ -138,6 +140,7 @@ describe("Form initialRecord", () => {
 					onlySubmitNestedIfMounted
 					nestedSubmitBeforeParent
 					errorComponent={DefaultErrorComponent}
+					customProps={undefined}
 				>
 					{NestedCapture}
 				</Form>
@@ -149,8 +152,13 @@ describe("Form initialRecord", () => {
 		};
 		render(
 			<Framework>
-				<Form model={model} id={"1"} errorComponent={DefaultErrorComponent}>
-					{ParentPage as unknown as React.ComponentType<never>}
+				<Form
+					model={model}
+					id={"1"}
+					errorComponent={DefaultErrorComponent}
+					customProps={undefined}
+				>
+					{ParentPage}
 				</Form>
 			</Framework>,
 		);

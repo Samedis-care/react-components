@@ -209,12 +209,12 @@ export const WithSelection: Story = {
 		// rounder than the box would cut through the box's border
 		const root = canvasElement.querySelector(
 			".CcDataGrid-dataCell .MuiCheckbox-root",
-		);
+		)!;
 		await expect(getComputedStyle(root).overflow).toBe("hidden");
 		// the theme's shape radius (4px) instead of MUI's round root
 		await expect(getComputedStyle(root).borderTopLeftRadius).toBe("4px");
 		await expect(
-			getComputedStyle(root.querySelector(":scope > svg")).borderTopLeftRadius,
+			getComputedStyle(root.querySelector(":scope > svg")!).borderTopLeftRadius,
 		).toBe("4px");
 	},
 };
@@ -484,7 +484,7 @@ export const LimitedSelectAllWhileLoading: Story = {
 	play: async ({ args, canvas }) => {
 		await expect(await canvas.findByText("Person 1")).toBeVisible();
 		const loadData = mocked(args.loadData);
-		const onSelectionChange = mocked(args.onSelectionChange);
+		const onSelectionChange = mocked(args.onSelectionChange!);
 		const [header, first] = canvas.getAllByRole("checkbox", {
 			name: "First 50",
 		});
@@ -575,8 +575,12 @@ export const ImperativeRowUpdate: Story = {
 		);
 		return (
 			<Box
-				sx={{ height: "100%", display: "flex", flexDirection: "column" }}
-				gap={1}
+				sx={{
+					height: "100%",
+					display: "flex",
+					flexDirection: "column",
+					gap: 1,
+				}}
 			>
 				<Button onClick={promote} variant={"contained"}>
 					Promote Bob
@@ -828,8 +832,12 @@ export const OverrideIsNotPersisted: Story = {
 		);
 		return (
 			<Box
-				sx={{ height: "100%", display: "flex", flexDirection: "column" }}
-				gap={1}
+				sx={{
+					height: "100%",
+					display: "flex",
+					flexDirection: "column",
+					gap: 1,
+				}}
 			>
 				<Button onClick={showQuery} variant={"contained"}>
 					Show query

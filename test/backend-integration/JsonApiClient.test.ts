@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import JsonApiClient, {
 	RequestOptions,
+	ResponseProcessor,
 } from "../../src/backend-integration/Connector/JsonApiClient";
 import AuthMode from "../../src/backend-integration/Connector/AuthMode";
 import NetworkError from "../../src/backend-integration/Connector/NetworkError";
@@ -79,7 +80,7 @@ const pendingFetch = () =>
 	);
 
 const makeClient = () => {
-	const responseProcessor = vi.fn((_response: Response, data: unknown) => data);
+	const responseProcessor = vi.fn<ResponseProcessor>((_response, data) => data);
 	const preRequest = vi.fn();
 	const postRequest = vi.fn();
 	const exceptionHook = vi.fn();

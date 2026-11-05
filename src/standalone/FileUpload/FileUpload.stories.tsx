@@ -19,7 +19,7 @@ import {
 	VideoFileIcon,
 	WordFileIcon,
 } from "./FileIcons";
-import { Alert, Grid, Typography } from "@mui/material";
+import { Alert, Grid, Typography, type SvgIconProps } from "@mui/material";
 import { getFileType, getFileIconOrDefault } from "./Generic/File";
 
 // ---------------------------------------------------------------------------
@@ -135,7 +135,7 @@ const makeNoisePhoto = async (name: string, size = 400): Promise<File> => {
 	const canvas = document.createElement("canvas");
 	canvas.width = size;
 	canvas.height = size;
-	const ctx = canvas.getContext("2d");
+	const ctx = canvas.getContext("2d")!;
 	const pixels = ctx.createImageData(size, size);
 	for (let i = 0; i < pixels.data.length; i++) {
 		pixels.data[i] = i % 4 === 3 ? 255 : Math.floor(Math.random() * 256);
@@ -187,7 +187,7 @@ export const SizeLimits: FUGStory = {
 	},
 	play: async ({ canvas, canvasElement }) => {
 		const input =
-			canvasElement.querySelector<HTMLInputElement>('input[type="file"]');
+			canvasElement.querySelector<HTMLInputElement>('input[type="file"]')!;
 
 		const photo = await makeNoisePhoto("photo.png");
 		await expect(photo.size).toBeGreaterThan(100 * 1024);
@@ -217,7 +217,7 @@ const makeColorImage = (color: string, accent: string, size = 128): string => {
 	const canvas = document.createElement("canvas");
 	canvas.width = size;
 	canvas.height = size;
-	const ctx = canvas.getContext("2d");
+	const ctx = canvas.getContext("2d")!;
 	// background
 	ctx.fillStyle = color;
 	ctx.fillRect(0, 0, size, size);
@@ -254,7 +254,9 @@ const makeColorImage = (color: string, accent: string, size = 128): string => {
 export const ImageSelectorModern: StoryObj = {
 	name: "ImageSelector — modern (with preview dialog)",
 	render: () => {
-		const [value, setValue] = useState(makeColorImage("#e53935", "#ffcdd2"));
+		const [value, setValue] = useState<string | Blob>(
+			makeColorImage("#e53935", "#ffcdd2"),
+		);
 		return (
 			<div style={{ width: 300, height: 200 }}>
 				<ImageSelector
@@ -277,7 +279,7 @@ export const ImageSelectorModern: StoryObj = {
 export const ImageSelectorEmpty: StoryObj = {
 	name: "ImageSelector — empty",
 	render: () => {
-		const [value, setValue] = useState("");
+		const [value, setValue] = useState<string | Blob>("");
 		return (
 			<div style={{ width: 300, height: 200 }}>
 				<ImageSelector
@@ -302,7 +304,7 @@ export const ImageSelectorWithValue: StoryObj = {
 		const redPixel =
 			"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==";
 
-		const [value, setValue] = useState(redPixel);
+		const [value, setValue] = useState<string | Blob>(redPixel);
 		return (
 			<div style={{ width: 300, height: 200 }}>
 				<ImageSelector
@@ -352,7 +354,7 @@ const makeUndecodableImage = () =>
 export const ImageSelectorUnsupportedImage: StoryObj = {
 	name: "ImageSelector — unsupported image reports an error",
 	render: () => {
-		const [value, setValue] = useState("");
+		const [value, setValue] = useState<string | Blob>("");
 		const [error, setError] = useState("");
 		const [errorName, setErrorName] = useState("");
 		return (
@@ -374,14 +376,16 @@ export const ImageSelectorUnsupportedImage: StoryObj = {
 				/>
 				<div data-testid="error-message">{error}</div>
 				<div data-testid="error-name">{errorName}</div>
-				<div data-testid="current-value">{value}</div>
+				<div data-testid="current-value">
+					{typeof value === "string" ? value : "a picked image"}
+				</div>
 			</div>
 		);
 	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const input =
-			canvasElement.querySelector<HTMLInputElement>('input[type="file"]');
+			canvasElement.querySelector<HTMLInputElement>('input[type="file"]')!;
 		await expect(input).not.toBeNull();
 
 		await userEvent.upload(input, makeUndecodableImage());
@@ -501,7 +505,7 @@ export const MultiImageUnsupportedImage: StoryObj = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const input =
-			canvasElement.querySelector<HTMLInputElement>('input[type="file"]');
+			canvasElement.querySelector<HTMLInputElement>('input[type="file"]')!;
 		await expect(input).not.toBeNull();
 
 		await userEvent.upload(input, makeUndecodableImage());
@@ -743,7 +747,10 @@ export const MultiImageDialogMessage: StoryObj<
 // FileIcons gallery
 // ---------------------------------------------------------------------------
 
-const fileIconRows: { label: string; component: React.ComponentType }[] = [
+const fileIconRows: {
+	label: string;
+	component: React.ComponentType<SvgIconProps>;
+}[] = [
 	{ label: "Archive (.zip, .rar, ...)", component: ArchiveFileIcon },
 	{ label: "Audio (.mp3, .wav, ...)", component: AudioFileIcon },
 	{ label: "Code (.js, .ts, .py, ...)", component: CodeFileIcon },
@@ -887,7 +894,7 @@ export const DirtyMarkerOnGroupBoxLabels: StoryObj = {
 	name: "Dirty marker — file upload and image selector",
 	render: () => {
 		const [files, setFiles] = useState<FileData[]>([]);
-		const [value, setValue] = useState("");
+		const [value, setValue] = useState<string | Blob>("");
 		return (
 			<Grid container spacing={2} sx={{ width: 640 }}>
 				<Grid size={6}>
@@ -895,6 +902,7 @@ export const DirtyMarkerOnGroupBoxLabels: StoryObj = {
 						files={files}
 						onChange={setFiles}
 						label="Attachments"
+						previewSize={64}
 						dirty
 						handleError={() => {}}
 					/>
@@ -903,6 +911,9 @@ export const DirtyMarkerOnGroupBoxLabels: StoryObj = {
 					<ImageSelector
 						name="unmodified"
 						value={value}
+						capture={false}
+						alt="Profile picture"
+						readOnly={false}
 						onChange={(_name, v) => setValue(v)}
 						label="Profile picture"
 					/>
@@ -911,7 +922,7 @@ export const DirtyMarkerOnGroupBoxLabels: StoryObj = {
 		);
 	},
 	play: async ({ canvas }) => {
-		const marker = canvas.getByText("Attachments").querySelector("span");
+		const marker = canvas.getByText("Attachments").querySelector("span")!;
 		await expect(marker).not.toBe(null);
 		// a painted dot, not just an empty span
 		await expect(getComputedStyle(marker).width).toBe("6px");

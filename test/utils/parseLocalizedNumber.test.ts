@@ -58,7 +58,7 @@ describe("parseLocalizedNumber", () => {
 				expect(parseLocalizedNumber(value, options)).toBe(expected);
 			});
 
-			it.each([
+			it.each<[Intl.NumberFormatOptions | undefined]>([
 				[undefined],
 				[EUR],
 				[{ maximumFractionDigits: 0 }],

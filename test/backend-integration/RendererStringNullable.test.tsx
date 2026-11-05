@@ -24,6 +24,8 @@ const renderParams = (
 	initialValue: value,
 	label: "Notes",
 	touched: false,
+	dirty: false,
+	autoFocus: false,
 	visibility: {
 		disabled: false,
 		hidden: false,

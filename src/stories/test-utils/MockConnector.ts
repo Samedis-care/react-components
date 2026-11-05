@@ -72,7 +72,10 @@ class MockConnector extends Connector {
 		return [rows.slice(start, end), { totalRows, filteredRows }];
 	}
 
-	create(data: Record<string, unknown>): ModelGetResponse<ModelUnknown> {
+	// typed as Connector's create, so that a subclass can hold an upload open
+	create(
+		data: Record<string, unknown>,
+	): Promise<ModelGetResponse<ModelUnknown>> | ModelGetResponse<ModelUnknown> {
 		const id = String(this.nextId++);
 		const record = { ...data, id };
 		this.data.set(id, record);

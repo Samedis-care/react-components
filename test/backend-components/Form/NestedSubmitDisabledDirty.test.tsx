@@ -56,6 +56,7 @@ const renderForms = (disableNestedSubmit: boolean) => {
 				nestedFormName={"child"}
 				disableNestedSubmit={disable}
 				errorComponent={DefaultErrorComponent}
+				customProps={undefined}
 			>
 				{NestedCapture}
 			</Form>
@@ -63,8 +64,13 @@ const renderForms = (disableNestedSubmit: boolean) => {
 	};
 	render(
 		<Framework>
-			<Form model={model} id={"1"} errorComponent={DefaultErrorComponent}>
-				{ParentPage as unknown as React.ComponentType<never>}
+			<Form
+				model={model}
+				id={"1"}
+				errorComponent={DefaultErrorComponent}
+				customProps={undefined}
+			>
+				{ParentPage}
 			</Form>
 		</Framework>,
 	);

@@ -35,7 +35,8 @@ if (!i18next.isInitialized) {
 const DAY_FIRST_LOCALE = "day-first";
 moment.defineLocale(DAY_FIRST_LOCALE, {
 	parentLocale: "en",
-	longDateFormat: { L: "DD.MM.YYYY", LT: "HH:mm" },
+	// the formats left out come from the parent locale, which moment's types don't model
+	longDateFormat: { L: "DD.MM.YYYY", LT: "HH:mm" } as moment.LongDateFormatSpec,
 });
 // defineLocale makes the new locale current, which would change every story
 moment.locale("en");
@@ -135,7 +136,7 @@ const clickDay = async (userEvent: PlayContext["userEvent"], day: string) => {
 	const cells = await screen.findAllByRole("gridcell");
 	const cell = cells.find((candidate) => candidate.textContent === day);
 	await expect(cell).toBeTruthy();
-	await userEvent.click(cell);
+	await userEvent.click(cell!);
 };
 
 export const PickFromCalendar: StoryObj<BehaviourArgs> = {

@@ -6,7 +6,7 @@ import useCrudSelect, {
 	UseCrudSelectParams,
 } from "../../../src/backend-components/Selector/useCrudSelect";
 import { Connector, ModelUnknown } from "../../../src/backend-integration";
-import { BaseSelectorData } from "../../../src/standalone";
+import { BaseSelectorData, getStringLabel } from "../../../src/standalone";
 import PartialApplyError from "../../../src/backend-components/Form/PartialApplyError";
 
 afterEach(cleanup);
@@ -227,7 +227,7 @@ describe("useCrudSelect prepareNewEntry", () => {
 					label: "L" + (record.id as string),
 					note: record.note as string | undefined,
 				}),
-				getIdOfData: (data) => data.label,
+				getIdOfData: (data) => getStringLabel(data),
 			}),
 		);
 		await waitFor(() => expect(result.current.loading).toBe(false));

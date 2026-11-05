@@ -229,7 +229,7 @@ const CrudMultiSelectStory = () => {
 
 	return (
 		<>
-			<CrudMultiSelect<string, never, null, AssignmentData>
+			<CrudMultiSelect
 				model={model}
 				connector={connector}
 				errorComponent={ErrorComponent}
@@ -264,7 +264,7 @@ const CrudMultiSelectStory = () => {
 						type="date"
 						value={assignedFrom}
 						onChange={(ev) => setAssignedFrom(ev.target.value)}
-						InputLabelProps={{ shrink: true }}
+						slotProps={{ inputLabel: { shrink: true } }}
 					/>
 					<TextField
 						label="Note"

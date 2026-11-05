@@ -57,7 +57,7 @@ const buildParams = <T,>(
 
 const RadioDemo = () => {
 	const [value, setValue] = useState("alpha");
-	const renderer = useMemo(() => new RendererEnumRadio(values), []);
+	const renderer = useMemo(() => new RendererEnumRadio(values, "alpha"), []);
 	const handleChange = useCallback(
 		(_field: string, next: string) => setValue(next),
 		[],
@@ -77,7 +77,10 @@ const MultiCheckboxDemo = () => {
 
 const SimpleSelectDemo = () => {
 	const [value, setValue] = useState("alpha");
-	const renderer = useMemo(() => new RendererEnumSimpleSelect(values), []);
+	const renderer = useMemo(
+		() => new RendererEnumSimpleSelect(values, "alpha"),
+		[],
+	);
 	const handleChange = useCallback(
 		(_field: string, next: string) => setValue(next),
 		[],

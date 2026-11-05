@@ -32,6 +32,8 @@ const renderParams = (
 	initialValue: value,
 	label: "Birthday",
 	touched: false,
+	dirty: false,
+	autoFocus: false,
 	visibility: {
 		disabled: false,
 		hidden: false,
