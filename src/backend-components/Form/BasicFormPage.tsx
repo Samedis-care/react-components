@@ -24,7 +24,7 @@ import FormPageLayout, {
 } from "../../standalone/Form/FormPageLayout";
 import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { Transition } from "history";
+import { Action, Transition } from "history";
 import { RouteContext } from "../../standalone/Routes/Route";
 import { useThemeProps } from "@mui/material";
 import { CrudFormProps } from "../CRUD";
@@ -183,14 +183,36 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	useEffect(() => {
 		// if the form is read-only, don't annoy the user
 		if (readOnly) return;
+		// set while the history block is lifted for a POP inside the form page, see passThrough
+		let stopWaitingForPop: (() => void) | null = null;
+		const releaseHistoryBlock = () => {
+			if (unblock.current) {
+				unblock.current();
+				unblock.current = undefined;
+			}
+		};
 		const blocker = (transition: Transition) => {
 			const allowTransition = () => {
 				// temp unblock to retry transaction
-				if (unblock.current) {
-					unblock.current();
-					unblock.current = undefined;
-				}
+				releaseHistoryBlock();
 				transition.retry();
+			};
+			// lets a navigation inside the form page through and keeps the page guarded
+			const passThrough = () => {
+				releaseHistoryBlock();
+				if (transition.action === Action.Pop) {
+					// A browser history reverts every POP while a blocker is set and retries
+					// it asynchronously (history.go), so block again only once the retried POP
+					// has arrived: blocking at once would revert it again, and so on forever.
+					stopWaitingForPop = FrameworkHistory.listen(() =>
+						applyGuards(dirtyRef.current),
+					);
+					transition.retry();
+				} else {
+					// PUSH and REPLACE are retried synchronously
+					transition.retry();
+					applyGuards(dirtyRef.current);
+				}
 			};
 			//console.log("History.block(", location, ",", action, ")", match);
 			// the form may have gone clean since the guards were applied (a submit resolves
@@ -205,8 +227,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 				!disableRouting &&
 				transition.location.pathname.startsWith(routeUrl)
 			) {
-				allowTransition();
-				unblock.current = FrameworkHistory.block(blocker);
+				passThrough();
 				return;
 			}
 			// otherwise: ask user for confirmation
@@ -227,6 +248,10 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 		// flag which a pending re-render would have cleared. Idempotent in both directions.
 		let releaseLocks: (() => void) | null = null;
 		const applyGuards = (isDirty: boolean) => {
+			if (stopWaitingForPop) {
+				stopWaitingForPop();
+				stopWaitingForPop = null;
+			}
 			if (isDirty) {
 				if (!unblock.current) unblock.current = FrameworkHistory.block(blocker);
 				if (releaseLocks) return;
@@ -237,10 +262,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 					if (formDialog) formDialog.unblockClosing();
 				};
 			} else {
-				if (unblock.current) {
-					unblock.current();
-					unblock.current = undefined;
-				}
+				releaseHistoryBlock();
 				if (releaseLocks) {
 					releaseLocks();
 					releaseLocks = null;
