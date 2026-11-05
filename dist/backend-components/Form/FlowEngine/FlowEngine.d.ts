@@ -1,5 +1,5 @@
 import React from "react";
-import { PageProps } from "../Form";
+import { FormSubmitOptions, PageProps } from "../Form";
 import { ModelUnknown } from "../../../backend-integration";
 export interface FlowEngineFormProps {
     buttons: React.ReactNode;
@@ -8,26 +8,33 @@ export type FlowFormProps<M extends ModelUnknown, CustomPropsT> = PageProps<M, F
 export interface FlowStageProps<M extends ModelUnknown, StageT extends string, CustomPropsT> extends FlowStageContextType<StageT> {
     formProps: PageProps<M, CustomPropsT>;
 }
+/**
+ * The options of the submit a stage change makes, besides submitToServer
+ */
+export type FlowStageSubmitOptions = Omit<FormSubmitOptions, "submitToServer">;
 export interface FlowStageContextType<StageT extends string> {
     /**
      * Go to next stage (or current stage to submit)
      * @param nextStage The next stage
      * @param submitToServer Submit to server?
+     * @param options The submit's further options, e.g. ignoreWarnings when the
+     *                warnings were already confirmed by a submit just before
      * @throws ValidationError
      * @remarks this calls FormEngine submitForm and if successful sets the stage
      */
-    goToStage: (nextStage: StageT, submitToServer: boolean) => Promise<void>;
+    goToStage: (nextStage: StageT, submitToServer: boolean, options?: FlowStageSubmitOptions) => Promise<void>;
     /**
      * Like goToStage, but swallows the error instead of throwing
      * @param nextStage The next stage
      * @param submitToServer Submit to server?
+     * @param options The submit's further options, see goToStage
      * @returns false if submitting failed, true otherwise
      * @remarks if submitting fails the stage is left unchanged. The error is shown by the form's
      *          errorComponent and reported via the global error reporting config regardless.
      * @see goToStage
      * @see FormContextData.safeSubmit
      */
-    safeGoToStage: (nextStage: StageT, submitToServer: boolean) => Promise<boolean>;
+    safeGoToStage: (nextStage: StageT, submitToServer: boolean, options?: FlowStageSubmitOptions) => Promise<boolean>;
     /**
      * the current stage
      */

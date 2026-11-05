@@ -14,13 +14,13 @@ const FlowEngine = (props) => {
     const { flowEngine, submit } = useFormContextLite();
     if (!flowEngine)
         throw new Error("Form not configured for flowEngine");
-    const goToStage = useCallback(async (nextStage, submitToServer) => {
-        await submit({ submitToServer });
+    const goToStage = useCallback(async (nextStage, submitToServer, options) => {
+        await submit({ ...options, submitToServer });
         setStage(nextStage);
     }, [submit]);
-    const safeGoToStage = useCallback(async (nextStage, submitToServer) => {
+    const safeGoToStage = useCallback(async (nextStage, submitToServer, options) => {
         try {
-            await goToStage(nextStage, submitToServer);
+            await goToStage(nextStage, submitToServer, options);
             return true;
         }
         catch {
