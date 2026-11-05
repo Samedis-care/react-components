@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
 import * as Icons from "../../src/standalone/Icons";
+import SuccessOutlinedIcon from "../../src/standalone/Icons/SuccessOutlinedIcon";
+
+// every icon in src/standalone/Icons, including the one the barrel misses
+const ALL_ICONS = { ...Icons, SuccessOutlinedIcon };
+type IconName = keyof typeof ALL_ICONS;
+const ALL_NAMES = Object.keys(ALL_ICONS) as IconName[];
 
 describe("Icons", () => {
 	const expectedExports = [
@@ -47,5 +53,36 @@ describe("Icons", () => {
 		for (const name of expectedExports) {
 			expect(keys).toContain(name);
 		}
+	});
+});
+
+describe("Icons component shape", () => {
+	interface MemoShape {
+		$$typeof: symbol;
+		type: {
+			$$typeof?: symbol;
+			name?: string;
+			render?: { name: string };
+		};
+	}
+
+	it("wraps each icon in React.memo around a function named like the export", () => {
+		for (const name of ALL_NAMES) {
+			const icon = ALL_ICONS[name] as unknown as MemoShape;
+			expect(icon.$$typeof, name).toBe(Symbol.for("react.memo"));
+			// the forwardRef render function carries the name (ISSUE-3460-ITEM-1)
+			expect(icon.type.render?.name ?? icon.type.name, name).toBe(name);
+		}
+	});
+
+	it("[ISSUE-3460-ITEM-1] forwards refs on React 18 too: each icon is memo(forwardRef(...))", () => {
+		// React 18, which the peer range allows, passes no ref to a plain function
+		// component, so the ref stays null; the tests run React 19, where ref is a prop.
+		const refDroppedOnReact18 = ALL_NAMES.filter(
+			(name) =>
+				(ALL_ICONS[name] as unknown as MemoShape).type.$$typeof !==
+				Symbol.for("react.forward_ref"),
+		);
+		expect(refDroppedOnReact18).toEqual([]);
 	});
 });
