@@ -95,6 +95,18 @@ const HiddenDiv = styled("div", {
 	position: "absolute",
 });
 
+/**
+ * Whether a canvas cropped by trim-canvas holds no ink. trim-canvas crops to
+ * the non-transparent pixels and leaves a single transparent pixel when there
+ * are none.
+ * @param trimmed The canvas trim-canvas returned
+ * @returns true when the canvas holds no ink
+ */
+const isBlankTrim = (trimmed: HTMLCanvasElement): boolean =>
+	trimmed.width === 1 &&
+	trimmed.height === 1 &&
+	trimmed.getContext("2d")?.getImageData(0, 0, 1, 1).data[3] === 0;
+
 export type SignPadDialogClassKey =
 	| "root"
 	| "dialogTitle"
@@ -156,7 +168,12 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 			copy.width = canvas.width;
 			copy.height = canvas.height;
 			copy.getContext("2d")!.drawImage(canvas, 0, 0);
-			const newSignature = trimCanvas(copy).toDataURL("image/png");
+			const trimmed = trimCanvas(copy);
+			// isEmpty() counts strokes, not pixels: a canvas whose bitmap was
+			// lost still has its strokes, and must not save a blank image
+			const newSignature = isBlankTrim(trimmed)
+				? ""
+				: trimmed.toDataURL("image/png");
 			if (setSignature) setSignature(newSignature);
 		} else {
 			if (setSignature) setSignature(resetCanvas ? (signature ?? "") : "");
@@ -240,6 +257,9 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 						}}
 						width={canvasSize[0]}
 						height={canvasSize[1]}
+						// re-dimensioning the canvas clears its bitmap: draw the
+						// strokes again, so the ink survives a resize
+						redrawOnResize
 					/>
 				) : (
 					<ImageDiv className={classes?.imageDiv}>

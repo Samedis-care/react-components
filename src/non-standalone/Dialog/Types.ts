@@ -168,7 +168,10 @@ export interface IDialogConfigSign {
 	 */
 	signature: string | null;
 	/**
-	 * Callback method which returns signature base64 string
+	 * Called when the user presses Save: with the drawn signature as a PNG data
+	 * URL cropped to the ink, with `""` when the canvas holds no ink (also when
+	 * the stored signature was cleared), or with the unchanged `signature` when
+	 * it was shown and not cleared
 	 */
 	setSignature?: (url: string) => void;
 	/**
