@@ -2,10 +2,12 @@ import { describe, it, expect } from "vitest";
 import * as Icons from "../../src/standalone/Icons";
 import SuccessOutlinedIcon from "../../src/standalone/Icons/SuccessOutlinedIcon";
 
-// every icon in src/standalone/Icons, including the one the barrel misses
+// every icon in src/standalone/Icons, SuccessOutlinedIcon also if the barrel drops it again (ISSUE-3460-ITEM-5)
 const ALL_ICONS = { ...Icons, SuccessOutlinedIcon };
 type IconName = keyof typeof ALL_ICONS;
 const ALL_NAMES = Object.keys(ALL_ICONS) as IconName[];
+
+const importTimeout = 90000;
 
 describe("Icons", () => {
 	const expectedExports = [
@@ -54,6 +56,24 @@ describe("Icons", () => {
 			expect(keys).toContain(name);
 		}
 	});
+});
+
+describe("Icons exports", () => {
+	it(
+		"[ISSUE-3460-ITEM-5] exports SuccessOutlinedIcon from the Icons barrel and the package root",
+		async () => {
+			const root = (await import("../../src")) as Record<string, unknown>;
+			expect(
+				(Icons as Record<string, unknown>).SuccessOutlinedIcon,
+				"SuccessOutlinedIcon is missing from src/standalone/Icons/index.ts",
+			).toBe(SuccessOutlinedIcon);
+			expect(
+				root.SuccessOutlinedIcon,
+				"SuccessOutlinedIcon is missing from the package root",
+			).toBe(SuccessOutlinedIcon);
+		},
+		importTimeout,
+	);
 });
 
 describe("Icons component shape", () => {
