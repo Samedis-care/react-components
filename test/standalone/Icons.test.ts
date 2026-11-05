@@ -1,6 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, assertType } from "vitest";
 import * as Icons from "../../src/standalone/Icons";
 import SuccessOutlinedIcon from "../../src/standalone/Icons/SuccessOutlinedIcon";
+import { SvgIcon } from "@mui/material";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
+import type { SvgIconComponent } from "@mui/icons-material";
 
 // every icon in src/standalone/Icons, SuccessOutlinedIcon also if the barrel drops it again (ISSUE-3460-ITEM-5)
 const ALL_ICONS = { ...Icons, SuccessOutlinedIcon };
@@ -104,5 +107,30 @@ describe("Icons component shape", () => {
 				Symbol.for("react.forward_ref"),
 		);
 		expect(refDroppedOnReact18).toEqual([]);
+	});
+});
+
+describe("Icons as Material icons", () => {
+	interface RenderShape {
+		type: { render?: { muiName?: unknown } };
+	}
+	const muiNameOf = (icon: unknown) =>
+		(icon as RenderShape).type.render?.muiName;
+
+	it("[ISSUE-3460-ITEM-10] each icon is assignable to SvgIconComponent, the type of every Material icon", () => {
+		// A type test: vitest does not type-check, tsc does
+		// (node_modules/.bin/tsc -p tsconfig-test.json --noEmit). While an icon is
+		// not a SvgIconComponent, this line does not compile.
+		assertType<Record<IconName, SvgIconComponent>>(ALL_ICONS);
+	});
+
+	it("[ISSUE-3460-ITEM-10] sets muiName on each icon's render function, where a Material icon has it", () => {
+		// MUI's createSvgIcon sets SvgIcon.muiName on the render function inside
+		// memo(forwardRef(...))
+		expect(muiNameOf(FilterAltIcon), "Material icon").toBe(SvgIcon.muiName);
+		const withoutMuiName = ALL_NAMES.filter(
+			(name) => muiNameOf(ALL_ICONS[name]) !== SvgIcon.muiName,
+		);
+		expect(withoutMuiName).toEqual([]);
 	});
 });
