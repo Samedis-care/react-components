@@ -207,7 +207,7 @@
 				"close": "Close",
 				"signature": "Signature"
 			},
-			"sign-here": "Digitally signed here"
+			"sign-here": "Sign here digitally"
 		},
 		"toast": {
 			"close": "Close"

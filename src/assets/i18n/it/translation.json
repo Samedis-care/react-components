@@ -207,7 +207,7 @@
 				"close": "Chiudi",
 				"signature": "Firma"
 			},
-			"sign-here": "Firmato digitalmente qui"
+			"sign-here": "Firma qui digitalmente"
 		},
 		"toast": {
 			"close": "Chiudi"

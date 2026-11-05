@@ -203,7 +203,7 @@
 				"close": "Sluiten",
 				"signature": "Handtekening"
 			},
-			"sign-here": "Digitaal ondertekend hier"
+			"sign-here": "Teken hier digitaal"
 		},
 		"signal-portlet": {
 			"last-updated": "Laatste vernieuwing: {{AGE}}",

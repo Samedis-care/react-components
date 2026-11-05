@@ -203,7 +203,7 @@
 				"close": "Fermer",
 				"signature": "Signature"
 			},
-			"sign-here": "Signé numériquement ici"
+			"sign-here": "Signez ici numériquement"
 		},
 		"signal-portlet": {
 			"last-updated": "Dernière actualisation : {{AGE}}",
