@@ -482,7 +482,10 @@ export type DataGridIdFilterData = Omit<
 
 export interface DataGridCustomFilterDataComponentProps<T = unknown> {
 	/**
-	 * custom filter data
+	 * What setFilter stored, parsed from the column filter's value1 (JSON).
+	 * undefined while the column has no filter, and when value1 is not JSON
+	 * (a filter from a URL or a defaultFilter, or one stored while the column
+	 * had another filter type).
 	 */
 	filter: T | undefined;
 	/**

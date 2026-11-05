@@ -44,6 +44,22 @@ import moment, { Moment } from "moment";
 import { BackendMultiSelect } from "../../../backend-components";
 
 /**
+ * A custom filter's value1 is what its setFilter stored, as JSON. A value1 that
+ * is not JSON (from a URL, a defaultFilter, or stored while the column had
+ * another filter type) opens as no filter instead of throwing during render.
+ * @param value The stored filter value
+ * @returns The parsed filter, or undefined if there is none or it is not JSON
+ */
+const customFilterValue = (value: string | undefined): unknown => {
+	if (!value) return undefined;
+	try {
+		return JSON.parse(value) as unknown;
+	} catch {
+		return undefined;
+	}
+};
+
+/**
  * Date filter values are stored as date-only values (12:00 UTC) — show them by
  * their UTC day, so the day doesn't shift in timezones at or beyond UTC+12.
  * @param value The stored filter value
@@ -459,11 +475,8 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 
 	if (isFirstFilter && props.valueType === "custom") {
 		const customFilterData = props.valueData as DataGridCustomFilterData;
-		const customFilterValue: unknown | undefined = props.value?.value1
-			? JSON.parse(props.value?.value1)
-			: undefined;
 		return React.createElement(customFilterData.filterComponent, {
-			filter: customFilterValue,
+			filter: customFilterValue(props.value?.value1),
 			setFilter: setCustomFilter,
 			close,
 		});
