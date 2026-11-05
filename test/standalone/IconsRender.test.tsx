@@ -43,3 +43,15 @@ describe.each(ALL_NAMES)("%s", (name) => {
 		expect(callbackRef.mock.lastCall?.[0]).toBeNull();
 	});
 });
+
+describe("fill", () => {
+	it("[ISSUE-3460-ITEM-4] SignIcon hard-codes no fill and passes a caller's fill through", () => {
+		const { svg } = renderIcon(<Icons.SignIcon />);
+		expect(svg).not.toHaveAttribute("fill");
+		cleanup();
+		expect(renderIcon(<Icons.SignIcon fill={"red"} />).svg).toHaveAttribute(
+			"fill",
+			"red",
+		);
+	});
+});

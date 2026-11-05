@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-05 | [SignIcon passes a fill prop through and sets no fill of its own](2026-11-05-sign-icon-fill.md) | behavior |
 | 2026-11-05 | [The icons forward refs on React 18](2026-11-05-icons-forward-refs.md) | behavior |
 | 2026-11-02 | [CrudFileUpload's additionalFiles no longer count toward its limits](2026-11-02-crud-file-upload-extras-outside-limits.md) | behavior |
 | 2026-11-02 | [CrudFileUpload no longer takes defaultFiles and onRestoreFile](2026-11-02-crud-file-upload-drops-no-op-props.md) | type |
