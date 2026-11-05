@@ -1,15 +1,22 @@
 import React from "react";
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import { ThemeProvider, createTheme } from "@mui/material";
+import { ThemeProvider, createTheme, Theme } from "@mui/material";
 import Loader from "../../src/standalone/Loader";
 
-afterEach(cleanup);
+afterEach(() => {
+	cleanup();
+	vi.restoreAllMocks();
+});
 
 const theme = createTheme();
 
-const renderLoader = (ui: React.ReactElement) =>
-	render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+const withTheme = (ui: React.ReactElement, t: Theme = theme) => (
+	<ThemeProvider theme={t}>{ui}</ThemeProvider>
+);
+
+const renderLoader = (ui: React.ReactElement, t: Theme = theme) =>
+	render(withTheme(ui, t));
 
 describe("Loader", () => {
 	it("renders a circular progress indicator", () => {
@@ -37,5 +44,106 @@ describe("Loader", () => {
 		const paragraph = container.querySelector("p");
 		expect(paragraph).toBeInTheDocument();
 		expect(paragraph?.textContent).toBe("Please wait");
+	});
+
+	it("[ISSUE-3461-ITEM-10] applies theme variants for CcLoader", () => {
+		const themed = createTheme({
+			components: {
+				CcLoader: {
+					variants: [{ props: {}, style: { backgroundColor: "rgb(1, 2, 3)" } }],
+				},
+			},
+		});
+		const { container } = renderLoader(<Loader />, themed);
+		expect(
+			getComputedStyle(container.firstElementChild as HTMLElement)
+				.backgroundColor,
+		).toBe("rgb(1, 2, 3)");
+	});
+
+	it("[ISSUE-3461-ITEM-10] matches theme variants on the Loader's props, with their defaults", () => {
+		const themed = createTheme({
+			components: {
+				CcLoader: {
+					variants: [
+						{
+							props: { typographyVariant: "caption" },
+							style: { backgroundColor: "rgb(1, 2, 3)" },
+						},
+						{
+							props: { typographyVariant: "h6" },
+							style: { color: "rgb(4, 5, 6)" },
+						},
+						{
+							props: ({ text }) => !!text,
+							style: { borderTopColor: "rgb(7, 8, 9)" },
+						},
+					],
+				},
+			},
+		});
+		const { container, rerender } = renderLoader(
+			<Loader text={"Loading"} typographyVariant={"caption"} />,
+			themed,
+		);
+		const root = () => getComputedStyle(container.firstElementChild as Element);
+		expect(root().backgroundColor).toBe("rgb(1, 2, 3)");
+		expect(root().color).not.toBe("rgb(4, 5, 6)");
+		expect(root().borderTopColor).toBe("rgb(7, 8, 9)");
+
+		// without text, typographyVariant is its default "h6"
+		rerender(withTheme(<Loader />, themed));
+		expect(root().backgroundColor).not.toBe("rgb(1, 2, 3)");
+		expect(root().color).toBe("rgb(4, 5, 6)");
+		expect(root().borderTopColor).not.toBe("rgb(7, 8, 9)");
+	});
+
+	it("[ISSUE-3461-ITEM-10] matches theme variants on props set by the theme's defaultProps", () => {
+		const themed = createTheme({
+			components: {
+				CcLoader: {
+					defaultProps: { typographyVariant: "caption" },
+					variants: [
+						{
+							props: { typographyVariant: "caption" },
+							style: { backgroundColor: "rgb(1, 2, 3)" },
+						},
+					],
+				},
+			},
+		});
+		const { container } = renderLoader(<Loader />, themed);
+		expect(
+			getComputedStyle(container.firstElementChild as Element).backgroundColor,
+		).toBe("rgb(1, 2, 3)");
+	});
+
+	it("[ISSUE-3461-ITEM-10] keeps the props theme variants match on off the DOM", () => {
+		const error = vi.spyOn(console, "error").mockImplementation(() => {});
+		const { container } = renderLoader(
+			<Loader text={"Loading"} typographyVariant={"caption"} />,
+		);
+		const root = container.firstElementChild as Element;
+		expect(root.getAttributeNames()).toEqual(["class"]);
+		expect(error).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3461-ITEM-10] applies the theme's root styleOverrides to its outer box", () => {
+		const themed = createTheme({
+			components: {
+				CcLoader: {
+					styleOverrides: { root: { backgroundColor: "rgb(1, 2, 3)" } },
+				},
+			},
+		});
+		const { container } = renderLoader(<Loader text={"Loading"} />, themed);
+		const root = container.firstElementChild as Element;
+		expect(root).toContainElement(screen.getByRole("progressbar"));
+		expect(getComputedStyle(root).backgroundColor).toBe("rgb(1, 2, 3)");
+	});
+
+	it('[ISSUE-3461-ITEM-10] takes "inherit" as typographyVariant, as Typography does', () => {
+		renderLoader(<Loader text={"Loading"} typographyVariant={"inherit"} />);
+		expect(screen.getByText("Loading")).toHaveClass("MuiTypography-inherit");
 	});
 });

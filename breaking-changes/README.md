@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-05 | [The Loader's outer slot is `root`, and theme variants apply to it](2026-11-05-loader-root-slot.md) | type, behavior |
 | 2026-11-05 | [AppsIcon shows both rows of squares, centered](2026-11-05-apps-icon-viewbox.md) | behavior |
 | 2026-11-05 | [SignIcon passes a fill prop through and sets no fill of its own](2026-11-05-sign-icon-fill.md) | behavior |
 | 2026-11-05 | [The icons forward refs on React 18](2026-11-05-icons-forward-refs.md) | behavior |
