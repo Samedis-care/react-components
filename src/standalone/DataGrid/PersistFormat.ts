@@ -321,12 +321,17 @@ const isLegacy = (
  * legacy data doesn't record. The legacy columnState carries an entry for every
  * column the grid rendered, so its keys (plus whatever the visibility arrays
  * mention) are exactly that set.
+ *
+ * The legacy columnState is the whole sort and filter state, not a deviation
+ * from the defaults, so every column in it gets a sort and a filter entry
+ * (an unsorted column [0], an unfiltered one null). Applied to whatever the
+ * defaults are when it is read, that gives back exactly the legacy state, so
+ * the migration needs no defaults and a part of the data can be migrated on
+ * its own (see mergePersistedState).
  * @param legacy The legacy data
- * @param defaultColumnState The column state the grid would start out with
  */
 const migrateLegacyPersistedState = (
 	legacy: DataGridPersistentStateLegacy,
-	defaultColumnState: IDataGridColumnsState,
 ): DataGridPersistentState => {
 	const columnState = asRecord(legacy.columnState) as IDataGridColumnsState;
 	const state = asRecord(legacy.state);
@@ -351,7 +356,17 @@ const migrateLegacyPersistedState = (
 		}
 	}
 
-	const [sort, filter] = encodeColumnStateDiff(columnState, defaultColumnState);
+	const sort: Record<string, DataGridPersistedSort> = {};
+	const filter: Record<string, IFilterDef | null> = {};
+	for (const field in columnState) {
+		const entry: IDataGridColumnState | undefined = columnState[field];
+		if (!isPlainObject(entry)) continue;
+		const direction = entry.sort || 0;
+		// sortOrder is meaningless while the column isn't sorted
+		const order = direction === 0 ? undefined : entry.sortOrder;
+		sort[field] = order == null ? [direction] : [direction, order];
+		filter[field] = normalizeFilterDef(entry.filter) ?? null;
+	}
 	if (Object.keys(sort).length) result.sort = sort;
 	if (Object.keys(filter).length) result.filter = filter;
 
@@ -405,7 +420,7 @@ const decode = (
 	const result = getDecodedDefaults(columns, defaultColumnState);
 	const { columnHidden, columnPinned } = result.state;
 	const data = isLegacy(persisted)
-		? migrateLegacyPersistedState(persisted, defaultColumnState)
+		? migrateLegacyPersistedState(persisted)
 		: persisted;
 
 	if (cfg.includes("columns")) {
@@ -511,29 +526,53 @@ export const splitPersistedState = (
 };
 
 /**
- * Merges persisted data which was stored in separate places back together
- * @param parts The parts, in the order they should be merged
+ * Merges persisted data which was stored in separate places back together.
+ *
+ * Each part is read in its own format: a part is rewritten in the current
+ * format only when it is written, so the parts may be in different formats.
+ * Then every legacy part is migrated on its own, and the result is in the
+ * current format, with the `v` of the last part that was stored in it. A
+ * migrated part has a sort and a filter entry for every column in its legacy
+ * columnState, as the legacy format stored the whole state, not deviations
+ * from the defaults.
+ * @param parts The parts, in the order they should be merged (a later part's
+ *        keys win). Missing parts (undefined, null) are skipped.
+ * @returns The merged data, undefined when no part is there. It is in the
+ *          legacy format only when every part is.
  * @see splitPersistedState
  */
 export const mergePersistedState = (
 	parts: (DataGridPersistedData | undefined)[],
 ): DataGridPersistedData | undefined => {
-	let result: DataGridPersistedData | undefined;
-	for (const part of parts) {
+	const current = parts.filter(
+		(part): part is DataGridPersistentState => !!part && !isLegacy(part),
+	);
+	if (current.length) {
+		let merged: DataGridPersistentState | undefined;
+		for (const part of parts) {
+			if (!part) continue;
+			merged = {
+				...merged,
+				...(isLegacy(part) ? migrateLegacyPersistedState(part) : part),
+			};
+		}
+		// the version of the parts stored in the current format, not the one
+		// the migration of a legacy part put in
+		return { ...merged, v: current[current.length - 1].v };
+	}
+
+	// every part is legacy data, which nests half of the split under state, so
+	// a plain merge would drop whatever the earlier part had in there
+	let result: DataGridPersistentStateLegacy | undefined;
+	for (const part of parts as (DataGridPersistentStateLegacy | undefined)[]) {
 		if (!part) continue;
 		if (!result) {
 			result = { ...part };
 			continue;
 		}
-		// legacy data nests half of the split under state, so a plain merge would
-		// drop whatever the earlier part had in there
-		const legacyState = {
-			...(isLegacy(result) ? result.state : undefined),
-			...(isLegacy(part) ? part.state : undefined),
-		};
+		const state = { ...result.state, ...part.state };
 		result = { ...result, ...part };
-		if (isLegacy(result) && Object.keys(legacyState).length)
-			result.state = legacyState;
+		if (Object.keys(state).length) result.state = state;
 	}
 	return result;
 };

@@ -919,3 +919,94 @@ describe("persistence robustness backstop", () => {
 		expect(mergePersistedState(splitPersistedState(encoded))).toEqual(encoded);
 	});
 });
+
+describe("persisted format bugs", () => {
+	const LEGACY_FILTERS = {
+		columnState: {
+			id: { sort: 1, sortOrder: 1 },
+			name: { sort: 0, filter: filter("bob") },
+			secret: { sort: 0 },
+			pinme: { sort: 0 },
+		},
+		state: {
+			search: "needle",
+			hiddenColumns: ["name"],
+			lockedColumns: ["id"],
+			customData: { "filter[status]": "active" },
+		},
+	} as unknown as DataGridPersistentStateLegacy;
+
+	it("[ISSUE-3496-ITEM-1] a v2 sizing bucket next to a legacy filters bucket keeps the legacy filters", () => {
+		const merged = mergePersistedState([
+			{ v: DATA_GRID_PERSIST_VERSION, width: { id: 300 }, initialResize: true },
+			LEGACY_FILTERS,
+		]);
+		const result = decodePersistedState(merged, COLUMNS, defaults(), undefined);
+		expect(result.state.search).toBe("needle");
+		expect(result.state.customData).toEqual({ "filter[status]": "active" });
+		expect(result.state.columnHidden.name).toBe(true);
+		expect(result.state.columnPinned.id).toBe(true);
+		expect(dataGridPrepareFiltersAndSorts(result.columnState)).toEqual([
+			[{ field: "id", direction: 1 }],
+			{ name: filter("bob") },
+		]);
+		expect(result.columnWidth).toEqual({ id: 300 });
+	});
+
+	it("[ISSUE-3496-ITEM-1] a legacy sizing bucket next to a v2 filters bucket keeps the legacy widths", () => {
+		const [, rest] = splitPersistedState({
+			v: DATA_GRID_PERSIST_VERSION,
+			shown: ["id"],
+			hidden: ["name"],
+			search: "x",
+		});
+		const merged = mergePersistedState([
+			{ columnWidth: { id: 211, name: 222 }, state: { initialResize: true } },
+			JSON.parse(JSON.stringify(rest)) as DataGridPersistentState,
+		]);
+		const result = decodePersistedState(merged, COLUMNS, defaults(), undefined);
+		expect(result.state.search).toBe("x");
+		expect(result.columnWidth).toEqual({ id: 211, name: 222 });
+		expect(result.state.initialResize).toBe(true);
+	});
+
+	it("[ISSUE-3496-ITEM-1] a legacy filters bucket next to a v2 sizing bucket keeps a default sort and a default filter the user had cleared", () => {
+		const merged = mergePersistedState([
+			{ v: DATA_GRID_PERSIST_VERSION, width: { id: 300 } },
+			{
+				columnState: {
+					id: { sort: 0 },
+					name: { sort: 1, sortOrder: 1 },
+					secret: { sort: 0 },
+					pinme: { sort: 0 },
+				},
+				state: { hiddenColumns: [], lockedColumns: [] },
+			} as unknown as DataGridPersistentStateLegacy,
+		]);
+		const result = decodePersistedState(
+			merged,
+			COLUMNS,
+			defaults(
+				COLUMNS,
+				[{ field: "id", direction: -1 }],
+				[{ field: "pinme", filter: filter("d") }],
+			),
+			undefined,
+		);
+		expect(dataGridPrepareFiltersAndSorts(result.columnState)).toEqual([
+			[{ field: "name", direction: 1 }],
+			{},
+		]);
+	});
+
+	it("[ISSUE-3496-ITEM-1] a legacy bucket merged after a bucket of another version keeps that version", () => {
+		const newer = DATA_GRID_PERSIST_VERSION + 1;
+		const merged = mergePersistedState([
+			{ v: newer, width: { id: 300 } },
+			{ columnState: {}, state: { search: "x" } },
+		]) as DataGridPersistentState;
+		expect(merged.v).toBe(newer);
+		expect(merged.search).toBe("x");
+		expect(merged.width).toEqual({ id: 300 });
+	});
+});
