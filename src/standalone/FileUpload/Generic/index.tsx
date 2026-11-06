@@ -37,6 +37,8 @@ import { captureError } from "../../../framework/ErrorReporting";
 export interface FileUploadProps {
 	/**
 	 * The HTML name attribute on the upload button
+	 * @remarks classic: the Upload button; modern: the button around the call to action.
+	 *          Unset means none.
 	 */
 	name?: string;
 	/**
@@ -142,10 +144,14 @@ export interface FileUploadProps {
 	onRestoreFile?: (file: FileData) => void;
 	/**
 	 * onBlur event handler
+	 * @remarks Called when the upload button (see `name`) loses focus
 	 */
 	onBlur?: React.FocusEventHandler<HTMLElement>;
 	/**
 	 * Custom label for the upload files button
+	 * @remarks classic: the Upload button's text, "Upload" by default; modern: the call to
+	 *          action, "Drag & drop file here or click for an upload dialog" by default.
+	 *          It is the button's accessible name in both.
 	 */
 	uploadLabel?: string;
 	/**
@@ -434,6 +440,32 @@ const FormatText = styled(FormHelperText, {
 	textAlign: "right",
 });
 
+/**
+ * The modern variant's upload control: a button around its call to action that looks
+ * like the text, with an outline on keyboard focus
+ */
+const ModernUploadButton = styled("button", {
+	name: "CcFileUpload",
+	slot: "modernUploadButton",
+})(({ theme }) => ({
+	display: "block",
+	width: "100%",
+	margin: 0,
+	padding: 0,
+	border: 0,
+	borderRadius: theme.shape.borderRadius,
+	background: "none",
+	color: "inherit",
+	font: "inherit",
+	letterSpacing: "inherit",
+	textAlign: "inherit",
+	cursor: "pointer",
+	"&:focus-visible": {
+		outline: `2px solid ${theme.palette.primary.main}`,
+		outlineOffset: 2,
+	},
+}));
+
 const ModernUploadLabel = styled("span", {
 	name: "CcFileUpload",
 	slot: "modernUploadLabel",
@@ -452,6 +484,7 @@ export type FileUploadClassKey =
 	| "formatIconsModern"
 	| "fileInput"
 	| "formatText"
+	| "modernUploadButton"
 	| "modernUploadLabel";
 
 const FileUpload = (
@@ -976,14 +1009,24 @@ const FileUpload = (
 				>
 					{!readOnly && (
 						<Grid key={"upload"} size="grow">
-							<ModernUploadLabel
-								className={combineClassNames([
-									classes?.modernUploadLabel,
-									files.length === 0 && "CcFileUpload-modernUploadLabel-empty",
-								])}
+							{/* no click handler of its own: its click, by mouse or by Enter and
+							    Space, reaches the drop zone's, which opens the picker */}
+							<ModernUploadButton
+								type={"button"}
+								name={name}
+								onBlur={onBlur}
+								className={classes?.modernUploadButton}
 							>
-								{uploadLabel || t("standalone.file-upload.upload-modern")}
-							</ModernUploadLabel>
+								<ModernUploadLabel
+									className={combineClassNames([
+										classes?.modernUploadLabel,
+										files.length === 0 &&
+											"CcFileUpload-modernUploadLabel-empty",
+									])}
+								>
+									{uploadLabel || t("standalone.file-upload.upload-modern")}
+								</ModernUploadLabel>
+							</ModernUploadButton>
 							<FileInput
 								type={"file"}
 								accept={accept || undefined}

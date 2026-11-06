@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { FileUploadGeneric, ImageSelector } from "./index";
-import type { FileData, FileMeta } from "./Generic";
+import type { FileData, FileMeta, FileUploadProps } from "./Generic";
 import type { MultiImageImage, MultiImageProps } from "./MultiImage/MultiImage";
 import { MultiImage } from "./MultiImage";
 import {
@@ -930,5 +930,136 @@ export const DirtyMarkerOnGroupBoxLabels: StoryObj = {
 		await expect(
 			canvas.getByText("Profile picture").querySelector("span"),
 		).toBe(null);
+	},
+};
+
+// ---------------------------------------------------------------------------
+// FileUploadGeneric: keyboard, change states, theming and bug stories
+// ---------------------------------------------------------------------------
+
+/**
+ * FileUploadGeneric holding its value in state, as a form does
+ */
+const ControlledUpload = (
+	props: Partial<FileUploadProps> & { initial?: FileData[] },
+) => {
+	const { initial, onChange, ...rest } = props;
+	const [files, setFiles] = useState<FileData[]>(initial ?? []);
+	return (
+		<FileUploadGeneric
+			previewSize={rest.variant === "modern" ? 24 : 64}
+			handleError={() => {}}
+			{...rest}
+			files={files}
+			onChange={(next) => {
+				setFiles(next);
+				onChange?.(next);
+			}}
+		/>
+	);
+};
+
+/**
+ * Counts how often the hidden file input is clicked (the picker would open) and keeps
+ * the picker closed
+ * @returns The current count, and the cleanup
+ */
+const countPickerOpens = (canvasElement: HTMLElement) => {
+	const input = canvasElement.querySelector('input[type="file"]');
+	let clicks = 0;
+	const count = (evt: Event) => {
+		clicks++;
+		evt.preventDefault();
+	};
+	input?.addEventListener("click", count);
+	return {
+		clicks: () => clicks,
+		stop: () => input?.removeEventListener("click", count),
+	};
+};
+
+export const Issue3489Item2ModernUploadIsKeyboardOperable: FUGStory = {
+	args: { name: "docs", label: "Documents", variant: "modern" },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3489-ITEM-2: the modern variant (SCF's default) has no tab stop. Tab from the button before it lands on the button after it, so a keyboard user cannot add a file. Expected: a focusable upload control inside the field that opens the picker on Enter and carries `name`.",
+			},
+		},
+	},
+	render: (args) => (
+		<div style={{ width: 480 }}>
+			<button type="button">before</button>
+			<ControlledUpload {...args} />
+			<button type="button">after</button>
+		</div>
+	),
+	play: async ({ canvas, canvasElement, userEvent }) => {
+		const picker = countPickerOpens(canvasElement);
+		try {
+			canvas.getByRole("button", { name: "before" }).focus();
+			await userEvent.tab();
+			const active = document.activeElement;
+			await expect(
+				canvasElement.querySelector("fieldset")?.contains(active),
+				`Tab moved focus to "${active?.textContent ?? ""}"`,
+			).toBe(true);
+			await expect(active).toHaveAttribute("name", "docs");
+			await userEvent.keyboard("{Enter}");
+			await expect(picker.clicks()).toBe(1);
+		} finally {
+			picker.stop();
+		}
+	},
+};
+
+/**
+ * The modern upload button: Enter and Space open the file picker, a click on it opens it
+ * once, keyboard focus shows an outline, and leaving it calls onBlur.
+ */
+export const Issue3489Item2ModernUploadButtonKeyboard: FUGStory = {
+	name: "FileUploadGeneric — keyboard (modern)",
+	args: { name: "docs", onBlur: fn(), label: "Documents", variant: "modern" },
+	parameters: {
+		a11y: {
+			test: "error",
+			// the modern texts' contrast is ISSUE-3489-ITEM-10, not what this story is about
+			config: { rules: [{ id: "color-contrast", enabled: false }] },
+		},
+	},
+	render: (args) => (
+		<div style={{ width: 480 }}>
+			<button type="button">before</button>
+			<ControlledUpload {...args} />
+			<button type="button">after</button>
+		</div>
+	),
+	play: async ({ args, canvas, canvasElement, userEvent }) => {
+		const picker = countPickerOpens(canvasElement);
+		try {
+			canvas.getByRole("button", { name: "before" }).focus();
+			await userEvent.tab();
+			const upload = canvas.getByRole("button", {
+				name: "Drag & drop file here or click for an upload dialog",
+			});
+			await expect(upload).toHaveFocus();
+			const cs = getComputedStyle(upload);
+			await expect(
+				cs.outlineStyle !== "none" && parseFloat(cs.outlineWidth) >= 2,
+				`outline ${cs.outlineStyle} ${cs.outlineWidth}`,
+			).toBe(true);
+			await userEvent.keyboard("{Enter}");
+			await expect(picker.clicks()).toBe(1);
+			await userEvent.keyboard(" ");
+			await expect(picker.clicks()).toBe(2);
+			await userEvent.click(upload);
+			await expect(picker.clicks()).toBe(3);
+			await userEvent.tab();
+			await expect(canvas.getByRole("button", { name: "after" })).toHaveFocus();
+			await expect(args.onBlur).toHaveBeenCalledTimes(1);
+		} finally {
+			picker.stop();
+		}
 	},
 };
