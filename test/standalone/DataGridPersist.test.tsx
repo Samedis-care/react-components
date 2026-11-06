@@ -527,4 +527,101 @@ describe("persistence provider bugs", () => {
 			"needle",
 		);
 	});
+	it("[ISSUE-3496-ITEM-3] StorageManagerPersist renders its children when a bucket cannot be read", async () => {
+		const failing = new (class extends MemoryProvider {
+			getItem(): Promise<string | null> {
+				return Promise.reject(new Error("503"));
+			}
+		})();
+		StorageManager.configure((_id, keys) => [failing, keys]);
+		render(smp({ model: "x" }, <span data-testid={"child"} />));
+		await waitFor(() =>
+			expect(screen.queryByTestId("child")).toBeInTheDocument(),
+		);
+	});
+	it("[ISSUE-3496-ITEM-3] StorageManagerPersist renders its children when deleting an unparsable bucket fails", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const failing = new (class extends MemoryProvider {
+			setItem(): Promise<void> {
+				return Promise.reject(new Error("503"));
+			}
+		})();
+		failing.data[keyOf(FILTERS, { model: "x" })] = "{not json";
+		StorageManager.configure((_id, keys) => [failing, keys]);
+		render(smp({ model: "x" }, <span data-testid={"child"} />));
+		await waitFor(() =>
+			expect(screen.queryByTestId("child")).toBeInTheDocument(),
+		);
+	});
+	it("[ISSUE-3496-ITEM-3] a filters bucket that cannot be read is not overwritten, while the grid opens with the stored widths and keeps writing them", async () => {
+		const error = vi.spyOn(console, "error").mockImplementation(() => {});
+		const server = new (class extends MemoryProvider {
+			getItem(): Promise<string | null> {
+				return Promise.reject(new Error("500"));
+			}
+		})();
+		configureLikeSamedis(server);
+		const keys = { model: "m", tenant: "t" };
+		localStorage.setItem(
+			localKeyOf(SIZING, { model: "m" }),
+			JSON.stringify({ v: 2, width: { name: 311 }, initialResize: true }),
+		);
+		render(smp(keys));
+		await gridIdle();
+		expect(grid!.widths.name).toBe(311);
+		expect(grid!.state.search).toBe("");
+		expect(error).toHaveBeenCalled();
+
+		act(() => grid!.setState((prev) => ({ ...prev, search: "typed" })));
+		act(() => grid!.setWidths((prev) => ({ ...prev, role: 199 })));
+		await waitFor(() =>
+			expect(
+				JSON.parse(localStorage.getItem(localKeyOf(SIZING, { model: "m" }))!),
+			).toMatchObject({ width: { name: 311, role: 199 } }),
+		);
+		expect(grid!.state.search).toBe("typed");
+		expect(server.writes).toEqual([]);
+	});
+	it("[ISSUE-3496-ITEM-3] after a failed read, new storage keys are read and written again", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const server = new (class extends MemoryProvider {
+			getItem(key: string): Promise<string | null> {
+				if (key.includes('"a"')) return Promise.reject(new Error("500"));
+				return super.getItem(key);
+			}
+		})();
+		StorageManager.configure((_id, keys) => [server, keys]);
+		server.data[keyOf(FILTERS, { model: "b" })] = JSON.stringify({
+			v: 2,
+			search: "stored b",
+		});
+		const { rerender } = render(smp({ model: "a" }));
+		await gridIdle();
+		expect(server.writes).toEqual([]);
+
+		grid = null;
+		rerender(smp({ model: "b" }));
+		await gridIdle();
+		expect(grid!.state.search).toBe("stored b");
+		act(() => grid!.setState((prev) => ({ ...prev, search: "changed b" })));
+		await waitFor(() =>
+			expect(
+				JSON.parse(server.data[keyOf(FILTERS, { model: "b" })]),
+			).toMatchObject({ search: "changed b" }),
+		);
+	});
+	it("[ISSUE-3496-ITEM-3] StorageManagerPersist renders its children without waiting for the delete of an unparsable bucket", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const hanging = new (class extends MemoryProvider {
+			setItem(key: string, value: string | null): Promise<void> {
+				this.writes.push([key, value]);
+				return new Promise<void>(() => {});
+			}
+		})();
+		hanging.data[keyOf(FILTERS, { model: "x" })] = "{not json";
+		StorageManager.configure((_id, keys) => [hanging, keys]);
+		render(smp({ model: "x" }, <span data-testid={"child"} />));
+		expect(await screen.findByTestId("child")).toBeInTheDocument();
+		expect(hanging.writes).toEqual([[keyOf(FILTERS, { model: "x" }), null]]);
+	});
 });
