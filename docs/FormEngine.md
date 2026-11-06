@@ -649,6 +649,14 @@ Things to know about the queue:
   with the mapped id.
 - `deserialize` gets a queued entry as `serialize` returned it, with that client-side id: a
   picked file where the backend would send a URL.
+- A control that unmounts keeps its queue, and lists it again when it mounts again. With
+  `onlySubmitMounted` the queue of an unmounted control is neither saved nor counted as dirty,
+  like the value of an unmounted field, until the control mounts again.
+- In a flow form, a submit (`goToStage` makes one before it changes the stage) stages the queue
+  of every mounted control, like the values of the mounted fields, until the queue is empty
+  again. A control that unmounts with a staged queue, as it does when its stage is left, keeps
+  the form dirty, and the next submit to the server sends the queue with the record. A control
+  hidden within its stage, with nothing staged since it mounted, follows `onlySubmitMounted`.
 
 The `Backend-Components/FileUpload` stories `InForm` and `InReadOnlyForm` show both file
 controls in a form.

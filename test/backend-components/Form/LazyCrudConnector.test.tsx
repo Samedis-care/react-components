@@ -19,21 +19,27 @@ import {
 	setupFormTests,
 	Sink,
 	TestPage,
+	trySubmit,
 } from "./formFixture";
 import {
 	FormContextData,
+	PageProps,
 	useFormContext,
 } from "../../../src/backend-components/Form/Form";
 import FormCrudMultiSelect, {
 	FormCrudMultiSelectProps,
 } from "../../../src/backend-components/Form/CrudControls/FormCrudMultiSelect";
 import ApiConnector from "../../../src/backend-integration/Connector/ApiConnector";
+import LazyConnector from "../../../src/backend-integration/Connector/LazyConnector";
 import type { ResponseMeta } from "../../../src/backend-integration/Connector/Connector";
 import { useCrudSelectContext } from "../../../src/backend-components/Selector/CrudMultiSelect";
 import type {
 	CrudSelectDispatch,
 	UseCrudSelectResult,
 } from "../../../src/backend-components/Selector/useCrudSelect";
+import FlowEngine, {
+	FlowStageProps,
+} from "../../../src/backend-components/Form/FlowEngine/FlowEngine";
 import type {
 	ModelGetResponse,
 	ModelUnknown,
@@ -198,6 +204,31 @@ afterAll(async () => {
 	await new Promise((resolve) => setTimeout(resolve, 1000));
 });
 
+/**
+ * Picks an entry through the ref (addToSelection is worked by an effect: start it in a sync
+ * act, wait for the result, then await it)
+ */
+const add = async (
+	ref: React.RefObject<CrudSelectDispatch<JoinData> | null>,
+	sourceId = "s2",
+) => {
+	let pending: Promise<void> | undefined;
+	act(() => {
+		pending = ref.current!.addToSelection({
+			value: "to-create-" + sourceId,
+			label: "L" + sourceId,
+			source_id: sourceId,
+		});
+	});
+	await waitFor(() =>
+		expect(selected().some((entry) => entry.source_id === sourceId)).toBe(true),
+	);
+	await act(async () => {
+		await pending;
+	});
+	await settle();
+};
+
 type SelectProps = FormCrudMultiSelectProps<ModelUnknown, JoinData>;
 
 /**
@@ -271,6 +302,308 @@ const mountSelector = async (
 	await ready();
 	return { ...result, model, env, sink, ref };
 };
+
+const hideAndShow = async () => {
+	act(() => ctl.setShow(false));
+	await settle();
+	selSink.ctx = undefined;
+	act(() => ctl.setShow(true));
+	await ready();
+};
+
+describe("useLazyCrudConnector: unmount and remount", () => {
+	it("without onlySubmitMounted a hidden selector's picks stay pending, come back with it and are saved", async () => {
+		const { env, sink, ref } = await mountSelector();
+		await add(ref);
+
+		act(() => ctl.setShow(false));
+		await settle();
+		expect(sink.ctx!.dirty).toBe(true);
+
+		selSink.ctx = undefined;
+		act(() => ctl.setShow(true));
+		await ready();
+
+		// the same connector, so the same queue
+		expect(env.getConnector).toHaveBeenCalledTimes(1);
+		expect(labels()).toEqual(["Ls1", "Ls2"]);
+		expect(sink.ctx!.dirty).toBe(true);
+
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+		expect(env.calls).toContain("create:joins/1:s2");
+		expect(sink.ctx!.dirty).toBe(false);
+	});
+
+	it("without onlySubmitMounted a save while the selector is hidden writes its picks", async () => {
+		const { env, sink, ref } = await mountSelector();
+		await add(ref);
+		act(() => ctl.setShow(false));
+		await settle();
+
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		expect(env.calls).toEqual([
+			"index:joins/1",
+			"setApiEndpoint:joins/1",
+			"create:joins/1:s2",
+		]);
+		expect(sink.ctx!.dirty).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-1] with onlySubmitMounted, a remounted selector that lists a queued pick keeps the form dirty", async () => {
+		const { sink, ref } = await mountSelector(
+			undefined,
+			{},
+			{
+				onlySubmitMounted: true,
+			},
+		);
+		await add(ref);
+		expect(sink.ctx!.dirty).toBe(true);
+
+		await hideAndShow();
+
+		// whichever way the queue of an unmounted selector is handled (dropped, or kept and
+		// saved), what the selector lists after the remount has to match what the next save
+		// writes: a listed pick that is not saved is lost without a word
+		const listsPick = labels().includes("Ls2");
+		expect({ listsPick, dirty: sink.ctx!.dirty }).toEqual({
+			listsPick,
+			dirty: listsPick,
+		});
+	});
+
+	it("[ISSUE-3505-ITEM-1] in a flow form, a pick made in a stage that was left is saved from the next stage, or dropped", async () => {
+		const model = makeModel();
+		const env = makeEnv({ "joins/1": [] });
+		const sink: Sink = {};
+		const ref = React.createRef<CrudSelectDispatch<JoinData>>();
+		type St = "a" | "b";
+		const flow: { props?: FlowStageProps<ModelUnknown, St, undefined> } = {};
+		const StageA = (props: FlowStageProps<ModelUnknown, St, undefined>) => {
+			flow.props = props;
+			return (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					ref={ref}
+					{...selectorProps(model, env)}
+				/>
+			);
+		};
+		const StageB = (props: FlowStageProps<ModelUnknown, St, undefined>) => {
+			flow.props = props;
+			return null;
+		};
+		const stages = { a: StageA, b: StageB };
+		const Page = (formProps: PageProps<ModelUnknown, undefined>) => {
+			sink.ctx = useFormContext<ModelUnknown>();
+			return (
+				<FlowEngine<ModelUnknown, St, undefined>
+					defaultStage={"a"}
+					formProps={formProps}
+				>
+					{stages}
+				</FlowEngine>
+			);
+		};
+		mountForm(model, Page, { flowEngine: true });
+		await loaded(sink);
+		await ready();
+		await add(ref);
+		expect(sink.ctx!.dirty).toBe(true);
+
+		await act(async () => {
+			await flow.props!.goToStage("b", false);
+		});
+		await settle();
+		await act(async () => {
+			await sink.ctx!.submit({ submitToServer: true });
+		});
+		await settle();
+
+		// staged model values of a stage that was left are saved with the record; the pick
+		// must be too, unless leaving the stage dropped it
+		const lazy = sink.ctx!.getCustomState<LazyConnector>("joins");
+		const sent = env.calls.includes("create:joins/1:s2");
+		const dropped = !lazy || lazy.isQueueEmpty();
+		expect(
+			sent || dropped,
+			`neither sent nor dropped: requests ${JSON.stringify(env.calls)}, dirty ${String(sink.ctx!.dirty)}`,
+		).toBe(true);
+	});
+
+	it("[ISSUE-3505-ITEM-1] with onlySubmitMounted, a hidden selector's pick is not saved, and is saved once the selector is shown again", async () => {
+		const { env, sink, ref } = await mountSelector(
+			undefined,
+			{},
+			{ onlySubmitMounted: true },
+		);
+		await add(ref);
+		act(() => ctl.setShow(false));
+		await settle();
+
+		// like the value of an unmounted field: not counted, not saved
+		expect(sink.ctx!.dirty).toBe(false);
+		await act(async () => {
+			await sink.ctx!.submit({ ignoreDirtyCheck: true });
+		});
+		await settle();
+		expect(env.calls).not.toContain("create:joins/1:s2");
+
+		selSink.ctx = undefined;
+		act(() => ctl.setShow(true));
+		await ready();
+		expect(labels()).toEqual(["Ls1", "Ls2"]);
+		expect(sink.ctx!.dirty).toBe(true);
+
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+		expect(env.calls.filter((call) => call.startsWith("create:"))).toEqual([
+			"create:joins/1:s2",
+		]);
+		expect(sink.ctx!.dirty).toBe(false);
+	});
+
+	/**
+	 * A flow form whose stage "a" renders the selector (hidden and shown within the stage by
+	 * ctl.setShow, shown again whenever the stage is entered) and stage "b" nothing
+	 */
+	const mountFlow = async () => {
+		const model = makeModel();
+		const env = makeEnv({ "joins/1": [] });
+		const sink: Sink = {};
+		const ref = React.createRef<CrudSelectDispatch<JoinData>>();
+		type St = "a" | "b";
+		const flow: { props?: FlowStageProps<ModelUnknown, St, undefined> } = {};
+		const StageA = (props: FlowStageProps<ModelUnknown, St, undefined>) => {
+			flow.props = props;
+			const [show, setShow] = useState(true);
+			ctl.setShow = setShow;
+			return show ? (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					ref={ref}
+					{...selectorProps(model, env)}
+				/>
+			) : null;
+		};
+		const StageB = (props: FlowStageProps<ModelUnknown, St, undefined>) => {
+			flow.props = props;
+			return null;
+		};
+		const stages = { a: StageA, b: StageB };
+		const Page = (formProps: PageProps<ModelUnknown, undefined>) => {
+			sink.ctx = useFormContext<ModelUnknown>();
+			return (
+				<FlowEngine<ModelUnknown, St, undefined>
+					defaultStage={"a"}
+					formProps={formProps}
+				>
+					{stages}
+				</FlowEngine>
+			);
+		};
+		mountForm(model, Page, { flowEngine: true });
+		await loaded(sink);
+		await ready();
+		const goTo = async (stage: St, submitToServer: boolean) => {
+			await act(async () => {
+				await flow.props!.goToStage(stage, submitToServer);
+			});
+			await settle();
+		};
+		return { env, sink, ref, goTo };
+	};
+
+	it("[ISSUE-3505-ITEM-1] in a flow form, a pick made in a stage that was left keeps the form dirty and is saved by the next submit to the server", async () => {
+		const { env, sink, ref, goTo } = await mountFlow();
+		await add(ref);
+
+		await goTo("b", false);
+		expect(sink.ctx!.dirty).toBe(true);
+		expect(env.calls).not.toContain("create:joins/1:s2");
+
+		await act(async () => {
+			await sink.ctx!.submit({ submitToServer: true });
+		});
+		await settle();
+
+		expect(env.calls.filter((call) => call.startsWith("create:"))).toEqual([
+			"create:joins/1:s2",
+		]);
+		expect(sink.ctx!.dirty).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-1] in a flow form, a stage left with nothing queued sends nothing for it", async () => {
+		const { env, goTo, sink } = await mountFlow();
+
+		await goTo("b", false);
+		await act(async () => {
+			await sink.ctx!.submit({ submitToServer: true });
+		});
+		await settle();
+
+		expect(env.calls).toEqual(["index:joins/1"]);
+	});
+
+	it("[ISSUE-3505-ITEM-1] in a flow form, a lazy control hidden within its stage does not keep its queue", async () => {
+		const { env, sink, ref, goTo } = await mountFlow();
+		await add(ref);
+		expect(sink.ctx!.dirty).toBe(true);
+
+		// hidden while its stage stays shown: like an unmounted field with onlySubmitMounted,
+		// not counted, and neither staged by the stage change nor saved
+		act(() => ctl.setShow(false));
+		await settle();
+		expect(sink.ctx!.dirty).toBe(false);
+		await goTo("b", false);
+		expect(sink.ctx!.dirty).toBe(false);
+		await act(async () => {
+			await sink.ctx!.submit({ submitToServer: true });
+		});
+		await settle();
+		expect(env.calls).not.toContain("create:joins/1:s2");
+
+		// the queue waits for the control, which lists it again once it is shown
+		selSink.ctx = undefined;
+		await goTo("a", false);
+		await ready();
+		expect(labels()).toEqual(["Ls2"]);
+		expect(sink.ctx!.dirty).toBe(true);
+
+		await goTo("b", false);
+		await act(async () => {
+			await sink.ctx!.submit({ submitToServer: true });
+		});
+		await settle();
+		expect(env.calls.filter((call) => call.startsWith("create:"))).toEqual([
+			"create:joins/1:s2",
+		]);
+		expect(sink.ctx!.dirty).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-1] in a flow form, a pick made after the queue was saved is not kept when the control is hidden within its stage", async () => {
+		const { env, sink, ref, goTo } = await mountFlow();
+		await add(ref);
+		await act(async () => {
+			await sink.ctx!.submit({ submitToServer: true });
+		});
+		await settle();
+		expect(env.calls).toContain("create:joins/1:s2");
+
+		await add(ref, "s3");
+		act(() => ctl.setShow(false));
+		await settle();
+		expect(sink.ctx!.dirty).toBe(false);
+
+		await goTo("b", false);
+		await act(async () => {
+			await sink.ctx!.submit({ submitToServer: true });
+		});
+		await settle();
+		expect(env.calls).not.toContain("create:joins/1:s3");
+	});
+});
 
 describe("FormCrudMultiSelect: the form's state", () => {
 	it("[ISSUE-3505-ITEM-15] keeps the field's label while it loads and after the load failed", async () => {

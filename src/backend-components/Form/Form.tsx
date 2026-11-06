@@ -258,6 +258,10 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
 	/**
 	 * Only submit mounted fields
 	 * @remarks Exempt fields using alwaysSubmitFields
+	 * @remarks The controls built on useLazyCrudConnector follow it too: the queued writes of
+	 *          one that is not mounted are neither saved nor counted as dirty until it mounts
+	 *          again. In flow mode, the queue a submit staged before the control unmounted (a
+	 *          stage that was left) is saved like the staged values, see useLazyCrudConnector.
 	 */
 	onlySubmitMounted?: boolean;
 	/**
