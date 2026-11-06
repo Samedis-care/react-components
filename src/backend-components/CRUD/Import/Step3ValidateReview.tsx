@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { CrudImporterStepProps, isFieldImportable } from "./index";
 import GenericDataPreview from "./GenericDataPreview";
+import normalizeImportValue from "./normalizeImportValue";
 import deepAssign from "../../../utils/deepAssign";
 import { dotToObject } from "../../../utils/dotUtils";
 import isObjectEmpty from "../../../utils/isObjectEmpty";
@@ -28,12 +29,15 @@ export const useImportStep3Logic = (props: CrudImporterStepProps) => {
 									isFieldImportable(name, field) &&
 									state.conversionScripts[name]?.scriptFn(record),
 							)
-							.forEach(([name]) => {
+							.forEach(([name, field]) => {
 								deepAssign(
 									modelRecord,
 									dotToObject(
 										name,
-										state.conversionScripts[name].scriptFn(record) ?? null,
+										normalizeImportValue(
+											field,
+											state.conversionScripts[name].scriptFn(record) ?? null,
+										),
 									),
 								);
 							});

@@ -14,6 +14,18 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 import { ValidationResult } from "../../Form";
 import { useCrudDispatchContext } from "../index";
 
+/**
+ * Converts one row of the uploaded worksheet into the value of one model field: an entry
+ * of CrudImportProps.importConfig, or the script typed in step 2 of the unguided importer.
+ *
+ * For a date-only field (ModelDataTypeDate, ModelDataTypeDateNullable) return a Date: the
+ * importer validates and writes the calendar day it names, at 12:00 UTC as the date
+ * pickers do. A Date at exactly 00:00 or 12:00 UTC names its UTC date
+ * (`new Date("2024-03-31")`, `toDateOnly(…)`), any other its local date
+ * (`new Date(record.Born)` of a date cell, which arrives as local time without an offset,
+ * `"2024-03-31T00:00:00"`). In UTC+12 local midnight is 12:00 UTC, so there use
+ * `new Date(record.Born.slice(0, 10))`, which names the cell's day in every timezone.
+ */
 export type ConversionScriptFn = (record: Record<string, unknown>) => unknown;
 export interface CrudImportProps<M extends ModelUnknown> {
 	/**

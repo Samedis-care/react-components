@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { CrudImporterStepProps, isFieldImportable } from "./index";
+import normalizeImportValue from "./normalizeImportValue";
 import { Grid, TextField, Typography } from "@mui/material";
 import Model, {
 	useModelMutation,
@@ -75,9 +76,11 @@ export const useImportStep4Logic = (props: CrudImporterStepProps) => {
 					try {
 						Object.entries(model.fields)
 							.filter(([name, field]) => isFieldImportable(name, field))
-							.forEach(([name]) => {
-								const value: unknown =
-									state.conversionScripts[name]?.scriptFn(record);
+							.forEach(([name, field]) => {
+								const value: unknown = normalizeImportValue(
+									field,
+									state.conversionScripts[name]?.scriptFn(record),
+								);
 								if (value === undefined) return;
 								deepAssign(modelRecord, dotToObject(name, value));
 							});
