@@ -1,6 +1,6 @@
 export { default as DialogContextProvider } from "./DialogContextProvider";
 export * from "./DialogContextProvider";
-export { useCloseThisDialog } from "./PushedDialogCloseContext";
+export * from "./PushedDialogCloseContext";
 export { default as ToastContextProvider } from "./ToastContextProvider";
 export * from "./ToastContextProvider";
 export * from "./ThemeProvider";

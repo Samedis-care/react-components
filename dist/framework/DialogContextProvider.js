@@ -7,6 +7,12 @@ import { PushedDialogCloseContext, } from "./PushedDialogCloseContext";
  * Context for the dialog state
  */
 export const DialogContext = React.createContext(undefined);
+/**
+ * Returns the dialog functions `[pushDialog, popDialog]` of the nearest
+ * DialogContextProvider (part of Framework). pushDialog returns a function that closes the
+ * dialog it pushed; see DialogContextType.
+ * @throws Error when there is no DialogContextProvider around the calling component
+ */
 export const useDialogContext = () => {
     const ctx = useContext(DialogContext);
     if (!ctx)
@@ -51,10 +57,16 @@ const DialogContextProvider = (props) => {
         }
         const id = nextId.current++;
         openIds.current.push(id);
-        setDialogs((prevValue) => [
-            ...prevValue,
-            { id, dialog, close: { close: () => closeDialog(id), pushed: true } },
-        ]);
+        // one function for the dialog's life: returned here, and the dialog's
+        // PushedDialogCloseContext (useCloseThisDialog)
+        const close = () => closeDialog(id);
+        const entry = {
+            id,
+            dialog,
+            close: { close, pushed: true },
+        };
+        setDialogs((prevValue) => [...prevValue, entry]);
+        return close;
     }, [t, closeDialog]);
     const popDialog = useCallback(() => {
         const id = openIds.current.pop();
