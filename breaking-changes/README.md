@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [InlineSwitch draws a focus ring](2026-11-06-inline-switch-focus-ring.md) | behavior |
 | 2026-11-06 | [The empty modern image selector has an upload button](2026-11-06-image-selector-modern-upload-button.md) | behavior |
 | 2026-11-06 | [FlowEngine moves the focus to a new stage, in a container of its own](2026-11-06-flow-engine-stage-focus.md) | behavior |
 | 2026-11-06 | [Schedule entries wrap long words](2026-11-06-schedule-entries-wrap-long-words.md) | behavior |

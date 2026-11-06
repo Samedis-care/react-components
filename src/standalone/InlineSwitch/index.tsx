@@ -37,18 +37,32 @@ const AntSwitch = styled(Switch, { name: "CcInlineSwitch", slot: "switch" })(
 		height: 16,
 		padding: 0,
 		display: "flex",
+		// the track fills the root, so the focus ring around it lies outside the root
+		overflow: "visible",
 		"& .MuiSwitch-switchBase": {
 			padding: 2,
 			color: theme.palette.grey[500],
+			// MUI widens the input past the thumb and lets the root clip it to the
+			// track; the root no longer clips, so the input covers just the track
+			"& .MuiSwitch-input": { left: 0, width: 35 },
 			"&.Mui-checked": {
 				transform: "translateX(18px)",
 				color: theme.palette.common.white,
+				"& .MuiSwitch-input": { left: -18 },
 				"& + .MuiSwitch-track": {
 					opacity: 1,
 					backgroundColor: theme.palette.primary.main,
 					borderColor: theme.palette.primary.main,
 				},
 			},
+			// keyboard focus: with the theme's focusVisible MUI draws its own ring on
+			// the track; otherwise this one (MUI's default shows only the focus ripple)
+			...(!theme.focusVisible && {
+				"&.Mui-focusVisible + .MuiSwitch-track": {
+					outline: `2px solid ${(theme.vars || theme).palette.primary.main}`,
+					outlineOffset: 2,
+				},
+			}),
 		},
 		"& .MuiSwitch-thumb": {
 			width: 12,
@@ -105,7 +119,12 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 						spacing={1}
 					>
 						<Grid>
-							<AntSwitch checked={value} onChange={handleSwitchChange} />
+							<AntSwitch
+								checked={value}
+								onChange={handleSwitchChange}
+								// the focus ring shows focus; the ripple would pulse under it endlessly
+								disableFocusRipple
+							/>
 						</Grid>
 						<Grid>{label}</Grid>
 					</Grid>
