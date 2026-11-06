@@ -27,11 +27,19 @@ export interface TextFieldWithHelpProps extends UIInputProps {
 	 */
 	openInfo?: () => void;
 	/**
-	 * custom clear handler if clear button is pressed
+	 * Replaces what the touch Clear button does: called without arguments
+	 * when it is pressed. Without it, the button empties the text input, so
+	 * `onChange` receives an event whose `target.value` is `""`.
+	 *
+	 * A `select` has no such default: it shows the Clear button only when
+	 * this is set.
 	 */
 	customHandleClear?: () => void;
 	/**
-	 * disable clear button on mobile devices
+	 * Hides the Clear button. That button is only rendered on touch devices,
+	 * while the field has a value and is not disabled; in a `select` only
+	 * with `customHandleClear`.
+	 * @default false
 	 */
 	disableClearable?: boolean;
 }
@@ -65,12 +73,12 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 
 	const handleClear = useCallback(
 		(evt: React.MouseEvent) => {
-			if (!inputRef.current) {
-				throw new Error("InputRef not set");
-			}
 			evt.stopPropagation();
 			if (customHandleClear) {
 				return customHandleClear();
+			}
+			if (!inputRef.current) {
+				throw new Error("InputRef not set");
 			}
 
 			const proto = (
@@ -110,7 +118,13 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 
 	// render
 	const showClear =
-		isTouchDevice() && hasValue && !muiProps.disabled && !disableClearable;
+		isTouchDevice() &&
+		hasValue &&
+		!muiProps.disabled &&
+		!disableClearable &&
+		// the default clear empties the <input> or <textarea>; a select has
+		// neither (its htmlInput ref holds MUI's handle), so it needs a handler
+		(!muiProps.select || !!customHandleClear);
 
 	return (
 		<UiKitTextFieldWithState
