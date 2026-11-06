@@ -1,7 +1,14 @@
 import React from "react";
-import { describe, it, expect, afterEach, beforeEach, vi } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
-import { ThemeProvider, createTheme, List } from "@mui/material";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	renderHook,
+	screen,
+} from "@testing-library/react";
+import { createTheme, List, ThemeProvider } from "@mui/material";
 import { createMemoryHistory, History } from "history";
 import MaterialMenuItem from "../../src/standalone/Portal/MenuItem/Material";
 import HistoryRouter from "../../src/standalone/Routes/HistoryRouter";
@@ -36,6 +43,11 @@ const entry = (title: string) => {
 		throw new Error(`${found.length} entries titled "${title}"`);
 	return found[0];
 };
+
+/** The titles of all rendered entries, in DOM order */
+const titles = () =>
+	screen.getAllByRole("button", { hidden: true }).map((b) => b.textContent);
+
 const middleClick = (el: HTMLElement, button = 1) =>
 	fireEvent(el, new MouseEvent("auxclick", { bubbles: true, button }));
 
@@ -84,6 +96,21 @@ const leaf = (
 // Bugs: these tests assert the expected behavior and fail until fixed
 // ---------------------------------------------------------------------------
 
+const group = (
+	title: string,
+	children: IRoutedMenuItemDefinition[],
+	extra: Partial<IRoutedMenuItemDefinition> = {},
+): IRoutedMenuItemDefinition => ({
+	title,
+	shouldRender: true,
+	children,
+	...extra,
+});
+
+// ---------------------------------------------------------------------------
+// Bugs: these tests assert the expected behavior and fail until fixed
+// ---------------------------------------------------------------------------
+
 describe("RoutedMenu bugs", () => {
 	it("[ISSUE-3479-ITEM-1] a right click on a routed entry does not open a tab", () => {
 		const open = vi.spyOn(window, "open").mockImplementation(() => null);
@@ -91,7 +118,6 @@ describe("RoutedMenu bugs", () => {
 		middleClick(entry("Users"), 2);
 		expect(open).not.toHaveBeenCalled();
 	});
-
 	it("[ISSUE-3479-ITEM-1] useRoutedMenuLogic's entries react to the middle button only, also in a custom rendering", () => {
 		const open = vi.spyOn(window, "open").mockImplementation(() => null);
 		const onAuxClick = vi.fn();
@@ -132,5 +158,186 @@ describe("RoutedMenu bugs", () => {
 		expect(open.mock.calls).toEqual([["/users"]]);
 		expect(onAuxClick).toHaveBeenCalledTimes(1);
 		expect(history.location.pathname).toBe("/profile");
+	});
+	it("[ISSUE-3498-ITEM-1] params of a route inside a group are filled from the current URL", () => {
+		const { history } = mount(
+			[
+				leaf("Home", "/"),
+				group("Project", [
+					leaf("Review", "/projects/:id/review"),
+					leaf("Capture", "/projects/:id/capture"),
+				]),
+			],
+			"/projects/42/review",
+		);
+		fireEvent.click(entry("Capture"));
+		expect(history.location.pathname).toBe("/projects/42/capture");
+	});
+	it("[ISSUE-3498-ITEM-1] a param in the first segment is filled from a nested entry, also for the new-tab gestures", () => {
+		const open = vi.spyOn(window, "open").mockImplementation(() => null);
+		const { history } = mount(
+			[
+				leaf("Home", "/"),
+				group("Tenant", [leaf("A", "/:tenant/a"), leaf("B", "/:tenant/b")]),
+			],
+			"/t1/a",
+		);
+		fireEvent.click(entry("B"), { ctrlKey: true });
+		middleClick(entry("B"));
+		expect(open.mock.calls).toEqual([["/t1/b", "_blank"], ["/t1/b"]]);
+		fireEvent.click(entry("B"));
+		expect(history.location.pathname).toBe("/t1/b");
+	});
+	it("[ISSUE-3498-ITEM-1] an entry whose route needs a param that the current URL does not provide is hidden", () => {
+		// the development error is tested below
+		vi.spyOn(console, "error").mockImplementation(() => undefined);
+		const defs = [
+			leaf("Home", "/"),
+			leaf("Tenant page", "/:tenant/page"),
+			group("Apps", [
+				leaf("Y", "/apps/:app/y"),
+				// the URL has a value for :app, none for :appId
+				leaf("X", "/apps/:appId/x"),
+			]),
+			group("Project", [leaf("Review", "/projects/:id/review")], {
+				route: "/projects/:id",
+			}),
+		];
+		mount(defs, "/apps/a1/y");
+		expect(titles()).toEqual(["Home", "Apps", "Y"]);
+		cleanup();
+		mount(defs, "/projects/7");
+		expect(titles()).toEqual(["Home", "Apps", "Project", "Review"]);
+	});
+	it("[ISSUE-3498-ITEM-1] useRoutedMenuLogic hides an entry with an unresolved param, and its handlers do not navigate", () => {
+		vi.spyOn(console, "error").mockImplementation(() => undefined);
+		const open = vi.spyOn(window, "open").mockImplementation(() => null);
+		const onClick = vi.fn();
+		const onAuxClick = vi.fn();
+		const history = createMemoryHistory({ initialEntries: ["/"] });
+		const { result } = renderHook(
+			() =>
+				useRoutedMenuLogic({
+					definition: [
+						leaf("Home", "/"),
+						leaf("Tenant page", "/:tenant/page", { onClick, onAuxClick }),
+					],
+				}),
+			{
+				wrapper: ({ children }) => (
+					<HistoryRouter history={history}>{children}</HistoryRouter>
+				),
+			},
+		);
+		const [home, tenantPage] = result.current.definition;
+		expect(home.shouldRender).toBe(true);
+		expect(tenantPage.shouldRender).toBe(false);
+		// an app's own renderer that shows it anyway
+		const click = { button: 0 } as React.MouseEvent;
+		act(() => tenantPage.onClick(click));
+		act(() => tenantPage.onClick({ ...click, ctrlKey: true }));
+		act(() => tenantPage.onAuxClick?.({ ...click, button: 1 }));
+		expect(onClick).toHaveBeenCalledTimes(2);
+		expect(onAuxClick).toHaveBeenCalledTimes(1);
+		expect(open).not.toHaveBeenCalled();
+		expect(history.index).toBe(0);
+		expect(history.location.pathname).toBe("/");
+	});
+
+	/** Entries with unresolved params on "/", and two the app hides itself */
+	const UNRESOLVED = (): IRoutedMenuItemDefinition[] => [
+		leaf("Home", "/"),
+		leaf("Tenant page", "/:tenant/page"),
+		group("Project", [leaf("Capture", "/projects/:id/:step")]),
+		// hidden with its child; only the group is reported
+		group("Tenant", [leaf("Child", "/:tenant/child")], { route: "/:tenant" }),
+		leaf("Admin", "/:tenant/admin", { shouldRender: false }),
+		group("Hidden", [leaf("X", "/:tenant/x")], { shouldRender: false }),
+	];
+	it("[ISSUE-3498-ITEM-1] in development, each hidden entry and missing param is reported once per mounted menu", () => {
+		vi.stubEnv("NODE_ENV", "development");
+		const error = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
+		const history = createMemoryHistory({ initialEntries: ["/"] });
+		const defs = UNRESOLVED();
+		const renderMenu = () =>
+			render(
+				<React.StrictMode>
+					<ThemeProvider theme={theme}>
+						<HistoryRouter history={history}>
+							<RoutedMenu
+								definition={defs}
+								wrapper={Wrap}
+								menuItem={MaterialMenuItem}
+							/>
+						</HistoryRouter>
+					</ThemeProvider>
+				</React.StrictMode>,
+			);
+		const reports = [
+			[
+				expect.stringMatching(
+					/^RoutedMenu: the entry "Tenant page" \(route "\/:tenant\/page"\) is hidden, because the current URL "\/" has no value for its param ":tenant"/,
+				),
+			],
+			[
+				expect.stringMatching(
+					/the entry "Project > Capture" \(route "\/projects\/:id\/:step"\) .* its param ":id"/,
+				),
+			],
+			[
+				expect.stringMatching(
+					/the entry "Project > Capture" \(route "\/projects\/:id\/:step"\) .* its param ":step"/,
+				),
+			],
+			[
+				expect.stringMatching(
+					/the entry "Tenant" \(route "\/:tenant"\) .* its param ":tenant"/,
+				),
+			],
+		];
+		try {
+			const { rerender } = renderMenu();
+			expect(titles()).toEqual(["Home", "Project"]);
+			expect(error.mock.calls).toEqual(reports);
+			// away (where /:tenant reads the tenant) and back, a rebuilt definition
+			act(() => history.push("/other"));
+			act(() => history.back());
+			defs.splice(0, defs.length, ...UNRESOLVED());
+			rerender(
+				<React.StrictMode>
+					<ThemeProvider theme={theme}>
+						<HistoryRouter history={history}>
+							<RoutedMenu
+								definition={[...defs]}
+								wrapper={Wrap}
+								menuItem={MaterialMenuItem}
+							/>
+						</HistoryRouter>
+					</ThemeProvider>
+				</React.StrictMode>,
+			);
+			expect(error).toHaveBeenCalledTimes(4);
+			// a menu mounted anew reports again
+			cleanup();
+			renderMenu();
+			expect(error).toHaveBeenCalledTimes(8);
+		} finally {
+			vi.unstubAllEnvs();
+		}
+	});
+	it("[ISSUE-3498-ITEM-1] in production, the entry is only hidden", () => {
+		vi.stubEnv("NODE_ENV", "production");
+		const error = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
+		try {
+			mount(UNRESOLVED(), "/");
+			expect(titles()).toEqual(["Home", "Project"]);
+			expect(error).not.toHaveBeenCalled();
+		} finally {
+			vi.unstubAllEnvs();
+		}
 	});
 });

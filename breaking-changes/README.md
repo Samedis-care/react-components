@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [RoutedMenu fills route params from the whole menu, and hides and reports entries it cannot fill](2026-11-06-routed-menu-unresolved-route-params.md) | type, behavior |
 | 2026-11-06 | [The column settings' search says that it searches the columns, and when nothing matches](2026-11-06-data-grid-column-search-says-so.md) | behavior |
 | 2026-11-06 | [A keepMounted PopupMenu opens on its first item every time](2026-11-06-popup-menu-opens-on-first-item.md) | behavior |
 | 2026-11-06 | [FullFormDialog closes only itself and calls onClose first; useCloseThisDialog closes the dialog a component is in](2026-11-06-full-form-dialog-closes-itself.md) | behavior |

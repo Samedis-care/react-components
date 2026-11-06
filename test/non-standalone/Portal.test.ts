@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
 	doesRouteMatch,
 	extractRouteParameters,
+	getMissingRouteParameters,
 	insertRouteParameters,
 } from "../../src/utils/routeUtils";
 
@@ -93,6 +94,34 @@ describe("Portal / RoutedMenu route utilities", () => {
 		it("leaves non-parameter segments unchanged", () => {
 			const result = insertRouteParameters("/static/path", {});
 			expect(result).toBe("/static/path");
+		});
+
+		it("[ISSUE-3498-ITEM-1] returns null when a param has no value", () => {
+			expect(insertRouteParameters("/:tenant/page", {})).toBeNull();
+			expect(
+				insertRouteParameters("/projects/:id/capture", { other: "1" }),
+			).toBeNull();
+			expect(insertRouteParameters("/projects/:id", { id: "" })).toBeNull();
+			// not the prototype's members
+			expect(insertRouteParameters("/:constructor/x", {})).toBeNull();
+		});
+	});
+
+	describe("getMissingRouteParameters", () => {
+		it("[ISSUE-3498-ITEM-1] lists the params without a value, in route order", () => {
+			expect(
+				getMissingRouteParameters("/:tenant/projects/:id/:step", {
+					id: "7",
+					step: "",
+				}),
+			).toEqual(["tenant", "step"]);
+			expect(getMissingRouteParameters("/:constructor/x", {})).toEqual([
+				"constructor",
+			]);
+			expect(
+				getMissingRouteParameters("/projects/:id", { id: "7", other: "" }),
+			).toEqual([]);
+			expect(getMissingRouteParameters("/static/path", {})).toEqual([]);
 		});
 	});
 });
