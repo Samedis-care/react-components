@@ -38,6 +38,16 @@ const flush = async () => {
 	for (let i = 0; i < 10; i++) await act(() => Promise.resolve());
 };
 
+const deferred = <T,>() => {
+	let resolve!: (value: T) => void;
+	let reject!: (reason: unknown) => void;
+	const promise = new Promise<T>((res, rej) => {
+		resolve = res;
+		reject = rej;
+	});
+	return { promise, resolve, reject };
+};
+
 const FRUITS: MultiSelectorData[] = [
 	{ value: "apple", label: "Apple" },
 	{ value: "banana", label: "Banana" },
@@ -174,5 +184,98 @@ describe("MultiSelectWithTags bugs", () => {
 		await flush();
 		expect(groupField()).toBeDisabled();
 		expect(dataField()).toBeDisabled();
+	});
+	it("[ISSUE-3488-ITEM-27] marks the control busy while a group loads", async () => {
+		const gate = deferred<MultiSelectorData[]>();
+		const { container } = renderUi(
+			<Host loadGroupEntries={() => gate.promise} />,
+		);
+		await flush();
+		await pickGroup("Red fruits");
+		expect(container.firstElementChild).toHaveAttribute("aria-busy", "true");
+		act(() => {
+			gate.resolve([APPLE]);
+		});
+		await flush();
+	});
+	it("[ISSUE-3488-ITEM-27] keeps the group field focusable but read-only while a group loads", async () => {
+		const gate = deferred<MultiSelectorData[]>();
+		const { container } = renderUi(
+			<Host loadGroupEntries={() => gate.promise} />,
+		);
+		await flush();
+		await pickGroup("Red fruits");
+		expect(groupField()).toBeEnabled();
+		expect(groupField()).toHaveAttribute("readonly");
+		// no key opens the list while the entries load
+		fireEvent.keyDown(groupField(), { key: "ArrowDown" });
+		await flush();
+		expect(screen.queryByRole("listbox")).toBeNull();
+		act(() => {
+			gate.resolve([APPLE, CHERRY]);
+		});
+		await flush();
+		expect(container.firstElementChild).toHaveAttribute("aria-busy", "false");
+		expect(groupField()).not.toHaveAttribute("readonly");
+		fireEvent.keyDown(groupField(), { key: "ArrowDown" });
+		await flush();
+		expect(
+			within(screen.getByRole("listbox"))
+				.getAllByRole("option")
+				.map((option) => option.textContent),
+		).toEqual(["Yellow fruits"]);
+	});
+	it("[ISSUE-3488-ITEM-27] gives focus back to the group field after a pick, but not after a touch", async () => {
+		renderUi(<Host />);
+		await flush();
+		await open(groupField());
+		const red = screen.getByRole("option", { name: "Red fruits" });
+		fireEvent.pointerDown(red, { pointerType: "mouse" });
+		fireEvent.click(red);
+		await flush();
+		expect(screen.getByRole("button", { name: "Remove Cherry" })).toBeVisible();
+		expect(groupField()).toHaveFocus();
+		await open(groupField());
+		const yellow = screen.getByRole("option", { name: "Yellow fruits" });
+		// a touch pick blurs the field to close the on-screen keyboard
+		fireEvent.touchStart(yellow);
+		fireEvent.pointerDown(yellow, { pointerType: "touch" });
+		fireEvent.click(yellow);
+		await flush();
+		expect(screen.getByRole("button", { name: "Remove Banana" })).toBeVisible();
+		expect(groupField()).not.toHaveFocus();
+	});
+	it("[ISSUE-3488-ITEM-27] leaves focus where the user moved it during the load", async () => {
+		const gate = deferred<MultiSelectorData[]>();
+		renderUi(
+			<>
+				<Host loadGroupEntries={() => gate.promise} />
+				<button type="button">after</button>
+			</>,
+		);
+		await flush();
+		await pickGroup("Red fruits");
+		expect(groupField()).toHaveFocus();
+		const after = screen.getByRole("button", { name: "after" });
+		act(() => after.focus());
+		act(() => {
+			gate.resolve([APPLE]);
+		});
+		await flush();
+		expect(after).toHaveFocus();
+	});
+	it("[ISSUE-3488-ITEM-27] takes focus back only until the picked group has loaded", async () => {
+		const { rerender } = renderUi(<Host />);
+		await flush();
+		await pickGroup("Red fruits");
+		expect(groupField()).toHaveFocus();
+		act(() => groupField().blur());
+		rerender(
+			<ThemeProvider theme={createTheme()}>
+				<Host title="Fruit" />
+			</ThemeProvider>,
+		);
+		await flush();
+		expect(document.body).toHaveFocus();
 	});
 });

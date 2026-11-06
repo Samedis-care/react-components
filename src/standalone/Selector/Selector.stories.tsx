@@ -1055,3 +1055,108 @@ export const Issue3487Item17ComboboxIsNamedByItsLabel: StoryObj = {
 		await expect(input).toHaveFocus();
 	},
 };
+
+/** set once the pending group load of Issue3488Item27KeepsFocusDuringGroupLoad has started */
+let groupLoadStarted = false;
+
+export const Issue3488Item27KeepsFocusDuringGroupLoad: StoryObj = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3488-ITEM-27: picking a group with Enter blurs the group field and disables it while the entries load, so focus falls to the page.",
+			},
+		},
+	},
+	beforeEach: () => {
+		groupLoadStarted = false;
+	},
+	render: () => {
+		const [selected, setSelected] = useState<MultiSelectorData[]>([]);
+		return (
+			<div style={{ width: 400 }}>
+				<MultiSelectWithTags<MultiSelectorData, BaseSelectorData>
+					title="Fruits by category"
+					searchInputLabel="Search individual fruits"
+					selected={selected}
+					onChange={setSelected}
+					loadGroupOptions={selectorLocalLoadHandler(CATEGORIES)}
+					loadDataOptions={selectorLocalLoadHandler(FRUITS)}
+					loadGroupEntries={() => {
+						groupLoadStarted = true;
+						// stays pending: the story looks at the loading state
+						return new Promise<MultiSelectorData[]>(() => {});
+					}}
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const groupField = canvas.getAllByRole("combobox")[0];
+		groupField.focus();
+		await userEvent.keyboard("{ArrowDown}");
+		await waitFor(() =>
+			expect(groupField).toHaveAttribute("aria-expanded", "true"),
+		);
+		await userEvent.keyboard("{ArrowDown}{Enter}");
+		await waitFor(() => expect(groupLoadStarted).toBe(true));
+		await expect(canvas.getAllByRole("combobox")[0]).toHaveFocus();
+	},
+};
+
+/** answers the pending group load of Issue3488Item27KeepsFocusAfterGroupLoad */
+let releaseGroupLoad: (() => void) | undefined;
+
+export const Issue3488Item27KeepsFocusAfterGroupLoad: StoryObj = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3488-ITEM-27: after a pick with the mouse, too, the group field keeps focus while the group's entries load and after the field reloaded without the picked group; the control is busy only during the load.",
+			},
+		},
+	},
+	beforeEach: () => {
+		releaseGroupLoad = undefined;
+	},
+	render: () => {
+		const [selected, setSelected] = useState<MultiSelectorData[]>([]);
+		return (
+			<div style={{ width: 400 }}>
+				<MultiSelectWithTags<MultiSelectorData, BaseSelectorData>
+					title="Fruits by category"
+					searchInputLabel="Search individual fruits"
+					selected={selected}
+					onChange={setSelected}
+					loadGroupOptions={selectorLocalLoadHandler(CATEGORIES)}
+					loadDataOptions={selectorLocalLoadHandler(FRUITS)}
+					loadGroupEntries={(group) =>
+						new Promise<MultiSelectorData[]>((resolve) => {
+							releaseGroupLoad = () => {
+								resolve(
+									FRUITS.filter(
+										(fruit) => fruit.group?.toLowerCase() === group.value,
+									),
+								);
+							};
+						})
+					}
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const control = canvas.getByRole("group", { name: "Fruits by category" });
+		await userEvent.click(canvas.getAllByRole("combobox")[0]);
+		await userEvent.click(
+			await within(document.body).findByRole("option", { name: "Berries" }),
+		);
+		await waitFor(() => expect(releaseGroupLoad).toBeDefined());
+		await expect(control).toHaveAttribute("aria-busy", "true");
+		await expect(canvas.getAllByRole("combobox")[0]).toHaveFocus();
+		releaseGroupLoad?.();
+		await canvas.findByRole("button", { name: "Remove Strawberry" });
+		await expect(control).toHaveAttribute("aria-busy", "false");
+		await expect(canvas.getAllByRole("combobox")[0]).toHaveFocus();
+	},
+};

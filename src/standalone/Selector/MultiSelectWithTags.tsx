@@ -1,4 +1,11 @@
-import React, { useCallback, useEffect, useId, useState } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useId,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from "react";
 import { Box, styled, Typography, useThemeProps } from "@mui/material";
 import SingleSelect from "../../standalone/Selector/SingleSelect";
 import MultiSelectWithoutGroup, {
@@ -86,6 +93,8 @@ export interface MultiSelectWithTagsProps<
 	// Required callbacks
 	/**
 	 * Callback which loads the data entries for the given group
+	 * @remarks While they load, the control is busy (`aria-busy`) and the group
+	 * field is read-only: it keeps focus, but nothing can be typed or picked.
 	 * @param group The group which was selected
 	 * @returns The data entries to add for this group
 	 */
@@ -224,6 +233,15 @@ const MultiSelectWithTags = <
 	const [loadingGroupRecords, setLoadingGroupRecords] = useState(false);
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
 	const getId = getIdOfData ?? getIdDefault;
+	const rootRef = useRef<HTMLDivElement>(null);
+	/** pointerType of the last press in the control, null after a key press */
+	const lastPointerTypeRef = useRef<string | null>(null);
+	/** the group field gets focus back after a group pick, see handleGroupSelect */
+	const keepGroupFocusRef = useRef(false);
+	const getGroupInput = useCallback(
+		() => rootRef.current?.ownerDocument.getElementById(groupFieldId) ?? null,
+		[groupFieldId],
+	);
 
 	// set switch value if switch visibility is toggled
 	useEffect(() => {
@@ -245,6 +263,13 @@ const MultiSelectWithTags = <
 	const handleGroupSelect = useCallback(
 		async (selectedGroup: GroupT | null) => {
 			if (!selectedGroup || !onChange) return;
+			// the pick blurs the group field, and the reload after the load replaces it, so
+			// it gets focus back; not after a touch, whose blur closes the on-screen keyboard
+			const groupInput = getGroupInput();
+			keepGroupFocusRef.current =
+				lastPointerTypeRef.current !== "touch" &&
+				!!groupInput &&
+				groupInput === groupInput.ownerDocument.activeElement;
 			try {
 				setLoadingGroupRecords(true);
 				const groupEntries = await loadGroupEntries(selectedGroup);
@@ -273,8 +298,33 @@ const MultiSelectWithTags = <
 				setLoadingGroupRecords(false);
 			}
 		},
-		[onChange, loadGroupEntries, getId, selected],
+		[onChange, loadGroupEntries, getId, selected, getGroupInput],
 	);
+
+	// gives focus back to the group field after a group pick, but only from the page:
+	// focus the user moved elsewhere during the load stays there
+	useLayoutEffect(() => {
+		if (!keepGroupFocusRef.current) return;
+		const groupInput = getGroupInput();
+		const active = groupInput?.ownerDocument.activeElement;
+		if (groupInput && (!active || active === groupInput.ownerDocument.body))
+			groupInput.focus();
+		if (!loadingGroupRecords) keepGroupFocusRef.current = false;
+	});
+
+	const handleKeyDownCapture = useCallback(
+		(evt: React.KeyboardEvent) => {
+			lastPointerTypeRef.current = null;
+			// the group field is read-only while a group loads: no key opens its list or picks
+			if (loadingGroupRecords && evt.target === getGroupInput())
+				evt.stopPropagation();
+		},
+		[loadingGroupRecords, getGroupInput],
+	);
+
+	const handlePointerDownCapture = useCallback((evt: React.PointerEvent) => {
+		lastPointerTypeRef.current = evt.pointerType;
+	}, []);
 
 	const loadGroupOptionsAndProcess = useCallback(
 		async (query: string) => {
@@ -298,9 +348,13 @@ const MultiSelectWithTags = <
 
 	return (
 		<Root
+			ref={rootRef}
 			className={combineClassNames([className, classes?.root])}
 			role={"group"}
 			aria-labelledby={titleId}
+			aria-busy={loadingGroupRecords}
+			onKeyDownCapture={handleKeyDownCapture}
+			onPointerDownCapture={handlePointerDownCapture}
 		>
 			<LoadOverlay
 				className={classes?.loadOverlay}
@@ -329,7 +383,8 @@ const MultiSelectWithTags = <
 				onSelect={handleGroupSelect}
 				refreshToken={selectedGroups.length.toString()}
 				onLoad={loadGroupOptionsAndProcess}
-				disabled={disabled || loadingGroupRecords}
+				disabled={disabled}
+				disableSearch={loadingGroupRecords}
 				enableIcons={enableIcons}
 				noOptionsText={noOptionsText}
 				loadingText={loadingText}

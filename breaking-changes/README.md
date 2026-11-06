@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [MultiSelectWithTags keeps focus in the group field while a group loads](2026-11-06-multi-select-with-tags-group-load-keeps-focus.md) | behavior |
 | 2026-11-06 | [A selector's combobox and list are named by its label](2026-11-06-selector-named-by-its-label.md) | behavior |
 | 2026-11-06 | [MultiSelect lists its entries in one list, and only an entry with onClick is a button](2026-11-06-multi-select-entries-one-list.md) | behavior |
 | 2026-11-06 | [MultiSelectWithoutGroup's disabled disables its search field and its switch](2026-11-06-multi-select-without-group-disabled.md) | behavior |
