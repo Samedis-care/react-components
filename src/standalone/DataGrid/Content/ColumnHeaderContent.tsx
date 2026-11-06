@@ -34,9 +34,10 @@ export interface IDataGridContentColumnHeaderContentProps {
 	 */
 	enableResize: boolean;
 	/**
-	 * Start dragging callback
+	 * Start dragging callback, called with the press on the resize handle
+	 * @param evt The mouse down event
 	 */
-	startDrag: () => void;
+	startDrag: (evt: React.MouseEvent) => void;
 	/**
 	 * Automatic resize callback
 	 */

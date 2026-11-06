@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import isTouchDevice from "../../../utils/isTouchDevice";
 import combineClassNames from "../../../utils/combineClassNames";
 import {
@@ -48,8 +48,21 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 	const [columnState, setColumnState] = useDataGridColumnState();
 	const { sortLimit, classes } = useDataGridProps();
 	const { sort, sortOrder, filter } = columnState[field] ?? FallbackColumnState;
-	const [, setColumnWidthState] = useDataGridColumnsWidthState();
-	const [dragging, setDragging] = useState(false);
+	const [columnWidthState, setColumnWidthState] =
+		useDataGridColumnsWidthState();
+	const width = columnWidthState[field];
+	// the column's width, for the start of a resize, without making startDrag
+	// change with every width
+	const widthRef = useRef(width);
+	useEffect(() => {
+		widthRef.current = width;
+	}, [width]);
+	// the pointer's x position and the column's width when the resize started;
+	// null while no resize runs
+	const dragStart = useRef<{ x: number; width: number } | null>(null);
+	// did the press of the current click start a resize? Such a click is the
+	// end of the resize, not a click on the header
+	const pressedOnResizer = useRef(false);
 
 	const onFilterChange = useCallback(
 		(field: string, newFilter: IFilterDef) => {
@@ -133,21 +146,35 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 		[sortLimit, setColumnState],
 	);
 
-	const startDrag = useCallback(() => setDragging(true), [setDragging]);
-	const stopDrag = useCallback(() => setDragging(false), [setDragging]);
+	const resetPressedOnResizer = useCallback(() => {
+		pressedOnResizer.current = false;
+	}, []);
+	const startDrag = useCallback((evt: React.MouseEvent) => {
+		pressedOnResizer.current = true;
+		dragStart.current = { x: evt.clientX, width: widthRef.current };
+	}, []);
+	const stopDrag = useCallback(() => {
+		dragStart.current = null;
+	}, []);
 	const onDrag = useCallback(
 		(evt: MouseEvent) => {
-			if (!dragging) return;
+			const start = dragStart.current;
+			if (!start) return;
 			evt.preventDefault();
 
-			const move = evt.movementX;
+			// the edge follows the pointer: the start width plus the pointer's
+			// distance, in CSS pixels
+			const newWidth = applyColumnWidthLimits(
+				column,
+				start.width + evt.clientX - start.x,
+			);
 
 			setColumnWidthState((prevState) => ({
 				...prevState,
-				[field]: applyColumnWidthLimits(column, prevState[field] + move),
+				[field]: newWidth,
 			}));
 		},
-		[column, dragging, field, setColumnWidthState],
+		[column, field, setColumnWidthState],
 	);
 	const onColumnSortChange = useCallback(
 		(modKey: boolean) => {
@@ -161,6 +188,12 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 	);
 	const onColumnClick = useCallback(
 		(evt: React.MouseEvent) => {
+			// the click that ends a resize lands here when the pointer is
+			// released elsewhere in the header
+			if (pressedOnResizer.current) {
+				pressedOnResizer.current = false;
+				return;
+			}
 			onColumnSortChange(evt.shiftKey);
 		},
 		[onColumnSortChange],
@@ -213,6 +246,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 
 	return (
 		<DataGridColumnHeaderContentWrapper
+			onMouseDownCapture={resetPressedOnResizer}
 			onClick={onColumnClick}
 			onContextMenu={isTouchDevice() ? onColumnLongClick : undefined}
 			className={combineClassNames([
