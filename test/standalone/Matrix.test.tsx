@@ -19,6 +19,7 @@ import {
 	MatrixColumn,
 	MatrixExtraRow,
 	MatrixRow,
+	MatrixRowHeaderContext,
 	MatrixTileItem,
 } from "../../src/standalone/Matrix/types";
 
@@ -27,6 +28,7 @@ afterEach(() => {
 });
 
 const theme = createTheme();
+
 const wrap = (ui: React.ReactNode) =>
 	render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
 
@@ -43,7 +45,6 @@ describe("buildDateColumns", () => {
 		expect(columns[6].key).toBe("2026-03-08");
 		expect(columns[0].label).toBe(2);
 	});
-
 	it("mutes the weekend, marks today, and lets accent win", () => {
 		const columns = buildDateColumns({
 			from: "2026-03-02", // Monday
@@ -59,7 +60,6 @@ describe("buildDateColumns", () => {
 		expect(variantOf("2026-03-07")).toBe("accent");
 		expect(variantOf("2026-03-08")).toBe("muted");
 	});
-
 	it("normalizes today and accent, so a timestamp marks its day", () => {
 		const columns = buildDateColumns({
 			from: "2026-03-02",
@@ -72,7 +72,6 @@ describe("buildDateColumns", () => {
 		expect(variantOf("2026-03-04")).toBe("current");
 		expect(variantOf("2026-03-06")).toBe("accent");
 	});
-
 	it("localizes the weekday sub label without moment locales", () => {
 		const [monday] = buildDateColumns({
 			from: "2026-03-02",
@@ -82,7 +81,6 @@ describe("buildDateColumns", () => {
 		});
 		expect(monday.subLabel as string).toMatch(/^Mo/);
 	});
-
 	it("says so when the range is reversed or unparseable", () => {
 		const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 		expect(
@@ -91,7 +89,6 @@ describe("buildDateColumns", () => {
 		expect(warn).toHaveBeenCalledWith(expect.stringContaining("no columns"));
 		warn.mockRestore();
 	});
-
 	it("caps the range at maxColumns and says so", () => {
 		const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 		const columns = buildDateColumns({
@@ -104,7 +101,6 @@ describe("buildDateColumns", () => {
 		expect(warn).toHaveBeenCalledWith(expect.stringContaining("truncated"));
 		warn.mockRestore();
 	});
-
 	describe("across timezones", () => {
 		const ZONES = [
 			"Pacific/Kiritimati", // UTC+14
@@ -190,7 +186,6 @@ describe("buildDateColumns", () => {
 		});
 	});
 });
-
 // ---- MatrixGrid -------------------------------------------------------------
 
 interface TestCell {
@@ -238,6 +233,7 @@ const cellOf = (rowKey: string, columnKey: string) =>
 const renderRowHeaderByKey = (row: MatrixRow<TestCell>) => (
 	<span>{`header-${row.key}`}</span>
 );
+
 const renderCellWithTestId = (
 	cell: TestCell | undefined,
 	context: MatrixCellContext<TestCell>,
@@ -246,6 +242,7 @@ const renderCellWithTestId = (
 		{cell?.text ?? ""}
 	</span>
 );
+
 const TEST_CLASSES = {
 	root: "t-root",
 	grid: "t-grid",
@@ -260,6 +257,7 @@ const TEST_CLASSES = {
 	badge: "t-badge",
 	extraCellAddHint: "t-hint",
 };
+
 /** The grid with a focusable "outside" button before it, for rerender() */
 const gridElement = (props: Partial<MatrixGridProps<TestCell>> = {}) => (
 	<ThemeProvider theme={theme}>
@@ -275,6 +273,7 @@ const gridElement = (props: Partial<MatrixGridProps<TestCell>> = {}) => (
 		/>
 	</ThemeProvider>
 );
+
 /** Four columns keyed `${prefix}1` to `${prefix}4`: a fresh range per prefix */
 const keysOf = (prefix: string): MatrixColumn[] =>
 	[1, 2, 3, 4].map((n) => ({ key: `${prefix}${n}`, label: `${n}` }));
@@ -289,7 +288,6 @@ describe("MatrixGrid", () => {
 		expect(document.querySelectorAll("[data-testid^=cell-]")).toHaveLength(8);
 		expect(cellOf("r1", "c2")).toHaveTextContent("busy");
 	});
-
 	it("is reachable by keyboard, and a named region when labelled", () => {
 		const { container } = wrap(
 			<MatrixGrid<TestCell>
@@ -305,7 +303,6 @@ describe("MatrixGrid", () => {
 		expect(scroller).toHaveAttribute("role", "region");
 		expect(scroller).toHaveAttribute("aria-label", "Ward A roster");
 	});
-
 	it("reports a single cell range on a plain click", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({ selectable: true, onSelectRange });
@@ -318,7 +315,6 @@ describe("MatrixGrid", () => {
 			columnKeys: ["c1"],
 		});
 	});
-
 	it("normalizes a range swept from right to left", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({ selectable: true, onSelectRange });
@@ -332,7 +328,6 @@ describe("MatrixGrid", () => {
 			columnKeys: ["c3", "c4"],
 		});
 	});
-
 	it("ignores anything but the left button", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({ selectable: true, onSelectRange });
@@ -351,7 +346,6 @@ describe("MatrixGrid", () => {
 		fireEvent.mouseUp(window, { button: 2 });
 		expect(onSelectRange).not.toHaveBeenCalled();
 	});
-
 	it("drops the press when it is released with another button", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({
@@ -370,7 +364,6 @@ describe("MatrixGrid", () => {
 		fireEvent.mouseUp(window);
 		expect(onSelectRange).not.toHaveBeenCalled();
 	});
-
 	it("drops the press when the window loses focus or the menu opens", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({
@@ -387,7 +380,6 @@ describe("MatrixGrid", () => {
 		fireEvent.mouseUp(window);
 		expect(onSelectRange).not.toHaveBeenCalled();
 	});
-
 	it("stops a sweep at the first cell isCellSelectable rejects", () => {
 		const onSelectRange = vi.fn();
 		// c2 holds a cell -> not selectable under the default predicate
@@ -410,7 +402,6 @@ describe("MatrixGrid", () => {
 			columnKeys: ["c1"],
 		});
 	});
-
 	it("clamps a fast drag that skipped over the rejected cell", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({ selectable: true, onSelectRange });
@@ -426,7 +417,6 @@ describe("MatrixGrid", () => {
 			columnKeys: ["c1"],
 		});
 	});
-
 	it("extends a range across cells that are free", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({
@@ -441,7 +431,6 @@ describe("MatrixGrid", () => {
 			expect.objectContaining({ columnKeys: ["c1", "c2", "c3", "c4"] }),
 		);
 	});
-
 	it("shrinks the range when the pointer comes back to the press cell", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({
@@ -463,7 +452,6 @@ describe("MatrixGrid", () => {
 			expect.objectContaining({ columnKeys: ["c1"] }),
 		);
 	});
-
 	it("paints exactly the cells of the range", () => {
 		renderGrid({ selectable: true, onSelectRange: vi.fn() });
 		fireEvent.mouseDown(cellOf("r1", "c3"));
@@ -474,7 +462,6 @@ describe("MatrixGrid", () => {
 			matrixClasses.cellSelected,
 		);
 	});
-
 	it("re-renders only the row that changed", () => {
 		const renderCell = vi.fn(
 			(cell: TestCell | undefined, context: { row: { key: string } }) => (
@@ -500,7 +487,6 @@ describe("MatrixGrid", () => {
 		const rowsRendered = renderCell.mock.calls.map((call) => call[1].row.key);
 		expect(rowsRendered).toEqual(["r2", "r2", "r2", "r2"]);
 	});
-
 	it("leaves the cell contents alone while a range is swept", () => {
 		// The point of the interaction store: a sweep repaints a handful of
 		// cells and must not send renderCell over the whole grid again.
@@ -527,7 +513,6 @@ describe("MatrixGrid", () => {
 		expect(renderCell).toHaveBeenCalledTimes(4);
 		expect(cells[3].className).not.toContain(matrixClasses.cellSelected);
 	});
-
 	it("re-checks selectability at release, not only while moving", () => {
 		const onSelectRange = vi.fn();
 		const free: MatrixRow<TestCell>[] = [{ key: "r1", cells: {} }];
@@ -568,7 +553,6 @@ describe("MatrixGrid", () => {
 			expect.objectContaining({ columnKeys: ["c1"] }),
 		);
 	});
-
 	it("drops the range when the press cell itself filled up", () => {
 		const onSelectRange = vi.fn();
 		const cellRenderer = (
@@ -594,7 +578,6 @@ describe("MatrixGrid", () => {
 		fireEvent.mouseUp(window);
 		expect(onSelectRange).not.toHaveBeenCalled();
 	});
-
 	it("drops the range when the row was opted out mid-press", () => {
 		const onSelectRange = vi.fn();
 		const cellRenderer = (
@@ -620,7 +603,6 @@ describe("MatrixGrid", () => {
 		fireEvent.mouseUp(window);
 		expect(onSelectRange).not.toHaveBeenCalled();
 	});
-
 	it("drops the press when selection is switched off mid-drag", () => {
 		const onSelectRange = vi.fn();
 		const grid = (selectable: boolean) => (
@@ -651,7 +633,6 @@ describe("MatrixGrid", () => {
 		fireEvent.mouseUp(window);
 		expect(onSelectRange).not.toHaveBeenCalled();
 	});
-
 	it("lays out an empty column set as empty, not as one column", () => {
 		renderGrid({ columns: [] });
 		const grid = document.querySelector(
@@ -661,7 +642,6 @@ describe("MatrixGrid", () => {
 		expect(grid.style.gridTemplateColumns).toBe("116px");
 		expect(screen.getByText("header-r1")).toBeInTheDocument();
 	});
-
 	it("aborts the range on Escape", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({ selectable: true, onSelectRange });
@@ -673,7 +653,6 @@ describe("MatrixGrid", () => {
 		fireEvent.mouseUp(window);
 		expect(onSelectRange).not.toHaveBeenCalled();
 	});
-
 	it("does not select occupied cells, or rows opted out", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({ selectable: true, onSelectRange });
@@ -683,7 +662,6 @@ describe("MatrixGrid", () => {
 		fireEvent.mouseUp(window);
 		expect(onSelectRange).not.toHaveBeenCalled();
 	});
-
 	it("selects an occupied cell when isCellSelectable says so", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({
@@ -697,7 +675,6 @@ describe("MatrixGrid", () => {
 			expect.objectContaining({ rowKey: "r1", fromColumnKey: "c2" }),
 		);
 	});
-
 	it("offers a chip, not an overlay, on a cell that is not blank", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({
@@ -723,7 +700,6 @@ describe("MatrixGrid", () => {
 			columnKeys: ["c2"],
 		});
 	});
-
 	it("reports the chip's cell once, not twice", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({
@@ -741,7 +717,6 @@ describe("MatrixGrid", () => {
 		fireEvent.click(chip);
 		expect(onSelectRange).toHaveBeenCalledTimes(1);
 	});
-
 	it("activates the chip by keyboard", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({
@@ -758,7 +733,6 @@ describe("MatrixGrid", () => {
 			expect.objectContaining({ columnKeys: ["c2"] }),
 		);
 	});
-
 	it("offers the same hint over the lower half when asked to", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({
@@ -783,7 +757,6 @@ describe("MatrixGrid", () => {
 			expect.objectContaining({ columnKeys: ["c2"] }),
 		);
 	});
-
 	it("keeps the blank-cell hint pointer-transparent in overlay mode", () => {
 		renderGrid({
 			selectable: true,
@@ -796,7 +769,6 @@ describe("MatrixGrid", () => {
 		expect(hint.className).not.toContain(matrixClasses.addHintHalf);
 		expect(getComputedStyle(hint).pointerEvents).toBe("none");
 	});
-
 	it("draws no affordance at all where a range may not start", () => {
 		renderGrid({ selectable: true, addLabel: "Add" }); // default predicate
 		// c2 holds an entry, so the default predicate rejects it
@@ -812,7 +784,6 @@ describe("MatrixGrid", () => {
 		fireEvent.mouseOver(cellOf("r2", "c1"));
 		expect(screen.queryByText("Add")).not.toBeInTheDocument();
 	});
-
 	it("draws no pointer-catching overlay where a range may not start", () => {
 		renderGrid({
 			selectable: true,
@@ -824,7 +795,6 @@ describe("MatrixGrid", () => {
 		fireEvent.mouseOver(cellOf("r1", "c2"));
 		expect(screen.queryByText("Add")).not.toBeInTheDocument();
 	});
-
 	it("keeps the chip in the DOM, so a keyboard can reach it", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({
@@ -844,7 +814,6 @@ describe("MatrixGrid", () => {
 			expect.objectContaining({ columnKeys: ["c2"] }),
 		);
 	});
-
 	it("keeps the add hint after a click finished a range", () => {
 		renderGrid({ selectable: true, addLabel: "Add", onSelectRange: vi.fn() });
 		fireEvent.mouseOver(cellOf("r1", "c1"));
@@ -853,7 +822,6 @@ describe("MatrixGrid", () => {
 		// the pointer never left the cell, so the hint is still there
 		expect(screen.getByText("Add")).toBeInTheDocument();
 	});
-
 	it("does not swallow the default on a drag handle inside a cell", () => {
 		renderGrid({
 			selectable: true,
@@ -866,7 +834,6 @@ describe("MatrixGrid", () => {
 		const notPrevented = fireEvent.mouseDown(handle);
 		expect(notPrevented).toBe(true);
 	});
-
 	it("wraps cell contents with renderCellWrapper", () => {
 		renderGrid({
 			renderCellWrapper: (node, context) => (
@@ -877,7 +844,6 @@ describe("MatrixGrid", () => {
 		});
 		expect(screen.getByTestId("wrapper-r1-c1")).toBeInTheDocument();
 	});
-
 	describe("extra rows", () => {
 		const extraRows = [
 			{
@@ -889,7 +855,6 @@ describe("MatrixGrid", () => {
 				onCellClick: vi.fn(),
 			},
 		];
-
 		it("renders below the data rows by default", () => {
 			renderGrid({ extraRows });
 			const cells = Array.from(
@@ -902,7 +867,6 @@ describe("MatrixGrid", () => {
 			);
 			expect(kinds).toEqual(["data", "data", "extra"]);
 		});
-
 		it("renders above the data rows when asked to", () => {
 			renderGrid({ extraRows, extraRowsPosition: "top" });
 			const cells = Array.from(
@@ -915,7 +879,6 @@ describe("MatrixGrid", () => {
 			);
 			expect(kinds).toEqual(["extra", "data", "data"]);
 		});
-
 		it("renders a badge of zero, and reports clicks", () => {
 			renderGrid({ extraRows });
 			expect(screen.getByText("9")).toBeInTheDocument();
@@ -924,7 +887,6 @@ describe("MatrixGrid", () => {
 			fireEvent.click(screen.getByText("9"));
 			expect(extraRows[0].onCellClick).toHaveBeenCalledWith("c2");
 		});
-
 		it("is one tab stop with arrow keys, not one stop per column", () => {
 			renderGrid({ extraRows });
 			const cells = screen.getAllByRole("button");
@@ -940,7 +902,6 @@ describe("MatrixGrid", () => {
 			fireEvent.keyDown(cells[3], { key: "Home" });
 			expect(document.activeElement).toBe(cells[0]);
 		});
-
 		it("labels its cells and answers the keyboard", () => {
 			renderGrid({ extraRows });
 			const cell = screen.getByLabelText("Open demand on c1");
@@ -966,7 +927,6 @@ describe("MatrixGrid", () => {
 			screen.getAllByRole("button", { name: /^Open demand/ });
 		const tabStops = () =>
 			demandCells().filter((cell) => cell.getAttribute("tabindex") === "0");
-
 		it("[ISSUE-3480-ITEM-12] keeps one tab stop when the columns change under the remembered cell", () => {
 			const extra = demandRow();
 			const { rerender } = render(
@@ -979,7 +939,6 @@ describe("MatrixGrid", () => {
 			rerender(gridElement({ columns: keysOf("d"), extraRows: extra }));
 			expect(tabStops()).toHaveLength(1);
 		});
-
 		it("[ISSUE-3480-ITEM-12] falls back to the first column without taking the focus", () => {
 			const extra = demandRow();
 			const { rerender } = render(
@@ -999,7 +958,6 @@ describe("MatrixGrid", () => {
 			expect(document.activeElement).toBe(outside);
 		});
 	});
-
 	describe("touch mode", () => {
 		beforeEach(() => {
 			window.matchMedia = vi.fn().mockImplementation((query: string) => ({
@@ -1017,7 +975,6 @@ describe("MatrixGrid", () => {
 			// @ts-expect-error jsdom has no matchMedia to restore to
 			delete window.matchMedia;
 		});
-
 		it("turns the row header into one labelled, keyboard-reachable button", () => {
 			const onRowHeaderActions = vi.fn();
 			renderGrid({ onRowHeaderActions });
@@ -1029,7 +986,6 @@ describe("MatrixGrid", () => {
 			fireEvent.click(header);
 			expect(onRowHeaderActions).toHaveBeenCalledTimes(2);
 		});
-
 		it("shows the aggregate row's add hint outright", () => {
 			renderGrid({
 				extraRows: [
@@ -1045,7 +1001,6 @@ describe("MatrixGrid", () => {
 			const cell = screen.getAllByLabelText("Open demand")[0];
 			expect(cell.className).toContain(matrixClasses.touch);
 		});
-
 		it("fires the row action once, not once per auto-repeat tick", () => {
 			const onRowHeaderActions = vi.fn();
 			renderGrid({ onRowHeaderActions });
@@ -1055,13 +1010,11 @@ describe("MatrixGrid", () => {
 			fireEvent.keyDown(header, { key: " ", repeat: true });
 			expect(onRowHeaderActions).toHaveBeenCalledTimes(1);
 		});
-
 		it("shows no add hint, because there is no hover", () => {
 			renderGrid({ selectable: true, addLabel: "Add" });
 			fireEvent.mouseOver(cellOf("r1", "c1"));
 			expect(screen.queryByText("Add")).not.toBeInTheDocument();
 		});
-
 		it("falls back to a visible chip on an occupied cell, in either mode", () => {
 			const onSelectRange = vi.fn();
 			const { rerender } = wrap(
@@ -1106,8 +1059,51 @@ describe("MatrixGrid", () => {
 				getComputedStyle(screen.getByRole("button", { name: "Add" })).opacity,
 			).toBe("1");
 		});
+		it("[ISSUE-3480-ITEM-2] does not tell renderRowHeader the header is the tap target when it is not", () => {
+			// A renderer that follows MatrixRowHeaderContext.touch: it drops its
+			// own buttons when the header takes over. Without onRowHeaderActions
+			// nothing takes over, so the buttons have to stay.
+			const seen: MatrixRowHeaderContext[] = [];
+			render(
+				gridElement({
+					renderRowHeader: (row, context) => {
+						seen.push(context);
+						return context.touch ? (
+							<span>{row.key}</span>
+						) : (
+							<button>{`edit ${row.key}`}</button>
+						);
+					},
+				}),
+			);
+			expect(seen.map((context) => context.touch)).not.toContain(true);
+			expect(screen.getByRole("button", { name: "edit r1" })).toBeVisible();
+		});
+		it("[ISSUE-3480-ITEM-2] tells renderRowHeader the header is the tap target while it is one", () => {
+			const touchOf: Record<string, boolean> = {};
+			const renderRowHeader = (
+				row: MatrixRow<TestCell>,
+				context: MatrixRowHeaderContext,
+			) => {
+				touchOf[row.key] = context.touch;
+				return <span>{row.key}</span>;
+			};
+			const { rerender } = render(
+				gridElement({ renderRowHeader, onRowHeaderActions: vi.fn() }),
+			);
+			expect(screen.getByRole("button", { name: "Row one" })).toHaveClass(
+				matrixClasses.rowHeaderButton,
+			);
+			expect(touchOf).toEqual({ r1: true, r2: true });
+			// onRowHeaderActions taken away after mount: the header is a plain
+			// container again, and the renderer is told so
+			rerender(gridElement({ renderRowHeader }));
+			expect(
+				screen.queryByRole("button", { name: "Row one" }),
+			).not.toBeInTheDocument();
+			expect(touchOf).toEqual({ r1: false, r2: false });
+		});
 	});
-
 	describe("scrolling to a column", () => {
 		let writes: number[] = [];
 		let offsetDescriptor: PropertyDescriptor | undefined;
@@ -1225,7 +1221,6 @@ describe("MatrixGrid", () => {
 		});
 	});
 });
-
 // ---- MatrixCellTile ---------------------------------------------------------
 
 const item = (

@@ -51,7 +51,10 @@ const MatrixRowHeader = <TCell,>(props: MatrixRowHeaderProps<TCell>) => {
 		button ? activate : undefined,
 		row.label,
 	);
-	const context = useMemo(() => ({ touch }), [touch]);
+	// touch tells the renderer to drop its own buttons, so it follows the tap
+	// target, not the device: without onRowHeaderActions those buttons are the
+	// only way to the row's actions
+	const context = useMemo(() => ({ touch: button }), [button]);
 	const content = useMemo(
 		() => renderRowHeader(row, context),
 		[renderRowHeader, row, context],

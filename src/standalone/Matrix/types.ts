@@ -110,9 +110,12 @@ export interface MatrixCellContext<TCell> {
 
 export interface MatrixRowHeaderContext {
 	/**
-	 * True while the grid runs in touch mode: the whole row header is one tap
-	 * target calling onRowHeaderActions, so the renderer should not offer its
-	 * own (finger-sized) buttons.
+	 * True while the whole row header is one tap target calling
+	 * onRowHeaderActions, so the renderer should not offer its own buttons:
+	 * on a touch-only device (coarse pointer, no hover) with
+	 * onRowHeaderActions set. False on other devices, and on a touch-only
+	 * device without onRowHeaderActions, where the renderer's own buttons are
+	 * the way to the row's actions.
 	 */
 	touch: boolean;
 }

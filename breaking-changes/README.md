@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [MatrixGrid tells renderRowHeader `touch` only while the header is the tap target](2026-11-06-matrix-row-header-touch-follows-tap-target.md) | behavior |
 | 2026-11-06 | [PortalLayout's mobile drawer leaves a strip of backdrop on narrow screens](2026-11-06-portal-drawer-max-width.md) | behavior |
 | 2026-11-06 | [buildDateColumns reads today and accent as date-only values](2026-11-06-build-date-columns-date-only-today.md) | behavior |
 | 2026-11-06 | [Menu entries call onAuxClick for the middle button only](2026-11-06-menu-aux-click-middle-button-only.md) | behavior |
