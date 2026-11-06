@@ -21,7 +21,11 @@ export interface InfiniteScrollProps {
 	 */
 	loadMoreBottom: () => void;
 	/**
-	 * Debounce wait (in ms) for loadMoreTop and loadMoreBottom. Defaults to 100ms
+	 * Debounce wait in milliseconds for `loadMoreTop` and `loadMoreBottom`: a
+	 * burst of triggers results in one call, made `callBackDebounce` ms after
+	 * the last trigger. `0` calls the callbacks synchronously. Can be changed
+	 * after mount.
+	 * @default 100
 	 */
 	callBackDebounce?: number;
 	/**
@@ -46,6 +50,13 @@ interface IState {
 }
 
 /**
+ * Wraps a load callback as `callBackDebounce` asks: debounced by `wait` ms, or
+ * for `0` the callback itself, so that it is called synchronously
+ */
+const debounceCallback = (callback: () => void, wait: number): (() => void) =>
+	wait === 0 ? callback : debounce(callback, wait);
+
+/**
  * Provides infinite scrolling to whatever is inside it
  */
 class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
@@ -62,16 +73,10 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 			: null;
 		this.state = {
 			initScroll: !this.props.loadMoreTop, // we don't need to set an initial scroll if we don't need up-scrolling
-			loadMoreTop:
-				debounceWait === 0
-					? this.props.loadMoreTop
-						? debounce(this.props.loadMoreTop, debounceWait)
-						: undefined
-					: this.props.loadMoreTop,
-			loadMoreBottom:
-				debounceWait === 0
-					? this.props.loadMoreBottom
-					: debounce(this.props.loadMoreBottom, debounceWait),
+			loadMoreTop: this.props.loadMoreTop
+				? debounceCallback(this.props.loadMoreTop, debounceWait)
+				: undefined,
+			loadMoreBottom: debounceCallback(this.props.loadMoreBottom, debounceWait),
 		};
 	}
 
@@ -100,12 +105,9 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 			debounceWait !== prevDebounceWait
 		) {
 			this.setState({
-				loadMoreTop:
-					debounceWait === 0
-						? this.props.loadMoreTop
-							? debounce(this.props.loadMoreTop, debounceWait)
-							: undefined
-						: this.props.loadMoreTop,
+				loadMoreTop: this.props.loadMoreTop
+					? debounceCallback(this.props.loadMoreTop, debounceWait)
+					: undefined,
 			});
 		}
 		if (
@@ -113,10 +115,10 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 			debounceWait !== prevDebounceWait
 		) {
 			this.setState({
-				loadMoreBottom:
-					debounceWait === 0
-						? debounce(this.props.loadMoreBottom, debounceWait)
-						: this.props.loadMoreBottom,
+				loadMoreBottom: debounceCallback(
+					this.props.loadMoreBottom,
+					debounceWait,
+				),
 			});
 		}
 		if (!!prevProps.dynamicallySized !== !!this.props.dynamicallySized) {
