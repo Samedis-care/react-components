@@ -1,11 +1,12 @@
 /**
- * BackendSingleSelect over a model of people (backendSelectorFixture): the search request.
+ * BackendSingleSelect over a model of people (backendSelectorFixture): which record the
+ * field shows for `selected`, and the search request.
  */
 // first: BackendSingleSelect cannot be the first components-care module imported (import cycle)
 import "../../../src/standalone";
 import React, { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
-import { act, render } from "@testing-library/react";
+import { act, render, waitFor } from "@testing-library/react";
 import { Framework } from "../../../src/framework";
 import BackendSingleSelect, {
 	BackendSingleSelectProps,
@@ -13,9 +14,12 @@ import BackendSingleSelect, {
 import type { ModelUnknown } from "../../../src/backend-integration";
 import { setupFormTests } from "../Form/formFixture";
 import {
+	combobox,
 	conv,
+	flush,
 	openList,
 	peopleModel,
+	pickOption,
 	typeText,
 } from "./backendSelectorFixture";
 
@@ -36,6 +40,131 @@ const field = (props: Props) => (
 );
 
 const ui = (props: Props) => <Framework>{field(props)}</Framework>;
+
+/** a parent that applies every onSelect to selected */
+const Parent = ({
+	initial = null,
+	onSelect,
+	...props
+}: Props & { initial?: string | null }) => {
+	const [selected, setSelected] = useState<string | null>(initial);
+	return field({
+		...props,
+		selected,
+		onSelect: (value) => {
+			onSelect?.(value);
+			setSelected(value);
+		},
+	});
+};
+
+/**
+ * Records the titles the input gets from now on (its title is the shown entry's label);
+ * the returned function stops recording and lists every title committed in between, in
+ * order, from the one it had at the start to the current one
+ */
+const watchTitles = (input: HTMLInputElement = combobox()) => {
+	const records: MutationRecord[] = [];
+	const observer = new MutationObserver((list) => records.push(...list));
+	observer.observe(input, {
+		attributeFilter: ["title"],
+		attributeOldValue: true,
+	});
+	return () => {
+		records.push(...observer.takeRecords());
+		observer.disconnect();
+		return [
+			...records.map((record) => record.oldValue),
+			input.getAttribute("title"),
+		];
+	};
+};
+
+// ---------------------------------------------------------------------------
+// Bugs (each test asserts the correct behavior and fails until it is fixed)
+// ---------------------------------------------------------------------------
+
+describe("BackendSingleSelect bugs", () => {
+	it("[ISSUE-3510-ITEM-1] after an outside change the field shows the placeholder, not the previous record, while the new one loads", async () => {
+		const { model, connector } = peopleModel();
+		const { rerender } = render(
+			ui({ model, selected: "2", disableRequestBatching: true }),
+		);
+		await waitFor(() => expect(combobox().value).toBe("Bob"));
+		const release = connector.hold("3");
+		rerender(ui({ model, selected: "3", disableRequestBatching: true }));
+		await flush();
+		expect(combobox().value).toBe("Loading…");
+		await release();
+		expect(combobox().value).toBe("Carol");
+	});
+
+	it("[ISSUE-3510-ITEM-1] a lookup that finishes after selected moved on is discarded", async () => {
+		const { model, connector } = peopleModel();
+		const release = connector.hold("1");
+		const { rerender } = render(
+			ui({ model, selected: "1", disableRequestBatching: true }),
+		);
+		await flush();
+		rerender(ui({ model, selected: "2", disableRequestBatching: true }));
+		await waitFor(() => expect(combobox().value).toBe("Bob"));
+		await release();
+		expect(combobox().value).toBe("Bob");
+	});
+
+	it("[ISSUE-3510-ITEM-1] a lookup that fails after selected moved on is discarded: no onLoadError, no onSelect(null)", async () => {
+		const { model, connector } = peopleModel();
+		connector.fail["1"] = new Error("gone");
+		const release = connector.hold("1");
+		const onLoadError = vi.fn(() => null);
+		const onSelect = vi.fn();
+		const props = {
+			model,
+			onLoadError,
+			onSelect,
+			disableRequestBatching: true,
+		};
+		const { rerender } = render(ui({ ...props, selected: "1" }));
+		await flush();
+		rerender(ui({ ...props, selected: "2" }));
+		await waitFor(() => expect(combobox().value).toBe("Bob"));
+		await release();
+		expect(onLoadError).not.toHaveBeenCalled();
+		expect(onSelect).not.toHaveBeenCalled();
+		expect(combobox().value).toBe("Bob");
+	});
+
+	it("[ISSUE-3510-ITEM-1] a pick is shown at once, without 'Loading…' while the parent applies it", async () => {
+		const { model } = peopleModel();
+		render(
+			<Framework>
+				<Parent model={model} initial={"1"} disableRequestBatching />
+			</Framework>,
+		);
+		await waitFor(() => expect(combobox().value).toBe("Alice"));
+		await openList();
+		const titles = watchTitles();
+		await pickOption("Bob");
+		expect(combobox().value).toBe("Bob");
+		expect(titles()).toEqual(["Alice", "Bob"]);
+	});
+
+	it("[ISSUE-3510-ITEM-1] an outside change to an additionalOptions id shows that entry at once, without 'Loading…'", async () => {
+		const { model } = peopleModel();
+		const props = {
+			model,
+			disableRequestBatching: true,
+			additionalOptions: [{ value: "none", label: "No one" }],
+		};
+		const { rerender } = render(ui({ ...props, selected: "2" }));
+		await waitFor(() => expect(combobox().value).toBe("Bob"));
+		const titles = watchTitles();
+		rerender(ui({ ...props, selected: "none" }));
+		await flush();
+		expect(combobox().value).toBe("No one");
+		expect(titles()).toEqual(["Bob", "No one"]);
+	});
+});
 
 describe("BackendSingleSelect bugs (debounced search)", () => {
 	it("[ISSUE-3510-ITEM-19] a parent render between two keystrokes does not send the first search", async () => {

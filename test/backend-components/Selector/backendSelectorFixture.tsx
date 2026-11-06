@@ -247,3 +247,9 @@ export const typeText = async (
 	fireEvent.change(input, { target: { value: text } });
 	await flush();
 };
+
+/** clicks the option whose name matches, once it is listed */
+export const pickOption = async (name: RegExp | string) => {
+	fireEvent.click(await screen.findByRole("option", { name }));
+	await flush();
+};

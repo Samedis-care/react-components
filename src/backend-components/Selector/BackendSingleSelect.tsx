@@ -1,10 +1,4 @@
-import React, {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useThemeProps } from "@mui/material";
 import {
 	BaseSelectorData,
@@ -59,7 +53,13 @@ export interface BackendSingleSelectProps<M extends ModelUnknown> extends Omit<
 	 */
 	onSelect?: (value: string | null) => void;
 	/**
-	 * The currently selected values
+	 * The id of the selected record, or null (undefined counts as null). Shown from a
+	 * matching `additionalOptions` entry or `initialData` record without a request,
+	 * otherwise loaded through `modelFetch`. Until the record of this id is there, the
+	 * field shows the translated "Loading…" (`backend-components.selector.loading`), never
+	 * the record of an earlier id, and a lookup of an earlier id that finishes later is
+	 * discarded (also its error: no `onLoadError`, no `onSelect(null)`). Not shown while
+	 * `selectedFreeSolo` is a non-empty string.
 	 */
 	selected: string | null;
 	/**
@@ -146,7 +146,9 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 	if (freeSolo && !onSelectFreeSolo)
 		throw new Error("freeSolo enabled, but no onSelectFreeSolo callback");
 
-	const upcomingSelectedCache = useRef<BaseSelectorData | null>(null);
+	// the entry picked from the list last, shown for its id until the effect below
+	// has taken it into the cache, so a pick does not show "Loading…" in between
+	const [picked, setPicked] = useState<BaseSelectorData | null>(null);
 	const [selectedCache, setSelectedCache] = useState<BaseSelectorData | null>(
 		null,
 	);
@@ -202,7 +204,7 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 				if (onSelectFreeSolo) onSelectFreeSolo(selected.value);
 				return;
 			}
-			upcomingSelectedCache.current = selected;
+			setPicked(selected);
 			if (onSelect) {
 				onSelect(selected ? selected.value : null);
 			}
@@ -225,14 +227,15 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 		}
 
 		// if this comes from selection no need to fetch it either
-		if (
-			upcomingSelectedCache.current &&
-			upcomingSelectedCache.current.value === selected
-		) {
-			setSelectedCache(upcomingSelectedCache.current);
-			upcomingSelectedCache.current = null;
+		if (picked && picked.value === selected) {
+			setSelectedCache(picked);
+			setPicked(null);
 		}
 
+		// set when selected changes again or the field unmounts: what is loaded for this
+		// id then is discarded, so it can neither replace the entry of the new id nor
+		// drop it
+		let discarded = false;
 		void (async () => {
 			let newCache: BaseSelectorData | null = null;
 			if (initialData) {
@@ -252,6 +255,7 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 					});
 					newCache = await modelToSelectorData(data[0]);
 				} catch (e) {
+					if (discarded) return;
 					const label = getSelectedLoadErrorLabel(
 						selected,
 						e as Error,
@@ -271,10 +275,26 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 					};
 				}
 			}
+			if (discarded) return;
 			setSelectedCache((oldCache) => Object.assign({}, oldCache, newCache));
 		})();
+		return () => {
+			discarded = true;
+		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selected]);
+
+	// the entry of selected: the cached one only while it is this id's, else one that
+	// is known without loading it (just picked, or an additionalOptions entry; the
+	// effect above caches it), else null while it loads
+	const selectedEntry =
+		selected == null
+			? null
+			: selectedCache?.value === selected
+				? selectedCache
+				: picked?.value === selected
+					? picked
+					: (additionalOptions?.find((opt) => opt.value === selected) ?? null);
 
 	const debouncedLoad = useDebouncedLoad(handleLoad, searchDebounceTime ?? 500);
 
@@ -289,7 +309,7 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 				selectedFreeSolo
 					? { value: selectedFreeSolo, label: selectedFreeSolo, freeSolo: true }
 					: selected != null
-						? (selectedCache ?? {
+						? (selectedEntry ?? {
 								value: selected,
 								label: t("backend-components.selector.loading"),
 							})
