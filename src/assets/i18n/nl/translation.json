@@ -38,6 +38,7 @@
 					"any": "Alle"
 				},
 				"set-filter": {
+					"label": "Waarden",
 					"search": "Zoeken…",
 					"select-all": "Selecteer alles",
 					"invert": "Toon alles behalve…"

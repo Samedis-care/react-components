@@ -38,6 +38,7 @@
 					"any": "Hammasi"
 				},
 				"set-filter": {
+					"label": "Qiymatlar",
 					"search": "Qidirmoq…",
 					"select-all": "Hammasini belgilash",
 					"invert": "Barchasini ko'rsatish…"

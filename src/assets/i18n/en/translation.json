@@ -42,6 +42,7 @@
 					"any": "Any"
 				},
 				"set-filter": {
+					"label": "Values",
 					"search": "Search…",
 					"select-all": "Select all",
 					"invert": "Show all except…"

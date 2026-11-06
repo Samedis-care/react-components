@@ -477,7 +477,9 @@ export interface DataGridSetFilterDataEntry {
 	 */
 	value: string;
 	/**
-	 * The label to display
+	 * The label to display. It labels the entry's checkbox: a click on it ticks
+	 * the checkbox, and screen readers read it as the checkbox's name, so it must
+	 * not contain interactive elements.
 	 * Fallback if not set: getLabelText
 	 */
 	getLabel?: () => React.ReactNode;
@@ -1072,6 +1074,13 @@ export const DataGridSetFilterListItem = styled(ListItem, {
 })({
 	paddingLeft: 0,
 	paddingRight: 0,
+	// the label spans the row, so the whole row ticks the box
+	"& > .MuiFormControlLabel-root": {
+		flex: "1 1 auto",
+		minWidth: 0,
+		marginLeft: 0,
+		marginRight: 0,
+	},
 }) as typeof ListItem;
 
 export const DataGridSetFilterContainer = styled(Grid, {

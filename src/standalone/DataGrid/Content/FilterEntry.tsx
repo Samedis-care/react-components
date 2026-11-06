@@ -5,7 +5,6 @@ import {
 	FormControlLabel,
 	Grid,
 	List,
-	ListItemText,
 	MenuItem,
 	Radio,
 	RadioGroup,
@@ -145,7 +144,18 @@ export interface DataGridContentFilterEntryProps {
 }
 
 const ENUM_FILTER_MAGIC_EMPTY = "__MAGIC_EMPTY__";
-const LIST_ITEM_SLOT_PROPS = { primary: { noWrap: true } };
+const LIST_ITEM_LABEL_SLOT_PROPS = { typography: { noWrap: true } };
+
+/**
+ * The values "Select all" ticks: every entry of an enum filter except the
+ * dividers, with the empty value as ENUM_FILTER_MAGIC_EMPTY
+ * @param data The enum column's filter data
+ * @returns The values, in the order of the list
+ */
+const enumFilterValues = (data: DataGridSetFilterData): string[] =>
+	data
+		.filter((entry) => !entry.isDivider)
+		.map((entry) => entry.value || ENUM_FILTER_MAGIC_EMPTY);
 
 const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	const { onChange, depth, close } = props;
@@ -293,10 +303,9 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		checked: boolean,
 	) => {
 		if (checked) {
-			filterValue = (props.valueData as DataGridSetFilterData)
-				.filter((entry) => !entry.isDivider)
-				.map((entry) => entry.value || ENUM_FILTER_MAGIC_EMPTY)
-				.join(",");
+			filterValue = enumFilterValues(
+				props.valueData as DataGridSetFilterData,
+			).join(",");
 		} else {
 			filterValue = "";
 		}
@@ -461,6 +470,18 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 
 	filterTypeMenuItems = filterTypeMenuItems.filter((e) => e);
 
+	// "Select all": checked when every value is ticked, mixed when some are
+	const enumValues =
+		props.valueType === "enum"
+			? enumFilterValues(props.valueData as DataGridSetFilterData)
+			: [];
+	const enumTicked = filterValue ? filterValue.split(",") : [];
+	const enumAllTicked =
+		filterValue.split(",").sort().join(",") ===
+		[...enumValues].sort().join(",");
+	const enumSomeTicked =
+		!enumAllTicked && enumValues.some((value) => enumTicked.includes(value));
+
 	// filter type custom
 	const setCustomFilter = useCallback(
 		(customFilter: unknown) => {
@@ -616,26 +637,27 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 					<DataGridSetFilterContainer
 						size={12}
 						className={classes?.setFilterContainer}
+						role="group"
+						aria-label={t("standalone.data-grid.content.set-filter.label")}
 					>
 						<List>
 							{(props.valueData as DataGridSetFilterData).length > 5 && (
 								<DataGridSetFilterListItem
 									className={classes?.setFilterListItem}
 								>
-									<Checkbox
-										checked={
-											filterValue.split(",").sort().join(",") ===
-											(props.valueData as DataGridSetFilterData)
-												.filter((entry) => !entry.isDivider)
-												.map((entry) => entry.value || ENUM_FILTER_MAGIC_EMPTY)
-												.sort()
-												.join(",")
+									<FormControlLabel
+										control={
+											<Checkbox
+												checked={enumAllTicked}
+												indeterminate={enumSomeTicked}
+												onChange={onFilterValueChangeEnumAll}
+											/>
 										}
-										onChange={onFilterValueChangeEnumAll}
+										label={t(
+											"standalone.data-grid.content.set-filter.select-all",
+										)}
+										slotProps={LIST_ITEM_LABEL_SLOT_PROPS}
 									/>
-									<ListItemText slotProps={LIST_ITEM_SLOT_PROPS}>
-										{t("standalone.data-grid.content.set-filter.select-all")}
-									</ListItemText>
 								</DataGridSetFilterListItem>
 							)}
 							{checkSupport(props.valueType, "notInSet") && (
@@ -643,13 +665,18 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 									<DataGridSetFilterListItem
 										className={classes?.setFilterListItem}
 									>
-										<Checkbox
-											checked={enumFilterInverted}
-											onChange={onFilterTypeChangeEnum}
+										<FormControlLabel
+											control={
+												<Checkbox
+													checked={enumFilterInverted}
+													onChange={onFilterTypeChangeEnum}
+												/>
+											}
+											label={t(
+												"standalone.data-grid.content.set-filter.invert",
+											)}
+											slotProps={LIST_ITEM_LABEL_SLOT_PROPS}
 										/>
-										<ListItemText slotProps={LIST_ITEM_SLOT_PROPS}>
-											{t("standalone.data-grid.content.set-filter.invert")}
-										</ListItemText>
 									</DataGridSetFilterListItem>
 									<DataGridSetFilterListItemDivider
 										className={classes?.setFilterListItemDivider}
@@ -685,19 +712,20 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 													className={classes?.setFilterListDivider}
 												/>
 											) : (
-												<>
-													<Checkbox
-														value={entry.value || ENUM_FILTER_MAGIC_EMPTY}
-														checked={filterValue
-															.split(",")
-															.includes(entry.value || ENUM_FILTER_MAGIC_EMPTY)}
-														onChange={onFilterValueChangeEnum}
-														disabled={entry.disabled}
-													/>
-													<ListItemText slotProps={LIST_ITEM_SLOT_PROPS}>
-														{(entry.getLabel || entry.getLabelText)()}
-													</ListItemText>
-												</>
+												<FormControlLabel
+													control={
+														<Checkbox
+															value={entry.value || ENUM_FILTER_MAGIC_EMPTY}
+															checked={enumTicked.includes(
+																entry.value || ENUM_FILTER_MAGIC_EMPTY,
+															)}
+															onChange={onFilterValueChangeEnum}
+															disabled={entry.disabled}
+														/>
+													}
+													label={(entry.getLabel || entry.getLabelText)()}
+													slotProps={LIST_ITEM_LABEL_SLOT_PROPS}
+												/>
 											)}
 										</ListItemComp>
 									);

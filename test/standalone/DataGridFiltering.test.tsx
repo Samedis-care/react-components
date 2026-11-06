@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import { act, cleanup, render, screen } from "@testing-library/react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	within,
+} from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
@@ -11,6 +18,7 @@ import FilterEntry, {
 import {
 	DataGridPropsContext,
 	type DataGridProps,
+	type DataGridSetFilterData,
 	type IDataGridColumnDef,
 } from "../../src/standalone/DataGrid/DataGrid";
 import type { ModelFilterType } from "../../src/backend-integration/Model";
@@ -198,6 +206,104 @@ const renderEntry = (p: Parameters<typeof Entry>[0]) => {
 	close.mockClear();
 	return render(<Entry {...p} />);
 };
+const box = (v: string) =>
+	document.querySelector<HTMLInputElement>(
+		`input[type=checkbox][value="${v}"]`,
+	)!;
+const MAGIC = "__MAGIC_EMPTY__";
+const ENUM3: DataGridSetFilterData = [
+	{ value: "", getLabelText: () => "None" },
+	{ value: "a", getLabelText: () => "A" },
+	{ value: "b", getLabelText: () => "B" },
+];
+/** more than 5 entries: the list gets "Select all" */
+const ENUM6: DataGridSetFilterData = [
+	...ENUM3,
+	{ value: "c", getLabelText: () => "C" },
+	{ value: "d", getLabelText: () => "D" },
+	{ value: "e", getLabelText: () => "E" },
+];
+
+describe("FilterEntry: enum", () => {
+	it("[ISSUE-3494-ITEM-16] every checkbox of the list is named by its text", () => {
+		renderEntry({ valueType: "enum", valueData: ENUM6 });
+		expect(screen.getByRole("checkbox", { name: "A" })).toBe(box("a"));
+		expect(screen.getByRole("checkbox", { name: "None" })).toBe(box(MAGIC));
+		expect(
+			screen.getByRole("checkbox", { name: "Select all" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("checkbox", { name: "Show all except…" }),
+		).toBeInTheDocument();
+	});
+	it("[ISSUE-3494-ITEM-16] clicking a value's text ticks it", () => {
+		renderEntry({ valueType: "enum", valueData: ENUM3 });
+		fireEvent.click(screen.getByText("A"));
+		expect(last).toMatchObject({ type: "inSet", value1: "a" });
+	});
+	it("[ISSUE-3494-ITEM-16] clicking the text of Select all and Show all except… toggles them", () => {
+		renderEntry({ valueType: "enum", valueData: ENUM6 });
+		fireEvent.click(screen.getByText("Select all"));
+		expect(last).toMatchObject({
+			type: "inSet",
+			value1: `${MAGIC},a,b,c,d,e`,
+		});
+		fireEvent.click(screen.getByText("Show all except…"));
+		expect(last).toMatchObject({ type: "notInSet" });
+		expect(
+			screen.getByRole("checkbox", { name: "Show all except…" }),
+		).toBeChecked();
+	});
+	it("[ISSUE-3494-ITEM-16] clicking the text of a disabled value does not tick it", () => {
+		renderEntry({
+			valueType: "enum",
+			valueData: [
+				{ value: "a", getLabelText: () => "A" },
+				{ value: "b", getLabelText: () => "B", disabled: true },
+			],
+		});
+		fireEvent.click(screen.getByText("B"));
+		expect(last).toBeUndefined();
+		expect(screen.getByRole("checkbox", { name: "B" })).toBeDisabled();
+	});
+	it('[ISSUE-3494-ITEM-16] the checkboxes are a group named "Values"', () => {
+		renderEntry({ valueType: "enum", valueData: ENUM6 });
+		const group = screen.getByRole("group", { name: "Values" });
+		expect(
+			within(group).getByRole("checkbox", { name: "Select all" }),
+		).toBeInTheDocument();
+		expect(within(group).getByRole("checkbox", { name: "E" })).toBe(box("e"));
+	});
+	it("[ISSUE-3494-ITEM-16] Select all is mixed while only some values are ticked", () => {
+		renderEntry({ valueType: "enum", valueData: ENUM6 });
+		const all = () => screen.getByRole("checkbox", { name: "Select all" });
+		expect(all()).not.toBeChecked();
+		expect(all()).not.toBePartiallyChecked();
+		fireEvent.click(box("a"));
+		expect(all()).toBePartiallyChecked();
+		expect(all()).not.toBeChecked();
+		// a mixed Select all ticks every value
+		fireEvent.click(all());
+		expect(last).toMatchObject({
+			type: "inSet",
+			value1: `${MAGIC},a,b,c,d,e`,
+		});
+		expect(all()).toBeChecked();
+		expect(all()).not.toBePartiallyChecked();
+		fireEvent.click(box("c"));
+		expect(all()).toBePartiallyChecked();
+	});
+	it("[ISSUE-3494-ITEM-16] Select all is not mixed for a stored value the list does not offer", () => {
+		renderEntry({
+			valueType: "enum",
+			valueData: ENUM6,
+			initial: { type: "inSet", value1: "gone", value2: "" },
+		});
+		const all = screen.getByRole("checkbox", { name: "Select all" });
+		expect(all).not.toBeChecked();
+		expect(all).not.toBePartiallyChecked();
+	});
+});
 
 type CustomProps = {
 	filter: unknown;

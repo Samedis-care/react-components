@@ -38,6 +38,7 @@
 					"any": "Tous"
 				},
 				"set-filter": {
+					"label": "Valeurs",
 					"search": "Chercher…",
 					"select-all": "Tout sélectionner",
 					"invert": "Afficher tout sauf…"
