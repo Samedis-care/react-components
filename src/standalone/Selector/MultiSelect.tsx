@@ -55,7 +55,11 @@ export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
 	 */
 	classes?: Partial<Record<MultiSelectClassKey, string>>;
 	/**
-	 * Sort function to perform a view-based sort on selected entries
+	 * Comparison function (as for Array.sort) for the order in which the
+	 * selected entries are listed. It sorts a copy for display only: `selected`
+	 * is not changed (it may be frozen), and `onSelect` reports the entries in
+	 * `selected`'s order. Without it the entries are listed in `selected`'s
+	 * order.
 	 * @remarks This is a comparison function
 	 * @see Array.sort
 	 */
@@ -250,7 +254,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 				<SelectedEntry size={12} className={classes?.selectedEntry}>
 					<Paper elevation={0}>
 						{(selectedSort
-							? props.selected.sort(selectedSort)
+							? [...props.selected].sort(selectedSort)
 							: props.selected
 						).map((data: DataT, index: number) => (
 							<EntryRender
