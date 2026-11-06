@@ -12,7 +12,10 @@ import combineClassNames from "../../utils/combineClassNames";
 
 export interface SignPadProps {
 	/**
-	 * Boolean flag to disable edit signature
+	 * Shows the tile as disabled: greys the pen icon and marks its button
+	 * `aria-disabled`, so assistive technology announces it as unavailable.
+	 * The button stays focusable, so a focused tile that gets disabled keeps
+	 * the focus. Default `false`.
 	 */
 	disabled?: boolean;
 	/**
@@ -169,6 +172,9 @@ const SignPad = (inProps: SignPadProps) => {
 			<SignPadButton
 				type="button"
 				aria-label={label}
+				// not the native disabled: that drops the focus of a focused tile
+				// to the page, and takes read-only signatures out of the Tab order
+				aria-disabled={disabled || undefined}
 				className={classes?.button}
 			>
 				<SignTextDiv className={classes?.signTextDiv}>

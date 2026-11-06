@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import SignPad from "../../src/standalone/SignPad";
 import ccI18n, { langs } from "../../src/i18n";
 import userEvent from "@testing-library/user-event";
+import { ThemeProvider, createTheme } from "@mui/material";
 
 afterEach(() => {
 	cleanup();
@@ -139,5 +140,58 @@ describe("SignPad tile", () => {
 		screen.getByRole("button").focus();
 		await user.keyboard("{Enter}");
 		expect(submit).not.toHaveBeenCalled();
+	});
+	it("[ISSUE-3467-ITEM-15] a signed tile tells assistive technology that, and whose, it is", () => {
+		render(<SignPad signature={SIG} signerName="Alice Müller" />);
+		// today the preview has alt="" (role presentation) and the tile no text;
+		// the preview's alt or the name of the activator (ISSUE-3467-ITEM-14) may carry it
+		const saysSigned = (name: string) =>
+			/signature|signed/i.test(name) && name.includes("Alice Müller");
+		const named = [
+			...screen.queryAllByRole("img", { name: saysSigned }),
+			...screen.queryAllByRole("button", { name: saysSigned }),
+		];
+		expect(
+			named,
+			"no image or button named as Alice Müller's signature",
+		).not.toHaveLength(0);
+	});
+	it("[ISSUE-3467-ITEM-15] a disabled tile exposes its disabled state", () => {
+		const { container } = render(<SignPad signature={null} disabled />);
+		expect(
+			container.querySelector('[aria-disabled="true"], :disabled'),
+			"no element of the disabled tile is aria-disabled",
+		).not.toBeNull();
+	});
+	it("[ISSUE-3467-ITEM-15] the tile's button is aria-disabled exactly while the tile is disabled, signed or not, and stays focusable", () => {
+		const { rerender } = render(<SignPad signature={null} />);
+		const button = screen.getByRole("button");
+		expect(button).not.toHaveAttribute("aria-disabled");
+
+		rerender(<SignPad signature={null} disabled />);
+		expect(button).toHaveAttribute("aria-disabled", "true");
+		// no native disabled: a focused tile that gets disabled keeps the focus
+		expect(button).toBeEnabled();
+
+		rerender(<SignPad signature={SIG} signerName="Bob Smith" disabled />);
+		expect(button).toHaveAttribute("aria-disabled", "true");
+		expect(button).toHaveAccessibleName("Signature (Bob Smith)");
+
+		rerender(<SignPad signature={SIG} signerName="Bob Smith" />);
+		expect(button).not.toHaveAttribute("aria-disabled");
+	});
+	it("[ISSUE-3467-ITEM-15] a tile disabled by the theme's default props is aria-disabled, as its grey icon shows", () => {
+		const theme = createTheme({
+			components: { CcSignPad: { defaultProps: { disabled: true } } },
+		});
+		const { container } = render(
+			<ThemeProvider theme={theme}>
+				<SignPad signature={null} />
+			</ThemeProvider>,
+		);
+		expect(container.querySelector("svg")).toHaveClass(
+			"MuiSvgIcon-colorDisabled",
+		);
+		expect(screen.getByRole("button")).toHaveAttribute("aria-disabled", "true");
 	});
 });

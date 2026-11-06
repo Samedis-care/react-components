@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Box } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
-import { fn, expect } from "storybook/test";
+import { fn, expect, waitFor } from "storybook/test";
 import SignPad, { SignPadProps } from "./index";
 
 const SAMPLE_SIGNATURE =
@@ -136,5 +136,58 @@ export const Issue3467Item14KeyboardFocusShowsRing: Story = {
 			canvas.getByRole("button", { name: "More information" }),
 		).toHaveFocus();
 		await expect(args.openInfo).not.toHaveBeenCalled();
+	},
+};
+
+/** a field that turns read-only once its tile is activated, as a form after an autosave */
+const DisabledOnOpen = ({ openSignPad, ...props }: SignPadProps) => {
+	const [disabled, setDisabled] = useState(false);
+	const open = useCallback(() => {
+		openSignPad?.();
+		setDisabled(true);
+	}, [openSignPad]);
+	return <WrappedSignPad {...props} disabled={disabled} openSignPad={open} />;
+};
+
+export const Issue3467Item15DisabledWhileFocusedKeepsFocus: Story = {
+	args: {
+		signature: SAMPLE_SIGNATURE,
+		signerName: "Alice Müller",
+		openSignPad: fn(),
+	},
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3467-ITEM-15: a disabled tile is marked aria-disabled and stays focusable. When the focused tile gets disabled (here: on activation), it keeps the focus instead of dropping it to the page, and it stays a Tab stop, so whose signature it shows can still be heard.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	render: (args) => (
+		<>
+			<button>Before</button>
+			<DisabledOnOpen {...args} />
+		</>
+	),
+	play: async ({ canvas, userEvent, args }) => {
+		const before = canvas.getByRole("button", { name: "Before" });
+		before.focus();
+		await userEvent.tab();
+		const tile = canvas.getByRole("button", {
+			name: "Signature (Alice Müller)",
+		});
+		await expect(tile).toHaveFocus();
+		await expect(tile).not.toHaveAttribute("aria-disabled");
+
+		await userEvent.keyboard("{Enter}");
+		await expect(args.openSignPad).toHaveBeenCalledTimes(1);
+		await waitFor(() => expect(tile).toHaveAttribute("aria-disabled", "true"));
+		await expect(tile, "focus once the tile is disabled").toHaveFocus();
+
+		await userEvent.tab({ shift: true });
+		await expect(before).toHaveFocus();
+		await userEvent.tab();
+		await expect(tile, "Tab reaches the disabled tile").toHaveFocus();
 	},
 };
