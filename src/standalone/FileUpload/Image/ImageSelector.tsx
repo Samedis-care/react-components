@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
 	alpha,
 	Box,
@@ -40,6 +40,8 @@ export type PostImageEditCallback = (image: File) => Promise<Blob>;
 export interface ImageSelectorProps {
 	/**
 	 * The name of the input
+	 * @remarks Set as `name` on the normal variant's buttons and on the button of the empty
+	 *          modern field, and as `data-name` on the modern variant's image area
 	 */
 	name: string;
 	/**
@@ -76,10 +78,16 @@ export interface ImageSelectorProps {
 	onChange?: (name: string, value: File) => void;
 	/**
 	 * The blur event handler of the input
+	 * @remarks normal: blur of the Upload and Take photo buttons. modern: blur of any element
+	 *          in the image area (the empty field's button, or the upload and camera buttons
+	 *          shown with an image).
 	 */
 	onBlur?: React.FocusEventHandler<HTMLElement>;
 	/**
 	 * Label overwrite for Upload label
+	 * @remarks normal: the Upload button's text. modern: the empty field's call to action,
+	 *          which is the text and accessible name of its button, and the tooltip of the
+	 *          shown image.
 	 */
 	uploadLabel?: string;
 	/**
@@ -188,8 +196,35 @@ const ModernUploadLabel = styled(Typography, {
 	name: "CcImageSelector",
 	slot: "modernUploadLabel",
 })(({ theme }) => ({
+	display: "block",
 	color: theme.palette.action.disabled,
 })) as typeof Typography;
+
+/**
+ * The empty modern field's upload control: a button around its call to action that looks
+ * like the text, with an outline on keyboard focus
+ */
+const ModernUploadButton = styled("button", {
+	name: "CcImageSelector",
+	slot: "modernUploadButton",
+})(({ theme }) => ({
+	display: "block",
+	width: "100%",
+	margin: 0,
+	padding: 0,
+	border: 0,
+	borderRadius: theme.shape.borderRadius,
+	background: "none",
+	color: "inherit",
+	font: "inherit",
+	letterSpacing: "inherit",
+	textAlign: "inherit",
+	cursor: "pointer",
+	"&:focus-visible": {
+		outline: `2px solid ${theme.palette.primary.main}`,
+		outlineOffset: 2,
+	},
+}));
 
 const ModernFullHeightBox = styled(Box, {
 	name: "CcImageSelector",
@@ -284,6 +319,7 @@ export type ImageSelectorClassKey =
 	| "previewModern"
 	| "changeEventHelper"
 	| "modernUploadLabel"
+	| "modernUploadButton"
 	| "modernFullHeightBox"
 	| "modernFullHeightGrid"
 	| "modernFormatsLabel"
@@ -417,6 +453,35 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 		[readOnly],
 	);
 
+	// The empty modern field's button is replaced by the image once a pick is applied. If it
+	// had focus then, focus moves on to the image's upload button instead of to the page.
+	const modernUploadButtonRef = useRef<HTMLButtonElement | null>(null);
+	const modernImageUploadRef = useRef<HTMLButtonElement>(null);
+	const refocusUploadRef = useRef(false);
+	const setModernUploadButton = useCallback(
+		(elem: HTMLButtonElement | null) => {
+			const prev = modernUploadButtonRef.current;
+			modernUploadButtonRef.current = elem;
+			// React detaches a ref before it removes the element, so the focus is still on it here
+			if (!elem && prev && prev.ownerDocument.activeElement === prev) {
+				refocusUploadRef.current = true;
+			}
+		},
+		[],
+	);
+	const showsModernUploadButton = variant === "modern" && !value && !readOnly;
+	useLayoutEffect(() => {
+		if (showsModernUploadButton || !refocusUploadRef.current) return;
+		refocusUploadRef.current = false;
+		const target = modernImageUploadRef.current;
+		if (!target) return;
+		// only take over focus that was lost with the button, never move it away from elsewhere
+		const active = target.ownerDocument.activeElement;
+		if (active && active !== target.ownerDocument.body && active.isConnected)
+			return;
+		target.focus();
+	}, [showsModernUploadButton]);
+
 	const [showPreviewDialog, setShowPreviewDialog] = useState(false);
 	const handlePreviewDialog = useCallback(() => {
 		setShowPreviewDialog(true);
@@ -512,6 +577,16 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 			</GroupBox>
 		);
 	} else if (variant === "modern") {
+		const modernUploadLabel = (
+			<ModernUploadLabel
+				component={"span"}
+				variant={"h5"}
+				className={classes?.modernUploadLabel}
+				align={"center"}
+			>
+				{props.uploadLabel ?? t("standalone.file-upload.upload-modern") ?? ""}
+			</ModernUploadLabel>
+		);
 		return (
 			<>
 				{previewDialog}
@@ -571,7 +646,10 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 											<Tooltip
 												title={t("standalone.file-upload.upload-modern-btn")}
 											>
-												<ModernUploadControlUpload onClick={handleUpload}>
+												<ModernUploadControlUpload
+													ref={modernImageUploadRef}
+													onClick={handleUpload}
+												>
 													<UploadIcon />
 												</ModernUploadControlUpload>
 											</Tooltip>
@@ -615,16 +693,20 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 											size="grow"
 										>
 											<Grid>
-												<ModernUploadLabel
-													component={"h1"}
-													variant={"h5"}
-													className={classes?.modernUploadLabel}
-													align={"center"}
-												>
-													{props.uploadLabel ??
-														t("standalone.file-upload.upload-modern") ??
-														""}
-												</ModernUploadLabel>
+												{readOnly ? (
+													modernUploadLabel
+												) : (
+													// no click handler of its own: its click, by mouse or by
+													// Enter and Space, reaches the field's, which opens the picker
+													<ModernUploadButton
+														ref={setModernUploadButton}
+														type={"button"}
+														name={props.name}
+														className={classes?.modernUploadButton}
+													>
+														{modernUploadLabel}
+													</ModernUploadButton>
+												)}
 											</Grid>
 										</Grid>
 										<Grid>
