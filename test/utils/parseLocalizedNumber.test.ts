@@ -108,6 +108,48 @@ describe("parseLocalizedNumber", () => {
 			}
 		},
 	);
+
+	it.each([
+		"ru",
+		"fr",
+		"de",
+		"it",
+		"es",
+		"uz",
+		"en",
+		"nl",
+		"de-AT",
+		"de-CH",
+		"it-CH",
+		"nl-BE",
+	])(
+		"[ISSUE-3484-ITEM-3] reads back the negative numbers %s formats",
+		async (locale) => {
+			await ccI18n.changeLanguage(locale);
+			for (const options of [undefined, EUR]) {
+				for (const num of [-5, -0.25, -1234.5, -12345, -1234567.25]) {
+					const formatted = num.toLocaleString(locale, options);
+					expect(parseLocalizedNumber(formatted, options), formatted).toBe(num);
+				}
+			}
+		},
+	);
+
+	it.each<[string, string, number | null]>([
+		["fr", "\u22121 234,5", -1234.5],
+		["en", "-", null],
+		["en", "-.", NaN],
+		["en", "-0", 0],
+		["en", "-0.00", 0],
+		["en", "5-", 5],
+		["en", "€-5", -5],
+	])(
+		"[ISSUE-3484-ITEM-3] reads %s text %j as %j",
+		async (locale, text, expected) => {
+			await ccI18n.changeLanguage(locale);
+			expect(parseLocalizedNumber(text)).toBe(expected);
+		},
+	);
 });
 
 describe("getNumberSeparator", () => {

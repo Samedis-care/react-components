@@ -182,6 +182,67 @@ describe("IntegerInputField", () => {
 		tabThrough(field("Count"));
 		expect(onBlur).toHaveBeenCalledTimes(1);
 	});
+
+	it("[ISSUE-3484-ITEM-3] keeps the sign of a negative number", () => {
+		const onValue: ValueSpy = vi.fn();
+		render(
+			<Controlled initial={-5} onValue={onValue}>
+				{(value, onChange) => (
+					<IntegerInputField label="Count" value={value} onChange={onChange} />
+				)}
+			</Controlled>,
+		);
+		expect(field("Count")).toHaveValue("-5");
+		fireEvent.change(field("Count"), { target: { value: "-56" } });
+		// -56, or the minus refused visibly: never the flipped number
+		expect(reported(onValue)).not.toContain(56);
+	});
+
+	it("[ISSUE-3484-ITEM-3] takes a minus typed key by key, and shows it until a digit follows", async () => {
+		const user = userEvent.setup();
+		const onValue: ValueSpy = vi.fn();
+		renderCount(null, onValue);
+		await user.type(field("Count"), "-");
+		expect(field("Count")).toHaveValue("-");
+		expect(reported(onValue)).toEqual([null]);
+		await user.type(field("Count"), "1234");
+		expect(reported(onValue)).toEqual([null, -1, -12, -123, -1234]);
+		expect(field("Count")).toHaveValue("-1,234");
+		await user.type(field("Count"), ".5");
+		expect(reported(onValue).at(-1)).toBe(-1234);
+	});
+
+	it("[ISSUE-3484-ITEM-3] drops a lone minus on blur, and reads -0 as 0", async () => {
+		const user = userEvent.setup();
+		const onValue: ValueSpy = vi.fn();
+		renderCount(null, onValue);
+		await user.type(field("Count"), "-");
+		tabThrough(field("Count"));
+		expect(field("Count")).toHaveValue("");
+		await user.type(field("Count"), "-0");
+		expect(reported(onValue).at(-1)).toBe(0);
+		expect(Object.is(reported(onValue).at(-1), -0)).toBe(false);
+		expect(field("Count")).toHaveValue("-0");
+		await user.type(field("Count"), "7");
+		expect(reported(onValue).at(-1)).toBe(-7);
+		expect(field("Count")).toHaveValue("-7");
+	});
+
+	it.each([
+		["en", "\u22125", -5],
+		["de", "-1.234", -1234],
+		["de", "-7,5", -7],
+		["en", "5-", 5],
+	])(
+		"[ISSUE-3484-ITEM-3] reads %s text %j as %j",
+		async (lng, text, expected) => {
+			await setLanguage(lng);
+			const onValue: ValueSpy = vi.fn();
+			renderCount(null, onValue);
+			fireEvent.change(field("Count"), { target: { value: text } });
+			expect(reported(onValue)).toEqual([expected]);
+		},
+	);
 });
 
 describe("CurrencyInput", () => {
@@ -207,6 +268,76 @@ describe("CurrencyInput", () => {
 			});
 			fireEvent.blur(field("Amount"));
 			expect(reported(onValue)).toEqual([12346]);
+		});
+
+		it("[ISSUE-3484-ITEM-3] keeps the sign of a negative amount", () => {
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={-5} onValue={onValue}>
+					{(value, onChange) => (
+						<CurrencyInput
+							label="Amount"
+							currency="EUR"
+							value={value}
+							onChange={onChange}
+						/>
+					)}
+				</Controlled>,
+			);
+			expect(field("Amount")).toHaveValue("-€5.00");
+			fireEvent.change(field("Amount"), { target: { value: "-€5.50" } });
+			fireEvent.blur(field("Amount"));
+			// -5.5, or the minus refused visibly: never the flipped amount
+			expect(reported(onValue)).not.toContain(5.5);
+		});
+
+		it.each(["en", "de", "es", "fr", "it", "nl", "ru", "uz", "de-CH", "it-CH"])(
+			"[ISSUE-3484-ITEM-3] reads back a negative amount as %s shows it",
+			async (lng) => {
+				await setLanguage(lng);
+				const onValue: ValueSpy = vi.fn();
+				render(
+					<Controlled initial={-1} onValue={onValue}>
+						{(value, onChange) => (
+							<CurrencyInput
+								label="Amount"
+								currency="EUR"
+								value={value}
+								onChange={onChange}
+							/>
+						)}
+					</Controlled>,
+				);
+				const shown = fmt(lng, -1234.56, EUR);
+				fireEvent.change(field("Amount"), { target: { value: shown } });
+				fireEvent.blur(field("Amount"));
+				expect(reported(onValue)).toEqual([-1234.56]);
+				expect(field("Amount")).toHaveValue(shown);
+			},
+		);
+
+		it("[ISSUE-3484-ITEM-3] takes a typed minus, and saves an amount that rounds to zero as 0", () => {
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={null} onValue={onValue}>
+					{(value, onChange) => (
+						<CurrencyInput
+							label="Amount"
+							currency="EUR"
+							value={value}
+							onChange={onChange}
+						/>
+					)}
+				</Controlled>,
+			);
+			fireEvent.change(field("Amount"), { target: { value: "-19.99" } });
+			fireEvent.blur(field("Amount"));
+			expect(reported(onValue)).toEqual([-19.99]);
+			expect(field("Amount")).toHaveValue("-€19.99");
+			fireEvent.change(field("Amount"), { target: { value: "-0.001" } });
+			fireEvent.blur(field("Amount"));
+			expect(Object.is(reported(onValue).at(-1), 0)).toBe(true);
+			expect(field("Amount")).toHaveValue("€0.00");
 		});
 	});
 	describe("text that does not parse", () => {
@@ -465,5 +596,54 @@ describe("DecimalInputField", () => {
 				onChange.mock.invocationCallOrder[0],
 			);
 		});
+
+		it("[ISSUE-3484-ITEM-3] keeps the sign of a stored negative number on a blur", () => {
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={-5} onValue={onValue}>
+					{(value, onChange) => (
+						<DecimalInputField
+							label="Hours"
+							value={value}
+							onChange={onChange}
+						/>
+					)}
+				</Controlled>,
+			);
+			expect(field("Hours")).toHaveValue("-5");
+			tabThrough(field("Hours"));
+			expect(reported(onValue).filter((value) => value !== -5)).toEqual([]);
+		});
+
+		it.each([
+			["en", "-3.5", -3.5],
+			["en", "-5", -5],
+			["en", "-.5", -0.5],
+			["en", "-", null],
+			["en", "-0", 0],
+			["de", "-1.234,5", -1234.5],
+			["de", "-7.5", -7.5],
+		])(
+			"[ISSUE-3484-ITEM-3] commits %s text %j as %j",
+			async (lng, text, expected) => {
+				await setLanguage(lng);
+				const onValue: ValueSpy = vi.fn();
+				render(
+					<Controlled initial={1} onValue={onValue}>
+						{(value, onChange) => (
+							<DecimalInputField
+								label="Hours"
+								value={value}
+								onChange={onChange}
+							/>
+						)}
+					</Controlled>,
+				);
+				fireEvent.change(field("Hours"), { target: { value: text } });
+				fireEvent.blur(field("Hours"));
+				expect(reported(onValue)).toHaveLength(1);
+				expect(Object.is(reported(onValue)[0], expected)).toBe(true);
+			},
+		);
 	});
 });

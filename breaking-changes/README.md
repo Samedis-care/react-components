@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [The number inputs keep a minus sign](2026-11-06-number-inputs-keep-minus-sign.md) | behavior |
 | 2026-11-06 | [DataGrid's enum filter labels its checkboxes with their text](2026-11-06-data-grid-enum-filter-labelled-checkboxes.md) | behavior |
 | 2026-11-06 | [A file's name is a link, or a button, that opens the file](2026-11-06-file-upload-files-open-by-keyboard.md) | behavior |
 | 2026-11-06 | [The date pickers report a blur once focus leaves the field](2026-11-06-picker-blur-on-leaving-the-field.md) | behavior |
