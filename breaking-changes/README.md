@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [Matrix tile labels are black or white by contrast, for every fill](2026-11-06-matrix-tile-label-color.md) | behavior |
 | 2026-11-06 | [FormCrudMultiSelect stays locked in a read-only Form, whatever disabled says](2026-11-06-form-crud-multi-select-read-only-wins.md) | behavior |
 | 2026-11-06 | [CurrencyInput says in text why the amount is invalid](2026-11-06-currency-input-parse-error-message.md) | behavior |
 | 2026-11-06 | [ObjectUrlLink links only http(s), blob and data URLs](2026-11-06-object-url-link-safe-schemes.md) | behavior |

@@ -12,7 +12,10 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import MatrixGrid from "../../src/standalone/Matrix/MatrixGrid";
 import MatrixCellTile from "../../src/standalone/Matrix/MatrixCellTile";
 import buildDateColumns from "../../src/standalone/Matrix/buildDateColumns";
-import { matrixClasses } from "../../src/standalone/Matrix/matrixClasses";
+import {
+	matrixClasses,
+	matrixVars,
+} from "../../src/standalone/Matrix/matrixClasses";
 import type { MatrixGridProps } from "../../src/standalone/Matrix/MatrixGridContext";
 import {
 	MatrixCellContext,
@@ -22,6 +25,8 @@ import {
 	MatrixRowHeaderContext,
 	MatrixTileItem,
 } from "../../src/standalone/Matrix/types";
+import { decomposeColor, getContrastRatio } from "@mui/material/styles";
+import type { MatrixCellTileProps } from "../../src/standalone/Matrix/MatrixCellTileContext";
 
 afterEach(() => {
 	cleanup();
@@ -1233,12 +1238,161 @@ const item = (
 	...overrides,
 });
 
+// ---- Body cells, tiles and interaction --------------------------------------
+// These blocks run before describe("MatrixCellTile") on purpose: MUI's Tooltip
+// keeps a module-level "a tooltip was just open" flag for 800ms of real time
+// after a close, and while it is set the next tooltip skips its enter delay.
+// The real-timer tooltip test in that block would leave it set for the
+// fake-timer tooltip tests here.
+
+/**
+ * WCAG contrast of a label color on a fill, either of them possibly
+ * translucent, with the fill drawn over white paper (the grid's background)
+ */
+const labelContrastOnPaper = (label: string, fill: string): number => {
+	const rgba = (color: string) => {
+		const { values } = decomposeColor(color);
+		return [values[0], values[1], values[2], values[3] ?? 1];
+	};
+	const over = (fg: number[], bg: number[]) =>
+		[0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3])).concat(1);
+	const css = (color: number[]) =>
+		`rgb(${color.slice(0, 3).map(Math.round).join(", ")})`;
+	const paper = over(rgba(fill), [255, 255, 255, 1]);
+	return getContrastRatio(css(over(rgba(label), paper)), css(paper));
+};
+
+describe("MatrixCellTile entries", () => {
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	/** stable selectors that do not depend on emotion's dev-only labels */
+	const TILE_CLASSES = {
+		root: "x-root",
+		item: "x-item",
+		itemContent: "x-content",
+		highlight: "x-ring",
+		diagonal: "x-diagonal",
+		diagonalLabel: "x-dlabel",
+		placeholder: "x-placeholder",
+		corner: "x-corner",
+	};
+	const entry = (overrides: Partial<MatrixTileItem> = {}): MatrixTileItem => ({
+		key: "a",
+		label: "F",
+		backgroundColor: "#2e7d32",
+		...overrides,
+	});
+	const tile = (
+		props: Partial<MatrixCellTileProps> & { items: MatrixTileItem[] },
+	) => (
+		<ThemeProvider theme={theme}>
+			<MatrixCellTile classes={TILE_CLASSES} {...props} />
+		</ThemeProvider>
+	);
+	const slotsOf = (container: HTMLElement, slot: keyof typeof TILE_CLASSES) =>
+		Array.from(
+			container.querySelectorAll<HTMLElement>(`.${TILE_CLASSES[slot]}`),
+		);
+
+	describe("colors and dimming", () => {
+		it("[ISSUE-3481-ITEM-10] picks a label color with 4.5:1 on common opaque fills", () => {
+			// warning.main, info.main, teal, red, pink and blue grey 500
+			for (const fill of [
+				"#ed6c02",
+				"#0288d1",
+				"#009688",
+				"#f44336",
+				"#e91e63",
+				"#607d8b",
+			]) {
+				const { container } = render(
+					tile({ items: [entry({ label: "RD", backgroundColor: fill })] }),
+				);
+				const label = slotsOf(container, "item")[0].style.getPropertyValue(
+					matrixVars.tileForeground,
+				);
+				expect(labelContrastOnPaper(label, fill), fill).toBeGreaterThanOrEqual(
+					4.5,
+				);
+				cleanup();
+			}
+		});
+
+		it("[ISSUE-3481-ITEM-10] picks a readable label color for keyword and translucent fills", () => {
+			// [the fill as passed, the same color as decomposeColor reads it]
+			for (const [fill, resolved] of [
+				["navy", "#000080"],
+				["darkgreen", "#006400"],
+				["rgba(21, 101, 192, 0.15)", "rgba(21, 101, 192, 0.15)"],
+				["#1565c026", "#1565c026"],
+			]) {
+				const { container } = render(
+					tile({ items: [entry({ backgroundColor: fill })] }),
+				);
+				// unset, the label inherits the theme's text color
+				const label =
+					slotsOf(container, "item")[0].style.getPropertyValue(
+						matrixVars.tileForeground,
+					) || theme.palette.text.primary;
+				expect(
+					labelContrastOnPaper(label, resolved),
+					fill,
+				).toBeGreaterThanOrEqual(4.5);
+				cleanup();
+			}
+		});
+
+		it("[ISSUE-3481-ITEM-10] picks the label colors of a diagonal pair the same way", () => {
+			const { container } = render(
+				tile({
+					pairLayout: "diagonal",
+					items: [
+						entry({ label: "RD", backgroundColor: "#ed6c02" }),
+						entry({ key: "b", label: "N", backgroundColor: "navy" }),
+					],
+				}),
+			);
+			const [pair] = slotsOf(container, "diagonal");
+			// unset, a label inherits the theme's text color
+			const label = (name: string) =>
+				pair.style.getPropertyValue(name) || theme.palette.text.primary;
+			expect(
+				labelContrastOnPaper(label(matrixVars.tileForegroundA), "#ed6c02"),
+			).toBeGreaterThanOrEqual(4.5);
+			expect(
+				labelContrastOnPaper(label(matrixVars.tileForegroundB), "#000080"),
+			).toBeGreaterThanOrEqual(4.5);
+		});
+
+		it("[ISSUE-3481-ITEM-10] measures a translucent fill over the paper of a dark theme", () => {
+			const dark = createTheme({ palette: { mode: "dark" } });
+			const { container } = render(
+				<ThemeProvider theme={dark}>
+					<MatrixCellTile
+						classes={TILE_CLASSES}
+						items={[entry({ backgroundColor: "rgba(255, 235, 59, 0.2)" })]}
+					/>
+				</ThemeProvider>,
+			);
+			const label = slotsOf(container, "item")[0].style.getPropertyValue(
+				matrixVars.tileForeground,
+			);
+			// yellow at 20% over the dark paper (#121212)
+			expect(dark.palette.background.paper).toBe("#121212");
+			expect(getContrastRatio(label, "rgb(65, 61, 26)")).toBeGreaterThanOrEqual(
+				4.5,
+			);
+		});
+	});
+});
+
 describe("MatrixCellTile", () => {
 	it("renders the placeholder when there are no items", () => {
 		wrap(<MatrixCellTile items={[]} placeholder={<span>{"absent"}</span>} />);
 		expect(screen.getByText("absent")).toBeInTheDocument();
 	});
-
 	it("renders both items of a split pair, and the corners of each", () => {
 		wrap(
 			<MatrixCellTile
@@ -1253,12 +1407,10 @@ describe("MatrixCellTile", () => {
 		expect(screen.getByText("glyph")).toBeInTheDocument();
 		expect(screen.getByText("flag")).toBeInTheDocument();
 	});
-
 	it("renders at most two items", () => {
 		wrap(<MatrixCellTile items={[item("a"), item("b"), item("c")]} />);
 		expect(screen.queryByText("C")).not.toBeInTheDocument();
 	});
-
 	it("renders a diagonal pair as one click target", () => {
 		const onItemClick = vi.fn();
 		wrap(
@@ -1274,7 +1426,6 @@ describe("MatrixCellTile", () => {
 			expect.objectContaining({ key: "a" }),
 		);
 	});
-
 	it("drops all but the first item's bottom left corner in a diagonal pair", () => {
 		wrap(
 			<MatrixCellTile
@@ -1294,7 +1445,6 @@ describe("MatrixCellTile", () => {
 		expect(screen.queryByText("dropped")).not.toBeInTheDocument();
 		expect(screen.queryByText("also-dropped")).not.toBeInTheDocument();
 	});
-
 	it("reports the clicked item of a split pair", () => {
 		const onItemClick = vi.fn();
 		wrap(
@@ -1308,7 +1458,6 @@ describe("MatrixCellTile", () => {
 			expect.objectContaining({ key: "b" }),
 		);
 	});
-
 	it("makes a clickable entry reachable by keyboard", () => {
 		const onItemClick = vi.fn();
 		wrap(<MatrixCellTile items={[item("a")]} onItemClick={onItemClick} />);
@@ -1321,22 +1470,17 @@ describe("MatrixCellTile", () => {
 		fireEvent.keyDown(entry, { key: " ", repeat: true });
 		expect(onItemClick).toHaveBeenCalledTimes(1);
 	});
-
 	it("leaves a non-clickable entry out of the tab order", () => {
 		wrap(<MatrixCellTile items={[item("a")]} />);
 		expect(screen.queryByRole("button")).not.toBeInTheDocument();
 	});
-
 	it("derives a readable label color from the fill", () => {
-		// the library's own rule, so a consumer raising contrastThreshold moves
-		// tile labels with everything else
+		// black or white, whichever contrasts more with the fill
 		const { container } = wrap(
 			<MatrixCellTile items={[item("a", { backgroundColor: "#ffffff" })]} />,
 		);
 		const entry = container.querySelector("[class*=item]") as HTMLElement;
-		expect(entry.style.getPropertyValue("--cc-matrix-tile-fg")).toBe(
-			theme.palette.getContrastText("#ffffff"),
-		);
+		expect(entry.style.getPropertyValue("--cc-matrix-tile-fg")).toBe("#000");
 		cleanup();
 		const dark = wrap(
 			<MatrixCellTile items={[item("b", { backgroundColor: "#1a237e" })]} />,
@@ -1345,13 +1489,9 @@ describe("MatrixCellTile", () => {
 			"[class*=item]",
 		) as HTMLElement;
 		expect(darkEntry.style.getPropertyValue("--cc-matrix-tile-fg")).toBe(
-			theme.palette.getContrastText("#1a237e"),
-		);
-		expect(theme.palette.getContrastText("#1a237e")).not.toBe(
-			theme.palette.getContrastText("#ffffff"),
+			"#fff",
 		);
 	});
-
 	it("never draws the secondary label larger than the primary", () => {
 		const { container } = wrap(
 			<MatrixCellTile
@@ -1365,7 +1505,6 @@ describe("MatrixCellTile", () => {
 		);
 		expect(parseFloat(secondary)).toBeLessThanOrEqual(parseFloat(primary));
 	});
-
 	it("keeps an explicit text color", () => {
 		const { container } = wrap(
 			<MatrixCellTile
@@ -1377,7 +1516,6 @@ describe("MatrixCellTile", () => {
 		const entry = container.querySelector("[class*=item]") as HTMLElement;
 		expect(entry.style.getPropertyValue("--cc-matrix-tile-fg")).toBe("#ff0000");
 	});
-
 	it("passes every rendered item through renderItem", () => {
 		wrap(
 			<MatrixCellTile
@@ -1390,7 +1528,6 @@ describe("MatrixCellTile", () => {
 		expect(screen.getByTestId("handle-a")).toBeInTheDocument();
 		expect(screen.getByTestId("handle-b")).toBeInTheDocument();
 	});
-
 	it("mounts a tooltip only for an item that has one", async () => {
 		wrap(
 			<MatrixCellTile items={[item("a", { tooltip: "hello" }), item("b")]} />,
@@ -1407,7 +1544,6 @@ describe("MatrixCellTile", () => {
 		await new Promise((resolve) => setTimeout(resolve, 600)); // past enterDelay
 		expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
 	});
-
 	it("dims a diagonal half in any color format", () => {
 		const { container } = wrap(
 			<MatrixCellTile
@@ -1426,7 +1562,6 @@ describe("MatrixCellTile", () => {
 			"rgba(1, 2, 3, 0.6)",
 		);
 	});
-
 	it("dims a CSS keyword too, and leaves the unresolvable alone", () => {
 		const { container } = wrap(
 			<MatrixCellTile
@@ -1447,7 +1582,6 @@ describe("MatrixCellTile", () => {
 			"var(--brand)",
 		);
 	});
-
 	it("renders the highlight ring with a palette color of any format", () => {
 		const rgbTheme = createTheme({
 			palette: { warning: { main: "rgb(237, 108, 2)" } },
@@ -1463,7 +1597,6 @@ describe("MatrixCellTile", () => {
 		expect(shadow).toContain("rgb(237, 108, 2)");
 		expect(shadow).toContain("rgba(237, 108, 2, 0.5)");
 	});
-
 	it("renders a placeholder of zero", () => {
 		wrap(<MatrixCellTile items={[]} placeholder={0} />);
 		expect(screen.getByText("0")).toBeInTheDocument();
