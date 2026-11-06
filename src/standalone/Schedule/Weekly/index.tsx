@@ -46,7 +46,10 @@ export interface WeekViewProps {
 	 */
 	filters?: Record<string, ScheduleFilterDefinition>;
 	/**
-	 * Optional actions
+	 * Buttons in the header. With at most one action and at most two filters,
+	 * the action renders inline on the right; otherwise all actions are listed,
+	 * in order, in the settings menu (gear button), after the filters it holds.
+	 * Default: no actions.
 	 */
 	actions?: ScheduleAction[];
 	/**
@@ -348,26 +351,22 @@ const WeekView = (inProps: WeekViewProps) => {
 																</Grid>
 															),
 													)}
-													{filterCount > 2 && (
+													{filterCount > 1 && actions.length > 0 && (
 														<Grid key={"divider"} size={12}>
 															<Divider />
 														</Grid>
 													)}
-													{actions.length > 1 &&
-														actions.map(
-															(action, idx) =>
-																idx !== 0 && (
-																	<Grid key={"action-" + action.id} size={12}>
-																		<Button
-																			onClick={action.onClick}
-																			disabled={action.disabled}
-																			fullWidth
-																		>
-																			{action.label}
-																		</Button>
-																	</Grid>
-																),
-														)}
+													{actions.map((action) => (
+														<Grid key={"action-" + action.id} size={12}>
+															<Button
+																onClick={action.onClick}
+																disabled={action.disabled}
+																fullWidth
+															>
+																{action.label}
+															</Button>
+														</Grid>
+													))}
 												</Grid>
 											</Box>
 										</Menu>

@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [The weekly schedule's settings menu lists every action](2026-11-06-weekly-schedule-menu-lists-every-action.md) | behavior |
 | 2026-11-06 | [FormPageLayout's body is its own stacking context](2026-11-06-form-page-layout-body-stacking-context.md) | behavior |
 | 2026-11-06 | [LocaleSelectorDialog keeps the current language when the picked one fails to load](2026-11-06-locale-selector-failed-load.md) | behavior |
 | 2026-11-06 | [A data grid writes its persisted state when it changes, not when it opens](2026-11-06-data-grid-writes-persisted-state-on-change.md) | behavior |
