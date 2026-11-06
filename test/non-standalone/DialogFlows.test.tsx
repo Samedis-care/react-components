@@ -25,6 +25,7 @@ import ccI18n from "../../src/i18n";
 // Dialog/Utils must come before the component modules: importing the Dialog
 // index first runs into an import cycle
 import {
+	showConfirmDialog,
 	showErrorDialog,
 	showInfoDialog,
 } from "../../src/non-standalone/Dialog/Utils";
@@ -100,6 +101,33 @@ const inputProps = (
 	handlerButtonYes: vi.fn(),
 	handlerButtonNo: vi.fn(),
 	...overrides,
+});
+
+describe("showConfirmDialogBool and showConfirmDialog through the dialog", () => {
+	it("[ISSUE-3497-ITEM-4] showConfirmDialog resolves with undefined on Yes and rejects with undefined on No", async () => {
+		mount();
+		let yesValue: unknown = "pending";
+		act(() => {
+			void showConfirmDialog(ctx[0], confirmProps).then((v: unknown) => {
+				yesValue = v;
+			});
+		});
+		fireEvent.click(btn("Yes"));
+		await flush();
+
+		let noReason: unknown = "pending";
+		act(() => {
+			showConfirmDialog(ctx[0], confirmProps).catch((e: unknown) => {
+				noReason = e;
+			});
+		});
+		fireEvent.click(btn("No"));
+		await flush();
+		expect({ yes: typeof yesValue, no: typeof noReason }).toEqual({
+			yes: "undefined",
+			no: "undefined",
+		});
+	});
 });
 
 describe("ErrorDialog / InfoDialog buttons", () => {
