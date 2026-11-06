@@ -62,6 +62,8 @@ const open = async (input: HTMLElement = combobox()) => {
 };
 const removeButton = (label: string) =>
 	screen.getByRole("button", { name: `Remove ${label}` });
+const switchInput = (container: HTMLElement) =>
+	container.querySelector<HTMLInputElement>("input[type=checkbox]");
 /** the labels of the chips, in the order they are shown */
 const chipLabels = () =>
 	screen
@@ -142,5 +144,64 @@ describe("MultiSelectWithoutGroup bugs", () => {
 				/>,
 			),
 		).not.toThrow();
+	});
+
+	it("[ISSUE-3488-ITEM-6] disables the search field while disabled", async () => {
+		const onSel = vi.fn();
+		renderUi(<Host initial={[APPLE]} disabled onSel={onSel} />);
+		await flush();
+		expect(combobox()).toBeDisabled();
+	});
+
+	it("[ISSUE-3488-ITEM-6] disables the switch while disabled", async () => {
+		const setSwitchValue = vi.fn();
+		const { container } = renderUi(
+			<Host
+				initial={[APPLE]}
+				disabled
+				displaySwitch
+				switchLabel="Show inactive"
+				switchValue={false}
+				setSwitchValue={setSwitchValue}
+			/>,
+		);
+		await flush();
+		const checkbox = switchInput(container);
+		if (!checkbox) throw new Error("no switch");
+		fireEvent.click(checkbox);
+		expect(setSwitchValue).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3488-ITEM-6] disables the switch input, also for clicks on its label, and enables the search field and the switch again when disabled is turned off", async () => {
+		const setSwitchValue = vi.fn();
+		const ui = (disabled: boolean) => (
+			<ThemeProvider theme={createTheme()}>
+				<MultiSelectWithoutGroup
+					label="Search fruits"
+					selected={[APPLE]}
+					onSelect={() => {}}
+					loadDataOptions={loadFruits}
+					disabled={disabled}
+					displaySwitch
+					switchLabel="Show inactive"
+					switchValue={false}
+					setSwitchValue={setSwitchValue}
+				/>
+			</ThemeProvider>
+		);
+		const { rerender } = render(ui(true));
+		await flush();
+		const sw = screen.getByRole("switch", { name: "Show inactive" });
+		expect(sw).toBeDisabled();
+		fireEvent.click(screen.getByText("Show inactive"));
+		expect(setSwitchValue).not.toHaveBeenCalled();
+		rerender(ui(false));
+		await flush();
+		expect(combobox()).not.toBeDisabled();
+		expect(
+			screen.getByRole("switch", { name: "Show inactive" }),
+		).not.toBeDisabled();
+		fireEvent.click(screen.getByText("Show inactive"));
+		expect(setSwitchValue).toHaveBeenCalledWith(true);
 	});
 });

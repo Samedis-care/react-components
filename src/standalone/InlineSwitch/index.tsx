@@ -20,6 +20,12 @@ export interface InlineSwitchProps {
 	 * Label for switch control (only used if visible is truthy)
 	 */
 	label?: React.ReactNode;
+	/**
+	 * Disables the switch: it cannot be focused or toggled, also not through
+	 * its label, `onChange` is not called, and switch and label are greyed out
+	 * @default false
+	 */
+	disabled?: boolean;
 	children?: React.ReactElement;
 	/**
 	 * custom styles
@@ -54,6 +60,10 @@ const AntSwitch = styled(Switch, { name: "CcInlineSwitch", slot: "switch" })(
 					backgroundColor: theme.palette.primary.main,
 					borderColor: theme.palette.primary.main,
 				},
+				// as faint as the unchecked track while disabled, like MUI's Switch
+				"&.Mui-disabled + .MuiSwitch-track": {
+					opacity: theme.palette.mode === "light" ? 0.12 : 0.2,
+				},
 			},
 			// keyboard focus: with the theme's focusVisible MUI draws its own ring on
 			// the track; otherwise this one (MUI's default shows only the focus ripple)
@@ -85,23 +95,36 @@ const StyledRoot = styled("div", { name: "CcInlineSwitch", slot: "root" })({
 const StyledSwitchWrapper = styled(Typography, {
 	name: "CcInlineSwitch",
 	slot: "switchWrapper",
-})({
+})(({ theme }) => ({
 	lineHeight: "30px",
 	float: "right",
-}) as typeof Typography;
+	"&.CcInlineSwitch-disabled": {
+		color: theme.palette.text.disabled,
+	},
+})) as typeof Typography;
 
 export type InlineSwitchClassKey = "switch" | "root" | "switchWrapper";
 
 const InlineSwitch = (inProps: InlineSwitchProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcInlineSwitch" });
-	const { label, value, onChange, visible, children, classes, className } =
-		props;
+	const {
+		label,
+		value,
+		onChange,
+		visible,
+		disabled,
+		children,
+		classes,
+		className,
+	} = props;
 
 	const handleSwitchChange = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
+			// a click event dispatched on the disabled input by a script can still reach React
+			if (disabled) return;
 			if (onChange) onChange(event.target.checked);
 		},
-		[onChange],
+		[onChange, disabled],
 	);
 
 	return (
@@ -109,7 +132,10 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 			{visible && (
 				<StyledSwitchWrapper
 					component="div"
-					className={classes?.switchWrapper}
+					className={combineClassNames([
+						classes?.switchWrapper,
+						disabled && "CcInlineSwitch-disabled",
+					])}
 					variant={"caption"}
 				>
 					<Grid
@@ -122,6 +148,7 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 							<AntSwitch
 								checked={value}
 								onChange={handleSwitchChange}
+								disabled={disabled}
 								// the focus ring shows focus; the ripple would pulse under it endlessly
 								disableFocusRipple
 							/>

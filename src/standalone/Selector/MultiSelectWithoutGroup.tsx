@@ -194,6 +194,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 			<BaseSelector
 				{...otherProps}
 				onLoad={onLoad}
+				disabled={disabled}
 				selected={null}
 				onSelect={multiSelectHandler}
 				refreshToken={
@@ -202,7 +203,9 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 					(switchValue ?? false).toString()
 				}
 				variant={"standard"}
-				startAdornment={<SearchIcon color={"primary"} />}
+				startAdornment={
+					<SearchIcon color={disabled ? "disabled" : "primary"} />
+				}
 				freeSolo={true}
 				displaySwitch={false}
 				filterIds={combinedFilterIds}
@@ -212,6 +215,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 				value={!!switchValue}
 				onChange={props.setSwitchValue}
 				label={props.switchLabel}
+				disabled={disabled}
 				className={classes?.switch}
 			>
 				<>

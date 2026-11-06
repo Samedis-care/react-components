@@ -66,6 +66,8 @@ const renderUi = (ui: React.ReactElement) =>
 
 const groupField = () => screen.getAllByRole<HTMLInputElement>("combobox")[0];
 
+const dataField = () => screen.getAllByRole<HTMLInputElement>("combobox")[1];
+
 const open = async (input: HTMLElement) => {
 	act(() => input.focus());
 	fireEvent.mouseDown(input);
@@ -166,5 +168,11 @@ describe("MultiSelectWithTags bugs", () => {
 		expect(within(vegetables).getAllByRole("combobox")[0]).toHaveAccessibleName(
 			"Add a vegetable family",
 		);
+	});
+	it("[ISSUE-3488-ITEM-6] disables the data field while disabled", async () => {
+		renderUi(<Host initial={[APPLE]} disabled />);
+		await flush();
+		expect(groupField()).toBeDisabled();
+		expect(dataField()).toBeDisabled();
 	});
 });
