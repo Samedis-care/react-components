@@ -7,9 +7,11 @@ export interface PartialApplyFailure<EntryT = unknown> {
 	 */
 	entry: EntryT;
 	/**
-	 * What was attempted for it
+	 * What was attempted for it. `read`: the write went through, but its result could
+	 * not be turned into an entry (CrudMultiSelect's and CrudMultiSelectWithGroups'
+	 * `deserialize` failed after a create); the control lists `entry` as it was sent.
 	 */
-	action: "create" | "update" | "delete";
+	action: "create" | "update" | "delete" | "read";
 	/**
 	 * Why it failed
 	 */
@@ -21,8 +23,9 @@ export const isPartialApplyError = (e: Error): e is PartialApplyError => {
 };
 
 /**
- * The writes of a CRUD control's change that did not go through. Every other write of
- * the same change did, and the control shows it.
+ * The writes of a CRUD control's change that did not go through, or whose result could
+ * not be read (action `read`). Every other write of the same change did, and the
+ * control shows it.
  * @remarks Handed to `errorComponent` by CrudMultiSelect, CrudMultiSelectWithGroups,
  *          CrudFileUpload and CrudMultiImage. The message says what failed and why, as
  *          the control words it; `failures` lists the writes for a component that wants

@@ -43,8 +43,13 @@ export interface UseCrudSelectParams<
 		| Partial<Record<string, unknown>>;
 	/**
 	 * Callback for deserializing data after getting it from the backend connector
-	 * @param data The data from the backend connector (index function)
+	 * @param data The data from the backend connector (index function, or the record a
+	 *   create returned)
 	 * @returns The selector data which can be used by the control
+	 * @remarks If it fails for the record of a create, the row exists anyway: it is
+	 *   listed as the entry that was created, with the row's `id` as `value` (so
+	 *   `serialize` has to read a kept entry's row id from `value`), and the failure is
+	 *   reported in `error` as a PartialApplyError failure with the action `read`.
 	 */
 	deserialize: (data: Record<string, unknown>) => Promise<DataT> | DataT;
 	/**
@@ -139,6 +144,10 @@ export interface CrudSelectDispatch<DataT extends BaseSelectorData> {
 	/**
 	 * Adds the entry to the list of selected records
 	 * @param entry The entry to insert
+	 * @returns Resolves once the entry is selected. Rejects with the error of the create
+	 *   if it failed. Rejects with a PartialApplyError whose failure has the action
+	 *   `read` if `deserialize` failed after the create went through: the entry is
+	 *   selected then, as it was passed in, with the row's `id` as `value`.
 	 * @remarks Does not update existing record
 	 */
 	addToSelection: (entry: DataT) => Promise<void>;
@@ -147,6 +156,53 @@ export interface CrudSelectDispatch<DataT extends BaseSelectorData> {
 // the entry as the field names it, for the message of a write that failed
 const labelOf = (entry: BaseSelectorData): string =>
 	typeof entry.label === "string" ? entry.label : entry.label[0];
+
+const toPartialApplyError = <DataT extends BaseSelectorData>(
+	failures: PartialApplyFailure<DataT>[],
+) =>
+	new PartialApplyError(
+		failures
+			.map((failure) => `${labelOf(failure.entry)}: ${failure.error.message}`)
+			.join("; "),
+		failures,
+	);
+
+interface CreatedEntry<DataT extends BaseSelectorData> {
+	/**
+	 * The row the connector created
+	 */
+	record: Record<string, unknown>;
+	/**
+	 * The entry listed for it
+	 */
+	entry: DataT;
+	/**
+	 * Why `deserialize` failed: the entry is then the one sent, under the row's id
+	 */
+	readError?: Error;
+}
+
+/**
+ * Creates the row of a new entry. Rejects only when nothing was created: once the row
+ * exists it is listed, so it can be removed and is not created a second time.
+ */
+const createEntry = async <DataT extends BaseSelectorData>(
+	connector: Connector,
+	serialize: UseCrudSelectParams<ModelUnknown, DataT>["serialize"],
+	deserialize: UseCrudSelectParams<ModelUnknown, DataT>["deserialize"],
+	entry: DataT,
+): Promise<CreatedEntry<DataT>> => {
+	const record = (await connector.create(await serialize(entry)))[0];
+	try {
+		return { record, entry: await deserialize(record) };
+	} catch (e) {
+		return {
+			record,
+			entry: { ...entry, value: (record as Record<"id", string>).id },
+			readError: e as Error,
+		};
+	}
+};
 
 let ticketCounter = 0;
 const nextTicket = () => {
@@ -178,6 +234,9 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 	const [initialRawData, setInitialRawData] = useState<
 		Record<string, unknown>[]
 	>([]);
+	// the entries listed for created rows whose deserialize failed, by row: the field
+	// shows these instead of deserializing the row again
+	const readFallbacks = useRef(new WeakMap<Record<string, unknown>, DataT>());
 	// async processing of add to selection
 	const addToSelectionResults = useRef<
 		Record<string, [resolve: () => void, reject: (err: Error) => void]>
@@ -209,7 +268,7 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 		if (fetchingAddSelection.current) return; // don't run this code twice
 		fetchingAddSelection.current = true;
 		const ticket = addToSelectionQueue[0];
-		let entry = addToSelectionInputs.current[ticket];
+		const entry = addToSelectionInputs.current[ticket];
 		// if entry is undefined here we already started working on this, thus just wait and keep retrying
 		if (entry === undefined) {
 			// this happens when fetchingAddSelection is set to false before selection queue is updated (removed first entry) in finally handler of async code
@@ -227,15 +286,23 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 			);
 			if (existing) return;
 
-			const modelRecord = (await connector.create(await serialize(entry)))[0];
-			entry = {
-				...(await deserialize(modelRecord)),
-			};
+			const created = await createEntry(
+				connector,
+				serialize,
+				deserialize,
+				entry,
+			);
+			if (created.readError)
+				readFallbacks.current.set(created.record, created.entry);
 			// store record in cache
-			setInitialRawData((oldRawData) => [...oldRawData, modelRecord]);
+			setInitialRawData((oldRawData) => [...oldRawData, created.record]);
 
-			currentSelected.current = [...currentSelected.current, entry];
+			currentSelected.current = [...currentSelected.current, created.entry];
 			setSelected(currentSelected.current);
+			if (created.readError)
+				throw toPartialApplyError([
+					{ entry: created.entry, action: "read", error: created.readError },
+				]);
 		})()
 			.then(resolve)
 			.catch(reject)
@@ -341,13 +408,17 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 
 			// wait for response
 			const created = (
-				await settle("create", entriesToCreate, async (entry) => {
-					const record = (await connector.create(await serialize(entry)))[0];
-					return [record, await deserialize(record)] as const;
-				})
+				await settle("create", entriesToCreate, (entry) =>
+					createEntry(connector, serialize, deserialize, entry),
+				)
 			)
 				.filter((result) => result.status === "fulfilled")
 				.map((result) => result.value);
+			created.forEach(({ record, entry, readError }) => {
+				if (!readError) return;
+				readFallbacks.current.set(record, entry);
+				failures.push({ entry, action: "read", error: readError });
+			});
 			const updated = await updatePromise;
 			const deleted = await deletePromise;
 
@@ -365,36 +436,25 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 				...deletedEntries.filter(
 					(_entry, index) => deleted[index].status === "rejected",
 				),
-				...created.map(([, entry]) => entry),
+				...created.map(({ entry }) => entry),
 			];
 
 			// reflect changes
 			setInitialRawData((oldRawData) => [
 				...oldRawData,
-				...created.map(([record]) => record),
+				...created.map(({ record }) => record),
 			]);
 			currentSelected.current = finalSelected;
 			setSelected(currentSelected.current);
-			setError(
-				failures.length > 0
-					? new PartialApplyError(
-							failures
-								.map(
-									(failure) =>
-										`${labelOf(failure.entry)}: ${failure.error.message}`,
-								)
-								.join("; "),
-							failures,
-						)
-					: null,
-			);
+			setError(failures.length > 0 ? toPartialApplyError(failures) : null);
 		},
 		[connector, deserialize, prepareNewEntry, selected, serialize],
 	);
 
 	const modelToSelectorData = useCallback(
 		async (data: ModelRecord<M>): Promise<DataT> => {
-			if (initialRawData.includes(data)) return deserialize(data);
+			if (initialRawData.includes(data))
+				return readFallbacks.current.get(data) ?? deserialize(data);
 			const deserialized = (await deserializeModel(data)) as DataT;
 			// Use a stable value derived from the record id (not Math.random()),
 			// so rebuilds of not-yet-persisted entries keep the same value.

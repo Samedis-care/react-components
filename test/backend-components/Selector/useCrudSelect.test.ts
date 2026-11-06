@@ -1,6 +1,8 @@
+import React from "react";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { renderHook, act, waitFor, cleanup } from "@testing-library/react";
 import useCrudSelect, {
+	CrudSelectDispatch,
 	UseCrudSelectParams,
 } from "../../../src/backend-components/Selector/useCrudSelect";
 import { Connector, ModelUnknown } from "../../../src/backend-integration";
@@ -391,5 +393,267 @@ describe("useCrudSelect partial failures", () => {
 		});
 		expect(result.current.error).toBeNull();
 		expect(result.current.selected).toHaveLength(1);
+	});
+});
+
+// ---------------------------------------------------------------------------
+// A join collection as the apps have it: rows { id, source_id, note } behind the
+// connector, entries whose value is the row id and whose getIdOfData is the
+// looked-up record's id (source_id), new entries with value "to-create-<source>".
+// Every request is logged ("create:s1", "update:j1:b", "delete:j1"); a delete of
+// a row that is gone is refused like a 404. Creates and deletes can be held in
+// flight to overlap two changes.
+// ---------------------------------------------------------------------------
+
+interface SourceJoinData extends BaseSelectorData {
+	source_id: string;
+	note?: string;
+}
+
+const makeBackend = (initial: Record<string, unknown>[] = []) => {
+	const rows = new Map<string, Record<string, unknown>>();
+	initial.forEach((row) => rows.set(row.id as string, { ...row }));
+	let nextId = 100;
+	const calls: string[] = [];
+	const gates: { create?: Promise<void>; delete?: Promise<void> } = {};
+	let createsInFlight = 0;
+	let maxCreatesInFlight = 0;
+	const create = vi.fn(async (data: Record<string, unknown>) => {
+		createsInFlight++;
+		maxCreatesInFlight = Math.max(maxCreatesInFlight, createsInFlight);
+		if (gates.create) await gates.create;
+		createsInFlight--;
+		calls.push("create:" + String(data.source_id));
+		const record = { ...data, id: String(nextId++) };
+		rows.set(record.id, record);
+		return [record, {}];
+	});
+	const update = vi.fn((data: Record<string, unknown>) => {
+		calls.push("update:" + String(data.id) + ":" + String(data.note));
+		rows.set(data.id as string, { ...rows.get(data.id as string), ...data });
+		return Promise.resolve([data, {}]);
+	});
+	const del = vi.fn(async (id: string) => {
+		if (gates.delete) await gates.delete;
+		calls.push("delete:" + String(id));
+		if (!rows.has(id)) throw new Error("not found " + String(id));
+		rows.delete(id);
+	});
+	const index = vi.fn(() => {
+		const list = Array.from(rows.values()).map((row) => ({ ...row }));
+		return Promise.resolve([
+			list,
+			{ totalRows: list.length, filteredRows: list.length },
+		]);
+	});
+	/** holds every create (or delete) until the returned function is called */
+	const hold = (kind: "create" | "delete") => {
+		let release!: () => void;
+		gates[kind] = new Promise<void>((resolve) => (release = resolve));
+		return () => {
+			gates[kind] = undefined;
+			release();
+		};
+	};
+	return {
+		connector: { index, create, update, delete: del } as unknown as Connector,
+		rows,
+		calls,
+		create,
+		update,
+		del,
+		index,
+		hold,
+		maxCreatesInFlight: () => maxCreatesInFlight,
+	};
+};
+type Backend = ReturnType<typeof makeBackend>;
+
+// a new entry has no row id yet: leave it out, the backend assigns it
+const joinSerialize = (data: SourceJoinData) => ({
+	id: data.value.startsWith("to-create-") ? undefined : data.value,
+	source_id: data.source_id,
+	note: data.note,
+});
+const joinDeserialize = (record: Record<string, unknown>): SourceJoinData => ({
+	value: record.id as string,
+	label: "L" + String(record.source_id),
+	source_id: record.source_id as string,
+	note: record.note as string | undefined,
+});
+const joinParams = (
+	connector: Connector,
+	overrides: Partial<UseCrudSelectParams<ModelUnknown, SourceJoinData>> = {},
+): UseCrudSelectParams<ModelUnknown, SourceJoinData> => ({
+	connector,
+	serialize: joinSerialize,
+	deserialize: joinDeserialize,
+	deserializeModel: (record) => ({
+		label: "L" + String(record.id),
+		source_id: record.id as string,
+	}),
+	getIdOfData: (data) => data.source_id,
+	...overrides,
+});
+/** a search result picked in the field, as modelToSelectorData builds it */
+const pick = (source: string): SourceJoinData => ({
+	value: "to-create-" + source,
+	label: "L" + source,
+	source_id: source,
+});
+const values = (entries: BaseSelectorData[]) =>
+	entries.map((entry) => entry.value);
+
+const mountJoins = (
+	be: Backend,
+	overrides: Partial<UseCrudSelectParams<ModelUnknown, SourceJoinData>> = {},
+) => {
+	const ref = React.createRef<CrudSelectDispatch<SourceJoinData>>();
+	const hook = renderHook(() =>
+		useCrudSelect(joinParams(be.connector, overrides), ref),
+	);
+	return { ref, ...hook };
+};
+
+/**
+ * Starts addToSelection in a sync act and returns its promise, to be awaited
+ * outside of act: the queue is worked by an effect, which only runs once the act
+ * scope is flushed, so awaiting it inside an async act never resolves
+ */
+const startAdd = (
+	ref: React.RefObject<CrudSelectDispatch<SourceJoinData> | null>,
+	entry: SourceJoinData,
+) => {
+	let pending!: Promise<void>;
+	act(() => {
+		pending = ref.current!.addToSelection(entry);
+	});
+	return pending;
+};
+
+/** lets pending promise callbacks and the state updates they cause run */
+const flush = async () => {
+	await act(async () => {});
+	await act(async () => {});
+};
+
+// ---------------------------------------------------------------------------
+// Bugs: these assert the correct behavior and fail until the entry in BUGS.md
+// is fixed
+// ---------------------------------------------------------------------------
+
+describe("useCrudSelect bugs", () => {
+	it("[ISSUE-3509-ITEM-3] a create that went through stays listed when deserializing its response fails", async () => {
+		const be = makeBackend();
+		let failDeserialize = false;
+		const { result } = mountJoins(be, {
+			deserialize: (record) =>
+				failDeserialize
+					? Promise.reject(new Error("lookup failed"))
+					: joinDeserialize(record),
+		});
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		failDeserialize = true;
+		await act(async () => {
+			await result.current.handleSelect(["to-create-s1"], [pick("s1")]);
+		});
+		expect(be.calls).toEqual(["create:s1"]);
+		// the row exists in the backend: it is listed, so it can be removed and is not picked again
+		expect(values(result.current.selected)).toEqual(["100"]);
+	});
+
+	it("[ISSUE-3509-ITEM-3] a deserialize that fails after a create went through is reported as a read of the listed entry, not as a failed create", async () => {
+		const be = makeBackend();
+		const createImpl = be.create.getMockImplementation()!;
+		be.create.mockImplementation((data: Record<string, unknown>) =>
+			data.source_id === "s3"
+				? Promise.reject(new Error("refused"))
+				: createImpl(data),
+		);
+		const { result } = mountJoins(be, {
+			deserialize: (record) =>
+				record.source_id === "s2"
+					? Promise.reject(new Error("lookup failed"))
+					: joinDeserialize(record),
+		});
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		await act(async () => {
+			await result.current.handleSelect(
+				["to-create-s1", "to-create-s2", "to-create-s3"],
+				[pick("s1"), pick("s2"), pick("s3")],
+			);
+		});
+		expect(be.calls).toEqual(["create:s1", "create:s2"]);
+		// s2 is listed as it was picked, under the id of its row
+		expect(result.current.selected).toEqual([
+			joinDeserialize({ id: "100", source_id: "s1" }),
+			{ ...pick("s2"), value: "101" },
+		]);
+		expect(result.current.initialRawData.map((record) => record.id)).toEqual([
+			"100",
+			"101",
+		]);
+		const error = result.current.error as PartialApplyError<SourceJoinData>;
+		expect(error).toBeInstanceOf(PartialApplyError);
+		expect(
+			error.failures.map(
+				(failure) => failure.action + ":" + failure.entry.value,
+			),
+		).toEqual(["create:to-create-s3", "read:101"]);
+		expect(error.failures[1].entry).toBe(result.current.selected[1]);
+		expect(error.failures[1].error.message).toBe("lookup failed");
+		expect(error.message).toBe("Ls3: refused; Ls2: lookup failed");
+	});
+
+	it("[ISSUE-3509-ITEM-3] the field is handed the listed entry for a row whose deserialize failed, and removing it deletes the row", async () => {
+		const be = makeBackend();
+		const deserialize = vi.fn(() =>
+			Promise.reject<SourceJoinData>(new Error("lookup failed")),
+		);
+		const { result } = mountJoins(be, { deserialize });
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		await act(async () => {
+			await result.current.handleSelect(["to-create-s1"], [pick("s1")]);
+		});
+		const [listed] = result.current.selected;
+		// the field builds the entries of the rows through modelToSelectorData
+		await expect(
+			result.current.modelToSelectorData(result.current.initialRawData[0]),
+		).resolves.toBe(listed);
+		expect(deserialize).toHaveBeenCalledTimes(1);
+		await act(async () => {
+			await result.current.handleSelect([], []);
+		});
+		expect(be.calls).toEqual(["create:s1", "delete:100"]);
+		expect(result.current.selected).toEqual([]);
+		expect(result.current.error).toBeNull();
+	});
+
+	it("[ISSUE-3509-ITEM-3] addToSelection lists a create whose response cannot be deserialized, and rejects with the read failure", async () => {
+		const be = makeBackend();
+		const { ref, result } = mountJoins(be, {
+			deserialize: () => Promise.reject(new Error("lookup failed")),
+		});
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		const outcome = await startAdd(ref, pick("s1")).then(
+			() => null,
+			(e: unknown) => e,
+		);
+		await flush();
+		expect(outcome).toBeInstanceOf(PartialApplyError);
+		const error = outcome as PartialApplyError<SourceJoinData>;
+		expect(error.failures.map((failure) => failure.action)).toEqual(["read"]);
+		expect(error.failures[0].entry).toBe(result.current.selected[0]);
+		expect(values(result.current.selected)).toEqual(["100"]);
+		expect(result.current.initialRawData.map((record) => record.id)).toEqual([
+			"100",
+		]);
+		await expect(
+			result.current.modelToSelectorData(result.current.initialRawData[0]),
+		).resolves.toBe(result.current.selected[0]);
+		// it is listed, so adding it again is skipped
+		await startAdd(ref, pick("s1"));
+		await flush();
+		expect(be.calls).toEqual(["create:s1"]);
 	});
 });
