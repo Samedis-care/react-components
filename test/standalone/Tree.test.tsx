@@ -1,6 +1,6 @@
 import React from "react";
-import { describe, it, expect, vi, beforeAll, afterEach } from "vitest";
-import { act, render, waitFor } from "@testing-library/react";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import TreeView from "../../src/standalone/Tree/TreeView";
 import TreeViewCheckboxSelectionRenderer from "../../src/standalone/Tree/TreeViewCheckboxSelectionRenderer";
 import {
@@ -171,6 +171,7 @@ const FOREST_FLAT: TreeDataFlat[] = [
 ];
 
 const noop = vi.fn();
+
 const noopAsync = async () => {};
 
 // ─── Renderer capture helper ─────────────────────────────────────────────────
@@ -223,6 +224,8 @@ const labelsInDom = (container: HTMLElement): string[] =>
 	);
 
 afterEach(() => {
+	// the unit project has no globals, so RTL does not clean up on its own
+	cleanup();
 	vi.unstubAllEnvs();
 	vi.restoreAllMocks();
 });
@@ -641,6 +644,34 @@ const node = (id: string, extra?: Partial<TreeData>): TreeData => ({
 	...extra,
 });
 
+describe("TreeView accessibility bugs", () => {
+	const TREE = node("root", {
+		hasChildren: true,
+		expanded: true,
+		children: [
+			node("folder", { hasChildren: true, children: [node("x")] }),
+			node("leaf"),
+			node("locked-leaf", { expandLocked: true }),
+		],
+	});
+
+	it("[ISSUE-3476-ITEM-12] names every checkbox after its entry's label", () => {
+		render(
+			<TreeView
+				data={TREE}
+				renderer={TreeViewCheckboxSelectionRenderer}
+				onToggleExpanded={vi.fn()}
+				onLoadChildren={vi.fn()}
+			/>,
+		);
+		const boxes = screen.getAllByRole("checkbox");
+		// precondition: only the two leaves have a checkbox
+		expect(boxes).toHaveLength(2);
+		expect(boxes[0]).toHaveAccessibleName("leaf");
+		expect(boxes[1]).toHaveAccessibleName("locked-leaf");
+	});
+});
+
 /** Runs fn inside an async act, so the toggle's promise chain settles before the asserts */
 const settle = (fn: () => void) =>
 	act(async () => {
@@ -655,6 +686,7 @@ interface RejectionEvents {
 	on(event: "unhandledRejection", listener: (reason: unknown) => void): void;
 	off(event: "unhandledRejection", listener: (reason: unknown) => void): void;
 }
+
 const nodeProcess = (globalThis as unknown as { process: RejectionEvents })
 	.process;
 

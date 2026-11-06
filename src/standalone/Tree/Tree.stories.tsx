@@ -103,6 +103,8 @@ const meta: Meta<typeof TreeView> = {
 
 export default meta;
 
+type Story = StoryObj<typeof TreeView>;
+
 // ─── Stories ──────────────────────────────────────────────────────────────────
 
 const DefaultTreeStory = () => {
@@ -364,4 +366,27 @@ const EmptyTreeStory = () => {
 
 export const Empty: StoryObj<typeof TreeView> = {
 	render: () => <EmptyTreeStory />,
+};
+
+export const Issue3476Item12CheckboxesHaveNames: Story = {
+	render: () => <CheckboxTreeStory />,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3476-ITEM-12: the leaf checkboxes of `TreeViewCheckboxSelectionRenderer` have no accessible name; the label next to them is not associated. Fails the axe rule `label`.",
+			},
+		},
+		a11y: {
+			test: "error",
+			options: { runOnly: { type: "rule", values: ["label"] } },
+		},
+	},
+	play: async ({ canvas }) => {
+		// the last row holds the checkbox; axe has to see it
+		await expect(
+			await canvas.findByText("package.json", {}, { timeout: 5000 }),
+		).toBeVisible();
+		await expect(canvas.getAllByRole("checkbox")).toHaveLength(1);
+	},
 };

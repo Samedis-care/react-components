@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useId, useMemo } from "react";
 import { Checkbox, Grid, Typography } from "@mui/material";
 import {
 	KeyboardArrowUp as ClosedIcon,
@@ -25,6 +25,13 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 	const handleExpand = useCallback(
 		() => onToggleExpanded(id),
 		[onToggleExpanded, id],
+	);
+
+	// the checkbox is named by the entry's label next to it
+	const labelId = useId();
+	const checkboxSlotProps = useMemo(
+		() => ({ input: { "aria-labelledby": labelId } }),
+		[labelId],
 	);
 
 	const offsetLeft = hasConnector ? 12 : 0;
@@ -83,7 +90,11 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 						<ClosedIcon />
 					)
 				) : (
-					<Checkbox style={{ padding: 0 }} checked={expanded} />
+					<Checkbox
+						style={{ padding: 0 }}
+						checked={expanded}
+						slotProps={checkboxSlotProps}
+					/>
 				)}
 			</Grid>
 			{icon && (
@@ -92,7 +103,9 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 				</Grid>
 			)}
 			<Grid key={"label"} onClick={onClick} onAuxClick={onAuxClick} size="grow">
-				<Typography noWrap>{label}</Typography>
+				<Typography noWrap id={labelId}>
+					{label}
+				</Typography>
 			</Grid>
 		</Grid>
 	);
