@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [A pending auto-save is dropped when the form unmounts](2026-11-06-form-auto-save-dropped-on-unmount.md) | behavior, type |
 | 2026-11-06 | [The default Back button is grey with dark text](2026-11-06-default-back-button-colors.md) | behavior |
 | 2026-11-06 | [A field's message describes its control, and selectors show the error state](2026-11-06-form-field-message-describes-control.md) | behavior |
 | 2026-11-06 | [ActionButton, SubActionButton and Checkbox draw a keyboard focus ring](2026-11-06-uikit-focus-ring.md) | behavior |
