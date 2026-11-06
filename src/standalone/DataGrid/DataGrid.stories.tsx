@@ -965,3 +965,57 @@ export const OverrideSearchIsNotPersisted: Story = {
 		await waitFor(() => expect(stored().search).toBe("Dave"));
 	},
 };
+
+/**
+ * ISSUE-3492-ITEM-1: the parent holds the selection (shown above the grid). Tick Bob,
+ * then search for "Smith": the selection stays Bob's, and the reload reports
+ * no change to the parent.
+ */
+export const Issue3492Item1SearchKeepsControlledSelection: Story = {
+	render: () => {
+		const [selection, setSelection] = useState<[boolean, string[]]>([
+			false,
+			[],
+		]);
+		const onSelectionChange = useCallback(
+			(invert: boolean, ids: string[]) => setSelection([invert, ids]),
+			[],
+		);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		const loadData = useCallback(makeLoadData(), []);
+		return (
+			<Box
+				sx={{
+					height: "100%",
+					display: "flex",
+					flexDirection: "column",
+					gap: 1,
+				}}
+			>
+				<Box data-testid={"selection"}>{JSON.stringify(selection)}</Box>
+				<Box sx={{ flexGrow: 1, minHeight: 0 }}>
+					<DataGrid
+						columns={COLUMNS}
+						loadData={loadData}
+						searchPlaceholder={"Search people"}
+						selection={selection}
+						onSelectionChange={onSelectionChange}
+					/>
+				</Box>
+			</Box>
+		);
+	},
+	play: async ({ canvas }) => {
+		const selection = canvas.getByTestId("selection");
+		await userEvent.click(await canvas.findByText("Bob Smith"));
+		await waitFor(() => expect(selection).toHaveTextContent('[false,["2"]]'));
+		await userEvent.type(canvas.getByPlaceholderText("Search people"), "Smith");
+		// the reload has happened once the other people are gone
+		await waitFor(
+			() => expect(canvas.queryByText("Alice Müller")).not.toBeInTheDocument(),
+			{ timeout: 3000 },
+		);
+		await expect(await canvas.findByText("Bob Smith")).toBeVisible();
+		await expect(selection).toHaveTextContent('[false,["2"]]');
+	},
+};

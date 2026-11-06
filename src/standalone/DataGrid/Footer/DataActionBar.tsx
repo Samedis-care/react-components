@@ -62,6 +62,8 @@ const DataActionBar = () => {
 					...prevState,
 					selectAll: false,
 					selectedRows: [],
+					// reported also to a parent whose selection prop set it
+					selectionUpdatedByProps: false,
 				}));
 			} catch {
 				// user cancelled

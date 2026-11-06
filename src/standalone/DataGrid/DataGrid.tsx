@@ -240,10 +240,19 @@ export interface IDataGridCallbacks {
 	 * Set the (initial) selection of the grid when provided/updated.
 	 * Content: [invert, ids].
 	 * Use together with onSelectionChange for controlled selection.
+	 * @remarks While this prop is set, the selection is the parent's value: a
+	 *          reload (a search, filter, sort, custom data or forceRefreshToken
+	 *          change) keeps it, also the ids the new result does not contain.
+	 *          Only the user (reported through onSelectionChange) and this prop
+	 *          change it. Without it, a reload clears the selected ids (an
+	 *          active select all stays on).
 	 */
 	selection?: [boolean, string[]];
 	/**
-	 * Event for selection change
+	 * Event for selection change: a row click, a row checkbox, select all, a
+	 * successful delete clearing the selection, or (without the selection prop)
+	 * a reload clearing the selected ids. Not called for a change made through
+	 * the selection prop.
 	 * @param invert Are ids inverted? If true: Everything is selected except ids. If false: Only ids are selected
 	 * @param ids The ids that are selected/not selected based on invert
 	 */
@@ -661,7 +670,8 @@ export interface IDataGridState {
 	/**
 	 * The ids the last limited select all (DataGridProps.limitSelectAll)
 	 * selected. While selectedRows holds exactly these ids (in any order), the
-	 * select all checkbox is checked.
+	 * select all checkbox is checked. A reload clears it: they are the first
+	 * rows of the query they were loaded for.
 	 */
 	limitedSelectAll: string[] | null;
 	/**
@@ -1458,6 +1468,9 @@ const DataGrid = (
 					};
 		});
 	}, [setState, selection]);
+	// a controlled selection is the parent's value: a reload keeps it
+	const selectionControlled = useRef(false);
+	selectionControlled.current = !!selection;
 
 	// refresh data if desired
 	useEffect(() => {
@@ -1590,7 +1603,11 @@ const DataGrid = (
 				setState((prevState) => ({
 					...prevState,
 					rows: {},
-					selectedRows: [],
+					selectedRows: selectionControlled.current
+						? prevState.selectedRows
+						: [],
+					// the first rows of the old query
+					limitedSelectAll: null,
 					rowsTotal: 0, // reset scrolling
 					rowsFiltered: null,
 					refreshDataInstance: Date.now(),
