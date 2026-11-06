@@ -221,6 +221,7 @@
 			}
 		},
 		"language-switcher": {
+			"load-error": "La langue n'a pas pu être chargée. Vérifiez votre connexion Internet, rechargez la page et réessayez.",
 			"title": "Sélectionnez votre pays et votre langue",
 			"no-locales": "Aucun paramètre régional ne correspond à votre requête de recherche"
 		}

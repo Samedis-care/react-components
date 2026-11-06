@@ -221,6 +221,7 @@
 			}
 		},
 		"language-switcher": {
+			"load-error": "No se ha podido cargar el idioma. Compruebe su conexión a Internet, vuelva a cargar la página e inténtelo de nuevo.",
 			"title": "Seleccione su país e idioma",
 			"no-locales": "Ningún idioma coincide con su búsqueda"
 		}

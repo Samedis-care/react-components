@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [LocaleSelectorDialog keeps the current language when the picked one fails to load](2026-11-06-locale-selector-failed-load.md) | behavior |
 | 2026-11-06 | [A data grid writes its persisted state when it changes, not when it opens](2026-11-06-data-grid-writes-persisted-state-on-change.md) | behavior |
 | 2026-11-06 | [A Form given another record starts over](2026-11-06-form-record-switch-starts-over.md) | behavior |
 | 2026-11-06 | [The multi selects sort a copy of the selection, and report it in the caller's order](2026-11-06-multi-select-sort-for-display-only.md) | behavior |

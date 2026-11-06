@@ -221,6 +221,7 @@
 			}
 		},
 		"language-switcher": {
+			"load-error": "The language could not be loaded. Check your internet connection, reload the page and try again.",
 			"title": "Select your country and language",
 			"no-locales": "No locales match your search query"
 		}

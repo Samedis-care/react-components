@@ -221,6 +221,7 @@
 			}
 		},
 		"language-switcher": {
+			"load-error": "De taal kon niet worden geladen. Controleer uw internetverbinding, laad de pagina opnieuw en probeer het nog eens.",
 			"title": "Selecteer uw land en taal",
 			"no-locales": "Geen enkele locatie komt overeen met uw zoekopdracht"
 		}

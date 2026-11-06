@@ -221,6 +221,7 @@
 			}
 		},
 		"language-switcher": {
+			"load-error": "Tilni yuklab bo'lmadi. Internet aloqangizni tekshiring, sahifani qayta yuklang va yana urinib ko'ring.",
 			"title": "Mamlakatingizni va tilingizni tanlang",
 			"no-locales": "Sizning qidiruv so'rovingizga hech qanday mahalliy til mos kelmaydi"
 		}

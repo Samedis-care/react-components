@@ -7,6 +7,7 @@ import {
 	useThemeProps,
 } from "@mui/material";
 import { List, RowComponentProps, useDynamicRowHeight } from "react-window";
+import ccI18n from "../../i18n";
 import supportedLanguages from "../../assets/data/supported-languages.json";
 import countryLanguages from "../../assets/data/country-languages.json";
 import LocaleSelectorEntry from "./LocaleSelectorEntry";
@@ -24,6 +25,11 @@ import { showErrorDialog } from "../Dialog";
 import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 
 export interface LocaleSelectorDialogContentProps extends LocaleSelectorDialogCommonProps {
+	/**
+	 * Called once the picked language is loaded and applied. Not called when its
+	 * texts fail to load or `changeLanguage` rejects: an error dialog shows
+	 * instead, and the previous language stays. The dialog passes `popDialog`.
+	 */
 	close: () => void;
 	className?: string;
 }
@@ -71,6 +77,17 @@ const NoLocalesMessage = styled("div", {
 export type LocaleSelectorDialogContentClassKey =
 	"localeList" | "noLocalesMessage";
 
+/**
+ * Whether every namespace loaded so far has its texts for the locale or its
+ * language, i.e. the UI can show the locale without falling back to English
+ */
+const hasTexts = (locale: string) => {
+	const codes = [locale, locale.split("-")[0]];
+	return ([] as string[])
+		.concat(ccI18n.options.ns ?? [])
+		.every((ns) => codes.some((code) => ccI18n.hasResourceBundle(code, ns)));
+};
+
 const SearchInputProps = {
 	startAdornment: (
 		<InputAdornment position={"start"}>
@@ -90,7 +107,7 @@ const LocaleSelectorDialogContent = (
 
 	const [filter, setFilter] = useState("");
 	const lowercaseFilter = filter.toLowerCase();
-	const { i18n, t } = useCCTranslations();
+	const { t } = useCCTranslations();
 	const { t: tLocale } = useCCLocaleSwitcherTranslations();
 	const currentLang = useCurrentLanguage();
 	const handleFilterChange = useCallback(
@@ -159,9 +176,19 @@ const LocaleSelectorDialogContent = (
 
 	const handleSwitch = useCallback(
 		async (lang: string) => {
+			// the instance itself: the hook's i18n is a snapshot of the render
+			const previousLang = ccI18n.language;
 			setSwitchingLanguage(true);
 			try {
-				await i18n.changeLanguage(lang);
+				await ccI18n.changeLanguage(lang);
+				// i18next applies a language whose texts failed to load (offline, or
+				// chunks gone after a deploy) and never retries the load: switch back
+				if (ccI18n.language === lang && !hasTexts(lang)) {
+					if (previousLang) await ccI18n.changeLanguage(previousLang);
+					throw new Error(
+						ccI18n.t("non-standalone.language-switcher.load-error"),
+					);
+				}
 				close();
 			} catch (e) {
 				await showErrorDialog(pushDialog, e as Error);
@@ -169,7 +196,7 @@ const LocaleSelectorDialogContent = (
 				setSwitchingLanguage(false);
 			}
 		},
-		[close, i18n, pushDialog],
+		[close, pushDialog],
 	);
 
 	const LocaleEntryRenderer = useCallback(
