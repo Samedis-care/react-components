@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
 	Grid,
 	IconButton,
@@ -97,6 +97,12 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 	const closeExportMenu = useCallback(() => {
 		setExportAnchorEl(null);
 	}, [setExportAnchorEl]);
+	const moreOptionsRef = useRef<HTMLButtonElement>(null);
+	// from the phone's "More options" menu: anchored to its button, as the
+	// menu's entry closes with that menu
+	const openExportMenuFromMoreOptions = useCallback(() => {
+		setExportAnchorEl(moreOptionsRef.current);
+	}, []);
 
 	const [resetAnchorEl, setResetAnchorEl] =
 		useState<MenuProps["anchorEl"]>(undefined);
@@ -141,6 +147,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 						<VerticalDivider />
 					</Grid>
 					<IconButton
+						ref={moreOptionsRef}
 						color={"primary"}
 						onClick={openSettingsMenu}
 						size="large"
@@ -152,7 +159,9 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 						anchorEl={settingsAnchorEl}
 						toggleSettings={toggleSettings}
 						openResetDialog={hideReset ? undefined : openResetDialog}
-						openExportMenu={exporters ? openExportMenu : undefined}
+						openExportMenu={
+							exporters ? openExportMenuFromMoreOptions : undefined
+						}
 						handleImport={handleImport}
 						onClose={closeSettingsMenu}
 					/>
@@ -263,11 +272,6 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 										</IconButton>
 									</Tooltip>
 								)}
-								<ExportMenu
-									exporters={exporters}
-									anchorEl={exportAnchorEl}
-									onClose={closeExportMenu}
-								/>
 							</Grid>
 						</>
 					)}
@@ -343,6 +347,13 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 						})}
 					</Grid>
 				</>
+			)}
+			{exporters && (
+				<ExportMenu
+					exporters={exporters}
+					anchorEl={exportAnchorEl}
+					onClose={closeExportMenu}
+				/>
 			)}
 			<ResetMenu
 				anchorEl={resetAnchorEl}
