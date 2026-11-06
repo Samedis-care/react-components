@@ -69,8 +69,9 @@ export const WithInfoButton: Story = {
 
 /** WCAG contrast of two CSS colors, the first composited over the second */
 const parseColor = (css: string) => {
-	const parts = /rgba?\(([^)]+)\)/
-		.exec(css)[1]
+	const match = /rgba?\(([^)]+)\)/.exec(css);
+	if (!match) throw new Error(`not an rgb(a) color: ${css}`);
+	const parts = match[1]
 		.split(/[ ,/]+/)
 		.filter(Boolean)
 		.map(Number);
@@ -117,8 +118,10 @@ export const Issue3467Item14KeyboardFocusShowsRing: Story = {
 		const ring = getComputedStyle(tile);
 		await expect(ring.outlineStyle).toBe("solid");
 		await expect(parseFloat(ring.outlineWidth)).toBeGreaterThanOrEqual(2);
+		const tileParent = tile.parentElement;
+		if (!tileParent) throw new Error("the tile has no parent");
 		const background = over(
-			parseColor(getComputedStyle(tile.parentElement).backgroundColor),
+			parseColor(getComputedStyle(tileParent).backgroundColor),
 			WHITE,
 		);
 		await expect(

@@ -291,6 +291,7 @@ export const Issue3495Item1PhoneExportFromMoreOptions: Story = {
 		const excel = await body.findByRole("menuitem", { name: "Excel" });
 		await waitFor(() => expect(excel).toBeVisible());
 		const paper = excel.closest<HTMLElement>(".MuiPaper-root");
+		if (!paper) throw new Error("the Excel entry is not in a menu paper");
 		await waitFor(async () => {
 			const menuRect = paper.getBoundingClientRect();
 			const buttonRect = more.getBoundingClientRect();

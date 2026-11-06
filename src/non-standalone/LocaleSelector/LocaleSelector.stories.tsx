@@ -86,10 +86,13 @@ const openDialog = async (canvasElement: HTMLElement) => {
 };
 
 /** the row control at the given 1-based position of the filtered list */
-const rowButton = (dialog: HTMLElement, position: number) =>
-	dialog.querySelector<HTMLElement>(
+const rowButton = (dialog: HTMLElement, position: number) => {
+	const button = dialog.querySelector<HTMLElement>(
 		`[role="listitem"][aria-posinset="${position}"] [role="button"]`,
 	);
+	if (!button) throw new Error(`no row at position ${position}`);
+	return button;
+};
 
 // ─── Default (all locales) ───────────────────────────────────────────────────
 
@@ -149,6 +152,7 @@ export const Issue3499Item4CountryReadableOnPhone: Story = {
 		const country = rowButton(dialog, 1).querySelector<HTMLElement>(
 			"span[title]",
 		);
+		if (!country) throw new Error("the first row shows no country");
 		await expect(
 			country.clientWidth,
 			`"${country.textContent}" needs ${country.scrollWidth}px`,
@@ -179,6 +183,7 @@ export const Issue3499Item4LongNamesWrapWithTextSpacing: Story = {
 		try {
 			const dialog = await openDialog(canvasElement);
 			const input = dialog.querySelector("input");
+			if (!input) throw new Error("the dialog has no search input");
 			for (const [query, name] of [
 				["hongkong", "Sonderverwaltungsregion Hongkong"],
 				["niederl", "Niederländisch"],

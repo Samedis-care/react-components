@@ -486,9 +486,11 @@ export const Issue3510Item16LabelledFieldCountsSelection: StoryObj = {
 		await userEvent.click(rowCheckboxes(canvasElement)[2]);
 		await waitFor(() => expect(status).toHaveTextContent("Selected: 3"));
 		const box = canvas.getByTestId("field-box").getBoundingClientRect();
-		const footer = canvasElement
-			.querySelector("[class*=CcDataGrid-footer]")
-			.getBoundingClientRect();
+		const footerElement = canvasElement.querySelector(
+			"[class*=CcDataGrid-footer]",
+		);
+		if (!footerElement) throw new Error("no DataGrid footer rendered");
+		const footer = footerElement.getBoundingClientRect();
 		await expect(footer.bottom).toBeLessThanOrEqual(box.bottom);
 	},
 };

@@ -359,7 +359,9 @@ export const Issue3504Item9ReadOnlySaveSaysWhy: StoryObj<FlowArgs> = {
 		await expect(save).toBeDisabled();
 		await expect(save).toHaveAccessibleDescription("You may not edit people");
 		// a disabled button takes no pointer events; the element around it does
-		await userEvent.hover(save.parentElement);
+		const wrapper = save.parentElement;
+		if (!wrapper) throw new Error("Save has no element around it");
+		await userEvent.hover(wrapper);
 		const tooltip = await page().findByRole("tooltip", undefined, LOAD);
 		await expect(tooltip).toHaveTextContent("You may not edit people");
 	},

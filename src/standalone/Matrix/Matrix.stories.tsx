@@ -747,7 +747,9 @@ export const Issue3480Item15HeaderLabelsHaveContrast: Story = {
 			const header = headers.find((candidate) =>
 				candidate.classList.contains(variant),
 			);
+			if (!header) throw new Error(`no ${variant} column header`);
 			const label = header.querySelector(`.${PLAIN_CLASSES.columnHeaderLabel}`);
+			if (!label) throw new Error(`the ${variant} column header has no label`);
 			const ratio = contrast(
 				parseColor(getComputedStyle(label).color),
 				backgroundOf(header),
@@ -814,6 +816,7 @@ export const Issue3481Item11EntryFocusRingStandsOut: Story = {
 		const entry = tileCell(canvasElement, 0, 2).querySelector<HTMLElement>(
 			"[role=button]",
 		);
+		if (!entry) throw new Error("no entry in the cell");
 		entry.focus();
 		await expect(entry.matches(":focus-visible")).toBe(true);
 		const style = getComputedStyle(entry);
@@ -886,18 +889,22 @@ export const Issue3481Item11EveryRingKeepsItsContrast: Story = {
 				name,
 			).toBeGreaterThanOrEqual(3);
 		};
-		const entryIn = (column: number) =>
-			tileCell(canvasElement, 0, column).querySelector<HTMLElement>(
-				"[role=button]",
-			);
+		const entryIn = (column: number) => {
+			const found = tileCell(
+				canvasElement,
+				0,
+				column,
+			).querySelector<HTMLElement>("[role=button]");
+			if (!found) throw new Error(`no entry in column ${column}`);
+			return found;
+		};
 		await checkRing(entryIn(1), "highlighted");
 		await checkRing(entryIn(2), "dimmed");
 		await checkRing(entryIn(3), "diagonal");
-		await checkRing(
-			tileCell(canvasElement, 0, 4).querySelector<HTMLElement>(
-				`.${TILE_CLASSES.addChip}`,
-			),
-			"chip",
+		const chip = tileCell(canvasElement, 0, 4).querySelector<HTMLElement>(
+			`.${TILE_CLASSES.addChip}`,
 		);
+		if (!chip) throw new Error("no add chip in column 4");
+		await checkRing(chip, "chip");
 	},
 };

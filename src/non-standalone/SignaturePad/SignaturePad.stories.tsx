@@ -188,7 +188,9 @@ const drawStroke = (
 };
 
 const inkPixels = (c: HTMLCanvasElement) => {
-	const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
+	const ctx = c.getContext("2d");
+	if (!ctx) throw new Error("the pad canvas has no 2d context");
+	const d = ctx.getImageData(0, 0, c.width, c.height).data;
 	let n = 0;
 	for (let i = 3; i < d.length; i += 4) if (d[i]) n++;
 	return n;
@@ -202,6 +204,7 @@ const decodePng = async (src: string) => {
 	k.width = img.naturalWidth;
 	k.height = img.naturalHeight;
 	const ctx = k.getContext("2d");
+	if (!ctx) throw new Error("no 2d context to decode the PNG");
 	ctx.drawImage(img, 0, 0);
 	const d = ctx.getImageData(0, 0, k.width, k.height).data;
 	let opaque = 0;
@@ -276,9 +279,11 @@ export const Issue3467Item14MouseCloseReturnsFocusToTile: Story = {
 		await userEvent.click(activator);
 		await waitFor(() => expect(dialogEl()).not.toBeNull());
 		await userEvent.click(
-			await waitFor(() =>
-				within(dialogEl()).getByRole("button", { name: "Close" }),
-			),
+			await waitFor(() => {
+				const dialog = dialogEl();
+				if (!dialog) throw new Error("the sign dialog is not open");
+				return within(dialog).getByRole("button", { name: "Close" });
+			}),
 		);
 		await waitFor(() => expect(dialogEl()).toBeNull());
 		await expect(activator, "focus after closing the dialog").toHaveFocus();

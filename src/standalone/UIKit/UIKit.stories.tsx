@@ -131,13 +131,14 @@ export const Issue3482Item3KeyboardFocusRing: ActionButtonStory = {
 		</Box>
 	),
 	play: async ({ canvas, userEvent }) => {
+		const box = canvas.getByRole("checkbox", {
+			name: "Accept terms",
+		}).parentElement;
+		if (!box) throw new Error("the checkbox input has no box around it");
 		const targets: [string, HTMLElement][] = [
 			["ActionButton", canvas.getByRole("button", { name: "Save" })],
 			["SubActionButton", canvas.getByRole("button", { name: "Go Home" })],
-			[
-				"Checkbox",
-				canvas.getByRole("checkbox", { name: "Accept terms" }).parentElement,
-			],
+			["Checkbox", box],
 		];
 		for (const [name, target] of targets) {
 			await userEvent.tab();
@@ -178,10 +179,13 @@ const tabToEachRing = async ({ canvas, userEvent }: PlayContext) => {
 	const box = canvas.getByRole("checkbox", {
 		name: "Accept terms",
 	}).parentElement;
+	if (!box) throw new Error("the checkbox input has no box around it");
+	const checkIcon = box.querySelector(":scope > svg");
+	if (!checkIcon) throw new Error("the checkbox box has no icon");
 	const targets: [string, HTMLElement, Element][] = [
 		["ActionButton", save, save],
 		["SubActionButton", home, home],
-		["Checkbox", box, box.querySelector(":scope > svg")],
+		["Checkbox", box, checkIcon],
 	];
 	const rings: { name: string; style: string; width: string; color: string }[] =
 		[];

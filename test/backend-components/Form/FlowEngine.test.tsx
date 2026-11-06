@@ -18,6 +18,7 @@ import {
 	useFormContext,
 } from "../../../src/backend-components/Form/Form";
 import FlowEngine, {
+	FlowEngineProps,
 	FlowStageContextType,
 	FlowStageProps,
 	useFlowStageContext,
