@@ -7,6 +7,7 @@ export * from "./DirtyStateProvider";
 export * from "./DirtyStateContext";
 export { default as FullFormDialog } from "./FormDialog";
 export * from "./FormDialog";
+export { default as useSetFormDialogTitle } from "./useSetFormDialogTitle";
 export { default as BasicFormPage } from "./BasicFormPage";
 export * from "./BasicFormPage";
 export { default as DefaultFormPage } from "./DefaultFormPage";

@@ -179,6 +179,10 @@ import {
 	FormDialogProps,
 } from "./backend-components/Form/FormDialog";
 import {
+	PageTitleClassKey,
+	PageTitleProps,
+} from "./non-standalone/PageTitle/PageTitle";
+import {
 	NotificationsClassKey,
 	NotificationsProps,
 } from "./standalone/Notifications";
@@ -311,6 +315,7 @@ declare module "@mui/material/styles" {
 		CcLocaleSelectorEntry: LocaleSelectorEntryClassKey;
 		CcSignPad: SignPadClassKey;
 		CcFormDialog: FormDialogClassKey;
+		CcPageTitle: PageTitleClassKey;
 		CcPopupMenu: PopupMenuClassKey;
 		CcPortalLayout: PortalLayoutClassKey;
 		CcNotifications: NotificationsClassKey;
@@ -390,6 +395,7 @@ declare module "@mui/material/styles" {
 		CcLocaleSelectorEntry: Partial<LocaleSelectorEntryProps>;
 		CcSignPad: Partial<SignPadProps>;
 		CcFormDialog: Partial<FormDialogProps>;
+		CcPageTitle: Partial<PageTitleProps>;
 		CcPortalLayout: Partial<PortalLayoutProps>;
 		CcNotifications: Partial<NotificationsProps>;
 		CcToast: Partial<ToastProps>;
@@ -682,6 +688,11 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcFormDialog"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcFormDialog"];
 			variants?: ComponentsVariants["CcFormDialog"];
+		};
+		CcPageTitle?: {
+			defaultProps?: ComponentsPropsList["CcPageTitle"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcPageTitle"];
+			variants?: ComponentsVariants["CcPageTitle"];
 		};
 		CcPopupMenu?: {
 			styleOverrides?: ComponentsOverrides<Theme>["CcPopupMenu"];

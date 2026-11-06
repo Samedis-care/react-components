@@ -2,10 +2,24 @@ import React, { useContext, useLayoutEffect, useMemo, useState } from "react";
 import { History, Location } from "history";
 import { sentryHandleNavigation } from "./SentryRoutingInstrumentation";
 import { LocationContext } from "./useLocation";
+import DocumentTitleProvider, { DocumentTitleFormatter } from "./DocumentTitle";
 
 export interface HistoryRouterProps {
 	history: History;
 	children: React.ReactNode;
+	/**
+	 * Builds the document title from the page titles that `PageTitle` headings
+	 * and `usePageTitle` set, whenever one of them changes, see
+	 * {@link DocumentTitleFormatter}.
+	 * Default: the most specific page title and the app title (the document's
+	 * title when the router mounted), joined by " – ", e.g.
+	 * "Device 4711 – Samedis.care"; the app title alone when no page title is
+	 * set.
+	 * The router changes the document title only once a page title is set, and
+	 * sets the app title again when it unmounts. A HistoryRouter inside another
+	 * one hands its page titles to the outer one and ignores this prop.
+	 */
+	formatDocumentTitle?: DocumentTitleFormatter;
 }
 
 export interface HistoryRouterContextType {
@@ -33,7 +47,7 @@ export const useHistoryRouterContext = () => {
  * @param props The props
  */
 const HistoryRouter = (props: HistoryRouterProps) => {
-	const { history, children } = props;
+	const { history, children, formatDocumentTitle } = props;
 	const [location, setLocation] = useState<Location>(history.location);
 	const ctx = useMemo((): HistoryRouterContextType => ({ history }), [history]);
 	// a layout effect, so the router listens before the passive effects of its
@@ -51,7 +65,9 @@ const HistoryRouter = (props: HistoryRouterProps) => {
 	return (
 		<HistoryRouterContext.Provider value={ctx}>
 			<LocationContext.Provider value={location}>
-				{children}
+				<DocumentTitleProvider formatDocumentTitle={formatDocumentTitle}>
+					{children}
+				</DocumentTitleProvider>
 			</LocationContext.Provider>
 		</HistoryRouterContext.Provider>
 	);
