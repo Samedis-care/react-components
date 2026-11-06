@@ -1,5 +1,5 @@
-import React, { useId } from "react";
-import { useDialogContext } from "../../framework";
+import React, { useContext, useId } from "react";
+import { PushedDialogCloseContext } from "../../framework/PushedDialogCloseContext";
 import {
 	Button,
 	Dialog,
@@ -11,15 +11,18 @@ import {
 import { IDialogConfigForm } from "./Types";
 
 const FormDialogRaw = (props: IDialogConfigForm) => {
-	const [, popDialog] = useDialogContext();
 	const { onClose } = props;
+	// not useCloseThisDialog, which throws: rendered without pushDialog (or in a
+	// FullFormDialog's content, pushed: false), the dialog closes through onClose
+	const pushedClose = useContext(PushedDialogCloseContext);
+	const closeThisDialog = pushedClose?.pushed ? pushedClose.close : null;
 	// the message is the dialog's description
 	const messageId = useId();
 
 	const removeDialog = React.useCallback(() => {
-		popDialog();
+		closeThisDialog?.();
 		if (onClose) onClose();
-	}, [popDialog, onClose]);
+	}, [closeThisDialog, onClose]);
 
 	return (
 		<Dialog open={true} onClose={removeDialog} aria-describedby={messageId}>
@@ -33,7 +36,7 @@ const FormDialogRaw = (props: IDialogConfigForm) => {
 					<Button
 						key={index}
 						onClick={async () => {
-							if (!btn.dontClose) popDialog();
+							if (!btn.dontClose) closeThisDialog?.();
 							if (btn.onClick) await btn.onClick(onClose);
 							if (!btn.dontClose && onClose) onClose();
 						}}
@@ -48,4 +51,14 @@ const FormDialogRaw = (props: IDialogConfigForm) => {
 	);
 };
 
+/**
+ * Message dialog with `inputs` under the message and a row of buttons. Not the model form
+ * dialog, which is `FullFormDialog`. Show it with `pushDialog(<FormDialog … />)`.
+ *
+ * A button closes the dialog (unless `dontClose`), awaits its `onClick`, then calls `onClose`
+ * (unless `dontClose`). Escape and a backdrop click close it and call `onClose`. It
+ * closes the dialog it was pushed in, and only that one, also when dialogs were pushed after
+ * it. Rendered without pushDialog, it is always open: it closes through `onClose`, which has
+ * to stop rendering it.
+ */
 export const FormDialog = React.memo(FormDialogRaw);

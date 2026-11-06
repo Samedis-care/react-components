@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useCallback, useContext } from "react";
 import {
 	Dialog,
 	DialogContent,
@@ -7,7 +7,7 @@ import {
 	useTheme,
 	useThemeProps,
 } from "@mui/material";
-import { useDialogContext } from "../../framework/DialogContextProvider";
+import { PushedDialogCloseContext } from "../../framework/PushedDialogCloseContext";
 import { DialogTitle } from "../Dialog";
 import Loader from "../../standalone/Loader";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -90,7 +90,13 @@ const LocaleSelectorDialog = (inProps: LocaleSelectorDialogProps) => {
 		name: "CcLocaleSelectorDialog",
 	});
 	const { className, classes, ...contentProps } = props;
-	const [, popDialog] = useDialogContext();
+	// not useCloseThisDialog, which throws: rendered without pushDialog, there is no dialog
+	// to close (LocaleSelectorDialog has no onClose)
+	const pushedClose = useContext(PushedDialogCloseContext);
+	const closeThisDialog = pushedClose?.pushed ? pushedClose.close : null;
+	// closes this dialog, and only this one, also when it was closed already (Escape while
+	// the picked language loads) or a dialog was pushed after it
+	const close = useCallback(() => closeThisDialog?.(), [closeThisDialog]);
 	const theme = useTheme();
 	const fullScreen = useMediaQuery(theme.breakpoints.down("sm"), {
 		noSsr: true,
@@ -102,10 +108,10 @@ const LocaleSelectorDialog = (inProps: LocaleSelectorDialogProps) => {
 		<StyledDialog
 			open={true}
 			fullScreen={fullScreen}
-			onClose={popDialog}
+			onClose={close}
 			className={combineClassNames([className, classes?.root])}
 		>
-			<StyledDialogTitle onClose={popDialog} className={classes?.title}>
+			<StyledDialogTitle onClose={close} className={classes?.title}>
 				{t("non-standalone.language-switcher.title")}
 			</StyledDialogTitle>
 			<StyledDialogContent className={classes?.contentWrapper}>
@@ -113,7 +119,7 @@ const LocaleSelectorDialog = (inProps: LocaleSelectorDialogProps) => {
 					<StyledLocaleSelectorDialogContent
 						{...contentProps}
 						className={classes?.content}
-						close={popDialog}
+						close={close}
 					/>
 				</Suspense>
 			</StyledDialogContent>

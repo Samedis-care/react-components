@@ -10,12 +10,14 @@ import {
 } from "vitest";
 import {
 	render,
+	screen,
 	fireEvent,
 	cleanup,
 	act,
 	waitFor,
 	within,
 } from "@testing-library/react";
+import { Dialog, DialogTitle as MuiDialogTitle } from "@mui/material";
 import { createTheme, ThemeProvider, type Theme } from "@mui/material/styles";
 import { createMemoryHistory } from "history";
 import { setFrameworkHistory } from "../../src/framework/History";
@@ -28,6 +30,8 @@ import ccI18n from "../../src/i18n";
 // index first runs into an import cycle
 import "../../src/non-standalone/Dialog/Utils";
 import LocaleSelectorDialog from "../../src/non-standalone/LocaleSelector/LocaleSelectorDialog";
+
+const DE = ["de"];
 
 /**
  * jsdom has no ResizeObserver, and without one react-window renders no rows at
@@ -87,6 +91,10 @@ const open = (dialog: React.ReactNode) =>
 	act(() => {
 		ctx[0](dialog);
 	});
+/** lets pending promise continuations and their state updates settle */
+const flush = async () => {
+	for (let i = 0; i < 20; i++) await act(() => Promise.resolve());
+};
 /** all mounted dialogs, including the ones a dialog on top hides */
 const dialogEls = () =>
 	Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]'));
@@ -101,6 +109,28 @@ const rowBtn = (text: string) =>
 		if (!button) throw new Error("no row " + text);
 		return button;
 	});
+
+type ChangeLanguage = typeof ccI18n.changeLanguage;
+/** replaces ccI18n.changeLanguage with a call that stays pending until released */
+const holdSwitch = () => {
+	let resolve: (() => void) | undefined;
+	const spy = vi.spyOn(ccI18n, "changeLanguage").mockImplementation(
+		(() =>
+			new Promise<void>((res) => {
+				resolve = res;
+			})) as unknown as ChangeLanguage,
+	);
+	return {
+		spy,
+		release: async () => {
+			await act(async () => {
+				resolve?.();
+				await Promise.resolve();
+			});
+			await flush();
+		},
+	};
+};
 
 type ReadFn = (
 	lng: string,
@@ -191,6 +221,39 @@ describe("LocaleSelectorDialog", () => {
 			});
 			await waitFor(() => expect(dialogEls()).toHaveLength(0));
 			expect(localStorage.getItem("i18nextLng")).toBe("fr-FR");
+		});
+
+		it("[ISSUE-3499-ITEM-2] Escape while the language loads: the switch finishes without an error dialog", async () => {
+			const { release } = holdSwitch();
+			const error = vi.spyOn(console, "error").mockImplementation(() => {});
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			fireEvent.click(await rowBtn("Austria"));
+			await flush();
+			fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+			await flush();
+			await release();
+			// closed by Escape or by the finished switch, and nothing else shown
+			expect(dialogEls().map((el) => el.textContent)).toEqual([]);
+			expect(error).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3499-ITEM-2] Escape while the language loads: the dialog below stays open when the load ends", async () => {
+			const { release } = holdSwitch();
+			mount();
+			open(
+				<Dialog open>
+					<MuiDialogTitle>Below</MuiDialogTitle>
+				</Dialog>,
+			);
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			fireEvent.click(await rowBtn("Austria"));
+			await flush();
+			const top = dialogEls()[1];
+			fireEvent.keyDown(top, { key: "Escape" });
+			await flush();
+			await release();
+			expect(dialogEls().map((el) => el.textContent)).toEqual(["Below"]);
 		});
 	});
 });

@@ -1,6 +1,12 @@
-import React, { ChangeEvent, useCallback, useId, useState } from "react";
+import React, {
+	ChangeEvent,
+	useCallback,
+	useContext,
+	useId,
+	useState,
+} from "react";
 import { IDialogConfigInput } from "./Types";
-import { useDialogContext } from "../../framework";
+import { PushedDialogCloseContext } from "../../framework/PushedDialogCloseContext";
 import {
 	Button,
 	Dialog,
@@ -12,9 +18,13 @@ import {
 } from "@mui/material";
 
 const InputDialogRaw = (props: IDialogConfigInput) => {
-	const [, popDialog] = useDialogContext();
 	const { onClose, handlerButtonNo, handlerButtonYes, textFieldValidator } =
 		props;
+	// not useCloseThisDialog, which throws: rendered without pushDialog (or in a
+	// FullFormDialog's content, pushed: false), the dialog closes through onClose and the
+	// button handlers
+	const pushedClose = useContext(PushedDialogCloseContext);
+	const closeThisDialog = pushedClose?.pushed ? pushedClose.close : null;
 	const [valid, setValid] = useState(true);
 	const [value, setValue] = useState("");
 	// the message is the dialog's description
@@ -29,23 +39,23 @@ const InputDialogRaw = (props: IDialogConfigInput) => {
 	);
 
 	const removeDialog = React.useCallback(() => {
-		popDialog();
+		closeThisDialog?.();
 		if (onClose) onClose();
-	}, [popDialog, onClose]);
+	}, [closeThisDialog, onClose]);
 
 	const handleNo = React.useCallback(() => {
-		popDialog();
+		closeThisDialog?.();
 		handlerButtonNo();
-	}, [popDialog, handlerButtonNo]);
+	}, [closeThisDialog, handlerButtonNo]);
 
 	const handleYes = React.useCallback(() => {
 		if (textFieldValidator(value)) {
-			popDialog();
+			closeThisDialog?.();
 			handlerButtonYes(value);
 		} else {
 			setValid(false);
 		}
-	}, [value, handlerButtonYes, textFieldValidator, popDialog, setValid]);
+	}, [value, handlerButtonYes, textFieldValidator, closeThisDialog, setValid]);
 
 	return (
 		<Dialog open={true} onClose={removeDialog} aria-describedby={messageId}>
@@ -76,4 +86,14 @@ const InputDialogRaw = (props: IDialogConfigInput) => {
 	);
 };
 
+/**
+ * Text prompt with a title, a message, a text field and the buttons `textButtonNo` and
+ * `textButtonYes`. Show it with `pushDialog(<InputDialog … />)`, or use `showInputDialog`.
+ *
+ * Yes, once `textFieldValidator` accepts the value, closes the dialog and calls
+ * `handlerButtonYes`; No closes it and calls `handlerButtonNo`; Escape and a backdrop click
+ * close it and call `onClose`. It closes the dialog it was pushed in, and only that one, also
+ * when dialogs were pushed after it. Rendered without pushDialog, it is always open: it closes
+ * through `onClose` and the button handlers, which have to stop rendering it.
+ */
 export const InputDialog = React.memo(InputDialogRaw);

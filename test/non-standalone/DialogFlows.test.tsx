@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
 	describe,
 	it,
@@ -8,7 +8,13 @@ import {
 	beforeAll,
 	beforeEach,
 } from "vitest";
-import { render, screen, cleanup, act } from "@testing-library/react";
+import {
+	render,
+	screen,
+	fireEvent,
+	cleanup,
+	act,
+} from "@testing-library/react";
 import { createMemoryHistory, MemoryHistory } from "history";
 import { setFrameworkHistory } from "../../src/framework/History";
 import DialogContextProvider, {
@@ -18,11 +24,17 @@ import DialogContextProvider, {
 import ccI18n from "../../src/i18n";
 // Dialog/Utils must come before the component modules: importing the Dialog
 // index first runs into an import cycle
-import { showErrorDialog } from "../../src/non-standalone/Dialog/Utils";
+import {
+	showErrorDialog,
+	showInfoDialog,
+} from "../../src/non-standalone/Dialog/Utils";
 import { ConfirmDialog } from "../../src/non-standalone/Dialog/ConfirmDialog";
+import { ErrorDialog } from "../../src/non-standalone/Dialog/ErrorDialog";
+import { InfoDialog } from "../../src/non-standalone/Dialog/InfoDialog";
 import { InputDialog } from "../../src/non-standalone/Dialog/InputDialog";
 import { FormDialog } from "../../src/non-standalone/Dialog/FormDialog";
 import type { IDialogConfigInput } from "../../src/non-standalone/Dialog/Types";
+import FullFormDialog from "../../src/backend-components/Form/FormDialog";
 
 let history: MemoryHistory;
 beforeAll(async () => {
@@ -48,13 +60,25 @@ const mount = () =>
 			<Grab />
 		</DialogContextProvider>,
 	);
+/** lets pending handler continuations and their state updates settle */
+const flush = async () => {
+	for (let i = 0; i < 10; i++) await act(() => Promise.resolve());
+};
 const push = (dialog: React.ReactNode) =>
 	act(() => {
 		ctx[0](dialog);
 	});
+const btn = (name: string) => screen.getByRole("button", { name });
 /** all mounted dialogs, including the ones a dialog on top hides */
 const dialogEls = () =>
 	Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]'));
+/** the title texts of the mounted dialogs, bottom to top */
+const openTitles = () =>
+	dialogEls().map(
+		(d) =>
+			document.getElementById(d.getAttribute("aria-labelledby") ?? "")
+				?.textContent,
+	);
 
 const confirmProps = {
 	title: "Delete records?",
@@ -76,6 +100,193 @@ const inputProps = (
 	handlerButtonYes: vi.fn(),
 	handlerButtonNo: vi.fn(),
 	...overrides,
+});
+
+describe("ErrorDialog / InfoDialog buttons", () => {
+	it("[ISSUE-3497-ITEM-1] a dialog pushed from an InfoDialog button handler stays open; the InfoDialog closes", async () => {
+		mount();
+		push(
+			<InfoDialog
+				title="First"
+				message="f"
+				buttons={[
+					{
+						text: "Next",
+						onClick: () => {
+							void showInfoDialog(ctx[0], { title: "Second", message: "s" });
+						},
+					},
+				]}
+			/>,
+		);
+		fireEvent.click(btn("Next"));
+		await flush();
+		expect(openTitles()).toEqual(["Second"]);
+	});
+
+	it("[ISSUE-3497-ITEM-1] a dialog pushed while an async button handler runs stays open when the handler ends", async () => {
+		mount();
+		let release!: () => void;
+		push(
+			<InfoDialog
+				title="First"
+				message="f"
+				buttons={[
+					{
+						text: "Save",
+						onClick: () =>
+							new Promise<void>((resolve) => {
+								release = resolve;
+							}),
+					},
+				]}
+			/>,
+		);
+		fireEvent.click(btn("Save"));
+		await flush();
+		act(() => {
+			void showErrorDialog(ctx[0], "Background error");
+		});
+		act(() => release());
+		await flush();
+		expect(openTitles()).toEqual(["An error occurred"]);
+	});
+});
+
+describe("InputDialog and showInputDialog", () => {
+	it("[ISSUE-3497-ITEM-8] an InputDialog pushed from another InputDialog's Save handler starts with an empty field", () => {
+		mount();
+		push(
+			<InputDialog
+				{...inputProps({
+					title: "First",
+					handlerButtonYes: () =>
+						ctx[0](<InputDialog {...inputProps({ title: "Second" })} />),
+				})}
+			/>,
+		);
+		fireEvent.change(screen.getByRole("textbox"), {
+			target: { value: "carry" },
+		});
+		fireEvent.click(btn("Save"));
+		expect(screen.getByRole("dialog")).toHaveAccessibleName("Second");
+		expect(screen.getByRole("textbox")).toHaveValue("");
+	});
+});
+
+describe("rendered without pushDialog", () => {
+	/** renders a dialog from state, as `{open && <Dialog onClose={…} />}` */
+	const InlineHost = (props: {
+		make: (onClose: () => void) => React.ReactNode;
+	}) => {
+		const [open, setOpen] = useState(true);
+		return open ? <>{props.make(() => setOpen(false))}</> : null;
+	};
+	const mountInline = (make: (onClose: () => void) => React.ReactNode) =>
+		render(
+			<DialogContextProvider>
+				<Grab />
+				<InlineHost make={make} />
+			</DialogContextProvider>,
+		);
+
+	it.each([
+		[
+			"InfoDialog's button",
+			(onClose: () => void) => (
+				<InfoDialog
+					title="Inline"
+					message="m"
+					onClose={onClose}
+					buttons={[{ text: "Go" }]}
+				/>
+			),
+			() => fireEvent.click(btn("Go")),
+		],
+		[
+			"ConfirmDialog's Yes",
+			(onClose: () => void) => (
+				<ConfirmDialog
+					{...confirmProps}
+					title="Inline"
+					textButtonYes="Go"
+					onClose={onClose}
+					handlerButtonYes={() => {}}
+					handlerButtonNo={() => {}}
+				/>
+			),
+			() => fireEvent.click(btn("Go")),
+		],
+		[
+			"InputDialog's Escape",
+			(onClose: () => void) => (
+				<InputDialog {...inputProps({ title: "Inline", onClose })} />
+			),
+			() => fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" }),
+		],
+		[
+			"FormDialog's button",
+			(onClose: () => void) => (
+				<FormDialog
+					title="Inline"
+					message="m"
+					inputs={null}
+					onClose={onClose}
+					buttons={[{ text: "Go" }]}
+				/>
+			),
+			() => fireEvent.click(btn("Go")),
+		],
+	])(
+		"[ISSUE-3497-ITEM-1] %s closes the dialog through onClose and leaves a pushed dialog open",
+		async (_label, make, close) => {
+			const error = vi.spyOn(console, "error");
+			mountInline(make);
+			// not a modal, so the inline dialog's controls stay reachable by role
+			push(<div>pushed dialog</div>);
+			expect(openTitles()).toEqual(["Inline"]);
+			close();
+			await flush();
+			expect(openTitles()).toEqual([]);
+			expect(screen.queryByText("pushed dialog")).not.toBeNull();
+			expect(error).not.toHaveBeenCalled();
+		},
+	);
+
+	it("[ISSUE-3497-ITEM-1] without onClose a button closes nothing and throws nothing", async () => {
+		const error = vi.spyOn(console, "error");
+		mountInline(() => (
+			<ErrorDialog title="Inline" message="m" buttons={[{ text: "OK" }]} />
+		));
+		fireEvent.click(btn("OK"));
+		await flush();
+		expect(openTitles()).toEqual(["Inline"]);
+		expect(error).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3497-ITEM-1] in the content of a pushed FullFormDialog, an InfoDialog closes through its onClose, not the FullFormDialog", async () => {
+		const ContentWithInfo = () => {
+			const [open, setOpen] = useState(true);
+			return open ? (
+				<InfoDialog
+					title="Inline"
+					message="m"
+					onClose={() => setOpen(false)}
+					buttons={[{ text: "Go" }]}
+				/>
+			) : null;
+		};
+		mount();
+		push(
+			<FullFormDialog dialogTitle="Edit">
+				<ContentWithInfo />
+			</FullFormDialog>,
+		);
+		expect(openTitles()).toEqual(["Edit", "Inline"]);
+		fireEvent.click(btn("Go"));
+		await flush();
+		expect(openTitles()).toEqual(["Edit"]);
+	});
 });
 
 describe("message content and description", () => {

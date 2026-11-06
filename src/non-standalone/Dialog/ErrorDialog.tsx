@@ -1,5 +1,5 @@
-import React, { useId } from "react";
-import { useDialogContext } from "../../framework";
+import React, { useContext, useId } from "react";
+import { PushedDialogCloseContext } from "../../framework/PushedDialogCloseContext";
 import {
 	Button,
 	Dialog,
@@ -12,8 +12,11 @@ import { IDialogConfigSimple } from "./Types";
 import useRefState from "../../utils/useRefState";
 
 const ErrorDialogRaw = (props: IDialogConfigSimple) => {
-	const [, popDialog] = useDialogContext();
 	const { onClose } = props;
+	// not useCloseThisDialog, which throws: rendered without pushDialog (or in a
+	// FullFormDialog's content, pushed: false), the dialog closes through onClose
+	const pushedClose = useContext(PushedDialogCloseContext);
+	const closeThisDialog = pushedClose?.pushed ? pushedClose.close : null;
 	// pending state of an async button handler. the ref part guards against a
 	// second click landing before the re-render which disables the buttons.
 	const {
@@ -25,9 +28,9 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 	const messageId = useId();
 
 	const removeDialog = React.useCallback(() => {
-		popDialog();
+		closeThisDialog?.();
 		if (onClose) onClose();
-	}, [popDialog, onClose]);
+	}, [closeThisDialog, onClose]);
 
 	const handleClose = React.useCallback(() => {
 		if (getBusy()) return;
@@ -70,4 +73,16 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 	);
 };
 
+/**
+ * Message dialog with a title, a message and a row of buttons; InfoDialog and ConfirmDialog
+ * render it. Show it with `pushDialog(<ErrorDialog … />)`, or use `showErrorDialog` /
+ * `showInfoDialog`.
+ *
+ * A button runs its `onClick` while the dialog is open (a returned promise is awaited with the
+ * buttons disabled and Escape and the backdrop ignored), then, unless `dontClose`, closes the
+ * dialog and calls `onClose`. Escape and a backdrop click close it and call `onClose`.
+ * It closes the dialog it was pushed in, and only that one, also when dialogs were pushed
+ * after it. Rendered without pushDialog, it is always open: it closes through `onClose`,
+ * which has to stop rendering it.
+ */
 export const ErrorDialog = React.memo(ErrorDialogRaw);

@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [The simple dialogs, SignDialog and LocaleSelectorDialog close only their own dialog](2026-11-06-simple-dialogs-close-themselves.md) | behavior |
 | 2026-11-06 | [pushDialog returns a close for the dialog it pushed, and PushedDialogCloseContext is exported](2026-11-06-push-dialog-returns-close.md) | API, type |
 | 2026-11-06 | [A lazy control's queue counts again when it mounts again, and flow forms save it](2026-11-06-lazy-crud-connector-unmounted-queue.md) | behavior |
 | 2026-11-06 | [A multiline MultiLanguageInput switches its language with buttons below the field](2026-11-06-multi-language-input-language-buttons.md) | behavior, theme |
