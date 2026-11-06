@@ -215,6 +215,10 @@ import {
 import { FormClassKey } from "./backend-components";
 import { BasicFormPageProps } from "./backend-components/Form/BasicFormPage";
 import {
+	FlowEngineClassKey,
+	FlowEngineThemeProps,
+} from "./backend-components/Form/FlowEngine/FlowEngine";
+import {
 	DirtyMarkerClassKey,
 	FieldStateClassKey,
 } from "./standalone/UIKit/MuiFieldState";
@@ -325,6 +329,7 @@ declare module "@mui/material/styles" {
 		CcGridSingleSelectFilterBackend: GridSingleSelectFilterBackendClassKey;
 		CcBackendDataGridMultiSelect: BackendDataGridMultiSelectClassKey;
 		CcForm: FormClassKey;
+		CcFlowEngine: FlowEngineClassKey;
 		CcFieldState: FieldStateClassKey;
 		CcDirtyMarker: DirtyMarkerClassKey;
 		CcCrud: CrudClassKey;
@@ -409,6 +414,7 @@ declare module "@mui/material/styles" {
 			GridSingleSelectFilterBackendProps<ModelUnknown>
 		>;
 		CcBasicFormPage: Partial<BasicFormPageProps<never, never>>;
+		CcFlowEngine: Partial<FlowEngineThemeProps>;
 	}
 
 	interface Components {
@@ -767,6 +773,10 @@ declare module "@mui/material/styles" {
 		};
 		CcBasicFormPage?: {
 			defaultProps?: ComponentsPropsList["CcBasicFormPage"];
+		};
+		CcFlowEngine?: {
+			defaultProps?: ComponentsPropsList["CcFlowEngine"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcFlowEngine"];
 		};
 		CcCrud?: {
 			styleOverrides?: ComponentsOverrides<Theme>["CcCrud"];
