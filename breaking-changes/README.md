@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [A dialog button's onClick gets the dialog's close; the show…Dialog helpers return a closable promise](2026-11-06-dialog-button-onclick-gets-close.md) | type, behavior |
 | 2026-11-06 | [The simple dialogs, SignDialog and LocaleSelectorDialog close only their own dialog](2026-11-06-simple-dialogs-close-themselves.md) | behavior |
 | 2026-11-06 | [pushDialog returns a close for the dialog it pushed, and PushedDialogCloseContext is exported](2026-11-06-push-dialog-returns-close.md) | API, type |
 | 2026-11-06 | [A lazy control's queue counts again when it mounts again, and flow forms save it](2026-11-06-lazy-crud-connector-unmounted-queue.md) | behavior |

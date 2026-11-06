@@ -14,85 +14,165 @@ import type { ValidationResult } from "../../backend-components/Form/Form";
 import { isValidationError } from "../../backend-components";
 
 /**
+ * What the `show…Dialog` helpers return: the promise of the dialog's result, with `close`,
+ * which closes that dialog from outside it. Await it like any promise; only this promise has
+ * `close`, the ones `then`, `catch` and `finally` return don't.
+ * @example
+ * const info = showInfoDialog(pushDialog, { title, message });
+ * // later, e.g. when the record it is about was deleted meanwhile
+ * info.close();
+ */
+export type DialogPromise<T> = Promise<T> & {
+	/**
+	 * Closes the dialog the helper pushed, and only that one, also while dialogs pushed after
+	 * it are open, and settles the promise at once, as dismissing the dialog with Escape does
+	 * (see the helper's `@returns`). Navigation, which is blocked while a dialog is open, works
+	 * right after it. Calling it again, or after the dialog was closed another way, does
+	 * nothing.
+	 * @remarks In a handler of one of the dialog's own buttons, close the dialog with the
+	 *          `close` the handler gets (IDialogButtonConfig.onClick), not with this one: this
+	 *          one settles the promise at once, the handler's lets it settle once the handler
+	 *          has ended.
+	 */
+	close: () => void;
+};
+
+/**
+ * Pushes the dialog `render` returns and returns its result as a DialogPromise
+ * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
+ * @param render Returns the dialog, given the promise's resolve and reject
+ * @param dismiss Settles the promise when `close` closes the dialog, as dismissing it does
+ */
+const pushDialogPromise = <T,>(
+	pushDialog: DialogContextType[0],
+	render: (
+		resolve: (value: T) => void,
+		reject: (reason?: unknown) => void,
+	) => React.ReactNode,
+	dismiss: (
+		resolve: (value: T) => void,
+		reject: (reason?: unknown) => void,
+	) => void,
+): DialogPromise<T> => {
+	let closeDialog: (() => void) | undefined;
+	let settle: (() => void) | undefined;
+	const promise = new Promise<T>((resolve, reject) => {
+		settle = () => dismiss(resolve, reject);
+		closeDialog = pushDialog(render(resolve, reject));
+	});
+	return Object.assign(promise, {
+		close: () => {
+			closeDialog?.();
+			settle?.();
+		},
+	});
+};
+
+/**
  * Shows an awaitable confirm dialog
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
  * @param props The dialog properties
- * @returns Awaitable promise, resolves if user clicks Yes, rejects otherwise
+ * @returns A DialogPromise: resolves if the user clicks Yes, rejects with `undefined` on No,
+ *          Escape and a backdrop click. Its `close()` closes the dialog and rejects it with
+ *          `undefined` at once, so handle that rejection as the one of No.
  */
-export const showConfirmDialog = async (
+export const showConfirmDialog = (
 	pushDialog: DialogContextType[0],
 	props: IDialogConfigConfirmAsync,
-): Promise<void> => {
-	return new Promise((resolve, reject) => {
-		pushDialog(
+): DialogPromise<void> =>
+	pushDialogPromise<void>(
+		pushDialog,
+		(resolve, reject) => (
 			<ConfirmDialog
 				{...props}
 				onClose={reject}
 				handlerButtonYes={resolve}
 				handlerButtonNo={reject}
-			/>,
-		);
-	});
-};
+			/>
+		),
+		(_resolve, reject) => reject(),
+	);
 
 /**
  * Shows an awaitable confirm dialog (returns boolean)
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
  * @param props The dialog properties
- * @returns Awaitable promise, resolves to true if user clicks yes, to false if user clicks no or closes dialog
+ * @returns A DialogPromise: resolves to true if the user clicks Yes, to false on No, Escape
+ *          and a backdrop click. Its `close()` closes the dialog and resolves it to false at
+ *          once.
  */
-export const showConfirmDialogBool = async (
+export const showConfirmDialogBool = (
 	pushDialog: DialogContextType[0],
 	props: IDialogConfigConfirmAsync,
-): Promise<boolean> => {
-	return new Promise((resolve) => {
-		pushDialog(
+): DialogPromise<boolean> =>
+	pushDialogPromise<boolean>(
+		pushDialog,
+		(resolve) => (
 			<ConfirmDialog
 				{...props}
 				onClose={() => resolve(false)}
 				handlerButtonYes={() => resolve(true)}
 				handlerButtonNo={() => resolve(false)}
-			/>,
-		);
-	});
-};
+			/>
+		),
+		(resolve) => resolve(false),
+	);
 
 /**
  * Shows an awaitable input dialog
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
  * @param props The dialog properties
- * @returns Awaitable promise, resolves if user clicks Yes, rejects otherwise
+ * @returns A DialogPromise: resolves with the entered value if the user clicks Yes, rejects
+ *          with `undefined` on No, Escape and a backdrop click. Its `close()` closes the
+ *          dialog and rejects it with `undefined` at once, so handle that rejection as the one
+ *          of No.
  */
-export const showInputDialog = async (
+export const showInputDialog = (
 	pushDialog: DialogContextType[0],
 	props: IDialogConfigInputAsync,
-): Promise<string> => {
-	return new Promise((resolve, reject) => {
-		pushDialog(
+): DialogPromise<string> =>
+	pushDialogPromise<string>(
+		pushDialog,
+		(resolve, reject) => (
 			<InputDialog
 				{...props}
 				onClose={reject}
 				handlerButtonYes={resolve}
 				handlerButtonNo={reject}
-			/>,
-		);
-	});
-};
+			/>
+		),
+		(_resolve, reject) => reject(),
+	);
 
 /**
  * Shows an info dialog
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
  * @param props The dialog properties (with buttons optional, defaults to an Okay button)
- * @return A promise which resolves when the dialog is closed
+ * @returns A DialogPromise that resolves when the dialog is closed: by a button once its
+ *          handler has ended, by Escape or a backdrop click. Its `close()` closes the dialog
+ *          and resolves it at once.
+ * @example
+ * // a button that navigates closes the dialog first, as navigation is blocked while a dialog
+ * // is open. It uses the close it gets: the awaiting code continues after the handler.
+ * await showInfoDialog(pushDialog, {
+ * 	title,
+ * 	message,
+ * 	buttons: [{ text: "Open", onClick: (close) => { close(); navigate(target); } }],
+ * });
+ * @example
+ * // closing the dialog from outside it
+ * const info = showInfoDialog(pushDialog, { title, message });
+ * info.close();
  */
 export const showInfoDialog = (
 	pushDialog: DialogContextType[0],
 	props: Omit<IDialogConfigSimple, "buttons"> &
 		Partial<Pick<IDialogConfigSimple, "buttons">>,
-): Promise<void> => {
+): DialogPromise<void> => {
 	const { title, message, buttons } = props;
-	return new Promise((resolve) => {
-		pushDialog(
+	return pushDialogPromise<void>(
+		pushDialog,
+		(resolve) => (
 			<InfoDialog
 				title={title}
 				message={message}
@@ -105,21 +185,23 @@ export const showInfoDialog = (
 					]
 				}
 				onClose={resolve}
-			/>,
-		);
-	});
+			/>
+		),
+		(resolve) => resolve(),
+	);
 };
 
 /**
  * Shows an error dialog
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
  * @param e The error or validation error
- * @return A promise which resolves when the dialog is closed
+ * @returns A DialogPromise that resolves when the dialog is closed (OK, Escape, a backdrop
+ *          click). Its `close()` closes the dialog and resolves it at once.
  */
 export const showErrorDialog = (
 	pushDialog: DialogContextType[0],
 	e: Error | ValidationResult | string,
-): Promise<void> => {
+): DialogPromise<void> => {
 	// display generic errors and validation errors
 	let errorTitle = "";
 	let errorMsg: React.ReactNode = "";
@@ -148,8 +230,9 @@ export const showErrorDialog = (
 	} else {
 		setValuesForValidationError(e);
 	}
-	return new Promise((resolve) => {
-		pushDialog(
+	return pushDialogPromise<void>(
+		pushDialog,
+		(resolve) => (
 			<ErrorDialog
 				title={errorTitle}
 				message={errorMsg}
@@ -160,7 +243,8 @@ export const showErrorDialog = (
 					},
 				]}
 				onClose={resolve}
-			/>,
-		);
-	});
+			/>
+		),
+		(resolve) => resolve(),
+	);
 };

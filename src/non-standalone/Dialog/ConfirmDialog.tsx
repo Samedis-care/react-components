@@ -1,26 +1,43 @@
-import React from "react";
-import { IDialogConfigConfirm } from "./Types";
+import React, { useMemo } from "react";
+import { IDialogButtonConfig, IDialogConfigConfirm } from "./Types";
 import { InfoDialog } from "./InfoDialog";
 
-const ConfirmDialogRaw = (props: IDialogConfigConfirm) => (
-	<InfoDialog
-		title={props.title}
-		message={props.message}
-		onClose={props.onClose}
-		buttons={[
+const ConfirmDialogRaw = (props: IDialogConfigConfirm) => {
+	const {
+		title,
+		message,
+		onClose,
+		textButtonYes,
+		textButtonNo,
+		handlerButtonYes,
+		handlerButtonNo,
+	} = props;
+	// the handlers are called without the button's close, so that a promise's resolve or
+	// reject passed as a handler settles with undefined. A returned promise is still awaited.
+	const buttons = useMemo(
+		(): IDialogButtonConfig[] => [
 			{
-				text: props.textButtonYes,
-				onClick: props.handlerButtonYes,
+				text: textButtonYes,
+				onClick: () => handlerButtonYes(),
 				autoFocus: true,
 			},
 			{
-				text: props.textButtonNo,
-				onClick: props.handlerButtonNo,
+				text: textButtonNo,
+				onClick: () => handlerButtonNo(),
 				autoFocus: false,
 				color: "secondary",
 			},
-		]}
-	/>
-);
+		],
+		[textButtonYes, textButtonNo, handlerButtonYes, handlerButtonNo],
+	);
+	return (
+		<InfoDialog
+			title={title}
+			message={message}
+			onClose={onClose}
+			buttons={buttons}
+		/>
+	);
+};
 
 export const ConfirmDialog = React.memo(ConfirmDialogRaw);

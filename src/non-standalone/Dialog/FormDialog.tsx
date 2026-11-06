@@ -9,6 +9,7 @@ import {
 	DialogTitle,
 } from "@mui/material";
 import { IDialogConfigForm } from "./Types";
+import { dialogButtonClose } from "./dialogButtonClose";
 
 const FormDialogRaw = (props: IDialogConfigForm) => {
 	const { onClose } = props;
@@ -36,9 +37,17 @@ const FormDialogRaw = (props: IDialogConfigForm) => {
 					<Button
 						key={index}
 						onClick={async () => {
-							if (!btn.dontClose) closeThisDialog?.();
-							if (btn.onClick) await btn.onClick(onClose);
-							if (!btn.dontClose && onClose) onClose();
+							const { close, end } = dialogButtonClose(
+								closeThisDialog,
+								onClose,
+							);
+							if (!btn.dontClose) close();
+							try {
+								if (btn.onClick) await btn.onClick(close);
+							} finally {
+								// report the close once the handler has ended, also when it failed
+								end();
+							}
 						}}
 						color="primary"
 						autoFocus={btn.autoFocus}
@@ -56,7 +65,9 @@ const FormDialogRaw = (props: IDialogConfigForm) => {
  * dialog, which is `FullFormDialog`. Show it with `pushDialog(<FormDialog … />)`.
  *
  * A button closes the dialog (unless `dontClose`), awaits its `onClick`, then calls `onClose`
- * (unless `dontClose`). Escape and a backdrop click close it and call `onClose`. It
+ * (unless `dontClose`), also when the handler failed. `onClick` gets a `close` that closes the
+ * dialog at once; with `dontClose`, `onClose` is then called once the handler has ended.
+ * Escape and a backdrop click close it and call `onClose`. It
  * closes the dialog it was pushed in, and only that one, also when dialogs were pushed after
  * it. Rendered without pushDialog, it is always open: it closes through `onClose`, which has
  * to stop rendering it.
