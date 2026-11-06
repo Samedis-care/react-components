@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, userEvent, waitFor, within } from "storybook/test";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { Box, Grid } from "@mui/material";
 import { DataGrid, DataGridNoPersist } from "./index";
 import type {
@@ -131,6 +131,85 @@ export default meta;
 type Story = StoryObj<typeof DataGrid>;
 
 // ─── Stories ──────────────────────────────────────────────────────────────────
+
+/**
+ * ISSUE-3495-ITEM-16: Enter on Delete drops keyboard focus to the page once the deleted
+ * rows are unselected, because Delete turns disabled
+ */
+export const Issue3495Item16DeleteByKeyboardKeepsFocus: Story = {
+	args: { columns: COLUMNS, loadData: loadPeople, onDelete: fn() },
+	play: async ({ args, canvas, canvasElement }) => {
+		await userEvent.click(await canvas.findByText("Bob Smith"));
+		const del = canvas.getByRole("button", { name: "Delete" });
+		await waitFor(() => expect(del).toBeEnabled());
+		del.focus();
+		await userEvent.keyboard("{Enter}");
+		await expect(args.onDelete).toHaveBeenCalledOnce();
+		// the selection is cleared once onDelete resolved
+		await waitFor(() =>
+			expect(
+				canvasElement.querySelectorAll(
+					".CcDataGrid-dataCell input[type=checkbox]:checked",
+				),
+			).toHaveLength(0),
+		);
+		await expect(document.activeElement, "focus fell to the page").not.toBe(
+			document.body,
+		);
+	},
+};
+
+/**
+ * ISSUE-3495-ITEM-16: an unavailable Delete stays in the tab order, marked
+ * unavailable and dimmed, and neither Enter nor a click on it deletes. After a
+ * delete by keyboard, focus stays on it.
+ */
+export const Issue3495Item16UnavailableDeleteKeepsFocus: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadPeople,
+		onDelete: fn(),
+		classes: { footer: "story-footer" },
+	},
+	// the footer only: the rest of the grid has violations of its own
+	parameters: {
+		a11y: {
+			test: "error",
+			context: { include: [".story-footer"] },
+			options: {
+				rules: {
+					// the caption of the unavailable Delete: an inactive control,
+					// which WCAG 1.4.3 exempts
+					"color-contrast": { enabled: false },
+				},
+			},
+		},
+	},
+	play: async ({ args, canvas }) => {
+		await expect(await canvas.findByText("Bob Smith")).toBeVisible();
+		const del = canvas.getByRole("button", { name: "Delete" });
+		await expect(del).toHaveAttribute("aria-disabled", "true");
+		await expect(del).toHaveClass("Mui-disabled");
+		await expect(del.closest("label")).toHaveClass("Mui-disabled");
+		await expect(del.tabIndex).toBe(0);
+		del.focus();
+		await expect(del).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		await userEvent.keyboard(" ");
+		// the caption is the button's label: a click on it clicks the button
+		await userEvent.click(canvas.getByText("Delete"));
+		await expect(args.onDelete).not.toHaveBeenCalled();
+
+		await userEvent.click(canvas.getByText("Bob Smith"));
+		await waitFor(() => expect(del).not.toHaveAttribute("aria-disabled"));
+		await expect(del.closest("label")).not.toHaveClass("Mui-disabled");
+		del.focus();
+		await userEvent.keyboard("{Enter}");
+		await expect(args.onDelete).toHaveBeenCalledOnce();
+		await waitFor(() => expect(del).toHaveAttribute("aria-disabled", "true"));
+		await expect(del).toHaveFocus();
+	},
+};
 
 /**
  * ISSUE-3495-ITEM-1: on a phone with a filter bar, More options → Export opens the

@@ -281,7 +281,7 @@ export const WithSelectAll: Story = {
 		await userEvent.click(canvas.getByText("Bob Smith"));
 		await expect(all).toBePartiallyChecked();
 		await expect(header).toBePartiallyChecked();
-		await expect(deleteButton).toBeDisabled();
+		await expect(deleteButton).toHaveAttribute("aria-disabled", "true");
 
 		// on xs the custom buttons are in the "More" menu
 		const more = canvas.queryByRole("button", { name: "More" });
@@ -319,14 +319,14 @@ export const WithSelectAll: Story = {
 		await userEvent.click(all);
 		await expect(all).not.toBeChecked();
 		await expect(all).not.toBePartiallyChecked();
-		await expect(deleteButton).toBeDisabled();
+		await expect(deleteButton).toHaveAttribute("aria-disabled", "true");
 
 		// the header checkbox is the same control, by keyboard too
 		header.focus();
 		await userEvent.keyboard(" ");
 		await expect(header).toBeChecked();
 		await expect(all).toBeChecked();
-		await expect(deleteButton).toBeDisabled();
+		await expect(deleteButton).toHaveAttribute("aria-disabled", "true");
 		await userEvent.keyboard(" ");
 		await expect(header).not.toBeChecked();
 		await expect(all).not.toBeChecked();
@@ -402,7 +402,9 @@ export const WithLimitedSelectAll: Story = {
 			expect.objectContaining({ page: 2, rows: 25 }),
 		);
 
-		await expect(canvas.getByRole("button", { name: "Delete" })).toBeEnabled();
+		await expect(
+			canvas.getByRole("button", { name: "Delete" }),
+		).not.toHaveAttribute("aria-disabled");
 		const invite = canvas.getByRole("button", { name: "Invite" });
 		await expect(invite).toBeEnabled();
 		await userEvent.click(invite);

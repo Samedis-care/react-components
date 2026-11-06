@@ -22,6 +22,7 @@ import {
 } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import DataActionBarMenu from "./DataActionBarMenu";
+import FocusableWhenDisabledIconButton from "./FocusableWhenDisabledIconButton";
 import { dataGridIsCustomDataActionDisabled } from "../CallbackUtil";
 
 export interface DataActionBarViewProps {
@@ -95,17 +96,19 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 		props.numSelected === 0 ||
 		!props.handleDelete ||
 		(props.selectAll && !props.enableDeleteAll);
+	// stays focusable while disabled: a delete clears the selection, which
+	// disables Delete while it has keyboard focus
 	const deleteBtn = (
 		<ComponentWithLabel
 			control={
-				<SmallestIconButton
+				<FocusableWhenDisabledIconButton
 					color={"primary"}
 					disabled={deleteDisabled}
 					onClick={props.handleDelete}
 					aria-label={t("standalone.data-grid.footer.delete")}
 				>
 					<DeleteIcon />
-				</SmallestIconButton>
+				</FocusableWhenDisabledIconButton>
 			}
 			labelText={t("standalone.data-grid.footer.delete")}
 			labelPlacement={"bottom"}

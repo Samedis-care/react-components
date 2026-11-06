@@ -1,5 +1,7 @@
 import React, { useMemo } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+// eslint-disable-next-line import/no-unresolved
+import { expect, userEvent, waitFor, within } from "storybook/test";
 import BackendDataGrid from "./index";
 import { Framework } from "../../framework";
 import createTestModel from "../../stories/test-utils/TestModel";
@@ -50,4 +52,30 @@ const WithEditDataGridStory = () => {
 
 export const WithEdit: StoryObj = {
 	render: () => <WithEditDataGridStory />,
+};
+
+/**
+ * ISSUE-3495-ITEM-16: after a delete by keyboard and Yes in the confirmation,
+ * focus returns to Delete and stays there once the reload has cleared the
+ * selection
+ */
+export const Issue3495Item16DeleteByKeyboardKeepsFocusAfterYes: StoryObj = {
+	render: () => <WithDeleteDataGridStory />,
+	play: async ({ canvas }) => {
+		const body = within(document.body);
+		await userEvent.click(await canvas.findByText("Alice"));
+		const del = canvas.getByRole("button", { name: "Delete" });
+		await waitFor(() => expect(del).not.toHaveAttribute("aria-disabled"));
+		del.focus();
+		await userEvent.keyboard("{Enter}");
+		const dialog = await body.findByRole("dialog");
+		await userEvent.click(within(dialog).getByRole("button", { name: "Yes" }));
+		await waitFor(() => expect(body.queryByRole("dialog")).toBeNull());
+		await waitFor(() => expect(canvas.getByText(/Total: 7/)).toBeVisible(), {
+			timeout: 3000,
+		});
+		const delAfter = canvas.getByRole("button", { name: "Delete" });
+		await expect(delAfter).toHaveAttribute("aria-disabled", "true");
+		await expect(delAfter, "focus left Delete").toHaveFocus();
+	},
 };
