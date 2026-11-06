@@ -31,6 +31,9 @@ class RendererYourType extends ModelDataTypeYourType {
 			errorMsg,
 			dirty,
 			autoFocus,
+			id,
+			messageId,
+			describedBy,
 		} = params;
 
 		// if the visibility is disabled you should not render anything, so return <></> (empty React.Fragment)
@@ -55,6 +58,7 @@ class RendererYourType extends ModelDataTypeYourType {
 			return (
 				<>
 					<YourEditControl
+						id={id}
 						name={field}
 						value={value}
 						label={label}
@@ -62,11 +66,14 @@ class RendererYourType extends ModelDataTypeYourType {
 						onChange={(value) => handleChange(field, value)}
 						onBlur={handleBlur}
 						error={!!errorMsg}
+						aria-describedby={describedBy}
 						dirty={dirty}
 						autoFocus={autoFocus}
 						fullWidth
 					/>
-					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
+					<FormHelperText id={messageId} error={!!errorMsg}>
+						{errorMsg}
+					</FormHelperText>
 				</>
 			);
 		}
@@ -98,5 +105,13 @@ after any options you spread, so the form's value wins, and render that input ri
 A control with several inputs gives it to the one where typing starts, such as the empty
 entry at the end of a list; a control with nothing to type into can ignore it. See
 [Starting in a field](../../../../../docs/FormEngine.md#starting-in-a-field).
+
+`id`, `messageId` and `describedBy` tie the field's message to its control. Give `id` to the
+element the user operates (the input, or the group of a radio field) and `describedBy` to the same
+element as its `aria-describedby`, and render the error or warning message in an element with
+`messageId`: a screen reader then reads the message when the user reaches the control. While
+`errorMsg` is set, mark the control invalid: `error` does that for a MUI input, anything else
+needs `aria-invalid`. All three are undefined where there is no form behind the control. See
+[Describing a field](../../../../../docs/FormEngine.md#describing-a-field).
 
 If you implement an editable grid control you need to make sure that handleChange is only called when needed. Calling handleChange will send a update request to the backend and refresh the grid.

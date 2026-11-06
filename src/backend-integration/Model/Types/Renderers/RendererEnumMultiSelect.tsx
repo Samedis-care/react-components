@@ -45,6 +45,8 @@ class RendererEnumMultiSelect<
 			warningMsg,
 			dirty,
 			autoFocus,
+			id,
+			messageId,
 			value,
 		} = params;
 
@@ -110,8 +112,13 @@ class RendererEnumMultiSelect<
 						{...this.props}
 						dirty={dirty}
 						autoFocus={autoFocus}
+						autocompleteId={id}
+						error={!!errorMsg}
+						warning={!!warningMsg}
 					/>
-					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+					<FormHelperText id={messageId}>
+						{errorMsg || warningMsg}
+					</FormHelperText>
 				</FormControlFieldsetCC>
 			);
 		}

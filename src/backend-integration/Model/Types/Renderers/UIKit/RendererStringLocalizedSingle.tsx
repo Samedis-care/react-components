@@ -5,6 +5,7 @@ import { FormHelperTextCC, TextFieldWithHelp } from "../../../../../standalone";
 import { TextFieldWithHelpProps } from "../../../../../standalone/UIKit/TextFieldWithHelp";
 import TypeLocalizedString from "../../TypeLocalizedString";
 import { MultiLanguageInputSupportedLanguages } from "../../../../../standalone/UIKit/InputControls/MultiLanguageInput";
+import addSlotAttributes from "../../../../../utils/internal/addSlotAttributes";
 
 export type ModelDataTypeStringLocalizedSingleRendererCCParams = Omit<
 	TextFieldProps,
@@ -51,6 +52,9 @@ class RendererStringLocalizedSingle extends TypeLocalizedString {
 			warningMsg,
 			dirty,
 			autoFocus,
+			id,
+			messageId,
+			describedBy,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -101,8 +105,20 @@ class RendererStringLocalizedSingle extends TypeLocalizedString {
 									warning={!!warningMsg}
 									dirty={dirty}
 									autoFocus={autoFocus}
+									id={id}
+									slotProps={addSlotAttributes(
+										this.props?.slotProps,
+										"htmlInput",
+										{
+											"aria-describedby": describedBy,
+										},
+									)}
 								/>
-								<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
+								<FormHelperTextCC
+									id={messageId}
+									error={!!errorMsg}
+									warning={!!warningMsg}
+								>
 									{errorMsg || warningMsg}
 								</FormHelperTextCC>
 							</>

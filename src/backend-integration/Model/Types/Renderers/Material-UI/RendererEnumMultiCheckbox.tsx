@@ -48,6 +48,9 @@ class RendererEnumRadio<T extends string = string> extends TypeEnumMulti<T> {
 			dirty,
 			autoFocus,
 			value,
+			id,
+			messageId,
+			describedBy,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -78,6 +81,8 @@ class RendererEnumRadio<T extends string = string> extends TypeEnumMulti<T> {
 					error={!!errorMsg}
 					warning={!!warningMsg}
 					dirty={dirty}
+					id={id}
+					aria-describedby={describedBy}
 				>
 					<FormLabel component={"legend"}>{label}</FormLabel>
 					<FormGroup
@@ -97,6 +102,9 @@ class RendererEnumRadio<T extends string = string> extends TypeEnumMulti<T> {
 												checked={value.includes(entry.value)}
 												autoFocus={entry.value === focusValue}
 												name={entry.value}
+												slotProps={{
+													input: { "aria-invalid": !!errorMsg },
+												}}
 												onChange={(evt) =>
 													handleChange(
 														field,
@@ -114,7 +122,9 @@ class RendererEnumRadio<T extends string = string> extends TypeEnumMulti<T> {
 								),
 							)}
 					</FormGroup>
-					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+					<FormHelperText id={messageId}>
+						{errorMsg || warningMsg}
+					</FormHelperText>
 				</FormControlFieldsetCC>
 			);
 		}

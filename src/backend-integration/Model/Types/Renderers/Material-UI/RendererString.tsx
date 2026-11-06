@@ -6,6 +6,7 @@ import {
 	FormHelperTextCC,
 	TextFieldCC,
 } from "../../../../../standalone/UIKit/MuiFieldState";
+import addSlotAttributes from "../../../../../utils/internal/addSlotAttributes";
 
 export type ModelDataTypeStringRendererMUIParams = Omit<
 	TextFieldProps,
@@ -44,6 +45,9 @@ class RendererString extends TypeString {
 			warningMsg,
 			dirty,
 			autoFocus,
+			id,
+			messageId,
+			describedBy,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -80,8 +84,16 @@ class RendererString extends TypeString {
 						warning={!!warningMsg}
 						dirty={dirty}
 						autoFocus={autoFocus}
+						id={id}
+						slotProps={addSlotAttributes(this.props?.slotProps, "htmlInput", {
+							"aria-describedby": describedBy,
+						})}
 					/>
-					<FormHelperTextCC warning={!!warningMsg} error={!!errorMsg}>
+					<FormHelperTextCC
+						id={messageId}
+						warning={!!warningMsg}
+						error={!!errorMsg}
+					>
 						{errorMsg || warningMsg}
 					</FormHelperTextCC>
 				</>

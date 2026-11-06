@@ -7,6 +7,7 @@ import CurrencyInput, {
 	CurrencyInputProps,
 } from "../../../../../standalone/UIKit/InputControls/CurrencyInput";
 import { TypeSettings } from "../../../Type";
+import addSlotAttributes from "../../../../../utils/internal/addSlotAttributes";
 
 export interface ModelDataTypeDecimalCurrencyRendererCCParams
 	extends
@@ -61,6 +62,9 @@ class RendererDecimalCurrency extends TypeNumber {
 			warningMsg,
 			dirty,
 			autoFocus,
+			id,
+			messageId,
+			describedBy,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -102,8 +106,16 @@ class RendererDecimalCurrency extends TypeNumber {
 						warning={!!warningMsg}
 						dirty={dirty}
 						autoFocus={autoFocus}
+						id={id}
+						slotProps={addSlotAttributes(otherProps.slotProps, "htmlInput", {
+							"aria-describedby": describedBy,
+						})}
 					/>
-					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
+					<FormHelperTextCC
+						id={messageId}
+						error={!!errorMsg}
+						warning={!!warningMsg}
+					>
 						{errorMsg || warningMsg}
 					</FormHelperTextCC>
 				</>

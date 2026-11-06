@@ -4,6 +4,7 @@ import ModelRenderParams from "../../../RenderParams";
 import { ColorInput, FormHelperTextCC } from "../../../../../standalone";
 import { ColorInputProps } from "../../../../../standalone/UIKit/InputControls/ColorInput";
 import TypeColor from "../../TypeColor";
+import addSlotAttributes from "../../../../../utils/internal/addSlotAttributes";
 
 export type ModelDataTypeColorRenderer = Omit<
 	ColorInputProps,
@@ -43,6 +44,9 @@ class RendererColor extends TypeColor {
 			warningMsg,
 			dirty,
 			autoFocus,
+			id,
+			messageId,
+			describedBy,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -78,8 +82,16 @@ class RendererColor extends TypeColor {
 						warning={!!warningMsg}
 						dirty={dirty}
 						autoFocus={autoFocus}
+						id={id}
+						slotProps={addSlotAttributes(this.props?.slotProps, "htmlInput", {
+							"aria-describedby": describedBy,
+						})}
 					/>
-					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
+					<FormHelperTextCC
+						id={messageId}
+						error={!!errorMsg}
+						warning={!!warningMsg}
+					>
 						{errorMsg || warningMsg}
 					</FormHelperTextCC>
 				</>

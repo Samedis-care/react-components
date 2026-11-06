@@ -4,6 +4,7 @@ import TypeStringNullable from "../../TypeStringNullable";
 import ModelRenderParams from "../../../RenderParams";
 import { FormHelperTextCC, TextFieldWithHelp } from "../../../../../standalone";
 import type { ModelDataTypeStringRendererCCParams } from "./RendererString";
+import addSlotAttributes from "../../../../../utils/internal/addSlotAttributes";
 
 /**
  * Renders a text field for a string that can be unset (null)
@@ -33,6 +34,9 @@ class RendererStringNullable extends TypeStringNullable {
 			warningMsg,
 			dirty,
 			autoFocus,
+			id,
+			messageId,
+			describedBy,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -69,8 +73,16 @@ class RendererStringNullable extends TypeStringNullable {
 						warning={!!warningMsg}
 						dirty={dirty}
 						autoFocus={autoFocus}
+						id={id}
+						slotProps={addSlotAttributes(this.props?.slotProps, "htmlInput", {
+							"aria-describedby": describedBy,
+						})}
 					/>
-					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
+					<FormHelperTextCC
+						id={messageId}
+						error={!!errorMsg}
+						warning={!!warningMsg}
+					>
 						{errorMsg || warningMsg}
 					</FormHelperTextCC>
 				</>

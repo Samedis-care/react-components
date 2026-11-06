@@ -457,6 +457,30 @@ A custom renderer receives it as `RenderParams.autoFocus`, see
 [the renderer remarks](../src/backend-integration/Model/Types/Renderers/README.md#remarks). The
 `Backend-Components/Form` story `AutoFocus` starts the form in any of its fields.
 
+### Describing a field
+
+A field's error or warning message is the description of its control: a screen reader reads it
+when the user reaches the control, not only when the user happens to read on past it. While an
+error shows, the control is marked invalid, checkboxes, radio groups and selects as well as text
+fields. To describe a field with text of your own, such as instructions next to it, give the text
+an id and pass it to `FormField`:
+
+```tsx
+<Typography id={"serial-hint"}>As printed on the type plate</Typography>
+<FormField name={"serial_number"} aria-describedby={"serial-hint"} />
+```
+
+The control is then described by your text, followed by the message while one shows. `id` sets the
+id of the field's control, for a link or a label of your own that points to it; by default each
+`FormField` generates one. The message gets the id `<id>-message`.
+
+Selectors are marked invalid, but not described by the message yet. Date and time fields,
+localized strings, file and image uploads, the signature pad, the tag selector and the data grid
+multi select take neither the id nor the description yet.
+
+A custom renderer receives the ids as `RenderParams.id`, `messageId` and `describedBy`, see
+[the renderer remarks](../src/backend-integration/Model/Types/Renderers/README.md#remarks).
+
 ### Showing dirty state
 
 A field can be marked as modified with a small blue dot after its label. Nothing is marked

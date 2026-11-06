@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [A field's message describes its control, and selectors show the error state](2026-11-06-form-field-message-describes-control.md) | behavior |
 | 2026-11-06 | [ActionButton, SubActionButton and Checkbox draw a keyboard focus ring](2026-11-06-uikit-focus-ring.md) | behavior |
 | 2026-11-06 | [FormButtons keys its slots by the buttons' keys and flattens nested arrays](2026-11-06-form-buttons-slot-keys.md) | behavior |
 | 2026-11-06 | [Date and date-time fields show their message as the field's helper text](2026-11-06-date-fields-message-is-helper-text.md) | behavior |

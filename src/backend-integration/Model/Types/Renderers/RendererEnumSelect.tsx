@@ -54,6 +54,8 @@ class RendererEnumSelect<T extends string = string> extends TypeEnum<T> {
 			warningMsg,
 			dirty,
 			autoFocus,
+			id,
+			messageId,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -121,8 +123,13 @@ class RendererEnumSelect<T extends string = string> extends TypeEnum<T> {
 						required={visibility.required}
 						dirty={dirty}
 						autoFocus={autoFocus}
+						autocompleteId={id}
+						error={!!errorMsg}
+						warning={!!warningMsg}
 					/>
-					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+					<FormHelperText id={messageId}>
+						{errorMsg || warningMsg}
+					</FormHelperText>
 				</FormControlFieldsetCC>
 			);
 		}

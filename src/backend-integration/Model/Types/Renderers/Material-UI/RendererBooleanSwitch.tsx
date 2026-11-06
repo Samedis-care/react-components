@@ -10,6 +10,7 @@ import ModelRenderParams from "../../../RenderParams";
 import TypeBoolean from "../../TypeBoolean";
 import ccI18n from "../../../../../i18n";
 import { FormControlFieldsetCC } from "../../../../../standalone/UIKit/MuiFieldState";
+import addSlotAttributes from "../../../../../utils/internal/addSlotAttributes";
 
 export interface ModelDataTypeBooleanSwitchRendererMUIProps {
 	switchProps: Omit<
@@ -47,6 +48,9 @@ class RendererBooleanSwitch extends TypeBoolean {
 			warningMsg,
 			dirty,
 			autoFocus,
+			id,
+			messageId,
+			describedBy,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -91,11 +95,22 @@ class RendererBooleanSwitch extends TypeBoolean {
 								onBlur={handleBlur}
 								data-name={field}
 								autoFocus={autoFocus}
+								id={id}
+								slotProps={addSlotAttributes(
+									this.props?.switchProps.slotProps,
+									"input",
+									{
+										"aria-invalid": !!errorMsg,
+										"aria-describedby": describedBy,
+									},
+								)}
 							/>
 						}
 						label={label}
 					/>
-					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+					<FormHelperText id={messageId}>
+						{errorMsg || warningMsg}
+					</FormHelperText>
 				</FormControlFieldsetCC>
 			);
 		}

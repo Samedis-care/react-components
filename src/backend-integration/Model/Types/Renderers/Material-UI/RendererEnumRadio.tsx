@@ -49,6 +49,9 @@ class RendererEnumRadio<T extends string = string> extends TypeEnum<T> {
 			warningMsg,
 			dirty,
 			autoFocus,
+			id,
+			messageId,
+			describedBy,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -86,6 +89,7 @@ class RendererEnumRadio<T extends string = string> extends TypeEnum<T> {
 				>
 					<FormLabel component={"legend"}>{label}</FormLabel>
 					<RadioGroup
+						id={id}
 						name={field}
 						value={value}
 						// the radios are the enum's values
@@ -95,6 +99,9 @@ class RendererEnumRadio<T extends string = string> extends TypeEnum<T> {
 						onBlur={handleBlur}
 						data-name={field}
 						row={this.horizontal}
+						aria-invalid={!!errorMsg}
+						aria-required={!!visibility.required}
+						aria-describedby={describedBy}
 					>
 						{this.values
 							.filter((value) => !value.invisible)
@@ -111,7 +118,9 @@ class RendererEnumRadio<T extends string = string> extends TypeEnum<T> {
 								),
 							)}
 					</RadioGroup>
-					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+					<FormHelperText id={messageId}>
+						{errorMsg || warningMsg}
+					</FormHelperText>
 				</FormControlFieldsetCC>
 			);
 		}

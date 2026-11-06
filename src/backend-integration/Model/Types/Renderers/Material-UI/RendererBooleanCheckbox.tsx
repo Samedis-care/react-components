@@ -34,6 +34,9 @@ class RendererBooleanCheckbox extends TypeBoolean {
 			warningMsg,
 			dirty,
 			autoFocus,
+			id,
+			messageId,
+			describedBy,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -63,6 +66,13 @@ class RendererBooleanCheckbox extends TypeBoolean {
 					onBlur={handleBlur}
 					data-name={field}
 					autoFocus={autoFocus}
+					id={id}
+					slotProps={{
+						input: {
+							"aria-invalid": !!errorMsg,
+							"aria-describedby": describedBy,
+						},
+					}}
 				/>
 			);
 
@@ -77,7 +87,9 @@ class RendererBooleanCheckbox extends TypeBoolean {
 					component={"fieldset"}
 				>
 					<FormControlLabel control={control} label={label} />
-					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+					<FormHelperText id={messageId}>
+						{errorMsg || warningMsg}
+					</FormHelperText>
 				</FormControlFieldsetCC>
 			);
 		}

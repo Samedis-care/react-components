@@ -60,6 +60,8 @@ class RendererBackendSingleSelect<M extends ModelUnknown> extends TypeId {
 			warningMsg,
 			dirty,
 			autoFocus,
+			id,
+			messageId,
 			relationData,
 			relationModel,
 		} = params;
@@ -114,13 +116,18 @@ class RendererBackendSingleSelect<M extends ModelUnknown> extends TypeId {
 						{...this.props}
 						dirty={dirty}
 						autoFocus={autoFocus}
+						autocompleteId={id}
+						error={!!errorMsg}
+						warning={!!warningMsg}
 						modelFetch={modelFetch}
 						refreshToken={
 							JSON.stringify(relationModel.getReactQueryKeyFetchAll()) +
 							this.props.refreshToken
 						}
 					/>
-					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+					<FormHelperText id={messageId}>
+						{errorMsg || warningMsg}
+					</FormHelperText>
 				</FormControlFieldsetCC>
 			);
 		}

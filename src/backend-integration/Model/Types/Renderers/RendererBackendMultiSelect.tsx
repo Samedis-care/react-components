@@ -56,6 +56,8 @@ class RendererBackendMultiSelect<M extends ModelUnknown> extends TypeIds {
 			warningMsg,
 			dirty,
 			autoFocus,
+			id,
+			messageId,
 			relationData,
 			relationModel,
 			value,
@@ -106,8 +108,13 @@ class RendererBackendMultiSelect<M extends ModelUnknown> extends TypeIds {
 						{...this.props}
 						dirty={dirty}
 						autoFocus={autoFocus}
+						autocompleteId={id}
+						error={!!errorMsg}
+						warning={!!warningMsg}
 					/>
-					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+					<FormHelperText id={messageId}>
+						{errorMsg || warningMsg}
+					</FormHelperText>
 				</FormControlFieldsetCC>
 			);
 		}

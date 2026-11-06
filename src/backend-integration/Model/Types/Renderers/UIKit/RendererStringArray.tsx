@@ -84,6 +84,9 @@ const RendererStringArrayComponent = (
 		warningMsg,
 		dirty,
 		autoFocus,
+		id,
+		messageId,
+		describedBy,
 	} = props;
 
 	useMountLogging(RendererStringArrayComponent);
@@ -115,9 +118,13 @@ const RendererStringArrayComponent = (
 	);
 
 	return (
-		<GroupBox label={label}>
+		<GroupBox label={label} id={id} aria-describedby={describedBy}>
 			{value.map((_, idx) => textField(idx)).concat(textField(value.length))}
-			<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
+			<FormHelperTextCC
+				id={messageId}
+				error={!!errorMsg}
+				warning={!!warningMsg}
+			>
 				{errorMsg || warningMsg}
 			</FormHelperTextCC>
 		</GroupBox>

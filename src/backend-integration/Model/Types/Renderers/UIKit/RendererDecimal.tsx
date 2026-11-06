@@ -8,6 +8,7 @@ import {
 } from "../../../../../standalone";
 import TypeNumber from "../../TypeNumber";
 import { DecimalInputFieldProps } from "../../../../../standalone/UIKit/InputControls/DecimalInputField";
+import addSlotAttributes from "../../../../../utils/internal/addSlotAttributes";
 
 export type ModelDataTypeDecimalRendererCCParams = Omit<
 	TextFieldProps,
@@ -48,6 +49,9 @@ class RendererDecimal extends TypeNumber {
 			warningMsg,
 			dirty,
 			autoFocus,
+			id,
+			messageId,
+			describedBy,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -86,8 +90,16 @@ class RendererDecimal extends TypeNumber {
 						warning={!!warningMsg}
 						dirty={dirty}
 						autoFocus={autoFocus}
+						id={id}
+						slotProps={addSlotAttributes(this.props?.slotProps, "htmlInput", {
+							"aria-describedby": describedBy,
+						})}
 					/>
-					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
+					<FormHelperTextCC
+						id={messageId}
+						error={!!errorMsg}
+						warning={!!warningMsg}
+					>
 						{errorMsg || warningMsg}
 					</FormHelperTextCC>
 				</>

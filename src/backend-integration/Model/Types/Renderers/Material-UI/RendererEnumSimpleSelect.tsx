@@ -27,6 +27,9 @@ class RendererEnumSelect<T extends string = string> extends TypeEnum<T> {
 			warningMsg,
 			dirty,
 			autoFocus,
+			id,
+			messageId,
+			describedBy,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -60,6 +63,8 @@ class RendererEnumSelect<T extends string = string> extends TypeEnum<T> {
 						onChange={(evt) => handleChange(field, evt.target.value as T)}
 						onBlur={handleBlur}
 						autoFocus={autoFocus}
+						SelectDisplayProps={{ id }}
+						aria-describedby={describedBy}
 					>
 						{this.values.map((entry) => (
 							<MenuItem
@@ -71,7 +76,9 @@ class RendererEnumSelect<T extends string = string> extends TypeEnum<T> {
 							</MenuItem>
 						))}
 					</Select>
-					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+					<FormHelperText id={messageId}>
+						{errorMsg || warningMsg}
+					</FormHelperText>
 				</FormControlFieldsetCC>
 			);
 		}
