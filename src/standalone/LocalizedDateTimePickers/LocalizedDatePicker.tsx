@@ -8,6 +8,8 @@ import { withMuiFieldState } from "../UIKit/MuiFieldState";
 import useMuiLocaleData from "./useMuiLocaleData";
 import usePickerDraft from "./usePickerDraft";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
+import usePickerValidationError from "./usePickerValidationError";
+import withAccessibleError from "./withAccessibleError";
 import withRequiredSections from "./withRequiredSections";
 import withFieldBlur from "./withFieldBlur";
 
@@ -30,6 +32,7 @@ const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
 		otherProps.onChange,
 		publishIntermediateValues,
 	);
+	const validation = usePickerValidationError(otherProps.onError);
 
 	const { settle } = draft;
 	const consumerOnOpen = otherProps.onOpen;
@@ -48,6 +51,7 @@ const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
 				value={draft.value}
 				onChange={draft.onChange}
 				onOpen={handleOpen}
+				onError={validation.onError}
 				slotProps={{
 					...otherProps.slotProps,
 					textField: (ownerState) => {
@@ -55,14 +59,17 @@ const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
 							ownerState,
 							otherProps.slotProps?.textField,
 						);
-						const fieldProps = withRequiredSections({
-							...orgSlotProps,
-							// called once focus leaves the field, see withFieldBlur
-							onBlur: (event: React.FocusEvent<HTMLDivElement>) => {
-								draft.settle();
-								orgSlotProps?.onBlur?.(event);
-							},
-						});
+						const fieldProps = withAccessibleError(
+							validation.hasValidationError,
+							withRequiredSections({
+								...orgSlotProps,
+								// called once focus leaves the field, see withFieldBlur
+								onBlur: (event: React.FocusEvent<HTMLDivElement>) => {
+									draft.settle();
+									orgSlotProps?.onBlur?.(event);
+								},
+							}),
+						);
 						return withFieldBlur(ownerState, fieldProps);
 					},
 				}}

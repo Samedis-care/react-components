@@ -44,6 +44,14 @@ afterEach(async () => {
 	}
 });
 
+const STORED = "2026-08-01T10:00";
+
+/** The aria-invalid of every section, in order */
+const invalidSections = () =>
+	screen
+		.getAllByRole("spinbutton")
+		.map((section) => section.getAttribute("aria-invalid"));
+
 describe("accessibility", () => {
 	it.each([
 		[
@@ -205,6 +213,232 @@ describe("accessibility", () => {
 			}
 		},
 	);
+
+	it("[ISSUE-3474-ITEM-17] marks the focused section invalid, not only the group", () => {
+		render(
+			<Wrap>
+				<LocalizedKeyboardDatePicker
+					label="Due"
+					value={moment(STORED)}
+					onChange={vi.fn()}
+					error
+				/>
+			</Wrap>,
+		);
+		const year = screen.getByRole("spinbutton", { name: "Year" });
+		focus(year);
+		expect(year).toHaveAttribute("aria-invalid", "true");
+	});
+
+	it.each([
+		[
+			"LocalizedKeyboardDatePicker",
+			<LocalizedKeyboardDatePicker
+				key="k"
+				label="Due"
+				value={moment(STORED)}
+				onChange={vi.fn()}
+				error
+			/>,
+		],
+		[
+			"LocalizedDatePicker",
+			<LocalizedDatePicker
+				key="d"
+				label="Due"
+				value={moment(STORED)}
+				onChange={vi.fn()}
+				slotProps={{ textField: { error: true } }}
+			/>,
+		],
+		[
+			"LocalizedDateTimePicker",
+			<LocalizedDateTimePicker
+				key="dt"
+				label="Due"
+				value={moment(STORED)}
+				onChange={vi.fn()}
+				error
+			/>,
+		],
+		[
+			"DateInput",
+			<DateInput
+				key="di"
+				label="Due"
+				value={moment(STORED).toDate()}
+				onChange={vi.fn()}
+				error
+			/>,
+		],
+		[
+			"DateTimeInput",
+			<DateTimeInput
+				key="dti"
+				label="Due"
+				value={moment(STORED)}
+				onChange={vi.fn()}
+				error
+			/>,
+		],
+	])(
+		"[ISSUE-3474-ITEM-17] marks every section of a %s invalid while error is set",
+		(_name, element) => {
+			render(<Wrap>{element}</Wrap>);
+			for (const section of screen.getAllByRole("spinbutton")) {
+				expect(section).toHaveAttribute("aria-invalid", "true");
+			}
+		},
+	);
+
+	it.each(PICKERS)(
+		"[ISSUE-3474-ITEM-17] leaves the sections of a valid %s unmarked",
+		(_name, Picker) => {
+			render(
+				<Wrap>
+					<Picker label="Due" value={moment(STORED)} onChange={vi.fn()} />
+				</Wrap>,
+			);
+			expect(invalidSections()).not.toContain("true");
+		},
+	);
+
+	it("[ISSUE-3474-ITEM-17] follows error={false} over the picker's own validation, as the group does", () => {
+		render(
+			<Wrap>
+				<LocalizedKeyboardDatePicker
+					label="Due"
+					value={moment(STORED)}
+					maxDate={moment(STORED).subtract(1, "day")}
+					onChange={vi.fn()}
+					error={false}
+				/>
+			</Wrap>,
+		);
+		expect(screen.getByRole("group")).toHaveAttribute("aria-invalid", "false");
+		expect(invalidSections()).not.toContain("true");
+	});
+
+	it("[ISSUE-3474-ITEM-17] follows error when it changes after mount", () => {
+		const picker = (error: boolean) => (
+			<Wrap>
+				<LocalizedKeyboardDatePicker
+					label="Due"
+					value={moment(STORED)}
+					onChange={vi.fn()}
+					error={error}
+				/>
+			</Wrap>
+		);
+		const { rerender } = render(picker(false));
+		expect(invalidSections()).toEqual([null, null, null]);
+		rerender(picker(true));
+		expect(invalidSections()).toEqual(["true", "true", "true"]);
+		rerender(picker(false));
+		expect(invalidSections()).toEqual([null, null, null]);
+	});
+
+	it.each([
+		["an object", { className: "caller-section" }],
+		["a function", () => ({ className: "caller-section" })],
+	])(
+		"[ISSUE-3474-ITEM-17] keeps the caller's section content props given as %s",
+		(_form, sectionContent) => {
+			render(
+				<Wrap>
+					<LocalizedKeyboardDatePicker
+						label="Due"
+						value={moment(STORED)}
+						onChange={vi.fn()}
+						error
+						slotProps={{
+							textField: {
+								slotProps: { input: { slotProps: { sectionContent } } },
+							},
+						}}
+					/>
+				</Wrap>,
+			);
+			for (const section of screen.getAllByRole("spinbutton")) {
+				expect(section).toHaveAttribute("aria-invalid", "true");
+				expect(section).toHaveClass("caller-section");
+			}
+		},
+	);
+
+	const helperTextSlotProps = {
+		textField: { helperText: "Pick a weekday" },
+	} as const;
+	const withHelperText: [string, React.ReactElement][] = [
+		...PICKERS.map(([name, Picker]): [string, React.ReactElement] => [
+			name,
+			<Picker
+				key={name}
+				label="Due"
+				value={moment(STORED)}
+				onChange={vi.fn()}
+				slotProps={helperTextSlotProps}
+			/>,
+		]),
+		[
+			"DateInput",
+			<DateInput
+				key="di"
+				label="Due"
+				value={moment(STORED).toDate()}
+				onChange={vi.fn()}
+				slotProps={helperTextSlotProps}
+			/>,
+		],
+		[
+			"DateTimeInput",
+			<DateTimeInput
+				key="dti"
+				label="Due"
+				value={moment(STORED)}
+				onChange={vi.fn()}
+				slotProps={helperTextSlotProps}
+			/>,
+		],
+	];
+	it.each(withHelperText)(
+		"[ISSUE-3474-ITEM-17] makes the helper text of a %s the live region, not the field group",
+		(_name, element) => {
+			render(<Wrap>{element}</Wrap>);
+			const group = screen.getByRole("group");
+			const helperText = screen.getByText("Pick a weekday");
+			expect(group).not.toHaveAttribute("aria-live");
+			expect(helperText).toHaveAttribute("aria-live", "polite");
+			// still the field's description
+			expect(group).toHaveAccessibleDescription("Pick a weekday");
+		},
+	);
+
+	it("[ISSUE-3474-ITEM-17] keeps an aria-live the caller set on the group or the helper text", () => {
+		render(
+			<Wrap>
+				<LocalizedKeyboardDatePicker
+					label="Due"
+					value={moment(STORED)}
+					onChange={vi.fn()}
+					slotProps={{
+						textField: {
+							helperText: "Pick a weekday",
+							slotProps: {
+								input: { "aria-live": "assertive" },
+								formHelperText: { "aria-live": "off" },
+							},
+						},
+					}}
+				/>
+			</Wrap>,
+		);
+		expect(screen.getByRole("group")).toHaveAttribute("aria-live", "assertive");
+		expect(screen.getByText("Pick a weekday")).toHaveAttribute(
+			"aria-live",
+			"off",
+		);
+	});
 });
 
 const PICKERS = [
@@ -212,8 +446,6 @@ const PICKERS = [
 	["LocalizedDatePicker", LocalizedDatePicker],
 	["LocalizedDateTimePicker", LocalizedDateTimePicker],
 ] as const;
-
-const STORED = "2026-08-01T10:00";
 
 /** What the whole field reads, sections joined with "|" */
 const fieldText = () =>
@@ -240,6 +472,71 @@ const outside = () => screen.getByRole("button", { name: "outside" });
 const openButton = () => screen.getByRole("button", { name: /choose date/i });
 
 describe.each(PICKERS)("%s wiring", (_name, Picker) => {
+	const ControlledWithError = (props: {
+		onError?: (error: unknown, value: unknown) => void;
+	}) => {
+		const [value, setValue] = useState<Moment | null>(() => moment(STORED));
+		return (
+			<Picker
+				label="Due"
+				value={value}
+				maxDate={moment(STORED).endOf("day")}
+				onChange={setValue}
+				onError={props.onError}
+			/>
+		);
+	};
+
+	it("[ISSUE-3474-ITEM-17] marks the sections invalid while the picker rejects what it shows", () => {
+		const onError = vi.fn();
+		render(
+			<Wrap>
+				<ControlledWithError onError={onError} />
+			</Wrap>,
+		);
+		expect(invalidSections()).not.toContain("true");
+
+		makeDraft();
+		expect(screen.getByRole("group")).toHaveAttribute("aria-invalid", "true");
+		for (const section of screen.getAllByRole("spinbutton")) {
+			expect(section).toHaveAttribute("aria-invalid", "true");
+		}
+		// the consumer's onError still gets MUI's arguments
+		expect(onError).toHaveBeenCalledTimes(1);
+		expect(onError.mock.calls[0][0]).toBe("maxDate");
+		expect(moment(onError.mock.calls[0][1] as Moment).format()).toBe(
+			moment(STORED).add(1, "day").format(),
+		);
+
+		act(() => {
+			fireEvent.keyDown(screen.getAllByRole("spinbutton")[1], {
+				key: "ArrowDown",
+			});
+		});
+		expect(screen.getByRole("group")).toHaveAttribute("aria-invalid", "false");
+		expect(invalidSections()).not.toContain("true");
+		expect(onError).toHaveBeenCalledTimes(2);
+		expect(onError.mock.calls[1][0]).toBeNull();
+	});
+
+	it("[ISSUE-3474-ITEM-17] calls the onError of the latest render", () => {
+		const first = vi.fn();
+		const second = vi.fn();
+		const { rerender } = render(
+			<Wrap>
+				<ControlledWithError onError={first} />
+			</Wrap>,
+		);
+		rerender(
+			<Wrap>
+				<ControlledWithError onError={second} />
+			</Wrap>,
+		);
+		makeDraft();
+		expect(first).not.toHaveBeenCalled();
+		expect(second).toHaveBeenCalledTimes(1);
+	});
+
 	const Controlled = (props: {
 		onChange?: (value: Moment | null) => void;
 		onError?: (error: unknown) => void;

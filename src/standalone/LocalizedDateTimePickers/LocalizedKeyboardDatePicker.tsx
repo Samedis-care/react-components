@@ -10,6 +10,8 @@ import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
 import usePickerDraft from "./usePickerDraft";
+import usePickerValidationError from "./usePickerValidationError";
+import withAccessibleError from "./withAccessibleError";
 import withRequiredSections from "./withRequiredSections";
 import withFieldBlur from "./withFieldBlur";
 
@@ -29,7 +31,11 @@ export interface LocalizedKeyboardDatePickerProps
 	 */
 	required?: TextFieldProps["required"];
 	/**
-	 * Set error flag for text field input
+	 * Forces the error state of the field: red outline and label, and
+	 * `aria-invalid` on the field group and on every section, so a screen reader
+	 * announces it while the user types. When set, also to `false`, it replaces
+	 * the picker's own validation state, which is used while it is undefined.
+	 * Takes precedence over `slotProps.textField.error` when set.
 	 */
 	error?: TextFieldProps["error"];
 	/**
@@ -85,6 +91,7 @@ const LocalizedKeyboardDatePicker = (
 		otherProps.onChange,
 		publishIntermediateValues,
 	);
+	const validation = usePickerValidationError(otherProps.onError);
 
 	const { settle } = draft;
 	const consumerOnOpen = otherProps.onOpen;
@@ -103,6 +110,7 @@ const LocalizedKeyboardDatePicker = (
 				value={draft.value}
 				onChange={draft.onChange}
 				onOpen={handleOpen}
+				onError={validation.onError}
 				slots={
 					otherProps.disabled && hideDisabledIcon
 						? slotOverrideHideIcon
@@ -115,26 +123,29 @@ const LocalizedKeyboardDatePicker = (
 							ownerState,
 							otherProps.slotProps?.textField,
 						);
-						const fieldProps = withRequiredSections({
-							...textFieldProps,
-							// only where the caller actually gave one, so a value passed
-							// through slotProps.textField is not overwritten with undefined
-							...(required === undefined ? {} : { required }),
-							...(error === undefined ? {} : { error }),
-							...(fullWidth === undefined ? {} : { fullWidth }),
-							// called once focus leaves the field, see withFieldBlur
-							onBlur: (event: React.FocusEvent<HTMLInputElement>) => {
-								draft.settle();
-								textFieldProps?.onBlur?.(event);
-								onBlur?.(event);
-							},
-							// disableClearable suppresses the clear button that our
-							// TextFieldWithHelp based fields render on touch devices. MUI's
-							// own PickersTextField has no such button and forwards the prop
-							// it does not know to the DOM, so it is only sent on to a text
-							// field that was actually swapped in for it.
-							...(otherProps.slots?.textField ? { disableClearable } : {}),
-						});
+						const fieldProps = withAccessibleError(
+							validation.hasValidationError,
+							withRequiredSections({
+								...textFieldProps,
+								// only where the caller actually gave one, so a value passed
+								// through slotProps.textField is not overwritten with undefined
+								...(required === undefined ? {} : { required }),
+								...(error === undefined ? {} : { error }),
+								...(fullWidth === undefined ? {} : { fullWidth }),
+								// called once focus leaves the field, see withFieldBlur
+								onBlur: (event: React.FocusEvent<HTMLInputElement>) => {
+									draft.settle();
+									textFieldProps?.onBlur?.(event);
+									onBlur?.(event);
+								},
+								// disableClearable suppresses the clear button that our
+								// TextFieldWithHelp based fields render on touch devices. MUI's
+								// own PickersTextField has no such button and forwards the prop
+								// it does not know to the DOM, so it is only sent on to a text
+								// field that was actually swapped in for it.
+								...(otherProps.slots?.textField ? { disableClearable } : {}),
+							}),
+						);
 						return withFieldBlur(ownerState, fieldProps);
 					},
 				}}
