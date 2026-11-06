@@ -46,7 +46,44 @@ export interface FlowEngineProps<M extends ModelUnknown, StageT extends string, 
     defaultStage: StageT;
     formProps: PageProps<M, CustomPropsT>;
     children: Record<StageT, React.ComponentType<FlowStageProps<M, StageT, CustomPropsT>>>;
+    /**
+     * The name of each stage for assistive technology, translated: the step title the user
+     * sees, e.g. `{ contact: "Step 2 of 4: Contact" }`.
+     *
+     * The stage is rendered in a container that is a `group` with this name. A stage change
+     * moves the focus to that container (see disableAutoFocus), so screen readers announce
+     * the name. A stage without a name gets a container without a role or name, and its
+     * stage change is not announced.
+     * @remarks Pass a module constant or a memoized object, so FlowEngine does not render
+     *          again for a new object with the same names.
+     * @default undefined (no stage has a name)
+     */
+    stageLabels?: Partial<Record<StageT, string>>;
+    /**
+     * Leaves the focus and the scroll position as they are after a stage change, for an app
+     * that moves the focus itself.
+     *
+     * Without it, after a stage change the new stage's container takes the focus (it shows
+     * no focus ring; the next Tab goes to the first control of the stage), and if the start
+     * of the new stage is scrolled out of view, it is scrolled to the top of its scroll area
+     * (the window, a dialog's content). Nothing changes when the new stage focused a control
+     * itself (`autoFocus`) or when the focus is on an element outside the FlowEngine, e.g. a
+     * stepper around it. The first stage after mount is never focused or scrolled, and
+     * neither is the shown stage when goToStage stays on it.
+     * @default false
+     */
+    disableAutoFocus?: boolean;
 }
-declare const FlowEngine: <M extends ModelUnknown, StageT extends string, CustomPropsT>(props: FlowEngineProps<M, StageT, CustomPropsT>) => React.JSX.Element;
+/**
+ * The FlowEngine props a theme can set (`components.CcFlowEngine.defaultProps`)
+ */
+export type FlowEngineThemeProps = Pick<FlowEngineProps<ModelUnknown, string, unknown>, "disableAutoFocus">;
+/**
+ * The theme slots of FlowEngine (`components.CcFlowEngine.styleOverrides`): `root` is the
+ * container of the stage (a flex column that grows, so a stage that fills its parent still
+ * does; no outline when it has the focus)
+ */
+export type FlowEngineClassKey = "root";
+declare const FlowEngine: <M extends ModelUnknown, StageT extends string, CustomPropsT>(inProps: FlowEngineProps<M, StageT, CustomPropsT>) => React.JSX.Element;
 declare const _default: typeof FlowEngine;
 export default _default;

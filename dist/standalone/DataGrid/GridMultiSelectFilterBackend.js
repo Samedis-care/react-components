@@ -1,7 +1,6 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { Grid, styled, useThemeProps } from "@mui/material";
-import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
 import BackendMultipleSelect from "../../backend-components/Selector/BackendMultipleSelect";
 import BackendMultiSelect from "../../backend-components/Selector/BackendMultiSelect";
@@ -40,15 +39,6 @@ const GridMultiSelectFilterBackend = (inProps) => {
     const selected = selectorProps.selected ?? EMPTY_STRING_ARRAY;
     const { classes } = useDataGridProps();
     const isActive = selected.length > 0;
-    const [, setActiveFilter] = useCustomFilterActiveContext();
-    useEffect(() => {
-        if (!isActive)
-            return;
-        setActiveFilter((prev) => prev + 1);
-        return () => {
-            setActiveFilter((prev) => prev - 1);
-        };
-    }, [setActiveFilter, isActive]);
     const selectorClasses = useMemo(() => ({
         autocomplete: isActive ? "Mui-active" : undefined,
     }), [isActive]);

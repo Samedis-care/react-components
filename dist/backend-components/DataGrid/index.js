@@ -6,6 +6,9 @@ import { useDialogContext } from "../../framework/DialogContextProvider";
 import { ErrorDialog, showConfirmDialog } from "../../non-standalone/Dialog";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { dotToObject, getValueByDot } from "../../utils/dotUtils";
+import deepAssign from "../../utils/deepAssign";
+import deepClone from "../../utils/deepClone";
+import isPlainObject from "../../utils/isPlainObject";
 export const useBackendDataGridAddNewButtons = (props) => {
     const { t } = useCCTranslations();
     const addNewButtons = useMemo(() => {
@@ -42,6 +45,18 @@ export const useBackendDataGridAddNewButtons = (props) => {
     }, [props.additionalNewButtons, props.onAddNew, t]);
     return addNewButtons;
 };
+/**
+ * The delete handler BackendDataGrid passes to DataGrid as onDelete: it asks for
+ * confirmation (customDeleteConfirm or the built-in dialog), deletes through the
+ * model, calls refreshGrid and onDeleteSettled, and reports a failure
+ * (customDeleteErrorHandler or the built-in error dialog).
+ * @param props The delete props of BackendDataGrid
+ * @param refreshGrid Called after the delete ran, failed or not, to reload the rows
+ * @returns The handler, or undefined without enableDelete. The handler resolves false
+ *          when the user cancels the confirmation: nothing was deleted, so the grid
+ *          keeps the selection. It resolves true once the delete ran, also when it
+ *          failed (a failed delete may have deleted some of the records).
+ */
 export const useBackendDataGridDeleteHandler = (props, refreshGrid) => {
     const { model, enableDelete, enableDeleteAll, customDeleteConfirm, customDeleteErrorHandler, onDeleteSettled, } = props;
     const { t } = useCCTranslations();
@@ -70,7 +85,7 @@ export const useBackendDataGridDeleteHandler = (props, refreshGrid) => {
             // user cancelled
             // eslint-disable-next-line no-console
             console.error(e);
-            return;
+            return false;
         }
         let error;
         try {
@@ -87,7 +102,7 @@ export const useBackendDataGridDeleteHandler = (props, refreshGrid) => {
         refreshGrid();
         onDeleteSettled?.(invert, ids, filter, error);
         if (!error)
-            return;
+            return true;
         if (customDeleteErrorHandler) {
             await customDeleteErrorHandler(error);
         }
@@ -98,6 +113,7 @@ export const useBackendDataGridDeleteHandler = (props, refreshGrid) => {
                     },
                 ] }));
         }
+        return true;
     }, [
         customDeleteConfirm,
         customDeleteErrorHandler,
@@ -182,6 +198,32 @@ export const renderDataGridRecordUsingModel = (model, refreshGrid) => (entry) =>
     ];
 })
     .flat());
+/**
+ * The record a row of renderDataGridRecordUsingModel was rendered from: the
+ * values of the model's fields before rendering, put together as the model's
+ * deserialization does
+ * @param model The model the row was rendered with
+ * @param row The row
+ */
+const dataGridRowToModelRecord = (model, row) => {
+    const record = {};
+    for (const key of Object.keys(model.fields)) {
+        const value = row[key + "_raw"];
+        deepAssign(record, dotToObject(key, isPlainObject(value) ? deepClone(value) : value));
+    }
+    return record;
+};
+/**
+ * DataGridProps.getRowLabel for a grid whose rows renderDataGridRecordUsingModel
+ * rendered, from a getRowLabel that takes the model's record
+ * (BackendDataGridProps.getRowLabel)
+ * @param model The model the rows are rendered with
+ * @param getRowLabel The row label from the model's record, or undefined for
+ *                    the grid's default
+ * @returns The grid's getRowLabel, undefined without getRowLabel
+ */
+export const useBackendDataGridRowLabel = (model, getRowLabel) => useMemo(() => getRowLabel &&
+    ((row) => getRowLabel(dataGridRowToModelRecord(model, row))), [model, getRowLabel]);
 const BackendDataGrid = (props, ref) => {
     const { model } = props;
     const [refreshToken, setRefreshToken] = useState("");
@@ -196,6 +238,7 @@ const BackendDataGrid = (props, ref) => {
     }, [model, refreshGrid]);
     const addNewButtons = useBackendDataGridAddNewButtons(props);
     const handleDelete = useBackendDataGridDeleteHandler(props, refreshGrid);
-    return (_jsx(DataGrid, { ...props, ref: ref, onAddNew: addNewButtons, onDelete: handleDelete, loadData: loadData, columns: useMemo(() => model.toDataGridColumnDefinition(), [model]), forceRefreshToken: `${props.forceRefreshToken || "undefined"}${refreshToken}`, exporters: props.disableExport ? undefined : model.connector.dataGridExporters }));
+    const getRowLabel = useBackendDataGridRowLabel(model, props.getRowLabel);
+    return (_jsx(DataGrid, { ...props, ref: ref, getRowLabel: getRowLabel, onAddNew: addNewButtons, onDelete: handleDelete, loadData: loadData, columns: useMemo(() => model.toDataGridColumnDefinition(), [model]), forceRefreshToken: `${props.forceRefreshToken || "undefined"}${refreshToken}`, exporters: props.disableExport ? undefined : model.connector.dataGridExporters }));
 };
 export default React.memo(React.forwardRef(BackendDataGrid));

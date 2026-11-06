@@ -1,6 +1,7 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { Checkbox as MuiCheckbox, styled, SvgIcon, useThemeProps, } from "@mui/material";
+import focusRing from "../../utils/internal/focusRing";
 const StyledCheckbox = styled(MuiCheckbox, {
     name: "CcCheckbox",
     slot: "root",
@@ -19,6 +20,8 @@ const StyledCheckbox = styled(MuiCheckbox, {
     "&.Mui-disabled > svg": {
         borderColor: theme.palette.action.disabled,
     },
+    // around the box, where MUI draws the theme's ring
+    "&.Mui-focusVisible > svg": focusRing(theme, 2),
 }));
 const _uncheckedIcon = (_jsx(SvgIcon, { viewBox: "-3.5 -4.5 24 24", children: _jsx("polyline", { id: "check", fill: "transparent", stroke: "transparent", strokeWidth: "3.5", points: "1 7 6 12 16.5 1.5" }) }));
 const _checkedIcon = (_jsx(SvgIcon, { viewBox: "-3.5 -4.5 24 24", children: _jsx("polyline", { id: "check", fill: "transparent", stroke: "currentColor", strokeWidth: "3.5", points: "1 7 6 12 16.5 1.5" }) }));

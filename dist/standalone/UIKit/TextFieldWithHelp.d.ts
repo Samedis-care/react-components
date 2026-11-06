@@ -6,11 +6,19 @@ export interface TextFieldWithHelpProps extends UIInputProps {
      */
     openInfo?: () => void;
     /**
-     * custom clear handler if clear button is pressed
+     * Replaces what the touch Clear button does: called without arguments
+     * when it is pressed. Without it, the button empties the text input, so
+     * `onChange` receives an event whose `target.value` is `""`.
+     *
+     * A `select` has no such default: it shows the Clear button only when
+     * this is set.
      */
     customHandleClear?: () => void;
     /**
-     * disable clear button on mobile devices
+     * Hides the Clear button. That button is only rendered on touch devices,
+     * while the field has a value and is not disabled; in a `select` only
+     * with `customHandleClear`.
+     * @default false
      */
     disableClearable?: boolean;
 }

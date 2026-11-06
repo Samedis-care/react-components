@@ -11,6 +11,6 @@ const SignaturePadCanvas = (props) => {
             return;
         pushDialog(_jsx(SignDialog, { signature: signature, ...dialogProps }));
     }, [pushDialog, disabled, signature, dialogProps]);
-    return (_jsx(SignPad, { openSignPad: showSignDialog, signature: signature, disabled: disabled, openInfo: openInfo }));
+    return (_jsx(SignPad, { openSignPad: showSignDialog, signature: signature, signerName: dialogProps.signerName, disabled: disabled, openInfo: openInfo }));
 };
 export default React.memo(SignaturePadCanvas);

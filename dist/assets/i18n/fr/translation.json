@@ -16,7 +16,12 @@
 			"info": "Plus d'informations",
 			"clear": "Effacer",
 			"multi-language-input": {
+				"language": "Langue",
+				"language-of": "Langue de {{label}}",
 				"toggle-languages": "Basculer les saisies de langue"
+			},
+			"number-input": {
+				"invalid": "Entrez un nombre, par exemple {{EXAMPLE}}"
 			}
 		},
 		"notifications": {
@@ -35,6 +40,7 @@
 					"any": "Tous"
 				},
 				"set-filter": {
+					"label": "Valeurs",
 					"search": "Chercher…",
 					"select-all": "Tout sélectionner",
 					"invert": "Afficher tout sauf…"
@@ -64,11 +70,14 @@
 				"grid-label": "Contenu du tableau",
 				"no-data": "La liste ne contient aucune donnée.",
 				"filter-combination": {
+					"label": "Combiner les conditions",
 					"and": "ET",
 					"or": "OU"
 				},
 				"no-data-reset-filters": "Effacer les filtres",
-				"no-data-filters": "Aucune donnée ne correspond à vos filtres."
+				"no-data-filters": "Aucune donnée ne correspond à vos filtres.",
+				"select-row": "Sélectionner {{ROW}}",
+				"select-row-fallback": "Sélectionner la ligne"
 			},
 			"header": {
 				"new": "Nouveau",
@@ -91,9 +100,13 @@
 				}
 			},
 			"settings": {
+				"search": "Rechercher des colonnes",
+				"no-match": "Aucune colonne correspondante",
 				"column": "Colonne",
 				"show": "Visible",
 				"pin": "Accrocher",
+				"pin-hidden": "Les colonnes masquées ne peuvent pas être épinglées",
+				"pin-forced": "Cette colonne est toujours épinglée",
 				"close": "Fermer"
 			},
 			"custom-filters": {
@@ -137,6 +150,9 @@
 					"no": "Non"
 				},
 				"remove-item": "Supprimer {{ITEM}}"
+			},
+			"multi-select-with-tags": {
+				"group-input-label": "Ajouter toutes les entrées d'un groupe"
 			}
 		},
 		"file-upload": {
@@ -164,8 +180,13 @@
 				"edit": "Éditer",
 				"primary": "Primaire",
 				"remove": "Supprimer l'image",
+				"add": "Ajouter une image",
+				"replace": "Remplacer l'image",
 				"prev-image": "Image précédente",
-				"next-image": "Image suivante"
+				"next-image": "Image suivante",
+				"open-full-screen": "Ouvrir {{NAME}} en plein écran",
+				"open-full-screen-unnamed": "Ouvrir l'image en plein écran",
+				"image-position": "Image {{INDEX}} sur {{TOTAL}}"
 			},
 			"upload-modern-dnd": "Glissez et déposez le fichier ici",
 			"upload-modern-btn": "Cliquez pour une boîte de dialogue de téléchargement",
@@ -183,6 +204,7 @@
 			"invalid": "Entrez le numéro de téléphone correct"
 		},
 		"signature-pad": {
+			"with-signer": "{{LABEL}} ({{NAME}})",
 			"dialog": {
 				"reset": "Effacer la signature",
 				"save-changes": "Enregistrer les changements",
@@ -198,7 +220,7 @@
 				"close": "Fermer",
 				"signature": "Signature"
 			},
-			"sign-here": "Signé numériquement ici"
+			"sign-here": "Signez ici numériquement"
 		},
 		"signal-portlet": {
 			"last-updated": "Dernière actualisation : {{AGE}}",
@@ -221,6 +243,7 @@
 			}
 		},
 		"language-switcher": {
+			"load-error": "La langue n'a pas pu être chargée. Vérifiez votre connexion Internet, rechargez la page et réessayez.",
 			"title": "Sélectionnez votre pays et votre langue",
 			"no-locales": "Aucun paramètre régional ne correspond à votre requête de recherche"
 		}
@@ -254,6 +277,10 @@
 					},
 					"files": {
 						"no-file": "Aucun dossier présent"
+					},
+					"string-array": {
+						"entry": "{{LABEL}} {{NUM}}",
+						"new-entry": "{{LABEL}} : nouvelle entrée"
 					}
 				},
 				"date-nullable": {
@@ -311,7 +338,10 @@
 		"selector": {
 			"loading": "Chargement…",
 			"loading-error": "Erreur lors de la récupération des données",
-			"unknown-entry": "Entrée inconnue"
+			"unknown-entry": "Entrée inconnue",
+			"selected-count": "Sélectionnés : {{COUNT}}",
+			"selection-load-error": "{{LABEL}} : échec du chargement.",
+			"selection-load-error-unlabelled": "Impossible de charger les entrées sélectionnées."
 		},
 		"crud": {
 			"import": {
@@ -323,13 +353,14 @@
 				"source_field": "Champ",
 				"source_field_type": "Types de données",
 				"destination_fields": "Champs de destination",
-				"conv_script": "Script de conversion (JavaScript)",
+				"conv_script": "{{FIELD}} : script de conversion (JavaScript)",
 				"queue": "En file d'attente : {{COUNT}}",
 				"success": "Succès : {{COUNT}}",
 				"failed": "Échec : {{COUNT}}",
 				"last_error": "Dernière erreur",
 				"errors": {
 					"file_select": "Fichier sélectionné non valide",
+					"file_read": "Impossible de lire {{FILE_NAME}}. Enregistrez le fichier en tant que classeur Excel (.xlsx) sans mot de passe, puis sélectionnez-le à nouveau.",
 					"update-key-not-uniq": "{{UPDATE_KEY}} n'est pas unique dans l'ensemble de données d'importation"
 				},
 				"validations": {
@@ -338,8 +369,13 @@
 					"currency_unsupported": "La devise ne peut pas encore être importée",
 					"date": "Le résultat doit être une date ou nul",
 					"boolean": "Le résultat doit être un booléen ou nul",
-					"fail": "Échec de la validation : {{REASON}}. Pour plus de détails, voir la console du navigateur.",
-					"unknown": "Inconnu"
+					"fail": "Échec de la validation : {{REASON}}. Pour plus de détails, voir la console du navigateur."
+				},
+				"script_status": {
+					"none": "{{FIELD}} : aucun script",
+					"pending": "{{FIELD}} : vérification du script",
+					"okay": "{{FIELD}} : le script est valide",
+					"error": "{{FIELD}} : le script n'est pas valide"
 				},
 				"validation_errors": "Erreurs de validation",
 				"conversion_errors": "Erreurs de conversion de données"

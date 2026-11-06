@@ -4,7 +4,7 @@ import TypeDate from "../../TypeDate";
 import ccI18n from "../../../../../i18n";
 import getCurrentLocale from "../../../../../utils/getCurrentLocale";
 import { formatDateOnly } from "../../../../../utils/dateOnlyUtils";
-import { DateInput, FormHelperTextCC } from "../../../../../standalone";
+import { DateInput } from "../../../../../standalone";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
 /**
  * Renders a non-nullable Date with Date Selector
@@ -25,23 +25,23 @@ class RendererDate extends TypeDate {
         if (visibility.editable) {
             if (visibility.grid)
                 throw new Error("Not supported");
-            return (_jsxs(_Fragment, { children: [_jsx(DateInput, { ...this.props, name: field, value: value, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (date) => {
-                            // The field can be emptied even though this type cannot hold null:
-                            // that is an invalid entry, so it surfaces as a validation error
-                            // and the model value stays.
-                            if (!date) {
-                                this.error = ccI18n.t("backend-integration.model.types.renderers.date.validation-error");
-                                setFieldTouched(field, touched, true);
-                                return;
-                            }
-                            this.error = "";
-                            handleChange(field, date);
-                        }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, autoFocus: autoFocus, onError: (error) => {
-                            this.error = error
-                                ? ccI18n.t("backend-integration.model.types.renderers.date.validation-error")
-                                : "";
-                            setFieldTouched(field, touched, true);
-                        }, fullWidth: true }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
+            return (_jsx(DateInput, { ...this.props, name: field, value: value, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (date) => {
+                    // The field can be emptied even though this type cannot hold null:
+                    // that is an invalid entry, so it surfaces as a validation error
+                    // and the model value stays.
+                    if (!date) {
+                        this.error = ccI18n.t("backend-integration.model.types.renderers.date.validation-error");
+                        setFieldTouched(field, touched, true);
+                        return;
+                    }
+                    this.error = "";
+                    handleChange(field, date);
+                }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, autoFocus: autoFocus, onError: (error) => {
+                    this.error = error
+                        ? ccI18n.t("backend-integration.model.types.renderers.date.validation-error")
+                        : "";
+                    setFieldTouched(field, touched, true);
+                }, helperText: errorMsg || warningMsg || undefined, fullWidth: true }));
         }
         return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, formatDateOnly(value, getCurrentLocale(ccI18n), ToDateLocaleStringOptions)] }));
     }

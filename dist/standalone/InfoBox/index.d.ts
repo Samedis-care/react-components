@@ -12,11 +12,21 @@ export interface InfoBoxProps {
      */
     heading: string;
     /**
-     * Is the info box expanded by default
+     * Initial expanded state, read once at mount: `true` shows the message,
+     * `false` shows only the header until the user opens it. Later changes
+     * are ignored. While `alwaysExpanded` is `true` the box is open whatever
+     * this says.
      */
     expanded: boolean;
     /**
-     * Is the InfoBox force expanded or force collapsed?
+     * `true` keeps the box open: the message is shown and the user cannot
+     * collapse it. `false` is the same as not set: the box starts as
+     * `expanded` says and the user opens and closes it, so a condition can be
+     * passed directly (`alwaysExpanded={isLocked}`). A change after mount
+     * takes effect: once it is no longer `true`, the box shows the state the
+     * user last toggled to (initially `expanded`), and the user can toggle it
+     * again.
+     * @default false
      */
     alwaysExpanded?: boolean;
     /**

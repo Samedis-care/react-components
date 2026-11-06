@@ -28,6 +28,28 @@ const AvatarInactive = styled(Avatar, {
     color: theme.palette.getContrastText(theme.palette.action.disabled),
     backgroundColor: theme.palette.action.disabled,
 }));
+const CountCapped = styled("span", {
+    name: "CcSignalPortletItem",
+    slot: "countCapped",
+})({
+    // "999+" in the avatar's font size is wider than the 40px avatar
+    fontSize: "0.7em",
+});
+const CountFull = styled("span", {
+    name: "CcSignalPortletItem",
+    slot: "countFull",
+})({
+    // visually hidden, as MUI's visuallyHidden
+    border: 0,
+    clipPath: "inset(50%)",
+    height: 1,
+    margin: -1,
+    overflow: "hidden",
+    padding: 0,
+    position: "absolute",
+    whiteSpace: "nowrap",
+    width: 1,
+});
 const ListText = styled(ListItemText, {
     name: "CcSignalPortletItem",
     slot: "listText",
@@ -40,6 +62,8 @@ const ListRootButton = styled(ListItemButton, {
     name: "CcSignalPortletItem",
     slot: "rootBtn",
 })({});
+/** The highest count shown as it is; higher counts show as "999+" */
+const MAX_COUNT = 999;
 const SignalPortletItem = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcSignalPortletItem" });
     const { count, link, text, textTypographyProps, className, classes } = props;
@@ -57,7 +81,7 @@ const SignalPortletItem = (inProps) => {
                 ? classes.itemColorActive
                 : classes.itemColorInactive
         : undefined;
-    const content = (_jsxs(_Fragment, { children: [_jsx(ListAvatar, { className: classes?.listAvatar, children: _jsx(AvatarComponent, { className: avatarClass, children: count == null ? _jsx(Loader, {}) : Math.min(count, 999).toString() }) }), _jsx(ListText, { slotProps: { primary: textTypographyProps }, children: text })] }));
+    const content = (_jsxs(_Fragment, { children: [_jsx(ListAvatar, { className: classes?.listAvatar, children: _jsx(AvatarComponent, { className: avatarClass, children: count == null ? (_jsx(Loader, {})) : count > MAX_COUNT ? (_jsxs(_Fragment, { children: [_jsx(CountCapped, { "aria-hidden": true, className: classes?.countCapped, children: `${MAX_COUNT}+` }), _jsx(CountFull, { className: classes?.countFull, children: count.toString() })] })) : (count.toString()) }) }), _jsx(ListText, { slotProps: { primary: textTypographyProps }, children: text })] }));
     return link ? (_jsx(ListRootButton, { onClick: handleClick, className: combineClassNames([className, classes?.rootBtn]), children: content })) : (_jsx(ListRoot, { className: combineClassNames([className, classes?.root]), children: content }));
 };
 export default React.memo(SignalPortletItem);

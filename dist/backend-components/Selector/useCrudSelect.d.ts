@@ -19,8 +19,13 @@ export interface UseCrudSelectParams<M extends ModelUnknown, DataT extends BaseS
     serialize: (data: DataT) => Promise<Partial<Record<string, unknown>>> | Partial<Record<string, unknown>>;
     /**
      * Callback for deserializing data after getting it from the backend connector
-     * @param data The data from the backend connector (index function)
+     * @param data The data from the backend connector (index function, or the record a
+     *   create returned)
      * @returns The selector data which can be used by the control
+     * @remarks If it fails for the record of a create, the row exists anyway: it is
+     *   listed as the entry that was created, with the row's `id` as `value` (so
+     *   `serialize` has to read a kept entry's row id from `value`), and the failure is
+     *   reported in `error` as a PartialApplyError failure with the action `read`.
      */
     deserialize: (data: Record<string, unknown>) => Promise<DataT> | DataT;
     /**
@@ -70,6 +75,13 @@ export interface UseCrudSelectParams<M extends ModelUnknown, DataT extends BaseS
      * Get ID of data
      */
     getIdOfData: NonNullable<BackendMultiSelectProps<M, DataT>["getIdOfData"]>;
+    /**
+     * Is the control disabled? A disabled control writes nothing: handleSelect ignores
+     * every change and addToSelection rejects, also when an end adornment or the caller's
+     * ref calls them
+     * @default false
+     */
+    disabled?: boolean;
 }
 export interface UseCrudSelectResult<M extends ModelUnknown, DataT extends BaseSelectorData> {
     /**
@@ -96,8 +108,15 @@ export interface UseCrudSelectResult<M extends ModelUnknown, DataT extends BaseS
      * Selection handler
      * @param ids The new selected entry ids
      * @param newSelected The new selected entries
+     * @remarks Ignores the change while the control is disabled
      */
     handleSelect: (ids: string[], newSelected: DataT[]) => Promise<void>;
+    /**
+     * Is the control disabled? An end adornment that picks or removes entries locks itself
+     * while it is: handleSelect ignores its changes meanwhile
+     * @see UseCrudSelectParams.disabled
+     */
+    disabled: boolean;
     /**
      * Conversion function for model data to selection data (handles special case when data comes from CRUD controller)
      * @param data The model data
@@ -108,6 +127,11 @@ export interface CrudSelectDispatch<DataT extends BaseSelectorData> {
     /**
      * Adds the entry to the list of selected records
      * @param entry The entry to insert
+     * @returns Resolves once the entry is selected. Rejects with the error of the create
+     *   if it failed. Rejects with a PartialApplyError whose failure has the action
+     *   `read` if `deserialize` failed after the create went through: the entry is
+     *   selected then, as it was passed in, with the row's `id` as `value`. Rejects without
+     *   a write if the control is disabled when the entry's turn comes.
      * @remarks Does not update existing record
      */
     addToSelection: (entry: DataT) => Promise<void>;

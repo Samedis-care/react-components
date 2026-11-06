@@ -12,7 +12,10 @@ const transformOrigin = {
     horizontal: "center",
 };
 const ColorInput = (props) => {
-    const { value, onChange } = props;
+    const { onChange } = props;
+    // null and undefined behave like "": the input stays controlled, and the
+    // picker gets a string (react-color throws on null)
+    const value = props.value ?? "";
     const [pickerAnchor, setPickerAnchor] = useState(null);
     const openColorPicker = (evt) => {
         if (props.disabled)

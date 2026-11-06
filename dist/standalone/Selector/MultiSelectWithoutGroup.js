@@ -80,9 +80,9 @@ const MultiSelectWithoutGroup = (inProps) => {
                 : entry),
         };
     }, [getId, loadDataOptions, selectedIds, switchValue]);
-    return (_jsxs(Typography, { component: "div", className: className, children: [_jsx(BaseSelector, { ...otherProps, onLoad: onLoad, selected: null, onSelect: multiSelectHandler, refreshToken: (refreshToken ?? "") +
+    return (_jsxs(Typography, { component: "div", className: className, children: [_jsx(BaseSelector, { ...otherProps, onLoad: onLoad, disabled: disabled, selected: null, onSelect: multiSelectHandler, refreshToken: (refreshToken ?? "") +
                     selectedIds.join(",") +
-                    (switchValue ?? false).toString(), variant: "standard", startAdornment: _jsx(SearchIcon, { color: "primary" }), freeSolo: true, displaySwitch: false, filterIds: combinedFilterIds }), _jsx(StyledInlineSwitch, { visible: !!props.displaySwitch, value: !!switchValue, onChange: props.setSwitchValue, label: props.switchLabel, className: classes?.switch, children: _jsx(_Fragment, { children: (sortCompareFn ? selected.sort(sortCompareFn) : selected).map((data, index) => {
+                    (switchValue ?? false).toString(), variant: "standard", startAdornment: _jsx(SearchIcon, { color: disabled ? "disabled" : "primary" }), freeSolo: true, displaySwitch: false, filterIds: combinedFilterIds }), _jsx(StyledInlineSwitch, { visible: !!props.displaySwitch, value: !!switchValue, onChange: props.setSwitchValue, label: props.switchLabel, disabled: disabled, className: classes?.switch, children: _jsx(_Fragment, { children: (sortCompareFn ? [...selected].sort(sortCompareFn) : selected).map((data, index) => {
                         return (_jsxs(Outlined, { className: classes?.outlined, children: [enableIcons && (_jsx(SmallListItemIcon, { children: data.icon })), _jsx("span", { children: data.label }), !disabled && (_jsx(SmallIconButton, { edge: "end", name: data.value, disabled: disabled, onClick: handleDelete, "aria-label": t("standalone.selector.multi-select.remove-item", { ITEM: data.label }), children: _jsx(RemoveIcon, {}) }))] }, index));
                     }) }) })] }));
 };

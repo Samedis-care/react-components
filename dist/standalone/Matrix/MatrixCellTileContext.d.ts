@@ -38,6 +38,8 @@ export interface MatrixCellTileProps {
      * Wraps every rendered entry, so each one can become a drag handle without
      * this component knowing anything about drag & drop. Not called for a
      * diagonal pair — those two halves are one box.
+     * @remarks The wrapper must not clip the node (no overflow: hidden): a
+     * clickable entry draws its focus ring just outside itself.
      */
     renderItem?: (item: MatrixTileItem, node: React.ReactNode) => React.ReactNode;
     /**

@@ -17,6 +17,12 @@ const Body = styled("div", { name: "CcFormPageLayout", slot: "body" })({
     flexGrow: 1,
     display: "flex",
     flexDirection: "column",
+    // Its own stacking context, so the footer, which floats over the body and comes
+    // after it, paints above all of the body's content and gets every click in its
+    // area: also content with a z-index of its own, such as outlined field labels,
+    // badges or the DataGrid's settings panel. Unlike a z-index on the footer, this
+    // leaves the footer below the busy overlay (`other`) and app-level layers.
+    isolation: "isolate",
 });
 const Footer = styled("div", { name: "CcFormPageLayout", slot: "footer" })({
     position: "absolute",

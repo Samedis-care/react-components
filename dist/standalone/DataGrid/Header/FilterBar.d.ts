@@ -14,11 +14,5 @@ export interface IDataGridFilterBarProps {
      */
     inDialog: boolean;
 }
-type CustomFilterActiveContextType = [
-    number,
-    Dispatch<React.SetStateAction<number>>
-];
-export declare const CustomFilterActiveContext: React.Context<CustomFilterActiveContextType | undefined>;
-export declare const useCustomFilterActiveContext: () => CustomFilterActiveContextType;
 declare const _default: React.MemoExoticComponent<() => React.JSX.Element>;
 export default _default;

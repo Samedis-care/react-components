@@ -118,10 +118,17 @@ export interface PageProps<M extends ModelUnknown, CustomPropsT> {
 export interface FormProps<M extends ModelUnknown, CustomPropsT> {
     /**
      * The data model this form follows
+     * @remarks Another model (another model id or other cache keys) starts the form over, like
+     *          another id. A model object created again for the same model id and cache keys
+     *          does not.
      */
     model: M;
     /**
      * The current data entry id
+     * @remarks null for a new record. Another id starts the form over, as when it mounts: the
+     *          page is mounted again, and the values, touched state, errors, warnings and custom
+     *          state come from the new record. A change from null to the id of the record the
+     *          form has just created keeps the form as it is.
      */
     id: string | null;
     /**
@@ -177,6 +184,10 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
     /**
      * Only submit mounted fields
      * @remarks Exempt fields using alwaysSubmitFields
+     * @remarks The controls built on useLazyCrudConnector follow it too: the queued writes of
+     *          one that is not mounted are neither saved nor counted as dirty until it mounts
+     *          again. In flow mode, the queue a submit staged before the control unmounted (a
+     *          stage that was left) is saved like the staged values, see useLazyCrudConnector.
      */
     onlySubmitMounted?: boolean;
     /**

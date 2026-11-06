@@ -13,7 +13,7 @@ class RendererBackendDataGridMultiSelect extends TypeIds {
         this.props = props;
     }
     render(params) {
-        const { visibility, field, handleChange, handleBlur, errorMsg, warningMsg, relationModel, value, } = params;
+        const { visibility, field, label, handleChange, handleBlur, errorMsg, warningMsg, relationModel, value, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -24,7 +24,9 @@ class RendererBackendDataGridMultiSelect extends TypeIds {
                 throw new Error("Not supported");
             if (!relationModel)
                 throw new Error("Type BackendDataGridMultiSelect requires relation model: " + field);
-            return (_jsxs(FormControl, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, onBlur: handleBlur, name: field, style: { height: "100%" }, children: [_jsx(BackendDataGridMultiSelect, { selected: value, model: relationModel, onChange: (value) => handleChange(field, value), readOnly: visibility.readOnly, ...this.props }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
+            return (_jsxs(FormControl, { required: visibility.required, fullWidth: true, error: !!errorMsg, onBlur: handleBlur, "data-name": field, style: { height: "100%" }, children: [_jsx(BackendDataGridMultiSelect, { label: label, selected: value, 
+                        // the field's relation model is the M this renderer was created for
+                        model: relationModel, onChange: (value) => handleChange(field, value), readOnly: visibility.readOnly, ...this.props }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
         }
         throw new Error("view-only rendering not supported");
     }

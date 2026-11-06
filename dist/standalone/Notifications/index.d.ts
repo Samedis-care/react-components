@@ -59,8 +59,13 @@ export interface NotificationsProps {
      */
     loadLatest: () => void;
     /**
-     * Refresh interval (delay between loadLatest calls) in ms
-     * @default 1 minute
+     * Delay between `loadLatest` calls in ms: a positive number up to 2^31 - 1
+     * (about 24.8 days, the longest timer delay browsers support). `0`
+     * switches polling off, and so does any longer delay, `Infinity` included;
+     * `loadLatest` is then still called on mount and on window focus. A
+     * negative number or `NaN` uses the default. A change restarts the
+     * interval, without an immediate call.
+     * @default 60000
      */
     refreshInterval?: number;
     /**

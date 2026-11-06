@@ -16,7 +16,12 @@
 			"info": "Meer informatie",
 			"clear": "Wissen",
 			"multi-language-input": {
+				"language": "Taal",
+				"language-of": "Taal van {{label}}",
 				"toggle-languages": "Talinvoer wisselen"
+			},
+			"number-input": {
+				"invalid": "Voer een getal in, bijvoorbeeld {{EXAMPLE}}"
 			}
 		},
 		"notifications": {
@@ -35,6 +40,7 @@
 					"any": "Alle"
 				},
 				"set-filter": {
+					"label": "Waarden",
 					"search": "Zoeken…",
 					"select-all": "Selecteer alles",
 					"invert": "Toon alles behalve…"
@@ -64,11 +70,14 @@
 				"grid-label": "Tabelinhoud",
 				"no-data": "De lijst bevat geen data.",
 				"filter-combination": {
+					"label": "Voorwaarden combineren",
 					"or": "OF",
 					"and": "EN"
 				},
 				"no-data-filters": "Er zijn geen gegevens die aan uw filters voldoen.",
-				"no-data-reset-filters": "Filters wissen"
+				"no-data-reset-filters": "Filters wissen",
+				"select-row": "{{ROW}} selecteren",
+				"select-row-fallback": "Rij selecteren"
 			},
 			"header": {
 				"new": "Nieuw",
@@ -91,9 +100,13 @@
 				}
 			},
 			"settings": {
+				"search": "Kolommen zoeken",
+				"no-match": "Geen overeenkomende kolom",
 				"column": "Kolom",
 				"show": "Zichtbaar",
 				"pin": "Pin",
+				"pin-hidden": "Verborgen kolommen kunnen niet worden vastgezet",
+				"pin-forced": "Deze kolom is altijd vastgezet",
 				"close": "Sluiten"
 			},
 			"custom-filters": {
@@ -137,6 +150,9 @@
 					"no": "Nee"
 				},
 				"remove-item": "{{ITEM}} verwijderen"
+			},
+			"multi-select-with-tags": {
+				"group-input-label": "Alle items van een groep toevoegen"
 			}
 		},
 		"file-upload": {
@@ -164,8 +180,13 @@
 				"edit": "Bewerken",
 				"primary": "Primair",
 				"remove": "Afbeelding verwijderen",
+				"add": "Afbeelding toevoegen",
+				"replace": "Afbeelding vervangen",
 				"prev-image": "Vorige afbeelding",
-				"next-image": "Volgende afbeelding"
+				"next-image": "Volgende afbeelding",
+				"open-full-screen": "{{NAME}} op volledig scherm openen",
+				"open-full-screen-unnamed": "Afbeelding op volledig scherm openen",
+				"image-position": "Afbeelding {{INDEX}} van {{TOTAL}}"
 			},
 			"upload-modern-dnd": "Sleep het bestand hierheen",
 			"upload-modern-btn": "Klik voor een uploaddialoogvenster",
@@ -183,6 +204,7 @@
 			"invalid": "Voer het juiste telefoonnummer in"
 		},
 		"signature-pad": {
+			"with-signer": "{{LABEL}} ({{NAME}})",
 			"dialog": {
 				"reset": "Handtekening verwijderen",
 				"save-changes": "Wijzigingen opslaan",
@@ -198,7 +220,7 @@
 				"close": "Sluiten",
 				"signature": "Handtekening"
 			},
-			"sign-here": "Digitaal ondertekend hier"
+			"sign-here": "Teken hier digitaal"
 		},
 		"signal-portlet": {
 			"last-updated": "Laatste vernieuwing: {{AGE}}",
@@ -221,6 +243,7 @@
 			}
 		},
 		"language-switcher": {
+			"load-error": "De taal kon niet worden geladen. Controleer uw internetverbinding, laad de pagina opnieuw en probeer het nog eens.",
 			"title": "Selecteer uw land en taal",
 			"no-locales": "Geen enkele locatie komt overeen met uw zoekopdracht"
 		}
@@ -254,6 +277,10 @@
 					},
 					"files": {
 						"no-file": "Geen bestanden aanwezig"
+					},
+					"string-array": {
+						"entry": "{{LABEL}} {{NUM}}",
+						"new-entry": "{{LABEL}}: nieuwe invoer"
 					}
 				},
 				"date-nullable": {
@@ -311,7 +338,10 @@
 		"selector": {
 			"loading": "Laadt…",
 			"loading-error": "Fout bij het ophalen van gegevens",
-			"unknown-entry": "Onbekend item"
+			"unknown-entry": "Onbekend item",
+			"selected-count": "Geselecteerd: {{COUNT}}",
+			"selection-load-error": "{{LABEL}}: laden mislukt.",
+			"selection-load-error-unlabelled": "De geselecteerde items konden niet worden geladen."
 		},
 		"crud": {
 			"import": {
@@ -323,13 +353,14 @@
 				"source_field": "Veld",
 				"source_field_type": "Gegevenstypen",
 				"destination_fields": "Bestemmingsvelden",
-				"conv_script": "Conversiescript (JavaScript)",
+				"conv_script": "{{FIELD}}: conversiescript (JavaScript)",
 				"queue": "In wachtrij: {{COUNT}}",
 				"success": "Succes: {{COUNT}}",
 				"failed": "Mislukt: {{COUNT}}",
 				"last_error": "Laatste error",
 				"errors": {
 					"file_select": "Ongeldig bestand geselecteerd",
+					"file_read": "{{FILE_NAME}} kan niet worden gelezen. Sla het bestand op als Excel-werkmap (.xlsx) zonder wachtwoord en kies het opnieuw.",
 					"update-key-not-uniq": "{{UPDATE_KEY}} is niet uniek in importdataset"
 				},
 				"validations": {
@@ -338,8 +369,13 @@
 					"currency_unsupported": "Valuta kan nog niet worden geïmporteerd",
 					"date": "Het resultaat moet een Datum of null zijn",
 					"boolean": "Het resultaat moet een boolean of null zijn",
-					"fail": "Validatie mislukt: {{REASON}}. Zie browserconsole voor details.",
-					"unknown": "Onbekend"
+					"fail": "Validatie mislukt: {{REASON}}. Zie browserconsole voor details."
+				},
+				"script_status": {
+					"none": "{{FIELD}}: geen script",
+					"pending": "{{FIELD}}: script wordt gecontroleerd",
+					"okay": "{{FIELD}}: script is geldig",
+					"error": "{{FIELD}}: script is ongeldig"
 				},
 				"conversion_errors": "Fouten bij gegevensconversie",
 				"validation_errors": "Validatiefouten"

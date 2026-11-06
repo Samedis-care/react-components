@@ -180,7 +180,8 @@ export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends bool
      */
     variant?: "outlined" | "standard";
     /**
-     * The label of the selector
+     * The label of the selector, shown above the field. It names the combobox and
+     * its list, and a click on it focuses the input.
      */
     label?: string;
     /**
@@ -209,7 +210,8 @@ export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends bool
      */
     autoFocus?: boolean;
     /**
-     * String used for the Autocomplete component
+     * The id of the input. The label gets `<id>-label` and the list `<id>-listbox`.
+     * Generated when omitted or empty.
      */
     autocompleteId?: string;
     /**
@@ -350,6 +352,12 @@ export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends bool
     defaultQuery?: string;
     /**
      * Enable freeSolo. Allows user to enter any content. Selected option will be { value: USER_INPUT, label: USER_INPUT }
+     * @remarks Leaving the field commits what it holds: the option highlighted in the
+     * open list (the selection, until the arrow keys move on; a mouse hover does not
+     * count), else the typed text. Typed text equal to the label of a listed, enabled
+     * option commits that option. A single select left with the selection's own text,
+     * with the selection highlighted, or with "Create" highlighted keeps the selection
+     * and calls no onSelect.
      */
     freeSolo?: boolean;
     /**

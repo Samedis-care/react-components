@@ -6,6 +6,8 @@ export interface ImagePreviewDialogProps {
     src: string;
     /**
      * Alt text for the image
+     * @remarks Also the dialog's accessible name (the dialog is labelled by the image), so a
+     *          screen reader announces it when the dialog opens. Should not be empty.
      */
     alt: string;
     /**

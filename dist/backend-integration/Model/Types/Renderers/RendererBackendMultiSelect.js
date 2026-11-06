@@ -24,7 +24,7 @@ class RendererBackendMultiSelect extends TypeIds {
         };
     }
     render(params) {
-        const { visibility, field, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, relationData, relationModel, value, } = params;
+        const { visibility, field, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, id, messageId, relationData, relationModel, value, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -38,7 +38,7 @@ class RendererBackendMultiSelect extends TypeIds {
             const typedRelationModel = relationModel;
             return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, onBlur: handleBlur, name: field, children: [_jsx(FormBackendMultiSelect, { selected: value, label: label, onSelect: (value) => handleChange(field, value), disabled: visibility.readOnly, required: visibility.required, model: typedRelationModel, 
                         // the form's relations hold deserialized records of the relation model
-                        initialData: relationData, ...this.props, dirty: dirty, autoFocus: autoFocus }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
+                        initialData: relationData, ...this.props, dirty: dirty, autoFocus: autoFocus, autocompleteId: id, error: !!errorMsg, warning: !!warningMsg }), _jsx(FormHelperText, { id: messageId, children: errorMsg || warningMsg })] }));
         }
         throw new Error("view-only rendering not supported");
     }

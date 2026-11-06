@@ -2,6 +2,7 @@ import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useEffect, useMemo } from "react";
 import { isFieldImportable } from "./index";
 import GenericDataPreview from "./GenericDataPreview";
+import normalizeImportValue from "./normalizeImportValue";
 import deepAssign from "../../../utils/deepAssign";
 import { dotToObject } from "../../../utils/dotUtils";
 import isObjectEmpty from "../../../utils/isObjectEmpty";
@@ -18,8 +19,8 @@ export const useImportStep3Logic = (props) => {
             Object.entries(model.fields)
                 .filter(([name, field]) => isFieldImportable(name, field) &&
                 state.conversionScripts[name]?.scriptFn(record))
-                .forEach(([name]) => {
-                deepAssign(modelRecord, dotToObject(name, state.conversionScripts[name].scriptFn(record) ?? null));
+                .forEach(([name, field]) => {
+                deepAssign(modelRecord, dotToObject(name, normalizeImportValue(field, state.conversionScripts[name].scriptFn(record) ?? null)));
             });
             // noinspection JSUnusedAssignment
             isModelRecordComplete = true;

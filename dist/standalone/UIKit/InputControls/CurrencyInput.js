@@ -3,8 +3,10 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import TextFieldWithHelp from "../TextFieldWithHelp";
 import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
 import useCurrentLocale from "../../../utils/useCurrentLocale";
+import useCCTranslations from "../../../utils/useCCTranslations";
 const CurrencyInput = (props) => {
     const { value, onChange, onBlur, currency, ...muiProps } = props;
+    const { t } = useCCTranslations();
     const locale = useCurrentLocale();
     const numberFormatOptions = useMemo(() => ({
         style: "currency",
@@ -13,9 +15,14 @@ const CurrencyInput = (props) => {
     const formatNumber = useCallback((value) => value != null ? value.toLocaleString(locale, numberFormatOptions) : "", [locale, numberFormatOptions]);
     const valueFormatted = formatNumber(value);
     const [valueInternal, setValueInternal] = useState(valueFormatted);
-    useEffect(() => setValueInternal(formatNumber(value)), [formatNumber, value]);
+    // set by a blur whose text does not parse, and shown as the helper text
+    const [parseError, setParseError] = useState(false);
+    // a new value, currency or language replaces the text, and with it its error
+    useEffect(() => {
+        setValueInternal(formatNumber(value));
+        setParseError(false);
+    }, [formatNumber, value]);
     const [lastChangeEvent, setLastChangeEvent] = useState(null);
-    const [error, setError] = useState(false);
     // on change handling
     const handleChange = useCallback((event) => {
         if (!onChange)
@@ -33,10 +40,10 @@ const CurrencyInput = (props) => {
         if (lastChangeEvent) {
             const value = parseLocalizedNumber(valueInternal, numberFormatOptions);
             if (value != null && isNaN(value)) {
-                setError(true);
+                setParseError(true);
             }
             else if (onChange) {
-                setError(false);
+                setParseError(false);
                 const formatted = formatNumber(value);
                 // we parse here so decimal points are limited and view always matches data
                 onChange(lastChangeEvent, parseLocalizedNumber(formatted, numberFormatOptions));
@@ -52,7 +59,11 @@ const CurrencyInput = (props) => {
         valueInternal,
     ]);
     // component rendering
-    return (_jsx(TextFieldWithHelp, { ...muiProps, value: lastChangeEvent ? valueInternal : valueFormatted, onChange: handleChange, onBlur: handleBlur, error: error || muiProps.error, slotProps: {
+    return (_jsx(TextFieldWithHelp, { ...muiProps, value: lastChangeEvent ? valueInternal : valueFormatted, onChange: handleChange, onBlur: handleBlur, error: parseError || muiProps.error, helperText: parseError
+            ? t("standalone.uikit.number-input.invalid", {
+                EXAMPLE: formatNumber(1234.56),
+            })
+            : muiProps.helperText, slotProps: {
             ...muiProps.slotProps,
             htmlInput: {
                 ...muiProps.slotProps?.htmlInput,

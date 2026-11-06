@@ -40,7 +40,8 @@ const DataGridSettings = (props) => {
             },
         }));
     }, [setColumnState, setState]);
-    return (_jsx(DataGridContentOverlayCollapse, { className: classes?.contentOverlayCollapse, in: state.showSettings, children: _jsx(Dialog, { columns: props.columns.filter((col) => !state.settingsSearch ||
-                col.headerName.toLowerCase().includes(state.settingsSearch)), closeGridSettings: closeGridSettings, toggleColumnLock: toggleColumnLock, toggleColumnVisibility: toggleColumnVisibility, columnPinned: state.columnPinned, columnHidden: state.columnHidden }) }));
+    // the column search ignores case and the spaces around the query
+    const columnQuery = state.settingsSearch.trim().toLowerCase();
+    return (_jsx(DataGridContentOverlayCollapse, { className: classes?.contentOverlayCollapse, in: state.showSettings, children: _jsx(Dialog, { columns: props.columns.filter((col) => !columnQuery || col.headerName.toLowerCase().includes(columnQuery)), closeGridSettings: closeGridSettings, toggleColumnLock: toggleColumnLock, toggleColumnVisibility: toggleColumnVisibility, columnPinned: state.columnPinned, columnHidden: state.columnHidden }) }));
 };
 export default React.memo(DataGridSettings);

@@ -20,28 +20,19 @@ const BottomLeftVariableSizeGrid = styled(VGrid, {
     name: "CcMultiGrid",
     slot: "bottomLeftGrid",
 })({
-    // in webkit based browsers:
-    // hide the vertical scrollbar, sadly also removes the default styles
-    // from the horizontal scrollbar
-    "&::-webkit-scrollbar": {
-        width: 0,
-        height: "auto",
-    },
-    "&::-webkit-scrollbar-track": {
-        background: "white",
-    },
-    "&::-webkit-scrollbar-thumb": {
-        background: "hsl(0, 0%, 60%)",
-    },
-    // in firefox just hide it completely
-    // we can do that because the scrollbar
-    // doesn't add to the content width in firefox
+    // scrolls with the body pane but shows no scrollbars of its own: its height
+    // leaves out the body's horizontal scrollbar instead
     scrollbarWidth: "none",
+    // Safari before 18.2 has no scrollbar-width
+    "&::-webkit-scrollbar": {
+        display: "none",
+    },
 });
 const BottomRightVariableSizeGrid = styled(VGrid, {
     name: "CcMultiGrid",
     slot: "bottomRightGrid",
 })(({ theme }) => scrollPaneFocusRing(theme));
+const NO_SCROLLBARS = { vertical: 0, horizontal: 0 };
 const SCROLL_DETECTION_DELAY_MS = 100; // ms to consider scroll events caused by JS code
 const MultiGrid = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiGrid" });
@@ -131,7 +122,7 @@ const MultiGrid = (inProps) => {
             const leftGrid = bottomLeftGrid.current;
             if (!rightGrid || !leftGrid)
                 return;
-            const scrollStep = height - fixedHeight;
+            const scrollStep = rightGrid.element?.clientHeight ?? 0;
             const scrollCurrent = rightGrid.element?.scrollTop ?? 0;
             if (evt.key === "PageDown") {
                 rightGrid.element?.scrollTo({
@@ -146,7 +137,7 @@ const MultiGrid = (inProps) => {
         };
         document.addEventListener("keydown", handleKeyPress);
         return () => document.removeEventListener("keydown", handleKeyPress);
-    }, [globalScrollListener, fixedHeight, height]);
+    }, [globalScrollListener]);
     // restore horizontal scroll when bottom grid is enabled again
     const bottomRightRendered = rowCount - fixedRowCount > 0;
     const [triggerScrollSync, setTriggerScrollSync] = useState(false);
@@ -165,6 +156,42 @@ const MultiGrid = (inProps) => {
         bottomGrid.scrollLeft = topGrid.scrollLeft;
         setTriggerScrollSync(false);
     }, [triggerScrollSync]);
+    // The header pane and the pinned column show no scrollbars, so they leave
+    // out the room the body pane's scrollbars take (none with overlay
+    // scrollbars, or while the body has nothing to scroll). All three then have
+    // the same viewport and scroll range, and the header and the pinned column
+    // follow the body to its last position.
+    const [bodyPane, setBodyPane] = useState(null);
+    const handleBottomRightGridRef = useCallback((grid) => {
+        bottomRightGrid.current = grid;
+        // react-window's element is null in its first render. The element of
+        // an unmounted pane stays here until the next pane's arrives.
+        if (grid?.element)
+            setBodyPane(grid.element);
+    }, []);
+    const [bodyScrollbars, setBodyScrollbars] = useState(NO_SCROLLBARS);
+    useLayoutEffect(() => {
+        if (!bottomRightRendered || !bodyPane?.isConnected) {
+            setBodyScrollbars(NO_SCROLLBARS);
+            return;
+        }
+        const measure = () => {
+            const vertical = bodyPane.offsetWidth - bodyPane.clientWidth;
+            const horizontal = bodyPane.offsetHeight - bodyPane.clientHeight;
+            setBodyScrollbars((prev) => prev.vertical === vertical && prev.horizontal === horizontal
+                ? prev
+                : { vertical, horizontal });
+        };
+        measure();
+        // a scrollbar that comes or goes resizes the pane's content box, which
+        // the observer reports like any other resize
+        const Observer = bodyPane.ownerDocument.defaultView?.ResizeObserver;
+        if (!Observer)
+            return;
+        const observer = new Observer(measure);
+        observer.observe(bodyPane);
+        return () => observer.disconnect();
+    }, [bodyPane, bottomRightRendered]);
     return (_jsxs(Root, { style: { width, height }, children: [_jsx(VGrid, { gridRef: topLeftGrid, columnWidth: (index) => columnWidth(index), rowHeight: (index) => rowHeight(index), columnCount: fixedColumnCount, rowCount: fixedRowCount, style: {
                     ...styleTopLeftGrid,
                     position: "absolute",
@@ -180,7 +207,7 @@ const MultiGrid = (inProps) => {
                     position: "absolute",
                     top: 0,
                     left: fixedWidth,
-                    width: Math.max(width - fixedWidth, 0),
+                    width: Math.max(width - fixedWidth - bodyScrollbars.vertical, 0),
                     height: fixedHeight,
                 }, cellComponent: CellRendererTopRight, cellProps: {} }), _jsx(BottomLeftVariableSizeGrid, { gridRef: bottomLeftGrid, columnWidth: (index) => columnWidth(index), rowHeight: (index) => rowHeight(index + fixedRowCount), columnCount: fixedColumnCount, rowCount: rowCount - fixedRowCount, onScroll: handleScrollPinned, style: {
                     ...styleBottomLeftGrid,
@@ -189,14 +216,14 @@ const MultiGrid = (inProps) => {
                     top: fixedHeight,
                     left: 0,
                     width: Math.min(fixedWidth, width),
-                    height: height - fixedHeight,
-                }, cellComponent: CellRendererBottomLeft, cellProps: {} }), bottomRightRendered ? (_jsx(BottomRightVariableSizeGrid, { gridRef: bottomRightGrid, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index + fixedRowCount), columnCount: columnCount - fixedColumnCount, rowCount: rowCount - fixedRowCount, onScroll: handleScroll, 
+                    height: Math.max(height - fixedHeight - bodyScrollbars.horizontal, 0),
+                }, cellComponent: CellRendererBottomLeft, cellProps: {} }), bottomRightRendered ? (_jsx(BottomRightVariableSizeGrid, { gridRef: handleBottomRightGridRef, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index + fixedRowCount), columnCount: columnCount - fixedColumnCount, rowCount: rowCount - fixedRowCount, onScroll: handleScroll, 
                 // the pane that actually scrolls in both directions: making it a
                 // tab stop is what gives the grid a keyboard scrolling path, and
                 // its onScroll keeps the two pinned panes in sync
                 tabIndex: 0, "aria-label": label, style: {
                     ...styleBottomRightGrid,
-                    overflowX: "scroll",
+                    overflowX: "auto",
                     overflowY: "auto",
                     position: "absolute",
                     top: fixedHeight,

@@ -16,7 +16,12 @@
 			"info": "Weitere Informationen",
 			"clear": "Löschen",
 			"multi-language-input": {
+				"language": "Sprache",
+				"language-of": "Sprache für {{label}}",
 				"toggle-languages": "Spracheingaben umschalten"
+			},
+			"number-input": {
+				"invalid": "Gib eine Zahl ein, z. B. {{EXAMPLE}}"
 			}
 		},
 		"notifications": {
@@ -35,6 +40,7 @@
 					"any": "Alle"
 				},
 				"set-filter": {
+					"label": "Werte",
 					"search": "Suche…",
 					"select-all": "Alle auswählen",
 					"invert": "Alle anzeigen außer…"
@@ -64,11 +70,14 @@
 				"grid-label": "Tabelleninhalt",
 				"no-data": "Die Liste enthält keine Daten.",
 				"filter-combination": {
+					"label": "Bedingungen verknüpfen",
 					"and": "UND",
 					"or": "ODER"
 				},
 				"no-data-reset-filters": "Filter löschen",
-				"no-data-filters": "Mit den eingestellten Filtern wurden keine Daten gefunden."
+				"no-data-filters": "Mit den eingestellten Filtern wurden keine Daten gefunden.",
+				"select-row": "{{ROW}} auswählen",
+				"select-row-fallback": "Zeile auswählen"
 			},
 			"header": {
 				"new": "Neu",
@@ -91,9 +100,13 @@
 				}
 			},
 			"settings": {
+				"search": "Spalten durchsuchen",
+				"no-match": "Keine passende Spalte",
 				"column": "Spalte",
 				"show": "Sichtbar",
 				"pin": "Anheften",
+				"pin-hidden": "Ausgeblendete Spalten können nicht angeheftet werden",
+				"pin-forced": "Diese Spalte ist immer angeheftet",
 				"close": "Schließen"
 			},
 			"custom-filters": {
@@ -137,6 +150,9 @@
 					"no": "Nein"
 				},
 				"remove-item": "{{ITEM}} entfernen"
+			},
+			"multi-select-with-tags": {
+				"group-input-label": "Alle Einträge einer Gruppe hinzufügen"
 			}
 		},
 		"file-upload": {
@@ -164,8 +180,13 @@
 				"edit": "Bearbeiten",
 				"primary": "Primär",
 				"remove": "Bild entfernen",
+				"add": "Bild hinzufügen",
+				"replace": "Bild ersetzen",
 				"prev-image": "Vorheriges Bild",
-				"next-image": "Nächstes Bild"
+				"next-image": "Nächstes Bild",
+				"open-full-screen": "{{NAME}} im Vollbild öffnen",
+				"open-full-screen-unnamed": "Bild im Vollbild öffnen",
+				"image-position": "Bild {{INDEX}} von {{TOTAL}}"
 			},
 			"upload-modern-dnd": "Datei hierher ziehen und ablegen",
 			"upload-modern-btn": "Klicke hier, um einen Upload-Dialog aufzurufen",
@@ -183,6 +204,7 @@
 			"invalid": "Korrekte Rufnummer eingeben"
 		},
 		"signature-pad": {
+			"with-signer": "{{LABEL}} ({{NAME}})",
 			"dialog": {
 				"reset": "Signatur zurücksetzen",
 				"save-changes": "Änderungen speichern",
@@ -221,6 +243,7 @@
 			}
 		},
 		"language-switcher": {
+			"load-error": "Die Sprache konnte nicht geladen werden. Prüfe deine Internetverbindung, lade die Seite neu und versuche es noch einmal.",
 			"title": "Wähle das Land und die Sprache",
 			"no-locales": "Keine Gebietsschemas entsprechen Ihrer Suchanfrage"
 		}
@@ -254,6 +277,10 @@
 					},
 					"files": {
 						"no-file": "Keine Dateien vorhanden"
+					},
+					"string-array": {
+						"entry": "{{LABEL}} {{NUM}}",
+						"new-entry": "{{LABEL}}: neuer Eintrag"
 					}
 				},
 				"date-nullable": {
@@ -311,7 +338,10 @@
 		"selector": {
 			"loading": "Lädt…",
 			"loading-error": "Fehler beim Abrufen der Daten",
-			"unknown-entry": "Unbekannter Eintrag"
+			"unknown-entry": "Unbekannter Eintrag",
+			"selected-count": "Ausgewählt: {{COUNT}}",
+			"selection-load-error": "{{LABEL}}: Laden fehlgeschlagen.",
+			"selection-load-error-unlabelled": "Die ausgewählten Einträge konnten nicht geladen werden."
 		},
 		"crud": {
 			"import": {
@@ -323,13 +353,14 @@
 				"source_field": "Feld",
 				"source_field_type": "Datentypen",
 				"destination_fields": "Zielfelder",
-				"conv_script": "Konvertierungsskript (JavaScript)",
+				"conv_script": "{{FIELD}}: Konvertierungsskript (JavaScript)",
 				"queue": "In Warteschlange: {{COUNT}}",
 				"success": "Erfolg: {{COUNT}}",
 				"failed": "Fehlgeschlagen: {{COUNT}}",
 				"last_error": "Letzter Fehler",
 				"errors": {
 					"file_select": "Ungültige Datei ausgewählt",
+					"file_read": "{{FILE_NAME}} kann nicht gelesen werden. Speichere die Datei als Excel-Arbeitsmappe (.xlsx) ohne Kennwort und wähle sie erneut aus.",
 					"update-key-not-uniq": "{{UPDATE_KEY}} ist im Importdatensatz nicht eindeutig"
 				},
 				"validations": {
@@ -338,8 +369,13 @@
 					"currency_unsupported": "Währung kann noch nicht importiert werden",
 					"date": "Ergebnis muss ein Datum oder null sein",
 					"boolean": "Ergebnis muss ein boolescher Wert oder null sein",
-					"fail": "Validierung fehlgeschlagen: {{REASON}}. Für Details siehe Browser-Konsole.",
-					"unknown": "Unbekannt"
+					"fail": "Validierung fehlgeschlagen: {{REASON}}. Für Details siehe Browser-Konsole."
+				},
+				"script_status": {
+					"none": "{{FIELD}}: kein Skript",
+					"pending": "{{FIELD}}: Skript wird geprüft",
+					"okay": "{{FIELD}}: Skript ist gültig",
+					"error": "{{FIELD}}: Skript ist ungültig"
 				},
 				"validation_errors": "Validierungsfehler",
 				"conversion_errors": "Datenkonvertierungsfehler"

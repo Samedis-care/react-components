@@ -27,7 +27,9 @@ export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
      */
     selected: DataT[];
     /**
-     * Specify a custom component for displaying multi select items
+     * Specify a custom component for displaying multi select items. The entries
+     * are the items of one list (`<ul>`), so its root must be an `<li>`, e.g.
+     * MUI's ListItem, as MultiSelectEntry renders.
      */
     selectedEntryRenderer?: React.ComponentType<MultiSelectEntryProps<DataT>>;
     /**
@@ -39,7 +41,11 @@ export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
      */
     classes?: Partial<Record<MultiSelectClassKey, string>>;
     /**
-     * Sort function to perform a view-based sort on selected entries
+     * Comparison function (as for Array.sort) for the order in which the
+     * selected entries are listed. It sorts a copy for display only: `selected`
+     * is not changed (it may be frozen), and `onSelect` reports the entries in
+     * `selected`'s order. Without it the entries are listed in `selected`'s
+     * order.
      * @remarks This is a comparison function
      * @see Array.sort
      */

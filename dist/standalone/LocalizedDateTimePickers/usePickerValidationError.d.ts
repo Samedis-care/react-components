@@ -1,0 +1,22 @@
+export interface PickerValidationErrorResult<TError, TValue> {
+    /** Whether MUI's own validation rejects the value the field shows */
+    hasValidationError: boolean;
+    /**
+     * The `onError` to hand to the picker: records the state and calls the
+     * consumer's `onError` with the same arguments
+     */
+    onError: (error: TError, value: TValue) => void;
+}
+/**
+ * Follows MUI's own validation result for a picker.
+ *
+ * MUI marks the field invalid from its validation (`minDate`, an impossible
+ * date, …) inside the field, and tells the outside about it only through
+ * `onError`, which it calls whenever the error changes. The wrappers need the
+ * state to put it on the sections, so they hand the picker this handler in
+ * place of the consumer's.
+ * @param onError The consumer's `onError`, if any. The latest one is called.
+ * @returns The validation state and the handler to pass to the picker
+ */
+declare const usePickerValidationError: <TError, TValue>(onError: ((error: TError, value: TValue) => void) | undefined) => PickerValidationErrorResult<TError, TValue>;
+export default usePickerValidationError;

@@ -9,7 +9,10 @@ export interface PortalLayoutMenuProps {
      */
     mobile: boolean;
     /**
-     * The width of the menu
+     * The width of the menu, in px
+     *
+     * In mobile view the drawer is never wider than the screen minus 56px, so a
+     * strip of backdrop stays to tap to close it.
      */
     drawerWidth?: number;
     /**

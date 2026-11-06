@@ -17,14 +17,19 @@ export interface BuildDateColumnsParams {
     locale?: string;
     /**
      * Which day counts as today and gets the "current" variant. Pass null to
-     * mark no day at all. Anything moment can parse; it is normalized to a
-     * date, so a timestamp works too.
-     * @default the actual current day
+     * mark no day at all.
+     *
+     * An ISO 8601 date or timestamp, read like a date-only value (see
+     * docs/DateOnlyValues.md and toDateOnly): "YYYY-MM-DD" and a date-only
+     * value's serialization ("2026-03-04T12:00:00.000Z", exactly 12:00 UTC)
+     * mark that day in every timezone; any other timestamp marks the day the
+     * viewer sees it on. An unparseable value marks no day.
+     * @default the actual current day, in the viewer's timezone
      */
     today?: string | null;
     /**
-     * Day(s) to mark with the "accent" variant. Wins over "current". Normalized
-     * like today.
+     * Day(s) to mark with the "accent" variant. Wins over "current". Read like
+     * today.
      */
     accent?: string | string[];
     /**

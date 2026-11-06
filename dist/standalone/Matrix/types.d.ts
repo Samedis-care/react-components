@@ -104,9 +104,12 @@ export interface MatrixCellContext<TCell> {
 }
 export interface MatrixRowHeaderContext {
     /**
-     * True while the grid runs in touch mode: the whole row header is one tap
-     * target calling onRowHeaderActions, so the renderer should not offer its
-     * own (finger-sized) buttons.
+     * True while the whole row header is one tap target calling
+     * onRowHeaderActions, so the renderer should not offer its own buttons:
+     * on a touch-only device (coarse pointer, no hover) with
+     * onRowHeaderActions set. False on other devices, and on a touch-only
+     * device without onRowHeaderActions, where the renderer's own buttons are
+     * the way to the row's actions.
      */
     touch: boolean;
 }
@@ -157,12 +160,20 @@ export interface MatrixTileItem {
      */
     flow?: "horizontal" | "vertical";
     /**
-     * Fill color of the entry. Any CSS color.
+     * Fill color of the entry. Any CSS color. A translucent fill shows over the
+     * cell beneath it.
+     * @remarks Without textColor the label color is derived from this, which
+     * needs a color that can be resolved in JavaScript: hex, rgb(), hsl() or a
+     * keyword. Pass textColor with a var().
      */
     backgroundColor: string;
     /**
      * Text (and adornment) color of the entry
-     * @default black or white, whichever contrasts with backgroundColor
+     * @default black or white, whichever has the higher contrast with
+     * backgroundColor (at least 4.5:1). A translucent backgroundColor is
+     * measured over the theme's palette.background.paper. A backgroundColor
+     * that cannot be resolved (a var()) gets none: the entry then inherits the
+     * surrounding text color.
      */
     textColor?: string;
     /**

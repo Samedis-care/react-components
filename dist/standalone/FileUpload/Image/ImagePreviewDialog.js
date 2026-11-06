@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React from "react";
+import React, { useId } from "react";
 import { Dialog, IconButton, styled, useThemeProps } from "@mui/material";
 import { Close as CloseIcon, RotateLeft as RotateLeftIcon, RotateRight as RotateRightIcon, } from "@mui/icons-material";
 import useImageZoomPan from "../../../utils/useImageZoomPan";
@@ -68,6 +68,9 @@ const ImagePreviewDialog = (inProps) => {
     const { src, alt, open, onClose, disableRotation, classes } = props;
     const { t } = useCCTranslations();
     const { imgRef, containerRef, containerProps, rotateLeft, rotateRight } = useImageZoomPan(open, src);
-    return (_jsxs(Root, { open: open, fullScreen: true, onClose: onClose, className: classes?.root, children: [_jsx(CloseButton, { onClick: onClose, "aria-label": t("standalone.file-upload.close"), className: classes?.closeButton, children: _jsx(CloseIcon, {}) }), !disableRotation && (_jsxs(RotateButtons, { className: classes?.rotateButtons, children: [_jsx(RotateLeftButton, { onClick: rotateLeft, "aria-label": t("standalone.file-upload.rotate-left"), className: classes?.rotateLeftButton, children: _jsx(RotateLeftIcon, {}) }), _jsx(RotateRightButton, { onClick: rotateRight, "aria-label": t("standalone.file-upload.rotate-right"), className: classes?.rotateRightButton, children: _jsx(RotateRightIcon, {}) })] })), _jsx(Container, { ref: containerRef, ...containerProps, className: classes?.container, children: _jsx(PreviewImage, { ref: imgRef, src: src, alt: alt, className: classes?.image, draggable: false }) })] }));
+    // the dialog is named by the image's alt: without a DialogTitle, MUI's own aria-labelledby
+    // would point at an id no element carries
+    const imageId = useId();
+    return (_jsxs(Root, { open: open, fullScreen: true, onClose: onClose, "aria-labelledby": imageId, className: classes?.root, children: [_jsx(CloseButton, { onClick: onClose, "aria-label": t("standalone.file-upload.close"), className: classes?.closeButton, children: _jsx(CloseIcon, {}) }), !disableRotation && (_jsxs(RotateButtons, { className: classes?.rotateButtons, children: [_jsx(RotateLeftButton, { onClick: rotateLeft, "aria-label": t("standalone.file-upload.rotate-left"), className: classes?.rotateLeftButton, children: _jsx(RotateLeftIcon, {}) }), _jsx(RotateRightButton, { onClick: rotateRight, "aria-label": t("standalone.file-upload.rotate-right"), className: classes?.rotateRightButton, children: _jsx(RotateRightIcon, {}) })] })), _jsx(Container, { ref: containerRef, ...containerProps, className: classes?.container, children: _jsx(PreviewImage, { ref: imgRef, id: imageId, src: src, alt: alt, className: classes?.image, draggable: false }) })] }));
 };
 export default React.memo(ImagePreviewDialog);

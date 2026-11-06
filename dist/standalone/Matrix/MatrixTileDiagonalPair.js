@@ -5,6 +5,7 @@ import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
 import { contrastTextFor, dimColor, MATRIX_TILE_DIM_OPACITY, } from "./matrixTileDim";
 import { useMatrixCellTileProps } from "./MatrixCellTileContext";
+import { entryFocusRing } from "./matrixTints";
 import MatrixTileCorners from "./MatrixTileCorners";
 import useMatrixActivation from "./useMatrixActivation";
 export const MatrixTileDiagonalRoot = styled("div", {
@@ -19,10 +20,7 @@ export const MatrixTileDiagonalRoot = styled("div", {
     background: `linear-gradient(to bottom right, ${cssVar(matrixVars.tileBackgroundA)} 0 49.5%, ${cssVar(matrixVars.tileBackgroundB)} 50.5% 100%)`,
     [`&.${matrixClasses.itemClickable}`]: {
         cursor: "pointer",
-        "&:focus-visible": {
-            outline: `2px solid ${theme.palette.primary.main}`,
-            outlineOffset: -2,
-        },
+        "&:focus-visible": entryFocusRing(theme),
     },
 }));
 export const MatrixTileDiagonalLabel = styled("div", {

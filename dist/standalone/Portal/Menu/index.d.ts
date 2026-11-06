@@ -28,6 +28,11 @@ export interface MenuItemProps {
     onClick: React.MouseEventHandler;
     /**
      * Middle-click handler
+     *
+     * Put it on the entry's element as `onAuxClick`. MenuBase passes the
+     * `auxclick` event on to the definition's `onAuxClick` for the middle button
+     * (`button === 1`) only; the right, back and forward buttons, for which
+     * browsers fire `auxclick` too, are dropped.
      */
     onAuxClick: React.MouseEventHandler;
     /**
@@ -65,6 +70,11 @@ export interface IMenuItemDefinition {
     onClick: React.MouseEventHandler;
     /**
      * Middle-click handler
+     *
+     * Called with the `auxclick` event when the entry is clicked with the middle
+     * button (`button === 1`), not for the right, back or forward button. Does not
+     * change the active entry. In RoutedMenu it runs before the entry's `route`
+     * opens in a new tab.
      */
     onAuxClick?: React.MouseEventHandler;
     /**

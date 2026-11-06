@@ -57,7 +57,7 @@ const Cell = (props) => {
         content = _jsx(ColumnHeader, { column: column });
     }
     else if (columnIndex === 0 && !disableSelection) {
-        content = record ? (_jsx(SelectRow, { record: record })) : (_jsx(Skeleton, { variant: "rectangular" }));
+        content = record ? (_jsx(SelectRow, { record: record, columns: columns })) : (_jsx(Skeleton, { variant: "rectangular" }));
     }
     else {
         const content2 = record ? (record[column.field]) : (_jsx(Skeleton, { variant: "text" }));

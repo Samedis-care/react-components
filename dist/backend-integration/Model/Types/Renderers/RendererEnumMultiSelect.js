@@ -15,7 +15,7 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
         this.props = props;
     }
     render(params) {
-        const { visibility, field, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, value, } = params;
+        const { visibility, field, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, id, messageId, value, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -39,7 +39,7 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
                     ...data.filter((entry) => getStringLabel(entry).toLowerCase().includes(query.toLowerCase())),
                 ]),
             });
-            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, onBlur: handleBlur, name: field, children: [_jsx(MultiSelect, { refreshToken: this.values.map((e) => e.value).join(","), label: label, selected: selected, onLoad: onLoad, onSelect: (selected) => handleChange(field, selected.map((entry) => entry.value)), disabled: visibility.readOnly, ...this.props, dirty: dirty, autoFocus: autoFocus }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
+            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, onBlur: handleBlur, name: field, children: [_jsx(MultiSelect, { refreshToken: this.values.map((e) => e.value).join(","), label: label, selected: selected, onLoad: onLoad, onSelect: (selected) => handleChange(field, selected.map((entry) => entry.value)), disabled: visibility.readOnly, ...this.props, dirty: dirty, autoFocus: autoFocus, autocompleteId: id, error: !!errorMsg, warning: !!warningMsg }), _jsx(FormHelperText, { id: messageId, children: errorMsg || warningMsg })] }));
         }
         return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, value
                     .map((enumValue) => {

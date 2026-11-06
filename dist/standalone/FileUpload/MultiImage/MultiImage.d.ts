@@ -39,13 +39,14 @@ export interface MultiImageProps {
      */
     previewSize?: number;
     /**
-     * Upload image
-     * Shown to in edit dialog
+     * URL of the graphic on the edit dialog's add tile: a button named "Add image" that opens
+     * the file picker, and adds the files dropped on it. Also shown on the page while there is
+     * no image and no placeholderImage.
      */
     uploadImage: string;
     /**
-     * Capture image
-     * Shown to in edit dialog
+     * URL of the graphic on the edit dialog's camera tile: a button named "Take photo" that
+     * opens the camera, shown only when capture is set and the browser supports it
      */
     captureImage: string;
     /**
@@ -165,7 +166,12 @@ export interface MultiImageProps {
         imageDialogEntrySubClasses?: ImageDialogEntryProps["subClasses"];
     };
 }
-export type MultiImageClassKey = "root" | "uploadInput" | "rootContainer" | "imageItem" | "editLabel";
+/**
+ * Slots of MultiImage (theme CcMultiImage): root (outer div), uploadInput (the hidden file
+ * input), rootContainer (Grid container inside the frame), imageItem (Grid item of the page
+ * preview), editLabel (the edit control), tileButton (the edit dialog's add and camera tiles)
+ */
+export type MultiImageClassKey = "root" | "uploadInput" | "rootContainer" | "imageItem" | "editLabel" | "tileButton";
 export declare const MultiImageNewIdPrefix = "MultiImage-New-";
 declare const _default: React.MemoExoticComponent<(inProps: MultiImageProps) => React.JSX.Element>;
 export default _default;

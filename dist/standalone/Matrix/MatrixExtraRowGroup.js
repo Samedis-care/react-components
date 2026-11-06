@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useMatrixConfig } from "./MatrixGridContext";
 import MatrixExtraRowHeader from "./MatrixExtraRowHeader";
 import MatrixExtraRowCell from "./MatrixExtraRowCell";
@@ -18,7 +18,14 @@ const MatrixExtraRowGroup = (props) => {
     // only true right after an arrow key, so the row does not steal the focus
     // when it renders
     const [pullFocus, setPullFocus] = useState(false);
-    const active = activeKey ?? columns[0]?.key;
+    // The remembered cell only while its column is on screen: after the
+    // columns change under it (paging to another range), the row falls back
+    // to its first column rather than having no tab stop at all. The key is
+    // kept, so the cell is the tab stop again if its column comes back.
+    const remembered = useMemo(() => activeKey !== null && columns.some((column) => column.key === activeKey)
+        ? activeKey
+        : null, [activeKey, columns]);
+    const active = remembered ?? columns[0]?.key;
     const navigate = useCallback((from, to) => {
         const index = columns.findIndex((column) => column.key === from);
         if (index < 0)
@@ -37,6 +44,9 @@ const MatrixExtraRowGroup = (props) => {
         setActiveKey(columnKey);
         setPullFocus(false);
     }, []);
-    return (_jsxs(React.Fragment, { children: [_jsx(MatrixExtraRowHeader, { extraRow: props.extraRow }), columns.map((column) => (_jsx(MatrixExtraRowCell, { extraRow: props.extraRow, column: column, tabStop: column.key === active, pullFocus: pullFocus && column.key === active, onNavigate: navigate, onFocusColumn: focusColumn }, column.key)))] }));
+    return (_jsxs(React.Fragment, { children: [_jsx(MatrixExtraRowHeader, { extraRow: props.extraRow }), columns.map((column) => (_jsx(MatrixExtraRowCell, { extraRow: props.extraRow, column: column, tabStop: column.key === active, 
+                // only the cell an arrow key moved to takes the focus, never
+                // the fallback
+                pullFocus: pullFocus && column.key === remembered, onNavigate: navigate, onFocusColumn: focusColumn }, column.key)))] }));
 };
 export default React.memo(MatrixExtraRowGroup);

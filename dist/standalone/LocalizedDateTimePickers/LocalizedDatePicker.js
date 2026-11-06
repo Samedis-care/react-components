@@ -5,10 +5,15 @@ import { withMuiFieldState } from "../UIKit/MuiFieldState";
 import useMuiLocaleData from "./useMuiLocaleData";
 import usePickerDraft from "./usePickerDraft";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
+import usePickerValidationError from "./usePickerValidationError";
+import withAccessibleError from "./withAccessibleError";
+import withRequiredSections from "./withRequiredSections";
+import withFieldBlur from "./withFieldBlur";
 const LocalizedDatePicker = (props) => {
     const { publishIntermediateValues, ...otherProps } = props;
     const localeText = useMuiLocaleData();
     const draft = usePickerDraft(otherProps.value, otherProps.onChange, publishIntermediateValues);
+    const validation = usePickerValidationError(otherProps.onError);
     const { settle } = draft;
     const consumerOnOpen = otherProps.onOpen;
     const handleOpen = useCallback(() => {
@@ -17,17 +22,19 @@ const LocalizedDatePicker = (props) => {
         settle();
         consumerOnOpen?.();
     }, [settle, consumerOnOpen]);
-    return (_jsx(LocalizationProvider, { localeText: localeText, children: _jsx(DatePicker, { format: "L", ...otherProps, value: draft.value, onChange: draft.onChange, onOpen: handleOpen, slotProps: {
+    return (_jsx(LocalizationProvider, { localeText: localeText, children: _jsx(DatePicker, { format: "L", ...otherProps, value: draft.value, onChange: draft.onChange, onOpen: handleOpen, onError: validation.onError, slotProps: {
                 ...otherProps.slotProps,
                 textField: (ownerState) => {
                     const orgSlotProps = accessSlotProps(ownerState, otherProps.slotProps?.textField);
-                    return {
+                    const fieldProps = withAccessibleError(validation.hasValidationError, withRequiredSections({
                         ...orgSlotProps,
+                        // called once focus leaves the field, see withFieldBlur
                         onBlur: (event) => {
-                            draft.settleOnBlur(event);
+                            draft.settle();
                             orgSlotProps?.onBlur?.(event);
                         },
-                    };
+                    }));
+                    return withFieldBlur(ownerState, fieldProps);
                 },
             } }) }));
 };

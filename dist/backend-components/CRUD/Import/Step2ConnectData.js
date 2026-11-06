@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useId, useMemo, useRef } from "react";
 import { isFieldImportable, } from "./index";
 import { Box, Card, CardContent, CircularProgress, Grid, Table, TableBody, TableCell, TableHead, TableRow, TextField, Tooltip, Typography, styled, } from "@mui/material";
 import { Check as CheckIcon, ErrorOutlined as ErrorIcon, HelpOutlined as UnknownIcon, } from "@mui/icons-material";
@@ -29,6 +29,45 @@ const StyledCardContent = styled(CardContent, {
         paddingBottom: 4,
     },
 });
+const StatusText = styled("span", {
+    name: "CcCrudImportStep2",
+    slot: "statusText",
+})({
+    // visually hidden, as MUI's visuallyHidden
+    border: 0,
+    clipPath: "inset(50%)",
+    height: 1,
+    margin: -1,
+    overflow: "hidden",
+    padding: 0,
+    position: "absolute",
+    whiteSpace: "nowrap",
+    width: 1,
+});
+/**
+ * The text of each state of a script's check (no script yet, being checked, passed, failed)
+ */
+const STATUS_TEXT_KEYS = {
+    none: "backend-components.crud.import.script_status.none",
+    pending: "backend-components.crud.import.script_status.pending",
+    okay: "backend-components.crud.import.script_status.okay",
+    error: "backend-components.crud.import.script_status.error",
+};
+/**
+ * The values an enum field takes, as a conversion script has to return them: each value as
+ * a string literal, followed by its label when that differs (`"eng" (Engineering)`).
+ * Dividers and invisible values are left out, as in the field's own selector.
+ * @param values The enum type's values
+ * @returns The values joined with ", ", or "" when none is left
+ */
+const formatEnumValues = (values) => values
+    .filter((entry) => !entry.isDivider && !entry.invisible)
+    .map((entry) => {
+    const literal = JSON.stringify(entry.value);
+    const label = entry.getLabel();
+    return label && label !== entry.value ? `${literal} (${label})` : literal;
+})
+    .join(", ");
 export const useImportStep2Logic = (props) => {
     const { model, state, setState } = props;
     const { t } = useCCTranslations();
@@ -135,18 +174,41 @@ const Step2ConnectData = (props) => {
     const { model, state } = props;
     const { t } = useCCTranslations();
     const { columns, handleConversionScriptChange } = useImportStep2Logic(props);
+    const idPrefix = useId();
     return (_jsxs(Grid, { container: true, spacing: 2, children: [_jsxs(Grid, { size: 6, children: [_jsx(Box, { sx: { mb: 2 }, children: _jsx(Typography, { variant: "h5", children: t("backend-components.crud.import.source_fields") }) }), _jsxs(Table, { children: [_jsx(TableHead, { children: _jsxs(TableRow, { children: [_jsx(TableCell, { children: t("backend-components.crud.import.source_field") }), _jsx(TableCell, { children: t("backend-components.crud.import.source_field_type") })] }) }), _jsx(TableBody, { children: columns.map((column) => {
                                     const dataTypes = uniqueArray(state.data.map((record) => typeof record[column])).sort();
                                     return (_jsxs(TableRow, { children: [_jsx(MonoTableCell, { children: `record["${column}"]` }), _jsx(TableCell, { children: dataTypes.join(", ") })] }, column));
                                 }) })] })] }), _jsxs(Grid, { size: 6, children: [_jsx(Box, { sx: { mb: 2 }, children: _jsx(Typography, { variant: "h5", children: t("backend-components.crud.import.destination_fields") }) }), _jsx(Grid, { container: true, spacing: 2, children: Object.entries(model.fields)
                             .filter(([name, field]) => isFieldImportable(name, field))
-                            .map(([name, field]) => {
+                            .map(([name, field], index) => {
                             const convScript = state.conversionScripts[name];
-                            return (_jsx(Grid, { size: 12, children: _jsx(Card, { children: _jsxs(StyledCardContent, { children: [_jsxs(Grid, { container: true, sx: { justifyContent: "space-between" }, children: [_jsxs(Grid, { children: [_jsx(Typography, { children: field.getLabel()
+                            const fieldLabel = field.getLabel() || name;
+                            const scriptId = `${idPrefix}-script-${index}`;
+                            const typeId = `${idPrefix}-type-${index}`;
+                            const valuesId = `${idPrefix}-values-${index}`;
+                            const enumValues = field.type.getEnumValues
+                                ? formatEnumValues(field.type.getEnumValues())
+                                : "";
+                            const statusText = t(STATUS_TEXT_KEYS[convScript?.status ?? "none"], { FIELD: fieldLabel });
+                            const failed = convScript?.status === "error";
+                            const errorText = failed
+                                ? convScript.error?.toString()
+                                : undefined;
+                            // the error (MUI's helper text id), then the expected type
+                            const describedBy = [
+                                errorText ? `${scriptId}-helper-text` : null,
+                                typeId,
+                                enumValues ? valuesId : null,
+                            ]
+                                .filter(Boolean)
+                                .join(" ");
+                            return (_jsx(Grid, { size: 12, children: _jsx(Card, { children: _jsxs(StyledCardContent, { children: [_jsxs(Grid, { container: true, sx: { justifyContent: "space-between" }, children: [_jsxs(Grid, { size: "grow", children: [_jsx(Typography, { children: field.getLabel()
                                                                     ? `${field.getLabel()} (${name})`
-                                                                    : name }), _jsx(Typography, { color: "textSecondary", children: field.type.getFilterType() })] }), _jsx(Grid, { children: _jsx(Tooltip, { title: convScript
-                                                                ? (convScript.error?.toString() ?? "")
-                                                                : (t("backend-components.crud.import.validations.unknown") ?? ""), children: convScript ? (convScript.status === "okay" ? (_jsx(CheckIcon, {})) : convScript.status === "pending" ? (_jsx(CircularProgress, {})) : convScript.status === "error" ? (_jsx(ErrorIcon, {})) : (_jsx(UnknownIcon, {}))) : (_jsx(UnknownIcon, {})) }) })] }), _jsx(Grid, { size: 12, children: _jsxs(Box, { sx: { mt: 2 }, children: [convScript?.error && (_jsx(Typography, { children: convScript.error.toString() })), _jsx(ScriptInput, { multiline: true, label: t("backend-components.crud.import.conv_script"), name: name, value: convScript?.script ?? "", onChange: handleConversionScriptChange, placeholder: `${name} = `, fullWidth: true })] }) })] }) }) }, name));
+                                                                    : name }), _jsx(Typography, { color: "textSecondary", id: typeId, children: field.type.getFilterType() }), enumValues && (_jsx(Typography, { color: "textSecondary", variant: "body2", id: valuesId, children: enumValues }))] }), _jsxs(Grid, { children: [_jsx(Tooltip, { title: statusText, children: convScript ? (convScript.status === "okay" ? (_jsx(CheckIcon, {})) : convScript.status === "pending" ? (_jsx(CircularProgress, { "aria-hidden": true })) : convScript.status === "error" ? (_jsx(ErrorIcon, {})) : (_jsx(UnknownIcon, {}))) : (_jsx(UnknownIcon, {})) }), _jsx(StatusText, { role: "status", children: statusText })] })] }), _jsx(Grid, { size: 12, children: _jsx(Box, { sx: { mt: 2 }, children: _jsx(ScriptInput, { multiline: true, id: scriptId, label: t("backend-components.crud.import.conv_script", { FIELD: fieldLabel }), name: name, value: convScript?.script ?? "", onChange: handleConversionScriptChange, placeholder: `${name} = `, fullWidth: true, error: failed, helperText: errorText, slotProps: {
+                                                            htmlInput: {
+                                                                "aria-describedby": describedBy,
+                                                            },
+                                                        } }) }) })] }) }) }, name));
                         }) })] })] }));
 };
 export default React.memo(Step2ConnectData);

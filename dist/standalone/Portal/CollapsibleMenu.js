@@ -5,6 +5,7 @@ import { DoubleArrow } from "@mui/icons-material";
 import { usePortalLayoutContext } from "./Layout";
 import combineClassNames from "../../utils/combineClassNames";
 import useCCTranslations from "../../utils/useCCTranslations";
+import focusRing from "./focusRing";
 const Root = styled(Grid, { name: "CcCollapsibleMenu", slot: "root" })({
     width: "100%",
     height: "100%",
@@ -32,7 +33,7 @@ const IconClose = styled(DoubleArrow, {
 const StyledButton = styled(IconButton, {
     name: "CcCollapsibleMenu",
     slot: "button",
-})({});
+})(({ theme }) => focusRing(theme.palette.primary.main));
 const CollapsibleMenu = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcCollapsibleMenu" });
     const { classes, className } = props;

@@ -16,7 +16,12 @@
 			"info": "Qo'shimcha ma'lumot",
 			"clear": "Tozalash",
 			"multi-language-input": {
+				"language": "Til",
+				"language-of": "{{label}} tili",
 				"toggle-languages": "Til maydonlarini almashtirish"
+			},
+			"number-input": {
+				"invalid": "Raqam kiriting, masalan {{EXAMPLE}}"
 			}
 		},
 		"notifications": {
@@ -35,6 +40,7 @@
 					"any": "Hammasi"
 				},
 				"set-filter": {
+					"label": "Qiymatlar",
 					"search": "Qidirmoq…",
 					"select-all": "Hammasini belgilash",
 					"invert": "Barchasini ko'rsatish…"
@@ -64,11 +70,14 @@
 				"grid-label": "Jadval mazmuni",
 				"no-data": "Ro'yxatda hech qanday ma'lumot yo'q.",
 				"filter-combination": {
+					"label": "Shartlarni birlashtirish",
 					"and": "VA",
 					"or": "YOKI"
 				},
 				"no-data-filters": "Filtrlaringizga mos keladigan maʼlumotlar topilmadi.",
-				"no-data-reset-filters": "Filtrlarni tozalash"
+				"no-data-reset-filters": "Filtrlarni tozalash",
+				"select-row": "{{ROW}} belgilash",
+				"select-row-fallback": "Qatorni belgilash"
 			},
 			"header": {
 				"new": "Yangi",
@@ -91,9 +100,13 @@
 				}
 			},
 			"settings": {
+				"search": "Ustunlarni qidirish",
+				"no-match": "Mos ustun topilmadi",
 				"column": "Ustun",
 				"show": "Ko'rinadigan",
 				"pin": "Qoplash uchun",
+				"pin-hidden": "Yashirin ustunlarni mahkamlab bo'lmaydi",
+				"pin-forced": "Bu ustun doim mahkamlangan",
 				"close": "Yoping"
 			},
 			"custom-filters": {
@@ -137,6 +150,9 @@
 					"no": "Yo'q"
 				},
 				"remove-item": "{{ITEM}} o'chirish"
+			},
+			"multi-select-with-tags": {
+				"group-input-label": "Guruhning barcha yozuvlarini qo'shish"
 			}
 		},
 		"file-upload": {
@@ -164,8 +180,13 @@
 				"edit": "Tahrirlash",
 				"primary": "Birlamchi",
 				"remove": "Rasmni o'chirish",
+				"add": "Rasm qo'shish",
+				"replace": "Rasmni almashtirish",
 				"prev-image": "Oldingi rasm",
-				"next-image": "Keyingi rasm"
+				"next-image": "Keyingi rasm",
+				"open-full-screen": "«{{NAME}}» rasmini to‘liq ekranda ochish",
+				"open-full-screen-unnamed": "Rasmni to‘liq ekranda ochish",
+				"image-position": "{{TOTAL}} ta rasmdan {{INDEX}}-rasm"
 			},
 			"upload-modern-dnd": "Faylni bu yerga sudrab olib tashlang",
 			"upload-modern-btn": "Yuklash muloqot oynasi uchun bosing",
@@ -183,6 +204,7 @@
 			"invalid": "To'g'ri telefon raqamini kiriting"
 		},
 		"signature-pad": {
+			"with-signer": "{{LABEL}} ({{NAME}})",
 			"dialog": {
 				"reset": "Imzoni tozalash",
 				"save-changes": "O'zgarishlarni saqlash",
@@ -198,7 +220,7 @@
 				"close": "Yoping",
 				"signature": "Imzo"
 			},
-			"sign-here": "Bu erda raqamli imzolangan"
+			"sign-here": "Bu yerda raqamli imzolang"
 		},
 		"signal-portlet": {
 			"last-updated": "Oxirgi yangilanish: {{AGE}}",
@@ -221,6 +243,7 @@
 			}
 		},
 		"language-switcher": {
+			"load-error": "Tilni yuklab bo'lmadi. Internet aloqangizni tekshiring, sahifani qayta yuklang va yana urinib ko'ring.",
 			"title": "Mamlakatingizni va tilingizni tanlang",
 			"no-locales": "Sizning qidiruv so'rovingizga hech qanday mahalliy til mos kelmaydi"
 		}
@@ -254,6 +277,10 @@
 					},
 					"files": {
 						"no-file": "Hech qanday fayl mavjud emas"
+					},
+					"string-array": {
+						"entry": "{{LABEL}} {{NUM}}",
+						"new-entry": "{{LABEL}}: yangi yozuv"
 					}
 				},
 				"date-nullable": {
@@ -311,7 +338,10 @@
 		"selector": {
 			"loading": "Yuklanmoqda…",
 			"loading-error": "Ma'lumotlarni olishda xatolik yuz berdi",
-			"unknown-entry": "Noma'lum yozuv"
+			"unknown-entry": "Noma'lum yozuv",
+			"selected-count": "Tanlangan: {{COUNT}}",
+			"selection-load-error": "{{LABEL}}: yuklab bo‘lmadi.",
+			"selection-load-error-unlabelled": "Tanlangan yozuvlarni yuklab bo‘lmadi."
 		},
 		"crud": {
 			"import": {
@@ -323,13 +353,14 @@
 				"source_field": "Maydon",
 				"source_field_type": "Ma'lumotlar turlari",
 				"destination_fields": "Belgilangan joylar",
-				"conv_script": "Konvertatsiya skripti (JavaScript)",
+				"conv_script": "{{FIELD}}: konvertatsiya skripti (JavaScript)",
 				"queue": "Navbatda: {{COUNT}}",
 				"success": "Muvaffaqiyatli: {{COUNT}}",
 				"failed": "Muvaffaqiyatsiz: {{COUNT}}",
 				"last_error": "Oxirgi xato",
 				"errors": {
 					"file_select": "Yaroqsiz fayl tanlandi",
+					"file_read": "{{FILE_NAME}} faylini oʻqib boʻlmaydi. Uni parolsiz Excel ish kitobi (.xlsx) sifatida saqlang va qaytadan tanlang.",
 					"update-key-not-uniq": "{{UPDATE_KEY}} import maʼlumotlar toʻplamida yagona emas"
 				},
 				"validations": {
@@ -338,8 +369,13 @@
 					"currency_unsupported": "Hozircha valyutani import qilib bo‘lmaydi",
 					"date": "Natija sana yoki null bo'lishi kerak",
 					"boolean": "Natija mantiqiy yoki null bo'lishi kerak",
-					"fail": "Tasdiqlash amalga oshmadi: {{REASON}}. Tafsilotlar uchun brauzer konsoliga qarang.",
-					"unknown": "Noma'lum"
+					"fail": "Tasdiqlash amalga oshmadi: {{REASON}}. Tafsilotlar uchun brauzer konsoliga qarang."
+				},
+				"script_status": {
+					"none": "{{FIELD}}: skript mavjud emas",
+					"pending": "{{FIELD}}: skript tekshirilmoqda",
+					"okay": "{{FIELD}}: skript yaroqli",
+					"error": "{{FIELD}}: skript yaroqsiz"
 				},
 				"validation_errors": "Tasdiqlash xatolari",
 				"conversion_errors": "Ma'lumotlarni o'zgartirish xatolari"

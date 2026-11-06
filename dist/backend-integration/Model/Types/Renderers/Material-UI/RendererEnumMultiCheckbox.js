@@ -15,7 +15,7 @@ class RendererEnumRadio extends TypeEnumMulti {
         this.wrapButton = wrapButton;
     }
     render(params) {
-        const { visibility, field, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, value, } = params;
+        const { visibility, field, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, value, id, messageId, describedBy, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -28,11 +28,13 @@ class RendererEnumRadio extends TypeEnumMulti {
                 ? this.values.find((entry) => !entry.invisible && !entry.disabled)
                     ?.value
                 : undefined;
-            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, children: [_jsx(FormLabel, { component: "legend", children: label }), _jsx(FormGroup, { onBlur: handleBlur, row: this.horizontal, "data-name": field, children: this.values
+            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, id: id, "aria-describedby": describedBy, children: [_jsx(FormLabel, { component: "legend", children: label }), _jsx(FormGroup, { onBlur: handleBlur, row: this.horizontal, "data-name": field, children: this.values
                             .filter((entry) => !entry.invisible)
-                            .map((entry) => this.wrapButton(_jsx(FormControlLabel, { value: entry.value, control: _jsx(Checkbox, { checked: value.includes(entry.value), autoFocus: entry.value === focusValue, name: entry.value, onChange: (evt) => handleChange(field, evt.target.checked
+                            .map((entry) => this.wrapButton(_jsx(FormControlLabel, { value: entry.value, control: _jsx(Checkbox, { checked: value.includes(entry.value), autoFocus: entry.value === focusValue, name: entry.value, slotProps: {
+                                    input: { "aria-invalid": !!errorMsg },
+                                }, onChange: (evt) => handleChange(field, evt.target.checked
                                     ? value.concat([entry.value]) // add value
-                                    : value.filter((v) => v !== entry.value)) }), label: entry.getLabel(), disabled: visibility.readOnly || entry.disabled }, entry.value), entry)) }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
+                                    : value.filter((v) => v !== entry.value)) }), label: entry.getLabel(), disabled: visibility.readOnly || entry.disabled }, entry.value), entry)) }), _jsx(FormHelperText, { id: messageId, children: errorMsg || warningMsg })] }));
         }
         return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, value
                     .map((enumValue) => {

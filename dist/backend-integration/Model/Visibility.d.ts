@@ -30,7 +30,10 @@ export interface Visibility {
  * - empty values and initialValues (when creating a new record)
  * - values matching initialValues (form submit, dirty check)
  * - values and initialValues correct (inside a form, for form fields)
- * You should not dynamically switch between disabled/hidden and not disabled/hidden fields, you're risking subtle bugs otherwise
+ * A callback may disable its field for some values and enable it for others: the record keeps a value for
+ * the field meanwhile (its default value in a new record, the loaded one in an existing record), a save
+ * leaves it out while it is disabled, and a form renders and validates it once it is enabled.
+ * Switching between hidden and not hidden has no such handling: a hidden field is still validated and saved.
  */
 export type VisibilityCallback = Visibility | ((values: Record<string, unknown>, initialValues: Record<string, unknown>) => Visibility);
 export declare const getVisibility: (cb: VisibilityCallback, values: Record<string, unknown>, initialValues: Record<string, unknown>) => Visibility;

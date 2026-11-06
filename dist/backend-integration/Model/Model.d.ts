@@ -607,6 +607,10 @@ declare class Model<FieldsT extends ModelFields = ModelFields, KeyT extends Mode
     validate(values: Record<string, unknown>, view?: "edit" | "create", fieldsToValidate?: KeyT[], type?: "normal" | "hint"): Promise<Record<string, string>>;
     /**
      * Gets an empty/default model data entry
+     * @remarks Every field gets its default value except one whose create visibility is a
+     *          disabled Visibility object. A visibility callback may enable its field once the
+     *          user enters values, so its field gets a default value too, to be rendered and
+     *          validated with when it is enabled.
      */
     protected getDefaultValues(): Promise<Record<string, unknown>>;
     /**
@@ -619,14 +623,17 @@ declare class Model<FieldsT extends ModelFields = ModelFields, KeyT extends Mode
     /**
      * Deserializes the given JSON data back into a data record
      * @param data The JSON string
-     * @param visibility The visibility of the field to check. Field will be dropped if visibility has disabled == true.
+     * @param visibility The view whose visibility applies. A field disabled for the data is dropped, unless it is
+     *                   read-only or its visibility is a callback (an edit of the values may enable it).
      */
     deserialize(data: string, visibility: keyof PageVisibility): Promise<Record<string, unknown>>;
     /**
      * Applies the given serialization function to the data
      * @param values The data
      * @param func The function to apply
-     * @param visibility The visibility of the field to check. Field will be dropped if visibility has disabled == true.
+     * @param visibility The view whose visibility applies. A field disabled for the values is dropped; when
+     *                   deserializing, one that is read-only or whose visibility is a callback (an edit of the
+     *                   values may enable it) is kept. The id is always kept.
      * @returns A copy of the data
      */
     applySerialization(values: Record<string, unknown>, func: "serialize" | "deserialize", visibility: keyof PageVisibility): Promise<Record<string, unknown>>;

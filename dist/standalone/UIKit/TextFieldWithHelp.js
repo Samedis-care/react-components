@@ -17,12 +17,12 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
     const composeRef = useRefComposer();
     const inputRef = useRef(null);
     const handleClear = useCallback((evt) => {
-        if (!inputRef.current) {
-            throw new Error("InputRef not set");
-        }
         evt.stopPropagation();
         if (customHandleClear) {
             return customHandleClear();
+        }
+        if (!inputRef.current) {
+            throw new Error("InputRef not set");
         }
         const proto = (muiProps.multiline ? HTMLTextAreaElement : HTMLInputElement).prototype;
         // eslint-disable-next-line @typescript-eslint/unbound-method
@@ -46,7 +46,13 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
         setHasValue(!!muiProps.value);
     }, [muiProps.value]);
     // render
-    const showClear = isTouchDevice() && hasValue && !muiProps.disabled && !disableClearable;
+    const showClear = isTouchDevice() &&
+        hasValue &&
+        !muiProps.disabled &&
+        !disableClearable &&
+        // the default clear empties the <input> or <textarea>; a select has
+        // neither (its htmlInput ref holds MUI's handle), so it needs a handler
+        (!muiProps.select || !!customHandleClear);
     return (_jsx(UiKitTextFieldWithState, { ref: ref, ...muiProps, warning: warning, dirty: dirty, onChange: handleChange, slotProps: {
             input: (props) => {
                 const orgSlotProps = {

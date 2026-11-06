@@ -85,6 +85,31 @@ const FormatText = styled(FormHelperText, {
 })({
     textAlign: "right",
 });
+/**
+ * The modern variant's upload control: a button around its call to action that looks
+ * like the text, with an outline on keyboard focus
+ */
+const ModernUploadButton = styled("button", {
+    name: "CcFileUpload",
+    slot: "modernUploadButton",
+})(({ theme }) => ({
+    display: "block",
+    width: "100%",
+    margin: 0,
+    padding: 0,
+    border: 0,
+    borderRadius: theme.shape.borderRadius,
+    background: "none",
+    color: "inherit",
+    font: "inherit",
+    letterSpacing: "inherit",
+    textAlign: "inherit",
+    cursor: "pointer",
+    "&:focus-visible": {
+        outline: `2px solid ${theme.palette.primary.main}`,
+        outlineOffset: 2,
+    },
+}));
 const ModernUploadLabel = styled("span", {
     name: "CcFileUpload",
     slot: "modernUploadLabel",
@@ -273,9 +298,15 @@ const FileUpload = (inProps, ref) => {
         }
     }, [maxFiles, getRemainingFileCount, handleError, t]);
     const handleFileChange = useCallback(async (evt) => {
-        const files = evt.currentTarget.files;
-        if (!files)
+        const input = evt.currentTarget;
+        if (!input.files)
             return;
+        // a copy, because clearing the input can empty its FileList
+        const files = Array.from(input.files);
+        // cleared on every pick, also a refused one: browsers fire no change event for
+        // a selection equal to the input's current one, so picking the same file again
+        // would do nothing
+        input.value = "";
         return processFiles(files);
     }, [processFiles]);
     // A removal that waits for onDelete applies to the field as it is by then: it may have
@@ -393,10 +424,11 @@ const FileUpload = (inProps, ref) => {
                     classes?.dropzone,
                     "components-care-dropzone",
                     dragging && "Mui-active",
-                ]), children: [!readOnly && (_jsxs(Grid, { size: "grow", children: [_jsx(ModernUploadLabel, { className: combineClassNames([
-                                    classes?.modernUploadLabel,
-                                    files.length === 0 && "CcFileUpload-modernUploadLabel-empty",
-                                ]), children: uploadLabel || t("standalone.file-upload.upload-modern") }), _jsx(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef })] }, "upload")), files.length > 0 && (_jsx(Grid, { size: 12, children: _jsx(Box, { sx: { mx: 1 }, children: _jsx(Grid, { container: true, spacing: 1, sx: { alignContent: "flex-start", alignItems: "flex-start" }, children: files.map((data, index) => data && (_jsx(FilePreview, { name: data.file.name, mimeType: data.file.type, downloadLink: "downloadLink" in data.file
+                ]), children: [!readOnly && (_jsxs(Grid, { size: "grow", children: [_jsx(ModernUploadButton, { type: "button", name: name, onBlur: onBlur, className: classes?.modernUploadButton, children: _jsx(ModernUploadLabel, { className: combineClassNames([
+                                        classes?.modernUploadLabel,
+                                        files.length === 0 &&
+                                            "CcFileUpload-modernUploadLabel-empty",
+                                    ]), children: uploadLabel || t("standalone.file-upload.upload-modern") }) }), _jsx(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef })] }, "upload")), files.length > 0 && (_jsx(Grid, { size: 12, children: _jsx(Box, { sx: { mx: 1 }, children: _jsx(Grid, { container: true, spacing: 1, sx: { alignContent: "flex-start", alignItems: "flex-start" }, children: files.map((data, index) => data && (_jsx(FilePreview, { name: data.file.name, mimeType: data.file.type, downloadLink: "downloadLink" in data.file
                                         ? data.file.downloadLink
                                         : undefined, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, changeState: getChangeState(data), restoreLabel: t("standalone.file-upload.restore"), onRemove: readOnly || data.preventDelete
                                         ? undefined

@@ -1,6 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useEffect, useState } from "react";
 import { isFieldImportable } from "./index";
+import normalizeImportValue from "./normalizeImportValue";
 import { Grid, TextField, Typography } from "@mui/material";
 import Model, { useModelMutation, } from "../../../backend-integration/Model/Model";
 import ModelVisibilityHidden from "../../../backend-integration/Model/Visibilities/VisibilityHidden";
@@ -52,8 +53,8 @@ export const useImportStep4Logic = (props) => {
                 try {
                     Object.entries(model.fields)
                         .filter(([name, field]) => isFieldImportable(name, field))
-                        .forEach(([name]) => {
-                        const value = state.conversionScripts[name]?.scriptFn(record);
+                        .forEach(([name, field]) => {
+                        const value = normalizeImportValue(field, state.conversionScripts[name]?.scriptFn(record));
                         if (value === undefined)
                             return;
                         deepAssign(modelRecord, dotToObject(name, value));

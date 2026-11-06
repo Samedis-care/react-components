@@ -2,7 +2,16 @@ import React from "react";
 import { TypographyProps } from "@mui/material";
 export interface SignalPortletItemProps {
     /**
-     * The count to show or null/undefined to signal loading
+     * The number to show. `null` or `undefined` shows a spinner (loading),
+     * 0 the grey "inactive" avatar, any other number the primary "active"
+     * avatar. A count above 999 shows as "999+" in a smaller font, and
+     * assistive technology gets the full number instead (screen readers read
+     * `count: 1500, text: "Devices"` as "1500 Devices").
+     *
+     * Pass a non-negative integer: negative numbers, NaN and fractions are
+     * shown as given ("-3" and "2.5" in the active avatar, "NaN" in the inactive
+     * one). `count: data?.x` therefore spins until `data` arrives, and also
+     * forever if the field is missing from the loaded data.
      */
     count: number | null | undefined;
     /**
@@ -26,6 +35,22 @@ export interface SignalPortletItemProps {
      */
     classes?: Partial<Record<SignalPortletItemClassKey, string>>;
 }
-export type SignalPortletItemClassKey = "listAvatar" | "itemColorLoading" | "itemColorActive" | "itemColorInactive" | "listText" | "root" | "rootBtn";
+/**
+ * Slots of a SignalPortlet row, for an item's `classes` and for the theme's
+ * `components.CcSignalPortletItem.styleOverrides`:
+ * - `root`: the ListItem (`<li>`) of a row without link
+ * - `rootBtn`: the ListItemButton (a `div` with role button) of a row with
+ *   link
+ * - `listAvatar`: the ListItemAvatar around the count
+ * - `itemColorLoading`, `itemColorActive`, `itemColorInactive`: the 40px
+ *   Avatar while the count is `null` or `undefined`, when it is non-zero, and
+ *   when it is 0
+ * - `countCapped`: the visible "999+" of a count above 999, hidden from
+ *   assistive technology
+ * - `countFull`: the visually hidden full number of a count above 999, read
+ *   by assistive technology
+ * - `listText`: the ListItemText
+ */
+export type SignalPortletItemClassKey = "listAvatar" | "itemColorLoading" | "itemColorActive" | "itemColorInactive" | "countCapped" | "countFull" | "listText" | "root" | "rootBtn";
 declare const _default: React.MemoExoticComponent<(inProps: SignalPortletItemProps) => React.JSX.Element>;
 export default _default;

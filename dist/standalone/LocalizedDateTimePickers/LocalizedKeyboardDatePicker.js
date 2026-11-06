@@ -6,6 +6,10 @@ import { withMuiFieldState } from "../UIKit/MuiFieldState";
 import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 import usePickerDraft from "./usePickerDraft";
+import usePickerValidationError from "./usePickerValidationError";
+import withAccessibleError from "./withAccessibleError";
+import withRequiredSections from "./withRequiredSections";
+import withFieldBlur from "./withFieldBlur";
 const NoIcon = () => {
     return _jsx(_Fragment, {});
 };
@@ -21,6 +25,7 @@ const LocalizedKeyboardDatePicker = (inProps) => {
     };
     const localeText = useMuiLocaleData();
     const draft = usePickerDraft(otherProps.value, otherProps.onChange, publishIntermediateValues);
+    const validation = usePickerValidationError(otherProps.onError);
     const { settle } = draft;
     const consumerOnOpen = otherProps.onOpen;
     const handleOpen = useCallback(() => {
@@ -29,21 +34,22 @@ const LocalizedKeyboardDatePicker = (inProps) => {
         settle();
         consumerOnOpen?.();
     }, [settle, consumerOnOpen]);
-    return (_jsx(LocalizationProvider, { localeText: localeText, children: _jsx(DatePicker, { format: "L", ...otherProps, value: draft.value, onChange: draft.onChange, onOpen: handleOpen, slots: otherProps.disabled && hideDisabledIcon
+    return (_jsx(LocalizationProvider, { localeText: localeText, children: _jsx(DatePicker, { format: "L", ...otherProps, value: draft.value, onChange: draft.onChange, onOpen: handleOpen, onError: validation.onError, slots: otherProps.disabled && hideDisabledIcon
                 ? slotOverrideHideIcon
                 : otherProps.slots, slotProps: {
                 ...otherProps.slotProps,
                 textField: (ownerState) => {
                     const textFieldProps = accessSlotProps(ownerState, otherProps.slotProps?.textField);
-                    return {
+                    const fieldProps = withAccessibleError(validation.hasValidationError, withRequiredSections({
                         ...textFieldProps,
                         // only where the caller actually gave one, so a value passed
                         // through slotProps.textField is not overwritten with undefined
                         ...(required === undefined ? {} : { required }),
                         ...(error === undefined ? {} : { error }),
                         ...(fullWidth === undefined ? {} : { fullWidth }),
+                        // called once focus leaves the field, see withFieldBlur
                         onBlur: (event) => {
-                            draft.settleOnBlur(event);
+                            draft.settle();
                             textFieldProps?.onBlur?.(event);
                             onBlur?.(event);
                         },
@@ -53,7 +59,8 @@ const LocalizedKeyboardDatePicker = (inProps) => {
                         // it does not know to the DOM, so it is only sent on to a text
                         // field that was actually swapped in for it.
                         ...(otherProps.slots?.textField ? { disableClearable } : {}),
-                    };
+                    }));
+                    return withFieldBlur(ownerState, fieldProps);
                 },
             } }) }));
 };

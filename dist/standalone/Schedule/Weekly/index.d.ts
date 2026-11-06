@@ -12,7 +12,10 @@ export interface WeekViewProps {
      */
     filters?: Record<string, ScheduleFilterDefinition>;
     /**
-     * Optional actions
+     * Buttons in the header. With at most one action and at most two filters,
+     * the action renders inline on the right; otherwise all actions are listed,
+     * in order, in the settings menu (gear button), after the filters it holds.
+     * Default: no actions.
      */
     actions?: ScheduleAction[];
     /**

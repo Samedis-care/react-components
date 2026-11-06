@@ -1,4 +1,3 @@
-import React from "react";
 import type { PickerChangeHandlerContext, PickerValidDate } from "@mui/x-date-pickers";
 export type PickerDraftChangeHandler<TError> = (value: PickerValidDate | null, context: PickerChangeHandlerContext<TError>) => void;
 export interface PickerDraftResult<TError> {
@@ -7,15 +6,10 @@ export interface PickerDraftResult<TError> {
     /** The change handler to hand to the picker */
     onChange: PickerDraftChangeHandler<TError>;
     /**
-     * To be called from the text field's `onBlur`, alongside whatever the consumer
-     * passed. Settles the draft once focus really leaves the field, and ignores
-     * focus moves within it.
-     */
-    settleOnBlur: (event: React.FocusEvent<Element>) => void;
-    /**
-     * Drops an unaccepted draft. To be called from the picker's `onOpen`: the
-     * calendar renders from the value it is given, so a half-typed date would open
-     * it on a year nothing is selectable in.
+     * Drops an unaccepted draft. To be called once focus leaves the field (see
+     * `withFieldBlur`), and from the picker's `onOpen`: the calendar renders from
+     * the value it is given, so a half-typed date would open it on a year nothing
+     * is selectable in.
      */
     settle: () => void;
 }

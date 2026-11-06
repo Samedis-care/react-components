@@ -11,7 +11,7 @@ declare class MockConnector extends Connector {
     private nextId;
     constructor(initialData?: Record<string, unknown>[]);
     index(params?: Partial<IDataGridLoadDataParameters>): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]>;
-    create(data: Record<string, unknown>): ModelGetResponse<ModelUnknown>;
+    create(data: Record<string, unknown>): Promise<ModelGetResponse<ModelUnknown>> | ModelGetResponse<ModelUnknown>;
     read(id: string): ModelGetResponse<ModelUnknown>;
     update(data: Record<string, unknown>): ModelGetResponse<ModelUnknown>;
     delete(id: string): void;

@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { Button, Dialog, DialogActions, IconButton, styled, useThemeProps, } from "@mui/material";
 import MuiDialogTitle from "@mui/material/DialogTitle";
 import { Close } from "@mui/icons-material";
@@ -67,6 +67,16 @@ const HiddenDiv = styled("div", {
     left: -500,
     position: "absolute",
 });
+/**
+ * Whether a canvas cropped by trim-canvas holds no ink. trim-canvas crops to
+ * the non-transparent pixels and leaves a single transparent pixel when there
+ * are none.
+ * @param trimmed The canvas trim-canvas returned
+ * @returns true when the canvas holds no ink
+ */
+const isBlankTrim = (trimmed) => trimmed.width === 1 &&
+    trimmed.height === 1 &&
+    trimmed.getContext("2d")?.getImageData(0, 0, 1, 1).data[3] === 0;
 const SignPadDialog = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcSignPadDialog" });
     const { t } = useCCTranslations();
@@ -74,10 +84,8 @@ const SignPadDialog = (inProps) => {
     const signerName = signerNameUntrim?.trim();
     const [resetCanvas, setResetCanvas] = useState(!!signature);
     const [pushDialog, popDialog] = useDialogContext();
-    const canvasWrapper = useRef(null);
     const signCanvas = useRef(null);
     const hiddenRef = useRef(null);
-    const [canvasSize, setCanvasSize] = useState([0, 0]);
     const clearCanvas = useCallback(async () => {
         if (!(await showConfirmDialogBool(pushDialog, {
             title: t("standalone.signature-pad.dialog.reset-confirm.title"),
@@ -105,7 +113,12 @@ const SignPadDialog = (inProps) => {
             copy.width = canvas.width;
             copy.height = canvas.height;
             copy.getContext("2d").drawImage(canvas, 0, 0);
-            const newSignature = trimCanvas(copy).toDataURL("image/png");
+            const trimmed = trimCanvas(copy);
+            // isEmpty() counts strokes, not pixels: a canvas whose bitmap was
+            // lost still has its strokes, and must not save a blank image
+            const newSignature = isBlankTrim(trimmed)
+                ? ""
+                : trimmed.toDataURL("image/png");
             if (setSignature)
                 setSignature(newSignature);
         }
@@ -125,27 +138,19 @@ const SignPadDialog = (inProps) => {
         popDialog();
     }, [popDialog]);
     const closeCanvasBtn = useCallback(() => closeCanvas({}, "closeBtn"), [closeCanvas]);
-    const handleResize = useCallback((wrapper) => {
-        setCanvasSize([wrapper.clientWidth, wrapper.clientHeight]);
-    }, []);
-    const setCanvasWrapperRef = useCallback((node) => {
-        canvasWrapper.current = node;
-        if (node) {
-            handleResize(node);
-        }
-    }, [handleResize]);
-    useEffect(() => {
-        const resizeHandler = () => canvasWrapper.current && handleResize(canvasWrapper.current);
-        window.addEventListener("resize", resizeHandler);
-        return () => window.removeEventListener("resize", resizeHandler);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [canvasWrapper.current]);
     return (_jsxs(RootDialog, { open: true, maxWidth: "sm", onClose: closeCanvas, className: combineClassNames([className, classes?.root]), children: [_jsxs(StyledDialogTitle, { className: classes?.dialogTitle, children: [signerName
                         ? t("standalone.signature-pad.dialog.title-name", {
                             NAME: signerName,
                         })
-                        : t("standalone.signature-pad.dialog.title"), _jsx(StyledCloseButton, { "aria-label": t("standalone.signature-pad.dialog.close"), className: classes?.closeButton, onClick: closeCanvasBtn, size: "large", children: _jsx(Close, {}) })] }), _jsxs(SignDiv, { className: classes?.signDiv, ref: setCanvasWrapperRef, "data-name": name, onBlur: onBlur, children: [!resetCanvas ? (_jsx(SignaturePad, { ref: signCanvas, options: {
+                        : t("standalone.signature-pad.dialog.title"), _jsx(StyledCloseButton, { "aria-label": t("standalone.signature-pad.dialog.close"), className: classes?.closeButton, onClick: closeCanvasBtn, size: "large", children: _jsx(Close, {}) })] }), _jsxs(SignDiv, { className: classes?.signDiv, "data-name": name, onBlur: onBlur, children: [!resetCanvas ? (_jsx(SignaturePad, { ref: signCanvas, options: {
                             penColor: penColor || "blue",
-                        }, width: canvasSize[0], height: canvasSize[1] })) : (_jsx(ImageDiv, { className: classes?.imageDiv, children: _jsx(SignatureImage, { src: signature ?? undefined, alt: t("standalone.signature-pad.dialog.signature") }) })), _jsx(HiddenDiv, { className: classes?.hiddenDiv, children: _jsx("input", { type: "text", value: signature ?? "", readOnly: true, ref: hiddenRef, name: name, onBlur: onBlur }) })] }), _jsxs(DialogActions, { children: [_jsx(Button, { onClick: saveCanvas, color: "primary", children: t("standalone.signature-pad.dialog.save-changes") }), _jsx(Button, { onClick: clearCanvas, color: "error", children: t("standalone.signature-pad.dialog.reset") })] })] }));
+                        }, 
+                        // no width or height: the wrapper reads them only on mount.
+                        // Without them it sizes the bitmap to the canvas's box (the
+                        // sign area) times devicePixelRatio, on mount and on every
+                        // window resize, so the ink lands under the pen.
+                        // Re-dimensioning the canvas clears its bitmap: draw the
+                        // strokes again, so the ink survives a resize
+                        redrawOnResize: true })) : (_jsx(ImageDiv, { className: classes?.imageDiv, children: _jsx(SignatureImage, { src: signature ?? undefined, alt: t("standalone.signature-pad.dialog.signature") }) })), _jsx(HiddenDiv, { className: classes?.hiddenDiv, children: _jsx("input", { type: "text", value: signature ?? "", readOnly: true, ref: hiddenRef, name: name, onBlur: onBlur }) })] }), _jsxs(DialogActions, { children: [_jsx(Button, { onClick: saveCanvas, color: "primary", children: t("standalone.signature-pad.dialog.save-changes") }), _jsx(Button, { onClick: clearCanvas, color: "error", children: t("standalone.signature-pad.dialog.reset") })] })] }));
 };
 export const SignDialog = React.memo(SignPadDialog);

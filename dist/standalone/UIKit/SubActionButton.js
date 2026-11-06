@@ -1,6 +1,7 @@
 import { jsxs as _jsxs, jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { Button, styled, Tooltip, useThemeProps, } from "@mui/material";
+import focusRing from "../../utils/internal/focusRing";
 const StyledButton = styled(Button, {
     name: "CcSubActionButton",
     slot: "button",
@@ -33,6 +34,8 @@ const StyledButton = styled(Button, {
     "&.Mui-disabled": {
         color: theme.palette.text.disabled,
     },
+    // inside the row: the rows fill their menu, which may clip an outer ring
+    "&.Mui-focusVisible": focusRing(theme, -2),
     "&.MuiButton-label": {
         justifyContent: "flex-start",
     },

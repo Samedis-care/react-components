@@ -2,6 +2,7 @@ import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-run
 import { Typography } from "@mui/material";
 import { FormHelperTextCC, IntegerInputField, NumberFormatter, } from "../../../../../standalone";
 import TypeNumber from "../../TypeNumber";
+import addSlotAttributes from "../../../../../utils/internal/addSlotAttributes";
 /**
  * Renders a text field
  */
@@ -12,7 +13,7 @@ class RendererInteger extends TypeNumber {
         this.props = props;
     }
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, } = params;
+        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, id, messageId, describedBy, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -23,7 +24,9 @@ class RendererInteger extends TypeNumber {
                 throw new Error("Not supported");
             return (_jsxs(_Fragment, { children: [_jsx(IntegerInputField, { fullWidth: true, ...this.props, name: field, value: value, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (evt, value) => {
                             handleChange(evt.target.name, value);
-                        }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, autoFocus: autoFocus }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
+                        }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, autoFocus: autoFocus, id: id, slotProps: addSlotAttributes(this.props?.slotProps, "htmlInput", {
+                            "aria-describedby": describedBy,
+                        }) }), _jsx(FormHelperTextCC, { id: messageId, error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
         }
         return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, this.props?.noFormat ? (value ? (value.toString(10)) : ("")) : (_jsx(NumberFormatter, { value: value }))] }));
     }

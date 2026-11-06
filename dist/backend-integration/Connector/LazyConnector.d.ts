@@ -63,6 +63,18 @@ declare class LazyConnector extends Connector {
     delete(id: string, model: ModelUnknown | undefined): void;
     index(params: Partial<IDataGridLoadDataParameters> | undefined, model: ModelUnknown | undefined): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]>;
     read(id: string, model: ModelUnknown | undefined): Promise<ModelGetResponse<ModelUnknown>> | ModelGetResponse<ModelUnknown>;
+    /**
+     * Queues an update of a record
+     * @param data The record's data, including its id as index hands it out (a fake one for
+     *             a record created through this connector)
+     * @param model The model performing the request
+     * @returns The record as the queue will write it, which index and read serve until the
+     *          queue is worked
+     * @remarks A record which already has a create or an update queued keeps that one
+     *          request, which then carries this data over the data queued before: what the
+     *          two requests would have written one after the other. An update of a queued
+     *          create is still sent as the create, under the fake id the create handed out.
+     */
     update(data: Record<ModelFieldName, unknown>, model: ModelUnknown | undefined): Promise<ModelGetResponse<ModelUnknown>> | ModelGetResponse<ModelUnknown>;
     deleteMultiple(ids: string[], model?: ModelUnknown): void;
     handleAdvancedDelete: (req: AdvancedDeleteRequest, model?: ModelUnknown) => void;

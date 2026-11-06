@@ -26,7 +26,8 @@ export interface MultiGridProps {
      */
     label?: string;
     /**
-     * Enable global scrolling listener (enables page up/down scrolling)
+     * Enable global scrolling listener (enables page up/down scrolling).
+     * One page is the height the scrolling pane shows.
      */
     globalScrollListener?: boolean;
 }

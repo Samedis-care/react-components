@@ -1,3 +1,14 @@
+import { normalizeFilterDef } from "./PersistFormat";
+/**
+ * Splits the column state into the sorts and the column filters loadData gets
+ * @param columnsState The column state
+ * @returns The sorts, by priority (sortOrder), and the column filters (field
+ *          -> filter) whose first condition has a value1
+ * @remarks The filters are normalized like for the reload trigger
+ *          (normalizeFilterDef): a filter chain ends before its first
+ *          condition without a value1, so every page of a list is loaded with
+ *          the same query
+ */
 export const dataGridPrepareFiltersAndSorts = (columnsState) => {
     const baseSorts = [];
     const fieldFilter = {};
@@ -10,10 +21,9 @@ export const dataGridPrepareFiltersAndSorts = (columnsState) => {
                 ...columnsState[field],
             });
         }
-        const filter = columnsState[field].filter;
-        if (filter && filter.value1) {
+        const filter = normalizeFilterDef(columnsState[field].filter);
+        if (filter)
             fieldFilter[field] = filter;
-        }
     });
     const sorts = baseSorts
         .sort((a, b) => a.sortOrder - b.sortOrder)

@@ -19,7 +19,11 @@ export interface InfiniteScrollProps {
      */
     loadMoreBottom: () => void;
     /**
-     * Debounce wait (in ms) for loadMoreTop and loadMoreBottom. Defaults to 100ms
+     * Debounce wait in milliseconds for `loadMoreTop` and `loadMoreBottom`: a
+     * burst of triggers results in one call, made `callBackDebounce` ms after
+     * the last trigger. `0` calls the callbacks synchronously. Can be changed
+     * after mount.
+     * @default 100
      */
     callBackDebounce?: number;
     /**

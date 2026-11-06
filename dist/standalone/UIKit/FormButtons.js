@@ -20,11 +20,11 @@ const ButtonWrapper = styled(Grid, {
 }));
 const FormButtons = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcFormButtons" });
-    const children = (Array.isArray(props.children) ? props.children : [props.children]).filter((child) => child !== undefined && child !== null && child !== false);
+    // flat, without null, undefined and booleans, each element keyed by its own key
+    // or its original position, so a removed button does not shift the others' slots
+    const children = React.Children.toArray(props.children);
     if (children.length === 0)
         return _jsx(_Fragment, {});
-    return (_jsx(Container, { container: true, direction: "row", spacing: 2, wrap: "nowrap", className: combineClassNames([props.classes?.root, props.className]), children: children.flat().map((child, index) => {
-            return (_jsx(ButtonWrapper, { className: props.classes?.buttonWrapper, children: child }, index));
-        }) }));
+    return (_jsx(Container, { container: true, direction: "row", spacing: 2, wrap: "nowrap", className: combineClassNames([props.classes?.root, props.className]), children: children.map((child, index) => (_jsx(ButtonWrapper, { className: props.classes?.buttonWrapper, children: child }, React.isValidElement(child) ? child.key : index))) }));
 };
 export default React.memo(FormButtons);

@@ -11,7 +11,10 @@ export interface CurrencyInputProps extends TextFieldWithHelpProps {
      */
     value: number | null;
     /**
-     * The change event handler
+     * The change event handler. Not called when the text does not parse
+     * (`"."`): the field keeps the previous amount and shows a message in
+     * place of `helperText` until a valid edit or a new `value`, `currency` or
+     * language.
      * @param evt
      * @param value
      */

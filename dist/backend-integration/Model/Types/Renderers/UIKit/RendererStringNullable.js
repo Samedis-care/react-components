@@ -2,6 +2,7 @@ import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-run
 import { Typography } from "@mui/material";
 import TypeStringNullable from "../../TypeStringNullable";
 import { FormHelperTextCC, TextFieldWithHelp } from "../../../../../standalone";
+import addSlotAttributes from "../../../../../utils/internal/addSlotAttributes";
 /**
  * Renders a text field for a string that can be unset (null)
  * @remarks null shows as empty. Editing sets a string, so a cleared field holds "", not null.
@@ -14,7 +15,7 @@ class RendererStringNullable extends TypeStringNullable {
     }
     // also takes the non-nullable string's params: RendererString renders through this
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, } = params;
+        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, id, messageId, describedBy, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -25,7 +26,9 @@ class RendererStringNullable extends TypeStringNullable {
                 throw new Error("Not supported");
             return (_jsxs(_Fragment, { children: [_jsx(TextFieldWithHelp, { variant: this.multiline ? "outlined" : undefined, fullWidth: true, ...this.props, name: field, value: value ?? "", label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (evt) => {
                             handleChange(evt.target.name, evt.target.value);
-                        }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, autoFocus: autoFocus }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
+                        }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, autoFocus: autoFocus, id: id, slotProps: addSlotAttributes(this.props?.slotProps, "htmlInput", {
+                            "aria-describedby": describedBy,
+                        }) }), _jsx(FormHelperTextCC, { id: messageId, error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
         }
         return (_jsxs(Typography, { noWrap: visibility.grid, children: [!visibility.grid && `${label}: `, value] }));
     }

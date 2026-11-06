@@ -32,7 +32,13 @@ export interface BackendSingleSelectProps<M extends ModelUnknown> extends Omit<B
      */
     onSelect?: (value: string | null) => void;
     /**
-     * The currently selected values
+     * The id of the selected record, or null (undefined counts as null). Shown from a
+     * matching `additionalOptions` entry or `initialData` record without a request,
+     * otherwise loaded through `modelFetch`. Until the record of this id is there, the
+     * field shows the translated "Loading…" (`backend-components.selector.loading`), never
+     * the record of an earlier id, and a lookup of an earlier id that finishes later is
+     * discarded (also its error: no `onLoadError`, no `onSelect(null)`). Not shown while
+     * `selectedFreeSolo` is a non-empty string.
      */
     selected: string | null;
     /**

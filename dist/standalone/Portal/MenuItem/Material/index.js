@@ -2,10 +2,11 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import { ListItemButton, ListItemIcon, ListItemText, styled, useThemeProps, } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
+import focusRing from "../../focusRing";
 const StyledListItem = styled(ListItemButton, {
     name: "CcMenuItemMaterial",
     slot: "root",
-})({});
+})(({ theme }) => focusRing(theme.palette.primary.main));
 const MenuItemMaterial = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMenuItemMaterial" });
     const Icon = props.icon;

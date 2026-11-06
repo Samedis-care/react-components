@@ -1,6 +1,11 @@
 import React from "react";
 import { LocaleSelectorDialogCommonProps } from "./LocaleSelectorDialog";
 export interface LocaleSelectorDialogContentProps extends LocaleSelectorDialogCommonProps {
+    /**
+     * Called once the picked language is loaded and applied. Not called when its
+     * texts fail to load or `changeLanguage` rejects: an error dialog shows
+     * instead, and the previous language stays. The dialog passes `popDialog`.
+     */
     close: () => void;
     className?: string;
 }

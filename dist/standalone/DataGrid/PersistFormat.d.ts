@@ -103,7 +103,9 @@ export interface DataGridDecodedState {
 /**
  * Drops filter entries which carry no value, as those have no effect on the
  * query. Used to keep the refresh trigger and the persisted data from reacting
- * to half-entered filters.
+ * to half-entered filters, and to build the column filters of the query
+ * (dataGridPrepareFiltersAndSorts), so the query holds exactly the filters the
+ * refresh trigger compares.
  * @param filter The filter to normalize
  * @returns The normalized filter, or undefined if it has no effect at all
  */
@@ -137,8 +139,19 @@ export declare const decodePersistedState: (persisted: DataGridPersistedData | u
  */
 export declare const splitPersistedState: (data: DataGridPersistentState) => [sizing: DataGridPersistentState, rest: DataGridPersistentState];
 /**
- * Merges persisted data which was stored in separate places back together
- * @param parts The parts, in the order they should be merged
+ * Merges persisted data which was stored in separate places back together.
+ *
+ * Each part is read in its own format: a part is rewritten in the current
+ * format only when it is written, so the parts may be in different formats.
+ * Then every legacy part is migrated on its own, and the result is in the
+ * current format, with the `v` of the last part that was stored in it. A
+ * migrated part has a sort and a filter entry for every column in its legacy
+ * columnState, as the legacy format stored the whole state, not deviations
+ * from the defaults.
+ * @param parts The parts, in the order they should be merged (a later part's
+ *        keys win). Missing parts (undefined, null) are skipped.
+ * @returns The merged data, undefined when no part is there. It is in the
+ *          legacy format only when every part is.
  * @see splitPersistedState
  */
 export declare const mergePersistedState: (parts: (DataGridPersistedData | undefined)[]) => DataGridPersistedData | undefined;

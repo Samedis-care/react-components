@@ -38,7 +38,10 @@ const MatrixRowHeader = (props) => {
     // The tap target has to answer to a keyboard too: on touch it is the only
     // path to the row actions, since the header's own buttons are suppressed.
     const activation = useMatrixActivation(button ? activate : undefined, row.label);
-    const context = useMemo(() => ({ touch }), [touch]);
+    // touch tells the renderer to drop its own buttons, so it follows the tap
+    // target, not the device: without onRowHeaderActions those buttons are the
+    // only way to the row's actions
+    const context = useMemo(() => ({ touch: button }), [button]);
     const content = useMemo(() => renderRowHeader(row, context), [renderRowHeader, row, context]);
     return (_jsx(MatrixRowHeaderRoot, { className: combineClassNames([
             classes?.rowHeader,

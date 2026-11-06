@@ -30,7 +30,8 @@ export interface DataGridProps extends IDataGridHeaderProps, IDataGridColumnProp
      */
     disableFooter?: boolean;
     /**
-     * Custom selection control (instead of default checkbox)
+     * Custom selection control (instead of default checkbox). It gets the row's
+     * label (see getRowLabel) to name itself after its row.
      */
     customSelectionControl?: React.ComponentType<IDataGridContentSelectRowViewProps>;
     /**
@@ -119,7 +120,9 @@ export interface IDataGridLoadDataParameters {
      */
     additionalFilters: DataGridAdditionalFilters;
     /**
-     * The field filter contents
+     * The active column filters (field -> filter). A field is present when its
+     * filter's first condition has a value1, and its chain (nextFilter) ends
+     * before the first condition without a value1.
      */
     fieldFilter: IDataGridFieldFilter;
     /**
@@ -160,6 +163,12 @@ export interface IDataGridCallbacks {
     getAdditionalFilters?: (customData: DataGridCustomDataType) => DataGridAdditionalFilters;
     /**
      * Default initial values for custom data (overwritten by persisted custom data)
+     * @remarks The grid compares the custom data with these to tell whether the
+     *          user filtered ("No data matched your filters"). Plain data
+     *          (strings, numbers, booleans, Dates, arrays, plain objects) is
+     *          compared by value; any other value (a class instance, a Map, a
+     *          function) by identity, so pass the same instance on every render
+     *          (e.g. with useMemo).
      */
     defaultCustomData?: Record<string, unknown>;
     /**
@@ -172,10 +181,19 @@ export interface IDataGridCallbacks {
      * Set the (initial) selection of the grid when provided/updated.
      * Content: [invert, ids].
      * Use together with onSelectionChange for controlled selection.
+     * @remarks While this prop is set, the selection is the parent's value: a
+     *          reload (a search, filter, sort, custom data or forceRefreshToken
+     *          change) keeps it, also the ids the new result does not contain.
+     *          Only the user (reported through onSelectionChange) and this prop
+     *          change it. Without it, a reload clears the selected ids (an
+     *          active select all stays on).
      */
     selection?: [boolean, string[]];
     /**
-     * Event for selection change
+     * Event for selection change: a row click, a row checkbox, select all, a
+     * successful delete clearing the selection, or (without the selection prop)
+     * a reload clearing the selected ids. Not called for a change made through
+     * the selection prop.
      * @param invert Are ids inverted? If true: Everything is selected except ids. If false: Only ids are selected
      * @param ids The ids that are selected/not selected based on invert
      */
@@ -219,6 +237,20 @@ export interface IDataGridCallbacks {
      * @return Can the row be selected
      */
     canSelectRow?: (record: Record<string, unknown>) => boolean;
+    /**
+     * The text that identifies a row to assistive technology, e.g. a person's
+     * name. The row's checkbox is named after it ("Select Carol Jones"), and a
+     * customSelectionControl gets it as rowLabel.
+     * Defaults to the text of the first visible column that has any, in the
+     * order the columns are shown; columns of type "string", "localized-string"
+     * and "combined-string" go first. The text of a rendered value (a React
+     * element) is the text among its children, so a value rendered by a
+     * component that takes its text as another prop has none. Pass getRowLabel
+     * when that default does not identify the row.
+     * @param record The loaded row
+     * @return The label; an empty string names the checkbox "Select row"
+     */
+    getRowLabel?: (record: DataGridRowData) => string;
 }
 export type DataGridAdditionalFilters = Record<string, unknown>;
 export type DataGridSortSetting = {
@@ -279,9 +311,12 @@ export interface IDataGridColumnProps {
      * @param invert if invert is true, delete everything except ids, otherwise only delete ids
      * @param ids The list of ids to (not) delete
      * @param filter The current data grid filter (if set)
-     * @return Promise Optional promise, which will cancel automatic unselect if rejected
+     * @returns false, or a promise that resolves false, when nothing was deleted (e.g.
+     *          the user cancelled a confirmation): the selection stays. Otherwise the
+     *          selection is cleared, once the promise resolves. A promise that rejects
+     *          keeps the selection as well.
      */
-    onDelete?: (invert: boolean, ids: string[], filter?: DataGridFilterParameters) => Promise<void> | unknown;
+    onDelete?: (invert: boolean, ids: string[], filter?: DataGridFilterParameters) => Promise<boolean | void> | boolean | void;
     /**
      * Reason why delete is disabled
      */
@@ -371,7 +406,9 @@ export interface DataGridSetFilterDataEntry {
      */
     value: string;
     /**
-     * The label to display
+     * The label to display. It labels the entry's checkbox: a click on it ticks
+     * the checkbox, and screen readers read it as the checkbox's name, so it must
+     * not contain interactive elements.
      * Fallback if not set: getLabelText
      */
     getLabel?: () => React.ReactNode;
@@ -392,7 +429,10 @@ export type DataGridSetFilterData = DataGridSetFilterDataEntry[];
 export type DataGridIdFilterData = Omit<BackendMultiSelectProps<ModelUnknown, MultiSelectorData>, "selected" | "onSelect">;
 export interface DataGridCustomFilterDataComponentProps<T = unknown> {
     /**
-     * custom filter data
+     * What setFilter stored, parsed from the column filter's value1 (JSON).
+     * undefined while the column has no filter, and when value1 is not JSON
+     * (a filter from a URL or a defaultFilter, or one stored while the column
+     * had another filter type).
      */
     filter: T | undefined;
     /**
@@ -573,7 +613,8 @@ export interface IDataGridState {
     /**
      * The ids the last limited select all (DataGridProps.limitSelectAll)
      * selected. While selectedRows holds exactly these ids (in any order), the
-     * select all checkbox is checked.
+     * select all checkbox is checked. A reload clears it: they are the first
+     * rows of the query they were loaded for.
      */
     limitedSelectAll: string[] | null;
     /**
@@ -723,7 +764,7 @@ export declare const DataGridColumnHeaderFilterActiveIcon: typeof FilterIcon;
 export declare const DataGridColumnHeaderFilterButton: typeof IconButton;
 export declare const DataGridQuickFilterIcon: typeof SearchIcon;
 export declare const DataGridCustomFilterIcon: typeof AppsIcon;
-export type DataGridClassKey = "root" | "header" | "content" | "footer" | "contentOverlayCollapse" | "contentOverlayPaper" | "contentOverlayClosed" | "customFilterContainer" | "selectCheckbox" | "selectAllCheckbox" | "selectAllHeader" | "selectAllWrapper" | "paginationText" | "setFilterListDivider" | "setFilterListItemDivider" | "setFilterListItem" | "setFilterContainer" | "idFilterContainer" | "filterBarGrid" | "filterBarBox" | "filterClearBtn" | "columnHeaderLabel" | "columnHeaderResizer" | "columnHeaderSortIcon" | "columnHeaderContentWrapper" | "cell" | "columnHeaderFilterPopup" | "columnHeaderFilterPopupEnum" | "columnHeaderFilterPopupId" | "columnHeaderFilterPopupDateTime" | "columnHeaderFilterIcon" | "columnHeaderFilterActiveIcon" | "columnHeaderFilterButton" | "quickFilterIcon" | "customFilterIcon" | "customFilterMulti" | "customFilterMultiBackend" | "customFilterSingle" | "customFilterSingleBackend" | "centeredStickyTypography" | "settingsTableCell" | "settingsTable" | "settingsTableRow" | "settingsTableHead" | "settingsTableBody" | "customFilterContainerHeader" | "search";
+export type DataGridClassKey = "root" | "header" | "content" | "footer" | "contentOverlayCollapse" | "contentOverlayPaper" | "contentOverlayClosed" | "customFilterContainer" | "selectCheckbox" | "selectAllCheckbox" | "selectAllHeader" | "selectAllWrapper" | "paginationText" | "setFilterListDivider" | "setFilterListItemDivider" | "setFilterListItem" | "setFilterContainer" | "idFilterContainer" | "filterCombinator" | "filterBarGrid" | "filterBarBox" | "filterClearBtn" | "columnHeaderLabel" | "columnHeaderResizer" | "columnHeaderSortIcon" | "columnHeaderContentWrapper" | "cell" | "columnHeaderFilterPopup" | "columnHeaderFilterPopupEnum" | "columnHeaderFilterPopupId" | "columnHeaderFilterPopupDateTime" | "columnHeaderFilterIcon" | "columnHeaderFilterActiveIcon" | "columnHeaderFilterButton" | "quickFilterIcon" | "customFilterIcon" | "customFilterMulti" | "customFilterMultiBackend" | "customFilterSingle" | "customFilterSingleBackend" | "centeredStickyTypography" | "settingsTableCell" | "settingsTable" | "settingsTableRow" | "settingsTableHead" | "settingsTableBody" | "settingsStatus" | "customFilterContainerHeader" | "search";
 export declare const isDataGridColumnPinned: (column: IDataGridColumnDef, columnPinned: Record<string, boolean>) => boolean;
 export declare const getActiveDataGridColumns: (columns: IDataGridColumnDef[], columnHidden: Record<string, boolean>, columnPinned: Record<string, boolean>) => IDataGridColumnDef[];
 export declare const getDefaultColumnWidths: (columns: IDataGridColumnDef[], theme: Theme) => Record<string, number>;

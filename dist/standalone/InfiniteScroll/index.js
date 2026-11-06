@@ -2,6 +2,11 @@ import { jsx as _jsx } from "react/jsx-runtime";
 import { PureComponent } from "react";
 import debounce from "../../utils/debounce";
 /**
+ * Wraps a load callback as `callBackDebounce` asks: debounced by `wait` ms, or
+ * for `0` the callback itself, so that it is called synchronously
+ */
+const debounceCallback = (callback, wait) => wait === 0 ? callback : debounce(callback, wait);
+/**
  * Provides infinite scrolling to whatever is inside it
  */
 class InfiniteScroll extends PureComponent {
@@ -15,14 +20,10 @@ class InfiniteScroll extends PureComponent {
             : null;
         this.state = {
             initScroll: !this.props.loadMoreTop, // we don't need to set an initial scroll if we don't need up-scrolling
-            loadMoreTop: debounceWait === 0
-                ? this.props.loadMoreTop
-                    ? debounce(this.props.loadMoreTop, debounceWait)
-                    : undefined
-                : this.props.loadMoreTop,
-            loadMoreBottom: debounceWait === 0
-                ? this.props.loadMoreBottom
-                : debounce(this.props.loadMoreBottom, debounceWait),
+            loadMoreTop: this.props.loadMoreTop
+                ? debounceCallback(this.props.loadMoreTop, debounceWait)
+                : undefined,
+            loadMoreBottom: debounceCallback(this.props.loadMoreBottom, debounceWait),
         };
     }
     componentDidMount() {
@@ -48,19 +49,15 @@ class InfiniteScroll extends PureComponent {
         if (prevProps.loadMoreTop !== this.props.loadMoreTop ||
             debounceWait !== prevDebounceWait) {
             this.setState({
-                loadMoreTop: debounceWait === 0
-                    ? this.props.loadMoreTop
-                        ? debounce(this.props.loadMoreTop, debounceWait)
-                        : undefined
-                    : this.props.loadMoreTop,
+                loadMoreTop: this.props.loadMoreTop
+                    ? debounceCallback(this.props.loadMoreTop, debounceWait)
+                    : undefined,
             });
         }
         if (prevProps.loadMoreBottom !== this.props.loadMoreBottom ||
             debounceWait !== prevDebounceWait) {
             this.setState({
-                loadMoreBottom: debounceWait === 0
-                    ? debounce(this.props.loadMoreBottom, debounceWait)
-                    : this.props.loadMoreBottom,
+                loadMoreBottom: debounceCallback(this.props.loadMoreBottom, debounceWait),
             });
         }
         if (!!prevProps.dynamicallySized !== !!this.props.dynamicallySized) {

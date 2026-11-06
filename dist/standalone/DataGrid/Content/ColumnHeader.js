@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import isTouchDevice from "../../../utils/isTouchDevice";
 import combineClassNames from "../../../utils/combineClassNames";
 import { DataGridColumnHeaderContentWrapper, useDataGridColumnState, useDataGridColumnsWidthState, useDataGridProps, useDataGridRootRef, } from "../DataGrid";
@@ -26,8 +26,20 @@ const ColumnHeader = (props) => {
     const [columnState, setColumnState] = useDataGridColumnState();
     const { sortLimit, classes } = useDataGridProps();
     const { sort, sortOrder, filter } = columnState[field] ?? FallbackColumnState;
-    const [, setColumnWidthState] = useDataGridColumnsWidthState();
-    const [dragging, setDragging] = useState(false);
+    const [columnWidthState, setColumnWidthState] = useDataGridColumnsWidthState();
+    const width = columnWidthState[field];
+    // the column's width, for the start of a resize, without making startDrag
+    // change with every width
+    const widthRef = useRef(width);
+    useEffect(() => {
+        widthRef.current = width;
+    }, [width]);
+    // the pointer's x position and the column's width when the resize started;
+    // null while no resize runs
+    const dragStart = useRef(null);
+    // did the press of the current click start a resize? Such a click is the
+    // end of the resize, not a click on the header
+    const pressedOnResizer = useRef(false);
     const onFilterChange = useCallback((field, newFilter) => {
         setColumnState((prevState) => ({
             ...prevState,
@@ -95,18 +107,29 @@ const ColumnHeader = (props) => {
             return newColumnState;
         });
     }, [sortLimit, setColumnState]);
-    const startDrag = useCallback(() => setDragging(true), [setDragging]);
-    const stopDrag = useCallback(() => setDragging(false), [setDragging]);
+    const resetPressedOnResizer = useCallback(() => {
+        pressedOnResizer.current = false;
+    }, []);
+    const startDrag = useCallback((evt) => {
+        pressedOnResizer.current = true;
+        dragStart.current = { x: evt.clientX, width: widthRef.current };
+    }, []);
+    const stopDrag = useCallback(() => {
+        dragStart.current = null;
+    }, []);
     const onDrag = useCallback((evt) => {
-        if (!dragging)
+        const start = dragStart.current;
+        if (!start)
             return;
         evt.preventDefault();
-        const move = evt.movementX;
+        // the edge follows the pointer: the start width plus the pointer's
+        // distance, in CSS pixels
+        const newWidth = applyColumnWidthLimits(column, start.width + evt.clientX - start.x);
         setColumnWidthState((prevState) => ({
             ...prevState,
-            [field]: applyColumnWidthLimits(column, prevState[field] + move),
+            [field]: newWidth,
         }));
-    }, [column, dragging, field, setColumnWidthState]);
+    }, [column, field, setColumnWidthState]);
     const onColumnSortChange = useCallback((modKey) => {
         if (!sortable)
             return;
@@ -120,6 +143,12 @@ const ColumnHeader = (props) => {
             onSortChange(field, 0, true);
     }, [sortable, field, sort, onSortChange]);
     const onColumnClick = useCallback((evt) => {
+        // the click that ends a resize lands here when the pointer is
+        // released elsewhere in the header
+        if (pressedOnResizer.current) {
+            pressedOnResizer.current = false;
+            return;
+        }
         onColumnSortChange(evt.shiftKey);
     }, [onColumnSortChange]);
     const onColumnLongClick = useCallback((evt) => {
@@ -157,7 +186,7 @@ const ColumnHeader = (props) => {
             document.removeEventListener("mouseup", stopDrag);
         };
     }, [onDrag, stopDrag]);
-    return (_jsx(DataGridColumnHeaderContentWrapper, { onClick: onColumnClick, onContextMenu: isTouchDevice() ? onColumnLongClick : undefined, className: combineClassNames([
+    return (_jsx(DataGridColumnHeaderContentWrapper, { onMouseDownCapture: resetPressedOnResizer, onClick: onColumnClick, onContextMenu: isTouchDevice() ? onColumnLongClick : undefined, className: combineClassNames([
             classes?.columnHeaderContentWrapper,
             filterable && "CcDataGrid-columnHeaderFilterable",
             "column-header-" + column.field,

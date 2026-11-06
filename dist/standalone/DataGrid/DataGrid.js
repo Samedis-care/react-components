@@ -16,7 +16,6 @@ import CustomFilterDialog from "./CustomFilterDialog";
 import SelectAllProvider from "./SelectAllProvider";
 import StatePersistence, { DataGridPersistentStateContext, } from "./StatePersistence";
 import { decodePersistedState, normalizeFilterDef } from "./PersistFormat";
-import { CustomFilterActiveContext } from "./Header/FilterBar";
 import combineClassNames from "../../utils/combineClassNames";
 import Checkbox from "../UIKit/Checkbox";
 import ComponentWithLabel from "../UIKit/ComponentWithLabel";
@@ -227,6 +226,13 @@ export const DataGridSetFilterListItem = styled(ListItem, {
 })({
     paddingLeft: 0,
     paddingRight: 0,
+    // the label spans the row, so the whole row ticks the box
+    "& > .MuiFormControlLabel-root": {
+        flex: "1 1 auto",
+        minWidth: 0,
+        marginLeft: 0,
+        marginRight: 0,
+    },
 });
 export const DataGridSetFilterContainer = styled(Grid, {
     name: "CcDataGrid",
@@ -456,7 +462,6 @@ const DataGrid = (inProps, ref) => {
     const [state, setState] = statePack;
     const { search, rows, pages, columnHidden, columnPinned, refreshDataInstance, refreshData, customData, selectAll, selectedRows, selectionUpdatedByProps, } = state;
     const lastRefreshData = useRef(0);
-    const activeCustomFiltersPack = useState(0);
     const gridRoot = useRef(null);
     const visibleColumns = useMemo(() => getActiveDataGridColumns(columns, columnHidden, columnPinned), [columns, columnHidden, columnPinned]);
     const columnsStatePack = useState(() => {
@@ -495,6 +500,9 @@ const DataGrid = (inProps, ref) => {
                 };
         });
     }, [setState, selection]);
+    // a controlled selection is the parent's value: a reload keeps it
+    const selectionControlled = useRef(false);
+    selectionControlled.current = !!selection;
     // refresh data if desired
     useEffect(() => {
         // we have an issue with a rare stuck loading bug. my assumption is that
@@ -594,7 +602,11 @@ const DataGrid = (inProps, ref) => {
         setState((prevState) => ({
             ...prevState,
             rows: {},
-            selectedRows: [],
+            selectedRows: selectionControlled.current
+                ? prevState.selectedRows
+                : [],
+            // the first rows of the old query
+            limitedSelectAll: null,
             rowsTotal: 0, // reset scrolling
             rowsFiltered: null,
             refreshDataInstance: Date.now(),
@@ -648,8 +660,8 @@ const DataGrid = (inProps, ref) => {
             flexDirection: "column",
             justifyContent: "space-between",
             alignItems: "stretch",
-        }, wrap: "nowrap", className: combineClassNames([className, classes?.root]), ref: gridRoot, children: _jsx(DataGridRootRefContext.Provider, { value: gridRoot, children: _jsx(DataGridPropsContext.Provider, { value: props, children: _jsx(DataGridStateContext.Provider, { value: statePack, children: _jsx(DataGridColumnsStateContext.Provider, { value: columnsStatePack, children: _jsx(DataGridColumnsWidthStateContext.Provider, { value: columnWidthStatePack, children: _jsx(CustomFilterActiveContext.Provider, { value: activeCustomFiltersPack, children: _jsxs(SelectAllProvider, { children: [_jsx(StatePersistence, {}), _jsx(HeaderWrapper, { className: classes?.header, sx: state.showFilterDialog ? { display: "none" } : undefined, children: _jsx(Header, {}) }), _jsxs(ContentWrapper, { size: "grow", className: classes?.content, children: [_jsx(Settings, { columns: columns }), _jsx(CustomFilterDialog, {}), _jsx(Content, { columns: visibleColumns, rowsPerPage: rowsPerPage, disableSelection: disableSelection, headerHeight: headerHeight, globalScrollListener: globalScrollListener })] }), !disableFooter && (_jsx(FooterWrapper, { className: classes?.footer, sx: state.showSettings || state.showFilterDialog
-                                                ? { display: "none" }
-                                                : undefined, children: _jsx(Footer, {}) }))] }) }) }) }) }) }) }) }));
+        }, wrap: "nowrap", className: combineClassNames([className, classes?.root]), ref: gridRoot, children: _jsx(DataGridRootRefContext.Provider, { value: gridRoot, children: _jsx(DataGridPropsContext.Provider, { value: props, children: _jsx(DataGridStateContext.Provider, { value: statePack, children: _jsx(DataGridColumnsStateContext.Provider, { value: columnsStatePack, children: _jsx(DataGridColumnsWidthStateContext.Provider, { value: columnWidthStatePack, children: _jsxs(SelectAllProvider, { children: [_jsx(StatePersistence, {}), _jsx(HeaderWrapper, { className: classes?.header, sx: state.showFilterDialog ? { display: "none" } : undefined, children: _jsx(Header, {}) }), _jsxs(ContentWrapper, { size: "grow", className: classes?.content, children: [_jsx(Settings, { columns: columns }), _jsx(CustomFilterDialog, {}), _jsx(Content, { columns: visibleColumns, rowsPerPage: rowsPerPage, disableSelection: disableSelection, headerHeight: headerHeight, globalScrollListener: globalScrollListener })] }), !disableFooter && (_jsx(FooterWrapper, { className: classes?.footer, sx: state.showSettings || state.showFilterDialog
+                                            ? { display: "none" }
+                                            : undefined, children: _jsx(Footer, {}) }))] }) }) }) }) }) }) }));
 };
 export default React.memo(React.forwardRef(DataGrid));

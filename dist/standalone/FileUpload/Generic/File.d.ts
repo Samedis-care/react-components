@@ -54,6 +54,18 @@ export interface FileProps {
      * The download link to open if the file is clicked: a URL, or the file itself
      * @remarks A Blob is opened through an object URL, revoked once the link changes or
      *          the file unmounts
+     *
+     *          The link is opened in a new tab that gets no access to the app window
+     *          (`noopener`) and no referrer. Only http(s), blob and data URLs, and URLs
+     *          relative to the page, count as a link. A link with any other scheme (e.g.
+     *          `javascript:`) is ignored: the file is shown as one without a link, nothing
+     *          opens and onClick is not called.
+     *
+     *          A file with a link is opened through one control: its name (in icon-only
+     *          its icon) is a link to the file (`<a href target="_blank">`), or a button
+     *          with onClick. It is a tab stop, named by name and activated with Enter, as
+     *          a click does. A click on the icon or the preview opens the file as well.
+     *          Without a link the name is plain text and nothing is focusable.
      */
     downloadLink?: string | Blob;
     /**
@@ -74,6 +86,9 @@ export interface FileProps {
     variant: "box" | "list" | "compact-list" | "icon-only";
     /**
      * custom onClick handler
+     * @remarks Called instead of opening the link, only for a downloadLink that counts as
+     *          a link. The control that opens the file is then a button instead of a link
+     *          (see downloadLink).
      * @param name The file name including extension
      * @param url The file URL. For a Blob or data URI link an object URL, which stays
      *            valid at least until the handler has resolved

@@ -6,7 +6,7 @@ import moment from "moment";
 import LocalizedKeyboardDatePicker from "../../LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
 import accessSlotProps from "../../../utils/internal/accessSlotProps";
 const DateInput = (props) => {
-    const { value, onChange, hideDisabledIcon, required, error, fullWidth, onBlur, ...muiProps } = props;
+    const { value, onChange, hideDisabledIcon, required, error, fullWidth, onBlur, helperText, ...muiProps } = props;
     // the picker compares its value by reference, so building the moment during
     // render would rebuild the field's sections on every unrelated re-render
     const pickerValue = useMemo(() => (value ? moment(denormalizeDate(value)) : null), [value]);
@@ -21,6 +21,9 @@ const DateInput = (props) => {
                     // @ts-ignore This just passes props down to the text field component, TS defs don't support custom props here, but the implementation does.
                     customHandleClear: () => onChange(null),
                     ...textFieldSlotPropsProp,
+                    // only where the caller gave one, so a helper text passed through
+                    // slotProps.textField is not overwritten with undefined
+                    ...(helperText === undefined ? {} : { helperText }),
                 };
             },
         } }));

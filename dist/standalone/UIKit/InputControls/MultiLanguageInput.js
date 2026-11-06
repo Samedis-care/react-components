@@ -1,20 +1,44 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { jsxs as _jsxs, Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useState } from "react";
-import { Grid, IconButton, InputAdornment, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
+import { Grid, IconButton, InputAdornment, styled, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import useCCTranslations, { useCCLanguagesTranslations, } from "../../../utils/useCCTranslations";
 import { useCurrentLanguage } from "../../../utils/useCurrentLocale";
 import { Translate } from "@mui/icons-material";
 import { TextFieldCC } from "../MuiFieldState";
-const LanguageLabel = styled("span", {
+import focusRing from "../../../utils/internal/focusRing";
+/** The language buttons below a multiline field */
+const LanguageSwitcher = styled(ToggleButtonGroup, {
+    name: "CcMultiLanguageInput",
+    slot: "languageSwitcher",
+})(({ theme }) => ({
+    flexWrap: "wrap",
+    marginTop: theme.spacing(0.5),
+}));
+/** One language button of the multiline switcher, showing the language code */
+const LanguageLabel = styled(ToggleButton, {
     name: "CcMultiLanguageInput",
     slot: "languageLabel",
-})(({ ownerState }) => ({
-    cursor: "pointer",
-    pointerEvents: "auto",
-    ...(ownerState.active && {
-        fontWeight: "bold",
-    }),
+})(({ theme }) => ({
+    // compact (about 29px high), the codes in the case they are written in
+    padding: theme.spacing(0.25, 1),
+    minWidth: 32,
+    textTransform: "none",
+    // inside the button: its neighbours overlap its border
+    "&.Mui-focusVisible": focusRing(theme, -2),
 }));
+/** The active language's name, read with the multiline label */
+const ActiveLanguageName = styled("span")({
+    // visually hidden, as MUI's visuallyHidden
+    border: 0,
+    clipPath: "inset(50%)",
+    height: 1,
+    margin: -1,
+    overflow: "hidden",
+    padding: 0,
+    position: "absolute",
+    whiteSpace: "nowrap",
+    width: 1,
+});
 const LanguageLabelInputAdornment = styled(Typography, {
     name: "CcMultiLanguageInput",
     slot: "languageLabelInputAdornment",
@@ -32,7 +56,15 @@ const MultiLanguageInput = (inProps) => {
         defaultLanguage = enabledLanguages[0];
     }
     const [expanded, setExpanded] = useState(false); // if normal text field
-    const [activeLanguage, setActiveLanguage] = useState(defaultLanguage); // if multi line text area
+    // the language code clicked in the multiline label, null until one is
+    const [pickedLanguage, setPickedLanguage] = useState(null);
+    // the language the multiline textarea edits: the picked one while it is
+    // enabled, otherwise (and in single-line mode) the default language
+    const activeLanguage = textFieldProps.multiline &&
+        pickedLanguage &&
+        enabledLanguages.includes(pickedLanguage)
+        ? pickedLanguage
+        : defaultLanguage;
     const toggleExpanded = useCallback(() => setExpanded((prev) => !prev), []);
     const incomplete = !textFieldProps.disabled &&
         !disableIncompleteMarker &&
@@ -60,15 +92,18 @@ const MultiLanguageInput = (inProps) => {
     ]
         .filter((e) => e)
         .join(" ");
-    const handleActiveLangSelect = useCallback((evt) => {
-        setActiveLanguage(evt.currentTarget.getAttribute("data-lang"));
+    const handleLanguageSwitch = useCallback((_evt, lang) => {
+        // null: the pressed button was pressed again, which keeps its language
+        if (lang)
+            setPickedLanguage(lang);
     }, []);
-    const renderLanguage = (lang, focus) => (_jsx(TextFieldCC, { ...textFieldProps, warning: warning, dirty: dirty, autoFocus: focus, fullWidth: true, label: textFieldProps.multiline ? (_jsxs("span", { children: [label, " -", " ", [
-                    defaultLanguage,
-                    ...enabledLanguages.filter((lang) => lang !== defaultLanguage),
-                ].map((lang) => (_jsxs("span", { children: [_jsx(Tooltip, { title: getLanguageName(lang), children: _jsx(LanguageLabel, { ownerState: { active: activeLanguage === lang }, "data-lang": lang, onClick: handleActiveLangSelect, children: lang }) }), " "] }, lang)))] })) : lang === defaultLanguage ? (label) : undefined, required: defaultLanguage === lang && activeLanguage === defaultLanguage
+    const renderLanguage = (lang, focus) => (_jsx(TextFieldCC, { ...textFieldProps, warning: warning, dirty: dirty, autoFocus: focus, fullWidth: true, label: textFieldProps.multiline
+            ? label && (_jsxs(_Fragment, { children: [label, lang && (_jsxs(ActiveLanguageName, { children: [" ", "(", t(lang, { defaultValue: lang }), ")"] }))] }))
+            : lang === defaultLanguage
+                ? label
+                : undefined, required: defaultLanguage === lang && activeLanguage === defaultLanguage
             ? required
-            : undefined, value: values[lang], onChange: handleChange, name: `${name ?? "mli"}-${lang}`, slotProps: {
+            : undefined, value: values[lang] ?? "", onChange: handleChange, name: `${name ?? "mli"}-${lang}`, slotProps: {
             inputLabel: {
                 ...textFieldProps.slotProps?.inputLabel,
                 shrink: textFieldProps.multiline
@@ -81,7 +116,14 @@ const MultiLanguageInput = (inProps) => {
                 endAdornment: defaultLanguage === lang && !textFieldProps.multiline ? (_jsx(InputAdornment, { position: "end", children: _jsx(IconButton, { onClick: toggleExpanded, size: "large", "aria-label": tCC("standalone.uikit.multi-language-input.toggle-languages"), children: _jsx(Translate, { color: expanded ? "primary" : incomplete ? "error" : undefined }) }) })) : undefined,
             },
         } }));
-    return (_jsxs(Grid, { container: true, spacing: 2, "data-name": name, onBlur: onBlur, children: [_jsx(Grid, { size: 12, children: renderLanguage(textFieldProps.multiline ? activeLanguage : defaultLanguage, !!autoFocus) }), expanded &&
+    return (_jsxs(Grid, { container: true, spacing: 2, "data-name": name, onBlur: onBlur, children: [_jsxs(Grid, { size: 12, children: [renderLanguage(textFieldProps.multiline ? activeLanguage : defaultLanguage, !!autoFocus), textFieldProps.multiline && (_jsx(LanguageSwitcher, { exclusive: true, size: "small", value: activeLanguage, onChange: handleLanguageSwitch, "aria-label": label
+                            ? tCC("standalone.uikit.multi-language-input.language-of", {
+                                label,
+                            })
+                            : tCC("standalone.uikit.multi-language-input.language"), children: [
+                            defaultLanguage,
+                            ...enabledLanguages.filter((lang) => lang !== defaultLanguage),
+                        ].map((lang) => (_jsx(Tooltip, { title: getLanguageName(lang), children: _jsx(LanguageLabel, { value: lang, "data-lang": lang, ownerState: { active: activeLanguage === lang }, children: lang }) }, lang))) }))] }), expanded &&
                 !textFieldProps.multiline &&
                 enabledLanguages
                     .filter((lang) => lang !== defaultLanguage)

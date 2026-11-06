@@ -1,4 +1,15 @@
 import moment from "moment";
+import { toDateOnly } from "../../utils/dateOnlyUtils";
+/**
+ * The column key of the day a today or accent value stands for.
+ * @param value An ISO 8601 date or timestamp
+ * @returns The key ("YYYY-MM-DD"), or "Invalid date" for an unparseable
+ * value, which matches no column
+ */
+const dayKeyOf = (value) => 
+// the UTC parts of a date-only value carry its day; moment(value) would
+// read them in local time, the next day in UTC+12 and beyond
+moment.utc(toDateOnly(value)).format("YYYY-MM-DD");
 /**
  * Builds the columns of a day-per-column matrix.
  * @param params The range, and how to mark the days in it
@@ -16,8 +27,8 @@ const buildDateColumns = (params) => {
         ? moment().format("YYYY-MM-DD")
         : params.today === null
             ? null
-            : moment(params.today).format("YYYY-MM-DD");
-    const accentDays = (Array.isArray(accent) ? accent : accent ? [accent] : []).map((day) => moment(day).format("YYYY-MM-DD"));
+            : dayKeyOf(params.today);
+    const accentDays = (Array.isArray(accent) ? accent : accent ? [accent] : []).map(dayKeyOf);
     const weekdayFormat = new Intl.DateTimeFormat(locale, { weekday: "short" });
     const columns = [];
     const end = moment(to);

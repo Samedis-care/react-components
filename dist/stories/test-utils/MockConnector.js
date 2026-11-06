@@ -52,6 +52,7 @@ class MockConnector extends Connector {
         const end = start + pageSize;
         return [rows.slice(start, end), { totalRows, filteredRows }];
     }
+    // typed as Connector's create, so that a subclass can hold an upload open
     create(data) {
         const id = String(this.nextId++);
         const record = { ...data, id };

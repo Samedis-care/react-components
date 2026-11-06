@@ -2,7 +2,7 @@ import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-run
 import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
 import ImageBox from "./ImageBox";
 import GroupBox from "../../GroupBox";
-import { Dialog, DialogContent, DialogTitle, Grid, IconButton, Link, styled, Typography, useThemeProps, } from "@mui/material";
+import { ButtonBase, Dialog, DialogContent, DialogTitle, Grid, IconButton, Link, styled, Typography, useThemeProps, } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 import processImage from "../../../utils/processImage";
 import ImageDialogEntry from "./ImageDialogEntry";
@@ -34,6 +34,22 @@ const EditLabel = styled(Typography, {
     name: "CcMultiImage",
     slot: "editLabel",
 })({});
+const TileButton = styled(ButtonBase, {
+    name: "CcMultiImage",
+    slot: "tileButton",
+})(({ theme }) => ({
+    borderRadius: theme.shape.borderRadius,
+    // a ring over the ImageBox inside: an outline of the button is painted under the ImageBox,
+    // and one outside the button is cut off in the first row by the scrolling dialog content
+    "&.Mui-focusVisible::after": {
+        content: '""',
+        position: "absolute",
+        inset: 0,
+        border: `2px solid ${theme.palette.primary.main}`,
+        borderRadius: "inherit",
+        pointerEvents: "none",
+    },
+}));
 export const MultiImageNewIdPrefix = "MultiImage-New-";
 const MultiImage = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiImage" });
@@ -181,11 +197,15 @@ const MultiImage = (inProps) => {
                                                         xs: previewSize ? undefined : 12,
                                                         md: previewSize ? undefined : 6,
                                                         lg: previewSize ? undefined : 3,
-                                                    }, children: _jsx(ImageBox, { width: previewSize, height: previewSize, image: uploadImage, onClick: startUpload, onFilesDropped: handleUploadViaDrop, classes: subClasses?.imageBox }) }), enableCapture && (_jsx(Grid, { size: {
+                                                    }, children: _jsx(TileButton
+                                                    // it holds the ImageBox's divs
+                                                    , { 
+                                                        // it holds the ImageBox's divs
+                                                        component: "div", onClick: startUpload, "aria-label": t("standalone.file-upload.multi-image.add"), className: classes?.tileButton, children: _jsx(ImageBox, { width: previewSize, height: previewSize, image: uploadImage, onClick: null, onFilesDropped: handleUploadViaDrop, classes: subClasses?.imageBox }) }) }), enableCapture && (_jsx(Grid, { size: {
                                                         xs: previewSize ? undefined : 12,
                                                         md: previewSize ? undefined : 6,
                                                         lg: previewSize ? undefined : 3,
-                                                    }, children: _jsx(ImageBox, { width: previewSize, height: previewSize, image: captureImage, onClick: startUploadCapture, onFilesDropped: handleUploadViaDrop, classes: subClasses?.imageBox }) }))] })), additionalDialogContent?.map((elem, i) => (_jsx(Grid, { style: previewSize ? { width: previewSize } : undefined, size: {
+                                                    }, children: _jsx(TileButton, { component: "div", onClick: startUploadCapture, "aria-label": t("standalone.file-upload.upload-capture.image"), className: classes?.tileButton, children: _jsx(ImageBox, { width: previewSize, height: previewSize, image: captureImage, onClick: null, onFilesDropped: handleUploadViaDrop, classes: subClasses?.imageBox }) }) }))] })), additionalDialogContent?.map((elem, i) => (_jsx(Grid, { style: previewSize ? { width: previewSize } : undefined, size: {
                                                 xs: previewSize ? undefined : 12,
                                                 md: previewSize ? undefined : 6,
                                                 lg: previewSize ? undefined : 3,

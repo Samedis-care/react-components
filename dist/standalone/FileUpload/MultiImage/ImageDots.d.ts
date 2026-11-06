@@ -9,7 +9,9 @@ export interface ImageDotsProps {
      */
     active: number;
     /**
-     * Set currently active image
+     * Set currently active image, called when a dot is activated (click, Enter or Space).
+     * Each dot is a button named after its position ("Image 2 of 3"); the active one has
+     * `aria-current`.
      * @param active Image index
      */
     setActive: (active: number) => void;

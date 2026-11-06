@@ -8,9 +8,11 @@ export type ColorInputProps = TextFieldWithHelpProps & Omit<TextFieldProps, "onC
      */
     onChange: (newColor: string) => void;
     /**
-     * The current color
+     * The current color, as text (e.g. `#336699`). `""` or `null` for none,
+     * which shows an empty field; `undefined` (from untyped data) is treated
+     * like `null`.
      */
-    value: string;
+    value: string | null;
 };
 declare const _default: React.MemoExoticComponent<(props: ColorInputProps) => React.JSX.Element>;
 export default _default;

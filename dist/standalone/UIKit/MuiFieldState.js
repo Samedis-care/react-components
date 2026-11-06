@@ -1,6 +1,7 @@
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import { FormControl, FormHelperText, FormLabel, styled, TextField, } from "@mui/material";
+import readableTextColor from "../../utils/internal/readableTextColor";
 /**
  * The dot itself, shared by the pseudo element and the element version
  */
@@ -49,6 +50,14 @@ export const DirtyMarker = React.memo(DirtyMarkerInner);
  * @param dirty Is the field modified?
  */
 export const labelWithDirtyMarker = (label, dirty) => dirty ? (_jsxs(_Fragment, { children: [label, _jsx(DirtyMarker, {})] })) : (label);
+/**
+ * The colour of a warning's text: `palette.warning.main` as far as it reaches the
+ * 4.5:1 that text needs (MUI's default orange has 3.11:1 on white). Outlines and
+ * underlines need only 3:1 and keep `palette.warning.main`.
+ * @param theme The theme
+ * @returns The colour for the label and helper text of a field with a warning
+ */
+const warningTextColor = (theme) => readableTextColor(theme, theme.palette.warning.main);
 /**
  * How much horizontal room {@link dirtyMarkerStyles} takes up (dot plus its margin)
  */
@@ -100,10 +109,10 @@ export const withMuiFieldState = (Component) => {
         }),
         ...(warning && {
             "& > .MuiFormLabel-root": {
-                color: theme.palette.warning.main,
+                color: warningTextColor(theme),
             },
             "&.MuiFormLabel-root": {
-                color: theme.palette.warning.main,
+                color: warningTextColor(theme),
             },
             "& > .MuiFormLabel-root.Mui-error": {
                 color: theme.palette.error.main,
@@ -120,10 +129,10 @@ export const withMuiFieldState = (Component) => {
                 borderBottomColor: theme.palette.error.main,
             },
             "& > .MuiFormHelperText-root": {
-                color: theme.palette.warning.main,
+                color: warningTextColor(theme),
             },
             "&.MuiFormHelperText-root": {
-                color: theme.palette.warning.main,
+                color: warningTextColor(theme),
             },
             "& > .MuiFormHelperText-root.Mui-error": {
                 color: theme.palette.error.main,

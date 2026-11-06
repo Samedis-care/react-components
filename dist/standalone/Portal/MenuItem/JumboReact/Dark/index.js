@@ -3,6 +3,7 @@ import React from "react";
 import { ListItemButton, ListItemIcon, ListItemText, styled, useThemeProps, } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import combineClassNames from "../../../../../utils/combineClassNames";
+import focusRing from "../../../focusRing";
 const MyListItem = styled(ListItemButton, {
     name: "CcMenuItemJumboReactDark",
     slot: "root",
@@ -10,10 +11,12 @@ const MyListItem = styled(ListItemButton, {
     borderBottomRightRadius: "30px",
     borderTopRightRadius: "30px",
     width: "calc(100% - 20px)",
+    ...focusRing(theme.palette.primary.main),
     color: "#a1a1a1",
     "&.Mui-active": {
         backgroundColor: theme.palette.primary.main,
         color: theme.palette.getContrastText(theme.palette.primary.main),
+        ...focusRing(theme.palette.getContrastText(theme.palette.primary.main)),
     },
     "& .MuiListItemButton-button:hover": {
         color: "white",

@@ -44,6 +44,13 @@ export interface MultiSelectEntryImageOwnerState {
     iconSize?: number;
 }
 export type MultiSelectEntryClassKey = "root" | "selected" | "label" | "icon" | "iconSvg" | "divider" | "image";
+/**
+ * One selected entry of MultiSelect, rendered as a list item (`<li>`, the
+ * `root` slot) of the list of selected entries: the row (`selected`) with the
+ * optional icon and the label, and beside it the remove button (`icon`) when
+ * `handleDelete` is set. With `data.onClick` the row is a button, otherwise
+ * plain text.
+ */
 declare const MultiSelectEntry: <DataT extends MultiSelectorData>(inProps: MultiSelectEntryProps<DataT>) => React.JSX.Element;
 declare const _default: typeof MultiSelectEntry;
 export default _default;

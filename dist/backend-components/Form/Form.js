@@ -15,6 +15,7 @@ import deepSort from "../../utils/deepSort";
 import useDevKeybinds from "../../utils/useDevKeybinds";
 import useRefState from "../../utils/useRefState";
 import uniqueArray from "../../utils/uniqueArray";
+import { hashKey } from "@tanstack/react-query";
 import ValidationError from "./ValidationError";
 import TypedEventTarget from "../../utils/TypedEventTarget";
 import { DirtyStateContext, NO_DIRTY_STATE } from "./DirtyStateContext";
@@ -326,10 +327,12 @@ const Form = (props) => {
     // dirty baseline and to seed the form data, so the two can never diverge.
     // initialRecord is applied when the server data loads, not when it changes: the
     // form data was seeded from it then, and after a save the baseline is the saved
-    // record, which a re-rendered initialRecord must not replace
+    // record, which a re-rendered initialRecord must not replace.
+    // data is the react-query cache entry (for a new record, the model's default record
+    // that every create form starts from), so initialRecord is merged into a copy of it
     const initialRecordRef = useRef(initialRecord);
     initialRecordRef.current = initialRecord;
-    const buildInitialValues = useCallback((data) => deepAssign({}, data, data.id || !initialRecordRef.current ? {} : initialRecordRef.current), []);
+    const buildInitialValues = useCallback((data) => deepAssign(deepClone(data), data.id || !initialRecordRef.current ? {} : initialRecordRef.current), []);
     useEffect(() => {
         setInitialValues(serverData ? buildInitialValues(serverData[0]) : undefined);
     }, [serverData, buildInitialValues, setInitialValues]);
@@ -339,7 +342,15 @@ const Form = (props) => {
     ]), 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.alwaysSubmitFields, flowEngineConfig.current.alwaysSubmitFields]);
-    const getNormalizedData = useCallback((values, initialValuesOverride) => {
+    /**
+     * Normalizes the values and the baseline for the dirty comparison
+     * @param values The values (defaults to the current values)
+     * @param initialValuesOverride The baseline (defaults to initialValues)
+     * @param countedFields The fields that count as mounted for onlySubmitMounted
+     *                      (defaults to the mounted fields)
+     * @returns The normalized values and the normalized baseline
+     */
+    const getNormalizedData = useCallback((values, initialValuesOverride, countedFields) => {
         const initialValues = initialValuesOverride ?? getInitialValues();
         if (!initialValues) {
             throw new Error("No server data (initialValues)");
@@ -354,7 +365,7 @@ const Form = (props) => {
             onlySubmitMountedBehaviour,
             onlySubmitMounted: onlySubmitMounted ?? false,
             alwaysSubmitFields,
-            mountedFields,
+            mountedFields: countedFields ?? mountedFields,
         });
         const remoteData = normalizeValues(initialValues, {
             ignoreFields: dirtyIgnoreFields,
@@ -363,7 +374,7 @@ const Form = (props) => {
             onlySubmitMountedBehaviour,
             onlySubmitMounted: onlySubmitMounted ?? false,
             alwaysSubmitFields,
-            mountedFields,
+            mountedFields: countedFields ?? mountedFields,
         });
         return [localData, remoteData];
     }, [
@@ -389,16 +400,18 @@ const Form = (props) => {
      * Computes per-field dirty state (value differs from the given baseline).
      * @param values The current form values to check
      * @param baseline The baseline to compare against (defaults to initialValues)
+     * @param countedFields The fields that count as mounted for onlySubmitMounted
+     *                      (defaults to the mounted fields)
      * @returns A map of field name to modified (true) / unmodified (false)
      */
-    const getDirtyFields = useCallback((values, baseline) => {
+    const getDirtyFields = useCallback((values, baseline, countedFields) => {
         const initialValues = baseline ?? getInitialValues();
         // getNormalizedData needs both the baseline and the default record; if
         // either isn't available yet nothing has been modified (first load)
         if (!initialValues || !defaultRecord) {
             return Object.fromEntries(Object.keys(model.fields).map((field) => [field, false]));
         }
-        const [localData, remoteData] = getNormalizedData(values, initialValues);
+        const [localData, remoteData] = getNormalizedData(values, initialValues, countedFields);
         return Object.fromEntries(Object.keys(model.fields).map((field) => [
             field,
             toComparisonJson(getValueByDot(field, localData)) !==
@@ -580,7 +593,41 @@ const Form = (props) => {
     // Suspense boundary shows the form again, Activity when it shows a hidden subtree):
     // that must keep what was entered, only the next load initializes again
     const initializedRef = useRef(false);
-    // init data structs after a load
+    // the server data the form data was last updated from. A re-run of the refetch effect
+    // below with the same data (see initializedRef) has nothing to apply, and must not take
+    // fields of a flow engine stage that is no longer mounted for unmodified ones
+    const appliedServerDataRef = useRef(undefined);
+    // the record the form data belongs to: its model, by query key (a model object created
+    // again for the same data is the same model), and its id. Another record starts the form
+    // over, as on a fresh mount: the page shows the loader for a render, so it is mounted
+    // again, and the init effect below fills the form from the new record. The id a create
+    // form is given for the record it has just saved is that same record
+    const modelKey = useMemo(() => hashKey(model.getReactQueryKey(null, false)), [model]);
+    const recordId = id || null;
+    const [dataRecord, setDataRecord] = useState({ modelKey, id: recordId });
+    const recordChanged = dataRecord.modelKey !== modelKey || dataRecord.id !== recordId;
+    const recordSwitched = recordChanged &&
+        !(dataRecord.modelKey === modelKey &&
+            dataRecord.id === null &&
+            recordId !== null &&
+            values.id === recordId);
+    useEffect(() => {
+        if (!recordChanged)
+            return;
+        setDataRecord({ modelKey, id: recordId });
+        if (!recordSwitched)
+            return;
+        initializedRef.current = false;
+        prevServerDataRef.current = null;
+        appliedServerDataRef.current = undefined;
+        customFieldState.current = {};
+        setCustomDirtyFields([]);
+        setErrors({});
+        setWarnings({});
+        setUpdateError(null);
+    }, [recordChanged, recordSwitched, modelKey, recordId, setCustomDirtyFields]);
+    // init data structs after a load, or after a switch to another record (which may be
+    // cached, then nothing loads)
     useEffect(() => {
         if (isLoading) {
             initializedRef.current = false;
@@ -598,11 +645,7 @@ const Form = (props) => {
         valuesStagedModifiedRef.current = deepClone(touchedRef.current);
         setValuesStagedModified(valuesStagedModifiedRef.current);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isLoading]);
-    // the server data the form data was last updated from. A re-run of the effect below
-    // with the same data (see initializedRef) has nothing to apply, and must not take
-    // fields of a flow engine stage that is no longer mounted for unmodified ones
-    const appliedServerDataRef = useRef(undefined);
+    }, [isLoading, serverData]);
     // update data struct after background fetch
     useEffect(() => {
         if (isLoading || !serverData || !serverData[0])
@@ -642,10 +685,14 @@ const Form = (props) => {
             return combined;
         };
         // decide which fields to update from server data based on per-field dirty
-        // state (value differs from the previous server data), not touched state
+        // state (value differs from the previous server data), not touched state.
+        // The staged values count wherever the flow's save sends them (the staged
+        // modified fields), also when the stage that staged them is no longer shown
         const baseline = prevServerDataRef.current;
         const mainDirty = getDirtyFields(valuesRef.current, baseline);
-        const stagedDirty = getDirtyFields(valuesStagedRef.current, baseline);
+        const stagedDirty = getDirtyFields(valuesStagedRef.current, baseline, flowEngine
+            ? combineModified(mountedFields, valuesStagedModifiedRef.current)
+            : undefined);
         valuesRef.current = updateUnmodified(valuesRef.current, flowEngine ? combineModified(stagedDirty, mainDirty) : mainDirty);
         valuesStagedRef.current = updateUnmodified(valuesStagedRef.current, stagedDirty);
         setValues(valuesRef.current);
@@ -1252,7 +1299,10 @@ const Form = (props) => {
             return _jsx(ErrorRenderer, { customProps: customProps, error: error });
         return _jsx(Typography, { color: "error", children: error.message });
     }
-    if (isLoading || isDefaultRecordLoading || isObjectEmpty(values)) {
+    if (isLoading ||
+        isDefaultRecordLoading ||
+        isObjectEmpty(values) ||
+        recordSwitched) {
         return _jsx(Loader, {});
     }
     const displayError = defaultRecordError || updateError;

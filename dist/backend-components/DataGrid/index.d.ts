@@ -1,11 +1,21 @@
 import React from "react";
 import { DataGridDispatch, DataGridFilterParameters, DataGridProps, IDataGridAddButton } from "../../standalone/DataGrid/DataGrid";
 import { ModelRecord, ModelUnknown } from "../../backend-integration/Model/Model";
-export interface BackendDataGridProps<M extends ModelUnknown> extends Omit<DataGridProps, "loadData" | "columns" | "exporters" | "onDelete"> {
+export interface BackendDataGridProps<M extends ModelUnknown> extends Omit<DataGridProps, "loadData" | "columns" | "exporters" | "onDelete" | "getRowLabel"> {
     /**
      * The model to use
      */
     model: M;
+    /**
+     * The text that identifies a row to assistive technology, e.g. a person's
+     * name: the row's checkbox is named after it ("Select Carol Jones"), and a
+     * customSelectionControl gets it as rowLabel.
+     * Defaults to DataGridProps.getRowLabel's default: the text the first
+     * visible text column shows.
+     * @param record The row's record, as the model's index returned it
+     * @return The label; an empty string names the checkbox "Select row"
+     */
+    getRowLabel?: (record: ModelRecord<M>) => string;
     /**
      * Enable deletion?
      */
@@ -46,10 +56,32 @@ export interface BackendDataGridProps<M extends ModelUnknown> extends Omit<DataG
     onDeleteSettled?: (inverted: boolean, ids: string[], filter: DataGridFilterParameters | undefined, error: Error | undefined) => void;
 }
 export declare const useBackendDataGridAddNewButtons: (props: Pick<BackendDataGridProps<ModelUnknown>, "onAddNew" | "additionalNewButtons">) => string | IDataGridAddButton[] | (() => void) | undefined;
-export declare const useBackendDataGridDeleteHandler: <M extends ModelUnknown>(props: Pick<BackendDataGridProps<M>, "model" | "enableDelete" | "enableDeleteAll" | "customDeleteConfirm" | "customDeleteErrorHandler" | "onDeleteSettled">, refreshGrid: () => void) => ((invert: boolean, ids: string[], filter?: DataGridFilterParameters) => Promise<void>) | undefined;
+/**
+ * The delete handler BackendDataGrid passes to DataGrid as onDelete: it asks for
+ * confirmation (customDeleteConfirm or the built-in dialog), deletes through the
+ * model, calls refreshGrid and onDeleteSettled, and reports a failure
+ * (customDeleteErrorHandler or the built-in error dialog).
+ * @param props The delete props of BackendDataGrid
+ * @param refreshGrid Called after the delete ran, failed or not, to reload the rows
+ * @returns The handler, or undefined without enableDelete. The handler resolves false
+ *          when the user cancels the confirmation: nothing was deleted, so the grid
+ *          keeps the selection. It resolves true once the delete ran, also when it
+ *          failed (a failed delete may have deleted some of the records).
+ */
+export declare const useBackendDataGridDeleteHandler: <M extends ModelUnknown>(props: Pick<BackendDataGridProps<M>, "model" | "enableDelete" | "enableDeleteAll" | "customDeleteConfirm" | "customDeleteErrorHandler" | "onDeleteSettled">, refreshGrid: () => void) => ((invert: boolean, ids: string[], filter?: DataGridFilterParameters) => Promise<boolean>) | undefined;
 export declare const renderDataGridRecordUsingModel: (model: ModelUnknown, refreshGrid: () => void) => (entry: ModelRecord<ModelUnknown>) => {
     id: string;
 } & Record<string, string | null>;
+/**
+ * DataGridProps.getRowLabel for a grid whose rows renderDataGridRecordUsingModel
+ * rendered, from a getRowLabel that takes the model's record
+ * (BackendDataGridProps.getRowLabel)
+ * @param model The model the rows are rendered with
+ * @param getRowLabel The row label from the model's record, or undefined for
+ *                    the grid's default
+ * @returns The grid's getRowLabel, undefined without getRowLabel
+ */
+export declare const useBackendDataGridRowLabel: <M extends ModelUnknown>(model: M, getRowLabel: ((record: ModelRecord<M>) => string) | undefined) => DataGridProps["getRowLabel"];
 export type BackendDataGridType = <M extends ModelUnknown>(props: BackendDataGridProps<M> & React.RefAttributes<DataGridDispatch>) => React.ReactElement | null;
 declare const _default: BackendDataGridType;
 export default _default;

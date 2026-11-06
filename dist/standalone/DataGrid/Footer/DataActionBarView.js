@@ -9,6 +9,7 @@ import SelectAll from "./SelectAll";
 import { DataGridSelectAllWrapper, useDataGridProps, } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import DataActionBarMenu from "./DataActionBarMenu";
+import FocusableWhenDisabledIconButton from "./FocusableWhenDisabledIconButton";
 import { dataGridIsCustomDataActionDisabled } from "../CallbackUtil";
 const DataActionBarView = (props) => {
     const { classes, editIcon, editLabel } = useDataGridProps();
@@ -27,7 +28,9 @@ const DataActionBarView = (props) => {
     const deleteDisabled = props.numSelected === 0 ||
         !props.handleDelete ||
         (props.selectAll && !props.enableDeleteAll);
-    const deleteBtn = (_jsx(ComponentWithLabel, { control: _jsx(SmallestIconButton, { color: "primary", disabled: deleteDisabled, onClick: props.handleDelete, "aria-label": t("standalone.data-grid.footer.delete"), children: _jsx(DeleteIcon, {}) }), labelText: t("standalone.data-grid.footer.delete"), labelPlacement: "bottom", disabled: deleteDisabled }));
+    // stays focusable while disabled: a delete clears the selection, which
+    // disables Delete while it has keyboard focus
+    const deleteBtn = (_jsx(ComponentWithLabel, { control: _jsx(FocusableWhenDisabledIconButton, { color: "primary", disabled: deleteDisabled, onClick: props.handleDelete, "aria-label": t("standalone.data-grid.footer.delete"), children: _jsx(DeleteIcon, {}) }), labelText: t("standalone.data-grid.footer.delete"), labelPlacement: "bottom", disabled: deleteDisabled }));
     const allCustomButtonsDisabled = !!props.customButtons?.every((entry) => dataGridIsCustomDataActionDisabled(entry, props.numSelected, props.selectAll));
     return (_jsxs(Grid, { container: true, wrap: "nowrap", children: [_jsx(Grid, { children: _jsx(DataGridSelectAllWrapper, { control: _jsx(SelectAll, {}), labelText: props.selectAllLabel, labelPlacement: "bottom", className: classes?.selectAllWrapper, style: props.disableSelection
                         ? { opacity: 0, pointerEvents: "none" }

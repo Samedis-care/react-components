@@ -128,7 +128,7 @@ const Content = (props) => {
     }, [state.initialResize, width]);
     const filtersActive = useDataGridFiltersActive();
     const resetFilters = useDataGridResetFilters();
-    const noContentRenderer = useCallback(() => (_jsx(_Fragment, { children: state.refreshData ? (_jsx(Loader, {})) : state.dataLoadError ? (_jsx(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h5", children: state.dataLoadError.message })) : (_jsx(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h4", children: _jsxs(Grid, { container: true, spacing: 2, sx: { flexDirection: "column" }, children: [_jsx(Grid, { children: filtersActive
+    const noContentRenderer = useCallback(() => (_jsx(_Fragment, { children: state.refreshData ? (_jsx(Loader, {})) : state.dataLoadError ? (_jsx(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h5", component: "div", role: "alert", children: state.dataLoadError.message })) : (_jsx(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h4", component: "div", children: _jsxs(Grid, { container: true, spacing: 2, sx: { flexDirection: "column" }, children: [_jsx(Grid, { role: "status", children: filtersActive
                             ? t("standalone.data-grid.content.no-data-filters")
                             : t("standalone.data-grid.content.no-data") }), filtersActive && (_jsx(Grid, { children: _jsx(ActionButton, { onClick: resetFilters, fullWidth: false, icon: _jsx(ResetFilterIcon, {}), children: t("standalone.data-grid.content.no-data-reset-filters") }) }))] }) })) })), [
         classes?.centeredStickyTypography,

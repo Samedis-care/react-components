@@ -4,7 +4,7 @@ import { styled, useThemeProps } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 import useIsTouchOnly from "../../utils/useIsTouchOnly";
 import { cssVar, matrixVars } from "./matrixClasses";
-import { cellBorders } from "./matrixTints";
+import { cellBorders, columnLabelColorVars } from "./matrixTints";
 import { defaultIsCellOccupied, defaultIsCellSelectable, isCellSelectableIn, MatrixConfigContext, } from "./MatrixGridContext";
 import { MatrixInteractionContext, MatrixInteractionStore, } from "./MatrixInteractionContext";
 import MatrixColumnHeader from "./MatrixColumnHeader";
@@ -20,6 +20,7 @@ export const MatrixGridScroller = styled("div", {
     border: `1px solid ${theme.palette.divider}`,
     borderRadius: theme.shape.borderRadius,
     backgroundColor: theme.palette.background.paper,
+    ...columnLabelColorVars(theme),
 }));
 export const MatrixGridRoot = styled("div", {
     name: "CcMatrixGrid",

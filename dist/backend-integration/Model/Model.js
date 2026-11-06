@@ -795,17 +795,17 @@ class Model {
     }
     /**
      * Gets an empty/default model data entry
+     * @remarks Every field gets its default value except one whose create visibility is a
+     *          disabled Visibility object. A visibility callback may enable its field once the
+     *          user enters values, so its field gets a default value too, to be rendered and
+     *          validated with when it is enabled.
      */
     async getDefaultValues() {
         const data = {};
         const promises = Object.entries(this.fields)
             .filter(([field]) => {
-            try {
-                return !getVisibility(this.fieldsByName[field].visibility.create, {}, {}).disabled;
-            }
-            catch {
-                return true;
-            }
+            const create = this.fieldsByName[field].visibility.create;
+            return typeof create === "function" || !create.disabled;
         })
             .map(async (entry) => {
             const [field, def] = entry;
@@ -843,7 +843,8 @@ class Model {
     /**
      * Deserializes the given JSON data back into a data record
      * @param data The JSON string
-     * @param visibility The visibility of the field to check. Field will be dropped if visibility has disabled == true.
+     * @param visibility The view whose visibility applies. A field disabled for the data is dropped, unless it is
+     *                   read-only or its visibility is a callback (an edit of the values may enable it).
      */
     async deserialize(data, visibility) {
         const parsed = JSON.parse(data);
@@ -853,7 +854,9 @@ class Model {
      * Applies the given serialization function to the data
      * @param values The data
      * @param func The function to apply
-     * @param visibility The visibility of the field to check. Field will be dropped if visibility has disabled == true.
+     * @param visibility The view whose visibility applies. A field disabled for the values is dropped; when
+     *                   deserializing, one that is read-only or whose visibility is a callback (an edit of the
+     *                   values may enable it) is kept. The id is always kept.
      * @returns A copy of the data
      */
     async applySerialization(values, func, visibility) {
@@ -866,10 +869,13 @@ class Model {
             if (value === undefined && func === "serialize") {
                 continue;
             }
-            // don't include disabled fields (except ID and disabled+readonly fields when serializing)
-            const visValue = getVisibility(field.visibility[visibility], values, values);
+            // don't include disabled fields (except ID, and when deserializing disabled+readonly fields
+            // and fields whose visibility callback may enable them once the values are edited)
+            const visCallback = field.visibility[visibility];
+            const visValue = getVisibility(visCallback, values, values);
             if (visValue.disabled &&
-                (func === "serialize" || !visValue.readOnly) &&
+                (func === "serialize" ||
+                    !(visValue.readOnly || typeof visCallback === "function")) &&
                 key !== "id") {
                 continue;
             }

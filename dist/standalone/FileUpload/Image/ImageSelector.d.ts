@@ -11,6 +11,8 @@ export type PostImageEditCallback = (image: File) => Promise<Blob>;
 export interface ImageSelectorProps {
     /**
      * The name of the input
+     * @remarks Set as `name` on the normal variant's buttons and on the button of the empty
+     *          modern field, and as `data-name` on the modern variant's image area
      */
     name: string;
     /**
@@ -47,10 +49,16 @@ export interface ImageSelectorProps {
     onChange?: (name: string, value: File) => void;
     /**
      * The blur event handler of the input
+     * @remarks normal: blur of the Upload and Take photo buttons. modern: blur of any element
+     *          in the image area (the empty field's button, or the upload and camera buttons
+     *          shown with an image).
      */
     onBlur?: React.FocusEventHandler<HTMLElement>;
     /**
      * Label overwrite for Upload label
+     * @remarks normal: the Upload button's text. modern: the empty field's call to action,
+     *          which is the text and accessible name of its button, and the tooltip of the
+     *          shown image.
      */
     uploadLabel?: string;
     /**
@@ -102,6 +110,6 @@ export interface ImageSelectorProps {
      */
     onError?: ImageErrorHandler;
 }
-export type ImageSelectorClassKey = "rootClassic" | "rootModern" | "imgWrapper" | "previewClassic" | "previewModern" | "changeEventHelper" | "modernUploadLabel" | "modernFullHeightBox" | "modernFullHeightGrid" | "modernFormatsLabel" | "modernFormatIcon" | "modernUploadControlsWrapper" | "modernUploadControlUpload" | "pfpRoot" | "pfpIconBtn" | "pfpImg" | "pfpImgPlaceholder";
+export type ImageSelectorClassKey = "rootClassic" | "rootModern" | "imgWrapper" | "previewClassic" | "previewModern" | "changeEventHelper" | "modernUploadLabel" | "modernUploadButton" | "modernFullHeightBox" | "modernFullHeightGrid" | "modernFormatsLabel" | "modernFormatIcon" | "modernUploadControlsWrapper" | "modernUploadControlUpload" | "pfpRoot" | "pfpIconBtn" | "pfpImg" | "pfpImgPlaceholder";
 declare const _default: React.MemoExoticComponent<(inProps: ImageSelectorProps) => React.JSX.Element>;
 export default _default;

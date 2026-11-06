@@ -1,28 +1,39 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useRef, useState, } from "react";
 import useDropZone from "../../../utils/useDropZone";
-import { Dialog, DialogContent, IconButton, styled, Tooltip, useThemeProps, } from "@mui/material";
-import { ArrowBack as PrevIcon, ArrowForward as NextIcon, Close as CloseIcon, Delete as DeleteIcon, RotateLeft as RotateLeftIcon, RotateRight as RotateRightIcon, } from "@mui/icons-material";
+import { ButtonBase, Dialog, DialogContent, IconButton, iconButtonClasses, styled, Tooltip, useThemeProps, } from "@mui/material";
+import { ArrowBack as PrevIcon, ArrowForward as NextIcon, Close as CloseIcon, RotateLeft as RotateLeftIcon, RotateRight as RotateRightIcon, } from "@mui/icons-material";
 import combineClassNames from "../../../utils/combineClassNames";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { useDebounce } from "../../../utils/useDebounce";
 import ImageDots from "./ImageDots";
 import useImageZoomPan from "../../../utils/useImageZoomPan";
 import useObjectUrl from "../../../utils/useObjectUrl";
+import focusRing from "../../../utils/internal/focusRing";
 const swipeWidth = 30;
 const Root = styled("div", { name: "CcImageBox", slot: "root" })(({ theme, ownerState: { background, dragging, clickable } }) => ({
     borderRadius: theme.shape.borderRadius,
     position: "relative",
     height: "100%",
-    "& button": {
-        visibility: "hidden",
+    // Previous and Next over the image show while the box is hovered or holds the focus, and
+    // always where nothing can hover. opacity, not visibility: hidden by opacity they stay in
+    // the tab order and the accessibility tree, and focusing one shows it.
+    [`& > .${iconButtonClasses.root}`]: {
         opacity: 0,
-        transition: "visibility 0s linear 300ms, opacity 300ms",
+        transition: "opacity 300ms",
     },
-    "&:hover button": {
-        visibility: "visible",
+    [`&:hover > .${iconButtonClasses.root}`]: {
         opacity: 1,
-        transition: "visibility 0s linear 0s, opacity 300ms",
+    },
+    // at once: a button the keyboard focus moves to is visible from the start
+    [`&:focus-within > .${iconButtonClasses.root}`]: {
+        opacity: 1,
+        transition: "none",
+    },
+    "@media (hover: none)": {
+        [`& > .${iconButtonClasses.root}`]: {
+            opacity: 1,
+        },
     },
     ...(background && {
         backgroundColor: theme.palette.secondary.light,
@@ -55,6 +66,38 @@ const NextButton = styled(IconButton, { name: "CcImageBox", slot: "nextBtn" })({
     right: 0,
     transform: "translateY(-50%)",
 });
+/**
+ * State classes of the open button: there is a previous (swipeLeft) or a next (swipeRight)
+ * image, so the swipe pane needs room on that side
+ */
+const openButtonClasses = {
+    swipeLeft: "CcImageBox-swipeLeft",
+    swipeRight: "CcImageBox-swipeRight",
+};
+const OpenButton = styled(ButtonBase, {
+    name: "CcImageBox",
+    slot: "openButton",
+})(({ theme }) => ({
+    // in the swipe pane in place of the image, laid out as the image was: the image fills
+    // the button, and the swipe room is the button's margin
+    display: "inline-block",
+    verticalAlign: "baseline",
+    width: "100%",
+    height: "100%",
+    borderRadius: theme.shape.borderRadius,
+    [`&.${openButtonClasses.swipeLeft}`]: {
+        marginLeft: swipeWidth,
+    },
+    [`&.${openButtonClasses.swipeLeft}, &.${openButtonClasses.swipeRight}`]: {
+        marginRight: swipeWidth,
+    },
+    "& > img": {
+        display: "block",
+        margin: 0,
+    },
+    // inside the button: the swipe pane cuts off what lies outside it
+    "&.Mui-focusVisible": focusRing(theme, -2),
+}));
 const FullScreenRotateButtons = styled("div", {
     name: "CcImageBox",
     slot: "fullScreenRotateButtons",
@@ -215,7 +258,7 @@ const useScrollSwipe = (params) => {
 const ImageBox = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcImageBox" });
     const { t } = useCCTranslations();
-    const { image, width, height, onClick, onFilesDropped, onRemove, onNextImage, onPrevImage, disableBackground, disableRotation, fileName, imageDots, className, classes, } = props;
+    const { image, width, height, onClick, onFilesDropped, onNextImage, onPrevImage, disableBackground, disableRotation, fileName, imageDots, className, classes, } = props;
     const src = useObjectUrl(image);
     const { handleDragOver, handleDrop, dragging } = useDropZone(onFilesDropped);
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -225,11 +268,6 @@ const ImageBox = (inProps) => {
     const closeDialog = useCallback(() => {
         setDialogOpen(false);
     }, []);
-    const handleRemove = useCallback((evt) => {
-        evt.stopPropagation();
-        if (onRemove)
-            onRemove();
-    }, [onRemove]);
     const handlePrevImage = useCallback((evt) => {
         evt.stopPropagation();
         if (onPrevImage)
@@ -243,15 +281,24 @@ const ImageBox = (inProps) => {
     const { containerRef: containerRefImage, handleScroll: handleScrollImage, handleTouchEnd: handleTouchEndImage, } = useScrollSwipe(props);
     const { containerRef: containerRefFS, handleScroll: handleScrollFS, handleTouchEnd: handleTouchEndFS, } = useScrollSwipe(props);
     const { imgRef: zoomImgRef, containerRef: zoomContainerRef, containerProps: zoomContainerProps, rotateLeft, rotateRight, } = useImageZoomPan(dialogOpen, src);
+    const boxImage = (_jsx(Tooltip, { title: fileName ?? "", disableTouchListener: !fileName, disableHoverListener: !fileName, disableFocusListener: !fileName, children: _jsx(StyledImage, { src: src, alt: "", ownerState: {
+                swipeLeft: !!onPrevImage,
+                swipeRight: !!onNextImage,
+                imageDots: false,
+            }, className: classes?.image }) }));
     return (_jsxs(_Fragment, { children: [_jsxs(Root, { onClick: onClick === null ? undefined : (onClick ?? openDialog), onDragOver: handleDragOver, onDrop: handleDrop, style: { width, height }, ownerState: {
                     clickable: !!onClick,
                     dragging,
                     background: !disableBackground,
-                }, className: combineClassNames([className, classes?.root]), children: [onRemove && (_jsx(RemoveButton, { onClick: handleRemove, className: classes?.removeBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.remove"), children: _jsx(DeleteIcon, {}) })), onPrevImage && (_jsx(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.prev-image"), children: _jsx(PrevIcon, {}) })), onNextImage && (_jsx(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.next-image"), children: _jsx(NextIcon, {}) })), _jsx(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollImage, ref: containerRefImage, onTouchEnd: handleTouchEndImage, children: _jsx(Tooltip, { title: fileName ?? "", disableTouchListener: !fileName, disableHoverListener: !fileName, disableFocusListener: !fileName, children: _jsx(StyledImage, { src: src, alt: "", ownerState: {
-                                    swipeLeft: !!onPrevImage,
-                                    swipeRight: !!onNextImage,
-                                    imageDots: false,
-                                }, className: classes?.image }) }) })] }), !onClick && (_jsx(StyledDialog, { open: dialogOpen, fullScreen: true, onClose: closeDialog, children: _jsx(DialogContent, { children: _jsxs(FullScreenImageWrapper, { className: classes?.fullScreenImageWrapper, children: [_jsx(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollFS, ref: containerRefFS, onTouchEnd: handleTouchEndFS, children: _jsx(FullScreenZoomContainer, { ref: zoomContainerRef, ...zoomContainerProps, className: classes?.fullScreenZoomContainer, children: _jsx(StyledImage, { ref: zoomImgRef, src: src, alt: "", draggable: false, ownerState: {
+                }, className: combineClassNames([className, classes?.root]), children: [_jsx(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollImage, ref: containerRefImage, onTouchEnd: handleTouchEndImage, children: onClick === undefined ? (_jsx(OpenButton, { "aria-label": fileName
+                                ? t("standalone.file-upload.multi-image.open-full-screen", {
+                                    NAME: fileName,
+                                })
+                                : t("standalone.file-upload.multi-image.open-full-screen-unnamed"), className: combineClassNames([
+                                onPrevImage && openButtonClasses.swipeLeft,
+                                onNextImage && openButtonClasses.swipeRight,
+                                classes?.openButton,
+                            ]), children: boxImage })) : (boxImage) }), onPrevImage && (_jsx(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.prev-image"), children: _jsx(PrevIcon, {}) })), onNextImage && (_jsx(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.next-image"), children: _jsx(NextIcon, {}) }))] }), !onClick && (_jsx(StyledDialog, { open: dialogOpen, fullScreen: true, onClose: closeDialog, children: _jsx(DialogContent, { children: _jsxs(FullScreenImageWrapper, { className: classes?.fullScreenImageWrapper, children: [_jsx(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollFS, ref: containerRefFS, onTouchEnd: handleTouchEndFS, children: _jsx(FullScreenZoomContainer, { ref: zoomContainerRef, ...zoomContainerProps, className: classes?.fullScreenZoomContainer, children: _jsx(StyledImage, { ref: zoomImgRef, src: src, alt: "", draggable: false, ownerState: {
                                             swipeLeft: !!onPrevImage,
                                             swipeRight: !!onNextImage,
                                             imageDots: !imageDots,

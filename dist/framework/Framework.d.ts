@@ -1,6 +1,7 @@
 import React from "react";
 import { GetDefaultThemeCallback } from "./ThemeProvider";
 import { MobileScalingFixProps } from "../standalone/MobileScalingFix/MobileScalingFix";
+import type { DocumentTitleFormatter } from "../standalone/Routes/DocumentTitle";
 /**
  * Properties for the Framework
  */
@@ -29,6 +30,13 @@ export interface IFrameworkProps {
      * Disable unsafe-to-leave handling (window.beforeunload callback)
      */
     disableUnsafeToLeave?: boolean;
+    /**
+     * Builds the document title from the page titles that `PageTitle` headings
+     * and `usePageTitle` set (see `HistoryRouterProps.formatDocumentTitle`).
+     * Default: "<most specific page title> – <app title>", where the app title
+     * is the document's title when the Framework mounted.
+     */
+    formatDocumentTitle?: DocumentTitleFormatter;
     /**
      * The children which have access to the framework's capabilities (usually your whole app)
      */

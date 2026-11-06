@@ -1,4 +1,3 @@
-import React from "react";
-import { SvgIconProps } from "@mui/material";
-declare const _default: React.MemoExoticComponent<(props: SvgIconProps) => React.JSX.Element>;
+import type { SvgIconComponent } from "@mui/icons-material";
+declare const _default: SvgIconComponent;
 export default _default;

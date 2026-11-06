@@ -37,7 +37,11 @@ export interface BackendMultiSelectProps<M extends ModelUnknown, DataT extends M
      */
     onSelect?: (value: string[], raw: DataT[]) => void;
     /**
-     * The currently selected values
+     * The ids of the selected records, listed in this order. An id is shown from a
+     * matching `additionalOptions` entry (never looked up, never dropped by
+     * `onLoadError`), an `initialData` record or an entry picked in this field without a
+     * request, otherwise loaded through `modelFetch`; until then it is listed as a
+     * translated "Loading…" entry.
      */
     selected: string[];
     /**
@@ -76,7 +80,7 @@ interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
      */
     handleSelect: (selected: DataT[]) => void;
 }
-export declare const useSelectedCache: <M extends ModelUnknown, DataT extends MultiSelectorData>(props: Pick<BackendMultiSelectProps<M, DataT>, "model" | "modelFetch" | "disableRequestBatching" | "modelToSelectorData" | "onSelect" | "selected" | "initialData" | "onLoadError">) => UseSelectedCacheResult<DataT>;
+export declare const useSelectedCache: <M extends ModelUnknown, DataT extends MultiSelectorData>(props: Pick<BackendMultiSelectProps<M, DataT>, "model" | "modelFetch" | "disableRequestBatching" | "modelToSelectorData" | "onSelect" | "selected" | "initialData" | "onLoadError" | "additionalOptions">) => UseSelectedCacheResult<DataT>;
 /**
  * Themable subset of BackendMultiSelectProps (used for theme defaultProps)
  * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)

@@ -19,6 +19,25 @@ interface FieldProps {
      *          image uploads, the signature pad and the data grid multi select ignore it.
      */
     autoFocus?: boolean;
+    /**
+     * The id of the field's control, unique in the document
+     * @remarks Default: an id generated for this FormField. The renderer gives it to the
+     *          control the user operates (the input, the combobox of a selector, the group
+     *          of a radio field or of a list of checkboxes), and the field's error or
+     *          warning message gets the id `<id>-message`. Date and time fields, localized
+     *          strings, file and image uploads, the signature pad, the tag selector and the
+     *          data grid multi select do not use it yet.
+     */
+    id?: string;
+    /**
+     * The ids of elements that describe the field, separated by spaces, such as
+     * instructions the page shows next to it
+     * @remarks The control references them, followed by the field's error or warning
+     *          message while one is shown. Default: none, so only the message describes the
+     *          control. The selectors, and the controls `id` lists as not using it, do not
+     *          take a description yet.
+     */
+    "aria-describedby"?: string;
 }
 export interface FormFieldContextType<T> extends ModelRenderParams<T> {
     type: Type<T>;

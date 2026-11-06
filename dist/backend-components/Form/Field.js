@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState, } from "react";
+import React, { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, } from "react";
 import { useFormContext } from "./Form";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
 import { dotsToObject, getValueByDot } from "../../utils/dotUtils";
@@ -61,6 +61,9 @@ const Field = (props) => {
     // selector refreshing its options) must not pull the focus back to itself
     const [autoFocus, setAutoFocus] = useState(!!props.autoFocus);
     useEffect(() => setAutoFocus(false), []);
+    const generatedId = useId();
+    const id = props.id ?? generatedId;
+    const messageId = id + "-message";
     const { name } = props;
     const value = getValueByDot(name, values);
     const initialValue = initialValues[name];
@@ -69,6 +72,10 @@ const Field = (props) => {
     const touch = touched[props.name] || false;
     const errorMsg = (touch && errors[props.name]) || null;
     const warningMsg = (touch && warnings[props.name]) || null;
+    // the app's description first, then what is wrong with the value
+    const describedBy = [props["aria-describedby"], (errorMsg || warningMsg) && messageId]
+        .filter(Boolean)
+        .join(" ") || undefined;
     const relationData = relations[props.name];
     const dirty = useDirtyState(props.name);
     const visibility = getVisibility(hasId ? fieldDef.visibility.edit : fieldDef.visibility.create, values, initialValues);
@@ -79,6 +86,9 @@ const Field = (props) => {
     return useMemo(() => {
         const renderParams = {
             field: name,
+            id,
+            messageId,
+            describedBy,
             value: value,
             touched: touch,
             dirty: dirty,
@@ -104,6 +114,8 @@ const Field = (props) => {
     [
         value,
         name,
+        id,
+        describedBy,
         type,
         label,
         visibility,

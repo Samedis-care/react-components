@@ -47,7 +47,9 @@ export interface ToastProps {
      */
     onClose: () => void;
     /**
-     * Called when the close transition has finished
+     * Called when the close transition has finished: the moment to unmount the
+     * toast or clear its content. Optional: the closed toast leaves the page
+     * after its close transition with or without it
      */
     onExited?: () => void;
     /**

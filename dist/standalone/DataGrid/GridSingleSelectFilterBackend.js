@@ -1,7 +1,6 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { FormControl, Grid, styled, useThemeProps } from "@mui/material";
-import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
 import BackendSingleSelect from "../../backend-components/Selector/BackendSingleSelect";
 const GridSingleSelectFilterBackendDialogRoot = styled(Grid, {
@@ -38,15 +37,6 @@ const GridSingleSelectFilterBackend = (inProps) => {
     const { selected } = selectorProps;
     const { classes } = useDataGridProps();
     const isActive = !!selected;
-    const [, setActiveFilter] = useCustomFilterActiveContext();
-    useEffect(() => {
-        if (!isActive)
-            return;
-        setActiveFilter((prev) => prev + 1);
-        return () => {
-            setActiveFilter((prev) => prev - 1);
-        };
-    }, [setActiveFilter, isActive]);
     const selectorStyles = useMemo(() => ({
         autocomplete: isActive ? "Mui-active" : undefined,
     }), [isActive]);

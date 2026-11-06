@@ -43,6 +43,7 @@ import { LocaleSelectorDialogContentClassKey, LocaleSelectorDialogContentProps }
 import { LocaleSelectorEntryClassKey, LocaleSelectorEntryProps } from "./non-standalone/LocaleSelector/LocaleSelectorEntry";
 import { SignPadClassKey, SignPadProps } from "./standalone/SignPad";
 import { FormDialogClassKey, FormDialogProps } from "./backend-components/Form/FormDialog";
+import { PageTitleClassKey, PageTitleProps } from "./non-standalone/PageTitle/PageTitle";
 import { NotificationsClassKey, NotificationsProps } from "./standalone/Notifications";
 import { ToastClassKey, ToastProps } from "./standalone/Toast";
 import { DayContentsClassKey, DayContentsProps } from "./standalone/Schedule/Common/DayContents";
@@ -55,6 +56,7 @@ import { GridSingleSelectFilterClassKey, GridSingleSelectFilterProps } from "./s
 import { ScrollableScheduleDayClassKey, ScrollableScheduleDayProps } from "./standalone/Schedule/Scrollable/ScrollableScheduleDay";
 import { FormClassKey } from "./backend-components";
 import { BasicFormPageProps } from "./backend-components/Form/BasicFormPage";
+import { FlowEngineClassKey, FlowEngineThemeProps } from "./backend-components/Form/FlowEngine/FlowEngine";
 import { DirtyMarkerClassKey, FieldStateClassKey } from "./standalone/UIKit/MuiFieldState";
 import { CrudClassKey } from "./backend-components/CRUD";
 import { CrudLoadStatusClassKey, CrudLoadStatusProps } from "./backend-components/FileUpload/CrudLoadStatus";
@@ -62,6 +64,7 @@ import { BackendSingleSelectThemeProps } from "./backend-components/Selector/Bac
 import { BackendMultiSelectThemeProps } from "./backend-components/Selector/BackendMultiSelect";
 import { BackendMultipleSelectThemeProps } from "./backend-components/Selector/BackendMultipleSelect";
 import { BackendMultiSelectWithTagsThemeProps } from "./backend-components/Selector/BackendMultiSelectWithTags";
+import { BackendDataGridMultiSelectClassKey } from "./backend-components/Selector/BackendDataGridMultiSelect";
 import { GridSingleSelectFilterBackendClassKey, GridSingleSelectFilterBackendProps } from "./standalone/DataGrid/GridSingleSelectFilterBackend";
 import { ModelUnknown } from "./backend-integration";
 import { GridMultiSelectFilterBackendClassKey, GridMultiSelectFilterBackendProps } from "./standalone/DataGrid/GridMultiSelectFilterBackend";
@@ -127,6 +130,7 @@ declare module "@mui/material/styles" {
         CcLocaleSelectorEntry: LocaleSelectorEntryClassKey;
         CcSignPad: SignPadClassKey;
         CcFormDialog: FormDialogClassKey;
+        CcPageTitle: PageTitleClassKey;
         CcPopupMenu: PopupMenuClassKey;
         CcPortalLayout: PortalLayoutClassKey;
         CcNotifications: NotificationsClassKey;
@@ -143,7 +147,9 @@ declare module "@mui/material/styles" {
         CcGridMultiSelectFilterBackend: GridMultiSelectFilterBackendClassKey;
         CcGridSingleSelectFilter: GridSingleSelectFilterClassKey;
         CcGridSingleSelectFilterBackend: GridSingleSelectFilterBackendClassKey;
+        CcBackendDataGridMultiSelect: BackendDataGridMultiSelectClassKey;
         CcForm: FormClassKey;
+        CcFlowEngine: FlowEngineClassKey;
         CcFieldState: FieldStateClassKey;
         CcDirtyMarker: DirtyMarkerClassKey;
         CcCrud: CrudClassKey;
@@ -203,6 +209,7 @@ declare module "@mui/material/styles" {
         CcLocaleSelectorEntry: Partial<LocaleSelectorEntryProps>;
         CcSignPad: Partial<SignPadProps>;
         CcFormDialog: Partial<FormDialogProps>;
+        CcPageTitle: Partial<PageTitleProps>;
         CcPortalLayout: Partial<PortalLayoutProps>;
         CcNotifications: Partial<NotificationsProps>;
         CcToast: Partial<ToastProps>;
@@ -219,6 +226,7 @@ declare module "@mui/material/styles" {
         CcGridSingleSelectFilter: Partial<GridSingleSelectFilterProps>;
         CcGridSingleSelectFilterBackend: Partial<GridSingleSelectFilterBackendProps<ModelUnknown>>;
         CcBasicFormPage: Partial<BasicFormPageProps<never, never>>;
+        CcFlowEngine: Partial<FlowEngineThemeProps>;
     }
     interface Components {
         CcSignalPortlet?: {
@@ -322,6 +330,9 @@ declare module "@mui/material/styles" {
         };
         CcBackendMultiSelectWithTags?: {
             defaultProps?: ComponentsPropsList["CcBackendMultiSelectWithTags"];
+        };
+        CcBackendDataGridMultiSelect?: {
+            styleOverrides?: ComponentsOverrides<Theme>["CcBackendDataGridMultiSelect"];
         };
         CcBaseSelector?: {
             defaultProps?: ComponentsPropsList["CcBaseSelector"];
@@ -483,6 +494,11 @@ declare module "@mui/material/styles" {
             styleOverrides?: ComponentsOverrides<Theme>["CcFormDialog"];
             variants?: ComponentsVariants["CcFormDialog"];
         };
+        CcPageTitle?: {
+            defaultProps?: ComponentsPropsList["CcPageTitle"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcPageTitle"];
+            variants?: ComponentsVariants["CcPageTitle"];
+        };
         CcPopupMenu?: {
             styleOverrides?: ComponentsOverrides<Theme>["CcPopupMenu"];
             variants?: ComponentsVariants["CcFormDialog"];
@@ -573,6 +589,10 @@ declare module "@mui/material/styles" {
         };
         CcBasicFormPage?: {
             defaultProps?: ComponentsPropsList["CcBasicFormPage"];
+        };
+        CcFlowEngine?: {
+            defaultProps?: ComponentsPropsList["CcFlowEngine"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcFlowEngine"];
         };
         CcCrud?: {
             styleOverrides?: ComponentsOverrides<Theme>["CcCrud"];

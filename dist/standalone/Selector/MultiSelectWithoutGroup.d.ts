@@ -36,7 +36,10 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> e
      */
     getIdOfData?: (data: DataT) => string;
     /**
-     * Comparison function for client side sorting
+     * Comparison function (as for Array.sort) for the order of the chips. It
+     * sorts a copy for display only: `selected` is not changed (it may be
+     * frozen), and `onSelect` reports the entries in `selected`'s order.
+     * Without it the chips are shown in `selected`'s order.
      */
     sortCompareFn?: (value1: DataT, value2: DataT) => number;
 }

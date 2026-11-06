@@ -39,6 +39,15 @@ const FormPageWrapper = (props) => {
         return _jsx(_Fragment, {});
     return (_jsx(Suspense, { fallback: _jsx(Loader, {}), children: props.form(params.id ?? "", props.children) }));
 };
+/**
+ * A location pathname in the form of a route's url, which has no trailing or repeated slashes
+ * @param pathname The pathname
+ */
+const toRouteUrl = (pathname) => "/" +
+    pathname
+        .split("/")
+        .filter((segment) => segment)
+        .join("/");
 const CRUD = (props, ref) => {
     const { t } = useCCTranslations();
     const navigate = useNavigate();
@@ -188,7 +197,7 @@ const CRUD = (props, ref) => {
     useImperativeHandle(ref, () => dispatch, [dispatch]);
     const showGrid = disableRouting
         ? id === null
-        : routeUrl === location.pathname;
+        : routeUrl === toRouteUrl(location.pathname);
     useEffect(() => {
         window.dispatchEvent(new UIEvent("resize", { bubbles: true })); // trigger size recalculations
     }, [showGrid]);
@@ -196,7 +205,7 @@ const CRUD = (props, ref) => {
                     id !== "import" &&
                     id !== "devimport" &&
                     props.children &&
-                    form(id, props.children)] })) : (_jsxs(_Fragment, { children: [(id === null || !disableBackgroundGrid) && (_jsx(GridVisibilityWrapper, { className: !showGrid ? "Mui-hidden" : undefined, children: grid(routeUrl === location.pathname) })), props.children && (_jsxs(Routes, { children: [_jsx(RouteComponent, { path: `import/*`, element: hasImportPermission || !ForbiddenPage ? (importer(true)) : (_jsx(ForbiddenPage, {})) }), _jsx(RouteComponent, { path: `devimport/*`, element: hasImportPermission || !ForbiddenPage ? (importer(false)) : (_jsx(ForbiddenPage, {})) }), _jsx(RouteComponent, { path: `:id/*`, element: hasPermission(perms, props.readPermission) ||
+                    form(id, props.children)] })) : (_jsxs(_Fragment, { children: [(id === null || !disableBackgroundGrid) && (_jsx(GridVisibilityWrapper, { className: !showGrid ? "Mui-hidden" : undefined, children: grid(showGrid) })), props.children && (_jsxs(Routes, { children: [_jsx(RouteComponent, { path: `import/*`, element: hasImportPermission || !ForbiddenPage ? (importer(true)) : (_jsx(ForbiddenPage, {})) }), _jsx(RouteComponent, { path: `devimport/*`, element: hasImportPermission || !ForbiddenPage ? (importer(false)) : (_jsx(ForbiddenPage, {})) }), _jsx(RouteComponent, { path: `:id/*`, element: hasPermission(perms, props.readPermission) ||
                                 hasPermission(perms, props.editPermission) ||
                                 hasPermission(perms, props.newPermission) ||
                                 !ForbiddenPage ? (_jsx(FormPageWrapper, { form: form, children: props.children })) : (_jsx(ForbiddenPage, {})) })] }))] })) }));

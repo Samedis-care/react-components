@@ -4,6 +4,26 @@ import { FormContext } from "../Form";
 import PartialApplyError from "../Form/PartialApplyError";
 // the entry as the field names it, for the message of a write that failed
 const labelOf = (entry) => typeof entry.label === "string" ? entry.label : entry.label[0];
+const toPartialApplyError = (failures) => new PartialApplyError(failures
+    .map((failure) => `${labelOf(failure.entry)}: ${failure.error.message}`)
+    .join("; "), failures);
+/**
+ * Creates the row of a new entry. Rejects only when nothing was created: once the row
+ * exists it is listed, so it can be removed and is not created a second time.
+ */
+const createEntry = async (connector, serialize, deserialize, entry) => {
+    const record = (await connector.create(await serialize(entry)))[0];
+    try {
+        return { record, entry: await deserialize(record) };
+    }
+    catch (e) {
+        return {
+            record,
+            entry: { ...entry, value: record.id },
+            readError: e,
+        };
+    }
+};
 let ticketCounter = 0;
 const nextTicket = () => {
     ticketCounter = (ticketCounter + 1) % Number.MAX_SAFE_INTEGER;
@@ -11,12 +31,20 @@ const nextTicket = () => {
 };
 const useCrudSelect = (params, ref) => {
     const { connector, serialize, deserialize, deserializeModel, prepareNewEntry, onChange, initialSelected, validate, field, getIdOfData, } = params;
+    const disabled = !!params.disabled;
+    // read when a write would start, so a change queued or a handleSelect kept from an
+    // earlier render does not write after the control was disabled
+    const disabledRef = useRef(disabled);
+    disabledRef.current = disabled;
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [loadError, setLoadError] = useState(null);
     const [selected, setSelected] = useState([]);
     const currentSelected = useRef([]); // current state of selected, always set this and then use setSelected(currentSelected.current)
     const [initialRawData, setInitialRawData] = useState([]);
+    // the entries listed for created rows whose deserialize failed, by row: the field
+    // shows these instead of deserializing the row again
+    const readFallbacks = useRef(new WeakMap());
     // async processing of add to selection
     const addToSelectionResults = useRef({});
     const addToSelectionInputs = useRef({});
@@ -44,7 +72,7 @@ const useCrudSelect = (params, ref) => {
             return; // don't run this code twice
         fetchingAddSelection.current = true;
         const ticket = addToSelectionQueue[0];
-        let entry = addToSelectionInputs.current[ticket];
+        const entry = addToSelectionInputs.current[ticket];
         // if entry is undefined here we already started working on this, thus just wait and keep retrying
         if (entry === undefined) {
             // this happens when fetchingAddSelection is set to false before selection queue is updated (removed first entry) in finally handler of async code
@@ -58,17 +86,22 @@ const useCrudSelect = (params, ref) => {
         (async () => {
             if (loadError)
                 throw new Error("CrudSelect loading failed");
+            if (disabledRef.current)
+                throw new Error("CrudSelect is disabled");
             const existing = currentSelected.current.find((selEntry) => getIdOfData(selEntry) === getIdOfData(entry));
             if (existing)
                 return;
-            const modelRecord = (await connector.create(await serialize(entry)))[0];
-            entry = {
-                ...(await deserialize(modelRecord)),
-            };
+            const created = await createEntry(connector, serialize, deserialize, entry);
+            if (created.readError)
+                readFallbacks.current.set(created.record, created.entry);
             // store record in cache
-            setInitialRawData((oldRawData) => [...oldRawData, modelRecord]);
-            currentSelected.current = [...currentSelected.current, entry];
+            setInitialRawData((oldRawData) => [...oldRawData, created.record]);
+            currentSelected.current = [...currentSelected.current, created.entry];
             setSelected(currentSelected.current);
+            if (created.readError)
+                throw toPartialApplyError([
+                    { entry: created.entry, action: "read", error: created.readError },
+                ]);
         })()
             .then(resolve)
             .catch(reject)
@@ -79,7 +112,8 @@ const useCrudSelect = (params, ref) => {
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [loading, addToSelectionQueue]);
-    const handleSelect = useCallback(async (_ids, newSelected) => {
+    // writes the change, whether the control is disabled or not: the initial load uses it
+    const applySelection = useCallback(async (_ids, newSelected) => {
         // find new entries
         const newEntries = newSelected.filter((entry) => !selected.find((selEntry) => selEntry.value === entry.value));
         // remove new entries from array
@@ -149,12 +183,15 @@ const useCrudSelect = (params, ref) => {
             }
         }
         // wait for response
-        const created = (await settle("create", entriesToCreate, async (entry) => {
-            const record = (await connector.create(await serialize(entry)))[0];
-            return [record, await deserialize(record)];
-        }))
+        const created = (await settle("create", entriesToCreate, (entry) => createEntry(connector, serialize, deserialize, entry)))
             .filter((result) => result.status === "fulfilled")
             .map((result) => result.value);
+        created.forEach(({ record, entry, readError }) => {
+            if (!readError)
+                return;
+            readFallbacks.current.set(record, entry);
+            failures.push({ entry, action: "read", error: readError });
+        });
         const updated = await updatePromise;
         const deleted = await deletePromise;
         // create final values: a refused update keeps the entry as it was, a
@@ -167,24 +204,25 @@ const useCrudSelect = (params, ref) => {
                 return (selected.find((selEntry) => selEntry.value === entry.value) ?? entry);
             }),
             ...deletedEntries.filter((_entry, index) => deleted[index].status === "rejected"),
-            ...created.map(([, entry]) => entry),
+            ...created.map(({ entry }) => entry),
         ];
         // reflect changes
         setInitialRawData((oldRawData) => [
             ...oldRawData,
-            ...created.map(([record]) => record),
+            ...created.map(({ record }) => record),
         ]);
         currentSelected.current = finalSelected;
         setSelected(currentSelected.current);
-        setError(failures.length > 0
-            ? new PartialApplyError(failures
-                .map((failure) => `${labelOf(failure.entry)}: ${failure.error.message}`)
-                .join("; "), failures)
-            : null);
+        setError(failures.length > 0 ? toPartialApplyError(failures) : null);
     }, [connector, deserialize, prepareNewEntry, selected, serialize]);
+    const handleSelect = useCallback(async (ids, newSelected) => {
+        if (disabledRef.current)
+            return;
+        await applySelection(ids, newSelected);
+    }, [applySelection]);
     const modelToSelectorData = useCallback(async (data) => {
         if (initialRawData.includes(data))
-            return deserialize(data);
+            return readFallbacks.current.get(data) ?? deserialize(data);
         const deserialized = (await deserializeModel(data));
         // Use a stable value derived from the record id (not Math.random()),
         // so rebuilds of not-yet-persisted entries keep the same value.
@@ -201,7 +239,7 @@ const useCrudSelect = (params, ref) => {
         void (async () => {
             setLoading(true);
             if (initialSelected) {
-                await handleSelect(initialSelected.map((entry) => entry.value), initialSelected);
+                await applySelection(initialSelected.map((entry) => entry.value), initialSelected);
                 setLoading(false);
                 return;
             }
@@ -216,6 +254,9 @@ const useCrudSelect = (params, ref) => {
                 setSelected(currentSelected.current);
             }
             catch (e) {
+                // the field says that the load failed; the error's message is technical
+                // eslint-disable-next-line no-console
+                console.warn("[Components-Care] [CrudSelect] Could not load the selected entries:", e);
                 setLoadError(e);
             }
             finally {
@@ -259,6 +300,7 @@ const useCrudSelect = (params, ref) => {
         initialRawData,
         handleSelect,
         modelToSelectorData,
+        disabled,
     };
 };
 export default useCrudSelect;

@@ -1,6 +1,6 @@
 import { createElement as _createElement } from "react";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useEffect, useMemo, useState, } from "react";
+import React, { useCallback, useEffect, useId, useMemo, useState, } from "react";
 import { Autocomplete, Divider, Grid, IconButton, InputAdornment, InputLabel, ListItemText, Paper, Popper, styled, Typography, useThemeProps, } from "@mui/material";
 import { Add as AddIcon, ExpandMore, Info as InfoIcon, } from "@mui/icons-material";
 import TextFieldWithHelp from "../UIKit/TextFieldWithHelp";
@@ -151,6 +151,10 @@ const BaseSelector = (inProps) => {
     const { variant, refreshToken, onSelect, multiple, selected, label, disabled, required, error, warning, dirty, autoFocus, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, additionalOptions, enableIcons, noOptionsText, loadingText, startTypingToSearchText, disableTruncationNotice, truncatedLabel, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, forceQuery, defaultQuery, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, iconSize, classes, className, } = props;
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
+    // the label sits outside the text field, so it is tied to the input by id, the way
+    // MUI's Autocomplete names its list (aria-labelledby `<id>-label`)
+    const generatedId = useId();
+    const inputId = autocompleteId || generatedId;
     const defaultSwitchValue = !!(props.displaySwitch && props.defaultSwitchValue);
     const [switchValue, setSwitchValue] = useState(defaultSwitchValue);
     const { t } = useCCTranslations();
@@ -228,23 +232,53 @@ const BaseSelector = (inProps) => {
             : selected
                 ? [selected]
                 : [];
+        // a blur that changes nothing: MUI has put the committed entry's text into the
+        // input, so put the selection's text back
+        const keepSelection = () => setQuery(!multiple && selectedNormalized.length > 0
+            ? getStringLabel(selectedNormalized[0])
+            : "");
+        // freeSolo turns on MUI's autoSelect, which commits on blur what the field holds:
+        // the highlighted option (on opening, the selection), else the input text.
+        // Leaving the field with the selection's own text or record keeps the selection.
+        if (!multiple && reason === "blur" && dataNormalized.length > 0) {
+            const current = selectedNormalized[0];
+            if (dataNormalized[0].freeSolo) {
+                const text = getStringLabel(dataNormalized[0]);
+                if (current && text === getStringLabel(current)) {
+                    keepSelection();
+                    return;
+                }
+                // the list offers no free text entry for an option's exact label
+                const option = selectorOptions.find((entry) => !getOptionDisabled(entry) &&
+                    !entry.isAddNewButton &&
+                    getStringLabel(entry) === text);
+                if (option)
+                    dataNormalized[0] = option;
+            }
+            const committed = dataNormalized[0];
+            if (current &&
+                !committed.freeSolo &&
+                !committed.isAddNewButton &&
+                !current.freeSolo &&
+                getId(committed) === getId(current)) {
+                keepSelection();
+                return;
+            }
+        }
         if (dataNormalized.length > 0 &&
             dataNormalized[dataNormalized.length - 1].isAddNewButton) {
-            // if not free solo auto select on blur
-            if (reason !== "blur") {
-                if (!onAddNew)
-                    return;
-                const created = await onAddNew();
-                if (!created)
-                    return;
-                setSelectorOptions((old) => [created, ...old]);
-                dataNormalized[dataNormalized.length - 1] = created;
+            // "Create" highlighted when the field is left (autoSelect) creates nothing
+            if (reason === "blur") {
+                keepSelection();
+                return;
             }
-            else {
-                // make sure we don't select this element
-                dataNormalized.pop();
-                setQuery("");
-            }
+            if (!onAddNew)
+                return;
+            const created = await onAddNew();
+            if (!created)
+                return;
+            setSelectorOptions((old) => [created, ...old]);
+            dataNormalized[dataNormalized.length - 1] = created;
         }
         // single select shows the selected record in the input, so the query has to go.
         // multi select keeps it, so multiple records can be picked from one search.
@@ -265,7 +299,7 @@ const BaseSelector = (inProps) => {
                     addToLru(getId(lastRecord));
             }
         }
-    }, [onSelect, onAddNew, multiple, selected, addToLru, getId]);
+    }, [onSelect, onAddNew, multiple, selected, selectorOptions, addToLru, getId]);
     const context = useMemo(() => ({
         addToLru,
     }), [addToLru]);
@@ -496,7 +530,7 @@ const BaseSelector = (inProps) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lruIds.join(",")]);
     const filterOptions = useCallback((options) => options, []);
-    return (_jsx(StyledInlineSwitch, { visible: !!props.displaySwitch, value: switchValue, onChange: setSwitchValue, label: switchLabel, className: combineClassNames([className, classes?.inlineSwitch]), children: _jsxs(BaseSelectorContext.Provider, { value: context, children: [label && (_jsx(StyledLabel, { shrink: true, disableAnimation: true, disabled: disabled, className: classes?.label, required: !!required, error: !!error, dirty: dirty, children: label })), _jsx(Wrapper, { elevation: 0, className: classes?.wrapper, children: _jsx(StyledAutocomplete, { id: autocompleteId, className: classes?.autocomplete, multiple: multiple, disableCloseOnSelect: multiple, open: open, onOpen: handleOpen, onClose: () => {
+    return (_jsx(StyledInlineSwitch, { visible: !!props.displaySwitch, value: switchValue, onChange: setSwitchValue, label: switchLabel, className: combineClassNames([className, classes?.inlineSwitch]), children: _jsxs(BaseSelectorContext.Provider, { value: context, children: [label && (_jsx(StyledLabel, { id: `${inputId}-label`, htmlFor: inputId, shrink: true, disableAnimation: true, disabled: disabled, className: classes?.label, required: !!required, error: !!error, dirty: dirty, children: label })), _jsx(Wrapper, { elevation: 0, className: classes?.wrapper, children: _jsx(StyledAutocomplete, { id: inputId, className: classes?.autocomplete, multiple: multiple, disableCloseOnSelect: multiple, open: open, onOpen: handleOpen, onClose: () => {
                             setOpen(false);
                         }, disableClearable: disableClearable, loading: !!loading, loadingText: loadingText ?? t("standalone.selector.base-selector.loading-text"), autoComplete: true, disabled: disabled, selectOnFocus: !disableSearch, options: (() => {
                             let options = [];

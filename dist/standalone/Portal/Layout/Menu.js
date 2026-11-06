@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import { Drawer, Paper, styled, useTheme, useThemeProps } from "@mui/material";
+import { Drawer, drawerClasses, Paper, styled, useTheme, useThemeProps, } from "@mui/material";
 import React, { useMemo } from "react";
 import combineClassNames from "../../../utils/combineClassNames";
 const modalProps = {
@@ -14,7 +14,13 @@ const MenuPaper = styled(Paper, {
 const MenuDrawer = styled(Drawer, {
     name: "CcPortalLayoutMenu",
     slot: "menuDrawer",
-})({});
+})({
+    // leave a strip of backdrop to tap on any screen, also with drawerWidth
+    // (Material: a modal navigation drawer is at most the screen width minus 56px)
+    [`& .${drawerClasses.paper}`]: {
+        maxWidth: "calc(100% - 56px)",
+    },
+});
 const PortalLayoutMenu = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcPortalLayoutMenu" });
     const { menuOpen, toggleMenu, drawerWidth, className, classes } = props;

@@ -62,7 +62,6 @@ const ScrollableSchedule = (inProps) => {
     const todayElem = useRef(null);
     const scrollElem = useRef(null);
     const getDefaultState = useCallback(() => ({
-        items: [],
         dataOffsetTop: -1,
         dataOffsetBottom: 0,
         today: moment(),
@@ -91,25 +90,19 @@ const ScrollableSchedule = (inProps) => {
      * @param top load more data on top? (if false loads more data at bottom)
      */
     const loadMore = useCallback((top) => {
-        const mkItem = (state) => {
-            const page = top ? state.dataOffsetTop : state.dataOffsetBottom;
-            return (_jsx(ScrollableScheduleWeek, { loadData: () => loadWeekCallback(page, state.filterValues), setTodayElement: (elem) => (todayElem.current = elem), moment: state.today.clone().add(page, "weeks") }, page.toString()));
-        };
         if (top) {
             setState((prevState) => ({
                 ...prevState,
-                items: [mkItem(prevState), ...prevState.items],
                 dataOffsetTop: prevState.dataOffsetTop - 1,
             }));
         }
         else {
             setState((prevState) => ({
                 ...prevState,
-                items: [...prevState.items, mkItem(prevState)],
                 dataOffsetBottom: prevState.dataOffsetBottom + 1,
             }));
         }
-    }, [loadWeekCallback]);
+    }, []);
     /**
      * Loads more data on top of the scroller
      */
@@ -118,6 +111,9 @@ const ScrollableSchedule = (inProps) => {
      * Loads more data at the bottom of the scroller
      */
     const loadMoreBottom = useCallback(() => loadMore(false), [loadMore]);
+    const setTodayElement = useCallback((elem) => {
+        todayElem.current = elem;
+    }, []);
     const jumpToToday = useCallback(() => {
         if (!todayElem.current ||
             !scrollElem.current ||
@@ -149,6 +145,12 @@ const ScrollableSchedule = (inProps) => {
         setFilterSettingsAnchorEl(null);
     }, []);
     const filterCount = filters ? Object.keys(filters).length : 0;
+    // the weeks are rendered from their offsets, so they always get the current
+    // loadWeekCallback and reload when it changes
+    const weeks = [];
+    for (let page = state.dataOffsetTop + 1; page < state.dataOffsetBottom; ++page) {
+        weeks.push(_jsx(ScrollableScheduleWeek, { weekOffset: page, today: state.today, loadWeekCallback: loadWeekCallback, filterValues: state.filterValues, setTodayElement: setTodayElement }, page));
+    }
     return (_jsxs(Grid, { container: true, className: className, children: [_jsx(TodayButtonWrapper, { size: 12, className: classes?.today, onClick: jumpToToday, children: _jsxs(Grid, { container: true, sx: { justifyContent: "space-between" }, children: [_jsx(Grid, { children: _jsx(TodayButton, { className: classes?.todayBtn, onClick: jumpToToday, fullWidth: true, children: _jsx(Box, { sx: { m: 2 }, children: state.today.format("ddd DD MMMM") }) }) }), _jsx(Grid, { children: filterCount + actions.length > 0 && (_jsx(FilterWrapper, { sx: { px: 2 }, className: classes?.filterWrapper, onClick: preventAction, children: filterCount + actions.length > 1 ? (_jsxs(_Fragment, { children: [_jsx(IconButton, { onClick: openFilterSettings, "aria-label": t("standalone.schedule.filter-settings"), children: _jsx(FilterSettingsIcon, { className: classes?.filterSettingsBtn }) }), _jsx(Menu, { open: filterSettingsAnchorEl != null, anchorEl: filterSettingsAnchorEl, onClose: closeFiltersMenu, children: _jsx(Box, { sx: { p: 1 }, children: _jsxs(Grid, { container: true, spacing: 1, children: [Object.entries(filters).map(([name, filter]) => (_jsx(Grid, { size: 12, children: _jsx(ScrollableFilterRenderer, { ...filter, name: name, value: filter.type === "select"
                                                                     ? state.filterValues[name]
                                                                     : state.filterValues[name], onChange: handleFilterChange }) }, "filter-" + name))), filterCount > 0 && (_jsx(Grid, { size: 12, children: _jsx(Divider, {}) }, "divider")), actions.map((action) => (_jsx(Grid, { size: 12, children: _jsx(Button, { onClick: action.onClick, disabled: action.disabled, fullWidth: true, children: action.label }) }, "action-" + action.id)))] }) }) })] })) : filterCount > 0 ? ((() => {
@@ -157,6 +159,6 @@ const ScrollableSchedule = (inProps) => {
                                 })()) : actions.length > 0 ? ((() => {
                                     const action = actions[0];
                                     return (_jsx(Button, { onClick: action.onClick, disabled: action.disabled, children: action.label }, "action-" + action.id));
-                                })()) : (throwError("code should be unreachable")) })) })] }) }), _jsx(Grid, { size: 12, children: _jsx(StyledInfiniteScroll, { className: combineClassNames([wrapperClass, classes?.scroller]), loadMoreTop: loadMoreTop, loadMoreBottom: loadMoreBottom, ref: scrollElem, children: _jsx(Box, { sx: { m: 2 }, children: _jsx(Grid, { container: true, spacing: 2, children: state.items }) }) }) })] }));
+                                })()) : (throwError("code should be unreachable")) })) })] }) }), _jsx(Grid, { size: 12, children: _jsx(StyledInfiniteScroll, { className: combineClassNames([wrapperClass, classes?.scroller]), loadMoreTop: loadMoreTop, loadMoreBottom: loadMoreBottom, ref: scrollElem, children: _jsx(Box, { sx: { m: 2 }, children: _jsx(Grid, { container: true, spacing: 2, children: weeks }) }) }) })] }));
 };
 export default React.memo(ScrollableSchedule);

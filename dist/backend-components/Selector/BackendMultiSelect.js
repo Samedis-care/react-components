@@ -6,7 +6,7 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import getSelectedLoadErrorLabel from "./getSelectedLoadErrorLabel";
 import useDebouncedLoad from "./useDebouncedLoad";
 export const useSelectedCache = (props) => {
-    const { model, disableRequestBatching, modelToSelectorData, onSelect, selected, initialData, onLoadError, } = props;
+    const { model, disableRequestBatching, modelToSelectorData, onSelect, selected, initialData, onLoadError, additionalOptions, } = props;
     const modelFetch = props.modelFetch ?? model;
     const [selectedCache, setSelectedCache] = useState({});
     const { t } = useCCTranslations();
@@ -31,6 +31,11 @@ export const useSelectedCache = (props) => {
                     .map(async (record) => (newCache[record.id] =
                     await modelToSelectorData(record))));
             }
+            // an additionalOptions entry is not a record: listed as it is, never looked up
+            additionalOptions?.forEach((option) => {
+                if (selected.includes(option.value) && !(option.value in selectedCache))
+                    newCache[option.value] = option;
+            });
             const isIdNotInCache = (value) => !(value in selectedCache) && !(value in newCache);
             await Promise.all(selected.filter(isIdNotInCache).map(async (value) => {
                 try {

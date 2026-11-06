@@ -1,10 +1,13 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
-import React, { useCallback } from "react";
+import React, { useCallback, useId, useMemo } from "react";
 import { Checkbox, Grid, Typography } from "@mui/material";
 import { KeyboardArrowUp as ClosedIcon, KeyboardArrowDown as ExpandedIcon, } from "@mui/icons-material";
 const TreeViewCheckboxSelectionRenderer = (props) => {
     const { expanded, icon, label, hasChildren, onToggleExpanded, expandLocked, id, hasNext, ancestorLanes, hasConnector, onClick, onAuxClick, } = props;
     const handleExpand = useCallback(() => onToggleExpanded(id), [onToggleExpanded, id]);
+    // the checkbox is named by the entry's label next to it
+    const labelId = useId();
+    const checkboxSlotProps = useMemo(() => ({ input: { "aria-labelledby": labelId } }), [labelId]);
     const offsetLeft = hasConnector ? 12 : 0;
     return (_jsxs(Grid, { container: true, style: {
             height: 24,
@@ -23,6 +26,6 @@ const TreeViewCheckboxSelectionRenderer = (props) => {
                                     height: 12,
                                     width: 12,
                                     borderLeft: hasNext ? "1px solid black" : undefined,
-                                } })] })] })), _jsx(Grid, { style: { height: 24 }, onClick: expandLocked ? undefined : handleExpand, children: hasChildren ? (expanded ? (_jsx(ExpandedIcon, {})) : (_jsx(ClosedIcon, {}))) : (_jsx(Checkbox, { style: { padding: 0 }, checked: expanded })) }, "expandable"), icon && (_jsx(Grid, { onClick: onClick, onAuxClick: onAuxClick, children: icon }, "icon")), _jsx(Grid, { onClick: onClick, onAuxClick: onAuxClick, size: "grow", children: _jsx(Typography, { noWrap: true, children: label }) }, "label")] }));
+                                } })] })] })), _jsx(Grid, { style: { height: 24 }, onClick: expandLocked ? undefined : handleExpand, children: hasChildren ? (expanded ? (_jsx(ExpandedIcon, {})) : (_jsx(ClosedIcon, {}))) : (_jsx(Checkbox, { style: { padding: 0 }, checked: expanded, slotProps: checkboxSlotProps })) }, "expandable"), icon && (_jsx(Grid, { onClick: onClick, onAuxClick: onAuxClick, children: icon }, "icon")), _jsx(Grid, { onClick: onClick, onAuxClick: onAuxClick, size: "grow", children: _jsx(Typography, { noWrap: true, id: labelId, children: label }) }, "label")] }));
 };
 export default React.memo(TreeViewCheckboxSelectionRenderer);

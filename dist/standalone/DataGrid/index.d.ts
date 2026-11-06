@@ -9,3 +9,4 @@ export { default as GridMultiSelectFilter } from "./GridMultiSelectFilter";
 export { default as GridMultiSelectFilterBackend } from "./GridMultiSelectFilterBackend";
 export { default as GridSingleSelectFilter } from "./GridSingleSelectFilter";
 export { default as GridSingleSelectFilterBackend } from "./GridSingleSelectFilterBackend";
+export { isDataGridCustomFilterActive, areDataGridCustomFiltersActive, } from "./DataGridUtils";

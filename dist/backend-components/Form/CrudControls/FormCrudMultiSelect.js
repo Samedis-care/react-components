@@ -7,7 +7,9 @@ const FormCrudMultiSelect = (props, ref) => {
     const [connectorParams, otherProps] = extractLazyCrudConnectorParams(props);
     const { connector } = useLazyCrudConnector(connectorParams);
     const { readOnly, errorComponent } = useFormContextLite();
-    return (_jsx(CrudMultiSelect, { connector: connector, errorComponent: errorComponent, disabled: props.disabled || readOnly, field: connectorParams.field, ref: ref, ...otherProps }));
+    // the caller's props first: the Form's state wins, so an explicit falsy disabled
+    // cannot unlock the control in a read-only form
+    return (_jsx(CrudMultiSelect, { ...otherProps, connector: connector, errorComponent: errorComponent, disabled: otherProps.disabled || readOnly, field: connectorParams.field, ref: ref }));
 };
 export const ForwardedCrudMultiSelect = React.forwardRef(FormCrudMultiSelect);
 export default React.memo(ForwardedCrudMultiSelect);

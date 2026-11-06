@@ -5,7 +5,7 @@ import LocalizedDateTimePicker from "../../../standalone/LocalizedDateTimePicker
 import accessSlotProps from "../../../utils/internal/accessSlotProps";
 import PickersTextFieldWithHelp from "../PickersTextFieldWithHelp";
 const DateTimeInput = (props) => {
-    const { openInfo, important, required, error, fullWidth, onBlur, ...muiProps } = props;
+    const { openInfo, important, required, error, fullWidth, onBlur, helperText, ...muiProps } = props;
     return (_jsx(LocalizedDateTimePicker, { ...muiProps, 
         // the picker owns these four: it builds the text field slot props itself, so
         // passing them down through slotProps.textField would be overwritten there
@@ -21,6 +21,9 @@ const DateTimeInput = (props) => {
                     important,
                     openInfo,
                     ...orgSlotProps,
+                    // only where the caller gave one, so a helper text passed through
+                    // slotProps.textField is not overwritten with undefined
+                    ...(helperText === undefined ? {} : { helperText }),
                     slotProps: {
                         inputLabel: {
                             ...InputLabelConfig,

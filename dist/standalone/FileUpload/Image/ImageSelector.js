@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { alpha, Box, Button, Grid, IconButton, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import { AttachFile, FileUpload as UploadIcon, Person, CameraAlt as CameraIcon, } from "@mui/icons-material";
 import ImagePreviewDialog from "./ImagePreviewDialog";
@@ -63,7 +63,33 @@ const ModernUploadLabel = styled(Typography, {
     name: "CcImageSelector",
     slot: "modernUploadLabel",
 })(({ theme }) => ({
+    display: "block",
     color: theme.palette.action.disabled,
+}));
+/**
+ * The empty modern field's upload control: a button around its call to action that looks
+ * like the text, with an outline on keyboard focus
+ */
+const ModernUploadButton = styled("button", {
+    name: "CcImageSelector",
+    slot: "modernUploadButton",
+})(({ theme }) => ({
+    display: "block",
+    width: "100%",
+    margin: 0,
+    padding: 0,
+    border: 0,
+    borderRadius: theme.shape.borderRadius,
+    background: "none",
+    color: "inherit",
+    font: "inherit",
+    letterSpacing: "inherit",
+    textAlign: "inherit",
+    cursor: "pointer",
+    "&:focus-visible": {
+        outline: `2px solid ${theme.palette.primary.main}`,
+        outlineOffset: 2,
+    },
 }));
 const ModernFullHeightBox = styled(Box, {
     name: "CcImageSelector",
@@ -225,6 +251,33 @@ const ImageSelector = (inProps) => {
             return;
         evt.preventDefault();
     }, [readOnly]);
+    // The empty modern field's button is replaced by the image once a pick is applied. If it
+    // had focus then, focus moves on to the image's upload button instead of to the page.
+    const modernUploadButtonRef = useRef(null);
+    const modernImageUploadRef = useRef(null);
+    const refocusUploadRef = useRef(false);
+    const setModernUploadButton = useCallback((elem) => {
+        const prev = modernUploadButtonRef.current;
+        modernUploadButtonRef.current = elem;
+        // React detaches a ref before it removes the element, so the focus is still on it here
+        if (!elem && prev && prev.ownerDocument.activeElement === prev) {
+            refocusUploadRef.current = true;
+        }
+    }, []);
+    const showsModernUploadButton = variant === "modern" && !value && !readOnly;
+    useLayoutEffect(() => {
+        if (showsModernUploadButton || !refocusUploadRef.current)
+            return;
+        refocusUploadRef.current = false;
+        const target = modernImageUploadRef.current;
+        if (!target)
+            return;
+        // only take over focus that was lost with the button, never move it away from elsewhere
+        const active = target.ownerDocument.activeElement;
+        if (active && active !== target.ownerDocument.body && active.isConnected)
+            return;
+        target.focus();
+    }, [showsModernUploadButton]);
     const [showPreviewDialog, setShowPreviewDialog] = useState(false);
     const handlePreviewDialog = useCallback(() => {
         setShowPreviewDialog(true);
@@ -244,6 +297,7 @@ const ImageSelector = (inProps) => {
                                         t("standalone.file-upload.upload-capture.image") }) })), _jsx(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper })] }, "upload")), _jsx(ImageWrapper, { size: "grow", className: classes?.imgWrapper, children: value && (_jsx(PreviewClassic, { src: src, alt: props.alt, className: classes?.previewClassic })) }, "image")] }) }));
     }
     else if (variant === "modern") {
+        const modernUploadLabel = (_jsx(ModernUploadLabel, { component: "span", variant: "h5", className: classes?.modernUploadLabel, align: "center", children: props.uploadLabel ?? t("standalone.file-upload.upload-modern") ?? "" }));
         return (_jsxs(_Fragment, { children: [previewDialog, _jsx(GroupBox, { label: boxLabel, smallLabel: props.smallLabel, className: className, children: _jsxs(RootModern, { container: true, spacing: 0, sx: {
                             flexDirection: "column",
                             alignContent: "flex-start",
@@ -251,12 +305,10 @@ const ImageSelector = (inProps) => {
                             justifyContent: "center",
                         }, wrap: "nowrap", className: classes?.rootModern, onDrop: handleDrop, onDragOver: handleDragOver, children: [!props.readOnly && (_jsx(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper })), _jsx(ImageWrapper, { size: "grow", className: classes?.imgWrapper, onBlur: props.onBlur, "data-name": props.name, children: value ? (_jsxs(_Fragment, { children: [_jsx(Tooltip, { title: props.uploadLabel ??
                                                 t("standalone.file-upload.upload-modern-dnd") ??
-                                                "", children: _jsx(PreviewModern, { src: src, alt: props.alt, onClick: handlePreviewDialog, className: classes?.previewModern }) }), _jsxs(ModernUploadControlsWrapper, { container: true, spacing: 1, children: [_jsx(Grid, { children: _jsx(Tooltip, { title: t("standalone.file-upload.upload-modern-btn"), children: _jsx(ModernUploadControlUpload, { onClick: handleUpload, children: _jsx(UploadIcon, {}) }) }) }), captureEnabled && (_jsx(Grid, { children: _jsx(Tooltip, { title: t("standalone.file-upload.upload-modern-btn-capture.image"), children: _jsx(ModernUploadControlUpload, { onClick: handleUploadCapture, children: _jsx(CameraIcon, {}) }) }) }))] })] })) : (_jsx(ModernFullHeightBox, { sx: { px: 2 }, className: classes?.modernFullHeightBox, children: _jsxs(ModernFullHeightGrid, { container: true, onClick: handleUpload, sx: { flexDirection: "column" }, spacing: 0, className: classes?.modernFullHeightGrid, children: [_jsx(Grid, { container: true, sx: {
+                                                "", children: _jsx(PreviewModern, { src: src, alt: props.alt, onClick: handlePreviewDialog, className: classes?.previewModern }) }), _jsxs(ModernUploadControlsWrapper, { container: true, spacing: 1, children: [_jsx(Grid, { children: _jsx(Tooltip, { title: t("standalone.file-upload.upload-modern-btn"), children: _jsx(ModernUploadControlUpload, { ref: modernImageUploadRef, onClick: handleUpload, children: _jsx(UploadIcon, {}) }) }) }), captureEnabled && (_jsx(Grid, { children: _jsx(Tooltip, { title: t("standalone.file-upload.upload-modern-btn-capture.image"), children: _jsx(ModernUploadControlUpload, { onClick: handleUploadCapture, children: _jsx(CameraIcon, {}) }) }) }))] })] })) : (_jsx(ModernFullHeightBox, { sx: { px: 2 }, className: classes?.modernFullHeightBox, children: _jsxs(ModernFullHeightGrid, { container: true, onClick: handleUpload, sx: { flexDirection: "column" }, spacing: 0, className: classes?.modernFullHeightGrid, children: [_jsx(Grid, { container: true, sx: {
                                                     flexDirection: "column",
                                                     justifyContent: "space-around",
-                                                }, wrap: "nowrap", size: "grow", children: _jsx(Grid, { children: _jsx(ModernUploadLabel, { component: "h1", variant: "h5", className: classes?.modernUploadLabel, align: "center", children: props.uploadLabel ??
-                                                            t("standalone.file-upload.upload-modern") ??
-                                                            "" }) }) }), _jsx(Grid, { children: _jsxs(Grid, { container: true, wrap: "nowrap", spacing: 0, sx: { justifyContent: "space-between" }, children: [_jsx(Grid, { children: _jsx(ModernFormatsLabel, { className: classes?.modernFormatsLabel, children: props.formatsLabel ??
+                                                }, wrap: "nowrap", size: "grow", children: _jsx(Grid, { children: readOnly ? (modernUploadLabel) : (_jsx(ModernUploadButton, { ref: setModernUploadButton, type: "button", name: props.name, className: classes?.modernUploadButton, children: modernUploadLabel })) }) }), _jsx(Grid, { children: _jsxs(Grid, { container: true, wrap: "nowrap", spacing: 0, sx: { justifyContent: "space-between" }, children: [_jsx(Grid, { children: _jsx(ModernFormatsLabel, { className: classes?.modernFormatsLabel, children: props.formatsLabel ??
                                                                     t("standalone.file-upload.formats-modern") ??
                                                                     "" }) }), _jsx(Grid, { children: _jsx(ModernFormatIcon, { className: classes?.modernFormatIcon }) })] }) })] }) })) }, "image")] }) })] }));
     }

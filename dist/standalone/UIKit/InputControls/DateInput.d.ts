@@ -1,5 +1,5 @@
 import React from "react";
-import { DatePickerProps } from "@mui/x-date-pickers";
+import { DatePickerProps, PickersTextFieldProps } from "@mui/x-date-pickers";
 import { PickersTextFieldWithHelpProps } from "../PickersTextFieldWithHelp";
 import { LocalizedKeyboardDatePickerProps } from "../../LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
 export interface DateInputProps extends Omit<PickersTextFieldWithHelpProps, "customHandleClear"> {
@@ -32,6 +32,14 @@ export interface DateInputProps extends Omit<PickersTextFieldWithHelpProps, "cus
      * onBlur callback passed to text field
      */
     onBlur?: LocalizedKeyboardDatePickerProps["onBlur"];
+    /**
+     * Text below the field: a hint, or the message of a validation error or warning
+     * @remarks The field group's description (`aria-describedby`), so a screen reader
+     *          reads it when the user reaches the field; its color follows `error` and
+     *          `warning`. Takes the place of `slotProps.textField.helperText`, which is
+     *          used while this is undefined. Default: none.
+     */
+    helperText?: PickersTextFieldProps["helperText"];
 }
 declare const _default: React.MemoExoticComponent<(props: DateInputProps & Omit<DatePickerProps, "value" | "onChange">) => React.JSX.Element>;
 export default _default;

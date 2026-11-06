@@ -1,4 +1,14 @@
 import { DataGridCustomDataActionButton, DataGridFilterParameters, DataGridQuery, DataGridRowData, DataGridRowUpdate, DataGridSortSetting, IDataGridCallbacks, IDataGridColumnsState, IDataGridFieldFilter, IDataGridState } from "./DataGrid";
+/**
+ * Splits the column state into the sorts and the column filters loadData gets
+ * @param columnsState The column state
+ * @returns The sorts, by priority (sortOrder), and the column filters (field
+ *          -> filter) whose first condition has a value1
+ * @remarks The filters are normalized like for the reload trigger
+ *          (normalizeFilterDef): a filter chain ends before its first
+ *          condition without a value1, so every page of a list is loaded with
+ *          the same query
+ */
 export declare const dataGridPrepareFiltersAndSorts: (columnsState: IDataGridColumnsState) => [DataGridSortSetting[], IDataGridFieldFilter];
 /**
  * The filter the grid shows, as loadData gets it

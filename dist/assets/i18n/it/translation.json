@@ -16,7 +16,12 @@
 			"info": "Ulteriori informazioni",
 			"clear": "Cancella",
 			"multi-language-input": {
+				"language": "Lingua",
+				"language-of": "Lingua di {{label}}",
 				"toggle-languages": "Attiva/disattiva input lingua"
+			},
+			"number-input": {
+				"invalid": "Inserisci un numero, ad esempio {{EXAMPLE}}"
 			}
 		},
 		"signal-portlet": {
@@ -39,6 +44,7 @@
 					"any": "Tutti"
 				},
 				"set-filter": {
+					"label": "Valori",
 					"search": "Cerca…",
 					"select-all": "Seleziona tutto",
 					"invert": "Mostra tutto tranne…"
@@ -68,11 +74,14 @@
 				"grid-label": "Contenuto della tabella",
 				"no-data": "L'elenco non contiene dati.",
 				"filter-combination": {
+					"label": "Combina le condizioni",
 					"and": "E",
 					"or": "O"
 				},
 				"no-data-reset-filters": "Cancella filtri",
-				"no-data-filters": "Nessun dato corrisponde ai filtri impostati."
+				"no-data-filters": "Nessun dato corrisponde ai filtri impostati.",
+				"select-row": "Seleziona {{ROW}}",
+				"select-row-fallback": "Seleziona riga"
 			},
 			"header": {
 				"new": "Nuovo",
@@ -95,9 +104,13 @@
 				}
 			},
 			"settings": {
+				"search": "Cerca colonne",
+				"no-match": "Nessuna colonna corrispondente",
 				"column": "Colonna",
 				"show": "Visibile",
 				"pin": "Fissa",
+				"pin-hidden": "Le colonne nascoste non possono essere fissate",
+				"pin-forced": "Questa colonna è sempre fissata",
 				"close": "Chiudi"
 			},
 			"custom-filters": {
@@ -141,6 +154,9 @@
 					"yes": "Sì",
 					"no": "No"
 				}
+			},
+			"multi-select-with-tags": {
+				"group-input-label": "Aggiungi tutte le voci di un gruppo"
 			}
 		},
 		"file-upload": {
@@ -179,14 +195,20 @@
 				"edit": "Modifica",
 				"primary": "Principale",
 				"remove": "Rimuovi immagine",
+				"add": "Aggiungi immagine",
+				"replace": "Sostituisci immagine",
 				"prev-image": "Immagine precedente",
-				"next-image": "Immagine successiva"
+				"next-image": "Immagine successiva",
+				"open-full-screen": "Apri {{NAME}} a schermo intero",
+				"open-full-screen-unnamed": "Apri l'immagine a schermo intero",
+				"image-position": "Immagine {{INDEX}} di {{TOTAL}}"
 			}
 		},
 		"phone-number": {
 			"invalid": "Inserisci un numero di telefono corretto"
 		},
 		"signature-pad": {
+			"with-signer": "{{LABEL}} ({{NAME}})",
 			"dialog": {
 				"reset": "Cancella firma",
 				"save-changes": "Salva modifiche",
@@ -202,7 +224,7 @@
 				"close": "Chiudi",
 				"signature": "Firma"
 			},
-			"sign-here": "Firmato digitalmente qui"
+			"sign-here": "Firma qui digitalmente"
 		},
 		"toast": {
 			"close": "Chiudi"
@@ -221,6 +243,7 @@
 			}
 		},
 		"language-switcher": {
+			"load-error": "Non è stato possibile caricare la lingua. Controlla la tua connessione a Internet, ricarica la pagina e riprova.",
 			"title": "Seleziona il tuo paese e la tua lingua",
 			"no-locales": "Nessuna impostazione locale corrisponde alla tua ricerca"
 		}
@@ -254,6 +277,10 @@
 					},
 					"files": {
 						"no-file": "Nessun file presente"
+					},
+					"string-array": {
+						"entry": "{{LABEL}} {{NUM}}",
+						"new-entry": "{{LABEL}}: nuova voce"
 					}
 				},
 				"date-nullable": {
@@ -311,7 +338,10 @@
 		"selector": {
 			"loading": "Caricamento…",
 			"loading-error": "Errore durante il recupero dei dati",
-			"unknown-entry": "Voce sconosciuta"
+			"unknown-entry": "Voce sconosciuta",
+			"selected-count": "Selezionati: {{COUNT}}",
+			"selection-load-error": "{{LABEL}}: caricamento non riuscito.",
+			"selection-load-error-unlabelled": "Impossibile caricare le voci selezionate."
 		},
 		"crud": {
 			"import": {
@@ -323,13 +353,14 @@
 				"source_field": "Campo",
 				"source_field_type": "Tipi di dati",
 				"destination_fields": "Campi di destinazione",
-				"conv_script": "Script di conversione (JavaScript)",
+				"conv_script": "{{FIELD}}: script di conversione (JavaScript)",
 				"queue": "In coda: {{COUNT}}",
 				"success": "Riuscito: {{COUNT}}",
 				"failed": "Non riuscito: {{COUNT}}",
 				"last_error": "Ultimo errore",
 				"errors": {
 					"file_select": "File selezionato non valido",
+					"file_read": "Impossibile leggere {{FILE_NAME}}. Salva il file come cartella di lavoro di Excel (.xlsx) senza password e selezionalo di nuovo.",
 					"update-key-not-uniq": "{{UPDATE_KEY}} non è univoco nel set di dati di importazione"
 				},
 				"validations": {
@@ -338,8 +369,13 @@
 					"currency_unsupported": "La valuta non può ancora essere importata",
 					"date": "Il risultato deve essere una data o null",
 					"boolean": "Il risultato deve essere un valore booleano o null",
-					"fail": "Validazione non riuscita: {{REASON}}. Per i dettagli consulta la console del browser.",
-					"unknown": "Sconosciuto"
+					"fail": "Validazione non riuscita: {{REASON}}. Per i dettagli consulta la console del browser."
+				},
+				"script_status": {
+					"none": "{{FIELD}}: nessuno script",
+					"pending": "{{FIELD}}: verifica dello script in corso",
+					"okay": "{{FIELD}}: lo script è valido",
+					"error": "{{FIELD}}: lo script non è valido"
 				},
 				"validation_errors": "Errori di validazione",
 				"conversion_errors": "Errori di conversione dei dati"

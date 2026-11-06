@@ -28,7 +28,14 @@ export interface FormDialogProps {
      */
     children?: React.ReactNode;
     /**
-     * Called on dialog close
+     * Called when the X, Escape or a backdrop click closes the dialog, after "Leave form
+     * page?" when a form page inside is dirty. A dialog shown with pushDialog then closes
+     * itself, unless onClose closed it already, so `onClose={popDialog}` closes only this
+     * dialog. A dialog rendered without pushDialog closes only through onClose, which has to
+     * stop rendering it. Not called when the content closes the dialog (useCloseThisDialog,
+     * popDialog, a goBack).
+     * @remarks Runs while the dialog is still open: a navigation from onClose is blocked like
+     *          any navigation while a pushed dialog is open.
      */
     onClose?: () => void;
     /**

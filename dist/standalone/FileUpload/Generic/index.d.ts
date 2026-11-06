@@ -6,6 +6,8 @@ import { GroupBoxHTMLProps } from "../../GroupBox";
 export interface FileUploadProps {
     /**
      * The HTML name attribute on the upload button
+     * @remarks classic: the Upload button; modern: the button around the call to action.
+     *          Unset means none.
      */
     name?: string;
     /**
@@ -111,10 +113,14 @@ export interface FileUploadProps {
     onRestoreFile?: (file: FileData) => void;
     /**
      * onBlur event handler
+     * @remarks Called when the upload button (see `name`) loses focus
      */
     onBlur?: React.FocusEventHandler<HTMLElement>;
     /**
      * Custom label for the upload files button
+     * @remarks classic: the Upload button's text, "Upload" by default; modern: the call to
+     *          action, "Drag & drop file here or click for an upload dialog" by default.
+     *          It is the button's accessible name in both.
      */
     uploadLabel?: string;
     /**
@@ -175,6 +181,8 @@ export interface FileUploadRendererProps extends Omit<FileUploadProps, "variant"
     handleDrop: React.DragEventHandler;
     /**
      * Dragging flag to display "drop here" styles
+     * @remarks true while files are dragged anywhere over the page, not only over the drop
+     *          zone; dragged text, links and images from the page don't count
      */
     dragging: boolean;
     /**
@@ -188,6 +196,9 @@ export interface FileUploadRendererProps extends Omit<FileUploadProps, "variant"
     getRemainingFileCount: () => number;
     /**
      * onChange handler for file input
+     * @remarks Adds the picked files as a pick in the built-in variants does, and clears the
+     *          input (`value = ""`) right away, so that picking the same file again fires a
+     *          change event too. The input's `files` are empty afterwards.
      */
     handleFileChange: React.ChangeEventHandler<HTMLInputElement>;
     /**
@@ -222,6 +233,11 @@ export interface FileMeta {
      * The download link for the file
      * @remarks A URL, or the file itself while it is only held locally (e.g. a file whose
      *          upload is queued)
+     *
+     *          A click on the file opens it in a new tab without access to the app window.
+     *          Only http(s), blob and data URLs, and URLs relative to the page, are
+     *          opened; a link with any other scheme (e.g. `javascript:`) is shown as no
+     *          link.
      */
     downloadLink?: string | Blob;
     /**
@@ -291,6 +307,6 @@ export interface FileCaptureConfig {
     source: "user" | "environment";
 }
 export declare const FileInput: React.ComponentType<React.InputHTMLAttributes<HTMLInputElement> & React.RefAttributes<HTMLInputElement>>;
-export type FileUploadClassKey = "root" | "dropzone" | "formatTextModern" | "formatIconsModern" | "fileInput" | "formatText" | "modernUploadLabel";
+export type FileUploadClassKey = "root" | "dropzone" | "formatTextModern" | "formatIconsModern" | "fileInput" | "formatText" | "modernUploadButton" | "modernUploadLabel";
 declare const _default: React.ForwardRefExoticComponent<Omit<FileUploadProps & React.RefAttributes<FileUploadDispatch>, "ref"> & React.RefAttributes<FileUploadDispatch>>;
 export default _default;

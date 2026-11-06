@@ -1,5 +1,9 @@
 import React from "react";
 export interface FormAutoSaveProps {
+    /**
+     * Milliseconds without a change of the values before the form is saved
+     * @default 5000; 0 saves on every change, without waiting
+     */
     debounceTime?: number;
 }
 declare const _default: React.MemoExoticComponent<(props: FormAutoSaveProps) => React.JSX.Element>;

@@ -16,7 +16,12 @@
 			"info": "More information",
 			"clear": "Clear",
 			"multi-language-input": {
+				"language": "Language",
+				"language-of": "Language of {{label}}",
 				"toggle-languages": "Toggle language inputs"
+			},
+			"number-input": {
+				"invalid": "Enter a number, such as {{EXAMPLE}}"
 			}
 		},
 		"signal-portlet": {
@@ -39,6 +44,7 @@
 					"any": "Any"
 				},
 				"set-filter": {
+					"label": "Values",
 					"search": "Search…",
 					"select-all": "Select all",
 					"invert": "Show all except…"
@@ -68,11 +74,14 @@
 				"grid-label": "Table contents",
 				"no-data": "The list does not contain any data.",
 				"filter-combination": {
+					"label": "Combine conditions",
 					"and": "AND",
 					"or": "OR"
 				},
 				"no-data-reset-filters": "Clear filters",
-				"no-data-filters": "No data matched your filters."
+				"no-data-filters": "No data matched your filters.",
+				"select-row": "Select {{ROW}}",
+				"select-row-fallback": "Select row"
 			},
 			"header": {
 				"new": "New",
@@ -95,9 +104,13 @@
 				}
 			},
 			"settings": {
+				"search": "Search columns",
+				"no-match": "No matching column",
 				"column": "Column",
 				"show": "Visible",
 				"pin": "Pin",
+				"pin-hidden": "Hidden columns cannot be pinned",
+				"pin-forced": "This column is always pinned",
 				"close": "Close"
 			},
 			"custom-filters": {
@@ -141,6 +154,9 @@
 					"yes": "Yes",
 					"no": "No"
 				}
+			},
+			"multi-select-with-tags": {
+				"group-input-label": "Add all entries of a group"
 			}
 		},
 		"file-upload": {
@@ -179,14 +195,20 @@
 				"edit": "Edit",
 				"primary": "Primary",
 				"remove": "Remove image",
+				"add": "Add image",
+				"replace": "Replace image",
 				"prev-image": "Previous image",
-				"next-image": "Next image"
+				"next-image": "Next image",
+				"open-full-screen": "Open {{NAME}} in full screen",
+				"open-full-screen-unnamed": "Open image in full screen",
+				"image-position": "Image {{INDEX}} of {{TOTAL}}"
 			}
 		},
 		"phone-number": {
 			"invalid": "Enter correct phone number"
 		},
 		"signature-pad": {
+			"with-signer": "{{LABEL}} ({{NAME}})",
 			"dialog": {
 				"reset": "Clear signature",
 				"save-changes": "Save Changes",
@@ -202,7 +224,7 @@
 				"close": "Close",
 				"signature": "Signature"
 			},
-			"sign-here": "Digitally signed here"
+			"sign-here": "Sign here digitally"
 		},
 		"toast": {
 			"close": "Close"
@@ -221,6 +243,7 @@
 			}
 		},
 		"language-switcher": {
+			"load-error": "The language could not be loaded. Check your internet connection, reload the page and try again.",
 			"title": "Select your country and language",
 			"no-locales": "No locales match your search query"
 		}
@@ -254,6 +277,10 @@
 					},
 					"files": {
 						"no-file": "No files present"
+					},
+					"string-array": {
+						"entry": "{{LABEL}} {{NUM}}",
+						"new-entry": "{{LABEL}}: new entry"
 					}
 				},
 				"date-nullable": {
@@ -311,7 +338,10 @@
 		"selector": {
 			"loading": "Loading…",
 			"loading-error": "Error while fetching data",
-			"unknown-entry": "Unknown entry"
+			"unknown-entry": "Unknown entry",
+			"selected-count": "Selected: {{COUNT}}",
+			"selection-load-error": "{{LABEL}} could not be loaded.",
+			"selection-load-error-unlabelled": "The selected entries could not be loaded."
 		},
 		"crud": {
 			"import": {
@@ -323,13 +353,14 @@
 				"source_field": "Field",
 				"source_field_type": "Data types",
 				"destination_fields": "Destination fields",
-				"conv_script": "Conversion Script (JavaScript)",
+				"conv_script": "{{FIELD}}: Conversion Script (JavaScript)",
 				"queue": "In queue: {{COUNT}}",
 				"success": "Success: {{COUNT}}",
 				"failed": "Failed: {{COUNT}}",
 				"last_error": "Last error",
 				"errors": {
 					"file_select": "Invalid file selected",
+					"file_read": "{{FILE_NAME}} cannot be read. Save it as an Excel workbook (.xlsx) without a password and pick it again.",
 					"update-key-not-uniq": "{{UPDATE_KEY}} is not unique in import dataset"
 				},
 				"validations": {
@@ -338,8 +369,13 @@
 					"currency_unsupported": "Currency cannot be imported yet",
 					"date": "Result must be a Date or null",
 					"boolean": "Result must be a boolean or null",
-					"fail": "Validation failed: {{REASON}}. For details see browser console.",
-					"unknown": "Unknown"
+					"fail": "Validation failed: {{REASON}}. For details see browser console."
+				},
+				"script_status": {
+					"none": "{{FIELD}}: no script",
+					"pending": "{{FIELD}}: checking the script",
+					"okay": "{{FIELD}}: the script is valid",
+					"error": "{{FIELD}}: the script is invalid"
 				},
 				"validation_errors": "Validation errors",
 				"conversion_errors": "Data conversion errors"

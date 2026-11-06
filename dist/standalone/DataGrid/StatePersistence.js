@@ -48,7 +48,10 @@ const StatePersistence = () => {
         };
     });
     // the grid state changes on every page of data loaded, so compare what we'd
-    // write before writing it - persistence may well be a request to a server
+    // write before writing it - persistence may well be a request to a server.
+    // The first run sees the state the grid opened with, decoded from what is
+    // stored. It is the baseline, not written: writing it would only replace
+    // what this visit could not read (a column it doesn't have, a newer format)
     const lastWritten = useRef(undefined);
     // save on changes
     useEffect(() => {
@@ -65,6 +68,10 @@ const StatePersistence = () => {
             ? withColumnFilter(columnState, kept.columnFilter)
             : columnState, columnWidthState, defaultColumnState, columns, config);
         const serialized = JSON.stringify(data);
+        if (lastWritten.current === undefined) {
+            lastWritten.current = serialized;
+            return;
+        }
         if (lastWritten.current === serialized)
             return;
         lastWritten.current = serialized;

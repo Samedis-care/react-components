@@ -2,6 +2,7 @@ import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-run
 import React, { Suspense, useCallback, useContext, useEffect, useMemo, useRef, useState, } from "react";
 import useCCTranslations from "../utils/useCCTranslations";
 import { FrameworkHistory } from "./History";
+import { PushedDialogCloseContext, } from "./PushedDialogCloseContext";
 /**
  * Context for the dialog state
  */
@@ -22,19 +23,42 @@ const navBlockFn = (t) => () => {
 const DialogContextProvider = (props) => {
     const { t } = useCCTranslations();
     const navBlock = useRef(null);
-    const dialogCount = useRef(0);
+    // the ids of the open dialogs in push order, current before the dialogs state renders
+    const openIds = useRef([]);
+    const nextId = useRef(0);
     const [dialogs, setDialogs] = useState([]);
     const parentContext = useContext(DialogContext);
+    // removes a dialog whose id was taken out of openIds
+    const removeDialog = useCallback((id) => {
+        // if all dialogs closed, remove callback
+        if (openIds.current.length === 0 && navBlock.current) {
+            navBlock.current();
+            navBlock.current = null;
+        }
+        setDialogs((prevValue) => prevValue.filter((entry) => entry.id !== id));
+    }, []);
+    const closeDialog = useCallback((id) => {
+        const index = openIds.current.indexOf(id);
+        if (index === -1)
+            return; // closed already
+        openIds.current.splice(index, 1);
+        removeDialog(id);
+    }, [removeDialog]);
     const pushDialog = useCallback((dialog) => {
         // if no dialogs were present, add callback
-        if (dialogCount.current === 0) {
+        if (openIds.current.length === 0) {
             navBlock.current = FrameworkHistory.block(navBlockFn(t));
         }
-        dialogCount.current++;
-        setDialogs((prevValue) => [...prevValue, dialog]);
-    }, [t]);
+        const id = nextId.current++;
+        openIds.current.push(id);
+        setDialogs((prevValue) => [
+            ...prevValue,
+            { id, dialog, close: { close: () => closeDialog(id), pushed: true } },
+        ]);
+    }, [t, closeDialog]);
     const popDialog = useCallback(() => {
-        if (dialogCount.current === 0) {
+        const id = openIds.current.pop();
+        if (id === undefined) {
             if (parentContext) {
                 // call parent popDialog and return
                 return parentContext[1]();
@@ -44,17 +68,8 @@ const DialogContextProvider = (props) => {
             console.error(err);
             throw err;
         }
-        // if all dialogs closed, remove callback
-        dialogCount.current--;
-        if (dialogCount.current === 0 && navBlock.current) {
-            navBlock.current();
-            navBlock.current = null;
-        }
-        setDialogs((prevValue) => {
-            void prevValue.pop();
-            return [...prevValue];
-        });
-    }, [parentContext]);
+        removeDialog(id);
+    }, [parentContext, removeDialog]);
     const dialogActions = useMemo(() => [pushDialog, popDialog], [pushDialog, popDialog]);
     // update callback if locale changes
     useEffect(() => {
@@ -72,10 +87,10 @@ const DialogContextProvider = (props) => {
                 // eslint-disable-next-line no-console
                 console.warn(
                 // eslint-disable-next-line react-hooks/exhaustive-deps
-                `[Components-Care] [DialogContextProvder] Unmounting with ${dialogCount.current} dialogs open`);
+                `[Components-Care] [DialogContextProvder] Unmounting with ${openIds.current.length} dialogs open`);
             }
         };
     }, []);
-    return (_jsx(_Fragment, { children: _jsxs(DialogContext.Provider, { value: dialogActions, children: [_jsx(_Fragment, { children: props.children }), _jsx(_Fragment, { children: dialogs.map((dialog, index) => (_jsx(Suspense, { children: dialog }, index.toString()))) })] }) }));
+    return (_jsx(_Fragment, { children: _jsxs(DialogContext.Provider, { value: dialogActions, children: [_jsx(_Fragment, { children: props.children }), _jsx(_Fragment, { children: dialogs.map((entry) => (_jsx(PushedDialogCloseContext.Provider, { value: entry.close, children: _jsx(Suspense, { children: entry.dialog }) }, entry.id))) })] }) }));
 };
 export default React.memo(DialogContextProvider);

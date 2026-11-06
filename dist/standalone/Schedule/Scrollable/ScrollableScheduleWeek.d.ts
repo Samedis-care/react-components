@@ -1,12 +1,17 @@
 import React from "react";
 import { Moment } from "moment";
-import { IDayData } from "../Common/DayContents";
 import { WithTranslation } from "react-i18next";
+import type { LoadWeekCallback } from "./index";
 export interface IProps extends WithTranslation {
     /**
-     * The moment.js object of a day in the week that should be displayed
+     * The week to display, in weeks relative to the week of `today`
      */
-    moment: Moment;
+    weekOffset: number;
+    /**
+     * The day the week offsets count from (ScrollableSchedule's today); not
+     * modified
+     */
+    today: Moment;
     /**
      * Callback which gets called to set the HTML element for today, used for
      * jumpToToday
@@ -14,11 +19,16 @@ export interface IProps extends WithTranslation {
      */
     setTodayElement: (elem: HTMLElement | null) => void;
     /**
-     * Callback to load more data
-     * @returns The day contents for this week.
-     * 			Format: IDayData[weekday starting Monday][n]
+     * Loads the week, called with `weekOffset` and `filterValues` on mount and
+     * again when one of the three changes. The rows shown stay until the new
+     * result arrives; the result of an earlier call that arrives later is
+     * ignored.
      */
-    loadData: () => IDayData[][] | Promise<IDayData[][]>;
+    loadWeekCallback: LoadWeekCallback;
+    /**
+     * The filter values passed to `loadWeekCallback`
+     */
+    filterValues: Record<string, string | boolean>;
 }
 declare const ScrollableScheduleWeekWithTranslation: (props: Omit<IProps, keyof WithTranslation>) => React.ReactElement;
 export default ScrollableScheduleWeekWithTranslation;

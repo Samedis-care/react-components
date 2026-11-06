@@ -10,9 +10,24 @@ import { FormDialogDispatchContext } from "./FormDialog";
 import FormPageLayout from "../../standalone/Form/FormPageLayout";
 import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 import useCCTranslations from "../../utils/useCCTranslations";
+import { Action } from "history";
 import { RouteContext } from "../../standalone/Routes/Route";
+import matchPath from "../../standalone/Routes/matchPath";
 import { useThemeProps } from "@mui/material";
 export const BasicFormPageNestingContext = createContext(null);
+/**
+ * Does a navigation to pathname stay inside the form page (routed tab panels, a routed
+ * stepper)? It does when the form's Route still renders at pathname with the same url: the
+ * url itself or a path below it (/rec/1 → /rec/1/more), not one that only starts with the
+ * same characters (/rec/10, /rec/1-archive).
+ * At the root this follows the Route too: a Route "/" renders only at "/", so every other
+ * path leaves the page; a Route "/*" renders at every path, so for it no path leaves the
+ * page.
+ * @param routePath The full path of the form's nearest Route (RouteContext path)
+ * @param routeUrl The url the Route currently matches (RouteContext url)
+ * @param pathname The navigation's target
+ */
+const isInsideFormPage = (routePath, routeUrl, pathname) => matchPath({ path: routePath }, pathname)?.url === routeUrl;
 const BasicFormPage = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcBasicFormPage" });
     const { submit, 
@@ -52,18 +67,40 @@ const BasicFormPage = (inProps) => {
     if (!disableRouting && !routeCtx)
         throw new Error("no route match");
     const routeUrl = routeCtx ? routeCtx.url : "";
+    const routePath = routeCtx ? routeCtx.path : "";
     useEffect(() => {
         // if the form is read-only, don't annoy the user
         if (readOnly)
             return;
+        // set while the history block is lifted for a POP inside the form page, see passThrough
+        let stopWaitingForPop = null;
+        const releaseHistoryBlock = () => {
+            if (unblock.current) {
+                unblock.current();
+                unblock.current = undefined;
+            }
+        };
         const blocker = (transition) => {
             const allowTransition = () => {
                 // temp unblock to retry transaction
-                if (unblock.current) {
-                    unblock.current();
-                    unblock.current = undefined;
-                }
+                releaseHistoryBlock();
                 transition.retry();
+            };
+            // lets a navigation inside the form page through and keeps the page guarded
+            const passThrough = () => {
+                releaseHistoryBlock();
+                if (transition.action === Action.Pop) {
+                    // A browser history reverts every POP while a blocker is set and retries
+                    // it asynchronously (history.go), so block again only once the retried POP
+                    // has arrived: blocking at once would revert it again, and so on forever.
+                    stopWaitingForPop = FrameworkHistory.listen(() => applyGuards(dirtyRef.current));
+                    transition.retry();
+                }
+                else {
+                    // PUSH and REPLACE are retried synchronously
+                    transition.retry();
+                    applyGuards(dirtyRef.current);
+                }
             };
             //console.log("History.block(", location, ",", action, ")", match);
             // the form may have gone clean since the guards were applied (a submit resolves
@@ -75,9 +112,8 @@ const BasicFormPage = (inProps) => {
             }
             // special handling: routing inside form page (e.g. routed tab panels, routed stepper)
             if (!disableRouting &&
-                transition.location.pathname.startsWith(routeUrl)) {
-                allowTransition();
-                unblock.current = FrameworkHistory.block(blocker);
+                isInsideFormPage(routePath, routeUrl, transition.location.pathname)) {
+                passThrough();
                 return;
             }
             // otherwise: ask user for confirmation
@@ -98,6 +134,10 @@ const BasicFormPage = (inProps) => {
         // flag which a pending re-render would have cleared. Idempotent in both directions.
         let releaseLocks = null;
         const applyGuards = (isDirty) => {
+            if (stopWaitingForPop) {
+                stopWaitingForPop();
+                stopWaitingForPop = null;
+            }
             if (isDirty) {
                 if (!unblock.current)
                     unblock.current = FrameworkHistory.block(blocker);
@@ -113,10 +153,7 @@ const BasicFormPage = (inProps) => {
                 };
             }
             else {
-                if (unblock.current) {
-                    unblock.current();
-                    unblock.current = undefined;
-                }
+                releaseHistoryBlock();
                 if (releaseLocks) {
                     releaseLocks();
                     releaseLocks = null;
@@ -134,6 +171,7 @@ const BasicFormPage = (inProps) => {
         readOnly,
         t,
         formDialog,
+        routePath,
         routeUrl,
         pushDialog,
         disableRouting,

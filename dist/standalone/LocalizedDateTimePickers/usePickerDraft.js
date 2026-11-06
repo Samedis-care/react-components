@@ -1,6 +1,25 @@
 import { useCallback, useState } from "react";
 import { usePickerAdapter } from "@mui/x-date-pickers";
 /**
+ * Whether two picker values are the same, compared as MUI's own value manager
+ * does: the same object, the same instant, or both an invalid date. The adapter
+ * alone says an invalid date differs even from itself, which would make the
+ * render-phase reset below fire on every render. `null` and an invalid date
+ * stay different.
+ * @param adapter The picker adapter
+ * @param a One value
+ * @param b The other value
+ * @returns Whether the two are the same value
+ */
+const isSameValue = (adapter, a, b) => {
+    if (a === b)
+        return true;
+    if (a != null && b != null && !adapter.isValid(a) && !adapter.isValid(b)) {
+        return true;
+    }
+    return adapter.isEqual(a, b);
+};
+/**
  * Makes a controlled picker typable, by keeping what is being typed apart from
  * what gets reported upstream.
  *
@@ -46,10 +65,11 @@ const usePickerDraft = (value, onChange, publishIntermediateValues) => {
     });
     // The consumer's value now means a different moment in time than the one the
     // draft was typed over, so the draft is stale. Comparing by value rather than
-    // by reference is what tolerates the `moment(...)`-in-render idiom; deriving
-    // during render rather than in an effect keeps the stale draft from being
-    // painted once first.
-    if (holdsDraft && !adapter.isEqual(state.committed ?? null, value ?? null)) {
+    // by reference is what tolerates the `moment(...)`-in-render idiom (also for
+    // an invalid date, `moment(null)` in render); deriving during render rather
+    // than in an effect keeps the stale draft from being painted once first.
+    if (holdsDraft &&
+        !isSameValue(adapter, state.committed ?? null, value ?? null)) {
         setState({ draft: value ?? null, committed: value });
     }
     const handleChange = useCallback((newValue, context) => {
@@ -70,20 +90,9 @@ const usePickerDraft = (value, onChange, publishIntermediateValues) => {
     const settle = useCallback(() => {
         setState((prev) => ({ ...prev, draft: prev.committed ?? null }));
     }, []);
-    const settleOnBlur = useCallback((event) => {
-        // The field forwards this from the container holding the sections, whose
-        // parent also holds the adornment buttons — so stepping from one section
-        // to the next, or reaching for the calendar, is not a blur.
-        const field = event.currentTarget.parentElement ?? event.currentTarget;
-        if (event.relatedTarget && field.contains(event.relatedTarget)) {
-            return;
-        }
-        settle();
-    }, [settle]);
     return {
         value: holdsDraft ? state.draft : value,
         onChange: handleChange,
-        settleOnBlur,
         settle,
     };
 };

@@ -10,6 +10,17 @@ export interface IDataGridSearchViewProps {
      */
     handleSearchChange: (evt: ChangeEvent<HTMLInputElement>) => void;
     /**
+     * The box's placeholder. Default: DataGridProps.searchPlaceholder
+     */
+    placeholder?: string;
+    /**
+     * The box's accessible name: the field's aria-label and, below sm, the
+     * name of the button that opens the field. Nothing visible renders it.
+     * Default: no aria-label on the field, and "Search" (translated) for the
+     * button
+     */
+    label?: string;
+    /**
      * CSS class name
      */
     className?: string;

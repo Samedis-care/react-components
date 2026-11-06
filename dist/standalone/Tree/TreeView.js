@@ -2,6 +2,7 @@ import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, } from "react";
 import TreeViewDefaultRenderer from "./TreeViewDefaultRenderer";
 import { List } from "react-window";
+import { captureError } from "../../framework/ErrorReporting";
 const enhanceData = (data, loading, ancestorLanes, index, depth, forest) => {
     // the root level of a single root tree has no spine: the lone root has no sibling
     // to connect to, so descending past it must not open a lane. Every other level
@@ -120,8 +121,21 @@ const TreeView = React.forwardRef(function TreeView(props, ref) {
                 if (toggleRecord.childrenLoading)
                     return;
                 setLoading((prev) => [...prev, id]);
-                await onLoadChildren(id);
-                setLoading((prev) => prev.filter((entry) => entry !== id));
+                try {
+                    await onLoadChildren(id);
+                }
+                catch (e) {
+                    // nothing was loaded: leave the entry as it is, so that the next
+                    // toggle loads again
+                    captureError(e, {
+                        source: "TreeView.onLoadChildren",
+                        extra: { id },
+                    });
+                    return;
+                }
+                finally {
+                    setLoading((prev) => prev.filter((entry) => entry !== id));
+                }
             }
             onToggleExpanded(id);
         })();

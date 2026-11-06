@@ -41,7 +41,9 @@ const ToastRaw = (inProps) => {
         if (evt.key === "Escape")
             onClose();
     }, [onClose]);
-    const slotProps = useMemo(() => ({ transition: { onExited } }), [onExited]);
+    // only with a handler: an onExited key, even undefined, replaces the
+    // Snackbar's own exit handler, so the closed toast would stay in the page
+    const slotProps = useMemo(() => (onExited ? { transition: { onExited } } : undefined), [onExited]);
     return (_jsx(Portal, { children: _jsx(Root, { open: open, autoHideDuration: duration, anchorOrigin: anchorOrigin, onClose: handleSnackbarClose, slotProps: slotProps, className: combineClassNames([className, classes?.root]), children: _jsxs(ToastAlert, { severity: severity, variant: variant, role: severity === "error" || severity === "warning" ? "alert" : "status", closeText: t("standalone.toast.close"), onClose: onClose, onKeyDown: handleKeyDown, className: classes?.alert, children: [title && _jsx(AlertTitle, { children: title }), message] }) }) }));
 };
 export const Toast = React.memo(ToastRaw);

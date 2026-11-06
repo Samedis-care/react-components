@@ -1,7 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useContext, useMemo } from "react";
 import BaseSelector from "./BaseSelector";
-import { Grid, Paper, styled, useThemeProps } from "@mui/material";
+import { Grid, List, Paper, styled, useThemeProps } from "@mui/material";
 import MultiSelectEntry from "./MultiSelectEntry";
 import { showConfirmDialogBool } from "../../non-standalone/Dialog/Utils";
 import { DialogContext } from "../../framework/DialogContextProvider";
@@ -99,8 +99,8 @@ const MultiSelect = (inProps) => {
     }, [getId, onSelect, selected]);
     return (_jsxs(Root, { size: "grow", container: true, className: combineClassNames([className, classes?.root]), children: [_jsx(Grid, { size: 12, children: _jsx(StyledBaseSelector, { ...props, 
                     // @ts-expect-error removed owner state from props to preserve generics
-                    ownerState: { selected: selected.length > 0 }, className: classes?.selector, onLoad: multiSelectLoadHandler, selected: null, onSelect: multiSelectHandler, refreshToken: (refreshToken ?? "") + selectedIds.join(","), displaySwitch: displaySwitch, switchLabel: switchLabel, defaultSwitchValue: defaultSwitchValue, filterIds: combinedFilterIds }) }), props.selected.length > 0 && (_jsx(SelectedEntry, { size: 12, className: classes?.selectedEntry, children: _jsx(Paper, { elevation: 0, children: (selectedSort
-                        ? props.selected.sort(selectedSort)
-                        : props.selected).map((data, index) => (_jsx(EntryRender, { enableDivider: props.selected.length === index - 1, enableIcons: enableIcons, handleDelete: disabled || data.noDelete ? undefined : handleDelete, data: data, setData: handleSetData, iconSize: props.iconSize }, getId(data) || index.toString(16)))) }) }))] }));
+                    ownerState: { selected: selected.length > 0 }, className: classes?.selector, onLoad: multiSelectLoadHandler, selected: null, onSelect: multiSelectHandler, refreshToken: (refreshToken ?? "") + selectedIds.join(","), displaySwitch: displaySwitch, switchLabel: switchLabel, defaultSwitchValue: defaultSwitchValue, filterIds: combinedFilterIds }) }), props.selected.length > 0 && (_jsx(SelectedEntry, { size: 12, className: classes?.selectedEntry, children: _jsx(Paper, { elevation: 0, children: _jsx(List, { disablePadding: true, children: (selectedSort
+                            ? [...props.selected].sort(selectedSort)
+                            : props.selected).map((data, index) => (_jsx(EntryRender, { enableDivider: props.selected.length === index - 1, enableIcons: enableIcons, handleDelete: disabled || data.noDelete ? undefined : handleDelete, data: data, setData: handleSetData, iconSize: props.iconSize }, getId(data) || index.toString(16)))) }) }) }))] }));
 };
 export default React.memo(MultiSelect);

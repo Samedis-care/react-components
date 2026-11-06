@@ -6,6 +6,24 @@ import InfiniteScroll from "../InfiniteScroll";
 import timestampToAge from "../../utils/timestampToAge";
 import useCCTranslations from "../../utils/useCCTranslations";
 import useCurrentLocale from "../../utils/useCurrentLocale";
+/** The longest delay browsers support for a timer (about 24.8 days) */
+const MAX_TIMER_DELAY = 2 ** 31 - 1;
+const DEFAULT_REFRESH_INTERVAL = 60000;
+/**
+ * The delay of the polling interval for a `refreshInterval`, or `null` for no
+ * polling. Browsers convert a delay to a 32-bit integer: they run `0`, `NaN`,
+ * `Infinity` and negative numbers at their minimum delay of a few ms, and wrap
+ * values of 2^31 and more around (2^31 itself to a negative number), so none
+ * of them may reach `setInterval`.
+ * @param refreshInterval The prop value
+ */
+const getPollingDelay = (refreshInterval = DEFAULT_REFRESH_INTERVAL) => {
+    if (refreshInterval === 0 || refreshInterval > MAX_TIMER_DELAY)
+        return null;
+    if (!(refreshInterval > 0))
+        return DEFAULT_REFRESH_INTERVAL; // negative, NaN
+    return refreshInterval;
+};
 const anchorOrigin = {
     vertical: "bottom",
     horizontal: "right",
@@ -55,14 +73,17 @@ const Notifications = (inProps) => {
     const handleLoadLatest = useCallback(() => {
         loadLatest();
     }, [loadLatest]);
+    const pollingDelay = getPollingDelay(refreshInterval);
     useEffect(() => {
         window.addEventListener("focus", handleLoadLatest);
-        const intervalHandle = window.setInterval(handleLoadLatest, refreshInterval ?? 60000);
+        const intervalHandle = pollingDelay === null
+            ? undefined
+            : window.setInterval(handleLoadLatest, pollingDelay);
         return () => {
             window.removeEventListener("focus", handleLoadLatest);
             window.clearInterval(intervalHandle);
         };
-    }, [handleLoadLatest, refreshInterval]);
+    }, [handleLoadLatest, pollingDelay]);
     useEffect(() => {
         // initial load
         handleLoadLatest();

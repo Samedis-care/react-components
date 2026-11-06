@@ -6,5 +6,7 @@ export { default as Routes } from "./Routes";
 export { default as useLocation } from "./useLocation";
 export { default as useNavigate } from "./useNavigate";
 export { default as useParams } from "./useParams";
+export { default as usePageTitle } from "./usePageTitle";
+export type { DocumentTitleFormatter } from "./DocumentTitle";
 export { default as Link } from "./Link";
 export * from "./SentryRoutingInstrumentation";

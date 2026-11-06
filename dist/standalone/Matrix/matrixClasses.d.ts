@@ -53,6 +53,10 @@ export declare const matrixVars: {
     readonly headerHeight: "--cc-matrix-header-height";
     readonly extraRowHeight: "--cc-matrix-extra-row-height";
     readonly maxHeight: "--cc-matrix-max-height";
+    /** label color of the "current" column header, readable on its tint */
+    readonly currentLabelColor: "--cc-matrix-current-label-color";
+    /** label color of the "accent" column header, readable on its tint */
+    readonly accentLabelColor: "--cc-matrix-accent-label-color";
     readonly tileBackground: "--cc-matrix-tile-bg";
     readonly tileForeground: "--cc-matrix-tile-fg";
     readonly tileBackgroundA: "--cc-matrix-tile-bg-a";

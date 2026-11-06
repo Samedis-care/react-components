@@ -15,7 +15,7 @@ class RendererEnumSelect extends TypeEnum {
         this.props = props;
     }
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, } = params;
+        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, id, messageId, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -42,7 +42,7 @@ class RendererEnumSelect extends TypeEnum {
                         // only an enum that starts empty can be emptied
                         disableClearable: this.defaultValue !== "", ...this.props, label: label, selected: selected, onLoad: onLoad, 
                         // the options are the enum's values
-                        onSelect: (value) => handleChange(field, value ? value.value : this.defaultValue), disabled: visibility.readOnly, required: visibility.required, dirty: dirty, autoFocus: autoFocus }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
+                        onSelect: (value) => handleChange(field, value ? value.value : this.defaultValue), disabled: visibility.readOnly, required: visibility.required, dirty: dirty, autoFocus: autoFocus, autocompleteId: id, error: !!errorMsg, warning: !!warningMsg }), _jsx(FormHelperText, { id: messageId, children: errorMsg || warningMsg })] }));
         }
         const valueInfo = this.values.find((entry) => entry.value === value);
         return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, valueInfo

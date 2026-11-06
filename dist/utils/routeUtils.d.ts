@@ -1,3 +1,19 @@
 export declare const doesRouteMatch: (route: string, path: string, exact?: boolean, strict?: boolean) => boolean;
 export declare const extractRouteParameters: (route: string, path: string, exact?: boolean, strict?: boolean) => Record<string, string>;
-export declare const insertRouteParameters: (route: string, params: Record<string, string>) => string;
+/**
+ * The params of a route that have no value
+ * @param route The route, e.g. `/apps/:app/roles`
+ * @param params The param values by name
+ * @returns The names (without `:`) of the route's params that `params` has no
+ * value, or an empty one, for, in route order; empty when the route can be
+ * filled
+ */
+export declare const getMissingRouteParameters: (route: string, params: Record<string, string>) => string[];
+/**
+ * Fills the `:name` segments of a route with the given params
+ * @param route The route, e.g. `/apps/:app/roles`
+ * @param params The param values by name, inserted as given (not encoded)
+ * @returns The path, or null when `params` has no value (or an empty one) for
+ * one of the route's params (see getMissingRouteParameters)
+ */
+export declare const insertRouteParameters: (route: string, params: Record<string, string>) => string | null;

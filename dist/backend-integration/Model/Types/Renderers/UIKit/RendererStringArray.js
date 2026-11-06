@@ -3,6 +3,8 @@ import { Typography } from "@mui/material";
 import { FormHelperTextCC, GroupBox, TextFieldWithHelp, } from "../../../../../standalone";
 import TypeStringArray from "../../TypeStringArray";
 import { useMountLogging } from "../../../../../utils";
+import useCCTranslations from "../../../../../utils/useCCTranslations";
+import addSlotAttributes from "../../../../../utils/internal/addSlotAttributes";
 /**
  * Renders text fields inside a group box
  */
@@ -28,8 +30,9 @@ class RendererStringArray extends TypeStringArray {
     }
 }
 const RendererStringArrayComponent = (props) => {
-    const { options, visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, } = props;
+    const { options, visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, id, messageId, describedBy, } = props;
     useMountLogging(RendererStringArrayComponent);
+    const { t } = useCCTranslations();
     const textField = (idx) => (_jsx(TextFieldWithHelp, { fullWidth: true, ...options, name: `${field}`, value: value[idx] ?? "", disabled: visibility.readOnly, required: visibility.required, onChange: (evt) => {
             const newValue = [...value];
             newValue[idx] = evt.target.value;
@@ -39,7 +42,13 @@ const RendererStringArrayComponent = (props) => {
             handleBlur(evt);
         }, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, 
         // the empty entry at the end, where a new value goes
-        autoFocus: autoFocus && idx === value.length }, "input_" + idx));
-    return (_jsxs(GroupBox, { label: label, children: [value.map((_, idx) => textField(idx)).concat(textField(value.length)), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
+        autoFocus: autoFocus && idx === value.length, 
+        // the group box's legend shows the label once for all entries
+        slotProps: addSlotAttributes(options?.slotProps, "htmlInput", {
+            "aria-label": idx === value.length
+                ? t("backend-integration.model.types.renderers.string-array.new-entry", { LABEL: label })
+                : t("backend-integration.model.types.renderers.string-array.entry", { LABEL: label, NUM: idx + 1 }),
+        }) }, "input_" + idx));
+    return (_jsxs(GroupBox, { label: label, id: id, "aria-describedby": describedBy, children: [value.map((_, idx) => textField(idx)).concat(textField(value.length)), _jsx(FormHelperTextCC, { id: messageId, error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
 };
 export default RendererStringArray;

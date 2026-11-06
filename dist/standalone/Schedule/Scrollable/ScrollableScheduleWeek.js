@@ -5,6 +5,11 @@ import ScrollableScheduleDay from "./ScrollableScheduleDay";
 import moment from "moment";
 import useCCTranslations from "../../../utils/useCCTranslations";
 class ScrollableScheduleWeek extends PureComponent {
+    /**
+     * Counts the loads started; a result is applied only if no other load
+     * started after it and the week is still mounted
+     */
+    loadId = 0;
     constructor(props) {
         super(props);
         this.state = {
@@ -13,15 +18,36 @@ class ScrollableScheduleWeek extends PureComponent {
         };
     }
     componentDidMount() {
+        this.load();
+    }
+    componentDidUpdate(prevProps) {
+        if (prevProps.loadWeekCallback !== this.props.loadWeekCallback ||
+            prevProps.weekOffset !== this.props.weekOffset ||
+            prevProps.filterValues !== this.props.filterValues) {
+            this.load();
+        }
+    }
+    componentWillUnmount() {
+        ++this.loadId;
+    }
+    load() {
+        const loadId = ++this.loadId;
+        const { loadWeekCallback, weekOffset, filterValues } = this.props;
         void (async () => {
             try {
-                const data = await this.props.loadData();
+                const data = await loadWeekCallback(weekOffset, filterValues);
+                if (loadId !== this.loadId)
+                    return;
                 this.setState({
                     data,
+                    loadError: null,
                 });
             }
             catch (e) {
+                if (loadId !== this.loadId)
+                    return;
                 this.setState({
+                    data: null,
                     loadError: e,
                 });
             }
@@ -34,7 +60,9 @@ class ScrollableScheduleWeek extends PureComponent {
         if (!this.state.data) {
             return (_jsx(Grid, { size: 12, children: _jsx(Grid, { container: true, sx: { justifyContent: "space-around" }, children: _jsx(CircularProgress, {}) }) }));
         }
-        const firstDay = this.props.moment;
+        const firstDay = this.props.today
+            .clone()
+            .add(this.props.weekOffset, "weeks");
         firstDay.subtract(firstDay.weekday(), "days");
         const dayItems = [];
         const now = moment();

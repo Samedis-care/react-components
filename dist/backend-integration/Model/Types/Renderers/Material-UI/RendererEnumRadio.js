@@ -15,7 +15,7 @@ class RendererEnumRadio extends TypeEnum {
         this.wrapButton = wrapButton;
     }
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, } = params;
+        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, id, messageId, describedBy, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -30,11 +30,11 @@ class RendererEnumRadio extends TypeEnum {
                 ? (focusable.find((entry) => entry.value === value) ?? focusable[0])
                     ?.value
                 : undefined;
-            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, children: [_jsx(FormLabel, { component: "legend", children: label }), _jsx(RadioGroup, { name: field, value: value, 
+            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, children: [_jsx(FormLabel, { component: "legend", children: label }), _jsx(RadioGroup, { id: id, name: field, value: value, 
                         // the radios are the enum's values
-                        onChange: (evt) => handleChange(evt.target.name, evt.target.value), onBlur: handleBlur, "data-name": field, row: this.horizontal, children: this.values
+                        onChange: (evt) => handleChange(evt.target.name, evt.target.value), onBlur: handleBlur, "data-name": field, row: this.horizontal, "aria-invalid": !!errorMsg, "aria-required": !!visibility.required, "aria-describedby": describedBy, children: this.values
                             .filter((value) => !value.invisible)
-                            .map((entry) => this.wrapButton(_jsx(FormControlLabel, { value: entry.value, control: _jsx(Radio, { autoFocus: entry.value === focusValue }), label: entry.getLabel(), disabled: visibility.readOnly || entry.disabled }, entry.value), entry)) }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
+                            .map((entry) => this.wrapButton(_jsx(FormControlLabel, { value: entry.value, control: _jsx(Radio, { autoFocus: entry.value === focusValue }), label: entry.getLabel(), disabled: visibility.readOnly || entry.disabled }, entry.value), entry)) }), _jsx(FormHelperText, { id: messageId, children: errorMsg || warningMsg })] }));
         }
         const valueInfo = this.values.find((entry) => entry.value === value);
         return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, valueInfo

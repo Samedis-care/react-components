@@ -1,6 +1,6 @@
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useState } from "react";
-import { Checkbox, FormControl, FormControlLabel, Grid, List, ListItemText, MenuItem, Radio, RadioGroup, Select, TextField, Tooltip, } from "@mui/material";
+import { Checkbox, FormControl, FormControlLabel, Grid, List, MenuItem, Radio, RadioGroup, Select, TextField, Tooltip, } from "@mui/material";
 import { Delete as ClearIcon } from "@mui/icons-material";
 import FilterCombinator from "./FilterCombinator";
 import { DataGridFilterClearButton, DataGridIdFilterContainer, DataGridSetFilterContainer, DataGridSetFilterListDivider, DataGridSetFilterListItem, DataGridSetFilterListItemDivider, useDataGridProps, } from "../DataGrid";
@@ -10,6 +10,23 @@ import { denormalizeDate, normalizeDate, parseDateOnly, } from "../../../utils/d
 import moment from "moment";
 import { BackendMultiSelect } from "../../../backend-components";
 /**
+ * A custom filter's value1 is what its setFilter stored, as JSON. A value1 that
+ * is not JSON (from a URL, a defaultFilter, or stored while the column had
+ * another filter type) opens as no filter instead of throwing during render.
+ * @param value The stored filter value
+ * @returns The parsed filter, or undefined if there is none or it is not JSON
+ */
+const customFilterValue = (value) => {
+    if (!value)
+        return undefined;
+    try {
+        return JSON.parse(value);
+    }
+    catch {
+        return undefined;
+    }
+};
+/**
  * Date filter values are stored as date-only values (12:00 UTC) — show them by
  * their UTC day, so the day doesn't shift in timezones at or beyond UTC+12.
  * @param value The stored filter value
@@ -17,7 +34,16 @@ import { BackendMultiSelect } from "../../../backend-components";
  */
 const dateFilterValue = (value) => value === "" ? null : moment(denormalizeDate(parseDateOnly(value)));
 const ENUM_FILTER_MAGIC_EMPTY = "__MAGIC_EMPTY__";
-const LIST_ITEM_SLOT_PROPS = { primary: { noWrap: true } };
+const LIST_ITEM_LABEL_SLOT_PROPS = { typography: { noWrap: true } };
+/**
+ * The values "Select all" ticks: every entry of an enum filter except the
+ * dividers, with the empty value as ENUM_FILTER_MAGIC_EMPTY
+ * @param data The enum column's filter data
+ * @returns The values, in the order of the list
+ */
+const enumFilterValues = (data) => data
+    .filter((entry) => !entry.isDivider)
+    .map((entry) => entry.value || ENUM_FILTER_MAGIC_EMPTY);
 const FilterEntry = (props) => {
     const { onChange, depth, close } = props;
     const isFirstFilter = depth === 1;
@@ -144,10 +170,7 @@ const FilterEntry = (props) => {
     };
     const onFilterValueChangeEnumAll = (_, checked) => {
         if (checked) {
-            filterValue = props.valueData
-                .filter((entry) => !entry.isDivider)
-                .map((entry) => entry.value || ENUM_FILTER_MAGIC_EMPTY)
-                .join(",");
+            filterValue = enumFilterValues(props.valueData).join(",");
         }
         else {
             filterValue = "";
@@ -203,6 +226,14 @@ const FilterEntry = (props) => {
         filterTypeMenuItems.push(checkSupport(props.valueType, "lessThan") && (_jsx(MenuItem, { value: "lessThan", children: t("standalone.data-grid.content.filter-type.lt-date") }, "lessThan")), checkSupport(props.valueType, "lessThanOrEqual") && (_jsx(MenuItem, { value: "lessThanOrEqual", children: t("standalone.data-grid.content.filter-type.lte-date") }, "lessThanOrEqual")), checkSupport(props.valueType, "greaterThan") && (_jsx(MenuItem, { value: "greaterThan", children: t("standalone.data-grid.content.filter-type.gt-date") }, "greaterThan")), checkSupport(props.valueType, "greaterThanOrEqual") && (_jsx(MenuItem, { value: "greaterThanOrEqual", children: t("standalone.data-grid.content.filter-type.gte-date") }, "greaterThanOrEqual")), checkSupport(props.valueType, "inRange") && (_jsx(MenuItem, { value: "inRange", children: t("standalone.data-grid.content.filter-type.in-range-date") }, "inRange")));
     }
     filterTypeMenuItems = filterTypeMenuItems.filter((e) => e);
+    // "Select all": checked when every value is ticked, mixed when some are
+    const enumValues = props.valueType === "enum"
+        ? enumFilterValues(props.valueData)
+        : [];
+    const enumTicked = filterValue ? filterValue.split(",") : [];
+    const enumAllTicked = filterValue.split(",").sort().join(",") ===
+        [...enumValues].sort().join(",");
+    const enumSomeTicked = !enumAllTicked && enumValues.some((value) => enumTicked.includes(value));
     // filter type custom
     const setCustomFilter = useCallback((customFilter) => {
         onChange({
@@ -213,11 +244,8 @@ const FilterEntry = (props) => {
     }, [onChange]);
     if (isFirstFilter && props.valueType === "custom") {
         const customFilterData = props.valueData;
-        const customFilterValue = props.value?.value1
-            ? JSON.parse(props.value?.value1)
-            : undefined;
         return React.createElement(customFilterData.filterComponent, {
-            filter: customFilterValue,
+            filter: customFilterValue(props.value?.value1),
             setFilter: setCustomFilter,
             close,
         });
@@ -229,12 +257,7 @@ const FilterEntry = (props) => {
                 props.valueType === "number" ||
                 props.valueType === "date" ||
                 props.valueType === "datetime" ||
-                manualIdEntry) && (_jsxs(_Fragment, { children: [_jsx(Grid, { size: 12, children: _jsx(Select, { onChange: onFilterTypeChange, value: filterType, fullWidth: true, children: filterTypeMenuItems }) }), filterType !== "empty" && filterType !== "notEmpty" && (_jsx(Grid, { size: 12, children: props.valueType === "date" ? (_jsx(LocalizedKeyboardDatePicker, { value: dateFilterValue(filterValue), onChange: onFilterValueChangeDate, fullWidth: true, autoFocus: depth === 1 })) : props.valueType === "datetime" ? (_jsx(LocalizedDateTimePicker, { value: filterValue === "" ? null : moment(filterValue), onChange: onFilterValueChangeDateTime, fullWidth: true, autoFocus: depth === 1 })) : (_jsx(TextField, { value: filterValue, onChange: onFilterValueChange, fullWidth: true, autoFocus: depth === 1 })) })), filterType === "inRange" && (_jsx(Grid, { size: 12, children: props.valueType === "date" ? (_jsx(LocalizedKeyboardDatePicker, { value: dateFilterValue(filterValue2), onChange: onFilterValue2ChangeDate })) : props.valueType === "datetime" ? (_jsx(LocalizedDateTimePicker, { value: filterValue2 === "" ? null : moment(filterValue2), onChange: onFilterValueChangeDateTime })) : (_jsx(TextField, { value: filterValue2, onChange: onFilterValue2Change, fullWidth: true })) }))] })), props.valueType === "boolean" && (_jsx(Grid, { size: 12, children: _jsx(FormControl, { children: _jsxs(RadioGroup, { value: filterValue, onChange: onFilterValueChangeBool, children: [_jsx(FormControlLabel, { value: "", control: _jsx(Radio, {}), label: t("standalone.data-grid.content.bool-filter.any") }), _jsx(FormControlLabel, { value: "true", control: _jsx(Radio, {}), label: t("standalone.data-grid.content.bool-filter.true") }), _jsx(FormControlLabel, { value: "false", control: _jsx(Radio, {}), label: t("standalone.data-grid.content.bool-filter.false") })] }) }) })), props.valueType === "enum" && (_jsxs(_Fragment, { children: [props.valueData.length > 10 && (_jsx(Grid, { size: 12, children: _jsx(TextField, { value: enumFilterSearch, onChange: (evt) => setEnumFilterSearch(evt.target.value), placeholder: t("standalone.data-grid.content.set-filter.search"), fullWidth: true, autoFocus: depth === 1 }) })), _jsx(DataGridSetFilterContainer, { size: 12, className: classes?.setFilterContainer, children: _jsxs(List, { children: [props.valueData.length > 5 && (_jsxs(DataGridSetFilterListItem, { className: classes?.setFilterListItem, children: [_jsx(Checkbox, { checked: filterValue.split(",").sort().join(",") ===
-                                                props.valueData
-                                                    .filter((entry) => !entry.isDivider)
-                                                    .map((entry) => entry.value || ENUM_FILTER_MAGIC_EMPTY)
-                                                    .sort()
-                                                    .join(","), onChange: onFilterValueChangeEnumAll }), _jsx(ListItemText, { slotProps: LIST_ITEM_SLOT_PROPS, children: t("standalone.data-grid.content.set-filter.select-all") })] })), checkSupport(props.valueType, "notInSet") && (_jsxs(_Fragment, { children: [_jsxs(DataGridSetFilterListItem, { className: classes?.setFilterListItem, children: [_jsx(Checkbox, { checked: enumFilterInverted, onChange: onFilterTypeChangeEnum }), _jsx(ListItemText, { slotProps: LIST_ITEM_SLOT_PROPS, children: t("standalone.data-grid.content.set-filter.invert") })] }), _jsx(DataGridSetFilterListItemDivider, { className: classes?.setFilterListItemDivider, children: _jsx(DataGridSetFilterListDivider, { className: classes?.setFilterListDivider }) })] })), props.valueData
+                manualIdEntry) && (_jsxs(_Fragment, { children: [_jsx(Grid, { size: 12, children: _jsx(Select, { onChange: onFilterTypeChange, value: filterType, fullWidth: true, children: filterTypeMenuItems }) }), filterType !== "empty" && filterType !== "notEmpty" && (_jsx(Grid, { size: 12, children: props.valueType === "date" ? (_jsx(LocalizedKeyboardDatePicker, { value: dateFilterValue(filterValue), onChange: onFilterValueChangeDate, fullWidth: true, autoFocus: depth === 1 })) : props.valueType === "datetime" ? (_jsx(LocalizedDateTimePicker, { value: filterValue === "" ? null : moment(filterValue), onChange: onFilterValueChangeDateTime, fullWidth: true, autoFocus: depth === 1 })) : (_jsx(TextField, { value: filterValue, onChange: onFilterValueChange, fullWidth: true, autoFocus: depth === 1 })) })), filterType === "inRange" && (_jsx(Grid, { size: 12, children: props.valueType === "date" ? (_jsx(LocalizedKeyboardDatePicker, { value: dateFilterValue(filterValue2), onChange: onFilterValue2ChangeDate })) : props.valueType === "datetime" ? (_jsx(LocalizedDateTimePicker, { value: filterValue2 === "" ? null : moment(filterValue2), onChange: onFilterValueChangeDateTime })) : (_jsx(TextField, { value: filterValue2, onChange: onFilterValue2Change, fullWidth: true })) }))] })), props.valueType === "boolean" && (_jsx(Grid, { size: 12, children: _jsx(FormControl, { children: _jsxs(RadioGroup, { value: filterValue, onChange: onFilterValueChangeBool, children: [_jsx(FormControlLabel, { value: "", control: _jsx(Radio, {}), label: t("standalone.data-grid.content.bool-filter.any") }), _jsx(FormControlLabel, { value: "true", control: _jsx(Radio, {}), label: t("standalone.data-grid.content.bool-filter.true") }), _jsx(FormControlLabel, { value: "false", control: _jsx(Radio, {}), label: t("standalone.data-grid.content.bool-filter.false") })] }) }) })), props.valueType === "enum" && (_jsxs(_Fragment, { children: [props.valueData.length > 10 && (_jsx(Grid, { size: 12, children: _jsx(TextField, { value: enumFilterSearch, onChange: (evt) => setEnumFilterSearch(evt.target.value), placeholder: t("standalone.data-grid.content.set-filter.search"), fullWidth: true, autoFocus: depth === 1 }) })), _jsx(DataGridSetFilterContainer, { size: 12, className: classes?.setFilterContainer, role: "group", "aria-label": t("standalone.data-grid.content.set-filter.label"), children: _jsxs(List, { children: [props.valueData.length > 5 && (_jsx(DataGridSetFilterListItem, { className: classes?.setFilterListItem, children: _jsx(FormControlLabel, { control: _jsx(Checkbox, { checked: enumAllTicked, indeterminate: enumSomeTicked, onChange: onFilterValueChangeEnumAll }), label: t("standalone.data-grid.content.set-filter.select-all"), slotProps: LIST_ITEM_LABEL_SLOT_PROPS }) })), checkSupport(props.valueType, "notInSet") && (_jsxs(_Fragment, { children: [_jsx(DataGridSetFilterListItem, { className: classes?.setFilterListItem, children: _jsx(FormControlLabel, { control: _jsx(Checkbox, { checked: enumFilterInverted, onChange: onFilterTypeChangeEnum }), label: t("standalone.data-grid.content.set-filter.invert"), slotProps: LIST_ITEM_LABEL_SLOT_PROPS }) }), _jsx(DataGridSetFilterListItemDivider, { className: classes?.setFilterListItemDivider, children: _jsx(DataGridSetFilterListDivider, { className: classes?.setFilterListDivider }) })] })), props.valueData
                                     .filter((entry) => entry
                                     .getLabelText()
                                     .toLowerCase()
@@ -245,9 +268,7 @@ const FilterEntry = (props) => {
                                         : DataGridSetFilterListItem;
                                     return (_jsx(ListItemComp, { className: entry.isDivider
                                             ? classes?.setFilterListItemDivider
-                                            : classes?.setFilterListItem, children: entry.isDivider ? (_jsx(DataGridSetFilterListDivider, { className: classes?.setFilterListDivider })) : (_jsxs(_Fragment, { children: [_jsx(Checkbox, { value: entry.value || ENUM_FILTER_MAGIC_EMPTY, checked: filterValue
-                                                        .split(",")
-                                                        .includes(entry.value || ENUM_FILTER_MAGIC_EMPTY), onChange: onFilterValueChangeEnum, disabled: entry.disabled }), _jsx(ListItemText, { slotProps: LIST_ITEM_SLOT_PROPS, children: (entry.getLabel || entry.getLabelText)() })] })) }, entry.value));
+                                            : classes?.setFilterListItem, children: entry.isDivider ? (_jsx(DataGridSetFilterListDivider, { className: classes?.setFilterListDivider })) : (_jsx(FormControlLabel, { control: _jsx(Checkbox, { value: entry.value || ENUM_FILTER_MAGIC_EMPTY, checked: enumTicked.includes(entry.value || ENUM_FILTER_MAGIC_EMPTY), onChange: onFilterValueChangeEnum, disabled: entry.disabled }), label: (entry.getLabel || entry.getLabelText)(), slotProps: LIST_ITEM_LABEL_SLOT_PROPS })) }, entry.value));
                                 })] }) })] })), props.valueType === "id" && !manualIdEntry && (_jsx(_Fragment, { children: _jsxs(DataGridIdFilterContainer, { size: 12, className: classes?.idFilterContainer, children: [checkSupport(props.valueType, "notInSet") && (_jsx(FormControlLabel, { control: _jsx(Checkbox, { checked: enumFilterInverted, onChange: onFilterTypeChangeEnum }), label: t("standalone.data-grid.content.set-filter.invert") })), _jsx(BackendMultiSelect, { ...props.valueData, selected: filterValue ? filterValue.split(",") : [], onSelect: handleIdFilterSelect, confirmDelete: false })] }) })), filterValue &&
                 props.valueType !== "enum" &&
                 (props.valueType !== "id" || manualIdEntry) &&

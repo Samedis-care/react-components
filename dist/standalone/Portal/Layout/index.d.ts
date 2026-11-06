@@ -32,6 +32,11 @@ interface PortalLayoutPropsBase {
     content: React.ReactNode;
     /**
      * The width of the menu area
+     *
+     * In px. Sets the menu column and the menu paper on desktop, and the drawer
+     * width on mobile. The drawer is never wider than the screen minus 56px, so
+     * a strip of backdrop stays to tap to close it (320 gives a 264px drawer on
+     * a 320px phone).
      */
     drawerWidth?: number;
     /**

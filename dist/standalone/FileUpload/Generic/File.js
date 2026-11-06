@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { Grid, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import { Cancel as CancelIconList, CancelOutlined as CancelIcon, InsertDriveFile as DefaultFileIcon, RestoreFromTrash as RestoreIconSvg, } from "@mui/icons-material";
 import { ArchiveFileIcon, AudioFileIcon, CodeFileIcon, CsvFileIcon, ExcelFileIcon, ImageFileIcon, PdfFileIcon, PowerPointFileIcon, TextFileIcon, VideoFileIcon, WordFileIcon, } from "../FileIcons";
@@ -43,10 +43,28 @@ const RemoveIcon = styled(CancelIcon, {
 })({
     cursor: "pointer",
 });
+/**
+ * Makes the control that opens a file (a link, or a button with onClick, see
+ * FileProps.downloadLink) look like the plain name or icon, and gives it an outline on
+ * keyboard focus. On the plain `p` and `div` these declarations change nothing.
+ */
+const openControlStyles = (theme) => ({
+    display: "block",
+    padding: 0,
+    border: 0,
+    background: "none",
+    color: "inherit",
+    textDecoration: "none",
+    "&:focus-visible": {
+        outline: `2px solid ${theme.palette.primary.main}`,
+        outlineOffset: 2,
+    },
+});
 const IconWrapperList = styled("div", {
     name: "CcFile",
     slot: "iconWrapperList",
 })(({ theme }) => ({
+    ...openControlStyles(theme),
     height: "100%",
     width: "auto",
     color: theme.palette.error.main,
@@ -82,6 +100,7 @@ const StyledLabelList = styled(Typography, {
     name: "CcFile",
     slot: "listLabel",
 })(({ theme }) => ({
+    ...openControlStyles(theme),
     position: "absolute",
     maxWidth: "100%",
     "&.Mui-active": {
@@ -96,6 +115,9 @@ const StyledLabel = styled(Typography, {
     name: "CcFile",
     slot: "label",
 })(({ theme }) => ({
+    ...openControlStyles(theme),
+    // a button is only as wide as its text otherwise
+    width: "100%",
     "&.Mui-active": {
         cursor: "pointer",
         "&:hover": {
@@ -339,52 +361,129 @@ export const getFileTypeIcon = (type) => {
     }
 };
 export const getFileIconOrDefault = (fileName, mimeType) => getFileIcon(fileName, mimeType) ?? DefaultFileIcon;
+/**
+ * The URL schemes a file's link may have. Any other (`javascript:`, `vbscript:`, …) does
+ * not count as a link: opening it would run script with access to the app window.
+ */
+const LINK_PROTOCOLS = ["http:", "https:", "blob:", "data:"];
+/**
+ * The scheme of a file's link, if it counts as a link
+ * @param url The link: absolute, or relative to the page
+ * @returns The scheme as the browser reads it (lower case, with the colon, after leading
+ *          spaces and control characters and with tabs and newlines removed), or null for
+ *          no link, a link that cannot be parsed and a scheme not in LINK_PROTOCOLS
+ */
+const getLinkProtocol = (url) => {
+    if (!url)
+        return null;
+    let protocol;
+    try {
+        protocol = new URL(url, document.baseURI).protocol;
+    }
+    catch {
+        return null;
+    }
+    return LINK_PROTOCOLS.includes(protocol) ? protocol : null;
+};
+/**
+ * Opens a file's link in a new tab, without giving that tab access to the app window
+ * (`window.opener`) and without sending a referrer
+ * @param url A link getLinkProtocol accepted
+ */
+const openInNewTab = (url) => {
+    window.open(url, "_blank", "noopener,noreferrer");
+};
+/**
+ * One file of FileUploadGeneric: its icon or image preview, its name, and its remove or
+ * restore control. The default export of this module, imported as FilePreview by apps.
+ * @remarks A file with a link is opened by keyboard through its name (in icon-only its
+ *          icon), see FileProps.downloadLink.
+ */
 const File = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcFile" });
     const { name, downloadLink, variant, className, classes, onClick } = props;
     const FileIcon = getFileIconOrDefault(props.name, props.mimeType);
     const previewSrc = useObjectUrl(props.preview);
     const downloadUrl = useObjectUrl(downloadLink);
+    const linkProtocol = useMemo(() => getLinkProtocol(downloadUrl), [downloadUrl]);
+    const hasLink = linkProtocol != null;
     const openDownload = useCallback(async () => {
-        if (downloadUrl) {
-            if (downloadUrl.startsWith("data:")) {
-                const url = URL.createObjectURL(dataToFile(downloadUrl));
-                if (onClick)
-                    await onClick(name, url);
-                else
-                    window.open(url, "_blank");
-                URL.revokeObjectURL(url);
-            }
-            else {
-                if (onClick)
-                    await onClick(name, downloadUrl);
-                else
-                    window.open(downloadUrl, "_blank");
-            }
+        if (!downloadUrl || !linkProtocol)
+            return;
+        if (linkProtocol === "data:") {
+            const url = URL.createObjectURL(dataToFile(downloadUrl));
+            if (onClick)
+                await onClick(name, url);
+            else
+                openInNewTab(url);
+            URL.revokeObjectURL(url);
         }
-    }, [downloadUrl, name, onClick]);
+        else {
+            if (onClick)
+                await onClick(name, downloadUrl);
+            else
+                openInNewTab(downloadUrl);
+        }
+    }, [downloadUrl, linkProtocol, name, onClick]);
+    // a click on the open control, also one by keyboard. openDownload opens the file, not
+    // the browser: a data: link needs an object URL, and onClick replaces opening it.
+    const handleOpen = useCallback((evt) => {
+        evt.preventDefault();
+        void openDownload();
+    }, [openDownload]);
+    // what makes the name (icon-only: the icon) the control that opens the file
+    const openControl = useMemo(() => !hasLink
+        ? undefined
+        : onClick
+            ? {
+                component: "button",
+                props: { type: "button", onClick: handleOpen },
+            }
+            : {
+                component: "a",
+                props: {
+                    href: downloadUrl,
+                    target: "_blank",
+                    rel: "noopener noreferrer",
+                    onClick: handleOpen,
+                },
+            }, [hasLink, onClick, handleOpen, downloadUrl]);
     const handleListClick = useCallback((evt) => {
         evt.stopPropagation();
     }, []);
     const isList = variant === "list" || variant === "compact-list" || variant === "icon-only";
     const renderIcon = () => {
         const IconWrapperComp = isList ? IconWrapperList : IconWrapper;
-        return (_jsx(IconWrapperComp, { className: combineClassNames([
+        // icon-only shows no name, so its icon is the open control
+        const control = variant === "icon-only" ? openControl : undefined;
+        // elsewhere a click on the icon opens the file too, for the mouse only: the name
+        // is the control
+        const iconClick = hasLink && !control ? openDownload : undefined;
+        return (_jsx(IconWrapperComp, { as: control?.component, ...control?.props, className: combineClassNames([
                 isList ? classes?.iconWrapperList : classes?.iconWrapper,
                 props.disabled && "Mui-disabled",
-                downloadLink && "Mui-active",
-            ]), children: props.preview ? (_jsx("img", { src: previewSrc, alt: props.name, onClick: openDownload, style: { height: props.size } })) : (_jsx(FileIcon, { onClick: openDownload, style: { height: props.size } })) }));
+                hasLink && "Mui-active",
+            ]), children: props.preview ? (_jsx("img", { src: previewSrc, alt: props.name, onClick: iconClick, style: { height: props.size } })) : (_jsx(FileIcon, { onClick: iconClick, style: { height: props.size } })) }));
     };
     const renderName = () => {
         const TypographyComp = variant === "list" ? StyledLabelList : StyledLabel;
-        return (_jsx(Tooltip, { title: props.name, children: _jsx(TypographyComp, { align: isList ? "left" : "center", noWrap: true, className: combineClassNames([
-                    variant === "list" ? classes?.listLabel : classes?.label,
-                    downloadLink && "Mui-active",
-                ]), "data-cc-change": props.changeState, onClick: openDownload, variant: "body2", style: isList
-                    ? {
-                        lineHeight: `${props.size}px`,
-                    }
-                    : undefined, children: props.label ?? props.name }) }));
+        const nameProps = {
+            align: isList ? "left" : "center",
+            noWrap: true,
+            className: combineClassNames([
+                variant === "list" ? classes?.listLabel : classes?.label,
+                hasLink && "Mui-active",
+            ]),
+            "data-cc-change": props.changeState,
+            variant: "body2",
+            style: isList
+                ? {
+                    lineHeight: `${props.size}px`,
+                }
+                : undefined,
+            children: props.label ?? props.name,
+        };
+        return (_jsx(Tooltip, { title: props.name, children: openControl ? (_jsx(TypographyComp, { ...nameProps, component: openControl.component, ...openControl.props })) : (_jsx(TypographyComp, { ...nameProps })) }));
     };
     const restoreBtn = props.changeState === "removed" &&
         props.onRestore &&
@@ -423,7 +522,7 @@ const File = (inProps) => {
         return (_jsx(CompactListWrapper, { onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]), children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap", children: [_jsx(Grid, { children: renderIcon() }), _jsx(ListEntryText, { className: classes?.listEntryText, children: renderName() }), actionBtn && _jsx(Grid, { children: actionBtn })] }) }));
     }
     else if (variant === "icon-only") {
-        return (_jsx(CompactListWrapper, { onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]), children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap", children: [_jsx(Grid, { children: _jsx(Tooltip, { title: props.name, children: _jsx("span", { children: renderIcon() }) }) }), actionBtn && _jsx(Grid, { children: actionBtn })] }) }));
+        return (_jsx(CompactListWrapper, { onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]), children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap", children: [_jsx(Grid, { children: _jsx(Tooltip, { title: props.name, children: openControl ? renderIcon() : _jsx("span", { children: renderIcon() }) }) }), actionBtn && _jsx(Grid, { children: actionBtn })] }) }));
     }
     else {
         throw new Error("Invalid variant passed");

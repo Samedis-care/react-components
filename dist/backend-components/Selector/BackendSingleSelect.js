@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useThemeProps } from "@mui/material";
 import { SingleSelect, } from "../../standalone";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -14,7 +14,9 @@ const BackendSingleSelect = (inProps) => {
     const modelFetch = modelFetchProp ?? model;
     if (freeSolo && !onSelectFreeSolo)
         throw new Error("freeSolo enabled, but no onSelectFreeSolo callback");
-    const upcomingSelectedCache = useRef(null);
+    // the entry picked from the list last, shown for its id until the effect below
+    // has taken it into the cache, so a pick does not show "Loading…" in between
+    const [picked, setPicked] = useState(null);
     const [selectedCache, setSelectedCache] = useState(null);
     const { t } = useCCTranslations();
     const handleLoad = useCallback(async (search) => {
@@ -49,7 +51,7 @@ const BackendSingleSelect = (inProps) => {
                 onSelectFreeSolo(selected.value);
             return;
         }
-        upcomingSelectedCache.current = selected;
+        setPicked(selected);
         if (onSelect) {
             onSelect(selected ? selected.value : null);
         }
@@ -67,11 +69,14 @@ const BackendSingleSelect = (inProps) => {
             return;
         }
         // if this comes from selection no need to fetch it either
-        if (upcomingSelectedCache.current &&
-            upcomingSelectedCache.current.value === selected) {
-            setSelectedCache(upcomingSelectedCache.current);
-            upcomingSelectedCache.current = null;
+        if (picked && picked.value === selected) {
+            setSelectedCache(picked);
+            setPicked(null);
         }
+        // set when selected changes again or the field unmounts: what is loaded for this
+        // id then is discarded, so it can neither replace the entry of the new id nor
+        // drop it
+        let discarded = false;
         void (async () => {
             let newCache = null;
             if (initialData) {
@@ -89,6 +94,8 @@ const BackendSingleSelect = (inProps) => {
                     newCache = await modelToSelectorData(data[0]);
                 }
                 catch (e) {
+                    if (discarded)
+                        return;
                     const label = getSelectedLoadErrorLabel(selected, e, onLoadError, t);
                     // if we should drop the record...
                     if (!label) {
@@ -104,15 +111,30 @@ const BackendSingleSelect = (inProps) => {
                     };
                 }
             }
+            if (discarded)
+                return;
             setSelectedCache((oldCache) => Object.assign({}, oldCache, newCache));
         })();
+        return () => {
+            discarded = true;
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selected]);
+    // the entry of selected: the cached one only while it is this id's, else one that
+    // is known without loading it (just picked, or an additionalOptions entry; the
+    // effect above caches it), else null while it loads
+    const selectedEntry = selected == null
+        ? null
+        : selectedCache?.value === selected
+            ? selectedCache
+            : picked?.value === selected
+                ? picked
+                : (additionalOptions?.find((opt) => opt.value === selected) ?? null);
     const debouncedLoad = useDebouncedLoad(handleLoad, searchDebounceTime ?? 500);
     return (_jsx(SingleSelect, { ...otherProps, freeSolo: freeSolo, onLoad: debouncedLoad, additionalOptions: additionalOptions, onSelect: handleSelect, selected: selectedFreeSolo
             ? { value: selectedFreeSolo, label: selectedFreeSolo, freeSolo: true }
             : selected != null
-                ? (selectedCache ?? {
+                ? (selectedEntry ?? {
                     value: selected,
                     label: t("backend-components.selector.loading"),
                 })

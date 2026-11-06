@@ -12,7 +12,13 @@ export type DataGridPersistentStateContextType = [
      */
     DataGridPersistedData | undefined,
     /**
-     * Store the given data, and provide it from now on
+     * Store the given data, and provide it from now on.
+     *
+     * A grid calls it when the data it persists changes: a filter, sort,
+     * search or custom data change, a column shown, hidden, pinned or resized,
+     * the first auto-fit of the column widths. It does not call it when it
+     * opens, so what it opened on stays stored as it is until one of these
+     * changes; data in an older format is written in the current one then.
      */
     (data: DataGridPersistentState) => Promise<void> | void
 ];

@@ -3,6 +3,7 @@ import React from "react";
 import { Typography } from "@mui/material";
 import { FormHelperTextCC, TextFieldWithHelp } from "../../../../../standalone";
 import TypeLocalizedString from "../../TypeLocalizedString";
+import addSlotAttributes from "../../../../../utils/internal/addSlotAttributes";
 export const ModelDataTypeStringLocalizedSingleRendererContext = React.createContext(null);
 /**
  * Renders a text field
@@ -14,7 +15,7 @@ class RendererStringLocalizedSingle extends TypeLocalizedString {
         this.props = props;
     }
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, } = params;
+        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, id, messageId, describedBy, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -36,7 +37,9 @@ class RendererStringLocalizedSingle extends TypeLocalizedString {
                                     if (!evt.target.value)
                                         delete newValue[language];
                                     handleChange(evt.target.name, newValue);
-                                }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, autoFocus: autoFocus }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
+                                }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, autoFocus: autoFocus, id: id, slotProps: addSlotAttributes(this.props?.slotProps, "htmlInput", {
+                                    "aria-describedby": describedBy,
+                                }) }), _jsx(FormHelperTextCC, { id: messageId, error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
                 } }));
         }
         return (_jsx(ModelDataTypeStringLocalizedSingleRendererContext.Consumer, { children: (language) => {

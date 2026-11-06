@@ -1,16 +1,9 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useCallback, useContext, useEffect, useRef, useState, } from "react";
+import React, { useCallback, useEffect, useRef, useState, } from "react";
 import { Grid, useMediaQuery } from "@mui/material";
 import { DataGridFilterBarBox, DataGridFilterBarGrid, useDataGridProps, useDataGridState, } from "../DataGrid";
 import CustomFiltersButton from "./CustomFiltersButton";
 import combineClassNames from "../../../utils/combineClassNames";
-export const CustomFilterActiveContext = React.createContext(undefined);
-export const useCustomFilterActiveContext = () => {
-    const ctx = useContext(CustomFilterActiveContext);
-    if (!ctx)
-        throw new Error("Context not set");
-    return ctx;
-};
 const FilterBar = () => {
     const props = useDataGridProps();
     const { enableFilterDialogMediaQuery, enableFilterDialogWidth } = props;

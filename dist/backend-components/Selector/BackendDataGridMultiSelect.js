@@ -1,11 +1,60 @@
-import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useCallback, useEffect, useState } from "react";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import React, { useCallback, useEffect, useId, useState } from "react";
+import { FormLabel, styled } from "@mui/material";
 import DataGrid from "../../standalone/DataGrid/DataGrid";
 import Connector from "../../backend-integration/Connector/Connector";
-import { renderDataGridRecordUsingModel } from "../DataGrid";
+import { renderDataGridRecordUsingModel, useBackendDataGridRowLabel, } from "../DataGrid";
 import { DataGridNoPersist } from "../../standalone";
+import useCCTranslations from "../../utils/useCCTranslations";
+/**
+ * The field: a fieldset named by the legend (label), described by the count of selected
+ * rows, with the grid filling the rest of its height
+ */
+const Root = styled("fieldset", {
+    name: "CcBackendDataGridMultiSelect",
+    slot: "root",
+})({
+    display: "flex",
+    flexDirection: "column",
+    height: "100%",
+    minWidth: 0,
+    margin: 0,
+    padding: 0,
+    border: 0,
+});
+const Label = styled(FormLabel, {
+    name: "CcBackendDataGridMultiSelect",
+    slot: "label",
+})({
+    padding: 0,
+});
+const Status = styled("div", {
+    name: "CcBackendDataGridMultiSelect",
+    slot: "status",
+})(({ theme }) => ({
+    ...theme.typography.body2,
+    color: theme.palette.text.secondary,
+    marginBottom: theme.spacing(0.5),
+}));
+const GridSlot = styled("div", {
+    name: "CcBackendDataGridMultiSelect",
+    slot: "grid",
+})({
+    flex: "1 1 auto",
+    minHeight: 0,
+});
+/**
+ * Multi selection as a DataGrid over a model, with a checkbox per row: a fieldset with the
+ * label as its legend, the number of selected rows ("Selected: 2", a polite status that
+ * also describes the field) and the grid, which fills the rest of the field's height. It
+ * needs a parent with a height. Theme name for styleOverrides:
+ * `CcBackendDataGridMultiSelect` (slots root, label, status, grid).
+ */
 const BackendDataGridMultiSelect = (props) => {
-    const { model, readOnly, selected, onChange, ...gridProps } = props;
+    const { model, readOnly, selected, onChange, label, getRowLabel: getRecordLabel, ...gridProps } = props;
+    const getRowLabel = useBackendDataGridRowLabel(model, getRecordLabel);
+    const { t } = useCCTranslations();
+    const statusId = useId();
     const [refreshToken, setRefreshToken] = useState("");
     const refreshGrid = useCallback(() => setRefreshToken(new Date().toISOString()), []);
     const [initialSelectionChangeReceived, setInitialSelectionChangeReceived] = useState(false);
@@ -17,7 +66,7 @@ const BackendDataGridMultiSelect = (props) => {
             console.warn("[Components-Care] [DataGridMultiSelectCRUD] Backend connector does not support index2 function, offset based pagination will be emulated (inefficient)");
         }
     }, [model]);
-    return (_jsx(DataGridNoPersist, { children: _jsx(DataGrid, { ...gridProps, columns: model.toDataGridColumnDefinition(), forceRefreshToken: `${gridProps.forceRefreshToken || "undefined"}${refreshToken}`, disableSelection: false, prohibitMultiSelect: false, customSelectionControl: undefined, onSelectionChange: (invert, newIds) => {
+    const grid = (_jsx(DataGridNoPersist, { children: _jsx(DataGrid, { ...gridProps, columns: model.toDataGridColumnDefinition(), forceRefreshToken: `${gridProps.forceRefreshToken || "undefined"}${refreshToken}`, disableSelection: false, prohibitMultiSelect: false, customSelectionControl: undefined, getRowLabel: getRowLabel, onSelectionChange: (invert, newIds) => {
                 if (!initialSelectionChangeReceived) {
                     setInitialSelectionChangeReceived(true);
                     return;
@@ -63,5 +112,8 @@ const BackendDataGridMultiSelect = (props) => {
                     rows: [...relationshipRecordsFiltered, ...dataRecords].map(renderDataGridRecordUsingModel(model, refreshGrid)),
                 };
             } }) }));
+    return (_jsxs(Root, { "aria-describedby": statusId, children: [label && _jsx(Label, { component: "legend", children: label }), _jsx(Status, { id: statusId, role: "status", children: t("backend-components.selector.selected-count", {
+                    COUNT: selected.length,
+                }) }), _jsx(GridSlot, { children: grid })] }));
 };
 export default React.memo(BackendDataGridMultiSelect);

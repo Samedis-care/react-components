@@ -17,6 +17,12 @@ export interface InlineSwitchProps {
      * Label for switch control (only used if visible is truthy)
      */
     label?: React.ReactNode;
+    /**
+     * Disables the switch: it cannot be focused or toggled, also not through
+     * its label, `onChange` is not called, and switch and label are greyed out
+     * @default false
+     */
+    disabled?: boolean;
     children?: React.ReactElement;
     /**
      * custom styles

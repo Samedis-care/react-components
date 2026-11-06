@@ -24,18 +24,15 @@ const ExportMenuEntry = React.forwardRef((props, ref) => {
     const IdleIcon = props.exporter.icon || ExportIcon;
     const { onRequest, onDownload, autoDownload } = props.exporter;
     const { search, customData, columnPinned, columnHidden } = state;
-    const finishExport = useCallback(() => {
-        onDownload(exportData, pushDialog);
+    // gets the data passed: right after the request, the state still holds
+    // the previous export's data
+    const download = useCallback((data) => {
+        onDownload(data, pushDialog);
         setStatus(DataGridExportStatus.Idle);
         if (!keepExportMenuOpenAfterDownload)
             closeMenu({}, "backdropClick");
-    }, [
-        onDownload,
-        exportData,
-        pushDialog,
-        closeMenu,
-        keepExportMenuOpenAfterDownload,
-    ]);
+    }, [onDownload, pushDialog, closeMenu, keepExportMenuOpenAfterDownload]);
+    const finishExport = useCallback(() => download(exportData), [download, exportData]);
     const startExport = useCallback(async () => {
         setStatus(DataGridExportStatus.Working);
         try {
@@ -45,7 +42,7 @@ const ExportMenuEntry = React.forwardRef((props, ref) => {
             setExportData(data);
             setStatus(DataGridExportStatus.Ready);
             if (autoDownload)
-                finishExport();
+                download(data);
         }
         catch (e) {
             // eslint-disable-next-line no-console
@@ -66,7 +63,7 @@ const ExportMenuEntry = React.forwardRef((props, ref) => {
         columnPinned,
         onError,
         autoDownload,
-        finishExport,
+        download,
     ]);
     const cancelExport = useCallback(() => {
         setStatus(DataGridExportStatus.Idle);
