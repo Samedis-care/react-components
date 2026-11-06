@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
 	Button,
 	Dialog,
@@ -132,10 +132,8 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 	const signerName = signerNameUntrim?.trim();
 	const [resetCanvas, setResetCanvas] = useState(!!signature);
 	const [pushDialog, popDialog] = useDialogContext();
-	const canvasWrapper = useRef<HTMLDivElement>(null);
 	const signCanvas = useRef<SignaturePad>(null);
 	const hiddenRef = useRef<HTMLInputElement>(null);
-	const [canvasSize, setCanvasSize] = useState<[number, number]>([0, 0]);
 	const clearCanvas = useCallback(async () => {
 		if (
 			!(await showConfirmDialogBool(pushDialog, {
@@ -197,30 +195,6 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 		[closeCanvas],
 	);
 
-	const handleResize = useCallback((wrapper: HTMLDivElement) => {
-		setCanvasSize([wrapper.clientWidth, wrapper.clientHeight]);
-	}, []);
-
-	const setCanvasWrapperRef = useCallback(
-		(node: HTMLDivElement | null) => {
-			canvasWrapper.current = node;
-
-			if (node) {
-				handleResize(node);
-			}
-		},
-		[handleResize],
-	);
-
-	useEffect(() => {
-		const resizeHandler = () =>
-			canvasWrapper.current && handleResize(canvasWrapper.current);
-
-		window.addEventListener("resize", resizeHandler);
-		return () => window.removeEventListener("resize", resizeHandler);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [canvasWrapper.current]);
-
 	return (
 		<RootDialog
 			open={true}
@@ -243,21 +217,18 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 					<Close />
 				</StyledCloseButton>
 			</StyledDialogTitle>
-			<SignDiv
-				className={classes?.signDiv}
-				ref={setCanvasWrapperRef}
-				data-name={name}
-				onBlur={onBlur}
-			>
+			<SignDiv className={classes?.signDiv} data-name={name} onBlur={onBlur}>
 				{!resetCanvas ? (
 					<SignaturePad
 						ref={signCanvas}
 						options={{
 							penColor: penColor || "blue",
 						}}
-						width={canvasSize[0]}
-						height={canvasSize[1]}
-						// re-dimensioning the canvas clears its bitmap: draw the
+						// no width or height: the wrapper reads them only on mount.
+						// Without them it sizes the bitmap to the canvas's box (the
+						// sign area) times devicePixelRatio, on mount and on every
+						// window resize, so the ink lands under the pen.
+						// Re-dimensioning the canvas clears its bitmap: draw the
 						// strokes again, so the ink survives a resize
 						redrawOnResize
 					/>

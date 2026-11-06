@@ -140,6 +140,11 @@ const signCanvas = () =>
 
 const page = () => within(document.body);
 
+const closeDialog = async () => {
+	page().getByRole("button", { name: "Close" }).click();
+	await waitFor(() => expect(dialogEl()).toBeNull());
+};
+
 /** the bitmap is the CSS box times the device pixel ratio, so ink lands under the pen */
 const bitmapMatchesBox = (c: HTMLCanvasElement) => {
 	const box = c.getBoundingClientRect();
@@ -395,5 +400,123 @@ export const Issue3467Item1ResizeRedrawsInk: Story = {
 		const png = await decodePng(mocked(args.setSignature).mock.calls[0][0]);
 		await expect(png.opaque).toBeGreaterThan(0);
 		await expect(png.strongest).toEqual([0, 0, 255, 255]);
+	},
+};
+
+export const Issue3467Item2ResizeAfterClearKeepsInkUnderPen: Story = {
+	args: { initial: SAMPLE_SIGNATURE },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3467-ITEM-2: on a stored signature press Clear, Yes, then the sign area changes size: the canvas keeps its old bitmap while its box shrinks, so the bitmap is scaled into the box and strokes land away from the pen. Expected: the bitmap follows the box (box size times devicePixelRatio).",
+			},
+		},
+		a11y: { test: "todo" }, // the failing play leaves the dialog open
+	},
+	play: async ({ canvasElement, userEvent }) => {
+		tileIn(canvasElement).click();
+		await waitFor(() => expect(dialogEl()).not.toBeNull());
+		await userEvent.click(
+			page().getByRole("button", { name: "Clear signature" }),
+		);
+		await userEvent.click(
+			within(
+				await page().findByRole("dialog", { name: "Clear signature" }),
+			).getByRole("button", { name: "Yes" }),
+		);
+		const c = await signCanvas();
+		const [before, beforeBox] = bitmapMatchesBox(c);
+		await expect(before).toEqual(beforeBox);
+
+		signDivEl().style.width = "300px";
+		window.dispatchEvent(new Event("resize"));
+		await waitFor(
+			async () => {
+				const [bitmap, box] = bitmapMatchesBox(await signCanvas());
+				await expect(
+					bitmap,
+					"canvas bitmap vs. its box after the resize",
+				).toEqual(box);
+			},
+			{ timeout: 2000 },
+		);
+		await closeDialog();
+	},
+};
+
+/**
+ * Where the ink shows on screen: the bounding box of the inked pixels, in CSS
+ * px from the canvas's top left corner, for a bitmap that fills its box
+ */
+const inkBounds = (c: HTMLCanvasElement) => {
+	const ctx = c.getContext("2d");
+	if (!ctx) throw new Error("no 2d context");
+	const d = ctx.getImageData(0, 0, c.width, c.height).data;
+	const box = c.getBoundingClientRect();
+	const [sx, sy] = [box.width / c.width, box.height / c.height];
+	let [left, top, right, bottom] = [Infinity, Infinity, -Infinity, -Infinity];
+	for (let y = 0; y < c.height; y++)
+		for (let x = 0; x < c.width; x++)
+			if (d[(y * c.width + x) * 4 + 3]) {
+				left = Math.min(left, x * sx);
+				top = Math.min(top, y * sy);
+				right = Math.max(right, (x + 1) * sx);
+				bottom = Math.max(bottom, (y + 1) * sy);
+			}
+	return { left, top, right, bottom };
+};
+
+/** a stroke's ink reaches about 3 CSS px beyond the points it went through */
+const expectNear = (actual: number, expected: number, what: string) =>
+	expect(Math.abs(actual - expected), `${what}: ${actual}`).toBeLessThan(5);
+
+export const Issue3467Item2ResizeAfterClearDrawsUnderPen: Story = {
+	args: { initial: SAMPLE_SIGNATURE },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3467-ITEM-2: on a stored signature press Clear, Yes and draw, then the sign area narrows: the stroke drawn before stays where it was drawn, and a new stroke shows under the pen.",
+			},
+		},
+		// the play leaves no dialog open when it passes; on failure it may
+		a11y: { test: "todo" },
+	},
+	play: async ({ canvasElement, userEvent }) => {
+		tileIn(canvasElement).click();
+		await waitFor(() => expect(dialogEl()).not.toBeNull());
+		await userEvent.click(
+			page().getByRole("button", { name: "Clear signature" }),
+		);
+		await userEvent.click(
+			within(
+				await page().findByRole("dialog", { name: "Clear signature" }),
+			).getByRole("button", { name: "Yes" }),
+		);
+		const c = await signCanvas();
+		// signature_pad draws a stroke from its first point to its second
+		drawStroke(c, [20, 40], [60, 60], [100, 80]);
+
+		signDivEl().style.width = "300px";
+		window.dispatchEvent(new Event("resize"));
+		await waitFor(
+			async () => {
+				const [bitmap, box] = bitmapMatchesBox(c);
+				await expect(bitmap).toEqual(box);
+			},
+			{ timeout: 2000 },
+		);
+		const first = inkBounds(c);
+		await expectNear(first.left, 20, "left edge of the first stroke");
+		await expectNear(first.top, 40, "top edge of the first stroke");
+		await expectNear(first.right, 60, "right edge of the first stroke");
+		await expectNear(first.bottom, 60, "bottom edge of the first stroke");
+
+		drawStroke(c, [200, 120], [260, 180], [280, 200]);
+		const both = inkBounds(c);
+		await expectNear(both.right, 260, "right edge of the second stroke");
+		await expectNear(both.bottom, 180, "bottom edge of the second stroke");
+		await closeDialog();
 	},
 };
