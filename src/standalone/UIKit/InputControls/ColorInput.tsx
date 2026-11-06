@@ -13,9 +13,11 @@ export type ColorInputProps = TextFieldWithHelpProps &
 		 */
 		onChange: (newColor: string) => void;
 		/**
-		 * The current color
+		 * The current color, as text (e.g. `#336699`). `""` or `null` for none,
+		 * which shows an empty field; `undefined` (from untyped data) is treated
+		 * like `null`.
 		 */
-		value: string;
+		value: string | null;
 	};
 
 const anchorOrigin: PopoverOrigin = {
@@ -28,7 +30,10 @@ const transformOrigin: PopoverOrigin = {
 };
 
 const ColorInput = (props: ColorInputProps) => {
-	const { value, onChange } = props;
+	const { onChange } = props;
+	// null and undefined behave like "": the input stays controlled, and the
+	// picker gets a string (react-color throws on null)
+	const value = props.value ?? "";
 	const [pickerAnchor, setPickerAnchor] = useState<HTMLElement | null>(null);
 	const openColorPicker = (evt: React.MouseEvent<HTMLElement>) => {
 		if (props.disabled) return;
