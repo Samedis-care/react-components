@@ -20,7 +20,15 @@ export interface FormCrudMultiSelectProps<
 			CrudMultiSelectProps<M, DataT>,
 			"errorComponent" | "connector" | "field"
 		>,
-		UseLazyCrudConnectorParams<Record<string, unknown>> {}
+		UseLazyCrudConnectorParams<Record<string, unknown>> {
+	/**
+	 * Locks the control: the search field is disabled and the entries have no remove
+	 * button. While the Form is read-only (which includes a save in progress) the control is
+	 * locked whatever this says: `disabled` can only add to that.
+	 * @default false
+	 */
+	disabled?: boolean;
+}
 
 const FormCrudMultiSelect = <
 	M extends ModelUnknown,
@@ -38,14 +46,16 @@ const FormCrudMultiSelect = <
 		useLazyCrudConnector<Record<string, unknown>>(connectorParams);
 	const { readOnly, errorComponent } = useFormContextLite<ModelUnknown>();
 
+	// the caller's props first: the Form's state wins, so an explicit falsy disabled
+	// cannot unlock the control in a read-only form
 	return (
 		<CrudMultiSelect
+			{...otherProps}
 			connector={connector}
 			errorComponent={errorComponent}
-			disabled={props.disabled || readOnly}
+			disabled={otherProps.disabled || readOnly}
 			field={connectorParams.field}
 			ref={ref}
-			{...otherProps}
 		/>
 	);
 };

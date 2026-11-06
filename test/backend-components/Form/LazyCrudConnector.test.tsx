@@ -30,7 +30,10 @@ import FormCrudMultiSelect, {
 import ApiConnector from "../../../src/backend-integration/Connector/ApiConnector";
 import type { ResponseMeta } from "../../../src/backend-integration/Connector/Connector";
 import { useCrudSelectContext } from "../../../src/backend-components/Selector/CrudMultiSelect";
-import type { UseCrudSelectResult } from "../../../src/backend-components/Selector/useCrudSelect";
+import type {
+	CrudSelectDispatch,
+	UseCrudSelectResult,
+} from "../../../src/backend-components/Selector/useCrudSelect";
 import type {
 	ModelGetResponse,
 	ModelUnknown,
@@ -143,21 +146,25 @@ interface JoinData extends MultiSelectorData {
 	source_id: string;
 	note?: string;
 }
+
 const serialize = (data: JoinData) => ({
 	id: data.value.startsWith("to-create-") ? undefined : data.value,
 	source_id: data.source_id,
 	note: data.note,
 });
+
 const deserialize = (record: Record<string, unknown>): JoinData => ({
 	value: record.id as string,
 	label: "L" + String(record.source_id),
 	source_id: record.source_id as string,
 	note: record.note as string | undefined,
 });
+
 const deserializeModel = (record: Record<string, unknown>) => ({
 	label: "L" + String(record.id),
 	source_id: record.id as string,
 });
+
 const getIdOfData = (data: JoinData) => data.source_id;
 
 /**
@@ -165,12 +172,16 @@ const getIdOfData = (data: JoinData) => data.source_id;
  */
 const selSink: { ctx?: UseCrudSelectResult<ModelUnknown, MultiSelectorData> } =
 	{};
+
 const CaptureSelectCtx = () => {
 	selSink.ctx = useCrudSelectContext();
 	return null;
 };
+
 const selected = () => selSink.ctx!.selected as JoinData[];
+
 const labels = () => selected().map((entry) => entry.label);
+
 const ready = async () => {
 	await waitFor(() => expect(selSink.ctx).toBeDefined());
 	await settle();
@@ -230,6 +241,37 @@ const makePage = (
 	return Page;
 };
 
+/**
+ * Mounts the form on record "1" with a FormCrudMultiSelect and waits until both are ready
+ * @param stores The join rows per endpoint
+ * @param props Changes of the selector props
+ * @param formProps Form props
+ */
+const mountSelector = async (
+	stores: Record<string, Rows> = { "joins/1": [{ id: "j1", source_id: "s1" }] },
+	props: Partial<SelectProps> = {},
+	formProps: Parameters<typeof mountForm>[2] = {},
+) => {
+	const model = makeModel();
+	const env = makeEnv(stores);
+	const sink: Sink = {};
+	const ref = React.createRef<CrudSelectDispatch<JoinData>>();
+	const result = mountForm(
+		model,
+		makePage(sink, () => (
+			<FormCrudMultiSelect<ModelUnknown, JoinData>
+				ref={ref}
+				{...selectorProps(model, env)}
+				{...props}
+			/>
+		)),
+		formProps,
+	);
+	await loaded(sink);
+	await ready();
+	return { ...result, model, env, sink, ref };
+};
+
 describe("FormCrudMultiSelect: the form's state", () => {
 	it("[ISSUE-3505-ITEM-15] keeps the field's label while it loads and after the load failed", async () => {
 		const model = makeModel();
@@ -263,7 +305,6 @@ describe("FormCrudMultiSelect: the form's state", () => {
 			afterFailure: true,
 		});
 	});
-
 	it("[ISSUE-3505-ITEM-15] while it loads the field is locked and busy and says so; once loaded it can be edited", async () => {
 		const model = makeModel();
 		const env = makeEnv();
@@ -306,7 +347,6 @@ describe("FormCrudMultiSelect: the form's state", () => {
 		expect(screen.queryByRole("status")).toBeNull();
 		expect(container.querySelector('[aria-busy="true"]')).toBeNull();
 	});
-
 	it("[ISSUE-3505-ITEM-15] a failed load is announced in words that name the field, the error itself goes to the console, and the field stays locked", async () => {
 		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 		const model = makeModel();
@@ -345,7 +385,6 @@ describe("FormCrudMultiSelect: the form's state", () => {
 		expect(container.querySelector('[aria-busy="true"]')).toBeNull();
 		expect(selSink.ctx).toBeUndefined();
 	});
-
 	it("[ISSUE-3505-ITEM-15] a failed load of a field without a label still says what failed", async () => {
 		vi.spyOn(console, "warn").mockImplementation(() => {});
 		const model = makeModel();
@@ -374,5 +413,51 @@ describe("FormCrudMultiSelect: the form's state", () => {
 		expect(screen.getByRole("alert")).toHaveTextContent(
 			"The selected entries could not be loaded.",
 		);
+	});
+	it("cannot be edited in a read-only form, and can be once the form is editable again", async () => {
+		const { rerenderWith } = await mountSelector(
+			undefined,
+			{},
+			{
+				readOnly: true,
+			},
+		);
+
+		expect(screen.queryByRole("button", { name: "Remove Ls1" })).toBeNull();
+
+		rerenderWith({ readOnly: false });
+		await settle();
+
+		expect(
+			screen.getByRole("button", { name: "Remove Ls1" }),
+		).toBeInTheDocument();
+		expect(screen.getByRole("combobox")).toBeEnabled();
+	});
+	it("cannot be edited with disabled in an editable form", async () => {
+		await mountSelector(undefined, { disabled: true });
+
+		expect(screen.queryByRole("button", { name: "Remove Ls1" })).toBeNull();
+	});
+	it("[ISSUE-3505-ITEM-4] an explicit disabled={undefined} or disabled={false} does not unlock it in a read-only form", async () => {
+		const first = await mountSelector(
+			undefined,
+			{ disabled: undefined },
+			{ readOnly: true },
+		);
+		const undefinedUnlocks = !!screen.queryByRole("button", {
+			name: "Remove Ls1",
+		});
+		first.unmount();
+		selSink.ctx = undefined;
+
+		await mountSelector(undefined, { disabled: false }, { readOnly: true });
+		const falseUnlocks = !!screen.queryByRole("button", {
+			name: "Remove Ls1",
+		});
+
+		expect({ undefinedUnlocks, falseUnlocks }).toEqual({
+			undefinedUnlocks: false,
+			falseUnlocks: false,
+		});
 	});
 });
