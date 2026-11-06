@@ -1,112 +1,133 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, it, expect } from "vitest";
+import { act, cleanup, renderHook } from "@testing-library/react";
 
 // ---------------------------------------------------------------------------
-// Locale mapping tested via getLocaleData (extracted inline for unit testing)
-// The useMuiLocaleData hook depends on i18next + React, so we test the pure
-// language → locale-object mapping logic independently.
+// useMuiLocaleData: the components-care language → the MUI picker texts handed
+// to the pickers' LocalizationProvider. Driven through the library's own i18next
+// instance, which is what the hook reads.
 // ---------------------------------------------------------------------------
 
-import { deDE, enUS, frFR, nlNL, ruRU } from "@mui/x-date-pickers/locales";
-import type { LocalizationProviderProps } from "@mui/x-date-pickers";
+import {
+	deDE,
+	enUS,
+	esES,
+	frFR,
+	itIT,
+	nlNL,
+	ruRU,
+} from "@mui/x-date-pickers/locales";
+import * as muiLocales from "@mui/x-date-pickers/locales";
+import ccI18n, { langs } from "../../src/i18n";
+import useMuiLocaleData from "../../src/standalone/LocalizedDateTimePickers/useMuiLocaleData";
 
-const extractLocaleData = (
-	locale: typeof enUS | typeof deDE | typeof frFR | typeof nlNL | typeof ruRU,
-): LocalizationProviderProps<never>["localeText"] =>
+type MuiLocale = typeof enUS;
+
+const extractLocaleData = (locale: MuiLocale) =>
 	locale.components.MuiLocalizationProvider.defaultProps.localeText;
 
-const getLocaleData = (
-	language: string,
-): LocalizationProviderProps<never>["localeText"] => {
-	switch (language) {
-		case "en":
-			return extractLocaleData(enUS);
-		case "de":
-			return extractLocaleData(deDE);
-		case "fr":
-			return extractLocaleData(frFR);
-		case "nl":
-			return extractLocaleData(nlNL);
-		case "ru":
-			return extractLocaleData(ruRU);
-		default:
-			return extractLocaleData(enUS);
-	}
+const switchLanguage = async (language: string) => {
+	await act(async () => {
+		await ccI18n.changeLanguage(language);
+	});
 };
 
-describe("locale mapping (useMuiLocaleData logic)", () => {
-	it("returns enUS locale data for language 'en'", () => {
-		const result = getLocaleData("en");
-		const expected = extractLocaleData(enUS);
-		expect(result).toEqual(expected);
+/** The picker texts the hook returns for a library language */
+const getLocaleData = async (language: string) => {
+	await switchLanguage(language);
+	return renderHook(() => useMuiLocaleData()).result.current;
+};
+
+afterEach(async () => {
+	cleanup();
+	await switchLanguage("en");
+});
+
+describe("useMuiLocaleData", () => {
+	it("returns enUS locale data for language 'en'", async () => {
+		expect(await getLocaleData("en")).toBe(extractLocaleData(enUS));
 	});
 
-	it("returns deDE locale data for language 'de'", () => {
-		const result = getLocaleData("de");
-		const expected = extractLocaleData(deDE);
-		expect(result).toEqual(expected);
+	it("returns deDE locale data for language 'de'", async () => {
+		expect(await getLocaleData("de")).toBe(extractLocaleData(deDE));
 	});
 
-	it("returns frFR locale data for language 'fr'", () => {
-		const result = getLocaleData("fr");
-		const expected = extractLocaleData(frFR);
-		expect(result).toEqual(expected);
+	it("returns frFR locale data for language 'fr'", async () => {
+		expect(await getLocaleData("fr")).toBe(extractLocaleData(frFR));
 	});
 
-	it("returns nlNL locale data for language 'nl'", () => {
-		const result = getLocaleData("nl");
-		const expected = extractLocaleData(nlNL);
-		expect(result).toEqual(expected);
+	it("returns nlNL locale data for language 'nl'", async () => {
+		expect(await getLocaleData("nl")).toBe(extractLocaleData(nlNL));
 	});
 
-	it("returns ruRU locale data for language 'ru'", () => {
-		const result = getLocaleData("ru");
-		const expected = extractLocaleData(ruRU);
-		expect(result).toEqual(expected);
+	it("returns ruRU locale data for language 'ru'", async () => {
+		expect(await getLocaleData("ru")).toBe(extractLocaleData(ruRU));
 	});
 
-	it("falls back to enUS for an unsupported language", () => {
-		const result = getLocaleData("zh");
-		const expected = extractLocaleData(enUS);
-		expect(result).toEqual(expected);
+	// compared by one text, so a failure names the language that came out
+	it("[ISSUE-3474-ITEM-7] returns itIT locale data for language 'it'", async () => {
+		expect((await getLocaleData("it"))?.previousMonth).toBe(
+			extractLocaleData(itIT)?.previousMonth,
+		);
 	});
 
-	it("falls back to enUS for an empty language string", () => {
-		const result = getLocaleData("");
-		const expected = extractLocaleData(enUS);
-		expect(result).toEqual(expected);
+	it("[ISSUE-3474-ITEM-7] returns esES locale data for language 'es'", async () => {
+		expect((await getLocaleData("es"))?.previousMonth).toBe(
+			extractLocaleData(esES)?.previousMonth,
+		);
 	});
 
-	it("de locale is different from en locale", () => {
-		const de = getLocaleData("de");
-		const en = getLocaleData("en");
-		// The objects themselves differ (different localized strings)
-		expect(de).not.toEqual(en);
+	// MUI's texts for a language: every MUI locale named after it (ptBR, ptPT, …)
+	const muiLocaleDataOf = (language: string) =>
+		Object.entries(muiLocales)
+			.filter(([name]) => new RegExp(`^${language}[A-Z]{2}$`).test(name))
+			.map(([, locale]) => extractLocaleData(locale as MuiLocale));
+
+	// a language added to supported-languages.json fails here until the hook maps it
+	it.each(langs)(
+		"[ISSUE-3474-ITEM-7] library language %s gets MUI's picker texts when MUI ships them",
+		async (language) => {
+			const own = muiLocaleDataOf(language);
+			const result = await getLocaleData(language);
+			if (own.length === 0) expect(result).toBe(extractLocaleData(enUS));
+			else expect(own).toContain(result);
+		},
+	);
+
+	it("falls back to enUS for a library language MUI has no texts for", async () => {
+		expect(await getLocaleData("uz")).toBe(extractLocaleData(enUS));
 	});
 
-	it("fr locale is different from en locale", () => {
-		const fr = getLocaleData("fr");
-		const en = getLocaleData("en");
-		expect(fr).not.toEqual(en);
+	it("falls back to enUS for an unsupported language", async () => {
+		expect(await getLocaleData("zh")).toBe(extractLocaleData(enUS));
 	});
 
-	it("all supported locales return an object with keys", () => {
-		const languages = ["en", "de", "fr", "nl", "ru"];
-		for (const lang of languages) {
-			const data = getLocaleData(lang);
-			expect(data).toBeDefined();
-			expect(typeof data).toBe("object");
-			expect(Object.keys(data ?? {}).length).toBeGreaterThan(0);
-		}
+	it("falls back to enUS in i18next's cimode", async () => {
+		expect(await getLocaleData("cimode")).toBe(extractLocaleData(enUS));
 	});
 
-	it("region part of a locale tag is stripped correctly (simulated)", () => {
-		// The hook does: const [language] = i18n.language.split("-")
-		// Simulate "de-AT" → "de"
-		const fullTag = "de-AT";
-		const [language] = fullTag.split("-");
-		const result = getLocaleData(language);
-		const expected = extractLocaleData(deDE);
-		expect(result).toEqual(expected);
+	it.each([
+		["de-AT", deDE],
+		["de_DE", deDE],
+		["fr-CA", frFR],
+	] as const)(
+		"region part of the locale tag %s is stripped",
+		async (tag, locale) => {
+			expect(await getLocaleData(tag)).toBe(extractLocaleData(locale));
+		},
+	);
+
+	it("follows a language change without a remount", async () => {
+		const { result } = renderHook(() => useMuiLocaleData());
+		expect(result.current).toBe(extractLocaleData(enUS));
+		await switchLanguage("de");
+		expect(result.current).toBe(extractLocaleData(deDE));
+	});
+
+	it("keeps the same object while the language stays", () => {
+		const { result, rerender } = renderHook(() => useMuiLocaleData());
+		const first = result.current;
+		rerender();
+		expect(result.current).toBe(first);
 	});
 });
 
