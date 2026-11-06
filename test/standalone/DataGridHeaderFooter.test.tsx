@@ -403,6 +403,73 @@ describe("column settings", () => {
 			"Ausgeblendete Spalten können nicht angeheftet werden",
 		);
 	});
+
+	it("[ISSUE-3495-ITEM-19] in settings mode the search box says that it searches the columns", async () => {
+		render(<Grid searchPlaceholder={"Search people"} />);
+		await idle();
+		expect(searchBox()).toHaveAttribute("placeholder", "Search people");
+		openSettings();
+		const field = searchBox();
+		const purpose = `${field.getAttribute("placeholder") ?? ""} ${
+			field.getAttribute("aria-label") ?? ""
+		}`;
+		expect(purpose).toMatch(/column/i);
+	});
+
+	it("[ISSUE-3495-ITEM-19] the search box is named and labelled Search columns while the settings are open, and gets the grid's placeholder back when they close", async () => {
+		render(<Grid searchPlaceholder={"Search people"} />);
+		await idle();
+		openSettings();
+		expect(searchBox()).toHaveAccessibleName("Search columns");
+		expect(searchBox()).toHaveAttribute("placeholder", "Search columns");
+		fireEvent.click(
+			within(settingsPanel()).getByRole("button", { name: "Close" }),
+		);
+		expect(searchBox()).toHaveAttribute("placeholder", "Search people");
+		expect(searchBox()).not.toHaveAccessibleName("Search columns");
+	});
+
+	it("[ISSUE-3495-ITEM-19] a column search without a match shows a row that says so, announced by a polite status", async () => {
+		render(<Grid />);
+		await idle();
+		openSettings();
+		const panel = within(settingsPanel());
+		// the live region is there, empty, before the result changes
+		const status = panel.getByRole("status");
+		expect(status).toBeEmptyDOMElement();
+		typeSearch("zzz");
+		expect(panel.getByRole("cell", { name: "No matching column" })).toBe(
+			settingsPanel().querySelector("tbody td"),
+		);
+		expect(panel.getByRole("status")).toBe(status);
+		expect(status).toHaveTextContent("No matching column");
+		typeSearch("na");
+		expect(
+			panel.queryByRole("cell", { name: "No matching column" }),
+		).toBeNull();
+		expect(status).toBeEmptyDOMElement();
+	});
+
+	it("[ISSUE-3495-ITEM-19] applies classes.settingsStatus to the status", async () => {
+		render(<Grid classes={{ settingsStatus: "my-status" }} />);
+		await idle();
+		openSettings();
+		expect(within(settingsPanel()).getByRole("status")).toHaveClass(
+			"my-status",
+		);
+	});
+
+	it("[ISSUE-3495-ITEM-19] on a phone the Search button says that it searches the columns while the settings are open", async () => {
+		stubViewport(320);
+		render(<Grid filterBar={undefined} />);
+		await screen.findByRole("button", { name: "Search" });
+		openSettings();
+		fireEvent.click(screen.getByRole("button", { name: "Search columns" }));
+		const field = await screen.findByRole("textbox", {
+			name: "Search columns",
+		});
+		expect(field).toHaveAttribute("placeholder", "Search columns");
+	});
 });
 
 const openMenu = async (trigger: string, item?: string) => {

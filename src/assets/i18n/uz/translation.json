@@ -96,6 +96,8 @@
 				}
 			},
 			"settings": {
+				"search": "Ustunlarni qidirish",
+				"no-match": "Mos ustun topilmadi",
 				"column": "Ustun",
 				"show": "Ko'rinadigan",
 				"pin": "Qoplash uchun",

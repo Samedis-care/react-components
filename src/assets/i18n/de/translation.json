@@ -96,6 +96,8 @@
 				}
 			},
 			"settings": {
+				"search": "Spalten durchsuchen",
+				"no-match": "Keine passende Spalte",
 				"column": "Spalte",
 				"show": "Sichtbar",
 				"pin": "Anheften",

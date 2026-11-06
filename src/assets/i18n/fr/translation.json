@@ -96,6 +96,8 @@
 				}
 			},
 			"settings": {
+				"search": "Rechercher des colonnes",
+				"no-match": "Aucune colonne correspondante",
 				"column": "Colonne",
 				"show": "Visible",
 				"pin": "Accrocher",

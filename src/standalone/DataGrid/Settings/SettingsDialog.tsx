@@ -74,6 +74,24 @@ const StyledTableCell = styled(TableCell, {
 	padding: 4,
 });
 
+// announces that no column matches the column search (a live region must
+// exist before its text changes, so it is always rendered)
+const StyledStatus = styled("span", {
+	name: "CcDataGrid",
+	slot: "settingsStatus",
+})({
+	// visually hidden, as MUI's visuallyHidden
+	border: 0,
+	clipPath: "inset(50%)",
+	height: 1,
+	margin: -1,
+	overflow: "hidden",
+	padding: 0,
+	position: "absolute",
+	whiteSpace: "nowrap",
+	width: 1,
+});
+
 const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 	const { classes } = useDataGridProps();
 	const { t } = useCCTranslations();
@@ -90,6 +108,8 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 			),
 		[props.columns],
 	);
+	// the column search matches no column
+	const noMatch = columns.length === 0;
 
 	return (
 		<DataGridContentOverlayPaper
@@ -163,8 +183,21 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 							</StyledTableRow>
 						);
 					})}
+					{noMatch && (
+						<StyledTableRow className={classes?.settingsTableRow}>
+							<StyledTableCell
+								colSpan={3}
+								className={classes?.settingsTableCell}
+							>
+								{t("standalone.data-grid.settings.no-match")}
+							</StyledTableCell>
+						</StyledTableRow>
+					)}
 				</StyledTableBody>
 			</StyledTable>
+			<StyledStatus role={"status"} className={classes?.settingsStatus}>
+				{noMatch && t("standalone.data-grid.settings.no-match")}
+			</StyledStatus>
 			<span hidden id={pinHiddenReasonId}>
 				{t("standalone.data-grid.settings.pin-hidden")}
 			</span>

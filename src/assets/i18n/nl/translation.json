@@ -96,6 +96,8 @@
 				}
 			},
 			"settings": {
+				"search": "Kolommen zoeken",
+				"no-match": "Geen overeenkomende kolom",
 				"column": "Kolom",
 				"show": "Zichtbaar",
 				"pin": "Pin",

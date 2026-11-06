@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [The column settings' search says that it searches the columns, and when nothing matches](2026-11-06-data-grid-column-search-says-so.md) | behavior |
 | 2026-11-06 | [A keepMounted PopupMenu opens on its first item every time](2026-11-06-popup-menu-opens-on-first-item.md) | behavior |
 | 2026-11-06 | [FullFormDialog closes only itself and calls onClose first; useCloseThisDialog closes the dialog a component is in](2026-11-06-full-form-dialog-closes-itself.md) | behavior |
 | 2026-11-06 | [The DataGrid's empty and error messages are no longer headings, and are announced](2026-11-06-data-grid-empty-and-error-messages.md) | behavior |

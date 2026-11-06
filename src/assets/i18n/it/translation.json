@@ -100,6 +100,8 @@
 				}
 			},
 			"settings": {
+				"search": "Cerca colonne",
+				"no-match": "Nessuna colonna corrispondente",
 				"column": "Colonna",
 				"show": "Visibile",
 				"pin": "Fissa",

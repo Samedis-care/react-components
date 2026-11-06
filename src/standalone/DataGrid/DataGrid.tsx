@@ -1313,6 +1313,7 @@ export type DataGridClassKey =
 	| "settingsTableRow"
 	| "settingsTableHead"
 	| "settingsTableBody"
+	| "settingsStatus"
 	| "customFilterContainerHeader"
 	| "search";
 

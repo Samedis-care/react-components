@@ -30,6 +30,17 @@ export interface IDataGridSearchViewProps {
 	 */
 	handleSearchChange: (evt: ChangeEvent<HTMLInputElement>) => void;
 	/**
+	 * The box's placeholder. Default: DataGridProps.searchPlaceholder
+	 */
+	placeholder?: string;
+	/**
+	 * The box's accessible name: the field's aria-label and, below sm, the
+	 * name of the button that opens the field. Nothing visible renders it.
+	 * Default: no aria-label on the field, and "Search" (translated) for the
+	 * button
+	 */
+	label?: string;
+	/**
 	 * CSS class name
 	 */
 	className?: string;
@@ -46,10 +57,11 @@ const transformOrigin: PopoverOrigin = {
 
 /**
  * The search box: a text field with a search icon, placeholder
- * DataGridProps.searchPlaceholder. Below sm it is a "Search" icon button
- * that opens the field in a popover, outside the `search` slot's element. The
- * popover is a dialog named by the button, and its field takes focus when it
- * opens. Must be rendered inside a DataGrid (it reads the grid's props).
+ * `placeholder` (default DataGridProps.searchPlaceholder) and accessible name
+ * `label`. Below sm it is an icon button ("Search", or `label`) that opens the
+ * field in a popover, outside the `search` slot's element. The popover is a
+ * dialog named by the button, and its field takes focus when it opens. Must
+ * be rendered inside a DataGrid (it reads the grid's props).
  */
 const SearchView = (props: IDataGridSearchViewProps) => {
 	const { searchPlaceholder, classes } = useDataGridProps();
@@ -82,8 +94,9 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 			autoFocus={autoFocus}
 			value={props.search}
 			onChange={props.handleSearchChange}
-			placeholder={searchPlaceholder}
+			placeholder={props.placeholder ?? searchPlaceholder}
 			slotProps={{
+				htmlInput: { "aria-label": props.label },
 				input: {
 					startAdornment: (
 						<InputAdornment position="start">
@@ -113,7 +126,7 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 						id={buttonId}
 						onClick={openPopover}
 						size="large"
-						aria-label={t("standalone.data-grid.header.search")}
+						aria-label={props.label ?? t("standalone.data-grid.header.search")}
 						aria-haspopup="dialog"
 						aria-expanded={open}
 						aria-controls={open ? popoverId : undefined}

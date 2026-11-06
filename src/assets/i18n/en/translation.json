@@ -100,6 +100,8 @@
 				}
 			},
 			"settings": {
+				"search": "Search columns",
+				"no-match": "No matching column",
 				"column": "Column",
 				"show": "Visible",
 				"pin": "Pin",
