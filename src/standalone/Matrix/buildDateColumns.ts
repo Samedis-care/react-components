@@ -1,5 +1,6 @@
 import moment from "moment";
 import { MatrixColumn } from "./types";
+import { toDateOnly } from "../../utils/dateOnlyUtils";
 
 export interface BuildDateColumnsParams {
 	/**
@@ -19,14 +20,19 @@ export interface BuildDateColumnsParams {
 	locale?: string;
 	/**
 	 * Which day counts as today and gets the "current" variant. Pass null to
-	 * mark no day at all. Anything moment can parse; it is normalized to a
-	 * date, so a timestamp works too.
-	 * @default the actual current day
+	 * mark no day at all.
+	 *
+	 * An ISO 8601 date or timestamp, read like a date-only value (see
+	 * docs/DateOnlyValues.md and toDateOnly): "YYYY-MM-DD" and a date-only
+	 * value's serialization ("2026-03-04T12:00:00.000Z", exactly 12:00 UTC)
+	 * mark that day in every timezone; any other timestamp marks the day the
+	 * viewer sees it on. An unparseable value marks no day.
+	 * @default the actual current day, in the viewer's timezone
 	 */
 	today?: string | null;
 	/**
-	 * Day(s) to mark with the "accent" variant. Wins over "current". Normalized
-	 * like today.
+	 * Day(s) to mark with the "accent" variant. Wins over "current". Read like
+	 * today.
 	 */
 	accent?: string | string[];
 	/**
@@ -41,6 +47,17 @@ export interface BuildDateColumnsParams {
 	 */
 	maxColumns?: number;
 }
+
+/**
+ * The column key of the day a today or accent value stands for.
+ * @param value An ISO 8601 date or timestamp
+ * @returns The key ("YYYY-MM-DD"), or "Invalid date" for an unparseable
+ * value, which matches no column
+ */
+const dayKeyOf = (value: string): string =>
+	// the UTC parts of a date-only value carry its day; moment(value) would
+	// read them in local time, the next day in UTC+12 and beyond
+	moment.utc(toDateOnly(value)).format("YYYY-MM-DD");
 
 /**
  * Builds the columns of a day-per-column matrix.
@@ -67,10 +84,10 @@ const buildDateColumns = (params: BuildDateColumnsParams): MatrixColumn[] => {
 			? moment().format("YYYY-MM-DD")
 			: params.today === null
 				? null
-				: moment(params.today).format("YYYY-MM-DD");
+				: dayKeyOf(params.today);
 	const accentDays = (
 		Array.isArray(accent) ? accent : accent ? [accent] : []
-	).map((day) => moment(day).format("YYYY-MM-DD"));
+	).map(dayKeyOf);
 	const weekdayFormat = new Intl.DateTimeFormat(locale, { weekday: "short" });
 	const columns: MatrixColumn[] = [];
 	const end = moment(to);

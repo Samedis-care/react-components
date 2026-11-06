@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [buildDateColumns reads today and accent as date-only values](2026-11-06-build-date-columns-date-only-today.md) | behavior |
 | 2026-11-06 | [Menu entries call onAuxClick for the middle button only](2026-11-06-menu-aux-click-middle-button-only.md) | behavior |
 | 2026-11-06 | [ScrollableSchedule reloads its weeks when `loadWeekCallback` changes](2026-11-06-scrollable-schedule-reloads-on-new-callback.md) | behavior |
 | 2026-11-06 | [Notifications: `refreshInterval` 0 switches polling off](2026-11-06-notifications-refresh-interval-off.md) | behavior |

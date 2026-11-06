@@ -104,6 +104,91 @@ describe("buildDateColumns", () => {
 		expect(warn).toHaveBeenCalledWith(expect.stringContaining("truncated"));
 		warn.mockRestore();
 	});
+
+	describe("across timezones", () => {
+		const ZONES = [
+			"Pacific/Kiritimati", // UTC+14
+			"Pacific/Auckland", // UTC+13 in March
+			"Europe/Berlin",
+			"UTC",
+			"America/New_York",
+			"America/Santiago", // skips local midnight on 2026-09-06
+			"Etc/GMT+12", // UTC-12
+		];
+		afterEach(() => {
+			vi.unstubAllEnvs();
+		});
+
+		it("[ISSUE-3480-ITEM-1] marks the day of a date-only today and accent (noon UTC) in every timezone", () => {
+			const marked: Record<string, string[]> = {};
+			for (const tz of ZONES) {
+				vi.stubEnv("TZ", tz);
+				marked[tz] = buildDateColumns({
+					from: "2026-03-02",
+					to: "2026-03-08",
+					// what a date-only value serializes to (docs/DateOnlyValues.md)
+					today: "2026-03-04T12:00:00.000Z",
+					accent: new Date(Date.UTC(2026, 2, 6, 12)).toISOString(),
+				})
+					.filter(
+						(column) =>
+							column.variant === "current" || column.variant === "accent",
+					)
+					.map((column) => `${column.key}:${column.variant}`);
+			}
+			for (const tz of ZONES)
+				expect(marked[tz], tz).toEqual([
+					"2026-03-04:current",
+					"2026-03-06:accent",
+				]);
+		});
+
+		it("[ISSUE-3480-ITEM-1] still marks a YYYY-MM-DD day, and an instant on the viewer's day, in every timezone", () => {
+			// midnight UTC is still the 6th behind UTC, the 7th from UTC on
+			const viewersDay: Record<string, string> = {
+				"Pacific/Kiritimati": "2026-03-07",
+				"Pacific/Auckland": "2026-03-07",
+				"Europe/Berlin": "2026-03-07",
+				UTC: "2026-03-07",
+				"America/New_York": "2026-03-06",
+				"America/Santiago": "2026-03-06",
+				"Etc/GMT+12": "2026-03-06",
+			};
+			for (const tz of ZONES) {
+				vi.stubEnv("TZ", tz);
+				expect(
+					buildDateColumns({
+						from: "2026-03-02",
+						to: "2026-03-08",
+						today: "2026-03-04",
+						accent: ["2026-03-07T00:00:00Z"],
+					})
+						.filter(
+							(column) =>
+								column.variant === "current" || column.variant === "accent",
+						)
+						.map((column) => `${column.key}:${column.variant}`),
+					tz,
+				).toEqual(["2026-03-04:current", `${viewersDay[tz]}:accent`]);
+			}
+		});
+
+		it("[ISSUE-3480-ITEM-1] marks no day for an unparseable today or accent", () => {
+			const columns = buildDateColumns({
+				from: "2026-03-02",
+				to: "2026-03-08",
+				today: "not a date",
+				accent: ["", "2026-13-45"],
+			});
+			expect(columns).toHaveLength(7);
+			expect(
+				columns.filter(
+					(column) =>
+						column.variant === "current" || column.variant === "accent",
+				),
+			).toEqual([]);
+		});
+	});
 });
 
 // ---- MatrixGrid -------------------------------------------------------------
