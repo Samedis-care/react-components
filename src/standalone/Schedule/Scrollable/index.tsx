@@ -25,6 +25,13 @@ import throwError from "../../../utils/throwError";
 
 /**
  * Callback to load week data from a data source
+ *
+ * ScrollableSchedule calls it for each week it adds to the list. When it is
+ * passed a new function, it calls the new one for every week in the list; each
+ * week keeps its rows until the new result arrives, and a result or error of
+ * an earlier call that arrives later is ignored. Pass a function that changes
+ * only when the data source does (`useCallback`): a new function on every
+ * render reloads the list on every render.
  * @param weekOffset The week relative to the current week of year
  * 					 Example: -1 for last week, 0 for this week, 1 for next week
  * @param filter The filter selected by the user
@@ -42,7 +49,8 @@ export interface ScrollableScheduleProps {
 	 */
 	wrapperClass: string;
 	/**
-	 * The callback to load data for a week
+	 * The callback to load data for a week. A new function reloads the weeks in
+	 * the list (see LoadWeekCallback).
 	 */
 	loadWeekCallback: LoadWeekCallback;
 
@@ -75,15 +83,12 @@ interface ScrollableScheduleState<
 	Filters extends Record<string, ScheduleFilterDefinition>,
 > {
 	/**
-	 * Array of ScrollableScheduleWeek components
-	 */
-	items: React.ReactNode[];
-	/**
-	 * Infinite scroll top most week offset
+	 * Week offset of the next week to add at the top. The list shows the weeks
+	 * between dataOffsetTop and dataOffsetBottom, both exclusive.
 	 */
 	dataOffsetTop: number;
 	/**
-	 * Infinite scroll bottom most week offset
+	 * Week offset of the next week to add at the bottom
 	 */
 	dataOffsetBottom: number;
 	/**
@@ -162,7 +167,6 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 
 	const getDefaultState = useCallback(
 		(): ScrollableScheduleState<typeof filters> => ({
-			items: [],
 			dataOffsetTop: -1,
 			dataOffsetBottom: 0,
 			today: moment(),
@@ -198,37 +202,19 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 	 * Loads more data in the infinite scroll
 	 * @param top load more data on top? (if false loads more data at bottom)
 	 */
-	const loadMore = useCallback(
-		(top: boolean) => {
-			const mkItem = (state: ScrollableScheduleState<typeof filters>) => {
-				const page = top ? state.dataOffsetTop : state.dataOffsetBottom;
-				return (
-					<ScrollableScheduleWeek
-						key={page.toString()}
-						loadData={() => loadWeekCallback(page, state.filterValues)}
-						setTodayElement={(elem: HTMLElement | null) =>
-							(todayElem.current = elem)
-						}
-						moment={state.today.clone().add(page, "weeks")}
-					/>
-				);
-			};
-			if (top) {
-				setState((prevState) => ({
-					...prevState,
-					items: [mkItem(prevState), ...prevState.items],
-					dataOffsetTop: prevState.dataOffsetTop - 1,
-				}));
-			} else {
-				setState((prevState) => ({
-					...prevState,
-					items: [...prevState.items, mkItem(prevState)],
-					dataOffsetBottom: prevState.dataOffsetBottom + 1,
-				}));
-			}
-		},
-		[loadWeekCallback],
-	);
+	const loadMore = useCallback((top: boolean) => {
+		if (top) {
+			setState((prevState) => ({
+				...prevState,
+				dataOffsetTop: prevState.dataOffsetTop - 1,
+			}));
+		} else {
+			setState((prevState) => ({
+				...prevState,
+				dataOffsetBottom: prevState.dataOffsetBottom + 1,
+			}));
+		}
+	}, []);
 
 	/**
 	 * Loads more data on top of the scroller
@@ -238,6 +224,10 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 	 * Loads more data at the bottom of the scroller
 	 */
 	const loadMoreBottom = useCallback(() => loadMore(false), [loadMore]);
+
+	const setTodayElement = useCallback((elem: HTMLElement | null) => {
+		todayElem.current = elem;
+	}, []);
 
 	const jumpToToday = useCallback(() => {
 		if (
@@ -284,6 +274,26 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 	}, []);
 
 	const filterCount = filters ? Object.keys(filters).length : 0;
+
+	// the weeks are rendered from their offsets, so they always get the current
+	// loadWeekCallback and reload when it changes
+	const weeks: React.ReactElement[] = [];
+	for (
+		let page = state.dataOffsetTop + 1;
+		page < state.dataOffsetBottom;
+		++page
+	) {
+		weeks.push(
+			<ScrollableScheduleWeek
+				key={page}
+				weekOffset={page}
+				today={state.today}
+				loadWeekCallback={loadWeekCallback}
+				filterValues={state.filterValues}
+				setTodayElement={setTodayElement}
+			/>,
+		);
+	}
 
 	return (
 		<Grid container className={className}>
@@ -404,7 +414,7 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 				>
 					<Box sx={{ m: 2 }}>
 						<Grid container spacing={2}>
-							{state.items}
+							{weeks}
 						</Grid>
 					</Box>
 				</StyledInfiniteScroll>
