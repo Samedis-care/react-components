@@ -235,6 +235,31 @@ const makeExporter = (
 	...over,
 });
 
+describe("export", () => {
+	it("[ISSUE-3495-ITEM-5] autoDownload hands onDownload the data just requested", async () => {
+		let n = 0;
+		const onDownload = vi.fn<(data: unknown) => void>();
+		const exporter = makeExporter({
+			onRequest: vi.fn(() => Promise.resolve({ file: ++n })),
+			onDownload,
+			autoDownload: true,
+		});
+		render(<Grid exporters={[exporter]} />);
+		await idle();
+		await openMenu("Export", "Excel");
+		await waitFor(() => expect(onDownload).toHaveBeenCalledTimes(1));
+		await waitFor(() =>
+			expect(screen.queryByRole("menu")).not.toBeInTheDocument(),
+		);
+		await openMenu("Export", "Excel");
+		await waitFor(() => expect(onDownload).toHaveBeenCalledTimes(2));
+		expect(onDownload.mock.calls.map((call) => call[0])).toEqual([
+			{ file: 1 },
+			{ file: 2 },
+		]);
+	});
+});
+
 describe("header action bar", () => {
 	it("[ISSUE-3495-ITEM-1] on a phone with a filter bar, More options → Export opens the export menu", async () => {
 		stubViewport(320);
