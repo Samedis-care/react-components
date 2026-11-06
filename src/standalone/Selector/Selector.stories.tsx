@@ -4,14 +4,14 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor, within } from "storybook/test";
 import {
 	BaseSelector,
-	SingleSelect,
-	MultiSelect,
-	MultiSelectWithTags,
-	MultiSelectWithoutGroup,
-	selectorLocalLoadHandler,
 	BaseSelectorData,
 	BaseSelectorLoadResult,
+	MultiSelect,
+	MultiSelectWithoutGroup,
+	MultiSelectWithTags,
+	selectorLocalLoadHandler,
 	SelectorLruOptions,
+	SingleSelect,
 } from "./index";
 import type { MultiSelectorData } from "./MultiSelect";
 import debouncePromise from "../../utils/debouncePromise";
@@ -469,7 +469,9 @@ export const MultiSelectWithTagsWithInitialValues: StoryObj = {
 // ---------------------------------------------------------------------------
 
 const APPLE = FRUITS[0];
+
 const BANANA = FRUITS[2];
+
 const loadFruitOptions = selectorLocalLoadHandler(FRUITS);
 
 /** a controlled MultiSelect over FRUITS between two buttons, for tab order */
@@ -500,7 +502,9 @@ const MultiBetweenButtons = ({
 // ---------------------------------------------------------------------------
 
 const TRUNCATED_TOTAL = 312;
+
 const CUSTOM_TRUNCATED_LABEL = "Too many matches";
+
 const ADD_NEW_LABEL = "Add a country";
 
 const loadTruncated = (
@@ -671,6 +675,7 @@ const ADDITIONAL_OPTIONS: BaseSelectorData[] = [
 	{ value: "any", label: "Any country" },
 	{ value: "none", label: "No country" },
 ];
+
 const ADDITIONAL_LABELS = ["Any country", "No country"];
 
 const LRU_FORCE_QUERY: SelectorLruOptions<BaseSelectorData> = {
@@ -745,6 +750,7 @@ export const SingleSelectLruAdditionalOptions: StoryObj = {
 // ---------------------------------------------------------------------------
 
 const LRU_PREPEND_STORAGE_KEY = "cc-story-lru-prepend";
+
 const LRU_PREPEND: SelectorLruOptions<BaseSelectorData> = {
 	mode: "prepend",
 	count: 3,
@@ -753,6 +759,7 @@ const LRU_PREPEND: SelectorLruOptions<BaseSelectorData> = {
 	// unknown ids are skipped (and kept), not shown as raw ids
 	loadData: (id) => COUNTRIES.find((entry) => entry.value === id),
 };
+
 const loadCountries = selectorLocalLoadHandler(COUNTRIES);
 
 export const SingleSelectLruPrepend: StoryObj = {
@@ -822,6 +829,7 @@ export const SingleSelectLruPrepend: StoryObj = {
 };
 
 const LRU_SKIPPED_STORAGE_KEY = "cc-story-lru-skipped";
+
 const LRU_SKIPPED: SelectorLruOptions<BaseSelectorData> = {
 	count: 3,
 	storageKey: LRU_SKIPPED_STORAGE_KEY,
@@ -1005,5 +1013,45 @@ export const Issue3488Item22EntriesAreOneList: StoryObj = {
 		await expect(
 			canvas.getAllByRole("button", { name: /^Remove/ }),
 		).toHaveLength(2);
+	},
+};
+
+export const Issue3487Item17ComboboxIsNamedByItsLabel: StoryObj = {
+	parameters: {
+		a11y: {
+			test: "error",
+			options: {
+				runOnly: { type: "rule", values: ["label", "label-title-only"] },
+			},
+		},
+		docs: {
+			description: {
+				story:
+					"ISSUE-3487-ITEM-17: the visible label is tied to the input, so the combobox is named by its label with and without a selection (axe `label`, `label-title-only`), and a click on the label focuses the input.",
+			},
+		},
+	},
+	render: () => (
+		<div style={{ width: 300 }}>
+			<SingleSelect
+				label="Country"
+				selected={null}
+				onSelect={() => {}}
+				onLoad={loadCountries}
+			/>
+			<SingleSelect
+				label="Country of birth"
+				selected={COUNTRIES[0]}
+				onSelect={() => {}}
+				onLoad={loadCountries}
+			/>
+		</div>
+	),
+	play: async ({ canvas, userEvent }) => {
+		await expect(canvas.getAllByRole("combobox")).toHaveLength(2);
+		// [ISSUE-3487-ITEM-17] a click on the label focuses its input
+		const input = canvas.getByRole("combobox", { name: "Country of birth" });
+		await userEvent.click(canvas.getByText("Country of birth"));
+		await expect(input).toHaveFocus();
 	},
 };

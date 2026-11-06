@@ -5,6 +5,7 @@ import React, {
 	ReactNode,
 	useCallback,
 	useEffect,
+	useId,
 	useMemo,
 	useState,
 } from "react";
@@ -292,7 +293,8 @@ export type BaseSelectorProps<
 		 */
 		variant?: "outlined" | "standard";
 		/**
-		 * The label of the selector
+		 * The label of the selector, shown above the field. It names the combobox and
+		 * its list, and a click on it focuses the input.
 		 */
 		label?: string;
 		/**
@@ -321,7 +323,8 @@ export type BaseSelectorProps<
 		 */
 		autoFocus?: boolean;
 		/**
-		 * String used for the Autocomplete component
+		 * The id of the input. The label gets `<id>-label` and the list `<id>-listbox`.
+		 * Generated when omitted or empty.
 		 */
 		autocompleteId?: string;
 		/**
@@ -723,6 +726,10 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
 	const getId = getIdOfData ?? getIdDefault;
+	// the label sits outside the text field, so it is tied to the input by id, the way
+	// MUI's Autocomplete names its list (aria-labelledby `<id>-label`)
+	const generatedId = useId();
+	const inputId = autocompleteId || generatedId;
 
 	const defaultSwitchValue = !!(
 		props.displaySwitch && props.defaultSwitchValue
@@ -1264,6 +1271,8 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 			<BaseSelectorContext.Provider value={context}>
 				{label && (
 					<StyledLabel
+						id={`${inputId}-label`}
+						htmlFor={inputId}
 						shrink
 						disableAnimation
 						disabled={disabled}
@@ -1277,7 +1286,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 				)}
 				<Wrapper elevation={0} className={classes?.wrapper}>
 					<StyledAutocomplete
-						id={autocompleteId}
+						id={inputId}
 						className={classes?.autocomplete}
 						multiple={multiple}
 						disableCloseOnSelect={multiple}

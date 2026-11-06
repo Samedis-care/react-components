@@ -215,4 +215,51 @@ describe("BaseSelector bugs", () => {
 		expect(onSel).toHaveBeenCalledTimes(1);
 		expect(onSel.mock.calls[0][0]).toBe(FRANCE);
 	});
+
+	it("[ISSUE-3487-ITEM-17] names the combobox and its listbox with the label, with and without a selection", async () => {
+		renderUi(<Host />);
+		await flush();
+		expect(screen.getByRole("combobox", { name: "Country" })).toBe(combobox());
+		cleanup();
+		const { input } = await mountOpen(<Host initial={GERMANY} />);
+		expect(screen.getByRole("combobox", { name: "Country" })).toBe(input);
+		expect(
+			screen.getByRole("listbox", { name: "Country" }),
+		).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3487-ITEM-17] ties the label to the input that has the autocompleteId", async () => {
+		const { input } = await mountOpen(<Host autocompleteId="country-input" />);
+		expect(input).toHaveAttribute("id", "country-input");
+		const label = screen.getByText("Country").closest("label");
+		expect(label).toHaveAttribute("for", "country-input");
+		expect(label).toHaveAttribute("id", "country-input-label");
+		expect(screen.getByRole("listbox")).toHaveAttribute(
+			"aria-labelledby",
+			"country-input-label",
+		);
+	});
+
+	it("[ISSUE-3487-ITEM-17] names each of several selectors without autocompleteId by its own label", async () => {
+		renderUi(
+			<>
+				<Host />
+				<Host label="Country of birth" initial={GERMANY} />
+			</>,
+		);
+		await flush();
+		const [first, second] = screen.getAllByRole("combobox");
+		expect(first.id).not.toBe(second.id);
+		expect(screen.getByRole("combobox", { name: "Country" })).toBe(first);
+		expect(screen.getByRole("combobox", { name: "Country of birth" })).toBe(
+			second,
+		);
+	});
+
+	it("[ISSUE-3487-ITEM-17] names the combobox by its label when autocompleteId is empty", async () => {
+		renderUi(<Host autocompleteId="" />);
+		await flush();
+		expect(combobox().id).not.toBe("");
+		expect(screen.getByRole("combobox", { name: "Country" })).toBe(combobox());
+	});
 });
