@@ -112,6 +112,7 @@ const StyledButton = styled(Button, { name: "CcDayContents", slot: "button" })<{
 	textAlign: "left",
 	color: "inherit",
 	display: "block",
+	overflowWrap: "anywhere",
 	...(altBorder && {
 		borderColor: `rgba(${combineColors(
 			theme.palette.background.paper,
