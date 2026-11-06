@@ -1,5 +1,6 @@
-import { alpha, Theme } from "@mui/material";
-import { matrixClasses } from "./matrixClasses";
+import { alpha, darken, getContrastRatio, lighten, Theme } from "@mui/material";
+import colorToRgba from "../../utils/colorToRgba";
+import { matrixClasses, matrixVars } from "./matrixClasses";
 
 /**
  * The column tints, as style objects keyed by state class.
@@ -41,6 +42,85 @@ const stickyTint = (
 			return alpha(theme.palette.info.main, 0.2);
 	}
 };
+
+/**
+ * The color a sticky cell of a variant shows: its tint over the paper.
+ * @returns An rgb() color, or undefined if a palette color cannot be read
+ */
+const stickyBackground = (
+	theme: Theme,
+	variant: "current" | "accent",
+): string | undefined => {
+	const paper = colorToRgba(theme.palette.background.paper);
+	const layer = colorToRgba(stickyTint(theme, variant));
+	if (!paper || !layer) return undefined;
+	const [r, g, b] = [0, 1, 2].map((channel) =>
+		Math.round(layer[channel] * layer[3] + paper[channel] * (1 - layer[3])),
+	);
+	return `rgb(${r}, ${g}, ${b})`;
+};
+
+/** WCAG 2 AA for normal-size text; the header label is 0.8rem bold */
+const LABEL_CONTRAST = 4.5;
+
+/**
+ * A label color for a sticky header of a variant: the given color if it has
+ * LABEL_CONTRAST on that header's background, else the color darkened (on a
+ * dark background: lightened) just enough, so it keeps its hue.
+ * @param theme The theme
+ * @param variant The column variant whose header the label sits on
+ * @param color The color the label is meant to have
+ * @returns A CSS color
+ */
+const readableStickyLabel = (
+	theme: Theme,
+	variant: "current" | "accent",
+	color: string,
+): string => {
+	try {
+		const background = stickyBackground(theme, variant);
+		if (!background) return color;
+		const toward =
+			getContrastRatio("#000", background) >=
+			getContrastRatio("#fff", background)
+				? darken
+				: lighten;
+		// in steps of 5%: at 100% the color is black (or white), which has
+		// at least 4.58:1 on any background it was picked for
+		let label = color;
+		for (
+			let step = 1;
+			step <= 20 && getContrastRatio(label, background) < LABEL_CONTRAST;
+			step++
+		)
+			label = toward(color, step / 20);
+		return label;
+	} catch {
+		// a color MUI cannot decompose: keep it rather than fail the grid
+		return color;
+	}
+};
+
+/**
+ * The label colors of the "current" and "accent" column headers, as the
+ * custom properties the header labels read.
+ * @remarks Set once on the grid root: the search for a readable color would
+ * otherwise run in the style of every one of up to 400 header labels.
+ */
+export const columnLabelColorVars = (theme: Theme) => ({
+	[matrixVars.currentLabelColor]: readableStickyLabel(
+		theme,
+		"current",
+		theme.palette.mode === "dark"
+			? theme.palette.warning.light
+			: theme.palette.warning.dark,
+	),
+	[matrixVars.accentLabelColor]: readableStickyLabel(
+		theme,
+		"accent",
+		theme.palette.info.main,
+	),
+});
 
 /** Translucent tints for the cells that scroll (body cells). */
 export const columnTintStyles = (theme: Theme) => ({

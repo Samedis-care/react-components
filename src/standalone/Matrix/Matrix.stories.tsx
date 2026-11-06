@@ -2,13 +2,26 @@ import React, { useCallback } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, userEvent, within } from "storybook/test";
-import { Avatar, Box, Typography } from "@mui/material";
+import {
+	Avatar,
+	Box,
+	createTheme,
+	ThemeProvider,
+	Typography,
+} from "@mui/material";
 import { BeachAccess, Group, PanTool } from "@mui/icons-material";
 import MatrixGrid from "./MatrixGrid";
 import { MatrixGridProps } from "./index";
 import MatrixCellTile from "./MatrixCellTile";
 import buildDateColumns from "./buildDateColumns";
-import { MatrixCellContext, MatrixRow, MatrixTileItem } from "./types";
+import { matrixClasses } from "./matrixClasses";
+import {
+	MatrixCellContext,
+	MatrixColumn,
+	MatrixExtraRow,
+	MatrixRow,
+	MatrixTileItem,
+} from "./types";
 
 /**
  * The demo domain: a duty roster. Everything domain-shaped (the people, the
@@ -420,5 +433,211 @@ export const SweepARange: Story = {
 				columnKeys: ["2026-03-06", "2026-03-07", "2026-03-08"],
 			}),
 		);
+	},
+};
+
+// ---- Grid structure ---------------------------------------------------------
+// The stories below render MatrixGrid directly, with plain text cells and no
+// MatrixCellTile, so what they check is the grid itself: the scroll target,
+// the sticky parts, the aggregate row and the layout.
+
+interface PlainCell {
+	text: string;
+}
+
+const PLAIN_LABEL = "Ward B roster";
+/** 90 days, wider than any test viewport; today mid-range so it can be centred */
+const PLAIN_COLUMNS = buildDateColumns({
+	from: "2026-01-01",
+	to: "2026-03-31",
+	locale: "en-GB",
+	today: "2026-02-10",
+	accent: "2026-02-12",
+});
+const PLAIN_ROWS: MatrixRow<PlainCell>[] = Array.from(
+	{ length: 30 },
+	(_, rowIndex) => ({
+		key: `p${rowIndex + 1}`,
+		label: `Person ${rowIndex + 1}`,
+		cells: Object.fromEntries(
+			PLAIN_COLUMNS.filter((_, i) => (i + rowIndex) % 3 === 0).map((column) => [
+				column.key,
+				{ text: "F" },
+			]),
+		),
+	}),
+);
+const PLAIN_DEMAND: MatrixExtraRow = {
+	key: "demand",
+	header: "Open",
+	label: "Open demand",
+	getCellLabel: (columnKey) => `Open demand on ${columnKey}`,
+	badges: { "2026-02-05": 2, "2026-02-11": 1, "2026-02-12": 0 },
+};
+/** stable selectors for the slots the play functions measure */
+const PLAIN_CLASSES = {
+	corner: "plain-corner",
+	columnHeader: "plain-column-header",
+	columnHeaderLabel: "plain-column-header-label",
+	rowHeader: "plain-row-header",
+	extraRowHeader: "plain-extra-row-header",
+	badge: "plain-badge",
+	extraCellAddHint: "plain-extra-cell-add-hint",
+};
+const renderPlainRowHeader = (row: MatrixRow<PlainCell>) => (
+	<Typography noWrap sx={{ p: 1, fontSize: "0.8rem" }}>
+		{row.label}
+	</Typography>
+);
+const renderPlainCell = (cell: PlainCell | undefined) => (
+	<Typography sx={{ textAlign: "center", lineHeight: "58px" }}>
+		{cell?.text ?? ""}
+	</Typography>
+);
+
+interface PlainRosterProps {
+	/** Reported by the aggregate row */
+	onExtraCellClick?: (columnKey: string) => void;
+	/** Replaces the aggregate row */
+	extraRow?: MatrixExtraRow;
+	/** Replaces the 90-day window */
+	columns?: MatrixColumn[];
+}
+
+const PlainRoster = (props: PlainRosterProps) => {
+	const { onExtraCellClick, extraRow = PLAIN_DEMAND } = props;
+	const extraRows = React.useMemo(
+		() => [{ ...extraRow, onCellClick: onExtraCellClick }],
+		[extraRow, onExtraCellClick],
+	);
+	return (
+		<MatrixGrid<PlainCell>
+			columns={props.columns ?? PLAIN_COLUMNS}
+			rows={PLAIN_ROWS}
+			extraRows={extraRows}
+			label={PLAIN_LABEL}
+			corner={"Ward B"}
+			maxHeight={420}
+			classes={PLAIN_CLASSES}
+			renderRowHeader={renderPlainRowHeader}
+			renderCell={renderPlainCell}
+		/>
+	);
+};
+
+const plainSlot = (
+	canvasElement: HTMLElement,
+	slot: keyof typeof PLAIN_CLASSES,
+) =>
+	Array.from(
+		canvasElement.querySelectorAll<HTMLElement>(`.${PLAIN_CLASSES[slot]}`),
+	);
+
+// ---- Bug stories ------------------------------------------------------------
+// Each one asserts the correct behavior and fails until the BUGS.md entry it
+// is named after is fixed.
+
+// WCAG contrast; fg may be translucent over an opaque bg
+type Rgba = { r: number; g: number; b: number; a: number };
+const parseColor = (color: string): Rgba => {
+	const m = /rgba?\(([^)]+)\)/.exec(color);
+	if (!m) throw new Error(`cannot parse color ${color}`);
+	const [r, g, b, a = 1] = m[1]
+		.split(/[\s,/]+/)
+		.filter(Boolean)
+		.map(Number);
+	return { r, g, b, a };
+};
+const over = (fg: Rgba, bg: Rgba): Rgba => ({
+	r: fg.r * fg.a + bg.r * (1 - fg.a),
+	g: fg.g * fg.a + bg.g * (1 - fg.a),
+	b: fg.b * fg.a + bg.b * (1 - fg.a),
+	a: 1,
+});
+const luminance = ({ r, g, b }: Rgba) => {
+	const channel = (v: number) => {
+		const c = v / 255;
+		return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+	};
+	return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+};
+const contrast = (fg: Rgba, bg: Rgba) => {
+	const [hi, lo] = [luminance(over(fg, bg)), luminance(bg)].sort(
+		(x, y) => y - x,
+	);
+	return (hi + 0.05) / (lo + 0.05);
+};
+/** an element's background: its color with a one-color gradient layered over it */
+const backgroundOf = (element: Element): Rgba => {
+	const style = getComputedStyle(element);
+	const base = parseColor(style.backgroundColor);
+	const layer = /linear-gradient\((rgba?\([^)]+\))/.exec(
+		style.backgroundImage,
+	)?.[1];
+	return layer ? over(parseColor(layer), base) : base;
+};
+
+/** ISSUE-3480-ITEM-15: the labels of the "current" and "accent" column headers are below 4.5:1. */
+export const Issue3480Item15HeaderLabelsHaveContrast: Story = {
+	render: (args) => <PlainRoster onExtraCellClick={args.onExtraCellClick} />,
+	play: async ({ canvasElement }) => {
+		const headers = plainSlot(canvasElement, "columnHeader");
+		for (const variant of [
+			matrixClasses.columnCurrent,
+			matrixClasses.columnAccent,
+		]) {
+			const header = headers.find((candidate) =>
+				candidate.classList.contains(variant),
+			);
+			const label = header.querySelector(`.${PLAIN_CLASSES.columnHeaderLabel}`);
+			const ratio = contrast(
+				parseColor(getComputedStyle(label).color),
+				backgroundOf(header),
+			);
+			// 0.8rem bold is normal-size text: 4.5:1
+			await expect(ratio, variant).toBeGreaterThanOrEqual(4.5);
+		}
+	},
+};
+
+const ITEM_15_THEMES = [
+	// samedis.care's warning color: its warning.dark has 2.9:1 on the tint
+	createTheme({ palette: { warning: { main: "#FFCF00" } } }),
+	createTheme({ palette: { mode: "dark" } }),
+];
+const ITEM_15_COLUMNS = buildDateColumns({
+	from: "2026-02-08",
+	to: "2026-02-14",
+	locale: "en-GB",
+	today: "2026-02-10",
+	accent: "2026-02-12",
+});
+
+/** ISSUE-3480-ITEM-15: the same 4.5:1 with another warning color, and in dark mode. */
+export const Issue3480Item15HeaderLabelsHaveContrastInOtherPalettes: Story = {
+	render: (args) => (
+		<>
+			{ITEM_15_THEMES.map((theme, index) => (
+				<ThemeProvider key={index} theme={theme}>
+					<Box data-palette={index} sx={{ mb: 2 }}>
+						<PlainRoster
+							onExtraCellClick={args.onExtraCellClick}
+							columns={ITEM_15_COLUMNS}
+						/>
+					</Box>
+				</ThemeProvider>
+			))}
+		</>
+	),
+	play: async (context) => {
+		const palettes = Array.from(
+			context.canvasElement.querySelectorAll<HTMLElement>("[data-palette]"),
+		);
+		await expect(palettes).toHaveLength(ITEM_15_THEMES.length);
+		for (const canvasElement of palettes)
+			await Issue3480Item15HeaderLabelsHaveContrast.play?.({
+				...context,
+				canvasElement,
+			});
 	},
 };

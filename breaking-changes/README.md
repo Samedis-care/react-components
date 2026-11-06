@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [MatrixGrid's today and accent header labels are darkened to 4.5:1](2026-11-06-matrix-header-label-contrast.md) | behavior |
 | 2026-11-06 | [RoutedTabs selects the default tab when no Tab has the URL's segment](2026-11-06-routed-tabs-default-tab-for-unknown-segment.md) | behavior |
 | 2026-11-06 | [The Save buttons of DefaultFormPage and FlowEngine say why the form is read-only](2026-11-06-form-page-save-button-read-only-reasons.md) | behavior |
 | 2026-11-06 | [BackendDataGridMultiSelect shows its label and the number of selected rows](2026-11-06-data-grid-multi-select-label-and-count.md) | behavior, type |

@@ -56,6 +56,12 @@ export const matrixVars = {
 	headerHeight: "--cc-matrix-header-height",
 	extraRowHeight: "--cc-matrix-extra-row-height",
 	maxHeight: "--cc-matrix-max-height",
+	// The names must not end in "label": emotion reads "label:<value>;" in a
+	// style as the class name label, and drops the declaration.
+	/** label color of the "current" column header, readable on its tint */
+	currentLabelColor: "--cc-matrix-current-label-color",
+	/** label color of the "accent" column header, readable on its tint */
+	accentLabelColor: "--cc-matrix-accent-label-color",
 	tileBackground: "--cc-matrix-tile-bg",
 	tileForeground: "--cc-matrix-tile-fg",
 	tileBackgroundA: "--cc-matrix-tile-bg-a",

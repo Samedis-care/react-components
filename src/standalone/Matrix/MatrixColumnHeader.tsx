@@ -36,19 +36,18 @@ export const MatrixColumnHeaderRoot = styled("div", {
 export const MatrixColumnHeaderLabel = styled("div", {
 	name: "CcMatrixGrid",
 	slot: "columnHeaderLabel",
-})(({ theme }) => ({
+})({
 	fontWeight: 700,
 	fontSize: "0.8rem",
+	// warning.dark (light mode) and info.main, made readable on the header's
+	// tint: see columnLabelColorVars
 	[`.${matrixClasses.columnCurrent} > &`]: {
-		color:
-			theme.palette.mode === "dark"
-				? theme.palette.warning.light
-				: theme.palette.warning.dark,
+		color: cssVar(matrixVars.currentLabelColor),
 	},
 	[`.${matrixClasses.columnAccent} > &`]: {
-		color: theme.palette.info.main,
+		color: cssVar(matrixVars.accentLabelColor),
 	},
-}));
+});
 
 export const MatrixColumnHeaderSubLabel = styled("div", {
 	name: "CcMatrixGrid",
