@@ -1,10 +1,4 @@
-import React, {
-	useCallback,
-	useContext,
-	useEffect,
-	useMemo,
-	useState,
-} from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import type {
 	BasicFormPageRendererProps,
 	EnhancedCustomProps,
@@ -22,7 +16,8 @@ import FormButtons from "../../standalone/UIKit/FormButtons";
 import combineClassNames from "../../utils/combineClassNames";
 import { IsInFormDialogContext } from "./FormDialog";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { styled, Tooltip, useThemeProps } from "@mui/material";
+import { styled, useThemeProps } from "@mui/material";
+import FormPageSaveButton from "./FormPageSaveButton";
 import type { DefaultFormPageProps } from "./DefaultFormPage";
 
 export const BackButtonDefaultColorClass =
@@ -79,7 +74,6 @@ const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 	const {
 		showBackButtonOnly,
 		readOnly,
-		readOnlyReasons,
 		dirty,
 		isSubmitting,
 		safeSubmit,
@@ -125,32 +119,16 @@ const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 		void handleBack();
 	}, [autoBackTrigger, handleBack]);
 
-	const saveBtn = (
-		<ActionButton
-			disabled={!dirty || isSubmitting || readOnly}
-			onClick={
-				displayConfirmDialog ? submitWithConfirmDialog : submitAndAutoBack
-			}
-		>
-			{t("common.buttons.save")}
-		</ActionButton>
-	);
-
-	const humanReadOnlyReasons = useMemo(
-		() => Object.values(readOnlyReasons).filter((e) => !!e) as string[],
-		[readOnlyReasons],
-	);
-
 	return (
 		<FormButtons>
-			{!showBackButtonOnly &&
-				(readOnly && humanReadOnlyReasons.length > 0 ? (
-					<Tooltip title={humanReadOnlyReasons.join(", ")}>
-						<span>{saveBtn}</span>
-					</Tooltip>
-				) : (
-					saveBtn
-				))}
+			{!showBackButtonOnly && (
+				<FormPageSaveButton
+					disabled={!dirty || isSubmitting || readOnly}
+					onClick={
+						displayConfirmDialog ? submitWithConfirmDialog : submitAndAutoBack
+					}
+				/>
+			)}
 			{extraButtons}
 			{goBack && !(isInDialog && hasCustomCloseHandler) && (
 				<BackActionButton disabled={isSubmitting} onClick={handleBack}>

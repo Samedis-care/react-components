@@ -15,6 +15,8 @@ export { default as EditOnlyFormPage } from "./EditOnlyFormPage";
 export * from "./EditOnlyFormPage";
 export { default as DefaultFormPageButtons } from "./DefaultFormPageButtons";
 export * from "./DefaultFormPageButtons";
+export { default as FormPageSaveButton } from "./FormPageSaveButton";
+export * from "./FormPageSaveButton";
 export { default as DefaultErrorComponent } from "./DefaultErrorComponent";
 export { default as useLazyCrudConnector } from "./useLazyCrudConnector";
 export * from "./useLazyCrudConnector";

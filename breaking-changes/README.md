@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [The Save buttons of DefaultFormPage and FlowEngine say why the form is read-only](2026-11-06-form-page-save-button-read-only-reasons.md) | behavior |
 | 2026-11-06 | [BackendDataGridMultiSelect shows its label and the number of selected rows](2026-11-06-data-grid-multi-select-label-and-count.md) | behavior, type |
 | 2026-11-06 | [GroupBox fills its parent's height only as the parent's only child](2026-11-06-group-box-fills-parent-only-as-only-child.md) | behavior |
 | 2026-11-06 | [PopupMenu items and the Small icon buttons draw a focus ring](2026-11-06-focus-ring-popup-menu-small-icon-buttons.md) | behavior |

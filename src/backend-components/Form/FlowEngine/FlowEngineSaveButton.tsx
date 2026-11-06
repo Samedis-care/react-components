@@ -1,9 +1,7 @@
 import React, { useCallback } from "react";
-import ActionButton, {
-	ActionButtonProps,
-} from "../../../standalone/UIKit/ActionButton";
+import { ActionButtonProps } from "../../../standalone/UIKit/ActionButton";
 import { useFormContext } from "../Form";
-import useCCTranslations from "../../../utils/useCCTranslations";
+import FormPageSaveButton from "../FormPageSaveButton";
 import { ModelUnknown } from "../../../backend-integration";
 
 export interface FlowEngineSaveButtonProps extends Omit<
@@ -14,7 +12,6 @@ export interface FlowEngineSaveButtonProps extends Omit<
 }
 
 const FlowEngineSaveButton = (props: FlowEngineSaveButtonProps) => {
-	const { t } = useCCTranslations();
 	const { dirty, submitting, readOnly, safeSubmit } =
 		useFormContext<ModelUnknown>();
 	const disabled = !dirty || submitting || readOnly;
@@ -24,13 +21,11 @@ const FlowEngineSaveButton = (props: FlowEngineSaveButtonProps) => {
 	}, [safeSubmit]);
 
 	return (
-		<ActionButton
+		<FormPageSaveButton
 			onClick={handleClick}
 			{...props}
 			disabled={disabled || props.disabled}
-		>
-			{props.children ?? t("common.buttons.save")}
-		</ActionButton>
+		/>
 	);
 };
 
