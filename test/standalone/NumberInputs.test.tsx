@@ -10,6 +10,8 @@ import {
 import CurrencyInput from "../../src/standalone/UIKit/InputControls/CurrencyInput";
 import DecimalInputField from "../../src/standalone/UIKit/InputControls/DecimalInputField";
 import ccI18n from "../../src/i18n";
+import userEvent from "@testing-library/user-event";
+import IntegerInputField from "../../src/standalone/UIKit/InputControls/IntegerInputField";
 
 // jsdom has "ontouchstart" on window, so isTouchDevice() would be true and
 // every field with a value would get a Clear button; the tests that need one
@@ -81,6 +83,104 @@ const tabThrough = (input: HTMLElement) => {
 	fireEvent.focus(input);
 	fireEvent.blur(input);
 };
+
+describe("IntegerInputField", () => {
+	it("[ISSUE-3484-ITEM-8] does not join the digits on both sides of a decimal separator", () => {
+		const onValue: ValueSpy = vi.fn();
+		render(
+			<Controlled initial={null} onValue={onValue}>
+				{(value, onChange) => (
+					<IntegerInputField label="Count" value={value} onChange={onChange} />
+				)}
+			</Controlled>,
+		);
+		// pasted
+		fireEvent.change(field("Count"), { target: { value: "1.5" } });
+		expect(reported(onValue)).not.toContain(15);
+	});
+
+	/** an IntegerInputField whose value is kept in state, as a form does */
+	const renderCount = (initial: number | null, onValue: ValueSpy) =>
+		render(
+			<Controlled initial={initial} onValue={onValue}>
+				{(value, onChange) => (
+					<IntegerInputField label="Count" value={value} onChange={onChange} />
+				)}
+			</Controlled>,
+		);
+
+	it("[ISSUE-3484-ITEM-8] keeps digits typed after a decimal separator out of the number, and drops them on blur", async () => {
+		const user = userEvent.setup();
+		const onValue: ValueSpy = vi.fn();
+		renderCount(null, onValue);
+		await user.type(field("Count"), "1.5");
+		expect(reported(onValue)).toEqual([1, 1, 1]);
+		// the typed text stays, so the 5 lands after the separator
+		expect(field("Count")).toHaveValue("1.5");
+		await user.type(field("Count"), "0");
+		expect(reported(onValue).at(-1)).toBe(1);
+		expect(field("Count")).toHaveValue("1.50");
+		tabThrough(field("Count"));
+		expect(field("Count")).toHaveValue("1");
+		expect(reported(onValue).at(-1)).toBe(1);
+	});
+
+	it.each([
+		["en", "1,234.56", 1234],
+		["en", ".5", 0],
+		["en", ".", null],
+		["de", "7,5", 7],
+		["de", "1.234,5", 1234],
+		// the group separator, wherever it is: digits typed into a grouped number
+		["de", "1.2345", 12345],
+		["en", "12,34", 1234],
+	])(
+		"[ISSUE-3484-ITEM-8] reads %s text %j as %j",
+		async (lng, text, expected) => {
+			await setLanguage(lng);
+			const onValue: ValueSpy = vi.fn();
+			renderCount(null, onValue);
+			fireEvent.change(field("Count"), { target: { value: text } });
+			expect(reported(onValue)).toEqual([expected]);
+		},
+	);
+
+	it("[ISSUE-3484-ITEM-8] truncates a fractional value on the first keystroke instead of appending to its digits", async () => {
+		const user = userEvent.setup();
+		const onValue: ValueSpy = vi.fn();
+		renderCount(7.5, onValue);
+		expect(field("Count")).toHaveValue("7.5");
+		await user.type(field("Count"), "1");
+		expect(reported(onValue)).toEqual([7]);
+	});
+
+	it("[ISSUE-3484-ITEM-8] shows the value the parent keeps instead of the typed fraction", () => {
+		const onValue: ValueSpy = vi.fn();
+		render(
+			<Controlled initial={10} onValue={onValue}>
+				{(value, onChange) => (
+					<IntegerInputField
+						label="Count"
+						value={value}
+						onChange={(evt, next) =>
+							onChange(evt, next == null ? next : Math.min(next, 10))
+						}
+					/>
+				)}
+			</Controlled>,
+		);
+		fireEvent.change(field("Count"), { target: { value: "15.5" } });
+		expect(reported(onValue)).toEqual([10]);
+		expect(field("Count")).toHaveValue("10");
+	});
+
+	it("[ISSUE-3484-ITEM-8] still calls onBlur", () => {
+		const onBlur = vi.fn();
+		render(<IntegerInputField label="Count" value={1} onBlur={onBlur} />);
+		tabThrough(field("Count"));
+		expect(onBlur).toHaveBeenCalledTimes(1);
+	});
+});
 
 describe("CurrencyInput", () => {
 	describe("locales and currencies", () => {
