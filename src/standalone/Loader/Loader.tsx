@@ -45,18 +45,17 @@ const Root = styled("div", {
 	slot: "root",
 	shouldForwardProp: (prop) => !ROOT_PROPS_NOT_FORWARDED.has(prop),
 })<LoaderRootProps>({
+	// in flow, so that a parent of automatic height makes room for the content;
+	// a parent with a definite height is filled, its content centered
+	display: "flex",
+	flexDirection: "column",
+	justifyContent: "center",
 	height: "100%",
-	position: "relative",
 	width: "100%",
 });
 
 const InnerWrapper = styled("div", { name: "CcLoader", slot: "innerWrapper" })({
-	height: 70,
-	left: "50%",
-	position: "absolute",
 	textAlign: "center",
-	top: "50%",
-	transform: "translate(-50%, -50%)",
 	width: "100%",
 });
 
@@ -64,7 +63,7 @@ const OuterProgressWrapper = styled("div", {
 	name: "CcLoader",
 	slot: "outerProgressWrapper",
 })({
-	height: "100%",
+	height: 70,
 	position: "relative",
 	width: "100%",
 });
@@ -87,12 +86,13 @@ const Progress = styled(CircularProgress, {
 /**
  * Theme style slots of {@link Loader}
  * (`components.CcLoader.styleOverrides.<slot>`):
- * - `root`: the outermost box, 100% of the parent's width and height. Theme
+ * - `root`: the outermost box, 100% of the parent's width and height, a flex
+ *   column that centers `innerWrapper` vertically. Theme
  *   `components.CcLoader.variants` apply to it. They match the Loader's `text`
  *   and `typographyVariant` after theme `defaultProps`, with
  *   `typographyVariant` `"h6"` when it is not set.
- * - `innerWrapper`: the box holding text and spinner
- * - `outerProgressWrapper`: the box below the text
+ * - `innerWrapper`: the box holding text and spinner, as tall as they are
+ * - `outerProgressWrapper`: the 70px tall box below the text
  * - `innerProgressWrapper`: the box that centers the spinner
  * - `progress`: the MUI `CircularProgress`
  */
@@ -125,6 +125,11 @@ const Loader = (inProps: LoaderProps) => {
 /**
  * Indeterminate loading indicator: a MUI `CircularProgress` with an optional
  * status `text` above it, centered in its parent.
+ *
+ * Layout: in a parent with a definite height (a fixed height, or a box that a
+ * flex or grid layout stretches) it fills the parent and centers text and
+ * spinner in it. In a parent of automatic height it is as tall as its
+ * content: 70px for the spinner, plus the text.
  *
  * Theme: `components.CcLoader.defaultProps` ({@link LoaderProps}),
  * `components.CcLoader.styleOverrides` per {@link LoaderClassKey} slot, and
