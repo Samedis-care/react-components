@@ -20,22 +20,36 @@ import { styled, useThemeProps } from "@mui/material";
 import FormPageSaveButton from "./FormPageSaveButton";
 import type { DefaultFormPageProps } from "./DefaultFormPage";
 
+/**
+ * Class BackActionButton sets when it gets no `color`. It paints the button in MUI's grey for a
+ * contained button without a palette color (`grey[300]` in the light palette, `grey[800]` in the
+ * dark one) with the palette's contrast text for that grey. Restyle it through
+ * `CcDefaultFormPageButtons.styleOverrides.backButton`, and set `color` together with
+ * `backgroundColor` there, or the text keeps the contrast color of the grey.
+ */
 export const BackButtonDefaultColorClass =
 	"CcDefaultFormPageButtons-backButtonDefaultColor";
 
 const BackActionButtonRoot = styled(ActionButton, {
 	name: "CcDefaultFormPageButtons",
 	slot: "backButton",
-})({
-	[`&.${BackButtonDefaultColorClass}`]: {
-		backgroundColor: "#bcbdbf",
-	},
-	boxShadow: "none",
-	border: "none",
-	"&:hover": {
+})(({ theme }) => {
+	const background =
+		theme.palette.mode === "light"
+			? theme.palette.grey[300]
+			: theme.palette.grey[800];
+	return {
+		[`&.${BackButtonDefaultColorClass}`]: {
+			backgroundColor: background,
+			color: theme.palette.getContrastText(background),
+		},
 		boxShadow: "none",
 		border: "none",
-	},
+		"&:hover": {
+			boxShadow: "none",
+			border: "none",
+		},
+	};
 }) as typeof ActionButton;
 
 const BackActionButtonInner = ({
@@ -53,6 +67,10 @@ const BackActionButtonInner = ({
 	/>
 );
 
+/**
+ * ActionButton styled as the secondary "back" action of a form footer: no shadow, no border, and
+ * grey (BackButtonDefaultColorClass) unless a `color` is given. Takes ActionButton's props.
+ */
 export const BackActionButton = React.memo(
 	BackActionButtonInner,
 ) as typeof ActionButton;

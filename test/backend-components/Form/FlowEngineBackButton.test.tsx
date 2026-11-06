@@ -42,7 +42,8 @@ function getAppliedCssValues(el: HTMLElement, property: string): string[] {
 	return values;
 }
 
-const GREY_BG = "#bcbdbf";
+// MUI's grey for a contained button without a palette color, in the light palette
+const GREY_BG = theme.palette.grey[300].toLowerCase();
 
 describe("BackActionButton / FlowEngineBackButton color prop", () => {
 	it("uses grey background by default when no color prop is given", () => {
