@@ -1295,6 +1295,7 @@ export type DataGridClassKey =
 	| "setFilterListItem"
 	| "setFilterContainer"
 	| "idFilterContainer"
+	| "filterCombinator"
 	| "filterBarGrid"
 	| "filterBarBox"
 	| "filterClearBtn"

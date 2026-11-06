@@ -152,9 +152,11 @@ type Story = StoryObj<typeof DataGrid>;
 /** The header content of a column (`column-header-<field>`) */
 const headerOf = (root: HTMLElement, field: string) =>
 	root.querySelector<HTMLElement>(`[class~="column-header-${field}"]`);
+
 /** The header "Filter" button of a column */
 const filterButtonOf = (root: HTMLElement, field: string) =>
 	within(headerOf(root, field)!).getByRole("button", { name: /filter/i });
+
 /** The open column filter popup (the header's hidden menus are popovers too) */
 const openPopup = () =>
 	waitFor(() => {
@@ -164,6 +166,7 @@ const openPopup = () =>
 		if (!paper) throw new Error("the filter popup is not open");
 		return paper;
 	});
+
 /** Class hooks for the parts the stories look at */
 const STORY_CLASSES: DataGridProps["classes"] = {
 	columnHeaderFilterPopup: "story-filter-popup",
@@ -196,6 +199,47 @@ export const Issue3494Item16EnumFilterCheckboxesAreNamed: Story = {
 		const paper = await openPopup();
 		await expect(paper.querySelectorAll("input[type=checkbox]")).toHaveLength(
 			4,
+		);
+	},
+};
+
+/**
+ * ISSUE-3494-ITEM-19: between two conditions of a text column's filter, AND and OR
+ * are two toggle buttons named "Combine conditions". A click on the word already
+ * picked keeps it, a click on the other word picks that one, and axe finds
+ * nothing on the group. It is no taller than the value field.
+ */
+export const Issue3494Item19AndOrAreToggleButtons: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadTasks,
+		classes: STORY_CLASSES,
+	},
+	parameters: {
+		a11y: {
+			test: "error",
+			context: { include: ['[aria-label="Combine conditions"]'] },
+		},
+	},
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		await userEvent.click(filterButtonOf(canvasElement, "name"));
+		const paper = await openPopup();
+		const value = within(paper).getByRole("textbox");
+		await userEvent.type(value, "a");
+		const group = await within(paper).findByRole("group", {
+			name: "Combine conditions",
+		});
+		const and = within(group).getByRole("button", { name: "AND" });
+		const or = within(group).getByRole("button", { name: "OR" });
+		await expect(and).toHaveAttribute("aria-pressed", "true");
+		await userEvent.click(and);
+		await expect(and).toHaveAttribute("aria-pressed", "true");
+		await userEvent.click(or);
+		await expect(or).toHaveAttribute("aria-pressed", "true");
+		await expect(and).toHaveAttribute("aria-pressed", "false");
+		await expect(group.getBoundingClientRect().height).toBeLessThanOrEqual(
+			value.getBoundingClientRect().height,
 		);
 	},
 };

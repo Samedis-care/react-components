@@ -68,6 +68,7 @@
 				"grid-label": "Tabelinhoud",
 				"no-data": "De lijst bevat geen data.",
 				"filter-combination": {
+					"label": "Voorwaarden combineren",
 					"or": "OF",
 					"and": "EN"
 				},

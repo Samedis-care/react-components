@@ -68,6 +68,7 @@
 				"grid-label": "Contenu du tableau",
 				"no-data": "La liste ne contient aucune donnée.",
 				"filter-combination": {
+					"label": "Combiner les conditions",
 					"and": "ET",
 					"or": "OU"
 				},

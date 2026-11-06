@@ -72,6 +72,7 @@
 				"grid-label": "Table contents",
 				"no-data": "The list does not contain any data.",
 				"filter-combination": {
+					"label": "Combine conditions",
 					"and": "AND",
 					"or": "OR"
 				},

@@ -72,6 +72,7 @@
 				"grid-label": "Contenido de la tabla",
 				"no-data": "La lista no contiene datos.",
 				"filter-combination": {
+					"label": "Combinar condiciones",
 					"and": "Y",
 					"or": "O"
 				},

@@ -68,6 +68,7 @@
 				"grid-label": "Tabelleninhalt",
 				"no-data": "Die Liste enthält keine Daten.",
 				"filter-combination": {
+					"label": "Bedingungen verknüpfen",
 					"and": "UND",
 					"or": "ODER"
 				},

@@ -68,6 +68,7 @@
 				"grid-label": "Jadval mazmuni",
 				"no-data": "Ro'yxatda hech qanday ma'lumot yo'q.",
 				"filter-combination": {
+					"label": "Shartlarni birlashtirish",
 					"and": "VA",
 					"or": "YOKI"
 				},

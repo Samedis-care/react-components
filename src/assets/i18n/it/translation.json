@@ -72,6 +72,7 @@
 				"grid-label": "Contenuto della tabella",
 				"no-data": "L'elenco non contiene dati.",
 				"filter-combination": {
+					"label": "Combina le condizioni",
 					"and": "E",
 					"or": "O"
 				},

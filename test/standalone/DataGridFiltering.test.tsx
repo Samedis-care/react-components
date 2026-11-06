@@ -345,3 +345,96 @@ describe("FilterEntry: custom", () => {
 		expect(seen.at(-1)).toEqual({ a: 1 });
 	});
 });
+
+describe("FilterEntry: AND/OR", () => {
+	const chained: IFilterDef = {
+		type: "contains",
+		value1: "x",
+		value2: "",
+		nextFilterType: "and",
+		nextFilter: { type: "contains", value1: "y", value2: "" },
+	};
+	it("[ISSUE-3494-ITEM-19] clicking the word AND while AND is chosen keeps AND", () => {
+		renderEntry({ valueType: "string", initial: chained });
+		fireEvent.click(screen.getAllByText("AND")[0]);
+		expect(last?.nextFilterType ?? "and").toBe("and");
+	});
+	it('[ISSUE-3494-ITEM-19] the choice of OR is named "OR", not "AND OR"', () => {
+		renderEntry({ valueType: "string", initial: chained });
+		const named = (name: string) => [
+			...screen.queryAllByRole("switch", { name }),
+			...screen.queryAllByRole("radio", { name }),
+			...screen.queryAllByRole("button", { name }),
+		];
+		expect(named("OR")).not.toHaveLength(0);
+		expect(named("AND OR")).toHaveLength(0);
+	});
+	/** the AND/OR buttons of the (only) combinator */
+	const combinator = () => {
+		const group = screen.getByRole("group", { name: "Combine conditions" });
+		return {
+			group,
+			and: within(group).getByRole("button", { name: "AND" }),
+			or: within(group).getByRole("button", { name: "OR" }),
+		};
+	};
+	const single: IFilterDef = { ...chained, nextFilter: undefined };
+	it('[ISSUE-3494-ITEM-19] AND and OR are the two toggle buttons of a group named "Combine conditions", the chosen one pressed', () => {
+		renderEntry({
+			valueType: "string",
+			initial: { ...single, nextFilterType: "or" },
+		});
+		const { group, and, or } = combinator();
+		expect(within(group).getAllByRole("button")).toEqual([and, or]);
+		expect(and).toHaveAttribute("aria-pressed", "false");
+		expect(or).toHaveAttribute("aria-pressed", "true");
+	});
+	it("[ISSUE-3494-ITEM-19] a click on a word picks that word, a click on the picked word keeps it, and only nextFilterType changes", () => {
+		renderEntry({ valueType: "string", initial: chained });
+		fireEvent.click(screen.getAllByText("OR")[0]);
+		expect(last).toEqual({ ...chained, nextFilterType: "or" });
+		last = undefined;
+		fireEvent.click(screen.getAllByText("OR")[0]);
+		expect(last).toBeUndefined();
+		expect(screen.getAllByRole("button", { name: "OR" })[0]).toHaveAttribute(
+			"aria-pressed",
+			"true",
+		);
+		fireEvent.click(screen.getAllByText("AND")[0]);
+		expect(last).toEqual({ ...chained, nextFilterType: "and" });
+	});
+	it("[ISSUE-3494-ITEM-19] a filter without nextFilterType shows AND as chosen", () => {
+		renderEntry({
+			valueType: "string",
+			initial: { type: "contains", value1: "x", value2: "" },
+		});
+		const { and, or } = combinator();
+		expect(and).toHaveAttribute("aria-pressed", "true");
+		expect(or).toHaveAttribute("aria-pressed", "false");
+	});
+	it("[ISSUE-3494-ITEM-19] the group is one Tab stop: the arrow keys move the focus, Space or Enter picks the focused word", async () => {
+		const user = userEvent.setup();
+		renderEntry({ valueType: "string", initial: single });
+		const { and, or } = combinator();
+		// the first condition's value field
+		await user.click(screen.getAllByRole("textbox")[0]);
+		await user.tab();
+		expect(and).toHaveFocus();
+		await user.keyboard("{ArrowRight}");
+		expect(or).toHaveFocus();
+		// moving the focus picks nothing
+		expect(last).toBeUndefined();
+		await user.keyboard(" ");
+		expect(last).toEqual({ ...single, nextFilterType: "or" });
+		expect(or).toHaveAttribute("aria-pressed", "true");
+		expect(or).toHaveFocus();
+		await user.keyboard("{ArrowLeft}");
+		expect(and).toHaveFocus();
+		await user.keyboard("{Enter}");
+		expect(last).toEqual({ ...single, nextFilterType: "and" });
+		expect(and).toHaveAttribute("aria-pressed", "true");
+		// the next Tab leaves the group, to the next condition
+		await user.tab();
+		expect(screen.getAllByRole("combobox")[1]).toHaveFocus();
+	});
+});
