@@ -315,7 +315,9 @@
 			"loading": "Загружается…",
 			"loading-error": "Ошибка при получении данных",
 			"unknown-entry": "Неизвестная запись",
-			"selected-count": "Выбрано: {{COUNT}}"
+			"selected-count": "Выбрано: {{COUNT}}",
+			"selection-load-error": "{{LABEL}}: не удалось загрузить.",
+			"selection-load-error-unlabelled": "Не удалось загрузить выбранные записи."
 		},
 		"crud": {
 			"import": {

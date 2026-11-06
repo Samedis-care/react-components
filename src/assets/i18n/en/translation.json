@@ -315,7 +315,9 @@
 			"loading": "Loading…",
 			"loading-error": "Error while fetching data",
 			"unknown-entry": "Unknown entry",
-			"selected-count": "Selected: {{COUNT}}"
+			"selected-count": "Selected: {{COUNT}}",
+			"selection-load-error": "{{LABEL}} could not be loaded.",
+			"selection-load-error-unlabelled": "The selected entries could not be loaded."
 		},
 		"crud": {
 			"import": {

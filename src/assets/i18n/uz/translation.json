@@ -315,7 +315,9 @@
 			"loading": "Yuklanmoqda…",
 			"loading-error": "Ma'lumotlarni olishda xatolik yuz berdi",
 			"unknown-entry": "Noma'lum yozuv",
-			"selected-count": "Tanlangan: {{COUNT}}"
+			"selected-count": "Tanlangan: {{COUNT}}",
+			"selection-load-error": "{{LABEL}}: yuklab bo‘lmadi.",
+			"selection-load-error-unlabelled": "Tanlangan yozuvlarni yuklab bo‘lmadi."
 		},
 		"crud": {
 			"import": {

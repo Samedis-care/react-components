@@ -315,7 +315,9 @@
 			"loading": "Lädt…",
 			"loading-error": "Fehler beim Abrufen der Daten",
 			"unknown-entry": "Unbekannter Eintrag",
-			"selected-count": "Ausgewählt: {{COUNT}}"
+			"selected-count": "Ausgewählt: {{COUNT}}",
+			"selection-load-error": "{{LABEL}}: Laden fehlgeschlagen.",
+			"selection-load-error-unlabelled": "Die ausgewählten Einträge konnten nicht geladen werden."
 		},
 		"crud": {
 			"import": {

@@ -6,7 +6,7 @@ import React, {
 } from "react";
 import { ModelRecord, ModelUnknown } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
-import { Loader, MultiSelectorData } from "../../standalone";
+import { MultiSelectorData } from "../../standalone";
 import BackendMultiSelect, {
 	BackendMultiSelectProps,
 } from "./BackendMultiSelect";
@@ -16,6 +16,7 @@ import useCrudSelect, {
 	UseCrudSelectResult,
 } from "./useCrudSelect";
 import DialogContextProvider from "../../framework/DialogContextProvider";
+import CrudSelectLoadState from "./CrudSelectLoadState";
 
 export interface CrudMultiSelectProps<
 	M extends ModelUnknown,
@@ -70,8 +71,9 @@ const CrudMultiSelect = <
 		modelToSelectorData,
 	} = crudSelect;
 
-	if (loading) return <Loader />;
-	if (loadError) return <span>{loadError.message}</span>;
+	// until the selection is loaded nothing can be picked or removed, and the components
+	// inside the field, which work on the selection, are not rendered
+	const locked = loading || !!loadError;
 
 	return (
 		<CrudSelectContext.Provider
@@ -86,13 +88,23 @@ const CrudMultiSelect = <
 			// for creating dialogs inside end adornment of selector with access to selector data
 			>
 				{error && <ErrorComponent error={error} />}
-				<BackendMultiSelect
-					{...props}
-					selected={selected.map((entry) => entry.value)}
-					onSelect={handleSelect}
-					modelToSelectorData={modelToSelectorData}
-					// the connector's records seed the selected cache: modelToSelectorData tells them apart
-					initialData={initialRawData as ModelRecord<M>[]}
+				<div aria-busy={loading}>
+					<BackendMultiSelect
+						{...props}
+						disabled={props.disabled || locked}
+						endAdornment={locked ? undefined : props.endAdornment}
+						endAdornmentLeft={locked ? undefined : props.endAdornmentLeft}
+						selected={selected.map((entry) => entry.value)}
+						onSelect={handleSelect}
+						modelToSelectorData={modelToSelectorData}
+						// the connector's records seed the selected cache: modelToSelectorData tells them apart
+						initialData={initialRawData as ModelRecord<M>[]}
+					/>
+				</div>
+				<CrudSelectLoadState
+					loading={loading}
+					loadError={loadError}
+					label={props.label}
 				/>
 			</DialogContextProvider>
 		</CrudSelectContext.Provider>

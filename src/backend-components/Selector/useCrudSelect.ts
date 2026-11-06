@@ -499,6 +499,12 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 				currentSelected.current = initialSelected;
 				setSelected(currentSelected.current);
 			} catch (e) {
+				// the field says that the load failed; the error's message is technical
+				// eslint-disable-next-line no-console
+				console.warn(
+					"[Components-Care] [CrudSelect] Could not load the selected entries:",
+					e,
+				);
 				setLoadError(e as Error);
 			} finally {
 				setLoading(false);

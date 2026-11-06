@@ -315,7 +315,9 @@
 			"loading": "Laadt…",
 			"loading-error": "Fout bij het ophalen van gegevens",
 			"unknown-entry": "Onbekend item",
-			"selected-count": "Geselecteerd: {{COUNT}}"
+			"selected-count": "Geselecteerd: {{COUNT}}",
+			"selection-load-error": "{{LABEL}}: laden mislukt.",
+			"selection-load-error-unlabelled": "De geselecteerde items konden niet worden geladen."
 		},
 		"crud": {
 			"import": {

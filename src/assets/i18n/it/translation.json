@@ -315,7 +315,9 @@
 			"loading": "Caricamento…",
 			"loading-error": "Errore durante il recupero dei dati",
 			"unknown-entry": "Voce sconosciuta",
-			"selected-count": "Selezionati: {{COUNT}}"
+			"selected-count": "Selezionati: {{COUNT}}",
+			"selection-load-error": "{{LABEL}}: caricamento non riuscito.",
+			"selection-load-error-unlabelled": "Impossibile caricare le voci selezionate."
 		},
 		"crud": {
 			"import": {

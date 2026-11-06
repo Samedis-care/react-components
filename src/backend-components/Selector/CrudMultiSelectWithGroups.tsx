@@ -1,7 +1,7 @@
 import React, { ForwardedRef, RefAttributes } from "react";
 import { ModelRecord, ModelUnknown } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
-import { BaseSelectorData, Loader, MultiSelectorData } from "../../standalone";
+import { BaseSelectorData, MultiSelectorData } from "../../standalone";
 import BackendMultiSelectWithTags, {
 	BackendMultiSelectWithTagsProps,
 } from "./BackendMultiSelectWithTags";
@@ -9,6 +9,7 @@ import useCrudSelect, {
 	CrudSelectDispatch,
 	UseCrudSelectParams,
 } from "./useCrudSelect";
+import CrudSelectLoadState from "./CrudSelectLoadState";
 
 export interface CrudMultiSelectWithGroupsProps<
 	GroupModelT extends ModelUnknown,
@@ -71,24 +72,32 @@ const CrudMultiSelectWithGroups = <
 		modelToSelectorData,
 	} = useCrudSelect(props, ref);
 
-	if (loading) return <Loader />;
-	if (loadError) return <span>{loadError.message}</span>;
+	// until the selection is loaded nothing can be picked or removed
+	const locked = loading || !!loadError;
 
 	return (
 		<>
 			{error && <ErrorComponent error={error} />}
-			<BackendMultiSelectWithTags<
-				GroupModelT,
-				DataModelT,
-				GroupDataT,
-				DataDataT
-			>
-				{...props}
-				selected={selected.map((entry) => entry.value)}
-				onChange={handleSelect}
-				convData={modelToSelectorData}
-				// the connector's records seed the selected cache: modelToSelectorData tells them apart
-				initialData={initialRawData as ModelRecord<DataModelT>[]}
+			<div aria-busy={loading}>
+				<BackendMultiSelectWithTags<
+					GroupModelT,
+					DataModelT,
+					GroupDataT,
+					DataDataT
+				>
+					{...props}
+					disabled={props.disabled || locked}
+					selected={selected.map((entry) => entry.value)}
+					onChange={handleSelect}
+					convData={modelToSelectorData}
+					// the connector's records seed the selected cache: modelToSelectorData tells them apart
+					initialData={initialRawData as ModelRecord<DataModelT>[]}
+				/>
+			</div>
+			<CrudSelectLoadState
+				loading={loading}
+				loadError={loadError}
+				label={props.title}
 			/>
 		</>
 	);

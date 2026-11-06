@@ -315,7 +315,9 @@
 			"loading": "Chargement…",
 			"loading-error": "Erreur lors de la récupération des données",
 			"unknown-entry": "Entrée inconnue",
-			"selected-count": "Sélectionnés : {{COUNT}}"
+			"selected-count": "Sélectionnés : {{COUNT}}",
+			"selection-load-error": "{{LABEL}} : échec du chargement.",
+			"selection-load-error-unlabelled": "Impossible de charger les entrées sélectionnées."
 		},
 		"crud": {
 			"import": {
