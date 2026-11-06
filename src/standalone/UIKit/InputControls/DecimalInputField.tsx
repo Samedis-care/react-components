@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { TextFieldProps } from "@mui/material";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
@@ -16,9 +16,11 @@ export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 	 */
 	format?: Intl.NumberFormatOptions;
 	/**
-	 * The change event handler
-	 * @param evt
-	 * @param value
+	 * Called on the blur after the user edited the text, with the parsed text.
+	 * Typing alone, and a blur without an edit, never call it.
+	 * @param evt The blur event, although typed as a change event;
+	 * `evt.target.name` is the input's `name`
+	 * @param value The number; `null` for an empty field or text without a digit
 	 */
 	onChange?: (
 		evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
@@ -29,7 +31,7 @@ export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 const DecimalInputField = (
 	props: DecimalInputFieldProps & Omit<TextFieldProps, "onChange" | "value">,
 ) => {
-	const { value, onChange, format, ...muiProps } = props;
+	const { value, onChange, onBlur, format, ...muiProps } = props;
 	const locale = useCurrentLocale();
 	const [valueInternal, setValueInternal] = useState("");
 	useEffect(() => {
@@ -39,17 +41,24 @@ const DecimalInputField = (
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [value]);
 
+	// whether the text was edited since the last commit: only then does a blur commit, so
+	// tabbing through the field never stores the shown (rounded) text in place of the value
+	const editedRef = useRef(false);
+
 	const handleBlur = useCallback(
 		(event: React.FocusEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-			if (!onChange) return;
+			if (onBlur) onBlur(event);
+			if (!editedRef.current || !onChange) return;
+			editedRef.current = false;
 			onChange(event, parseLocalizedNumber(event.target.value));
 		},
-		[onChange],
+		[onBlur, onChange],
 	);
 
 	// on change handling
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+			editedRef.current = true;
 			setValueInternal(event.target.value);
 		},
 		[],
