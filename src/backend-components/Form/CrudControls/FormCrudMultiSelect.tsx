@@ -22,9 +22,10 @@ export interface FormCrudMultiSelectProps<
 		>,
 		UseLazyCrudConnectorParams<Record<string, unknown>> {
 	/**
-	 * Locks the control: the search field is disabled and the entries have no remove
-	 * button. While the Form is read-only (which includes a save in progress) the control is
-	 * locked whatever this says: `disabled` can only add to that.
+	 * Locks the control: the search field is disabled, the entries have no remove button,
+	 * and nothing queues a write, neither the ref's addToSelection nor an end adornment's
+	 * handleSelect. While the Form is read-only (which includes a save in progress) the
+	 * control is locked whatever this says: `disabled` can only add to that.
 	 * @default false
 	 */
 	disabled?: boolean;

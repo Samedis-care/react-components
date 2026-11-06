@@ -40,6 +40,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-06 | [The column settings' search says that it searches the columns, and when nothing matches](2026-11-06-data-grid-column-search-says-so.md) | behavior |
 | 2026-11-06 | [A keepMounted PopupMenu opens on its first item every time](2026-11-06-popup-menu-opens-on-first-item.md) | behavior |
 | 2026-11-06 | [FullFormDialog closes only itself and calls onClose first; useCloseThisDialog closes the dialog a component is in](2026-11-06-full-form-dialog-closes-itself.md) | behavior |
+| 2026-11-06 | [A disabled CrudMultiSelect takes no writes, also from its ref or an end adornment](2026-11-06-crud-select-disabled-takes-no-writes.md) | behavior, type |
 | 2026-11-06 | [The DataGrid's empty and error messages are no longer headings, and are announced](2026-11-06-data-grid-empty-and-error-messages.md) | behavior |
 | 2026-11-06 | [DataGrid row checkboxes are named after their row](2026-11-06-data-grid-row-checkboxes-named.md) | behavior, type |
 | 2026-11-06 | [MultiGrid's header and pinned column leave room for the scrolling pane's scrollbars](2026-11-06-multi-grid-scrollbar-room.md) | behavior |

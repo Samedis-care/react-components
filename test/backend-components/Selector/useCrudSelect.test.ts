@@ -657,3 +657,82 @@ describe("useCrudSelect bugs", () => {
 		expect(be.calls).toEqual(["create:s1"]);
 	});
 });
+
+describe("useCrudSelect: a disabled control", () => {
+	const mountDisabled = (be: Backend) => {
+		const ref = React.createRef<CrudSelectDispatch<SourceJoinData>>();
+		const hook = renderHook(
+			({ disabled }: { disabled: boolean }) =>
+				useCrudSelect(joinParams(be.connector, { disabled }), ref),
+			{ initialProps: { disabled: true } },
+		);
+		return { ref, ...hook };
+	};
+
+	it("[ISSUE-3505-ITEM-5] writes nothing: handleSelect ignores picks, updates and removals, and addToSelection rejects", async () => {
+		const be = makeBackend([{ id: "j1", source_id: "s1", note: "a" }]);
+		const { ref, result } = mountDisabled(be);
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		expect(result.current.disabled).toBe(true);
+
+		await act(async () => {
+			await result.current.handleSelect(
+				["j1", "to-create-s2"],
+				[{ ...result.current.selected[0], note: "b" }, pick("s2")],
+			);
+		});
+		await act(async () => {
+			await result.current.handleSelect([], []);
+		});
+		const outcome = await startAdd(ref, pick("s3")).then(
+			() => null,
+			(e: unknown) => e,
+		);
+		await flush();
+
+		expect(outcome).toBeInstanceOf(Error);
+		expect(be.calls).toEqual([]);
+		expect(values(result.current.selected)).toEqual(["j1"]);
+		expect(result.current.selected[0].note).toBe("a");
+		expect(result.current.error).toBeNull();
+	});
+
+	it("[ISSUE-3505-ITEM-5] takes writes again once it is enabled", async () => {
+		const be = makeBackend([{ id: "j1", source_id: "s1" }]);
+		const { ref, result, rerender } = mountDisabled(be);
+		await waitFor(() => expect(result.current.loading).toBe(false));
+
+		rerender({ disabled: false });
+		expect(result.current.disabled).toBe(false);
+		await startAdd(ref, pick("s2"));
+		await flush();
+		await act(async () => {
+			await result.current.handleSelect(
+				[result.current.selected[1].value],
+				[result.current.selected[1]],
+			);
+		});
+
+		expect(be.calls).toEqual(["create:s2", "delete:j1"]);
+		expect(values(result.current.selected)).toEqual(["100"]);
+	});
+
+	it("[ISSUE-3505-ITEM-5] still lists its initialSelected", async () => {
+		const be = makeBackend();
+		const { result } = renderHook(() =>
+			useCrudSelect(
+				joinParams(be.connector, {
+					disabled: true,
+					initialSelected: [pick("s1")],
+				}),
+				{ current: null },
+			),
+		);
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		await flush();
+
+		expect(result.current.selected.map((entry) => entry.label)).toEqual([
+			"Ls1",
+		]);
+	});
+});

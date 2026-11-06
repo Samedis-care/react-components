@@ -629,6 +629,10 @@ anything is queued the form is dirty. The connector is kept as the form's custom
 `field`.
 
 They take the form's `readOnly` on top of their own, and its `errorComponent`.
+While `FormCrudMultiSelect` is locked that way, nothing else writes to it either: its ref's
+`addToSelection` rejects, and the select context's `handleSelect`, which end adornments call,
+ignores the change. An end adornment reads `useCrudSelectContext().disabled` to lock its own
+buttons.
 `FormCrudFileUpload` also follows the form's `showDirtyState` unless its own prop is set.
 Outside a form, use `CrudFileUpload` and `CrudMultiImage` with a connector of your own: they
 do not read the form.

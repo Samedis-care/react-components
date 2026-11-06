@@ -460,4 +460,85 @@ describe("FormCrudMultiSelect: the form's state", () => {
 			falseUnlocks: false,
 		});
 	});
+
+	it("[ISSUE-3505-ITEM-5] a pick through the ref does not queue a write in a read-only form", async () => {
+		const { sink, ref } = await mountSelector(
+			undefined,
+			{},
+			{
+				readOnly: true,
+			},
+		);
+
+		let pending: Promise<void> | undefined;
+		act(() => {
+			pending = ref
+				.current!.addToSelection({
+					value: "to-create-s2",
+					label: "Ls2",
+					source_id: "s2",
+				})
+				.catch(() => {});
+		});
+		await act(async () => {
+			await pending;
+		});
+		await settle();
+
+		expect(labels()).toEqual(["Ls1"]);
+		expect(sink.ctx!.dirty).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-5] an end adornment's handleSelect queues no pick and no removal in a read-only form, and the context says the control is disabled", async () => {
+		const { sink } = await mountSelector(undefined, {}, { readOnly: true });
+		expect(selSink.ctx!.disabled).toBe(true);
+
+		const picked: JoinData = {
+			value: "to-create-s2",
+			label: "Ls2",
+			source_id: "s2",
+		};
+		await act(async () => {
+			await selSink.ctx!.handleSelect(
+				["j1", picked.value],
+				[...selected(), picked],
+			);
+		});
+		await settle();
+		expect(labels()).toEqual(["Ls1"]);
+
+		await act(async () => {
+			await selSink.ctx!.handleSelect([], []);
+		});
+		await settle();
+		expect(labels()).toEqual(["Ls1"]);
+		expect(sink.ctx!.dirty).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-5] once the form is editable again, a pick through the ref is queued", async () => {
+		const { sink, ref, rerenderWith } = await mountSelector(
+			undefined,
+			{},
+			{ readOnly: true },
+		);
+		rerenderWith({ readOnly: false });
+		await settle();
+		expect(selSink.ctx!.disabled).toBe(false);
+
+		let pending: Promise<void> | undefined;
+		act(() => {
+			pending = ref.current!.addToSelection({
+				value: "to-create-s2",
+				label: "Ls2",
+				source_id: "s2",
+			});
+		});
+		await act(async () => {
+			await pending;
+		});
+		await settle();
+
+		expect(labels()).toEqual(["Ls1", "Ls2"]);
+		expect(sink.ctx!.dirty).toBe(true);
+	});
 });

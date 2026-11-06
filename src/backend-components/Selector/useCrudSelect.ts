@@ -101,6 +101,13 @@ export interface UseCrudSelectParams<
 	 * Get ID of data
 	 */
 	getIdOfData: NonNullable<BackendMultiSelectProps<M, DataT>["getIdOfData"]>;
+	/**
+	 * Is the control disabled? A disabled control writes nothing: handleSelect ignores
+	 * every change and addToSelection rejects, also when an end adornment or the caller's
+	 * ref calls them
+	 * @default false
+	 */
+	disabled?: boolean;
 }
 
 export interface UseCrudSelectResult<
@@ -131,8 +138,15 @@ export interface UseCrudSelectResult<
 	 * Selection handler
 	 * @param ids The new selected entry ids
 	 * @param newSelected The new selected entries
+	 * @remarks Ignores the change while the control is disabled
 	 */
 	handleSelect: (ids: string[], newSelected: DataT[]) => Promise<void>;
+	/**
+	 * Is the control disabled? An end adornment that picks or removes entries locks itself
+	 * while it is: handleSelect ignores its changes meanwhile
+	 * @see UseCrudSelectParams.disabled
+	 */
+	disabled: boolean;
 	/**
 	 * Conversion function for model data to selection data (handles special case when data comes from CRUD controller)
 	 * @param data The model data
@@ -147,7 +161,8 @@ export interface CrudSelectDispatch<DataT extends BaseSelectorData> {
 	 * @returns Resolves once the entry is selected. Rejects with the error of the create
 	 *   if it failed. Rejects with a PartialApplyError whose failure has the action
 	 *   `read` if `deserialize` failed after the create went through: the entry is
-	 *   selected then, as it was passed in, with the row's `id` as `value`.
+	 *   selected then, as it was passed in, with the row's `id` as `value`. Rejects without
+	 *   a write if the control is disabled when the entry's turn comes.
 	 * @remarks Does not update existing record
 	 */
 	addToSelection: (entry: DataT) => Promise<void>;
@@ -226,6 +241,11 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 		field,
 		getIdOfData,
 	} = params;
+	const disabled = !!params.disabled;
+	// read when a write would start, so a change queued or a handleSelect kept from an
+	// earlier render does not write after the control was disabled
+	const disabledRef = useRef(disabled);
+	disabledRef.current = disabled;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
 	const [loadError, setLoadError] = useState<Error | null>(null);
@@ -281,6 +301,7 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 		delete addToSelectionResults.current[ticket];
 		(async () => {
 			if (loadError) throw new Error("CrudSelect loading failed");
+			if (disabledRef.current) throw new Error("CrudSelect is disabled");
 			const existing = currentSelected.current.find(
 				(selEntry) => getIdOfData(selEntry) === getIdOfData(entry),
 			);
@@ -316,7 +337,8 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [loading, addToSelectionQueue]);
 
-	const handleSelect = useCallback(
+	// writes the change, whether the control is disabled or not: the initial load uses it
+	const applySelection = useCallback(
 		async (_ids: string[], newSelected: DataT[]) => {
 			// find new entries
 			const newEntries = newSelected.filter(
@@ -450,6 +472,13 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 		},
 		[connector, deserialize, prepareNewEntry, selected, serialize],
 	);
+	const handleSelect = useCallback(
+		async (ids: string[], newSelected: DataT[]) => {
+			if (disabledRef.current) return;
+			await applySelection(ids, newSelected);
+		},
+		[applySelection],
+	);
 
 	const modelToSelectorData = useCallback(
 		async (data: ModelRecord<M>): Promise<DataT> => {
@@ -475,7 +504,7 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 			setLoading(true);
 
 			if (initialSelected) {
-				await handleSelect(
+				await applySelection(
 					initialSelected.map((entry) => entry.value),
 					initialSelected,
 				);
@@ -562,6 +591,7 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 		initialRawData,
 		handleSelect,
 		modelToSelectorData,
+		disabled,
 	};
 };
 
