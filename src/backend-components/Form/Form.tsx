@@ -41,7 +41,7 @@ import deepSort from "../../utils/deepSort";
 import useDevKeybinds from "../../utils/useDevKeybinds";
 import useRefState from "../../utils/useRefState";
 import uniqueArray from "../../utils/uniqueArray";
-import { QueryObserverBaseResult } from "@tanstack/react-query";
+import { hashKey, QueryObserverBaseResult } from "@tanstack/react-query";
 import ValidationError from "./ValidationError";
 import TypedEventTarget from "../../utils/TypedEventTarget";
 import { FormEvents, FormEventTarget } from "./FormEvents";
@@ -182,10 +182,17 @@ export interface PageProps<M extends ModelUnknown, CustomPropsT> {
 export interface FormProps<M extends ModelUnknown, CustomPropsT> {
 	/**
 	 * The data model this form follows
+	 * @remarks Another model (another model id or other cache keys) starts the form over, like
+	 *          another id. A model object created again for the same model id and cache keys
+	 *          does not.
 	 */
 	model: M;
 	/**
 	 * The current data entry id
+	 * @remarks null for a new record. Another id starts the form over, as when it mounts: the
+	 *          page is mounted again, and the values, touched state, errors, warnings and custom
+	 *          state come from the new record. A change from null to the id of the record the
+	 *          form has just created keeps the form as it is.
 	 */
 	id: string | null;
 	/**
@@ -1636,7 +1643,48 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 	// Suspense boundary shows the form again, Activity when it shows a hidden subtree):
 	// that must keep what was entered, only the next load initializes again
 	const initializedRef = useRef(false);
-	// init data structs after a load
+	// the server data the form data was last updated from. A re-run of the refetch effect
+	// below with the same data (see initializedRef) has nothing to apply, and must not take
+	// fields of a flow engine stage that is no longer mounted for unmodified ones
+	const appliedServerDataRef = useRef<typeof serverData>(undefined);
+
+	// the record the form data belongs to: its model, by query key (a model object created
+	// again for the same data is the same model), and its id. Another record starts the form
+	// over, as on a fresh mount: the page shows the loader for a render, so it is mounted
+	// again, and the init effect below fills the form from the new record. The id a create
+	// form is given for the record it has just saved is that same record
+	const modelKey = useMemo(
+		() => hashKey(model.getReactQueryKey(null, false)),
+		[model],
+	);
+	const recordId = id || null;
+	const [dataRecord, setDataRecord] = useState({ modelKey, id: recordId });
+	const recordChanged =
+		dataRecord.modelKey !== modelKey || dataRecord.id !== recordId;
+	const recordSwitched =
+		recordChanged &&
+		!(
+			dataRecord.modelKey === modelKey &&
+			dataRecord.id === null &&
+			recordId !== null &&
+			values.id === recordId
+		);
+	useEffect(() => {
+		if (!recordChanged) return;
+		setDataRecord({ modelKey, id: recordId });
+		if (!recordSwitched) return;
+		initializedRef.current = false;
+		prevServerDataRef.current = null;
+		appliedServerDataRef.current = undefined;
+		customFieldState.current = {};
+		setCustomDirtyFields([]);
+		setErrors({});
+		setWarnings({});
+		setUpdateError(null);
+	}, [recordChanged, recordSwitched, modelKey, recordId, setCustomDirtyFields]);
+
+	// init data structs after a load, or after a switch to another record (which may be
+	// cached, then nothing loads)
 	useEffect(() => {
 		if (isLoading) {
 			initializedRef.current = false;
@@ -1656,12 +1704,8 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 		setValuesStagedModified(valuesStagedModifiedRef.current);
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [isLoading]);
+	}, [isLoading, serverData]);
 
-	// the server data the form data was last updated from. A re-run of the effect below
-	// with the same data (see initializedRef) has nothing to apply, and must not take
-	// fields of a flow engine stage that is no longer mounted for unmodified ones
-	const appliedServerDataRef = useRef<typeof serverData>(undefined);
 	// update data struct after background fetch
 	useEffect(() => {
 		if (isLoading || !serverData || !serverData[0]) return;
@@ -2491,7 +2535,12 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 			return <ErrorRenderer customProps={customProps} error={error} />;
 		return <Typography color={"error"}>{error.message}</Typography>;
 	}
-	if (isLoading || isDefaultRecordLoading || isObjectEmpty(values)) {
+	if (
+		isLoading ||
+		isDefaultRecordLoading ||
+		isObjectEmpty(values) ||
+		recordSwitched
+	) {
 		return <Loader />;
 	}
 
