@@ -3,7 +3,7 @@ import { Typography } from "@mui/material";
 import ModelRenderParams from "../../../RenderParams";
 import ccI18n from "../../../../../i18n";
 import getCurrentLocale from "../../../../../utils/getCurrentLocale";
-import { DateTimeInput, FormHelperTextCC } from "../../../../../standalone";
+import { DateTimeInput } from "../../../../../standalone";
 import TypeDateTimeNullable from "../../TypeDateTimeNullable";
 import moment from "moment";
 
@@ -43,35 +43,29 @@ class RendererDateTimeNullable extends TypeDateTimeNullable {
 			if (visibility.grid) throw new Error("Not supported");
 
 			return (
-				<>
-					<DateTimeInput
-						value={value ? moment(value) : null}
-						name={field}
-						label={label}
-						disabled={visibility.readOnly}
-						required={visibility.required}
-						onChange={(date) =>
-							handleChange(field, date ? date.toDate() : null)
-						}
-						onBlur={handleBlur}
-						error={!!errorMsg}
-						warning={!!warningMsg}
-						dirty={dirty}
-						autoFocus={autoFocus}
-						onError={(error: React.ReactNode) => {
-							this.error = error
-								? ccI18n.t(
-										"backend-integration.model.types.renderers.date.validation-error",
-									)
-								: "";
-							setFieldTouched(field, touched, true);
-						}}
-						fullWidth
-					/>
-					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
-						{errorMsg || warningMsg}
-					</FormHelperTextCC>
-				</>
+				<DateTimeInput
+					value={value ? moment(value) : null}
+					name={field}
+					label={label}
+					disabled={visibility.readOnly}
+					required={visibility.required}
+					onChange={(date) => handleChange(field, date ? date.toDate() : null)}
+					onBlur={handleBlur}
+					error={!!errorMsg}
+					warning={!!warningMsg}
+					dirty={dirty}
+					autoFocus={autoFocus}
+					onError={(error: React.ReactNode) => {
+						this.error = error
+							? ccI18n.t(
+									"backend-integration.model.types.renderers.date.validation-error",
+								)
+							: "";
+						setFieldTouched(field, touched, true);
+					}}
+					helperText={errorMsg || warningMsg || undefined}
+					fullWidth
+				/>
 			);
 		}
 		return (

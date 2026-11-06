@@ -70,12 +70,7 @@ const mount = (renderer: Renderer, value: Date) =>
 /** Calls the input's `onChange` the way the field does */
 const emitChange = (renderer: Renderer, value: Date, date: unknown) => {
 	const h = handlers();
-	const element = renderer.render(
-		renderParams(value, h),
-	) as React.ReactElement<{
-		children: React.ReactElement[];
-	}>;
-	const input = element.props.children[0] as React.ReactElement<{
+	const input = renderer.render(renderParams(value, h)) as React.ReactElement<{
 		onChange: (date: unknown) => void;
 	}>;
 	input.props.onChange(date);

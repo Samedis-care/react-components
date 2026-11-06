@@ -28,6 +28,14 @@ export interface DateTimeInputProps extends UIInputProps {
 	 * full width?
 	 */
 	fullWidth?: LocalizedDateTimePickerProps["fullWidth"];
+	/**
+	 * Text below the field: a hint, or the message of a validation error or warning
+	 * @remarks The field group's description (`aria-describedby`), so a screen reader
+	 *          reads it when the user reaches the field; its color follows `error` and
+	 *          `warning`. Takes the place of `slotProps.textField.helperText`, which is
+	 *          used while this is undefined. Default: none.
+	 */
+	helperText?: PickersTextFieldProps["helperText"];
 }
 
 const DateTimeInput = (props: DateTimeInputProps & DateTimePickerProps) => {
@@ -38,6 +46,7 @@ const DateTimeInput = (props: DateTimeInputProps & DateTimePickerProps) => {
 		error,
 		fullWidth,
 		onBlur,
+		helperText,
 		...muiProps
 	} = props;
 
@@ -66,6 +75,9 @@ const DateTimeInput = (props: DateTimeInputProps & DateTimePickerProps) => {
 						important,
 						openInfo,
 						...orgSlotProps,
+						// only where the caller gave one, so a helper text passed through
+						// slotProps.textField is not overwritten with undefined
+						...(helperText === undefined ? {} : { helperText }),
 						slotProps: {
 							inputLabel: {
 								...InputLabelConfig,

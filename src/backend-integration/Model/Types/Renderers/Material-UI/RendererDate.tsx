@@ -12,7 +12,6 @@ import TypeDate from "../../TypeDate";
 import { LocalizedKeyboardDatePicker } from "../../../../../standalone/LocalizedDateTimePickers";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
 import { IDataGridColumnDef } from "../../../../../standalone/DataGrid/DataGrid";
-import { FormHelperTextCC } from "../../../../../standalone/UIKit/MuiFieldState";
 import moment from "moment";
 
 /**
@@ -51,49 +50,47 @@ class RendererDate extends TypeDate {
 			if (visibility.grid) throw new Error("Not supported");
 
 			return (
-				<>
-					<LocalizedKeyboardDatePicker
-						name={field}
-						value={value ? moment(denormalizeDate(value)) : null}
-						label={label}
-						disabled={visibility.readOnly}
-						required={visibility.required}
-						onChange={(date) => {
-							// The field can be emptied — by the clear button, or by deleting
-							// a single section — even though this type cannot hold null. That
-							// is the user entering an invalid date, not a broken caller, so
-							// it has to surface as a validation error rather than throw
-							// inside a React event handler.
-							if (!date) {
-								this.error = ccI18n.t(
-									"backend-integration.model.types.renderers.date.validation-error",
-								);
-								setFieldTouched(field, touched, true);
-								return;
-							}
-							this.error = "";
-							handleChange(field, normalizeDate(date.toDate()));
-						}}
-						onBlur={handleBlur}
-						error={!!errorMsg}
-						warning={!!warningMsg}
-						dirty={dirty}
-						autoFocus={autoFocus}
-						onError={(error: React.ReactNode) => {
-							this.error = error
-								? ccI18n.t(
-										"backend-integration.model.types.renderers.date.validation-error",
-									)
-								: "";
+				<LocalizedKeyboardDatePicker
+					name={field}
+					value={value ? moment(denormalizeDate(value)) : null}
+					label={label}
+					disabled={visibility.readOnly}
+					required={visibility.required}
+					onChange={(date) => {
+						// The field can be emptied — by the clear button, or by deleting
+						// a single section — even though this type cannot hold null. That
+						// is the user entering an invalid date, not a broken caller, so
+						// it has to surface as a validation error rather than throw
+						// inside a React event handler.
+						if (!date) {
+							this.error = ccI18n.t(
+								"backend-integration.model.types.renderers.date.validation-error",
+							);
 							setFieldTouched(field, touched, true);
-						}}
-						fullWidth
-						disableClearable
-					/>
-					<FormHelperTextCC warning={!!warningMsg} error={!!errorMsg}>
-						{errorMsg || warningMsg}
-					</FormHelperTextCC>
-				</>
+							return;
+						}
+						this.error = "";
+						handleChange(field, normalizeDate(date.toDate()));
+					}}
+					onBlur={handleBlur}
+					error={!!errorMsg}
+					warning={!!warningMsg}
+					dirty={dirty}
+					autoFocus={autoFocus}
+					onError={(error: React.ReactNode) => {
+						this.error = error
+							? ccI18n.t(
+									"backend-integration.model.types.renderers.date.validation-error",
+								)
+							: "";
+						setFieldTouched(field, touched, true);
+					}}
+					slotProps={{
+						textField: { helperText: errorMsg || warningMsg || undefined },
+					}}
+					fullWidth
+					disableClearable
+				/>
 			);
 		}
 		return (

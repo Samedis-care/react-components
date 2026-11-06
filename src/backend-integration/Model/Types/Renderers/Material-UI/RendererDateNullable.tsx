@@ -12,7 +12,6 @@ import {
 import { LocalizedKeyboardDatePicker } from "../../../../../standalone/LocalizedDateTimePickers";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
 import { IDataGridColumnDef } from "../../../../../standalone/DataGrid/DataGrid";
-import { FormHelperTextCC } from "../../../../../standalone/UIKit/MuiFieldState";
 import moment from "moment";
 
 /**
@@ -51,35 +50,33 @@ class RendererDateNullable extends TypeDateNullable {
 			if (visibility.grid) throw new Error("Not supported");
 
 			return (
-				<>
-					<LocalizedKeyboardDatePicker
-						name={field}
-						value={value ? moment(denormalizeDate(value)) : null}
-						label={label}
-						disabled={visibility.readOnly}
-						required={visibility.required}
-						onChange={(date) =>
-							handleChange(field, date ? normalizeDate(date.toDate()) : null)
-						}
-						onBlur={handleBlur}
-						error={!!errorMsg}
-						warning={!!warningMsg}
-						dirty={dirty}
-						autoFocus={autoFocus}
-						onError={(error: React.ReactNode) => {
-							this.error = error
-								? ccI18n.t(
-										"backend-integration.model.types.renderers.date.validation-error",
-									)
-								: "";
-							setFieldTouched(field, touched, true);
-						}}
-						fullWidth
-					/>
-					<FormHelperTextCC warning={!!warningMsg} error={!!errorMsg}>
-						{errorMsg || warningMsg}
-					</FormHelperTextCC>
-				</>
+				<LocalizedKeyboardDatePicker
+					name={field}
+					value={value ? moment(denormalizeDate(value)) : null}
+					label={label}
+					disabled={visibility.readOnly}
+					required={visibility.required}
+					onChange={(date) =>
+						handleChange(field, date ? normalizeDate(date.toDate()) : null)
+					}
+					onBlur={handleBlur}
+					error={!!errorMsg}
+					warning={!!warningMsg}
+					dirty={dirty}
+					autoFocus={autoFocus}
+					onError={(error: React.ReactNode) => {
+						this.error = error
+							? ccI18n.t(
+									"backend-integration.model.types.renderers.date.validation-error",
+								)
+							: "";
+						setFieldTouched(field, touched, true);
+					}}
+					slotProps={{
+						textField: { helperText: errorMsg || warningMsg || undefined },
+					}}
+					fullWidth
+				/>
 			);
 		}
 		return (

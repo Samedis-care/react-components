@@ -73,10 +73,9 @@ const emitChange = (renderer: RendererDate, value: Date, date: unknown) => {
 		handleChange: vi.fn(),
 		setFieldTouched: vi.fn(),
 	};
-	const element = renderer.render(
+	const picker = renderer.render(
 		renderParams(value, handlers),
-	) as React.ReactElement<{ children: React.ReactElement[] }>;
-	const picker = element.props.children[0] as React.ReactElement<{
+	) as React.ReactElement<{
 		onChange: (date: unknown) => void;
 	}>;
 	picker.props.onChange(date);

@@ -5,7 +5,7 @@ import TypeDateNullable from "../../TypeDateNullable";
 import ccI18n from "../../../../../i18n";
 import getCurrentLocale from "../../../../../utils/getCurrentLocale";
 import { formatDateOnly } from "../../../../../utils/dateOnlyUtils";
-import { DateInput, FormHelperTextCC } from "../../../../../standalone";
+import { DateInput } from "../../../../../standalone";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
 import { IDataGridColumnDef } from "../../../../../standalone/DataGrid/DataGrid";
 
@@ -22,6 +22,7 @@ export type RendererDateNullableProps = Omit<
 	| "onError"
 	| "fullWidth"
 	| "clearable"
+	| "helperText"
 >;
 
 /**
@@ -68,34 +69,30 @@ class RendererDateNullable extends TypeDateNullable {
 			if (visibility.grid) throw new Error("Not supported");
 
 			return (
-				<>
-					<DateInput
-						{...this.props}
-						name={field}
-						value={value}
-						label={label}
-						disabled={visibility.readOnly}
-						required={visibility.required}
-						onChange={(date) => handleChange(field, date)}
-						onBlur={handleBlur}
-						error={!!errorMsg}
-						warning={!!warningMsg}
-						dirty={dirty}
-						autoFocus={autoFocus}
-						onError={(error: React.ReactNode) => {
-							this.error = error
-								? ccI18n.t(
-										"backend-integration.model.types.renderers.date.validation-error",
-									)
-								: "";
-							setFieldTouched(field, touched, true);
-						}}
-						fullWidth
-					/>
-					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
-						{errorMsg || warningMsg}
-					</FormHelperTextCC>
-				</>
+				<DateInput
+					{...this.props}
+					name={field}
+					value={value}
+					label={label}
+					disabled={visibility.readOnly}
+					required={visibility.required}
+					onChange={(date) => handleChange(field, date)}
+					onBlur={handleBlur}
+					error={!!errorMsg}
+					warning={!!warningMsg}
+					dirty={dirty}
+					autoFocus={autoFocus}
+					onError={(error: React.ReactNode) => {
+						this.error = error
+							? ccI18n.t(
+									"backend-integration.model.types.renderers.date.validation-error",
+								)
+							: "";
+						setFieldTouched(field, touched, true);
+					}}
+					helperText={errorMsg || warningMsg || undefined}
+					fullWidth
+				/>
 			);
 		}
 		return (

@@ -45,6 +45,8 @@ const wrap = (ui: React.ReactNode) =>
 		</ThemeProvider>,
 	);
 
+const noop = () => {};
+
 /** The date the picker's text field currently shows, as MM/DD/YYYY */
 const shownDate = (container: HTMLElement) =>
 	container.querySelector<HTMLInputElement>("input[value]")?.value;
@@ -149,5 +151,51 @@ describe("DateInput", () => {
 			/>,
 		);
 		expect(screen.getByRole("button", { name: /clear/i })).toBeTruthy();
+	});
+});
+
+describe("DateInput bugs", () => {
+	it("[ISSUE-3485-ITEM-13] links a helperText prop to the field group", async () => {
+		wrap(
+			<DateInput
+				label="Due"
+				value={null}
+				onChange={noop}
+				error
+				helperText="Date is required"
+			/>,
+		);
+		await screen.findByRole("button", { name: /choose date/i });
+		expect(
+			screen.getByRole("group", { name: "Due" }),
+		).toHaveAccessibleDescription("Date is required");
+	});
+
+	it("[ISSUE-3485-ITEM-13] shows helperText in place of slotProps.textField.helperText, which stays without it", async () => {
+		const hint = { textField: { helperText: "Day of delivery" } };
+		wrap(
+			<DateInput
+				label="Due"
+				value={null}
+				onChange={noop}
+				error
+				helperText="Date is required"
+				slotProps={hint}
+			/>,
+		);
+		await screen.findByRole("button", { name: /choose date/i });
+		expect(
+			screen.getByRole("group", { name: "Due" }),
+		).toHaveAccessibleDescription("Date is required");
+		expect(screen.queryByText("Day of delivery")).toBeNull();
+		cleanup();
+
+		wrap(
+			<DateInput label="Due" value={null} onChange={noop} slotProps={hint} />,
+		);
+		await screen.findByRole("button", { name: /choose date/i });
+		expect(
+			screen.getByRole("group", { name: "Due" }),
+		).toHaveAccessibleDescription("Day of delivery");
 	});
 });
