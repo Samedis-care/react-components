@@ -215,8 +215,13 @@ export type MultiLanguageInputProps = Omit<
 	| "fullWidth"
 > & {
 	/**
-	 * The languages shown
-	 * First entry is fallback default language
+	 * The languages that can be edited: the default language first, then the
+	 * others in this order. The default language is the components-care UI
+	 * language when it is in this list and `ignoreI18nLocale` is not set,
+	 * otherwise the first entry; it is the labelled and required field, and it
+	 * follows later changes of this list and of the UI language. In multiline
+	 * mode the textarea shows the default language until a code is clicked,
+	 * and again when the clicked language is no longer in this list.
 	 */
 	enabledLanguages: MultiLanguageInputSupportedLanguages[];
 	/**
@@ -326,7 +331,17 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 	}
 
 	const [expanded, setExpanded] = useState(false); // if normal text field
-	const [activeLanguage, setActiveLanguage] = useState(defaultLanguage); // if multi line text area
+	// the language code clicked in the multiline label, null until one is
+	const [pickedLanguage, setPickedLanguage] =
+		useState<MultiLanguageInputSupportedLanguages | null>(null);
+	// the language the multiline textarea edits: the picked one while it is
+	// enabled, otherwise (and in single-line mode) the default language
+	const activeLanguage =
+		textFieldProps.multiline &&
+		pickedLanguage &&
+		enabledLanguages.includes(pickedLanguage)
+			? pickedLanguage
+			: defaultLanguage;
 	const toggleExpanded = useCallback(() => setExpanded((prev) => !prev), []);
 
 	const incomplete =
@@ -366,7 +381,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 
 	const handleActiveLangSelect = useCallback(
 		(evt: React.MouseEvent<HTMLSpanElement>) => {
-			setActiveLanguage(
+			setPickedLanguage(
 				evt.currentTarget.getAttribute(
 					"data-lang",
 				) as MultiLanguageInputSupportedLanguages,

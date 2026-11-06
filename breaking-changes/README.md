@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [MultiLanguageInput follows its default language after mount](2026-11-06-multi-language-input-follows-default-language.md) | behavior |
 | 2026-11-06 | [IntegerInputField ends the number at the decimal separator](2026-11-06-integer-input-ends-at-decimal-separator.md) | behavior |
 | 2026-11-06 | [MatrixGrid tells renderRowHeader `touch` only while the header is the tap target](2026-11-06-matrix-row-header-touch-follows-tap-target.md) | behavior |
 | 2026-11-06 | [PortalLayout's mobile drawer leaves a strip of backdrop on narrow screens](2026-11-06-portal-drawer-max-width.md) | behavior |

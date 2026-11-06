@@ -23,6 +23,7 @@ import MultiLanguageInput, {
  */
 
 type Values = MultiLanguageInputProps["values"];
+
 type Lang = MultiLanguageInputSupportedLanguages;
 
 beforeAll(async () => {
@@ -96,6 +97,21 @@ const labelCode = (lang: Lang) =>
 const type = (el: Element | null, value: string) =>
 	fireEvent.change(el!, { target: { value } });
 
+/** Collects errors that escape event handlers (jsdom reports them on window) */
+const collectWindowErrors = () => {
+	const errors: string[] = [];
+	const onError = (event: ErrorEvent) => {
+		const error = event.error as Error | undefined;
+		errors.push(String(error?.message ?? event.message));
+		event.preventDefault();
+	};
+	window.addEventListener("error", onError);
+	return {
+		errors,
+		stop: () => window.removeEventListener("error", onError),
+	};
+};
+
 describe("bugs", () => {
 	it("[ISSUE-3486-ITEM-1] shows an empty textarea for a language without a value after switching to it, and saves only what is typed there", () => {
 		const spy = vi.fn();
@@ -114,7 +130,6 @@ describe("bugs", () => {
 		type(textarea, textarea.value + "X");
 		expect(spy).toHaveBeenLastCalledWith({ en: "Hello", de: "X" });
 	});
-
 	it("[ISSUE-3486-ITEM-1] shows the new default language's value after the UI language changes", async () => {
 		render(<Controlled initial={{ en: "Hello" }} />);
 		expect(field("title-en")).toHaveValue("Hello");
@@ -122,7 +137,6 @@ describe("bugs", () => {
 		expect(fieldNames()).toEqual(["title-de"]);
 		expect(field("title-de")).toHaveValue("");
 	});
-
 	it("[ISSUE-3486-ITEM-1] empties a field when the parent removes its language from values", () => {
 		const props = {
 			enabledLanguages: ["en", "de"] as Lang[],
@@ -139,7 +153,6 @@ describe("bugs", () => {
 		rerender(<MultiLanguageInput {...props} values={{}} />);
 		expect(field("title-de")).toHaveValue("");
 	});
-
 	it("[ISSUE-3486-ITEM-1] keeps showing the parent's value when the parent does not apply a change", () => {
 		render(
 			<MultiLanguageInput
@@ -153,7 +166,6 @@ describe("bugs", () => {
 		type(field("title-en"), "b");
 		expect(field("title-en")).toHaveValue("");
 	});
-
 	it("[ISSUE-3486-ITEM-1] empties a field when the backend sends its language as null", () => {
 		const props = {
 			enabledLanguages: ["en", "de"] as Lang[],
@@ -171,5 +183,126 @@ describe("bugs", () => {
 			/>,
 		);
 		expect(field("title-en")).toHaveValue("");
+	});
+	it("[ISSUE-3486-ITEM-2] keeps required on the default field when the default language changes after mount", () => {
+		const props = {
+			label: "Title",
+			name: "title",
+			required: true,
+			ignoreI18nLocale: true,
+			values: { de: "Pumpe" },
+			onChange: noop,
+		};
+		const { rerender } = render(
+			<MultiLanguageInput {...props} enabledLanguages={["en", "de"]} />,
+		);
+		expect(field("title-en")).toBeRequired();
+		rerender(<MultiLanguageInput {...props} enabledLanguages={["de", "en"]} />);
+		expect(fieldNames()).toEqual(["title-de"]);
+		expect(field("title-de")).toBeRequired();
+	});
+	it("[ISSUE-3486-ITEM-2] edits the default language in a multiline field mounted before its languages arrived", () => {
+		const spy = vi.fn();
+		const props = {
+			label: "Desc",
+			name: "desc",
+			multiline: true,
+			values: {},
+			onChange: spy,
+		};
+		const { rerender } = render(
+			<MultiLanguageInput {...props} enabledLanguages={[]} />,
+		);
+		rerender(<MultiLanguageInput {...props} enabledLanguages={["en", "de"]} />);
+		const caught = collectWindowErrors();
+		try {
+			expect(fieldNames()).toEqual(["desc-en"]);
+			type(field("desc-en"), "x");
+		} finally {
+			caught.stop();
+		}
+		expect(caught.errors).toEqual([]);
+		expect(spy).toHaveBeenLastCalledWith({ en: "x" });
+	});
+	it("[ISSUE-3486-ITEM-2] falls back to the default language when the active one is no longer enabled", () => {
+		const spy = vi.fn();
+		const props = {
+			label: "Desc",
+			name: "desc",
+			multiline: true,
+			values: { en: "Hello", de: "Hallo" },
+			onChange: spy,
+		};
+		const { rerender } = render(
+			<MultiLanguageInput {...props} enabledLanguages={["en", "de"]} />,
+		);
+		fireEvent.click(labelCode("de"));
+		rerender(<MultiLanguageInput {...props} enabledLanguages={["en", "fr"]} />);
+		const caught = collectWindowErrors();
+		try {
+			expect(fieldNames()).toEqual(["desc-en"]);
+			expect(field("desc-en")).toHaveValue("Hello");
+			type(field("desc-en"), "Hello!");
+		} finally {
+			caught.stop();
+		}
+		expect(caught.errors).toEqual([]);
+		expect(spy).toHaveBeenLastCalledWith({ en: "Hello!", de: "Hallo" });
+	});
+	it("[ISSUE-3486-ITEM-2] moves required to the new default field when the UI language changes after mount", async () => {
+		render(<Controlled initial={{ en: "Pump", de: "Pumpe" }} required />);
+		expect(field("title-en")).toBeRequired();
+		await setLanguage("de");
+		expect(fieldNames()).toEqual(["title-de"]);
+		expect(field("title-de")).toBeRequired();
+		// the toggle's name is German now
+		fireEvent.click(screen.getByRole("button"));
+		expect(fieldNames()).toEqual(["title-de", "title-en", "title-fr"]);
+		expect(field("title-en")).not.toBeRequired();
+		expect(field("title-fr")).not.toBeRequired();
+		// and back, while expanded
+		await setLanguage("en");
+		expect(fieldNames()).toEqual(["title-en", "title-de", "title-fr"]);
+		expect(field("title-en")).toBeRequired();
+		expect(field("title-de")).not.toBeRequired();
+		fireEvent.click(toggle());
+		expect(fieldNames()).toEqual(["title-en"]);
+	});
+	it("[ISSUE-3486-ITEM-2] shows the new default language in a multiline field when the UI language changes before a code was clicked", async () => {
+		render(
+			<Controlled
+				initial={{ en: "Hello", de: "Hallo" }}
+				label="Desc"
+				name="desc"
+				multiline
+				required
+			/>,
+		);
+		expect(field("desc-en")).toHaveValue("Hello");
+		await setLanguage("de");
+		expect(fieldNames()).toEqual(["desc-de"]);
+		expect(field("desc-de")).toHaveValue("Hallo");
+		expect(field("desc-de")).toBeRequired();
+		// the active code is bold
+		expect(["bold", "700"]).toContain(
+			getComputedStyle(labelCode("de")).fontWeight,
+		);
+		expect(["bold", "700"]).not.toContain(
+			getComputedStyle(labelCode("en")).fontWeight,
+		);
+	});
+	it("[ISSUE-3486-ITEM-2] keeps a clicked language in a multiline field when the default language changes", async () => {
+		render(
+			<Controlled
+				initial={{ en: "Hello", de: "Hallo", fr: "Bonjour" }}
+				label="Desc"
+				name="desc"
+				multiline
+			/>,
+		);
+		fireEvent.click(labelCode("fr"));
+		await setLanguage("de");
+		expect(fieldNames()).toEqual(["desc-fr"]);
+		expect(field("desc-fr")).toHaveValue("Bonjour");
 	});
 });
