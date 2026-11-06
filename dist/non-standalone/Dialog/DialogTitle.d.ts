@@ -18,7 +18,8 @@ export interface DialogTitleProps {
     /**
      * When set, a close (X) button is shown next to the heading, named by
      * `non-standalone.dialog.dialog-title.close`, and this is called when it is
-     * clicked. DialogTitle closes nothing itself: pass e.g. `popDialog`.
+     * clicked. DialogTitle closes nothing itself: pass e.g. the function
+     * `useCloseThisDialog` returns.
      */
     onClose?: () => void;
     /**

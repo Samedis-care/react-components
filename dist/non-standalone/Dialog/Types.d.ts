@@ -8,11 +8,28 @@ export interface IDialogButtonConfig {
      */
     text: React.ReactNode;
     /**
-     * The action to perform if the button is clicked (the dialog will be closed automatically)
-     * @param onClose The dialog close handler. Should be called to close this dialog, only call if dontClose is set
+     * Called when the button is clicked. A returned promise is awaited. Unless `dontClose` is
+     * set, the dialog closes and calls its `onClose` afterwards (FormDialog closes before the
+     * handler runs, and calls `onClose` afterwards).
+     * @param close Closes the dialog this button belongs to, at once, and only that one, also
+     *              while dialogs pushed after it are open; e.g. before navigating, which is
+     *              blocked while a dialog is open. It does not call the dialog's `onClose`:
+     *              the dialog calls it once the handler has ended (returned, or its promise
+     *              settled, also rejected), so a `show…Dialog` helper's promise settles only
+     *              then. Called after the handler has ended, it calls `onClose` right away.
+     *              Calling it is optional (without `dontClose` the dialog closes after the
+     *              handler anyway), and calling it again does nothing. In a dialog rendered
+     *              without pushDialog it closes nothing itself: the dialog closes when its
+     *              `onClose`, called after the handler, stops rendering it.
+     * @remarks In a button of a dialog shown with a `show…Dialog` helper, close the dialog
+     *          with this `close`, not with the `close` of the helper's promise: that one
+     *          settles the promise at once, while the handler is still running.
+     * @example
+     * // closes the dialog, prints, and the code awaiting showInfoDialog continues after printing
+     * { text: "Print", onClick: async (close) => { close(); await print(); } }
      * @see dontClose
      */
-    onClick?: (onClose?: () => void) => void | Promise<void>;
+    onClick?: (close: () => void) => void | Promise<void>;
     /**
      * Should the button be initially focused?
      */
@@ -22,8 +39,10 @@ export interface IDialogButtonConfig {
      */
     color?: "primary" | "secondary";
     /**
-     * Set to true to prevent closing the dialog
-     * @remarks Requires use of the closeDialog param in onClick to trigger onClose handlers of the dialog
+     * Keeps the dialog open after `onClick`, e.g. for a button that copies or downloads
+     * something. The handler can still close it with the `close` it gets; the dialog then
+     * calls `onClose` once the handler has ended. If the handler does not call `close`, the
+     * dialog stays open and `onClose` is not called. Default false.
      * @see onClick
      */
     dontClose?: boolean;

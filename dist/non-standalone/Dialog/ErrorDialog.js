@@ -1,21 +1,25 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useId } from "react";
-import { useDialogContext } from "../../framework";
+import React, { useContext, useId } from "react";
+import { PushedDialogCloseContext } from "../../framework/PushedDialogCloseContext";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, } from "@mui/material";
 import useRefState from "../../utils/useRefState";
+import { dialogButtonClose } from "./dialogButtonClose";
 const ErrorDialogRaw = (props) => {
-    const [, popDialog] = useDialogContext();
     const { onClose } = props;
+    // not useCloseThisDialog, which throws: rendered without pushDialog (or in a
+    // FullFormDialog's content, pushed: false), the dialog closes through onClose
+    const pushedClose = useContext(PushedDialogCloseContext);
+    const closeThisDialog = pushedClose?.pushed ? pushedClose.close : null;
     // pending state of an async button handler. the ref part guards against a
     // second click landing before the re-render which disables the buttons.
     const { get: getBusy, set: setBusy, state: busy, } = useRefState(false);
     // the message is the dialog's description
     const messageId = useId();
     const removeDialog = React.useCallback(() => {
-        popDialog();
+        closeThisDialog?.();
         if (onClose)
             onClose();
-    }, [popDialog, onClose]);
+    }, [closeThisDialog, onClose]);
     const handleClose = React.useCallback(() => {
         if (getBusy())
             return;
@@ -24,17 +28,39 @@ const ErrorDialogRaw = (props) => {
     return (_jsxs(Dialog, { open: true, onClose: handleClose, "aria-describedby": messageId, children: [_jsx(DialogTitle, { children: props.title }), _jsx(DialogContent, { children: _jsx(DialogContentText, { component: "span", id: messageId, children: props.message }) }), _jsx(DialogActions, { children: props.buttons.map((data, index) => (_jsx(Button, { onClick: async () => {
                         if (getBusy())
                             return;
-                        if (data.onClick) {
-                            setBusy(true);
-                            try {
-                                await data.onClick(onClose);
-                            }
-                            finally {
-                                setBusy(false);
+                        const { close, end } = dialogButtonClose(closeThisDialog, onClose);
+                        try {
+                            if (data.onClick) {
+                                setBusy(true);
+                                try {
+                                    await data.onClick(close);
+                                }
+                                finally {
+                                    setBusy(false);
+                                }
                             }
                         }
+                        finally {
+                            // the handler closed the dialog: report it closed, also when the handler
+                            // failed, as nothing can close the dialog anymore
+                            end();
+                        }
                         if (!data.dontClose)
-                            removeDialog();
+                            close();
                     }, color: data.color || "primary", autoFocus: data.autoFocus, disabled: busy, children: data.text }, index))) })] }));
 };
+/**
+ * Message dialog with a title, a message and a row of buttons; InfoDialog and ConfirmDialog
+ * render it. Show it with `pushDialog(<ErrorDialog … />)`, or use `showErrorDialog` /
+ * `showInfoDialog`.
+ *
+ * A button runs its `onClick` while the dialog is open (a returned promise is awaited with the
+ * buttons disabled and Escape and the backdrop ignored), then, unless `dontClose`, closes the
+ * dialog and calls `onClose`. `onClick` gets a `close` that closes the dialog at once, e.g.
+ * before navigating; `onClose` is then called once the handler has ended, also with
+ * `dontClose`. Escape and a backdrop click close it and call `onClose`.
+ * It closes the dialog it was pushed in, and only that one, also when dialogs were pushed
+ * after it. Rendered without pushDialog, it is always open: it closes through `onClose`,
+ * which has to stop rendering it.
+ */
 export const ErrorDialog = React.memo(ErrorDialogRaw);

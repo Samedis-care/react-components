@@ -1,7 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { Suspense } from "react";
+import React, { Suspense, useCallback, useContext } from "react";
 import { Dialog, DialogContent, styled, useMediaQuery, useTheme, useThemeProps, } from "@mui/material";
-import { useDialogContext } from "../../framework/DialogContextProvider";
+import { PushedDialogCloseContext } from "../../framework/PushedDialogCloseContext";
 import { DialogTitle } from "../Dialog";
 import Loader from "../../standalone/Loader";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -59,12 +59,18 @@ const LocaleSelectorDialog = (inProps) => {
         name: "CcLocaleSelectorDialog",
     });
     const { className, classes, ...contentProps } = props;
-    const [, popDialog] = useDialogContext();
+    // not useCloseThisDialog, which throws: rendered without pushDialog, there is no dialog
+    // to close (LocaleSelectorDialog has no onClose)
+    const pushedClose = useContext(PushedDialogCloseContext);
+    const closeThisDialog = pushedClose?.pushed ? pushedClose.close : null;
+    // closes this dialog, and only this one, also when it was closed already (Escape while
+    // the picked language loads) or a dialog was pushed after it
+    const close = useCallback(() => closeThisDialog?.(), [closeThisDialog]);
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down("sm"), {
         noSsr: true,
     });
     const { t } = useCCTranslations();
-    return (_jsxs(StyledDialog, { open: true, fullScreen: fullScreen, onClose: popDialog, className: combineClassNames([className, classes?.root]), children: [_jsx(StyledDialogTitle, { onClose: popDialog, className: classes?.title, children: t("non-standalone.language-switcher.title") }), _jsx(StyledDialogContent, { className: classes?.contentWrapper, children: _jsx(Suspense, { fallback: _jsx(Loader, {}), children: _jsx(StyledLocaleSelectorDialogContent, { ...contentProps, className: classes?.content, close: popDialog }) }) })] }));
+    return (_jsxs(StyledDialog, { open: true, fullScreen: fullScreen, onClose: close, className: combineClassNames([className, classes?.root]), children: [_jsx(StyledDialogTitle, { onClose: close, className: classes?.title, children: t("non-standalone.language-switcher.title") }), _jsx(StyledDialogContent, { className: classes?.contentWrapper, children: _jsx(Suspense, { fallback: _jsx(Loader, {}), children: _jsx(StyledLocaleSelectorDialogContent, { ...contentProps, className: classes?.content, close: close }) }) })] }));
 };
 export default React.memo(LocaleSelectorDialog);

@@ -4,7 +4,8 @@ export interface LocaleSelectorDialogContentProps extends LocaleSelectorDialogCo
     /**
      * Called once the picked language is loaded and applied. Not called when its
      * texts fail to load or `changeLanguage` rejects: an error dialog shows
-     * instead, and the previous language stays. The dialog passes `popDialog`.
+     * instead, and the previous language stays. The dialog passes a function that
+     * closes it, and only it, and does nothing once it is closed.
      */
     close: () => void;
     className?: string;

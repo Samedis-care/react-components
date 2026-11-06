@@ -1,17 +1,23 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React from "react";
+import React, { useMemo } from "react";
 import { InfoDialog } from "./InfoDialog";
-const ConfirmDialogRaw = (props) => (_jsx(InfoDialog, { title: props.title, message: props.message, onClose: props.onClose, buttons: [
+const ConfirmDialogRaw = (props) => {
+    const { title, message, onClose, textButtonYes, textButtonNo, handlerButtonYes, handlerButtonNo, } = props;
+    // the handlers are called without the button's close, so that a promise's resolve or
+    // reject passed as a handler settles with undefined. A returned promise is still awaited.
+    const buttons = useMemo(() => [
         {
-            text: props.textButtonYes,
-            onClick: props.handlerButtonYes,
+            text: textButtonYes,
+            onClick: () => handlerButtonYes(),
             autoFocus: true,
         },
         {
-            text: props.textButtonNo,
-            onClick: props.handlerButtonNo,
+            text: textButtonNo,
+            onClick: () => handlerButtonNo(),
             autoFocus: false,
             color: "secondary",
         },
-    ] }));
+    ], [textButtonYes, textButtonNo, handlerButtonYes, handlerButtonNo]);
+    return (_jsx(InfoDialog, { title: title, message: message, onClose: onClose, buttons: buttons }));
+};
 export const ConfirmDialog = React.memo(ConfirmDialogRaw);

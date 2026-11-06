@@ -1,10 +1,11 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useContext, useRef, useState } from "react";
 import { Button, Dialog, DialogActions, IconButton, styled, useThemeProps, } from "@mui/material";
 import MuiDialogTitle from "@mui/material/DialogTitle";
 import { Close } from "@mui/icons-material";
 import SignaturePad from "react-signature-pad-wrapper";
 import { useDialogContext } from "../../framework";
+import { PushedDialogCloseContext } from "../../framework/PushedDialogCloseContext";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { showConfirmDialogBool } from "./Utils";
 import combineClassNames from "../../utils/combineClassNames";
@@ -83,7 +84,11 @@ const SignPadDialog = (inProps) => {
     const { penColor, setSignature, signature, signerName: signerNameUntrim, classes, className, name, onBlur, } = props;
     const signerName = signerNameUntrim?.trim();
     const [resetCanvas, setResetCanvas] = useState(!!signature);
-    const [pushDialog, popDialog] = useDialogContext();
+    const [pushDialog] = useDialogContext();
+    // not useCloseThisDialog, which throws: rendered without pushDialog, there is no dialog
+    // to close (SignDialog has no onClose)
+    const pushedClose = useContext(PushedDialogCloseContext);
+    const closeThisDialog = pushedClose?.pushed ? pushedClose.close : null;
     const signCanvas = useRef(null);
     const hiddenRef = useRef(null);
     const clearCanvas = useCallback(async () => {
@@ -128,15 +133,15 @@ const SignPadDialog = (inProps) => {
         }
         hiddenRef.current?.focus();
         hiddenRef.current?.blur();
-        popDialog();
-    }, [setSignature, popDialog, signature, resetCanvas]);
+        closeThisDialog?.();
+    }, [setSignature, closeThisDialog, signature, resetCanvas]);
     const closeCanvas = useCallback((_, reason) => {
         if (reason === "backdropClick" && isTouchDevice())
             return; // prevent accidential close by hand palm when signing with pen
         hiddenRef.current?.focus();
         hiddenRef.current?.blur();
-        popDialog();
-    }, [popDialog]);
+        closeThisDialog?.();
+    }, [closeThisDialog]);
     const closeCanvasBtn = useCallback(() => closeCanvas({}, "closeBtn"), [closeCanvas]);
     return (_jsxs(RootDialog, { open: true, maxWidth: "sm", onClose: closeCanvas, className: combineClassNames([className, classes?.root]), children: [_jsxs(StyledDialogTitle, { className: classes?.dialogTitle, children: [signerName
                         ? t("standalone.signature-pad.dialog.title-name", {
