@@ -12,6 +12,7 @@ import {
 	TextFieldProps,
 	Theme,
 } from "@mui/material";
+import readableTextColor from "../../utils/internal/readableTextColor";
 
 /**
  * What a component must accept to be wrapped by {@link withMuiFieldState}
@@ -26,8 +27,13 @@ export interface MuiFieldStateSourceProps {
 export interface MuiFieldStateProps {
 	/**
 	 * Is there a warning on the field?
-	 * @remarks A step below error: colours the label, underline and outline in
-	 *          `palette.warning.main`, and yields to `error` where both are set.
+	 * @remarks A step below error: colours the underline and outline in
+	 *          `palette.warning.main`, and the label and helper text in the same
+	 *          colour, darkened (lightened on a dark background) just enough to
+	 *          reach the 4.5:1 that text needs against `palette.background`. Yields
+	 *          to `error` where both are set. It is a colour only, so show what the
+	 *          warning is about as text too, e.g. as the helper text, as the
+	 *          library's model renderers do with their warning message.
 	 */
 	warning?: boolean;
 	/**
@@ -105,6 +111,16 @@ export const labelWithDirtyMarker = (
 	);
 
 /**
+ * The colour of a warning's text: `palette.warning.main` as far as it reaches the
+ * 4.5:1 that text needs (MUI's default orange has 3.11:1 on white). Outlines and
+ * underlines need only 3:1 and keep `palette.warning.main`.
+ * @param theme The theme
+ * @returns The colour for the label and helper text of a field with a warning
+ */
+const warningTextColor = (theme: Theme): string =>
+	readableTextColor(theme, theme.palette.warning.main);
+
+/**
  * How much horizontal room {@link dirtyMarkerStyles} takes up (dot plus its margin)
  */
 const DIRTY_MARKER_WIDTH = 10;
@@ -170,10 +186,10 @@ export const withMuiFieldState = <T extends MuiFieldStateSourceProps>(
 		}),
 		...(warning && {
 			"& > .MuiFormLabel-root": {
-				color: theme.palette.warning.main,
+				color: warningTextColor(theme),
 			},
 			"&.MuiFormLabel-root": {
-				color: theme.palette.warning.main,
+				color: warningTextColor(theme),
 			},
 			"& > .MuiFormLabel-root.Mui-error": {
 				color: theme.palette.error.main,
@@ -190,10 +206,10 @@ export const withMuiFieldState = <T extends MuiFieldStateSourceProps>(
 				borderBottomColor: theme.palette.error.main,
 			},
 			"& > .MuiFormHelperText-root": {
-				color: theme.palette.warning.main,
+				color: warningTextColor(theme),
 			},
 			"&.MuiFormHelperText-root": {
-				color: theme.palette.warning.main,
+				color: warningTextColor(theme),
 			},
 			"& > .MuiFormHelperText-root.Mui-error": {
 				color: theme.palette.error.main,

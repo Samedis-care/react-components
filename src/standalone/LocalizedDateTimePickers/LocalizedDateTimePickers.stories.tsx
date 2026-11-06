@@ -7,6 +7,8 @@ import LocalizedDateTimePicker from "./LocalizedDateTimePicker";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import moment, { type Moment } from "moment";
+import { ThemeProvider, createTheme } from "@mui/material";
+import { FormHelperTextCC } from "../UIKit/MuiFieldState";
 
 // Minimal i18next initialisation so that useCCTranslations does not throw.
 // Only initialise once; Storybook hot-reloads the module so guard with isInitialized.
@@ -211,4 +213,66 @@ export const DateTimePickerGermanLocale: StoryObj = {
 			/>
 		);
 	},
+};
+
+// ---------------------------------------------------------------------------
+// Bugs
+// ---------------------------------------------------------------------------
+
+export const Issue3474Item19WarningLabelContrast: StoryObj = {
+	name: "ISSUE-3474-ITEM-19: the warning label is readable",
+	parameters: {
+		a11y: {
+			test: "error",
+			options: { runOnly: { type: "rule", values: ["color-contrast"] } },
+		},
+		docs: {
+			description: {
+				story:
+					"ISSUE-3474-ITEM-19: `warning` colors the label `palette.warning.main` (#ed6c02, 3.11:1 on white), below the 4.5:1 text needs. axe `color-contrast` fails on the label.",
+			},
+		},
+	},
+	render: () => (
+		<LocalizedKeyboardDatePicker
+			label="Due date"
+			value={moment("2026-08-01")}
+			onChange={() => {}}
+			warning
+		/>
+	),
+};
+
+/** SCF's palette: a yellow warning, 1.48:1 on white */
+const yellowWarningTheme = createTheme({
+	palette: { warning: { main: "#FFCF00" } },
+});
+
+export const Issue3474Item19WarningTextContrastInAYellowTheme: StoryObj = {
+	name: "ISSUE-3474-ITEM-19: warning label and helper text stay readable in a yellow theme",
+	parameters: {
+		a11y: {
+			test: "error",
+			options: { runOnly: { type: "rule", values: ["color-contrast"] } },
+		},
+		docs: {
+			description: {
+				story:
+					"ISSUE-3474-ITEM-19: the label and the helper text of a warning are drawn in `palette.warning.main` darkened to 4.5:1, also where that is a light yellow.",
+			},
+		},
+	},
+	render: () => (
+		<ThemeProvider theme={yellowWarningTheme}>
+			<div>
+				<LocalizedKeyboardDatePicker
+					label="Due date"
+					value={moment("2026-08-01")}
+					onChange={() => {}}
+					warning
+				/>
+				<FormHelperTextCC warning>The due date is in the past</FormHelperTextCC>
+			</div>
+		</ThemeProvider>
+	),
 };

@@ -60,6 +60,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-06 | [The multi selects sort a copy of the selection, and report it in the caller's order](2026-11-06-multi-select-sort-for-display-only.md) | behavior |
 | 2026-11-06 | [The image preview dialog is named by its image's alt](2026-11-06-image-preview-dialog-named-by-alt.md) | behavior |
 | 2026-11-06 | [LocaleSelectorDialog is full screen on phones, and its names wrap](2026-11-06-locale-selector-reflows.md) | behavior |
+| 2026-11-05 | [Warning labels and helper texts are darkened to a readable contrast](2026-11-05-warning-text-contrast.md) | behavior |
 | 2026-11-05 | [MultiLanguageInput shows only `values`: a language without a value is an empty field](2026-11-05-multi-language-input-controlled.md) | behavior |
 | 2026-11-05 | [The Loader takes up the height of its content in a parent of automatic height](2026-11-05-loader-reserves-its-height.md) | behavior |
 | 2026-11-05 | [A controlled DataGrid selection survives reloads](2026-11-05-data-grid-controlled-selection-survives-reloads.md) | behavior |
