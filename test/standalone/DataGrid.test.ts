@@ -102,6 +102,34 @@ describe("dataGridPrepareFiltersAndSorts", () => {
 		expect(sorts).toEqual([{ field: "name", direction: 1 }]);
 		expect(filters).toEqual({ role: filter });
 	});
+
+	it("keeps a filter chain whose conditions all have a value", () => {
+		const filter = {
+			...makeFilter("contains", "a"),
+			nextFilterType: "or" as const,
+			nextFilter: makeFilter("contains", "b"),
+		};
+		const [, filters] = dataGridPrepareFiltersAndSorts({
+			name: { sort: 0, filter },
+		});
+		expect(filters).toEqual({ name: filter });
+	});
+
+	it("[ISSUE-3492-ITEM-12] leaves out the empty conditions of a filter chain", () => {
+		// the second condition was added in the filter popup, but not filled in yet
+		const [, filters] = dataGridPrepareFiltersAndSorts({
+			name: {
+				sort: 0,
+				filter: {
+					...makeFilter("contains", "a"),
+					nextFilterType: "and",
+					nextFilter: makeFilter("contains", ""),
+				},
+			},
+		});
+		expect(filters.name).toMatchObject(makeFilter("contains", "a"));
+		expect(filters.name.nextFilter).toBeUndefined();
+	});
 });
 
 describe("dataGridApplyRowUpdate", () => {

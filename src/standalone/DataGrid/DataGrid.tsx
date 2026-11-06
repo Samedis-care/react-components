@@ -175,7 +175,9 @@ export interface IDataGridLoadDataParameters {
 	 */
 	additionalFilters: DataGridAdditionalFilters;
 	/**
-	 * The field filter contents
+	 * The active column filters (field -> filter). A field is present when its
+	 * filter's first condition has a value1, and its chain (nextFilter) ends
+	 * before the first condition without a value1.
 	 */
 	fieldFilter: IDataGridFieldFilter;
 	/**

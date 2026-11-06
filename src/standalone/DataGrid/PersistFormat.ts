@@ -133,7 +133,9 @@ const MAX_FILTER_CHAIN = 512;
 /**
  * Drops filter entries which carry no value, as those have no effect on the
  * query. Used to keep the refresh trigger and the persisted data from reacting
- * to half-entered filters.
+ * to half-entered filters, and to build the column filters of the query
+ * (dataGridPrepareFiltersAndSorts), so the query holds exactly the filters the
+ * refresh trigger compares.
  * @param filter The filter to normalize
  * @returns The normalized filter, or undefined if it has no effect at all
  */
