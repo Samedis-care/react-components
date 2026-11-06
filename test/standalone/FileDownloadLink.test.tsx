@@ -60,7 +60,11 @@ describe("File download link", () => {
 		renderFile({ downloadLink: "https://x/notes.txt" });
 		fireEvent.click(screen.getByText("notes.txt"));
 		await waitFor(() =>
-			expect(open).toHaveBeenCalledWith("https://x/notes.txt", "_blank"),
+			expect(open).toHaveBeenCalledWith(
+				"https://x/notes.txt",
+				"_blank",
+				"noopener,noreferrer",
+			),
 		);
 	});
 
@@ -69,7 +73,11 @@ describe("File download link", () => {
 		const { unmount } = renderFile({ downloadLink: blob });
 		fireEvent.click(screen.getByText("notes.txt"));
 		await waitFor(() =>
-			expect(open).toHaveBeenCalledWith("blob:url-0", "_blank"),
+			expect(open).toHaveBeenCalledWith(
+				"blob:url-0",
+				"_blank",
+				"noopener,noreferrer",
+			),
 		);
 		expect(revokeObjectURL).not.toHaveBeenCalled();
 		unmount();

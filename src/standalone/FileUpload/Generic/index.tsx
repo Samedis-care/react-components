@@ -260,6 +260,11 @@ export interface FileMeta {
 	 * The download link for the file
 	 * @remarks A URL, or the file itself while it is only held locally (e.g. a file whose
 	 *          upload is queued)
+	 *
+	 *          A click on the file opens it in a new tab without access to the app window.
+	 *          Only http(s), blob and data URLs, and URLs relative to the page, are
+	 *          opened; a link with any other scheme (e.g. `javascript:`) is shown as no
+	 *          link.
 	 */
 	downloadLink?: string | Blob;
 	/**

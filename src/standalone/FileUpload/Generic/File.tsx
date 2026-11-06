@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
 	CSSObject,
 	Grid,
@@ -88,6 +88,12 @@ export interface FileProps {
 	 * The download link to open if the file is clicked: a URL, or the file itself
 	 * @remarks A Blob is opened through an object URL, revoked once the link changes or
 	 *          the file unmounts
+	 *
+	 *          The link is opened in a new tab that gets no access to the app window
+	 *          (`noopener`) and no referrer. Only http(s), blob and data URLs, and URLs
+	 *          relative to the page, count as a link. A link with any other scheme (e.g.
+	 *          `javascript:`) is ignored: the file is shown as one without a link, nothing
+	 *          opens and onClick is not called.
 	 */
 	downloadLink?: string | Blob;
 	/**
@@ -108,6 +114,8 @@ export interface FileProps {
 	variant: "box" | "list" | "compact-list" | "icon-only";
 	/**
 	 * custom onClick handler
+	 * @remarks Called instead of opening the link, only for a downloadLink that counts as
+	 *          a link
 	 * @param name The file name including extension
 	 * @param url The file URL. For a Blob or data URI link an object URL, which stays
 	 *            valid at least until the handler has resolved
@@ -488,6 +496,39 @@ export const getFileIconOrDefault = (
 ): React.ComponentType<SvgIconProps> =>
 	getFileIcon(fileName, mimeType) ?? DefaultFileIcon;
 
+/**
+ * The URL schemes a file's link may have. Any other (`javascript:`, `vbscript:`, …) does
+ * not count as a link: opening it would run script with access to the app window.
+ */
+const LINK_PROTOCOLS = ["http:", "https:", "blob:", "data:"];
+
+/**
+ * The scheme of a file's link, if it counts as a link
+ * @param url The link: absolute, or relative to the page
+ * @returns The scheme as the browser reads it (lower case, with the colon, after leading
+ *          spaces and control characters and with tabs and newlines removed), or null for
+ *          no link, a link that cannot be parsed and a scheme not in LINK_PROTOCOLS
+ */
+const getLinkProtocol = (url: string | undefined): string | null => {
+	if (!url) return null;
+	let protocol: string;
+	try {
+		protocol = new URL(url, document.baseURI).protocol;
+	} catch {
+		return null;
+	}
+	return LINK_PROTOCOLS.includes(protocol) ? protocol : null;
+};
+
+/**
+ * Opens a file's link in a new tab, without giving that tab access to the app window
+ * (`window.opener`) and without sending a referrer
+ * @param url A link getLinkProtocol accepted
+ */
+const openInNewTab = (url: string) => {
+	window.open(url, "_blank", "noopener,noreferrer");
+};
+
 const File = (inProps: FileProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcFile" });
 	const { name, downloadLink, variant, className, classes, onClick } = props;
@@ -495,20 +536,24 @@ const File = (inProps: FileProps) => {
 	const FileIcon = getFileIconOrDefault(props.name, props.mimeType);
 	const previewSrc = useObjectUrl(props.preview);
 	const downloadUrl = useObjectUrl(downloadLink);
+	const linkProtocol = useMemo(
+		() => getLinkProtocol(downloadUrl),
+		[downloadUrl],
+	);
+	const hasLink = linkProtocol != null;
 
 	const openDownload = useCallback(async () => {
-		if (downloadUrl) {
-			if (downloadUrl.startsWith("data:")) {
-				const url = URL.createObjectURL(dataToFile(downloadUrl));
-				if (onClick) await onClick(name, url);
-				else window.open(url, "_blank");
-				URL.revokeObjectURL(url);
-			} else {
-				if (onClick) await onClick(name, downloadUrl);
-				else window.open(downloadUrl, "_blank");
-			}
+		if (!downloadUrl || !linkProtocol) return;
+		if (linkProtocol === "data:") {
+			const url = URL.createObjectURL(dataToFile(downloadUrl));
+			if (onClick) await onClick(name, url);
+			else openInNewTab(url);
+			URL.revokeObjectURL(url);
+		} else {
+			if (onClick) await onClick(name, downloadUrl);
+			else openInNewTab(downloadUrl);
 		}
-	}, [downloadUrl, name, onClick]);
+	}, [downloadUrl, linkProtocol, name, onClick]);
 
 	const handleListClick = useCallback((evt: React.MouseEvent) => {
 		evt.stopPropagation();
@@ -523,7 +568,7 @@ const File = (inProps: FileProps) => {
 				className={combineClassNames([
 					isList ? classes?.iconWrapperList : classes?.iconWrapper,
 					props.disabled && "Mui-disabled",
-					downloadLink && "Mui-active",
+					hasLink && "Mui-active",
 				])}
 			>
 				{props.preview ? (
@@ -550,7 +595,7 @@ const File = (inProps: FileProps) => {
 					noWrap
 					className={combineClassNames([
 						variant === "list" ? classes?.listLabel : classes?.label,
-						downloadLink && "Mui-active",
+						hasLink && "Mui-active",
 					])}
 					data-cc-change={props.changeState}
 					onClick={openDownload}
