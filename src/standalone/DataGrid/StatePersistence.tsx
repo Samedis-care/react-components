@@ -34,7 +34,13 @@ export type DataGridPersistentStateContextType = [
 	 */
 	DataGridPersistedData | undefined,
 	/**
-	 * Store the given data, and provide it from now on
+	 * Store the given data, and provide it from now on.
+	 *
+	 * A grid calls it when the data it persists changes: a filter, sort,
+	 * search or custom data change, a column shown, hidden, pinned or resized,
+	 * the first auto-fit of the column widths. It does not call it when it
+	 * opens, so what it opened on stays stored as it is until one of these
+	 * changes; data in an older format is written in the current one then.
 	 */
 	(data: DataGridPersistentState) => Promise<void> | void,
 ];
@@ -140,7 +146,10 @@ const StatePersistence = () => {
 	});
 
 	// the grid state changes on every page of data loaded, so compare what we'd
-	// write before writing it - persistence may well be a request to a server
+	// write before writing it - persistence may well be a request to a server.
+	// The first run sees the state the grid opened with, decoded from what is
+	// stored. It is the baseline, not written: writing it would only replace
+	// what this visit could not read (a column it doesn't have, a newer format)
 	const lastWritten = useRef<string>(undefined);
 
 	// save on changes
@@ -165,6 +174,10 @@ const StatePersistence = () => {
 			config,
 		);
 		const serialized = JSON.stringify(data);
+		if (lastWritten.current === undefined) {
+			lastWritten.current = serialized;
+			return;
+		}
 		if (lastWritten.current === serialized) return;
 		lastWritten.current = serialized;
 

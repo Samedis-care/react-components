@@ -1,20 +1,80 @@
-import React, { useContext } from "react";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import React, { StrictMode, useContext, useMemo } from "react";
+import {
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vitest";
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { ThemeProvider, createTheme } from "@mui/material";
+import ccI18n from "../../src/i18n";
+import DataGrid, {
+	DataGridData,
+	DataGridProps,
+	IDataGridColumnDef,
+	IDataGridColumnsState,
+	IDataGridState,
+	useDataGridColumnState,
+	useDataGridColumnsWidthState,
+	useDataGridState,
+} from "../../src/standalone/DataGrid/DataGrid";
+import type { IDataGridFilterBarProps } from "../../src/standalone/DataGrid/Header/FilterBar";
 import LocalStoragePersist from "../../src/standalone/DataGrid/LocalStoragePersist";
 import StorageManagerPersist, {
+	DATA_GRID_STORAGE_KEY_COLUMN_SIZING,
 	DATA_GRID_STORAGE_KEY_FILTERS,
 } from "../../src/standalone/DataGrid/StorageManagerPersist";
-import { DataGridPersistentStateContext } from "../../src/standalone/DataGrid/StatePersistence";
+import {
+	DataGridPersistentStateContext,
+	DataGridPersistentStateContextType,
+} from "../../src/standalone/DataGrid/StatePersistence";
 import {
 	DATA_GRID_PERSIST_VERSION,
+	DataGridPersistedData,
 	DataGridPersistentState,
 } from "../../src/standalone/DataGrid/PersistFormat";
 import {
 	DefaultGetStorageProviderCallback,
+	LocalStorageProviderInstance,
 	StorageManager,
+	StorageProvider,
 } from "../../src/framework/Storage";
+
+// MultiGrid renders the cells and reports the rendered rows; the grid tests
+// below only need the state the grid restores and writes
+vi.mock("../../src/standalone/Virtualized/MultiGrid", () => ({
+	default: () => null,
+}));
+
+beforeAll(async () => {
+	await ccI18n.init();
+	await ccI18n.changeLanguage("en");
+	// jsdom has neither; MUI's useMediaQuery and the grid's layout need them
+	if (!("matchMedia" in window)) {
+		Object.defineProperty(window, "matchMedia", {
+			configurable: true,
+			value: (query: string) =>
+				({
+					matches: false,
+					media: query,
+					onchange: null,
+					addListener: () => {},
+					removeListener: () => {},
+					addEventListener: () => {},
+					removeEventListener: () => {},
+					dispatchEvent: () => false,
+				}) as MediaQueryList,
+		});
+	}
+	window.ResizeObserver ??= class {
+		observe() {}
+		unobserve() {}
+		disconnect() {}
+	} as never;
+});
 
 const theme = createTheme();
 
@@ -44,7 +104,13 @@ beforeEach(() => {
 	write = null;
 });
 
-afterEach(cleanup);
+afterEach(() => {
+	cleanup();
+	vi.restoreAllMocks();
+	grid = null;
+	localStorage.clear();
+	StorageManager.configure(DefaultGetStorageProviderCallback);
+});
 
 describe("LocalStoragePersist", () => {
 	const renderPersist = (storageKey: string, ui: React.ReactNode) => (
@@ -155,5 +221,262 @@ describe("StorageManagerPersist", () => {
 		await waitFor(() =>
 			expect(screen.getByTestId("a")).toHaveTextContent("stored"),
 		);
+	});
+});
+
+// ─── Grids under a provider ──────────────────────────────────────────────────
+
+const GRID_COLUMNS: IDataGridColumnDef[] = [
+	{
+		field: "name",
+		headerName: "Name",
+		type: "string",
+		filterable: true,
+		sortable: true,
+	},
+	{
+		field: "role",
+		headerName: "Role",
+		type: "string",
+		filterable: true,
+		sortable: true,
+	},
+	{ field: "secret", headerName: "Secret", type: "string", hidden: true },
+];
+const noRows = (): DataGridData => ({ rowsTotal: 0, rows: [] });
+
+type GridProbe = {
+	state: IDataGridState;
+	setState: React.Dispatch<React.SetStateAction<IDataGridState>>;
+	columnState: IDataGridColumnsState;
+	setColumnState: React.Dispatch<React.SetStateAction<IDataGridColumnsState>>;
+	widths: Record<string, number>;
+	setWidths: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+};
+let grid: GridProbe | null = null;
+/**
+ * A filter bar renders inside the grid's providers, so it reads and drives
+ * the grid's state through the exported hooks, as app filter bars do
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const ProbeBar = React.memo(function ProbeBar(_p: IDataGridFilterBarProps) {
+	const [state, setState] = useDataGridState();
+	const [columnState, setColumnState] = useDataGridColumnState();
+	const [widths, setWidths] = useDataGridColumnsWidthState();
+	grid = { state, setState, columnState, setColumnState, widths, setWidths };
+	return null;
+});
+const Grid = (props: Partial<DataGridProps>) => (
+	<ThemeProvider theme={theme}>
+		<DataGrid
+			columns={GRID_COLUMNS}
+			loadData={noRows}
+			filterBar={ProbeBar}
+			{...props}
+		/>
+	</ThemeProvider>
+);
+/** the grid has mounted and no load is running or queued */
+const gridIdle = () =>
+	waitFor(() => expect(grid?.state.refreshData).toBe(0), { timeout: 3000 });
+
+/** A provider handing out the given data, with a stable context value */
+const ValueProvider = (props: {
+	stored: DataGridPersistedData | undefined;
+	save: DataGridPersistentStateContextType[1];
+	children: React.ReactNode;
+}) => {
+	const { stored, save, children } = props;
+	const ctx = useMemo(
+		(): DataGridPersistentStateContextType => [stored, save],
+		[stored, save],
+	);
+	return (
+		<DataGridPersistentStateContext.Provider value={ctx}>
+			{children}
+		</DataGridPersistentStateContext.Provider>
+	);
+};
+
+/** An in-memory storage (a "server") which records its writes */
+class MemoryProvider extends StorageProvider {
+	data: Record<string, string> = {};
+	writes: [key: string, value: string | null][] = [];
+	getItem(key: string): Promise<string | null> {
+		return Promise.resolve(this.data[key] ?? null);
+	}
+	setItem(key: string, value: string | null): Promise<void> {
+		this.writes.push([key, value]);
+		if (value == null) delete this.data[key];
+		else this.data[key] = value;
+		return Promise.resolve();
+	}
+	clear() {
+		this.data = {};
+	}
+}
+/** The key StorageManager stores a bucket under */
+const keyOf = (id: string, keys: Record<string, string>) =>
+	id + "-" + JSON.stringify(keys);
+const SIZING = DATA_GRID_STORAGE_KEY_COLUMN_SIZING;
+const FILTERS = DATA_GRID_STORAGE_KEY_FILTERS;
+
+/** Routes the buckets like samedis.care: filters to the server, sizing local and across tenants */
+const configureLikeSamedis = (server: MemoryProvider) =>
+	StorageManager.configure((id, keys) => {
+		if (id === FILTERS) return [server, keys];
+		delete keys["tenant"];
+		return [LocalStorageProviderInstance, keys];
+	});
+/** Where LocalStorageProviderInstance keeps a bucket */
+const localKeyOf = (id: string, keys: Record<string, string>) =>
+	"cc-lsp-" + keyOf(id, keys);
+
+describe("persistence provider bugs", () => {
+	const smp = (keys: Record<string, string>, child = <Grid />) => (
+		<ThemeProvider theme={theme}>
+			<StorageManagerPersist storageKeys={keys}>{child}</StorageManagerPersist>
+		</ThemeProvider>
+	);
+
+	it("[ISSUE-3496-ITEM-6] a grid that opens on what is stored does not write it again", async () => {
+		const first = vi.fn<DataGridPersistentStateContextType[1]>();
+		render(
+			<ValueProvider stored={undefined} save={first}>
+				<Grid />
+			</ValueProvider>,
+		);
+		await gridIdle();
+		act(() => grid!.setState((prev) => ({ ...prev, search: "s" })));
+		const stored = JSON.parse(
+			JSON.stringify(first.mock.lastCall![0]),
+		) as DataGridPersistentState;
+		cleanup();
+		grid = null;
+
+		const second = vi.fn<DataGridPersistentStateContextType[1]>();
+		render(
+			<ValueProvider stored={stored} save={second}>
+				<Grid />
+			</ValueProvider>,
+		);
+		await gridIdle();
+		expect(grid!.state.search).toBe("s");
+		expect(second).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3496-ITEM-6] a grid that opens on both StorageManagerPersist buckets writes neither, and writes its first change", async () => {
+		const server = new MemoryProvider();
+		configureLikeSamedis(server);
+		const keys = { model: "m", tenant: "t" };
+		localStorage.setItem(
+			localKeyOf(SIZING, { model: "m" }),
+			JSON.stringify({
+				v: 2,
+				width: { name: 211, role: 222, secret: 233 },
+				initialResize: true,
+			}),
+		);
+		server.data[keyOf(FILTERS, keys)] = JSON.stringify({
+			v: 2,
+			shown: ["name", "role"],
+			hidden: ["secret"],
+			sort: { role: [1, 1] },
+			search: "kept",
+			customData: {},
+		});
+		const local = vi.spyOn(LocalStorageProviderInstance, "setItem");
+		render(smp(keys));
+		await gridIdle();
+		expect(grid!.state.search).toBe("kept");
+		expect(server.writes).toEqual([]);
+		expect(local).not.toHaveBeenCalled();
+
+		act(() => grid!.setState((prev) => ({ ...prev, search: "typed" })));
+		await waitFor(() => expect(server.writes).toHaveLength(1));
+		expect(JSON.parse(server.writes[0][1]!)).toMatchObject({
+			shown: ["name", "role"],
+			hidden: ["secret"],
+			sort: { role: [1, 1] },
+			search: "typed",
+		});
+	});
+
+	it("[ISSUE-3496-ITEM-6] legacy data is written back as v2 on the next state change, not when the grid opens", async () => {
+		const legacy = JSON.stringify({
+			columnState: {
+				name: { sort: 0 },
+				role: { sort: 1, sortOrder: 1 },
+				secret: { sort: 0 },
+			},
+			columnWidth: { name: 211, role: 222, secret: 233 },
+			state: {
+				hiddenColumns: ["secret"],
+				lockedColumns: [],
+				search: "old",
+				initialResize: true,
+			},
+		});
+		localStorage.setItem("legacy", legacy);
+		const setItem = vi.spyOn(Storage.prototype, "setItem");
+		render(
+			<LocalStoragePersist storageKey={"legacy"}>
+				<Grid />
+			</LocalStoragePersist>,
+		);
+		await gridIdle();
+		expect(grid!.state.search).toBe("old");
+		expect(setItem).not.toHaveBeenCalled();
+		expect(localStorage.getItem("legacy")).toBe(legacy);
+
+		act(() => grid!.setState((prev) => ({ ...prev, search: "new" })));
+		expect(setItem).toHaveBeenCalledTimes(1);
+		expect(JSON.parse(localStorage.getItem("legacy")!)).toMatchObject({
+			v: DATA_GRID_PERSIST_VERSION,
+			shown: ["name", "role"],
+			hidden: ["secret"],
+			sort: { role: [1, 1] },
+			search: "new",
+			width: { name: 211, role: 222, secret: 233 },
+			initialResize: true,
+		});
+	});
+
+	it("[ISSUE-3496-ITEM-6] a visit without a column does not write away that column's stored sort and filter", async () => {
+		const save = vi.fn<DataGridPersistentStateContextType[1]>();
+		const stored: DataGridPersistentState = {
+			v: DATA_GRID_PERSIST_VERSION,
+			shown: ["name", "role", "gated"],
+			hidden: ["secret"],
+			sort: { gated: [-1, 1] },
+			filter: { gated: { type: "contains", value1: "x", value2: "" } },
+			width: { name: 211, role: 222, secret: 233, gated: 244 },
+			initialResize: true,
+		};
+		render(
+			<ValueProvider stored={stored} save={save}>
+				<Grid />
+			</ValueProvider>,
+		);
+		await gridIdle();
+		expect(grid!.columnState).not.toHaveProperty("gated");
+		expect(save).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3496-ITEM-6] in StrictMode a grid with nothing stored writes nothing when it opens, and a change once", async () => {
+		const save = vi.fn<DataGridPersistentStateContextType[1]>();
+		render(
+			<StrictMode>
+				<ValueProvider stored={undefined} save={save}>
+					<Grid />
+				</ValueProvider>
+			</StrictMode>,
+		);
+		await gridIdle();
+		expect(save).not.toHaveBeenCalled();
+
+		act(() => grid!.setState((prev) => ({ ...prev, search: "q" })));
+		expect(save).toHaveBeenCalledTimes(1);
+		expect(save.mock.lastCall![0]).toMatchObject({ search: "q" });
 	});
 });
