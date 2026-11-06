@@ -362,8 +362,13 @@
 					"currency_unsupported": "Währung kann noch nicht importiert werden",
 					"date": "Ergebnis muss ein Datum oder null sein",
 					"boolean": "Ergebnis muss ein boolescher Wert oder null sein",
-					"fail": "Validierung fehlgeschlagen: {{REASON}}. Für Details siehe Browser-Konsole.",
-					"unknown": "Unbekannt"
+					"fail": "Validierung fehlgeschlagen: {{REASON}}. Für Details siehe Browser-Konsole."
+				},
+				"script_status": {
+					"none": "{{FIELD}}: kein Skript",
+					"pending": "{{FIELD}}: Skript wird geprüft",
+					"okay": "{{FIELD}}: Skript ist gültig",
+					"error": "{{FIELD}}: Skript ist ungültig"
 				},
 				"validation_errors": "Validierungsfehler",
 				"conversion_errors": "Datenkonvertierungsfehler"

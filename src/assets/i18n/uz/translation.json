@@ -362,8 +362,13 @@
 					"currency_unsupported": "Hozircha valyutani import qilib bo‘lmaydi",
 					"date": "Natija sana yoki null bo'lishi kerak",
 					"boolean": "Natija mantiqiy yoki null bo'lishi kerak",
-					"fail": "Tasdiqlash amalga oshmadi: {{REASON}}. Tafsilotlar uchun brauzer konsoliga qarang.",
-					"unknown": "Noma'lum"
+					"fail": "Tasdiqlash amalga oshmadi: {{REASON}}. Tafsilotlar uchun brauzer konsoliga qarang."
+				},
+				"script_status": {
+					"none": "{{FIELD}}: skript mavjud emas",
+					"pending": "{{FIELD}}: skript tekshirilmoqda",
+					"okay": "{{FIELD}}: skript yaroqli",
+					"error": "{{FIELD}}: skript yaroqsiz"
 				},
 				"validation_errors": "Tasdiqlash xatolari",
 				"conversion_errors": "Ma'lumotlarni o'zgartirish xatolari"

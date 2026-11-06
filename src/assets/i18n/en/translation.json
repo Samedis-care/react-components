@@ -362,8 +362,13 @@
 					"currency_unsupported": "Currency cannot be imported yet",
 					"date": "Result must be a Date or null",
 					"boolean": "Result must be a boolean or null",
-					"fail": "Validation failed: {{REASON}}. For details see browser console.",
-					"unknown": "Unknown"
+					"fail": "Validation failed: {{REASON}}. For details see browser console."
+				},
+				"script_status": {
+					"none": "{{FIELD}}: no script",
+					"pending": "{{FIELD}}: checking the script",
+					"okay": "{{FIELD}}: the script is valid",
+					"error": "{{FIELD}}: the script is invalid"
 				},
 				"validation_errors": "Validation errors",
 				"conversion_errors": "Data conversion errors"

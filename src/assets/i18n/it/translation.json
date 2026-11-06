@@ -362,8 +362,13 @@
 					"currency_unsupported": "La valuta non può ancora essere importata",
 					"date": "Il risultato deve essere una data o null",
 					"boolean": "Il risultato deve essere un valore booleano o null",
-					"fail": "Validazione non riuscita: {{REASON}}. Per i dettagli consulta la console del browser.",
-					"unknown": "Sconosciuto"
+					"fail": "Validazione non riuscita: {{REASON}}. Per i dettagli consulta la console del browser."
+				},
+				"script_status": {
+					"none": "{{FIELD}}: nessuno script",
+					"pending": "{{FIELD}}: verifica dello script in corso",
+					"okay": "{{FIELD}}: lo script è valido",
+					"error": "{{FIELD}}: lo script non è valido"
 				},
 				"validation_errors": "Errori di validazione",
 				"conversion_errors": "Errori di conversione dei dati"

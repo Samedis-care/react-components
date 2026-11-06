@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [Connect data shows a failed script check on its field, and says each check's result](2026-11-06-import-script-check-status.md) | behavior |
 | 2026-11-06 | [The import upload names a file it cannot read, and drops it](2026-11-06-import-unreadable-file-dialog.md) | behavior |
 | 2026-11-06 | [The import wizard writes the calendar day a date-only conversion names](2026-11-06-import-date-only-calendar-day.md) | behavior |
 | 2026-11-06 | [A dirty form page asks before leaving for a path that only starts like its own](2026-11-06-form-page-guard-matches-route.md) | behavior |

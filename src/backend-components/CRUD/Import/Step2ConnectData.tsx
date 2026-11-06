@@ -67,6 +67,32 @@ const StyledCardContent = styled(CardContent, {
 	},
 });
 
+const StatusText = styled("span", {
+	name: "CcCrudImportStep2",
+	slot: "statusText",
+})({
+	// visually hidden, as MUI's visuallyHidden
+	border: 0,
+	clipPath: "inset(50%)",
+	height: 1,
+	margin: -1,
+	overflow: "hidden",
+	padding: 0,
+	position: "absolute",
+	whiteSpace: "nowrap",
+	width: 1,
+});
+
+/**
+ * The text of each state of a script's check (no script yet, being checked, passed, failed)
+ */
+const STATUS_TEXT_KEYS = {
+	none: "backend-components.crud.import.script_status.none",
+	pending: "backend-components.crud.import.script_status.pending",
+	okay: "backend-components.crud.import.script_status.okay",
+	error: "backend-components.crud.import.script_status.error",
+} as const;
+
 /**
  * The values an enum field takes, as a conversion script has to return them: each value as
  * a string literal, followed by its label when that differs (`"eng" (Engineering)`).
@@ -290,11 +316,29 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 						.filter(([name, field]) => isFieldImportable(name, field))
 						.map(([name, field], index) => {
 							const convScript = state.conversionScripts[name];
+							const fieldLabel = field.getLabel() || name;
+							const scriptId = `${idPrefix}-script-${index}`;
 							const typeId = `${idPrefix}-type-${index}`;
 							const valuesId = `${idPrefix}-values-${index}`;
 							const enumValues = field.type.getEnumValues
 								? formatEnumValues(field.type.getEnumValues())
 								: "";
+							const statusText = t(
+								STATUS_TEXT_KEYS[convScript?.status ?? "none"],
+								{ FIELD: fieldLabel },
+							);
+							const failed = convScript?.status === "error";
+							const errorText = failed
+								? convScript.error?.toString()
+								: undefined;
+							// the error (MUI's helper text id), then the expected type
+							const describedBy = [
+								errorText ? `${scriptId}-helper-text` : null,
+								typeId,
+								enumValues ? valuesId : null,
+							]
+								.filter(Boolean)
+								.join(" ");
 							return (
 								<Grid key={name} size={12}>
 									<Card>
@@ -320,20 +364,13 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 													)}
 												</Grid>
 												<Grid>
-													<Tooltip
-														title={
-															convScript
-																? (convScript.error?.toString() ?? "")
-																: (t(
-																		"backend-components.crud.import.validations.unknown",
-																	) ?? "")
-														}
-													>
+													<Tooltip title={statusText}>
 														{convScript ? (
 															convScript.status === "okay" ? (
 																<CheckIcon />
 															) : convScript.status === "pending" ? (
-																<CircularProgress />
+																// the status text says it
+																<CircularProgress aria-hidden />
 															) : convScript.status === "error" ? (
 																<ErrorIcon />
 															) : (
@@ -344,31 +381,28 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 															<UnknownIcon />
 														)}
 													</Tooltip>
+													<StatusText role={"status"}>{statusText}</StatusText>
 												</Grid>
 											</Grid>
 											<Grid size={12}>
 												<Box sx={{ mt: 2 }}>
-													{convScript?.error && (
-														<Typography>
-															{convScript.error.toString()}
-														</Typography>
-													)}
 													<ScriptInput
 														multiline
+														id={scriptId}
 														label={t(
 															"backend-components.crud.import.conv_script",
-															{ FIELD: field.getLabel() || name },
+															{ FIELD: fieldLabel },
 														)}
 														name={name}
 														value={convScript?.script ?? ""}
 														onChange={handleConversionScriptChange}
 														placeholder={`${name} = `}
 														fullWidth
+														error={failed}
+														helperText={errorText}
 														slotProps={{
 															htmlInput: {
-																"aria-describedby": enumValues
-																	? `${typeId} ${valuesId}`
-																	: typeId,
+																"aria-describedby": describedBy,
 															},
 														}}
 													/>

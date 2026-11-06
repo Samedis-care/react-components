@@ -362,8 +362,13 @@
 					"currency_unsupported": "Valuta kan nog niet worden geïmporteerd",
 					"date": "Het resultaat moet een Datum of null zijn",
 					"boolean": "Het resultaat moet een boolean of null zijn",
-					"fail": "Validatie mislukt: {{REASON}}. Zie browserconsole voor details.",
-					"unknown": "Onbekend"
+					"fail": "Validatie mislukt: {{REASON}}. Zie browserconsole voor details."
+				},
+				"script_status": {
+					"none": "{{FIELD}}: geen script",
+					"pending": "{{FIELD}}: script wordt gecontroleerd",
+					"okay": "{{FIELD}}: script is geldig",
+					"error": "{{FIELD}}: script is ongeldig"
 				},
 				"conversion_errors": "Fouten bij gegevensconversie",
 				"validation_errors": "Validatiefouten"
