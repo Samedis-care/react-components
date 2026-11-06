@@ -53,7 +53,7 @@ const meta: Meta<typeof Notifications> = {
 		loadRead: fn(),
 		loadUnread: undefined,
 		notifications: sampleNotifications,
-		refreshInterval: 999999999, // effectively disable polling in stories
+		refreshInterval: 0, // no polling in stories
 	},
 };
 export default meta;

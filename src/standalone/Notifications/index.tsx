@@ -80,8 +80,13 @@ export interface NotificationsProps {
 	 */
 	loadLatest: () => void;
 	/**
-	 * Refresh interval (delay between loadLatest calls) in ms
-	 * @default 1 minute
+	 * Delay between `loadLatest` calls in ms: a positive number up to 2^31 - 1
+	 * (about 24.8 days, the longest timer delay browsers support). `0`
+	 * switches polling off, and so does any longer delay, `Infinity` included;
+	 * `loadLatest` is then still called on mount and on window focus. A
+	 * negative number or `NaN` uses the default. A change restarts the
+	 * interval, without an immediate call.
+	 * @default 60000
 	 */
 	refreshInterval?: number;
 	/**
@@ -110,6 +115,26 @@ export interface NotificationsProps {
 	 */
 	classes?: Partial<Record<NotificationsClassKey, string>>;
 }
+
+/** The longest delay browsers support for a timer (about 24.8 days) */
+const MAX_TIMER_DELAY = 2 ** 31 - 1;
+const DEFAULT_REFRESH_INTERVAL = 60000;
+
+/**
+ * The delay of the polling interval for a `refreshInterval`, or `null` for no
+ * polling. Browsers convert a delay to a 32-bit integer: they run `0`, `NaN`,
+ * `Infinity` and negative numbers at their minimum delay of a few ms, and wrap
+ * values of 2^31 and more around (2^31 itself to a negative number), so none
+ * of them may reach `setInterval`.
+ * @param refreshInterval The prop value
+ */
+const getPollingDelay = (
+	refreshInterval = DEFAULT_REFRESH_INTERVAL,
+): number | null => {
+	if (refreshInterval === 0 || refreshInterval > MAX_TIMER_DELAY) return null;
+	if (!(refreshInterval > 0)) return DEFAULT_REFRESH_INTERVAL; // negative, NaN
+	return refreshInterval;
+};
 
 const anchorOrigin: PopoverOrigin = {
 	vertical: "bottom",
@@ -223,17 +248,18 @@ const Notifications = (inProps: NotificationsProps) => {
 		loadLatest();
 	}, [loadLatest]);
 
+	const pollingDelay = getPollingDelay(refreshInterval);
 	useEffect(() => {
 		window.addEventListener("focus", handleLoadLatest);
-		const intervalHandle = window.setInterval(
-			handleLoadLatest,
-			refreshInterval ?? 60000,
-		);
+		const intervalHandle =
+			pollingDelay === null
+				? undefined
+				: window.setInterval(handleLoadLatest, pollingDelay);
 		return () => {
 			window.removeEventListener("focus", handleLoadLatest);
 			window.clearInterval(intervalHandle);
 		};
-	}, [handleLoadLatest, refreshInterval]);
+	}, [handleLoadLatest, pollingDelay]);
 	useEffect(() => {
 		// initial load
 		handleLoadLatest();

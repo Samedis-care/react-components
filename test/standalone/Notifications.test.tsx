@@ -6,10 +6,12 @@ import {
 	fireEvent,
 	cleanup,
 	waitFor,
+	act,
 } from "@testing-library/react";
-import { ThemeProvider, createTheme } from "@mui/material";
+import { ThemeProvider, createTheme, Theme } from "@mui/material";
 import Notifications, {
 	Notification,
+	NotificationsProps,
 } from "../../src/standalone/Notifications";
 import timestampToAge from "../../src/utils/timestampToAge";
 
@@ -227,5 +229,156 @@ describe("timestampToAge utility", () => {
 		const result = timestampToAge(ts);
 		expect(typeof result).toBe("string");
 		expect(result.length).toBeGreaterThan(0);
+	});
+});
+
+// ─── Shared helpers for the tests below ───────────────────────────────────────
+//
+// Fixture dates are relative to the (real or faked) clock, never fixed, so the
+// rendered ages are predictable. The popover renders in a portal: query it
+// through `document`/`screen`, not the render container. While it is open,
+// MUI hides the rest of the page (aria-hidden), so keep a reference to the
+// bell instead of querying it by role again.
+
+const MINUTE = 60_000;
+
+const base = (over: Partial<NotificationsProps> = {}): NotificationsProps => ({
+	notifications: [],
+	loadLatest: vi.fn(),
+	loadRead: vi.fn(),
+	loadUnread: undefined,
+	refreshInterval: 999999999,
+	...over,
+});
+
+const renderN = (props: NotificationsProps, t: Theme = theme) => {
+	const result = render(<Notifications {...props} />, {
+		wrapper: ({ children }) => (
+			<ThemeProvider theme={t}>{children}</ThemeProvider>
+		),
+	});
+	const bell = screen.getByRole("button");
+	return {
+		...result,
+		bell,
+		rerenderN: (next: NotificationsProps) =>
+			result.rerender(<Notifications {...next} />),
+	};
+};
+
+const advance = (ms: number) =>
+	act(() => {
+		vi.advanceTimersByTime(ms);
+	});
+
+/**
+ * Browsers convert a timer delay to a 32-bit integer (NaN and ±Infinity become
+ * 0, 2^31 wraps negative) and clamp repeating timers to at least 4 ms. The
+ * fake timers do neither (a 0 ms interval never lets time advance), so this
+ * applies the browser's conversion before scheduling on the fake clock.
+ */
+const useBrowserLikeSetInterval = () => {
+	const fakeSetInterval = window.setInterval.bind(window);
+	vi.spyOn(window, "setInterval").mockImplementation(((
+		handler: TimerHandler,
+		timeout?: number,
+		...rest: unknown[]
+	) => {
+		const n = Number(timeout ?? 0);
+		const asLong = Number.isFinite(n) ? n | 0 : 0;
+		return fakeSetInterval(handler, Math.max(4, asLong), ...rest);
+	}) as typeof window.setInterval);
+};
+
+describe("Notifications: polling with loadLatest", () => {
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
+	afterEach(() => {
+		cleanup();
+		vi.useRealTimers();
+		vi.restoreAllMocks();
+	});
+
+	it.each([
+		["0", 0],
+		["-1", -1],
+		["NaN", NaN],
+		["Infinity", Infinity],
+		["2^31", 2 ** 31],
+	])(
+		"[ISSUE-3468-ITEM-1] does not call loadLatest every few ms with refreshInterval=%s",
+		(_label, refreshInterval) => {
+			useBrowserLikeSetInterval();
+			const loadLatest = vi.fn();
+			renderN(base({ loadLatest, refreshInterval }));
+			advance(200);
+			expect(
+				loadLatest,
+				"loadLatest calls within 200 ms (1 = the mount call)",
+			).toHaveBeenCalledTimes(1);
+		},
+	);
+
+	it.each([
+		["0", 0],
+		["Infinity", Infinity],
+		["2^31", 2 ** 31],
+	])(
+		"[ISSUE-3468-ITEM-1] switches polling off with refreshInterval=%s, and still loads on mount and window focus",
+		(_label, refreshInterval) => {
+			useBrowserLikeSetInterval();
+			const loadLatest = vi.fn();
+			renderN(base({ loadLatest, refreshInterval }));
+			advance(24 * 60 * MINUTE);
+			expect(loadLatest, "only the mount call in a day").toHaveBeenCalledTimes(
+				1,
+			);
+			act(() => {
+				window.dispatchEvent(new Event("focus"));
+			});
+			expect(loadLatest).toHaveBeenCalledTimes(2);
+		},
+	);
+
+	it.each([
+		["-1", -1],
+		["NaN", NaN],
+	])(
+		"[ISSUE-3468-ITEM-1] polls at the 60 s default with refreshInterval=%s",
+		(_label, refreshInterval) => {
+			useBrowserLikeSetInterval();
+			const loadLatest = vi.fn();
+			renderN(base({ loadLatest, refreshInterval }));
+			advance(MINUTE - 1);
+			expect(loadLatest).toHaveBeenCalledTimes(1);
+			advance(1);
+			expect(loadLatest).toHaveBeenCalledTimes(2);
+		},
+	);
+
+	it("[ISSUE-3468-ITEM-1] polls at the longest delay browsers support, 2^31 - 1 ms", () => {
+		useBrowserLikeSetInterval();
+		const loadLatest = vi.fn();
+		renderN(base({ loadLatest, refreshInterval: 2 ** 31 - 1 }));
+		advance(2 ** 31 - 2);
+		expect(loadLatest).toHaveBeenCalledTimes(1);
+		advance(1);
+		expect(loadLatest).toHaveBeenCalledTimes(2);
+	});
+
+	it("[ISSUE-3468-ITEM-1] stops polling when refreshInterval changes to 0, and resumes when it changes back", () => {
+		useBrowserLikeSetInterval();
+		const loadLatest = vi.fn();
+		const props = base({ loadLatest, refreshInterval: 1000 });
+		const { rerenderN } = renderN(props);
+		advance(1000);
+		expect(loadLatest).toHaveBeenCalledTimes(2);
+		rerenderN({ ...props, refreshInterval: 0 });
+		advance(10_000);
+		expect(loadLatest).toHaveBeenCalledTimes(2);
+		rerenderN({ ...props, refreshInterval: 1000 });
+		advance(1000);
+		expect(loadLatest).toHaveBeenCalledTimes(3);
 	});
 });
