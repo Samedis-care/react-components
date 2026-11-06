@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [FileUpload clears its file input after every pick](2026-11-06-file-upload-clears-input-after-pick.md) | behavior |
 | 2026-11-06 | [ImageBox opens its full-screen view from a button, and MultiImage's dots are buttons](2026-11-06-multi-image-viewing-by-keyboard.md) | behavior, type |
 | 2026-11-06 | [DecimalInputField shows its value in the current language and format](2026-11-06-decimal-input-follows-value-language-format.md) | behavior |
 | 2026-11-06 | [The grid filter helpers take their default from defaultCustomData, and the Filter button follows the custom data](2026-11-06-custom-filters-button-follows-custom-data.md) | type, behavior |

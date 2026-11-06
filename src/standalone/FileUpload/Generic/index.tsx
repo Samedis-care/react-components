@@ -231,6 +231,9 @@ export interface FileUploadRendererProps extends Omit<
 	getRemainingFileCount: () => number;
 	/**
 	 * onChange handler for file input
+	 * @remarks Adds the picked files as a pick in the built-in variants does, and clears the
+	 *          input (`value = ""`) right away, so that picking the same file again fires a
+	 *          change event too. The input's `files` are empty afterwards.
 	 */
 	handleFileChange: React.ChangeEventHandler<HTMLInputElement>;
 	/**
@@ -769,8 +772,14 @@ const FileUpload = (
 
 	const handleFileChange = useCallback(
 		async (evt: React.ChangeEvent<HTMLInputElement>) => {
-			const files = evt.currentTarget.files;
-			if (!files) return;
+			const input = evt.currentTarget;
+			if (!input.files) return;
+			// a copy, because clearing the input can empty its FileList
+			const files = Array.from(input.files);
+			// cleared on every pick, also a refused one: browsers fire no change event for
+			// a selection equal to the input's current one, so picking the same file again
+			// would do nothing
+			input.value = "";
 			return processFiles(files);
 		},
 		[processFiles],
