@@ -3,7 +3,10 @@ import {
 	Model,
 	ModelDataTypeAny,
 	ModelDataTypeDateNullableRendererCC,
+	ModelVisibility,
+	ModelVisibilityDisabled,
 	ModelVisibilityEdit,
+	ModelVisibilityEditRequired,
 } from "../../src/backend-integration";
 import MockConnector from "../../src/stories/test-utils/MockConnector";
 
@@ -97,5 +100,65 @@ describe("Model default values", () => {
 		expect(first.result).toEqual({ note: "a", found_at: new Date(1) });
 		expect(second.result).toEqual({ note: "a", found_at: new Date(2) });
 		expect(RESULT).toEqual({ note: "a" });
+	});
+});
+
+// "other" is enabled by the value of "reason", "internal" is always disabled
+const otherVisibility = (values: Record<string, unknown>): ModelVisibility =>
+	values.reason === "other"
+		? ModelVisibilityEditRequired
+		: ModelVisibilityDisabled;
+const createReasonModel = () => {
+	const field = (
+		visibility: ModelVisibility | typeof otherVisibility,
+		getDefaultValue?: () => string,
+	) => ({
+		type: new ModelDataTypeAny<string | null>(),
+		getLabel: () => "Field",
+		getDefaultValue,
+		visibility: {
+			overview: ModelVisibilityEdit,
+			edit: visibility,
+			create: visibility,
+		},
+		customData: null,
+	});
+	return new Model(
+		"serialization-reason-" + Math.random().toString(16),
+		{
+			id: field(ModelVisibilityDisabled),
+			reason: field(ModelVisibilityEditRequired, () => "a"),
+			other: field(otherVisibility, () => "D"),
+			internal: field(ModelVisibilityDisabled, () => "never"),
+		},
+		new MockConnector([]),
+	);
+};
+
+describe("Model: a field whose visibility callback depends on the values", () => {
+	it("[ISSUE-3501-ITEM-3] gets a default value in a new record although the empty values disable it; an always disabled field gets none", async () => {
+		const [record] = await createReasonModel().getRaw(null);
+		expect(record).toEqual({ reason: "a", other: "D" });
+	});
+
+	it("[ISSUE-3501-ITEM-3] keeps its value when deserialized with the field disabled, and is left out when serialized disabled", async () => {
+		const model = createReasonModel();
+		const data = { id: "1", reason: "a", other: "loaded", internal: "x" };
+		const deserialized = await model.applySerialization(
+			data,
+			"deserialize",
+			"edit",
+		);
+		expect(deserialized).toEqual({ id: "1", reason: "a", other: "loaded" });
+		expect(
+			await model.applySerialization(deserialized, "serialize", "edit"),
+		).toEqual({ id: "1", reason: "a" });
+		expect(
+			await model.applySerialization(
+				{ ...deserialized, reason: "other" },
+				"serialize",
+				"edit",
+			),
+		).toEqual({ id: "1", reason: "other", other: "loaded" });
 	});
 });
