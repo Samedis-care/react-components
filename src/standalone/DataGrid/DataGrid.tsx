@@ -228,6 +228,12 @@ export interface IDataGridCallbacks {
 	) => DataGridAdditionalFilters;
 	/**
 	 * Default initial values for custom data (overwritten by persisted custom data)
+	 * @remarks The grid compares the custom data with these to tell whether the
+	 *          user filtered ("No data matched your filters"). Plain data
+	 *          (strings, numbers, booleans, Dates, arrays, plain objects) is
+	 *          compared by value; any other value (a class instance, a Map, a
+	 *          function) by identity, so pass the same instance on every render
+	 *          (e.g. with useMemo).
 	 */
 	defaultCustomData?: Record<string, unknown>;
 	/**

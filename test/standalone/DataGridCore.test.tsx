@@ -72,6 +72,7 @@ afterEach(() => {
 });
 
 const theme = createTheme();
+
 const COLUMNS: IDataGridColumnDef[] = [
 	{
 		field: "name",
@@ -88,10 +89,12 @@ const COLUMNS: IDataGridColumnDef[] = [
 		sortable: true,
 	},
 ];
+
 const ROWS: DataGridRowData[] = [
 	{ id: "1", name: "Alice", role: "admin" },
 	{ id: "2", name: "Bob", role: "user" },
 ];
+
 const ok = (): DataGridData => ({ rowsTotal: 2, rows: ROWS });
 
 type Probe = {
@@ -103,7 +106,9 @@ type Probe = {
 	resetFilters: () => void;
 	widths: Record<string, number>;
 };
+
 let probe: Probe | null = null;
+
 /**
  * A filter bar renders inside all of the grid's providers, so it can read and
  * drive the grid's state through the exported hooks, as app filter bars do
@@ -143,13 +148,71 @@ const Grid = (
 		</ThemeProvider>
 	);
 };
+
 /** no load running or queued */
 const idle = () =>
 	waitFor(() => expect(probe?.state.refreshData).toBe(0), { timeout: 3000 });
+
+describe("filters active / reset filters", () => {
+	it("[ISSUE-3492-ITEM-6] a class instance in the custom data does not crash the grid", async () => {
+		class DateRange {
+			constructor(public from: string) {}
+		}
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const range = new DateRange("2026-01-01");
+		let thrown: unknown = null;
+		try {
+			render(<Grid defaultCustomData={{ range }} />);
+		} catch (e) {
+			thrown = e;
+		}
+		expect(thrown).toBeNull();
+		await idle();
+		expect(probe!.state.customData).toEqual({ range });
+	});
+
+	it.each([
+		["a Map", new Map([["from", "2026-01-01"]])],
+		["a function", () => "2026-01-01"],
+	])(
+		"[ISSUE-3492-ITEM-6] %s in the custom data does not crash the grid",
+		async (_name, value) => {
+			vi.spyOn(console, "error").mockImplementation(() => {});
+			render(<Grid defaultCustomData={{ value }} />);
+			await idle();
+			expect(probe!.state.customData.value).toBe(value);
+			expect(probe!.filtersActive).toBe(false);
+		},
+	);
+
+	it("[ISSUE-3492-ITEM-6] a class instance the filter bar stores counts as a filter until it is the default's again", async () => {
+		class DateRange {
+			constructor(public from: string) {}
+		}
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const defaultRange = new DateRange("2026-01-01");
+		render(<Grid defaultCustomData={{ range: defaultRange }} />);
+		await idle();
+		expect(probe!.filtersActive).toBe(false);
+		act(() =>
+			probe!.setState((p) => ({
+				...p,
+				customData: { range: new DateRange("2026-02-01") },
+			})),
+		);
+		expect(probe!.filtersActive).toBe(true);
+		act(() => probe!.resetFilters());
+		expect(probe!.state.customData.range).toBe(defaultRange);
+		expect(probe!.filtersActive).toBe(false);
+	});
+});
+
 /** past the 500ms debounce of the reload after a query change */
 const passDebounce = () => act(() => void vi.advanceTimersByTime(700));
+
 const loadSpy = (impl: (p: IDataGridLoadDataParameters) => DataGridData = ok) =>
 	vi.fn<(p: IDataGridLoadDataParameters) => DataGridData>(impl);
+
 const setSearch = (search: string) =>
 	act(() => probe!.setState((p) => ({ ...p, search })));
 
@@ -175,6 +238,7 @@ const ControlledGrid = (props: Partial<DataGridProps>) => {
 		/>
 	);
 };
+
 /** what a click on a row does (Content/Cell) */
 const toggleRow = (id: string) =>
 	act(() =>

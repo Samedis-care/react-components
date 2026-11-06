@@ -23,7 +23,9 @@ export const useDataGridFiltersActive = () => {
 		);
 		return (
 			state.search !== defaultState.search ||
-			!deepEqual(state.customData, defaultState.customData) ||
+			// a value deepEqual can't look into (a class instance, Map,
+			// function) is compared by identity
+			!deepEqual(state.customData, defaultState.customData, "equals") ||
 			Object.entries(columnState).some(
 				([key, value]) =>
 					!deepEqual(value.filter ?? {}, defaultColumnState[key]?.filter ?? {}),
