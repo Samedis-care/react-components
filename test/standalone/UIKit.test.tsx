@@ -181,6 +181,29 @@ describe("UIKit", () => {
 			expect(screen.getByRole("button", { name: "C" })).toBe(c);
 			expect(c).toHaveFocus();
 		});
+
+		it("[ISSUE-3482-ITEM-24] gives no slot to null or false inside a nested children array", () => {
+			const { container } = wrap(
+				<FormButtons>
+					<Button>Save</Button>
+					{[<Button key={"extra"}>Extra</Button>, false, null]}
+					<Button>Back</Button>
+				</FormButtons>,
+			);
+			const slots = Array.from(container.firstElementChild!.children);
+			expect(slots.filter((slot) => slot.childNodes.length === 0)).toEqual([]);
+			expect(slots).toHaveLength(3);
+		});
+
+		it("[ISSUE-3482-ITEM-24] renders nothing when only nested falsy children remain", () => {
+			const { container } = wrap(
+				<FormButtons>
+					{[null]}
+					{false}
+				</FormButtons>,
+			);
+			expect(container).toBeEmptyDOMElement();
+		});
 	});
 
 	describe("IconButtonWithText", () => {
