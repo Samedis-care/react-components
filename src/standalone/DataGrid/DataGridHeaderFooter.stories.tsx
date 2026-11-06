@@ -133,6 +133,37 @@ type Story = StoryObj<typeof DataGrid>;
 // ─── Stories ──────────────────────────────────────────────────────────────────
 
 /**
+ * ISSUE-3495-ITEM-18: on a phone, Enter on "Search" opens the search popover
+ * with focus in its field, so what the user types right away is searched;
+ * Escape closes it and focus returns to "Search"
+ */
+export const Issue3495Item18PhoneSearchFocusesField: Story = {
+	args: { columns: COLUMNS, loadData: loadPeople },
+	globals: PHONE,
+	play: async ({ canvas }) => {
+		const body = within(document.body);
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		const search = canvas.getByRole("button", { name: "Search" });
+		search.focus();
+		await userEvent.keyboard("{Enter}");
+		const dialog = await body.findByRole("dialog", { name: "Search" });
+		const field = within(dialog).getByRole("textbox");
+		await waitFor(() => expect(field).toHaveFocus());
+		await expect(search).toHaveAttribute("aria-expanded", "true");
+		await userEvent.keyboard("bob");
+		await expect(field).toHaveValue("bob");
+		await waitFor(() =>
+			expect(canvas.queryByText("Alice Müller")).not.toBeInTheDocument(),
+		);
+		await expect(await canvas.findByText("Bob Smith")).toBeVisible();
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() => expect(search).toHaveFocus());
+		await waitFor(() => expect(body.queryByRole("dialog")).toBeNull());
+		await expect(search).toHaveAttribute("aria-expanded", "false");
+	},
+};
+
+/**
  * ISSUE-3495-ITEM-13: the column settings' "Visible" and "Pin" checkboxes have no
  * accessible name
  */

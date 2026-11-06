@@ -1,10 +1,17 @@
-import React, { ChangeEvent, useCallback, useState } from "react";
+import React, {
+	ChangeEvent,
+	useCallback,
+	useId,
+	useMemo,
+	useState,
+} from "react";
 import {
 	Box,
 	IconButton,
 	InputAdornment,
 	Popover,
 	PopoverOrigin,
+	PopoverProps,
 	useMediaQuery,
 } from "@mui/material";
 import { DataGridQuickFilterIcon, useDataGridProps } from "../DataGrid";
@@ -37,6 +44,13 @@ const transformOrigin: PopoverOrigin = {
 	horizontal: "center",
 };
 
+/**
+ * The search box: a text field with a search icon, placeholder
+ * DataGridProps.searchPlaceholder. Below sm it is a "Search" icon button
+ * that opens the field in a popover, outside the `search` slot's element. The
+ * popover is a dialog named by the button, and its field takes focus when it
+ * opens. Must be rendered inside a DataGrid (it reads the grid's props).
+ */
 const SearchView = (props: IDataGridSearchViewProps) => {
 	const { searchPlaceholder, classes } = useDataGridProps();
 	const { t } = useCCTranslations();
@@ -46,9 +60,26 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 		[],
 	);
 	const closePopover = useCallback(() => setAnchorEl(null), []);
+	const open = anchorEl !== null;
+	const buttonId = useId();
+	const popoverId = useId();
+	// the popover is a modal dialog (focus trap, the page behind is hidden from
+	// assistive technology), named by the button that opens it
+	const popoverSlotProps = useMemo(
+		(): PopoverProps["slotProps"] => ({
+			paper: {
+				id: popoverId,
+				role: "dialog",
+				"aria-modal": true,
+				"aria-labelledby": buttonId,
+			},
+		}),
+		[buttonId, popoverId],
+	);
 
-	const renderTextField = () => (
+	const renderTextField = (autoFocus: boolean) => (
 		<TextFieldWithHelp
+			autoFocus={autoFocus}
 			value={props.search}
 			onChange={props.handleSearchChange}
 			placeholder={searchPlaceholder}
@@ -75,13 +106,17 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 	return (
 		<div className={combineClassNames([props.className, classes?.search])}>
 			{!smDown ? (
-				renderTextField()
+				renderTextField(false)
 			) : (
 				<>
 					<IconButton
+						id={buttonId}
 						onClick={openPopover}
 						size="large"
 						aria-label={t("standalone.data-grid.header.search")}
+						aria-haspopup="dialog"
+						aria-expanded={open}
+						aria-controls={open ? popoverId : undefined}
 					>
 						<DataGridQuickFilterIcon
 							className={combineClassNames([
@@ -91,13 +126,15 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 						/>
 					</IconButton>
 					<Popover
-						open={anchorEl !== null}
+						open={open}
 						anchorEl={anchorEl}
 						onClose={closePopover}
 						anchorOrigin={anchorOrigin}
 						transformOrigin={transformOrigin}
+						slotProps={popoverSlotProps}
 					>
-						<Box sx={{ p: 1 }}>{renderTextField()}</Box>
+						{/* the field takes focus when the popover opens, so typing goes straight in */}
+						<Box sx={{ p: 1 }}>{renderTextField(true)}</Box>
 					</Popover>
 				</>
 			)}

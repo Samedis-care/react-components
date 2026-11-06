@@ -185,6 +185,45 @@ const idle = () =>
 
 const header = () => document.querySelector<HTMLElement>(".test-header")!;
 
+describe("search", () => {
+	it("[ISSUE-3495-ITEM-18] on a phone the search popover puts focus into its field and the button exposes the popover", async () => {
+		stubViewport(320);
+		render(<Grid filterBar={undefined} />);
+		const search = await screen.findByRole("button", { name: "Search" });
+		fireEvent.click(search);
+		const field = await screen.findByRole("textbox");
+		await waitFor(() => expect(field).toHaveFocus());
+		expect(search).toHaveAttribute("aria-expanded", "true");
+		expect(search).toHaveAttribute("aria-haspopup");
+	});
+
+	it("[ISSUE-3495-ITEM-18] on a phone the popover is a dialog named after the Search button, which controls it while it is open", async () => {
+		stubViewport(320);
+		render(<Grid filterBar={undefined} />);
+		const search = await screen.findByRole("button", { name: "Search" });
+		expect(search).toHaveAttribute("aria-haspopup", "dialog");
+		expect(search).toHaveAttribute("aria-expanded", "false");
+		expect(search).not.toHaveAttribute("aria-controls");
+		fireEvent.click(search);
+		const dialog = await screen.findByRole("dialog", { name: "Search" });
+		expect(dialog).toHaveAttribute("aria-modal", "true");
+		expect(search).toHaveAttribute("aria-controls", dialog.id);
+		const field = within(dialog).getByRole("textbox");
+		fireEvent.keyDown(field, { key: "Escape" });
+		await waitFor(() =>
+			expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+		);
+		expect(search).toHaveAttribute("aria-expanded", "false");
+		expect(search).not.toHaveAttribute("aria-controls");
+	});
+
+	it("[ISSUE-3495-ITEM-18] the search field of the wider layouts does not take focus when the grid mounts", async () => {
+		render(<Grid />);
+		await idle();
+		expect(within(header()).getByRole("textbox")).not.toHaveFocus();
+	});
+});
+
 /** The column settings panel (with MultiGrid mocked, the only table) */
 const settingsPanel = () =>
 	document.querySelector("table")!.closest<HTMLElement>(".MuiPaper-root")!;
