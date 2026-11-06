@@ -2,7 +2,14 @@ import React, { useCallback } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
-import { Button, TextField, Box } from "@mui/material";
+import {
+	Box,
+	Button,
+	Dialog,
+	DialogContent,
+	DialogContentText,
+	TextField,
+} from "@mui/material";
 import DialogContextProvider from "../../framework/DialogContextProvider";
 import { useDialogContext } from "../../framework";
 import { ErrorDialog } from "./ErrorDialog";
@@ -34,6 +41,10 @@ const meta: Meta = {
 };
 
 export default meta;
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const page = () => within(document.body);
 
 // ─── ErrorDialog ─────────────────────────────────────────────────────────────
 
@@ -242,6 +253,10 @@ export const FormDialogStory: StoryObj = {
 
 // ─── DialogTitle ─────────────────────────────────────────────────────────────
 
+interface DialogTitleArgs {
+	onClose: () => void;
+}
+
 export const DialogTitleStory: StoryObj = {
 	name: "DialogTitle",
 	render: () => (
@@ -259,3 +274,77 @@ export const DialogTitleNoClose: StoryObj = {
 		</Box>
 	),
 };
+
+// ─── Bugs ────────────────────────────────────────────────────────────────────
+
+export const Issue3497Item13TitleIsOneHeading: StoryObj<DialogTitleArgs> = {
+	args: { onClose: fn() },
+	parameters: {
+		// no exception: axe fails "heading-order" (an h6 inside the dialog's h2)
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3497-ITEM-13: DialogTitle inside a Dialog. The close button and an `h6` with the text sit inside the `h2` that names the dialog: Chromium names the dialog and the heading "My Title Close", and axe reports `heading-order`.',
+			},
+		},
+	},
+	render: (args) => (
+		<Dialog open>
+			<DialogTitle onClose={args.onClose}>My Title</DialogTitle>
+			<DialogContent>
+				<DialogContentText>Dialog content.</DialogContentText>
+			</DialogContent>
+		</Dialog>
+	),
+	play: async () => {
+		const dialog = await page().findByRole("dialog");
+		await waitFor(() => expect(dialog).toBeVisible());
+	},
+};
+
+export const Issue3497Item13CloseButtonBesideHeading: StoryObj<DialogTitleArgs> =
+	{
+		args: { onClose: fn() },
+		parameters: {
+			a11y: { test: "error" },
+			docs: {
+				description: {
+					story:
+						"ISSUE-3497-ITEM-13: the close button sits next to the heading that names the dialog, not inside it, centered on the title row. The content starts right below the title, as after MUI's `DialogTitle`.",
+				},
+			},
+		},
+		render: (args) => (
+			<Dialog open>
+				<DialogTitle onClose={args.onClose}>My Title</DialogTitle>
+				<DialogContent>
+					<DialogContentText>Dialog content.</DialogContentText>
+				</DialogContent>
+			</Dialog>
+		),
+		play: async ({ args }) => {
+			const dialog = await page().findByRole("dialog");
+			await waitFor(() => expect(dialog).toBeVisible());
+			const heading = within(dialog).getByRole("heading");
+			const close = within(dialog).getByRole("button", { name: "Close" });
+			await expect(heading).toHaveTextContent(/^My Title$/);
+			await expect(heading).not.toContainElement(close);
+			const headingBox = heading.getBoundingClientRect();
+			const closeBox = close.getBoundingClientRect();
+			await expect(closeBox.left).toBeGreaterThanOrEqual(headingBox.right);
+			await expect(
+				Math.abs(
+					closeBox.top +
+						closeBox.height / 2 -
+						(headingBox.top + headingBox.height / 2),
+				),
+			).toBeLessThan(1);
+			const content = dialog.querySelector<HTMLElement>(
+				".MuiDialogContent-root",
+			);
+			await expect(content && getComputedStyle(content).paddingTop).toBe("0px");
+			await userEvent.click(close);
+			await expect(args.onClose).toHaveBeenCalledTimes(1);
+		},
+	};

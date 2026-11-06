@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [DialogTitle's heading holds only the title; the close button sits beside it](2026-11-06-dialog-title-heading.md) | behavior |
 | 2026-11-06 | [The DataGrid query leaves out empty filter conditions](2026-11-06-data-grid-query-leaves-out-empty-conditions.md) | behavior |
 | 2026-11-06 | [MatrixGrid's today and accent header labels are darkened to 4.5:1](2026-11-06-matrix-header-label-contrast.md) | behavior |
 | 2026-11-06 | [RoutedTabs selects the default tab when no Tab has the URL's segment](2026-11-06-routed-tabs-default-tab-for-unknown-segment.md) | behavior |
