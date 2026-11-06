@@ -83,7 +83,10 @@ const mount = (theme: Theme = createTheme()) =>
 			</DialogContextProvider>
 		</ThemeProvider>,
 	);
-const open = (dialog: React.ReactNode) => act(() => ctx[0](dialog));
+const open = (dialog: React.ReactNode) =>
+	act(() => {
+		ctx[0](dialog);
+	});
 /** all mounted dialogs, including the ones a dialog on top hides */
 const dialogEls = () =>
 	Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]'));

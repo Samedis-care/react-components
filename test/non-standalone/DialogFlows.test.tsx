@@ -48,7 +48,10 @@ const mount = () =>
 			<Grab />
 		</DialogContextProvider>,
 	);
-const push = (dialog: React.ReactNode) => act(() => ctx[0](dialog));
+const push = (dialog: React.ReactNode) =>
+	act(() => {
+		ctx[0](dialog);
+	});
 /** all mounted dialogs, including the ones a dialog on top hides */
 const dialogEls = () =>
 	Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]'));

@@ -41,7 +41,10 @@ const Grab = () => {
 	ctx = useDialogContext();
 	return null;
 };
-const push = (dialog: React.ReactNode) => act(() => ctx[0](dialog));
+const push = (dialog: React.ReactNode) =>
+	act(() => {
+		ctx[0](dialog);
+	});
 
 const closers: Record<string, () => void> = {};
 
