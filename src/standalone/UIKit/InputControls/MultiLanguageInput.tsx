@@ -224,7 +224,11 @@ export type MultiLanguageInputProps = Omit<
 	 */
 	ignoreI18nLocale?: boolean;
 	/**
-	 * The current values
+	 * The text per language, keyed by language code, e.g.
+	 * `{ en: "Pump", de: "Pumpe" }`. Use `{}` for no text; must not be `null`
+	 * or `undefined`. A language without a key (or with `null`) shows an empty
+	 * field. Keys of languages that are not in `enabledLanguages` are kept by
+	 * `onChange`.
 	 */
 	values: Partial<Record<MultiLanguageInputSupportedLanguages, string>>;
 	/**
@@ -411,7 +415,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 					? required
 					: undefined
 			}
-			value={values[lang]}
+			value={values[lang] ?? ""}
 			onChange={handleChange}
 			name={`${name ?? "mli"}-${lang}`}
 			slotProps={{
