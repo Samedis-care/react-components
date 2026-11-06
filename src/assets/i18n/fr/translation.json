@@ -353,6 +353,7 @@
 				"last_error": "Dernière erreur",
 				"errors": {
 					"file_select": "Fichier sélectionné non valide",
+					"file_read": "Impossible de lire {{FILE_NAME}}. Enregistrez le fichier en tant que classeur Excel (.xlsx) sans mot de passe, puis sélectionnez-le à nouveau.",
 					"update-key-not-uniq": "{{UPDATE_KEY}} n'est pas unique dans l'ensemble de données d'importation"
 				},
 				"validations": {

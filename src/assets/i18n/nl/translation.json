@@ -353,6 +353,7 @@
 				"last_error": "Laatste error",
 				"errors": {
 					"file_select": "Ongeldig bestand geselecteerd",
+					"file_read": "{{FILE_NAME}} kan niet worden gelezen. Sla het bestand op als Excel-werkmap (.xlsx) zonder wachtwoord en kies het opnieuw.",
 					"update-key-not-uniq": "{{UPDATE_KEY}} is niet uniek in importdataset"
 				},
 				"validations": {

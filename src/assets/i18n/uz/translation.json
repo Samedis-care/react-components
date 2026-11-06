@@ -353,6 +353,7 @@
 				"last_error": "Oxirgi xato",
 				"errors": {
 					"file_select": "Yaroqsiz fayl tanlandi",
+					"file_read": "{{FILE_NAME}} faylini oʻqib boʻlmaydi. Uni parolsiz Excel ish kitobi (.xlsx) sifatida saqlang va qaytadan tanlang.",
 					"update-key-not-uniq": "{{UPDATE_KEY}} import maʼlumotlar toʻplamida yagona emas"
 				},
 				"validations": {

@@ -353,6 +353,7 @@
 				"last_error": "Último error",
 				"errors": {
 					"file_select": "Archivo seleccionado no válido",
+					"file_read": "No se puede leer {{FILE_NAME}}. Guarde el archivo como libro de Excel (.xlsx) sin contraseña y vuelva a seleccionarlo.",
 					"update-key-not-uniq": "{{UPDATE_KEY}} no es único en el conjunto de datos de importación"
 				},
 				"validations": {

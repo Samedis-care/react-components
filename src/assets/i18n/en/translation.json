@@ -353,6 +353,7 @@
 				"last_error": "Last error",
 				"errors": {
 					"file_select": "Invalid file selected",
+					"file_read": "{{FILE_NAME}} cannot be read. Save it as an Excel workbook (.xlsx) without a password and pick it again.",
 					"update-key-not-uniq": "{{UPDATE_KEY}} is not unique in import dataset"
 				},
 				"validations": {

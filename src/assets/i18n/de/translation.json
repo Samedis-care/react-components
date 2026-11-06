@@ -353,6 +353,7 @@
 				"last_error": "Letzter Fehler",
 				"errors": {
 					"file_select": "Ungültige Datei ausgewählt",
+					"file_read": "{{FILE_NAME}} kann nicht gelesen werden. Speichere die Datei als Excel-Arbeitsmappe (.xlsx) ohne Kennwort und wähle sie erneut aus.",
 					"update-key-not-uniq": "{{UPDATE_KEY}} ist im Importdatensatz nicht eindeutig"
 				},
 				"validations": {
