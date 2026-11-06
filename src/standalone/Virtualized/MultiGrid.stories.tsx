@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Box, Dialog, DialogContent } from "@mui/material";
-import MultiGrid from "./MultiGrid";
+import MultiGrid, { MultiGridProps } from "./MultiGrid";
 import type { CellComponentProps } from "react-window";
 
 // ─── Meta ─────────────────────────────────────────────────────────────────────
@@ -51,6 +51,13 @@ const HEADER_STYLE: React.CSSProperties = {
 	fontWeight: "bold",
 };
 
+// the pane styles are module constants: a new object on every render would
+// defeat MultiGrid's memoization
+const NO_STYLE: React.CSSProperties = {};
+// with data rows the body pane drives the header's horizontal position, so the
+// header itself does not scroll (as in DataGrid)
+const HEADER_WITH_ROWS: React.CSSProperties = { overflow: "hidden" };
+
 const NoContent = () => (
 	<Box
 		sx={{
@@ -67,13 +74,49 @@ const NoContent = () => (
 
 // ─── Stories ──────────────────────────────────────────────────────────────────
 
-const CellRenderer = ({ columnIndex, rowIndex, style }: CellComponentProps) => {
+/**
+ * Spreads `ariaAttributes`, so every cell is a `gridcell` inside its row, and
+ * applies `style`, which positions the cell.
+ */
+const CellRenderer = ({
+	columnIndex,
+	rowIndex,
+	style,
+	ariaAttributes,
+}: CellComponentProps) => {
 	const isHeader = rowIndex === 0 || columnIndex === 0;
 	return (
-		<div style={{ ...style, ...(isHeader ? HEADER_STYLE : CELL_STYLE) }}>
+		<div
+			{...ariaAttributes}
+			style={{ ...style, ...(isHeader ? HEADER_STYLE : CELL_STYLE) }}
+		>
 			{rowLabel(rowIndex, columnIndex)}
 		</div>
 	);
+};
+
+/** MultiGrid's root is absolutely positioned: give it a positioned, sized parent */
+const GridBox = (props: MultiGridProps) => (
+	<Box
+		data-testid={"grid-box"}
+		sx={{ position: "relative", width: props.width, height: props.height }}
+	>
+		<MultiGrid {...props} />
+	</Box>
+);
+
+/**
+ * The four panes in DOM order: top left, top right (pinned rows), bottom left
+ * (pinned columns), bottom right (the scrolling pane, or the no-content
+ * placeholder while there are no data rows).
+ */
+const getPanes = (container: HTMLElement) => {
+	const root = within(container).getByTestId("grid-box")
+		.firstElementChild as HTMLElement;
+	const [topLeft, topRight, bottomLeft, bottomRight] = Array.from(
+		root.children,
+	) as HTMLElement[];
+	return { root, topLeft, topRight, bottomLeft, bottomRight };
 };
 
 export const Default: StoryObj<typeof MultiGrid> = {
@@ -217,5 +260,107 @@ export const InDialog: StoryObj<typeof MultiGrid> = {
 		// clicking a cell has to land focus on the pane rather than on the paper
 		await userEvent.click(within(pane).getByText("R1C1"));
 		await waitFor(() => expect(pane).toHaveFocus());
+	},
+};
+
+// Story tests run in headless Chromium, which hides scrollbars. A 15px border
+// on the right and bottom of the scrolling pane takes the room that classic
+// scrollbars (Windows, Linux desktops, macOS set to always show them) take
+// from its viewport, and nothing from the header's or the pinned column's.
+const BODY_WITH_SCROLLBAR_ROOM: React.CSSProperties = {
+	boxSizing: "border-box",
+	borderRight: "15px solid #bdbdbd",
+	borderBottom: "15px solid #bdbdbd",
+};
+
+const SCROLLBAR_ROOM_PROPS: MultiGridProps = {
+	width: 600,
+	height: 400,
+	columnCount: COLUMN_COUNT,
+	columnWidth,
+	rowCount: ROW_COUNT,
+	rowHeight,
+	fixedColumnCount: FIXED_COLUMNS,
+	fixedRowCount: FIXED_ROWS,
+	styleTopLeftGrid: NO_STYLE,
+	styleTopRightGrid: HEADER_WITH_ROWS,
+	styleBottomLeftGrid: NO_STYLE,
+	styleBottomRightGrid: BODY_WITH_SCROLLBAR_ROOM,
+	children: CellRenderer,
+	noContentRenderer: NoContent,
+	label: GRID_LABEL,
+};
+
+const SCROLLBAR_ROOM_A11Y = {
+	test: "error",
+	config: {
+		// the pinned column pane scrolls (overflow: scroll) but is not focusable
+		// and holds nothing focusable (ISSUE-3472-ITEM-17)
+		rules: [{ id: "scrollable-region-focusable", enabled: false }],
+	},
+};
+
+/**
+ * Where scrollbars take room, the header and the pinned column leave out the
+ * scrolling pane's scrollbars: scrolled to the end, the last column's header
+ * still sits over that column and the last row's pinned cell next to that row.
+ */
+export const Issue3472Item2HeaderAndPinnedColumnFollowToTheEnd: StoryObj<
+	typeof MultiGrid
+> = {
+	render: () => <GridBox {...SCROLLBAR_ROOM_PROPS} />,
+	parameters: { a11y: SCROLLBAR_ROOM_A11Y },
+	play: async ({ canvasElement }) => {
+		const { topRight, bottomLeft, bottomRight } = getPanes(canvasElement);
+		// the scrollbar room: less than 600 - 60 pinned and 400 - 35 header
+		await expect(bottomRight.clientWidth).toBeLessThan(540);
+		await expect(bottomRight.clientHeight).toBeLessThan(365);
+		await expect(topRight.clientWidth).toBe(bottomRight.clientWidth);
+		await expect(bottomLeft.clientHeight).toBe(bottomRight.clientHeight);
+
+		bottomRight.scrollTo({ left: 100000, top: 100000 });
+		const endLeft = bottomRight.scrollWidth - bottomRight.clientWidth;
+		const endTop = bottomRight.scrollHeight - bottomRight.clientHeight;
+		await waitFor(() => expect(bottomRight.scrollLeft).toBe(endLeft));
+		await waitFor(() => expect(topRight.scrollLeft).toBe(endLeft));
+		await waitFor(() => expect(bottomRight.scrollTop).toBe(endTop));
+		await waitFor(() => expect(bottomLeft.scrollTop).toBe(endTop));
+
+		const lastHeader = await within(topRight).findByText("Col 19");
+		const lastRowPinned = await within(bottomLeft).findByText("Row 99");
+		const lastCell = await within(bottomRight).findByText("R99C19");
+		await expect(lastHeader.getBoundingClientRect().right).toBe(
+			lastCell.getBoundingClientRect().right,
+		);
+		await expect(lastRowPinned.getBoundingClientRect().bottom).toBe(
+			lastCell.getBoundingClientRect().bottom,
+		);
+	},
+};
+
+/**
+ * With `globalScrollListener`, PageDown scrolls by the height the scrolling
+ * pane shows, so no row is skipped where a scrollbar takes room.
+ */
+export const Issue3472Item2PageDownScrollsOneVisiblePage: StoryObj<
+	typeof MultiGrid
+> = {
+	render: () => <GridBox {...SCROLLBAR_ROOM_PROPS} globalScrollListener />,
+	parameters: { a11y: SCROLLBAR_ROOM_A11Y },
+	play: async ({ canvasElement }) => {
+		const { bottomLeft, bottomRight } = getPanes(canvasElement);
+		const page = bottomRight.clientHeight;
+		// the scrollbar room: less than 400 - 35 header
+		await expect(page).toBeLessThan(365);
+
+		await userEvent.keyboard("{PageDown}");
+		await waitFor(() => expect(bottomRight.scrollTop).toBe(page));
+		await waitFor(() => expect(bottomLeft.scrollTop).toBe(page));
+
+		await userEvent.keyboard("{PageDown}");
+		await waitFor(() => expect(bottomRight.scrollTop).toBe(2 * page));
+
+		await userEvent.keyboard("{PageUp}");
+		await waitFor(() => expect(bottomRight.scrollTop).toBe(page));
 	},
 };
