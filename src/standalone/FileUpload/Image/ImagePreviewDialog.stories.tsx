@@ -326,3 +326,41 @@ export const RotationResetsOnReopen: Story = {
 		await expect(readTransform(reopened.image).rotation).toBe(0);
 	},
 };
+
+// ---------------------------------------------------------------------------
+// Bug stories: each asserts the expected behavior and fails until its BUGS.md entry is fixed
+// ---------------------------------------------------------------------------
+
+export const Issue3490Item7PreviewDialogHasAName: Story = {
+	args: { open: true },
+	parameters: {
+		a11y: {
+			test: "error",
+			options: { runOnly: { type: "rule", values: ["aria-dialog-name"] } },
+		},
+		docs: {
+			description: {
+				story:
+					'ISSUE-3490-ITEM-7: the preview dialog has no accessible name: MUI points `aria-labelledby` at a title id that no element carries, so a screen reader announces just "dialog" (axe `aria-dialog-name`). The image\'s alt is the obvious name.',
+			},
+		},
+	},
+	play: async () => {
+		await getDialogImage();
+	},
+};
+
+/**
+ * The open preview passes every axe rule: the dialog is named by the image's alt, and a
+ * screen reader announces that name when it opens.
+ */
+export const Issue3490Item7OpenPreviewPassesAxe: Story = {
+	args: { open: true },
+	parameters: { a11y: { test: "error" } },
+	play: async () => {
+		await getDialogImage();
+		await expect(
+			within(document.body).getByRole("dialog", { name: "Test image" }),
+		).toBeInTheDocument();
+	},
+};

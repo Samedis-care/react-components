@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useId } from "react";
 import { Dialog, IconButton, styled, useThemeProps } from "@mui/material";
 import {
 	Close as CloseIcon,
@@ -15,6 +15,8 @@ export interface ImagePreviewDialogProps {
 	src: string;
 	/**
 	 * Alt text for the image
+	 * @remarks Also the dialog's accessible name (the dialog is labelled by the image), so a
+	 *          screen reader announces it when the dialog opens. Should not be empty.
 	 */
 	alt: string;
 	/**
@@ -116,9 +118,18 @@ const ImagePreviewDialog = (inProps: ImagePreviewDialogProps) => {
 	const { t } = useCCTranslations();
 	const { imgRef, containerRef, containerProps, rotateLeft, rotateRight } =
 		useImageZoomPan(open, src);
+	// the dialog is named by the image's alt: without a DialogTitle, MUI's own aria-labelledby
+	// would point at an id no element carries
+	const imageId = useId();
 
 	return (
-		<Root open={open} fullScreen onClose={onClose} className={classes?.root}>
+		<Root
+			open={open}
+			fullScreen
+			onClose={onClose}
+			aria-labelledby={imageId}
+			className={classes?.root}
+		>
 			<CloseButton
 				onClick={onClose}
 				aria-label={t("standalone.file-upload.close")}
@@ -151,6 +162,7 @@ const ImagePreviewDialog = (inProps: ImagePreviewDialogProps) => {
 			>
 				<PreviewImage
 					ref={imgRef}
+					id={imageId}
 					src={src}
 					alt={alt}
 					className={classes?.image}
