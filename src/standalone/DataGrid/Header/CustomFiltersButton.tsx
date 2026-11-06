@@ -3,11 +3,11 @@ import { Button, ButtonProps, Grid } from "@mui/material";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { DataGridCustomFilterIcon, useDataGridProps } from "../DataGrid";
 import combineClassNames from "../../../utils/combineClassNames";
-import { useCustomFilterActiveContext } from "./FilterBar";
+import { useDataGridCustomFiltersActive } from "../DataGridUtils";
 
 const CustomFiltersButton = (props: Omit<ButtonProps, "outlined">) => {
 	const { classes } = useDataGridProps();
-	const customDataChanged = useCustomFilterActiveContext()[0] > 0;
+	const customDataChanged = useDataGridCustomFiltersActive();
 	const { t } = useCCTranslations();
 	return (
 		<Button {...props} variant={"outlined"}>

@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { FormControl, Grid, styled, useThemeProps } from "@mui/material";
-import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
 import { GridSize } from "@mui/material/Grid";
 import { Breakpoint } from "@mui/material/styles";
@@ -81,16 +80,6 @@ const GridSingleSelectFilterBackend = <M extends ModelUnknown>(
 	const { selected } = selectorProps;
 	const { classes } = useDataGridProps();
 	const isActive = !!selected;
-
-	const [, setActiveFilter] = useCustomFilterActiveContext();
-
-	useEffect(() => {
-		if (!isActive) return;
-		setActiveFilter((prev) => prev + 1);
-		return () => {
-			setActiveFilter((prev) => prev - 1);
-		};
-	}, [setActiveFilter, isActive]);
 
 	const selectorStyles = useMemo(
 		() => ({

@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { Grid, styled, useThemeProps } from "@mui/material";
-import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
 import { Breakpoint } from "@mui/material/styles";
 import { GridSize } from "@mui/material/Grid";
@@ -72,16 +71,6 @@ const GridMultiSelectFilterBackend = <
 	const selected = selectorProps.selected ?? EMPTY_STRING_ARRAY;
 	const { classes } = useDataGridProps();
 	const isActive = selected.length > 0;
-	const [, setActiveFilter] = useCustomFilterActiveContext();
-
-	useEffect(() => {
-		if (!isActive) return;
-		setActiveFilter((prev) => prev + 1);
-		return () => {
-			setActiveFilter((prev) => prev - 1);
-		};
-	}, [setActiveFilter, isActive]);
-
 	const selectorClasses = useMemo(
 		() => ({
 			autocomplete: isActive ? "Mui-active" : undefined,

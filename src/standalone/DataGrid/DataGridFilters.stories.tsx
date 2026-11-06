@@ -1,11 +1,17 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, userEvent, waitFor, within } from "storybook/test";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { Box } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
-import { DataGrid, DataGridNoPersist } from "./index";
+import {
+	DataGrid,
+	DataGridNoPersist,
+	GridMultiSelectFilter,
+	GridMultiSelectFilterBackend,
+	GridSingleSelectFilter,
+	GridSingleSelectFilterBackend,
+} from "./index";
 import type {
 	DataGridData,
 	DataGridProps,
@@ -14,6 +20,11 @@ import type {
 } from "./DataGrid";
 
 // ─── Sample data ────────────────────────────────────────────────────────────
+import React, { useMemo } from "react";
+import type { IDataGridFilterBarProps } from "./Header/FilterBar";
+import type { BaseSelectorData, MultiSelectorData } from "../Selector";
+import { Framework } from "../../framework";
+import createTestModel from "../../stories/test-utils/TestModel";
 
 type Task = {
 	id: string;
@@ -114,6 +125,50 @@ const COLUMNS: IDataGridColumnDef[] = [
 		width: [60, 100],
 	},
 ];
+
+// ─── Decorator ───────────────────────────────────────────────────────────────
+
+const STATUS_OPTIONS: BaseSelectorData[] = [
+	{ value: "", label: "All" },
+	{ value: "open", label: "Open" },
+	{ value: "done", label: "Done" },
+	{ value: "lost", label: "Lost" },
+];
+
+const KIND_OPTIONS: MultiSelectorData[] = [
+	{ value: "alpha", label: "Alpha" },
+	{ value: "beta", label: "Beta" },
+	{ value: "gamma", label: "Gamma" },
+];
+
+/**
+ * A filter bar with the two plain helpers for the custom data keys status and
+ * kinds. It changes one key of the custom data at a time (the functional form
+ * of setCustomData keeps the others).
+ */
+const StatusKindsBar = (props: IDataGridFilterBarProps) => {
+	const { customData, setCustomData, inDialog } = props;
+	return (
+		<>
+			<GridSingleSelectFilter
+				label="Status"
+				options={STATUS_OPTIONS}
+				field="status"
+				selected={customData.status as string | undefined}
+				onSelect={(status) => setCustomData((prev) => ({ ...prev, status }))}
+				dialog={inDialog}
+			/>
+			<GridMultiSelectFilter
+				label="Kinds"
+				options={KIND_OPTIONS}
+				field="kinds"
+				selected={customData.kinds as string[] | undefined}
+				onSelect={(kinds) => setCustomData((prev) => ({ ...prev, kinds }))}
+				dialog={inDialog}
+			/>
+		</>
+	);
+};
 
 // ─── Decorator ───────────────────────────────────────────────────────────────
 
@@ -241,5 +296,320 @@ export const Issue3494Item19AndOrAreToggleButtons: Story = {
 		await expect(group.getBoundingClientRect().height).toBeLessThanOrEqual(
 			value.getBoundingClientRect().height,
 		);
+	},
+};
+
+/** The bar's "Filter" button, which opens the filter panel */
+const panelButtonOf = (root: HTMLElement) => {
+	const button = root.querySelector<HTMLElement>(
+		".components-care-data-grid-filter-bar .MuiButton-root",
+	);
+	if (!button) throw new Error("no filter panel button");
+	return button;
+};
+
+/** The calls of a loadData spy */
+const loadCalls = (loadData: unknown) =>
+	(loadData as ReturnType<typeof fn>).mock.calls as [
+		IDataGridLoadDataParameters,
+	][];
+
+const lastLoad = (loadData: unknown) => loadCalls(loadData).at(-1)?.[0];
+
+/** Opens a bar select (BaseSelector) and picks an option */
+const pickInBar = async (combobox: HTMLElement, option: string) => {
+	await userEvent.click(combobox);
+	const listbox = await within(document.body).findByRole("listbox");
+	await userEvent.click(within(listbox).getByRole("option", { name: option }));
+};
+
+// ─── Filter bar and panel ────────────────────────────────────────────────────
+
+/**
+ * The filter bar with GridSingleSelectFilter ("Status") and
+ * GridMultiSelectFilter ("Kinds") next to the search. Picking a value writes
+ * the custom data, the grid reloads with it as additionalFilters, and the
+ * changed filter is outlined (theme secondary colour).
+ */
+export const FilterBarHelpers: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: fn(loadTasks),
+		filterBar: StatusKindsBar,
+	},
+	play: async ({ args, canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		const bar = canvasElement.querySelector<HTMLElement>(
+			".components-care-data-grid-filter-bar",
+		);
+		if (!bar) throw new Error("no filter bar");
+		const [status, kinds] = within(bar).getAllByRole("combobox");
+		await expect(status).toHaveValue("All");
+		await expect(
+			bar.querySelector(".MuiAutocomplete-root.Mui-active"),
+		).toBeNull();
+		await pickInBar(status, "Open");
+		await waitFor(
+			() =>
+				expect(lastLoad(args.loadData)?.additionalFilters).toEqual({
+					status: "open",
+				}),
+			{ timeout: 3000 },
+		);
+		await waitFor(() => expect(canvas.queryByText("Bob Smith")).toBeNull());
+		await expect(status).toHaveValue("Open");
+		await expect(status.closest(".MuiAutocomplete-root")).toHaveClass(
+			"Mui-active",
+		);
+		await pickInBar(kinds, "Beta");
+		await waitFor(
+			() =>
+				expect(lastLoad(args.loadData)?.additionalFilters).toEqual({
+					status: "open",
+					kinds: ["beta"],
+				}),
+			{ timeout: 3000 },
+		);
+		await expect(await canvas.findByText("Carol Jones")).toBeVisible();
+		await expect(canvas.queryByText("Alice Müller")).toBeNull();
+	},
+};
+
+/**
+ * Narrower than enableFilterDialogWidth, the bar is a "Filter" button. It
+ * opens the panel over the rows, where the helpers render as a radio list
+ * and a checkbox list. A pick applies at once; "Close" hides the panel, and
+ * the button's icon marks the changed custom filters.
+ */
+export const FilterPanelHelpers: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: fn(loadTasks),
+		filterBar: StatusKindsBar,
+		enableFilterDialogWidth: 100000,
+		// the settings panel shares this slot; it is hidden and has no violations
+		classes: { contentOverlayPaper: "story-filter-panel" },
+	},
+	parameters: {
+		a11y: {
+			test: "error",
+			// the grid behind the panel has violations of its own
+			context: { include: [".story-filter-panel"] },
+		},
+	},
+	play: async ({ args, canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		// the bar is not shown; the button is
+		await expect(canvasElement.querySelector("[role=combobox]")).toBeNull();
+		const button = panelButtonOf(canvasElement);
+		await expect(button).toHaveTextContent("Filter");
+		const icon = button.querySelector("svg");
+		await expect(icon).not.toHaveClass("CcDataGrid-customFilterActiveIcon");
+		await userEvent.click(button);
+		const panel = await waitFor(() => {
+			const element = Array.from(
+				canvasElement.querySelectorAll<HTMLElement>(".story-filter-panel"),
+			).find((paper) => paper.textContent.includes("Filter selection"));
+			if (!element) throw new Error("the panel is not open");
+			return element;
+		});
+		await expect(
+			within(panel).getByRole("heading", { name: "Filter selection" }),
+		).toBeVisible();
+		await userEvent.click(within(panel).getByRole("radio", { name: "Open" }));
+		await userEvent.click(
+			within(panel).getByRole("checkbox", { name: "Beta" }),
+		);
+		await expect(
+			within(panel).getByRole("radio", { name: "Open" }),
+		).toBeChecked();
+		await waitFor(
+			() =>
+				expect(lastLoad(args.loadData)?.additionalFilters).toEqual({
+					status: "open",
+					kinds: ["beta"],
+				}),
+			{ timeout: 3000 },
+		);
+		await userEvent.click(within(panel).getByRole("button", { name: "Close" }));
+		await waitFor(() => expect(panel).not.toBeVisible());
+		await expect(await canvas.findByText("Carol Jones")).toBeVisible();
+		await expect(button).toBeVisible();
+		await expect(button.querySelector("svg")).toHaveClass(
+			"CcDataGrid-customFilterActiveIcon",
+		);
+		// reopened, the panel shows the same selection
+		await userEvent.click(button);
+		await waitFor(() => expect(panel).toBeVisible());
+		await expect(
+			within(panel).getByRole("radio", { name: "Open" }),
+		).toBeChecked();
+		await expect(
+			within(panel).getByRole("checkbox", { name: "Beta" }),
+		).toBeChecked();
+	},
+};
+
+const OWNER_TO_DATA = (data: Record<string, unknown>): BaseSelectorData => ({
+	value: data.id as string,
+	label: `${data.first_name as string} ${data.last_name as string}`,
+});
+
+const TEAM_TO_DATA = (data: Record<string, unknown>): MultiSelectorData => ({
+	value: data.id as string,
+	label: data.department as string,
+});
+
+const BackendBarHost = (props: Partial<DataGridProps>) => {
+	const model = useMemo(createTestModel, []);
+	const Bar = useMemo(
+		() =>
+			function BackendBar(barProps: IDataGridFilterBarProps) {
+				const { customData, setCustomData, inDialog } = barProps;
+				return (
+					<>
+						<GridSingleSelectFilterBackend
+							label="Owner"
+							model={model}
+							modelToSelectorData={OWNER_TO_DATA}
+							selected={(customData.owner as string | undefined) ?? null}
+							onSelect={(owner) =>
+								setCustomData((prev) => ({ ...prev, owner }))
+							}
+							dialog={inDialog}
+						/>
+						<GridMultiSelectFilterBackend
+							label="Teams"
+							model={model}
+							modelToSelectorData={TEAM_TO_DATA}
+							selected={(customData.teams as string[] | undefined) ?? []}
+							onSelect={(teams) =>
+								setCustomData((prev) => ({ ...prev, teams }))
+							}
+							dialog={inDialog}
+						/>
+					</>
+				);
+			},
+		[model],
+	);
+	return (
+		<Framework>
+			<Box sx={{ height: 500 }}>
+				<DataGridNoPersist>
+					<DataGrid
+						columns={COLUMNS}
+						loadData={loadTasks}
+						filterBar={Bar}
+						{...props}
+					/>
+				</DataGridNoPersist>
+			</Box>
+		</Framework>
+	);
+};
+
+/**
+ * GridSingleSelectFilterBackend ("Owner") and GridMultiSelectFilterBackend
+ * ("Teams") load their options through a model. Picking an owner writes its
+ * id into the custom data and outlines the filter.
+ */
+export const BackendFilterBarHelpers: Story = {
+	args: { loadData: fn(loadTasks) },
+	render: (args) => <BackendBarHost loadData={args.loadData} />,
+	play: async ({ args, canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		const bar = canvasElement.querySelector<HTMLElement>(
+			".components-care-data-grid-filter-bar",
+		);
+		if (!bar) throw new Error("no filter bar");
+		const [owner] = within(bar).getAllByRole("combobox");
+		await userEvent.click(owner);
+		const listbox = await within(document.body).findByRole("listbox");
+		await userEvent.click(
+			await within(listbox).findByRole("option", { name: "Bob Smith" }),
+		);
+		await waitFor(
+			() =>
+				expect(lastLoad(args.loadData)?.additionalFilters).toEqual({
+					owner: "2",
+				}),
+			{ timeout: 3000 },
+		);
+		await expect(owner.closest(".MuiAutocomplete-root")).toHaveClass(
+			"Mui-active",
+		);
+	},
+};
+
+// ─── Defaults from defaultCustomData ─────────────────────────────────────────
+
+const STATUS_KINDS_DEFAULTS = { status: "open", kinds: ["beta"] };
+
+/**
+ * The helpers take their default from the grid's defaultCustomData, here
+ * `{ status: "open", kinds: ["beta"] }`: at the default neither is outlined.
+ * Picking "All" outlines the status filter, because it differs from the
+ * default, and "Reset filter" restores the default, which removes the outline.
+ */
+export const Issue3494Item4HelpersFollowDefaultCustomData: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: fn(loadTasks),
+		filterBar: StatusKindsBar,
+		defaultCustomData: STATUS_KINDS_DEFAULTS,
+	},
+	play: async ({ args, canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Carol Jones")).toBeVisible();
+		await expect(canvas.queryByText("Bob Smith")).toBeNull();
+		const bar = canvasElement.querySelector<HTMLElement>(
+			".components-care-data-grid-filter-bar",
+		);
+		if (!bar) throw new Error("no filter bar");
+		const [status, kinds] = within(bar).getAllByRole("combobox");
+		await expect(status).toHaveValue("Open");
+		// the multi-select lists its selection in the input
+		await expect((kinds as HTMLInputElement).value.trim()).toBe("Beta");
+		await expect(
+			bar.querySelector(".MuiAutocomplete-root.Mui-active"),
+		).toBeNull();
+		await pickInBar(status, "All");
+		await waitFor(
+			() =>
+				expect(lastLoad(args.loadData)?.additionalFilters).toEqual({
+					status: "",
+					kinds: ["beta"],
+				}),
+			{ timeout: 3000 },
+		);
+		await expect(await canvas.findByText("Bob Smith")).toBeVisible();
+		await expect(status.closest(".MuiAutocomplete-root")).toHaveClass(
+			"Mui-active",
+		);
+		await expect(kinds.closest(".MuiAutocomplete-root")).not.toHaveClass(
+			"Mui-active",
+		);
+		await userEvent.click(canvas.getByRole("button", { name: "Reset" }));
+		await userEvent.click(
+			await within(document.body).findByRole("menuitem", {
+				name: "Reset filter",
+			}),
+		);
+		await waitFor(() => expect(status).toHaveValue("Open"));
+		await expect(
+			bar.querySelector(".MuiAutocomplete-root.Mui-active"),
+		).toBeNull();
+		await waitFor(
+			() =>
+				expect(lastLoad(args.loadData)?.additionalFilters).toEqual(
+					STATUS_KINDS_DEFAULTS,
+				),
+			{ timeout: 3000 },
+		);
+		// the rows of the default filter (not those of a reload in between)
+		await waitFor(async () => {
+			await expect(canvas.getByText("Carol Jones")).toBeVisible();
+			await expect(canvas.queryByText("Bob Smith")).toBeNull();
+		});
 	},
 };

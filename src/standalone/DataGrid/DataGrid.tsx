@@ -47,7 +47,6 @@ import StatePersistence, {
 } from "./StatePersistence";
 import { decodePersistedState, normalizeFilterDef } from "./PersistFormat";
 import { IDataGridContentSelectRowViewProps } from "./Content/SelectRowView";
-import { CustomFilterActiveContext } from "./Header/FilterBar";
 import combineClassNames from "../../utils/combineClassNames";
 import Checkbox from "../UIKit/Checkbox";
 import ComponentWithLabel, {
@@ -1459,7 +1458,6 @@ const DataGrid = (
 		selectionUpdatedByProps,
 	} = state;
 	const lastRefreshData = useRef<number>(0);
-	const activeCustomFiltersPack = useState(0);
 
 	const gridRoot = useRef<HTMLDivElement>(null);
 
@@ -1731,44 +1729,40 @@ const DataGrid = (
 							<DataGridColumnsWidthStateContext.Provider
 								value={columnWidthStatePack}
 							>
-								<CustomFilterActiveContext.Provider
-									value={activeCustomFiltersPack}
-								>
-									<SelectAllProvider>
-										<StatePersistence />
-										<HeaderWrapper
-											className={classes?.header}
+								<SelectAllProvider>
+									<StatePersistence />
+									<HeaderWrapper
+										className={classes?.header}
+										sx={
+											state.showFilterDialog ? { display: "none" } : undefined
+										}
+									>
+										<Header />
+									</HeaderWrapper>
+									<ContentWrapper size={"grow"} className={classes?.content}>
+										<Settings columns={columns} />
+										<CustomFilterDialog />
+										<Content
+											columns={visibleColumns}
+											rowsPerPage={rowsPerPage}
+											disableSelection={disableSelection}
+											headerHeight={headerHeight}
+											globalScrollListener={globalScrollListener}
+										/>
+									</ContentWrapper>
+									{!disableFooter && (
+										<FooterWrapper
+											className={classes?.footer}
 											sx={
-												state.showFilterDialog ? { display: "none" } : undefined
+												state.showSettings || state.showFilterDialog
+													? { display: "none" }
+													: undefined
 											}
 										>
-											<Header />
-										</HeaderWrapper>
-										<ContentWrapper size={"grow"} className={classes?.content}>
-											<Settings columns={columns} />
-											<CustomFilterDialog />
-											<Content
-												columns={visibleColumns}
-												rowsPerPage={rowsPerPage}
-												disableSelection={disableSelection}
-												headerHeight={headerHeight}
-												globalScrollListener={globalScrollListener}
-											/>
-										</ContentWrapper>
-										{!disableFooter && (
-											<FooterWrapper
-												className={classes?.footer}
-												sx={
-													state.showSettings || state.showFilterDialog
-														? { display: "none" }
-														: undefined
-												}
-											>
-												<Footer />
-											</FooterWrapper>
-										)}
-									</SelectAllProvider>
-								</CustomFilterActiveContext.Provider>
+											<Footer />
+										</FooterWrapper>
+									)}
+								</SelectAllProvider>
 							</DataGridColumnsWidthStateContext.Provider>
 						</DataGridColumnsStateContext.Provider>
 					</DataGridStateContext.Provider>

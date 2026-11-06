@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
 	Checkbox,
 	Divider,
@@ -8,17 +8,20 @@ import {
 	Typography,
 	useThemeProps,
 } from "@mui/material";
-import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
+import { isDataGridCustomFilterActive } from "./DataGridUtils";
 import { Breakpoint } from "@mui/material/styles";
 import { GridSize } from "@mui/material/Grid";
-import compareArrayContent from "../../utils/compareArrayContent";
 import { MultiSelectorData } from "../Selector";
 import BaseSelector from "../Selector/BaseSelector";
 
+/**
+ * Props of GridMultiSelectFilter
+ */
 export interface GridMultiSelectFilterProps {
 	/**
-	 * Optional label for the filter
+	 * The filter's label: the selector's label in the bar, a text above the
+	 * checkboxes in the panel
 	 */
 	label?: string;
 	/**
@@ -26,28 +29,37 @@ export interface GridMultiSelectFilterProps {
 	 */
 	options: MultiSelectorData[];
 	/**
-	 * The currently selected options
+	 * The key of the grid's custom data this filter edits. Its value in
+	 * DataGridProps.defaultCustomData is the filter's default: shown while
+	 * selected is unset, and restored by "Reset filter". While the selection
+	 * has other entries (isDataGridCustomFilterActive: in any order, undefined,
+	 * null and [] count as unset), the bar outlines the filter.
+	 */
+	field: string;
+	/**
+	 * The selected option values: the custom data's value of field.
+	 * undefined (and null) show the value of field in
+	 * DataGridProps.defaultCustomData, or no selection if it has none.
 	 */
 	selected: string[] | undefined;
 	/**
-	 * Updates the currently selected options
-	 * @param selected The selected options
+	 * Called with the complete new selection when the user adds or removes a
+	 * value
+	 * @param selected The selected option values
 	 */
 	onSelect: (selected: string[]) => void;
 	/**
-	 * Is the grid filter rendered in a dialog?
+	 * Renders the filter panel's variant: pass IDataGridFilterBarProps.inDialog
 	 */
 	dialog: boolean;
 	/**
-	 * Default selection
-	 */
-	defaultSelection: string[];
-	/**
-	 * Breakpoints used in dialog
+	 * Grid sizes of the root in the filter panel, merged over
+	 * `{ xs: 12, md: 6, lg: 3 }`
 	 */
 	dialogBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
 	/**
-	 * Breakpoints used in filter bar
+	 * Grid sizes of the root in the header's filter bar, merged over
+	 * `{ xs: 4 }`
 	 */
 	barBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
 }
@@ -80,6 +92,16 @@ const GridMultiSelectFilterBarRoot = styled(Grid, {
 })({});
 export type GridMultiSelectFilterClassKey = "dialogRoot" | "barRoot";
 
+const EMPTY_SELECTION: string[] = [];
+
+/**
+ * A multi-select for a DataGrid filter bar (DataGridProps.filterBar): a
+ * dropdown without search in the header's bar, a checkbox list in the filter
+ * panel. It edits the custom data key `field` and takes its default from
+ * DataGridProps.defaultCustomData; while its selection differs from that
+ * default, the bar outlines it. Only inside a DataGrid (it reads the grid's
+ * props context). Theme name CcGridMultiSelectFilter.
+ */
 const GridMultiSelectFilter = (inProps: GridMultiSelectFilterProps) => {
 	const props = useThemeProps({
 		props: inProps,
@@ -88,23 +110,20 @@ const GridMultiSelectFilter = (inProps: GridMultiSelectFilterProps) => {
 	const {
 		label,
 		options,
+		field,
 		onSelect,
 		dialog,
 		dialogBreakpoints,
 		barBreakpoints,
 	} = props;
-	const { classes } = useDataGridProps();
-	const selected = props.selected ?? props.defaultSelection;
-	const isActive = !compareArrayContent(selected, props.defaultSelection);
-	const [, setActiveFilter] = useCustomFilterActiveContext();
-
-	useEffect(() => {
-		if (!isActive) return;
-		setActiveFilter((prev) => prev + 1);
-		return () => {
-			setActiveFilter((prev) => prev - 1);
-		};
-	}, [setActiveFilter, isActive]);
+	const { classes, defaultCustomData } = useDataGridProps();
+	const defaultValue = defaultCustomData?.[field];
+	const selected =
+		props.selected ??
+		(Array.isArray(defaultValue)
+			? (defaultValue as string[])
+			: EMPTY_SELECTION);
+	const isActive = isDataGridCustomFilterActive(selected, defaultValue);
 
 	const handleDialogCheckboxToggle = useCallback(
 		(evt: React.ChangeEvent<{ name: string }>, checked: boolean) => {
