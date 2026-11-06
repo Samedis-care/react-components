@@ -26,7 +26,12 @@ export type FormButtonsClassKey = "root" | "buttonWrapper";
 
 export interface FormButtonsProps {
 	/**
-	 * Action buttons (used on form)
+	 * The action buttons, each in its own slot, in order. Arrays are flattened, and
+	 * `null`, `undefined` and booleans get no slot, so conditional buttons can be
+	 * written inline (`{canDelete && <ActionButton … />}`). A slot is keyed by its
+	 * button's `key`, or by the button's position among the children, so a button
+	 * keeps its DOM node (and focus) when a conditional button before it
+	 * disappears. Buttons in an array need unique keys.
 	 */
 	children: React.ReactNode | React.ReactNode[];
 	/**
@@ -41,9 +46,9 @@ export interface FormButtonsProps {
 
 const FormButtons = (inProps: FormButtonsProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcFormButtons" });
-	const children = (
-		Array.isArray(props.children) ? props.children : [props.children]
-	).filter((child) => child !== undefined && child !== null && child !== false);
+	// flat, without null, undefined and booleans, each element keyed by its own key
+	// or its original position, so a removed button does not shift the others' slots
+	const children = React.Children.toArray(props.children);
 
 	if (children.length === 0) return <></>;
 
@@ -55,13 +60,14 @@ const FormButtons = (inProps: FormButtonsProps) => {
 			wrap={"nowrap"}
 			className={combineClassNames([props.classes?.root, props.className])}
 		>
-			{children.flat().map((child: React.ReactNode, index: number) => {
-				return (
-					<ButtonWrapper key={index} className={props.classes?.buttonWrapper}>
-						{child}
-					</ButtonWrapper>
-				);
-			})}
+			{children.map((child, index) => (
+				<ButtonWrapper
+					key={React.isValidElement(child) ? child.key : index}
+					className={props.classes?.buttonWrapper}
+				>
+					{child}
+				</ButtonWrapper>
+			))}
 		</Container>
 	);
 };

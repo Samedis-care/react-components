@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import {
+	render,
+	screen,
+	fireEvent,
+	cleanup,
+	act,
+} from "@testing-library/react";
 import { ThemeProvider, createTheme, Button } from "@mui/material";
 import { Save as SaveIcon } from "@mui/icons-material";
 import ActionButton from "../../src/standalone/UIKit/ActionButton";
@@ -125,6 +131,55 @@ describe("UIKit", () => {
 				</FormButtons>,
 			);
 			expect(screen.getByRole("button", { name: "Only" })).toBeTruthy();
+		});
+
+		it("[ISSUE-3482-ITEM-6] keeps each button's DOM node and focus when a conditional button before it disappears", () => {
+			const Bar = ({ show }: { show: boolean }) => (
+				<FormButtons>
+					<Button>A</Button>
+					{show && <Button>B</Button>}
+					<Button>C</Button>
+				</FormButtons>
+			);
+			const { rerender } = wrap(<Bar show />);
+			const b = screen.getByRole("button", { name: "B" });
+			const c = screen.getByRole("button", { name: "C" });
+			act(() => b.focus());
+			rerender(
+				<ThemeProvider theme={theme}>
+					<Bar show={false} />
+				</ThemeProvider>,
+			);
+			// B's node must go away rather than be reused for C, focus included
+			expect(
+				screen.getByRole("button", { name: "C" }),
+				"C is rendered into B's DOM node",
+			).toBe(c);
+			expect(b).not.toBeInTheDocument();
+			expect(c).not.toHaveFocus();
+		});
+
+		it("[ISSUE-3482-ITEM-6] keeps a keyed button's DOM node and focus when the button before it is dropped from its array", () => {
+			// extraButtons of DefaultFormPageButtons: one array child, filtered by the app
+			const Bar = ({ show }: { show: boolean }) => (
+				<FormButtons>
+					<Button>Save</Button>
+					{[
+						show && <Button key={"b"}>B</Button>,
+						<Button key={"c"}>C</Button>,
+					].filter(Boolean)}
+				</FormButtons>
+			);
+			const { rerender } = wrap(<Bar show />);
+			const c = screen.getByRole("button", { name: "C" });
+			act(() => c.focus());
+			rerender(
+				<ThemeProvider theme={theme}>
+					<Bar show={false} />
+				</ThemeProvider>,
+			);
+			expect(screen.getByRole("button", { name: "C" })).toBe(c);
+			expect(c).toHaveFocus();
 		});
 	});
 
