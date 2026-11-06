@@ -2,6 +2,8 @@ import React, { useMemo } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Box } from "@mui/material";
 import { createMemoryHistory } from "history";
+// eslint-disable-next-line import/no-unresolved
+import { expect } from "storybook/test";
 import SignalPortlet from "./index";
 import { HistoryRouter } from "../Routes";
 
@@ -90,10 +92,56 @@ export const LargeCount: Story = {
 			<SignalPortlet
 				title="High Volume"
 				items={[
-					{ count: 1500, text: "Total Records (capped at 999)" },
+					{ count: 1500, text: "Total Records" },
 					{ count: 42, text: "Processed" },
 				]}
 			/>
 		</WithRouter>
 	),
+};
+
+/**
+ * A count above 999 shows "999+" within its round 40px avatar, and the full
+ * number for assistive technology
+ */
+export const Issue3469Item1CappedCountFitsItsAvatar: Story = {
+	render: () => (
+		<WithRouter>
+			<SignalPortlet
+				title="High Volume"
+				items={[
+					{ count: 999, text: "Exactly 999" },
+					{ count: 1500, text: "Total Records" },
+					{ count: 123456, text: "Archived" },
+				]}
+			/>
+		</WithRouter>
+	),
+	parameters: { a11y: { test: "error" } },
+	play: async ({ canvas, canvasElement }) => {
+		const avatars = Array.from(
+			canvasElement.querySelectorAll<HTMLElement>(".MuiAvatar-root"),
+		);
+		await expect(avatars).toHaveLength(3);
+		await expect(avatars[0]).toHaveTextContent(/^999$/);
+		// every glyph box of "999+" lies inside the circle, so nothing is clipped
+		for (const av of avatars.slice(1)) {
+			const circle = av.getBoundingClientRect();
+			const radius = circle.width / 2;
+			const cx = circle.left + radius;
+			const cy = circle.top + radius;
+			const text = av.querySelector<HTMLElement>("[aria-hidden='true']");
+			if (!text) throw new Error("no visible capped count");
+			await expect(text).toHaveTextContent(/^999\+$/);
+			const box = text.getBoundingClientRect();
+			const dy = Math.max(Math.abs(box.top - cy), Math.abs(box.bottom - cy));
+			const halfChord = Math.sqrt(radius * radius - dy * dy);
+			await expect(box.left).toBeGreaterThanOrEqual(cx - halfChord);
+			await expect(box.right).toBeLessThanOrEqual(cx + halfChord);
+		}
+		// the full numbers, for assistive technology
+		for (const full of ["1500", "123456"]) {
+			await expect(canvas.getByText(full)).not.toHaveAttribute("aria-hidden");
+		}
+	},
 };
