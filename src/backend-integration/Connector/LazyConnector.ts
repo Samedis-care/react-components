@@ -210,6 +210,18 @@ class LazyConnector extends Connector {
 		return this.realConnector.read(this.mapId(id), model);
 	}
 
+	/**
+	 * Queues an update of a record
+	 * @param data The record's data, including its id as index hands it out (a fake one for
+	 *             a record created through this connector)
+	 * @param model The model performing the request
+	 * @returns The record as the queue will write it, which index and read serve until the
+	 *          queue is worked
+	 * @remarks A record which already has a create or an update queued keeps that one
+	 *          request, which then carries this data over the data queued before: what the
+	 *          two requests would have written one after the other. An update of a queued
+	 *          create is still sent as the create, under the fake id the create handed out.
+	 */
 	update(
 		data: Record<ModelFieldName, unknown>,
 		model: ModelUnknown | undefined,
@@ -219,36 +231,33 @@ class LazyConnector extends Connector {
 				(entry.type === "create" || entry.type === "update") &&
 				entry.id === (data.id as string),
 		);
-		const { id, ...otherData } = data;
-
-		const updateFunc = () =>
-			this.realConnector.update(
-				{ ...otherData, id: this.mapId(id as string) },
-				model,
-			);
+		const record = { ...previousQueueEntry?.result?.[0], ...data };
+		const { id, ...fields } = record;
+		const result: ModelGetResponse<ModelUnknown> = [record, {}];
+		const func =
+			previousQueueEntry?.type === "create"
+				? this.realConnector.create.bind(this.realConnector, fields, model)
+				: () =>
+						this.realConnector.update(
+							{ ...fields, id: this.mapId(id as string) },
+							model,
+						);
 
 		if (previousQueueEntry) {
-			if (previousQueueEntry.type === "update") {
-				previousQueueEntry.func = () => updateFunc;
-			} else if (previousQueueEntry.type === "create") {
-				previousQueueEntry.func = this.realConnector.create.bind(
-					this.realConnector,
-					otherData,
-					model,
-				);
-			}
+			previousQueueEntry.func = func;
+			previousQueueEntry.result = result;
 		} else {
 			this.queue.push({
 				type: "update",
-				id: data.id as string,
-				func: updateFunc,
-				result: [data, {}],
+				id: id as string,
+				func,
+				result,
 			});
 		}
 
 		this.onAfterOperation();
 
-		return [data, {}];
+		return result;
 	}
 
 	deleteMultiple(ids: string[], model?: ModelUnknown): void {

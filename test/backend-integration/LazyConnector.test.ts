@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, type Mock } from "vitest";
 import LazyConnector from "../../src/backend-integration/Connector/LazyConnector";
 import type ApiConnector from "../../src/backend-integration/Connector/ApiConnector";
 
@@ -331,5 +331,116 @@ describe("LazyConnector workQueue", () => {
 		// deleting what the backend no longer has is not a reason to stop
 		expect(calls).toStrictEqual(["delete:gone", "create:a"]);
 		expect(lazy.isQueueEmpty()).toBe(true);
+	});
+});
+
+describe("LazyConnector update", () => {
+	/**
+	 * A real connector whose updates are logged with the data they carry
+	 */
+	const makeUpdatingConnector = () => {
+		const { connector, calls } = makeRealConnector();
+		(
+			connector as unknown as {
+				update: (data: Record<string, unknown>) => Promise<unknown>;
+			}
+		).update = vi.fn((data: Record<string, unknown>) => {
+			calls.push(`update:${String(data.id)}:${String(data.note)}`);
+			return Promise.resolve([data, {}]);
+		});
+		return { connector, calls };
+	};
+
+	it("queues an update, shows it in index and sends it once the queue is worked", async () => {
+		const { connector, calls } = makeUpdatingConnector();
+		const lazy = new LazyConnector(connector, false);
+
+		void lazy.update({ id: "j1", note: "first" }, undefined);
+
+		const [rows] = await lazy.index(undefined, undefined);
+		expect(rows).toStrictEqual([{ id: "j1", note: "first" }]);
+		expect(calls).toStrictEqual([]);
+		await lazy.workQueue();
+		expect(calls).toStrictEqual(["update:j1:first"]);
+	});
+
+	it("[ISSUE-3505-ITEM-6] a second update of a record before the queue is worked sends the latest data, and index shows it", async () => {
+		const { connector, calls } = makeUpdatingConnector();
+		const lazy = new LazyConnector(connector, false);
+
+		void lazy.update({ id: "j1", note: "first" }, undefined);
+		void lazy.update({ id: "j1", note: "second" }, undefined);
+		const [rows] = await lazy.index(undefined, undefined);
+		await lazy.workQueue();
+
+		expect({ shown: rows, sent: calls }).toStrictEqual({
+			shown: [{ id: "j1", note: "second" }],
+			sent: ["update:j1:second"],
+		});
+	});
+
+	it("[ISSUE-3505-ITEM-6] index shows the update of a queued create before the queue is worked", async () => {
+		const { connector } = makeUpdatingConnector();
+		const lazy = new LazyConnector(connector, true);
+
+		const [created] = lazy.create({ name: "a", note: "first" }, undefined);
+		void lazy.update({ ...created, note: "second" }, undefined);
+		const [rows] = await lazy.index(undefined, undefined);
+
+		expect(rows.map((row) => row.note)).toStrictEqual(["second"]);
+	});
+
+	/**
+	 * The data each create or update of a connector from makeUpdatingConnector was given
+	 */
+	const sentData = (connector: ApiConnector, method: "create" | "update") =>
+		(
+			connector as unknown as Record<
+				typeof method,
+				Mock<(data: Record<string, unknown>) => unknown>
+			>
+		)[method].mock.calls.map(([data]) => data);
+
+	it("[ISSUE-3505-ITEM-6] two updates carrying different fields send both edits in one request, and read serves them", async () => {
+		const { connector } = makeUpdatingConnector();
+		const lazy = new LazyConnector(connector, false);
+
+		// a partial update, as the DataGrid's inline edit sends one per edited field
+		void lazy.update({ id: "j1", note: "first" }, undefined);
+		const returned = await lazy.update({ id: "j1", title: "t" }, undefined);
+		const read = await lazy.read("j1", undefined);
+		await lazy.workQueue();
+
+		expect({
+			returned: returned[0],
+			read: read[0],
+			sent: sentData(connector, "update"),
+		}).toStrictEqual({
+			returned: { id: "j1", note: "first", title: "t" },
+			read: { id: "j1", note: "first", title: "t" },
+			sent: [{ id: "j1", note: "first", title: "t" }],
+		});
+	});
+
+	it("[ISSUE-3505-ITEM-6] an update of a queued create is sent as that create, with the fields of both", async () => {
+		const { connector, calls } = makeUpdatingConnector();
+		const lazy = new LazyConnector(connector, true);
+
+		const [created] = lazy.create({ name: "a", note: "first" }, undefined);
+		const fakeId = (created as Record<"id", string>).id;
+		void lazy.update({ id: fakeId, note: "second" }, undefined);
+		const [rows] = await lazy.index(undefined, undefined);
+		await lazy.workQueue();
+
+		expect({
+			shown: rows,
+			sent: calls,
+			created: sentData(connector, "create"),
+		}).toStrictEqual({
+			shown: [{ id: fakeId, name: "a", note: "second" }],
+			sent: ["create:a"],
+			created: [{ name: "a", note: "second" }],
+		});
+		expect(lazy.mapId(fakeId)).toBe("real-a");
 	});
 });

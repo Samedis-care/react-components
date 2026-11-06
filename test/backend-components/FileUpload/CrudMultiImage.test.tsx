@@ -486,6 +486,30 @@ describe("CrudMultiImage", () => {
 		expect(await onServer(backend)).toEqual(["a", "b", "c.png"]);
 	});
 
+	it("[ISSUE-3505-ITEM-6] an image replaced twice on a LazyConnector is updated with the second image once the queue is worked", async () => {
+		usePassThroughImages();
+		const backend = new Backend(OWN);
+		const lazy = new LazyConnector(backend as unknown as ApiConnector, false);
+		const { container } = renderMI({ connector: lazy });
+		await ready(container);
+		const dialog = openEdit();
+
+		await dropOn(entries(dialog)[1], [png("first.png")]);
+		await waitFor(() => expect(lazy.isQueueEmpty()).toBe(false));
+		await dropOn(entries(dialog)[1], [png("second.png")]);
+		await waitFor(() => expect(serialize).toHaveBeenCalledTimes(2));
+		await settle();
+		expect(backend.updates).toEqual([]);
+
+		await act(async () => {
+			await lazy.workQueue();
+		});
+
+		expect(
+			backend.updates.map((data) => [data.id, (data.image as File).name]),
+		).toEqual([["2", "second.png"]]);
+	});
+
 	it("reports a refused upload through errorComponent", async () => {
 		usePassThroughImages();
 		const backend = new Backend(OWN);

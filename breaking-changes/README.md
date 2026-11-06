@@ -60,6 +60,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-06 | [The multi selects sort a copy of the selection, and report it in the caller's order](2026-11-06-multi-select-sort-for-display-only.md) | behavior |
 | 2026-11-06 | [The image preview dialog is named by its image's alt](2026-11-06-image-preview-dialog-named-by-alt.md) | behavior |
 | 2026-11-06 | [LocaleSelectorDialog is full screen on phones, and its names wrap](2026-11-06-locale-selector-reflows.md) | behavior |
+| 2026-11-05 | [LazyConnector writes a record updated twice before the save](2026-11-05-lazy-connector-repeated-update.md) | behavior |
 | 2026-11-05 | [File links open only http(s), blob and data URLs, in a tab without access to the app](2026-11-05-file-links-open-safely.md) | behavior |
 | 2026-11-05 | [DecimalInputField commits only an edit, and calls onBlur](2026-11-05-decimal-input-commits-edits-only.md) | behavior |
 | 2026-11-05 | [Warning labels and helper texts are darkened to a readable contrast](2026-11-05-warning-text-contrast.md) | behavior |
