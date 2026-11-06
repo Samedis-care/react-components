@@ -24,6 +24,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-06 | [The multi selects sort a copy of the selection, and report it in the caller's order](2026-11-06-multi-select-sort-for-display-only.md) | behavior |
 | 2026-11-06 | [The image preview dialog is named by its image's alt](2026-11-06-image-preview-dialog-named-by-alt.md) | behavior |
 | 2026-11-06 | [LocaleSelectorDialog is full screen on phones, and its names wrap](2026-11-06-locale-selector-reflows.md) | behavior |
+| 2026-11-05 | [getNumberSeparator finds the group separator in every locale](2026-11-05-number-group-separator-every-locale.md) | behavior |
 | 2026-11-05 | [The icons are typed as Material icons](2026-11-05-icons-svg-icon-component.md) | type |
 | 2026-11-05 | [The Loader's outer slot is `root`, and theme variants apply to it](2026-11-05-loader-root-slot.md) | type, behavior |
 | 2026-11-05 | [AppsIcon shows both rows of squares, centered](2026-11-05-apps-icon-viewbox.md) | behavior |

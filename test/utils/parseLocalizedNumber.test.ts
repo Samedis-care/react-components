@@ -1,6 +1,7 @@
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import ccI18n from "../../src/i18n";
 import parseLocalizedNumber from "../../src/utils/parseLocalizedNumber";
+import getNumberSeparator from "../../src/utils/getNumberSeparator";
 
 const initialLanguage = ccI18n.language;
 afterAll(async () => {
@@ -80,4 +81,80 @@ describe("parseLocalizedNumber", () => {
 			});
 		});
 	}
+
+	// the number inputs commit what they show, so every language CC offers must
+	// read its own grouped numbers back
+	const GROUPED = [10000, 12345, 99999, 123456, 1234567.5];
+
+	it.each(["ru", "fr", "de", "uz", "en", "nl", "de-AT", "de-CH", "it-CH"])(
+		"reads back the grouped numbers %s formats",
+		async (locale) => {
+			await ccI18n.changeLanguage(locale);
+			for (const num of GROUPED) {
+				const formatted = num.toLocaleString(locale);
+				expect(parseLocalizedNumber(formatted), formatted).toBe(num);
+			}
+		},
+	);
+
+	// es and it leave 4-digit numbers ungrouped (minimumGroupingDigits 2)
+	it.each(["es", "es-ES", "it", "it-IT"])(
+		"[ISSUE-3484-ITEM-1] reads back the grouped numbers %s formats",
+		async (locale) => {
+			await ccI18n.changeLanguage(locale);
+			for (const num of GROUPED) {
+				const formatted = num.toLocaleString(locale);
+				expect(parseLocalizedNumber(formatted), formatted).toBe(num);
+			}
+		},
+	);
+});
+
+describe("getNumberSeparator", () => {
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	/** the group separator as the locale shows it in a number it always groups */
+	const groupOf = (locale: string, options?: Intl.NumberFormatOptions) =>
+		new Intl.NumberFormat(locale, { ...options, useGrouping: true })
+			.formatToParts(1234567)
+			.find((part) => part.type === "group")!.value;
+
+	// es, it, it-CH and ru-UA show 1234 ungrouped
+	it.each(["es", "it", "it-CH", "ru-UA", "de", "en"])(
+		"[ISSUE-3484-ITEM-1] gives the group separator of %s, also with options that show no grouping or no fraction digits",
+		async (locale) => {
+			await ccI18n.changeLanguage(locale);
+			const JPY: Intl.NumberFormatOptions = {
+				style: "currency",
+				currency: "JPY",
+			};
+			expect(getNumberSeparator("group")).toBe(groupOf(locale));
+			expect(getNumberSeparator("group", { useGrouping: false })).toBe(
+				groupOf(locale),
+			);
+			expect(getNumberSeparator("group", JPY)).toBe(groupOf(locale, JPY));
+		},
+	);
+
+	it('[ISSUE-3484-ITEM-1] gives the group separator of es and it in an engine without useGrouping "always"', async () => {
+		const NumberFormat = Intl.NumberFormat;
+		// engines before Intl.NumberFormat v3 take "always" as true, which there
+		// means the locale's own grouping ("auto" today)
+		vi.spyOn(Intl, "NumberFormat").mockImplementation(
+			function NumberFormatV1(locales, options) {
+				return new NumberFormat(locales, {
+					...options,
+					useGrouping:
+						options?.useGrouping === "always" ? "auto" : options?.useGrouping,
+				});
+			},
+		);
+		for (const locale of ["es", "it"]) {
+			await ccI18n.changeLanguage(locale);
+			expect(getNumberSeparator("group"), locale).toBe(".");
+			expect(parseLocalizedNumber("12.345"), locale).toBe(12345);
+		}
+	});
 });
