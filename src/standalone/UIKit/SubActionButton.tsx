@@ -6,6 +6,7 @@ import {
 	Tooltip,
 	useThemeProps,
 } from "@mui/material";
+import focusRing from "../../utils/internal/focusRing";
 
 export interface SubActionButtonOwnerState {
 	small: boolean;
@@ -46,6 +47,8 @@ const StyledButton = styled(Button, {
 		"&.Mui-disabled": {
 			color: theme.palette.text.disabled,
 		},
+		// inside the row: the rows fill their menu, which may clip an outer ring
+		"&.Mui-focusVisible": focusRing(theme, -2),
 		"&.MuiButton-label": {
 			justifyContent: "flex-start",
 		},

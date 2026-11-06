@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { fn, expect } from "storybook/test";
+import { fn, expect, waitFor } from "storybook/test";
 import {
 	Save as SaveIcon,
 	Delete as DeleteIcon,
@@ -17,7 +17,14 @@ import NumberFormatter from "./NumberFormatter";
 import CenteredTypography from "./CenteredTypography";
 import Checkbox from "./Checkbox";
 import { TextFieldCC } from "./MuiFieldState";
-import { Button, decomposeColor, getContrastRatio } from "@mui/material";
+import {
+	Box,
+	Button,
+	createTheme,
+	decomposeColor,
+	getContrastRatio,
+	ThemeProvider,
+} from "@mui/material";
 
 // ---- ActionButton ----
 
@@ -75,6 +82,174 @@ export const SmallDisabled: ActionButtonStory = {
 export const NoIcon: ActionButtonStory = {
 	args: {
 		children: "Continue",
+	},
+};
+
+// a focus indicator: an outline or a box-shadow on the element or its box
+const focusRing = (el: Element | null) => {
+	if (!el) return null;
+	const style = getComputedStyle(el);
+	if (style.outlineStyle !== "none" && parseFloat(style.outlineWidth) > 0)
+		return { outline: style.outlineColor };
+	if (style.boxShadow !== "none") return { shadow: style.boxShadow };
+	return null;
+};
+
+// an outline colour composited over white paper
+const overPaper = (color: string) => {
+	const [r, g, b, a = 1] = decomposeColor(color).values;
+	const over = (channel: number) => Math.round(channel * a + 255 * (1 - a));
+	return `rgb(${over(r)}, ${over(g)}, ${over(b)})`;
+};
+
+export const Issue3482Item3KeyboardFocusRing: ActionButtonStory = {
+	parameters: {
+		layout: "padded",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3482-ITEM-3: keyboard focus on ActionButton, SubActionButton and Checkbox shows only a faint ripple (1.5-1.9:1); there is no outline or ring (WCAG 2.4.7, 1.4.11).",
+			},
+		},
+	},
+	render: (args) => (
+		<Box sx={{ display: "flex", gap: 3, alignItems: "center" }}>
+			<ActionButton
+				fullWidth={false}
+				icon={<SaveIcon />}
+				onClick={args.onClick}
+			>
+				Save
+			</ActionButton>
+			<Box sx={{ width: 200 }}>
+				<SubActionButton icon={<HomeIcon />} onClick={args.onClick}>
+					Go Home
+				</SubActionButton>
+			</Box>
+			<Checkbox slotProps={{ input: { "aria-label": "Accept terms" } }} />
+		</Box>
+	),
+	play: async ({ canvas, userEvent }) => {
+		const targets: [string, HTMLElement][] = [
+			["ActionButton", canvas.getByRole("button", { name: "Save" })],
+			["SubActionButton", canvas.getByRole("button", { name: "Go Home" })],
+			[
+				"Checkbox",
+				canvas.getByRole("checkbox", { name: "Accept terms" }).parentElement,
+			],
+		];
+		for (const [name, target] of targets) {
+			await userEvent.tab();
+			// keyboard focus as MUI sees it, so the ring is the only open question
+			await waitFor(() => expect(target).toHaveClass("Mui-focusVisible"));
+			const ring =
+				focusRing(target) ?? focusRing(target.querySelector(":scope > svg"));
+			await expect(ring, `${name} shows no focus ring`).not.toBeNull();
+			if (ring?.outline)
+				await expect(
+					getContrastRatio(overPaper(ring.outline), "#fff"),
+					`${name}'s focus ring is too faint`,
+				).toBeGreaterThanOrEqual(3);
+		}
+	},
+};
+
+const renderFocusTargets: ActionButtonStory["render"] = (args) => (
+	<Box sx={{ display: "flex", gap: 3, alignItems: "center" }}>
+		<ActionButton fullWidth={false} icon={<SaveIcon />} onClick={args.onClick}>
+			Save
+		</ActionButton>
+		<Box sx={{ width: 200 }}>
+			<SubActionButton icon={<HomeIcon />} onClick={args.onClick}>
+				Go Home
+			</SubActionButton>
+		</Box>
+		<Checkbox slotProps={{ input: { "aria-label": "Accept terms" } }} />
+	</Box>
+);
+
+type PlayContext = Parameters<NonNullable<ActionButtonStory["play"]>>[0];
+
+/** Tabs to each control of renderFocusTargets and reads the outline of its ring */
+const tabToEachRing = async ({ canvas, userEvent }: PlayContext) => {
+	const save = canvas.getByRole("button", { name: "Save" });
+	const home = canvas.getByRole("button", { name: "Go Home" });
+	const box = canvas.getByRole("checkbox", {
+		name: "Accept terms",
+	}).parentElement;
+	const targets: [string, HTMLElement, Element][] = [
+		["ActionButton", save, save],
+		["SubActionButton", home, home],
+		["Checkbox", box, box.querySelector(":scope > svg")],
+	];
+	const rings: { name: string; style: string; width: string; color: string }[] =
+		[];
+	for (const [name, target, ring] of targets) {
+		await userEvent.tab();
+		await waitFor(() => expect(target).toHaveClass("Mui-focusVisible"));
+		const style = getComputedStyle(ring);
+		rings.push({
+			name,
+			style: style.outlineStyle,
+			width: style.outlineWidth,
+			color: style.outlineColor,
+		});
+	}
+	return rings;
+};
+
+export const Issue3482Item3FocusRingIsAnOutline: ActionButtonStory = {
+	parameters: {
+		layout: "padded",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3482-ITEM-3: the focus ring is a 2px outline, which forced colors keep in a system color (they drop box-shadows).",
+			},
+		},
+	},
+	render: renderFocusTargets,
+	play: async (context) => {
+		for (const ring of await tabToEachRing(context))
+			await expect(ring, `${ring.name}'s ring`).toMatchObject({
+				style: "solid",
+				width: "2px",
+			});
+	},
+};
+
+// an app's theme ring, as MUI's createTheme({ focusVisible }) takes it
+const GREEN_RING = createTheme({
+	focusVisible: { outlineColor: "rgb(0, 128, 0)" },
+});
+
+export const Issue3482Item3ThemeFocusVisibleRing: ActionButtonStory = {
+	parameters: {
+		layout: "padded",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3482-ITEM-3: a theme that sets MUI's `focusVisible` ring (here `outlineColor: rgb(0, 128, 0)`) styles the ring of all three controls.",
+			},
+		},
+	},
+	decorators: [
+		(Story) => (
+			<ThemeProvider theme={GREEN_RING}>
+				<Story />
+			</ThemeProvider>
+		),
+	],
+	render: renderFocusTargets,
+	play: async (context) => {
+		for (const ring of await tabToEachRing(context))
+			await expect(ring, `${ring.name}'s ring`).toMatchObject({
+				style: "solid",
+				color: "rgb(0, 128, 0)",
+			});
 	},
 };
 
@@ -242,6 +417,24 @@ export const CheckboxChecked: ActionButtonStory = {
 export const CheckboxIndeterminate: ActionButtonStory = {
 	render: () => <Checkbox indeterminate />,
 	play: expectBoxBoundaryContrast,
+};
+
+export const Issue3482Item2IndeterminateCheckboxIsMixed: ActionButtonStory = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3482-ITEM-2: an indeterminate Checkbox is announced as "not checked": only `aria-checked="mixed"` is set, which browsers ignore on a native checkbox (axe `aria-conditional-attr`).',
+			},
+		},
+	},
+	render: () => (
+		<Checkbox
+			indeterminate
+			slotProps={{ input: { "aria-label": "Select all rows" } }}
+		/>
+	),
 };
 
 export const CheckboxDisabled: ActionButtonStory = {

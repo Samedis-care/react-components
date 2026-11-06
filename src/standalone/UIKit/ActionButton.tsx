@@ -8,6 +8,7 @@ import {
 	useThemeProps,
 } from "@mui/material";
 import combineColors from "../../utils/combineColors";
+import focusRing from "../../utils/internal/focusRing";
 
 export type ActionButtonClassKey = "button";
 
@@ -39,6 +40,8 @@ const StyledButton = styled(Button, {
 		"&:.Mui-disabled": {
 			backgroundColor: theme.palette.action.disabled,
 		},
+		// outside the button: drawn on its own fill, the ring would not show
+		"&.Mui-focusVisible": focusRing(theme, 2),
 		minWidth: small ? 0 : undefined,
 		paddingLeft: small ? theme.spacing(3) : undefined,
 		paddingRight: small ? theme.spacing(3) : undefined,

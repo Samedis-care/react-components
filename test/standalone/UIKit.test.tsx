@@ -337,6 +337,29 @@ describe("UIKit", () => {
 			fireEvent.click(screen.getByRole("checkbox"));
 			expect(onChange).toHaveBeenCalled();
 		});
+
+		it("[ISSUE-3482-ITEM-2] puts the native checkbox into the indeterminate state, and takes it out again", () => {
+			const { rerender } = wrap(
+				<Checkbox
+					indeterminate
+					slotProps={{ input: { "aria-label": "Select all" } }}
+				/>,
+			);
+			const input = screen.getByRole<HTMLInputElement>("checkbox", {
+				name: "Select all",
+			});
+			// browsers expose a native checkbox's state from this property and ignore aria-checked
+			expect(input.indeterminate).toBe(true);
+			rerender(
+				<ThemeProvider theme={theme}>
+					<Checkbox
+						indeterminate={false}
+						slotProps={{ input: { "aria-label": "Select all" } }}
+					/>
+				</ThemeProvider>,
+			);
+			expect(input.indeterminate).toBe(false);
+		});
 	});
 
 	describe("MuiFieldState (withMuiFieldState HOC)", () => {

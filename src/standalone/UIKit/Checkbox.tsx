@@ -6,6 +6,7 @@ import {
 	SvgIcon,
 	useThemeProps,
 } from "@mui/material";
+import focusRing from "../../utils/internal/focusRing";
 
 const StyledCheckbox = styled(MuiCheckbox, {
 	name: "CcCheckbox",
@@ -26,6 +27,8 @@ const StyledCheckbox = styled(MuiCheckbox, {
 	"&.Mui-disabled > svg": {
 		borderColor: theme.palette.action.disabled,
 	},
+	// around the box, where MUI draws the theme's ring
+	"&.Mui-focusVisible > svg": focusRing(theme, 2),
 }));
 
 export type CheckboxClassKey = "root";
