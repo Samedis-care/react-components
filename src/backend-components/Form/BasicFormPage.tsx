@@ -26,6 +26,7 @@ import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { Action, Transition } from "history";
 import { RouteContext } from "../../standalone/Routes/Route";
+import matchPath from "../../standalone/Routes/matchPath";
 import { useThemeProps } from "@mui/material";
 import { CrudFormProps } from "../CRUD";
 
@@ -128,6 +129,24 @@ export const BasicFormPageNestingContext = createContext<
 	((active: boolean) => void) | null
 >(null);
 
+/**
+ * Does a navigation to pathname stay inside the form page (routed tab panels, a routed
+ * stepper)? It does when the form's Route still renders at pathname with the same url: the
+ * url itself or a path below it (/rec/1 → /rec/1/more), not one that only starts with the
+ * same characters (/rec/10, /rec/1-archive).
+ * At the root this follows the Route too: a Route "/" renders only at "/", so every other
+ * path leaves the page; a Route "/*" renders at every path, so for it no path leaves the
+ * page.
+ * @param routePath The full path of the form's nearest Route (RouteContext path)
+ * @param routeUrl The url the Route currently matches (RouteContext url)
+ * @param pathname The navigation's target
+ */
+const isInsideFormPage = (
+	routePath: string,
+	routeUrl: string,
+	pathname: string,
+): boolean => matchPath({ path: routePath }, pathname)?.url === routeUrl;
+
 const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	inProps: BasicFormPageProps<RendererPropsT, CustomPropsT>,
 ) => {
@@ -179,6 +198,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	const routeCtx = useContext(RouteContext);
 	if (!disableRouting && !routeCtx) throw new Error("no route match");
 	const routeUrl = routeCtx ? routeCtx.url : "";
+	const routePath = routeCtx ? routeCtx.path : "";
 
 	useEffect(() => {
 		// if the form is read-only, don't annoy the user
@@ -225,7 +245,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 			// special handling: routing inside form page (e.g. routed tab panels, routed stepper)
 			if (
 				!disableRouting &&
-				transition.location.pathname.startsWith(routeUrl)
+				isInsideFormPage(routePath, routeUrl, transition.location.pathname)
 			) {
 				passThrough();
 				return;
@@ -281,6 +301,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 		readOnly,
 		t,
 		formDialog,
+		routePath,
 		routeUrl,
 		pushDialog,
 		disableRouting,
