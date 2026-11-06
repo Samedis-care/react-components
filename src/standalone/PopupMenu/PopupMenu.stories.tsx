@@ -1,8 +1,8 @@
 import React, { useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, within } from "storybook/test";
-import { Button, MenuItem } from "@mui/material";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
+import { Button, MenuItem, MenuProps } from "@mui/material";
 import PopupMenu from "./index";
 
 const meta: Meta<typeof PopupMenu> = {
@@ -95,4 +95,104 @@ const OpenByDefaultDemo = () => {
 
 export const OpenWithItems: Story = {
 	render: () => <OpenByDefaultDemo />,
+};
+
+// --- keyboard, focus, dialogs ---
+
+interface MenuDemoProps {
+	/** called with the label of the activated item */
+	onSelect: (label: string) => void;
+	/** called with the close reason */
+	onClose: (reason: string) => void;
+	labels?: string[];
+	disabledLabels?: string[];
+	keepMounted?: boolean;
+	triggerLabel?: string;
+	menuProps?: Partial<MenuProps>;
+}
+
+const MenuDemo = (props: MenuDemoProps) => {
+	const {
+		onSelect,
+		onClose,
+		labels = ["Alpha", "Beta", "Gamma", "Settings"],
+		disabledLabels = ["Beta"],
+		keepMounted,
+		triggerLabel = "Options",
+		menuProps,
+	} = props;
+	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+	const open = Boolean(anchorEl);
+	return (
+		<>
+			<Button
+				id={"menu-demo-trigger"}
+				aria-haspopup={"menu"}
+				aria-controls={open ? "menu-demo" : undefined}
+				aria-expanded={open}
+				onClick={(e) => setAnchorEl(e.currentTarget)}
+			>
+				{triggerLabel}
+			</Button>
+			<PopupMenu
+				elevation={0}
+				keepMounted={keepMounted}
+				anchorEl={anchorEl}
+				open={open}
+				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+				transformOrigin={{ vertical: "top", horizontal: "center" }}
+				onClose={(_evt, reason) => {
+					onClose(reason);
+					setAnchorEl(null);
+				}}
+				slotProps={{
+					list: { id: "menu-demo", "aria-labelledby": "menu-demo-trigger" },
+				}}
+				{...menuProps}
+			>
+				{labels.map((label) => (
+					<MenuItem
+						key={label}
+						disabled={disabledLabels.includes(label)}
+						onClick={() => {
+							onSelect(label);
+							setAnchorEl(null);
+						}}
+					>
+						{label}
+					</MenuItem>
+				))}
+			</PopupMenu>
+		</>
+	);
+};
+
+type MenuDemoStory = StoryObj<typeof MenuDemo>;
+
+// --- bugs ---
+
+export const Issue3459Item8FocusedItemShowsFocusRing: MenuDemoStory = {
+	args: { onSelect: fn(), onClose: fn() },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3459-ITEM-8: the keyboard-focused item is only tinted (`action.focus`, 1.33:1) and shows nothing in forced colors. Expected: a focus outline.",
+			},
+		},
+	},
+	render: (args) => <MenuDemo {...args} />,
+	play: async ({ canvas }) => {
+		await userEvent.tab();
+		await expect(canvas.getByRole("button", { name: "Options" })).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		const alpha = await within(document.body).findByRole("menuitem", {
+			name: "Alpha",
+		});
+		await waitFor(() => expect(alpha).toHaveFocus());
+		await waitFor(() => expect(alpha).toHaveClass("Mui-focusVisible"));
+		const style = getComputedStyle(alpha);
+		await expect(style.outlineStyle).not.toBe("none");
+		await expect(style.outlineColor).not.toBe("rgba(0, 0, 0, 0)");
+	},
 };

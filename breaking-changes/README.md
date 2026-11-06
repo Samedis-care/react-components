@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [PopupMenu items and the Small icon buttons draw a focus ring](2026-11-06-focus-ring-popup-menu-small-icon-buttons.md) | behavior |
 | 2026-11-06 | [The DataGrid's Delete stays focusable while unavailable](2026-11-06-data-grid-delete-focusable-while-unavailable.md) | behavior |
 | 2026-11-06 | [CrudSelect lists a create that went through when deserialize fails on its response](2026-11-06-crud-select-lists-create-when-deserialize-fails.md) | behavior, type |
 | 2026-11-06 | [The weekly schedule's settings menu lists every action](2026-11-06-weekly-schedule-menu-lists-every-action.md) | behavior |
