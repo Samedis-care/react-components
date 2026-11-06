@@ -1,6 +1,8 @@
 import React from "react";
-import { styled, useThemeProps } from "@mui/material";
+import { ButtonBase, styled, useThemeProps } from "@mui/material";
 import combineClassNames from "../../../utils/combineClassNames";
+import useCCTranslations from "../../../utils/useCCTranslations";
+import focusRing from "../../../utils/internal/focusRing";
 
 export interface ImageDotsProps {
 	/**
@@ -12,7 +14,9 @@ export interface ImageDotsProps {
 	 */
 	active: number;
 	/**
-	 * Set currently active image
+	 * Set currently active image, called when a dot is activated (click, Enter or Space).
+	 * Each dot is a button named after its position ("Image 2 of 3"); the active one has
+	 * `aria-current`.
 	 * @param active Image index
 	 */
 	setActive: (active: number) => void;
@@ -43,19 +47,21 @@ const Container = styled("div", { name: "CcImageDots", slot: "container" })({
 	whiteSpace: "nowrap",
 });
 
-const ImageDot = styled("div", { name: "CcImageDots", slot: "imageDot" })(
+const ImageDot = styled(ButtonBase, { name: "CcImageDots", slot: "imageDot" })(
 	({ theme }) => ({
 		border: `1px solid ${theme.palette.text.primary}`,
 		borderRadius: "100%",
 		height: 12,
 		width: 12,
 		display: "inline-block",
+		verticalAlign: "baseline",
 		flex: "0 0 12px",
 		marginRight: 12,
 		cursor: "pointer",
 		"&.Mui-active": {
 			backgroundColor: theme.palette.text.primary,
 		},
+		"&.Mui-focusVisible": focusRing(theme, 2),
 	}),
 );
 
@@ -64,6 +70,7 @@ export type ImageDotsClassKey = "root" | "container" | "imageDot";
 const ImageDots = (inProps: ImageDotsProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcImageDots" });
 	const { total, active, setActive, className, classes } = props;
+	const { t } = useCCTranslations();
 
 	return (
 		<>
@@ -78,6 +85,14 @@ const ImageDots = (inProps: ImageDotsProps) => {
 									classes?.imageDot,
 								])}
 								onClick={() => setActive(idx)}
+								aria-label={t(
+									"standalone.file-upload.multi-image.image-position",
+									{
+										INDEX: idx + 1,
+										TOTAL: total,
+									},
+								)}
+								aria-current={active === idx ? "true" : undefined}
 							/>
 						))}
 					</Container>

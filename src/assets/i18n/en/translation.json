@@ -196,7 +196,10 @@
 				"add": "Add image",
 				"replace": "Replace image",
 				"prev-image": "Previous image",
-				"next-image": "Next image"
+				"next-image": "Next image",
+				"open-full-screen": "Open {{NAME}} in full screen",
+				"open-full-screen-unnamed": "Open image in full screen",
+				"image-position": "Image {{INDEX}} of {{TOTAL}}"
 			}
 		},
 		"phone-number": {

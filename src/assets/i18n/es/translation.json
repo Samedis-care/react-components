@@ -196,7 +196,10 @@
 				"add": "Añadir imagen",
 				"replace": "Reemplazar imagen",
 				"prev-image": "Imagen anterior",
-				"next-image": "Imagen siguiente"
+				"next-image": "Imagen siguiente",
+				"open-full-screen": "Abrir {{NAME}} en pantalla completa",
+				"open-full-screen-unnamed": "Abrir imagen en pantalla completa",
+				"image-position": "Imagen {{INDEX}} de {{TOTAL}}"
 			}
 		},
 		"phone-number": {

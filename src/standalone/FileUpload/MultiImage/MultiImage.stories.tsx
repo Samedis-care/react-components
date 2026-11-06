@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import MultiImage, { MultiImageImage, MultiImageProps } from "./MultiImage";
+import ImageBox from "./ImageBox";
 
 const svg = (width: number, height: number, body: string) =>
 	"data:image/svg+xml;base64," +
@@ -207,6 +208,32 @@ export const Issue3491Item1EditDialogIsKeyboardOperable: Story = {
 	},
 };
 
+export const Issue3491Item2PageIsKeyboardOperable: Story = {
+	args: { readOnly: true, initialPrimary: "img-1" },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3491-ITEM-2: the page preview opens the full-screen view on click only (a div), Previous and Next are hidden until hovered, and the dots are divs. Expected: a button named after the shown image opens the view with Enter, and focus returns to it on close.",
+			},
+		},
+	},
+	play: async ({ canvas }) => {
+		const opener = canvas.getByRole("button", { name: /photo-2\.png/ });
+		opener.focus();
+		await userEvent.keyboard("{Enter}");
+		await within(document.body).findByRole("dialog");
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() =>
+			expect(within(document.body).queryByRole("dialog")).toBeNull(),
+		);
+		await expect(opener).toHaveFocus();
+		await expect(
+			canvas.getByRole("button", { name: "Next image" }),
+		).toBeVisible();
+	},
+};
+
 /** The edit dialog's actions, in tab order, as their visible text or aria-label reads */
 /**
  * Width in px of the focus ring a control shows: its outline, or a border or outline drawn
@@ -279,5 +306,124 @@ export const Issue3491Item1EveryActionIsATabStop: Story = {
 		);
 		await expect(star).toHaveAttribute("aria-pressed", "true");
 		await expect(star).toHaveFocus();
+	},
+};
+
+/** The element a pointer at the centre of the given element would hit */
+const hitAtCentre = (element: Element) => {
+	const rect = element.getBoundingClientRect();
+	return document.elementFromPoint(
+		rect.left + rect.width / 2,
+		rect.top + rect.height / 2,
+	);
+};
+
+const PAGE_STOPS = [
+	"Open photo-2.png in full screen",
+	"Previous image",
+	"Next image",
+	"Image 1 of 3",
+	"Image 2 of 3",
+	"Image 3 of 3",
+	"Edit",
+];
+
+export const Issue3491Item2EveryViewingControlIsATabStop: Story = {
+	args: { initialPrimary: "img-1" },
+	parameters: {
+		...AXE_GATE,
+		docs: {
+			description: {
+				story:
+					"ISSUE-3491-ITEM-2: Tab reaches every viewing control of the page, each one visible: the button that opens the shown image in full screen, Previous, Next and a dot per image. The open button and the dots show a focus ring. Enter on a dot shows its image. In the full-screen view the dots are buttons too, and Escape gives focus back to the open button.",
+			},
+		},
+	},
+	play: async ({ canvas, canvasElement }) => {
+		const root = canvasElement.querySelector<HTMLElement>(
+			'[class*="CcMultiImage-root"]',
+		);
+		if (!root) throw new Error("no field");
+		// Previous and Next lie over the open button, so a click on them reaches them
+		for (const name of ["Previous image", "Next image"]) {
+			const button = canvas.getByRole("button", { name });
+			await expect(button.contains(hitAtCentre(button))).toBe(true);
+		}
+		const reached: string[] = [];
+		for (let step = 0; step < PAGE_STOPS.length; step++) {
+			await userEvent.tab();
+			const focused = document.activeElement as HTMLElement;
+			await expect(root.contains(focused)).toBe(true);
+			await expect(focused).toBeVisible();
+			const text = focused.getAttribute("aria-label") ?? focused.textContent;
+			reached.push(text ?? "");
+			if (text?.startsWith("Open") || text?.startsWith("Image")) {
+				await expect(
+					focusRingWidth(focused),
+					`${text}: focus ring`,
+				).toBeGreaterThanOrEqual(2);
+			}
+		}
+		await expect(reached).toEqual(PAGE_STOPS);
+
+		const lastDot = canvas.getByRole("button", { name: "Image 3 of 3" });
+		lastDot.focus();
+		await userEvent.keyboard("{Enter}");
+		await expect(lastDot).toHaveAttribute("aria-current", "true");
+		const opener = canvas.getByRole("button", {
+			name: "Open photo-3.png in full screen",
+		});
+
+		opener.focus();
+		await userEvent.keyboard("{Enter}");
+		const view = await within(document.body).findByRole("dialog");
+		const dot = within(view).getByRole("button", { name: "Image 1 of 3" });
+		// the dialog fades in
+		await waitFor(() => expect(dot).toBeVisible());
+		dot.focus();
+		await userEvent.keyboard("{Enter}");
+		await expect(dot).toHaveAttribute("aria-current", "true");
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() =>
+			expect(within(document.body).queryByRole("dialog")).toBeNull(),
+		);
+		await expect(
+			canvas.getByRole("button", { name: "Open photo-1.png in full screen" }),
+		).toHaveFocus();
+	},
+};
+
+export const Issue3491Item2ImageBoxOpensByKeyboard: StoryObj = {
+	parameters: {
+		...AXE_GATE,
+		docs: {
+			description: {
+				story:
+					"ISSUE-3491-ITEM-2: ImageBox on its own, as SCF shows a walk photo, is a button named after the image: Tab shows its focus ring, Enter opens the full-screen view, and Escape gives focus back to it.",
+			},
+		},
+	},
+	render: () => (
+		<ImageBox
+			image={solid("#43a047")}
+			fileName={"Type plate"}
+			width={96}
+			height={96}
+		/>
+	),
+	play: async ({ canvas }) => {
+		await userEvent.tab();
+		const opener = canvas.getByRole("button", {
+			name: "Open Type plate in full screen",
+		});
+		await expect(opener).toHaveFocus();
+		await expect(focusRingWidth(opener)).toBeGreaterThanOrEqual(2);
+		await userEvent.keyboard("{Enter}");
+		await within(document.body).findByRole("dialog");
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() =>
+			expect(within(document.body).queryByRole("dialog")).toBeNull(),
+		);
+		await expect(opener).toHaveFocus();
 	},
 };

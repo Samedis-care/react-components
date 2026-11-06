@@ -51,6 +51,9 @@ const theme = createTheme();
 const t = (key: string) => ccI18n.t(key);
 const UPLOAD = "upload.png";
 const REMOVE = () => t("standalone.file-upload.multi-image.remove");
+const PREV = () => t("standalone.file-upload.multi-image.prev-image");
+const NEXT = () => t("standalone.file-upload.multi-image.next-image");
+const CLOSE = () => t("standalone.file-upload.close");
 const EDIT = () => t("standalone.file-upload.multi-image.edit");
 const REPLACE = () => t("standalone.file-upload.multi-image.replace");
 
@@ -60,6 +63,12 @@ const mk = (id: string): MultiImageImage => ({
 	name: `${id}.png`,
 });
 const png = (name: string) => new File([name], name, { type: "image/png" });
+const allDialogs = () =>
+	Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]'));
+const pageImg = (container: HTMLElement) =>
+	container.querySelector<HTMLImageElement>(
+		'[class*="CcMultiImage-root"] img',
+	)!;
 const entries = (dialog: HTMLElement) =>
 	Array.from(
 		dialog.querySelectorAll<HTMLElement>('[class*="CcImageDialogEntry-root"]'),
@@ -252,5 +261,108 @@ describe("MultiImage a11y — bugs", () => {
 			.focus();
 		await user.keyboard(" ");
 		expect(opened).toEqual([null, "environment"]);
+	});
+
+	it("[ISSUE-3491-ITEM-2] page: a button named after the shown image opens the full-screen view, and Previous and Next are reachable", () => {
+		const { container } = renderPlain({
+			images: [mk("a"), mk("b"), mk("c")],
+			primary: "b",
+			readOnly: true,
+		});
+		const opener = within(container).getByRole("button", { name: /b\.png/ });
+		// before the view opens: the modal view hides the page from assistive technology
+		expect(
+			within(container).getByRole("button", { name: PREV() }),
+		).toBeInTheDocument();
+		expect(
+			within(container).getByRole("button", { name: NEXT() }),
+		).toBeInTheDocument();
+		fireEvent.click(opener);
+		expect(screen.getByRole("dialog")).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3491-ITEM-2] page: Tab reaches the open button, Previous, Next and a dot per image, in that order", async () => {
+		const user = userEventLib.setup();
+		renderPlain({
+			images: [mk("a"), mk("b"), mk("c")],
+			primary: "b",
+			onChange: vi.fn(),
+		});
+		const reached: string[] = [];
+		for (let step = 0; step < 7; step++) {
+			await user.tab();
+			reached.push(
+				document.activeElement!.getAttribute("aria-label") ??
+					document.activeElement!.textContent,
+			);
+		}
+		expect(reached).toEqual([
+			"Open b.png in full screen",
+			PREV(),
+			NEXT(),
+			"Image 1 of 3",
+			"Image 2 of 3",
+			"Image 3 of 3",
+			EDIT(),
+		]);
+	});
+
+	it("[ISSUE-3491-ITEM-2] page: a dot shows its image, and the shown image's dot is marked current", () => {
+		const { container } = renderPlain({
+			images: [mk("a"), mk("b"), mk("c")],
+			primary: "a",
+			readOnly: true,
+		});
+		const dot = (n: number) =>
+			within(container).getByRole("button", { name: `Image ${n} of 3` });
+		expect(dot(1)).toHaveAttribute("aria-current", "true");
+		fireEvent.click(dot(3));
+		expect(pageImg(container)).toHaveAttribute("src", "c.png");
+		expect(dot(3)).toHaveAttribute("aria-current", "true");
+		expect(dot(1)).not.toHaveAttribute("aria-current");
+		expect(
+			within(container).getByRole("button", { name: /c\.png/ }),
+		).toHaveAccessibleName("Open c.png in full screen");
+	});
+
+	it("[ISSUE-3491-ITEM-2] full-screen view: the dots are buttons too", () => {
+		const { container } = renderPlain({
+			images: [mk("a"), mk("b")],
+			primary: "a",
+			readOnly: true,
+		});
+		fireEvent.click(within(container).getByRole("button", { name: /a\.png/ }));
+		const view = screen.getByRole("dialog");
+		fireEvent.click(within(view).getByRole("button", { name: "Image 2 of 2" }));
+		expect(view.querySelector("img")).toHaveAttribute("src", "b.png");
+		expect(
+			within(view).getByRole("button", { name: "Image 2 of 2" }),
+		).toHaveAttribute("aria-current", "true");
+	});
+
+	it("[ISSUE-3491-ITEM-2] edit dialog: each image opens the full-screen view by keyboard, and Escape returns focus to it", async () => {
+		const user = userEventLib.setup();
+		renderPlain({
+			images: [mk("a"), mk("b")],
+			primary: "a",
+			onChange: vi.fn(),
+		});
+		const dialog = openEdit();
+		const opener = within(entries(dialog)[1]).getByRole("button", {
+			name: "Open b.png in full screen",
+		});
+		opener.focus();
+		await user.keyboard("{Enter}");
+		expect(allDialogs()).toHaveLength(2);
+		expect(allDialogs()[1].querySelector("img")).toHaveAttribute(
+			"src",
+			"b.png",
+		);
+		fireEvent.keyDown(allDialogs()[1], { key: "Escape" });
+		await waitFor(() => expect(allDialogs()).toHaveLength(1));
+		expect(opener).toHaveFocus();
+		expect(
+			within(dialog).getByRole("button", { name: CLOSE() }),
+		).toBeInTheDocument();
 	});
 });

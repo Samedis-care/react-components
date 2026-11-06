@@ -7,9 +7,11 @@ import React, {
 } from "react";
 import useDropZone, { UseDropZoneParams } from "../../../utils/useDropZone";
 import {
+	ButtonBase,
 	Dialog,
 	DialogContent,
 	IconButton,
+	iconButtonClasses,
 	styled,
 	Tooltip,
 	useThemeProps,
@@ -27,6 +29,7 @@ import { useDebounce } from "../../../utils/useDebounce";
 import ImageDots, { ImageDotsProps } from "./ImageDots";
 import useImageZoomPan from "../../../utils/useImageZoomPan";
 import useObjectUrl from "../../../utils/useObjectUrl";
+import focusRing from "../../../utils/internal/focusRing";
 
 export interface ImageBoxProps {
 	/**
@@ -47,8 +50,11 @@ export interface ImageBoxProps {
 	height?: CSSProperties["height"];
 	/**
 	 * The custom onClick handler.
-	 * If not set a fullscreen preview will be opened
-	 * If set the onClick handler will be called
+	 * If not set, the image is a button named after fileName ("Open photo.jpg in full
+	 * screen") that opens a fullscreen preview by click, Enter or Space; focus returns to it
+	 * when the preview closes
+	 * If set the onClick handler will be called when the box is clicked, and there is no
+	 * button and no fullscreen preview
 	 * If set to null explicitly no action will be performed and the cursor won't show clickable
 	 */
 	onClick?: React.MouseEventHandler | null;
@@ -57,11 +63,15 @@ export interface ImageBoxProps {
 	 */
 	onFilesDropped?: UseDropZoneParams;
 	/**
-	 * Goto next image. Optional, will show next arrow if set
+	 * Goto next image. Optional, will show next arrow if set. On the box the arrow shows
+	 * while the box is hovered or holds the focus, and always on devices that cannot
+	 * hover; in the fullscreen preview always.
 	 */
 	onNextImage?: () => void;
 	/**
-	 * Goto prev image. Optional, will show go back arrow if set
+	 * Goto prev image. Optional, will show go back arrow if set. On the box the arrow shows
+	 * while the box is hovered or holds the focus, and always on devices that cannot
+	 * hover; in the fullscreen preview always.
 	 */
 	onPrevImage?: () => void;
 	/**
@@ -77,7 +87,8 @@ export interface ImageBoxProps {
 	 */
 	className?: string;
 	/**
-	 * Custom CSS styles
+	 * Custom CSS styles. openButton is the button around the image that opens the
+	 * fullscreen preview (only rendered while onClick is not set).
 	 */
 	classes?: Partial<Record<ImageBoxClassKey, string>>;
 	/**
@@ -99,15 +110,25 @@ const Root = styled("div", { name: "CcImageBox", slot: "root" })<{
 	borderRadius: theme.shape.borderRadius,
 	position: "relative",
 	height: "100%",
-	"& button": {
-		visibility: "hidden",
+	// Previous and Next over the image show while the box is hovered or holds the focus, and
+	// always where nothing can hover. opacity, not visibility: hidden by opacity they stay in
+	// the tab order and the accessibility tree, and focusing one shows it.
+	[`& > .${iconButtonClasses.root}`]: {
 		opacity: 0,
-		transition: "visibility 0s linear 300ms, opacity 300ms",
+		transition: "opacity 300ms",
 	},
-	"&:hover button": {
-		visibility: "visible",
+	[`&:hover > .${iconButtonClasses.root}`]: {
 		opacity: 1,
-		transition: "visibility 0s linear 0s, opacity 300ms",
+	},
+	// at once: a button the keyboard focus moves to is visible from the start
+	[`&:focus-within > .${iconButtonClasses.root}`]: {
+		opacity: 1,
+		transition: "none",
+	},
+	"@media (hover: none)": {
+		[`& > .${iconButtonClasses.root}`]: {
+			opacity: 1,
+		},
 	},
 	...(background && {
 		backgroundColor: theme.palette.secondary.light,
@@ -143,6 +164,40 @@ const NextButton = styled(IconButton, { name: "CcImageBox", slot: "nextBtn" })({
 	right: 0,
 	transform: "translateY(-50%)",
 });
+
+/**
+ * State classes of the open button: there is a previous (swipeLeft) or a next (swipeRight)
+ * image, so the swipe pane needs room on that side
+ */
+const openButtonClasses = {
+	swipeLeft: "CcImageBox-swipeLeft",
+	swipeRight: "CcImageBox-swipeRight",
+};
+
+const OpenButton = styled(ButtonBase, {
+	name: "CcImageBox",
+	slot: "openButton",
+})(({ theme }) => ({
+	// in the swipe pane in place of the image, laid out as the image was: the image fills
+	// the button, and the swipe room is the button's margin
+	display: "inline-block",
+	verticalAlign: "baseline",
+	width: "100%",
+	height: "100%",
+	borderRadius: theme.shape.borderRadius,
+	[`&.${openButtonClasses.swipeLeft}`]: {
+		marginLeft: swipeWidth,
+	},
+	[`&.${openButtonClasses.swipeLeft}, &.${openButtonClasses.swipeRight}`]: {
+		marginRight: swipeWidth,
+	},
+	"& > img": {
+		display: "block",
+		margin: 0,
+	},
+	// inside the button: the swipe pane cuts off what lies outside it
+	"&.Mui-focusVisible": focusRing(theme, -2),
+}));
 
 const FullScreenRotateButtons = styled("div", {
 	name: "CcImageBox",
@@ -275,6 +330,7 @@ export type ImageBoxClassKey =
 	| "removeBtn"
 	| "prevBtn"
 	| "nextBtn"
+	| "openButton"
 	| "fullScreenRotateButtons"
 	| "rotateLeftBtn"
 	| "rotateRightBtn"
@@ -408,6 +464,26 @@ const ImageBox = (inProps: ImageBoxProps) => {
 		rotateRight,
 	} = useImageZoomPan(dialogOpen, src);
 
+	const boxImage = (
+		<Tooltip
+			title={fileName ?? ""}
+			disableTouchListener={!fileName}
+			disableHoverListener={!fileName}
+			disableFocusListener={!fileName}
+		>
+			<StyledImage
+				src={src}
+				alt={""}
+				ownerState={{
+					swipeLeft: !!onPrevImage,
+					swipeRight: !!onNextImage,
+					imageDots: false,
+				}}
+				className={classes?.image}
+			/>
+		</Tooltip>
+	);
+
 	return (
 		<>
 			<Root
@@ -422,6 +498,37 @@ const ImageBox = (inProps: ImageBoxProps) => {
 				}}
 				className={combineClassNames([className, classes?.root])}
 			>
+				<SwipeListener
+					className={classes?.swipeListener}
+					onScroll={handleScrollImage}
+					ref={containerRefImage}
+					onTouchEnd={handleTouchEndImage}
+				>
+					{onClick === undefined ? (
+						// its click, also from Enter and Space, reaches the root's handler
+						<OpenButton
+							aria-label={
+								fileName
+									? t("standalone.file-upload.multi-image.open-full-screen", {
+											NAME: fileName,
+										})
+									: t(
+											"standalone.file-upload.multi-image.open-full-screen-unnamed",
+										)
+							}
+							className={combineClassNames([
+								onPrevImage && openButtonClasses.swipeLeft,
+								onNextImage && openButtonClasses.swipeRight,
+								classes?.openButton,
+							])}
+						>
+							{boxImage}
+						</OpenButton>
+					) : (
+						boxImage
+					)}
+				</SwipeListener>
+				{/* after the image, so they follow it in the tab order and lie over the open button */}
 				{onPrevImage && (
 					<PrevButton
 						onClick={handlePrevImage}
@@ -442,30 +549,6 @@ const ImageBox = (inProps: ImageBoxProps) => {
 						<NextIcon />
 					</NextButton>
 				)}
-				<SwipeListener
-					className={classes?.swipeListener}
-					onScroll={handleScrollImage}
-					ref={containerRefImage}
-					onTouchEnd={handleTouchEndImage}
-				>
-					<Tooltip
-						title={fileName ?? ""}
-						disableTouchListener={!fileName}
-						disableHoverListener={!fileName}
-						disableFocusListener={!fileName}
-					>
-						<StyledImage
-							src={src}
-							alt={""}
-							ownerState={{
-								swipeLeft: !!onPrevImage,
-								swipeRight: !!onNextImage,
-								imageDots: false,
-							}}
-							className={classes?.image}
-						/>
-					</Tooltip>
-				</SwipeListener>
 			</Root>
 			{!onClick && (
 				<StyledDialog open={dialogOpen} fullScreen onClose={closeDialog}>

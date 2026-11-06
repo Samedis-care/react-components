@@ -181,7 +181,10 @@
 				"add": "Rasm qo'shish",
 				"replace": "Rasmni almashtirish",
 				"prev-image": "Oldingi rasm",
-				"next-image": "Keyingi rasm"
+				"next-image": "Keyingi rasm",
+				"open-full-screen": "«{{NAME}}» rasmini to‘liq ekranda ochish",
+				"open-full-screen-unnamed": "Rasmni to‘liq ekranda ochish",
+				"image-position": "{{TOTAL}} ta rasmdan {{INDEX}}-rasm"
 			},
 			"upload-modern-dnd": "Faylni bu yerga sudrab olib tashlang",
 			"upload-modern-btn": "Yuklash muloqot oynasi uchun bosing",

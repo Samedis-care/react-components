@@ -181,7 +181,10 @@
 				"add": "Afbeelding toevoegen",
 				"replace": "Afbeelding vervangen",
 				"prev-image": "Vorige afbeelding",
-				"next-image": "Volgende afbeelding"
+				"next-image": "Volgende afbeelding",
+				"open-full-screen": "{{NAME}} op volledig scherm openen",
+				"open-full-screen-unnamed": "Afbeelding op volledig scherm openen",
+				"image-position": "Afbeelding {{INDEX}} van {{TOTAL}}"
 			},
 			"upload-modern-dnd": "Sleep het bestand hierheen",
 			"upload-modern-btn": "Klik voor een uploaddialoogvenster",

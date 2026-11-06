@@ -181,7 +181,10 @@
 				"add": "Ajouter une image",
 				"replace": "Remplacer l'image",
 				"prev-image": "Image précédente",
-				"next-image": "Image suivante"
+				"next-image": "Image suivante",
+				"open-full-screen": "Ouvrir {{NAME}} en plein écran",
+				"open-full-screen-unnamed": "Ouvrir l'image en plein écran",
+				"image-position": "Image {{INDEX}} sur {{TOTAL}}"
 			},
 			"upload-modern-dnd": "Glissez et déposez le fichier ici",
 			"upload-modern-btn": "Cliquez pour une boîte de dialogue de téléchargement",
