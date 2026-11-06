@@ -6,8 +6,9 @@ import {
 	fireEvent,
 	render,
 	screen,
+	within,
 } from "@testing-library/react";
-import { createTheme, Theme, ThemeProvider } from "@mui/material";
+import { createTheme, List, Theme, ThemeProvider } from "@mui/material";
 import {
 	getStringLabel,
 	selectorLocalLoadHandler,
@@ -17,6 +18,7 @@ import MultiSelect, {
 	MultiSelectProps,
 } from "../../src/standalone/Selector/MultiSelect";
 import ccI18n from "../../src/i18n";
+import MultiSelectEntry from "../../src/standalone/Selector/MultiSelectEntry";
 
 // jsdom has "ontouchstart" on window, so TextFieldWithHelp would add its touch
 // Clear button next to Autocomplete's own one
@@ -47,8 +49,10 @@ const FRUITS: MultiSelectorData[] = [
 	{ value: "cherry", label: "Cherry" },
 	{ value: "zeta", label: "Zeta" },
 ];
-const [APPLE, , CHERRY, ZETA] = FRUITS;
+const [APPLE, BANANA, CHERRY, ZETA] = FRUITS;
+
 const loadFruits = selectorLocalLoadHandler(FRUITS);
+
 const byLabel = (a: MultiSelectorData, b: MultiSelectorData) =>
 	getStringLabel(a).localeCompare(getStringLabel(b));
 
@@ -60,6 +64,7 @@ const values = (spy: { mock: { calls: unknown[][] } }) =>
 
 const renderUi = (ui: React.ReactElement, theme: Theme = createTheme()) =>
 	render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+
 const rerenderUi = (
 	rerender: (ui: React.ReactElement) => void,
 	ui: React.ReactElement,
@@ -67,14 +72,17 @@ const rerenderUi = (
 ) => rerender(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
 
 const combobox = () => screen.getByRole<HTMLInputElement>("combobox");
+
 /** focuses the input (typing needs focus) and opens the list */
 const open = async (input: HTMLElement = combobox()) => {
 	act(() => input.focus());
 	fireEvent.mouseDown(input);
 	await flush();
 };
+
 const removeButton = (label: string) =>
 	screen.getByRole("button", { name: `Remove ${label}` });
+
 /** the labels of the selected entries, in the order they are listed */
 const entryLabels = () =>
 	screen
@@ -161,5 +169,93 @@ describe("MultiSelect bugs", () => {
 		expect(entryLabels()).toEqual(["Zeta", "Cherry", "Banana", "Apple"]);
 		rerenderUi(rerender, ui(undefined));
 		expect(entryLabels()).toEqual(["Zeta", "Cherry", "Apple", "Banana"]);
+	});
+	it("[ISSUE-3488-ITEM-22] exposes the selected entries as one list with an item per entry", async () => {
+		renderUi(
+			<Host
+				initial={[APPLE, BANANA, CHERRY]}
+				classes={{ selectedEntry: "entries" }}
+			/>,
+		);
+		await flush();
+		const box = document.querySelector(".entries");
+		if (!(box instanceof HTMLElement)) throw new Error("no entries box");
+		expect(within(box).getAllByRole("list")).toHaveLength(1);
+		expect(within(box).getAllByRole("listitem")).toHaveLength(3);
+	});
+	it("[ISSUE-3488-ITEM-22] makes no control of an entry without onClick, also while disabled", async () => {
+		const ui = (disabled: boolean) => (
+			<MultiSelect
+				selected={[APPLE, BANANA]}
+				onSelect={() => {}}
+				onLoad={loadFruits}
+				disabled={disabled}
+				classes={{ selectedEntry: "entries" }}
+			/>
+		);
+		const { rerender } = renderUi(ui(false));
+		await flush();
+		const box = () => {
+			const element = document.querySelector(".entries");
+			if (!(element instanceof HTMLElement)) throw new Error("no entries box");
+			return element;
+		};
+		// only the remove buttons are controls
+		expect(
+			within(box())
+				.getAllByRole("button")
+				.map((button) => button.getAttribute("aria-label")),
+		).toEqual(["Remove Apple", "Remove Banana"]);
+		rerenderUi(rerender, ui(true));
+		await flush();
+		expect(box().querySelectorAll("[tabindex='0']")).toHaveLength(0);
+	});
+	it("[ISSUE-3488-ITEM-22] makes the row of an entry with onClick a button beside its remove button, inside the entry's list item", async () => {
+		const onClick = vi.fn();
+		renderUi(
+			<Host
+				initial={[{ ...APPLE, onClick }, BANANA]}
+				classes={{ selectedEntry: "entries" }}
+			/>,
+		);
+		await flush();
+		const box = document.querySelector(".entries");
+		if (!(box instanceof HTMLElement)) throw new Error("no entries box");
+		const [appleItem, bananaItem] = within(box).getAllByRole("listitem");
+		const row = within(appleItem).getByRole("button", { name: "Apple" });
+		// one stop for the row, one per remove button, in reading order
+		expect(within(box).getAllByRole("button")).toEqual([
+			row,
+			removeButton("Apple"),
+			removeButton("Banana"),
+		]);
+		expect(row.contains(removeButton("Apple"))).toBe(false);
+		expect(appleItem.contains(removeButton("Apple"))).toBe(true);
+		expect(bananaItem.contains(removeButton("Banana"))).toBe(true);
+		fireEvent.click(row);
+		expect(onClick).toHaveBeenCalledTimes(1);
+		fireEvent.click(removeButton("Apple"));
+		await flush();
+		expect(onClick).toHaveBeenCalledTimes(1);
+		expect(within(box).getAllByRole("listitem")).toHaveLength(1);
+	});
+	it("[ISSUE-3488-ITEM-22] keeps an entry's divider inside its list item", () => {
+		const { container } = renderUi(
+			<List>
+				<MultiSelectEntry enableDivider setData={() => {}} data={APPLE} />
+				<MultiSelectEntry
+					enableDivider={false}
+					setData={() => {}}
+					data={BANANA}
+				/>
+			</List>,
+		);
+		const list = container.querySelector("ul");
+		if (!list) throw new Error("no list");
+		expect(Array.from(list.children).map((child) => child.tagName)).toEqual([
+			"LI",
+			"LI",
+		]);
+		expect(list.querySelectorAll("li > hr")).toHaveLength(1);
 	});
 });

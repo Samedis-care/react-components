@@ -1,7 +1,7 @@
 import React from "react";
 import {
 	Divider,
-	List,
+	ListItem,
 	ListItemSecondaryAction,
 	ListItemText,
 	styled,
@@ -54,21 +54,44 @@ export interface MultiSelectEntryProps<DataT extends MultiSelectorData> {
 	classes?: Partial<Record<MultiSelectEntryClassKey, string>>;
 }
 
-const Root = styled(List, { name: "CcMultiSelectEntry", slot: "root" })({});
+const Root = styled(ListItem, { name: "CcMultiSelectEntry", slot: "root" })({
+	// the row spans the whole width, the remove button sits on its end
+	paddingLeft: 0,
+	paddingRight: 0,
+});
 
 export interface MultiSelectEntrySelectedOwnerState {
 	unClickable: boolean;
 	ignore: boolean;
 }
+const selectedStyles = ({
+	ownerState: { unClickable, ignore },
+}: {
+	ownerState: MultiSelectEntrySelectedOwnerState;
+}) => ({
+	...(unClickable && { cursor: "unset" }),
+	...(ignore && { textDecoration: "line-through" }),
+});
+// the row of an entry with onClick
 const Selected = styled(SmallListItemButton, {
 	name: "CcMultiSelectEntry",
 	slot: "selected",
-})<{ ownerState: MultiSelectEntrySelectedOwnerState }>(
-	({ ownerState: { unClickable, ignore } }) => ({
-		...(unClickable && { cursor: "unset" }),
-		...(ignore && { textDecoration: "line-through" }),
-	}),
-);
+})<{ ownerState: MultiSelectEntrySelectedOwnerState }>(selectedStyles);
+// the row of an entry without onClick: laid out like a list item button, but no control
+const SelectedText = styled("div", {
+	name: "CcMultiSelectEntry",
+	slot: "selected",
+})<{ ownerState: MultiSelectEntrySelectedOwnerState }>((props) => ({
+	display: "flex",
+	flexGrow: 1,
+	alignItems: "center",
+	position: "relative",
+	minWidth: 0,
+	boxSizing: "border-box",
+	textAlign: "left",
+	padding: "8px 16px",
+	...selectedStyles(props),
+}));
 
 const Label = styled(ListItemText, {
 	name: "CcMultiSelectEntry",
@@ -94,7 +117,13 @@ const StyledRemoveIcon = styled(RemoveIcon, {
 const StyledDivider = styled(Divider, {
 	name: "CcMultiSelectEntry",
 	slot: "divider",
-})({});
+})({
+	// along the bottom edge of the list item, outside its flex row
+	position: "absolute",
+	left: 0,
+	right: 0,
+	bottom: 0,
+});
 
 export interface MultiSelectEntryImageOwnerState {
 	iconSize?: number;
@@ -113,6 +142,13 @@ const StyledImage = styled("img", {
 export type MultiSelectEntryClassKey =
 	"root" | "selected" | "label" | "icon" | "iconSvg" | "divider" | "image";
 
+/**
+ * One selected entry of MultiSelect, rendered as a list item (`<li>`, the
+ * `root` slot) of the list of selected entries: the row (`selected`) with the
+ * optional icon and the label, and beside it the remove button (`icon`) when
+ * `handleDelete` is set. With `data.onClick` the row is a button, otherwise
+ * plain text.
+ */
 const MultiSelectEntry = <DataT extends MultiSelectorData>(
 	inProps: MultiSelectEntryProps<DataT>,
 ) => {
@@ -128,51 +164,60 @@ const MultiSelectEntry = <DataT extends MultiSelectorData>(
 		className,
 	} = props;
 
-	return (
+	const rowContent = (
 		<>
-			<Root className={combineClassNames([className, classes?.root])}>
+			{enableIcons && (
+				<SmallListItemIcon>
+					{typeof data.icon === "string" ? (
+						<StyledImage
+							ownerState={{ iconSize }}
+							src={data.icon}
+							alt={""}
+							className={classes?.image}
+						/>
+					) : (
+						data.icon
+					)}
+				</SmallListItemIcon>
+			)}
+			<Label className={classes?.label}>{data.label}</Label>
+		</>
+	);
+	const rowOwnerState = { unClickable: !data.onClick, ignore: !!data.ignore };
+
+	return (
+		<Root className={combineClassNames([className, classes?.root])}>
+			{data.onClick ? (
 				<Selected
-					ownerState={{ unClickable: !data.onClick, ignore: !!data.ignore }}
+					ownerState={rowOwnerState}
 					onClick={data.onClick}
 					className={classes?.selected}
-					disableRipple={!data.onClick}
-					disableTouchRipple={!data.onClick}
 				>
-					{enableIcons && (
-						<SmallListItemIcon>
-							{typeof data.icon === "string" ? (
-								<StyledImage
-									ownerState={{ iconSize }}
-									src={data.icon}
-									alt={""}
-									className={classes?.image}
-								/>
-							) : (
-								data.icon
-							)}
-						</SmallListItemIcon>
-					)}
-					<Label className={classes?.label}>{data.label}</Label>
-					{handleDelete && (
-						<ListItemSecondaryAction>
-							<StyledRemoveButton
-								className={classes?.icon}
-								edge={"end"}
-								name={data.value}
-								disabled={!handleDelete}
-								onClick={handleDelete}
-								aria-label={t("standalone.selector.multi-select.remove-item", {
-									ITEM: data.label,
-								})}
-							>
-								<StyledRemoveIcon className={classes?.iconSvg} />
-							</StyledRemoveButton>
-						</ListItemSecondaryAction>
-					)}
+					{rowContent}
 				</Selected>
-			</Root>
+			) : (
+				<SelectedText ownerState={rowOwnerState} className={classes?.selected}>
+					{rowContent}
+				</SelectedText>
+			)}
+			{handleDelete && (
+				<ListItemSecondaryAction>
+					<StyledRemoveButton
+						className={classes?.icon}
+						edge={"end"}
+						name={data.value}
+						disabled={!handleDelete}
+						onClick={handleDelete}
+						aria-label={t("standalone.selector.multi-select.remove-item", {
+							ITEM: data.label,
+						})}
+					>
+						<StyledRemoveIcon className={classes?.iconSvg} />
+					</StyledRemoveButton>
+				</ListItemSecondaryAction>
+			)}
 			{enableDivider && <StyledDivider className={classes?.divider} />}
-		</>
+		</Root>
 	);
 };
 

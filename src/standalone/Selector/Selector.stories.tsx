@@ -465,6 +465,37 @@ export const MultiSelectWithTagsWithInitialValues: StoryObj = {
 };
 
 // ---------------------------------------------------------------------------
+// MultiSelect family: keyboard, removal and the entry renderer
+// ---------------------------------------------------------------------------
+
+const APPLE = FRUITS[0];
+const BANANA = FRUITS[2];
+const loadFruitOptions = selectorLocalLoadHandler(FRUITS);
+
+/** a controlled MultiSelect over FRUITS between two buttons, for tab order */
+const MultiBetweenButtons = ({
+	initial = [],
+	...other
+}: Partial<React.ComponentProps<typeof MultiSelect<MultiSelectorData>>> & {
+	initial?: MultiSelectorData[];
+}) => {
+	const [selected, setSelected] = useState<MultiSelectorData[]>(initial);
+	return (
+		<div style={{ width: 350 }}>
+			<button type="button">before</button>
+			<MultiSelect<MultiSelectorData>
+				label="Fruits"
+				onLoad={loadFruitOptions}
+				{...other}
+				selected={selected}
+				onSelect={setSelected}
+			/>
+			<button type="button">after</button>
+		</div>
+	);
+};
+
+// ---------------------------------------------------------------------------
 // Truncated result sets
 // ---------------------------------------------------------------------------
 
@@ -944,5 +975,35 @@ export const BaseSelectorMultipleSlowLoad: StoryObj = {
 		await waitFor(() =>
 			expect(optionTexts()).toEqual(["Strawberry", "Blueberry"]),
 		);
+	},
+};
+
+// ---------------------------------------------------------------------------
+// known bugs (see BUGS.md)
+// ---------------------------------------------------------------------------
+
+export const Issue3488Item22EntriesAreOneList: StoryObj = {
+	parameters: {
+		a11y: {
+			test: "error",
+			options: {
+				runOnly: {
+					type: "rule",
+					values: ["list", "listitem", "nested-interactive"],
+				},
+			},
+		},
+		docs: {
+			description: {
+				story:
+					'ISSUE-3488-ITEM-22: every selected entry of MultiSelect is its own `<ul>` holding a `role="button"` row (no `<li>`), with the remove button nested inside that row.',
+			},
+		},
+	},
+	render: () => <MultiBetweenButtons initial={[APPLE, BANANA]} />,
+	play: async ({ canvas }) => {
+		await expect(
+			canvas.getAllByRole("button", { name: /^Remove/ }),
+		).toHaveLength(2);
 	},
 };

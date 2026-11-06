@@ -3,7 +3,7 @@ import BaseSelector, {
 	BaseSelectorData,
 	BaseSelectorProps,
 } from "./BaseSelector";
-import { Grid, Paper, styled, useThemeProps } from "@mui/material";
+import { Grid, List, Paper, styled, useThemeProps } from "@mui/material";
 import MultiSelectEntry, { MultiSelectEntryProps } from "./MultiSelectEntry";
 import { showConfirmDialogBool } from "../../non-standalone/Dialog/Utils";
 import { DialogContext } from "../../framework/DialogContextProvider";
@@ -43,7 +43,9 @@ export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
 	 */
 	selected: DataT[];
 	/**
-	 * Specify a custom component for displaying multi select items
+	 * Specify a custom component for displaying multi select items. The entries
+	 * are the items of one list (`<ul>`), so its root must be an `<li>`, e.g.
+	 * MUI's ListItem, as MultiSelectEntry renders.
 	 */
 	selectedEntryRenderer?: React.ComponentType<MultiSelectEntryProps<DataT>>;
 	/**
@@ -253,22 +255,24 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 			{props.selected.length > 0 && (
 				<SelectedEntry size={12} className={classes?.selectedEntry}>
 					<Paper elevation={0}>
-						{(selectedSort
-							? [...props.selected].sort(selectedSort)
-							: props.selected
-						).map((data: DataT, index: number) => (
-							<EntryRender
-								key={getId(data) || index.toString(16)}
-								enableDivider={props.selected.length === index - 1}
-								enableIcons={enableIcons}
-								handleDelete={
-									disabled || data.noDelete ? undefined : handleDelete
-								}
-								data={data}
-								setData={handleSetData}
-								iconSize={props.iconSize}
-							/>
-						))}
+						<List disablePadding>
+							{(selectedSort
+								? [...props.selected].sort(selectedSort)
+								: props.selected
+							).map((data: DataT, index: number) => (
+								<EntryRender
+									key={getId(data) || index.toString(16)}
+									enableDivider={props.selected.length === index - 1}
+									enableIcons={enableIcons}
+									handleDelete={
+										disabled || data.noDelete ? undefined : handleDelete
+									}
+									data={data}
+									setData={handleSetData}
+									iconSize={props.iconSize}
+								/>
+							))}
+						</List>
 					</Paper>
 				</SelectedEntry>
 			)}
