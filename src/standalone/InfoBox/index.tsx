@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import {
 	ErrorOutlined,
 	InfoOutlined,
@@ -128,11 +128,21 @@ export interface InfoBoxProps {
 	 */
 	heading: string;
 	/**
-	 * Is the info box expanded by default
+	 * Initial expanded state, read once at mount: `true` shows the message,
+	 * `false` shows only the header until the user opens it. Later changes
+	 * are ignored. While `alwaysExpanded` is `true` the box is open whatever
+	 * this says.
 	 */
 	expanded: boolean;
 	/**
-	 * Is the InfoBox force expanded or force collapsed?
+	 * `true` keeps the box open: the message is shown and the user cannot
+	 * collapse it. `false` is the same as not set: the box starts as
+	 * `expanded` says and the user opens and closes it, so a condition can be
+	 * passed directly (`alwaysExpanded={isLocked}`). A change after mount
+	 * takes effect: once it is no longer `true`, the box shows the state the
+	 * user last toggled to (initially `expanded`), and the user can toggle it
+	 * again.
+	 * @default false
 	 */
 	alwaysExpanded?: boolean;
 	/**
@@ -192,12 +202,23 @@ const InfoBox = (inProps: InfoBoxProps) => {
 		}
 	}, [status]);
 
+	// The state the user toggles, starting at `expanded`. The Accordion is
+	// always controlled, so `alwaysExpanded` can change after mount without
+	// switching it between controlled and uncontrolled.
+	const [userExpanded, setUserExpanded] = useState(expanded);
+	const handleChange = useCallback(
+		(event: React.SyntheticEvent, newExpanded: boolean) => {
+			setUserExpanded(newExpanded);
+			onChange?.(event, newExpanded);
+		},
+		[onChange],
+	);
+
 	return (
 		<AccordionStyled
 			className={combineClassNames([className, classes?.root])}
-			defaultExpanded={expanded}
-			expanded={alwaysExpanded}
-			onChange={onChange}
+			expanded={!!alwaysExpanded || userExpanded}
+			onChange={handleChange}
 		>
 			<AccordionSummaryStyled
 				ownerState={{ status, alwaysExpanded: !!alwaysExpanded }}
