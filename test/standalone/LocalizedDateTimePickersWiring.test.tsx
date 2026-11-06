@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import React from "react";
 import { act, cleanup, render, screen } from "@testing-library/react";
-import { ThemeProvider, createTheme } from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import moment from "moment";
@@ -17,6 +17,7 @@ import LocalizedDateTimePicker from "../../src/standalone/LocalizedDateTimePicke
  */
 
 const theme = createTheme();
+
 const Wrap = ({ children }: { children: React.ReactNode }) => (
 	<ThemeProvider theme={theme}>
 		<LocalizationProvider dateAdapter={AdapterMoment}>
@@ -39,6 +40,53 @@ const PICKERS = [
 	["LocalizedDatePicker", LocalizedDatePicker],
 	["LocalizedDateTimePicker", LocalizedDateTimePicker],
 ] as const;
+
+describe.each(PICKERS)("%s wiring", (_name, Picker) => {
+	it("[ISSUE-3474-ITEM-1] renders an invalid value instead of looping", () => {
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => {});
+		try {
+			render(
+				<Wrap>
+					<Picker label="Due" value={moment.invalid()} onChange={vi.fn()} />
+				</Wrap>,
+			);
+		} finally {
+			consoleError.mockRestore();
+		}
+		expect(screen.getByRole("group", { name: "Due" })).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3474-ITEM-1] shows an invalid value as an invalid field and reports invalidDate, as MUI does", () => {
+		const onChange = vi.fn();
+		const onError = vi.fn<(error: unknown) => void>();
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => {});
+		try {
+			render(
+				<Wrap>
+					<Picker
+						label="Due"
+						value={moment.invalid()}
+						onChange={onChange}
+						onError={onError}
+					/>
+				</Wrap>,
+			);
+		} finally {
+			consoleError.mockRestore();
+		}
+		expect({
+			invalid: screen
+				.getByRole("group", { name: "Due" })
+				.getAttribute("aria-invalid"),
+			errors: onError.mock.calls.map((call) => call[0]),
+			changes: onChange.mock.calls.length,
+		}).toEqual({ invalid: "true", errors: ["invalidDate"], changes: 0 });
+	});
+});
 
 const STORED = "2026-08-01T10:00";
 

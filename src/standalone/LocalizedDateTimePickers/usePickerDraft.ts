@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { usePickerAdapter } from "@mui/x-date-pickers";
 import type {
+	MuiPickersAdapter,
 	PickerChangeHandlerContext,
 	PickerValidDate,
 } from "@mui/x-date-pickers";
@@ -16,6 +17,29 @@ interface PickerDraftState {
 	draft: PickerValidDate | null;
 	committed: PickerValidDate | null | undefined;
 }
+
+/**
+ * Whether two picker values are the same, compared as MUI's own value manager
+ * does: the same object, the same instant, or both an invalid date. The adapter
+ * alone says an invalid date differs even from itself, which would make the
+ * render-phase reset below fire on every render. `null` and an invalid date
+ * stay different.
+ * @param adapter The picker adapter
+ * @param a One value
+ * @param b The other value
+ * @returns Whether the two are the same value
+ */
+const isSameValue = (
+	adapter: MuiPickersAdapter,
+	a: PickerValidDate | null,
+	b: PickerValidDate | null,
+): boolean => {
+	if (a === b) return true;
+	if (a != null && b != null && !adapter.isValid(a) && !adapter.isValid(b)) {
+		return true;
+	}
+	return adapter.isEqual(a, b);
+};
 
 export type PickerDraftChangeHandler<TError> = (
 	value: PickerValidDate | null,
@@ -92,10 +116,13 @@ const usePickerDraft = <TError>(
 
 	// The consumer's value now means a different moment in time than the one the
 	// draft was typed over, so the draft is stale. Comparing by value rather than
-	// by reference is what tolerates the `moment(...)`-in-render idiom; deriving
-	// during render rather than in an effect keeps the stale draft from being
-	// painted once first.
-	if (holdsDraft && !adapter.isEqual(state.committed ?? null, value ?? null)) {
+	// by reference is what tolerates the `moment(...)`-in-render idiom (also for
+	// an invalid date, `moment(null)` in render); deriving during render rather
+	// than in an effect keeps the stale draft from being painted once first.
+	if (
+		holdsDraft &&
+		!isSameValue(adapter, state.committed ?? null, value ?? null)
+	) {
 		setState({ draft: value ?? null, committed: value });
 	}
 

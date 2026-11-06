@@ -215,4 +215,38 @@ describe("usePickerDraft", () => {
 		// and the consumer's value is rendered as-is, with no draft in between
 		expect(shown(result)).toBe("2024-06-15");
 	});
+
+	it("[ISSUE-3474-ITEM-1] settles on an invalid value instead of looping", () => {
+		const invalid = moment.invalid();
+		let rendered: { current: Draft } | undefined;
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => {});
+		try {
+			rendered = renderDraft(invalid, vi.fn()).result;
+		} finally {
+			consoleError.mockRestore();
+		}
+
+		expect(rendered?.current.value).toBe(invalid);
+	});
+
+	it("[ISSUE-3474-ITEM-1] keeps one invalid value, and still follows the consumer to null or a date", () => {
+		const first = moment.invalid();
+		const { result, rerender } = renderDraft(first, vi.fn());
+
+		// `moment(record.due_date)` in render: a fresh invalid instance each time.
+		// The field compares by reference, so a new object would rebuild its sections.
+		rerender({ value: moment.invalid() });
+		expect(result.current.value).toBe(first);
+
+		// an invalid date is not an empty value
+		rerender({ value: null });
+		expect(result.current.value).toBeNull();
+		rerender({ value: moment.invalid() });
+		expect((result.current.value as Moment).isValid()).toBe(false);
+
+		rerender({ value: moment("2024-06-15") });
+		expect(shown(result)).toBe("2024-06-15");
+	});
 });
