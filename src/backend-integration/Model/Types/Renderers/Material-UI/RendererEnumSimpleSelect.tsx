@@ -45,6 +45,11 @@ class RendererEnumSelect<T extends string = string> extends TypeEnum<T> {
 			);
 		}
 		if (visibility.editable) {
+			// the combobox is a div, which a label's htmlFor cannot reach: it and its list of
+			// options point at the label by id, else (no form behind them, e.g. a data grid
+			// cell) take its text
+			const labelId = id && `${id}-label`;
+			const nameProps = labelId ? undefined : { "aria-label": label };
 			return (
 				<FormControlFieldsetCC
 					component={"fieldset"}
@@ -54,7 +59,9 @@ class RendererEnumSelect<T extends string = string> extends TypeEnum<T> {
 					warning={!!warningMsg}
 					dirty={dirty}
 				>
-					<InputLabel shrink>{label}</InputLabel>
+					<InputLabel id={labelId} shrink>
+						{label}
+					</InputLabel>
 					<Select
 						name={field}
 						value={value}
@@ -63,6 +70,9 @@ class RendererEnumSelect<T extends string = string> extends TypeEnum<T> {
 						onChange={(evt) => handleChange(field, evt.target.value as T)}
 						onBlur={handleBlur}
 						autoFocus={autoFocus}
+						labelId={labelId}
+						inputProps={nameProps}
+						MenuProps={nameProps && { slotProps: { list: nameProps } }}
 						SelectDisplayProps={{ id }}
 						aria-describedby={describedBy}
 					>

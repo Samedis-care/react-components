@@ -114,4 +114,10 @@ element as its `aria-describedby`, and render the error or warning message in an
 needs `aria-invalid`. All three are undefined where there is no form behind the control. See
 [Describing a field](../../../../../docs/FormEngine.md#describing-a-field).
 
+The label must name the control. A MUI `TextField` and a `<label>` around or `for` an input
+do that on their own. A control the label cannot point at, such as MUI's `Select`, whose
+combobox is a `div`, points at the label instead: give the label the id `` `${id}-label` `` and
+the control `labelId` (or `aria-labelledby`) with it, and where `id` is undefined, give the
+control `aria-label={label}`. `RendererEnumSimpleSelect` does both.
+
 If you implement an editable grid control you need to make sure that handleChange is only called when needed. Calling handleChange will send a update request to the backend and refresh the grid.

@@ -237,4 +237,32 @@ describe("Form accessibility: bugs", () => {
 		expect(note).toHaveAccessibleDescription("Note is quite short");
 		expect(note).toHaveAttribute("aria-invalid", "false");
 	});
+
+	it.each([
+		["the id of its FormField", "priority"],
+		["a generated id", undefined],
+	] as const)(
+		"[ISSUE-3501-ITEM-42] a select's combobox and its list of options are named by the field's label, with %s",
+		async (_, id) => {
+			const sink: Sink = {};
+			mountForm(
+				makeModel({}, undefined, {
+					priority: {
+						type: new ModelDataTypeEnumSelectRendererMUI(options, "low"),
+						getLabel: () => "Priority",
+						visibility: editRequired,
+						customData: null,
+					},
+				}),
+				capture(sink, () => <FormField name={"priority"} id={id} />),
+				{ id: null },
+			);
+			await loaded(sink, "");
+			const combobox = screen.getByRole("combobox", { name: "Priority" });
+			if (id) expect(combobox.id).toBe(id);
+			fireEvent.mouseDown(combobox);
+			const listbox = await screen.findByRole("listbox", { name: "Priority" });
+			expect(within(listbox).getAllByRole("option")).toHaveLength(2);
+		},
+	);
 });
