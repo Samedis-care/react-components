@@ -169,6 +169,13 @@ const MenuDemo = (props: MenuDemoProps) => {
 
 type MenuDemoStory = StoryObj<typeof MenuDemo>;
 
+const menuItem = (name: string) =>
+	within(document.body).getByRole("menuitem", { name });
+const menuClosed = () =>
+	waitFor(() =>
+		expect(within(document.body).queryByRole("menu")).not.toBeInTheDocument(),
+	);
+
 // --- bugs ---
 
 export const Issue3459Item8FocusedItemShowsFocusRing: MenuDemoStory = {
@@ -196,3 +203,236 @@ export const Issue3459Item8FocusedItemShowsFocusRing: MenuDemoStory = {
 		await expect(style.outlineColor).not.toBe("rgba(0, 0, 0, 0)");
 	},
 };
+
+export const Issue3459Item9KeepMountedReopensOnFirstItem: MenuDemoStory = {
+	args: {
+		onSelect: fn(),
+		onClose: fn(),
+		keepMounted: true,
+		labels: ["One", "Two", "Three", "Four"],
+		disabledLabels: [],
+	},
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3459-ITEM-9: with `keepMounted` (as in every DataGrid menu), a menu that was closed on its third item opens on the third item again. Expected: every open starts on the first item.",
+			},
+		},
+	},
+	render: (args) => <MenuDemo {...args} />,
+	play: async ({ canvas }) => {
+		const trigger = canvas.getByRole("button", { name: "Options" });
+		await userEvent.click(trigger);
+		await waitFor(() => expect(menuItem("One")).toHaveFocus());
+		await userEvent.keyboard("{ArrowDown}{ArrowDown}");
+		await expect(menuItem("Three")).toHaveFocus();
+		await userEvent.keyboard("{Escape}");
+		await menuClosed();
+		await waitFor(() => expect(trigger).toHaveFocus());
+
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() =>
+			expect(within(document.body).getByRole("menu")).toBeVisible(),
+		);
+		await waitFor(() => expect(menuItem("One")).toHaveFocus());
+	},
+};
+
+const CountingItem = () => {
+	const [count, setCount] = useState(0);
+	return (
+		<MenuItem onClick={() => setCount((prev) => prev + 1)}>
+			{`Count ${count}`}
+		</MenuItem>
+	);
+};
+
+interface KeepMountedDemoProps {
+	/** called with the label of the activated item */
+	onSelect: (label: string) => void;
+	variant?: MenuProps["variant"];
+	/** label of the selected item */
+	selectedLabel?: string;
+	/** labels of the items after the counting one */
+	labels?: string[];
+	disabledLabels?: string[];
+}
+
+const KeepMountedDemo = (props: KeepMountedDemoProps) => {
+	const {
+		onSelect,
+		variant,
+		selectedLabel,
+		labels = ["Two", "Three"],
+		disabledLabels = [],
+	} = props;
+	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+	return (
+		<>
+			<Button onClick={(e) => setAnchorEl(e.currentTarget)}>Options</Button>
+			<PopupMenu
+				elevation={0}
+				keepMounted
+				variant={variant}
+				anchorEl={anchorEl}
+				open={Boolean(anchorEl)}
+				onClose={() => setAnchorEl(null)}
+			>
+				<CountingItem />
+				{labels.map((label) => (
+					<MenuItem
+						key={label}
+						selected={label === selectedLabel}
+						disabled={disabledLabels.includes(label)}
+						onClick={() => {
+							onSelect(label);
+							setAnchorEl(null);
+						}}
+					>
+						{label}
+					</MenuItem>
+				))}
+			</PopupMenu>
+		</>
+	);
+};
+
+export const Issue3459Item9KeepMountedReopensOnFirstItemAfterActivation: StoryObj<
+	typeof KeepMountedDemo
+> = {
+	args: { onSelect: fn() },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3459-ITEM-9: an item activated with Enter has focus when the menu closes. The menu reopens on the first item, and the items keep their state (the first one counts its clicks without closing the menu).",
+			},
+		},
+	},
+	render: (args) => <KeepMountedDemo {...args} />,
+	play: async ({ args, canvas }) => {
+		const trigger = canvas.getByRole("button", { name: "Options" });
+		await userEvent.tab();
+		await expect(trigger).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() => expect(menuItem("Count 0")).toHaveFocus());
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() => expect(menuItem("Count 1")).toHaveFocus());
+		await userEvent.keyboard("{ArrowDown}{ArrowDown}");
+		await expect(menuItem("Three")).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		await expect(args.onSelect).toHaveBeenCalledWith("Three");
+		await menuClosed();
+		await waitFor(() => expect(trigger).toHaveFocus());
+
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() =>
+			expect(within(document.body).getByRole("menu")).toBeVisible(),
+		);
+		await waitFor(() => expect(menuItem("Count 1")).toHaveFocus());
+	},
+};
+
+export const Issue3459Item9KeepMountedReopensOnSelectedItem: StoryObj<
+	typeof KeepMountedDemo
+> = {
+	args: { onSelect: fn(), selectedLabel: "Two", labels: ["Two", "Three"] },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3459-ITEM-9: with the default variant `selectedMenu`, every open starts on the selected item, as the first one does.",
+			},
+		},
+	},
+	render: (args) => <KeepMountedDemo {...args} />,
+	play: async ({ canvas }) => {
+		const trigger = canvas.getByRole("button", { name: "Options" });
+		await userEvent.click(trigger);
+		await waitFor(() => expect(menuItem("Two")).toHaveFocus());
+		await userEvent.keyboard("{ArrowDown}");
+		await expect(menuItem("Three")).toHaveFocus();
+		await userEvent.keyboard("{Escape}");
+		await menuClosed();
+		await waitFor(() => expect(trigger).toHaveFocus());
+
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() =>
+			expect(within(document.body).getByRole("menu")).toBeVisible(),
+		);
+		await waitFor(() => expect(menuItem("Two")).toHaveFocus());
+	},
+};
+
+export const Issue3459Item9KeepMountedMenuVariantReopensOnFirstEnabledItem: StoryObj<
+	typeof KeepMountedDemo
+> = {
+	args: {
+		onSelect: fn(),
+		variant: "menu",
+		selectedLabel: "Three",
+		labels: ["Two", "Three", "Four"],
+	},
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3459-ITEM-9: with variant `menu`, a selected item does not decide where an open starts; every open starts on the first item.",
+			},
+		},
+	},
+	render: (args) => <KeepMountedDemo {...args} />,
+	play: async ({ canvas }) => {
+		const trigger = canvas.getByRole("button", { name: "Options" });
+		await userEvent.click(trigger);
+		await waitFor(() => expect(menuItem("Count 0")).toHaveFocus());
+		await userEvent.keyboard("{End}");
+		await expect(menuItem("Four")).toHaveFocus();
+		await userEvent.keyboard("{Escape}");
+		await menuClosed();
+		await waitFor(() => expect(trigger).toHaveFocus());
+
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() =>
+			expect(within(document.body).getByRole("menu")).toBeVisible(),
+		);
+		await waitFor(() => expect(menuItem("Count 0")).toHaveFocus());
+	},
+};
+
+export const Issue3459Item9KeepMountedReopensOnFirstEnabledItem: MenuDemoStory =
+	{
+		args: {
+			onSelect: fn(),
+			onClose: fn(),
+			keepMounted: true,
+			labels: ["Zero", "One", "Two", "Three"],
+			disabledLabels: ["Zero"],
+		},
+		parameters: {
+			docs: {
+				description: {
+					story:
+						"ISSUE-3459-ITEM-9: every open starts on the first enabled item; a disabled first item is skipped.",
+				},
+			},
+		},
+		render: (args) => <MenuDemo {...args} />,
+		play: async ({ canvas }) => {
+			const trigger = canvas.getByRole("button", { name: "Options" });
+			await userEvent.click(trigger);
+			await waitFor(() => expect(menuItem("One")).toHaveFocus());
+			await userEvent.keyboard("{End}");
+			await expect(menuItem("Three")).toHaveFocus();
+			await userEvent.keyboard("{Escape}");
+			await menuClosed();
+			await waitFor(() => expect(trigger).toHaveFocus());
+
+			await userEvent.keyboard("{Enter}");
+			await waitFor(() =>
+				expect(within(document.body).getByRole("menu")).toBeVisible(),
+			);
+			await waitFor(() => expect(menuItem("One")).toHaveFocus());
+		},
+	};
