@@ -157,7 +157,6 @@ const GridSingleSelectFilter = (inProps: GridSingleSelectFilterProps) => {
 									) : (
 										<FormControlLabel
 											control={<Radio />}
-											name={option.value}
 											value={option.value}
 											label={option.label}
 										/>
