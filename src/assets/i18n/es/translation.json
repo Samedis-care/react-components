@@ -329,7 +329,7 @@
 				"source_field": "Campo",
 				"source_field_type": "Tipos de datos",
 				"destination_fields": "Campos de destino",
-				"conv_script": "Script de conversión (JavaScript)",
+				"conv_script": "{{FIELD}}: script de conversión (JavaScript)",
 				"queue": "En cola: {{COUNT}}",
 				"success": "Correctos: {{COUNT}}",
 				"failed": "Fallidos: {{COUNT}}",

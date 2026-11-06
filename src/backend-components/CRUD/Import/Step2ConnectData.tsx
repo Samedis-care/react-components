@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useId, useMemo, useRef } from "react";
 import {
 	ConversionScriptFn,
 	CrudImporterStepProps,
@@ -29,6 +29,7 @@ import {
 	ModelFieldDefinition,
 	PageVisibility,
 } from "../../../backend-integration";
+import type { EnumValue } from "../../../backend-integration/Model/Types/TypeEnum";
 import uniqueArray from "../../../utils/uniqueArray";
 import debouncePromise from "../../../utils/debouncePromise";
 
@@ -65,6 +66,23 @@ const StyledCardContent = styled(CardContent, {
 		paddingBottom: 4,
 	},
 });
+
+/**
+ * The values an enum field takes, as a conversion script has to return them: each value as
+ * a string literal, followed by its label when that differs (`"eng" (Engineering)`).
+ * Dividers and invisible values are left out, as in the field's own selector.
+ * @param values The enum type's values
+ * @returns The values joined with ", ", or "" when none is left
+ */
+const formatEnumValues = (values: EnumValue[]): string =>
+	values
+		.filter((entry) => !entry.isDivider && !entry.invisible)
+		.map((entry) => {
+			const literal = JSON.stringify(entry.value);
+			const label = entry.getLabel();
+			return label && label !== entry.value ? `${literal} (${label})` : literal;
+		})
+		.join(", ");
 
 export const useImportStep2Logic = (props: CrudImporterStepProps) => {
 	const { model, state, setState } = props;
@@ -224,6 +242,7 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 	const { model, state } = props;
 	const { t } = useCCTranslations();
 	const { columns, handleConversionScriptChange } = useImportStep2Logic(props);
+	const idPrefix = useId();
 
 	return (
 		<Grid container spacing={2}>
@@ -269,22 +288,36 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 				<Grid container spacing={2}>
 					{Object.entries(model.fields)
 						.filter(([name, field]) => isFieldImportable(name, field))
-						.map(([name, field]) => {
+						.map(([name, field], index) => {
 							const convScript = state.conversionScripts[name];
+							const typeId = `${idPrefix}-type-${index}`;
+							const valuesId = `${idPrefix}-values-${index}`;
+							const enumValues = field.type.getEnumValues
+								? formatEnumValues(field.type.getEnumValues())
+								: "";
 							return (
 								<Grid key={name} size={12}>
 									<Card>
 										<StyledCardContent>
 											<Grid container sx={{ justifyContent: "space-between" }}>
-												<Grid>
+												<Grid size={"grow"}>
 													<Typography>
 														{field.getLabel()
 															? `${field.getLabel()} (${name})`
 															: name}
 													</Typography>
-													<Typography color={"textSecondary"}>
+													<Typography color={"textSecondary"} id={typeId}>
 														{field.type.getFilterType()}
 													</Typography>
+													{enumValues && (
+														<Typography
+															color={"textSecondary"}
+															variant={"body2"}
+															id={valuesId}
+														>
+															{enumValues}
+														</Typography>
+													)}
 												</Grid>
 												<Grid>
 													<Tooltip
@@ -324,12 +357,20 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 														multiline
 														label={t(
 															"backend-components.crud.import.conv_script",
+															{ FIELD: field.getLabel() || name },
 														)}
 														name={name}
 														value={convScript?.script ?? ""}
 														onChange={handleConversionScriptChange}
 														placeholder={`${name} = `}
 														fullWidth
+														slotProps={{
+															htmlInput: {
+																"aria-describedby": enumValues
+																	? `${typeId} ${valuesId}`
+																	: typeId,
+															},
+														}}
 													/>
 												</Box>
 											</Grid>

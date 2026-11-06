@@ -329,7 +329,7 @@
 				"source_field": "Field",
 				"source_field_type": "Data types",
 				"destination_fields": "Destination fields",
-				"conv_script": "Conversion Script (JavaScript)",
+				"conv_script": "{{FIELD}}: Conversion Script (JavaScript)",
 				"queue": "In queue: {{COUNT}}",
 				"success": "Success: {{COUNT}}",
 				"failed": "Failed: {{COUNT}}",

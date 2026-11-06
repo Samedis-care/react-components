@@ -329,7 +329,7 @@
 				"source_field": "Поле",
 				"source_field_type": "Типы данных",
 				"destination_fields": "Поля назначения",
-				"conv_script": "Сценарий преобразования (JavaScript)",
+				"conv_script": "{{FIELD}}: сценарий преобразования (JavaScript)",
 				"queue": "В очереди: {{COUNT}}",
 				"success": "Успех: {{COUNT}}",
 				"failed": "Ошибка: {{COUNT}}",

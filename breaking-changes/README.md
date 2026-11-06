@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [Each script field in Connect data is named after its field, and enum cards list their values](2026-11-06-import-script-field-names.md) | behavior |
 | 2026-11-06 | [CRUD selects keep their field while the selection loads and after the load failed](2026-11-06-crud-select-keeps-field-while-loading.md) | behavior |
 | 2026-11-06 | [SignalPortlet shows a count above 999 as "999+"](2026-11-06-signal-portlet-capped-count.md) | behavior |
 | 2026-11-06 | [InfiniteScroll debounces loadMoreTop, and keeps debouncing callbacks passed after mount](2026-11-06-infinite-scroll-debounces-both-callbacks.md) | behavior |

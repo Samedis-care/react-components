@@ -329,7 +329,7 @@
 				"source_field": "Champ",
 				"source_field_type": "Types de données",
 				"destination_fields": "Champs de destination",
-				"conv_script": "Script de conversion (JavaScript)",
+				"conv_script": "{{FIELD}} : script de conversion (JavaScript)",
 				"queue": "En file d'attente : {{COUNT}}",
 				"success": "Succès : {{COUNT}}",
 				"failed": "Échec : {{COUNT}}",

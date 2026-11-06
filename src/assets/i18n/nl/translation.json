@@ -329,7 +329,7 @@
 				"source_field": "Veld",
 				"source_field_type": "Gegevenstypen",
 				"destination_fields": "Bestemmingsvelden",
-				"conv_script": "Conversiescript (JavaScript)",
+				"conv_script": "{{FIELD}}: conversiescript (JavaScript)",
 				"queue": "In wachtrij: {{COUNT}}",
 				"success": "Succes: {{COUNT}}",
 				"failed": "Mislukt: {{COUNT}}",
