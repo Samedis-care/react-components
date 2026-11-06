@@ -3,6 +3,10 @@ import { describe, it, expect, vi, beforeAll, afterEach } from "vitest";
 import { act, render, waitFor } from "@testing-library/react";
 import TreeView from "../../src/standalone/Tree/TreeView";
 import TreeViewCheckboxSelectionRenderer from "../../src/standalone/Tree/TreeViewCheckboxSelectionRenderer";
+import {
+	configureErrorReporting,
+	getErrorReportingConfig,
+} from "../../src/framework/ErrorReporting";
 import type {
 	TreeData,
 	TreeDataFlat,
@@ -623,5 +627,106 @@ describe("TreeView flat data edge cases", () => {
 			/>,
 		);
 		expect(labelsInDom(container)).toEqual(["Root", "Node A", "Node B"]);
+	});
+});
+
+// ─── Helpers for the behavior tests below ────────────────────────────────────
+
+const node = (id: string, extra?: Partial<TreeData>): TreeData => ({
+	id,
+	label: id,
+	icon: null,
+	hasChildren: false,
+	expanded: false,
+	...extra,
+});
+
+/** Runs fn inside an async act, so the toggle's promise chain settles before the asserts */
+const settle = (fn: () => void) =>
+	act(async () => {
+		fn();
+		await Promise.resolve();
+	});
+
+/** The part of Node's process this file uses (the test config has no Node types) */
+interface RejectionEvents {
+	listeners(event: "unhandledRejection"): ((reason: unknown) => void)[];
+	removeAllListeners(event: "unhandledRejection"): void;
+	on(event: "unhandledRejection", listener: (reason: unknown) => void): void;
+	off(event: "unhandledRejection", listener: (reason: unknown) => void): void;
+}
+const nodeProcess = (globalThis as unknown as { process: RejectionEvents })
+	.process;
+
+describe("TreeView lazy loading bugs", () => {
+	it("[ISSUE-3476-ITEM-1] clears the loading state after onLoadChildren rejects, so that a retry loads again", async () => {
+		const capture = createCapture();
+		const onLoadChildren = vi
+			.fn<(id: string) => Promise<void>>()
+			.mockRejectedValueOnce(new Error("network"))
+			.mockResolvedValue(undefined);
+		render(
+			<TreeView
+				data={node("a", { hasChildren: true })}
+				renderer={capture.renderer}
+				onToggleExpanded={vi.fn()}
+				onLoadChildren={onLoadChildren}
+			/>,
+		);
+		await settle(() => capture.row("a").onToggleExpanded("a"));
+		await waitFor(() => expect(capture.row("a").childrenLoading).toBe(false));
+		await settle(() => capture.row("a").onToggleExpanded("a"));
+		expect(onLoadChildren).toHaveBeenCalledTimes(2);
+	});
+
+	it("[ISSUE-3476-ITEM-1] clears the loading state after onLoadChildren throws", async () => {
+		const capture = createCapture();
+		const onLoadChildren = vi.fn(() => {
+			throw new Error("sync");
+		});
+		render(
+			<TreeView
+				data={node("a", { hasChildren: true })}
+				renderer={capture.renderer}
+				onToggleExpanded={vi.fn()}
+				onLoadChildren={onLoadChildren}
+			/>,
+		);
+		await settle(() => capture.row("a").onToggleExpanded("a"));
+		await waitFor(() => expect(capture.row("a").childrenLoading).toBe(false));
+	});
+
+	it("[ISSUE-3476-ITEM-1] reports a failed load instead of leaving it unhandled, and does not toggle the entry", async () => {
+		const before = { ...getErrorReportingConfig() };
+		const report = vi.fn();
+		configureErrorReporting({ report, shouldReport: () => true });
+		const unhandled = vi.fn();
+		nodeProcess.on("unhandledRejection", unhandled);
+		try {
+			const capture = createCapture();
+			const failure = new Error("network");
+			const onToggleExpanded = vi.fn();
+			render(
+				<TreeView
+					data={node("a", { hasChildren: true })}
+					renderer={capture.renderer}
+					onToggleExpanded={onToggleExpanded}
+					onLoadChildren={() => Promise.reject(failure)}
+				/>,
+			);
+			await settle(() => capture.row("a").onToggleExpanded("a"));
+			await waitFor(() => expect(capture.row("a").childrenLoading).toBe(false));
+			// Node reports unhandled rejections once the microtask queue is empty
+			await new Promise((resolve) => setTimeout(resolve, 0));
+			expect(report).toHaveBeenCalledExactlyOnceWith(failure, {
+				source: "TreeView.onLoadChildren",
+				extra: { id: "a" },
+			});
+			expect(unhandled).not.toHaveBeenCalled();
+			expect(onToggleExpanded).not.toHaveBeenCalled();
+		} finally {
+			nodeProcess.off("unhandledRejection", unhandled);
+			configureErrorReporting(before);
+		}
 	});
 });

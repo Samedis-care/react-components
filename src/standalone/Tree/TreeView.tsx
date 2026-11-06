@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import TreeViewDefaultRenderer from "./TreeViewDefaultRenderer";
 import { List, ListImperativeAPI, RowComponentProps } from "react-window";
+import { captureError } from "../../framework/ErrorReporting";
 
 export interface TreeData {
 	/**
@@ -150,8 +151,20 @@ export interface TreeViewProps extends TreeViewRendererCallbacks {
 	 */
 	rendererItemHeight?: number;
 	/**
-	 * Load children of a specific record
+	 * Loads the children of the given record. TreeView calls it when the user
+	 * toggles an entry that has `hasChildren` and no children in `data`, marks
+	 * the entry `childrenLoading` until the load ends, and calls
+	 * `onToggleExpanded(id)` once it succeeded. Add the children to `data`
+	 * before the returned promise resolves.
+	 *
+	 * If it throws or its promise rejects, TreeView ends the entry's loading
+	 * state without toggling it, so the next toggle loads again, and passes the
+	 * error to the error reporter (see `configureErrorReporting`, source
+	 * `"TreeView.onLoadChildren"`). It shows the user nothing: to tell them,
+	 * show the error yourself, then rethrow it to keep the entry collapsed.
 	 * @param id The record ID
+	 * @returns A promise that resolves once the children are in `data`, or
+	 * nothing for a synchronous load
 	 */
 	onLoadChildren: (id: string) => Promise<void> | void;
 }
@@ -329,8 +342,19 @@ const TreeView = React.forwardRef(function TreeView(
 				) {
 					if (toggleRecord.childrenLoading) return;
 					setLoading((prev) => [...prev, id]);
-					await onLoadChildren(id);
-					setLoading((prev) => prev.filter((entry) => entry !== id));
+					try {
+						await onLoadChildren(id);
+					} catch (e) {
+						// nothing was loaded: leave the entry as it is, so that the next
+						// toggle loads again
+						captureError(e, {
+							source: "TreeView.onLoadChildren",
+							extra: { id },
+						});
+						return;
+					} finally {
+						setLoading((prev) => prev.filter((entry) => entry !== id));
+					}
 				}
 				onToggleExpanded(id);
 			})();
