@@ -4,6 +4,7 @@ import { DoubleArrow } from "@mui/icons-material";
 import { usePortalLayoutContext } from "./Layout";
 import combineClassNames from "../../utils/combineClassNames";
 import useCCTranslations from "../../utils/useCCTranslations";
+import focusRing from "./focusRing";
 
 export interface CollapsibleMenuProps {
 	/**
@@ -55,7 +56,7 @@ const IconClose = styled(DoubleArrow, {
 const StyledButton = styled(IconButton, {
 	name: "CcCollapsibleMenu",
 	slot: "button",
-})({});
+})(({ theme }) => focusRing(theme.palette.primary.main));
 
 export type CollapsibleMenuClassKey =
 	"root" | "content" | "bar" | "iconOpen" | "iconClose" | "button";

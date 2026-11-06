@@ -9,11 +9,12 @@ import {
 	useThemeProps,
 } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
+import focusRing from "../../focusRing";
 
 const StyledListItem = styled(ListItemButton, {
 	name: "CcMenuItemMaterial",
 	slot: "root",
-})({});
+})(({ theme }) => focusRing(theme.palette.primary.main));
 
 export type MenuItemMaterialClassKey = "root";
 

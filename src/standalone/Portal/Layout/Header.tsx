@@ -2,12 +2,14 @@ import {
 	AppBar,
 	AppBarProps,
 	IconButton,
+	styled,
 	Toolbar,
 	ToolbarProps,
 } from "@mui/material";
 import { Menu as MenuIcon } from "@mui/icons-material";
 import React from "react";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import focusRing from "../focusRing";
 
 export interface PortalLayoutHeaderProps {
 	/**
@@ -31,6 +33,11 @@ export interface PortalLayoutHeaderProps {
 	};
 }
 
+// on the AppBar (color "primary"), so the ring takes its text color
+const MenuButton = styled(IconButton)(({ theme }) =>
+	focusRing(theme.palette.primary.contrastText),
+);
+
 const PortalLayoutHeader = (props: PortalLayoutHeaderProps) => {
 	const { mobile, customClasses, toggleMenu, contents } = props;
 	const { t } = useCCTranslations();
@@ -39,13 +46,13 @@ const PortalLayoutHeader = (props: PortalLayoutHeaderProps) => {
 		<AppBar position={"relative"} classes={customClasses?.appBar}>
 			<Toolbar classes={customClasses?.toolbar}>
 				{mobile && (
-					<IconButton
+					<MenuButton
 						onClick={toggleMenu}
 						size="large"
 						aria-label={t("standalone.portal.menu-toggle")}
 					>
 						<MenuIcon />
-					</IconButton>
+					</MenuButton>
 				)}
 				{contents}
 			</Toolbar>
