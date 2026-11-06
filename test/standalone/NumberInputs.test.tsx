@@ -478,6 +478,159 @@ describe("DecimalInputField", () => {
 			tabThrough(field("Hours"));
 			expect(reported(onValue).filter((value) => value !== 12345)).toEqual([]);
 		});
+
+		it("[ISSUE-3484-ITEM-4] re-formats on a language switch and keeps the value on the next blur", async () => {
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={1234.5} onValue={onValue}>
+					{(value, onChange) => (
+						<DecimalInputField
+							label="Hours"
+							value={value}
+							onChange={onChange}
+						/>
+					)}
+				</Controlled>,
+			);
+			expect(field("Hours")).toHaveValue("1,234.5");
+			await setLanguage("de");
+			expect(field("Hours")).toHaveValue(fmt("de", 1234.5));
+			tabThrough(field("Hours"));
+			expect(reported(onValue).filter((value) => value !== 1234.5)).toEqual([]);
+		});
+
+		it("[ISSUE-3484-ITEM-4] shows a new format at once", () => {
+			const { rerender } = render(
+				<DecimalInputField
+					label="Hours"
+					value={7.25}
+					onChange={noop}
+					format={{ maximumFractionDigits: 0 }}
+				/>,
+			);
+			expect(field("Hours")).toHaveValue("7");
+			rerender(
+				<DecimalInputField
+					label="Hours"
+					value={7.25}
+					onChange={noop}
+					format={{ maximumFractionDigits: 2 }}
+				/>,
+			);
+			expect(field("Hours")).toHaveValue("7.25");
+		});
+
+		it("[ISSUE-3484-ITEM-4] shows the value the parent keeps after a commit", () => {
+			// an app that clamps the number in onChange (at most 10)
+			const Clamped = function Clamped() {
+				const [value, setValue] = useState<number | null>(10);
+				return (
+					<DecimalInputField
+						label="Hours"
+						value={value}
+						onChange={(_evt, next) =>
+							setValue(next == null ? null : Math.min(next, 10))
+						}
+					/>
+				);
+			};
+			render(<Clamped />);
+			fireEvent.change(field("Hours"), { target: { value: "15" } });
+			fireEvent.blur(field("Hours"));
+			expect(field("Hours")).toHaveValue("10");
+		});
+
+		it("[ISSUE-3484-ITEM-4] shows the value again after a commit of text that parses to it", () => {
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={1.2} onValue={onValue}>
+					{(value, onChange) => (
+						<DecimalInputField
+							label="Hours"
+							value={value}
+							onChange={onChange}
+						/>
+					)}
+				</Controlled>,
+			);
+			fireEvent.change(field("Hours"), { target: { value: "1.20" } });
+			fireEvent.blur(field("Hours"));
+			expect(reported(onValue)).toEqual([1.2]);
+			expect(field("Hours")).toHaveValue("1.2");
+		});
+
+		it("[ISSUE-3484-ITEM-4] keeps the typed text over a new format while it is edited, and commits it", () => {
+			const onChange = vi.fn<NumberChange>();
+			const { rerender } = render(
+				<DecimalInputField
+					label="Hours"
+					value={7.25}
+					onChange={onChange}
+					format={{ maximumFractionDigits: 0 }}
+				/>,
+			);
+			fireEvent.change(field("Hours"), { target: { value: "8.5" } });
+			rerender(
+				<DecimalInputField
+					label="Hours"
+					value={7.25}
+					onChange={onChange}
+					format={{ maximumFractionDigits: 2 }}
+				/>,
+			);
+			expect(field("Hours")).toHaveValue("8.5");
+			fireEvent.blur(field("Hours"));
+			expect(onChange.mock.calls.map(([, value]) => value)).toEqual([8.5]);
+		});
+
+		it("[ISSUE-3484-ITEM-4] a new value replaces the typed text, and the blur then commits nothing", () => {
+			const onChange = vi.fn<NumberChange>();
+			const { rerender } = render(
+				<DecimalInputField label="Hours" value={1} onChange={onChange} />,
+			);
+			fireEvent.change(field("Hours"), { target: { value: "45" } });
+			// e.g. the form is reset, or the record is reloaded
+			rerender(
+				<DecimalInputField label="Hours" value={0.12345} onChange={onChange} />,
+			);
+			expect(field("Hours")).toHaveValue("0.123");
+			fireEvent.blur(field("Hours"));
+			expect(onChange).not.toHaveBeenCalled();
+			// the next edit is committed again
+			fireEvent.change(field("Hours"), { target: { value: "2" } });
+			fireEvent.blur(field("Hours"));
+			expect(onChange.mock.calls.map(([, value]) => value)).toEqual([2]);
+		});
+
+		it("[ISSUE-3484-ITEM-4] the touch Clear empties the field, and a blur commits null once", () => {
+			env.touch = true;
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={5} onValue={onValue}>
+					{(value, onChange) => (
+						<DecimalInputField
+							label="Hours"
+							value={value}
+							onChange={onChange}
+						/>
+					)}
+				</Controlled>,
+			);
+			fireEvent.focus(field("Hours"));
+			fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+			expect(field("Hours")).toHaveValue("");
+			fireEvent.blur(field("Hours"));
+			expect(reported(onValue)).toEqual([null]);
+			expect(field("Hours")).toHaveValue("");
+		});
+
+		it("[ISSUE-3484-ITEM-4] renders a NaN value again without looping", () => {
+			const { rerender } = render(
+				<DecimalInputField label="Hours" value={NaN} onChange={noop} />,
+			);
+			rerender(<DecimalInputField label="Hours" value={NaN} onChange={noop} />);
+			expect(field("Hours")).toBeInTheDocument();
+		});
 	});
 	describe("commit", () => {
 		it("[ISSUE-3484-ITEM-2] keeps the value on a blur without an edit instead of rounding it to the shown digits", () => {

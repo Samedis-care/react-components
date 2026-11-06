@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [DecimalInputField shows its value in the current language and format](2026-11-06-decimal-input-follows-value-language-format.md) | behavior |
 | 2026-11-06 | [The grid filter helpers take their default from defaultCustomData, and the Filter button follows the custom data](2026-11-06-custom-filters-button-follows-custom-data.md) | type, behavior |
 | 2026-11-06 | [The column filter's AND/OR choice is a pair of toggle buttons](2026-11-06-data-grid-filter-and-or-toggle-buttons.md) | behavior |
 | 2026-11-06 | [The number inputs keep a minus sign](2026-11-06-number-inputs-keep-minus-sign.md) | behavior |

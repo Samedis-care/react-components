@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { TextFieldProps } from "@mui/material";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
@@ -8,11 +8,18 @@ import useCurrentLocale from "../../../utils/useCurrentLocale";
 
 export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 	/**
-	 * The current value or null if not set
+	 * The number, or `null` for an empty field. While the user is not editing
+	 * the text, the field shows this value formatted with `format` in the
+	 * components-care language, and follows every change of the three. After a
+	 * commit it shows the value the parent keeps, which can differ from the
+	 * typed text (a clamped or rounded number). A new value also replaces text
+	 * the user is typing.
 	 */
 	value: number | null;
 	/**
-	 * number formatting options
+	 * `Intl.NumberFormatOptions` for the shown text, e.g.
+	 * `{ maximumFractionDigits: 2 }`. Read on every render.
+	 * @default undefined (at most 3 fraction digits, grouped)
 	 */
 	format?: Intl.NumberFormatOptions;
 	/**
@@ -33,33 +40,35 @@ const DecimalInputField = (
 ) => {
 	const { value, onChange, onBlur, format, ...muiProps } = props;
 	const locale = useCurrentLocale();
-	const [valueInternal, setValueInternal] = useState("");
-	useEffect(() => {
-		setValueInternal(
-			value !== null ? value.toLocaleString(locale, format) : "",
-		);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [value]);
-
-	// whether the text was edited since the last commit: only then does a blur commit, so
-	// tabbing through the field never stores the shown (rounded) text in place of the value
-	const editedRef = useRef(false);
+	// the text typed since the last commit, or null while the field is not edited. Only
+	// an edit is committed, so tabbing through the field never stores the shown (rounded)
+	// text in place of the value. Without an edit the text is derived from value, locale
+	// and format on every render.
+	const [draft, setDraft] = useState<string | null>(null);
+	// a new value replaces the typed text (Object.is, so a NaN value is no change)
+	const [draftValue, setDraftValue] = useState(value);
+	if (!Object.is(draftValue, value)) {
+		setDraftValue(value);
+		setDraft(null);
+	}
+	const text =
+		draft ?? (value !== null ? value.toLocaleString(locale, format) : "");
 
 	const handleBlur = useCallback(
 		(event: React.FocusEvent<HTMLTextAreaElement | HTMLInputElement>) => {
 			if (onBlur) onBlur(event);
-			if (!editedRef.current || !onChange) return;
-			editedRef.current = false;
+			if (draft === null || !onChange) return;
+			// shows the value the parent keeps from here on, even when it does not change
+			setDraft(null);
 			onChange(event, parseLocalizedNumber(event.target.value));
 		},
-		[onBlur, onChange],
+		[draft, onBlur, onChange],
 	);
 
 	// on change handling
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-			editedRef.current = true;
-			setValueInternal(event.target.value);
+			setDraft(event.target.value);
 		},
 		[],
 	);
@@ -67,7 +76,7 @@ const DecimalInputField = (
 	return (
 		<TextFieldWithHelp
 			{...muiProps}
-			value={valueInternal}
+			value={text}
 			onChange={handleChange}
 			onBlur={handleBlur}
 			slotProps={{
