@@ -3,6 +3,7 @@ import React, {
 	SetStateAction,
 	Suspense,
 	useCallback,
+	useContext,
 	useMemo,
 	useRef,
 	useState,
@@ -10,6 +11,11 @@ import React, {
 import { Dialog, DialogContent, styled, useThemeProps } from "@mui/material";
 import { OpenInNew } from "@mui/icons-material";
 import { useDialogContext } from "../../framework/DialogContextProvider";
+import {
+	PushedDialogClose,
+	PushedDialogCloseContext,
+} from "../../framework/PushedDialogCloseContext";
+import { captureError } from "../../framework/ErrorReporting";
 import { showConfirmDialog } from "../../non-standalone/Dialog/Utils";
 import { DialogTitle } from "../../non-standalone/Dialog/DialogTitle";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -46,7 +52,14 @@ export interface FormDialogProps {
 	 */
 	children?: React.ReactNode;
 	/**
-	 * Called on dialog close
+	 * Called when the X, Escape or a backdrop click closes the dialog, after "Leave form
+	 * page?" when a form page inside is dirty. A dialog shown with pushDialog then closes
+	 * itself, unless onClose closed it already, so `onClose={popDialog}` closes only this
+	 * dialog. A dialog rendered without pushDialog closes only through onClose, which has to
+	 * stop rendering it. Not called when the content closes the dialog (useCloseThisDialog,
+	 * popDialog, a goBack).
+	 * @remarks Runs while the dialog is still open: a navigation from onClose is blocked like
+	 *          any navigation while a pushed dialog is open.
 	 */
 	onClose?: () => void;
 	/**
@@ -141,7 +154,12 @@ const FormDialog = (inProps: FormDialogProps) => {
 		openInNewLink: openInNewLinkOverride,
 		renderer,
 	} = props;
-	const [pushDialog, popDialog] = useDialogContext();
+	const [pushDialog] = useDialogContext();
+	// not useCloseThisDialog, which throws: a FullFormDialog may be rendered without pushDialog,
+	// then it closes through onClose. It is the pushed dialog when the nearest close comes from
+	// pushDialog; inside another FullFormDialog's content it was rendered without pushDialog.
+	const outerClose = useContext(PushedDialogCloseContext);
+	const closeThisDialog = outerClose?.pushed ? outerClose.close : null;
 	const blockClosingCounter = useRef(0);
 	const [title, setTitle] = useState<React.ReactNode>(null);
 	const [openInNewLink, setOpenInNewLink] = useState<null | (() => void)>(null);
@@ -150,22 +168,38 @@ const FormDialog = (inProps: FormDialogProps) => {
 	const { t } = useCCTranslations();
 
 	const handleClose = useCallback(async () => {
-		try {
-			if (blockClosingCounter.current > 0) {
+		if (blockClosingCounter.current > 0) {
+			try {
 				await showConfirmDialog(pushDialog, {
 					title: t("backend-components.form.back-on-dirty.title"),
 					message: t("backend-components.form.back-on-dirty.message"),
 					textButtonYes: t("backend-components.form.back-on-dirty.yes"),
 					textButtonNo: t("backend-components.form.back-on-dirty.no"),
 				});
+			} catch {
+				return; // user cancelled
 			}
-
-			popDialog();
-			if (onClose) onClose();
-		} catch {
-			// user cancelled
 		}
-	}, [t, onClose, popDialog, pushDialog]);
+		if (!closeThisDialog && !onClose) {
+			// eslint-disable-next-line no-console
+			console.error(
+				new Error(
+					"[Components-Care] FullFormDialog: rendered without pushDialog and without onClose, so it cannot be closed. Show it with pushDialog, or pass an onClose that stops rendering it.",
+				),
+			);
+			return;
+		}
+		// onClose first: it may close the dialog itself (onClose={popDialog}, or the state of a
+		// dialog rendered without pushDialog), and closing this dialog again does nothing
+		try {
+			onClose?.();
+		} catch (e) {
+			captureError(e, { source: "FullFormDialog.onClose" });
+			// eslint-disable-next-line no-console
+			console.error("[Components-Care] [FullFormDialog] onClose threw", e);
+		}
+		closeThisDialog?.();
+	}, [t, onClose, closeThisDialog, pushDialog]);
 
 	const blockClosing = useCallback(() => blockClosingCounter.current++, []);
 	const unblockClosing = useCallback(() => blockClosingCounter.current--, []);
@@ -185,16 +219,25 @@ const FormDialog = (inProps: FormDialogProps) => {
 			? (title ?? titleOverride)
 			: (titleOverride ?? title);
 	const Renderer = renderer ?? FormDialogDefaultRenderer;
+	// the content's useCloseThisDialog closes this dialog; a FullFormDialog rendered in the
+	// content without pushDialog sees pushed: false and closes through its own onClose
+	const contentClose = useMemo(
+		(): PushedDialogClose | null =>
+			closeThisDialog ? { close: closeThisDialog, pushed: false } : null,
+		[closeThisDialog],
+	);
 
 	return (
 		<IsInFormDialogContext.Provider value={!disableFormDialogContext}>
 			<FormDialogDispatchContext.Provider value={dispatch}>
-				<Renderer
-					{...props}
-					onClose={handleClose}
-					dialogTitle={dialogTitle}
-					openInNewLink={openInNewLink ?? openInNewLinkOverride}
-				/>
+				<PushedDialogCloseContext.Provider value={contentClose}>
+					<Renderer
+						{...props}
+						onClose={handleClose}
+						dialogTitle={dialogTitle}
+						openInNewLink={openInNewLink ?? openInNewLinkOverride}
+					/>
+				</PushedDialogCloseContext.Provider>
 			</FormDialogDispatchContext.Provider>
 		</IsInFormDialogContext.Provider>
 	);
