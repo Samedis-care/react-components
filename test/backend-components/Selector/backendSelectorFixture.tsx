@@ -248,6 +248,12 @@ export const typeText = async (
 	await flush();
 };
 
+/** the names of the "Remove …" buttons of BackendMultiSelect's entries */
+export const removeButtons = () =>
+	screen
+		.queryAllByRole("button", { name: /^Remove / })
+		.map((button) => button.getAttribute("aria-label"));
+
 /** clicks the option whose name matches, once it is listed */
 export const pickOption = async (name: RegExp | string) => {
 	fireEvent.click(await screen.findByRole("option", { name }));

@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [The backend multi selects list additionalOptions ids from their entries](2026-11-06-multi-selects-list-additional-options.md) | behavior |
 | 2026-11-06 | [BackendSingleSelect shows only the selected record](2026-11-06-backend-single-select-shows-only-the-selected-record.md) | behavior |
 | 2026-11-06 | [A cancelled delete keeps the DataGrid's selection](2026-11-06-data-grid-cancelled-delete-keeps-selection.md) | type, behavior |
 | 2026-11-06 | [MultiSelectWithTags is a group named by its title, and its group field has a name](2026-11-06-multi-select-with-tags-named-group.md) | behavior |

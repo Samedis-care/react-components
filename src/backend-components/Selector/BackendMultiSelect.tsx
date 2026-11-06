@@ -59,7 +59,11 @@ export interface BackendMultiSelectProps<
 	 */
 	onSelect?: (value: string[], raw: DataT[]) => void;
 	/**
-	 * The currently selected values
+	 * The ids of the selected records, listed in this order. An id is shown from a
+	 * matching `additionalOptions` entry (never looked up, never dropped by
+	 * `onLoadError`), an `initialData` record or an entry picked in this field without a
+	 * request, otherwise loaded through `modelFetch`; until then it is listed as a
+	 * translated "Loading…" entry.
 	 */
 	selected: string[];
 	/**
@@ -114,6 +118,7 @@ export const useSelectedCache = <
 		| "selected"
 		| "initialData"
 		| "onLoadError"
+		| "additionalOptions"
 	>,
 ): UseSelectedCacheResult<DataT> => {
 	const {
@@ -124,6 +129,7 @@ export const useSelectedCache = <
 		selected,
 		initialData,
 		onLoadError,
+		additionalOptions,
 	} = props;
 	const modelFetch = props.modelFetch ?? model;
 
@@ -167,6 +173,11 @@ export const useSelectedCache = <
 						),
 				);
 			}
+			// an additionalOptions entry is not a record: listed as it is, never looked up
+			additionalOptions?.forEach((option) => {
+				if (selected.includes(option.value) && !(option.value in selectedCache))
+					newCache[option.value] = option;
+			});
 			const isIdNotInCache = (value: string): boolean =>
 				!(value in selectedCache) && !(value in newCache);
 			await Promise.all(
