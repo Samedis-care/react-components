@@ -15,6 +15,8 @@ import LocalizedDateTimePicker from "../../src/standalone/LocalizedDateTimePicke
  * pickers, which of the consumer's props reach the field, and what the field
  * exposes to assistive technology.
  */
+import DateInput from "../../src/standalone/UIKit/InputControls/DateInput";
+import DateTimeInput from "../../src/standalone/UIKit/InputControls/DateTimeInput";
 
 const theme = createTheme();
 
@@ -33,6 +35,169 @@ afterEach(async () => {
 			await ccI18n.changeLanguage("en");
 		});
 	}
+});
+
+describe("accessibility", () => {
+	it.each([
+		[
+			"LocalizedKeyboardDatePicker",
+			<LocalizedKeyboardDatePicker
+				key="k"
+				label="Due"
+				value={null}
+				onChange={vi.fn()}
+				required
+			/>,
+		],
+		[
+			"LocalizedDatePicker",
+			<LocalizedDatePicker
+				key="d"
+				label="Due"
+				value={null}
+				onChange={vi.fn()}
+				slotProps={{ textField: { required: true } }}
+			/>,
+		],
+		[
+			"LocalizedDateTimePicker",
+			<LocalizedDateTimePicker
+				key="dt"
+				label="Due"
+				value={null}
+				onChange={vi.fn()}
+				required
+			/>,
+		],
+	])(
+		"[ISSUE-3474-ITEM-16] exposes required on every section of a %s",
+		(_name, element) => {
+			render(<Wrap>{element}</Wrap>);
+			for (const section of screen.getAllByRole("spinbutton")) {
+				expect(section).toBeRequired();
+			}
+		},
+	);
+
+	it.each([
+		["LocalizedKeyboardDatePicker", LocalizedKeyboardDatePicker],
+		["LocalizedDatePicker", LocalizedDatePicker],
+		["LocalizedDateTimePicker", LocalizedDateTimePicker],
+	] as const)(
+		"[ISSUE-3474-ITEM-16] leaves required off the sections of an optional %s",
+		(_name, Picker) => {
+			render(
+				<Wrap>
+					<Picker label="Due" value={null} onChange={vi.fn()} />
+				</Wrap>,
+			);
+			for (const section of screen.getAllByRole("spinbutton")) {
+				expect(section).not.toBeRequired();
+			}
+		},
+	);
+
+	it.each(["standard", "filled"] as const)(
+		"[ISSUE-3474-ITEM-16] exposes required on every section of the %s variant",
+		(variant) => {
+			render(
+				<Wrap>
+					<LocalizedKeyboardDatePicker
+						label="Due"
+						value={null}
+						onChange={vi.fn()}
+						required
+						slotProps={{ textField: { variant } }}
+					/>
+				</Wrap>,
+			);
+			for (const section of screen.getAllByRole("spinbutton")) {
+				expect(section).toBeRequired();
+			}
+		},
+	);
+
+	it("[ISSUE-3474-ITEM-16] follows required when it changes after mount", () => {
+		const picker = (required: boolean) => (
+			<Wrap>
+				<LocalizedKeyboardDatePicker
+					label="Due"
+					value={null}
+					onChange={vi.fn()}
+					required={required}
+				/>
+			</Wrap>
+		);
+		const { rerender } = render(picker(false));
+		const requiredSections = () =>
+			screen
+				.getAllByRole("spinbutton")
+				.map((section) => section.getAttribute("aria-required"));
+
+		rerender(picker(true));
+		expect(requiredSections()).toEqual(["true", "true", "true"]);
+		rerender(picker(false));
+		expect(requiredSections()).toEqual([null, null, null]);
+	});
+
+	it.each([
+		["an object", { className: "caller-section" }],
+		["a function", () => ({ className: "caller-section" })],
+	])(
+		"[ISSUE-3474-ITEM-16] keeps the caller's section content props given as %s",
+		(_form, sectionContent) => {
+			render(
+				<Wrap>
+					<LocalizedKeyboardDatePicker
+						label="Due"
+						value={null}
+						onChange={vi.fn()}
+						required
+						slotProps={{
+							textField: {
+								slotProps: { input: { slotProps: { sectionContent } } },
+							},
+						}}
+					/>
+				</Wrap>,
+			);
+			for (const section of screen.getAllByRole("spinbutton")) {
+				expect(section).toBeRequired();
+				expect(section).toHaveClass("caller-section");
+			}
+		},
+	);
+
+	it.each([
+		[
+			"DateInput",
+			<DateInput
+				key="d"
+				label="Due"
+				value={null}
+				onChange={vi.fn()}
+				required
+			/>,
+		],
+		[
+			"DateTimeInput",
+			<DateTimeInput
+				key="dt"
+				label="Due"
+				value={null}
+				onChange={vi.fn()}
+				required
+			/>,
+		],
+	])(
+		"[ISSUE-3474-ITEM-16] exposes required on every section of a %s",
+		(_name, element) => {
+			render(<Wrap>{element}</Wrap>);
+			for (const section of screen.getAllByRole("spinbutton")) {
+				expect(section).toBeRequired();
+			}
+		},
+	);
 });
 
 const PICKERS = [

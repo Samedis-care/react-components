@@ -10,6 +10,7 @@ import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
 import usePickerDraft from "./usePickerDraft";
+import withRequiredSections from "./withRequiredSections";
 
 export interface LocalizedKeyboardDatePickerProps
 	extends
@@ -20,7 +21,10 @@ export interface LocalizedKeyboardDatePickerProps
 	 */
 	hideDisabledIcon?: boolean;
 	/**
-	 * Set required flag for text field input
+	 * Marks the field required: an asterisk after the label, `required` on the
+	 * hidden input and `aria-required` on every section, so screen readers
+	 * announce it. When set, also to `false`, it takes precedence over
+	 * `slotProps.textField.required`; leave it undefined to use that.
 	 */
 	required?: TextFieldProps["required"];
 	/**
@@ -105,7 +109,7 @@ const LocalizedKeyboardDatePicker = (
 							ownerState,
 							otherProps.slotProps?.textField,
 						);
-						return {
+						return withRequiredSections({
 							...textFieldProps,
 							// only where the caller actually gave one, so a value passed
 							// through slotProps.textField is not overwritten with undefined
@@ -123,7 +127,7 @@ const LocalizedKeyboardDatePicker = (
 							// it does not know to the DOM, so it is only sent on to a text
 							// field that was actually swapped in for it.
 							...(otherProps.slots?.textField ? { disableClearable } : {}),
-						};
+						});
 					},
 				}}
 			/>

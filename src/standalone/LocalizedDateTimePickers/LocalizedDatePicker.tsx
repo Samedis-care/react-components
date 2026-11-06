@@ -8,6 +8,7 @@ import { withMuiFieldState } from "../UIKit/MuiFieldState";
 import useMuiLocaleData from "./useMuiLocaleData";
 import usePickerDraft from "./usePickerDraft";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
+import withRequiredSections from "./withRequiredSections";
 
 export interface LocalizedDatePickerProps extends Omit<
 	DatePickerProps,
@@ -53,13 +54,13 @@ const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
 							ownerState,
 							otherProps.slotProps?.textField,
 						);
-						return {
+						return withRequiredSections({
 							...orgSlotProps,
 							onBlur: (event: React.FocusEvent<HTMLDivElement>) => {
 								draft.settleOnBlur(event);
 								orgSlotProps?.onBlur?.(event);
 							},
-						};
+						});
 					},
 				}}
 			/>

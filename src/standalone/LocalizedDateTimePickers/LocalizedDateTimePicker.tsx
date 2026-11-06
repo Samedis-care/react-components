@@ -10,13 +10,17 @@ import { TextFieldProps } from "@mui/material";
 import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 import usePickerDraft from "./usePickerDraft";
+import withRequiredSections from "./withRequiredSections";
 
 export interface LocalizedDateTimePickerProps extends Omit<
 	DateTimePickerProps,
 	"format"
 > {
 	/**
-	 * Set required flag for text field input
+	 * Marks the field required: an asterisk after the label, `required` on the
+	 * hidden input and `aria-required` on every section, so screen readers
+	 * announce it. When set, also to `false`, it takes precedence over
+	 * `slotProps.textField.required`; leave it undefined to use that.
 	 */
 	required?: TextFieldProps["required"];
 	/**
@@ -77,7 +81,7 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 							ownerState,
 							otherProps.slotProps?.textField,
 						);
-						return {
+						return withRequiredSections({
 							...orgSlotProps,
 							// only where the caller actually gave one, so a value passed
 							// through slotProps.textField is not overwritten with undefined
@@ -89,7 +93,7 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 								orgSlotProps?.onBlur?.(event);
 								onBlur?.(event);
 							},
-						};
+						});
 					},
 				}}
 			/>
