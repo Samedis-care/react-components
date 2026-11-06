@@ -187,6 +187,8 @@
 				"edit": "Edit",
 				"primary": "Primary",
 				"remove": "Remove image",
+				"add": "Add image",
+				"replace": "Replace image",
 				"prev-image": "Previous image",
 				"next-image": "Next image"
 			}

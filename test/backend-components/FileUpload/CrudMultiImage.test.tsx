@@ -324,7 +324,7 @@ const dropOn = (entry: HTMLElement, files: File[]) =>
 		await tick();
 		await tick();
 	});
-// Remove is visibility: hidden until hovered (ISSUE-3491-ITEM-1), so it is found by its label
+// Remove is named after its image too, so it is found by its label
 const removeEntry = (dialog: HTMLElement, index: number) =>
 	act(async () => {
 		fireEvent.click(
@@ -335,7 +335,7 @@ const removeEntry = (dialog: HTMLElement, index: number) =>
 		await tick();
 		await tick();
 	});
-// the "make primary" row has no role (ISSUE-3491-ITEM-1, ISSUE-3491-ITEM-10)
+// the star and text inside the make-primary button; a click on them reaches the button
 const makePrimary = (dialog: HTMLElement, index: number) =>
 	act(async () => {
 		fireEvent.click(

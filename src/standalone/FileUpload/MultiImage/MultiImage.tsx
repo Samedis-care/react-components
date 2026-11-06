@@ -8,6 +8,7 @@ import React, {
 import ImageBox, { ImageBoxProps } from "./ImageBox";
 import GroupBox, { GroupBoxHTMLProps } from "../../GroupBox";
 import {
+	ButtonBase,
 	Dialog,
 	DialogContent,
 	DialogTitle,
@@ -66,13 +67,14 @@ export interface MultiImageProps {
 	 */
 	previewSize?: number;
 	/**
-	 * Upload image
-	 * Shown to in edit dialog
+	 * URL of the graphic on the edit dialog's add tile: a button named "Add image" that opens
+	 * the file picker, and adds the files dropped on it. Also shown on the page while there is
+	 * no image and no placeholderImage.
 	 */
 	uploadImage: string;
 	/**
-	 * Capture image
-	 * Shown to in edit dialog
+	 * URL of the graphic on the edit dialog's camera tile: a button named "Take photo" that
+	 * opens the camera, shown only when capture is set and the browser supports it
 	 */
 	captureImage: string;
 	/**
@@ -221,8 +223,35 @@ const EditLabel = styled(Typography, {
 	slot: "editLabel",
 })({}) as typeof Typography;
 
+const TileButton = styled(ButtonBase, {
+	name: "CcMultiImage",
+	slot: "tileButton",
+})(({ theme }) => ({
+	borderRadius: theme.shape.borderRadius,
+	// a ring over the ImageBox inside: an outline of the button is painted under the ImageBox,
+	// and one outside the button is cut off in the first row by the scrolling dialog content
+	"&.Mui-focusVisible::after": {
+		content: '""',
+		position: "absolute",
+		inset: 0,
+		border: `2px solid ${theme.palette.primary.main}`,
+		borderRadius: "inherit",
+		pointerEvents: "none",
+	},
+})) as typeof ButtonBase;
+
+/**
+ * Slots of MultiImage (theme CcMultiImage): root (outer div), uploadInput (the hidden file
+ * input), rootContainer (Grid container inside the frame), imageItem (Grid item of the page
+ * preview), editLabel (the edit control), tileButton (the edit dialog's add and camera tiles)
+ */
 export type MultiImageClassKey =
-	"root" | "uploadInput" | "rootContainer" | "imageItem" | "editLabel";
+	| "root"
+	| "uploadInput"
+	| "rootContainer"
+	| "imageItem"
+	| "editLabel"
+	| "tileButton";
 
 export const MultiImageNewIdPrefix = "MultiImage-New-";
 
@@ -548,14 +577,22 @@ const MultiImage = (inProps: MultiImageProps) => {
 												lg: previewSize ? undefined : 3,
 											}}
 										>
-											<ImageBox
-												width={previewSize}
-												height={previewSize}
-												image={uploadImage}
+											<TileButton
+												// it holds the ImageBox's divs
+												component={"div"}
 												onClick={startUpload}
-												onFilesDropped={handleUploadViaDrop}
-												classes={subClasses?.imageBox}
-											/>
+												aria-label={t("standalone.file-upload.multi-image.add")}
+												className={classes?.tileButton}
+											>
+												<ImageBox
+													width={previewSize}
+													height={previewSize}
+													image={uploadImage}
+													onClick={null}
+													onFilesDropped={handleUploadViaDrop}
+													classes={subClasses?.imageBox}
+												/>
+											</TileButton>
 										</Grid>
 										{enableCapture && (
 											<Grid
@@ -565,14 +602,23 @@ const MultiImage = (inProps: MultiImageProps) => {
 													lg: previewSize ? undefined : 3,
 												}}
 											>
-												<ImageBox
-													width={previewSize}
-													height={previewSize}
-													image={captureImage}
+												<TileButton
+													component={"div"}
 													onClick={startUploadCapture}
-													onFilesDropped={handleUploadViaDrop}
-													classes={subClasses?.imageBox}
-												/>
+													aria-label={t(
+														"standalone.file-upload.upload-capture.image",
+													)}
+													className={classes?.tileButton}
+												>
+													<ImageBox
+														width={previewSize}
+														height={previewSize}
+														image={captureImage}
+														onClick={null}
+														onFilesDropped={handleUploadViaDrop}
+														classes={subClasses?.imageBox}
+													/>
+												</TileButton>
 											</Grid>
 										)}
 									</>

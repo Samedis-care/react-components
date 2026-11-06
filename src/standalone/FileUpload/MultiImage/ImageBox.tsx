@@ -18,7 +18,6 @@ import {
 	ArrowBack as PrevIcon,
 	ArrowForward as NextIcon,
 	Close as CloseIcon,
-	Delete as DeleteIcon,
 	RotateLeft as RotateLeftIcon,
 	RotateRight as RotateRightIcon,
 } from "@mui/icons-material";
@@ -57,10 +56,6 @@ export interface ImageBoxProps {
 	 * File drop handler
 	 */
 	onFilesDropped?: UseDropZoneParams;
-	/**
-	 * Remove handler. Optional, will show remove icon if set
-	 */
-	onRemove?: () => void;
 	/**
 	 * Goto next image. Optional, will show next arrow if set
 	 */
@@ -360,7 +355,6 @@ const ImageBox = (inProps: ImageBoxProps) => {
 		height,
 		onClick,
 		onFilesDropped,
-		onRemove,
 		onNextImage,
 		onPrevImage,
 		disableBackground,
@@ -380,13 +374,6 @@ const ImageBox = (inProps: ImageBoxProps) => {
 	const closeDialog = useCallback(() => {
 		setDialogOpen(false);
 	}, []);
-	const handleRemove = useCallback(
-		(evt: React.MouseEvent) => {
-			evt.stopPropagation();
-			if (onRemove) onRemove();
-		},
-		[onRemove],
-	);
 	const handlePrevImage = useCallback(
 		(evt: React.MouseEvent) => {
 			evt.stopPropagation();
@@ -435,16 +422,6 @@ const ImageBox = (inProps: ImageBoxProps) => {
 				}}
 				className={combineClassNames([className, classes?.root])}
 			>
-				{onRemove && (
-					<RemoveButton
-						onClick={handleRemove}
-						className={classes?.removeBtn}
-						size="large"
-						aria-label={t("standalone.file-upload.multi-image.remove")}
-					>
-						<DeleteIcon />
-					</RemoveButton>
-				)}
 				{onPrevImage && (
 					<PrevButton
 						onClick={handlePrevImage}

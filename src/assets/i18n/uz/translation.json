@@ -172,6 +172,8 @@
 				"edit": "Tahrirlash",
 				"primary": "Birlamchi",
 				"remove": "Rasmni o'chirish",
+				"add": "Rasm qo'shish",
+				"replace": "Rasmni almashtirish",
 				"prev-image": "Oldingi rasm",
 				"next-image": "Keyingi rasm"
 			},

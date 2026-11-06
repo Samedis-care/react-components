@@ -172,6 +172,8 @@
 				"edit": "Bewerken",
 				"primary": "Primair",
 				"remove": "Afbeelding verwijderen",
+				"add": "Afbeelding toevoegen",
+				"replace": "Afbeelding vervangen",
 				"prev-image": "Vorige afbeelding",
 				"next-image": "Volgende afbeelding"
 			},

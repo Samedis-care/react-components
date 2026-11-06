@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [MultiImage's edit dialog has a row of buttons under each image, and ImageBox has no onRemove](2026-11-06-multi-image-edit-dialog-buttons.md) | type, behavior |
 | 2026-11-06 | [InlineSwitch draws a focus ring](2026-11-06-inline-switch-focus-ring.md) | behavior |
 | 2026-11-06 | [The empty modern image selector has an upload button](2026-11-06-image-selector-modern-upload-button.md) | behavior |
 | 2026-11-06 | [FlowEngine moves the focus to a new stage, in a container of its own](2026-11-06-flow-engine-stage-focus.md) | behavior |
