@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import React from "react";
 import {
+	act,
 	cleanup,
 	fireEvent,
 	render,
@@ -12,9 +13,11 @@ import MatrixGrid from "../../src/standalone/Matrix/MatrixGrid";
 import MatrixCellTile from "../../src/standalone/Matrix/MatrixCellTile";
 import buildDateColumns from "../../src/standalone/Matrix/buildDateColumns";
 import { matrixClasses } from "../../src/standalone/Matrix/matrixClasses";
+import type { MatrixGridProps } from "../../src/standalone/Matrix/MatrixGridContext";
 import {
 	MatrixCellContext,
 	MatrixColumn,
+	MatrixExtraRow,
 	MatrixRow,
 	MatrixTileItem,
 } from "../../src/standalone/Matrix/types";
@@ -143,6 +146,53 @@ const cellOf = (rowKey: string, columnKey: string) =>
 	screen
 		.getByTestId(`cell-${rowKey}-${columnKey}`)
 		.closest("[class*=CcMatrixGrid-cell]") as HTMLElement;
+
+// Stable render props and classes, so a rerender changes only what a test
+// passes; the classes give each slot a selector that does not depend on
+// emotion's dev-only labels.
+const renderRowHeaderByKey = (row: MatrixRow<TestCell>) => (
+	<span>{`header-${row.key}`}</span>
+);
+const renderCellWithTestId = (
+	cell: TestCell | undefined,
+	context: MatrixCellContext<TestCell>,
+) => (
+	<span data-testid={`cell-${context.row.key}-${context.column.key}`}>
+		{cell?.text ?? ""}
+	</span>
+);
+const TEST_CLASSES = {
+	root: "t-root",
+	grid: "t-grid",
+	corner: "t-corner",
+	columnHeader: "t-ch",
+	columnHeaderLabel: "t-chl",
+	columnHeaderSubLabel: "t-chs",
+	rowHeader: "t-rh",
+	cell: "t-cell",
+	extraRowHeader: "t-erh",
+	extraCell: "t-ec",
+	badge: "t-badge",
+	extraCellAddHint: "t-hint",
+};
+/** The grid with a focusable "outside" button before it, for rerender() */
+const gridElement = (props: Partial<MatrixGridProps<TestCell>> = {}) => (
+	<ThemeProvider theme={theme}>
+		<button>{"outside"}</button>
+		<MatrixGrid<TestCell>
+			columns={COLUMNS}
+			rows={ROWS}
+			corner={"corner"}
+			classes={TEST_CLASSES}
+			renderRowHeader={renderRowHeaderByKey}
+			renderCell={renderCellWithTestId}
+			{...props}
+		/>
+	</ThemeProvider>
+);
+/** Four columns keyed `${prefix}1` to `${prefix}4`: a fresh range per prefix */
+const keysOf = (prefix: string): MatrixColumn[] =>
+	[1, 2, 3, 4].map((n) => ({ key: `${prefix}${n}`, label: `${n}` }));
 
 describe("MatrixGrid", () => {
 	it("renders a corner, every column header and every row header", () => {
@@ -812,6 +862,56 @@ describe("MatrixGrid", () => {
 			expect(cell).toHaveAttribute("role", "button");
 			fireEvent.keyDown(cell, { key: "Enter" });
 			expect(extraRows[0].onCellClick).toHaveBeenCalledWith("c1");
+		});
+
+		const demandRow = (
+			more: Partial<MatrixExtraRow> = {},
+		): MatrixExtraRow[] => [
+			{
+				key: "demand",
+				header: <span>{"demand-header"}</span>,
+				label: "Open demand",
+				getCellLabel: (columnKey: string) => `Open demand on ${columnKey}`,
+				badges: { c2: 9 },
+				onCellClick: vi.fn(),
+				...more,
+			},
+		];
+		const demandCells = () =>
+			screen.getAllByRole("button", { name: /^Open demand/ });
+		const tabStops = () =>
+			demandCells().filter((cell) => cell.getAttribute("tabindex") === "0");
+
+		it("[ISSUE-3480-ITEM-12] keeps one tab stop when the columns change under the remembered cell", () => {
+			const extra = demandRow();
+			const { rerender } = render(
+				gridElement({ columns: keysOf("c"), extraRows: extra }),
+			);
+			act(() =>
+				screen.getByRole("button", { name: "Open demand on c3" }).focus(),
+			);
+			// the consumer pages to the next range
+			rerender(gridElement({ columns: keysOf("d"), extraRows: extra }));
+			expect(tabStops()).toHaveLength(1);
+		});
+
+		it("[ISSUE-3480-ITEM-12] falls back to the first column without taking the focus", () => {
+			const extra = demandRow();
+			const { rerender } = render(
+				gridElement({ columns: keysOf("c"), extraRows: extra }),
+			);
+			// ArrowRight on the last cell: the row asks for the focus, which it
+			// already has, and the new range's cells must not answer that ask
+			const last = screen.getByRole("button", { name: "Open demand on c4" });
+			act(() => last.focus());
+			fireEvent.keyDown(last, { key: "ArrowRight" });
+			const outside = screen.getByRole("button", { name: "outside" });
+			act(() => outside.focus());
+			rerender(gridElement({ columns: keysOf("d"), extraRows: extra }));
+			expect(tabStops()).toEqual([
+				screen.getByRole("button", { name: "Open demand on d1" }),
+			]);
+			expect(document.activeElement).toBe(outside);
 		});
 	});
 
