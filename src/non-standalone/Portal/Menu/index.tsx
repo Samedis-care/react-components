@@ -110,6 +110,10 @@ const convertDefinition = (
 		}
 	},
 	onAuxClick: (evt) => {
+		// the middle button only: browsers fire auxclick for the right button too.
+		// MenuBase filters as well, but useRoutedMenuLogic's handlers also go to
+		// an app's own elements
+		if (evt.button !== 1) return;
 		if (definition.onAuxClick) {
 			definition.onAuxClick(evt);
 		}

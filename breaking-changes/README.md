@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [Menu entries call onAuxClick for the middle button only](2026-11-06-menu-aux-click-middle-button-only.md) | behavior |
 | 2026-11-06 | [ScrollableSchedule reloads its weeks when `loadWeekCallback` changes](2026-11-06-scrollable-schedule-reloads-on-new-callback.md) | behavior |
 | 2026-11-06 | [Notifications: `refreshInterval` 0 switches polling off](2026-11-06-notifications-refresh-interval-off.md) | behavior |
 | 2026-11-06 | [InfoBox's alwaysExpanded={false} lets the user open and close the box](2026-11-06-info-box-always-expanded-false.md) | behavior |

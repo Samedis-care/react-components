@@ -65,6 +65,15 @@ const MenuItem = (props: MenuItemControllerProps) => {
 		[expandable, forceExpand, setMenuState, menuItemId, onClick],
 	);
 
+	// browsers fire auxclick for every non-primary button, the right one included
+	const auxClickProxy = useCallback(
+		(evt: React.MouseEvent) => {
+			if (evt.button !== 1) return;
+			onAuxClick(evt);
+		},
+		[onAuxClick],
+	);
+
 	// force expand
 	if (expandable && !expanded && forceExpand) {
 		setExpanded(true);
@@ -80,7 +89,7 @@ const MenuItem = (props: MenuItemControllerProps) => {
 				expanded={expandable ? expanded : undefined}
 				active={expandable ? undefined : menuState === menuItemId}
 				onClick={clickProxy}
-				onAuxClick={onAuxClick}
+				onAuxClick={auxClickProxy}
 				depth={depth}
 			/>
 			{expandable && (
