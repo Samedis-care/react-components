@@ -195,6 +195,7 @@
 			"invalid": "Introduzca un número de teléfono correcto"
 		},
 		"signature-pad": {
+			"with-signer": "{{LABEL}} ({{NAME}})",
 			"dialog": {
 				"reset": "Borrar firma",
 				"save-changes": "Guardar cambios",

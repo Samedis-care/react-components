@@ -191,6 +191,7 @@
 			"invalid": "Введите правильный номер телефона"
 		},
 		"signature-pad": {
+			"with-signer": "{{LABEL}} ({{NAME}})",
 			"dialog": {
 				"reset": "Удалить подпись",
 				"save-changes": "Сохранить изменения",

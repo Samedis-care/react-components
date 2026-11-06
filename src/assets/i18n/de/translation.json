@@ -191,6 +191,7 @@
 			"invalid": "Korrekte Rufnummer eingeben"
 		},
 		"signature-pad": {
+			"with-signer": "{{LABEL}} ({{NAME}})",
 			"dialog": {
 				"reset": "Signatur zurücksetzen",
 				"save-changes": "Änderungen speichern",

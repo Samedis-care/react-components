@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Box } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
-import { fn, expect, waitFor, within, mocked } from "storybook/test";
+import { expect, fn, mocked, waitFor, within } from "storybook/test";
 import DialogContextProvider from "../../framework/DialogContextProvider";
 import SignaturePadCanvas, { SignaturePadCanvasProps } from "./SignaturePad";
 import { setFrameworkHistory } from "../../framework/History";
@@ -122,19 +122,24 @@ const tileIn = (canvasElement: HTMLElement) => {
 	if (!(el instanceof HTMLElement)) throw new Error("tile missing");
 	return el;
 };
+
 const dialogEl = () => document.querySelector<HTMLElement>('[role="dialog"]');
+
 const signDivEl = () => {
 	const el = document.querySelector('[class*="CcSignPadDialog-signDiv"]');
 	if (!(el instanceof HTMLElement)) throw new Error("sign area missing");
 	return el;
 };
+
 const signCanvas = () =>
 	waitFor(() => {
 		const el = document.querySelector('[role="dialog"] canvas');
 		if (!(el instanceof HTMLCanvasElement)) throw new Error("no canvas yet");
 		return el;
 	});
+
 const page = () => within(document.body);
+
 /** the bitmap is the CSS box times the device pixel ratio, so ink lands under the pen */
 const bitmapMatchesBox = (c: HTMLCanvasElement) => {
 	const box = c.getBoundingClientRect();
@@ -165,6 +170,7 @@ const pointer = (
 		pressure: 0.5,
 	});
 };
+
 /**
  * One pen stroke through three points (CSS px inside the canvas): press, move,
  * release. Dispatched at once; signature_pad throttles moves to one per 16ms,
@@ -180,12 +186,14 @@ const drawStroke = (
 	c.dispatchEvent(pointer("pointermove", c, via, 1));
 	c.dispatchEvent(pointer("pointerup", c, to, 0));
 };
+
 const inkPixels = (c: HTMLCanvasElement) => {
 	const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
 	let n = 0;
 	for (let i = 3; i < d.length; i += 4) if (d[i]) n++;
 	return n;
 };
+
 const decodePng = async (src: string) => {
 	const img = new Image();
 	img.src = src;
@@ -222,6 +230,60 @@ export const DisabledPad: Story = {
 };
 
 // ─── bug pins ────────────────────────────────────────────────────────────────
+
+export const Issue3467Item14KeyboardOpensPadAndRestoresFocus: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3467-ITEM-14: Tab skips the tile (a plain div with only onClick), so the dialog cannot be opened by keyboard, and after a mouse user closes it focus falls to the page body. Expected: Tab reaches a button named by the prompt, Enter opens the dialog, and closing it returns focus to that button.",
+			},
+		},
+	},
+	render: (args) => (
+		<>
+			<button>Before</button>
+			<PadHost {...args} />
+		</>
+	),
+	play: async ({ canvas, userEvent }) => {
+		canvas.getByRole("button", { name: "Before" }).focus();
+		await userEvent.tab();
+		const activator = canvas.getByRole("button", { name: /sign/i });
+		await expect(activator).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() => expect(dialogEl()).not.toBeNull());
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() => expect(dialogEl()).toBeNull());
+		await expect(activator, "focus after closing the dialog").toHaveFocus();
+	},
+};
+
+export const Issue3467Item14MouseCloseReturnsFocusToTile: Story = {
+	args: { initial: SAMPLE_SIGNATURE, signerName: "Alice Müller" },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3467-ITEM-14: the tile's button is named after the stored signature and its signer. A click opens the dialog, and closing it with the close button returns focus to the tile instead of the page body.",
+			},
+		},
+	},
+	play: async ({ canvas, userEvent }) => {
+		const activator = canvas.getByRole("button", {
+			name: "Signature (Alice Müller)",
+		});
+		await userEvent.click(activator);
+		await waitFor(() => expect(dialogEl()).not.toBeNull());
+		await userEvent.click(
+			await waitFor(() =>
+				within(dialogEl()).getByRole("button", { name: "Close" }),
+			),
+		);
+		await waitFor(() => expect(dialogEl()).toBeNull());
+		await expect(activator, "focus after closing the dialog").toHaveFocus();
+	},
+};
 
 export const Issue3467Item1ResizeAfterDrawingNeverSavesBlankImage: Story = {
 	parameters: {

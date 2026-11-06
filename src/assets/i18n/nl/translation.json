@@ -191,6 +191,7 @@
 			"invalid": "Voer het juiste telefoonnummer in"
 		},
 		"signature-pad": {
+			"with-signer": "{{LABEL}} ({{NAME}})",
 			"dialog": {
 				"reset": "Handtekening verwijderen",
 				"save-changes": "Wijzigingen opslaan",

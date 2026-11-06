@@ -68,6 +68,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-06 | [The multi selects sort a copy of the selection, and report it in the caller's order](2026-11-06-multi-select-sort-for-display-only.md) | behavior |
 | 2026-11-06 | [The image preview dialog is named by its image's alt](2026-11-06-image-preview-dialog-named-by-alt.md) | behavior |
 | 2026-11-06 | [LocaleSelectorDialog is full screen on phones, and its names wrap](2026-11-06-locale-selector-reflows.md) | behavior |
+| 2026-11-05 | [The signature tile is a button](2026-11-05-sign-pad-tile-is-a-button.md) | behavior |
 | 2026-11-05 | [The modern file upload has an upload button](2026-11-05-file-upload-modern-upload-button.md) | behavior |
 | 2026-11-05 | [A field disabled by a visibility callback keeps its value](2026-11-05-value-dependent-visibility-keeps-value.md) | behavior |
 | 2026-11-05 | [LazyConnector writes a record updated twice before the save](2026-11-05-lazy-connector-repeated-update.md) | behavior |

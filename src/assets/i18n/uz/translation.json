@@ -191,6 +191,7 @@
 			"invalid": "To'g'ri telefon raqamini kiriting"
 		},
 		"signature-pad": {
+			"with-signer": "{{LABEL}} ({{NAME}})",
 			"dialog": {
 				"reset": "Imzoni tozalash",
 				"save-changes": "O'zgarishlarni saqlash",

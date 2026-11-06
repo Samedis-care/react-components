@@ -40,6 +40,7 @@ const SignaturePadCanvas = (
 		<SignPad
 			openSignPad={showSignDialog}
 			signature={signature}
+			signerName={dialogProps.signerName}
 			disabled={disabled}
 			openInfo={openInfo}
 		/>
