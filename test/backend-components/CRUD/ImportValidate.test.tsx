@@ -61,7 +61,9 @@ describe("Step 3: the records it validates", () => {
 			},
 			{ validate },
 		);
-		const reviewed = result.current.result.recordsNormalized[0].born as Date;
+		const reviewed = (
+			result.current.result.recordsNormalized[0] as Record<string, unknown>
+		).born as Date;
 		expect(reviewed.toISOString()).toBe("2024-03-31T12:00:00.000Z");
 		// validate sees the value the import writes
 		expect(validate).toHaveBeenCalledWith({
