@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, within } from "storybook/test";
+import { expect, waitFor, within } from "storybook/test";
 import {
 	Button,
 	Dialog,
@@ -18,15 +18,24 @@ import {
 	TextField,
 } from "@mui/material";
 import { Framework } from "../../framework";
-import createTestModel from "../../stories/test-utils/TestModel";
+import createTestModel, {
+	sampleData,
+} from "../../stories/test-utils/TestModel";
 import MockConnector from "../../stories/test-utils/MockConnector";
 import type { BaseSelectorData, MultiSelectorData } from "../../standalone";
+import type { IDataGridLoadDataParameters } from "../../standalone/DataGrid/DataGrid";
 import type { ErrorComponentProps } from "../Form";
+import { Model } from "../../backend-integration";
+import type { ModelUnknown } from "../../backend-integration";
+import type BackendDataGridMultiSelectType from "./BackendDataGridMultiSelect";
 
 // Lazy-import to avoid circular dependency at module evaluation time
 const BackendSingleSelect = lazy(() => import("./BackendSingleSelect"));
 const BackendMultiSelect = lazy(() => import("./BackendMultiSelect"));
 const CrudMultiSelect = lazy(() => import("./CrudMultiSelect"));
+const BackendDataGridMultiSelect = lazy(
+	() => import("./BackendDataGridMultiSelect"),
+) as unknown as typeof BackendDataGridMultiSelectType;
 
 const FrameworkDecorator = (Story: React.ComponentType) => (
 	<Framework>
@@ -366,5 +375,120 @@ export const SingleSelectForceQueryAdditionalOptions: StoryObj = {
 		await expect(await body.findByText("Unassigned")).toBeVisible();
 		// while forceQuery keeps the backend records out until something is typed
 		await expect(body.queryByText("Alice Mueller")).toBeNull();
+	},
+};
+
+// ---------------------------------------------------------------------------
+// BackendDataGridMultiSelect: a grid with a checkbox per row
+// ---------------------------------------------------------------------------
+
+let storyModelCounter = 0;
+
+/**
+ * MockConnector that also honours the `id` inSet/notInSet field filter, which
+ * BackendDataGridMultiSelect needs (MockConnector ignores field filters). It reports only
+ * totalRows, as the filtered count.
+ */
+class IdFilterConnector extends MockConnector {
+	async index(params?: Partial<IDataGridLoadDataParameters>) {
+		const ids = params?.fieldFilter?.id;
+		if (!ids) return super.index(params);
+		const [all] = await super.index({
+			...params,
+			fieldFilter: {},
+			page: 1,
+			rows: 1000,
+		});
+		const set = ids.value1 ? ids.value1.split(",") : [];
+		const list = all.filter((row) =>
+			ids.type === "inSet"
+				? set.includes(row.id as string)
+				: !set.includes(row.id as string),
+		);
+		const page = params?.page ?? 1;
+		const size = params?.rows ?? 25;
+		return [
+			list.slice((page - 1) * size, page * size),
+			{ totalRows: list.length },
+		] as [Record<string, unknown>[], { totalRows: number }];
+	}
+}
+
+const createGridModel = () =>
+	new Model(
+		"u52-story-grid-" + String(++storyModelCounter),
+		createTestModel().fields,
+		new IdFilterConnector(sampleData),
+	) as unknown as ModelUnknown;
+
+/**
+ * axe for the grid stories: every violation fails the story, except the DataGrid's own
+ * that are filed already
+ */
+const GRID_A11Y = {
+	test: "error",
+	config: {
+		rules: [
+			// the search field and the row checkboxes have no name (ISSUE-3492-ITEM-25, ISSUE-3493-ITEM-13)
+			{ id: "label", enabled: false },
+			// the virtualized rows have no cells (ISSUE-3472-ITEM-11)
+			{ id: "aria-required-children", enabled: false },
+			// the indeterminate "All" checkbox (ISSUE-3482-ITEM-2)
+			{ id: "aria-conditional-attr", enabled: false },
+		],
+	},
+};
+
+const rowCheckboxes = (canvasElement: HTMLElement) =>
+	Array.from(
+		canvasElement.querySelectorAll<HTMLInputElement>(
+			"[class*=CcDataGrid-selectCheckbox] input",
+		),
+	);
+
+const LabelledDataGridMultiSelectStory = () => {
+	const model = useMemo(createGridModel, []);
+	const [selected, setSelected] = useState<string[]>(["2", "5"]);
+	return (
+		<div style={{ height: 400 }} data-testid={"field-box"}>
+			<BackendDataGridMultiSelect
+				model={model}
+				label={"Recipients"}
+				selected={selected}
+				onChange={setSelected}
+			/>
+		</div>
+	);
+};
+
+/**
+ * ISSUE-3510-ITEM-16: the label names the field (a group around the grid), the number of
+ * selected rows is a status inside it that follows a tick, and the grid still fits into
+ * the field's height below them
+ */
+export const Issue3510Item16LabelledFieldCountsSelection: StoryObj = {
+	parameters: { a11y: GRID_A11Y },
+	render: () => <LabelledDataGridMultiSelectStory />,
+	play: async ({ canvas, canvasElement, userEvent }) => {
+		const group = await canvas.findByRole(
+			"group",
+			{ name: "Recipients" },
+			{ timeout: 3000 },
+		);
+		await waitFor(
+			() => expect(rowCheckboxes(canvasElement).length).toBeGreaterThan(2),
+			{ timeout: 5000 },
+		);
+		const status = within(group).getByRole("status");
+		await expect(status).toHaveTextContent("Selected: 2");
+		await expect(group).toHaveAccessibleDescription("Selected: 2");
+		// the selected Bob and Eve lead, Alice is the first unselected row
+		await userEvent.click(rowCheckboxes(canvasElement)[2]);
+		await waitFor(() => expect(status).toHaveTextContent("Selected: 3"));
+		const box = canvas.getByTestId("field-box").getBoundingClientRect();
+		const footer = canvasElement
+			.querySelector("[class*=CcDataGrid-footer]")
+			.getBoundingClientRect();
+		await expect(footer.bottom).toBeLessThanOrEqual(box.bottom);
 	},
 };

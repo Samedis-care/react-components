@@ -314,7 +314,8 @@
 		"selector": {
 			"loading": "Yuklanmoqda…",
 			"loading-error": "Ma'lumotlarni olishda xatolik yuz berdi",
-			"unknown-entry": "Noma'lum yozuv"
+			"unknown-entry": "Noma'lum yozuv",
+			"selected-count": "Tanlangan: {{COUNT}}"
 		},
 		"crud": {
 			"import": {

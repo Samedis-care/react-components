@@ -314,7 +314,8 @@
 		"selector": {
 			"loading": "Caricamento…",
 			"loading-error": "Errore durante il recupero dei dati",
-			"unknown-entry": "Voce sconosciuta"
+			"unknown-entry": "Voce sconosciuta",
+			"selected-count": "Selezionati: {{COUNT}}"
 		},
 		"crud": {
 			"import": {

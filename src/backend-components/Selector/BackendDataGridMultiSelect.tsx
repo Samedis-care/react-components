@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useId, useState } from "react";
+import { FormLabel, styled } from "@mui/material";
 import { ModelUnknown } from "../../backend-integration";
 import DataGrid, {
 	DataGridData,
@@ -8,6 +9,52 @@ import DataGrid, {
 import Connector from "../../backend-integration/Connector/Connector";
 import { renderDataGridRecordUsingModel } from "../DataGrid";
 import { DataGridNoPersist } from "../../standalone";
+import useCCTranslations from "../../utils/useCCTranslations";
+
+/**
+ * The field: a fieldset named by the legend (label), described by the count of selected
+ * rows, with the grid filling the rest of its height
+ */
+const Root = styled("fieldset", {
+	name: "CcBackendDataGridMultiSelect",
+	slot: "root",
+})({
+	display: "flex",
+	flexDirection: "column",
+	height: "100%",
+	minWidth: 0,
+	margin: 0,
+	padding: 0,
+	border: 0,
+});
+
+const Label = styled(FormLabel, {
+	name: "CcBackendDataGridMultiSelect",
+	slot: "label",
+})({
+	padding: 0,
+}) as typeof FormLabel;
+
+const Status = styled("div", {
+	name: "CcBackendDataGridMultiSelect",
+	slot: "status",
+})(({ theme }) => ({
+	...theme.typography.body2,
+	color: theme.palette.text.secondary,
+	marginBottom: theme.spacing(0.5),
+}));
+
+const GridSlot = styled("div", {
+	name: "CcBackendDataGridMultiSelect",
+	slot: "grid",
+})({
+	flex: "1 1 auto",
+	minHeight: 0,
+});
+
+/** The slots of BackendDataGridMultiSelect, for the theme's styleOverrides */
+export type BackendDataGridMultiSelectClassKey =
+	"root" | "label" | "status" | "grid";
 
 export interface BackendDataGridMultiSelectProps<
 	M extends ModelUnknown,
@@ -26,6 +73,12 @@ export interface BackendDataGridMultiSelectProps<
 	 */
 	model: M;
 	/**
+	 * The field's label, shown above the grid as the legend of the field's fieldset, so
+	 * it also names the field (a group) for assistive technology. Without it the field
+	 * has no name: label it some other way.
+	 */
+	label?: React.ReactNode;
+	/**
 	 * Selection read only?
 	 */
 	readOnly?: boolean;
@@ -41,10 +94,19 @@ export interface BackendDataGridMultiSelectProps<
 	onChange: (selected: string[]) => void;
 }
 
+/**
+ * Multi selection as a DataGrid over a model, with a checkbox per row: a fieldset with the
+ * label as its legend, the number of selected rows ("Selected: 2", a polite status that
+ * also describes the field) and the grid, which fills the rest of the field's height. It
+ * needs a parent with a height. Theme name for styleOverrides:
+ * `CcBackendDataGridMultiSelect` (slots root, label, status, grid).
+ */
 const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 	props: BackendDataGridMultiSelectProps<M>,
 ) => {
-	const { model, readOnly, selected, onChange, ...gridProps } = props;
+	const { model, readOnly, selected, onChange, label, ...gridProps } = props;
+	const { t } = useCCTranslations();
+	const statusId = useId();
 	const [refreshToken, setRefreshToken] = useState("");
 	const refreshGrid = useCallback(
 		() => setRefreshToken(new Date().toISOString()),
@@ -66,7 +128,7 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 		}
 	}, [model]);
 
-	return (
+	const grid = (
 		<DataGridNoPersist>
 			<DataGrid
 				{...gridProps}
@@ -136,6 +198,18 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 				}}
 			/>
 		</DataGridNoPersist>
+	);
+
+	return (
+		<Root aria-describedby={statusId}>
+			{label && <Label component={"legend"}>{label}</Label>}
+			<Status id={statusId} role={"status"}>
+				{t("backend-components.selector.selected-count", {
+					COUNT: selected.length,
+				})}
+			</Status>
+			<GridSlot>{grid}</GridSlot>
+		</Root>
 	);
 };
 

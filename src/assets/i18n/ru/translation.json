@@ -314,7 +314,8 @@
 		"selector": {
 			"loading": "Загружается…",
 			"loading-error": "Ошибка при получении данных",
-			"unknown-entry": "Неизвестная запись"
+			"unknown-entry": "Неизвестная запись",
+			"selected-count": "Выбрано: {{COUNT}}"
 		},
 		"crud": {
 			"import": {

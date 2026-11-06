@@ -10,6 +10,7 @@
  * - `index:<quickFilter>:ids=<ids>` an `id inSet` query (a batched lookup, or the
  *   selected rows of BackendDataGridMultiSelect)
  * - `index:<quickFilter>:not=<ids>` an `id notInSet` query
+ * - `index2:<offset>+<rows>` an offset query (GridTestConnector only)
  * - `read:<id>` a single lookup (disableRequestBatching)
  *
  * Every model gets its own id from a counter, so two models never share react-query cache
@@ -20,6 +21,7 @@
  */
 import { act, fireEvent, screen } from "@testing-library/react";
 import Connector, {
+	ConnectorIndex2Params,
 	ResponseMeta,
 } from "../../../src/backend-integration/Connector/Connector";
 import {
@@ -159,6 +161,25 @@ export class SelectorTestConnector extends Connector {
 
 	delete(): never {
 		throw new Error("not supported");
+	}
+}
+
+/** SelectorTestConnector with its own index2 (offset paging), as BackendDataGridMultiSelect wants */
+export class GridTestConnector extends SelectorTestConnector {
+	async index2(
+		params: ConnectorIndex2Params,
+	): Promise<[Row[], ResponseMeta, unknown?]> {
+		this.log.push(
+			`index2:${params.offset}+${params.rows}` + this.describe(params),
+		);
+		await Promise.resolve();
+		const list = this.matching(params);
+		return [
+			list
+				.slice(params.offset, params.offset + params.rows)
+				.map((row) => ({ ...row })),
+			this.meta(list),
+		];
 	}
 }
 

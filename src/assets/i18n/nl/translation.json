@@ -314,7 +314,8 @@
 		"selector": {
 			"loading": "Laadt…",
 			"loading-error": "Fout bij het ophalen van gegevens",
-			"unknown-entry": "Onbekend item"
+			"unknown-entry": "Onbekend item",
+			"selected-count": "Geselecteerd: {{COUNT}}"
 		},
 		"crud": {
 			"import": {

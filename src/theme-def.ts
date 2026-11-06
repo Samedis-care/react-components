@@ -227,6 +227,7 @@ import { BackendSingleSelectThemeProps } from "./backend-components/Selector/Bac
 import { BackendMultiSelectThemeProps } from "./backend-components/Selector/BackendMultiSelect";
 import { BackendMultipleSelectThemeProps } from "./backend-components/Selector/BackendMultipleSelect";
 import { BackendMultiSelectWithTagsThemeProps } from "./backend-components/Selector/BackendMultiSelectWithTags";
+import { BackendDataGridMultiSelectClassKey } from "./backend-components/Selector/BackendDataGridMultiSelect";
 import {
 	GridSingleSelectFilterBackendClassKey,
 	GridSingleSelectFilterBackendProps,
@@ -322,6 +323,7 @@ declare module "@mui/material/styles" {
 		CcGridMultiSelectFilterBackend: GridMultiSelectFilterBackendClassKey;
 		CcGridSingleSelectFilter: GridSingleSelectFilterClassKey;
 		CcGridSingleSelectFilterBackend: GridSingleSelectFilterBackendClassKey;
+		CcBackendDataGridMultiSelect: BackendDataGridMultiSelectClassKey;
 		CcForm: FormClassKey;
 		CcFieldState: FieldStateClassKey;
 		CcDirtyMarker: DirtyMarkerClassKey;
@@ -511,6 +513,9 @@ declare module "@mui/material/styles" {
 		};
 		CcBackendMultiSelectWithTags?: {
 			defaultProps?: ComponentsPropsList["CcBackendMultiSelectWithTags"];
+		};
+		CcBackendDataGridMultiSelect?: {
+			styleOverrides?: ComponentsOverrides<Theme>["CcBackendDataGridMultiSelect"];
 		};
 		CcBaseSelector?: {
 			defaultProps?: ComponentsPropsList["CcBaseSelector"];

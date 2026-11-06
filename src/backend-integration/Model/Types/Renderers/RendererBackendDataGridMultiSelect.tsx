@@ -32,6 +32,7 @@ class RendererBackendDataGridMultiSelect<
 		const {
 			visibility,
 			field,
+			label,
 			handleChange,
 			handleBlur,
 			errorMsg,
@@ -62,15 +63,15 @@ class RendererBackendDataGridMultiSelect<
 
 			return (
 				<FormControl
-					component={"fieldset"}
 					required={visibility.required}
 					fullWidth
 					error={!!errorMsg}
 					onBlur={handleBlur}
-					name={field}
+					data-name={field}
 					style={{ height: "100%" }}
 				>
 					<BackendDataGridMultiSelect
+						label={label}
 						selected={value}
 						model={relationModel}
 						onChange={(value) => handleChange(field, value)}

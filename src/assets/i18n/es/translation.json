@@ -314,7 +314,8 @@
 		"selector": {
 			"loading": "Cargando…",
 			"loading-error": "Error al obtener los datos",
-			"unknown-entry": "Entrada desconocida"
+			"unknown-entry": "Entrada desconocida",
+			"selected-count": "Seleccionados: {{COUNT}}"
 		},
 		"crud": {
 			"import": {
