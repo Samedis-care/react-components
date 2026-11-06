@@ -1027,3 +1027,29 @@ export const Issue3492Item1SearchKeepsControlledSelection: Story = {
 		await expect(selection).toHaveTextContent('[false,["2"]]');
 	},
 };
+
+/**
+ * ISSUE-3493-ITEM-13: every row checkbox is named after its row ("Select Alice Müller"),
+ * so a screen reader user can tell which row it selects. axe's label rule runs on
+ * the row checkboxes as an error (the play only waits for them).
+ */
+export const Issue3493Item13RowCheckboxesAreNamed: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: makeLoadData(),
+		classes: { selectCheckbox: "story-row-checkbox" },
+	},
+	parameters: {
+		a11y: {
+			test: "error",
+			context: { include: [".story-row-checkbox"] },
+			options: { runOnly: { type: "rule", values: ["label"] } },
+		},
+	},
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		await expect(
+			canvasElement.querySelectorAll(".story-row-checkbox input"),
+		).toHaveLength(PEOPLE.length);
+	},
+};

@@ -5,6 +5,7 @@ import DataGrid, {
 	DataGridFilterParameters,
 	IDataGridLoadDataParameters,
 	DataGridProps,
+	DataGridRowData,
 	IDataGridAddButton,
 } from "../../standalone/DataGrid/DataGrid";
 import {
@@ -18,15 +19,28 @@ import { useDialogContext } from "../../framework/DialogContextProvider";
 import { ErrorDialog, showConfirmDialog } from "../../non-standalone/Dialog";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { dotToObject, getValueByDot } from "../../utils/dotUtils";
+import deepAssign from "../../utils/deepAssign";
+import deepClone from "../../utils/deepClone";
+import isPlainObject from "../../utils/isPlainObject";
 
 export interface BackendDataGridProps<M extends ModelUnknown> extends Omit<
 	DataGridProps,
-	"loadData" | "columns" | "exporters" | "onDelete"
+	"loadData" | "columns" | "exporters" | "onDelete" | "getRowLabel"
 > {
 	/**
 	 * The model to use
 	 */
 	model: M;
+	/**
+	 * The text that identifies a row to assistive technology, e.g. a person's
+	 * name: the row's checkbox is named after it ("Select Carol Jones"), and a
+	 * customSelectionControl gets it as rowLabel.
+	 * Defaults to DataGridProps.getRowLabel's default: the text the first
+	 * visible text column shows.
+	 * @param record The row's record, as the model's index returned it
+	 * @return The label; an empty string names the checkbox "Select row"
+	 */
+	getRowLabel?: (record: ModelRecord<M>) => string;
 	/**
 	 * Enable deletion?
 	 */
@@ -331,6 +345,49 @@ export const renderDataGridRecordUsingModel =
 				.flat(),
 		) as { id: string } & Record<string, string | null>;
 
+/**
+ * The record a row of renderDataGridRecordUsingModel was rendered from: the
+ * values of the model's fields before rendering, put together as the model's
+ * deserialization does
+ * @param model The model the row was rendered with
+ * @param row The row
+ */
+const dataGridRowToModelRecord = <M extends ModelUnknown>(
+	model: M,
+	row: DataGridRowData,
+): ModelRecord<M> => {
+	const record: Record<string, unknown> = {};
+	for (const key of Object.keys(model.fields)) {
+		const value: unknown = row[key + "_raw"];
+		deepAssign(
+			record,
+			dotToObject(key, isPlainObject(value) ? deepClone(value) : value),
+		);
+	}
+	return record as ModelRecord<M>;
+};
+
+/**
+ * DataGridProps.getRowLabel for a grid whose rows renderDataGridRecordUsingModel
+ * rendered, from a getRowLabel that takes the model's record
+ * (BackendDataGridProps.getRowLabel)
+ * @param model The model the rows are rendered with
+ * @param getRowLabel The row label from the model's record, or undefined for
+ *                    the grid's default
+ * @returns The grid's getRowLabel, undefined without getRowLabel
+ */
+export const useBackendDataGridRowLabel = <M extends ModelUnknown>(
+	model: M,
+	getRowLabel: ((record: ModelRecord<M>) => string) | undefined,
+): DataGridProps["getRowLabel"] =>
+	useMemo(
+		() =>
+			getRowLabel &&
+			((row: DataGridRowData) =>
+				getRowLabel(dataGridRowToModelRecord(model, row))),
+		[model, getRowLabel],
+	);
+
 const BackendDataGrid = <M extends ModelUnknown>(
 	props: BackendDataGridProps<M>,
 	ref: React.Ref<DataGridDispatch>,
@@ -358,11 +415,13 @@ const BackendDataGrid = <M extends ModelUnknown>(
 
 	const addNewButtons = useBackendDataGridAddNewButtons(props);
 	const handleDelete = useBackendDataGridDeleteHandler(props, refreshGrid);
+	const getRowLabel = useBackendDataGridRowLabel(model, props.getRowLabel);
 
 	return (
 		<DataGrid
 			{...props}
 			ref={ref}
+			getRowLabel={getRowLabel}
 			onAddNew={addNewButtons}
 			onDelete={handleDelete}
 			loadData={loadData}

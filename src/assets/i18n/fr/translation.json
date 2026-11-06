@@ -71,7 +71,9 @@
 					"or": "OU"
 				},
 				"no-data-reset-filters": "Effacer les filtres",
-				"no-data-filters": "Aucune donnée ne correspond à vos filtres."
+				"no-data-filters": "Aucune donnée ne correspond à vos filtres.",
+				"select-row": "Sélectionner {{ROW}}",
+				"select-row-fallback": "Sélectionner la ligne"
 			},
 			"header": {
 				"new": "Nouveau",

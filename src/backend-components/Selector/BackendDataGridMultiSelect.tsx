@@ -1,13 +1,16 @@
 import React, { useCallback, useEffect, useId, useState } from "react";
 import { FormLabel, styled } from "@mui/material";
-import { ModelUnknown } from "../../backend-integration";
+import { ModelRecord, ModelUnknown } from "../../backend-integration";
 import DataGrid, {
 	DataGridData,
 	DataGridProps,
 	IDataGridLoadDataParameters,
 } from "../../standalone/DataGrid/DataGrid";
 import Connector from "../../backend-integration/Connector/Connector";
-import { renderDataGridRecordUsingModel } from "../DataGrid";
+import {
+	renderDataGridRecordUsingModel,
+	useBackendDataGridRowLabel,
+} from "../DataGrid";
 import { DataGridNoPersist } from "../../standalone";
 import useCCTranslations from "../../utils/useCCTranslations";
 
@@ -67,11 +70,21 @@ export interface BackendDataGridMultiSelectProps<
 	| "customSelectionControl"
 	| "onSelectionChange"
 	| "selection"
+	| "getRowLabel"
 > {
 	/**
 	 * The model to load data from
 	 */
 	model: M;
+	/**
+	 * The text that identifies a row to assistive technology, e.g. a person's
+	 * name: the row's checkbox is named after it ("Select Carol Jones").
+	 * Defaults to DataGridProps.getRowLabel's default: the text the first
+	 * visible text column shows.
+	 * @param record The row's record, as the model's index returned it
+	 * @return The label; an empty string names the checkbox "Select row"
+	 */
+	getRowLabel?: (record: ModelRecord<M>) => string;
 	/**
 	 * The field's label, shown above the grid as the legend of the field's fieldset, so
 	 * it also names the field (a group) for assistive technology. Without it the field
@@ -104,7 +117,16 @@ export interface BackendDataGridMultiSelectProps<
 const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 	props: BackendDataGridMultiSelectProps<M>,
 ) => {
-	const { model, readOnly, selected, onChange, label, ...gridProps } = props;
+	const {
+		model,
+		readOnly,
+		selected,
+		onChange,
+		label,
+		getRowLabel: getRecordLabel,
+		...gridProps
+	} = props;
+	const getRowLabel = useBackendDataGridRowLabel(model, getRecordLabel);
 	const { t } = useCCTranslations();
 	const statusId = useId();
 	const [refreshToken, setRefreshToken] = useState("");
@@ -139,6 +161,7 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 				disableSelection={false}
 				prohibitMultiSelect={false}
 				customSelectionControl={undefined}
+				getRowLabel={getRowLabel}
 				onSelectionChange={(invert, newIds) => {
 					if (!initialSelectionChangeReceived) {
 						setInitialSelectionChangeReceived(true);

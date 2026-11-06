@@ -88,7 +88,7 @@ const Cell = (props: CellComponentProps): React.ReactElement => {
 		content = <ColumnHeader column={column} />;
 	} else if (columnIndex === 0 && !disableSelection) {
 		content = record ? (
-			<SelectRow record={record} />
+			<SelectRow record={record} columns={columns} />
 		) : (
 			<Skeleton variant="rectangular" />
 		);

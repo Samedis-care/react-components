@@ -73,7 +73,8 @@ class RendererBackendDataGridMultiSelect<
 					<BackendDataGridMultiSelect
 						label={label}
 						selected={value}
-						model={relationModel}
+						// the field's relation model is the M this renderer was created for
+						model={relationModel as M}
 						onChange={(value) => handleChange(field, value)}
 						readOnly={visibility.readOnly}
 						{...this.props}

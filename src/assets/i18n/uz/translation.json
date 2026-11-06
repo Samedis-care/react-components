@@ -71,7 +71,9 @@
 					"or": "YOKI"
 				},
 				"no-data-filters": "Filtrlaringizga mos keladigan maʼlumotlar topilmadi.",
-				"no-data-reset-filters": "Filtrlarni tozalash"
+				"no-data-reset-filters": "Filtrlarni tozalash",
+				"select-row": "{{ROW}} belgilash",
+				"select-row-fallback": "Qatorni belgilash"
 			},
 			"header": {
 				"new": "Yangi",

@@ -75,7 +75,9 @@
 					"or": "O"
 				},
 				"no-data-reset-filters": "Cancella filtri",
-				"no-data-filters": "Nessun dato corrisponde ai filtri impostati."
+				"no-data-filters": "Nessun dato corrisponde ai filtri impostati.",
+				"select-row": "Seleziona {{ROW}}",
+				"select-row-fallback": "Seleziona riga"
 			},
 			"header": {
 				"new": "Nuovo",

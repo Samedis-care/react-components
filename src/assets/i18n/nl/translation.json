@@ -71,7 +71,9 @@
 					"and": "EN"
 				},
 				"no-data-filters": "Er zijn geen gegevens die aan uw filters voldoen.",
-				"no-data-reset-filters": "Filters wissen"
+				"no-data-reset-filters": "Filters wissen",
+				"select-row": "{{ROW}} selecteren",
+				"select-row-fallback": "Rij selecteren"
 			},
 			"header": {
 				"new": "Nieuw",

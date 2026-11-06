@@ -71,7 +71,9 @@
 					"or": "ODER"
 				},
 				"no-data-reset-filters": "Filter löschen",
-				"no-data-filters": "Mit den eingestellten Filtern wurden keine Daten gefunden."
+				"no-data-filters": "Mit den eingestellten Filtern wurden keine Daten gefunden.",
+				"select-row": "{{ROW}} auswählen",
+				"select-row-fallback": "Zeile auswählen"
 			},
 			"header": {
 				"new": "Neu",

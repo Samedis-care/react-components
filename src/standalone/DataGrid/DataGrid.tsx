@@ -79,7 +79,8 @@ export interface DataGridProps
 	 */
 	disableFooter?: boolean;
 	/**
-	 * Custom selection control (instead of default checkbox)
+	 * Custom selection control (instead of default checkbox). It gets the row's
+	 * label (see getRowLabel) to name itself after its row.
 	 */
 	customSelectionControl?: React.ComponentType<IDataGridContentSelectRowViewProps>;
 	/**
@@ -306,6 +307,20 @@ export interface IDataGridCallbacks {
 	 * @return Can the row be selected
 	 */
 	canSelectRow?: (record: Record<string, unknown>) => boolean;
+	/**
+	 * The text that identifies a row to assistive technology, e.g. a person's
+	 * name. The row's checkbox is named after it ("Select Carol Jones"), and a
+	 * customSelectionControl gets it as rowLabel.
+	 * Defaults to the text of the first visible column that has any, in the
+	 * order the columns are shown; columns of type "string", "localized-string"
+	 * and "combined-string" go first. The text of a rendered value (a React
+	 * element) is the text among its children, so a value rendered by a
+	 * component that takes its text as another prop has none. Pass getRowLabel
+	 * when that default does not identify the row.
+	 * @param record The loaded row
+	 * @return The label; an empty string names the checkbox "Select row"
+	 */
+	getRowLabel?: (record: DataGridRowData) => string;
 }
 
 export type DataGridAdditionalFilters = Record<string, unknown>;
