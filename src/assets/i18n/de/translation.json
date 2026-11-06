@@ -94,6 +94,8 @@
 				"column": "Spalte",
 				"show": "Sichtbar",
 				"pin": "Anheften",
+				"pin-hidden": "Ausgeblendete Spalten können nicht angeheftet werden",
+				"pin-forced": "Diese Spalte ist immer angeheftet",
 				"close": "Schließen"
 			},
 			"custom-filters": {

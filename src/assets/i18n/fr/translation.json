@@ -94,6 +94,8 @@
 				"column": "Colonne",
 				"show": "Visible",
 				"pin": "Accrocher",
+				"pin-hidden": "Les colonnes masquées ne peuvent pas être épinglées",
+				"pin-forced": "Cette colonne est toujours épinglée",
 				"close": "Fermer"
 			},
 			"custom-filters": {

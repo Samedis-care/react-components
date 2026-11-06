@@ -98,6 +98,8 @@
 				"column": "Column",
 				"show": "Visible",
 				"pin": "Pin",
+				"pin-hidden": "Hidden columns cannot be pinned",
+				"pin-forced": "This column is always pinned",
 				"close": "Close"
 			},
 			"custom-filters": {

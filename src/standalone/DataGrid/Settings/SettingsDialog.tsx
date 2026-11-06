@@ -1,8 +1,7 @@
-import React, { ChangeEvent, useMemo } from "react";
+import React, { ChangeEvent, useId, useMemo } from "react";
 import {
 	Box,
 	Button,
-	Checkbox,
 	Divider,
 	Grid,
 	Table,
@@ -21,6 +20,7 @@ import {
 	useDataGridProps,
 } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import SettingsCheckbox from "./SettingsCheckbox";
 
 export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
 	/**
@@ -77,6 +77,11 @@ const StyledTableCell = styled(TableCell, {
 const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 	const { classes } = useDataGridProps();
 	const { t } = useCCTranslations();
+	const id = useId();
+	const visibleHeaderId = `${id}-visible`;
+	const pinHeaderId = `${id}-pin`;
+	const pinHiddenReasonId = `${id}-pin-hidden`;
+	const pinForcedReasonId = `${id}-pin-forced`;
 
 	const columns = useMemo(
 		() =>
@@ -91,50 +96,81 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 			elevation={0}
 			className={classes?.contentOverlayPaper}
 		>
-			<StyledTable stickyHeader>
+			<StyledTable
+				stickyHeader
+				aria-label={t("standalone.data-grid.header.settings")}
+			>
 				<StyledTableHead className={classes?.settingsTableHead}>
 					<StyledTableRow className={classes?.settingsTableRow}>
 						<StyledTableCell className={classes?.settingsTableCell}>
 							{t("standalone.data-grid.settings.column")}
 						</StyledTableCell>
-						<StyledTableCell className={classes?.settingsTableCell}>
+						<StyledTableCell
+							id={visibleHeaderId}
+							className={classes?.settingsTableCell}
+						>
 							{t("standalone.data-grid.settings.show")}
 						</StyledTableCell>
-						<StyledTableCell className={classes?.settingsTableCell}>
+						<StyledTableCell
+							id={pinHeaderId}
+							className={classes?.settingsTableCell}
+						>
 							{t("standalone.data-grid.settings.pin")}
 						</StyledTableCell>
 					</StyledTableRow>
 				</StyledTableHead>
 				<StyledTableBody className={classes?.settingsTableBody}>
-					{columns.map((column: IDataGridColumnDef) => (
-						<StyledTableRow
-							key={column.field}
-							className={classes?.settingsTableRow}
-						>
-							<StyledTableCell className={classes?.settingsTableCell}>
-								{column.headerName}
-							</StyledTableCell>
-							<StyledTableCell className={classes?.settingsTableCell}>
-								<Checkbox
-									checked={!props.columnHidden[column.field]}
-									onChange={props.toggleColumnVisibility}
-									value={column.field}
-								/>
-							</StyledTableCell>
-							<StyledTableCell className={classes?.settingsTableCell}>
-								<Checkbox
-									checked={isDataGridColumnPinned(column, props.columnPinned)}
-									disabled={
-										!!props.columnHidden[column.field] || column.forcePin
-									}
-									onChange={props.toggleColumnLock}
-									value={column.field}
-								/>
-							</StyledTableCell>
-						</StyledTableRow>
-					))}
+					{columns.map((column: IDataGridColumnDef, index) => {
+						const rowHeaderId = `${id}-row-${index}`;
+						const hidden = !!props.columnHidden[column.field];
+						// why the column's pin cannot be changed
+						const pinReasonId = column.forcePin
+							? pinForcedReasonId
+							: hidden
+								? pinHiddenReasonId
+								: undefined;
+						return (
+							<StyledTableRow
+								key={column.field}
+								className={classes?.settingsTableRow}
+							>
+								<StyledTableCell
+									component={"th"}
+									scope={"row"}
+									id={rowHeaderId}
+									className={classes?.settingsTableCell}
+								>
+									{column.headerName}
+								</StyledTableCell>
+								<StyledTableCell className={classes?.settingsTableCell}>
+									<SettingsCheckbox
+										field={column.field}
+										checked={!hidden}
+										onChange={props.toggleColumnVisibility}
+										labelledBy={`${visibleHeaderId} ${rowHeaderId}`}
+									/>
+								</StyledTableCell>
+								<StyledTableCell className={classes?.settingsTableCell}>
+									<SettingsCheckbox
+										field={column.field}
+										checked={isDataGridColumnPinned(column, props.columnPinned)}
+										disabled={!!pinReasonId}
+										onChange={props.toggleColumnLock}
+										labelledBy={`${pinHeaderId} ${rowHeaderId}`}
+										describedBy={pinReasonId}
+									/>
+								</StyledTableCell>
+							</StyledTableRow>
+						);
+					})}
 				</StyledTableBody>
 			</StyledTable>
+			<span hidden id={pinHiddenReasonId}>
+				{t("standalone.data-grid.settings.pin-hidden")}
+			</span>
+			<span hidden id={pinForcedReasonId}>
+				{t("standalone.data-grid.settings.pin-forced")}
+			</span>
 			<DataGridContentOverlayClosed className={classes?.contentOverlayClosed}>
 				<Divider />
 				<Grid container sx={{ justifyContent: "flex-end" }}>

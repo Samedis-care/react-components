@@ -98,6 +98,8 @@
 				"column": "Colonna",
 				"show": "Visibile",
 				"pin": "Fissa",
+				"pin-hidden": "Le colonne nascoste non possono essere fissate",
+				"pin-forced": "Questa colonna è sempre fissata",
 				"close": "Chiudi"
 			},
 			"custom-filters": {

@@ -98,6 +98,8 @@
 				"column": "Columna",
 				"show": "Visible",
 				"pin": "Fijar",
+				"pin-hidden": "Las columnas ocultas no se pueden fijar",
+				"pin-forced": "Esta columna siempre está fijada",
 				"close": "Cerrar"
 			},
 			"custom-filters": {

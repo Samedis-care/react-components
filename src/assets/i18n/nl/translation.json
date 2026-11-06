@@ -94,6 +94,8 @@
 				"column": "Kolom",
 				"show": "Zichtbaar",
 				"pin": "Pin",
+				"pin-hidden": "Verborgen kolommen kunnen niet worden vastgezet",
+				"pin-forced": "Deze kolom is altijd vastgezet",
 				"close": "Sluiten"
 			},
 			"custom-filters": {

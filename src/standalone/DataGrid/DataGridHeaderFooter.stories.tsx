@@ -133,6 +133,32 @@ type Story = StoryObj<typeof DataGrid>;
 // ─── Stories ──────────────────────────────────────────────────────────────────
 
 /**
+ * ISSUE-3495-ITEM-13: the column settings' "Visible" and "Pin" checkboxes have no
+ * accessible name
+ */
+export const Issue3495Item13SettingsCheckboxesAreNamed: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadPeople,
+		classes: { contentOverlayPaper: "story-settings" },
+	},
+	parameters: {
+		a11y: {
+			test: "error",
+			context: { include: [".story-settings"] },
+			options: { runOnly: { type: "rule", values: ["label"] } },
+		},
+	},
+	play: async ({ canvas }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		await userEvent.click(canvas.getByRole("button", { name: "Columns" }));
+		await expect(
+			await canvas.findByRole("button", { name: "Close" }),
+		).toBeVisible();
+	},
+};
+
+/**
  * ISSUE-3495-ITEM-16: Enter on Delete drops keyboard focus to the page once the deleted
  * rows are unselected, because Delete turns disabled
  */

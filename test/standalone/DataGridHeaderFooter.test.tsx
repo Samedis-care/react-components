@@ -43,7 +43,9 @@ vi.mock("../../src/standalone/Virtualized/MultiGrid", () => ({
 // matchMedia stub: evaluates (min-width:Npx)/(max-width:Npx) against a fake
 // viewport width and notifies MUI's useMediaQuery subscriptions on resizeTo()
 let viewportWidth = 1200;
+
 const mediaListeners = new Set<() => void>();
+
 const evaluateQuery = (query: string) => {
 	const max = /max-width:\s*([\d.]+)px/.exec(query);
 	const min = /min-width:\s*([\d.]+)px/.exec(query);
@@ -53,10 +55,12 @@ const evaluateQuery = (query: string) => {
 		(!min || viewportWidth >= parseFloat(min[1]))
 	);
 };
+
 /** md and up: 1200, sm: 700, xs (a phone): 320 */
 const stubViewport = (width: number) => {
 	viewportWidth = width;
 };
+
 const resizeTo = (width: number) =>
 	act(() => {
 		viewportWidth = width;
@@ -105,6 +109,7 @@ afterEach(async () => {
 });
 
 const theme = createTheme();
+
 const COLUMNS: IDataGridColumnDef[] = [
 	{
 		field: "name",
@@ -121,10 +126,12 @@ const COLUMNS: IDataGridColumnDef[] = [
 		sortable: true,
 	},
 ];
+
 const ROWS: DataGridRowData[] = [
 	{ id: "1", name: "Alice", role: "admin" },
 	{ id: "2", name: "Bob", role: "user" },
 ];
+
 const ok = (): DataGridData => ({ rowsTotal: 2, rows: ROWS });
 
 type Probe = {
@@ -135,7 +142,9 @@ type Probe = {
 	widths: Record<string, number>;
 	setWidths: React.Dispatch<React.SetStateAction<Record<string, number>>>;
 };
+
 let probe: Probe | null = null;
+
 /**
  * A filter bar renders inside all of the grid's providers, so it can read and
  * drive the grid's state through the exported hooks, as app filter bars do
@@ -169,19 +178,25 @@ const Grid = ({ classes, ...props }: Partial<DataGridProps>) => (
 		/>
 	</ThemeProvider>
 );
+
 /** no load running or queued */
 const idle = () =>
 	waitFor(() => expect(probe?.state.refreshData).toBe(0), { timeout: 3000 });
+
 const header = () => document.querySelector<HTMLElement>(".test-header")!;
+
 /** The column settings panel (with MultiGrid mocked, the only table) */
 const settingsPanel = () =>
 	document.querySelector("table")!.closest<HTMLElement>(".MuiPaper-root")!;
+
 const settingsRows = () =>
 	Array.from(
 		settingsPanel().querySelectorAll("tbody tr"),
 		(row) => row.querySelector("td, th")!.textContent,
 	);
+
 const searchBox = () => within(header()).getByRole("textbox");
+
 const typeSearch = (value: string) =>
 	act(() => void fireEvent.change(searchBox(), { target: { value } }));
 
@@ -215,6 +230,77 @@ describe("column settings", () => {
 		// the box keeps what was typed
 		expect(searchBox()).toHaveValue("   ");
 	});
+	it("[ISSUE-3495-ITEM-13] each checkbox is named with its column, and the column name is the row header", async () => {
+		const columns: IDataGridColumnDef[] = [
+			...COLUMNS,
+			{ field: "id", headerName: "ID", type: "string", forcePin: true },
+		];
+		render(<Grid columns={columns} />);
+		await idle();
+		openSettings();
+		const panel = within(settingsPanel());
+		expect(
+			panel.getAllByRole("rowheader").map((cell) => cell.textContent),
+		).toEqual(["ID", "Name", "Role"]);
+		expect(
+			panel.getByRole("checkbox", { name: /Visible.*Name|Name.*Visible/ }),
+		).toBeChecked();
+		const pinId = panel.getByRole("checkbox", { name: /Pin.*ID|ID.*Pin/ });
+		expect(pinId).toBeDisabled();
+		// why it cannot be changed
+		expect(pinId).toHaveAccessibleDescription();
+	});
+	it("[ISSUE-3495-ITEM-13] the Pin of a hidden column says why it cannot be changed, and the table is named", async () => {
+		const columns: IDataGridColumnDef[] = [
+			...COLUMNS,
+			{ field: "id", headerName: "ID", type: "string", forcePin: true },
+		];
+		render(<Grid columns={columns} />);
+		await idle();
+		openSettings();
+		const panel = within(settingsPanel());
+		expect(panel.getByRole("table")).toHaveAccessibleName("Columns");
+		expect(
+			panel.getByRole("checkbox", { name: "Pin ID" }),
+		).toHaveAccessibleDescription("This column is always pinned");
+		const visibleRole = panel.getByRole("checkbox", { name: "Visible Role" });
+		const pinRole = panel.getByRole("checkbox", { name: "Pin Role" });
+		expect(pinRole).toBeEnabled();
+		expect(pinRole).not.toHaveAccessibleDescription();
+		fireEvent.click(visibleRole);
+		expect(pinRole).toBeDisabled();
+		expect(pinRole).toHaveAccessibleDescription(
+			"Hidden columns cannot be pinned",
+		);
+		fireEvent.click(visibleRole);
+		expect(pinRole).toBeEnabled();
+		expect(pinRole).not.toHaveAccessibleDescription();
+		expect(visibleRole).not.toHaveAccessibleDescription();
+	});
+	it("[ISSUE-3495-ITEM-13] the names and the reasons are translated", async () => {
+		await ccI18n.changeLanguage("de");
+		const columns: IDataGridColumnDef[] = [
+			...COLUMNS,
+			{ field: "id", headerName: "ID", type: "string", forcePin: true },
+			{ field: "notes", headerName: "Notes", type: "string", hidden: true },
+		];
+		render(<Grid columns={columns} />);
+		await idle();
+		fireEvent.click(screen.getByRole("button", { name: "Spalten" }));
+		const panel = within(settingsPanel());
+		expect(panel.getByRole("table")).toHaveAccessibleName("Spalten");
+		expect(
+			panel.getByRole("checkbox", { name: "Sichtbar Notes" }),
+		).not.toBeChecked();
+		expect(
+			panel.getByRole("checkbox", { name: "Anheften ID" }),
+		).toHaveAccessibleDescription("Diese Spalte ist immer angeheftet");
+		expect(
+			panel.getByRole("checkbox", { name: "Anheften Notes" }),
+		).toHaveAccessibleDescription(
+			"Ausgeblendete Spalten können nicht angeheftet werden",
+		);
+	});
 });
 
 const openMenu = async (trigger: string, item?: string) => {
@@ -222,6 +308,7 @@ const openMenu = async (trigger: string, item?: string) => {
 	if (item)
 		fireEvent.click(await screen.findByRole("menuitem", { name: item }));
 };
+
 const makeExporter = (
 	over: Partial<IDataGridExporter<unknown>> = {},
 ): IDataGridExporter<unknown> => ({

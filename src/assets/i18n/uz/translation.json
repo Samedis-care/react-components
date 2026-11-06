@@ -94,6 +94,8 @@
 				"column": "Ustun",
 				"show": "Ko'rinadigan",
 				"pin": "Qoplash uchun",
+				"pin-hidden": "Yashirin ustunlarni mahkamlab bo'lmaydi",
+				"pin-forced": "Bu ustun doim mahkamlangan",
 				"close": "Yoping"
 			},
 			"custom-filters": {
