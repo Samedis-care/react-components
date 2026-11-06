@@ -196,6 +196,8 @@ const Content = (props: IDataGridContentProps) => {
 					<CenteredStickyTypography
 						className={classes?.centeredStickyTypography}
 						variant={"h5"}
+						component={"div"}
+						role={"alert"}
 					>
 						{state.dataLoadError.message}
 					</CenteredStickyTypography>
@@ -203,9 +205,11 @@ const Content = (props: IDataGridContentProps) => {
 					<CenteredStickyTypography
 						className={classes?.centeredStickyTypography}
 						variant={"h4"}
+						component={"div"}
 					>
 						<Grid container spacing={2} sx={{ flexDirection: "column" }}>
-							<Grid>
+							{/* the status holds only the text, the button stays outside it */}
+							<Grid role={"status"}>
 								{filtersActive
 									? t("standalone.data-grid.content.no-data-filters")
 									: t("standalone.data-grid.content.no-data")}

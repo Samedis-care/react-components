@@ -311,6 +311,25 @@ describe("UIKit", () => {
 			);
 			expect(screen.getByText("Heading")).toBeTruthy();
 		});
+
+		it("[ISSUE-3482-ITEM-9] renders a heading variant as that heading, as Typography does", () => {
+			wrap(<CenteredTypography variant="h4">Section</CenteredTypography>);
+			expect(
+				screen.getByRole("heading", { level: 4, name: "Section" }),
+			).toHaveClass("MuiTypography-h4");
+		});
+
+		it("[ISSUE-3482-ITEM-9] takes the element from component and keeps the variant's look", () => {
+			wrap(
+				<CenteredTypography variant="h4" component="div">
+					Nothing found
+				</CenteredTypography>,
+			);
+			const text = screen.getByText("Nothing found");
+			expect(text.tagName).toBe("DIV");
+			expect(text).toHaveClass("MuiTypography-h4");
+			expect(screen.queryByRole("heading")).toBeNull();
+		});
 	});
 
 	describe("Checkbox", () => {

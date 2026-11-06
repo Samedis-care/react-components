@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-06 | [The DataGrid's empty and error messages are no longer headings, and are announced](2026-11-06-data-grid-empty-and-error-messages.md) | behavior |
 | 2026-11-06 | [DataGrid row checkboxes are named after their row](2026-11-06-data-grid-row-checkboxes-named.md) | behavior, type |
 | 2026-11-06 | [MultiGrid's header and pinned column leave room for the scrolling pane's scrollbars](2026-11-06-multi-grid-scrollbar-room.md) | behavior |
 | 2026-11-06 | [Portal menu entries and buttons show a keyboard focus ring](2026-11-06-portal-focus-ring.md) | behavior |
