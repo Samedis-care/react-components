@@ -5,6 +5,7 @@ import TextFieldWithHelp, {
 } from "../TextFieldWithHelp";
 import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
 import useCurrentLocale from "../../../utils/useCurrentLocale";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface CurrencyInputProps extends TextFieldWithHelpProps {
 	/**
@@ -16,7 +17,10 @@ export interface CurrencyInputProps extends TextFieldWithHelpProps {
 	 */
 	value: number | null;
 	/**
-	 * The change event handler
+	 * The change event handler. Not called when the text does not parse
+	 * (`"."`): the field keeps the previous amount and shows a message in
+	 * place of `helperText` until a valid edit or a new `value`, `currency` or
+	 * language.
 	 * @param evt
 	 * @param value
 	 */
@@ -30,6 +34,7 @@ const CurrencyInput = (
 	props: CurrencyInputProps & Omit<TextFieldProps, "onChange" | "value">,
 ) => {
 	const { value, onChange, onBlur, currency, ...muiProps } = props;
+	const { t } = useCCTranslations();
 	const locale = useCurrentLocale();
 	const numberFormatOptions: Intl.NumberFormatOptions = useMemo(
 		() => ({
@@ -45,11 +50,16 @@ const CurrencyInput = (
 	);
 	const valueFormatted = formatNumber(value);
 	const [valueInternal, setValueInternal] = useState(valueFormatted);
-	useEffect(() => setValueInternal(formatNumber(value)), [formatNumber, value]);
+	// set by a blur whose text does not parse, and shown as the helper text
+	const [parseError, setParseError] = useState(false);
+	// a new value, currency or language replaces the text, and with it its error
+	useEffect(() => {
+		setValueInternal(formatNumber(value));
+		setParseError(false);
+	}, [formatNumber, value]);
 	const [lastChangeEvent, setLastChangeEvent] = useState<React.ChangeEvent<
 		HTMLTextAreaElement | HTMLInputElement
 	> | null>(null);
-	const [error, setError] = useState(false);
 
 	// on change handling
 	const handleChange = useCallback(
@@ -71,9 +81,9 @@ const CurrencyInput = (
 			if (lastChangeEvent) {
 				const value = parseLocalizedNumber(valueInternal, numberFormatOptions);
 				if (value != null && isNaN(value)) {
-					setError(true);
+					setParseError(true);
 				} else if (onChange) {
-					setError(false);
+					setParseError(false);
 					const formatted = formatNumber(value);
 					// we parse here so decimal points are limited and view always matches data
 					onChange(
@@ -101,7 +111,14 @@ const CurrencyInput = (
 			value={lastChangeEvent ? valueInternal : valueFormatted}
 			onChange={handleChange}
 			onBlur={handleBlur}
-			error={error || muiProps.error}
+			error={parseError || muiProps.error}
+			helperText={
+				parseError
+					? t("standalone.uikit.number-input.invalid", {
+							EXAMPLE: formatNumber(1234.56),
+						})
+					: muiProps.helperText
+			}
 			slotProps={{
 				...muiProps.slotProps,
 				htmlInput: {

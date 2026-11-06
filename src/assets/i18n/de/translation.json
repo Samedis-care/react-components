@@ -17,6 +17,9 @@
 			"clear": "Löschen",
 			"multi-language-input": {
 				"toggle-languages": "Spracheingaben umschalten"
+			},
+			"number-input": {
+				"invalid": "Gib eine Zahl ein, z. B. {{EXAMPLE}}"
 			}
 		},
 		"notifications": {

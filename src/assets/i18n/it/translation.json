@@ -17,6 +17,9 @@
 			"clear": "Cancella",
 			"multi-language-input": {
 				"toggle-languages": "Attiva/disattiva input lingua"
+			},
+			"number-input": {
+				"invalid": "Inserisci un numero, ad esempio {{EXAMPLE}}"
 			}
 		},
 		"signal-portlet": {

@@ -17,6 +17,9 @@
 			"clear": "Tozalash",
 			"multi-language-input": {
 				"toggle-languages": "Til maydonlarini almashtirish"
+			},
+			"number-input": {
+				"invalid": "Raqam kiriting, masalan {{EXAMPLE}}"
 			}
 		},
 		"notifications": {

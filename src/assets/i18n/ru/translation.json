@@ -17,6 +17,9 @@
 			"clear": "Очистить",
 			"multi-language-input": {
 				"toggle-languages": "Переключить языковые поля"
+			},
+			"number-input": {
+				"invalid": "Введите число, например {{EXAMPLE}}"
 			}
 		},
 		"notifications": {

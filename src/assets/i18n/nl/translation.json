@@ -17,6 +17,9 @@
 			"clear": "Wissen",
 			"multi-language-input": {
 				"toggle-languages": "Talinvoer wisselen"
+			},
+			"number-input": {
+				"invalid": "Voer een getal in, bijvoorbeeld {{EXAMPLE}}"
 			}
 		},
 		"notifications": {

@@ -17,6 +17,9 @@
 			"clear": "Borrar",
 			"multi-language-input": {
 				"toggle-languages": "Alternar entradas de idioma"
+			},
+			"number-input": {
+				"invalid": "Introduzca un número, por ejemplo {{EXAMPLE}}"
 			}
 		},
 		"signal-portlet": {

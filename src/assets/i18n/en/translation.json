@@ -17,6 +17,9 @@
 			"clear": "Clear",
 			"multi-language-input": {
 				"toggle-languages": "Toggle language inputs"
+			},
+			"number-input": {
+				"invalid": "Enter a number, such as {{EXAMPLE}}"
 			}
 		},
 		"signal-portlet": {

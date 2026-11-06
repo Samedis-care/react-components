@@ -41,6 +41,8 @@ const setLanguage = (lng: string) =>
 		await ccI18n.changeLanguage(lng);
 	});
 
+const EUR: Intl.NumberFormatOptions = { style: "currency", currency: "EUR" };
+
 const JPY: Intl.NumberFormatOptions = { style: "currency", currency: "JPY" };
 
 /** expected text, built with Intl so the non-breaking spaces match */
@@ -205,6 +207,122 @@ describe("CurrencyInput", () => {
 			});
 			fireEvent.blur(field("Amount"));
 			expect(reported(onValue)).toEqual([12346]);
+		});
+	});
+	describe("text that does not parse", () => {
+		it("[ISSUE-3484-ITEM-20] says in text why the amount is invalid", () => {
+			render(
+				<CurrencyInput
+					label="Amount"
+					currency="EUR"
+					value={3}
+					onChange={noop}
+				/>,
+			);
+			const input = field("Amount");
+			fireEvent.change(input, { target: { value: "." } });
+			fireEvent.blur(input);
+			expect(input).toHaveAttribute("aria-invalid", "true");
+			expect(input).toHaveAccessibleDescription(/\S/);
+		});
+
+		it("[ISSUE-3484-ITEM-20] drops the parse error when a new value arrives", () => {
+			const { rerender } = render(
+				<CurrencyInput
+					label="Amount"
+					currency="EUR"
+					value={3}
+					onChange={noop}
+				/>,
+			);
+			fireEvent.change(field("Amount"), { target: { value: "." } });
+			fireEvent.blur(field("Amount"));
+			expect(field("Amount")).toHaveAttribute("aria-invalid", "true");
+			// e.g. the form is reset, or the record is reloaded
+			rerender(
+				<CurrencyInput
+					label="Amount"
+					currency="EUR"
+					value={9}
+					onChange={noop}
+				/>,
+			);
+			expect(field("Amount")).toHaveValue("€9.00");
+			expect(field("Amount")).toHaveAttribute("aria-invalid", "false");
+		});
+
+		it("[ISSUE-3484-ITEM-20] names a number in the field's format, in the CC language", async () => {
+			await setLanguage("de");
+			render(
+				<CurrencyInput
+					label="Amount"
+					currency="EUR"
+					value={3}
+					onChange={noop}
+				/>,
+			);
+			fireEvent.change(field("Amount"), { target: { value: "," } });
+			fireEvent.blur(field("Amount"));
+			expect(field("Amount")).toHaveAccessibleDescription(
+				`Gib eine Zahl ein, z. B. ${fmt("de", 1234.56, EUR)}`,
+			);
+		});
+
+		it("[ISSUE-3484-ITEM-20] shows the message in place of the helper text until a valid edit", () => {
+			render(
+				<CurrencyInput
+					label="Amount"
+					currency="EUR"
+					value={3}
+					onChange={noop}
+					helperText="Net amount"
+				/>,
+			);
+			const input = field("Amount");
+			expect(input).toHaveAccessibleDescription("Net amount");
+			fireEvent.change(input, { target: { value: "." } });
+			fireEvent.blur(input);
+			expect(input).toHaveAccessibleDescription(
+				`Enter a number, such as ${fmt("en", 1234.56, EUR)}`,
+			);
+			// still invalid while it is edited, until the next blur
+			fireEvent.change(input, { target: { value: "5" } });
+			expect(input).toHaveAttribute("aria-invalid", "true");
+			fireEvent.blur(input);
+			expect(input).toHaveAttribute("aria-invalid", "false");
+			expect(input).toHaveAccessibleDescription("Net amount");
+		});
+
+		it("[ISSUE-3484-ITEM-20] drops the parse error on a currency or language switch", async () => {
+			const { rerender } = render(
+				<CurrencyInput
+					label="Amount"
+					currency="EUR"
+					value={3}
+					onChange={noop}
+				/>,
+			);
+			fireEvent.change(field("Amount"), { target: { value: "." } });
+			fireEvent.blur(field("Amount"));
+			rerender(
+				<CurrencyInput
+					label="Amount"
+					currency="JPY"
+					value={3}
+					onChange={noop}
+				/>,
+			);
+			expect(field("Amount")).toHaveValue(fmt("en", 3, JPY));
+			expect(field("Amount")).toHaveAttribute("aria-invalid", "false");
+			expect(field("Amount")).toHaveAccessibleDescription("");
+
+			fireEvent.change(field("Amount"), { target: { value: "." } });
+			fireEvent.blur(field("Amount"));
+			expect(field("Amount")).toHaveAttribute("aria-invalid", "true");
+			await setLanguage("de");
+			expect(field("Amount")).toHaveValue(fmt("de", 3, JPY));
+			expect(field("Amount")).toHaveAttribute("aria-invalid", "false");
+			expect(field("Amount")).toHaveAccessibleDescription("");
 		});
 	});
 });
