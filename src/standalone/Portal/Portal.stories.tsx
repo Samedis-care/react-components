@@ -7,11 +7,13 @@ import {
 	BarChart as BarChartIcon,
 } from "@mui/icons-material";
 import { List, Typography } from "@mui/material";
-import PortalLayout, { PortalLayoutContext } from "./Layout";
+// eslint-disable-next-line import/no-unresolved
+import { expect, userEvent, waitFor, within } from "storybook/test";
+import PortalLayout, { PortalLayoutContext, PortalLayoutProps } from "./Layout";
 import MenuBase from "./Menu";
 import CollapsibleMenu from "./CollapsibleMenu";
 import { MaterialMenuItem } from "./MenuItem";
-import type { IMenuItemDefinition } from "./Menu";
+import type { IMenuItemDefinition, MenuItemComponent } from "./Menu";
 
 // Provide a PortalLayoutContext so CollapsibleMenu doesn't throw
 const MockPortalLayoutProvider = ({
@@ -101,9 +103,53 @@ const menuDefinitionForceExpand: IMenuItemDefinition[] = [
 	},
 ];
 
+const noop = () => {};
+
+const longTitleDefinition: IMenuItemDefinition[] = [
+	{ title: "Dashboard", onClick: noop, shouldRender: true },
+	{
+		title: "A very long menu title ".repeat(12).trim(),
+		onClick: noop,
+		shouldRender: true,
+	},
+];
+
 const SimpleWrapper = ({ children }: { children: React.ReactNode }) => (
 	<List>{children}</List>
 );
+
+const menu = (
+	definition: IMenuItemDefinition[] = menuDefinition,
+	menuItem: MenuItemComponent = MaterialMenuItem,
+) => (
+	<MenuBase
+		definition={definition}
+		wrapper={SimpleWrapper}
+		menuItem={menuItem}
+	/>
+);
+
+const pageTitle = (text = "Page Title") => (
+	<Typography variant="h6" style={{ flexGrow: 1 }}>
+		{text}
+	</Typography>
+);
+
+const MOBILE = { viewport: { value: "mobile1", isRotated: false } };
+
+// Axe in error mode, minus two rules the open drawer breaks until their items are
+// fixed (drop each rule with its fix): the drawer is an unnamed modal dialog
+// ("aria-dialog-name", ISSUE-3479-ITEM-13), and with MUI List as the wrapper the
+// entries are `ul > div[role=button]` ("list", ISSUE-3479-ITEM-19).
+const A11Y_OPEN_DRAWER_EXCEPTION = {
+	test: "error",
+	config: {
+		rules: [
+			{ id: "aria-dialog-name", enabled: false },
+			{ id: "list", enabled: false },
+		],
+	},
+} as const;
 
 const meta: Meta<typeof PortalLayout> = {
 	title: "Standalone/Portal/PortalLayout",
@@ -112,7 +158,42 @@ const meta: Meta<typeof PortalLayout> = {
 };
 export default meta;
 
+type LayoutArgs = Partial<
+	Pick<
+		PortalLayoutProps,
+		| "drawerWidth"
+		| "collapseMenu"
+		| "collapseBreakpoint"
+		| "mobileViewCondition"
+	>
+>;
+type LayoutStory = StoryObj<LayoutArgs>;
 type Story = StoryObj<typeof PortalLayout>;
+
+const fullHeight = { height: "100vh" };
+
+const drawerRoot = () => {
+	const el = document.querySelector<HTMLElement>(".MuiDrawer-root");
+	if (!el) throw new Error("no drawer rendered");
+	return el;
+};
+const drawerPaper = () => {
+	const el = drawerRoot().querySelector<HTMLElement>(".MuiDrawer-paper");
+	if (!el) throw new Error("no drawer paper rendered");
+	return el;
+};
+// hidden: true, because an open drawer hides the rest of the page from AT
+const burgerIn = (canvasElement: HTMLElement) =>
+	within(canvasElement).getByRole("button", {
+		name: "Toggle menu",
+		hidden: true,
+	});
+const openDrawer = async (canvasElement: HTMLElement) => {
+	await userEvent.click(burgerIn(canvasElement));
+	await waitFor(() => expect(drawerRoot()).not.toHaveAttribute("aria-hidden"));
+	// the slide-in is over
+	await waitFor(() => expect(drawerPaper().getBoundingClientRect().x).toBe(0));
+};
 
 export const BasicLayout: Story = {
 	render: () => (
@@ -299,4 +380,74 @@ export const MaterialMenuItemActive: Story = {
 			/>
 		</List>
 	),
+};
+
+export const Issue3479Item2PhoneDrawerLeavesRoomToClose: LayoutStory = {
+	globals: MOBILE,
+	args: { drawerWidth: 320 },
+	parameters: {
+		a11y: A11Y_OPEN_DRAWER_EXCEPTION,
+		docs: {
+			description: {
+				story:
+					"ISSUE-3479-ITEM-2: with `drawerWidth={320}` (the identity-management admin UI) the open drawer covers a 320px phone completely: there is no backdrop left to tap.",
+			},
+		},
+	},
+	render: (args) => (
+		<div style={fullHeight}>
+			<PortalLayout
+				{...args}
+				variant="no-top-left"
+				headerContent={pageTitle()}
+				menuContent={menu()}
+				content={<div style={{ padding: 16 }}>Content</div>}
+			/>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		await openDrawer(canvasElement);
+		await expect(
+			drawerPaper().getBoundingClientRect().width,
+		).toBeLessThanOrEqual(window.innerWidth - 56);
+		const atRightEdge = document.elementFromPoint(window.innerWidth - 8, 300);
+		await expect(atRightEdge?.closest(".MuiBackdrop-root")).not.toBeNull();
+	},
+};
+
+export const Issue3479Item2LongTitleDrawerLeavesRoomToClose: LayoutStory = {
+	globals: MOBILE,
+	parameters: {
+		a11y: A11Y_OPEN_DRAWER_EXCEPTION,
+		docs: {
+			description: {
+				story:
+					"ISSUE-3479-ITEM-2: without `drawerWidth` the drawer is as wide as its longest title, but never wider than the screen minus 56px: the long title wraps and a backdrop strip stays to tap.",
+			},
+		},
+	},
+	render: (args) => (
+		<div style={fullHeight}>
+			<PortalLayout
+				{...args}
+				variant="no-top-left"
+				headerContent={pageTitle()}
+				menuContent={menu(longTitleDefinition)}
+				content={<div style={{ padding: 16 }}>Content</div>}
+			/>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		await openDrawer(canvasElement);
+		await expect(drawerPaper().getBoundingClientRect().width).toBe(
+			window.innerWidth - 56,
+		);
+		const atRightEdge = document.elementFromPoint(window.innerWidth - 8, 300);
+		await expect(atRightEdge?.closest(".MuiBackdrop-root")).not.toBeNull();
+		// the title wraps inside the drawer instead of overflowing it
+		const title = within(drawerPaper()).getByText(/^A very long menu title/);
+		await expect(title.getBoundingClientRect().right).toBeLessThanOrEqual(
+			drawerPaper().getBoundingClientRect().right,
+		);
+	},
 };

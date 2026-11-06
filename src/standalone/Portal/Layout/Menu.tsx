@@ -1,4 +1,11 @@
-import { Drawer, Paper, styled, useTheme, useThemeProps } from "@mui/material";
+import {
+	Drawer,
+	drawerClasses,
+	Paper,
+	styled,
+	useTheme,
+	useThemeProps,
+} from "@mui/material";
 import React, { useMemo } from "react";
 import combineClassNames from "../../../utils/combineClassNames";
 
@@ -12,7 +19,10 @@ export interface PortalLayoutMenuProps {
 	 */
 	mobile: boolean;
 	/**
-	 * The width of the menu
+	 * The width of the menu, in px
+	 *
+	 * In mobile view the drawer is never wider than the screen minus 56px, so a
+	 * strip of backdrop stays to tap to close it.
 	 */
 	drawerWidth?: number;
 	/**
@@ -47,7 +57,13 @@ const MenuPaper = styled(Paper, {
 const MenuDrawer = styled(Drawer, {
 	name: "CcPortalLayoutMenu",
 	slot: "menuDrawer",
-})({});
+})({
+	// leave a strip of backdrop to tap on any screen, also with drawerWidth
+	// (Material: a modal navigation drawer is at most the screen width minus 56px)
+	[`& .${drawerClasses.paper}`]: {
+		maxWidth: "calc(100% - 56px)",
+	},
+});
 
 export type PortalLayoutMenuClassKey = "menuPaper" | "menuDrawer";
 
