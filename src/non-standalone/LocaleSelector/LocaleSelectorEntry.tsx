@@ -20,11 +20,9 @@ const ListItemRoot = styled(ListItemButton, {
 	name: "CcLocaleSelectorEntry",
 	slot: "root",
 })({
-	height: "100%",
-	display: "block",
-	// long names (e.g. de: "Sonderverwaltungsregion Hongkong") must never bleed
-	// into the neighbouring entries of the virtualized list
-	overflow: "hidden",
+	// the row grows when a long name wraps (e.g. de: "Sonderverwaltungsregion
+	// Hongkong"); the list measures it
+	minHeight: 70,
 });
 
 const Container = styled("div", {
@@ -35,7 +33,6 @@ const Container = styled("div", {
 	alignItems: "center",
 	gap: 16,
 	width: "100%",
-	height: "100%",
 });
 
 const ImageWrapper = styled("div", {
@@ -44,7 +41,7 @@ const ImageWrapper = styled("div", {
 })({
 	flex: "0 0 auto",
 	width: 60,
-	height: 30, // available: 70px - 16px padding
+	height: 30,
 	display: "flex",
 	alignItems: "center",
 });
@@ -61,8 +58,9 @@ const Image = styled("img", { name: "CcLocaleSelectorEntry", slot: "image" })({
 /**
  * Both text lines share a single grid, so the language column stays aligned
  * while the country column gets all the remaining space.
- * The language column has a fixed width so it doesn't jump around between
- * entries - 120px fits the longest translated language name we ship.
+ * The language column has the same width in every entry, so it doesn't jump
+ * around: 120px fits most translated language names, and on a narrow screen
+ * it shrinks to 45% so the country keeps room too. Longer names wrap.
  */
 const TextContainer = styled("div", {
 	name: "CcLocaleSelectorEntry",
@@ -71,15 +69,14 @@ const TextContainer = styled("div", {
 	flex: "1 1 auto",
 	minWidth: 0,
 	display: "grid",
-	gridTemplateColumns: "minmax(0, 1fr) 120px",
+	gridTemplateColumns: "minmax(0, 1fr) min(120px, 45%)",
 	columnGap: 16,
-	alignItems: "center",
+	// a name that wraps keeps its neighbour on its first line
+	alignItems: "start",
 });
 
 const Text = styled("span", { name: "CcLocaleSelectorEntry", slot: "text" })({
-	whiteSpace: "nowrap",
-	overflow: "hidden",
-	textOverflow: "ellipsis",
+	overflowWrap: "anywhere",
 });
 
 export type LocaleSelectorEntryClassKey =

@@ -1,5 +1,12 @@
 import React, { Suspense } from "react";
-import { Dialog, DialogContent, styled, useThemeProps } from "@mui/material";
+import {
+	Dialog,
+	DialogContent,
+	styled,
+	useMediaQuery,
+	useTheme,
+	useThemeProps,
+} from "@mui/material";
 import { useDialogContext } from "../../framework/DialogContextProvider";
 import { DialogTitle } from "../Dialog";
 import Loader from "../../standalone/Loader";
@@ -13,11 +20,14 @@ const LocaleSelectorDialogContent = React.lazy(
 const StyledDialog = styled(Dialog, {
 	name: "CcLocaleSelectorDialog",
 	slot: "root",
-})({
-	"& .MuiPaper-root": {
-		width: 400,
+})(({ theme }) => ({
+	// below sm the dialog is full screen
+	[theme.breakpoints.up("sm")]: {
+		"& .MuiPaper-root": {
+			width: 400,
+		},
 	},
-});
+}));
 const StyledDialogTitle = styled(DialogTitle, {
 	name: "CcLocaleSelectorDialog",
 	slot: "title",
@@ -32,7 +42,14 @@ const StyledDialogContent = styled(DialogContent, {
 const StyledLocaleSelectorDialogContent = styled(LocaleSelectorDialogContent, {
 	name: "CcLocaleSelectorDialog",
 	slot: "content",
-})({});
+})(({ theme }) => ({
+	// full screen: the list fills the height below the search box
+	[theme.breakpoints.down("sm")]: {
+		height: "100%",
+		flexDirection: "column",
+		flexWrap: "nowrap",
+	},
+}));
 
 export type LocaleSelectorDialogClassKey =
 	"root" | "title" | "contentWrapper" | "content";
@@ -55,7 +72,8 @@ export interface LocaleSelectorDialogProps extends LocaleSelectorDialogCommonPro
 }
 
 /**
- * Locale selector dialog
+ * Locale selector dialog. Below the theme's `sm` breakpoint it is full screen,
+ * from `sm` up 400px wide; names that don't fit their column wrap.
  * @usage `pushDialog(<LocaleSelectorDialog \>)`
  * @remarks You should add the following code snipped into your app entry point to enable locale synchronization.
  * ```ts
@@ -73,12 +91,17 @@ const LocaleSelectorDialog = (inProps: LocaleSelectorDialogProps) => {
 	});
 	const { className, classes, ...contentProps } = props;
 	const [, popDialog] = useDialogContext();
+	const theme = useTheme();
+	const fullScreen = useMediaQuery(theme.breakpoints.down("sm"), {
+		noSsr: true,
+	});
 
 	const { t } = useCCTranslations();
 
 	return (
 		<StyledDialog
 			open={true}
+			fullScreen={fullScreen}
 			onClose={popDialog}
 			className={combineClassNames([className, classes?.root])}
 		>

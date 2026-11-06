@@ -6,7 +6,7 @@ import {
 	styled,
 	useThemeProps,
 } from "@mui/material";
-import { List, RowComponentProps } from "react-window";
+import { List, RowComponentProps, useDynamicRowHeight } from "react-window";
 import supportedLanguages from "../../assets/data/supported-languages.json";
 import countryLanguages from "../../assets/data/country-languages.json";
 import LocaleSelectorEntry from "./LocaleSelectorEntry";
@@ -49,10 +49,16 @@ interface LocaleSelectorEntryFilterData extends LocaleSelectorEntryData {
 const LocaleList = styled(Grid, {
 	name: "CcLocaleSelectorDialogContent",
 	slot: "localeList",
-})({
+})(({ theme }) => ({
 	height: "calc(75vh - 128px)",
 	width: "100%",
-});
+	// the dialog is full screen below sm: fill it
+	[theme.breakpoints.down("sm")]: {
+		height: "auto",
+		flex: "1 1 auto",
+		minHeight: 70,
+	},
+}));
 
 const NoLocalesMessage = styled("div", {
 	name: "CcLocaleSelectorDialogContent",
@@ -187,6 +193,18 @@ const LocaleSelectorDialogContent = (
 		[currentLang, handleSwitch, switchingLanguage],
 	);
 
+	// names wrap, so each row is as tall as its text: react-window measures the
+	// rendered rows (70px until then). It caches the heights by index, so the
+	// cache starts over when other rows or other names fill the list
+	const rowHeightKey = useMemo(
+		() => currentLang + ":" + filteredData.map((e) => e.locale).join(","),
+		[currentLang, filteredData],
+	);
+	const rowHeight = useDynamicRowHeight({
+		defaultRowHeight: 70,
+		key: rowHeightKey,
+	});
+
 	return (
 		<Grid container className={className}>
 			<Grid size={12}>
@@ -209,7 +227,7 @@ const LocaleSelectorDialogContent = (
 					<List
 						overscanCount={2}
 						rowCount={filteredData.length}
-						rowHeight={70}
+						rowHeight={rowHeight}
 						rowComponent={LocaleEntryRenderer}
 						rowProps={{ filteredData }}
 					/>
