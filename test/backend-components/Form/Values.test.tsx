@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import React, { useEffect } from "react";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import Form, {
 	useFormContext,
 } from "../../../src/backend-components/Form/Form";
@@ -21,8 +21,38 @@ import {
 	Sink,
 	trySubmit,
 } from "./formFixture";
+import ModelDataStore from "../../../src/backend-integration/Store";
 
 setupFormTests();
+
+describe("Form values: loading and initialRecord", () => {
+	it("[ISSUE-3501-ITEM-1] an object value in initialRecord does not leak into the next create form", async () => {
+		const model = makeModel();
+		const first: Sink = {};
+		mountForm(model, capture(first), {
+			id: null,
+			initialRecord: { loc: { de: "Prefill" }, address: { city: "Berlin" } },
+		});
+		await waitFor(() =>
+			expect((first.ctx?.values.loc as Record<string, string>)?.de).toBe(
+				"Prefill",
+			),
+		);
+		cleanup();
+		// the default record the next create form starts from, as cached for the model
+		const cached = ModelDataStore.getQueryData(
+			model.getReactQueryKey(null, false),
+		) as [Record<string, unknown>, unknown];
+		expect(cached[0].loc).toEqual({});
+		expect(cached[0].address).toEqual({ city: "" });
+
+		const second: Sink = {};
+		mountForm(model, capture(second), { id: null });
+		await loaded(second, "");
+		expect(second.ctx!.values.loc).toEqual({});
+		expect(second.ctx!.values.address).toEqual({ city: "" });
+	});
+});
 
 describe("Form values: refetch and record changes", () => {
 	it("[ISSUE-3501-ITEM-2] switching to a record that is already cached shows that record, not the previous one's edits", async () => {

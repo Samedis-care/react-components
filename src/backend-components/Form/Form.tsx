@@ -1286,14 +1286,15 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 	// dirty baseline and to seed the form data, so the two can never diverge.
 	// initialRecord is applied when the server data loads, not when it changes: the
 	// form data was seeded from it then, and after a save the baseline is the saved
-	// record, which a re-rendered initialRecord must not replace
+	// record, which a re-rendered initialRecord must not replace.
+	// data is the react-query cache entry (for a new record, the model's default record
+	// that every create form starts from), so initialRecord is merged into a copy of it
 	const initialRecordRef = useRef(initialRecord);
 	initialRecordRef.current = initialRecord;
 	const buildInitialValues = useCallback(
 		(data: Record<string, unknown>): Record<string, unknown> =>
 			deepAssign(
-				{},
-				data,
+				deepClone(data),
 				data.id || !initialRecordRef.current ? {} : initialRecordRef.current,
 			),
 		[],
