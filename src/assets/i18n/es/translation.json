@@ -143,6 +143,9 @@
 					"yes": "Sí",
 					"no": "No"
 				}
+			},
+			"multi-select-with-tags": {
+				"group-input-label": "Añadir todas las entradas de un grupo"
 			}
 		},
 		"file-upload": {

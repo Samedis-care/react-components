@@ -139,6 +139,9 @@
 					"no": "Nein"
 				},
 				"remove-item": "{{ITEM}} entfernen"
+			},
+			"multi-select-with-tags": {
+				"group-input-label": "Alle Einträge einer Gruppe hinzufügen"
 			}
 		},
 		"file-upload": {

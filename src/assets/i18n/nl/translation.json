@@ -139,6 +139,9 @@
 					"no": "Nee"
 				},
 				"remove-item": "{{ITEM}} verwijderen"
+			},
+			"multi-select-with-tags": {
+				"group-input-label": "Alle items van een groep toevoegen"
 			}
 		},
 		"file-upload": {

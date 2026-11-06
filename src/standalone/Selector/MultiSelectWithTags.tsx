@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useId, useState } from "react";
 import { Box, styled, Typography, useThemeProps } from "@mui/material";
 import SingleSelect from "../../standalone/Selector/SingleSelect";
 import MultiSelectWithoutGroup, {
@@ -15,6 +15,7 @@ import Loader from "../Loader";
 import { MultiSelectorData } from "./MultiSelect";
 import combineClassNames from "../../utils/combineClassNames";
 import { labelWithDirtyMarker } from "../UIKit/MuiFieldState";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,
@@ -47,7 +48,8 @@ export interface MultiSelectWithTagsProps<
 		> {
 	// UI Props
 	/**
-	 * The title of control
+	 * Title of the control, shown above both fields; names the group they form
+	 * for assistive technology
 	 */
 	title: string;
 	/**
@@ -63,6 +65,13 @@ export interface MultiSelectWithTagsProps<
 	 * Label above search bar
 	 */
 	searchInputLabel?: string;
+	/**
+	 * Accessible name of the group field, the field whose pick adds all
+	 * entries of a group. Read by screen readers, not shown. An empty string
+	 * uses the default as well.
+	 * @default "Add all entries of a group", translated
+	 */
+	groupInputLabel?: string;
 	/**
 	 * Custom styles for multi select without groups
 	 */
@@ -122,6 +131,22 @@ const Root = styled("div", { name: "CcMultiSelectWithTags", slot: "root" })({
 	position: "relative",
 });
 
+const GroupInputLabel = styled("label", {
+	name: "CcMultiSelectWithTags",
+	slot: "groupInputLabel",
+})({
+	// visually hidden, as MUI's visuallyHidden
+	border: 0,
+	clipPath: "inset(50%)",
+	height: 1,
+	margin: -1,
+	overflow: "hidden",
+	padding: 0,
+	position: "absolute",
+	whiteSpace: "nowrap",
+	width: 1,
+});
+
 const LoadOverlay = styled("div", {
 	name: "CcMultiSelectWithTags",
 	slot: "loadOverlay",
@@ -136,7 +161,14 @@ const LoadOverlay = styled("div", {
 	transition: "opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) 500ms",
 });
 
-export type MultiSelectWithTagsClassKey = "root" | "loadOverlay";
+/**
+ * Slots of MultiSelectWithTags (theme `CcMultiSelectWithTags`, `classes`):
+ * - `root`: the outer element, a group named by the title
+ * - `loadOverlay`: the overlay shown while a group's entries load
+ * - `groupInputLabel`: the visually hidden label of the group field
+ */
+export type MultiSelectWithTagsClassKey =
+	"root" | "loadOverlay" | "groupInputLabel";
 
 const MultiSelectWithTags = <
 	DataT extends MultiSelectorData,
@@ -153,6 +185,7 @@ const MultiSelectWithTags = <
 		dirty,
 		autoFocus,
 		searchInputLabel,
+		groupInputLabel,
 		selected,
 		disabled,
 		autocompleteId,
@@ -177,6 +210,11 @@ const MultiSelectWithTags = <
 		classes,
 		filterIds,
 	} = props;
+
+	const { t } = useCCTranslations();
+	const id = useId();
+	const titleId = `${id}-title`;
+	const groupFieldId = `${autocompleteId || id}-group-select`;
 
 	const defaultSwitchValue = props.displaySwitch
 		? (props.defaultSwitchValue ?? false)
@@ -259,7 +297,11 @@ const MultiSelectWithTags = <
 	);
 
 	return (
-		<Root className={combineClassNames([className, classes?.root])}>
+		<Root
+			className={combineClassNames([className, classes?.root])}
+			role={"group"}
+			aria-labelledby={titleId}
+		>
 			<LoadOverlay
 				className={classes?.loadOverlay}
 				style={
@@ -270,13 +312,19 @@ const MultiSelectWithTags = <
 			>
 				<Loader />
 			</LoadOverlay>
-			<Typography component="label" variant={"caption"} color={"textSecondary"}>
+			<Typography id={titleId} variant={"caption"} color={"textSecondary"}>
 				{labelWithDirtyMarker(title, dirty)}
 			</Typography>
+			<GroupInputLabel
+				id={`${groupFieldId}-label`}
+				htmlFor={groupFieldId}
+				className={classes?.groupInputLabel}
+			>
+				{groupInputLabel ||
+					t("standalone.selector.multi-select-with-tags.group-input-label")}
+			</GroupInputLabel>
 			<SingleSelect
-				autocompleteId={
-					autocompleteId ? autocompleteId + "-group-select" : undefined
-				}
+				autocompleteId={groupFieldId}
 				selected={null}
 				onSelect={handleGroupSelect}
 				refreshToken={selectedGroups.length.toString()}

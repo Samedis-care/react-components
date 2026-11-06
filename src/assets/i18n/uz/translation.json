@@ -139,6 +139,9 @@
 					"no": "Yo'q"
 				},
 				"remove-item": "{{ITEM}} o'chirish"
+			},
+			"multi-select-with-tags": {
+				"group-input-label": "Guruhning barcha yozuvlarini qo'shish"
 			}
 		},
 		"file-upload": {

@@ -6,6 +6,7 @@ import {
 	fireEvent,
 	render,
 	screen,
+	within,
 } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import {
@@ -44,11 +45,14 @@ const FRUITS: MultiSelectorData[] = [
 	{ value: "zeta", label: "Zeta" },
 ];
 const [APPLE, BANANA, CHERRY] = FRUITS;
+
 const loadFruits = selectorLocalLoadHandler(FRUITS);
+
 const GROUPS: BaseSelectorData[] = [
 	{ value: "g-red", label: "Red fruits" },
 	{ value: "g-yellow", label: "Yellow fruits" },
 ];
+
 const groupEntries = (group: BaseSelectorData) =>
 	group.value === "g-red" ? [APPLE, CHERRY] : [BANANA];
 
@@ -61,11 +65,13 @@ const renderUi = (ui: React.ReactElement) =>
 	render(<ThemeProvider theme={createTheme()}>{ui}</ThemeProvider>);
 
 const groupField = () => screen.getAllByRole<HTMLInputElement>("combobox")[0];
+
 const open = async (input: HTMLElement) => {
 	act(() => input.focus());
 	fireEvent.mouseDown(input);
 	await flush();
 };
+
 const pickGroup = async (label: string) => {
 	await open(groupField());
 	fireEvent.click(screen.getByRole("option", { name: label }));
@@ -121,5 +127,44 @@ describe("MultiSelectWithTags bugs", () => {
 		expect(initial.map((entry) => entry.value)).toEqual(["cherry", "banana"]);
 		await pickGroup("Red fruits");
 		expect(values(onChg)).toEqual([["cherry", "banana", "apple"]]);
+	});
+	it("[ISSUE-3488-ITEM-26] groups both fields under the title and names the group field", async () => {
+		renderUi(<Host />);
+		await flush();
+		const group = screen.getByRole("group", { name: "Fruits" });
+		expect(within(group).getAllByRole("combobox")).toHaveLength(2);
+		expect(groupField()).toHaveAccessibleName();
+	});
+	it("[ISSUE-3488-ITEM-26] names the group field with a translated default, or with groupInputLabel, and its listbox likewise", async () => {
+		renderUi(<Host dirty />);
+		await flush();
+		// the dirty marker does not change the group's name
+		expect(screen.getByRole("group", { name: "Fruits" })).toBeInTheDocument();
+		expect(groupField()).toHaveAccessibleName("Add all entries of a group");
+		cleanup();
+		renderUi(<Host groupInputLabel="Add a fruit family" />);
+		await flush();
+		expect(groupField()).toHaveAccessibleName("Add a fruit family");
+		await open(groupField());
+		expect(screen.getByRole("listbox")).toHaveAccessibleName(
+			"Add a fruit family",
+		);
+	});
+	it("[ISSUE-3488-ITEM-26] names the fields of each of two controls on a page after their own title", async () => {
+		renderUi(
+			<>
+				<Host title="Fruits" groupInputLabel="Add a fruit family" />
+				<Host title="Vegetables" groupInputLabel="Add a vegetable family" />
+			</>,
+		);
+		await flush();
+		const fruits = screen.getByRole("group", { name: "Fruits" });
+		const vegetables = screen.getByRole("group", { name: "Vegetables" });
+		expect(within(fruits).getAllByRole("combobox")[0]).toHaveAccessibleName(
+			"Add a fruit family",
+		);
+		expect(within(vegetables).getAllByRole("combobox")[0]).toHaveAccessibleName(
+			"Add a vegetable family",
+		);
 	});
 });

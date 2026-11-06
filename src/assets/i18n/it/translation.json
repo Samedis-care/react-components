@@ -143,6 +143,9 @@
 					"yes": "Sì",
 					"no": "No"
 				}
+			},
+			"multi-select-with-tags": {
+				"group-input-label": "Aggiungi tutte le voci di un gruppo"
 			}
 		},
 		"file-upload": {

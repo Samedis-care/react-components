@@ -139,6 +139,9 @@
 					"no": "Нет"
 				},
 				"remove-item": "Удалить {{ITEM}}"
+			},
+			"multi-select-with-tags": {
+				"group-input-label": "Добавить все записи группы"
 			}
 		},
 		"file-upload": {
