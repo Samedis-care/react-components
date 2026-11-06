@@ -270,6 +270,10 @@
 					},
 					"files": {
 						"no-file": "Hech qanday fayl mavjud emas"
+					},
+					"string-array": {
+						"entry": "{{LABEL}} {{NUM}}",
+						"new-entry": "{{LABEL}}: yangi yozuv"
 					}
 				},
 				"date-nullable": {

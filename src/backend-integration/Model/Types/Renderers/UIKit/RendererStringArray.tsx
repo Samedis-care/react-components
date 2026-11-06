@@ -9,6 +9,8 @@ import {
 import { TextFieldWithHelpProps } from "../../../../../standalone/UIKit/TextFieldWithHelp";
 import TypeStringArray from "../../TypeStringArray";
 import { useMountLogging } from "../../../../../utils";
+import useCCTranslations from "../../../../../utils/useCCTranslations";
+import addSlotAttributes from "../../../../../utils/internal/addSlotAttributes";
 
 export type ModelDataTypeStringArrayRendererCCParams = Omit<
 	TextFieldProps,
@@ -90,6 +92,7 @@ const RendererStringArrayComponent = (
 	} = props;
 
 	useMountLogging(RendererStringArrayComponent);
+	const { t } = useCCTranslations();
 
 	const textField = (idx: number) => (
 		<TextFieldWithHelp
@@ -114,6 +117,19 @@ const RendererStringArrayComponent = (
 			dirty={dirty}
 			// the empty entry at the end, where a new value goes
 			autoFocus={autoFocus && idx === value.length}
+			// the group box's legend shows the label once for all entries
+			slotProps={addSlotAttributes(options?.slotProps, "htmlInput", {
+				"aria-label":
+					idx === value.length
+						? t(
+								"backend-integration.model.types.renderers.string-array.new-entry",
+								{ LABEL: label },
+							)
+						: t(
+								"backend-integration.model.types.renderers.string-array.entry",
+								{ LABEL: label, NUM: idx + 1 },
+							),
+			})}
 		/>
 	);
 

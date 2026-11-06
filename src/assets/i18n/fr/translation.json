@@ -270,6 +270,10 @@
 					},
 					"files": {
 						"no-file": "Aucun dossier présent"
+					},
+					"string-array": {
+						"entry": "{{LABEL}} {{NUM}}",
+						"new-entry": "{{LABEL}} : nouvelle entrée"
 					}
 				},
 				"date-nullable": {

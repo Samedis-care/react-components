@@ -270,6 +270,10 @@
 					},
 					"files": {
 						"no-file": "Файлы отсутствуют"
+					},
+					"string-array": {
+						"entry": "{{LABEL}} {{NUM}}",
+						"new-entry": "{{LABEL}}: новая запись"
 					}
 				},
 				"date-nullable": {
