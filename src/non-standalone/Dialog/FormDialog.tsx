@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useId } from "react";
 import { useDialogContext } from "../../framework";
 import {
 	Button,
@@ -13,6 +13,8 @@ import { IDialogConfigForm } from "./Types";
 const FormDialogRaw = (props: IDialogConfigForm) => {
 	const [, popDialog] = useDialogContext();
 	const { onClose } = props;
+	// the message is the dialog's description
+	const messageId = useId();
 
 	const removeDialog = React.useCallback(() => {
 		popDialog();
@@ -20,10 +22,10 @@ const FormDialogRaw = (props: IDialogConfigForm) => {
 	}, [popDialog, onClose]);
 
 	return (
-		<Dialog open={true} onClose={removeDialog}>
+		<Dialog open={true} onClose={removeDialog} aria-describedby={messageId}>
 			<DialogTitle>{props.title}</DialogTitle>
 			<DialogContent>
-				<DialogContentText>{props.message}</DialogContentText>
+				<DialogContentText id={messageId}>{props.message}</DialogContentText>
 				<>{props.inputs}</>
 			</DialogContent>
 			<DialogActions>

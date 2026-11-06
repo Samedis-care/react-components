@@ -39,7 +39,8 @@ export interface IDialogConfigSimple {
 	 */
 	title: string;
 	/**
-	 * The message contents of the dialog
+	 * The message contents of the dialog. They are the dialog's accessible
+	 * description (`aria-describedby`).
 	 */
 	message: React.ReactNode;
 	/**
@@ -61,7 +62,8 @@ export interface IDialogConfigConfirm {
 	 */
 	title: string;
 	/**
-	 * The message contents
+	 * The message contents. They are the dialog's accessible description
+	 * (`aria-describedby`).
 	 */
 	message: React.ReactNode;
 	/**

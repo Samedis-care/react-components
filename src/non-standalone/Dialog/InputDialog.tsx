@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useCallback, useState } from "react";
+import React, { ChangeEvent, useCallback, useId, useState } from "react";
 import { IDialogConfigInput } from "./Types";
 import { useDialogContext } from "../../framework";
 import {
@@ -17,6 +17,8 @@ const InputDialogRaw = (props: IDialogConfigInput) => {
 		props;
 	const [valid, setValid] = useState(true);
 	const [value, setValue] = useState("");
+	// the message is the dialog's description
+	const messageId = useId();
 
 	const updateValue = useCallback(
 		(evt: ChangeEvent<HTMLInputElement>) => {
@@ -46,10 +48,10 @@ const InputDialogRaw = (props: IDialogConfigInput) => {
 	}, [value, handlerButtonYes, textFieldValidator, popDialog, setValid]);
 
 	return (
-		<Dialog open={true} onClose={removeDialog}>
+		<Dialog open={true} onClose={removeDialog} aria-describedby={messageId}>
 			<DialogTitle>{props.title}</DialogTitle>
 			<DialogContent>
-				<DialogContentText>{props.message}</DialogContentText>
+				<DialogContentText id={messageId}>{props.message}</DialogContentText>
 				<TextField
 					autoFocus
 					margin="dense"

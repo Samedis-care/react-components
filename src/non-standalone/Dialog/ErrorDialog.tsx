@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useId } from "react";
 import { useDialogContext } from "../../framework";
 import {
 	Button,
@@ -21,6 +21,8 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 		set: setBusy,
 		state: busy,
 	} = useRefState<boolean>(false);
+	// the message is the dialog's description
+	const messageId = useId();
 
 	const removeDialog = React.useCallback(() => {
 		popDialog();
@@ -33,10 +35,10 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 	}, [getBusy, removeDialog]);
 
 	return (
-		<Dialog open={true} onClose={handleClose}>
+		<Dialog open={true} onClose={handleClose} aria-describedby={messageId}>
 			<DialogTitle>{props.title}</DialogTitle>
 			<DialogContent>
-				<DialogContentText component={"span"}>
+				<DialogContentText component={"span"} id={messageId}>
 					{props.message}
 				</DialogContentText>
 			</DialogContent>
