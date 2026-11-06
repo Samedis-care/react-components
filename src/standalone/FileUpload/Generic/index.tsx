@@ -210,6 +210,8 @@ export interface FileUploadRendererProps extends Omit<
 	handleDrop: React.DragEventHandler;
 	/**
 	 * Dragging flag to display "drop here" styles
+	 * @remarks true while files are dragged anywhere over the page, not only over the drop
+	 *          zone; dragged text, links and images from the page don't count
 	 */
 	dragging: boolean;
 	/**
