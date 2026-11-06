@@ -5,6 +5,7 @@ import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
 import { contrastTextFor, MATRIX_TILE_DIM_OPACITY } from "./matrixTileDim";
 import { useMatrixCellTileProps } from "./MatrixCellTileContext";
+import { entryFocusRing } from "./matrixTints";
 import MatrixTileCorners from "./MatrixTileCorners";
 import useMatrixActivation from "./useMatrixActivation";
 import { MatrixTileItem as MatrixTileItemData } from "./types";
@@ -25,14 +26,14 @@ export const MatrixTileItemRoot = styled("div", {
 	borderRadius: theme.shape.borderRadius,
 	backgroundColor: cssVar(matrixVars.tileBackground),
 	color: cssVar(matrixVars.tileForeground),
-	// informational entry: same area, faded, instead of stealing space
-	[`&.${matrixClasses.itemDimmed}`]: { opacity: MATRIX_TILE_DIM_OPACITY },
+	// informational entry: same area, faded, instead of stealing space. Not
+	// while the keyboard is on it: the fade would take the focus ring with it.
+	[`&.${matrixClasses.itemDimmed}:not(:focus-visible)`]: {
+		opacity: MATRIX_TILE_DIM_OPACITY,
+	},
 	[`&.${matrixClasses.itemClickable}`]: {
 		cursor: "pointer",
-		"&:focus-visible": {
-			outline: `2px solid ${theme.palette.primary.main}`,
-			outlineOffset: -2,
-		},
+		"&:focus-visible": entryFocusRing(theme),
 	},
 }));
 

@@ -8,6 +8,7 @@ import {
 	MATRIX_TILE_DIM_OPACITY,
 } from "./matrixTileDim";
 import { useMatrixCellTileProps } from "./MatrixCellTileContext";
+import { entryFocusRing } from "./matrixTints";
 import MatrixTileCorners from "./MatrixTileCorners";
 import useMatrixActivation from "./useMatrixActivation";
 import { MatrixTileCorner, MatrixTileItem } from "./types";
@@ -26,10 +27,7 @@ export const MatrixTileDiagonalRoot = styled("div", {
 	)} 0 49.5%, ${cssVar(matrixVars.tileBackgroundB)} 50.5% 100%)`,
 	[`&.${matrixClasses.itemClickable}`]: {
 		cursor: "pointer",
-		"&:focus-visible": {
-			outline: `2px solid ${theme.palette.primary.main}`,
-			outlineOffset: -2,
-		},
+		"&:focus-visible": entryFocusRing(theme),
 	},
 }));
 

@@ -131,6 +131,9 @@ export const MatrixAddChip = styled("div", {
 	"&:focus-visible": {
 		outline: `2px solid ${theme.palette.primary.main}`,
 		outlineOffset: 1,
+		// the ring lies on the entry beneath the chip: a line of the grid's
+		// background between the two keeps it visible on any fill
+		boxShadow: `0 0 0 1px ${theme.palette.background.paper}`,
 	},
 }));
 

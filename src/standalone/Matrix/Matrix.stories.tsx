@@ -19,6 +19,7 @@ import {
 	MatrixCellContext,
 	MatrixColumn,
 	MatrixExtraRow,
+	MatrixRangeSelection,
 	MatrixRow,
 	MatrixTileItem,
 } from "./types";
@@ -59,7 +60,9 @@ const PEOPLE: DemoPerson[] = [
 ];
 
 const FROM = "2026-03-02";
+
 const TO = "2026-03-22";
+
 const TODAY = "2026-03-10";
 
 const SHIFTS: DemoEntry[] = [
@@ -446,6 +449,7 @@ interface PlainCell {
 }
 
 const PLAIN_LABEL = "Ward B roster";
+
 /** 90 days, wider than any test viewport; today mid-range so it can be centred */
 const PLAIN_COLUMNS = buildDateColumns({
 	from: "2026-01-01",
@@ -454,6 +458,7 @@ const PLAIN_COLUMNS = buildDateColumns({
 	today: "2026-02-10",
 	accent: "2026-02-12",
 });
+
 const PLAIN_ROWS: MatrixRow<PlainCell>[] = Array.from(
 	{ length: 30 },
 	(_, rowIndex) => ({
@@ -467,6 +472,7 @@ const PLAIN_ROWS: MatrixRow<PlainCell>[] = Array.from(
 		),
 	}),
 );
+
 const PLAIN_DEMAND: MatrixExtraRow = {
 	key: "demand",
 	header: "Open",
@@ -474,6 +480,7 @@ const PLAIN_DEMAND: MatrixExtraRow = {
 	getCellLabel: (columnKey) => `Open demand on ${columnKey}`,
 	badges: { "2026-02-05": 2, "2026-02-11": 1, "2026-02-12": 0 },
 };
+
 /** stable selectors for the slots the play functions measure */
 const PLAIN_CLASSES = {
 	corner: "plain-corner",
@@ -484,11 +491,13 @@ const PLAIN_CLASSES = {
 	badge: "plain-badge",
 	extraCellAddHint: "plain-extra-cell-add-hint",
 };
+
 const renderPlainRowHeader = (row: MatrixRow<PlainCell>) => (
 	<Typography noWrap sx={{ p: 1, fontSize: "0.8rem" }}>
 		{row.label}
 	</Typography>
 );
+
 const renderPlainCell = (cell: PlainCell | undefined) => (
 	<Typography sx={{ textAlign: "center", lineHeight: "58px" }}>
 		{cell?.text ?? ""}
@@ -537,8 +546,153 @@ const plainSlot = (
 // Each one asserts the correct behavior and fails until the BUGS.md entry it
 // is named after is fixed.
 
+// ---- Cells and tiles --------------------------------------------------------
+// The stories below render a small roster whose cells are MatrixCellTile and
+// all accept one more entry, so the add chip (and in overlay mode the half
+// hint) appears on every occupied cell: what they check is the body cells, the
+// tiles and the pointer and keyboard interaction.
+
+interface TileCell {
+	items: MatrixTileItem[];
+	/** draw two entries as a diagonal pair */
+	diagonal?: boolean;
+	/** stack a split pair */
+	column?: boolean;
+}
+
+const TILE_LABEL = "Ward C roster";
+
+/** 30 days: wider than the test viewport, so the grid scrolls both ways */
+const TILE_COLUMNS: MatrixColumn[] = Array.from({ length: 30 }, (_, i) => ({
+	key: `t${i + 1}`,
+	label: i + 1,
+}));
+
+const EARLY: MatrixTileItem = {
+	key: "early",
+	label: "F",
+	backgroundColor: "#2e7d32",
+	textColor: "#ffffff",
+};
+
+const LATE: MatrixTileItem = {
+	key: "late",
+	label: "S",
+	backgroundColor: "#1565c0",
+	textColor: "#ffffff",
+};
+
+const TILE_ROWS: MatrixRow<TileCell>[] = [
+	{
+		key: "a",
+		label: "Alice Weber",
+		cells: {
+			t2: {
+				items: [
+					{
+						...EARLY,
+						corners: {
+							bottomRight: <span data-testid={"corner-br"}>{"!"}</span>,
+						},
+					},
+				],
+			},
+			t3: { items: [EARLY, LATE] },
+			t4: { items: [EARLY, LATE], diagonal: true },
+			t5: { items: [{ ...EARLY, secondaryLabel: "ICU" }] },
+		},
+	},
+	...[
+		"Bruno Fischer",
+		"Chiara Neumann",
+		"Dimitri Klein",
+		"Eva Sommer",
+		"Frank Ludwig",
+		"Greta Hahn",
+		"Hanna Roth",
+	].map((label, index) => ({ key: `p${index}`, label, cells: {} })),
+];
+
+/** stable selectors for the slots the play functions measure */
+const TILE_CLASSES = {
+	cell: "tile-cell",
+	addHint: "tile-add-hint",
+	addChip: "tile-add-chip",
+	columnHeader: "tile-column-header",
+	rowHeader: "tile-row-header",
+};
+
+const acceptEveryCell = () => true;
+
+const renderTileRowHeader = (row: MatrixRow<TileCell>) => (
+	<Typography noWrap sx={{ p: 1, fontSize: "0.8rem" }}>
+		{row.label}
+	</Typography>
+);
+
+interface TileRosterProps {
+	/** Reported by a sweep, a click on a free cell and the add chip */
+	onSelectRange?: (selection: MatrixRangeSelection) => void;
+	/** Reported by a click on an entry */
+	onItemClick?: (item: MatrixTileItem) => void;
+	/** How an occupied cell offers "add" */
+	occupiedAddAffordance?: "chip" | "overlay";
+	/** Text of the hint, name of the chip */
+	addLabel?: React.ReactNode;
+	/** No range selection, so no chip and no hint */
+	readOnly?: boolean;
+	/** Replaces the roster's rows */
+	rows?: MatrixRow<TileCell>[];
+}
+
+const TileRoster = (props: TileRosterProps) => {
+	const { onItemClick } = props;
+	const renderCell = useCallback(
+		(cell: TileCell | undefined) => (
+			<MatrixCellTile
+				items={cell?.items ?? []}
+				pairLayout={cell?.diagonal ? "diagonal" : "split"}
+				splitDirection={cell?.column ? "column" : "row"}
+				onItemClick={onItemClick}
+			/>
+		),
+		[onItemClick],
+	);
+	return (
+		<MatrixGrid<TileCell>
+			columns={TILE_COLUMNS}
+			rows={props.rows ?? TILE_ROWS}
+			label={TILE_LABEL}
+			corner={"Ward C"}
+			maxHeight={300}
+			classes={TILE_CLASSES}
+			selectable={!props.readOnly}
+			addLabel={props.addLabel ?? "Add"}
+			occupiedAddAffordance={props.occupiedAddAffordance}
+			isCellSelectable={acceptEveryCell}
+			onSelectRange={props.onSelectRange}
+			renderRowHeader={renderTileRowHeader}
+			renderCell={renderCell}
+		/>
+	);
+};
+
+const tileScroller = (canvasElement: HTMLElement) =>
+	within(canvasElement).getByRole("region", { name: TILE_LABEL });
+
+/** the body cell at (row, column), in DOM order */
+const tileCell = (canvasElement: HTMLElement, row: number, column: number) =>
+	Array.from(
+		canvasElement.querySelectorAll<HTMLElement>(`.${TILE_CLASSES.cell}`),
+	)[row * TILE_COLUMNS.length + column];
+
+// ---- Bug stories ------------------------------------------------------------
+// Each one asserts the correct behavior and fails until the BUGS.md entry it
+// is named after is fixed.
+
 // WCAG contrast; fg may be translucent over an opaque bg
 type Rgba = { r: number; g: number; b: number; a: number };
+
 const parseColor = (color: string): Rgba => {
 	const m = /rgba?\(([^)]+)\)/.exec(color);
 	if (!m) throw new Error(`cannot parse color ${color}`);
@@ -548,12 +702,14 @@ const parseColor = (color: string): Rgba => {
 		.map(Number);
 	return { r, g, b, a };
 };
+
 const over = (fg: Rgba, bg: Rgba): Rgba => ({
 	r: fg.r * fg.a + bg.r * (1 - fg.a),
 	g: fg.g * fg.a + bg.g * (1 - fg.a),
 	b: fg.b * fg.a + bg.b * (1 - fg.a),
 	a: 1,
 });
+
 const luminance = ({ r, g, b }: Rgba) => {
 	const channel = (v: number) => {
 		const c = v / 255;
@@ -561,12 +717,14 @@ const luminance = ({ r, g, b }: Rgba) => {
 	};
 	return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
 };
+
 const contrast = (fg: Rgba, bg: Rgba) => {
 	const [hi, lo] = [luminance(over(fg, bg)), luminance(bg)].sort(
 		(x, y) => y - x,
 	);
 	return (hi + 0.05) / (lo + 0.05);
 };
+
 /** an element's background: its color with a one-color gradient layered over it */
 const backgroundOf = (element: Element): Rgba => {
 	const style = getComputedStyle(element);
@@ -605,6 +763,7 @@ const ITEM_15_THEMES = [
 	createTheme({ palette: { warning: { main: "#FFCF00" } } }),
 	createTheme({ palette: { mode: "dark" } }),
 ];
+
 const ITEM_15_COLUMNS = buildDateColumns({
 	from: "2026-02-08",
 	to: "2026-02-14",
@@ -639,5 +798,106 @@ export const Issue3480Item15HeaderLabelsHaveContrastInOtherPalettes: Story = {
 				...context,
 				canvasElement,
 			});
+	},
+};
+
+/** ISSUE-3481-ITEM-11: the focus ring of an entry is drawn inside its fill, in primary.main. */
+export const Issue3481Item11EntryFocusRingStandsOut: Story = {
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<TileRoster
+			onSelectRange={args.onSelectRange}
+			onItemClick={args.onItemClick}
+		/>
+	),
+	play: async ({ canvasElement }) => {
+		const entry = tileCell(canvasElement, 0, 2).querySelector<HTMLElement>(
+			"[role=button]",
+		);
+		entry.focus();
+		await expect(entry.matches(":focus-visible")).toBe(true);
+		const style = getComputedStyle(entry);
+		await expect(style.outlineStyle).not.toBe("none");
+		// a ring inside the entry has to stand out from the fill, one outside
+		// from the grid behind it (WCAG 1.4.11: 3:1)
+		const behind =
+			parseFloat(style.outlineOffset) < 0
+				? parseColor(style.backgroundColor)
+				: backgroundOf(tileScroller(canvasElement));
+		await expect(
+			contrast(parseColor(style.outlineColor), behind),
+		).toBeGreaterThanOrEqual(3);
+	},
+};
+
+/** ISSUE-3481-ITEM-11: every ring keeps its contrast, whatever surrounds or fades the entry. */
+const RING_ROWS: MatrixRow<TileCell>[] = [
+	{
+		key: "a",
+		label: "Alice Weber",
+		cells: {
+			t2: { items: [{ ...LATE, highlighted: true }] },
+			t3: { items: [{ ...EARLY, dimmed: true }] },
+			t4: { items: [EARLY, LATE], diagonal: true },
+			// the add chip on an entry filled with primary.main, the ring's color
+			t5: { items: [{ ...LATE, backgroundColor: "#1976d2" }] },
+		},
+	},
+];
+
+export const Issue3481Item11EveryRingKeepsItsContrast: Story = {
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<TileRoster
+			onSelectRange={args.onSelectRange}
+			onItemClick={args.onItemClick}
+			rows={RING_ROWS}
+		/>
+	),
+	play: async ({ canvasElement }) => {
+		const grid = backgroundOf(tileScroller(canvasElement));
+		const checkRing = async (element: HTMLElement, name: string) => {
+			element.focus();
+			await expect(element.matches(":focus-visible"), name).toBe(true);
+			const style = getComputedStyle(element);
+			const outline = parseColor(style.outlineColor);
+			// an element's opacity fades its outline too
+			const ring = { ...outline, a: outline.a * Number(style.opacity) };
+			const offset = parseFloat(style.outlineOffset);
+			// outside the element, on the grid's background
+			await expect(offset, name).toBeGreaterThanOrEqual(0);
+			await expect(contrast(ring, grid), name).toBeGreaterThanOrEqual(3);
+			// and a line of contrasting color between the ring and the element,
+			// for whatever lies under the ring (a highlight, the entry under the
+			// chip)
+			const line =
+				/(rgba?\([^)]+\)) [\d.]+px [\d.]+px [\d.]+px ([\d.]+)px( inset)?/.exec(
+					style.boxShadow,
+				);
+			await expect(line, name).not.toBeNull();
+			if (!line) throw new Error(`${name}: no contrast line in the box shadow`);
+			const [, color, spread, inset] = line;
+			await expect(
+				inset ? offset === 0 : parseFloat(spread) >= offset,
+				name,
+			).toBe(true);
+			await expect(
+				contrast(ring, over(parseColor(color), grid)),
+				name,
+			).toBeGreaterThanOrEqual(3);
+		};
+		const entryIn = (column: number) =>
+			tileCell(canvasElement, 0, column).querySelector<HTMLElement>(
+				"[role=button]",
+			);
+		await checkRing(entryIn(1), "highlighted");
+		await checkRing(entryIn(2), "dimmed");
+		await checkRing(entryIn(3), "diagonal");
+		await checkRing(
+			tileCell(canvasElement, 0, 4).querySelector<HTMLElement>(
+				`.${TILE_CLASSES.addChip}`,
+			),
+			"chip",
+		);
 	},
 };

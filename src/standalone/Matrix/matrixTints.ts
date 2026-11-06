@@ -162,3 +162,16 @@ export const cellBorders = (theme: Theme) => ({
 	borderRight: `1px solid ${theme.palette.divider}`,
 	borderBottom: `1px solid ${theme.palette.divider}`,
 });
+
+/**
+ * The focus ring of an entry (a split entry or a diagonal pair). It lies just
+ * outside the entry, in the tile's padding, so it stands out from the grid's
+ * background whatever the entry's fill is. A line of that background inside it
+ * keeps it apart from the fill where something else surrounds the entry: the
+ * highlight ring, the other entry of a split pair.
+ */
+export const entryFocusRing = (theme: Theme) => ({
+	outline: `2px solid ${theme.palette.primary.main}`,
+	outlineOffset: 0,
+	boxShadow: `inset 0 0 0 1px ${theme.palette.background.paper}`,
+});
