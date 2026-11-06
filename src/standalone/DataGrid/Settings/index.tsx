@@ -54,6 +54,8 @@ const DataGridSettings = (props: IDataGridColumnProps) => {
 		},
 		[setColumnState, setState],
 	);
+	// the column search ignores case and the spaces around the query
+	const columnQuery = state.settingsSearch.trim().toLowerCase();
 
 	return (
 		<DataGridContentOverlayCollapse
@@ -63,8 +65,7 @@ const DataGridSettings = (props: IDataGridColumnProps) => {
 			<Dialog
 				columns={props.columns.filter(
 					(col) =>
-						!state.settingsSearch ||
-						col.headerName.toLowerCase().includes(state.settingsSearch),
+						!columnQuery || col.headerName.toLowerCase().includes(columnQuery),
 				)}
 				closeGridSettings={closeGridSettings}
 				toggleColumnLock={toggleColumnLock}

@@ -15,6 +15,7 @@ import {
 	render,
 	screen,
 	waitFor,
+	within,
 } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import ccI18n from "../../src/i18n";
@@ -171,6 +172,51 @@ const Grid = ({ classes, ...props }: Partial<DataGridProps>) => (
 /** no load running or queued */
 const idle = () =>
 	waitFor(() => expect(probe?.state.refreshData).toBe(0), { timeout: 3000 });
+const header = () => document.querySelector<HTMLElement>(".test-header")!;
+/** The column settings panel (with MultiGrid mocked, the only table) */
+const settingsPanel = () =>
+	document.querySelector("table")!.closest<HTMLElement>(".MuiPaper-root")!;
+const settingsRows = () =>
+	Array.from(
+		settingsPanel().querySelectorAll("tbody tr"),
+		(row) => row.querySelector("td, th")!.textContent,
+	);
+const searchBox = () => within(header()).getByRole("textbox");
+const typeSearch = (value: string) =>
+	act(() => void fireEvent.change(searchBox(), { target: { value } }));
+
+describe("column settings", () => {
+	const openSettings = () =>
+		fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+
+	it("[ISSUE-3495-ITEM-2] the column search ignores case", async () => {
+		render(<Grid />);
+		await idle();
+		openSettings();
+		typeSearch("Name");
+		expect(settingsRows()).toEqual(["Name"]);
+	});
+
+	it("[ISSUE-3495-ITEM-2] the column search ignores leading and trailing spaces, and case in letters with umlauts", async () => {
+		const columns: IDataGridColumnDef[] = [
+			{ field: "device", headerName: "Gerätename", type: "string" },
+			{ field: "maker", headerName: "Hersteller", type: "string" },
+		];
+		render(<Grid columns={columns} />);
+		await idle();
+		openSettings();
+		typeSearch("  GERÄT ");
+		expect(settingsRows()).toEqual(["Gerätename"]);
+		typeSearch("hersteller");
+		expect(settingsRows()).toEqual(["Hersteller"]);
+		// only spaces: no filter
+		typeSearch("   ");
+		expect(settingsRows()).toEqual(["Gerätename", "Hersteller"]);
+		// the box keeps what was typed
+		expect(searchBox()).toHaveValue("   ");
+	});
+});
+
 const openMenu = async (trigger: string, item?: string) => {
 	fireEvent.click(screen.getByRole("button", { name: trigger }));
 	if (item)
