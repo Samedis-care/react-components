@@ -19,6 +19,7 @@ import UnsafeToLeave from "./UnsafeToLeave";
 import DragAndDropPrevention from "./DragAndDropPrevention";
 import { StyledEngineProvider } from "@mui/material";
 import HistoryRouter from "../standalone/Routes/HistoryRouter";
+import type { DocumentTitleFormatter } from "../standalone/Routes/PageTitle";
 
 /**
  * Properties for the Framework
@@ -48,6 +49,14 @@ export interface IFrameworkProps {
 	 * Disable unsafe-to-leave handling (window.beforeunload callback)
 	 */
 	disableUnsafeToLeave?: boolean;
+	/**
+	 * Builds the document title from the page titles that the matched Routes'
+	 * `title` prop and `usePageTitle` set (see
+	 * `HistoryRouterProps.formatDocumentTitle`).
+	 * Default: "<most specific page title> – <app title>", where the app title
+	 * is the document's title when the Framework mounted.
+	 */
+	formatDocumentTitle?: DocumentTitleFormatter;
 	/**
 	 * The children which have access to the framework's capabilities (usually your whole app)
 	 */
@@ -100,7 +109,10 @@ const ComponentsCareFramework = (props: ICompleteFrameworkProps) => {
 							<QueryClientProvider client={ModelDataStore}>
 								<PermissionContextProvider>
 									<UnsafeToLeave disable={props.disableUnsafeToLeave}>
-										<HistoryRouter history={FrameworkHistory}>
+										<HistoryRouter
+											history={FrameworkHistory}
+											formatDocumentTitle={props.formatDocumentTitle}
+										>
 											<ToastContextProvider>
 												<DialogContextProvider>
 													{props.children}
