@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { usePickerAdapter } from "@mui/x-date-pickers";
 import type {
 	MuiPickersAdapter,
@@ -52,15 +52,10 @@ export interface PickerDraftResult<TError> {
 	/** The change handler to hand to the picker */
 	onChange: PickerDraftChangeHandler<TError>;
 	/**
-	 * To be called from the text field's `onBlur`, alongside whatever the consumer
-	 * passed. Settles the draft once focus really leaves the field, and ignores
-	 * focus moves within it.
-	 */
-	settleOnBlur: (event: React.FocusEvent<Element>) => void;
-	/**
-	 * Drops an unaccepted draft. To be called from the picker's `onOpen`: the
-	 * calendar renders from the value it is given, so a half-typed date would open
-	 * it on a year nothing is selectable in.
+	 * Drops an unaccepted draft. To be called once focus leaves the field (see
+	 * `withFieldBlur`), and from the picker's `onOpen`: the calendar renders from
+	 * the value it is given, so a half-typed date would open it on a year nothing
+	 * is selectable in.
 	 */
 	settle: () => void;
 }
@@ -152,24 +147,9 @@ const usePickerDraft = <TError>(
 		setState((prev) => ({ ...prev, draft: prev.committed ?? null }));
 	}, []);
 
-	const settleOnBlur = useCallback(
-		(event: React.FocusEvent<Element>) => {
-			// The field forwards this from the container holding the sections, whose
-			// parent also holds the adornment buttons — so stepping from one section
-			// to the next, or reaching for the calendar, is not a blur.
-			const field = event.currentTarget.parentElement ?? event.currentTarget;
-			if (event.relatedTarget && field.contains(event.relatedTarget)) {
-				return;
-			}
-			settle();
-		},
-		[settle],
-	);
-
 	return {
 		value: holdsDraft ? state.draft : value,
 		onChange: handleChange,
-		settleOnBlur,
 		settle,
 	};
 };

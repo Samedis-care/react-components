@@ -59,28 +59,14 @@ const shown = (result: { current: Draft }) =>
 	(result.current.value as Moment | null)?.format("YYYY-MM-DD") ?? null;
 
 /**
- * Blurs the field. The handler reads the DOM to tell a real blur from focus
- * stepping between sections, so this builds the shape the picker gives it: the
- * container holding the sections, inside the field that also holds the buttons.
+ * Settles the draft, as the pickers do once focus leaves the field (which focus
+ * moves count as leaving is `withFieldBlur`'s call, tested through the pickers in
+ * `LocalizedDateTimePickersWiring.test.tsx`)
  */
-const blur = (result: { current: Draft }, to: "outside" | "inside" | null) => {
-	const field = document.createElement("div");
-	const sections = document.createElement("div");
-	const sibling = document.createElement("button");
-	const outside = document.createElement("button");
-	field.append(sections, sibling);
-	document.body.append(field, outside);
-
-	const relatedTarget =
-		to === "inside" ? sibling : to === "outside" ? outside : null;
+const settle = (result: { current: Draft }) => {
 	act(() => {
-		result.current.settleOnBlur({
-			currentTarget: sections,
-			relatedTarget,
-		} as unknown as React.FocusEvent<Element>);
+		result.current.settle();
 	});
-	field.remove();
-	outside.remove();
 };
 
 describe("usePickerDraft", () => {
@@ -162,34 +148,24 @@ describe("usePickerDraft", () => {
 		expect(shown(result)).toBe("2030-01-01");
 	});
 
-	it("drops a rejected draft when focus leaves the field", () => {
+	it("drops a rejected draft when it settles", () => {
 		const onChange = vi.fn();
 		const { result } = renderDraft(moment("2024-06-15"), onChange);
 
 		emit(result, moment("0020-06-15"), INVALID);
-		blur(result, "outside");
+		settle(result);
 
 		expect(shown(result)).toBe("2024-06-15");
 		expect(onChange).not.toHaveBeenCalled();
 	});
 
-	it("keeps the draft while focus only moves within the field", () => {
-		const onChange = vi.fn();
-		const { result } = renderDraft(moment("2024-06-15"), onChange);
-
-		emit(result, moment("0020-06-15"), INVALID);
-		blur(result, "inside");
-
-		expect(shown(result)).toBe("0020-06-15");
-	});
-
-	it("keeps an accepted value across a blur", () => {
+	it("keeps an accepted value when it settles", () => {
 		const onChange = vi.fn();
 		const { result, rerender } = renderDraft(moment("2024-06-15"), onChange);
 
 		emit(result, moment("2030-01-01"), VALID);
 		rerender({ value: moment("2030-01-01") });
-		blur(result, "outside");
+		settle(result);
 
 		expect(shown(result)).toBe("2030-01-01");
 	});

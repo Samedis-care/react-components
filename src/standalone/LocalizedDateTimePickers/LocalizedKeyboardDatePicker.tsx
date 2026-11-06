@@ -11,6 +11,7 @@ import accessSlotProps from "../../utils/internal/accessSlotProps";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
 import usePickerDraft from "./usePickerDraft";
 import withRequiredSections from "./withRequiredSections";
+import withFieldBlur from "./withFieldBlur";
 
 export interface LocalizedKeyboardDatePickerProps
 	extends
@@ -36,7 +37,12 @@ export interface LocalizedKeyboardDatePickerProps
 	 */
 	fullWidth?: TextFieldProps["fullWidth"];
 	/**
-	 * onBlur callback for the text field input
+	 * Called once focus leaves the field: from a section, the open-picker button
+	 * or another adornment to anything outside the field and its open popup.
+	 * Moving between those is not leaving. Focus that leaves from inside the open
+	 * popup (a click on another control while the calendar is open) is not
+	 * reported. Receives the blur event of the field's input root
+	 * (`role="group"`); `target` is the element that lost focus.
 	 */
 	onBlur?: TextFieldProps["onBlur"];
 	/**
@@ -109,15 +115,16 @@ const LocalizedKeyboardDatePicker = (
 							ownerState,
 							otherProps.slotProps?.textField,
 						);
-						return withRequiredSections({
+						const fieldProps = withRequiredSections({
 							...textFieldProps,
 							// only where the caller actually gave one, so a value passed
 							// through slotProps.textField is not overwritten with undefined
 							...(required === undefined ? {} : { required }),
 							...(error === undefined ? {} : { error }),
 							...(fullWidth === undefined ? {} : { fullWidth }),
+							// called once focus leaves the field, see withFieldBlur
 							onBlur: (event: React.FocusEvent<HTMLInputElement>) => {
-								draft.settleOnBlur(event);
+								draft.settle();
 								textFieldProps?.onBlur?.(event);
 								onBlur?.(event);
 							},
@@ -128,6 +135,7 @@ const LocalizedKeyboardDatePicker = (
 							// field that was actually swapped in for it.
 							...(otherProps.slots?.textField ? { disableClearable } : {}),
 						});
+						return withFieldBlur(ownerState, fieldProps);
 					},
 				}}
 			/>

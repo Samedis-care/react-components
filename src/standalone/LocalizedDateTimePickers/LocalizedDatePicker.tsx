@@ -9,6 +9,7 @@ import useMuiLocaleData from "./useMuiLocaleData";
 import usePickerDraft from "./usePickerDraft";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 import withRequiredSections from "./withRequiredSections";
+import withFieldBlur from "./withFieldBlur";
 
 export interface LocalizedDatePickerProps extends Omit<
 	DatePickerProps,
@@ -54,13 +55,15 @@ const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
 							ownerState,
 							otherProps.slotProps?.textField,
 						);
-						return withRequiredSections({
+						const fieldProps = withRequiredSections({
 							...orgSlotProps,
+							// called once focus leaves the field, see withFieldBlur
 							onBlur: (event: React.FocusEvent<HTMLDivElement>) => {
-								draft.settleOnBlur(event);
+								draft.settle();
 								orgSlotProps?.onBlur?.(event);
 							},
 						});
+						return withFieldBlur(ownerState, fieldProps);
 					},
 				}}
 			/>

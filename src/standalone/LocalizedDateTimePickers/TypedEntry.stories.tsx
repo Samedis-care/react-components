@@ -357,3 +357,57 @@ export const DateTimePickerOverwriteStoredDate: StoryObj<TypedEntryArgs> = {
 		);
 	},
 };
+
+interface PickerProps {
+	label: string;
+	value: Moment | null;
+	onChange: (value: Moment | null) => void;
+}
+
+/** A controlled picker, followed by a button to move focus to */
+const ControlledWithElsewhere = ({
+	Picker,
+	...args
+}: TypedEntryArgs & { Picker: React.ComponentType<PickerProps> }) => {
+	const consumer = useConsumerState(args);
+	return (
+		<>
+			<Picker label="Date" {...consumer} />
+			<button type="button">elsewhere</button>
+		</>
+	);
+};
+
+export const Issue3474Item2TabOutThroughCalendarButton: StoryObj<TypedEntryArgs> =
+	{
+		name: "ISSUE-3474-ITEM-2: tabbing out past the calendar button drops a half-typed date",
+		args: { onChange: fn(), initialValue: "2026-08-01" },
+		parameters: {
+			docs: {
+				description: {
+					story:
+						"ISSUE-3474-ITEM-2: Tab from the year goes to the calendar button, which is part of the field, so the half-typed year is kept. The next Tab leaves the field from the button, which drops it: the field shows 2026-08-01 again, the date the consumer holds, as it does when focus leaves from a section.",
+				},
+			},
+		},
+		render: (args) => (
+			<ControlledWithElsewhere {...args} Picker={LocalizedKeyboardDatePicker} />
+		),
+		play: async ({ args, canvas, userEvent }) => {
+			await userEvent.click(sections(canvas).year);
+			await typeSlowly(userEvent, "20");
+			await expect(fieldText(canvas)).toBe("08|01|0020");
+
+			await userEvent.tab();
+			await expect(
+				canvas.getByRole("button", { name: /choose date/i }),
+			).toHaveFocus();
+			await userEvent.tab();
+			await expect(
+				canvas.getByRole("button", { name: "elsewhere" }),
+			).toHaveFocus();
+
+			await expect(args.onChange).not.toHaveBeenCalled();
+			await expect(fieldText(canvas)).toBe("08|01|2026");
+		},
+	};
