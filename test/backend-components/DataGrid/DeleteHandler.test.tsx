@@ -162,3 +162,37 @@ describe("useBackendDataGridDeleteHandler onDeleteSettled", () => {
 		expect(customDeleteErrorHandler).not.toHaveBeenCalled();
 	});
 });
+
+describe("useBackendDataGridDeleteHandler result", () => {
+	it("[ISSUE-3495-ITEM-4] resolves false when the user cancels, so the grid keeps the selection", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const { handleDelete, connector } = renderDeleteHandler({
+			customDeleteConfirm: () => {
+				throw new Error("cancelled");
+			},
+		});
+		const deleteMultiple = vi.spyOn(connector, "deleteMultiple");
+
+		await expect(act(() => handleDelete(false, ["1"], FILTER))).resolves.toBe(
+			false,
+		);
+		expect(deleteMultiple).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3495-ITEM-4] resolves true once the delete ran, also when it failed", async () => {
+		const { handleDelete, connector } = renderDeleteHandler({
+			customDeleteErrorHandler: vi.fn(),
+		});
+
+		await expect(act(() => handleDelete(false, ["1"], FILTER))).resolves.toBe(
+			true,
+		);
+		// a failed delete may have deleted some of the records
+		vi.spyOn(connector, "deleteMultiple").mockRejectedValue(
+			new BackendError("conflict", "conflict"),
+		);
+		await expect(act(() => handleDelete(false, ["2"], FILTER))).resolves.toBe(
+			true,
+		);
+	});
+});

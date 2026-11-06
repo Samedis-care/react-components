@@ -357,13 +357,16 @@ export interface IDataGridColumnProps {
 	 * @param invert if invert is true, delete everything except ids, otherwise only delete ids
 	 * @param ids The list of ids to (not) delete
 	 * @param filter The current data grid filter (if set)
-	 * @return Promise Optional promise, which will cancel automatic unselect if rejected
+	 * @returns false, or a promise that resolves false, when nothing was deleted (e.g.
+	 *          the user cancelled a confirmation): the selection stays. Otherwise the
+	 *          selection is cleared, once the promise resolves. A promise that rejects
+	 *          keeps the selection as well.
 	 */
 	onDelete?: (
 		invert: boolean,
 		ids: string[],
 		filter?: DataGridFilterParameters,
-	) => Promise<void> | unknown;
+	) => Promise<boolean | void> | boolean | void;
 	/**
 	 * Reason why delete is disabled
 	 */

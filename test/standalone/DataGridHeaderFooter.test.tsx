@@ -183,6 +183,69 @@ const Grid = ({ classes, ...props }: Partial<DataGridProps>) => (
 const idle = () =>
 	waitFor(() => expect(probe?.state.refreshData).toBe(0), { timeout: 3000 });
 
+const deferred = <T,>() => {
+	let resolve!: (v: T) => void;
+	let reject!: (e: unknown) => void;
+	const promise = new Promise<T>((res, rej) => {
+		resolve = res;
+		reject = rej;
+	});
+	return { promise, resolve, reject };
+};
+
+const select = (selectedRows: string[], selectAll = false) =>
+	act(() =>
+		probe!.setState((p) => ({
+			...p,
+			selectAll,
+			selectedRows,
+			selectionUpdatedByProps: false,
+		})),
+	);
+
+describe("footer actions", () => {
+	it("[ISSUE-3495-ITEM-4] Delete keeps the selection when onDelete returns or resolves false, as nothing was deleted", async () => {
+		let pending = deferred<boolean | void>();
+		const onDelete = vi.fn<NonNullable<DataGridProps["onDelete"]>>(
+			() => pending.promise,
+		);
+		render(<Grid onDelete={onDelete} />);
+		await idle();
+		select(["1", "2"]);
+		const del = screen.getByRole("button", { name: "Delete" });
+		/** clicks Delete, then lets onDelete resolve with the value */
+		const deleteAndResolve = async (value: boolean | void) => {
+			pending = deferred<boolean | void>();
+			fireEvent.click(del);
+			await act(async () => {
+				pending.resolve(value);
+				// the footer awaited the promise first, so it has handled it by now
+				await pending.promise;
+			});
+		};
+
+		await deleteAndResolve(false);
+		expect(onDelete).toHaveBeenCalledTimes(1);
+		expect(probe!.state.selectedRows, "resolved false").toEqual(["1", "2"]);
+		expect(del).toBeEnabled();
+
+		onDelete.mockReturnValueOnce(false);
+		await act(async () => {
+			fireEvent.click(del);
+			await Promise.resolve();
+		});
+		expect(onDelete).toHaveBeenCalledTimes(2);
+		expect(probe!.state.selectedRows, "returned false").toEqual(["1", "2"]);
+
+		// anything else is a delete that ran: the selection is cleared
+		await deleteAndResolve(undefined);
+		expect(onDelete).toHaveBeenCalledTimes(3);
+		expect(probe!.state.selectedRows).toEqual([]);
+		// unavailable, but still focusable since ISSUE-3495-ITEM-16
+		expect(del).toHaveAttribute("aria-disabled", "true");
+	});
+});
+
 const header = () => document.querySelector<HTMLElement>(".test-header")!;
 
 describe("search", () => {

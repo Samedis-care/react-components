@@ -41,6 +41,30 @@ export const WithDelete: StoryObj = {
 	render: () => <WithDeleteDataGridStory />,
 };
 
+/**
+ * ISSUE-3495-ITEM-4: "No" in the delete confirmation unticks every selected row,
+ * although nothing was deleted
+ */
+export const Issue3495Item4CancelledDeleteKeepsSelection: StoryObj = {
+	render: () => <WithDeleteDataGridStory />,
+	play: async ({ canvas, canvasElement }) => {
+		const body = within(document.body);
+		const checked = () =>
+			canvasElement.querySelectorAll(
+				".CcDataGrid-dataCell input[type=checkbox]:checked",
+			).length;
+		await userEvent.click(await canvas.findByText("Alice"));
+		await userEvent.click(canvas.getByText("Bob"));
+		await waitFor(() => expect(checked()).toBe(2));
+		await userEvent.click(canvas.getByRole("button", { name: "Delete" }));
+		const dialog = await body.findByRole("dialog");
+		await userEvent.click(within(dialog).getByRole("button", { name: "No" }));
+		await waitFor(() => expect(body.queryByRole("dialog")).toBeNull());
+		await expect(canvas.getByText("Alice")).toBeVisible();
+		await expect(checked(), "selected rows after No").toBe(2);
+	},
+};
+
 const WithEditDataGridStory = () => {
 	const model = useMemo(createTestModel, []);
 	const handleEdit = (id: string) => {

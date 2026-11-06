@@ -114,6 +114,18 @@ export const useBackendDataGridAddNewButtons = (
 	return addNewButtons;
 };
 
+/**
+ * The delete handler BackendDataGrid passes to DataGrid as onDelete: it asks for
+ * confirmation (customDeleteConfirm or the built-in dialog), deletes through the
+ * model, calls refreshGrid and onDeleteSettled, and reports a failure
+ * (customDeleteErrorHandler or the built-in error dialog).
+ * @param props The delete props of BackendDataGrid
+ * @param refreshGrid Called after the delete ran, failed or not, to reload the rows
+ * @returns The handler, or undefined without enableDelete. The handler resolves false
+ *          when the user cancels the confirmation: nothing was deleted, so the grid
+ *          keeps the selection. It resolves true once the delete ran, also when it
+ *          failed (a failed delete may have deleted some of the records).
+ */
 export const useBackendDataGridDeleteHandler = <M extends ModelUnknown>(
 	props: Pick<
 		BackendDataGridProps<M>,
@@ -150,7 +162,7 @@ export const useBackendDataGridDeleteHandler = <M extends ModelUnknown>(
 			invert: boolean,
 			ids: string[],
 			filter?: DataGridFilterParameters,
-		): Promise<void> => {
+		): Promise<boolean> => {
 			try {
 				if (customDeleteConfirm) {
 					await customDeleteConfirm(invert, ids, filter);
@@ -176,7 +188,7 @@ export const useBackendDataGridDeleteHandler = <M extends ModelUnknown>(
 				// user cancelled
 				// eslint-disable-next-line no-console
 				console.error(e);
-				return;
+				return false;
 			}
 
 			let error: Error | undefined;
@@ -191,7 +203,7 @@ export const useBackendDataGridDeleteHandler = <M extends ModelUnknown>(
 			}
 			refreshGrid();
 			onDeleteSettled?.(invert, ids, filter, error);
-			if (!error) return;
+			if (!error) return true;
 
 			if (customDeleteErrorHandler) {
 				await customDeleteErrorHandler(error);
@@ -213,6 +225,7 @@ export const useBackendDataGridDeleteHandler = <M extends ModelUnknown>(
 					/>,
 				);
 			}
+			return true;
 		},
 		[
 			customDeleteConfirm,

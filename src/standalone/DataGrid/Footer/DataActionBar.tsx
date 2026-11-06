@@ -49,7 +49,7 @@ const DataActionBar = () => {
 		if (selectAll && !enableDeleteAll) return;
 		if (onDelete) {
 			try {
-				await onDelete(
+				const deleted = await onDelete(
 					selectAll,
 					selectedRows,
 					dataGridGetFilterParameters(
@@ -58,6 +58,8 @@ const DataActionBar = () => {
 						getAdditionalFilters,
 					),
 				);
+				// nothing was deleted, e.g. the user cancelled a confirmation
+				if (deleted === false) return;
 				setState((prevState) => ({
 					...prevState,
 					selectAll: false,
@@ -66,7 +68,7 @@ const DataActionBar = () => {
 					selectionUpdatedByProps: false,
 				}));
 			} catch {
-				// user cancelled
+				// the selection stays
 			}
 		}
 	}, [
