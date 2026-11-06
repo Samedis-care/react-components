@@ -1,7 +1,9 @@
+import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Box, Button } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, waitFor, within } from "storybook/test";
-import { Toast } from "./Toast";
+import { Toast, ToastProps } from "./Toast";
 
 // The toast renders in a portal, so query from the document body
 const body = within(document.body);
@@ -39,6 +41,17 @@ const meta: Meta<typeof Toast> = {
 export default meta;
 
 type Story = StoryObj<typeof Toast>;
+
+/** waits until the toast's enter animation (scale and fade in) has finished */
+const entered = (alert: HTMLElement) =>
+	waitFor(() =>
+		expect({
+			transform: alert.style.transform,
+			transitions: alert
+				.getAnimations()
+				.filter((a) => a instanceof CSSTransition).length,
+		}).toEqual({ transform: "none", transitions: 0 }),
+	);
 
 export const Info: Story = {
 	play: async ({ args, userEvent }) => {
@@ -116,5 +129,67 @@ export const StaysOnClickElsewhere: Story = {
 		await body.findByRole("status");
 		await userEvent.click(document.body);
 		await expect(args.onClose).not.toHaveBeenCalled();
+	},
+};
+
+// ─── Bugs ─────────────────────────────────────────────────────────────────────
+
+const UNDER_TOAST_SX = { position: "fixed", right: 40, bottom: 32 } as const;
+
+/** Rendered without onExited, as a plain controlled component */
+const WithoutOnExited = (props: Pick<ToastProps, "onClose">) => {
+	const { onClose } = props;
+	const [open, setOpen] = useState(true);
+	const close = useCallback(() => {
+		setOpen(false);
+		onClose();
+	}, [onClose]);
+	return (
+		<>
+			<Box sx={UNDER_TOAST_SX}>
+				<Button variant={"outlined"}>Next page</Button>
+			</Box>
+			<Toast
+				open={open}
+				severity={"success"}
+				message={"Saved."}
+				autoHideDuration={null}
+				onClose={close}
+			/>
+		</>
+	);
+};
+
+export const Issue3470Item2ClosedToastLetsClicksThrough: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'Rendered without `onExited`, a closed toast leaves the page after its close animation, so clicks reach what lies under it, here "Next page".',
+			},
+		},
+	},
+	render: (args) => <WithoutOnExited onClose={args.onClose} />,
+	play: async ({ args, canvas, userEvent }) => {
+		const next = canvas.getByRole("button", { name: "Next page" });
+		const r = next.getBoundingClientRect();
+		const hit = () => {
+			const el = document.elementFromPoint(
+				r.left + r.width / 2,
+				r.top + r.height / 2,
+			);
+			return el?.closest("button")?.textContent ?? el?.className ?? "nothing";
+		};
+		const toast = await body.findByRole("status");
+		await entered(toast);
+		// while it is shown, the toast lies over the button
+		await expect(hit()).not.toBe("Next page");
+		await userEvent.click(within(toast).getByRole("button", { name: "Close" }));
+		await expect(args.onClose).toHaveBeenCalledTimes(1);
+		await waitFor(() => expect(body.queryByRole("status")).toBeNull());
+		await waitFor(() =>
+			expect(hit(), "what a click there hits").toBe("Next page"),
+		);
 	},
 };

@@ -62,7 +62,9 @@ export interface ToastProps {
 	 */
 	onClose: () => void;
 	/**
-	 * Called when the close transition has finished
+	 * Called when the close transition has finished: the moment to unmount the
+	 * toast or clear its content. Optional: the closed toast leaves the page
+	 * after its close transition with or without it
 	 */
 	onExited?: () => void;
 	/**
@@ -143,8 +145,10 @@ const ToastRaw = (inProps: ToastProps) => {
 		[onClose],
 	);
 
+	// only with a handler: an onExited key, even undefined, replaces the
+	// Snackbar's own exit handler, so the closed toast would stay in the page
 	const slotProps: SnackbarProps["slotProps"] = useMemo(
-		() => ({ transition: { onExited } }),
+		() => (onExited ? { transition: { onExited } } : undefined),
 		[onExited],
 	);
 
