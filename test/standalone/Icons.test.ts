@@ -15,7 +15,6 @@ const importTimeout = 90000;
 describe("Icons", () => {
 	const expectedExports = [
 		"FilterIcon",
-		"FilterActiveIcon",
 		"SignIcon",
 		"TuneIcon",
 		"ResetIcon",
@@ -74,6 +73,22 @@ describe("Icons exports", () => {
 				root.SuccessOutlinedIcon,
 				"SuccessOutlinedIcon is missing from the package root",
 			).toBe(SuccessOutlinedIcon);
+		},
+		importTimeout,
+	);
+
+	it(
+		"[ISSUE-3460-ITEM-8] no longer exports FilterActiveIcon, whose funnel with an x reads as 'clear filter'",
+		async () => {
+			const root = (await import("../../src")) as Record<string, unknown>;
+			expect(
+				Icons,
+				"FilterActiveIcon is still exported from src/standalone/Icons/index.ts",
+			).not.toHaveProperty("FilterActiveIcon");
+			expect(
+				root,
+				"FilterActiveIcon is still exported from the package root",
+			).not.toHaveProperty("FilterActiveIcon");
 		},
 		importTimeout,
 	);

@@ -4,7 +4,6 @@ import { Box, Typography } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { expect } from "storybook/test";
 import FilterIcon from "./FilterIcon";
-import FilterActiveIcon from "./FilterActiveIcon";
 import SignIcon from "./SignIcon";
 import TuneIcon from "./TuneIcon";
 import ResetIcon from "./ResetIcon";
@@ -14,7 +13,6 @@ import SuccessOutlinedIcon from "./SuccessOutlinedIcon";
 
 const ICONS = {
 	FilterIcon,
-	FilterActiveIcon,
 	SignIcon,
 	TuneIcon,
 	ResetIcon,
@@ -27,7 +25,7 @@ type IconName = keyof typeof ICONS;
 const shapesOf = (svg: SVGSVGElement) =>
 	Array.from(svg.querySelectorAll<SVGGraphicsElement>("path, rect"));
 
-// user units; FilterActiveIcon's glyph overshoots its viewBox by 0.02
+// user units; ResetIcon's glyph overshoots its viewBox by 0.01
 const VIEWBOX_TOLERANCE = 0.1;
 const PIXEL_TOLERANCE = 0.5;
 
@@ -92,7 +90,6 @@ const glyphProblems = (svg: SVGSVGElement) => {
 
 const allIcons = [
 	{ name: "FilterIcon", Component: FilterIcon },
-	{ name: "FilterActiveIcon", Component: FilterActiveIcon },
 	{ name: "SignIcon", Component: SignIcon },
 	{ name: "TuneIcon", Component: TuneIcon },
 	{ name: "ResetIcon", Component: ResetIcon },
