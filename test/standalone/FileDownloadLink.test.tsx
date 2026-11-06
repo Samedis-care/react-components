@@ -122,4 +122,54 @@ describe("ObjectUrlLink", () => {
 			"https://x/notes.txt",
 		);
 	});
+
+	it("[ISSUE-3489-ITEM-41] renders no href for a javascript: link", () => {
+		render(
+			<ObjectUrlLink href={"javascript:alert(document.cookie)"}>
+				notes.txt
+			</ObjectUrlLink>,
+		);
+		expect(screen.getByText("notes.txt")).not.toHaveAttribute("href");
+		expect(screen.queryByRole("link")).toBeNull();
+	});
+
+	it.each([
+		["mixed case", "JaVaScRiPt:alert(1)"],
+		["leading control characters", "\u0001 javascript:alert(1)"],
+		["an embedded tab and newline", "java\tscr\nipt:alert(1)"],
+		["vbscript:", "vbscript:msgbox(1)"],
+		["file:", "file:///etc/passwd"],
+		["a custom scheme", "app-scheme://open"],
+		["a URL that does not parse", "http://[::1"],
+	])("[ISSUE-3489-ITEM-41] renders no href for %s", (_label, url: string) => {
+		render(<ObjectUrlLink href={url}>notes.txt</ObjectUrlLink>);
+		expect(screen.getByText("notes.txt")).not.toHaveAttribute("href");
+		expect(screen.queryByRole("link")).toBeNull();
+	});
+
+	it.each([
+		["an http URL", "http://x/notes.txt"],
+		["a URL relative to the page", "/files/notes.txt"],
+		["a data URL", "data:text/plain;base64,eA=="],
+	])("[ISSUE-3489-ITEM-41] links %s as it is", (_label, url: string) => {
+		render(<ObjectUrlLink href={url}>notes.txt</ObjectUrlLink>);
+		expect(screen.getByRole("link")).toHaveAttribute("href", url);
+	});
+
+	it("[ISSUE-3489-ITEM-41] follows href changes between a script and a real link", () => {
+		const { rerender } = render(
+			<ObjectUrlLink href={"https://x/notes.txt"}>notes.txt</ObjectUrlLink>,
+		);
+		rerender(
+			<ObjectUrlLink href={"javascript:alert(1)"}>notes.txt</ObjectUrlLink>,
+		);
+		expect(screen.getByText("notes.txt")).not.toHaveAttribute("href");
+		rerender(
+			<ObjectUrlLink href={"https://x/other.txt"}>notes.txt</ObjectUrlLink>,
+		);
+		expect(screen.getByRole("link")).toHaveAttribute(
+			"href",
+			"https://x/other.txt",
+		);
+	});
 });

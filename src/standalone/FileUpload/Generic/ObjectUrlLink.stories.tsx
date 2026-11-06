@@ -43,3 +43,19 @@ export const FromUrl: Story = {
 		);
 	},
 };
+
+/**
+ * A link with a scheme other than http(s), blob or data, such as `javascript:`: rendered
+ * without href, so it is not a link and a click runs nothing
+ */
+export const Issue3489Item41ScriptLinkIsNoLink: Story = {
+	args: {
+		href: "javascript:alert(document.cookie)",
+	},
+	parameters: { a11y: { test: "error" } },
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(canvas.queryByRole("link")).toBeNull();
+		await expect(canvas.getByText("notes.txt")).not.toHaveAttribute("href");
+	},
+};
