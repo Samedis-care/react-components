@@ -94,6 +94,12 @@ export interface FileProps {
 	 *          relative to the page, count as a link. A link with any other scheme (e.g.
 	 *          `javascript:`) is ignored: the file is shown as one without a link, nothing
 	 *          opens and onClick is not called.
+	 *
+	 *          A file with a link is opened through one control: its name (in icon-only
+	 *          its icon) is a link to the file (`<a href target="_blank">`), or a button
+	 *          with onClick. It is a tab stop, named by name and activated with Enter, as
+	 *          a click does. A click on the icon or the preview opens the file as well.
+	 *          Without a link the name is plain text and nothing is focusable.
 	 */
 	downloadLink?: string | Blob;
 	/**
@@ -115,7 +121,8 @@ export interface FileProps {
 	/**
 	 * custom onClick handler
 	 * @remarks Called instead of opening the link, only for a downloadLink that counts as
-	 *          a link
+	 *          a link. The control that opens the file is then a button instead of a link
+	 *          (see downloadLink).
 	 * @param name The file name including extension
 	 * @param url The file URL. For a Blob or data URI link an object URL, which stays
 	 *            valid at least until the handler has resolved
@@ -165,10 +172,29 @@ const RemoveIcon = styled(CancelIcon, {
 	cursor: "pointer",
 });
 
+/**
+ * Makes the control that opens a file (a link, or a button with onClick, see
+ * FileProps.downloadLink) look like the plain name or icon, and gives it an outline on
+ * keyboard focus. On the plain `p` and `div` these declarations change nothing.
+ */
+const openControlStyles = (theme: Theme): CSSObject => ({
+	display: "block",
+	padding: 0,
+	border: 0,
+	background: "none",
+	color: "inherit",
+	textDecoration: "none",
+	"&:focus-visible": {
+		outline: `2px solid ${theme.palette.primary.main}`,
+		outlineOffset: 2,
+	},
+});
+
 const IconWrapperList = styled("div", {
 	name: "CcFile",
 	slot: "iconWrapperList",
 })(({ theme }) => ({
+	...openControlStyles(theme),
 	height: "100%",
 	width: "auto",
 	color: theme.palette.error.main,
@@ -207,6 +233,7 @@ const StyledLabelList = styled(Typography, {
 	name: "CcFile",
 	slot: "listLabel",
 })(({ theme }) => ({
+	...openControlStyles(theme),
 	position: "absolute",
 	maxWidth: "100%",
 	"&.Mui-active": {
@@ -216,12 +243,15 @@ const StyledLabelList = styled(Typography, {
 		},
 	},
 	...changeStateStyles(theme),
-}));
+})) as typeof Typography;
 
 const StyledLabel = styled(Typography, {
 	name: "CcFile",
 	slot: "label",
 })(({ theme }) => ({
+	...openControlStyles(theme),
+	// a button is only as wide as its text otherwise
+	width: "100%",
 	"&.Mui-active": {
 		cursor: "pointer",
 		"&:hover": {
@@ -229,7 +259,7 @@ const StyledLabel = styled(Typography, {
 		},
 	},
 	...changeStateStyles(theme),
-}));
+})) as typeof Typography;
 
 // mirrors the CloseIcon/CloseIconList pair: the box variant positions its action over
 // the icon, every other variant lays it out inline
@@ -529,6 +559,12 @@ const openInNewTab = (url: string) => {
 	window.open(url, "_blank", "noopener,noreferrer");
 };
 
+/**
+ * One file of FileUploadGeneric: its icon or image preview, its name, and its remove or
+ * restore control. The default export of this module, imported as FilePreview by apps.
+ * @remarks A file with a link is opened by keyboard through its name (in icon-only its
+ *          icon), see FileProps.downloadLink.
+ */
 const File = (inProps: FileProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcFile" });
 	const { name, downloadLink, variant, className, classes, onClick } = props;
@@ -555,6 +591,38 @@ const File = (inProps: FileProps) => {
 		}
 	}, [downloadUrl, linkProtocol, name, onClick]);
 
+	// a click on the open control, also one by keyboard. openDownload opens the file, not
+	// the browser: a data: link needs an object URL, and onClick replaces opening it.
+	const handleOpen = useCallback(
+		(evt: React.MouseEvent) => {
+			evt.preventDefault();
+			void openDownload();
+		},
+		[openDownload],
+	);
+
+	// what makes the name (icon-only: the icon) the control that opens the file
+	const openControl = useMemo(
+		() =>
+			!hasLink
+				? undefined
+				: onClick
+					? {
+							component: "button" as const,
+							props: { type: "button" as const, onClick: handleOpen },
+						}
+					: {
+							component: "a" as const,
+							props: {
+								href: downloadUrl,
+								target: "_blank",
+								rel: "noopener noreferrer",
+								onClick: handleOpen,
+							},
+						},
+		[hasLink, onClick, handleOpen, downloadUrl],
+	);
+
 	const handleListClick = useCallback((evt: React.MouseEvent) => {
 		evt.stopPropagation();
 	}, []);
@@ -563,8 +631,15 @@ const File = (inProps: FileProps) => {
 		variant === "list" || variant === "compact-list" || variant === "icon-only";
 	const renderIcon = () => {
 		const IconWrapperComp = isList ? IconWrapperList : IconWrapper;
+		// icon-only shows no name, so its icon is the open control
+		const control = variant === "icon-only" ? openControl : undefined;
+		// elsewhere a click on the icon opens the file too, for the mouse only: the name
+		// is the control
+		const iconClick = hasLink && !control ? openDownload : undefined;
 		return (
 			<IconWrapperComp
+				as={control?.component}
+				{...control?.props}
 				className={combineClassNames([
 					isList ? classes?.iconWrapperList : classes?.iconWrapper,
 					props.disabled && "Mui-disabled",
@@ -575,11 +650,11 @@ const File = (inProps: FileProps) => {
 					<img
 						src={previewSrc}
 						alt={props.name}
-						onClick={openDownload}
+						onClick={iconClick}
 						style={{ height: props.size }}
 					/>
 				) : (
-					<FileIcon onClick={openDownload} style={{ height: props.size }} />
+					<FileIcon onClick={iconClick} style={{ height: props.size }} />
 				)}
 			</IconWrapperComp>
 		);
@@ -587,29 +662,34 @@ const File = (inProps: FileProps) => {
 
 	const renderName = () => {
 		const TypographyComp = variant === "list" ? StyledLabelList : StyledLabel;
+		const nameProps = {
+			align: isList ? "left" : "center",
+			noWrap: true,
+			className: combineClassNames([
+				variant === "list" ? classes?.listLabel : classes?.label,
+				hasLink && "Mui-active",
+			]),
+			"data-cc-change": props.changeState,
+			variant: "body2",
+			style: isList
+				? {
+						lineHeight: `${props.size}px`,
+					}
+				: undefined,
+			children: props.label ?? props.name,
+		} as const;
 
 		return (
 			<Tooltip title={props.name}>
-				<TypographyComp
-					align={isList ? "left" : "center"}
-					noWrap
-					className={combineClassNames([
-						variant === "list" ? classes?.listLabel : classes?.label,
-						hasLink && "Mui-active",
-					])}
-					data-cc-change={props.changeState}
-					onClick={openDownload}
-					variant={"body2"}
-					style={
-						isList
-							? {
-									lineHeight: `${props.size}px`,
-								}
-							: undefined
-					}
-				>
-					{props.label ?? props.name}
-				</TypographyComp>
+				{openControl ? (
+					<TypographyComp
+						{...nameProps}
+						component={openControl.component}
+						{...openControl.props}
+					/>
+				) : (
+					<TypographyComp {...nameProps} />
+				)}
 			</Tooltip>
 		);
 	};
@@ -713,7 +793,7 @@ const File = (inProps: FileProps) => {
 				>
 					<Grid>
 						<Tooltip title={props.name}>
-							<span>{renderIcon()}</span>
+							{openControl ? renderIcon() : <span>{renderIcon()}</span>}
 						</Tooltip>
 					</Grid>
 					{actionBtn && <Grid>{actionBtn}</Grid>}

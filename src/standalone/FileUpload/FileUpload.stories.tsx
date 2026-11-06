@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, fn, userEvent, waitFor, within } from "storybook/test";
+import { expect, fn, spyOn, userEvent, waitFor, within } from "storybook/test";
 import { FileUploadGeneric, ImageSelector } from "./index";
 import type { FileData, FileMeta, FileUploadProps } from "./Generic";
 import type { MultiImageImage, MultiImageProps } from "./MultiImage/MultiImage";
@@ -19,8 +19,8 @@ import {
 	VideoFileIcon,
 	WordFileIcon,
 } from "./FileIcons";
-import { Alert, Grid, Typography, type SvgIconProps } from "@mui/material";
-import { getFileType, getFileIconOrDefault } from "./Generic/File";
+import { Alert, Grid, type SvgIconProps, Typography } from "@mui/material";
+import FilePreview, { getFileIconOrDefault, getFileType } from "./Generic/File";
 
 // ---------------------------------------------------------------------------
 // Meta
@@ -1060,6 +1060,112 @@ export const Issue3489Item2ModernUploadButtonKeyboard: FUGStory = {
 			await expect(args.onBlur).toHaveBeenCalledTimes(1);
 		} finally {
 			picker.stop();
+		}
+	},
+};
+
+/**
+ * Opening files by keyboard: the name of each file with a link is a link (or, with a
+ * custom onClick, a button) named by the file name. Tab reaches it, keyboard focus shows
+ * an outline and the full name as tooltip, and Enter opens the file. A file without a
+ * link is no tab stop.
+ */
+export const Issue3489Item3FilesOpenByKeyboard: StoryObj<{
+	onOpen: (name: string, url: string) => void;
+}> = {
+	name: "FileUploadGeneric — opening files by keyboard",
+	args: { onOpen: fn() },
+	parameters: { a11y: { test: "error" } },
+	render: (args) => {
+		const files: FileData<FileMeta>[] = [
+			{
+				file: {
+					name: "contract.pdf",
+					type: "application/pdf",
+					downloadLink: "https://example.com/contract.pdf",
+				},
+			},
+			{ file: { name: "notes.txt", type: "text/plain" } },
+		];
+		return (
+			<div style={{ width: 480 }}>
+				<button type="button">before</button>
+				<FileUploadGeneric
+					files={files}
+					readOnly
+					label="Classic"
+					previewSize={64}
+					handleError={() => {}}
+				/>
+				<FileUploadGeneric
+					files={files}
+					readOnly
+					label="Modern"
+					variant="modern"
+					previewSize={24}
+					handleError={() => {}}
+				/>
+				<FilePreview
+					name="photo.png"
+					mimeType="image/png"
+					downloadLink="https://example.com/photo.png"
+					onClick={args.onOpen}
+					variant="compact-list"
+					size={24}
+					disabled={false}
+				/>
+				<button type="button">after</button>
+			</div>
+		);
+	},
+	play: async ({ args, canvas, userEvent }) => {
+		const open = spyOn(window, "open").mockImplementation(() => null);
+		try {
+			canvas.getByRole("button", { name: "before" }).focus();
+			for (const field of ["Classic", "Modern"]) {
+				await userEvent.tab();
+				const link = within(
+					canvas.getByRole("group", { name: field }),
+				).getByRole("link", { name: "contract.pdf" });
+				await expect(link).toHaveFocus();
+				const cs = getComputedStyle(link);
+				await expect(
+					cs.outlineStyle !== "none" && parseFloat(cs.outlineWidth) >= 2,
+					`outline ${cs.outlineStyle} ${cs.outlineWidth}`,
+				).toBe(true);
+				// the tooltip with the full name opens on keyboard focus too
+				await waitFor(() =>
+					expect(
+						[...document.querySelectorAll('[role="tooltip"]')].map(
+							(el) => el.textContent,
+						),
+					).toContain("contract.pdf"),
+				);
+				await userEvent.keyboard("{Enter}");
+				await expect(open).toHaveBeenLastCalledWith(
+					"https://example.com/contract.pdf",
+					"_blank",
+					"noopener,noreferrer",
+				);
+			}
+			await expect(open).toHaveBeenCalledTimes(2);
+			// notes.txt has no link, so the next stop is the file with a custom onClick
+			await userEvent.tab();
+			await expect(
+				canvas.getByRole("button", { name: "photo.png" }),
+			).toHaveFocus();
+			await userEvent.keyboard("{Enter}");
+			await waitFor(() =>
+				expect(args.onOpen).toHaveBeenCalledWith(
+					"photo.png",
+					"https://example.com/photo.png",
+				),
+			);
+			await expect(open).toHaveBeenCalledTimes(2);
+			await userEvent.tab();
+			await expect(canvas.getByRole("button", { name: "after" })).toHaveFocus();
+		} finally {
+			open.mockRestore();
 		}
 	},
 };
