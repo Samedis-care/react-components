@@ -1313,10 +1313,19 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[props.alwaysSubmitFields, flowEngineConfig.current.alwaysSubmitFields],
 	);
+	/**
+	 * Normalizes the values and the baseline for the dirty comparison
+	 * @param values The values (defaults to the current values)
+	 * @param initialValuesOverride The baseline (defaults to initialValues)
+	 * @param countedFields The fields that count as mounted for onlySubmitMounted
+	 *                      (defaults to the mounted fields)
+	 * @returns The normalized values and the normalized baseline
+	 */
 	const getNormalizedData = useCallback(
 		(
 			values?: Record<string, unknown>,
 			initialValuesOverride?: Record<string, unknown>,
+			countedFields?: Record<string, boolean>,
 		): [
 			localData: Record<string, unknown>,
 			remoteData: Record<string, unknown>,
@@ -1335,7 +1344,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 				onlySubmitMountedBehaviour,
 				onlySubmitMounted: onlySubmitMounted ?? false,
 				alwaysSubmitFields,
-				mountedFields,
+				mountedFields: countedFields ?? mountedFields,
 			});
 
 			const remoteData = normalizeValues(initialValues, {
@@ -1345,7 +1354,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 				onlySubmitMountedBehaviour,
 				onlySubmitMounted: onlySubmitMounted ?? false,
 				alwaysSubmitFields,
-				mountedFields,
+				mountedFields: countedFields ?? mountedFields,
 			});
 			return [localData, remoteData];
 		},
@@ -1377,12 +1386,15 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 	 * Computes per-field dirty state (value differs from the given baseline).
 	 * @param values The current form values to check
 	 * @param baseline The baseline to compare against (defaults to initialValues)
+	 * @param countedFields The fields that count as mounted for onlySubmitMounted
+	 *                      (defaults to the mounted fields)
 	 * @returns A map of field name to modified (true) / unmodified (false)
 	 */
 	const getDirtyFields = useCallback(
 		(
 			values: Record<string, unknown>,
 			baseline?: Record<string, unknown>,
+			countedFields?: Record<string, boolean>,
 		): Record<string, boolean> => {
 			const initialValues = baseline ?? getInitialValues();
 			// getNormalizedData needs both the baseline and the default record; if
@@ -1392,7 +1404,11 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 					Object.keys(model.fields).map((field) => [field, false]),
 				);
 			}
-			const [localData, remoteData] = getNormalizedData(values, initialValues);
+			const [localData, remoteData] = getNormalizedData(
+				values,
+				initialValues,
+				countedFields,
+			);
 			return Object.fromEntries(
 				Object.keys(model.fields).map((field) => [
 					field,
@@ -1755,10 +1771,18 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 		};
 
 		// decide which fields to update from server data based on per-field dirty
-		// state (value differs from the previous server data), not touched state
+		// state (value differs from the previous server data), not touched state.
+		// The staged values count wherever the flow's save sends them (the staged
+		// modified fields), also when the stage that staged them is no longer shown
 		const baseline = prevServerDataRef.current;
 		const mainDirty = getDirtyFields(valuesRef.current, baseline);
-		const stagedDirty = getDirtyFields(valuesStagedRef.current, baseline);
+		const stagedDirty = getDirtyFields(
+			valuesStagedRef.current,
+			baseline,
+			flowEngine
+				? combineModified(mountedFields, valuesStagedModifiedRef.current)
+				: undefined,
+		);
 
 		valuesRef.current = updateUnmodified(
 			valuesRef.current,

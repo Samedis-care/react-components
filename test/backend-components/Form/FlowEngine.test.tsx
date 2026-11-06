@@ -36,6 +36,7 @@ import {
 	setupFormTests,
 	Sink,
 	TestFormProps,
+	wait,
 } from "./formFixture";
 import ActionButton from "../../../src/standalone/UIKit/ActionButton";
 
@@ -145,6 +146,26 @@ const setup = (
 };
 
 /**
+ * Calls goToStage and returns what it rejected with (null if it resolved)
+ */
+const go = async (
+	flow: Flow,
+	stage: St,
+	toServer: boolean,
+): Promise<unknown> => {
+	let error: unknown = null;
+	await act(async () => {
+		try {
+			await flow.props!.goToStage(stage, toServer);
+		} catch (e) {
+			error = e;
+		}
+	});
+	await settle();
+	return error;
+};
+
+/**
  * Keeps every update pending until release() (then it is written to the connector)
  */
 const hold = (update: MockInstance, connector: MockConnector) => {
@@ -164,6 +185,17 @@ const hold = (update: MockInstance, connector: MockConnector) => {
 		await settle();
 	};
 };
+
+const set = async (sink: Sink, field: string, value: unknown) => {
+	act(() => sink.ctx!.setFieldValue(field, value));
+	await settle();
+};
+
+const sent = (spy: MockInstance): unknown[] =>
+	(spy.mock.calls as unknown[][]).map((call) => call[0]);
+
+const TITLE: StageBody = () => <FormField name={"title"} />;
+const NOTE: StageBody = () => <FormField name={"note"} />;
 
 /**
  * A FlowEngineFormPage stage with the field and the buttons (customProps.buttons)
@@ -272,6 +304,62 @@ const setupSave = (
 	);
 
 describe("FlowEngine: bugs", () => {
+	it("[ISSUE-3504-ITEM-2] a refetch with a server change elsewhere keeps the staged values of a stage that is not shown", async () => {
+		const { sink, flow, update, connector } = setup({ a: TITLE, b: NOTE });
+		await loaded(sink);
+		await set(sink, "title", "staged");
+		expect(await go(flow, "b", false)).toBeNull();
+		// another user changes a field nobody edited here
+		MockConnector.prototype.update.call(connector, {
+			id: "1",
+			reason: "R-server",
+		});
+		await act(async () => {
+			await sink.ctx!.refetchForm();
+		});
+		await wait(50);
+		expect(sink.ctx!.values.reason).toBe("R-server");
+		expect(sink.ctx!.values.title, "the staged title").toBe("staged");
+		expect(await go(flow, "c", true)).toBeNull();
+		expect(sent(update)).toEqual([{ id: "1", title: "staged" }]);
+	});
+
+	it("[ISSUE-3504-ITEM-2] a refetch that changes the staged field on the server keeps the staged value, as it keeps a typed one", async () => {
+		const { sink, flow, update, connector } = setup({ a: TITLE, b: NOTE });
+		await loaded(sink);
+		await set(sink, "title", "staged");
+		expect(await go(flow, "b", false)).toBeNull();
+		MockConnector.prototype.update.call(connector, {
+			id: "1",
+			title: "T-server",
+		});
+		await act(async () => {
+			await sink.ctx!.refetchForm();
+		});
+		await wait(50);
+		expect(sink.ctx!.values.title).toBe("staged");
+		expect(await go(flow, "c", true)).toBeNull();
+		expect(sent(update)).toEqual([{ id: "1", title: "staged" }]);
+	});
+
+	it("[ISSUE-3504-ITEM-2] once the flow saved the staged values, a refetch takes the server's value for them again", async () => {
+		const { sink, flow, update, connector } = setup({ a: TITLE, b: NOTE });
+		await loaded(sink);
+		await set(sink, "title", "staged");
+		expect(await go(flow, "b", true)).toBeNull();
+		expect(sent(update)).toEqual([{ id: "1", title: "staged" }]);
+		MockConnector.prototype.update.call(connector, {
+			id: "1",
+			title: "T-server",
+		});
+		await act(async () => {
+			await sink.ctx!.refetchForm();
+		});
+		await wait(50);
+		expect(sink.ctx!.values.title).toBe("T-server");
+		expect(sink.ctx!.dirty).toBe(false);
+	});
+
 	it("[ISSUE-3504-ITEM-9] a read-only FlowEngineSaveButton says why it is disabled", async () => {
 		const { sink } = setup(
 			{
