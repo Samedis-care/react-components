@@ -466,6 +466,12 @@ export type BaseSelectorProps<
 		defaultQuery?: string;
 		/**
 		 * Enable freeSolo. Allows user to enter any content. Selected option will be { value: USER_INPUT, label: USER_INPUT }
+		 * @remarks Leaving the field commits what it holds: the option highlighted in the
+		 * open list (the selection, until the arrow keys move on; a mouse hover does not
+		 * count), else the typed text. Typed text equal to the label of a listed, enabled
+		 * option commits that option. A single select left with the selection's own text,
+		 * with the selection highlighted, or with "Create" highlighted keeps the selection
+		 * and calls no onSelect.
 		 */
 		freeSolo?: boolean;
 		/**
@@ -895,22 +901,60 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 				: selected
 					? [selected]
 					: [];
+			// a blur that changes nothing: MUI has put the committed entry's text into the
+			// input, so put the selection's text back
+			const keepSelection = () =>
+				setQuery(
+					!multiple && selectedNormalized.length > 0
+						? getStringLabel(selectedNormalized[0])
+						: "",
+				);
+			// freeSolo turns on MUI's autoSelect, which commits on blur what the field holds:
+			// the highlighted option (on opening, the selection), else the input text.
+			// Leaving the field with the selection's own text or record keeps the selection.
+			if (!multiple && reason === "blur" && dataNormalized.length > 0) {
+				const current = selectedNormalized[0] as DataT | undefined;
+				if (dataNormalized[0].freeSolo) {
+					const text = getStringLabel(dataNormalized[0]);
+					if (current && text === getStringLabel(current)) {
+						keepSelection();
+						return;
+					}
+					// the list offers no free text entry for an option's exact label
+					const option = selectorOptions.find(
+						(entry) =>
+							!getOptionDisabled(entry) &&
+							!entry.isAddNewButton &&
+							getStringLabel(entry) === text,
+					);
+					if (option) dataNormalized[0] = option;
+				}
+				const committed = dataNormalized[0];
+				if (
+					current &&
+					!committed.freeSolo &&
+					!committed.isAddNewButton &&
+					!current.freeSolo &&
+					getId(committed) === getId(current)
+				) {
+					keepSelection();
+					return;
+				}
+			}
 			if (
 				dataNormalized.length > 0 &&
 				dataNormalized[dataNormalized.length - 1].isAddNewButton
 			) {
-				// if not free solo auto select on blur
-				if (reason !== "blur") {
-					if (!onAddNew) return;
-					const created = await onAddNew();
-					if (!created) return;
-					setSelectorOptions((old) => [created, ...old]);
-					dataNormalized[dataNormalized.length - 1] = created;
-				} else {
-					// make sure we don't select this element
-					dataNormalized.pop();
-					setQuery("");
+				// "Create" highlighted when the field is left (autoSelect) creates nothing
+				if (reason === "blur") {
+					keepSelection();
+					return;
 				}
+				if (!onAddNew) return;
+				const created = await onAddNew();
+				if (!created) return;
+				setSelectorOptions((old) => [created, ...old]);
+				dataNormalized[dataNormalized.length - 1] = created;
 			}
 			// single select shows the selected record in the input, so the query has to go.
 			// multi select keeps it, so multiple records can be picked from one search.
@@ -931,7 +975,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 				}
 			}
 		},
-		[onSelect, onAddNew, multiple, selected, addToLru, getId],
+		[onSelect, onAddNew, multiple, selected, selectorOptions, addToLru, getId],
 	);
 
 	const context = useMemo<BaseSelectorContextType>(
