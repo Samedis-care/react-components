@@ -291,6 +291,17 @@ const FormPageWrapper = <M extends ModelUnknown>(
 	);
 };
 
+/**
+ * A location pathname in the form of a route's url, which has no trailing or repeated slashes
+ * @param pathname The pathname
+ */
+const toRouteUrl = (pathname: string) =>
+	"/" +
+	pathname
+		.split("/")
+		.filter((segment) => segment)
+		.join("/");
+
 const CRUD = <M extends ModelUnknown>(
 	props: CrudProps<M>,
 	ref: React.Ref<CrudDispatch>,
@@ -552,7 +563,7 @@ const CRUD = <M extends ModelUnknown>(
 
 	const showGrid = disableRouting
 		? id === null
-		: routeUrl === location.pathname;
+		: routeUrl === toRouteUrl(location.pathname);
 
 	useEffect(() => {
 		window.dispatchEvent(new UIEvent("resize", { bubbles: true })); // trigger size recalculations
@@ -583,7 +594,7 @@ const CRUD = <M extends ModelUnknown>(
 						<GridVisibilityWrapper
 							className={!showGrid ? "Mui-hidden" : undefined}
 						>
-							{grid(routeUrl === location.pathname)}
+							{grid(showGrid)}
 						</GridVisibilityWrapper>
 					)}
 					{props.children && (
