@@ -16,6 +16,8 @@
 			"info": "Ulteriori informazioni",
 			"clear": "Cancella",
 			"multi-language-input": {
+				"language": "Lingua",
+				"language-of": "Lingua di {{label}}",
 				"toggle-languages": "Attiva/disattiva input lingua"
 			},
 			"number-input": {

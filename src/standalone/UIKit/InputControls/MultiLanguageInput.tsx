@@ -5,6 +5,8 @@ import {
 	InputAdornment,
 	styled,
 	TextFieldProps,
+	ToggleButton,
+	ToggleButtonGroup,
 	Tooltip,
 	Typography,
 	useThemeProps,
@@ -15,6 +17,7 @@ import useCCTranslations, {
 import { useCurrentLanguage } from "../../../utils/useCurrentLocale";
 import { Translate } from "@mui/icons-material";
 import { TextFieldCC } from "../MuiFieldState";
+import focusRing from "../../../utils/internal/focusRing";
 
 // src/assets/data/languages.json
 export type MultiLanguageInputSupportedLanguages =
@@ -220,8 +223,9 @@ export type MultiLanguageInputProps = Omit<
 	 * language when it is in this list and `ignoreI18nLocale` is not set,
 	 * otherwise the first entry; it is the labelled and required field, and it
 	 * follows later changes of this list and of the UI language. In multiline
-	 * mode the textarea shows the default language until a code is clicked,
-	 * and again when the clicked language is no longer in this list.
+	 * mode the textarea shows the default language until another language's
+	 * button below it is pressed, and again when that language is no longer in
+	 * this list.
 	 */
 	enabledLanguages: MultiLanguageInputSupportedLanguages[];
 	/**
@@ -278,29 +282,66 @@ export type MultiLanguageInputProps = Omit<
 	dirty?: boolean;
 };
 
+/**
+ * The `ownerState` of the `languageLabel` theme slot (a language button below
+ * a multiline field).
+ */
 export interface MultiLanguageInputLanguageLabelOwnerState {
+	/** The button's language is the one the textarea edits (pressed) */
 	active: boolean;
 }
-const LanguageLabel = styled("span", {
+
+/** The language buttons below a multiline field */
+const LanguageSwitcher = styled(ToggleButtonGroup, {
+	name: "CcMultiLanguageInput",
+	slot: "languageSwitcher",
+})(({ theme }) => ({
+	flexWrap: "wrap",
+	marginTop: theme.spacing(0.5),
+}));
+
+/** One language button of the multiline switcher, showing the language code */
+const LanguageLabel = styled(ToggleButton, {
 	name: "CcMultiLanguageInput",
 	slot: "languageLabel",
-})<{ ownerState: MultiLanguageInputLanguageLabelOwnerState }>(
-	({ ownerState }) => ({
-		cursor: "pointer",
-		pointerEvents: "auto",
-		...(ownerState.active && {
-			fontWeight: "bold",
-		}),
-	}),
-);
+})<{ ownerState: MultiLanguageInputLanguageLabelOwnerState }>(({ theme }) => ({
+	// compact (about 29px high), the codes in the case they are written in
+	padding: theme.spacing(0.25, 1),
+	minWidth: 32,
+	textTransform: "none",
+	// inside the button: its neighbours overlap its border
+	"&.Mui-focusVisible": focusRing(theme, -2),
+}));
+
+/** The active language's name, read with the multiline label */
+const ActiveLanguageName = styled("span")({
+	// visually hidden, as MUI's visuallyHidden
+	border: 0,
+	clipPath: "inset(50%)",
+	height: 1,
+	margin: -1,
+	overflow: "hidden",
+	padding: 0,
+	position: "absolute",
+	whiteSpace: "nowrap",
+	width: 1,
+});
 
 const LanguageLabelInputAdornment = styled(Typography, {
 	name: "CcMultiLanguageInput",
 	slot: "languageLabelInputAdornment",
 })({});
 
+/**
+ * Theme slots of `CcMultiLanguageInput`:
+ * - `languageSwitcher`: the group of language buttons below a multiline field
+ *   (a `ToggleButtonGroup`);
+ * - `languageLabel`: one language button of that group (a `ToggleButton`,
+ *   gets {@link MultiLanguageInputLanguageLabelOwnerState});
+ * - `languageLabelInputAdornment`: the code adornment of a single-line field.
+ */
 export type MultiLanguageInputClassKey =
-	"languageLabel" | "languageLabelInputAdornment";
+	"languageSwitcher" | "languageLabel" | "languageLabelInputAdornment";
 
 const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcMultiLanguageInput" });
@@ -379,13 +420,13 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 			.filter((e) => e)
 			.join(" ");
 
-	const handleActiveLangSelect = useCallback(
-		(evt: React.MouseEvent<HTMLSpanElement>) => {
-			setPickedLanguage(
-				evt.currentTarget.getAttribute(
-					"data-lang",
-				) as MultiLanguageInputSupportedLanguages,
-			);
+	const handleLanguageSwitch = useCallback(
+		(
+			_evt: React.MouseEvent<HTMLElement>,
+			lang: MultiLanguageInputSupportedLanguages | null,
+		) => {
+			// null: the pressed button was pressed again, which keeps its language
+			if (lang) setPickedLanguage(lang);
 		},
 		[],
 	);
@@ -401,29 +442,21 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 			autoFocus={focus}
 			fullWidth
 			label={
-				textFieldProps.multiline ? (
-					<span>
-						{label} -{" "}
-						{[
-							defaultLanguage,
-							...enabledLanguages.filter((lang) => lang !== defaultLanguage),
-						].map((lang) => (
-							<span key={lang}>
-								<Tooltip title={getLanguageName(lang)}>
-									<LanguageLabel
-										ownerState={{ active: activeLanguage === lang }}
-										data-lang={lang}
-										onClick={handleActiveLangSelect}
-									>
-										{lang}
-									</LanguageLabel>
-								</Tooltip>{" "}
-							</span>
-						))}
-					</span>
-				) : lang === defaultLanguage ? (
-					label
-				) : undefined
+				textFieldProps.multiline
+					? label && (
+							<>
+								{label}
+								{lang && (
+									<ActiveLanguageName>
+										{" "}
+										({t(lang, { defaultValue: lang })})
+									</ActiveLanguageName>
+								)}
+							</>
+						)
+					: lang === defaultLanguage
+						? label
+						: undefined
 			}
 			required={
 				defaultLanguage === lang && activeLanguage === defaultLanguage
@@ -483,6 +516,36 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 				{renderLanguage(
 					textFieldProps.multiline ? activeLanguage : defaultLanguage,
 					!!autoFocus,
+				)}
+				{textFieldProps.multiline && (
+					<LanguageSwitcher
+						exclusive
+						size="small"
+						value={activeLanguage}
+						onChange={handleLanguageSwitch}
+						aria-label={
+							label
+								? tCC("standalone.uikit.multi-language-input.language-of", {
+										label,
+									})
+								: tCC("standalone.uikit.multi-language-input.language")
+						}
+					>
+						{[
+							defaultLanguage,
+							...enabledLanguages.filter((lang) => lang !== defaultLanguage),
+						].map((lang) => (
+							<Tooltip key={lang} title={getLanguageName(lang)}>
+								<LanguageLabel
+									value={lang}
+									data-lang={lang}
+									ownerState={{ active: activeLanguage === lang }}
+								>
+									{lang}
+								</LanguageLabel>
+							</Tooltip>
+						))}
+					</LanguageSwitcher>
 				)}
 			</Grid>
 			{expanded &&

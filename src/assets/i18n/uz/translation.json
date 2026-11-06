@@ -16,6 +16,8 @@
 			"info": "Qo'shimcha ma'lumot",
 			"clear": "Tozalash",
 			"multi-language-input": {
+				"language": "Til",
+				"language-of": "{{label}} tili",
 				"toggle-languages": "Til maydonlarini almashtirish"
 			},
 			"number-input": {

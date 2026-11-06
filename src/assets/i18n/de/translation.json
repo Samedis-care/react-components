@@ -16,6 +16,8 @@
 			"info": "Weitere Informationen",
 			"clear": "Löschen",
 			"multi-language-input": {
+				"language": "Sprache",
+				"language-of": "Sprache für {{label}}",
 				"toggle-languages": "Spracheingaben umschalten"
 			},
 			"number-input": {

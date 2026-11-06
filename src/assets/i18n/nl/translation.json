@@ -16,6 +16,8 @@
 			"info": "Meer informatie",
 			"clear": "Wissen",
 			"multi-language-input": {
+				"language": "Taal",
+				"language-of": "Taal van {{label}}",
 				"toggle-languages": "Talinvoer wisselen"
 			},
 			"number-input": {

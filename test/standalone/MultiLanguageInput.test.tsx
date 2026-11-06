@@ -6,6 +6,7 @@ import {
 	fireEvent,
 	render,
 	screen,
+	within,
 } from "@testing-library/react";
 import ccI18n from "../../src/i18n";
 import MultiLanguageInput, {
@@ -90,9 +91,9 @@ const fieldNames = () =>
 const toggle = () =>
 	screen.getByRole("button", { name: "Toggle language inputs" });
 
-/** the language codes in the visible multiline label (the outlined legend repeats them) */
+/** a multiline field's language button */
 const labelCode = (lang: Lang) =>
-	document.querySelector<HTMLElement>(`label [data-lang="${lang}"]`)!;
+	document.querySelector<HTMLElement>(`button[data-lang="${lang}"]`)!;
 
 const type = (el: Element | null, value: string) =>
 	fireEvent.change(el!, { target: { value } });
@@ -283,13 +284,9 @@ describe("bugs", () => {
 		expect(fieldNames()).toEqual(["desc-de"]);
 		expect(field("desc-de")).toHaveValue("Hallo");
 		expect(field("desc-de")).toBeRequired();
-		// the active code is bold
-		expect(["bold", "700"]).toContain(
-			getComputedStyle(labelCode("de")).fontWeight,
-		);
-		expect(["bold", "700"]).not.toContain(
-			getComputedStyle(labelCode("en")).fontWeight,
-		);
+		// the active language's button is pressed
+		expect(labelCode("de")).toHaveAttribute("aria-pressed", "true");
+		expect(labelCode("en")).toHaveAttribute("aria-pressed", "false");
 	});
 	it("[ISSUE-3486-ITEM-2] keeps a clicked language in a multiline field when the default language changes", async () => {
 		render(
@@ -304,5 +301,86 @@ describe("bugs", () => {
 		await setLanguage("de");
 		expect(fieldNames()).toEqual(["desc-fr"]);
 		expect(field("desc-fr")).toHaveValue("Bonjour");
+	});
+
+	it("[ISSUE-3486-ITEM-9] exposes the multiline language codes as focusable controls with the active one marked", () => {
+		render(
+			<MultiLanguageInput
+				enabledLanguages={["en", "de"]}
+				label="Desc"
+				name="desc"
+				multiline
+				variant="standard"
+				values={{}}
+				onChange={noop}
+			/>,
+		);
+		const control = (name: RegExp) =>
+			screen.queryByRole("tab", { name }) ??
+			screen.queryByRole("radio", { name }) ??
+			screen.queryByRole("button", { name });
+		const isOn = (el: HTMLElement | null) =>
+			[
+				el?.getAttribute("aria-selected"),
+				el?.getAttribute("aria-pressed"),
+				el?.getAttribute("aria-checked"),
+			].includes("true");
+		const en = control(/English/);
+		const de = control(/German/);
+		expect(en, "a control for English").not.toBeNull();
+		expect(de, "a control for German").not.toBeNull();
+		expect(isOn(en)).toBe(true);
+		expect(isOn(de)).toBe(false);
+		fireEvent.click(de!);
+		expect(isOn(control(/German/))).toBe(true);
+	});
+
+	it("[ISSUE-3486-ITEM-9] names the multiline textarea with the language it edits", () => {
+		render(
+			<MultiLanguageInput
+				enabledLanguages={["en", "de"]}
+				label="Desc"
+				name="desc"
+				multiline
+				variant="standard"
+				values={{}}
+				onChange={noop}
+			/>,
+		);
+		// jest-dom's matcher: dom-accessibility-api's types do not resolve here
+		const textarea = () => document.querySelector("textarea[name]")!;
+		expect(textarea()).toHaveAccessibleName(/English/);
+		expect(textarea()).not.toHaveAccessibleName(/German/);
+		fireEvent.click(labelCode("de"));
+		expect(textarea()).toHaveAccessibleName(/German/);
+		expect(textarea()).not.toHaveAccessibleName(/English/);
+	});
+
+	it("[ISSUE-3486-ITEM-9] groups the language buttons under the field's label, and keeps them usable while the field is disabled", async () => {
+		render(
+			<Controlled
+				initial={{ en: "Hello", de: "Hallo" }}
+				label="Desc"
+				name="desc"
+				multiline
+				disabled
+			/>,
+		);
+		const group = screen.getByRole("group", { name: "Language of Desc" });
+		const buttons = within(group).getAllByRole("button");
+		expect(buttons.map((button) => button.textContent)).toEqual([
+			"en",
+			"de",
+			"fr",
+		]);
+		for (const button of buttons) expect(button).toBeEnabled();
+		fireEvent.click(labelCode("de"));
+		expect(field("desc-de")).toHaveValue("Hallo");
+		expect(field("desc-de")).toBeDisabled();
+		expect(labelCode("de")).toHaveAttribute("aria-pressed", "true");
+		await setLanguage("de");
+		expect(
+			screen.getByRole("group", { name: "Sprache für Desc" }),
+		).toBeInTheDocument();
 	});
 });

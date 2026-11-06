@@ -16,6 +16,8 @@
 			"info": "Подробнее",
 			"clear": "Очистить",
 			"multi-language-input": {
+				"language": "Язык",
+				"language-of": "Язык поля «{{label}}»",
 				"toggle-languages": "Переключить языковые поля"
 			},
 			"number-input": {

@@ -16,6 +16,8 @@
 			"info": "More information",
 			"clear": "Clear",
 			"multi-language-input": {
+				"language": "Language",
+				"language-of": "Language of {{label}}",
 				"toggle-languages": "Toggle language inputs"
 			},
 			"number-input": {
