@@ -32,7 +32,10 @@ import ScheduleFilterRenderer from "../Common/ScheduleFilterRenderers";
 
 export interface WeekViewProps {
 	/**
-	 * Callback to load data of this week
+	 * Callback to load data of this week. Called on mount and again when the
+	 * week, the filter values or this function change; only the result or
+	 * error of the latest call is shown, one of an earlier call that arrives
+	 * later is ignored.
 	 * @param weekOffset The offset to the current week
 	 * @param filter The selected filter(s)
 	 */
@@ -214,6 +217,11 @@ const WeekView = (inProps: WeekViewProps) => {
 	}, [i18n]);
 
 	useEffect(() => {
+		/**
+		 * Set by the cleanup when a newer load starts or the view unmounts, so
+		 * a result or error of this load that arrives later is dropped
+		 */
+		let stale = false;
 		setData(null);
 		setLoadError(null);
 
@@ -221,11 +229,17 @@ const WeekView = (inProps: WeekViewProps) => {
 		void (async () => {
 			try {
 				const data = await loadData(weekOffset, filterValues);
+				if (stale) return;
 				setData(data);
 			} catch (loadError) {
+				if (stale) return;
 				setLoadError(loadError as Error);
 			}
 		})();
+
+		return () => {
+			stale = true;
+		};
 	}, [filterValues, loadData, weekOffset]);
 
 	const now = moment();

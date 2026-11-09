@@ -28,6 +28,23 @@ const flush = async () => {
 const click = (name: string | RegExp) =>
 	fireEvent.click(screen.getByRole("button", { name }));
 
+const deferred = <T,>() => {
+	let resolve!: (v: T) => void;
+	let reject!: (e: unknown) => void;
+	const promise = new Promise<T>((res, rej) => {
+		resolve = res;
+		reject = rej;
+	});
+	return { promise, resolve, reject };
+};
+
+const setNow = (date: Date) => {
+	vi.useFakeTimers({ toFake: ["Date"] });
+	vi.setSystemTime(date);
+};
+// Wed 2026-10-14 12:00 local
+const WED = new Date(2026, 9, 14, 12);
+
 beforeAll(async () => {
 	await ccI18n.changeLanguage("en");
 });
@@ -159,5 +176,80 @@ describe("header layout of filters and actions", () => {
 				.getAllByRole("button")
 				.map((b) => b.textContent),
 		).toEqual(["First action", "Second action"]);
+	});
+});
+
+describe("load lifecycle and navigation", () => {
+	it("[ISSUE-3477-ITEM-2] a late result of an earlier week does not replace the shown week's entries", async () => {
+		setNow(WED);
+		const pending: Record<
+			number,
+			ReturnType<typeof deferred<IDayData[][]>>
+		> = {};
+		const loadData = vi.fn((offset: number) => {
+			pending[offset] = deferred<IDayData[][]>();
+			return pending[offset].promise;
+		});
+		render(<WeekView loadData={loadData} />);
+		await act(async () => {
+			pending[0].resolve(week("w0"));
+			await pending[0].promise;
+		});
+		click("Next week");
+		click("Next week");
+		await act(async () => {
+			pending[2].resolve(week("w2"));
+			await pending[2].promise;
+		});
+		await act(async () => {
+			pending[1].resolve(week("w1"));
+			await pending[1].promise;
+		});
+		expect(screen.getByText("Week 44 2026")).toBeInTheDocument();
+		expect(screen.queryByText("w1-idx0")).toBeNull();
+		expect(screen.getByText("w2-idx0")).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3477-ITEM-2] a late rejection of an earlier week does not show an error over the shown week", async () => {
+		const pending: Record<
+			number,
+			ReturnType<typeof deferred<IDayData[][]>>
+		> = {};
+		const loadData = vi.fn((offset: number) => {
+			pending[offset] = deferred<IDayData[][]>();
+			return pending[offset].promise;
+		});
+		render(<WeekView loadData={loadData} />);
+		await flush();
+		click("Next week");
+		await act(async () => {
+			pending[1].resolve(week("w1"));
+			await pending[1].promise;
+		});
+		await act(async () => {
+			pending[0].reject(new Error("week 0 failed"));
+			await pending[0].promise.catch(() => undefined);
+		});
+		expect(screen.getByText("w1-idx0")).toBeInTheDocument();
+		expect(screen.queryByText("week 0 failed")).toBeNull();
+	});
+
+	it("[ISSUE-3477-ITEM-2] after loadData changes, a late result of the previous function does not replace the new one's error", async () => {
+		const previous = deferred<IDayData[][]>();
+		const current = deferred<IDayData[][]>();
+		const loadPrevious = () => previous.promise;
+		const loadCurrent = () => current.promise;
+		const { rerender } = render(<WeekView loadData={loadPrevious} />);
+		rerender(<WeekView loadData={loadCurrent} />);
+		await act(async () => {
+			current.reject(new Error("current source failed"));
+			await current.promise.catch(() => undefined);
+		});
+		await act(async () => {
+			previous.resolve(week("previous"));
+			await previous.promise;
+		});
+		expect(screen.getByText("current source failed")).toBeInTheDocument();
+		expect(screen.queryByText("previous-idx0")).toBeNull();
 	});
 });
