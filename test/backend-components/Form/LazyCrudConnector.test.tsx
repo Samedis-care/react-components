@@ -25,6 +25,7 @@ import {
 	FormContextData,
 	PageProps,
 	useFormContext,
+	useFormFlowEngineStageConfig,
 } from "../../../src/backend-components/Form/Form";
 import FormCrudMultiSelect, {
 	FormCrudMultiSelectProps,
@@ -602,6 +603,58 @@ describe("useLazyCrudConnector: unmount and remount", () => {
 		});
 		await settle();
 		expect(env.calls).not.toContain("create:joins/1:s3");
+	});
+});
+
+describe("useLazyCrudConnector: re-renders of the form", () => {
+	it("a pick in a flow stage that passes a new stage config on every render renders the stage a few times and keeps the form dirty", async () => {
+		const model = makeModel();
+		const env = makeEnv({ "joins/1": [] });
+		const sink: Sink = {};
+		const ref = React.createRef<CrudSelectDispatch<JoinData>>();
+		type St = "a" | "b";
+		// from this many renders on the stage passes one config object, so that a render loop
+		// ends and fails the test instead of hanging it
+		const renderLimit = 100;
+		const lastConfig = { alwaysSubmitFields: ["title"] };
+		let renders = 0;
+		const StageA = () => {
+			renders++;
+			// a literal at the call site: a new object, and a new array, on every render
+			useFormFlowEngineStageConfig(
+				renders < renderLimit ? { alwaysSubmitFields: ["title"] } : lastConfig,
+			);
+			// renders whenever the form does, like a stage that reads the form's state
+			useFormContext<ModelUnknown>();
+			return (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					ref={ref}
+					{...selectorProps(model, env)}
+				/>
+			);
+		};
+		const StageB = () => null;
+		const stages = { a: StageA, b: StageB };
+		const Page = (formProps: PageProps<ModelUnknown, undefined>) => {
+			sink.ctx = useFormContext<ModelUnknown>();
+			return (
+				<FlowEngine<ModelUnknown, St, undefined>
+					defaultStage={"a"}
+					formProps={formProps}
+				>
+					{stages}
+				</FlowEngine>
+			);
+		};
+		mountForm(model, Page, { flowEngine: true });
+		await loaded(sink);
+		await ready();
+
+		renders = 0;
+		await add(ref);
+
+		expect(renders).toBeLessThan(10);
+		expect(sink.ctx!.dirty).toBe(true);
 	});
 });
 

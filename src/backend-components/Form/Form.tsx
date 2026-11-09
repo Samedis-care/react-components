@@ -496,6 +496,8 @@ export interface FormContextData<
 	 * Set custom field dirty state
 	 * @param field The unique field name
 	 * @param dirty The dirty state
+	 * @remarks The same function for the life of the Form, so an effect that lists it (and
+	 *          clears its field in the cleanup) doesn't re-run when the Form re-renders.
 	 */
 	setCustomFieldDirty: (field: string, dirty: boolean) => void;
 	/**
@@ -1470,6 +1472,10 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 	useEffect(() => {
 		dispatchDirtyEvent(dirty);
 	}, [dirty, dispatchDirtyEvent]);
+	// syncDirtyState changes with the dirty baseline (initial values, mounted fields, a flow
+	// stage's alwaysSubmitFields), setCustomFieldDirty must not
+	const syncDirtyStateRef = useRef(syncDirtyState);
+	syncDirtyStateRef.current = syncDirtyState;
 	/**
 	 * @see FormContextData.setCustomFieldDirty
 	 */
@@ -1484,9 +1490,9 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 			// a custom field is the one dirty source the form engine doesn't compute itself,
 			// so announce it here - a caller which clears its field and then navigates away
 			// must not be stopped by the render which hasn't happened yet
-			syncDirtyState();
+			syncDirtyStateRef.current();
 		},
-		[setCustomDirtyFields, syncDirtyState],
+		[setCustomDirtyFields],
 	);
 
 	// main form handling - dispatch
