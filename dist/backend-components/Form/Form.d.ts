@@ -402,6 +402,8 @@ export interface FormContextData<M extends ModelUnknown, CustomPropsT = unknown>
      * Set custom field dirty state
      * @param field The unique field name
      * @param dirty The dirty state
+     * @remarks The same function for the life of the Form, so an effect that lists it (and
+     *          clears its field in the cleanup) doesn't re-run when the Form re-renders.
      */
     setCustomFieldDirty: (field: string, dirty: boolean) => void;
     /**

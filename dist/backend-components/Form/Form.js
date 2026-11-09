@@ -456,6 +456,10 @@ const Form = (props) => {
     useEffect(() => {
         dispatchDirtyEvent(dirty);
     }, [dirty, dispatchDirtyEvent]);
+    // syncDirtyState changes with the dirty baseline (initial values, mounted fields, a flow
+    // stage's alwaysSubmitFields), setCustomFieldDirty must not
+    const syncDirtyStateRef = useRef(syncDirtyState);
+    syncDirtyStateRef.current = syncDirtyState;
     /**
      * @see FormContextData.setCustomFieldDirty
      */
@@ -472,8 +476,8 @@ const Form = (props) => {
         // a custom field is the one dirty source the form engine doesn't compute itself,
         // so announce it here - a caller which clears its field and then navigates away
         // must not be stopped by the render which hasn't happened yet
-        syncDirtyState();
-    }, [setCustomDirtyFields, syncDirtyState]);
+        syncDirtyStateRef.current();
+    }, [setCustomDirtyFields]);
     // main form handling - dispatch
     const alwaysWarnFields = useMemo(() => (props.alwaysWarnFields ?? []).concat(flowEngineConfig.current.alwaysWarnFields ?? []), 
     // eslint-disable-next-line react-hooks/exhaustive-deps
