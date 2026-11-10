@@ -152,6 +152,16 @@ const overlapY = (a: Rect, b: Rect) =>
 const overlapsX = (a: Rect, b: Rect) => a.left < b.right && a.right > b.left;
 const nextFrame = () =>
 	new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+const buttonBar = (scope: ParentNode) => {
+	const bar = scope.querySelector('[class*="CcFormButtons-root"]');
+	if (!bar) throw new Error("FormButtons not rendered");
+	return bar;
+};
+const overlayIn = (scope: ParentNode) => {
+	const overlay = scope.querySelector('[class*="CcFormLoaderOverlay-root"]');
+	if (!overlay) throw new Error("FormLoaderOverlay not rendered");
+	return overlay;
+};
 
 export const Issue3473Item1FooterAboveFieldLabels: Story = {
 	parameters: {
@@ -260,5 +270,214 @@ export const Issue3473Item1FooterAboveRaisedBodyContent: Story = {
 			hit?.closest("button"),
 			`the point on Save hits ${hit?.tagName} "${hit?.textContent}"`,
 		).toBe(save);
+	},
+};
+
+export const Issue3473Item2FooterAndOverlayStayInScrollingPanel: Story = {
+	parameters: {
+		a11y: {
+			config: {
+				// the busy overlay's spinner has no accessible name yet, a known defect of
+				// the overlay; drop this line once it has one
+				rules: [{ id: "aria-progressbar-name", enabled: false }],
+			},
+		},
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-2: in a positioned scroll container (a Drawer's paper, a side panel with `position: relative; overflow: auto`) the footer and the busy overlay are placed against the scrolling content. Scrolled to the end, the Save bar has scrolled out of view and the overlay covers only the first screen.",
+			},
+		},
+	},
+	render: () => (
+		<Box
+			data-testid={"panel"}
+			sx={{
+				position: "relative",
+				overflowY: "auto",
+				width: 400,
+				height: 500,
+				display: "flex",
+				flexDirection: "column",
+			}}
+		>
+			<FormPageLayout
+				body={<Fields count={20} />}
+				footer={<SaveBackButtons />}
+				other={<FormLoaderOverlay visible />}
+			/>
+		</Box>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const panelEl = canvas.getByTestId("panel");
+		panelEl.scrollTop = panelEl.scrollHeight;
+		await nextFrame();
+		await expect(panelEl.scrollTop).toBeGreaterThan(0);
+
+		const panel = rectOf(panelEl);
+		const footer = rectOf(buttonBar(panelEl));
+		const overlay = rectOf(overlayIn(panelEl));
+		// scrollTop is a whole number while the content height can be fractional, so
+		// allow a pixel of rounding
+		const EPS = 1;
+		// the Save bar is in view
+		await expect(footer.top).toBeGreaterThanOrEqual(panel.top - EPS);
+		await expect(footer.bottom).toBeLessThanOrEqual(panel.bottom + EPS);
+		// the busy overlay covers what the user sees
+		await expect(overlay.top).toBeLessThanOrEqual(panel.top + EPS);
+		await expect(overlay.bottom).toBeGreaterThanOrEqual(panel.bottom - EPS);
+	},
+};
+
+const distance = (a: number, b: number) => Math.abs(a - b);
+const middleOf = (rect: Rect) => (rect.top + rect.bottom) / 2;
+const progressbarIn = (scope: ParentNode) => {
+	const bar = scope.querySelector('[role="progressbar"]');
+	if (!bar) throw new Error("no spinner shown");
+	return bar;
+};
+
+export const Issue3473Item2SaveAndSpinnerStayInViewWhileScrolling: Story = {
+	parameters: {
+		a11y: {
+			config: {
+				// the busy overlay's spinner has no accessible name yet, a known defect of
+				// the overlay; drop this line once it has one
+				rules: [{ id: "aria-progressbar-name", enabled: false }],
+			},
+		},
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-2: a busy form much taller than the scrolling panel it is in. At the start, in the middle and at the end, the Save bar sits at the same place at the bottom of the panel, and the spinner in the middle of the panel.",
+			},
+		},
+	},
+	render: () => (
+		<Box sx={{ pt: 10 }}>
+			<Box
+				data-testid={"panel"}
+				sx={{
+					position: "relative",
+					overflowY: "auto",
+					width: 400,
+					height: 500,
+					display: "flex",
+					flexDirection: "column",
+				}}
+			>
+				<FormPageLayout
+					body={<Fields count={40} />}
+					footer={<SaveBackButtons />}
+					other={<FormLoaderOverlay visible />}
+				/>
+			</Box>
+		</Box>
+	),
+	play: async ({ canvasElement }) => {
+		const panelEl = within(canvasElement).getByTestId("panel");
+		const panel = rectOf(panelEl);
+		const EPS = 1;
+		const max = panelEl.scrollHeight - panelEl.clientHeight;
+		for (const scrollTop of [0, max / 2, max]) {
+			panelEl.scrollTop = scrollTop;
+			await nextFrame();
+			const footer = rectOf(buttonBar(panelEl));
+			await expect(footer.top, `Save bar at ${scrollTop}`).toBeGreaterThan(
+				panel.top,
+			);
+			await expect(
+				distance(footer.bottom, panel.bottom - 36),
+				`Save bar at ${scrollTop}`,
+			).toBeLessThanOrEqual(EPS);
+			const spinner = rectOf(progressbarIn(panelEl));
+			await expect(
+				distance(middleOf(spinner), middleOf(panel)),
+				`spinner at ${scrollTop}`,
+			).toBeLessThanOrEqual(EPS);
+		}
+	},
+};
+
+export const Issue3473Item2FooterAndOverlayFollowDocumentScroll: Story = {
+	parameters: {
+		layout: "fullscreen",
+		a11y: {
+			config: {
+				// the busy overlay's spinner has no accessible name yet, a known defect of
+				// the overlay; drop this line once it has one
+				rules: [{ id: "aria-progressbar-name", enabled: false }],
+			},
+		},
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-2: a page whose document scrolls, with no positioned ancestor. Scrolled down, the Save bar stays at the bottom of the viewport and the busy overlay covers the viewport, with the spinner in its middle.",
+			},
+		},
+	},
+	render: () => (
+		<FormPageLayout
+			body={<Fields count={30} />}
+			footer={<SaveBackButtons />}
+			other={<FormLoaderOverlay visible />}
+		/>
+	),
+	play: async ({ canvasElement }) => {
+		try {
+			window.scrollTo(0, 700);
+			await nextFrame();
+			await expect(window.scrollY).toBe(700);
+			const EPS = 1;
+			const footer = rectOf(buttonBar(canvasElement));
+			const viewportHeight = document.documentElement.clientHeight;
+			await expect(
+				distance(footer.bottom, viewportHeight - 36),
+			).toBeLessThanOrEqual(EPS);
+			const overlay = rectOf(overlayIn(canvasElement));
+			await expect(overlay.top).toBeLessThanOrEqual(EPS);
+			await expect(overlay.bottom).toBeGreaterThanOrEqual(viewportHeight - EPS);
+			const spinner = rectOf(progressbarIn(canvasElement));
+			await expect(
+				distance(middleOf(spinner), viewportHeight / 2),
+			).toBeLessThanOrEqual(EPS);
+		} finally {
+			window.scrollTo(0, 0);
+		}
+	},
+};
+
+export const Issue3473Item2FooterStaysPutInDialog: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-2: in a FormDialog the Save bar stays at the same place inside the dialog while its content scrolls, also at the end, where the last field ends above it.",
+			},
+		},
+	},
+	render: () => <DialogForm count={15} />,
+	play: async () => {
+		const screen = within(document.body);
+		await screen.findByRole("button", { name: "Save" });
+		const content = screen.getByTestId("content");
+		const paper = rectOf(screen.getByRole("dialog"));
+		const before = rectOf(buttonBar(content));
+		await expect(before.top).toBeGreaterThan(paper.top);
+		await expect(before.bottom).toBeLessThan(paper.bottom);
+
+		content.scrollTop = content.scrollHeight;
+		await nextFrame();
+		await expect(content.scrollTop).toBeGreaterThan(0);
+		const after = rectOf(buttonBar(content));
+		// scrollTop is a whole number while the content height can be fractional
+		await expect(distance(after.top, before.top)).toBeLessThanOrEqual(1);
+		await expect(distance(after.bottom, before.bottom)).toBeLessThanOrEqual(1);
+		const lastField = screen
+			.getByRole("textbox", { name: /field number 14/ })
+			.closest(".MuiFormControl-root");
+		if (!lastField) throw new Error("the last field is not a FormControl");
+		await expect(rectOf(lastField).bottom).toBeLessThanOrEqual(after.top);
 	},
 };

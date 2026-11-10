@@ -25,6 +25,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-10 | [MobileScalingFix keeps the page's other viewport directives](2026-11-10-mobile-scaling-fix-keeps-viewport-directives.md) | behavior |
 | 2026-11-10 | [CountryFlags has no prototype: names of Object.prototype are not flags](2026-11-10-country-flags-no-prototype.md) | behavior |
 | 2026-11-10 | [The Loader passes className and HTML attributes on, so styled(Loader) and FormLoaderOverlay's loader override apply](2026-11-10-loader-passes-class-name-and-attributes.md) | behavior |
+| 2026-11-10 | [A form page's footer is sticky, and its busy overlay covers only the form](2026-11-10-form-page-layout-sticky-footer.md) | behavior, theme |
 | 2026-11-10 | [A dirty form page still asks before it is left while it saves](2026-11-10-form-page-guarded-while-saving.md) | behavior |
 | 2026-11-10 | [FilterIcon, SignIcon and ExportIcon take a caller's viewBox](2026-11-10-icons-take-a-callers-viewbox.md) | behavior |
 | 2026-11-10 | [A line break in a HowToBox entry starts a new line](2026-11-10-how-to-box-line-breaks-in-entries.md) | behavior |
