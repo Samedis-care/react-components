@@ -8,7 +8,11 @@ export interface InfiniteScrollProps {
 	 */
 	children: React.ReactNode;
 	/**
-	 * The CSS class to apply, must set a height value and overflow: auto
+	 * The CSS class to apply, must bound the container's height (`height`,
+	 * `max-height`, or `flex: 1` inside a flex column of bounded height) and
+	 * set `overflow: auto`. Without a bounded height the content never
+	 * overflows, so `loadMoreBottom` is called again after every page until
+	 * it stops changing `children`.
 	 */
 	className: string;
 	/**
@@ -21,6 +25,10 @@ export interface InfiniteScrollProps {
 	 * A call that waits for `callBackDebounce` is only made if, once the wait is
 	 * over, the content still does not fill the container or the container is
 	 * still scrolled to the bottom.
+	 *
+	 * Not called while the container is hidden by `display: none` on it or an
+	 * ancestor (e.g. an inactive tab that stays mounted): the container is
+	 * filled once it is shown.
 	 */
 	loadMoreBottom: () => void;
 	/**
@@ -66,6 +74,16 @@ const isAtBottom = (wrapper: HTMLElement): boolean =>
 	wrapper.scrollTop === wrapper.scrollHeight - wrapper.clientHeight;
 
 /**
+ * Has the scroll container no layout box, because it or an ancestor is
+ * `display: none` (e.g. an inactive tab that stays mounted)? All its sizes
+ * are 0 then, so the fill check cannot tell whether content is missing. A
+ * container that has a box but is 0px high, such as an empty one bounded by
+ * `max-height`, is not affected.
+ */
+const hasNoLayoutBox = (wrapper: HTMLElement): boolean =>
+	wrapper.clientHeight === 0 && wrapper.getClientRects().length === 0;
+
+/**
  * Provides infinite scrolling to whatever is inside it
  */
 class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
@@ -78,6 +96,16 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 		loadMoreTop: 0,
 		loadMoreBottom: 0,
 	};
+	/**
+	 * Did the last fill check find the scroll container without a layout box?
+	 * Its size is observed until it gets one, and the fill check runs again then.
+	 */
+	private awaitingLayoutBox = false;
+	/**
+	 * Is the scroll container's size observed (by `resizeObserver`, or through
+	 * `window` resize events without ResizeObserver)?
+	 */
+	private observingSize = false;
 
 	constructor(props: InfiniteScrollProps) {
 		super(props);
@@ -95,13 +123,7 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 
 		this.wrapper.addEventListener("scroll", this.handleScroll);
 		this.handleResize();
-		if (this.props.dynamicallySized) {
-			if (this.resizeObserver) {
-				this.resizeObserver.observe(this.wrapper);
-			} else {
-				window.addEventListener("resize", this.handleResize);
-			}
-		}
+		this.observeSize();
 	}
 
 	componentDidUpdate(prevProps: Readonly<InfiniteScrollProps>): void {
@@ -109,33 +131,14 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 			this.handleResize();
 		}
 		if (!!prevProps.dynamicallySized !== !!this.props.dynamicallySized) {
-			if (!this.wrapper) return;
-			if (prevProps.dynamicallySized) {
-				if (this.resizeObserver) {
-					this.resizeObserver.unobserve(this.wrapper);
-				} else {
-					window.removeEventListener("resize", this.handleResize);
-				}
-			} else {
-				if (this.resizeObserver) {
-					this.resizeObserver.observe(this.wrapper);
-				} else {
-					window.addEventListener("resize", this.handleResize);
-				}
-			}
+			this.observeSize();
 		}
 	}
 
 	componentWillUnmount(): void {
 		if (!this.wrapper) throw new Error("Ref is null");
 		this.wrapper.removeEventListener("scroll", this.handleScroll);
-		if (this.props.dynamicallySized) {
-			if (this.resizeObserver) {
-				this.resizeObserver.unobserve(this.wrapper);
-			} else {
-				window.removeEventListener("resize", this.handleResize);
-			}
-		}
+		this.observeSize(false);
 	}
 
 	render(): React.ReactElement {
@@ -148,6 +151,43 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 
 	setScrollerRef = (ref: HTMLElement | null): void => {
 		this.wrapper = ref;
+	};
+
+	/**
+	 * Starts or stops observing the scroll container's size; every change runs
+	 * the fill check again. Without ResizeObserver, `window` resize events are
+	 * listened to instead.
+	 * @param observe Observe? By default while `dynamicallySized` is set or
+	 * the fill waits for a layout box.
+	 */
+	private observeSize = (
+		observe = !!this.props.dynamicallySized || this.awaitingLayoutBox,
+	): void => {
+		if (!this.wrapper || observe === this.observingSize) return;
+		this.observingSize = observe;
+		if (this.resizeObserver) {
+			if (observe) this.resizeObserver.observe(this.wrapper);
+			else this.resizeObserver.unobserve(this.wrapper);
+		} else if (observe) {
+			window.addEventListener("resize", this.handleResize);
+		} else {
+			window.removeEventListener("resize", this.handleResize);
+		}
+	};
+
+	/**
+	 * Pauses the fill while the scroll container has no layout box: no
+	 * `loadMoreBottom` call is made, and the container is observed until it
+	 * gets a box, which runs the fill check again. Without ResizeObserver
+	 * nothing would notice the container being shown, so the fill is not
+	 * paused there.
+	 * @returns Whether the fill is paused
+	 */
+	private pauseFillWhileHidden = (): boolean => {
+		if (!this.wrapper || !this.resizeObserver) return false;
+		this.awaitingLayoutBox = hasNoLayoutBox(this.wrapper);
+		this.observeSize();
+		return this.awaitingLayoutBox;
 	};
 
 	/**
@@ -173,7 +213,8 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 	 * props now, so it is the one of the latest render. `loadMoreBottom` is only
 	 * called if the content still needs it: a request made while the content was
 	 * short, or while the container was at the bottom, is dropped once content
-	 * that arrived in the meantime fills the container and moves the bottom away.
+	 * that arrived in the meantime fills the container and moves the bottom away,
+	 * and one is not made while the container is hidden (`pauseFillWhileHidden`).
 	 */
 	private callLoad = (name: LoadCallbackName): void => {
 		if (name === "loadMoreTop") {
@@ -181,14 +222,14 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 			if (loadMoreTop) loadMoreTop();
 			return;
 		}
-		if (!this.wrapper) return;
+		if (!this.wrapper || this.pauseFillWhileHidden()) return;
 		if (isFilled(this.wrapper) && !isAtBottom(this.wrapper)) return;
 		const loadMoreBottom = this.props.loadMoreBottom;
 		loadMoreBottom();
 	};
 
 	handleResize = (): void => {
-		if (!this.wrapper) return;
+		if (!this.wrapper || this.pauseFillWhileHidden()) return;
 
 		if (isFilled(this.wrapper)) {
 			if (!this.state.initScroll) {
