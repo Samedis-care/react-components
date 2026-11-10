@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Box } from "@mui/material";
+import { Box, Dialog, DialogContent, DialogTitle } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { expect, within } from "storybook/test";
 import Loader from "./index";
@@ -162,5 +162,33 @@ export const Issue3461Item8LongTextKeepsSpinnerInBox: Story = {
 		const spinner = spinnerBox(canvas.getByRole("progressbar"));
 		await expect(spinner.top).toBeGreaterThanOrEqual(box.top);
 		await expect(spinner.bottom).toBeLessThanOrEqual(box.bottom);
+	},
+};
+
+export const Issue3461Item5AddsNoScrollRegionToDialogContent: Story = {
+	parameters: {
+		a11y: {
+			test: "error",
+			options: {
+				runOnly: { type: "rule", values: ["scrollable-region-focusable"] },
+			},
+		},
+		docs: {
+			description: {
+				story:
+					"ISSUE-3461-ITEM-5: as the only content of a `DialogContent` (FormDialog's Suspense fallback), the Loader's content overflows the 20px content box, which becomes an unnamed, focusable scroll region (axe `scrollable-region-focusable`).",
+			},
+		},
+	},
+	render: () => (
+		<Dialog open aria-labelledby={"bug039-title"}>
+			<DialogTitle id={"bug039-title"}>Edit device</DialogTitle>
+			<DialogContent>
+				<Loader />
+			</DialogContent>
+		</Dialog>
+	),
+	play: async () => {
+		await within(document.body).findByRole("progressbar");
 	},
 };
