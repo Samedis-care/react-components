@@ -1,4 +1,4 @@
-import { ModelIndexResponse, ModelUnknown } from "./Model";
+import { ModelUnknown, PageVisibility } from "./Model";
 import sleep from "../../utils/sleep";
 import RequestBatchingError from "../Connector/RequestBatchingError";
 
@@ -19,18 +19,30 @@ class RequestBatching {
 
 	private static batchPromises: Record<
 		string,
-		Promise<ModelIndexResponse<ModelUnknown>>
+		ReturnType<ModelUnknown["fetchAllRaw"]>
 	> = {};
 	private static batchNonce: Record<string, string> = {};
 	private static batchRequestIds: Record<string, string[]> = {};
 	private static batchLastAdded: Record<string, number> = {};
 
+	/**
+	 * Loads a record through a batched index request
+	 * @param id The record id
+	 * @param model The model
+	 * @param visibility The visibility to deserialize the record with: "edit" where the batch
+	 *                   stands in for a show (the model's enableRequestBatching), "overview"
+	 *                   where the caller asked for a batch
+	 * @returns The deserialized record
+	 * @remarks Gets of both visibilities share one request: the batch holds the records as the
+	 *          connector returns them, and each get deserializes its own.
+	 */
 	public static async get(
 		id: string,
 		model: ModelUnknown,
+		visibility: keyof PageVisibility = "overview",
 	): Promise<Record<string, unknown>> {
 		const batchKey = JSON.stringify(model.getReactQueryKey(null, true));
-		let promise: Promise<ModelIndexResponse<ModelUnknown>>;
+		let promise: ReturnType<ModelUnknown["fetchAllRaw"]>;
 		if (
 			batchKey in this.batchPromises &&
 			this.batchRequestIds[batchKey].length < this.MAX_BATCH_REQUESTS
@@ -73,7 +85,7 @@ class RequestBatching {
 					delete this.batchLastAdded[batchKey];
 				}
 				// execute batch
-				return model.fetchAll({
+				return model.fetchAllRaw({
 					fieldFilter: {
 						id: {
 							type: "inSet",
@@ -92,7 +104,7 @@ class RequestBatching {
 				"[Components-Care] [RequestBatching] Requested record not returned by backend: " +
 					JSON.stringify(model.getReactQueryKey(id, true)),
 			);
-		return record;
+		return model.applySerialization(record, "deserialize", visibility);
 	}
 }
 

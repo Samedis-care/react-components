@@ -35,6 +35,20 @@ import("@sentry/react")
 	.then((Sentry) => (captureException = Sentry.captureException))
 	.catch(() => {}); // ignore
 
+/**
+ * Reports an error to Sentry, if it is loaded, unless the network or the backend caused it
+ * @param err The error
+ */
+const reportUnexpectedError = (err: unknown) => {
+	if (
+		captureException &&
+		err instanceof Error &&
+		!["NetworkError", "BackendError"].includes(err.name)
+	) {
+		captureException(err);
+	}
+};
+
 export interface PageVisibility {
 	overview: Visibility;
 	edit: VisibilityCallback;
@@ -388,6 +402,10 @@ export interface CacheOptions {
 export interface ModelGetOptions {
 	/**
 	 * Use batched requests
+	 * @remarks true loads the record through an index request and deserializes it with the
+	 *          overview visibility, e.g. for a list of records shown together. Not set, the
+	 *          model's enableRequestBatching decides, and a batch then stands in for a show: the
+	 *          record is deserialized with the edit visibility.
 	 * @see ModelOptions.enableRequestBatching
 	 */
 	batch?: boolean;
@@ -413,10 +431,7 @@ export const useModelGet = <M extends ModelUnknown>(
 		ModelGetOptions,
 ): UseQueryResult<ModelGetResponse<M>, Error> => {
 	return useQuery({
-		queryKey: model.getReactQueryKey(
-			id,
-			options?.batch ?? model.requestBatchingEnabled,
-		),
+		queryKey: model.getReactQueryKeyGet(id, options),
 		queryFn: () => model.getRaw(id, options),
 		// 3 retries if we get network error
 		retry: (count, err: Error) => err.name === "NetworkError" && count < 3,
@@ -544,6 +559,10 @@ export const useModelMutation = <M extends ModelUnknown, TContext = unknown>(
 						model.getReactQueryKey(id, true),
 						responseData,
 					);
+					ModelDataStore.setQueryData(
+						model.getReactQueryKeyGet(id),
+						responseData,
+					);
 				} else {
 					ModelDataStore.removeQueries({
 						queryKey: model.getReactQueryKey(id, true),
@@ -651,7 +670,10 @@ export interface ModelOptions {
 	hooks?: ModelHooks;
 	/**
 	 * Enable request batching: uses index requests instead of show requests using field filter for ID inSet to reduce the number of GET requests
-	 * Uses overview visibility settings, can be toggled for single requests using options there. This is the default value if not specified there
+	 * Can be toggled for single requests using options there. This is the default value if not specified there
+	 * @remarks Set it only if the index returns the same data as a show: a record batched because
+	 *          of this option stands in for a show and is deserialized with the edit visibility.
+	 *          A get that passes `batch: true` itself gets an overview record.
 	 * @remarks configure RequestBatching class for performance tweaking
 	 * @see RequestBatching
 	 */
@@ -808,25 +830,9 @@ class Model<
 				deepClone(params),
 				this.asModelUnknown,
 			);
-			return [
-				this.cacheIndexRecords(
-					await Promise.all(
-						rawData.map((data) =>
-							this.applySerialization(data, "deserialize", "overview"),
-						),
-					),
-				),
-				meta,
-				userData,
-			];
+			return [await this.deserializeIndexRecords(rawData), meta, userData];
 		} catch (err) {
-			if (
-				captureException &&
-				err instanceof Error &&
-				!["NetworkError", "BackendError"].includes(err.name)
-			) {
-				captureException(err);
-			}
+			reportUnexpectedError(err);
 			throw err;
 		}
 	}
@@ -843,17 +849,24 @@ class Model<
 			deepClone(params),
 			this.asModelUnknown,
 		);
-		return [
-			this.cacheIndexRecords(
-				await Promise.all(
-					rawData.map((data) =>
-						this.applySerialization(data, "deserialize", "overview"),
-					),
+		return [await this.deserializeIndexRecords(rawData), meta, userData];
+	}
+
+	/**
+	 * Deserializes index records with the overview visibility and caches them for batched requests
+	 * @param rawData The records as the connector returns them
+	 * @returns The deserialized records
+	 */
+	private async deserializeIndexRecords(
+		rawData: Record<string, unknown>[],
+	): Promise<ModelRecord<this>[]> {
+		return this.cacheIndexRecords(
+			await Promise.all(
+				rawData.map((data) =>
+					this.applySerialization(data, "deserialize", "overview"),
 				),
 			),
-			meta,
-			userData,
-		];
+		);
 	}
 
 	/**
@@ -880,10 +893,34 @@ class Model<
 	 * Fetches all records using index calls
 	 * @param params The params to pass to index
 	 * @returns ModelIndexResponse where userMeta and meta is taken from the last call
+	 * @remarks The records of fetchAllRaw, deserialized and cached as index does it
 	 */
 	public async fetchAll(
 		params?: ModelFetchAllParams,
 	): Promise<ModelIndexResponse<this>> {
+		try {
+			const [rawData, meta, userMeta] = await this.fetchAllRaw(params);
+			return [await this.deserializeIndexRecords(rawData), meta, userMeta];
+		} catch (err) {
+			reportUnexpectedError(err);
+			throw err;
+		}
+	}
+
+	/**
+	 * Fetches all records using index calls, as the connector returns them
+	 * @param params The params to pass to the connector's index, which gets a copy of them
+	 * @returns The records, neither deserialized nor cached, and the meta and user meta of the last call
+	 * @remarks RequestBatching loads its batches with it, so each record of a batch can be
+	 *          deserialized for the get that asked for it. Errors are not reported to Sentry here,
+	 *          fetchAll and getRaw report them.
+	 * @see fetchAll
+	 */
+	public async fetchAllRaw(
+		params?: ModelFetchAllParams,
+	): Promise<
+		[records: Record<string, unknown>[], meta: ResponseMeta, userMeta?: unknown]
+	> {
 		let page = 1;
 		let perPage = 1000;
 		let perPageDefault = true;
@@ -892,11 +929,15 @@ class Model<
 		const records: Record<string, unknown>[] = [];
 
 		while (true) {
-			const [tRecords, tMeta, tUserMeta] = await this.index({
-				...params,
-				rows: perPage,
-				page,
-			});
+			// a copy, so what the connector changes doesn't reach the caller's params (or the cache keys holding them)
+			const [tRecords, tMeta, tUserMeta] = await this.connector.index(
+				deepClone({
+					...params,
+					rows: perPage,
+					page,
+				}),
+				this.asModelUnknown,
+			);
 			// save data
 			records.push(...tRecords);
 			meta = tMeta;
@@ -914,7 +955,7 @@ class Model<
 			if (records.length >= totalRows || tRecords.length === 0) break;
 		}
 
-		return [this.asRecords(records), meta, userMeta];
+		return [records, meta, userMeta];
 	}
 
 	/**
@@ -945,6 +986,34 @@ class Model<
 			batch ? (this.cacheKeysIndex ?? []) : null,
 			this.cacheKeys,
 		];
+	}
+
+	/**
+	 * Gets the react-query cache key of a record as getCached and useModelGet load it
+	 * @param id The record id
+	 * @param options The options of the get
+	 * @returns getReactQueryKey(id, batch). A batch that comes from enableRequestBatching alone
+	 *          (options.batch not set) holds the record deserialized for edit, not for overview,
+	 *          so its key is getReactQueryKey(id, true) followed by "edit".
+	 */
+	public getReactQueryKeyGet(
+		id: string | null,
+		options?: ModelGetOptions,
+	): QueryKey {
+		const key = this.getReactQueryKey(
+			id,
+			options?.batch ?? this.requestBatchingEnabled,
+		);
+		return this.isGetBatchedForEdit(options) ? [...key, "edit"] : key;
+	}
+
+	/**
+	 * Does a get with these options load a batched record that stands in for a show?
+	 * @param options The options of the get
+	 * @returns true if the model's enableRequestBatching batches it, not options.batch
+	 */
+	private isGetBatchedForEdit(options: ModelGetOptions | undefined): boolean {
+		return options?.batch === undefined && this.requestBatchingEnabled;
 	}
 
 	/**
@@ -1070,10 +1139,7 @@ class Model<
 		options?: ModelGetOptions,
 	): Promise<ModelGetResponse<this>> {
 		return ModelDataStore.fetchQuery({
-			queryKey: this.getReactQueryKey(
-				id,
-				options?.batch ?? this.requestBatchingEnabled,
-			),
+			queryKey: this.getReactQueryKeyGet(id, options),
 			queryFn: () => this.getRaw(id, options),
 			...this.cacheOptions,
 		});
@@ -1094,7 +1160,11 @@ class Model<
 			const batch = options?.batch ?? this.requestBatchingEnabled;
 
 			if (batch) {
-				const rawData = await RequestBatching.get(id, this.asModelUnknown);
+				const rawData = await RequestBatching.get(
+					id,
+					this.asModelUnknown,
+					this.isGetBatchedForEdit(options) ? "edit" : "overview",
+				);
 				return [this.asRecord(rawData), {}];
 			} else {
 				const rawData = await this.connector.read(id, this.asModelUnknown);
