@@ -5,16 +5,30 @@ import json
 import requests
 import csv
 import io
+import sys
 
 # cldr-json packages (https://github.com/unicode-org/cldr-json)
 CLDR_LOCALENAMES = "../node_modules/cldr-localenames-full/main/"
 CLDR_NUMBERS = "../node_modules/cldr-numbers-full/main/"
 CLDR_CORE = "../node_modules/cldr-core/supplemental/"
 
+FLAG_DIR = "../src/assets/img/countries/"
+
+# true if the country's flag is on disk; an empty file (what older versions of this script
+# wrote for a failed download) counts as missing
+def has_flag(country_code: str) -> bool:
+    path = FLAG_DIR + country_code + ".svg"
+    return os.path.isfile(path) and os.path.getsize(path) > 0
+
+# codes whose flag download failed in this run, not requested again before the next run
+failed_flag_downloads = set()
+
+# downloads the flags that are not on disk. A failed download writes no file, so the next run
+# tries again; until then the code stays out of the CountryFlags map (see the end of main)
 def download_flags(country_list: [str]):
     for country_code in country_list:
-        dl_path = "../src/assets/img/countries/" + country_code + ".svg"
-        if os.path.isfile(dl_path):
+        dl_path = FLAG_DIR + country_code + ".svg"
+        if has_flag(country_code) or country_code in failed_flag_downloads:
             continue
         print("Downloading country flag", country_code)
         r = requests.get("https://raw.githubusercontent.com/smucode/react-world-flags/master/src/svgs/" + country_code.lower() + ".svg")
@@ -23,9 +37,8 @@ def download_flags(country_list: [str]):
                 f.write(r.content)
                 f.flush()
         else:
-            print("ERROR:", r)
-            open(dl_path, "wb").close() # create file so we don't try downloading again
-            # raise ValueError("Response is not okay!")
+            print("ERROR: could not download the flag of", country_code + ":", r)
+            failed_flag_downloads.add(country_code)
 
 # returns country_code -> language array
 def get_country_languages() -> dict[str, [str]]:
@@ -325,8 +338,14 @@ if __name__ == "__main__":
             locale_switcher_countries = [locale.split("-")[1] for locale in locale_switcher_data.keys()]
             download_flags(locale_switcher_countries)
             flag_countries.update(locale_switcher_countries)
-    write_country_flags(sorted(flag_countries))
+    # a code without a flag file stays out of the map (an import of a missing file breaks the
+    # build, an empty one renders nothing) and fails the run once every file is written
+    missing_flags = sorted(code for code in flag_countries if not has_flag(code))
+    write_country_flags(sorted(flag_countries.difference(missing_flags)))
     supported_locales = list(supported_locales)
     supported_locales.sort()
     with open("../src/assets/data/supported-locales.json", "w") as f:
         json.dump(supported_locales, f, indent=2, ensure_ascii=False)
+    if missing_flags:
+        sys.exit("ERROR: no flag for " + ", ".join(missing_flags) + ", left out of CountryFlags."
+                 " Run the script again to retry the download, or add the SVG to src/assets/img/countries/.")
