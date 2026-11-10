@@ -91,6 +91,12 @@ const entryLabels = () =>
 			(button.getAttribute("aria-label") ?? "").replace(/^Remove /, ""),
 		);
 
+/** a row's left and right padding in px */
+const rowGutters = (row: Element) => {
+	const style = getComputedStyle(row);
+	return [parseFloat(style.paddingLeft), parseFloat(style.paddingRight)];
+};
+
 type HostProps = Partial<
 	Omit<MultiSelectProps<MultiSelectorData>, "selected" | "onSelect">
 > & {
@@ -257,5 +263,51 @@ describe("MultiSelect bugs", () => {
 			"LI",
 		]);
 		expect(list.querySelectorAll("li > hr")).toHaveLength(1);
+	});
+	it("[ISSUE-3459-ITEM-1] gives the rows of entries with and without onClick the same 8px gutters", async () => {
+		renderUi(
+			<Host
+				initial={[{ ...APPLE, onClick: () => {} }, BANANA]}
+				classes={{ selectedEntry: "entries" }}
+			/>,
+		);
+		await flush();
+		const box = document.querySelector(".entries");
+		if (!(box instanceof HTMLElement)) throw new Error("no entries box");
+		const rows = within(box)
+			.getAllByRole("listitem")
+			.map((item) => item.firstElementChild!);
+		expect(rows[0]).toHaveRole("button");
+		expect(rows[1]).not.toHaveRole("button");
+		expect(rows.map(rowGutters)).toEqual([
+			[8, 8],
+			[8, 8],
+		]);
+	});
+	it("[ISSUE-3459-ITEM-1] lets a theme override of the selected slot set the row's gutters", async () => {
+		const theme = createTheme({
+			components: {
+				CcMultiSelectEntry: {
+					styleOverrides: { selected: { paddingLeft: 24, paddingRight: 24 } },
+				},
+			},
+		});
+		renderUi(
+			<Host
+				initial={[{ ...APPLE, onClick: () => {} }, BANANA]}
+				classes={{ selectedEntry: "entries" }}
+			/>,
+			theme,
+		);
+		await flush();
+		const box = document.querySelector(".entries");
+		if (!(box instanceof HTMLElement)) throw new Error("no entries box");
+		const rows = within(box)
+			.getAllByRole("listitem")
+			.map((item) => item.firstElementChild!);
+		expect(rows.map(rowGutters)).toEqual([
+			[24, 24],
+			[24, 24],
+		]);
 	});
 });

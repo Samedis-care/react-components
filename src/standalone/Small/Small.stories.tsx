@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { List, ListItemText } from "@mui/material";
+import { List, ListItem, ListItemText } from "@mui/material";
 import {
 	Delete as DeleteIcon,
 	Home as HomeIcon,
@@ -82,6 +82,52 @@ export const SmallListItems: SmallIconButtonStory = {
 			</SelectorSmallListItemButton>
 		</List>
 	),
+};
+
+export const Issue3459Item1ListItemGutters: SmallIconButtonStory = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3459-ITEM-1: `SmallListItem` and `SmallListItemButton` have 8px left and right gutters, the Selector variants none on the left and 8px on the right; MUI's own list items have 16px.",
+			},
+		},
+	},
+	render: () => (
+		<List sx={{ width: 320 }}>
+			<SmallListItem>
+				<ListItemText primary="SmallListItem" />
+			</SmallListItem>
+			<ListItem disablePadding>
+				<SmallListItemButton>
+					<ListItemText primary="SmallListItemButton" />
+				</SmallListItemButton>
+			</ListItem>
+			<SelectorSmallListItem>
+				<ListItemText primary="SelectorSmallListItem" />
+			</SelectorSmallListItem>
+			<ListItem disablePadding>
+				<SelectorSmallListItemButton>
+					<ListItemText primary="SelectorSmallListItemButton" />
+				</SelectorSmallListItemButton>
+			</ListItem>
+		</List>
+	),
+	play: async ({ canvas }) => {
+		// where the text starts and ends inside the row, in px
+		const inset = (name: string) => {
+			const text = canvas.getByText(name);
+			const row = text.closest(".MuiListItem-root, .MuiListItemButton-root")!;
+			const rowBox = row.getBoundingClientRect();
+			const textBox = text.parentElement!.getBoundingClientRect();
+			return [textBox.left - rowBox.left, rowBox.right - textBox.right];
+		};
+		await expect(inset("SmallListItem")).toEqual([8, 8]);
+		await expect(inset("SmallListItemButton")).toEqual([8, 8]);
+		await expect(inset("SelectorSmallListItem")).toEqual([0, 8]);
+		await expect(inset("SelectorSmallListItemButton")).toEqual([0, 8]);
+	},
 };
 
 interface KeyboardDemoProps {
