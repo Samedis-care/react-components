@@ -156,3 +156,81 @@ export const Issue3459Item8SmallIconButtonShowsFocusRing: StoryObj<
 		await expect(style.outlineColor).not.toBe("rgba(0, 0, 0, 0)");
 	},
 };
+
+export const Issue3459Item13SmallestIconButtonTargetSize: SmallIconButtonStory =
+	{
+		parameters: {
+			a11y: {
+				test: "error",
+				// target-size (WCAG 2.5.8) is off in axe by default
+				options: { runOnly: { type: "rule", values: ["target-size"] } },
+			},
+			docs: {
+				description: {
+					story:
+						"ISSUE-3459-ITEM-13: with small icons, `SmallestIconButton`s are 20x20 and closer together than 24px (axe `target-size`).",
+				},
+			},
+		},
+		render: () => (
+			<div style={{ display: "flex", alignItems: "center" }}>
+				<SmallestIconButton aria-label={"Edit filter"}>
+					<TuneIcon fontSize={"small"} />
+				</SmallestIconButton>
+				<SmallestIconButton aria-label={"Delete filter"}>
+					<DeleteIcon fontSize={"small"} />
+				</SmallestIconButton>
+			</div>
+		),
+	};
+
+export const Issue3459Item13SmallestIconButtonMinimumSize: SmallIconButtonStory =
+	{
+		parameters: {
+			a11y: { test: "error" },
+			docs: {
+				description: {
+					story:
+						"ISSUE-3459-ITEM-13: a `SmallestIconButton` is at least 24x24, with the icon centered in it; a default or larger icon sets the size itself.",
+				},
+			},
+		},
+		render: () => (
+			<div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+				<SmallestIconButton aria-label={"Default"}>
+					<HomeIcon />
+				</SmallestIconButton>
+				<SmallestIconButton aria-label={"Small"}>
+					<HomeIcon fontSize={"small"} />
+				</SmallestIconButton>
+				<SmallestIconButton aria-label={"Inherit (size small)"} size={"small"}>
+					<HomeIcon fontSize={"inherit"} />
+				</SmallestIconButton>
+				<SmallestIconButton aria-label={"14px"}>
+					<HomeIcon sx={{ fontSize: 14 }} />
+				</SmallestIconButton>
+				<SmallestIconButton aria-label={"Large"}>
+					<HomeIcon fontSize={"large"} />
+				</SmallestIconButton>
+			</div>
+		),
+		play: async ({ canvas }) => {
+			const box = (name: string) => {
+				const rect = canvas
+					.getByRole("button", { name })
+					.getBoundingClientRect();
+				return [rect.width, rect.height];
+			};
+			await expect(box("Default")).toEqual([24, 24]);
+			await expect(box("Small")).toEqual([24, 24]);
+			await expect(box("Inherit (size small)")).toEqual([24, 24]);
+			await expect(box("14px")).toEqual([24, 24]);
+			await expect(box("Large")).toEqual([35, 35]);
+			// the icon is centered in the larger box
+			const button = canvas.getByRole("button", { name: "14px" });
+			const icon = button.querySelector("svg")!.getBoundingClientRect();
+			const outer = button.getBoundingClientRect();
+			await expect(icon.left - outer.left).toBe(outer.right - icon.right);
+			await expect(icon.top - outer.top).toBe(outer.bottom - icon.bottom);
+		},
+	};

@@ -27,6 +27,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-10 | [PopupMenu is flat by default](2026-11-10-popup-menu-flat-by-default.md) | behavior |
 | 2026-11-10 | [useCountryOptions gives each country a CountryFlag as its icon](2026-11-10-country-options-icon-is-country-flag.md) | type, behavior |
 | 2026-11-10 | [LocaleSelectorEntry shows its flag as a CountryFlag: the theme slot flag replaces imageWrapper and image](2026-11-10-locale-selector-entry-country-flag.md) | type, behavior |
+| 2026-11-10 | [SmallestIconButton is at least 24x24](2026-11-10-smallest-icon-button-minimum-target.md) | behavior |
 | 2026-11-10 | [The Loader's progressbar is named by its text, or "Loading…"](2026-11-10-loader-progressbar-named.md) | behavior |
 | 2026-11-10 | [MobileScalingFix keeps the page's other viewport directives](2026-11-10-mobile-scaling-fix-keeps-viewport-directives.md) | behavior |
 | 2026-11-10 | [CountryFlags has no prototype: names of Object.prototype are not flags](2026-11-10-country-flags-no-prototype.md) | behavior |
