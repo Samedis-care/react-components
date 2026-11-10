@@ -29,6 +29,8 @@ export default meta;
 
 type Story = StoryObj<typeof Loader>;
 
+const MOBILE = { viewport: { value: "mobile1", isRotated: false } };
+
 const rectOf = (el: Element) => el.getBoundingClientRect();
 
 /**
@@ -190,5 +192,29 @@ export const Issue3461Item5AddsNoScrollRegionToDialogContent: Story = {
 	),
 	play: async () => {
 		await within(document.body).findByRole("progressbar");
+	},
+};
+
+export const Issue3461Item6LongWordWrapsOnPhone: Story = {
+	globals: MOBILE,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3461-ITEM-6: a status text with a long compound word does not wrap, so at 320px the page scrolls horizontally.",
+			},
+		},
+	},
+	render: () => (
+		<Box sx={{ height: 160 }}>
+			<Loader text={"Medizinproduktebetreiberverordnungsprüfung läuft"} />
+		</Box>
+	),
+	play: async ({ canvasElement }) => {
+		const text = within(canvasElement).getByText(/Medizinprodukte/);
+		await expect(text.scrollWidth).toBeLessThanOrEqual(text.clientWidth);
+		await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+			window.innerWidth,
+		);
 	},
 };

@@ -9,7 +9,9 @@ import {
 
 export interface LoaderProps {
 	/**
-	 * Optional status message to show
+	 * Optional status message to show. It wraps to the Loader's width, also
+	 * inside a word that is wider than that, so a long translated word does
+	 * not make the page scroll sideways.
 	 */
 	text?: string;
 	/**
@@ -62,6 +64,9 @@ const InnerWrapper = styled("div", { name: "CcLoader", slot: "innerWrapper" })(
 		display: "flex",
 		flexDirection: "column",
 		gap: theme.spacing(1),
+		// a word wider than the Loader (a German compound on a phone) breaks
+		// inside, and does not widen the Loader or the page
+		overflowWrap: "anywhere",
 		padding: theme.spacing(2, 0),
 		textAlign: "center",
 		width: "100%",
@@ -83,7 +88,9 @@ const Progress = styled(CircularProgress, {
  *   `typographyVariant` `"h6"` when it is not set.
  * - `innerWrapper`: the block of text and spinner: a flex column that
  *   centers them horizontally, with `theme.spacing(1)` between them and
- *   `theme.spacing(2)` of padding above and below
+ *   `theme.spacing(2)` of padding above and below. It sets
+ *   `overflow-wrap: anywhere`, so the text breaks inside a word that is wider
+ *   than the Loader.
  * - `progress`: the MUI `CircularProgress`
  */
 export type LoaderClassKey = "root" | "innerWrapper" | "progress";
