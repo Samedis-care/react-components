@@ -7,6 +7,7 @@ export * from "./Schedule";
 export * from "./Selector";
 export * from "./Small";
 export * from "./PopupMenu";
+export { default as PopupMenu } from "./PopupMenu";
 export * from "./GroupBox";
 export { default as GroupBox } from "./GroupBox";
 export * from "./DataGrid";
