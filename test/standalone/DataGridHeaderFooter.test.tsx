@@ -20,6 +20,7 @@ import {
 import { createTheme, ThemeProvider } from "@mui/material";
 import { Refresh, Tune } from "@mui/icons-material";
 import type { SvgIconComponent } from "@mui/icons-material";
+import { computeAccessibleName } from "dom-accessibility-api";
 import ccI18n from "../../src/i18n";
 import DataGrid, {
 	DataGridData,
@@ -621,5 +622,135 @@ describe("header action bar icons", () => {
 		const reset = screen.getByRole("menuitem", { name: "Reset" });
 		expect(glyphOf(columns.querySelector("svg"))).toEqual(tune);
 		expect(glyphOf(reset.querySelector("svg"))).toEqual(refresh);
+	});
+});
+
+/**
+ * What assistive technology learns from a button that opens a menu, before and
+ * while the menu is open: the button says that it opens a menu, aria-expanded
+ * follows the menu, aria-controls is the menu's id while it is open, and the
+ * menu is named by the button
+ * @param trigger The button that opens the menu
+ * @param item The name of an item of that menu
+ */
+const menuButtonState = async (trigger: HTMLElement, item: string) => {
+	const attributes = () => ({
+		"aria-haspopup": trigger.getAttribute("aria-haspopup"),
+		"aria-expanded": trigger.getAttribute("aria-expanded"),
+	});
+	const closed = {
+		...attributes(),
+		"aria-controls": trigger.getAttribute("aria-controls"),
+	};
+	fireEvent.click(trigger);
+	const menu = (await screen.findByRole("menuitem", { name: item })).closest(
+		"[role='menu']",
+	)!;
+	return {
+		closed,
+		open: {
+			...attributes(),
+			"aria-controls is the menu's id":
+				menu.id !== "" && trigger.getAttribute("aria-controls") === menu.id,
+			"the menu's name": computeAccessibleName(menu),
+		},
+	};
+};
+
+const menuButtonExpected = (name: string) => ({
+	closed: {
+		"aria-haspopup": "menu",
+		"aria-expanded": "false",
+		"aria-controls": null,
+	},
+	open: {
+		"aria-haspopup": "menu",
+		"aria-expanded": "true",
+		"aria-controls is the menu's id": true,
+		"the menu's name": name,
+	},
+});
+
+const customActions: DataGridProps["customDataActionButtons"] = [
+	{
+		icon: <Tune />,
+		label: "Archive",
+		isDisabled: () => false,
+		onClick: () => {},
+	},
+	{
+		icon: <Refresh />,
+		label: "Copy",
+		isDisabled: () => false,
+		onClick: () => {},
+	},
+];
+
+describe("menu buttons", () => {
+	it.each([
+		["a wide screen", "Reset", 1200, "Refresh"],
+		["a wide screen", "Export", 1200, "Excel"],
+		["a tablet", "Reset", 700, "Refresh"],
+		["a tablet", "Export", 700, "Excel"],
+	])(
+		"[ISSUE-3459-ITEM-11] on %s the %s button announces its menu and names it",
+		async (_screen, trigger, width, item) => {
+			stubViewport(width);
+			render(<Grid exporters={[makeExporter()]} />);
+			await idle();
+			expect(
+				await menuButtonState(
+					screen.getByRole("button", { name: trigger }),
+					item,
+				),
+			).toEqual(menuButtonExpected(trigger));
+		},
+	);
+
+	it("[ISSUE-3459-ITEM-11] on a phone with a filter bar, More options announces its menu and names it", async () => {
+		stubViewport(320);
+		render(<Grid exporters={[makeExporter()]} />);
+		await idle();
+		expect(
+			await menuButtonState(
+				screen.getByRole("button", { name: "More options" }),
+				"Columns",
+			),
+		).toEqual(menuButtonExpected("More options"));
+		// its Reset and Export entries open menus, Columns does not
+		expect(
+			["Columns", "Reset", "Export"].map((name) =>
+				screen.getByRole("menuitem", { name }).getAttribute("aria-haspopup"),
+			),
+		).toEqual([null, "menu", "menu"]);
+	});
+
+	it.each([
+		["Reset", "Refresh"],
+		["Export", "Excel"],
+	])(
+		"[ISSUE-3459-ITEM-11] on a phone with a filter bar, the %s menu opened from More options is named after its entry",
+		async (entry, item) => {
+			stubViewport(320);
+			render(<Grid exporters={[makeExporter()]} />);
+			await idle();
+			await openMenu("More options", entry);
+			const menu = (
+				await screen.findByRole("menuitem", { name: item })
+			).closest("[role='menu']")!;
+			expect(computeAccessibleName(menu)).toBe(entry);
+		},
+	);
+
+	it("[ISSUE-3459-ITEM-11] on a phone the footer's More announces its menu and names it", async () => {
+		stubViewport(320);
+		render(<Grid customDataActionButtons={customActions} />);
+		await idle();
+		expect(
+			await menuButtonState(
+				screen.getByRole("button", { name: "More" }),
+				"Archive",
+			),
+		).toEqual(menuButtonExpected("More"));
 	});
 });

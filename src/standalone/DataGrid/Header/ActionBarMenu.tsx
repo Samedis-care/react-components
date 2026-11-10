@@ -1,7 +1,8 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
 	ListItemIcon,
 	MenuItem,
+	MenuItemProps,
 	MenuProps,
 	PopoverOrigin,
 } from "@mui/material";
@@ -14,6 +15,25 @@ import {
 import PopupMenu from "../../PopupMenu";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
+/**
+ * The props of the "More options" menu's slots: MUI Menu's `slotProps`, and
+ * the "Reset" and "Export" entries
+ */
+export interface ActionBarMenuSlotProps extends NonNullable<
+	MenuProps["slotProps"]
+> {
+	/**
+	 * The props of the "Reset" entry, which opens the reset menu (see
+	 * useMenuButton)
+	 */
+	resetItem?: Partial<MenuItemProps>;
+	/**
+	 * The props of the "Export" entry, which opens the export menu (see
+	 * useMenuButton)
+	 */
+	exportItem?: Partial<MenuItemProps>;
+}
+
 export interface ActionBarMenuProps {
 	anchorEl: MenuProps["anchorEl"];
 	toggleSettings?: (evt: React.MouseEvent) => void;
@@ -21,6 +41,13 @@ export interface ActionBarMenuProps {
 	openExportMenu?: (evt: React.MouseEvent) => void;
 	handleImport?: (evt: React.MouseEvent) => void;
 	onClose: () => void;
+	/**
+	 * The props of the slots: the menu's (MUI Menu's `slotProps`; `list` gives
+	 * the menu an id and names it by its button) and of the "Reset" and
+	 * "Export" entries, which open the reset and export menus and name them
+	 * (see useMenuButton)
+	 */
+	slotProps?: ActionBarMenuSlotProps;
 }
 
 const anchorOrigin: PopoverOrigin = {
@@ -41,7 +68,15 @@ const ActionBarMenu = (props: ActionBarMenuProps) => {
 		openResetDialog,
 		openExportMenu,
 		handleImport,
+		slotProps,
 	} = props;
+	const menuSlotProps = useMemo((): MenuProps["slotProps"] => {
+		if (!slotProps) return undefined;
+		// the entries are not slots of the Menu
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { resetItem, exportItem, ...menuSlots } = slotProps;
+		return menuSlots;
+	}, [slotProps]);
 	const toggleSettingsWrap = useCallback(
 		(evt: React.MouseEvent) => {
 			if (toggleSettings) toggleSettings(evt);
@@ -80,6 +115,7 @@ const ActionBarMenu = (props: ActionBarMenuProps) => {
 			keepMounted
 			open={!!anchorEl}
 			onClose={onClose}
+			slotProps={menuSlotProps}
 		>
 			{toggleSettings && (
 				<MenuItem onClick={toggleSettingsWrap}>
@@ -90,7 +126,7 @@ const ActionBarMenu = (props: ActionBarMenuProps) => {
 				</MenuItem>
 			)}
 			{openResetDialog && (
-				<MenuItem onClick={openResetDialogWrap}>
+				<MenuItem {...slotProps?.resetItem} onClick={openResetDialogWrap}>
 					<ListItemIcon>
 						<RefreshIcon fontSize={"small"} />
 					</ListItemIcon>
@@ -98,7 +134,7 @@ const ActionBarMenu = (props: ActionBarMenuProps) => {
 				</MenuItem>
 			)}
 			{openExportMenu && (
-				<MenuItem onClick={openExportMenuWrap}>
+				<MenuItem {...slotProps?.exportItem} onClick={openExportMenuWrap}>
 					<ListItemIcon>
 						<ExportIcon fontSize={"small"} />
 					</ListItemIcon>

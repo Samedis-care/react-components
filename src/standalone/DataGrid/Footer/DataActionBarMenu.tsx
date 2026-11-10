@@ -16,6 +16,11 @@ export interface DataActionBarMenuProps {
 	numSelected: 0 | 1 | 2;
 	selectAll: boolean;
 	handleCustomButtonClick: (label: string) => void;
+	/**
+	 * The props of the menu's slots, MUI Menu's `slotProps`; `list` gives the
+	 * menu an id and names it by the element that opened it (see useMenuButton)
+	 */
+	slotProps?: MenuProps["slotProps"];
 }
 
 const anchorOrigin: PopoverOrigin = {
@@ -36,6 +41,7 @@ const DataActionBarMenu = (props: DataActionBarMenuProps) => {
 		numSelected,
 		selectAll,
 		handleCustomButtonClick,
+		slotProps,
 	} = props;
 	return (
 		<PopupMenu
@@ -46,6 +52,7 @@ const DataActionBarMenu = (props: DataActionBarMenuProps) => {
 			keepMounted
 			open={!!anchorEl}
 			onClose={onClose}
+			slotProps={slotProps}
 		>
 			{customButtons.map((entry) => (
 				<MenuItem

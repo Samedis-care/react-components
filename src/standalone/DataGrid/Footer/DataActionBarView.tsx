@@ -24,6 +24,7 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 import DataActionBarMenu from "./DataActionBarMenu";
 import FocusableWhenDisabledIconButton from "./FocusableWhenDisabledIconButton";
 import { dataGridIsCustomDataActionDisabled } from "../CallbackUtil";
+import useMenuButton from "../../../utils/internal/useMenuButton";
 
 export interface DataActionBarViewProps {
 	/**
@@ -91,6 +92,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 	const handleExtendedMenuClose = useCallback(() => {
 		setExtendedMenuAnchor(undefined);
 	}, []);
+	const extendedMenu = useMenuButton(!!extendedMenuAnchor);
 
 	const deleteDisabled =
 		props.numSelected === 0 ||
@@ -188,6 +190,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 						<ComponentWithLabel
 							control={
 								<SmallestIconButton
+									{...extendedMenu.buttonProps}
 									color={"primary"}
 									disabled={allCustomButtonsDisabled}
 									onClick={handleExtendedMenuOpen}
@@ -208,6 +211,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 						onClose={handleExtendedMenuClose}
 						customButtons={props.customButtons}
 						handleCustomButtonClick={props.handleCustomButtonClick}
+						slotProps={extendedMenu.slotProps}
 					/>
 				</React.Fragment>
 			) : (

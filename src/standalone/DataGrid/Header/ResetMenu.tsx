@@ -24,6 +24,11 @@ export interface ResetMenuProps extends ResetCallbacks {
 	 * The menu onClose handler
 	 */
 	onClose: () => void;
+	/**
+	 * The props of the menu's slots, MUI Menu's `slotProps`; `list` gives the
+	 * menu an id and names it by the element that opened it (see useMenuButton)
+	 */
+	slotProps?: MenuProps["slotProps"];
 }
 
 const anchorOrigin: PopoverOrigin = {
@@ -47,6 +52,7 @@ const ResetMenu = (props: ResetMenuProps) => {
 		resetColumn,
 		resetWidth,
 		resetAll,
+		slotProps,
 	} = props;
 
 	const refreshAndClose = useCallback(() => {
@@ -83,6 +89,7 @@ const ResetMenu = (props: ResetMenuProps) => {
 			keepMounted
 			open={!!anchorEl}
 			onClose={onClose}
+			slotProps={slotProps}
 		>
 			<MenuItem onClick={refreshAndClose}>
 				{t("standalone.data-grid.header.reset-options.refresh")}

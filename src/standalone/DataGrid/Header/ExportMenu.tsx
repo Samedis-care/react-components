@@ -17,6 +17,11 @@ export interface IDataGridExportMenuProps {
 	 * The menu onClose handler
 	 */
 	onClose: NonNullable<MenuProps["onClose"]>;
+	/**
+	 * The props of the menu's slots, MUI Menu's `slotProps`; `list` gives the
+	 * menu an id and names it by the element that opened it (see useMenuButton)
+	 */
+	slotProps?: MenuProps["slotProps"];
 }
 
 const anchorOrigin: PopoverOrigin = {
@@ -39,6 +44,7 @@ const ExportMenu = (props: IDataGridExportMenuProps) => {
 			keepMounted
 			open={!!props.anchorEl}
 			onClose={props.onClose}
+			slotProps={props.slotProps}
 		>
 			{props.exporters.map((exporter) => (
 				<ExportMenuEntry

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
 	Grid,
 	IconButton,
@@ -24,7 +24,8 @@ import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
 import { IDataGridAddButton } from "../DataGrid";
 import ResetMenu, { ResetCallbacks } from "./ResetMenu";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import ActionBarMenu from "./ActionBarMenu";
+import ActionBarMenu, { type ActionBarMenuSlotProps } from "./ActionBarMenu";
+import useMenuButton from "../../../utils/internal/useMenuButton";
 
 export interface IDataGridActionBarViewProps extends ResetCallbacks {
 	/**
@@ -124,6 +125,20 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 		setSettingsAnchorEl(undefined);
 	}, []);
 
+	// on phones with a filter bar, the "Reset" and "Export" entries of "More
+	// options" open the reset and export menus instead of the buttons
+	const moreOptionsMenu = useMenuButton(!!settingsAnchorEl);
+	const resetMenu = useMenuButton(!!resetAnchorEl);
+	const exportMenu = useMenuButton(!!exportAnchorEl);
+	const moreOptionsSlotProps = useMemo(
+		(): ActionBarMenuSlotProps => ({
+			...moreOptionsMenu.slotProps,
+			resetItem: resetMenu.buttonProps,
+			exportItem: exportMenu.buttonProps,
+		}),
+		[moreOptionsMenu.slotProps, resetMenu.buttonProps, exportMenu.buttonProps],
+	);
+
 	const addButtons: IDataGridAddButton[] = Array.isArray(handleAddNew)
 		? handleAddNew
 		: handleAddNew == null
@@ -150,6 +165,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 					</Grid>
 					<IconButton
 						ref={moreOptionsRef}
+						{...moreOptionsMenu.buttonProps}
 						color={"primary"}
 						onClick={openSettingsMenu}
 						size="large"
@@ -166,6 +182,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 						}
 						handleImport={handleImport}
 						onClose={closeSettingsMenu}
+						slotProps={moreOptionsSlotProps}
 					/>
 				</>
 			) : (
@@ -217,6 +234,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 									<ComponentWithLabel
 										control={
 											<SmallestIconButton
+												{...resetMenu.buttonProps}
 												color={"primary"}
 												aria-label={t("standalone.data-grid.header.reset")}
 											>
@@ -230,6 +248,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 								) : (
 									<Tooltip title={t("standalone.data-grid.header.reset")}>
 										<IconButton
+											{...resetMenu.buttonProps}
 											color={"primary"}
 											onClick={openResetDialog}
 											size="large"
@@ -252,6 +271,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 									<ComponentWithLabel
 										control={
 											<SmallestIconButton
+												{...exportMenu.buttonProps}
 												color={"primary"}
 												aria-label={t("standalone.data-grid.header.export")}
 											>
@@ -265,6 +285,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 								) : (
 									<Tooltip title={t("standalone.data-grid.header.export")}>
 										<IconButton
+											{...exportMenu.buttonProps}
 											color={"primary"}
 											onClick={openExportMenu}
 											size="large"
@@ -355,11 +376,13 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 					exporters={exporters}
 					anchorEl={exportAnchorEl}
 					onClose={closeExportMenu}
+					slotProps={exportMenu.slotProps}
 				/>
 			)}
 			<ResetMenu
 				anchorEl={resetAnchorEl}
 				onClose={closeResetMenu}
+				slotProps={resetMenu.slotProps}
 				refresh={refresh}
 				resetFilter={resetFilter}
 				resetSort={resetSort}
