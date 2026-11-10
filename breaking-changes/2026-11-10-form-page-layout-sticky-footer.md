@@ -10,21 +10,29 @@
 
 `FormPageLayout`:
 
-- The footer (Save, Back) is `position: sticky` in flow below the body, instead of
-  `position: absolute` against the nearest positioned ancestor. While the body reaches
-  below the visible area, the footer stays 36px above the bottom of the content area of
+- The footer (Save, Back) is `position: sticky` with `bottom: 36px`, in flow at the
+  bottom of the layout, instead of `position: absolute` against the nearest positioned
+  ancestor. It never sits lower than 36px above the bottom of the content area of
   whatever scrolls (a FormDialog's content, a scrolling panel, drawer or main area, or the
-  document), and the body scrolls under it. Scrolled to the end, it rests at the same
-  height below the last field.
+  viewport). While the body reaches below the visible area, the footer stays there and
+  the body scrolls under it. Scrolled to the end, it rests at the same height below the
+  last field.
 - In a FormDialog the footer sits 20px higher than before: 36px above the dialog
   content's bottom padding instead of 36px above the dialog's edge.
-- A form shorter than the visible area has its footer right below its content (30px
-  below the last field), unless the layout is stretched to the height of the area (the
-  root has `flexGrow: 1`, so a flex column parent of definite height stretches it). Before,
-  the footer was at the bottom of the positioned ancestor or of the viewport.
-- The body's 150px bottom padding is gone. The footer has a 30px margin above and a 36px
-  margin below it, so with FormButtons the space below the last field at the end is still
-  150px.
+- The root fills the height of its parent: in a flex column it grows into the space the
+  other children leave (`flex-grow: 1`, as before), and as the only element of its parent
+  it is at least as tall as that parent (`min-height: 100%`, new). The body grows. So on a
+  short form Save stays where it was, at the bottom of the page, 36px above the bottom of
+  the visible area, when the layout's parent reaches down to within 36px of it (a page
+  container that fills the main area, as on IMF's profile and admin pages). A layout that
+  ends higher (in a parent only as tall as its content, next to other content in a block
+  parent, or in a box that does not scroll and ends further up) has its footer at its own
+  bottom edge, where before it was at the bottom of the positioned ancestor or of the
+  viewport.
+- The body's 150px bottom padding is gone. The footer has a 66px margin above it: 30px
+  between the last field and the footer, plus the up to 36px that `bottom: 36px` lifts it
+  by at the bottom of the visible area. With FormButtons the space below the last field is
+  still 150px.
 - The root is `position: relative`. `other`, and absolutely positioned content in the
   body that has no positioned ancestor of its own, is placed against the layout. The busy
   overlay that BasicFormPage passes as `other` covers the form layout, however far it is
@@ -62,12 +70,13 @@ form's center.
   to the nearest ancestor with an `overflow` other than `visible`, and as that one does not
   scroll, the footer stays below the content and scrolls away. Use `overflow: clip` on that
   ancestor instead, which clips the same way without becoming a scroll container.
-- A form page that should keep its footer at the bottom of a taller area when the form is
-  short: stretch the layout, e.g. make its parent a flex column of definite height
-  (`display: flex; flex-direction: column` and a height, or `flex-grow: 1` inside such a
-  column).
+- A form page that shares a block parent with other content (a heading above it, say)
+  does not fill that parent, so a short form has its footer right below its content plus
+  66px: to keep Save at the bottom, make that parent a flex column
+  (`display: flex; flex-direction: column`) or give the layout a parent of its own.
 - Theme overrides: `CcFormPageLayout.styleOverrides.footer` that set `position`, `bottom`
-  or `margin`, and `body` overrides that relied on the 150px padding, need a review.
+  or `margin`, `root` overrides that set `min-height` or `flex-shrink`, and `body`
+  overrides that relied on the 150px padding, need a review.
   `CcFormLoaderOverlay.styleOverrides.root` that sets `display` or `padding` changes where
   the spinner sits.
 - Replacement layouts set through `CcBasicFormPage.defaultProps.formPageLayoutComponent`

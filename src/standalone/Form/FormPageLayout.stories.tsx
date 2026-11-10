@@ -1,12 +1,14 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
+	Alert,
 	Box,
 	Button,
 	Dialog,
 	DialogContent,
 	DialogTitle,
 	Grid,
+	Paper,
 	TextField,
 	Typography,
 } from "@mui/material";
@@ -33,7 +35,7 @@ export const Default: Story = {
 	render: () => (
 		<Box
 			sx={{
-				position: "relative",
+				overflowY: "auto",
 				width: 500,
 				height: 400,
 				border: "1px solid #ccc",
@@ -67,7 +69,7 @@ export const WithOther: Story = {
 	render: () => (
 		<Box
 			sx={{
-				position: "relative",
+				overflowY: "auto",
 				width: 500,
 				height: 400,
 				border: "1px solid #ccc",
@@ -275,13 +277,6 @@ export const Issue3473Item1FooterAboveRaisedBodyContent: Story = {
 
 export const Issue3473Item2FooterAndOverlayStayInScrollingPanel: Story = {
 	parameters: {
-		a11y: {
-			config: {
-				// the busy overlay's spinner has no accessible name yet, a known defect of
-				// the overlay; drop this line once it has one
-				rules: [{ id: "aria-progressbar-name", enabled: false }],
-			},
-		},
 		docs: {
 			description: {
 				story:
@@ -340,13 +335,6 @@ const progressbarIn = (scope: ParentNode) => {
 
 export const Issue3473Item2SaveAndSpinnerStayInViewWhileScrolling: Story = {
 	parameters: {
-		a11y: {
-			config: {
-				// the busy overlay's spinner has no accessible name yet, a known defect of
-				// the overlay; drop this line once it has one
-				rules: [{ id: "aria-progressbar-name", enabled: false }],
-			},
-		},
 		docs: {
 			description: {
 				story:
@@ -403,13 +391,6 @@ export const Issue3473Item2SaveAndSpinnerStayInViewWhileScrolling: Story = {
 export const Issue3473Item2FooterAndOverlayFollowDocumentScroll: Story = {
 	parameters: {
 		layout: "fullscreen",
-		a11y: {
-			config: {
-				// the busy overlay's spinner has no accessible name yet, a known defect of
-				// the overlay; drop this line once it has one
-				rules: [{ id: "aria-progressbar-name", enabled: false }],
-			},
-		},
 		docs: {
 			description: {
 				story:
@@ -479,5 +460,127 @@ export const Issue3473Item2FooterStaysPutInDialog: Story = {
 			.closest(".MuiFormControl-root");
 		if (!lastField) throw new Error("the last field is not a FormControl");
 		await expect(rectOf(lastField).bottom).toBeLessThanOrEqual(after.top);
+	},
+};
+
+/**
+ * An app shell like IMF's: a header and a main area that scrolls, with no positioned
+ * ancestor, filling the viewport.
+ */
+const AppShell = ({ children }: { children: React.ReactNode }) => (
+	<Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+		<Box
+			data-testid={"header"}
+			sx={{ height: 64, flex: "none", bgcolor: "primary.main" }}
+		/>
+		<Box
+			data-testid={"main"}
+			sx={{
+				flex: 1,
+				minHeight: 0,
+				overflow: "auto",
+				display: "flex",
+				flexDirection: "column",
+			}}
+		>
+			{children}
+		</Box>
+	</Box>
+);
+
+const paddingOf = (el: Element) => {
+	const style = getComputedStyle(el);
+	return {
+		top: parseFloat(style.paddingTop),
+		bottom: parseFloat(style.paddingBottom),
+	};
+};
+
+export const Issue3473Item2ShortFormSaveAtBottomOfPage: Story = {
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-2: a short form in an app shell like IMF's profile page: the main area scrolls, a page container (a Paper) fills it, and the form page's parent fills the Paper (`height: 100%`, with padding). The layout fills its parent, so Save sits at the bottom of the page, 36px above the bottom of the main area, not right below the fields, and the busy overlay covers the parent's content area.",
+			},
+		},
+	},
+	render: () => (
+		<AppShell>
+			<Box sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}>
+				<Paper sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+					<Box data-testid={"page"} sx={{ height: "100%", p: 2 }}>
+						<FormPageLayout
+							body={<Fields count={3} />}
+							footer={<SaveBackButtons />}
+							other={<FormLoaderOverlay visible />}
+						/>
+					</Box>
+				</Paper>
+			</Box>
+		</AppShell>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const mainEl = canvas.getByTestId("main");
+		const pageEl = canvas.getByTestId("page");
+		await nextFrame();
+		// the form is short: nothing scrolls
+		await expect(mainEl.scrollHeight).toBeLessThanOrEqual(mainEl.clientHeight);
+		const EPS = 1;
+		const main = rectOf(mainEl);
+		const footer = rectOf(buttonBar(pageEl));
+		await expect(distance(footer.bottom, main.bottom - 36)).toBeLessThanOrEqual(
+			EPS,
+		);
+		// the busy overlay covers the content area of the layout's parent
+		const page = rectOf(pageEl);
+		const padding = paddingOf(pageEl);
+		const overlay = rectOf(overlayIn(pageEl));
+		await expect(
+			distance(overlay.top, page.top + padding.top),
+		).toBeLessThanOrEqual(EPS);
+		await expect(
+			distance(overlay.bottom, page.bottom - padding.bottom),
+		).toBeLessThanOrEqual(EPS);
+	},
+};
+
+export const Issue3473Item2ShortFormSaveAtBottomOfFlexColumn: Story = {
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-2: a short form page in a flex column that it shares with other content, like the form element of IMF's admin pages (`min-height: 100%`) with an error above the page. The layout takes the height the error leaves: Save sits 36px above the bottom of the main area, and the main area does not scroll.",
+			},
+		},
+	},
+	render: () => (
+		<AppShell>
+			<Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+				<Box
+					sx={{ minHeight: "100%", display: "flex", flexDirection: "column" }}
+				>
+					<Alert severity={"error"}>The record could not be saved.</Alert>
+					<FormPageLayout
+						body={<Fields count={3} />}
+						footer={<SaveBackButtons />}
+						other={<FormLoaderOverlay visible={false} />}
+					/>
+				</Box>
+			</Box>
+		</AppShell>
+	),
+	play: async ({ canvasElement }) => {
+		const mainEl = within(canvasElement).getByTestId("main");
+		await nextFrame();
+		await expect(mainEl.scrollHeight).toBeLessThanOrEqual(mainEl.clientHeight);
+		const main = rectOf(mainEl);
+		const footer = rectOf(buttonBar(mainEl));
+		await expect(distance(footer.bottom, main.bottom - 36)).toBeLessThanOrEqual(
+			1,
+		);
 	},
 };
