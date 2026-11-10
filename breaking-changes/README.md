@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-10 | [FilterIcon, SignIcon and ExportIcon take a caller's viewBox](2026-11-10-icons-take-a-callers-viewbox.md) | behavior |
 | 2026-11-10 | [A line break in a HowToBox entry starts a new line](2026-11-10-how-to-box-line-breaks-in-entries.md) | behavior |
 | 2026-11-10 | [InfiniteScroll calls the latest callbacks, and drops a bottom call the list no longer needs](2026-11-10-infinite-scroll-calls-latest-callbacks.md) | behavior |
 | 2026-11-10 | [A record batched by enableRequestBatching is deserialized for edit](2026-11-10-model-batched-get-deserialized-for-edit.md) | behavior |
