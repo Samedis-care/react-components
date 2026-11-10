@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-10 | [The Loader is a status region](2026-11-10-loader-status-region.md) | behavior |
 | 2026-11-10 | [The Loader's progressbar is named by its text, or "Loading…"](2026-11-10-loader-progressbar-named.md) | behavior |
 | 2026-11-10 | [MobileScalingFix keeps the page's other viewport directives](2026-11-10-mobile-scaling-fix-keeps-viewport-directives.md) | behavior |
 | 2026-11-10 | [CountryFlags has no prototype: names of Object.prototype are not flags](2026-11-10-country-flags-no-prototype.md) | behavior |

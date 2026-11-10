@@ -15,9 +15,9 @@ import ccI18n from "../../i18n";
 /**
  * Props of {@link Loader}. Besides its own props, the Loader takes the HTML
  * attributes of a `div` (`id`, `style`, `data-*`, `aria-*`, event handlers,
- * ...) and passes them to its `root` slot, except `aria-label` and
- * `aria-labelledby`, which name the spinner's progressbar instead of `text`
- * or the default name.
+ * ...) and passes them to its `root` slot, the status region, except
+ * `aria-label` and `aria-labelledby`, which name the spinner's progressbar
+ * instead of `text` or the default name.
  */
 export interface LoaderProps extends Omit<
 	React.HTMLAttributes<HTMLDivElement>,
@@ -29,7 +29,9 @@ export interface LoaderProps extends Omit<
 	 * translated word does not make the page scroll sideways. It also names
 	 * the spinner's progressbar, unless `aria-label` or `aria-labelledby` is
 	 * set. Without it (`undefined` or `""`) the progressbar is named
-	 * "Loading…", in the library's current language.
+	 * "Loading…", in the library's current language. Text and progressbar are
+	 * the content of the Loader's status region, so a changed text is
+	 * announced (see `aria-live`).
 	 */
 	text?: string;
 	/**
@@ -67,6 +69,16 @@ export interface LoaderProps extends Omit<
 	 * default name, and it wins over `aria-label`.
 	 */
 	"aria-labelledby"?: string;
+	/**
+	 * Politeness of the Loader's status region. The `root` slot has
+	 * `role="status"`, which makes its content (the text and the named
+	 * progressbar) a polite status message. Set `"off"` where many Loaders
+	 * show at once, such as one per chart on a dashboard, so that they do not
+	 * each announce themselves: the Loader stays a status, and its progressbar
+	 * keeps its name.
+	 * @default "polite", implied by `role="status"` (no attribute is set)
+	 */
+	"aria-live"?: React.AriaAttributes["aria-live"];
 }
 
 /**
@@ -130,8 +142,9 @@ const Progress = styled(CircularProgress, {
  * (`components.CcLoader.styleOverrides.<slot>`), and the keys of its
  * `classes` prop:
  * - `root`: the outermost box, 100% of the parent's width and height, a flex
- *   column that centers `innerWrapper` vertically. It gets `className`, `sx`
- *   and the HTML attributes the Loader passes on. Theme
+ *   column that centers `innerWrapper` vertically, and the Loader's status
+ *   region (`role="status"`). It gets `className`, `sx` and the HTML
+ *   attributes the Loader passes on. Theme
  *   `components.CcLoader.variants` apply to it. They match the Loader's `text`
  *   and `typographyVariant` after theme `defaultProps`, with
  *   `typographyVariant` `"h6"` when it is not set.
@@ -185,6 +198,7 @@ const Loader = (inProps: LoaderProps) => {
 
 	return (
 		<Root
+			role={"status"}
 			{...rootProps}
 			text={text}
 			typographyVariant={typographyVariant}
@@ -222,11 +236,17 @@ const Loader = (inProps: LoaderProps) => {
  * the `root` slot, `classes` to the slot of each key, so `styled(Loader)`
  * styles the outer box.
  *
- * Accessibility: the spinner is a `progressbar`, named by `text`, or without
- * text "Loading…" in the library's current language. `aria-label` and
- * `aria-labelledby` replace that name. The Loader does not suspend, also not
- * before the library's translations have loaded, so it can be a Suspense
- * fallback.
+ * Accessibility: the `root` slot is a polite status region
+ * (`role="status"`) around text and spinner, so screen readers announce the
+ * loading; `aria-live="off"` silences it where many Loaders show at once.
+ * Nothing in it is focusable. The spinner is a `progressbar`, named by
+ * `text`, or without text "Loading…" in the library's current language.
+ * `aria-label` and `aria-labelledby` replace that name. A status region
+ * that mounts together with its content is not announced by every screen
+ * reader: a message that must be heard belongs in a status region the app
+ * keeps mounted. The Loader sets no `aria-busy`; that belongs on the region
+ * whose content is loading. The Loader does not suspend, also not before
+ * the library's translations have loaded, so it can be a Suspense fallback.
  *
  * Theme: `components.CcLoader.defaultProps` ({@link LoaderProps}),
  * `components.CcLoader.styleOverrides` per {@link LoaderClassKey} slot, and

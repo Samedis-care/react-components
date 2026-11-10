@@ -189,6 +189,55 @@ describe("Loader", () => {
 		}
 	});
 
+	it("[ISSUE-3461-ITEM-3] exposes loading as a polite status region around the progressbar", () => {
+		renderLoader(<Loader text={"Loading data…"} />);
+		const status = screen.getByRole("status");
+		expect(status).toContainElement(screen.getByRole("progressbar"));
+		expect(status).toHaveTextContent("Loading data…");
+		expect(status).not.toHaveAttribute("aria-live", "assertive");
+		expect(status).not.toHaveAttribute("tabindex");
+	});
+
+	it("[ISSUE-3461-ITEM-3] exposes loading as a status region without text too", () => {
+		renderLoader(<Loader />);
+		expect(screen.getByRole("status")).toContainElement(
+			screen.getByRole("progressbar"),
+		);
+	});
+
+	it("[ISSUE-3461-ITEM-3] keeps its status region when the text changes, so the new text is announced as a change", () => {
+		const { rerender } = renderLoader(<Loader text={"Validating 1 of 3"} />);
+		const status = screen.getByRole("status");
+
+		rerender(withTheme(<Loader text={"Validating 2 of 3"} />));
+		expect(screen.getByRole("status")).toBe(status);
+		expect(status).toHaveTextContent("Validating 2 of 3");
+
+		rerender(withTheme(<Loader />));
+		expect(screen.getByRole("status")).toBe(status);
+		expect(status).toContainElement(
+			screen.getByRole("progressbar", { name: "Loading…" }),
+		);
+	});
+
+	it('[ISSUE-3461-ITEM-3] stops announcing with aria-live="off", and stays a status with a named progressbar', () => {
+		renderLoader(
+			<>
+				<Loader aria-live={"off"} />
+				<Loader aria-live={"off"} text={"Loading chart…"} />
+			</>,
+		);
+		const [withoutText, withText] = screen.getAllByRole("status");
+		expect(withoutText).toHaveAttribute("aria-live", "off");
+		expect(withText).toHaveAttribute("aria-live", "off");
+		expect(withoutText).toContainElement(
+			screen.getByRole("progressbar", { name: "Loading…" }),
+		);
+		expect(withText).toContainElement(
+			screen.getByRole("progressbar", { name: "Loading chart…" }),
+		);
+	});
+
 	it("[ISSUE-3461-ITEM-10] applies theme variants for CcLoader", () => {
 		const themed = createTheme({
 			components: {
@@ -267,7 +316,7 @@ describe("Loader", () => {
 			<Loader text={"Loading"} typographyVariant={"caption"} />,
 		);
 		const root = container.firstElementChild as Element;
-		expect(root.getAttributeNames()).toEqual(["class"]);
+		expect(root.getAttributeNames().sort()).toEqual(["class", "role"]);
 		expect(error).not.toHaveBeenCalled();
 	});
 
@@ -395,7 +444,7 @@ describe("Loader", () => {
 		// mt: 2 is theme.spacing(2)
 		expect(getComputedStyle(root).marginTop).toBe("16px");
 		expect(getComputedStyle(root).color).toBe("rgb(4, 5, 6)");
-		expect(root.getAttributeNames().sort()).toEqual(["class", "style"]);
+		expect(root.getAttributeNames().sort()).toEqual(["class", "role", "style"]);
 	});
 
 	it("[ISSUE-3461-ITEM-7] passes id, data-* and other aria-* attributes to its root element", () => {

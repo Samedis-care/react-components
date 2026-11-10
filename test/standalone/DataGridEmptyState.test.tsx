@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import ccI18n from "../../src/i18n";
 import DataGrid, {
@@ -74,6 +74,17 @@ const Grid = (props: Partial<DataGridProps>) => (
 	</ThemeProvider>
 );
 
+/**
+ * the grid's one status message once it shows the given text; while the grid
+ * loads, its Loader is a status region too
+ */
+const findStatus = async (text: string) => {
+	await waitFor(() =>
+		expect(screen.getByRole("status")).toHaveTextContent(text),
+	);
+	return screen.getByRole("status");
+};
+
 /** the elements a screen reader lists as headings, also inside the given one */
 const headings = (container: HTMLElement) =>
 	container.querySelectorAll('h1, h2, h3, h4, h5, h6, [role="heading"]');
@@ -81,15 +92,13 @@ const headings = (container: HTMLElement) =>
 describe("DataGrid empty and error messages", () => {
 	it("[ISSUE-3482-ITEM-9] says that the list is empty as a status message, not as a heading", async () => {
 		const { container } = render(<Grid />);
-		const status = await screen.findByRole("status");
-		expect(status).toHaveTextContent("The list does not contain any data.");
+		await findStatus("The list does not contain any data.");
 		expect(headings(container)).toHaveLength(0);
 	});
 
 	it("[ISSUE-3482-ITEM-9] says that the filters matched nothing as a status message, with Clear filters outside it and outside any text element", async () => {
 		const { container } = render(<Grid overrideSearch={"zzz"} />);
-		const status = await screen.findByRole("status");
-		expect(status).toHaveTextContent("No data matched your filters.");
+		const status = await findStatus("No data matched your filters.");
 		const reset = screen.getByRole("button", { name: "Clear filters" });
 		// the live region holds only the message, so the button's label is not
 		// read as part of it
