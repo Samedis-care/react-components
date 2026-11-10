@@ -13,6 +13,10 @@ CLDR_NUMBERS = "../node_modules/cldr-numbers-full/main/"
 CLDR_CORE = "../node_modules/cldr-core/supplemental/"
 
 FLAG_DIR = "../src/assets/img/countries/"
+# the flags: the 3x2 set of country-flag-icons (MIT, https://www.npmjs.com/package/country-flag-icons)
+# at a pinned version. The script only downloads missing flags, so to update them change the
+# version, delete the SVGs in FLAG_DIR and run the script (see FLAG_DIR's README.md)
+FLAG_SOURCE = "https://unpkg.com/country-flag-icons@1.6.20/3x2/"
 
 # true if the country's flag is on disk; an empty file (what older versions of this script
 # wrote for a failed download) counts as missing
@@ -31,7 +35,7 @@ def download_flags(country_list: [str]):
         if has_flag(country_code) or country_code in failed_flag_downloads:
             continue
         print("Downloading country flag", country_code)
-        r = requests.get("https://raw.githubusercontent.com/smucode/react-world-flags/master/src/svgs/" + country_code.lower() + ".svg")
+        r = requests.get(FLAG_SOURCE + country_code + ".svg")
         if r.ok:
             with open(dl_path, "wb") as f:
                 f.write(r.content)

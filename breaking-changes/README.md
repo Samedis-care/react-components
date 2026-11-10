@@ -22,6 +22,7 @@ One file per change, so this never grows into a single unreadable log.
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
 | 2026-11-10 | [InfiniteScroll loads nothing while it is hidden, and fills once it is shown](2026-11-10-infinite-scroll-waits-while-hidden.md) | behavior |
 | 2026-11-10 | [The Small list items narrow MUI's gutters, and MultiSelect's entries move 8px to the left](2026-11-10-small-list-item-gutters.md) | behavior |
+| 2026-11-10 | [Country flags come from country-flag-icons: every flag is 3:2 and drawn for small sizes](2026-11-10-country-flags-from-country-flag-icons.md) | behavior |
 | 2026-11-10 | [The Loader is a status region](2026-11-10-loader-status-region.md) | behavior |
 | 2026-11-10 | [A form page's footer is sticky, and its busy overlay covers only the form](2026-11-10-form-page-layout-sticky-footer.md) | behavior, theme |
 | 2026-11-10 | [MobileScalingFix puts the page's viewport back when it unmounts](2026-11-10-mobile-scaling-fix-restores-viewport-on-unmount.md) | behavior |

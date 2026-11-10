@@ -156,7 +156,7 @@ export const Issue3466Item8EveryFlagFitsItsBox: Story = {
 		docs: {
 			description: {
 				story:
-					"Every flag beside its name, at the default size: each one is 16px high and as wide as its aspect ratio needs (Qatar's, the only one wider than 2:1, is 32px wide), in a 32x16 box, so the names line up. Each flag has the theme's divider color as its outline.",
+					"Every flag beside its name, at the default size: each one is 16px high and as wide as its aspect ratio needs (all flags are 3:2, so 24px), in a 32x16 box, so the names line up. Each flag has the theme's divider color as its outline.",
 			},
 		},
 	},
@@ -229,8 +229,8 @@ export const Issue3466Item8DarkMode: Story = {
 		const img = canvasElement.querySelector("img")!;
 		await decoded([img]);
 		await expect(outlineOf(img)).toBe(`solid 1px ${darkTheme.palette.divider}`);
-		// 24px high, 5:3
+		// 24px high, 3:2
 		const rect = img.getBoundingClientRect();
-		await expect([Math.round(rect.width), rect.height]).toEqual([40, 24]);
+		await expect([Math.round(rect.width), rect.height]).toEqual([36, 24]);
 	},
 };

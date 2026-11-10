@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { afterEach, describe, it, expect } from "vitest";
 import { createElement } from "react";
 import { cleanup, render, within } from "@testing-library/react";
@@ -9,8 +10,66 @@ import flagAW from "../../src/assets/img/countries/AW.svg";
 import LocaleSelectorEntry from "../../src/non-standalone/LocaleSelector/LocaleSelectorEntry";
 import type { LocaleSelectorEntryData } from "../../src/non-standalone/LocaleSelector/LocaleSelectorDialogContent";
 
+// the text of every flag file, by its path
+const FLAG_DIR = "../../src/assets/img/countries/";
+const flagSources = import.meta.glob<string>(
+	"../../src/assets/img/countries/*.svg",
+	{ query: "?raw", import: "default", eager: true },
+);
+
+const codes = Object.keys(CountryFlags);
 const lookup = (code: string): unknown =>
 	(CountryFlags as Record<string, unknown>)[code];
+
+/**
+ * true unless the text is an SVG document an <img> can draw: well-formed,
+ * an <svg> root with a positive viewBox, and nothing that runs or loads
+ */
+const isUnusableSvg = (text: string): boolean => {
+	if (text.trim() === "") return true;
+	const doc = new DOMParser().parseFromString(text, "image/svg+xml");
+	const root = doc.documentElement;
+	if (doc.getElementsByTagName("parsererror").length > 0) return true;
+	if (
+		root.localName !== "svg" ||
+		root.namespaceURI !== "http://www.w3.org/2000/svg"
+	)
+		return true;
+	const viewBox = (root.getAttribute("viewBox") ?? "")
+		.trim()
+		.split(/[\s,]+/)
+		.map(Number);
+	if (
+		viewBox.length !== 4 ||
+		!viewBox.every(Number.isFinite) ||
+		viewBox[2] <= 0 ||
+		viewBox[3] <= 0
+	)
+		return true;
+	if (doc.querySelector("script, foreignObject, image, a") !== null)
+		return true;
+	return Array.from(doc.querySelectorAll("*")).some((el) =>
+		Array.from(el.attributes).some(
+			(attr) =>
+				/^on/i.test(attr.name) ||
+				(/href$/i.test(attr.name) &&
+					/^(https?:|javascript:|\/\/)/i.test(attr.value)),
+		),
+	);
+};
+
+/** the width-to-height ratio of an SVG's viewBox */
+const viewBoxRatio = (text: string): number => {
+	const root = new DOMParser().parseFromString(
+		text,
+		"image/svg+xml",
+	).documentElement;
+	const [, , width, height] = (root.getAttribute("viewBox") ?? "")
+		.trim()
+		.split(/[\s,]+/)
+		.map(Number);
+	return width / height;
+};
 
 describe("CountryFlags", () => {
 	it("contains entries for well-known country codes", () => {
@@ -104,6 +163,30 @@ describe("CountryFlags", () => {
 			expect(
 				supportedLocales.filter(
 					(locale) => !Object.hasOwn(CountryFlags, locale.split("-")[1]),
+				),
+			).toEqual([]);
+		});
+	});
+
+	describe("flag files", () => {
+		it("[ISSUE-3466-ITEM-10] every flag file is a non-empty, well-formed, self-contained SVG with a viewBox", () => {
+			// what an <img> of the map draws: an empty file would import as the
+			// truthy "data:image/svg+xml," and draw nothing
+			expect(
+				codes.filter((code) =>
+					isUnusableSvg(flagSources[`${FLAG_DIR}${code}.svg`] ?? ""),
+				),
+			).toEqual([]);
+		});
+
+		it("[ISSUE-3466-ITEM-10] every flag is 3:2, like every flag of country-flag-icons' 3x2 set", () => {
+			// a 3:2 viewBox tells the generator's flags from a file of another source
+			expect(
+				codes.filter(
+					(code) =>
+						Math.abs(
+							viewBoxRatio(flagSources[`${FLAG_DIR}${code}.svg`] ?? "") - 1.5,
+						) > 0.001,
 				),
 			).toEqual([]);
 		});

@@ -24,8 +24,8 @@ export interface CountryFlagProps extends Omit<
 	 * The flag's height: a number of px, or a CSS length (`"1em"` follows the
 	 * text around the flag). The box is twice as wide as it is high. A flag
 	 * fills the height and is as wide as its aspect ratio needs, at the start of
-	 * the box: 3:2 flags take three quarters of the width, 2:1 flags all of it.
-	 * Qatar's flag (2.55:1) fills the width and is less high.
+	 * the box. The flags of `CountryFlags` are all 3:2, so they take three
+	 * quarters of the width.
 	 * @default `theme.typography.pxToRem(16)` (`1rem` in MUI's default theme)
 	 */
 	size?: number | string;
