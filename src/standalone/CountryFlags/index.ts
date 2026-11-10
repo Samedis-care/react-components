@@ -251,7 +251,10 @@ import flag_ZM from "../../assets/img/countries/ZM.svg";
 import flag_ZW from "../../assets/img/countries/ZW.svg";
 
 // JS Object
-const CountryFlags: Record<string, string> = {
+// No prototype: a lookup of a name of Object.prototype ("toString",
+// "__proto__", ...) gives undefined, like any other code without a flag
+const CountryFlags = Object.create(null) as Record<string, string>;
+Object.assign(CountryFlags, {
 	AD: flag_AD,
 	AE: flag_AE,
 	AF: flag_AF,
@@ -500,6 +503,6 @@ const CountryFlags: Record<string, string> = {
 	ZA: flag_ZA,
 	ZM: flag_ZM,
 	ZW: flag_ZW,
-};
+});
 
 export default CountryFlags;

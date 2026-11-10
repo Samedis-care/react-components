@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-10 | [CountryFlags has no prototype: names of Object.prototype are not flags](2026-11-10-country-flags-no-prototype.md) | behavior |
 | 2026-11-10 | [The Loader passes className and HTML attributes on, so styled(Loader) and FormLoaderOverlay's loader override apply](2026-11-10-loader-passes-class-name-and-attributes.md) | behavior |
 | 2026-11-10 | [A dirty form page still asks before it is left while it saves](2026-11-10-form-page-guarded-while-saving.md) | behavior |
 | 2026-11-10 | [FilterIcon, SignIcon and ExportIcon take a caller's viewBox](2026-11-10-icons-take-a-callers-viewbox.md) | behavior |

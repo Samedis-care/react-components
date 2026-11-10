@@ -9,6 +9,9 @@ import flagAW from "../../src/assets/img/countries/AW.svg";
 import LocaleSelectorEntry from "../../src/non-standalone/LocaleSelector/LocaleSelectorEntry";
 import type { LocaleSelectorEntryData } from "../../src/non-standalone/LocaleSelector/LocaleSelectorDialogContent";
 
+const lookup = (code: string): unknown =>
+	(CountryFlags as Record<string, unknown>)[code];
+
 describe("CountryFlags", () => {
 	it("contains entries for well-known country codes", () => {
 		const knownCodes = [
@@ -51,6 +54,31 @@ describe("CountryFlags", () => {
 	});
 
 	describe("key set", () => {
+		it("[ISSUE-3466-ITEM-2] returns undefined for names inherited from Object.prototype", () => {
+			const inherited = [
+				"toString",
+				"constructor",
+				"__proto__",
+				"hasOwnProperty",
+				"valueOf",
+				"isPrototypeOf",
+				"propertyIsEnumerable",
+				"toLocaleString",
+			];
+			expect(inherited.filter((name) => lookup(name) !== undefined)).toEqual(
+				[],
+			);
+		});
+
+		it("[ISSUE-3466-ITEM-2] `in` finds the country codes, not names inherited from Object.prototype", () => {
+			expect("DE" in CountryFlags).toBe(true);
+			expect(
+				["toString", "constructor", "__proto__", "hasOwnProperty"].filter(
+					(name) => name in CountryFlags,
+				),
+			).toEqual([]);
+		});
+
 		it("[ISSUE-3466-ITEM-1] has a flag for the country of every LocaleSelector entry", () => {
 			// the entries LocaleSelectorDialogContent lists without supportedLocales
 			const entries = Object.entries(

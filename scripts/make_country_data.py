@@ -177,10 +177,13 @@ def write_country_flags(country_codes: [str]):
             f.write(f"import flag_{country} from \"../../assets/img/countries/{country}.svg\";" + os.linesep)
         f.write(os.linesep)
         f.write("// JS Object" + os.linesep)
-        f.write("const CountryFlags: Record<string, string> = {" + os.linesep)
+        f.write("// No prototype: a lookup of a name of Object.prototype (\"toString\"," + os.linesep)
+        f.write("// \"__proto__\", ...) gives undefined, like any other code without a flag" + os.linesep)
+        f.write("const CountryFlags = Object.create(null) as Record<string, string>;" + os.linesep)
+        f.write("Object.assign(CountryFlags, {" + os.linesep)
         for country in country_codes:
             f.write(f"\t{country}: flag_{country}," + os.linesep)
-        f.write("};" + os.linesep)
+        f.write("});" + os.linesep)
         f.write(os.linesep)
         f.write("export default CountryFlags;" + os.linesep)
 
