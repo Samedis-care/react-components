@@ -1,5 +1,4 @@
 import React, { PureComponent } from "react";
-import debounce from "../../utils/debounce";
 
 export interface InfiniteScrollProps {
 	/**
@@ -18,6 +17,10 @@ export interface InfiniteScrollProps {
 	loadMoreTop?: () => void;
 	/**
 	 * Callback to load more elements at the bottom.
+	 *
+	 * A call that waits for `callBackDebounce` is only made if, once the wait is
+	 * over, the content still does not fill the container or the container is
+	 * still scrolled to the bottom.
 	 */
 	loadMoreBottom: () => void;
 	/**
@@ -25,6 +28,9 @@ export interface InfiniteScrollProps {
 	 * burst of triggers results in one call, made `callBackDebounce` ms after
 	 * the last trigger. `0` calls the callbacks synchronously. Can be changed
 	 * after mount.
+	 *
+	 * A call is made with the callback of the latest render: a callback that is
+	 * replaced or removed while a call waits is not called.
 	 * @default 100
 	 */
 	callBackDebounce?: number;
@@ -39,22 +45,25 @@ interface IState {
 	 * Initial scroll set? Used for infinite up-scrolling
 	 */
 	initScroll: boolean;
-	/**
-	 * Debounced version of IProps.loadMoreTop
-	 */
-	loadMoreTop?: () => void;
-	/**
-	 * Debounced version of IProps.loadMoreBottom
-	 */
-	loadMoreBottom: () => void;
 }
 
 /**
- * Wraps a load callback as `callBackDebounce` asks: debounced by `wait` ms, or
- * for `0` the callback itself, so that it is called synchronously
+ * The load callbacks, by prop name
  */
-const debounceCallback = (callback: () => void, wait: number): (() => void) =>
-	wait === 0 ? callback : debounce(callback, wait);
+type LoadCallbackName = "loadMoreTop" | "loadMoreBottom";
+
+/**
+ * Does the content overflow the scroll container by more than 24px? Until it
+ * does, the container is filled through `loadMoreBottom`.
+ */
+const isFilled = (wrapper: HTMLElement): boolean =>
+	wrapper.scrollHeight > wrapper.clientHeight + 24;
+
+/**
+ * Is the scroll container scrolled to the bottom?
+ */
+const isAtBottom = (wrapper: HTMLElement): boolean =>
+	wrapper.scrollTop === wrapper.scrollHeight - wrapper.clientHeight;
 
 /**
  * Provides infinite scrolling to whatever is inside it
@@ -62,21 +71,22 @@ const debounceCallback = (callback: () => void, wait: number): (() => void) =>
 class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 	public wrapper: HTMLElement | null = null;
 	public resizeObserver: ResizeObserver | null;
+	/**
+	 * Timer of the pending debounced call per callback, 0 while none is pending
+	 */
+	private loadTimers: Record<LoadCallbackName, number> = {
+		loadMoreTop: 0,
+		loadMoreBottom: 0,
+	};
 
 	constructor(props: InfiniteScrollProps) {
 		super(props);
-
-		const debounceWait = this.props.callBackDebounce ?? 100;
 
 		this.resizeObserver = window.ResizeObserver
 			? new ResizeObserver(this.handleResize)
 			: null;
 		this.state = {
 			initScroll: !this.props.loadMoreTop, // we don't need to set an initial scroll if we don't need up-scrolling
-			loadMoreTop: this.props.loadMoreTop
-				? debounceCallback(this.props.loadMoreTop, debounceWait)
-				: undefined,
-			loadMoreBottom: debounceCallback(this.props.loadMoreBottom, debounceWait),
 		};
 	}
 
@@ -97,29 +107,6 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 	componentDidUpdate(prevProps: Readonly<InfiniteScrollProps>): void {
 		if (prevProps.children !== this.props.children) {
 			this.handleResize();
-		}
-		const debounceWait = this.props.callBackDebounce ?? 100;
-		const prevDebounceWait = prevProps.callBackDebounce ?? 100;
-		if (
-			prevProps.loadMoreTop !== this.props.loadMoreTop ||
-			debounceWait !== prevDebounceWait
-		) {
-			this.setState({
-				loadMoreTop: this.props.loadMoreTop
-					? debounceCallback(this.props.loadMoreTop, debounceWait)
-					: undefined,
-			});
-		}
-		if (
-			prevProps.loadMoreBottom !== this.props.loadMoreBottom ||
-			debounceWait !== prevDebounceWait
-		) {
-			this.setState({
-				loadMoreBottom: debounceCallback(
-					this.props.loadMoreBottom,
-					debounceWait,
-				),
-			});
 		}
 		if (!!prevProps.dynamicallySized !== !!this.props.dynamicallySized) {
 			if (!this.wrapper) return;
@@ -163,10 +150,47 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 		this.wrapper = ref;
 	};
 
+	/**
+	 * Requests a call of the `loadMoreTop` or `loadMoreBottom` prop: debounced by
+	 * `callBackDebounce` (a request replaces the pending one), or right away for 0
+	 */
+	private requestLoad = (name: LoadCallbackName): void => {
+		window.clearTimeout(this.loadTimers[name]);
+		this.loadTimers[name] = 0;
+		const wait = this.props.callBackDebounce ?? 100;
+		if (wait === 0) {
+			this.callLoad(name);
+			return;
+		}
+		this.loadTimers[name] = window.setTimeout(() => {
+			this.loadTimers[name] = 0;
+			this.callLoad(name);
+		}, wait);
+	};
+
+	/**
+	 * Makes a call requested by `requestLoad`. The callback is read from the
+	 * props now, so it is the one of the latest render. `loadMoreBottom` is only
+	 * called if the content still needs it: a request made while the content was
+	 * short, or while the container was at the bottom, is dropped once content
+	 * that arrived in the meantime fills the container and moves the bottom away.
+	 */
+	private callLoad = (name: LoadCallbackName): void => {
+		if (name === "loadMoreTop") {
+			const loadMoreTop = this.props.loadMoreTop;
+			if (loadMoreTop) loadMoreTop();
+			return;
+		}
+		if (!this.wrapper) return;
+		if (isFilled(this.wrapper) && !isAtBottom(this.wrapper)) return;
+		const loadMoreBottom = this.props.loadMoreBottom;
+		loadMoreBottom();
+	};
+
 	handleResize = (): void => {
 		if (!this.wrapper) return;
 
-		if (this.wrapper.scrollHeight > this.wrapper.clientHeight + 24) {
+		if (isFilled(this.wrapper)) {
 			if (!this.state.initScroll) {
 				this.wrapper.scrollTop = 24;
 				this.setState({
@@ -174,21 +198,18 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 				});
 			}
 		} else {
-			this.state.loadMoreBottom();
+			this.requestLoad("loadMoreBottom");
 		}
 	};
 
 	handleScroll = (): void => {
 		if (!this.wrapper) return;
 
-		if (this.wrapper.scrollTop === 0 && this.state.loadMoreTop) {
+		if (this.wrapper.scrollTop === 0 && this.props.loadMoreTop) {
 			this.wrapper.scrollTop = 1;
-			this.state.loadMoreTop();
-		} else if (
-			this.wrapper.scrollTop ===
-			this.wrapper.scrollHeight - this.wrapper.clientHeight
-		) {
-			this.state.loadMoreBottom();
+			this.requestLoad("loadMoreTop");
+		} else if (isAtBottom(this.wrapper)) {
+			this.requestLoad("loadMoreBottom");
 		}
 	};
 }

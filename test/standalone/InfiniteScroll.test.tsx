@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import {
 	describe,
 	it,
@@ -175,6 +175,51 @@ const advance = (ms: number) =>
 	act(() => {
 		vi.advanceTimersByTime(ms);
 	});
+/** Advances in small steps so that renders caused by a callback run in between */
+const advanceInStepsAsync = async (total: number, step = 10) => {
+	for (let elapsed = 0; elapsed < total; elapsed += step) {
+		await act(async () => {
+			await vi.advanceTimersByTimeAsync(step);
+		});
+	}
+};
+const range = (start: number, count: number) =>
+	Array.from({ length: count }, (_, i) => start + i);
+
+const PAGE_SIZE = 10;
+/**
+ * The first pattern an app developer writes: an async page load guarded by a
+ * loading flag kept in React state.
+ */
+const StateGuardedList = ({
+	fetchPage,
+}: {
+	fetchPage: (offset: number) => Promise<number[]>;
+}) => {
+	const [rows, setRows] = useState<number[]>([]);
+	const [loading, setLoading] = useState(false);
+	const [hasMore, setHasMore] = useState(true);
+	const loadMore = useCallback(() => {
+		if (loading || !hasMore) return;
+		setLoading(true);
+		void fetchPage(rows.length)
+			.then((page) => {
+				setRows((prev) => [...prev, ...page]);
+				setHasMore(page.length === PAGE_SIZE);
+			})
+			.finally(() => setLoading(false));
+	}, [loading, hasMore, rows.length, fetchPage]);
+	return (
+		<InfiniteScroll className={SCROLLER} loadMoreBottom={loadMore}>
+			{rows.map((row) => (
+				<div className="row" key={row}>
+					Row {row}
+				</div>
+			))}
+			{loading && <div>Loading</div>}
+		</InfiniteScroll>
+	);
+};
 
 describe("InfiniteScroll behavior (stubbed layout)", () => {
 	beforeAll(() => {
@@ -367,6 +412,180 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 			expect(top).toHaveBeenCalledTimes(2);
 			scrollTo(scroller, 700);
 			expect(bottom).toHaveBeenCalledTimes(2);
+		});
+
+		it("[ISSUE-3471-ITEM-2] calls the new loadMoreBottom when children and callback change in the same render", () => {
+			scrollHeightOf = () => 300;
+			const first = vi.fn();
+			const second = vi.fn();
+			const { rerender } = render(
+				<InfiniteScroll className={SCROLLER} loadMoreBottom={first}>
+					<div>page 1</div>
+				</InfiniteScroll>,
+			);
+			advance(200);
+			expect(first).toHaveBeenCalledTimes(1);
+			rerender(
+				<InfiniteScroll className={SCROLLER} loadMoreBottom={second}>
+					<div>page 2</div>
+				</InfiniteScroll>,
+			);
+			advance(200);
+			expect({
+				first: first.mock.calls.length,
+				second: second.mock.calls.length,
+			}).toEqual({ first: 1, second: 1 });
+		});
+
+		it("[ISSUE-3471-ITEM-2] does not call a replaced loadMoreBottom from a pending debounced call", () => {
+			scrollHeightOf = () => 300;
+			const first = vi.fn();
+			const second = vi.fn();
+			const children = <div />;
+			const { rerender } = render(
+				<InfiniteScroll className={SCROLLER} loadMoreBottom={first}>
+					{children}
+				</InfiniteScroll>,
+			);
+			// the mount fill call is pending; the parent now passes a new callback
+			rerender(
+				<InfiniteScroll className={SCROLLER} loadMoreBottom={second}>
+					{children}
+				</InfiniteScroll>,
+			);
+			advance(200);
+			expect(first).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3471-ITEM-2] a consumer that guards with its own loading state requests each page once", async () => {
+			scrollHeightOf = (el) => el.querySelectorAll(".row").length * 30;
+			const offsets: number[] = [];
+			const fetchPage = (offset: number) => {
+				offsets.push(offset);
+				return new Promise<number[]>((resolve) =>
+					setTimeout(
+						() => resolve(offset < 30 ? range(offset, PAGE_SIZE) : []),
+						50,
+					),
+				);
+			};
+			// a duplicate page renders duplicate keys; keep React's warning out of the output
+			vi.spyOn(console, "error").mockImplementation(() => undefined);
+			render(<StateGuardedList fetchPage={fetchPage} />);
+			await advanceInStepsAsync(1000);
+			expect(offsets).toEqual([0, 10]);
+		});
+
+		it("[ISSUE-3471-ITEM-2] calls the new loadMoreBottom right away with callBackDebounce={0} when children and callback change in the same render", () => {
+			scrollHeightOf = () => 300;
+			const first = vi.fn();
+			const second = vi.fn();
+			const { rerender } = render(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreBottom={first}
+					callBackDebounce={0}
+				>
+					<div>page 1</div>
+				</InfiniteScroll>,
+			);
+			expect(first).toHaveBeenCalledTimes(1);
+			rerender(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreBottom={second}
+					callBackDebounce={0}
+				>
+					<div>page 2</div>
+				</InfiniteScroll>,
+			);
+			expect({
+				first: first.mock.calls.length,
+				second: second.mock.calls.length,
+			}).toEqual({ first: 1, second: 1 });
+		});
+
+		it("[ISSUE-3471-ITEM-2] calls the latest loadMoreTop from a pending debounced call, and none once it is removed", () => {
+			const first = vi.fn();
+			const second = vi.fn();
+			const bottom = vi.fn();
+			const children = <div />;
+			const { container, rerender } = render(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={first}
+					loadMoreBottom={bottom}
+				>
+					{children}
+				</InfiniteScroll>,
+			);
+			const scroller = getScroller(container);
+			scrollTo(scroller, 0);
+			rerender(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={second}
+					loadMoreBottom={bottom}
+				>
+					{children}
+				</InfiniteScroll>,
+			);
+			advance(100);
+			expect({
+				first: first.mock.calls.length,
+				second: second.mock.calls.length,
+			}).toEqual({ first: 0, second: 1 });
+
+			// e.g. nothing more to load on top: the parent stops passing loadMoreTop
+			scrollTo(scroller, 0);
+			rerender(
+				<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+					{children}
+				</InfiniteScroll>,
+			);
+			advance(100);
+			expect(second).toHaveBeenCalledTimes(1);
+		});
+
+		it("[ISSUE-3471-ITEM-2] drops a pending fill call once new content fills the container", () => {
+			let rows = 5;
+			scrollHeightOf = () => rows * 30;
+			const bottom = vi.fn();
+			const { rerender } = render(
+				<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+					<div>page 1</div>
+				</InfiniteScroll>,
+			);
+			// the mount fill call is pending when a page arrives that fills the container
+			rows = 20;
+			rerender(
+				<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+					<div>pages 1 and 2</div>
+				</InfiniteScroll>,
+			);
+			advance(200);
+			expect(bottom).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3471-ITEM-2] drops a pending bottom call once new content moves the bottom away", () => {
+			let height = 1000;
+			scrollHeightOf = () => height;
+			const bottom = vi.fn();
+			const { container, rerender } = render(
+				<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+					<div>page 1</div>
+				</InfiniteScroll>,
+			);
+			scrollTo(getScroller(container), 700);
+			// the call for the bottom is pending when content is appended
+			height = 1300;
+			rerender(
+				<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+					<div>pages 1 and 2</div>
+				</InfiniteScroll>,
+			);
+			advance(200);
+			expect(bottom).not.toHaveBeenCalled();
 		});
 	});
 });

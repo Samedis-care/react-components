@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-10 | [InfiniteScroll calls the latest callbacks, and drops a bottom call the list no longer needs](2026-11-10-infinite-scroll-calls-latest-callbacks.md) | behavior |
 | 2026-11-10 | [A record batched by enableRequestBatching is deserialized for edit](2026-11-10-model-batched-get-deserialized-for-edit.md) | behavior |
 | 2026-11-10 | [FilterIcon, SignIcon and ExportIcon are padded like Material icons](2026-11-10-icons-padded-like-material-icons.md) | behavior |
 | 2026-11-10 | [The Loader centers its text and spinner as one block](2026-11-10-loader-centers-text-and-spinner.md) | type, behavior |
