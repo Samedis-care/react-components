@@ -1,13 +1,13 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Box, Typography } from "@mui/material";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import {
 	Description as MuiDescription,
 	Draw as MuiDraw,
 	FilterAlt as MuiFilterAlt,
 } from "@mui/icons-material";
 // eslint-disable-next-line import/no-unresolved
-import { expect } from "storybook/test";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import FilterIcon from "./FilterIcon";
 import SignIcon from "./SignIcon";
 import ExportIcon from "./ExportIcon";
@@ -193,6 +193,64 @@ export const ColorVariants: Story = {
 			))}
 		</Box>
 	),
+};
+
+interface IconButtonDemoProps {
+	onActivate: () => void;
+}
+
+const IconButtonDemo = React.memo(function IconButtonDemo(
+	props: IconButtonDemoProps,
+) {
+	return (
+		<Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+			<button type={"button"}>Before</button>
+			<Tooltip title={"Filters"}>
+				<IconButton aria-label={"Filters"} onClick={props.onActivate}>
+					<FilterIcon />
+				</IconButton>
+			</Tooltip>
+			<button type={"button"}>After</button>
+		</Box>
+	);
+});
+
+export const InIconButton: StoryObj<typeof IconButtonDemo> = {
+	args: { onActivate: fn() },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"The accessible way to use an icon as a control, as the DataGrid action bar does: an `IconButton` with an `aria-label` (and a `Tooltip` for sighted users). The button is a tab stop with the label as its name; the icon stays hidden from assistive tech. An `onClick`, `aria-label` or `Tooltip` on the icon itself is not: the hidden `<svg>` is skipped by Tab and by screen readers.",
+			},
+		},
+	},
+	render: (args) => <IconButtonDemo {...args} />,
+	play: async ({ args, canvas }) => {
+		const button = canvas.getByRole("button", { name: "Filters" });
+		await expect(canvas.queryByRole("img")).toBeNull();
+		await expect(button.querySelector("svg")).toHaveAttribute(
+			"aria-hidden",
+			"true",
+		);
+
+		await userEvent.tab();
+		await expect(canvas.getByRole("button", { name: "Before" })).toHaveFocus();
+		await userEvent.tab();
+		await expect(button).toHaveFocus();
+		await waitFor(() =>
+			expect(within(document.body).getByRole("tooltip")).toHaveTextContent(
+				"Filters",
+			),
+		);
+		await userEvent.keyboard("{Enter}");
+		await expect(args.onActivate).toHaveBeenCalledTimes(1);
+		await userEvent.keyboard(" ");
+		await expect(args.onActivate).toHaveBeenCalledTimes(2);
+
+		await userEvent.tab();
+		await expect(canvas.getByRole("button", { name: "After" })).toHaveFocus();
+	},
 };
 
 // --- bugs ---
