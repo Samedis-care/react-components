@@ -397,6 +397,13 @@ export interface FormErrorRendererProps<CustomPropsT> {
 export const FormRenderAsDivContext = React.createContext(false);
 
 /**
+ * The key of FormContextData.readOnlyReasons under which a form is read-only while it
+ * submits or is busy (FormContextData.submitting), with the text "The form is currently
+ * being saved". Any other key means the form is read-only for another reason.
+ */
+export const FORM_SUBMITTING_READ_ONLY_REASON = "submit";
+
+/**
  * The context of a form, typed by the form's model
  * @typeParam M The model of the form, ModelUnknown for code that works with any form
  * @typeParam CustomPropsT The custom props of the form
@@ -590,6 +597,7 @@ export interface FormContextData<
 	 * @see FormProps.readOnlyReasons
 	 * @see setCustomReadOnly
 	 * @remarks identifier "form-legacy" is used for compatibility
+	 * @remarks identifier FORM_SUBMITTING_READ_ONLY_REASON is set while the form submits or is busy
 	 */
 	readOnlyReasons: Partial<Record<"form-legacy" | string, string | null>>;
 	/**
@@ -1245,7 +1253,8 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 			: {};
 		const submitReadOnly: Record<string, string | null> = submitting
 			? {
-					submit: t("backend-components.form.read-only.submitting") ?? null,
+					[FORM_SUBMITTING_READ_ONLY_REASON]:
+						t("backend-components.form.read-only.submitting") ?? null,
 				}
 			: {};
 		return {

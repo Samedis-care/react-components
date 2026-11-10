@@ -6,7 +6,12 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import { FormContextData, PageProps, useFormContextLite } from "../Form";
+import {
+	FORM_SUBMITTING_READ_ONLY_REASON,
+	FormContextData,
+	PageProps,
+	useFormContextLite,
+} from "../Form";
 import { FormDirtyEvent } from "./FormEvents";
 import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
 import { FrameworkHistory } from "../../framework/History";
@@ -76,7 +81,8 @@ export type EnhancedGoBackType = {
 	 * Closes the form page, asking the user for confirmation if the form is dirty
 	 * @param forceRefresh Force a refresh of the CRUD data grid after navigating back? (default false)
 	 * @param forceNavigate Skip the unsaved changes confirmation dialog and navigate back immediately? (default false).
-	 *                      Has no effect if the form isn't dirty or is read-only, as no dialog is shown then.
+	 *                      Has no effect if the form isn't dirty or is read-only for a reason other than a
+	 *                      pending save, as no dialog is shown then.
 	 * @returns A promise which resolves once the user confirmed (or the dialog was skipped) and navigation happened.
 	 *          Resolves without navigating if the user cancelled the confirmation dialog.
 	 * @remarks Enhances CrudFormProps.goBack, which only takes forceRefresh and shows no confirmation dialog
@@ -169,6 +175,12 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	const { t } = useCCTranslations();
 	const { readOnly, readOnlyReasons, addEventListener, removeEventListener } =
 		useFormContextLite<ModelUnknown>();
+	// a save makes the form read-only too, but its changes are unsaved until it succeeds and
+	// a failed save is shown in the form, so a form being saved keeps its guards. Only a form
+	// which is read-only for another reason goes without them.
+	const readOnlyBesidesSaving = Object.keys(readOnlyReasons).some(
+		(reason) => reason !== FORM_SUBMITTING_READ_ONLY_REASON,
+	);
 	// the dirty prop is one render behind the form engine, which breaks "submit, then
 	// navigate away": the record is saved, but the guards below still see a dirty form.
 	// The dirty event fires as soon as the form engine sees the change, so this ref is
@@ -202,7 +214,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 
 	useEffect(() => {
 		// if the form is read-only, don't annoy the user
-		if (readOnly) return;
+		if (readOnlyBesidesSaving) return;
 		// set while the history block is lifted for a POP inside the form page, see passThrough
 		let stopWaitingForPop: (() => void) | null = null;
 		const releaseHistoryBlock = () => {
@@ -298,7 +310,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 			applyGuards(false);
 		};
 	}, [
-		readOnly,
+		readOnlyBesidesSaving,
 		t,
 		formDialog,
 		routePath,
@@ -329,7 +341,11 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 			typeof orgGoBack === "function"
 				? async (forceRefresh?: boolean, forceNavigate?: boolean) => {
 						try {
-							if (dirtyRef.current && !readOnly && !forceNavigate) {
+							if (
+								dirtyRef.current &&
+								!readOnlyBesidesSaving &&
+								!forceNavigate
+							) {
 								await showConfirmDialog(pushDialog, {
 									title: t("backend-components.form.back-on-dirty.title"),
 									message: t("backend-components.form.back-on-dirty.message"),

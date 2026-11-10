@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 import React from "react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
 	act,
 	fireEvent,
@@ -15,17 +15,33 @@ import {
 	FrameworkHistory,
 	setFrameworkHistory,
 } from "../../../src/framework/History";
-import Form from "../../../src/backend-components/Form/Form";
+import Form, {
+	PageProps,
+	useFormContext,
+} from "../../../src/backend-components/Form/Form";
+import FormField from "../../../src/backend-components/Form/Field";
+import BasicFormPage, {
+	BasicFormPageRendererProps,
+	EnhancedCustomProps,
+} from "../../../src/backend-components/Form/BasicFormPage";
+import { ModelUnknown } from "../../../src/backend-integration";
 import DefaultErrorComponent from "../../../src/backend-components/Form/DefaultErrorComponent";
 import Routes from "../../../src/standalone/Routes/Routes";
 import Route from "../../../src/standalone/Routes/Route";
 import {
 	findLeavePrompt,
+	holdUpdates,
+	LOAD,
 	leavePrompts,
 	makeDirty,
 	makePage,
 	makePeopleModel,
+	mountPage,
+	PeopleModel,
+	saveButton,
 	setupPageTests,
+	TestCustomProps,
+	unloadIsBlocked,
 } from "./pageFixture";
 
 setupPageTests();
@@ -140,5 +156,137 @@ describe("Form page leave guard", () => {
 		expect(history.location.pathname).toBe("/other");
 		expect(leavePrompts()).toHaveLength(0);
 		expect(screen.getByDisplayValue("AliceX")).toBeInTheDocument();
+	});
+});
+
+describe("Form page leave guard while the form saves", () => {
+	/**
+	 * Makes the page dirty, clicks Save and waits until the form is read-only for the save
+	 */
+	const startSave = async () => {
+		const input = await makeDirty();
+		fireEvent.click(saveButton());
+		await waitFor(() => expect(input).toBeDisabled());
+	};
+
+	it("[ISSUE-3473-ITEM-4] a navigation during a save asks and closing the tab is blocked; after No, a failed save is shown and the page stays guarded", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const model = makePeopleModel();
+		const updates = holdUpdates(model);
+		const { history } = mountPage(FieldPage, { model });
+		await startSave();
+
+		expect(unloadIsBlocked(), "closing the tab is not guarded").toBe(true);
+		await navigate("/other");
+		expect(history.location.pathname).toBe("/page");
+		fireEvent.click(
+			within(await findLeavePrompt()).getByRole("button", { name: "No" }),
+		);
+		await waitFor(() => expect(leavePrompts()).toHaveLength(0));
+
+		updates.fail(new Error("Server said no"));
+		const error = await screen.findByRole("dialog", { name: /error/i });
+		expect(error).toHaveTextContent("Server said no");
+		fireEvent.click(within(error).getByRole("button"));
+		await waitFor(() =>
+			expect(screen.getByDisplayValue("AliceX")).toBeEnabled(),
+		);
+		expect(unloadIsBlocked()).toBe(true);
+		await navigate("/other");
+		expect(history.location.pathname).toBe("/page");
+		expect(leavePrompts()).toHaveLength(1);
+	});
+
+	it("[ISSUE-3473-ITEM-4] a successful save releases the guards it kept while it was pending", async () => {
+		const model = makePeopleModel();
+		const updates = holdUpdates(model);
+		const { history } = mountPage(FieldPage, { model });
+		await startSave();
+		expect(unloadIsBlocked()).toBe(true);
+
+		updates.release();
+		await waitFor(() =>
+			expect(screen.getByDisplayValue("AliceX")).toBeEnabled(),
+		);
+		expect(unloadIsBlocked()).toBe(false);
+		await navigate("/other");
+		expect(history.location.pathname).toBe("/other");
+		expect(leavePrompts()).toHaveLength(0);
+	});
+
+	it("[ISSUE-3473-ITEM-4] the footer's goBack asks while the form saves", async () => {
+		const Footer = (
+			p: BasicFormPageRendererProps<EnhancedCustomProps<TestCustomProps>>,
+		) => (
+			<>
+				<button type={"button"} onClick={() => void p.safeSubmit()}>
+					Save
+				</button>
+				<button type={"button"} onClick={() => void p.customProps.goBack()}>
+					Close
+				</button>
+			</>
+		);
+		const Page = (props: PageProps<PeopleModel, TestCustomProps>) => (
+			<BasicFormPage
+				{...props}
+				form={<FormField name="first_name" />}
+				childrenProps={{}}
+			>
+				{Footer}
+			</BasicFormPage>
+		);
+		const model = makePeopleModel();
+		const updates = holdUpdates(model);
+		const { goBack } = mountPage(Page, { model });
+		await startSave();
+
+		fireEvent.click(screen.getByRole("button", { name: "Close" }));
+		fireEvent.click(
+			within(await findLeavePrompt()).getByRole("button", { name: "No" }),
+		);
+		await waitFor(() => expect(leavePrompts()).toHaveLength(0));
+		expect(goBack).not.toHaveBeenCalled();
+
+		updates.release();
+		await waitFor(() =>
+			expect(screen.getByDisplayValue("AliceX")).toBeEnabled(),
+		);
+		fireEvent.click(screen.getByRole("button", { name: "Close" }));
+		await waitFor(() => expect(goBack).toHaveBeenCalledTimes(1));
+		expect(leavePrompts()).toHaveLength(0);
+	});
+
+	it("[ISSUE-3473-ITEM-4] a form that is read-only for another reason takes no guard, also while it is busy", async () => {
+		const Controls = () => {
+			const { setFieldValue, addBusyReason } = useFormContext<ModelUnknown>();
+			return (
+				<>
+					<button
+						type={"button"}
+						onClick={() => setFieldValue("first_name", "Changed")}
+					>
+						Change from code
+					</button>
+					<button type={"button"} onClick={() => addBusyReason("test")}>
+						Get busy
+					</button>
+				</>
+			);
+		};
+		const Page = makePage({}, <Controls />);
+		const { history } = mountPage(Page, {
+			formProps: { readOnlyReasons: { permission: "No permission" } },
+		});
+		await screen.findByDisplayValue("Alice", undefined, LOAD);
+		fireEvent.click(screen.getByRole("button", { name: "Change from code" }));
+		await screen.findByDisplayValue("Changed");
+		fireEvent.click(screen.getByRole("button", { name: "Get busy" }));
+		await screen.findByRole("progressbar");
+
+		expect(unloadIsBlocked()).toBe(false);
+		await navigate("/other");
+		expect(history.location.pathname).toBe("/other");
+		expect(leavePrompts()).toHaveLength(0);
 	});
 });
