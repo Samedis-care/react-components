@@ -59,13 +59,18 @@ const setViewportDirectives = (
  * wrote it. Without a viewport meta, it appends one to `<head>`. Writes on
  * mount and whenever `minWidth` changes; renders nothing.
  *
+ * On unmount it puts back the content the meta had before it mounted, or
+ * removes the meta it appended. Each `minWidth` change starts from that
+ * content too, so a change another script made to the meta while it was
+ * mounted does not survive a `minWidth` change or the unmount.
+ *
  * Framework renders it for the app (`disableMobileScalingFix`,
  * `mobileScalingFixProps`).
  */
 const MobileScalingFix = (props: MobileScalingFixProps) => {
 	const { minWidth } = props;
 	useEffect(() => {
-		let meta: HTMLMetaElement | null = document.querySelector(
+		const pageMeta = document.querySelector<HTMLMetaElement>(
 			"meta[name='viewport']",
 		);
 		const directives = new Map([
@@ -77,12 +82,17 @@ const MobileScalingFix = (props: MobileScalingFixProps) => {
 		) {
 			directives.set("maximum-scale", "1"); // prevent scaling in on inputs
 		}
-		if (!meta) {
-			meta = document.createElement("meta");
+		const meta = pageMeta ?? document.createElement("meta");
+		if (!pageMeta) {
 			meta.name = "viewport";
 			document.head.appendChild(meta);
 		}
-		meta.content = setViewportDirectives(meta.content, directives);
+		const previousContent = meta.content;
+		meta.content = setViewportDirectives(previousContent, directives);
+		return () => {
+			if (pageMeta) meta.content = previousContent;
+			else meta.remove();
+		};
 	}, [minWidth]);
 
 	return <></>;

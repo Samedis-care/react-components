@@ -71,6 +71,29 @@ describe("MobileScalingFix in Framework", () => {
 		expect(viewportContent()).toBeUndefined();
 	});
 
+	it("[ISSUE-3459-ITEM-5] restores the page's viewport when disableMobileScalingFix turns true", async () => {
+		const meta = document.createElement("meta");
+		meta.name = "viewport";
+		meta.content = "width=device-width, initial-scale=1";
+		document.head.appendChild(meta);
+		const { rerender } = render(
+			<Framework mobileScalingFixProps={{ minWidth: 1000 }}>
+				<div>app</div>
+			</Framework>,
+		);
+		await screen.findByText("app");
+		expect(meta.content).toBe("width=1000, initial-scale=1");
+		rerender(
+			<Framework
+				mobileScalingFixProps={{ minWidth: 1000 }}
+				disableMobileScalingFix
+			>
+				<div>app</div>
+			</Framework>,
+		);
+		expect(meta.content).toBe("width=device-width, initial-scale=1");
+	});
+
 	it("[ISSUE-3459-ITEM-3] sets the viewport while the app's first render suspends", async () => {
 		// awaited, because React leaves a commit's effects pending when it
 		// suspends inside an act() that is not awaited
