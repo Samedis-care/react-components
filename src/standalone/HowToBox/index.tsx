@@ -11,7 +11,12 @@ export interface HowToBoxProps {
 	 */
 	titleLabel?: React.ReactNode;
 	/**
-	 * How to entries
+	 * How to entries. An array renders one list item per element; any other
+	 * value renders as a single item.
+	 *
+	 * A line break `"\n"` in an entry starts a new line inside the same item,
+	 * which is the only way to break a line in a translated string. Other runs
+	 * of white space collapse to one space, as in normal text.
 	 */
 	labels: string[] | React.ReactNode[] | string | React.ReactNode | undefined;
 	className?: string;
@@ -29,7 +34,9 @@ const UnorderedList = styled("ul", { name: "CcHowToBox", slot: "ul" })({
 	paddingLeft: "1.5rem",
 });
 
-const ListItem = styled("li", { name: "CcHowToBox", slot: "li" })({});
+const ListItem = styled("li", { name: "CcHowToBox", slot: "li" })({
+	whiteSpace: "pre-line",
+});
 
 export type HowToBoxClassKey = "root" | "ul" | "li";
 
