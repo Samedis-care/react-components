@@ -8,17 +8,24 @@ import type { DataGridCustomDataType, DataGridProps, IDataGridColumnDef, IDataGr
 export declare const DATA_GRID_PERSIST_VERSION = 2;
 export declare const DEFAULT_PERSIST_CONFIG: NonNullable<DataGridProps["persist"]>;
 /**
- * The persisted sort of a single column: [direction, order]
+ * The persisted sort of a single column: [direction, order], in the sort
+ * record of earlier versions (see DataGridPersistentState.sort)
  * @remarks A direction of 0 records that the user cleared a sort which is active
  *          by default (see DataGridProps.defaultSort). Columns which are unsorted
  *          by default and unsorted by the user aren't written at all.
  */
 export type DataGridPersistedSort = [direction: -1 | 0 | 1, order?: number];
 /**
+ * A grid's whole sort as persisted: the sorted columns as [field, direction],
+ * highest priority first. Empty when nothing is sorted.
+ */
+export type DataGridPersistedSortList = [field: string, direction: -1 | 1][];
+/**
  * The persisted (wire) format of the DataGrid state.
  *
  * This is deliberately not the shape of the runtime state: it is stored per user
- * on a server, so it only carries what deviates from the defaults. Keys are kept
+ * on a server, so apart from the sort it only carries what deviates from the
+ * defaults. Keys are kept
  * short-ish and everything optional, which keeps a 70 column grid at well under
  * half the size of the legacy format.
  *
@@ -46,9 +53,19 @@ export interface DataGridPersistentState {
      */
     pinned?: string[];
     /**
-     * Sort per column, only for columns which deviate from the default
+     * The sort, as a whole (DataGridPersistedSortList). It is what the grid
+     * opens with: DataGridProps.defaultSort only applies when nothing is
+     * stored, and on a reset, so a default sort added or changed later leaves
+     * it as it is. The sort of a column which is not currently defined is
+     * dropped on read.
+     * @remarks Data of earlier versions holds a record instead (field ->
+     *          DataGridPersistedSort) with only the columns whose sort deviated
+     *          from the default sort of that time. It is read on top of the
+     *          current default sort, except for the default sorts that cannot
+     *          have been in place when it was written: a default sort of a
+     *          column without an entry, with the priority of a stored one.
      */
-    sort?: Record<string, DataGridPersistedSort>;
+    sort?: DataGridPersistedSortList | Record<string, DataGridPersistedSort>;
     /**
      * Filter per column, only for columns which deviate from the default.
      * null records that the user cleared a filter which is set by default.
@@ -145,9 +162,9 @@ export declare const splitPersistedState: (data: DataGridPersistentState) => [si
  * format only when it is written, so the parts may be in different formats.
  * Then every legacy part is migrated on its own, and the result is in the
  * current format, with the `v` of the last part that was stored in it. A
- * migrated part has a sort and a filter entry for every column in its legacy
- * columnState, as the legacy format stored the whole state, not deviations
- * from the defaults.
+ * migrated part has the whole sort and a filter entry for every column in its
+ * legacy columnState, as the legacy format stored the whole state, not
+ * deviations from the defaults.
  * @param parts The parts, in the order they should be merged (a later part's
  *        keys win). Missing parts (undefined, null) are skipped.
  * @returns The merged data, undefined when no part is there. It is in the

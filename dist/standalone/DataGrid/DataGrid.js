@@ -1,7 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useContext, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, } from "react";
 import { Box, Collapse, Divider, Grid, IconButton, ListItem, Paper, styled, Typography, useTheme, useThemeProps, } from "@mui/material";
-import { Apps as AppsIcon, Search as SearchIcon } from "@mui/icons-material";
+import { Apps as AppsIcon, FilterAlt as FilterAltIcon, FilterAltOutlined as FilterAltOutlinedIcon, Search as SearchIcon, } from "@mui/icons-material";
 import Header from "./Header";
 import Footer from "./Footer";
 import Settings from "./Settings";
@@ -19,7 +19,6 @@ import { decodePersistedState, normalizeFilterDef } from "./PersistFormat";
 import combineClassNames from "../../utils/combineClassNames";
 import Checkbox from "../UIKit/Checkbox";
 import ComponentWithLabel from "../UIKit/ComponentWithLabel";
-import FilterIcon from "../Icons/FilterIcon";
 import deepClone from "../../utils/deepClone";
 export const DataGridStateContext = React.createContext(undefined);
 export const useDataGridState = () => {
@@ -362,20 +361,29 @@ export const DataGridColumnHeaderFilterPopupDateTime = styled(Grid, {
 })({
     width: 200,
 });
-export const DataGridColumnHeaderFilterIcon = styled(FilterIcon, {
+/**
+ * Theme slot `columnHeaderFilterIcon`: the filter button's icon of a column
+ * without an active filter. Draws MUI's outlined funnel (`FilterAltOutlined`)
+ * at MUI's small icon size (20px).
+ */
+export const DataGridColumnHeaderFilterIcon = styled(FilterAltOutlinedIcon, {
     name: "CcDataGrid",
     slot: "columnHeaderFilterIcon",
-})({
-    width: 16,
-    height: "auto",
-});
-export const DataGridColumnHeaderFilterActiveIcon = styled(FilterIcon, {
+})(({ theme }) => ({
+    fontSize: theme.typography.pxToRem(20),
+}));
+/**
+ * Theme slot `columnHeaderFilterActiveIcon`: the filter button's icon of a
+ * column with an active filter. Draws MUI's filled funnel (`FilterAlt`) at
+ * MUI's small icon size (20px), so a filtered column differs from the others
+ * in shape, not only in the button's color.
+ */
+export const DataGridColumnHeaderFilterActiveIcon = styled(FilterAltIcon, {
     name: "CcDataGrid",
     slot: "columnHeaderFilterActiveIcon",
-})({
-    width: 16,
-    height: "auto",
-});
+})(({ theme }) => ({
+    fontSize: theme.typography.pxToRem(20),
+}));
 export const DataGridColumnHeaderFilterButton = styled(IconButton, {
     name: "CcDataGrid",
     slot: "columnHeaderFilterButton",
@@ -503,6 +511,13 @@ const DataGrid = (inProps, ref) => {
     // a controlled selection is the parent's value: a reload keeps it
     const selectionControlled = useRef(false);
     selectionControlled.current = !!selection;
+    // the loads of one query (refreshDataInstance) share an AbortController:
+    // it aborts once a reload replaces the query or the grid unmounts
+    const loadAbort = useRef(null);
+    useEffect(() => () => {
+        loadAbort.current?.abort();
+        loadAbort.current = null;
+    }, [refreshDataInstance]);
     // refresh data if desired
     useEffect(() => {
         // we have an issue with a rare stuck loading bug. my assumption is that
@@ -514,6 +529,7 @@ const DataGrid = (inProps, ref) => {
             return;
         }
         const query = dataGridGetQuery(state, columnsState, getAdditionalFilters);
+        const { signal } = (loadAbort.current ??= new AbortController());
         void (async () => {
             for (let pageIndex = pages[0]; pageIndex <= pages[1]; pageIndex++) {
                 // check if page was already loaded
@@ -525,7 +541,13 @@ const DataGrid = (inProps, ref) => {
                         page: pageIndex + 1,
                         rows: rowsPerPage,
                         ...query,
+                        signal,
                     });
+                    // aborted meanwhile: the grid shows another query or is gone, so
+                    // the pass sets nothing and requests no further page (a StrictMode
+                    // remount runs a pass of its own)
+                    if (signal.aborted)
+                        return;
                     const dataRowsTotal = data.rowsFiltered ?? data.rowsTotal;
                     // check if we are on an invalid page
                     if (pageIndex !== 0 &&
@@ -560,6 +582,9 @@ const DataGrid = (inProps, ref) => {
                         : prevState);
                 }
                 catch (err) {
+                    // aborted meanwhile (this may be the abort itself): as above
+                    if (signal.aborted)
+                        return;
                     // eslint-disable-next-line no-console
                     console.error("[Components-Care] [DataGrid] LoadData: ", err);
                     setState((prevState) => prevState.refreshDataInstance === refreshDataInstance
@@ -614,6 +639,8 @@ const DataGrid = (inProps, ref) => {
             refreshShouldWipeRows: false,
         }));
     }, 500), [setState]);
+    // a reload still waiting for its debounce goes with the grid
+    useEffect(() => () => resetView.cancel(), [resetView]);
     const initialRender = useRef(true);
     // reset initial render state after unmount (react 18 does remounts with persisted data)
     useEffect(() => {

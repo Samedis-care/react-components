@@ -14,6 +14,17 @@ import("@sentry/react")
     .then((Sentry) => (captureException = Sentry.captureException))
     .catch(() => { }); // ignore
 /**
+ * Reports an error to Sentry, if it is loaded, unless the network or the backend caused it
+ * @param err The error
+ */
+const reportUnexpectedError = (err) => {
+    if (captureException &&
+        err instanceof Error &&
+        !["NetworkError", "BackendError"].includes(err.name)) {
+        captureException(err);
+    }
+};
+/**
  * React-Query's useQuery for the given model and record ID
  * @param model The model ID to load
  * @param id The record ID (or null to get default values on create)
@@ -21,7 +32,7 @@ import("@sentry/react")
  */
 export const useModelGet = (model, id, options) => {
     return useQuery({
-        queryKey: model.getReactQueryKey(id, options?.batch ?? model.requestBatchingEnabled),
+        queryKey: model.getReactQueryKeyGet(id, options),
         queryFn: () => model.getRaw(id, options),
         // 3 retries if we get network error
         retry: (count, err) => err.name === "NetworkError" && count < 3,
@@ -111,6 +122,7 @@ export const useModelMutation = (model) => {
                 ModelDataStore.setQueryData(model.getReactQueryKey(id, false), responseData);
                 if (model.requestBatchingEnabled) {
                     ModelDataStore.setQueryData(model.getReactQueryKey(id, true), responseData);
+                    ModelDataStore.setQueryData(model.getReactQueryKeyGet(id), responseData);
                 }
                 else {
                     ModelDataStore.removeQueries({
@@ -296,18 +308,10 @@ class Model {
         try {
             // a copy, so what the connector changes doesn't reach the caller's params (or the cache keys holding them)
             const [rawData, meta, userData] = await this.connector.index(deepClone(params), this.asModelUnknown);
-            return [
-                this.cacheIndexRecords(await Promise.all(rawData.map((data) => this.applySerialization(data, "deserialize", "overview")))),
-                meta,
-                userData,
-            ];
+            return [await this.deserializeIndexRecords(rawData), meta, userData];
         }
         catch (err) {
-            if (captureException &&
-                err instanceof Error &&
-                !["NetworkError", "BackendError"].includes(err.name)) {
-                captureException(err);
-            }
+            reportUnexpectedError(err);
             throw err;
         }
     }
@@ -318,11 +322,15 @@ class Model {
      */
     async index2(params) {
         const [rawData, meta, userData] = await this.connector.index2(deepClone(params), this.asModelUnknown);
-        return [
-            this.cacheIndexRecords(await Promise.all(rawData.map((data) => this.applySerialization(data, "deserialize", "overview")))),
-            meta,
-            userData,
-        ];
+        return [await this.deserializeIndexRecords(rawData), meta, userData];
+    }
+    /**
+     * Deserializes index records with the overview visibility and caches them for batched requests
+     * @param rawData The records as the connector returns them
+     * @returns The deserialized records
+     */
+    async deserializeIndexRecords(rawData) {
+        return this.cacheIndexRecords(await Promise.all(rawData.map((data) => this.applySerialization(data, "deserialize", "overview"))));
     }
     /**
      * Cache index records for batched requests
@@ -341,8 +349,28 @@ class Model {
      * Fetches all records using index calls
      * @param params The params to pass to index
      * @returns ModelIndexResponse where userMeta and meta is taken from the last call
+     * @remarks The records of fetchAllRaw, deserialized and cached as index does it
      */
     async fetchAll(params) {
+        try {
+            const [rawData, meta, userMeta] = await this.fetchAllRaw(params);
+            return [await this.deserializeIndexRecords(rawData), meta, userMeta];
+        }
+        catch (err) {
+            reportUnexpectedError(err);
+            throw err;
+        }
+    }
+    /**
+     * Fetches all records using index calls, as the connector returns them
+     * @param params The params to pass to the connector's index, which gets a copy of them
+     * @returns The records, neither deserialized nor cached, and the meta and user meta of the last call
+     * @remarks RequestBatching loads its batches with it, so each record of a batch can be
+     *          deserialized for the get that asked for it. Errors are not reported to Sentry here,
+     *          fetchAll and getRaw report them.
+     * @see fetchAll
+     */
+    async fetchAllRaw(params) {
         let page = 1;
         let perPage = 1000;
         let perPageDefault = true;
@@ -350,11 +378,12 @@ class Model {
         let userMeta;
         const records = [];
         while (true) {
-            const [tRecords, tMeta, tUserMeta] = await this.index({
+            // a copy, so what the connector changes doesn't reach the caller's params (or the cache keys holding them)
+            const [tRecords, tMeta, tUserMeta] = await this.connector.index(deepClone({
                 ...params,
                 rows: perPage,
                 page,
-            });
+            }), this.asModelUnknown);
             // save data
             records.push(...tRecords);
             meta = tMeta;
@@ -370,7 +399,7 @@ class Model {
             if (records.length >= totalRows || tRecords.length === 0)
                 break;
         }
-        return [this.asRecords(records), meta, userMeta];
+        return [records, meta, userMeta];
     }
     /**
      * Fetches all records using index calls and caches the result
@@ -397,6 +426,26 @@ class Model {
             batch ? (this.cacheKeysIndex ?? []) : null,
             this.cacheKeys,
         ];
+    }
+    /**
+     * Gets the react-query cache key of a record as getCached and useModelGet load it
+     * @param id The record id
+     * @param options The options of the get
+     * @returns getReactQueryKey(id, batch). A batch that comes from enableRequestBatching alone
+     *          (options.batch not set) holds the record deserialized for edit, not for overview,
+     *          so its key is getReactQueryKey(id, true) followed by "edit".
+     */
+    getReactQueryKeyGet(id, options) {
+        const key = this.getReactQueryKey(id, options?.batch ?? this.requestBatchingEnabled);
+        return this.isGetBatchedForEdit(options) ? [...key, "edit"] : key;
+    }
+    /**
+     * Does a get with these options load a batched record that stands in for a show?
+     * @param options The options of the get
+     * @returns true if the model's enableRequestBatching batches it, not options.batch
+     */
+    isGetBatchedForEdit(options) {
+        return options?.batch === undefined && this.requestBatchingEnabled;
     }
     /**
      * Gets the react-query cache key for this model (for fetch all)
@@ -503,7 +552,7 @@ class Model {
      */
     getCached(id, options) {
         return ModelDataStore.fetchQuery({
-            queryKey: this.getReactQueryKey(id, options?.batch ?? this.requestBatchingEnabled),
+            queryKey: this.getReactQueryKeyGet(id, options),
             queryFn: () => this.getRaw(id, options),
             ...this.cacheOptions,
         });
@@ -519,7 +568,7 @@ class Model {
                 return [this.asRecord(await this.getDefaultValues()), {}];
             const batch = options?.batch ?? this.requestBatchingEnabled;
             if (batch) {
-                const rawData = await RequestBatching.get(id, this.asModelUnknown);
+                const rawData = await RequestBatching.get(id, this.asModelUnknown, this.isGetBatchedForEdit(options) ? "edit" : "overview");
                 return [this.asRecord(rawData), {}];
             }
             else {

@@ -18,7 +18,18 @@ class RequestBatching {
     static batchNonce = {};
     static batchRequestIds = {};
     static batchLastAdded = {};
-    static async get(id, model) {
+    /**
+     * Loads a record through a batched index request
+     * @param id The record id
+     * @param model The model
+     * @param visibility The visibility to deserialize the record with: "edit" where the batch
+     *                   stands in for a show (the model's enableRequestBatching), "overview"
+     *                   where the caller asked for a batch
+     * @returns The deserialized record
+     * @remarks Gets of both visibilities share one request: the batch holds the records as the
+     *          connector returns them, and each get deserializes its own.
+     */
+    static async get(id, model, visibility = "overview") {
         const batchKey = JSON.stringify(model.getReactQueryKey(null, true));
         let promise;
         if (batchKey in this.batchPromises &&
@@ -61,7 +72,7 @@ class RequestBatching {
                     delete this.batchLastAdded[batchKey];
                 }
                 // execute batch
-                return model.fetchAll({
+                return model.fetchAllRaw({
                     fieldFilter: {
                         id: {
                             type: "inSet",
@@ -77,7 +88,7 @@ class RequestBatching {
         if (!record)
             throw new RequestBatchingError("[Components-Care] [RequestBatching] Requested record not returned by backend: " +
                 JSON.stringify(model.getReactQueryKey(id, true)));
-        return record;
+        return model.applySerialization(record, "deserialize", visibility);
     }
 }
 export default RequestBatching;

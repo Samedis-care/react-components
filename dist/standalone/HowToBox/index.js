@@ -8,12 +8,14 @@ const GroupBoxStyled = styled(GroupBox, { name: "CcHowToBox", slot: "root" })({}
 const UnorderedList = styled("ul", { name: "CcHowToBox", slot: "ul" })({
     paddingLeft: "1.5rem",
 });
-const ListItem = styled("li", { name: "CcHowToBox", slot: "li" })({});
+const ListItem = styled("li", { name: "CcHowToBox", slot: "li" })({
+    whiteSpace: "pre-line",
+});
 const HowToBox = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcHowToBox" });
     const { titleLabel, labels, className, classes } = props;
     const { t } = useCCTranslations();
-    if (!labels)
+    if (!labels || (Array.isArray(labels) && labels.length === 0))
         return _jsx(_Fragment, {});
     return (_jsx(GroupBoxStyled, { label: titleLabel ?? t("standalone.how-it-works.title"), className: combineClassNames([className, classes?.root]), children: _jsx(UnorderedList, { className: classes?.ul, children: Array.isArray(labels) ? (labels.map((label, i) => (_jsx(ListItem, { className: classes?.li, children: label }, i)))) : (_jsx(ListItem, { className: classes?.li, children: labels })) }) }));
 };

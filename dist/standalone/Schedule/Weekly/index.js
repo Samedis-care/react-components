@@ -125,18 +125,30 @@ const WeekView = (inProps) => {
         };
     }, [i18n]);
     useEffect(() => {
+        /**
+         * Set by the cleanup when a newer load starts or the view unmounts, so
+         * a result or error of this load that arrives later is dropped
+         */
+        let stale = false;
         setData(null);
         setLoadError(null);
         // fetch data
         void (async () => {
             try {
                 const data = await loadData(weekOffset, filterValues);
+                if (stale)
+                    return;
                 setData(data);
             }
             catch (loadError) {
+                if (stale)
+                    return;
                 setLoadError(loadError);
             }
         })();
+        return () => {
+            stale = true;
+        };
     }, [filterValues, loadData, weekOffset]);
     const now = moment();
     const weekday = now.weekday();

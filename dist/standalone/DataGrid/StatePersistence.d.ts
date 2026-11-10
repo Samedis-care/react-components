@@ -1,6 +1,6 @@
 import React from "react";
 import { DataGridPersistedData, DataGridPersistentState } from "./PersistFormat";
-export type { DataGridPersistedData, DataGridPersistedSort, DataGridPersistentState, DataGridPersistentStateLegacy, } from "./PersistFormat";
+export type { DataGridPersistedData, DataGridPersistedSort, DataGridPersistedSortList, DataGridPersistentState, DataGridPersistentStateLegacy, } from "./PersistFormat";
 export type DataGridPersistentStateContextType = [
     /**
      * The persisted data, in whichever format it was written: what the setter

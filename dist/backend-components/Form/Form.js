@@ -39,6 +39,12 @@ export var OnlySubmitMountedBehaviour;
 })(OnlySubmitMountedBehaviour || (OnlySubmitMountedBehaviour = {}));
 export const FormRenderAsDivContext = React.createContext(false);
 /**
+ * The key of FormContextData.readOnlyReasons under which a form is read-only while it
+ * submits or is busy (FormContextData.submitting), with the text "The form is currently
+ * being saved". Any other key means the form is read-only for another reason.
+ */
+export const FORM_SUBMITTING_READ_ONLY_REASON = "submit";
+/**
  * Context which stores information about the current form so it can be used by fields
  */
 export const FormContext = React.createContext(null);
@@ -290,7 +296,7 @@ const Form = (props) => {
             : {};
         const submitReadOnly = submitting
             ? {
-                submit: t("backend-components.form.read-only.submitting") ?? null,
+                [FORM_SUBMITTING_READ_ONLY_REASON]: t("backend-components.form.read-only.submitting") ?? null,
             }
             : {};
         return {

@@ -12,8 +12,8 @@ const transformOrigin = {
     horizontal: "center",
 };
 const DataActionBarMenu = (props) => {
-    const { anchorEl, onClose, customButtons, numSelected, selectAll, handleCustomButtonClick, } = props;
-    return (_jsx(PopupMenu, { elevation: 0, anchorEl: anchorEl, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, keepMounted: true, open: !!anchorEl, onClose: onClose, children: customButtons.map((entry) => (_jsxs(MenuItem, { disabled: dataGridIsCustomDataActionDisabled(entry, numSelected, selectAll), onClick: () => {
+    const { anchorEl, onClose, customButtons, numSelected, selectAll, handleCustomButtonClick, slotProps, } = props;
+    return (_jsx(PopupMenu, { anchorEl: anchorEl, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, keepMounted: true, open: !!anchorEl, onClose: onClose, slotProps: slotProps, children: customButtons.map((entry) => (_jsxs(MenuItem, { disabled: dataGridIsCustomDataActionDisabled(entry, numSelected, selectAll), onClick: () => {
                 handleCustomButtonClick(entry.label);
                 onClose();
             }, children: [_jsx(ListItemIcon, { children: entry.icon }), entry.label] }, entry.label))) }));

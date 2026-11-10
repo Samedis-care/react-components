@@ -1,7 +1,7 @@
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import { useCallback } from "react";
 import { ListItemButton, styled, useThemeProps } from "@mui/material";
-import CountryFlags from "../../standalone/CountryFlags";
+import CountryFlag from "../../standalone/CountryFlag";
 const ListItemRoot = styled(ListItemButton, {
     name: "CcLocaleSelectorEntry",
     slot: "root",
@@ -19,24 +19,11 @@ const Container = styled("div", {
     gap: 16,
     width: "100%",
 });
-const ImageWrapper = styled("div", {
+// 30px high in a 60x30 box, outlined in the theme's divider color
+const Flag = styled(CountryFlag, {
     name: "CcLocaleSelectorEntry",
-    slot: "imageWrapper",
-})({
-    flex: "0 0 auto",
-    width: 60,
-    height: 30,
-    display: "flex",
-    alignItems: "center",
-});
-// the flag keeps its aspect ratio within the wrapper, so the border always
-// hugs the flag itself (ratios range from 0.82 (NP) to 2.54 (QA))
-const Image = styled("img", { name: "CcLocaleSelectorEntry", slot: "image" })({
-    maxHeight: "100%",
-    maxWidth: "100%",
-    objectFit: "contain",
-    border: "1px solid lightgray",
-});
+    slot: "flag",
+})({});
 /**
  * Both text lines share a single grid, so the language column stays aligned
  * while the country column gets all the remaining space.
@@ -69,8 +56,7 @@ const LocaleSelectorEntry = (inProps) => {
     const handleClick = useCallback(() => {
         handleSwitch(locale.locale);
     }, [locale, handleSwitch]);
-    const flag = CountryFlags[locale.country_short];
-    return (_jsx(ListItemRoot, { onClick: handleClick, disabled: disabled, className: className, children: _jsxs(Container, { children: [_jsx(ImageWrapper, { children: _jsx(Image, { alt: locale.country, src: flag }) }), _jsxs(TextContainer, { children: [_jsx(Text, { title: locale.country, children: locale.country }), _jsx(Text, { title: locale.language, children: locale.language }), !sameLang && (_jsxs(_Fragment, { children: [_jsx(Text, { title: locale.native_country, children: locale.native_country }), _jsx(Text, { title: locale.native_language, children: locale.native_language })] }))] })] }) }));
+    return (_jsx(ListItemRoot, { onClick: handleClick, disabled: disabled, className: className, children: _jsxs(Container, { children: [_jsx(Flag, { code: locale.country_short, size: 30 }), _jsxs(TextContainer, { children: [_jsx(Text, { title: locale.country, children: locale.country }), _jsx(Text, { title: locale.language, children: locale.language }), !sameLang && (_jsxs(_Fragment, { children: [_jsx(Text, { title: locale.native_country, children: locale.native_country }), _jsx(Text, { title: locale.native_language, children: locale.native_language })] }))] })] }) }));
 };
 // virtualization remounts the component every time, so no need for memo here
 export default LocaleSelectorEntry;

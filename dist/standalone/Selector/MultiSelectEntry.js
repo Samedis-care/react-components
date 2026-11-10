@@ -19,7 +19,8 @@ const Selected = styled(SmallListItemButton, {
     name: "CcMultiSelectEntry",
     slot: "selected",
 })(selectedStyles);
-// the row of an entry without onClick: laid out like a list item button, but no control
+// the row of an entry without onClick: laid out like the SmallListItemButton
+// of an entry with onClick (MUI's 8px vertical padding, 8px gutters), but no control
 const SelectedText = styled("div", {
     name: "CcMultiSelectEntry",
     slot: "selected",
@@ -31,7 +32,7 @@ const SelectedText = styled("div", {
     minWidth: 0,
     boxSizing: "border-box",
     textAlign: "left",
-    padding: "8px 16px",
+    padding: 8,
     ...selectedStyles(props),
 }));
 const Label = styled(ListItemText, {

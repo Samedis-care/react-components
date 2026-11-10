@@ -228,6 +228,9 @@
 		},
 		"toast": {
 			"close": "Fermer"
+		},
+		"loader": {
+			"label": "Chargement…"
 		}
 	},
 	"framework": {

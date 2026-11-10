@@ -1,6 +1,6 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState, } from "react";
-import { useFormContextLite } from "../Form";
+import { FORM_SUBMITTING_READ_ONLY_REASON, useFormContextLite, } from "../Form";
 import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
 import { FrameworkHistory } from "../../framework/History";
 import { useDialogContext } from "../../framework/DialogContextProvider";
@@ -36,6 +36,10 @@ const BasicFormPage = (inProps) => {
     dirty, disableRouting, postSubmitHandler, isSubmitting, children: FormButtons, form, childrenProps, customProps: originalCustomProps, formPageLayoutComponent, ...otherProps } = props;
     const { t } = useCCTranslations();
     const { readOnly, readOnlyReasons, addEventListener, removeEventListener } = useFormContextLite();
+    // a save makes the form read-only too, but its changes are unsaved until it succeeds and
+    // a failed save is shown in the form, so a form being saved keeps its guards. Only a form
+    // which is read-only for another reason goes without them.
+    const readOnlyBesidesSaving = Object.keys(readOnlyReasons).some((reason) => reason !== FORM_SUBMITTING_READ_ONLY_REASON);
     // the dirty prop is one render behind the form engine, which breaks "submit, then
     // navigate away": the record is saved, but the guards below still see a dirty form.
     // The dirty event fires as soon as the form engine sees the change, so this ref is
@@ -70,7 +74,7 @@ const BasicFormPage = (inProps) => {
     const routePath = routeCtx ? routeCtx.path : "";
     useEffect(() => {
         // if the form is read-only, don't annoy the user
-        if (readOnly)
+        if (readOnlyBesidesSaving)
             return;
         // set while the history block is lifted for a POP inside the form page, see passThrough
         let stopWaitingForPop = null;
@@ -168,7 +172,7 @@ const BasicFormPage = (inProps) => {
             applyGuards(false);
         };
     }, [
-        readOnly,
+        readOnlyBesidesSaving,
         t,
         formDialog,
         routePath,
@@ -194,7 +198,9 @@ const BasicFormPage = (inProps) => {
             typeof orgGoBack === "function"
                 ? async (forceRefresh, forceNavigate) => {
                     try {
-                        if (dirtyRef.current && !readOnly && !forceNavigate) {
+                        if (dirtyRef.current &&
+                            !readOnlyBesidesSaving &&
+                            !forceNavigate) {
                             await showConfirmDialog(pushDialog, {
                                 title: t("backend-components.form.back-on-dirty.title"),
                                 message: t("backend-components.form.back-on-dirty.message"),

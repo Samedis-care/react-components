@@ -67,6 +67,9 @@ const asPersistedSort = (value) => {
         ? [direction, order]
         : [direction];
 };
+const asSortList = (value) => value.filter((entry) => Array.isArray(entry) &&
+    typeof entry[0] === "string" &&
+    (entry[1] === -1 || entry[1] === 1));
 const asFilterDef = (value, depth = 0) => {
     if (depth >= MAX_FILTER_CHAIN)
         return undefined;
@@ -94,33 +97,35 @@ const asWidths = (value) => {
     return result;
 };
 /**
- * Reduces the column state to what deviates from the defaults
+ * The sorted columns of a column state, highest priority (lowest sortOrder)
+ * first; a sorted column without a sortOrder comes last
+ * @param columnState The column state
+ */
+const encodeSort = (columnState) => Object.entries(columnState)
+    .filter((entry) => isPlainObject(entry[1]) &&
+    (entry[1].sort === -1 || entry[1].sort === 1))
+    .sort(([, a], [, b]) => (a.sortOrder ?? Number.MAX_SAFE_INTEGER) -
+    (b.sortOrder ?? Number.MAX_SAFE_INTEGER))
+    .map(([field, entry]) => [field, entry.sort]);
+/**
+ * Reduces the column filters to what deviates from the defaults
  * @param columnState The current column state
  * @param defaultColumnState The column state the grid would start out with
  */
-const encodeColumnStateDiff = (columnState, defaultColumnState) => {
-    const sort = {};
+const encodeFilterDiff = (columnState, defaultColumnState) => {
     const filter = {};
     for (const field in columnState) {
         const entry = columnState[field];
         if (!isPlainObject(entry))
             continue;
         const def = defaultColumnState[field];
-        const entrySort = entry.sort || 0;
-        const defSort = def?.sort || 0;
-        // sortOrder is meaningless while the column isn't sorted
-        const entryOrder = entrySort === 0 ? undefined : entry.sortOrder;
-        const defOrder = defSort === 0 ? undefined : def?.sortOrder;
-        if (entrySort !== defSort || entryOrder !== defOrder) {
-            sort[field] = entryOrder == null ? [entrySort] : [entrySort, entryOrder];
-        }
         const entryFilter = normalizeFilterDef(entry.filter) ?? null;
         const defFilter = normalizeFilterDef(def?.filter) ?? null;
         if (!deepEqual(entryFilter, defFilter, "equals")) {
             filter[field] = entryFilter;
         }
     }
-    return [sort, filter];
+    return filter;
 };
 /**
  * Encodes the runtime state into the format we persist
@@ -163,11 +168,13 @@ export const encodePersistedState = (state, columnState, columnWidth, defaultCol
         result.width = width;
         result.initialResize = state.initialResize;
     }
-    if (cfg.includes("sort") || cfg.includes("filters")) {
-        const [sort, filter] = encodeColumnStateDiff(columnState, defaultColumnState);
-        if (cfg.includes("sort") && Object.keys(sort).length)
-            result.sort = sort;
-        if (cfg.includes("filters") && Object.keys(filter).length)
+    // the whole sort, also when it is the default one: a default sort changed
+    // later must not change what the user has
+    if (cfg.includes("sort"))
+        result.sort = encodeSort(columnState);
+    if (cfg.includes("filters")) {
+        const filter = encodeFilterDiff(columnState, defaultColumnState);
+        if (Object.keys(filter).length)
             result.filter = filter;
     }
     if (cfg.includes("filters")) {
@@ -189,8 +196,8 @@ const isLegacy = (data) => data.v == null;
  * mention) are exactly that set.
  *
  * The legacy columnState is the whole sort and filter state, not a deviation
- * from the defaults, so every column in it gets a sort and a filter entry
- * (an unsorted column [0], an unfiltered one null). Applied to whatever the
+ * from the defaults: its sort becomes the whole sort, and every column in it
+ * gets a filter entry (an unfiltered one null). Applied to whatever the
  * defaults are when it is read, that gives back exactly the legacy state, so
  * the migration needs no defaults and a part of the data can be migrated on
  * its own (see mergePersistedState).
@@ -218,22 +225,18 @@ const migrateLegacyPersistedState = (legacy) => {
             result.pinned = known.filter((field) => lockedColumns.includes(field));
         }
     }
-    const sort = {};
     const filter = {};
     for (const field in columnState) {
         const entry = columnState[field];
         if (!isPlainObject(entry))
             continue;
-        const direction = entry.sort || 0;
-        // sortOrder is meaningless while the column isn't sorted
-        const order = direction === 0 ? undefined : entry.sortOrder;
-        sort[field] = order == null ? [direction] : [direction, order];
         filter[field] = normalizeFilterDef(entry.filter) ?? null;
     }
-    if (Object.keys(sort).length)
-        result.sort = sort;
-    if (Object.keys(filter).length)
+    // a column state without a usable entry says nothing about the sort
+    if (Object.keys(filter).length) {
+        result.sort = encodeSort(columnState);
         result.filter = filter;
+    }
     if (typeof state.search === "string" && state.search)
         result.search = state.search;
     if (isPlainObject(state.customData))
@@ -268,6 +271,88 @@ const getDecodedDefaults = (columns, defaultColumnState) => {
         columnWidth: {},
     };
 };
+/**
+ * Applies a stored whole sort (DataGridPersistedSortList): the default sort
+ * doesn't apply
+ * @param columnState The column state to change, starting with the defaults
+ * @param list The stored list
+ */
+const applySortList = (columnState, list) => {
+    for (const field in columnState) {
+        columnState[field] = {
+            ...columnState[field],
+            sort: 0,
+            sortOrder: undefined,
+        };
+    }
+    let priority = 0;
+    for (const [field, direction] of asSortList(list)) {
+        // sort of a column which no longer exists would be sent to the backend
+        if (!Object.prototype.hasOwnProperty.call(columnState, field))
+            continue;
+        // a column listed twice keeps its first entry
+        if (columnState[field].sort !== 0)
+            continue;
+        columnState[field] = {
+            ...columnState[field],
+            sort: direction,
+            sortOrder: ++priority,
+        };
+    }
+};
+/**
+ * Applies a stored sort record, as written before the sort was stored as a
+ * whole: the columns whose sort deviated from the default sort of that time
+ * @param columnState The column state to change, starting with the defaults
+ * @param record The stored record
+ */
+const applySortRecord = (columnState, record) => {
+    const sort = new Map();
+    for (const [field, value] of Object.entries(asRecord(record))) {
+        const entry = asPersistedSort(value);
+        if (entry)
+            sort.set(field, entry);
+    }
+    // a stored sort and a default sort of a column without an entry which
+    // share a priority were not both in place when the record was written:
+    // that default sort was added or changed since, and doesn't apply
+    const storedOrders = new Set();
+    for (const [direction, order] of sort.values()) {
+        if (direction !== 0 && order != null)
+            storedOrders.add(order);
+    }
+    const defaultChanged = Object.entries(columnState).some(([field, entry]) => !sort.has(field) &&
+        entry.sort !== 0 &&
+        entry.sortOrder != null &&
+        storedOrders.has(entry.sortOrder));
+    if (defaultChanged) {
+        for (const field in columnState) {
+            if (sort.has(field))
+                continue;
+            columnState[field] = {
+                ...columnState[field],
+                sort: 0,
+                sortOrder: undefined,
+            };
+        }
+    }
+    for (const [field, [direction, order]] of sort) {
+        // sort of a column which no longer exists would be sent to the backend
+        if (!(field in columnState))
+            continue;
+        columnState[field] = {
+            ...columnState[field],
+            sort: direction,
+            sortOrder: direction === 0 ? undefined : order,
+        };
+    }
+    // the record may leave gaps in the priorities, or none at all: number the
+    // sorted columns 1..n, as the grid does
+    let priority = 0;
+    for (const [field] of encodeSort(columnState)) {
+        columnState[field] = { ...columnState[field], sortOrder: ++priority };
+    }
+};
 const decode = (persisted, columns, defaultColumnState, config) => {
     const cfg = config ?? DEFAULT_PERSIST_CONFIG;
     const result = getDecodedDefaults(columns, defaultColumnState);
@@ -299,21 +384,10 @@ const decode = (persisted, columns, defaultColumnState, config) => {
             result.state.initialResize = data.initialResize;
     }
     if (cfg.includes("sort")) {
-        const sort = asRecord(data.sort);
-        for (const field in sort) {
-            // sort of a column which no longer exists would be sent to the backend
-            if (!(field in result.columnState))
-                continue;
-            const entry = asPersistedSort(sort[field]);
-            if (!entry)
-                continue;
-            const [direction, order] = entry;
-            result.columnState[field] = {
-                ...result.columnState[field],
-                sort: direction,
-                sortOrder: direction === 0 ? undefined : order,
-            };
-        }
+        if (Array.isArray(data.sort))
+            applySortList(result.columnState, data.sort);
+        else
+            applySortRecord(result.columnState, data.sort);
     }
     if (cfg.includes("filters")) {
         const filter = asRecord(data.filter);
@@ -376,9 +450,9 @@ export const splitPersistedState = (data) => {
  * format only when it is written, so the parts may be in different formats.
  * Then every legacy part is migrated on its own, and the result is in the
  * current format, with the `v` of the last part that was stored in it. A
- * migrated part has a sort and a filter entry for every column in its legacy
- * columnState, as the legacy format stored the whole state, not deviations
- * from the defaults.
+ * migrated part has the whole sort and a filter entry for every column in its
+ * legacy columnState, as the legacy format stored the whole state, not
+ * deviations from the defaults.
  * @param parts The parts, in the order they should be merged (a later part's
  *        keys win). Missing parts (undefined, null) are skipped.
  * @returns The merged data, undefined when no part is there. It is in the

@@ -1,13 +1,12 @@
 import React, { Dispatch, SetStateAction } from "react";
 import { Box, Collapse, Divider, Grid, IconButton, ListItem, Paper, SvgIconProps, Theme, Typography } from "@mui/material";
-import { Apps as AppsIcon, Search as SearchIcon } from "@mui/icons-material";
+import { Apps as AppsIcon, FilterAlt as FilterAltIcon, FilterAltOutlined as FilterAltOutlinedIcon, Search as SearchIcon } from "@mui/icons-material";
 import { IDataGridHeaderProps } from "./Header";
 import { FilterType, IFilterDef } from "./Content/FilterEntry";
 import { ModelFilterType, ModelUnknown } from "../../backend-integration/Model";
 import { IDataGridContentSelectRowViewProps } from "./Content/SelectRowView";
 import Checkbox from "../UIKit/Checkbox";
 import ComponentWithLabel from "../UIKit/ComponentWithLabel";
-import FilterIcon from "../Icons/FilterIcon";
 import { BackendMultiSelectProps } from "../../backend-components/Selector/BackendMultiSelect";
 import { MultiSelectorData } from "../Selector";
 export interface DataGridProps extends IDataGridHeaderProps, IDataGridColumnProps, IDataGridCallbacks {
@@ -129,6 +128,18 @@ export interface IDataGridLoadDataParameters {
      * The sort settings
      */
     sort: DataGridSortSetting[];
+    /**
+     * Aborts once the grid no longer needs the page: a reload replaced the
+     * query (search, filters, sort, custom data or forceRefreshToken changed)
+     * or the grid unmounted. Pass it on to the request (fetch's `signal`) to
+     * cancel it. The grid ignores what a call resolves or rejects with after
+     * its signal aborted, so an abort is never shown as a load error.
+     * @remarks Set when the grid loads the pages it shows; the pages the
+     *          limited select all (DataGridProps.limitSelectAll) loads come
+     *          without one. BackendDataGrid hands it on to the connector's
+     *          index as params.signal.
+     */
+    signal?: AbortSignal;
 }
 /**
  * The filter parts of the load data parameters: which rows the grid shows
@@ -136,12 +147,16 @@ export interface IDataGridLoadDataParameters {
 export type DataGridFilterParameters = Pick<IDataGridLoadDataParameters, "quickFilter" | "additionalFilters" | "fieldFilter">;
 /**
  * Which rows the grid shows and in which order: the load data parameters
- * without the paging
+ * without the paging and the signal
  */
-export type DataGridQuery = Omit<IDataGridLoadDataParameters, "page" | "rows">;
+export type DataGridQuery = Omit<IDataGridLoadDataParameters, "page" | "rows" | "signal">;
 export interface IDataGridCallbacks {
     /**
      * Loads data for the grid
+     *
+     * A reload (search, filters, sort, custom data or forceRefreshToken
+     * changed) or the unmount ends the load of the old query: the grid
+     * requests none of its remaining pages and aborts params.signal.
      * @param params The load data parameters
      * @returns The loaded data (resolve) or an error (reject)
      */
@@ -370,7 +385,10 @@ export interface IDataGridColumnProps {
      */
     disableSelection?: boolean;
     /**
-     * The default sort settings
+     * The sort a grid opens with when nothing is stored for it (see
+     * DataGridPersistentStateContext), and what "Reset sort settings" goes back
+     * to. A stored sort is used as it is: a default sort added or changed later
+     * does not change it.
      */
     defaultSort?: DataGridSortSetting[];
     /**
@@ -759,8 +777,19 @@ export declare const DataGridColumnHeaderFilterPopup: typeof Grid;
 export declare const DataGridColumnHeaderFilterPopupEnum: typeof Grid;
 export declare const DataGridColumnHeaderFilterPopupId: typeof Grid;
 export declare const DataGridColumnHeaderFilterPopupDateTime: typeof Grid;
-export declare const DataGridColumnHeaderFilterIcon: typeof FilterIcon;
-export declare const DataGridColumnHeaderFilterActiveIcon: typeof FilterIcon;
+/**
+ * Theme slot `columnHeaderFilterIcon`: the filter button's icon of a column
+ * without an active filter. Draws MUI's outlined funnel (`FilterAltOutlined`)
+ * at MUI's small icon size (20px).
+ */
+export declare const DataGridColumnHeaderFilterIcon: typeof FilterAltOutlinedIcon;
+/**
+ * Theme slot `columnHeaderFilterActiveIcon`: the filter button's icon of a
+ * column with an active filter. Draws MUI's filled funnel (`FilterAlt`) at
+ * MUI's small icon size (20px), so a filtered column differs from the others
+ * in shape, not only in the button's color.
+ */
+export declare const DataGridColumnHeaderFilterActiveIcon: typeof FilterAltIcon;
 export declare const DataGridColumnHeaderFilterButton: typeof IconButton;
 export declare const DataGridQuickFilterIcon: typeof SearchIcon;
 export declare const DataGridCustomFilterIcon: typeof AppsIcon;

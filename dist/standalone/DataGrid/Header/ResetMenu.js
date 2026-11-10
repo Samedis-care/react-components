@@ -13,7 +13,7 @@ const transformOrigin = {
 };
 const ResetMenu = (props) => {
     const { t } = useCCTranslations();
-    const { anchorEl, onClose, refresh, resetFilter, resetSort, resetColumn, resetWidth, resetAll, } = props;
+    const { anchorEl, onClose, refresh, resetFilter, resetSort, resetColumn, resetWidth, resetAll, slotProps, } = props;
     const refreshAndClose = useCallback(() => {
         refresh();
         onClose();
@@ -38,6 +38,6 @@ const ResetMenu = (props) => {
         resetAll();
         onClose();
     }, [resetAll, onClose]);
-    return (_jsxs(PopupMenu, { elevation: 0, anchorEl: anchorEl, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, keepMounted: true, open: !!anchorEl, onClose: onClose, children: [_jsx(MenuItem, { onClick: refreshAndClose, children: t("standalone.data-grid.header.reset-options.refresh") }), _jsx(MenuItem, { onClick: resetFilterAndClose, children: t("standalone.data-grid.header.reset-options.filter") }), _jsx(MenuItem, { onClick: resetSortAndClose, children: t("standalone.data-grid.header.reset-options.sort") }), _jsx(MenuItem, { onClick: resetColumnAndClose, children: t("standalone.data-grid.header.reset-options.column") }), _jsx(MenuItem, { onClick: resetWidthAndClose, children: t("standalone.data-grid.header.reset-options.width") }), _jsx(MenuItem, { onClick: resetAllAndClose, children: t("standalone.data-grid.header.reset-options.all") })] }));
+    return (_jsxs(PopupMenu, { anchorEl: anchorEl, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, keepMounted: true, open: !!anchorEl, onClose: onClose, slotProps: slotProps, children: [_jsx(MenuItem, { onClick: refreshAndClose, children: t("standalone.data-grid.header.reset-options.refresh") }), _jsx(MenuItem, { onClick: resetFilterAndClose, children: t("standalone.data-grid.header.reset-options.filter") }), _jsx(MenuItem, { onClick: resetSortAndClose, children: t("standalone.data-grid.header.reset-options.sort") }), _jsx(MenuItem, { onClick: resetColumnAndClose, children: t("standalone.data-grid.header.reset-options.column") }), _jsx(MenuItem, { onClick: resetWidthAndClose, children: t("standalone.data-grid.header.reset-options.width") }), _jsx(MenuItem, { onClick: resetAllAndClose, children: t("standalone.data-grid.header.reset-options.all") })] }));
 };
 export default React.memo(ResetMenu);

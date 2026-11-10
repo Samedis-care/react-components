@@ -1,8 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useState } from "react";
-import { ErrorOutlined, InfoOutlined, ReportProblemOutlined, } from "@mui/icons-material";
+import { ErrorOutlined, InfoOutlined, ReportProblemOutlined, TaskAlt, } from "@mui/icons-material";
 import { Accordion, AccordionDetails, AccordionSummary, styled, Typography, useThemeProps, } from "@mui/material";
-import SuccessOutlinedIcon from "../Icons/SuccessOutlinedIcon";
 import combineClassNames from "../../utils/combineClassNames";
 const AccordionStyled = styled(Accordion, { name: "CcInfoBox", slot: "root" })({
     boxShadow: "none",
@@ -92,7 +91,7 @@ const InfoBox = (inProps) => {
             case "warning":
                 return _jsx(ReportProblemOutlined, {});
             case "success":
-                return _jsx(SuccessOutlinedIcon, {});
+                return _jsx(TaskAlt, {});
             case "error":
                 return _jsx(ErrorOutlined, {});
             default:

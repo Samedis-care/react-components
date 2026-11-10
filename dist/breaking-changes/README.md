@@ -20,6 +20,31 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-10 | [InfiniteScroll loads nothing while it is hidden, and fills once it is shown](2026-11-10-infinite-scroll-waits-while-hidden.md) | behavior |
+| 2026-11-10 | [The Small list items narrow MUI's gutters, and MultiSelect's entries move 8px to the left](2026-11-10-small-list-item-gutters.md) | behavior |
+| 2026-11-10 | [Country flags come from country-flag-icons: every flag is 3:2 and drawn for small sizes](2026-11-10-country-flags-from-country-flag-icons.md) | behavior |
+| 2026-11-10 | [The Loader is a status region](2026-11-10-loader-status-region.md) | behavior |
+| 2026-11-10 | [A form page's footer is sticky, and its busy overlay covers only the form](2026-11-10-form-page-layout-sticky-footer.md) | behavior, theme |
+| 2026-11-10 | [MobileScalingFix puts the page's viewport back when it unmounts](2026-11-10-mobile-scaling-fix-restores-viewport-on-unmount.md) | behavior |
+| 2026-11-10 | [A HowToBox with an empty labels array renders nothing](2026-11-10-how-to-box-hides-empty-array.md) | behavior |
+| 2026-11-10 | [PopupMenu is flat by default](2026-11-10-popup-menu-flat-by-default.md) | behavior |
+| 2026-11-10 | [useCountryOptions gives each country a CountryFlag as its icon](2026-11-10-country-options-icon-is-country-flag.md) | type, behavior |
+| 2026-11-10 | [LocaleSelectorEntry shows its flag as a CountryFlag: the theme slot flag replaces imageWrapper and image](2026-11-10-locale-selector-entry-country-flag.md) | type, behavior |
+| 2026-11-10 | [SmallestIconButton is at least 24x24](2026-11-10-smallest-icon-button-minimum-target.md) | behavior |
+| 2026-11-10 | [The Loader's progressbar is named by its text, or "Loading…"](2026-11-10-loader-progressbar-named.md) | behavior |
+| 2026-11-10 | [MobileScalingFix keeps the page's other viewport directives](2026-11-10-mobile-scaling-fix-keeps-viewport-directives.md) | behavior |
+| 2026-11-10 | [CountryFlags has no prototype: names of Object.prototype are not flags](2026-11-10-country-flags-no-prototype.md) | behavior |
+| 2026-11-10 | [The Loader passes className and HTML attributes on, so styled(Loader) and FormLoaderOverlay's loader override apply](2026-11-10-loader-passes-class-name-and-attributes.md) | behavior |
+| 2026-11-10 | [A dirty form page still asks before it is left while it saves](2026-11-10-form-page-guarded-while-saving.md) | behavior |
+| 2026-11-10 | [FilterIcon, SignIcon and ExportIcon take a caller's viewBox](2026-11-10-icons-take-a-callers-viewbox.md) | behavior |
+| 2026-11-10 | [A line break in a HowToBox entry starts a new line](2026-11-10-how-to-box-line-breaks-in-entries.md) | behavior |
+| 2026-11-10 | [InfiniteScroll calls the latest callbacks, and drops a bottom call the list no longer needs](2026-11-10-infinite-scroll-calls-latest-callbacks.md) | behavior |
+| 2026-11-10 | [A record batched by enableRequestBatching is deserialized for edit](2026-11-10-model-batched-get-deserialized-for-edit.md) | behavior |
+| 2026-11-10 | [FilterIcon, SignIcon and ExportIcon are padded like Material icons](2026-11-10-icons-padded-like-material-icons.md) | behavior |
+| 2026-11-10 | [The Loader centers its text and spinner as one block](2026-11-10-loader-centers-text-and-spinner.md) | type, behavior |
+| 2026-11-10 | [A data grid's stored sort is its whole sort; defaultSort only applies when nothing is stored](2026-11-10-data-grid-stored-sort-is-whole.md) | behavior, type |
+| 2026-11-10 | [TuneIcon, ResetIcon, SuccessOutlinedIcon and AppsIcon are replaced by Material icons](2026-11-10-icons-retired-for-material-icons.md) | type, behavior |
+| 2026-11-10 | [The DataGrid's column-header filter buttons show an outlined funnel, and a filled one while the column is filtered](2026-11-10-data-grid-column-filter-icons.md) | behavior, theme |
 | 2026-11-06 | [A dialog button's onClick gets the dialog's close; the show…Dialog helpers return a closable promise](2026-11-06-dialog-button-onclick-gets-close.md) | type, behavior |
 | 2026-11-06 | [The simple dialogs, SignDialog and LocaleSelectorDialog close only their own dialog](2026-11-06-simple-dialogs-close-themselves.md) | behavior |
 | 2026-11-06 | [pushDialog returns a close for the dialog it pushed, and PushedDialogCloseContext is exported](2026-11-06-push-dialog-returns-close.md) | API, type |

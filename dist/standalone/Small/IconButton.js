@@ -10,8 +10,11 @@ export const SmallIconButton = styled(IconButton)(({ theme }) => ({
     padding: 4,
     ...focusRing(theme, 0),
 }));
-// without padding the button is the icon's box, so the ring keeps clear of the glyph
+// without padding the button is the icon's box, so the ring keeps clear of the glyph;
+// a smaller icon sits centered in the 24x24 minimum target (WCAG 2.5.8)
 export const SmallestIconButton = styled(IconButton)(({ theme }) => ({
     padding: 0,
+    minWidth: 24,
+    minHeight: 24,
     ...focusRing(theme, 2),
 }));

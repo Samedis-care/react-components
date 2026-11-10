@@ -14,6 +14,11 @@ export interface IDataGridExportMenuProps {
      * The menu onClose handler
      */
     onClose: NonNullable<MenuProps["onClose"]>;
+    /**
+     * The props of the menu's slots, MUI Menu's `slotProps`; `list` gives the
+     * menu an id and names it by the element that opened it (see useMenuButton)
+     */
+    slotProps?: MenuProps["slotProps"];
 }
 declare const _default: React.MemoExoticComponent<(props: IDataGridExportMenuProps) => React.JSX.Element>;
 export default _default;

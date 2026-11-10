@@ -13,6 +13,8 @@ import flag_AR from "../../assets/img/countries/AR.svg";
 import flag_AS from "../../assets/img/countries/AS.svg";
 import flag_AT from "../../assets/img/countries/AT.svg";
 import flag_AU from "../../assets/img/countries/AU.svg";
+import flag_AW from "../../assets/img/countries/AW.svg";
+import flag_AX from "../../assets/img/countries/AX.svg";
 import flag_AZ from "../../assets/img/countries/AZ.svg";
 import flag_BA from "../../assets/img/countries/BA.svg";
 import flag_BB from "../../assets/img/countries/BB.svg";
@@ -23,6 +25,7 @@ import flag_BG from "../../assets/img/countries/BG.svg";
 import flag_BH from "../../assets/img/countries/BH.svg";
 import flag_BI from "../../assets/img/countries/BI.svg";
 import flag_BJ from "../../assets/img/countries/BJ.svg";
+import flag_BL from "../../assets/img/countries/BL.svg";
 import flag_BM from "../../assets/img/countries/BM.svg";
 import flag_BN from "../../assets/img/countries/BN.svg";
 import flag_BO from "../../assets/img/countries/BO.svg";
@@ -34,6 +37,7 @@ import flag_BW from "../../assets/img/countries/BW.svg";
 import flag_BY from "../../assets/img/countries/BY.svg";
 import flag_BZ from "../../assets/img/countries/BZ.svg";
 import flag_CA from "../../assets/img/countries/CA.svg";
+import flag_CC from "../../assets/img/countries/CC.svg";
 import flag_CD from "../../assets/img/countries/CD.svg";
 import flag_CF from "../../assets/img/countries/CF.svg";
 import flag_CG from "../../assets/img/countries/CG.svg";
@@ -47,6 +51,8 @@ import flag_CO from "../../assets/img/countries/CO.svg";
 import flag_CR from "../../assets/img/countries/CR.svg";
 import flag_CU from "../../assets/img/countries/CU.svg";
 import flag_CV from "../../assets/img/countries/CV.svg";
+import flag_CW from "../../assets/img/countries/CW.svg";
+import flag_CX from "../../assets/img/countries/CX.svg";
 import flag_CY from "../../assets/img/countries/CY.svg";
 import flag_CZ from "../../assets/img/countries/CZ.svg";
 import flag_DE from "../../assets/img/countries/DE.svg";
@@ -58,6 +64,7 @@ import flag_DZ from "../../assets/img/countries/DZ.svg";
 import flag_EC from "../../assets/img/countries/EC.svg";
 import flag_EE from "../../assets/img/countries/EE.svg";
 import flag_EG from "../../assets/img/countries/EG.svg";
+import flag_EH from "../../assets/img/countries/EH.svg";
 import flag_ER from "../../assets/img/countries/ER.svg";
 import flag_ES from "../../assets/img/countries/ES.svg";
 import flag_ET from "../../assets/img/countries/ET.svg";
@@ -131,6 +138,7 @@ import flag_MA from "../../assets/img/countries/MA.svg";
 import flag_MC from "../../assets/img/countries/MC.svg";
 import flag_MD from "../../assets/img/countries/MD.svg";
 import flag_ME from "../../assets/img/countries/ME.svg";
+import flag_MF from "../../assets/img/countries/MF.svg";
 import flag_MG from "../../assets/img/countries/MG.svg";
 import flag_MH from "../../assets/img/countries/MH.svg";
 import flag_MK from "../../assets/img/countries/MK.svg";
@@ -150,7 +158,9 @@ import flag_MX from "../../assets/img/countries/MX.svg";
 import flag_MY from "../../assets/img/countries/MY.svg";
 import flag_MZ from "../../assets/img/countries/MZ.svg";
 import flag_NA from "../../assets/img/countries/NA.svg";
+import flag_NC from "../../assets/img/countries/NC.svg";
 import flag_NE from "../../assets/img/countries/NE.svg";
+import flag_NF from "../../assets/img/countries/NF.svg";
 import flag_NG from "../../assets/img/countries/NG.svg";
 import flag_NI from "../../assets/img/countries/NI.svg";
 import flag_NL from "../../assets/img/countries/NL.svg";
@@ -162,6 +172,7 @@ import flag_NZ from "../../assets/img/countries/NZ.svg";
 import flag_OM from "../../assets/img/countries/OM.svg";
 import flag_PA from "../../assets/img/countries/PA.svg";
 import flag_PE from "../../assets/img/countries/PE.svg";
+import flag_PF from "../../assets/img/countries/PF.svg";
 import flag_PG from "../../assets/img/countries/PG.svg";
 import flag_PH from "../../assets/img/countries/PH.svg";
 import flag_PK from "../../assets/img/countries/PK.svg";
@@ -183,19 +194,21 @@ import flag_SA from "../../assets/img/countries/SA.svg";
 import flag_SB from "../../assets/img/countries/SB.svg";
 import flag_SC from "../../assets/img/countries/SC.svg";
 import flag_SD from "../../assets/img/countries/SD.svg";
-import flag_SS from "../../assets/img/countries/SS.svg";
 import flag_SE from "../../assets/img/countries/SE.svg";
 import flag_SG from "../../assets/img/countries/SG.svg";
 import flag_SH from "../../assets/img/countries/SH.svg";
 import flag_SI from "../../assets/img/countries/SI.svg";
+import flag_SJ from "../../assets/img/countries/SJ.svg";
 import flag_SK from "../../assets/img/countries/SK.svg";
 import flag_SL from "../../assets/img/countries/SL.svg";
 import flag_SM from "../../assets/img/countries/SM.svg";
 import flag_SN from "../../assets/img/countries/SN.svg";
 import flag_SO from "../../assets/img/countries/SO.svg";
 import flag_SR from "../../assets/img/countries/SR.svg";
+import flag_SS from "../../assets/img/countries/SS.svg";
 import flag_ST from "../../assets/img/countries/ST.svg";
 import flag_SV from "../../assets/img/countries/SV.svg";
+import flag_SX from "../../assets/img/countries/SX.svg";
 import flag_SY from "../../assets/img/countries/SY.svg";
 import flag_SZ from "../../assets/img/countries/SZ.svg";
 import flag_TC from "../../assets/img/countries/TC.svg";
@@ -229,13 +242,17 @@ import flag_VN from "../../assets/img/countries/VN.svg";
 import flag_VU from "../../assets/img/countries/VU.svg";
 import flag_WF from "../../assets/img/countries/WF.svg";
 import flag_WS from "../../assets/img/countries/WS.svg";
+import flag_XK from "../../assets/img/countries/XK.svg";
 import flag_YE from "../../assets/img/countries/YE.svg";
 import flag_YT from "../../assets/img/countries/YT.svg";
 import flag_ZA from "../../assets/img/countries/ZA.svg";
 import flag_ZM from "../../assets/img/countries/ZM.svg";
 import flag_ZW from "../../assets/img/countries/ZW.svg";
 // JS Object
-const CountryFlags = {
+// No prototype: a lookup of a name of Object.prototype ("toString",
+// "__proto__", ...) gives undefined, like any other code without a flag
+const CountryFlags = Object.create(null);
+Object.assign(CountryFlags, {
     AD: flag_AD,
     AE: flag_AE,
     AF: flag_AF,
@@ -249,6 +266,8 @@ const CountryFlags = {
     AS: flag_AS,
     AT: flag_AT,
     AU: flag_AU,
+    AW: flag_AW,
+    AX: flag_AX,
     AZ: flag_AZ,
     BA: flag_BA,
     BB: flag_BB,
@@ -259,6 +278,7 @@ const CountryFlags = {
     BH: flag_BH,
     BI: flag_BI,
     BJ: flag_BJ,
+    BL: flag_BL,
     BM: flag_BM,
     BN: flag_BN,
     BO: flag_BO,
@@ -270,6 +290,7 @@ const CountryFlags = {
     BY: flag_BY,
     BZ: flag_BZ,
     CA: flag_CA,
+    CC: flag_CC,
     CD: flag_CD,
     CF: flag_CF,
     CG: flag_CG,
@@ -283,6 +304,8 @@ const CountryFlags = {
     CR: flag_CR,
     CU: flag_CU,
     CV: flag_CV,
+    CW: flag_CW,
+    CX: flag_CX,
     CY: flag_CY,
     CZ: flag_CZ,
     DE: flag_DE,
@@ -294,6 +317,7 @@ const CountryFlags = {
     EC: flag_EC,
     EE: flag_EE,
     EG: flag_EG,
+    EH: flag_EH,
     ER: flag_ER,
     ES: flag_ES,
     ET: flag_ET,
@@ -367,6 +391,7 @@ const CountryFlags = {
     MC: flag_MC,
     MD: flag_MD,
     ME: flag_ME,
+    MF: flag_MF,
     MG: flag_MG,
     MH: flag_MH,
     MK: flag_MK,
@@ -386,7 +411,9 @@ const CountryFlags = {
     MY: flag_MY,
     MZ: flag_MZ,
     NA: flag_NA,
+    NC: flag_NC,
     NE: flag_NE,
+    NF: flag_NF,
     NG: flag_NG,
     NI: flag_NI,
     NL: flag_NL,
@@ -398,6 +425,7 @@ const CountryFlags = {
     OM: flag_OM,
     PA: flag_PA,
     PE: flag_PE,
+    PF: flag_PF,
     PG: flag_PG,
     PH: flag_PH,
     PK: flag_PK,
@@ -419,19 +447,21 @@ const CountryFlags = {
     SB: flag_SB,
     SC: flag_SC,
     SD: flag_SD,
-    SS: flag_SS,
     SE: flag_SE,
     SG: flag_SG,
     SH: flag_SH,
     SI: flag_SI,
+    SJ: flag_SJ,
     SK: flag_SK,
     SL: flag_SL,
     SM: flag_SM,
     SN: flag_SN,
     SO: flag_SO,
     SR: flag_SR,
+    SS: flag_SS,
     ST: flag_ST,
     SV: flag_SV,
+    SX: flag_SX,
     SY: flag_SY,
     SZ: flag_SZ,
     TC: flag_TC,
@@ -465,10 +495,11 @@ const CountryFlags = {
     VU: flag_VU,
     WF: flag_WF,
     WS: flag_WS,
+    XK: flag_XK,
     YE: flag_YE,
     YT: flag_YT,
     ZA: flag_ZA,
     ZM: flag_ZM,
     ZW: flag_ZW,
-};
+});
 export default CountryFlags;

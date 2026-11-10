@@ -2,7 +2,10 @@ import React from "react";
 import { IDayData, ScheduleAction, ScheduleFilterDefinition } from "../Common/DayContents";
 export interface WeekViewProps {
     /**
-     * Callback to load data of this week
+     * Callback to load data of this week. Called on mount and again when the
+     * week, the filter values or this function change; only the result or
+     * error of the latest call is shown, one of an earlier call that arrives
+     * later is ignored.
      * @param weekOffset The offset to the current week
      * @param filter The selected filter(s)
      */
