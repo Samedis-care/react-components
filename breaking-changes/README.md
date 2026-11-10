@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-10 | [FilterIcon, SignIcon and ExportIcon are padded like Material icons](2026-11-10-icons-padded-like-material-icons.md) | behavior |
 | 2026-11-10 | [The Loader centers its text and spinner as one block](2026-11-10-loader-centers-text-and-spinner.md) | type, behavior |
 | 2026-11-10 | [A data grid's stored sort is its whole sort; defaultSort only applies when nothing is stored](2026-11-10-data-grid-stored-sort-is-whole.md) | behavior, type |
 | 2026-11-10 | [TuneIcon, ResetIcon, SuccessOutlinedIcon and AppsIcon are replaced by Material icons](2026-11-10-icons-retired-for-material-icons.md) | type, behavior |
