@@ -228,6 +228,9 @@
 		},
 		"toast": {
 			"close": "Close"
+		},
+		"loader": {
+			"label": "Loading…"
 		}
 	},
 	"framework": {

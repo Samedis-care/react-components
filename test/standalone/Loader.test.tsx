@@ -1,9 +1,10 @@
 import React from "react";
 import { describe, it, expect, afterEach, vi, assertType } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, act } from "@testing-library/react";
 import { ThemeProvider, createTheme, Theme, styled } from "@mui/material";
 import Loader from "../../src/standalone/Loader";
 import FormLoaderOverlay from "../../src/standalone/Form/FormLoaderOverlay";
+import ccI18n from "../../src/i18n";
 import type { LoaderClassKey, LoaderProps } from "../../src";
 
 afterEach(() => {
@@ -46,6 +47,146 @@ describe("Loader", () => {
 		const paragraph = container.querySelector("p");
 		expect(paragraph).toBeInTheDocument();
 		expect(paragraph?.textContent).toBe("Please wait");
+	});
+
+	it("shows synchronously as a Suspense fallback and does not suspend itself, also before the library's translations have loaded", async () => {
+		// translations still loading: not ready, and the load never completes. A
+		// Loader that suspended on them would show the outer fallback right away
+		// instead of re-suspending in a loop until the test timeout.
+		vi.spyOn(ccI18n, "hasLoadedNamespace").mockReturnValue(false);
+		vi.spyOn(ccI18n, "loadNamespaces").mockReturnValue(new Promise(() => {}));
+		let resolve!: () => void;
+		const pending = new Promise<void>((r) => {
+			resolve = r;
+		});
+		const Content = () => {
+			React.use(pending);
+			return <p>Content</p>;
+		};
+
+		await act(async () => {
+			renderLoader(
+				<React.Suspense fallback={<span>outer fallback</span>}>
+					<React.Suspense fallback={<Loader text={"Lädt…"} />}>
+						<Content />
+					</React.Suspense>
+				</React.Suspense>,
+			);
+			await Promise.resolve();
+		});
+		// queried once, not with findBy: a Loader that suspended would show the
+		// outer fallback here
+		expect(screen.queryByText("outer fallback")).toBeNull();
+		expect(screen.getByRole("progressbar")).toBeInTheDocument();
+		expect(screen.getByText("Lädt…")).toBeInTheDocument();
+
+		await act(async () => {
+			resolve();
+			await pending;
+		});
+		expect(screen.getByText("Content")).toBeInTheDocument();
+		expect(screen.queryByRole("progressbar")).toBeNull();
+	});
+
+	it("[ISSUE-3461-ITEM-2] names the progressbar after its text", () => {
+		renderLoader(<Loader text={"Loading data…"} />);
+		expect(
+			screen.getByRole("progressbar", { name: "Loading data…" }),
+		).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3461-ITEM-2] names the progressbar without text", () => {
+		renderLoader(<Loader />);
+		expect(screen.getByRole("progressbar", { name: /\S/ })).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3461-ITEM-2] names each Loader on a page after its own text", () => {
+		renderLoader(
+			<>
+				<Loader text={"Loading devices…"} />
+				<Loader text={"Loading incidents…"} />
+			</>,
+		);
+		expect(
+			screen.getByRole("progressbar", { name: "Loading devices…" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("progressbar", { name: "Loading incidents…" }),
+		).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3461-ITEM-2] follows changes of its text, and without text takes the default name", () => {
+		const { rerender } = renderLoader(<Loader text={"Loading devices…"} />);
+		const bar = screen.getByRole("progressbar");
+		expect(bar).toHaveAccessibleName("Loading devices…");
+
+		rerender(withTheme(<Loader text={"Saving…"} />));
+		expect(bar).toHaveAccessibleName("Saving…");
+
+		rerender(withTheme(<Loader text={""} />));
+		expect(bar).toHaveAccessibleName("Loading…");
+		expect(bar).not.toHaveAttribute("aria-labelledby");
+
+		rerender(withTheme(<Loader />));
+		expect(bar).toHaveAccessibleName("Loading…");
+		expect(bar).not.toHaveAttribute("aria-labelledby");
+
+		rerender(withTheme(<Loader text={"Loading devices…"} />));
+		expect(bar).toHaveAccessibleName("Loading devices…");
+		expect(bar).not.toHaveAttribute("aria-label");
+	});
+
+	it("[ISSUE-3461-ITEM-2] takes the name a caller gives over its text and the default name", () => {
+		const { rerender } = renderLoader(
+			<Loader text={"Loading data…"} aria-label={"Loading devices"} />,
+		);
+		const bar = screen.getByRole("progressbar");
+		expect(bar).toHaveAccessibleName("Loading devices");
+		expect(bar).not.toHaveAttribute("aria-labelledby");
+
+		rerender(
+			withTheme(
+				<>
+					<Loader text={"Loading data…"} aria-labelledby={"incidents-label"} />
+					<span id={"incidents-label"}>Loading incidents</span>
+				</>,
+			),
+		);
+		expect(screen.getByRole("progressbar")).toHaveAccessibleName(
+			"Loading incidents",
+		);
+		expect(screen.getByRole("progressbar")).not.toHaveAttribute("aria-label");
+
+		rerender(withTheme(<Loader aria-label={"Loading devices"} />));
+		expect(screen.getByRole("progressbar")).toHaveAccessibleName(
+			"Loading devices",
+		);
+	});
+
+	it("[ISSUE-3461-ITEM-2] names the progressbar without text in the library's current language", async () => {
+		const language = ccI18n.language;
+		renderLoader(<Loader />);
+		try {
+			await act(() => ccI18n.changeLanguage("de"));
+			expect(screen.getByRole("progressbar")).toHaveAccessibleName("Lädt…");
+		} finally {
+			await act(() => ccI18n.changeLanguage(language));
+		}
+		expect(screen.getByRole("progressbar")).toHaveAccessibleName("Loading…");
+	});
+
+	it('[ISSUE-3461-ITEM-2] names the progressbar "Loading…" while the library\'s translations are loading', async () => {
+		const language = ccI18n.language;
+		await act(() => ccI18n.changeLanguage("de"));
+		try {
+			vi.spyOn(ccI18n, "hasLoadedNamespace").mockReturnValue(false);
+			vi.spyOn(ccI18n, "loadNamespaces").mockReturnValue(new Promise(() => {}));
+			renderLoader(<Loader />);
+			expect(screen.getByRole("progressbar")).toHaveAccessibleName("Loading…");
+		} finally {
+			vi.restoreAllMocks();
+			await act(() => ccI18n.changeLanguage(language));
+		}
 	});
 
 	it("[ISSUE-3461-ITEM-10] applies theme variants for CcLoader", () => {

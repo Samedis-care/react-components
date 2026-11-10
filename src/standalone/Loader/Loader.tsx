@@ -8,22 +8,28 @@ import {
 	TypographyProps,
 	useThemeProps,
 } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import combineClassNames from "../../utils/combineClassNames";
+import ccI18n from "../../i18n";
 
 /**
  * Props of {@link Loader}. Besides its own props, the Loader takes the HTML
  * attributes of a `div` (`id`, `style`, `data-*`, `aria-*`, event handlers,
  * ...) and passes them to its `root` slot, except `aria-label` and
- * `aria-labelledby`, which name the spinner's progressbar.
+ * `aria-labelledby`, which name the spinner's progressbar instead of `text`
+ * or the default name.
  */
 export interface LoaderProps extends Omit<
 	React.HTMLAttributes<HTMLDivElement>,
 	"children"
 > {
 	/**
-	 * Optional status message to show. It wraps to the Loader's width, also
-	 * inside a word that is wider than that, so a long translated word does
-	 * not make the page scroll sideways.
+	 * Optional status message to show, already translated. It wraps to the
+	 * Loader's width, also inside a word that is wider than that, so a long
+	 * translated word does not make the page scroll sideways. It also names
+	 * the spinner's progressbar, unless `aria-label` or `aria-labelledby` is
+	 * set. Without it (`undefined` or `""`) the progressbar is named
+	 * "Loading…", in the library's current language.
 	 */
 	text?: string;
 	/**
@@ -50,12 +56,15 @@ export interface LoaderProps extends Omit<
 	 */
 	sx?: SxProps<Theme>;
 	/**
-	 * Accessible name of the spinner's progressbar
+	 * Accessible name of the spinner's progressbar. It replaces the name the
+	 * Loader gives it otherwise: `text`, or without text "Loading…" in the
+	 * library's current language.
 	 */
 	"aria-label"?: string;
 	/**
 	 * Id (or space-separated ids) of the element(s) whose text names the
-	 * spinner's progressbar
+	 * spinner's progressbar. Like `aria-label`, it replaces `text` and the
+	 * default name, and it wins over `aria-label`.
 	 */
 	"aria-labelledby"?: string;
 }
@@ -135,6 +144,19 @@ const Progress = styled(CircularProgress, {
  */
 export type LoaderClassKey = "root" | "innerWrapper" | "progress";
 
+/**
+ * Name of the progressbar without text while the library's translations are
+ * still loading
+ */
+const DEFAULT_NAME = "Loading…";
+
+/**
+ * The Loader is a Suspense fallback, also the app's while it boots, so its
+ * translation must not suspend: until the translations have loaded it uses
+ * {@link DEFAULT_NAME}, then re-renders
+ */
+const TRANSLATION_OPTIONS = { i18n: ccI18n, useSuspense: false };
+
 const Loader = (inProps: LoaderProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcLoader" });
 	const {
@@ -147,6 +169,19 @@ const Loader = (inProps: LoaderProps) => {
 		...rootProps
 	} = props;
 	const typographyVariant = typographyVariantProp ?? "h6";
+	const { t, ready } = useTranslation("translation", TRANSLATION_OPTIONS);
+	const textId = React.useId();
+
+	// a name the caller gives wins; otherwise the text names the progressbar,
+	// and without text the default name does
+	let progressLabel = ariaLabel;
+	let progressLabelledBy = ariaLabelledBy;
+	if (!ariaLabel && !ariaLabelledBy) {
+		progressLabel = undefined;
+		progressLabelledBy = undefined;
+		if (text) progressLabelledBy = textId;
+		else progressLabel = ready ? t("standalone.loader.label") : DEFAULT_NAME;
+	}
 
 	return (
 		<Root
@@ -156,11 +191,15 @@ const Loader = (inProps: LoaderProps) => {
 			className={combineClassNames([className, classes?.root])}
 		>
 			<InnerWrapper className={classes?.innerWrapper}>
-				{text && <Typography variant={typographyVariant}>{text}</Typography>}
+				{text && (
+					<Typography id={textId} variant={typographyVariant}>
+						{text}
+					</Typography>
+				)}
 				<Progress
 					className={classes?.progress}
-					aria-label={ariaLabel}
-					aria-labelledby={ariaLabelledBy}
+					aria-label={progressLabel}
+					aria-labelledby={progressLabelledBy}
 				/>
 			</InnerWrapper>
 		</Root>
@@ -181,8 +220,13 @@ const Loader = (inProps: LoaderProps) => {
  *
  * Styling: `className`, `sx`, `style` and the other HTML attributes go to
  * the `root` slot, `classes` to the slot of each key, so `styled(Loader)`
- * styles the outer box. `aria-label` and `aria-labelledby` name the spinner's
- * progressbar.
+ * styles the outer box.
+ *
+ * Accessibility: the spinner is a `progressbar`, named by `text`, or without
+ * text "Loading…" in the library's current language. `aria-label` and
+ * `aria-labelledby` replace that name. The Loader does not suspend, also not
+ * before the library's translations have loaded, so it can be a Suspense
+ * fallback.
  *
  * Theme: `components.CcLoader.defaultProps` ({@link LoaderProps}),
  * `components.CcLoader.styleOverrides` per {@link LoaderClassKey} slot, and

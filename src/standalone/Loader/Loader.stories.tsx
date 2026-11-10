@@ -8,7 +8,7 @@ import Loader from "./index";
 const meta: Meta<typeof Loader> = {
 	title: "Standalone/Loader",
 	component: Loader,
-	parameters: { layout: "centered" },
+	parameters: { layout: "centered", a11y: { test: "error" } },
 	argTypes: {
 		typographyVariant: {
 			control: "select",
@@ -99,6 +99,33 @@ export const Issue3461Item1ReservesHeightInBlockFlow: Story = {
 		await expect(spinner.top).toBeGreaterThanOrEqual(above.bottom);
 		await expect(spinner.bottom).toBeLessThanOrEqual(below.top);
 	},
+};
+
+export const Issue3461Item2ProgressbarHasName: Story = {
+	parameters: {
+		a11y: {
+			test: "error",
+			options: {
+				runOnly: { type: "rule", values: ["aria-progressbar-name"] },
+			},
+		},
+		docs: {
+			description: {
+				story:
+					"ISSUE-3461-ITEM-2: the progressbar has no accessible name, with or without text (axe `aria-progressbar-name`).",
+			},
+		},
+	},
+	render: () => (
+		<>
+			<Box sx={{ width: 300, height: 120 }}>
+				<Loader />
+			</Box>
+			<Box sx={{ width: 300, height: 200 }}>
+				<Loader text={"Loading data…"} />
+			</Box>
+		</>
+	),
 };
 
 export const Issue3461Item8CentersTextAndSpinnerAsGroup: Story = {
