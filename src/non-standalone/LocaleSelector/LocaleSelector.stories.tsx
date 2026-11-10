@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, userEvent, waitFor, within } from "storybook/test";
-import { Button } from "@mui/material";
+import { Button, createTheme } from "@mui/material";
 import DialogContextProvider from "../../framework/DialogContextProvider";
 import { useDialogContext } from "../../framework";
 import LocaleSelectorDialog, {
@@ -217,5 +217,54 @@ export const Issue3499Item4LongNamesWrapWithTextSpacing: Story = {
 			style.remove();
 			await reset();
 		}
+	},
+};
+
+export const Issue3466Item8FlagsOutlined: Story = {
+	args: { supportedLocales: SCF },
+	parameters: {
+		// the open dialog has other axe findings; this story is about the flags
+		a11y: { test: "todo" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3466-ITEM-8: each row shows its flag as a `CountryFlag` 30px high in a 60x30 box, outlined in the theme's divider color like every flag of the library (not a fixed light grey border).",
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ canvasElement }) => {
+		await reset();
+		const dialog = await openDialog(canvasElement);
+		const imgs = Array.from(
+			dialog.querySelectorAll<HTMLImageElement>('[role="listitem"] img'),
+		);
+		await expect(imgs.length).toBeGreaterThan(3);
+		await waitFor(
+			() =>
+				expect(
+					imgs.filter((img) => !img.complete || img.naturalWidth === 0),
+				).toEqual([]),
+			{ timeout: 10000 },
+		);
+		const divider = createTheme().palette.divider;
+		const misfit = imgs
+			.map((img) => {
+				const style = getComputedStyle(img);
+				const box = img.parentElement!.getBoundingClientRect();
+				const rect = img.getBoundingClientRect();
+				const ratio = img.naturalWidth / img.naturalHeight;
+				const height = ratio > 2 ? 60 / ratio : 30;
+				return `${style.outlineStyle} ${style.outlineWidth} ${style.outlineColor}` !==
+					`solid 1px ${divider}` ||
+					style.borderStyle !== "none" ||
+					box.width !== 60 ||
+					box.height !== 30 ||
+					Math.abs(rect.height - height) > 0.5
+					? `${img.getAttribute("src")?.slice(0, 40)}: ${style.outline} / ${style.border}, ${rect.width}x${rect.height} in ${box.width}x${box.height}`
+					: null;
+			})
+			.filter((entry) => entry !== null);
+		await expect(misfit).toEqual([]);
 	},
 };

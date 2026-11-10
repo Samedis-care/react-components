@@ -84,6 +84,10 @@ import {
 	VerticalDividerProps,
 } from "./standalone/VerticalDivider";
 import {
+	CountryFlagClassKey,
+	CountryFlagProps,
+} from "./standalone/CountryFlag";
+import {
 	MultiLanguageInputClassKey,
 	MultiLanguageInputProps,
 } from "./standalone/UIKit/InputControls/MultiLanguageInput";
@@ -272,6 +276,7 @@ declare module "@mui/material/styles" {
 		CcLoader: LoaderClassKey;
 		CcMultiGrid: MultiGridClassKey;
 		CcVerticalDivider: VerticalDividerClassKey;
+		CcCountryFlag: CountryFlagClassKey;
 		CcMultiLanguageInput: MultiLanguageInputClassKey;
 		CcFormButtons: FormButtonsClassKey;
 		CcDefaultFormPageButtons: DefaultFormPageButtonsClassKey;
@@ -348,6 +353,7 @@ declare module "@mui/material/styles" {
 		CcLoader: Partial<LoaderProps>;
 		CcMultiGrid: Partial<MultiGridProps>;
 		CcVerticalDivider: Partial<VerticalDividerProps>;
+		CcCountryFlag: Partial<CountryFlagProps>;
 		CcMultiLanguageInput: Partial<MultiLanguageInputProps>;
 		CcFormButtons: Partial<FormButtonsProps>;
 		CcDefaultFormPageButtons: Partial<DefaultFormPageButtonsProps>;
@@ -458,6 +464,11 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcVerticalDivider"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcVerticalDivider"];
 			variants?: ComponentsVariants["CcVerticalDivider"];
+		};
+		CcCountryFlag?: {
+			defaultProps?: ComponentsPropsList["CcCountryFlag"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcCountryFlag"];
+			variants?: ComponentsVariants["CcCountryFlag"];
 		};
 		CcMultiLanguageInput?: {
 			defaultProps?: ComponentsPropsList["CcMultiLanguageInput"];

@@ -26,6 +26,8 @@ export { default as CountryFlags } from "./CountryFlags";
 export { default as CountryCodes } from "./CountryFlags/CountryCodes";
 export { default as useCountryOptions } from "./CountryFlags/useCountryOptions";
 export * from "./CountryFlags/useCountryOptions";
+export * from "./CountryFlag";
+export { default as CountryFlag } from "./CountryFlag";
 export * from "./Tree";
 export * from "./Matrix";
 export * from "./Toast";

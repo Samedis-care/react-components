@@ -4,7 +4,7 @@ import {
 	LocaleSelectorEntryData,
 } from "./LocaleSelectorDialogContent";
 import { ListItemButton, styled, useThemeProps } from "@mui/material";
-import CountryFlags from "../../standalone/CountryFlags";
+import CountryFlag from "../../standalone/CountryFlag";
 
 export interface LocaleSelectorEntryProps extends Omit<
 	LocaleSelectorDialogContentProps,
@@ -35,25 +35,11 @@ const Container = styled("div", {
 	width: "100%",
 });
 
-const ImageWrapper = styled("div", {
+// 30px high in a 60x30 box, outlined in the theme's divider color
+const Flag = styled(CountryFlag, {
 	name: "CcLocaleSelectorEntry",
-	slot: "imageWrapper",
-})({
-	flex: "0 0 auto",
-	width: 60,
-	height: 30,
-	display: "flex",
-	alignItems: "center",
-});
-
-// the flag keeps its aspect ratio within the wrapper, so the border always
-// hugs the flag itself (ratios range from 0.82 (NP) to 2.54 (QA))
-const Image = styled("img", { name: "CcLocaleSelectorEntry", slot: "image" })({
-	maxHeight: "100%",
-	maxWidth: "100%",
-	objectFit: "contain",
-	border: "1px solid lightgray",
-});
+	slot: "flag",
+})({});
 
 /**
  * Both text lines share a single grid, so the language column stays aligned
@@ -80,7 +66,7 @@ const Text = styled("span", { name: "CcLocaleSelectorEntry", slot: "text" })({
 });
 
 export type LocaleSelectorEntryClassKey =
-	"root" | "container" | "imageWrapper" | "image" | "textContainer" | "text";
+	"root" | "container" | "flag" | "textContainer" | "text";
 
 const LocaleSelectorEntry = (
 	inProps: LocaleSelectorEntryProps,
@@ -96,8 +82,6 @@ const LocaleSelectorEntry = (
 		handleSwitch(locale.locale);
 	}, [locale, handleSwitch]);
 
-	const flag = CountryFlags[locale.country_short];
-
 	return (
 		<ListItemRoot
 			onClick={handleClick}
@@ -105,11 +89,9 @@ const LocaleSelectorEntry = (
 			className={className}
 		>
 			<Container>
-				<ImageWrapper>
-					{/* decorative: the country's name is the text beside it, so a
-					    named flag would read the country twice */}
-					<Image alt="" src={flag} />
-				</ImageWrapper>
+				{/* decorative: the country's name is the text beside it, so a
+				    named flag would read the country twice */}
+				<Flag code={locale.country_short} size={30} />
 				<TextContainer>
 					<Text title={locale.country}>{locale.country}</Text>
 					<Text title={locale.language}>{locale.language}</Text>

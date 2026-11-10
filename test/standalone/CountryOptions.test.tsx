@@ -6,7 +6,11 @@ import countryNamesDe from "../../src/assets/i18n/de/countries.json";
 import countryNamesEn from "../../src/assets/i18n/en/countries.json";
 import CountryFlags from "../../src/standalone/CountryFlags";
 // the tier indexes the package root re-exports (src/index.ts: export * from both)
-import { CountryCodes, useCountryOptions } from "../../src/standalone";
+import {
+	CountryCodes,
+	CountryFlag,
+	useCountryOptions,
+} from "../../src/standalone";
 import { useCCCountryTranslations } from "../../src/utils";
 
 const labelsOf = (options: { label: string }[]) =>
@@ -48,7 +52,7 @@ describe("CountryCodes", () => {
 });
 
 describe("useCountryOptions", () => {
-	it("[ISSUE-3466-ITEM-9] lists every country once: its code as value, its name in the current language as label, its flag as icon", async () => {
+	it("[ISSUE-3466-ITEM-9] lists every country once: its code as value, its name in the current language as label, its CountryFlag as icon", async () => {
 		await act(() => ccI18n.changeLanguage("de-DE"));
 		const { result } = renderHook(() => useCountryOptions());
 		const options = result.current;
@@ -60,14 +64,13 @@ describe("useCountryOptions", () => {
 				(option) =>
 					option.label !==
 						(countryNamesDe as Record<string, string>)[option.value] ||
-					option.icon !== CountryFlags[option.value],
+					(option.icon.props as { code?: string }).code !== option.value,
 			),
 		).toEqual([]);
-		expect(options.find((option) => option.value === "DE")).toEqual({
-			value: "DE",
-			label: "Deutschland",
-			icon: CountryFlags.DE,
-		});
+		const germany = options.find((option) => option.value === "DE");
+		expect(germany).toMatchObject({ value: "DE", label: "Deutschland" });
+		expect(germany?.icon.type).toBe(CountryFlag);
+		expect(germany?.icon.props).toEqual({ code: "DE" });
 	});
 
 	it("[ISSUE-3466-ITEM-9] sorts the options by name with the current language's collation", async () => {

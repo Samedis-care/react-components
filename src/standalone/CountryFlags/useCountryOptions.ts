@@ -1,6 +1,6 @@
-import { useMemo } from "react";
-import CountryFlags from "./index";
+import React, { createElement, useMemo } from "react";
 import CountryCodes from "./CountryCodes";
+import CountryFlag from "../CountryFlag";
 import { useCCCountryTranslations } from "../../utils/useCCTranslations";
 import getCurrentLocale from "../../utils/getCurrentLocale";
 
@@ -20,10 +20,11 @@ export interface CountryOption {
 	 */
 	label: string;
 	/**
-	 * The URL of the country's flag (`CountryFlags[value]`), for `<img src>` or
-	 * the Selector's `enableIcons`
+	 * The country's flag, decorative (the label names the country):
+	 * `<CountryFlag code={value} />`, shown by the Selector with `enableIcons`.
+	 * `CountryFlags[value]` gives the image's URL.
 	 */
-	icon: string;
+	icon: React.ReactElement;
 }
 
 /**
@@ -35,7 +36,7 @@ export interface CountryOption {
  * re-sorted options; until then the hook returns the same array. Like
  * `useCCCountryTranslations()`, it suspends while the country names load.
  *
- * @returns One option per country: `{ value: code, label: name, icon: flag URL }`
+ * @returns One option per country: `{ value: code, label: name, icon: <CountryFlag code={code} /> }`
  * @example
  * // a Selector
  * const countries = useCountryOptions();
@@ -58,7 +59,7 @@ const useCountryOptions = (): CountryOption[] => {
 		return CountryCodes.map((code): CountryOption => ({
 			value: code,
 			label: t(code),
-			icon: CountryFlags[code],
+			icon: createElement(CountryFlag, { code }),
 		})).sort((a, b) => collator.compare(a.label, b.label));
 	}, [t, locale]);
 };

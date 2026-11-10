@@ -59,9 +59,10 @@ export const useCCLocaleSwitcherTranslations = (): UseTranslationResponse<
 /**
  * Country names in components-care's current language, keyed by the codes of
  * `CountryCodes`: `t("DE")` is "Germany" in English, "Deutschland" in German.
- * UN M49 region codes are named too (`t("150")`: "Europe"). Use it for the alt
- * text of a flag shown without the country's name; for a country select use
- * `useCountryOptions()`. Suspends until the names have loaded.
+ * UN M49 region codes are named too (`t("150")`: "Europe"). A flag shown
+ * without the country's name is named this way by `<CountryFlag code named />`;
+ * for a country select use `useCountryOptions()`. Suspends until the names have
+ * loaded.
  */
 export const useCCCountryTranslations = (): UseTranslationResponse<
 	"countries",
