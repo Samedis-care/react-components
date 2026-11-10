@@ -1,5 +1,13 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, it, expect } from "vitest";
+import { createElement } from "react";
+import { cleanup, render } from "@testing-library/react";
 import CountryFlags from "../../src/standalone/CountryFlags";
+import countryLanguages from "../../src/assets/data/country-languages.json";
+import supportedLanguages from "../../src/assets/data/supported-languages.json";
+import supportedLocales from "../../src/assets/data/supported-locales.json";
+import flagAW from "../../src/assets/img/countries/AW.svg";
+import LocaleSelectorEntry from "../../src/non-standalone/LocaleSelector/LocaleSelectorEntry";
+import type { LocaleSelectorEntryData } from "../../src/non-standalone/LocaleSelector/LocaleSelectorDialogContent";
 
 describe("CountryFlags", () => {
 	it("contains entries for well-known country codes", () => {
@@ -40,5 +48,64 @@ describe("CountryFlags", () => {
 		for (const code of Object.keys(CountryFlags)) {
 			expect(code).toMatch(/^[A-Z]{2}$/);
 		}
+	});
+
+	describe("key set", () => {
+		it("[ISSUE-3466-ITEM-1] has a flag for the country of every LocaleSelector entry", () => {
+			// the entries LocaleSelectorDialogContent lists without supportedLocales
+			const entries = Object.entries(
+				countryLanguages as Record<string, string[]>,
+			).flatMap(([country, langs]) =>
+				langs
+					.filter((lang) => supportedLanguages.includes(lang))
+					.map((lang) => lang + "-" + country),
+			);
+			expect(entries.length).toBeGreaterThan(0);
+			expect(
+				entries.filter(
+					(locale) => !Object.hasOwn(CountryFlags, locale.split("-")[1]),
+				),
+			).toEqual([]);
+		});
+
+		it("[ISSUE-3466-ITEM-1] has a flag for the country of every locale with locale-switcher texts", () => {
+			// supported-locales.json lists every locale the locale-switcher
+			// translations name (sv-AX, sq-XK, ...): the rows the dialog shows once
+			// their language ships in src/assets/i18n
+			expect(supportedLocales.length).toBeGreaterThan(0);
+			expect(
+				supportedLocales.filter(
+					(locale) => !Object.hasOwn(CountryFlags, locale.split("-")[1]),
+				),
+			).toEqual([]);
+		});
+	});
+
+	describe("in LocaleSelectorEntry", () => {
+		afterEach(cleanup);
+		const renderEntry = (locale: LocaleSelectorEntryData) =>
+			render(
+				createElement(LocaleSelectorEntry, {
+					locale,
+					currentLanguage: "en",
+					handleSwitch: () => {},
+					disabled: false,
+				}),
+			);
+
+		it("[ISSUE-3466-ITEM-1] shows the flag of a country that is not in countries.json", () => {
+			const aruba: LocaleSelectorEntryData = {
+				locale: "nl-AW",
+				language_short: "nl",
+				country_short: "AW",
+				country: "Aruba",
+				language: "Dutch",
+				native_country: "Aruba",
+				native_language: "Nederlands",
+			};
+			const { container } = renderEntry(aruba);
+			expect(flagAW).toBeTruthy();
+			expect(container.querySelector("img")?.getAttribute("src")).toBe(flagAW);
+		});
 	});
 });
