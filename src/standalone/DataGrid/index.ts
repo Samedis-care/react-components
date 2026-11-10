@@ -14,6 +14,7 @@ export {
 	type DataGridPersistentStateLegacy,
 	type DataGridPersistedData,
 	type DataGridPersistedSort,
+	type DataGridPersistedSortList,
 } from "./StatePersistence";
 export { DATA_GRID_PERSIST_VERSION } from "./PersistFormat";
 export { default as GridMultiSelectFilter } from "./GridMultiSelectFilter";

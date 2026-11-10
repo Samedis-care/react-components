@@ -8,7 +8,14 @@ import {
 	it,
 	vi,
 } from "vitest";
-import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import ccI18n from "../../src/i18n";
 import DataGrid, {
@@ -408,7 +415,7 @@ describe("persistence provider bugs", () => {
 		expect(JSON.parse(server.writes[0][1]!)).toMatchObject({
 			shown: ["name", "role"],
 			hidden: ["secret"],
-			sort: { role: [1, 1] },
+			sort: [["role", 1]],
 			search: "typed",
 		});
 	});
@@ -445,7 +452,7 @@ describe("persistence provider bugs", () => {
 			v: DATA_GRID_PERSIST_VERSION,
 			shown: ["name", "role"],
 			hidden: ["secret"],
-			sort: { role: [1, 1] },
+			sort: [["role", 1]],
 			search: "new",
 			width: { name: 211, role: 222, secret: 233 },
 			initialResize: true,
@@ -623,5 +630,81 @@ describe("persistence provider bugs", () => {
 		render(smp({ model: "x" }, <span data-testid={"child"} />));
 		expect(await screen.findByTestId("child")).toBeInTheDocument();
 		expect(hanging.writes).toEqual([[keyOf(FILTERS, { model: "x" }), null]]);
+	});
+
+	it("[ISSUE-3496-ITEM-2] a grid with a sort record stored before a defaultSort was added loads with the user's sort only", async () => {
+		const loadData = vi.fn<DataGridProps["loadData"]>(noRows);
+		const stored: DataGridPersistentState = {
+			v: DATA_GRID_PERSIST_VERSION,
+			sort: { role: [1, 1] },
+		};
+		render(
+			<ValueProvider stored={stored} save={vi.fn()}>
+				<Grid
+					loadData={loadData}
+					defaultSort={[{ field: "name", direction: -1 }]}
+					sortLimit={0}
+				/>
+			</ValueProvider>,
+		);
+		await gridIdle();
+		expect(loadData).toHaveBeenCalled();
+		expect(loadData.mock.lastCall![0].sort).toEqual([
+			{ field: "role", direction: 1 },
+		]);
+		expect(grid!.columnState.name).toMatchObject({ sort: 0 });
+	});
+
+	it("[ISSUE-3496-ITEM-2] a grid opens with its stored sort whatever the defaultSort, and a reset applies the defaultSort", async () => {
+		const loadData = vi.fn<DataGridProps["loadData"]>(noRows);
+		const save = vi.fn<DataGridPersistentStateContextType[1]>();
+		const stored: DataGridPersistentState = {
+			v: DATA_GRID_PERSIST_VERSION,
+			sort: [["role", 1]],
+		};
+		render(
+			<ValueProvider stored={stored} save={save}>
+				<Grid
+					loadData={loadData}
+					defaultSort={[{ field: "name", direction: -1 }]}
+				/>
+			</ValueProvider>,
+		);
+		await gridIdle();
+		expect(loadData.mock.lastCall![0].sort).toEqual([
+			{ field: "role", direction: 1 },
+		]);
+
+		// the header is laid out for a phone here: the reset sits in "More options"
+		fireEvent.click(screen.getByRole("button", { name: "More options" }));
+		fireEvent.click(await screen.findByRole("menuitem", { name: "Reset" }));
+		fireEvent.click(
+			await screen.findByRole("menuitem", { name: "Reset sort settings" }),
+		);
+		await waitFor(() =>
+			expect(loadData.mock.lastCall![0].sort).toEqual([
+				{ field: "name", direction: -1 },
+			]),
+		);
+		expect(save.mock.lastCall![0].sort).toEqual([["name", -1]]);
+	});
+
+	it("[ISSUE-3496-ITEM-2] a grid with nothing stored opens with the defaultSort, and stores it as its sort", async () => {
+		const loadData = vi.fn<DataGridProps["loadData"]>(noRows);
+		const save = vi.fn<DataGridPersistentStateContextType[1]>();
+		render(
+			<ValueProvider stored={undefined} save={save}>
+				<Grid
+					loadData={loadData}
+					defaultSort={[{ field: "name", direction: -1 }]}
+				/>
+			</ValueProvider>,
+		);
+		await gridIdle();
+		expect(loadData.mock.lastCall![0].sort).toEqual([
+			{ field: "name", direction: -1 },
+		]);
+		act(() => grid!.setState((prev) => ({ ...prev, search: "s" })));
+		expect(save.mock.lastCall![0].sort).toEqual([["name", -1]]);
 	});
 });

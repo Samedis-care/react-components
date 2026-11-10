@@ -19,6 +19,7 @@ import {
 export type {
 	DataGridPersistedData,
 	DataGridPersistedSort,
+	DataGridPersistedSortList,
 	DataGridPersistentState,
 	DataGridPersistentStateLegacy,
 } from "./PersistFormat";

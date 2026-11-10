@@ -444,7 +444,10 @@ export interface IDataGridColumnProps {
 	 */
 	disableSelection?: boolean;
 	/**
-	 * The default sort settings
+	 * The sort a grid opens with when nothing is stored for it (see
+	 * DataGridPersistentStateContext), and what "Reset sort settings" goes back
+	 * to. A stored sort is used as it is: a default sort added or changed later
+	 * does not change it.
 	 */
 	defaultSort?: DataGridSortSetting[];
 	/**

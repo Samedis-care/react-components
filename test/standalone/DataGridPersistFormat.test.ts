@@ -103,19 +103,20 @@ describe("encodePersistedState", () => {
 
 	it("writes nothing for columns which sit at their defaults", () => {
 		const data = encode({});
-		expect(data.sort).toBeUndefined();
+		// the sort is stored as a whole: nothing is sorted
+		expect(data.sort).toEqual([]);
 		expect(data.filter).toBeUndefined();
 		expect(data.search).toBeUndefined();
 	});
 
-	it("only writes sort and filter deviations", () => {
+	it("writes the whole sort and only the filter deviations", () => {
 		const columnState: IDataGridColumnsState = {
 			...defaults(),
 			name: { sort: -1, sortOrder: 1, filter: undefined },
 			id: { sort: 0, sortOrder: undefined, filter: filter("42") },
 		};
 		const data = encode({}, columnState);
-		expect(data.sort).toEqual({ name: [-1, 1] });
+		expect(data.sort).toEqual([["name", -1]]);
 		expect(data.filter).toEqual({ id: filter("42") });
 	});
 
@@ -127,7 +128,7 @@ describe("encodePersistedState", () => {
 		expect(encode({}, columnState).filter).toBeUndefined();
 	});
 
-	it("records a cleared default sort so it stays cleared", () => {
+	it("stores a cleared default sort as no sort", () => {
 		const defaultSort: DataGridSortSetting[] = [
 			{ field: "name", direction: 1 },
 		];
@@ -144,7 +145,7 @@ describe("encodePersistedState", () => {
 			COLUMNS,
 			undefined,
 		);
-		expect(data.sort).toEqual({ name: [0] });
+		expect(data.sort).toEqual([]);
 	});
 
 	it("records a cleared default filter as null", () => {
@@ -201,7 +202,7 @@ describe("encodePersistedState", () => {
 		const onlySort = encode({ ...state }, columnState, { config: ["sort"] });
 		expect(onlySort.shown).toBeUndefined();
 		expect(onlySort.width).toBeUndefined();
-		expect(onlySort.sort).toEqual({ name: [-1, 1] });
+		expect(onlySort.sort).toEqual([["name", -1]]);
 		expect(onlySort.filter).toBeUndefined();
 	});
 });
@@ -630,7 +631,7 @@ describe("decodePersistedState (column set churn)", () => {
 		// sort and filter do not: they would be sent to the backend for a field
 		// the grid has no column for
 		expect(second.decoded.columnState.gated).toBeUndefined();
-		expect(second.stored.sort?.gated).toBeUndefined();
+		expect(second.stored.sort).toEqual([]);
 		expect(second.stored.filter?.gated).toBeUndefined();
 	});
 
@@ -1008,5 +1009,241 @@ describe("persisted format bugs", () => {
 		expect(merged.v).toBe(newer);
 		expect(merged.search).toBe("x");
 		expect(merged.width).toEqual({ id: 300 });
+	});
+
+	it("[ISSUE-3496-ITEM-2] a user's own sort replaces a defaultSort added after it was stored", () => {
+		// release 1: no default sort, the user sorts by name
+		const defs1 = defaults(COLUMNS);
+		const first = decodePersistedState(undefined, COLUMNS, defs1, undefined);
+		const stored = encodePersistedState(
+			{ ...getDataGridDefaultState(COLUMNS, undefined), ...first.state },
+			{
+				...first.columnState,
+				name: { sort: 1, sortOrder: 1, filter: undefined },
+			},
+			{},
+			defs1,
+			COLUMNS,
+			undefined,
+		);
+		// release 2 adds a default sort by id
+		const result = decodePersistedState(
+			JSON.parse(JSON.stringify(stored)) as never,
+			COLUMNS,
+			defaults(COLUMNS, [{ field: "id", direction: -1 }]),
+			undefined,
+		);
+		expect(dataGridPrepareFiltersAndSorts(result.columnState)[0]).toEqual([
+			{ field: "name", direction: 1 },
+		]);
+	});
+
+	/** The query's sort after storing a sort under one default sort and reading it under another */
+	const sortReadBack = (
+		columnState: (defs: IDataGridColumnsState) => IDataGridColumnsState,
+		writtenWith: DataGridSortSetting[] | undefined,
+		readWith: DataGridSortSetting[] | undefined,
+	) => {
+		const defsWritten = defaults(COLUMNS, writtenWith);
+		const stored = encode({}, columnState(defsWritten), {
+			defaultColumnState: defsWritten,
+		});
+		const result = decodePersistedState(
+			JSON.parse(JSON.stringify(stored)) as DataGridPersistentState,
+			COLUMNS,
+			defaults(COLUMNS, readWith),
+			undefined,
+		);
+		return dataGridPrepareFiltersAndSorts(result.columnState)[0];
+	};
+	/** The query's sort after reading the given sort, as stored, under a default sort */
+	const sortRead = (
+		sort: unknown,
+		readWith: DataGridSortSetting[] | undefined,
+		columns = COLUMNS,
+	) => {
+		const result = decodePersistedState(
+			{ v: DATA_GRID_PERSIST_VERSION, sort } as DataGridPersistentState,
+			columns,
+			defaults(columns, readWith),
+			undefined,
+		);
+		return dataGridPrepareFiltersAndSorts(result.columnState)[0];
+	};
+	const BY_ID: DataGridSortSetting[] = [{ field: "id", direction: -1 }];
+	const BY_PINME: DataGridSortSetting[] = [{ field: "pinme", direction: -1 }];
+
+	it("[ISSUE-3496-ITEM-2] the whole sort is stored, highest priority first, also when it is the default sort", () => {
+		expect(
+			encode(
+				{},
+				{
+					...defaults(),
+					id: { sort: -1, sortOrder: 2, filter: undefined },
+					name: { sort: 1, sortOrder: 1, filter: undefined },
+				},
+			).sort,
+		).toEqual([
+			["name", 1],
+			["id", -1],
+		]);
+		expect(
+			encode({}, defaults(COLUMNS, BY_ID), {
+				defaultColumnState: defaults(COLUMNS, BY_ID),
+			}).sort,
+		).toEqual([["id", -1]]);
+		expect(encode({}).sort).toEqual([]);
+	});
+
+	it("[ISSUE-3496-ITEM-2] a stored sort stays as it is when the defaultSort is changed later", () => {
+		// a click on "name" while "id" was the default sort
+		expect(
+			sortReadBack(
+				(defs) => ({
+					...defs,
+					id: { ...defs.id, sort: 0, sortOrder: undefined },
+					name: { ...defs.name, sort: 1, sortOrder: 1 },
+				}),
+				BY_ID,
+				BY_PINME,
+			),
+		).toEqual([{ field: "name", direction: 1 }]);
+		// the default sort of that time, which the user kept
+		expect(sortReadBack((defs) => defs, BY_ID, BY_PINME)).toEqual([
+			{ field: "id", direction: -1 },
+		]);
+		// "name" added with shift to the default sort of that time
+		expect(
+			sortReadBack(
+				(defs) => ({ ...defs, name: { ...defs.name, sort: 1, sortOrder: 2 } }),
+				BY_ID,
+				[
+					{ field: "name", direction: -1 },
+					{ field: "pinme", direction: -1 },
+				],
+			),
+		).toEqual([
+			{ field: "id", direction: -1 },
+			{ field: "name", direction: 1 },
+		]);
+		// every sort cleared
+		expect(
+			sortReadBack(
+				(defs) => ({
+					...defs,
+					id: { ...defs.id, sort: 0, sortOrder: undefined },
+				}),
+				BY_ID,
+				BY_PINME,
+			),
+		).toEqual([]);
+	});
+
+	it("[ISSUE-3496-ITEM-2] with nothing stored, the grid opens with the current defaultSort", () => {
+		const result = decodePersistedState(
+			undefined,
+			COLUMNS,
+			defaults(COLUMNS, BY_PINME),
+			undefined,
+		);
+		expect(dataGridPrepareFiltersAndSorts(result.columnState)[0]).toEqual([
+			{ field: "pinme", direction: -1 },
+		]);
+	});
+
+	it("[ISSUE-3496-ITEM-2] a stored sort list keeps its usable entries in their order, numbered 1..n", () => {
+		const result = decodePersistedState(
+			{
+				v: DATA_GRID_PERSIST_VERSION,
+				sort: [
+					["gone", 1],
+					["pinme", -1],
+					["name", 5],
+					[3, 1],
+					"id",
+					null,
+					["pinme", 1],
+					["name", 1],
+				],
+			} as unknown as DataGridPersistentState,
+			COLUMNS,
+			defaults(COLUMNS, BY_ID),
+			undefined,
+		);
+		expect(result.columnState.pinme).toMatchObject({ sort: -1, sortOrder: 1 });
+		expect(result.columnState.name).toMatchObject({ sort: 1, sortOrder: 2 });
+		expect(result.columnState.id).toMatchObject({ sort: 0 });
+		expect(result.columnState.id.sortOrder).toBeUndefined();
+	});
+
+	it("[ISSUE-3496-ITEM-2] a legacy sort is the user's whole sort: a defaultSort of a column added later does not apply", () => {
+		const columns = [...COLUMNS, col("added")];
+		const result = decodePersistedState(
+			{
+				columnState: {
+					id: { sort: 0 },
+					name: { sort: 1, sortOrder: 1 },
+					secret: { sort: 0 },
+					pinme: { sort: 0 },
+				},
+				state: { hiddenColumns: [], lockedColumns: [] },
+			} as unknown as DataGridPersistentStateLegacy,
+			columns,
+			defaults(columns, [{ field: "added", direction: -1 }]),
+			undefined,
+		);
+		expect(dataGridPrepareFiltersAndSorts(result.columnState)[0]).toEqual([
+			{ field: "name", direction: 1 },
+		]);
+	});
+
+	// sort records, as written before the sort was stored as a whole: only the
+	// columns whose sort differed from the default sort of that time
+
+	it("[ISSUE-3496-ITEM-2] a sort record keeps a defaultSort added or changed later out of the user's sort", () => {
+		// written without a default sort, read with one
+		expect(sortRead({ name: [1, 1] }, BY_ID)).toEqual([
+			{ field: "name", direction: 1 },
+		]);
+		// written with "id" as the default sort, read with another one
+		expect(sortRead({ id: [0], name: [1, 1] }, BY_PINME)).toEqual([
+			{ field: "name", direction: 1 },
+		]);
+		// a sort on a column which is not defined now is still the user's
+		expect(sortRead({ gone: [1, 1] }, BY_ID)).toEqual([]);
+	});
+
+	it("[ISSUE-3496-ITEM-2] a sort record under the default sort it was written with reads as it was stored", () => {
+		// a click on the sorted "id" header turned it around and kept "name"
+		expect(
+			sortRead({ id: [-1, 1] }, [
+				{ field: "id", direction: 1 },
+				{ field: "name", direction: 1 },
+			]),
+		).toEqual([
+			{ field: "id", direction: -1 },
+			{ field: "name", direction: 1 },
+		]);
+		// "name" added with shift
+		expect(sortRead({ name: [1, 2] }, BY_ID)).toEqual([
+			{ field: "id", direction: -1 },
+			{ field: "name", direction: 1 },
+		]);
+		// the default sort cleared
+		expect(sortRead({ id: [0] }, BY_ID)).toEqual([]);
+	});
+
+	it("[ISSUE-3496-ITEM-2] a sort record with gaps in its priorities reads as 1..n", () => {
+		const result = decodePersistedState(
+			{
+				v: DATA_GRID_PERSIST_VERSION,
+				sort: { id: [1, 4], name: [-1] },
+			},
+			COLUMNS,
+			defaults(),
+			undefined,
+		);
+		expect(result.columnState.id).toMatchObject({ sort: 1, sortOrder: 1 });
+		expect(result.columnState.name).toMatchObject({ sort: -1, sortOrder: 2 });
 	});
 });

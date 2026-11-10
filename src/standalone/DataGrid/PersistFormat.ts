@@ -25,7 +25,8 @@ export const DEFAULT_PERSIST_CONFIG: NonNullable<DataGridProps["persist"]> = [
 ];
 
 /**
- * The persisted sort of a single column: [direction, order]
+ * The persisted sort of a single column: [direction, order], in the sort
+ * record of earlier versions (see DataGridPersistentState.sort)
  * @remarks A direction of 0 records that the user cleared a sort which is active
  *          by default (see DataGridProps.defaultSort). Columns which are unsorted
  *          by default and unsorted by the user aren't written at all.
@@ -33,10 +34,17 @@ export const DEFAULT_PERSIST_CONFIG: NonNullable<DataGridProps["persist"]> = [
 export type DataGridPersistedSort = [direction: -1 | 0 | 1, order?: number];
 
 /**
+ * A grid's whole sort as persisted: the sorted columns as [field, direction],
+ * highest priority first. Empty when nothing is sorted.
+ */
+export type DataGridPersistedSortList = [field: string, direction: -1 | 1][];
+
+/**
  * The persisted (wire) format of the DataGrid state.
  *
  * This is deliberately not the shape of the runtime state: it is stored per user
- * on a server, so it only carries what deviates from the defaults. Keys are kept
+ * on a server, so apart from the sort it only carries what deviates from the
+ * defaults. Keys are kept
  * short-ish and everything optional, which keeps a 70 column grid at well under
  * half the size of the legacy format.
  *
@@ -64,9 +72,19 @@ export interface DataGridPersistentState {
 	 */
 	pinned?: string[];
 	/**
-	 * Sort per column, only for columns which deviate from the default
+	 * The sort, as a whole (DataGridPersistedSortList). It is what the grid
+	 * opens with: DataGridProps.defaultSort only applies when nothing is
+	 * stored, and on a reset, so a default sort added or changed later leaves
+	 * it as it is. The sort of a column which is not currently defined is
+	 * dropped on read.
+	 * @remarks Data of earlier versions holds a record instead (field ->
+	 *          DataGridPersistedSort) with only the columns whose sort deviated
+	 *          from the default sort of that time. It is read on top of the
+	 *          current default sort, except for the default sorts that cannot
+	 *          have been in place when it was written: a default sort of a
+	 *          column without an entry, with the priority of a stored one.
 	 */
-	sort?: Record<string, DataGridPersistedSort>;
+	sort?: DataGridPersistedSortList | Record<string, DataGridPersistedSort>;
 	/**
 	 * Filter per column, only for columns which deviate from the default.
 	 * null records that the user cleared a filter which is set by default.
@@ -183,6 +201,14 @@ const asPersistedSort = (value: unknown): DataGridPersistedSort | undefined => {
 		: [direction];
 };
 
+const asSortList = (value: unknown[]): DataGridPersistedSortList =>
+	value.filter(
+		(entry): entry is [string, -1 | 1] =>
+			Array.isArray(entry) &&
+			typeof entry[0] === "string" &&
+			(entry[1] === -1 || entry[1] === 1),
+	);
+
 const asFilterDef = (value: unknown, depth = 0): IFilterDef | undefined => {
 	if (depth >= MAX_FILTER_CHAIN) return undefined;
 	if (!isPlainObject(value)) return undefined;
@@ -208,38 +234,47 @@ const asWidths = (value: unknown): Record<string, number> => {
 };
 
 /**
- * Reduces the column state to what deviates from the defaults
+ * The sorted columns of a column state, highest priority (lowest sortOrder)
+ * first; a sorted column without a sortOrder comes last
+ * @param columnState The column state
+ */
+const encodeSort = (
+	columnState: Record<string, IDataGridColumnState | undefined>,
+): DataGridPersistedSortList =>
+	Object.entries(columnState)
+		.filter(
+			(entry): entry is [string, IDataGridColumnState] =>
+				isPlainObject(entry[1]) &&
+				(entry[1].sort === -1 || entry[1].sort === 1),
+		)
+		.sort(
+			([, a], [, b]) =>
+				(a.sortOrder ?? Number.MAX_SAFE_INTEGER) -
+				(b.sortOrder ?? Number.MAX_SAFE_INTEGER),
+		)
+		.map(([field, entry]) => [field, entry.sort as -1 | 1]);
+
+/**
+ * Reduces the column filters to what deviates from the defaults
  * @param columnState The current column state
  * @param defaultColumnState The column state the grid would start out with
  */
-const encodeColumnStateDiff = (
+const encodeFilterDiff = (
 	columnState: IDataGridColumnsState,
 	defaultColumnState: IDataGridColumnsState,
-): [
-	sort: Record<string, DataGridPersistedSort>,
-	filter: Record<string, IFilterDef | null>,
-] => {
-	const sort: Record<string, DataGridPersistedSort> = {};
+): Record<string, IFilterDef | null> => {
 	const filter: Record<string, IFilterDef | null> = {};
 	for (const field in columnState) {
 		const entry: IDataGridColumnState | undefined = columnState[field];
 		if (!isPlainObject(entry)) continue;
 		const def: IDataGridColumnState | undefined = defaultColumnState[field];
-		const entrySort = entry.sort || 0;
-		const defSort = def?.sort || 0;
-		// sortOrder is meaningless while the column isn't sorted
-		const entryOrder = entrySort === 0 ? undefined : entry.sortOrder;
-		const defOrder = defSort === 0 ? undefined : def?.sortOrder;
-		if (entrySort !== defSort || entryOrder !== defOrder) {
-			sort[field] = entryOrder == null ? [entrySort] : [entrySort, entryOrder];
-		}
 		const entryFilter = normalizeFilterDef(entry.filter) ?? null;
 		const defFilter = normalizeFilterDef(def?.filter) ?? null;
 		if (!deepEqual(entryFilter, defFilter, "equals")) {
 			filter[field] = entryFilter;
 		}
 	}
-	return [sort, filter];
+	return filter;
 };
 
 /**
@@ -290,14 +325,13 @@ export const encodePersistedState = (
 		result.initialResize = state.initialResize;
 	}
 
-	if (cfg.includes("sort") || cfg.includes("filters")) {
-		const [sort, filter] = encodeColumnStateDiff(
-			columnState,
-			defaultColumnState,
-		);
-		if (cfg.includes("sort") && Object.keys(sort).length) result.sort = sort;
-		if (cfg.includes("filters") && Object.keys(filter).length)
-			result.filter = filter;
+	// the whole sort, also when it is the default one: a default sort changed
+	// later must not change what the user has
+	if (cfg.includes("sort")) result.sort = encodeSort(columnState);
+
+	if (cfg.includes("filters")) {
+		const filter = encodeFilterDiff(columnState, defaultColumnState);
+		if (Object.keys(filter).length) result.filter = filter;
 	}
 
 	if (cfg.includes("filters")) {
@@ -323,8 +357,8 @@ const isLegacy = (
  * mention) are exactly that set.
  *
  * The legacy columnState is the whole sort and filter state, not a deviation
- * from the defaults, so every column in it gets a sort and a filter entry
- * (an unsorted column [0], an unfiltered one null). Applied to whatever the
+ * from the defaults: its sort becomes the whole sort, and every column in it
+ * gets a filter entry (an unfiltered one null). Applied to whatever the
  * defaults are when it is read, that gives back exactly the legacy state, so
  * the migration needs no defaults and a part of the data can be migrated on
  * its own (see mergePersistedState).
@@ -356,19 +390,17 @@ const migrateLegacyPersistedState = (
 		}
 	}
 
-	const sort: Record<string, DataGridPersistedSort> = {};
 	const filter: Record<string, IFilterDef | null> = {};
 	for (const field in columnState) {
 		const entry: IDataGridColumnState | undefined = columnState[field];
 		if (!isPlainObject(entry)) continue;
-		const direction = entry.sort || 0;
-		// sortOrder is meaningless while the column isn't sorted
-		const order = direction === 0 ? undefined : entry.sortOrder;
-		sort[field] = order == null ? [direction] : [direction, order];
 		filter[field] = normalizeFilterDef(entry.filter) ?? null;
 	}
-	if (Object.keys(sort).length) result.sort = sort;
-	if (Object.keys(filter).length) result.filter = filter;
+	// a column state without a usable entry says nothing about the sort
+	if (Object.keys(filter).length) {
+		result.sort = encodeSort(columnState);
+		result.filter = filter;
+	}
 
 	if (typeof state.search === "string" && state.search)
 		result.search = state.search;
@@ -410,6 +442,90 @@ const getDecodedDefaults = (
 	};
 };
 
+/**
+ * Applies a stored whole sort (DataGridPersistedSortList): the default sort
+ * doesn't apply
+ * @param columnState The column state to change, starting with the defaults
+ * @param list The stored list
+ */
+const applySortList = (columnState: IDataGridColumnsState, list: unknown[]) => {
+	for (const field in columnState) {
+		columnState[field] = {
+			...columnState[field],
+			sort: 0,
+			sortOrder: undefined,
+		};
+	}
+	let priority = 0;
+	for (const [field, direction] of asSortList(list)) {
+		// sort of a column which no longer exists would be sent to the backend
+		if (!Object.prototype.hasOwnProperty.call(columnState, field)) continue;
+		// a column listed twice keeps its first entry
+		if (columnState[field].sort !== 0) continue;
+		columnState[field] = {
+			...columnState[field],
+			sort: direction,
+			sortOrder: ++priority,
+		};
+	}
+};
+
+/**
+ * Applies a stored sort record, as written before the sort was stored as a
+ * whole: the columns whose sort deviated from the default sort of that time
+ * @param columnState The column state to change, starting with the defaults
+ * @param record The stored record
+ */
+const applySortRecord = (
+	columnState: IDataGridColumnsState,
+	record: unknown,
+) => {
+	const sort = new Map<string, DataGridPersistedSort>();
+	for (const [field, value] of Object.entries(asRecord(record))) {
+		const entry = asPersistedSort(value);
+		if (entry) sort.set(field, entry);
+	}
+	// a stored sort and a default sort of a column without an entry which
+	// share a priority were not both in place when the record was written:
+	// that default sort was added or changed since, and doesn't apply
+	const storedOrders = new Set<number>();
+	for (const [direction, order] of sort.values()) {
+		if (direction !== 0 && order != null) storedOrders.add(order);
+	}
+	const defaultChanged = Object.entries(columnState).some(
+		([field, entry]) =>
+			!sort.has(field) &&
+			entry.sort !== 0 &&
+			entry.sortOrder != null &&
+			storedOrders.has(entry.sortOrder),
+	);
+	if (defaultChanged) {
+		for (const field in columnState) {
+			if (sort.has(field)) continue;
+			columnState[field] = {
+				...columnState[field],
+				sort: 0,
+				sortOrder: undefined,
+			};
+		}
+	}
+	for (const [field, [direction, order]] of sort) {
+		// sort of a column which no longer exists would be sent to the backend
+		if (!(field in columnState)) continue;
+		columnState[field] = {
+			...columnState[field],
+			sort: direction,
+			sortOrder: direction === 0 ? undefined : order,
+		};
+	}
+	// the record may leave gaps in the priorities, or none at all: number the
+	// sorted columns 1..n, as the grid does
+	let priority = 0;
+	for (const [field] of encodeSort(columnState)) {
+		columnState[field] = { ...columnState[field], sortOrder: ++priority };
+	}
+};
+
 const decode = (
 	persisted: DataGridPersistedData,
 	columns: IDataGridColumnDef[],
@@ -445,19 +561,8 @@ const decode = (
 	}
 
 	if (cfg.includes("sort")) {
-		const sort = asRecord(data.sort);
-		for (const field in sort) {
-			// sort of a column which no longer exists would be sent to the backend
-			if (!(field in result.columnState)) continue;
-			const entry = asPersistedSort(sort[field]);
-			if (!entry) continue;
-			const [direction, order] = entry;
-			result.columnState[field] = {
-				...result.columnState[field],
-				sort: direction,
-				sortOrder: direction === 0 ? undefined : order,
-			};
-		}
+		if (Array.isArray(data.sort)) applySortList(result.columnState, data.sort);
+		else applySortRecord(result.columnState, data.sort);
 	}
 
 	if (cfg.includes("filters")) {
@@ -532,9 +637,9 @@ export const splitPersistedState = (
  * format only when it is written, so the parts may be in different formats.
  * Then every legacy part is migrated on its own, and the result is in the
  * current format, with the `v` of the last part that was stored in it. A
- * migrated part has a sort and a filter entry for every column in its legacy
- * columnState, as the legacy format stored the whole state, not deviations
- * from the defaults.
+ * migrated part has the whole sort and a filter entry for every column in its
+ * legacy columnState, as the legacy format stored the whole state, not
+ * deviations from the defaults.
  * @param parts The parts, in the order they should be merged (a later part's
  *        keys win). Missing parts (undefined, null) are skipped.
  * @returns The merged data, undefined when no part is there. It is in the
