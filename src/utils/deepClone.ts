@@ -2,6 +2,7 @@
  * Deep clones data
  * @param item The data to clone
  * @returns The cloned object
+ * @remarks Blobs (files included) and AbortSignals are kept as they are
  */
 const deepClone = <T>(item: T): T => {
 	// source: https://stackoverflow.com/a/4460624 (license: CC BY-SA 4.0)
@@ -22,6 +23,11 @@ const deepClone = <T>(item: T): T => {
 
 	// immutable, and a file picked by the user is told apart from another by identity
 	if (item instanceof Blob) {
+		result = item;
+	}
+
+	// a handle, not data: a copy would never abort
+	if (typeof AbortSignal !== "undefined" && item instanceof AbortSignal) {
 		result = item;
 	}
 

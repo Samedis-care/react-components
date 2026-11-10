@@ -96,6 +96,13 @@ const ROWS: DataGridRowData[] = [
 ];
 
 const ok = (): DataGridData => ({ rowsTotal: 2, rows: ROWS });
+/** 75 rows in pages of 25, the query is only recorded */
+const paged = (p: IDataGridLoadDataParameters): DataGridData => ({
+	rowsTotal: 75,
+	rows: Array.from({ length: 25 }, (_, i) => ({
+		id: String((p.page - 1) * 25 + i),
+	})),
+});
 
 type Probe = {
 	state: IDataGridState;
@@ -209,6 +216,15 @@ describe("filters active / reset filters", () => {
 
 /** past the 500ms debounce of the reload after a query change */
 const passDebounce = () => act(() => void vi.advanceTimersByTime(700));
+const deferred = <T,>() => {
+	let resolve!: (v: T) => void;
+	let reject!: (e: unknown) => void;
+	const promise = new Promise<T>((res, rej) => {
+		resolve = res;
+		reject = rej;
+	});
+	return { promise, resolve, reject };
+};
 
 const loadSpy = (impl: (p: IDataGridLoadDataParameters) => DataGridData = ok) =>
 	vi.fn<(p: IDataGridLoadDataParameters) => DataGridData>(impl);
@@ -409,5 +425,177 @@ describe("selection", () => {
 		);
 		expect(onDelete).toHaveBeenCalledWith(false, ["1"], expect.anything());
 		expect(probe!.state.selectedRows).toEqual([]);
+	});
+});
+
+describe("loading", () => {
+	it("[ISSUE-3492-ITEM-17] an outdated load stops requesting pages once the query changed", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		const page2 = deferred<DataGridData>();
+		const loadData = vi.fn((p: IDataGridLoadDataParameters) =>
+			p.quickFilter === "" && p.page === 2 ? page2.promise : paged(p),
+		);
+		render(<Grid loadData={loadData} />);
+		await idle();
+		// three pages in view: page 2 of the unfiltered list hangs
+		act(() => probe!.setState((p) => ({ ...p, pages: [0, 2] })));
+		await waitFor(() =>
+			expect(loadData).toHaveBeenCalledWith(
+				expect.objectContaining({ quickFilter: "", page: 2 }),
+			),
+		);
+		setSearch("b");
+		passDebounce();
+		await waitFor(() =>
+			expect(loadData).toHaveBeenCalledWith(
+				expect.objectContaining({ quickFilter: "b", page: 3 }),
+			),
+		);
+		await act(async () => {
+			page2.resolve(paged({ page: 2 } as IDataGridLoadDataParameters));
+			await page2.promise;
+		});
+		await idle();
+		expect(loadData).not.toHaveBeenCalledWith(
+			expect.objectContaining({ quickFilter: "", page: 3 }),
+		);
+	});
+});
+
+describe("loading: the signal", () => {
+	type LoadData = (p: IDataGridLoadDataParameters) => Promise<DataGridData>;
+
+	/** page 2 of the unfiltered list hangs until its signal aborts */
+	const hangOnPage2: LoadData = (p) =>
+		p.quickFilter === "" && p.page === 2
+			? new Promise((_resolve, reject) =>
+					p.signal?.addEventListener("abort", () =>
+						reject(new DOMException("aborted", "AbortError")),
+					),
+				)
+			: Promise.resolve(paged(p));
+
+	/** three pages in view, page 2 of the unfiltered list is loading */
+	const loadPage2 = async (loadData: ReturnType<typeof vi.fn<LoadData>>) => {
+		await idle();
+		act(() => probe!.setState((p) => ({ ...p, pages: [0, 2] })));
+		await waitFor(() =>
+			expect(loadData).toHaveBeenCalledWith(
+				expect.objectContaining({ quickFilter: "", page: 2 }),
+			),
+		);
+		return loadData.mock.lastCall![0].signal!;
+	};
+
+	it("[ISSUE-3492-ITEM-17] loadData gets a signal that aborts once a reload replaced the query", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		const loadData = vi.fn<LoadData>(hangOnPage2);
+		render(<Grid loadData={loadData} />);
+		const signal = await loadPage2(loadData);
+		expect(signal).toBeInstanceOf(AbortSignal);
+		expect(signal.aborted).toBe(false);
+		setSearch("b");
+		passDebounce();
+		await waitFor(() =>
+			expect(loadData).toHaveBeenCalledWith(
+				expect.objectContaining({ quickFilter: "b" }),
+			),
+		);
+		expect(signal.aborted).toBe(true);
+		const next = loadData.mock.lastCall![0].signal!;
+		expect(next).not.toBe(signal);
+		expect(next.aborted).toBe(false);
+		await idle();
+	});
+
+	it("[ISSUE-3492-ITEM-17] a load of a replaced query that rejects (its abort) is neither logged nor shown", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		const error = vi.spyOn(console, "error");
+		const page2 = deferred<DataGridData>();
+		const loadData = vi.fn<LoadData>((p) =>
+			p.quickFilter === "" && p.page === 2
+				? page2.promise
+				: Promise.resolve(paged(p)),
+		);
+		render(<Grid loadData={loadData} />);
+		await loadPage2(loadData);
+		setSearch("b");
+		passDebounce();
+		await waitFor(() =>
+			expect(loadData).toHaveBeenCalledWith(
+				expect.objectContaining({ quickFilter: "b" }),
+			),
+		);
+		// what fetch rejects with once its signal aborted
+		await act(async () => {
+			page2.reject(new DOMException("aborted", "AbortError"));
+			await page2.promise.catch(() => {});
+		});
+		await idle();
+		expect(probe!.state.dataLoadError).toBeNull();
+		expect(probe!.state.rowsTotal).toBe(75);
+		expect(error).not.toHaveBeenCalledWith(
+			"[Components-Care] [DataGrid] LoadData: ",
+			expect.anything(),
+		);
+	});
+
+	it("[ISSUE-3492-ITEM-17] an unmount aborts the running load, which requests no further page", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		const page2 = deferred<DataGridData>();
+		const loadData = vi.fn<LoadData>((p) =>
+			p.page === 2 ? page2.promise : Promise.resolve(paged(p)),
+		);
+		const { unmount } = render(<Grid loadData={loadData} />);
+		const signal = await loadPage2(loadData);
+		unmount();
+		expect(signal.aborted).toBe(true);
+		await act(async () => {
+			page2.resolve(paged({ page: 2 } as IDataGridLoadDataParameters));
+			await page2.promise;
+		});
+		await act(() => vi.advanceTimersByTimeAsync(700));
+		expect(loadData).not.toHaveBeenCalledWith(
+			expect.objectContaining({ page: 3 }),
+		);
+	});
+
+	it("[ISSUE-3492-ITEM-17] an unmount drops the reload still waiting for its debounce", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		const { unmount } = render(<Grid loadData={paged} />);
+		await idle();
+		setSearch("b");
+		expect(vi.getTimerCount()).toBeGreaterThan(0);
+		unmount();
+		// nothing left to fire once the test environment is gone
+		expect(vi.getTimerCount()).toBe(0);
+	});
+
+	it("[ISSUE-3492-ITEM-17] under StrictMode the remount's load shows the first page, the aborted one nothing", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		const error = vi.spyOn(console, "error");
+		// a backend that takes a moment and honours the signal
+		const loadData = vi.fn<LoadData>(
+			(p) =>
+				new Promise((resolve, reject) => {
+					p.signal?.addEventListener("abort", () =>
+						reject(new DOMException("aborted", "AbortError")),
+					);
+					setTimeout(() => resolve(paged(p)), 10);
+				}),
+		);
+		render(
+			<React.StrictMode>
+				<Grid loadData={loadData} />
+			</React.StrictMode>,
+		);
+		await idle();
+		expect(probe!.state.rows[0]).toEqual({ id: "0" });
+		expect(probe!.state.rowsTotal).toBe(75);
+		expect(probe!.state.dataLoadError).toBeNull();
+		expect(error).not.toHaveBeenCalledWith(
+			"[Components-Care] [DataGrid] LoadData: ",
+			expect.anything(),
+		);
 	});
 });

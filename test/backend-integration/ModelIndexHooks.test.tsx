@@ -361,6 +361,24 @@ describe("index params", () => {
 			JSON.stringify(createFilter()),
 		]);
 	});
+
+	it("[ISSUE-3492-ITEM-17] hand the connector the caller's AbortSignal itself, also through the index2 polyfill", async () => {
+		const received: unknown[] = [];
+		class SignalConnector extends MockConnector {
+			index(params?: Partial<IDataGridLoadDataParameters>) {
+				received.push(params?.signal);
+				return super.index(params);
+			}
+		}
+		const model = createModel(new SignalConnector(THIRTY_RECORDS));
+		const { signal } = new AbortController();
+
+		await model.index({ page: 1, rows: 10, signal });
+		// spans the polyfill's first two pages
+		await model.index2({ offset: 20, rows: 10, signal });
+		expect(received).toHaveLength(3);
+		received.forEach((value) => expect(value).toBe(signal));
+	});
 });
 
 describe("index2 polyfill", () => {

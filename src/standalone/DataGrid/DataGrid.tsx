@@ -188,6 +188,18 @@ export interface IDataGridLoadDataParameters {
 	 * The sort settings
 	 */
 	sort: DataGridSortSetting[];
+	/**
+	 * Aborts once the grid no longer needs the page: a reload replaced the
+	 * query (search, filters, sort, custom data or forceRefreshToken changed)
+	 * or the grid unmounted. Pass it on to the request (fetch's `signal`) to
+	 * cancel it. The grid ignores what a call resolves or rejects with after
+	 * its signal aborted, so an abort is never shown as a load error.
+	 * @remarks Set when the grid loads the pages it shows; the pages the
+	 *          limited select all (DataGridProps.limitSelectAll) loads come
+	 *          without one. BackendDataGrid hands it on to the connector's
+	 *          index as params.signal.
+	 */
+	signal?: AbortSignal;
 }
 
 /**
@@ -200,13 +212,20 @@ export type DataGridFilterParameters = Pick<
 
 /**
  * Which rows the grid shows and in which order: the load data parameters
- * without the paging
+ * without the paging and the signal
  */
-export type DataGridQuery = Omit<IDataGridLoadDataParameters, "page" | "rows">;
+export type DataGridQuery = Omit<
+	IDataGridLoadDataParameters,
+	"page" | "rows" | "signal"
+>;
 
 export interface IDataGridCallbacks {
 	/**
 	 * Loads data for the grid
+	 *
+	 * A reload (search, filters, sort, custom data or forceRefreshToken
+	 * changed) or the unmount ends the load of the old query: the grid
+	 * requests none of its remaining pages and aborts params.signal.
 	 * @param params The load data parameters
 	 * @returns The loaded data (resolve) or an error (reject)
 	 */
@@ -1524,6 +1543,17 @@ const DataGrid = (
 	const selectionControlled = useRef(false);
 	selectionControlled.current = !!selection;
 
+	// the loads of one query (refreshDataInstance) share an AbortController:
+	// it aborts once a reload replaces the query or the grid unmounts
+	const loadAbort = useRef<AbortController | null>(null);
+	useEffect(
+		() => () => {
+			loadAbort.current?.abort();
+			loadAbort.current = null;
+		},
+		[refreshDataInstance],
+	);
+
 	// refresh data if desired
 	useEffect(() => {
 		// we have an issue with a rare stuck loading bug. my assumption is that
@@ -1537,6 +1567,7 @@ const DataGrid = (
 		}
 
 		const query = dataGridGetQuery(state, columnsState, getAdditionalFilters);
+		const { signal } = (loadAbort.current ??= new AbortController());
 
 		void (async () => {
 			for (let pageIndex = pages[0]; pageIndex <= pages[1]; pageIndex++) {
@@ -1550,7 +1581,12 @@ const DataGrid = (
 						page: pageIndex + 1,
 						rows: rowsPerPage,
 						...query,
+						signal,
 					});
+					// aborted meanwhile: the grid shows another query or is gone, so
+					// the pass sets nothing and requests no further page (a StrictMode
+					// remount runs a pass of its own)
+					if (signal.aborted) return;
 					const dataRowsTotal = data.rowsFiltered ?? data.rowsTotal;
 
 					// check if we are on an invalid page
@@ -1597,6 +1633,8 @@ const DataGrid = (
 							: prevState,
 					);
 				} catch (err) {
+					// aborted meanwhile (this may be the abort itself): as above
+					if (signal.aborted) return;
 					// eslint-disable-next-line no-console
 					console.error("[Components-Care] [DataGrid] LoadData: ", err);
 					setState((prevState) =>
@@ -1669,6 +1707,8 @@ const DataGrid = (
 			}, 500),
 		[setState],
 	);
+	// a reload still waiting for its debounce goes with the grid
+	useEffect(() => () => resetView.cancel(), [resetView]);
 
 	const initialRender = useRef(true);
 	// reset initial render state after unmount (react 18 does remounts with persisted data)
