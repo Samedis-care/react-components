@@ -21,6 +21,10 @@ export { default as SignalPortlet } from "./SignalPortlet";
 export { default as Notifications } from "./Notifications";
 export * from "./Routes";
 export { default as CountryFlags } from "./CountryFlags";
+// CountryFlags/index.ts is the generated map, so its siblings are exported here
+export { default as CountryCodes } from "./CountryFlags/CountryCodes";
+export { default as useCountryOptions } from "./CountryFlags/useCountryOptions";
+export * from "./CountryFlags/useCountryOptions";
 export * from "./Tree";
 export * from "./Matrix";
 export * from "./Toast";

@@ -32,6 +32,7 @@ export { default as getCurrentLocale } from "./getCurrentLocale";
 export * from "./getCurrentLocale";
 export { default as useCurrentLocale } from "./useCurrentLocale";
 export * from "./useCurrentLocale";
+export * from "./useCCTranslations";
 export { default as getNumberSeparator } from "./getNumberSeparator";
 export { default as delocalizeNumber } from "./delocalizeNumber";
 export { default as parseLocalizedNumber } from "./parseLocalizedNumber";
