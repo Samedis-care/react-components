@@ -3,6 +3,9 @@ import { SvgIcon, SvgIconProps } from "@mui/material";
 import type { SvgIconComponent } from "@mui/icons-material";
 import withMuiName from "./withMuiName";
 
+// Source: Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
+// Modified: the "filter" icon, scaled from 512x512 to 26x26.02, rounded to two decimals and padded (VIEW_BOX).
+
 // The 26x26.02 glyph fitted into Material's 18x18 square keyline and centered
 // on its 24-unit grid, so it looks as large as a Material icon of the same size.
 // The default: a caller's viewBox replaces it, as on a Material icon.

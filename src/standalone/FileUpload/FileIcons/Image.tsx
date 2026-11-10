@@ -1,7 +1,7 @@
 import React from "react";
 import { SvgIcon, SvgIconProps } from "@mui/material";
 
-// Source: Font Awesome Pro 6.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc.
+// Source: Font Awesome Free 6.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.
 
 const Image = (props: SvgIconProps) => (
 	<SvgIcon {...props} viewBox="0 0 384 512">
