@@ -5,8 +5,12 @@ import {
 	MenuProps,
 	PopoverOrigin,
 } from "@mui/material";
-import { ExportIcon, ResetIcon, TuneIcon } from "../../Icons";
-import { Publish as ImportIcon } from "@mui/icons-material";
+import { ExportIcon } from "../../Icons";
+import {
+	Publish as ImportIcon,
+	Refresh as RefreshIcon,
+	Tune as TuneIcon,
+} from "@mui/icons-material";
 import PopupMenu from "../../PopupMenu";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
@@ -88,7 +92,7 @@ const ActionBarMenu = (props: ActionBarMenuProps) => {
 			{openResetDialog && (
 				<MenuItem onClick={openResetDialogWrap}>
 					<ListItemIcon>
-						<ResetIcon fontSize={"small"} />
+						<RefreshIcon fontSize={"small"} />
 					</ListItemIcon>
 					{t("standalone.data-grid.header.reset")}
 				</MenuItem>

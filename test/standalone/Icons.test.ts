@@ -1,26 +1,18 @@
 import { describe, it, expect, assertType } from "vitest";
 import * as Icons from "../../src/standalone/Icons";
-import SuccessOutlinedIcon from "../../src/standalone/Icons/SuccessOutlinedIcon";
 import { SvgIcon } from "@mui/material";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import type { SvgIconComponent } from "@mui/icons-material";
 
-// every icon in src/standalone/Icons, SuccessOutlinedIcon also if the barrel drops it again (ISSUE-3460-ITEM-5)
-const ALL_ICONS = { ...Icons, SuccessOutlinedIcon };
+// every icon in src/standalone/Icons
+const ALL_ICONS = { ...Icons };
 type IconName = keyof typeof ALL_ICONS;
 const ALL_NAMES = Object.keys(ALL_ICONS) as IconName[];
 
 const importTimeout = 90000;
 
 describe("Icons", () => {
-	const expectedExports = [
-		"FilterIcon",
-		"SignIcon",
-		"TuneIcon",
-		"ResetIcon",
-		"ExportIcon",
-		"AppsIcon",
-	] as const;
+	const expectedExports = ["FilterIcon", "SignIcon", "ExportIcon"] as const;
 
 	it("exports all expected icon names", () => {
 		for (const name of expectedExports) {
@@ -62,17 +54,23 @@ describe("Icons", () => {
 
 describe("Icons exports", () => {
 	it(
-		"[ISSUE-3460-ITEM-5] exports SuccessOutlinedIcon from the Icons barrel and the package root",
+		"[ISSUE-3460-ITEM-12] no longer exports TuneIcon, ResetIcon, SuccessOutlinedIcon and AppsIcon, which MUI's Tune, Refresh, TaskAlt and Apps replace",
 		async () => {
 			const root = (await import("../../src")) as Record<string, unknown>;
+			const retired = [
+				"TuneIcon",
+				"ResetIcon",
+				"SuccessOutlinedIcon",
+				"AppsIcon",
+			];
 			expect(
-				(Icons as Record<string, unknown>).SuccessOutlinedIcon,
-				"SuccessOutlinedIcon is missing from src/standalone/Icons/index.ts",
-			).toBe(SuccessOutlinedIcon);
+				retired.filter((name) => name in Icons),
+				"still exported from src/standalone/Icons/index.ts",
+			).toEqual([]);
 			expect(
-				root.SuccessOutlinedIcon,
-				"SuccessOutlinedIcon is missing from the package root",
-			).toBe(SuccessOutlinedIcon);
+				retired.filter((name) => name in root),
+				"still exported from the package root",
+			).toEqual([]);
 		},
 		importTimeout,
 	);

@@ -11,8 +11,10 @@ import {
 	Add as AddIcon,
 	Menu as MenuIcon,
 	Publish as ImportIcon,
+	Refresh as RefreshIcon,
+	Tune as TuneIcon,
 } from "@mui/icons-material";
-import { ExportIcon, ResetIcon, TuneIcon } from "../../Icons";
+import { ExportIcon } from "../../Icons";
 import ActionButton from "../../UIKit/ActionButton";
 import { SmallestIconButton } from "../../Small";
 import VerticalDivider from "../../VerticalDivider";
@@ -218,7 +220,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 												color={"primary"}
 												aria-label={t("standalone.data-grid.header.reset")}
 											>
-												<ResetIcon />
+												<RefreshIcon />
 											</SmallestIconButton>
 										}
 										labelText={t("standalone.data-grid.header.reset")}
@@ -233,7 +235,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 											size="large"
 											aria-label={t("standalone.data-grid.header.reset")}
 										>
-											<ResetIcon />
+											<RefreshIcon />
 										</IconButton>
 									</Tooltip>
 								)}

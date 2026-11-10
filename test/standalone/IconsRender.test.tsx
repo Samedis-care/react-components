@@ -3,10 +3,9 @@ import React from "react";
 import { render, cleanup } from "@testing-library/react";
 import { ThemeProvider, createTheme, Theme } from "@mui/material";
 import * as Icons from "../../src/standalone/Icons";
-import SuccessOutlinedIcon from "../../src/standalone/Icons/SuccessOutlinedIcon";
 
-// every icon in src/standalone/Icons, including the one the barrel misses
-const ALL_ICONS = { ...Icons, SuccessOutlinedIcon };
+// every icon in src/standalone/Icons
+const ALL_ICONS = { ...Icons };
 type IconName = keyof typeof ALL_ICONS;
 const ALL_NAMES = Object.keys(ALL_ICONS) as IconName[];
 
@@ -41,25 +40,6 @@ describe.each(ALL_NAMES)("%s", (name) => {
 		expect(callbackRef).toHaveBeenCalledWith(svg2);
 		unmount();
 		expect(callbackRef.mock.lastCall?.[0]).toBeNull();
-	});
-});
-
-describe("viewBox", () => {
-	it("[ISSUE-3460-ITEM-2] AppsIcon's viewBox covers both rows of squares", () => {
-		const { svg } = renderIcon(<Icons.AppsIcon />);
-		const [, , , viewBoxHeight] = (svg.getAttribute("viewBox") ?? "")
-			.split(" ")
-			.map(Number);
-		const glyphBottom = Math.max(
-			...Array.from(
-				svg.querySelectorAll("rect"),
-				(rect) =>
-					Number(rect.getAttribute("y") ?? 0) +
-					Number(rect.getAttribute("height")),
-			),
-		);
-		expect(glyphBottom).toBeCloseTo(26.54);
-		expect(viewBoxHeight).toBeGreaterThanOrEqual(glyphBottom);
 	});
 });
 

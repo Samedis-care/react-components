@@ -2,6 +2,8 @@ import React from "react";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { ThemeProvider, createTheme, Theme } from "@mui/material";
+import { TaskAlt } from "@mui/icons-material";
+import type { SvgIconComponent } from "@mui/icons-material";
 import InfoBox from "../../src/standalone/InfoBox";
 
 afterEach(() => {
@@ -24,6 +26,22 @@ const header = (heading: string) =>
 	screen.getByRole("button", { name: new RegExp(heading) });
 
 type OnChange = (event: React.SyntheticEvent, expanded: boolean) => void;
+
+/** what an svg draws, its viewBox and path data: tells the icons apart */
+const glyphOf = (svg: SVGSVGElement | null | undefined) => ({
+	viewBox: svg?.getAttribute("viewBox"),
+	paths: Array.from(svg?.querySelectorAll("path") ?? [], (path) =>
+		path.getAttribute("d"),
+	),
+});
+
+/** the glyph of a Material icon */
+const materialGlyph = (Icon: SvgIconComponent) => {
+	const { container, unmount } = render(<Icon />);
+	const glyph = glyphOf(container.querySelector("svg"));
+	unmount();
+	return glyph;
+};
 
 describe("InfoBox", () => {
 	it("renders the heading text", () => {
@@ -90,6 +108,14 @@ describe("InfoBox", () => {
 			/>,
 		);
 		expect(screen.getByText("Success")).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3460-ITEM-12] status success shows MUI's TaskAlt", () => {
+		const taskAlt = materialGlyph(TaskAlt);
+		renderInfoBox(
+			<InfoBox heading="Done" message="M" expanded={false} status="success" />,
+		);
+		expect(glyphOf(header("Done").querySelector("svg"))).toEqual(taskAlt);
 	});
 
 	it("renders status error without error", () => {

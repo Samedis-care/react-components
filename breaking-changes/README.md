@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-10 | [TuneIcon, ResetIcon, SuccessOutlinedIcon and AppsIcon are replaced by Material icons](2026-11-10-icons-retired-for-material-icons.md) | type, behavior |
 | 2026-11-10 | [The DataGrid's column-header filter buttons show an outlined funnel, and a filled one while the column is filtered](2026-11-10-data-grid-column-filter-icons.md) | behavior, theme |
 | 2026-11-06 | [A dialog button's onClick gets the dialog's close; the show…Dialog helpers return a closable promise](2026-11-06-dialog-button-onclick-gets-close.md) | type, behavior |
 | 2026-11-06 | [The simple dialogs, SignDialog and LocaleSelectorDialog close only their own dialog](2026-11-06-simple-dialogs-close-themselves.md) | behavior |

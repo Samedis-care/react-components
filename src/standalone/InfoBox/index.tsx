@@ -3,6 +3,7 @@ import {
 	ErrorOutlined,
 	InfoOutlined,
 	ReportProblemOutlined,
+	TaskAlt,
 } from "@mui/icons-material";
 import {
 	Accordion,
@@ -13,7 +14,6 @@ import {
 	Typography,
 	useThemeProps,
 } from "@mui/material";
-import SuccessOutlinedIcon from "../Icons/SuccessOutlinedIcon";
 import combineClassNames from "../../utils/combineClassNames";
 import { TypographyVariant } from "@mui/material/styles";
 
@@ -194,7 +194,7 @@ const InfoBox = (inProps: InfoBoxProps) => {
 			case "warning":
 				return <ReportProblemOutlined />;
 			case "success":
-				return <SuccessOutlinedIcon />;
+				return <TaskAlt />;
 			case "error":
 				return <ErrorOutlined />;
 			default:

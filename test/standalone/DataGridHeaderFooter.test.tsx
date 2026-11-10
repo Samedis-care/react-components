@@ -18,6 +18,8 @@ import {
 	within,
 } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material";
+import { Refresh, Tune } from "@mui/icons-material";
+import type { SvgIconComponent } from "@mui/icons-material";
 import ccI18n from "../../src/i18n";
 import DataGrid, {
 	DataGridData,
@@ -570,5 +572,54 @@ describe("header action bar", () => {
 		expect(
 			await screen.findByRole("menuitem", { name: "Ready" }),
 		).toBeInTheDocument();
+	});
+});
+
+/** what an svg draws, its viewBox and path data: tells the icons apart */
+const glyphOf = (svg: SVGSVGElement | null | undefined) => ({
+	viewBox: svg?.getAttribute("viewBox"),
+	paths: Array.from(svg?.querySelectorAll("path") ?? [], (path) =>
+		path.getAttribute("d"),
+	),
+});
+
+/** the glyph of a Material icon */
+const materialGlyph = (Icon: SvgIconComponent) => {
+	const { container, unmount } = render(<Icon />);
+	const glyph = glyphOf(container.querySelector("svg"));
+	unmount();
+	return glyph;
+};
+
+describe("header action bar icons", () => {
+	it.each([
+		["a wide screen", 1200],
+		["a tablet", 700],
+	])(
+		"[ISSUE-3460-ITEM-12] on %s the Columns and Reset buttons show MUI's Tune and Refresh",
+		async (_screen, width) => {
+			stubViewport(width);
+			const tune = materialGlyph(Tune);
+			const refresh = materialGlyph(Refresh);
+			render(<Grid />);
+			await idle();
+			const columns = screen.getByRole("button", { name: "Columns" });
+			const reset = screen.getByRole("button", { name: "Reset" });
+			expect(glyphOf(columns.querySelector("svg"))).toEqual(tune);
+			expect(glyphOf(reset.querySelector("svg"))).toEqual(refresh);
+		},
+	);
+
+	it("[ISSUE-3460-ITEM-12] on a phone, More options shows MUI's Tune for Columns and Refresh for Reset", async () => {
+		stubViewport(320);
+		const tune = materialGlyph(Tune);
+		const refresh = materialGlyph(Refresh);
+		render(<Grid />);
+		await idle();
+		await openMenu("More options");
+		const columns = await screen.findByRole("menuitem", { name: "Columns" });
+		const reset = screen.getByRole("menuitem", { name: "Reset" });
+		expect(glyphOf(columns.querySelector("svg"))).toEqual(tune);
+		expect(glyphOf(reset.querySelector("svg"))).toEqual(refresh);
 	});
 });
