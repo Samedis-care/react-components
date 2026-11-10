@@ -87,45 +87,51 @@ const loaderComponent = <Loader />;
  * - html language attribute setting based on locale (optional, enabled by default)
  * - mobile scaling fix (optional, enabled by default)
  * - drag & drop default prevention (prevents unloading page)
+ *
+ * The mobile scaling fix and the drag & drop prevention take effect as soon as
+ * the Framework mounts, also while the app's first render suspends and the
+ * Framework shows its Loader.
  */
 const ComponentsCareFramework = (props: ICompleteFrameworkProps) => {
 	return (
-		<Suspense fallback={loaderComponent}>
+		<>
 			{!props.disableMobileScalingFix && (
 				<MobileScalingFix {...props.mobileScalingFixProps} />
 			)}
 			{!props.disableDragAndDropPrevention && <DragAndDropPrevention />}
-			<CCI18nProvider
-				disableHtmlLanguageAttributeSetter={
-					props.disableHtmlLanguageAttributeSetter
-				}
-			>
-				<MuiPickerUtils disable={props.disableMuiPickerUtils}>
-					<StyledEngineProvider injectFirst>
-						<ThemeProvider
-							defaultTheme={props.defaultTheme || getStandardTheme}
-						>
-							<QueryClientProvider client={ModelDataStore}>
-								<PermissionContextProvider>
-									<UnsafeToLeave disable={props.disableUnsafeToLeave}>
-										<HistoryRouter
-											history={FrameworkHistory}
-											formatDocumentTitle={props.formatDocumentTitle}
-										>
-											<ToastContextProvider>
-												<DialogContextProvider>
-													{props.children}
-												</DialogContextProvider>
-											</ToastContextProvider>
-										</HistoryRouter>
-									</UnsafeToLeave>
-								</PermissionContextProvider>
-							</QueryClientProvider>
-						</ThemeProvider>
-					</StyledEngineProvider>
-				</MuiPickerUtils>
-			</CCI18nProvider>
-		</Suspense>
+			<Suspense fallback={loaderComponent}>
+				<CCI18nProvider
+					disableHtmlLanguageAttributeSetter={
+						props.disableHtmlLanguageAttributeSetter
+					}
+				>
+					<MuiPickerUtils disable={props.disableMuiPickerUtils}>
+						<StyledEngineProvider injectFirst>
+							<ThemeProvider
+								defaultTheme={props.defaultTheme || getStandardTheme}
+							>
+								<QueryClientProvider client={ModelDataStore}>
+									<PermissionContextProvider>
+										<UnsafeToLeave disable={props.disableUnsafeToLeave}>
+											<HistoryRouter
+												history={FrameworkHistory}
+												formatDocumentTitle={props.formatDocumentTitle}
+											>
+												<ToastContextProvider>
+													<DialogContextProvider>
+														{props.children}
+													</DialogContextProvider>
+												</ToastContextProvider>
+											</HistoryRouter>
+										</UnsafeToLeave>
+									</PermissionContextProvider>
+								</QueryClientProvider>
+							</ThemeProvider>
+						</StyledEngineProvider>
+					</MuiPickerUtils>
+				</CCI18nProvider>
+			</Suspense>
+		</>
 	);
 };
 
