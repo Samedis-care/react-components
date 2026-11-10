@@ -1,5 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Box } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { expect, within } from "storybook/test";
 import Loader from "./index";
@@ -41,6 +42,8 @@ const spinnerBox = (bar: HTMLElement) => {
 	const half = bar.offsetHeight / 2;
 	return { cx, cy, top: cy - half, bottom: cy + half };
 };
+
+const centerY = (rect: DOMRect) => (rect.top + rect.bottom) / 2;
 
 export const NoText: Story = {
 	args: {},
@@ -93,5 +96,71 @@ export const Issue3461Item1ReservesHeightInBlockFlow: Story = {
 		const spinner = spinnerBox(canvas.getByRole("progressbar"));
 		await expect(spinner.top).toBeGreaterThanOrEqual(above.bottom);
 		await expect(spinner.bottom).toBeLessThanOrEqual(below.top);
+	},
+};
+
+export const Issue3461Item8CentersTextAndSpinnerAsGroup: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3461-ITEM-8: in a 400x300 box the text and spinner are not centered as a group (6.75px low), and without text the spinner sits 3.5px above the center.",
+			},
+		},
+	},
+	render: () => (
+		<>
+			<Box data-testid={"with-text"} sx={{ width: 400, height: 300 }}>
+				<Loader text={"Loading"} />
+			</Box>
+			<Box data-testid={"without-text"} sx={{ width: 400, height: 300 }}>
+				<Loader />
+			</Box>
+		</>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const withText = canvas.getByTestId("with-text");
+		const withoutText = canvas.getByTestId("without-text");
+		const text = rectOf(within(withText).getByText("Loading"));
+		const spinner = spinnerBox(within(withText).getByRole("progressbar"));
+		const groupCenter = (text.top + spinner.bottom) / 2;
+		await expect(
+			Math.abs(groupCenter - centerY(rectOf(withText))),
+		).toBeLessThanOrEqual(2);
+		const alone = spinnerBox(within(withoutText).getByRole("progressbar"));
+		await expect(
+			Math.abs(alone.cy - centerY(rectOf(withoutText))),
+		).toBeLessThanOrEqual(1);
+	},
+};
+
+export const Issue3461Item8LongTextKeepsSpinnerInBox: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3461-ITEM-8: a status text of four lines pushes the spinner below a 240x200 box that hides its overflow, so only the text is visible.",
+			},
+		},
+	},
+	render: () => (
+		<Box
+			data-testid={"box"}
+			sx={{ width: 240, height: 200, overflow: "hidden" }}
+		>
+			<Loader
+				text={
+					"Die Datei wurde hochgeladen und wird nun von unserem System analysiert. Bitte warten..."
+				}
+			/>
+		</Box>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const box = rectOf(canvas.getByTestId("box"));
+		const spinner = spinnerBox(canvas.getByRole("progressbar"));
+		await expect(spinner.top).toBeGreaterThanOrEqual(box.top);
+		await expect(spinner.bottom).toBeLessThanOrEqual(box.bottom);
 	},
 };

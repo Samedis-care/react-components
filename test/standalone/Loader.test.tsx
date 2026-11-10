@@ -155,4 +155,29 @@ describe("Loader", () => {
 		assertType<LoaderProps>({ text: "Loading", typographyVariant: "caption" });
 		assertType<LoaderClassKey>("root");
 	});
+
+	it("[ISSUE-3461-ITEM-8] puts text and spinner into the innerWrapper slot and applies the theme's styleOverrides to each slot", () => {
+		const themed = createTheme({
+			components: {
+				CcLoader: {
+					styleOverrides: {
+						root: { backgroundColor: "rgb(0, 128, 0)" },
+						innerWrapper: { backgroundColor: "rgb(0, 0, 128)" },
+						progress: { color: "rgb(255, 0, 0)" },
+					},
+				},
+			},
+		});
+		const { container } = renderLoader(<Loader text={"Loading"} />, themed);
+		// slots located by structure: the CcLoader-<slot> class label exists
+		// only in development builds
+		const root = container.firstElementChild as HTMLElement;
+		const inner = root.firstElementChild as HTMLElement;
+		const bar = screen.getByRole("progressbar");
+		expect(screen.getByText("Loading").parentElement).toBe(inner);
+		expect(bar.parentElement).toBe(inner);
+		expect(getComputedStyle(root).backgroundColor).toBe("rgb(0, 128, 0)");
+		expect(getComputedStyle(inner).backgroundColor).toBe("rgb(0, 0, 128)");
+		expect(getComputedStyle(bar).color).toBe("rgb(255, 0, 0)");
+	});
 });

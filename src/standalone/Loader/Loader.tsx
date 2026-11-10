@@ -54,29 +54,19 @@ const Root = styled("div", {
 	width: "100%",
 });
 
-const InnerWrapper = styled("div", { name: "CcLoader", slot: "innerWrapper" })({
-	textAlign: "center",
-	width: "100%",
-});
-
-const OuterProgressWrapper = styled("div", {
-	name: "CcLoader",
-	slot: "outerProgressWrapper",
-})({
-	height: 70,
-	position: "relative",
-	width: "100%",
-});
-
-const InnerProgressWrapper = styled("div", {
-	name: "CcLoader",
-	slot: "innerProgressWrapper",
-})({
-	left: "50%",
-	position: "absolute",
-	top: "50%",
-	transform: "translate(-50%, -50%)",
-});
+// text and spinner as one block; the padding is equal above and below, so
+// centering the block centers text and spinner
+const InnerWrapper = styled("div", { name: "CcLoader", slot: "innerWrapper" })(
+	({ theme }) => ({
+		alignItems: "center",
+		display: "flex",
+		flexDirection: "column",
+		gap: theme.spacing(1),
+		padding: theme.spacing(2, 0),
+		textAlign: "center",
+		width: "100%",
+	}),
+);
 
 const Progress = styled(CircularProgress, {
 	name: "CcLoader",
@@ -91,17 +81,12 @@ const Progress = styled(CircularProgress, {
  *   `components.CcLoader.variants` apply to it. They match the Loader's `text`
  *   and `typographyVariant` after theme `defaultProps`, with
  *   `typographyVariant` `"h6"` when it is not set.
- * - `innerWrapper`: the box holding text and spinner, as tall as they are
- * - `outerProgressWrapper`: the 70px tall box below the text
- * - `innerProgressWrapper`: the box that centers the spinner
+ * - `innerWrapper`: the block of text and spinner: a flex column that
+ *   centers them horizontally, with `theme.spacing(1)` between them and
+ *   `theme.spacing(2)` of padding above and below
  * - `progress`: the MUI `CircularProgress`
  */
-export type LoaderClassKey =
-	| "root"
-	| "innerWrapper"
-	| "outerProgressWrapper"
-	| "innerProgressWrapper"
-	| "progress";
+export type LoaderClassKey = "root" | "innerWrapper" | "progress";
 
 const Loader = (inProps: LoaderProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcLoader" });
@@ -112,11 +97,7 @@ const Loader = (inProps: LoaderProps) => {
 		<Root text={text} typographyVariant={typographyVariant}>
 			<InnerWrapper>
 				{text && <Typography variant={typographyVariant}>{text}</Typography>}
-				<OuterProgressWrapper>
-					<InnerProgressWrapper>
-						<Progress />
-					</InnerProgressWrapper>
-				</OuterProgressWrapper>
+				<Progress />
 			</InnerWrapper>
 		</Root>
 	);
@@ -126,10 +107,13 @@ const Loader = (inProps: LoaderProps) => {
  * Indeterminate loading indicator: a MUI `CircularProgress` with an optional
  * status `text` above it, centered in its parent.
  *
- * Layout: in a parent with a definite height (a fixed height, or a box that a
- * flex or grid layout stretches) it fills the parent and centers text and
- * spinner in it. In a parent of automatic height it is as tall as its
- * content: 70px for the spinner, plus the text.
+ * Layout: text and spinner form one block. In a parent with a definite height
+ * (a fixed height, or a box that a flex or grid layout stretches) the Loader
+ * fills the parent and centers that block in it; a block taller than the
+ * parent overflows it equally above and below. In a parent of automatic
+ * height the Loader is as tall as the block: 72px without text (the 40px
+ * spinner and 16px above and below it), and with text the text's height and
+ * 8px more (at MUI's default spacing).
  *
  * Theme: `components.CcLoader.defaultProps` ({@link LoaderProps}),
  * `components.CcLoader.styleOverrides` per {@link LoaderClassKey} slot, and
