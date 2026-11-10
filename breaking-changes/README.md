@@ -24,6 +24,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-10 | [A form page's footer is sticky, and its busy overlay covers only the form](2026-11-10-form-page-layout-sticky-footer.md) | behavior, theme |
 | 2026-11-10 | [MobileScalingFix puts the page's viewport back when it unmounts](2026-11-10-mobile-scaling-fix-restores-viewport-on-unmount.md) | behavior |
 | 2026-11-10 | [A HowToBox with an empty labels array renders nothing](2026-11-10-how-to-box-hides-empty-array.md) | behavior |
+| 2026-11-10 | [PopupMenu is flat by default](2026-11-10-popup-menu-flat-by-default.md) | behavior |
 | 2026-11-10 | [The Loader's progressbar is named by its text, or "Loading…"](2026-11-10-loader-progressbar-named.md) | behavior |
 | 2026-11-10 | [MobileScalingFix keeps the page's other viewport directives](2026-11-10-mobile-scaling-fix-keeps-viewport-directives.md) | behavior |
 | 2026-11-10 | [CountryFlags has no prototype: names of Object.prototype are not flags](2026-11-10-country-flags-no-prototype.md) | behavior |

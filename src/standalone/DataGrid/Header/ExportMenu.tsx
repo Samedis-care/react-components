@@ -37,7 +37,6 @@ const transformOrigin: PopoverOrigin = {
 const ExportMenu = (props: IDataGridExportMenuProps) => {
 	return (
 		<PopupMenu
-			elevation={0}
 			anchorEl={props.anchorEl}
 			anchorOrigin={anchorOrigin}
 			transformOrigin={transformOrigin}

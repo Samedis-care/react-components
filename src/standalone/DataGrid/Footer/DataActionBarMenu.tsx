@@ -45,7 +45,6 @@ const DataActionBarMenu = (props: DataActionBarMenuProps) => {
 	} = props;
 	return (
 		<PopupMenu
-			elevation={0}
 			anchorEl={anchorEl}
 			anchorOrigin={anchorOrigin}
 			transformOrigin={transformOrigin}

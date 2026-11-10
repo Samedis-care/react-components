@@ -108,7 +108,6 @@ const ActionBarMenu = (props: ActionBarMenuProps) => {
 	const { t } = useCCTranslations();
 	return (
 		<PopupMenu
-			elevation={0}
 			anchorEl={anchorEl}
 			anchorOrigin={anchorOrigin}
 			transformOrigin={transformOrigin}

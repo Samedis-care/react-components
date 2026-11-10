@@ -51,6 +51,32 @@ describe("PopupMenu", () => {
 		const menu = screen.getByRole("menu", { name: "Options" });
 		expect(menu).toHaveAttribute("id", "options-menu");
 	});
+
+	it("[ISSUE-3459-ITEM-7] is flat by default: its border is the paper's only outline", () => {
+		wrap(
+			<PopupMenu open anchorEl={anchor}>
+				{items}
+			</PopupMenu>,
+		);
+		const paper = screen.getByRole("menu").closest(".MuiMenu-paper")!;
+		expect(paper).toHaveClass("MuiPaper-elevation0");
+		expect(getComputedStyle(paper).borderTop).toBe(
+			`1px solid ${theme.palette.divider}`,
+		);
+	});
+
+	it("[ISSUE-3459-ITEM-7] draws MUI's shadow in addition to the border when given an elevation", () => {
+		wrap(
+			<PopupMenu open anchorEl={anchor} elevation={8}>
+				{items}
+			</PopupMenu>,
+		);
+		const paper = screen.getByRole("menu").closest(".MuiMenu-paper")!;
+		expect(paper).toHaveClass("MuiPaper-elevation8");
+		expect(getComputedStyle(paper).borderTop).toBe(
+			`1px solid ${theme.palette.divider}`,
+		);
+	});
 });
 
 // importing the whole package (or the DataGrid) takes ~20s in jsdom

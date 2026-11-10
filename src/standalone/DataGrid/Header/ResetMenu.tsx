@@ -82,7 +82,6 @@ const ResetMenu = (props: ResetMenuProps) => {
 
 	return (
 		<PopupMenu
-			elevation={0}
 			anchorEl={anchorEl}
 			anchorOrigin={anchorOrigin}
 			transformOrigin={transformOrigin}

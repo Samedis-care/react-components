@@ -61,17 +61,35 @@ const focusInitialItem = (container: HTMLElement, preferSelected: boolean) => {
 };
 
 /**
+ * Props of {@link PopupMenu}: MUI's `MenuProps`, with a different default for
+ * `elevation`.
+ */
+export interface PopupMenuProps extends MenuProps {
+	/**
+	 * The shadow depth of the menu paper, an index into `theme.shadows`. The
+	 * border outlines the menu, so by default it has no shadow; a value above 0
+	 * draws MUI's shadow of that depth in addition to the border.
+	 * @default 0
+	 */
+	elevation?: MenuProps["elevation"];
+}
+
+/**
  * A MUI `Menu` with a 1px `theme.palette.divider` border around its paper. It
- * takes all `MenuProps`. Every open starts where MUI starts a menu's first
+ * takes all `MenuProps`. It is flat: `elevation` defaults to 0, so the border
+ * is its only outline. Placement and mounting are `Menu`'s defaults: it opens
+ * below its anchor, aligned at the anchor's start edge (`anchorOrigin`,
+ * `transformOrigin`), and its items leave the page while it is closed
+ * (`keepMounted`). Every open starts where MUI starts a menu's first
  * open: on the selected item with the default variant `selectedMenu`, else on
  * the first enabled item. This also holds with `keepMounted`, whose items keep
  * their state between opens.
  */
 const PopupMenu = React.forwardRef(function PopupMenu(
-	props: MenuProps,
+	props: PopupMenuProps,
 	ref: React.ForwardedRef<HTMLDivElement>,
 ) {
-	const { slotProps, variant } = props;
+	const { slotProps, variant, elevation = 0 } = props;
 	const theme = useTheme();
 	const preferSelected =
 		(variant ??
@@ -100,9 +118,12 @@ const PopupMenu = React.forwardRef(function PopupMenu(
 
 	return React.createElement(PopupMenuRoot, {
 		...props,
+		elevation,
 		ref,
 		slotProps: menuSlotProps,
 	});
 });
 
-export default React.memo(PopupMenu) as unknown as typeof Menu;
+export default React.memo(PopupMenu) as unknown as (
+	props: PopupMenuProps,
+) => React.JSX.Element;

@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
-import { Button, MenuItem, MenuProps } from "@mui/material";
+import { Box, Button, MenuItem, MenuProps } from "@mui/material";
 import PopupMenu from "./index";
 
 const meta: Meta<typeof PopupMenu> = {
@@ -177,6 +177,80 @@ const menuClosed = () =>
 	);
 
 // --- bugs ---
+
+const DefaultsDemo = () => {
+	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+	const open = Boolean(anchorEl);
+	return (
+		// away from the viewport's edges, which MUI keeps the menu 16px off
+		<Box sx={{ p: 8 }}>
+			<Button
+				id={"defaults-demo-trigger"}
+				aria-haspopup={"menu"}
+				aria-controls={open ? "defaults-demo" : undefined}
+				aria-expanded={open}
+				onClick={(e) => setAnchorEl(e.currentTarget)}
+			>
+				Options
+			</Button>
+			<PopupMenu
+				anchorEl={anchorEl}
+				open={open}
+				onClose={() => setAnchorEl(null)}
+				slotProps={{
+					list: {
+						id: "defaults-demo",
+						"aria-labelledby": "defaults-demo-trigger",
+					},
+				}}
+			>
+				<MenuItem onClick={() => setAnchorEl(null)}>Alpha</MenuItem>
+				<MenuItem onClick={() => setAnchorEl(null)}>Beta</MenuItem>
+			</PopupMenu>
+		</Box>
+	);
+};
+
+export const Issue3459Item7FlatWithMuiPlacementByDefault: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3459-ITEM-7: without props, PopupMenu is flat (its border is the only outline, no shadow), opens below its trigger aligned at the trigger's start edge, and removes its items from the page when it closes, as MUI's `Menu` does.",
+			},
+		},
+	},
+	render: () => <DefaultsDemo />,
+	play: async ({ canvas }) => {
+		const trigger = canvas.getByRole("button", { name: "Options" });
+		await userEvent.click(trigger);
+		const alpha = await within(document.body).findByRole("menuitem", {
+			name: "Alpha",
+		});
+		const paper = alpha.closest<HTMLElement>(".MuiMenu-paper")!;
+		// the Grow transition scales the paper until it has entered
+		await waitFor(() => expect(getComputedStyle(paper).transform).toBe("none"));
+		const style = getComputedStyle(paper);
+		await expect(style.borderTopWidth).toBe("1px");
+		await expect(style.borderTopStyle).toBe("solid");
+		await expect(style.boxShadow).toBe("none");
+
+		const triggerBox = trigger.getBoundingClientRect();
+		const paperBox = paper.getBoundingClientRect();
+		await expect(Math.abs(paperBox.top - triggerBox.bottom)).toBeLessThan(1);
+		await expect(Math.abs(paperBox.left - triggerBox.left)).toBeLessThan(1);
+
+		await userEvent.keyboard("{Escape}");
+		// by text: a hidden item has no accessible name to find it by
+		await waitFor(() =>
+			expect(
+				within(document.body).queryByText("Alpha"),
+			).not.toBeInTheDocument(),
+		);
+		await waitFor(() => expect(trigger).toHaveFocus());
+	},
+};
 
 export const Issue3459Item8FocusedItemShowsFocusRing: MenuDemoStory = {
 	args: { onSelect: fn(), onClose: fn() },
