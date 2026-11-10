@@ -1,6 +1,6 @@
 import { afterEach, describe, it, expect } from "vitest";
 import { createElement } from "react";
-import { cleanup, render } from "@testing-library/react";
+import { cleanup, render, within } from "@testing-library/react";
 import CountryFlags from "../../src/standalone/CountryFlags";
 import countryLanguages from "../../src/assets/data/country-languages.json";
 import supportedLanguages from "../../src/assets/data/supported-languages.json";
@@ -83,6 +83,15 @@ describe("CountryFlags", () => {
 
 	describe("in LocaleSelectorEntry", () => {
 		afterEach(cleanup);
+		const germany: LocaleSelectorEntryData = {
+			locale: "de-DE",
+			language_short: "de",
+			country_short: "DE",
+			country: "Germany",
+			language: "German",
+			native_country: "Deutschland",
+			native_language: "Deutsch",
+		};
 		const renderEntry = (locale: LocaleSelectorEntryData) =>
 			render(
 				createElement(LocaleSelectorEntry, {
@@ -106,6 +115,15 @@ describe("CountryFlags", () => {
 			const { container } = renderEntry(aruba);
 			expect(flagAW).toBeTruthy();
 			expect(container.querySelector("img")?.getAttribute("src")).toBe(flagAW);
+		});
+
+		it("[ISSUE-3466-ITEM-6] the flag next to the country name is decorative: empty alt, the row names the country once", () => {
+			const { container } = renderEntry(germany);
+			expect(container.querySelector("img")).toHaveAttribute("alt", "");
+			expect(within(container).queryByRole("img")).toBeNull();
+			expect(within(container).getByRole("button")).not.toHaveAccessibleName(
+				/^Germany\s*Germany/,
+			);
 		});
 	});
 });

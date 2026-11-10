@@ -106,7 +106,9 @@ const LocaleSelectorEntry = (
 		>
 			<Container>
 				<ImageWrapper>
-					<Image alt={locale.country} src={flag} />
+					{/* decorative: the country's name is the text beside it, so a
+					    named flag would read the country twice */}
+					<Image alt="" src={flag} />
 				</ImageWrapper>
 				<TextContainer>
 					<Text title={locale.country}>{locale.country}</Text>
