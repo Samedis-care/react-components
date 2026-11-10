@@ -27,7 +27,12 @@ import {
 	useTheme,
 	useThemeProps,
 } from "@mui/material";
-import { Apps as AppsIcon, Search as SearchIcon } from "@mui/icons-material";
+import {
+	Apps as AppsIcon,
+	FilterAlt as FilterAltIcon,
+	FilterAltOutlined as FilterAltOutlinedIcon,
+	Search as SearchIcon,
+} from "@mui/icons-material";
 import Header, { IDataGridHeaderProps } from "./Header";
 import Footer from "./Footer";
 import Settings from "./Settings";
@@ -52,7 +57,6 @@ import Checkbox from "../UIKit/Checkbox";
 import ComponentWithLabel, {
 	ComponentWithLabelProps,
 } from "../UIKit/ComponentWithLabel";
-import FilterIcon from "../Icons/FilterIcon";
 import deepClone from "../../utils/deepClone";
 import { BackendMultiSelectProps } from "../../backend-components/Selector/BackendMultiSelect";
 import { MultiSelectorData } from "../Selector";
@@ -1228,21 +1232,30 @@ export const DataGridColumnHeaderFilterPopupDateTime = styled(Grid, {
 	width: 200,
 }) as typeof Grid;
 
-export const DataGridColumnHeaderFilterIcon = styled(FilterIcon, {
+/**
+ * Theme slot `columnHeaderFilterIcon`: the filter button's icon of a column
+ * without an active filter. Draws MUI's outlined funnel (`FilterAltOutlined`)
+ * at MUI's small icon size (20px).
+ */
+export const DataGridColumnHeaderFilterIcon = styled(FilterAltOutlinedIcon, {
 	name: "CcDataGrid",
 	slot: "columnHeaderFilterIcon",
-})({
-	width: 16,
-	height: "auto",
-}) as unknown as typeof FilterIcon;
+})(({ theme }) => ({
+	fontSize: theme.typography.pxToRem(20),
+})) as unknown as typeof FilterAltOutlinedIcon;
 
-export const DataGridColumnHeaderFilterActiveIcon = styled(FilterIcon, {
+/**
+ * Theme slot `columnHeaderFilterActiveIcon`: the filter button's icon of a
+ * column with an active filter. Draws MUI's filled funnel (`FilterAlt`) at
+ * MUI's small icon size (20px), so a filtered column differs from the others
+ * in shape, not only in the button's color.
+ */
+export const DataGridColumnHeaderFilterActiveIcon = styled(FilterAltIcon, {
 	name: "CcDataGrid",
 	slot: "columnHeaderFilterActiveIcon",
-})({
-	width: 16,
-	height: "auto",
-}) as unknown as typeof FilterIcon;
+})(({ theme }) => ({
+	fontSize: theme.typography.pxToRem(20),
+})) as unknown as typeof FilterAltIcon;
 
 export const DataGridColumnHeaderFilterButton = styled(IconButton, {
 	name: "CcDataGrid",
