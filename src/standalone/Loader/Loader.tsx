@@ -2,12 +2,24 @@ import React from "react";
 import {
 	CircularProgress,
 	styled,
+	SxProps,
+	Theme,
 	Typography,
 	TypographyProps,
 	useThemeProps,
 } from "@mui/material";
+import combineClassNames from "../../utils/combineClassNames";
 
-export interface LoaderProps {
+/**
+ * Props of {@link Loader}. Besides its own props, the Loader takes the HTML
+ * attributes of a `div` (`id`, `style`, `data-*`, `aria-*`, event handlers,
+ * ...) and passes them to its `root` slot, except `aria-label` and
+ * `aria-labelledby`, which name the spinner's progressbar.
+ */
+export interface LoaderProps extends Omit<
+	React.HTMLAttributes<HTMLDivElement>,
+	"children"
+> {
 	/**
 	 * Optional status message to show. It wraps to the Loader's width, also
 	 * inside a word that is wider than that, so a long translated word does
@@ -21,11 +33,37 @@ export interface LoaderProps {
 	 * @default "h6"
 	 */
 	typographyVariant?: TypographyProps["variant"];
+	/**
+	 * Class name added to the `root` slot. As on MUI components, the styles
+	 * of `styled(Loader)` and of a parent's theme slot that is a Loader
+	 * (FormLoaderOverlay's `loader`) arrive this way and win over the Loader's
+	 * own `root` styles.
+	 */
+	className?: string;
+	/**
+	 * Class names added to the Loader's slots, one per {@link LoaderClassKey}:
+	 * `root` (together with `className`), `innerWrapper` and `progress`
+	 */
+	classes?: Partial<Record<LoaderClassKey, string>>;
+	/**
+	 * System styles for the `root` slot, as on MUI components
+	 */
+	sx?: SxProps<Theme>;
+	/**
+	 * Accessible name of the spinner's progressbar
+	 */
+	"aria-label"?: string;
+	/**
+	 * Id (or space-separated ids) of the element(s) whose text names the
+	 * spinner's progressbar
+	 */
+	"aria-labelledby"?: string;
 }
 
 /**
- * Props of the root slot: the Loader's own props, so that theme `variants`
- * can match them. They do not reach the DOM.
+ * Props of the root slot: `text` and `typographyVariant`, so that theme
+ * `variants` can match them (they do not reach the DOM), and the HTML
+ * attributes the Loader passes on
  */
 type LoaderRootProps = Pick<LoaderProps, "text" | "typographyVariant">;
 
@@ -80,9 +118,11 @@ const Progress = styled(CircularProgress, {
 
 /**
  * Theme style slots of {@link Loader}
- * (`components.CcLoader.styleOverrides.<slot>`):
+ * (`components.CcLoader.styleOverrides.<slot>`), and the keys of its
+ * `classes` prop:
  * - `root`: the outermost box, 100% of the parent's width and height, a flex
- *   column that centers `innerWrapper` vertically. Theme
+ *   column that centers `innerWrapper` vertically. It gets `className`, `sx`
+ *   and the HTML attributes the Loader passes on. Theme
  *   `components.CcLoader.variants` apply to it. They match the Loader's `text`
  *   and `typographyVariant` after theme `defaultProps`, with
  *   `typographyVariant` `"h6"` when it is not set.
@@ -97,14 +137,31 @@ export type LoaderClassKey = "root" | "innerWrapper" | "progress";
 
 const Loader = (inProps: LoaderProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcLoader" });
-	const { text } = props;
-	const typographyVariant = props.typographyVariant ?? "h6";
+	const {
+		text,
+		typographyVariant: typographyVariantProp,
+		className,
+		classes,
+		"aria-label": ariaLabel,
+		"aria-labelledby": ariaLabelledBy,
+		...rootProps
+	} = props;
+	const typographyVariant = typographyVariantProp ?? "h6";
 
 	return (
-		<Root text={text} typographyVariant={typographyVariant}>
-			<InnerWrapper>
+		<Root
+			{...rootProps}
+			text={text}
+			typographyVariant={typographyVariant}
+			className={combineClassNames([className, classes?.root])}
+		>
+			<InnerWrapper className={classes?.innerWrapper}>
 				{text && <Typography variant={typographyVariant}>{text}</Typography>}
-				<Progress />
+				<Progress
+					className={classes?.progress}
+					aria-label={ariaLabel}
+					aria-labelledby={ariaLabelledBy}
+				/>
 			</InnerWrapper>
 		</Root>
 	);
@@ -121,6 +178,11 @@ const Loader = (inProps: LoaderProps) => {
  * height the Loader is as tall as the block: 72px without text (the 40px
  * spinner and 16px above and below it), and with text the text's height and
  * 8px more (at MUI's default spacing).
+ *
+ * Styling: `className`, `sx`, `style` and the other HTML attributes go to
+ * the `root` slot, `classes` to the slot of each key, so `styled(Loader)`
+ * styles the outer box. `aria-label` and `aria-labelledby` name the spinner's
+ * progressbar.
  *
  * Theme: `components.CcLoader.defaultProps` ({@link LoaderProps}),
  * `components.CcLoader.styleOverrides` per {@link LoaderClassKey} slot, and

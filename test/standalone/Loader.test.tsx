@@ -1,8 +1,9 @@
 import React from "react";
 import { describe, it, expect, afterEach, vi, assertType } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import { ThemeProvider, createTheme, Theme } from "@mui/material";
+import { ThemeProvider, createTheme, Theme, styled } from "@mui/material";
 import Loader from "../../src/standalone/Loader";
+import FormLoaderOverlay from "../../src/standalone/Form/FormLoaderOverlay";
 import type { LoaderClassKey, LoaderProps } from "../../src";
 
 afterEach(() => {
@@ -179,5 +180,122 @@ describe("Loader", () => {
 		expect(getComputedStyle(root).backgroundColor).toBe("rgb(0, 128, 0)");
 		expect(getComputedStyle(inner).backgroundColor).toBe("rgb(0, 0, 128)");
 		expect(getComputedStyle(bar).color).toBe("rgb(255, 0, 0)");
+	});
+
+	it("[ISSUE-3461-ITEM-7] passes className to its root element", () => {
+		const { container } = renderLoader(<Loader className={"my-class"} />);
+		expect(container.firstElementChild).toHaveClass("my-class");
+	});
+
+	it("[ISSUE-3461-ITEM-7] applies FormLoaderOverlay's loader slot override to its Loader", () => {
+		const themed = createTheme({
+			components: {
+				CcFormLoaderOverlay: {
+					styleOverrides: { loader: { backgroundColor: "rgb(0, 0, 255)" } },
+				},
+			},
+		});
+		const { container } = renderLoader(<FormLoaderOverlay visible />, themed);
+		expect(screen.getByRole("progressbar")).toBeInTheDocument();
+		const styled = Array.from(container.querySelectorAll("*")).filter(
+			(el) => getComputedStyle(el).backgroundColor === "rgb(0, 0, 255)",
+		);
+		expect(styled).not.toHaveLength(0);
+	});
+
+	it("[ISSUE-3461-ITEM-7] applies the styles of styled(Loader) to its root element, over the Loader's own", () => {
+		const TallLoader = styled(Loader)({ height: 123 });
+		const { container } = renderLoader(<TallLoader text={"Loading"} />);
+		const root = container.firstElementChild as HTMLElement;
+		expect(root).toContainElement(screen.getByRole("progressbar"));
+		expect(getComputedStyle(root).height).toBe("123px");
+	});
+
+	it("[ISSUE-3461-ITEM-7] puts classes on their slots, root together with className, and follows changes", () => {
+		const { container, rerender } = renderLoader(
+			<Loader
+				text={"Loading"}
+				className={"a"}
+				classes={{ root: "r", innerWrapper: "w", progress: "p" }}
+			/>,
+		);
+		const root = container.firstElementChild as HTMLElement;
+		const inner = root.firstElementChild as HTMLElement;
+		const bar = screen.getByRole("progressbar");
+		expect(root).toHaveClass("a", "r");
+		expect(inner).toHaveClass("w");
+		expect(bar).toHaveClass("p");
+
+		rerender(
+			withTheme(
+				<Loader text={"Loading"} className={"a2"} classes={{ root: "r2" }} />,
+			),
+		);
+		expect(container.firstElementChild).toBe(root);
+		expect(root).toHaveClass("a2", "r2");
+		expect(root).not.toHaveClass("a");
+		expect(root).not.toHaveClass("r");
+		expect(inner).not.toHaveClass("w");
+		expect(bar).not.toHaveClass("p");
+
+		rerender(withTheme(<Loader text={"Loading"} />));
+		expect(root).not.toHaveClass("a2");
+		expect(root).not.toHaveClass("r2");
+		for (const el of [root, inner, bar]) {
+			expect(el.className).not.toMatch(/\b(undefined|null|false)\b/);
+		}
+	});
+
+	it("[ISSUE-3461-ITEM-7] applies sx and style to its root element", () => {
+		const { container } = renderLoader(
+			<Loader sx={{ mt: 2 }} style={{ color: "rgb(4, 5, 6)" }} />,
+		);
+		const root = container.firstElementChild as HTMLElement;
+		// mt: 2 is theme.spacing(2)
+		expect(getComputedStyle(root).marginTop).toBe("16px");
+		expect(getComputedStyle(root).color).toBe("rgb(4, 5, 6)");
+		expect(root.getAttributeNames().sort()).toEqual(["class", "style"]);
+	});
+
+	it("[ISSUE-3461-ITEM-7] passes id, data-* and other aria-* attributes to its root element", () => {
+		const { container } = renderLoader(
+			<Loader
+				id={"devices-loader"}
+				data-testid={"devices-loader"}
+				aria-describedby={"hint"}
+			/>,
+		);
+		const root = screen.getByTestId("devices-loader");
+		expect(root).toBe(container.firstElementChild);
+		expect(root).toHaveAttribute("id", "devices-loader");
+		expect(root).toHaveAttribute("aria-describedby", "hint");
+		expect(screen.getByRole("progressbar")).not.toHaveAttribute(
+			"aria-describedby",
+		);
+	});
+
+	it("[ISSUE-3461-ITEM-7] names the progressbar with aria-label or aria-labelledby, not its root element", () => {
+		const { container, rerender } = renderLoader(
+			<Loader aria-label={"Loading devices"} />,
+		);
+		const root = container.firstElementChild as HTMLElement;
+		expect(
+			screen.getByRole("progressbar", { name: "Loading devices" }),
+		).toBeInTheDocument();
+		expect(root).not.toHaveAttribute("aria-label");
+
+		rerender(
+			withTheme(
+				<>
+					<Loader aria-labelledby={"incidents-label"} />
+					<span id={"incidents-label"}>Loading incidents</span>
+				</>,
+			),
+		);
+		expect(
+			screen.getByRole("progressbar", { name: "Loading incidents" }),
+		).toBeInTheDocument();
+		expect(container.firstElementChild).not.toHaveAttribute("aria-labelledby");
+		expect(screen.getByRole("progressbar")).not.toHaveAttribute("aria-label");
 	});
 });
