@@ -53,6 +53,27 @@ describe("Icons", () => {
 });
 
 describe("Icons exports", () => {
+	it("exports nothing but icons from the folder", () => {
+		// the *Icon.tsx files of src/standalone/Icons
+		const folder = ["ExportIcon", "FilterIcon", "SignIcon"];
+		const extras = Object.keys(Icons).filter((name) => !folder.includes(name));
+		expect(extras).toEqual([]);
+		expect([...ALL_NAMES].sort()).toEqual(folder);
+	});
+
+	it(
+		"re-exports every icon of the barrel from the package root",
+		async () => {
+			const root = (await import("../../src")) as Record<string, unknown>;
+			for (const [name, icon] of Object.entries(Icons)) {
+				expect(root[name], `${name} is missing from the package root`).toBe(
+					icon,
+				);
+			}
+		},
+		importTimeout,
+	);
+
 	it(
 		"[ISSUE-3460-ITEM-12] no longer exports TuneIcon, ResetIcon, SuccessOutlinedIcon and AppsIcon, which MUI's Tune, Refresh, TaskAlt and Apps replace",
 		async () => {

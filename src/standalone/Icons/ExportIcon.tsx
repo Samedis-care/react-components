@@ -23,7 +23,9 @@ const ExportIcon = React.forwardRef<SVGSVGElement, SvgIconProps>(
 
 /**
  * A spreadsheet (Excel) file, a page with an "X". The DataGrid action bar
- * shows it on its Export button and its Export menu entry.
+ * shows it on its Export button and its Export menu entry, whatever formats
+ * the grid exports. For the icon of a file type, see the FileUpload file icons
+ * (`ExcelFileIcon` and the others).
  *
  * Takes MUI `SvgIconProps`, like a Material icon. Size it with `fontSize`
  * (`"small"` 20px, `"medium"` 24px, the default, `"large"` 35px, `"inherit"`
