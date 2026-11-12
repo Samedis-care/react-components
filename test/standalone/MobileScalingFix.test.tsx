@@ -37,6 +37,53 @@ const setPlatform = (platform: string) =>
 		configurable: true,
 	});
 
+/** Stubs navigator.maxTouchPoints, which jsdom leaves undefined */
+const setMaxTouchPoints = (maxTouchPoints: number) =>
+	Object.defineProperty(navigator, "maxTouchPoints", {
+		value: maxTouchPoints,
+		configurable: true,
+	});
+
+/**
+ * Text fields and a checkbox with a 13px font size of their own, and a text
+ * input that inherits 24px
+ */
+const renderFields = () =>
+	render(
+		<>
+			<input aria-label="input" style={{ fontSize: 13 }} />
+			<textarea aria-label="textarea" style={{ fontSize: 13 }} />
+			<select aria-label="select" style={{ fontSize: 13 }} />
+			<div aria-label="editable" contentEditable style={{ fontSize: 13 }} />
+			<input aria-label="checkbox" type="checkbox" style={{ fontSize: 13 }} />
+			<div style={{ fontSize: 24 }}>
+				<input aria-label="inherits 24px" />
+			</div>
+		</>,
+	);
+
+/** The computed font size of every element with an aria-label, by label */
+const fontSizes = (): Record<string, string> =>
+	Object.fromEntries(
+		Array.from(
+			document.querySelectorAll("[aria-label]"),
+			(element) =>
+				[
+					element.getAttribute("aria-label") ?? "",
+					getComputedStyle(element).fontSize,
+				] as const,
+		),
+	);
+
+const ownFontSizes = {
+	input: "13px",
+	textarea: "13px",
+	select: "13px",
+	editable: "13px",
+	checkbox: "13px",
+	"inherits 24px": "24px",
+};
+
 describe("MobileScalingFix", () => {
 	beforeEach(() => {
 		// Remove any pre-existing viewport meta so tests start clean
@@ -50,6 +97,7 @@ describe("MobileScalingFix", () => {
 		viewportMetas().forEach((meta) => meta.remove());
 		// deleting the own property restores jsdom's "" platform
 		delete (navigator as unknown as Record<string, unknown>).platform;
+		delete (navigator as unknown as Record<string, unknown>).maxTouchPoints;
 	});
 
 	it("renders without crashing", () => {
@@ -205,5 +253,67 @@ describe("MobileScalingFix", () => {
 		expect(meta.content).toBe(
 			"width=device-width, initial-scale=1, maximum-scale=5",
 		);
+	});
+
+	it.each(["iPhone", "iPod touch"])(
+		"[ISSUE-3459-ITEM-12] does not restrict zoom on %s (no maximum-scale)",
+		(platform) => {
+			setPlatform(platform);
+			render(<MobileScalingFix />);
+			const content = directives(viewportContent());
+			expect(content.width).toBe("device-width");
+			expect(content["initial-scale"]).toBe("1");
+			expect(content).not.toHaveProperty("maximum-scale");
+			expect(content).not.toHaveProperty("user-scalable");
+		},
+	);
+
+	it.each([
+		["iPhone", 5],
+		["iPod touch", 5],
+		["iPad", 5],
+		["MacIntel", 5], // iPadOS 13 and later
+	])(
+		"[ISSUE-3459-ITEM-12] gives text fields at least 16px on %s with %i touch points",
+		(platform, maxTouchPoints) => {
+			setPlatform(platform);
+			setMaxTouchPoints(maxTouchPoints);
+			renderFields();
+			expect(fontSizes()).toEqual(ownFontSizes);
+			render(<MobileScalingFix />);
+			expect(fontSizes()).toEqual({
+				input: "16px",
+				textarea: "16px",
+				select: "16px",
+				editable: "16px",
+				checkbox: "13px",
+				"inherits 24px": "24px",
+			});
+		},
+	);
+
+	it.each([
+		["MacIntel", 0],
+		["Win32", 10],
+		["Linux armv8l", 5],
+		["Linux aarch64", 5],
+	])(
+		"[ISSUE-3459-ITEM-12] leaves the font size of text fields alone on %s with %i touch points",
+		(platform, maxTouchPoints) => {
+			setPlatform(platform);
+			setMaxTouchPoints(maxTouchPoints);
+			renderFields();
+			render(<MobileScalingFix />);
+			expect(fontSizes()).toEqual(ownFontSizes);
+		},
+	);
+
+	it("[ISSUE-3459-ITEM-12] drops the 16px minimum of text fields on unmount", () => {
+		setPlatform("iPhone");
+		renderFields();
+		const { unmount } = render(<MobileScalingFix />);
+		expect(fontSizes().input).toBe("16px");
+		unmount();
+		expect(fontSizes()).toEqual(ownFontSizes);
 	});
 });
