@@ -1,6 +1,7 @@
 import React, { createElement, useMemo } from "react";
 import CountryCodes from "./CountryCodes";
 import CountryFlag from "../CountryFlag";
+import type { CountryCode } from "./index";
 import { useCCCountryTranslations } from "../../utils/useCCTranslations";
 import getCurrentLocale from "../../utils/getCurrentLocale";
 
@@ -13,7 +14,7 @@ export interface CountryOption {
 	/**
 	 * The upper-case ISO 3166-1 alpha-2 code, e.g. `"DE"`: the value to store
 	 */
-	value: string;
+	value: CountryCode;
 	/**
 	 * The country's name in components-care's current language, e.g.
 	 * `"Deutschland"` in German

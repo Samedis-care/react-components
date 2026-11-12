@@ -4,9 +4,11 @@ import { Box, Typography } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { expect } from "storybook/test";
 import CountryFlags from "./index";
+import getCountryFlag from "./getCountryFlag";
 
-// CountryFlags is a data module (Record<string, string>), not a React component.
-// These stories wrap it in presentational components for visual exploration.
+// CountryFlags is a data module (the flags' URLs by CountryCode), not a React
+// component. These stories wrap it in presentational components for visual
+// exploration.
 
 const AllFlagsGrid = () => (
 	<Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
@@ -34,7 +36,7 @@ const AllFlagsGrid = () => (
 );
 
 const SingleFlag = ({ countryCode }: { countryCode: string }) => {
-	const src = CountryFlags[countryCode];
+	const src = getCountryFlag(countryCode);
 	if (!src)
 		return <Typography color="error">Unknown code: {countryCode}</Typography>;
 	return (

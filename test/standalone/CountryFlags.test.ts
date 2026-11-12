@@ -1,8 +1,15 @@
 /// <reference types="vite/client" />
-import { afterEach, describe, it, expect } from "vitest";
+import { afterEach, describe, it, expect, expectTypeOf } from "vitest";
 import { createElement } from "react";
 import { cleanup, render, within } from "@testing-library/react";
 import CountryFlags from "../../src/standalone/CountryFlags";
+// the tier index the package root re-exports (src/index.ts: export * from it)
+import {
+	CountryCodes,
+	getCountryFlag,
+	isCountryCode,
+} from "../../src/standalone";
+import type { CountryCode, CountryOption } from "../../src/standalone";
 import countryLanguages from "../../src/assets/data/country-languages.json";
 import supportedLanguages from "../../src/assets/data/supported-languages.json";
 import supportedLocales from "../../src/assets/data/supported-locales.json";
@@ -165,6 +172,90 @@ describe("CountryFlags", () => {
 					(locale) => !Object.hasOwn(CountryFlags, locale.split("-")[1]),
 				),
 			).toEqual([]);
+		});
+	});
+
+	describe("lookups by code", () => {
+		// strings that are no country code: lower case, the United Kingdom as UK
+		// (ISO: GB), malformed codes, a region and names of Object.prototype
+		const misses = [
+			"de",
+			"De",
+			"UK",
+			"EU",
+			"DEU",
+			"",
+			" DE",
+			"toString",
+			"constructor",
+			"__proto__",
+		];
+
+		it("[ISSUE-3466-ITEM-3] the map is frozen: changing, adding or deleting a flag throws and leaves the map as it was", () => {
+			// what code that ignores the read-only type would do
+			const map = CountryFlags as Record<string, string>;
+			const de = CountryFlags.DE;
+			expect(Object.isFrozen(CountryFlags)).toBe(true);
+			expect(() => {
+				map.DE = "x";
+			}).toThrow(TypeError);
+			expect(() => {
+				map.UK = "x";
+			}).toThrow(TypeError);
+			expect(() => {
+				delete map.FR;
+			}).toThrow(TypeError);
+			expect(CountryFlags.DE).toBe(de);
+			expect("UK" in CountryFlags).toBe(false);
+			expect("FR" in CountryFlags).toBe(true);
+		});
+
+		it("[ISSUE-3466-ITEM-3] getCountryFlag returns the flag of a country code and undefined for any other string", () => {
+			expect(getCountryFlag("DE")).toBe(CountryFlags.DE);
+			expect(getCountryFlag("AW")).toBe(flagAW);
+			expect(
+				misses.filter((code) => getCountryFlag(code) !== undefined),
+			).toEqual([]);
+		});
+
+		it("[ISSUE-3466-ITEM-3] isCountryCode is true for the keys of CountryFlags and false for any other string", () => {
+			expect(codes.length).toBeGreaterThanOrEqual(200);
+			expect(codes.filter((code) => !isCountryCode(code))).toEqual([]);
+			expect(misses.filter((code) => isCountryCode(code))).toEqual([]);
+		});
+
+		it("[ISSUE-3466-ITEM-3] every code of CountryCodes is a key of CountryFlags", () => {
+			expect(CountryCodes.length).toBeGreaterThanOrEqual(200);
+			expect(
+				CountryCodes.filter((code) => !Object.hasOwn(CountryFlags, code)),
+			).toEqual([]);
+		});
+
+		it("[ISSUE-3466-ITEM-3] the types: a lookup takes a CountryCode, the map is read-only, a lookup by string can miss", () => {
+			expectTypeOf(CountryFlags).toEqualTypeOf<
+				Readonly<Record<CountryCode, string>>
+			>();
+			expectTypeOf<"DE" | "GB" | "AW" | "XK">().toExtend<CountryCode>();
+			expectTypeOf<"de">().not.toExtend<CountryCode>();
+			expectTypeOf<"UK">().not.toExtend<CountryCode>();
+			expectTypeOf<string>().not.toExtend<CountryCode>();
+			expectTypeOf(getCountryFlag).toEqualTypeOf<
+				(code: string) => string | undefined
+			>();
+			expectTypeOf(isCountryCode).parameters.toEqualTypeOf<[code: string]>();
+			expectTypeOf(isCountryCode).guards.toEqualTypeOf<CountryCode>();
+			expectTypeOf(CountryCodes).toEqualTypeOf<readonly CountryCode[]>();
+			expectTypeOf<CountryOption["value"]>().toEqualTypeOf<CountryCode>();
+			// type-checked, never called: each marked line must not compile
+			const misuse = (code: string) => {
+				// @ts-expect-error a string is not known to be a country code
+				void CountryFlags[code];
+				// @ts-expect-error UK is no ISO 3166-1 code (the United Kingdom is GB)
+				void CountryFlags.UK;
+				// @ts-expect-error the map is read-only
+				CountryFlags.DE = "x";
+			};
+			expect(misuse).toBeTypeOf("function");
 		});
 	});
 

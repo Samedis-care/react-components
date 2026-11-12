@@ -251,10 +251,7 @@ import flag_ZM from "../../assets/img/countries/ZM.svg";
 import flag_ZW from "../../assets/img/countries/ZW.svg";
 
 // JS Object
-// No prototype: a lookup of a name of Object.prototype ("toString",
-// "__proto__", ...) gives undefined, like any other code without a flag
-const CountryFlags = Object.create(null) as Record<string, string>;
-Object.assign(CountryFlags, {
+const flags = {
 	AD: flag_AD,
 	AE: flag_AE,
 	AF: flag_AF,
@@ -503,6 +500,34 @@ Object.assign(CountryFlags, {
 	ZA: flag_ZA,
 	ZM: flag_ZM,
 	ZW: flag_ZW,
-});
+};
+
+/**
+ * A country the library has a flag and a name for, as its upper-case
+ * ISO 3166-1 alpha-2 code: `"DE"`, `"GB"` (not `"de"`, not `"UK"`), or
+ * Kosovo's user-assigned `"XK"`. The keys of `CountryFlags`; the name is
+ * `useCCCountryTranslations().t(code)`.
+ *
+ * `CountryCodes` lists the countries a country select offers, all of them
+ * country codes. A code known only at runtime, such as user or backend data,
+ * is a `string`: test it with `isCountryCode(code)`, or look up its flag with
+ * `getCountryFlag(code)`.
+ */
+export type CountryCode = keyof typeof flags;
+
+/**
+ * Country flag images by `CountryCode`: `CountryFlags.DE` is the URL of
+ * Germany's flag, for `<img src>` or CSS `url()`. To show a flag, use the
+ * `CountryFlag` component, which sizes, outlines and names it.
+ *
+ * A lookup takes a `CountryCode`; for a `string` use `getCountryFlag(code)`,
+ * which returns `undefined` for a code without a flag. The map is frozen and
+ * has no prototype: a lookup of a name of `Object.prototype` (`"toString"`,
+ * `"__proto__"`, ...) gives `undefined`, and `code in CountryFlags` is true
+ * for country codes only.
+ */
+const CountryFlags: Readonly<Record<CountryCode, string>> = Object.freeze(
+	Object.assign(Object.create(null) as object, flags),
+);
 
 export default CountryFlags;

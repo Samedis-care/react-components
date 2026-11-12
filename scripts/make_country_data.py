@@ -184,6 +184,39 @@ def get_currency_users() -> dict[str, int]:
     return currency_users
 
 
+# what write_country_flags writes after the entries of the map
+COUNTRY_FLAGS_TAIL = """
+/**
+ * A country the library has a flag and a name for, as its upper-case
+ * ISO 3166-1 alpha-2 code: `"DE"`, `"GB"` (not `"de"`, not `"UK"`), or
+ * Kosovo's user-assigned `"XK"`. The keys of `CountryFlags`; the name is
+ * `useCCCountryTranslations().t(code)`.
+ *
+ * `CountryCodes` lists the countries a country select offers, all of them
+ * country codes. A code known only at runtime, such as user or backend data,
+ * is a `string`: test it with `isCountryCode(code)`, or look up its flag with
+ * `getCountryFlag(code)`.
+ */
+export type CountryCode = keyof typeof flags;
+
+/**
+ * Country flag images by `CountryCode`: `CountryFlags.DE` is the URL of
+ * Germany's flag, for `<img src>` or CSS `url()`. To show a flag, use the
+ * `CountryFlag` component, which sizes, outlines and names it.
+ *
+ * A lookup takes a `CountryCode`; for a `string` use `getCountryFlag(code)`,
+ * which returns `undefined` for a code without a flag. The map is frozen and
+ * has no prototype: a lookup of a name of `Object.prototype` (`"toString"`,
+ * `"__proto__"`, ...) gives `undefined`, and `code in CountryFlags` is true
+ * for country codes only.
+ */
+const CountryFlags: Readonly<Record<CountryCode, string>> = Object.freeze(
+\tObject.assign(Object.create(null) as object, flags),
+);
+
+export default CountryFlags;
+"""
+
 # writes the CountryFlags map: one import and one entry per code, in the given order
 def write_country_flags(country_codes: [str]):
     with open("../src/standalone/CountryFlags/index.ts", "w") as f:
@@ -194,15 +227,11 @@ def write_country_flags(country_codes: [str]):
             f.write(f"import flag_{country} from \"../../assets/img/countries/{country}.svg\";" + os.linesep)
         f.write(os.linesep)
         f.write("// JS Object" + os.linesep)
-        f.write("// No prototype: a lookup of a name of Object.prototype (\"toString\"," + os.linesep)
-        f.write("// \"__proto__\", ...) gives undefined, like any other code without a flag" + os.linesep)
-        f.write("const CountryFlags = Object.create(null) as Record<string, string>;" + os.linesep)
-        f.write("Object.assign(CountryFlags, {" + os.linesep)
+        f.write("const flags = {" + os.linesep)
         for country in country_codes:
             f.write(f"\t{country}: flag_{country}," + os.linesep)
-        f.write("});" + os.linesep)
-        f.write(os.linesep)
-        f.write("export default CountryFlags;" + os.linesep)
+        f.write("};" + os.linesep)
+        f.write(COUNTRY_FLAGS_TAIL.replace("\n", os.linesep))
 
 def get_country_list() -> [str]:
     return list(requests.get("https://raw.githubusercontent.com/esosedi/3166/master/i18n/dispute/UN/en.json").json().keys())
