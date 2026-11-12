@@ -48,6 +48,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-12 | [MobileScalingFix no longer restricts zoom on iPhone; text fields get at least 16px on iOS](2026-11-12-mobile-scaling-fix-ios-text-field-font-size.md) | behavior |
 | 2026-11-12 | [A HowToBox skips entries that render nothing](2026-11-12-how-to-box-skips-empty-entries.md) | behavior |
 | 2026-11-12 | [InfiniteScroll's scroll container is a tab stop and takes the props of a div](2026-11-12-infinite-scroll-tab-stop.md) | behavior |
+| 2026-11-12 | [The busy overlay stays below dialogs, snackbars, tooltips and the app bar](2026-11-12-form-loader-overlay-below-app-layers.md) | behavior, theme |
 | 2026-11-10 | [InfiniteScroll loads nothing while it is hidden, and fills once it is shown](2026-11-10-infinite-scroll-waits-while-hidden.md) | behavior |
 | 2026-11-10 | [The Small list items narrow MUI's gutters, and MultiSelect's entries move 8px to the left](2026-11-10-small-list-item-gutters.md) | behavior |
 | 2026-11-10 | [Country flags come from country-flag-icons: every flag is 3:2 and drawn for small sizes](2026-11-10-country-flags-from-country-flag-icons.md) | behavior |

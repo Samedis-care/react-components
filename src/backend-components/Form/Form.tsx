@@ -232,7 +232,13 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
 		previousData: ModelRecord<M>,
 	) => Promise<void> | void;
 	/**
-	 * Disable busy state while onSubmit is running. Required if you want to show a dialog for example
+	 * The submit stops keeping the form busy when `onSubmit` is called: unless
+	 * something else keeps it busy (`addBusyReason`), the fields and buttons are no
+	 * longer read-only and the busy overlay is hidden while `onSubmit` runs. A dialog
+	 * opened from `onSubmit` can be used without it, as the busy overlay stays below
+	 * dialogs. A boolean, or a function that decides per submit and gets the same
+	 * arguments as `onSubmit`.
+	 * @default false (the form stays busy until `onSubmit` has finished)
 	 */
 	onSubmitUserInteractive?:
 		| boolean
