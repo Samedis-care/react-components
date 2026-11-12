@@ -24,9 +24,10 @@ export interface LoaderProps extends Omit<
 	"children"
 > {
 	/**
-	 * Optional status message to show, already translated. It wraps to the
-	 * Loader's width, also inside a word that is wider than that, so a long
-	 * translated word does not make the page scroll sideways. It also names
+	 * Optional status message to show, already translated. It is a paragraph
+	 * (`<p>`), never a heading, whatever `typographyVariant` it has. It wraps
+	 * to the Loader's width, also inside a word that is wider than that, so a
+	 * long translated word does not make the page scroll sideways. It also names
 	 * the spinner's progressbar, unless `aria-label` or `aria-labelledby` is
 	 * set. Without it (`undefined` or `""`) the progressbar is named
 	 * "Loading…", in the library's current language. Text and progressbar are
@@ -37,7 +38,10 @@ export interface LoaderProps extends Omit<
 	/**
 	 * Typography variant of `text`: any variant MUI's `Typography` takes,
 	 * including `"inherit"` and the variants a theme adds through
-	 * `TypographyPropsVariantOverrides`. Ignored without `text`.
+	 * `TypographyPropsVariantOverrides`. Ignored without `text`. It sets the
+	 * text's look, not its element: the text stays a `<p>`, also in the
+	 * variants that `Typography` renders as a heading (`h1`-`h6`,
+	 * `subtitle1`, `subtitle2`).
 	 * @default "h6"
 	 */
 	typographyVariant?: TypographyProps["variant"];
@@ -206,7 +210,7 @@ const Loader = (inProps: LoaderProps) => {
 		>
 			<InnerWrapper className={classes?.innerWrapper}>
 				{text && (
-					<Typography id={textId} variant={typographyVariant}>
+					<Typography id={textId} variant={typographyVariant} component={"p"}>
 						{text}
 					</Typography>
 				)}
@@ -239,6 +243,7 @@ const Loader = (inProps: LoaderProps) => {
  * Accessibility: the `root` slot is a polite status region
  * (`role="status"`) around text and spinner, so screen readers announce the
  * loading; `aria-live="off"` silences it where many Loaders show at once.
+ * The text is a paragraph, not a heading, in every `typographyVariant`.
  * Nothing in it is focusable. The spinner is a `progressbar`, named by
  * `text`, or without text "Loading…" in the library's current language.
  * `aria-label` and `aria-labelledby` replace that name. A status region

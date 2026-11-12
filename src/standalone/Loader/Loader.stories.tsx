@@ -1,6 +1,12 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Box, Dialog, DialogContent, DialogTitle } from "@mui/material";
+import {
+	Box,
+	Dialog,
+	DialogContent,
+	DialogTitle,
+	Typography,
+} from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { expect, within } from "storybook/test";
 import Loader from "./index";
@@ -123,6 +129,31 @@ export const Issue3461Item2ProgressbarHasName: Story = {
 			</Box>
 			<Box sx={{ width: 300, height: 200 }}>
 				<Loader text={"Loading data…"} />
+			</Box>
+		</>
+	),
+};
+
+export const Issue3461Item4StatusTextIsNoHeading: Story = {
+	parameters: {
+		a11y: {
+			test: "error",
+			options: { runOnly: { type: "rule", values: ["heading-order"] } },
+		},
+		docs: {
+			description: {
+				story:
+					"ISSUE-3461-ITEM-4: the status text is an `<h6>`, so below a page or dialog title (`<h2>`) the heading level jumps from 2 to 6 (axe `heading-order`).",
+			},
+		},
+	},
+	render: () => (
+		<>
+			<Typography variant={"h5"} component={"h2"}>
+				Devices
+			</Typography>
+			<Box sx={{ width: 400, height: 300 }}>
+				<Loader text={"Loading devices…"} />
 			</Box>
 		</>
 	),

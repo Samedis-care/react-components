@@ -31,7 +31,9 @@ describe("Loader", () => {
 	it("does not render text when text prop is omitted", () => {
 		const { container } = renderLoader(<Loader />);
 		// No typography elements beyond the progress wrapper
-		expect(container.querySelector("h6")).not.toBeInTheDocument();
+		expect(
+			container.querySelector(".MuiTypography-root"),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders text when text prop is provided", () => {
@@ -237,6 +239,21 @@ describe("Loader", () => {
 			screen.getByRole("progressbar", { name: "Loading chart…" }),
 		);
 	});
+
+	it.each([
+		["the default variant", undefined, "MuiTypography-h6"],
+		["subtitle1", "subtitle1", "MuiTypography-subtitle1"],
+		["h4", "h4", "MuiTypography-h4"],
+	] as const)(
+		"[ISSUE-3461-ITEM-4] does not render the status text as a heading (%s), but keeps its look",
+		(_, variant, look) => {
+			renderLoader(
+				<Loader text={"Loading data…"} typographyVariant={variant} />,
+			);
+			expect(screen.getByText("Loading data…")).toHaveClass(look);
+			expect(screen.queryByRole("heading")).toBeNull();
+		},
+	);
 
 	it("[ISSUE-3461-ITEM-10] applies theme variants for CcLoader", () => {
 		const themed = createTheme({
