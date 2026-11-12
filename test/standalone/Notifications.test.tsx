@@ -146,6 +146,25 @@ describe("Notifications component", () => {
 		fireEvent.click(button);
 		expect(onOpen).toHaveBeenCalledOnce();
 	});
+
+	it("[ISSUE-3471-ITEM-9] names the scrolling notification list by the popover's heading", async () => {
+		wrap(
+			<Notifications
+				notifications={makeNotifications()}
+				loadLatest={vi.fn()}
+				loadRead={vi.fn()}
+				loadUnread={undefined}
+				refreshInterval={999999999}
+			/>,
+		);
+		fireEvent.click(await screen.findByRole("button"));
+		const heading = await screen.findByRole("heading", { level: 2 });
+		const title = heading.textContent ?? "";
+		expect(title).not.toBe("");
+		const list = screen.getByRole("region", { name: title });
+		expect(list).toHaveAttribute("tabindex", "0");
+		expect(list).toContainElement(screen.getByText("Unread notification"));
+	});
 });
 
 describe("timestampToAge utility", () => {

@@ -1,6 +1,12 @@
 import React, { PureComponent } from "react";
+import { styled } from "@mui/material";
 
-export interface InfiniteScrollProps {
+/**
+ * The props of InfiniteScroll. Every prop of a `div` that is not listed here
+ * (`role`, `aria-label`, `aria-labelledby`, `id`, `style`, event handlers, …)
+ * is passed to the scroll container.
+ */
+export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement> {
 	/**
 	 * The children to render, must not change their size though internal state updates.
 	 * Should update if loadMoreTop or loadMoreBottom is called.
@@ -46,6 +52,19 @@ export interface InfiniteScrollProps {
 	 * Dynamic size mode (enables resize listener)
 	 */
 	dynamicallySized?: boolean;
+	/**
+	 * The scroll container's `tabIndex`. By default it is a tab stop, so
+	 * keyboard users can scroll it (and so load more) even when the rows
+	 * contain nothing focusable, and a click on a row keeps focus in the list,
+	 * where the arrow keys, Page Up/Down, Home and End scroll it. `-1` takes it
+	 * out of the tab order but keeps focus in the list on click.
+	 *
+	 * A tab stop needs a name: give the container a role and an accessible
+	 * name, e.g. `role="region"` with `aria-labelledby` pointing at the
+	 * list's visible heading, or `aria-label`.
+	 * @default 0
+	 */
+	tabIndex?: number;
 }
 
 interface IState {
@@ -84,7 +103,21 @@ const hasNoLayoutBox = (wrapper: HTMLElement): boolean =>
 	wrapper.clientHeight === 0 && wrapper.getClientRects().length === 0;
 
 /**
- * Provides infinite scrolling to whatever is inside it
+ * The scroll container. It is a tab stop, so it shows the library's focus
+ * ring while it has keyboard focus, drawn inside its edge because an
+ * ancestor may clip it.
+ */
+const ScrollContainer = styled("div")(({ theme }) => ({
+	"&:focus-visible": {
+		outline: `2px solid ${theme.palette.primary.main}`,
+		outlineOffset: -2,
+	},
+}));
+
+/**
+ * Provides infinite scrolling to whatever is inside it. The scroll container
+ * is a tab stop (see `tabIndex`) and takes the props of a `div`, such as a
+ * role and an accessible name.
  */
 class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 	public wrapper: HTMLElement | null = null;
@@ -142,10 +175,27 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 	}
 
 	render(): React.ReactElement {
+		const {
+			children,
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			loadMoreTop,
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			loadMoreBottom,
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			callBackDebounce,
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			dynamicallySized,
+			tabIndex,
+			...containerProps
+		} = this.props;
 		return (
-			<div className={this.props.className} ref={this.setScrollerRef}>
-				{this.props.children}
-			</div>
+			<ScrollContainer
+				{...containerProps}
+				tabIndex={tabIndex ?? 0}
+				ref={this.setScrollerRef}
+			>
+				{children}
+			</ScrollContainer>
 		);
 	}
 

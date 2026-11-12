@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Box, Typography } from "@mui/material";
+import { Box, Paper, Typography, styled } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import InfiniteScroll from "./index";
@@ -15,51 +15,70 @@ const meta: Meta<typeof InfiniteScroll> = {
 
 export default meta;
 
+type Story = StoryObj<typeof InfiniteScroll>;
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const makeItems = (start: number, count: number) =>
 	Array.from({ length: count }, (_, i) => start + i);
 
+/**
+ * The scroll container needs a bounded height and overflow: auto. Styling it
+ * with styled() still requires the className prop, hence className="".
+ */
+const Scroller = styled(InfiniteScroll)({
+	height: 300,
+	width: 300,
+	overflow: "auto",
+});
+
+const Row = styled("div")({
+	height: 30,
+	boxSizing: "border-box",
+	padding: "0 8px",
+	lineHeight: "30px",
+	borderBottom: "1px solid #eee",
+	fontSize: 14,
+});
+
+const renderItems = (items: number[]) =>
+	items.map((n) => <Row key={n}>Item {n}</Row>);
+
+/** The scroll container is the parent of the rows */
+const getScroller = (canvasElement: HTMLElement, firstRowText: string) => {
+	const scroller = within(canvasElement).getByText(firstRowText).parentElement;
+	if (!scroller) throw new Error("scroll container not found");
+	return scroller;
+};
+
+/** Has the fill check stopped, i.e. does the content overflow by more than 24px? */
+const isFilled = (scroller: HTMLElement) =>
+	scroller.scrollHeight > scroller.clientHeight + 24;
+
 // ─── Stories ──────────────────────────────────────────────────────────────────
 
-// Simpler approach: use a global style injected via a <style> tag in the story.
-// This avoids the need to capture a class name at runtime.
-
-const SCROLL_CLASS = "story-infinite-scroll";
-
-const InjectScrollStyle = () => (
-	<style>{`.${SCROLL_CLASS} { height: 300px; overflow: auto; width: 300px; }`}</style>
-);
-
-const BottomScrollStorySimple = () => {
+const BottomScrollStory = ({ onLoadBottom }: { onLoadBottom?: () => void }) => {
 	const [items, setItems] = useState<number[]>(() => makeItems(1, 20));
 
 	const loadMoreBottom = useCallback(() => {
+		onLoadBottom?.();
 		setItems((prev) => [...prev, ...makeItems(prev.length + 1, 10)]);
-	}, []);
+	}, [onLoadBottom]);
 
 	return (
 		<Box sx={{ width: 300 }}>
-			<InjectScrollStyle />
 			<Typography variant="caption" sx={{ display: "block", mb: 1 }}>
 				Scroll to the bottom to load more items. Total: {items.length}
 			</Typography>
-			<InfiniteScroll className={SCROLL_CLASS} loadMoreBottom={loadMoreBottom}>
-				{items.map((n) => (
-					<Box
-						key={n}
-						sx={{ p: 1, borderBottom: "1px solid #eee", fontSize: 14 }}
-					>
-						Item {n}
-					</Box>
-				))}
-			</InfiniteScroll>
+			<Scroller className="" loadMoreBottom={loadMoreBottom}>
+				{renderItems(items)}
+			</Scroller>
 		</Box>
 	);
 };
 
 export const LoadMoreOnBottom: StoryObj<typeof InfiniteScroll> = {
-	render: () => <BottomScrollStorySimple />,
+	render: () => <BottomScrollStory />,
 };
 
 const BIDIRECTIONAL_CLASS = "story-bidirectional-scroll";
@@ -136,16 +155,6 @@ const InjectContainerStyles = () => (
 .${MAX_HEIGHT_CLASS} { max-height: 300px; overflow: auto; width: 300px; }`}</style>
 );
 
-/**
- * Any axe violation fails these stories, except `scrollable-region-focusable`:
- * the rows contain nothing focusable, and the scroll container is not
- * focusable yet (ISSUE-3471-ITEM-9).
- */
-const A11Y_EXCEPT_SCROLLER_FOCUS = {
-	test: "error",
-	config: { rules: [{ id: "scrollable-region-focusable", enabled: false }] },
-};
-
 interface AppendingListProps {
 	className: string;
 	callBackDebounce?: number;
@@ -214,7 +223,7 @@ export const Issue3471Item4HiddenListFillsOnceShown: StoryObj<
 	args: { loadMoreBottom: fn() },
 	render: (args) => <HiddenPanelStory onLoadBottom={args.loadMoreBottom} />,
 	parameters: {
-		a11y: A11Y_EXCEPT_SCROLLER_FOCUS,
+		a11y: { test: "error" },
 		docs: {
 			description: {
 				story:
@@ -253,7 +262,7 @@ export const Issue3471Item4EmptyListWithMaxHeightFills: StoryObj<
 	args: { loadMoreBottom: fn() },
 	render: (args) => <MaxHeightStory onLoadBottom={args.loadMoreBottom} />,
 	parameters: {
-		a11y: A11Y_EXCEPT_SCROLLER_FOCUS,
+		a11y: { test: "error" },
 		docs: {
 			description: {
 				story:
@@ -270,5 +279,63 @@ export const Issue3471Item4EmptyListWithMaxHeightFills: StoryObj<
 		);
 		await expect(scroller.clientHeight).toBe(300);
 		await expect(args.loadMoreBottom).toHaveBeenCalledTimes(2);
+	},
+};
+
+// ─── Keyboard access and naming ───────────────────────────────────────────────
+
+export const Issue3471Item9ScrollerReachableByKeyboard: Story = {
+	args: { loadMoreBottom: fn() },
+	render: (args) => <BottomScrollStory onLoadBottom={args.loadMoreBottom} />,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"The rows contain nothing focusable, so the scroll container is the list's tab stop (`tabIndex` is 0 by default). Tab reaches it in every browser, including Safari, which gives a scroll container no tab stop of its own; it shows the focus ring, and the arrow keys, Page Up/Down, Home and End then scroll it, which loads more at the bottom.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ canvasElement }) => {
+		const scroller = getScroller(canvasElement, "Item 1");
+		// precondition: the region scrolls and has no focusable content
+		await expect(isFilled(scroller)).toBe(true);
+		await expect(
+			scroller.querySelector("a, button, input, select, textarea, [tabindex]"),
+		).toBeNull();
+
+		await userEvent.tab();
+		await expect(scroller).toHaveFocus();
+		// precondition: the browser shows keyboard focus
+		await expect(scroller.matches(":focus-visible")).toBe(true);
+		await expect(getComputedStyle(scroller).outlineStyle).toBe("solid");
+		await expect(getComputedStyle(scroller).outlineWidth).toBe("2px");
+	},
+};
+
+export const Issue3471Item9ClickInDialogKeepsFocusInList: Story = {
+	args: { loadMoreBottom: fn() },
+	render: (args) => (
+		// like the paper of a Popover or Dialog, which holds focus (tabIndex -1)
+		<Paper tabIndex={-1} sx={{ p: 2 }} data-testid="paper">
+			<BottomScrollStory onLoadBottom={args.loadMoreBottom} />
+		</Paper>
+	),
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"Inside a focusable ancestor (here a Paper with `tabIndex={-1}`, as in the Notifications popover or a dialog), a click on a row focuses the scroll container rather than the ancestor, so End, Page Down and the arrow keys scroll the list and load more.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ canvasElement }) => {
+		const scroller = getScroller(canvasElement, "Item 1");
+		await userEvent.click(within(canvasElement).getByText("Item 2"));
+		// the scroll keys act on the focused element's scroll chain
+		await expect(scroller).toContainElement(
+			document.activeElement as HTMLElement | null,
+		);
 	},
 };

@@ -785,5 +785,72 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 			advance(100);
 			expect(bottom).toHaveBeenCalledTimes(1);
 		});
+
+		it("[ISSUE-3471-ITEM-9] passes role, aria-label, tabIndex and id to the scroll container", () => {
+			const { container } = render(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreBottom={vi.fn()}
+					role="region"
+					aria-label="Notifications"
+					tabIndex={0}
+					id="notification-list"
+				>
+					<div>Notification 1</div>
+				</InfiniteScroll>,
+			);
+			const scroller = getScroller(container);
+			expect(screen.getByRole("region", { name: "Notifications" })).toBe(
+				scroller,
+			);
+			expect(scroller).toHaveAttribute("tabindex", "0");
+			expect(scroller).toHaveAttribute("id", "notification-list");
+		});
+
+		it("[ISSUE-3471-ITEM-9] makes the scroll container a tab stop by default, and passes none of its own props to it", () => {
+			// React reports an unknown DOM prop with console.error, and renders none
+			// of these as an attribute
+			const consoleError = vi.spyOn(console, "error");
+			const { container } = render(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={vi.fn()}
+					loadMoreBottom={vi.fn()}
+					callBackDebounce={0}
+					dynamicallySized
+				>
+					<div>Row 1</div>
+				</InfiniteScroll>,
+			);
+			const scroller = getScroller(container);
+			expect(scroller).toHaveAttribute("tabindex", "0");
+			expect(scroller.getAttributeNames().sort()).toEqual([
+				"class",
+				"tabindex",
+			]);
+			expect(consoleError).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3471-ITEM-9] keeps the tabIndex the consumer passes", () => {
+			const bottom = vi.fn();
+			const { container, rerender } = render(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreBottom={bottom}
+					tabIndex={-1}
+				>
+					<div>Row 1</div>
+				</InfiniteScroll>,
+			);
+			const scroller = getScroller(container);
+			expect(scroller).toHaveAttribute("tabindex", "-1");
+
+			rerender(
+				<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+					<div>Row 1</div>
+				</InfiniteScroll>,
+			);
+			expect(scroller).toHaveAttribute("tabindex", "0");
+		});
 	});
 });

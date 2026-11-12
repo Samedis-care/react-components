@@ -1,4 +1,10 @@
-import React, { CSSProperties, useCallback, useEffect, useState } from "react";
+import React, {
+	CSSProperties,
+	useCallback,
+	useEffect,
+	useId,
+	useState,
+} from "react";
 import { Notifications as NotificationsIcon } from "@mui/icons-material";
 import {
 	Badge,
@@ -218,6 +224,7 @@ export type NotificationsClassKey = "notificationArea" | "header";
 const Notifications = (inProps: NotificationsProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcNotifications" });
 	const { t } = useCCTranslations();
+	const headerId = useId();
 
 	const [anchor, setAnchor] = useState<HTMLElement | null>(null);
 	const {
@@ -305,6 +312,7 @@ const Notifications = (inProps: NotificationsProps) => {
 								component={"h2"}
 								variant={"h6"}
 								className={classes?.header}
+								id={headerId}
 							>
 								{t("standalone.notifications.title")}
 							</StyledHeader>
@@ -317,6 +325,8 @@ const Notifications = (inProps: NotificationsProps) => {
 								loadMoreBottom={loadRead}
 								loadMoreTop={loadUnread}
 								className={classes?.notificationArea ?? ""}
+								role={"region"}
+								aria-labelledby={headerId}
 							>
 								{notifications.map((notification) => (
 									<Renderer key={notification.id} {...notification} />
