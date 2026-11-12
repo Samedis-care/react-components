@@ -510,3 +510,158 @@ export const Issue3459Item9KeepMountedReopensOnFirstEnabledItem: MenuDemoStory =
 			await waitFor(() => expect(menuItem("One")).toHaveFocus());
 		},
 	};
+
+export const Issue3459Item10LongLabelsReadableOnPhone: MenuDemoStory = {
+	args: {
+		onSelect: fn(),
+		onClose: fn(),
+		// the French DataGrid reset menu
+		labels: [
+			"Recharger",
+			"Réinitialiser le filtre",
+			"Réinitialiser les paramètres de tri",
+			"Réinitialiser les paramètres de la colonne",
+			"Réinitialiser les largeurs de colonne",
+			"Effacer tout",
+		],
+		disabledLabels: [],
+		triggerLabel: "Réinitialiser",
+	},
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3459-ITEM-10: at 320px the paper is 288px wide; long labels are cut off without an ellipsis and cannot be scrolled into view. Expected: every label is readable.",
+			},
+		},
+	},
+	render: (args) => <MenuDemo {...args} />,
+	play: async ({ canvas }) => {
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Réinitialiser" }),
+		);
+		const items = await within(document.body).findAllByRole("menuitem");
+		await expect(items).toHaveLength(6);
+		const paperEl = items[0].closest<HTMLElement>(".MuiMenu-paper")!;
+		// the Grow transition scales the paper until it has entered
+		await waitFor(() =>
+			expect(getComputedStyle(paperEl).transform).toBe("none"),
+		);
+		const paper = paperEl.getBoundingClientRect();
+		await expect(paper.left).toBeGreaterThanOrEqual(16);
+		await expect(paper.right).toBeLessThanOrEqual(304);
+		const clipped = items
+			.filter((item) => item.scrollWidth > item.clientWidth)
+			.map((item) => item.textContent);
+		await expect(clipped).toEqual([]);
+	},
+};
+
+const resetLabels = {
+	en: [
+		"Refresh",
+		"Reset filter",
+		"Reset sort settings",
+		"Reset column settings",
+		"Reset column widths",
+		"Reset all",
+	],
+	fr: [
+		"Recharger",
+		"Réinitialiser le filtre",
+		"Réinitialiser les paramètres de tri",
+		"Réinitialiser les paramètres de la colonne",
+		"Réinitialiser les largeurs de colonne",
+		"Effacer tout",
+	],
+};
+
+const LanguageSwitchDemo = () => {
+	const [language, setLanguage] = useState<keyof typeof resetLabels>("en");
+	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+	const open = Boolean(anchorEl);
+	return (
+		<Box sx={{ display: "flex", justifyContent: "space-between", p: 1 }}>
+			<Button onClick={() => setLanguage("fr")}>Français</Button>
+			<Button
+				id={"language-demo-trigger"}
+				aria-haspopup={"menu"}
+				aria-controls={open ? "language-demo" : undefined}
+				aria-expanded={open}
+				onClick={(e) => setAnchorEl(e.currentTarget)}
+			>
+				Reset
+			</Button>
+			<PopupMenu
+				keepMounted
+				anchorEl={anchorEl}
+				open={open}
+				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+				transformOrigin={{ vertical: "top", horizontal: "center" }}
+				onClose={() => setAnchorEl(null)}
+				slotProps={{
+					list: {
+						id: "language-demo",
+						"aria-labelledby": "language-demo-trigger",
+					},
+				}}
+			>
+				{resetLabels[language].map((label) => (
+					<MenuItem key={label} onClick={() => setAnchorEl(null)}>
+						{label}
+					</MenuItem>
+				))}
+			</PopupMenu>
+		</Box>
+	);
+};
+
+export const Issue3459Item10KeepMountedMenuWidensForLongerLabels: Story = {
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		layout: "fullscreen",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3459-ITEM-10: a menu kept mounted (as every DataGrid menu) keeps its position between opens. After its labels got longer (here another language), it opens as wide as they need, up to 288px at 320px, and is moved left to fit, rather than wrapping them into the room right of its old position.",
+			},
+		},
+	},
+	render: () => <LanguageSwitchDemo />,
+	play: async ({ canvas }) => {
+		const trigger = canvas.getByRole("button", { name: "Reset" });
+		const openedPaper = async () => {
+			await userEvent.click(trigger);
+			const items = await within(document.body).findAllByRole("menuitem");
+			const paper = items[0].closest<HTMLElement>(".MuiMenu-paper")!;
+			// the Grow transition scales the paper until it has entered
+			await waitFor(() =>
+				expect(getComputedStyle(paper).transform).toBe("none"),
+			);
+			return { items, paper: paper.getBoundingClientRect() };
+		};
+
+		// the English labels fit, so the menu sits right of the window's margin
+		const english = await openedPaper();
+		await expect(english.paper.left).toBeGreaterThan(16);
+		await expect(english.paper.right).toBeLessThanOrEqual(304);
+		await userEvent.keyboard("{Escape}");
+		await menuClosed();
+
+		await userEvent.click(canvas.getByRole("button", { name: "Français" }));
+		const french = await openedPaper();
+		await expect(french.items[3]).toHaveTextContent(
+			"Réinitialiser les paramètres de la colonne",
+		);
+		await expect(french.paper.left).toBeGreaterThanOrEqual(16);
+		await expect(french.paper.right).toBeLessThanOrEqual(304);
+		await expect(french.paper.width).toBeCloseTo(288, 0);
+		const clipped = french.items
+			.filter((item) => item.scrollWidth > item.clientWidth)
+			.map((item) => item.textContent);
+		await expect(clipped).toEqual([]);
+	},
+};
