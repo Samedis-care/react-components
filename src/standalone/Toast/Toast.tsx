@@ -1,18 +1,22 @@
 import React, { useCallback, useMemo } from "react";
 import {
 	Alert,
+	alertClasses,
 	AlertColor,
 	AlertProps,
 	AlertTitle,
+	CSSObject,
 	Portal,
 	Snackbar,
 	SnackbarCloseReason,
 	SnackbarOrigin,
 	SnackbarProps,
 	styled,
+	Theme,
 	useThemeProps,
 } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
+import readableFill from "../../utils/internal/readableFill";
 import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface ToastProps {
@@ -56,6 +60,15 @@ export interface ToastProps {
 	/**
 	 * The alert variant
 	 * @default "filled"
+	 * @remarks `filled` is MUI's filled Alert: MUI's text color
+	 * (`palette.getContrastText(palette[severity].main)`) on MUI's fill
+	 * (`palette[severity].main`, in a dark palette `.dark`). Where that text has
+	 * less than the 4.5:1 that text needs, the toast darkens the fill (behind
+	 * dark text: lightens it) just enough, keeping its hue; with MUI's default
+	 * light palette that is info and warning. A custom palette needs nothing
+	 * more: only a color the toast cannot measure (a CSS variable, a keyword) is
+	 * used as it is, and must then reach 4.5:1 with its contrast text itself.
+	 * `standard` and `outlined` keep MUI's colors.
 	 */
 	variant?: AlertProps["variant"];
 	/**
@@ -93,6 +106,40 @@ const DEFAULT_ANCHOR_ORIGIN: SnackbarOrigin = {
 	horizontal: "right",
 };
 
+const COLOR_CLASSES: Record<AlertColor, string> = {
+	success: alertClasses.colorSuccess,
+	info: alertClasses.colorInfo,
+	warning: alertClasses.colorWarning,
+	error: alertClasses.colorError,
+};
+
+/**
+ * The fills of the filled variant that differ from MUI's: for each severity
+ * whose text has less than 4.5:1 on MUI's fill, that fill moved away from the
+ * text just enough (MUI's own aims at 3:1). The text color stays MUI's.
+ * @param theme The theme
+ * @returns The rules for the alert slot
+ */
+const readableFilledFills = (theme: Theme): CSSObject => {
+	const rules: CSSObject = {};
+	for (const [severity, colorClass] of Object.entries(COLOR_CLASSES)) {
+		const color = theme.palette[severity as AlertColor];
+		const fill = theme.palette.mode === "dark" ? color.dark : color.main;
+		const readable = readableFill(
+			fill,
+			theme.palette.getContrastText(color.main),
+		);
+		if (readable !== fill) {
+			rules[`&.${alertClasses.filled}.${colorClass}`] = {
+				backgroundColor: readable,
+			};
+		}
+	}
+	// with CSS theme variables, only in the color scheme theme.palette
+	// describes; other schemes keep MUI's fills
+	return theme.applyStyles(theme.palette.mode, rules);
+};
+
 const Root = styled(Snackbar, { name: "CcToast", slot: "root" })({});
 
 const ToastAlert = styled(Alert, { name: "CcToast", slot: "alert" })(
@@ -103,6 +150,7 @@ const ToastAlert = styled(Alert, { name: "CcToast", slot: "alert" })(
 			minWidth: 288,
 			maxWidth: 560,
 		},
+		...readableFilledFills(theme),
 	}),
 );
 
