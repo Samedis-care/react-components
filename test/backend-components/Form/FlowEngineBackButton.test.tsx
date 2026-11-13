@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import { describe, it, expect, afterEach, vi } from "vitest";
 import React from "react";
-import { act, render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup } from "@testing-library/react";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { BackActionButton } from "../../../src/backend-components/Form/DefaultFormPageButtons";
 import FlowEngineBackButton from "../../../src/backend-components/Form/FlowEngine/FlowEngineBackButton";
@@ -11,7 +11,6 @@ import {
 } from "../../../src/backend-components/Form/Form";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import { ModelUnknown } from "../../../src/backend-integration";
-import ccI18n from "../../../src/i18n";
 import {
 	loaded,
 	makeModel,
@@ -128,37 +127,21 @@ const mountWith = (
 };
 
 describe("[ISSUE-3504-ITEM-10] FlowEngineBackButton's label", () => {
-	afterEach(async () => {
-		await ccI18n.changeLanguage("en");
+	it("[ISSUE-3504-ITEM-10] has no default: children are required (checked by tsc -p tsconfig-test.json)", () => {
+		// @ts-expect-error the label is required: the button leaves the whole flow, and whether that reads as "Cancel" or "Back" depends on the stage
+		const unlabelled = <FlowEngineBackButton />;
+		expect(unlabelled.type).toBe(FlowEngineBackButton);
 	});
 
-	it("[ISSUE-3504-ITEM-10] is Cancel by default, as the button leaves the whole flow", async () => {
-		const { sink } = mountWith(
-			{ goBack: vi.fn(), hasCustomSubmitHandler: false },
-			() => <FlowEngineBackButton />,
-		);
-		await loaded(sink);
-		expect(screen.getByRole("button")).toHaveAccessibleName("Cancel");
-	});
-
-	it("[ISSUE-3504-ITEM-10] the default follows the language (common.buttons.cancel)", async () => {
-		const { sink } = mountWith(
-			{ goBack: vi.fn(), hasCustomSubmitHandler: false },
-			() => <FlowEngineBackButton />,
-		);
-		await loaded(sink);
-		await act(async () => {
-			await ccI18n.changeLanguage("de");
-		});
-		expect(screen.getByRole("button")).toHaveAccessibleName("Abbrechen");
-	});
-
-	it("[ISSUE-3504-ITEM-10] children replace the default", async () => {
-		const { sink } = mountWith(
-			{ goBack: vi.fn(), hasCustomSubmitHandler: false },
-			() => <FlowEngineBackButton>{"Back to the list"}</FlowEngineBackButton>,
-		);
-		await loaded(sink);
-		expect(screen.getByRole("button")).toHaveAccessibleName("Back to the list");
-	});
+	it.each(["Cancel", "Back"])(
+		"[ISSUE-3504-ITEM-10] the children are the button's name: %s",
+		async (label) => {
+			const { sink } = mountWith(
+				{ goBack: vi.fn(), hasCustomSubmitHandler: false },
+				() => <FlowEngineBackButton>{label}</FlowEngineBackButton>,
+			);
+			await loaded(sink);
+			expect(screen.getByRole("button")).toHaveAccessibleName(label);
+		},
+	);
 });

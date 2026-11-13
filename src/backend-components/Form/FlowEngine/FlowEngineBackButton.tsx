@@ -3,7 +3,6 @@ import { ActionButtonProps } from "../../../standalone/UIKit/ActionButton";
 import { useFormContextLite } from "../Form";
 import { BackActionButton } from "../DefaultFormPageButtons";
 import { CrudFormProps } from "../../CRUD";
-import useCCTranslations from "../../../utils/useCCTranslations";
 import { IsInFormDialogContext } from "../FormDialog";
 import { EnhancedCustomProps } from "../BasicFormPage";
 import { ModelUnknown } from "../../../backend-integration";
@@ -13,11 +12,12 @@ export interface FlowEngineBackButtonProps extends Omit<
 	"onClick" | "children"
 > {
 	/**
-	 * The label
-	 * @default the translated "Cancel" (common.buttons.cancel): the button leaves the whole
-	 *          flow, not only the current stage
+	 * The label, required: the button leaves the whole flow (it calls the Form's goBack), not
+	 * only the current stage, and whether that reads as "Cancel" or "Back" depends on the
+	 * stage. In a step of a wizard, next to "Next", "Back" reads as "previous step", so such
+	 * a stage says "Cancel"; a final form opened from a list may say "Back".
 	 */
-	children?: ActionButtonProps["children"];
+	children: ActionButtonProps["children"];
 }
 
 export const useShouldRenderFlowEngineBackButton = () => {
@@ -42,7 +42,6 @@ const FlowEngineBackButton = (props: FlowEngineBackButtonProps) => {
 	const isInDialog = useContext(IsInFormDialogContext);
 	const goBack = custProps?.goBack;
 	const hasCustomCloseHandler = custProps?.hasCustomSubmitHandler;
-	const { t } = useCCTranslations();
 
 	const handleBack = useCallback(() => {
 		if (goBack) void goBack();
@@ -56,7 +55,7 @@ const FlowEngineBackButton = (props: FlowEngineBackButtonProps) => {
 					disabled={props.disabled || submitting}
 					onClick={handleBack}
 				>
-					{props.children ?? t("common.buttons.cancel")}
+					{props.children}
 				</BackActionButton>
 			)}
 		</>
