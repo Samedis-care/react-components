@@ -75,8 +75,34 @@ const NoLocalesMessage = styled("div", {
 	width: "100%",
 });
 
+// states the number of rows the search leaves, or that none match (a live
+// region must exist before its text changes, so it is always rendered)
+const SearchStatus = styled("div", {
+	name: "CcLocaleSelectorDialogContent",
+	slot: "searchStatus",
+})({
+	// visually hidden, as MUI's visuallyHidden
+	border: 0,
+	clipPath: "inset(50%)",
+	height: 1,
+	margin: -1,
+	overflow: "hidden",
+	padding: 0,
+	position: "absolute",
+	whiteSpace: "nowrap",
+	width: 1,
+});
+
+/**
+ * Theme style slots of LocaleSelectorDialogContent
+ * (`components.CcLocaleSelectorDialogContent.styleOverrides.<slot>`):
+ * - `localeList`: the area below the search box that holds the rows
+ * - `noLocalesMessage`: the message that replaces the rows when none match
+ * - `searchStatus`: the visually hidden status region (`role="status"`) that
+ *   states the number of rows, or that none match the search
+ */
 export type LocaleSelectorDialogContentClassKey =
-	"localeList" | "noLocalesMessage";
+	"localeList" | "noLocalesMessage" | "searchStatus";
 
 /**
  * Whether every namespace loaded so far has its texts for the locale or its
@@ -233,6 +259,15 @@ const LocaleSelectorDialogContent = (
 		key: rowHeightKey,
 	});
 
+	const searchLabel = t("standalone.data-grid.header.search");
+	const searchSlotProps = useMemo(
+		() => ({
+			input: SearchInputProps,
+			htmlInput: { "aria-label": searchLabel },
+		}),
+		[searchLabel],
+	);
+
 	return (
 		<Grid container className={className}>
 			<Grid size={12}>
@@ -241,8 +276,16 @@ const LocaleSelectorDialogContent = (
 						value={filter}
 						onChange={handleFilterChange}
 						fullWidth
-						slotProps={{ input: SearchInputProps }}
+						placeholder={searchLabel}
+						slotProps={searchSlotProps}
 					/>
+					<SearchStatus role={"status"}>
+						{filteredData.length === 0
+							? t("non-standalone.language-switcher.no-locales")
+							: t("non-standalone.language-switcher.results", {
+									COUNT: filteredData.length,
+								})}
+					</SearchStatus>
 				</Box>
 			</Grid>
 			<LocaleList size={12}>

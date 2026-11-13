@@ -254,7 +254,8 @@
 		"language-switcher": {
 			"load-error": "Non è stato possibile caricare la lingua. Controlla la tua connessione a Internet, ricarica la pagina e riprova.",
 			"title": "Seleziona il tuo paese e la tua lingua",
-			"no-locales": "Nessuna impostazione locale corrisponde alla tua ricerca"
+			"no-locales": "Nessuna impostazione locale corrisponde alla tua ricerca",
+			"results": "Risultati: {{COUNT}}"
 		}
 	},
 	"backend-integration": {

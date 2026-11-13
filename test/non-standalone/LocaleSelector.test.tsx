@@ -100,6 +100,12 @@ const dialogEls = () =>
 	Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]'));
 const rows = () =>
 	Array.from(document.querySelectorAll<HTMLElement>('[role="listitem"]'));
+/** the rows appear after the lazy content chunk and the locale-switcher namespace */
+const waitRows = () =>
+	waitFor(() => {
+		if (!rows().length) throw new Error("no rows rendered");
+		return rows();
+	});
 /** the row control (role=button) whose texts include the given text */
 const rowBtn = (text: string) =>
 	waitFor(() => {
@@ -109,6 +115,19 @@ const rowBtn = (text: string) =>
 		if (!button) throw new Error("no row " + text);
 		return button;
 	});
+const search = async (query: string) => {
+	fireEvent.change(searchInput(), { target: { value: query } });
+	await flush();
+};
+const searchInput = () => {
+	const input = document.querySelector<HTMLInputElement>(
+		'[role="dialog"] input',
+	);
+	if (!input) throw new Error("no search input");
+	return input;
+};
+const noLocalesText = () =>
+	ccI18n.t("non-standalone.language-switcher.no-locales");
 
 type ChangeLanguage = typeof ccI18n.changeLanguage;
 /** replaces ccI18n.changeLanguage with a call that stays pending until released */
@@ -254,6 +273,46 @@ describe("LocaleSelectorDialog", () => {
 			await flush();
 			await release();
 			expect(dialogEls().map((el) => el.textContent)).toEqual(["Below"]);
+		});
+	});
+
+	describe("accessibility", () => {
+		it("[ISSUE-3499-ITEM-3] the search box is named", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			await waitRows();
+			expect(searchInput()).toHaveAccessibleName(/search/i);
+		});
+
+		it("[ISSUE-3499-ITEM-3] the search result is announced in a status region", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			await waitRows();
+			await search("xyz");
+			expect(
+				within(screen.getByRole("dialog")).getByRole("status"),
+			).toHaveTextContent(noLocalesText());
+		});
+
+		it("[ISSUE-3499-ITEM-3] the status region states the number of rows, and stays the same element while the search changes", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			await waitRows();
+			// a live region announces changes of its text, not its insertion
+			const status = within(screen.getByRole("dialog")).getByRole("status");
+			const all = rows()[0].getAttribute("aria-setsize");
+			expect(Number(all)).toBeGreaterThan(1);
+			expect(status.textContent).toBe(`Results: ${all}`);
+			await search("Germany");
+			expect(rows()).toHaveLength(1);
+			expect(status.textContent).toBe("Results: 1");
+			await search("xyz");
+			expect(status.textContent).toBe(noLocalesText());
+			await search("");
+			expect(status.textContent).toBe(`Results: ${all}`);
+			expect(within(screen.getByRole("dialog")).getByRole("status")).toBe(
+				status,
+			);
 		});
 	});
 });

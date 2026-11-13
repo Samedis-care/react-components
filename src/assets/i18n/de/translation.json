@@ -254,7 +254,8 @@
 		"language-switcher": {
 			"load-error": "Die Sprache konnte nicht geladen werden. Prüfe deine Internetverbindung, lade die Seite neu und versuche es noch einmal.",
 			"title": "Wähle das Land und die Sprache",
-			"no-locales": "Keine Gebietsschemas entsprechen Ihrer Suchanfrage"
+			"no-locales": "Keine Gebietsschemas entsprechen Ihrer Suchanfrage",
+			"results": "Ergebnisse: {{COUNT}}"
 		}
 	},
 	"backend-integration": {

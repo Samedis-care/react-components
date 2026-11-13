@@ -132,12 +132,38 @@ export const FilteredLocales: StoryObj = {
 
 // ─── Bugs ────────────────────────────────────────────────────────────────────
 
+export const Issue3499Item3SearchBoxIsNamed: Story = {
+	args: { supportedLocales: SCF },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3499-ITEM-3: the search box is named "Search" and shows it as its placeholder next to the magnifier (axe `label`). A status region, visually hidden, states the number of rows the search leaves or that none match, so screen readers announce the result.',
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ canvasElement }) => {
+		await reset();
+		const dialog = await openDialog(canvasElement);
+		const input = within(dialog).getByRole("textbox");
+		await expect(input).toHaveAccessibleName("Search");
+		await expect(input).toHaveAttribute("placeholder", "Search");
+		const status = within(dialog).getByRole("status");
+		await expect(status).toHaveTextContent(/^Results: 220$/);
+		await userEvent.type(input, "xyz");
+		await expect(status).toHaveTextContent(
+			/^No locales match your search query$/,
+		);
+	},
+};
+
 export const Issue3499Item4CountryReadableOnPhone: Story = {
 	args: { supportedLocales: SCF },
 	globals: { viewport: { value: "mobile1", isRotated: false } },
 	parameters: {
-		// the open dialog has other axe findings; this story is about the layout
-		a11y: { test: "todo" },
+		a11y: { test: "error" },
 		docs: {
 			description: {
 				story:
@@ -163,8 +189,7 @@ export const Issue3499Item4CountryReadableOnPhone: Story = {
 export const Issue3499Item4LongNamesWrapWithTextSpacing: Story = {
 	args: { supportedLocales: SCF },
 	parameters: {
-		// the open dialog has other axe findings; this story is about the layout
-		a11y: { test: "todo" },
+		a11y: { test: "error" },
 		docs: {
 			description: {
 				story:
@@ -223,8 +248,7 @@ export const Issue3499Item4LongNamesWrapWithTextSpacing: Story = {
 export const Issue3466Item8FlagsOutlined: Story = {
 	args: { supportedLocales: SCF },
 	parameters: {
-		// the open dialog has other axe findings; this story is about the flags
-		a11y: { test: "todo" },
+		a11y: { test: "error" },
 		docs: {
 			description: {
 				story:
