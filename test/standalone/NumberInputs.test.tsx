@@ -541,6 +541,28 @@ describe("CurrencyInput", () => {
 			expect(Object.is(reported(onValue).at(-1), 0)).toBe(true);
 			expect(field("Amount")).toHaveValue("€0.00");
 		});
+
+		it("[ISSUE-3484-ITEM-5] reads a fraction typed with the other region's separator after a grouped amount", async () => {
+			await setLanguage("de");
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={null} onValue={onValue}>
+					{(value, onChange) => (
+						<CurrencyInput
+							label="Amount"
+							currency="EUR"
+							value={value}
+							onChange={onChange}
+						/>
+					)}
+				</Controlled>,
+			);
+			// typed with the grouping, on a keypad that only offers "."
+			fireEvent.change(field("Amount"), { target: { value: "1.234.5" } });
+			fireEvent.blur(field("Amount"));
+			expect(reported(onValue)).toEqual([1234.5]);
+			expect(field("Amount")).toHaveValue(fmt("de", 1234.5, EUR));
+		});
 	});
 	describe("text that does not parse", () => {
 		it("[ISSUE-3484-ITEM-20] says in text why the amount is invalid", () => {
@@ -968,6 +990,28 @@ describe("DecimalInputField", () => {
 			expect(field("Hours")).toHaveValue("-5");
 			tabThrough(field("Hours"));
 			expect(reported(onValue).filter((value) => value !== -5)).toEqual([]);
+		});
+
+		it("[ISSUE-3484-ITEM-5] reads a fraction typed with the other region's separator after group separators", async () => {
+			await setLanguage("de");
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={1234} onValue={onValue}>
+					{(value, onChange) => (
+						<DecimalInputField
+							label="Hours"
+							value={value}
+							onChange={onChange}
+						/>
+					)}
+				</Controlled>,
+			);
+			expect(field("Hours")).toHaveValue("1.234");
+			// a keypad that only offers "." appends ".5"
+			fireEvent.change(field("Hours"), { target: { value: "1.234.5" } });
+			fireEvent.blur(field("Hours"));
+			// 1234.5, or nothing while the text is flagged
+			expect(reported(onValue).filter((value) => value !== 1234.5)).toEqual([]);
 		});
 
 		it.each([
