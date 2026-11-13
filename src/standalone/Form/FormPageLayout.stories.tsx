@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
 	Alert,
@@ -13,7 +14,7 @@ import {
 	Typography,
 } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
-import { expect, within } from "storybook/test";
+import { expect, userEvent, within } from "storybook/test";
 import FormPageLayout from "./FormPageLayout";
 import FormLoaderOverlay from "./FormLoaderOverlay";
 import ActionButton from "../UIKit/ActionButton";
@@ -158,6 +159,11 @@ const buttonBar = (scope: ParentNode) => {
 	const bar = scope.querySelector('[class*="CcFormButtons-root"]');
 	if (!bar) throw new Error("FormButtons not rendered");
 	return bar;
+};
+const bodyIn = (scope: ParentNode) => {
+	const body = scope.querySelector('[class*="CcFormPageLayout-body"]');
+	if (!body) throw new Error("FormPageLayout not rendered");
+	return body;
 };
 const overlayIn = (scope: ParentNode) => {
 	const overlay = scope.querySelector('[class*="CcFormLoaderOverlay-root"]');
@@ -582,5 +588,259 @@ export const Issue3473Item2ShortFormSaveAtBottomOfFlexColumn: Story = {
 		await expect(distance(footer.bottom, main.bottom - 36)).toBeLessThanOrEqual(
 			1,
 		);
+	},
+};
+
+export const Issue3473Item9FocusedFieldNotUnderFooter: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-9: tabbing through a dialog form, fields that are inside the scroll area but behind the floating footer get focus without being scrolled into view, so the focused field is hidden (WCAG 2.4.11).",
+			},
+		},
+	},
+	render: () => <DialogForm count={15} />,
+	play: async () => {
+		const screen = within(document.body);
+		await screen.findByRole("button", { name: "Save" });
+		const content = screen.getByTestId("content");
+		const body = bodyIn(content);
+		screen.getByRole("textbox", { name: /field number 0$/ }).focus();
+		const hidden: { field: string; overlap: number }[] = [];
+		for (let i = 1; i < 15; i++) {
+			await userEvent.tab();
+			const active = document.activeElement as HTMLElement;
+			if (!body.contains(active)) break;
+			await nextFrame();
+			const field = active.closest(".MuiFormControl-root") ?? active;
+			const overlap = overlapY(rectOf(field), rectOf(buttonBar(content)));
+			if (overlap > 0)
+				hidden.push({
+					field: (active as HTMLInputElement).labels?.[0]?.textContent ?? "",
+					overlap: Math.round(overlap),
+				});
+		}
+		await expect(hidden).toEqual([]);
+	},
+};
+
+export const Issue3473Item9FocusedFieldNotUnderFooterInScrollingDocument: Story =
+	{
+		parameters: {
+			layout: "fullscreen",
+			docs: {
+				description: {
+					story:
+						"ISSUE-3473-ITEM-9: a page whose document scrolls. Tabbing through the form, a field that the Save bar covers, or that lies below it, is scrolled up until it ends above the bar.",
+				},
+			},
+		},
+		render: () => (
+			<FormPageLayout
+				body={<Fields count={30} />}
+				footer={<SaveBackButtons />}
+				other={<FormLoaderOverlay visible={false} />}
+			/>
+		),
+		play: async ({ canvasElement }) => {
+			const canvas = within(canvasElement);
+			const body = bodyIn(canvasElement);
+			try {
+				canvas.getByRole("textbox", { name: /field number 0$/ }).focus();
+				const hidden: { field: string; overlap: number }[] = [];
+				for (let i = 1; i < 30; i++) {
+					await userEvent.tab();
+					const active = document.activeElement as HTMLInputElement;
+					if (!body.contains(active)) break;
+					await nextFrame();
+					const field = active.closest(".MuiFormControl-root") ?? active;
+					const overlap = overlapY(
+						rectOf(field),
+						rectOf(buttonBar(canvasElement)),
+					);
+					if (overlap > 0)
+						hidden.push({
+							field: active.labels?.[0]?.textContent ?? "",
+							overlap: Math.round(overlap),
+						});
+				}
+				await expect(window.scrollY).toBeGreaterThan(0);
+				await expect(hidden).toEqual([]);
+			} finally {
+				window.scrollTo(0, 0);
+			}
+		},
+	};
+
+/**
+ * A button that the body's content renders into a portal, at the bottom of the viewport,
+ * like a Select's menu that opens over the Save bar
+ */
+const ButtonInPortal = () =>
+	createPortal(
+		<Button
+			variant={"contained"}
+			sx={{ position: "fixed", left: 0, right: 0, bottom: 0 }}
+		>
+			In a portal
+		</Button>,
+		document.body,
+	);
+
+export const Issue3473Item9FocusInPortalLeavesFormAlone: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-9: focus that React passes on from a portal the body's content renders (a menu, a popover) is not in the layout, so the form does not scroll, even where the portal's element lies over the Save bar.",
+			},
+		},
+	},
+	render: () => (
+		<Box
+			data-testid={"panel"}
+			sx={{
+				position: "relative",
+				overflowY: "auto",
+				width: 400,
+				height: 500,
+				display: "flex",
+				flexDirection: "column",
+			}}
+		>
+			<FormPageLayout
+				body={
+					<>
+						<Fields count={20} />
+						<ButtonInPortal />
+					</>
+				}
+				footer={<SaveBackButtons />}
+				other={<FormLoaderOverlay visible={false} />}
+			/>
+		</Box>
+	),
+	play: async ({ canvasElement }) => {
+		const panelEl = within(canvasElement).getByTestId("panel");
+		const inPortal = within(document.body).getByRole("button", {
+			name: "In a portal",
+		});
+		await expect(canvasElement.contains(inPortal)).toBe(false);
+		await expect(rectOf(inPortal).bottom > rectOf(buttonBar(panelEl)).top).toBe(
+			true,
+		);
+		inPortal.focus();
+		await nextFrame();
+		await nextFrame();
+		await expect(panelEl.scrollTop).toBe(0);
+	},
+};
+
+export const Issue3473Item9FooterInFlowOnShortScreen: Story = {
+	globals: { viewport: { value: "zoomed400", isRotated: false } },
+	parameters: {
+		layout: "fullscreen",
+		viewport: {
+			options: {
+				zoomed400: {
+					name: "1280×1024 zoomed to 400%",
+					styles: { width: "320px", height: "256px" },
+					type: "desktop",
+				},
+			},
+		},
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-9: a page zoomed to 400% (320×256 CSS px) below a 64px app header. A floating Save bar would cover 120px of the 192px main area, so a 4-row text area could never be seen whole. On a screen at most 480px tall the footer stays in flow after the body: nothing covers the form while it scrolls, the text area can be seen whole, and at the end Save rests where a floating footer would, 36px above the bottom of the main area.",
+			},
+		},
+	},
+	render: () => (
+		<AppShell>
+			<FormPageLayout
+				body={
+					<Box sx={{ p: 2 }}>
+						<Grid container spacing={2}>
+							<Grid size={12}>
+								<TextField
+									label={"First name"}
+									defaultValue={"Alice"}
+									fullWidth
+								/>
+							</Grid>
+							<Grid size={12}>
+								<TextField
+									label={"Last name"}
+									defaultValue={"Smith"}
+									fullWidth
+								/>
+							</Grid>
+							<Grid size={12}>
+								<TextField
+									label={"Notes"}
+									defaultValue={"one\ntwo\nthree\nfour"}
+									multiline
+									rows={4}
+									fullWidth
+								/>
+							</Grid>
+							<Grid size={12}>
+								<TextField
+									label={"Email"}
+									defaultValue={"alice@example.com"}
+									fullWidth
+								/>
+							</Grid>
+							<Grid size={12}>
+								<TextField
+									label={"Phone"}
+									defaultValue={"555 0100"}
+									fullWidth
+								/>
+							</Grid>
+						</Grid>
+					</Box>
+				}
+				footer={<SaveBackButtons />}
+				other={<FormLoaderOverlay visible={false} />}
+			/>
+		</AppShell>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const mainEl = canvas.getByTestId("main");
+		await nextFrame();
+		await expect(document.documentElement.clientHeight).toBe(256);
+		const main = rectOf(mainEl);
+		const EPS = 1;
+		// nothing covers the form while it scrolls
+		const max = mainEl.scrollHeight - mainEl.clientHeight;
+		await expect(max).toBeGreaterThan(0);
+		for (const scrollTop of [0, max / 2]) {
+			mainEl.scrollTop = scrollTop;
+			await nextFrame();
+			await expect(
+				overlapY(rectOf(buttonBar(mainEl)), main),
+				`Save bar over the main area at ${scrollTop}`,
+			).toBe(0);
+		}
+		// the text area can be seen whole
+		const notes = canvas
+			.getByRole("textbox", { name: "Notes" })
+			.closest(".MuiFormControl-root");
+		if (!notes) throw new Error("the text area is not a FormControl");
+		mainEl.scrollTop += rectOf(notes).top - main.top;
+		await nextFrame();
+		await expect(rectOf(notes).top).toBeGreaterThanOrEqual(main.top - EPS);
+		await expect(rectOf(notes).bottom).toBeLessThanOrEqual(main.bottom + EPS);
+		await expect(overlapY(rectOf(notes), rectOf(buttonBar(mainEl)))).toBe(0);
+		// at the end Save rests where a floating footer would
+		mainEl.scrollTop = max;
+		await nextFrame();
+		await expect(
+			distance(rectOf(buttonBar(mainEl)).bottom, main.bottom - 36),
+		).toBeLessThanOrEqual(EPS);
 	},
 };
