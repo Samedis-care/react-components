@@ -15,6 +15,7 @@ import { MatrixGridProps } from "./index";
 import MatrixCellTile from "./MatrixCellTile";
 import buildDateColumns from "./buildDateColumns";
 import { matrixClasses, matrixVars } from "./matrixClasses";
+import { MATRIX_TILE_DIM_OPACITY } from "./matrixTileDim";
 import {
 	MatrixCellContext,
 	MatrixColumn,
@@ -812,6 +813,95 @@ export const Issue3480Item15HeaderLabelsHaveContrastInOtherPalettes: Story = {
 // ---- Bug stories: cells and tiles -------------------------------------------
 
 const WHITE: Rgba = { r: 255, g: 255, b: 255, a: 1 };
+
+/** ISSUE-3481-ITEM-8: a dimmed entry with a percentage rgb() or a color() fill turns darker, and a modern color is not faded. */
+const DIMMED_FILLS: [fill: string, shown: Rgba][] = [
+	["rgb(50%, 20%, 10%)", { r: 128, g: 51, b: 26, a: 1 }],
+	["color(srgb 1 0 0)", { r: 255, g: 0, b: 0, a: 1 }],
+	["rgb(46 125 50)", { r: 46, g: 125, b: 50, a: 1 }],
+	["hsl(260 60% 40%)", { r: 82, g: 41, b: 163, a: 1 }],
+	// these the browser resolves
+	["oklch(0.628 0.2577 29.23)", { r: 255, g: 0, b: 0, a: 1 }],
+	["lab(50% 0 0)", { r: 119, g: 119, b: 119, a: 1 }],
+	["color(display-p3 0.5 0.5 0.5)", { r: 128, g: 128, b: 128, a: 1 }],
+	["color-mix(in srgb, #1565c0 50%, white)", { r: 138, g: 178, b: 224, a: 1 }],
+];
+
+const DIMMED_FILL_ROWS: MatrixRow<TileCell>[] = [
+	{
+		key: "a",
+		label: "Alice Weber",
+		cells: {
+			...Object.fromEntries(
+				DIMMED_FILLS.map(([backgroundColor], index): [string, TileCell] => [
+					`t${index + 2}`,
+					{ items: [{ ...LATE, backgroundColor, dimmed: true }] },
+				]),
+			),
+			// the oklch() entry as the dimmed half of a diagonal pair
+			[`t${DIMMED_FILLS.length + 2}`]: {
+				items: [
+					{ ...LATE, backgroundColor: DIMMED_FILLS[4][0], dimmed: true },
+					EARLY,
+				],
+				diagonal: true,
+			},
+		},
+	},
+];
+
+export const Issue3481Item8DimmedFillsKeepTheirColor: Story = {
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<TileRoster
+			onItemClick={args.onItemClick}
+			rows={DIMMED_FILL_ROWS}
+			readOnly
+		/>
+	),
+	play: async ({ canvasElement }) => {
+		const expectShown = async (name: string, fill: Rgba, shown: Rgba) => {
+			const off = Math.max(
+				...(["r", "g", "b"] as const).map((channel) =>
+					Math.abs(fill[channel] - shown[channel]),
+				),
+			);
+			// the browser may round a channel either way
+			await expect(off, name).toBeLessThanOrEqual(2);
+			await expect(fill.a, name).toBeCloseTo(MATRIX_TILE_DIM_OPACITY, 2);
+		};
+		for (const [index, [name, shown]] of DIMMED_FILLS.entries()) {
+			const entry = tileCell(
+				canvasElement,
+				0,
+				index + 1,
+			).querySelector<HTMLElement>("[role=button]");
+			if (!entry) throw new Error(`no entry for ${name}`);
+			const style = getComputedStyle(entry);
+			const fill = parseColor(style.backgroundColor);
+			await expectShown(name, fill, shown);
+			// and the label reads on the faded fill
+			await expect(
+				contrast(parseColor(style.color), over(fill, WHITE)),
+				name,
+			).toBeGreaterThanOrEqual(4.5);
+		}
+		// the dimmed half of a diagonal pair is faded the same way
+		const pair = tileCell(
+			canvasElement,
+			0,
+			DIMMED_FILLS.length + 1,
+		).querySelector<HTMLElement>("[role=button]");
+		if (!pair) throw new Error("no diagonal pair");
+		await expectShown(
+			"diagonal",
+			parseColor(
+				getComputedStyle(pair).getPropertyValue(matrixVars.tileBackgroundA),
+			),
+			DIMMED_FILLS[4][1],
+		);
+	},
+};
 
 /** ISSUE-3481-ITEM-11: the focus ring of an entry is drawn inside its fill, in primary.main. */
 export const Issue3481Item11EntryFocusRingStandsOut: Story = {

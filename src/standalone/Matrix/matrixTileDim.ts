@@ -11,13 +11,15 @@ export const MATRIX_TILE_DIM_OPACITY = 0.6;
 /**
  * Fades a color to MATRIX_TILE_DIM_OPACITY.
  * @param color Any CSS color
- * @returns The color at reduced alpha, or the color unchanged if it cannot be
- * resolved at all
- * @remarks Goes through colorToRgba, which covers hex (3, 4, 6 and 8 digits),
- * rgb(), hsl() and all CSS keywords, with a canvas fallback. A value it cannot
- * resolve — a CSS variable, say — must not take a cell down, so it passes
- * through and the entry stays flat instead. An alpha the color already carries
- * is multiplied rather than replaced, so a translucent entry keeps being
+ * @returns The same color as rgba() at reduced alpha, or the color unchanged
+ * if it cannot be resolved at all
+ * @remarks Goes through colorToRgba, which reads keywords, hex, rgb(), hsl(),
+ * hwb() and color(srgb …) itself and has the browser resolve the rest
+ * (oklch(), lab(), color() in other spaces, color-mix(), …) on a canvas. A
+ * value it cannot resolve — a CSS variable, say, or one of those where there
+ * is no canvas (jsdom) — must not take a cell down, so it passes through and
+ * the entry stays flat instead. An alpha the color already carries is
+ * multiplied rather than replaced, so a translucent entry keeps being
  * translucent.
  */
 export const dimColor = (color: string): string => {

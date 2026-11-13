@@ -182,8 +182,10 @@ export interface MatrixTileItem {
 	 * Fill color of the entry. Any CSS color. A translucent fill shows over the
 	 * cell beneath it.
 	 * @remarks Without textColor the label color is derived from this, which
-	 * needs a color that can be resolved in JavaScript: hex, rgb(), hsl() or a
-	 * keyword. Pass textColor with a var().
+	 * needs a color that can be resolved: any CSS color but a var() or
+	 * currentcolor (oklch(), lab(), color-mix() and color() in a space other
+	 * than srgb where the browser paints them on a canvas, not in jsdom). Pass
+	 * textColor with a var().
 	 */
 	backgroundColor: string;
 	/**

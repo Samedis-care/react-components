@@ -22,7 +22,10 @@ import {
 	matrixClasses,
 	matrixVars,
 } from "../../src/standalone/Matrix/matrixClasses";
-import { dimColor } from "../../src/standalone/Matrix/matrixTileDim";
+import {
+	dimColor,
+	MATRIX_TILE_DIM_OPACITY,
+} from "../../src/standalone/Matrix/matrixTileDim";
 import type { MatrixGridProps } from "../../src/standalone/Matrix/MatrixGridContext";
 import {
 	MatrixCellContext,
@@ -1761,6 +1764,25 @@ describe("useMatrixActivation", () => {
 	it("[ISSUE-3481-ITEM-12] adds no aria-label without a label, so it never clears a name set around it", () => {
 		const { result } = renderHook(() => useMatrixActivation(vi.fn()));
 		expect(result.current).not.toHaveProperty("aria-label");
+	});
+});
+
+describe("dimColor", () => {
+	/** the four channels of an rgba() string */
+	const channels = (color: string) =>
+		(/rgba?\(([^)]+)\)/.exec(color)?.[1] ?? "").split(",").map(Number);
+
+	it("[ISSUE-3481-ITEM-8] fades percentage rgb() and color() values to the same color", () => {
+		const expectFaded = (color: string, rgb: number[]) => {
+			const dimmed = dimColor(color);
+			const [r, g, b, a] = channels(dimmed);
+			// rounding a channel either way is fine
+			const off = Math.max(...[r, g, b].map((v, i) => Math.abs(v - rgb[i])));
+			expect(off, `${color} -> ${dimmed}`).toBeLessThanOrEqual(1);
+			expect(a, `${color} -> ${dimmed}`).toBeCloseTo(MATRIX_TILE_DIM_OPACITY);
+		};
+		expectFaded("rgb(50%, 20%, 10%)", [127.5, 51, 25.5]);
+		expectFaded("color(srgb 1 0 0)", [255, 0, 0]);
 	});
 });
 
