@@ -494,3 +494,81 @@ export const Issue3510Item16LabelledFieldCountsSelection: StoryObj = {
 		await expect(footer.bottom).toBeLessThanOrEqual(box.bottom);
 	},
 };
+
+// ---------------------------------------------------------------------------
+// BackendSingleSelect with switchFilterName: a switch that filters the options
+// ---------------------------------------------------------------------------
+
+/** sampleData with Grace and Henry inactive */
+const SWITCH_FILTER_DATA = sampleData.map((record) => ({
+	...record,
+	inactive: record.first_name === "Grace" || record.first_name === "Henry",
+}));
+
+/**
+ * MockConnector that lists the inactive records only while the search sends the
+ * additional filter `include_inactive: true`. It reports only totalRows, as the
+ * filtered count.
+ */
+class InactiveFilterConnector extends MockConnector {
+	async index(params?: Partial<IDataGridLoadDataParameters>) {
+		const [all] = await super.index({ ...params, page: 1, rows: 1000 });
+		const list =
+			params?.additionalFilters?.include_inactive === true
+				? all
+				: all.filter((row) => !row.inactive);
+		const page = params?.page ?? 1;
+		const size = params?.rows ?? 25;
+		return [
+			list.slice((page - 1) * size, page * size),
+			{ totalRows: list.length },
+		] as [Record<string, unknown>[], { totalRows: number }];
+	}
+}
+
+const createSwitchFilterModel = () =>
+	new Model(
+		"u52-story-switch-" + String(++storyModelCounter),
+		createTestModel().fields,
+		new InactiveFilterConnector(SWITCH_FILTER_DATA),
+	) as unknown as ModelUnknown;
+
+const SingleSelectSwitchFilterStory = () => {
+	const model = useMemo(createSwitchFilterModel, []);
+	const [selected, setSelected] = useState<string | null>(null);
+	return (
+		<BackendSingleSelect
+			model={model}
+			modelToSelectorData={modelToSelectorData}
+			selected={selected}
+			onSelect={setSelected}
+			switchFilterName={"include_inactive"}
+			switchLabel={"Show inactive"}
+			label={"Select a person"}
+		/>
+	);
+};
+
+/**
+ * ISSUE-3465-ITEM-7: with switchFilterName the field shows a switch, and turning it on
+ * reloads the options with that filter set, here adding the inactive Grace and Henry
+ */
+export const Issue3465Item7SingleSelectSwitchFilter: StoryObj = {
+	parameters: { a11y: { test: "error" } },
+	render: () => <SingleSelectSwitchFilterStory />,
+	play: async ({ canvas, userEvent }) => {
+		const body = within(document.body);
+		const input = await canvas.findByRole("combobox");
+		await userEvent.click(input);
+		await expect(await body.findByText("Alice Mueller")).toBeVisible();
+		await expect(body.queryByText("Henry Taylor")).toBeNull();
+		const toggle = canvas.getByRole("switch", { name: "Show inactive" });
+		await expect(toggle).not.toBeChecked();
+		// a click on the label toggles the switch, and closes the list
+		await userEvent.click(canvas.getByText("Show inactive"));
+		await expect(toggle).toBeChecked();
+		await userEvent.click(input);
+		await expect(await body.findByText("Henry Taylor")).toBeVisible();
+		await expect(body.getByText("Grace Lee")).toBeVisible();
+	},
+};

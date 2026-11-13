@@ -6,7 +6,13 @@
 import "../../../src/standalone";
 import React, { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
-import { act, render, waitFor } from "@testing-library/react";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { Framework } from "../../../src/framework";
 import BackendSingleSelect, {
 	BackendSingleSelectProps,
@@ -17,9 +23,13 @@ import {
 	combobox,
 	conv,
 	flush,
+	makeSelectorModel,
 	openList,
+	people,
 	peopleModel,
 	pickOption,
+	type Row,
+	SelectorTestConnector,
 	typeText,
 } from "./backendSelectorFixture";
 
@@ -219,5 +229,109 @@ describe("BackendSingleSelect bugs (debounced search)", () => {
 		} finally {
 			vi.useRealTimers();
 		}
+	});
+});
+
+/**
+ * SelectorTestConnector whose rows marked `inactive` match only while the search sends
+ * the `additionalFilters` entry `show_inactive: true`
+ */
+class InactiveFilterConnector extends SelectorTestConnector {
+	protected matching(
+		params?: Parameters<SelectorTestConnector["index"]>[0],
+	): Row[] {
+		const list = super.matching(params);
+		return params?.additionalFilters?.show_inactive === true
+			? list
+			: list.filter((row) => !row.inactive);
+	}
+}
+
+/** people() plus Alfred (id "6"), who is inactive */
+const peopleWithInactive = () => {
+	const connector = new InactiveFilterConnector([
+		...people(),
+		{ id: "6", name: "Alfred", inactive: true },
+	]);
+	return { connector, model: makeSelectorModel(connector) };
+};
+
+const optionNames = () =>
+	screen.queryAllByRole("option").map((option) => option.textContent);
+
+describe("BackendSingleSelect bugs (switch filter)", () => {
+	it("[ISSUE-3465-ITEM-7] with switchFilterName, turning the switch on reloads the options with that filter set", async () => {
+		const { model, connector } = peopleWithInactive();
+		render(
+			ui({
+				model,
+				switchFilterName: "show_inactive",
+				switchLabel: "Show inactive",
+			}),
+		);
+		await openList();
+		await waitFor(() => expect(optionNames()).toContain("Alice"));
+		expect(optionNames()).not.toContain("Alfred");
+		expect(connector.params.at(-1)?.additionalFilters).toEqual({
+			show_inactive: false,
+		});
+		const toggle = screen.getByRole("switch", { name: "Show inactive" });
+		expect(toggle).not.toBeChecked();
+		fireEvent.click(toggle);
+		await flush();
+		expect(toggle).toBeChecked();
+		await waitFor(() => expect(optionNames()).toContain("Alfred"));
+		expect(connector.params.at(-1)?.additionalFilters).toEqual({
+			show_inactive: true,
+		});
+	});
+
+	it("[ISSUE-3465-ITEM-7] defaultSwitchValue starts the switch on: the first search sends the filter as true", async () => {
+		const { model, connector } = peopleWithInactive();
+		render(
+			ui({
+				model,
+				switchFilterName: "show_inactive",
+				switchLabel: "Show inactive",
+				defaultSwitchValue: true,
+			}),
+		);
+		expect(screen.getByRole("switch", { name: "Show inactive" })).toBeChecked();
+		await openList();
+		await waitFor(() => expect(optionNames()).toContain("Alfred"));
+		expect(connector.params.map((params) => params.additionalFilters)).toEqual(
+			connector.params.map(() => ({ show_inactive: true })),
+		);
+	});
+
+	it("[ISSUE-3465-ITEM-7] without switchFilterName the field shows no switch and searches send no additionalFilters", async () => {
+		const { model, connector } = peopleWithInactive();
+		render(ui({ model, switchLabel: "Show inactive" }));
+		await openList();
+		await waitFor(() => expect(optionNames()).toContain("Alice"));
+		expect(screen.queryByRole("switch")).toBeNull();
+		expect(connector.params.length).toBeGreaterThan(0);
+		expect(connector.params.map((params) => params.additionalFilters)).toEqual(
+			connector.params.map(() => undefined),
+		);
+	});
+
+	it("[ISSUE-3465-ITEM-7] displaySwitch is no prop of BackendSingleSelect: passed anyway, it shows no switch that filters nothing", async () => {
+		const { model } = peopleWithInactive();
+		render(
+			<Framework>
+				<BackendSingleSelect
+					model={model}
+					modelToSelectorData={conv}
+					label={"Person"}
+					selected={null}
+					// @ts-expect-error the switch comes with switchFilterName, which also filters
+					displaySwitch
+					switchLabel={"Show inactive"}
+				/>
+			</Framework>,
+		);
+		await flush();
+		expect(screen.queryByRole("switch")).toBeNull();
 	});
 });

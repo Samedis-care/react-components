@@ -21,7 +21,13 @@ export type BackendSingleSelectLruOptions<DataT extends BaseSelectorData> =
 
 export interface BackendSingleSelectProps<M extends ModelUnknown> extends Omit<
 	BaseSelectorProps<BaseSelectorData, false>,
-	"onLoad" | "selected" | "onSelect" | "lru"
+	| "onLoad"
+	| "selected"
+	| "onSelect"
+	| "lru"
+	| "displaySwitch"
+	| "switchLabel"
+	| "defaultSwitchValue"
 > {
 	/**
 	 * The model to use
@@ -66,6 +72,26 @@ export interface BackendSingleSelectProps<M extends ModelUnknown> extends Omit<
 	 * Sort settings
 	 */
 	sort?: DataGridSortSetting[];
+	/**
+	 * Name of the filter a switch above the field sets, e.g. `"include_inactive"` for a
+	 * "Show inactive" switch. With it the field shows the switch, and every search sends
+	 * `additionalFilters: { [switchFilterName]: true }` to `model.index` while the switch
+	 * is on (`false` while it is off), so toggling it reloads the options. A new name
+	 * applies from the next search.
+	 * @default undefined (no switch, searches send no additionalFilters)
+	 */
+	switchFilterName?: string;
+	/**
+	 * Label of the switch, which is also its accessible name: pass one with
+	 * `switchFilterName`. Ignored without `switchFilterName`.
+	 */
+	switchLabel?: React.ReactNode;
+	/**
+	 * Whether the switch is on when the field mounts with `switchFilterName`; later
+	 * changes are ignored, from then on the user sets it.
+	 * @default false
+	 */
+	defaultSwitchValue?: boolean;
 	/**
 	 * Initial data (model format) used for selected cache
 	 */
@@ -132,6 +158,7 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 		initialData,
 		searchDebounceTime,
 		sort,
+		switchFilterName,
 		lru,
 		onLoadError,
 		additionalOptions,
@@ -158,12 +185,16 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 	const handleLoad = useCallback(
 		async (
 			search: string,
+			switchValue: boolean,
 		): Promise<BaseSelectorLoadResult<BaseSelectorData>> => {
 			const [records, meta] = await model.index({
 				page: 1,
 				rows: searchResultLimit ?? 25,
 				sort: sort,
 				quickFilter: search,
+				additionalFilters: switchFilterName
+					? { [switchFilterName]: switchValue }
+					: undefined,
 			});
 			return {
 				options: await Promise.all(
@@ -172,7 +203,7 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 				total: meta.filteredRows ?? meta.totalRows,
 			};
 		},
-		[model, searchResultLimit, sort, modelToSelectorData],
+		[model, searchResultLimit, sort, switchFilterName, modelToSelectorData],
 	);
 
 	const handleLoadLruRecord = useCallback(
@@ -303,6 +334,7 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 			{...otherProps}
 			freeSolo={freeSolo}
 			onLoad={debouncedLoad}
+			displaySwitch={!!switchFilterName}
 			additionalOptions={additionalOptions}
 			onSelect={handleSelect}
 			selected={
