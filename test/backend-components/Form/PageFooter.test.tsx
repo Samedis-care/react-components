@@ -65,10 +65,15 @@ describe("DefaultFormPage footer", () => {
 		const input = await screen.findByDisplayValue("Alice", undefined, LOAD);
 		fireEvent.change(input, { target: { value: "AliceX" } });
 		const create = screen.getByRole("button", { name: "Create" });
-		await waitFor(() => expect(create).toBeEnabled());
+		await waitFor(() =>
+			expect(create).not.toHaveAttribute("aria-disabled", "true"),
+		);
 		fireEvent.click(create);
 		await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
-		await waitFor(() => expect(create).toBeDisabled());
+		// unavailable after the save, but focusable (aria-disabled, not the native disabled)
+		await waitFor(() =>
+			expect(create).toHaveAttribute("aria-disabled", "true"),
+		);
 		const cancel = screen.getByRole("button", { name: "Cancel" });
 		await waitFor(() => expect(cancel).toBeEnabled());
 		fireEvent.click(cancel);

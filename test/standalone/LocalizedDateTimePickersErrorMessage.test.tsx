@@ -382,7 +382,7 @@ describe("messages", () => {
 					label="Next maintenance"
 					value={new Date("2032-03-01T12:00:00Z")}
 					onChange={vi.fn()}
-					maxDate={moment("2031-11-13")}
+					maxDate={new Date("2031-11-13T12:00:00Z")}
 					helperText="From the inspection sticker."
 				/>
 			</Wrap>,
