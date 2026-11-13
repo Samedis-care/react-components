@@ -30,7 +30,9 @@ const CLIENTS_WITH_INSTRUMENT_NAVIGATION: Client[] = [];
  * Sentry's browserTracingIntegration, with pageload and navigation spans that follow the
  * HistoryRouter and are named after the matched Route.
  * Not exported by the components-care index, import it from components-care/dist/sentry: it
- * imports Sentry, which is an optional peer dependency.
+ * imports Sentry, which is an optional peer dependency. It needs `@sentry/react` and the
+ * `@sentry/core` and `@sentry/conventions` that `@sentry/react` depends on; with a node_modules
+ * layout that doesn't hoist (e.g. Yarn PnP), the app has to install those two as well.
  * @param options The options of browserTracingIntegration
  */
 export function componentsCareBrowserTracingIntegration(
