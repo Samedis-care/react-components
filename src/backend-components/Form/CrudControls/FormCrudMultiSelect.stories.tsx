@@ -234,32 +234,33 @@ const overWhite = (color: string) => {
 };
 
 /**
- * ISSUE-3505-ITEM-16: in a read-only Form the field is read-only, not disabled. Tab reaches the
- * search field, which is marked read-only, takes no typing and opens no list, and its label
- * keeps the contrast of an editable field (at least 4.5:1). The entry
- * has no remove button.
+ * ISSUE-3505-ITEM-16: in a read-only Form the field shows its entries read-only, as the
+ * read-only file upload does: the label and the entries, without a search field or remove
+ * buttons, and nothing disabled. Label and entries keep the contrast of an editable field
+ * (at least 4.5:1).
  */
 export const Issue3505Item16ReadOnlyFieldIsReadOnly: StoryObj = {
 	parameters: { a11y: { test: "error" } },
 	render: () => <FriendsForm id={"1"} friends={CAROL} readOnly />,
-	play: async ({ canvasElement, userEvent }) => {
+	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		const body = within(document.body);
-		await canvas.findByText("Carol Jones", {}, { timeout: 5000 });
-		const input = canvas.getByRole("combobox", { name: "Friends" });
+		const list = await canvas.findByRole(
+			"list",
+			{ name: "Friends" },
+			{ timeout: 5000 },
+		);
+		const entry = within(list).getByText("Carol Jones");
 
-		await userEvent.tab();
-		await expect(input).toHaveFocus();
-		await expect(input).toHaveAttribute("readonly");
-		await userEvent.keyboard("Ca{ArrowDown}");
-		await expect(input).toHaveValue("");
-		await expect(body.queryByRole("listbox")).toBeNull();
+		await expect(canvas.queryByRole("combobox")).toBeNull();
 		await expect(canvas.queryByRole("button", { name: /^Remove/ })).toBeNull();
-
-		const label = canvas.getByText("Friends");
 		await expect(
-			getContrastRatio(overWhite(getComputedStyle(label).color), "#fff"),
-		).toBeGreaterThanOrEqual(4.5);
+			canvasElement.querySelector(":disabled, .Mui-disabled"),
+		).toBeNull();
+		for (const text of [canvas.getByText("Friends"), entry]) {
+			await expect(
+				getContrastRatio(overWhite(getComputedStyle(text).color), "#fff"),
+			).toBeGreaterThanOrEqual(4.5);
+		}
 	},
 };
 

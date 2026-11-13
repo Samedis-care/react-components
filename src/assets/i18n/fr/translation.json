@@ -154,6 +154,7 @@
 				"selected": "CHOISI"
 			},
 			"multi-select": {
+				"no-entries": "Aucune entrée",
 				"delete-confirm": {
 					"title": "Confirmer la suppression",
 					"message": "Voulez-vous vraiment supprimer cette entrée?",

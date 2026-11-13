@@ -29,12 +29,11 @@ export interface FormCrudMultiSelectProps<
 	 */
 	disabled?: boolean;
 	/**
-	 * Shows the control read-only: the search field stays focusable but takes no typing and
-	 * opens no list, the entries have no remove button, and nothing queues a write. While
-	 * the Form is read-only the control is read-only whatever this says. A save in progress
-	 * is the exception: it leaves the control as it is, the focus and the text typed into
-	 * the search field included, and only blocks picks and removals while it runs
-	 * (blockWrites).
+	 * Shows the control read-only: the label and the entries, without search field, end
+	 * adornments or remove buttons, and nothing queues a write. While the Form is read-only
+	 * the control is read-only whatever this says. A save in progress is the exception: it
+	 * leaves the control as it is, the focus and the text typed into the search field
+	 * included, and only blocks picks and removals while it runs (blockWrites).
 	 * @default false
 	 */
 	readOnly?: boolean;

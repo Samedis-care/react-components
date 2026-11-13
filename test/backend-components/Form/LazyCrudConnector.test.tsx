@@ -10,7 +10,13 @@
  */
 import React, { useState } from "react";
 import { afterAll, beforeEach, describe, expect, it, Mock, vi } from "vitest";
-import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import {
+	act,
+	fireEvent,
+	screen,
+	waitFor,
+	within,
+} from "@testing-library/react";
 import {
 	loaded,
 	makeModel,
@@ -46,6 +52,9 @@ import type {
 	ModelUnknown,
 } from "../../../src/backend-integration";
 import type { MultiSelectorData } from "../../../src/standalone";
+import MultiSelectEntry, {
+	MultiSelectEntryProps,
+} from "../../../src/standalone/Selector/MultiSelectEntry";
 
 setupFormTests();
 
@@ -175,7 +184,8 @@ const deserializeModel = (record: Record<string, unknown>) => ({
 const getIdOfData = (data: JoinData) => data.source_id;
 
 /**
- * The selector's state, captured by an end adornment (rendered once loading finished)
+ * The selector's state, captured by an end adornment and by the entries (rendered once
+ * loading finished; a read-only field renders no end adornment)
  */
 const selSink: { ctx?: UseCrudSelectResult<ModelUnknown, MultiSelectorData> } =
 	{};
@@ -183,6 +193,11 @@ const selSink: { ctx?: UseCrudSelectResult<ModelUnknown, MultiSelectorData> } =
 const CaptureSelectCtx = () => {
 	selSink.ctx = useCrudSelectContext();
 	return null;
+};
+
+const CaptureEntry = (props: MultiSelectEntryProps<JoinData>) => {
+	selSink.ctx = useCrudSelectContext();
+	return <MultiSelectEntry {...props} />;
 };
 
 const selected = () => selSink.ctx!.selected as JoinData[];
@@ -261,6 +276,7 @@ const selectorProps = (model: ModelUnknown, env: Env): SelectProps => ({
 	label: "Joins",
 	placeholder: "Search joins",
 	endAdornment: <CaptureSelectCtx />,
+	selectedEntryRenderer: CaptureEntry,
 });
 
 /**
@@ -1123,15 +1139,62 @@ describe("FormCrudMultiSelect: the form's state", () => {
 		expect(disabledWhileSaving).toBe(false);
 	});
 
-	it("[ISSUE-3505-ITEM-16] in a read-only form the search field is read-only, not disabled", async () => {
-		await mountSelector(undefined, {}, { readOnly: true });
+	it("[ISSUE-3505-ITEM-16] in a read-only form nothing is disabled: the entries are listed under the field's label, without a search field", async () => {
+		const { container } = await mountSelector(
+			undefined,
+			{},
+			{ readOnly: true },
+		);
 
-		const input = screen.getByRole("combobox");
-		expect(input).not.toBeDisabled();
+		expect(screen.queryByRole("combobox")).toBeNull();
+		expect(container.querySelector(":disabled, .Mui-disabled")).toBeNull();
+		const list = screen.getByRole("list", { name: "Joins" });
+		expect(within(list).getByText("Ls1")).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3505-ITEM-16] while it loads in a read-only form, the field is shown loading, not as a field without entries", async () => {
+		const model = makeModel();
+		const env = makeEnv();
+		let resolve: (result: [Rows, ResponseMeta]) => void = () => {};
+		env.indexResult = new Promise((resolveLoad) => {
+			resolve = resolveLoad;
+		});
+		const sink: Sink = {};
+		mountForm(
+			model,
+			makePage(sink, () => (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					{...selectorProps(model, env)}
+				/>
+			)),
+			{ readOnly: true },
+		);
+		await loaded(sink);
+		await settle();
+		const whileLoading = {
+			field: screen.queryByRole<HTMLInputElement>("combobox")?.disabled,
+			status: screen.queryByRole("status")?.textContent,
+			noEntries: screen.queryByText("No entries") !== null,
+		};
+
+		await act(async () => {
+			resolve([
+				[{ id: "j1", source_id: "s1" }],
+				{ totalRows: 1, filteredRows: 1 },
+			]);
+			await Promise.resolve();
+		});
+		await settle();
+
+		expect(whileLoading).toEqual({
+			field: true,
+			status: "Loading…",
+			noEntries: false,
+		});
+		expect(screen.queryByRole("combobox")).toBeNull();
 		expect(
-			input.hasAttribute("readonly") ||
-				input.getAttribute("aria-readonly") === "true",
-		).toBe(true);
+			within(screen.getByRole("list", { name: "Joins" })).getByText("Ls1"),
+		).toBeInTheDocument();
 	});
 
 	it("[ISSUE-3505-ITEM-16] while the form saves, the entries keep their remove buttons, but a removal or a pick through the ref queues nothing; afterwards the field takes them again", async () => {
@@ -1194,21 +1257,7 @@ describe("FormCrudMultiSelect: the form's state", () => {
 		expect(sink.ctx!.dirty).toBe(true);
 	});
 
-	it("[ISSUE-3505-ITEM-16] in a read-only form the label keeps its normal color and the search field opens no list", async () => {
-		await mountSelector(undefined, {}, { readOnly: true });
-		const input = screen.getByRole("combobox");
-
-		act(() => input.focus());
-		fireEvent.mouseDown(input);
-		fireEvent.keyDown(input, { key: "ArrowDown" });
-		await settle();
-
-		expect(input).toHaveFocus();
-		expect(screen.getByText("Joins")).not.toHaveClass("Mui-disabled");
-		expect(screen.queryByRole("listbox")).toBeNull();
-	});
-
-	it("[ISSUE-3505-ITEM-16] once the form is editable again, the search field is no longer read-only", async () => {
+	it("[ISSUE-3505-ITEM-16] once the form is editable again, the search field is back", async () => {
 		const { rerenderWith } = await mountSelector(
 			undefined,
 			{},
@@ -1217,7 +1266,10 @@ describe("FormCrudMultiSelect: the form's state", () => {
 		rerenderWith({ readOnly: false });
 		await settle();
 
-		expect(screen.getByRole("combobox")).not.toHaveAttribute("readonly");
+		expect(screen.getByRole("combobox")).toBeEnabled();
+		expect(
+			screen.getByRole("button", { name: "Remove Ls1" }),
+		).toBeInTheDocument();
 	});
 
 	it("[ISSUE-3505-ITEM-16] an explicit readOnly={false} or blockWrites={false} does not unlock it in a read-only form", async () => {
@@ -1227,7 +1279,7 @@ describe("FormCrudMultiSelect: the form's state", () => {
 			{ readOnly: true },
 		);
 
-		expect(screen.getByRole("combobox")).toHaveAttribute("readonly");
+		expect(screen.queryByRole("combobox")).toBeNull();
 		expect(screen.queryByRole("button", { name: "Remove Ls1" })).toBeNull();
 		expect(selSink.ctx!.disabled).toBe(true);
 	});

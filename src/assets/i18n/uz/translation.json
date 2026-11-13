@@ -154,6 +154,7 @@
 				"selected": "TANLANGAN"
 			},
 			"multi-select": {
+				"no-entries": "Yozuvlar yo'q",
 				"delete-confirm": {
 					"title": "O'chirishni tasdiqlang",
 					"message": "Haqiqatan ham bu yozuvni olib tashlamoqchimisiz?",

@@ -313,28 +313,56 @@ describe("MultiSelect bugs", () => {
 });
 
 describe("MultiSelect: read-only", () => {
-	it("[ISSUE-3505-ITEM-16] lists the entries without remove buttons, keeps the search field focusable and picks nothing", async () => {
+	it("[ISSUE-3505-ITEM-16] lists the entries under the label, without search field or remove buttons, and nothing in it is disabled", async () => {
 		const onSel = vi.fn();
-		renderUi(<Host initial={[APPLE, BANANA]} readOnly onSel={onSel} />);
+		const { container } = renderUi(
+			<Host initial={[APPLE, BANANA]} readOnly onSel={onSel} />,
+		);
 		await flush();
-		const input = combobox();
 
-		expect(screen.getByText("Apple")).toBeInTheDocument();
-		expect(screen.getByText("Banana")).toBeInTheDocument();
+		expect(screen.queryByRole("combobox")).toBeNull();
+		const list = screen.getByRole("list", { name: "Fruits" });
+		expect(
+			within(list)
+				.getAllByRole("listitem")
+				.map((item) => item.textContent),
+		).toEqual(["Apple", "Banana"]);
 		expect(screen.queryByRole("button", { name: /^Remove / })).toBeNull();
-		expect(input).not.toBeDisabled();
-		expect(input).toHaveAttribute("readonly");
-		await open(input);
-		fireEvent.keyDown(input, { key: "ArrowDown" });
-		fireEvent.keyDown(input, { key: "Enter" });
-		await flush();
-		expect(screen.queryByRole("listbox")).toBeNull();
+		expect(container.querySelector(":disabled, .Mui-disabled")).toBeNull();
 		expect(onSel).not.toHaveBeenCalled();
 	});
 
-	it("[ISSUE-3505-ITEM-16] shows the remove buttons again once it is no longer read-only", async () => {
+	it("[ISSUE-3505-ITEM-16] says so when nothing is selected", async () => {
+		renderUi(<Host readOnly />);
+		await flush();
+
+		expect(screen.getByText("No entries")).toBeInTheDocument();
+		expect(screen.queryByRole("list")).toBeNull();
+		expect(screen.queryByRole("combobox")).toBeNull();
+	});
+
+	it("[ISSUE-3505-ITEM-16] keeps an entry's onClick and the dirty marker of its label", async () => {
+		const onClick = vi.fn();
+		renderUi(<Host initial={[{ ...APPLE, onClick }]} readOnly dirty />);
+		await flush();
+
+		fireEvent.click(screen.getByRole("button", { name: "Apple" }));
+		expect(onClick).toHaveBeenCalledTimes(1);
+		expect(screen.getByText("Fruits")).toHaveAttribute("data-cc-dirty", "true");
+	});
+
+	it("[ISSUE-3505-ITEM-16] takes precedence over disabled", async () => {
+		renderUi(<Host initial={[APPLE]} readOnly disabled />);
+		await flush();
+
+		expect(screen.queryByRole("combobox")).toBeNull();
+		expect(screen.getByRole("list", { name: "Fruits" })).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3505-ITEM-16] shows the search field and the remove buttons again once it is no longer read-only", async () => {
 		const ui = (readOnly: boolean) => (
 			<MultiSelect
+				label={"Fruits"}
 				selected={[APPLE]}
 				onSelect={() => {}}
 				onLoad={loadFruits}
@@ -347,6 +375,7 @@ describe("MultiSelect: read-only", () => {
 		await flush();
 
 		expect(removeButton("Apple")).toBeInTheDocument();
-		expect(combobox()).not.toHaveAttribute("readonly");
+		expect(combobox()).toBeEnabled();
+		expect(screen.getByRole("combobox", { name: "Fruits" })).toBe(combobox());
 	});
 });

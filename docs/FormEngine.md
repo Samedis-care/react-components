@@ -635,11 +635,11 @@ anything is queued the form is dirty. The connector is kept as the form's custom
 `field`.
 
 They take the form's `readOnly` on top of their own, and its `errorComponent`.
-`FormCrudMultiSelect` is read-only in a read-only form, not disabled: its search field stays
-in the tab order with its label in the normal color, but takes no typing and opens no list,
-and the entries have no remove buttons. A save makes the form read-only as well, but leaves
-the field as it is, with its focus and the text typed into it; only picks and removals are
-ignored while it runs.
+`FormCrudMultiSelect` is read-only in a read-only form, not disabled: it shows its label and
+the entries, without search field, end adornments or remove buttons ("No entries" when there
+are none), as `FormCrudFileUpload` drops its upload button. A save makes the form read-only as
+well, but leaves the field as it is, with its focus and the text typed into it; only picks
+and removals are ignored while it runs.
 While `FormCrudMultiSelect` is read-only, disabled or saving, nothing else writes to it either:
 its ref's `addToSelection` rejects, and the select context's `handleSelect`, which end
 adornments call, ignores the change. An end adornment reads

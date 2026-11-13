@@ -1,11 +1,12 @@
 /**
  * CrudMultiSelect outside a form, read-only and with blocked writes. The searched model is
  * TestModel; a join row is { id, source_id }, its entry is labelled "L<source_id>". The
- * connector logs every write.
+ * connector logs every write. The entries capture the select context (a read-only field
+ * renders no end adornment).
  */
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import CrudMultiSelect, {
 	useCrudSelectContext,
 } from "../../../src/backend-components/Selector/CrudMultiSelect";
@@ -15,6 +16,9 @@ import type { Connector, ModelUnknown } from "../../../src/backend-integration";
 import { Framework } from "../../../src/framework";
 import createTestModel from "../../../src/stories/test-utils/TestModel";
 import type { MultiSelectorData } from "../../../src/standalone";
+import MultiSelectEntry, {
+	MultiSelectEntryProps,
+} from "../../../src/standalone/Selector/MultiSelectEntry";
 import { settle, setupFormTests } from "../Form/formFixture";
 
 setupFormTests();
@@ -67,12 +71,16 @@ const ErrorSink = (props: ErrorComponentProps) => (
 
 const model = createTestModel();
 
-/** what the select context says, as an end adornment sees it */
+/** what the select context says, as the entries see it */
 const ctxSink: { disabled?: boolean } = {};
-const CaptureCtx = () => {
+const CaptureEntry = (props: MultiSelectEntryProps<JoinData>) => {
 	ctxSink.disabled = useCrudSelectContext().disabled;
-	return null;
+	return <MultiSelectEntry {...props} />;
 };
+
+beforeEach(() => {
+	ctxSink.disabled = undefined;
+});
 
 const mountSelect = (
 	connector: Connector,
@@ -91,7 +99,7 @@ const mountSelect = (
 				deserialize={deserialize}
 				deserializeModel={deserializeModel}
 				getIdOfData={getIdOfData}
-				endAdornment={<CaptureCtx />}
+				selectedEntryRenderer={CaptureEntry}
 				searchDebounceTime={0}
 				{...props}
 			/>
@@ -130,15 +138,16 @@ const pickThroughRef = async (
 };
 
 describe("CrudMultiSelect", () => {
-	it("[ISSUE-3505-ITEM-16] read-only: a focusable read-only search field, no remove buttons, and nothing is written", async () => {
+	it("[ISSUE-3505-ITEM-16] read-only: the entries under the label, no search field or remove buttons, and nothing is written", async () => {
 		const be = makeBackend();
 		const ref = mountSelect(be.connector, { readOnly: true });
 		expect(await screen.findByText("L1")).toBeInTheDocument();
 		await settle();
-		const input = screen.getByRole("combobox", { name: "Members" });
 
-		expect(input).not.toBeDisabled();
-		expect(input).toHaveAttribute("readonly");
+		expect(screen.queryByRole("combobox")).toBeNull();
+		expect(
+			within(screen.getByRole("list", { name: "Members" })).getByText("L1"),
+		).toBeInTheDocument();
 		expect(screen.queryByRole("button", { name: "Remove L1" })).toBeNull();
 		expect(ctxSink.disabled).toBe(true);
 		expect(await pickThroughRef(ref)).toBeInstanceOf(Error);

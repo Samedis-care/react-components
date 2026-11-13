@@ -158,6 +158,7 @@
 				"selected": "SELECTED"
 			},
 			"multi-select": {
+				"no-entries": "No entries",
 				"remove-item": "Remove {{ITEM}}",
 				"delete-confirm": {
 					"title": "Confirm Removal",

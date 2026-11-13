@@ -17,7 +17,7 @@ import useDebouncedLoad from "./useDebouncedLoad";
 export type BackendMultipleSelectProps<
 	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
-> = Omit<BackendMultiSelectProps<M, DataT>, "classes"> &
+> = Omit<BackendMultiSelectProps<M, DataT>, "classes" | "readOnly"> &
 	Pick<BaseSelectorProps<DataT, true>, "classes">;
 
 /**

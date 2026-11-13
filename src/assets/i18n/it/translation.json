@@ -158,6 +158,7 @@
 				"selected": "SELEZIONATO"
 			},
 			"multi-select": {
+				"no-entries": "Nessuna voce",
 				"remove-item": "Rimuovi {{ITEM}}",
 				"delete-confirm": {
 					"title": "Conferma rimozione",

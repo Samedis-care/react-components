@@ -37,11 +37,11 @@ export interface CrudMultiSelectProps<
 	 */
 	errorComponent: React.ComponentType<ErrorComponentProps>;
 	/**
-	 * Shows the selection without letting it change (MultiSelectProps.readOnly): the search
-	 * field stays focusable but takes no typing and opens no list, the entries have no
-	 * remove buttons, and nothing is written, as if disabled: handleSelect ignores every
-	 * change and addToSelection rejects, also when an end adornment or the caller's ref
-	 * calls them
+	 * Shows the selection without a way to change it (MultiSelectProps.readOnly): the label
+	 * and the entries, without search field, end adornments or remove buttons. Nothing is
+	 * written, as if disabled: handleSelect ignores every change and addToSelection rejects,
+	 * also when an end adornment or the caller's ref calls them. While the selection loads
+	 * the field is shown disabled, as without readOnly.
 	 * @default false
 	 */
 	readOnly?: boolean;
@@ -105,6 +105,8 @@ const CrudMultiSelect = <
 					<BackendMultiSelect
 						{...props}
 						disabled={props.disabled || locked}
+						// until the selection is loaded there is nothing to list
+						readOnly={props.readOnly && !locked}
 						endAdornment={locked ? undefined : props.endAdornment}
 						endAdornmentLeft={locked ? undefined : props.endAdornmentLeft}
 						selected={selected.map((entry) => entry.value)}
