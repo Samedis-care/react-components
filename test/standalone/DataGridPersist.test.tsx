@@ -703,7 +703,6 @@ describe("persistence provider bugs", () => {
 		expect(await screen.findByTestId("child")).toBeInTheDocument();
 		expect(hanging.writes).toEqual([[keyOf(FILTERS, { model: "x" }), null]]);
 	});
-
 	it("[ISSUE-3496-ITEM-4] a load for the previous storage keys that answers late is neither shown nor written under the new keys", async () => {
 		const pending: Record<string, (value: string | null) => void> = {};
 		const slow = new (class extends MemoryProvider {
@@ -743,7 +742,6 @@ describe("persistence provider bugs", () => {
 		expect(writtenToB).toEqual([]);
 		expect(grid!.state.search).toBe("from B");
 	});
-
 	it("[ISSUE-3496-ITEM-2] a grid with a sort record stored before a defaultSort was added loads with the user's sort only", async () => {
 		const loadData = vi.fn<DataGridProps["loadData"]>(noRows);
 		const stored: DataGridPersistentState = {
@@ -766,7 +764,6 @@ describe("persistence provider bugs", () => {
 		]);
 		expect(grid!.columnState.name).toMatchObject({ sort: 0 });
 	});
-
 	it("[ISSUE-3496-ITEM-2] a grid opens with its stored sort whatever the defaultSort, and a reset applies the defaultSort", async () => {
 		const loadData = vi.fn<DataGridProps["loadData"]>(noRows);
 		const save = vi.fn<DataGridPersistentStateContextType[1]>();
@@ -800,7 +797,6 @@ describe("persistence provider bugs", () => {
 		);
 		expect(save.mock.lastCall![0].sort).toEqual([["name", -1]]);
 	});
-
 	it("[ISSUE-3496-ITEM-2] a grid with nothing stored opens with the defaultSort, and stores it as its sort", async () => {
 		const loadData = vi.fn<DataGridProps["loadData"]>(noRows);
 		const save = vi.fn<DataGridPersistentStateContextType[1]>();
@@ -861,5 +857,206 @@ describe("restored column widths", () => {
 		expect(grid!.widths.name).toBe(applyColumnWidthLimits(GRID_COLUMNS[0], 0));
 		expect(grid!.widths.role).toBe(250);
 		expect(grid!.widths.gone).toBe(8);
+	});
+});
+
+describe("StorageManagerPersist bucket writes", () => {
+	const smp = (keys: Record<string, string>, child = <Grid />) => (
+		<ThemeProvider theme={theme}>
+			<StorageManagerPersist storageKeys={keys}>{child}</StorageManagerPersist>
+		</ThemeProvider>
+	);
+
+	/** shows what the provider provides for the given keys, and keeps its setter */
+	const probe = (keys: Record<string, string>) => (
+		<ThemeProvider theme={theme}>
+			<StorageManagerPersist storageKeys={keys}>
+				<Probe testId={"a"} />
+			</StorageManagerPersist>
+		</ThemeProvider>
+	);
+
+	/** what a write of WRITTEN stores in the filters bucket */
+	const writtenFilters = () =>
+		JSON.stringify({
+			v: WRITTEN.v,
+			search: WRITTEN.search,
+			customData: WRITTEN.customData,
+		});
+
+	it("[ISSUE-3496-ITEM-8] a column resize writes only the sizing bucket", async () => {
+		const server = new MemoryProvider();
+		StorageManager.configure((_id, keys) => [server, keys]);
+		const keys = { model: "m" };
+		render(smp(keys));
+		await gridIdle();
+		// a grid writes nothing when it opens, its first change writes both
+		act(() => grid!.setState((prev) => ({ ...prev, search: "s" })));
+		expect(server.writes.map(([key]) => key)).toEqual([
+			keyOf(SIZING, keys),
+			keyOf(FILTERS, keys),
+		]);
+		server.writes = [];
+		act(() => grid!.setWidths((prev) => ({ ...prev, name: 321 })));
+		expect(server.writes.map(([key]) => key)).toEqual([keyOf(SIZING, keys)]);
+	});
+
+	it("[ISSUE-3496-ITEM-8] typing in the search writes only the filters bucket", async () => {
+		const server = new MemoryProvider();
+		configureLikeSamedis(server);
+		const keys = { model: "m", tenant: "t" };
+		render(smp(keys));
+		await gridIdle();
+		act(() => grid!.setWidths((prev) => ({ ...prev, name: 321 })));
+		server.writes = [];
+		const local = vi.spyOn(LocalStorageProviderInstance, "setItem");
+		act(() => grid!.setState((prev) => ({ ...prev, search: "a" })));
+		act(() => grid!.setState((prev) => ({ ...prev, search: "ab" })));
+		expect(local).not.toHaveBeenCalled();
+		expect(server.writes.map(([key]) => key)).toEqual([
+			keyOf(FILTERS, keys),
+			keyOf(FILTERS, keys),
+		]);
+	});
+
+	it("[ISSUE-3496-ITEM-8] a grid opened on what an earlier visit stored writes only the sizing bucket on a resize", async () => {
+		const server = new MemoryProvider();
+		StorageManager.configure((_id, keys) => [server, keys]);
+		const keys = { model: "m" };
+		render(smp(keys));
+		await gridIdle();
+		act(() =>
+			grid!.setState((prev) => ({
+				...prev,
+				search: "s",
+				columnHidden: { ...prev.columnHidden, role: true },
+				customData: { "filter[status]": "open" },
+			})),
+		);
+		act(() => grid!.setWidths((prev) => ({ ...prev, name: 321 })));
+		cleanup();
+		grid = null;
+
+		server.writes = [];
+		render(smp(keys));
+		await gridIdle();
+		expect(grid!.state.search).toBe("s");
+		expect(grid!.widths.name).toBe(321);
+		act(() => grid!.setWidths((prev) => ({ ...prev, name: 300 })));
+		expect(server.writes.map(([key]) => key)).toEqual([keyOf(SIZING, keys)]);
+	});
+
+	it("[ISSUE-3496-ITEM-8] a bucket changed back to what it held when the grid opened is written again", async () => {
+		const server = new MemoryProvider();
+		StorageManager.configure((_id, keys) => [server, keys]);
+		const keys = { model: "m" };
+		const sizing: DataGridPersistentState = {
+			v: DATA_GRID_PERSIST_VERSION,
+			width: { name: 200 },
+			initialResize: true,
+		};
+		server.data[keyOf(SIZING, keys)] = JSON.stringify(sizing);
+		server.data[keyOf(FILTERS, keys)] = JSON.stringify(STORED);
+		render(probe(keys));
+		expect(await screen.findByTestId("a")).toHaveTextContent("stored");
+
+		await act(async () => {
+			await write!({ ...sizing, ...STORED, search: "typed" });
+		});
+		// back to what is stored, e.g. by a reset: the bucket holds "typed" now
+		await act(async () => {
+			await write!({ ...sizing, ...STORED });
+		});
+		expect(server.writes).toEqual([
+			[keyOf(FILTERS, keys), JSON.stringify({ ...STORED, search: "typed" })],
+			[keyOf(FILTERS, keys), JSON.stringify(STORED)],
+		]);
+	});
+
+	it("[ISSUE-3496-ITEM-8] other storage keys start from what is stored for them", async () => {
+		const server = new MemoryProvider();
+		StorageManager.configure((_id, keys) => [server, keys]);
+		const a = { model: "a" };
+		const b = { model: "b" };
+		server.data[keyOf(FILTERS, b)] = JSON.stringify(STORED);
+		const { rerender } = render(probe(a));
+		expect(await screen.findByTestId("a")).toHaveTextContent("none");
+		await act(async () => {
+			await write!(WRITTEN);
+		});
+
+		rerender(probe(b));
+		await waitFor(() =>
+			expect(screen.getByTestId("a")).toHaveTextContent("stored"),
+		);
+		await act(async () => {
+			await write!(WRITTEN);
+		});
+		expect(server.writes).toEqual([
+			[keyOf(SIZING, a), JSON.stringify({ v: WRITTEN.v })],
+			[keyOf(FILTERS, a), writtenFilters()],
+			[keyOf(SIZING, b), JSON.stringify({ v: WRITTEN.v })],
+			[keyOf(FILTERS, b), writtenFilters()],
+		]);
+	});
+
+	it("[ISSUE-3496-ITEM-8] storage keys read again start from what is stored for them then", async () => {
+		const server = new MemoryProvider();
+		StorageManager.configure((_id, keys) => [server, keys]);
+		const a = { model: "a" };
+		const b = { model: "b" };
+		server.data[keyOf(FILTERS, b)] = JSON.stringify(STORED);
+		const { rerender } = render(probe(a));
+		expect(await screen.findByTestId("a")).toHaveTextContent("none");
+		await act(async () => {
+			await write!(WRITTEN);
+		});
+		rerender(probe(b));
+		await waitFor(() =>
+			expect(screen.getByTestId("a")).toHaveTextContent("stored"),
+		);
+
+		// meanwhile a's filters were changed elsewhere (another tab)
+		server.data[keyOf(FILTERS, a)] = JSON.stringify({
+			...STORED,
+			search: "elsewhere",
+		});
+		server.writes = [];
+		rerender(probe(a));
+		// the Loader stands in for the children until a is read
+		expect(screen.queryByTestId("a")).not.toBeInTheDocument();
+		await screen.findByTestId("a");
+		await act(async () => {
+			await write!(WRITTEN);
+		});
+		expect(server.writes).toEqual([[keyOf(FILTERS, a), writtenFilters()]]);
+	});
+
+	it("[ISSUE-3496-ITEM-8] a bucket whose write failed is written with the next change", async () => {
+		const server = new (class extends MemoryProvider {
+			failures = 1;
+			setItem(key: string, value: string | null): Promise<void> {
+				if (key.startsWith(FILTERS) && this.failures > 0) {
+					this.failures--;
+					return Promise.reject(new Error("503"));
+				}
+				return super.setItem(key, value);
+			}
+		})();
+		StorageManager.configure((_id, keys) => [server, keys]);
+		const keys = { model: "m" };
+		render(probe(keys));
+		await screen.findByTestId("a");
+		await act(async () => {
+			await Promise.resolve(write!(WRITTEN)).catch(() => {});
+		});
+		expect(server.failures).toBe(0);
+		expect(server.data[keyOf(FILTERS, keys)]).toBeUndefined();
+
+		// only the widths change, the filters bucket still lacks the search
+		await act(async () => {
+			await write!({ ...WRITTEN, width: { name: 200 } });
+		});
+		expect(server.data[keyOf(FILTERS, keys)]).toBe(writtenFilters());
 	});
 });
