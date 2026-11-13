@@ -407,6 +407,21 @@ describe("rendered without pushDialog", () => {
 	});
 });
 
+describe("FormDialog", () => {
+	it("[ISSUE-3497-ITEM-9] renders a button's color", () => {
+		mount();
+		push(
+			<FormDialog
+				title="T"
+				message="M"
+				inputs={null}
+				buttons={[{ text: "Submit" }, { text: "Cancel", color: "secondary" }]}
+			/>,
+		);
+		expect(btn("Cancel")).toHaveClass("MuiButton-colorSecondary");
+	});
+});
+
 describe("message content and description", () => {
 	it.each([
 		[

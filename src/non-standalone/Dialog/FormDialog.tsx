@@ -49,7 +49,7 @@ const FormDialogRaw = (props: IDialogConfigForm) => {
 								end();
 							}
 						}}
-						color="primary"
+						color={btn.color || "primary"}
 						autoFocus={btn.autoFocus}
 					>
 						{btn.text}

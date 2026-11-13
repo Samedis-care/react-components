@@ -36,7 +36,7 @@ export interface IDialogButtonConfig {
 	 */
 	autoFocus?: boolean;
 	/**
-	 * The color of the button
+	 * The color of the button, as MUI Button's `color`. Default `"primary"`.
 	 */
 	color?: "primary" | "secondary";
 	/**
