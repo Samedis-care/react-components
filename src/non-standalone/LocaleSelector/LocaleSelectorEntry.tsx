@@ -5,6 +5,7 @@ import {
 } from "./LocaleSelectorDialogContent";
 import { ListItemButton, styled, useThemeProps } from "@mui/material";
 import CountryFlag from "../../standalone/CountryFlag";
+import focusRing from "../../utils/internal/focusRing";
 
 export interface LocaleSelectorEntryProps extends Omit<
 	LocaleSelectorDialogContentProps,
@@ -19,11 +20,14 @@ export interface LocaleSelectorEntryProps extends Omit<
 const ListItemRoot = styled(ListItemButton, {
 	name: "CcLocaleSelectorEntry",
 	slot: "root",
-})({
+})(({ theme }) => ({
 	// the row grows when a long name wraps (e.g. de: "Sonderverwaltungsregion
 	// Hongkong"); the list measures it
 	minHeight: 70,
-});
+	// MUI marks the keyboard-focused row with a faint tint only, which forced
+	// colors drop; inside the row, because the scrolling list clips its sides
+	"&.Mui-focusVisible": focusRing(theme, -2),
+}));
 
 const Container = styled("div", {
 	name: "CcLocaleSelectorEntry",

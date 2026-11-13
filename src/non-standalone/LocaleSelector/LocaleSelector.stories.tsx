@@ -245,6 +245,98 @@ export const Issue3499Item4LongNamesWrapWithTextSpacing: Story = {
 	},
 };
 
+export const Issue3499Item5RowFocusIsVisible: Story = {
+	args: { supportedLocales: SCF },
+	parameters: {
+		// the open dialog has other axe findings; this story is about the focus ring
+		a11y: { test: "todo" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-5: Tab to the first row. The only focus cue is a 12% grey background (1.32:1 against the dialog), no outline, and nothing at all in forced-colors mode. Expected: a focus ring of at least 2px.",
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ canvasElement }) => {
+		await reset();
+		const dialog = await openDialog(canvasElement);
+		await userEvent.tab(); // close button
+		await userEvent.tab(); // search box
+		await userEvent.tab(); // first row
+		const row = rowButton(dialog, 1);
+		await expect(row).toHaveFocus();
+		await waitFor(() => expect(row).toHaveClass("Mui-focusVisible"));
+		const cs = getComputedStyle(row);
+		const ring =
+			(cs.outlineStyle !== "none" && parseFloat(cs.outlineWidth) >= 2) ||
+			cs.boxShadow !== "none";
+		await expect(
+			ring,
+			`outline ${cs.outlineStyle} ${cs.outlineWidth}, box-shadow ${cs.boxShadow}`,
+		).toBe(true);
+	},
+};
+
+/** `[r, g, b, alpha]` of a computed `rgb()` or `rgba()` color */
+const rgba = (color: string) => {
+	const [r, g, b, alpha = 1] = (color.match(/[\d.]+/g) ?? []).map(Number);
+	return [r, g, b, alpha];
+};
+
+/** WCAG contrast ratio of two opaque colors, given as `[r, g, b]` */
+const contrast = (a: number[], b: number[]) => {
+	const luminance = (color: number[]) => {
+		const [r, g, bl] = color.slice(0, 3).map((value) => {
+			const c = value / 255;
+			return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+		});
+		return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
+	};
+	const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+	return (light + 0.05) / (dark + 0.05);
+};
+
+export const Issue3499Item5RowFocusRingContrast: Story = {
+	args: { supportedLocales: SCF },
+	parameters: {
+		// the open dialog has other axe findings; this story is about the focus ring
+		a11y: { test: "todo" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-5: the keyboard-focused row's ring is an outline, which forced-colors mode keeps (it drops background tints and box shadows), drawn inside the row so the scrolling list cannot clip it, and at least 3:1 against the row's focus background.",
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ canvasElement }) => {
+		await reset();
+		const dialog = await openDialog(canvasElement);
+		await userEvent.tab(); // close button
+		await userEvent.tab(); // search box
+		await userEvent.tab(); // first row
+		const row = rowButton(dialog, 1);
+		await waitFor(() => expect(row).toHaveClass("Mui-focusVisible"));
+		// the focus background fades in
+		await Promise.all(row.getAnimations().map((anim) => anim.finished));
+		const style = getComputedStyle(row);
+		await expect(style.outlineStyle).toBe("solid");
+		const width = parseFloat(style.outlineWidth);
+		await expect(width).toBeGreaterThanOrEqual(2);
+		await expect(parseFloat(style.outlineOffset)).toBeLessThanOrEqual(-width);
+		const paper = rgba(getComputedStyle(dialog).backgroundColor);
+		const tint = rgba(style.backgroundColor);
+		const behind = paper.map(
+			(value, i) => tint[3] * tint[i] + (1 - tint[3]) * value,
+		);
+		await expect(
+			contrast(rgba(style.outlineColor), behind),
+			`${style.outlineColor} on ${style.backgroundColor} over ${getComputedStyle(dialog).backgroundColor}`,
+		).toBeGreaterThanOrEqual(3);
+	},
+};
+
 export const Issue3466Item8FlagsOutlined: Story = {
 	args: { supportedLocales: SCF },
 	parameters: {
