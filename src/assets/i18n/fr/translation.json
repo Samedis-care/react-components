@@ -254,6 +254,9 @@
 			"okay": "OK",
 			"dialog-title": {
 				"close": "Fermer"
+			},
+			"input-dialog": {
+				"invalid": "Entrez une valeur valide"
 			}
 		},
 		"language-switcher": {

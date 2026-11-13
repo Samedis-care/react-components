@@ -254,6 +254,9 @@
 			"okay": "OK",
 			"dialog-title": {
 				"close": "Yoping"
+			},
+			"input-dialog": {
+				"invalid": "Toʻgʻri qiymat kiriting"
 			}
 		},
 		"language-switcher": {

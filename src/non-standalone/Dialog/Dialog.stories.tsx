@@ -187,7 +187,16 @@ export const AsyncButtonHandlerStory: StoryObj<AsyncButtonHandlerArgs> = {
 
 // ─── InputDialog ─────────────────────────────────────────────────────────────
 
-const InputDialogDemo = () => {
+interface InputDialogArgs {
+	textFieldErrorText?: string;
+	onYes: (value: string) => void;
+	onNo: () => void;
+}
+
+const validateName = (value: string) => value.trim().length > 0;
+
+const InputDialogDemo = (props: InputDialogArgs) => {
+	const { textFieldErrorText, onYes, onNo } = props;
 	const [pushDialog] = useDialogContext();
 	const open = useCallback(() => {
 		pushDialog(
@@ -198,12 +207,13 @@ const InputDialogDemo = () => {
 				textButtonNo="Cancel"
 				textFieldLabel="New Name"
 				textFieldPlaceholder="e.g. My Document"
-				textFieldValidator={(value: string) => value.trim().length > 0}
-				handlerButtonYes={() => {}}
-				handlerButtonNo={() => {}}
+				textFieldValidator={validateName}
+				textFieldErrorText={textFieldErrorText}
+				handlerButtonYes={onYes}
+				handlerButtonNo={onNo}
 			/>,
 		);
-	}, [pushDialog]);
+	}, [pushDialog, textFieldErrorText, onYes, onNo]);
 	return (
 		<Button variant="contained" color="primary" onClick={open}>
 			Open Input Dialog
@@ -211,10 +221,38 @@ const InputDialogDemo = () => {
 	);
 };
 
-export const InputDialogStory: StoryObj = {
+export const InputDialogStory: StoryObj<InputDialogArgs> = {
 	name: "InputDialog",
-	render: () => <InputDialogDemo />,
+	args: { textFieldErrorText: "Enter a name", onYes: fn(), onNo: fn() },
+	render: (args) => <InputDialogDemo {...args} />,
 };
+
+export const Issue3497Item16RejectedValueIsDescribed: StoryObj<InputDialogArgs> =
+	{
+		args: { textFieldErrorText: "Enter a name", onYes: fn(), onNo: fn() },
+		parameters: {
+			a11y: { test: "error" },
+			docs: {
+				description: {
+					story:
+						"ISSUE-3497-ITEM-16: Rename with an empty field. The dialog stays open, focus moves to the field, and the field is marked invalid and described by the error text below it.",
+				},
+			},
+		},
+		render: (args) => <InputDialogDemo {...args} />,
+		play: async ({ args }) => {
+			await userEvent.click(
+				page().getByRole("button", { name: "Open Input Dialog" }),
+			);
+			const input = await page().findByRole("textbox", { name: "New Name" });
+			await userEvent.click(page().getByRole("button", { name: "Rename" }));
+			await expect(input).toHaveFocus();
+			await expect(input).toHaveAttribute("aria-invalid", "true");
+			await expect(input).toHaveAccessibleDescription("Enter a name");
+			await expect(page().getByText("Enter a name")).toBeVisible();
+			await expect(args.onYes).not.toHaveBeenCalled();
+		},
+	};
 
 // ─── FormDialog ──────────────────────────────────────────────────────────────
 

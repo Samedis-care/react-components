@@ -143,12 +143,20 @@ export interface IDialogConfigInput extends Omit<
 	 */
 	textFieldPlaceholder?: string;
 	/**
-	 * The validator for the input field.
-	 * Called when user presses "yes"
+	 * The validator for the input field. Runs on every change and when Yes is clicked.
+	 * While it returns false, the field is marked invalid and shows `textFieldErrorText`,
+	 * and Yes moves focus to the field instead of closing the dialog.
 	 * @param value The current input
 	 * @returns Value valid?
 	 */
 	textFieldValidator: (value: string) => boolean;
+	/**
+	 * The error text shown below the field, as its description, while
+	 * `textFieldValidator` rejects the value. Say what the value has to be, e.g.
+	 * "Enter the e-mail address of your account". Default (also for an empty string): the
+	 * translation of `non-standalone.dialog.input-dialog.invalid`, "Enter a valid value".
+	 */
+	textFieldErrorText?: string;
 }
 
 /**

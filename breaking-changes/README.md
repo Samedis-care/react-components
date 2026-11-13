@@ -77,6 +77,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [A Toast rendered closed calls onExited right away](2026-11-13-toast-rendered-closed-calls-on-exited.md) | behavior |
 | 2026-11-13 | [FlowEngineBackButton is labelled "Cancel" by default](2026-11-13-flow-engine-back-button-cancel-label.md) | behavior |
 | 2026-11-13 | [FlowEngineBackButton has no default label: children are required](2026-11-13-flow-engine-back-button-label-required.md) | type |
+| 2026-11-13 | [InputDialog describes a rejected value in text and moves focus to the field](2026-11-13-input-dialog-error-text.md) | behavior |
 | 2026-11-12 | [The Loader's status text is a paragraph, not a heading](2026-11-12-loader-status-text-is-no-heading.md) | behavior |
 | 2026-11-12 | [PopupMenu item labels wrap instead of being cut off](2026-11-12-popup-menu-labels-wrap.md) | behavior |
 | 2026-11-12 | [CountryFlags, CountryCodes and CountryOption.value are typed by CountryCode, and CountryFlags is frozen](2026-11-12-country-flags-typed-by-country-code.md) | type, behavior |

@@ -292,6 +292,106 @@ describe("InputDialog and showInputDialog", () => {
 	});
 });
 
+describe("InputDialog validation", () => {
+	it("[ISSUE-3497-ITEM-16] a value the validator rejects is identified in text, not by color only", () => {
+		mount();
+		push(
+			<InputDialog
+				{...inputProps({ textFieldValidator: (v) => v.length >= 3 })}
+			/>,
+		);
+		const input = screen.getByRole("textbox", { name: "Name" });
+		fireEvent.change(input, { target: { value: "ab" } });
+		fireEvent.click(btn("Save"));
+		expect(input).toHaveAttribute("aria-invalid", "true");
+		expect(input).toHaveAccessibleDescription();
+	});
+
+	it("[ISSUE-3497-ITEM-16] the field is described by textFieldErrorText while the validator rejects its value", () => {
+		mount();
+		push(
+			<InputDialog
+				{...inputProps({
+					textFieldValidator: (v) => v.length >= 3,
+					textFieldErrorText: "Enter at least 3 characters",
+				})}
+			/>,
+		);
+		const input = screen.getByRole("textbox", { name: "Name" });
+		expect(input).toHaveAttribute("aria-invalid", "false");
+		expect(input).not.toHaveAttribute("aria-describedby");
+
+		fireEvent.change(input, { target: { value: "ab" } });
+		expect(input).toHaveAttribute("aria-invalid", "true");
+		expect(input).toHaveAccessibleDescription("Enter at least 3 characters");
+
+		fireEvent.change(input, { target: { value: "abc" } });
+		expect(input).toHaveAttribute("aria-invalid", "false");
+		expect(input).not.toHaveAttribute("aria-describedby");
+		expect(
+			screen.queryByText("Enter at least 3 characters"),
+		).not.toBeInTheDocument();
+	});
+
+	it.each([
+		["without textFieldErrorText", undefined],
+		["with an empty textFieldErrorText", ""],
+	])(
+		"[ISSUE-3497-ITEM-16] %s the error text is the translated default",
+		(_label, textFieldErrorText) => {
+			mount();
+			push(
+				<InputDialog
+					{...inputProps({
+						textFieldValidator: () => false,
+						textFieldErrorText,
+					})}
+				/>,
+			);
+			fireEvent.click(btn("Save"));
+			expect(
+				screen.getByRole("textbox", { name: "Name" }),
+			).toHaveAccessibleDescription(
+				ccI18n.t("non-standalone.dialog.input-dialog.invalid"),
+			);
+			expect(
+				ccI18n.t("non-standalone.dialog.input-dialog.invalid"),
+			).not.toMatch(/input-dialog/);
+		},
+	);
+
+	it("[ISSUE-3497-ITEM-16] a rejected Yes keeps the dialog open and moves focus to the field", () => {
+		mount();
+		const yes = vi.fn();
+		push(
+			<InputDialog
+				{...inputProps({
+					textFieldValidator: (v) => v === "pump@example.com",
+					handlerButtonYes: yes,
+				})}
+			/>,
+		);
+		const input = screen.getByRole("textbox", { name: "Name" });
+		// never typed: the empty value is rejected too
+		btn("Save").focus();
+		fireEvent.click(btn("Save"));
+		expect(input).toHaveFocus();
+		expect(input).toHaveAttribute("aria-invalid", "true");
+
+		fireEvent.change(input, { target: { value: "pump@example" } });
+		btn("Save").focus();
+		fireEvent.click(btn("Save"));
+		expect(input).toHaveFocus();
+		expect(yes).not.toHaveBeenCalled();
+		expect(openTitles()).toEqual(["Rename"]);
+
+		fireEvent.change(input, { target: { value: "pump@example.com" } });
+		fireEvent.click(btn("Save"));
+		expect(yes).toHaveBeenCalledWith("pump@example.com");
+		expect(openTitles()).toEqual([]);
+	});
+});
+
 describe("rendered without pushDialog", () => {
 	/** renders a dialog from state, as `{open && <Dialog onClose={…} />}` */
 	const InlineHost = (props: {
