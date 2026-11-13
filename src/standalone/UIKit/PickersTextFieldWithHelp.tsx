@@ -7,6 +7,7 @@ import {
 	UiKitPickersTextField,
 } from "./CommonStyles";
 import isTouchDevice from "../../utils/isTouchDevice";
+import accessSlotProps from "../../utils/internal/accessSlotProps";
 import { withMuiFieldState } from "./MuiFieldState";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { PickersTextFieldProps } from "@mui/x-date-pickers";
@@ -131,9 +132,11 @@ const TextFieldWithHelp: React.ForwardRefExoticComponent<
 						</>
 					) : undefined,
 				},
+				// an object, resolved from a function form (as MUI's TextField takes it):
+				// PickersTextField spreads it and reads its shrink for the outline's notch
 				inputLabel: {
 					...InputLabelConfig,
-					...(muiProps.slotProps?.inputLabel as Record<string, unknown>),
+					...accessSlotProps(props, muiProps.slotProps?.inputLabel),
 				},
 			}}
 		/>

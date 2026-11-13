@@ -65,6 +65,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [timestampToAge words the age with Intl.RelativeTimeFormat: grammatical in every language, with weeks to years and future times](2026-11-13-timestamp-to-age-intl.md) | behavior |
 | 2026-11-13 | [The backend multi selects leave "Loading…" entries out of raw](2026-11-13-backend-multi-select-raw-without-loading-entries.md) | behavior |
 | 2026-11-13 | [useNavigate and Link keep a navigation inside the app](2026-11-13-navigate-stays-in-app.md) | behavior |
+| 2026-11-13 | [DateTimeInput passes on all of slotProps.textField.slotProps, and a function-form inputLabel is used on both date inputs](2026-11-13-date-time-input-text-field-slot-props.md) | behavior |
 | 2026-11-12 | [The Loader's status text is a paragraph, not a heading](2026-11-12-loader-status-text-is-no-heading.md) | behavior |
 | 2026-11-12 | [PopupMenu item labels wrap instead of being cut off](2026-11-12-popup-menu-labels-wrap.md) | behavior |
 | 2026-11-12 | [CountryFlags, CountryCodes and CountryOption.value are typed by CountryCode, and CountryFlags is frozen](2026-11-12-country-flags-typed-by-country-code.md) | type, behavior |

@@ -3,7 +3,7 @@ import {
 	DateTimePickerProps,
 	PickersTextFieldProps,
 } from "@mui/x-date-pickers";
-import { InputLabelConfig, UIInputProps } from "../CommonStyles";
+import { UIInputProps } from "../CommonStyles";
 import LocalizedDateTimePicker, {
 	LocalizedDateTimePickerProps,
 } from "../../../standalone/LocalizedDateTimePickers/LocalizedDateTimePicker";
@@ -78,12 +78,6 @@ const DateTimeInput = (props: DateTimeInputProps & DateTimePickerProps) => {
 						// only where the caller gave one, so a helper text passed through
 						// slotProps.textField is not overwritten with undefined
 						...(helperText === undefined ? {} : { helperText }),
-						slotProps: {
-							inputLabel: {
-								...InputLabelConfig,
-								...orgSlotProps?.slotProps?.inputLabel,
-							},
-						},
 					} as PickersTextFieldProps;
 				},
 			}}
