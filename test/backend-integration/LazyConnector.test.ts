@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, type Mock } from "vitest";
 import LazyConnector from "../../src/backend-integration/Connector/LazyConnector";
 import type ApiConnector from "../../src/backend-integration/Connector/ApiConnector";
+import type { AdvancedDeleteRequest } from "../../src/backend-integration/Model/Model";
 
 /**
  * The subset of the real connector the queue ever calls, so that a test can see exactly
@@ -442,5 +443,161 @@ describe("LazyConnector update", () => {
 			created: [{ name: "a", note: "second" }],
 		});
 		expect(lazy.mapId(fakeId)).toBe("real-a");
+	});
+});
+
+describe("LazyConnector after a first save", () => {
+	/**
+	 * A form's connector after its first save, which leaves the form open: the record
+	 * created through it is on the server, where index lists it under its real id next
+	 * to one that was there before, and the form still holds the fake id
+	 */
+	const makeSavedHere = async () => {
+		const { connector, calls } = makeRealConnector();
+		const rows: Record<string, unknown>[] = [{ id: "b", name: "b" }];
+		const real = connector as unknown as Record<string, unknown>;
+		real.create = vi.fn((data: Record<string, unknown>) => {
+			const row = { ...data, id: `real-${String(data.name)}` };
+			calls.push(`create:${String(data.name)}`);
+			rows.push(row);
+			return Promise.resolve([{ ...row }, {}]);
+		});
+		real.index = vi.fn(() =>
+			Promise.resolve([
+				rows.map((row) => ({ ...row })),
+				{ totalRows: rows.length, filteredRows: rows.length },
+			]),
+		);
+		real.read = vi.fn((id: string) => {
+			const row = rows.find((candidate) => candidate.id === id);
+			return row
+				? Promise.resolve([{ ...row }, {}])
+				: Promise.reject(new Error(`${id} not found`));
+		});
+		real.update = vi.fn((data: Record<string, unknown>) => {
+			calls.push(`update:${String(data.id)}:${String(data.note)}`);
+			return Promise.resolve([data, {}]);
+		});
+		real.deleteAdvanced = vi.fn(([invert, ids]: [boolean, string[]]) => {
+			calls.push(`deleteAdvanced:${String(invert)}:${ids.join("+")}`);
+			return Promise.resolve();
+		});
+		const lazy = new LazyConnector(connector, false);
+		const [created] = lazy.create({ name: "a" }, undefined);
+		const fakeId = (created as Record<"id", string>).id;
+		await lazy.workQueue();
+		calls.length = 0;
+		return { lazy, calls, fakeId };
+	};
+
+	it("[ISSUE-3505-ITEM-19] a queued delete of a record created there hides it from index and read", async () => {
+		const { lazy, calls, fakeId } = await makeSavedHere();
+		// index lists it under the id the form holds
+		const [before] = await lazy.index(undefined, undefined);
+		expect(before.map((row) => row.id)).toStrictEqual(["b", fakeId]);
+
+		lazy.delete(fakeId, undefined);
+		const [rows, meta] = await lazy.index(undefined, undefined);
+
+		expect(rows.map((row) => row.id)).toStrictEqual(["b"]);
+		expect(meta.totalRows).toBe(1);
+		expect(lazy.getQueuedDeleteRecords()).toStrictEqual([
+			{ id: fakeId, name: "a" },
+		]);
+		expect(() => lazy.read(fakeId, undefined)).toThrow("data has been deleted");
+		expect(lazy.getQueuedOperation(fakeId)).toBe("delete");
+		await lazy.workQueue();
+		expect(calls).toStrictEqual(["delete:real-a"]);
+	});
+
+	it("[ISSUE-3505-ITEM-19] a queued update of a record created there is reported, and cancelling it sends nothing", async () => {
+		const { lazy, calls, fakeId } = await makeSavedHere();
+
+		void lazy.update({ id: fakeId, note: "n" }, undefined);
+
+		expect(lazy.getQueuedOperation(fakeId)).toBe("update");
+		const [rows] = await lazy.index(undefined, undefined);
+		// the update takes the place of the row it changes, under the id the form holds
+		expect(rows.map((row) => [row.id, row.note])).toStrictEqual([
+			["b", undefined],
+			[fakeId, "n"],
+		]);
+		expect((await lazy.read(fakeId, undefined))[0]).toStrictEqual({
+			id: fakeId,
+			note: "n",
+		});
+
+		expect(lazy.cancelQueuedOperation(fakeId)).toBe(true);
+		expect(lazy.getQueuedOperation(fakeId)).toBe(null);
+		expect(lazy.isQueueEmpty()).toBe(true);
+		await lazy.workQueue();
+		expect(calls).toStrictEqual([]);
+	});
+
+	it("[ISSUE-3505-ITEM-19] a queued update of a record created there is sent under its real id, merged with a second one", async () => {
+		const { lazy, calls, fakeId } = await makeSavedHere();
+
+		void lazy.update({ id: fakeId, note: "first" }, undefined);
+		void lazy.update({ id: fakeId, note: "second" }, undefined);
+		await lazy.workQueue();
+
+		expect(calls).toStrictEqual(["update:real-a:second"]);
+	});
+
+	it("[ISSUE-3505-ITEM-19] a delete replaces a queued update of a record created there, and deleting it again queues nothing more", async () => {
+		const single = await makeSavedHere();
+		void single.lazy.update({ id: single.fakeId, note: "n" }, undefined);
+		single.lazy.delete(single.fakeId, undefined);
+		single.lazy.delete(single.fakeId, undefined);
+		await single.lazy.workQueue();
+
+		const batch = await makeSavedHere();
+		void batch.lazy.update({ id: batch.fakeId, note: "n" }, undefined);
+		batch.lazy.deleteMultiple([batch.fakeId], undefined);
+		batch.lazy.deleteMultiple([batch.fakeId], undefined);
+		await batch.lazy.workQueue();
+
+		expect({ single: single.calls, batch: batch.calls }).toStrictEqual({
+			single: ["delete:real-a"],
+			batch: ["deleteMultiple:real-a"],
+		});
+	});
+
+	it("[ISSUE-3505-ITEM-19] cancelling one id of a batched delete keeps remembering a record created there", async () => {
+		const { lazy, fakeId } = await makeSavedHere();
+
+		lazy.deleteMultiple([fakeId, "b"], undefined);
+		await lazy.index(undefined, undefined);
+		lazy.cancelQueuedOperation("b");
+
+		expect(lazy.getQueuedDeleteRecords()).toStrictEqual([
+			{ id: fakeId, name: "a" },
+		]);
+	});
+
+	it("[ISSUE-3505-ITEM-19] an advanced delete of a record created there is queued and sent under its real id", async () => {
+		const { lazy, calls, fakeId } = await makeSavedHere();
+		const deleteAdvanced = lazy.deleteAdvanced!;
+
+		void lazy.update({ id: fakeId, note: "n" }, undefined);
+		const request: AdvancedDeleteRequest = [false, [fakeId]];
+		void deleteAdvanced(request, undefined);
+		// and with a filter, where the ids are the ones to keep
+		void deleteAdvanced(
+			[
+				true,
+				[fakeId],
+				{ quickFilter: "", additionalFilters: {}, fieldFilter: {} },
+			],
+			undefined,
+		);
+		await lazy.workQueue();
+
+		expect(calls).toStrictEqual([
+			"deleteAdvanced:false:real-a",
+			"deleteAdvanced:true:real-a",
+		]);
+		// the caller's request still names the record as the caller knows it
+		expect(request).toStrictEqual([false, [fakeId]]);
 	});
 });
