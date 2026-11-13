@@ -8,6 +8,7 @@ import {
 	screen,
 	within,
 } from "@testing-library/react";
+import { computeAccessibleName } from "dom-accessibility-api";
 import ccI18n from "../../src/i18n";
 import MultiLanguageInput, {
 	MultiLanguageInputProps,
@@ -90,6 +91,14 @@ const fieldNames = () =>
 
 const toggle = () =>
 	screen.getByRole("button", { name: "Toggle language inputs" });
+
+/**
+ * The name of a field whose label reads its language: "Title (German)". jsdom
+ * does not blockify the visually hidden (absolutely positioned) language name,
+ * so dom-accessibility-api drops the space before it that Chromium keeps.
+ */
+const labelledName = (label: string, language: string) =>
+	new RegExp(`^${label} ?\\(${language}\\)$`);
 
 /** a multiline field's language button */
 const labelCode = (lang: Lang) =>
@@ -382,5 +391,88 @@ describe("bugs", () => {
 		expect(
 			screen.getByRole("group", { name: "Sprache für Desc" }),
 		).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3486-ITEM-10] names every language field with the label and its language", () => {
+		render(
+			<MultiLanguageInput
+				enabledLanguages={["en", "de", "fr"]}
+				label="Title"
+				name="title"
+				variant="standard"
+				values={{}}
+				onChange={noop}
+			/>,
+		);
+		fireEvent.click(toggle());
+		const names = ["en", "de", "fr"].map((lang) =>
+			computeAccessibleName(field(`title-${lang}`)!),
+		);
+		expect(names[0]).toMatch(/Title.*English|English.*Title/);
+		expect(names[1]).toMatch(/Title.*German|German.*Title/);
+		expect(names[2]).toMatch(/Title.*French|French.*Title/);
+	});
+
+	it("[ISSUE-3486-ITEM-10] names the fields in the UI language rather than after the placeholder", async () => {
+		render(
+			<Controlled
+				initial={{}}
+				placeholder="Enter a title"
+				variant="standard"
+			/>,
+		);
+		fireEvent.click(toggle());
+		expect(field("title-en")).toHaveAccessibleName(
+			labelledName("Title", "English"),
+		);
+		expect(field("title-de")).toHaveAccessibleName("Title (German)");
+		expect(field("title-fr")).toHaveAccessibleName("Title (French)");
+		// the UI language makes German the default language, and names the languages
+		await setLanguage("de");
+		expect(fieldNames()).toEqual(["title-de", "title-en", "title-fr"]);
+		expect(field("title-de")).toHaveAccessibleName(
+			labelledName("Title", "Deutsch"),
+		);
+		expect(field("title-en")).toHaveAccessibleName("Title (Englisch)");
+		expect(field("title-fr")).toHaveAccessibleName("Title (Französisch)");
+	});
+
+	it("[ISSUE-3486-ITEM-10] names the fields after their language alone when there is no label", () => {
+		render(
+			<Controlled
+				initial={{}}
+				label={undefined}
+				placeholder="Enter a title"
+				variant="standard"
+			/>,
+		);
+		fireEvent.click(toggle());
+		expect(field("title-en")).toHaveAccessibleName("English");
+		expect(field("title-de")).toHaveAccessibleName("German");
+		expect(field("title-fr")).toHaveAccessibleName("French");
+		cleanup();
+		render(<Controlled initial={{}} label={undefined} name="desc" multiline />);
+		expect(field("desc-en")).toHaveAccessibleName("English");
+		fireEvent.click(labelCode("de"));
+		expect(field("desc-de")).toHaveAccessibleName("German");
+	});
+
+	it("[ISSUE-3486-ITEM-10] puts the language fields in a group named by the label", () => {
+		render(<Controlled initial={{}} variant="standard" />);
+		const group = screen.getByRole("group", { name: "Title" });
+		expect(group).toContainElement(field("title-en"));
+		expect(group).toContainElement(toggle());
+		fireEvent.click(toggle());
+		expect(group).toContainElement(field("title-de"));
+		expect(group).toContainElement(field("title-fr"));
+	});
+
+	it("[ISSUE-3486-ITEM-10] puts a multiline field and its language buttons in a group named by the label", () => {
+		render(<Controlled initial={{}} label="Desc" name="desc" multiline />);
+		const group = screen.getByRole("group", { name: "Desc" });
+		expect(group).toContainElement(field("desc-en"));
+		expect(group).toContainElement(
+			screen.getByRole("group", { name: "Language of Desc" }),
+		);
 	});
 });

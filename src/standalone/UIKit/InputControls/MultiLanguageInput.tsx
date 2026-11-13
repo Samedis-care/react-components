@@ -248,7 +248,12 @@ export type MultiLanguageInputProps = Omit<
 		newValues: Partial<Record<MultiLanguageInputSupportedLanguages, string>>,
 	) => void;
 	/**
-	 * Label for the text field
+	 * Label of the default language's field (single-line) or of the textarea
+	 * (multiline), and the name of the group around all language fields. Each
+	 * field is named with the label and its language, e.g. "Title (German)":
+	 * the labelled field reads the language with its label (visually hidden),
+	 * the other languages' fields, which show only their code, carry the name as
+	 * `aria-label`. Without a label each field is named with its language only.
 	 */
 	label?: string;
 	/**
@@ -313,8 +318,8 @@ const LanguageLabel = styled(ToggleButton, {
 	"&.Mui-focusVisible": focusRing(theme, -2),
 }));
 
-/** The active language's name, read with the multiline label */
-const ActiveLanguageName = styled("span")({
+/** The field's language name, read with its label but not shown */
+const LabelLanguageName = styled("span")({
 	// visually hidden, as MUI's visuallyHidden
 	border: 0,
 	clipPath: "inset(50%)",
@@ -431,6 +436,15 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 		[],
 	);
 
+	// a field's language in the UI language, e.g. "German"
+	const getFieldLanguageName = (lang: MultiLanguageInputSupportedLanguages) =>
+		lang ? t(lang, { defaultValue: lang }) : "";
+
+	// the default language's field and the textarea show the label; the other
+	// languages' fields show only their code, so their name is an aria-label
+	const showsLabel = (lang: MultiLanguageInputSupportedLanguages) =>
+		!!label && (!!textFieldProps.multiline || lang === defaultLanguage);
+
 	const renderLanguage = (
 		lang: MultiLanguageInputSupportedLanguages,
 		focus: boolean,
@@ -442,21 +456,17 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 			autoFocus={focus}
 			fullWidth
 			label={
-				textFieldProps.multiline
-					? label && (
-							<>
-								{label}
-								{lang && (
-									<ActiveLanguageName>
-										{" "}
-										({t(lang, { defaultValue: lang })})
-									</ActiveLanguageName>
-								)}
-							</>
-						)
-					: lang === defaultLanguage
-						? label
-						: undefined
+				showsLabel(lang) ? (
+					<>
+						{label}
+						{lang && (
+							<LabelLanguageName>
+								{" "}
+								({getFieldLanguageName(lang)})
+							</LabelLanguageName>
+						)}
+					</>
+				) : undefined
 			}
 			required={
 				defaultLanguage === lang && activeLanguage === defaultLanguage
@@ -474,6 +484,13 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 						: ((textFieldProps.slotProps?.inputLabel as Record<string, unknown>)
 								?.shrink as boolean | undefined),
 				},
+				htmlInput: showsLabel(lang)
+					? undefined
+					: {
+							"aria-label": label
+								? `${label} (${getFieldLanguageName(lang)})`
+								: getFieldLanguageName(lang) || undefined,
+						},
 				input: {
 					startAdornment: !textFieldProps.multiline ? (
 						<InputAdornment position={"start"}>
@@ -511,7 +528,14 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 	);
 
 	return (
-		<Grid container spacing={2} data-name={name} onBlur={onBlur}>
+		<Grid
+			container
+			spacing={2}
+			data-name={name}
+			onBlur={onBlur}
+			role="group"
+			aria-label={label || undefined}
+		>
 			<Grid size={12}>
 				{renderLanguage(
 					textFieldProps.multiline ? activeLanguage : defaultLanguage,

@@ -48,6 +48,9 @@ const BetweenButtons = function BetweenButtons(props: Props) {
  * - **Multiline** (`multiline`) shows one textarea; the language buttons
  *   below it switch the language it edits (the pressed one is shown).
  *
+ * Every field is named with the label and its language ("Title (German)"),
+ * and the fields are a group named by the label.
+ *
  * The default language is the components-care UI language when it is in
  * `enabledLanguages` and `ignoreI18nLocale` is not set, otherwise
  * `enabledLanguages[0]`. The stories set `ignoreI18nLocale`, so `en` comes
@@ -107,7 +110,7 @@ const meta: Meta<typeof MultiLanguageInput> = {
 		},
 		label: {
 			description:
-				"Label of the default language's field, or of the multiline textarea",
+				"Label of the default language's field, or of the multiline textarea; also the name of the group of fields and, with its language, of every field",
 			control: "text",
 		},
 		multiline: {
@@ -151,6 +154,8 @@ const meta: Meta<typeof MultiLanguageInput> = {
 export default meta;
 
 type Story = StoryObj<typeof MultiLanguageInput>;
+
+const TOGGLE = "Toggle language inputs";
 
 const field = (root: HTMLElement, name: string) =>
 	root.querySelector<HTMLInputElement & HTMLTextAreaElement>(
@@ -233,5 +238,43 @@ export const Issue3486Item9LanguageButtonFocusRing: Story = {
 		const style = getComputedStyle(german);
 		await expect(style.outlineStyle).toBe("solid");
 		await expect(parseFloat(style.outlineWidth)).toBeGreaterThanOrEqual(2);
+	},
+};
+
+export const Issue3486Item10ExpandedFieldsAreNamed: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3486-ITEM-10: the other languages' fields have no label, only a code adornment; axe reports `label` (critical) for each of them (WCAG 1.3.1, 4.1.2). Expected: every field named with the label and its language.",
+			},
+		},
+	},
+	play: async ({ canvas, canvasElement, userEvent }) => {
+		await userEvent.click(await canvas.findByRole("button", { name: TOGGLE }));
+		await waitFor(() =>
+			expect(field(canvasElement, "title-fr")).not.toBeNull(),
+		);
+	},
+};
+
+/**
+ * Every language field is named with the label and its language, inside a
+ * group named by the label (exact names: Chromium keeps the space before the
+ * visually hidden language name, which jsdom drops)
+ */
+export const Issue3486Item10FieldNames: Story = {
+	play: async ({ canvas, userEvent }) => {
+		const group = await canvas.findByRole("group", { name: "Title" });
+		await expect(
+			canvas.getByRole("textbox", { name: "Title (English)" }),
+		).toHaveValue("Infusion pump");
+		await userEvent.click(canvas.getByRole("button", { name: TOGGLE }));
+		const german = await canvas.findByRole("textbox", {
+			name: "Title (German)",
+		});
+		const french = canvas.getByRole("textbox", { name: "Title (French)" });
+		await expect(group).toContainElement(german);
+		await expect(group).toContainElement(french);
 	},
 };
