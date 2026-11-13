@@ -3,7 +3,7 @@ import { styled, Tooltip, useTheme } from "@mui/material";
 import { ArrowDownward, ArrowRightAlt } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
-import { contrastTextFor, MATRIX_TILE_DIM_OPACITY } from "./matrixTileDim";
+import { tileColors } from "./matrixTileDim";
 import { useMatrixCellTileProps } from "./MatrixCellTileContext";
 import { entryFocusRing } from "./matrixTints";
 import MatrixTileCorners from "./MatrixTileCorners";
@@ -26,11 +26,8 @@ export const MatrixTileItemRoot = styled("div", {
 	borderRadius: theme.shape.borderRadius,
 	backgroundColor: cssVar(matrixVars.tileBackground),
 	color: cssVar(matrixVars.tileForeground),
-	// informational entry: same area, faded, instead of stealing space. Not
-	// while the keyboard is on it: the fade would take the focus ring with it.
-	[`&.${matrixClasses.itemDimmed}:not(:focus-visible)`]: {
-		opacity: MATRIX_TILE_DIM_OPACITY,
-	},
+	// a dimmed entry fades its fill only (tileColors): opacity on the entry
+	// would fade its label, its corners and its focus ring with it
 	[`&.${matrixClasses.itemClickable}`]: {
 		cursor: "pointer",
 		"&:focus-visible": entryFocusRing(theme),
@@ -94,28 +91,32 @@ const MatrixTileItem = (props: MatrixTileItemProps) => {
 		event.stopPropagation();
 	}, []);
 	const horizontal = (item.flow ?? "vertical") === "horizontal";
-	const style = useMemo(
-		() =>
-			({
-				[matrixVars.tileBackground]: item.backgroundColor,
-				[matrixVars.tileForeground]:
-					item.textColor ?? contrastTextFor(theme, item.backgroundColor),
-				[matrixVars.tileFontSize]: `${labelFontSize(item.label)}px`,
-				// never above the primary label: the arrow points AT this, it is
-				// not the headline (see MatrixTileItem.secondaryLabel)
-				[matrixVars.tileSecondaryFontSize]: `${Math.min(
-					labelFontSize(item.label),
-					labelFontSize(item.secondaryLabel),
-				)}px`,
-			}) as React.CSSProperties,
-		[
+	const style = useMemo(() => {
+		const colors = tileColors(
 			theme,
 			item.backgroundColor,
 			item.textColor,
-			item.label,
-			item.secondaryLabel,
-		],
-	);
+			item.dimmed,
+		);
+		return {
+			[matrixVars.tileBackground]: colors.fill,
+			[matrixVars.tileForeground]: colors.label,
+			[matrixVars.tileFontSize]: `${labelFontSize(item.label)}px`,
+			// never above the primary label: the arrow points AT this, it is
+			// not the headline (see MatrixTileItem.secondaryLabel)
+			[matrixVars.tileSecondaryFontSize]: `${Math.min(
+				labelFontSize(item.label),
+				labelFontSize(item.secondaryLabel),
+			)}px`,
+		} as React.CSSProperties;
+	}, [
+		theme,
+		item.backgroundColor,
+		item.textColor,
+		item.dimmed,
+		item.label,
+		item.secondaryLabel,
+	]);
 
 	const entry = (
 		<MatrixTileItemRoot

@@ -193,10 +193,21 @@ export interface MatrixTileItem {
 	 * measured over the theme's palette.background.paper. A backgroundColor
 	 * that cannot be resolved (a var()) gets none: the entry then inherits the
 	 * surrounding text color.
+	 * @remarks A dimmed entry uses it only if its fill cannot be faded, see
+	 * dimmed.
 	 */
 	textColor?: string;
 	/**
-	 * Render the entry de-emphasized (it is informational, not actionable)
+	 * Render the entry de-emphasized (it is informational, not actionable):
+	 * its fill is faded to MATRIX_TILE_DIM_OPACITY, in a split and a diagonal
+	 * pair alike. The label, the secondary label and the corners are not
+	 * faded. The label is black or white, whichever has the higher contrast
+	 * with the faded fill as it shows over the theme's
+	 * palette.background.paper (at least 4.5:1); textColor, meant for the
+	 * full fill, is not used.
+	 * @remarks A backgroundColor that cannot be resolved (a var()) is not
+	 * faded, and keeps textColor.
+	 * @default false
 	 */
 	dimmed?: boolean;
 	/**

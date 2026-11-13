@@ -14,7 +14,7 @@ import MatrixGrid from "./MatrixGrid";
 import { MatrixGridProps } from "./index";
 import MatrixCellTile from "./MatrixCellTile";
 import buildDateColumns from "./buildDateColumns";
-import { matrixClasses } from "./matrixClasses";
+import { matrixClasses, matrixVars } from "./matrixClasses";
 import {
 	MatrixCellContext,
 	MatrixColumn,
@@ -809,6 +809,10 @@ export const Issue3480Item15HeaderLabelsHaveContrastInOtherPalettes: Story = {
 	},
 };
 
+// ---- Bug stories: cells and tiles -------------------------------------------
+
+const WHITE: Rgba = { r: 255, g: 255, b: 255, a: 1 };
+
 /** ISSUE-3481-ITEM-11: the focus ring of an entry is drawn inside its fill, in primary.main. */
 export const Issue3481Item11EntryFocusRingStandsOut: Story = {
 	parameters: { a11y: { test: "error" } },
@@ -912,6 +916,65 @@ export const Issue3481Item11EveryRingKeepsItsContrast: Story = {
 		);
 		if (!chip) throw new Error("no add chip in column 4");
 		await checkRing(chip, "chip");
+	},
+};
+
+/** ISSUE-3481-ITEM-13: a dimmed entry's label drops below 4.5:1, twice over in a diagonal pair. */
+const DIMMED_ROWS: MatrixRow<TileCell>[] = [
+	{
+		key: "a",
+		label: "Alice Weber",
+		cells: {
+			t2: { items: [{ ...LATE, dimmed: true }] },
+			t3: { items: [{ ...LATE, dimmed: true }, EARLY], diagonal: true },
+		},
+	},
+];
+
+export const Issue3481Item13DimmedLabelsKeepTheirContrast: Story = {
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<TileRoster onItemClick={args.onItemClick} rows={DIMMED_ROWS} readOnly />
+	),
+	play: async ({ canvasElement }) => {
+		// split: the whole entry is faded, label and fill together, over the
+		// white grid
+		const entry = tileCell(canvasElement, 0, 1).querySelector<HTMLElement>(
+			"[role=button]",
+		);
+		const span = entry?.querySelector("span");
+		if (!entry || !span) throw new Error("no labelled entry in column 1");
+		const opacity = Number(getComputedStyle(entry).opacity);
+		const fill = parseColor(getComputedStyle(entry).backgroundColor);
+		const text = parseColor(getComputedStyle(span).color);
+		const fillSeen = over({ ...fill, a: fill.a * opacity }, WHITE);
+		const textSeen = over({ ...over(text, fill), a: opacity }, WHITE);
+		await expect(contrast(textSeen, fillSeen), "split").toBeGreaterThanOrEqual(
+			4.5,
+		);
+		// diagonal: the half's fill is faded, and its label once more on top
+		const pair = tileCell(canvasElement, 0, 2).querySelector<HTMLElement>(
+			"[role=button]",
+		);
+		const start = pair?.querySelector<HTMLElement>(
+			`.${matrixClasses.diagonalLabelStart}`,
+		);
+		if (!pair || !start) throw new Error("no diagonal pair in column 2");
+		const halfSeen = over(
+			parseColor(
+				getComputedStyle(pair).getPropertyValue(matrixVars.tileBackgroundA),
+			),
+			WHITE,
+		);
+		const label = parseColor(getComputedStyle(start).color);
+		const labelSeen = over(
+			{ ...label, a: label.a * Number(getComputedStyle(start).opacity) },
+			halfSeen,
+		);
+		await expect(
+			contrast(labelSeen, halfSeen),
+			"diagonal",
+		).toBeGreaterThanOrEqual(4.5);
 	},
 };
 

@@ -2,9 +2,9 @@ import { getContrastRatio, Theme } from "@mui/material";
 import colorToRgba from "../../utils/colorToRgba";
 
 /**
- * How strongly a dimmed entry is faded.
- * @remarks One half of a diagonal pair cannot use opacity (that would fade both
- * halves), so it dims its gradient color with dimColor below.
+ * How strongly the fill of a dimmed entry (MatrixTileItem.dimmed) is faded:
+ * its alpha is multiplied by this, in both pair layouts. The label is not
+ * faded; it gets a color that reads on the faded fill (see tileColors).
  */
 export const MATRIX_TILE_DIM_OPACITY = 0.6;
 
@@ -80,4 +80,36 @@ export const contrastTextFor = (
 	return getContrastRatio(shown, WHITE) >= getContrastRatio(shown, BLACK)
 		? WHITE
 		: BLACK;
+};
+
+/**
+ * The colors an entry is drawn in, the same in a split and a diagonal pair.
+ * @param theme The theme (see contrastTextFor)
+ * @param backgroundColor The entry's fill (MatrixTileItem.backgroundColor)
+ * @param textColor The entry's label color (MatrixTileItem.textColor)
+ * @param dimmed Whether the entry is dimmed (MatrixTileItem.dimmed)
+ * @returns fill: backgroundColor, faded with dimColor if dimmed. label: for
+ * a faded fill, black or white by contrast with the faded fill, since
+ * textColor was meant for the full one; otherwise textColor, or black or
+ * white by contrast with backgroundColor, or undefined if the fill cannot be
+ * resolved (the label then inherits the surrounding text color)
+ * @remarks A dimmed fill that cannot be resolved (a var()) is not faded, so
+ * it keeps textColor.
+ */
+export const tileColors = (
+	theme: Theme,
+	backgroundColor: string,
+	textColor: string | undefined,
+	dimmed: boolean | undefined,
+): { fill: string; label: string | undefined } => {
+	if (dimmed) {
+		const fill = dimColor(backgroundColor);
+		// undefined exactly when dimColor could not fade it either
+		const label = contrastTextFor(theme, fill);
+		if (label) return { fill, label };
+	}
+	return {
+		fill: backgroundColor,
+		label: textColor ?? contrastTextFor(theme, backgroundColor),
+	};
 };

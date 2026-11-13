@@ -22,6 +22,7 @@ import {
 	matrixClasses,
 	matrixVars,
 } from "../../src/standalone/Matrix/matrixClasses";
+import { dimColor } from "../../src/standalone/Matrix/matrixTileDim";
 import type { MatrixGridProps } from "../../src/standalone/Matrix/MatrixGridContext";
 import {
 	MatrixCellContext,
@@ -1619,6 +1620,74 @@ describe("MatrixCellTile entries", () => {
 			expect(dark.palette.background.paper).toBe("#121212");
 			expect(getContrastRatio(label, "rgb(65, 61, 26)")).toBeGreaterThanOrEqual(
 				4.5,
+			);
+		});
+
+		it("[ISSUE-3481-ITEM-13] fades only the fill of a dimmed entry and gives its label 4.5:1 on it, the same in a split and a diagonal pair", () => {
+			// white labels as a record brings them, and a light fill without one
+			for (const colors of [
+				{ backgroundColor: "#1565c0", textColor: "#ffffff" },
+				{ backgroundColor: "#2e7d32", textColor: "#ffffff" },
+				{ backgroundColor: "#4527a0", textColor: "#ffffff" },
+				{ backgroundColor: "#fdd835" },
+			]) {
+				const name = colors.backgroundColor;
+				const dimmed = entry({ ...colors, dimmed: true });
+				const split = render(tile({ items: [dimmed, second()] }));
+				const [item] = slotsOf(split.container, "item");
+				const fill = item.style.getPropertyValue(matrixVars.tileBackground);
+				const label = item.style.getPropertyValue(matrixVars.tileForeground);
+				expect(fill, name).toBe(dimColor(name));
+				expect(labelContrastOnPaper(label, fill), name).toBeGreaterThanOrEqual(
+					4.5,
+				);
+				// the entry is not faded on top of its fill
+				expect(["", "1"], name).toContain(getComputedStyle(item).opacity);
+				cleanup();
+				// the same colors as either half of a diagonal pair
+				for (const [index, background, foreground] of [
+					[0, matrixVars.tileBackgroundA, matrixVars.tileForegroundA],
+					[1, matrixVars.tileBackgroundB, matrixVars.tileForegroundB],
+				] as const) {
+					const items = [second(), second()];
+					items[index] = dimmed;
+					const pair = render(tile({ pairLayout: "diagonal", items }));
+					const [box] = slotsOf(pair.container, "diagonal");
+					expect(
+						[
+							box.style.getPropertyValue(background),
+							box.style.getPropertyValue(foreground),
+						],
+						`${name}, half ${index}`,
+					).toEqual([fill, label]);
+					// and the label is not faded on top of it
+					const halfLabel = slotsOf(pair.container, "diagonalLabel")[index];
+					expect(["", "1"], `${name}, half ${index}`).toContain(
+						getComputedStyle(halfLabel).opacity,
+					);
+					cleanup();
+				}
+			}
+		});
+
+		it("[ISSUE-3481-ITEM-13] keeps textColor on a dimmed fill it cannot fade", () => {
+			const { container } = render(
+				tile({
+					items: [
+						entry({
+							dimmed: true,
+							backgroundColor: "var(--brand)",
+							textColor: "#123456",
+						}),
+					],
+				}),
+			);
+			const [item] = slotsOf(container, "item");
+			expect(item.style.getPropertyValue(matrixVars.tileBackground)).toBe(
+				"var(--brand)",
+			);
+			expect(item.style.getPropertyValue(matrixVars.tileForeground)).toBe(
+				"#123456",
 			);
 		});
 	});

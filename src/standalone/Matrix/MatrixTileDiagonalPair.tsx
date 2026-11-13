@@ -2,11 +2,7 @@ import React, { useCallback, useMemo } from "react";
 import { styled, Tooltip, useTheme } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
-import {
-	contrastTextFor,
-	dimColor,
-	MATRIX_TILE_DIM_OPACITY,
-} from "./matrixTileDim";
+import { tileColors } from "./matrixTileDim";
 import { useMatrixCellTileProps } from "./MatrixCellTileContext";
 import { entryFocusRing } from "./matrixTints";
 import MatrixTileCorners from "./MatrixTileCorners";
@@ -49,9 +45,6 @@ export const MatrixTileDiagonalLabel = styled("div", {
 		right: 3,
 		color: cssVar(matrixVars.tileForegroundB),
 	},
-	[`&.${matrixClasses.diagonalLabelDimmed}`]: {
-		opacity: MATRIX_TILE_DIM_OPACITY,
-	},
 });
 
 /** The only corner a diagonal pair draws — the others would land on a label. */
@@ -85,30 +78,25 @@ const MatrixTileDiagonalPair = (props: MatrixTileDiagonalPairProps) => {
 	const handleMouseDown = useCallback((event: React.MouseEvent) => {
 		event.stopPropagation();
 	}, []);
-	const style = useMemo(
-		() =>
-			({
-				[matrixVars.tileBackgroundA]: a.dimmed
-					? dimColor(a.backgroundColor)
-					: a.backgroundColor,
-				[matrixVars.tileBackgroundB]: b.dimmed
-					? dimColor(b.backgroundColor)
-					: b.backgroundColor,
-				[matrixVars.tileForegroundA]:
-					a.textColor ?? contrastTextFor(theme, a.backgroundColor),
-				[matrixVars.tileForegroundB]:
-					b.textColor ?? contrastTextFor(theme, b.backgroundColor),
-			}) as React.CSSProperties,
-		[
-			theme,
-			a.dimmed,
-			a.backgroundColor,
-			a.textColor,
-			b.dimmed,
-			b.backgroundColor,
-			b.textColor,
-		],
-	);
+	// a dimmed half fades its fill, not its label, as a dimmed entry does
+	const style = useMemo(() => {
+		const colorsA = tileColors(theme, a.backgroundColor, a.textColor, a.dimmed);
+		const colorsB = tileColors(theme, b.backgroundColor, b.textColor, b.dimmed);
+		return {
+			[matrixVars.tileBackgroundA]: colorsA.fill,
+			[matrixVars.tileBackgroundB]: colorsB.fill,
+			[matrixVars.tileForegroundA]: colorsA.label,
+			[matrixVars.tileForegroundB]: colorsB.label,
+		} as React.CSSProperties;
+	}, [
+		theme,
+		a.dimmed,
+		a.backgroundColor,
+		a.textColor,
+		b.dimmed,
+		b.backgroundColor,
+		b.textColor,
+	]);
 	const tooltip = [a.tooltip, b.tooltip].filter((e) => !!e).join(" / ");
 
 	const pair = (
