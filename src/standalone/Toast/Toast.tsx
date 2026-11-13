@@ -31,7 +31,9 @@ export interface ToastProps {
 	 */
 	title?: React.ReactNode;
 	/**
-	 * The message
+	 * The message. Shown through the ToastContext, the title and message
+	 * render where the ToastContextProvider renders its toasts, not where
+	 * showToast was called (see useToastContext)
 	 */
 	message: React.ReactNode;
 	/**

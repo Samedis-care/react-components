@@ -7,9 +7,20 @@ import {
 	Dialog,
 	DialogActions,
 	DialogContent,
+	DialogTitle,
 	Stack,
 } from "@mui/material";
+import { createMemoryHistory } from "history";
 import ToastContextProvider, { useToastContext } from "./ToastContextProvider";
+import ToastOutlet from "./ToastOutlet";
+import DialogContextProvider, {
+	useDialogContext,
+} from "./DialogContextProvider";
+import { useCloseThisDialog } from "./PushedDialogCloseContext";
+import { setFrameworkHistory } from "./History";
+
+// DialogContextProvider blocks navigation through the FrameworkHistory while a dialog is open
+setFrameworkHistory(createMemoryHistory());
 
 // The toast renders in a portal, so query from the document body
 const body = within(document.body);
@@ -181,5 +192,82 @@ export const Placed: StoryObj = {
 		await expect(snackbarOf(body.getByRole("status"))).toHaveClass(
 			"MuiSnackbar-anchorOriginBottomRight",
 		);
+	},
+};
+
+const DeviceDialog = () => {
+	const close = useCloseThisDialog();
+	return (
+		<Dialog open onClose={close}>
+			<DialogTitle>Device 1042</DialogTitle>
+			<DialogContent>Infusion pump, ward 3</DialogContent>
+			<DialogActions>
+				<Button onClick={close}>Close</Button>
+			</DialogActions>
+		</Dialog>
+	);
+};
+
+const DetailsButton = () => {
+	const [pushDialog] = useDialogContext();
+	const open = useCallback(() => pushDialog(<DeviceDialog />), [pushDialog]);
+	return (
+		<Button color={"inherit"} size={"small"} onClick={open}>
+			Details
+		</Button>
+	);
+};
+
+const SaveDeviceDemo = () => {
+	const [showToast] = useToastContext();
+	const save = useCallback(
+		() =>
+			showToast({
+				severity: "success",
+				message: (
+					<>
+						Device saved. <DetailsButton />
+					</>
+				),
+				autoHideDuration: null,
+			}),
+		[showToast],
+	);
+	return (
+		<Button variant={"contained"} onClick={save}>
+			Save device
+		</Button>
+	);
+};
+
+/**
+ * With `disableDefaultOutlet`, a `ToastOutlet` among the children renders the
+ * toasts, and their content can use the contexts provided around the outlet.
+ * The Framework renders its outlet inside its DialogContextProvider like this,
+ * so a toast's content can open a dialog.
+ */
+export const AtAnOutlet: StoryObj = {
+	render: () => (
+		<ToastContextProvider disableDefaultOutlet>
+			<DialogContextProvider>
+				<SaveDeviceDemo />
+				<ToastOutlet />
+			</DialogContextProvider>
+		</ToastContextProvider>
+	),
+	parameters: { a11y: { test: "error" } },
+	play: async ({ canvas, userEvent }) => {
+		await userEvent.click(canvas.getByRole("button", { name: "Save device" }));
+		const toast = await body.findByRole("status");
+		await expect(toast).toHaveTextContent("Device saved.");
+		await userEvent.click(
+			within(toast).getByRole("button", { name: "Details" }),
+		);
+		const dialog = await body.findByRole("dialog", { name: "Device 1042" });
+		await userEvent.click(
+			within(dialog).getByRole("button", { name: "Close" }),
+		);
+		await waitFor(() => expect(body.queryByRole("dialog")).toBeNull());
+		await expect(body.getByRole("status")).toHaveTextContent("Device saved.");
 	},
 };

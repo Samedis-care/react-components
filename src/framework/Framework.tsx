@@ -2,6 +2,7 @@ import React, { Suspense } from "react";
 import Loader from "../standalone/Loader";
 import DialogContextProvider from "./DialogContextProvider";
 import ToastContextProvider from "./ToastContextProvider";
+import ToastOutlet from "./ToastOutlet";
 import { FrameworkHistory } from "./History";
 import CCI18nProvider from "./CCI18nProvider";
 import ThemeProvider, {
@@ -72,12 +73,13 @@ export interface IFrameworkThemeProps {
 type ICompleteFrameworkProps = IFrameworkProps & IFrameworkThemeProps;
 
 const loaderComponent = <Loader />;
+const toastOutlet = <ToastOutlet />;
 
 /**
  * Provides:
  * - react-router instance
  * - dialog context
- * - toast context (non-blocking notices)
+ * - toast context (non-blocking notices), whose toasts can use the dialog context
  * - i18n context (for components-care)
  * - react-query cache
  * - theme provider
@@ -117,9 +119,13 @@ const ComponentsCareFramework = (props: ICompleteFrameworkProps) => {
 												history={FrameworkHistory}
 												formatDocumentTitle={props.formatDocumentTitle}
 											>
-												<ToastContextProvider>
+												{/* the ToastContext reaches the pushed dialogs, which render
+												 beside the children, and the toasts render inside the
+												 DialogContextProvider, so their content can push dialogs */}
+												<ToastContextProvider disableDefaultOutlet>
 													<DialogContextProvider>
 														{props.children}
+														{toastOutlet}
 													</DialogContextProvider>
 												</ToastContextProvider>
 											</HistoryRouter>
