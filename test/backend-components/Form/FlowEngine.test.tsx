@@ -29,6 +29,7 @@ import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import { ModelUnknown } from "../../../src/backend-integration";
 import {
 	FieldExtras,
+	inputOf,
 	loaded,
 	makeModel,
 	mountForm,
@@ -717,5 +718,38 @@ describe("FlowEngine: bugs", () => {
 		await goFromCode(flow, "b");
 		expect(document.activeElement).toBe(document.body);
 		expect(screen.getByRole("group", { name: "Note step" })).toBeVisible();
+	});
+	it("[ISSUE-3504-ITEM-11] FlowEngineSaveButton does not render again on every keystroke", async () => {
+		let renders = 0;
+		const onRender = () => {
+			renders++;
+		};
+		// a memoized slot with no props: only a context the button reads can render it again
+		const SaveSlot = React.memo(function SaveSlot() {
+			return (
+				<React.Profiler id={"save"} onRender={onRender}>
+					<FlowEngineSaveButton />
+				</React.Profiler>
+			);
+		});
+		const { sink, container } = setup({
+			a: () => (
+				<>
+					<FormField name={"title"} />
+					<SaveSlot />
+				</>
+			),
+		});
+		await loaded(sink);
+		const input = inputOf(container, "title");
+		fireEvent.change(input, { target: { value: "x" } });
+		await settle();
+		expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
+		renders = 0;
+		fireEvent.change(input, { target: { value: "xy" } });
+		fireEvent.change(input, { target: { value: "xyz" } });
+		await settle();
+		expect(sink.ctx!.values.title).toBe("xyz");
+		expect(renders, "renders of the Save button for two keystrokes").toBe(0);
 	});
 });
