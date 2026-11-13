@@ -1,6 +1,13 @@
 import React from "react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import TreeView from "../../src/standalone/Tree/TreeView";
 import TreeViewCheckboxSelectionRenderer from "../../src/standalone/Tree/TreeViewCheckboxSelectionRenderer";
 import {
@@ -686,6 +693,23 @@ describe("TreeView accessibility bugs", () => {
 		expect(boxes).toHaveLength(2);
 		expect(boxes[0]).toHaveAccessibleName("leaf");
 		expect(boxes[1]).toHaveAccessibleName("locked-leaf");
+	});
+
+	it("[ISSUE-3476-ITEM-13] disables the checkbox of an expandLocked leaf", () => {
+		const onToggleExpanded = vi.fn();
+		render(
+			<TreeView
+				data={TREE}
+				renderer={TreeViewCheckboxSelectionRenderer}
+				onToggleExpanded={onToggleExpanded}
+				onLoadChildren={vi.fn()}
+			/>,
+		);
+		const locked = screen.getAllByRole("checkbox")[1];
+		// precondition: clicking the locked checkbox does nothing
+		fireEvent.click(locked);
+		expect(onToggleExpanded).not.toHaveBeenCalled();
+		expect(locked).toBeDisabled();
 	});
 });
 

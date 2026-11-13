@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, waitFor } from "storybook/test";
 import { Box } from "@mui/material";
-import { FolderOpen, Folder, InsertDriveFile } from "@mui/icons-material";
+import { Folder, FolderOpen, InsertDriveFile } from "@mui/icons-material";
 import TreeView from "./TreeView";
 import type {
 	TreeData,
@@ -544,5 +544,95 @@ export const Issue3476Item7ScrollToRightAfterMount: Story = {
 				box.bottom + 0.5,
 			);
 		});
+	},
+};
+
+const LockedLeafTreeStory = () => {
+	const [selected, setSelected] = useState<Set<string>>(
+		new Set(["defibrillator"]),
+	);
+
+	const handleToggle = useCallback((id: string) => {
+		setSelected((prev) => {
+			const next = new Set(prev);
+			if (next.has(id)) next.delete(id);
+			else next.add(id);
+			return next;
+		});
+	}, []);
+
+	const handleLoadChildren = useCallback(async () => {}, []);
+
+	const leaf = (id: string, label: string, locked?: boolean): TreeData => ({
+		id,
+		label,
+		icon: <InsertDriveFile />,
+		hasChildren: false,
+		expanded: selected.has(id),
+		expandLocked: locked,
+	});
+
+	return (
+		<Box
+			sx={{
+				width: 320,
+				height: 160,
+				border: "1px solid #ccc",
+				overflow: "hidden",
+			}}
+		>
+			<TreeView
+				data={{
+					id: "devices",
+					label: "Devices",
+					icon: <FolderOpen />,
+					hasChildren: true,
+					expanded: true,
+					children: [
+						leaf("pump", "Infusion pump"),
+						leaf("defibrillator", "Defibrillator (locked)", true),
+						leaf("ventilator", "Ventilator"),
+						leaf("monitor", "Monitor (locked)", true),
+					],
+				}}
+				renderer={TreeViewCheckboxSelectionRenderer}
+				onToggleExpanded={handleToggle}
+				onLoadChildren={handleLoadChildren}
+			/>
+		</Box>
+	);
+};
+
+export const Issue3476Item13LockedLeafCheckboxDisabled: Story = {
+	render: () => <LockedLeafTreeStory />,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3476-ITEM-13: the checkbox of a leaf with `expandLocked` is disabled, keeps its checked state and is skipped by Tab.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ canvas, userEvent }) => {
+		const pump = await canvas.findByRole(
+			"checkbox",
+			{ name: "Infusion pump" },
+			{ timeout: 5000 },
+		);
+		const defibrillator = canvas.getByRole("checkbox", {
+			name: "Defibrillator (locked)",
+		});
+		const monitor = canvas.getByRole("checkbox", { name: "Monitor (locked)" });
+		const ventilator = canvas.getByRole("checkbox", { name: "Ventilator" });
+		await expect(defibrillator).toBeDisabled();
+		await expect(defibrillator).toBeChecked();
+		await expect(monitor).toBeDisabled();
+		await expect(monitor).not.toBeChecked();
+		await expect(pump).toBeEnabled();
+		// Tab goes from one unlocked leaf to the next, past the locked one
+		pump.focus();
+		await userEvent.tab();
+		await expect(ventilator).toHaveFocus();
 	},
 };
