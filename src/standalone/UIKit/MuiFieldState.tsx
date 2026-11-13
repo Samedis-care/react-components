@@ -30,7 +30,9 @@ export interface MuiFieldStateProps {
 	 * @remarks A step below error: colours the underline and outline in
 	 *          `palette.warning.main`, and the label and helper text in the same
 	 *          colour, darkened (lightened on a dark background) just enough to
-	 *          reach the 4.5:1 that text needs against `palette.background`. Yields
+	 *          reach the 4.5:1 that text needs against `palette.background`. The
+	 *          underline of a standard or filled field is drawn like an error's:
+	 *          1px at rest and while hovered, 2px only while focused. Yields
 	 *          to `error` where both are set. It is a colour only, so show what the
 	 *          warning is about as text too, e.g. as the helper text, as the
 	 *          library's model renderers do with their warning message.
@@ -217,14 +219,22 @@ export const withMuiFieldState = <T extends MuiFieldStateSourceProps>(
 			"&.MuiFormLabel-root.Mui-error": {
 				color: theme.palette.error.main,
 			},
-			"& > .MuiInput-underline::after": {
-				transform: "scaleX(1)",
-				borderBottomColor: theme.palette.warning.main,
-			},
-			"& > .MuiInput-underline.Mui-error::after": {
-				transform: "scaleX(1)",
-				borderBottomColor: theme.palette.error.main,
-			},
+			// standard and filled inputs are drawn as MUI draws an error: the idle 1px
+			// underline and the 2px focus underline take the colour, the latter still
+			// only while focused, so focus stays visible. With an error MUI's own
+			// error styles apply.
+			"& > .MuiInput-underline:not(.Mui-error), & > .MuiFilledInput-underline:not(.Mui-error)":
+				{
+					"&::before, &::after": {
+						borderBottomColor: theme.palette.warning.main,
+					},
+				},
+			// and hovering keeps the idle underline, as it does on an error. MUI's own
+			// hover rule, which exempts errors only, would draw it in the text colour.
+			"& > .MuiInput-underline:hover:not(.Mui-disabled, .Mui-error)::before, & > .MuiFilledInput-underline:hover:not(.Mui-disabled, .Mui-error)::before":
+				{
+					borderBottom: `1px solid ${theme.palette.warning.main}`,
+				},
 			"& > .MuiFormHelperText-root": {
 				color: warningTextColor(theme),
 			},
@@ -242,14 +252,6 @@ export const withMuiFieldState = <T extends MuiFieldStateSourceProps>(
 			},
 			"& > .MuiOutlinedInput-root.Mui-error .MuiOutlinedInput-notchedOutline": {
 				borderColor: theme.palette.error.main,
-			},
-			"& > .MuiFilledInput-underline::after": {
-				transform: "scaleX(1)",
-				borderBottomColor: theme.palette.warning.main,
-			},
-			"& > .MuiFilledInput-underline.Mui-error::after": {
-				transform: "scaleX(1)",
-				borderBottomColor: theme.palette.error.main,
 			},
 		}),
 	}));

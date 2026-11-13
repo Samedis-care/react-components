@@ -2,7 +2,7 @@ import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, waitFor } from "storybook/test";
-import { Box } from "@mui/material";
+import { Box, createTheme, hexToRgb, MenuItem } from "@mui/material";
 import TextFieldWithHelp from "./TextFieldWithHelp";
 import DateInput from "./InputControls/DateInput";
 import MuiPickerUtils from "../../framework/MuiPickerUtils";
@@ -143,5 +143,127 @@ export const Issue3483Item22DirtyDotAfterEllipsis: Story = {
 			(text.getBoundingClientRect().right - box.left) *
 			(short.offsetWidth / box.width);
 		await expect(dirtyDot(short).left - textEnd).toBeCloseTo(4, 0);
+	},
+};
+
+const palette = createTheme().palette;
+
+const WARNING = hexToRgb(palette.warning.main);
+
+export const Issue3483Item17WarningFieldShowsFocus: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3483-ITEM-17: a field with `warning` draws MUI's 2px focus underline permanently, so focusing it changes nothing; a select in that state shows no focus at all (WCAG 2.4.7).",
+			},
+		},
+	},
+	render: (args) => (
+		<Box sx={{ width: 300, display: "grid", gap: 4 }}>
+			<TextFieldWithHelp {...args} label="Serial" value="x" warning />
+			<TextFieldWithHelp
+				{...args}
+				label="Status"
+				select
+				value="active"
+				warning
+				disableClearable
+			>
+				<MenuItem value="active">Active</MenuItem>
+			</TextFieldWithHelp>
+		</Box>
+	),
+	play: async ({ canvas, userEvent }) => {
+		const targets = [
+			await canvas.findByRole("textbox", { name: "Serial" }),
+			canvas.getByRole("combobox", { name: "Status" }),
+		];
+		for (const target of targets) {
+			const root = target.closest(".MuiInputBase-root")!;
+			const underline = () => {
+				const after = getComputedStyle(root, "::after");
+				return [
+					after.transform,
+					after.borderBottomColor,
+					after.borderBottomWidth,
+				].join(" | ");
+			};
+			const idle = underline();
+			await userEvent.tab();
+			await expect(target).toHaveFocus();
+			// the underline grows in with a transition
+			await waitFor(() =>
+				expect(underline(), "focus changes nothing").not.toBe(idle),
+			);
+		}
+	},
+};
+
+export const Issue3483Item17WarningUnderlineDrawnLikeError: Story = {
+	parameters: {
+		a11y: {
+			// the warning label of the filled field reaches 4.5:1 against the page,
+			// not against the input's grey (3.95:1); every other rule runs
+			config: { rules: [{ id: "color-contrast", enabled: false }] },
+		},
+		docs: {
+			description: {
+				story:
+					"ISSUE-3483-ITEM-17: a standard or filled field with `warning` draws its underline as MUI draws an error's, in the warning colour: 1px at rest, 2px only while focused. With `error` as well it looks like an error.",
+			},
+		},
+	},
+	render: (args) => (
+		<Box sx={{ width: 300, display: "grid", gap: 4 }}>
+			<TextFieldWithHelp {...args} label="Standard" value="x" warning />
+			<TextFieldWithHelp
+				{...args}
+				variant="filled"
+				label="Filled"
+				value="x"
+				warning
+			/>
+			<TextFieldWithHelp {...args} label="Both" value="x" warning error />
+			<TextFieldWithHelp {...args} label="Error" value="x" error />
+		</Box>
+	),
+	play: async ({ canvas, userEvent }) => {
+		const underline = (name: string) => {
+			const root = canvas
+				.getByRole("textbox", { name })
+				.closest(".MuiInputBase-root")!;
+			const line = (pseudo: string) => {
+				const style = getComputedStyle(root, pseudo);
+				return {
+					color: style.borderBottomColor,
+					width: style.borderBottomWidth,
+					transform: style.transform,
+				};
+			};
+			return { idle: line("::before"), focus: line("::after") };
+		};
+		const HIDDEN = "matrix(0, 0, 0, 1, 0, 0)";
+		await canvas.findByRole("textbox", { name: "Standard" });
+		for (const name of ["Standard", "Filled"]) {
+			const { idle, focus } = underline(name);
+			await expect(idle, name).toEqual({
+				color: WARNING,
+				width: "1px",
+				transform: "none",
+			});
+			await expect(focus.transform, name).toBe(HIDDEN);
+		}
+		// error wins: the field looks exactly like one with an error only
+		await expect(underline("Both")).toEqual(underline("Error"));
+
+		await userEvent.click(canvas.getByRole("textbox", { name: "Standard" }));
+		await waitFor(() =>
+			expect(underline("Standard").focus).toEqual({
+				color: WARNING,
+				width: "2px",
+				transform: "matrix(1, 0, 0, 1, 0, 0)",
+			}),
+		);
 	},
 };
