@@ -9,6 +9,7 @@ import React, {
 import { styled, useThemeProps } from "@mui/material";
 import { FormSubmitOptions, PageProps, useFormContextLite } from "../Form";
 import { ModelUnknown } from "../../../backend-integration";
+import { captureError } from "../../../framework/ErrorReporting";
 
 export interface FlowEngineFormProps {
 	buttons: React.ReactNode;
@@ -35,11 +36,14 @@ export type FlowStageSubmitOptions = Omit<FormSubmitOptions, "submitToServer">;
 export interface FlowStageContextType<StageT extends string> {
 	/**
 	 * Go to next stage (or current stage to submit)
-	 * @param nextStage The next stage
+	 * @param nextStage The next stage, a key of FlowEngineProps.children
 	 * @param submitToServer Submit to server?
 	 * @param options The submit's further options, e.g. ignoreWarnings when the
 	 *                warnings were already confirmed by a submit just before
 	 * @throws ValidationError
+	 * @throws Error that names nextStage when FlowEngineProps.children has no component for
+	 *         it. Nothing is submitted then, the stage stays, and the error is reported via
+	 *         the global error reporting config and logged to the console.
 	 * @remarks this calls FormEngine submitForm and if successful sets the stage
 	 */
 	goToStage: (
@@ -52,9 +56,10 @@ export interface FlowStageContextType<StageT extends string> {
 	 * @param nextStage The next stage
 	 * @param submitToServer Submit to server?
 	 * @param options The submit's further options, see goToStage
-	 * @returns false if submitting failed, true otherwise
+	 * @returns false if submitting failed or nextStage has no component, true otherwise
 	 * @remarks if submitting fails the stage is left unchanged. The error is shown by the form's
 	 *          errorComponent and reported via the global error reporting config regardless.
+	 *          A nextStage without a component is reported and logged, see goToStage.
 	 * @see goToStage
 	 * @see FormContextData.safeSubmit
 	 */
@@ -71,6 +76,14 @@ export interface FlowStageContextType<StageT extends string> {
 
 export const FlowStageContext =
 	React.createContext<FlowStageContextType<string> | null>(null);
+/**
+ * The stage API of the nearest FlowEngine, for components below a stage (a stepper,
+ * buttons deeper in the tree)
+ * @typeParam StageT The FlowEngine's union of stage names. It is not checked against the
+ *            FlowEngine, and without it any string compiles; goToStage rejects a name
+ *            that has no stage.
+ * @throws Error "FlowStageContext not set" outside a FlowEngine
+ */
 export const useFlowStageContext = <StageT extends string>() => {
 	const ctx = useContext(FlowStageContext);
 	if (!ctx) throw new Error("FlowStageContext not set");
@@ -82,8 +95,17 @@ export interface FlowEngineProps<
 	StageT extends string,
 	CustomPropsT,
 > {
+	/**
+	 * The stage shown first, a key of children
+	 * @remarks A name without a component in children fails the render with the error
+	 *          goToStage rejects with for it.
+	 */
 	defaultStage: StageT;
 	formProps: PageProps<M, CustomPropsT>;
+	/**
+	 * One component per stage, keyed by stage name
+	 * @remarks Only the object's own keys are stages, and only those with a component.
+	 */
 	children: Record<
 		StageT,
 		React.ComponentType<FlowStageProps<M, StageT, CustomPropsT>>
@@ -156,6 +178,28 @@ const isStartScrolledAway = (el: HTMLElement): boolean => {
 	return false;
 };
 
+/**
+ * The component of a stage
+ * @param children FlowEngineProps.children
+ * @param stage The stage name
+ * @returns The component, or undefined if children has none for the name (also for a name
+ *          every object inherits, such as "constructor")
+ */
+const getStageComponent = <C,>(
+	children: Record<string, C | null | undefined>,
+	stage: string,
+): C | undefined =>
+	Object.prototype.hasOwnProperty.call(children, stage)
+		? (children[stage] ?? undefined)
+		: undefined;
+
+/**
+ * The error for a stage name without a component in FlowEngineProps.children
+ * @param stage The stage name
+ */
+const unknownStageError = (stage: string): Error =>
+	new Error(`FlowEngine: children has no component for stage "${stage}"`);
+
 const FlowEngine = <
 	M extends ModelUnknown,
 	StageT extends string,
@@ -169,6 +213,10 @@ const FlowEngine = <
 	const [stage, setStage] = useState(defaultStage);
 	const { flowEngine, submit } = useFormContextLite<ModelUnknown>();
 	if (!flowEngine) throw new Error("Form not configured for flowEngine");
+	// the stages of the latest render, so goToStage checks a name against them and keeps
+	// its identity when the app passes a new object
+	const childrenRef = useRef(children);
+	childrenRef.current = children;
 
 	const goToStage = useCallback(
 		async (
@@ -176,6 +224,16 @@ const FlowEngine = <
 			submitToServer: boolean,
 			options?: FlowStageSubmitOptions,
 		) => {
+			// checked before the submit, so an unknown name neither stages nor saves anything,
+			// and the render below never gets a stage without a component
+			if (!getStageComponent(childrenRef.current, nextStage)) {
+				const error = unknownStageError(nextStage);
+				captureError(error, { source: "FlowEngine.goToStage" });
+				// safeGoToStage swallows the error, so the developer would not see it otherwise
+				// eslint-disable-next-line no-console
+				console.error("[Components-Care] [FlowEngine]", error);
+				throw error;
+			}
 			await submit({ ...options, submitToServer });
 			setStage(nextStage);
 		},
@@ -227,9 +285,8 @@ const FlowEngine = <
 		if (isStartScrolledAway(root)) root.scrollIntoView({ block: "start" });
 	}, [stage, disableAutoFocus]);
 
-	const StageComp: React.ComponentType<
-		FlowStageProps<M, StageT, CustomPropsT>
-	> = children[stage];
+	const StageComp = getStageComponent(children, stage);
+	if (!StageComp) throw unknownStageError(stage);
 	const stageLabel = stageLabels?.[stage];
 	return (
 		<FlowStageContext.Provider

@@ -40,6 +40,10 @@ import {
 	wait,
 } from "./formFixture";
 import ActionButton from "../../../src/standalone/UIKit/ActionButton";
+import {
+	configureErrorReporting,
+	getErrorReportingConfig,
+} from "../../../src/framework/ErrorReporting";
 
 setupFormTests();
 
@@ -218,6 +222,26 @@ const pageStage = (
 			</FlowEngineFormPage>
 		);
 	};
+
+const errorBoundary = () => {
+	const caught: { message: string | null } = { message: null };
+	class Boundary extends React.Component<
+		{ children: React.ReactNode },
+		{ failed: boolean }
+	> {
+		state = { failed: false };
+		static getDerivedStateFromError() {
+			return { failed: true };
+		}
+		componentDidCatch(e: Error) {
+			caught.message = e.message;
+		}
+		render() {
+			return this.state.failed ? null : this.props.children;
+		}
+	}
+	return { Boundary, caught };
+};
 
 /**
  * Footer buttons of a stage: "Next <stage>", which goes to the given stage
@@ -445,6 +469,142 @@ describe("FlowEngine: bugs", () => {
 		expect(screen.getByRole("button", { name: "Save" })).toBe(save);
 		expect(update).toHaveBeenCalledTimes(1);
 	});
+
+	it("[ISSUE-3504-ITEM-6] goToStage with a stage name that has no component rejects and keeps the form", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const boundary = errorBoundary();
+		const connector = new MockConnector(recordData());
+		const sink: Sink = {};
+		const flow: Flow = { mounts: {} };
+		const stages = makeStages(flow, { a: TITLE, b: NOTE });
+		const Page = (formProps: PageProps<ModelUnknown, unknown>) => {
+			sink.ctx = useFormContext<ModelUnknown>();
+			return (
+				<boundary.Boundary>
+					<FlowEngine<ModelUnknown, St, unknown>
+						defaultStage={"a"}
+						formProps={formProps}
+					>
+						{stages}
+					</FlowEngine>
+				</boundary.Boundary>
+			);
+		};
+		mountForm(makeModel({}, connector), Page as never, { flowEngine: true });
+		await loaded(sink);
+		const error = await go(flow, "zzz" as St, false);
+		expect(boundary.caught.message, "the render error").toBeNull();
+		expect(screen.getByRole("textbox", { name: "Title" })).toBeVisible();
+		expect(String(error)).toContain("zzz");
+	});
+	it("[ISSUE-3504-ITEM-6] goToStage with a stage name that has no component saves and stages nothing", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const { sink, flow, update } = setup({ a: TITLE, b: NOTE });
+		await loaded(sink);
+		await set(sink, "title", "x");
+		const error = await go(flow, "zzz" as St, true);
+		expect(String(error)).toContain("zzz");
+		expect(update, "sent to the server").not.toHaveBeenCalled();
+		expect(sink.ctx!.dirty, "the typed value is still unsaved").toBe(true);
+		expect(flow.props!.stage).toBe("a");
+		expect(screen.getByRole("textbox", { name: "Title" })).toHaveValue("x");
+	});
+	it("[ISSUE-3504-ITEM-6] safeGoToStage with a stage name that has no component resolves false and reports the error", async () => {
+		const log = vi.spyOn(console, "error").mockImplementation(() => {});
+		const before = { ...getErrorReportingConfig() };
+		const report = vi.fn();
+		configureErrorReporting({ report, shouldReport: () => true });
+		try {
+			const { sink, flow, update } = setup({ a: TITLE, b: NOTE });
+			await loaded(sink);
+			let result: boolean | undefined;
+			await act(async () => {
+				result = await flow.props!.safeGoToStage("zzz" as St, true);
+			});
+			await settle();
+			expect(result).toBe(false);
+			expect(update).not.toHaveBeenCalled();
+			expect(flow.props!.stage).toBe("a");
+			expect(screen.getByRole("textbox", { name: "Title" })).toBeVisible();
+			expect(report).toHaveBeenCalledTimes(1);
+			const [reported, context] = report.mock.calls[0] as [
+				Error,
+				{ source: string },
+			];
+			expect(reported.message).toContain('"zzz"');
+			expect(context.source).toBe("FlowEngine.goToStage");
+			expect(log, "logged for the developer").toHaveBeenCalledWith(
+				expect.any(String),
+				reported,
+			);
+		} finally {
+			configureErrorReporting(before);
+		}
+	});
+	it("[ISSUE-3504-ITEM-6] a name every object inherits (constructor) is no stage either", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const { sink, flow, update } = setup({ a: TITLE, b: NOTE });
+		await loaded(sink);
+		const error = await go(flow, "constructor" as St, true);
+		expect(String(error)).toContain('"constructor"');
+		expect(update).not.toHaveBeenCalled();
+		expect(screen.getByRole("textbox", { name: "Title" })).toBeVisible();
+	});
+	it("[ISSUE-3504-ITEM-6] an unknown defaultStage fails the render with the error goToStage rejects with", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const { sink, flow, unmount } = setup({ a: TITLE, b: NOTE });
+		await loaded(sink);
+		const error = await go(flow, "zzz" as St, false);
+		expect(error).toBeInstanceOf(Error);
+		unmount();
+
+		const boundary = errorBoundary();
+		const stages = makeStages({ mounts: {} }, { a: TITLE });
+		const Page = (formProps: PageProps<ModelUnknown, unknown>) => (
+			<boundary.Boundary>
+				<FlowEngine<ModelUnknown, St, unknown>
+					defaultStage={"zzz" as St}
+					formProps={formProps}
+				>
+					{stages}
+				</FlowEngine>
+			</boundary.Boundary>
+		);
+		mountForm(makeModel({}, new MockConnector(recordData())), Page as never, {
+			flowEngine: true,
+		});
+		await waitFor(() => expect(boundary.caught.message).not.toBeNull());
+		expect(boundary.caught.message).toBe((error as Error).message);
+	});
+	it("[ISSUE-3504-ITEM-6] a stage that children gets after mount can be shown", async () => {
+		const sink: Sink = {};
+		const flow: Flow = { mounts: {} };
+		const all = makeStages(flow, { a: TITLE, b: NOTE, c: TITLE });
+		const first = { a: all.a, b: all.b } as typeof all;
+		let addC!: () => void;
+		const Page = (formProps: PageProps<ModelUnknown, unknown>) => {
+			sink.ctx = useFormContext<ModelUnknown>();
+			const [stages, setStages] = useState(first);
+			addC = () => setStages(all);
+			return (
+				<FlowEngine<ModelUnknown, St, unknown>
+					defaultStage={"a"}
+					formProps={formProps}
+				>
+					{stages}
+				</FlowEngine>
+			);
+		};
+		mountForm(makeModel({}, new MockConnector(recordData())), Page as never, {
+			flowEngine: true,
+		});
+		await loaded(sink);
+		act(() => addC());
+		await settle();
+		expect(await go(flow, "c", false)).toBeNull();
+		expect(flow.props!.stage).toBe("c");
+	});
+
 	it("[ISSUE-3504-ITEM-7] after a stage change from a focused button, focus is in the new stage", async () => {
 		const next = (stage: St) => (p: StageProps) => [
 			<ActionButton
