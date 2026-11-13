@@ -24,6 +24,16 @@
 				"invalid": "Entrez un nombre, par exemple {{EXAMPLE}}"
 			}
 		},
+		"date-picker": {
+			"error": {
+				"invalid": "Entrez une date valide",
+				"min-date": "Entrez une date égale ou postérieure au {{DATE}}",
+				"max-date": "Entrez une date égale ou antérieure au {{DATE}}",
+				"past": "Entrez la date du jour ou une date ultérieure",
+				"future": "Entrez la date du jour ou une date antérieure",
+				"unavailable": "Entrez une date qui peut être sélectionnée"
+			}
+		},
 		"notifications": {
 			"title": "Avis"
 		},

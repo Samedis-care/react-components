@@ -7,7 +7,9 @@ type FocusHandler = (event: React.FocusEvent<HTMLDivElement>) => void;
 interface TextFieldPropsWithBlur {
 	onBlur?: FocusHandler;
 	slotProps?: {
-		input?: { slotProps?: { root?: { onBlur?: FocusHandler } } };
+		input?: {
+			slotProps?: { root?: { onBlur?: FocusHandler; onFocus?: FocusHandler } };
+		};
 	};
 }
 
@@ -54,18 +56,25 @@ const leavesPicker = (
  * root, `target` the section or button that lost focus. A blur handler the
  * caller set on the input root (`slotProps.input.slotProps.root.onBlur`) is kept
  * and still sees every blur.
+ *
+ * `onFieldFocus`, if given, is called from the input root's focus, whenever
+ * focus enters the field or moves within it; a focus handler the caller set on
+ * the input root is kept.
  * @param ownerState The owner state the picker resolves the `textField` slot
  * props with, for whether its popup is open
  * @param textFieldProps The props for MUI's `textField` slot
- * @returns The same props, with `onBlur` moved to the input root
+ * @param onFieldFocus Called whenever an element of the field gets focus
+ * @returns The same props, with `onBlur` moved to the input root, and
+ * `onFieldFocus` called from it
  */
 const withFieldBlur = <P extends object>(
 	ownerState: PickerOwnerState,
 	textFieldProps: P,
+	onFieldFocus?: () => void,
 ): P => {
 	const { onBlur, slotProps: slotPropsProp } =
 		textFieldProps as TextFieldPropsWithBlur;
-	if (!onBlur) return textFieldProps;
+	if (!onBlur && !onFieldFocus) return textFieldProps;
 	const slotProps = slotPropsProp ?? {};
 	const input = slotProps.input ?? {};
 	const root = input.slotProps?.root;
@@ -83,6 +92,7 @@ const withFieldBlur = <P extends object>(
 						onBlur: (event: React.FocusEvent<HTMLDivElement>) => {
 							root?.onBlur?.(event);
 							if (
+								onBlur &&
 								leavesPicker(
 									event.currentTarget,
 									event.relatedTarget,
@@ -92,6 +102,12 @@ const withFieldBlur = <P extends object>(
 								onBlur(event);
 							}
 						},
+						...(onFieldFocus && {
+							onFocus: (event: React.FocusEvent<HTMLDivElement>) => {
+								root?.onFocus?.(event);
+								onFieldFocus();
+							},
+						}),
 					},
 				},
 			},

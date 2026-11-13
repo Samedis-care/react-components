@@ -24,6 +24,16 @@
 				"invalid": "Raqam kiriting, masalan {{EXAMPLE}}"
 			}
 		},
+		"date-picker": {
+			"error": {
+				"invalid": "To'g'ri sanani kiriting",
+				"min-date": "{{DATE}} yoki undan keyingi sanani kiriting",
+				"max-date": "{{DATE}} yoki undan oldingi sanani kiriting",
+				"past": "Bugungi yoki undan keyingi sanani kiriting",
+				"future": "Bugungi yoki undan oldingi sanani kiriting",
+				"unavailable": "Tanlash mumkin bo'lgan sanani kiriting"
+			}
+		},
 		"notifications": {
 			"title": "Bildirishnomalar"
 		},

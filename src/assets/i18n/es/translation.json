@@ -24,6 +24,16 @@
 				"invalid": "Introduzca un número, por ejemplo {{EXAMPLE}}"
 			}
 		},
+		"date-picker": {
+			"error": {
+				"invalid": "Introduzca una fecha válida",
+				"min-date": "Introduzca una fecha igual o posterior al {{DATE}}",
+				"max-date": "Introduzca una fecha igual o anterior al {{DATE}}",
+				"past": "Introduzca la fecha de hoy o una posterior",
+				"future": "Introduzca la fecha de hoy o una anterior",
+				"unavailable": "Introduzca una fecha que se pueda seleccionar"
+			}
+		},
 		"signal-portlet": {
 			"last-updated": "Última actualización: {{AGE}}",
 			"refresh": "Actualizar"

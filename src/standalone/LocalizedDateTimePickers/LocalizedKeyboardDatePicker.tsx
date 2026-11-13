@@ -11,10 +11,28 @@ import accessSlotProps from "../../utils/internal/accessSlotProps";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
 import usePickerDraft from "./usePickerDraft";
 import usePickerValidationError from "./usePickerValidationError";
+import usePickerErrorMessage from "./usePickerErrorMessage";
 import withAccessibleError from "./withAccessibleError";
 import withRequiredSections from "./withRequiredSections";
 import withFieldBlur from "./withFieldBlur";
 
+/**
+ * Props of a date picker typed into with the keyboard (MUI's `DatePicker`
+ * with the `L` format of the current language).
+ *
+ * While the picker's own validation rejects the date the field shows
+ * (`minDate`, `maxDate`, `disablePast`, `disableFuture`, `shouldDisableDate`,
+ * an impossible date such as 02/31), the field says why in a message under it,
+ * in the components-care language: "Enter a date on or after 01/01/2020". The
+ * message takes the place of `slotProps.textField.helperText` and is the
+ * field's description. A rejection that comes up while the user is in the
+ * field shows once focus leaves it, so a year typed through 0002 does not
+ * flash it; one that comes up while the user is elsewhere (a date set from
+ * outside, a changed `minDate`) shows at once. It goes as soon as the date is
+ * valid. A caller that sets `error` (also to `false`) decides the error state
+ * and its text itself, and gets no message: to show a text of its own, set
+ * `error` from `onError` and pass that text as `helperText`.
+ */
 export interface LocalizedKeyboardDatePickerProps
 	extends
 		Omit<DatePickerProps, "format">,
@@ -34,8 +52,9 @@ export interface LocalizedKeyboardDatePickerProps
 	 * Forces the error state of the field: red outline and label, and
 	 * `aria-invalid` on the field group and on every section, so a screen reader
 	 * announces it while the user types. When set, also to `false`, it replaces
-	 * the picker's own validation state, which is used while it is undefined.
-	 * Takes precedence over `slotProps.textField.error` when set.
+	 * the picker's own validation state, which is used while it is undefined,
+	 * and with it the picker's own message under the field. Takes precedence
+	 * over `slotProps.textField.error` when set.
 	 */
 	error?: TextFieldProps["error"];
 	/**
@@ -92,6 +111,10 @@ const LocalizedKeyboardDatePicker = (
 		publishIntermediateValues,
 	);
 	const validation = usePickerValidationError(otherProps.onError);
+	const errorMessage = usePickerErrorMessage(validation.shownError, {
+		minDate: otherProps.minDate,
+		maxDate: otherProps.maxDate,
+	});
 
 	const { settle } = draft;
 	const consumerOnOpen = otherProps.onOpen;
@@ -135,6 +158,7 @@ const LocalizedKeyboardDatePicker = (
 								// called once focus leaves the field, see withFieldBlur
 								onBlur: (event: React.FocusEvent<HTMLInputElement>) => {
 									draft.settle();
+									validation.onFieldLeave();
 									textFieldProps?.onBlur?.(event);
 									onBlur?.(event);
 								},
@@ -145,8 +169,13 @@ const LocalizedKeyboardDatePicker = (
 								// field that was actually swapped in for it.
 								...(otherProps.slots?.textField ? { disableClearable } : {}),
 							}),
+							errorMessage,
 						);
-						return withFieldBlur(ownerState, fieldProps);
+						return withFieldBlur(
+							ownerState,
+							fieldProps,
+							validation.onFieldFocus,
+						);
 					},
 				}}
 			/>

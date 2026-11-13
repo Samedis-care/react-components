@@ -48,7 +48,9 @@ export interface DateInputProps extends Omit<
 	 * @remarks The field group's description (`aria-describedby`), so a screen reader
 	 *          reads it when the user reaches the field; its color follows `error` and
 	 *          `warning`. Takes the place of `slotProps.textField.helperText`, which is
-	 *          used while this is undefined. Default: none.
+	 *          used while this is undefined. While `error` is unset and the picker's own
+	 *          validation rejects the date (`minDate`, `maxDate`, …), the picker's message
+	 *          shows in its place (see `LocalizedKeyboardDatePickerProps`). Default: none.
 	 */
 	helperText?: PickersTextFieldProps["helperText"];
 }

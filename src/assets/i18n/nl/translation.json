@@ -24,6 +24,16 @@
 				"invalid": "Voer een getal in, bijvoorbeeld {{EXAMPLE}}"
 			}
 		},
+		"date-picker": {
+			"error": {
+				"invalid": "Voer een geldige datum in",
+				"min-date": "Voer een datum in op of na {{DATE}}",
+				"max-date": "Voer een datum in op of vóór {{DATE}}",
+				"past": "Voer de datum van vandaag of een latere datum in",
+				"future": "Voer de datum van vandaag of een eerdere datum in",
+				"unavailable": "Voer een datum in die geselecteerd kan worden"
+			}
+		},
 		"notifications": {
 			"title": "Meldingen"
 		},

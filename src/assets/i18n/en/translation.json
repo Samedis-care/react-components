@@ -24,6 +24,16 @@
 				"invalid": "Enter a number, such as {{EXAMPLE}}"
 			}
 		},
+		"date-picker": {
+			"error": {
+				"invalid": "Enter a valid date",
+				"min-date": "Enter a date on or after {{DATE}}",
+				"max-date": "Enter a date on or before {{DATE}}",
+				"past": "Enter today's date or a later one",
+				"future": "Enter today's date or an earlier one",
+				"unavailable": "Enter a date that can be selected"
+			}
+		},
 		"signal-portlet": {
 			"last-updated": "Last refresh: {{AGE}}",
 			"refresh": "Refresh"

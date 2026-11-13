@@ -24,6 +24,16 @@
 				"invalid": "Gib eine Zahl ein, z. B. {{EXAMPLE}}"
 			}
 		},
+		"date-picker": {
+			"error": {
+				"invalid": "Gib ein gültiges Datum ein",
+				"min-date": "Gib ein Datum ab dem {{DATE}} ein",
+				"max-date": "Gib ein Datum bis zum {{DATE}} ein",
+				"past": "Gib das heutige oder ein späteres Datum ein",
+				"future": "Gib das heutige oder ein früheres Datum ein",
+				"unavailable": "Gib ein Datum ein, das ausgewählt werden kann"
+			}
+		},
 		"notifications": {
 			"title": "Benachrichtigungen"
 		},
