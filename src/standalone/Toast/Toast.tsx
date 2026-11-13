@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
 	Alert,
 	alertClasses,
@@ -78,8 +78,10 @@ export interface ToastProps {
 	onClose: () => void;
 	/**
 	 * Called when the close transition has finished: the moment to unmount the
-	 * toast or clear its content. Optional: the closed toast leaves the page
-	 * after its close transition with or without it
+	 * toast or clear its content. A toast rendered closed without having been
+	 * in the page (e.g. closed in the update that opened it) has no close
+	 * transition and calls it right after that render, once. Optional: the
+	 * closed toast leaves the page after its close transition with or without it
 	 */
 	onExited?: () => void;
 	/**
@@ -195,11 +197,34 @@ const ToastRaw = (inProps: ToastProps) => {
 		[onClose],
 	);
 
-	// only with a handler: an onExited key, even undefined, replaces the
-	// Snackbar's own exit handler, so the closed toast would stay in the page
+	const onExitedRef = useRef(onExited);
+	onExitedRef.current = onExited;
+	// the toast has been in the page (its close transition calls onExited), or
+	// has called onExited without one
+	const exitHandledRef = useRef(false);
+
+	const handleEnter = useCallback(() => {
+		exitHandledRef.current = true;
+	}, []);
+	const handleExited = useCallback(() => {
+		onExitedRef.current?.();
+	}, []);
+
+	// rendered closed without having been in the page (e.g. closed in the
+	// update that opened it), the Snackbar renders nothing and runs no close
+	// transition: the toast has exited already. Once, also when StrictMode runs
+	// the effect twice
+	useEffect(() => {
+		if (open || exitHandledRef.current) return;
+		exitHandledRef.current = true;
+		onExitedRef.current?.();
+	}, [open]);
+
+	// both handlers are functions: an onExited key, even undefined, replaces
+	// the Snackbar's own exit handler, so the closed toast would stay in the page
 	const slotProps: SnackbarProps["slotProps"] = useMemo(
-		() => (onExited ? { transition: { onExited } } : undefined),
-		[onExited],
+		() => ({ transition: { onEnter: handleEnter, onExited: handleExited } }),
+		[handleEnter, handleExited],
 	);
 
 	return (

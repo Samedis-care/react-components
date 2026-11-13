@@ -17,9 +17,6 @@ import {
 	ThemeProvider,
 } from "@mui/material";
 import { Toast, ToastProps } from "../../src/standalone/Toast";
-import ToastContextProvider, {
-	useToastContext,
-} from "../../src/framework/ToastContextProvider";
 import ToastOutlet from "../../src/framework/ToastOutlet";
 import { useDialogContext } from "../../src/framework/DialogContextProvider";
 import { Framework } from "../../src/framework";
@@ -28,6 +25,10 @@ import {
 	getErrorReportingConfig,
 } from "../../src/framework/ErrorReporting";
 import ccI18n from "../../src/i18n";
+import ToastContextProvider, {
+	ToastContextType,
+	useToastContext,
+} from "../../src/framework/ToastContextProvider";
 
 type Spy = ReturnType<typeof vi.fn>;
 
@@ -85,6 +86,128 @@ afterEach(async () => {
 			await ccI18n.changeLanguage("en");
 		});
 	}
+});
+
+describe("Toast: toasts shown in one update", () => {
+	/**
+	 * Renders a ToastContextProvider
+	 * @returns its showToast and closeToast
+	 */
+	const renderToasts = (strict = false): ToastContextType => {
+		const actions: { current?: ToastContextType } = {};
+		const Capture = () => {
+			actions.current = useToastContext();
+			return null;
+		};
+		const tree = (
+			<ThemeProvider theme={theme}>
+				<ToastContextProvider>
+					<Capture />
+				</ToastContextProvider>
+			</ThemeProvider>
+		);
+		render(strict ? <React.StrictMode>{tree}</React.StrictMode> : tree);
+		if (!actions.current) throw new Error("no ToastContext");
+		return actions.current;
+	};
+
+	/**
+	 * The text of every toast in the page: errors and warnings are alerts, the
+	 * others statuses
+	 */
+	const toastTexts = () =>
+		[...screen.queryAllByRole("alert"), ...screen.queryAllByRole("status")].map(
+			(el) => el.textContent,
+		);
+
+	it.each([
+		["", false],
+		[", also in StrictMode", true],
+	])(
+		"[ISSUE-3470-ITEM-25] two showToast calls in one act show the second toast, and a later toast still shows%s",
+		(_name, strict) => {
+			vi.useFakeTimers();
+			const [showToast] = renderToasts(strict);
+			act(() => {
+				showToast({
+					severity: "warning",
+					message: "Device saved without a serial number.",
+					autoHideDuration: null,
+				});
+				showToast({
+					severity: "success",
+					message: "Device saved.",
+					autoHideDuration: null,
+				});
+			});
+			// the warning is dropped without ever being in the page
+			expect(toastTexts()).toEqual(["Device saved."]);
+
+			act(() => {
+				showToast({ message: "Label printed.", autoHideDuration: null });
+			});
+			advance(EXIT_MS + 300);
+			expect(toastTexts()).toEqual(["Label printed."]);
+		},
+	);
+
+	it("[ISSUE-3470-ITEM-25] a toast closed in the act that showed it does not block later toasts", () => {
+		vi.useFakeTimers();
+		const [showToast, closeToast] = renderToasts();
+		act(() => {
+			showToast({ message: "Saving device…", autoHideDuration: null });
+			closeToast();
+		});
+		expect(toastTexts()).toEqual([]);
+
+		// nothing to wait for
+		act(() => {
+			showToast({ message: "Device saved.", autoHideDuration: null });
+		});
+		expect(toastTexts()).toEqual(["Device saved."]);
+	});
+
+	it.each([
+		["", false],
+		[", also in StrictMode", true],
+	])(
+		"[ISSUE-3470-ITEM-25] a toast rendered closed calls onExited once right away, after it was shown its close transition does%s",
+		(_name, strict) => {
+			vi.useFakeTimers();
+			const onExited = vi.fn();
+			const onClose = vi.fn();
+			const toast = (open: boolean, message: string) => {
+				const el = (
+					<ThemeProvider theme={theme}>
+						<Toast
+							open={open}
+							message={message}
+							autoHideDuration={null}
+							onClose={onClose}
+							onExited={onExited}
+						/>
+					</ThemeProvider>
+				);
+				return strict ? <React.StrictMode>{el}</React.StrictMode> : el;
+			};
+			const { rerender } = render(toast(false, "Device saved."));
+			expect(onExited).toHaveBeenCalledTimes(1);
+			expect(document.querySelectorAll(".MuiSnackbar-root").length).toBe(0);
+
+			// still closed, with other content: nothing new to exit
+			rerender(toast(false, "Label printed."));
+			expect(onExited).toHaveBeenCalledTimes(1);
+
+			// shown, then closed: its close transition calls it
+			rerender(toast(true, "Label printed."));
+			expect(screen.getByRole("status")).toHaveTextContent("Label printed.");
+			rerender(toast(false, "Label printed."));
+			expect(onExited).toHaveBeenCalledTimes(1);
+			advance(EXIT_MS + 300);
+			expect(onExited).toHaveBeenCalledTimes(2);
+			expect(document.querySelectorAll(".MuiSnackbar-root").length).toBe(0);
+		},
+	);
 });
 
 describe("Toast: bugs", () => {
