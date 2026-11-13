@@ -68,6 +68,7 @@ import {
 	CheckboxProps,
 	ComponentsOverrides,
 	ComponentsVariants,
+	Interpolation,
 	Theme as MuiTheme,
 } from "@mui/material";
 import { LoaderClassKey, LoaderProps } from "./standalone/Loader";
@@ -266,6 +267,15 @@ declare module "@mui/material/styles" {
 // start new styles
 
 type Theme = Omit<MuiTheme, "components">;
+
+/**
+ * `styleOverrides` of a component that passes no `ownerState` to its slots:
+ * a function override is called with the theme, and the component's states
+ * are styled through its state classes and state keys
+ */
+type StyleOverridesWithoutOwnerState<ClassKey extends string> = Partial<
+	Record<ClassKey, Interpolation<{ theme: Theme }>>
+>;
 
 declare module "@mui/material/styles" {
 	interface ComponentNameToClassKey {
@@ -492,7 +502,7 @@ declare module "@mui/material/styles" {
 		};
 		CcGroupBox?: {
 			defaultProps?: ComponentsPropsList["CcGroupBox"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcGroupBox"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<GroupBoxClassKey>;
 			variants?: ComponentsVariants["CcGroupBox"];
 		};
 		CcMatrixGrid?: {

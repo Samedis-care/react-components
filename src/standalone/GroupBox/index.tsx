@@ -26,23 +26,46 @@ const GroupBoxRoot = styled("fieldset", { name: "CcGroupBox", slot: "root" })(
 	}),
 );
 
-export interface GroupBoxLegendOwnerState {
-	smallLabel: boolean;
-}
+/**
+ * State class of the legend while `smallLabel` is set
+ */
+const SMALL_LABEL_CLASS = "CcGroupBox-smallLabel";
+
 const GroupBoxLegend = styled("legend", {
 	name: "CcGroupBox",
 	slot: "legend",
-})<{ ownerState: GroupBoxLegendOwnerState }>(
-	({ ownerState: { smallLabel } }) => ({
-		paddingInlineStart: 5,
-		paddingInlineEnd: 5,
-		...(smallLabel && {
-			fontSize: "0.75em",
-		}),
-	}),
-);
+	// A legend with the state class gets the theme's smallLabel overrides
+	// after its legend overrides.
+	overridesResolver: (props: { className?: string }, styles) => [
+		styles.legend,
+		!!props.className?.split(" ").includes(SMALL_LABEL_CLASS) &&
+			styles.smallLabel,
+	],
+})({
+	paddingInlineStart: 5,
+	paddingInlineEnd: 5,
+	// :where() keeps the rule at zero specificity, so a font size from the
+	// theme (legend or smallLabel), from classes.smallLabel or from app CSS
+	// wins. The leading * stops emotion from reading the selector as a
+	// pseudo-class of the legend.
+	[`*:where(&.${SMALL_LABEL_CLASS})`]: {
+		fontSize: "0.75em",
+	},
+});
 
-export type GroupBoxClassKey = "root" | "legend";
+/**
+ * Keys of the theme's `components.CcGroupBox.styleOverrides`, also the keys
+ * of the `classes` prop:
+ * - `root`: the `<fieldset>` frame
+ * - `legend`: the `<legend>` title
+ * - `smallLabel`: the legend while `smallLabel` is set. Its theme overrides
+ *   apply after those of `legend`.
+ *
+ * No slot receives an `ownerState`: a function override is called with the
+ * theme. The small legend has the class `CcGroupBox-smallLabel`, so a
+ * `legend` override can also style it with `"&.CcGroupBox-smallLabel"`.
+ */
+export type GroupBoxClassKey = "root" | "legend" | "smallLabel";
 
 /**
  * The HTML attributes of the GroupBox's fieldset, e.g. `aria-busy` or `aria-describedby`
@@ -61,7 +84,11 @@ export interface GroupBoxProps extends GroupBoxHTMLProps {
 	 */
 	label: React.ReactNode;
 	/**
-	 * The label type of the box
+	 * Renders the legend at 0.75em of the inherited font size. The legend
+	 * then has the class `CcGroupBox-smallLabel` and `classes.smallLabel`, and
+	 * gets the theme's `styleOverrides.smallLabel`; a font size from the theme
+	 * replaces the 0.75em.
+	 * @default false
 	 */
 	smallLabel?: boolean;
 	/**
@@ -73,7 +100,8 @@ export interface GroupBoxProps extends GroupBoxHTMLProps {
 	 */
 	className?: string;
 	/**
-	 * Custom styles
+	 * Additional class names: `root` is added to the `<fieldset>`,
+	 * `smallLabel` to the legend while `smallLabel` is set
 	 */
 	classes?: Partial<Record<GroupBoxClassKey, string>>;
 }
@@ -88,7 +116,12 @@ const GroupBox = (inProps: GroupBoxProps) => {
 			className={combineClassNames([className, classes?.root])}
 		>
 			{label && (
-				<GroupBoxLegend ownerState={{ smallLabel: !!smallLabel }}>
+				<GroupBoxLegend
+					className={combineClassNames([
+						smallLabel && SMALL_LABEL_CLASS,
+						smallLabel && classes?.smallLabel,
+					])}
+				>
 					{label}
 				</GroupBoxLegend>
 			)}
