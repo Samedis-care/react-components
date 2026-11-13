@@ -327,6 +327,11 @@
 						"okay": "xop"
 					}
 				}
+			},
+			"inline-edit": {
+				"error-dialog": {
+					"message": "«{{LABEL}}» maydonidagi o‘zgarish saqlanmadi: {{ERROR}}"
+				}
 			}
 		},
 		"form": {

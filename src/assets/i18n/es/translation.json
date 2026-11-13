@@ -327,6 +327,11 @@
 						"okay": "OK"
 					}
 				}
+			},
+			"inline-edit": {
+				"error-dialog": {
+					"message": "No se guardó el cambio en «{{LABEL}}»: {{ERROR}}"
+				}
 			}
 		},
 		"form": {

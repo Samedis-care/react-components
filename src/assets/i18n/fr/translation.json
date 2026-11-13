@@ -327,6 +327,11 @@
 						"okay": "OK"
 					}
 				}
+			},
+			"inline-edit": {
+				"error-dialog": {
+					"message": "La modification de « {{LABEL}} » n'a pas été enregistrée : {{ERROR}}"
+				}
 			}
 		},
 		"form": {

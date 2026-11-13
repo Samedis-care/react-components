@@ -327,6 +327,11 @@
 						"okay": "OK"
 					}
 				}
+			},
+			"inline-edit": {
+				"error-dialog": {
+					"message": "Изменение поля «{{LABEL}}» не сохранено: {{ERROR}}"
+				}
 			}
 		},
 		"form": {

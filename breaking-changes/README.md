@@ -59,6 +59,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [InfoBox's expanded is controlled, and defaultExpanded sets the initial state](2026-11-13-info-box-expanded-controlled.md) | API, type, behavior |
 | 2026-11-13 | [MultiLanguageInput names every field with its language, inside a group named by the label](2026-11-13-multi-language-input-field-names.md) | behavior |
 | 2026-11-13 | [The MUI checkbox renderer draws a keyboard focus ring](2026-11-13-checkbox-renderer-focus-ring.md) | behavior |
+| 2026-11-13 | [A refused inline edit in BackendDataGrid shows an error dialog](2026-11-13-data-grid-refused-inline-edit-dialog.md) | behavior |
 | 2026-11-12 | [The Loader's status text is a paragraph, not a heading](2026-11-12-loader-status-text-is-no-heading.md) | behavior |
 | 2026-11-12 | [PopupMenu item labels wrap instead of being cut off](2026-11-12-popup-menu-labels-wrap.md) | behavior |
 | 2026-11-12 | [CountryFlags, CountryCodes and CountryOption.value are typed by CountryCode, and CountryFlags is frozen](2026-11-12-country-flags-typed-by-country-code.md) | type, behavior |

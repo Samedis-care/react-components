@@ -327,6 +327,11 @@
 						"okay": "OK"
 					}
 				}
+			},
+			"inline-edit": {
+				"error-dialog": {
+					"message": "La modifica di «{{LABEL}}» non è stata salvata: {{ERROR}}"
+				}
 			}
 		},
 		"form": {
