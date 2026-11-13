@@ -8,7 +8,13 @@ import {
 	beforeEach,
 	type MockInstance,
 } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+} from "@testing-library/react";
 import { Tab } from "@mui/material";
 import { createMemoryHistory, History, InitialEntry } from "history";
 import HistoryRouter from "../../src/standalone/Routes/HistoryRouter";
@@ -16,6 +22,7 @@ import Routes from "../../src/standalone/Routes/Routes";
 import Route from "../../src/standalone/Routes/Route";
 import {
 	RoutedTabPanelWrapper,
+	RoutedTabPanelWrapperProps,
 	RoutedTabs,
 	RoutedTabsProps,
 	useRoutedTabPanel,
@@ -196,5 +203,58 @@ describe("RoutedTabs: bugs", () => {
 		expect(selected()).toEqual(["Main"]);
 		expect(screen.getByText("MAIN PANEL")).toBeInTheDocument();
 		expect(muiErrors()).toEqual([]);
+	});
+
+	it("[ISSUE-3500-ITEM-14] the panel wrapper renders a single tab entry", () => {
+		const Single = () => {
+			const tab = useRoutedTabPanel();
+			// typed as an array today (TS2745 for one child); the cast keeps this compiling after the fix
+			const only = tab(
+				"",
+				<div>ONLY PANEL</div>,
+			) as unknown as RoutedTabPanelWrapperProps["children"];
+			return <RoutedTabPanelWrapper>{only}</RoutedTabPanelWrapper>;
+		};
+		renderAt(mem("/settings"), <Single />);
+		expect(screen.getByText("ONLY PANEL")).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3500-ITEM-14] the panel wrapper skips a false entry of a conditional tab", () => {
+		const Conditional = (props: { admin: boolean }) => {
+			const tab = useRoutedTabPanel();
+			// `cond && tab(…)` is TS2322 today; the cast keeps this compiling after the fix
+			const entries = [
+				props.admin && tab("sync", <div>SYNC PANEL</div>),
+				tab("", <div>MAIN PANEL</div>),
+			] as unknown as RoutedTabPanelWrapperProps["children"];
+			return <RoutedTabPanelWrapper>{entries}</RoutedTabPanelWrapper>;
+		};
+		renderAt(mem("/settings"), <Conditional admin={false} />);
+		expect(screen.getByText("MAIN PANEL")).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3500-ITEM-14] the panel wrapper takes conditional entries as separate JSX children, and tab takes any element", () => {
+		const Sync = (props: { interval: number }) => (
+			<div>SYNC PANEL {props.interval}</div>
+		);
+		const Conditional = (props: { admin: boolean }) => {
+			const tab = useRoutedTabPanel();
+			return (
+				<RoutedTabPanelWrapper>
+					{props.admin &&
+						tab("sync", React.createElement(Sync, { interval: 5 }))}
+					{props.admin ? tab("audit", <div>AUDIT PANEL</div>) : null}
+					{tab("", <div>MAIN PANEL</div>)}
+				</RoutedTabPanelWrapper>
+			);
+		};
+		const h = mem("/settings/sync");
+		const { rerender } = renderAt(h, <Conditional admin />);
+		expect(screen.getByText("SYNC PANEL 5")).toBeInTheDocument();
+		act(() => h.push("/settings/audit"));
+		expect(screen.getByText("AUDIT PANEL")).toBeInTheDocument();
+		rerender(routed(h, <Conditional admin={false} />));
+		expect(screen.getByText("MAIN PANEL")).toBeInTheDocument();
+		expect(screen.queryByText("AUDIT PANEL")).toBeNull();
 	});
 });
