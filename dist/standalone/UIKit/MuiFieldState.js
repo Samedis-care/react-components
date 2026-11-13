@@ -97,6 +97,24 @@ export const withMuiFieldState = (Component) => {
             "&.MuiFormLabel-root::after": dirtyMarkerStyles(theme),
             // checkboxes and switches label the control, not the FormControl around it
             "& > .MuiFormControlLabel-root > .MuiFormControlLabel-label::after": dirtyMarkerStyles(theme),
+            // a text field's label stays on one line and MUI cuts a label too long for
+            // the field with an ellipsis, which would cut the dot off with it. The dot
+            // goes into room kept free at the end of the label instead, so the ellipsis
+            // comes before it; border-box keeps that room inside MUI's max-width. The
+            // label is positioned and as wide as its text (up to that maximum), so a
+            // label that fits shows the dot right after the text.
+            "& > .MuiInputLabel-formControl": {
+                boxSizing: "border-box",
+                paddingInlineEnd: DIRTY_MARKER_WIDTH,
+                "&::after": {
+                    position: "absolute",
+                    insetInlineEnd: 0,
+                    // centred on the line, where vertical-align: middle put it
+                    top: "50%",
+                    marginTop: -3,
+                    marginLeft: 0,
+                },
+            },
             // the notched outline holds its own copy of the label, which is what sizes
             // the gap in the border — widen it or the dot sits on top of the outline.
             // Only the copy which actually holds a label: MUI renders the legend either
@@ -120,13 +138,19 @@ export const withMuiFieldState = (Component) => {
             "&.MuiFormLabel-root.Mui-error": {
                 color: theme.palette.error.main,
             },
-            "& > .MuiInput-underline::after": {
-                transform: "scaleX(1)",
-                borderBottomColor: theme.palette.warning.main,
+            // standard and filled inputs are drawn as MUI draws an error: the idle 1px
+            // underline and the 2px focus underline take the colour, the latter still
+            // only while focused, so focus stays visible. With an error MUI's own
+            // error styles apply.
+            "& > .MuiInput-underline:not(.Mui-error), & > .MuiFilledInput-underline:not(.Mui-error)": {
+                "&::before, &::after": {
+                    borderBottomColor: theme.palette.warning.main,
+                },
             },
-            "& > .MuiInput-underline.Mui-error::after": {
-                transform: "scaleX(1)",
-                borderBottomColor: theme.palette.error.main,
+            // and hovering keeps the idle underline, as it does on an error. MUI's own
+            // hover rule, which exempts errors only, would draw it in the text colour.
+            "& > .MuiInput-underline:hover:not(.Mui-disabled, .Mui-error)::before, & > .MuiFilledInput-underline:hover:not(.Mui-disabled, .Mui-error)::before": {
+                borderBottom: `1px solid ${theme.palette.warning.main}`,
             },
             "& > .MuiFormHelperText-root": {
                 color: warningTextColor(theme),
@@ -145,14 +169,6 @@ export const withMuiFieldState = (Component) => {
             },
             "& > .MuiOutlinedInput-root.Mui-error .MuiOutlinedInput-notchedOutline": {
                 borderColor: theme.palette.error.main,
-            },
-            "& > .MuiFilledInput-underline::after": {
-                transform: "scaleX(1)",
-                borderBottomColor: theme.palette.warning.main,
-            },
-            "& > .MuiFilledInput-underline.Mui-error::after": {
-                transform: "scaleX(1)",
-                borderBottomColor: theme.palette.error.main,
             },
         }),
     }));

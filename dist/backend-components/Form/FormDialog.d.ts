@@ -6,6 +6,13 @@ export interface FormDialogProps {
      */
     dialogTitle?: React.ReactNode;
     /**
+     * Accessible name of the dialog while it shows no title (no `dialogTitle` and none set
+     * through `FormDialogDispatch.setTitle`), e.g. the translated purpose of a picker. A shown
+     * title names the dialog instead. Without either the dialog has no name, like an MUI `Dialog`
+     * without `DialogTitle`: screen readers announce only "dialog".
+     */
+    "aria-label"?: string;
+    /**
      * Dialog width optional parameter
      * @default "lg"
      */
@@ -34,8 +41,6 @@ export interface FormDialogProps {
      * dialog. A dialog rendered without pushDialog closes only through onClose, which has to
      * stop rendering it. Not called when the content closes the dialog (useCloseThisDialog,
      * popDialog, a goBack).
-     * @remarks Runs while the dialog is still open: a navigation from onClose is blocked like
-     *          any navigation while a pushed dialog is open.
      */
     onClose?: () => void;
     /**

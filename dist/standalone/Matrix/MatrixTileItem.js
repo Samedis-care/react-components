@@ -4,7 +4,7 @@ import { styled, Tooltip, useTheme } from "@mui/material";
 import { ArrowDownward, ArrowRightAlt } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
-import { contrastTextFor, MATRIX_TILE_DIM_OPACITY } from "./matrixTileDim";
+import { tileColors } from "./matrixTileDim";
 import { useMatrixCellTileProps } from "./MatrixCellTileContext";
 import { entryFocusRing } from "./matrixTints";
 import MatrixTileCorners from "./MatrixTileCorners";
@@ -25,11 +25,8 @@ export const MatrixTileItemRoot = styled("div", {
     borderRadius: theme.shape.borderRadius,
     backgroundColor: cssVar(matrixVars.tileBackground),
     color: cssVar(matrixVars.tileForeground),
-    // informational entry: same area, faded, instead of stealing space. Not
-    // while the keyboard is on it: the fade would take the focus ring with it.
-    [`&.${matrixClasses.itemDimmed}:not(:focus-visible)`]: {
-        opacity: MATRIX_TILE_DIM_OPACITY,
-    },
+    // a dimmed entry fades its fill only (tileColors): opacity on the entry
+    // would fade its label, its corners and its focus ring with it
     [`&.${matrixClasses.itemClickable}`]: {
         cursor: "pointer",
         "&:focus-visible": entryFocusRing(theme),
@@ -74,7 +71,7 @@ const MatrixTileItem = (props) => {
         onItemClick?.(item);
     }, [onItemClick, item]);
     // An entry one can click has to be one a keyboard can reach too. The name
-    // comes from the label it renders, or from the tooltip via MUI.
+    // comes from the label it renders; the tooltip is its description.
     const activation = useMatrixActivation(onItemClick ? activate : undefined);
     // A clickable entry must not also start a range selection in the grid
     // below it: without this, pressing an entry would both open it and begin
@@ -83,17 +80,21 @@ const MatrixTileItem = (props) => {
         event.stopPropagation();
     }, []);
     const horizontal = (item.flow ?? "vertical") === "horizontal";
-    const style = useMemo(() => ({
-        [matrixVars.tileBackground]: item.backgroundColor,
-        [matrixVars.tileForeground]: item.textColor ?? contrastTextFor(theme, item.backgroundColor),
-        [matrixVars.tileFontSize]: `${labelFontSize(item.label)}px`,
-        // never above the primary label: the arrow points AT this, it is
-        // not the headline (see MatrixTileItem.secondaryLabel)
-        [matrixVars.tileSecondaryFontSize]: `${Math.min(labelFontSize(item.label), labelFontSize(item.secondaryLabel))}px`,
-    }), [
+    const style = useMemo(() => {
+        const colors = tileColors(theme, item.backgroundColor, item.textColor, item.dimmed);
+        return {
+            [matrixVars.tileBackground]: colors.fill,
+            [matrixVars.tileForeground]: colors.label,
+            [matrixVars.tileFontSize]: `${labelFontSize(item.label)}px`,
+            // never above the primary label: the arrow points AT this, it is
+            // not the headline (see MatrixTileItem.secondaryLabel)
+            [matrixVars.tileSecondaryFontSize]: `${Math.min(labelFontSize(item.label), labelFontSize(item.secondaryLabel))}px`,
+        };
+    }, [
         theme,
         item.backgroundColor,
         item.textColor,
+        item.dimmed,
         item.label,
         item.secondaryLabel,
     ]);
@@ -106,6 +107,9 @@ const MatrixTileItem = (props) => {
                     horizontal && matrixClasses.flowHorizontal,
                 ]), children: [_jsx("span", { children: item.label }), item.secondaryLabel != null && (_jsxs(_Fragment, { children: [horizontal ? _jsx(FlowArrowHorizontal, {}) : _jsx(FlowArrowVertical, {}), _jsx("span", { className: "CcMatrixCellTile-secondaryLabel", children: item.secondaryLabel })] }))] }), _jsx(MatrixTileCorners, { item: item, className: classes?.corner })] }));
     // No tooltip, no Tooltip: one per cell entry adds up over a whole grid.
-    return item.tooltip ? (_jsx(Tooltip, { title: item.tooltip, enterDelay: 400, children: entry })) : (entry);
+    // describeChild: the tooltip describes the entry instead of naming it, so
+    // the label stays the name, and a read-only entry (a div without a role)
+    // gets no aria-label, which a role-less element cannot carry.
+    return item.tooltip ? (_jsx(Tooltip, { title: item.tooltip, enterDelay: 400, describeChild: true, children: entry })) : (entry);
 };
 export default React.memo(MatrixTileItem);

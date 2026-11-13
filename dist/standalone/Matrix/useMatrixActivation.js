@@ -10,7 +10,8 @@ import { useCallback, useMemo } from "react";
  * The focus ring comes from each part's own styled slot (:focus-visible).
  * @param onActivate What the click or key press does. Undefined means the
  * element is not interactive and gets no props at all.
- * @param label Accessible name, if the element's own contents are not one
+ * @param label Accessible name, if the element's own contents are not one.
+ * Without it (or with an empty string) the props carry no aria-label at all.
  * @returns The props to spread, or undefined
  */
 const useMatrixActivation = (onActivate, label) => {
@@ -30,7 +31,7 @@ const useMatrixActivation = (onActivate, label) => {
         ? {
             role: "button",
             tabIndex: 0,
-            "aria-label": label,
+            ...(label ? { "aria-label": label } : undefined),
             onClick: handleClick,
             onKeyDown: handleKeyDown,
         }

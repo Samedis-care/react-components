@@ -3,6 +3,7 @@ export * from "./DialogContextProvider";
 export * from "./PushedDialogCloseContext";
 export { default as ToastContextProvider } from "./ToastContextProvider";
 export * from "./ToastContextProvider";
+export { default as ToastOutlet } from "./ToastOutlet";
 export * from "./ThemeProvider";
 export * from "./History";
 export { default as PermissionContextProvider } from "./PermissionContextProvider";

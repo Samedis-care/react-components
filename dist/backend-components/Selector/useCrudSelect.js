@@ -31,7 +31,7 @@ const nextTicket = () => {
 };
 const useCrudSelect = (params, ref) => {
     const { connector, serialize, deserialize, deserializeModel, prepareNewEntry, onChange, initialSelected, validate, field, getIdOfData, } = params;
-    const disabled = !!params.disabled;
+    const disabled = !!params.disabled || !!params.blockWrites;
     // read when a write would start, so a change queued or a handleSelect kept from an
     // earlier render does not write after the control was disabled
     const disabledRef = useRef(disabled);
@@ -113,7 +113,13 @@ const useCrudSelect = (params, ref) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [loading, addToSelectionQueue]);
     // writes the change, whether the control is disabled or not: the initial load uses it
-    const applySelection = useCallback(async (_ids, newSelected) => {
+    const applySelection = useCallback(async (ids, reported) => {
+        // an id reported without its entry (still loading in the field) keeps its entry
+        const kept = selected.filter((entry) => ids.includes(entry.value) &&
+            !reported.some((other) => other.value === entry.value));
+        let newSelected = kept.length === 0
+            ? reported
+            : [...reported, ...kept].sort((a, b) => ids.indexOf(a.value) - ids.indexOf(b.value));
         // find new entries
         const newEntries = newSelected.filter((entry) => !selected.find((selEntry) => selEntry.value === entry.value));
         // remove new entries from array

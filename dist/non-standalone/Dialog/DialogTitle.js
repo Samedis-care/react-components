@@ -50,13 +50,14 @@ const DialogTitleRaw = (inProps) => {
             className,
             classes?.root,
             noTitle && "CcDialogTitle-noTitle",
-        ]), children: [_jsx(TextWrapper, { className: classes?.textWrapper, children: _jsx(Text, { id: id, noWrap: true, className: classes?.text, children: children }) }), onClose && (_jsx(CloseButton, { "aria-label": t("non-standalone.dialog.dialog-title.close"), className: classes?.closeButton, onClick: onClose, size: "large", children: _jsx(Close, {}) }))] }));
+        ]), children: [_jsx(TextWrapper, { className: classes?.textWrapper, children: noTitle ? (children) : (_jsx(Text, { id: id, noWrap: true, className: classes?.text, children: children })) }), onClose && (_jsx(CloseButton, { "aria-label": t("non-standalone.dialog.dialog-title.close"), className: classes?.closeButton, onClick: onClose, size: "large", children: _jsx(Close, {}) }))] }));
 };
 /**
  * Title row for an MUI `Dialog`: a heading with the title and an optional
  * close (X) button next to it. Place it inside the `Dialog`: the heading is
  * MUI's `DialogTitle`, so it names the dialog, and the close button is not
- * part of that name.
+ * part of that name. With `noTitle` there is no heading, only the close
+ * button, and the dialog needs a name from elsewhere.
  * Theme: `CcDialogTitle` (slots `root`, `textWrapper`, `text`, `closeButton`).
  */
 export const DialogTitle = React.memo(DialogTitleRaw);

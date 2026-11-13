@@ -1,7 +1,7 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useMemo } from "react";
 import { styled, useThemeProps } from "@mui/material";
-import CountryFlags from "../CountryFlags";
+import getCountryFlag from "../CountryFlags/getCountryFlag";
 import combineClassNames from "../../utils/combineClassNames";
 import CountryFlagImage from "./CountryFlagImage";
 import CountryFlagNamedImage from "./CountryFlagNamedImage";
@@ -34,7 +34,7 @@ const Root = styled("span", {
 const CountryFlag = React.forwardRef(function CountryFlag(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: "CcCountryFlag" });
     const { code, size, named, className, classes, style, ...rootProps } = props;
-    const src = CountryFlags[code];
+    const src = getCountryFlag(code);
     const rootStyle = useMemo(() => size == null
         ? style
         : {

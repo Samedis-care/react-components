@@ -35,6 +35,23 @@ const NoLocalesMessage = styled("div", {
     textAlign: "center",
     width: "100%",
 });
+// states the number of rows the search leaves, or that none match (a live
+// region must exist before its text changes, so it is always rendered)
+const SearchStatus = styled("div", {
+    name: "CcLocaleSelectorDialogContent",
+    slot: "searchStatus",
+})({
+    // visually hidden, as MUI's visuallyHidden
+    border: 0,
+    clipPath: "inset(50%)",
+    height: 1,
+    margin: -1,
+    overflow: "hidden",
+    padding: 0,
+    position: "absolute",
+    whiteSpace: "nowrap",
+    width: 1,
+});
 /**
  * Whether every namespace loaded so far has its texts for the locale or its
  * language, i.e. the UI can show the locale without falling back to English
@@ -133,6 +150,15 @@ const LocaleSelectorDialogContent = (inProps) => {
         defaultRowHeight: 70,
         key: rowHeightKey,
     });
-    return (_jsxs(Grid, { container: true, className: className, children: [_jsx(Grid, { size: 12, children: _jsx(Box, { sx: { px: 2, pb: 1 }, children: _jsx(TextFieldWithHelp, { value: filter, onChange: handleFilterChange, fullWidth: true, slotProps: { input: SearchInputProps } }) }) }), _jsxs(LocaleList, { size: 12, children: [_jsx(FormLoaderOverlay, { visible: switchingLanguage }), filteredData.length === 0 ? (_jsx(NoLocalesMessage, { children: t("non-standalone.language-switcher.no-locales") })) : (_jsx(List, { overscanCount: 2, rowCount: filteredData.length, rowHeight: rowHeight, rowComponent: LocaleEntryRenderer, rowProps: { filteredData } }))] })] }));
+    const searchLabel = t("standalone.data-grid.header.search");
+    const searchSlotProps = useMemo(() => ({
+        input: SearchInputProps,
+        htmlInput: { "aria-label": searchLabel },
+    }), [searchLabel]);
+    return (_jsxs(Grid, { container: true, className: className, children: [_jsx(Grid, { size: 12, children: _jsxs(Box, { sx: { px: 2, pb: 1 }, children: [_jsx(TextFieldWithHelp, { value: filter, onChange: handleFilterChange, fullWidth: true, placeholder: searchLabel, slotProps: searchSlotProps }), _jsx(SearchStatus, { role: "status", children: filteredData.length === 0
+                                ? t("non-standalone.language-switcher.no-locales")
+                                : t("non-standalone.language-switcher.results", {
+                                    COUNT: filteredData.length,
+                                }) })] }) }), _jsxs(LocaleList, { size: 12, children: [_jsx(FormLoaderOverlay, { visible: switchingLanguage }), filteredData.length === 0 ? (_jsx(NoLocalesMessage, { children: t("non-standalone.language-switcher.no-locales") })) : (_jsx(List, { overscanCount: 2, rowCount: filteredData.length, rowHeight: rowHeight, rowComponent: LocaleEntryRenderer, rowProps: { filteredData } }))] })] }));
 };
 export default React.memo(LocaleSelectorDialogContent);

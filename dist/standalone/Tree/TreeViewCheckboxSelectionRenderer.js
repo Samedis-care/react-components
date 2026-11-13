@@ -26,6 +26,8 @@ const TreeViewCheckboxSelectionRenderer = (props) => {
                                     height: 12,
                                     width: 12,
                                     borderLeft: hasNext ? "1px solid black" : undefined,
-                                } })] })] })), _jsx(Grid, { style: { height: 24 }, onClick: expandLocked ? undefined : handleExpand, children: hasChildren ? (expanded ? (_jsx(ExpandedIcon, {})) : (_jsx(ClosedIcon, {}))) : (_jsx(Checkbox, { style: { padding: 0 }, checked: expanded, slotProps: checkboxSlotProps })) }, "expandable"), icon && (_jsx(Grid, { onClick: onClick, onAuxClick: onAuxClick, children: icon }, "icon")), _jsx(Grid, { onClick: onClick, onAuxClick: onAuxClick, size: "grow", children: _jsx(Typography, { noWrap: true, id: labelId, children: label }) }, "label")] }));
+                                } })] })] })), _jsx(Grid, { style: { height: 24 }, onClick: expandLocked ? undefined : handleExpand, children: hasChildren ? (expanded ? (_jsx(ExpandedIcon, {})) : (_jsx(ClosedIcon, {}))) : (_jsx(Checkbox, { style: { padding: 0 }, checked: expanded, 
+                    // a locked leaf cannot be toggled, so its checkbox says so
+                    disabled: expandLocked, slotProps: checkboxSlotProps })) }, "expandable"), icon && (_jsx(Grid, { onClick: onClick, onAuxClick: onAuxClick, children: icon }, "icon")), _jsx(Grid, { onClick: onClick, onAuxClick: onAuxClick, size: "grow", children: _jsx(Typography, { noWrap: true, id: labelId, children: label }) }, "label")] }));
 };
 export default React.memo(TreeViewCheckboxSelectionRenderer);

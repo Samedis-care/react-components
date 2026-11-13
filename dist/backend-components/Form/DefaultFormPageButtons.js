@@ -54,7 +54,7 @@ const DefaultFormPageButtons = (inProps) => {
         props: inProps,
         name: "CcDefaultFormPageButtons",
     });
-    const { showBackButtonOnly, readOnly, dirty, isSubmitting, safeSubmit, customProps, confirmDialogMessage, autoBack, extraButtons, } = props;
+    const { showBackButtonOnly, readOnly, dirty, isSubmitting, safeSubmit, customProps, confirmDialogMessage, autoBack, extraButtons, textButtonSave, textButtonBack, } = props;
     const goBack = customProps?.goBack;
     const hasCustomCloseHandler = customProps?.hasCustomSubmitHandler;
     const { t } = useCCTranslations();
@@ -89,6 +89,6 @@ const DefaultFormPageButtons = (inProps) => {
             return;
         void handleBack();
     }, [autoBackTrigger, handleBack]);
-    return (_jsxs(FormButtons, { children: [!showBackButtonOnly && (_jsx(FormPageSaveButton, { disabled: !dirty || isSubmitting || readOnly, onClick: displayConfirmDialog ? submitWithConfirmDialog : submitAndAutoBack })), extraButtons, goBack && !(isInDialog && hasCustomCloseHandler) && (_jsx(BackActionButton, { disabled: isSubmitting, onClick: handleBack, children: t("common.buttons.back") }))] }));
+    return (_jsxs(FormButtons, { children: [!showBackButtonOnly && (_jsx(FormPageSaveButton, { disabled: !dirty || isSubmitting || readOnly, onClick: displayConfirmDialog ? submitWithConfirmDialog : submitAndAutoBack, children: textButtonSave })), extraButtons, goBack && !(isInDialog && hasCustomCloseHandler) && (_jsx(BackActionButton, { disabled: isSubmitting, onClick: handleBack, children: textButtonBack ?? t("common.buttons.back") }))] }));
 };
 export default React.memo(DefaultFormPageButtons);

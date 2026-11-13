@@ -28,6 +28,8 @@ export type ToastAction = {
 export declare const initialToastState: ToastState;
 /**
  * One toast at a time: a new toast closes the current one and is shown once
- * that has closed. Only the newest toast waits, older ones are dropped
+ * that has closed. Only the newest toast waits, older ones are dropped. A
+ * current toast closed before it was in the page (two toasts in one update)
+ * has closed at once: the Toast calls onExited right after rendering it closed
  */
 export declare const toastReducer: (state: ToastState, action: ToastAction) => ToastState;

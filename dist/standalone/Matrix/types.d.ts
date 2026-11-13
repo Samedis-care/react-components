@@ -23,6 +23,14 @@ export interface MatrixColumn {
      */
     subLabel?: React.ReactNode;
     /**
+     * The column in words, for assistive technology: the full date in a
+     * calendar ("Thursday, March 5, 2026"), where label and subLabel only show
+     * "5" and "Thu". The add chips of the column's cells say it in their
+     * accessible name (see MatrixGridProps.addLabel). buildDateColumns sets it.
+     * @default label, if that is a string or a number; nothing otherwise
+     */
+    name?: string;
+    /**
      * How the whole column is tinted
      * @default "normal"
      */
@@ -39,9 +47,12 @@ export interface MatrixRow<TCell> {
      */
     cells: Record<string, TCell>;
     /**
-     * Accessible name of the row, used when the row header becomes a single
-     * button in touch mode (see MatrixGridProps.onRowHeaderActions). Without
-     * it, that button is announced by whatever the header renders.
+     * Accessible name of the row (a person's name). The add chips of the row's
+     * cells say it in their accessible name (see MatrixGridProps.addLabel), and
+     * it names the row header when that becomes a single button in touch mode
+     * (see MatrixGridProps.onRowHeaderActions). Without it, the chips do not
+     * say their row, and that button is announced by whatever the header
+     * renders.
      */
     label?: string;
     /**
@@ -163,8 +174,10 @@ export interface MatrixTileItem {
      * Fill color of the entry. Any CSS color. A translucent fill shows over the
      * cell beneath it.
      * @remarks Without textColor the label color is derived from this, which
-     * needs a color that can be resolved in JavaScript: hex, rgb(), hsl() or a
-     * keyword. Pass textColor with a var().
+     * needs a color that can be resolved: any CSS color but a var() or
+     * currentcolor (oklch(), lab(), color-mix() and color() in a space other
+     * than srgb where the browser paints them on a canvas, not in jsdom). Pass
+     * textColor with a var().
      */
     backgroundColor: string;
     /**
@@ -174,10 +187,21 @@ export interface MatrixTileItem {
      * measured over the theme's palette.background.paper. A backgroundColor
      * that cannot be resolved (a var()) gets none: the entry then inherits the
      * surrounding text color.
+     * @remarks A dimmed entry uses it only if its fill cannot be faded, see
+     * dimmed.
      */
     textColor?: string;
     /**
-     * Render the entry de-emphasized (it is informational, not actionable)
+     * Render the entry de-emphasized (it is informational, not actionable):
+     * its fill is faded to MATRIX_TILE_DIM_OPACITY, in a split and a diagonal
+     * pair alike. The label, the secondary label and the corners are not
+     * faded. The label is black or white, whichever has the higher contrast
+     * with the faded fill as it shows over the theme's
+     * palette.background.paper (at least 4.5:1); textColor, meant for the
+     * full fill, is not used.
+     * @remarks A backgroundColor that cannot be resolved (a var()) is not
+     * faded, and keeps textColor.
+     * @default false
      */
     dimmed?: boolean;
     /**
@@ -193,8 +217,10 @@ export interface MatrixTileItem {
      */
     corners?: Partial<Record<MatrixTileCorner, React.ReactNode>>;
     /**
-     * Tooltip shown when hovering the entry. Without it no tooltip is mounted
-     * at all.
+     * Tooltip shown when hovering the entry, or focusing a clickable one.
+     * It is also the entry's accessible description: screen readers read it
+     * after the name, which stays the label. In a diagonal pair both tooltips
+     * are joined with " / ". Without it no tooltip is mounted at all.
      */
     tooltip?: string;
 }

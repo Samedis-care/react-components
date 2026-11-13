@@ -8,5 +8,6 @@ export interface FlowEngineFormPageProps<CustomPropsT> extends PageProps<ModelUn
      */
     children: React.ReactNode;
 }
-declare const _default: React.MemoExoticComponent<(<CustomPropsT>(props: FlowEngineFormPageProps<CustomPropsT>) => React.JSX.Element)>;
+declare const FlowEngineFormPage: <CustomPropsT>(props: FlowEngineFormPageProps<CustomPropsT>) => React.JSX.Element;
+declare const _default: typeof FlowEngineFormPage;
 export default _default;

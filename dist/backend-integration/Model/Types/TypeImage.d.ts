@@ -5,7 +5,10 @@ import FilterType from "../FilterType";
 import { ImageSelectorProps } from "../../../standalone/FileUpload/Image/ImageSelector";
 export type TypeImageParams = Partial<Pick<ImageSelectorProps, "uploadLabel" | "convertImagesTo" | "downscale" | "capture" | "variant" | "postEditCallback" | "disableRotation">> & {
     /**
-     * Fallback image to display
+     * Fallback image to display when no image is stored: its URL or data URI.
+     * Where the image is only shown (a grid cell, a read-only form field), the placeholder's
+     * alt text is "No image present"; without a placeholder that text is shown instead.
+     * Defaults to none.
      */
     placeholder?: string;
 };

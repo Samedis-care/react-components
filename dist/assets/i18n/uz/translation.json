@@ -21,7 +21,21 @@
 				"toggle-languages": "Til maydonlarini almashtirish"
 			},
 			"number-input": {
+				"out-of-range": "{{MIN}} dan {{MAX}} gacha raqam kiriting",
 				"invalid": "Raqam kiriting, masalan {{EXAMPLE}}"
+			},
+			"color-input": {
+				"open-picker": "Rangni tanlang"
+			}
+		},
+		"date-picker": {
+			"error": {
+				"invalid": "To'g'ri sanani kiriting",
+				"min-date": "{{DATE}} yoki undan keyingi sanani kiriting",
+				"max-date": "{{DATE}} yoki undan oldingi sanani kiriting",
+				"past": "Bugungi yoki undan keyingi sanani kiriting",
+				"future": "Bugungi yoki undan oldingi sanani kiriting",
+				"unavailable": "Tanlash mumkin bo'lgan sanani kiriting"
 			}
 		},
 		"notifications": {
@@ -143,6 +157,7 @@
 				"selected": "TANLANGAN"
 			},
 			"multi-select": {
+				"no-entries": "Yozuvlar yo'q",
 				"delete-confirm": {
 					"title": "O'chirishni tasdiqlang",
 					"message": "Haqiqatan ham bu yozuvni olib tashlamoqchimisiz?",
@@ -220,7 +235,8 @@
 				"close": "Yoping",
 				"signature": "Imzo"
 			},
-			"sign-here": "Bu yerda raqamli imzolang"
+			"sign-here": "Bu yerda raqamli imzolang",
+			"required": "Majburiy"
 		},
 		"signal-portlet": {
 			"last-updated": "Oxirgi yangilanish: {{AGE}}",
@@ -233,22 +249,21 @@
 			"label": "Yuklanmoqda…"
 		}
 	},
-	"framework": {
-		"dialogs": {
-			"navblock": "Navigatsiya bloklangan. Iltimos, avval ochiq muloqot oynalarini yoping."
-		}
-	},
 	"non-standalone": {
 		"dialog": {
 			"okay": "OK",
 			"dialog-title": {
 				"close": "Yoping"
+			},
+			"input-dialog": {
+				"invalid": "Toʻgʻri qiymat kiriting"
 			}
 		},
 		"language-switcher": {
 			"load-error": "Tilni yuklab bo'lmadi. Internet aloqangizni tekshiring, sahifani qayta yuklang va yana urinib ko'ring.",
 			"title": "Mamlakatingizni va tilingizni tanlang",
-			"no-locales": "Sizning qidiruv so'rovingizga hech qanday mahalliy til mos kelmaydi"
+			"no-locales": "Sizning qidiruv so'rovingizga hech qanday mahalliy til mos kelmaydi",
+			"results": "Natijalar: {{COUNT}}"
 		}
 	},
 	"backend-integration": {
@@ -279,7 +294,9 @@
 						"not-set": "Imzo qo'yilmagan"
 					},
 					"files": {
-						"no-file": "Hech qanday fayl mavjud emas"
+						"no-file": "Hech qanday fayl mavjud emas",
+						"count_one": "{{count}} ta fayl",
+						"count_other": "{{count}} ta fayl"
 					},
 					"string-array": {
 						"entry": "{{LABEL}} {{NUM}}",
@@ -318,6 +335,11 @@
 					"buttons": {
 						"okay": "xop"
 					}
+				}
+			},
+			"inline-edit": {
+				"error-dialog": {
+					"message": "«{{LABEL}}» maydonidagi o‘zgarish saqlanmadi: {{ERROR}}"
 				}
 			}
 		},
@@ -406,17 +428,6 @@
 			"email": "{{attribute}} maydoni toʻgʻri elektron pochta manzilini talab qiladi",
 			"url": "{{attribute}} maydoni toʻgʻri URL manzilni talab qiladi",
 			"missing": "{{attribute}} maydoni yoʻq"
-		},
-		"timestampToAge": {
-			"just-now": "hozirgina",
-			"less-minute": "Bir daqiqadan kamroq vaqt oldin",
-			"minute": "daqiqa",
-			"minutes": "daqiqa",
-			"hour": "soat",
-			"hours": "soat",
-			"day": "kun",
-			"days": "kunlar",
-			"str": "{{AMOUNT}} {{UNIT}} oldin"
 		}
 	},
 	"common": {

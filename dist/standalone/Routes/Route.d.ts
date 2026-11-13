@@ -1,7 +1,8 @@
 import React from "react";
 export interface RouteProps {
     /**
-     * Path of the route
+     * Path of the route. Nested in another Route it is relative to that
+     * Route's path: "info" under "/devices/*" or "/devices" is "/devices/info".
      */
     path: string;
     /**

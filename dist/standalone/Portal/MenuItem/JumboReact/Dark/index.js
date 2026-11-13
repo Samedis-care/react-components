@@ -49,7 +49,7 @@ const MenuItemJumboReactDark = (inProps) => {
         name: "CcMenuItemJumboReactDark",
     });
     const Icon = props.icon;
-    return (_jsxs(MyListItem, { onClick: props.onClick, onAuxClick: props.onAuxClick, className: combineClassNames([
+    return (_jsxs(MyListItem, { ref: props.focusRef, onClick: props.onClick, onAuxClick: props.onAuxClick, className: combineClassNames([
             props.active && "Mui-active",
             props.expandable && "Cc-expandable",
         ]), children: [_jsx(StyledListItemIcon, { children: Icon && _jsx(Icon, {}) }), _jsx(ListItemText, { primary: props.title, slotProps: { primary: props.typographyProps ?? typographyProps } }), props.expandable && (props.expanded ? _jsx(ExpandLess, {}) : _jsx(ExpandMore, {})), props.active && _jsx(Dot, {})] }));

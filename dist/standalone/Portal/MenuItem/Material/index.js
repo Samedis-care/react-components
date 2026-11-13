@@ -10,6 +10,6 @@ const StyledListItem = styled(ListItemButton, {
 const MenuItemMaterial = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMenuItemMaterial" });
     const Icon = props.icon;
-    return (_jsxs(StyledListItem, { onClick: props.onClick, onAuxClick: props.onAuxClick, selected: props.active, children: [_jsx(ListItemIcon, { children: Icon && _jsx(Icon, {}) }), _jsx(ListItemText, { primary: props.title }), props.expandable && (props.expanded ? _jsx(ExpandLess, {}) : _jsx(ExpandMore, {}))] }));
+    return (_jsxs(StyledListItem, { ref: props.focusRef, onClick: props.onClick, onAuxClick: props.onAuxClick, selected: props.active, children: [_jsx(ListItemIcon, { children: Icon && _jsx(Icon, {}) }), _jsx(ListItemText, { primary: props.title }), props.expandable && (props.expanded ? _jsx(ExpandLess, {}) : _jsx(ExpandMore, {}))] }));
 };
 export default React.memo(MenuItemMaterial);

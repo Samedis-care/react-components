@@ -10,7 +10,15 @@ export interface SignalPortletProps {
      */
     items: SignalPortletItemProps[];
     /**
-     * Updated at (optional)
+     * When the shown data was produced, as a Date or in milliseconds since the
+     * epoch (e.g. `Date.now()`). Shows "Last refresh: <age>" in the footer, with
+     * the date and time in a tooltip. The age advances while the card stays
+     * mounted.
+     *
+     * `null`, `undefined`, an invalid time (`NaN`, `new Date("garbage")`) and 0
+     * (the epoch, also as `new Date(0)`, which is what `new Date(null)` gives)
+     * hide the label. So react-query's `dataUpdatedAt`, 0 until the first
+     * successful fetch, can be passed as it is.
      */
     updatedAt?: number | Date | null | undefined;
     /**

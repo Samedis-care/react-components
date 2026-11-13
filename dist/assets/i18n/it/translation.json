@@ -21,7 +21,21 @@
 				"toggle-languages": "Attiva/disattiva input lingua"
 			},
 			"number-input": {
+				"out-of-range": "Inserisci un numero da {{MIN}} a {{MAX}}",
 				"invalid": "Inserisci un numero, ad esempio {{EXAMPLE}}"
+			},
+			"color-input": {
+				"open-picker": "Scegli il colore"
+			}
+		},
+		"date-picker": {
+			"error": {
+				"invalid": "Inserisci una data valida",
+				"min-date": "Inserisci una data uguale o successiva al {{DATE}}",
+				"max-date": "Inserisci una data uguale o precedente al {{DATE}}",
+				"past": "Inserisci la data di oggi o una successiva",
+				"future": "Inserisci la data di oggi o una precedente",
+				"unavailable": "Inserisci una data selezionabile"
 			}
 		},
 		"signal-portlet": {
@@ -147,6 +161,7 @@
 				"selected": "SELEZIONATO"
 			},
 			"multi-select": {
+				"no-entries": "Nessuna voce",
 				"remove-item": "Rimuovi {{ITEM}}",
 				"delete-confirm": {
 					"title": "Conferma rimozione",
@@ -224,7 +239,8 @@
 				"close": "Chiudi",
 				"signature": "Firma"
 			},
-			"sign-here": "Firma qui digitalmente"
+			"sign-here": "Firma qui digitalmente",
+			"required": "Obbligatorio"
 		},
 		"toast": {
 			"close": "Chiudi"
@@ -233,22 +249,21 @@
 			"label": "Caricamento…"
 		}
 	},
-	"framework": {
-		"dialogs": {
-			"navblock": "La navigazione è bloccata. Chiudi prima le finestre di dialogo aperte."
-		}
-	},
 	"non-standalone": {
 		"dialog": {
 			"okay": "OK",
 			"dialog-title": {
 				"close": "Chiudi"
+			},
+			"input-dialog": {
+				"invalid": "Inserisci un valore valido"
 			}
 		},
 		"language-switcher": {
 			"load-error": "Non è stato possibile caricare la lingua. Controlla la tua connessione a Internet, ricarica la pagina e riprova.",
 			"title": "Seleziona il tuo paese e la tua lingua",
-			"no-locales": "Nessuna impostazione locale corrisponde alla tua ricerca"
+			"no-locales": "Nessuna impostazione locale corrisponde alla tua ricerca",
+			"results": "Risultati: {{COUNT}}"
 		}
 	},
 	"backend-integration": {
@@ -279,7 +294,10 @@
 						"not-set": "Non firmato"
 					},
 					"files": {
-						"no-file": "Nessun file presente"
+						"no-file": "Nessun file presente",
+						"count_one": "{{count}} file",
+						"count_many": "{{count}} file",
+						"count_other": "{{count}} file"
 					},
 					"string-array": {
 						"entry": "{{LABEL}} {{NUM}}",
@@ -318,6 +336,11 @@
 					"buttons": {
 						"okay": "OK"
 					}
+				}
+			},
+			"inline-edit": {
+				"error-dialog": {
+					"message": "La modifica di «{{LABEL}}» non è stata salvata: {{ERROR}}"
 				}
 			}
 		},
@@ -406,17 +429,6 @@
 			"missing": "Il campo {{attribute}} è mancante",
 			"email": "Il campo {{attribute}} richiede un'email valida",
 			"url": "Il campo {{attribute}} richiede un URL valido"
-		},
-		"timestampToAge": {
-			"just-now": "proprio ora",
-			"less-minute": "Meno di un minuto fa",
-			"minute": "minuto",
-			"minutes": "minuti",
-			"hour": "ora",
-			"hours": "ore",
-			"day": "giorno",
-			"days": "giorni",
-			"str": "{{AMOUNT}} {{UNIT}} fa"
 		}
 	},
 	"common": {

@@ -139,11 +139,9 @@ const Content = (props) => {
         t,
     ]);
     const styleTopRightGrid = useMemo(() => ({
-        overflow: "hidden",
-        overflowX: (state.rowsFiltered ?? state.rowsTotal) === 0 ? "auto" : "hidden",
         overscrollBehavior: "contain",
         display: columns.length === 0 ? "none" : undefined,
-    }), [columns.length, state.rowsFiltered, state.rowsTotal]);
+    }), [columns.length]);
     const styleBottomLeftGrid = useMemo(() => ({
         display: (state.rowsFiltered ?? state.rowsTotal) === 0 ? "none" : undefined,
     }), [state.rowsFiltered, state.rowsTotal]);

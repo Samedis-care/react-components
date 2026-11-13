@@ -2,7 +2,16 @@ import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useContext, useLayoutEffect, useMemo, useRef, useState, } from "react";
 import { styled, useThemeProps } from "@mui/material";
 import { useFormContextLite } from "../Form";
+import { captureError } from "../../../framework/ErrorReporting";
 export const FlowStageContext = React.createContext(null);
+/**
+ * The stage API of the nearest FlowEngine, for components below a stage (a stepper,
+ * buttons deeper in the tree)
+ * @typeParam StageT The FlowEngine's union of stage names. It is not checked against the
+ *            FlowEngine, and without it any string compiles; goToStage rejects a name
+ *            that has no stage.
+ * @throws Error "FlowStageContext not set" outside a FlowEngine
+ */
 export const useFlowStageContext = () => {
     const ctx = useContext(FlowStageContext);
     if (!ctx)
@@ -33,6 +42,21 @@ const isStartScrolledAway = (el) => {
     }
     return false;
 };
+/**
+ * The component of a stage
+ * @param children FlowEngineProps.children
+ * @param stage The stage name
+ * @returns The component, or undefined if children has none for the name (also for a name
+ *          every object inherits, such as "constructor")
+ */
+const getStageComponent = (children, stage) => Object.prototype.hasOwnProperty.call(children, stage)
+    ? (children[stage] ?? undefined)
+    : undefined;
+/**
+ * The error for a stage name without a component in FlowEngineProps.children
+ * @param stage The stage name
+ */
+const unknownStageError = (stage) => new Error(`FlowEngine: children has no component for stage "${stage}"`);
 const FlowEngine = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcFlowEngine" });
     const { defaultStage, formProps, children, stageLabels, disableAutoFocus } = props;
@@ -40,7 +64,21 @@ const FlowEngine = (inProps) => {
     const { flowEngine, submit } = useFormContextLite();
     if (!flowEngine)
         throw new Error("Form not configured for flowEngine");
+    // the stages of the latest render, so goToStage checks a name against them and keeps
+    // its identity when the app passes a new object
+    const childrenRef = useRef(children);
+    childrenRef.current = children;
     const goToStage = useCallback(async (nextStage, submitToServer, options) => {
+        // checked before the submit, so an unknown name neither stages nor saves anything,
+        // and the render below never gets a stage without a component
+        if (!getStageComponent(childrenRef.current, nextStage)) {
+            const error = unknownStageError(nextStage);
+            captureError(error, { source: "FlowEngine.goToStage" });
+            // safeGoToStage swallows the error, so the developer would not see it otherwise
+            // eslint-disable-next-line no-console
+            console.error("[Components-Care] [FlowEngine]", error);
+            throw error;
+        }
         await submit({ ...options, submitToServer });
         setStage(nextStage);
     }, [submit]);
@@ -81,7 +119,9 @@ const FlowEngine = (inProps) => {
         if (isStartScrolledAway(root))
             root.scrollIntoView({ block: "start" });
     }, [stage, disableAutoFocus]);
-    const StageComp = children[stage];
+    const StageComp = getStageComponent(children, stage);
+    if (!StageComp)
+        throw unknownStageError(stage);
     const stageLabel = stageLabels?.[stage];
     return (_jsx(FlowStageContext.Provider, { value: context, children: _jsx(FlowEngineRoot, { ref: rootRef, tabIndex: -1, role: stageLabel ? "group" : undefined, "aria-label": stageLabel, children: _jsx(StageComp, { formProps: formProps, goToStage: goToStage, safeGoToStage: safeGoToStage, stage: stage }) }) }));
 };

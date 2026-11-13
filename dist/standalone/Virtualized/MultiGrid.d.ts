@@ -15,6 +15,15 @@ export interface MultiGridProps {
     fixedColumnCount: number;
     fixedRowCount: number;
     styleTopLeftGrid: CSSProperties;
+    /**
+     * Extra inline style for the top-right pane: the pinned rows right of the
+     * pinned columns, i.e. the header. MultiGrid sets its position, size and
+     * overflow, which win over this style. While there are data rows the user
+     * cannot scroll the header: it follows the body's horizontal position, and
+     * when the browser scrolls it to reveal an element focused in it, the body
+     * follows the header. While there are none it scrolls sideways itself and is
+     * the tab stop.
+     */
     styleTopRightGrid: CSSProperties;
     styleBottomLeftGrid: CSSProperties;
     styleBottomRightGrid: CSSProperties;

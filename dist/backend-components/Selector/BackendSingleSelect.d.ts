@@ -3,7 +3,7 @@ import { BaseSelectorData, BaseSelectorProps, SelectorLruOptions } from "../../s
 import { ModelRecord, ModelUnknown } from "../../backend-integration/Model/Model";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 export type BackendSingleSelectLruOptions<DataT extends BaseSelectorData> = Omit<SelectorLruOptions<DataT>, "loadData">;
-export interface BackendSingleSelectProps<M extends ModelUnknown> extends Omit<BaseSelectorProps<BaseSelectorData, false>, "onLoad" | "selected" | "onSelect" | "lru"> {
+export interface BackendSingleSelectProps<M extends ModelUnknown> extends Omit<BaseSelectorProps<BaseSelectorData, false>, "onLoad" | "selected" | "onSelect" | "lru" | "displaySwitch" | "switchLabel" | "defaultSwitchValue"> {
     /**
      * The model to use
      */
@@ -45,6 +45,26 @@ export interface BackendSingleSelectProps<M extends ModelUnknown> extends Omit<B
      * Sort settings
      */
     sort?: DataGridSortSetting[];
+    /**
+     * Name of the filter a switch above the field sets, e.g. `"include_inactive"` for a
+     * "Show inactive" switch. With it the field shows the switch, and every search sends
+     * `additionalFilters: { [switchFilterName]: true }` to `model.index` while the switch
+     * is on (`false` while it is off), so toggling it reloads the options. A new name
+     * applies from the next search.
+     * @default undefined (no switch, searches send no additionalFilters)
+     */
+    switchFilterName?: string;
+    /**
+     * Label of the switch, which is also its accessible name: pass one with
+     * `switchFilterName`. Ignored without `switchFilterName`.
+     */
+    switchLabel?: React.ReactNode;
+    /**
+     * Whether the switch is on when the field mounts with `switchFilterName`; later
+     * changes are ignored, from then on the user sets it.
+     * @default false
+     */
+    defaultSwitchValue?: boolean;
     /**
      * Initial data (model format) used for selected cache
      */

@@ -27,9 +27,12 @@ const OpenInNewIcon = styled(OpenInNew, {
 export const IsInFormDialogContext = React.createContext(false);
 export const FormDialogDispatchContext = React.createContext(undefined);
 export const FormDialogDefaultRenderer = (props) => {
-    const { maxWidth, onClose, fullWidth, className, dialogTitle, openInNewLink, useCustomClasses, children, } = props;
+    const { maxWidth, onClose, fullWidth, className, dialogTitle, openInNewLink, useCustomClasses, children, "aria-label": ariaLabel, } = props;
     const ContentComp = useCustomClasses ? TallDialogContent : DialogContent;
-    return (_jsxs(Dialog, { maxWidth: maxWidth ?? "lg", open: true, onClose: onClose, fullWidth: fullWidth ?? true, className: combineClassNames(["CcFormDialog", className]), children: [_jsxs(DialogTitle, { onClose: onClose, noTitle: !dialogTitle, children: [dialogTitle, openInNewLink && _jsx(OpenInNewIcon, { onClick: openInNewLink })] }), _jsx(ContentComp, { children: _jsx(Suspense, { fallback: _jsx(Loader, {}), children: children }) })] }));
+    // the paper is the element with role="dialog"; a shown title names it through MUI's
+    // aria-labelledby, which wins over aria-label
+    const slotProps = useMemo(() => ({ paper: { "aria-label": ariaLabel } }), [ariaLabel]);
+    return (_jsxs(Dialog, { maxWidth: maxWidth ?? "lg", open: true, onClose: onClose, fullWidth: fullWidth ?? true, className: combineClassNames(["CcFormDialog", className]), slotProps: slotProps, children: [_jsxs(DialogTitle, { onClose: onClose, noTitle: !dialogTitle, children: [dialogTitle, openInNewLink && _jsx(OpenInNewIcon, { onClick: openInNewLink })] }), _jsx(ContentComp, { children: _jsx(Suspense, { fallback: _jsx(Loader, {}), children: children }) })] }));
 };
 const FormDialog = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcFormDialog" });

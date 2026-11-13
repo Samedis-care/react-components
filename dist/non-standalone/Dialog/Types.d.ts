@@ -12,11 +12,11 @@ export interface IDialogButtonConfig {
      * set, the dialog closes and calls its `onClose` afterwards (FormDialog closes before the
      * handler runs, and calls `onClose` afterwards).
      * @param close Closes the dialog this button belongs to, at once, and only that one, also
-     *              while dialogs pushed after it are open; e.g. before navigating, which is
-     *              blocked while a dialog is open. It does not call the dialog's `onClose`:
-     *              the dialog calls it once the handler has ended (returned, or its promise
-     *              settled, also rejected), so a `show…Dialog` helper's promise settles only
-     *              then. Called after the handler has ended, it calls `onClose` right away.
+     *              while dialogs pushed after it are open, e.g. before work the dialog should
+     *              not wait for. It does not call the dialog's `onClose`: the dialog calls it
+     *              once the handler has ended (returned, or its promise settled, also
+     *              rejected), so a `show…Dialog` helper's promise settles only then. Called
+     *              after the handler has ended, it calls `onClose` right away.
      *              Calling it is optional (without `dontClose` the dialog closes after the
      *              handler anyway), and calling it again does nothing. In a dialog rendered
      *              without pushDialog it closes nothing itself: the dialog closes when its
@@ -35,7 +35,7 @@ export interface IDialogButtonConfig {
      */
     autoFocus?: boolean;
     /**
-     * The color of the button
+     * The color of the button, as MUI Button's `color`. Default `"primary"`.
      */
     color?: "primary" | "secondary";
     /**
@@ -130,12 +130,20 @@ export interface IDialogConfigInput extends Omit<IDialogConfigConfirm, "handlerB
      */
     textFieldPlaceholder?: string;
     /**
-     * The validator for the input field.
-     * Called when user presses "yes"
+     * The validator for the input field. Runs on every change and when Yes is clicked.
+     * While it returns false, the field is marked invalid and shows `textFieldErrorText`,
+     * and Yes moves focus to the field instead of closing the dialog.
      * @param value The current input
      * @returns Value valid?
      */
     textFieldValidator: (value: string) => boolean;
+    /**
+     * The error text shown below the field, as its description, while
+     * `textFieldValidator` rejects the value. Say what the value has to be, e.g.
+     * "Enter the e-mail address of your account". Default (also for an empty string): the
+     * translation of `non-standalone.dialog.input-dialog.invalid`, "Enter a valid value".
+     */
+    textFieldErrorText?: string;
 }
 /**
  * Awaitable input dialog properties

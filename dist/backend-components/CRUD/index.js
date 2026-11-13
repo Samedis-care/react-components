@@ -119,7 +119,16 @@ const CRUD = (props, ref) => {
         }
         else if (location.pathname.startsWith(routeUrl + "/new") ||
             location.pathname.startsWith(routeUrl + "/new/")) {
-            navigate(`${routeUrl}/${id}`, { replace: true });
+            // the saved record opens where the create form was, e.g. on the same
+            // tab: <url>/new/permissions becomes <url>/<id>/permissions
+            const subPath = location.pathname
+                .substring(routeUrl.length)
+                .split("/")
+                .filter((segment) => segment)
+                .slice(1);
+            navigate([`${routeUrl}/${id}`, ...subPath].join("/"), {
+                replace: true,
+            });
         }
         refreshGrid();
         if (props.formProps.onSubmit) {

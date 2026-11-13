@@ -11,7 +11,7 @@ import isObjectEmpty from "../../utils/isObjectEmpty";
 import measureText from "../../utils/measureText";
 import shallowCompareArray from "../../utils/shallowCompareArray";
 import { dataGridApplyRowUpdate, dataGridGetQuery } from "./CallbackUtil";
-import { HEADER_PADDING } from "./Content/ColumnHeader";
+import { applyColumnWidthLimits, HEADER_PADDING } from "./Content/ColumnHeader";
 import CustomFilterDialog from "./CustomFilterDialog";
 import SelectAllProvider from "./SelectAllProvider";
 import StatePersistence, { DataGridPersistentStateContext, } from "./StatePersistence";
@@ -487,10 +487,21 @@ const DataGrid = (inProps, ref) => {
         return ret;
     });
     const [columnsState] = columnsStatePack;
-    const columnWidthStatePack = useState(() => ({
-        ...getDefaultColumnWidths(columns, theme),
-        ...persisted.columnWidth,
-    }));
+    const columnWidthStatePack = useState(() => {
+        const widths = {
+            ...getDefaultColumnWidths(columns, theme),
+            ...persisted.columnWidth,
+        };
+        // a stored width may be outside what the column allows now (stored on a
+        // narrow screen, edited, or from before its limits changed): clamp it
+        // like a resize, so the header has room for its sort and filter buttons
+        for (const column of columns) {
+            const stored = persisted.columnWidth[column.field];
+            if (typeof stored === "number")
+                widths[column.field] = applyColumnWidthLimits(column, stored);
+        }
+        return widths;
+    });
     // update selection (if controlled)
     useEffect(() => {
         if (!selection)

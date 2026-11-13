@@ -55,8 +55,8 @@ class LazyConnector extends Connector {
         return returnData;
     }
     delete(id, model) {
-        this.queue = this.queue.filter((entry) => !entry.id || entry.id !== id);
         id = this.mapId(id);
+        this.queue = this.queue.filter((entry) => !entry.id || entry.id !== id);
         if (id.startsWith(this.FAKE_ID_PREFIX)) {
             this.onAfterOperation();
             return;
@@ -86,6 +86,8 @@ class LazyConnector extends Connector {
             ...entry,
             id: this.unmapId(entry.id),
         }));
+        // ...which the queue compares in their mapped form, see QueuedFunction.id
+        const queueIdOf = (record) => this.mapId(record.id);
         // enhance result with local data
         this.queue.forEach((entry) => {
             if (entry.type === "create") {
@@ -96,17 +98,16 @@ class LazyConnector extends Connector {
             }
             else if (entry.type === "update") {
                 result[0] = result[0]
-                    .filter((backendRecord) => backendRecord.id !== entry.id)
+                    .filter((backendRecord) => queueIdOf(backendRecord) !== entry.id)
                     .concat(entry.result[0]);
             }
             else if (entry.type === "delete") {
-                const { id: entryId } = entry;
-                if (!entryId)
-                    return;
                 // deleteMultiple queues every id it was given as one entry
-                const deletedIds = entryId.split(",");
-                const hidden = result[0].filter((backendRecord) => deletedIds.includes(backendRecord.id));
-                result[0] = result[0].filter((backendRecord) => !deletedIds.includes(backendRecord.id));
+                const deletedIds = entry.deleteIds;
+                if (!deletedIds)
+                    return;
+                const hidden = result[0].filter((backendRecord) => deletedIds.includes(queueIdOf(backendRecord)));
+                result[0] = result[0].filter((backendRecord) => !deletedIds.includes(queueIdOf(backendRecord)));
                 // the delete has not been sent yet, so the backend still hands these out
                 // on every index call. Keeping them is what lets a control which unmounted
                 // and came back show the removal as pending, rather than as gone.
@@ -121,7 +122,8 @@ class LazyConnector extends Connector {
         return result;
     }
     read(id, model) {
-        const localData = last(this.queue.filter((entry) => entry.id === id || entry.id?.split(",").includes(id)));
+        id = this.mapId(id);
+        const localData = last(this.queue.filter((entry) => entry.id === id || (entry.deleteIds?.includes(id) ?? false)));
         if (localData) {
             if (localData.result) {
                 return localData.result;
@@ -130,7 +132,7 @@ class LazyConnector extends Connector {
                 throw new Error("data has been deleted");
             }
         }
-        return this.realConnector.read(this.mapId(id), model);
+        return this.realConnector.read(id, model);
     }
     /**
      * Queues an update of a record
@@ -145,8 +147,9 @@ class LazyConnector extends Connector {
      *          create is still sent as the create, under the fake id the create handed out.
      */
     update(data, model) {
+        const queueId = this.mapId(data.id);
         const previousQueueEntry = this.queue.find((entry) => (entry.type === "create" || entry.type === "update") &&
-            entry.id === data.id);
+            entry.id === queueId);
         const record = { ...previousQueueEntry?.result?.[0], ...data };
         const { id, ...fields } = record;
         const result = [record, {}];
@@ -160,7 +163,7 @@ class LazyConnector extends Connector {
         else {
             this.queue.push({
                 type: "update",
-                id: id,
+                id: queueId,
                 func,
                 result,
             });
@@ -169,8 +172,8 @@ class LazyConnector extends Connector {
         return result;
     }
     deleteMultiple(ids, model) {
-        this.queue = this.queue.filter((entry) => !entry.id || !ids.includes(entry.id));
         ids = ids.map((id) => this.mapId(id));
+        this.queue = this.queue.filter((entry) => !entry.id || !ids.includes(entry.id));
         ids = ids.filter((id) => !id.startsWith(this.FAKE_ID_PREFIX) ||
             this.queue.find((entry) => entry.id === id));
         if (ids.length === 0) {
@@ -191,6 +194,10 @@ class LazyConnector extends Connector {
     handleAdvancedDelete = (req, model) => {
         if (!this.realConnector.deleteAdvanced)
             throw new Error("deleteAdvanced got undefined!");
+        // the ids as the queue and the backend know them, in a copy: the caller's request
+        // keeps naming the records the way the caller does
+        const ids = req[1].map((id) => this.mapId(id));
+        req = req.length === 2 ? [req[0], ids] : [req[0], ids, req[2]];
         // optimize queue if filter is not active
         if (req.length === 2) {
             const [invert] = req;
@@ -261,8 +268,9 @@ class LazyConnector extends Connector {
                         id: remaining.join(","),
                         deleteIds: remaining,
                         // the cancelled record is no longer pending removal, so it stops
-                        // being remembered as one
-                        deletedRecords: entry.deletedRecords?.filter((record) => remaining.includes(record.id)),
+                        // being remembered as one (index remembers it under the id the
+                        // caller holds, the queue under the mapped one)
+                        deletedRecords: entry.deletedRecords?.filter((record) => remaining.includes(this.mapId(record.id))),
                         func: entry.rebuildDelete(remaining),
                     },
                 ];

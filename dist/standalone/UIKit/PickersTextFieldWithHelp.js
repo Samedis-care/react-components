@@ -4,6 +4,7 @@ import { IconButton, InputAdornment } from "@mui/material";
 import { Clear as ClearIcon, Info as InfoIcon } from "@mui/icons-material";
 import { InputLabelConfig, UiKitPickersTextField, } from "./CommonStyles";
 import isTouchDevice from "../../utils/isTouchDevice";
+import accessSlotProps from "../../utils/internal/accessSlotProps";
 import { withMuiFieldState } from "./MuiFieldState";
 import useCCTranslations from "../../utils/useCCTranslations";
 export const UiKitPickersTextFieldWithState = withMuiFieldState(UiKitPickersTextField);
@@ -28,7 +29,12 @@ const TextFieldWithHelp = React.forwardRef(function PickersTextFieldWithHelpInne
     // render
     const inputSlotProps = muiProps.slotProps?.input;
     const existingEndAdornment = inputSlotProps?.endAdornment;
-    const showClear = isTouchDevice() && hasValue && !muiProps.disabled && !disableClearable;
+    // a read-only picker passes its readOnly as slotProps.input.readOnly
+    const showClear = isTouchDevice() &&
+        hasValue &&
+        !muiProps.disabled &&
+        !inputSlotProps?.readOnly &&
+        !disableClearable;
     const hasEndAdornment = !!(showClear || openInfo || existingEndAdornment);
     return (_jsx(UiKitPickersTextFieldWithState, { ref: ref, ...muiProps, warning: warning, dirty: dirty, onChange: handleChange, slotProps: {
             ...muiProps.slotProps,
@@ -38,9 +44,11 @@ const TextFieldWithHelp = React.forwardRef(function PickersTextFieldWithHelpInne
                                 ? existingEndAdornment
                                 : existingEndAdornment?.props?.children, openInfo && (_jsx(IconButton, { onClick: openInfo, size: "small", "aria-label": t("standalone.uikit.info"), children: _jsx(InfoIcon, { color: "disabled" }) }))] }) })) : undefined,
             },
+            // an object, resolved from a function form (as MUI's TextField takes it):
+            // PickersTextField spreads it and reads its shrink for the outline's notch
             inputLabel: {
                 ...InputLabelConfig,
-                ...muiProps.slotProps?.inputLabel,
+                ...accessSlotProps(props, muiProps.slotProps?.inputLabel),
             },
         } }));
 });

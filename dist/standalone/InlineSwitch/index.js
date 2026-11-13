@@ -76,7 +76,7 @@ const InlineSwitch = (inProps) => {
     return (_jsxs(StyledRoot, { className: combineClassNames([className, classes?.root]), children: [visible && (_jsx(StyledSwitchWrapper, { component: "div", className: combineClassNames([
                     classes?.switchWrapper,
                     disabled && "CcInlineSwitch-disabled",
-                ]), variant: "caption", children: _jsxs(Grid, { component: "label", container: true, sx: { alignItems: "center" }, spacing: 1, children: [_jsx(Grid, { children: _jsx(AntSwitch, { checked: value, onChange: handleSwitchChange, disabled: disabled, 
+                ]), variant: "caption", children: _jsxs(Grid, { component: "label", container: true, sx: { alignItems: "center" }, spacing: 1, children: [_jsx(Grid, { children: _jsx(AntSwitch, { className: classes?.switch, checked: value, onChange: handleSwitchChange, disabled: disabled, 
                                 // the focus ring shows focus; the ripple would pulse under it endlessly
                                 disableFocusRipple: true }) }), _jsx(Grid, { children: label })] }) })), _jsx("div", { children: children })] }));
 };

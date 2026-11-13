@@ -6,14 +6,20 @@ import useMuiLocaleData from "./useMuiLocaleData";
 import usePickerDraft from "./usePickerDraft";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 import usePickerValidationError from "./usePickerValidationError";
+import usePickerErrorMessage from "./usePickerErrorMessage";
 import withAccessibleError from "./withAccessibleError";
 import withRequiredSections from "./withRequiredSections";
-import withFieldBlur from "./withFieldBlur";
+import useFieldBlur from "./useFieldBlur";
 const LocalizedDatePicker = (props) => {
     const { publishIntermediateValues, ...otherProps } = props;
     const localeText = useMuiLocaleData();
     const draft = usePickerDraft(otherProps.value, otherProps.onChange, publishIntermediateValues);
     const validation = usePickerValidationError(otherProps.onError);
+    const errorMessage = usePickerErrorMessage(validation.shownError, {
+        minDate: otherProps.minDate,
+        maxDate: otherProps.maxDate,
+    });
+    const withFieldBlur = useFieldBlur();
     const { settle } = draft;
     const consumerOnOpen = otherProps.onOpen;
     const handleOpen = useCallback(() => {
@@ -30,11 +36,11 @@ const LocalizedDatePicker = (props) => {
                         ...orgSlotProps,
                         // called once focus leaves the field, see withFieldBlur
                         onBlur: (event) => {
-                            draft.settle();
+                            validation.onFieldLeave();
                             orgSlotProps?.onBlur?.(event);
                         },
-                    }));
-                    return withFieldBlur(ownerState, fieldProps);
+                    }), errorMessage);
+                    return withFieldBlur(ownerState, fieldProps, validation.onFieldFocus);
                 },
             } }) }));
 };

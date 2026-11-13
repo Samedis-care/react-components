@@ -21,7 +21,21 @@
 				"toggle-languages": "Talinvoer wisselen"
 			},
 			"number-input": {
+				"out-of-range": "Voer een getal van {{MIN}} tot {{MAX}} in",
 				"invalid": "Voer een getal in, bijvoorbeeld {{EXAMPLE}}"
+			},
+			"color-input": {
+				"open-picker": "Kies kleur"
+			}
+		},
+		"date-picker": {
+			"error": {
+				"invalid": "Voer een geldige datum in",
+				"min-date": "Voer een datum in op of na {{DATE}}",
+				"max-date": "Voer een datum in op of vóór {{DATE}}",
+				"past": "Voer de datum van vandaag of een latere datum in",
+				"future": "Voer de datum van vandaag of een eerdere datum in",
+				"unavailable": "Voer een datum in die geselecteerd kan worden"
 			}
 		},
 		"notifications": {
@@ -143,6 +157,7 @@
 				"selected": "GESELECTEERD"
 			},
 			"multi-select": {
+				"no-entries": "Geen items",
 				"delete-confirm": {
 					"title": "Bevestig verwijdering",
 					"message": "Weet u zeker dat u dit item wilt verwijderen?",
@@ -220,7 +235,8 @@
 				"close": "Sluiten",
 				"signature": "Handtekening"
 			},
-			"sign-here": "Teken hier digitaal"
+			"sign-here": "Teken hier digitaal",
+			"required": "Verplicht"
 		},
 		"signal-portlet": {
 			"last-updated": "Laatste vernieuwing: {{AGE}}",
@@ -233,22 +249,21 @@
 			"label": "Laadt…"
 		}
 	},
-	"framework": {
-		"dialogs": {
-			"navblock": "Navigatie is geblokkeerd. Sluit eerst jouw geopende dialoogvensters."
-		}
-	},
 	"non-standalone": {
 		"dialog": {
 			"okay": "OK",
 			"dialog-title": {
 				"close": "Sluiten"
+			},
+			"input-dialog": {
+				"invalid": "Voer een geldige waarde in"
 			}
 		},
 		"language-switcher": {
 			"load-error": "De taal kon niet worden geladen. Controleer uw internetverbinding, laad de pagina opnieuw en probeer het nog eens.",
 			"title": "Selecteer uw land en taal",
-			"no-locales": "Geen enkele locatie komt overeen met uw zoekopdracht"
+			"no-locales": "Geen enkele locatie komt overeen met uw zoekopdracht",
+			"results": "Resultaten: {{COUNT}}"
 		}
 	},
 	"backend-integration": {
@@ -279,7 +294,9 @@
 						"not-set": "Niet ondertekend"
 					},
 					"files": {
-						"no-file": "Geen bestanden aanwezig"
+						"no-file": "Geen bestanden aanwezig",
+						"count_one": "{{count}} bestand",
+						"count_other": "{{count}} bestanden"
 					},
 					"string-array": {
 						"entry": "{{LABEL}} {{NUM}}",
@@ -318,6 +335,11 @@
 					"buttons": {
 						"okay": "OK"
 					}
+				}
+			},
+			"inline-edit": {
+				"error-dialog": {
+					"message": "De wijziging van ‘{{LABEL}}’ is niet opgeslagen: {{ERROR}}"
 				}
 			}
 		},
@@ -406,17 +428,6 @@
 			"email": "Voor het veld {{attribute}} is een geldig e-mailadres vereist",
 			"url": "Het veld {{attribute}} vereist een geldige URL",
 			"missing": "Het veld {{attribute}} ontbreekt"
-		},
-		"timestampToAge": {
-			"just-now": "net nu",
-			"less-minute": "Minder dan een minuut geleden",
-			"minute": "minuut",
-			"minutes": "minuten",
-			"hour": "uur",
-			"hours": "uren",
-			"day": "dag",
-			"days": "dagen",
-			"str": "{{AMOUNT}} {{UNIT}} geleden"
 		}
 	},
 	"common": {

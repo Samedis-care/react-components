@@ -16,7 +16,9 @@ export interface ToastProps {
      */
     title?: React.ReactNode;
     /**
-     * The message
+     * The message. Shown through the ToastContext, the title and message
+     * render where the ToastContextProvider renders its toasts, not where
+     * showToast was called (see useToastContext)
      */
     message: React.ReactNode;
     /**
@@ -39,6 +41,15 @@ export interface ToastProps {
     /**
      * The alert variant
      * @default "filled"
+     * @remarks `filled` is MUI's filled Alert: MUI's text color
+     * (`palette.getContrastText(palette[severity].main)`) on MUI's fill
+     * (`palette[severity].main`, in a dark palette `.dark`). Where that text has
+     * less than the 4.5:1 that text needs, the toast darkens the fill (behind
+     * dark text: lightens it) just enough, keeping its hue; with MUI's default
+     * light palette that is info and warning. A custom palette needs nothing
+     * more: only a color the toast cannot measure (a CSS variable, a keyword) is
+     * used as it is, and must then reach 4.5:1 with its contrast text itself.
+     * `standard` and `outlined` keep MUI's colors.
      */
     variant?: AlertProps["variant"];
     /**
@@ -48,8 +59,10 @@ export interface ToastProps {
     onClose: () => void;
     /**
      * Called when the close transition has finished: the moment to unmount the
-     * toast or clear its content. Optional: the closed toast leaves the page
-     * after its close transition with or without it
+     * toast or clear its content. A toast rendered closed without having been
+     * in the page (e.g. closed in the update that opened it) has no close
+     * transition and calls it right after that render, once. Optional: the
+     * closed toast leaves the page after its close transition with or without it
      */
     onExited?: () => void;
     /**

@@ -127,8 +127,10 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
      * The current data entry id
      * @remarks null for a new record. Another id starts the form over, as when it mounts: the
      *          page is mounted again, and the values, touched state, errors, warnings and custom
-     *          state come from the new record. A change from null to the id of the record the
-     *          form has just created keeps the form as it is.
+     *          state come from the new record. The validation and submit handlers the previous
+     *          page registered are dropped, also those of a control it no longer showed, so
+     *          nothing queued for the previous record is saved with the new one. A change from
+     *          null to the id of the record the form has just created keeps the form as it is.
      */
     id: string | null;
     /**
@@ -164,7 +166,13 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
      */
     onSubmit?: (dataFromServer: ModelRecord<M>, submittedData: ModelRecord<M>, previousData: ModelRecord<M>) => Promise<void> | void;
     /**
-     * Disable busy state while onSubmit is running. Required if you want to show a dialog for example
+     * The submit stops keeping the form busy when `onSubmit` is called: unless
+     * something else keeps it busy (`addBusyReason`), the fields and buttons are no
+     * longer read-only and the busy overlay is hidden while `onSubmit` runs. A dialog
+     * opened from `onSubmit` can be used without it, as the busy overlay stays below
+     * dialogs. A boolean, or a function that decides per submit and gets the same
+     * arguments as `onSubmit`.
+     * @default false (the form stays busy until `onSubmit` has finished)
      */
     onSubmitUserInteractive?: boolean | ((dataFromServer: ModelRecord<M>, submittedData: ModelRecord<M>, previousData: ModelRecord<M>) => boolean);
     /**
@@ -356,6 +364,8 @@ export interface FormContextData<M extends ModelUnknown, CustomPropsT = unknown>
     /**
      * Sets the callback to perform hard validation (for custom fields)
      * @param field custom field name (must not be in model)
+     * @remarks Stays registered until it is removed, also after the component that set it
+     *          unmounted. A Form given another record (id or model) drops it.
      */
     setCustomValidationHandler: (field: string, handler: CustomValidationHandler) => void;
     /**
@@ -366,6 +376,8 @@ export interface FormContextData<M extends ModelUnknown, CustomPropsT = unknown>
     /**
      * Sets the callback to perform soft validation (for custom fields)
      * @param field custom field name (must not be in model)
+     * @remarks Stays registered until it is removed, also after the component that set it
+     *          unmounted. A Form given another record (id or model) drops it.
      */
     setCustomWarningHandler: (field: string, handler: CustomValidationHandler) => void;
     /**
@@ -376,6 +388,8 @@ export interface FormContextData<M extends ModelUnknown, CustomPropsT = unknown>
     /**
      * Sets the pre submit handler (for custom fields)
      * @param field custom field name (must not be in model)
+     * @remarks Stays registered until it is removed, also after the component that set it
+     *          unmounted. A Form given another record (id or model) drops it.
      */
     setPreSubmitHandler: (field: string, handler: PreSubmitHandler) => void;
     /**
@@ -386,6 +400,8 @@ export interface FormContextData<M extends ModelUnknown, CustomPropsT = unknown>
     /**
      * Sets the post submit handler (for custom fields)
      * @param field custom field name (must not be in model)
+     * @remarks Stays registered until it is removed, also after the component that set it
+     *          unmounted. A Form given another record (id or model) drops it.
      */
     setPostSubmitHandler: (field: string, handler: PostSubmitHandler) => void;
     /**

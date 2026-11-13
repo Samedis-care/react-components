@@ -52,7 +52,7 @@ export const MatrixCorner = styled("div", {
 const px = (value) => typeof value === "number" ? `${value}px` : value;
 const MatrixGrid = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMatrixGrid" });
-    const { columns, rows, corner, renderRowHeader, renderCell, renderColumnHeader, renderCellWrapper, columnWidth = 46, rowHeight = 58, rowHeaderWidth = 116, headerHeight = 42, extraRowHeight = 48, maxHeight = "70vh", scrollToColumn, selectable = false, isCellSelectable = defaultIsCellSelectable, isCellOccupied = defaultIsCellOccupied, onSelectRange, addLabel, occupiedAddAffordance = "chip", onRowHeaderActions, extraRows, extraRowsPosition = "bottom", label, className, classes, } = props;
+    const { columns, rows, corner, renderRowHeader, renderCell, renderColumnHeader, renderCellWrapper, columnWidth = 56, rowHeight = 58, rowHeaderWidth = 116, headerHeight = 42, extraRowHeight = 48, maxHeight = "70vh", scrollToColumn, selectable = false, isCellSelectable = defaultIsCellSelectable, isCellOccupied = defaultIsCellOccupied, onSelectRange, addLabel, occupiedAddAffordance = "chip", onRowHeaderActions, extraRows, extraRowsPosition = "bottom", label, className, classes, } = props;
     // Touch-only devices (phone, tablet): there is no hover, and sweeping a
     // range fights with scrolling — the hint would flicker and read as broken.
     // A plain tap on a cell still reports a single-cell range (mousedown plus

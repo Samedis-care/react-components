@@ -1,6 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
-import { InputLabelConfig } from "../CommonStyles";
 import LocalizedDateTimePicker from "../../../standalone/LocalizedDateTimePickers/LocalizedDateTimePicker";
 import accessSlotProps from "../../../utils/internal/accessSlotProps";
 import PickersTextFieldWithHelp from "../PickersTextFieldWithHelp";
@@ -24,12 +23,6 @@ const DateTimeInput = (props) => {
                     // only where the caller gave one, so a helper text passed through
                     // slotProps.textField is not overwritten with undefined
                     ...(helperText === undefined ? {} : { helperText }),
-                    slotProps: {
-                        inputLabel: {
-                            ...InputLabelConfig,
-                            ...orgSlotProps?.slotProps?.inputLabel,
-                        },
-                    },
                 };
             },
         } }));

@@ -1,20 +1,22 @@
 import { Theme } from "@mui/material";
 /**
- * How strongly a dimmed entry is faded.
- * @remarks One half of a diagonal pair cannot use opacity (that would fade both
- * halves), so it dims its gradient color with dimColor below.
+ * How strongly the fill of a dimmed entry (MatrixTileItem.dimmed) is faded:
+ * its alpha is multiplied by this, in both pair layouts. The label is not
+ * faded; it gets a color that reads on the faded fill (see tileColors).
  */
 export declare const MATRIX_TILE_DIM_OPACITY = 0.6;
 /**
  * Fades a color to MATRIX_TILE_DIM_OPACITY.
  * @param color Any CSS color
- * @returns The color at reduced alpha, or the color unchanged if it cannot be
- * resolved at all
- * @remarks Goes through colorToRgba, which covers hex (3, 4, 6 and 8 digits),
- * rgb(), hsl() and all CSS keywords, with a canvas fallback. A value it cannot
- * resolve — a CSS variable, say — must not take a cell down, so it passes
- * through and the entry stays flat instead. An alpha the color already carries
- * is multiplied rather than replaced, so a translucent entry keeps being
+ * @returns The same color as rgba() at reduced alpha, or the color unchanged
+ * if it cannot be resolved at all
+ * @remarks Goes through colorToRgba, which reads keywords, hex, rgb(), hsl(),
+ * hwb() and color(srgb …) itself and has the browser resolve the rest
+ * (oklch(), lab(), color() in other spaces, color-mix(), …) on a canvas. A
+ * value it cannot resolve — a CSS variable, say, or one of those where there
+ * is no canvas (jsdom) — must not take a cell down, so it passes through and
+ * the entry stays flat instead. An alpha the color already carries is
+ * multiplied rather than replaced, so a translucent entry keeps being
  * translucent.
  */
 export declare const dimColor: (color: string) => string;
@@ -31,3 +33,21 @@ export declare const dimColor: (color: string) => string;
  * var(), say: then the label inherits the surrounding text color)
  */
 export declare const contrastTextFor: (theme: Theme, background: string) => string | undefined;
+/**
+ * The colors an entry is drawn in, the same in a split and a diagonal pair.
+ * @param theme The theme (see contrastTextFor)
+ * @param backgroundColor The entry's fill (MatrixTileItem.backgroundColor)
+ * @param textColor The entry's label color (MatrixTileItem.textColor)
+ * @param dimmed Whether the entry is dimmed (MatrixTileItem.dimmed)
+ * @returns fill: backgroundColor, faded with dimColor if dimmed. label: for
+ * a faded fill, black or white by contrast with the faded fill, since
+ * textColor was meant for the full one; otherwise textColor, or black or
+ * white by contrast with backgroundColor, or undefined if the fill cannot be
+ * resolved (the label then inherits the surrounding text color)
+ * @remarks A dimmed fill that cannot be resolved (a var()) is not faded, so
+ * it keeps textColor.
+ */
+export declare const tileColors: (theme: Theme, backgroundColor: string, textColor: string | undefined, dimmed: boolean | undefined) => {
+    fill: string;
+    label: string | undefined;
+};

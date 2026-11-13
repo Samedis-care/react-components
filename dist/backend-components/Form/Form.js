@@ -19,6 +19,7 @@ import { hashKey } from "@tanstack/react-query";
 import ValidationError from "./ValidationError";
 import TypedEventTarget from "../../utils/TypedEventTarget";
 import { DirtyStateContext, NO_DIRTY_STATE } from "./DirtyStateContext";
+import useFormPageGuard, { FormPageGuardContext } from "./FormPageGuard";
 import deepEqual from "../../utils/deepEqual";
 import toComparisonJson from "../../utils/toComparisonJson";
 import { captureError } from "../../framework/ErrorReporting";
@@ -631,6 +632,13 @@ const Form = (props) => {
         prevServerDataRef.current = null;
         appliedServerDataRef.current = undefined;
         customFieldState.current = {};
+        // the previous page has unmounted by now. What it left registered (the save or the
+        // validation of a hidden control or nested form) belongs to the previous record; the
+        // page mounted for the new record registers its own
+        preSubmitHandlers.current = {};
+        postSubmitHandlers.current = {};
+        customValidationHandlers.current = {};
+        customWarningHandlers.current = {};
         setCustomDirtyFields([]);
         setErrors({});
         setWarnings({});
@@ -1124,6 +1132,17 @@ const Form = (props) => {
         model.fields,
     ]);
     useDevKeybinds(useMemo(() => ({ "ccform dirty?": () => debugDirty(true) }), [debugDirty]));
+    // the leave guard which the form pages switch on. The Form holds it, so it lasts as long
+    // as the changes do, also while no form page is mounted (one in a routed tab panel when
+    // another tab is open). A save makes the form read-only too, but its changes are unsaved
+    // until it succeeds, so only a form which is read-only for another reason goes unguarded.
+    const pageGuard = useFormPageGuard({
+        disableRouting: !!props.disableRouting,
+        readOnlyBesidesSaving: Object.keys(readOnlyReasons).some((reason) => reason !== FORM_SUBMITTING_READ_ONLY_REASON),
+        dirty,
+        addEventListener: formEvents.addEventListener,
+        removeEventListener: formEvents.removeEventListener,
+    });
     // context and rendering
     const Children = useMemo(() => React.memo(children), [children]);
     const setError = useCallback((error) => {
@@ -1321,7 +1340,7 @@ const Form = (props) => {
         console.error("[Components-Care] [FormEngine] Data is faulty", serverData ? JSON.stringify(serverData, undefined, 4) : null);
         throw new Error("Data is not present, this should never happen");
     }
-    const innerForm = () => (_jsxs(DirtyStateContext.Provider, { value: showDirtyState ? dirtyFields : NO_DIRTY_STATE, children: [displayError && !nestedFormName && (_jsx(ErrorComponent, { error: displayError })), isLoading ? (_jsx("div", { style: loaderContainerStyles, children: _jsx(Loader, {}) })) : (_jsx(Children, { isSubmitting: submitting, values: props.renderConditionally ? asModelRecord(values) : undefined, submit: submitForm, safeSubmit: safeSubmitForm, reset: resetForm, dirty: dirty, id: id, customProps: customProps, disableRouting: !!props.disableRouting }))] }));
+    const innerForm = () => (_jsxs(DirtyStateContext.Provider, { value: showDirtyState ? dirtyFields : NO_DIRTY_STATE, children: [displayError && !nestedFormName && (_jsx(ErrorComponent, { error: displayError })), isLoading ? (_jsx("div", { style: loaderContainerStyles, children: _jsx(Loader, {}) })) : (_jsx(FormPageGuardContext.Provider, { value: pageGuard, children: _jsx(Children, { isSubmitting: submitting, values: props.renderConditionally ? asModelRecord(values) : undefined, submit: submitForm, safeSubmit: safeSubmitForm, reset: resetForm, dirty: dirty, id: id, customProps: customProps, disableRouting: !!props.disableRouting }) }))] }));
     return (_jsx(FormContextLite.Provider, { value: formContextDataLite, children: _jsx(FormContext.Provider, { value: formContextData, children: !parentFormContext && !renderFormAsDiv ? (_jsx(StyledForm, { onSubmit: handleSubmit, className: formClass, "data-form-submitting": submitting, "data-form-dirty": dirty, "data-form-recordid": id, "data-form-modelid": model.modelId, children: innerForm() })) : (_jsx(StyledFormDiv, { className: formClass, "data-form-submitting": submitting, "data-form-dirty": dirty, "data-form-recordid": id, "data-form-modelid": model.modelId, children: innerForm() })) }) }));
 };
 export default React.memo(Form);

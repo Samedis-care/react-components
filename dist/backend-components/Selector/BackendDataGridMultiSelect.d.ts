@@ -5,7 +5,10 @@ import { DataGridProps } from "../../standalone/DataGrid/DataGrid";
 export type BackendDataGridMultiSelectClassKey = "root" | "label" | "status" | "grid";
 export interface BackendDataGridMultiSelectProps<M extends ModelUnknown> extends Omit<DataGridProps, "columns" | "loadData" | "disableSelection" | "prohibitMultiSelect" | "customSelectionControl" | "onSelectionChange" | "selection" | "getRowLabel"> {
     /**
-     * The model to load data from
+     * The model to load data from. The grid's row counts follow its connector's
+     * ResponseMeta: with `filteredRows`, `totalRows` is the whole collection and
+     * `filteredRows` the records that match the search and filters; without it,
+     * `totalRows` is the matching records.
      */
     model: M;
     /**

@@ -12,7 +12,7 @@ export const SignatureNameContext = React.createContext(null);
  */
 class RendererSignature extends TypeSignature {
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, } = params;
+        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, id, messageId, describedBy, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -21,7 +21,9 @@ class RendererSignature extends TypeSignature {
         if (visibility.editable) {
             if (visibility.grid)
                 throw new Error("Not supported");
-            return (_jsxs(FormControlCC, { required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, onBlur: handleBlur, "data-name": field, children: [_jsx(FormLabel, { component: "legend", children: label }), _jsx(SignatureNameContext.Consumer, { children: (signerName) => (_jsx(SignaturePad, { name: field, signature: value, setSignature: (newValue) => handleChange(field, newValue), disabled: visibility.readOnly, signerName: signerName })) }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
+            // the tile's button is named by the label, so it points at it by id
+            const labelId = id && `${id}-label`;
+            return (_jsxs(FormControlCC, { required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, onBlur: handleBlur, "data-name": field, children: [_jsx(FormLabel, { component: "legend", id: labelId, children: label }), _jsx(SignatureNameContext.Consumer, { children: (signerName) => (_jsx(SignaturePad, { id: id, name: field, signature: value, setSignature: (newValue) => handleChange(field, newValue), disabled: visibility.readOnly, signerName: signerName, "aria-labelledby": labelId, "aria-describedby": describedBy, "aria-invalid": !!errorMsg, required: visibility.required })) }), _jsx(FormHelperText, { id: messageId, children: errorMsg || warningMsg })] }));
         }
         const content = value ? (_jsx("img", { src: value, alt: label })) : (_jsx(_Fragment, { children: ccI18n.t("backend-integration.model.types.renderers.signature.not-set") }));
         return visibility.grid ? (content) : (_jsxs(FormControl, { children: [_jsx(FormLabel, { children: label }), content] }));

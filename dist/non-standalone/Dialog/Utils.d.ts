@@ -14,9 +14,8 @@ export type DialogPromise<T> = Promise<T> & {
     /**
      * Closes the dialog the helper pushed, and only that one, also while dialogs pushed after
      * it are open, and settles the promise at once, as dismissing the dialog with Escape does
-     * (see the helper's `@returns`). Navigation, which is blocked while a dialog is open, works
-     * right after it. Calling it again, or after the dialog was closed another way, does
-     * nothing.
+     * (see the helper's `@returns`). Calling it again, or after the dialog was closed another
+     * way, does nothing.
      * @remarks In a handler of one of the dialog's own buttons, close the dialog with the
      *          `close` the handler gets (IDialogButtonConfig.onClick), not with this one: this
      *          one settles the promise at once, the handler's lets it settle once the handler
@@ -60,12 +59,12 @@ export declare const showInputDialog: (pushDialog: DialogContextType[0], props: 
  *          handler has ended, by Escape or a backdrop click. Its `close()` closes the dialog
  *          and resolves it at once.
  * @example
- * // a button that navigates closes the dialog first, as navigation is blocked while a dialog
- * // is open. It uses the close it gets: the awaiting code continues after the handler.
+ * // a button that leads somewhere: the dialog closes after the handler, then the awaiting
+ * // code continues
  * await showInfoDialog(pushDialog, {
  * 	title,
  * 	message,
- * 	buttons: [{ text: "Open", onClick: (close) => { close(); navigate(target); } }],
+ * 	buttons: [{ text: "Open", onClick: () => navigate(target) }],
  * });
  * @example
  * // closing the dialog from outside it

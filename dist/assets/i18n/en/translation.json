@@ -21,7 +21,21 @@
 				"toggle-languages": "Toggle language inputs"
 			},
 			"number-input": {
+				"out-of-range": "Enter a number from {{MIN}} to {{MAX}}",
 				"invalid": "Enter a number, such as {{EXAMPLE}}"
+			},
+			"color-input": {
+				"open-picker": "Choose color"
+			}
+		},
+		"date-picker": {
+			"error": {
+				"invalid": "Enter a valid date",
+				"min-date": "Enter a date on or after {{DATE}}",
+				"max-date": "Enter a date on or before {{DATE}}",
+				"past": "Enter today's date or a later one",
+				"future": "Enter today's date or an earlier one",
+				"unavailable": "Enter a date that can be selected"
 			}
 		},
 		"signal-portlet": {
@@ -147,6 +161,7 @@
 				"selected": "SELECTED"
 			},
 			"multi-select": {
+				"no-entries": "No entries",
 				"remove-item": "Remove {{ITEM}}",
 				"delete-confirm": {
 					"title": "Confirm Removal",
@@ -224,7 +239,8 @@
 				"close": "Close",
 				"signature": "Signature"
 			},
-			"sign-here": "Sign here digitally"
+			"sign-here": "Sign here digitally",
+			"required": "Required"
 		},
 		"toast": {
 			"close": "Close"
@@ -233,22 +249,21 @@
 			"label": "Loading…"
 		}
 	},
-	"framework": {
-		"dialogs": {
-			"navblock": "Navigation is blocked. Please close your open dialogs first."
-		}
-	},
 	"non-standalone": {
 		"dialog": {
 			"okay": "OK",
 			"dialog-title": {
 				"close": "Close"
+			},
+			"input-dialog": {
+				"invalid": "Enter a valid value"
 			}
 		},
 		"language-switcher": {
 			"load-error": "The language could not be loaded. Check your internet connection, reload the page and try again.",
 			"title": "Select your country and language",
-			"no-locales": "No locales match your search query"
+			"no-locales": "No locales match your search query",
+			"results": "Results: {{COUNT}}"
 		}
 	},
 	"backend-integration": {
@@ -279,7 +294,9 @@
 						"not-set": "Not signed"
 					},
 					"files": {
-						"no-file": "No files present"
+						"no-file": "No files present",
+						"count_one": "{{count}} file",
+						"count_other": "{{count}} files"
 					},
 					"string-array": {
 						"entry": "{{LABEL}} {{NUM}}",
@@ -318,6 +335,11 @@
 					"buttons": {
 						"okay": "OK"
 					}
+				}
+			},
+			"inline-edit": {
+				"error-dialog": {
+					"message": "The change to \"{{LABEL}}\" was not saved: {{ERROR}}"
 				}
 			}
 		},
@@ -406,17 +428,6 @@
 			"missing": "The {{attribute}} field is missing",
 			"email": "The {{attribute}} field requires a valid email",
 			"url": "The {{attribute}} field requires a valid URL"
-		},
-		"timestampToAge": {
-			"just-now": "just now",
-			"less-minute": "Less than a minute ago",
-			"minute": "minute",
-			"minutes": "minutes",
-			"hour": "hour",
-			"hours": "hours",
-			"day": "day",
-			"days": "days",
-			"str": "{{AMOUNT}} {{UNIT}} ago"
 		}
 	},
 	"common": {

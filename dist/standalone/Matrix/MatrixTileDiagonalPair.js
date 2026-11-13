@@ -3,7 +3,7 @@ import React, { useCallback, useMemo } from "react";
 import { styled, Tooltip, useTheme } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
-import { contrastTextFor, dimColor, MATRIX_TILE_DIM_OPACITY, } from "./matrixTileDim";
+import { tileColors } from "./matrixTileDim";
 import { useMatrixCellTileProps } from "./MatrixCellTileContext";
 import { entryFocusRing } from "./matrixTints";
 import MatrixTileCorners from "./MatrixTileCorners";
@@ -41,16 +41,14 @@ export const MatrixTileDiagonalLabel = styled("div", {
         right: 3,
         color: cssVar(matrixVars.tileForegroundB),
     },
-    [`&.${matrixClasses.diagonalLabelDimmed}`]: {
-        opacity: MATRIX_TILE_DIM_OPACITY,
-    },
 });
 /** The only corner a diagonal pair draws — the others would land on a label. */
 const DIAGONAL_CORNERS = ["bottomLeft"];
 /**
  * Two entries as one diagonally cut box: space-saving, but one click target and
- * one drag handle, and only label plus fill color of each entry survive (see
- * MatrixCellTileProps.pairLayout).
+ * one drag handle (MatrixCellTile passes it to renderItem as the first entry),
+ * and of each entry only the label, the colors and the tooltip survive, plus
+ * the first entry's bottomLeft corner (see MatrixCellTileProps.pairLayout).
  */
 const MatrixTileDiagonalPair = (props) => {
     const { a, b } = props;
@@ -63,16 +61,17 @@ const MatrixTileDiagonalPair = (props) => {
     const handleMouseDown = useCallback((event) => {
         event.stopPropagation();
     }, []);
-    const style = useMemo(() => ({
-        [matrixVars.tileBackgroundA]: a.dimmed
-            ? dimColor(a.backgroundColor)
-            : a.backgroundColor,
-        [matrixVars.tileBackgroundB]: b.dimmed
-            ? dimColor(b.backgroundColor)
-            : b.backgroundColor,
-        [matrixVars.tileForegroundA]: a.textColor ?? contrastTextFor(theme, a.backgroundColor),
-        [matrixVars.tileForegroundB]: b.textColor ?? contrastTextFor(theme, b.backgroundColor),
-    }), [
+    // a dimmed half fades its fill, not its label, as a dimmed entry does
+    const style = useMemo(() => {
+        const colorsA = tileColors(theme, a.backgroundColor, a.textColor, a.dimmed);
+        const colorsB = tileColors(theme, b.backgroundColor, b.textColor, b.dimmed);
+        return {
+            [matrixVars.tileBackgroundA]: colorsA.fill,
+            [matrixVars.tileBackgroundB]: colorsB.fill,
+            [matrixVars.tileForegroundA]: colorsA.label,
+            [matrixVars.tileForegroundB]: colorsB.label,
+        };
+    }, [
         theme,
         a.dimmed,
         a.backgroundColor,
@@ -94,6 +93,8 @@ const MatrixTileDiagonalPair = (props) => {
                     matrixClasses.diagonalLabelEnd,
                     b.dimmed && matrixClasses.diagonalLabelDimmed,
                 ]), children: b.label }), _jsx(MatrixTileCorners, { item: a, only: DIAGONAL_CORNERS, className: classes?.corner })] }));
-    return tooltip ? (_jsx(Tooltip, { title: tooltip, enterDelay: 400, children: pair })) : (pair);
+    // describeChild: both tooltips describe the pair, named by both labels
+    // (see MatrixTileItem)
+    return tooltip ? (_jsx(Tooltip, { title: tooltip, enterDelay: 400, describeChild: true, children: pair })) : (pair);
 };
 export default React.memo(MatrixTileDiagonalPair);

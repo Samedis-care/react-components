@@ -1,4 +1,3 @@
-import { decomposeColor, hslToRgb } from "@mui/material/styles";
 // map color keyword -> #rrggbbaa
 export const colorLookupMap = {
     aliceblue: "#f0f8ffff",
@@ -151,42 +150,211 @@ export const colorLookupMap = {
     yellow: "#ffff00ff",
     yellowgreen: "#9acd32ff",
 };
+const COMPONENT_PATTERN = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)(%|deg|grad|rad|turn)?$/;
+const parseComponent = (token) => {
+    if (token === "none")
+        return { value: 0, unit: "", none: true };
+    const match = COMPONENT_PATTERN.exec(token);
+    if (!match)
+        return undefined;
+    return { value: parseFloat(match[1]), unit: match[2] ?? "" };
+};
 /**
- * Converts color to RGBA array
- * @param color The color
- * @return undefined if color cannot be parsed, rgba array on success. alpha channel is 0.0 - 1.0
+ * Splits the arguments of a color function into three components and an
+ * alpha, in the legacy syntax (commas) or the modern one (spaces, "/ alpha")
+ * @returns undefined if they are not three components and an optional alpha
+ * (calc() and var() are not read either)
  */
-const colorToRgba = (color) => {
-    // lookup color keywords and convert to #rrggbbaa
-    if (color.toLowerCase() in colorLookupMap) {
-        color = colorLookupMap[color.toLowerCase()];
+const parseArguments = (args) => {
+    const legacy = args.includes(",");
+    let tokens;
+    let alphaToken;
+    if (legacy) {
+        tokens = args.split(",").map((token) => token.trim());
+        if (tokens.length === 4)
+            alphaToken = tokens.pop();
     }
-    // decode #rgb, #rgba, #rrggbb, #rrggbbaa, rgb(), rgba(), hsl(), hsla() using JS
-    // https://github.com/mui/material-ui/blob/v4.12.3/packages/material-ui/src/styles/colorManipulator.js#L102
-    try {
-        let decoded = decomposeColor(color);
-        if (["hsl", "hsla"].includes(decoded.type)) {
-            decoded = decomposeColor(hslToRgb(color));
-        }
-        if (decoded.values.length === 3) {
-            return [...decoded.values, 1.0];
-        }
-        else {
-            return decoded.values;
-        }
+    else {
+        const parts = args.split("/");
+        if (parts.length > 2)
+            return undefined;
+        tokens = parts[0].trim().split(/\s+/);
+        alphaToken = parts[1]?.trim();
     }
-    catch {
-        // format not supported
+    if (tokens.length !== 3)
+        return undefined;
+    const components = [];
+    for (const token of tokens) {
+        const component = parseComponent(token);
+        if (!component)
+            return undefined;
+        components.push(component);
     }
-    // Fallback (using canvas)
+    const alpha = alphaToken === undefined
+        ? { value: 1, unit: "" }
+        : parseComponent(alphaToken);
+    if (!alpha || (alpha.unit !== "" && alpha.unit !== "%"))
+        return undefined;
+    // none belongs to the modern syntax only
+    if (legacy && (alpha.none || components.some((component) => component.none)))
+        return undefined;
+    return {
+        legacy,
+        components,
+        alpha: alpha.unit === "%" ? alpha.value / 100 : alpha.value,
+    };
+};
+/** A hue in degrees, from a number (degrees) or an angle */
+const toDegrees = ({ value, unit }) => {
+    switch (unit) {
+        case "":
+        case "deg":
+            return value;
+        case "grad":
+            return value * 0.9;
+        case "rad":
+            return (value * 180) / Math.PI;
+        case "turn":
+            return value * 360;
+        default:
+            return undefined;
+    }
+};
+/**
+ * A percentage (or, in the modern syntax, a number meaning one) as 0-1
+ */
+const toFraction = ({ value, unit }, legacy) => unit === "%" || (unit === "" && !legacy) ? value / 100 : undefined;
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+/** HSL to red, green and blue 0-1 (CSS Color 4, section 7.1) */
+const hslToChannels = (hue, saturation, lightness) => {
+    const sat = Math.max(0, saturation);
+    const light = clamp(lightness, 0, 1);
+    const channel = (n) => {
+        const k = (((n + hue / 30) % 12) + 12) % 12;
+        const a = sat * Math.min(light, 1 - light);
+        return light - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+    };
+    return [channel(0), channel(8), channel(4)];
+};
+/** a linear-light sRGB channel to the gamma-encoded one */
+const encodeSrgb = (linear) => {
+    const abs = Math.abs(linear);
+    return abs > 0.0031308
+        ? Math.sign(linear) * (1.055 * abs ** (1 / 2.4) - 0.055)
+        : 12.92 * linear;
+};
+/**
+ * Red, green and blue (0-1, not yet clamped) of a color function's
+ * arguments, or undefined if the function or the arguments are not read here
+ */
+const functionChannels = (name, body) => {
+    if (name === "color") {
+        // color() has the modern syntax only
+        if (body.includes(","))
+            return undefined;
+        const [space, ...rest] = body.trim().split(/\s+/);
+        const args = parseArguments(rest.join(" "));
+        if (!args)
+            return undefined;
+        const values = args.components.map(({ value, unit }) => unit === "%" ? value / 100 : unit === "" ? value : NaN);
+        if (space === "srgb")
+            return [values, args.alpha];
+        if (space === "srgb-linear")
+            return [values.map(encodeSrgb), args.alpha];
+        // other spaces need a conversion: the canvas does that
+        return undefined;
+    }
+    const args = parseArguments(body);
+    if (!args)
+        return undefined;
+    const { legacy, components, alpha } = args;
+    switch (name) {
+        case "rgb":
+        case "rgba": {
+            const units = components.map((component) => component.unit);
+            if (units.some((unit) => unit !== "" && unit !== "%"))
+                return undefined;
+            // the legacy syntax takes three numbers or three percentages
+            if (legacy && new Set(units).size > 1)
+                return undefined;
+            return [
+                components.map(({ value, unit }) => unit === "%" ? value / 100 : value / 255),
+                alpha,
+            ];
+        }
+        case "hsl":
+        case "hsla":
+        case "hwb": {
+            if (name === "hwb" && legacy)
+                return undefined;
+            const hue = toDegrees(components[0]);
+            const second = toFraction(components[1], legacy);
+            const third = toFraction(components[2], legacy);
+            if (hue === undefined || second === undefined || third === undefined)
+                return undefined;
+            if (name !== "hwb")
+                return [hslToChannels(hue, second, third), alpha];
+            const white = clamp(second, 0, 1);
+            const black = clamp(third, 0, 1);
+            if (white + black >= 1) {
+                const gray = white / (white + black);
+                return [[gray, gray, gray], alpha];
+            }
+            return [
+                hslToChannels(hue, 1, 0.5).map((channel) => channel * (1 - white - black) + white),
+                alpha,
+            ];
+        }
+        default:
+            return undefined;
+    }
+};
+const HEX_PATTERN = /^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/;
+/** #rgb, #rgba, #rrggbb and #rrggbbaa (lower case) */
+const parseHex = (value) => {
+    const match = HEX_PATTERN.exec(value);
+    if (!match)
+        return undefined;
+    const digits = match[1].length > 4
+        ? match[1]
+        : Array.from(match[1], (digit) => digit + digit).join("");
+    const bytes = Array.from({ length: digits.length / 2 }, (_, index) => parseInt(digits.slice(index * 2, index * 2 + 2), 16));
+    return [
+        bytes[0],
+        bytes[1],
+        bytes[2],
+        // as MUI's hexToRgb rounds it
+        bytes.length === 4 ? Math.round((bytes[3] / 255) * 1000) / 1000 : 1,
+    ];
+};
+const FUNCTION_PATTERN = /^([a-z-]+)\((.*)\)$/;
+/** rgb(), rgba(), hsl(), hsla(), hwb() and color(srgb | srgb-linear ...) */
+const parseFunction = (value) => {
+    const match = FUNCTION_PATTERN.exec(value);
+    if (!match)
+        return undefined;
+    const parsed = functionChannels(match[1], match[2]);
+    if (!parsed)
+        return undefined;
+    const [channels, alpha] = parsed;
+    if ([...channels, alpha].some((number) => !Number.isFinite(number)))
+        return undefined;
+    return [
+        Math.round(clamp(channels[0], 0, 1) * 255),
+        Math.round(clamp(channels[1], 0, 1) * 255),
+        Math.round(clamp(channels[2], 0, 1) * 255),
+        clamp(alpha, 0, 1),
+    ];
+};
+/**
+ * Resolves a color by painting it on a canvas, so the browser reads it
+ * @throws if there is no canvas (jsdom without the canvas package, a server)
+ */
+const resolveWithCanvas = (color) => {
     // credits: https://stackoverflow.com/a/19366389
     // Jest patch (canvas not supported), not used in prod
-    if (process && process.env && process.env.JEST_WORKER_ID)
+    if (typeof process !== "undefined" && process.env?.JEST_WORKER_ID)
         return [0, 0, 0, 1.0]; // black
-    if (process && process.env && process.env.NODE_ENV === "development") {
-        // eslint-disable-next-line no-console
-        console.warn("[Components-Care] colorToRgba (slow/unreliable) fallback triggered with color input:", color);
-    }
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     if (!ctx)
@@ -208,5 +376,30 @@ const colorToRgba = (color) => {
     ctx.getImageData(0, 0, 1, 1).data.forEach((val) => ret.push(val));
     ret[3] = Math.round((ret[3] / 0xff) * 1000) / 1000; // 0 - 255 => 0.0 - 1.0
     return ret;
+};
+/**
+ * Converts a CSS color to its red, green, blue and alpha channels.
+ * @param color Any CSS color. Keywords, hex (3, 4, 6 and 8 digits), rgb(),
+ * rgba(), hsl() and hsla() (numbers, percentages, angle units and none, with
+ * commas or spaces), hwb() and color() in the srgb and srgb-linear spaces
+ * are read here. Anything else (lab(), lch(), oklab(), oklch(), color() in
+ * another space, color-mix(), ...) is painted on a canvas, so it resolves
+ * wherever the browser supports it, mapped into sRGB as the browser does.
+ * @return [r, g, b, a]: red, green and blue 0-255 (rounded), alpha 0.0-1.0;
+ * or undefined if the color cannot be resolved (a var(), currentcolor, an
+ * invalid value)
+ * @throws if the color needs the canvas and there is none (jsdom without the
+ * canvas package, a server)
+ * @remarks Under Jest a color that needs the canvas resolves to black.
+ */
+const colorToRgba = (color) => {
+    const value = color.trim().toLowerCase();
+    if (Object.prototype.hasOwnProperty.call(colorLookupMap, value))
+        return parseHex(colorLookupMap[value]);
+    // the color of the element it is used on, which the value alone cannot tell
+    if (value === "currentcolor")
+        return undefined;
+    const parsed = value.startsWith("#") ? parseHex(value) : parseFunction(value);
+    return parsed ?? resolveWithCanvas(color);
 };
 export default colorToRgba;

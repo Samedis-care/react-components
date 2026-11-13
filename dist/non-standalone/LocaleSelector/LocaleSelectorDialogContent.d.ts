@@ -19,6 +19,14 @@ export interface LocaleSelectorEntryData {
     native_country: string;
     native_language: string;
 }
-export type LocaleSelectorDialogContentClassKey = "localeList" | "noLocalesMessage";
+/**
+ * Theme style slots of LocaleSelectorDialogContent
+ * (`components.CcLocaleSelectorDialogContent.styleOverrides.<slot>`):
+ * - `localeList`: the area below the search box that holds the rows
+ * - `noLocalesMessage`: the message that replaces the rows when none match
+ * - `searchStatus`: the visually hidden status region (`role="status"`) that
+ *   states the number of rows, or that none match the search
+ */
+export type LocaleSelectorDialogContentClassKey = "localeList" | "noLocalesMessage" | "searchStatus";
 declare const _default: React.MemoExoticComponent<(inProps: LocaleSelectorDialogContentProps) => React.JSX.Element>;
 export default _default;

@@ -11,7 +11,11 @@ const FormLoaderOverlayRoot = styled("div", {
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 9999,
+    // above the content it covers, also content with a z-index of its own, and below
+    // the lowest of the theme's app-level layers (mobile stepper, fab, speed dial,
+    // app bar, drawer, modal, snackbar, tooltip), so that dialogs, menus, snackbars
+    // and tooltips opened while it is shown stay above the wash and can be used
+    zIndex: theme.zIndex.mobileStepper - 1,
     // the spinner's line (loaderAnchor) rests in the middle; the padding, half the
     // Loader's height (a 40px spinner with theme.spacing(2) above and below), keeps
     // the spinner inside the wash wherever the line is moved to
@@ -56,5 +60,15 @@ const FormLoaderOverlay = (inProps) => {
  * what is shown of it, such as a long form scrolled to any point, the spinner stays
  * in the middle of what is shown. On a wash shown whole, it moves toward that line
  * as far as the wash allows, and stays inside the wash.
+ *
+ * Stacking: the wash's z-index is one below `theme.zIndex.mobileStepper` (999 with
+ * MUI's defaults), the lowest of the theme's app-level layers. It covers the content
+ * of the area it is placed in, before or after the overlay in the DOM, also content
+ * with a z-index of its own below that (outlined field labels, raised button bars).
+ * App bars, drawers, dialogs, menus, snackbars and tooltips stay above it, so a dialog
+ * opened while it is shown, such as one from a form's post-submit handler, can be
+ * used. Content of the covered area with a z-index of 999 or more can show above
+ * the wash, unless it is in a stacking context of its own (`isolation: isolate` on
+ * its container), as the body of FormPageLayout is.
  */
 export default React.memo(FormLoaderOverlay);

@@ -8,8 +8,7 @@ export type DialogType = React.ReactNode;
  */
 export type DialogContextType = [
     /**
-     * Shows `dialog` above the dialogs that are open already. Navigation is blocked while a
-     * pushed dialog is open.
+     * Shows `dialog` above the dialogs that are open already.
      * @returns A function that closes this dialog, and only this one, also while dialogs
      *          pushed after it are open. It is the function useCloseThisDialog returns inside
      *          the dialog, the same one for the life of the dialog. Calling it again, or after

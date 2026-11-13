@@ -84,7 +84,8 @@ export const MatrixAddHint = styled("div", {
  * transparent hint. It is a chip in the corner, and not a band across the cell,
  * because what is drawn and what is clickable have to be the same thing: a
  * strip that overlays the entries either steals their clicks or, if it is thin
- * enough not to, is too thin to hit.
+ * enough not to, is too thin to hit. It is 24x24px, the smallest target WCAG
+ * 2.5.8 allows for a control that lies on another one.
  */
 export const MatrixAddChip = styled("div", {
     name: "CcMatrixGrid",
@@ -94,8 +95,9 @@ export const MatrixAddChip = styled("div", {
     zIndex: 3,
     right: 3,
     bottom: 3,
-    minWidth: 26,
-    height: 20,
+    boxSizing: "border-box",
+    minWidth: 24,
+    height: 24,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -116,6 +118,38 @@ export const MatrixAddChip = styled("div", {
         boxShadow: `0 0 0 1px ${theme.palette.background.paper}`,
     },
 }));
+/**
+ * The add chip's name: addLabel, the row's label and the column's name, as
+ * text that is visually hidden (the chip shows only its icon). Text rather
+ * than an aria-label, so that an addLabel that is a node names the chip too.
+ */
+export const MatrixAddChipLabel = styled("span", {
+    name: "CcMatrixGrid",
+    slot: "addChipLabel",
+})({
+    // visually hidden, as MUI's visuallyHidden
+    border: 0,
+    clipPath: "inset(50%)",
+    height: 1,
+    margin: -1,
+    overflow: "hidden",
+    padding: 0,
+    position: "absolute",
+    whiteSpace: "nowrap",
+    width: 1,
+});
+/**
+ * Is this part of the add chip's name there at all? React renders nothing for
+ * null, undefined and booleans, and an empty string says nothing.
+ */
+const isNamePart = (part) => part != null && typeof part !== "boolean" && part !== "";
+/**
+ * MatrixColumn.name, or the label when that is text
+ */
+const columnNameOf = (column) => column.name ??
+    (typeof column.label === "string" || typeof column.label === "number"
+        ? String(column.label)
+        : undefined);
 /**
  * One body cell. Everything but its own row and column comes from the grid's
  * contexts, and its pointer state comes as a bit mask from the interaction
@@ -168,7 +202,18 @@ const MatrixBodyCell = (props) => {
     const overlay = cellSelectable && !touch && occupiedAddAffordance === "overlay"
         ? occupied
         : false;
-    const chipActivation = useMatrixActivation(chip ? addToCell : undefined, typeof addLabel === "string" ? addLabel : undefined);
+    // named by its contents, see MatrixAddChipLabel
+    const chipActivation = useMatrixActivation(chip ? addToCell : undefined);
+    // The chip's name says what it does and on which cell, or every chip of the
+    // grid would be the same "Add". It doubles as the tooltip where it is text.
+    const chipWhere = [row.label, columnNameOf(column)]
+        .filter(isNamePart)
+        .join(", ");
+    const chipTitle = (typeof addLabel === "string"
+        ? [addLabel, chipWhere].filter(Boolean).join(", ")
+        : isNamePart(addLabel)
+            ? undefined // a node, not text
+            : chipWhere) || undefined;
     const stopPress = useCallback((event) => {
         // the chip reports the cell itself; letting the press through would
         // begin a range on the same cell and report it twice
@@ -188,10 +233,10 @@ const MatrixBodyCell = (props) => {
         // about every cell the pointer reaches: a fast drag skips cells
         // (pointer events are sampled), and the store resolves the range
         // from the anchor to wherever the pointer is now.
-        onMouseEnter: selectable ? handleMouseEnter : undefined, onMouseLeave: selectable ? handleMouseLeave : undefined, children: [content, chip && (_jsx(MatrixAddChip, { "data-cc-matrix-add-chip": "", className: combineClassNames([
+        onMouseEnter: selectable ? handleMouseEnter : undefined, onMouseLeave: selectable ? handleMouseLeave : undefined, children: [content, chip && (_jsxs(MatrixAddChip, { "data-cc-matrix-add-chip": "", className: combineClassNames([
                     classes?.addChip,
                     touch && matrixClasses.touch,
-                ]), title: typeof addLabel === "string" ? addLabel : undefined, ...chipActivation, onMouseDown: stopPress, children: _jsx(Add, { fontSize: "small" }) })), !chip && cellSelectable && !!(state & MATRIX_CELL_ADD_HINT) && (_jsx(MatrixAddHint, { className: combineClassNames([
+                ]), title: chipTitle, ...chipActivation, onMouseDown: stopPress, children: [_jsx(Add, { fontSize: "small" }), _jsxs(MatrixAddChipLabel, { className: classes?.addChipLabel, children: [addLabel, isNamePart(addLabel) && chipWhere ? ", " : null, chipWhere] })] })), !chip && cellSelectable && !!(state & MATRIX_CELL_ADD_HINT) && (_jsx(MatrixAddHint, { className: combineClassNames([
                     classes?.addHint,
                     overlay && matrixClasses.addHintHalf,
                 ]), children: addLabel }))] }));

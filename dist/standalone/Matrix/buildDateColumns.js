@@ -14,7 +14,8 @@ moment.utc(toDateOnly(value)).format("YYYY-MM-DD");
  * Builds the columns of a day-per-column matrix.
  * @param params The range, and how to mark the days in it
  * @returns One column per day, keyed by ISO date, labeled with the day number
- * and the localized short weekday
+ * and the localized short weekday, and named with the localized full date
+ * ("Thursday, March 5, 2026")
  * @remarks The weekday names come from Intl, not from moment, so a consumer
  * does not have to bundle moment's locale files to get localized headers.
  */
@@ -30,6 +31,7 @@ const buildDateColumns = (params) => {
             : dayKeyOf(params.today);
     const accentDays = (Array.isArray(accent) ? accent : accent ? [accent] : []).map(dayKeyOf);
     const weekdayFormat = new Intl.DateTimeFormat(locale, { weekday: "short" });
+    const nameFormat = new Intl.DateTimeFormat(locale, { dateStyle: "full" });
     const columns = [];
     const end = moment(to);
     const day = moment(from);
@@ -39,6 +41,7 @@ const buildDateColumns = (params) => {
             key,
             label: day.date(),
             subLabel: weekdayFormat.format(day.toDate()),
+            name: nameFormat.format(day.toDate()),
             variant: accentDays.includes(key)
                 ? "accent"
                 : key === today

@@ -61,12 +61,12 @@ export const showInputDialog = (pushDialog, props) => pushDialogPromise(pushDial
  *          handler has ended, by Escape or a backdrop click. Its `close()` closes the dialog
  *          and resolves it at once.
  * @example
- * // a button that navigates closes the dialog first, as navigation is blocked while a dialog
- * // is open. It uses the close it gets: the awaiting code continues after the handler.
+ * // a button that leads somewhere: the dialog closes after the handler, then the awaiting
+ * // code continues
  * await showInfoDialog(pushDialog, {
  * 	title,
  * 	message,
- * 	buttons: [{ text: "Open", onClick: (close) => { close(); navigate(target); } }],
+ * 	buttons: [{ text: "Open", onClick: () => navigate(target) }],
  * });
  * @example
  * // closing the dialog from outside it

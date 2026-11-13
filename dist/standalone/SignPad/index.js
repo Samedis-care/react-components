@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback } from "react";
+import React, { useCallback, useId } from "react";
 import { IconButton, InputAdornment, styled, useThemeProps, } from "@mui/material";
 import { SignIcon } from "../../standalone";
 import { Info as InfoIcon } from "@mui/icons-material";
@@ -67,8 +67,20 @@ const InfoDiv = styled("div", { name: "CcSignPad", slot: "infoDiv" })({
 });
 const SignPad = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcSignPad" });
-    const { signature, signerName: signerNameUntrim, disabled, openInfo, openSignPad, className, classes, } = props;
+    const { signature, signerName: signerNameUntrim, disabled, openInfo, openSignPad, className, classes, id, "aria-labelledby": labelledByProp, "aria-describedby": describedByProp, "aria-invalid": invalid, required, } = props;
     const { t } = useCCTranslations();
+    const generatedId = useId();
+    const buttonId = id || generatedId;
+    const infoId = `${buttonId}-info`;
+    const requiredId = `${buttonId}-required`;
+    const labelledBy = labelledByProp?.trim();
+    // the field's label first, then the button's own name, which tells whether
+    // it is signed (a self reference reads the button's aria-label)
+    const buttonLabelledBy = labelledBy ? `${labelledBy} ${buttonId}` : undefined;
+    const infoLabelledBy = labelledBy ? `${infoId} ${labelledBy}` : undefined;
+    const describedBy = [required ? requiredId : "", describedByProp?.trim()]
+        .filter(Boolean)
+        .join(" ") || undefined;
     const signerName = signerNameUntrim?.trim();
     const prompt = t("standalone.signature-pad.sign-here");
     // what the tile holds (it starts with the visible prompt while unsigned),
@@ -89,6 +101,6 @@ const SignPad = (inProps) => {
     }, [openInfo]);
     return (_jsxs(SignPadDiv, { className: combineClassNames([className, classes?.root]), 
         // also gets the button's clicks, Enter and Space included
-        onClick: openSignPad, children: [_jsxs(SignPadButton, { type: "button", "aria-label": label, "aria-disabled": disabled || undefined, className: classes?.button, children: [_jsxs(SignTextDiv, { className: classes?.signTextDiv, children: [_jsx(SignIcon, { color: disabled ? "disabled" : "primary" }), !signature && _jsx("span", { children: prompt })] }), _jsx(ImageDiv, { className: classes?.imageDiv, children: signature && (_jsx(SignPreview, { className: classes?.signPreview, src: signature, alt: "" })) })] }), _jsx(InfoDiv, { className: classes?.infoDiv, children: openInfo && (_jsx(InputAdornment, { position: "end", children: _jsx(IconButton, { onClick: handelOpenInfo, size: "large", "aria-label": t("standalone.uikit.info"), children: _jsx(InfoIcon, { color: "disabled" }) }) })) })] }));
+        onClick: openSignPad, children: [_jsxs(SignPadButton, { type: "button", id: buttonId, "aria-label": label, "aria-labelledby": buttonLabelledBy, "aria-describedby": describedBy, "aria-invalid": invalid, "aria-disabled": disabled || undefined, className: classes?.button, children: [_jsxs(SignTextDiv, { className: classes?.signTextDiv, children: [_jsx(SignIcon, { color: disabled ? "disabled" : "primary" }), !signature && _jsx("span", { children: prompt })] }), _jsx(ImageDiv, { className: classes?.imageDiv, children: signature && (_jsx(SignPreview, { className: classes?.signPreview, src: signature, alt: "" })) })] }), _jsx(InfoDiv, { className: classes?.infoDiv, children: openInfo && (_jsx(InputAdornment, { position: "end", children: _jsx(IconButton, { id: infoId, onClick: handelOpenInfo, size: "large", "aria-label": t("standalone.uikit.info"), "aria-labelledby": infoLabelledBy, children: _jsx(InfoIcon, { color: "disabled" }) }) })) }), required && (_jsx("span", { id: requiredId, hidden: true, children: t("standalone.signature-pad.required") }))] }));
 };
 export default React.memo(SignPad);

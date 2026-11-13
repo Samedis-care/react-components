@@ -55,8 +55,8 @@ const MatrixCellTile = (inProps) => {
     const { items, pairLayout = "split", splitDirection = "row", placeholder, onItemClick, renderItem, className, classes, } = props;
     // A plain function on purpose: this is called while rendering, never passed
     // to a memoized child, so a useCallback around it would buy nothing.
-    const wrap = (item, node) => {
-        const highlighted = item.highlighted ? (_jsx(MatrixTileHighlight, { className: classes?.highlight, children: node })) : (node);
+    const wrap = (item, node, ringed = !!item.highlighted) => {
+        const highlighted = ringed ? (_jsx(MatrixTileHighlight, { className: classes?.highlight, children: node })) : (node);
         return renderItem ? renderItem(item, highlighted) : highlighted;
     };
     let content;
@@ -71,9 +71,9 @@ const MatrixCellTile = (inProps) => {
             .map((item) => (_jsx(React.Fragment, { children: wrap(item, _jsx(MatrixTileItem, { item: item })) }, item.key)));
     }
     else {
-        const pair = _jsx(MatrixTileDiagonalPair, { a: items[0], b: items[1] });
-        content =
-            items[0].highlighted || items[1].highlighted ? (_jsx(MatrixTileHighlight, { className: classes?.highlight, children: pair })) : (pair);
+        // One box: one ring if either entry is highlighted, and one renderItem
+        // call, as the first entry (the one a click on the pair reports)
+        content = wrap(items[0], _jsx(MatrixTileDiagonalPair, { a: items[0], b: items[1] }), !!(items[0].highlighted || items[1].highlighted));
     }
     // Only what an entry reads, so a consumer mapping its items fresh on every
     // render (the normal case) does not invalidate this and re-render them.

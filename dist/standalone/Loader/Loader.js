@@ -76,7 +76,7 @@ const Loader = (inProps) => {
         else
             progressLabel = ready ? t("standalone.loader.label") : DEFAULT_NAME;
     }
-    return (_jsx(Root, { role: "status", ...rootProps, text: text, typographyVariant: typographyVariant, className: combineClassNames([className, classes?.root]), children: _jsxs(InnerWrapper, { className: classes?.innerWrapper, children: [text && (_jsx(Typography, { id: textId, variant: typographyVariant, children: text })), _jsx(Progress, { className: classes?.progress, "aria-label": progressLabel, "aria-labelledby": progressLabelledBy })] }) }));
+    return (_jsx(Root, { role: "status", ...rootProps, text: text, typographyVariant: typographyVariant, className: combineClassNames([className, classes?.root]), children: _jsxs(InnerWrapper, { className: classes?.innerWrapper, children: [text && (_jsx(Typography, { id: textId, variant: typographyVariant, component: "p", children: text })), _jsx(Progress, { className: classes?.progress, "aria-label": progressLabel, "aria-labelledby": progressLabelledBy })] }) }));
 };
 /**
  * Indeterminate loading indicator: a MUI `CircularProgress` with an optional
@@ -97,6 +97,7 @@ const Loader = (inProps) => {
  * Accessibility: the `root` slot is a polite status region
  * (`role="status"`) around text and spinner, so screen readers announce the
  * loading; `aria-live="off"` silences it where many Loaders show at once.
+ * The text is a paragraph, not a heading, in every `typographyVariant`.
  * Nothing in it is focusable. The spinner is a `progressbar`, named by
  * `text`, or without text "Loading…" in the library's current language.
  * `aria-label` and `aria-labelledby` replace that name. A status region

@@ -82,6 +82,8 @@ const SignalPortletItem = (inProps) => {
                 : classes.itemColorInactive
         : undefined;
     const content = (_jsxs(_Fragment, { children: [_jsx(ListAvatar, { className: classes?.listAvatar, children: _jsx(AvatarComponent, { className: avatarClass, children: count == null ? (_jsx(Loader, {})) : count > MAX_COUNT ? (_jsxs(_Fragment, { children: [_jsx(CountCapped, { "aria-hidden": true, className: classes?.countCapped, children: `${MAX_COUNT}+` }), _jsx(CountFull, { className: classes?.countFull, children: count.toString() })] })) : (count.toString()) }) }), _jsx(ListText, { slotProps: { primary: textTypographyProps }, children: text })] }));
-    return link ? (_jsx(ListRootButton, { onClick: handleClick, className: combineClassNames([className, classes?.rootBtn]), children: content })) : (_jsx(ListRoot, { className: combineClassNames([className, classes?.root]), children: content }));
+    // every row is a list item; a linked row puts its button inside, as in
+    // MUI's ListItem disablePadding + ListItemButton pattern
+    return (_jsx(ListRoot, { disablePadding: !!link, className: combineClassNames([className, classes?.root]), children: link ? (_jsx(ListRootButton, { onClick: handleClick, className: classes?.rootBtn, children: content })) : (content) }));
 };
 export default React.memo(SignalPortletItem);

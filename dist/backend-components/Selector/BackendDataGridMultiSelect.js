@@ -102,13 +102,15 @@ const BackendDataGridMultiSelect = (props) => {
                     offset: Math.max(requestedOffset, 0),
                     rows: Math.max(requestedOffset + params.rows, 0),
                 });
+                // a connector that reports filteredRows counts the whole collection (the
+                // selected records included) in totalRows and the other matches in
+                // filteredRows; one that doesn't counts the other matches in totalRows
+                const reportsFiltered = dataMeta.filteredRows != null;
+                const matchCount = relationshipRecordFilteredCount +
+                    (dataMeta.filteredRows ?? dataMeta.totalRows);
                 return {
-                    rowsTotal: (dataMeta.filteredRows != null
-                        ? selected.length
-                        : relationshipRecordFilteredCount) + dataMeta.totalRows,
-                    rowsFiltered: dataMeta.filteredRows != null
-                        ? relationshipRecordFilteredCount + dataMeta.totalRows
-                        : undefined,
+                    rowsTotal: reportsFiltered ? dataMeta.totalRows : matchCount,
+                    rowsFiltered: reportsFiltered ? matchCount : undefined,
                     rows: [...relationshipRecordsFiltered, ...dataRecords].map(renderDataGridRecordUsingModel(model, refreshGrid)),
                 };
             } }) }));

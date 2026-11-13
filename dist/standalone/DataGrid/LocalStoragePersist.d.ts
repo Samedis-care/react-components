@@ -1,7 +1,13 @@
 import React from "react";
 export interface LocalStoragePersistProps {
     /**
-     * The local storage key to use for persisting
+     * The localStorage key the grids inside read their state from and write it
+     * to.
+     *
+     * When it changes, the children are mounted again, so the grids open with
+     * what is stored under the new key. Everything else inside is mounted
+     * again as well: it loses its state, and keyboard focus inside it falls
+     * back to the page.
      */
     storageKey: string;
     /**

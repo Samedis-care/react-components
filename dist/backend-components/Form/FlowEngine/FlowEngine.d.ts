@@ -15,11 +15,14 @@ export type FlowStageSubmitOptions = Omit<FormSubmitOptions, "submitToServer">;
 export interface FlowStageContextType<StageT extends string> {
     /**
      * Go to next stage (or current stage to submit)
-     * @param nextStage The next stage
+     * @param nextStage The next stage, a key of FlowEngineProps.children
      * @param submitToServer Submit to server?
      * @param options The submit's further options, e.g. ignoreWarnings when the
      *                warnings were already confirmed by a submit just before
      * @throws ValidationError
+     * @throws Error that names nextStage when FlowEngineProps.children has no component for
+     *         it. Nothing is submitted then, the stage stays, and the error is reported via
+     *         the global error reporting config and logged to the console.
      * @remarks this calls FormEngine submitForm and if successful sets the stage
      */
     goToStage: (nextStage: StageT, submitToServer: boolean, options?: FlowStageSubmitOptions) => Promise<void>;
@@ -28,9 +31,10 @@ export interface FlowStageContextType<StageT extends string> {
      * @param nextStage The next stage
      * @param submitToServer Submit to server?
      * @param options The submit's further options, see goToStage
-     * @returns false if submitting failed, true otherwise
+     * @returns false if submitting failed or nextStage has no component, true otherwise
      * @remarks if submitting fails the stage is left unchanged. The error is shown by the form's
      *          errorComponent and reported via the global error reporting config regardless.
+     *          A nextStage without a component is reported and logged, see goToStage.
      * @see goToStage
      * @see FormContextData.safeSubmit
      */
@@ -41,10 +45,27 @@ export interface FlowStageContextType<StageT extends string> {
     stage: StageT;
 }
 export declare const FlowStageContext: React.Context<FlowStageContextType<string> | null>;
+/**
+ * The stage API of the nearest FlowEngine, for components below a stage (a stepper,
+ * buttons deeper in the tree)
+ * @typeParam StageT The FlowEngine's union of stage names. It is not checked against the
+ *            FlowEngine, and without it any string compiles; goToStage rejects a name
+ *            that has no stage.
+ * @throws Error "FlowStageContext not set" outside a FlowEngine
+ */
 export declare const useFlowStageContext: <StageT extends string>() => FlowStageContextType<StageT>;
 export interface FlowEngineProps<M extends ModelUnknown, StageT extends string, CustomPropsT> {
+    /**
+     * The stage shown first, a key of children
+     * @remarks A name without a component in children fails the render with the error
+     *          goToStage rejects with for it.
+     */
     defaultStage: StageT;
     formProps: PageProps<M, CustomPropsT>;
+    /**
+     * One component per stage, keyed by stage name
+     * @remarks Only the object's own keys are stages, and only those with a component.
+     */
     children: Record<StageT, React.ComponentType<FlowStageProps<M, StageT, CustomPropsT>>>;
     /**
      * The name of each stage for assistive technology, translated: the step title the user

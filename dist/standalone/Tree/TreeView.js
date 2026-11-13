@@ -148,26 +148,33 @@ const TreeView = React.forwardRef(function TreeView(props, ref) {
             onToggleExpanded: hookOnToggleExpanded,
         },
     }), [renderer, enhancedData, rendererProps, hookOnToggleExpanded]);
-    // controlled scrolling
+    // controlled scrolling: a request waits until its entry is visible and
+    // react-window has measured the list, which it does in a ResizeObserver after
+    // the first render. Before that it would align the row to a 0px high list.
     const [scrollToId, setScrollToId] = useState(null);
+    const [measured, setMeasured] = useState(false);
+    const handleResize = useCallback((size) => {
+        // 0px high: not laid out yet, or hidden (display: none)
+        setMeasured(size.height > 0);
+    }, []);
     useEffect(() => {
-        if (!scrollToId)
+        if (scrollToId === null || !measured)
             return;
         const list = listRef.current;
         if (!list)
             return;
-        setScrollToId(null);
         const entry = enhancedData.find((entry) => entry.id === scrollToId);
         if (!entry)
             return;
+        setScrollToId(null);
         list.scrollToRow({ index: entry.index });
-    }, [scrollToId, enhancedData]);
+    }, [scrollToId, measured, enhancedData]);
     // ref
     useImperativeHandle(ref, () => ({
         scrollTo: (id) => {
             setScrollToId(id);
         },
     }), []);
-    return (_jsx(List, { listRef: listRef, rowComponent: RendererWrapper, rowHeight: itemHeight, rowCount: enhancedData.length, rowProps: itemData }));
+    return (_jsx(List, { listRef: listRef, rowComponent: RendererWrapper, rowHeight: itemHeight, rowCount: enhancedData.length, rowProps: itemData, onResize: handleResize }));
 });
 export default React.memo(TreeView);

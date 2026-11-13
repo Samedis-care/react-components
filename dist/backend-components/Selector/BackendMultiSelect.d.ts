@@ -32,8 +32,10 @@ export interface BackendMultiSelectProps<M extends ModelUnknown, DataT extends M
     searchResultLimit?: number;
     /**
      * Selection change handler
-     * @param data The selected data entry/entries values
-     * @param raw The selected data entry/entries
+     * @param value The ids of the new selection, in order
+     * @param raw The entries of these ids, in the same order. An id whose record is still
+     *        loading (listed as "Loading…") has no entry yet and is left out, so match the
+     *        entries to the ids by `value`, not by position.
      */
     onSelect?: (value: string[], raw: DataT[]) => void;
     /**
@@ -76,7 +78,8 @@ interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
      */
     selected: DataT[];
     /**
-     * Event handler for the selection event
+     * Event handler for the selection event: caches the entries and calls `onSelect` with
+     * their ids and the entries, without the "Loading…" ones
      */
     handleSelect: (selected: DataT[]) => void;
 }

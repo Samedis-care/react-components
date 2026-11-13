@@ -27,6 +27,16 @@ export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
      */
     selected: DataT[];
     /**
+     * Shows the selection without a way to change it, as the read-only file upload does:
+     * the label, then the selected entries without remove buttons, or "No entries" when
+     * none is selected. There is no search field, so nothing that looks editable: no
+     * placeholder, popup button, end adornments or info button. The entries keep their
+     * onClick, and the list is named by the label. Takes precedence over disabled, which
+     * instead keeps the search field, greyed out and out of the tab order.
+     * @default false
+     */
+    readOnly?: boolean;
+    /**
      * Specify a custom component for displaying multi select items. The entries
      * are the items of one list (`<ul>`), so its root must be an `<li>`, e.g.
      * MUI's ListItem, as MultiSelectEntry renders.
@@ -59,7 +69,7 @@ export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
 export interface MultiSelectSelectorOwnerState {
     selected: boolean;
 }
-export type MultiSelectClassKey = "root" | "selectedEntry" | "selector";
+export type MultiSelectClassKey = "root" | "selectedEntry" | "selector" | "label" | "empty";
 declare const MultiSelect: <DataT extends MultiSelectorData>(inProps: MultiSelectProps<DataT>) => React.JSX.Element;
 declare const _default: typeof MultiSelect;
 export default _default;

@@ -6,8 +6,11 @@ const focusRing = (theme, offset) => ({
         outlineOffset: offset,
     },
 });
+// an icon smaller than 16px sits centered in the 24x24 minimum target (WCAG 2.5.8)
 export const SmallIconButton = styled(IconButton)(({ theme }) => ({
     padding: 4,
+    minWidth: 24,
+    minHeight: 24,
     ...focusRing(theme, 0),
 }));
 // without padding the button is the icon's box, so the ring keeps clear of the glyph;

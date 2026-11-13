@@ -1,5 +1,5 @@
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useId, useState, } from "react";
 import { Notifications as NotificationsIcon } from "@mui/icons-material";
 import { Badge, Box, Divider, Grid, IconButton, Popover, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import InfiniteScroll from "../InfiniteScroll";
@@ -60,6 +60,7 @@ const StyledHeader = styled(Typography, {
 const Notifications = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcNotifications" });
     const { t } = useCCTranslations();
+    const headerId = useId();
     const [anchor, setAnchor] = useState(null);
     const { onOpen, loadLatest, loadRead, loadUnread, refreshInterval, unreadCount, classes, className, IconButtonProps, } = props;
     const onIconClick = useCallback((evt) => {
@@ -91,6 +92,6 @@ const Notifications = (inProps) => {
     }, []);
     const Renderer = props.notificationRenderer || DefaultRenderer;
     const notifications = props.notifications.filter((not) => !not.expires || not.expires > new Date());
-    return (_jsxs("div", { className: className, children: [_jsx(IconButton, { size: "large", "aria-label": t("standalone.notifications.title"), ...IconButtonProps, onClick: onIconClick, children: _jsx(Badge, { badgeContent: unreadCount ?? notifications.filter((not) => !not.read).length, max: 99, color: "error", ...props.BadgeProps, children: _jsx(NotificationsIcon, {}) }) }), _jsx(Popover, { open: !!anchor, anchorEl: anchor, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onClose: onClose, ...props.PopoverProps, children: _jsx(Box, { sx: { p: 2 }, children: _jsxs(Grid, { container: true, spacing: 2, children: [_jsx(Grid, { size: 12, children: _jsx(StyledHeader, { component: "h2", variant: "h6", className: classes?.header, children: t("standalone.notifications.title") }) }), _jsx(Grid, { size: 12, children: _jsx(Divider, {}) }), _jsx(Grid, { size: 12, children: _jsx(StyledInfiniteScroll, { loadMoreBottom: loadRead, loadMoreTop: loadUnread, className: classes?.notificationArea ?? "", children: notifications.map((notification) => (_jsx(Renderer, { ...notification }, notification.id))) }) })] }) }) })] }));
+    return (_jsxs("div", { className: className, children: [_jsx(IconButton, { size: "large", "aria-label": t("standalone.notifications.title"), ...IconButtonProps, onClick: onIconClick, children: _jsx(Badge, { badgeContent: unreadCount ?? notifications.filter((not) => !not.read).length, max: 99, color: "error", ...props.BadgeProps, children: _jsx(NotificationsIcon, {}) }) }), _jsx(Popover, { open: !!anchor, anchorEl: anchor, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onClose: onClose, ...props.PopoverProps, children: _jsx(Box, { sx: { p: 2 }, children: _jsxs(Grid, { container: true, spacing: 2, children: [_jsx(Grid, { size: 12, children: _jsx(StyledHeader, { component: "h2", variant: "h6", className: classes?.header, id: headerId, children: t("standalone.notifications.title") }) }), _jsx(Grid, { size: 12, children: _jsx(Divider, {}) }), _jsx(Grid, { size: 12, children: _jsx(StyledInfiniteScroll, { loadMoreBottom: loadRead, loadMoreTop: loadUnread, className: classes?.notificationArea ?? "", role: "region", "aria-labelledby": headerId, children: notifications.map((notification) => (_jsx(Renderer, { ...notification }, notification.id))) }) })] }) }) })] }));
 };
 export default React.memo(Notifications);

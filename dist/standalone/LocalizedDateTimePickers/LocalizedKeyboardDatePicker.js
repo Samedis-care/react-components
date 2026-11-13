@@ -7,9 +7,10 @@ import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 import usePickerDraft from "./usePickerDraft";
 import usePickerValidationError from "./usePickerValidationError";
+import usePickerErrorMessage from "./usePickerErrorMessage";
 import withAccessibleError from "./withAccessibleError";
 import withRequiredSections from "./withRequiredSections";
-import withFieldBlur from "./withFieldBlur";
+import useFieldBlur from "./useFieldBlur";
 const NoIcon = () => {
     return _jsx(_Fragment, {});
 };
@@ -26,6 +27,11 @@ const LocalizedKeyboardDatePicker = (inProps) => {
     const localeText = useMuiLocaleData();
     const draft = usePickerDraft(otherProps.value, otherProps.onChange, publishIntermediateValues);
     const validation = usePickerValidationError(otherProps.onError);
+    const errorMessage = usePickerErrorMessage(validation.shownError, {
+        minDate: otherProps.minDate,
+        maxDate: otherProps.maxDate,
+    });
+    const withFieldBlur = useFieldBlur();
     const { settle } = draft;
     const consumerOnOpen = otherProps.onOpen;
     const handleOpen = useCallback(() => {
@@ -49,7 +55,7 @@ const LocalizedKeyboardDatePicker = (inProps) => {
                         ...(fullWidth === undefined ? {} : { fullWidth }),
                         // called once focus leaves the field, see withFieldBlur
                         onBlur: (event) => {
-                            draft.settle();
+                            validation.onFieldLeave();
                             textFieldProps?.onBlur?.(event);
                             onBlur?.(event);
                         },
@@ -59,8 +65,8 @@ const LocalizedKeyboardDatePicker = (inProps) => {
                         // it does not know to the DOM, so it is only sent on to a text
                         // field that was actually swapped in for it.
                         ...(otherProps.slots?.textField ? { disableClearable } : {}),
-                    }));
-                    return withFieldBlur(ownerState, fieldProps);
+                    }), errorMessage);
+                    return withFieldBlur(ownerState, fieldProps, validation.onFieldFocus);
                 },
             } }) }));
 };

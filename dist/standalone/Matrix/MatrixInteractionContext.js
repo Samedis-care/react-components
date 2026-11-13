@@ -91,9 +91,10 @@ export class MatrixInteractionStore {
     /**
      * How far a range from `anchor` towards `target` may reach: the last index
      * before the first cell canSelect rejects.
-     * @remarks The single source of the clamp, so what a sweep paints and what
-     * it reports cannot drift apart — not even when the data changed under a
-     * held button and no pointer event fired in between.
+     * @remarks The single source of the clamp: resolveBounds() paints with it
+     * and commit() reports those bounds, so what a sweep paints and what it
+     * reports cannot drift apart — not even when the data changed under a held
+     * button and no pointer event fired in between.
      */
     resolveFocus(rowKey, anchor, target) {
         if (target === anchor)
@@ -107,17 +108,29 @@ export class MatrixInteractionStore {
         }
         return focus;
     }
-    /** Recomputes the painted bounds from the anchor and focus keys. */
+    /**
+     * Recomputes the bounds of the range from the anchor and focus keys and the
+     * current data: they are what is painted and what commit() reports.
+     * @remarks Runs on every configure(), so a press cell that filled up while
+     * the button was down drops the range, and a cell in between that filled
+     * up shrinks it to the cells before it.
+     */
     resolveBounds() {
+        const rowKey = this.rowKey;
         const anchor = this.indexOf(this.anchorKey);
         const focus = this.indexOf(this.focusKey);
-        if (!this.dragging || anchor < 0 || focus < 0) {
+        if (!this.dragging ||
+            rowKey === null ||
+            anchor < 0 ||
+            focus < 0 ||
+            !this.config.canSelect(rowKey, anchor)) {
             this.from = -1;
             this.to = -1;
             return;
         }
-        this.from = Math.min(anchor, focus);
-        this.to = Math.max(anchor, focus);
+        const reachable = this.resolveFocus(rowKey, anchor, focus);
+        this.from = Math.min(anchor, reachable);
+        this.to = Math.max(anchor, reachable);
     }
     /** Begins a range on a cell. */
     begin(rowKey, columnKey) {
@@ -196,25 +209,18 @@ export class MatrixInteractionStore {
         if (!this.dragging)
             return;
         const rowKey = this.rowKey;
-        const anchor = this.indexOf(this.anchorKey);
-        const focus = this.indexOf(this.focusKey);
+        // Report the painted bounds. resolveBounds() keeps them current with
+        // every configure(): a column that disappeared mid-press, a press cell
+        // or a cell in between that filled up, or a row that was opted out while
+        // the button was down and the pointer stood still are already in them.
+        const columnKeys = this.from < 0 ? [] : this.config.columnKeys.slice(this.from, this.to + 1);
         this.dragging = false;
         this.rowKey = null;
         this.anchorKey = null;
         this.focusKey = null;
         this.resolveBounds();
         this.notify();
-        // A column that disappeared mid-press takes the range with it.
-        if (rowKey === null || anchor < 0 || focus < 0)
-            return;
-        // Re-check the press cell itself, then re-walk from it: both it and the
-        // cells in between may have filled up, or the whole row may have been
-        // opted out, while the button was down and the pointer stood still.
-        if (!this.config.canSelect(rowKey, anchor))
-            return;
-        const reachable = this.resolveFocus(rowKey, anchor, focus);
-        const columnKeys = this.config.columnKeys.slice(Math.min(anchor, reachable), Math.max(anchor, reachable) + 1);
-        if (columnKeys.length === 0)
+        if (rowKey === null || columnKeys.length === 0)
             return;
         this.config.onSelectRange?.({
             rowKey,

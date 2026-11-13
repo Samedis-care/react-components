@@ -1,7 +1,8 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import { ErrorOutlined, InfoOutlined, ReportProblemOutlined, TaskAlt, } from "@mui/icons-material";
 import { Accordion, AccordionDetails, AccordionSummary, styled, Typography, useThemeProps, } from "@mui/material";
+import { useControlled } from "@mui/material/utils";
 import combineClassNames from "../../utils/combineClassNames";
 const AccordionStyled = styled(Accordion, { name: "CcInfoBox", slot: "root" })({
     boxShadow: "none",
@@ -85,7 +86,7 @@ const DetailsText = styled("div", { name: "CcInfoBox", slot: "detailsText" })({}
 // .MuiAccordionSummary-root.Mui-expanded => min-height => unset
 const InfoBox = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcInfoBox" });
-    const { heading, onChange, expanded, alwaysExpanded, message, status, headingVariant, className, classes, } = props;
+    const { heading, onChange, expanded: expandedProp, defaultExpanded = false, alwaysExpanded, message, status, headingVariant, className, classes, } = props;
     const getIcon = useCallback(() => {
         switch (status) {
             case "warning":
@@ -98,14 +99,20 @@ const InfoBox = (inProps) => {
                 return _jsx(InfoOutlined, {});
         }
     }, [status]);
-    // The state the user toggles, starting at `expanded`. The Accordion is
-    // always controlled, so `alwaysExpanded` can change after mount without
-    // switching it between controlled and uncontrolled.
-    const [userExpanded, setUserExpanded] = useState(expanded);
+    // `expanded` when set, otherwise the state the user toggles, starting at
+    // `defaultExpanded`. The Accordion is always controlled, with a boolean,
+    // so `alwaysExpanded` can change after mount, and `expanded` can be
+    // removed, without switching it between controlled and uncontrolled.
+    const [expanded, setExpanded] = useControlled({
+        controlled: expandedProp,
+        default: defaultExpanded,
+        name: "InfoBox",
+        state: "expanded",
+    });
     const handleChange = useCallback((event, newExpanded) => {
-        setUserExpanded(newExpanded);
+        setExpanded(newExpanded);
         onChange?.(event, newExpanded);
-    }, [onChange]);
-    return (_jsxs(AccordionStyled, { className: combineClassNames([className, classes?.root]), expanded: !!alwaysExpanded || userExpanded, onChange: handleChange, children: [_jsx(AccordionSummaryStyled, { ownerState: { status, alwaysExpanded: !!alwaysExpanded }, className: classes?.summary, children: _jsxs(SummaryRoot, { className: classes?.summaryRoot, children: [_jsx(SpanIconButton, { className: classes?.iconButton, children: getIcon() }), _jsx(SummaryHeading, { variant: headingVariant ?? "caption", className: classes?.heading, children: heading })] }) }), _jsx(AccordionDetailsStyled, { className: classes?.details, children: _jsx(DetailsText, { className: classes?.detailsText, children: message }) })] }));
+    }, [onChange, setExpanded]);
+    return (_jsxs(AccordionStyled, { className: combineClassNames([className, classes?.root]), expanded: !!alwaysExpanded || !!expanded, onChange: handleChange, children: [_jsx(AccordionSummaryStyled, { ownerState: { status, alwaysExpanded: !!alwaysExpanded }, className: classes?.summary, children: _jsxs(SummaryRoot, { className: classes?.summaryRoot, children: [_jsx(SpanIconButton, { className: classes?.iconButton, children: getIcon() }), _jsx(SummaryHeading, { variant: headingVariant ?? "caption", className: classes?.heading, children: heading })] }) }), _jsx(AccordionDetailsStyled, { className: classes?.details, children: _jsx(DetailsText, { className: classes?.detailsText, children: message }) })] }));
 };
 export default React.memo(InfoBox);

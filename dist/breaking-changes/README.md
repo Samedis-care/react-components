@@ -20,6 +20,77 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-13 | [SignalPortlet shows no "Last refresh" label for 0 or an invalid time](2026-11-13-signal-portlet-no-label-without-time.md) | behavior |
+| 2026-11-13 | [The date pickers report a blur when focus leaves the open calendar](2026-11-13-picker-blur-on-leaving-the-calendar.md) | behavior |
+| 2026-11-13 | [Matrix columns are 56px wide by default, and the add chip is 24x24](2026-11-13-matrix-targets-24px.md) | behavior |
+| 2026-11-13 | [A dimmed Matrix entry fades its fill only, and its label is picked for the faded fill](2026-11-13-matrix-dimmed-entry-fades-fill-only.md) | behavior |
+| 2026-11-13 | [The touch Clear button is hidden while the input is read-only or disabled](2026-11-13-text-field-clear-hidden-while-read-only.md) | behavior |
+| 2026-11-13 | [The Matrix add chip is named after its cell](2026-11-13-matrix-add-chip-names-its-cell.md) | behavior |
+| 2026-11-13 | [A diagonal Matrix pair goes through renderItem, as its first entry](2026-11-13-matrix-diagonal-pair-goes-through-render-item.md) | behavior |
+| 2026-11-13 | [A Matrix entry's tooltip is its accessible description](2026-11-13-matrix-entry-tooltip-is-its-description.md) | behavior |
+| 2026-11-13 | [The touch Clear button follows what the field shows, and selectors only have their own](2026-11-13-text-field-clear-follows-shown-value.md) | behavior |
+| 2026-11-13 | [A date picker says in text why it rejects a date](2026-11-13-date-picker-validation-message.md) | behavior |
+| 2026-11-13 | [LocalizedDateTimePicker opens the mobile dialog below 600px](2026-11-13-date-time-picker-mobile-dialog-below-600px.md) | behavior |
+| 2026-11-13 | [SignalPortlet's "Last refresh" age advances while the card is mounted](2026-11-13-signal-portlet-age-advances.md) | behavior |
+| 2026-11-13 | [DialogTitle with noTitle renders no heading; an untitled FullFormDialog is named by aria-label](2026-11-13-dialog-title-no-title-no-heading.md) | behavior, type |
+| 2026-11-13 | [IntegerInputField flags numbers it can't hold, and never shows exponent form](2026-11-13-integer-input-out-of-range.md) | behavior |
+| 2026-11-13 | [DecimalInputField flags a separator without a digit instead of reporting NaN](2026-11-13-decimal-input-parse-error-message.md) | behavior |
+| 2026-11-13 | [A dialog button's handler may navigate, and the confirm helpers settle once their dialog is closed](2026-11-13-dialog-button-handler-may-navigate.md) | behavior |
+| 2026-11-13 | [Open dialogs no longer block navigation or closing the tab](2026-11-13-dialogs-no-longer-block-navigation.md) | behavior, i18n |
+| 2026-11-13 | [A date picker keeps a rejected entry when focus leaves it](2026-11-13-picker-keeps-rejected-entry.md) | behavior |
+| 2026-11-13 | [InputWithHelp and OutlinedInputWithHelp are removed](2026-11-13-input-with-help-removed.md) | type |
+| 2026-11-13 | [A warning's underline is 1px at rest and 2px only while the field is focused](2026-11-13-warning-underline-drawn-like-error.md) | behavior |
+| 2026-11-13 | [Filled toasts darken a fill until its text reaches 4.5:1](2026-11-13-toast-filled-fill-contrast.md) | behavior |
+| 2026-11-13 | [A form page scrolls a focused field clear of its footer, and the footer stops floating on short screens](2026-11-13-form-page-layout-focus-clear-of-footer.md) | behavior |
+| 2026-11-13 | [A form page's Save stays focusable while unavailable](2026-11-13-form-page-save-focusable-while-unavailable.md) | behavior |
+| 2026-11-13 | [A Form given another record drops the previous page's validation and submit handlers](2026-11-13-form-record-switch-drops-handlers.md) | behavior |
+| 2026-11-13 | [GroupBox's small legend is a state class, not an ownerState](2026-11-13-group-box-small-label-state-class.md) | type, theme |
+| 2026-11-13 | [The Portal menu keeps keyboard focus when the focused entry is removed](2026-11-13-portal-menu-keeps-focus.md) | behavior |
+| 2026-11-13 | [The locale selector's search box is named "Search", and a status announces its result](2026-11-13-locale-selector-search-named.md) | behavior |
+| 2026-11-13 | [RoutedMenu highlights the most specific entry of the whole menu](2026-11-13-routed-menu-most-specific-match.md) | behavior |
+| 2026-11-13 | [MultiGrid sets its header's overflow, and a scroll of the header moves the body](2026-11-13-multi-grid-header-scroll-moves-body.md) | behavior |
+| 2026-11-13 | [FormCrudMultiSelect is read-only in a read-only form, and a save leaves it as it is](2026-11-13-form-crud-multi-select-read-only.md) | behavior |
+| 2026-11-13 | [FormCrudMultiSelect is read-only in a read-only form, listing only its entries, and a save leaves it as it is](2026-11-13-form-crud-multi-select-read-only.md) | behavior, theme |
+| 2026-11-13 | [The locale selector's rows draw a keyboard focus ring](2026-11-13-locale-selector-row-focus-ring.md) | behavior |
+| 2026-11-13 | [InlineSwitch applies classes.switch](2026-11-13-inline-switch-classes-switch.md) | behavior |
+| 2026-11-13 | [DataGridLocalStoragePersist mounts its children again when its storageKey changes](2026-11-13-data-grid-local-storage-persist-remounts-on-key-change.md) | behavior |
+| 2026-11-13 | [BackendSingleSelect's switch comes with switchFilterName, which filters the options; displaySwitch is gone](2026-11-13-backend-single-select-switch-filter-name.md) | type |
+| 2026-11-13 | [A data grid clamps stored column widths to the column's limits when it opens](2026-11-13-data-grid-stored-widths-clamped.md) | behavior |
+| 2026-11-13 | [InfoBox's expanded is controlled, and defaultExpanded sets the initial state](2026-11-13-info-box-expanded-controlled.md) | API, type, behavior |
+| 2026-11-13 | [MultiLanguageInput names every field with its language, inside a group named by the label](2026-11-13-multi-language-input-field-names.md) | behavior |
+| 2026-11-13 | [The MUI checkbox renderer draws a keyboard focus ring](2026-11-13-checkbox-renderer-focus-ring.md) | behavior |
+| 2026-11-13 | [A refused inline edit in BackendDataGrid shows an error dialog](2026-11-13-data-grid-refused-inline-edit-dialog.md) | behavior |
+| 2026-11-13 | [An image's placeholder is announced as "No image present"](2026-11-13-image-placeholder-alt-no-image-present.md) | behavior |
+| 2026-11-13 | [A files field in a grid cell takes one line: a link, or a count with a menu](2026-11-13-files-renderer-grid-cell-one-line.md) | behavior, theme |
+| 2026-11-13 | [timestampToAge words the age with Intl.RelativeTimeFormat: grammatical in every language, with weeks to years and future times](2026-11-13-timestamp-to-age-intl.md) | behavior |
+| 2026-11-13 | [The backend multi selects leave "Loading…" entries out of raw](2026-11-13-backend-multi-select-raw-without-loading-entries.md) | behavior |
+| 2026-11-13 | [useNavigate and Link keep a navigation inside the app](2026-11-13-navigate-stays-in-app.md) | behavior |
+| 2026-11-13 | [DateTimeInput passes on all of slotProps.textField.slotProps, and a function-form inputLabel is used on both date inputs](2026-11-13-date-time-input-text-field-slot-props.md) | behavior |
+| 2026-11-13 | [ColorInput has a "Choose color" button, and its open picker is a dialog](2026-11-13-color-input-picker-button.md) | behavior |
+| 2026-11-13 | [DateInput takes and gives every date as a date-only value](2026-11-13-date-input-date-only-date-props.md) | type, behavior |
+| 2026-11-13 | [RoutedTabs draws a focus ring and turns the focus ripple off](2026-11-13-routed-tabs-focus-ring.md) | behavior, theme |
+| 2026-11-13 | [Saving a new record keeps the tab it was saved on](2026-11-13-crud-save-new-keeps-tab.md) | behavior |
+| 2026-11-13 | [A form page's leave guard lasts as long as its Form](2026-11-13-form-page-guard-lasts-as-long-as-the-form.md) | behavior |
+| 2026-11-13 | [The sign dialog scales a stored signature to fit its sign area](2026-11-13-sign-dialog-stored-signature-fits.md) | behavior |
+| 2026-11-13 | [A signature field's button is named by its label, described by its message, and marked required and invalid](2026-11-13-signature-field-labelled-and-described.md) | behavior |
+| 2026-11-13 | [FormDialog renders a button's color](2026-11-13-form-dialog-button-color.md) | behavior |
+| 2026-11-13 | [A Toast rendered closed calls onExited right away](2026-11-13-toast-rendered-closed-calls-on-exited.md) | behavior |
+| 2026-11-13 | [FlowEngineBackButton is labelled "Cancel" by default](2026-11-13-flow-engine-back-button-cancel-label.md) | behavior |
+| 2026-11-13 | [FlowEngineBackButton has no default label: children are required](2026-11-13-flow-engine-back-button-label-required.md) | type |
+| 2026-11-13 | [InputDialog describes a rejected value in text and moves focus to the field](2026-11-13-input-dialog-error-text.md) | behavior |
+| 2026-11-13 | [TreeView's scrollTo waits until its entry is visible and the list is measured](2026-11-13-tree-view-scroll-to-waits.md) | behavior |
+| 2026-11-13 | [DefaultFormPage applies textButtonSave and textButtonBack](2026-11-13-form-page-button-labels.md) | behavior |
+| 2026-11-13 | [TreeViewCheckboxSelectionRenderer disables a locked leaf's checkbox](2026-11-13-tree-checkbox-renderer-locked-leaf-disabled.md) | behavior |
+| 2026-11-13 | [CurrencyInput reports an emptied field once, on blur](2026-11-13-currency-input-reports-emptied-field-on-blur.md) | behavior |
+| 2026-11-13 | [A linked SignalPortlet row is a list item, with its button inside](2026-11-13-signal-portlet-linked-rows-are-list-items.md) | behavior, theme |
+| 2026-11-12 | [The Loader's status text is a paragraph, not a heading](2026-11-12-loader-status-text-is-no-heading.md) | behavior |
+| 2026-11-12 | [PopupMenu item labels wrap instead of being cut off](2026-11-12-popup-menu-labels-wrap.md) | behavior |
+| 2026-11-12 | [CountryFlags, CountryCodes and CountryOption.value are typed by CountryCode, and CountryFlags is frozen](2026-11-12-country-flags-typed-by-country-code.md) | type, behavior |
+| 2026-11-12 | [SmallIconButton is at least 24x24](2026-11-12-small-icon-button-minimum-target.md) | behavior |
+| 2026-11-12 | [MobileScalingFix no longer restricts zoom on iPhone; text fields get at least 16px on iOS](2026-11-12-mobile-scaling-fix-ios-text-field-font-size.md) | behavior |
+| 2026-11-12 | [A HowToBox skips entries that render nothing](2026-11-12-how-to-box-skips-empty-entries.md) | behavior |
+| 2026-11-12 | [InfiniteScroll's scroll container is a tab stop and takes the props of a div](2026-11-12-infinite-scroll-tab-stop.md) | behavior |
+| 2026-11-12 | [The busy overlay stays below dialogs, snackbars, tooltips and the app bar](2026-11-12-form-loader-overlay-below-app-layers.md) | behavior, theme |
 | 2026-11-10 | [InfiniteScroll loads nothing while it is hidden, and fills once it is shown](2026-11-10-infinite-scroll-waits-while-hidden.md) | behavior |
 | 2026-11-10 | [The Small list items narrow MUI's gutters, and MultiSelect's entries move 8px to the left](2026-11-10-small-list-item-gutters.md) | behavior |
 | 2026-11-10 | [Country flags come from country-flag-icons: every flag is 3:2 and drawn for small sizes](2026-11-10-country-flags-from-country-flag-icons.md) | behavior |

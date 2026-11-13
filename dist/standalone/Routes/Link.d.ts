@@ -1,8 +1,11 @@
 import React from "react";
-import type { To } from "history";
+import { type To } from "history";
 export interface LinkProps extends Omit<React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>, "href"> {
     /**
-     * Target location
+     * Target location: a path of the app or a location object. Leading slashes
+     * collapse into one, as with `useNavigate`: "//7" links to "/7".
+     * A URL with a scheme ("https://…", "mailto:…") makes a plain link that
+     * the browser follows; `replace` and `state` don't apply to it.
      */
     to: To;
     /**

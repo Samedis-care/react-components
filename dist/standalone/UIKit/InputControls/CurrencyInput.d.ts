@@ -11,12 +11,15 @@ export interface CurrencyInputProps extends TextFieldWithHelpProps {
      */
     value: number | null;
     /**
-     * The change event handler. Not called when the text does not parse
-     * (`"."`): the field keeps the previous amount and shows a message in
-     * place of `helperText` until a valid edit or a new `value`, `currency` or
-     * language.
-     * @param evt
-     * @param value
+     * Called once on the blur after the user edited the text, with the amount
+     * rounded to the currency's minor units, or `null` for an emptied field.
+     * Typing does not call it, emptying the field and the touch Clear button
+     * included, and neither does a blur without an edit. `onBlur`, if given,
+     * runs first. Not called when the text does not parse (`"."`): the field
+     * keeps the previous amount and shows a message in place of `helperText`
+     * until a valid edit or a new `value`, `currency` or language.
+     * @param evt The last change event of the edit, not the blur event
+     * @param value The amount, or `null` for an empty field
      */
     onChange?: (evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, value: number | null) => void;
 }

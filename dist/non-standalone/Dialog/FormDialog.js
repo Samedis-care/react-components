@@ -28,7 +28,7 @@ const FormDialogRaw = (props) => {
                             // report the close once the handler has ended, also when it failed
                             end();
                         }
-                    }, color: "primary", autoFocus: btn.autoFocus, children: btn.text }, index))) })] }));
+                    }, color: btn.color || "primary", autoFocus: btn.autoFocus, children: btn.text }, index))) })] }));
 };
 /**
  * Message dialog with `inputs` under the message and a row of buttons. Not the model form

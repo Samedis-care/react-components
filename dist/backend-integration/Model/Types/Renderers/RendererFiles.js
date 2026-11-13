@@ -6,8 +6,13 @@ import GroupBox from "../../../../standalone/GroupBox";
 import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiFieldState";
 import ObjectUrlImage from "../../../../standalone/FileUpload/Image/ObjectUrlImage";
 import ObjectUrlLink from "../../../../standalone/FileUpload/Generic/ObjectUrlLink";
+import FilesGrid from "./FilesGrid/FilesGrid";
 /**
  * Renders a file selector
+ * @remarks In a grid cell (overview visibility with `grid`) the files take one
+ *          line (FilesGrid): "No files present", the only file's name as a link
+ *          to it, or for more files their count ("2 files") as a button that
+ *          opens a menu of the files.
  */
 class RendererFiles extends TypeFiles {
     render(params) {
@@ -24,9 +29,11 @@ class RendererFiles extends TypeFiles {
                                 handleChange(field, files);
                             }, onBlur: handleBlur, handleError: (_, msg) => setError(new Error(msg)), maxFiles: this.params?.maxFiles, minFileSize: this.params?.minFileSize, maxFileSize: this.params?.maxFileSize, maxTotalFileSize: this.params?.maxTotalFileSize, accept: this.params?.accept, acceptLabel: this.params?.acceptLabel, imageDownscaleOptions: this.params?.imageDownscaleOptions, convertImagesTo: this.params?.convertImagesTo, previewSize: this.params?.previewSize || 96, previewImages: this.params?.previewImages, allowDuplicates: this.params?.allowDuplicates, smallLabel: this.params?.smallLabel }) }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
         }
+        if (visibility.grid)
+            return _jsx(FilesGrid, { files: value });
         const content = (_jsxs(_Fragment, { children: [_jsx("ul", { children: value.map((entry, index) => (_jsxs("li", { children: [entry.preview && (_jsx(ObjectUrlImage, { src: entry.preview, alt: entry.file.name })), !entry.preview && "downloadLink" in entry.file && (_jsx(ObjectUrlLink, { href: entry.file.downloadLink, children: entry.file.name }))] }, index))) }), value.length === 0 &&
                     ccI18n.t("backend-integration.model.types.renderers.files.no-file")] }));
-        return visibility.grid ? (content) : (_jsx(GroupBox, { label: label, children: content }));
+        return _jsx(GroupBox, { label: label, children: content });
     }
 }
 export default RendererFiles;

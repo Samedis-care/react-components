@@ -22,12 +22,12 @@ export interface LocalizedDateTimePickerProps extends Omit<DateTimePickerProps, 
      */
     fullWidth?: TextFieldProps["fullWidth"];
     /**
-     * Called once focus leaves the field: from a section, the open-picker button
-     * or another adornment to anything outside the field and its open popup.
-     * Moving between those is not leaving. Focus that leaves from inside the open
-     * popup (a click on another control while the calendar is open) is not
-     * reported. Receives the blur event of the field's input root
-     * (`role="group"`); `target` is the element that lost focus.
+     * Called once focus leaves the field: from a section, the open-picker button,
+     * another adornment or the open calendar to anything outside the field and
+     * its open calendar (a click on another control while the calendar is open
+     * counts). Moving between those is not leaving. Receives a blur event of the
+     * field's input root (`role="group"`); `target` is the element that lost
+     * focus, also one in the calendar.
      */
     onBlur?: TextFieldProps["onBlur"] & PickersTextFieldProps["onBlur"];
     /**
@@ -35,6 +35,14 @@ export interface LocalizedDateTimePickerProps extends Omit<DateTimePickerProps, 
      * See {@link usePickerDraft}.
      */
     publishIntermediateValues?: boolean;
+    /**
+     * The CSS media query that selects the desktop popup; where it does not
+     * match, the picker opens MUI's mobile dialog. Defaults to
+     * `"@media (pointer: fine) and (min-width: 600px)"`: a fine pointer, as in
+     * MUI, on a viewport wide enough for the popup's calendar and time columns,
+     * so the popup never scrolls the page sideways.
+     */
+    desktopModeMediaQuery?: DateTimePickerProps["desktopModeMediaQuery"];
 }
 declare const _default: React.MemoExoticComponent<React.ComponentType<LocalizedDateTimePickerProps & import("..").MuiFieldStateProps>>;
 export default _default;

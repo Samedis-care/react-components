@@ -11,13 +11,16 @@ const UnorderedList = styled("ul", { name: "CcHowToBox", slot: "ul" })({
 const ListItem = styled("li", { name: "CcHowToBox", slot: "li" })({
     whiteSpace: "pre-line",
 });
+/** whether React renders the entry as nothing */
+const isEmptyEntry = (entry) => entry == null || typeof entry === "boolean" || entry === "";
 const HowToBox = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcHowToBox" });
     const { titleLabel, labels, className, classes } = props;
     const { t } = useCCTranslations();
-    if (!labels || (Array.isArray(labels) && labels.length === 0))
+    const entries = (Array.isArray(labels) ? labels : [labels]).filter((entry) => !isEmptyEntry(entry));
+    if (entries.length === 0)
         return _jsx(_Fragment, {});
-    return (_jsx(GroupBoxStyled, { label: titleLabel ?? t("standalone.how-it-works.title"), className: combineClassNames([className, classes?.root]), children: _jsx(UnorderedList, { className: classes?.ul, children: Array.isArray(labels) ? (labels.map((label, i) => (_jsx(ListItem, { className: classes?.li, children: label }, i)))) : (_jsx(ListItem, { className: classes?.li, children: labels })) }) }));
+    return (_jsx(GroupBoxStyled, { label: titleLabel ?? t("standalone.how-it-works.title"), className: combineClassNames([className, classes?.root]), children: _jsx(UnorderedList, { className: classes?.ul, children: entries.map((entry, i) => (_jsx(ListItem, { className: classes?.li, children: entry }, i))) }) }));
 };
 /**
  * i18n version of HowToBox

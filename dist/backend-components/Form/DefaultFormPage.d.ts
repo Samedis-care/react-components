@@ -24,11 +24,15 @@ export interface DefaultFormPageProps extends PageProps<ModelUnknown, CrudFormPr
      */
     extraButtons?: React.ReactNode;
     /**
-     * Custom text for save button
+     * Label of the Save button, instead of the translated "Save". Its text is the button's
+     * accessible name.
+     * @default the translated "Save" (common.buttons.save); also used for null
      */
     textButtonSave?: React.ReactNode;
     /**
-     * Custom text for back button
+     * Label of the Back button, instead of the translated "Back". Its text is the button's
+     * accessible name.
+     * @default the translated "Back" (common.buttons.back); also used for null
      */
     textButtonBack?: React.ReactNode;
 }

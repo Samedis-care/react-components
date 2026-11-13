@@ -65,12 +65,19 @@ export declare class MatrixInteractionStore {
     /**
      * How far a range from `anchor` towards `target` may reach: the last index
      * before the first cell canSelect rejects.
-     * @remarks The single source of the clamp, so what a sweep paints and what
-     * it reports cannot drift apart — not even when the data changed under a
-     * held button and no pointer event fired in between.
+     * @remarks The single source of the clamp: resolveBounds() paints with it
+     * and commit() reports those bounds, so what a sweep paints and what it
+     * reports cannot drift apart — not even when the data changed under a held
+     * button and no pointer event fired in between.
      */
     private resolveFocus;
-    /** Recomputes the painted bounds from the anchor and focus keys. */
+    /**
+     * Recomputes the bounds of the range from the anchor and focus keys and the
+     * current data: they are what is painted and what commit() reports.
+     * @remarks Runs on every configure(), so a press cell that filled up while
+     * the button was down drops the range, and a cell in between that filled
+     * up shrinks it to the cells before it.
+     */
     private resolveBounds;
     /** Begins a range on a cell. */
     begin(rowKey: string, columnKey: string): void;

@@ -1,12 +1,13 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useContext, useMemo } from "react";
+import React, { useCallback, useContext, useId, useMemo } from "react";
 import BaseSelector from "./BaseSelector";
-import { Grid, List, Paper, styled, useThemeProps } from "@mui/material";
+import { Grid, InputLabel, List, Paper, styled, Typography, useThemeProps, } from "@mui/material";
 import MultiSelectEntry from "./MultiSelectEntry";
 import { showConfirmDialogBool } from "../../non-standalone/Dialog/Utils";
 import { DialogContext } from "../../framework/DialogContextProvider";
 import useCCTranslations from "../../utils/useCCTranslations";
 import combineClassNames from "../../utils/combineClassNames";
+import { withMuiFieldState } from "../UIKit/MuiFieldState";
 const Root = styled(Grid, {
     name: "CcMultiSelect",
     slot: "root",
@@ -18,6 +19,30 @@ const SelectedEntry = styled(Grid, {
     border: `1px solid rgba(0, 0, 0, 0.23)`,
     borderTop: 0,
     borderRadius: `0px 0px ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
+    // read-only: no search field above, so the box is closed on all sides
+    "&.CcMultiSelect-readOnly": {
+        borderTop: `1px solid rgba(0, 0, 0, 0.23)`,
+        borderRadius: theme.shape.borderRadius,
+    },
+}));
+// a span: it names the list, there is no control to label
+const SpanLabel = (props) => (_jsx(InputLabel, { component: "span", ...props }));
+// the read-only selector's label, drawn as BaseSelector draws the label of its field
+const ReadOnlyLabel = withMuiFieldState(styled(SpanLabel, {
+    name: "CcMultiSelect",
+    slot: "label",
+})({
+    position: "relative",
+    transform: "translate(0,0) scale(0.75)",
+    zIndex: "unset",
+}));
+// "No entries" of an empty read-only selector, where an entry's text would be
+const EmptyText = styled(Typography, {
+    name: "CcMultiSelect",
+    slot: "empty",
+})(({ theme }) => ({
+    padding: "12px 8px",
+    color: theme.palette.text.secondary,
 }));
 const StyledBaseSelector = styled(BaseSelector, {
     name: "CcMultiSelect",
@@ -31,8 +56,9 @@ const StyledBaseSelector = styled(BaseSelector, {
 })); // tradeoff: remove ownerState from type config, but keep generics
 const MultiSelect = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiSelect" });
-    const { onLoad, onSelect, selected, enableIcons, selectedEntryRenderer, disabled, getIdOfData, displaySwitch, switchLabel, defaultSwitchValue, selectedSort, confirmDelete, className, classes, filterIds, refreshToken, } = props;
+    const { onLoad, onSelect, selected, enableIcons, selectedEntryRenderer, disabled, readOnly, label, error, dirty, getIdOfData, displaySwitch, switchLabel, defaultSwitchValue, selectedSort, confirmDelete, className, classes, filterIds, refreshToken, } = props;
     const { t } = useCCTranslations();
+    const labelId = useId();
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
     const selectedIds = useMemo(() => selected.map(getId), [getId, selected]);
@@ -97,10 +123,17 @@ const MultiSelect = (inProps) => {
             return;
         onSelect(selected.map((entry) => getId(entry) === getId(newValue) ? newValue : entry));
     }, [getId, onSelect, selected]);
+    const entries = props.selected.length > 0 && (_jsx(List, { disablePadding: true, "aria-labelledby": readOnly && label ? labelId : undefined, children: (selectedSort
+            ? [...props.selected].sort(selectedSort)
+            : props.selected).map((data, index) => (_jsx(EntryRender, { enableDivider: props.selected.length === index - 1, enableIcons: enableIcons, handleDelete: disabled || readOnly || data.noDelete ? undefined : handleDelete, data: data, setData: handleSetData, iconSize: props.iconSize }, getId(data) || index.toString(16)))) }));
+    if (readOnly) {
+        return (_jsxs(Root, { size: "grow", container: true, className: combineClassNames([className, classes?.root]), children: [label && (_jsx(Grid, { size: 12, children: _jsx(ReadOnlyLabel, { id: labelId, shrink: true, disableAnimation: true, error: !!error, dirty: dirty, className: classes?.label, children: label }) })), _jsx(SelectedEntry, { size: 12, className: combineClassNames([
+                        classes?.selectedEntry,
+                        "CcMultiSelect-readOnly",
+                    ]), children: _jsx(Paper, { elevation: 0, children: entries || (_jsx(EmptyText, { className: classes?.empty, children: t("standalone.selector.multi-select.no-entries") })) }) })] }));
+    }
     return (_jsxs(Root, { size: "grow", container: true, className: combineClassNames([className, classes?.root]), children: [_jsx(Grid, { size: 12, children: _jsx(StyledBaseSelector, { ...props, 
                     // @ts-expect-error removed owner state from props to preserve generics
-                    ownerState: { selected: selected.length > 0 }, className: classes?.selector, onLoad: multiSelectLoadHandler, selected: null, onSelect: multiSelectHandler, refreshToken: (refreshToken ?? "") + selectedIds.join(","), displaySwitch: displaySwitch, switchLabel: switchLabel, defaultSwitchValue: defaultSwitchValue, filterIds: combinedFilterIds }) }), props.selected.length > 0 && (_jsx(SelectedEntry, { size: 12, className: classes?.selectedEntry, children: _jsx(Paper, { elevation: 0, children: _jsx(List, { disablePadding: true, children: (selectedSort
-                            ? [...props.selected].sort(selectedSort)
-                            : props.selected).map((data, index) => (_jsx(EntryRender, { enableDivider: props.selected.length === index - 1, enableIcons: enableIcons, handleDelete: disabled || data.noDelete ? undefined : handleDelete, data: data, setData: handleSetData, iconSize: props.iconSize }, getId(data) || index.toString(16)))) }) }) }))] }));
+                    ownerState: { selected: selected.length > 0 }, className: classes?.selector, onLoad: multiSelectLoadHandler, selected: null, onSelect: multiSelectHandler, refreshToken: (refreshToken ?? "") + selectedIds.join(","), displaySwitch: displaySwitch, switchLabel: switchLabel, defaultSwitchValue: defaultSwitchValue, filterIds: combinedFilterIds }) }), entries && (_jsx(SelectedEntry, { size: 12, className: classes?.selectedEntry, children: _jsx(Paper, { elevation: 0, children: entries }) }))] }));
 };
 export default React.memo(MultiSelect);

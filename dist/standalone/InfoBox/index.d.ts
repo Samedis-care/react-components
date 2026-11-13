@@ -12,20 +12,38 @@ export interface InfoBoxProps {
      */
     heading: string;
     /**
-     * Initial expanded state, read once at mount: `true` shows the message,
-     * `false` shows only the header until the user opens it. Later changes
-     * are ignored. While `alwaysExpanded` is `true` the box is open whatever
-     * this says.
+     * Controlled expanded state, like MUI Accordion's `expanded`: `true`
+     * shows the message, `false` shows only the header. The box shows this
+     * value and follows every change of it. A click on the header does not
+     * change it by itself: it calls `onChange` with the requested state, so
+     * pass that back (`onChange={(_, next) => setOpen(next)}`) to let the
+     * user toggle the box.
+     *
+     * Leave it unset (`undefined`) for a box the user toggles on its own,
+     * starting at `defaultExpanded`. Decide at mount: switching between set
+     * and unset later logs a MUI error in development; a value set later is
+     * ignored, and removing the value closes the box.
+     * While `alwaysExpanded` is `true` the box is open whatever this says.
      */
-    expanded: boolean;
+    expanded?: boolean;
+    /**
+     * Initial expanded state of a box without `expanded` (uncontrolled), like
+     * MUI Accordion's `defaultExpanded`: `true` shows the message, `false`
+     * only the header, until the user toggles it. Read once at mount: a later
+     * change is ignored and logs a MUI error in development. Ignored while
+     * `expanded` is set.
+     * @default false
+     */
+    defaultExpanded?: boolean;
     /**
      * `true` keeps the box open: the message is shown and the user cannot
-     * collapse it. `false` is the same as not set: the box starts as
-     * `expanded` says and the user opens and closes it, so a condition can be
-     * passed directly (`alwaysExpanded={isLocked}`). A change after mount
-     * takes effect: once it is no longer `true`, the box shows the state the
-     * user last toggled to (initially `expanded`), and the user can toggle it
-     * again.
+     * collapse it. `false` is the same as not set: the box shows `expanded`,
+     * or, without it, the user opens and closes it starting at
+     * `defaultExpanded`, so a condition can be passed directly
+     * (`alwaysExpanded={isLocked}`). A change after mount takes effect: once
+     * it is no longer `true`, the box shows `expanded`, or, without it, the
+     * state the user last toggled to (initially `defaultExpanded`), and the
+     * user can toggle it again.
      * @default false
      */
     alwaysExpanded?: boolean;
@@ -34,9 +52,12 @@ export interface InfoBoxProps {
      */
     message: React.ReactNode;
     /**
-     * Change event fired upon expansion/retraction of the info box
-     * @param event The change event
-     * @param expanded The new expanded state
+     * Called when the user toggles the header (a click, or Enter or Space on
+     * it), with the requested expanded state. Not called when `expanded`
+     * changes. With `expanded` set, the box changes only once that new state
+     * is passed back into `expanded`.
+     * @param event The click event
+     * @param expanded The requested expanded state: `true` to open the box
      */
     onChange?: AccordionProps["onChange"];
     /**

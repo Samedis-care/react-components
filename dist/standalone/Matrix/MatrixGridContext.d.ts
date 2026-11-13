@@ -1,6 +1,6 @@
 import React from "react";
 import { MatrixCellContext, MatrixColumn, MatrixExtraRow, MatrixRangeSelection, MatrixRow, MatrixRowHeaderContext } from "./types";
-export type MatrixGridClassKey = "root" | "grid" | "corner" | "columnHeader" | "columnHeaderLabel" | "columnHeaderSubLabel" | "rowHeader" | "cell" | "addHint" | "addChip" | "extraRowHeader" | "extraCell" | "badge" | "extraCellAddHint";
+export type MatrixGridClassKey = "root" | "grid" | "corner" | "columnHeader" | "columnHeaderLabel" | "columnHeaderSubLabel" | "rowHeader" | "cell" | "addHint" | "addChip" | "addChipLabel" | "extraRowHeader" | "extraCell" | "badge" | "extraCellAddHint";
 export interface MatrixGridProps<TCell> {
     /**
      * The columns, left to right. Their keys address the cells of every row.
@@ -38,11 +38,19 @@ export interface MatrixGridProps<TCell> {
     renderCellWrapper?: (node: React.ReactNode, context: MatrixCellContext<TCell>) => React.ReactNode;
     /**
      * Width of one column in px
-     * @default 46
+     * @remarks Two entries side by side in a cell (a MatrixCellTile split pair
+     * with splitDirection "row") are half of the column less 3.5px wide each:
+     * 24.5px at 56px, and narrower than the 24px a clickable target needs
+     * (WCAG 2.5.8 Target Size) below 55px.
+     * @default 56
      */
     columnWidth?: number;
     /**
      * Height of one row in px
+     * @remarks Two entries stacked in a cell (a MatrixCellTile split pair with
+     * splitDirection "column") are half of the row less 3.5px high each:
+     * 25.5px at 58px, and lower than the 24px a clickable target needs (WCAG
+     * 2.5.8 Target Size) below 55px.
      * @default 58
      */
     rowHeight?: number;
@@ -104,7 +112,15 @@ export interface MatrixGridProps<TCell> {
      */
     onSelectRange?: (selection: MatrixRangeSelection) => void;
     /**
-     * Label of the hover hint on a selectable cell
+     * What a press on a selectable cell does ("Add"): the text of the hover
+     * hint, and the start of the add chip's accessible name. The chip shows
+     * only an icon, so it is named by this, the row's label and the column's
+     * name ("Add, Alice Weber, Thursday, March 5, 2026"), and a screen reader
+     * user hears which cell each chip adds to (see MatrixRow.label and
+     * MatrixColumn.name).
+     * @remarks Pass a string where you can: the chip then shows its name as its
+     * tooltip too. A node (a <Trans> element) names the chip as well, but
+     * renders once more, hidden, in every chip, and the chip has no tooltip.
      */
     addLabel?: React.ReactNode;
     /**

@@ -14,9 +14,16 @@ export declare const MatrixAddHint: import("@emotion/styled").StyledComponent<im
  * transparent hint. It is a chip in the corner, and not a band across the cell,
  * because what is drawn and what is clickable have to be the same thing: a
  * strip that overlays the entries either steals their clicks or, if it is thin
- * enough not to, is too thin to hit.
+ * enough not to, is too thin to hit. It is 24x24px, the smallest target WCAG
+ * 2.5.8 allows for a control that lies on another one.
  */
 export declare const MatrixAddChip: import("@emotion/styled").StyledComponent<import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof React.ClassAttributes<HTMLDivElement> | keyof React.HTMLAttributes<HTMLDivElement>>, {}>;
+/**
+ * The add chip's name: addLabel, the row's label and the column's name, as
+ * text that is visually hidden (the chip shows only its icon). Text rather
+ * than an aria-label, so that an addLabel that is a node names the chip too.
+ */
+export declare const MatrixAddChipLabel: import("@emotion/styled").StyledComponent<import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>, keyof React.ClassAttributes<HTMLSpanElement> | keyof React.HTMLAttributes<HTMLSpanElement>>, {}>;
 export interface MatrixBodyCellProps<TCell> {
     /**
      * The row this cell belongs to

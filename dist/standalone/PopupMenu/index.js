@@ -3,6 +3,15 @@ import { Menu, menuItemClasses, styled, useTheme, } from "@mui/material";
 const PopupMenuRoot = styled(Menu, { name: "CcPopupMenu", slot: "root" })(({ theme }) => ({
     "& .MuiMenu-paper": {
         border: `1px solid ${theme.palette.divider}`,
+        // as wide as the widest item, up to MUI's max-width: MUI measures the paper
+        // where it sat before, so with wrapping labels a menu kept mounted would
+        // shrink to the room between that spot and the window's right edge
+        width: "max-content",
+    },
+    // MUI's items don't wrap and the paper clips them, so a label wider than the
+    // screen allows was cut off; it wraps inside the paper instead
+    [`& .${menuItemClasses.root}`]: {
+        whiteSpace: "normal",
     },
     // MUI marks the keyboard-focused item with a faint tint only, which forced colors
     // drop; inset, because the paper clips the item's sides
@@ -46,7 +55,9 @@ const focusInitialItem = (container, preferSelected) => {
  * (`keepMounted`). Every open starts where MUI starts a menu's first
  * open: on the selected item with the default variant `selectedMenu`, else on
  * the first enabled item. This also holds with `keepMounted`, whose items keep
- * their state between opens.
+ * their state between opens. The paper is as wide as its widest item, up to
+ * MUI's limit of the window's width minus 32px; a longer item label wraps onto
+ * more lines instead of being cut off.
  */
 const PopupMenu = React.forwardRef(function PopupMenu(props, ref) {
     const { slotProps, variant, elevation = 0 } = props;

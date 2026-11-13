@@ -5,6 +5,17 @@ import { MultiSelect, } from "../../standalone";
 import useCCTranslations from "../../utils/useCCTranslations";
 import getSelectedLoadErrorLabel from "./getSelectedLoadErrorLabel";
 import useDebouncedLoad from "./useDebouncedLoad";
+/**
+ * Marks the "Loading…" entry listed for a selected id whose record is still loading. The
+ * selector hands it back with the next change like any entry, but it is none: it is not
+ * reported in `onSelect`'s `raw` and never replaces a loaded entry.
+ */
+const LOADING_PLACEHOLDER = Symbol("BackendMultiSelect loading placeholder");
+const makeLoadingPlaceholder = (value, label) => {
+    const placeholder = { value, label, [LOADING_PLACEHOLDER]: true };
+    return placeholder;
+};
+const isLoadingPlaceholder = (entry) => LOADING_PLACEHOLDER in entry;
 export const useSelectedCache = (props) => {
     const { model, disableRequestBatching, modelToSelectorData, onSelect, selected, initialData, onLoadError, additionalOptions, } = props;
     const modelFetch = props.modelFetch ?? model;
@@ -13,11 +24,17 @@ export const useSelectedCache = (props) => {
     const handleSelect = useCallback((selected) => {
         setSelectedCache((cache) => {
             const newCache = { ...cache };
-            selected.forEach((entry) => (newCache[entry.value] = entry));
+            selected.forEach((entry) => {
+                // a placeholder handed back keeps its id from being looked up twice, but
+                // never replaces the entry that loaded meanwhile (a group pick reports late)
+                if (isLoadingPlaceholder(entry) && entry.value in newCache)
+                    return;
+                newCache[entry.value] = entry;
+            });
             return newCache;
         });
         if (onSelect) {
-            onSelect(selected.map((entry) => entry.value), selected);
+            onSelect(selected.map((entry) => entry.value), selected.filter((entry) => !isLoadingPlaceholder(entry)));
         }
     }, [onSelect]);
     // fetch missing data entries
@@ -61,7 +78,9 @@ export const useSelectedCache = (props) => {
             if (onSelect && selected.filter(isIdNotInCache).length > 0) {
                 // call onSelect with new array
                 const newSelection = selected.filter((id) => !isIdNotInCache(id));
-                onSelect(newSelection, newSelection.map((id) => selectedCache[id] ?? newCache[id]));
+                onSelect(newSelection, newSelection
+                    .map((id) => selectedCache[id] ?? newCache[id])
+                    .filter((entry) => !isLoadingPlaceholder(entry)));
             }
             setSelectedCache((oldCache) => Object.assign({}, oldCache, newCache));
         })();
@@ -69,10 +88,7 @@ export const useSelectedCache = (props) => {
     }, [selected]);
     // stable identity: a new array on every render makes the selector reset its search
     const selectedData = useMemo(() => selected.map((value) => selectedCache[value] ??
-        {
-            value,
-            label: t("backend-components.selector.loading"),
-        }), [selected, selectedCache, t]);
+        makeLoadingPlaceholder(value, t("backend-components.selector.loading"))), [selected, selectedCache, t]);
     return {
         selected: selectedData,
         handleSelect,

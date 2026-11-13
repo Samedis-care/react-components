@@ -15,7 +15,9 @@ export interface MuiFieldStateProps {
      * @remarks A step below error: colours the underline and outline in
      *          `palette.warning.main`, and the label and helper text in the same
      *          colour, darkened (lightened on a dark background) just enough to
-     *          reach the 4.5:1 that text needs against `palette.background`. Yields
+     *          reach the 4.5:1 that text needs against `palette.background`. The
+     *          underline of a standard or filled field is drawn like an error's:
+     *          1px at rest and while hovered, 2px only while focused. Yields
      *          to `error` where both are set. It is a colour only, so show what the
      *          warning is about as text too, e.g. as the helper text, as the
      *          library's model renderers do with their warning message.
@@ -24,7 +26,9 @@ export interface MuiFieldStateProps {
     /**
      * Does the value differ from the server-side value?
      * @remarks Draws {@link dirtyMarkerStyles} after the control's label, and exposes a
-     *          `data-cc-dirty` attribute for anything the marker doesn't reach.
+     *          `data-cc-dirty` attribute for anything the marker doesn't reach. A text
+     *          field's label too long for the field ends in an ellipsis, as MUI cuts
+     *          it, and the dot follows the ellipsis.
      */
     dirty?: boolean;
 }

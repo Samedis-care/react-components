@@ -1,7 +1,8 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useContext, useEffect, useMemo } from "react";
 import useLocation from "./useLocation";
-import matchPath, { normalizePath } from "./matchPath";
+import matchPath from "./matchPath";
+import joinRoutePath from "./joinRoutePath";
 import { sentrySetRoutePath } from "./SentryRoutingInstrumentation";
 export const RouteContext = React.createContext(null);
 /**
@@ -28,7 +29,7 @@ const Route = (props) => {
     const parentCtx = useContext(RouteContext);
     const depth = parentCtx ? parentCtx.depth + 1 : 0;
     const ctx = useMemo(() => {
-        const finalPath = normalizePath(routePrefix + path);
+        const finalPath = joinRoutePath(routePrefix, path);
         const match = matchPath({ path: finalPath }, pathname);
         if (!match)
             return null; // this one is about to be unmounted

@@ -155,7 +155,21 @@ export interface TreeViewContextType {
     rendererProps: TreeViewRendererCallbacks;
     data: TreeDataForRenderer[];
 }
+/**
+ * Imperative handle of {@link TreeView}, received through its `ref`
+ */
 export interface TreeViewDispatch {
+    /**
+     * Scrolls the list until the row of the given entry is in view, with the
+     * smallest scroll that gets it there (react-window's `align: "auto"`).
+     *
+     * The request waits until the entry is visible, that is in `data` and not
+     * under a collapsed ancestor, and until the list is on screen and has been
+     * measured. So it can be made right after TreeView mounted, while the
+     * entry's data is still loading, or before its ancestors are expanded. It
+     * scrolls once; a later call replaces a request that is still waiting.
+     * @param id The record ID
+     */
     scrollTo: (id: string) => void;
 }
 declare const _default: React.NamedExoticComponent<TreeViewProps & React.RefAttributes<TreeViewDispatch>>;

@@ -89,3 +89,4 @@ const readableTextColor = (theme, color) => {
     return shift(color, high);
 };
 export default readableTextColor;
+export { TEXT_CONTRAST, parse as parseColor, luminance, contrast };

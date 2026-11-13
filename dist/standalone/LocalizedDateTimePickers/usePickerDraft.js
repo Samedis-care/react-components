@@ -37,6 +37,14 @@ const isSameValue = (adapter, a, b) => {
  * the picker's default `minDate` being 1900-01-01. Clearing the field still
  * reports `null` immediately, an empty value being valid.
  *
+ * An entry the picker rejects stays in the field, as in MUI's own field, also
+ * once focus leaves it: marked invalid, with the picker's `onError` reporting
+ * the error, until the user changes it, the consumer hands in another date, or
+ * the calendar opens (`settle`). Handing in the date the consumer already holds,
+ * as a form reset of a field whose value never changed does, is not another
+ * date. Meanwhile the consumer holds the last value it accepted, so a consumer
+ * that acts on the value checks `onError` first.
+ *
  * What it cannot separate is an intermediate that is a plausible date in its own
  * right: retyping the day of a stored date reports the day passed through on the
  * way, because nothing distinguishes it from that day being meant.
@@ -85,8 +93,6 @@ const usePickerDraft = (value, onChange, publishIntermediateValues) => {
         setState((prev) => ({ ...prev, committed: newValue }));
         onChange?.(newValue, context);
     }, [onChange, publishIntermediateValues]);
-    // A draft the consumer never accepted would otherwise be left standing as a
-    // red half-date while the consumer holds something else entirely.
     const settle = useCallback(() => {
         setState((prev) => ({ ...prev, draft: prev.committed ?? null }));
     }, []);

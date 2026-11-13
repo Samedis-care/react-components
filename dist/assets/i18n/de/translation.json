@@ -21,7 +21,21 @@
 				"toggle-languages": "Spracheingaben umschalten"
 			},
 			"number-input": {
+				"out-of-range": "Gib eine Zahl von {{MIN}} bis {{MAX}} ein",
 				"invalid": "Gib eine Zahl ein, z. B. {{EXAMPLE}}"
+			},
+			"color-input": {
+				"open-picker": "Farbe auswählen"
+			}
+		},
+		"date-picker": {
+			"error": {
+				"invalid": "Gib ein gültiges Datum ein",
+				"min-date": "Gib ein Datum ab dem {{DATE}} ein",
+				"max-date": "Gib ein Datum bis zum {{DATE}} ein",
+				"past": "Gib das heutige oder ein späteres Datum ein",
+				"future": "Gib das heutige oder ein früheres Datum ein",
+				"unavailable": "Gib ein Datum ein, das ausgewählt werden kann"
 			}
 		},
 		"notifications": {
@@ -143,6 +157,7 @@
 				"selected": "AUSGEWÄHLT"
 			},
 			"multi-select": {
+				"no-entries": "Keine Einträge",
 				"delete-confirm": {
 					"title": "Entfernen bestätigen",
 					"message": "Möchtest Du diesen Eintrag wirklich entfernen?",
@@ -220,7 +235,8 @@
 				"close": "Schließen",
 				"signature": "Unterschrift"
 			},
-			"sign-here": "Hier digital unterschreiben"
+			"sign-here": "Hier digital unterschreiben",
+			"required": "Erforderlich"
 		},
 		"signal-portlet": {
 			"last-updated": "Letzte Aktualisierung: {{AGE}}",
@@ -233,22 +249,21 @@
 			"label": "Lädt…"
 		}
 	},
-	"framework": {
-		"dialogs": {
-			"navblock": "Die Navigation ist gesperrt. Bitte schließe zuerst die geöffneten Dialoge."
-		}
-	},
 	"non-standalone": {
 		"dialog": {
 			"okay": "OK",
 			"dialog-title": {
 				"close": "Schließen"
+			},
+			"input-dialog": {
+				"invalid": "Gib einen gültigen Wert ein"
 			}
 		},
 		"language-switcher": {
 			"load-error": "Die Sprache konnte nicht geladen werden. Prüfe deine Internetverbindung, lade die Seite neu und versuche es noch einmal.",
 			"title": "Wähle das Land und die Sprache",
-			"no-locales": "Keine Gebietsschemas entsprechen Ihrer Suchanfrage"
+			"no-locales": "Keine Gebietsschemas entsprechen Ihrer Suchanfrage",
+			"results": "Ergebnisse: {{COUNT}}"
 		}
 	},
 	"backend-integration": {
@@ -279,7 +294,9 @@
 						"not-set": "Nicht unterschrieben"
 					},
 					"files": {
-						"no-file": "Keine Dateien vorhanden"
+						"no-file": "Keine Dateien vorhanden",
+						"count_one": "{{count}} Datei",
+						"count_other": "{{count}} Dateien"
 					},
 					"string-array": {
 						"entry": "{{LABEL}} {{NUM}}",
@@ -318,6 +335,11 @@
 					"buttons": {
 						"okay": "OK"
 					}
+				}
+			},
+			"inline-edit": {
+				"error-dialog": {
+					"message": "Die Änderung an „{{LABEL}}“ wurde nicht gespeichert: {{ERROR}}"
 				}
 			}
 		},
@@ -406,17 +428,6 @@
 			"email": "Das Feld {{attribute}} erfordert eine gültige E-Mail-Adresse",
 			"url": "Das Feld {{attribute}} erfordert eine gültige URL",
 			"missing": "Das Feld {{attribute}} fehlt"
-		},
-		"timestampToAge": {
-			"just-now": "gerade jetzt",
-			"less-minute": "Vor weniger als einer Minute",
-			"minute": "Minute",
-			"minutes": "Minuten",
-			"hour": "Stunde",
-			"hours": "Stunden",
-			"day": "Tag",
-			"days": "Tagen",
-			"str": "Vor {{AMOUNT}} {{UNIT}}"
 		}
 	},
 	"common": {

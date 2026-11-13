@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
-import React, { useCallback, useEffect, useRef, useState, } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { IconButton, InputAdornment, } from "@mui/material";
 import { Clear as ClearIcon, Info as InfoIcon } from "@mui/icons-material";
 import { InputLabelConfig, UiKitTextField } from "./CommonStyles";
@@ -13,7 +13,8 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
     const { openInfo, customHandleClear, disableClearable, warning, dirty, onChange, ...muiProps } = props;
     const { t } = useCCTranslations();
     // handle clear
-    const [hasValue, setHasValue] = useState(!!(muiProps.value ?? muiProps.defaultValue));
+    // what an uncontrolled field shows: its defaultValue, then what was typed
+    const [uncontrolledValue, setUncontrolledValue] = useState(muiProps.defaultValue);
     const composeRef = useRefComposer();
     const inputRef = useRef(null);
     const handleClear = useCallback((evt) => {
@@ -36,18 +37,14 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
         inputRef.current.blur();
         inputRef.current.focus();
     }, [muiProps.multiline, customHandleClear]);
-    // keep "hasValue" up to date
+    // keep "uncontrolledValue" up to date
     const handleChange = useCallback((evt) => {
         if (onChange)
             onChange(evt);
-        setHasValue(!!evt.target.value);
+        setUncontrolledValue(evt.target.value);
     }, [onChange]);
-    useEffect(() => {
-        setHasValue(!!muiProps.value);
-    }, [muiProps.value]);
     // render
-    const showClear = isTouchDevice() &&
-        hasValue &&
+    const canClear = isTouchDevice() &&
         !muiProps.disabled &&
         !disableClearable &&
         // the default clear empties the <input> or <textarea>; a select has
@@ -58,6 +55,20 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
                 const orgSlotProps = {
                     ...accessSlotProps(props, muiProps.slotProps?.input),
                 };
+                // what the field shows: the controlled value, which MUI takes
+                // from slotProps.htmlInput before value, or the uncontrolled one
+                const htmlInputProps = accessSlotProps(props, muiProps.slotProps?.htmlInput);
+                const value = htmlInputProps?.value ?? muiProps.value ?? uncontrolledValue;
+                // the input slots can lock the input while the field is not disabled
+                const inputLocked = !!(orgSlotProps.readOnly ||
+                    orgSlotProps.disabled ||
+                    htmlInputProps?.readOnly ||
+                    htmlInputProps?.disabled);
+                const showClear = canClear &&
+                    !inputLocked &&
+                    value != null &&
+                    value !== "" &&
+                    !(Array.isArray(value) && value.length === 0);
                 const hasEndAdornment = !!(showClear ||
                     openInfo ||
                     orgSlotProps?.endAdornment);

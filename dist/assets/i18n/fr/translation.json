@@ -21,11 +21,25 @@
 				"toggle-languages": "Basculer les saisies de langue"
 			},
 			"number-input": {
+				"out-of-range": "Entrez un nombre entre {{MIN}} et {{MAX}}",
 				"invalid": "Entrez un nombre, par exemple {{EXAMPLE}}"
+			},
+			"color-input": {
+				"open-picker": "Choisir la couleur"
+			}
+		},
+		"date-picker": {
+			"error": {
+				"invalid": "Entrez une date valide",
+				"min-date": "Entrez une date égale ou postérieure au {{DATE}}",
+				"max-date": "Entrez une date égale ou antérieure au {{DATE}}",
+				"past": "Entrez la date du jour ou une date ultérieure",
+				"future": "Entrez la date du jour ou une date antérieure",
+				"unavailable": "Entrez une date qui peut être sélectionnée"
 			}
 		},
 		"notifications": {
-			"title": "Avis"
+			"title": "Notifications"
 		},
 		"how-it-works": {
 			"title": "Comment ça fonctionne"
@@ -143,6 +157,7 @@
 				"selected": "CHOISI"
 			},
 			"multi-select": {
+				"no-entries": "Aucune entrée",
 				"delete-confirm": {
 					"title": "Confirmer la suppression",
 					"message": "Voulez-vous vraiment supprimer cette entrée?",
@@ -220,7 +235,8 @@
 				"close": "Fermer",
 				"signature": "Signature"
 			},
-			"sign-here": "Signez ici numériquement"
+			"sign-here": "Signez ici numériquement",
+			"required": "Obligatoire"
 		},
 		"signal-portlet": {
 			"last-updated": "Dernière actualisation : {{AGE}}",
@@ -233,22 +249,21 @@
 			"label": "Chargement…"
 		}
 	},
-	"framework": {
-		"dialogs": {
-			"navblock": "La navigation est bloquée. Veuillez d'abord fermer vos boîtes de dialogue ouvertes."
-		}
-	},
 	"non-standalone": {
 		"dialog": {
 			"okay": "OK",
 			"dialog-title": {
 				"close": "Fermer"
+			},
+			"input-dialog": {
+				"invalid": "Entrez une valeur valide"
 			}
 		},
 		"language-switcher": {
 			"load-error": "La langue n'a pas pu être chargée. Vérifiez votre connexion Internet, rechargez la page et réessayez.",
 			"title": "Sélectionnez votre pays et votre langue",
-			"no-locales": "Aucun paramètre régional ne correspond à votre requête de recherche"
+			"no-locales": "Aucun paramètre régional ne correspond à votre requête de recherche",
+			"results": "Résultats : {{COUNT}}"
 		}
 	},
 	"backend-integration": {
@@ -279,7 +294,10 @@
 						"not-set": "Pas signé"
 					},
 					"files": {
-						"no-file": "Aucun dossier présent"
+						"no-file": "Aucun dossier présent",
+						"count_one": "{{count}} fichier",
+						"count_many": "{{count}} fichiers",
+						"count_other": "{{count}} fichiers"
 					},
 					"string-array": {
 						"entry": "{{LABEL}} {{NUM}}",
@@ -318,6 +336,11 @@
 					"buttons": {
 						"okay": "OK"
 					}
+				}
+			},
+			"inline-edit": {
+				"error-dialog": {
+					"message": "La modification de « {{LABEL}} » n'a pas été enregistrée : {{ERROR}}"
 				}
 			}
 		},
@@ -406,17 +429,6 @@
 			"email": "Le champ {{attribute}} nécessite un email valide",
 			"url": "Le champ {{attribute}} nécessite une URL valide",
 			"missing": "Le champ {{attribute}} est manquant"
-		},
-		"timestampToAge": {
-			"just-now": "juste maintenant",
-			"less-minute": "Il y a moins d'une minute",
-			"minute": "minute",
-			"minutes": "minutes",
-			"hour": "heure",
-			"hours": "heures",
-			"day": "journée",
-			"days": "journées",
-			"str": "Il y a {{AMOUNT}} {{UNIT}}"
 		}
 	},
 	"common": {

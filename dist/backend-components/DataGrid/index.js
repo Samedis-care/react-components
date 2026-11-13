@@ -9,6 +9,8 @@ import { dotToObject, getValueByDot } from "../../utils/dotUtils";
 import deepAssign from "../../utils/deepAssign";
 import deepClone from "../../utils/deepClone";
 import isPlainObject from "../../utils/isPlainObject";
+import InlineEditCell from "./InlineEditCell";
+import renderModelCell from "./renderModelCell";
 export const useBackendDataGridAddNewButtons = (props) => {
     const { t } = useCCTranslations();
     const addNewButtons = useMemo(() => {
@@ -127,6 +129,26 @@ export const useBackendDataGridDeleteHandler = (props, refreshGrid) => {
     ]);
     return enableDelete ? handleDelete : undefined;
 };
+/**
+ * A cell's change handler where the cell has no editor: its overview visibility is
+ * not editable, so its renderer shows no control that could call it
+ */
+const notEditableInGrid = () => {
+    throw new Error("Not editable in Grid");
+};
+/**
+ * Turns a record from model.index into a grid row: `row.id` is the record's id,
+ * `row[field]` the rendered cell of each model field and `row[field + "_raw"]` its
+ * value. A field with an editable overview visibility (ModelVisibilityGridEdit) is
+ * edited in its cell, which saves every change at once through
+ * model.connector.update, then calls refreshGrid; a refused save is shown in an error
+ * dialog (the cell needs the Framework), and refreshGrid is called as well.
+ * @param model The model the record belongs to
+ * @param refreshGrid Called after an inline edit was saved or refused, to reload the
+ *                    rows
+ * @returns A function that builds the row of one record. It throws "Not supported"
+ *          for an editable field whose renderer has no grid editor.
+ */
 export const renderDataGridRecordUsingModel = (model, refreshGrid) => (entry) => Object.fromEntries(Object.keys(model.fields)
     .map((key) => {
     // we cannot render the ID, this will cause issues with the selection
@@ -138,7 +160,6 @@ export const renderDataGridRecordUsingModel = (model, refreshGrid) => (entry) =>
         ];
     }
     const field = model.fields[key];
-    const { id } = entry;
     // no need to render disabled fields
     if (field.visibility.overview.disabled) {
         return [
@@ -146,53 +167,13 @@ export const renderDataGridRecordUsingModel = (model, refreshGrid) => (entry) =>
             [key + "_raw", value],
         ];
     }
+    // rendered for an editable field too, so that a renderer without a grid
+    // editor fails the load ("Not supported") instead of the grid's render
+    const cell = renderModelCell(model, key, entry, notEditableInGrid);
     return [
         [
             key,
-            field
-                ? field.type.render({
-                    field: key,
-                    value: value,
-                    touched: false,
-                    // grid cells render server data, there is nothing to diff against
-                    dirty: false,
-                    autoFocus: false,
-                    initialValue: value,
-                    label: field.getLabel(),
-                    visibility: Object.assign({}, field.visibility.overview, {
-                        hidden: false,
-                    }),
-                    /**
-                     * The onChange handler for editable input fields
-                     */
-                    handleChange: (field, value) => {
-                        if (!id)
-                            throw new Error("ID not set!");
-                        void (async () => {
-                            await model.connector.update(await model.applySerialization({
-                                id,
-                                ...dotToObject(field, value),
-                            }, "serialize", "overview"));
-                            refreshGrid();
-                        })();
-                    },
-                    setFieldValue: () => {
-                        throw new Error("Not implemented in Grid");
-                    },
-                    handleBlur: () => {
-                        // this is unhandled in the data grid
-                    },
-                    errorMsg: null,
-                    warningMsg: null,
-                    setError: () => {
-                        throw new Error("Not implemented in Grid");
-                    },
-                    setFieldTouched: () => {
-                        throw new Error("Not implemented in Grid");
-                    },
-                    values: entry,
-                })
-                : null,
+            field.visibility.overview.editable ? (_jsx(InlineEditCell, { model: model, field: key, record: entry, refreshGrid: refreshGrid })) : (cell),
         ],
         [key + "_raw", value],
     ];

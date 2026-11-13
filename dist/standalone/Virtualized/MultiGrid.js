@@ -109,6 +109,21 @@ const MultiGrid = (inProps) => {
             top: evt.currentTarget.scrollTop,
         });
     }, []);
+    // The user cannot scroll the header pane while there are data rows
+    // (overflow: hidden), but the browser scrolls it to reveal an element
+    // focused in it, e.g. a column's filter button: the body follows.
+    const handleScrollHeader = useCallback((evt) => {
+        if (handleScrollPinnedRequested.current != null)
+            return;
+        if (handleScrollRequested.current)
+            window.clearTimeout(handleScrollRequested.current);
+        handleScrollRequested.current = window.setTimeout(() => {
+            handleScrollRequested.current = null;
+        }, SCROLL_DETECTION_DELAY_MS);
+        bottomRightGrid.current?.element?.scrollTo({
+            left: evt.currentTarget.scrollLeft,
+        });
+    }, []);
     // page up/down scrolls the grid from anywhere on the page, for the routes
     // where the grid *is* the page and there is nothing else to page
     useEffect(() => {
@@ -202,8 +217,12 @@ const MultiGrid = (inProps) => {
                 }, cellComponent: CellRenderer, cellProps: {} }), _jsx(TopRightVariableSizeGrid, { gridRef: topRightGrid, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index), columnCount: columnCount - fixedColumnCount, rowCount: fixedRowCount, 
                 // without rows the bottom right pane doesn't exist and this one
                 // takes over as the horizontal scroller, so it's the tab stop then
-                tabIndex: bottomRightRendered ? undefined : 0, "aria-label": bottomRightRendered ? undefined : label, style: {
+                tabIndex: bottomRightRendered ? undefined : 0, "aria-label": bottomRightRendered ? undefined : label, onScroll: handleScrollHeader, style: {
                     ...styleTopRightGrid,
+                    // while there are data rows the body is the horizontal scroller
+                    // and the header follows it
+                    overflowX: bottomRightRendered ? "hidden" : "auto",
+                    overflowY: "hidden",
                     position: "absolute",
                     top: 0,
                     left: fixedWidth,

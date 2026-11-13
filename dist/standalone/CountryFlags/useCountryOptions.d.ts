@@ -1,4 +1,5 @@
 import React from "react";
+import type { CountryCode } from "./index";
 /**
  * A country as an option of a select. It has the shape of the Selector's
  * `BaseSelectorData`, so it can be passed to `SingleSelect` or `MultiSelect`
@@ -8,7 +9,7 @@ export interface CountryOption {
     /**
      * The upper-case ISO 3166-1 alpha-2 code, e.g. `"DE"`: the value to store
      */
-    value: string;
+    value: CountryCode;
     /**
      * The country's name in components-care's current language, e.g.
      * `"Deutschland"` in German

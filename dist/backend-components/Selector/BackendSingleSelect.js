@@ -10,7 +10,7 @@ const BackendSingleSelect = (inProps) => {
         props: inProps,
         name: "CcBackendSingleSelect",
     });
-    const { model, modelFetch: modelFetchProp, modelToSelectorData, searchResultLimit, onSelect, selected, initialData, searchDebounceTime, sort, lru, onLoadError, additionalOptions, disableRequestBatching, freeSolo, selectedFreeSolo, onSelectFreeSolo, ...otherProps } = props;
+    const { model, modelFetch: modelFetchProp, modelToSelectorData, searchResultLimit, onSelect, selected, initialData, searchDebounceTime, sort, switchFilterName, lru, onLoadError, additionalOptions, disableRequestBatching, freeSolo, selectedFreeSolo, onSelectFreeSolo, ...otherProps } = props;
     const modelFetch = modelFetchProp ?? model;
     if (freeSolo && !onSelectFreeSolo)
         throw new Error("freeSolo enabled, but no onSelectFreeSolo callback");
@@ -19,18 +19,21 @@ const BackendSingleSelect = (inProps) => {
     const [picked, setPicked] = useState(null);
     const [selectedCache, setSelectedCache] = useState(null);
     const { t } = useCCTranslations();
-    const handleLoad = useCallback(async (search) => {
+    const handleLoad = useCallback(async (search, switchValue) => {
         const [records, meta] = await model.index({
             page: 1,
             rows: searchResultLimit ?? 25,
             sort: sort,
             quickFilter: search,
+            additionalFilters: switchFilterName
+                ? { [switchFilterName]: switchValue }
+                : undefined,
         });
         return {
             options: await Promise.all(records.map((record) => Promise.resolve(modelToSelectorData(record)))),
             total: meta.filteredRows ?? meta.totalRows,
         };
-    }, [model, searchResultLimit, sort, modelToSelectorData]);
+    }, [model, searchResultLimit, sort, switchFilterName, modelToSelectorData]);
     const handleLoadLruRecord = useCallback(async (id) => {
         const [data] = await modelFetch.getCached(id, {
             batch: !disableRequestBatching,
@@ -131,7 +134,7 @@ const BackendSingleSelect = (inProps) => {
                 ? picked
                 : (additionalOptions?.find((opt) => opt.value === selected) ?? null);
     const debouncedLoad = useDebouncedLoad(handleLoad, searchDebounceTime ?? 500);
-    return (_jsx(SingleSelect, { ...otherProps, freeSolo: freeSolo, onLoad: debouncedLoad, additionalOptions: additionalOptions, onSelect: handleSelect, selected: selectedFreeSolo
+    return (_jsx(SingleSelect, { ...otherProps, freeSolo: freeSolo, onLoad: debouncedLoad, displaySwitch: !!switchFilterName, additionalOptions: additionalOptions, onSelect: handleSelect, selected: selectedFreeSolo
             ? { value: selectedFreeSolo, label: selectedFreeSolo, freeSolo: true }
             : selected != null
                 ? (selectedEntry ?? {

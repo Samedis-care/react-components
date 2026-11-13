@@ -30,9 +30,6 @@ const CurrencyInput = (props) => {
         setValueInternal(event.target.value);
         event.persist();
         setLastChangeEvent(event);
-        if (!event.target.value) {
-            onChange(event, null);
-        }
     }, [onChange]);
     const handleBlur = useCallback((evt) => {
         if (onBlur)

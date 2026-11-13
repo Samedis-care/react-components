@@ -2,7 +2,7 @@ import React from "react";
 import { BaseSelectorProps, MultiSelectorData } from "../../standalone";
 import { ModelUnknown } from "../../backend-integration/Model/Model";
 import { BackendMultiSelectProps } from "./BackendMultiSelect";
-export type BackendMultipleSelectProps<M extends ModelUnknown, DataT extends MultiSelectorData> = Omit<BackendMultiSelectProps<M, DataT>, "classes"> & Pick<BaseSelectorProps<DataT, true>, "classes">;
+export type BackendMultipleSelectProps<M extends ModelUnknown, DataT extends MultiSelectorData> = Omit<BackendMultiSelectProps<M, DataT>, "classes" | "readOnly"> & Pick<BaseSelectorProps<DataT, true>, "classes">;
 /**
  * Themable subset of BackendMultipleSelectProps (used for theme defaultProps)
  * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)

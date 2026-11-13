@@ -26,8 +26,8 @@ const LanguageLabel = styled(ToggleButton, {
     // inside the button: its neighbours overlap its border
     "&.Mui-focusVisible": focusRing(theme, -2),
 }));
-/** The active language's name, read with the multiline label */
-const ActiveLanguageName = styled("span")({
+/** The field's language name, read with its label but not shown */
+const LabelLanguageName = styled("span")({
     // visually hidden, as MUI's visuallyHidden
     border: 0,
     clipPath: "inset(50%)",
@@ -97,11 +97,12 @@ const MultiLanguageInput = (inProps) => {
         if (lang)
             setPickedLanguage(lang);
     }, []);
-    const renderLanguage = (lang, focus) => (_jsx(TextFieldCC, { ...textFieldProps, warning: warning, dirty: dirty, autoFocus: focus, fullWidth: true, label: textFieldProps.multiline
-            ? label && (_jsxs(_Fragment, { children: [label, lang && (_jsxs(ActiveLanguageName, { children: [" ", "(", t(lang, { defaultValue: lang }), ")"] }))] }))
-            : lang === defaultLanguage
-                ? label
-                : undefined, required: defaultLanguage === lang && activeLanguage === defaultLanguage
+    // a field's language in the UI language, e.g. "German"
+    const getFieldLanguageName = (lang) => lang ? t(lang, { defaultValue: lang }) : "";
+    // the default language's field and the textarea show the label; the other
+    // languages' fields show only their code, so their name is an aria-label
+    const showsLabel = (lang) => !!label && (!!textFieldProps.multiline || lang === defaultLanguage);
+    const renderLanguage = (lang, focus) => (_jsx(TextFieldCC, { ...textFieldProps, warning: warning, dirty: dirty, autoFocus: focus, fullWidth: true, label: showsLabel(lang) ? (_jsxs(_Fragment, { children: [label, lang && (_jsxs(LabelLanguageName, { children: [" ", "(", getFieldLanguageName(lang), ")"] }))] })) : undefined, required: defaultLanguage === lang && activeLanguage === defaultLanguage
             ? required
             : undefined, value: values[lang] ?? "", onChange: handleChange, name: `${name ?? "mli"}-${lang}`, slotProps: {
             inputLabel: {
@@ -111,12 +112,19 @@ const MultiLanguageInput = (inProps) => {
                     : textFieldProps.slotProps?.inputLabel
                         ?.shrink,
             },
+            htmlInput: showsLabel(lang)
+                ? undefined
+                : {
+                    "aria-label": label
+                        ? `${label} (${getFieldLanguageName(lang)})`
+                        : getFieldLanguageName(lang) || undefined,
+                },
             input: {
                 startAdornment: !textFieldProps.multiline ? (_jsx(InputAdornment, { position: "start", children: _jsx(Tooltip, { title: getLanguageName(lang), children: _jsx(LanguageLabelInputAdornment, { variant: "caption", color: "textSecondary", children: lang }) }) })) : undefined,
                 endAdornment: defaultLanguage === lang && !textFieldProps.multiline ? (_jsx(InputAdornment, { position: "end", children: _jsx(IconButton, { onClick: toggleExpanded, size: "large", "aria-label": tCC("standalone.uikit.multi-language-input.toggle-languages"), children: _jsx(Translate, { color: expanded ? "primary" : incomplete ? "error" : undefined }) }) })) : undefined,
             },
         } }));
-    return (_jsxs(Grid, { container: true, spacing: 2, "data-name": name, onBlur: onBlur, children: [_jsxs(Grid, { size: 12, children: [renderLanguage(textFieldProps.multiline ? activeLanguage : defaultLanguage, !!autoFocus), textFieldProps.multiline && (_jsx(LanguageSwitcher, { exclusive: true, size: "small", value: activeLanguage, onChange: handleLanguageSwitch, "aria-label": label
+    return (_jsxs(Grid, { container: true, spacing: 2, "data-name": name, onBlur: onBlur, role: "group", "aria-label": label || undefined, children: [_jsxs(Grid, { size: 12, children: [renderLanguage(textFieldProps.multiline ? activeLanguage : defaultLanguage, !!autoFocus), textFieldProps.multiline && (_jsx(LanguageSwitcher, { exclusive: true, size: "small", value: activeLanguage, onChange: handleLanguageSwitch, "aria-label": label
                             ? tCC("standalone.uikit.multi-language-input.language-of", {
                                 label,
                             })

@@ -31,7 +31,12 @@ export type MultiLanguageInputProps = Omit<TextFieldProps, "value" | "onChange" 
      */
     onChange: (newValues: Partial<Record<MultiLanguageInputSupportedLanguages, string>>) => void;
     /**
-     * Label for the text field
+     * Label of the default language's field (single-line) or of the textarea
+     * (multiline), and the name of the group around all language fields. Each
+     * field is named with the label and its language, e.g. "Title (German)":
+     * the labelled field reads the language with its label (visually hidden),
+     * the other languages' fields, which show only their code, carry the name as
+     * `aria-label`. Without a label each field is named with its language only.
      */
     label?: string;
     /**

@@ -599,7 +599,9 @@ const BaseSelector = (inProps) => {
                                                 ?.endAdornment).props.children, infoBtn, endAdornment)) : (_jsxs(InputAdornment, { position: "end", children: [endAdornmentLeft, infoBtn, endAdornment] }))) : (paramSlotProps.input?.endAdornment);
                                         })(),
                                     },
-                                }, placeholder: placeholder, required: required, error: error, warning: warning, dirty: dirty, autoFocus: autoFocus }));
+                                }, placeholder: placeholder, required: required, error: error, warning: warning, dirty: dirty, autoFocus: autoFocus, 
+                                // the Autocomplete has a Clear button of its own
+                                disableClearable: true }));
                         } }, `${refreshToken || "no-refresh-token"} ${onAddNew
                         ? `add-new${actualAddNewLabel || "no-add-new-label"}`
                         : "no-add-new"}`) })] }) }));

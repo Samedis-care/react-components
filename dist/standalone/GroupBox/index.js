@@ -23,20 +23,38 @@ const GroupBoxRoot = styled("fieldset", { name: "CcGroupBox", slot: "root" })(({
     minWidth: 0,
     width: "100%",
 }));
+/**
+ * State class of the legend while `smallLabel` is set
+ */
+const SMALL_LABEL_CLASS = "CcGroupBox-smallLabel";
 const GroupBoxLegend = styled("legend", {
     name: "CcGroupBox",
     slot: "legend",
-})(({ ownerState: { smallLabel } }) => ({
+    // A legend with the state class gets the theme's smallLabel overrides
+    // after its legend overrides.
+    overridesResolver: (props, styles) => [
+        styles.legend,
+        !!props.className?.split(" ").includes(SMALL_LABEL_CLASS) &&
+            styles.smallLabel,
+    ],
+})({
     paddingInlineStart: 5,
     paddingInlineEnd: 5,
-    ...(smallLabel && {
+    // :where() keeps the rule at zero specificity, so a font size from the
+    // theme (legend or smallLabel), from classes.smallLabel or from app CSS
+    // wins. The leading * stops emotion from reading the selector as a
+    // pseudo-class of the legend.
+    [`*:where(&.${SMALL_LABEL_CLASS})`]: {
         fontSize: "0.75em",
-    }),
-}));
+    },
+});
 const GroupBox = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcGroupBox" });
     const { label, children, smallLabel, className, classes, ...fieldsetProps } = props;
-    return (_jsxs(GroupBoxRoot, { ...fieldsetProps, className: combineClassNames([className, classes?.root]), children: [label && (_jsx(GroupBoxLegend, { ownerState: { smallLabel: !!smallLabel }, children: label })), children] }));
+    return (_jsxs(GroupBoxRoot, { ...fieldsetProps, className: combineClassNames([className, classes?.root]), children: [label && (_jsx(GroupBoxLegend, { className: combineClassNames([
+                    smallLabel && SMALL_LABEL_CLASS,
+                    smallLabel && classes?.smallLabel,
+                ]), children: label })), children] }));
 };
 /**
  * A frame with an optional title: a native `<fieldset>` whose `label` is drawn

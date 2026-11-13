@@ -7,9 +7,10 @@ export interface FormPageLayoutProps {
     body: React.ReactNode;
     /**
      * Button bar, usually `<FormButtons>`. Follows the body and, while the body is
-     * longer than the visible area, floats over its bottom (see
-     * {@link FormPageLayout}); give it an opaque background, as FormButtons has, so
-     * that the content scrolling under it is hidden. `null` for no buttons.
+     * longer than the visible area, floats over its bottom, except on a screen at most
+     * 480px tall (see {@link FormPageLayout}); give it an opaque background, as
+     * FormButtons has, so that the content scrolling under it is hidden. `null` for no
+     * buttons.
      */
     footer: React.ReactNode;
     /**
@@ -55,6 +56,20 @@ export type FormPageLayoutClassKey = "root" | "wrapper" | "body" | "footer";
  *   layout that ends higher (in a parent only as tall as its content, next to other
  *   content in a block parent, or in a box that does not scroll and ends further up),
  *   the footer sits at the layout's bottom edge, 66px below the body's content.
+ * - A short screen (at most 480px tall: a phone held sideways, a page zoomed to 400%):
+ *   a floating footer would cover much of the little that is visible, so the footer
+ *   is `position: static`, in flow after the body, 30px below the body's content and
+ *   36px above the layout's end. That is where a floating footer rests at the end of a
+ *   long form and on a short form that fills its parent; on a long form, Save is at
+ *   the end.
+ *
+ * Keyboard focus: the browser scrolls a newly focused element into view only when it
+ * lies outside the visible area, and the floating footer is inside it. So when an
+ * element in the body gets the focus while the footer covers it or it lies below the
+ * footer's top edge (within the footer's width), the layout scrolls it up in the next
+ * frame, until it ends 30px above the footer, but no further than its top stays in
+ * view. Focus inside a portal that the body's content renders (a menu, a popover) does
+ * not scroll the form.
  *
  * An `overflow: hidden` ancestor between the layout and the element that scrolls
  * makes the footer stick to that ancestor, which does not scroll, so the footer then

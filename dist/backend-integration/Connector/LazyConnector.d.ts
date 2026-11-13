@@ -4,6 +4,13 @@ import Connector, { ResponseMeta } from "./Connector";
 import ApiConnector from "./ApiConnector";
 interface QueuedFunction {
     type: "create" | "update" | "delete";
+    /**
+     * The record's id as mapId gives it: the real id once the backend has one, the fake id
+     * of a record whose create is still queued; null for an advanced delete
+     * @remarks Every lookup maps the id it is given before comparing, and index maps the
+     *          ids of the rows it hands out: a caller keeps the fake id of a record created
+     *          through this connector after the queue was worked.
+     */
     id: string | null;
     func: () => unknown;
     result: ModelGetResponse<ModelUnknown> | null;

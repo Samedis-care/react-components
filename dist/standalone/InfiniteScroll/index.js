@@ -1,5 +1,6 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import { PureComponent } from "react";
+import { styled } from "@mui/material";
 /**
  * Does the content overflow the scroll container by more than 24px? Until it
  * does, the container is filled through `loadMoreBottom`.
@@ -18,7 +19,20 @@ const isAtBottom = (wrapper) => wrapper.scrollTop === wrapper.scrollHeight - wra
  */
 const hasNoLayoutBox = (wrapper) => wrapper.clientHeight === 0 && wrapper.getClientRects().length === 0;
 /**
- * Provides infinite scrolling to whatever is inside it
+ * The scroll container. It is a tab stop, so it shows the library's focus
+ * ring while it has keyboard focus, drawn inside its edge because an
+ * ancestor may clip it.
+ */
+const ScrollContainer = styled("div")(({ theme }) => ({
+    "&:focus-visible": {
+        outline: `2px solid ${theme.palette.primary.main}`,
+        outlineOffset: -2,
+    },
+}));
+/**
+ * Provides infinite scrolling to whatever is inside it. The scroll container
+ * is a tab stop (see `tabIndex`) and takes the props of a `div`, such as a
+ * role and an accessible name.
  */
 class InfiniteScroll extends PureComponent {
     wrapper = null;
@@ -71,7 +85,16 @@ class InfiniteScroll extends PureComponent {
         this.observeSize(false);
     }
     render() {
-        return (_jsx("div", { className: this.props.className, ref: this.setScrollerRef, children: this.props.children }));
+        const { children, 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        loadMoreTop, 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        loadMoreBottom, 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        callBackDebounce, 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        dynamicallySized, tabIndex, ...containerProps } = this.props;
+        return (_jsx(ScrollContainer, { ...containerProps, tabIndex: tabIndex ?? 0, ref: this.setScrollerRef, children: children }));
     }
     setScrollerRef = (ref) => {
         this.wrapper = ref;

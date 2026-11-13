@@ -13,7 +13,7 @@ import { FormPageLayoutClassKey, FormPageLayoutProps } from "./standalone/Form/F
 import { GroupBoxClassKey, GroupBoxProps } from "./standalone/GroupBox";
 import { MatrixCellTileClassKey, MatrixCellTileProps, MatrixGridClassKey, MatrixGridProps } from "./standalone/Matrix";
 import { SignalPortletClassKey, SignalPortletProps } from "./standalone/SignalPortlet";
-import { CheckboxProps, ComponentsOverrides, ComponentsVariants } from "@mui/material";
+import { CheckboxProps, ComponentsOverrides, ComponentsVariants, Interpolation, Theme as MuiTheme } from "@mui/material";
 import { LoaderClassKey, LoaderProps } from "./standalone/Loader";
 import { FormLoaderOverlayClassKey, FormLoaderOverlayProps } from "./standalone/Form/FormLoaderOverlay";
 import { MultiGridClassKey, MultiGridProps } from "./standalone/Virtualized/MultiGrid";
@@ -21,6 +21,7 @@ import { VerticalDividerClassKey, VerticalDividerProps } from "./standalone/Vert
 import { CountryFlagClassKey, CountryFlagProps } from "./standalone/CountryFlag";
 import { MultiLanguageInputClassKey, MultiLanguageInputProps } from "./standalone/UIKit/InputControls/MultiLanguageInput";
 import { DefaultFormPageButtonsClassKey, DefaultFormPageButtonsProps } from "./backend-components/Form/DefaultFormPageButtons";
+import type { FilesGridClassKey } from "./backend-integration/Model/Types/Renderers/FilesGrid/FilesGrid";
 import { InfoBoxClassKey, InfoBoxProps } from "./standalone/InfoBox";
 import { SignalPortletItemClassKey, SignalPortletItemProps } from "./standalone/SignalPortlet/SignalPortletItem";
 import { InlineSwitchClassKey, InlineSwitchProps } from "./standalone/InlineSwitch";
@@ -60,6 +61,7 @@ import { BasicFormPageProps } from "./backend-components/Form/BasicFormPage";
 import { FlowEngineClassKey, FlowEngineThemeProps } from "./backend-components/Form/FlowEngine/FlowEngine";
 import { DirtyMarkerClassKey, FieldStateClassKey } from "./standalone/UIKit/MuiFieldState";
 import { CrudClassKey } from "./backend-components/CRUD";
+import { RoutedTabsClassKey } from "./non-standalone/RoutedTabs/RoutedTabs";
 import { CrudLoadStatusClassKey, CrudLoadStatusProps } from "./backend-components/FileUpload/CrudLoadStatus";
 import { BackendSingleSelectThemeProps } from "./backend-components/Selector/BackendSingleSelect";
 import { BackendMultiSelectThemeProps } from "./backend-components/Selector/BackendMultiSelect";
@@ -79,6 +81,15 @@ declare module "@mui/material/styles" {
         componentsCare?: ComponentsCareTheme;
     }
 }
+type Theme = Omit<MuiTheme, "components">;
+/**
+ * `styleOverrides` of a component that passes no `ownerState` to its slots:
+ * a function override is called with the theme, and the component's states
+ * are styled through its state classes and state keys
+ */
+type StyleOverridesWithoutOwnerState<ClassKey extends string> = Partial<Record<ClassKey, Interpolation<{
+    theme: Theme;
+}>>>;
 declare module "@mui/material/styles" {
     interface ComponentNameToClassKey {
         CcSignalPortlet: SignalPortletClassKey;
@@ -134,6 +145,7 @@ declare module "@mui/material/styles" {
         CcFormDialog: FormDialogClassKey;
         CcPageTitle: PageTitleClassKey;
         CcPopupMenu: PopupMenuClassKey;
+        CcFilesGrid: FilesGridClassKey;
         CcPortalLayout: PortalLayoutClassKey;
         CcNotifications: NotificationsClassKey;
         CcToast: ToastClassKey;
@@ -155,6 +167,7 @@ declare module "@mui/material/styles" {
         CcFieldState: FieldStateClassKey;
         CcDirtyMarker: DirtyMarkerClassKey;
         CcCrud: CrudClassKey;
+        CcRoutedTabs: RoutedTabsClassKey;
     }
     interface ComponentsPropsList {
         CcSignalPortlet: Partial<SignalPortletProps>;
@@ -294,7 +307,7 @@ declare module "@mui/material/styles" {
         };
         CcGroupBox?: {
             defaultProps?: ComponentsPropsList["CcGroupBox"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcGroupBox"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<GroupBoxClassKey>;
             variants?: ComponentsVariants["CcGroupBox"];
         };
         CcMatrixGrid?: {
@@ -511,6 +524,9 @@ declare module "@mui/material/styles" {
             styleOverrides?: ComponentsOverrides<Theme>["CcPopupMenu"];
             variants?: ComponentsVariants["CcFormDialog"];
         };
+        CcFilesGrid?: {
+            styleOverrides?: ComponentsOverrides<Theme>["CcFilesGrid"];
+        };
         CcPortalLayout?: {
             defaultProps?: ComponentsPropsList["CcPortalLayout"];
             styleOverrides?: ComponentsOverrides<Theme>["CcPortalLayout"];
@@ -605,5 +621,9 @@ declare module "@mui/material/styles" {
         CcCrud?: {
             styleOverrides?: ComponentsOverrides<Theme>["CcCrud"];
         };
+        CcRoutedTabs?: {
+            styleOverrides?: ComponentsOverrides<Theme>["CcRoutedTabs"];
+        };
     }
 }
+export {};

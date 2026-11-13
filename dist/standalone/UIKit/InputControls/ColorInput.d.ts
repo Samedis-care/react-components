@@ -14,5 +14,13 @@ export type ColorInputProps = TextFieldWithHelpProps & Omit<TextFieldProps, "onC
      */
     value: string | null;
 };
+/**
+ * A text field for a color, with react-color's `ChromePicker` in a popover
+ * below it. The palette button at the end of the field ("Choose color", in
+ * the library's language) opens the picker, from the pointer or the keyboard,
+ * and so does a click anywhere in the field; neither while `disabled`. The
+ * open picker is a modal dialog named after the field's label. Escape or a
+ * click outside closes it, and focus returns to where it was.
+ */
 declare const _default: React.MemoExoticComponent<(props: ColorInputProps) => React.JSX.Element>;
 export default _default;

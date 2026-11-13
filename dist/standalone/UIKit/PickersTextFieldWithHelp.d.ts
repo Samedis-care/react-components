@@ -11,7 +11,10 @@ export interface PickersTextFieldWithHelpProps extends UIInputProps {
      */
     customHandleClear: () => void;
     /**
-     * Disable clear button on mobile
+     * Hides the Clear button. That button is only rendered on touch devices,
+     * while the field has a value and is neither disabled nor read-only (the
+     * picker's `readOnly`, which reaches the field as `slotProps.input.readOnly`).
+     * @default false
      */
     disableClearable?: boolean;
 }

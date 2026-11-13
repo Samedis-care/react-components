@@ -9,7 +9,7 @@ export interface BuildDateColumnsParams {
      */
     to: string;
     /**
-     * Locale for the weekday names
+     * Locale for the weekday names and the full dates
      * @default the browser's locale
      * @remarks Inside a component use useCurrentLocale() to pass the locale the
      * rest of the app uses.
@@ -48,7 +48,8 @@ export interface BuildDateColumnsParams {
  * Builds the columns of a day-per-column matrix.
  * @param params The range, and how to mark the days in it
  * @returns One column per day, keyed by ISO date, labeled with the day number
- * and the localized short weekday
+ * and the localized short weekday, and named with the localized full date
+ * ("Thursday, March 5, 2026")
  * @remarks The weekday names come from Intl, not from moment, so a consumer
  * does not have to bundle moment's locale files to get localized headers.
  */

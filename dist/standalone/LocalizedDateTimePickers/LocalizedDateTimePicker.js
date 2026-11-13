@@ -8,12 +8,21 @@ import usePickerDraft from "./usePickerDraft";
 import usePickerValidationError from "./usePickerValidationError";
 import withAccessibleError from "./withAccessibleError";
 import withRequiredSections from "./withRequiredSections";
-import withFieldBlur from "./withFieldBlur";
+import useFieldBlur from "./useFieldBlur";
+/**
+ * When the picker opens its desktop popup rather than MUI's mobile dialog: with
+ * a fine pointer, as in MUI, and only where the popup fits. The popup puts the
+ * 320px calendar next to the time columns, up to 545px wide with seconds and
+ * AM/PM, so a narrow window or a zoomed-in page would scroll sideways; 600px
+ * leaves room for a scrollbar. The mobile dialog fits a 320px viewport.
+ */
+const DESKTOP_MODE_MEDIA_QUERY = "@media (pointer: fine) and (min-width: 600px)";
 const LocalizedDateTimePicker = (props) => {
     const { required, error, fullWidth, onBlur, publishIntermediateValues, ...otherProps } = props;
     const localeText = useMuiLocaleData();
     const draft = usePickerDraft(otherProps.value, otherProps.onChange, publishIntermediateValues);
     const validation = usePickerValidationError(otherProps.onError);
+    const withFieldBlur = useFieldBlur();
     const { settle } = draft;
     const consumerOnOpen = otherProps.onOpen;
     const handleOpen = useCallback(() => {
@@ -22,7 +31,7 @@ const LocalizedDateTimePicker = (props) => {
         settle();
         consumerOnOpen?.();
     }, [settle, consumerOnOpen]);
-    return (_jsx(LocalizationProvider, { localeText: localeText, children: _jsx(DateTimePicker, { format: "L LT", ...otherProps, value: draft.value, onChange: draft.onChange, onOpen: handleOpen, onError: validation.onError, slotProps: {
+    return (_jsx(LocalizationProvider, { localeText: localeText, children: _jsx(DateTimePicker, { format: "L LT", ...otherProps, value: draft.value, onChange: draft.onChange, onOpen: handleOpen, onError: validation.onError, desktopModeMediaQuery: otherProps.desktopModeMediaQuery ?? DESKTOP_MODE_MEDIA_QUERY, slotProps: {
                 ...otherProps.slotProps,
                 textField: (ownerState) => {
                     const orgSlotProps = accessSlotProps(ownerState, otherProps.slotProps?.textField);
@@ -35,7 +44,6 @@ const LocalizedDateTimePicker = (props) => {
                         ...(fullWidth === undefined ? {} : { fullWidth }),
                         // called once focus leaves the field, see withFieldBlur
                         onBlur: (event) => {
-                            draft.settle();
                             orgSlotProps?.onBlur?.(event);
                             onBlur?.(event);
                         },

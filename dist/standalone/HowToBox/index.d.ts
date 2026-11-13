@@ -9,8 +9,14 @@ export interface HowToBoxProps {
      * How to entries. An array renders one list item per element; any other
      * value renders as a single item.
      *
+     * Entries that React renders as nothing (`undefined`, `null`, `""`, `false`
+     * and `true`) are skipped, so a conditional step (`[a, isAdmin && b, c]`)
+     * or an empty string in a translated array leaves no empty bullet. `0` is
+     * an entry and shows "0", as React renders it. An element is always an
+     * entry, even if its component renders nothing.
+     *
      * Without entries the box renders nothing, not even its frame and title:
-     * `undefined`, `null`, `""`, `false` and an empty array hide it.
+     * a skipped value, an empty array and an array of skipped values hide it.
      *
      * A line break `"\n"` in an entry starts a new line inside the same item,
      * which is the only way to break a line in a translated string. Other runs
@@ -35,7 +41,8 @@ export interface HowToBoxTranslateProps extends Omit<HowToBoxProps, "titleLabel"
     titleLabel?: string;
     /**
      * i18n key passed to t function, used in combination with return object to obtain array of strings.
-     * A key that holds an empty array renders nothing, like an empty `labels` array of HowToBox.
+     * Empty strings in that array are skipped, and a key that holds an empty array renders nothing,
+     * like the `labels` of HowToBox.
      */
     labels: string;
 }

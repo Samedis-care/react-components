@@ -51,6 +51,17 @@ export interface MenuItemProps {
      * The depth in the menu tree
      */
     depth: number;
+    /**
+     * Ref callback for the element of the entry that takes keyboard focus (the
+     * one with `onClick`); put it on that element as `ref`
+     *
+     * When the focused entry is removed (the definition changed after a
+     * navigation, or `shouldRender` turned false), MenuBase moves focus to the
+     * highlighted entry through it. Optional for a renderer: without it, focus
+     * goes to the first focusable element of the menu instead. Always passed by
+     * MenuBase.
+     */
+    focusRef?: React.RefCallback<HTMLElement>;
 }
 /**
  * The menu item definition
