@@ -1,5 +1,10 @@
-import React, { Dispatch, SetStateAction, useState } from "react";
-import { MenuContext, toMenuItemComponent } from "./MenuItem";
+import React, { Dispatch, SetStateAction, useRef, useState } from "react";
+import {
+	MenuContext,
+	MenuEntryElementsContext,
+	toMenuItemComponent,
+} from "./MenuItem";
+import useMenuFocusRestore from "./useMenuFocusRestore";
 import { SvgIconComponent } from "@mui/icons-material";
 import combineClassNames from "../../../utils/combineClassNames";
 import { styled, SvgIconProps, useThemeProps } from "@mui/material";
@@ -55,6 +60,17 @@ export interface MenuItemProps {
 	 * The depth in the menu tree
 	 */
 	depth: number;
+	/**
+	 * Ref callback for the element of the entry that takes keyboard focus (the
+	 * one with `onClick`); put it on that element as `ref`
+	 *
+	 * When the focused entry is removed (the definition changed after a
+	 * navigation, or `shouldRender` turned false), MenuBase moves focus to the
+	 * highlighted entry through it. Optional for a renderer: without it, focus
+	 * goes to the first focusable element of the menu instead. Always passed by
+	 * MenuBase.
+	 */
+	focusRef?: React.RefCallback<HTMLElement>;
 }
 
 /**
@@ -133,6 +149,8 @@ export interface MenuProps {
 	classes?: Partial<Record<PortalMenuClassKey, string>>;
 }
 
+// tabindex -1: focus goes here when the focused entry is removed and the menu
+// has no focusable element left
 const Root = styled("div", { name: "CcPortalMenu", slot: "root" })({
 	height: "100%",
 	width: "100%",
@@ -142,6 +160,15 @@ const Root = styled("div", { name: "CcPortalMenu", slot: "root" })({
 export type PortalMenuClassKey = "root";
 export type PortalMenuProps = MenuProps; // alias
 
+/**
+ * A menu tree rendered with the given wrapper and entry renderer. A click on an
+ * entry highlights it (a group expands or collapses instead).
+ *
+ * Keyboard focus stays in the menu when the focused entry is removed (the
+ * definition changed, e.g. after a navigation, or `shouldRender` turned false):
+ * it moves to the highlighted entry, or, if that cannot take focus, to the first
+ * focusable element of the menu. Focus that is elsewhere is left alone.
+ */
 const PortalMenu = (inProps: MenuProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcPortalMenu" });
 	const {
@@ -152,15 +179,31 @@ const PortalMenu = (inProps: MenuProps) => {
 		definition,
 	} = props;
 	const state = useState("");
+	const menuState = customState || state;
+	const [entries] = useState(() => new Map<string, HTMLElement>());
+	const rootRef = useRef<HTMLDivElement>(null);
+	const { onFocus, onBlur } = useMenuFocusRestore(
+		rootRef,
+		entries,
+		menuState[0],
+	);
 
 	return (
-		<Root className={combineClassNames([className, classes?.root])}>
+		<Root
+			ref={rootRef}
+			className={combineClassNames([className, classes?.root])}
+			tabIndex={-1}
+			onFocus={onFocus}
+			onBlur={onBlur}
+		>
 			<Wrapper>
-				<MenuContext.Provider value={customState || state}>
-					{definition.map((child) =>
-						toMenuItemComponent(props, child, 0, null),
-					)}
-				</MenuContext.Provider>
+				<MenuEntryElementsContext.Provider value={entries}>
+					<MenuContext.Provider value={menuState}>
+						{definition.map((child) =>
+							toMenuItemComponent(props, child, 0, null),
+						)}
+					</MenuContext.Provider>
+				</MenuEntryElementsContext.Provider>
 			</Wrapper>
 		</Root>
 	);

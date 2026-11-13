@@ -68,6 +68,7 @@ const MenuItemJumboReactLight = (
 
 	return (
 		<MyListItem
+			ref={props.focusRef}
 			onClick={props.onClick}
 			onAuxClick={props.onAuxClick}
 			className={combineClassNames([

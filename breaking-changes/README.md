@@ -45,6 +45,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [A form page's Save stays focusable while unavailable](2026-11-13-form-page-save-focusable-while-unavailable.md) | behavior |
 | 2026-11-13 | [A Form given another record drops the previous page's validation and submit handlers](2026-11-13-form-record-switch-drops-handlers.md) | behavior |
 | 2026-11-13 | [GroupBox's small legend is a state class, not an ownerState](2026-11-13-group-box-small-label-state-class.md) | type, theme |
+| 2026-11-13 | [The Portal menu keeps keyboard focus when the focused entry is removed](2026-11-13-portal-menu-keeps-focus.md) | behavior |
 | 2026-11-12 | [The Loader's status text is a paragraph, not a heading](2026-11-12-loader-status-text-is-no-heading.md) | behavior |
 | 2026-11-12 | [PopupMenu item labels wrap instead of being cut off](2026-11-12-popup-menu-labels-wrap.md) | behavior |
 | 2026-11-12 | [CountryFlags, CountryCodes and CountryOption.value are typed by CountryCode, and CountryFlags is frozen](2026-11-12-country-flags-typed-by-country-code.md) | type, behavior |

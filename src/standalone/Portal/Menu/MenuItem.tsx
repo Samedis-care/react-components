@@ -3,6 +3,7 @@ import React, {
 	SetStateAction,
 	useCallback,
 	useContext,
+	useRef,
 	useState,
 } from "react";
 import type { IMenuItemDefinition, MenuItemProps, MenuProps } from "./index";
@@ -41,6 +42,15 @@ export const MenuContext = React.createContext<
 	[string, Dispatch<SetStateAction<string>>] | undefined
 >(undefined);
 
+/**
+ * The elements of the rendered entries by entry id, filled through the
+ * renderers' `focusRef`; MenuBase moves focus to them
+ */
+export const MenuEntryElementsContext = React.createContext<Map<
+	string,
+	HTMLElement
+> | null>(null);
+
 const MenuItem = (props: MenuItemControllerProps) => {
 	const {
 		depth,
@@ -55,6 +65,21 @@ const MenuItem = (props: MenuItemControllerProps) => {
 	const menuContext = useContext(MenuContext);
 	if (!menuContext) throw new Error("MenuContext is undefined");
 	const [menuState, setMenuState] = menuContext;
+
+	const entries = useContext(MenuEntryElementsContext);
+	const elementRef = useRef<HTMLElement | null>(null);
+	const focusRef = useCallback(
+		(element: HTMLElement | null) => {
+			const previous = elementRef.current;
+			elementRef.current = element;
+			if (!entries) return;
+			if (element) entries.set(menuItemId, element);
+			// siblings with the same title share an id: only remove this entry's own
+			else if (previous && entries.get(menuItemId) === previous)
+				entries.delete(menuItemId);
+		},
+		[entries, menuItemId],
+	);
 
 	const clickProxy = useCallback(
 		(evt: React.MouseEvent) => {
@@ -91,6 +116,7 @@ const MenuItem = (props: MenuItemControllerProps) => {
 				onClick={clickProxy}
 				onAuxClick={auxClickProxy}
 				depth={depth}
+				focusRef={focusRef}
 			/>
 			{expandable && (
 				<Collapse in={expanded} className={props.childWrapperClassName}>

@@ -28,6 +28,7 @@ const MenuItemMaterial = (inProps: MenuItemProps & MenuItemMaterialProps) => {
 	const Icon = props.icon;
 	return (
 		<StyledListItem
+			ref={props.focusRef}
 			onClick={props.onClick}
 			onAuxClick={props.onAuxClick}
 			selected={props.active}

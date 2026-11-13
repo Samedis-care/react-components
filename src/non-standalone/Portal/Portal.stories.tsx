@@ -1,11 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Box, List, ListItem, Typography } from "@mui/material";
 import { createMemoryHistory } from "history";
 import { Home, Info, Settings } from "@mui/icons-material";
+// eslint-disable-next-line import/no-unresolved
+import { expect, userEvent, waitFor } from "storybook/test";
 import HistoryRouter from "../../standalone/Routes/HistoryRouter";
 import Routes from "../../standalone/Routes/Routes";
 import Route from "../../standalone/Routes/Route";
+import useLocation from "../../standalone/Routes/useLocation";
+import { MaterialMenuItem } from "../../standalone/Portal/MenuItem";
 import RoutedMenu, { IRoutedMenuItemDefinition } from "./Menu";
 
 const meta: Meta = {
@@ -214,5 +218,91 @@ export const StartingOnSettings: StoryObj = {
 				</Box>
 			</HistoryRouter>
 		);
+	},
+};
+
+// ─── Menu swapped by path ────────────────────────────────────────────────────
+
+const NavWrapper = (props: { children: React.ReactNode }) => (
+	<List component={"nav"} aria-label={"Main menu"}>
+		{props.children}
+	</List>
+);
+
+const Page = (props: { title: string }) => {
+	const location = useLocation();
+	return (
+		<Box sx={{ p: 2 }}>
+			<Typography variant="h5" component="h1">
+				{props.title}
+			</Typography>
+			<Typography data-testid="current-path">{location.pathname}</Typography>
+		</Box>
+	);
+};
+
+const currentPath = () =>
+	document.querySelector("[data-testid=current-path]")?.textContent;
+
+const appMenu: IRoutedMenuItemDefinition[] = [
+	{ title: "Back", route: "/apps", shouldRender: true },
+	{ title: "General", route: "/apps/:app", shouldRender: true },
+	{ title: "Roles", route: "/apps/:app/roles", shouldRender: true },
+	{ title: "Users", route: "/apps/:app/users", shouldRender: true },
+];
+
+// IMF's admin UI picks a whole flat menu per path: the app menu (with "Back")
+// below /apps/<id>, the top menu elsewhere
+const topMenu: IRoutedMenuItemDefinition[] = [
+	{ title: "Profile", route: "/profile", shouldRender: true },
+	{ title: "Apps", route: "/apps", shouldRender: true },
+];
+
+const SwappingMenu = () => {
+	const { pathname } = useLocation();
+	return (
+		<RoutedMenu
+			definition={/^\/apps\/.+/.test(pathname) ? appMenu : topMenu}
+			wrapper={NavWrapper}
+			menuItem={MaterialMenuItem}
+		/>
+	);
+};
+
+const SwappingDemo = () => {
+	const [history] = useState(() =>
+		createMemoryHistory({ initialEntries: ["/apps/a1/roles"] }),
+	);
+	return (
+		<HistoryRouter history={history}>
+			<SwappingMenu />
+			<Box component="main">
+				<Page title="Content" />
+			</Box>
+		</HistoryRouter>
+	);
+};
+
+export const Issue3498Item8FocusStaysWhenTheMenuIsSwapped: StoryObj = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3498-ITEM-8: the definition depends on the path (as in IMF\'s admin UI). Enter on "Back" navigates to `/apps`, where the menu has no "Back" entry: the focused entry unmounts and keyboard focus falls to the document body.',
+			},
+		},
+	},
+	render: () => <SwappingDemo />,
+	play: async ({ canvas }) => {
+		canvas.getByRole("button", { name: "Back" }).focus();
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() =>
+			expect(canvas.getByRole("button", { name: "Apps" })).toHaveClass(
+				"Mui-selected",
+			),
+		);
+		await expect(currentPath()).toBe("/apps");
+		await expect(document.activeElement).not.toBe(document.body);
 	},
 };

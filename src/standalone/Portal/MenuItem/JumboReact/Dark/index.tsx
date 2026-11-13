@@ -74,6 +74,7 @@ const MenuItemJumboReactDark = (
 	const Icon = props.icon;
 	return (
 		<MyListItem
+			ref={props.focusRef}
 			onClick={props.onClick}
 			onAuxClick={props.onAuxClick}
 			className={combineClassNames([

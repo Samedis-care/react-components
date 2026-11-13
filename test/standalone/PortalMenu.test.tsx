@@ -118,3 +118,76 @@ describe("MenuBase: onAuxClick", () => {
 		expect(d[2].onClick).not.toHaveBeenCalled();
 	});
 });
+
+describe("MenuBase: focus when the focused entry is removed", () => {
+	const without = (title: string) => defs({ [title]: { shouldRender: false } });
+
+	const ui = (
+		d: IMenuItemDefinition[],
+		menuItem: React.ComponentType<MenuItemProps> = MaterialMenuItem,
+	) => (
+		<ThemeProvider theme={theme}>
+			<MenuBase
+				definition={d}
+				wrapper={Wrap}
+				menuItem={menuItem}
+				className={"test-menu"}
+			/>
+			<button type={"button"}>Outside</button>
+		</ThemeProvider>
+	);
+
+	it("[ISSUE-3498-ITEM-8] a permission change that hides the focused entry moves focus to the highlighted entry", () => {
+		const { rerender } = render(ui(defs()));
+		fireEvent.click(entry("Monthly"));
+		entry("Users").focus();
+		rerender(ui(without("Users")));
+		expect(document.activeElement).toBe(entry("Monthly"));
+	});
+
+	it("[ISSUE-3498-ITEM-8] without a highlighted entry, focus moves to the first entry", () => {
+		const { rerender } = render(ui(defs()));
+		entry("Users").focus();
+		rerender(ui(without("Users")));
+		expect(document.activeElement).toBe(entry("Dashboard"));
+	});
+
+	it("[ISSUE-3498-ITEM-8] a renderer without focusRef: focus moves to the first focusable element of the menu", () => {
+		const Custom = (p: MenuItemProps) => (
+			<button type={"button"} onClick={p.onClick}>
+				{p.title}
+			</button>
+		);
+		const { rerender } = render(ui(defs(), Custom));
+		fireEvent.click(entry("Users"));
+		entry("Dashboard").focus();
+		rerender(ui(without("Dashboard"), Custom));
+		expect(document.activeElement).toBe(entry("Reports"));
+	});
+
+	it("[ISSUE-3498-ITEM-8] when no entry is left, focus moves to the menu itself", () => {
+		const { container, rerender } = render(ui(defs()));
+		entry("Users").focus();
+		rerender(ui([]));
+		const root = container.querySelector(".test-menu");
+		expect(root).not.toBeNull();
+		expect(document.activeElement).toBe(root);
+	});
+
+	it("[ISSUE-3498-ITEM-8] focus outside the menu stays where it is", async () => {
+		const { rerender } = render(ui(defs()));
+		entry("Users").focus();
+		screen.getByRole("button", { name: "Outside" }).focus();
+		rerender(ui(without("Users")));
+		expect(document.activeElement).toBe(
+			screen.getByRole("button", { name: "Outside" }),
+		);
+		// focus that left the menu for the page is not pulled back either
+		fireEvent.click(entry("Monthly"));
+		entry("Dashboard").focus();
+		entry("Dashboard").blur();
+		await Promise.resolve();
+		rerender(ui(without("Dashboard")));
+		expect(document.activeElement).toBe(document.body);
+	});
+});

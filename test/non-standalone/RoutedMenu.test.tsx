@@ -12,6 +12,7 @@ import { createTheme, List, ThemeProvider } from "@mui/material";
 import { createMemoryHistory, History } from "history";
 import MaterialMenuItem from "../../src/standalone/Portal/MenuItem/Material";
 import HistoryRouter from "../../src/standalone/Routes/HistoryRouter";
+import useLocation from "../../src/standalone/Routes/useLocation";
 import RoutedMenu, {
 	IRoutedMenuItemDefinition,
 	IRoutedMenuProps,
@@ -339,5 +340,43 @@ describe("RoutedMenu bugs", () => {
 		} finally {
 			vi.unstubAllEnvs();
 		}
+	});
+});
+
+describe("RoutedMenu: focus when the menu is swapped", () => {
+	// IMF's admin UI picks a whole flat menu per path: the app menu (with "Back")
+	// below /apps/<id>, the top menu elsewhere
+	const appMenu = [
+		leaf("Back", "/apps"),
+		leaf("General", "/apps/:app"),
+		leaf("Roles", "/apps/:app/roles"),
+	];
+	const topMenu = [leaf("Profile", "/profile"), leaf("Apps", "/apps")];
+	const SwappingMenu = () => {
+		const { pathname } = useLocation();
+		return (
+			<RoutedMenu
+				definition={/^\/apps\/.+/.test(pathname) ? appMenu : topMenu}
+				wrapper={Wrap}
+				menuItem={MaterialMenuItem}
+			/>
+		);
+	};
+
+	it("[ISSUE-3498-ITEM-8] Enter on an entry that the navigation removes moves focus to the entry of the new location", () => {
+		const history = createMemoryHistory({ initialEntries: ["/apps/a1/roles"] });
+		render(
+			<ThemeProvider theme={theme}>
+				<HistoryRouter history={history}>
+					<SwappingMenu />
+				</HistoryRouter>
+			</ThemeProvider>,
+		);
+		const back = entry("Back");
+		back.focus();
+		fireEvent.keyDown(back, { key: "Enter" });
+		expect(history.location.pathname).toBe("/apps");
+		expect(entry("Apps")).toHaveClass("Mui-selected");
+		expect(document.activeElement).toBe(entry("Apps"));
 	});
 });
