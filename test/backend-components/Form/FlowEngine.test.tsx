@@ -370,7 +370,7 @@ describe("FlowEngine: bugs", () => {
 		);
 		await loaded(sink);
 		const save = screen.getByRole("button", { name: "Save" });
-		expect(save).toBeDisabled();
+		expect(save).toHaveAttribute("aria-disabled", "true");
 		expect(save).toHaveAccessibleDescription("You may not edit people");
 	});
 	it("[ISSUE-3504-ITEM-9] the reason shows in a tooltip when the pointer is on the read-only Save", async () => {
@@ -394,7 +394,7 @@ describe("FlowEngine: bugs", () => {
 		const { sink } = setupSave({ perm: null });
 		await loaded(sink);
 		const save = screen.getByRole("button", { name: "Save" });
-		expect(save).toBeDisabled();
+		expect(save).toHaveAttribute("aria-disabled", "true");
 		expect(save).not.toHaveAttribute("aria-describedby");
 	});
 	it("[ISSUE-3504-ITEM-9] an editable form's Save has no description", async () => {

@@ -356,7 +356,7 @@ export const Issue3504Item9ReadOnlySaveSaysWhy: StoryObj<FlowArgs> = {
 	play: async ({ canvas, userEvent }) => {
 		await canvas.findByDisplayValue("Alice", undefined, LOAD);
 		const save = canvas.getByRole("button", { name: "Save" });
-		await expect(save).toBeDisabled();
+		await expect(save).toHaveAttribute("aria-disabled", "true");
 		await expect(save).toHaveAccessibleDescription("You may not edit people");
 		// a disabled button takes no pointer events; the element around it does
 		const wrapper = save.parentElement;

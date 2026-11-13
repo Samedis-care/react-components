@@ -1,8 +1,14 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, fn } from "storybook/test";
-import { createTheme, CssBaseline, Grid, ThemeProvider } from "@mui/material";
+import { expect, fireEvent, fn, waitFor, within } from "storybook/test";
+import {
+	Button,
+	createTheme,
+	CssBaseline,
+	Grid,
+	ThemeProvider,
+} from "@mui/material";
 import { createMemoryHistory } from "history";
 import { Framework } from "../../framework";
 import { setFrameworkHistory } from "../../framework/History";
@@ -14,7 +20,11 @@ import createTestModel, {
 	sampleData,
 } from "../../stories/test-utils/TestModel";
 import MockConnector from "../../stories/test-utils/MockConnector";
-import { Model } from "../../backend-integration";
+import {
+	Model,
+	ModelGetResponse,
+	ModelUnknown,
+} from "../../backend-integration";
 
 // a dirty form page blocks the history; keep that away from the Storybook frame's own
 setFrameworkHistory(createMemoryHistory({ initialEntries: ["/page"] }));
@@ -143,5 +153,99 @@ export const Issue3503Item17BackButtonContrastDark: StoryObj<PageArgs> = {
 	play: async ({ canvas }) => {
 		await canvas.findByDisplayValue("Alice", undefined, LOAD);
 		await expect(canvas.getByRole("button", { name: "Back" })).toBeVisible();
+	},
+};
+
+/**
+ * The people connector, holding every save until finish() is called
+ */
+class HeldSaveConnector extends MockConnector {
+	private held: (() => void)[] = [];
+
+	// MockConnector's update is typed as synchronous, Connector's may return a promise
+	update(data: Record<string, unknown>) {
+		return new Promise<ModelGetResponse<ModelUnknown>>((resolve) => {
+			this.held.push(() => resolve(super.update(data)));
+		}) as never;
+	}
+
+	/**
+	 * Finishes the saves held so far
+	 */
+	finish() {
+		this.held.splice(0).forEach((save) => save());
+	}
+}
+
+/**
+ * PersonPage whose saves wait until "Finish saving" is pressed
+ */
+const HeldSaveStory = (props: { goBack: () => void }) => {
+	const { goBack } = props;
+	const connector = useMemo(() => new HeldSaveConnector(sampleData), []);
+	const model = useMemo(
+		() =>
+			new Model(
+				"u45-story-people-" + String(modelCounter++),
+				createTestModel().fields,
+				connector,
+			),
+		[connector],
+	);
+	const customProps = useMemo(() => ({ goBack }), [goBack]);
+	const finish = useCallback(() => connector.finish(), [connector]);
+	return (
+		<>
+			<Button onClick={finish}>Finish saving</Button>
+			<Form
+				model={model}
+				id={"1"}
+				errorComponent={DefaultErrorComponent}
+				customProps={customProps}
+				disableRouting
+			>
+				{PersonPage}
+			</Form>
+		</>
+	);
+};
+
+/**
+ * ISSUE-3473-ITEM-10: Save pressed by keyboard keeps the focus while the form saves and
+ * afterwards. Save is unavailable then, but stays focusable (`aria-disabled`, not the native
+ * `disabled`), so the browser does not move the focus to the page, and the tooltip says why
+ * Save is unavailable while it has keyboard focus.
+ */
+export const Issue3473Item10SaveKeepsFocus: StoryObj<PageArgs> = {
+	args: { goBack: fn() },
+	parameters: { a11y: { test: "error" } },
+	render: (args) => <HeldSaveStory goBack={args.goBack} />,
+	play: async ({ canvas, userEvent }) => {
+		const input = await canvas.findByDisplayValue("Alice", undefined, LOAD);
+		await userEvent.type(input, "X");
+		const save = canvas.getByRole("button", { name: "Save" });
+		await waitFor(() => expect(save).not.toHaveAttribute("aria-disabled"));
+		save.focus();
+		await userEvent.keyboard("{Enter}");
+
+		await waitFor(() => expect(input).toBeDisabled());
+		await expect(save).toHaveFocus();
+		await expect(save).toHaveAttribute("aria-disabled", "true");
+		// the tooltip is in a portal, outside the story's canvas
+		await expect(
+			await within(document.body).findByRole("tooltip", undefined, LOAD),
+		).toHaveTextContent("The form is currently being saved");
+
+		// a click on Finish saving that leaves the focus where it is
+		await fireEvent.click(
+			canvas.getByRole("button", { name: "Finish saving" }),
+		);
+		await waitFor(() => expect(input).toBeEnabled());
+		await expect(save).toHaveFocus();
+		await expect(save).toHaveAttribute("aria-disabled", "true");
+		// saved: no reason left to show
+		await waitFor(() =>
+			expect(within(document.body).queryByRole("tooltip")).toBeNull(),
+		);
 	},
 };

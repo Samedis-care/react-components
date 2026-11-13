@@ -317,7 +317,9 @@ export const fillCreateForm = async () => {
 		fireEvent.change(input, { target: { value: "v" + String(index) } }),
 	);
 	await waitFor(() =>
-		expect(screen.getByRole("button", { name: "Save" })).toBeEnabled(),
+		expect(screen.getByRole("button", { name: "Save" })).not.toHaveAttribute(
+			"aria-disabled",
+		),
 	);
 	return inputs;
 };

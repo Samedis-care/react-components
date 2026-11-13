@@ -42,6 +42,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [A warning's underline is 1px at rest and 2px only while the field is focused](2026-11-13-warning-underline-drawn-like-error.md) | behavior |
 | 2026-11-13 | [Filled toasts darken a fill until its text reaches 4.5:1](2026-11-13-toast-filled-fill-contrast.md) | behavior |
 | 2026-11-13 | [A form page scrolls a focused field clear of its footer, and the footer stops floating on short screens](2026-11-13-form-page-layout-focus-clear-of-footer.md) | behavior |
+| 2026-11-13 | [A form page's Save stays focusable while unavailable](2026-11-13-form-page-save-focusable-while-unavailable.md) | behavior |
 | 2026-11-12 | [The Loader's status text is a paragraph, not a heading](2026-11-12-loader-status-text-is-no-heading.md) | behavior |
 | 2026-11-12 | [PopupMenu item labels wrap instead of being cut off](2026-11-12-popup-menu-labels-wrap.md) | behavior |
 | 2026-11-12 | [CountryFlags, CountryCodes and CountryOption.value are typed by CountryCode, and CountryFlags is frozen](2026-11-12-country-flags-typed-by-country-code.md) | type, behavior |

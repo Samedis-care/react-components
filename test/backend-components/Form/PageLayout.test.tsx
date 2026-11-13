@@ -10,6 +10,7 @@ import {
 	fireEvent,
 	within,
 } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Grid } from "@mui/material";
 import { Framework, useDialogContext } from "../../../src/framework";
 import FormDialog from "../../../src/backend-components/Form/FormDialog";
@@ -92,6 +93,24 @@ const makePage = (field: string, body?: React.ReactNode) => {
 
 const FirstNamePage = makePage("first_name");
 
+const renderPage = (
+	model: TestModel,
+	defaultTheme?: React.ComponentProps<typeof Framework>["defaultTheme"],
+) =>
+	render(
+		<Framework defaultTheme={defaultTheme}>
+			<Form
+				model={model}
+				id={"1"}
+				errorComponent={DefaultErrorComponent}
+				customProps={{ goBack: () => {} }}
+				disableRouting
+			>
+				{FirstNamePage}
+			</Form>
+		</Framework>,
+	);
+
 const overlays = () =>
 	Array.from(
 		document.querySelectorAll<HTMLElement>(
@@ -112,12 +131,46 @@ const saveButton = () => screen.getByRole("button", { name: /save/i });
  */
 const editAndSave = async (input: HTMLElement) => {
 	fireEvent.change(input, { target: { value: "AliceX" } });
-	await waitFor(() => expect(saveButton()).toBeEnabled());
+	await waitFor(() =>
+		expect(saveButton()).not.toHaveAttribute("aria-disabled"),
+	);
 	fireEvent.click(saveButton());
 	await act(async () => {});
 };
 
 describe("FormPageLayout and FormLoaderOverlay in a form page", () => {
+	it("[ISSUE-3473-ITEM-10] keeps keyboard focus in the form page when Save is pressed", async () => {
+		const user = userEvent.setup();
+		const model = createTestModel();
+		const updates = holdUpdates(model);
+		renderPage(model);
+		const input = await screen.findByDisplayValue("Alice", undefined, LOAD);
+		fireEvent.change(input, { target: { value: "AliceX" } });
+		await waitFor(() =>
+			expect(saveButton()).not.toHaveAttribute("aria-disabled"),
+		);
+		saveButton().focus();
+		expect(saveButton()).toHaveFocus();
+
+		await user.keyboard("{Enter}");
+		await waitFor(() =>
+			expect(within(onlyOverlay()).getByRole("progressbar")).toBeVisible(),
+		);
+		const layout = document.querySelector('[class*="CcFormPageLayout-root"]')!;
+		expect(
+			layout.contains(document.activeElement),
+			`focus moved to ${document.activeElement?.tagName} while saving`,
+		).toBe(true);
+
+		updates.release();
+		await act(async () => {});
+		await waitFor(() => expect(screen.queryByRole("progressbar")).toBeNull());
+		expect(
+			layout.contains(document.activeElement),
+			`focus moved to ${document.activeElement?.tagName} after saving`,
+		).toBe(true);
+	});
+
 	const renderFormDialog = (model: TestModel) => {
 		const DialogForm = () => {
 			const [, popDialog] = useDialogContext();
@@ -153,7 +206,9 @@ describe("FormPageLayout and FormLoaderOverlay in a form page", () => {
 		renderFormDialog(createTestModel());
 		const input = await screen.findByDisplayValue("Alice", undefined, LOAD);
 		fireEvent.change(input, { target: { value: "AliceX" } });
-		await waitFor(() => expect(saveButton()).toBeEnabled());
+		await waitFor(() =>
+			expect(saveButton()).not.toHaveAttribute("aria-disabled"),
+		);
 
 		fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
 		expect(await screen.findByText("Leave form page?")).toBeInTheDocument();

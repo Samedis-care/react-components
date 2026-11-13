@@ -289,7 +289,9 @@ export const findLeavePrompt = () =>
 export const makeDirty = async (value = "AliceX") => {
 	const input = await screen.findByDisplayValue("Alice", undefined, LOAD);
 	fireEvent.change(input, { target: { value } });
-	await waitFor(() => expect(saveButton()).toBeEnabled());
+	await waitFor(() =>
+		expect(saveButton()).not.toHaveAttribute("aria-disabled"),
+	);
 	return input;
 };
 

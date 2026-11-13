@@ -8,6 +8,7 @@ import ActionButton, {
 import { useFormContextLite } from "./Form";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { ModelUnknown } from "../../backend-integration/Model/Model";
+import combineClassNames from "../../utils/combineClassNames";
 
 /**
  * Props of FormPageSaveButton: ActionButton's, with an optional label
@@ -21,6 +22,14 @@ export interface FormPageSaveButtonProps extends Omit<
 	 * @default the translated "Save" (common.buttons.save)
 	 */
 	children?: ActionButtonProps["children"];
+	/**
+	 * Makes the button unavailable: it is marked `aria-disabled="true"` instead of the
+	 * native `disabled`, looks disabled (MUI's `Mui-disabled` class), and neither a click
+	 * nor Enter or Space calls `onClick`. It stays in the tab order, so a Save that a save
+	 * makes unavailable keeps the keyboard focus.
+	 * @default false
+	 */
+	disabled?: boolean;
 }
 
 /**
@@ -34,15 +43,18 @@ export interface FormPageSaveButtonProps extends Omit<
  * text are left out; with none left, the button has no description and no tooltip.
  *
  * It neither saves nor disables itself: pass `onClick` and `disabled` (DefaultFormPage and
- * FlowEngineSaveButton disable it while the form is not dirty, saves or is read-only). An
- * `aria-describedby` of the caller is kept, before the reasons. Render it inside a Form.
+ * FlowEngineSaveButton disable it while the form is not dirty, saves or is read-only). A
+ * disabled Save stays focusable (see `disabled`), so keyboard focus stays on it during and
+ * after a save, and keyboard users reach the reasons too: the tooltip also shows while the
+ * button has keyboard focus. An `aria-describedby` of the caller is kept, before the
+ * reasons. Render it inside a Form.
  * @remarks The button sits in a `span` that takes the pointer events a disabled button
  *          does not get (MUI's way to put a tooltip on a disabled button), also while the
  *          form is editable, so the button is not mounted again when the form turns
  *          read-only for a save.
  */
 const FormPageSaveButton = (props: FormPageSaveButtonProps) => {
-	const { children, ...buttonProps } = props;
+	const { children, disabled, onClick, className, ...buttonProps } = props;
 	const { t } = useCCTranslations();
 	const { readOnlyReasons } = useFormContextLite<ModelUnknown>();
 	const descriptionId = useId();
@@ -63,7 +75,15 @@ const FormPageSaveButton = (props: FormPageSaveButtonProps) => {
 		// description, also while the tooltip is closed
 		<Tooltip title={reason ? <>{reason}</> : ""} describeChild>
 			<span>
-				<ActionButton {...buttonProps} aria-describedby={describedBy}>
+				<ActionButton
+					{...buttonProps}
+					// not the native disabled: a save disables the focused Save, and a natively
+					// disabled button drops the focus to the page
+					aria-disabled={disabled || undefined}
+					className={combineClassNames([className, disabled && "Mui-disabled"])}
+					onClick={disabled ? undefined : onClick}
+					aria-describedby={describedBy}
+				>
 					{children ?? t("common.buttons.save")}
 				</ActionButton>
 				{reason && (

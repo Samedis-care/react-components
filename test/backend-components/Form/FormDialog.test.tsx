@@ -82,7 +82,9 @@ describe("FullFormDialog", () => {
 		const { open } = mountDialogPage(FieldPage, { dialogProps: { onClose } });
 		const input = await open();
 		fireEvent.change(input, { target: { value: "AliceX" } });
-		await waitFor(() => expect(saveButton()).toBeEnabled());
+		await waitFor(() =>
+			expect(saveButton()).not.toHaveAttribute("aria-disabled"),
+		);
 		fireEvent.keyDown(screen.getByRole("dialog", { name: "Edit person" }), {
 			key: "Escape",
 		});
