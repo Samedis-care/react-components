@@ -15,16 +15,18 @@ export interface FlowEngineFormPageProps<CustomPropsT> extends PageProps<
 	children: React.ReactNode;
 }
 
+const NO_FOOTER_PROPS = {};
+
 const FlowEngineFormPage = <CustomPropsT,>(
 	props: FlowEngineFormPageProps<CustomPropsT>,
 ) => {
 	const { children } = props;
 
 	return (
-		<BasicFormPage {...props} form={children} childrenProps={undefined}>
+		<BasicFormPage {...props} form={children} childrenProps={NO_FOOTER_PROPS}>
 			{FlowEngineFormPageButtons}
 		</BasicFormPage>
 	);
 };
 
-export default React.memo(FlowEngineFormPage);
+export default React.memo(FlowEngineFormPage) as typeof FlowEngineFormPage;

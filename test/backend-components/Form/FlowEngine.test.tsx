@@ -10,7 +10,7 @@
  */
 import "@testing-library/jest-dom/vitest";
 import React, { useState } from "react";
-import { describe, expect, it, MockInstance, vi } from "vitest";
+import { assertType, describe, expect, it, MockInstance, vi } from "vitest";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import FormField from "../../../src/backend-components/Form/Field";
 import {
@@ -45,6 +45,10 @@ import {
 	configureErrorReporting,
 	getErrorReportingConfig,
 } from "../../../src/framework/ErrorReporting";
+import FlowEngineFormPageButtons, {
+	FlowEngineFormPageButtonsProps,
+} from "../../../src/backend-components/Form/FlowEngine/FlowEngineFormPageButtons";
+import { CrudFormProps } from "../../../src/backend-components/CRUD";
 
 setupFormTests();
 
@@ -201,6 +205,7 @@ const sent = (spy: MockInstance): unknown[] =>
 	(spy.mock.calls as unknown[][]).map((call) => call[0]);
 
 const TITLE: StageBody = () => <FormField name={"title"} />;
+
 const NOTE: StageBody = () => <FormField name={"note"} />;
 
 /**
@@ -349,7 +354,6 @@ describe("FlowEngine: bugs", () => {
 		expect(await go(flow, "c", true)).toBeNull();
 		expect(sent(update)).toEqual([{ id: "1", title: "staged" }]);
 	});
-
 	it("[ISSUE-3504-ITEM-2] a refetch that changes the staged field on the server keeps the staged value, as it keeps a typed one", async () => {
 		const { sink, flow, update, connector } = setup({ a: TITLE, b: NOTE });
 		await loaded(sink);
@@ -367,7 +371,6 @@ describe("FlowEngine: bugs", () => {
 		expect(await go(flow, "c", true)).toBeNull();
 		expect(sent(update)).toEqual([{ id: "1", title: "staged" }]);
 	});
-
 	it("[ISSUE-3504-ITEM-2] once the flow saved the staged values, a refetch takes the server's value for them again", async () => {
 		const { sink, flow, update, connector } = setup({ a: TITLE, b: NOTE });
 		await loaded(sink);
@@ -385,7 +388,6 @@ describe("FlowEngine: bugs", () => {
 		expect(sink.ctx!.values.title).toBe("T-server");
 		expect(sink.ctx!.dirty).toBe(false);
 	});
-
 	it("[ISSUE-3504-ITEM-9] a read-only FlowEngineSaveButton says why it is disabled", async () => {
 		const { sink } = setup(
 			{
@@ -470,7 +472,6 @@ describe("FlowEngine: bugs", () => {
 		expect(screen.getByRole("button", { name: "Save" })).toBe(save);
 		expect(update).toHaveBeenCalledTimes(1);
 	});
-
 	it("[ISSUE-3504-ITEM-6] goToStage with a stage name that has no component rejects and keeps the form", async () => {
 		vi.spyOn(console, "error").mockImplementation(() => {});
 		const boundary = errorBoundary();
@@ -605,7 +606,6 @@ describe("FlowEngine: bugs", () => {
 		expect(await go(flow, "c", false)).toBeNull();
 		expect(flow.props!.stage).toBe("c");
 	});
-
 	it("[ISSUE-3504-ITEM-7] after a stage change from a focused button, focus is in the new stage", async () => {
 		const next = (stage: St) => (p: StageProps) => [
 			<ActionButton
@@ -751,5 +751,47 @@ describe("FlowEngine: bugs", () => {
 		await settle();
 		expect(sink.ctx!.values.title).toBe("xyz");
 		expect(renders, "renders of the Save button for two keystrokes").toBe(0);
+	});
+	it("[ISSUE-3504-ITEM-18] FlowEngineFormPage and FlowEngineFormPageButtons keep their type parameter, so customProps is checked against the Form's", () => {
+		// A type test: vitest does not type-check, tsc does
+		// (node_modules/.bin/tsc -p tsconfig-test.json --noEmit). While React.memo drops
+		// the type parameter, the type arguments below do not compile (TS2558), customProps
+		// is checked against { buttons } only (the missing goBack goes unnoticed) and
+		// customProps written out with goBack does not compile (TS2353).
+		const customProps: CrudFormProps = {
+			goBack: () => {},
+			open: () => {},
+			hasCustomSubmitHandler: false,
+		};
+		const formProps = { customProps } as PageProps<ModelUnknown, CrudFormProps>;
+		assertType<React.ReactElement>(
+			<FlowEngineFormPage<CrudFormProps>
+				{...formProps}
+				customProps={{ ...formProps.customProps, buttons: [] }}
+			>
+				{null}
+			</FlowEngineFormPage>,
+		);
+		assertType<React.ReactElement>(
+			<FlowEngineFormPage<CrudFormProps>
+				{...formProps}
+				// @ts-expect-error CrudFormProps' goBack, open and hasCustomSubmitHandler are missing
+				customProps={{ buttons: [] }}
+			>
+				{null}
+			</FlowEngineFormPage>,
+		);
+		assertType<React.ReactElement>(
+			<FlowEngineFormPage
+				{...formProps}
+				customProps={{ goBack: customProps.goBack, buttons: [] }}
+			>
+				{null}
+			</FlowEngineFormPage>,
+		);
+		const footerProps = {} as FlowEngineFormPageButtonsProps<CrudFormProps>;
+		assertType<React.ReactElement>(
+			<FlowEngineFormPageButtons<CrudFormProps> {...footerProps} />,
+		);
 	});
 });

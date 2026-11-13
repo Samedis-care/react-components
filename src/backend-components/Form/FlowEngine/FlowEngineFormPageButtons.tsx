@@ -12,4 +12,6 @@ const FlowEngineFormPageButtons = <CustomPropsT,>(
 	return <FormButtons>{props.customProps.buttons}</FormButtons>;
 };
 
-export default React.memo(FlowEngineFormPageButtons);
+export default React.memo(
+	FlowEngineFormPageButtons,
+) as typeof FlowEngineFormPageButtons;
