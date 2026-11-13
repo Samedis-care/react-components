@@ -21,6 +21,7 @@
 				"toggle-languages": "Attiva/disattiva input lingua"
 			},
 			"number-input": {
+				"out-of-range": "Inserisci un numero da {{MIN}} a {{MAX}}",
 				"invalid": "Inserisci un numero, ad esempio {{EXAMPLE}}"
 			}
 		},

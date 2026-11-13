@@ -21,6 +21,7 @@
 				"toggle-languages": "Basculer les saisies de langue"
 			},
 			"number-input": {
+				"out-of-range": "Entrez un nombre entre {{MIN}} et {{MAX}}",
 				"invalid": "Entrez un nombre, par exemple {{EXAMPLE}}"
 			}
 		},

@@ -21,6 +21,7 @@
 				"toggle-languages": "Talinvoer wisselen"
 			},
 			"number-input": {
+				"out-of-range": "Voer een getal van {{MIN}} tot {{MAX}} in",
 				"invalid": "Voer een getal in, bijvoorbeeld {{EXAMPLE}}"
 			}
 		},

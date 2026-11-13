@@ -21,6 +21,7 @@
 				"toggle-languages": "Переключить языковые поля"
 			},
 			"number-input": {
+				"out-of-range": "Введите число от {{MIN}} до {{MAX}}",
 				"invalid": "Введите число, например {{EXAMPLE}}"
 			}
 		},

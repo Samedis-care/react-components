@@ -21,6 +21,7 @@
 				"toggle-languages": "Spracheingaben umschalten"
 			},
 			"number-input": {
+				"out-of-range": "Gib eine Zahl von {{MIN}} bis {{MAX}} ein",
 				"invalid": "Gib eine Zahl ein, z. B. {{EXAMPLE}}"
 			}
 		},

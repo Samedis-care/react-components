@@ -21,6 +21,7 @@
 				"toggle-languages": "Til maydonlarini almashtirish"
 			},
 			"number-input": {
+				"out-of-range": "{{MIN}} dan {{MAX}} gacha raqam kiriting",
 				"invalid": "Raqam kiriting, masalan {{EXAMPLE}}"
 			}
 		},

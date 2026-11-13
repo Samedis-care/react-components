@@ -243,6 +243,162 @@ describe("IntegerInputField", () => {
 			expect(reported(onValue)).toEqual([expected]);
 		},
 	);
+
+	it("[ISSUE-3484-ITEM-14] never shows a large value in exponent form", () => {
+		render(<IntegerInputField label="Count" value={1e21} noFormat />);
+		expect(field("Count").value).not.toMatch(/e/i);
+	});
+
+	describe("numbers beyond Number.MAX_SAFE_INTEGER", () => {
+		const MAX = Number.MAX_SAFE_INTEGER;
+		const NO_GROUPING: Intl.NumberFormatOptions = { useGrouping: false };
+		/** the message for a number out of range, in en */
+		const outOfRange = (options?: Intl.NumberFormatOptions) =>
+			`Enter a number from ${fmt("en", -MAX, options)} to ${fmt("en", MAX, options)}`;
+
+		it("[ISSUE-3484-ITEM-14] shows every digit of a large value, grouped or not", () => {
+			const { rerender } = render(
+				<IntegerInputField label="Count" value={1e21} noFormat />,
+			);
+			expect(field("Count")).toHaveValue("1000000000000000000000");
+			rerender(<IntegerInputField label="Count" value={-1e21} noFormat />);
+			expect(field("Count")).toHaveValue("-1000000000000000000000");
+			rerender(<IntegerInputField label="Count" value={1e21} />);
+			expect(field("Count")).toHaveValue("1,000,000,000,000,000,000,000");
+		});
+
+		it("[ISSUE-3484-ITEM-14] flags a digit typed past Number.MAX_SAFE_INTEGER instead of changing the digits", async () => {
+			const user = userEvent.setup();
+			const onValue: ValueSpy = vi.fn();
+			renderCount(null, onValue);
+			await user.type(field("Count"), "1234567890123456");
+			expect(reported(onValue).at(-1)).toBe(1234567890123456);
+			expect(field("Count")).toHaveAttribute("aria-invalid", "false");
+			await user.type(field("Count"), "7");
+			// not reported: the parent keeps the last number that fits
+			expect(reported(onValue)).toHaveLength(16);
+			expect(field("Count")).toHaveValue("1,234,567,890,123,4567");
+			expect(field("Count")).toHaveAttribute("aria-invalid", "true");
+			expect(field("Count")).toHaveAccessibleDescription(outOfRange());
+		});
+
+		it("[ISSUE-3484-ITEM-14] flags a digit typed after a large value instead of reading its exponent", async () => {
+			const user = userEvent.setup();
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={1e21} onValue={onValue}>
+					{(value, onChange) => (
+						<IntegerInputField
+							label="Count"
+							value={value}
+							onChange={onChange}
+							noFormat
+						/>
+					)}
+				</Controlled>,
+			);
+			await user.type(field("Count"), "5");
+			expect(reported(onValue)).toEqual([]);
+			expect(field("Count")).toHaveValue("10000000000000000000005");
+			expect(field("Count")).toHaveAccessibleDescription(
+				outOfRange(NO_GROUPING),
+			);
+		});
+
+		it("[ISSUE-3484-ITEM-14] keeps the flagged text on blur, in place of the helper text, until a valid edit", async () => {
+			const user = userEvent.setup();
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={1234567890123456} onValue={onValue}>
+					{(value, onChange) => (
+						<IntegerInputField
+							label="Count"
+							value={value}
+							onChange={onChange}
+							helperText="Pieces"
+						/>
+					)}
+				</Controlled>,
+			);
+			expect(field("Count")).toHaveAccessibleDescription("Pieces");
+			await user.type(field("Count"), "7");
+			tabThrough(field("Count"));
+			expect(field("Count")).toHaveValue("1,234,567,890,123,4567");
+			expect(field("Count")).toHaveAttribute("aria-invalid", "true");
+			expect(field("Count")).toHaveAccessibleDescription(outOfRange());
+			await user.type(field("Count"), "{Backspace}");
+			expect(reported(onValue)).toEqual([1234567890123456]);
+			expect(field("Count")).toHaveValue("1,234,567,890,123,456");
+			expect(field("Count")).toHaveAttribute("aria-invalid", "false");
+			expect(field("Count")).toHaveAccessibleDescription("Pieces");
+		});
+
+		it("[ISSUE-3484-ITEM-14] a new value replaces the flagged text", () => {
+			const { rerender } = render(
+				<IntegerInputField label="Count" value={3} onChange={noop} />,
+			);
+			fireEvent.change(field("Count"), {
+				target: { value: "12345678901234567" },
+			});
+			fireEvent.blur(field("Count"));
+			expect(field("Count")).toHaveAttribute("aria-invalid", "true");
+			// e.g. the form is reset, or the record is reloaded
+			rerender(<IntegerInputField label="Count" value={9} onChange={noop} />);
+			expect(field("Count")).toHaveValue("9");
+			expect(field("Count")).toHaveAttribute("aria-invalid", "false");
+			// and does not come back with the value it was typed over
+			rerender(<IntegerInputField label="Count" value={3} onChange={noop} />);
+			expect(field("Count")).toHaveValue("3");
+			expect(field("Count")).toHaveAttribute("aria-invalid", "false");
+		});
+
+		it.each([
+			["9007199254740991", 9007199254740991],
+			["-9007199254740991", -9007199254740991],
+			["9,007,199,254,740,991.5", 9007199254740991],
+			["00009007199254740991", 9007199254740991],
+			["9007199254740992", undefined],
+			["-9007199254740992", undefined],
+			["12345678901234567.5", undefined],
+			["9".repeat(25), undefined],
+		])("[ISSUE-3484-ITEM-14] reads text %j as %j", (text, expected) => {
+			const onValue: ValueSpy = vi.fn();
+			renderCount(null, onValue);
+			fireEvent.change(field("Count"), { target: { value: text } });
+			expect(reported(onValue)).toEqual(
+				expected === undefined ? [] : [expected],
+			);
+			expect(field("Count")).toHaveAttribute(
+				"aria-invalid",
+				String(expected === undefined),
+			);
+			if (expected === undefined) expect(field("Count")).toHaveValue(text);
+		});
+
+		it("[ISSUE-3484-ITEM-14] names the range in the field's format, in the CC language", async () => {
+			await setLanguage("de");
+			const { rerender } = render(
+				<IntegerInputField label="Count" value={null} onChange={noop} />,
+			);
+			fireEvent.change(field("Count"), {
+				target: { value: "12345678901234567" },
+			});
+			expect(field("Count")).toHaveAccessibleDescription(
+				`Gib eine Zahl von ${fmt("de", -MAX)} bis ${fmt("de", MAX)} ein`,
+			);
+			rerender(
+				<IntegerInputField
+					label="Count"
+					value={null}
+					onChange={noop}
+					noFormat
+				/>,
+			);
+			expect(field("Count")).toHaveAccessibleDescription(
+				`Gib eine Zahl von ${fmt("de", -MAX, NO_GROUPING)} bis ${fmt("de", MAX, NO_GROUPING)} ein`,
+			);
+		});
+	});
 });
 
 describe("CurrencyInput", () => {
