@@ -1,7 +1,8 @@
-import React, { useCallback } from "react";
-import type { To } from "history";
+import React, { useCallback, useMemo } from "react";
+import { createPath, type To } from "history";
 import { useHistoryRouterContext } from "./HistoryRouter";
 import useNavigate from "./useNavigate";
+import toAppPath from "./toAppPath";
 
 export interface LinkProps extends Omit<
 	React.DetailedHTMLProps<
@@ -11,7 +12,10 @@ export interface LinkProps extends Omit<
 	"href"
 > {
 	/**
-	 * Target location
+	 * Target location: a path of the app or a location object. Leading slashes
+	 * collapse into one, as with `useNavigate`: "//7" links to "/7".
+	 * A URL with a scheme ("https://…", "mailto:…") makes a plain link that
+	 * the browser follows; `replace` and `state` don't apply to it.
 	 */
 	to: To;
 	/**
@@ -47,20 +51,29 @@ const Link = React.forwardRef(function Link(
 	const { to, replace, state, onClick, ...anchorProps } = props;
 	const { history } = useHistoryRouterContext();
 	const navigate = useNavigate();
+	// null for a URL with a scheme, which the browser follows
+	const target = useMemo(() => toAppPath(to), [to]);
 	const handleNav = useCallback(
 		(evt: React.MouseEvent<HTMLAnchorElement>) => {
 			onClick?.(evt);
 			if (evt.defaultPrevented) return;
 			if (evt.ctrlKey || evt.metaKey || evt.shiftKey || evt.altKey) return;
+			if (!target) return;
 			evt.preventDefault();
-			navigate(to, { replace, state });
+			navigate(target, { replace, state });
 		},
-		[navigate, onClick, replace, state, to],
+		[navigate, onClick, replace, state, target],
 	);
 	return (
 		<a
 			ref={ref}
-			href={history.createHref(to)}
+			href={
+				target
+					? history.createHref(target)
+					: typeof to === "string"
+						? to
+						: createPath(to)
+			}
 			onClick={handleNav}
 			{...anchorProps}
 		/>

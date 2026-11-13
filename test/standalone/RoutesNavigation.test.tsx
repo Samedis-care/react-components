@@ -1,19 +1,26 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import React, { StrictMode, useEffect, useLayoutEffect, useState } from "react";
 import { render, screen, act, cleanup } from "@testing-library/react";
-import { createMemoryHistory } from "history";
+import {
+	createBrowserHistory,
+	createMemoryHistory,
+	MemoryHistory,
+} from "history";
 import HistoryRouter from "../../src/standalone/Routes/HistoryRouter";
 import Routes from "../../src/standalone/Routes/Routes";
-import Route from "../../src/standalone/Routes/Route";
+import Route, { useRouteInfo } from "../../src/standalone/Routes/Route";
 import useLocation from "../../src/standalone/Routes/useLocation";
-import useNavigate from "../../src/standalone/Routes/useNavigate";
+import useNavigate, {
+	NavigateFunction,
+} from "../../src/standalone/Routes/useNavigate";
 
 // HistoryRouter's location propagation and useNavigate. Assertions read the
 // rendered location (a useLocation reader), not only the history object.
 
+let scrollTo: ReturnType<typeof vi.spyOn>;
 beforeEach(() => {
 	// useNavigate resets the scroll position; jsdom does not implement scrollTo
-	vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+	scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
 });
 afterEach(() => {
 	cleanup();
@@ -32,6 +39,29 @@ const ShowLocation = () => {
 };
 const ShowPath = () => <div data-testid="path">{useLocation().pathname}</div>;
 const renderedPath = () => screen.getByTestId("path").textContent;
+
+/** renders a component that hands out the navigate function */
+const renderNavigate = (history: MemoryHistory, extra?: React.ReactNode) => {
+	const ref: { navigate: NavigateFunction | null; seen: NavigateFunction[] } = {
+		navigate: null,
+		seen: [],
+	};
+	const Grab = () => {
+		const navigate = useNavigate();
+		useLocation(); // re-render on every navigation
+		ref.navigate = navigate;
+		if (!ref.seen.includes(navigate)) ref.seen.push(navigate);
+		return null;
+	};
+	const result = render(
+		<HistoryRouter history={history}>
+			<Grab />
+			<ShowLocation />
+			{extra}
+		</HistoryRouter>,
+	);
+	return { ...result, ref };
+};
 
 describe("HistoryRouter", () => {
 	it("re-renders location readers and the matched route on push, replace and back", () => {
@@ -192,5 +222,106 @@ describe("HistoryRouter", () => {
 			return null;
 		};
 		expect(() => render(<Nav />)).toThrow("HistoryRouterContext missing");
+	});
+});
+
+describe("useNavigate", () => {
+	const location = () => screen.getByTestId("location").textContent;
+
+	it("[ISSUE-3475-ITEM-6] keeps a child link built from the root route's url inside the app", () => {
+		// what CRUD does for its edit, new and import pages: `${url}/${id}`
+		let navigateToChild!: () => void;
+		const Page = () => {
+			const navigate = useNavigate();
+			const { url } = useRouteInfo();
+			navigateToChild = () => navigate(`${url}/7`);
+			return <div data-testid="url">{url}</div>;
+		};
+		const history = mem("/");
+		render(
+			<HistoryRouter history={history}>
+				<Routes>{[<Route key="r" path="/*" element={<Page />} />]}</Routes>
+			</HistoryRouter>,
+		);
+		act(() => navigateToChild());
+		// "//7" is a protocol-relative URL: a browser history leaves the origin
+		expect(history.location.pathname).toBe("/7");
+	});
+
+	it("[ISSUE-3475-ITEM-6] collapses the leading slashes of a target, also backslashes, and keeps its search and hash", () => {
+		const history = mem("/a");
+		const { ref } = renderNavigate(history);
+		act(() => ref.navigate!("//b?q=1#h"));
+		expect(location()).toBe("/b|?q=1|#h|null");
+		// the URL parser reads a backslash as a slash and drops tabs and newlines
+		act(() => ref.navigate!("/\\c", { replace: true }));
+		expect(location()).toBe("/c|||null");
+		act(() => ref.navigate!("/\t/d"));
+		expect(location()).toBe("/d|||null");
+		act(() => ref.navigate!({ pathname: "///e", search: "?x=1" }));
+		expect(location()).toBe("/e|?x=1||null");
+		expect(history.index).toBe(3);
+	});
+
+	it("[ISSUE-3475-ITEM-6] leaves a target that stays inside the app as it is", () => {
+		const history = mem("/a");
+		const { ref } = renderNavigate(history);
+		act(() => ref.navigate!("/b//c"));
+		expect(location()).toBe("/b//c|||null");
+		act(() => ref.navigate!("?p=2"));
+		expect(location()).toBe("/b//c|?p=2||null");
+		act(() => ref.navigate!({ hash: "#h" }));
+		expect(location()).toBe("/b//c||#h|null");
+	});
+
+	it.each([
+		"https://other.example/",
+		"javascript:alert(1)",
+		"mailto:someone@example.com",
+		// what the URL parser drops: leading controls and spaces, tabs and newlines
+		" https://other.example/",
+		"\tjavascript:alert(1)",
+		"java\nscript:alert(1)",
+	])(
+		"[ISSUE-3475-ITEM-6] refuses %j with push and with replace, without navigating or scrolling",
+		(to) => {
+			const history = mem("/a");
+			const { ref } = renderNavigate(history);
+			for (const target of [to, { pathname: to }])
+				for (const replace of [false, true])
+					expect(() => ref.navigate!(target, { replace })).toThrow(
+						"is not a path of this app",
+					);
+			expect(history.index).toBe(0);
+			expect(location()).toBe("/a|||null");
+			expect(scrollTo).not.toHaveBeenCalled();
+		},
+	);
+
+	it("[ISSUE-3475-ITEM-6] keeps a browser history on the app's origin", () => {
+		window.history.replaceState(null, "", "/start");
+		const history = createBrowserHistory();
+		let navigate!: NavigateFunction;
+		const Grab = () => {
+			navigate = useNavigate();
+			return null;
+		};
+		render(
+			<HistoryRouter history={history}>
+				<Grab />
+				<ShowPath />
+			</HistoryRouter>,
+		);
+		act(() => navigate("//new"));
+		expect(window.location.href).toBe(`${window.location.origin}/new`);
+		expect(renderedPath()).toBe("/new");
+		expect(() => navigate("https://other.example/")).toThrow(
+			"is not a path of this app",
+		);
+		expect(() => navigate("https://other.example/", { replace: true })).toThrow(
+			"is not a path of this app",
+		);
+		expect(window.location.href).toBe(`${window.location.origin}/new`);
+		window.history.replaceState(null, "", "/");
 	});
 });

@@ -278,3 +278,52 @@ describe("Link: clicks", () => {
 		expect(renderedPath()).toBe("/x");
 	});
 });
+
+describe("Link: targets", () => {
+	it("[ISSUE-3475-ITEM-6] collapses the leading slashes of the target in its href and when routed", () => {
+		// `${useRouteInfo().url}/7` under a route that matches at the root
+		const { history } = renderAt(
+			"/",
+			<>
+				<Link to="//7?q=1#h">string target</Link>
+				<Link to={{ pathname: "/\\8", search: "?a=1" }}>object target</Link>
+			</>,
+		);
+		const stringLink = screen.getByRole("link", { name: "string target" });
+		const objectLink = screen.getByRole("link", { name: "object target" });
+		expect(stringLink).toHaveAttribute("href", "/7?q=1#h");
+		expect(objectLink).toHaveAttribute("href", "/8?a=1");
+		expect(fireEvent.click(stringLink)).toBe(false);
+		expect(renderedPath()).toBe("/7");
+		expect(fireEvent.click(objectLink)).toBe(false);
+		expect(renderedPath()).toBe("/8");
+		expect(history.index).toBe(2);
+	});
+
+	it("[ISSUE-3475-ITEM-6] leaves a link to a URL with a scheme to the browser", () => {
+		const onClick = vi.fn();
+		const { history } = renderAt(
+			"/",
+			<>
+				<Link to="https://other.example/page" onClick={onClick} replace>
+					other site
+				</Link>
+				<MuiLink
+					component={Link}
+					to={{ pathname: "mailto:someone@example.com" }}
+				>
+					mail
+				</MuiLink>
+			</>,
+		);
+		const other = screen.getByRole("link", { name: "other site" });
+		const mail = screen.getByRole("link", { name: "mail" });
+		expect(other).toHaveAttribute("href", "https://other.example/page");
+		expect(mail).toHaveAttribute("href", "mailto:someone@example.com");
+		expect(fireEvent.click(other)).toBe(true);
+		expect(onClick).toHaveBeenCalledTimes(1);
+		expect(fireEvent.click(mail)).toBe(true);
+		expect(history.index).toBe(0);
+		expect(renderedPath()).toBe("/");
+	});
+});
