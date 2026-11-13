@@ -22,6 +22,8 @@ const meta: Meta<typeof WrappedSignPad> = {
 		disabled: { control: "boolean" },
 		signature: { control: "text" },
 		signerName: { control: "text" },
+		required: { control: "boolean" },
+		"aria-invalid": { control: "boolean" },
 	},
 };
 export default meta;

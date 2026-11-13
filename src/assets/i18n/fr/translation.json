@@ -235,7 +235,8 @@
 				"close": "Fermer",
 				"signature": "Signature"
 			},
-			"sign-here": "Signez ici numériquement"
+			"sign-here": "Signez ici numériquement",
+			"required": "Obligatoire"
 		},
 		"signal-portlet": {
 			"last-updated": "Dernière actualisation : {{AGE}}",

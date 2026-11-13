@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Box } from "@mui/material";
+import { Box, FormControl, FormHelperText, FormLabel } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, mocked, spyOn, waitFor, within } from "storybook/test";
 import DialogContextProvider from "../../framework/DialogContextProvider";
@@ -221,6 +221,7 @@ const decodePng = async (src: string) => {
 	}
 	return { width: k.width, height: k.height, opaque, strongest };
 };
+
 /** a stored signature of a given pixel size: one diagonal line */
 const makeSignature = (width: number, height: number) => {
 	const c = document.createElement("canvas");
@@ -536,6 +537,8 @@ export const Issue3467Item2ResizeAfterClearDrawsUnderPen: Story = {
 	},
 };
 
+// ─── ISSUE-3467-ITEM-17: the field's label, message and states ───────────────
+
 export const Issue3467Item3ClosingRemovesResizeListeners: Story = {
 	parameters: {
 		docs: {
@@ -741,5 +744,79 @@ export const Issue3467Item4StoredSignaturesScaledAndCentered: Story = {
 			).toBeGreaterThanOrEqual(0.9);
 			await closeDialog();
 		}
+	},
+};
+
+/** a signature field as a Form renders it: a legend, the pad and its message, tied by ids */
+const LabelledField = ({
+	fieldId,
+	label,
+	message,
+	...props
+}: PadHostProps & { fieldId: string; label: string; message?: string }) => (
+	<FormControl required error={!!message} fullWidth>
+		<FormLabel component={"legend"} id={`${fieldId}-label`}>
+			{label}
+		</FormLabel>
+		<PadHost
+			{...props}
+			id={fieldId}
+			aria-labelledby={`${fieldId}-label`}
+			aria-describedby={message ? `${fieldId}-message` : undefined}
+			aria-invalid={!!message}
+			required
+		/>
+		<FormHelperText id={`${fieldId}-message`}>{message}</FormHelperText>
+	</FormControl>
+);
+
+export const Issue3467Item17LabelledRequiredFields: Story = {
+	args: { openInfo: fn() },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					'ISSUE-3467-ITEM-17: two required signature fields with a label, one of them showing an error. Each tile\'s button is named by its label followed by its own name, described as required and by the error, and marked invalid while the error shows; each info button is named after its field. A button cannot carry aria-required, so "Required" is part of the description.',
+			},
+		},
+	},
+	render: (args) => (
+		<Box sx={{ display: "grid", gap: 2 }}>
+			<LabelledField
+				{...args}
+				fieldId={"trainer"}
+				label={"Trainer signature"}
+				message={"Please sign"}
+			/>
+			<LabelledField
+				{...args}
+				initial={SAMPLE_SIGNATURE}
+				signerName={"Bob Smith"}
+				fieldId={"trainee"}
+				label={"Trainee signature"}
+			/>
+		</Box>
+	),
+	play: async ({ canvas }) => {
+		const trainer = canvas.getByRole("button", {
+			name: "Trainer signature Sign here digitally",
+		});
+		await expect(trainer).toHaveAccessibleDescription("Required Please sign");
+		await expect(trainer).toHaveAttribute("aria-invalid", "true");
+		const trainee = canvas.getByRole("button", {
+			name: "Trainee signature Signature (Bob Smith)",
+		});
+		await expect(trainee).toHaveAccessibleDescription("Required");
+		await expect(trainee).toHaveAttribute("aria-invalid", "false");
+		await expect(
+			canvas.getByRole("button", {
+				name: "More information Trainer signature",
+			}),
+		).toBeVisible();
+		await expect(
+			canvas.getByRole("button", {
+				name: "More information Trainee signature",
+			}),
+		).toBeVisible();
 	},
 };

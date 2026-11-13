@@ -30,7 +30,18 @@ const SignaturePadCanvas = (
 	props: SignaturePadCanvasProps &
 		Omit<SignPadProps, "classes" | "openSignPad">,
 ) => {
-	const { signature, disabled, openInfo, ...dialogProps } = props;
+	const {
+		signature,
+		disabled,
+		openInfo,
+		// the field's id, label, description and states go to the tile's button
+		id,
+		"aria-labelledby": ariaLabelledBy,
+		"aria-describedby": ariaDescribedBy,
+		"aria-invalid": ariaInvalid,
+		required,
+		...dialogProps
+	} = props;
 	const [pushDialog] = useDialogContext();
 	const showSignDialog = useCallback(() => {
 		if (disabled) return;
@@ -43,6 +54,11 @@ const SignaturePadCanvas = (
 			signerName={dialogProps.signerName}
 			disabled={disabled}
 			openInfo={openInfo}
+			id={id}
+			aria-labelledby={ariaLabelledBy}
+			aria-describedby={ariaDescribedBy}
+			aria-invalid={ariaInvalid}
+			required={required}
 		/>
 	);
 };

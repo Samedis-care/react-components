@@ -235,7 +235,8 @@
 				"close": "Yoping",
 				"signature": "Imzo"
 			},
-			"sign-here": "Bu yerda raqamli imzolang"
+			"sign-here": "Bu yerda raqamli imzolang",
+			"required": "Majburiy"
 		},
 		"signal-portlet": {
 			"last-updated": "Oxirgi yangilanish: {{AGE}}",

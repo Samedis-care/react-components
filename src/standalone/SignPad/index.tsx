@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useId } from "react";
 import {
 	IconButton,
 	InputAdornment,
@@ -52,6 +52,40 @@ export interface SignPadProps {
 	 * Blur event
 	 */
 	onBlur?: React.FocusEventHandler<HTMLDivElement>;
+	/**
+	 * The id of the tile's button, for a label or link of your own that points
+	 * to it. Default: an id generated per tile. The info button gets the id
+	 * `<id>-info`, and the hidden "Required" text of `required` `<id>-required`.
+	 */
+	id?: string;
+	/**
+	 * Ids of the elements that label the field (space separated), such as its
+	 * visible label. The tile's button is named by them, followed by its own
+	 * name, so it still tells whether the field is signed: e.g.
+	 * "Trainer signature Signature (Alice Müller)". The info button is named
+	 * "More information" followed by them. Default: none, the button's name
+	 * is its own (the prompt, or "Signature", with the signer).
+	 */
+	"aria-labelledby"?: string;
+	/**
+	 * Ids of the elements that describe the field (space separated), such as
+	 * its help text or error message; they become the description of the
+	 * tile's button. Default: none.
+	 */
+	"aria-describedby"?: string;
+	/**
+	 * Marks the tile's button invalid, e.g. while the field shows an error.
+	 * Default: not set.
+	 */
+	"aria-invalid"?: React.AriaAttributes["aria-invalid"];
+	/**
+	 * The field must be signed. The tile does not show it (put an asterisk on
+	 * your label, as a MUI FormLabel in a required FormControl does); its
+	 * button is described as "Required" (`standalone.signature-pad.required`),
+	 * before the `aria-describedby` text. A button cannot carry
+	 * `aria-required`, which is why this is a prop of its own. Default `false`.
+	 */
+	required?: boolean;
 }
 
 const SignPadDiv = styled("div", { name: "CcSignPad", slot: "root" })(
@@ -141,8 +175,26 @@ const SignPad = (inProps: SignPadProps) => {
 		openSignPad,
 		className,
 		classes,
+		id,
+		"aria-labelledby": labelledByProp,
+		"aria-describedby": describedByProp,
+		"aria-invalid": invalid,
+		required,
 	} = props;
 	const { t } = useCCTranslations();
+	const generatedId = useId();
+	const buttonId = id || generatedId;
+	const infoId = `${buttonId}-info`;
+	const requiredId = `${buttonId}-required`;
+	const labelledBy = labelledByProp?.trim();
+	// the field's label first, then the button's own name, which tells whether
+	// it is signed (a self reference reads the button's aria-label)
+	const buttonLabelledBy = labelledBy ? `${labelledBy} ${buttonId}` : undefined;
+	const infoLabelledBy = labelledBy ? `${infoId} ${labelledBy}` : undefined;
+	const describedBy =
+		[required ? requiredId : "", describedByProp?.trim()]
+			.filter(Boolean)
+			.join(" ") || undefined;
 	const signerName = signerNameUntrim?.trim();
 	const prompt = t("standalone.signature-pad.sign-here");
 	// what the tile holds (it starts with the visible prompt while unsigned),
@@ -171,7 +223,11 @@ const SignPad = (inProps: SignPadProps) => {
 		>
 			<SignPadButton
 				type="button"
+				id={buttonId}
 				aria-label={label}
+				aria-labelledby={buttonLabelledBy}
+				aria-describedby={describedBy}
+				aria-invalid={invalid}
 				// not the native disabled: that drops the focus of a focused tile
 				// to the page, and takes read-only signatures out of the Tab order
 				aria-disabled={disabled || undefined}
@@ -195,15 +251,22 @@ const SignPad = (inProps: SignPadProps) => {
 				{openInfo && (
 					<InputAdornment position={"end"}>
 						<IconButton
+							id={infoId}
 							onClick={handelOpenInfo}
 							size="large"
 							aria-label={t("standalone.uikit.info")}
+							aria-labelledby={infoLabelledBy}
 						>
 							<InfoIcon color={"disabled"} />
 						</IconButton>
 					</InputAdornment>
 				)}
 			</InfoDiv>
+			{required && (
+				<span id={requiredId} hidden>
+					{t("standalone.signature-pad.required")}
+				</span>
+			)}
 		</SignPadDiv>
 	);
 };

@@ -475,8 +475,8 @@ id of the field's control, for a link or a label of your own that points to it; 
 `FormField` generates one. The message gets the id `<id>-message`.
 
 Selectors are marked invalid, but not described by the message yet. Date and time fields,
-localized strings, file and image uploads, the signature pad, the tag selector and the data grid
-multi select take neither the id nor the description yet.
+localized strings, file and image uploads, the tag selector and the data grid multi select take
+neither the id nor the description yet.
 
 A custom renderer receives the ids as `RenderParams.id`, `messageId` and `describedBy`, see
 [the renderer remarks](../src/backend-integration/Model/Types/Renderers/README.md#remarks).

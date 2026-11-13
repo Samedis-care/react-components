@@ -16,6 +16,7 @@ import DialogContextProvider, {
 } from "../../src/framework/DialogContextProvider";
 import ccI18n from "../../src/i18n";
 
+import SignaturePad from "../../src/non-standalone/SignaturePad/SignaturePad";
 import {
 	SignDialog,
 	SignPadDialogProps,
@@ -86,6 +87,34 @@ const Opener = (props: SignPadDialogProps) => {
 	const [push] = useDialogContext();
 	return <button onClick={() => push(<SignDialog {...props} />)}>open</button>;
 };
+
+describe("SignaturePad", () => {
+	it("[ISSUE-3467-ITEM-17] aria-labelledby and aria-describedby given to SignaturePad name and describe its button", () => {
+		const aria = {
+			"aria-labelledby": "sig-label",
+			"aria-describedby": "sig-error",
+			"aria-invalid": true,
+			required: true,
+		};
+		withDialogs(
+			<>
+				<span id="sig-label">Trainer signature</span>
+				<span id="sig-error">Signature is required</span>
+				<SignaturePad signature={null} setSignature={() => {}} {...aria} />
+			</>,
+		);
+		// the label, then the button's own name, which tells whether it is signed
+		const activator = screen.getByRole("button", {
+			name: "Trainer signature Sign here digitally",
+		});
+		// a button cannot carry aria-required, so "Required" leads its description
+		expect(activator).toHaveAccessibleDescription(
+			"Required Signature is required",
+		);
+		expect(activator).toHaveAttribute("aria-invalid", "true");
+		expect(activator).not.toHaveAttribute("aria-required");
+	});
+});
 
 describe("SignDialog in a dialog stack", () => {
 	it("[ISSUE-3467-ITEM-8] Save closes the sign dialog, not a dialog that setSignature opened", () => {

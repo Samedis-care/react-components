@@ -239,7 +239,8 @@
 				"close": "Cerrar",
 				"signature": "Firma"
 			},
-			"sign-here": "Firme aquí digitalmente"
+			"sign-here": "Firme aquí digitalmente",
+			"required": "Obligatorio"
 		},
 		"toast": {
 			"close": "Cerrar"

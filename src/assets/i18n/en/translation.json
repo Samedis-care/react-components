@@ -239,7 +239,8 @@
 				"close": "Close",
 				"signature": "Signature"
 			},
-			"sign-here": "Sign here digitally"
+			"sign-here": "Sign here digitally",
+			"required": "Required"
 		},
 		"toast": {
 			"close": "Close"

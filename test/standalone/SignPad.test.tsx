@@ -194,4 +194,140 @@ describe("SignPad tile", () => {
 		);
 		expect(screen.getByRole("button")).toHaveAttribute("aria-disabled", "true");
 	});
+	it("[ISSUE-3467-ITEM-17] the button is named by the field's label, then by its own name, signed or not", () => {
+		const { rerender } = render(
+			<>
+				<span id="sig-label">Trainer signature</span>
+				<SignPad signature={null} aria-labelledby="sig-label" />
+			</>,
+		);
+		const button = screen.getByRole("button");
+		expect(button).toHaveAccessibleName(`Trainer signature ${prompt()}`);
+
+		rerender(
+			<>
+				<span id="sig-label">Trainer signature</span>
+				<SignPad
+					signature={SIG}
+					signerName="Alice Müller"
+					aria-labelledby=" sig-label "
+				/>
+			</>,
+		);
+		expect(button).toHaveAccessibleName(
+			"Trainer signature Signature (Alice Müller)",
+		);
+
+		rerender(
+			<>
+				<span id="sig-label">Trainer signature</span>
+				<SignPad signature={SIG} signerName="Alice Müller" />
+			</>,
+		);
+		expect(button).toHaveAccessibleName("Signature (Alice Müller)");
+		expect(button).not.toHaveAttribute("aria-labelledby");
+	});
+	it("[ISSUE-3467-ITEM-17] id goes to the button; without one, every tile's button gets its own", () => {
+		const { rerender } = render(
+			<>
+				<SignPad signature={null} />
+				<SignPad signature={null} />
+			</>,
+		);
+		const [first, second] = screen.getAllByRole("button");
+		expect(first.id).not.toBe("");
+		expect(second.id).not.toBe("");
+		expect(first.id).not.toBe(second.id);
+
+		rerender(
+			<>
+				<SignPad signature={null} id="trainer-signature" />
+				<SignPad signature={null} />
+			</>,
+		);
+		expect(first).toHaveAttribute("id", "trainer-signature");
+	});
+	it("[ISSUE-3467-ITEM-17] the info buttons of two labelled pads are told apart by the field's label", () => {
+		render(
+			<>
+				<span id="trainer">Trainer signature</span>
+				<span id="trainee">Trainee signature</span>
+				<SignPad
+					signature={null}
+					openInfo={() => {}}
+					aria-labelledby="trainer"
+				/>
+				<SignPad
+					signature={SIG}
+					openInfo={() => {}}
+					aria-labelledby="trainee"
+				/>
+			</>,
+		);
+		const infos = screen.getAllByRole("button", { name: /^More information/ });
+		expect(infos[0]).toHaveAccessibleName("More information Trainer signature");
+		expect(infos[1]).toHaveAccessibleName("More information Trainee signature");
+	});
+	it("[ISSUE-3467-ITEM-17] aria-describedby describes the button, and aria-invalid marks it, only while set", () => {
+		const { rerender } = render(
+			<>
+				<span id="sig-help">Sign with your finger</span>
+				<SignPad signature={null} aria-describedby="sig-help" aria-invalid />
+			</>,
+		);
+		const button = screen.getByRole("button");
+		expect(button).toHaveAccessibleDescription("Sign with your finger");
+		expect(button).toHaveAttribute("aria-invalid", "true");
+
+		rerender(
+			<>
+				<span id="sig-help">Sign with your finger</span>
+				<SignPad signature={null} />
+			</>,
+		);
+		expect(button).not.toHaveAttribute("aria-describedby");
+		expect(button).not.toHaveAttribute("aria-invalid");
+	});
+	it("[ISSUE-3467-ITEM-17] a required tile's button is described as required, before its other description, and not with aria-required", () => {
+		const { rerender } = render(
+			<>
+				<span id="sig-error">Please sign</span>
+				<SignPad signature={null} required aria-describedby="sig-error" />
+			</>,
+		);
+		const button = screen.getByRole("button");
+		expect(button).toHaveAccessibleDescription("Required Please sign");
+		// ARIA does not allow aria-required on a button, and browsers drop it
+		expect(button).not.toHaveAttribute("aria-required");
+		expect(screen.queryByText("Required")).not.toBeVisible();
+
+		rerender(
+			<>
+				<span id="sig-error">Please sign</span>
+				<SignPad signature={null} required />
+			</>,
+		);
+		expect(button).toHaveAccessibleDescription("Required");
+
+		rerender(
+			<>
+				<span id="sig-error">Please sign</span>
+				<SignPad signature={null} />
+			</>,
+		);
+		expect(button).toHaveAccessibleDescription("");
+		expect(screen.queryByText("Required")).toBeNull();
+	});
+	it("[ISSUE-3467-ITEM-17] every locale says that a signature is required", async () => {
+		await ccI18n.loadLanguages(langs);
+		const missing = langs.filter(
+			(lng) =>
+				!ccI18n.getResource(
+					lng.split("-")[0],
+					"translation",
+					"standalone.signature-pad.required",
+				),
+		);
+		expect(missing, "locales without the text").toEqual([]);
+	});
 });

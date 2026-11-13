@@ -235,7 +235,8 @@
 				"close": "Schließen",
 				"signature": "Unterschrift"
 			},
-			"sign-here": "Hier digital unterschreiben"
+			"sign-here": "Hier digital unterschreiben",
+			"required": "Erforderlich"
 		},
 		"signal-portlet": {
 			"last-updated": "Letzte Aktualisierung: {{AGE}}",

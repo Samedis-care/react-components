@@ -235,7 +235,8 @@
 				"close": "Sluiten",
 				"signature": "Handtekening"
 			},
-			"sign-here": "Teken hier digitaal"
+			"sign-here": "Teken hier digitaal",
+			"required": "Verplicht"
 		},
 		"signal-portlet": {
 			"last-updated": "Laatste vernieuwing: {{AGE}}",

@@ -72,6 +72,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [Saving a new record keeps the tab it was saved on](2026-11-13-crud-save-new-keeps-tab.md) | behavior |
 | 2026-11-13 | [A form page's leave guard lasts as long as its Form](2026-11-13-form-page-guard-lasts-as-long-as-the-form.md) | behavior |
 | 2026-11-13 | [The sign dialog scales a stored signature to fit its sign area](2026-11-13-sign-dialog-stored-signature-fits.md) | behavior |
+| 2026-11-13 | [A signature field's button is named by its label, described by its message, and marked required and invalid](2026-11-13-signature-field-labelled-and-described.md) | behavior |
 | 2026-11-12 | [The Loader's status text is a paragraph, not a heading](2026-11-12-loader-status-text-is-no-heading.md) | behavior |
 | 2026-11-12 | [PopupMenu item labels wrap instead of being cut off](2026-11-12-popup-menu-labels-wrap.md) | behavior |
 | 2026-11-12 | [CountryFlags, CountryCodes and CountryOption.value are typed by CountryCode, and CountryFlags is frozen](2026-11-12-country-flags-typed-by-country-code.md) | type, behavior |

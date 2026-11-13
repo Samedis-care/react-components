@@ -24,6 +24,9 @@ class RendererSignature extends TypeSignature {
 			errorMsg,
 			warningMsg,
 			dirty,
+			id,
+			messageId,
+			describedBy,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -41,6 +44,8 @@ class RendererSignature extends TypeSignature {
 		if (visibility.editable) {
 			if (visibility.grid) throw new Error("Not supported");
 
+			// the tile's button is named by the label, so it points at it by id
+			const labelId = id && `${id}-label`;
 			return (
 				<FormControlCC
 					required={visibility.required}
@@ -51,19 +56,28 @@ class RendererSignature extends TypeSignature {
 					onBlur={handleBlur}
 					data-name={field}
 				>
-					<FormLabel component={"legend"}>{label}</FormLabel>
+					<FormLabel component={"legend"} id={labelId}>
+						{label}
+					</FormLabel>
 					<SignatureNameContext.Consumer>
 						{(signerName) => (
 							<SignaturePad
+								id={id}
 								name={field}
 								signature={value}
 								setSignature={(newValue) => handleChange(field, newValue)}
 								disabled={visibility.readOnly}
 								signerName={signerName}
+								aria-labelledby={labelId}
+								aria-describedby={describedBy}
+								aria-invalid={!!errorMsg}
+								required={visibility.required}
 							/>
 						)}
 					</SignatureNameContext.Consumer>
-					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+					<FormHelperText id={messageId}>
+						{errorMsg || warningMsg}
+					</FormHelperText>
 				</FormControlCC>
 			);
 		}
