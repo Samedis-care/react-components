@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-13 | [The Matrix add chip is named after its cell](2026-11-13-matrix-add-chip-names-its-cell.md) | behavior |
 | 2026-11-13 | [A diagonal Matrix pair goes through renderItem, as its first entry](2026-11-13-matrix-diagonal-pair-goes-through-render-item.md) | behavior |
 | 2026-11-13 | [A Matrix entry's tooltip is its accessible description](2026-11-13-matrix-entry-tooltip-is-its-description.md) | behavior |
 | 2026-11-13 | [The touch Clear button follows what the field shows, and selectors only have their own](2026-11-13-text-field-clear-follows-shown-value.md) | behavior |

@@ -25,6 +25,14 @@ export interface MatrixColumn {
 	 */
 	subLabel?: React.ReactNode;
 	/**
+	 * The column in words, for assistive technology: the full date in a
+	 * calendar ("Thursday, March 5, 2026"), where label and subLabel only show
+	 * "5" and "Thu". The add chips of the column's cells say it in their
+	 * accessible name (see MatrixGridProps.addLabel). buildDateColumns sets it.
+	 * @default label, if that is a string or a number; nothing otherwise
+	 */
+	name?: string;
+	/**
 	 * How the whole column is tinted
 	 * @default "normal"
 	 */
@@ -42,9 +50,12 @@ export interface MatrixRow<TCell> {
 	 */
 	cells: Record<string, TCell>;
 	/**
-	 * Accessible name of the row, used when the row header becomes a single
-	 * button in touch mode (see MatrixGridProps.onRowHeaderActions). Without
-	 * it, that button is announced by whatever the header renders.
+	 * Accessible name of the row (a person's name). The add chips of the row's
+	 * cells say it in their accessible name (see MatrixGridProps.addLabel), and
+	 * it names the row header when that becomes a single button in touch mode
+	 * (see MatrixGridProps.onRowHeaderActions). Without it, the chips do not
+	 * say their row, and that button is announced by whatever the header
+	 * renders.
 	 */
 	label?: string;
 	/**

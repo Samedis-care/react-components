@@ -19,6 +19,7 @@ export type MatrixGridClassKey =
 	| "cell"
 	| "addHint"
 	| "addChip"
+	| "addChipLabel"
 	| "extraRowHeader"
 	| "extraCell"
 	| "badge"
@@ -142,7 +143,15 @@ export interface MatrixGridProps<TCell> {
 	 */
 	onSelectRange?: (selection: MatrixRangeSelection) => void;
 	/**
-	 * Label of the hover hint on a selectable cell
+	 * What a press on a selectable cell does ("Add"): the text of the hover
+	 * hint, and the start of the add chip's accessible name. The chip shows
+	 * only an icon, so it is named by this, the row's label and the column's
+	 * name ("Add, Alice Weber, Thursday, March 5, 2026"), and a screen reader
+	 * user hears which cell each chip adds to (see MatrixRow.label and
+	 * MatrixColumn.name).
+	 * @remarks Pass a string where you can: the chip then shows its name as its
+	 * tooltip too. A node (a <Trans> element) names the chip as well, but
+	 * renders once more, hidden, in every chip, and the chip has no tooltip.
 	 */
 	addLabel?: React.ReactNode;
 	/**

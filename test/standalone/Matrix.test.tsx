@@ -92,6 +92,24 @@ describe("buildDateColumns", () => {
 		});
 		expect(monday.subLabel as string).toMatch(/^Mo/);
 	});
+	it("[ISSUE-3481-ITEM-15] names each day with its full localized date, in every timezone", () => {
+		const nameOf = (locale: string) =>
+			buildDateColumns({
+				from: "2026-03-05",
+				to: "2026-03-05",
+				locale,
+				today: null,
+			})[0].name;
+		try {
+			for (const tz of ["Pacific/Kiritimati", "UTC", "Etc/GMT+12"]) {
+				vi.stubEnv("TZ", tz);
+				expect(nameOf("en-US"), tz).toBe("Thursday, March 5, 2026");
+				expect(nameOf("de-DE"), tz).toBe("Donnerstag, 5. März 2026");
+			}
+		} finally {
+			vi.unstubAllEnvs();
+		}
+	});
 	it("says so when the range is reversed or unparseable", () => {
 		const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 		expect(
@@ -702,7 +720,7 @@ describe("MatrixGrid", () => {
 		// what can be clicked are the same thing
 		fireEvent.mouseOver(cellOf("r1", "c2"));
 		expect(screen.queryByText("Add")).not.toBeInTheDocument();
-		const chip = screen.getByRole("button", { name: "Add" });
+		const chip = screen.getByRole("button", { name: "Add, Row one, 2" });
 		fireEvent.click(chip);
 		expect(onSelectRange).toHaveBeenCalledWith({
 			rowKey: "r1",
@@ -720,7 +738,7 @@ describe("MatrixGrid", () => {
 			onSelectRange,
 		});
 		fireEvent.mouseOver(cellOf("r1", "c2"));
-		const chip = screen.getByRole("button", { name: "Add" });
+		const chip = screen.getByRole("button", { name: "Add, Row one, 2" });
 		// a real click is mousedown + mouseup + click; the press must not also
 		// begin a range on the cell underneath
 		fireEvent.mouseDown(chip);
@@ -737,7 +755,7 @@ describe("MatrixGrid", () => {
 			onSelectRange,
 		});
 		fireEvent.mouseOver(cellOf("r1", "c2"));
-		const chip = screen.getByRole("button", { name: "Add" });
+		const chip = screen.getByRole("button", { name: "Add, Row one, 2" });
 		expect(chip).toHaveAttribute("tabindex", "0");
 		fireEvent.keyDown(chip, { key: "Enter" });
 		expect(onSelectRange).toHaveBeenCalledWith(
@@ -758,7 +776,7 @@ describe("MatrixGrid", () => {
 		const hint = screen.getByText("Add");
 		expect(hint.className).toContain(matrixClasses.addHintHalf);
 		expect(
-			screen.queryByRole("button", { name: "Add" }),
+			screen.queryByRole("button", { name: "Add, Row one, 2" }),
 		).not.toBeInTheDocument();
 		// half the cell, and it catches the pointer so a press starts a range
 		expect(getComputedStyle(hint).pointerEvents).toBe("auto");
@@ -815,7 +833,7 @@ describe("MatrixGrid", () => {
 			onSelectRange,
 		});
 		// no pointer has been anywhere near the grid
-		const chip = screen.getByRole("button", { name: "Add" });
+		const chip = screen.getByRole("button", { name: "Add, Row one, 2" });
 		expect(chip).toHaveAttribute("tabindex", "0");
 		expect(cellOf("r1", "c2")).toContainElement(chip);
 		chip.focus();
@@ -1046,7 +1064,7 @@ describe("MatrixGrid", () => {
 				/>,
 			);
 			// overlay mode, but a tablet has no hover to reveal it with
-			const chip = screen.getByRole("button", { name: "Add" });
+			const chip = screen.getByRole("button", { name: "Add, Row one, 2" });
 			expect(getComputedStyle(chip).opacity).toBe("1");
 			fireEvent.click(chip);
 			expect(onSelectRange).toHaveBeenCalledWith(
@@ -1067,7 +1085,9 @@ describe("MatrixGrid", () => {
 				</ThemeProvider>,
 			);
 			expect(
-				getComputedStyle(screen.getByRole("button", { name: "Add" })).opacity,
+				getComputedStyle(
+					screen.getByRole("button", { name: "Add, Row one, 2" }),
+				).opacity,
 			).toBe("1");
 		});
 		it("[ISSUE-3480-ITEM-2] does not tell renderRowHeader the header is the tap target when it is not", () => {
@@ -1267,6 +1287,132 @@ const labelContrastOnPaper = (label: string, fill: string): number => {
 	const paper = over(rgba(fill), [255, 255, 255, 1]);
 	return getContrastRatio(css(over(rgba(label), paper)), css(paper));
 };
+
+describe("MatrixGrid body cells", () => {
+	/** stable selectors that do not depend on emotion's dev-only labels */
+	const CELL_CLASSES = { cell: "u-cell", addHint: "u-hint", addChip: "u-chip" };
+	const FREE: MatrixRow<TestCell>[] = [
+		{ key: "r1", label: "Row one", cells: {} },
+		{ key: "r2", label: "Row two", cells: {} },
+	];
+	/** c2 holds an entry: the default predicate rejects it, acceptAll takes it */
+	const BUSY_C2: MatrixRow<TestCell>[] = [
+		{ key: "r1", label: "Row one", cells: { c2: { text: "busy" } } },
+	];
+	const acceptAll = () => true;
+	const renderText = (cell: TestCell | undefined) => (
+		<span>{cell?.text ?? ""}</span>
+	);
+	const grid = (props: Partial<MatrixGridProps<TestCell>> = {}) => (
+		<ThemeProvider theme={theme}>
+			<button>{"outside"}</button>
+			<MatrixGrid<TestCell>
+				columns={COLUMNS}
+				rows={FREE}
+				classes={CELL_CLASSES}
+				renderRowHeader={renderRowHeaderByKey}
+				renderCell={renderText}
+				{...props}
+			/>
+		</ThemeProvider>
+	);
+	/** the body cell at (row, column), in DOM order */
+	const cellAt = (row: number, column: number, columns = 4) =>
+		Array.from(document.querySelectorAll<HTMLElement>(`.${CELL_CLASSES.cell}`))[
+			row * columns + column
+		];
+	const chipIn = (cell: HTMLElement) =>
+		cell.querySelector<HTMLElement>(`.${CELL_CLASSES.addChip}`);
+
+	describe("the add chip", () => {
+		it("[ISSUE-3481-ITEM-15] has a name when addLabel is not a string", () => {
+			render(
+				grid({
+					selectable: true,
+					isCellSelectable: acceptAll,
+					addLabel: <span>{"Add"}</span>, // e.g. a <Trans> element
+					rows: BUSY_C2,
+				}),
+			);
+			expect(
+				computeAccessibleName(chipIn(cellAt(0, 1)) as HTMLElement),
+			).not.toBe("");
+		});
+
+		it("[ISSUE-3481-ITEM-15] names each chip after its row and column, and shows that name as its tooltip", () => {
+			const rows: MatrixRow<TestCell>[] = [
+				{ key: "r1", label: "Row one", cells: { c2: { text: "busy" } } },
+				{ key: "r2", label: "Row two", cells: { c3: { text: "busy" } } },
+			];
+			const props = { selectable: true, isCellSelectable: acceptAll };
+			const nameIn = (row: number, column: number) =>
+				computeAccessibleName(chipIn(cellAt(row, column)) as HTMLElement);
+			const { rerender } = render(grid({ ...props, addLabel: "Add", rows }));
+			expect(nameIn(0, 1)).toBe("Add, Row one, 2");
+			expect(nameIn(1, 2)).toBe("Add, Row two, 3");
+			expect(chipIn(cellAt(1, 2))).toHaveAttribute("title", "Add, Row two, 3");
+			// a column's name wins over its label, and every part follows a change
+			rerender(
+				grid({
+					...props,
+					addLabel: "New shift",
+					columns: COLUMNS.map((column) => ({
+						...column,
+						name: `Day ${column.key}`,
+					})),
+					rows: [{ ...rows[0], label: "Alice" }, rows[1]],
+				}),
+			);
+			expect(nameIn(0, 1)).toBe("New shift, Alice, Day c2");
+			expect(chipIn(cellAt(0, 1))).toHaveAttribute(
+				"title",
+				"New shift, Alice, Day c2",
+			);
+		});
+
+		it("[ISSUE-3481-ITEM-15] says a node addLabel in its hidden name, and has no tooltip then", () => {
+			render(
+				grid({
+					selectable: true,
+					isCellSelectable: acceptAll,
+					addLabel: <span>{"Add"}</span>,
+					rows: BUSY_C2,
+					classes: { ...CELL_CLASSES, addChipLabel: "u-chip-label" },
+				}),
+			);
+			const chip = chipIn(cellAt(0, 1)) as HTMLElement;
+			expect(computeAccessibleName(chip)).toBe("Add, Row one, 2");
+			expect(chip).not.toHaveAttribute("title");
+			expect(chip.querySelector(".u-chip-label")).toHaveTextContent(
+				"Add, Row one, 2",
+			);
+		});
+
+		it("[ISSUE-3481-ITEM-15] leaves out what the row and column do not say", () => {
+			render(
+				grid({
+					selectable: true,
+					isCellSelectable: acceptAll,
+					columns: [
+						{ key: "c1", label: <b>{"1"}</b> },
+						{ key: "c2", label: 2 },
+					],
+					rows: [
+						{ key: "r1", label: "Row one", cells: { c1: { text: "busy" } } },
+						{ key: "r2", cells: { c2: { text: "busy" } } },
+					],
+				}),
+			);
+			// no addLabel either: what is left is the cell
+			expect(
+				computeAccessibleName(chipIn(cellAt(0, 0, 2)) as HTMLElement),
+			).toBe("Row one");
+			expect(
+				computeAccessibleName(chipIn(cellAt(1, 1, 2)) as HTMLElement),
+			).toBe("2");
+		});
+	});
+});
 
 describe("MatrixCellTile entries", () => {
 	afterEach(() => {

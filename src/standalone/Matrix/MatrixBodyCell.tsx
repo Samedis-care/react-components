@@ -137,6 +137,43 @@ export const MatrixAddChip = styled("div", {
 	},
 }));
 
+/**
+ * The add chip's name: addLabel, the row's label and the column's name, as
+ * text that is visually hidden (the chip shows only its icon). Text rather
+ * than an aria-label, so that an addLabel that is a node names the chip too.
+ */
+export const MatrixAddChipLabel = styled("span", {
+	name: "CcMatrixGrid",
+	slot: "addChipLabel",
+})({
+	// visually hidden, as MUI's visuallyHidden
+	border: 0,
+	clipPath: "inset(50%)",
+	height: 1,
+	margin: -1,
+	overflow: "hidden",
+	padding: 0,
+	position: "absolute",
+	whiteSpace: "nowrap",
+	width: 1,
+});
+
+/**
+ * Is this part of the add chip's name there at all? React renders nothing for
+ * null, undefined and booleans, and an empty string says nothing.
+ */
+const isNamePart = (part: React.ReactNode): boolean =>
+	part != null && typeof part !== "boolean" && part !== "";
+
+/**
+ * MatrixColumn.name, or the label when that is text
+ */
+const columnNameOf = (column: MatrixColumn): string | undefined =>
+	column.name ??
+	(typeof column.label === "string" || typeof column.label === "number"
+		? String(column.label)
+		: undefined);
+
 export interface MatrixBodyCellProps<TCell> {
 	/**
 	 * The row this cell belongs to
@@ -229,10 +266,19 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 		cellSelectable && !touch && occupiedAddAffordance === "overlay"
 			? occupied
 			: false;
-	const chipActivation = useMatrixActivation(
-		chip ? addToCell : undefined,
-		typeof addLabel === "string" ? addLabel : undefined,
-	);
+	// named by its contents, see MatrixAddChipLabel
+	const chipActivation = useMatrixActivation(chip ? addToCell : undefined);
+	// The chip's name says what it does and on which cell, or every chip of the
+	// grid would be the same "Add". It doubles as the tooltip where it is text.
+	const chipWhere = [row.label, columnNameOf(column)]
+		.filter(isNamePart)
+		.join(", ");
+	const chipTitle =
+		(typeof addLabel === "string"
+			? [addLabel, chipWhere].filter(Boolean).join(", ")
+			: isNamePart(addLabel)
+				? undefined // a node, not text
+				: chipWhere) || undefined;
 	const stopPress = useCallback((event: React.MouseEvent) => {
 		// the chip reports the cell itself; letting the press through would
 		// begin a range on the same cell and report it twice
@@ -268,11 +314,16 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 						classes?.addChip,
 						touch && matrixClasses.touch,
 					])}
-					title={typeof addLabel === "string" ? addLabel : undefined}
+					title={chipTitle}
 					{...chipActivation}
 					onMouseDown={stopPress}
 				>
 					<Add fontSize={"small"} />
+					<MatrixAddChipLabel className={classes?.addChipLabel}>
+						{addLabel}
+						{isNamePart(addLabel) && chipWhere ? ", " : null}
+						{chipWhere}
+					</MatrixAddChipLabel>
 				</MatrixAddChip>
 			)}
 			{!chip && cellSelectable && !!(state & MATRIX_CELL_ADD_HINT) && (

@@ -686,6 +686,12 @@ const tileCell = (canvasElement: HTMLElement, row: number, column: number) =>
 		canvasElement.querySelectorAll<HTMLElement>(`.${TILE_CLASSES.cell}`),
 	)[row * TILE_COLUMNS.length + column];
 
+const tileSlotIn = (element: HTMLElement, slot: keyof typeof TILE_CLASSES) => {
+	const found = element.querySelector<HTMLElement>(`.${TILE_CLASSES[slot]}`);
+	if (!found) throw new Error(`no ${slot} in the cell`);
+	return found;
+};
+
 // ---- Bug stories ------------------------------------------------------------
 // Each one asserts the correct behavior and fails until the BUGS.md entry it
 // is named after is fixed.
@@ -906,5 +912,27 @@ export const Issue3481Item11EveryRingKeepsItsContrast: Story = {
 		);
 		if (!chip) throw new Error("no add chip in column 4");
 		await checkRing(chip, "chip");
+	},
+};
+
+/** ISSUE-3481-ITEM-15: with a non-string addLabel every add chip is a nameless button (axe aria-command-name). */
+export const Issue3481Item15ChipIsNamedWithANodeLabel: Story = {
+	parameters: {
+		a11y: {
+			test: "error",
+			options: { runOnly: { type: "rule", values: ["aria-command-name"] } },
+		},
+	},
+	render: (args) => (
+		<TileRoster
+			onSelectRange={args.onSelectRange}
+			onItemClick={args.onItemClick}
+			addLabel={<span>{"Add"}</span>}
+		/>
+	),
+	play: async ({ canvasElement }) => {
+		const chip = tileSlotIn(tileCell(canvasElement, 0, 1), "addChip");
+		await expect(chip).toHaveAttribute("role", "button");
+		chip.focus(); // shown, for a checker that skips what is not
 	},
 };
