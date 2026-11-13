@@ -32,7 +32,9 @@ export interface InlineSwitchProps {
 	 */
 	className?: string;
 	/**
-	 * Custom styles
+	 * Class names per slot: `root` (the outer div, combined with `className`),
+	 * `switchWrapper` (the wrapper of switch and label) and `switch` (the
+	 * switch's root, MUI's `.MuiSwitch-root`)
 	 */
 	classes?: Partial<Record<InlineSwitchClassKey, string>>;
 }
@@ -146,6 +148,7 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 					>
 						<Grid>
 							<AntSwitch
+								className={classes?.switch}
 								checked={value}
 								onChange={handleSwitchChange}
 								disabled={disabled}

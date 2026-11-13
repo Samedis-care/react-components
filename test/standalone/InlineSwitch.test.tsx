@@ -11,6 +11,12 @@ const theme = createTheme();
 const renderSwitch = (ui: React.ReactElement) =>
 	render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
 
+const switchRootOf = (container: HTMLElement) => {
+	const el = container.querySelector(".MuiSwitch-root");
+	if (!(el instanceof HTMLElement)) throw new Error(".MuiSwitch-root missing");
+	return el;
+};
+
 // MUI Switch renders an <input> with role="switch" (not role="checkbox")
 describe("InlineSwitch", () => {
 	it("renders without crashing", () => {
@@ -79,5 +85,19 @@ describe("InlineSwitch", () => {
 	it("does not throw when onChange is undefined and switch is clicked", () => {
 		renderSwitch(<InlineSwitch value={false} visible={true} />);
 		expect(() => fireEvent.click(screen.getByRole("switch"))).not.toThrow();
+	});
+});
+
+describe("InlineSwitch styling and theme", () => {
+	it("[ISSUE-3465-ITEM-3] classes.switch lands on the switch", () => {
+		const { container } = renderSwitch(
+			<InlineSwitch
+				value={false}
+				visible
+				label="L"
+				classes={{ switch: "s" }}
+			/>,
+		);
+		expect(switchRootOf(container)).toHaveClass("s");
 	});
 });
