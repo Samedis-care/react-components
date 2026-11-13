@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { RouteProps, useRoutePrefix } from "./Route";
 import useLocation from "./useLocation";
 import matchPath from "./matchPath";
+import joinRoutePath from "./joinRoutePath";
 
 export interface RoutesProps {
 	children: React.ReactElement<RouteProps>[];
@@ -19,7 +20,7 @@ const Routes = (props: RoutesProps) => {
 	const matchedRoutes = childrenWithKeys.filter(
 		(child) =>
 			!!matchPath(
-				{ ...child.props, path: routePrefix + child.props.path },
+				{ ...child.props, path: joinRoutePath(routePrefix, child.props.path) },
 				pathname,
 			),
 	);

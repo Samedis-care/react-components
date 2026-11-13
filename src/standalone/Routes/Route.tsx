@@ -1,11 +1,13 @@
 import React, { useContext, useEffect, useMemo } from "react";
 import useLocation from "./useLocation";
-import matchPath, { normalizePath } from "./matchPath";
+import matchPath from "./matchPath";
+import joinRoutePath from "./joinRoutePath";
 import { sentrySetRoutePath } from "./SentryRoutingInstrumentation";
 
 export interface RouteProps {
 	/**
-	 * Path of the route
+	 * Path of the route. Nested in another Route it is relative to that
+	 * Route's path: "info" under "/devices/*" or "/devices" is "/devices/info".
 	 */
 	path: string;
 	/**
@@ -55,7 +57,7 @@ const Route = (props: RouteProps) => {
 	const parentCtx = useContext(RouteContext);
 	const depth = parentCtx ? parentCtx.depth + 1 : 0;
 	const ctx = useMemo((): RouteContextType | null => {
-		const finalPath = normalizePath(routePrefix + path);
+		const finalPath = joinRoutePath(routePrefix, path);
 		const match = matchPath({ path: finalPath }, pathname);
 		if (!match) return null; // this one is about to be unmounted
 		return { url: match.url, path: finalPath, depth };
