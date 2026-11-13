@@ -287,7 +287,9 @@
 						"not-set": "Imzo qo'yilmagan"
 					},
 					"files": {
-						"no-file": "Hech qanday fayl mavjud emas"
+						"no-file": "Hech qanday fayl mavjud emas",
+						"count_one": "{{count}} ta fayl",
+						"count_other": "{{count}} ta fayl"
 					},
 					"string-array": {
 						"entry": "{{LABEL}} {{NUM}}",

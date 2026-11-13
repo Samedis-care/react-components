@@ -9,9 +9,14 @@ import GroupBox from "../../../../standalone/GroupBox";
 import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiFieldState";
 import ObjectUrlImage from "../../../../standalone/FileUpload/Image/ObjectUrlImage";
 import ObjectUrlLink from "../../../../standalone/FileUpload/Generic/ObjectUrlLink";
+import FilesGrid from "./FilesGrid/FilesGrid";
 
 /**
  * Renders a file selector
+ * @remarks In a grid cell (overview visibility with `grid`) the files take one
+ *          line (FilesGrid): "No files present", the only file's name as a link
+ *          to it, or for more files their count ("2 files") as a button that
+ *          opens a menu of the files.
  */
 class RendererFiles extends TypeFiles {
 	render(params: ModelRenderParams<FileData[]>): React.ReactElement {
@@ -78,6 +83,8 @@ class RendererFiles extends TypeFiles {
 			);
 		}
 
+		if (visibility.grid) return <FilesGrid files={value} />;
+
 		const content = (
 			<>
 				<ul>
@@ -99,11 +106,7 @@ class RendererFiles extends TypeFiles {
 			</>
 		);
 
-		return visibility.grid ? (
-			content
-		) : (
-			<GroupBox label={label}>{content}</GroupBox>
-		);
+		return <GroupBox label={label}>{content}</GroupBox>;
 	}
 }
 

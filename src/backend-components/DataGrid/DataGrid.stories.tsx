@@ -182,6 +182,7 @@ const inlineBoxes = (root: HTMLElement) =>
 			".CcDataGrid-dataCell.column-active input[type=checkbox]",
 		),
 	);
+
 /** The selection checkbox of each row */
 const selectBoxes = (root: HTMLElement) =>
 	Array.from(
@@ -245,5 +246,182 @@ export const Issue3495Item16DeleteByKeyboardKeepsFocusAfterYes: StoryObj = {
 		const delAfter = canvas.getByRole("button", { name: "Delete" });
 		await expect(delAfter).toHaveAttribute("aria-disabled", "true");
 		await expect(delAfter, "focus left Delete").toHaveFocus();
+	},
+};
+
+const FilesStory = () => {
+	const model = useMemo(
+		() =>
+			makeModel(
+				"files",
+				new MockConnector([
+					{
+						...PEOPLE[0],
+						files: [
+							{
+								file: {
+									name: "contract.pdf",
+									downloadLink: "https://example.invalid/contract.pdf",
+								},
+							},
+							{
+								file: {
+									name: "annex.pdf",
+									downloadLink: "https://example.invalid/annex.pdf",
+								},
+							},
+						],
+					},
+					PEOPLE[1],
+				]),
+				{ files: true },
+			),
+		[],
+	);
+	return <BackendDataGrid model={model} />;
+};
+
+/**
+ * ISSUE-3506-ITEM-13: a files cell is taller than the row: "No files present" is cut off,
+ * and a second file is out of sight
+ */
+export const Issue3506Item13FilesCellFitsTheRow: StoryObj = {
+	render: () => <FilesStory />,
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice")).toBeVisible();
+		const cells = () =>
+			Array.from(
+				canvasElement.querySelectorAll<HTMLElement>(
+					".CcDataGrid-dataCell.column-files",
+				),
+			);
+		await waitFor(() => expect(cells()).toHaveLength(2));
+		const [withFiles, withoutFiles] = cells();
+		// the names, or a count such as "2 files"
+		await expect(withFiles).toHaveTextContent(/contract\.pdf|2/);
+		await expect(withoutFiles).toHaveTextContent("No files present");
+		await expect(
+			cells().map((cell) => cell.scrollHeight - cell.clientHeight),
+			"how far each cell's content overflows the row",
+		).toEqual([0, 0]);
+	},
+};
+
+const FilesMenuStory = () => {
+	const model = useMemo(
+		() =>
+			makeModel(
+				"files-menu",
+				new MockConnector([
+					{
+						...PEOPLE[0],
+						files: [
+							{
+								file: {
+									name: "contract.pdf",
+									downloadLink: "https://example.invalid/contract.pdf",
+								},
+							},
+							{
+								file: {
+									name: "annex.pdf",
+									downloadLink: "https://example.invalid/annex.pdf",
+								},
+							},
+						],
+					},
+					PEOPLE[1],
+					{
+						...PEOPLE[2],
+						files: [
+							{
+								file: {
+									name: "maintenance-report-of-the-whole-year-2026.pdf",
+									downloadLink:
+										"https://example.invalid/maintenance-report.pdf",
+								},
+							},
+						],
+					},
+				]),
+				{ files: true },
+			),
+		[],
+	);
+	return <BackendDataGrid model={model} />;
+};
+
+/**
+ * ISSUE-3506-ITEM-13: the files of a row by keyboard: Tab to the count, Enter opens the
+ * menu of the files on the first one, Escape closes it on the count. Opening the menu
+ * neither selects the row nor moves the cell. A single file is a link on the row's line.
+ * The menu is left open for the axe check.
+ */
+export const Issue3506Item13FilesMenuByKeyboard: StoryObj = {
+	render: () => <FilesMenuStory />,
+	parameters: {
+		a11y: {
+			test: "error",
+			// the rest of the grid has its own, filed violations
+			context: { include: [".column-files", "[role=menu]"] },
+		},
+	},
+	play: async ({ canvas, canvasElement }) => {
+		const body = within(document.body);
+		await expect(await canvas.findByText("Alice")).toBeVisible();
+		const cells = () =>
+			Array.from(
+				canvasElement.querySelectorAll<HTMLElement>(
+					".CcDataGrid-dataCell.column-files",
+				),
+			);
+		await waitFor(() => expect(cells()).toHaveLength(3));
+		await expect(
+			cells().map((cell) => cell.scrollHeight - cell.clientHeight),
+			"how far each cell's content overflows the row",
+		).toEqual([0, 0, 0]);
+		const single = canvas.getByRole("link", {
+			name: "maintenance-report-of-the-whole-year-2026.pdf",
+		});
+		await expect(single).toHaveAttribute(
+			"href",
+			"https://example.invalid/maintenance-report.pdf",
+		);
+
+		const count = canvas.getByRole("button", { name: "2 files" });
+		const rowBox = canvasElement.querySelector<HTMLInputElement>(
+			'.CcDataGrid-dataCell:not([class*="column-"]) input[type=checkbox]',
+		)!;
+		rowBox.focus();
+		for (let i = 0; i < 10 && document.activeElement !== count; i++)
+			await userEvent.tab();
+		await expect(count).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		const menu = await body.findByRole("menu", { name: "2 files" });
+		await expect(rowBox, "the row was selected").not.toBeChecked();
+		const contract = within(menu).getByRole("menuitem", {
+			name: "contract.pdf",
+		});
+		await waitFor(() => expect(contract).toHaveFocus());
+		await expect(contract).toHaveAttribute(
+			"href",
+			"https://example.invalid/contract.pdf",
+		);
+		await userEvent.keyboard("{ArrowDown}");
+		await expect(
+			within(menu).getByRole("menuitem", { name: "annex.pdf" }),
+		).toHaveFocus();
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() => expect(body.queryByRole("menu")).toBeNull());
+		await waitFor(() => expect(count).toHaveFocus());
+		await expect(rowBox, "the row was selected").not.toBeChecked();
+
+		// by mouse
+		await userEvent.click(count);
+		const reopened = await body.findByRole("menu", { name: "2 files" });
+		await expect(rowBox, "the row was selected").not.toBeChecked();
+		await expect(cells()[0].scrollTop, "the cell scrolled").toBe(0);
+		// the menu grows in
+		await waitFor(() => expect(reopened).toBeVisible());
 	},
 };

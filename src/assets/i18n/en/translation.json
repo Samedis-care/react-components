@@ -287,7 +287,9 @@
 						"not-set": "Not signed"
 					},
 					"files": {
-						"no-file": "No files present"
+						"no-file": "No files present",
+						"count_one": "{{count}} file",
+						"count_other": "{{count}} files"
 					},
 					"string-array": {
 						"entry": "{{LABEL}} {{NUM}}",

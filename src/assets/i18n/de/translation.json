@@ -287,7 +287,9 @@
 						"not-set": "Nicht unterschrieben"
 					},
 					"files": {
-						"no-file": "Keine Dateien vorhanden"
+						"no-file": "Keine Dateien vorhanden",
+						"count_one": "{{count}} Datei",
+						"count_other": "{{count}} Dateien"
 					},
 					"string-array": {
 						"entry": "{{LABEL}} {{NUM}}",

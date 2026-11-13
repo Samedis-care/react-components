@@ -287,7 +287,10 @@
 						"not-set": "Non firmato"
 					},
 					"files": {
-						"no-file": "Nessun file presente"
+						"no-file": "Nessun file presente",
+						"count_one": "{{count}} file",
+						"count_many": "{{count}} file",
+						"count_other": "{{count}} file"
 					},
 					"string-array": {
 						"entry": "{{LABEL}} {{NUM}}",

@@ -287,7 +287,9 @@
 						"not-set": "Niet ondertekend"
 					},
 					"files": {
-						"no-file": "Geen bestanden aanwezig"
+						"no-file": "Geen bestanden aanwezig",
+						"count_one": "{{count}} bestand",
+						"count_other": "{{count}} bestanden"
 					},
 					"string-array": {
 						"entry": "{{LABEL}} {{NUM}}",

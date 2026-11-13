@@ -96,6 +96,7 @@ import {
 	DefaultFormPageButtonsClassKey,
 	DefaultFormPageButtonsProps,
 } from "./backend-components/Form/DefaultFormPageButtons";
+import type { FilesGridClassKey } from "./backend-integration/Model/Types/Renderers/FilesGrid/FilesGrid";
 import { InfoBoxClassKey, InfoBoxProps } from "./standalone/InfoBox";
 import {
 	SignalPortletItemClassKey,
@@ -332,6 +333,7 @@ declare module "@mui/material/styles" {
 		CcFormDialog: FormDialogClassKey;
 		CcPageTitle: PageTitleClassKey;
 		CcPopupMenu: PopupMenuClassKey;
+		CcFilesGrid: FilesGridClassKey;
 		CcPortalLayout: PortalLayoutClassKey;
 		CcNotifications: NotificationsClassKey;
 		CcToast: ToastClassKey;
@@ -718,6 +720,9 @@ declare module "@mui/material/styles" {
 		CcPopupMenu?: {
 			styleOverrides?: ComponentsOverrides<Theme>["CcPopupMenu"];
 			variants?: ComponentsVariants["CcFormDialog"];
+		};
+		CcFilesGrid?: {
+			styleOverrides?: ComponentsOverrides<Theme>["CcFilesGrid"];
 		};
 		CcPortalLayout?: {
 			defaultProps?: ComponentsPropsList["CcPortalLayout"];

@@ -287,7 +287,11 @@
 						"not-set": "Не подписан"
 					},
 					"files": {
-						"no-file": "Файлы отсутствуют"
+						"no-file": "Файлы отсутствуют",
+						"count_one": "{{count}} файл",
+						"count_few": "{{count}} файла",
+						"count_many": "{{count}} файлов",
+						"count_other": "{{count}} файла"
 					},
 					"string-array": {
 						"entry": "{{LABEL}} {{NUM}}",
