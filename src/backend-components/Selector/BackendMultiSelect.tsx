@@ -19,6 +19,24 @@ import useDebouncedLoad from "./useDebouncedLoad";
 export type BackendMultiSelectLruOptions<DataT extends MultiSelectorData> =
 	Omit<SelectorLruOptions<DataT>, "loadData">;
 
+/**
+ * Marks the "Loading…" entry listed for a selected id whose record is still loading. The
+ * selector hands it back with the next change like any entry, but it is none: it is not
+ * reported in `onSelect`'s `raw` and never replaces a loaded entry.
+ */
+const LOADING_PLACEHOLDER = Symbol("BackendMultiSelect loading placeholder");
+
+const makeLoadingPlaceholder = (
+	value: string,
+	label: string,
+): MultiSelectorData => {
+	const placeholder = { value, label, [LOADING_PLACEHOLDER]: true };
+	return placeholder;
+};
+
+const isLoadingPlaceholder = (entry: MultiSelectorData): boolean =>
+	LOADING_PLACEHOLDER in entry;
+
 export interface BackendMultiSelectProps<
 	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
@@ -54,8 +72,10 @@ export interface BackendMultiSelectProps<
 	searchResultLimit?: number;
 	/**
 	 * Selection change handler
-	 * @param data The selected data entry/entries values
-	 * @param raw The selected data entry/entries
+	 * @param value The ids of the new selection, in order
+	 * @param raw The entries of these ids, in the same order. An id whose record is still
+	 *        loading (listed as "Loading…") has no entry yet and is left out, so match the
+	 *        entries to the ids by `value`, not by position.
 	 */
 	onSelect?: (value: string[], raw: DataT[]) => void;
 	/**
@@ -99,7 +119,8 @@ interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
 	 */
 	selected: DataT[];
 	/**
-	 * Event handler for the selection event
+	 * Event handler for the selection event: caches the entries and calls `onSelect` with
+	 * their ids and the entries, without the "Loading…" ones
 	 */
 	handleSelect: (selected: DataT[]) => void;
 }
@@ -141,13 +162,18 @@ export const useSelectedCache = <
 		(selected: DataT[]) => {
 			setSelectedCache((cache) => {
 				const newCache = { ...cache };
-				selected.forEach((entry) => (newCache[entry.value] = entry));
+				selected.forEach((entry) => {
+					// a placeholder handed back keeps its id from being looked up twice, but
+					// never replaces the entry that loaded meanwhile (a group pick reports late)
+					if (isLoadingPlaceholder(entry) && entry.value in newCache) return;
+					newCache[entry.value] = entry;
+				});
 				return newCache;
 			});
 			if (onSelect) {
 				onSelect(
 					selected.map((entry) => entry.value),
-					selected,
+					selected.filter((entry) => !isLoadingPlaceholder(entry)),
 				);
 			}
 		},
@@ -213,7 +239,9 @@ export const useSelectedCache = <
 				const newSelection = selected.filter((id) => !isIdNotInCache(id));
 				onSelect(
 					newSelection,
-					newSelection.map((id) => selectedCache[id] ?? newCache[id]),
+					newSelection
+						.map((id) => selectedCache[id] ?? newCache[id])
+						.filter((entry) => !isLoadingPlaceholder(entry)),
 				);
 			}
 
@@ -228,10 +256,10 @@ export const useSelectedCache = <
 			selected.map(
 				(value) =>
 					selectedCache[value] ??
-					({
+					(makeLoadingPlaceholder(
 						value,
-						label: t("backend-components.selector.loading"),
-					} as DataT),
+						t("backend-components.selector.loading"),
+					) as DataT),
 			),
 		[selected, selectedCache, t],
 	);

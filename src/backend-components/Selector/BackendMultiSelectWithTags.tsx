@@ -43,7 +43,10 @@ export interface BackendMultiSelectWithTagsProps<
 	selected: string[];
 	/**
 	 * Change event callback
-	 * @param selected The now selected IDs
+	 * @param selected The ids of the new selection, in order
+	 * @param raw The entries of these ids, in the same order. An id whose record is still
+	 *        loading (listed as "Loading…") has no entry yet and is left out, so match the
+	 *        entries to the ids by `value`, not by position.
 	 */
 	onChange?: (selected: string[], raw: DataDataT[]) => void;
 	/**

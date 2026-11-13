@@ -63,6 +63,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [An image's placeholder is announced as "No image present"](2026-11-13-image-placeholder-alt-no-image-present.md) | behavior |
 | 2026-11-13 | [A files field in a grid cell takes one line: a link, or a count with a menu](2026-11-13-files-renderer-grid-cell-one-line.md) | behavior, theme |
 | 2026-11-13 | [timestampToAge words the age with Intl.RelativeTimeFormat: grammatical in every language, with weeks to years and future times](2026-11-13-timestamp-to-age-intl.md) | behavior |
+| 2026-11-13 | [The backend multi selects leave "Loading…" entries out of raw](2026-11-13-backend-multi-select-raw-without-loading-entries.md) | behavior |
 | 2026-11-12 | [The Loader's status text is a paragraph, not a heading](2026-11-12-loader-status-text-is-no-heading.md) | behavior |
 | 2026-11-12 | [PopupMenu item labels wrap instead of being cut off](2026-11-12-popup-menu-labels-wrap.md) | behavior |
 | 2026-11-12 | [CountryFlags, CountryCodes and CountryOption.value are typed by CountryCode, and CountryFlags is frozen](2026-11-12-country-flags-typed-by-country-code.md) | type, behavior |

@@ -656,6 +656,33 @@ describe("useCrudSelect bugs", () => {
 		await flush();
 		expect(be.calls).toEqual(["create:s1"]);
 	});
+
+	it("[ISSUE-3510-ITEM-20] an id the field reports without its entry, still loading there, keeps its row and its place", async () => {
+		const be = makeBackend([
+			{ id: "j1", source_id: "s1", note: "a" },
+			{ id: "j2", source_id: "s2" },
+		]);
+		const { result } = mountJoins(be);
+		await waitFor(() => expect(result.current.selected).toHaveLength(2));
+		const [first, second] = result.current.selected;
+		// j1 is listed as "Loading…" in the field, which reports its id but no entry for it
+		await act(async () => {
+			await result.current.handleSelect(
+				["j1", "j2", "to-create-s3"],
+				[second, pick("s3")],
+			);
+		});
+		await act(async () => {
+			await result.current.handleSelect(
+				["j1", "100"],
+				result.current.selected.filter((entry) => entry.source_id === "s3"),
+			);
+		});
+		expect(be.calls).toEqual(["create:s3", "delete:j2"]);
+		expect(values(result.current.selected)).toEqual(["j1", "100"]);
+		expect(result.current.selected[0]).toBe(first);
+		expect(result.current.error).toBeNull();
+	});
 });
 
 describe("useCrudSelect: a disabled control", () => {

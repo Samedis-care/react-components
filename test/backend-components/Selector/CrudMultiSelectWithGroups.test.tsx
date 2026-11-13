@@ -17,6 +17,12 @@ import type {
 	MultiSelectorData,
 } from "../../../src/standalone";
 import { settle, setupFormTests } from "../Form/formFixture";
+import {
+	openList,
+	pickOption,
+	removeButtons,
+	typeText,
+} from "./backendSelectorFixture";
 
 setupFormTests();
 
@@ -78,7 +84,12 @@ const ErrorSink = (props: ErrorComponentProps) => (
 
 const model = createTestModel();
 
-const mountGroups = (connector: Connector) =>
+const mountGroups = (
+	connector: Connector,
+	deserializeRecord: (
+		record: Record<string, unknown>,
+	) => JoinData | Promise<JoinData> = deserialize,
+) =>
 	render(
 		<Framework>
 			<CrudMultiSelectWithGroups<
@@ -96,7 +107,7 @@ const mountGroups = (connector: Connector) =>
 				convGroup={convGroup}
 				getGroupDataEntries={getGroupDataEntries}
 				serialize={serialize}
-				deserialize={deserialize}
+				deserialize={deserializeRecord}
 				deserializeModel={deserializeModel}
 				getIdOfData={getIdOfData}
 				groupSearchDebounceTime={0}
@@ -155,5 +166,51 @@ describe("CrudMultiSelectWithGroups", () => {
 		expect(screen.queryByText(/403 Forbidden/)).toBeNull();
 		expect(warn).toHaveBeenCalledWith(expect.any(String), failure);
 		expect(groupSearchDisabled()).toBe(true);
+	});
+
+	it("[ISSUE-3510-ITEM-20] a pick while a selected entry is still 'Loading…' neither updates nor removes its row", async () => {
+		const create = vi.fn((data: Record<string, unknown>) =>
+			Promise.resolve([{ ...data, id: "new-" + String(data.source_id) }, {}]),
+		);
+		const update = vi.fn();
+		const remove = vi.fn();
+		const connector = {
+			index: vi.fn(() =>
+				Promise.resolve([
+					[{ id: "j1", source_id: "1" }],
+					{ totalRows: 1, filteredRows: 1 },
+				]),
+			),
+			create,
+			update,
+			delete: remove,
+		} as unknown as Connector;
+		// the selection loads at once, the field's entries of its rows wait
+		let release!: () => void;
+		const held = new Promise<void>((resolve) => (release = resolve));
+		let calls = 0;
+		const slowDeserialize = async (record: Record<string, unknown>) => {
+			if (calls++ > 0) await held;
+			return deserialize(record);
+		};
+		mountGroups(connector, slowDeserialize);
+		await settle();
+		expect(removeButtons()).toEqual(["Remove Loading…"]);
+
+		const personInput = screen.getAllByRole<HTMLInputElement>("combobox")[1];
+		await openList(personInput);
+		await typeText("Bob", personInput);
+		await pickOption("Bob");
+		expect(create).toHaveBeenCalledWith({ id: undefined, source_id: "2" });
+		expect(update).not.toHaveBeenCalled();
+		expect(remove).not.toHaveBeenCalled();
+
+		await act(async () => {
+			release();
+			await Promise.resolve();
+		});
+		await settle();
+		// j1 is listed from its row once the field has built its entry
+		expect(removeButtons()[0]).toBe("Remove L1");
 	});
 });

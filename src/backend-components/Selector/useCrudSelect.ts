@@ -146,7 +146,9 @@ export interface UseCrudSelectResult<
 	/**
 	 * Selection handler
 	 * @param ids The new selected entry ids
-	 * @param newSelected The new selected entries
+	 * @param newSelected The new selected entries. A listed entry whose id is in `ids` but
+	 *        that is missing here stays as it is, in its place: BackendMultiSelect reports
+	 *        an entry that is still loading by its id only.
 	 * @remarks Ignores the change while the control is disabled
 	 */
 	handleSelect: (ids: string[], newSelected: DataT[]) => Promise<void>;
@@ -350,7 +352,19 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 
 	// writes the change, whether the control is disabled or not: the initial load uses it
 	const applySelection = useCallback(
-		async (_ids: string[], newSelected: DataT[]) => {
+		async (ids: string[], reported: DataT[]) => {
+			// an id reported without its entry (still loading in the field) keeps its entry
+			const kept = selected.filter(
+				(entry) =>
+					ids.includes(entry.value) &&
+					!reported.some((other) => other.value === entry.value),
+			);
+			let newSelected =
+				kept.length === 0
+					? reported
+					: [...reported, ...kept].sort(
+							(a, b) => ids.indexOf(a.value) - ids.indexOf(b.value),
+						);
 			// find new entries
 			const newEntries = newSelected.filter(
 				(entry) => !selected.find((selEntry) => selEntry.value === entry.value),
