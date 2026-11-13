@@ -38,7 +38,9 @@ export interface UseLazyCrudConnectorParams<ExtraT = undefined> {
 	 */
 	configureConnector?: (connector: ApiConnector) => void;
 	/**
-	 * The initial ID to use for getEndpoint
+	 * The parent record's id: the Form's id (useFormContextLite().id), null for a new record
+	 * @remarks Read when the connector is built. A Form given another record mounts its page
+	 *          again, and the control builds a new connector for that record.
 	 */
 	initialId: string | null;
 }
@@ -83,9 +85,12 @@ export const extractLazyCrudConnectorParams = <
  * LazyConnector bound to the current Form: reads go to getEndpoint(initialId), writes are
  * queued and sent to getEndpoint(savedId) after the Form saved its record
  * @param params See UseLazyCrudConnectorParams
- * @returns The connector, one per Form and field for the Form's lifetime
+ * @returns The connector, one per Form, field and record
  * @remarks
  * - While the queue holds writes the Form is dirty (a custom dirty flag named `field`).
+ * - A Form given another record (id or model) starts over: the control mounts again with a
+ *   new connector for that record, and a queue left for the previous record is dropped,
+ *   unsent, also when the new record's page does not show the control.
  * - The connector, queue included, is kept in the Form's custom state under `field`, so a
  *   control that unmounts and mounts again gets its queue back, and the Form is dirty again.
  * - Without onlySubmitMounted an unmounted control's queue keeps the Form dirty and is sent

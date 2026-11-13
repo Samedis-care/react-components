@@ -230,6 +230,19 @@ const add = async (
 	await settle();
 };
 
+/**
+ * Sets the selection the way the selector's own UI does: handleSelect with the new list
+ */
+const select = async (entries: JoinData[]) => {
+	await act(async () => {
+		await selSink.ctx!.handleSelect(
+			entries.map((entry) => entry.value),
+			entries,
+		);
+	});
+	await settle();
+};
+
 type SelectProps = FormCrudMultiSelectProps<ModelUnknown, JoinData>;
 
 /**
@@ -655,6 +668,165 @@ describe("useLazyCrudConnector: re-renders of the form", () => {
 
 		expect(renders).toBeLessThan(10);
 		expect(sink.ctx!.dirty).toBe(true);
+	});
+});
+
+describe("useLazyCrudConnector: params and record changes after mount", () => {
+	it("[ISSUE-3505-ITEM-2] a form that switches to another record without a new key lists and writes that record's rows", async () => {
+		const model = makeModel();
+		const env = makeEnv({
+			"joins/1": [{ id: "j1", source_id: "s1" }],
+			"joins/2": [{ id: "j2", source_id: "s9" }],
+		});
+		const sink: Sink = {};
+		const Page = () => {
+			const ctx = useFormContext<ModelUnknown>();
+			sink.ctx = ctx;
+			return (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					{...selectorProps(model, env)}
+					initialId={ctx.id}
+				/>
+			);
+		};
+		const { rerenderWith } = mountForm(model, Page);
+		await loaded(sink);
+		await ready();
+		expect(labels()).toEqual(["Ls1"]);
+
+		selSink.ctx = undefined;
+		rerenderWith({ id: "2" });
+		await loaded(sink, "T2");
+		await ready();
+		await settle();
+
+		// record 2's rows, not record 1's
+		expect(labels()).toEqual(["Ls9"]);
+
+		await select([]);
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		// record 1's join is never deleted through record 2
+		expect(env.calls).not.toContain("delete:joins/2:j1");
+	});
+
+	it("[ISSUE-3505-ITEM-2] a pick queued for record 1 is dropped when the form switches to record 2: record 2 lists its own rows, is clean, and its save sends none of it", async () => {
+		const model = makeModel();
+		const env = makeEnv({
+			"joins/1": [{ id: "j1", source_id: "s1" }],
+			"joins/2": [{ id: "j2", source_id: "s9" }],
+		});
+		const sink: Sink = {};
+		const ref = React.createRef<CrudSelectDispatch<JoinData>>();
+		const Page = () => {
+			const ctx = useFormContext<ModelUnknown>();
+			sink.ctx = ctx;
+			return (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					ref={ref}
+					{...selectorProps(model, env)}
+					initialId={ctx.id}
+				/>
+			);
+		};
+		const { rerenderWith } = mountForm(model, Page);
+		await loaded(sink);
+		await ready();
+		await add(ref);
+		expect(sink.ctx!.dirty).toBe(true);
+
+		selSink.ctx = undefined;
+		rerenderWith({ id: "2" });
+		await loaded(sink, "T2");
+		await ready();
+		await settle();
+
+		expect(labels()).toEqual(["Ls9"]);
+		expect(sink.ctx!.dirty).toBe(false);
+
+		act(() => sink.ctx!.setFieldValue("title", "T2 edited"));
+		await settle();
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		expect(env.calls).not.toContain("create:joins/2:s2");
+		expect(env.calls).not.toContain("create:joins/1:s2");
+	});
+
+	it("[ISSUE-3505-ITEM-2] a pick queued for record 1 is not saved into record 2 when record 2's page does not show the control", async () => {
+		const model = makeModel();
+		const env = makeEnv({
+			"joins/1": [{ id: "j1", source_id: "s1" }],
+			"joins/2": [{ id: "j2", source_id: "s9" }],
+		});
+		const sink: Sink = {};
+		const ref = React.createRef<CrudSelectDispatch<JoinData>>();
+		const Page = () => {
+			const ctx = useFormContext<ModelUnknown>();
+			sink.ctx = ctx;
+			if (ctx.id !== "1") return null;
+			return (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					ref={ref}
+					{...selectorProps(model, env)}
+					initialId={ctx.id}
+				/>
+			);
+		};
+		const { rerenderWith } = mountForm(model, Page);
+		await loaded(sink);
+		await ready();
+		await add(ref);
+		expect(sink.ctx!.dirty).toBe(true);
+
+		rerenderWith({ id: "2" });
+		await loaded(sink, "T2");
+		await settle();
+		expect(sink.ctx!.dirty).toBe(false);
+
+		act(() => sink.ctx!.setFieldValue("title", "T2 edited"));
+		await settle();
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		// record 1's connector sends nothing, to neither record
+		expect(env.calls).toEqual(["index:joins/1"]);
+	});
+
+	it("[ISSUE-3505-ITEM-2] the selector's validation of record 1 does not block the save of record 2 when record 2's page does not show the control", async () => {
+		const model = makeModel();
+		const env = makeEnv({
+			"joins/1": [{ id: "j1", source_id: "s1" }],
+			"joins/2": [{ id: "j2", source_id: "s9" }],
+		});
+		const sink: Sink = {};
+		const validate = (data: JoinData[]): Record<string, string> =>
+			data.length > 0 ? {} : { required: "Pick at least one" };
+		const Page = () => {
+			const ctx = useFormContext<ModelUnknown>();
+			sink.ctx = ctx;
+			if (ctx.id !== "1") return null;
+			return (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					{...selectorProps(model, env)}
+					initialId={ctx.id}
+					validate={validate}
+				/>
+			);
+		};
+		const { rerenderWith } = mountForm(model, Page);
+		await loaded(sink);
+		await ready();
+		await select([]);
+
+		rerenderWith({ id: "2" });
+		await loaded(sink, "T2");
+		await settle();
+
+		act(() => sink.ctx!.setFieldValue("title", "T2 edited"));
+		await settle();
+		expect(await trySubmit(sink)).toBeNull();
 	});
 });
 

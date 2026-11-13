@@ -132,6 +132,61 @@ describe("Form values: refetch and record changes", () => {
 		expect(sink.ctx!.getCustomState("tab")).toBeUndefined();
 	});
 
+	it("[ISSUE-3505-ITEM-2] switching records drops the validation and submit handlers the previous page left registered", async () => {
+		const model = makeModel();
+		const sink: Sink = {};
+		const ran = new Set<string>();
+		// registers its handlers and never removes them, like a control that keeps them after
+		// it unmounts so that the next save still covers it
+		const Leftover = () => {
+			const {
+				setCustomValidationHandler,
+				setCustomWarningHandler,
+				setPreSubmitHandler,
+				setPostSubmitHandler,
+			} = useFormContext<ModelUnknown>();
+			useEffect(() => {
+				setCustomValidationHandler("leftover", () => {
+					ran.add("validate");
+					return {};
+				});
+				setCustomWarningHandler("leftover", () => {
+					ran.add("warn");
+					return {};
+				});
+				setPreSubmitHandler("leftover", () => {
+					ran.add("pre");
+				});
+				setPostSubmitHandler("leftover", () => {
+					ran.add("post");
+				});
+			}, [
+				setCustomValidationHandler,
+				setCustomWarningHandler,
+				setPreSubmitHandler,
+				setPostSubmitHandler,
+			]);
+			return null;
+		};
+		// shown for record 1 only
+		const Page = () => {
+			sink.ctx = useFormContext<ModelUnknown>();
+			return sink.ctx.id === "1" ? <Leftover /> : null;
+		};
+		const r = mountForm(model, Page);
+		await loaded(sink);
+		act(() => sink.ctx!.setFieldValue("title", "Edited"));
+		expect(await trySubmit(sink)).toBeNull();
+		expect([...ran].sort()).toEqual(["post", "pre", "validate", "warn"]);
+
+		r.rerenderWith({ id: "2" });
+		await loaded(sink, "T2");
+		ran.clear();
+		act(() => sink.ctx!.setFieldValue("title", "T2 edited"));
+		expect(await trySubmit(sink)).toBeNull();
+		expect([...ran]).toEqual([]);
+	});
+
 	it("[ISSUE-3501-ITEM-2] a create form given the id of the record it has just saved keeps its values and its page", async () => {
 		const sink: Sink = {};
 		let mounts = 0;

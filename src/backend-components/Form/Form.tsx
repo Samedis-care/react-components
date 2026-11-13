@@ -191,8 +191,10 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
 	 * The current data entry id
 	 * @remarks null for a new record. Another id starts the form over, as when it mounts: the
 	 *          page is mounted again, and the values, touched state, errors, warnings and custom
-	 *          state come from the new record. A change from null to the id of the record the
-	 *          form has just created keeps the form as it is.
+	 *          state come from the new record. The validation and submit handlers the previous
+	 *          page registered are dropped, also those of a control it no longer showed, so
+	 *          nothing queued for the previous record is saved with the new one. A change from
+	 *          null to the id of the record the form has just created keeps the form as it is.
 	 */
 	id: string | null;
 	/**
@@ -448,6 +450,8 @@ export interface FormContextData<
 	/**
 	 * Sets the callback to perform hard validation (for custom fields)
 	 * @param field custom field name (must not be in model)
+	 * @remarks Stays registered until it is removed, also after the component that set it
+	 *          unmounted. A Form given another record (id or model) drops it.
 	 */
 	setCustomValidationHandler: (
 		field: string,
@@ -461,6 +465,8 @@ export interface FormContextData<
 	/**
 	 * Sets the callback to perform soft validation (for custom fields)
 	 * @param field custom field name (must not be in model)
+	 * @remarks Stays registered until it is removed, also after the component that set it
+	 *          unmounted. A Form given another record (id or model) drops it.
 	 */
 	setCustomWarningHandler: (
 		field: string,
@@ -474,6 +480,8 @@ export interface FormContextData<
 	/**
 	 * Sets the pre submit handler (for custom fields)
 	 * @param field custom field name (must not be in model)
+	 * @remarks Stays registered until it is removed, also after the component that set it
+	 *          unmounted. A Form given another record (id or model) drops it.
 	 */
 	setPreSubmitHandler: (field: string, handler: PreSubmitHandler) => void;
 	/**
@@ -484,6 +492,8 @@ export interface FormContextData<
 	/**
 	 * Sets the post submit handler (for custom fields)
 	 * @param field custom field name (must not be in model)
+	 * @remarks Stays registered until it is removed, also after the component that set it
+	 *          unmounted. A Form given another record (id or model) drops it.
 	 */
 	setPostSubmitHandler: (field: string, handler: PostSubmitHandler) => void;
 	/**
@@ -1719,6 +1729,13 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 		prevServerDataRef.current = null;
 		appliedServerDataRef.current = undefined;
 		customFieldState.current = {};
+		// the previous page has unmounted by now. What it left registered (the save or the
+		// validation of a hidden control or nested form) belongs to the previous record; the
+		// page mounted for the new record registers its own
+		preSubmitHandlers.current = {};
+		postSubmitHandlers.current = {};
+		customValidationHandlers.current = {};
+		customWarningHandlers.current = {};
 		setCustomDirtyFields([]);
 		setErrors({});
 		setWarnings({});
