@@ -27,6 +27,7 @@ import {
 	MatrixCellContext,
 	MatrixColumn,
 	MatrixExtraRow,
+	MatrixRangeSelection,
 	MatrixRow,
 	MatrixRowHeaderContext,
 	MatrixTileItem,
@@ -1323,7 +1324,6 @@ describe("MatrixGrid body cells", () => {
 		];
 	const chipIn = (cell: HTMLElement) =>
 		cell.querySelector<HTMLElement>(`.${CELL_CLASSES.addChip}`);
-
 	describe("the add chip", () => {
 		it("[ISSUE-3481-ITEM-15] has a name when addLabel is not a string", () => {
 			render(
@@ -1410,6 +1410,49 @@ describe("MatrixGrid body cells", () => {
 			expect(
 				computeAccessibleName(chipIn(cellAt(1, 1, 2)) as HTMLElement),
 			).toBe("2");
+		});
+	});
+	const painted = (row: number, columns = 4) =>
+		Array.from({ length: columns }, (_, i) => i).filter((i) =>
+			cellAt(row, i, columns).classList.contains(matrixClasses.cellSelected),
+		);
+	describe("a range", () => {
+		it("[ISSUE-3481-ITEM-2] paints what it will report when a cell fills up under a held button", () => {
+			const onSelectRange = vi.fn<(selection: MatrixRangeSelection) => void>();
+			const props = { selectable: true, onSelectRange };
+			const { rerender } = render(grid(props));
+			fireEvent.mouseDown(cellAt(0, 0), { button: 0 });
+			fireEvent.mouseOver(cellAt(0, 2));
+			// a refetch fills c2 while the button is held
+			rerender(
+				grid({
+					...props,
+					rows: [{ key: "r1", cells: { c2: { text: "busy" } } }, FREE[1]],
+				}),
+			);
+			fireEvent.mouseOver(cellAt(1, 3)); // a notification that moves nothing
+			expect(painted(0)).toEqual([0]);
+			fireEvent.mouseUp(window, { button: 0 });
+			expect(onSelectRange.mock.calls[0][0].columnKeys).toEqual(["c1"]);
+		});
+
+		it("[ISSUE-3481-ITEM-2] paints nothing once the press cell fills up under a held button", () => {
+			const onSelectRange = vi.fn();
+			const props = { selectable: true, onSelectRange };
+			const { rerender } = render(grid(props));
+			fireEvent.mouseDown(cellAt(0, 0), { button: 0 });
+			fireEvent.mouseOver(cellAt(0, 1));
+			// a refetch fills the press cell while the button is held
+			rerender(
+				grid({
+					...props,
+					rows: [{ key: "r1", cells: { c1: { text: "busy" } } }, FREE[1]],
+				}),
+			);
+			fireEvent.mouseOver(cellAt(0, 2)); // the sweep moves on
+			expect(painted(0)).toEqual([]);
+			fireEvent.mouseUp(window, { button: 0 });
+			expect(onSelectRange).not.toHaveBeenCalled();
 		});
 	});
 });
