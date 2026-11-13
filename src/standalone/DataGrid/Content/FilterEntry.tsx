@@ -337,6 +337,10 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		filterValue2 = date ? normalizeDate(date.toDate()).toISOString() : "";
 		updateParent();
 	};
+	const onFilterValue2ChangeDateTime = (date: Moment | null) => {
+		filterValue2 = date?.isValid() ? date.toDate().toISOString() : "";
+		updateParent();
+	};
 	const onSubFilterTypeChange = (value: FilterComboType) => {
 		subFilterComboType = value;
 		updateParent();
@@ -581,7 +585,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 							) : props.valueType === "datetime" ? (
 								<LocalizedDateTimePicker
 									value={filterValue2 === "" ? null : moment(filterValue2)}
-									onChange={onFilterValueChangeDateTime}
+									onChange={onFilterValue2ChangeDateTime}
 								/>
 							) : (
 								<TextField
