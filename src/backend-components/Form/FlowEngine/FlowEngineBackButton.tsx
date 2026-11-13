@@ -12,6 +12,11 @@ export interface FlowEngineBackButtonProps extends Omit<
 	ActionButtonProps,
 	"onClick" | "children"
 > {
+	/**
+	 * The label
+	 * @default the translated "Cancel" (common.buttons.cancel): the button leaves the whole
+	 *          flow, not only the current stage
+	 */
 	children?: ActionButtonProps["children"];
 }
 
@@ -51,7 +56,7 @@ const FlowEngineBackButton = (props: FlowEngineBackButtonProps) => {
 					disabled={props.disabled || submitting}
 					onClick={handleBack}
 				>
-					{props.children ?? t("common.buttons.back")}
+					{props.children ?? t("common.buttons.cancel")}
 				</BackActionButton>
 			)}
 		</>
