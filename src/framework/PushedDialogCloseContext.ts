@@ -20,6 +20,19 @@ export interface PushedDialogClose {
 	 * closes through its own onClose.
 	 */
 	pushed: boolean;
+	/**
+	 * Lets navigation through while the dialog stays open, for a dialog that closes once some
+	 * work is done: ErrorDialog, InfoDialog and ConfirmDialog call it when a button without
+	 * `dontClose` is clicked, before its handler runs, so that the handler, and code waiting for
+	 * the dialog, can navigate. Navigation is still blocked while another dialog is open.
+	 * @returns A function that blocks navigation again, while the dialog stays open after all
+	 *          (e.g. the handler failed). Calling it again, or after the dialog closed, does
+	 *          nothing; closing the dialog ends the allowance anyway.
+	 * @remarks Set by DialogContextProvider around every pushed dialog; missing where nothing
+	 *          blocks navigation for the dialog (a FullFormDialog's content, a dialog provided
+	 *          by hand). Use it only with `pushed: true`.
+	 */
+	allowNavigation?: () => () => void;
 }
 
 /**

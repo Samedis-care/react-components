@@ -26,6 +26,7 @@ import ccI18n from "../../src/i18n";
 // index first runs into an import cycle
 import {
 	showConfirmDialog,
+	showConfirmDialogBool,
 	showErrorDialog,
 	showInfoDialog,
 } from "../../src/non-standalone/Dialog/Utils";
@@ -73,6 +74,7 @@ const btn = (name: string) => screen.getByRole("button", { name });
 /** all mounted dialogs, including the ones a dialog on top hides */
 const dialogEls = () =>
 	Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]'));
+const dialogCount = () => dialogEls().length;
 /** the title texts of the mounted dialogs, bottom to top */
 const openTitles = () =>
 	dialogEls().map(
@@ -128,6 +130,81 @@ describe("showConfirmDialogBool and showConfirmDialog through the dialog", () =>
 			no: "undefined",
 		});
 	});
+
+	it("[ISSUE-3497-ITEM-2] code after await showConfirmDialogBool / showConfirmDialog navigates", async () => {
+		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
+		mount();
+		act(() => {
+			void (async () => {
+				if (await showConfirmDialogBool(ctx[0], confirmProps))
+					history.push("/bool");
+			})();
+		});
+		fireEvent.click(btn("Yes"));
+		await flush();
+		expect(history.location.pathname).toBe("/bool");
+
+		act(() => {
+			void showConfirmDialog(ctx[0], confirmProps).then(() =>
+				history.push("/plain"),
+			);
+		});
+		fireEvent.click(btn("Yes"));
+		await flush();
+		expect(history.location.pathname).toBe("/plain");
+		expect(alert).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		[
+			"showConfirmDialogBool",
+			() =>
+				void (async () => {
+					if (await showConfirmDialogBool(ctx[0], confirmProps)) ctx[1]();
+				})(),
+		],
+		[
+			"showConfirmDialog",
+			() => void showConfirmDialog(ctx[0], confirmProps).then(() => ctx[1]()),
+		],
+	])(
+		"[ISSUE-3497-ITEM-2] code after await %s runs with the dialog closed: popDialog closes the dialog below it",
+		async (_label, confirmThenPop) => {
+			mount();
+			push(<InfoDialog title="Edit" message="e" buttons={[{ text: "OK" }]} />);
+			act(confirmThenPop);
+			expect(openTitles()).toEqual(["Edit", "Delete records?"]);
+			fireEvent.click(btn("Yes"));
+			await flush();
+			expect(openTitles()).toEqual([]);
+		},
+	);
+
+	it("[ISSUE-3497-ITEM-2] code awaiting a promise that a pushed ConfirmDialog's handler resolves navigates", async () => {
+		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
+		mount();
+		act(() => {
+			void (async () => {
+				const leave = await new Promise<boolean>((resolve) => {
+					ctx[0](
+						<ConfirmDialog
+							{...confirmProps}
+							handlerButtonYes={() => resolve(true)}
+							handlerButtonNo={() => resolve(false)}
+						/>,
+					);
+				});
+				if (leave) history.push("/target");
+			})();
+		});
+		fireEvent.click(btn("Yes"));
+		await flush();
+		expect({
+			path: history.location.pathname,
+			alerts: alert.mock.calls.length,
+			open: dialogCount(),
+		}).toEqual({ path: "/target", alerts: 0, open: 0 });
+	});
 });
 
 describe("ErrorDialog / InfoDialog buttons", () => {
@@ -178,6 +255,177 @@ describe("ErrorDialog / InfoDialog buttons", () => {
 		act(() => release());
 		await flush();
 		expect(openTitles()).toEqual(["An error occurred"]);
+	});
+
+	it.each([
+		[
+			"an InfoDialog button",
+			() => (
+				<InfoDialog
+					title="Done"
+					message="m"
+					buttons={[{ text: "Go", onClick: () => history.push("/target") }]}
+				/>
+			),
+		],
+		[
+			"ConfirmDialog's handlerButtonYes",
+			() => (
+				<ConfirmDialog
+					{...confirmProps}
+					textButtonYes="Go"
+					handlerButtonYes={() => history.push("/target")}
+					handlerButtonNo={() => {}}
+				/>
+			),
+		],
+	])(
+		"[ISSUE-3497-ITEM-2] navigate() in %s navigates and closes the dialog",
+		async (_label, make) => {
+			const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
+			mount();
+			push(make());
+			fireEvent.click(btn("Go"));
+			await flush();
+			expect({
+				path: history.location.pathname,
+				alerts: alert.mock.calls.length,
+				open: dialogCount(),
+			}).toEqual({ path: "/target", alerts: 0, open: 0 });
+		},
+	);
+
+	it("[ISSUE-3497-ITEM-2] an async button handler navigates after its await, and the dialog closes when the handler ends", async () => {
+		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
+		mount();
+		let release!: () => void;
+		push(
+			<InfoDialog
+				title="Saving"
+				message="m"
+				buttons={[
+					{
+						text: "Save",
+						onClick: async () => {
+							await new Promise<void>((resolve) => {
+								release = resolve;
+							});
+							history.push("/saved");
+						},
+					},
+				]}
+			/>,
+		);
+		fireEvent.click(btn("Save"));
+		await flush();
+		expect(dialogCount()).toBe(1);
+		act(() => release());
+		await flush();
+		expect({
+			path: history.location.pathname,
+			alerts: alert.mock.calls.length,
+			open: dialogCount(),
+		}).toEqual({ path: "/saved", alerts: 0, open: 0 });
+	});
+
+	it.each([
+		[
+			"a dontClose button whose handler does not close the dialog",
+			() => [
+				<InfoDialog
+					key="top"
+					title="Top"
+					message="t"
+					buttons={[
+						{
+							text: "Go",
+							dontClose: true,
+							onClick: () => history.push("/target"),
+						},
+					]}
+				/>,
+			],
+			["Top"],
+		],
+		[
+			"a button of the top dialog while another dialog is open below it",
+			() => [
+				<InfoDialog
+					key="below"
+					title="Below"
+					message="b"
+					buttons={[{ text: "OK" }]}
+				/>,
+				<InfoDialog
+					key="top"
+					title="Top"
+					message="t"
+					buttons={[{ text: "Go", onClick: () => history.push("/target") }]}
+				/>,
+			],
+			["Below"],
+		],
+	])(
+		"[ISSUE-3497-ITEM-2] navigate() in %s is blocked, as a dialog stays open",
+		async (_label, make, staysOpen) => {
+			const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
+			mount();
+			make().forEach(push);
+			fireEvent.click(btn("Go"));
+			await flush();
+			expect({
+				path: history.location.pathname,
+				alerts: alert.mock.calls.length,
+				open: openTitles(),
+			}).toEqual({ path: "/", alerts: 1, open: staysOpen });
+		},
+	);
+
+	it("[ISSUE-3497-ITEM-2] a dialog whose button handler failed stays open and blocks navigation again", async () => {
+		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
+		// the dialog does not catch the handler's rejection: keep it from failing the run
+		const proc = (
+			globalThis as unknown as {
+				process: {
+					listeners(event: string): ((reason: unknown) => void)[];
+					removeAllListeners(event: string): void;
+					on(event: string, listener: (reason: unknown) => void): void;
+				};
+			}
+		).process;
+		const vitestListeners = proc.listeners("unhandledRejection");
+		proc.removeAllListeners("unhandledRejection");
+		const failures: unknown[] = [];
+		proc.on("unhandledRejection", (reason) => failures.push(reason));
+		try {
+			mount();
+			push(
+				<InfoDialog
+					title="Saving"
+					message="m"
+					buttons={[
+						{
+							text: "Save",
+							onClick: () => Promise.reject(new Error("save failed")),
+						},
+					]}
+				/>,
+			);
+			fireEvent.click(btn("Save"));
+			await flush();
+			await act(() => new Promise((resolve) => setTimeout(resolve, 20)));
+			act(() => history.push("/target"));
+			expect({
+				path: history.location.pathname,
+				alerts: alert.mock.calls.length,
+				open: dialogCount(),
+			}).toEqual({ path: "/", alerts: 1, open: 1 });
+		} finally {
+			proc.removeAllListeners("unhandledRejection");
+			vitestListeners.forEach((listener) =>
+				proc.on("unhandledRejection", listener),
+			);
+		}
 	});
 });
 

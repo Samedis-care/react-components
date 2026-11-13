@@ -18,6 +18,9 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 	// FullFormDialog's content, pushed: false), the dialog closes through onClose
 	const pushedClose = useContext(PushedDialogCloseContext);
 	const closeThisDialog = pushedClose?.pushed ? pushedClose.close : null;
+	const allowNavigation = pushedClose?.pushed
+		? pushedClose.allowNavigation
+		: undefined;
 	// pending state of an async button handler. the ref part guards against a
 	// second click landing before the re-render which disables the buttons.
 	const {
@@ -59,8 +62,17 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 							try {
 								if (data.onClick) {
 									setBusy(true);
+									// the dialog closes once the handler has ended: let the handler, and
+									// code waiting for the dialog, navigate meanwhile
+									const blockNavigationAgain = data.dontClose
+										? undefined
+										: allowNavigation?.();
 									try {
 										await data.onClick(close);
+									} catch (e) {
+										// the dialog stays open
+										blockNavigationAgain?.();
+										throw e;
 									} finally {
 										setBusy(false);
 									}
@@ -91,9 +103,12 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
  *
  * A button runs its `onClick` while the dialog is open (a returned promise is awaited with the
  * buttons disabled and Escape and the backdrop ignored), then, unless `dontClose`, closes the
- * dialog and calls `onClose`. `onClick` gets a `close` that closes the dialog at once, e.g.
- * before navigating; `onClose` is then called once the handler has ended, also with
- * `dontClose`. Escape and a backdrop click close it and call `onClose`.
+ * dialog and calls `onClose`. Navigation, blocked while a dialog is open, is not blocked by
+ * this one while the handler of a button without `dontClose` runs, as the dialog closes after
+ * it: the handler may navigate, and so may code that waits for the dialog (unless another
+ * dialog is open). `onClick` gets a `close` that closes the dialog at once, e.g. before
+ * navigating from a `dontClose` button; `onClose` is then called once the handler has ended.
+ * Escape and a backdrop click close it and call `onClose`.
  * It closes the dialog it was pushed in, and only that one, also when dialogs were pushed
  * after it. Rendered without pushDialog, it is always open: it closes through `onClose`,
  * which has to stop rendering it.

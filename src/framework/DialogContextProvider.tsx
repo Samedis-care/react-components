@@ -9,7 +9,6 @@ import React, {
 } from "react";
 import type { IFrameworkProps } from "./Framework";
 import useCCTranslations from "../utils/useCCTranslations";
-import type { TFunction } from "i18next";
 import { FrameworkHistory } from "./History";
 import {
 	PushedDialogClose,
@@ -25,7 +24,8 @@ export type DialogType = React.ReactNode;
 export type DialogContextType = [
 	/**
 	 * Shows `dialog` above the dialogs that are open already. Navigation is blocked while a
-	 * pushed dialog is open.
+	 * pushed dialog is open, but not by one that closes once the handler of its clicked button
+	 * has ended (see PushedDialogClose.allowNavigation).
 	 * @returns A function that closes this dialog, and only this one, also while dialogs
 	 *          pushed after it are open. It is the function useCloseThisDialog returns inside
 	 *          the dialog, the same one for the life of the dialog. Calling it again, or after
@@ -69,11 +69,6 @@ export const useDialogContext = (): DialogContextType => {
 	return ctx;
 };
 
-const navBlockFn = (t: TFunction) => (): false => {
-	alert(t("framework.dialogs.navblock"));
-	return false;
-};
-
 interface PushedDialog {
 	id: number;
 	dialog: DialogType;
@@ -89,22 +84,42 @@ interface PushedDialog {
  */
 const DialogContextProvider = (props: IFrameworkProps) => {
 	const { t } = useCCTranslations();
+	// the translation of the latest render, for the navigation block, which outlives it
+	const tRef = useRef(t);
+	useEffect(() => {
+		tRef.current = t;
+	}, [t]);
 	const navBlock = useRef<null | (() => void)>(null);
 	// the ids of the open dialogs in push order, current before the dialogs state renders
 	const openIds = useRef<number[]>([]);
+	// the open dialogs that let navigation through while they close (allowNavigation), with
+	// the number of allowNavigation calls not taken back
+	const navAllowed = useRef(new Map<number, number>());
 	const nextId = useRef(0);
 	const [dialogs, setDialogs] = useState<PushedDialog[]>([]);
 	const parentContext = useContext(DialogContext);
 
-	// removes a dialog whose id was taken out of openIds
-	const removeDialog = useCallback((id: number) => {
-		// if all dialogs closed, remove callback
-		if (openIds.current.length === 0 && navBlock.current) {
+	// blocks navigation while an open dialog does not let it through
+	const updateNavBlock = useCallback(() => {
+		const blocking = openIds.current.some((id) => !navAllowed.current.has(id));
+		if (blocking && !navBlock.current) {
+			navBlock.current = FrameworkHistory.block(() => {
+				alert(tRef.current("framework.dialogs.navblock"));
+			});
+		} else if (!blocking && navBlock.current) {
 			navBlock.current();
 			navBlock.current = null;
 		}
-		setDialogs((prevValue) => prevValue.filter((entry) => entry.id !== id));
 	}, []);
+	// removes a dialog whose id was taken out of openIds
+	const removeDialog = useCallback(
+		(id: number) => {
+			navAllowed.current.delete(id);
+			updateNavBlock();
+			setDialogs((prevValue) => prevValue.filter((entry) => entry.id !== id));
+		},
+		[updateNavBlock],
+	);
 	const closeDialog = useCallback(
 		(id: number) => {
 			const index = openIds.current.indexOf(id);
@@ -114,15 +129,31 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 		},
 		[removeDialog],
 	);
+	// lets navigation through while the dialog closes, see PushedDialogClose.allowNavigation
+	const allowNavigation = useCallback(
+		(id: number) => {
+			if (!openIds.current.includes(id)) return () => {}; // closed already
+			navAllowed.current.set(id, (navAllowed.current.get(id) ?? 0) + 1);
+			updateNavBlock();
+			let takenBack = false;
+			return () => {
+				if (takenBack) return;
+				takenBack = true;
+				const count = navAllowed.current.get(id);
+				if (count === undefined) return; // closed meanwhile
+				if (count > 1) navAllowed.current.set(id, count - 1);
+				else navAllowed.current.delete(id);
+				updateNavBlock();
+			};
+		},
+		[updateNavBlock],
+	);
 
 	const pushDialog = useCallback(
 		(dialog: React.ReactNode) => {
-			// if no dialogs were present, add callback
-			if (openIds.current.length === 0) {
-				navBlock.current = FrameworkHistory.block(navBlockFn(t));
-			}
 			const id = nextId.current++;
 			openIds.current.push(id);
+			updateNavBlock();
 
 			// one function for the dialog's life: returned here, and the dialog's
 			// PushedDialogCloseContext (useCloseThisDialog)
@@ -130,12 +161,16 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 			const entry: PushedDialog = {
 				id,
 				dialog,
-				close: { close, pushed: true },
+				close: {
+					close,
+					pushed: true,
+					allowNavigation: () => allowNavigation(id),
+				},
 			};
 			setDialogs((prevValue) => [...prevValue, entry]);
 			return close;
 		},
-		[t, closeDialog],
+		[closeDialog, allowNavigation, updateNavBlock],
 	);
 	const popDialog = useCallback(() => {
 		const id = openIds.current.pop();
@@ -158,14 +193,6 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 		() => [pushDialog, popDialog],
 		[pushDialog, popDialog],
 	);
-
-	// update callback if locale changes
-	useEffect(() => {
-		if (!navBlock.current) return;
-
-		navBlock.current(); // unblock
-		navBlock.current = FrameworkHistory.block(navBlockFn(t)); // reblock
-	}, [t]);
 
 	// remove callback on unmount
 	useEffect(() => {

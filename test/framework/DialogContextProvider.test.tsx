@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/vitest";
-import React, { useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import {
 	describe,
 	it,
@@ -194,6 +194,86 @@ describe("pushDialog", () => {
 		act(() => history.push("/free"));
 		expect(alert).not.toHaveBeenCalled();
 		expect(history.location.pathname).toBe("/free");
+	});
+});
+
+describe("navigation block while dialogs close", () => {
+	/** what allowNavigation the dialogs got, by name */
+	const allowers: Record<string, (() => () => void) | undefined> = {};
+	/** A dialog named `name` that hands out its allowNavigation */
+	const Allowing = (props: { name: string }) => {
+		allowers[props.name] = useContext(
+			PushedDialogCloseContext,
+		)?.allowNavigation;
+		return <Named name={props.name} />;
+	};
+	const allow = (name: string) => {
+		const allowNavigation = allowers[name];
+		if (!allowNavigation) throw new Error("no allowNavigation in " + name);
+		let blockAgain!: () => void;
+		act(() => {
+			blockAgain = allowNavigation();
+		});
+		return blockAgain;
+	};
+	/** pushes the path and returns where the history is then */
+	const navigate = (to: string) => {
+		act(() => history.push(to));
+		return history.location.pathname;
+	};
+
+	it("[ISSUE-3497-ITEM-2] lets navigation through while every open dialog allows it, until each allowance is taken back", () => {
+		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
+		renderProvider();
+		push(<Allowing name={"First"} />);
+		push(<Allowing name={"Second"} />);
+
+		const blockSecondAgain = allow("Second");
+		expect(navigate("/a"), "First still blocks").toBe("/");
+		expect(alert).toHaveBeenCalledTimes(1);
+
+		const blockFirstAgain = allow("First");
+		const blockFirstAgainToo = allow("First");
+		expect(navigate("/b")).toBe("/b");
+		act(() => blockFirstAgain());
+		act(() => blockFirstAgain());
+		expect(navigate("/c"), "one allowance of First is left").toBe("/c");
+		act(() => blockFirstAgainToo());
+		expect(navigate("/d")).toBe("/c");
+		expect(alert).toHaveBeenCalledTimes(2);
+
+		act(() => blockSecondAgain());
+		allow("First");
+		expect(navigate("/e"), "Second blocks again").toBe("/c");
+		expect(alert).toHaveBeenCalledTimes(3);
+	});
+
+	it("[ISSUE-3497-ITEM-2] an allowance taken back after its dialog closed blocks nothing", () => {
+		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
+		renderProvider();
+		const closeOnly = push(<Allowing name={"Only"} />);
+		const blockAgain = allow("Only");
+		act(() => closeOnly());
+		act(() => blockAgain());
+		expect(navigate("/free")).toBe("/free");
+		expect(alert).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3497-ITEM-2] the navigation block alerts in the language switched to while the dialog is open", async () => {
+		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
+		const initialLanguage = ccI18n.language;
+		await ccI18n.loadLanguages(["de"]);
+		try {
+			renderProvider();
+			push(<Allowing name={"Only"} />);
+			await act(() => ccI18n.changeLanguage("de-DE"));
+			expect(navigate("/blocked")).toBe("/");
+			expect(alert).toHaveBeenCalledWith(
+				"Die Navigation ist gesperrt. Bitte schließe zuerst die geöffneten Dialoge.",
+			);
+		} finally {
+			await act(() => ccI18n.changeLanguage(initialLanguage));
+		}
 	});
 });
 

@@ -29,6 +29,7 @@ import DefaultErrorComponent from "../../../src/backend-components/Form/DefaultE
 import Routes from "../../../src/standalone/Routes/Routes";
 import Route from "../../../src/standalone/Routes/Route";
 import {
+	backButton,
 	findLeavePrompt,
 	holdUpdates,
 	LOAD,
@@ -287,6 +288,37 @@ describe("Form page leave guard while the form saves", () => {
 		expect(unloadIsBlocked()).toBe(false);
 		await navigate("/other");
 		expect(history.location.pathname).toBe("/other");
+		expect(leavePrompts()).toHaveLength(0);
+	});
+});
+
+describe("Form page leave guard: Yes leaves", () => {
+	it("[ISSUE-3497-ITEM-2] Yes in the prompt of a link out of a dirty routed form page goes there", async () => {
+		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
+		const history = mountRoutedPage("/rec/:id/*", "/rec/1");
+		await makeDirty();
+		await navigate("/elsewhere");
+		expect(history.location.pathname).toBe("/rec/1");
+		fireEvent.click(
+			within(await findLeavePrompt()).getByRole("button", { name: "Yes" }),
+		);
+		await waitFor(() => expect(history.location.pathname).toBe("/elsewhere"));
+		expect(alert).not.toHaveBeenCalled();
+		expect(leavePrompts()).toHaveLength(0);
+	});
+
+	it("[ISSUE-3497-ITEM-2] Yes in the prompt of the footer's Back on a dirty form page runs goBack, which may navigate", async () => {
+		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
+		const goBack = vi.fn(() => FrameworkHistory.push("/list"));
+		const { history } = mountPage(FieldPage, { goBack });
+		await makeDirty();
+		fireEvent.click(backButton());
+		fireEvent.click(
+			within(await findLeavePrompt()).getByRole("button", { name: "Yes" }),
+		);
+		await waitFor(() => expect(history.location.pathname).toBe("/list"));
+		expect(goBack).toHaveBeenCalledTimes(1);
+		expect(alert).not.toHaveBeenCalled();
 		expect(leavePrompts()).toHaveLength(0);
 	});
 });

@@ -40,7 +40,8 @@ export type DialogPromise<T> = Promise<T> & {
 /**
  * Pushes the dialog `render` returns and returns its result as a DialogPromise
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
- * @param render Returns the dialog, given the promise's resolve and reject
+ * @param render Returns the dialog, given the promise's resolve and reject, and `close`, which
+ *               closes the dialog (the function pushDialog returned)
  * @param dismiss Settles the promise when `close` closes the dialog, as dismissing it does
  */
 const pushDialogPromise = <T,>(
@@ -48,6 +49,7 @@ const pushDialogPromise = <T,>(
 	render: (
 		resolve: (value: T) => void,
 		reject: (reason?: unknown) => void,
+		close: () => void,
 	) => React.ReactNode,
 	dismiss: (
 		resolve: (value: T) => void,
@@ -58,7 +60,7 @@ const pushDialogPromise = <T,>(
 	let settle: (() => void) | undefined;
 	const promise = new Promise<T>((resolve, reject) => {
 		settle = () => dismiss(resolve, reject);
-		closeDialog = pushDialog(render(resolve, reject));
+		closeDialog = pushDialog(render(resolve, reject, () => closeDialog?.()));
 	});
 	return Object.assign(promise, {
 		close: () => {
@@ -73,7 +75,8 @@ const pushDialogPromise = <T,>(
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
  * @param props The dialog properties
  * @returns A DialogPromise: resolves if the user clicks Yes, rejects with `undefined` on No,
- *          Escape and a backdrop click. Its `close()` closes the dialog and rejects it with
+ *          Escape and a backdrop click. It settles once the dialog is closed, so the code
+ *          after `await` may navigate. Its `close()` closes the dialog and rejects it with
  *          `undefined` at once, so handle that rejection as the one of No.
  */
 export const showConfirmDialog = (
@@ -82,12 +85,20 @@ export const showConfirmDialog = (
 ): DialogPromise<void> =>
 	pushDialogPromise<void>(
 		pushDialog,
-		(resolve, reject) => (
+		(resolve, reject, close) => (
 			<ConfirmDialog
 				{...props}
 				onClose={reject}
-				handlerButtonYes={resolve}
-				handlerButtonNo={reject}
+				// the buttons close the dialog before they settle the promise, so that the code
+				// after `await` runs with it closed: it may navigate, or close the dialog below
+				handlerButtonYes={() => {
+					close();
+					resolve();
+				}}
+				handlerButtonNo={() => {
+					close();
+					reject();
+				}}
 			/>
 		),
 		(_resolve, reject) => reject(),
@@ -98,7 +109,8 @@ export const showConfirmDialog = (
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
  * @param props The dialog properties
  * @returns A DialogPromise: resolves to true if the user clicks Yes, to false on No, Escape
- *          and a backdrop click. Its `close()` closes the dialog and resolves it to false at
+ *          and a backdrop click. It settles once the dialog is closed, so the code after
+ *          `await` may navigate. Its `close()` closes the dialog and resolves it to false at
  *          once.
  */
 export const showConfirmDialogBool = (
@@ -107,12 +119,19 @@ export const showConfirmDialogBool = (
 ): DialogPromise<boolean> =>
 	pushDialogPromise<boolean>(
 		pushDialog,
-		(resolve) => (
+		(resolve, _reject, close) => (
 			<ConfirmDialog
 				{...props}
 				onClose={() => resolve(false)}
-				handlerButtonYes={() => resolve(true)}
-				handlerButtonNo={() => resolve(false)}
+				// the buttons close the dialog before they settle the promise, see showConfirmDialog
+				handlerButtonYes={() => {
+					close();
+					resolve(true);
+				}}
+				handlerButtonNo={() => {
+					close();
+					resolve(false);
+				}}
 			/>
 		),
 		(resolve) => resolve(false),
@@ -152,12 +171,12 @@ export const showInputDialog = (
  *          handler has ended, by Escape or a backdrop click. Its `close()` closes the dialog
  *          and resolves it at once.
  * @example
- * // a button that navigates closes the dialog first, as navigation is blocked while a dialog
- * // is open. It uses the close it gets: the awaiting code continues after the handler.
+ * // a button that navigates: the dialog closes after the handler, and the awaiting code
+ * // continues then
  * await showInfoDialog(pushDialog, {
  * 	title,
  * 	message,
- * 	buttons: [{ text: "Open", onClick: (close) => { close(); navigate(target); } }],
+ * 	buttons: [{ text: "Open", onClick: () => navigate(target) }],
  * });
  * @example
  * // closing the dialog from outside it
