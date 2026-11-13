@@ -81,7 +81,7 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 		renderCell,
 		renderColumnHeader,
 		renderCellWrapper,
-		columnWidth = 46,
+		columnWidth = 56,
 		rowHeight = 58,
 		rowHeaderWidth = 116,
 		headerHeight = 42,

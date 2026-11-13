@@ -340,7 +340,7 @@ const meta: Meta<DemoArgs> = {
 		showExtraRow: true,
 		selectable: true,
 		addLabel: "Add",
-		columnWidth: 46,
+		columnWidth: 56,
 		rowHeight: 58,
 		rowHeaderWidth: 116,
 		headerHeight: 42,
@@ -935,4 +935,47 @@ export const Issue3481Item15ChipIsNamedWithANodeLabel: Story = {
 		await expect(chip).toHaveAttribute("role", "button");
 		chip.focus(); // shown, for a checker that skips what is not
 	},
+};
+
+/** ISSUE-3481-ITEM-16: split-pair entries (19.5px wide) and the add chip (20px high) are below 24px (axe target-size). */
+export const Issue3481Item16TargetsMeetTheMinimumSize: Story = {
+	parameters: {
+		a11y: {
+			test: "error",
+			options: { runOnly: { type: "rule", values: ["target-size"] } },
+		},
+	},
+	render: (args) => (
+		<TileRoster
+			onSelectRange={args.onSelectRange}
+			onItemClick={args.onItemClick}
+		/>
+	),
+	play: async ({ canvasElement }) => {
+		// the chip of the split pair, shown
+		const chip = tileSlotIn(tileCell(canvasElement, 0, 2), "addChip");
+		chip.focus();
+		await expect(getComputedStyle(chip).opacity).toBe("1");
+	},
+};
+
+/** ISSUE-3481-ITEM-16: the same for a stacked pair, with the chip on its lower entry. */
+const STACKED_ROWS: MatrixRow<TileCell>[] = [
+	{
+		key: "a",
+		label: "Alice Weber",
+		cells: { t3: { items: [EARLY, LATE], column: true } },
+	},
+];
+
+export const Issue3481Item16StackedTargetsMeetTheMinimumSize: Story = {
+	parameters: Issue3481Item16TargetsMeetTheMinimumSize.parameters,
+	render: (args) => (
+		<TileRoster
+			onSelectRange={args.onSelectRange}
+			onItemClick={args.onItemClick}
+			rows={STACKED_ROWS}
+		/>
+	),
+	play: Issue3481Item16TargetsMeetTheMinimumSize.play,
 };

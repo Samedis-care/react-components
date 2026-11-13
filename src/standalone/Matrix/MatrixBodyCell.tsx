@@ -104,7 +104,8 @@ export const MatrixAddHint = styled("div", {
  * transparent hint. It is a chip in the corner, and not a band across the cell,
  * because what is drawn and what is clickable have to be the same thing: a
  * strip that overlays the entries either steals their clicks or, if it is thin
- * enough not to, is too thin to hit.
+ * enough not to, is too thin to hit. It is 24x24px, the smallest target WCAG
+ * 2.5.8 allows for a control that lies on another one.
  */
 export const MatrixAddChip = styled("div", {
 	name: "CcMatrixGrid",
@@ -114,8 +115,9 @@ export const MatrixAddChip = styled("div", {
 	zIndex: 3,
 	right: 3,
 	bottom: 3,
-	minWidth: 26,
-	height: 20,
+	boxSizing: "border-box",
+	minWidth: 24,
+	height: 24,
 	display: "flex",
 	alignItems: "center",
 	justifyContent: "center",

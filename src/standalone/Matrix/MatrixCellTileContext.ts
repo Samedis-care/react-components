@@ -33,6 +33,11 @@ export interface MatrixCellTileProps {
 	pairLayout?: "split" | "diagonal";
 	/**
 	 * Which way a split pair is stacked
+	 * @remarks Each entry of a split pair is half of the tile less 3px in this
+	 * direction (2px of padding on either side and 2px between the two), so
+	 * clickable entries of at least 24x24px (WCAG 2.5.8 Target Size) need a
+	 * tile of 54px or more in this direction. In a MatrixGrid the tile is 1px
+	 * less than columnWidth and rowHeight (the cell's border).
 	 * @default "row"
 	 */
 	splitDirection?: "row" | "column";
