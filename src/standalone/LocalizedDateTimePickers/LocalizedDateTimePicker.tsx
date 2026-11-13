@@ -13,7 +13,7 @@ import usePickerDraft from "./usePickerDraft";
 import usePickerValidationError from "./usePickerValidationError";
 import withAccessibleError from "./withAccessibleError";
 import withRequiredSections from "./withRequiredSections";
-import withFieldBlur from "./withFieldBlur";
+import useFieldBlur from "./useFieldBlur";
 
 /**
  * When the picker opens its desktop popup rather than MUI's mobile dialog: with
@@ -49,12 +49,12 @@ export interface LocalizedDateTimePickerProps extends Omit<
 	 */
 	fullWidth?: TextFieldProps["fullWidth"];
 	/**
-	 * Called once focus leaves the field: from a section, the open-picker button
-	 * or another adornment to anything outside the field and its open popup.
-	 * Moving between those is not leaving. Focus that leaves from inside the open
-	 * popup (a click on another control while the calendar is open) is not
-	 * reported. Receives the blur event of the field's input root
-	 * (`role="group"`); `target` is the element that lost focus.
+	 * Called once focus leaves the field: from a section, the open-picker button,
+	 * another adornment or the open calendar to anything outside the field and
+	 * its open calendar (a click on another control while the calendar is open
+	 * counts). Moving between those is not leaving. Receives a blur event of the
+	 * field's input root (`role="group"`); `target` is the element that lost
+	 * focus, also one in the calendar.
 	 */
 	onBlur?: TextFieldProps["onBlur"] & PickersTextFieldProps["onBlur"];
 	/**
@@ -88,6 +88,7 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 		publishIntermediateValues,
 	);
 	const validation = usePickerValidationError(otherProps.onError);
+	const withFieldBlur = useFieldBlur();
 
 	const { settle } = draft;
 	const consumerOnOpen = otherProps.onOpen;

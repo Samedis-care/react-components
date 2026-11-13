@@ -12,7 +12,7 @@ import usePickerValidationError from "./usePickerValidationError";
 import usePickerErrorMessage from "./usePickerErrorMessage";
 import withAccessibleError from "./withAccessibleError";
 import withRequiredSections from "./withRequiredSections";
-import withFieldBlur from "./withFieldBlur";
+import useFieldBlur from "./useFieldBlur";
 
 /**
  * Props of a date picker (MUI's `DatePicker` with the `L` format of the
@@ -56,6 +56,7 @@ const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
 		minDate: otherProps.minDate,
 		maxDate: otherProps.maxDate,
 	});
+	const withFieldBlur = useFieldBlur();
 
 	const { settle } = draft;
 	const consumerOnOpen = otherProps.onOpen;

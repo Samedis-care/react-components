@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, fn, type Mock, screen } from "storybook/test";
+import { expect, fn, type Mock, screen, waitFor } from "storybook/test";
 import i18next from "i18next";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import moment, { type Moment } from "moment";
+import { TextField } from "@mui/material";
 import LocalizedKeyboardDatePicker from "./LocalizedKeyboardDatePicker";
 
 /**
@@ -97,6 +98,7 @@ const Controlled = (
 		readOnly?: boolean;
 		/** As `MuiPickerUtils` passes it in the framework, driving the format */
 		adapterLocale?: string;
+		onBlur?: () => void;
 	},
 ) => {
 	const [value, setValue] = useState<Moment | null>(() =>
@@ -113,6 +115,7 @@ const Controlled = (
 				minDate={props.minDate}
 				readOnly={props.readOnly}
 				onError={props.onError}
+				onBlur={props.onBlur}
 				onChange={(newValue) => {
 					setValue(newValue);
 					props.onChange(newValue);
@@ -274,3 +277,32 @@ export const ReadOnlyIgnoresTyping: StoryObj<BehaviourArgs> = {
 		await expect(args.onChange).not.toHaveBeenCalled();
 	},
 };
+
+interface LeaveArgs extends BehaviourArgs {
+	onBlur: Mock<() => void>;
+}
+
+export const Issue3474Item31ClickAnotherControlWhileOpen: StoryObj<LeaveArgs> =
+	{
+		name: "Clicking another control while the calendar is open leaves the field",
+		args: { onChange: fn(), onBlur: fn(), initialValue: "2026-08-01" },
+		parameters: { a11y: { test: "error" } },
+		render: (args) => (
+			<>
+				<Controlled {...args} />
+				<TextField label="Other" />
+			</>
+		),
+		play: async ({ args, canvas, userEvent }) => {
+			await openCalendar(canvas, userEvent);
+			// the calendar is part of the field
+			await expect(args.onBlur).not.toHaveBeenCalled();
+
+			const other = canvas.getByRole("textbox", { name: "Other" });
+			await userEvent.click(other);
+
+			await expect(other).toHaveFocus();
+			await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+			await expect(args.onBlur).toHaveBeenCalledTimes(1);
+		},
+	};

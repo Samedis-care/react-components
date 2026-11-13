@@ -20,7 +20,7 @@ export interface PickerValidationErrorResult<TError, TValue> {
 	onError: (error: TError, value: TValue) => void;
 	/** To be called whenever focus enters the field */
 	onFieldFocus: () => void;
-	/** To be called once focus leaves the field (see `withFieldBlur`) */
+	/** To be called once focus leaves the field (see `useFieldBlur`) */
 	onFieldLeave: () => void;
 }
 

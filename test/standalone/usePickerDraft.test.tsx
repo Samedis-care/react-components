@@ -60,7 +60,7 @@ const shown = (result: { current: Draft }) =>
 
 /**
  * Settles the draft, as the pickers do once focus leaves the field (which focus
- * moves count as leaving is `withFieldBlur`'s call, tested through the pickers in
+ * moves count as leaving is `useFieldBlur`'s call, tested through the pickers in
  * `LocalizedDateTimePickersWiring.test.tsx`)
  */
 const settle = (result: { current: Draft }) => {
