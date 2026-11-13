@@ -31,7 +31,12 @@ export interface SignalPortletProps {
 	 * When the shown data was produced, as a Date or in milliseconds since the
 	 * epoch (e.g. `Date.now()`). Shows "Last refresh: <age>" in the footer, with
 	 * the date and time in a tooltip. The age advances while the card stays
-	 * mounted. `null` and `undefined` hide the label.
+	 * mounted.
+	 *
+	 * `null`, `undefined`, an invalid time (`NaN`, `new Date("garbage")`) and 0
+	 * (the epoch, also as `new Date(0)`, which is what `new Date(null)` gives)
+	 * hide the label. So react-query's `dataUpdatedAt`, 0 until the first
+	 * successful fetch, can be passed as it is.
 	 */
 	updatedAt?: number | Date | null | undefined;
 	/**
@@ -112,8 +117,13 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcSignalPortlet" });
 	const { t } = useCCTranslations();
 	const locale = useCurrentLocale();
+	const updatedTime =
+		props.updatedAt == null ? NaN : new Date(props.updatedAt).getTime();
+	// 0, the epoch, is no refresh time: it stands for "not yet" (react-query's
+	// dataUpdatedAt) or for a missing value (new Date(null))
+	const hasUpdatedAt = Number.isFinite(updatedTime) && updatedTime !== 0;
 	// re-renders the card while the "Last refresh" age below can change
-	useAgeTick(props.updatedAt || null);
+	useAgeTick(hasUpdatedAt ? updatedTime : null);
 
 	return (
 		<SignalPortletRoot
@@ -158,7 +168,7 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 							</SignalPortletList>
 						</Grid>
 					</Grid>
-					{(props.updatedAt || props.onRefresh) && (
+					{(hasUpdatedAt || props.onRefresh) && (
 						<Grid
 							container
 							spacing={1}
@@ -168,14 +178,12 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 								alignContent: "center",
 							}}
 						>
-							{props.updatedAt && (
+							{hasUpdatedAt && (
 								<Grid>
-									<Tooltip
-										title={new Date(props.updatedAt).toLocaleString(locale)}
-									>
+									<Tooltip title={new Date(updatedTime).toLocaleString(locale)}>
 										<SignalPortletLastUpdatedAt>
 											{t("standalone.signal-portlet.last-updated", {
-												AGE: timestampToAge(new Date(props.updatedAt)),
+												AGE: timestampToAge(new Date(updatedTime)),
 											})}
 										</SignalPortletLastUpdatedAt>
 									</Tooltip>

@@ -43,6 +43,7 @@ const avatars = (container: HTMLElement) =>
 	Array.from(container.querySelectorAll<HTMLElement>(".MuiAvatar-root"));
 
 const ageLabel = () => screen.queryByText(/^Last refresh: /);
+const refreshButton = () => screen.queryByRole("button", { name: "Refresh" });
 
 beforeAll(async () => {
 	await ccI18n.changeLanguage("en");
@@ -178,5 +179,72 @@ describe("SignalPortlet: footer", () => {
 		expect(vi.getTimerCount()).toBeGreaterThan(0);
 		unmount();
 		expect(vi.getTimerCount()).toBe(0);
+	});
+
+	it.each([
+		["0", 0],
+		["NaN", NaN],
+	])(
+		"[ISSUE-3469-ITEM-3] shows no stray text for updatedAt=%s next to the Refresh button",
+		(_, updatedAt) => {
+			renderP({ title: "T", items: [], updatedAt, onRefresh: vi.fn() });
+			const footer = (refreshButton() as HTMLElement).parentElement
+				?.parentElement as HTMLElement;
+			expect(footer.textContent).not.toBe("0");
+			expect(footer.textContent).not.toContain("NaN");
+		},
+	);
+
+	it("[ISSUE-3469-ITEM-3] shows no NaN age for an invalid Date", () => {
+		renderP({ title: "T", items: [], updatedAt: new Date("garbage") });
+		expect(screen.queryByText(/NaN/)).toBeNull();
+	});
+
+	it.each([
+		["null", null],
+		["undefined", undefined],
+		["0", 0],
+		["NaN", NaN],
+		['new Date("garbage")', new Date("garbage")],
+		["new Date(0)", new Date(0)],
+	])(
+		"[ISSUE-3469-ITEM-3] treats updatedAt=%s as no time: no label, no timer, and no footer text besides the Refresh button",
+		(_, updatedAt) => {
+			vi.useFakeTimers();
+			const { rerenderP } = renderP({
+				title: "T",
+				items: [],
+				updatedAt,
+				onRefresh: vi.fn(),
+			});
+			const footer = (refreshButton() as HTMLElement).parentElement
+				?.parentElement as HTMLElement;
+			expect(footer.textContent).toBe("");
+			expect(vi.getTimerCount()).toBe(0);
+
+			// without onRefresh, nothing shows below the title
+			rerenderP({ title: "T", items: [], updatedAt });
+			expect(refreshButton()).toBeNull();
+			expect(
+				screen.getByRole("heading").closest(".MuiPaper-root"),
+			).toHaveTextContent(/^T$/);
+		},
+	);
+
+	it("[ISSUE-3469-ITEM-3] shows the label once updatedAt turns from 0 to a time, as react-query's dataUpdatedAt does after the first fetch", () => {
+		vi.useFakeTimers();
+		const onRefresh = vi.fn();
+		const { rerenderP } = renderP({
+			title: "T",
+			items: [],
+			updatedAt: 0,
+			onRefresh,
+		});
+		expect(ageLabel()).toBeNull();
+		const fetchedAt = Date.now() - 2 * MINUTE;
+		rerenderP({ title: "T", items: [], updatedAt: fetchedAt, onRefresh });
+		expect(ageLabel()).toHaveTextContent(
+			`Last refresh: ${timestampToAge(new Date(fetchedAt))}`,
+		);
 	});
 });
