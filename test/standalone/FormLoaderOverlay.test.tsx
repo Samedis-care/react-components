@@ -1,9 +1,13 @@
 import "@testing-library/jest-dom/vitest";
 import React from "react";
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, expectTypeOf, afterEach } from "vitest";
 import { render, cleanup, within } from "@testing-library/react";
 import { ThemeProvider, createTheme, Theme } from "@mui/material";
-import FormLoaderOverlay from "../../src/standalone/Form/FormLoaderOverlay";
+import FormLoaderOverlay, {
+	FormLoaderOverlayClassKey,
+	FormLoaderOverlayProps,
+} from "../../src/standalone/Form/FormLoaderOverlay";
+import type * as PackageRoot from "../../src";
 
 afterEach(cleanup);
 
@@ -43,5 +47,19 @@ describe("FormLoaderOverlay", () => {
 		);
 		// the override reaches an element inside the overlay that holds the spinner
 		expect(styled.some((el) => el.contains(progressbar))).toBe(true);
+	});
+
+	it("[ISSUE-3473-ITEM-6] exports FormLoaderOverlay from the package root", async () => {
+		const root = (await import("../../src")) as Record<string, unknown>;
+		expect(
+			root.FormLoaderOverlay,
+			"FormLoaderOverlay is missing from the package root",
+		).toBe(FormLoaderOverlay);
+	}, 90000);
+
+	it("[ISSUE-3473-ITEM-6] exports its props and class key types from the package root", () => {
+		// checked by tsc (tsconfig-test.json), not at runtime
+		expectTypeOf<PackageRoot.FormLoaderOverlayProps>().toEqualTypeOf<FormLoaderOverlayProps>();
+		expectTypeOf<PackageRoot.FormLoaderOverlayClassKey>().toEqualTypeOf<FormLoaderOverlayClassKey>();
 	});
 });
