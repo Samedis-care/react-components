@@ -152,28 +152,36 @@ describe("parseLocalizedNumber", () => {
 	);
 
 	it.each<[string, string, number | null, Intl.NumberFormatOptions?]>([
-		// a fraction typed with the other region's separator after groups
-		["de", "1.234.5", 1234.5],
-		["de", "1.234.56", 1234.56],
-		["de", "1.234.5678", 1234.5678],
-		["de", "12.345.678.9", 12345678.9],
-		["de", "-1.234.5", -1234.5],
-		["de", "1.234.5 €", 1234.5, EUR],
-		["en", "1,234,5", 1234.5],
-		["fr", "1.234.5", 1234.5],
-		["en-IN", "12,34,567,5", 1234567.5],
-		// exactly 3 digits after the last one: groups only
+		// several . and , that don't fit the locale's format
+		["de", "1.234.5", NaN],
+		["de", "1.234.5 €", NaN, EUR],
+		["de", "1,234.5", NaN],
+		["de", "1,234,567", NaN],
+		["de", "7.5.", NaN],
+		["de", "1.234.", NaN],
+		["de", "1.23.456", NaN],
+		["de", "0.123.456", NaN],
+		["en", "1,234,5", NaN],
+		["en", "1.234,5", NaN],
+		["en", "1.234.567", NaN],
+		["en", "7.5.", NaN],
+		["fr", "1.234.567", NaN],
+		["fr", "1.234,5", NaN],
+		["en-IN", "1,234,567", NaN],
+		// several that do
+		["de", "1.234,5", 1234.5],
 		["de", "1.234.567", 1234567],
+		["de", "-1.234.567,25 €", -1234567.25, EUR],
+		["de", "1.234,", 1234],
+		["en", "1,234.5", 1234.5],
 		["en", "1,234,567", 1234567],
-		["fr", "1.234.567", 1234567],
-		["en-IN", "12,34,567", 1234567],
-		// a separator without a digit after it separates nothing
-		["de", "7.5.", 7.5],
-		["en", "7,5,", 7.5],
-		["de", "1.234.", 1234],
+		["en-IN", "12,34,567.5", 1234567.5],
+		// a single one keeps its rule, and text without a digit isn't affected
+		["de", "1.234", 1234],
+		["en", "1.234", 1.234],
 		["de", "..", null],
 	])(
-		"[ISSUE-3484-ITEM-5] reads %s text %j as %j",
+		"[ISSUE-3484-ITEM-5] reads %s text %j as %s",
 		async (locale, text, expected, options) => {
 			await ccI18n.changeLanguage(locale);
 			expect(parseLocalizedNumber(text, options)).toBe(expected);

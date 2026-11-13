@@ -86,6 +86,27 @@ const tabThrough = (input: HTMLElement) => {
 	fireEvent.blur(input);
 };
 
+/** the parse-error message for a number shaped as `example` */
+const invalidMessage = (lng: string, example: string) =>
+	lng === "de"
+		? `Gib eine Zahl ein, z. B. ${example}`
+		: `Enter a number, such as ${example}`;
+
+/**
+ * several . and , that don't fit the language's format, typed into a field
+ * holding 1234 (de and en show it grouped as "1.234" and "1,234")
+ */
+const MIXED_SEPARATORS: [string, string][] = [
+	// a keypad that only offers the other region's separator, after the grouping
+	["de", "1.234.5"],
+	["en", "1,234,5"],
+	// a separator too many
+	["de", "7.5."],
+	// the other region's format
+	["de", "1,234.5"],
+	["en", "1.234,5"],
+];
+
 describe("IntegerInputField", () => {
 	it("[ISSUE-3484-ITEM-8] does not join the digits on both sides of a decimal separator", () => {
 		const onValue: ValueSpy = vi.fn();
@@ -541,28 +562,6 @@ describe("CurrencyInput", () => {
 			expect(Object.is(reported(onValue).at(-1), 0)).toBe(true);
 			expect(field("Amount")).toHaveValue("€0.00");
 		});
-
-		it("[ISSUE-3484-ITEM-5] reads a fraction typed with the other region's separator after a grouped amount", async () => {
-			await setLanguage("de");
-			const onValue: ValueSpy = vi.fn();
-			render(
-				<Controlled initial={null} onValue={onValue}>
-					{(value, onChange) => (
-						<CurrencyInput
-							label="Amount"
-							currency="EUR"
-							value={value}
-							onChange={onChange}
-						/>
-					)}
-				</Controlled>,
-			);
-			// typed with the grouping, on a keypad that only offers "."
-			fireEvent.change(field("Amount"), { target: { value: "1.234.5" } });
-			fireEvent.blur(field("Amount"));
-			expect(reported(onValue)).toEqual([1234.5]);
-			expect(field("Amount")).toHaveValue(fmt("de", 1234.5, EUR));
-		});
 	});
 	describe("text that does not parse", () => {
 		it("[ISSUE-3484-ITEM-20] says in text why the amount is invalid", () => {
@@ -679,6 +678,34 @@ describe("CurrencyInput", () => {
 			expect(field("Amount")).toHaveAttribute("aria-invalid", "false");
 			expect(field("Amount")).toHaveAccessibleDescription("");
 		});
+
+		it.each(MIXED_SEPARATORS)(
+			"[ISSUE-3484-ITEM-5] flags %s text %j whose separators don't fit the language's format, and keeps the amount",
+			async (lng, text) => {
+				await setLanguage(lng);
+				const onValue: ValueSpy = vi.fn();
+				render(
+					<Controlled initial={1234} onValue={onValue}>
+						{(value, onChange) => (
+							<CurrencyInput
+								label="Amount"
+								currency="EUR"
+								value={value}
+								onChange={onChange}
+							/>
+						)}
+					</Controlled>,
+				);
+				fireEvent.change(field("Amount"), { target: { value: text } });
+				fireEvent.blur(field("Amount"));
+				expect(reported(onValue)).toEqual([]);
+				expect(field("Amount")).toHaveValue(text);
+				expect(field("Amount")).toHaveAttribute("aria-invalid", "true");
+				expect(field("Amount")).toHaveAccessibleDescription(
+					invalidMessage(lng, fmt(lng, 1234.56, EUR)),
+				);
+			},
+		);
 	});
 });
 
@@ -1192,6 +1219,33 @@ describe("DecimalInputField", () => {
 			expect(field("Hours")).toHaveAttribute("aria-invalid", "false");
 			expect(field("Hours")).toHaveAccessibleDescription("");
 		});
+
+		it.each(MIXED_SEPARATORS)(
+			"[ISSUE-3484-ITEM-5] flags %s text %j whose separators don't fit the language's format, and keeps the value",
+			async (lng, text) => {
+				await setLanguage(lng);
+				const onValue: ValueSpy = vi.fn();
+				render(
+					<Controlled initial={1234} onValue={onValue}>
+						{(value, onChange) => (
+							<DecimalInputField
+								label="Hours"
+								value={value}
+								onChange={onChange}
+							/>
+						)}
+					</Controlled>,
+				);
+				fireEvent.change(field("Hours"), { target: { value: text } });
+				fireEvent.blur(field("Hours"));
+				expect(reported(onValue)).toEqual([]);
+				expect(field("Hours")).toHaveValue(text);
+				expect(field("Hours")).toHaveAttribute("aria-invalid", "true");
+				expect(field("Hours")).toHaveAccessibleDescription(
+					invalidMessage(lng, fmt(lng, 1234.56)),
+				);
+			},
+		);
 	});
 });
 

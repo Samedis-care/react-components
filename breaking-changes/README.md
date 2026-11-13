@@ -83,7 +83,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [TreeViewCheckboxSelectionRenderer disables a locked leaf's checkbox](2026-11-13-tree-checkbox-renderer-locked-leaf-disabled.md) | behavior |
 | 2026-11-13 | [CurrencyInput reports an emptied field once, on blur](2026-11-13-currency-input-reports-emptied-field-on-blur.md) | behavior |
 | 2026-11-13 | [A linked SignalPortlet row is a list item, with its button inside](2026-11-13-signal-portlet-linked-rows-are-list-items.md) | behavior, theme |
-| 2026-11-13 | [Localized numbers read a fraction typed with the other region's separator after group separators](2026-11-13-localized-numbers-fraction-after-groups.md) | behavior |
+| 2026-11-13 | [A number whose . and , don't fit the locale's format is invalid](2026-11-13-localized-numbers-mixed-separators-invalid.md) | behavior |
 | 2026-11-12 | [The Loader's status text is a paragraph, not a heading](2026-11-12-loader-status-text-is-no-heading.md) | behavior |
 | 2026-11-12 | [PopupMenu item labels wrap instead of being cut off](2026-11-12-popup-menu-labels-wrap.md) | behavior |
 | 2026-11-12 | [CountryFlags, CountryCodes and CountryOption.value are typed by CountryCode, and CountryFlags is frozen](2026-11-12-country-flags-typed-by-country-code.md) | type, behavior |
