@@ -296,7 +296,6 @@
 					"files": {
 						"no-file": "Aucun dossier présent",
 						"count_one": "{{count}} fichier",
-						"count_many": "{{count}} fichiers",
 						"count_other": "{{count}} fichiers"
 					},
 					"string-array": {
