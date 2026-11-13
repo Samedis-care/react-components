@@ -30,6 +30,15 @@ export interface MultiGridProps {
 	fixedColumnCount: number;
 	fixedRowCount: number;
 	styleTopLeftGrid: CSSProperties;
+	/**
+	 * Extra inline style for the top-right pane: the pinned rows right of the
+	 * pinned columns, i.e. the header. MultiGrid sets its position, size and
+	 * overflow, which win over this style. While there are data rows the user
+	 * cannot scroll the header: it follows the body's horizontal position, and
+	 * when the browser scrolls it to reveal an element focused in it, the body
+	 * follows the header. While there are none it scrolls sideways itself and is
+	 * the tab stop.
+	 */
 	styleTopRightGrid: CSSProperties;
 	styleBottomLeftGrid: CSSProperties;
 	styleBottomRightGrid: CSSProperties;
@@ -242,6 +251,24 @@ const MultiGrid = (inProps: MultiGridProps) => {
 		[],
 	);
 
+	// The user cannot scroll the header pane while there are data rows
+	// (overflow: hidden), but the browser scrolls it to reveal an element
+	// focused in it, e.g. a column's filter button: the body follows.
+	const handleScrollHeader = useCallback(
+		(evt: React.UIEvent<HTMLDivElement>) => {
+			if (handleScrollPinnedRequested.current != null) return;
+			if (handleScrollRequested.current)
+				window.clearTimeout(handleScrollRequested.current);
+			handleScrollRequested.current = window.setTimeout(() => {
+				handleScrollRequested.current = null;
+			}, SCROLL_DETECTION_DELAY_MS);
+			bottomRightGrid.current?.element?.scrollTo({
+				left: evt.currentTarget.scrollLeft,
+			});
+		},
+		[],
+	);
+
 	// page up/down scrolls the grid from anywhere on the page, for the routes
 	// where the grid *is* the page and there is nothing else to page
 	useEffect(() => {
@@ -355,8 +382,13 @@ const MultiGrid = (inProps: MultiGridProps) => {
 				// takes over as the horizontal scroller, so it's the tab stop then
 				tabIndex={bottomRightRendered ? undefined : 0}
 				aria-label={bottomRightRendered ? undefined : label}
+				onScroll={handleScrollHeader}
 				style={{
 					...styleTopRightGrid,
+					// while there are data rows the body is the horizontal scroller
+					// and the header follows it
+					overflowX: bottomRightRendered ? "hidden" : "auto",
+					overflowY: "hidden",
 					position: "absolute",
 					top: 0,
 					left: fixedWidth,

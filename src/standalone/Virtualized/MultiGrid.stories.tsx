@@ -54,9 +54,6 @@ const HEADER_STYLE: React.CSSProperties = {
 // the pane styles are module constants: a new object on every render would
 // defeat MultiGrid's memoization
 const NO_STYLE: React.CSSProperties = {};
-// with data rows the body pane drives the header's horizontal position, so the
-// header itself does not scroll (as in DataGrid)
-const HEADER_WITH_ROWS: React.CSSProperties = { overflow: "hidden" };
 
 const NoContent = () => (
 	<Box
@@ -91,6 +88,17 @@ const CellRenderer = ({
 			style={{ ...style, ...(isHeader ? HEADER_STYLE : CELL_STYLE) }}
 		>
 			{rowLabel(rowIndex, columnIndex)}
+		</div>
+	);
+};
+
+/** header cells hold a button, as DataGrid's column headers do (filter) */
+const HeaderButtonCellRenderer = (props: CellComponentProps) => {
+	const { columnIndex, rowIndex, style, ariaAttributes } = props;
+	if (rowIndex !== 0 || columnIndex === 0) return CellRenderer(props);
+	return (
+		<div {...ariaAttributes} style={{ ...style, ...HEADER_STYLE }}>
+			<button type={"button"}>{colLabel(columnIndex)}</button>
 		</div>
 	);
 };
@@ -160,7 +168,7 @@ export const NoData: StoryObj<typeof MultiGrid> = {
 				fixedColumnCount={FIXED_COLUMNS}
 				fixedRowCount={FIXED_ROWS}
 				styleTopLeftGrid={{}}
-				styleTopRightGrid={{ overflowX: "auto" }}
+				styleTopRightGrid={{}}
 				styleBottomLeftGrid={{}}
 				styleBottomRightGrid={{}}
 				children={CellRenderer}
@@ -263,6 +271,34 @@ export const InDialog: StoryObj<typeof MultiGrid> = {
 	},
 };
 
+// the demo grid of the stories below, which change a few of its props
+const GRID_PROPS: MultiGridProps = {
+	width: 600,
+	height: 400,
+	columnCount: COLUMN_COUNT,
+	columnWidth,
+	rowCount: ROW_COUNT,
+	rowHeight,
+	fixedColumnCount: FIXED_COLUMNS,
+	fixedRowCount: FIXED_ROWS,
+	styleTopLeftGrid: NO_STYLE,
+	styleTopRightGrid: NO_STYLE,
+	styleBottomLeftGrid: NO_STYLE,
+	styleBottomRightGrid: NO_STYLE,
+	children: CellRenderer,
+	noContentRenderer: NoContent,
+	label: GRID_LABEL,
+};
+
+const GRID_A11Y = {
+	test: "error",
+	config: {
+		// the pinned column pane scrolls (overflow: scroll) but is not focusable
+		// and holds nothing focusable (ISSUE-3472-ITEM-17)
+		rules: [{ id: "scrollable-region-focusable", enabled: false }],
+	},
+};
+
 // Story tests run in headless Chromium, which hides scrollbars. A 15px border
 // on the right and bottom of the scrolling pane takes the room that classic
 // scrollbars (Windows, Linux desktops, macOS set to always show them) take
@@ -274,30 +310,8 @@ const BODY_WITH_SCROLLBAR_ROOM: React.CSSProperties = {
 };
 
 const SCROLLBAR_ROOM_PROPS: MultiGridProps = {
-	width: 600,
-	height: 400,
-	columnCount: COLUMN_COUNT,
-	columnWidth,
-	rowCount: ROW_COUNT,
-	rowHeight,
-	fixedColumnCount: FIXED_COLUMNS,
-	fixedRowCount: FIXED_ROWS,
-	styleTopLeftGrid: NO_STYLE,
-	styleTopRightGrid: HEADER_WITH_ROWS,
-	styleBottomLeftGrid: NO_STYLE,
+	...GRID_PROPS,
 	styleBottomRightGrid: BODY_WITH_SCROLLBAR_ROOM,
-	children: CellRenderer,
-	noContentRenderer: NoContent,
-	label: GRID_LABEL,
-};
-
-const SCROLLBAR_ROOM_A11Y = {
-	test: "error",
-	config: {
-		// the pinned column pane scrolls (overflow: scroll) but is not focusable
-		// and holds nothing focusable (ISSUE-3472-ITEM-17)
-		rules: [{ id: "scrollable-region-focusable", enabled: false }],
-	},
 };
 
 /**
@@ -309,7 +323,7 @@ export const Issue3472Item2HeaderAndPinnedColumnFollowToTheEnd: StoryObj<
 	typeof MultiGrid
 > = {
 	render: () => <GridBox {...SCROLLBAR_ROOM_PROPS} />,
-	parameters: { a11y: SCROLLBAR_ROOM_A11Y },
+	parameters: { a11y: GRID_A11Y },
 	play: async ({ canvasElement }) => {
 		const { topRight, bottomLeft, bottomRight } = getPanes(canvasElement);
 		// the scrollbar room: less than 600 - 60 pinned and 400 - 35 header
@@ -346,7 +360,7 @@ export const Issue3472Item2PageDownScrollsOneVisiblePage: StoryObj<
 	typeof MultiGrid
 > = {
 	render: () => <GridBox {...SCROLLBAR_ROOM_PROPS} globalScrollListener />,
-	parameters: { a11y: SCROLLBAR_ROOM_A11Y },
+	parameters: { a11y: GRID_A11Y },
 	play: async ({ canvasElement }) => {
 		const { bottomLeft, bottomRight } = getPanes(canvasElement);
 		const page = bottomRight.clientHeight;
@@ -362,5 +376,31 @@ export const Issue3472Item2PageDownScrollsOneVisiblePage: StoryObj<
 
 		await userEvent.keyboard("{PageUp}");
 		await waitFor(() => expect(bottomRight.scrollTop).toBe(page));
+	},
+};
+
+const HEADER_BUTTONS_PROPS: MultiGridProps = {
+	...GRID_PROPS,
+	children: HeaderButtonCellRenderer,
+};
+
+/**
+ * The header cells hold buttons, as DataGrid's do. Focusing the button of a
+ * column right of the visible area scrolls the header pane to it, and the body
+ * pane follows, so every header label stays over its column.
+ */
+export const Issue3472Item1HeaderFocusKeepsColumnsAligned: StoryObj<
+	typeof MultiGrid
+> = {
+	render: () => <GridBox {...HEADER_BUTTONS_PROPS} />,
+	parameters: { a11y: GRID_A11Y },
+	play: async ({ canvas, canvasElement }) => {
+		const { topRight, bottomRight } = getPanes(canvasElement);
+		canvas.getByRole("button", { name: "Col 8" }).focus();
+		// precondition: the browser scrolled the header to the focused button
+		await waitFor(() => expect(topRight.scrollLeft).toBeGreaterThan(0));
+		await waitFor(() =>
+			expect(bottomRight.scrollLeft).toBe(topRight.scrollLeft),
+		);
 	},
 };
