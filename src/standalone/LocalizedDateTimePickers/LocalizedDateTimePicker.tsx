@@ -15,6 +15,16 @@ import withAccessibleError from "./withAccessibleError";
 import withRequiredSections from "./withRequiredSections";
 import withFieldBlur from "./withFieldBlur";
 
+/**
+ * When the picker opens its desktop popup rather than MUI's mobile dialog: with
+ * a fine pointer, as in MUI, and only where the popup fits. The popup puts the
+ * 320px calendar next to the time columns, up to 545px wide with seconds and
+ * AM/PM, so a narrow window or a zoomed-in page would scroll sideways; 600px
+ * leaves room for a scrollbar. The mobile dialog fits a 320px viewport.
+ */
+const DESKTOP_MODE_MEDIA_QUERY =
+	"@media (pointer: fine) and (min-width: 600px)";
+
 export interface LocalizedDateTimePickerProps extends Omit<
 	DateTimePickerProps,
 	"format"
@@ -52,6 +62,14 @@ export interface LocalizedDateTimePickerProps extends Omit<
 	 * See {@link usePickerDraft}.
 	 */
 	publishIntermediateValues?: boolean;
+	/**
+	 * The CSS media query that selects the desktop popup; where it does not
+	 * match, the picker opens MUI's mobile dialog. Defaults to
+	 * `"@media (pointer: fine) and (min-width: 600px)"`: a fine pointer, as in
+	 * MUI, on a viewport wide enough for the popup's calendar and time columns,
+	 * so the popup never scrolls the page sideways.
+	 */
+	desktopModeMediaQuery?: DateTimePickerProps["desktopModeMediaQuery"];
 }
 
 const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
@@ -88,6 +106,9 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 				onChange={draft.onChange}
 				onOpen={handleOpen}
 				onError={validation.onError}
+				desktopModeMediaQuery={
+					otherProps.desktopModeMediaQuery ?? DESKTOP_MODE_MEDIA_QUERY
+				}
 				slotProps={{
 					...otherProps.slotProps,
 					textField: (ownerState) => {

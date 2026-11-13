@@ -25,6 +25,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [A Matrix entry's tooltip is its accessible description](2026-11-13-matrix-entry-tooltip-is-its-description.md) | behavior |
 | 2026-11-13 | [The touch Clear button follows what the field shows, and selectors only have their own](2026-11-13-text-field-clear-follows-shown-value.md) | behavior |
 | 2026-11-13 | [A date picker says in text why it rejects a date](2026-11-13-date-picker-validation-message.md) | behavior |
+| 2026-11-13 | [LocalizedDateTimePicker opens the mobile dialog below 600px](2026-11-13-date-time-picker-mobile-dialog-below-600px.md) | behavior |
 | 2026-11-10 | [InfiniteScroll loads nothing while it is hidden, and fills once it is shown](2026-11-10-infinite-scroll-waits-while-hidden.md) | behavior |
 | 2026-11-10 | [The Small list items narrow MUI's gutters, and MultiSelect's entries move 8px to the left](2026-11-10-small-list-item-gutters.md) | behavior |
 | 2026-11-10 | [Country flags come from country-flag-icons: every flag is 3:2 and drawn for small sizes](2026-11-10-country-flags-from-country-flag-icons.md) | behavior |
