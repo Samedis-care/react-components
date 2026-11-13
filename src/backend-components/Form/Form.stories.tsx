@@ -386,3 +386,27 @@ export const AutoFocus: StoryObj<{ field: ModelFieldName }> = {
 		});
 	},
 };
+
+/**
+ * [ISSUE-3506-ITEM-12] Tab to the form's checkbox (ModelDataTypeBooleanCheckboxRendererMUI):
+ * its box gets an outline, which forced colors keep, not only the ripple's faint tint
+ */
+export const Issue3506Item12FormCheckboxShowsFocus: StoryObj = {
+	render: () => <MixedFormStory />,
+	play: async ({ canvas, canvasElement, userEvent }) => {
+		await canvas.findByDisplayValue("Alice", undefined, { timeout: 10000 });
+		const box = canvas.getByRole("checkbox", { name: "Active" });
+		canvasElement
+			.querySelector<HTMLInputElement>('[data-field="notify"] input')!
+			.focus();
+		await userEvent.tab({ shift: true });
+		await expect(box).toHaveFocus();
+		const root = box.parentElement!;
+		await waitFor(() => expect(root).toHaveClass("Mui-focusVisible"));
+		const style = getComputedStyle(root.querySelector(":scope > svg")!);
+		await expect(
+			{ style: style.outlineStyle, width: parseFloat(style.outlineWidth) },
+			"the outline around the focused checkbox's box",
+		).toEqual({ style: "solid", width: 2 });
+	},
+};

@@ -3,12 +3,25 @@ import {
 	Checkbox,
 	FormControlLabel,
 	FormHelperText,
+	styled,
 	Typography,
 } from "@mui/material";
 import ModelRenderParams from "../../../RenderParams";
 import TypeBoolean from "../../TypeBoolean";
 import ccI18n from "../../../../../i18n";
 import { FormControlFieldsetCC } from "../../../../../standalone";
+import focusRing from "../../../../../utils/internal/focusRing";
+
+/**
+ * MUI's Checkbox with CC's keyboard focus ring around its box, where MUI draws
+ * the ring of the theme's `focusVisible`
+ */
+const FocusRingCheckbox = styled(Checkbox)(({ theme }) => ({
+	"&.Mui-focusVisible > svg": {
+		borderRadius: theme.shape.borderRadius,
+		...focusRing(theme, 2),
+	},
+}));
 
 /**
  * Renders a TypeBoolean field as Checkbox
@@ -53,7 +66,7 @@ class RendererBooleanCheckbox extends TypeBoolean {
 		}
 		if (visibility.editable) {
 			const control = (
-				<Checkbox
+				<FocusRingCheckbox
 					name={field}
 					checked={this.invert ? !value : value}
 					disabled={visibility.readOnly}
