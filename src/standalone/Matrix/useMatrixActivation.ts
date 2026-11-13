@@ -3,7 +3,11 @@ import React, { useCallback, useMemo } from "react";
 export interface MatrixActivationProps {
 	role: "button";
 	tabIndex: 0;
-	"aria-label": string | undefined;
+	/**
+	 * The label given to useMatrixActivation. Absent without one, so spreading
+	 * these props never clears a name set around them (a MUI Tooltip's, say).
+	 */
+	"aria-label"?: string;
 	onClick: () => void;
 	onKeyDown: (event: React.KeyboardEvent) => void;
 }
@@ -19,7 +23,8 @@ export interface MatrixActivationProps {
  * The focus ring comes from each part's own styled slot (:focus-visible).
  * @param onActivate What the click or key press does. Undefined means the
  * element is not interactive and gets no props at all.
- * @param label Accessible name, if the element's own contents are not one
+ * @param label Accessible name, if the element's own contents are not one.
+ * Without it (or with an empty string) the props carry no aria-label at all.
  * @returns The props to spread, or undefined
  */
 const useMatrixActivation = (
@@ -45,7 +50,7 @@ const useMatrixActivation = (
 				? {
 						role: "button" as const,
 						tabIndex: 0 as const,
-						"aria-label": label,
+						...(label ? { "aria-label": label } : undefined),
 						onClick: handleClick,
 						onKeyDown: handleKeyDown,
 					}

@@ -85,7 +85,7 @@ const MatrixTileItem = (props: MatrixTileItemProps) => {
 		onItemClick?.(item);
 	}, [onItemClick, item]);
 	// An entry one can click has to be one a keyboard can reach too. The name
-	// comes from the label it renders, or from the tooltip via MUI.
+	// comes from the label it renders; the tooltip is its description.
 	const activation = useMatrixActivation(onItemClick ? activate : undefined);
 	// A clickable entry must not also start a range selection in the grid
 	// below it: without this, pressing an entry would both open it and begin
@@ -149,8 +149,11 @@ const MatrixTileItem = (props: MatrixTileItemProps) => {
 	);
 
 	// No tooltip, no Tooltip: one per cell entry adds up over a whole grid.
+	// describeChild: the tooltip describes the entry instead of naming it, so
+	// the label stays the name, and a read-only entry (a div without a role)
+	// gets no aria-label, which a role-less element cannot carry.
 	return item.tooltip ? (
-		<Tooltip title={item.tooltip} enterDelay={400}>
+		<Tooltip title={item.tooltip} enterDelay={400} describeChild>
 			{entry}
 		</Tooltip>
 	) : (

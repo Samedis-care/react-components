@@ -5,13 +5,19 @@ import {
 	cleanup,
 	fireEvent,
 	render,
+	renderHook,
 	screen,
 	waitFor,
 } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material";
+import {
+	computeAccessibleDescription,
+	computeAccessibleName,
+} from "dom-accessibility-api";
 import MatrixGrid from "../../src/standalone/Matrix/MatrixGrid";
 import MatrixCellTile from "../../src/standalone/Matrix/MatrixCellTile";
 import buildDateColumns from "../../src/standalone/Matrix/buildDateColumns";
+import useMatrixActivation from "../../src/standalone/Matrix/useMatrixActivation";
 import {
 	matrixClasses,
 	matrixVars,
@@ -1297,6 +1303,11 @@ describe("MatrixCellTile entries", () => {
 		Array.from(
 			container.querySelectorAll<HTMLElement>(`.${TILE_CLASSES[slot]}`),
 		);
+	/** what a screen reader gets: the name, then the description */
+	const announced = (element: HTMLElement) =>
+		[computeAccessibleName(element), computeAccessibleDescription(element)]
+			.filter(Boolean)
+			.join(" ");
 
 	describe("layout options", () => {
 		it("[ISSUE-3481-ITEM-1] passes a diagonal pair through renderItem, as its first entry", () => {
@@ -1421,6 +1432,77 @@ describe("MatrixCellTile entries", () => {
 				4.5,
 			);
 		});
+	});
+
+	describe("accessibility", () => {
+		it("[ISSUE-3481-ITEM-12] passes an entry's tooltip to assistive technology, and keeps the label in its name", () => {
+			render(
+				tile({
+					items: [entry({ tooltip: "Early shift, Alice Weber" })],
+					onItemClick: vi.fn(),
+				}),
+			);
+			const button = screen.getByRole("button");
+			expect(computeAccessibleName(button)).toContain("F");
+			expect(announced(button)).toContain("Early shift, Alice Weber");
+			cleanup();
+			// read-only: no aria-label on an element that has no role to carry it
+			const { container } = render(
+				tile({ items: [entry({ tooltip: "Early shift" })] }),
+			);
+			expect(container.querySelector("[aria-label]:not([role])")).toBeNull();
+		});
+
+		it("[ISSUE-3481-ITEM-12] describes a diagonal pair with both tooltips, after both labels", () => {
+			const items = [
+				entry({ tooltip: "Early, Alice" }),
+				second({ tooltip: "Late, Bruno" }),
+			];
+			render(tile({ items, pairLayout: "diagonal", onItemClick: vi.fn() }));
+			const button = screen.getByRole("button");
+			expect(computeAccessibleName(button)).toBe("F S");
+			expect(computeAccessibleDescription(button)).toBe(
+				"Early, Alice / Late, Bruno",
+			);
+			cleanup();
+			const { container } = render(tile({ items, pairLayout: "diagonal" }));
+			expect(container.querySelector("[aria-label]:not([role])")).toBeNull();
+		});
+
+		it("[ISSUE-3481-ITEM-12] keeps the tooltip as the entry's description while it is open", () => {
+			vi.useFakeTimers();
+			render(
+				tile({
+					items: [entry({ tooltip: "Early shift, Alice Weber" })],
+					onItemClick: vi.fn(),
+				}),
+			);
+			const button = screen.getByRole("button");
+			fireEvent.mouseOver(button);
+			act(() => {
+				vi.advanceTimersByTime(500);
+			});
+			expect(screen.getByRole("tooltip")).toHaveTextContent(
+				"Early shift, Alice Weber",
+			);
+			expect(computeAccessibleName(button)).toBe("F");
+			expect(computeAccessibleDescription(button)).toBe(
+				"Early shift, Alice Weber",
+			);
+			// close it and let MUI's "a tooltip was just open" window (800ms)
+			// run out, or the next tooltip opens without its delay
+			fireEvent.mouseOut(button);
+			act(() => {
+				vi.advanceTimersByTime(2000);
+			});
+		});
+	});
+});
+
+describe("useMatrixActivation", () => {
+	it("[ISSUE-3481-ITEM-12] adds no aria-label without a label, so it never clears a name set around it", () => {
+		const { result } = renderHook(() => useMatrixActivation(vi.fn()));
+		expect(result.current).not.toHaveProperty("aria-label");
 	});
 });
 

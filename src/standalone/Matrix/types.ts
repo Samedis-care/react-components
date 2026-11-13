@@ -201,8 +201,10 @@ export interface MatrixTileItem {
 	 */
 	corners?: Partial<Record<MatrixTileCorner, React.ReactNode>>;
 	/**
-	 * Tooltip shown when hovering the entry. Without it no tooltip is mounted
-	 * at all.
+	 * Tooltip shown when hovering the entry, or focusing a clickable one.
+	 * It is also the entry's accessible description: screen readers read it
+	 * after the name, which stays the label. In a diagonal pair both tooltips
+	 * are joined with " / ". Without it no tooltip is mounted at all.
 	 */
 	tooltip?: string;
 }

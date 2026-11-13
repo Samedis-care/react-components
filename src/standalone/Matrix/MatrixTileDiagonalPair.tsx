@@ -148,8 +148,10 @@ const MatrixTileDiagonalPair = (props: MatrixTileDiagonalPairProps) => {
 		</MatrixTileDiagonalRoot>
 	);
 
+	// describeChild: both tooltips describe the pair, named by both labels
+	// (see MatrixTileItem)
 	return tooltip ? (
-		<Tooltip title={tooltip} enterDelay={400}>
+		<Tooltip title={tooltip} enterDelay={400} describeChild>
 			{pair}
 		</Tooltip>
 	) : (
