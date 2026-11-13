@@ -1,8 +1,15 @@
 import React, { useCallback } from "react";
-import { Tabs, TabsProps } from "@mui/material";
+import {
+	buttonBaseClasses,
+	styled,
+	tabClasses,
+	Tabs,
+	TabsProps,
+} from "@mui/material";
 import useLocation from "../../standalone/Routes/useLocation";
 import { useRouteInfo } from "../../standalone";
 import useNavigate from "../../standalone/Routes/useNavigate";
+import focusRing from "../../utils/internal/focusRing";
 
 export interface RoutedTabsProps extends Omit<TabsProps, "value" | "onChange"> {
 	/**
@@ -12,9 +19,40 @@ export interface RoutedTabsProps extends Omit<TabsProps, "value" | "onChange"> {
 	 * and also when no Tab has the segment (a stale link, a Tab that is not
 	 * rendered, a path inside the default panel). Without a default tab, no
 	 * tab is selected then.
+	 *
+	 * Each Tab gets `disableFocusRipple` unless it sets the prop itself: a
+	 * keyboard-focused tab shows the focus ring, and MUI's pulsating focus
+	 * ripple would cover its label. A click still shows the ripple.
 	 */
 	children: React.ReactNode;
 }
+
+export type RoutedTabsClassKey = "root";
+
+/**
+ * MUI's Tabs with the library's focus ring on a keyboard-focused Tab
+ * (`Mui-focusVisible`): an outline, which forced colors keep, 4px inside the
+ * tab's edge, where MUI draws its own Tab ring when the theme sets
+ * `focusVisible`, so neither the scroller nor the selection indicator covers
+ * it. With `textColor="inherit"` (tabs on a colored bar such as an AppBar)
+ * the ring takes the tab's text color, which contrasts with the bar where the
+ * primary color may not, and the focused tab is fully opaque, as MUI's ring
+ * makes it. When the theme sets `focusVisible`, MUI's ring is the one shown.
+ */
+const RoutedTabsRoot = styled(Tabs, { name: "CcRoutedTabs", slot: "root" })(
+	({ theme }) => ({
+		[`& .${tabClasses.root}.${buttonBaseClasses.focusVisible}`]: focusRing(
+			theme,
+			-6,
+		),
+		...(!theme.focusVisible && {
+			[`& .${tabClasses.textColorInherit}.${buttonBaseClasses.focusVisible}`]: {
+				outlineColor: "currentColor",
+				opacity: 1,
+			},
+		}),
+	}),
+);
 
 /**
  * The values MUI's `Tabs` gives its children: each element's `value`, or its
@@ -30,6 +68,29 @@ const getTabValues = (children: React.ReactNode): unknown[] =>
 			return value === undefined ? index : value;
 		});
 
+/**
+ * Turns MUI's focus ripple off on each child that does not set
+ * `disableFocusRipple` itself
+ * @param children The Tabs' children
+ * @returns The children, each element among them with the prop set
+ */
+const withoutFocusRipple = (children: React.ReactNode): React.ReactNode =>
+	React.Children.map(children, (child) =>
+		React.isValidElement<{ disableFocusRipple?: boolean }>(child) &&
+		child.type !== React.Fragment &&
+		child.props.disableFocusRipple === undefined
+			? React.cloneElement(child, { disableFocusRipple: true })
+			: child,
+	);
+
+/**
+ * MUI `Tabs` whose selected tab is a segment of the URL (see `children`).
+ * A keyboard-focused tab shows a 2px focus ring inside its edge, in the
+ * primary color, or in the tab's text color with `textColor="inherit"` (tabs
+ * on an AppBar); MUI's own ring when the theme sets `focusVisible`. The
+ * theme styles it under `CcRoutedTabs` (`root` is the Tabs root).
+ * @param props The props
+ */
 const RoutedTabs = (props: RoutedTabsProps) => {
 	const { pathname, search, hash } = useLocation();
 	let { url } = useRouteInfo();
@@ -59,9 +120,9 @@ const RoutedTabs = (props: RoutedTabsProps) => {
 			? ""
 			: false;
 	return (
-		<Tabs {...props} value={current} onChange={handleChange}>
-			{props.children}
-		</Tabs>
+		<RoutedTabsRoot {...props} value={current} onChange={handleChange}>
+			{withoutFocusRipple(props.children)}
+		</RoutedTabsRoot>
 	);
 };
 

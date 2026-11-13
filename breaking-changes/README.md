@@ -68,6 +68,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [DateTimeInput passes on all of slotProps.textField.slotProps, and a function-form inputLabel is used on both date inputs](2026-11-13-date-time-input-text-field-slot-props.md) | behavior |
 | 2026-11-13 | [ColorInput has a "Choose color" button, and its open picker is a dialog](2026-11-13-color-input-picker-button.md) | behavior |
 | 2026-11-13 | [DateInput takes and gives every date as a date-only value](2026-11-13-date-input-date-only-date-props.md) | type, behavior |
+| 2026-11-13 | [RoutedTabs draws a focus ring and turns the focus ripple off](2026-11-13-routed-tabs-focus-ring.md) | behavior, theme |
 | 2026-11-12 | [The Loader's status text is a paragraph, not a heading](2026-11-12-loader-status-text-is-no-heading.md) | behavior |
 | 2026-11-12 | [PopupMenu item labels wrap instead of being cut off](2026-11-12-popup-menu-labels-wrap.md) | behavior |
 | 2026-11-12 | [CountryFlags, CountryCodes and CountryOption.value are typed by CountryCode, and CountryFlags is frozen](2026-11-12-country-flags-typed-by-country-code.md) | type, behavior |
