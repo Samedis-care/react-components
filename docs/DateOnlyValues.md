@@ -141,6 +141,18 @@ formatDateOnly(date, locale, ToDateLocaleStringOptions);
 Same for `moment(value).format(…)`, `moment(value).startOf("day")`, `value.getDate()` and
 friends: convert with `denormalizeDate` first, or read the UTC parts directly.
 
+A picker's other dates are local `Moment`s too: hand it its bounds the same way
+(`minDate={moment(denormalizeDate(min))}`, also `maxDate` and `referenceDate`), and take the
+days its callbacks receive (`shouldDisableDate`, `onAccept`, …) back with
+`normalizeDate(day.toDate())`.
+
+`DateInput` does all of this itself. Every date it takes or gives is a date-only value, its
+bounds and callbacks included, so pass them as they are:
+
+```tsx
+<DateInput value={value} onChange={setValue} minDate={parseDateOnly("2026-01-01")} … />
+```
+
 ### 4. Writing from a picker
 
 ```ts
@@ -183,6 +195,11 @@ grep -rnE "new Date\(" src/ | grep -iE "date|day|birthday|expir|valid"
   parts. Code that consumed its output directly, or built values for it with
   `localDateToUtcDate`, needs steps 3 and 4 above — otherwise it is now off by one in the
   other direction.
+- `DateInput`'s other date props (`minDate`, `maxDate`, `referenceDate`,
+  `shouldDisableDate`/`Month`/`Year`, `onAccept`, `onError`, `onMonthChange`, `onYearChange`,
+  `dayOfWeekFormatter`) take and give date-only values too, instead of MUI's local `Moment`s,
+  and its `defaultValue` is gone; see
+  [the breaking change](../breaking-changes/2026-11-13-date-input-date-only-date-props.md).
 - `TypeDate` / `TypeDateNullable` `deserialize` now reads calendar dates by their UTC day and
   timestamps by the viewer's local day (see
   [Timestamps rendered as dates](#timestamps-rendered-as-dates)); `stringify` formats by the

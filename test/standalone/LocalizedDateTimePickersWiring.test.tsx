@@ -867,7 +867,7 @@ describe("leaving the field", () => {
 					label="Due"
 					value={new Date(STORED)}
 					onChange={vi.fn()}
-					maxDate={moment(STORED).endOf("day")}
+					maxDate={new Date("2026-08-01T12:00:00.000Z")}
 					onBlur={onBlur}
 				/>
 			),
