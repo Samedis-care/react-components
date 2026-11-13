@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/vitest";
-import React, { useContext, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
 	describe,
 	it,
@@ -16,7 +16,11 @@ import {
 	act,
 	fireEvent,
 } from "@testing-library/react";
-import { createMemoryHistory, MemoryHistory } from "history";
+import {
+	createBrowserHistory,
+	createMemoryHistory,
+	MemoryHistory,
+} from "history";
 import { setFrameworkHistory } from "../../src/framework/History";
 import DialogContextProvider, {
 	DialogContextType,
@@ -167,113 +171,29 @@ describe("pushDialog", () => {
 		expect(openDialogs()).toEqual(["First"]);
 	});
 
-	it("releases the navigation block when the last dialog closes through it", () => {
+	it("[ISSUE-3497-ITEM-2] blocks neither navigation nor closing the tab, and the dialogs stay open", () => {
 		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
+		// a browser history: only that one blocks closing the tab while it blocks navigation
+		const browserHistory = createBrowserHistory();
+		setFrameworkHistory(browserHistory);
 		renderProvider();
-		const closeFirst = push(<Named name={"First"} />);
-		const closeSecond = push(<Named name={"Second"} />);
+		push(<Named name={"First"} />);
+		push(<Named name={"Second"} />);
 
-		act(() => closeFirst());
-		act(() => history.push("/blocked"));
-		expect(alert).toHaveBeenCalledTimes(1);
-		expect(history.location.pathname, "navigated with a dialog open").toBe("/");
-
-		act(() => closeSecond());
-		act(() => history.push("/free"));
-		expect(alert).toHaveBeenCalledTimes(1);
-		expect(history.location.pathname).toBe("/free");
-	});
-
-	it("releases the navigation block when the dialog is closed before the next render", () => {
-		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
-		renderProvider();
-		act(() => {
-			const close = ctx[0](<Named name={"First"} />);
-			close();
+		act(() => browserHistory.push("/elsewhere"));
+		const unload = new Event("beforeunload", { cancelable: true });
+		window.dispatchEvent(unload);
+		expect({
+			path: browserHistory.location.pathname,
+			alerts: alert.mock.calls.length,
+			unloadBlocked: unload.defaultPrevented,
+			open: openDialogs(),
+		}).toEqual({
+			path: "/elsewhere",
+			alerts: 0,
+			unloadBlocked: false,
+			open: ["First", "Second"],
 		});
-		act(() => history.push("/free"));
-		expect(alert).not.toHaveBeenCalled();
-		expect(history.location.pathname).toBe("/free");
-	});
-});
-
-describe("navigation block while dialogs close", () => {
-	/** what allowNavigation the dialogs got, by name */
-	const allowers: Record<string, (() => () => void) | undefined> = {};
-	/** A dialog named `name` that hands out its allowNavigation */
-	const Allowing = (props: { name: string }) => {
-		allowers[props.name] = useContext(
-			PushedDialogCloseContext,
-		)?.allowNavigation;
-		return <Named name={props.name} />;
-	};
-	const allow = (name: string) => {
-		const allowNavigation = allowers[name];
-		if (!allowNavigation) throw new Error("no allowNavigation in " + name);
-		let blockAgain!: () => void;
-		act(() => {
-			blockAgain = allowNavigation();
-		});
-		return blockAgain;
-	};
-	/** pushes the path and returns where the history is then */
-	const navigate = (to: string) => {
-		act(() => history.push(to));
-		return history.location.pathname;
-	};
-
-	it("[ISSUE-3497-ITEM-2] lets navigation through while every open dialog allows it, until each allowance is taken back", () => {
-		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
-		renderProvider();
-		push(<Allowing name={"First"} />);
-		push(<Allowing name={"Second"} />);
-
-		const blockSecondAgain = allow("Second");
-		expect(navigate("/a"), "First still blocks").toBe("/");
-		expect(alert).toHaveBeenCalledTimes(1);
-
-		const blockFirstAgain = allow("First");
-		const blockFirstAgainToo = allow("First");
-		expect(navigate("/b")).toBe("/b");
-		act(() => blockFirstAgain());
-		act(() => blockFirstAgain());
-		expect(navigate("/c"), "one allowance of First is left").toBe("/c");
-		act(() => blockFirstAgainToo());
-		expect(navigate("/d")).toBe("/c");
-		expect(alert).toHaveBeenCalledTimes(2);
-
-		act(() => blockSecondAgain());
-		allow("First");
-		expect(navigate("/e"), "Second blocks again").toBe("/c");
-		expect(alert).toHaveBeenCalledTimes(3);
-	});
-
-	it("[ISSUE-3497-ITEM-2] an allowance taken back after its dialog closed blocks nothing", () => {
-		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
-		renderProvider();
-		const closeOnly = push(<Allowing name={"Only"} />);
-		const blockAgain = allow("Only");
-		act(() => closeOnly());
-		act(() => blockAgain());
-		expect(navigate("/free")).toBe("/free");
-		expect(alert).not.toHaveBeenCalled();
-	});
-
-	it("[ISSUE-3497-ITEM-2] the navigation block alerts in the language switched to while the dialog is open", async () => {
-		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
-		const initialLanguage = ccI18n.language;
-		await ccI18n.loadLanguages(["de"]);
-		try {
-			renderProvider();
-			push(<Allowing name={"Only"} />);
-			await act(() => ccI18n.changeLanguage("de-DE"));
-			expect(navigate("/blocked")).toBe("/");
-			expect(alert).toHaveBeenCalledWith(
-				"Die Navigation ist gesperrt. Bitte schließe zuerst die geöffneten Dialoge.",
-			);
-		} finally {
-			await act(() => ccI18n.changeLanguage(initialLanguage));
-		}
 	});
 });
 

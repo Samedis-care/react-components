@@ -65,8 +65,6 @@ export interface FormDialogProps {
 	 * dialog. A dialog rendered without pushDialog closes only through onClose, which has to
 	 * stop rendering it. Not called when the content closes the dialog (useCloseThisDialog,
 	 * popDialog, a goBack).
-	 * @remarks Runs while the dialog is still open: a navigation from onClose is blocked like
-	 *          any navigation while a pushed dialog is open.
 	 */
 	onClose?: () => void;
 	/**

@@ -244,11 +244,6 @@
 			"label": "Yuklanmoqda…"
 		}
 	},
-	"framework": {
-		"dialogs": {
-			"navblock": "Navigatsiya bloklangan. Iltimos, avval ochiq muloqot oynalarini yoping."
-		}
-	},
 	"non-standalone": {
 		"dialog": {
 			"okay": "OK",

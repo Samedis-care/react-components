@@ -244,11 +244,6 @@
 			"label": "Caricamento…"
 		}
 	},
-	"framework": {
-		"dialogs": {
-			"navblock": "La navigazione è bloccata. Chiudi prima le finestre di dialogo aperte."
-		}
-	},
 	"non-standalone": {
 		"dialog": {
 			"okay": "OK",

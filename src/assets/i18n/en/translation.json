@@ -244,11 +244,6 @@
 			"label": "Loading…"
 		}
 	},
-	"framework": {
-		"dialogs": {
-			"navblock": "Navigation is blocked. Please close your open dialogs first."
-		}
-	},
 	"non-standalone": {
 		"dialog": {
 			"okay": "OK",

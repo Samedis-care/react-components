@@ -11,15 +11,13 @@ export interface IDialogButtonConfig {
 	/**
 	 * Called when the button is clicked. A returned promise is awaited. Unless `dontClose` is
 	 * set, the dialog closes and calls its `onClose` afterwards (FormDialog closes before the
-	 * handler runs, and calls `onClose` afterwards). Navigation is blocked while a dialog is
-	 * open, but not by a dialog that closes after the handler: without `dontClose` the handler
-	 * may navigate, unless another dialog is open.
+	 * handler runs, and calls `onClose` afterwards).
 	 * @param close Closes the dialog this button belongs to, at once, and only that one, also
-	 *              while dialogs pushed after it are open; e.g. before navigating from a
-	 *              `dontClose` button. It does not call the dialog's `onClose`:
-	 *              the dialog calls it once the handler has ended (returned, or its promise
-	 *              settled, also rejected), so a `show…Dialog` helper's promise settles only
-	 *              then. Called after the handler has ended, it calls `onClose` right away.
+	 *              while dialogs pushed after it are open, e.g. before work the dialog should
+	 *              not wait for. It does not call the dialog's `onClose`: the dialog calls it
+	 *              once the handler has ended (returned, or its promise settled, also
+	 *              rejected), so a `show…Dialog` helper's promise settles only then. Called
+	 *              after the handler has ended, it calls `onClose` right away.
 	 *              Calling it is optional (without `dontClose` the dialog closes after the
 	 *              handler anyway), and calling it again does nothing. In a dialog rendered
 	 *              without pushDialog it closes nothing itself: the dialog closes when its
@@ -96,7 +94,7 @@ export interface IDialogConfigConfirm {
 	 */
 	textButtonYes: React.ReactNode;
 	/**
-	 * The callback for the yes button (the dialog closes automatically). It may navigate.
+	 * The callback for the yes button (the dialog closes automatically)
 	 */
 	handlerButtonYes: () => void;
 	/**
@@ -104,7 +102,7 @@ export interface IDialogConfigConfirm {
 	 */
 	textButtonNo: React.ReactNode;
 	/**
-	 * The callback for the no button (the dialog closes automatically). It may navigate.
+	 * The callback for the no button (the dialog closes automatically)
 	 */
 	handlerButtonNo: () => void;
 }

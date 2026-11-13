@@ -244,11 +244,6 @@
 			"label": "Chargement…"
 		}
 	},
-	"framework": {
-		"dialogs": {
-			"navblock": "La navigation est bloquée. Veuillez d'abord fermer vos boîtes de dialogue ouvertes."
-		}
-	},
 	"non-standalone": {
 		"dialog": {
 			"okay": "OK",

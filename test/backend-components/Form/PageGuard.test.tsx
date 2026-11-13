@@ -37,6 +37,7 @@ import {
 	makeDirty,
 	makePage,
 	makePeopleModel,
+	mountDialogPage,
 	mountPage,
 	PeopleModel,
 	saveButton,
@@ -320,5 +321,22 @@ describe("Form page leave guard: Yes leaves", () => {
 		expect(goBack).toHaveBeenCalledTimes(1);
 		expect(alert).not.toHaveBeenCalled();
 		expect(leavePrompts()).toHaveLength(0);
+	});
+
+	it("[ISSUE-3497-ITEM-2] a form in a FullFormDialog lets a navigation through while it is clean; once dirty it asks and closing the tab is blocked", async () => {
+		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
+		const { open, history } = mountDialogPage(FieldPage);
+		const input = await open();
+		await navigate("/clean");
+		expect(history.location.pathname).toBe("/clean");
+		expect(leavePrompts()).toHaveLength(0);
+
+		fireEvent.change(input, { target: { value: "AliceX" } });
+		await waitFor(() => expect(saveButton()).toBeEnabled());
+		expect(unloadIsBlocked(), "closing the tab is not guarded").toBe(true);
+		await navigate("/dirty");
+		expect(history.location.pathname).toBe("/clean");
+		expect(leavePrompts()).toHaveLength(1);
+		expect(alert).not.toHaveBeenCalled();
 	});
 });

@@ -55,7 +55,7 @@ describe("MultiImage", () => {
 	 * navigates, the "#" entry it pushes has a null history state, which takes
 	 * history@5's popstate handler down the "location we did not create" branch:
 	 * it stops calling the blockers, so every FrameworkHistory.block guard on the
-	 * page (dialog nav block, dirty form guard) silently dies. jsdom does not
+	 * page (the dirty form guard) silently dies. jsdom does not
 	 * follow fragment links, so the cancelled default is what we can assert on.
 	 */
 	it("does not navigate when the edit label is clicked", () => {

@@ -244,11 +244,6 @@
 			"label": "Cargando…"
 		}
 	},
-	"framework": {
-		"dialogs": {
-			"navblock": "La navegación está bloqueada. Cierre primero los diálogos abiertos."
-		}
-	},
 	"non-standalone": {
 		"dialog": {
 			"okay": "OK",

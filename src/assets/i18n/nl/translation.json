@@ -244,11 +244,6 @@
 			"label": "Laadt…"
 		}
 	},
-	"framework": {
-		"dialogs": {
-			"navblock": "Navigatie is geblokkeerd. Sluit eerst jouw geopende dialoogvensters."
-		}
-	},
 	"non-standalone": {
 		"dialog": {
 			"okay": "OK",

@@ -244,11 +244,6 @@
 			"label": "Lädt…"
 		}
 	},
-	"framework": {
-		"dialogs": {
-			"navblock": "Die Navigation ist gesperrt. Bitte schließe zuerst die geöffneten Dialoge."
-		}
-	},
 	"non-standalone": {
 		"dialog": {
 			"okay": "OK",
