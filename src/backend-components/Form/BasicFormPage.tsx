@@ -13,25 +13,20 @@ import {
 	useFormContextLite,
 } from "../Form";
 import { FormDirtyEvent } from "./FormEvents";
-import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
-import { FrameworkHistory } from "../../framework/History";
+import { FormPageGuardContext } from "./FormPageGuard";
 import { useDialogContext } from "../../framework/DialogContextProvider";
 import { captureError } from "../../framework/ErrorReporting";
 import { ModelUnknown } from "../../backend-integration/Model/Model";
 import {
 	showConfirmDialog,
-	showConfirmDialogBool,
 	showErrorDialog,
 } from "../../non-standalone/Dialog/Utils";
-import { FormDialogDispatchContext } from "./FormDialog";
 import FormPageLayout, {
 	FormPageLayoutProps,
 } from "../../standalone/Form/FormPageLayout";
 import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { Action, Transition } from "history";
 import { RouteContext } from "../../standalone/Routes/Route";
-import matchPath from "../../standalone/Routes/matchPath";
 import { useThemeProps } from "@mui/material";
 import { CrudFormProps } from "../CRUD";
 
@@ -135,24 +130,6 @@ export const BasicFormPageNestingContext = createContext<
 	((active: boolean) => void) | null
 >(null);
 
-/**
- * Does a navigation to pathname stay inside the form page (routed tab panels, a routed
- * stepper)? It does when the form's Route still renders at pathname with the same url: the
- * url itself or a path below it (/rec/1 → /rec/1/more), not one that only starts with the
- * same characters (/rec/10, /rec/1-archive).
- * At the root this follows the Route too: a Route "/" renders only at "/", so every other
- * path leaves the page; a Route "/*" renders at every path, so for it no path leaves the
- * page.
- * @param routePath The full path of the form's nearest Route (RouteContext path)
- * @param routeUrl The url the Route currently matches (RouteContext url)
- * @param pathname The navigation's target
- */
-const isInsideFormPage = (
-	routePath: string,
-	routeUrl: string,
-	pathname: string,
-): boolean => matchPath({ path: routePath }, pathname)?.url === routeUrl;
-
 const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	inProps: BasicFormPageProps<RendererPropsT, CustomPropsT>,
 ) => {
@@ -176,13 +153,13 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	const { readOnly, readOnlyReasons, addEventListener, removeEventListener } =
 		useFormContextLite<ModelUnknown>();
 	// a save makes the form read-only too, but its changes are unsaved until it succeeds and
-	// a failed save is shown in the form, so a form being saved keeps its guards. Only a form
-	// which is read-only for another reason goes without them.
+	// a failed save is shown in the form, so goBack asks while the form saves, like the
+	// Form's leave guard. A form which is read-only for another reason is left without asking.
 	const readOnlyBesidesSaving = Object.keys(readOnlyReasons).some(
 		(reason) => reason !== FORM_SUBMITTING_READ_ONLY_REASON,
 	);
 	// the dirty prop is one render behind the form engine, which breaks "submit, then
-	// navigate away": the record is saved, but the guards below still see a dirty form.
+	// go back": the record is saved, but goBack below would still see a dirty form.
 	// The dirty event fires as soon as the form engine sees the change, so this ref is
 	// current even while a re-render is still pending.
 	const dirtyRef = useRef(dirty);
@@ -205,121 +182,15 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 		return () => hideParent(false);
 	}, [hideParent]);
 	const [pushDialog] = useDialogContext();
-	const formDialog = useContext(FormDialogDispatchContext);
-	const unblock = useRef<(() => void) | undefined>(undefined);
 	const routeCtx = useContext(RouteContext);
 	if (!disableRouting && !routeCtx) throw new Error("no route match");
-	const routeUrl = routeCtx ? routeCtx.url : "";
-	const routePath = routeCtx ? routeCtx.path : "";
-
+	// the leave guard belongs to the Form, which keeps the changes also while this page is
+	// not mounted (a page in a routed tab panel when another tab is open): this page only
+	// switches it on, for the rest of the Form's life
+	const pageGuard = useContext(FormPageGuardContext);
 	useEffect(() => {
-		// if the form is read-only, don't annoy the user
-		if (readOnlyBesidesSaving) return;
-		// set while the history block is lifted for a POP inside the form page, see passThrough
-		let stopWaitingForPop: (() => void) | null = null;
-		const releaseHistoryBlock = () => {
-			if (unblock.current) {
-				unblock.current();
-				unblock.current = undefined;
-			}
-		};
-		const blocker = (transition: Transition) => {
-			const allowTransition = () => {
-				// temp unblock to retry transaction
-				releaseHistoryBlock();
-				transition.retry();
-			};
-			// lets a navigation inside the form page through and keeps the page guarded
-			const passThrough = () => {
-				releaseHistoryBlock();
-				if (transition.action === Action.Pop) {
-					// A browser history reverts every POP while a blocker is set and retries
-					// it asynchronously (history.go), so block again only once the retried POP
-					// has arrived: blocking at once would revert it again, and so on forever.
-					stopWaitingForPop = FrameworkHistory.listen(() =>
-						applyGuards(dirtyRef.current),
-					);
-					transition.retry();
-				} else {
-					// PUSH and REPLACE are retried synchronously
-					transition.retry();
-					applyGuards(dirtyRef.current);
-				}
-			};
-			//console.log("History.block(", location, ",", action, ")", match);
-			// the form may have gone clean since the guards were applied (a submit resolves
-			// before React re-renders), so never ask about changes which no longer exist
-			if (!dirtyRef.current) {
-				applyGuards(false);
-				transition.retry();
-				return;
-			}
-			// special handling: routing inside form page (e.g. routed tab panels, routed stepper)
-			if (
-				!disableRouting &&
-				isInsideFormPage(routePath, routeUrl, transition.location.pathname)
-			) {
-				passThrough();
-				return;
-			}
-			// otherwise: ask user for confirmation
-			void (async () => {
-				const leave = await showConfirmDialogBool(pushDialog, {
-					title: t("backend-components.form.back-on-dirty.title"),
-					message: t("backend-components.form.back-on-dirty.message"),
-					textButtonYes: t("backend-components.form.back-on-dirty.yes"),
-					textButtonNo: t("backend-components.form.back-on-dirty.no"),
-				});
-				if (leave) {
-					allowTransition();
-				}
-			})();
-		};
-		// the guards are driven by the form engine's dirty event rather than by rendered
-		// state, so that submitting and then leaving in one go isn't stopped by a dirty
-		// flag which a pending re-render would have cleared. Idempotent in both directions.
-		let releaseLocks: (() => void) | null = null;
-		const applyGuards = (isDirty: boolean) => {
-			if (stopWaitingForPop) {
-				stopWaitingForPop();
-				stopWaitingForPop = null;
-			}
-			if (isDirty) {
-				if (!unblock.current) unblock.current = FrameworkHistory.block(blocker);
-				if (releaseLocks) return;
-				const safeToLeave = UnsafeToLeaveDispatch.lock("form-dirty");
-				if (formDialog) formDialog.blockClosing();
-				releaseLocks = () => {
-					safeToLeave();
-					if (formDialog) formDialog.unblockClosing();
-				};
-			} else {
-				releaseHistoryBlock();
-				if (releaseLocks) {
-					releaseLocks();
-					releaseLocks = null;
-				}
-			}
-		};
-		const handleDirtyChange = (event: FormDirtyEvent) =>
-			applyGuards(event.dirty);
-		applyGuards(dirtyRef.current);
-		addEventListener("dirty", handleDirtyChange);
-		return () => {
-			removeEventListener("dirty", handleDirtyChange);
-			applyGuards(false);
-		};
-	}, [
-		readOnlyBesidesSaving,
-		t,
-		formDialog,
-		routePath,
-		routeUrl,
-		pushDialog,
-		disableRouting,
-		addEventListener,
-		removeEventListener,
-	]);
+		pageGuard?.enable();
+	}, [pageGuard]);
 
 	// go back confirm dialog if form is dirty
 	const customPropsWithGoBack:
@@ -353,10 +224,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 									textButtonNo: t("backend-components.form.back-on-dirty.no"),
 								});
 							}
-							if (unblock.current) {
-								unblock.current();
-								unblock.current = undefined;
-							}
+							pageGuard?.releaseHistoryBlock();
 							orgGoBack(forceRefresh);
 						} catch {
 							// user cancelled

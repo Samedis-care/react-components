@@ -46,6 +46,7 @@ import ValidationError from "./ValidationError";
 import TypedEventTarget from "../../utils/TypedEventTarget";
 import { FormEvents, FormEventTarget } from "./FormEvents";
 import { DirtyStateContext, NO_DIRTY_STATE } from "./DirtyStateContext";
+import useFormPageGuard, { FormPageGuardContext } from "./FormPageGuard";
 import deepEqual from "../../utils/deepEqual";
 import toComparisonJson from "../../utils/toComparisonJson";
 import { captureError } from "../../framework/ErrorReporting";
@@ -2405,6 +2406,20 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 		useMemo(() => ({ "ccform dirty?": () => debugDirty(true) }), [debugDirty]),
 	);
 
+	// the leave guard which the form pages switch on. The Form holds it, so it lasts as long
+	// as the changes do, also while no form page is mounted (one in a routed tab panel when
+	// another tab is open). A save makes the form read-only too, but its changes are unsaved
+	// until it succeeds, so only a form which is read-only for another reason goes unguarded.
+	const pageGuard = useFormPageGuard({
+		disableRouting: !!props.disableRouting,
+		readOnlyBesidesSaving: Object.keys(readOnlyReasons).some(
+			(reason) => reason !== FORM_SUBMITTING_READ_ONLY_REASON,
+		),
+		dirty,
+		addEventListener: formEvents.addEventListener,
+		removeEventListener: formEvents.removeEventListener,
+	});
+
 	// context and rendering
 	const Children = useMemo(() => React.memo(children), [children]);
 	const setError = useCallback(
@@ -2637,19 +2652,21 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 					<Loader />
 				</div>
 			) : (
-				<Children
-					isSubmitting={submitting}
-					values={
-						props.renderConditionally ? asModelRecord<M>(values) : undefined
-					}
-					submit={submitForm}
-					safeSubmit={safeSubmitForm}
-					reset={resetForm}
-					dirty={dirty}
-					id={id}
-					customProps={customProps}
-					disableRouting={!!props.disableRouting}
-				/>
+				<FormPageGuardContext.Provider value={pageGuard}>
+					<Children
+						isSubmitting={submitting}
+						values={
+							props.renderConditionally ? asModelRecord<M>(values) : undefined
+						}
+						submit={submitForm}
+						safeSubmit={safeSubmitForm}
+						reset={resetForm}
+						dirty={dirty}
+						id={id}
+						customProps={customProps}
+						disableRouting={!!props.disableRouting}
+					/>
+				</FormPageGuardContext.Provider>
 			)}
 		</DirtyStateContext.Provider>
 	);
