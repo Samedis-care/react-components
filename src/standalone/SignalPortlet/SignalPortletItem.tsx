@@ -40,7 +40,9 @@ export interface SignalPortletItemProps {
 	 */
 	link?: string;
 	/**
-	 * custom CSS classes to apply to root/rootBtn
+	 * Class name for the row's `<li>` (the `root` slot), with or without
+	 * link. This is also the element that SignalPortlet's `classes.item` and
+	 * its theme slot `item` style.
 	 */
 	className?: string;
 	/**
@@ -111,9 +113,10 @@ const ListRootButton = styled(ListItemButton, {
 /**
  * Slots of a SignalPortlet row, for an item's `classes` and for the theme's
  * `components.CcSignalPortletItem.styleOverrides`:
- * - `root`: the ListItem (`<li>`) of a row without link
- * - `rootBtn`: the ListItemButton (a `div` with role button) of a row with
- *   link
+ * - `root`: the ListItem (`<li>`) of every row. A row with link has no
+ *   padding here (MUI's `disablePadding`), its ListItemButton has it.
+ * - `rootBtn`: the ListItemButton (a `div` with role button) inside the
+ *   `<li>` of a row with link
  * - `listAvatar`: the ListItemAvatar around the count
  * - `itemColorLoading`, `itemColorActive`, `itemColorInactive`: the 40px
  *   Avatar while the count is `null` or `undefined`, when it is non-zero, and
@@ -182,16 +185,20 @@ const SignalPortletItem = (inProps: SignalPortletItemProps) => {
 			<ListText slotProps={{ primary: textTypographyProps }}>{text}</ListText>
 		</>
 	);
-	return link ? (
-		<ListRootButton
-			onClick={handleClick}
-			className={combineClassNames([className, classes?.rootBtn])}
+	// every row is a list item; a linked row puts its button inside, as in
+	// MUI's ListItem disablePadding + ListItemButton pattern
+	return (
+		<ListRoot
+			disablePadding={!!link}
+			className={combineClassNames([className, classes?.root])}
 		>
-			{content}
-		</ListRootButton>
-	) : (
-		<ListRoot className={combineClassNames([className, classes?.root])}>
-			{content}
+			{link ? (
+				<ListRootButton onClick={handleClick} className={classes?.rootBtn}>
+					{content}
+				</ListRootButton>
+			) : (
+				content
+			)}
 		</ListRoot>
 	);
 };

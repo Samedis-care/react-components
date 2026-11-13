@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeAll, afterEach } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import React from "react";
-import { render, screen, cleanup, act, within } from "@testing-library/react";
-import { ThemeProvider, createTheme, Theme } from "@mui/material";
+import { act, cleanup, render, screen, within } from "@testing-library/react";
+import { createTheme, Theme, ThemeProvider } from "@mui/material";
 import { createMemoryHistory, MemoryHistory } from "history";
 import SignalPortlet, {
 	SignalPortletProps,
@@ -43,6 +43,7 @@ const avatars = (container: HTMLElement) =>
 	Array.from(container.querySelectorAll<HTMLElement>(".MuiAvatar-root"));
 
 const ageLabel = () => screen.queryByText(/^Last refresh: /);
+
 const refreshButton = () => screen.queryByRole("button", { name: "Refresh" });
 
 beforeAll(async () => {
@@ -246,5 +247,69 @@ describe("SignalPortlet: footer", () => {
 		expect(ageLabel()).toHaveTextContent(
 			`Last refresh: ${timestampToAge(new Date(fetchedAt))}`,
 		);
+	});
+});
+
+describe("SignalPortlet: theme and classes", () => {
+	it("[ISSUE-3469-ITEM-13] puts a row's className, classes.item and root on its <li>, and rootBtn on the button of a linked row", () => {
+		const t = createTheme({
+			components: {
+				CcSignalPortlet: { styleOverrides: { item: { columnGap: "8px" } } },
+				CcSignalPortletItem: {
+					styleOverrides: {
+						root: { rowGap: "6px" },
+						rootBtn: { rowGap: "7px" },
+					},
+				},
+			},
+		});
+		const itemClasses = { root: "i-root", rootBtn: "i-btn" };
+		renderP(
+			{
+				title: "T",
+				classes: { item: "c-item" },
+				items: [
+					{ count: 1, text: "linked", link: "/a", classes: itemClasses },
+					{ count: 2, text: "plain", classes: itemClasses },
+				],
+			},
+			{ theme: t },
+		);
+		const [linked, plain] = Array.from(screen.getByRole("list").children);
+		for (const row of [linked, plain]) {
+			expect(row).toHaveClass("c-item", "i-root");
+			expect(row).not.toHaveClass("i-btn");
+			expect(getComputedStyle(row).columnGap).toBe("8px");
+			expect(getComputedStyle(row).rowGap).toBe("6px");
+		}
+		const btn = screen.getByRole("button", { name: "1 linked" });
+		expect(btn.parentElement).toBe(linked);
+		expect(btn).toHaveClass("i-btn");
+		expect(btn).not.toHaveClass("c-item");
+		expect(btn).not.toHaveClass("i-root");
+		expect(getComputedStyle(btn).rowGap).toBe("7px");
+		expect(getComputedStyle(btn).columnGap).not.toBe("8px");
+		// a row without link has no button
+		expect(within(plain as HTMLElement).queryByRole("button")).toBeNull();
+	});
+});
+
+describe("SignalPortlet: accessibility", () => {
+	it("[ISSUE-3469-ITEM-13] renders every row, linked or not, as a list item", () => {
+		renderP({
+			title: "T",
+			items: [
+				{ count: 1, text: "linked", link: "/a" },
+				{ count: 2, text: "plain" },
+				{ count: null, text: "loading", link: "/b" },
+			],
+		});
+		const list = screen.getByRole("list");
+		expect(Array.from(list.children).map((c) => c.tagName)).toEqual([
+			"LI",
+			"LI",
+			"LI",
+		]);
+		expect(within(list).getAllByRole("listitem")).toHaveLength(3);
 	});
 });

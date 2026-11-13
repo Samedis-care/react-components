@@ -145,3 +145,52 @@ export const Issue3469Item1CappedCountFitsItsAvatar: Story = {
 		}
 	},
 };
+
+/**
+ * Every row is a list item: a linked row's button sits inside its `<li>`,
+ * fills it and is laid out like a plain row
+ */
+export const Issue3469Item13RowsAreListItems: Story = {
+	render: () => (
+		<WithRouter>
+			<SignalPortlet
+				title="Linked Items"
+				items={[
+					{ count: 7, text: "Active Users", link: "/users" },
+					{ count: 2, text: "Plain row" },
+				]}
+			/>
+		</WithRouter>
+	),
+	parameters: { a11y: { test: "error" } },
+	play: async ({ canvas }) => {
+		const rows = canvas.getAllByRole("listitem");
+		await expect(rows).toHaveLength(2);
+		const [linked, plain] = rows;
+		// the button fills its list item, so the whole row reacts to hover and focus
+		const btn = canvas.getByRole("button", { name: "7 Active Users" });
+		const rowBox = linked.getBoundingClientRect();
+		const btnBox = btn.getBoundingClientRect();
+		await expect([btnBox.width, btnBox.height]).toEqual([
+			rowBox.width,
+			rowBox.height,
+		]);
+		// a linked row is laid out like a plain one: same height, avatar and text
+		// at the same place
+		const layout = (row: HTMLElement) => {
+			const box = row.getBoundingClientRect();
+			const at = (selector: string) => {
+				const el = row.querySelector(selector);
+				if (!el) throw new Error(`no ${selector}`);
+				const r = el.getBoundingClientRect();
+				return [r.left - box.left, r.top - box.top];
+			};
+			return {
+				height: box.height,
+				avatar: at(".MuiAvatar-root"),
+				text: at(".MuiListItemText-root"),
+			};
+		};
+		await expect(layout(linked)).toEqual(layout(plain));
+	},
+};
