@@ -24,6 +24,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [The date pickers report a blur when focus leaves the open calendar](2026-11-13-picker-blur-on-leaving-the-calendar.md) | behavior |
 | 2026-11-13 | [Matrix columns are 56px wide by default, and the add chip is 24x24](2026-11-13-matrix-targets-24px.md) | behavior |
 | 2026-11-13 | [A dimmed Matrix entry fades its fill only, and its label is picked for the faded fill](2026-11-13-matrix-dimmed-entry-fades-fill-only.md) | behavior |
+| 2026-11-13 | [The touch Clear button is hidden while the input is read-only or disabled](2026-11-13-text-field-clear-hidden-while-read-only.md) | behavior |
 | 2026-11-13 | [The Matrix add chip is named after its cell](2026-11-13-matrix-add-chip-names-its-cell.md) | behavior |
 | 2026-11-13 | [A diagonal Matrix pair goes through renderItem, as its first entry](2026-11-13-matrix-diagonal-pair-goes-through-render-item.md) | behavior |
 | 2026-11-13 | [A Matrix entry's tooltip is its accessible description](2026-11-13-matrix-entry-tooltip-is-its-description.md) | behavior |

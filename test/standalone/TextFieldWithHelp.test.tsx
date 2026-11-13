@@ -1,7 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import React from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	within,
+} from "@testing-library/react";
 import { ThemeProvider, createTheme, MenuItem } from "@mui/material";
+import { computeAccessibleName } from "dom-accessibility-api";
 import TextFieldWithHelp from "../../src/standalone/UIKit/TextFieldWithHelp";
 
 // jsdom has "ontouchstart" on window, so isTouchDevice() is true unless mocked;
@@ -23,6 +30,12 @@ afterEach(() => {
 
 const noop = () => {};
 
+/** names of the buttons inside the field, in DOM order */
+const buttonNames = (root: HTMLElement = document.body) =>
+	within(root)
+		.queryAllByRole("button")
+		.map((button) => computeAccessibleName(button));
+
 describe("TextFieldWithHelp", () => {
 	describe("which fields show the Clear button", () => {
 		it("[ISSUE-3483-ITEM-1] shows none in a select without customHandleClear", async () => {
@@ -33,6 +46,55 @@ describe("TextFieldWithHelp", () => {
 			);
 			await screen.findByRole("combobox", { name: "Status" });
 			expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
+		});
+
+		it("[ISSUE-3483-ITEM-2] shows none while the field is read-only", async () => {
+			const seen: string[] = [];
+			wrap(
+				<>
+					<TextFieldWithHelp
+						label="Invoice"
+						value="R-1"
+						onChange={(e) => seen.push(e.target.value)}
+						slotProps={{ input: { readOnly: true } }}
+					/>
+					<TextFieldWithHelp
+						label="Number"
+						value="42"
+						onChange={(e) => seen.push(e.target.value)}
+						slotProps={{ htmlInput: { readOnly: true } }}
+					/>
+				</>,
+			);
+			await screen.findByRole("textbox", { name: "Invoice" });
+			expect(buttonNames()).toEqual([]);
+		});
+
+		it("[ISSUE-3483-ITEM-2] shows none while the input is disabled through slotProps, and shows it once the input is editable", async () => {
+			const Field = ({ locked }: { locked: boolean }) => (
+				<ThemeProvider theme={theme}>
+					<TextFieldWithHelp
+						label="Total"
+						value="120"
+						onChange={noop}
+						slotProps={{ input: { disabled: locked } }}
+					/>
+					<TextFieldWithHelp
+						label="Net"
+						value="100"
+						onChange={noop}
+						slotProps={{ htmlInput: () => ({ disabled: locked }) }}
+					/>
+				</ThemeProvider>
+			);
+			const { rerender } = render(<Field locked />);
+			expect(
+				await screen.findByRole("textbox", { name: "Total" }),
+			).toBeDisabled();
+			expect(screen.getByRole("textbox", { name: "Net" })).toBeDisabled();
+			expect(buttonNames()).toEqual([]);
+			rerender(<Field locked={false} />);
+			expect(buttonNames()).toEqual(["Clear", "Clear"]);
 		});
 
 		it("[ISSUE-3483-ITEM-7] shows the Clear button for a defaultValue, before anything is typed", async () => {

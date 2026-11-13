@@ -1104,3 +1104,20 @@ describe("DecimalInputField", () => {
 		});
 	});
 });
+
+describe("all three number inputs", () => {
+	it("[ISSUE-3484-ITEM-23] shows no Clear button on a touch device while the input is disabled through slotProps.htmlInput", () => {
+		env.touch = true;
+		// SCF's display-only cost total (DeviceTaskCostFields)
+		render(
+			<CurrencyInput
+				label="Total"
+				currency="EUR"
+				value={120}
+				slotProps={{ htmlInput: { disabled: true } }}
+			/>,
+		);
+		expect(field("Total")).toBeDisabled();
+		expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
+	});
+});

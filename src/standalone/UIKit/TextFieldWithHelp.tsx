@@ -32,8 +32,10 @@ export interface TextFieldWithHelpProps extends UIInputProps {
 	customHandleClear?: () => void;
 	/**
 	 * Hides the Clear button. That button is only rendered on touch devices,
-	 * while the field shows a value (`0` included) and is not disabled; in a
-	 * `select` only with `customHandleClear`.
+	 * while the field shows a value (`0` included) and its input can be
+	 * edited: not while the field is `disabled`, nor while `slotProps.input`
+	 * or `slotProps.htmlInput` sets `readOnly` or `disabled`. In a `select`
+	 * only with `customHandleClear`.
 	 * @default false
 	 */
 	disableClearable?: boolean;
@@ -137,8 +139,16 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 					) as InputBaseComponentProps | undefined;
 					const value: unknown =
 						htmlInputProps?.value ?? muiProps.value ?? uncontrolledValue;
+					// the input slots can lock the input while the field is not disabled
+					const inputLocked = !!(
+						orgSlotProps.readOnly ||
+						orgSlotProps.disabled ||
+						htmlInputProps?.readOnly ||
+						htmlInputProps?.disabled
+					);
 					const showClear =
 						canClear &&
+						!inputLocked &&
 						value != null &&
 						value !== "" &&
 						!(Array.isArray(value) && value.length === 0);
