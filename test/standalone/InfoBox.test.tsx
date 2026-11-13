@@ -1,6 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import {
+	render,
+	screen,
+	fireEvent,
+	cleanup,
+	waitFor,
+} from "@testing-library/react";
 import { ThemeProvider, createTheme, Theme } from "@mui/material";
 import { TaskAlt } from "@mui/icons-material";
 import type { SvgIconComponent } from "@mui/icons-material";
@@ -131,13 +137,13 @@ describe("InfoBox", () => {
 	});
 
 	describe("bugs", () => {
-		it("[ISSUE-3464-ITEM-1] alwaysExpanded={false} behaves like an unforced box: expanded opens it and a click toggles it", () => {
+		it("[ISSUE-3464-ITEM-1] alwaysExpanded={false} behaves like an unforced box: defaultExpanded opens it and a click toggles it", () => {
 			const onChange = vi.fn<OnChange>();
 			renderInfoBox(
 				<InfoBox
 					heading="H"
 					message="M"
-					expanded
+					defaultExpanded
 					alwaysExpanded={false}
 					onChange={onChange}
 				/>,
@@ -157,7 +163,7 @@ describe("InfoBox", () => {
 					<InfoBox
 						heading="H"
 						message="M"
-						expanded={false}
+						defaultExpanded={false}
 						alwaysExpanded={locked}
 					/>,
 				);
@@ -177,6 +183,124 @@ describe("InfoBox", () => {
 			fireEvent.click(btn);
 			expect(btn).toHaveAttribute("aria-expanded", before);
 			expect(error).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3464-ITEM-2] mirroring onChange into expanded logs no MUI error", () => {
+			const error = vi.spyOn(console, "error").mockImplementation(() => {});
+			const Mirror = () => {
+				const [open, setOpen] = useState(false);
+				return (
+					<InfoBox
+						heading="H"
+						message="M"
+						expanded={open}
+						onChange={(_, next) => setOpen(next)}
+					/>
+				);
+			};
+			renderInfoBox(<Mirror />);
+			fireEvent.click(header("H"));
+			expect(header("H")).toHaveAttribute("aria-expanded", "true");
+			expect(error).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3464-ITEM-2] removing alwaysExpanded after mount keeps aria-expanded on the header", () => {
+			const error = vi.spyOn(console, "error").mockImplementation(() => {});
+			const { rerender } = renderInfoBox(
+				<InfoBox heading="H" message="M" expanded alwaysExpanded />,
+			);
+			rerender(themed(<InfoBox heading="H" message="M" expanded />));
+			expect(header("H")).toHaveAttribute("aria-expanded");
+			expect(error).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3464-ITEM-2] with onChange mirrored into expanded, closing the box from code takes effect", async () => {
+			const error = vi.spyOn(console, "error").mockImplementation(() => {});
+			const Mirror = () => {
+				const [open, setOpen] = useState(false);
+				return (
+					<>
+						<button type="button" onClick={() => setOpen(false)}>
+							close from code
+						</button>
+						<InfoBox
+							heading="H"
+							message="M"
+							expanded={open}
+							onChange={(_, next) => setOpen(next)}
+						/>
+					</>
+				);
+			};
+			renderInfoBox(<Mirror />);
+			fireEvent.click(header("H"));
+			expect(header("H")).toHaveAttribute("aria-expanded", "true");
+			fireEvent.click(screen.getByRole("button", { name: "close from code" }));
+			expect(header("H")).toHaveAttribute("aria-expanded", "false");
+			// hidden once the Collapse's exit transition ends
+			await waitFor(() => expect(screen.getByText("M")).not.toBeVisible());
+			expect(error).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3464-ITEM-2] expanded controls the box: a value set after mount opens and closes it", () => {
+			const error = vi.spyOn(console, "error").mockImplementation(() => {});
+			const box = (expanded: boolean) =>
+				themed(<InfoBox heading="H" message="M" expanded={expanded} />);
+			const { rerender } = render(box(false));
+			expect(header("H")).toHaveAttribute("aria-expanded", "false");
+			rerender(box(true));
+			expect(header("H")).toHaveAttribute("aria-expanded", "true");
+			expect(screen.getByText("M")).toBeVisible();
+			rerender(box(false));
+			expect(header("H")).toHaveAttribute("aria-expanded", "false");
+			expect(error).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3464-ITEM-2] a click on a box with expanded set only reports the request: the box keeps showing expanded", () => {
+			const onChange = vi.fn<OnChange>();
+			renderInfoBox(
+				<InfoBox
+					heading="H"
+					message="M"
+					expanded={false}
+					onChange={onChange}
+				/>,
+			);
+			fireEvent.click(header("H"));
+			expect(onChange).toHaveBeenLastCalledWith(expect.anything(), true);
+			expect(header("H")).toHaveAttribute("aria-expanded", "false");
+			expect(screen.getByText("M")).not.toBeVisible();
+		});
+
+		it("[ISSUE-3464-ITEM-2] removing expanded after mount keeps aria-expanded on the header and logs MUI's error for InfoBox", () => {
+			const error = vi.spyOn(console, "error").mockImplementation(() => {});
+			const { rerender } = renderInfoBox(
+				<InfoBox heading="H" message="M" expanded />,
+			);
+			rerender(themed(<InfoBox heading="H" message="M" />));
+			expect(header("H")).toHaveAttribute("aria-expanded", "false");
+			expect(error).toHaveBeenCalledTimes(1);
+			expect(error).toHaveBeenCalledWith(
+				expect.stringContaining("controlled expanded state of InfoBox"),
+			);
+		});
+
+		it("[ISSUE-3464-ITEM-2] defaultExpanded sets the initial state, and the user toggles the box", () => {
+			const onChange = vi.fn<OnChange>();
+			renderInfoBox(
+				<>
+					<InfoBox heading="Open" message="open msg" defaultExpanded />
+					<InfoBox heading="Closed" message="closed msg" onChange={onChange} />
+				</>,
+			);
+			expect(header("Open")).toHaveAttribute("aria-expanded", "true");
+			expect(screen.getByText("open msg")).toBeVisible();
+			expect(header("Closed")).toHaveAttribute("aria-expanded", "false");
+			fireEvent.click(header("Closed"));
+			expect(onChange).toHaveBeenLastCalledWith(expect.anything(), true);
+			expect(header("Closed")).toHaveAttribute("aria-expanded", "true");
+			fireEvent.click(header("Open"));
+			expect(header("Open")).toHaveAttribute("aria-expanded", "false");
 		});
 	});
 });
