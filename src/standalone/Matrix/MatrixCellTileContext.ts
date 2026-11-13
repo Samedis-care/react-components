@@ -22,10 +22,12 @@ export interface MatrixCellTileProps {
 	 * cut single box (diagonal).
 	 *
 	 * The diagonal layout trades detail for space: the pair is ONE click target
-	 * and one drag handle (reporting the first entry), and of each entry only
-	 * the label and the fill color are drawn — secondaryLabel, flow and every
-	 * corner but the first entry's bottomLeft are dropped. Switching this in the
-	 * theme therefore hides props a consumer supplied.
+	 * and one drag handle (onItemClick reports it, and renderItem wraps it, as
+	 * the first entry). Of each entry it keeps the label, the colors (fill,
+	 * textColor, dimmed) and the tooltip (the pair's tooltip joins both with
+	 * " / "); a highlighted entry rings the whole pair. secondaryLabel, flow
+	 * and every corner but the first entry's bottomLeft are dropped. Switching
+	 * this in the theme therefore hides props a consumer supplied.
 	 * @default "split"
 	 */
 	pairLayout?: "split" | "diagonal";
@@ -46,8 +48,8 @@ export interface MatrixCellTileProps {
 	onItemClick?: (item: MatrixTileItem) => void;
 	/**
 	 * Wraps every rendered entry, so each one can become a drag handle without
-	 * this component knowing anything about drag & drop. Not called for a
-	 * diagonal pair — those two halves are one box.
+	 * this component knowing anything about drag & drop. A diagonal pair is one
+	 * box, so it is wrapped once, with its first entry (see pairLayout).
 	 * @remarks The wrapper must not clip the node (no overflow: hidden): a
 	 * clickable entry draws its focus ring just outside itself.
 	 */

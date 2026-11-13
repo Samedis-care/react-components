@@ -1284,6 +1284,8 @@ describe("MatrixCellTile entries", () => {
 		backgroundColor: "#2e7d32",
 		...overrides,
 	});
+	const second = (overrides: Partial<MatrixTileItem> = {}): MatrixTileItem =>
+		entry({ key: "b", label: "S", backgroundColor: "#1565c0", ...overrides });
 	const tile = (
 		props: Partial<MatrixCellTileProps> & { items: MatrixTileItem[] },
 	) => (
@@ -1295,6 +1297,40 @@ describe("MatrixCellTile entries", () => {
 		Array.from(
 			container.querySelectorAll<HTMLElement>(`.${TILE_CLASSES[slot]}`),
 		);
+
+	describe("layout options", () => {
+		it("[ISSUE-3481-ITEM-1] passes a diagonal pair through renderItem, as its first entry", () => {
+			const renderItem = vi.fn(
+				(_tileItem: MatrixTileItem, node: React.ReactNode) => (
+					<div draggable>{node}</div>
+				),
+			);
+			const items = [entry(), second()];
+			const { container } = render(
+				tile({ pairLayout: "diagonal", items, renderItem }),
+			);
+			// one drag handle for the pair, reporting the first entry
+			expect(container.querySelectorAll("[draggable=true]")).toHaveLength(1);
+			expect(renderItem).toHaveBeenCalledTimes(1);
+			expect(renderItem.mock.calls[0][0]).toBe(items[0]);
+		});
+
+		it("[ISSUE-3481-ITEM-1] wraps a highlighted pair with its ring, as it wraps a highlighted entry", () => {
+			const renderItem = (_tileItem: MatrixTileItem, node: React.ReactNode) => (
+				<div className={"x-drag"}>{node}</div>
+			);
+			const { container } = render(
+				tile({
+					pairLayout: "diagonal",
+					items: [entry(), second({ highlighted: true })],
+					renderItem,
+				}),
+			);
+			const [pair] = slotsOf(container, "diagonal");
+			expect(pair.parentElement).toHaveClass(TILE_CLASSES.highlight);
+			expect(pair.parentElement?.parentElement).toHaveClass("x-drag");
+		});
+	});
 
 	describe("colors and dimming", () => {
 		it("[ISSUE-3481-ITEM-10] picks a label color with 4.5:1 on common opaque fills", () => {

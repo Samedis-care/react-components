@@ -70,8 +70,9 @@ export interface MatrixTileDiagonalPairProps {
 
 /**
  * Two entries as one diagonally cut box: space-saving, but one click target and
- * one drag handle, and only label plus fill color of each entry survive (see
- * MatrixCellTileProps.pairLayout).
+ * one drag handle (MatrixCellTile passes it to renderItem as the first entry),
+ * and of each entry only the label, the colors and the tooltip survive, plus
+ * the first entry's bottomLeft corner (see MatrixCellTileProps.pairLayout).
  */
 const MatrixTileDiagonalPair = (props: MatrixTileDiagonalPairProps) => {
 	const { a, b } = props;
