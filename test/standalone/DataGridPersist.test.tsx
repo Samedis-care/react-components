@@ -703,6 +703,46 @@ describe("persistence provider bugs", () => {
 		expect(hanging.writes).toEqual([[keyOf(FILTERS, { model: "x" }), null]]);
 	});
 
+	it("[ISSUE-3496-ITEM-4] a load for the previous storage keys that answers late is neither shown nor written under the new keys", async () => {
+		const pending: Record<string, (value: string | null) => void> = {};
+		const slow = new (class extends MemoryProvider {
+			getItem(key: string) {
+				return new Promise<string | null>((resolve) => {
+					pending[key] = resolve;
+				});
+			}
+		})();
+		StorageManager.configure((_id, keys) => [slow, keys]);
+		const A = { model: "A" };
+		const B = { model: "B" };
+		const { rerender } = render(smp(A));
+		await waitFor(() =>
+			expect(pending[keyOf(FILTERS, A)]).toBeTypeOf("function"),
+		);
+		rerender(smp(B));
+		await waitFor(() =>
+			expect(pending[keyOf(FILTERS, B)]).toBeTypeOf("function"),
+		);
+		// A's answer arrives after the keys changed to B, and before B's
+		await act(async () => {
+			pending[keyOf(SIZING, A)](null);
+			pending[keyOf(FILTERS, A)](JSON.stringify({ v: 2, search: "from A" }));
+			await Promise.resolve();
+		});
+		await act(async () => {
+			pending[keyOf(SIZING, B)](null);
+			pending[keyOf(FILTERS, B)](JSON.stringify({ v: 2, search: "from B" }));
+			await Promise.resolve();
+		});
+		await gridIdle();
+		const writtenToB = slow.writes.filter(
+			([key, value]) =>
+				key === keyOf(FILTERS, B) && persisted(value).search === "from A",
+		);
+		expect(writtenToB).toEqual([]);
+		expect(grid!.state.search).toBe("from B");
+	});
+
 	it("[ISSUE-3496-ITEM-2] a grid with a sort record stored before a defaultSort was added loads with the user's sort only", async () => {
 		const loadData = vi.fn<DataGridProps["loadData"]>(noRows);
 		const stored: DataGridPersistentState = {
