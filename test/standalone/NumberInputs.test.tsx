@@ -402,6 +402,52 @@ describe("IntegerInputField", () => {
 });
 
 describe("CurrencyInput", () => {
+	describe("commit", () => {
+		it("[ISSUE-3484-ITEM-10] reports an emptied field once", () => {
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={3} onValue={onValue}>
+					{(value, onChange) => (
+						<CurrencyInput
+							label="Amount"
+							currency="EUR"
+							value={value}
+							onChange={onChange}
+						/>
+					)}
+				</Controlled>,
+			);
+			fireEvent.focus(field("Amount"));
+			fireEvent.change(field("Amount"), { target: { value: "" } });
+			fireEvent.blur(field("Amount"));
+			expect(reported(onValue)).toEqual([null]);
+		});
+
+		it("[ISSUE-3484-ITEM-10] the touch Clear empties the field, and the blur reports null once", () => {
+			env.touch = true;
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={3} onValue={onValue}>
+					{(value, onChange) => (
+						<CurrencyInput
+							label="Amount"
+							currency="EUR"
+							value={value}
+							onChange={onChange}
+						/>
+					)}
+				</Controlled>,
+			);
+			fireEvent.focus(field("Amount"));
+			fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+			expect(field("Amount")).toHaveValue("");
+			expect(reported(onValue)).toEqual([]);
+			fireEvent.blur(field("Amount"));
+			expect(reported(onValue)).toEqual([null]);
+			expect(field("Amount")).toHaveValue("");
+		});
+	});
+
 	describe("locales and currencies", () => {
 		it("[ISSUE-3484-ITEM-1] reads back a grouped yen amount in Spanish", async () => {
 			await setLanguage("es");

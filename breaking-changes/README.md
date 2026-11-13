@@ -81,6 +81,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [TreeView's scrollTo waits until its entry is visible and the list is measured](2026-11-13-tree-view-scroll-to-waits.md) | behavior |
 | 2026-11-13 | [DefaultFormPage applies textButtonSave and textButtonBack](2026-11-13-form-page-button-labels.md) | behavior |
 | 2026-11-13 | [TreeViewCheckboxSelectionRenderer disables a locked leaf's checkbox](2026-11-13-tree-checkbox-renderer-locked-leaf-disabled.md) | behavior |
+| 2026-11-13 | [CurrencyInput reports an emptied field once, on blur](2026-11-13-currency-input-reports-emptied-field-on-blur.md) | behavior |
 | 2026-11-12 | [The Loader's status text is a paragraph, not a heading](2026-11-12-loader-status-text-is-no-heading.md) | behavior |
 | 2026-11-12 | [PopupMenu item labels wrap instead of being cut off](2026-11-12-popup-menu-labels-wrap.md) | behavior |
 | 2026-11-12 | [CountryFlags, CountryCodes and CountryOption.value are typed by CountryCode, and CountryFlags is frozen](2026-11-12-country-flags-typed-by-country-code.md) | type, behavior |
