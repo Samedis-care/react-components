@@ -348,3 +348,38 @@ export const Issue3497Item13CloseButtonBesideHeading: StoryObj<DialogTitleArgs> 
 			await expect(args.onClose).toHaveBeenCalledTimes(1);
 		},
 	};
+
+const noTitleDialogSlotProps = { paper: { "aria-label": "Edit device" } };
+
+export const Issue3497Item14NoTitleDialogHasName: StoryObj<DialogTitleArgs> = {
+	args: { onClose: fn() },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3497-ITEM-14: `noTitle` with no children, as FullFormDialog renders it without a title. It renders no heading, only the close button, and does not name the dialog: the dialog is named the MUI way, here by an `aria-label` on its paper (FullFormDialog's `aria-label` prop).",
+			},
+		},
+	},
+	render: (args) => (
+		<Dialog open maxWidth="sm" fullWidth slotProps={noTitleDialogSlotProps}>
+			<DialogTitle noTitle onClose={args.onClose}>
+				{null}
+			</DialogTitle>
+			<DialogContent>
+				<TextField label="First field" fullWidth />
+			</DialogContent>
+		</Dialog>
+	),
+	play: async ({ args }) => {
+		const dialog = await page().findByRole("dialog");
+		await waitFor(() => expect(dialog).toBeVisible());
+		await expect(dialog).toHaveAccessibleName("Edit device");
+		await expect(within(dialog).queryAllByRole("heading")).toHaveLength(0);
+		await userEvent.click(
+			within(dialog).getByRole("button", { name: "Close" }),
+		);
+		await expect(args.onClose).toHaveBeenCalledTimes(1);
+	},
+};

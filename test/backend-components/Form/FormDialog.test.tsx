@@ -8,6 +8,7 @@ import {
 	waitFor,
 	within,
 } from "@testing-library/react";
+import { computeAccessibleName } from "dom-accessibility-api";
 import {
 	Framework,
 	useCloseThisDialog,
@@ -373,4 +374,62 @@ describe("FullFormDialog", () => {
 			"BasicFormPageNestingContext",
 		).toBe(BasicFormPageNestingContext);
 	}, 90000);
+
+	describe("[ISSUE-3497-ITEM-14] an untitled FullFormDialog", () => {
+		const TitleSetter = (props: { title: string }) => {
+			const dispatch = React.useContext(FormDialogDispatchContext);
+			React.useEffect(() => {
+				dispatch?.setTitle(props.title);
+			}, [dispatch, props.title]);
+			return null;
+		};
+		const dialog = () => screen.getByRole("dialog");
+
+		it("[ISSUE-3497-ITEM-14] has no heading and is not named by the close button", async () => {
+			renderPushed(
+				<FormDialog>
+					<div>content</div>
+				</FormDialog>,
+			);
+			await screen.findByText("content");
+			expect({
+				name: computeAccessibleName(dialog()),
+				headings: within(dialog()).queryAllByRole("heading").length,
+			}).toEqual({ name: "", headings: 0 });
+			expect(
+				within(dialog()).getByRole("button", { name: "Close" }),
+			).toBeInTheDocument();
+		});
+
+		it("[ISSUE-3497-ITEM-14] is named by aria-label", async () => {
+			renderPushed(
+				<FormDialog aria-label={"Pick users"}>
+					<div>content</div>
+				</FormDialog>,
+			);
+			await screen.findByText("content");
+			expect(dialog()).toHaveAccessibleName("Pick users");
+			expect(within(dialog()).queryAllByRole("heading")).toHaveLength(0);
+		});
+
+		it("[ISSUE-3497-ITEM-14] a title, from the prop or set by the content, names it instead of aria-label", async () => {
+			const { unmount } = renderPushed(
+				<FormDialog aria-label={"Pick users"} dialogTitle={"My Title"}>
+					<div>content</div>
+				</FormDialog>,
+			);
+			await screen.findByText("content");
+			expect(dialog()).toHaveAccessibleName("My Title");
+			unmount();
+			renderPushed(
+				<FormDialog aria-label={"Pick users"}>
+					<TitleSetter title={"Set Title"} />
+				</FormDialog>,
+			);
+			await waitFor(() => expect(dialog()).toHaveAccessibleName("Set Title"));
+			expect(within(dialog()).getByRole("heading")).toHaveTextContent(
+				/^Set Title$/,
+			);
+		});
+	});
 });

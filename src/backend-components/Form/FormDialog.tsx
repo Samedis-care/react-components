@@ -30,6 +30,13 @@ export interface FormDialogProps {
 	 */
 	dialogTitle?: React.ReactNode;
 	/**
+	 * Accessible name of the dialog while it shows no title (no `dialogTitle` and none set
+	 * through `FormDialogDispatch.setTitle`), e.g. the translated purpose of a picker. A shown
+	 * title names the dialog instead. Without either the dialog has no name, like an MUI `Dialog`
+	 * without `DialogTitle`: screen readers announce only "dialog".
+	 */
+	"aria-label"?: string;
+	/**
 	 * Dialog width optional parameter
 	 * @default "lg"
 	 */
@@ -124,8 +131,15 @@ export const FormDialogDefaultRenderer = (props: FormDialogRendererProps) => {
 		openInNewLink,
 		useCustomClasses,
 		children,
+		"aria-label": ariaLabel,
 	} = props;
 	const ContentComp = useCustomClasses ? TallDialogContent : DialogContent;
+	// the paper is the element with role="dialog"; a shown title names it through MUI's
+	// aria-labelledby, which wins over aria-label
+	const slotProps = useMemo(
+		() => ({ paper: { "aria-label": ariaLabel } }),
+		[ariaLabel],
+	);
 	return (
 		<Dialog
 			maxWidth={maxWidth ?? "lg"}
@@ -133,6 +147,7 @@ export const FormDialogDefaultRenderer = (props: FormDialogRendererProps) => {
 			onClose={onClose}
 			fullWidth={fullWidth ?? true}
 			className={combineClassNames(["CcFormDialog", className])}
+			slotProps={slotProps}
 		>
 			<DialogTitle onClose={onClose} noTitle={!dialogTitle}>
 				{dialogTitle}

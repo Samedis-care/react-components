@@ -24,6 +24,7 @@ export interface DialogTitleProps {
 	/**
 	 * The title. It is the content of the heading (an `h2`) that names the
 	 * dialog, rendered on one line and cut with an ellipsis when too long.
+	 * With `noTitle` it is rendered next to the close button, not as a heading.
 	 */
 	children: React.ReactNode;
 	/**
@@ -34,10 +35,14 @@ export interface DialogTitleProps {
 	 */
 	onClose?: () => void;
 	/**
-	 * For a dialog without a visible title: the title row is positioned
-	 * absolutely at the top right (padding `theme.spacing(1)`), so only the
-	 * close button shows, over the dialog content. Children are still rendered
-	 * (pass none). Default false.
+	 * For a dialog without a visible title: no heading is rendered, so
+	 * DialogTitle does not name the dialog. Name it another way, as an MUI
+	 * `Dialog` without `DialogTitle`: `aria-labelledby` on the `Dialog`
+	 * pointing at a heading in its content, or an `aria-label` on its paper
+	 * (`slotProps.paper`). The title row is positioned absolutely at the top
+	 * right (padding `theme.spacing(1)`), so only the close button shows, over
+	 * the dialog content. Children are still rendered there, not as a heading
+	 * (pass none, or an icon). Default false.
 	 */
 	noTitle?: boolean;
 	/**
@@ -47,7 +52,8 @@ export interface DialogTitleProps {
 	className?: string;
 	/**
 	 * CSS classes per slot: `root` (the title row), `textWrapper` (the box
-	 * around the heading), `text` (the heading), `closeButton`
+	 * around the heading), `text` (the heading, not rendered with `noTitle`),
+	 * `closeButton`
 	 */
 	classes?: Partial<Record<DialogTitleClassKey, string>>;
 }
@@ -118,9 +124,13 @@ const DialogTitleRaw = (inProps: DialogTitleProps) => {
 			])}
 		>
 			<TextWrapper className={classes?.textWrapper}>
-				<Text id={id} noWrap className={classes?.text}>
-					{children}
-				</Text>
+				{noTitle ? (
+					children
+				) : (
+					<Text id={id} noWrap className={classes?.text}>
+						{children}
+					</Text>
+				)}
 			</TextWrapper>
 			{onClose && (
 				<CloseButton
@@ -140,7 +150,8 @@ const DialogTitleRaw = (inProps: DialogTitleProps) => {
  * Title row for an MUI `Dialog`: a heading with the title and an optional
  * close (X) button next to it. Place it inside the `Dialog`: the heading is
  * MUI's `DialogTitle`, so it names the dialog, and the close button is not
- * part of that name.
+ * part of that name. With `noTitle` there is no heading, only the close
+ * button, and the dialog needs a name from elsewhere.
  * Theme: `CcDialogTitle` (slots `root`, `textWrapper`, `text`, `closeButton`).
  */
 export const DialogTitle = React.memo(DialogTitleRaw);

@@ -141,4 +141,45 @@ describe("DialogTitle", () => {
 				.map((h) => h.tagName),
 		}).toEqual({ buttonInLabel: false, headings: ["H2"] });
 	});
+
+	it("[ISSUE-3497-ITEM-14] with noTitle the dialog is not named by the close button and has no empty heading", () => {
+		render(
+			<Dialog open>
+				<DialogTitle noTitle onClose={() => {}}>
+					{null}
+				</DialogTitle>
+			</Dialog>,
+		);
+		// Chromium names this dialog "Close"
+		expect({
+			buttonInLabel: !!dialogLabel()?.querySelector("button"),
+			emptyHeadings: within(screen.getByRole("dialog"))
+				.queryAllByRole("heading")
+				.filter((h) => !h.textContent?.trim()).length,
+		}).toEqual({ buttonInLabel: false, emptyHeadings: 0 });
+	});
+
+	it("[ISSUE-3497-ITEM-14] with noTitle the children are shown outside any heading; a title shown later is the heading that names the dialog", () => {
+		const { rerender } = render(
+			<Dialog open>
+				<DialogTitle noTitle onClose={() => {}}>
+					<span>icon</span>
+				</DialogTitle>
+			</Dialog>,
+		);
+		expect(screen.getByText("icon")).toBeInTheDocument();
+		expect(
+			within(screen.getByRole("dialog")).queryAllByRole("heading"),
+		).toHaveLength(0);
+		expect(dialogLabel()).toBeNull();
+		rerender(
+			<Dialog open>
+				<DialogTitle onClose={() => {}}>My Title</DialogTitle>
+			</Dialog>,
+		);
+		expect(screen.getByRole("dialog")).toHaveAccessibleName("My Title");
+		expect(
+			within(screen.getByRole("dialog")).getByRole("heading"),
+		).toHaveTextContent(/^My Title$/);
+	});
 });
