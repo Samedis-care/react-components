@@ -8,10 +8,13 @@ import SignalPortlet, {
 } from "../../src/standalone/SignalPortlet";
 import HistoryRouter from "../../src/standalone/Routes/HistoryRouter";
 import ccI18n from "../../src/i18n";
+import timestampToAge from "../../src/utils/timestampToAge";
 
 // The component-level tests. SignalPortlet.test.ts next to this file mocks the
 // i18n module for the timestampToAge helper, so the component, which needs the
 // real translations, is tested here.
+
+const MINUTE = 60_000;
 
 const theme = createTheme();
 
@@ -38,6 +41,8 @@ const renderP = (
 /** The count avatars, in item order */
 const avatars = (container: HTMLElement) =>
 	Array.from(container.querySelectorAll<HTMLElement>(".MuiAvatar-root"));
+
+const ageLabel = () => screen.queryByText(/^Last refresh: /);
 
 beforeAll(async () => {
 	await ccI18n.changeLanguage("en");
@@ -120,5 +125,58 @@ describe("SignalPortlet: content", () => {
 		});
 		expect(screen.getByText("999+")).toHaveClass("capped");
 		expect(screen.getByText("1500")).toHaveClass("full");
+	});
+});
+
+describe("SignalPortlet: footer", () => {
+	it("[ISSUE-3469-ITEM-2] updates the age while mounted, without new props", () => {
+		vi.useFakeTimers();
+		const props: SignalPortletProps = {
+			title: "T",
+			items: [],
+			updatedAt: Date.now(),
+		};
+		renderP(props);
+		expect(ageLabel()).toHaveTextContent("Last refresh: just now");
+		act(() => {
+			vi.advanceTimersByTime(10 * MINUTE);
+		});
+		expect(ageLabel()).toHaveTextContent("Last refresh: 10 minutes ago");
+	});
+
+	it("[ISSUE-3469-ITEM-2] changes the age when it reaches the next minute, also when mounted mid-minute", () => {
+		vi.useFakeTimers();
+		const updatedAt = new Date(Date.now() - 90_000);
+		renderP({ title: "T", items: [], updatedAt });
+		const shown = ageLabel()?.textContent;
+		act(() => {
+			vi.advanceTimersByTime(30_000 - 1);
+		});
+		expect(ageLabel()?.textContent).toBe(shown);
+		act(() => {
+			vi.advanceTimersByTime(1);
+		});
+		expect(ageLabel()?.textContent).not.toBe(shown);
+		expect(ageLabel()?.textContent).toBe(
+			`Last refresh: ${timestampToAge(updatedAt)}`,
+		);
+		// the changing age is not announced
+		expect(
+			ageLabel()?.closest(
+				'[aria-live]:not([aria-live="off"]), [role="status"]',
+			),
+		).toBeNull();
+	});
+
+	it("[ISSUE-3469-ITEM-2] leaves no timer behind once unmounted", () => {
+		vi.useFakeTimers();
+		const { unmount } = renderP({
+			title: "T",
+			items: [],
+			updatedAt: Date.now(),
+		});
+		expect(vi.getTimerCount()).toBeGreaterThan(0);
+		unmount();
+		expect(vi.getTimerCount()).toBe(0);
 	});
 });

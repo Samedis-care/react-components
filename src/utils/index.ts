@@ -61,6 +61,7 @@ export { default as useFrontendDownload } from "./useFrontendDownload";
 export { default as dataToFile } from "./dataToFile";
 export { default as sortByLocaleRelevance } from "./sortByLocaleRelevance";
 export { default as timestampToAge } from "./timestampToAge";
+export { default as useAgeTick } from "./useAgeTick";
 export * from "./useDebounce";
 export { default as useDebouncedValue } from "./useDebouncedValue";
 export { default as deepSort } from "./deepSort";

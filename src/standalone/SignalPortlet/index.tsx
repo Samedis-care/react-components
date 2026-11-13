@@ -15,6 +15,7 @@ import { Sync as RefreshIcon } from "@mui/icons-material";
 import timestampToAge from "../../utils/timestampToAge";
 import useCCTranslations from "../../utils/useCCTranslations";
 import useCurrentLocale from "../../utils/useCurrentLocale";
+import useAgeTick from "../../utils/useAgeTick";
 import combineClassNames from "../../utils/combineClassNames";
 
 export interface SignalPortletProps {
@@ -27,7 +28,10 @@ export interface SignalPortletProps {
 	 */
 	items: SignalPortletItemProps[];
 	/**
-	 * Updated at (optional)
+	 * When the shown data was produced, as a Date or in milliseconds since the
+	 * epoch (e.g. `Date.now()`). Shows "Last refresh: <age>" in the footer, with
+	 * the date and time in a tooltip. The age advances while the card stays
+	 * mounted. `null` and `undefined` hide the label.
 	 */
 	updatedAt?: number | Date | null | undefined;
 	/**
@@ -108,6 +112,8 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcSignalPortlet" });
 	const { t } = useCCTranslations();
 	const locale = useCurrentLocale();
+	// re-renders the card while the "Last refresh" age below can change
+	useAgeTick(props.updatedAt || null);
 
 	return (
 		<SignalPortletRoot
