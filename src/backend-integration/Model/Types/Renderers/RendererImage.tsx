@@ -67,17 +67,20 @@ class RendererImage extends TypeImage {
 			);
 		}
 
+		const notSet = ccI18n.t(
+			"backend-integration.model.types.renderers.image.not-set",
+		);
 		const content =
 			value || this.params?.placeholder ? (
 				<ObjectUrlImage
 					src={value || (this.params?.placeholder ?? "")}
-					alt={label ?? ""}
+					// the placeholder stands for a missing picture, so it says so instead
+					// of carrying the label a stored picture has
+					alt={value ? (label ?? "") : notSet}
 					style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
 				/>
 			) : (
-				<>
-					{ccI18n.t("backend-integration.model.types.renderers.image.not-set")}
-				</>
+				<>{notSet}</>
 			);
 
 		return visibility.grid ? (

@@ -20,14 +20,15 @@ import { renderDataGridRecordUsingModel } from "../../../src/backend-components/
 import {
 	Model,
 	ModelDataTypeBooleanCheckboxRendererMUI,
+	ModelDataTypeImageRenderer,
 	ModelDataTypeStringRendererMUI,
 	ModelUnknown,
+	ModelVisibility,
 	ModelVisibilityDisabled,
 	ModelVisibilityDisabledReadOnly,
 	ModelVisibilityEdit,
 	ModelVisibilityGridEdit,
 	ModelVisibilityGridView,
-	ModelVisibility,
 	ModelVisibilityGridViewHidden,
 	PageVisibility,
 } from "../../../src/backend-integration";
@@ -75,7 +76,9 @@ const vis = (overview: ModelVisibility): PageVisibility => ({
 	edit: ModelVisibilityEdit,
 	create: ModelVisibilityEdit,
 });
+
 const str = () => new ModelDataTypeStringRendererMUI();
+
 const bool = () => new ModelDataTypeBooleanCheckboxRendererMUI();
 
 /**
@@ -199,6 +202,7 @@ interface RejectionEvents {
 	on(event: "unhandledRejection", listener: (reason: unknown) => void): void;
 	off(event: "unhandledRejection", listener: (reason: unknown) => void): void;
 }
+
 const nodeProcess = (globalThis as unknown as { process: RejectionEvents })
 	.process;
 
@@ -366,5 +370,50 @@ describe("renderDataGridRecordUsingModel", () => {
 			new MockConnector([{ id: "1", title: "One" }]),
 		);
 		await expect(rowOf(model)).rejects.toThrow("Not supported");
+	});
+});
+
+describe("renderDataGridRecordUsingModel: image cells", () => {
+	it("[ISSUE-3506-ITEM-14] an image cell showing the placeholder does not use the label as its alt text", async () => {
+		const STORED =
+			"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+		const PLACEHOLDER =
+			"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E";
+		const model = new Model(
+			"bdg-image-" + Math.random().toString(16),
+			{
+				id: {
+					type: str(),
+					getLabel: () => "ID",
+					visibility: vis(ModelVisibilityDisabled),
+					customData: null,
+				},
+				logo: {
+					type: new ModelDataTypeImageRenderer({ placeholder: PLACEHOLDER }),
+					getLabel: () => "Logo",
+					visibility: vis(ModelVisibilityGridView),
+					customData: null,
+				},
+			},
+			new MockConnector([
+				{ id: "1", logo: STORED },
+				{ id: "2", logo: "" },
+			]),
+		);
+		const stored = renderCell((await rowOf(model)).logo);
+		// a stored picture is named
+		expect(stored.container.querySelector("img")).toHaveAttribute(
+			"alt",
+			"Logo",
+		);
+		cleanup();
+
+		const missing = renderCell((await rowOf(model, vi.fn(), 1)).logo);
+		const placeholder = missing.container.querySelector("img");
+		expect(placeholder).toHaveAttribute("src", PLACEHOLDER);
+		expect(
+			placeholder,
+			"the placeholder is announced like the stored picture",
+		).not.toHaveAttribute("alt", "Logo");
 	});
 });
