@@ -55,6 +55,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [InlineSwitch applies classes.switch](2026-11-13-inline-switch-classes-switch.md) | behavior |
 | 2026-11-13 | [DataGridLocalStoragePersist mounts its children again when its storageKey changes](2026-11-13-data-grid-local-storage-persist-remounts-on-key-change.md) | behavior |
 | 2026-11-13 | [BackendSingleSelect's switch comes with switchFilterName, which filters the options; displaySwitch is gone](2026-11-13-backend-single-select-switch-filter-name.md) | type |
+| 2026-11-13 | [A data grid clamps stored column widths to the column's limits when it opens](2026-11-13-data-grid-stored-widths-clamped.md) | behavior |
 | 2026-11-12 | [The Loader's status text is a paragraph, not a heading](2026-11-12-loader-status-text-is-no-heading.md) | behavior |
 | 2026-11-12 | [PopupMenu item labels wrap instead of being cut off](2026-11-12-popup-menu-labels-wrap.md) | behavior |
 | 2026-11-12 | [CountryFlags, CountryCodes and CountryOption.value are typed by CountryCode, and CountryFlags is frozen](2026-11-12-country-flags-typed-by-country-code.md) | type, behavior |

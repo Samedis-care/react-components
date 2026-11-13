@@ -29,6 +29,7 @@ import DataGrid, {
 	useDataGridState,
 } from "../../src/standalone/DataGrid/DataGrid";
 import type { IDataGridFilterBarProps } from "../../src/standalone/DataGrid/Header/FilterBar";
+import { applyColumnWidthLimits } from "../../src/standalone/DataGrid/Content/ColumnHeader";
 import LocalStoragePersist from "../../src/standalone/DataGrid/LocalStoragePersist";
 import StorageManagerPersist, {
 	DATA_GRID_STORAGE_KEY_COLUMN_SIZING,
@@ -817,5 +818,48 @@ describe("persistence provider bugs", () => {
 		]);
 		act(() => grid!.setState((prev) => ({ ...prev, search: "s" })));
 		expect(save.mock.lastCall![0].sort).toEqual([["name", -1]]);
+	});
+});
+
+describe("restored column widths", () => {
+	it("[ISSUE-3496-ITEM-14] restored column widths below the header's minimum are raised to it", async () => {
+		render(
+			<ValueProvider
+				stored={{
+					v: DATA_GRID_PERSIST_VERSION,
+					width: { name: 10, role: 16 },
+					initialResize: true,
+				}}
+				save={vi.fn()}
+			>
+				<Grid />
+			</ValueProvider>,
+		);
+		await gridIdle();
+		// the floor of a filterable column: room for the header's padding,
+		// sort arrow and filter button
+		const floor = applyColumnWidthLimits(GRID_COLUMNS[0], 0);
+		expect(floor).toBeGreaterThan(16);
+		expect(grid!.widths.name).toBeGreaterThanOrEqual(floor);
+		expect(grid!.widths.role).toBeGreaterThanOrEqual(floor);
+	});
+
+	it("[ISSUE-3496-ITEM-14] legacy column widths below the header's minimum are raised to it, wider ones and those of undefined columns are kept", async () => {
+		localStorage.setItem(
+			"legacy",
+			JSON.stringify({
+				columnWidth: { name: 12, role: 250, gone: 8 },
+				state: { initialResize: true },
+			}),
+		);
+		render(
+			<LocalStoragePersist storageKey={"legacy"}>
+				<Grid />
+			</LocalStoragePersist>,
+		);
+		await gridIdle();
+		expect(grid!.widths.name).toBe(applyColumnWidthLimits(GRID_COLUMNS[0], 0));
+		expect(grid!.widths.role).toBe(250);
+		expect(grid!.widths.gone).toBe(8);
 	});
 });
