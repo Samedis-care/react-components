@@ -99,6 +99,8 @@ const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 		confirmDialogMessage,
 		autoBack,
 		extraButtons,
+		textButtonSave,
+		textButtonBack,
 	} = props;
 	const goBack = customProps?.goBack;
 	const hasCustomCloseHandler = customProps?.hasCustomSubmitHandler;
@@ -145,12 +147,14 @@ const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 					onClick={
 						displayConfirmDialog ? submitWithConfirmDialog : submitAndAutoBack
 					}
-				/>
+				>
+					{textButtonSave}
+				</FormPageSaveButton>
 			)}
 			{extraButtons}
 			{goBack && !(isInDialog && hasCustomCloseHandler) && (
 				<BackActionButton disabled={isSubmitting} onClick={handleBack}>
-					{t("common.buttons.back")}
+					{textButtonBack ?? t("common.buttons.back")}
 				</BackActionButton>
 			)}
 		</FormButtons>
