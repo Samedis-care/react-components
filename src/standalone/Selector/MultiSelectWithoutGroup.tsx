@@ -17,7 +17,7 @@ export interface MultiSelectWithoutGroupProps<
 	DataT extends MultiSelectorData,
 > extends Omit<
 	BaseSelectorProps<DataT, false>,
-	"onSelect" | "selected" | "classes" | "onLoad"
+	"onSelect" | "selected" | "classes" | "onLoad" | "readOnly"
 > {
 	// UI Props
 	/**

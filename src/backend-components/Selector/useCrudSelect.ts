@@ -108,6 +108,15 @@ export interface UseCrudSelectParams<
 	 * @default false
 	 */
 	disabled?: boolean;
+	/**
+	 * Writes nothing while true, as if disabled (handleSelect ignores every change and
+	 * addToSelection rejects), but leaves the control as it is: the search field stays
+	 * enabled and keeps its focus and typed text, and the entries keep their remove
+	 * buttons. For a short time in which the selection must not change, such as the save
+	 * of the Form a FormCrudMultiSelect is in.
+	 * @default false
+	 */
+	blockWrites?: boolean;
 }
 
 export interface UseCrudSelectResult<
@@ -142,9 +151,11 @@ export interface UseCrudSelectResult<
 	 */
 	handleSelect: (ids: string[], newSelected: DataT[]) => Promise<void>;
 	/**
-	 * Is the control disabled? An end adornment that picks or removes entries locks itself
-	 * while it is: handleSelect ignores its changes meanwhile
+	 * Does the control write nothing right now (disabled, read-only, or blockWrites)? An end
+	 * adornment that picks or removes entries locks itself while it is: handleSelect
+	 * ignores its changes meanwhile
 	 * @see UseCrudSelectParams.disabled
+	 * @see UseCrudSelectParams.blockWrites
 	 */
 	disabled: boolean;
 	/**
@@ -241,7 +252,7 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 		field,
 		getIdOfData,
 	} = params;
-	const disabled = !!params.disabled;
+	const disabled = !!params.disabled || !!params.blockWrites;
 	// read when a write would start, so a change queued or a handleSelect kept from an
 	// earlier render does not write after the control was disabled
 	const disabledRef = useRef(disabled);

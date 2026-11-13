@@ -10,7 +10,7 @@
  */
 import React, { useState } from "react";
 import { afterAll, beforeEach, describe, expect, it, Mock, vi } from "vitest";
-import { act, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import {
 	loaded,
 	makeModel,
@@ -1098,5 +1098,161 @@ describe("FormCrudMultiSelect: the form's state", () => {
 
 		expect(labels()).toEqual(["Ls1", "Ls2"]);
 		expect(sink.ctx!.dirty).toBe(true);
+	});
+
+	it("[ISSUE-3505-ITEM-16] the search field stays enabled while the form saves", async () => {
+		const { env, sink, ref } = await mountSelector();
+		await add(ref);
+		let release: () => void = () => {};
+		env.connectors[0].gate = new Promise((resolve) => {
+			release = resolve;
+		});
+		const input = screen.getByRole("combobox");
+
+		let saved!: Promise<void>;
+		act(() => {
+			saved = sink.ctx!.submit();
+		});
+		await waitFor(() => expect(sink.ctx!.submitting).toBe(true));
+		const disabledWhileSaving = (input as HTMLInputElement).disabled;
+		await act(async () => {
+			release();
+			await saved;
+		});
+
+		expect(disabledWhileSaving).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-16] in a read-only form the search field is read-only, not disabled", async () => {
+		await mountSelector(undefined, {}, { readOnly: true });
+
+		const input = screen.getByRole("combobox");
+		expect(input).not.toBeDisabled();
+		expect(
+			input.hasAttribute("readonly") ||
+				input.getAttribute("aria-readonly") === "true",
+		).toBe(true);
+	});
+
+	it("[ISSUE-3505-ITEM-16] while the form saves, the entries keep their remove buttons, but a removal or a pick through the ref queues nothing; afterwards the field takes them again", async () => {
+		const { env, sink, ref } = await mountSelector();
+		await add(ref);
+		let release: () => void = () => {};
+		env.connectors[0].gate = new Promise((resolve) => {
+			release = resolve;
+		});
+
+		let saved!: Promise<void>;
+		act(() => {
+			saved = sink.ctx!.submit();
+		});
+		await waitFor(() => expect(sink.ctx!.submitting).toBe(true));
+		const disabledWhileSaving = selSink.ctx!.disabled;
+		const readOnlyWhileSaving = screen
+			.getByRole("combobox")
+			.hasAttribute("readonly");
+		fireEvent.click(screen.getByRole("button", { name: "Remove Ls1" }));
+		await settle();
+		let refused: unknown = null;
+		let pending: Promise<void> | undefined;
+		act(() => {
+			pending = ref
+				.current!.addToSelection({
+					value: "to-create-s3",
+					label: "Ls3",
+					source_id: "s3",
+				})
+				.catch((e: unknown) => {
+					refused = e;
+				});
+		});
+		await act(async () => {
+			await pending;
+		});
+		const labelsWhileSaving = labels();
+		await act(async () => {
+			release();
+			await saved;
+		});
+		await settle();
+
+		expect(disabledWhileSaving).toBe(true);
+		expect(readOnlyWhileSaving).toBe(false);
+		expect(refused).toBeInstanceOf(Error);
+		expect(labelsWhileSaving).toEqual(["Ls1", "Ls2"]);
+		expect(env.calls).toEqual([
+			"index:joins/1",
+			"setApiEndpoint:joins/1",
+			"create:joins/1:s2",
+		]);
+		expect(sink.ctx!.dirty).toBe(false);
+		expect(selSink.ctx!.disabled).toBe(false);
+
+		fireEvent.click(screen.getByRole("button", { name: "Remove Ls1" }));
+		await settle();
+		expect(labels()).toEqual(["Ls2"]);
+		expect(sink.ctx!.dirty).toBe(true);
+	});
+
+	it("[ISSUE-3505-ITEM-16] in a read-only form the label keeps its normal color and the search field opens no list", async () => {
+		await mountSelector(undefined, {}, { readOnly: true });
+		const input = screen.getByRole("combobox");
+
+		act(() => input.focus());
+		fireEvent.mouseDown(input);
+		fireEvent.keyDown(input, { key: "ArrowDown" });
+		await settle();
+
+		expect(input).toHaveFocus();
+		expect(screen.getByText("Joins")).not.toHaveClass("Mui-disabled");
+		expect(screen.queryByRole("listbox")).toBeNull();
+	});
+
+	it("[ISSUE-3505-ITEM-16] once the form is editable again, the search field is no longer read-only", async () => {
+		const { rerenderWith } = await mountSelector(
+			undefined,
+			{},
+			{ readOnly: true },
+		);
+		rerenderWith({ readOnly: false });
+		await settle();
+
+		expect(screen.getByRole("combobox")).not.toHaveAttribute("readonly");
+	});
+
+	it("[ISSUE-3505-ITEM-16] an explicit readOnly={false} or blockWrites={false} does not unlock it in a read-only form", async () => {
+		await mountSelector(
+			undefined,
+			{ readOnly: false, blockWrites: false },
+			{ readOnly: true },
+		);
+
+		expect(screen.getByRole("combobox")).toHaveAttribute("readonly");
+		expect(screen.queryByRole("button", { name: "Remove Ls1" })).toBeNull();
+		expect(selSink.ctx!.disabled).toBe(true);
+	});
+
+	it("[ISSUE-3505-ITEM-16] an explicit blockWrites={false} does not unlock it while the form saves", async () => {
+		const { env, sink, ref } = await mountSelector(undefined, {
+			blockWrites: false,
+		});
+		await add(ref);
+		let release: () => void = () => {};
+		env.connectors[0].gate = new Promise((resolve) => {
+			release = resolve;
+		});
+
+		let saved!: Promise<void>;
+		act(() => {
+			saved = sink.ctx!.submit();
+		});
+		await waitFor(() => expect(sink.ctx!.submitting).toBe(true));
+		const disabledWhileSaving = selSink.ctx!.disabled;
+		await act(async () => {
+			release();
+			await saved;
+		});
+
+		expect(disabledWhileSaving).toBe(true);
 	});
 });

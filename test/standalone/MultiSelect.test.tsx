@@ -311,3 +311,42 @@ describe("MultiSelect bugs", () => {
 		]);
 	});
 });
+
+describe("MultiSelect: read-only", () => {
+	it("[ISSUE-3505-ITEM-16] lists the entries without remove buttons, keeps the search field focusable and picks nothing", async () => {
+		const onSel = vi.fn();
+		renderUi(<Host initial={[APPLE, BANANA]} readOnly onSel={onSel} />);
+		await flush();
+		const input = combobox();
+
+		expect(screen.getByText("Apple")).toBeInTheDocument();
+		expect(screen.getByText("Banana")).toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: /^Remove / })).toBeNull();
+		expect(input).not.toBeDisabled();
+		expect(input).toHaveAttribute("readonly");
+		await open(input);
+		fireEvent.keyDown(input, { key: "ArrowDown" });
+		fireEvent.keyDown(input, { key: "Enter" });
+		await flush();
+		expect(screen.queryByRole("listbox")).toBeNull();
+		expect(onSel).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3505-ITEM-16] shows the remove buttons again once it is no longer read-only", async () => {
+		const ui = (readOnly: boolean) => (
+			<MultiSelect
+				selected={[APPLE]}
+				onSelect={() => {}}
+				onLoad={loadFruits}
+				readOnly={readOnly}
+			/>
+		);
+		const { rerender } = renderUi(ui(true));
+		await flush();
+		rerenderUi(rerender, ui(false));
+		await flush();
+
+		expect(removeButton("Apple")).toBeInTheDocument();
+		expect(combobox()).not.toHaveAttribute("readonly");
+	});
+});

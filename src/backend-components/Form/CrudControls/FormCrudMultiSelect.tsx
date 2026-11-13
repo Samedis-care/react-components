@@ -8,7 +8,7 @@ import useLazyCrudConnector, {
 	UseLazyCrudConnectorParams,
 } from "../useLazyCrudConnector";
 import { MultiSelectorData } from "../../../standalone";
-import { useFormContextLite } from "../Form";
+import { FORM_SUBMITTING_READ_ONLY_REASON, useFormContextLite } from "../Form";
 import { CrudSelectDispatch } from "../../Selector/useCrudSelect";
 
 export interface FormCrudMultiSelectProps<
@@ -22,13 +22,22 @@ export interface FormCrudMultiSelectProps<
 		>,
 		UseLazyCrudConnectorParams<Record<string, unknown>> {
 	/**
-	 * Locks the control: the search field is disabled, the entries have no remove button,
+	 * Disables the control: the search field is disabled, the entries have no remove button,
 	 * and nothing queues a write, neither the ref's addToSelection nor an end adornment's
-	 * handleSelect. While the Form is read-only (which includes a save in progress) the
-	 * control is locked whatever this says: `disabled` can only add to that.
+	 * handleSelect. The Form never disables the control, see readOnly.
 	 * @default false
 	 */
 	disabled?: boolean;
+	/**
+	 * Shows the control read-only: the search field stays focusable but takes no typing and
+	 * opens no list, the entries have no remove button, and nothing queues a write. While
+	 * the Form is read-only the control is read-only whatever this says. A save in progress
+	 * is the exception: it leaves the control as it is, the focus and the text typed into
+	 * the search field included, and only blocks picks and removals while it runs
+	 * (blockWrites).
+	 * @default false
+	 */
+	readOnly?: boolean;
 }
 
 const FormCrudMultiSelect = <
@@ -45,16 +54,23 @@ const FormCrudMultiSelect = <
 	>(props);
 	const { connector } =
 		useLazyCrudConnector<Record<string, unknown>>(connectorParams);
-	const { readOnly, errorComponent } = useFormContextLite<ModelUnknown>();
+	const { readOnly, readOnlyReasons, errorComponent } =
+		useFormContextLite<ModelUnknown>();
+	// a save makes the Form read-only too, but changing the field then would take the user's
+	// focus and typed search away: while it runs, the field only takes no picks or removals
+	const readOnlyBesidesSaving = Object.keys(readOnlyReasons).some(
+		(reason) => reason !== FORM_SUBMITTING_READ_ONLY_REASON,
+	);
 
-	// the caller's props first: the Form's state wins, so an explicit falsy disabled
-	// cannot unlock the control in a read-only form
+	// the caller's props first: the Form's state wins, so an explicit falsy readOnly or
+	// blockWrites cannot unlock the control in a read-only or saving form
 	return (
 		<CrudMultiSelect
 			{...otherProps}
 			connector={connector}
 			errorComponent={errorComponent}
-			disabled={otherProps.disabled || readOnly}
+			readOnly={otherProps.readOnly || readOnlyBesidesSaving}
+			blockWrites={otherProps.blockWrites || readOnly}
 			field={connectorParams.field}
 			ref={ref}
 		/>

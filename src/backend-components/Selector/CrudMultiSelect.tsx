@@ -36,6 +36,15 @@ export interface CrudMultiSelectProps<
 	 * The error component that is used to display errors
 	 */
 	errorComponent: React.ComponentType<ErrorComponentProps>;
+	/**
+	 * Shows the selection without letting it change (MultiSelectProps.readOnly): the search
+	 * field stays focusable but takes no typing and opens no list, the entries have no
+	 * remove buttons, and nothing is written, as if disabled: handleSelect ignores every
+	 * change and addToSelection rejects, also when an end adornment or the caller's ref
+	 * calls them
+	 * @default false
+	 */
+	readOnly?: boolean;
 }
 
 export const CrudSelectContext = React.createContext<
@@ -60,7 +69,11 @@ const CrudMultiSelect = <
 ) => {
 	const { errorComponent: ErrorComponent } = props;
 
-	const crudSelect = useCrudSelect(props, ref);
+	// a read-only control writes nothing either
+	const crudSelect = useCrudSelect(
+		{ ...props, blockWrites: props.blockWrites || props.readOnly },
+		ref,
+	);
 	const {
 		loading,
 		error,

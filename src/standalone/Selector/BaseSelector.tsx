@@ -302,6 +302,14 @@ export type BaseSelectorProps<
 		 */
 		disabled?: boolean;
 		/**
+		 * Shows the selection without letting it change, as MUI's Autocomplete does with
+		 * readOnly: the input stays focusable and is marked read-only, takes no typing,
+		 * opens no list and has no clear button, and the label keeps its normal color.
+		 * A disabled selector instead leaves the tab order and is drawn greyed out.
+		 * @default false
+		 */
+		readOnly?: boolean;
+		/**
 		 * Required of input
 		 */
 		required?: boolean;
@@ -680,6 +688,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 		selected,
 		label,
 		disabled,
+		readOnly,
 		required,
 		error,
 		warning,
@@ -1223,6 +1232,8 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 
 	const handleOpen = useCallback(
 		(evt: React.SyntheticEvent) => {
+			// MUI asks to open a read-only field too, but shows no list
+			if (readOnly) return;
 			setOpen(true);
 			const nothingSelected = Array.isArray(selected)
 				? selected.length === 0
@@ -1234,7 +1245,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 			// typing opens the popup after updating the query, so what was typed wins
 			setQuery((prev) => prev || defaultQuery);
 		},
-		[defaultQuery, disableSearch, selected],
+		[defaultQuery, disableSearch, readOnly, selected],
 	);
 
 	// search handler
@@ -1302,6 +1313,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 						}
 						autoComplete
 						disabled={disabled}
+						readOnly={readOnly}
 						selectOnFocus={!disableSearch}
 						options={(() => {
 							let options = [];
@@ -1395,7 +1407,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 									slotProps={{
 										htmlInput: {
 											...paramSlotProps.htmlInput,
-											readOnly: disableSearch,
+											readOnly: disableSearch || readOnly,
 											title:
 												selected && !multiple
 													? (selected.titleTooltip ?? getStringLabel(selected))
@@ -1410,7 +1422,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 										input: {
 											...paramSlotProps.input,
 											classes: textFieldInputClasses,
-											readOnly: disableSearch,
+											readOnly: disableSearch || readOnly,
 											startAdornment:
 												(enableIcons && !multiple
 													? renderIcon(selected?.icon)

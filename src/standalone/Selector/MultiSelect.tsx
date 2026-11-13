@@ -43,6 +43,14 @@ export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
 	 */
 	selected: DataT[];
 	/**
+	 * Shows the selection without letting it change: the selected entries have no remove
+	 * buttons, and the search field stays focusable but takes no typing and opens no list
+	 * (BaseSelectorProps.readOnly). A disabled selector instead leaves the tab order and is
+	 * drawn greyed out.
+	 * @default false
+	 */
+	readOnly?: boolean;
+	/**
 	 * Specify a custom component for displaying multi select items. The entries
 	 * are the items of one list (`<ul>`), so its root must be an `<li>`, e.g.
 	 * MUI's ListItem, as MultiSelectEntry renders.
@@ -116,6 +124,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 		enableIcons,
 		selectedEntryRenderer,
 		disabled,
+		readOnly,
 		getIdOfData,
 		displaySwitch,
 		switchLabel,
@@ -265,7 +274,9 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 									enableDivider={props.selected.length === index - 1}
 									enableIcons={enableIcons}
 									handleDelete={
-										disabled || data.noDelete ? undefined : handleDelete
+										disabled || readOnly || data.noDelete
+											? undefined
+											: handleDelete
 									}
 									data={data}
 									setData={handleSetData}

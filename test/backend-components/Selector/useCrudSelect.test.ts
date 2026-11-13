@@ -736,3 +736,44 @@ describe("useCrudSelect: a disabled control", () => {
 		]);
 	});
 });
+
+describe("useCrudSelect: blocked writes", () => {
+	it("[ISSUE-3505-ITEM-16] blockWrites writes nothing, as if disabled, and says so; once it ends the control takes writes again", async () => {
+		const be = makeBackend([{ id: "j1", source_id: "s1", note: "a" }]);
+		const ref = React.createRef<CrudSelectDispatch<SourceJoinData>>();
+		const { result, rerender } = renderHook(
+			({ blockWrites }: { blockWrites: boolean }) =>
+				useCrudSelect(joinParams(be.connector, { blockWrites }), ref),
+			{ initialProps: { blockWrites: true } },
+		);
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		const disabledWhileBlocked = result.current.disabled;
+
+		await act(async () => {
+			await result.current.handleSelect(
+				["j1", "to-create-s2"],
+				[{ ...result.current.selected[0], note: "b" }, pick("s2")],
+			);
+		});
+		await act(async () => {
+			await result.current.handleSelect([], []);
+		});
+		const outcome = await startAdd(ref, pick("s3")).then(
+			() => null,
+			(e: unknown) => e,
+		);
+		await flush();
+		const callsWhileBlocked = [...be.calls];
+
+		rerender({ blockWrites: false });
+		await startAdd(ref, pick("s2"));
+		await flush();
+
+		expect(disabledWhileBlocked).toBe(true);
+		expect(outcome).toBeInstanceOf(Error);
+		expect(callsWhileBlocked).toEqual([]);
+		expect(result.current.disabled).toBe(false);
+		expect(be.calls).toEqual(["create:s2"]);
+		expect(values(result.current.selected)).toEqual(["j1", "100"]);
+	});
+});
