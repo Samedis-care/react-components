@@ -23,6 +23,9 @@
 			"number-input": {
 				"out-of-range": "Gib eine Zahl von {{MIN}} bis {{MAX}} ein",
 				"invalid": "Gib eine Zahl ein, z. B. {{EXAMPLE}}"
+			},
+			"color-input": {
+				"open-picker": "Farbe auswählen"
 			}
 		},
 		"date-picker": {

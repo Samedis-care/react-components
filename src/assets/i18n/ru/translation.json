@@ -23,6 +23,9 @@
 			"number-input": {
 				"out-of-range": "Введите число от {{MIN}} до {{MAX}}",
 				"invalid": "Введите число, например {{EXAMPLE}}"
+			},
+			"color-input": {
+				"open-picker": "Выберите цвет"
 			}
 		},
 		"date-picker": {

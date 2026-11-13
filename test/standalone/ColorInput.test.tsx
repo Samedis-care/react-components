@@ -1,7 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import React, { useState } from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { ThemeProvider, createTheme } from "@mui/material";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
+import { InputAdornment, ThemeProvider, createTheme } from "@mui/material";
 import ColorInput from "../../src/standalone/UIKit/InputControls/ColorInput";
 
 /**
@@ -126,6 +133,82 @@ describe("ColorInput", () => {
 				expect(input, String(value)).toHaveValue("");
 				unmount();
 			}
+		});
+
+		it("[ISSUE-3485-ITEM-11] opens the picker from a named button that says it opens a dialog", async () => {
+			wrap(<Host />);
+			const opener = screen.getByRole("button", { name: "Choose color" });
+			expect(opener).toHaveAttribute("aria-haspopup", "dialog");
+			expect(opener).toHaveAttribute("aria-expanded", "false");
+			expect(opener).not.toHaveAttribute("aria-controls");
+			act(() => opener.focus());
+			fireEvent.click(opener);
+			const dialog = screen.getByRole("dialog", { name: "Color" });
+			expect(dialog).toHaveAttribute("aria-modal", "true");
+			expect(dialog).toContainElement(picker());
+			expect(opener).toHaveAttribute("aria-expanded", "true");
+			expect(opener).toHaveAttribute("aria-controls", dialog.id);
+
+			fireEvent.keyDown(document.activeElement as Element, { key: "Escape" });
+			await waitFor(() => expect(picker()).toBeNull());
+			expect(opener).toHaveAttribute("aria-expanded", "false");
+			expect(opener).not.toHaveAttribute("aria-controls");
+			expect(document.activeElement).toBe(opener);
+		});
+
+		it("[ISSUE-3485-ITEM-11] names the picker after the field's label, with a caller's id too, and after its button without a label", () => {
+			const { unmount } = wrap(<Host id="primary-color" />);
+			fireEvent.click(screen.getByRole("button", { name: "Choose color" }));
+			expect(screen.getByRole("dialog")).toHaveAccessibleName("Color");
+			unmount();
+
+			wrap(<Host label={undefined} />);
+			fireEvent.click(screen.getByRole("button", { name: "Choose color" }));
+			expect(screen.getByRole("dialog")).toHaveAccessibleName("Choose color");
+		});
+
+		it("[ISSUE-3485-ITEM-11] disables the picker button with the field", () => {
+			const { rerender } = wrap(
+				<ColorInput
+					label="Color"
+					value="#336699"
+					onChange={vi.fn()}
+					disabled
+				/>,
+			);
+			const opener = screen.getByRole("button", { name: "Choose color" });
+			expect(opener).toBeDisabled();
+			rerender(
+				<ThemeProvider theme={theme}>
+					<ColorInput label="Color" value="#336699" onChange={vi.fn()} />
+				</ThemeProvider>,
+			);
+			expect(opener).toBeEnabled();
+		});
+
+		it("[ISSUE-3485-ITEM-11] keeps the caller's input slot props and end adornment beside the picker button", () => {
+			wrap(
+				<Host
+					slotProps={{
+						input: {
+							className: "own-input",
+							endAdornment: (
+								<InputAdornment position="end">
+									<span data-testid="own-end">px</span>
+								</InputAdornment>
+							),
+						},
+					}}
+				/>,
+			);
+			const opener = screen.getByRole("button", { name: "Choose color" });
+			const own = screen.getByTestId("own-end");
+			expect(opener.closest(".MuiInputBase-root")).toHaveClass("own-input");
+			// one adornment, the caller's content first
+			expect(own.parentElement).toBe(opener.parentElement);
+			expect(
+				own.compareDocumentPosition(opener) & Node.DOCUMENT_POSITION_FOLLOWING,
+			).toBeTruthy();
 		});
 	});
 });
