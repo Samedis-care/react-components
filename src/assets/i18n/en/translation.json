@@ -421,17 +421,6 @@
 			"missing": "The {{attribute}} field is missing",
 			"email": "The {{attribute}} field requires a valid email",
 			"url": "The {{attribute}} field requires a valid URL"
-		},
-		"timestampToAge": {
-			"just-now": "just now",
-			"less-minute": "Less than a minute ago",
-			"minute": "minute",
-			"minutes": "minutes",
-			"hour": "hour",
-			"hours": "hours",
-			"day": "day",
-			"days": "days",
-			"str": "{{AMOUNT}} {{UNIT}} ago"
 		}
 	},
 	"common": {

@@ -422,17 +422,6 @@
 			"missing": "Falta el campo {{attribute}}",
 			"email": "El campo {{attribute}} requiere un correo electrónico válido",
 			"url": "El campo {{attribute}} requiere una URL válida"
-		},
-		"timestampToAge": {
-			"just-now": "justo ahora",
-			"less-minute": "Hace menos de un minuto",
-			"minute": "minuto",
-			"minutes": "minutos",
-			"hour": "hora",
-			"hours": "horas",
-			"day": "día",
-			"days": "días",
-			"str": "Hace {{AMOUNT}} {{UNIT}}"
 		}
 	},
 	"common": {

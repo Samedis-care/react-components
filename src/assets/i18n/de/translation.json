@@ -421,17 +421,6 @@
 			"email": "Das Feld {{attribute}} erfordert eine gültige E-Mail-Adresse",
 			"url": "Das Feld {{attribute}} erfordert eine gültige URL",
 			"missing": "Das Feld {{attribute}} fehlt"
-		},
-		"timestampToAge": {
-			"just-now": "gerade jetzt",
-			"less-minute": "Vor weniger als einer Minute",
-			"minute": "Minute",
-			"minutes": "Minuten",
-			"hour": "Stunde",
-			"hours": "Stunden",
-			"day": "Tag",
-			"days": "Tagen",
-			"str": "Vor {{AMOUNT}} {{UNIT}}"
 		}
 	},
 	"common": {

@@ -1,28 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import timestampToAge from "../../src/utils/timestampToAge";
 
-// timestampToAge uses i18n, mock it to return predictable strings
+// timestampToAge formats in the language of the i18n instance; pin it to English
 vi.mock("../../src/i18n", () => ({
-	default: {
-		t: (key: string, params?: Record<string, unknown>): string => {
-			if (key === "utils.timestampToAge.just-now") return "just now";
-			if (key === "utils.timestampToAge.less-minute")
-				return "less than a minute";
-			if (key === "utils.timestampToAge.str") {
-				return `${String(params?.AMOUNT)} ${String(params?.UNIT)} ago`;
-			}
-			// unit translations
-			const unitMap: Record<string, string> = {
-				"utils.timestampToAge.minute": "minute",
-				"utils.timestampToAge.minutes": "minutes",
-				"utils.timestampToAge.hour": "hour",
-				"utils.timestampToAge.hours": "hours",
-				"utils.timestampToAge.day": "day",
-				"utils.timestampToAge.days": "days",
-			};
-			return unitMap[key] ?? key;
-		},
-	},
+	default: { language: "en" },
 }));
 
 describe("timestampToAge", () => {
@@ -38,19 +19,19 @@ describe("timestampToAge", () => {
 		vi.useRealTimers();
 	});
 
-	it("returns 'just now' for timestamps less than 5 seconds ago", () => {
+	it("returns 'now' for timestamps less than 5 seconds ago", () => {
 		const ts = new Date(now - 2000);
-		expect(timestampToAge(ts)).toBe("just now");
+		expect(timestampToAge(ts)).toBe("now");
 	});
 
-	it("returns 'just now' for timestamps exactly at the boundary (4999ms)", () => {
+	it("returns 'now' for timestamps exactly at the boundary (4999ms)", () => {
 		const ts = new Date(now - 4999);
-		expect(timestampToAge(ts)).toBe("just now");
+		expect(timestampToAge(ts)).toBe("now");
 	});
 
-	it("returns 'less than a minute' for timestamps 5s–59s ago", () => {
+	it("returns the seconds for timestamps 5s–59s ago", () => {
 		const ts = new Date(now - 30000);
-		expect(timestampToAge(ts)).toBe("less than a minute");
+		expect(timestampToAge(ts)).toBe("30 seconds ago");
 	});
 
 	it("returns '1 minute ago' for timestamps exactly 1 minute ago", () => {

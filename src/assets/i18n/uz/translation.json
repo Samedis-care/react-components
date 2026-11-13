@@ -421,17 +421,6 @@
 			"email": "{{attribute}} maydoni toʻgʻri elektron pochta manzilini talab qiladi",
 			"url": "{{attribute}} maydoni toʻgʻri URL manzilni talab qiladi",
 			"missing": "{{attribute}} maydoni yoʻq"
-		},
-		"timestampToAge": {
-			"just-now": "hozirgina",
-			"less-minute": "Bir daqiqadan kamroq vaqt oldin",
-			"minute": "daqiqa",
-			"minutes": "daqiqa",
-			"hour": "soat",
-			"hours": "soat",
-			"day": "kun",
-			"days": "kunlar",
-			"str": "{{AMOUNT}} {{UNIT}} oldin"
 		}
 	},
 	"common": {

@@ -138,7 +138,7 @@ describe("SignalPortlet: footer", () => {
 			updatedAt: Date.now(),
 		};
 		renderP(props);
-		expect(ageLabel()).toHaveTextContent("Last refresh: just now");
+		expect(ageLabel()).toHaveTextContent("Last refresh: now");
 		act(() => {
 			vi.advanceTimersByTime(10 * MINUTE);
 		});

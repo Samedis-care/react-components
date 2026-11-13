@@ -14,6 +14,7 @@ import Notifications, {
 	NotificationsProps,
 } from "../../src/standalone/Notifications";
 import timestampToAge from "../../src/utils/timestampToAge";
+import ccI18n from "../../src/i18n";
 
 const theme = createTheme();
 const wrap = (ui: React.ReactNode) =>
@@ -399,5 +400,63 @@ describe("Notifications: polling with loadLatest", () => {
 		rerenderN({ ...props, refreshInterval: 1000 });
 		advance(1000);
 		expect(loadLatest).toHaveBeenCalledTimes(3);
+	});
+});
+
+describe("Notifications: translations", () => {
+	afterEach(async () => {
+		cleanup();
+		vi.useRealTimers();
+		await act(async () => {
+			await ccI18n.changeLanguage("en");
+		});
+	});
+
+	const ageIn = async (lng: string, deltaMs: number) => {
+		await act(async () => {
+			await ccI18n.changeLanguage(lng);
+		});
+		return timestampToAge(new Date(Date.now() - deltaMs));
+	};
+
+	it("[ISSUE-3468-ITEM-3] uses the Russian plural and case forms for the age", async () => {
+		const ages = [
+			await ageIn("ru", 1 * MINUTE),
+			await ageIn("ru", 5 * MINUTE),
+			await ageIn("ru", 21 * MINUTE),
+			await ageIn("ru", 2 * 3_600_000),
+			await ageIn("ru", 5 * 3_600_000),
+			await ageIn("ru", 2 * 86_400_000),
+			await ageIn("ru", 5 * 86_400_000),
+		];
+		expect(ages).toEqual([
+			"1 минуту назад",
+			"5 минут назад",
+			"21 минуту назад",
+			"2 часа назад",
+			"5 часов назад",
+			"2 дня назад",
+			"5 дней назад",
+		]);
+	});
+
+	it("[ISSUE-3468-ITEM-3] uses the singular after numbers in Dutch and Uzbek, and jour in French", async () => {
+		expect(await ageIn("nl", 2 * 3_600_000)).toBe("2 uur geleden");
+		expect(await ageIn("uz", 2 * 86_400_000)).toBe("2 kun oldin");
+		// only the unit: the missing amount is ISSUE-3468-ITEM-2
+		expect(await ageIn("fr", 5 * 86_400_000)).toMatch(/ jours$/);
+	});
+
+	it("[ISSUE-3468-ITEM-3] titles the French popover Notifications, not Avis", async () => {
+		await ccI18n.loadLanguages(["fr"]);
+		expect(
+			ccI18n.getResource("fr", "translation", "standalone.notifications.title"),
+		).toBe("Notifications");
+	});
+
+	it("[ISSUE-3468-ITEM-3] does not call a creation time in the future just now", () => {
+		expect(timestampToAge(new Date(Date.now() + 2 * 3_600_000))).not.toBe(
+			"just now",
+		);
 	});
 });

@@ -36,7 +36,7 @@
 			}
 		},
 		"notifications": {
-			"title": "Avis"
+			"title": "Notifications"
 		},
 		"how-it-works": {
 			"title": "Comment ça fonctionne"
@@ -422,17 +422,6 @@
 			"email": "Le champ {{attribute}} nécessite un email valide",
 			"url": "Le champ {{attribute}} nécessite une URL valide",
 			"missing": "Le champ {{attribute}} est manquant"
-		},
-		"timestampToAge": {
-			"just-now": "juste maintenant",
-			"less-minute": "Il y a moins d'une minute",
-			"minute": "minute",
-			"minutes": "minutes",
-			"hour": "heure",
-			"hours": "heures",
-			"day": "journée",
-			"days": "journées",
-			"str": "Il y a {{AMOUNT}} {{UNIT}}"
 		}
 	},
 	"common": {

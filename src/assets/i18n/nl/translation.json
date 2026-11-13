@@ -421,17 +421,6 @@
 			"email": "Voor het veld {{attribute}} is een geldig e-mailadres vereist",
 			"url": "Het veld {{attribute}} vereist een geldige URL",
 			"missing": "Het veld {{attribute}} ontbreekt"
-		},
-		"timestampToAge": {
-			"just-now": "net nu",
-			"less-minute": "Minder dan een minuut geleden",
-			"minute": "minuut",
-			"minutes": "minuten",
-			"hour": "uur",
-			"hours": "uren",
-			"day": "dag",
-			"days": "dagen",
-			"str": "{{AMOUNT}} {{UNIT}} geleden"
 		}
 	},
 	"common": {
