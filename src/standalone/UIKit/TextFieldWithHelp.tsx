@@ -1,14 +1,9 @@
-import React, {
-	ForwardedRef,
-	useCallback,
-	useEffect,
-	useRef,
-	useState,
-} from "react";
+import React, { ForwardedRef, useCallback, useRef, useState } from "react";
 import {
 	IconButton,
 	InputAdornment,
 	InputAdornmentProps,
+	InputBaseComponentProps,
 	InputLabelProps,
 	InputProps,
 	TextFieldProps,
@@ -37,8 +32,8 @@ export interface TextFieldWithHelpProps extends UIInputProps {
 	customHandleClear?: () => void;
 	/**
 	 * Hides the Clear button. That button is only rendered on touch devices,
-	 * while the field has a value and is not disabled; in a `select` only
-	 * with `customHandleClear`.
+	 * while the field shows a value (`0` included) and is not disabled; in a
+	 * `select` only with `customHandleClear`.
 	 * @default false
 	 */
 	disableClearable?: boolean;
@@ -64,8 +59,9 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 
 	// handle clear
 
-	const [hasValue, setHasValue] = useState<boolean>(
-		!!(muiProps.value ?? muiProps.defaultValue),
+	// what an uncontrolled field shows: its defaultValue, then what was typed
+	const [uncontrolledValue, setUncontrolledValue] = useState<unknown>(
+		muiProps.defaultValue,
 	);
 
 	const composeRef = useRefComposer<HTMLTextAreaElement | HTMLInputElement>();
@@ -102,24 +98,19 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 		[muiProps.multiline, customHandleClear],
 	);
 
-	// keep "hasValue" up to date
+	// keep "uncontrolledValue" up to date
 
 	const handleChange = useCallback(
 		(evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
 			if (onChange) onChange(evt);
-			setHasValue(!!evt.target.value);
+			setUncontrolledValue(evt.target.value);
 		},
 		[onChange],
 	);
 
-	useEffect(() => {
-		setHasValue(!!muiProps.value);
-	}, [muiProps.value]);
-
 	// render
-	const showClear =
+	const canClear =
 		isTouchDevice() &&
-		hasValue &&
 		!muiProps.disabled &&
 		!disableClearable &&
 		// the default clear empties the <input> or <textarea>; a select has
@@ -138,6 +129,19 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 					const orgSlotProps: InputProps = {
 						...accessSlotProps(props, muiProps.slotProps?.input),
 					};
+					// what the field shows: the controlled value, which MUI takes
+					// from slotProps.htmlInput before value, or the uncontrolled one
+					const htmlInputProps = accessSlotProps(
+						props,
+						muiProps.slotProps?.htmlInput,
+					) as InputBaseComponentProps | undefined;
+					const value: unknown =
+						htmlInputProps?.value ?? muiProps.value ?? uncontrolledValue;
+					const showClear =
+						canClear &&
+						value != null &&
+						value !== "" &&
+						!(Array.isArray(value) && value.length === 0);
 					const hasEndAdornment = !!(
 						showClear ||
 						openInfo ||

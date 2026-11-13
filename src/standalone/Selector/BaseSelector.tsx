@@ -1462,6 +1462,8 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 									warning={warning}
 									dirty={dirty}
 									autoFocus={autoFocus}
+									// the Autocomplete has a Clear button of its own
+									disableClearable
 								/>
 							);
 						}}

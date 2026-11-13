@@ -34,6 +34,111 @@ describe("TextFieldWithHelp", () => {
 			await screen.findByRole("combobox", { name: "Status" });
 			expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
 		});
+
+		it("[ISSUE-3483-ITEM-7] shows the Clear button for a defaultValue, before anything is typed", async () => {
+			wrap(<TextFieldWithHelp label="About" defaultValue="abc" />);
+			expect(await screen.findByRole("textbox", { name: "About" })).toHaveValue(
+				"abc",
+			);
+			expect(screen.queryByRole("button", { name: "Clear" })).not.toBeNull();
+		});
+
+		it("[ISSUE-3483-ITEM-7] shows the Clear button for the number 0", async () => {
+			wrap(
+				<TextFieldWithHelp
+					label="Count"
+					type="number"
+					value={0}
+					onChange={noop}
+				/>,
+			);
+			expect(
+				await screen.findByRole("spinbutton", { name: "Count" }),
+			).toHaveValue(0);
+			expect(screen.queryByRole("button", { name: "Clear" })).not.toBeNull();
+		});
+
+		it("[ISSUE-3483-ITEM-7] keeps the Clear button while an owner rejects emptying the field", async () => {
+			// the owner keeps its value, so the field goes on showing "abc"
+			wrap(<TextFieldWithHelp label="Name" value="abc" onChange={noop} />);
+			const input = await screen.findByRole("textbox", { name: "Name" });
+			fireEvent.change(input, { target: { value: "" } });
+			expect(input).toHaveValue("abc");
+			expect(screen.queryByRole("button", { name: "Clear" })).not.toBeNull();
+		});
+
+		it("[ISSUE-3483-ITEM-7] shows no Clear button while an owner keeps the field empty", async () => {
+			// e.g. a letter typed into IntegerInputField
+			wrap(<TextFieldWithHelp label="Quantity" value="" onChange={noop} />);
+			const input = await screen.findByRole("textbox", { name: "Quantity" });
+			fireEvent.change(input, { target: { value: "a" } });
+			expect(input).toHaveValue("");
+			expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
+		});
+
+		it("[ISSUE-3483-ITEM-7] follows the value prop", async () => {
+			const { rerender } = wrap(
+				<TextFieldWithHelp label="Count" value="abc" onChange={noop} />,
+			);
+			await screen.findByRole("textbox", { name: "Count" });
+			expect(screen.queryByRole("button", { name: "Clear" })).not.toBeNull();
+			rerender(
+				<ThemeProvider theme={theme}>
+					<TextFieldWithHelp label="Count" value="" onChange={noop} />
+				</ThemeProvider>,
+			);
+			expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
+			rerender(
+				<ThemeProvider theme={theme}>
+					<TextFieldWithHelp label="Count" value={0} onChange={noop} />
+				</ThemeProvider>,
+			);
+			expect(screen.queryByRole("button", { name: "Clear" })).not.toBeNull();
+		});
+
+		it("[ISSUE-3483-ITEM-7] shows the Clear button for a value set through slotProps.htmlInput", async () => {
+			// as BaseSelector sets the text of its input
+			wrap(
+				<>
+					<TextFieldWithHelp
+						label="Country"
+						onChange={noop}
+						slotProps={{ htmlInput: { value: "Germany" } }}
+					/>
+					<TextFieldWithHelp
+						label="City"
+						onChange={noop}
+						slotProps={{ htmlInput: () => ({ value: "Berlin" }) }}
+					/>
+				</>,
+			);
+			expect(
+				await screen.findByRole("textbox", { name: "Country" }),
+			).toHaveValue("Germany");
+			expect(screen.getByRole("textbox", { name: "City" })).toHaveValue(
+				"Berlin",
+			);
+			expect(screen.getAllByRole("button", { name: "Clear" })).toHaveLength(2);
+		});
+
+		it("[ISSUE-3483-ITEM-7] follows what an uncontrolled field holds", async () => {
+			const onChange = vi.fn();
+			wrap(
+				<TextFieldWithHelp
+					label="About"
+					defaultValue="abc"
+					onChange={onChange}
+				/>,
+			);
+			const input = await screen.findByRole("textbox", { name: "About" });
+			fireEvent.change(input, { target: { value: "" } });
+			expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
+			fireEvent.change(input, { target: { value: "x" } });
+			fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+			expect(input).toHaveValue("");
+			expect(onChange).toHaveBeenCalledTimes(3);
+			expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
+		});
 	});
 
 	describe("the default clear", () => {
