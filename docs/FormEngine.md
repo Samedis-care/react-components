@@ -596,6 +596,12 @@ further, through
 widening the empty one puts a gap in the border of every control which labels itself
 outside the input, as the selectors do.
 
+A text field's label keeps room for the dot at its own end as well. MUI cuts a label too
+long for the field with an ellipsis, so the dot is placed in that room rather than after
+the text, and the ellipsis comes before it. The room is the `padding-inline-end` of
+`& > .MuiInputLabel-formControl`: a wider marker widens it, a theme that drops the dot can
+set it to 0.
+
 For a custom renderer, `DirtyMarker` (an element) and `dirtyMarkerStyles` (for a pseudo
 element) are both exported, so a control can draw the same marker wherever its label is.
 

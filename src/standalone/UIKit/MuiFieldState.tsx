@@ -39,7 +39,9 @@ export interface MuiFieldStateProps {
 	/**
 	 * Does the value differ from the server-side value?
 	 * @remarks Draws {@link dirtyMarkerStyles} after the control's label, and exposes a
-	 *          `data-cc-dirty` attribute for anything the marker doesn't reach.
+	 *          `data-cc-dirty` attribute for anything the marker doesn't reach. A text
+	 *          field's label too long for the field ends in an ellipsis, as MUI cuts
+	 *          it, and the dot follows the ellipsis.
 	 */
 	dirty?: boolean;
 }
@@ -173,6 +175,24 @@ export const withMuiFieldState = <T extends MuiFieldStateSourceProps>(
 			// checkboxes and switches label the control, not the FormControl around it
 			"& > .MuiFormControlLabel-root > .MuiFormControlLabel-label::after":
 				dirtyMarkerStyles(theme),
+			// a text field's label stays on one line and MUI cuts a label too long for
+			// the field with an ellipsis, which would cut the dot off with it. The dot
+			// goes into room kept free at the end of the label instead, so the ellipsis
+			// comes before it; border-box keeps that room inside MUI's max-width. The
+			// label is positioned and as wide as its text (up to that maximum), so a
+			// label that fits shows the dot right after the text.
+			"& > .MuiInputLabel-formControl": {
+				boxSizing: "border-box",
+				paddingInlineEnd: DIRTY_MARKER_WIDTH,
+				"&::after": {
+					position: "absolute",
+					insetInlineEnd: 0,
+					// centred on the line, where vertical-align: middle put it
+					top: "50%",
+					marginTop: -3,
+					marginLeft: 0,
+				},
+			},
 			// the notched outline holds its own copy of the label, which is what sizes
 			// the gap in the border — widen it or the dot sits on top of the outline.
 			// Only the copy which actually holds a label: MUI renders the legend either
