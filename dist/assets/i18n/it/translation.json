@@ -296,7 +296,6 @@
 					"files": {
 						"no-file": "Nessun file presente",
 						"count_one": "{{count}} file",
-						"count_many": "{{count}} file",
 						"count_other": "{{count}} file"
 					},
 					"string-array": {
