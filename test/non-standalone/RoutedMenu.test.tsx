@@ -48,6 +48,19 @@ const entry = (title: string) => {
 /** The titles of all rendered entries, in DOM order */
 const titles = () =>
 	screen.getAllByRole("button", { hidden: true }).map((b) => b.textContent);
+/** The titles of the highlighted (active) entries */
+const selected = () =>
+	screen
+		.queryAllByRole("button", { hidden: true })
+		.filter((b) => b.classList.contains("Mui-selected"))
+		.map((b) => b.textContent);
+/** "less" for an expanded group, "more" for a collapsed one, "none" for a leaf */
+const chevron = (el: HTMLElement) =>
+	el.querySelector("[data-testid=ExpandLessIcon]")
+		? "less"
+		: el.querySelector("[data-testid=ExpandMoreIcon]")
+			? "more"
+			: "none";
 
 const middleClick = (el: HTMLElement, button = 1) =>
 	fireEvent(el, new MouseEvent("auxclick", { bubbles: true, button }));
@@ -340,6 +353,70 @@ describe("RoutedMenu bugs", () => {
 		} finally {
 			vi.unstubAllEnvs();
 		}
+	});
+	it("[ISSUE-3498-ITEM-3] an exact match in a later group wins over a prefix match in an earlier group", () => {
+		mount(
+			[
+				group("Settings", [leaf("General", "/settings")]),
+				group("Advanced", [leaf("Expert", "/settings/expert")]),
+			],
+			"/settings/expert",
+		);
+		expect(selected()).toEqual(["Expert"]);
+		expect(chevron(entry("Settings"))).toBe("more");
+	});
+	it("[ISSUE-3498-ITEM-3] a literal route wins over a param route that matches the same path", () => {
+		mount(
+			[leaf("New app", "/apps/new"), leaf("App", "/apps/:app")],
+			"/apps/new",
+		);
+		expect(selected()).toEqual(["New app"]);
+	});
+	it("[ISSUE-3498-ITEM-3] an entry of the level above wins over a less specific match inside a group", () => {
+		mount(
+			[
+				group("Reports", [leaf("Overview", "/reports")]),
+				leaf("Device report", "/reports/devices"),
+			],
+			"/reports/devices",
+		);
+		expect(selected()).toEqual(["Device report"]);
+		expect(chevron(entry("Reports"))).toBe("more");
+	});
+	it("[ISSUE-3498-ITEM-3] more segments win over a longer route string, and the params come from the same entry", () => {
+		// General and Users are hidden (and reported in development): the import
+		// page has no value for :application
+		vi.spyOn(console, "error").mockImplementation(() => undefined);
+		mount(
+			[
+				leaf("Apps", "/apps"),
+				group("Application", [
+					leaf("General", "/apps/:application"),
+					leaf("Users", "/apps/:application/users"),
+				]),
+				group("Import", [leaf("Upload", "/apps/new/import")]),
+			],
+			"/apps/new/import/upload",
+		);
+		expect(selected()).toEqual(["Upload"]);
+		expect(titles()).toEqual(["Apps", "Application", "Import", "Upload"]);
+		expect(chevron(entry("Application"))).toBe("more");
+		expect(chevron(entry("Import"))).toBe("less");
+	});
+	it("[ISSUE-3498-ITEM-3] on a tie the deeper entry wins, so a group's entry with the group's own route is highlighted", () => {
+		mount(
+			[
+				leaf("Home", "/"),
+				group(
+					"Settings",
+					[leaf("General", "/settings"), leaf("Profile", "/settings/profile")],
+					{ route: "/settings" },
+				),
+			],
+			"/settings",
+		);
+		expect(selected()).toEqual(["General"]);
+		expect(chevron(entry("Settings"))).toBe("less");
 	});
 });
 
