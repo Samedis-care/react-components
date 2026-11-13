@@ -22,7 +22,16 @@ const CCI18nProvider = (props: CCI18nProviderProps) => {
 	const [, setMomentLocale] = useState(getCurrentLocale(ccI18n));
 
 	useEffect(() => {
+		// The moment locales load in any order, so only the latest update
+		// applies its locale and ends `updating`. Loading a locale also makes it
+		// moment's global one (moment.defineLocale does that), so a stale update
+		// puts back the locale applied last. After the cleanup, no update does
+		// anything.
+		let latestUpdate = 0;
+		let appliedLocale = moment.locale();
+		let active = true;
 		const updateLocale = () => {
+			const update = ++latestUpdate;
 			void (async () => {
 				setUpdating(true);
 				const lang = getCurrentLocale(ccI18n) ?? "en-US"; // fallback
@@ -36,19 +45,26 @@ const CCI18nProvider = (props: CCI18nProviderProps) => {
 					} catch {
 						// locale not found
 					}
-				} finally {
-					moment.locale(lang);
-					setMomentLocale(lang);
-					const htmlTag = document.querySelector("html");
-					if (htmlTag) htmlTag.lang = getCurrentLanguage(ccI18n);
-					setUpdating(false);
 				}
+				if (!active) return;
+				if (update !== latestUpdate) {
+					moment.locale(appliedLocale);
+					return;
+				}
+				appliedLocale = moment.locale(lang);
+				setMomentLocale(lang);
+				const htmlTag = document.querySelector("html");
+				if (htmlTag) htmlTag.lang = getCurrentLanguage(ccI18n);
+				setUpdating(false);
 			})();
 		};
 
 		updateLocale();
 		ccI18n.on("languageChanged", updateLocale);
-		return () => ccI18n.off("languageChanged", updateLocale);
+		return () => {
+			active = false;
+			ccI18n.off("languageChanged", updateLocale);
+		};
 	}, []);
 
 	return (
