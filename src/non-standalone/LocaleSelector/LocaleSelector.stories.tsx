@@ -1,7 +1,7 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, userEvent, waitFor, within } from "storybook/test";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { Button, createTheme } from "@mui/material";
 import DialogContextProvider from "../../framework/DialogContextProvider";
 import { useDialogContext } from "../../framework";
@@ -382,5 +382,56 @@ export const Issue3466Item8FlagsOutlined: Story = {
 			})
 			.filter((entry) => entry !== null);
 		await expect(misfit).toEqual([]);
+	},
+};
+
+/**
+ * A button that renders the dialog from state, without pushDialog, as an app does
+ * with an MUI Dialog
+ */
+const StateOpener = (props: LocaleSelectorDialogProps) => {
+	const { onClose, ...dialogProps } = props;
+	const [open, setOpen] = useState(false);
+	const show = useCallback(() => setOpen(true), []);
+	const close = useCallback(() => {
+		onClose?.();
+		setOpen(false);
+	}, [onClose]);
+	return (
+		<>
+			<Button variant="contained" onClick={show}>
+				Open locale selector
+			</Button>
+			{open && <LocaleSelectorDialog {...dialogProps} onClose={close} />}
+		</>
+	);
+};
+
+export const Issue3499Item17RenderedFromState: Story = {
+	args: { supportedLocales: SCF, onClose: fn() },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-17: rendered from state, without pushDialog, the close button and Escape call `onClose`, which closes the dialog by no longer rendering it, and focus returns to the button that opened it.",
+			},
+		},
+	},
+	render: (args) => <StateOpener {...args} />,
+	play: async ({ args, canvasElement }) => {
+		await reset();
+		const dialog = await openDialog(canvasElement);
+		await userEvent.click(
+			within(dialog).getByRole("button", { name: "Close" }),
+		);
+		await waitFor(() => expect(page().queryByRole("dialog")).toBeNull());
+		await expect(args.onClose).toHaveBeenCalledTimes(1);
+		await waitFor(() => expect(opener(canvasElement)).toHaveFocus());
+		await openDialog(canvasElement);
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() => expect(page().queryByRole("dialog")).toBeNull());
+		await expect(args.onClose).toHaveBeenCalledTimes(2);
+		await waitFor(() => expect(opener(canvasElement)).toHaveFocus());
 	},
 };

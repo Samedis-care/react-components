@@ -163,7 +163,136 @@ const backend = () =>
 		}
 	).backend;
 
+/** the close button in the dialog's title */
+const closeButton = () =>
+	within(screen.getByRole("dialog")).getByRole("button", { name: "Close" });
+/** a click on the area around the dialog box (MUI's backdrop click) */
+const clickBackdrop = () => {
+	const container = document.querySelector<HTMLElement>(".MuiDialog-container");
+	if (!container) throw new Error("no dialog container");
+	fireEvent.mouseDown(container);
+	fireEvent.click(container);
+};
+const dismissals: [string, () => void][] = [
+	["the close button", () => fireEvent.click(closeButton())],
+	[
+		"Escape",
+		() => fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" }),
+	],
+	["a backdrop click", clickBackdrop],
+];
+
+/** renders the dialog from state, as an app does with an MUI Dialog */
+const Inline = (props: { onClose: () => void }) => {
+	const { onClose } = props;
+	const [open, setOpen] = React.useState(true);
+	const close = React.useCallback(() => {
+		onClose();
+		setOpen(false);
+	}, [onClose]);
+	return open ? (
+		<LocaleSelectorDialog supportedLocales={DE} onClose={close} />
+	) : null;
+};
+
 describe("LocaleSelectorDialog", () => {
+	describe("onClose", () => {
+		it.each(dismissals)(
+			"[ISSUE-3499-ITEM-17] rendered without pushDialog, %s calls onClose, which closes it by no longer rendering it",
+			async (_way, dismiss) => {
+				const onClose = vi.fn();
+				render(
+					<DialogContextProvider>
+						<Inline onClose={onClose} />
+					</DialogContextProvider>,
+				);
+				await rowBtn("Austria");
+				dismiss();
+				expect(onClose).toHaveBeenCalledTimes(1);
+				await waitFor(() => expect(dialogEls()).toHaveLength(0));
+			},
+		);
+
+		it.each(dismissals)(
+			"[ISSUE-3499-ITEM-17] pushed, %s closes it and calls onClose once",
+			async (_way, dismiss) => {
+				const onClose = vi.fn();
+				mount();
+				open(<LocaleSelectorDialog supportedLocales={DE} onClose={onClose} />);
+				await rowBtn("Austria");
+				dismiss();
+				await waitFor(() => expect(dialogEls()).toHaveLength(0));
+				await flush();
+				expect(onClose).toHaveBeenCalledTimes(1);
+			},
+		);
+
+		it("[ISSUE-3499-ITEM-17] rendered without pushDialog, a pick calls onClose once the language is applied", async () => {
+			const onClose = vi.fn(() => {
+				// the language is applied before the dialog reports itself closed
+				expect(ccI18n.language).toBe("fr-FR");
+			});
+			render(
+				<DialogContextProvider>
+					<LocaleSelectorDialog supportedLocales={["fr"]} onClose={onClose} />
+				</DialogContextProvider>,
+			);
+			fireEvent.click(await rowBtn("France"));
+			await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1), {
+				timeout: 10000,
+			});
+			expect(onClose).toHaveReturned();
+		});
+
+		it("[ISSUE-3499-ITEM-17] pushed, a pick closes it and calls onClose once", async () => {
+			const onClose = vi.fn();
+			mount();
+			open(
+				<LocaleSelectorDialog supportedLocales={["fr"]} onClose={onClose} />,
+			);
+			fireEvent.click(await rowBtn("France"));
+			await waitFor(() => expect(dialogEls()).toHaveLength(0), {
+				timeout: 10000,
+			});
+			await flush();
+			expect(ccI18n.language).toBe("fr-FR");
+			expect(onClose).toHaveBeenCalledTimes(1);
+		});
+
+		it("[ISSUE-3499-ITEM-17] closed while the picked language loads, onClose is not called again when the load ends", async () => {
+			const { release } = holdSwitch();
+			const onClose = vi.fn();
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} onClose={onClose} />);
+			fireEvent.click(await rowBtn("Austria"));
+			await flush();
+			fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+			await flush();
+			expect(onClose).toHaveBeenCalledTimes(1);
+			await release();
+			expect(onClose).toHaveBeenCalledTimes(1);
+		});
+
+		it("[ISSUE-3499-ITEM-17] the onClose of the latest render is called", async () => {
+			const first = vi.fn();
+			const latest = vi.fn();
+			const { rerender } = render(
+				<DialogContextProvider>
+					<LocaleSelectorDialog supportedLocales={DE} onClose={first} />
+				</DialogContextProvider>,
+			);
+			await rowBtn("Austria");
+			rerender(
+				<DialogContextProvider>
+					<LocaleSelectorDialog supportedLocales={DE} onClose={latest} />
+				</DialogContextProvider>,
+			);
+			fireEvent.click(closeButton());
+			expect(first).not.toHaveBeenCalled();
+			expect(latest).toHaveBeenCalledTimes(1);
+		});
+	});
+
 	describe("switching", () => {
 		it("[ISSUE-3499-ITEM-1] a language that fails to load shows an error and keeps the previous language", async () => {
 			// e.g. offline, or the old chunk hashes return 404 after a deploy.
