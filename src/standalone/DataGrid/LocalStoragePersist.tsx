@@ -8,7 +8,13 @@ import {
 
 export interface LocalStoragePersistProps {
 	/**
-	 * The local storage key to use for persisting
+	 * The localStorage key the grids inside read their state from and write it
+	 * to.
+	 *
+	 * When it changes, the children are mounted again, so the grids open with
+	 * what is stored under the new key. Everything else inside is mounted
+	 * again as well: it loses its state, and keyboard focus inside it falls
+	 * back to the page.
 	 */
 	storageKey: string;
 	/**
@@ -21,6 +27,9 @@ export interface LocalStoragePersistProps {
  * A persistence provider for DataGrid.
  * Uses localStorage for storage.
  * Wrap around DataGrid component to archive persistence
+ *
+ * A change of storageKey mounts the children again, as a grid reads the
+ * persisted state when it mounts only.
  * @remarks The data it provides is what was written last, so a grid mounted
  *          later (or anything else reading the context) starts from the
  *          current state, not from the state loaded on mount
@@ -80,9 +89,12 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 		[written, storageKey, stored, setData],
 	);
 
+	// a grid reads the persisted state when it mounts: one mounted for the
+	// previous key would keep showing that key's state, and write it under
+	// this one
 	return (
 		<DataGridPersistentStateContext.Provider value={persistCtx}>
-			{children}
+			<React.Fragment key={storageKey}>{children}</React.Fragment>
 		</DataGridPersistentStateContext.Provider>
 	);
 };

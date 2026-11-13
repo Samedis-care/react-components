@@ -340,6 +340,10 @@ const SIZING = DATA_GRID_STORAGE_KEY_COLUMN_SIZING;
 
 const FILTERS = DATA_GRID_STORAGE_KEY_FILTERS;
 
+/** A stored bucket or entry */
+const persisted = (value: string | null | undefined) =>
+	JSON.parse(value ?? "null") as DataGridPersistentState;
+
 /** Routes the buckets like samedis.care: filters to the server, sizing local and across tenants */
 const configureLikeSamedis = (server: MemoryProvider) =>
 	StorageManager.configure((id, keys) => {
@@ -358,6 +362,73 @@ describe("persistence provider bugs", () => {
 			<StorageManagerPersist storageKeys={keys}>{child}</StorageManagerPersist>
 		</ThemeProvider>
 	);
+	it("[ISSUE-3496-ITEM-5] LocalStoragePersist does not write the previous key's grid state into a new storageKey", async () => {
+		localStorage.setItem(
+			"grid-B",
+			JSON.stringify({
+				v: 2,
+				search: "B's search",
+				shown: ["name", "role"],
+				hidden: ["secret"],
+			}),
+		);
+		const ui = (storageKey: string) => (
+			<LocalStoragePersist storageKey={storageKey}>
+				<Grid />
+			</LocalStoragePersist>
+		);
+		const { rerender } = render(ui("grid-A"));
+		await gridIdle();
+		act(() => grid!.setState((prev) => ({ ...prev, search: "A's search" })));
+		rerender(ui("grid-B"));
+		act(() =>
+			grid!.setState((prev) => ({
+				...prev,
+				columnHidden: { ...prev.columnHidden, role: true },
+			})),
+		);
+		expect(persisted(localStorage.getItem("grid-B")).search).toBe("B's search");
+	});
+	it("[ISSUE-3496-ITEM-5] after a storageKey change the grid shows what is stored under the new key, and back", async () => {
+		localStorage.setItem(
+			"grid-B",
+			JSON.stringify({
+				v: 2,
+				search: "B's search",
+				shown: ["name", "secret"],
+				hidden: ["role"],
+			}),
+		);
+		const ui = (storageKey: string) => (
+			<LocalStoragePersist storageKey={storageKey}>
+				<Grid />
+			</LocalStoragePersist>
+		);
+		const { rerender } = render(ui("grid-A"));
+		await gridIdle();
+		act(() => grid!.setState((prev) => ({ ...prev, search: "A's search" })));
+
+		grid = null;
+		rerender(ui("grid-B"));
+		await gridIdle();
+		expect(grid!.state.search).toBe("B's search");
+		expect(grid!.state.columnHidden).toMatchObject({
+			role: true,
+			secret: false,
+		});
+		// switching keys writes neither
+		expect(persisted(localStorage.getItem("grid-B")).search).toBe("B's search");
+
+		grid = null;
+		rerender(ui("grid-A"));
+		await gridIdle();
+		expect(grid!.state.search).toBe("A's search");
+		expect(grid!.state.columnHidden).toMatchObject({
+			role: false,
+			secret: true,
+		});
+		expect(persisted(localStorage.getItem("grid-A")).search).toBe("A's search");
+	});
 	it("[ISSUE-3496-ITEM-6] a grid that opens on what is stored does not write it again", async () => {
 		const first = vi.fn<DataGridPersistentStateContextType[1]>();
 		render(
