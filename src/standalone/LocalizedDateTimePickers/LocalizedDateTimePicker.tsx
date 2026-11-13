@@ -127,7 +127,6 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 								...(fullWidth === undefined ? {} : { fullWidth }),
 								// called once focus leaves the field, see withFieldBlur
 								onBlur: (event: React.FocusEvent<HTMLDivElement>) => {
-									draft.settle();
 									orgSlotProps?.onBlur?.(event);
 									onBlur?.(event);
 								},

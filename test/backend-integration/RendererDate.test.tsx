@@ -1,6 +1,12 @@
 import { afterEach, describe, expect, it, type Mock, vi } from "vitest";
 import React from "react";
-import { cleanup, render } from "@testing-library/react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+} from "@testing-library/react";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
@@ -86,6 +92,32 @@ const emitChange = (renderer: RendererDate, value: Date, date: unknown) => {
 
 describe("RendererDate", () => {
 	const stored = normalizeDate(new Date(2026, 7, 12));
+
+	it("[ISSUE-3474-ITEM-11] keeps the validation error of a rejected date after focus leaves the field", () => {
+		const renderer = renderEditable(normalizeDate(new Date(2099, 7, 12)), {
+			handleChange: vi.fn(),
+			setFieldTouched: vi.fn(),
+		});
+		render(<button type="button">outside</button>);
+		// ArrowUp in the year gives 2100, past the picker's default maxDate
+		const year = screen.getAllByRole("spinbutton")[2];
+		act(() => {
+			year.focus();
+		});
+		act(() => {
+			fireEvent.keyDown(year, { key: "ArrowUp" });
+		});
+		expect(renderer.validate()).toBe("Please enter a valid date");
+
+		act(() => {
+			screen.getByRole("button", { name: "outside" }).focus();
+		});
+		// the form still refuses to save the field: it shows 2100, not the stored day
+		expect({ year: year.textContent, error: renderer.validate() }).toEqual({
+			year: "2100",
+			error: "Please enter a valid date",
+		});
+	});
 
 	it("reports a validation error instead of throwing when emptied", () => {
 		const renderer = renderEditable(stored, {

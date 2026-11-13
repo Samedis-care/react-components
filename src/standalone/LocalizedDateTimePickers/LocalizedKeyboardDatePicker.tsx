@@ -157,7 +157,6 @@ const LocalizedKeyboardDatePicker = (
 								...(fullWidth === undefined ? {} : { fullWidth }),
 								// called once focus leaves the field, see withFieldBlur
 								onBlur: (event: React.FocusEvent<HTMLInputElement>) => {
-									draft.settle();
 									validation.onFieldLeave();
 									textFieldProps?.onBlur?.(event);
 									onBlur?.(event);

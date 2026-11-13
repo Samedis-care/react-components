@@ -261,8 +261,8 @@ export const ClearingIsReportedAtOnce: StoryObj<TypedEntryArgs> = {
 	},
 };
 
-export const BlurDropsAnUnfinishedDate: StoryObj<TypedEntryArgs> = {
-	name: "Leaving the field drops a half-typed date",
+export const BlurKeepsAnUnfinishedDate: StoryObj<TypedEntryArgs> = {
+	name: "Leaving the field keeps a half-typed date, marked invalid",
 	args: { onChange: fn(), initialValue: "2026-08-01" },
 	render: (args) => (
 		<>
@@ -277,9 +277,14 @@ export const BlurDropsAnUnfinishedDate: StoryObj<TypedEntryArgs> = {
 		await expect(fieldText(canvas)).toBe("08|01|0020");
 		await expect(args.onChange).not.toHaveBeenCalled();
 
-		// nothing was accepted, so the field must not be left showing year 20
+		// as in MUI's own field, what was typed stays, marked invalid, so the
+		// user sees that year 20 was not taken; the consumer keeps 2026
 		await userEvent.click(canvas.getByRole("button", { name: "elsewhere" }));
-		await expect(fieldText(canvas)).toBe("08|01|2026");
+		await expect(fieldText(canvas)).toBe("08|01|0020");
+		await expect(canvas.getByRole("group")).toHaveAttribute(
+			"aria-invalid",
+			"true",
+		);
 		await expect(args.onChange).not.toHaveBeenCalled();
 	},
 };
@@ -380,13 +385,13 @@ const ControlledWithElsewhere = ({
 
 export const Issue3474Item2TabOutThroughCalendarButton: StoryObj<TypedEntryArgs> =
 	{
-		name: "ISSUE-3474-ITEM-2: tabbing out past the calendar button drops a half-typed date",
+		name: "ISSUE-3474-ITEM-2: tabbing out past the calendar button keeps a half-typed date",
 		args: { onChange: fn(), initialValue: "2026-08-01" },
 		parameters: {
 			docs: {
 				description: {
 					story:
-						"ISSUE-3474-ITEM-2: Tab from the year goes to the calendar button, which is part of the field, so the half-typed year is kept. The next Tab leaves the field from the button, which drops it: the field shows 2026-08-01 again, the date the consumer holds, as it does when focus leaves from a section.",
+						"ISSUE-3474-ITEM-2: Tab from the year goes to the calendar button, which is part of the field. The next Tab leaves the field from the button. The half-typed year stays in the field, marked invalid, as it does when focus leaves from a section, and the consumer keeps 2026-08-01.",
 				},
 			},
 		},
@@ -408,6 +413,105 @@ export const Issue3474Item2TabOutThroughCalendarButton: StoryObj<TypedEntryArgs>
 			).toHaveFocus();
 
 			await expect(args.onChange).not.toHaveBeenCalled();
-			await expect(fieldText(canvas)).toBe("08|01|2026");
+			await expect(fieldText(canvas)).toBe("08|01|0020");
 		},
 	};
+
+export const Issue3474Item11RetypedImpossibleDayStays: StoryObj<TypedEntryArgs> =
+	{
+		name: "ISSUE-3474-ITEM-11: an impossible day stays in the field after leaving it, marked invalid",
+		args: { onChange: fn(), initialValue: "2026-03-02" },
+		parameters: {
+			docs: {
+				description: {
+					story:
+						"ISSUE-3474-ITEM-11: Over a stored 2026-03-02 the user types 02/31/2026. The month and the first day digit make real dates (Feb 2, Feb 3), which are reported; Feb 31 is not. Leaving the field keeps 02/31/2026 in it, marked invalid, as MUI's field does, rather than showing Feb 3, a day the user never meant.",
+				},
+			},
+		},
+		render: (args) => (
+			<ControlledWithElsewhere {...args} Picker={LocalizedKeyboardDatePicker} />
+		),
+		play: async ({ args, canvas, userEvent }) => {
+			await userEvent.click(sections(canvas).month);
+			await typeSlowly(userEvent, "02312026");
+			await expect(fieldText(canvas)).toBe("02|31|2026");
+			await expect(reported(args.onChange, "YYYY-MM-DD")).toEqual([
+				"2026-02-02",
+				"2026-02-03",
+			]);
+
+			await userEvent.click(canvas.getByRole("button", { name: "elsewhere" }));
+			await expect(fieldText(canvas)).toBe("02|31|2026");
+			await expect(canvas.getByRole("group")).toHaveAttribute(
+				"aria-invalid",
+				"true",
+			);
+			await expect(args.onChange).toHaveBeenCalledTimes(2);
+		},
+	};
+
+interface SubmitArgs extends TypedEntryArgs {
+	/** Receives what a submit handler sees: the consumer's error flag and date */
+	onSubmit: Mock<(error: boolean, value: string | null) => void>;
+}
+
+/** A consumer that checks the picker's onError before it acts on the date */
+const ValidatingConsumer = (args: SubmitArgs) => {
+	const consumer = useConsumerState(args);
+	const [error, setError] = useState(false);
+	return (
+		<>
+			<LocalizedKeyboardDatePicker
+				label="Date"
+				{...consumer}
+				onError={(newError) => {
+					setError(!!newError);
+				}}
+			/>
+			<button
+				type="button"
+				onClick={() => {
+					args.onSubmit(error, consumer.value?.format("YYYY-MM-DD") ?? null);
+				}}
+			>
+				submit
+			</button>
+		</>
+	);
+};
+
+export const Issue3474Item11SubmitAfterRejectedEntry: StoryObj<SubmitArgs> = {
+	name: "ISSUE-3474-ITEM-11: a submit after a rejected entry sees the picker's error",
+	args: { onChange: fn(), onSubmit: fn(), initialValue: "2026-08-01" },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3474-ITEM-11: A consumer that validates through `onError` holds 2026-08-01, and the user types the year 1899, before the default `minDate`. Pressing the submit button moves focus out of the field first. The entry stays, and so does the error, so the submit handler sees it and can refuse the date instead of acting on the previous one.",
+			},
+		},
+	},
+	render: (args) => <ValidatingConsumer {...args} />,
+	play: async ({ args, canvas, userEvent }) => {
+		await userEvent.click(sections(canvas).year);
+		await typeSlowly(userEvent, "1899");
+		await expect(fieldText(canvas)).toBe("08|01|1899");
+		await expect(canvas.getByRole("group")).toHaveAttribute(
+			"aria-invalid",
+			"true",
+		);
+
+		// a mouse click: press, a short pause, release
+		const submit = canvas.getByRole("button", { name: "submit" });
+		await userEvent.pointer({ keys: "[MouseLeft>]", target: submit });
+		await new Promise((resolve) => {
+			setTimeout(resolve, 150);
+		});
+		await userEvent.pointer({ keys: "[/MouseLeft]", target: submit });
+
+		await expect(args.onSubmit.mock.calls).toEqual([[true, "2026-08-01"]]);
+		await expect(args.onChange).not.toHaveBeenCalled();
+		await expect(fieldText(canvas)).toBe("08|01|1899");
+	},
+};

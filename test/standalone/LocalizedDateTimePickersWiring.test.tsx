@@ -567,7 +567,7 @@ describe.each(PICKERS)("%s wiring", (_name, Picker) => {
 		);
 	};
 
-	it("[ISSUE-3474-ITEM-2] settles the draft and calls onBlur when focus leaves through the open-picker button", () => {
+	it("[ISSUE-3474-ITEM-2] calls onBlur once when focus leaves through the open-picker button", () => {
 		const slotBlur = vi.fn();
 		render(
 			<Wrap>
@@ -583,7 +583,7 @@ describe.each(PICKERS)("%s wiring", (_name, Picker) => {
 			shown: datePart(),
 			blursOnTheWayIn,
 			blursInAll: slotBlur.mock.calls.length,
-		}).toEqual({ shown: "08|01|2026", blursOnTheWayIn: 0, blursInAll: 1 });
+		}).toEqual({ shown: "08|02|2026", blursOnTheWayIn: 0, blursInAll: 1 });
 	});
 
 	it("[ISSUE-3474-ITEM-2] keeps the draft and reports no blur while focus moves between the sections and to the open-picker button", () => {
@@ -602,7 +602,7 @@ describe.each(PICKERS)("%s wiring", (_name, Picker) => {
 		});
 	});
 
-	it("[ISSUE-3474-ITEM-2] settles the draft and calls onBlur once when focus goes back from the open-picker button through the sections", () => {
+	it("[ISSUE-3474-ITEM-2] calls onBlur once when focus goes back from the open-picker button through the sections", () => {
 		const slotBlur = vi.fn();
 		render(
 			<Wrap>
@@ -615,7 +615,7 @@ describe.each(PICKERS)("%s wiring", (_name, Picker) => {
 		focus(screen.getAllByRole("spinbutton").at(-1) as HTMLElement);
 		focus(outside());
 		expect({ shown: datePart(), blurs: slotBlur.mock.calls.length }).toEqual({
-			shown: "08|01|2026",
+			shown: "08|02|2026",
 			blurs: 1,
 		});
 	});
@@ -725,6 +725,58 @@ describe.each(PICKERS)("%s wiring", (_name, Picker) => {
 		focus(outside());
 		// it sees every blur inside the root, as MUI hands it over
 		expect(rootBlur).toHaveBeenCalledTimes(2);
+	});
+
+	it("[ISSUE-3474-ITEM-11] keeps a complete but rejected date, and its error, when focus leaves the field", () => {
+		const onChange = vi.fn();
+		const onError = vi.fn<(error: unknown) => void>();
+		render(
+			<Wrap>
+				<Controlled onChange={onChange} onError={onError} />
+			</Wrap>,
+		);
+		makeDraft();
+		focus(outside());
+		// as in MUI's own field: what was entered stays, marked invalid, and the
+		// error is not withdrawn; the consumer still holds the accepted date
+		expect({
+			shown: datePart(),
+			invalid: screen.getByRole("group").getAttribute("aria-invalid"),
+			errors: onError.mock.calls.map((call) => call[0]),
+			changes: onChange.mock.calls.length,
+		}).toEqual({
+			shown: "08|02|2026",
+			invalid: "true",
+			errors: ["maxDate"],
+			changes: 0,
+		});
+	});
+
+	it("[ISSUE-3474-ITEM-11] drops a rejected date when the calendar opens, and opens it on the accepted date", async () => {
+		const onError = vi.fn<(error: unknown) => void>();
+		render(
+			<Wrap>
+				<Controlled onError={onError} />
+			</Wrap>,
+		);
+		makeDraft();
+		// a mouse press focuses the button before the click opens the calendar
+		focus(openButton());
+		expect(datePart()).toBe("08|02|2026");
+		act(() => {
+			fireEvent.click(openButton());
+		});
+		const popup = await screen.findByRole("dialog");
+		expect({
+			shown: datePart(),
+			selected: popup.querySelector("[role='gridcell'][aria-selected='true']")
+				?.textContent,
+			errors: onError.mock.calls.map((call) => call[0]),
+		}).toEqual({
+			shown: "08|01|2026",
+			selected: "1",
+			errors: ["maxDate", null],
+		});
 	});
 
 	it("[ISSUE-3474-ITEM-1] renders an invalid value instead of looping", () => {
@@ -837,7 +889,7 @@ describe("leaving the field", () => {
 			() => screen.getByRole("button", { name: /info/i }),
 		],
 	] as const)(
-		"[ISSUE-3474-ITEM-2] settles the draft and calls onBlur once when focus leaves a %s through its %s button",
+		"[ISSUE-3474-ITEM-2] calls onBlur once when focus leaves a %s through its %s button",
 		(_name, _button, input, button) => {
 			const onBlur = vi.fn();
 			render(
@@ -854,7 +906,7 @@ describe("leaving the field", () => {
 			});
 			focus(outside());
 			expect({ shown: datePart(), blurs: onBlur.mock.calls.length }).toEqual({
-				shown: "08|01|2026",
+				shown: "08|02|2026",
 				blurs: 1,
 			});
 		},

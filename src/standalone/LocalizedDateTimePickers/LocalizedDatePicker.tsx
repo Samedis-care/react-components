@@ -88,7 +88,6 @@ const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
 								...orgSlotProps,
 								// called once focus leaves the field, see withFieldBlur
 								onBlur: (event: React.FocusEvent<HTMLDivElement>) => {
-									draft.settle();
 									validation.onFieldLeave();
 									orgSlotProps?.onBlur?.(event);
 								},
