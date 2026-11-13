@@ -644,6 +644,23 @@ const node = (id: string, extra?: Partial<TreeData>): TreeData => ({
 	...extra,
 });
 
+// jsdom has no Element.prototype.scrollTo, and react-window skips the call when it is missing
+const stubScrollTo = (fn: (options: ScrollToOptions) => void) => {
+	Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+		value: fn,
+		configurable: true,
+		writable: true,
+	});
+};
+
+/** A root with the children n1..n<count>, all visible */
+const manyRows = (count: number) =>
+	node("root", {
+		hasChildren: true,
+		expanded: true,
+		children: Array.from({ length: count }, (_, i) => node(`n${i + 1}`)),
+	});
+
 describe("TreeView accessibility bugs", () => {
 	const TREE = node("root", {
 		hasChildren: true,
@@ -760,5 +777,173 @@ describe("TreeView lazy loading bugs", () => {
 			nodeProcess.off("unhandledRejection", unhandled);
 			configureErrorReporting(before);
 		}
+	});
+});
+
+describe("TreeView data and rendering bugs", () => {
+	afterEach(() => {
+		delete (HTMLElement.prototype as Partial<HTMLElement>).scrollTo;
+	});
+
+	it("[ISSUE-3476-ITEM-7] scrolls to an entry once it appears, when scrollTo was called before", () => {
+		const scrollTo = vi.fn();
+		stubScrollTo(scrollTo);
+		const ref = React.createRef<TreeViewDispatch>();
+		const { rerender } = render(
+			<TreeView
+				ref={ref}
+				data={manyRows(99)}
+				onToggleExpanded={vi.fn()}
+				onLoadChildren={vi.fn()}
+			/>,
+		);
+		// n120 is not loaded yet
+		act(() => ref.current?.scrollTo("n120"));
+		rerender(
+			<TreeView
+				ref={ref}
+				data={manyRows(150)}
+				onToggleExpanded={vi.fn()}
+				onLoadChildren={vi.fn()}
+			/>,
+		);
+		expect(scrollTo).toHaveBeenCalledExactlyOnceWith({
+			behavior: "auto",
+			top: 121 * 24 - 1000,
+		});
+	});
+
+	it("[ISSUE-3476-ITEM-7] waits until the list has been measured, also while it is 0px high", () => {
+		// react-window measures the list in a ResizeObserver callback, which the
+		// browser runs after the first render; this one reports only on demand
+		const observed: { callback: ResizeObserverCallback; target: Element }[] =
+			[];
+		class DeferredResizeObserver {
+			private readonly callback: ResizeObserverCallback;
+			constructor(callback: ResizeObserverCallback) {
+				this.callback = callback;
+			}
+			observe(target: Element) {
+				observed.push({ callback: this.callback, target });
+			}
+			unobserve = vi.fn();
+			disconnect = vi.fn();
+		}
+		const resize = (height: number) =>
+			act(() => {
+				for (const { callback, target } of observed) {
+					callback(
+						[
+							{
+								target,
+								contentRect: { height, width: 500 },
+							} as unknown as ResizeObserverEntry,
+						],
+						{} as ResizeObserver,
+					);
+				}
+			});
+		const instantResizeObserver = globalThis.ResizeObserver;
+		globalThis.ResizeObserver = DeferredResizeObserver;
+		try {
+			const scrollTo = vi.fn();
+			stubScrollTo(scrollTo);
+			const ref = React.createRef<TreeViewDispatch>();
+			render(
+				<TreeView
+					ref={ref}
+					data={manyRows(99)}
+					onToggleExpanded={vi.fn()}
+					onLoadChildren={vi.fn()}
+				/>,
+			);
+			act(() => ref.current?.scrollTo("n80"));
+			expect(scrollTo).not.toHaveBeenCalled();
+			// laid out, but hidden (display: none)
+			resize(0);
+			expect(scrollTo).not.toHaveBeenCalled();
+			resize(200);
+			expect(scrollTo).toHaveBeenCalledExactlyOnceWith({
+				behavior: "auto",
+				top: 81 * 24 - 200,
+			});
+		} finally {
+			globalThis.ResizeObserver = instantResizeObserver;
+		}
+	});
+
+	it("[ISSUE-3476-ITEM-7] scrolls to an entry under a collapsed ancestor once the ancestor expands", () => {
+		const scrollTo = vi.fn();
+		stubScrollTo(scrollTo);
+		const ref = React.createRef<TreeViewDispatch>();
+		const withFolder = (expanded: boolean) =>
+			node("root", {
+				hasChildren: true,
+				expanded: true,
+				children: [
+					...(manyRows(99).children ?? []),
+					node("folder", {
+						hasChildren: true,
+						expanded,
+						children: Array.from({ length: 30 }, (_, i) => node(`f${i + 1}`)),
+					}),
+				],
+			});
+		const { rerender } = render(
+			<TreeView
+				ref={ref}
+				data={withFolder(false)}
+				onToggleExpanded={vi.fn()}
+				onLoadChildren={vi.fn()}
+			/>,
+		);
+		act(() => ref.current?.scrollTo("f20"));
+		expect(scrollTo).not.toHaveBeenCalled();
+		rerender(
+			<TreeView
+				ref={ref}
+				data={withFolder(true)}
+				onToggleExpanded={vi.fn()}
+				onLoadChildren={vi.fn()}
+			/>,
+		);
+		// root, n1..n99, folder, then f20 at index 120
+		expect(scrollTo).toHaveBeenCalledExactlyOnceWith({
+			behavior: "auto",
+			top: 121 * 24 - 1000,
+		});
+	});
+
+	it("[ISSUE-3476-ITEM-7] scrolls once per call, and a later call replaces a waiting one", () => {
+		const scrollTo = vi.fn();
+		stubScrollTo(scrollTo);
+		const ref = React.createRef<TreeViewDispatch>();
+		const { rerender } = render(
+			<TreeView
+				ref={ref}
+				data={manyRows(99)}
+				onToggleExpanded={vi.fn()}
+				onLoadChildren={vi.fn()}
+			/>,
+		);
+		act(() => ref.current?.scrollTo("n120"));
+		act(() => ref.current?.scrollTo("n50"));
+		expect(scrollTo).toHaveBeenCalledExactlyOnceWith({
+			behavior: "auto",
+			top: 51 * 24 - 1000,
+		});
+		// n120 appears, and the data changes after the scroll: nothing scrolls again
+		rerender(
+			<TreeView
+				ref={ref}
+				data={manyRows(150)}
+				onToggleExpanded={vi.fn()}
+				onLoadChildren={vi.fn()}
+			/>,
+		);
+		expect(scrollTo).toHaveBeenCalledTimes(1);
+		// the same id again is a new request
+		act(() => ref.current?.scrollTo("n50"));
+		expect(scrollTo).toHaveBeenCalledTimes(2);
 	});
 });

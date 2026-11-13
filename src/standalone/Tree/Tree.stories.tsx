@@ -1,11 +1,16 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect } from "storybook/test";
+import { expect, waitFor } from "storybook/test";
 import { Box } from "@mui/material";
 import { FolderOpen, Folder, InsertDriveFile } from "@mui/icons-material";
 import TreeView from "./TreeView";
-import type { TreeData, TreeDataFlat } from "./TreeView";
+import type {
+	TreeData,
+	TreeDataFlat,
+	TreeViewDispatch,
+	TreeViewRendererProps,
+} from "./TreeView";
 import TreeViewCheckboxSelectionRenderer from "./TreeViewCheckboxSelectionRenderer";
 
 // ─── Sample tree data ─────────────────────────────────────────────────────────
@@ -104,6 +109,120 @@ const meta: Meta<typeof TreeView> = {
 export default meta;
 
 type Story = StoryObj<typeof TreeView>;
+
+// ─── Helpers for the interaction stories ─────────────────────────────────────
+
+/** Expanded ids, toggled per id */
+const useToggleSet = (initial: string[]) => {
+	const [set, setSet] = useState(() => new Set(initial));
+	const toggle = useCallback((id: string) => {
+		setSet((prev) => {
+			const next = new Set(prev);
+			if (next.has(id)) next.delete(id);
+			else next.add(id);
+			return next;
+		});
+	}, []);
+	return [set, toggle] as const;
+};
+
+const leaf = (id: string, extra?: Partial<TreeData>): TreeData => ({
+	id,
+	label: id,
+	icon: <InsertDriveFile />,
+	hasChildren: false,
+	expanded: false,
+	...extra,
+});
+
+const folder = (
+	id: string,
+	children: TreeData[] | null,
+	extra?: Partial<TreeData>,
+): TreeData => ({
+	id,
+	label: id,
+	icon: <Folder />,
+	hasChildren: true,
+	expanded: false,
+	children,
+	...extra,
+});
+
+/**
+ * The tree with every `expanded` taken from the set. For leaves this is the
+ * checkbox renderer's selection.
+ */
+const applyExpanded = (entry: TreeData, expanded: Set<string>): TreeData => ({
+	...entry,
+	expanded: expanded.has(entry.id),
+	children: entry.children?.map((child) => applyExpanded(child, expanded)),
+});
+
+/** The scroll container of the tree (react-window's List element) */
+const scrollerOf = (canvasElement: HTMLElement): HTMLElement => {
+	const scroller = canvasElement.querySelector(
+		"[data-react-window-index]",
+	)?.parentElement;
+	if (!scroller) throw new Error("no scroller");
+	return scroller;
+};
+
+/** root > leaf 0 … leaf 99 */
+const LONG_TREE = folder(
+	"root",
+	Array.from({ length: 100 }, (_, i) => leaf(`leaf ${i}`)),
+);
+
+interface HarnessProps {
+	tree: TreeData;
+	initial: string[];
+	renderer?: React.ComponentType<TreeViewRendererProps>;
+	width?: number | string;
+	height?: number;
+	onToggleExpanded?: (id: string) => void;
+	/** Buttons before and after the tree, for Tab order checks */
+	withButtons?: boolean;
+	treeRef?: React.Ref<TreeViewDispatch>;
+}
+
+/** A controlled tree: the set of expanded (or, for checkbox leaves, selected) ids */
+const Harness = ({
+	tree,
+	initial,
+	renderer,
+	width = 320,
+	height = 300,
+	onToggleExpanded,
+	withButtons,
+	treeRef,
+}: HarnessProps) => {
+	const [expanded, toggle] = useToggleSet(initial);
+	const handleToggle = useCallback(
+		(id: string) => {
+			onToggleExpanded?.(id);
+			toggle(id);
+		},
+		[onToggleExpanded, toggle],
+	);
+	const handleLoad = useCallback(() => undefined, []);
+	const data = useMemo(() => applyExpanded(tree, expanded), [tree, expanded]);
+	return (
+		<div>
+			{withButtons && <button>Before the tree</button>}
+			<Box sx={{ width, height, border: "1px solid #ccc" }}>
+				<TreeView
+					ref={treeRef}
+					data={data}
+					renderer={renderer}
+					onToggleExpanded={handleToggle}
+					onLoadChildren={handleLoad}
+				/>
+			</Box>
+			{withButtons && <button>After the tree</button>}
+		</div>
+	);
+};
 
 // ─── Stories ──────────────────────────────────────────────────────────────────
 
@@ -388,5 +507,42 @@ export const Issue3476Item12CheckboxesHaveNames: Story = {
 			await canvas.findByText("package.json", {}, { timeout: 5000 }),
 		).toBeVisible();
 		await expect(canvas.getAllByRole("checkbox")).toHaveLength(1);
+	},
+};
+
+const ScrollOnMountStory = () => {
+	const ref = useRef<TreeViewDispatch>(null);
+	// as an app does to reveal the selected entry when the tree appears
+	React.useEffect(() => {
+		ref.current?.scrollTo("leaf 80");
+	}, []);
+	return (
+		<Harness tree={LONG_TREE} initial={["root"]} height={200} treeRef={ref} />
+	);
+};
+
+export const Issue3476Item7ScrollToRightAfterMount: Story = {
+	render: () => <ScrollOnMountStory />,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3476-ITEM-7: `scrollTo` from an effect that runs when the tree mounts happens before react-window has measured the list. It aligns the row as if the list were 0px high, so the target ends up just above the visible area.",
+			},
+		},
+	},
+	play: async ({ canvas, canvasElement }) => {
+		const target = await canvas.findByText("leaf 80", {}, { timeout: 5000 });
+		const scroller = scrollerOf(canvasElement);
+		await waitFor(async () => {
+			const box = scroller.getBoundingClientRect();
+			const row = target.getBoundingClientRect();
+			await expect(row.top, "row top vs list top").toBeGreaterThanOrEqual(
+				box.top - 0.5,
+			);
+			await expect(row.bottom, "row bottom vs list bottom").toBeLessThanOrEqual(
+				box.bottom + 0.5,
+			);
+		});
 	},
 };
