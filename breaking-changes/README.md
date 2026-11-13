@@ -30,6 +30,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [SignalPortlet's "Last refresh" age advances while the card is mounted](2026-11-13-signal-portlet-age-advances.md) | behavior |
 | 2026-11-13 | [DialogTitle with noTitle renders no heading; an untitled FullFormDialog is named by aria-label](2026-11-13-dialog-title-no-title-no-heading.md) | behavior, type |
 | 2026-11-13 | [IntegerInputField flags numbers it can't hold, and never shows exponent form](2026-11-13-integer-input-out-of-range.md) | behavior |
+| 2026-11-13 | [DecimalInputField flags a separator without a digit instead of reporting NaN](2026-11-13-decimal-input-parse-error-message.md) | behavior |
 | 2026-11-10 | [InfiniteScroll loads nothing while it is hidden, and fills once it is shown](2026-11-10-infinite-scroll-waits-while-hidden.md) | behavior |
 | 2026-11-10 | [The Small list items narrow MUI's gutters, and MultiSelect's entries move 8px to the left](2026-11-10-small-list-item-gutters.md) | behavior |
 | 2026-11-10 | [Country flags come from country-flag-icons: every flag is 3:2 and drawn for small sizes](2026-11-10-country-flags-from-country-flag-icons.md) | behavior |

@@ -955,4 +955,152 @@ describe("DecimalInputField", () => {
 			},
 		);
 	});
+	describe("text that does not parse", () => {
+		it("[ISSUE-3484-ITEM-7] neither reports NaN nor shows it for a lone separator", () => {
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={null} onValue={onValue}>
+					{(value, onChange) => (
+						<DecimalInputField
+							label="Hours"
+							value={value}
+							onChange={onChange}
+						/>
+					)}
+				</Controlled>,
+			);
+			fireEvent.change(field("Hours"), { target: { value: "." } });
+			fireEvent.blur(field("Hours"));
+			expect(reported(onValue).filter((value) => Number.isNaN(value))).toEqual(
+				[],
+			);
+			expect(field("Hours")).not.toHaveValue("NaN");
+		});
+
+		it.each([
+			["en", "."],
+			["en", ","],
+			["de", ","],
+			["de", "."],
+		])(
+			"[ISSUE-3484-ITEM-7] flags a lone separator in %s (%j), and reports nothing",
+			async (lng, text) => {
+				await setLanguage(lng);
+				const onValue: ValueSpy = vi.fn();
+				render(
+					<Controlled initial={3} onValue={onValue}>
+						{(value, onChange) => (
+							<DecimalInputField
+								label="Hours"
+								value={value}
+								onChange={onChange}
+							/>
+						)}
+					</Controlled>,
+				);
+				fireEvent.change(field("Hours"), { target: { value: text } });
+				fireEvent.blur(field("Hours"));
+				expect(reported(onValue)).toEqual([]);
+				expect(field("Hours")).toHaveValue(text);
+				expect(field("Hours")).toHaveAttribute("aria-invalid", "true");
+			},
+		);
+
+		it("[ISSUE-3484-ITEM-7] says in text why the number is invalid", () => {
+			render(<DecimalInputField label="Hours" value={3} onChange={noop} />);
+			const input = field("Hours");
+			fireEvent.change(input, { target: { value: "." } });
+			fireEvent.blur(input);
+			expect(input).toHaveAccessibleDescription(
+				`Enter a number, such as ${fmt("en", 1234.56)}`,
+			);
+		});
+
+		it("[ISSUE-3484-ITEM-7] names a number in the field's format, in the CC language", async () => {
+			await setLanguage("de");
+			render(
+				<DecimalInputField
+					label="Hours"
+					value={3}
+					onChange={noop}
+					format={{ useGrouping: false }}
+				/>,
+			);
+			fireEvent.change(field("Hours"), { target: { value: "," } });
+			fireEvent.blur(field("Hours"));
+			expect(field("Hours")).toHaveAccessibleDescription(
+				"Gib eine Zahl ein, z. B. 1234,56",
+			);
+		});
+
+		it("[ISSUE-3484-ITEM-7] keeps the value and shows the message in place of the helper text until a valid edit", () => {
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={3} onValue={onValue}>
+					{(value, onChange) => (
+						<DecimalInputField
+							label="Hours"
+							value={value}
+							onChange={onChange}
+							helperText="Working hours"
+						/>
+					)}
+				</Controlled>,
+			);
+			const input = field("Hours");
+			expect(input).toHaveAccessibleDescription("Working hours");
+			fireEvent.change(input, { target: { value: "." } });
+			fireEvent.blur(input);
+			// a Tab through the field keeps the text and its error
+			tabThrough(input);
+			expect(reported(onValue)).toEqual([]);
+			expect(input).toHaveValue(".");
+			expect(input).toHaveAttribute("aria-invalid", "true");
+			// still invalid while it is edited, until the next blur, also when the
+			// edit commits the value the field already holds
+			fireEvent.change(input, { target: { value: "3" } });
+			expect(input).toHaveAttribute("aria-invalid", "true");
+			fireEvent.blur(input);
+			expect(reported(onValue)).toEqual([3]);
+			expect(input).toHaveValue("3");
+			expect(input).toHaveAttribute("aria-invalid", "false");
+			expect(input).toHaveAccessibleDescription("Working hours");
+		});
+
+		it("[ISSUE-3484-ITEM-7] commits an emptied field as null after the error", () => {
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={3} onValue={onValue}>
+					{(value, onChange) => (
+						<DecimalInputField
+							label="Hours"
+							value={value}
+							onChange={onChange}
+						/>
+					)}
+				</Controlled>,
+			);
+			fireEvent.change(field("Hours"), { target: { value: "." } });
+			fireEvent.blur(field("Hours"));
+			fireEvent.change(field("Hours"), { target: { value: "" } });
+			fireEvent.blur(field("Hours"));
+			expect(reported(onValue)).toEqual([null]);
+			expect(field("Hours")).toHaveValue("");
+			expect(field("Hours")).toHaveAttribute("aria-invalid", "false");
+		});
+
+		it("[ISSUE-3484-ITEM-7] drops the parse error when a new value arrives", () => {
+			const { rerender } = render(
+				<DecimalInputField label="Hours" value={3} onChange={noop} />,
+			);
+			fireEvent.change(field("Hours"), { target: { value: "." } });
+			fireEvent.blur(field("Hours"));
+			expect(field("Hours")).toHaveAttribute("aria-invalid", "true");
+			// e.g. the form is reset, or the record is reloaded
+			rerender(<DecimalInputField label="Hours" value={9} onChange={noop} />);
+			expect(field("Hours")).toHaveValue("9");
+			expect(field("Hours")).toHaveAttribute("aria-invalid", "false");
+			expect(field("Hours")).toHaveAccessibleDescription("");
+		});
+	});
 });
