@@ -214,6 +214,23 @@ describe("HistoryRouter", () => {
 		expect(location()).toBe("/|||null");
 	});
 
+	it("[ISSUE-3475-ITEM-12] shows the location of a history passed after mount", () => {
+		const h1 = mem("/one");
+		const h2 = mem("/two");
+		const { rerender } = render(
+			<HistoryRouter history={h1}>
+				<ShowPath />
+			</HistoryRouter>,
+		);
+		expect(renderedPath()).toBe("/one");
+		rerender(
+			<HistoryRouter history={h2}>
+				<ShowPath />
+			</HistoryRouter>,
+		);
+		expect(renderedPath()).toBe("/two");
+	});
+
 	it("throws outside a HistoryRouter", () => {
 		vi.spyOn(console, "error").mockImplementation(() => {});
 		expect(() => render(<ShowPath />)).toThrow("Location context missing");
