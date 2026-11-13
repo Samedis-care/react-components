@@ -1,10 +1,11 @@
 /**
  * BackendDataGridMultiSelect over 30 people P1..P30 (GridTestConnector, which pages by
- * offset and honours id inSet/notInSet): how the field is named and what it says about
- * the selection.
+ * offset and honours id inSet/notInSet): how the field is named, what it says about
+ * the selection, and the row counts it gives the grid.
  *
- * DataGrid is wrapped so the test can read its props (store.props); with store.real the
- * real grid renders as well. MultiGrid (the cells) is not rendered in jsdom.
+ * DataGrid is wrapped so the test can read its props (store.props) and call its loadData
+ * like the grid does; with store.real the real grid renders as well. MultiGrid (the cells)
+ * is not rendered in jsdom.
  */
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -27,7 +28,11 @@ import {
 	ModelVisibilityEdit,
 	ModelVisibilityEditRequired,
 } from "../../../src/backend-integration";
-import type { DataGridProps } from "../../../src/standalone/DataGrid/DataGrid";
+import type {
+	DataGridData,
+	DataGridProps,
+	IDataGridLoadDataParameters,
+} from "../../../src/standalone/DataGrid/DataGrid";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import {
 	capture,
@@ -107,6 +112,28 @@ const ui = (props: Props) => (
 
 const gridProps = () => store.props as unknown as DataGridProps;
 
+const query = (
+	page: number,
+	quickFilter = "",
+): IDataGridLoadDataParameters => ({
+	page,
+	rows: 10,
+	quickFilter,
+	sort: [],
+	fieldFilter: {},
+	additionalFilters: {},
+});
+
+const idsOf = (data: DataGridData) => data.rows.map((row) => row.id);
+
+const mount = async (props: Props) => {
+	store.props = null;
+	store.real = false;
+	const result = render(ui(props));
+	await flush();
+	return result;
+};
+
 /** a form whose field "recipients" is a BackendDataGridMultiSelect over people */
 const recipientsForm = (
 	people: ModelUnknown,
@@ -137,6 +164,43 @@ const recipientsForm = (
 // ---------------------------------------------------------------------------
 
 describe("BackendDataGridMultiSelect bugs", () => {
+	it("[ISSUE-3510-ITEM-10] with a connector that reports filteredRows, the counts are the collection and the matches", async () => {
+		const { model } = gridModel();
+		await mount({ model, selected: ["3", "23"] });
+		// "P1" matches P1 and P10..P19, none of them selected
+		const data = await gridProps().loadData(query(1, "P1"));
+		expect(idsOf(data)).toHaveLength(10);
+		expect(data.rowsFiltered).toBe(11);
+		expect(data.rowsTotal).toBe(30);
+	});
+
+	it("[ISSUE-3510-ITEM-10] with a connector that reports filteredRows, a selected match is counted once, among the matches", async () => {
+		const { model } = gridModel();
+		await mount({ model, selected: ["3", "23"] });
+		// "P2" matches P2 and P20..P29, the selected P23 among them
+		const search = await gridProps().loadData(query(1, "P2"));
+		expect(idsOf(search)[0]).toBe("23");
+		expect(search.rowsFiltered).toBe(11);
+		expect(search.rowsTotal).toBe(30);
+		// without a search every record matches, the selected ones included
+		const all = await gridProps().loadData(query(1));
+		expect(all.rowsFiltered).toBe(30);
+		expect(all.rowsTotal).toBe(30);
+	});
+
+	it("[ISSUE-3510-ITEM-10] with a connector that reports only totalRows, as the filtered count (like SCF's), the total is the selected matches plus the others", async () => {
+		const { model, connector } = gridModel();
+		connector.reportFiltered = false;
+		await mount({ model, selected: ["3", "23"] });
+		const all = await gridProps().loadData(query(1));
+		expect(all.rowsTotal).toBe(30);
+		expect(all.rowsFiltered).toBeUndefined();
+		// "P2" matches P2 and P20..P29, the selected P23 among them
+		const search = await gridProps().loadData(query(1, "P2"));
+		expect(search.rowsTotal).toBe(11);
+		expect(search.rowsFiltered).toBeUndefined();
+	});
+
 	it("[ISSUE-3510-ITEM-16] as a form field the grid is labelled with the field's label", async () => {
 		const { model: people } = gridModel();
 		store.real = true;
