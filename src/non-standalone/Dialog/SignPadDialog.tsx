@@ -68,23 +68,28 @@ const SignDiv = styled("div", {
 	},
 });
 
+// fills the sign area, as the canvas does; the padding keeps the scaled ink off
+// the dotted border
 const ImageDiv = styled("div", {
 	name: "CcSignPadDialog",
 	slot: "imageDiv",
-})({
-	width: "auto",
-	height: "auto",
-	display: "table-cell",
-	verticalAlign: "middle",
-	textAlign: "center",
-});
+})(({ theme }) => ({
+	boxSizing: "border-box",
+	width: "100%",
+	height: "100%",
+	padding: theme.spacing(1),
+}));
 
+// the stored PNG's pixel size depends on the signing device (CSS size times
+// devicePixelRatio, cropped to the ink): scale it to fit and center it, as the
+// tile does
 const SignatureImage = styled("img", {
 	name: "CcSignPadDialog",
 	slot: "signatureImage",
 })({
-	maxWidth: "100%",
-	maxHeight: "100%",
+	display: "block",
+	width: "100%",
+	height: "100%",
 	objectFit: "contain",
 });
 

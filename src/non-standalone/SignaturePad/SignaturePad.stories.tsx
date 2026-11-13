@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Box } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
-import { expect, fn, mocked, waitFor, within } from "storybook/test";
+import { expect, fn, mocked, spyOn, waitFor, within } from "storybook/test";
 import DialogContextProvider from "../../framework/DialogContextProvider";
 import SignaturePadCanvas, { SignaturePadCanvasProps } from "./SignaturePad";
 import { setFrameworkHistory } from "../../framework/History";
@@ -220,6 +220,21 @@ const decodePng = async (src: string) => {
 			strongest = [d[i], d[i + 1], d[i + 2], d[i + 3]];
 	}
 	return { width: k.width, height: k.height, opaque, strongest };
+};
+/** a stored signature of a given pixel size: one diagonal line */
+const makeSignature = (width: number, height: number) => {
+	const c = document.createElement("canvas");
+	c.width = width;
+	c.height = height;
+	const ctx = c.getContext("2d");
+	if (!ctx) throw new Error("no 2d context to draw the signature");
+	ctx.strokeStyle = "blue";
+	ctx.lineWidth = 6;
+	ctx.beginPath();
+	ctx.moveTo(1, height - 1);
+	ctx.lineTo(width - 1, 1);
+	ctx.stroke();
+	return c.toDataURL("image/png");
 };
 
 // ─── stories ─────────────────────────────────────────────────────────────────
@@ -518,5 +533,213 @@ export const Issue3467Item2ResizeAfterClearDrawsUnderPen: Story = {
 		await expectNear(both.right, 260, "right edge of the second stroke");
 		await expectNear(both.bottom, 180, "bottom edge of the second stroke");
 		await closeDialog();
+	},
+};
+
+export const Issue3467Item3ClosingRemovesResizeListeners: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3467-ITEM-3: every open of an unsigned dialog registers a window resize listener that is not removed on close; it holds the canvas and its 2d context. Expected: no resize listener of the dialog survives its close.",
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const addSpy = spyOn(window, "addEventListener");
+		const removeSpy = spyOn(window, "removeEventListener");
+		const resizeListeners = (calls: unknown[][]) =>
+			calls
+				.filter(([type]) => type === "resize")
+				.map(([, listener]) => listener);
+		let added: unknown[];
+		let removed: unknown[];
+		try {
+			tileIn(canvasElement).click();
+			await signCanvas();
+			await closeDialog();
+			tileIn(canvasElement).click();
+			await signCanvas();
+			page().getByRole("button", { name: "Save Changes" }).click();
+			await waitFor(() => expect(dialogEl()).toBeNull());
+		} finally {
+			added = resizeListeners(addSpy.mock.calls);
+			removed = resizeListeners(removeSpy.mock.calls);
+			addSpy.mockRestore();
+			removeSpy.mockRestore();
+		}
+		await expect(added.length).toBeGreaterThan(0);
+		const leaked = added.filter((listener) => !removed.includes(listener));
+		await expect(
+			leaked.length,
+			"resize listeners still registered after two opens and closes",
+		).toBe(0);
+	},
+};
+
+const PortraitSignatureHost = (props: PadHostProps) => {
+	// what a portrait phone at devicePixelRatio 3 saves: 708x900 bitmap, cropped
+	const [signature] = useState(() => makeSignature(450, 900));
+	return <PadHost {...props} initial={signature} />;
+};
+
+export const Issue3467Item4StoredSignatureFitsSignArea: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3467-ITEM-4: the dialog shows a stored signature at its natural pixel size in the top-left corner of the sign area. A 450x900 signature (portrait phone, devicePixelRatio 3) runs 600px below the sign area and over the buttons. Expected: scaled to fit and centered, like the tile preview.",
+			},
+		},
+		a11y: { test: "todo" }, // the failing play leaves the dialog open
+	},
+	render: (args) => <PortraitSignatureHost {...args} />,
+	play: async ({ canvasElement }) => {
+		tileIn(canvasElement).click();
+		const img = await waitFor(() => {
+			const el = page().getByRole("img", { name: "Signature" });
+			if (!(el instanceof HTMLImageElement) || !el.complete || !el.naturalWidth)
+				throw new Error("image not loaded");
+			return el;
+		});
+		const area = signDivEl().getBoundingClientRect();
+		const r = img.getBoundingClientRect();
+		const outside = [
+			r.left < area.left - 1 && "left",
+			r.top < area.top - 1 && "top",
+			r.right > area.right + 1 && "right",
+			r.bottom > area.bottom + 1 && "bottom",
+		].filter(Boolean);
+		await expect(
+			outside,
+			`edges of the image ${JSON.stringify([r.left, r.top, r.width, r.height])} outside the sign area ${JSON.stringify([area.left, area.top, area.width, area.height])}`,
+		).toEqual([]);
+		await expect(
+			Math.abs(r.left + r.width / 2 - (area.left + area.width / 2)),
+		).toBeLessThanOrEqual(1);
+		await expect(
+			Math.abs(r.top + r.height / 2 - (area.top + area.height / 2)),
+		).toBeLessThanOrEqual(1);
+		await closeDialog();
+	},
+};
+
+/**
+ * Where an image paints its picture, in viewport px: object-fit scales the
+ * picture into the image's content box, object-position (checked to be the
+ * default, centered) places it there
+ */
+const paintedRect = async (img: HTMLImageElement) => {
+	const s = getComputedStyle(img);
+	await expect(s.objectPosition, "object-position of the image").toBe(
+		"50% 50%",
+	);
+	const px = (v: string) => parseFloat(v) || 0;
+	const r = img.getBoundingClientRect();
+	const left = r.left + px(s.borderLeftWidth) + px(s.paddingLeft);
+	const top = r.top + px(s.borderTopWidth) + px(s.paddingTop);
+	const width = r.right - px(s.borderRightWidth) - px(s.paddingRight) - left;
+	const height = r.bottom - px(s.borderBottomWidth) - px(s.paddingBottom) - top;
+	const [nw, nh] = [img.naturalWidth, img.naturalHeight];
+	const contain = Math.min(width / nw, height / nh);
+	const cover = Math.max(width / nw, height / nh);
+	const scales: Record<string, [number, number]> = {
+		fill: [width / nw, height / nh],
+		contain: [contain, contain],
+		cover: [cover, cover],
+		none: [1, 1],
+		"scale-down": [Math.min(1, contain), Math.min(1, contain)],
+	};
+	const [sx, sy] = scales[s.objectFit] ?? [1, 1];
+	const [w, h] = [nw * sx, nh * sy];
+	return {
+		left: left + (width - w) / 2,
+		top: top + (height - h) / 2,
+		width: w,
+		height: h,
+	};
+};
+
+const LandscapeSignatureHost = (props: PadHostProps) => {
+	// what a desktop at devicePixelRatio 1 saves for a short signature
+	const [signature] = useState(() => makeSignature(240, 80));
+	return <PadHost {...props} initial={signature} />;
+};
+
+export const Issue3467Item4StoredSignaturesScaledAndCentered: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3467-ITEM-4: a landscape stored signature (240x80, desktop) and a portrait one (450x900, phone at devicePixelRatio 3). The dialog paints each one undistorted, scaled to fill the sign area in one direction, and centered in it, as the tile does.",
+			},
+		},
+		// the play leaves no dialog open when it passes; on failure it may
+		a11y: { test: "todo" },
+	},
+	render: (args) => (
+		<Box sx={{ display: "flex", gap: 2 }}>
+			<LandscapeSignatureHost {...args} />
+			<PortraitSignatureHost {...args} />
+		</Box>
+	),
+	play: async ({ canvasElement }) => {
+		const tiles = canvasElement.querySelectorAll<HTMLElement>(
+			'[class*="CcSignPad-root"]',
+		);
+		await expect(tiles).toHaveLength(2);
+		for (const [i, size] of ["240x80", "450x900"].entries()) {
+			tiles[i].click();
+			const img = await waitFor(() => {
+				const el = page().getByRole("img", { name: "Signature" });
+				if (
+					!(el instanceof HTMLImageElement) ||
+					!el.complete ||
+					!el.naturalWidth
+				)
+					throw new Error("image not loaded");
+				return el;
+			});
+			await expect(`${img.naturalWidth}x${img.naturalHeight}`).toBe(size);
+			const sign = signDivEl();
+			const box = sign.getBoundingClientRect();
+			// inside the dotted border
+			const area = {
+				left: box.left + sign.clientLeft,
+				top: box.top + sign.clientTop,
+				width: sign.clientWidth,
+				height: sign.clientHeight,
+			};
+			const p = await paintedRect(img);
+			const where = `${size}: painted at ${JSON.stringify(p)} in the sign area ${JSON.stringify(area)}`;
+			await expect(p.width / p.height, `${where}, aspect ratio`).toBeCloseTo(
+				img.naturalWidth / img.naturalHeight,
+				2,
+			);
+			await expect(p.left, `${where}, left`).toBeGreaterThanOrEqual(
+				area.left - 1,
+			);
+			await expect(p.top, `${where}, top`).toBeGreaterThanOrEqual(area.top - 1);
+			await expect(p.left + p.width, `${where}, right`).toBeLessThanOrEqual(
+				area.left + area.width + 1,
+			);
+			await expect(p.top + p.height, `${where}, bottom`).toBeLessThanOrEqual(
+				area.top + area.height + 1,
+			);
+			await expect(
+				Math.abs(p.left + p.width / 2 - (area.left + area.width / 2)),
+				`${where}, horizontal center`,
+			).toBeLessThanOrEqual(1);
+			await expect(
+				Math.abs(p.top + p.height / 2 - (area.top + area.height / 2)),
+				`${where}, vertical center`,
+			).toBeLessThanOrEqual(1);
+			// scaled to fit: fills the sign area in one direction
+			await expect(
+				Math.max(p.width / area.width, p.height / area.height),
+				`${where}, share of the sign area it fills`,
+			).toBeGreaterThanOrEqual(0.9);
+			await closeDialog();
+		}
 	},
 };
