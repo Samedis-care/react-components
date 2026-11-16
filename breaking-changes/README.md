@@ -35,7 +35,6 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [DialogTitle with noTitle renders no heading; an untitled FullFormDialog is named by aria-label](2026-11-13-dialog-title-no-title-no-heading.md) | behavior, type |
 | 2026-11-13 | [IntegerInputField flags numbers it can't hold, and never shows exponent form](2026-11-13-integer-input-out-of-range.md) | behavior |
 | 2026-11-13 | [DecimalInputField flags a separator without a digit instead of reporting NaN](2026-11-13-decimal-input-parse-error-message.md) | behavior |
-| 2026-11-13 | [A dialog button's handler may navigate, and the confirm helpers settle once their dialog is closed](2026-11-13-dialog-button-handler-may-navigate.md) | behavior |
 | 2026-11-13 | [Open dialogs no longer block navigation or closing the tab](2026-11-13-dialogs-no-longer-block-navigation.md) | behavior, i18n |
 | 2026-11-13 | [A date picker keeps a rejected entry when focus leaves it](2026-11-13-picker-keeps-rejected-entry.md) | behavior |
 | 2026-11-13 | [InputWithHelp and OutlinedInputWithHelp are removed](2026-11-13-input-with-help-removed.md) | type |
@@ -49,7 +48,6 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [The locale selector's search box is named "Search", and a status announces its result](2026-11-13-locale-selector-search-named.md) | behavior |
 | 2026-11-13 | [RoutedMenu highlights the most specific entry of the whole menu](2026-11-13-routed-menu-most-specific-match.md) | behavior |
 | 2026-11-13 | [MultiGrid sets its header's overflow, and a scroll of the header moves the body](2026-11-13-multi-grid-header-scroll-moves-body.md) | behavior |
-| 2026-11-13 | [FormCrudMultiSelect is read-only in a read-only form, and a save leaves it as it is](2026-11-13-form-crud-multi-select-read-only.md) | behavior |
 | 2026-11-13 | [FormCrudMultiSelect is read-only in a read-only form, listing only its entries, and a save leaves it as it is](2026-11-13-form-crud-multi-select-read-only.md) | behavior, theme |
 | 2026-11-13 | [The locale selector's rows draw a keyboard focus ring](2026-11-13-locale-selector-row-focus-ring.md) | behavior |
 | 2026-11-13 | [InlineSwitch applies classes.switch](2026-11-13-inline-switch-classes-switch.md) | behavior |
@@ -75,7 +73,6 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [A signature field's button is named by its label, described by its message, and marked required and invalid](2026-11-13-signature-field-labelled-and-described.md) | behavior |
 | 2026-11-13 | [FormDialog renders a button's color](2026-11-13-form-dialog-button-color.md) | behavior |
 | 2026-11-13 | [A Toast rendered closed calls onExited right away](2026-11-13-toast-rendered-closed-calls-on-exited.md) | behavior |
-| 2026-11-13 | [FlowEngineBackButton is labelled "Cancel" by default](2026-11-13-flow-engine-back-button-cancel-label.md) | behavior |
 | 2026-11-13 | [FlowEngineBackButton has no default label: children are required](2026-11-13-flow-engine-back-button-label-required.md) | type |
 | 2026-11-13 | [InputDialog describes a rejected value in text and moves focus to the field](2026-11-13-input-dialog-error-text.md) | behavior |
 | 2026-11-13 | [TreeView's scrollTo waits until its entry is visible and the list is measured](2026-11-13-tree-view-scroll-to-waits.md) | behavior |
