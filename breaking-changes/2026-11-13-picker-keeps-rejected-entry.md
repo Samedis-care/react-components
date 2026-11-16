@@ -57,3 +57,9 @@ Feb 3 on the way, and leaving the field showed and kept Feb 3.
   	return;
   }
   ```
+
+  Reset that flag wherever the picker is hidden, or keep it in a component that unmounts
+  along with the picker. The picker calls `onError` only when its error changes, and not at
+  all when it mounts with a valid date. A flag that outlives its picker therefore still
+  refuses the valid date of a picker that is shown again, such as one that a dialog shows
+  for only one of its options.
