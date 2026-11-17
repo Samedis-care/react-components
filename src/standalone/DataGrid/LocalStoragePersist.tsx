@@ -30,6 +30,10 @@ export interface LocalStoragePersistProps {
  *
  * A change of storageKey mounts the children again, as a grid reads the
  * persisted state when it mounts only.
+ *
+ * If the browser blocks localStorage (blocked site data, some sandboxed
+ * iframes), the grids open at their defaults and nothing is kept for the next
+ * visit; the failed reads and writes are logged to the console.
  * @remarks The data it provides is what was written last, so a grid mounted
  *          later (or anything else reading the context) starts from the
  *          current state, not from the state loaded on mount
@@ -61,7 +65,19 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 	);
 
 	const stored = useMemo(() => {
-		const dataStr = localStorage?.getItem(storageKey);
+		let dataStr: string | null | undefined;
+		try {
+			// reading window.localStorage throws, too, when the browser blocks it
+			dataStr = localStorage?.getItem(storageKey);
+		} catch (e) {
+			// eslint-disable-next-line no-console
+			console.error(
+				"[Components-Care] Failed reading DataGrid config from localStorage." +
+					storageKey,
+				e,
+			);
+			return undefined;
+		}
 		let data: DataGridPersistedData | undefined;
 		if (dataStr) {
 			try {
@@ -74,7 +90,16 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 					"Removing from localStorage",
 					e,
 				);
-				localStorage?.removeItem(storageKey);
+				try {
+					localStorage?.removeItem(storageKey);
+				} catch (removeError) {
+					// eslint-disable-next-line no-console
+					console.error(
+						"[Components-Care] Failed removing DataGrid config from localStorage." +
+							storageKey,
+						removeError,
+					);
+				}
 			}
 		}
 		return data;

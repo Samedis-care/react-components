@@ -815,6 +815,56 @@ describe("persistence provider bugs", () => {
 		act(() => grid!.setState((prev) => ({ ...prev, search: "s" })));
 		expect(save.mock.lastCall![0].sort).toEqual([["name", -1]]);
 	});
+	it("[ISSUE-3496-ITEM-10] LocalStoragePersist renders when localStorage cannot be read", () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+			throw new DOMException("denied", "SecurityError");
+		});
+		expect(() =>
+			render(
+				<LocalStoragePersist storageKey={"blocked"}>
+					<span data-testid={"child"} />
+				</LocalStoragePersist>,
+			),
+		).not.toThrow();
+		expect(screen.getByTestId("child")).toBeInTheDocument();
+	});
+	it("[ISSUE-3496-ITEM-10] a grid under LocalStoragePersist opens at its defaults when the browser blocks localStorage, keeps its changes, and the failed read and write are logged", async () => {
+		const error = vi.spyOn(console, "error").mockImplementation(() => {});
+		// the browser throws when the page reads window.localStorage
+		const denied = new DOMException("denied", "SecurityError");
+		vi.spyOn(window, "localStorage", "get").mockImplementation(() => {
+			throw denied;
+		});
+		render(
+			<LocalStoragePersist storageKey={"blocked"}>
+				<Grid />
+			</LocalStoragePersist>,
+		);
+		await gridIdle();
+		expect(grid!.state.search).toBe("");
+		expect(error).toHaveBeenCalledWith(expect.any(String), denied);
+
+		error.mockClear();
+		act(() => grid!.setState((prev) => ({ ...prev, search: "typed" })));
+		expect(grid!.state.search).toBe("typed");
+		expect(error).toHaveBeenCalledWith(expect.any(String), denied);
+	});
+	it("[ISSUE-3496-ITEM-10] LocalStoragePersist renders when an unparsable entry cannot be removed, and logs it", () => {
+		const error = vi.spyOn(console, "error").mockImplementation(() => {});
+		localStorage.setItem("broken", "{not json");
+		const denied = new DOMException("denied", "SecurityError");
+		vi.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {
+			throw denied;
+		});
+		render(
+			<LocalStoragePersist storageKey={"broken"}>
+				<Probe testId={"a"} />
+			</LocalStoragePersist>,
+		);
+		expect(screen.getByTestId("a")).toHaveTextContent("none");
+		expect(error).toHaveBeenCalledWith(expect.any(String), denied);
+	});
 });
 
 describe("restored column widths", () => {
