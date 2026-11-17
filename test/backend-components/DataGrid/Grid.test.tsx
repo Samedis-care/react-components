@@ -371,6 +371,105 @@ describe("renderDataGridRecordUsingModel", () => {
 		);
 		await expect(rowOf(model)).rejects.toThrow("Not supported");
 	});
+
+	it("[ISSUE-3506-ITEM-2] an inline edit updates the cached record and tells the model's mutate listeners", async () => {
+		const { model, connector } = makeModel();
+		const update = vi.spyOn(connector, "update");
+		const mutate = vi.fn();
+		model.addEventHandler("mutate", mutate);
+		try {
+			// a form opened the record before
+			const [before] = await model.getCached("1");
+			expect(before.active).toBe(true);
+			const refreshGrid = vi.fn();
+			renderCell((await rowOf(model, refreshGrid)).active);
+
+			fireEvent.click(screen.getByRole("checkbox"));
+			await waitFor(() => expect(refreshGrid).toHaveBeenCalledTimes(1));
+
+			// what a form opened now shows
+			const [after] = await model.getCached("1");
+			expect({
+				cached: after.active,
+				mutateEvents: mutate.mock.calls.length,
+				// the model performing the request, which every other update passes
+				modelPassedToConnector:
+					(update.mock.calls[0] as unknown[])[1] === model,
+			}).toEqual({
+				cached: false,
+				mutateEvents: 1,
+				modelPassedToConnector: true,
+			});
+		} finally {
+			model.removeEventHandler("mutate", mutate);
+		}
+	});
+
+	it("[ISSUE-3506-ITEM-2] an inline edit calls the model's onCreateOrUpdate hook with the saved record", async () => {
+		const { model } = makeModel();
+		const onCreateOrUpdate = vi.fn();
+		model.hooks.onCreateOrUpdate = onCreateOrUpdate;
+		const refreshGrid = vi.fn();
+		renderCell((await rowOf(model, refreshGrid))["settings.active"]);
+
+		fireEvent.click(screen.getByRole("checkbox"));
+		await waitFor(() => expect(refreshGrid).toHaveBeenCalledTimes(1));
+
+		// the record the connector returned, not only the edited value
+		expect(onCreateOrUpdate).toHaveBeenCalledExactlyOnceWith([
+			expect.objectContaining({
+				id: "1",
+				title: "One",
+				settings: { active: false },
+			}),
+			{},
+		]);
+	});
+
+	it("[ISSUE-3506-ITEM-2] an inline edit of a field the edit form shows read-only is still saved", async () => {
+		const connector = new MockConnector([
+			{ id: "1", title: "One", active: true },
+		]);
+		const model = new Model(
+			"bdg-grid-only-" + Math.random().toString(16),
+			{
+				id: {
+					type: str(),
+					getLabel: () => "ID",
+					visibility: vis(ModelVisibilityDisabled),
+					customData: null,
+				},
+				title: {
+					type: str(),
+					getLabel: () => "Title",
+					visibility: vis(ModelVisibilityGridView),
+					customData: null,
+				},
+				active: {
+					type: bool(),
+					getLabel: () => "Active",
+					// only the grid changes it
+					visibility: {
+						overview: ModelVisibilityGridEdit,
+						edit: ModelVisibilityDisabledReadOnly,
+						create: ModelVisibilityDisabledReadOnly,
+					},
+					customData: null,
+				},
+			},
+			connector,
+		);
+		const update = vi.spyOn(connector, "update");
+		const refreshGrid = vi.fn();
+		renderCell((await rowOf(model, refreshGrid)).active);
+
+		fireEvent.click(screen.getByRole("checkbox"));
+		await waitFor(() => expect(refreshGrid).toHaveBeenCalledTimes(1));
+
+		expect(update.mock.calls[0][0]).toEqual({ id: "1", active: false });
+		const [cached] = await model.getCached("1");
+		expect(cached.active).toBe(false);
+	});
 });
 
 describe("renderDataGridRecordUsingModel: image cells", () => {
