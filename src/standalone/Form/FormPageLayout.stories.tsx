@@ -1004,3 +1004,78 @@ export const Issue3473Item9FooterInFlowOnShortScreen: Story = {
 		).toBeLessThanOrEqual(EPS);
 	},
 };
+
+export const Issue3473Item5NestedFormPageEndsLikeAnyPage: Story = {
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-5: a form page with a nested form page open in its body, as BasicFormPage renders it: the outer page passes `footer={null}`, so only the inner page shows its buttons. The outer page renders no footer and leaves no space for one, so at the end of the inner form Save rests 36px above the bottom of the main area, as on any other page, with no blank space below it.",
+			},
+		},
+	},
+	render: () => (
+		<AppShell>
+			<FormPageLayout
+				body={
+					<FormPageLayout
+						body={<Fields count={12} />}
+						footer={<SaveBackButtons />}
+						other={<FormLoaderOverlay visible={false} />}
+					/>
+				}
+				footer={null}
+			/>
+		</AppShell>
+	),
+	play: async ({ canvasElement }) => {
+		const mainEl = within(canvasElement).getByTestId("main");
+		await nextFrame();
+		const max = mainEl.scrollHeight - mainEl.clientHeight;
+		await expect(max).toBeGreaterThan(0);
+		mainEl.scrollTop = max;
+		await nextFrame();
+		await expect(
+			distance(rectOf(buttonBar(mainEl)).bottom, rectOf(mainEl).bottom - 36),
+		).toBeLessThanOrEqual(1);
+	},
+};
+
+/**
+ * What DefaultFormPageButtons renders on a read-only page without a way back: a
+ * FormButtons without a button left, which renders nothing.
+ */
+const NoButtonsLeft = () => <FormButtons>{false}</FormButtons>;
+
+export const Issue3473Item5FooterWithoutButtonsTakesNoSpace: Story = {
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-5: a read-only form page without a way back, like an EditOnlyFormPage without `goBack`: its footer is a FormButtons without a button, which renders nothing. The empty footer takes no space, so the form ends at the bottom of the main area with no blank space below the last field.",
+			},
+		},
+	},
+	render: () => (
+		<AppShell>
+			<FormPageLayout
+				body={<Fields count={12} />}
+				footer={<NoButtonsLeft />}
+				other={<FormLoaderOverlay visible={false} />}
+			/>
+		</AppShell>
+	),
+	play: async ({ canvasElement }) => {
+		const mainEl = within(canvasElement).getByTestId("main");
+		await nextFrame();
+		const max = mainEl.scrollHeight - mainEl.clientHeight;
+		await expect(max).toBeGreaterThan(0);
+		mainEl.scrollTop = max;
+		await nextFrame();
+		await expect(
+			distance(rectOf(bodyIn(mainEl)).bottom, rectOf(mainEl).bottom),
+		).toBeLessThanOrEqual(1);
+	},
+};

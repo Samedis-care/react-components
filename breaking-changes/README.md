@@ -23,6 +23,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-17 | [Leaving a date field marks it touched in a Form](2026-11-17-form-blur-marks-date-fields-touched.md) | behavior |
 | 2026-11-17 | [VerticalDivider, PopupMenu and the Small components take theme default props](2026-11-17-small-primitives-theme-slots.md) | behavior, type, theme |
 | 2026-11-17 | [The country flags load when the first flag is shown: loadCountryFlags and loadCountryFlag replace CountryFlags and getCountryFlag](2026-11-17-country-flags-load-when-shown.md) | type, behavior |
+| 2026-11-17 | [A form page without buttons ends where its body ends](2026-11-17-form-page-layout-no-footer-no-space.md) | behavior |
 | 2026-11-13 | [SignalPortlet shows no "Last refresh" label for 0 or an invalid time](2026-11-13-signal-portlet-no-label-without-time.md) | behavior |
 | 2026-11-13 | [The date pickers report a blur when focus leaves the open calendar](2026-11-13-picker-blur-on-leaving-the-calendar.md) | behavior |
 | 2026-11-13 | [Matrix columns are 56px wide by default, and the add chip is 24x24](2026-11-13-matrix-targets-24px.md) | behavior |
