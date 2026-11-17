@@ -1,11 +1,14 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
+	CachedServerStorageProvider,
 	LocalStorageProvider,
 	SessionStorageProvider,
 	StorageManager,
 	DefaultGetStorageProviderCallback,
 	LocalStorageProviderInstance,
+	StorageKeyType,
 } from "../../src/framework/Storage";
+import ModelDataStore from "../../src/backend-integration/Store";
 
 describe("LocalStorageProvider", () => {
 	let provider: LocalStorageProvider;
@@ -137,5 +140,54 @@ describe("StorageManager", () => {
 		// The key format is id + "-" + JSON.stringify(keys)
 		const expectedKey = "cc-lsp-testId-" + JSON.stringify(keys);
 		expect(localStorage.getItem(expectedKey)).toBe("val");
+	});
+});
+
+describe("CachedServerStorageProvider", () => {
+	class TestServerStorageProvider extends CachedServerStorageProvider {
+		readFromServer = vi.fn<(key: StorageKeyType) => Promise<string | null>>();
+
+		protected getItemFromServer(key: StorageKeyType): Promise<string | null> {
+			return this.readFromServer(key);
+		}
+
+		protected setItemOnServer(): Promise<void> {
+			return Promise.resolve();
+		}
+
+		protected clearFromServer(): Promise<void> {
+			return Promise.resolve();
+		}
+	}
+
+	afterEach(() => {
+		// drops the cached reads together with their garbage collection timers
+		ModelDataStore.clear();
+	});
+
+	it("[ISSUE-3496-ITEM-20] getItem resolves null when the server has nothing stored", async () => {
+		const provider = new TestServerStorageProvider();
+		provider.readFromServer.mockResolvedValue(null);
+
+		await expect(provider.getItem("key")).resolves.toBeNull();
+	});
+
+	it("[ISSUE-3496-ITEM-20] getItem rejects with the server's error when the read fails, instead of reporting nothing stored", async () => {
+		const provider = new TestServerStorageProvider();
+		const error = new Error("500 Internal Server Error");
+		provider.readFromServer.mockRejectedValue(error);
+
+		await expect(provider.getItem("key")).rejects.toBe(error);
+	});
+
+	it("[ISSUE-3496-ITEM-20] a failed read is not remembered: the next read asks the server again and gets the stored value", async () => {
+		const provider = new TestServerStorageProvider();
+		provider.readFromServer
+			.mockRejectedValueOnce(new Error("offline"))
+			.mockResolvedValueOnce("stored");
+
+		await expect(provider.getItem("key")).rejects.toThrow("offline");
+		await expect(provider.getItem("key")).resolves.toBe("stored");
+		expect(provider.readFromServer).toHaveBeenCalledTimes(2);
 	});
 });

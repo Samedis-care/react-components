@@ -23,7 +23,11 @@ export abstract class StorageProvider {
 	/**
 	 * Get item in key value store
 	 * @param key The key to load
-	 * @returns The stored value or null if nothing is stored
+	 * @returns The stored value, or null only when nothing is stored under the
+	 *          key. A read that fails (a server error, a timeout, offline, a
+	 *          blocked storage) throws or rejects instead: callers treat null
+	 *          as "nothing stored" and may write their defaults over the key,
+	 *          as DataGrid's StorageManagerPersist does.
 	 */
 	public abstract getItem(
 		key: StorageKeyType,
@@ -97,6 +101,10 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 	/**
 	 * Receive value of key from server
 	 * @param key The key
+	 * @returns The stored value, or null only when the server has nothing
+	 *          stored under the key. Reject on every other failure: a null is
+	 *          cached as "nothing stored" (see cacheOptions) and returned by
+	 *          getItem, a rejection is not cached.
 	 * @protected
 	 */
 	protected abstract getItemFromServer(
@@ -120,17 +128,19 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 	 */
 	protected abstract clearFromServer(): Promise<void>;
 
-	async getItem(key: StorageKeyType): Promise<string | null> {
-		try {
-			return ModelDataStore.fetchQuery({
-				queryKey: ["cc-css", key],
-				queryFn: () => this.getItemFromServer(key),
-				...this.cacheOptions,
-			});
-		} catch {
-			// on failure return null
-			return null;
-		}
+	/**
+	 * Reads the value of key through the react-query cache (see cacheOptions)
+	 * @param key The key to load
+	 * @returns The stored value, or null when the server has nothing stored.
+	 *          Rejects with getItemFromServer's error when the read fails; the
+	 *          next read asks the server again.
+	 */
+	getItem(key: StorageKeyType): Promise<string | null> {
+		return ModelDataStore.fetchQuery({
+			queryKey: ["cc-css", key],
+			queryFn: () => this.getItemFromServer(key),
+			...this.cacheOptions,
+		});
 	}
 
 	async setItem(key: StorageKeyType, value: StorageValueType): Promise<void> {
@@ -216,7 +226,9 @@ export class StorageManager {
 	 * Loads a record from storage
 	 * @param id Unique identifier, should be used to determine storage class
 	 * @param keys Identifiers which separate storage (think namespaces, such as tenant id)
-	 * @returns The value or null if not present
+	 * @returns The value, or null only when nothing is stored. Throws or
+	 *          rejects when the storage cannot be read (see
+	 *          StorageProvider.getItem).
 	 */
 	public static getItem(
 		id: StorageKeyType,
