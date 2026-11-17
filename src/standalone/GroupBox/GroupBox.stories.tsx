@@ -1,6 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
+	Button,
 	createTheme,
 	Grid,
 	styled,
@@ -82,6 +83,32 @@ export const Busy: Story = {
 		await expect(
 			canvas.getByRole("group", { name: "Attachments" }),
 		).toHaveAttribute("aria-busy", "true");
+	},
+};
+
+export const DescribedByErrorText: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"A framed form control ties the error shown below the frame to its group with `aria-describedby`, so a screen reader reads it when focus enters the group.",
+			},
+		},
+	},
+	render: () => (
+		<div style={{ width: 400 }}>
+			<GroupBox label={"Attachments"} aria-describedby={"attachments-error"}>
+				<Button variant={"contained"}>Upload</Button>
+			</GroupBox>
+			<FormHelperTextCC id={"attachments-error"} error>
+				At least one file is required
+			</FormHelperTextCC>
+		</div>
+	),
+	play: async ({ canvas }) => {
+		await expect(
+			canvas.getByRole("group", { name: "Attachments" }),
+		).toHaveAccessibleDescription("At least one file is required");
 	},
 };
 

@@ -180,5 +180,52 @@ describe("GroupBox", () => {
 				expect.any(Function),
 			);
 		});
+
+		it("[ISSUE-3462-ITEM-8] passes aria-describedby, aria-labelledby, data-* and ref to the fieldset", () => {
+			const ref = React.createRef<HTMLFieldSetElement>();
+			renderGroupBox(
+				<>
+					<GroupBox
+						label="Files"
+						aria-describedby="files-error"
+						data-testid="files-box"
+						ref={ref}
+					>
+						<button>Upload</button>
+					</GroupBox>
+					<p id="files-error">At least one file is required</p>
+					<GroupBox label={null} aria-labelledby="device-title">
+						<h2 id="device-title">Device X</h2>
+					</GroupBox>
+				</>,
+			);
+			const files = screen.getByRole("group", { name: "Files" });
+			expect(files).toHaveAccessibleDescription(
+				"At least one file is required",
+			);
+			expect(files).toHaveAttribute("data-testid", "files-box");
+			expect(ref.current).toBe(files);
+			expect(screen.getByRole("group", { name: "Device X" })).toBeTruthy();
+		});
+
+		it("[ISSUE-3462-ITEM-8] applies sx to the fieldset, over the theme's root override", () => {
+			const themed = createTheme({
+				components: {
+					CcGroupBox: {
+						styleOverrides: {
+							root: { padding: "4px", color: "rgb(0, 0, 255)" },
+						},
+					},
+				},
+			});
+			renderGroupBox(
+				<GroupBox label="Files" sx={{ padding: 3, marginTop: 1 }} />,
+				themed,
+			);
+			const box = screen.getByRole("group", { name: "Files" });
+			expect(getComputedStyle(box).padding).toBe("24px");
+			expect(getComputedStyle(box).marginTop).toBe("8px");
+			expect(getComputedStyle(box).color).toBe("rgb(0, 0, 255)");
+		});
 	});
 });

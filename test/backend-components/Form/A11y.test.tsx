@@ -21,6 +21,7 @@ import {
 	ModelDataTypeEnumRadioRendererMUI,
 	ModelDataTypeEnumSelectRenderer,
 	ModelDataTypeEnumSelectRendererMUI,
+	ModelDataTypeFilesRenderer,
 	ModelDataTypeIntegerRendererCC,
 	ModelDataTypeStringArrayRendererCC,
 	ModelDataTypeStringRendererCC,
@@ -165,6 +166,13 @@ describe("Form accessibility: bugs", () => {
 			);
 		},
 	);
+
+	it("[ISSUE-3462-ITEM-8] a files field: after a failed submit its message is the description of its group", async () => {
+		const control = await submitProbe(new ModelDataTypeFilesRenderer());
+		expect(control).toHaveRole("group");
+		expect(control).toHaveAccessibleName("Probe");
+		expect(control).toHaveAccessibleDescription("Probe is wrong");
+	});
 
 	it("[ISSUE-3501-ITEM-13] a required radio group is exposed as required", async () => {
 		const control = await submitProbe(

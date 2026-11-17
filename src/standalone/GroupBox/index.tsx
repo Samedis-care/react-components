@@ -1,6 +1,6 @@
 import React from "react";
 import combineClassNames from "../../utils/combineClassNames";
-import { styled, useThemeProps } from "@mui/material";
+import { styled, SxProps, Theme, useThemeProps } from "@mui/material";
 
 const GroupBoxRoot = styled("fieldset", { name: "CcGroupBox", slot: "root" })(
 	({ theme }) => ({
@@ -76,7 +76,9 @@ export type GroupBoxHTMLProps = Omit<
 >;
 
 /**
- * @remarks Every HTML attribute the box does not take itself is set on its fieldset.
+ * @remarks Every HTML attribute the box does not take itself is set on its fieldset, e.g.
+ *          `aria-describedby` for an error shown next to the frame, or `aria-labelledby`
+ *          for a frame without a title. A `ref` gets the fieldset.
  */
 export interface GroupBoxProps extends GroupBoxHTMLProps {
 	/**
@@ -104,15 +106,24 @@ export interface GroupBoxProps extends GroupBoxHTMLProps {
 	 * `smallLabel` to the legend while `smallLabel` is set
 	 */
 	classes?: Partial<Record<GroupBoxClassKey, string>>;
+	/**
+	 * System styles for the `<fieldset>`, as on MUI components. They apply after
+	 * GroupBox's own styles and the theme's `styleOverrides.root`.
+	 */
+	sx?: SxProps<Theme>;
 }
 
-const GroupBox = (inProps: GroupBoxProps) => {
+const GroupBox = React.forwardRef(function GroupBox(
+	inProps: GroupBoxProps,
+	ref: React.ForwardedRef<HTMLFieldSetElement>,
+) {
 	const props = useThemeProps({ props: inProps, name: "CcGroupBox" });
 	const { label, children, smallLabel, className, classes, ...fieldsetProps } =
 		props;
 	return (
 		<GroupBoxRoot
 			{...fieldsetProps}
+			ref={ref}
 			className={combineClassNames([className, classes?.root])}
 		>
 			{label && (
@@ -128,7 +139,7 @@ const GroupBox = (inProps: GroupBoxProps) => {
 			{children}
 		</GroupBoxRoot>
 	);
-};
+});
 
 /**
  * A frame with an optional title: a native `<fieldset>` whose `label` is drawn
@@ -141,5 +152,14 @@ const GroupBox = (inProps: GroupBoxProps) => {
  * below it) it is as tall as its content, and the siblings stay inside the
  * parent. A `height` set by the theme or a `styled(GroupBox)` wrapper
  * replaces this rule.
+ *
+ * Every other HTML attribute, `sx` and `ref` reach the fieldset. A framed
+ * form control ties its error to the group with `aria-describedby`: screen
+ * readers read it when focus enters the group. A frame without a title can be
+ * named by a heading inside it with `aria-labelledby`.
+ *
+ * @example
+ * <GroupBox label={t("files")} aria-describedby={"files-error"}>…</GroupBox>
+ * <FormHelperTextCC id={"files-error"} error>{errorMsg}</FormHelperTextCC>
  */
 export default React.memo(GroupBox);

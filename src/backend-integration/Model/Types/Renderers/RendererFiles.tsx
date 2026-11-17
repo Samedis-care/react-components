@@ -13,7 +13,9 @@ import FilesGrid from "./FilesGrid/FilesGrid";
 
 /**
  * Renders a file selector
- * @remarks In a grid cell (overview visibility with `grid`) the files take one
+ * @remarks In a form, the field's frame gets the field's id and its message as
+ *          description (`aria-describedby`).
+ *          In a grid cell (overview visibility with `grid`) the files take one
  *          line (FilesGrid): "No files present", the only file's name as a link
  *          to it, or for more files their count ("2 files") as a button that
  *          opens a menu of the files.
@@ -31,6 +33,9 @@ class RendererFiles extends TypeFiles {
 			warningMsg,
 			setError,
 			dirty,
+			id,
+			messageId,
+			describedBy,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -74,9 +79,14 @@ class RendererFiles extends TypeFiles {
 							previewImages={this.params?.previewImages}
 							allowDuplicates={this.params?.allowDuplicates}
 							smallLabel={this.params?.smallLabel}
+							slotProps={{ root: { id, "aria-describedby": describedBy } }}
 						/>
 					</div>
-					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
+					<FormHelperTextCC
+						id={messageId}
+						error={!!errorMsg}
+						warning={!!warningMsg}
+					>
 						{errorMsg || warningMsg}
 					</FormHelperTextCC>
 				</>
