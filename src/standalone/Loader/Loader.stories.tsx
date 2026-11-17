@@ -29,6 +29,19 @@ const meta: Meta<typeof Loader> = {
 				"caption",
 			],
 		},
+		size: { control: "number" },
+		color: {
+			control: "select",
+			options: [
+				"primary",
+				"secondary",
+				"error",
+				"info",
+				"success",
+				"warning",
+				"inherit",
+			],
+		},
 	},
 };
 export default meta;
@@ -273,6 +286,55 @@ export const Issue3461Item6LongWordWrapsOnPhone: Story = {
 		await expect(text.scrollWidth).toBeLessThanOrEqual(text.clientWidth);
 		await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
 			window.innerWidth,
+		);
+	},
+};
+
+export const Issue3461Item9SizeAndColor: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3461-ITEM-9: `size` and `color` set the spinner's size and color, as on `CircularProgress`: a 16px spinner, and on a primary surface a spinner in the surface's text color (`color=\"inherit\"`).",
+			},
+		},
+	},
+	render: () => (
+		<>
+			<Box data-testid={"small"} sx={{ width: 240 }}>
+				<Loader size={16} />
+			</Box>
+			<Box
+				data-testid={"surface"}
+				sx={{
+					width: 240,
+					height: 160,
+					bgcolor: "primary.main",
+					color: "primary.contrastText",
+				}}
+			>
+				<Loader
+					color={"inherit"}
+					text={"Loading devices…"}
+					typographyVariant={"body1"}
+				/>
+			</Box>
+		</>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const small = canvas.getByTestId("small");
+		await expect(within(small).getByRole("progressbar").offsetHeight).toBe(16);
+		// in a parent of automatic height, the Loader is as tall as the spinner
+		// and the 16px above and below it
+		await expect(small.offsetHeight).toBe(16 + 2 * 16);
+		const surface = canvas.getByTestId("surface");
+		const bar = within(surface).getByRole("progressbar");
+		await expect(getComputedStyle(bar).color).toBe(
+			getComputedStyle(surface).color,
+		);
+		await expect(getComputedStyle(bar).color).not.toBe(
+			getComputedStyle(surface).backgroundColor,
 		);
 	},
 };

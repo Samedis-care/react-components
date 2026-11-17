@@ -505,4 +505,125 @@ describe("Loader", () => {
 		expect(container.firstElementChild).not.toHaveAttribute("aria-labelledby");
 		expect(screen.getByRole("progressbar")).not.toHaveAttribute("aria-label");
 	});
+
+	it("[ISSUE-3461-ITEM-9] draws a 40px spinner in the primary color by default", () => {
+		renderLoader(<Loader />);
+		const bar = screen.getByRole("progressbar");
+		expect(bar).toHaveStyle({ width: "40px", height: "40px" });
+		expect(bar).toHaveStyle({ color: theme.palette.primary.main });
+	});
+
+	it("[ISSUE-3461-ITEM-9] sizes the spinner with size, in px or a CSS length, and follows changes", () => {
+		const { rerender } = renderLoader(<Loader size={16} />);
+		const bar = screen.getByRole("progressbar");
+		expect(bar).toHaveStyle({ width: "16px", height: "16px" });
+
+		rerender(withTheme(<Loader size={"3rem"} />));
+		expect(screen.getByRole("progressbar")).toBe(bar);
+		// as set (jsdom computes 3rem as 48px)
+		expect(bar.style.width).toBe("3rem");
+		expect(bar.style.height).toBe("3rem");
+
+		rerender(withTheme(<Loader />));
+		expect(bar).toHaveStyle({ width: "40px", height: "40px" });
+	});
+
+	it("[ISSUE-3461-ITEM-9] colors the spinner with color, a palette color or inherit, and follows changes", () => {
+		const { rerender } = renderLoader(
+			<div style={{ color: "rgb(1, 2, 3)" }}>
+				<Loader color={"secondary"} text={"Loading"} />
+			</div>,
+		);
+		const bar = screen.getByRole("progressbar");
+		expect(bar).toHaveStyle({ color: theme.palette.secondary.main });
+
+		rerender(
+			withTheme(
+				<div style={{ color: "rgb(1, 2, 3)" }}>
+					<Loader color={"inherit"} text={"Loading"} />
+				</div>,
+			),
+		);
+		expect(screen.getByRole("progressbar")).toBe(bar);
+		expect(bar).toHaveStyle({ color: "rgb(1, 2, 3)" });
+
+		rerender(
+			withTheme(
+				<div style={{ color: "rgb(1, 2, 3)" }}>
+					<Loader text={"Loading"} />
+				</div>,
+			),
+		);
+		expect(bar).toHaveStyle({ color: theme.palette.primary.main });
+	});
+
+	it("[ISSUE-3461-ITEM-9] takes size and color from the theme's defaultProps, and a prop wins over them", () => {
+		const themed = createTheme({
+			components: {
+				CcLoader: { defaultProps: { size: 24, color: "error" } },
+			},
+		});
+		const { rerender } = renderLoader(<Loader />, themed);
+		const bar = screen.getByRole("progressbar");
+		expect(bar).toHaveStyle({ width: "24px", height: "24px" });
+		expect(bar).toHaveStyle({ color: themed.palette.error.main });
+
+		rerender(withTheme(<Loader size={16} color={"secondary"} />, themed));
+		expect(bar).toHaveStyle({ width: "16px", height: "16px" });
+		expect(bar).toHaveStyle({ color: themed.palette.secondary.main });
+	});
+
+	it("[ISSUE-3461-ITEM-9] keeps size and color off its root element", () => {
+		const error = vi.spyOn(console, "error").mockImplementation(() => {});
+		const { container } = renderLoader(<Loader size={16} color={"inherit"} />);
+		const root = container.firstElementChild as Element;
+		expect(root.getAttributeNames().sort()).toEqual(["class", "role"]);
+		expect(error).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3461-ITEM-9] matches theme variants on size and color, with their defaults", () => {
+		const themed = createTheme({
+			components: {
+				CcLoader: {
+					variants: [
+						{
+							props: { size: 16 },
+							style: { backgroundColor: "rgb(1, 2, 3)" },
+						},
+						{
+							props: { size: 40, color: "primary" },
+							style: { borderTopColor: "rgb(4, 5, 6)" },
+						},
+						{
+							props: { color: "inherit" },
+							style: { outlineColor: "rgb(7, 8, 9)" },
+						},
+					],
+				},
+			},
+		});
+		const { container, rerender } = renderLoader(
+			<Loader size={16} color={"inherit"} />,
+			themed,
+		);
+		const root = () => getComputedStyle(container.firstElementChild as Element);
+		expect(root().backgroundColor).toBe("rgb(1, 2, 3)");
+		expect(root().borderTopColor).not.toBe("rgb(4, 5, 6)");
+		expect(root().outlineColor).toBe("rgb(7, 8, 9)");
+
+		// without size and color, they are their defaults 40 and "primary"
+		rerender(withTheme(<Loader />, themed));
+		expect(root().backgroundColor).not.toBe("rgb(1, 2, 3)");
+		expect(root().borderTopColor).toBe("rgb(4, 5, 6)");
+		expect(root().outlineColor).not.toBe("rgb(7, 8, 9)");
+	});
+
+	it("[ISSUE-3461-ITEM-9] types size and color as CircularProgress does", () => {
+		// A type test: vitest does not type-check, tsc does
+		// (node_modules/.bin/tsc -p tsconfig-test.json --noEmit)
+		assertType<LoaderProps>({ size: 16, color: "inherit" });
+		assertType<LoaderProps>({ size: "3rem", color: "secondary" });
+		// @ts-expect-error a CSS color is no palette color
+		assertType<LoaderProps>({ color: "red" });
+	});
 });

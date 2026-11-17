@@ -1,6 +1,7 @@
 import React from "react";
 import {
 	CircularProgress,
+	CircularProgressProps,
 	styled,
 	SxProps,
 	Theme,
@@ -17,11 +18,12 @@ import ccI18n from "../../i18n";
  * attributes of a `div` (`id`, `style`, `data-*`, `aria-*`, event handlers,
  * ...) and passes them to its `root` slot, the status region, except
  * `aria-label` and `aria-labelledby`, which name the spinner's progressbar
- * instead of `text` or the default name.
+ * instead of `text` or the default name. `color` is not the HTML attribute but
+ * the spinner's color.
  */
 export interface LoaderProps extends Omit<
 	React.HTMLAttributes<HTMLDivElement>,
-	"children"
+	"children" | "color"
 > {
 	/**
 	 * Optional status message to show, already translated. It is a paragraph
@@ -45,6 +47,27 @@ export interface LoaderProps extends Omit<
 	 * @default "h6"
 	 */
 	typographyVariant?: TypographyProps["variant"];
+	/**
+	 * Size of the spinner, as `size` of MUI's `CircularProgress`: a number in
+	 * px, or a string with a CSS unit (`"3rem"`). It sets the spinner's width
+	 * and height; the `theme.spacing(2)` above and below the spinner stays. The
+	 * theme's `styleOverrides.progress` cannot size the spinner, because
+	 * CircularProgress sets its size inline: set this prop instead, or
+	 * `components.CcLoader.defaultProps.size` for every Loader of an app.
+	 * @default 40
+	 */
+	size?: CircularProgressProps["size"];
+	/**
+	 * Color of the spinner, as `color` of MUI's `CircularProgress`: a palette
+	 * color of the theme (`"primary"`, `"secondary"`, `"error"`, `"info"`,
+	 * `"success"`, `"warning"`, or one the theme adds through
+	 * `CircularProgressPropsColorOverrides`), or `"inherit"`, the text color
+	 * around the Loader, such as the contrast text color of a primary-colored
+	 * surface. It does not color `text`, which always has the text color
+	 * around the Loader.
+	 * @default "primary"
+	 */
+	color?: CircularProgressProps["color"];
 	/**
 	 * Class name added to the `root` slot. As on MUI components, the styles
 	 * of `styled(Loader)` and of a parent's theme slot that is a Loader
@@ -86,11 +109,14 @@ export interface LoaderProps extends Omit<
 }
 
 /**
- * Props of the root slot: `text` and `typographyVariant`, so that theme
- * `variants` can match them (they do not reach the DOM), and the HTML
- * attributes the Loader passes on
+ * Props of the root slot: `text`, `typographyVariant`, `size` and `color`, so
+ * that theme `variants` can match them (they do not reach the DOM), and the
+ * HTML attributes the Loader passes on
  */
-type LoaderRootProps = Pick<LoaderProps, "text" | "typographyVariant">;
+type LoaderRootProps = Pick<
+	LoaderProps,
+	"text" | "typographyVariant" | "size" | "color"
+>;
 
 /**
  * What MUI keeps off the DOM of a root slot, plus the Loader's own props
@@ -98,6 +124,8 @@ type LoaderRootProps = Pick<LoaderProps, "text" | "typographyVariant">;
 const ROOT_PROPS_NOT_FORWARDED = new Set<PropertyKey>([
 	"text",
 	"typographyVariant",
+	"size",
+	"color",
 	"ownerState",
 	"theme",
 	"sx",
@@ -149,15 +177,18 @@ const Progress = styled(CircularProgress, {
  *   column that centers `innerWrapper` vertically, and the Loader's status
  *   region (`role="status"`). It gets `className`, `sx` and the HTML
  *   attributes the Loader passes on. Theme
- *   `components.CcLoader.variants` apply to it. They match the Loader's `text`
- *   and `typographyVariant` after theme `defaultProps`, with
- *   `typographyVariant` `"h6"` when it is not set.
+ *   `components.CcLoader.variants` apply to it. They match the Loader's
+ *   `text`, `typographyVariant`, `size` and `color` after theme
+ *   `defaultProps`, with `typographyVariant` `"h6"`, `size` `40` and `color`
+ *   `"primary"` when they are not set.
  * - `innerWrapper`: the block of text and spinner: a flex column that
  *   centers them horizontally, with `theme.spacing(1)` between them and
  *   `theme.spacing(2)` of padding above and below. It sets
  *   `overflow-wrap: anywhere`, so the text breaks inside a word that is wider
  *   than the Loader.
- * - `progress`: the MUI `CircularProgress`
+ * - `progress`: the MUI `CircularProgress`. Its size comes from the `size`
+ *   prop: CircularProgress sets its width and height inline, so a `width` or
+ *   `height` here has no effect.
  */
 export type LoaderClassKey = "root" | "innerWrapper" | "progress";
 
@@ -179,6 +210,8 @@ const Loader = (inProps: LoaderProps) => {
 	const {
 		text,
 		typographyVariant: typographyVariantProp,
+		size: sizeProp,
+		color: colorProp,
 		className,
 		classes,
 		"aria-label": ariaLabel,
@@ -186,6 +219,8 @@ const Loader = (inProps: LoaderProps) => {
 		...rootProps
 	} = props;
 	const typographyVariant = typographyVariantProp ?? "h6";
+	const size = sizeProp ?? 40;
+	const color = colorProp ?? "primary";
 	const { t, ready } = useTranslation("translation", TRANSLATION_OPTIONS);
 	const textId = React.useId();
 
@@ -206,6 +241,8 @@ const Loader = (inProps: LoaderProps) => {
 			{...rootProps}
 			text={text}
 			typographyVariant={typographyVariant}
+			size={size}
+			color={color}
 			className={combineClassNames([className, classes?.root])}
 		>
 			<InnerWrapper className={classes?.innerWrapper}>
@@ -215,6 +252,8 @@ const Loader = (inProps: LoaderProps) => {
 					</Typography>
 				)}
 				<Progress
+					size={size}
+					color={color}
 					className={classes?.progress}
 					aria-label={progressLabel}
 					aria-labelledby={progressLabelledBy}
@@ -226,15 +265,20 @@ const Loader = (inProps: LoaderProps) => {
 
 /**
  * Indeterminate loading indicator: a MUI `CircularProgress` with an optional
- * status `text` above it, centered in its parent.
+ * status `text` above it, centered in its parent. The spinner is 40px and in
+ * the theme's primary color unless `size` and `color` say otherwise.
  *
  * Layout: text and spinner form one block. In a parent with a definite height
  * (a fixed height, or a box that a flex or grid layout stretches) the Loader
  * fills the parent and centers that block in it; a block taller than the
  * parent overflows it equally above and below. In a parent of automatic
- * height the Loader is as tall as the block: 72px without text (the 40px
- * spinner and 16px above and below it), and with text the text's height and
- * 8px more (at MUI's default spacing).
+ * height the Loader is as tall as the block: without text the spinner's
+ * `size` and 16px above and below it (72px at the default size), and with
+ * text the text's height and 8px more (at MUI's default spacing).
+ *
+ * For a spinner inside a button, a menu or list item, or a line of text, use
+ * MUI's `CircularProgress` directly: the Loader is a block that fills its
+ * parent and keeps 16px above and below the spinner.
  *
  * Styling: `className`, `sx`, `style` and the other HTML attributes go to
  * the `root` slot, `classes` to the slot of each key, so `styled(Loader)`
@@ -253,7 +297,8 @@ const Loader = (inProps: LoaderProps) => {
  * whose content is loading. The Loader does not suspend, also not before
  * the library's translations have loaded, so it can be a Suspense fallback.
  *
- * Theme: `components.CcLoader.defaultProps` ({@link LoaderProps}),
+ * Theme: `components.CcLoader.defaultProps` ({@link LoaderProps}, such as
+ * `size` and `color` for every Loader of an app),
  * `components.CcLoader.styleOverrides` per {@link LoaderClassKey} slot, and
  * `components.CcLoader.variants`, which apply to the `root` slot.
  */
