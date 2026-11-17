@@ -338,8 +338,9 @@ describe("LazyConnector workQueue", () => {
 describe("LazyConnector update", () => {
 	/**
 	 * A real connector whose updates are logged with the data they carry
+	 * @param rows The records on the server: index lists them, read finds them by id
 	 */
-	const makeUpdatingConnector = () => {
+	const makeUpdatingConnector = (rows: Record<string, unknown>[] = []) => {
 		const { connector, calls } = makeRealConnector();
 		(
 			connector as unknown as {
@@ -348,6 +349,19 @@ describe("LazyConnector update", () => {
 		).update = vi.fn((data: Record<string, unknown>) => {
 			calls.push(`update:${String(data.id)}:${String(data.note)}`);
 			return Promise.resolve([data, {}]);
+		});
+		const real = connector as unknown as Record<string, unknown>;
+		real.index = vi.fn(() =>
+			Promise.resolve([
+				rows.map((row) => ({ ...row })),
+				{ totalRows: rows.length, filteredRows: rows.length },
+			]),
+		);
+		real.read = vi.fn((id: string) => {
+			const row = rows.find((candidate) => candidate.id === id);
+			return row
+				? Promise.resolve([{ ...row }, {}])
+				: Promise.reject(new Error(`${id} not found`));
 		});
 		return { connector, calls };
 	};
@@ -403,7 +417,7 @@ describe("LazyConnector update", () => {
 		)[method].mock.calls.map(([data]) => data);
 
 	it("[ISSUE-3505-ITEM-6] two updates carrying different fields send both edits in one request, and read serves them", async () => {
-		const { connector } = makeUpdatingConnector();
+		const { connector } = makeUpdatingConnector([{ id: "j1" }]);
 		const lazy = new LazyConnector(connector, false);
 
 		// a partial update, as the DataGrid's inline edit sends one per edited field
@@ -443,6 +457,48 @@ describe("LazyConnector update", () => {
 			created: [{ name: "a", note: "second" }],
 		});
 		expect(lazy.mapId(fakeId)).toBe("real-a");
+	});
+
+	it("[ISSUE-3505-ITEM-20] a queued partial update keeps the row's other fields in index and read", async () => {
+		const { connector } = makeUpdatingConnector([
+			{ id: "j1", title: "t", note: "old" },
+		]);
+		const lazy = new LazyConnector(connector, false);
+
+		void lazy.update({ id: "j1", note: "n" }, undefined);
+		const [rows] = await lazy.index(undefined, undefined);
+		const [read] = await lazy.read("j1", undefined);
+
+		expect({ rows, read }).toStrictEqual({
+			rows: [{ id: "j1", title: "t", note: "n" }],
+			read: { id: "j1", title: "t", note: "n" },
+		});
+	});
+
+	it("[ISSUE-3505-ITEM-20] a queued update leaves its row where the backend lists it", async () => {
+		const { connector } = makeUpdatingConnector([
+			{ id: "j1", title: "t" },
+			{ id: "k2", title: "u" },
+		]);
+		const lazy = new LazyConnector(connector, false);
+
+		void lazy.update({ id: "j1", note: "n" }, undefined);
+		const [rows] = await lazy.index(undefined, undefined);
+
+		expect(rows.map((row) => row.id)).toStrictEqual(["j1", "k2"]);
+	});
+
+	it("[ISSUE-3505-ITEM-20] with fakeReads, read serves a queued update as it is, without asking the backend", async () => {
+		const { connector } = makeUpdatingConnector([{ id: "j1", title: "t" }]);
+		const lazy = new LazyConnector(connector, true);
+
+		void lazy.update({ id: "j1", note: "n" }, undefined);
+		const [read] = await lazy.read("j1", undefined);
+
+		expect(read).toStrictEqual({ id: "j1", note: "n" });
+		expect(
+			(connector as unknown as Record<"read", Mock>).read,
+		).not.toHaveBeenCalled();
 	});
 });
 
@@ -524,6 +580,7 @@ describe("LazyConnector after a first save", () => {
 		]);
 		expect((await lazy.read(fakeId, undefined))[0]).toStrictEqual({
 			id: fakeId,
+			name: "a",
 			note: "n",
 		});
 
@@ -542,6 +599,31 @@ describe("LazyConnector after a first save", () => {
 		await lazy.workQueue();
 
 		expect(calls).toStrictEqual(["update:real-a:second"]);
+	});
+
+	it("[ISSUE-3505-ITEM-20] a queued update of a record created there keeps its other fields in index and read", async () => {
+		const { lazy, fakeId } = await makeSavedHere();
+
+		void lazy.update({ id: fakeId, note: "n" }, undefined);
+		const [rows] = await lazy.index(undefined, undefined);
+		const [read] = await lazy.read(fakeId, undefined);
+
+		expect({ rows, read }).toStrictEqual({
+			rows: [
+				{ id: "b", name: "b" },
+				{ id: fakeId, name: "a", note: "n" },
+			],
+			read: { id: fakeId, name: "a", note: "n" },
+		});
+	});
+
+	it("[ISSUE-3505-ITEM-20] index keeps listing a record created there under its fake id when an update names its real one", async () => {
+		const { lazy, fakeId } = await makeSavedHere();
+
+		void lazy.update({ id: lazy.mapId(fakeId), note: "n" }, undefined);
+		const [rows] = await lazy.index(undefined, undefined);
+
+		expect(rows.map((row) => row.id)).toStrictEqual(["b", fakeId]);
 	});
 
 	it("[ISSUE-3505-ITEM-19] a delete replaces a queued update of a record created there, and deleting it again queues nothing more", async () => {
