@@ -95,11 +95,10 @@ const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
 							}),
 							errorMessage,
 						);
-						return withFieldBlur(
-							ownerState,
-							fieldProps,
-							validation.onFieldFocus,
-						);
+						return withFieldBlur(ownerState, fieldProps, {
+							name: otherProps.name,
+							onFieldFocus: validation.onFieldFocus,
+						});
 					},
 				}}
 			/>

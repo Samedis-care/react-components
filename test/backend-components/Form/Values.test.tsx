@@ -256,3 +256,55 @@ describe("Form values: refetch and record changes", () => {
 		expect(mounts).toBe(2);
 	});
 });
+
+describe("Form values: handleBlur", () => {
+	it("[ISSUE-3501-ITEM-25] takes the field name from data-name or id when the input has no name", async () => {
+		const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+		const sink: Sink = {};
+		mountForm(
+			makeModel(),
+			capture(sink, () => (
+				<>
+					<input data-testid={"by-data-name"} data-name={"title"} />
+					<input data-testid={"by-id"} id={"note"} />
+				</>
+			)),
+		);
+		await loaded(sink);
+		const blur = (testId: string) => {
+			const el = screen.getByTestId(testId);
+			act(() =>
+				sink.ctx!.handleBlur({
+					currentTarget: el,
+					target: el,
+				} as unknown as React.FocusEvent<HTMLInputElement & HTMLElement>),
+			);
+		};
+		blur("by-data-name");
+		blur("by-id");
+		await settle();
+		expect(sink.ctx!.touched.title).toBe(true);
+		expect(sink.ctx!.touched.note).toBe(true);
+		expect(errors).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3474-ITEM-3] takes the field name from the input that lost focus when its wrapper has the handler", async () => {
+		const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+		const sink: Sink = {};
+		mountForm(
+			makeModel(),
+			capture(sink, () => (
+				<div onBlur={sink.ctx!.handleBlur}>
+					<input data-testid={"wrapped"} name={"title"} />
+				</div>
+			)),
+		);
+		await loaded(sink);
+		const input = screen.getByTestId("wrapped");
+		act(() => input.focus());
+		act(() => input.blur());
+		await settle();
+		expect(sink.ctx!.touched.title).toBe(true);
+		expect(errors).not.toHaveBeenCalled();
+	});
+});

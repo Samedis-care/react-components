@@ -53,8 +53,9 @@ export interface LocalizedDateTimePickerProps extends Omit<
 	 * another adornment or the open calendar to anything outside the field and
 	 * its open calendar (a click on another control while the calendar is open
 	 * counts). Moving between those is not leaving. Receives a blur event of the
-	 * field's input root (`role="group"`); `target` is the element that lost
-	 * focus, also one in the calendar.
+	 * field's input root (`role="group"`), which carries `name` as `data-name`,
+	 * so Form's `handleBlur` can be passed as it is; `target` is the element that
+	 * lost focus, also one in the calendar.
 	 */
 	onBlur?: TextFieldProps["onBlur"] & PickersTextFieldProps["onBlur"];
 	/**
@@ -133,7 +134,9 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 								},
 							}),
 						);
-						return withFieldBlur(ownerState, fieldProps);
+						return withFieldBlur(ownerState, fieldProps, {
+							name: otherProps.name,
+						});
 					},
 				}}
 			/>

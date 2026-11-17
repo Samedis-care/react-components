@@ -729,6 +729,11 @@ export interface FormContextData<
 	getFieldValues: () => ModelRecord<M>;
 	/**
 	 * Handle input blur events
+	 * @remarks Marks the field touched; does not validate. The field is named by the
+	 *          first non-empty name, data-name or id attribute of the event's
+	 *          currentTarget, then of its target (the element that lost focus, e.g. the
+	 *          input inside a wrapper that has the handler). Logs an error when none is
+	 *          set. The library's date pickers name their blur event by their `name`.
 	 */
 	handleBlur: React.FocusEventHandler<HTMLInputElement & HTMLElement>;
 	/**
@@ -1671,12 +1676,15 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 	}, [serverData, syncDirtyState]);
 	const handleBlur = useCallback(
 		(evt: React.FocusEvent<HTMLInputElement & HTMLElement>) => {
+			// an input's name and every element's id are "" when not set: an empty
+			// value names nothing, so the search goes on to the next attribute and on
+			// to the element that lost focus (e.g. the input inside a wrapper)
 			const fieldName =
-				evt.currentTarget?.name ??
-				evt.currentTarget?.getAttribute("data-name") ??
-				evt.currentTarget?.id ??
-				evt.target?.name ??
-				evt.target?.getAttribute("data-name") ??
+				evt.currentTarget?.name ||
+				evt.currentTarget?.getAttribute("data-name") ||
+				evt.currentTarget?.id ||
+				evt.target?.name ||
+				evt.target?.getAttribute("data-name") ||
 				evt.target?.id;
 			if (!fieldName) {
 				// eslint-disable-next-line no-console
