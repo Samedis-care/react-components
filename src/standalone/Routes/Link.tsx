@@ -27,6 +27,19 @@ export interface LinkProps extends Omit<
 	 */
 	state?: unknown;
 	/**
+	 * Where the browser opens the link. A target other than `_self`
+	 * (`_blank`, a window name) leaves a click to the browser, which opens the
+	 * href there; `replace` and `state` don't apply. An empty target or
+	 * `_self` routes as usual. Default: none (the current tab)
+	 */
+	target?: React.AnchorHTMLAttributes<HTMLAnchorElement>["target"];
+	/**
+	 * Downloads the href instead of opening it: `true`, or the file name to
+	 * save it as. A click is then left to the browser, which downloads it.
+	 * Default: none (no download)
+	 */
+	download?: React.AnchorHTMLAttributes<HTMLAnchorElement>["download"];
+	/**
 	 * Called on every click, also with Ctrl, Meta, Shift or Alt, before the
 	 * link handles it. Calling `evt.preventDefault()` keeps the link from
 	 * navigating, e.g. to open a dialog instead; skip that for a click with a
@@ -36,12 +49,25 @@ export interface LinkProps extends Omit<
 }
 
 /**
+ * Does the browser open the link in another tab or window, or download it?
+ * A target that is empty or "_self" (in any case) is the current tab, as in
+ * the HTML standard.
+ * @param anchor The clicked link
+ */
+const opensElsewhere = (anchor: HTMLAnchorElement): boolean => {
+	if (anchor.hasAttribute("download")) return true;
+	const target = anchor.getAttribute("target");
+	return !!target && target.toLowerCase() !== "_self";
+};
+
+/**
  * Anchor element using the history API for routing: a plain click runs the
- * `onClick` prop and is then routed, unless `onClick` prevented the default;
- * clicks with Ctrl, Meta, Shift or Alt are left to the browser. Also works as
- * the `component` of MUI's Link and ButtonBase components
- * (`<Button component={Link} to="/x">`, ListItemButton, MenuItem, Tab,
- * IconButton), which pass an `onClick` of their own.
+ * `onClick` prop and is then routed, unless `onClick` prevented the default.
+ * Clicks with Ctrl, Meta, Shift or Alt are left to the browser, and so is
+ * every click on a link with a `target` other than `_self` or with
+ * `download`. Also works as the `component` of MUI's Link and ButtonBase
+ * components (`<Button component={Link} to="/x">`, ListItemButton, MenuItem,
+ * Tab, IconButton), which pass an `onClick` of their own.
  * @param props The props
  */
 const Link = React.forwardRef(function Link(
@@ -58,6 +84,7 @@ const Link = React.forwardRef(function Link(
 			onClick?.(evt);
 			if (evt.defaultPrevented) return;
 			if (evt.ctrlKey || evt.metaKey || evt.shiftKey || evt.altKey) return;
+			if (opensElsewhere(evt.currentTarget)) return;
 			if (!target) return;
 			evt.preventDefault();
 			navigate(target, { replace, state });

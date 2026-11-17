@@ -277,6 +277,115 @@ describe("Link: clicks", () => {
 		expect(second).toHaveBeenCalledTimes(1);
 		expect(renderedPath()).toBe("/x");
 	});
+
+	it("[ISSUE-3475-ITEM-8] leaves a click on a link with target or download to the browser", () => {
+		const { history } = renderAt(
+			"/",
+			<>
+				<Link to="/x" target="_blank">
+					new tab
+				</Link>
+				<Link to="/report.csv" download>
+					download
+				</Link>
+				<Link to="/y" target="_self">
+					same tab
+				</Link>
+			</>,
+		);
+		expect(fireEvent.click(screen.getByRole("link", { name: "new tab" }))).toBe(
+			true,
+		);
+		expect(
+			fireEvent.click(screen.getByRole("link", { name: "download" })),
+		).toBe(true);
+		expect(history.index).toBe(0);
+		// target="_self" is a normal link
+		expect(
+			fireEvent.click(screen.getByRole("link", { name: "same tab" })),
+		).toBe(false);
+		expect(renderedPath()).toBe("/y");
+	});
+
+	it("[ISSUE-3475-ITEM-8] leaves a click on a link with a named target or a file name to download to the browser", () => {
+		const onClick = vi.fn();
+		const { history } = renderAt(
+			"/",
+			<>
+				<Link to="/x" target="report" onClick={onClick}>
+					named window
+				</Link>
+				<Link to="/export" download="devices.csv">
+					named download
+				</Link>
+				<Button component={Link} to="/z" target="_blank">
+					button link
+				</Button>
+			</>,
+		);
+		expect(
+			fireEvent.click(screen.getByRole("link", { name: "named window" })),
+		).toBe(true);
+		// the consumer's onClick still runs first
+		expect(onClick).toHaveBeenCalledTimes(1);
+		expect(
+			fireEvent.click(screen.getByRole("link", { name: "named download" })),
+		).toBe(true);
+		expect(
+			fireEvent.click(screen.getByRole("link", { name: "button link" })),
+		).toBe(true);
+		expect(history.index).toBe(0);
+		expect(renderedPath()).toBe("/");
+	});
+
+	it("[ISSUE-3475-ITEM-8] routes a link whose target is empty or _self in any case, or whose download is false", () => {
+		const { history } = renderAt(
+			"/",
+			<>
+				<Link to="/a" target="">
+					empty target
+				</Link>
+				<Link to="/b" target="_SELF">
+					upper case self
+				</Link>
+				<Link to="/c" download={false}>
+					no download
+				</Link>
+			</>,
+		);
+		expect(
+			fireEvent.click(screen.getByRole("link", { name: "empty target" })),
+		).toBe(false);
+		expect(renderedPath()).toBe("/a");
+		expect(
+			fireEvent.click(screen.getByRole("link", { name: "upper case self" })),
+		).toBe(false);
+		expect(renderedPath()).toBe("/b");
+		expect(
+			fireEvent.click(screen.getByRole("link", { name: "no download" })),
+		).toBe(false);
+		expect(renderedPath()).toBe("/c");
+		expect(history.index).toBe(3);
+	});
+
+	it("[ISSUE-3475-ITEM-8] follows a target that changes after mount", () => {
+		const { history, rerender } = renderAt(
+			"/",
+			<Link to="/x" target="_blank">
+				go
+			</Link>,
+		);
+		const link = screen.getByRole("link", { name: "go" });
+		expect(fireEvent.click(link)).toBe(true);
+		rerender(
+			<HistoryRouter history={history}>
+				<ShowPath />
+				<Link to="/x">go</Link>
+			</HistoryRouter>,
+		);
+		expect(fireEvent.click(link)).toBe(false);
+		expect(renderedPath()).toBe("/x");
+	});
 });
 
 describe("Link: targets", () => {
