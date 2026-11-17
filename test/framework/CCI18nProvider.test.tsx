@@ -78,6 +78,12 @@ const settlesOn = (code: string) =>
 		expect(document.documentElement.lang).toBe(code);
 		expect(screen.getByTestId("moment-locale").textContent).toBe(code);
 	});
+/** moment and a translated component settle on the language */
+const appliesMomentLocale = (code: string) =>
+	waitFor(() => {
+		expect(moment.locale()).toBe(code);
+		expect(screen.getByTestId("moment-locale").textContent).toBe(code);
+	});
 
 beforeEach(async () => {
 	await ccI18n.changeLanguage("en-US");
@@ -155,5 +161,44 @@ describe("CCI18nProvider", () => {
 		await finish(chunks.nl);
 		await finish(chunks.ru);
 		await settlesOn("ru");
+	});
+
+	it("[ISSUE-3499-ITEM-20] with disableHtmlLanguageAttributeSetter, a language change leaves <html lang> unchanged", async () => {
+		// the app sets <html lang> itself, e.g. to the language of the content shown
+		document.documentElement.lang = "fr";
+		render(
+			<CCI18nProvider disableHtmlLanguageAttributeSetter>
+				<MomentLocale />
+			</CCI18nProvider>,
+		);
+
+		await changeLanguage("de-DE");
+		await finish(chunks.de);
+		await appliesMomentLocale("de");
+		expect(document.documentElement.lang).toBe("fr");
+	});
+
+	it("[ISSUE-3499-ITEM-20] disableHtmlLanguageAttributeSetter takes effect when it changes after mount", async () => {
+		const ui = (disableHtmlLanguageAttributeSetter: boolean) => (
+			<CCI18nProvider
+				disableHtmlLanguageAttributeSetter={disableHtmlLanguageAttributeSetter}
+			>
+				<MomentLocale />
+			</CCI18nProvider>
+		);
+		const { rerender } = render(ui(false));
+		await settlesOn("en");
+
+		// turned on: the app's value stays through a language change
+		rerender(ui(true));
+		document.documentElement.lang = "fr";
+		await changeLanguage("de-DE");
+		await finish(chunks.de);
+		await appliesMomentLocale("de");
+		expect(document.documentElement.lang).toBe("fr");
+
+		// turned off: <html lang> follows the current language again right away
+		rerender(ui(false));
+		await settlesOn("de");
 	});
 });
