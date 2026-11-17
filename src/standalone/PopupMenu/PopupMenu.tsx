@@ -29,6 +29,18 @@ const PopupMenuRoot = styled(Menu, { name: "CcPopupMenu", slot: "root" })(
 		// screen allows was cut off; it wraps inside the paper instead
 		[`& .${menuItemClasses.root}`]: {
 			whiteSpace: "normal",
+			// a word too long for a line breaks where it has to. The item is a flex
+			// container, so its own text (the label of every library menu) can't get
+			// narrower than its longest word unless that word may break anywhere;
+			// "break-word" doesn't lower that minimum
+			overflowWrap: "anywhere",
+		},
+		// its elements break a word only when it doesn't fit on a line of its own:
+		// each one stays as wide as its longest word, so a shortcut hint beside a
+		// long label isn't broken mid-word, while a ListItemText label (min-width 0)
+		// gets narrower and breaks its too-long word
+		[`& .${menuItemClasses.root} > *`]: {
+			overflowWrap: "break-word",
 		},
 		// MUI marks the keyboard-focused item with a faint tint only (unless the theme
 		// sets its focusVisible ring), which forced colors drop; inset, because the
@@ -103,9 +115,14 @@ export interface PopupMenuProps extends MenuProps {
  * the first enabled item. This also holds with `keepMounted`, whose items keep
  * their state between opens. The paper is as wide as its widest item, up to
  * MUI's limit of the window's width minus 32px; a longer item label wraps onto
- * more lines instead of being cut off. The keyboard-focused item shows a 2px
- * outline in `theme.palette.primary.main` just inside its edges, or the ring of
- * the theme's `focusVisible` option when the theme sets one.
+ * more lines instead of being cut off, and a word too long for a line is broken
+ * where it has to be. That holds for a label that is the item's own text or a
+ * MUI `ListItemText`; a label in another element breaks a word only if that
+ * element may get narrower than the word (`min-width: 0`). Other elements
+ * beside the label, such as a shortcut hint, keep their words whole. The
+ * keyboard-focused item shows a 2px outline in `theme.palette.primary.main`
+ * just inside its edges, or the ring of the theme's `focusVisible` option when
+ * the theme sets one.
  *
  * Theme: `components.CcPopupMenu.defaultProps` ({@link PopupMenuProps}; they
  * apply before `components.MuiMenu.defaultProps`, and their `elevation` wins

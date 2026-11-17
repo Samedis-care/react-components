@@ -41,6 +41,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-17 | [Link leaves a click to the browser when it has target or download](2026-11-17-link-target-download-left-to-browser.md) | behavior |
 | 2026-11-17 | [useAsyncMemo returns `{ value, error }`, and a failing factory sets `error`](2026-11-17-use-async-memo-error-state.md) | type, behavior |
 | 2026-11-17 | [FormCrudMultiSelect shows which entries were added and removed until the form saves](2026-11-17-crud-multi-select-pending-changes.md) | behavior, type |
+| 2026-11-17 | [PopupMenu breaks a word too long for a line](2026-11-17-popup-menu-breaks-long-words.md) | behavior |
 | 2026-11-13 | [SignalPortlet shows no "Last refresh" label for 0 or an invalid time](2026-11-13-signal-portlet-no-label-without-time.md) | behavior |
 | 2026-11-13 | [The date pickers report a blur when focus leaves the open calendar](2026-11-13-picker-blur-on-leaving-the-calendar.md) | behavior |
 | 2026-11-13 | [Matrix columns are 56px wide by default, and the add chip is 24x24](2026-11-13-matrix-targets-24px.md) | behavior |

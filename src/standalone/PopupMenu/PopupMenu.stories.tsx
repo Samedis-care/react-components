@@ -6,11 +6,15 @@ import {
 	Box,
 	Button,
 	createTheme,
+	ListItemIcon,
+	ListItemText,
 	MenuItem,
 	MenuProps,
 	ThemeProvider,
+	Typography,
 } from "@mui/material";
 import PopupMenu from "./index";
+import { ContentCopy, Description } from "@mui/icons-material";
 
 const meta: Meta<typeof PopupMenu> = {
 	title: "Standalone/PopupMenu",
@@ -178,6 +182,7 @@ type MenuDemoStory = StoryObj<typeof MenuDemo>;
 
 const menuItem = (name: string) =>
 	within(document.body).getByRole("menuitem", { name });
+
 const menuClosed = () =>
 	waitFor(() =>
 		expect(within(document.body).queryByRole("menu")).not.toBeInTheDocument(),
@@ -707,5 +712,146 @@ export const Issue3459Item14ThemeFocusVisibleRing: MenuDemoStory = {
 		await waitFor(() => expect(alpha).toHaveFocus());
 		await waitFor(() => expect(alpha).toHaveClass("Mui-focusVisible"));
 		await expect(getComputedStyle(alpha).outlineColor).toBe("rgb(0, 128, 0)");
+	},
+};
+
+// one German compound word, wider than a menu item's text at 320px
+const longWord = "Medizinproduktebetreiberverordnungsprüfung";
+
+interface LongWordDemoProps {
+	/** called with the index of the activated item */
+	onSelect: (index: number) => void;
+}
+
+const LongWordDemo = (props: LongWordDemoProps) => {
+	const { onSelect } = props;
+	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+	const open = Boolean(anchorEl);
+	const select = (index: number) => {
+		onSelect(index);
+		setAnchorEl(null);
+	};
+	return (
+		<>
+			<Button
+				id={"long-word-demo-trigger"}
+				aria-haspopup={"menu"}
+				aria-controls={open ? "long-word-demo" : undefined}
+				aria-expanded={open}
+				onClick={(e) => setAnchorEl(e.currentTarget)}
+			>
+				Actions
+			</Button>
+			<PopupMenu
+				anchorEl={anchorEl}
+				open={open}
+				onClose={() => setAnchorEl(null)}
+				slotProps={{
+					list: {
+						id: "long-word-demo",
+						"aria-labelledby": "long-word-demo-trigger",
+					},
+				}}
+			>
+				{/* the item's own text, as DataGrid's reset menu and FilesGrid's file list */}
+				<MenuItem onClick={() => select(0)}>{longWord}</MenuItem>
+				{/* the item's own text after an icon, as DataGrid's data actions */}
+				<MenuItem onClick={() => select(1)}>
+					<ListItemIcon>
+						<Description fontSize={"small"} />
+					</ListItemIcon>
+					{longWord}
+				</MenuItem>
+				{/* a ListItemText with a shortcut hint, as in MUI's menu demos */}
+				<MenuItem onClick={() => select(2)}>
+					<ListItemIcon>
+						<ContentCopy fontSize={"small"} />
+					</ListItemIcon>
+					<ListItemText>{longWord}</ListItemText>
+					<Typography variant={"body2"} sx={{ color: "text.secondary" }}>
+						Ctrl+Shift+C
+					</Typography>
+				</MenuItem>
+			</PopupMenu>
+		</>
+	);
+};
+
+/**
+ * The line boxes of the text nodes in an element
+ * @param element The element whose text is measured
+ * @returns Per text node with text, its content and one rectangle per line
+ */
+const textLines = (element: HTMLElement) => {
+	const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+	const lines: { text: string; rects: DOMRect[] }[] = [];
+	for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+		if (!node.textContent?.trim()) continue;
+		const range = document.createRange();
+		range.selectNodeContents(node);
+		lines.push({
+			text: node.textContent,
+			rects: Array.from(range.getClientRects()),
+		});
+	}
+	return lines;
+};
+
+/**
+ * The texts of a menu item that reach past its padding, into the part the
+ * paper cuts off
+ * @param item The menu item
+ * @returns The content of each text node that does not fit
+ */
+const textOutsideItem = (item: HTMLElement) => {
+	const box = item.getBoundingClientRect();
+	const style = getComputedStyle(item);
+	const left = box.left + parseFloat(style.paddingLeft);
+	const right = box.right - parseFloat(style.paddingRight);
+	return textLines(item)
+		.filter(({ rects }) =>
+			rects.some((rect) => rect.left < left - 0.5 || rect.right > right + 0.5),
+		)
+		.map(({ text }) => text);
+};
+
+export const Issue3459Item16LongWordReadableOnPhone: StoryObj<
+	typeof LongWordDemo
+> = {
+	args: { onSelect: fn() },
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3459-ITEM-16: at 320px, a word wider than an item's text (here a 42-character German compound) stays on one line and is cut off without an ellipsis: as the item's own text, after an icon (as DataGrid's data actions) and in a `ListItemText`. Expected: the word breaks onto more lines where it does not fit on a line of its own, and the shortcut hint beside it keeps its words whole.",
+			},
+		},
+	},
+	render: (args) => <LongWordDemo {...args} />,
+	play: async ({ canvas }) => {
+		await userEvent.click(canvas.getByRole("button", { name: "Actions" }));
+		const items = await within(document.body).findAllByRole("menuitem");
+		await expect(items).toHaveLength(3);
+		const paperEl = items[0].closest<HTMLElement>(".MuiMenu-paper")!;
+		// the Grow transition scales the paper until it has entered
+		await waitFor(() =>
+			expect(getComputedStyle(paperEl).transform).toBe("none"),
+		);
+		const paper = paperEl.getBoundingClientRect();
+		await expect(paper.left).toBeGreaterThanOrEqual(16);
+		await expect(paper.right).toBeLessThanOrEqual(304);
+		await expect(items.flatMap(textOutsideItem)).toEqual([]);
+		// the word is longer than a line in every item, so the test covers it
+		const wordLines = items.map(
+			(item) =>
+				textLines(item).find(({ text }) => text === longWord)!.rects.length,
+		);
+		await expect(wordLines.every((count) => count > 1)).toBe(true);
+		const hint = textLines(items[2]).find(
+			({ text }) => text === "Ctrl+Shift+C",
+		)!;
+		await expect(hint.rects).toHaveLength(1);
 	},
 };
