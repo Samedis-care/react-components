@@ -12,6 +12,7 @@ import i18n from "../../i18n";
 import { ErrorDialog } from "./ErrorDialog";
 import type { ValidationResult } from "../../backend-components/Form/Form";
 import { isValidationError } from "../../backend-components";
+import { pushDialogPromise } from "./pushDialogPromise";
 
 /**
  * What the `show…Dialog` helpers return: the promise of the dialog's result, with `close`,
@@ -34,37 +35,6 @@ export type DialogPromise<T> = Promise<T> & {
 	 *          has ended.
 	 */
 	close: () => void;
-};
-
-/**
- * Pushes the dialog `render` returns and returns its result as a DialogPromise
- * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
- * @param render Returns the dialog, given the promise's resolve and reject
- * @param dismiss Settles the promise when `close` closes the dialog, as dismissing it does
- */
-const pushDialogPromise = <T,>(
-	pushDialog: DialogContextType[0],
-	render: (
-		resolve: (value: T) => void,
-		reject: (reason?: unknown) => void,
-	) => React.ReactNode,
-	dismiss: (
-		resolve: (value: T) => void,
-		reject: (reason?: unknown) => void,
-	) => void,
-): DialogPromise<T> => {
-	let closeDialog: (() => void) | undefined;
-	let settle: (() => void) | undefined;
-	const promise = new Promise<T>((resolve, reject) => {
-		settle = () => dismiss(resolve, reject);
-		closeDialog = pushDialog(render(resolve, reject));
-	});
-	return Object.assign(promise, {
-		close: () => {
-			closeDialog?.();
-			settle?.();
-		},
-	});
 };
 
 /**

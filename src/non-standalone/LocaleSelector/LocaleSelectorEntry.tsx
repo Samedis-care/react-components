@@ -9,7 +9,7 @@ import focusRing from "../../utils/internal/focusRing";
 
 export interface LocaleSelectorEntryProps extends Omit<
 	LocaleSelectorDialogContentProps,
-	"close"
+	"handleSwitch" | "switching"
 > {
 	locale: LocaleSelectorEntryData;
 	currentLanguage: string;

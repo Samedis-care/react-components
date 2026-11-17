@@ -30,6 +30,10 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-17 | [CrudSelect updates an entry only when what serialize returns for it changed](2026-11-17-crud-select-updates-by-serialized-entry.md) | behavior |
 | 2026-11-17 | [Route params are percent-decoded, and literal route segments match the decoded location](2026-11-17-route-params-decoded.md) | behavior |
 | 2026-11-17 | [A keyboard-focused InfoBox header keeps its status color and draws a ring](2026-11-17-info-box-focus-ring.md) | behavior |
+| 2026-11-17 | [ComponentsCareI18n leads the UI language: apps change the language through it](2026-11-17-components-care-i18n-leads-the-language.md) | API |
+| 2026-11-17 | [LocaleSelectorDialog reports the picked locale and stays open while it loads](2026-11-17-locale-selector-dialog-reports-the-pick.md) | behavior, type |
+| 2026-11-17 | [LocaleSelectorDialog's supportedLocales match ignoring case, with _ read as -](2026-11-17-locale-selector-supported-locales-normalized.md) | behavior, type |
+| 2026-11-17 | [LocaleSelectorDialog's visible box is the paper slot](2026-11-17-locale-selector-dialog-paper-slot.md) | theme |
 | 2026-11-13 | [SignalPortlet shows no "Last refresh" label for 0 or an invalid time](2026-11-13-signal-portlet-no-label-without-time.md) | behavior |
 | 2026-11-13 | [The date pickers report a blur when focus leaves the open calendar](2026-11-13-picker-blur-on-leaving-the-calendar.md) | behavior |
 | 2026-11-13 | [Matrix columns are 56px wide by default, and the add chip is 24x24](2026-11-13-matrix-targets-24px.md) | behavior |

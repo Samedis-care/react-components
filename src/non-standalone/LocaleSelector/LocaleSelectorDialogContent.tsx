@@ -7,7 +7,6 @@ import {
 	useThemeProps,
 } from "@mui/material";
 import { List, RowComponentProps, useDynamicRowHeight } from "react-window";
-import ccI18n from "../../i18n";
 import supportedLanguages from "../../assets/data/supported-languages.json";
 import countryLanguages from "../../assets/data/country-languages.json";
 import LocaleSelectorEntry from "./LocaleSelectorEntry";
@@ -20,18 +19,19 @@ import sortByLocaleRelevance from "../../utils/sortByLocaleRelevance";
 import TextFieldWithHelp from "../../standalone/UIKit/TextFieldWithHelp";
 import Loader from "../../standalone/Loader";
 import { LocaleSelectorDialogCommonProps } from "./LocaleSelectorDialog";
-import { useDialogContext } from "../../framework";
-import { showErrorDialog } from "../Dialog";
 import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 
 export interface LocaleSelectorDialogContentProps extends LocaleSelectorDialogCommonProps {
 	/**
-	 * Called once the picked language is loaded and applied. Not called when its
-	 * texts fail to load or `changeLanguage` rejects: an error dialog shows
-	 * instead, and the previous language stays. The dialog passes a function that
-	 * closes it, and only it, and does nothing once it is closed.
+	 * Called with the row's locale (`"<lang>-<COUNTRY>"`) when a row is picked. The
+	 * dialog switches the language, reports the pick and closes.
 	 */
-	close: () => void;
+	handleSwitch: (locale: string) => void;
+	/**
+	 * Whether a picked language loads: the rows are disabled, and a loader covers
+	 * the list
+	 */
+	switching: boolean;
 	className?: string;
 }
 
@@ -105,15 +105,11 @@ export type LocaleSelectorDialogContentClassKey =
 	"localeList" | "noLocalesMessage" | "searchStatus";
 
 /**
- * Whether every namespace loaded so far has its texts for the locale or its
- * language, i.e. the UI can show the locale without falling back to English
+ * A locale or language as `supportedLocales` entries are compared: lower case, with
+ * `_` read as `-` (language tags ignore case; `de_DE` is the POSIX spelling)
  */
-const hasTexts = (locale: string) => {
-	const codes = [locale, locale.split("-")[0]];
-	return ([] as string[])
-		.concat(ccI18n.options.ns ?? [])
-		.every((ns) => codes.some((code) => ccI18n.hasResourceBundle(code, ns)));
-};
+const normalizeLocale = (locale: string) =>
+	locale.replace(/_/g, "-").toLowerCase();
 
 const SearchInputProps = {
 	startAdornment: (
@@ -130,7 +126,12 @@ const LocaleSelectorDialogContent = (
 		props: inProps,
 		name: "CcLocaleSelectorDialogContent",
 	});
-	const { supportedLocales: appSupportedLocales, className, close } = props;
+	const {
+		supportedLocales: appSupportedLocales,
+		className,
+		handleSwitch,
+		switching,
+	} = props;
 
 	const [filter, setFilter] = useState("");
 	const lowercaseFilter = filter.toLowerCase();
@@ -143,12 +144,18 @@ const LocaleSelectorDialogContent = (
 		},
 		[setFilter],
 	);
-	const [switchingLanguage, setSwitchingLanguage] = useState(false);
-	const [pushDialog] = useDialogContext();
 
 	const supportedLangs = supportedLanguages;
 	const countryLanguageMapping = countryLanguages as Record<string, string[]>;
 
+	// the entries of supportedLocales as the rows' locales and languages are compared
+	const supported = useMemo(
+		() =>
+			appSupportedLocales
+				? new Set(appSupportedLocales.map(normalizeLocale))
+				: null,
+		[appSupportedLocales],
+	);
 	const data: LocaleSelectorEntryFilterData[] = useMemo(
 		() =>
 			Object.entries(countryLanguageMapping)
@@ -163,9 +170,9 @@ const LocaleSelectorDialogContent = (
 				.flat()
 				.filter(
 					(locale) =>
-						!appSupportedLocales ||
-						appSupportedLocales.includes(locale) ||
-						appSupportedLocales.includes(locale.split("-")[0]),
+						!supported ||
+						supported.has(locale.toLowerCase()) ||
+						supported.has(locale.split("-")[0]),
 				)
 				.map((locale) => ({
 					locale: locale,
@@ -185,7 +192,7 @@ const LocaleSelectorDialogContent = (
 					native_language_lower: entry.native_language.toLowerCase(),
 				}))
 				.sort((a, b) => sortByLocaleRelevance(a.locale, b.locale)),
-		[countryLanguageMapping, appSupportedLocales, supportedLangs, tLocale],
+		[countryLanguageMapping, supported, supportedLangs, tLocale],
 	);
 
 	const filteredData = useMemo(
@@ -201,31 +208,6 @@ const LocaleSelectorDialogContent = (
 		[data, lowercaseFilter],
 	);
 
-	const handleSwitch = useCallback(
-		async (lang: string) => {
-			// the instance itself: the hook's i18n is a snapshot of the render
-			const previousLang = ccI18n.language;
-			setSwitchingLanguage(true);
-			try {
-				await ccI18n.changeLanguage(lang);
-				// i18next applies a language whose texts failed to load (offline, or
-				// chunks gone after a deploy) and never retries the load: switch back
-				if (ccI18n.language === lang && !hasTexts(lang)) {
-					if (previousLang) await ccI18n.changeLanguage(previousLang);
-					throw new Error(
-						ccI18n.t("non-standalone.language-switcher.load-error"),
-					);
-				}
-				close();
-			} catch (e) {
-				await showErrorDialog(pushDialog, e as Error);
-			} finally {
-				setSwitchingLanguage(false);
-			}
-		},
-		[close, pushDialog],
-	);
-
 	const LocaleEntryRenderer = useCallback(
 		(entryProps: RowComponentProps<{ filteredData: typeof filteredData }>) => {
 			const locale = entryProps.filteredData[entryProps.index];
@@ -237,14 +219,14 @@ const LocaleSelectorDialogContent = (
 							locale={locale}
 							currentLanguage={currentLang}
 							handleSwitch={handleSwitch}
-							disabled={switchingLanguage}
+							disabled={switching}
 							key={locale.locale}
 						/>
 					</Suspense>
 				</div>
 			);
 		},
-		[currentLang, handleSwitch, switchingLanguage],
+		[currentLang, handleSwitch, switching],
 	);
 
 	// names wrap, so each row is as tall as its text: react-window measures the
@@ -289,7 +271,7 @@ const LocaleSelectorDialogContent = (
 				</Box>
 			</Grid>
 			<LocaleList size={12}>
-				<FormLoaderOverlay visible={switchingLanguage} />
+				<FormLoaderOverlay visible={switching} />
 				{filteredData.length === 0 ? (
 					<NoLocalesMessage>
 						{t("non-standalone.language-switcher.no-locales")}

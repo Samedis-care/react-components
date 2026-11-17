@@ -2,12 +2,19 @@ import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
-import { Button, createTheme } from "@mui/material";
+import {
+	Button,
+	createTheme,
+	Stack,
+	ThemeProvider,
+	Typography,
+} from "@mui/material";
 import DialogContextProvider from "../../framework/DialogContextProvider";
 import { useDialogContext } from "../../framework";
 import LocaleSelectorDialog, {
 	LocaleSelectorDialogProps,
 } from "./LocaleSelectorDialog";
+import { showLocaleSelectorDialog } from "./showLocaleSelectorDialog";
 import { setFrameworkHistory } from "../../framework/History";
 import { createMemoryHistory } from "history";
 import ccI18n from "../../i18n";
@@ -438,5 +445,196 @@ export const Issue3499Item17RenderedFromState: Story = {
 		await waitFor(() => expect(page().queryByRole("dialog")).toBeNull());
 		await expect(args.onClose).toHaveBeenCalledTimes(2);
 		await waitFor(() => expect(opener(canvasElement)).toHaveFocus());
+	},
+};
+
+export const Issue3499Item17OnChange: Story = {
+	args: { supportedLocales: SCF, onChange: fn(), onClose: fn() },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-17: picking a row calls `onChange` with the picked locale once it is applied, then `onClose`. The close button, Escape and the backdrop don't report a pick.",
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ args, canvasElement }) => {
+		await reset();
+		try {
+			let dialog = await openDialog(canvasElement);
+			await userEvent.keyboard("{Escape}");
+			await waitFor(() => expect(page().queryByRole("dialog")).toBeNull());
+			await expect(args.onClose).toHaveBeenCalledTimes(1);
+			await expect(args.onChange).not.toHaveBeenCalled();
+			dialog = await openDialog(canvasElement);
+			await userEvent.type(within(dialog).getByRole("textbox"), "France");
+			await waitFor(() =>
+				expect(rowButton(dialog, 1)).toHaveTextContent(/France/),
+			);
+			await userEvent.click(rowButton(dialog, 1));
+			await waitFor(() => expect(page().queryByRole("dialog")).toBeNull(), {
+				timeout: 10000,
+			});
+			await expect(args.onChange).toHaveBeenCalledTimes(1);
+			await expect(args.onChange).toHaveBeenCalledWith("fr-FR");
+			await expect(args.onClose).toHaveBeenCalledTimes(2);
+			await expect(ccI18n.language).toBe("fr-FR");
+		} finally {
+			await reset();
+		}
+	},
+};
+
+/** centers the buttons of a story */
+const centered = { alignItems: "center" };
+
+/**
+ * A button that shows the dialog with showLocaleSelectorDialog and states the result
+ */
+const PromiseOpener = (props: LocaleSelectorDialogProps) => {
+	const { supportedLocales } = props;
+	const [pushDialog] = useDialogContext();
+	const [result, setResult] = useState("");
+	const open = useCallback(async () => {
+		const locale = await showLocaleSelectorDialog(pushDialog, {
+			supportedLocales,
+		});
+		setResult(locale === null ? "Dismissed" : `Picked ${locale}`);
+	}, [pushDialog, supportedLocales]);
+	return (
+		<Stack spacing={2} sx={centered}>
+			<Button variant="contained" onClick={open}>
+				Open locale selector
+			</Button>
+			<Typography role={"status"}>{result}</Typography>
+		</Stack>
+	);
+};
+
+export const Issue3499Item17ShowLocaleSelectorDialog: Story = {
+	args: { supportedLocales: SCF },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-17: `showLocaleSelectorDialog(pushDialog, props)` resolves to the picked locale once it is applied, or to `null` when the dialog is dismissed.",
+			},
+		},
+	},
+	render: (args) => <PromiseOpener {...args} />,
+	play: async ({ canvasElement }) => {
+		await reset();
+		try {
+			const status = within(canvasElement).getByRole("status");
+			let dialog = await openDialog(canvasElement);
+			await userEvent.click(
+				within(dialog).getByRole("button", { name: "Close" }),
+			);
+			await waitFor(() => expect(status).toHaveTextContent(/^Dismissed$/));
+			await expect(page().queryByRole("dialog")).toBeNull();
+			dialog = await openDialog(canvasElement);
+			await userEvent.type(within(dialog).getByRole("textbox"), "France");
+			await waitFor(() =>
+				expect(rowButton(dialog, 1)).toHaveTextContent(/France/),
+			);
+			await userEvent.click(rowButton(dialog, 1));
+			await waitFor(() => expect(status).toHaveTextContent(/^Picked fr-FR$/), {
+				timeout: 10000,
+			});
+			await expect(page().queryByRole("dialog")).toBeNull();
+		} finally {
+			await reset();
+		}
+	},
+};
+
+/** a theme that widens the dialog's visible box through its paper slot */
+const widePaperTheme = createTheme({
+	components: {
+		CcLocaleSelectorDialog: {
+			styleOverrides: { paper: { width: 600 } },
+		},
+	},
+});
+
+/** A button that pushes the dialog with the story's args, in the wide theme */
+const WideOpener = (props: LocaleSelectorDialogProps) => {
+	const [pushDialog] = useDialogContext();
+	const open = useCallback(() => {
+		pushDialog(<LocaleSelectorDialog {...props} />);
+	}, [pushDialog, props]);
+	return (
+		<Button variant="outlined" onClick={open}>
+			Open wide
+		</Button>
+	);
+};
+
+export const Issue3499Item17PaperSlot: Story = {
+	args: { supportedLocales: SCF, classes: { paper: "app-paper" } },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-17: the visible box is the `paper` slot. It is 400px wide from the `sm` breakpoint up; a theme changes that with `components.CcLocaleSelectorDialog.styleOverrides.paper` (600px here), and `classes.paper` lands on it.",
+			},
+		},
+	},
+	render: (args) => (
+		<Stack spacing={2} sx={centered}>
+			<Opener {...args} />
+			<ThemeProvider theme={widePaperTheme}>
+				<DialogContextProvider>
+					<WideOpener {...args} />
+				</DialogContextProvider>
+			</ThemeProvider>
+		</Stack>
+	),
+	play: async ({ canvasElement }) => {
+		await reset();
+		let dialog = await openDialog(canvasElement);
+		await expect(dialog).toHaveClass("app-paper");
+		await expect(dialog.getBoundingClientRect().width).toBe(400);
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() => expect(page().queryByRole("dialog")).toBeNull());
+		await userEvent.click(
+			within(canvasElement).getByRole("button", { name: "Open wide" }),
+		);
+		dialog = await page().findByRole("dialog");
+		await waitForRows(dialog);
+		await expect(dialog).toHaveClass("app-paper");
+		await expect(dialog.getBoundingClientRect().width).toBe(600);
+	},
+};
+
+export const Issue3499Item17PaperSlotOnPhone: Story = {
+	args: { supportedLocales: SCF },
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-17: below the `sm` breakpoint the dialog stays full screen, also when the theme widens the `paper` slot (600px here).",
+			},
+		},
+	},
+	render: Issue3499Item17PaperSlot.render,
+	play: async ({ canvasElement }) => {
+		await reset();
+		await userEvent.click(
+			within(canvasElement).getByRole("button", { name: "Open wide" }),
+		);
+		const dialog = await page().findByRole("dialog");
+		await waitForRows(dialog);
+		const rect = dialog.getBoundingClientRect();
+		await expect([rect.left, rect.width]).toEqual([
+			0,
+			document.documentElement.clientWidth,
+		]);
 	},
 };

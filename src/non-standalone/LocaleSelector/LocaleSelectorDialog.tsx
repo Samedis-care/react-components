@@ -3,6 +3,7 @@ import React, {
 	useCallback,
 	useContext,
 	useEffect,
+	useMemo,
 	useRef,
 } from "react";
 import {
@@ -14,10 +15,13 @@ import {
 	useThemeProps,
 } from "@mui/material";
 import { PushedDialogCloseContext } from "../../framework/PushedDialogCloseContext";
-import { DialogTitle } from "../Dialog";
+import { useDialogContext } from "../../framework/DialogContextProvider";
+import { DialogTitle, showErrorDialog } from "../Dialog";
 import Loader from "../../standalone/Loader";
+import ccI18n from "../../i18n";
 import useCCTranslations from "../../utils/useCCTranslations";
 import combineClassNames from "../../utils/combineClassNames";
+import useRefState from "../../utils/useRefState";
 
 const LocaleSelectorDialogContent = React.lazy(
 	() => import("./LocaleSelectorDialogContent"),
@@ -26,14 +30,17 @@ const LocaleSelectorDialogContent = React.lazy(
 const StyledDialog = styled(Dialog, {
 	name: "CcLocaleSelectorDialog",
 	slot: "root",
-})(({ theme }) => ({
-	// below sm the dialog is full screen
-	[theme.breakpoints.up("sm")]: {
-		"& .MuiPaper-root": {
-			width: 400,
-		},
-	},
-}));
+})({});
+// the visible box: MUI's Dialog paper renders as this element (Paper's `component`), so it
+// keeps MUI's paper styles and gets these, the theme's `paper` overrides and `classes.paper`.
+// MUI's styles come after these: below sm, its full-screen paper keeps the screen's width,
+// also when a theme sets another width here
+const PaperSlot = styled("div", {
+	name: "CcLocaleSelectorDialog",
+	slot: "paper",
+})({
+	width: 400,
+});
 const StyledDialogTitle = styled(DialogTitle, {
 	name: "CcLocaleSelectorDialog",
 	slot: "title",
@@ -61,8 +68,12 @@ const StyledLocaleSelectorDialogContent = styled(LocaleSelectorDialogContent, {
  * Slots of {@link LocaleSelectorDialog}, for the `classes` prop and for the theme's
  * `components.CcLocaleSelectorDialog.styleOverrides`:
  * - `root`: the MUI Dialog root (the full-screen Modal container, the element
- *   `className` lands on, not the visible box; reach that with `& .MuiPaper-root`,
- *   which is 400px wide from the `sm` breakpoint up)
+ *   `className` lands on, not the visible box)
+ * - `paper`: the visible box, MUI's Dialog paper (`.MuiDialog-paper`, the element with
+ *   role `dialog`). 400px wide from the `sm` breakpoint up; change the width here, e.g.
+ *   `styleOverrides: { paper: { width: 600 } }`. Below `sm` it is full screen, whatever
+ *   width is set here. MUI's paper styles come after this slot's, as on every MUI
+ *   Dialog, including the theme's `MuiDialog.styleOverrides.paper`
  * - `title`: the DialogTitle (the dialog's `h2`)
  * - `contentWrapper`: the MUI DialogContent (no side padding)
  * - `content`: the Grid that holds the search box and the list
@@ -71,7 +82,7 @@ const StyledLocaleSelectorDialogContent = styled(LocaleSelectorDialogContent, {
  * `components.CcLocaleSelectorDialogContent` and `components.CcLocaleSelectorEntry`.
  */
 export type LocaleSelectorDialogClassKey =
-	"root" | "title" | "contentWrapper" | "content";
+	"root" | "paper" | "title" | "contentWrapper" | "content";
 
 /**
  * The props {@link LocaleSelectorDialog} passes on to its content
@@ -83,13 +94,15 @@ export interface LocaleSelectorDialogCommonProps {
 	 *   (Germany, Austria, Switzerland, … 11 rows), or
 	 * - a `language-COUNTRY` locale, e.g. `"de-AT"`: that one row.
 	 *
-	 * Entries are compared exactly and case-sensitively (`"de-de"` and `"de_DE"`
-	 * match nothing). Only the languages Components-Care ships translations for
-	 * (`assets/data/supported-languages.json`: ru, fr, de, it, es, uz, en, nl) and the
-	 * official country/language pairs of `assets/data/country-languages.json` can
-	 * appear, so `"pt"` or `"en-DE"` add nothing. Entries that match nothing are
-	 * dropped silently; when nothing matches at all, the list is empty. The order of
-	 * the entries is not used (see {@link LocaleSelectorDialog} for the row order).
+	 * Entries are compared ignoring case, and `_` reads as `-`: `"de-at"`, `"de_AT"`
+	 * and `"DE-AT"` all mean `de-AT`, `"DE"` means `de`. Only the languages
+	 * Components-Care ships translations for (`assets/data/supported-languages.json`:
+	 * ru, fr, de, it, es, uz, en, nl) and the official country/language pairs of
+	 * `assets/data/country-languages.json` can appear, so `"pt"` or `"en-DE"` add
+	 * nothing. Entries that match nothing are dropped silently; when nothing matches
+	 * at all, the list is empty. The order of the entries is not used (see
+	 * {@link LocaleSelectorDialog} for the row order). A readonly array (`as const`)
+	 * works too.
 	 *
 	 * Default (undefined): every country of every Components-Care language (261
 	 * rows), including languages your app may not have translations for, so pass
@@ -99,7 +112,7 @@ export interface LocaleSelectorDialogCommonProps {
 	 * the `DialogContextProvider` (the Framework's), not one around the `pushDialog`
 	 * call.
 	 */
-	supportedLocales?: string[];
+	supportedLocales?: readonly string[];
 }
 
 /**
@@ -108,21 +121,35 @@ export interface LocaleSelectorDialogCommonProps {
  */
 export interface LocaleSelectorDialogProps extends LocaleSelectorDialogCommonProps {
 	/**
+	 * Called with the picked locale once `ComponentsCareI18n` has applied it, right
+	 * before the dialog closes (and calls `onClose`). The locale is the picked row's
+	 * `"<lang>-<COUNTRY>"`, e.g. `"de-AT"`. Also called when the current locale is
+	 * picked again.
+	 *
+	 * Not called when the dialog is dismissed, nor when the picked language fails to
+	 * load (an error dialog shows, and the dialog stays open). Once the dialog is gone
+	 * it is not called anymore, also not when a locale picked before finishes loading.
+	 * The latest `onChange` is called. Default: none.
+	 */
+	onChange?: (locale: string) => void;
+	/**
 	 * Called when the dialog closes: by its close button, Escape or a backdrop click,
-	 * or once a picked locale is applied. It gets no arguments and does not say
-	 * whether or which locale was picked.
+	 * or once a picked locale is applied (after `onChange`). It gets no arguments;
+	 * `onChange` tells which locale was picked. While a picked language loads, the
+	 * close button, Escape and a backdrop click are ignored.
 	 * - Shown with `pushDialog`, the dialog closes itself, then calls it.
 	 * - Rendered without `pushDialog`, the dialog is open while it is rendered, and
 	 *   `onClose` has to stop rendering it.
 	 *
 	 * Once the dialog is gone it is not called anymore, also not when a locale picked
-	 * before finishes loading (closing the dialog does not stop the switch). The
+	 * before finishes loading (removing the dialog does not stop the switch). The
 	 * latest `onClose` is called. Default: none.
 	 */
 	onClose?: () => void;
 	/**
 	 * Class name of the dialog root: the full-screen MUI Modal container
 	 * (`.MuiDialog-root`), the same element as `classes.root`, not the visible box
+	 * (that is `classes.paper`)
 	 */
 	className?: string;
 	/**
@@ -132,17 +159,30 @@ export interface LocaleSelectorDialogProps extends LocaleSelectorDialogCommonPro
 }
 
 /**
+ * Whether every namespace loaded so far has its texts for the locale or its
+ * language, i.e. the UI can show the locale without falling back to English
+ */
+const hasTexts = (locale: string) => {
+	const codes = [locale, locale.split("-")[0]];
+	return ([] as string[])
+		.concat(ccI18n.options.ns ?? [])
+		.every((ns) => codes.some((code) => ccI18n.hasResourceBundle(code, ns)));
+};
+
+/**
  * Dialog that switches the Components-Care UI language (`ComponentsCareI18n`).
  *
- * @usage `pushDialog(<LocaleSelectorDialog supportedLocales={["de", "en"]} />)`,
- * with `pushDialog` from `useDialogContext()`; it then closes itself. Rendered
- * without `pushDialog`, e.g. `{open && <LocaleSelectorDialog onClose={() =>
+ * @usage `showLocaleSelectorDialog(pushDialog, { supportedLocales: ["de", "en"] })`,
+ * with `pushDialog` from `useDialogContext()`, resolves to the picked locale, or
+ * `null` when the dialog is dismissed. `pushDialog(<LocaleSelectorDialog
+ * supportedLocales={["de", "en"]} />)` shows it too; it then closes itself.
+ * Rendered without `pushDialog`, e.g. `{open && <LocaleSelectorDialog onClose={() =>
  * setOpen(false)} />}`, it is open while it is rendered and closes through
- * `onClose`. Either way it needs the Framework (or a `DialogContextProvider`)
- * around it: it shows errors with `showErrorDialog`.
+ * `onClose`. Either way it needs the Framework (or a `DialogContextProvider`) around
+ * it: it shows errors with `showErrorDialog`.
  *
- * Below the theme's `sm` breakpoint it is full screen, from `sm` up 400px wide;
- * names that don't fit their column wrap.
+ * Below the theme's `sm` breakpoint it is full screen, from `sm` up 400px wide (the
+ * `paper` slot); names that don't fit their column wrap.
  *
  * Rows: one per country and each of its official languages that Components-Care
  * ships (`de-AT`, `en-IN`, …), restricted by `supportedLocales`. Rows whose locale
@@ -151,27 +191,26 @@ export interface LocaleSelectorDialogProps extends LocaleSelectorDialogCommonPro
  * the rows by their names and locale code, ignoring case.
  *
  * Picking a row calls `ComponentsCareI18n.changeLanguage("<lang>-<COUNTRY>")`
- * (regional: the country also decides date and number formats), disables the rows
- * while the language loads and closes the dialog once it is applied. A language
- * whose texts fail to load is not applied: an error dialog shows, and the previous
- * language stays. Closing the dialog while the language loads does not stop the
- * switch. The i18next language detector stores the choice in
- * `localStorage.i18nextLng`.
+ * (regional: the country also decides date and number formats). While the language
+ * loads, the rows are disabled, and the close button, Escape and a backdrop click
+ * are ignored. Once it is applied, the dialog calls `onChange` with the locale and
+ * closes. A language whose texts fail to load is not applied: an error dialog shows,
+ * the previous language stays, and the dialog stays open. The i18next language
+ * detector stores the choice in `localStorage.i18nextLng`.
  *
- * The dialog reports no result: `onClose` does not say whether or which locale was
- * picked. To react to a change (sync your own i18next instance, save the choice to
- * the user's profile), listen to `ComponentsCareI18n`'s `languageChanged` event,
- * which also fires when the language is detected at start-up, for any other
- * `changeLanguage` call, and when the current locale is picked again. Inside the
- * Framework, `CCI18nProvider` already loads and sets the moment locale and
- * `<html lang>`.
+ * `onChange` (and the promise of `showLocaleSelectorDialog`) reports a pick in this
+ * dialog, e.g. to save it to the user's profile. `ComponentsCareI18n`'s
+ * `languageChanged` event reports every language change, also the detection at
+ * start-up and any other `changeLanguage` call: keep your own i18next instance in
+ * sync with that. Inside the Framework, `CCI18nProvider` already loads and sets the
+ * moment locale and `<html lang>`.
  *
- * @remarks Add something like this to your app entry point to keep your own i18next
- * instance in sync. It works one way: to change the language from code (e.g. to the
- * language of the user's profile after login), call
- * `ComponentsCareI18n.changeLanguage`, and your instance follows. Changing only your
- * own instance leaves the Components-Care widgets, moment and `<html lang>` in the
- * old language.
+ * @remarks `ComponentsCareI18n` leads the UI language, and your app's own i18next
+ * instance follows it. To change the language from code (e.g. to the language of
+ * the user's profile after login), call `ComponentsCareI18n.changeLanguage`, never
+ * only your own instance's `changeLanguage`: that leaves the Components-Care widgets,
+ * moment and `<html lang>` in the old language. Add something like this to your app
+ * entry point, so your instance follows:
  * ```ts
  * // Components-Care i18n locale sync
  * ComponentsCareI18n.on("languageChanged", () => {
@@ -184,15 +223,18 @@ const LocaleSelectorDialog = (inProps: LocaleSelectorDialogProps) => {
 		props: inProps,
 		name: "CcLocaleSelectorDialog",
 	});
-	const { className, classes, onClose, ...contentProps } = props;
+	const { className, classes, onChange, onClose, ...contentProps } = props;
 	// not useCloseThisDialog, which throws: rendered without pushDialog, the dialog closes
 	// through onClose
 	const pushedClose = useContext(PushedDialogCloseContext);
 	const closeThisDialog = pushedClose?.pushed ? pushedClose.close : null;
+	const [pushDialog] = useDialogContext();
 	const onCloseRef = useRef(onClose);
 	onCloseRef.current = onClose;
+	const onChangeRef = useRef(onChange);
+	onChangeRef.current = onChange;
 	// false once the dialog is gone: a pick that finishes loading after the dialog was
-	// closed (Escape while the language loads) neither closes nor reports anything
+	// removed neither closes nor reports anything
 	const mounted = useRef(false);
 	useEffect(() => {
 		mounted.current = true;
@@ -200,16 +242,61 @@ const LocaleSelectorDialog = (inProps: LocaleSelectorDialogProps) => {
 			mounted.current = false;
 		};
 	}, []);
+	// a picked language loads. The ref part guards against a dismissal or a second pick
+	// landing before the re-render that disables the rows
+	const {
+		get: getSwitching,
+		set: setSwitching,
+		state: switching,
+	} = useRefState<boolean>(false);
 	// closes this dialog, and only this one, also when a dialog was pushed after it
 	const close = useCallback(() => {
 		if (!mounted.current) return;
 		closeThisDialog?.();
 		onCloseRef.current?.();
 	}, [closeThisDialog]);
+	// the close button, Escape and a backdrop click: ignored while a picked language loads,
+	// so the dialog closes once the language is applied, or stays for the error
+	const dismiss = useCallback(() => {
+		if (getSwitching()) return;
+		close();
+	}, [close, getSwitching]);
+	const handleSwitch = useCallback(
+		async (locale: string) => {
+			if (getSwitching()) return;
+			// the instance itself: the hook's i18n is a snapshot of the render
+			const previousLang = ccI18n.language;
+			setSwitching(true);
+			try {
+				await ccI18n.changeLanguage(locale);
+				// i18next applies a language whose texts failed to load (offline, or
+				// chunks gone after a deploy) and never retries the load: switch back
+				if (ccI18n.language === locale && !hasTexts(locale)) {
+					if (previousLang) await ccI18n.changeLanguage(previousLang);
+					throw new Error(
+						ccI18n.t("non-standalone.language-switcher.load-error"),
+					);
+				}
+				if (!mounted.current) return;
+				onChangeRef.current?.(locale);
+				close();
+			} catch (e) {
+				await showErrorDialog(pushDialog, e as Error);
+			} finally {
+				if (mounted.current) setSwitching(false);
+			}
+		},
+		[close, getSwitching, pushDialog, setSwitching],
+	);
 	const theme = useTheme();
 	const fullScreen = useMediaQuery(theme.breakpoints.down("sm"), {
 		noSsr: true,
 	});
+	const paperClassName = classes?.paper;
+	const slotProps = useMemo(
+		() => ({ paper: { component: PaperSlot, className: paperClassName } }),
+		[paperClassName],
+	);
 
 	const { t } = useCCTranslations();
 
@@ -217,10 +304,11 @@ const LocaleSelectorDialog = (inProps: LocaleSelectorDialogProps) => {
 		<StyledDialog
 			open={true}
 			fullScreen={fullScreen}
-			onClose={close}
+			onClose={dismiss}
 			className={combineClassNames([className, classes?.root])}
+			slotProps={slotProps}
 		>
-			<StyledDialogTitle onClose={close} className={classes?.title}>
+			<StyledDialogTitle onClose={dismiss} className={classes?.title}>
 				{t("non-standalone.language-switcher.title")}
 			</StyledDialogTitle>
 			<StyledDialogContent className={classes?.contentWrapper}>
@@ -228,7 +316,8 @@ const LocaleSelectorDialog = (inProps: LocaleSelectorDialogProps) => {
 					<StyledLocaleSelectorDialogContent
 						{...contentProps}
 						className={classes?.content}
-						close={close}
+						switching={switching}
+						handleSwitch={handleSwitch}
 					/>
 				</Suspense>
 			</StyledDialogContent>
