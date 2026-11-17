@@ -16,7 +16,8 @@ export const useImportStep3Logic = (props: CrudImporterStepProps) => {
 
 	const { t } = useCCTranslations();
 
-	const records: RecordT[] | null = useAsyncMemo(
+	// the factory never rejects: what fails for a record is kept in its row
+	const { value: records } = useAsyncMemo<RecordT[]>(
 		() =>
 			Promise.all(
 				state.data.map(async (record): Promise<RecordT> => {
