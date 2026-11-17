@@ -1561,4 +1561,33 @@ describe("FormCrudMultiSelect: the form's state", () => {
 
 		expect(disabledWhileSaving).toBe(true);
 	});
+
+	it("[ISSUE-3505-ITEM-9] removing one entry does not write the others when deserialize builds a fresh object per call", async () => {
+		const { env, sink } = await mountSelector(
+			{
+				"joins/1": [
+					{ id: "j0", source_id: "s0" },
+					{ id: "j9", source_id: "s9" },
+				],
+			},
+			{
+				deserialize: (record) => ({
+					...deserialize(record),
+					meta: { at: new Date(0) },
+				}),
+			},
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "Remove Ls9" }));
+		await settle();
+		expect(labels()).toEqual(["Ls0"]);
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		expect(env.calls).toEqual([
+			"index:joins/1",
+			"setApiEndpoint:joins/1",
+			"delete:joins/1:j9",
+		]);
+	});
 });

@@ -13,7 +13,7 @@ import {
 	useRef,
 	useState,
 } from "react";
-import shallowCompare from "../../utils/shallowCompare";
+import toComparisonJson from "../../utils/toComparisonJson";
 import { FormContext, ValidationResult } from "../Form";
 import { BackendMultiSelectProps } from "./BackendMultiSelect";
 import PartialApplyError, {
@@ -33,8 +33,15 @@ export interface UseCrudSelectParams<
 	 * @param data The selector data to serialize
 	 * @returns Data to be passed to the backend connector, id may be null or data.value
 	 * @remarks Must stay pure: it runs for additions, updates and removals at
-	 *   backend (POST/PUT/DELETE) time. Do NOT trigger UI side effects (dialogs,
+	 *   backend (POST/PUT/DELETE) time, and on every change for each entry that stays
+	 *   selected, to tell whether it changed. Do NOT trigger UI side effects (dialogs,
 	 *   prompts) here — use {@link prepareNewEntry} to collect extra data on add.
+	 *
+	 *   What it returns decides whether an entry is updated: an entry handed to
+	 *   `handleSelect` is written only when its result differs, compared as JSON, from the
+	 *   result for the listed entry. A new but equal object, array or Date is no change.
+	 *   A field it leaves out (`label`, `titleTooltip`, `onClick`, …) never causes a
+	 *   write; a change of a field it returns does, also of a render field such as `label`.
 	 */
 	serialize: (
 		data: DataT,
@@ -149,7 +156,10 @@ export interface UseCrudSelectResult<
 	 * @param newSelected The new selected entries. A listed entry whose id is in `ids` but
 	 *        that is missing here stays as it is, in its place: BackendMultiSelect reports
 	 *        an entry that is still loading by its id only.
-	 * @remarks Ignores the change while the control is disabled
+	 * @remarks Ignores the change while the control is disabled. Creates the entries that
+	 *          are not listed yet, deletes the listed ones that are left out, and updates a
+	 *          listed entry only when `serialize` returns something else for it than for
+	 *          the listed entry.
 	 */
 	handleSelect: (ids: string[], newSelected: DataT[]) => Promise<void>;
 	/**
@@ -374,32 +384,31 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 				selected.find((selEntry) => selEntry.value === entry.value),
 			);
 
-			const changedEntries = newSelected.filter((entry) => {
+			// An entry is updated only when what it would send differs from what the listed
+			// entry sends. The field hands back copies of the listed entries (BackendMultiSelect
+			// deserializes the rows itself), so neither a deserialize that builds a new object,
+			// array or Date per call nor a field serialize leaves out (label, titleTooltip,
+			// freeSolo, onClick, …) may turn an untouched entry into a write. A serialize that
+			// fails counts as a change, so the update reports it.
+			const isChanged = async (entry: DataT): Promise<boolean> => {
 				const oldEntry = selected.find(
 					(selEntry) => selEntry.value === entry.value,
 				);
-				if (!oldEntry) return false;
-				// remove all base selector data and multi selector data render options
-				// this way we only update when the data actually changed
-				const normalize = (record: DataT) =>
-					Object.assign({}, record as Record<string, unknown>, {
-						label: null,
-						icon: null,
-						onClick: null,
-						canUnselect: null,
-						noDelete: null,
-						isDisabled: null,
-						selected: null,
-						hidden: null,
-						ignore: null,
-						group: null,
-						isAddNewButton: null,
-						isDivider: null,
-						isSmallLabel: null,
-						className: null,
-					});
-				return !shallowCompare(normalize(entry), normalize(oldEntry));
-			});
+				if (!oldEntry || oldEntry === entry) return false;
+				try {
+					const [oldData, newData] = await Promise.all([
+						serialize(oldEntry),
+						serialize(entry),
+					]);
+					return toComparisonJson(oldData) !== toComparisonJson(newData);
+				} catch {
+					return true;
+				}
+			};
+			const changed = await Promise.all(newSelected.map(isChanged));
+			const changedEntries = newSelected.filter(
+				(_entry, index) => changed[index],
+			);
 			const deletedEntries = selected.filter(
 				(entry) =>
 					!newSelected.find((selEntry) => selEntry.value === entry.value),

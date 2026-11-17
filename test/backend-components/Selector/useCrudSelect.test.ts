@@ -657,6 +657,84 @@ describe("useCrudSelect bugs", () => {
 		expect(be.calls).toEqual(["create:s1"]);
 	});
 
+	it("[ISSUE-3509-ITEM-11] an entry that differs only in titleTooltip or freeSolo writes nothing", async () => {
+		const be = makeBackend([{ id: "j1", source_id: "s1" }]);
+		const { result } = mountJoins(be);
+		await waitFor(() => expect(result.current.selected).toHaveLength(1));
+		await act(async () => {
+			await result.current.handleSelect(
+				["j1"],
+				[
+					{
+						...result.current.selected[0],
+						titleTooltip: "Assigned by Alice",
+						freeSolo: true,
+					},
+				],
+			);
+		});
+		expect(be.calls).toEqual([]);
+	});
+
+	it("[ISSUE-3505-ITEM-9] the field's copies of the listed entries are written only where serialize returns something else, also when deserialize builds a new object, array and Date per call", async () => {
+		const be = makeBackend([
+			{ id: "j1", source_id: "s1", note: "a" },
+			{ id: "j2", source_id: "s2", note: "b" },
+		]);
+		const deserialize = (record: Record<string, unknown>) => ({
+			...joinDeserialize(record),
+			at: new Date(0),
+			tags: ["t"],
+			meta: { by: "Alice" },
+		});
+		// sends the whole entry, the new objects included
+		const { result } = mountJoins(be, {
+			deserialize,
+			serialize: (data) => ({ ...data, id: data.value }),
+		});
+		await waitFor(() => expect(result.current.selected).toHaveLength(2));
+		// the field lists its own copies, deserialized from the same rows
+		const [first, second] = result.current.initialRawData.map(deserialize);
+
+		await act(async () => {
+			await result.current.handleSelect(
+				["j1", "j2"],
+				[first, { ...second, note: "c" }],
+			);
+		});
+
+		expect(be.calls).toEqual(["update:j2:c"]);
+		expect(result.current.selected.map((entry) => entry.note)).toEqual([
+			"a",
+			"c",
+		]);
+		expect(result.current.error).toBeNull();
+	});
+
+	it("[ISSUE-3505-ITEM-9] a changed entry whose serialize fails is reported as a failed update and keeps its listed entry", async () => {
+		const be = makeBackend([{ id: "j1", source_id: "s1", note: "a" }]);
+		const { result } = mountJoins(be, {
+			serialize: (data) => {
+				if (data.note === "bad") throw new Error("cannot serialize");
+				return joinSerialize(data);
+			},
+		});
+		await waitFor(() => expect(result.current.selected).toHaveLength(1));
+
+		await act(async () => {
+			await result.current.handleSelect(
+				["j1"],
+				[{ ...result.current.selected[0], note: "bad" }],
+			);
+		});
+
+		expect(be.calls).toEqual([]);
+		expect(result.current.selected[0].note).toBe("a");
+		const error = result.current.error as PartialApplyError<SourceJoinData>;
+		expect(error.failures.map((failure) => failure.action)).toEqual(["update"]);
+		expect(error.message).toBe("Ls1: cannot serialize");
+	});
+
 	it("[ISSUE-3510-ITEM-20] an id the field reports without its entry, still loading there, keeps its row and its place", async () => {
 		const be = makeBackend([
 			{ id: "j1", source_id: "s1", note: "a" },
