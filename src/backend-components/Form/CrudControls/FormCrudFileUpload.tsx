@@ -33,6 +33,9 @@ export interface FormCrudFileUploadProps
  *          (useLazyCrudConnector, from `field`, `getEndpoint`, `initialId` and the other
  *          params of the hook) and sent after the Form saved the record, so a new record
  *          gets its files too. The Form's custom state of `field` holds that connector.
+ *          The connector's params are read once: a later `getEndpoint`, `field` or other
+ *          param of the hook changes neither the list nor the save. Another collection
+ *          takes another `field` and a new mount, e.g. `key={field}`.
  *          It takes the Form's `readOnly`, `errorComponent` and `showDirtyState`.
  */
 const FormCrudFileUpload = (

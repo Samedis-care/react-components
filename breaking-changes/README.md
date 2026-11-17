@@ -26,6 +26,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-17 | [A form page without buttons ends where its body ends](2026-11-17-form-page-layout-no-footer-no-space.md) | behavior |
 | 2026-11-17 | [`disableHtmlLanguageAttributeSetter` leaves `<html lang>` to the app](2026-11-17-html-lang-setter-can-be-disabled.md) | behavior |
 | 2026-11-17 | [RoutedMenu's highlight follows the URL only](2026-11-17-routed-menu-highlight-follows-url.md) | behavior |
+| 2026-11-17 | [A lazy control reads its connector params once, for the list and the save alike](2026-11-17-lazy-crud-connector-params-read-once.md) | behavior |
 | 2026-11-13 | [SignalPortlet shows no "Last refresh" label for 0 or an invalid time](2026-11-13-signal-portlet-no-label-without-time.md) | behavior |
 | 2026-11-13 | [The date pickers report a blur when focus leaves the open calendar](2026-11-13-picker-blur-on-leaving-the-calendar.md) | behavior |
 | 2026-11-13 | [Matrix columns are 56px wide by default, and the add chip is 24x24](2026-11-13-matrix-targets-24px.md) | behavior |

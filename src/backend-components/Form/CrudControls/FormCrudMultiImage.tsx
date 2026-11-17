@@ -26,6 +26,9 @@ export interface FormCrudMultiImageProps
  *          (useLazyCrudConnector, from `field`, `getEndpoint`, `initialId` and the other
  *          params of the hook) and sent after the Form saved the record, so a new record
  *          gets its images too. The Form's custom state of `field` holds that connector.
+ *          The connector's params are read once: a later `getEndpoint`, `field` or other
+ *          param of the hook changes neither the list nor the save. Another collection
+ *          takes another `field` and a new mount, e.g. `key={field}`.
  *          It takes the Form's `readOnly` and `errorComponent`.
  *
  *          The primary image stays the owner's to store. The record is saved before the

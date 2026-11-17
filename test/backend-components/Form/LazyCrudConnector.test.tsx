@@ -687,7 +687,261 @@ describe("useLazyCrudConnector: re-renders of the form", () => {
 	});
 });
 
+/**
+ * The variant of the selector's params the page of mountVariants renders: "a" when it
+ * mounts, then whatever set switches it to
+ */
+const variant: { set: (value: string) => void } = { set: () => {} };
+
+/**
+ * Mounts the form on record "1" with a page that renders the selector for its current
+ * variant ("a" first), and waits until form and selector are ready
+ * @param stores The join rows per endpoint
+ * @param render Renders the selector of a variant, from the props every test starts from
+ * @param formProps Form props
+ */
+const mountVariants = async (
+	stores: Record<string, Rows>,
+	render: (
+		current: string,
+		props: SelectProps,
+		ref: React.RefObject<CrudSelectDispatch<JoinData> | null>,
+	) => React.ReactNode,
+	formProps: Parameters<typeof mountForm>[2] = {},
+) => {
+	const model = makeModel();
+	const env = makeEnv(stores);
+	const sink: Sink = {};
+	const ref = React.createRef<CrudSelectDispatch<JoinData>>();
+	const Page = () => {
+		sink.ctx = useFormContext<ModelUnknown>();
+		const [current, setCurrent] = useState("a");
+		variant.set = setCurrent;
+		return <>{render(current, selectorProps(model, env), ref)}</>;
+	};
+	const result = mountForm(model, Page, formProps);
+	await loaded(sink);
+	await ready();
+	return { ...result, env, sink, ref };
+};
+
+/**
+ * Switches the page of mountVariants to another variant of the selector's params
+ */
+const switchVariant = async (value: string) => {
+	act(() => variant.set(value));
+	await settle();
+};
+
 describe("useLazyCrudConnector: params and record changes after mount", () => {
+	it("[ISSUE-3505-ITEM-3] a getEndpoint and onParentIdChange changed after mount change neither the list nor the save: both keep the first", async () => {
+		const first = vi.fn();
+		const later = vi.fn();
+		const { env, sink, ref } = await mountVariants(
+			{
+				"a/1/joins": [{ id: "j1", source_id: "s1" }],
+				"b/1/joins": [{ id: "j7", source_id: "s7" }],
+			},
+			(current, props, ref) => (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					ref={ref}
+					{...props}
+					getEndpoint={(id) => `${current}/${id}/joins`}
+					onParentIdChange={current === "a" ? first : later}
+				/>
+			),
+		);
+		expect(first).toHaveBeenCalledWith("1");
+		first.mockClear();
+
+		await switchVariant("b");
+		expect(labels()).toEqual(["Ls1"]);
+		await add(ref);
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		expect(env.calls).toContain("create:a/1/joins:s2");
+		expect(env.calls.filter((call) => call.includes("b/1/joins"))).toEqual([]);
+		expect(first).toHaveBeenCalledWith("1");
+		expect(later).not.toHaveBeenCalled();
+		expect(sink.ctx!.dirty).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-3] the save keeps the first getEndpoint and onParentIdChange when the form's onlySubmitMounted changes after them", async () => {
+		const later = vi.fn();
+		const { env, sink, ref, rerenderWith } = await mountVariants(
+			{ "a/1/joins": [], "b/1/joins": [] },
+			(current, props, ref) => (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					ref={ref}
+					{...props}
+					getEndpoint={(id) => `${current}/${id}/joins`}
+					onParentIdChange={current === "a" ? undefined : later}
+				/>
+			),
+		);
+
+		await switchVariant("b");
+		rerenderWith({ onlySubmitMounted: true });
+		await settle();
+		await add(ref);
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		expect(env.calls).toContain("create:a/1/joins:s2");
+		expect(env.calls).not.toContain("create:b/1/joins:s2");
+		expect(later).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3505-ITEM-3] a selector mounted again under its field with another getEndpoint gets its connector back: it lists and saves the first endpoint's rows", async () => {
+		const { env, sink, ref } = await mountVariants(
+			{
+				"a/1/joins": [{ id: "j1", source_id: "s1" }],
+				"b/1/joins": [{ id: "j7", source_id: "s7" }],
+			},
+			(current, props, ref) => (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					key={current}
+					ref={ref}
+					{...props}
+					getEndpoint={(id) => `${current}/${id}/joins`}
+				/>
+			),
+		);
+
+		selSink.ctx = undefined;
+		await switchVariant("b");
+		await ready();
+		expect(labels()).toEqual(["Ls1"]);
+		await add(ref);
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		expect(env.calls).toContain("create:a/1/joins:s2");
+		expect(env.calls.filter((call) => call.includes("b/1/joins"))).toEqual([]);
+		expect(sink.ctx!.dirty).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-3] extraParams, getConnector and configureConnector changed after mount are never used: the connector is built once, from the first", async () => {
+		const configure = vi.fn();
+		const laterConfigure = vi.fn();
+		const laterEnv = makeEnv({ "joins/1": [{ id: "j7", source_id: "s7" }] });
+		const { env, sink, ref } = await mountVariants(
+			{ "joins/1": [{ id: "j1", source_id: "s1" }] },
+			(current, props, ref) => (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					ref={ref}
+					{...props}
+					getConnector={
+						current === "a" ? props.getConnector : laterEnv.getConnector
+					}
+					configureConnector={current === "a" ? configure : laterConfigure}
+					extraParams={{ variant: current }}
+				/>
+			),
+		);
+
+		await switchVariant("b");
+		expect(labels()).toEqual(["Ls1"]);
+		await add(ref);
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		expect(env.getConnector).toHaveBeenCalledTimes(1);
+		expect(env.getConnector).toHaveBeenCalledWith("joins/1", {
+			variant: "a",
+		});
+		expect(configure).toHaveBeenCalledTimes(1);
+		expect(configure).toHaveBeenCalledWith(env.connectors[0]);
+		expect(env.calls).toContain("create:joins/1:s2");
+		expect(laterEnv.getConnector).not.toHaveBeenCalled();
+		expect(laterConfigure).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3505-ITEM-3] a field changed after mount moves nothing: the queue stays under the first name, and the save leaves the form clean", async () => {
+		const { env, sink, ref } = await mountVariants(
+			{ "joins/1": [{ id: "j1", source_id: "s1" }] },
+			(current, props, ref) => (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					ref={ref}
+					{...props}
+					field={current === "a" ? "joins" : "joins2"}
+				/>
+			),
+		);
+
+		await add(ref);
+		await switchVariant("b");
+		expect(sink.ctx!.getCustomState("joins2")).toBeUndefined();
+		await add(ref, "s3");
+		expect(sink.ctx!.dirty).toBe(true);
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		expect(env.calls).toEqual(
+			expect.arrayContaining(["create:joins/1:s2", "create:joins/1:s3"]),
+		);
+		expect(sink.ctx!.dirty).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-3] a field changed after mount does not move FormCrudMultiSelect's validation: its messages keep the first name", async () => {
+		const validate = (data: JoinData[]): Record<string, string> =>
+			data.length > 1 ? { many: "Pick one at most" } : {};
+		const { sink, ref } = await mountVariants(
+			{ "joins/1": [{ id: "j1", source_id: "s1" }] },
+			(current, props, ref) => (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					ref={ref}
+					{...props}
+					field={current === "a" ? "joins" : "joins2"}
+					validate={validate}
+				/>
+			),
+		);
+
+		await switchVariant("b");
+		await add(ref);
+		expect(await trySubmit(sink)).not.toBeNull();
+		await settle();
+
+		const messages = Object.keys(sink.ctx!.errors).filter(
+			(key) => sink.ctx!.errors[key],
+		);
+		expect(messages).toEqual(["joins_many"]);
+	});
+
+	it("[ISSUE-3505-ITEM-3] another collection takes another field and a new mount (key): the selector lists and saves the new endpoint's rows", async () => {
+		const { env, sink, ref } = await mountVariants(
+			{
+				"a/1/joins": [{ id: "j1", source_id: "s1" }],
+				"b/1/joins": [{ id: "j7", source_id: "s7" }],
+			},
+			(current, props, ref) => (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					key={current}
+					ref={ref}
+					{...props}
+					field={`joins_${current}`}
+					getEndpoint={(id) => `${current}/${id}/joins`}
+				/>
+			),
+		);
+		expect(labels()).toEqual(["Ls1"]);
+
+		selSink.ctx = undefined;
+		await switchVariant("b");
+		await ready();
+		expect(labels()).toEqual(["Ls7"]);
+		await add(ref);
+		expect(sink.ctx!.dirty).toBe(true);
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		expect(env.calls).toContain("create:b/1/joins:s2");
+		expect(env.calls).not.toContain("create:a/1/joins:s2");
+		expect(sink.ctx!.dirty).toBe(false);
+	});
+
 	it("[ISSUE-3505-ITEM-2] a form that switches to another record without a new key lists and writes that record's rows", async () => {
 		const model = makeModel();
 		const env = makeEnv({

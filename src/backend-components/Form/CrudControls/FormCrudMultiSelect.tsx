@@ -1,4 +1,4 @@
-import React, { ForwardedRef, RefAttributes } from "react";
+import React, { ForwardedRef, RefAttributes, useRef } from "react";
 import { ModelUnknown } from "../../../backend-integration/Model/Model";
 import CrudMultiSelect, {
 	CrudMultiSelectProps,
@@ -39,6 +39,17 @@ export interface FormCrudMultiSelectProps<
 	readOnly?: boolean;
 }
 
+/**
+ * A CrudMultiSelect for a collection that belongs to the Form's record, e.g. its join records
+ * @remarks Only for use in a Form. Picks and removals are queued in a LazyConnector
+ *          (useLazyCrudConnector, from `field`, `getEndpoint`, `initialId` and the other
+ *          params of the hook) and sent after the Form saved the record. The Form's custom
+ *          state of `field` holds that connector, and `validate` reports under `field`.
+ *          These params are read once: a later `getEndpoint`, `field` or other param of the
+ *          hook changes neither the list nor the save, and `validate` keeps reporting under
+ *          the first `field`. Another collection takes another `field` and a new mount,
+ *          e.g. `key={field}`.
+ */
 const FormCrudMultiSelect = <
 	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
@@ -53,6 +64,8 @@ const FormCrudMultiSelect = <
 	>(props);
 	const { connector } =
 		useLazyCrudConnector<Record<string, unknown>>(connectorParams);
+	// read once, like the connector's: the validate messages stay under the queue's name
+	const field = useRef(connectorParams.field).current;
 	const { readOnly, readOnlyReasons, errorComponent } =
 		useFormContextLite<ModelUnknown>();
 	// a save makes the Form read-only too, but changing the field then would take the user's
@@ -70,7 +83,7 @@ const FormCrudMultiSelect = <
 			errorComponent={errorComponent}
 			readOnly={otherProps.readOnly || readOnlyBesidesSaving}
 			blockWrites={otherProps.blockWrites || readOnly}
-			field={connectorParams.field}
+			field={field}
 			ref={ref}
 		/>
 	);
