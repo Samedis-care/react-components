@@ -246,6 +246,12 @@ describe("RendererFiles in a grid cell", () => {
 		expect(names).toEqual(["2 файла", "5 файлов", "21 файл"]);
 	});
 
+	it("[ISSUE-3506-ITEM-20] says in French that there are no files, not no folder", async () => {
+		await act(() => ccI18n.changeLanguage("fr"));
+		const { container } = renderCell([]);
+		expect(container).toHaveTextContent("Aucun fichier présent");
+	});
+
 	it("[ISSUE-3506-ITEM-13] has the count in every locale, for each of its plural forms", () => {
 		const i18nDir = path.resolve(__dirname, "../../src/assets/i18n");
 		const missing = fs

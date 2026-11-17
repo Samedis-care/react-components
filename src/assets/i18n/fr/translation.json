@@ -294,7 +294,7 @@
 						"not-set": "Pas signé"
 					},
 					"files": {
-						"no-file": "Aucun dossier présent",
+						"no-file": "Aucun fichier présent",
 						"count_one": "{{count}} fichier",
 						"count_many": "{{count}} fichiers",
 						"count_other": "{{count}} fichiers"
