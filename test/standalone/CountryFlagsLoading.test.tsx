@@ -17,12 +17,19 @@ vi.mock("../../src/assets/img/countries/JP.svg", () => {
 
 afterEach(cleanup);
 
+// the first import of the whole library transforms all of it
+const importTimeout = 90000;
+
 // the tests run in order: the flags load once per file
 describe("loading the flags", () => {
-	it("[ISSUE-3466-ITEM-5] importing the library imports no flag", async () => {
-		await import("../../src");
-		expect([...imported]).toEqual([]);
-	});
+	it(
+		"[ISSUE-3466-ITEM-5] importing the library imports no flag",
+		async () => {
+			await import("../../src");
+			expect([...imported]).toEqual([]);
+		},
+		importTimeout,
+	);
 
 	it("[ISSUE-3466-ITEM-5] the first CountryFlag loads the flags and shows its flag once they have loaded", async () => {
 		const { CountryFlag } = await import("../../src");
