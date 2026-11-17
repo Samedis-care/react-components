@@ -34,7 +34,8 @@ export interface IRoutedMenuItemDefinition extends Omit<
 	 *
 	 * Its `:name` params are filled from the current URL, read with the route
 	 * of that best-matching entry: on `/projects/42/review`,
-	 * `/projects/:id/capture` navigates to `/projects/42/capture`. While the
+	 * `/projects/:id/capture` navigates to `/projects/42/capture`. The values
+	 * go in percent-encoded, so a value with "/" stays one segment. While the
 	 * current URL has no value for one of its params, the entry is hidden
 	 * (with its children), as if `shouldRender` were false, and in development
 	 * a `console.error` names the entry and the param (once per menu, entry
@@ -75,7 +76,8 @@ interface MenuRouteMatch {
 	 */
 	groups: string[];
 	/**
-	 * The params read from the path with the entry's route
+	 * The params read from the path with the entry's route, percent-encoded
+	 * again to fill the routes of the entries
 	 */
 	params: Record<string, string>;
 }
@@ -185,6 +187,21 @@ const flattenRoutes = (
 	});
 
 /**
+ * Percent-encodes route params for a path, so a value with "/", "?", "#" or
+ * "%" stays one segment
+ * @param params The params as matchPath gives them (decoded)
+ */
+const encodeRouteParameters = (
+	params: Record<string, string>,
+): Record<string, string> =>
+	Object.fromEntries(
+		Object.entries(params).map(([name, value]) => [
+			name,
+			encodeURIComponent(value),
+		]),
+	);
+
+/**
  * The entry of the whole menu tree whose route matches the path best: of all
  * entries whose route matches the path as a prefix, the most specific one
  * (compareSpecificity); on a full tie the earlier one in definition order.
@@ -212,7 +229,11 @@ const resolveLocation = (
 		if (best && compareSpecificity(specificity, best.specificity) >= 0)
 			continue;
 		best = {
-			match: { id: entry.id, groups: entry.groups, params: match.params },
+			match: {
+				id: entry.id,
+				groups: entry.groups,
+				params: encodeRouteParameters(match.params),
+			},
 			specificity,
 		};
 	}

@@ -527,6 +527,25 @@ describe("RoutedMenu bugs", () => {
 	});
 });
 
+describe("RoutedMenu: params with reserved characters", () => {
+	it("[ISSUE-3475-ITEM-11] fills a param with an encoded slash, space or percent sign into the targets encoded", () => {
+		const open = vi.spyOn(window, "open").mockImplementation(() => null);
+		const { history } = mount(
+			[
+				leaf("Results", "/search/:term/results"),
+				leaf("Details", "/search/:term/details"),
+			],
+			"/search/a%2Fb%20c%25/results",
+		);
+		expect(selected()).toEqual(["Results"]);
+		middleClick(entry("Details"));
+		expect(open.mock.calls).toEqual([["/search/a%2Fb%20c%25/details"]]);
+		fireEvent.click(entry("Details"));
+		expect(history.location.pathname).toBe("/search/a%2Fb%20c%25/details");
+		expect(selected()).toEqual(["Details"]);
+	});
+});
+
 describe("RoutedMenu: focus when the menu is swapped", () => {
 	// IMF's admin UI picks a whole flat menu per path: the app menu (with "Back")
 	// below /apps/<id>, the top menu elsewhere

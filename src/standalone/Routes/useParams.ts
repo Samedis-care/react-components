@@ -5,6 +5,8 @@ import matchPath from "./matchPath";
 
 /**
  * Use route params
+ * Each value is percent-decoded: "foo bar" at "foo%20bar", see
+ * `PathMatch.params`.
  */
 const useParams = <T extends string = string>(): Partial<Record<T, string>> => {
 	const location = useLocation();

@@ -120,6 +120,48 @@ describe("matchPath – case sensitivity", () => {
 	});
 });
 
+describe("matchPath – percent-encoding", () => {
+	it("[ISSUE-3475-ITEM-11] decodes params, also of a location with raw text, and keeps the url as the location has it", () => {
+		const result = matchPath(
+			{ path: "/search/:term/:x/*" },
+			"/search/foo%20bar/%C3%A4/more",
+		);
+		expect(result?.params).toEqual({ term: "foo bar", x: "ä" });
+		// paths are built from the url, so it keeps the location's encoding
+		expect(result?.url).toBe("/search/foo%20bar/%C3%A4");
+		// a memory history keeps the text as pushed
+		expect(
+			matchPath({ path: "/search/:term/:x" }, "/search/foo bar/ä")?.params,
+		).toEqual({ term: "foo bar", x: "ä" });
+	});
+
+	it("[ISSUE-3475-ITEM-11] keeps an encoded slash inside its segment", () => {
+		const result = matchPath({ path: "/files/:name/*" }, "/files/a%2Fb/c");
+		expect(result?.params).toEqual({ name: "a/b" });
+		expect(result?.url).toBe("/files/a%2Fb");
+		expect(matchPath({ path: "/files/:a/:b" }, "/files/a%2Fb")).toBeNull();
+		expect(matchPath({ path: "/files/a/b" }, "/files/a%2Fb")).toBeNull();
+	});
+
+	it("[ISSUE-3475-ITEM-11] gives the raw text of a segment with a malformed escape, without throwing", () => {
+		const result = matchPath({ path: "/x/:discount/:bad" }, "/x/100%/%E0%A4%A");
+		expect(result?.params).toEqual({ discount: "100%", bad: "%E0%A4%A" });
+		expect(matchPath({ path: "/100%" }, "/100%")).not.toBeNull();
+	});
+
+	it("[ISSUE-3475-ITEM-11] compares literal segments decoded, case-insensitively unless caseSensitive", () => {
+		expect(matchPath({ path: "/über" }, "/%C3%BCber")?.url).toBe("/%C3%BCber");
+		expect(matchPath({ path: "/über/*" }, "/%C3%9Cber/1")).not.toBeNull();
+		expect(
+			matchPath({ path: "/über", caseSensitive: true }, "/%C3%9Cber"),
+		).toBeNull();
+		expect(
+			matchPath({ path: "/Über", caseSensitive: true }, "/%C3%9Cber"),
+		).not.toBeNull();
+		expect(matchPath({ path: "/a b" }, "/a%20b")).not.toBeNull();
+	});
+});
+
 describe("SentryRoutingInstrumentation exports", () => {
 	it("exports the routing hooks without crashing at import time", async () => {
 		const mod =

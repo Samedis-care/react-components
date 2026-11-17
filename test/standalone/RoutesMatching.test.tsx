@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import React from "react";
-import { render, screen, cleanup } from "@testing-library/react";
-import { createMemoryHistory } from "history";
+import { render, screen, act, cleanup } from "@testing-library/react";
+import { createBrowserHistory, createMemoryHistory } from "history";
 import HistoryRouter from "../../src/standalone/Routes/HistoryRouter";
 import Routes from "../../src/standalone/Routes/Routes";
 import Route, {
@@ -143,5 +143,35 @@ describe("Routes: nesting", () => {
 			).toBe(fullPath);
 			cleanup();
 		}
+	});
+});
+
+describe("useParams", () => {
+	it("[ISSUE-3475-ITEM-11] decodes params and matches literal non-ASCII segments with browser history", () => {
+		window.history.replaceState(null, "", "/");
+		const history = createBrowserHistory();
+		const Params = () => (
+			<div data-testid="params">{JSON.stringify(useParams())}</div>
+		);
+		render(
+			<HistoryRouter history={history}>
+				<Routes>
+					{[
+						<Route key="s" path="/search/:term/:x" element={<Params />} />,
+						<Route key="u" path="/über" element={<div>ÜBER</div>} />,
+					]}
+				</Routes>
+			</HistoryRouter>,
+		);
+		act(() => history.push("/search/foo bar/ä"));
+		// the browser keeps the pathname percent-encoded
+		expect(history.location.pathname).toBe("/search/foo%20bar/%C3%A4");
+		expect(JSON.parse(screen.getByTestId("params").textContent ?? "")).toEqual({
+			term: "foo bar",
+			x: "ä",
+		});
+		act(() => history.push("/über"));
+		expect(screen.getByText("ÜBER")).toBeInTheDocument();
+		window.history.replaceState(null, "", "/");
 	});
 });
