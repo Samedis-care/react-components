@@ -1,8 +1,19 @@
 import React from "react";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import {
+	render,
+	screen,
+	fireEvent,
+	cleanup,
+	act,
+} from "@testing-library/react";
 import { ThemeProvider, createTheme } from "@mui/material";
 import InlineSwitch from "../../src/standalone/InlineSwitch";
+import BaseSelector, {
+	BaseSelectorData,
+	BaseSelectorLoadHandler,
+} from "../../src/standalone/Selector/BaseSelector";
+import { selectorLocalLoadHandler } from "../../src/standalone/Selector";
 
 afterEach(cleanup);
 
@@ -10,6 +21,9 @@ const theme = createTheme();
 
 const renderSwitch = (ui: React.ReactElement) =>
 	render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+
+/** lets the promises started by the last event (option loads) settle */
+const flush = () => act(() => Promise.resolve());
 
 const switchRootOf = (container: HTMLElement) => {
 	const el = container.querySelector(".MuiSwitch-root");
@@ -99,5 +113,38 @@ describe("InlineSwitch styling and theme", () => {
 			/>,
 		);
 		expect(switchRootOf(container)).toHaveClass("s");
+	});
+});
+
+describe("InlineSwitch inside BaseSelector (displaySwitch)", () => {
+	const OPTIONS: BaseSelectorData[] = [
+		{ value: "a", label: "Alpha" },
+		{ value: "b", label: "Beta" },
+	];
+	const loadSpy = () =>
+		vi.fn<BaseSelectorLoadHandler<BaseSelectorData>>(
+			selectorLocalLoadHandler(OPTIONS),
+		);
+
+	it("[ISSUE-3465-ITEM-1] a disabled selector disables its switch, and a click does not reload the options", async () => {
+		const onLoad = loadSpy();
+		renderSwitch(
+			<BaseSelector
+				label="Device type"
+				selected={null}
+				onSelect={() => {}}
+				onLoad={onLoad}
+				disabled
+				displaySwitch
+				switchLabel="Show inactive"
+			/>,
+		);
+		expect(screen.getByRole("combobox")).toBeDisabled();
+		const sw = screen.getByRole("switch", { name: "Show inactive" });
+		expect(sw).toBeDisabled();
+		fireEvent.click(sw);
+		await flush();
+		expect(sw).not.toBeChecked();
+		expect(onLoad).not.toHaveBeenCalledWith("", true);
 	});
 });

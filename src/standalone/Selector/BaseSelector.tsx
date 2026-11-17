@@ -298,7 +298,9 @@ export type BaseSelectorProps<
 		 */
 		label?: string;
 		/**
-		 * Disable autocomplete control
+		 * Disable autocomplete control. With `displaySwitch` the switch is disabled
+		 * too, so the switch filter cannot change.
+		 * @default false
 		 */
 		disabled?: boolean;
 		/**
@@ -1266,6 +1268,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 			value={switchValue}
 			onChange={setSwitchValue}
 			label={switchLabel}
+			disabled={disabled}
 			className={combineClassNames([className, classes?.inlineSwitch])}
 		>
 			<BaseSelectorContext.Provider value={context}>

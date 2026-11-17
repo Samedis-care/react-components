@@ -1160,3 +1160,39 @@ export const Issue3488Item27KeepsFocusAfterGroupLoad: StoryObj = {
 		await expect(canvas.getAllByRole("combobox")[0]).toHaveFocus();
 	},
 };
+
+export const Issue3465Item1DisabledSelectorDisablesItsSwitch: StoryObj = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3465-ITEM-1: a disabled selector disables its switch too, as it does its combobox: Tab goes past both, and a click on the switch's label does not turn the switch on, so the options are not reloaded with the switch filter.",
+			},
+		},
+	},
+	render: () => (
+		<div style={{ width: 300 }}>
+			<button type="button">Before</button>
+			<BaseSelector
+				label="Country"
+				selected={null}
+				onSelect={() => {}}
+				onLoad={loadCountries}
+				disabled
+				displaySwitch
+				switchLabel="Show inactive"
+			/>
+			<button type="button">After</button>
+		</div>
+	),
+	play: async ({ canvas, userEvent }) => {
+		const sw = canvas.getByRole("switch", { name: "Show inactive" });
+		await expect(sw).toBeDisabled();
+		canvas.getByRole("button", { name: "Before" }).focus();
+		await userEvent.tab();
+		await expect(canvas.getByRole("button", { name: "After" })).toHaveFocus();
+		await userEvent.click(canvas.getByText("Show inactive"));
+		await expect(sw).not.toBeChecked();
+	},
+};
