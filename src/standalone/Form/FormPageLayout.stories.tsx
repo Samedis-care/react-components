@@ -9,10 +9,12 @@ import {
 	DialogContent,
 	DialogTitle,
 	Grid,
+	IconButton,
 	Paper,
 	TextField,
 	Typography,
 } from "@mui/material";
+import { Close } from "@mui/icons-material";
 // eslint-disable-next-line import/no-unresolved
 import { expect, userEvent, within } from "storybook/test";
 import FormPageLayout from "./FormPageLayout";
@@ -588,6 +590,164 @@ export const Issue3473Item2ShortFormSaveAtBottomOfFlexColumn: Story = {
 		await expect(distance(footer.bottom, main.bottom - 36)).toBeLessThanOrEqual(
 			1,
 		);
+	},
+};
+
+/**
+ * An app shell like IMF's: a header with a menu button, a scrolling main area, no
+ * positioned ancestor. The form is busy: its fields and buttons are disabled, as Form
+ * does while saving, and the busy overlay is shown.
+ */
+const BusyPageInShell = () => (
+	<Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+		<Box component={"header"} sx={{ height: 56, flex: "none", p: 1 }}>
+			<Button>Menu</Button>
+		</Box>
+		<Box
+			component={"main"}
+			sx={{
+				flex: 1,
+				overflow: "auto",
+				display: "flex",
+				flexDirection: "column",
+			}}
+		>
+			<FormPageLayout
+				body={
+					<Box sx={{ p: 2 }}>
+						<TextField label={"First Name"} defaultValue={"Alice"} disabled />
+					</Box>
+				}
+				footer={
+					<FormButtons>
+						<ActionButton disabled>Save</ActionButton>
+						<ActionButton disabled>Back</ActionButton>
+					</FormButtons>
+				}
+				other={<FormLoaderOverlay visible />}
+			/>
+		</Box>
+	</Box>
+);
+
+export const Issue3473Item8CoveredControlsAreNotOperable: Story = {
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-8: in a page without a positioned ancestor the busy overlay covers the whole app. The header's Menu button is behind it, so a mouse cannot reach it, but it stays enabled: Tab reaches it and Enter activates it while the form is saving.",
+			},
+		},
+	},
+	render: () => <BusyPageInShell />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await canvas.findByRole("progressbar");
+		const overlay = overlayIn(canvasElement);
+		const focusable = Array.from(
+			canvasElement.querySelectorAll<HTMLElement>(
+				"a[href], button, input, select, textarea, [tabindex]",
+			),
+		);
+		// enabled controls a pointer cannot reach because the overlay covers them
+		const coveredButOperable = focusable
+			.filter((el) => {
+				if ((el as HTMLButtonElement).disabled || el.closest("[inert]"))
+					return false;
+				const r = rectOf(el);
+				const hit = document.elementFromPoint(
+					(r.left + r.right) / 2,
+					(r.top + r.bottom) / 2,
+				);
+				return !!hit && overlay.contains(hit);
+			})
+			.map((el) => el.textContent || el.tagName);
+		await expect(coveredButOperable).toEqual([]);
+	},
+};
+
+/**
+ * A busy form page in a dialog like FormDialog: a close button in the title, the form's
+ * field and buttons disabled, as Form does while saving, and the busy overlay shown.
+ */
+const BusyDialogForm = () => (
+	<Dialog open maxWidth={"sm"} fullWidth aria-labelledby={"busy-form-title"}>
+		<DialogTitle id={"busy-form-title"} sx={{ pr: 7 }}>
+			Edit device
+		</DialogTitle>
+		<IconButton
+			aria-label={"Close"}
+			sx={{ position: "absolute", right: 8, top: 8 }}
+		>
+			<Close />
+		</IconButton>
+		<DialogContent>
+			<FormPageLayout
+				body={
+					<TextField
+						label={"Device name"}
+						defaultValue={"Infusion pump"}
+						disabled
+						sx={{ mt: 1 }}
+					/>
+				}
+				footer={
+					<FormButtons>
+						<ActionButton disabled>Save</ActionButton>
+						<ActionButton disabled>Back</ActionButton>
+					</FormButtons>
+				}
+				other={<FormLoaderOverlay visible />}
+			/>
+		</DialogContent>
+	</Dialog>
+);
+
+export const Issue3473Item8DialogCloseButtonNotCovered: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-8: in a dialog the busy overlay covers the form page only. The dialog's close button is not under the wash, so pointer and keyboard can both use it while the form is saving (closing a dirty form then asks first).",
+			},
+		},
+	},
+	render: () => <BusyDialogForm />,
+	play: async () => {
+		const screen = within(document.body);
+		await screen.findByRole("progressbar");
+		const dialog = screen.getByRole("dialog");
+		const overlay = overlayIn(dialog);
+		const close = screen.getByRole("button", { name: "Close" });
+		const hitOnClose = () => {
+			const r = rectOf(close);
+			return document.elementFromPoint(
+				(r.left + r.right) / 2,
+				(r.top + r.bottom) / 2,
+			);
+		};
+		await expect(close.contains(hitOnClose())).toBe(true);
+		// enabled controls a pointer cannot reach because the overlay covers them
+		const coveredButOperable = Array.from(
+			dialog.querySelectorAll<HTMLElement>(
+				"a[href], button, input, select, textarea, [tabindex]",
+			),
+		)
+			.filter((el) => {
+				if ((el as HTMLButtonElement).disabled || el.closest("[inert]"))
+					return false;
+				const r = rectOf(el);
+				const hit = document.elementFromPoint(
+					(r.left + r.right) / 2,
+					(r.top + r.bottom) / 2,
+				);
+				return !!hit && overlay.contains(hit);
+			})
+			.map(
+				(el) => el.getAttribute("aria-label") || el.textContent || el.tagName,
+			);
+		await expect(coveredButOperable).toEqual([]);
 	},
 };
 

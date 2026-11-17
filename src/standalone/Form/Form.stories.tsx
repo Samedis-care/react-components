@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
 	AppBar,
@@ -14,7 +14,7 @@ import {
 	Typography,
 } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
-import { expect, within } from "storybook/test";
+import { expect, fireEvent, userEvent, waitFor, within } from "storybook/test";
 import FormLoaderOverlay, { FormLoaderOverlayProps } from "./FormLoaderOverlay";
 
 // --- FormLoaderOverlay ---
@@ -190,5 +190,90 @@ export const Issue3473Item3BusyOverlayCoversRaisedContent: OverlayStory = {
 			label: covered(label),
 			buttonBar: covered(canvas.getByRole("button", { name: "Save" })),
 		}).toEqual({ label: true, buttonBar: true });
+	},
+};
+
+/**
+ * An import step: a file name and a Start button that makes the step busy until "Finish
+ * import", outside the busy area, is pressed. The overlay wraps the step.
+ */
+const BusyImportStep = () => {
+	const [busy, setBusy] = useState(false);
+	const start = useCallback(() => setBusy(true), []);
+	const finish = useCallback(() => setBusy(false), []);
+	return (
+		<Box sx={{ p: 4 }}>
+			<Button>Help</Button>
+			<FormLoaderOverlay visible={busy}>
+				<Box
+					data-testid={"step"}
+					sx={{ display: "flex", gap: 2, alignItems: "center", py: 2 }}
+				>
+					<TextField label={"File name"} defaultValue={"devices.csv"} />
+					<Button variant={"contained"} onClick={start}>
+						Start
+					</Button>
+				</Box>
+			</FormLoaderOverlay>
+			<Button onClick={finish}>Finish import</Button>
+		</Box>
+	);
+};
+
+export const Issue3473Item8WrappedContentIsInert: OverlayStory = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-8: the overlay wraps the content it covers (`children`) and makes it inert while it is shown, so the keyboard reaches none of the controls the pointer cannot reach. Keyboard focus in the content moves to the wash when the overlay shows, and back when it hides.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	render: () => <BusyImportStep />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const field = canvas.getByRole("textbox", { name: "File name" });
+		const start = canvas.getByRole("button", { name: "Start" });
+		start.focus();
+		await userEvent.keyboard("{Enter}");
+		await canvas.findByRole("progressbar");
+		const overlay = canvasElement.querySelector<HTMLElement>(
+			'[class*="CcFormLoaderOverlay-root"]',
+		);
+		if (!overlay) throw new Error("overlay not rendered");
+
+		// the wash covers the wrapped content and nothing else
+		await expect(rectOf(overlay)).toEqual(rectOf(canvas.getByTestId("step")));
+		// keyboard focus moved to the wash, not to the page
+		await expect(overlay).toHaveFocus();
+		// no enabled control under the wash: the keyboard cannot reach what the
+		// pointer cannot
+		const coveredButOperable = Array.from(
+			canvasElement.querySelectorAll<HTMLElement>(
+				"a[href], button, input, select, textarea, [tabindex]",
+			),
+		)
+			.filter(
+				(el) =>
+					!overlay.contains(el) &&
+					!(el as HTMLButtonElement).disabled &&
+					!el.closest("[inert]") &&
+					overlay.contains(hitAtCenter(el)),
+			)
+			.map((el) => el.textContent || el.tagName);
+		await expect(coveredButOperable).toEqual([]);
+		await expect(field.closest("[inert]")).not.toBeNull();
+		for (const control of [field, start]) {
+			control.focus();
+			await expect(control).not.toHaveFocus();
+		}
+
+		// a click that leaves the focus where it is
+		await fireEvent.click(
+			canvas.getByRole("button", { name: "Finish import" }),
+		);
+		await waitFor(() => expect(start).toHaveFocus());
+		await expect(start.closest("[inert]")).toBeNull();
 	},
 };
