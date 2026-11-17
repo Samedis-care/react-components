@@ -1,12 +1,15 @@
 import React from "react";
-import { describe, it, expect, beforeAll, afterEach } from "vitest";
+import { describe, it, expect, beforeAll, afterEach, vi } from "vitest";
 import { render, screen, cleanup, within } from "@testing-library/react";
 import { ThemeProvider, createTheme, Theme } from "@mui/material";
 import i18next, { Resource } from "i18next";
 import HowToBox, { HowToBoxTranslate } from "../../src/standalone/HowToBox";
 import ccI18n from "../../src/i18n";
 
-afterEach(cleanup);
+afterEach(() => {
+	cleanup();
+	vi.restoreAllMocks();
+});
 
 // HowToBox suspends until the components-care "translation" namespace is
 // loaded. ccI18n.init() alone does not load it under vitest (initAsync), and a
@@ -147,6 +150,55 @@ describe("HowToBox", () => {
 			expect(
 				itemTexts(screen.getByRole("group", { name: "How it works" })),
 			).toEqual(["Step one", "Step two"]);
+		});
+
+		it("[ISSUE-3463-ITEM-4] HowToBoxTranslate does not crash when the labels key holds an object", async () => {
+			const app = await makeAppI18n({
+				en: { translation: { steps: { a: "Step A", b: "Step B" } } },
+			});
+			vi.spyOn(console, "error").mockImplementation(() => {});
+			const { container } = renderHowToBox(
+				<HowToBoxTranslate t={app.t} labels="steps" />,
+			);
+			expect(container.textContent).not.toContain("[object Object]");
+		});
+
+		it("[ISSUE-3463-ITEM-4] HowToBoxTranslate shows the values of a key that holds an object as entries, in key order", async () => {
+			const app = await makeAppI18n({
+				en: {
+					translation: {
+						steps: { download: "Download the template", upload: "Upload it" },
+					},
+				},
+			});
+			renderHowToBox(<HowToBoxTranslate t={app.t} labels="steps" />);
+			expect(
+				itemTexts(screen.getByRole("group", { name: "How it works" })),
+			).toEqual(["Download the template", "Upload it"]);
+		});
+
+		it("[ISSUE-3463-ITEM-4] HowToBoxTranslate skips nested groups, so the parent key of a group shows only its own strings", async () => {
+			const app = await makeAppI18n({
+				en: {
+					translation: {
+						import: {
+							title: "Import",
+							steps: ["Step one", "Step two"],
+							more: { a: "Step A" },
+						},
+						mixed: ["first", { a: "Step A" }, ["x", "y"], 3, "last"],
+						groups: { a: { b: "Step B" }, c: ["Step C"] },
+					},
+				},
+			});
+			const { container, rerender } = renderHowToBox(
+				<HowToBoxTranslate t={app.t} labels="import" />,
+			);
+			expect(itemTexts()).toEqual(["Import"]);
+			rerender(withTheme(<HowToBoxTranslate t={app.t} labels="mixed" />));
+			expect(itemTexts()).toEqual(["first", "3", "last"]);
+			rerender(withTheme(<HowToBoxTranslate t={app.t} labels="groups" />));
+			expect(container).toBeEmptyDOMElement();
 		});
 	});
 });

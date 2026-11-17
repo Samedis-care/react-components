@@ -95,9 +95,33 @@ export interface HowToBoxTranslateProps extends Omit<
 	 * i18n key passed to t function, used in combination with return object to obtain array of strings.
 	 * Empty strings in that array are skipped, and a key that holds an empty array renders nothing,
 	 * like the `labels` of HowToBox.
+	 *
+	 * A key that holds an object gives one entry per value, in the object's key order, so a keyed
+	 * list (`"steps": { "download": "…", "upload": "…" }`) works like an array. Only strings and
+	 * numbers become entries: a group nested inside the array or object is skipped, so a key that
+	 * names the parent of a group (`"import"` instead of `"import.steps"`) shows only the parent's
+	 * own strings. A key that holds a string is one entry, and a missing key shows the key itself.
 	 */
 	labels: string;
 }
+
+/** whether a value from the translation resources can be shown as an entry */
+const isTranslatedEntry = (value: unknown): value is string | number =>
+	typeof value === "string" || typeof value === "number";
+
+/**
+ * The entries in what `t(key, { returnObjects: true })` returned: the strings
+ * and numbers of an array, or of an object's values, in order; a string or
+ * number is one entry. Nested groups and anything else are skipped, as React
+ * cannot render a plain object.
+ */
+const translatedEntries = (value: unknown): (string | number)[] => {
+	if (isTranslatedEntry(value)) return [value];
+	if (value == null || typeof value !== "object") return [];
+	return (Array.isArray(value) ? value : Object.values(value)).filter(
+		isTranslatedEntry,
+	);
+};
 
 /**
  * i18n version of HowToBox
@@ -107,8 +131,8 @@ export interface HowToBoxTranslateProps extends Omit<
 export const HowToBoxTranslate = (props: HowToBoxTranslateProps) => {
 	const { t, titleLabel, labels, ...other } = props;
 	// memo content because it's an array which gets re-created every render
-	const content: string[] = useMemo(
-		() => t(labels, { returnObjects: true }) as string[],
+	const content = useMemo(
+		() => translatedEntries(t(labels, { returnObjects: true })),
 		[t, labels],
 	);
 	return (
