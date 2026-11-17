@@ -3,16 +3,19 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Box, Typography } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { expect } from "storybook/test";
-import CountryFlags from "./index";
-import getCountryFlag from "./getCountryFlag";
+import FlagCodes, { type CountryCode } from "./index";
+import isCountryCode from "./isCountryCode";
+import loadCountryFlags from "./loadCountryFlags";
 
-// CountryFlags is a data module (the flags' URLs by CountryCode), not a React
-// component. These stories wrap it in presentational components for visual
-// exploration.
+// loadCountryFlags() loads data (the flags' URLs by CountryCode), not a React
+// component. These stories load the flags before they render (`loaders`) and
+// wrap them in presentational components for visual exploration.
 
-const AllFlagsGrid = () => (
+type Flags = Readonly<Record<CountryCode, string>>;
+
+const AllFlagsGrid = ({ flags }: { flags: Flags }) => (
 	<Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-		{Object.entries(CountryFlags).map(([code, src]) => (
+		{Object.entries(flags).map(([code, src]) => (
 			<Box
 				key={code}
 				sx={{
@@ -35,8 +38,14 @@ const AllFlagsGrid = () => (
 	</Box>
 );
 
-const SingleFlag = ({ countryCode }: { countryCode: string }) => {
-	const src = getCountryFlag(countryCode);
+const SingleFlag = ({
+	flags,
+	countryCode,
+}: {
+	flags: Flags;
+	countryCode: string;
+}) => {
+	const src = isCountryCode(countryCode) ? flags[countryCode] : undefined;
 	if (!src)
 		return <Typography color="error">Unknown code: {countryCode}</Typography>;
 	return (
@@ -62,11 +71,12 @@ const SingleFlag = ({ countryCode }: { countryCode: string }) => {
 
 const meta: Meta = {
 	title: "Standalone/CountryFlags",
+	loaders: [async () => ({ flags: await loadCountryFlags() })],
 };
 export default meta;
 
 export const AllFlags: StoryObj = {
-	render: () => <AllFlagsGrid />,
+	render: (_args, { loaded }) => <AllFlagsGrid flags={loaded.flags as Flags} />,
 };
 
 export const SingleFlagLookup: StoryObj<{ countryCode: string }> = {
@@ -74,10 +84,12 @@ export const SingleFlagLookup: StoryObj<{ countryCode: string }> = {
 	argTypes: {
 		countryCode: {
 			control: "select",
-			options: Object.keys(CountryFlags),
+			options: [...FlagCodes],
 		},
 	},
-	render: ({ countryCode }) => <SingleFlag countryCode={countryCode} />,
+	render: ({ countryCode }, { loaded }) => (
+		<SingleFlag flags={loaded.flags as Flags} countryCode={countryCode} />
+	),
 };
 
 // the nearest of the colours a flag stripe or star can have
@@ -117,7 +129,9 @@ const flagColorsAt = (
 };
 
 export const Issue3466Item10SyriaFlag: StoryObj = {
-	render: () => <SingleFlag countryCode="SY" />,
+	render: (_args, { loaded }) => (
+		<SingleFlag flags={loaded.flags as Flags} countryCode="SY" />
+	),
 	parameters: {
 		a11y: { test: "error" },
 		docs: {

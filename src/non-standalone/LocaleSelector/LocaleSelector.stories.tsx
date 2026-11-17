@@ -352,10 +352,15 @@ export const Issue3466Item8FlagsOutlined: Story = {
 	play: async ({ canvasElement }) => {
 		await reset();
 		const dialog = await openDialog(canvasElement);
+		// the flags load with the first one shown
+		await waitFor(() =>
+			expect(
+				dialog.querySelectorAll('[role="listitem"] img').length,
+			).toBeGreaterThan(3),
+		);
 		const imgs = Array.from(
 			dialog.querySelectorAll<HTMLImageElement>('[role="listitem"] img'),
 		);
-		await expect(imgs.length).toBeGreaterThan(3);
 		await waitFor(
 			() =>
 				expect(

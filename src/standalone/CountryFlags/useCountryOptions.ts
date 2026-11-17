@@ -23,7 +23,7 @@ export interface CountryOption {
 	/**
 	 * The country's flag, decorative (the label names the country):
 	 * `<CountryFlag code={value} />`, shown by the Selector with `enableIcons`.
-	 * `CountryFlags[value]` gives the image's URL.
+	 * `loadCountryFlag(value)` gives the image's URL.
 	 */
 	icon: React.ReactElement;
 }

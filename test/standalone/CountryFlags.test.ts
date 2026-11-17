@@ -2,14 +2,16 @@
 import { afterEach, describe, it, expect, expectTypeOf } from "vitest";
 import { createElement } from "react";
 import { cleanup, render, within } from "@testing-library/react";
-import CountryFlags from "../../src/standalone/CountryFlags";
 // the tier index the package root re-exports (src/index.ts: export * from it)
 import {
 	CountryCodes,
-	getCountryFlag,
 	isCountryCode,
+	loadCountryFlag,
+	loadCountryFlags,
 } from "../../src/standalone";
 import type { CountryCode, CountryOption } from "../../src/standalone";
+// the generated list of every CountryCode
+import FlagCodes from "../../src/standalone/CountryFlags";
 import countryLanguages from "../../src/assets/data/country-languages.json";
 import supportedLanguages from "../../src/assets/data/supported-languages.json";
 import supportedLocales from "../../src/assets/data/supported-locales.json";
@@ -24,6 +26,9 @@ const flagSources = import.meta.glob<string>(
 	{ query: "?raw", import: "default", eager: true },
 );
 
+// the flags, loaded up front: the LocaleSelectorEntry tests below show their
+// flag in the first render
+const CountryFlags = await loadCountryFlags();
 const codes = Object.keys(CountryFlags);
 const lookup = (code: string): unknown =>
 	(CountryFlags as Record<string, unknown>)[code];
@@ -210,18 +215,25 @@ describe("CountryFlags", () => {
 			expect("FR" in CountryFlags).toBe(true);
 		});
 
-		it("[ISSUE-3466-ITEM-3] getCountryFlag returns the flag of a country code and undefined for any other string", () => {
-			expect(getCountryFlag("DE")).toBe(CountryFlags.DE);
-			expect(getCountryFlag("AW")).toBe(flagAW);
-			expect(
-				misses.filter((code) => getCountryFlag(code) !== undefined),
-			).toEqual([]);
+		it("[ISSUE-3466-ITEM-3] loadCountryFlag resolves to the flag of a country code and to undefined for any other string", async () => {
+			expect(await loadCountryFlag("DE")).toBe(CountryFlags.DE);
+			expect(await loadCountryFlag("AW")).toBe(flagAW);
+			const flags = await Promise.all(misses.map(loadCountryFlag));
+			expect(misses.filter((_, index) => flags[index] !== undefined)).toEqual(
+				[],
+			);
 		});
 
 		it("[ISSUE-3466-ITEM-3] isCountryCode is true for the keys of CountryFlags and false for any other string", () => {
 			expect(codes.length).toBeGreaterThanOrEqual(200);
 			expect(codes.filter((code) => !isCountryCode(code))).toEqual([]);
 			expect(misses.filter((code) => isCountryCode(code))).toEqual([]);
+		});
+
+		it("[ISSUE-3466-ITEM-5] isCountryCode, which needs no flag, knows exactly the codes the flags load for", () => {
+			// the generated list it tests against, and the map's keys
+			expect([...FlagCodes]).toEqual(codes);
+			expect(FlagCodes.filter((code) => !isCountryCode(code))).toEqual([]);
 		});
 
 		it("[ISSUE-3466-ITEM-3] every code of CountryCodes is a key of CountryFlags", () => {
@@ -239,8 +251,11 @@ describe("CountryFlags", () => {
 			expectTypeOf<"de">().not.toExtend<CountryCode>();
 			expectTypeOf<"UK">().not.toExtend<CountryCode>();
 			expectTypeOf<string>().not.toExtend<CountryCode>();
-			expectTypeOf(getCountryFlag).toEqualTypeOf<
-				(code: string) => string | undefined
+			expectTypeOf(loadCountryFlags).toEqualTypeOf<
+				() => Promise<Readonly<Record<CountryCode, string>>>
+			>();
+			expectTypeOf(loadCountryFlag).toEqualTypeOf<
+				(code: string) => Promise<string | undefined>
 			>();
 			expectTypeOf(isCountryCode).parameters.toEqualTypeOf<[code: string]>();
 			expectTypeOf(isCountryCode).guards.toEqualTypeOf<CountryCode>();

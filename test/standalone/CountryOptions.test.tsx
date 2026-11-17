@@ -4,14 +4,16 @@ import ccI18n from "../../src/i18n";
 import countries from "../../src/assets/data/countries.json";
 import countryNamesDe from "../../src/assets/i18n/de/countries.json";
 import countryNamesEn from "../../src/assets/i18n/en/countries.json";
-import CountryFlags from "../../src/standalone/CountryFlags";
 // the tier indexes the package root re-exports (src/index.ts: export * from both)
 import {
 	CountryCodes,
 	CountryFlag,
+	loadCountryFlags,
 	useCountryOptions,
 } from "../../src/standalone";
 import { useCCCountryTranslations } from "../../src/utils";
+
+const CountryFlags = await loadCountryFlags();
 
 const labelsOf = (options: { label: string }[]) =>
 	options.map((option) => option.label);

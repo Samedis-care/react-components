@@ -5,7 +5,7 @@ import { expect, waitFor, within } from "storybook/test";
 import { Box, createTheme } from "@mui/material";
 import ccI18n, { langs } from "../../i18n";
 import useCountryOptions from "./useCountryOptions";
-import CountryFlags from "./index";
+import loadCountryFlags from "./loadCountryFlags";
 import {
 	BaseSelectorData,
 	selectorLocalLoadHandler,
@@ -112,8 +112,12 @@ export const German: Story = {
 			name: "Österreich",
 		});
 		// the flag is decorative: the option's name is the country's
-		const flag = option.querySelector("img");
-		await expect(flag).toHaveAttribute("src", CountryFlags.AT);
+		const flag = await waitFor(async () => {
+			const img = option.querySelector("img");
+			await expect(img).not.toBeNull();
+			return img;
+		});
+		await expect(flag).toHaveAttribute("src", (await loadCountryFlags()).AT);
 		await expect(flag).toHaveAttribute("alt", "");
 		await userEvent.keyboard("{ArrowDown}{Enter}");
 		await waitFor(() => expect(input).toHaveValue("Österreich"));
@@ -160,8 +164,11 @@ export const Issue3466Item8FlagsKeepTheirShape: Story = {
 		const option = await within(document.body).findByRole("option", {
 			name: "Japan",
 		});
-		const optionFlag = option.querySelector("img")!;
-		await waitFor(() => expect(optionFlag.naturalWidth).toBeGreaterThan(0));
+		const optionFlag = await waitFor(async () => {
+			const img = option.querySelector("img");
+			await expect(img?.naturalWidth).toBeGreaterThan(0);
+			return img!;
+		});
 		// Japan's flag is 3:2
 		await expect(flagLook(optionFlag)).toBe(`solid 1px ${divider} 24x16`);
 		await userEvent.keyboard("{ArrowDown}{Enter}");

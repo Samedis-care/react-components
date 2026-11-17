@@ -3,9 +3,16 @@ import React, { createRef, Suspense } from "react";
 import { act, cleanup, render, renderHook } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import ccI18n from "../../src/i18n";
-import CountryFlags from "../../src/standalone/CountryFlags";
 // the tier index the package root re-exports (src/index.ts: export * from it)
-import { CountryFlag, useCountryOptions } from "../../src/standalone";
+import {
+	CountryFlag,
+	loadCountryFlags,
+	useCountryOptions,
+} from "../../src/standalone";
+
+// loaded before the first CountryFlag renders, so each one shows its flag in
+// its first render
+const CountryFlags = await loadCountryFlags();
 
 beforeAll(async () => {
 	await ccI18n.changeLanguage("en-US");

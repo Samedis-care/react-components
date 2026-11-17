@@ -10,7 +10,8 @@ import {
 // eslint-disable-next-line import/no-unresolved
 import { expect, waitFor } from "storybook/test";
 import CountryFlag, { CountryFlagProps } from "./index";
-import CountryFlags from "../CountryFlags";
+import FlagCodes from "../CountryFlags";
+import loadCountryFlags from "../CountryFlags/loadCountryFlags";
 import ccI18n from "../../i18n";
 import countryNamesEn from "../../assets/i18n/en/countries.json";
 
@@ -28,6 +29,14 @@ const decoded = (imgs: HTMLImageElement[]) =>
 			).toEqual([]),
 		{ timeout: 30000 },
 	);
+
+/** the flag's image in an element, once the flags have loaded */
+const findImg = (element: Element) =>
+	waitFor(async () => {
+		const img = element.querySelector("img");
+		await expect(img).not.toBeNull();
+		return img!;
+	});
 
 /** the outline of an element, as `<style> <width> <color>` */
 const outlineOf = (element: Element) => {
@@ -62,9 +71,9 @@ const meta: Meta<CountryFlagProps> = {
 	argTypes: {
 		code: {
 			description:
-				'Upper-case ISO 3166-1 alpha-2 code, a key of `CountryFlags` ("DE"). A code without a flag leaves the box empty.',
+				'Upper-case ISO 3166-1 alpha-2 code, a `CountryCode` ("DE"). A code without a flag leaves the box empty.',
 			control: "select",
-			options: Object.keys(CountryFlags),
+			options: [...FlagCodes],
 		},
 		size: {
 			description:
@@ -97,8 +106,8 @@ export const Decorative: Story = {
 		},
 	},
 	play: async ({ canvas, canvasElement }) => {
-		const img = canvasElement.querySelector("img");
-		await expect(img).toHaveAttribute("src", CountryFlags.JP);
+		const img = await findImg(canvasElement);
+		await expect(img).toHaveAttribute("src", (await loadCountryFlags()).JP);
 		await expect(img).toHaveAttribute("alt", "");
 		await expect(canvas.queryByRole("img")).toBeNull();
 	},
@@ -116,7 +125,7 @@ export const Named: Story = {
 	},
 	play: async ({ canvas }) => {
 		const img = await canvas.findByRole("img", { name: "Germany" });
-		await expect(img).toHaveAttribute("src", CountryFlags.DE);
+		await expect(img).toHaveAttribute("src", (await loadCountryFlags()).DE);
 	},
 };
 
@@ -135,7 +144,7 @@ const NameListItem = styled("li")({
 	breakInside: "avoid",
 });
 
-const CODES = Object.keys(CountryFlags);
+const CODES = FlagCodes;
 
 /** every flag beside its English name; the name makes the flag decorative */
 const FlagsBesideNames = () => (
@@ -167,8 +176,11 @@ export const Issue3466Item8EveryFlagFitsItsBox: Story = {
 			canvasElement.querySelectorAll<HTMLElement>("[data-code]"),
 		);
 		await expect(boxes).toHaveLength(CODES.length);
+		// the flags load with the first one shown
+		await waitFor(() =>
+			expect(boxes.filter((box) => !box.querySelector("img"))).toEqual([]),
+		);
 		const imgs = boxes.map((box) => box.querySelector("img")!);
-		await expect(imgs.filter((img) => !img)).toEqual([]);
 		await decoded(imgs);
 
 		// the box: 32x16, so the names beside it line up
@@ -226,7 +238,7 @@ export const Issue3466Item8DarkMode: Story = {
 		</ThemeProvider>
 	),
 	play: async ({ canvasElement }) => {
-		const img = canvasElement.querySelector("img")!;
+		const img = await findImg(canvasElement);
 		await decoded([img]);
 		await expect(outlineOf(img)).toBe(`solid 1px ${darkTheme.palette.divider}`);
 		// 24px high, 3:2
