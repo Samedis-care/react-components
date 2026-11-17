@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import {
 	getMissingRouteParameters,
 	insertRouteParameters,
@@ -28,7 +28,9 @@ export interface IRoutedMenuItemDefinition extends Omit<
 	 * the route with more segments, then, segment by segment from the left, a
 	 * literal before a `:name` param (`/apps/new` before `/apps/:app`). On a
 	 * tie the deeper entry wins (a group's entry with the group's own route),
-	 * then the earlier one.
+	 * then the earlier one. The highlight follows the URL only: on a path that
+	 * no entry matches, nothing is highlighted, and an entry without `route`
+	 * (an action such as "Log out") is never highlighted.
 	 *
 	 * Its `:name` params are filled from the current URL, read with the route
 	 * of that best-matching entry: on `/projects/42/review`,
@@ -316,11 +318,28 @@ const convertDefinition = (
 	},
 });
 
+/**
+ * The setter of useRoutedMenuLogic's active id. MenuBase calls it with the id
+ * of a clicked entry; it does nothing, because the active entry is the entry
+ * of the current URL.
+ */
+const ignoreActiveChange: Dispatch<SetStateAction<string>> = () => undefined;
+
+/**
+ * The routing logic of RoutedMenu, for a menu the app renders itself. Must be
+ * called inside a HistoryRouter.
+ * @param props The menu definition
+ * @return `definition`: the entries converted for MenuBase, with
+ * `forceExpand` set on the groups above the entry of the current URL and
+ * handlers that navigate to the entries' routes. `controlledState`: for
+ * MenuBase's `customState` or a `MenuContext.Provider`, the id of the entry
+ * of the current URL (the titles from the top level joined by `@`, `""` when
+ * no entry matches the URL) and a setter that does nothing, because the
+ * active entry follows the URL only.
+ */
 export const useRoutedMenuLogic = (
 	props: Pick<IRoutedMenuProps, "definition">,
 ) => {
-	const controlledState = useState("");
-	const [activeMenuItem, setActiveMenuItem] = controlledState;
 	const location = useLocation();
 	const path = location.pathname;
 	const navigate = useNavigate();
@@ -333,13 +352,16 @@ export const useRoutedMenuLogic = (
 		[rawDef, path],
 	);
 
-	// set the currently active item based off location
-	useEffect(() => {
-		const menuEntry = current?.id;
-		if (menuEntry && activeMenuItem !== menuEntry) {
-			setActiveMenuItem(menuEntry);
-		}
-	}, [activeMenuItem, current, setActiveMenuItem]);
+	// the active item is derived from the URL, so it is never left over from an
+	// earlier path or set by a click on an entry that the URL does not match
+	const activeMenuItem = current?.id ?? "";
+	const controlledState = React.useMemo(
+		(): [string, Dispatch<SetStateAction<string>>] => [
+			activeMenuItem,
+			ignoreActiveChange,
+		],
+		[activeMenuItem],
+	);
 
 	// convert routed menu definitions to normal menu definitions
 	const params = React.useMemo(() => current?.params ?? {}, [current]);
@@ -383,6 +405,15 @@ export const useRoutedMenuLogic = (
 	return { definition, controlledState };
 };
 
+/**
+ * A MenuBase driven by the URL: the entry whose `route` matches the current
+ * path best is highlighted and the groups above it are expanded (see
+ * IRoutedMenuItemDefinition's `route`), and a click on an entry runs its
+ * `onClick` and navigates to its route. The highlight follows the URL only:
+ * on a path that matches no entry nothing is highlighted, and a click
+ * highlights nothing by itself, only the navigation it starts does. Must be
+ * rendered inside a HistoryRouter.
+ */
 const RoutedMenu = (props: IRoutedMenuProps) => {
 	const { definition, controlledState } = useRoutedMenuLogic(props);
 	return (

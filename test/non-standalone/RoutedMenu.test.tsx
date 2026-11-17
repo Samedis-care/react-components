@@ -11,6 +11,7 @@ import {
 import { createTheme, List, ThemeProvider } from "@mui/material";
 import { createMemoryHistory, History } from "history";
 import MaterialMenuItem from "../../src/standalone/Portal/MenuItem/Material";
+import type { MenuItemProps } from "../../src/standalone/Portal/Menu";
 import HistoryRouter from "../../src/standalone/Routes/HistoryRouter";
 import useLocation from "../../src/standalone/Routes/useLocation";
 import RoutedMenu, {
@@ -105,6 +106,9 @@ const leaf = (
 	shouldRender: true,
 	...extra,
 });
+
+/** Profile and Users, defined once (the hook's definition stays the same) */
+const USERS_MENU = [leaf("Profile", "/profile"), leaf("Users", "/users")];
 
 // ---------------------------------------------------------------------------
 // Bugs: these tests assert the expected behavior and fail until fixed
@@ -353,6 +357,109 @@ describe("RoutedMenu bugs", () => {
 		} finally {
 			vi.unstubAllEnvs();
 		}
+	});
+	it("[ISSUE-3498-ITEM-2] a path that matches no entry clears the highlight", () => {
+		const { history } = mount(
+			[leaf("Profile", "/profile"), leaf("Users", "/users")],
+			"/users",
+		);
+		expect(selected()).toEqual(["Users"]);
+		act(() => history.push("/not-in-menu"));
+		expect(selected()).toEqual([]);
+	});
+	it("[ISSUE-3498-ITEM-2] an action entry clicked on a path that matches no entry is not left highlighted", () => {
+		mount(
+			[
+				leaf("Profile", "/profile"),
+				leaf("Logout", undefined, { onClick: vi.fn() }),
+			],
+			"/elsewhere",
+		);
+		fireEvent.click(entry("Logout"));
+		expect(selected()).toEqual([]);
+	});
+	it("[ISSUE-3498-ITEM-2] a click never renders an entry that the URL does not match as active, not even for one render", () => {
+		vi.spyOn(window, "open").mockImplementation(() => null);
+		const activeRenders: string[] = [];
+		const Recording = React.memo(function Recording(props: MenuItemProps) {
+			if (props.active) activeRenders.push(props.title);
+			return <MaterialMenuItem {...props} />;
+		});
+		const { history } = mount(
+			[
+				leaf("Profile", "/profile"),
+				leaf("Users", "/users"),
+				leaf("Logout", undefined, { onClick: vi.fn() }),
+			],
+			"/users",
+			{ menuItem: Recording },
+		);
+		activeRenders.length = 0;
+		// on a matched path: the URL's entry stays the only active one
+		fireEvent.click(entry("Logout"));
+		fireEvent.click(entry("Profile"), { ctrlKey: true });
+		expect(activeRenders).toEqual([]);
+		expect(selected()).toEqual(["Users"]);
+		// on a path that matches no entry: nothing becomes active
+		act(() => history.push("/elsewhere"));
+		activeRenders.length = 0;
+		fireEvent.click(entry("Logout"));
+		fireEvent.click(entry("Users"), { ctrlKey: true });
+		expect(activeRenders).toEqual([]);
+		expect(selected()).toEqual([]);
+		expect(history.location.pathname).toBe("/elsewhere");
+	});
+	it("[ISSUE-3498-ITEM-2] after a swap to a menu that matches none of its entries, an entry with the old entry's title is not highlighted", () => {
+		const top = [leaf("Profile", "/profile"), leaf("Users", "/users")];
+		const admin = [
+			leaf("Users", "/admin/users"),
+			leaf("Roles", "/admin/roles"),
+		];
+		const Switching = () => {
+			const { pathname } = useLocation();
+			return (
+				<RoutedMenu
+					definition={pathname.startsWith("/admin") ? admin : top}
+					wrapper={Wrap}
+					menuItem={MaterialMenuItem}
+				/>
+			);
+		};
+		const history = createMemoryHistory({ initialEntries: ["/users"] });
+		render(
+			<ThemeProvider theme={theme}>
+				<HistoryRouter history={history}>
+					<Switching />
+				</HistoryRouter>
+			</ThemeProvider>,
+		);
+		expect(selected()).toEqual(["Users"]);
+		act(() => history.push("/admin/unknown"));
+		expect(titles()).toEqual(["Users", "Roles"]);
+		expect(selected()).toEqual([]);
+		act(() => history.push("/admin/roles"));
+		expect(selected()).toEqual(["Roles"]);
+	});
+	it("[ISSUE-3498-ITEM-2] useRoutedMenuLogic's active id follows the URL only: empty on a path that matches no entry, and its setter changes nothing", () => {
+		const history = createMemoryHistory({ initialEntries: ["/users"] });
+		const { result } = renderHook(
+			() =>
+				useRoutedMenuLogic({
+					definition: USERS_MENU,
+				}),
+			{
+				wrapper: ({ children }: { children: React.ReactNode }) => (
+					<HistoryRouter history={history}>{children}</HistoryRouter>
+				),
+			},
+		);
+		expect(result.current.controlledState[0]).toBe("Users");
+		act(() => result.current.controlledState[1]("Profile"));
+		expect(result.current.controlledState[0]).toBe("Users");
+		act(() => history.push("/elsewhere"));
+		expect(result.current.controlledState[0]).toBe("");
+		act(() => result.current.controlledState[1]("Profile"));
+		expect(result.current.controlledState[0]).toBe("");
 	});
 	it("[ISSUE-3498-ITEM-3] an exact match in a later group wins over a prefix match in an earlier group", () => {
 		mount(
