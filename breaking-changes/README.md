@@ -29,6 +29,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-17 | [A lazy control reads its connector params once, for the list and the save alike](2026-11-17-lazy-crud-connector-params-read-once.md) | behavior |
 | 2026-11-17 | [CrudSelect updates an entry only when what serialize returns for it changed](2026-11-17-crud-select-updates-by-serialized-entry.md) | behavior |
 | 2026-11-17 | [Route params are percent-decoded, and literal route segments match the decoded location](2026-11-17-route-params-decoded.md) | behavior |
+| 2026-11-17 | [A keyboard-focused InfoBox header keeps its status color and draws a ring](2026-11-17-info-box-focus-ring.md) | behavior |
 | 2026-11-13 | [SignalPortlet shows no "Last refresh" label for 0 or an invalid time](2026-11-13-signal-portlet-no-label-without-time.md) | behavior |
 | 2026-11-13 | [The date pickers report a blur when focus leaves the open calendar](2026-11-13-picker-blur-on-leaving-the-calendar.md) | behavior |
 | 2026-11-13 | [Matrix columns are 56px wide by default, and the add chip is 24x24](2026-11-13-matrix-targets-24px.md) | behavior |

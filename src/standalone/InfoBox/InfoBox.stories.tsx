@@ -1,9 +1,9 @@
 import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Button, Stack } from "@mui/material";
+import { Button, createTheme, Stack, ThemeProvider } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, waitFor } from "storybook/test";
-import InfoBox from "./index";
+import InfoBox, { InfoBoxProps } from "./index";
 
 const meta: Meta<typeof InfoBox> = {
 	title: "Standalone/InfoBox",
@@ -32,6 +32,18 @@ const meta: Meta<typeof InfoBox> = {
 export default meta;
 
 type Story = StoryObj<typeof InfoBox>;
+
+const WHITE = "rgb(255, 255, 255)";
+
+/** waits until no CSS transition runs in or below el (the header's colors, the Collapse) */
+const transitionsDone = (el: Element) =>
+	waitFor(() =>
+		expect(
+			el
+				.getAnimations({ subtree: true })
+				.map((a) => (a instanceof CSSTransition ? a.transitionProperty : a.id)),
+		).toEqual([]),
+	);
 
 export const Info: Story = {
 	args: {
@@ -173,5 +185,142 @@ export const Controlled: Story = {
 		await expect(header).toHaveAttribute("aria-expanded", "true");
 		await waitFor(() => expect(message).toBeVisible());
 		await expect(args.onChange).toHaveBeenCalledTimes(1);
+	},
+};
+
+export const Issue3464Item6FocusKeepsStatusColorAndShowsRing: Story = {
+	parameters: {
+		a11y: {
+			test: "error",
+			options: { runOnly: { type: "rule", values: ["color-contrast"] } },
+		},
+		docs: {
+			description: {
+				story:
+					"ISSUE-3464-ITEM-6: keyboard focus replaces the red header with light grey (white text at 1.3:1, axe `color-contrast`), and there is no focus outline. Expected: the focused header keeps its status color and shows a ring inside its edges.",
+			},
+		},
+	},
+	decorators: [
+		(Story) => (
+			<div style={{ width: 600 }}>
+				<Story />
+			</div>
+		),
+	],
+	args: {
+		status: "error",
+		heading: "Upload failed",
+		message: "The file is too large.",
+		defaultExpanded: false,
+	},
+	play: async ({ canvas, userEvent }) => {
+		const btn = canvas.getByRole("button", { name: /Upload failed/ });
+		await userEvent.tab();
+		await expect(btn).toHaveFocus();
+		await expect(btn).toHaveClass("Mui-focusVisible");
+		await transitionsDone(btn);
+		const cs = getComputedStyle(btn);
+		await expect(cs.backgroundColor).toBe("rgb(211, 47, 47)");
+		await expect(cs.color).toBe(WHITE);
+		// a ring inside the header: the root's overflow: hidden clips one outside it
+		const insetRing =
+			(cs.outlineStyle !== "none" && parseFloat(cs.outlineOffset) < 0) ||
+			cs.boxShadow.includes("inset");
+		await expect(insetRing).toBe(true);
+	},
+};
+
+const STATUSES: InfoBoxProps["status"][] = [
+	undefined,
+	"info",
+	"warning",
+	"success",
+	"error",
+];
+
+const darkTheme = createTheme({ palette: { mode: "dark" } });
+
+const ringTheme = createTheme({ focusVisible: true });
+
+const FocusColumn = ({ label }: { label: string }) => (
+	<div style={{ width: 300 }}>
+		{STATUSES.map((status, index) => (
+			<InfoBox
+				key={String(status)}
+				status={status}
+				heading={`${label} ${String(status)}`}
+				message={"Message"}
+				defaultExpanded={index % 2 === 1}
+			/>
+		))}
+	</div>
+);
+
+export const Issue3464Item6FocusRingInEveryStatusAndTheme: Story = {
+	parameters: {
+		a11y: {
+			test: "error",
+			config: {
+				rules: [
+					// white on MUI's default warning orange (light) and error red (dark)
+					// is below 4.5:1 whether focused or not; the focused header's
+					// contrast is checked by Issue3464Item6FocusKeepsStatusColorAndShowsRing
+					{ id: "color-contrast", enabled: false },
+					// each open message is an unnamed region, so several open boxes
+					// repeat it; this story is about the headers
+					{ id: "landmark-unique", enabled: false },
+				],
+			},
+		},
+		docs: {
+			description: {
+				story:
+					"ISSUE-3464-ITEM-6: every status, open and collapsed, in light mode, in dark mode and with MUI's `focusVisible` theme option. A keyboard-focused header keeps its colors and shows a 2px ring in its text color inside its edges, where the box cannot clip it.",
+			},
+		},
+	},
+	render: () => (
+		<div style={{ display: "flex", gap: 16 }}>
+			<FocusColumn label={"Light"} />
+			<ThemeProvider theme={darkTheme}>
+				<div
+					style={{
+						color: darkTheme.palette.text.primary,
+						background: darkTheme.palette.background.default,
+					}}
+				>
+					<FocusColumn label={"Dark"} />
+				</div>
+			</ThemeProvider>
+			<ThemeProvider theme={ringTheme}>
+				<FocusColumn label={"Theme ring"} />
+			</ThemeProvider>
+		</div>
+	),
+	play: async ({ canvas, userEvent }) => {
+		const headers = canvas.getAllByRole("button");
+		await expect(headers).toHaveLength(3 * STATUSES.length);
+		for (const btn of headers) {
+			const before = getComputedStyle(btn);
+			const background = before.backgroundColor;
+			const color = before.color;
+			await expect(before.outlineStyle).toBe("none");
+			await userEvent.tab();
+			await expect(btn).toHaveFocus();
+			await expect(btn).toHaveClass("Mui-focusVisible");
+			await transitionsDone(btn);
+			const cs = getComputedStyle(btn);
+			await expect([cs.backgroundColor, cs.color]).toEqual([background, color]);
+			// a ring in the text color, which contrasts with the header like the
+			// heading does; forced colors keep outlines
+			await expect([cs.outlineStyle, cs.outlineWidth, cs.outlineColor]).toEqual(
+				["solid", "2px", color],
+			);
+			// inside the header: the box's overflow: hidden clips a ring outside it
+			await expect(
+				parseFloat(cs.outlineOffset) + parseFloat(cs.outlineWidth),
+			).toBeLessThanOrEqual(0);
+		}
 	},
 };
