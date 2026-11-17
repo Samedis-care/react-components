@@ -317,3 +317,10 @@ describe("MobileScalingFix", () => {
 		expect(fontSizes()).toEqual(ownFontSizes);
 	});
 });
+
+describe("[ISSUE-3459-ITEM-14] MobileScalingFix folder", () => {
+	it("[ISSUE-3459-ITEM-14] its folder's index exports the component", async () => {
+		const folder = await import("../../src/standalone/MobileScalingFix");
+		expect(folder.default).toBe(MobileScalingFix);
+	});
+});

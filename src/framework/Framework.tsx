@@ -15,7 +15,7 @@ import MuiPickerUtils from "./MuiPickerUtils";
 import PermissionContextProvider from "./PermissionContextProvider";
 import MobileScalingFix, {
 	MobileScalingFixProps,
-} from "../standalone/MobileScalingFix/MobileScalingFix";
+} from "../standalone/MobileScalingFix";
 import UnsafeToLeave from "./UnsafeToLeave";
 import DragAndDropPrevention from "./DragAndDropPrevention";
 import { StyledEngineProvider } from "@mui/material";

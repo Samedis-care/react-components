@@ -79,6 +79,79 @@ describe("PopupMenu", () => {
 	});
 });
 
+describe("[ISSUE-3459-ITEM-14] PopupMenu theme slot", () => {
+	it("[ISSUE-3459-ITEM-14] applies the theme's CcPopupMenu default props, its elevation over the flat default", () => {
+		const themed = createTheme({
+			components: {
+				CcPopupMenu: {
+					defaultProps: {
+						elevation: 8,
+						slotProps: { list: { "aria-label": "Actions" } },
+					},
+				},
+			},
+		});
+		wrap(
+			<PopupMenu open anchorEl={anchor}>
+				{items}
+			</PopupMenu>,
+			themed,
+		);
+		const paper = screen
+			.getByRole("menu", { name: "Actions" })
+			.closest(".MuiMenu-paper");
+		expect(paper).toHaveClass("MuiPaper-elevation8");
+	});
+
+	it("[ISSUE-3459-ITEM-14] props win over the theme's CcPopupMenu default props", () => {
+		const themed = createTheme({
+			components: { CcPopupMenu: { defaultProps: { elevation: 8 } } },
+		});
+		wrap(
+			<PopupMenu open anchorEl={anchor} elevation={2}>
+				{items}
+			</PopupMenu>,
+			themed,
+		);
+		const paper = screen.getByRole("menu").closest(".MuiMenu-paper");
+		expect(paper).toHaveClass("MuiPaper-elevation2");
+	});
+
+	it("[ISSUE-3459-ITEM-14] applies the theme's CcPopupMenu variants, matched against Menu props", () => {
+		const themed = createTheme({
+			components: {
+				CcPopupMenu: {
+					variants: [
+						{
+							props: { variant: "menu" },
+							style: { "& .MuiMenu-paper": { borderWidth: 3 } },
+						},
+						{
+							props: ({ anchorOrigin }) => anchorOrigin?.vertical === "top",
+							style: { "& .MuiMenu-paper": { borderStyle: "dashed" } },
+						},
+					],
+				},
+			},
+		});
+		wrap(
+			<PopupMenu
+				open
+				anchorEl={anchor}
+				variant={"menu"}
+				anchorOrigin={{ vertical: "top", horizontal: "left" }}
+			>
+				{items}
+			</PopupMenu>,
+			themed,
+		);
+		const paper = screen.getByRole("menu").closest(".MuiMenu-paper")!;
+		expect(getComputedStyle(paper).borderTop).toBe(
+			`3px dashed ${themed.palette.divider}`,
+		);
+	});
+});
+
 // importing the whole package (or the DataGrid) takes ~20s in jsdom
 const importTimeout = 90000;
 

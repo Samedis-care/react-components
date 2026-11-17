@@ -2,7 +2,14 @@ import React, { useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
-import { Box, Button, MenuItem, MenuProps } from "@mui/material";
+import {
+	Box,
+	Button,
+	createTheme,
+	MenuItem,
+	MenuProps,
+	ThemeProvider,
+} from "@mui/material";
 import PopupMenu from "./index";
 
 const meta: Meta<typeof PopupMenu> = {
@@ -663,5 +670,42 @@ export const Issue3459Item10KeepMountedMenuWidensForLongerLabels: Story = {
 			.filter((item) => item.scrollWidth > item.clientWidth)
 			.map((item) => item.textContent);
 		await expect(clipped).toEqual([]);
+	},
+};
+
+// an app's theme ring, as MUI's createTheme({ focusVisible }) takes it
+const GREEN_RING = createTheme({
+	focusVisible: { outlineColor: "rgb(0, 128, 0)" },
+});
+
+export const Issue3459Item14ThemeFocusVisibleRing: MenuDemoStory = {
+	args: { onSelect: fn(), onClose: fn() },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3459-ITEM-14: a theme that sets MUI's `focusVisible` ring (here `outlineColor: rgb(0, 128, 0)`) styles the keyboard-focused item's ring, as in every MUI `Menu`.",
+			},
+		},
+	},
+	decorators: [
+		(Story) => (
+			<ThemeProvider theme={GREEN_RING}>
+				<Story />
+			</ThemeProvider>
+		),
+	],
+	render: (args) => <MenuDemo {...args} />,
+	play: async ({ canvas }) => {
+		await userEvent.tab();
+		await expect(canvas.getByRole("button", { name: "Options" })).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		const alpha = await within(document.body).findByRole("menuitem", {
+			name: "Alpha",
+		});
+		await waitFor(() => expect(alpha).toHaveFocus());
+		await waitFor(() => expect(alpha).toHaveClass("Mui-focusVisible"));
+		await expect(getComputedStyle(alpha).outlineColor).toBe("rgb(0, 128, 0)");
 	},
 };

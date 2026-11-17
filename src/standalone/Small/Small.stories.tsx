@@ -1,6 +1,12 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { List, ListItem, ListItemText } from "@mui/material";
+import {
+	createTheme,
+	List,
+	ListItem,
+	ListItemText,
+	ThemeProvider,
+} from "@mui/material";
 import {
 	Delete as DeleteIcon,
 	Home as HomeIcon,
@@ -356,5 +362,45 @@ export const Issue3459Item15SmallIconButtonMinimumSize: SmallIconButtonStory = {
 		const outer = button.getBoundingClientRect();
 		await expect(icon.left - outer.left).toBe(outer.right - icon.right);
 		await expect(icon.top - outer.top).toBe(outer.bottom - icon.bottom);
+	},
+};
+
+// an app's theme ring, as MUI's createTheme({ focusVisible }) takes it
+const GREEN_RING = createTheme({
+	focusVisible: { outlineColor: "rgb(0, 128, 0)" },
+});
+
+export const Issue3459Item14ThemeFocusVisibleRing: StoryObj<
+	typeof KeyboardDemo
+> = {
+	args: { onSettings: fn(), onDelete: fn(), onDisabled: fn() },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3459-ITEM-14: a theme that sets MUI's `focusVisible` ring (here `outlineColor: rgb(0, 128, 0)`) styles the focus ring of both Small icon buttons, as on every MUI `IconButton`.",
+			},
+		},
+	},
+	decorators: [
+		(Story) => (
+			<ThemeProvider theme={GREEN_RING}>
+				<Story />
+			</ThemeProvider>
+		),
+	],
+	render: (args) => <KeyboardDemo {...args} />,
+	play: async ({ canvas }) => {
+		for (const name of ["Settings", "Delete"]) {
+			const button = canvas.getByRole("button", { name });
+			await userEvent.tab();
+			await expect(button).toHaveFocus();
+			await waitFor(() => expect(button).toHaveClass("Mui-focusVisible"));
+			await expect([name, getComputedStyle(button).outlineColor]).toEqual([
+				name,
+				"rgb(0, 128, 0)",
+			]);
+		}
 	},
 };

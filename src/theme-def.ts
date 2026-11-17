@@ -29,9 +29,26 @@ import {
 	MultiSelectWithTagsClassKey,
 	MultiSelectWithTagsProps,
 	PopupMenuClassKey,
+	PopupMenuProps,
 	PortalLayoutClassKey,
 	PortalLayoutProps,
 } from "./standalone";
+import {
+	SmallIconButtonClassKey,
+	SmallIconButtonProps,
+	SmallestIconButtonClassKey,
+	SmallestIconButtonProps,
+	SmallListItemClassKey,
+	SmallListItemProps,
+	SmallListItemButtonClassKey,
+	SmallListItemButtonProps,
+	SelectorSmallListItemClassKey,
+	SelectorSmallListItemProps,
+	SelectorSmallListItemButtonClassKey,
+	SelectorSmallListItemButtonProps,
+	SmallListItemIconClassKey,
+	SmallListItemIconProps,
+} from "./standalone/Small";
 import {
 	ComponentWithLabelClassKey,
 	ComponentWithLabelProps,
@@ -288,6 +305,13 @@ declare module "@mui/material/styles" {
 		CcLoader: LoaderClassKey;
 		CcMultiGrid: MultiGridClassKey;
 		CcVerticalDivider: VerticalDividerClassKey;
+		CcSmallIconButton: SmallIconButtonClassKey;
+		CcSmallestIconButton: SmallestIconButtonClassKey;
+		CcSmallListItem: SmallListItemClassKey;
+		CcSmallListItemButton: SmallListItemButtonClassKey;
+		CcSelectorSmallListItem: SelectorSmallListItemClassKey;
+		CcSelectorSmallListItemButton: SelectorSmallListItemButtonClassKey;
+		CcSmallListItemIcon: SmallListItemIconClassKey;
 		CcCountryFlag: CountryFlagClassKey;
 		CcMultiLanguageInput: MultiLanguageInputClassKey;
 		CcFormButtons: FormButtonsClassKey;
@@ -367,6 +391,13 @@ declare module "@mui/material/styles" {
 		CcLoader: Partial<LoaderProps>;
 		CcMultiGrid: Partial<MultiGridProps>;
 		CcVerticalDivider: Partial<VerticalDividerProps>;
+		CcSmallIconButton: Partial<SmallIconButtonProps>;
+		CcSmallestIconButton: Partial<SmallestIconButtonProps>;
+		CcSmallListItem: Partial<SmallListItemProps>;
+		CcSmallListItemButton: Partial<SmallListItemButtonProps>;
+		CcSelectorSmallListItem: Partial<SelectorSmallListItemProps>;
+		CcSelectorSmallListItemButton: Partial<SelectorSmallListItemButtonProps>;
+		CcSmallListItemIcon: Partial<SmallListItemIconProps>;
 		CcCountryFlag: Partial<CountryFlagProps>;
 		CcMultiLanguageInput: Partial<MultiLanguageInputProps>;
 		CcFormButtons: Partial<FormButtonsProps>;
@@ -416,6 +447,7 @@ declare module "@mui/material/styles" {
 		CcSignPad: Partial<SignPadProps>;
 		CcFormDialog: Partial<FormDialogProps>;
 		CcPageTitle: Partial<PageTitleProps>;
+		CcPopupMenu: Partial<PopupMenuProps>;
 		CcPortalLayout: Partial<PortalLayoutProps>;
 		CcNotifications: Partial<NotificationsProps>;
 		CcToast: Partial<ToastProps>;
@@ -476,8 +508,43 @@ declare module "@mui/material/styles" {
 		};
 		CcVerticalDivider?: {
 			defaultProps?: ComponentsPropsList["CcVerticalDivider"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcVerticalDivider"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<VerticalDividerClassKey>;
 			variants?: ComponentsVariants["CcVerticalDivider"];
+		};
+		CcSmallIconButton?: {
+			defaultProps?: ComponentsPropsList["CcSmallIconButton"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<SmallIconButtonClassKey>;
+			variants?: ComponentsVariants["CcSmallIconButton"];
+		};
+		CcSmallestIconButton?: {
+			defaultProps?: ComponentsPropsList["CcSmallestIconButton"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<SmallestIconButtonClassKey>;
+			variants?: ComponentsVariants["CcSmallestIconButton"];
+		};
+		CcSmallListItem?: {
+			defaultProps?: ComponentsPropsList["CcSmallListItem"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<SmallListItemClassKey>;
+			variants?: ComponentsVariants["CcSmallListItem"];
+		};
+		CcSmallListItemButton?: {
+			defaultProps?: ComponentsPropsList["CcSmallListItemButton"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<SmallListItemButtonClassKey>;
+			variants?: ComponentsVariants["CcSmallListItemButton"];
+		};
+		CcSelectorSmallListItem?: {
+			defaultProps?: ComponentsPropsList["CcSelectorSmallListItem"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<SelectorSmallListItemClassKey>;
+			variants?: ComponentsVariants["CcSelectorSmallListItem"];
+		};
+		CcSelectorSmallListItemButton?: {
+			defaultProps?: ComponentsPropsList["CcSelectorSmallListItemButton"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<SelectorSmallListItemButtonClassKey>;
+			variants?: ComponentsVariants["CcSelectorSmallListItemButton"];
+		};
+		CcSmallListItemIcon?: {
+			defaultProps?: ComponentsPropsList["CcSmallListItemIcon"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<SmallListItemIconClassKey>;
+			variants?: ComponentsVariants["CcSmallListItemIcon"];
 		};
 		CcCountryFlag?: {
 			defaultProps?: ComponentsPropsList["CcCountryFlag"];
@@ -720,8 +787,9 @@ declare module "@mui/material/styles" {
 			variants?: ComponentsVariants["CcPageTitle"];
 		};
 		CcPopupMenu?: {
-			styleOverrides?: ComponentsOverrides<Theme>["CcPopupMenu"];
-			variants?: ComponentsVariants["CcFormDialog"];
+			defaultProps?: ComponentsPropsList["CcPopupMenu"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<PopupMenuClassKey>;
+			variants?: ComponentsVariants["CcPopupMenu"];
 		};
 		CcFilesGrid?: {
 			styleOverrides?: ComponentsOverrides<Theme>["CcFilesGrid"];

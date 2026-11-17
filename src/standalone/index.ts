@@ -15,6 +15,7 @@ export { default as PopupMenu } from "./PopupMenu";
 export * from "./GroupBox";
 export { default as GroupBox } from "./GroupBox";
 export * from "./DataGrid";
+export * from "./VerticalDivider";
 export { default as VerticalDivider } from "./VerticalDivider";
 export * from "./LocalizedDateTimePickers";
 export { default as InfoBox } from "./InfoBox";
