@@ -1246,4 +1246,21 @@ describe("persisted format bugs", () => {
 		expect(result.columnState.id).toMatchObject({ sort: 1, sortOrder: 1 });
 		expect(result.columnState.name).toMatchObject({ sort: -1, sortOrder: 2 });
 	});
+
+	it("[ISSUE-3496-ITEM-7] parts of different versions merge with the highest version, so a part of a newer format is not taken for the current one", () => {
+		const newer = DATA_GRID_PERSIST_VERSION + 1;
+		const current = { v: DATA_GRID_PERSIST_VERSION, search: "x" };
+		expect(
+			mergePersistedState([{ v: newer, width: { id: 300 } }, current])?.v,
+		).toBe(newer);
+		expect(
+			mergePersistedState([current, { v: newer, width: { id: 300 } }])?.v,
+		).toBe(newer);
+		expect(
+			mergePersistedState([
+				{ v: newer, width: { id: 300 } },
+				{ columnState: {}, state: { search: "x" } },
+			])?.v,
+		).toBe(newer);
+	});
 });

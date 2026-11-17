@@ -11,6 +11,7 @@ import {
 	DataGrid,
 	DataGridLocalStoragePersist,
 	DataGridNoPersist,
+	DataGridStorageManagerPersist,
 } from "./index";
 import type {
 	DataGridCustomDataActionButton,
@@ -20,7 +21,19 @@ import type {
 	IDataGridColumnDef,
 	IDataGridLoadDataParameters,
 } from "./DataGrid";
-import type { DataGridPersistentState } from "./PersistFormat";
+import {
+	DATA_GRID_PERSIST_VERSION,
+	type DataGridPersistentState,
+} from "./PersistFormat";
+import {
+	DATA_GRID_STORAGE_KEY_COLUMN_SIZING,
+	DATA_GRID_STORAGE_KEY_FILTERS,
+} from "./StorageManagerPersist";
+import {
+	DefaultGetStorageProviderCallback,
+	StorageManager,
+	StorageProvider,
+} from "../../framework/Storage";
 
 // ─── Sample data ────────────────────────────────────────────────────────────
 
@@ -971,6 +984,114 @@ export const OverrideSearchIsNotPersisted: Story = {
 		await waitFor(() => expect(stored().search).toBeUndefined());
 		await userEvent.type(searchBox, "Dave");
 		await waitFor(() => expect(stored().search).toBe("Dave"));
+	},
+};
+
+/** A storage, like a server, which records what is written to it */
+class RecordingStorage extends StorageProvider {
+	data: Record<string, string> = {};
+	writes: [key: string, value: string][] = [];
+	getItem(key: string): Promise<string | null> {
+		return Promise.resolve(this.data[key] ?? null);
+	}
+	setItem(key: string, value: string | null): void {
+		if (value == null) {
+			delete this.data[key];
+			return;
+		}
+		this.data[key] = value;
+		this.writes.push([key, value]);
+	}
+	clear(): void {
+		this.data = {};
+		this.writes = [];
+	}
+}
+const newerFormatStorage = new RecordingStorage();
+const NEWER_FORMAT_STORAGE_KEYS = { model: "people" };
+/** The key StorageManager stores a bucket under */
+const newerFormatBucket = (id: string) =>
+	id + "-" + JSON.stringify(NEWER_FORMAT_STORAGE_KEYS);
+
+/**
+ * ISSUE-3496-ITEM-7: a newer library version (a tab of a later release, the
+ * release before a rollback) stored this grid's state in its own format, in
+ * both buckets of DataGridStorageManagerPersist, with the column widths in a
+ * place this version doesn't know. This version reads what it can: "Role"
+ * stays hidden and the search is "Bo". It fits the column widths to the grid,
+ * but leaves the stored data as it is. Only a change, here typing in the
+ * search, stores the grid's state, in this version's format.
+ */
+export const Issue3496Item7NewerFormatIsKeptUntilAChange: Story = {
+	beforeEach: () => {
+		newerFormatStorage.clear();
+		const v = DATA_GRID_PERSIST_VERSION + 1;
+		newerFormatStorage.data[
+			newerFormatBucket(DATA_GRID_STORAGE_KEY_COLUMN_SIZING)
+		] = JSON.stringify({ v, sizing: { name: 320, age: 80, active: 80 } });
+		newerFormatStorage.data[newerFormatBucket(DATA_GRID_STORAGE_KEY_FILTERS)] =
+			JSON.stringify({
+				v,
+				shown: ["name", "age", "active"],
+				hidden: ["role"],
+				search: "Bo",
+			});
+		StorageManager.configure((_id, keys) => [newerFormatStorage, keys]);
+		return () => StorageManager.configure(DefaultGetStorageProviderCallback);
+	},
+	render: () => {
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		const loadData = useCallback(makeLoadData(), []);
+		return (
+			<DataGridStorageManagerPersist storageKeys={NEWER_FORMAT_STORAGE_KEYS}>
+				<DataGrid
+					columns={COLUMNS}
+					loadData={loadData}
+					searchPlaceholder={"Search people"}
+				/>
+			</DataGridStorageManagerPersist>
+		);
+	},
+	play: async ({ canvas, canvasElement }) => {
+		// what was written to a bucket, oldest first
+		const writes = (id: string) =>
+			newerFormatStorage.writes
+				.filter(([key]) => key === newerFormatBucket(id))
+				.map(([, value]) => JSON.parse(value) as DataGridPersistentState);
+		const headerWidth = (field: string) =>
+			canvasElement.querySelector<HTMLElement>(
+				`[class~="column-header-${field}"]`,
+			)?.parentElement?.style.width;
+
+		// read what it can
+		const searchBox = await canvas.findByPlaceholderText("Search people");
+		await expect(searchBox).toHaveValue("Bo");
+		await expect(await canvas.findByText("Bob Smith")).toBeVisible();
+		await expect(canvas.queryByText("Alice Müller")).not.toBeInTheDocument();
+		await expect(headerWidth("role")).toBeUndefined();
+		// the widths are fitted: "Name" takes the room "Age" and "Active" leave
+		await waitFor(() =>
+			expect(parseFloat(headerWidth("name") ?? "0")).toBeGreaterThan(400),
+		);
+
+		await userEvent.type(searchBox, "b");
+		await waitFor(() =>
+			expect(writes(DATA_GRID_STORAGE_KEY_FILTERS)).not.toHaveLength(0),
+		);
+		// the first write is the change, not the fit
+		await expect(writes(DATA_GRID_STORAGE_KEY_FILTERS)[0]).toMatchObject({
+			v: DATA_GRID_PERSIST_VERSION,
+			hidden: ["role"],
+			search: "Bob",
+		});
+		// and the fitted widths go along with it
+		const sizing = writes(DATA_GRID_STORAGE_KEY_COLUMN_SIZING)[0];
+		await expect(sizing).toMatchObject({
+			v: DATA_GRID_PERSIST_VERSION,
+			initialResize: true,
+		});
+		await expect(sizing.width?.name).toBeGreaterThan(400);
+		await expect(sizing).not.toHaveProperty("sizing");
 	},
 };
 

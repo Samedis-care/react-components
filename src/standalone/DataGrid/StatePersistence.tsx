@@ -14,6 +14,7 @@ import {
 	DataGridPersistentState,
 	decodePersistedState,
 	encodePersistedState,
+	isNewerPersistedState,
 } from "./PersistFormat";
 
 export type {
@@ -42,6 +43,12 @@ export type DataGridPersistentStateContextType = [
 	 * the first auto-fit of the column widths. It does not call it when it
 	 * opens, so what it opened on stays stored as it is until one of these
 	 * changes; data in an older format is written in the current one then.
+	 *
+	 * Data in a newer format (a `v` higher than DATA_GRID_PERSIST_VERSION,
+	 * written by a newer library version) is read with this version's rules,
+	 * so what that version stores elsewhere starts from the defaults. The
+	 * first auto-fit of the column widths does not write it either: only one
+	 * of the other changes does, in this version's format.
 	 */
 	(data: DataGridPersistentState) => Promise<void> | void,
 ];
@@ -153,6 +160,14 @@ const StatePersistence = () => {
 	// what this visit could not read (a column it doesn't have, a newer format)
 	const lastWritten = useRef<string>(undefined);
 
+	// data a newer library version wrote may keep the column widths where this
+	// version doesn't look. The auto-fit then fills them in, and writing that
+	// would replace the data with what this visit could not read, so until
+	// the grid has written, an auto-fit only moves the baseline.
+	const keepNewer = useRef(isNewerPersistedState(persistedContext?.[0]));
+	// the auto-fit is what sets initialResize, once the grid knows its width
+	const lastInitialResize = useRef(state.initialResize);
+
 	// save on changes
 	useEffect(() => {
 		if (!setPersisted) return;
@@ -175,12 +190,16 @@ const StatePersistence = () => {
 			config,
 		);
 		const serialized = JSON.stringify(data);
+		const autoFit = state.initialResize && !lastInitialResize.current;
+		lastInitialResize.current = state.initialResize;
 		if (lastWritten.current === undefined) {
 			lastWritten.current = serialized;
 			return;
 		}
 		if (lastWritten.current === serialized) return;
 		lastWritten.current = serialized;
+		if (keepNewer.current && autoFit) return;
+		keepNewer.current = false;
 
 		void setPersisted(data);
 	}, [

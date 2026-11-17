@@ -13,6 +13,12 @@ import isPlainObject from "../../utils/isPlainObject";
 /**
  * Version of the persisted format written by this library.
  * Bump this whenever the encoding changes in a way decode has to tell apart.
+ *
+ * Data with a higher `v` was written by a newer library version (a tab of a
+ * later release, the release before a rollback). It is read with this
+ * version's rules, as far as they get, and stays stored as it is until the
+ * grid's state changes; the first auto-fit of the column widths does not
+ * count. See DataGridPersistentStateContextType.
  * @remarks Data without a version is the legacy format, see decodePersistedState
  */
 export const DATA_GRID_PERSIST_VERSION = 2;
@@ -349,6 +355,15 @@ const isLegacy = (
 ): data is DataGridPersistentStateLegacy => data.v == null;
 
 /**
+ * Was the data written by a newer library version, in a format this version
+ * does not know (a `v` higher than DATA_GRID_PERSIST_VERSION)?
+ * @param data The persisted data, as a provider hands it out
+ */
+export const isNewerPersistedState = (
+	data: DataGridPersistedData | undefined,
+): boolean => typeof data?.v === "number" && data.v > DATA_GRID_PERSIST_VERSION;
+
+/**
  * Brings the legacy format into the current one.
  *
  * The interesting part is the set of columns the user has already seen, which
@@ -592,6 +607,8 @@ const decode = (
  *
  * Persisted data is whatever is in the user's storage, so this never throws: a
  * payload it can't make sense of falls back to the column definition defaults.
+ * Data of a newer format (see isNewerPersistedState) is read with the rules of
+ * this version: what is stored where this version looks.
  * @param persisted The persisted data, in any format we ever wrote
  * @param columns The column definitions
  * @param defaultColumnState The column state the grid would start out with
@@ -636,7 +653,8 @@ export const splitPersistedState = (
  * Each part is read in its own format: a part is rewritten in the current
  * format only when it is written, so the parts may be in different formats.
  * Then every legacy part is migrated on its own, and the result is in the
- * current format, with the `v` of the last part that was stored in it. A
+ * current format, with the highest `v` of the parts stored in it, so data of
+ * a newer format next to data of this one is not taken for this one's. A
  * migrated part has the whole sort and a filter entry for every column in its
  * legacy columnState, as the legacy format stored the whole state, not
  * deviations from the defaults.
@@ -661,9 +679,9 @@ export const mergePersistedState = (
 				...(isLegacy(part) ? migrateLegacyPersistedState(part) : part),
 			};
 		}
-		// the version of the parts stored in the current format, not the one
-		// the migration of a legacy part put in
-		return { ...merged, v: current[current.length - 1].v };
+		// the version of the parts stored in the current format (or a newer
+		// one), not the one the migration of a legacy part put in
+		return { ...merged, v: Math.max(...current.map((part) => part.v)) };
 	}
 
 	// every part is legacy data, which nests half of the split under state, so

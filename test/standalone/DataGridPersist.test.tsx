@@ -566,6 +566,114 @@ describe("persistence provider bugs", () => {
 		expect(save).toHaveBeenCalledTimes(1);
 		expect(save.mock.lastCall![0]).toMatchObject({ search: "q" });
 	});
+	it("[ISSUE-3496-ITEM-7] a grid does not overwrite data of a newer format version when it opens", async () => {
+		const save = vi.fn<DataGridPersistentStateContextType[1]>();
+		const newer = {
+			v: DATA_GRID_PERSIST_VERSION + 1,
+			shown: ["name", "role"],
+			hidden: ["secret"],
+			layout: { name: "compact" },
+		} as unknown as DataGridPersistentState;
+		render(
+			<ValueProvider stored={newer} save={save}>
+				<Grid />
+			</ValueProvider>,
+		);
+		await gridIdle();
+		expect(save).not.toHaveBeenCalled();
+	});
+	/** What the grid does once it knows its width, which jsdom never reports */
+	const autoFit = () =>
+		act(() => {
+			grid!.setWidths((prev) => ({ ...prev, name: 500, role: 400 }));
+			grid!.setState((prev) => ({ ...prev, initialResize: true }));
+		});
+	it("[ISSUE-3496-ITEM-7] the auto-fit of the column widths does not write over data of a newer format version, the first change writes it in the current one", async () => {
+		const save = vi.fn<DataGridPersistentStateContextType[1]>();
+		const newer = {
+			v: DATA_GRID_PERSIST_VERSION + 1,
+			shown: ["name", "role"],
+			hidden: ["secret"],
+			search: "kept",
+			sizing: { name: 300 },
+		} as unknown as DataGridPersistentState;
+		render(
+			<ValueProvider stored={newer} save={save}>
+				<Grid />
+			</ValueProvider>,
+		);
+		await gridIdle();
+		expect(grid!.state.search).toBe("kept");
+		expect(grid!.state.initialResize).toBe(false);
+		autoFit();
+		expect(save).not.toHaveBeenCalled();
+
+		act(() => grid!.setState((prev) => ({ ...prev, search: "typed" })));
+		expect(save).toHaveBeenCalledTimes(1);
+		expect(save.mock.lastCall![0]).toMatchObject({
+			v: DATA_GRID_PERSIST_VERSION,
+			shown: ["name", "role"],
+			hidden: ["secret"],
+			search: "typed",
+			width: { name: 500, role: 400 },
+			initialResize: true,
+		});
+		expect(save.mock.lastCall![0]).not.toHaveProperty("sizing");
+	});
+	it("[ISSUE-3496-ITEM-7] the auto-fit of the column widths still writes over data of the current format version", async () => {
+		const save = vi.fn<DataGridPersistentStateContextType[1]>();
+		const current: DataGridPersistentState = {
+			v: DATA_GRID_PERSIST_VERSION,
+			shown: ["name", "role"],
+			hidden: ["secret"],
+		};
+		render(
+			<ValueProvider stored={current} save={save}>
+				<Grid />
+			</ValueProvider>,
+		);
+		await gridIdle();
+		autoFit();
+		expect(save).toHaveBeenCalledTimes(1);
+		expect(save.mock.lastCall![0]).toMatchObject({
+			v: DATA_GRID_PERSIST_VERSION,
+			width: { name: 500, role: 400 },
+			initialResize: true,
+		});
+	});
+	it("[ISSUE-3496-ITEM-7] the auto-fit does not write over a shared sizing bucket of a newer format version next to a current filters bucket", async () => {
+		const server = new MemoryProvider();
+		configureLikeSamedis(server);
+		const keys = { model: "m", tenant: "t" };
+		// a newer version opened another tenant's grid and wrote the sizing
+		// bucket, which samedis.care shares across tenants, in its format
+		const newerSizing = JSON.stringify({
+			v: DATA_GRID_PERSIST_VERSION + 1,
+			sizing: { name: 300 },
+		});
+		localStorage.setItem(localKeyOf(SIZING, { model: "m" }), newerSizing);
+		server.data[keyOf(FILTERS, keys)] = JSON.stringify({
+			v: DATA_GRID_PERSIST_VERSION,
+			shown: ["name", "role"],
+			hidden: ["secret"],
+			search: "kept",
+		});
+		const local = vi.spyOn(LocalStorageProviderInstance, "setItem");
+		render(smp(keys));
+		await gridIdle();
+		expect(grid!.state.search).toBe("kept");
+		autoFit();
+		expect(local).not.toHaveBeenCalled();
+		expect(server.writes).toEqual([]);
+		expect(localStorage.getItem(localKeyOf(SIZING, { model: "m" }))).toBe(
+			newerSizing,
+		);
+
+		act(() => grid!.setState((prev) => ({ ...prev, search: "typed" })));
+		await waitFor(() =>
+			expect(persisted(server.data[keyOf(FILTERS, keys)]).search).toBe("typed"),
+		);
+	});
 	it("[ISSUE-3496-ITEM-1] a tenant's legacy filters bucket survives a visit after another tenant wrote the shared sizing bucket as v2", async () => {
 		const server = new MemoryProvider();
 		configureLikeSamedis(server);
