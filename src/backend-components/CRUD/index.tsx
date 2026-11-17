@@ -14,6 +14,7 @@ import {
 } from "../../backend-integration/Model/Model";
 import BackendDataGrid, { BackendDataGridProps } from "../DataGrid";
 import { Form, FormProps } from "../Form";
+import { FORM_PAGE_MOVE_STATE } from "../Form/FormPageGuard";
 import {
 	hasPermission,
 	Permission,
@@ -411,8 +412,12 @@ const CRUD = <M extends ModelUnknown>(
 					.split("/")
 					.filter((segment) => segment)
 					.slice(1);
+				// the Form stays (skipNextFormIdReset), so this moves the form page rather than
+				// leaving it, and its leave guard lets it pass: a control's own dirty state may
+				// not have caught up with the saved record yet
 				navigate([`${routeUrl}/${id}`, ...subPath].join("/"), {
 					replace: true,
+					state: FORM_PAGE_MOVE_STATE,
 				});
 			}
 

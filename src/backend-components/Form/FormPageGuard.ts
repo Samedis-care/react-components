@@ -65,6 +65,16 @@ export interface UseFormPageGuardParams {
 }
 
 /**
+ * The history state of a navigation that moves a form page to another url rather than
+ * leaving it: CRUD's REPLACE from the create form to the record it has just saved
+ * (<url>/new → <url>/<id>), which keeps the Form and everything on it. The leave guard lets
+ * it pass, whatever the form's dirty state, and keeps guarding the page at its new url.
+ */
+export const FORM_PAGE_MOVE_STATE = Object.freeze({
+	formPageMove: true,
+});
+
+/**
  * Does a navigation to pathname stay inside the form page (routed tab panels, a routed
  * stepper)? It does when the Form's nearest Route still renders at pathname with the same
  * url: the url itself or a path below it (/rec/1 → /rec/1/more), not one that only starts
@@ -84,7 +94,8 @@ const isInsideFormPage = (
 
 /**
  * The leave guard of a Form's unsaved changes: while the form is dirty, a navigation asks
- * "Leave form page?" (a navigation inside the form's Route passes, unless disableRouting),
+ * "Leave form page?" (a navigation inside the form's Route passes, unless disableRouting, and
+ * so does a move of the page marked with FORM_PAGE_MOVE_STATE),
  * closing the browser tab asks (UnsafeToLeave), and so does closing the FullFormDialog the
  * Form is in. A form that is read-only for a reason other than a save takes no guard.
  *
@@ -165,6 +176,16 @@ const useFormPageGuard = (params: UseFormPageGuardParams): FormPageGuard => {
 			if (!dirtyRef.current) {
 				applyGuards(false);
 				transition.retry();
+				return;
+			}
+			// the form page moves to another url and stays (CRUD's move to the saved record):
+			// nothing is left, even if a control's own dirty state lags behind the save. Only
+			// the REPLACE counts: a later POP back to that history entry carries the state too.
+			if (
+				transition.action === Action.Replace &&
+				transition.location.state === FORM_PAGE_MOVE_STATE
+			) {
+				passThrough();
 				return;
 			}
 			// special handling: routing inside form page (e.g. routed tab panels, routed stepper)

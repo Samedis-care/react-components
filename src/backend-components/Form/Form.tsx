@@ -2061,10 +2061,11 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 					// re-render after post submit handler, this way we avoid mounting new components before the form is fully saved
 					setValues(valuesRef.current);
 					setValuesStaged(valuesStagedRef.current);
-					// the record was saved, so the form is clean again. Announce it once the
-					// post submit handlers have had their say, and before onSubmit, so it
+					// the record was saved, so its model fields are clean again. Announce it once
+					// the post submit handlers have had their say, and before onSubmit, so it
 					// (and the caller awaiting submit) can navigate away without hitting the
-					// dirty guard
+					// dirty guard. A custom dirty field counts until its control clears it; one
+					// that does so in an effect catches up only once the save has rendered
 					syncDirtyState();
 
 					if (onSubmit) {
