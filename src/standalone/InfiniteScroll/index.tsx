@@ -44,7 +44,8 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 * after mount.
 	 *
 	 * A call is made with the callback of the latest render: a callback that is
-	 * replaced or removed while a call waits is not called.
+	 * replaced or removed while a call waits is not called. A call that still
+	 * waits when the component unmounts is not made.
 	 * @default 100
 	 */
 	callBackDebounce?: number;
@@ -169,6 +170,8 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 	}
 
 	componentWillUnmount(): void {
+		this.cancelLoad("loadMoreTop");
+		this.cancelLoad("loadMoreBottom");
 		if (!this.wrapper) throw new Error("Ref is null");
 		this.wrapper.removeEventListener("scroll", this.handleScroll);
 		this.observeSize(false);
@@ -245,8 +248,7 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 	 * `callBackDebounce` (a request replaces the pending one), or right away for 0
 	 */
 	private requestLoad = (name: LoadCallbackName): void => {
-		window.clearTimeout(this.loadTimers[name]);
-		this.loadTimers[name] = 0;
+		this.cancelLoad(name);
 		const wait = this.props.callBackDebounce ?? 100;
 		if (wait === 0) {
 			this.callLoad(name);
@@ -256,6 +258,15 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 			this.loadTimers[name] = 0;
 			this.callLoad(name);
 		}, wait);
+	};
+
+	/**
+	 * Drops the call of the `loadMoreTop` or `loadMoreBottom` prop that waits
+	 * for `callBackDebounce`, if any
+	 */
+	private cancelLoad = (name: LoadCallbackName): void => {
+		window.clearTimeout(this.loadTimers[name]);
+		this.loadTimers[name] = 0;
 	};
 
 	/**

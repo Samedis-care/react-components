@@ -612,6 +612,71 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 			expect(bottom).not.toHaveBeenCalled();
 		});
 
+		it("[ISSUE-3471-ITEM-3] does not call loadMoreBottom after unmount", () => {
+			scrollHeightOf = () => 300;
+			const bottom = vi.fn();
+			const { unmount } = render(
+				<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+					<div />
+				</InfiniteScroll>,
+			);
+			// the mount fill call is pending when the list goes away
+			unmount();
+			advance(200);
+			expect(bottom).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3471-ITEM-3] does not call loadMoreTop after unmount", () => {
+			const top = vi.fn();
+			const { container, unmount } = render(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={top}
+					loadMoreBottom={vi.fn()}
+				>
+					<div />
+				</InfiniteScroll>,
+			);
+			// the user scrolls to the top and leaves the page while the call waits
+			scrollTo(getScroller(container), 0);
+			unmount();
+			advance(200);
+			expect(top).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3471-ITEM-3] leaves no timer behind on unmount", () => {
+			scrollHeightOf = () => 300;
+			const { container, unmount } = render(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={vi.fn()}
+					loadMoreBottom={vi.fn()}
+				>
+					<div />
+				</InfiniteScroll>,
+			);
+			scrollTo(getScroller(container), 0);
+			// a fill call and a top call wait
+			expect(vi.getTimerCount()).toBe(2);
+			unmount();
+			expect(vi.getTimerCount()).toBe(0);
+		});
+
+		it("[ISSUE-3471-ITEM-3] fills the container once under StrictMode", () => {
+			scrollHeightOf = () => 300;
+			const bottom = vi.fn();
+			// StrictMode unmounts and mounts again right after the first mount
+			render(
+				<React.StrictMode>
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						<div />
+					</InfiniteScroll>
+				</React.StrictMode>,
+			);
+			advance(200);
+			expect(bottom).toHaveBeenCalledTimes(1);
+		});
+
 		it("[ISSUE-3471-ITEM-4] does not load page after page while the scroll container is hidden", () => {
 			// what browsers report for a scroll container inside display: none
 			clientHeight = 0;
