@@ -4,7 +4,8 @@ import combineClassNames from "../../utils/combineClassNames";
 
 export interface InlineSwitchProps {
 	/**
-	 * Value for switch position
+	 * Value for switch position. While true, the root has the class
+	 * `CcInlineSwitch-checked`.
 	 */
 	value: boolean;
 	/**
@@ -13,7 +14,8 @@ export interface InlineSwitchProps {
 	 */
 	onChange?: (checked: boolean) => void;
 	/**
-	 * Display switch control?
+	 * Display switch control? While true, the root has the class
+	 * `CcInlineSwitch-visible`.
 	 */
 	visible: boolean;
 	/**
@@ -22,7 +24,9 @@ export interface InlineSwitchProps {
 	label?: React.ReactNode;
 	/**
 	 * Disables the switch: it cannot be focused or toggled, also not through
-	 * its label, `onChange` is not called, and switch and label are greyed out
+	 * its label, `onChange` is not called, and switch and label are greyed out.
+	 * While true, the root and the switch wrapper have the class
+	 * `CcInlineSwitch-disabled`.
 	 * @default false
 	 */
 	disabled?: boolean;
@@ -90,6 +94,11 @@ const AntSwitch = styled(Switch, { name: "CcInlineSwitch", slot: "switch" })(
 	}),
 );
 
+// state classes of the root, see InlineSwitchClassKey
+const CHECKED_CLASS = "CcInlineSwitch-checked";
+const VISIBLE_CLASS = "CcInlineSwitch-visible";
+const DISABLED_CLASS = "CcInlineSwitch-disabled";
+
 const StyledRoot = styled("div", { name: "CcInlineSwitch", slot: "root" })({
 	marginTop: 15,
 });
@@ -100,11 +109,26 @@ const StyledSwitchWrapper = styled(Typography, {
 })(({ theme }) => ({
 	lineHeight: "30px",
 	float: "right",
-	"&.CcInlineSwitch-disabled": {
+	[`&.${DISABLED_CLASS}`]: {
 		color: theme.palette.text.disabled,
 	},
 })) as typeof Typography;
 
+/**
+ * Keys of the theme's `components.CcInlineSwitch.styleOverrides`, also the
+ * keys of the `classes` prop:
+ * - `root`: the outer `<div>`
+ * - `switchWrapper`: the wrapper of switch and label
+ * - `switch`: the switch's root (MUI's `.MuiSwitch-root`)
+ *
+ * No slot receives an `ownerState`, and the theme has no `variants` for
+ * InlineSwitch: a function override is called with the theme. The props are
+ * state classes on the root instead: `CcInlineSwitch-checked` while `value`
+ * is true, `CcInlineSwitch-visible` while `visible` is true and
+ * `CcInlineSwitch-disabled` while `disabled` is true (the switch wrapper has
+ * that one too). A theme styles a state with a selector in the root's
+ * override, e.g. `root: { "&.CcInlineSwitch-checked": { … } }`.
+ */
 export type InlineSwitchClassKey = "switch" | "root" | "switchWrapper";
 
 const InlineSwitch = (inProps: InlineSwitchProps) => {
@@ -130,13 +154,21 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 	);
 
 	return (
-		<StyledRoot className={combineClassNames([className, classes?.root])}>
+		<StyledRoot
+			className={combineClassNames([
+				className,
+				classes?.root,
+				value && CHECKED_CLASS,
+				visible && VISIBLE_CLASS,
+				disabled && DISABLED_CLASS,
+			])}
+		>
 			{visible && (
 				<StyledSwitchWrapper
 					component="div"
 					className={combineClassNames([
 						classes?.switchWrapper,
-						disabled && "CcInlineSwitch-disabled",
+						disabled && DISABLED_CLASS,
 					])}
 					variant={"caption"}
 				>

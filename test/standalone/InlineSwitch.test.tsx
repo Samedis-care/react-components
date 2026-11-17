@@ -1,13 +1,13 @@
 import React from "react";
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+	act,
+	cleanup,
+	fireEvent,
 	render,
 	screen,
-	fireEvent,
-	cleanup,
-	act,
 } from "@testing-library/react";
-import { ThemeProvider, createTheme } from "@mui/material";
+import { createTheme, Theme, ThemeProvider } from "@mui/material";
 import InlineSwitch from "../../src/standalone/InlineSwitch";
 import BaseSelector, {
 	BaseSelectorData,
@@ -19,11 +19,17 @@ afterEach(cleanup);
 
 const theme = createTheme();
 
-const renderSwitch = (ui: React.ReactElement) =>
-	render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+const renderSwitch = (ui: React.ReactElement, t: Theme = theme) =>
+	render(<ThemeProvider theme={t}>{ui}</ThemeProvider>);
 
 /** lets the promises started by the last event (option loads) settle */
 const flush = () => act(() => Promise.resolve());
+
+const rootOf = (container: HTMLElement) => {
+	const root = container.firstElementChild;
+	if (!(root instanceof HTMLElement)) throw new Error("root missing");
+	return root;
+};
 
 const switchRootOf = (container: HTMLElement) => {
 	const el = container.querySelector(".MuiSwitch-root");
@@ -113,6 +119,98 @@ describe("InlineSwitch styling and theme", () => {
 			/>,
 		);
 		expect(switchRootOf(container)).toHaveClass("s");
+	});
+	it("[ISSUE-3465-ITEM-4] marks the root with CcInlineSwitch-checked, -visible and -disabled while value, visible and disabled are set", () => {
+		const classes = { root: "r" };
+		const { container, rerender } = renderSwitch(
+			<InlineSwitch
+				value
+				visible
+				disabled
+				label="L"
+				className="c"
+				classes={classes}
+			/>,
+		);
+		const root = rootOf(container);
+		expect(root).toHaveClass(
+			"c",
+			"r",
+			"CcInlineSwitch-checked",
+			"CcInlineSwitch-visible",
+			"CcInlineSwitch-disabled",
+		);
+
+		rerender(
+			<ThemeProvider theme={theme}>
+				<InlineSwitch
+					value={false}
+					visible={false}
+					className="c"
+					classes={classes}
+				/>
+			</ThemeProvider>,
+		);
+		expect(rootOf(container)).toBe(root);
+		expect(root).toHaveClass("c", "r");
+		expect(root).not.toHaveClass("CcInlineSwitch-checked");
+		expect(root).not.toHaveClass("CcInlineSwitch-visible");
+		expect(root).not.toHaveClass("CcInlineSwitch-disabled");
+	});
+	it("[ISSUE-3465-ITEM-4] a theme styles the root by value, visible and disabled through its state classes, with function overrides for every slot", () => {
+		const t = createTheme({
+			components: {
+				CcInlineSwitch: {
+					styleOverrides: {
+						root: ({ theme: th }) => ({
+							paddingTop: th.spacing(1),
+							"&.CcInlineSwitch-checked": { outlineStyle: "dotted" },
+							"&:not(.CcInlineSwitch-visible)": { paddingTop: 7 },
+							"&.CcInlineSwitch-disabled": { outlineColor: "rgb(255, 0, 0)" },
+						}),
+						switchWrapper: ({ theme: th }) => ({ paddingLeft: th.spacing(2) }),
+						switch: ({ theme: th }) => ({ marginLeft: th.spacing(3) }),
+					},
+				},
+			},
+		});
+		const { container } = renderSwitch(
+			<>
+				<InlineSwitch value={true} visible label="On" />
+				<InlineSwitch value={false} visible={false} />
+				<InlineSwitch value={false} visible disabled label="Off" />
+			</>,
+			t,
+		);
+		const [on, hidden, disabled] = Array.from(container.children);
+		expect(getComputedStyle(on).outlineStyle).toBe("dotted");
+		expect(getComputedStyle(on).paddingTop).toBe("8px");
+		expect(getComputedStyle(on).outlineColor).not.toBe("rgb(255, 0, 0)");
+		expect(getComputedStyle(hidden).outlineStyle).not.toBe("dotted");
+		expect(getComputedStyle(hidden).paddingTop).toBe("7px");
+		expect(getComputedStyle(disabled).outlineColor).toBe("rgb(255, 0, 0)");
+		expect(getComputedStyle(disabled).outlineStyle).not.toBe("dotted");
+		expect(getComputedStyle(on.firstElementChild!).paddingLeft).toBe("16px");
+		expect(getComputedStyle(switchRootOf(container)).marginLeft).toBe("24px");
+	});
+	it("[ISSUE-3465-ITEM-4] types function styleOverrides without an ownerState and offers no variants, which nothing would match", () => {
+		const t = createTheme({
+			components: {
+				CcInlineSwitch: {
+					styleOverrides: {
+						// @ts-expect-error InlineSwitch's slots get no ownerState; the root has state classes
+						root: ({ ownerState }) => ({
+							color: ownerState ? "red" : "blue",
+						}),
+					},
+					// @ts-expect-error InlineSwitch has no theme variants; the root has state classes
+					variants: [{ props: { value: true }, style: { color: "red" } }],
+				},
+			},
+		});
+		expect(t.components?.CcInlineSwitch?.styleOverrides?.root).toEqual(
+			expect.any(Function),
+		);
 	});
 });
 

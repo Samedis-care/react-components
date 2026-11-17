@@ -36,6 +36,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-17 | [LocaleSelectorDialog's visible box is the paper slot](2026-11-17-locale-selector-dialog-paper-slot.md) | theme |
 | 2026-11-17 | [Theme style override functions of most CC components get no ownerState](2026-11-17-theme-style-overrides-without-owner-state.md) | type, theme |
 | 2026-11-17 | [A disabled selector disables its switch](2026-11-17-base-selector-disabled-disables-switch.md) | behavior |
+| 2026-11-17 | [A theme styles InlineSwitch's states through classes, not ownerState or variants](2026-11-17-inline-switch-state-classes.md) | type, theme |
 | 2026-11-13 | [SignalPortlet shows no "Last refresh" label for 0 or an invalid time](2026-11-13-signal-portlet-no-label-without-time.md) | behavior |
 | 2026-11-13 | [The date pickers report a blur when focus leaves the open calendar](2026-11-13-picker-blur-on-leaving-the-calendar.md) | behavior |
 | 2026-11-13 | [Matrix columns are 56px wide by default, and the add chip is 24x24](2026-11-13-matrix-targets-24px.md) | behavior |

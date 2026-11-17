@@ -601,10 +601,12 @@ declare module "@mui/material/styles" {
 			styleOverrides?: StyleOverridesWithoutOwnerState<FormPageLayoutClassKey>;
 			variants?: ComponentsVariants["CcFormPageLayout"];
 		};
+		// No variants: MUI matches them against the root's own props and
+		// ownerState, which hold none of InlineSwitch's props. A theme reaches
+		// the props through the root's state classes (see InlineSwitchClassKey).
 		CcInlineSwitch?: {
 			defaultProps?: ComponentsPropsList["CcInlineSwitch"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcInlineSwitch"];
-			variants?: ComponentsVariants["CcInlineSwitch"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<InlineSwitchClassKey>;
 		};
 		CcBackendSingleSelect?: {
 			defaultProps?: ComponentsPropsList["CcBackendSingleSelect"];
