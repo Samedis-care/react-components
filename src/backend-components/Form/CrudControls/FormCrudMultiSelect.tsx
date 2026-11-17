@@ -37,6 +37,15 @@ export interface FormCrudMultiSelectProps<
 	 * @default false
 	 */
 	readOnly?: boolean;
+	/**
+	 * Marks the field as modified (a dot after its label) while picks, removals or changes
+	 * of entries are queued, until the Form saves them
+	 * @remarks Follows the Form's `showDirtyState` unless set. The entries' own marks
+	 *          ("Added", "Removed" with a restore button) are always shown.
+	 * @see CrudMultiSelectProps.showDirtyState
+	 * @default the Form's showDirtyState
+	 */
+	showDirtyState?: boolean;
 }
 
 /**
@@ -66,7 +75,7 @@ const FormCrudMultiSelect = <
 		useLazyCrudConnector<Record<string, unknown>>(connectorParams);
 	// read once, like the connector's: the validate messages stay under the queue's name
 	const field = useRef(connectorParams.field).current;
-	const { readOnly, readOnlyReasons, errorComponent } =
+	const { readOnly, readOnlyReasons, errorComponent, showDirtyState } =
 		useFormContextLite<ModelUnknown>();
 	// a save makes the Form read-only too, but changing the field then would take the user's
 	// focus and typed search away: while it runs, the field only takes no picks or removals
@@ -83,6 +92,7 @@ const FormCrudMultiSelect = <
 			errorComponent={errorComponent}
 			readOnly={otherProps.readOnly || readOnlyBesidesSaving}
 			blockWrites={otherProps.blockWrites || readOnly}
+			showDirtyState={otherProps.showDirtyState ?? showDirtyState}
 			field={field}
 			ref={ref}
 		/>

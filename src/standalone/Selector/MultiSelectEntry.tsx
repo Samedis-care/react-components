@@ -1,5 +1,6 @@
 import React from "react";
 import {
+	Chip,
 	Divider,
 	ListItem,
 	ListItemSecondaryAction,
@@ -13,9 +14,18 @@ import {
 	SmallListItemIcon,
 } from "../Small";
 import { MultiSelectorData } from "./MultiSelect";
-import { Cancel as RemoveIcon } from "@mui/icons-material";
+import {
+	Cancel as RemoveIcon,
+	RestoreFromTrash as RestoreIcon,
+} from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 import useCCTranslations from "../../utils/useCCTranslations";
+
+/**
+ * A selected entry's change that is not saved yet: "added" to the selection, or "removed"
+ * from it
+ */
+export type MultiSelectChangeState = "added" | "removed";
 
 export interface MultiSelectEntryProps<DataT extends MultiSelectorData> {
 	/**
@@ -35,6 +45,21 @@ export interface MultiSelectEntryProps<DataT extends MultiSelectorData> {
 	 * @param evt
 	 */
 	handleDelete?: (evt: React.MouseEvent<HTMLButtonElement>) => void;
+	/**
+	 * The entry's change that is not saved yet, if any
+	 * @remarks Shown as a text after the label ("Added", "Removed"), not by colour alone. A
+	 *          removed entry's label is struck through, and instead of the remove button it
+	 *          has a restore button (handleRestore).
+	 * @default undefined (no pending change)
+	 */
+	changeState?: MultiSelectChangeState;
+	/**
+	 * Restore handler of a removed entry (changeState "removed"): its restore button, named
+	 * "Restore <label>", takes the place of the remove button. Without it the removed entry
+	 * has no button.
+	 * @param evt The click on the restore button, whose `name` is the entry's value
+	 */
+	handleRestore?: (evt: React.MouseEvent<HTMLButtonElement>) => void;
 	/**
 	 * The data entry to render
 	 */
@@ -103,6 +128,22 @@ const Label = styled(ListItemText, {
 		textOverflow: "ellipsis",
 		overflow: "hidden",
 	},
+	// the change's text follows, and keeps the room for the button
+	"&.CcMultiSelectEntry-added, &.CcMultiSelectEntry-removed": {
+		paddingRight: 8,
+	},
+	"&.CcMultiSelectEntry-removed > span": {
+		textDecoration: "line-through",
+	},
+});
+
+// the text of a change that is not saved yet, after the label
+const ChangeState = styled(Chip, {
+	name: "CcMultiSelectEntry",
+	slot: "changeState",
+})({
+	flexShrink: 0,
+	marginRight: 32,
 });
 
 const StyledRemoveButton = styled(SmallIconButton, {
@@ -113,6 +154,11 @@ const StyledRemoveButton = styled(SmallIconButton, {
 const StyledRemoveIcon = styled(RemoveIcon, {
 	name: "CcMultiSelectEntry",
 	slot: "iconSvg",
+})({});
+
+const StyledRestoreIcon = styled(RestoreIcon, {
+	name: "CcMultiSelectEntry",
+	slot: "restoreIconSvg",
 })({});
 
 const StyledDivider = styled(Divider, {
@@ -141,14 +187,23 @@ const StyledImage = styled("img", {
 );
 
 export type MultiSelectEntryClassKey =
-	"root" | "selected" | "label" | "icon" | "iconSvg" | "divider" | "image";
+	| "root"
+	| "selected"
+	| "label"
+	| "changeState"
+	| "icon"
+	| "iconSvg"
+	| "restoreIconSvg"
+	| "divider"
+	| "image";
 
 /**
  * One selected entry of MultiSelect, rendered as a list item (`<li>`, the
  * `root` slot) of the list of selected entries: the row (`selected`) with the
- * optional icon and the label, and beside it the remove button (`icon`) when
- * `handleDelete` is set. With `data.onClick` the row is a button, otherwise
- * plain text.
+ * optional icon, the label and the text of a change that is not saved yet
+ * (`changeState`), and beside it the remove button (`icon`) when `handleDelete`
+ * is set, or for a removed entry the restore button when `handleRestore` is set.
+ * With `data.onClick` the row is a button, otherwise plain text.
  */
 const MultiSelectEntry = <DataT extends MultiSelectorData>(
 	inProps: MultiSelectEntryProps<DataT>,
@@ -159,6 +214,8 @@ const MultiSelectEntry = <DataT extends MultiSelectorData>(
 		enableIcons,
 		enableDivider,
 		handleDelete,
+		changeState,
+		handleRestore,
 		data,
 		classes,
 		iconSize,
@@ -181,9 +238,29 @@ const MultiSelectEntry = <DataT extends MultiSelectorData>(
 					)}
 				</SmallListItemIcon>
 			)}
-			<Label className={classes?.label}>{data.label}</Label>
+			<Label
+				className={combineClassNames([
+					classes?.label,
+					changeState && `CcMultiSelectEntry-${changeState}`,
+				])}
+			>
+				{data.label}
+			</Label>
+			{changeState && (
+				<ChangeState
+					size={"small"}
+					variant={"outlined"}
+					color={changeState === "added" ? "success" : "default"}
+					label={t(`standalone.selector.multi-select.change.${changeState}`)}
+					className={classes?.changeState}
+				/>
+			)}
 		</>
 	);
+	// a removed entry is restored where it would be removed: one button, so that the
+	// focus stays on it when the entry changes from one to the other
+	const restorable = changeState === "removed";
+	const handleAction = restorable ? handleRestore : handleDelete;
 	const rowOwnerState = { unClickable: !data.onClick, ignore: !!data.ignore };
 
 	return (
@@ -201,19 +278,25 @@ const MultiSelectEntry = <DataT extends MultiSelectorData>(
 					{rowContent}
 				</SelectedText>
 			)}
-			{handleDelete && (
+			{handleAction && (
 				<ListItemSecondaryAction>
 					<StyledRemoveButton
 						className={classes?.icon}
 						edge={"end"}
 						name={data.value}
-						disabled={!handleDelete}
-						onClick={handleDelete}
-						aria-label={t("standalone.selector.multi-select.remove-item", {
-							ITEM: data.label,
-						})}
+						onClick={handleAction}
+						aria-label={t(
+							restorable
+								? "standalone.selector.multi-select.restore-item"
+								: "standalone.selector.multi-select.remove-item",
+							{ ITEM: data.label },
+						)}
 					>
-						<StyledRemoveIcon className={classes?.iconSvg} />
+						{restorable ? (
+							<StyledRestoreIcon className={classes?.restoreIconSvg} />
+						) : (
+							<StyledRemoveIcon className={classes?.iconSvg} />
+						)}
 					</StyledRemoveButton>
 				</ListItemSecondaryAction>
 			)}

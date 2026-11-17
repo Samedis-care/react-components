@@ -13,7 +13,10 @@ import {
 	Typography,
 	useThemeProps,
 } from "@mui/material";
-import MultiSelectEntry, { MultiSelectEntryProps } from "./MultiSelectEntry";
+import MultiSelectEntry, {
+	MultiSelectChangeState,
+	MultiSelectEntryProps,
+} from "./MultiSelectEntry";
 import { showConfirmDialogBool } from "../../non-standalone/Dialog/Utils";
 import { DialogContext } from "../../framework/DialogContextProvider";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -53,6 +56,23 @@ export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
 	 */
 	selected: DataT[];
 	/**
+	 * The values of the entries in `selected` that were added but are not saved yet: each is
+	 * marked "Added" (MultiSelectEntryProps.changeState)
+	 * @default none
+	 */
+	added?: string[];
+	/**
+	 * Entries that were removed from the selection but are not saved yet. They are listed
+	 * after `selected` (sorted together with them by `selectedSort`), struck through and
+	 * marked "Removed", with a restore button where an entry's remove button is: restoring
+	 * one calls `onSelect` with the selection and the entry appended. Not part of the
+	 * selection otherwise: `onSelect` does not report them, and they are not offered as
+	 * options.
+	 * @remarks No restore button while disabled or read-only, as no remove button
+	 * @default none
+	 */
+	removed?: DataT[];
+	/**
 	 * Shows the selection without a way to change it, as the read-only file upload does:
 	 * the label, then the selected entries without remove buttons, or "No entries" when
 	 * none is selected. There is no search field, so nothing that looks editable: no
@@ -66,6 +86,9 @@ export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
 	 * Specify a custom component for displaying multi select items. The entries
 	 * are the items of one list (`<ul>`), so its root must be an `<li>`, e.g.
 	 * MUI's ListItem, as MultiSelectEntry renders.
+	 * @remarks With `added` or `removed` it has to show `changeState` and render
+	 *          `handleRestore`, as MultiSelectEntry does: a removed entry otherwise looks
+	 *          selected and cannot be restored.
 	 */
 	selectedEntryRenderer?: React.ComponentType<MultiSelectEntryProps<DataT>>;
 	/**
@@ -157,6 +180,16 @@ const StyledBaseSelector = styled(BaseSelector, {
 export type MultiSelectClassKey =
 	"root" | "selectedEntry" | "selector" | "label" | "empty";
 
+const NO_ENTRIES: never[] = [];
+
+/**
+ * An entry as MultiSelect lists it: a selected or a removed one
+ */
+interface ListedEntry<DataT extends MultiSelectorData> {
+	data: DataT;
+	changeState: MultiSelectChangeState | undefined;
+}
+
 const MultiSelect = <DataT extends MultiSelectorData>(
 	inProps: MultiSelectProps<DataT>,
 ) => {
@@ -165,6 +198,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 		onLoad,
 		onSelect,
 		selected,
+		added,
 		enableIcons,
 		selectedEntryRenderer,
 		disabled,
@@ -189,13 +223,32 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
 	const getId = getIdOfData ?? getIdDefault;
 
-	const selectedIds = useMemo(() => selected.map(getId), [getId, selected]);
+	const removed = props.removed ?? NO_ENTRIES;
 
-	// the selected entries are filtered out of the options on top of whatever the caller wants filtered
+	const selectedIds = useMemo(() => selected.map(getId), [getId, selected]);
+	const removedIds = useMemo(() => removed.map(getId), [getId, removed]);
+
+	// the selected entries are filtered out of the options on top of whatever the caller
+	// wants filtered, and so are the removed ones: they come back through their restore button
 	const combinedFilterIds = useMemo(
-		() => [...(filterIds ?? []), ...selectedIds],
-		[filterIds, selectedIds],
+		() => [...(filterIds ?? []), ...selectedIds, ...removedIds],
+		[filterIds, selectedIds, removedIds],
 	);
+
+	const listed = useMemo((): ListedEntry<DataT>[] => {
+		const entries: ListedEntry<DataT>[] = [
+			...selected.map((data) => ({
+				data,
+				changeState: added?.includes(data.value)
+					? ("added" as const)
+					: undefined,
+			})),
+			...removed.map((data) => ({ data, changeState: "removed" as const })),
+		];
+		return selectedSort
+			? entries.sort((a, b) => selectedSort(a.data, b.data))
+			: entries;
+	}, [added, removed, selected, selectedSort]);
 
 	const EntryRender: React.ComponentType<MultiSelectEntryProps<DataT>> =
 		selectedEntryRenderer || MultiSelectEntry;
@@ -275,6 +328,16 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 		[onSelect, selected, genericDeleteConfirm, confirmDelete],
 	);
 
+	const handleRestore = useCallback(
+		(evt: React.MouseEvent<HTMLButtonElement>) => {
+			evt.stopPropagation(); // don't trigger onClick event on item itself
+			const entry = removed.find((s) => s.value === evt.currentTarget.name);
+			if (!entry || !onSelect) return;
+			onSelect([...selected, entry]);
+		},
+		[onSelect, removed, selected],
+	);
+
 	const handleSetData = useCallback(
 		(newValue: DataT) => {
 			if (!onSelect) return;
@@ -287,21 +350,25 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 		[getId, onSelect, selected],
 	);
 
-	const entries = props.selected.length > 0 && (
+	const locked = disabled || readOnly;
+	const entries = listed.length > 0 && (
 		<List
 			disablePadding
 			aria-labelledby={readOnly && label ? labelId : undefined}
 		>
-			{(selectedSort
-				? [...props.selected].sort(selectedSort)
-				: props.selected
-			).map((data: DataT, index: number) => (
+			{listed.map(({ data, changeState }, index: number) => (
 				<EntryRender
 					key={getId(data) || index.toString(16)}
-					enableDivider={props.selected.length === index - 1}
+					enableDivider={listed.length === index - 1}
 					enableIcons={enableIcons}
 					handleDelete={
-						disabled || readOnly || data.noDelete ? undefined : handleDelete
+						locked || data.noDelete || changeState === "removed"
+							? undefined
+							: handleDelete
+					}
+					changeState={changeState}
+					handleRestore={
+						locked || changeState !== "removed" ? undefined : handleRestore
 					}
 					data={data}
 					setData={handleSetData}
@@ -361,11 +428,13 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 				<StyledBaseSelector
 					{...props}
 					// @ts-expect-error removed owner state from props to preserve generics
-					ownerState={{ selected: selected.length > 0 }}
+					ownerState={{ selected: listed.length > 0 }}
 					className={classes?.selector}
 					onLoad={multiSelectLoadHandler}
 					selected={null}
 					onSelect={multiSelectHandler}
+					// not by the removed entries: the token remounts the search field, and a save
+					// that sends a removal must leave the focus and the typed text in it
 					refreshToken={(refreshToken ?? "") + selectedIds.join(",")}
 					displaySwitch={displaySwitch}
 					switchLabel={switchLabel}

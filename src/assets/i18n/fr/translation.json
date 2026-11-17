@@ -164,7 +164,12 @@
 					"yes": "Oui",
 					"no": "Non"
 				},
-				"remove-item": "Supprimer {{ITEM}}"
+				"remove-item": "Supprimer {{ITEM}}",
+				"restore-item": "Restaurer {{ITEM}}",
+				"change": {
+					"added": "Ajouté",
+					"removed": "Supprimé"
+				}
 			},
 			"multi-select-with-tags": {
 				"group-input-label": "Ajouter toutes les entrées d'un groupe"

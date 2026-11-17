@@ -10,10 +10,12 @@ import {
 	useContext,
 	useEffect,
 	useImperativeHandle,
+	useMemo,
 	useRef,
 	useState,
 } from "react";
 import toComparisonJson from "../../utils/toComparisonJson";
+import LazyConnector from "../../backend-integration/Connector/LazyConnector";
 import { FormContext, ValidationResult } from "../Form";
 import { BackendMultiSelectProps } from "./BackendMultiSelect";
 import PartialApplyError, {
@@ -147,7 +149,28 @@ export interface UseCrudSelectResult<
 	 */
 	selected: DataT[];
 	/**
-	 * Currently selected entries (raw data)
+	 * The values of the selected entries whose create is queued and not sent yet
+	 * @remarks Only with a LazyConnector, whose writes wait for the Form's save (empty
+	 *          otherwise). An entry's queued write is looked up by its `value`, the record's
+	 *          id.
+	 */
+	added: string[];
+	/**
+	 * The entries removed from the selection whose delete is queued and not sent yet, in the
+	 * order they were removed; not part of `selected`
+	 * @remarks Only with a LazyConnector (empty otherwise). They include the removals queued
+	 *          while the control was unmounted before. An entry leaves the list when its
+	 *          delete is sent, and is selected again by handleSelect with the entry added,
+	 *          which cancels the delete instead of creating the record again.
+	 */
+	removed: DataT[];
+	/**
+	 * Does the LazyConnector hold writes of this control that are not sent yet (picks,
+	 * removals or changes)? Always false with another connector, which writes at once.
+	 */
+	pendingChanges: boolean;
+	/**
+	 * The records the connector listed or created (raw data), including those of `removed`
 	 */
 	initialRawData: Record<string, unknown>[];
 	/**
@@ -159,7 +182,8 @@ export interface UseCrudSelectResult<
 	 * @remarks Ignores the change while the control is disabled. Creates the entries that
 	 *          are not listed yet, deletes the listed ones that are left out, and updates a
 	 *          listed entry only when `serialize` returns something else for it than for
-	 *          the listed entry.
+	 *          the listed entry. An entry of `removed` added back is restored: its queued
+	 *          delete is cancelled, nothing is created.
 	 */
 	handleSelect: (ids: string[], newSelected: DataT[]) => Promise<void>;
 	/**
@@ -273,6 +297,41 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 	const [error, setError] = useState<Error | null>(null);
 	const [loadError, setLoadError] = useState<Error | null>(null);
 	const [selected, setSelected] = useState<DataT[]>([]);
+	// Only a queued write is pending: a LazyConnector sends it when the Form saves, any other
+	// connector has written it by the time it returns.
+	const lazyConnector = connector instanceof LazyConnector ? connector : null;
+	const [removed, setRemoved] = useState<DataT[]>([]);
+	// The queue is not React state: this counts its changes, so that what is read from it
+	// is read again. A removal that left the queue was sent, or cancelled by a restore,
+	// which selects the entry again: either way it is no longer listed as removed.
+	const [queueVersion, setQueueVersion] = useState(0);
+	useEffect(() => {
+		if (!lazyConnector) return;
+		return lazyConnector.addQueueChangeListener(() => {
+			setQueueVersion((version) => version + 1);
+			setRemoved((prev) => {
+				const next = prev.filter(
+					(entry) => lazyConnector.getQueuedOperation(entry.value) === "delete",
+				);
+				return next.length === prev.length ? prev : next;
+			});
+		});
+	}, [lazyConnector]);
+	const added = useMemo(
+		() =>
+			lazyConnector
+				? selected
+						.filter(
+							(entry) =>
+								lazyConnector.getQueuedOperation(entry.value) === "create",
+						)
+						.map((entry) => entry.value)
+				: [],
+		// queueVersion: the queue changed
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[lazyConnector, selected, queueVersion],
+	);
+	const pendingChanges = !!lazyConnector && !lazyConnector.isQueueEmpty();
 	const currentSelected = useRef<DataT[]>([]); // current state of selected, always set this and then use setSelected(currentSelected.current)
 	const [initialRawData, setInitialRawData] = useState<
 		Record<string, unknown>[]
@@ -375,9 +434,15 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 					: [...reported, ...kept].sort(
 							(a, b) => ids.indexOf(a.value) - ids.indexOf(b.value),
 						);
-			// find new entries
-			const newEntries = newSelected.filter(
+			// find new entries: one whose removal is still queued is restored, not created
+			const isQueuedRemoval = (entry: DataT) =>
+				lazyConnector?.getQueuedOperation(entry.value) === "delete";
+			const addedEntries = newSelected.filter(
 				(entry) => !selected.find((selEntry) => selEntry.value === entry.value),
+			);
+			const restoredEntries = addedEntries.filter(isQueuedRemoval);
+			const newEntries = addedEntries.filter(
+				(entry) => !isQueuedRemoval(entry),
 			);
 			// remove new entries from array
 			newSelected = newSelected.filter((entry) =>
@@ -477,6 +542,17 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 			});
 			const updated = await updatePromise;
 			const deleted = await deletePromise;
+			// a removal the LazyConnector queued is listed until it is sent or restored
+			const queuedRemovals = deletedEntries.filter(
+				(entry, index) =>
+					deleted[index].status === "fulfilled" && isQueuedRemoval(entry),
+			);
+			// Cancelled here, next to the state updates below, so that the entry leaves
+			// `removed` (the queue listener) in the render it is selected again. A delete the
+			// Form sent meanwhile cannot be cancelled: that entry stays removed.
+			const restored = restoredEntries.filter(
+				(entry) => lazyConnector?.cancelQueuedOperation(entry.value) ?? false,
+			);
 
 			// create final values: a refused update keeps the entry as it was, a
 			// refused removal keeps the entry selected
@@ -492,6 +568,7 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 				...deletedEntries.filter(
 					(_entry, index) => deleted[index].status === "rejected",
 				),
+				...restored,
 				...created.map(({ entry }) => entry),
 			];
 
@@ -502,9 +579,18 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 			]);
 			currentSelected.current = finalSelected;
 			setSelected(currentSelected.current);
+			if (queuedRemovals.length > 0)
+				setRemoved((prev) => [...prev, ...queuedRemovals]);
 			setError(failures.length > 0 ? toPartialApplyError(failures) : null);
 		},
-		[connector, deserialize, prepareNewEntry, selected, serialize],
+		[
+			connector,
+			deserialize,
+			lazyConnector,
+			prepareNewEntry,
+			selected,
+			serialize,
+		],
 	);
 	const handleSelect = useCallback(
 		async (ids: string[], newSelected: DataT[]) => {
@@ -557,10 +643,19 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 						Promise.resolve(deserialize(record)),
 					),
 				);
+				// A removal queued before the control was last unmounted (a language
+				// switch, a route change) is still pending: index hides it, and hands it back
+				// here. A queued pick is in the index result already.
+				const removedRecords = lazyConnector?.getQueuedDeleteRecords() ?? [];
+				const removedEntries = await Promise.all(
+					removedRecords.map((record) => Promise.resolve(deserialize(record))),
+				);
 
-				setInitialRawData(currentlySelected[0]);
+				// the removed records too: a restored entry is listed from its record
+				setInitialRawData([...currentlySelected[0], ...removedRecords]);
 				currentSelected.current = initialSelected;
 				setSelected(currentSelected.current);
+				setRemoved(removedEntries);
 			} catch (e) {
 				// the field says that the load failed; the error's message is technical
 				// eslint-disable-next-line no-console
@@ -622,6 +717,9 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 		error,
 		loadError,
 		selected,
+		added,
+		removed,
+		pendingChanges,
 		initialRawData,
 		handleSelect,
 		modelToSelectorData,

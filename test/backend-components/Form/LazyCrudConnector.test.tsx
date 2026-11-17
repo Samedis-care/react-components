@@ -1591,3 +1591,206 @@ describe("FormCrudMultiSelect: the form's state", () => {
 		]);
 	});
 });
+
+describe("FormCrudMultiSelect: changes that are not saved yet", () => {
+	/**
+	 * The entries' texts as listed, the mark of a change included (also while the error
+	 * dialog of a failed save hides the page)
+	 */
+	const listed = () =>
+		screen
+			.getAllByRole("listitem", { hidden: true })
+			.map((item) => item.textContent);
+
+	/** the field's dirty marker: "true", "false", or null where it shows no state */
+	const marker = (container: HTMLElement) =>
+		container.querySelector("[data-cc-dirty]")?.getAttribute("data-cc-dirty") ??
+		null;
+
+	const remove = async (label: string) => {
+		fireEvent.click(screen.getByRole("button", { name: `Remove ${label}` }));
+		await settle();
+		await settle();
+	};
+
+	const restore = async (label: string) => {
+		fireEvent.click(screen.getByRole("button", { name: `Restore ${label}` }));
+		await settle();
+		await settle();
+	};
+
+	it("[ISSUE-3505-ITEM-12] with the Form's showDirtyState the field is marked while a change is queued, and no longer once the save sent it", async () => {
+		const { container, sink, ref } = await mountSelector(
+			undefined,
+			{},
+			{ showDirtyState: true },
+		);
+		const before = marker(container);
+		await add(ref);
+		const queued = marker(container);
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		expect({ before, queued, saved: marker(container) }).toEqual({
+			before: "false",
+			queued: "true",
+			saved: "false",
+		});
+	});
+
+	it("[ISSUE-3505-ITEM-12] is not marked without the Form's showDirtyState, and its own showDirtyState wins over the Form's", async () => {
+		const first = await mountSelector();
+		await add(first.ref);
+		const withoutForms = marker(first.container);
+		first.unmount();
+		selSink.ctx = undefined;
+
+		const second = await mountSelector(
+			undefined,
+			{ showDirtyState: false },
+			{ showDirtyState: true },
+		);
+		await add(second.ref);
+		const offOverForms = marker(second.container);
+		second.unmount();
+		selSink.ctx = undefined;
+
+		const third = await mountSelector(undefined, { showDirtyState: true });
+		await add(third.ref);
+		const onWithoutForms = marker(third.container);
+
+		expect({ withoutForms, offOverForms, onWithoutForms }).toEqual({
+			withoutForms: null,
+			offOverForms: null,
+			onWithoutForms: "true",
+		});
+	});
+
+	it("[ISSUE-3505-ITEM-12] marks a queued pick as added, in text, until the save sent it", async () => {
+		const { sink, ref } = await mountSelector();
+		await add(ref);
+		const queued = listed();
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		expect({ queued, saved: listed() }).toEqual({
+			queued: ["Ls1", "Ls2Added"],
+			saved: ["Ls1", "Ls2"],
+		});
+	});
+
+	it("[ISSUE-3505-ITEM-12] keeps a queued removal listed, struck through and marked removed, with a restore button instead of the remove button, until the save sent it", async () => {
+		const { env, sink } = await mountSelector({
+			"joins/1": [
+				{ id: "j1", source_id: "s1" },
+				{ id: "j2", source_id: "s2" },
+			],
+		});
+		await remove("Ls1");
+
+		expect(labels()).toEqual(["Ls2"]);
+		expect(listed()).toEqual(["Ls2", "Ls1Removed"]);
+		expect(
+			screen.getByText("Ls1").closest(".CcMultiSelectEntry-removed"),
+		).not.toBeNull();
+		expect(screen.queryByRole("button", { name: "Remove Ls1" })).toBeNull();
+		expect(
+			screen.getByRole("button", { name: "Restore Ls1" }),
+		).toBeInTheDocument();
+
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+		expect(env.calls).toContain("delete:joins/1:j1");
+		expect(listed()).toEqual(["Ls2"]);
+	});
+
+	it("[ISSUE-3505-ITEM-12] restoring a queued removal cancels it: the entry is selected again, and nothing is written", async () => {
+		const { env, sink } = await mountSelector();
+		await remove("Ls1");
+		expect(sink.ctx!.dirty).toBe(true);
+
+		await restore("Ls1");
+
+		expect(labels()).toEqual(["Ls1"]);
+		expect(listed()).toEqual(["Ls1"]);
+		expect(
+			screen.getByRole("button", { name: "Remove Ls1" }),
+		).toBeInTheDocument();
+		expect(sink.ctx!.dirty).toBe(false);
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+		expect(env.calls).toEqual(["index:joins/1"]);
+	});
+
+	it("[ISSUE-3505-ITEM-12] an end adornment restores a queued removal by selecting the entry again", async () => {
+		const { env, sink } = await mountSelector();
+		await remove("Ls1");
+		const [removed] = selSink.ctx!.removed as JoinData[];
+
+		await select([...selected(), removed]);
+
+		expect(labels()).toEqual(["Ls1"]);
+		expect(selSink.ctx!.removed).toEqual([]);
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+		expect(env.calls).toEqual(["index:joins/1"]);
+	});
+
+	it("[ISSUE-3505-ITEM-12] a queued pick that is removed again leaves the list: there is nothing to restore", async () => {
+		const { sink, ref } = await mountSelector();
+		await add(ref);
+		expect(listed()).toEqual(["Ls1", "Ls2Added"]);
+		await remove("Ls2");
+
+		expect(listed()).toEqual(["Ls1"]);
+		expect(sink.ctx!.dirty).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-12] shows the queued pick and removal again after the control was unmounted, and the removal can still be restored", async () => {
+		const { env, sink, ref } = await mountSelector();
+		await add(ref);
+		await remove("Ls1");
+
+		await hideAndShow();
+		const afterRemount = listed();
+		await restore("Ls1");
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		expect(afterRemount).toEqual(["Ls2Added", "Ls1Removed"]);
+		expect(env.calls).toEqual([
+			"index:joins/1",
+			"index:joins/1",
+			"setApiEndpoint:joins/1",
+			"create:joins/1:s2",
+		]);
+		expect(listed()).toEqual(["Ls2", "Ls1"]);
+	});
+
+	it("[ISSUE-3505-ITEM-12] after the control was unmounted, an end adornment restores a queued removal, listed with its own label", async () => {
+		await mountSelector();
+		await remove("Ls1");
+		await hideAndShow();
+		const [removed] = selSink.ctx!.removed as JoinData[];
+
+		await select([...selected(), removed]);
+		await settle();
+
+		expect(listed()).toEqual(["Ls1"]);
+	});
+
+	it("[ISSUE-3505-ITEM-12] after a refused save, the entries the save did not send stay marked", async () => {
+		const { env, sink, ref } = await mountSelector();
+		env.refuse.add("s2");
+		await remove("Ls1");
+		await add(ref);
+
+		expect(await trySubmit(sink)).not.toBeNull();
+		await settle();
+
+		// the removal was sent before the refused pick, the pick is still queued
+		expect(env.calls).toContain("delete:joins/1:j1");
+		expect(listed()).toEqual(["Ls2Added"]);
+		expect(sink.ctx!.dirty).toBe(true);
+	});
+});

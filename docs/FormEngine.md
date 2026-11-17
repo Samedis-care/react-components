@@ -647,15 +647,19 @@ While `FormCrudMultiSelect` is read-only, disabled or saving, nothing else write
 its ref's `addToSelection` rejects, and the select context's `handleSelect`, which end
 adornments call, ignores the change. An end adornment reads
 `useCrudSelectContext().disabled` to lock its own buttons.
-`FormCrudFileUpload` also follows the form's `showDirtyState` unless its own prop is set.
+`FormCrudFileUpload` and `FormCrudMultiSelect` also follow the form's `showDirtyState` unless
+their own prop is set.
 Outside a form, use `CrudFileUpload` and `CrudMultiImage` with a connector of your own: they
 do not read the form.
 
 Things to know about the queue:
 
 - `FormCrudFileUpload` marks a queued upload as added and a queued removal as struck through,
-  with a restore. `FormCrudMultiImage` shows queued changes as if they were saved: there are
-  no marks, no restore and no dirty marker.
+  with a restore. `FormCrudMultiSelect` marks a queued pick "Added" and lists a queued
+  removal after the selected entries, struck through and marked "Removed", with a restore
+  button where its remove button was; it finds an entry's queued write by the entry's
+  `value`, the record's id. `FormCrudMultiImage` shows queued changes as if they were saved:
+  there are no marks, no restore and no dirty marker.
 - An entry created through the queue has a client-side id (`fake-id-N`). It keeps it in
   `onChange`, and in the multi image's `onPrimaryChange`, also after the save;
   `LazyConnector.mapId` gives the server's id once the queue is sent. The record is saved

@@ -28,6 +28,8 @@ export interface CrudMultiSelectProps<
 			| "modelToSelectorData"
 			| "initialData"
 			| "selected"
+			| "added"
+			| "removed"
 			| "onSelect"
 			| "getIdOfData"
 		>,
@@ -45,6 +47,16 @@ export interface CrudMultiSelectProps<
 	 * @default false
 	 */
 	readOnly?: boolean;
+	/**
+	 * Marks the field as modified (a dot after its label) while picks, removals or changes
+	 * of entries are queued and not saved yet
+	 * @remarks Only with a LazyConnector, whose writes wait for the Form's save; any other
+	 *          connector writes at once, and nothing is marked. An explicit `dirty` wins.
+	 *          The entries' own marks ("Added", "Removed" with a restore button) do not
+	 *          depend on it: they are shown with every LazyConnector.
+	 * @default false
+	 */
+	showDirtyState?: boolean;
 }
 
 export const CrudSelectContext = React.createContext<
@@ -79,10 +91,16 @@ const CrudMultiSelect = <
 		error,
 		loadError,
 		selected,
+		added,
+		removed,
+		pendingChanges,
 		initialRawData,
 		handleSelect,
 		modelToSelectorData,
 	} = crudSelect;
+	// an explicit prop wins, as over the other states the field takes from its props
+	const dirty =
+		props.dirty ?? (props.showDirtyState ? pendingChanges : undefined);
 
 	// until the selection is loaded nothing can be picked or removed, and the components
 	// inside the field, which work on the selection, are not rendered
@@ -110,6 +128,9 @@ const CrudMultiSelect = <
 						endAdornment={locked ? undefined : props.endAdornment}
 						endAdornmentLeft={locked ? undefined : props.endAdornmentLeft}
 						selected={selected.map((entry) => entry.value)}
+						added={added}
+						removed={removed}
+						dirty={dirty}
 						onSelect={handleSelect}
 						modelToSelectorData={modelToSelectorData}
 						// the connector's records seed the selected cache: modelToSelectorData tells them apart

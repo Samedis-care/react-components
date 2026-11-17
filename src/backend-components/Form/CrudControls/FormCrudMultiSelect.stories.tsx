@@ -37,7 +37,7 @@ const meta: Meta = {
 		docs: {
 			description: {
 				component:
-					"`FormCrudMultiSelect` edits a sub-collection of the Form's record: the join records behind `getEndpoint(id)` (here the friends of person 1, `persons/1/friends`). It lists them, and picks and removals are queued (see `useLazyCrudConnector`): nothing is written until the Form is saved, then the queued requests go to the saved record's endpoint. A queued change makes the Form dirty. The request log under the field shows what the backend receives and when.",
+					'`FormCrudMultiSelect` edits a sub-collection of the Form\'s record: the join records behind `getEndpoint(id)` (here the friends of person 1, `persons/1/friends`). It lists them, and picks and removals are queued (see `useLazyCrudConnector`): nothing is written until the Form is saved, then the queued requests go to the saved record\'s endpoint. A queued change makes the Form dirty, and the field shows it: a pick is marked "Added", a removed entry stays listed, struck through and marked "Removed", with a restore button, and with the Form\'s `showDirtyState` the label has the dirty marker. The request log under the field shows what the backend receives and when.',
 			},
 		},
 	},
@@ -190,10 +190,11 @@ interface FriendsFormProps {
 	 */
 	friends: Rows;
 	readOnly?: boolean;
+	showDirtyState?: boolean;
 }
 
 const FriendsForm = (props: FriendsFormProps) => {
-	const { id, friends, readOnly } = props;
+	const { id, friends, readOnly, showDirtyState } = props;
 	const model = useMemo(createTestModel, []);
 	const [log, setLog] = useState<string[]>([]);
 	const getConnector = useMemo(() => {
@@ -216,6 +217,7 @@ const FriendsForm = (props: FriendsFormProps) => {
 			customProps={customProps}
 			disableRouting
 			readOnly={readOnly}
+			showDirtyState={showDirtyState}
 		>
 			{FriendsPage}
 		</Form>
@@ -300,5 +302,115 @@ export const Issue3505Item16SaveKeepsSearchFocusAndText: StoryObj = {
 
 		await expect(input).toHaveFocus();
 		await expect(input).toHaveValue("Ca");
+	},
+};
+
+const CAROL_AND_DAVE: Rows = [
+	...CAROL,
+	{ id: "101", person_id: "4", label: "Dave Brown" },
+];
+
+/**
+ * ISSUE-3505-ITEM-12: a pick and a removal wait for the save, and the field says so: with
+ * the Form's showDirtyState its label has the dirty dot, the pick is marked "Added", and
+ * the removed entry stays listed, struck through and marked "Removed", with a restore
+ * button instead of the remove button.
+ */
+export const Issue3505Item12QueuedChangesAreMarked: StoryObj = {
+	parameters: { a11y: { test: "error" } },
+	render: () => (
+		<FriendsForm id={"1"} friends={CAROL_AND_DAVE} showDirtyState />
+	),
+	play: async ({ canvasElement, userEvent }) => {
+		const canvas = within(canvasElement);
+		await canvas.findByText("Dave Brown", {}, { timeout: 5000 });
+		const label = canvas.getByText("Friends");
+		await expect(label).toHaveAttribute("data-cc-dirty", "false");
+
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Remove Carol Jones" }),
+		);
+		await userEvent.click(canvas.getByRole("combobox", { name: "Friends" }));
+		await userEvent.keyboard("Grace");
+		await userEvent.click(
+			await within(document.body).findByRole(
+				"option",
+				{ name: /Grace Lee/ },
+				{ timeout: 5000 },
+			),
+		);
+		await canvas.findByText("Added");
+
+		// the field's list of entries, not the request log
+		const list = canvas.getByText("Dave Brown").closest("ul")!;
+		await expect(
+			within(list)
+				.getAllByRole("listitem")
+				.map((item) => item.textContent),
+		).toEqual(["Dave Brown", "Grace LeeAdded", "Carol JonesRemoved"]);
+		await expect(label).toHaveAttribute("data-cc-dirty", "true");
+		await expect(
+			getComputedStyle(canvas.getByText("Carol Jones")).textDecorationLine,
+		).toBe("line-through");
+		await expect(
+			getComputedStyle(canvas.getByText("Grace Lee")).textDecorationLine,
+		).toBe("none");
+		await expect(
+			canvas.getByRole("button", { name: "Restore Carol Jones" }),
+		).toBeVisible();
+		await expect(
+			canvas.queryByRole("button", { name: "Remove Carol Jones" }),
+		).toBeNull();
+		// nothing was sent yet
+		await expect(
+			Array.from(
+				canvas.getByTestId("requests").querySelectorAll("li"),
+				(item) => item.textContent,
+			),
+		).toEqual(["GET persons/1/friends"]);
+	},
+};
+
+/**
+ * ISSUE-3505-ITEM-12: a removal is undone from the keyboard where it was made: the focus
+ * stays on the entry's button, which restores it and then removes it again. A restored
+ * entry sends nothing.
+ */
+export const Issue3505Item12RestoreKeepsFocusAndSendsNothing: StoryObj = {
+	parameters: { a11y: { test: "error" } },
+	render: () => <FriendsForm id={"1"} friends={CAROL} />,
+	play: async ({ canvasElement, userEvent }) => {
+		const canvas = within(canvasElement);
+		await canvas.findByText("Carol Jones", {}, { timeout: 5000 });
+
+		canvas.getByRole("button", { name: "Remove Carol Jones" }).focus();
+		await userEvent.keyboard("{Enter}");
+		const restore = await canvas.findByRole("button", {
+			name: "Restore Carol Jones",
+		});
+		await expect(restore).toHaveFocus();
+		await waitFor(() =>
+			expect(canvas.getByTestId("dirty")).toHaveTextContent("yes"),
+		);
+
+		await userEvent.keyboard("{Enter}");
+		const remove = await canvas.findByRole("button", {
+			name: "Remove Carol Jones",
+		});
+		await expect(remove).toHaveFocus();
+		await waitFor(() =>
+			expect(canvas.getByTestId("dirty")).toHaveTextContent("no"),
+		);
+		await expect(canvas.queryByText("Removed")).toBeNull();
+
+		canvas.getByRole("button", { name: "Save" }).click();
+		await waitFor(() =>
+			expect(
+				Array.from(
+					canvas.getByTestId("requests").querySelectorAll("li"),
+					(item) => item.textContent,
+				),
+			).toEqual(["GET persons/1/friends"]),
+		);
 	},
 };

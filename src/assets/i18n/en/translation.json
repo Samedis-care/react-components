@@ -163,6 +163,11 @@
 			"multi-select": {
 				"no-entries": "No entries",
 				"remove-item": "Remove {{ITEM}}",
+				"restore-item": "Restore {{ITEM}}",
+				"change": {
+					"added": "Added",
+					"removed": "Removed"
+				},
 				"delete-confirm": {
 					"title": "Confirm Removal",
 					"message": "Are you sure you want to remove this entry?",

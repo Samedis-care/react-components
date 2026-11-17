@@ -274,6 +274,50 @@ export const MultiSelectFilterIds: StoryObj = {
 	},
 };
 
+// the selection as saved, for the story of changes that are not saved yet
+const SAVED_FRUITS = FRUITS.filter(
+	(fruit) => fruit.value === "apple" || fruit.value === "cherry",
+);
+
+export const MultiSelectPendingChanges: StoryObj = {
+	name: "MultiSelect — changes not saved yet",
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"`added` marks entries of the selection that are not saved yet, and `removed` lists entries removed from it: struck through, after the selection, with a restore button that selects them again. Here the saved selection is Apple and Cherry: Banana was picked and Cherry removed. Remove or restore entries to see the marks follow.",
+			},
+		},
+	},
+	render: () => {
+		const [selected, setSelected] = useState<MultiSelectorData[]>([
+			SAVED_FRUITS[0],
+			FRUITS.find((f) => f.value === "banana")!,
+		]);
+		const onLoad = selectorLocalLoadHandler(FRUITS);
+		const isSelected = (fruit: MultiSelectorData) =>
+			selected.some((entry) => entry.value === fruit.value);
+		const added = selected
+			.filter((entry) => !SAVED_FRUITS.some((s) => s.value === entry.value))
+			.map((entry) => entry.value);
+		const removed = SAVED_FRUITS.filter((fruit) => !isSelected(fruit));
+		return (
+			<div style={{ width: 350 }}>
+				<MultiSelect<MultiSelectorData>
+					label="Fruits"
+					selected={selected}
+					added={added}
+					removed={removed}
+					onSelect={setSelected}
+					onLoad={onLoad}
+					dirty={added.length > 0 || removed.length > 0}
+				/>
+			</div>
+		);
+	},
+};
+
 // ---------------------------------------------------------------------------
 // MultiSelectWithoutGroup stories
 // ---------------------------------------------------------------------------

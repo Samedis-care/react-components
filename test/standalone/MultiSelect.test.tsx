@@ -379,3 +379,101 @@ describe("MultiSelect: read-only", () => {
 		expect(screen.getByRole("combobox", { name: "Fruits" })).toBe(combobox());
 	});
 });
+
+describe("MultiSelect: changes that are not saved yet", () => {
+	/** the list items' texts, in the order they are listed */
+	const listed = () =>
+		within(screen.getByRole("list"))
+			.getAllByRole("listitem")
+			.map((item) => item.textContent);
+
+	it("[ISSUE-3505-ITEM-12] marks an added entry and lists a removed one after the selection, both in text", async () => {
+		renderUi(
+			<Host initial={[APPLE, BANANA]} added={["banana"]} removed={[CHERRY]} />,
+		);
+		await flush();
+
+		expect(listed()).toEqual(["Apple", "BananaAdded", "CherryRemoved"]);
+		expect(
+			screen.getByText("Cherry").closest(".CcMultiSelectEntry-removed"),
+		).not.toBeNull();
+		expect(
+			screen.getByText("Banana").closest(".CcMultiSelectEntry-added"),
+		).not.toBeNull();
+		expect(
+			screen.getByText("Apple").closest(".CcMultiSelectEntry-added"),
+		).toBeNull();
+	});
+
+	it("[ISSUE-3505-ITEM-12] gives a removed entry a restore button instead of the remove button, which selects it again", async () => {
+		const onSel = vi.fn();
+		renderUi(<Host initial={[APPLE]} removed={[CHERRY]} onSel={onSel} />);
+		await flush();
+
+		expect(screen.queryByRole("button", { name: "Remove Cherry" })).toBeNull();
+		fireEvent.click(screen.getByRole("button", { name: "Restore Cherry" }));
+
+		expect(values(onSel)).toEqual([["apple", "cherry"]]);
+	});
+
+	it("[ISSUE-3505-ITEM-12] sorts the removed entries with the selected ones by selectedSort", async () => {
+		renderUi(
+			<Host
+				initial={[ZETA, APPLE]}
+				removed={[CHERRY]}
+				selectedSort={byLabel}
+			/>,
+		);
+		await flush();
+
+		expect(listed()).toEqual(["Apple", "CherryRemoved", "Zeta"]);
+	});
+
+	it("[ISSUE-3505-ITEM-12] does not offer a removed entry as an option", async () => {
+		renderUi(<Host initial={[APPLE]} removed={[CHERRY]} />);
+		await flush();
+		await open();
+
+		expect(
+			screen.getAllByRole("option").map((option) => option.textContent),
+		).toEqual(["Banana", "Zeta"]);
+	});
+
+	it("[ISSUE-3505-ITEM-12] has no restore button while disabled or read-only, and still lists the removed entry", async () => {
+		const { rerender } = renderUi(
+			<Host initial={[APPLE]} removed={[CHERRY]} disabled />,
+		);
+		await flush();
+		const whileDisabled = {
+			restore: !!screen.queryByRole("button", { name: "Restore Cherry" }),
+			listed: listed(),
+		};
+		rerenderUi(
+			rerender,
+			<Host initial={[APPLE]} removed={[CHERRY]} readOnly />,
+		);
+		await flush();
+		const whileReadOnly = {
+			restore: !!screen.queryByRole("button", { name: "Restore Cherry" }),
+			listed: listed(),
+		};
+
+		expect({ whileDisabled, whileReadOnly }).toEqual({
+			whileDisabled: { restore: false, listed: ["Apple", "CherryRemoved"] },
+			whileReadOnly: { restore: false, listed: ["Apple", "CherryRemoved"] },
+		});
+	});
+
+	it("[ISSUE-3505-ITEM-12] translates the marks and the restore button", async () => {
+		await act(async () => {
+			await ccI18n.changeLanguage("de");
+		});
+		renderUi(<Host initial={[APPLE]} added={["apple"]} removed={[CHERRY]} />);
+		await flush();
+
+		expect(listed()).toEqual(["AppleHinzugefügt", "CherryEntfernt"]);
+		expect(
+			screen.getByRole("button", { name: "Cherry wiederherstellen" }),
+		).toBeInTheDocument();
+	});
+});

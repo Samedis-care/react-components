@@ -163,6 +163,11 @@
 			"multi-select": {
 				"no-entries": "Nessuna voce",
 				"remove-item": "Rimuovi {{ITEM}}",
+				"restore-item": "Ripristina {{ITEM}}",
+				"change": {
+					"added": "Aggiunto",
+					"removed": "Rimosso"
+				},
 				"delete-confirm": {
 					"title": "Conferma rimozione",
 					"message": "Sei sicuro di voler rimuovere questa voce?",
