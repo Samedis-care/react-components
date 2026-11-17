@@ -752,6 +752,24 @@ describe("FlowEngine: bugs", () => {
 		expect(sink.ctx!.values.title).toBe("xyz");
 		expect(renders, "renders of the Save button for two keystrokes").toBe(0);
 	});
+	it("[ISSUE-3504-ITEM-16] the stage is not in the history: stage changes add no entry and keep the URL, and a new mount starts at defaultStage", async () => {
+		const entries = window.history.length;
+		const href = window.location.href;
+		const state: unknown = window.history.state;
+		const first = setup({ a: TITLE, b: NOTE, c: TITLE });
+		await loaded(first.sink);
+		expect(await go(first.flow, "b", false)).toBeNull();
+		expect(await go(first.flow, "c", true)).toBeNull();
+		expect(first.flow.props!.stage).toBe("c");
+		expect(window.history.length, "history entries").toBe(entries);
+		expect(window.location.href).toBe(href);
+		expect(window.history.state).toEqual(state);
+		first.unmount();
+
+		const second = setup({ a: TITLE, b: NOTE, c: TITLE });
+		await loaded(second.sink);
+		expect(second.flow.props!.stage).toBe("a");
+	});
 	it("[ISSUE-3504-ITEM-18] FlowEngineFormPage and FlowEngineFormPageButtons keep their type parameter, so customProps is checked against the Form's", () => {
 		// A type test: vitest does not type-check, tsc does
 		// (node_modules/.bin/tsc -p tsconfig-test.json --noEmit). While React.memo drops
