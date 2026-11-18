@@ -31,17 +31,25 @@ describe("loading the flags", () => {
 		importTimeout,
 	);
 
-	it("[ISSUE-3466-ITEM-5] the first CountryFlag loads the flags and shows its flag once they have loaded", async () => {
-		const { CountryFlag } = await import("../../src");
-		const { container } = render(<CountryFlag code="DE" />);
-		await waitFor(() =>
-			expect(container.querySelector("img")).toHaveAttribute(
-				"src",
-				"data:image/svg+xml,DE",
-			),
-		);
-		expect([...imported].sort()).toEqual(["DE", "JP"]);
-	});
+	it(
+		"[ISSUE-3466-ITEM-5] the first CountryFlag loads the flags and shows its flag once they have loaded",
+		async () => {
+			const { CountryFlag } = await import("../../src");
+			const { container } = render(<CountryFlag code="DE" />);
+			// the flags chunk is a large module: under a full parallel run its import takes longer than
+			// waitFor's default second
+			await waitFor(
+				() =>
+					expect(container.querySelector("img")).toHaveAttribute(
+						"src",
+						"data:image/svg+xml,DE",
+					),
+				{ timeout: importTimeout },
+			);
+			expect([...imported].sort()).toEqual(["DE", "JP"]);
+		},
+		importTimeout,
+	);
 
 	it("[ISSUE-3466-ITEM-5] once the flags have loaded, a CountryFlag shows its flag in its first render", async () => {
 		const { CountryFlag } = await import("../../src");
