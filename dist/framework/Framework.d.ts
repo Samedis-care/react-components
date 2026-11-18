@@ -1,6 +1,6 @@
 import React from "react";
 import { GetDefaultThemeCallback } from "./ThemeProvider";
-import { MobileScalingFixProps } from "../standalone/MobileScalingFix/MobileScalingFix";
+import { MobileScalingFixProps } from "../standalone/MobileScalingFix";
 import type { DocumentTitleFormatter } from "../standalone/Routes/DocumentTitle";
 /**
  * Properties for the Framework
@@ -15,7 +15,11 @@ export interface IFrameworkProps {
      */
     disableDragAndDropPrevention?: boolean;
     /**
-     * Disable setting of HTML tag language attribute
+     * Leaves the `lang` attribute of the `<html>` element to the app, for an
+     * app that sets it itself (e.g. to the language of the content shown).
+     * By default (`false`), `<html lang>` follows `ComponentsCareI18n`'s
+     * language without region (e.g. "de" for "de-DE"); see
+     * `CCI18nProviderProps.disableHtmlLanguageAttributeSetter`.
      */
     disableHtmlLanguageAttributeSetter?: boolean;
     /**

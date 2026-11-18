@@ -185,7 +185,9 @@ export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends bool
      */
     label?: string;
     /**
-     * Disable autocomplete control
+     * Disable autocomplete control. With `displaySwitch` the switch is disabled
+     * too, so the switch filter cannot change.
+     * @default false
      */
     disabled?: boolean;
     /**

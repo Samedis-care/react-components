@@ -1,32 +1,64 @@
 import ApiConnector from "../../backend-integration/Connector/ApiConnector";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
+/**
+ * Params of useLazyCrudConnector, which FormCrudMultiSelect, FormCrudFileUpload,
+ * FormCrudMultiImage and app wrappers take as props (extractLazyCrudConnectorParams splits
+ * them off)
+ * @remarks The params are read once: field when the control mounts, the others when the
+ *          connector is built, which is the first time a control with this field renders in
+ *          its Form. The connector then lives as long as the Form (a Form given another
+ *          record starts over), and its reads and every save use what it was built with,
+ *          also when a param changes later or the control mounts again with other ones.
+ *          Another collection takes another field name and a new mount of the control,
+ *          e.g. `key={field}`.
+ */
 export interface UseLazyCrudConnectorParams<ExtraT = undefined> {
     /**
-     * The custom field name (must not be in model)
+     * The control's name in the Form: the Form keeps the control's connector (its custom
+     * state), its post-submit handler and its custom dirty flag under it. Unique within the
+     * Form, and not a model field.
+     * @remarks Read when the control mounts; a later value is ignored. A control that
+     *          mounts again under the same name gets that name's connector back, queue
+     *          included, built from the params of the first mount.
      */
     field: string;
     /**
-     * Extra parameters to be passed to the getEndpoint function
+     * Handed to getConnector (or to the default API connector factory) as its second
+     * argument when the connector is built
+     * @remarks Read once, when the connector is built; a later value is ignored.
      */
     extraParams?: ExtraT;
     /**
-     * The backend endpoint to use
+     * Builds the endpoint of the collection for a parent record id
+     * @param id The parent record's id: initialId when the connector is built (the string
+     *        "null" for a new record), the saved record's id on every save
+     * @returns The endpoint, e.g. `v1/orgs/${id}/roles`
+     * @remarks Read once, when the connector is built: its reads and every save use this
+     *          function, a later one is never called.
      */
     getEndpoint: (id: string) => string;
     /**
-     * Callback for parent record id changes
+     * Called with the parent record's id whenever getEndpoint is: when the connector is
+     * built and on every save
      * @param id The parent record id
+     * @remarks Read once, when the connector is built; a later one is never called.
      */
     onParentIdChange?: (id: string) => void;
     /**
-     * Creates an instance of the underlying connector
-     * @param initialEndpoint The initial endpoint to use
-     * @default defaults to DefaultConnector.api; will throw if not provided and this prop is not provided
+     * Creates the real connector, which the reads go through and the save sends the queue
+     * through
+     * @param initialEndpoint getEndpoint(initialId), getEndpoint("null") for a new record
+     * @param extraParams The extraParams param
+     * @default DefaultConnector.getApi (set by setDefaultConnectorAPI); with neither, building
+     *          the connector throws "No default connector set"
+     * @remarks Read once, when the connector is built; a later one is never called.
      */
     getConnector?: (initialEndpoint: string, extraParams: ExtraT | undefined) => ApiConnector;
     /**
-     * Callback to configure the connector after it got created by getConnector
+     * Called with the connector getConnector (or the default factory) created, right after
+     * it was created, e.g. to set request options
      * @param connector The connector which was created by getConnector
+     * @remarks Read once, when the connector is built; a later one is never called.
      */
     configureConnector?: (connector: ApiConnector) => void;
     /**
@@ -47,6 +79,10 @@ export declare const extractLazyCrudConnectorParams: <ExtraT, T extends UseLazyC
  * @param params See UseLazyCrudConnectorParams
  * @returns The connector, one per Form, field and record
  * @remarks
+ * - The params are read once (see UseLazyCrudConnectorParams): a later getEndpoint,
+ *   onParentIdChange, extraParams, getConnector, configureConnector or field changes
+ *   neither the reads nor the save. Another collection takes another field and a new
+ *   mount of the control, e.g. `key={field}`.
  * - While the queue holds writes the Form is dirty (a custom dirty flag named `field`).
  * - A Form given another record (id or model) starts over: the control mounts again with a
  *   new connector for that record, and a queue left for the previous record is dropped,

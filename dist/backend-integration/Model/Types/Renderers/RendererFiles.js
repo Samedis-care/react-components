@@ -9,14 +9,16 @@ import ObjectUrlLink from "../../../../standalone/FileUpload/Generic/ObjectUrlLi
 import FilesGrid from "./FilesGrid/FilesGrid";
 /**
  * Renders a file selector
- * @remarks In a grid cell (overview visibility with `grid`) the files take one
+ * @remarks In a form, the field's frame gets the field's id and its message as
+ *          description (`aria-describedby`).
+ *          In a grid cell (overview visibility with `grid`) the files take one
  *          line (FilesGrid): "No files present", the only file's name as a link
  *          to it, or for more files their count ("2 files") as a button that
  *          opens a menu of the files.
  */
 class RendererFiles extends TypeFiles {
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, setError, dirty, } = params;
+        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, setError, dirty, id, messageId, describedBy, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -27,7 +29,7 @@ class RendererFiles extends TypeFiles {
                 throw new Error("Not supported");
             return (_jsxs(_Fragment, { children: [_jsx("div", { children: _jsx(FileUpload, { name: field, label: label, dirty: dirty, files: value, readOnly: visibility.readOnly, onChange: (files) => {
                                 handleChange(field, files);
-                            }, onBlur: handleBlur, handleError: (_, msg) => setError(new Error(msg)), maxFiles: this.params?.maxFiles, minFileSize: this.params?.minFileSize, maxFileSize: this.params?.maxFileSize, maxTotalFileSize: this.params?.maxTotalFileSize, accept: this.params?.accept, acceptLabel: this.params?.acceptLabel, imageDownscaleOptions: this.params?.imageDownscaleOptions, convertImagesTo: this.params?.convertImagesTo, previewSize: this.params?.previewSize || 96, previewImages: this.params?.previewImages, allowDuplicates: this.params?.allowDuplicates, smallLabel: this.params?.smallLabel }) }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
+                            }, onBlur: handleBlur, handleError: (_, msg) => setError(new Error(msg)), maxFiles: this.params?.maxFiles, minFileSize: this.params?.minFileSize, maxFileSize: this.params?.maxFileSize, maxTotalFileSize: this.params?.maxTotalFileSize, accept: this.params?.accept, acceptLabel: this.params?.acceptLabel, imageDownscaleOptions: this.params?.imageDownscaleOptions, convertImagesTo: this.params?.convertImagesTo, previewSize: this.params?.previewSize || 96, previewImages: this.params?.previewImages, allowDuplicates: this.params?.allowDuplicates, smallLabel: this.params?.smallLabel, slotProps: { root: { id, "aria-describedby": describedBy } } }) }), _jsx(FormHelperTextCC, { id: messageId, error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
         }
         if (visibility.grid)
             return _jsx(FilesGrid, { files: value });

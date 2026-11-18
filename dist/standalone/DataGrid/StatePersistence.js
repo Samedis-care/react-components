@@ -1,7 +1,7 @@
 import { Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getDataGridDefaultColumnsState, useDataGridColumnState, useDataGridColumnsWidthState, useDataGridProps, useDataGridState, } from "./DataGrid";
-import { decodePersistedState, encodePersistedState, } from "./PersistFormat";
+import { decodePersistedState, encodePersistedState, isNewerPersistedState, } from "./PersistFormat";
 export const DataGridPersistentStateContext = React.createContext(undefined);
 /**
  * The column state with the given column filters in place of its own
@@ -53,6 +53,13 @@ const StatePersistence = () => {
     // stored. It is the baseline, not written: writing it would only replace
     // what this visit could not read (a column it doesn't have, a newer format)
     const lastWritten = useRef(undefined);
+    // data a newer library version wrote may keep the column widths where this
+    // version doesn't look. The auto-fit then fills them in, and writing that
+    // would replace the data with what this visit could not read, so until
+    // the grid has written, an auto-fit only moves the baseline.
+    const keepNewer = useRef(isNewerPersistedState(persistedContext?.[0]));
+    // the auto-fit is what sets initialResize, once the grid knows its width
+    const lastInitialResize = useRef(state.initialResize);
     // save on changes
     useEffect(() => {
         if (!setPersisted)
@@ -68,6 +75,8 @@ const StatePersistence = () => {
             ? withColumnFilter(columnState, kept.columnFilter)
             : columnState, columnWidthState, defaultColumnState, columns, config);
         const serialized = JSON.stringify(data);
+        const autoFit = state.initialResize && !lastInitialResize.current;
+        lastInitialResize.current = state.initialResize;
         if (lastWritten.current === undefined) {
             lastWritten.current = serialized;
             return;
@@ -75,6 +84,9 @@ const StatePersistence = () => {
         if (lastWritten.current === serialized)
             return;
         lastWritten.current = serialized;
+        if (keepNewer.current && autoFit)
+            return;
+        keepNewer.current = false;
         void setPersisted(data);
     }, [
         setPersisted,

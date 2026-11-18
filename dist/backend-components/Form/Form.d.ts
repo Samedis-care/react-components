@@ -621,6 +621,11 @@ export interface FormContextData<M extends ModelUnknown, CustomPropsT = unknown>
     getFieldValues: () => ModelRecord<M>;
     /**
      * Handle input blur events
+     * @remarks Marks the field touched; does not validate. The field is named by the
+     *          first non-empty name, data-name or id attribute of the event's
+     *          currentTarget, then of its target (the element that lost focus, e.g. the
+     *          input inside a wrapper that has the handler). Logs an error when none is
+     *          set. The library's date pickers name their blur event by their `name`.
      */
     handleBlur: React.FocusEventHandler<HTMLInputElement & HTMLElement>;
     /**

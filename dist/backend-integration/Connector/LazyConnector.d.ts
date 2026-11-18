@@ -46,7 +46,8 @@ export declare enum IndexEnhancementLevel {
      */
     None = 0,
     /**
-     * Pass though index call to backend, append new records and changed records in result
+     * Pass though index call to backend, append new records to the result and lay the
+     * fields of queued updates over the rows they change
      */
     Basic = 1
 }
@@ -69,14 +70,26 @@ declare class LazyConnector extends Connector {
     create(data: Record<string, unknown>, model: ModelUnknown | undefined): ModelGetResponse<ModelUnknown>;
     delete(id: string, model: ModelUnknown | undefined): void;
     index(params: Partial<IDataGridLoadDataParameters> | undefined, model: ModelUnknown | undefined): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]>;
+    /**
+     * Reads a record as it will be once the queue is worked
+     * @param id The record id — potentially a fake one, see getQueuedOperation
+     * @param model The model performing the request
+     * @returns A record whose create is queued: what the queue will create. A record with a
+     *          queued update: the backend's record with the update's fields laid over it
+     *          (with fakeReads the update alone, as index lists it). Any other record: the
+     *          backend's.
+     * @throws {Error} The record's delete is queued
+     */
     read(id: string, model: ModelUnknown | undefined): Promise<ModelGetResponse<ModelUnknown>> | ModelGetResponse<ModelUnknown>;
     /**
      * Queues an update of a record
      * @param data The record's data, including its id as index hands it out (a fake one for
      *             a record created through this connector)
      * @param model The model performing the request
-     * @returns The record as the queue will write it, which index and read serve until the
-     *          queue is worked
+     * @returns The record as the queue will write it: the whole record for an update of a
+     *          queued create, otherwise the fields given so far. Until the queue is worked,
+     *          index and read lay it over the record the backend has, so the fields it does
+     *          not carry keep the backend's values.
      * @remarks A record which already has a create or an update queued keeps that one
      *          request, which then carries this data over the data queued before: what the
      *          two requests would have written one after the other. An update of a queued

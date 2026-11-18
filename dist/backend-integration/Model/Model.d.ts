@@ -300,11 +300,18 @@ export declare const useModelIndex: <M extends ModelUnknown>(model: M, params?: 
  */
 export declare const useModelIndex2: <M extends ModelUnknown>(model: M, params: ConnectorIndex2Params, options?: Omit<UseQueryOptions<ModelIndexResponse<M>, Error, ModelIndexResponse<M>>, "queryFn" | "queryKey">) => UseQueryResult<ModelIndexResponse<M>, Error>;
 /**
- * React-Query's useMutation to update/create a new record on backend
+ * React-Query's useMutation to update/create a new record on backend. Once saved, the
+ * record the connector returned is what the model's cache holds for its id (what getCached
+ * and useModelGet return), hooks.onCreateOrUpdate is called with it, and the "mutate" event
+ * fires (addEventHandler).
  * @param model The model
+ * @param visibility The page the values were edited on: they are serialized with its field
+ *                   visibilities, so a field disabled there is not sent. Defaults to "edit"
+ *                   for an update (values.id set) and "create" for a create. BackendDataGrid's
+ *                   inline edits pass "overview".
  * @see model.createOrUpdateRecordRaw
  */
-export declare const useModelMutation: <M extends ModelUnknown, TContext = unknown>(model: M) => UseMutationResult<ModelGetResponse<M>, Error, ModelRecordPartial<M>, TContext>;
+export declare const useModelMutation: <M extends ModelUnknown, TContext = unknown>(model: M, visibility?: keyof PageVisibility) => UseMutationResult<ModelGetResponse<M>, Error, ModelRecordPartial<M>, TContext>;
 /**
  * React-Query's useMutation to delete a single record on backend
  * @param model The model
@@ -593,8 +600,12 @@ declare class Model<FieldsT extends ModelFields = ModelFields, KeyT extends Mode
     /**
      * Updates a single record on backend (doesn't update local cache)
      * @param values The new values (set id field to update)
+     * @param visibility The page the values were edited on: they are serialized with its
+     *                   field visibilities, so a field disabled there is not sent. Defaults to
+     *                   "edit" for an update and "create" for a create.
+     * @returns The record the connector returned, deserialized for edit
      */
-    createOrUpdateRecordRaw(values: ModelRecordPartial<this>): Promise<ModelGetResponse<this>>;
+    createOrUpdateRecordRaw(values: ModelRecordPartial<this>, visibility?: keyof PageVisibility): Promise<ModelGetResponse<this>>;
     /**
      * Provides a react hook to delete a given record id
      * @deprecated Use useModelDelete(model)

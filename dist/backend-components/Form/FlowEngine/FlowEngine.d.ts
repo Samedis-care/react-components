@@ -56,7 +56,8 @@ export declare const FlowStageContext: React.Context<FlowStageContextType<string
 export declare const useFlowStageContext: <StageT extends string>() => FlowStageContextType<StageT>;
 export interface FlowEngineProps<M extends ModelUnknown, StageT extends string, CustomPropsT> {
     /**
-     * The stage shown first, a key of children
+     * The stage shown first, a key of children; also the stage after a reload, as the stage
+     * is not kept in the URL or the browser history (see FlowEngine)
      * @remarks A name without a component in children fails the render with the error
      *          goToStage rejects with for it.
      */
@@ -105,6 +106,21 @@ export type FlowEngineThemeProps = Pick<FlowEngineProps<ModelUnknown, string, un
  * does; no outline when it has the focus)
  */
 export type FlowEngineClassKey = "root";
+/**
+ * Multi-step form: renders the component of the current stage from `children` and gives it
+ * the stage API (goToStage, safeGoToStage, stage) and the page props; useFlowStageContext
+ * gives the components below it the same API. Render it in the page component of a Form
+ * with `flowEngine`.
+ *
+ * The stage is component state, like the active step of MUI's Stepper: it is not in the
+ * URL, and a stage change adds no entry to the browser history. The browser's Back and
+ * Forward therefore never go to another stage: they leave the page the Form is on, guarded
+ * like any other navigation away from the Form (a form page's leave guard asks first while
+ * the form is dirty). A reload or a new mount starts at defaultStage again; what the stages
+ * staged and did not save is gone then, as every unsaved value of a Form is. An app that
+ * wants its steps in the history puts them on routes below the Form's route instead of
+ * stages: the leave guard lets a navigation inside the Form's route through.
+ */
 declare const FlowEngine: <M extends ModelUnknown, StageT extends string, CustomPropsT>(inProps: FlowEngineProps<M, StageT, CustomPropsT>) => React.JSX.Element;
 declare const _default: typeof FlowEngine;
 export default _default;

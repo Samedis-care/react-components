@@ -9,10 +9,15 @@ export interface FormPageLayoutProps {
      * Button bar, usually `<FormButtons>`. Follows the body and, while the body is
      * longer than the visible area, floats over its bottom, except on a screen at most
      * 480px tall (see {@link FormPageLayout}); give it an opaque background, as
-     * FormButtons has, so that the content scrolling under it is hidden. `null` for no
-     * buttons.
+     * FormButtons has, so that the content scrolling under it is hidden.
+     *
+     * `null`, `undefined` or `false` for no buttons, as BasicFormPage passes while a
+     * nested form page is open in its body: the layout then renders no footer element
+     * and keeps no space for one. A footer that renders nothing, such as a FormButtons
+     * without a button, is hidden and takes no space either.
+     * @default undefined (no footer)
      */
-    footer: React.ReactNode;
+    footer?: React.ReactNode;
     /**
      * Rendered inside the root after body and footer. The root is positioned, so an
      * absolutely positioned `other`, like the busy overlay (`FormLoaderOverlay`) that
@@ -62,6 +67,12 @@ export type FormPageLayoutClassKey = "root" | "wrapper" | "body" | "footer";
  *   36px above the layout's end. That is where a floating footer rests at the end of a
  *   long form and on a short form that fills its parent; on a long form, Save is at
  *   the end.
+ *
+ * Without buttons (`footer` `null`, `undefined` or `false`, as BasicFormPage passes
+ * while a nested form page is open in its body) the layout renders no footer element
+ * and keeps no space for one: it ends where the body ends, so a nested form page ends
+ * like any other. A footer that renders nothing, such as a FormButtons without a
+ * button left, is hidden while it is empty (`:empty`) and takes no space either.
  *
  * Keyboard focus: the browser scrolls a newly focused element into view only when it
  * lies outside the visible area, and the floating footer is inside it. So when an

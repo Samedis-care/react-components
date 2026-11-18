@@ -10,6 +10,8 @@ import ccI18n from "../../i18n";
 const ROOT_PROPS_NOT_FORWARDED = new Set([
     "text",
     "typographyVariant",
+    "size",
+    "color",
     "ownerState",
     "theme",
     "sx",
@@ -60,8 +62,10 @@ const DEFAULT_NAME = "Loading…";
 const TRANSLATION_OPTIONS = { i18n: ccI18n, useSuspense: false };
 const Loader = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcLoader" });
-    const { text, typographyVariant: typographyVariantProp, className, classes, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy, ...rootProps } = props;
+    const { text, typographyVariant: typographyVariantProp, size: sizeProp, color: colorProp, className, classes, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy, ...rootProps } = props;
     const typographyVariant = typographyVariantProp ?? "h6";
+    const size = sizeProp ?? 40;
+    const color = colorProp ?? "primary";
     const { t, ready } = useTranslation("translation", TRANSLATION_OPTIONS);
     const textId = React.useId();
     // a name the caller gives wins; otherwise the text names the progressbar,
@@ -76,19 +80,24 @@ const Loader = (inProps) => {
         else
             progressLabel = ready ? t("standalone.loader.label") : DEFAULT_NAME;
     }
-    return (_jsx(Root, { role: "status", ...rootProps, text: text, typographyVariant: typographyVariant, className: combineClassNames([className, classes?.root]), children: _jsxs(InnerWrapper, { className: classes?.innerWrapper, children: [text && (_jsx(Typography, { id: textId, variant: typographyVariant, component: "p", children: text })), _jsx(Progress, { className: classes?.progress, "aria-label": progressLabel, "aria-labelledby": progressLabelledBy })] }) }));
+    return (_jsx(Root, { role: "status", ...rootProps, text: text, typographyVariant: typographyVariant, size: size, color: color, className: combineClassNames([className, classes?.root]), children: _jsxs(InnerWrapper, { className: classes?.innerWrapper, children: [text && (_jsx(Typography, { id: textId, variant: typographyVariant, component: "p", children: text })), _jsx(Progress, { size: size, color: color, className: classes?.progress, "aria-label": progressLabel, "aria-labelledby": progressLabelledBy })] }) }));
 };
 /**
  * Indeterminate loading indicator: a MUI `CircularProgress` with an optional
- * status `text` above it, centered in its parent.
+ * status `text` above it, centered in its parent. The spinner is 40px and in
+ * the theme's primary color unless `size` and `color` say otherwise.
  *
  * Layout: text and spinner form one block. In a parent with a definite height
  * (a fixed height, or a box that a flex or grid layout stretches) the Loader
  * fills the parent and centers that block in it; a block taller than the
  * parent overflows it equally above and below. In a parent of automatic
- * height the Loader is as tall as the block: 72px without text (the 40px
- * spinner and 16px above and below it), and with text the text's height and
- * 8px more (at MUI's default spacing).
+ * height the Loader is as tall as the block: without text the spinner's
+ * `size` and 16px above and below it (72px at the default size), and with
+ * text the text's height and 8px more (at MUI's default spacing).
+ *
+ * For a spinner inside a button, a menu or list item, or a line of text, use
+ * MUI's `CircularProgress` directly: the Loader is a block that fills its
+ * parent and keeps 16px above and below the spinner.
  *
  * Styling: `className`, `sx`, `style` and the other HTML attributes go to
  * the `root` slot, `classes` to the slot of each key, so `styled(Loader)`
@@ -107,7 +116,8 @@ const Loader = (inProps) => {
  * whose content is loading. The Loader does not suspend, also not before
  * the library's translations have loaded, so it can be a Suspense fallback.
  *
- * Theme: `components.CcLoader.defaultProps` ({@link LoaderProps}),
+ * Theme: `components.CcLoader.defaultProps` ({@link LoaderProps}, such as
+ * `size` and `color` for every Loader of an app),
  * `components.CcLoader.styleOverrides` per {@link LoaderClassKey} slot, and
  * `components.CcLoader.variants`, which apply to the `root` slot.
  */

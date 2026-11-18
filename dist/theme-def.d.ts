@@ -3,7 +3,8 @@ import { FileUploadClassKey, FileUploadProps } from "./standalone/FileUpload/Gen
 import { ImageSelectorClassKey, ImageSelectorProps } from "./standalone/FileUpload/Image/ImageSelector";
 import { ImagePreviewDialogClassKey, ImagePreviewDialogProps } from "./standalone/FileUpload/Image/ImagePreviewDialog";
 import { MultiImageClassKey, MultiImageProps } from "./standalone/FileUpload/MultiImage/MultiImage";
-import { BaseSelectorClassKey, BaseSelectorData, BaseSelectorThemeProps, HowToBoxClassKey, HowToBoxProps, MultiSelectClassKey, MultiSelectorData, MultiSelectProps, MultiSelectWithoutGroupClassKey, MultiSelectWithoutGroupProps, MultiSelectWithTagsClassKey, MultiSelectWithTagsProps, PopupMenuClassKey, PortalLayoutClassKey, PortalLayoutProps } from "./standalone";
+import { BaseSelectorClassKey, BaseSelectorData, BaseSelectorThemeProps, HowToBoxClassKey, HowToBoxProps, MultiSelectClassKey, MultiSelectorData, MultiSelectProps, MultiSelectWithoutGroupClassKey, MultiSelectWithoutGroupProps, MultiSelectWithTagsClassKey, MultiSelectWithTagsProps, PopupMenuClassKey, PopupMenuProps, PortalLayoutClassKey, PortalLayoutProps } from "./standalone";
+import { SmallIconButtonClassKey, SmallIconButtonProps, SmallestIconButtonClassKey, SmallestIconButtonProps, SmallListItemClassKey, SmallListItemProps, SmallListItemButtonClassKey, SmallListItemButtonProps, SelectorSmallListItemClassKey, SelectorSmallListItemProps, SelectorSmallListItemButtonClassKey, SelectorSmallListItemButtonProps, SmallListItemIconClassKey, SmallListItemIconProps } from "./standalone/Small";
 import { ComponentWithLabelClassKey, ComponentWithLabelProps } from "./standalone/UIKit/ComponentWithLabel";
 import { CheckboxClassKey } from "./standalone/UIKit/Checkbox";
 import { ActionButtonClassKey, ActionButtonProps } from "./standalone/UIKit/ActionButton";
@@ -83,9 +84,9 @@ declare module "@mui/material/styles" {
 }
 type Theme = Omit<MuiTheme, "components">;
 /**
- * `styleOverrides` of a component that passes no `ownerState` to its slots:
- * a function override is called with the theme, and the component's states
- * are styled through its state classes and state keys
+ * `styleOverrides` of a component that passes no `ownerState` to its slots.
+ * MUI calls each function in it while styling every slot of the component,
+ * with that slot's props, so a function can rely on the theme only.
  */
 type StyleOverridesWithoutOwnerState<ClassKey extends string> = Partial<Record<ClassKey, Interpolation<{
     theme: Theme;
@@ -99,6 +100,13 @@ declare module "@mui/material/styles" {
         CcLoader: LoaderClassKey;
         CcMultiGrid: MultiGridClassKey;
         CcVerticalDivider: VerticalDividerClassKey;
+        CcSmallIconButton: SmallIconButtonClassKey;
+        CcSmallestIconButton: SmallestIconButtonClassKey;
+        CcSmallListItem: SmallListItemClassKey;
+        CcSmallListItemButton: SmallListItemButtonClassKey;
+        CcSelectorSmallListItem: SelectorSmallListItemClassKey;
+        CcSelectorSmallListItemButton: SelectorSmallListItemButtonClassKey;
+        CcSmallListItemIcon: SmallListItemIconClassKey;
         CcCountryFlag: CountryFlagClassKey;
         CcMultiLanguageInput: MultiLanguageInputClassKey;
         CcFormButtons: FormButtonsClassKey;
@@ -177,6 +185,13 @@ declare module "@mui/material/styles" {
         CcLoader: Partial<LoaderProps>;
         CcMultiGrid: Partial<MultiGridProps>;
         CcVerticalDivider: Partial<VerticalDividerProps>;
+        CcSmallIconButton: Partial<SmallIconButtonProps>;
+        CcSmallestIconButton: Partial<SmallestIconButtonProps>;
+        CcSmallListItem: Partial<SmallListItemProps>;
+        CcSmallListItemButton: Partial<SmallListItemButtonProps>;
+        CcSelectorSmallListItem: Partial<SelectorSmallListItemProps>;
+        CcSelectorSmallListItemButton: Partial<SelectorSmallListItemButtonProps>;
+        CcSmallListItemIcon: Partial<SmallListItemIconProps>;
         CcCountryFlag: Partial<CountryFlagProps>;
         CcMultiLanguageInput: Partial<MultiLanguageInputProps>;
         CcFormButtons: Partial<FormButtonsProps>;
@@ -226,6 +241,7 @@ declare module "@mui/material/styles" {
         CcSignPad: Partial<SignPadProps>;
         CcFormDialog: Partial<FormDialogProps>;
         CcPageTitle: Partial<PageTitleProps>;
+        CcPopupMenu: Partial<PopupMenuProps>;
         CcPortalLayout: Partial<PortalLayoutProps>;
         CcNotifications: Partial<NotificationsProps>;
         CcToast: Partial<ToastProps>;
@@ -267,22 +283,57 @@ declare module "@mui/material/styles" {
         };
         CcLoader?: {
             defaultProps?: ComponentsPropsList["CcLoader"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcLoader"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<LoaderClassKey>;
             variants?: ComponentsVariants["CcLoader"];
         };
         CcMultiGrid?: {
             defaultProps?: ComponentsPropsList["CcMultiGrid"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcMultiGrid"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<MultiGridClassKey>;
             variants?: ComponentsVariants["CcMultiGrid"];
         };
         CcVerticalDivider?: {
             defaultProps?: ComponentsPropsList["CcVerticalDivider"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcVerticalDivider"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<VerticalDividerClassKey>;
             variants?: ComponentsVariants["CcVerticalDivider"];
+        };
+        CcSmallIconButton?: {
+            defaultProps?: ComponentsPropsList["CcSmallIconButton"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<SmallIconButtonClassKey>;
+            variants?: ComponentsVariants["CcSmallIconButton"];
+        };
+        CcSmallestIconButton?: {
+            defaultProps?: ComponentsPropsList["CcSmallestIconButton"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<SmallestIconButtonClassKey>;
+            variants?: ComponentsVariants["CcSmallestIconButton"];
+        };
+        CcSmallListItem?: {
+            defaultProps?: ComponentsPropsList["CcSmallListItem"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<SmallListItemClassKey>;
+            variants?: ComponentsVariants["CcSmallListItem"];
+        };
+        CcSmallListItemButton?: {
+            defaultProps?: ComponentsPropsList["CcSmallListItemButton"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<SmallListItemButtonClassKey>;
+            variants?: ComponentsVariants["CcSmallListItemButton"];
+        };
+        CcSelectorSmallListItem?: {
+            defaultProps?: ComponentsPropsList["CcSelectorSmallListItem"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<SelectorSmallListItemClassKey>;
+            variants?: ComponentsVariants["CcSelectorSmallListItem"];
+        };
+        CcSelectorSmallListItemButton?: {
+            defaultProps?: ComponentsPropsList["CcSelectorSmallListItemButton"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<SelectorSmallListItemButtonClassKey>;
+            variants?: ComponentsVariants["CcSelectorSmallListItemButton"];
+        };
+        CcSmallListItemIcon?: {
+            defaultProps?: ComponentsPropsList["CcSmallListItemIcon"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<SmallListItemIconClassKey>;
+            variants?: ComponentsVariants["CcSmallListItemIcon"];
         };
         CcCountryFlag?: {
             defaultProps?: ComponentsPropsList["CcCountryFlag"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcCountryFlag"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<CountryFlagClassKey>;
             variants?: ComponentsVariants["CcCountryFlag"];
         };
         CcMultiLanguageInput?: {
@@ -297,7 +348,7 @@ declare module "@mui/material/styles" {
         };
         CcDefaultFormPageButtons?: {
             defaultProps?: ComponentsPropsList["CcDefaultFormPageButtons"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcDefaultFormPageButtons"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<DefaultFormPageButtonsClassKey>;
             variants?: ComponentsVariants["CcDefaultFormPageButtons"];
         };
         CcSubActionButton?: {
@@ -312,12 +363,12 @@ declare module "@mui/material/styles" {
         };
         CcMatrixGrid?: {
             defaultProps?: ComponentsPropsList["CcMatrixGrid"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcMatrixGrid"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<MatrixGridClassKey>;
             variants?: ComponentsVariants["CcMatrixGrid"];
         };
         CcMatrixCellTile?: {
             defaultProps?: ComponentsPropsList["CcMatrixCellTile"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcMatrixCellTile"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<MatrixCellTileClassKey>;
             variants?: ComponentsVariants["CcMatrixCellTile"];
         };
         CcHowToBox?: {
@@ -332,13 +383,12 @@ declare module "@mui/material/styles" {
         };
         CcFormPageLayout?: {
             defaultProps?: ComponentsPropsList["CcFormPageLayout"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcFormPageLayout"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<FormPageLayoutClassKey>;
             variants?: ComponentsVariants["CcFormPageLayout"];
         };
         CcInlineSwitch?: {
             defaultProps?: ComponentsPropsList["CcInlineSwitch"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcInlineSwitch"];
-            variants?: ComponentsVariants["CcInlineSwitch"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<InlineSwitchClassKey>;
         };
         CcBackendSingleSelect?: {
             defaultProps?: ComponentsPropsList["CcBackendSingleSelect"];
@@ -353,7 +403,7 @@ declare module "@mui/material/styles" {
             defaultProps?: ComponentsPropsList["CcBackendMultiSelectWithTags"];
         };
         CcBackendDataGridMultiSelect?: {
-            styleOverrides?: ComponentsOverrides<Theme>["CcBackendDataGridMultiSelect"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<BackendDataGridMultiSelectClassKey>;
         };
         CcBaseSelector?: {
             defaultProps?: ComponentsPropsList["CcBaseSelector"];
@@ -372,7 +422,7 @@ declare module "@mui/material/styles" {
         };
         CcImageDots?: {
             defaultProps?: ComponentsPropsList["CcImageDots"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcImageDots"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<ImageDotsClassKey>;
             variants?: ComponentsVariants["CcImageDots"];
         };
         CcImageBox?: {
@@ -382,12 +432,12 @@ declare module "@mui/material/styles" {
         };
         CcImageDialogEntry?: {
             defaultProps?: ComponentsPropsList["CcImageDialogEntry"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcImageDialogEntry"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<ImageDialogEntryClassKey>;
             variants?: ComponentsVariants["CcImageDialogEntry"];
         };
         CcCollapsibleMenu?: {
             defaultProps?: ComponentsPropsList["CcCollapsibleMenu"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcCollapsibleMenu"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<CollapsibleMenuClassKey>;
             variants?: ComponentsVariants["CcCollapsibleMenu"];
         };
         CcCenteredTypography?: {
@@ -397,67 +447,67 @@ declare module "@mui/material/styles" {
         };
         CcMultiImage?: {
             defaultProps?: ComponentsPropsList["CcMultiImage"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcMultiImage"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<MultiImageClassKey>;
             variants?: ComponentsVariants["CcMultiImage"];
         };
         CcPortalLayoutMenu?: {
             defaultProps?: ComponentsPropsList["CcPortalLayoutMenu"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcPortalLayoutMenu"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<PortalLayoutMenuClassKey>;
             variants?: ComponentsVariants["CcPortalLayoutMenu"];
         };
         CcSignPadDialog?: {
             defaultProps?: ComponentsPropsList["CcSignPadDialog"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcSignPadDialog"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<SignPadDialogClassKey>;
             variants?: ComponentsVariants["CcSignPadDialog"];
         };
         CcMenuItemJumboReactLight?: {
             defaultProps?: ComponentsPropsList["CcMenuItemJumboReactLight"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcMenuItemJumboReactLight"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<MenuItemJumboReactLightClassKey>;
             variants?: ComponentsVariants["CcMenuItemJumboReactLight"];
         };
         CcMenuItemJumboReactDark?: {
             defaultProps?: ComponentsPropsList["CcMenuItemJumboReactDark"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcMenuItemJumboReactDark"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<MenuItemJumboReactDarkClassKey>;
             variants?: ComponentsVariants["CcMenuItemJumboReactDark"];
         };
         CcFile?: {
             defaultProps?: ComponentsPropsList["CcFile"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcFile"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<FileClassKey>;
             variants?: ComponentsVariants["CcFile"];
         };
         CcDialogTitle?: {
             defaultProps?: ComponentsPropsList["CcDialogTitle"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcDialogTitle"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<DialogTitleClassKey>;
             variants?: ComponentsVariants["CcDialogTitle"];
         };
         CcFileUpload?: {
             defaultProps?: ComponentsPropsList["CcFileUpload"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcFileUpload"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<FileUploadClassKey>;
             variants?: ComponentsVariants["CcFileUpload"];
         };
         CcCrudLoadStatus?: {
             defaultProps?: ComponentsPropsList["CcCrudLoadStatus"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcCrudLoadStatus"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<CrudLoadStatusClassKey>;
             variants?: ComponentsVariants["CcCrudLoadStatus"];
         };
         CcImageSelector?: {
             defaultProps?: ComponentsPropsList["CcImageSelector"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcImageSelector"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<ImageSelectorClassKey>;
             variants?: ComponentsVariants["CcImageSelector"];
         };
         CcImagePreviewDialog?: {
             defaultProps?: ComponentsPropsList["CcImagePreviewDialog"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcImagePreviewDialog"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<ImagePreviewDialogClassKey>;
             variants?: ComponentsVariants["CcImagePreviewDialog"];
         };
         CcPortalMenu?: {
             defaultProps?: ComponentsPropsList["CcPortalMenu"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcPortalMenu"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<PortalMenuClassKey>;
             variants?: ComponentsVariants["CcPortalMenu"];
         };
         CcMenuItemMaterial?: {
             defaultProps?: ComponentsPropsList["CcMenuItemMaterial"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcMenuItemMaterial"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<MenuItemMaterialClassKey>;
             variants?: ComponentsVariants["CcMenuItemMaterial"];
         };
         CcLocalizedKeyboardDatePicker?: {
@@ -477,55 +527,56 @@ declare module "@mui/material/styles" {
         };
         CcUiKitInput?: {
             defaultProps?: ComponentsPropsList["CcUiKitInput"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcUiKitInput"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<UiKitInputClassKey>;
             variants?: ComponentsVariants["CcUiKitInput"];
         };
         CcUiKitInputOutlined?: {
             defaultProps?: ComponentsPropsList["CcUiKitInputOutlined"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcUiKitInputOutlined"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<UiKitInputOutlinedClassKey>;
             variants?: ComponentsVariants["CcUiKitInputOutlined"];
         };
         CcUiKitTextField?: {
             defaultProps?: ComponentsPropsList["CcUiKitTextField"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcUiKitTextField"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<UiKitTextFieldClassKey>;
             variants?: ComponentsVariants["CcUiKitTextField"];
         };
         CcLocaleSelectorDialog?: {
             defaultProps?: ComponentsPropsList["CcLocaleSelectorDialog"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcLocaleSelectorDialog"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<LocaleSelectorDialogClassKey>;
             variants?: ComponentsVariants["CcLocaleSelectorDialog"];
         };
         CcLocaleSelectorDialogContent?: {
             defaultProps?: ComponentsPropsList["CcLocaleSelectorDialogContent"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcLocaleSelectorDialogContent"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<LocaleSelectorDialogContentClassKey>;
             variants?: ComponentsVariants["CcLocaleSelectorDialogContent"];
         };
         CcLocaleSelectorEntry?: {
             defaultProps?: ComponentsPropsList["CcLocaleSelectorEntry"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcLocaleSelectorEntry"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<LocaleSelectorEntryClassKey>;
             variants?: ComponentsVariants["CcLocaleSelectorEntry"];
         };
         CcSignPad?: {
             defaultProps?: ComponentsPropsList["CcSignPad"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcSignPad"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<SignPadClassKey>;
             variants?: ComponentsVariants["CcSignPad"];
         };
         CcFormDialog?: {
             defaultProps?: ComponentsPropsList["CcFormDialog"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcFormDialog"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<FormDialogClassKey>;
             variants?: ComponentsVariants["CcFormDialog"];
         };
         CcPageTitle?: {
             defaultProps?: ComponentsPropsList["CcPageTitle"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcPageTitle"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<PageTitleClassKey>;
             variants?: ComponentsVariants["CcPageTitle"];
         };
         CcPopupMenu?: {
-            styleOverrides?: ComponentsOverrides<Theme>["CcPopupMenu"];
-            variants?: ComponentsVariants["CcFormDialog"];
+            defaultProps?: ComponentsPropsList["CcPopupMenu"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<PopupMenuClassKey>;
+            variants?: ComponentsVariants["CcPopupMenu"];
         };
         CcFilesGrid?: {
-            styleOverrides?: ComponentsOverrides<Theme>["CcFilesGrid"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<FilesGridClassKey>;
         };
         CcPortalLayout?: {
             defaultProps?: ComponentsPropsList["CcPortalLayout"];
@@ -544,12 +595,12 @@ declare module "@mui/material/styles" {
         };
         CcMultiSelectWithTags?: {
             defaultProps?: ComponentsPropsList["CcMultiSelectWithTags"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcMultiSelectWithTags"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<MultiSelectWithTagsClassKey>;
             variants?: ComponentsVariants["CcMultiSelectWithTags"];
         };
         CcMultiSelectWithoutGroup?: {
             defaultProps?: ComponentsPropsList["CcMultiSelectWithoutGroup"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcMultiSelectWithoutGroup"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<MultiSelectWithoutGroupClassKey>;
             variants?: ComponentsVariants["CcMultiSelectWithoutGroup"];
         };
         CcDayContents?: {
@@ -559,70 +610,70 @@ declare module "@mui/material/styles" {
         };
         CcWeekViewDay?: {
             defaultProps?: ComponentsPropsList["CcWeekViewDay"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcWeekViewDay"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<WeekViewDayClassKey>;
             variants?: ComponentsVariants["CcWeekViewDay"];
         };
         CcScrollableSchedule?: {
             defaultProps?: ComponentsPropsList["CcScrollableSchedule"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcScrollableSchedule"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<ScrollableScheduleClassKey>;
             variants?: ComponentsVariants["CcScrollableSchedule"];
         };
         CcScrollableScheduleDay?: {
             defaultProps?: ComponentsPropsList["CcScrollableScheduleDay"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcScrollableScheduleDay"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<ScrollableScheduleDayClassKey>;
             variants?: ComponentsVariants["CcScrollableScheduleDay"];
         };
         CcWeekView?: {
             defaultProps?: ComponentsPropsList["CcWeekView"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcWeekView"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<WeekViewClassKey>;
             variants?: ComponentsVariants["CcWeekView"];
         };
         CcDataGrid?: {
             defaultProps?: ComponentsPropsList["CcDataGrid"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcDataGrid"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<DataGridClassKey>;
             variants?: ComponentsVariants["CcDataGrid"];
         };
         CcGridMultiSelectFilter?: {
             defaultProps?: ComponentsPropsList["CcGridMultiSelectFilter"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcGridMultiSelectFilter"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<GridMultiSelectFilterClassKey>;
             variants?: ComponentsVariants["CcGridMultiSelectFilter"];
         };
         CcGridMultiSelectFilterBackend?: {
             defaultProps?: ComponentsPropsList["CcGridMultiSelectFilterBackend"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcGridMultiSelectFilterBackend"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<GridMultiSelectFilterBackendClassKey>;
             variants?: ComponentsVariants["CcGridMultiSelectFilterBackend"];
         };
         CcGridSingleSelectFilter?: {
             defaultProps?: ComponentsPropsList["CcGridSingleSelectFilter"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcGridSingleSelectFilter"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<GridSingleSelectFilterClassKey>;
             variants?: ComponentsVariants["CcGridSingleSelectFilter"];
         };
         CcGridSingleSelectFilterBackend?: {
             defaultProps?: ComponentsPropsList["CcGridSingleSelectFilterBackend"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcGridSingleSelectFilterBackend"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<GridSingleSelectFilterBackendClassKey>;
             variants?: ComponentsVariants["CcGridSingleSelectFilterBackend"];
         };
         CcForm?: {
-            styleOverrides?: ComponentsOverrides<Theme>["CcForm"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<FormClassKey>;
         };
         CcFieldState?: {
-            styleOverrides?: ComponentsOverrides<Theme>["CcFieldState"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<FieldStateClassKey>;
         };
         CcDirtyMarker?: {
-            styleOverrides?: ComponentsOverrides<Theme>["CcDirtyMarker"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<DirtyMarkerClassKey>;
         };
         CcBasicFormPage?: {
             defaultProps?: ComponentsPropsList["CcBasicFormPage"];
         };
         CcFlowEngine?: {
             defaultProps?: ComponentsPropsList["CcFlowEngine"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcFlowEngine"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<FlowEngineClassKey>;
         };
         CcCrud?: {
-            styleOverrides?: ComponentsOverrides<Theme>["CcCrud"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<CrudClassKey>;
         };
         CcRoutedTabs?: {
-            styleOverrides?: ComponentsOverrides<Theme>["CcRoutedTabs"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<RoutedTabsClassKey>;
         };
     }
 }

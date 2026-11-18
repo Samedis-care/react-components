@@ -3,6 +3,7 @@ export { default as BaseSelector } from "./BaseSelector";
 export { default as SingleSelect } from "./SingleSelect";
 export * from "./MultiSelect";
 export { default as MultiSelect } from "./MultiSelect";
+export * from "./MultiSelectEntry";
 export { default as MultiSelectEntry } from "./MultiSelectEntry";
 export * from "./MultiSelectWithTags";
 export { default as MultiSelectWithTags } from "./MultiSelectWithTags";

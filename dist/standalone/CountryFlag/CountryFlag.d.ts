@@ -7,17 +7,17 @@ import { SxProps, Theme } from "@mui/material";
  */
 export interface CountryFlagProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "children"> {
     /**
-     * The country: an upper-case ISO 3166-1 alpha-2 code, a key of
-     * `CountryFlags` (`"DE"`; not `"de"`, not `"UK"`). For a code without a
-     * flag the box stays empty, so a list of flags stays aligned.
+     * The country: an upper-case ISO 3166-1 alpha-2 code, a `CountryCode`
+     * (`"DE"`; not `"de"`, not `"UK"`). For a code without a flag the box stays
+     * empty, so a list of flags stays aligned.
      */
     code: string;
     /**
      * The flag's height: a number of px, or a CSS length (`"1em"` follows the
      * text around the flag). The box is twice as wide as it is high. A flag
      * fills the height and is as wide as its aspect ratio needs, at the start of
-     * the box. The flags of `CountryFlags` are all 3:2, so they take three
-     * quarters of the width.
+     * the box. The library's flags are all 3:2, so they take three quarters of
+     * the width.
      * @default `theme.typography.pxToRem(16)` (`1rem` in MUI's default theme)
      */
     size?: number | string;
@@ -72,7 +72,11 @@ export type CountryFlagClassKey = "root" | "image";
  *
  * Use it wherever an app shows a flag: as the `icon` of a Selector option
  * (`useCountryOptions()` does), in a list row, beside a name in text.
- * `CountryFlags` gives the bare image URLs.
+ * `loadCountryFlags()` gives the bare image URLs.
+ *
+ * The flags load with the first CountryFlag shown, as a chunk of their own
+ * (see `loadCountryFlags()`); until they are there, the box is empty. Once
+ * they have loaded, a CountryFlag shows its flag in its first render.
  *
  * Theme: `components.CcCountryFlag.defaultProps` ({@link CountryFlagProps}),
  * `components.CcCountryFlag.styleOverrides` per {@link CountryFlagClassKey}

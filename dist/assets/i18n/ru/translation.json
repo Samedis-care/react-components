@@ -164,7 +164,12 @@
 					"yes": "Да",
 					"no": "Нет"
 				},
-				"remove-item": "Удалить {{ITEM}}"
+				"remove-item": "Удалить {{ITEM}}",
+				"restore-item": "Восстановить {{ITEM}}",
+				"change": {
+					"added": "Добавлено",
+					"removed": "Удалено"
+				}
 			},
 			"multi-select-with-tags": {
 				"group-input-label": "Добавить все записи группы"

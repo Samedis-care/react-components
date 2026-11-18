@@ -1,5 +1,6 @@
-import { useCallback, useContext, useEffect, useImperativeHandle, useRef, useState, } from "react";
-import shallowCompare from "../../utils/shallowCompare";
+import { useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState, } from "react";
+import toComparisonJson from "../../utils/toComparisonJson";
+import LazyConnector from "../../backend-integration/Connector/LazyConnector";
 import { FormContext } from "../Form";
 import PartialApplyError from "../Form/PartialApplyError";
 // the entry as the field names it, for the message of a write that failed
@@ -40,6 +41,34 @@ const useCrudSelect = (params, ref) => {
     const [error, setError] = useState(null);
     const [loadError, setLoadError] = useState(null);
     const [selected, setSelected] = useState([]);
+    // Only a queued write is pending: a LazyConnector sends it when the Form saves, any other
+    // connector has written it by the time it returns.
+    const lazyConnector = connector instanceof LazyConnector ? connector : null;
+    const [removed, setRemoved] = useState([]);
+    // The queue is not React state: this counts its changes, so that what is read from it
+    // is read again. A removal that left the queue was sent, or cancelled by a restore,
+    // which selects the entry again: either way it is no longer listed as removed.
+    const [queueVersion, setQueueVersion] = useState(0);
+    useEffect(() => {
+        if (!lazyConnector)
+            return;
+        return lazyConnector.addQueueChangeListener(() => {
+            setQueueVersion((version) => version + 1);
+            setRemoved((prev) => {
+                const next = prev.filter((entry) => lazyConnector.getQueuedOperation(entry.value) === "delete");
+                return next.length === prev.length ? prev : next;
+            });
+        });
+    }, [lazyConnector]);
+    const added = useMemo(() => lazyConnector
+        ? selected
+            .filter((entry) => lazyConnector.getQueuedOperation(entry.value) === "create")
+            .map((entry) => entry.value)
+        : [], 
+    // queueVersion: the queue changed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [lazyConnector, selected, queueVersion]);
+    const pendingChanges = !!lazyConnector && !lazyConnector.isQueueEmpty();
     const currentSelected = useRef([]); // current state of selected, always set this and then use setSelected(currentSelected.current)
     const [initialRawData, setInitialRawData] = useState([]);
     // the entries listed for created rows whose deserialize failed, by row: the field
@@ -120,34 +149,36 @@ const useCrudSelect = (params, ref) => {
         let newSelected = kept.length === 0
             ? reported
             : [...reported, ...kept].sort((a, b) => ids.indexOf(a.value) - ids.indexOf(b.value));
-        // find new entries
-        const newEntries = newSelected.filter((entry) => !selected.find((selEntry) => selEntry.value === entry.value));
+        // find new entries: one whose removal is still queued is restored, not created
+        const isQueuedRemoval = (entry) => lazyConnector?.getQueuedOperation(entry.value) === "delete";
+        const addedEntries = newSelected.filter((entry) => !selected.find((selEntry) => selEntry.value === entry.value));
+        const restoredEntries = addedEntries.filter(isQueuedRemoval);
+        const newEntries = addedEntries.filter((entry) => !isQueuedRemoval(entry));
         // remove new entries from array
         newSelected = newSelected.filter((entry) => selected.find((selEntry) => selEntry.value === entry.value));
-        const changedEntries = newSelected.filter((entry) => {
+        // An entry is updated only when what it would send differs from what the listed
+        // entry sends. The field hands back copies of the listed entries (BackendMultiSelect
+        // deserializes the rows itself), so neither a deserialize that builds a new object,
+        // array or Date per call nor a field serialize leaves out (label, titleTooltip,
+        // freeSolo, onClick, …) may turn an untouched entry into a write. A serialize that
+        // fails counts as a change, so the update reports it.
+        const isChanged = async (entry) => {
             const oldEntry = selected.find((selEntry) => selEntry.value === entry.value);
-            if (!oldEntry)
+            if (!oldEntry || oldEntry === entry)
                 return false;
-            // remove all base selector data and multi selector data render options
-            // this way we only update when the data actually changed
-            const normalize = (record) => Object.assign({}, record, {
-                label: null,
-                icon: null,
-                onClick: null,
-                canUnselect: null,
-                noDelete: null,
-                isDisabled: null,
-                selected: null,
-                hidden: null,
-                ignore: null,
-                group: null,
-                isAddNewButton: null,
-                isDivider: null,
-                isSmallLabel: null,
-                className: null,
-            });
-            return !shallowCompare(normalize(entry), normalize(oldEntry));
-        });
+            try {
+                const [oldData, newData] = await Promise.all([
+                    serialize(oldEntry),
+                    serialize(entry),
+                ]);
+                return toComparisonJson(oldData) !== toComparisonJson(newData);
+            }
+            catch {
+                return true;
+            }
+        };
+        const changed = await Promise.all(newSelected.map(isChanged));
+        const changedEntries = newSelected.filter((_entry, index) => changed[index]);
         const deletedEntries = selected.filter((entry) => !newSelected.find((selEntry) => selEntry.value === entry.value));
         // Every write settles on its own, rather than the first failure taking the
         // rest with it: the backend keeps what went through either way, so the
@@ -200,6 +231,12 @@ const useCrudSelect = (params, ref) => {
         });
         const updated = await updatePromise;
         const deleted = await deletePromise;
+        // a removal the LazyConnector queued is listed until it is sent or restored
+        const queuedRemovals = deletedEntries.filter((entry, index) => deleted[index].status === "fulfilled" && isQueuedRemoval(entry));
+        // Cancelled here, next to the state updates below, so that the entry leaves
+        // `removed` (the queue listener) in the render it is selected again. A delete the
+        // Form sent meanwhile cannot be cancelled: that entry stays removed.
+        const restored = restoredEntries.filter((entry) => lazyConnector?.cancelQueuedOperation(entry.value) ?? false);
         // create final values: a refused update keeps the entry as it was, a
         // refused removal keeps the entry selected
         const finalSelected = [
@@ -210,6 +247,7 @@ const useCrudSelect = (params, ref) => {
                 return (selected.find((selEntry) => selEntry.value === entry.value) ?? entry);
             }),
             ...deletedEntries.filter((_entry, index) => deleted[index].status === "rejected"),
+            ...restored,
             ...created.map(({ entry }) => entry),
         ];
         // reflect changes
@@ -219,8 +257,17 @@ const useCrudSelect = (params, ref) => {
         ]);
         currentSelected.current = finalSelected;
         setSelected(currentSelected.current);
+        if (queuedRemovals.length > 0)
+            setRemoved((prev) => [...prev, ...queuedRemovals]);
         setError(failures.length > 0 ? toPartialApplyError(failures) : null);
-    }, [connector, deserialize, prepareNewEntry, selected, serialize]);
+    }, [
+        connector,
+        deserialize,
+        lazyConnector,
+        prepareNewEntry,
+        selected,
+        serialize,
+    ]);
     const handleSelect = useCallback(async (ids, newSelected) => {
         if (disabledRef.current)
             return;
@@ -255,9 +302,16 @@ const useCrudSelect = (params, ref) => {
                     rows: Number.MAX_SAFE_INTEGER,
                 });
                 const initialSelected = await Promise.all(currentlySelected[0].map((record) => Promise.resolve(deserialize(record))));
-                setInitialRawData(currentlySelected[0]);
+                // A removal queued before the control was last unmounted (a language
+                // switch, a route change) is still pending: index hides it, and hands it back
+                // here. A queued pick is in the index result already.
+                const removedRecords = lazyConnector?.getQueuedDeleteRecords() ?? [];
+                const removedEntries = await Promise.all(removedRecords.map((record) => Promise.resolve(deserialize(record))));
+                // the removed records too: a restored entry is listed from its record
+                setInitialRawData([...currentlySelected[0], ...removedRecords]);
                 currentSelected.current = initialSelected;
                 setSelected(currentSelected.current);
+                setRemoved(removedEntries);
             }
             catch (e) {
                 // the field says that the load failed; the error's message is technical
@@ -303,6 +357,9 @@ const useCrudSelect = (params, ref) => {
         error,
         loadError,
         selected,
+        added,
+        removed,
+        pendingChanges,
         initialRawData,
         handleSelect,
         modelToSelectorData,

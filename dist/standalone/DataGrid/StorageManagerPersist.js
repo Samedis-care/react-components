@@ -37,8 +37,9 @@ const StorageManagerPersist = (props) => {
     const [written, setWritten] = useState(null);
     // wrapped in a tuple so "loaded, but nothing stored" stays distinguishable
     // from "still loading" (useAsyncMemo yields null while it runs). The
-    // factory never rejects, a rejection would keep the Loader up for good.
-    const data = useAsyncMemo(async () => {
+    // factory never rejects (a bucket that cannot be read is reported in
+    // `unreadable`), so there is no error to show.
+    const { value: data } = useAsyncMemo(async () => {
         const unreadable = [];
         // what each bucket which could be read holds
         const read = new Map();

@@ -54,16 +54,34 @@ const StyledBaseSelector = styled(BaseSelector, {
             : undefined,
     },
 })); // tradeoff: remove ownerState from type config, but keep generics
+const NO_ENTRIES = [];
 const MultiSelect = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiSelect" });
-    const { onLoad, onSelect, selected, enableIcons, selectedEntryRenderer, disabled, readOnly, label, error, dirty, getIdOfData, displaySwitch, switchLabel, defaultSwitchValue, selectedSort, confirmDelete, className, classes, filterIds, refreshToken, } = props;
+    const { onLoad, onSelect, selected, added, enableIcons, selectedEntryRenderer, disabled, readOnly, label, error, dirty, getIdOfData, displaySwitch, switchLabel, defaultSwitchValue, selectedSort, confirmDelete, className, classes, filterIds, refreshToken, } = props;
     const { t } = useCCTranslations();
     const labelId = useId();
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
+    const removed = props.removed ?? NO_ENTRIES;
     const selectedIds = useMemo(() => selected.map(getId), [getId, selected]);
-    // the selected entries are filtered out of the options on top of whatever the caller wants filtered
-    const combinedFilterIds = useMemo(() => [...(filterIds ?? []), ...selectedIds], [filterIds, selectedIds]);
+    const removedIds = useMemo(() => removed.map(getId), [getId, removed]);
+    // the selected entries are filtered out of the options on top of whatever the caller
+    // wants filtered, and so are the removed ones: they come back through their restore button
+    const combinedFilterIds = useMemo(() => [...(filterIds ?? []), ...selectedIds, ...removedIds], [filterIds, selectedIds, removedIds]);
+    const listed = useMemo(() => {
+        const entries = [
+            ...selected.map((data) => ({
+                data,
+                changeState: added?.includes(data.value)
+                    ? "added"
+                    : undefined,
+            })),
+            ...removed.map((data) => ({ data, changeState: "removed" })),
+        ];
+        return selectedSort
+            ? entries.sort((a, b) => selectedSort(a.data, b.data))
+            : entries;
+    }, [added, removed, selected, selectedSort]);
     const EntryRender = selectedEntryRenderer || MultiSelectEntry;
     const multiSelectHandler = useCallback((data) => {
         if (!data)
@@ -118,14 +136,22 @@ const MultiSelect = (inProps) => {
             }
         })();
     }, [onSelect, selected, genericDeleteConfirm, confirmDelete]);
+    const handleRestore = useCallback((evt) => {
+        evt.stopPropagation(); // don't trigger onClick event on item itself
+        const entry = removed.find((s) => s.value === evt.currentTarget.name);
+        if (!entry || !onSelect)
+            return;
+        onSelect([...selected, entry]);
+    }, [onSelect, removed, selected]);
     const handleSetData = useCallback((newValue) => {
         if (!onSelect)
             return;
         onSelect(selected.map((entry) => getId(entry) === getId(newValue) ? newValue : entry));
     }, [getId, onSelect, selected]);
-    const entries = props.selected.length > 0 && (_jsx(List, { disablePadding: true, "aria-labelledby": readOnly && label ? labelId : undefined, children: (selectedSort
-            ? [...props.selected].sort(selectedSort)
-            : props.selected).map((data, index) => (_jsx(EntryRender, { enableDivider: props.selected.length === index - 1, enableIcons: enableIcons, handleDelete: disabled || readOnly || data.noDelete ? undefined : handleDelete, data: data, setData: handleSetData, iconSize: props.iconSize }, getId(data) || index.toString(16)))) }));
+    const locked = disabled || readOnly;
+    const entries = listed.length > 0 && (_jsx(List, { disablePadding: true, "aria-labelledby": readOnly && label ? labelId : undefined, children: listed.map(({ data, changeState }, index) => (_jsx(EntryRender, { enableDivider: listed.length === index - 1, enableIcons: enableIcons, handleDelete: locked || data.noDelete || changeState === "removed"
+                ? undefined
+                : handleDelete, changeState: changeState, handleRestore: locked || changeState !== "removed" ? undefined : handleRestore, data: data, setData: handleSetData, iconSize: props.iconSize }, getId(data) || index.toString(16)))) }));
     if (readOnly) {
         return (_jsxs(Root, { size: "grow", container: true, className: combineClassNames([className, classes?.root]), children: [label && (_jsx(Grid, { size: 12, children: _jsx(ReadOnlyLabel, { id: labelId, shrink: true, disableAnimation: true, error: !!error, dirty: dirty, className: classes?.label, children: label }) })), _jsx(SelectedEntry, { size: 12, className: combineClassNames([
                         classes?.selectedEntry,
@@ -134,6 +160,9 @@ const MultiSelect = (inProps) => {
     }
     return (_jsxs(Root, { size: "grow", container: true, className: combineClassNames([className, classes?.root]), children: [_jsx(Grid, { size: 12, children: _jsx(StyledBaseSelector, { ...props, 
                     // @ts-expect-error removed owner state from props to preserve generics
-                    ownerState: { selected: selected.length > 0 }, className: classes?.selector, onLoad: multiSelectLoadHandler, selected: null, onSelect: multiSelectHandler, refreshToken: (refreshToken ?? "") + selectedIds.join(","), displaySwitch: displaySwitch, switchLabel: switchLabel, defaultSwitchValue: defaultSwitchValue, filterIds: combinedFilterIds }) }), entries && (_jsx(SelectedEntry, { size: 12, className: classes?.selectedEntry, children: _jsx(Paper, { elevation: 0, children: entries }) }))] }));
+                    ownerState: { selected: listed.length > 0 }, className: classes?.selector, onLoad: multiSelectLoadHandler, selected: null, onSelect: multiSelectHandler, 
+                    // not by the removed entries: the token remounts the search field, and a save
+                    // that sends a removal must leave the focus and the typed text in it
+                    refreshToken: (refreshToken ?? "") + selectedIds.join(","), displaySwitch: displaySwitch, switchLabel: switchLabel, defaultSwitchValue: defaultSwitchValue, filterIds: combinedFilterIds }) }), entries && (_jsx(SelectedEntry, { size: 12, className: classes?.selectedEntry, children: _jsx(Paper, { elevation: 0, children: entries }) }))] }));
 };
 export default React.memo(MultiSelect);

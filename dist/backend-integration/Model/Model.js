@@ -101,14 +101,21 @@ export const useModelIndex2 = (model, params, options) => {
     });
 };
 /**
- * React-Query's useMutation to update/create a new record on backend
+ * React-Query's useMutation to update/create a new record on backend. Once saved, the
+ * record the connector returned is what the model's cache holds for its id (what getCached
+ * and useModelGet return), hooks.onCreateOrUpdate is called with it, and the "mutate" event
+ * fires (addEventHandler).
  * @param model The model
+ * @param visibility The page the values were edited on: they are serialized with its field
+ *                   visibilities, so a field disabled there is not sent. Defaults to "edit"
+ *                   for an update (values.id set) and "create" for a create. BackendDataGrid's
+ *                   inline edits pass "overview".
  * @see model.createOrUpdateRecordRaw
  */
-export const useModelMutation = (model) => {
+export const useModelMutation = (model, visibility) => {
     return useMutation({
         mutationKey: [model.modelId, "create-or-update"],
-        mutationFn: model.createOrUpdateRecordRaw.bind(model),
+        mutationFn: (values) => model.createOrUpdateRecordRaw(values, visibility),
         onSuccess: (responseData, inputData) => {
             const inputId = inputData.id;
             const id = responseData[0].id;
@@ -626,10 +633,14 @@ class Model {
     /**
      * Updates a single record on backend (doesn't update local cache)
      * @param values The new values (set id field to update)
+     * @param visibility The page the values were edited on: they are serialized with its
+     *                   field visibilities, so a field disabled there is not sent. Defaults to
+     *                   "edit" for an update and "create" for a create.
+     * @returns The record the connector returned, deserialized for edit
      */
-    async createOrUpdateRecordRaw(values) {
+    async createOrUpdateRecordRaw(values, visibility) {
         const update = !!("id" in values && values.id);
-        const serializedValues = await this.applySerialization(values, "serialize", update ? "edit" : "create");
+        const serializedValues = await this.applySerialization(values, "serialize", visibility ?? (update ? "edit" : "create"));
         if (update) {
             return this.deserializeResponse(await this.connector.update(serializedValues, this.asModelUnknown));
         }

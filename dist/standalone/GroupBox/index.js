@@ -48,14 +48,14 @@ const GroupBoxLegend = styled("legend", {
         fontSize: "0.75em",
     },
 });
-const GroupBox = (inProps) => {
+const GroupBox = React.forwardRef(function GroupBox(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: "CcGroupBox" });
     const { label, children, smallLabel, className, classes, ...fieldsetProps } = props;
-    return (_jsxs(GroupBoxRoot, { ...fieldsetProps, className: combineClassNames([className, classes?.root]), children: [label && (_jsx(GroupBoxLegend, { className: combineClassNames([
+    return (_jsxs(GroupBoxRoot, { ...fieldsetProps, ref: ref, className: combineClassNames([className, classes?.root]), children: [label && (_jsx(GroupBoxLegend, { className: combineClassNames([
                     smallLabel && SMALL_LABEL_CLASS,
                     smallLabel && classes?.smallLabel,
                 ]), children: label })), children] }));
-};
+});
 /**
  * A frame with an optional title: a native `<fieldset>` whose `label` is drawn
  * as a `<legend>` in its top border.
@@ -67,5 +67,14 @@ const GroupBox = (inProps) => {
  * below it) it is as tall as its content, and the siblings stay inside the
  * parent. A `height` set by the theme or a `styled(GroupBox)` wrapper
  * replaces this rule.
+ *
+ * Every other HTML attribute, `sx` and `ref` reach the fieldset. A framed
+ * form control ties its error to the group with `aria-describedby`: screen
+ * readers read it when focus enters the group. A frame without a title can be
+ * named by a heading inside it with `aria-labelledby`.
+ *
+ * @example
+ * <GroupBox label={t("files")} aria-describedby={"files-error"}>…</GroupBox>
+ * <FormHelperTextCC id={"files-error"} error>{errorMsg}</FormHelperTextCC>
  */
 export default React.memo(GroupBox);

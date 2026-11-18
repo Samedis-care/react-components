@@ -12,11 +12,14 @@ export interface IRoutedMenuItemDefinition extends Omit<IMenuItemDefinition, "on
      * the route with more segments, then, segment by segment from the left, a
      * literal before a `:name` param (`/apps/new` before `/apps/:app`). On a
      * tie the deeper entry wins (a group's entry with the group's own route),
-     * then the earlier one.
+     * then the earlier one. The highlight follows the URL only: on a path that
+     * no entry matches, nothing is highlighted, and an entry without `route`
+     * (an action such as "Log out") is never highlighted.
      *
      * Its `:name` params are filled from the current URL, read with the route
      * of that best-matching entry: on `/projects/42/review`,
-     * `/projects/:id/capture` navigates to `/projects/42/capture`. While the
+     * `/projects/:id/capture` navigates to `/projects/42/capture`. The values
+     * go in percent-encoded, so a value with "/" stays one segment. While the
      * current URL has no value for one of its params, the entry is hidden
      * (with its children), as if `shouldRender` were false, and in development
      * a `console.error` names the entry and the param (once per menu, entry
@@ -39,6 +42,18 @@ export interface IRoutedMenuProps extends Omit<MenuProps, "definition" | "custom
      */
     definition: IRoutedMenuItemDefinition[];
 }
+/**
+ * The routing logic of RoutedMenu, for a menu the app renders itself. Must be
+ * called inside a HistoryRouter.
+ * @param props The menu definition
+ * @return `definition`: the entries converted for MenuBase, with
+ * `forceExpand` set on the groups above the entry of the current URL and
+ * handlers that navigate to the entries' routes. `controlledState`: for
+ * MenuBase's `customState` or a `MenuContext.Provider`, the id of the entry
+ * of the current URL (the titles from the top level joined by `@`, `""` when
+ * no entry matches the URL) and a setter that does nothing, because the
+ * active entry follows the URL only.
+ */
 export declare const useRoutedMenuLogic: (props: Pick<IRoutedMenuProps, "definition">) => {
     definition: IMenuItemDefinition[];
     controlledState: [string, React.Dispatch<React.SetStateAction<string>>];

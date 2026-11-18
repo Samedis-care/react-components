@@ -16,12 +16,53 @@ export const extractLazyCrudConnectorParams = (data) => {
     return [params, otherProps];
 };
 /**
+ * The connector the hook keeps in the Form's custom state under `field`
+ * @remarks Keeps the getEndpoint and onParentIdChange it was built with, so that every save
+ *          sends the queue where the reads go, also from a control that mounted again
+ */
+class FormLazyConnector extends LazyConnector {
+    /**
+     * Calls onParentIdChange with a parent record id, then returns getEndpoint(id), as the
+     * connector was built with
+     */
+    getParentEndpoint;
+    constructor(connector, fakeReads, onQueueChange, getParentEndpoint) {
+        super(connector, fakeReads, onQueueChange);
+        this.getParentEndpoint = getParentEndpoint;
+    }
+}
+/**
+ * Builds the connector of a field from the params of its first render
+ * @param params The hook's params
+ * @param onQueueChange Called with the queue whenever it changes
+ * @throws "No default connector set" without params.getConnector and a default API connector
+ */
+const buildConnector = (params, onQueueChange) => {
+    const { getEndpoint, initialId, configureConnector, onParentIdChange, extraParams, } = params;
+    const getConnector = (params.getConnector ?? DefaultConnector.getApi);
+    if (!getConnector)
+        throw new Error("No default connector set");
+    const getParentEndpoint = (id) => {
+        if (onParentIdChange)
+            onParentIdChange(id);
+        return getEndpoint(id);
+    };
+    const connector = getConnector(getParentEndpoint(initialId ?? "null"), extraParams);
+    if (configureConnector)
+        configureConnector(connector);
+    return new FormLazyConnector(connector, initialId === null, onQueueChange, getParentEndpoint);
+};
+/**
  * Gives a Crud* control (FormCrudMultiSelect, FormCrudFileUpload, FormCrudMultiImage, …) a
  * LazyConnector bound to the current Form: reads go to getEndpoint(initialId), writes are
  * queued and sent to getEndpoint(savedId) after the Form saved its record
  * @param params See UseLazyCrudConnectorParams
  * @returns The connector, one per Form, field and record
  * @remarks
+ * - The params are read once (see UseLazyCrudConnectorParams): a later getEndpoint,
+ *   onParentIdChange, extraParams, getConnector, configureConnector or field changes
+ *   neither the reads nor the save. Another collection takes another field and a new
+ *   mount of the control, e.g. `key={field}`.
  * - While the queue holds writes the Form is dirty (a custom dirty flag named `field`).
  * - A Form given another record (id or model) starts over: the control mounts again with a
  *   new connector for that record, and a queue left for the previous record is dropped,
@@ -41,38 +82,29 @@ export const extractLazyCrudConnectorParams = (data) => {
  *   onlySubmitMounted.
  */
 const useLazyCrudConnector = (params) => {
-    // when updating params, also update extractLazyCrudConnectorParams
-    const { getEndpoint, initialId, getConnector: getConnectorOverride, configureConnector, onParentIdChange, extraParams, field, } = params;
     const { setPostSubmitHandler, removePostSubmitHandler, setCustomFieldDirty, getCustomState, setCustomState, setPreSubmitHandler, removePreSubmitHandler, onlySubmitMounted, flowEngine, } = useFormContext();
-    const getEndpointWrap = useCallback((currentId) => {
-        if (onParentIdChange)
-            onParentIdChange(currentId);
-        return getEndpoint(currentId);
-    }, [onParentIdChange, getEndpoint]);
-    const getConnector = (getConnectorOverride ?? DefaultConnector.getApi);
-    if (!getConnector)
-        throw new Error("No default connector set");
-    const getConnectorWrap = useCallback((endpoint, extraParams) => {
-        const connector = getConnector(endpoint, extraParams);
-        if (configureConnector)
-            configureConnector(connector);
-        return connector;
-    }, [getConnector, configureConnector]);
-    const uploadConnector = useRef(getCustomState(field) ??
-        (() => {
-            return new LazyConnector(getConnectorWrap(getEndpointWrap(initialId ?? "null"), extraParams), initialId === null, (queue) => {
-                setCustomFieldDirty(field, queue.length !== 0);
-            });
-        })());
+    // when updating params, also update extractLazyCrudConnectorParams
+    // the params are read once: field when the control mounts, the others when the
+    // connector is built (see UseLazyCrudConnectorParams)
+    const field = useRef(params.field).current;
+    const uploadConnector = useRef(null);
+    if (!uploadConnector.current) {
+        uploadConnector.current =
+            getCustomState(field) ??
+                buildConnector(params, (queue) => {
+                    setCustomFieldDirty(field, queue.length !== 0);
+                });
+    }
+    const connector = uploadConnector.current;
     /**
      * Has a flow form's submit staged the queue since the control mounted?
      * @remarks Set by the submit (the pre-submit handler below), cleared once the queue is
      *          empty (sent or undone)
      */
     const staged = useRef(false);
-    // we need to update thee QueueChangeHandler if params changed
+    // the connector's queue change handler belongs to the mounted control: it keeps the
+    // Form's dirty flag and the staged state
     useEffect(() => {
-        const connector = uploadConnector.current;
         connector.setQueueChangeHandler((queue) => {
             if (queue.length === 0)
                 staged.current = false;
@@ -80,7 +112,7 @@ const useLazyCrudConnector = (params) => {
         });
         // a queue kept from an earlier mount is listed again, and the next save sends it
         setCustomFieldDirty(field, !connector.isQueueEmpty());
-    }, [setCustomFieldDirty, field]);
+    }, [connector, setCustomFieldDirty, field]);
     // in flow mode every submit stages the values of the mounted fields (goToStage makes one
     // before it changes the stage), and with them the queue of a mounted lazy control
     useEffect(() => {
@@ -98,14 +130,13 @@ const useLazyCrudConnector = (params) => {
      * @remarks Only a staged one: a stage that is left was submitted first, a control hidden
      *          within its stage was not
      */
-    const savedWhenUnmounted = useCallback(() => staged.current && !uploadConnector.current.isQueueEmpty(), []);
+    const savedWhenUnmounted = useCallback(() => staged.current && !connector.isQueueEmpty(), [connector]);
     // set post submit handler for lazy connector
     useEffect(() => {
-        const connector = uploadConnector.current;
         setCustomState(field, () => connector);
         const submitHandler = async (id) => {
             // update API endpoint and disable fakeReads, then send requests
-            connector.realConnector.setApiEndpoint(getEndpointWrap(id));
+            connector.realConnector.setApiEndpoint(connector.getParentEndpoint(id));
             connector.fakeReads = false;
             return connector.workQueue();
         };
@@ -115,8 +146,15 @@ const useLazyCrudConnector = (params) => {
                 removePostSubmitHandler(field);
             }
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [setPostSubmitHandler, onlySubmitMounted, savedWhenUnmounted]);
+    }, [
+        connector,
+        field,
+        setCustomState,
+        setPostSubmitHandler,
+        removePostSubmitHandler,
+        onlySubmitMounted,
+        savedWhenUnmounted,
+    ]);
     // mark not dirty when unmounted and onlySubmitMounted
     useEffect(() => {
         if (!onlySubmitMounted)
@@ -127,6 +165,6 @@ const useLazyCrudConnector = (params) => {
             setCustomFieldDirty(field, false);
         };
     }, [field, onlySubmitMounted, setCustomFieldDirty, savedWhenUnmounted]);
-    return { connector: uploadConnector.current };
+    return { connector };
 };
 export default useLazyCrudConnector;

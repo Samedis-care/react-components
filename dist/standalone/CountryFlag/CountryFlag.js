@@ -1,7 +1,7 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useMemo } from "react";
 import { styled, useThemeProps } from "@mui/material";
-import getCountryFlag from "../CountryFlags/getCountryFlag";
+import useCountryFlag from "./useCountryFlag";
 import combineClassNames from "../../utils/combineClassNames";
 import CountryFlagImage from "./CountryFlagImage";
 import CountryFlagNamedImage from "./CountryFlagNamedImage";
@@ -34,7 +34,7 @@ const Root = styled("span", {
 const CountryFlag = React.forwardRef(function CountryFlag(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: "CcCountryFlag" });
     const { code, size, named, className, classes, style, ...rootProps } = props;
-    const src = getCountryFlag(code);
+    const src = useCountryFlag(code);
     const rootStyle = useMemo(() => size == null
         ? style
         : {
@@ -56,7 +56,11 @@ const CountryFlag = React.forwardRef(function CountryFlag(inProps, ref) {
  *
  * Use it wherever an app shows a flag: as the `icon` of a Selector option
  * (`useCountryOptions()` does), in a list row, beside a name in text.
- * `CountryFlags` gives the bare image URLs.
+ * `loadCountryFlags()` gives the bare image URLs.
+ *
+ * The flags load with the first CountryFlag shown, as a chunk of their own
+ * (see `loadCountryFlags()`); until they are there, the box is empty. Once
+ * they have loaded, a CountryFlag shows its flag in its first render.
  *
  * Theme: `components.CcCountryFlag.defaultProps` ({@link CountryFlagProps}),
  * `components.CcCountryFlag.styleOverrides` per {@link CountryFlagClassKey}

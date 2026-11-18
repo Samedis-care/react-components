@@ -74,7 +74,9 @@ export interface InfoBoxProps {
      */
     classes?: Partial<Record<InfoBoxClassKey, string>>;
     /**
-     * For which status InfoBox used
+     * For which status InfoBox used. It sets the header's color, which stays
+     * while the header has keyboard focus; the focused header shows a 2px
+     * ring in its text color, 2px inside its edges.
      */
     status?: "info" | "warning" | "success" | "error";
 }

@@ -1,5 +1,6 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback } from "react";
+import { useModelMutation, } from "../../backend-integration/Model/Model";
 import { useDialogContext } from "../../framework/DialogContextProvider";
 import { ErrorDialog } from "../../non-standalone/Dialog";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -8,22 +9,25 @@ import renderModelCell from "./renderModelCell";
 /**
  * The cell of a field with an editable overview visibility (ModelVisibilityGridEdit):
  * renders the field's control and saves every change at once, as
- * `{ id, [field]: value }` serialized for "overview", through model.connector.update.
+ * `{ id, [field]: value }` serialized for "overview", through the model's mutation
+ * (useModelMutation), like any other update: the model's cache of the record then holds
+ * the saved record, and hooks.onCreateOrUpdate and the "mutate" listeners hear of it.
  * Saved or refused, refreshGrid is called. A refused save is shown in an error dialog
  * naming the field and the error, and the reload shows the stored value again.
- * Needs the Framework (dialogs, translations).
+ * Needs the Framework (dialogs, translations, the model's query client).
  */
 const InlineEditCell = (props) => {
     const { model, field, record, refreshGrid } = props;
     const [pushDialog] = useDialogContext();
     const { t } = useCCTranslations();
+    const { mutateAsync: updateRecord } = useModelMutation(model, "overview");
     const handleChange = useCallback((changed, value) => {
         const { id } = record;
         if (!id)
             throw new Error("ID not set!");
         void (async () => {
             try {
-                await model.connector.update(await model.applySerialization({ id, ...dotToObject(changed, value) }, "serialize", "overview"));
+                await updateRecord({ id, ...dotToObject(changed, value) });
             }
             catch (error) {
                 refreshGrid();
@@ -35,7 +39,7 @@ const InlineEditCell = (props) => {
             }
             refreshGrid();
         })();
-    }, [model, field, record, refreshGrid, pushDialog, t]);
+    }, [model, field, record, refreshGrid, pushDialog, t, updateRecord]);
     return renderModelCell(model, field, record, handleChange);
 };
 export default React.memo(InlineEditCell);

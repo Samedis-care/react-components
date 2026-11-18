@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { getMissingRouteParameters, insertRouteParameters, } from "../../../utils/routeUtils";
 import matchPath, { normalizePath } from "../../../standalone/Routes/matchPath";
 import MenuBase from "../../../standalone/Portal/Menu";
@@ -71,6 +71,15 @@ const flattenRoutes = (definitions, groups) => definitions.flatMap((def) => {
     ];
 });
 /**
+ * Percent-encodes route params for a path, so a value with "/", "?", "#" or
+ * "%" stays one segment
+ * @param params The params as matchPath gives them (decoded)
+ */
+const encodeRouteParameters = (params) => Object.fromEntries(Object.entries(params).map(([name, value]) => [
+    name,
+    encodeURIComponent(value),
+]));
+/**
  * The entry of the whole menu tree whose route matches the path best: of all
  * entries whose route matches the path as a prefix, the most specific one
  * (compareSpecificity); on a full tie the earlier one in definition order.
@@ -91,7 +100,11 @@ const resolveLocation = (definitions, path) => {
         if (best && compareSpecificity(specificity, best.specificity) >= 0)
             continue;
         best = {
-            match: { id: entry.id, groups: entry.groups, params: match.params },
+            match: {
+                id: entry.id,
+                groups: entry.groups,
+                params: encodeRouteParameters(match.params),
+            },
             specificity,
         };
     }
@@ -173,9 +186,25 @@ const convertDefinition = (params, expanded, definition, id, navigate) => ({
             window.open(target);
     },
 });
+/**
+ * The setter of useRoutedMenuLogic's active id. MenuBase calls it with the id
+ * of a clicked entry; it does nothing, because the active entry is the entry
+ * of the current URL.
+ */
+const ignoreActiveChange = () => undefined;
+/**
+ * The routing logic of RoutedMenu, for a menu the app renders itself. Must be
+ * called inside a HistoryRouter.
+ * @param props The menu definition
+ * @return `definition`: the entries converted for MenuBase, with
+ * `forceExpand` set on the groups above the entry of the current URL and
+ * handlers that navigate to the entries' routes. `controlledState`: for
+ * MenuBase's `customState` or a `MenuContext.Provider`, the id of the entry
+ * of the current URL (the titles from the top level joined by `@`, `""` when
+ * no entry matches the URL) and a setter that does nothing, because the
+ * active entry follows the URL only.
+ */
 export const useRoutedMenuLogic = (props) => {
-    const controlledState = useState("");
-    const [activeMenuItem, setActiveMenuItem] = controlledState;
     const location = useLocation();
     const path = location.pathname;
     const navigate = useNavigate();
@@ -183,13 +212,13 @@ export const useRoutedMenuLogic = (props) => {
     // the entry of the current URL: the active item, the groups to expand and
     // the params
     const current = React.useMemo(() => resolveLocation(rawDef, path), [rawDef, path]);
-    // set the currently active item based off location
-    useEffect(() => {
-        const menuEntry = current?.id;
-        if (menuEntry && activeMenuItem !== menuEntry) {
-            setActiveMenuItem(menuEntry);
-        }
-    }, [activeMenuItem, current, setActiveMenuItem]);
+    // the active item is derived from the URL, so it is never left over from an
+    // earlier path or set by a click on an entry that the URL does not match
+    const activeMenuItem = current?.id ?? "";
+    const controlledState = React.useMemo(() => [
+        activeMenuItem,
+        ignoreActiveChange,
+    ], [activeMenuItem]);
     // convert routed menu definitions to normal menu definitions
     const params = React.useMemo(() => current?.params ?? {}, [current]);
     const definition = React.useMemo(() => rawDef.map((entry) => convertDefinition(params, current?.groups ?? [], entry, getItemId(null, entry.title), navigate)), [rawDef, params, current, navigate]);
@@ -215,6 +244,15 @@ export const useRoutedMenuLogic = (props) => {
     }, [rawDef, params, path]);
     return { definition, controlledState };
 };
+/**
+ * A MenuBase driven by the URL: the entry whose `route` matches the current
+ * path best is highlighted and the groups above it are expanded (see
+ * IRoutedMenuItemDefinition's `route`), and a click on an entry runs its
+ * `onClick` and navigates to its route. The highlight follows the URL only:
+ * on a path that matches no entry nothing is highlighted, and a click
+ * highlights nothing by itself, only the navigation it starts does. Must be
+ * rendered inside a HistoryRouter.
+ */
 const RoutedMenu = (props) => {
     const { definition, controlledState } = useRoutedMenuLogic(props);
     return (_jsx(MenuBase, { ...props, definition: definition, customState: controlledState }));

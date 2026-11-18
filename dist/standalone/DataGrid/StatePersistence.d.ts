@@ -19,6 +19,12 @@ export type DataGridPersistentStateContextType = [
      * the first auto-fit of the column widths. It does not call it when it
      * opens, so what it opened on stays stored as it is until one of these
      * changes; data in an older format is written in the current one then.
+     *
+     * Data in a newer format (a `v` higher than DATA_GRID_PERSIST_VERSION,
+     * written by a newer library version) is read with this version's rules,
+     * so what that version stores elsewhere starts from the defaults. The
+     * first auto-fit of the column widths does not write it either: only one
+     * of the other changes does, in this version's format.
      */
     (data: DataGridPersistentState) => Promise<void> | void
 ];

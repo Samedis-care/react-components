@@ -1,5 +1,5 @@
-import { jsx as _jsx } from "react/jsx-runtime";
-import React from "react";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import React, { useLayoutEffect, useRef } from "react";
 import Loader from "../Loader";
 import { styled, useThemeProps } from "@mui/material";
 const FormLoaderOverlayRoot = styled("div", {
@@ -25,6 +25,12 @@ const FormLoaderOverlayRoot = styled("div", {
     padding: `calc(${theme.spacing(2)} + 20px) 0`,
     backgroundColor: "rgba(255,255,255,.3)",
     transition: "opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) 1000ms",
+    // keyboard focus that the overlay takes from the content it wraps; inside the
+    // wash, so that a container that clips its overflow does not cut it off
+    "&:focus-visible": {
+        outline: `2px solid ${theme.palette.primary.main}`,
+        outlineOffset: -2,
+    },
     ...(visible
         ? { visibility: "visible", opacity: 1 }
         : { visibility: "hidden", opacity: 0 }),
@@ -45,15 +51,77 @@ const FormLoaderOverlayLoader = styled(Loader, {
     name: "CcFormLoaderOverlay",
     slot: "loader",
 })({});
+const FormLoaderOverlayContainer = styled("div", {
+    name: "CcFormLoaderOverlay",
+    slot: "container",
+})({
+    // the containing block of the wash: it covers the wrapped content, and nothing
+    // outside it
+    position: "relative",
+});
+const FormLoaderOverlayContent = styled("div", {
+    name: "CcFormLoaderOverlay",
+    slot: "content",
+})({});
 const FormLoaderOverlay = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcFormLoaderOverlay" });
-    return (_jsx(FormLoaderOverlayRoot, { ownerState: { visible: props.visible }, className: props.className, children: props.visible && (_jsx(FormLoaderOverlayLoaderAnchor, { children: _jsx(FormLoaderOverlayLoader, {}) })) }));
+    const { visible, className, children } = props;
+    const wraps = children !== undefined;
+    const rootRef = useRef(null);
+    const contentRef = useRef(null);
+    // the element in the content that had keyboard focus when the overlay was shown
+    const returnFocusRef = useRef(null);
+    // The wrapped content is inert while the overlay is visible: set on the DOM, as
+    // React 18 and 19 take the `inert` prop differently. Focus is moved out of the
+    // content before it turns inert, as the browser would drop it to the page. Both
+    // happen in the effect, not in a cleanup: React puts back the focus that changes
+    // while it applies a commit to the DOM, which is when cleanups run
+    useLayoutEffect(() => {
+        const root = rootRef.current;
+        const content = contentRef.current;
+        if (!root || !content)
+            return;
+        const doc = content.ownerDocument;
+        if (visible) {
+            const active = doc.activeElement;
+            if (active && content.contains(active)) {
+                returnFocusRef.current = active;
+                root.focus({ preventScroll: true });
+            }
+            content.setAttribute("inert", "");
+            return;
+        }
+        content.removeAttribute("inert");
+        const returnFocus = returnFocusRef.current;
+        returnFocusRef.current = null;
+        if (!returnFocus?.isConnected)
+            return;
+        const now = doc.activeElement;
+        // focus moved out of the wash meanwhile stays where it is
+        if (now && now !== root && now !== doc.body)
+            return;
+        returnFocus.focus();
+    }, [visible, wraps]);
+    const overlay = (_jsx(FormLoaderOverlayRoot, { ref: rootRef, tabIndex: wraps ? -1 : undefined, ownerState: { visible }, className: className, children: visible && (_jsx(FormLoaderOverlayLoaderAnchor, { children: _jsx(FormLoaderOverlayLoader, {}) })) }));
+    if (!wraps)
+        return overlay;
+    return (_jsxs(FormLoaderOverlayContainer, { children: [_jsx(FormLoaderOverlayContent, { ref: contentRef, children: children }), overlay] }));
 };
 /**
  * Busy overlay: a translucent wash with a spinner over the nearest positioned
- * ancestor (`position: absolute`, `inset: 0`). It blocks pointer input only.
+ * ancestor (`position: absolute`, `inset: 0`), or, with `children`, over them.
  * BasicFormPage shows it over the form page while the form is submitting, through
  * FormPageLayout's `other`, which makes it cover the form layout.
+ *
+ * Input: the wash alone blocks pointer input only. The controls under it stay
+ * reachable with Tab and operable by keyboard: disable them while it is shown, or pass
+ * them as `children`, which makes them `inert` while it is shown, so that neither
+ * pointer nor keyboard reaches them; keyboard focus in them moves to the wash and back
+ * (see {@link FormLoaderOverlayProps.children}). In a form page, Form makes its fields
+ * and buttons read-only while it is busy (Save stays focusable as an `aria-disabled`
+ * button); controls of the page that do not follow the form's read-only state stay
+ * operable by keyboard under the wash. With no positioned ancestor, the wash covers the
+ * initial viewport, and the page under it stays operable by keyboard.
  *
  * The spinner is kept on the middle line of the visible area of the nearest scroll
  * container (or the viewport), as far as the wash reaches: on a wash taller than
@@ -70,5 +138,12 @@ const FormLoaderOverlay = (inProps) => {
  * used. Content of the covered area with a z-index of 999 or more can show above
  * the wash, unless it is in a stacking context of its own (`isolation: isolate` on
  * its container), as the body of FormPageLayout is.
+ *
+ * @example
+ * // the import form is inert while it is busy; the steps' buttons below stay usable
+ * <FormLoaderOverlay visible={busy}>
+ * 	<ImportForm />
+ * </FormLoaderOverlay>
+ * <StepButtons />
  */
 export default React.memo(FormLoaderOverlay);

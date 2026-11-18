@@ -50,6 +50,10 @@ const AntSwitch = styled(Switch, { name: "CcInlineSwitch", slot: "switch" })(({ 
         backgroundColor: theme.palette.common.white,
     },
 }));
+// state classes of the root, see InlineSwitchClassKey
+const CHECKED_CLASS = "CcInlineSwitch-checked";
+const VISIBLE_CLASS = "CcInlineSwitch-visible";
+const DISABLED_CLASS = "CcInlineSwitch-disabled";
 const StyledRoot = styled("div", { name: "CcInlineSwitch", slot: "root" })({
     marginTop: 15,
 });
@@ -59,7 +63,7 @@ const StyledSwitchWrapper = styled(Typography, {
 })(({ theme }) => ({
     lineHeight: "30px",
     float: "right",
-    "&.CcInlineSwitch-disabled": {
+    [`&.${DISABLED_CLASS}`]: {
         color: theme.palette.text.disabled,
     },
 }));
@@ -73,9 +77,15 @@ const InlineSwitch = (inProps) => {
         if (onChange)
             onChange(event.target.checked);
     }, [onChange, disabled]);
-    return (_jsxs(StyledRoot, { className: combineClassNames([className, classes?.root]), children: [visible && (_jsx(StyledSwitchWrapper, { component: "div", className: combineClassNames([
+    return (_jsxs(StyledRoot, { className: combineClassNames([
+            className,
+            classes?.root,
+            value && CHECKED_CLASS,
+            visible && VISIBLE_CLASS,
+            disabled && DISABLED_CLASS,
+        ]), children: [visible && (_jsx(StyledSwitchWrapper, { component: "div", className: combineClassNames([
                     classes?.switchWrapper,
-                    disabled && "CcInlineSwitch-disabled",
+                    disabled && DISABLED_CLASS,
                 ]), variant: "caption", children: _jsxs(Grid, { component: "label", container: true, sx: { alignItems: "center" }, spacing: 1, children: [_jsx(Grid, { children: _jsx(AntSwitch, { className: classes?.switch, checked: value, onChange: handleSwitchChange, disabled: disabled, 
                                 // the focus ring shows focus; the ripple would pulse under it endlessly
                                 disableFocusRipple: true }) }), _jsx(Grid, { children: label })] }) })), _jsx("div", { children: children })] }));

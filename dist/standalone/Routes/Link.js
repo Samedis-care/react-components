@@ -5,12 +5,25 @@ import { useHistoryRouterContext } from "./HistoryRouter";
 import useNavigate from "./useNavigate";
 import toAppPath from "./toAppPath";
 /**
+ * Does the browser open the link in another tab or window, or download it?
+ * A target that is empty or "_self" (in any case) is the current tab, as in
+ * the HTML standard.
+ * @param anchor The clicked link
+ */
+const opensElsewhere = (anchor) => {
+    if (anchor.hasAttribute("download"))
+        return true;
+    const target = anchor.getAttribute("target");
+    return !!target && target.toLowerCase() !== "_self";
+};
+/**
  * Anchor element using the history API for routing: a plain click runs the
- * `onClick` prop and is then routed, unless `onClick` prevented the default;
- * clicks with Ctrl, Meta, Shift or Alt are left to the browser. Also works as
- * the `component` of MUI's Link and ButtonBase components
- * (`<Button component={Link} to="/x">`, ListItemButton, MenuItem, Tab,
- * IconButton), which pass an `onClick` of their own.
+ * `onClick` prop and is then routed, unless `onClick` prevented the default.
+ * Clicks with Ctrl, Meta, Shift or Alt are left to the browser, and so is
+ * every click on a link with a `target` other than `_self` or with
+ * `download`. Also works as the `component` of MUI's Link and ButtonBase
+ * components (`<Button component={Link} to="/x">`, ListItemButton, MenuItem,
+ * Tab, IconButton), which pass an `onClick` of their own.
  * @param props The props
  */
 const Link = React.forwardRef(function Link(props, ref) {
@@ -24,6 +37,8 @@ const Link = React.forwardRef(function Link(props, ref) {
         if (evt.defaultPrevented)
             return;
         if (evt.ctrlKey || evt.metaKey || evt.shiftKey || evt.altKey)
+            return;
+        if (opensElsewhere(evt.currentTarget))
             return;
         if (!target)
             return;

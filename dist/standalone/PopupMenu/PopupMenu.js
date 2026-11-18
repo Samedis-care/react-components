@@ -1,0 +1,111 @@
+import { jsx as _jsx } from "react/jsx-runtime";
+import React, { useMemo } from "react";
+import { Menu, menuItemClasses, styled, useTheme, useThemeProps, } from "@mui/material";
+import focusRing from "../../utils/internal/focusRing";
+const PopupMenuRoot = styled(Menu, { name: "CcPopupMenu", slot: "root" })(({ theme }) => ({
+    "& .MuiMenu-paper": {
+        border: `1px solid ${theme.palette.divider}`,
+        // as wide as the widest item, up to MUI's max-width: MUI measures the paper
+        // where it sat before, so with wrapping labels a menu kept mounted would
+        // shrink to the room between that spot and the window's right edge
+        width: "max-content",
+    },
+    // MUI's items don't wrap and the paper clips them, so a label wider than the
+    // screen allows was cut off; it wraps inside the paper instead
+    [`& .${menuItemClasses.root}`]: {
+        whiteSpace: "normal",
+        // a word too long for a line breaks where it has to. The item is a flex
+        // container, so its own text (the label of every library menu) can't get
+        // narrower than its longest word unless that word may break anywhere;
+        // "break-word" doesn't lower that minimum
+        overflowWrap: "anywhere",
+    },
+    // its elements break a word only when it doesn't fit on a line of its own:
+    // each one stays as wide as its longest word, so a shortcut hint beside a
+    // long label isn't broken mid-word, while a ListItemText label (min-width 0)
+    // gets narrower and breaks its too-long word
+    [`& .${menuItemClasses.root} > *`]: {
+        overflowWrap: "break-word",
+    },
+    // MUI marks the keyboard-focused item with a faint tint only (unless the theme
+    // sets its focusVisible ring), which forced colors drop; inset, because the
+    // paper clips the item's sides
+    [`& .${menuItemClasses.root}.${menuItemClasses.focusVisible}`]: focusRing(theme, -2),
+}));
+const isEnabledItem = (item) => !item.hasAttribute("disabled") &&
+    item.getAttribute("aria-disabled") !== "true";
+/**
+ * Moves focus to the item a menu opens on, the selected one (if preferred) or
+ * else the first enabled one, when MUI has put focus on another of its items.
+ * MUI's MenuList remembers the item that had focus for as long as it stays
+ * mounted, so a keepMounted menu reopened on the item that had focus when it
+ * closed.
+ * @param container The menu's paper (the transition's node)
+ * @param preferSelected Start on the selected item, as variant "selectedMenu"
+ * does
+ */
+const focusInitialItem = (container, preferSelected) => {
+    const focused = container.ownerDocument.activeElement;
+    // with autoFocus={false} or disableAutoFocusItem, MUI focuses no item
+    if (!(focused instanceof HTMLElement) ||
+        !container.contains(focused) ||
+        !focused.classList.contains(menuItemClasses.root))
+        return;
+    const items = Array.from(container.querySelectorAll(`.${menuItemClasses.root}`)).filter(isEnabledItem);
+    const initial = (preferSelected &&
+        items.find((item) => item.classList.contains(menuItemClasses.selected))) ||
+        items[0];
+    if (initial && initial !== focused)
+        initial.focus();
+};
+/**
+ * A MUI `Menu` with a 1px `theme.palette.divider` border around its paper. It
+ * takes all `MenuProps`. It is flat: `elevation` defaults to 0, so the border
+ * is its only outline. Placement and mounting are `Menu`'s defaults: it opens
+ * below its anchor, aligned at the anchor's start edge (`anchorOrigin`,
+ * `transformOrigin`), and its items leave the page while it is closed
+ * (`keepMounted`). Every open starts where MUI starts a menu's first
+ * open: on the selected item with the default variant `selectedMenu`, else on
+ * the first enabled item. This also holds with `keepMounted`, whose items keep
+ * their state between opens. The paper is as wide as its widest item, up to
+ * MUI's limit of the window's width minus 32px; a longer item label wraps onto
+ * more lines instead of being cut off, and a word too long for a line is broken
+ * where it has to be. That holds for a label that is the item's own text or a
+ * MUI `ListItemText`; a label in another element breaks a word only if that
+ * element may get narrower than the word (`min-width: 0`). Other elements
+ * beside the label, such as a shortcut hint, keep their words whole. The
+ * keyboard-focused item shows a 2px outline in `theme.palette.primary.main`
+ * just inside its edges, or the ring of the theme's `focusVisible` option when
+ * the theme sets one.
+ *
+ * Theme: `components.CcPopupMenu.defaultProps` ({@link PopupMenuProps}; they
+ * apply before `components.MuiMenu.defaultProps`, and their `elevation` wins
+ * over the flat default), `styleOverrides.root` (see {@link PopupMenuClassKey})
+ * and `variants`, which apply to the `root` slot and match the menu's props
+ * after the theme's default props, with `elevation` 0 when it is not set.
+ */
+const PopupMenu = React.forwardRef(function PopupMenu(inProps, ref) {
+    const props = useThemeProps({ props: inProps, name: "CcPopupMenu" });
+    const { slotProps, variant, elevation = 0 } = props;
+    const theme = useTheme();
+    const preferSelected = (variant ??
+        theme.components?.MuiMenu?.defaultProps?.variant ??
+        "selectedMenu") === "selectedMenu";
+    const transition = slotProps?.transition;
+    // runs after MUI's own initial focus (Menu calls the slot's onEntering after it)
+    const transitionWithInitialFocus = useMemo(() => {
+        const withInitialFocus = (transitionProps) => ({
+            ...transitionProps,
+            onEntering: (node, isAppearing) => {
+                focusInitialItem(node, preferSelected);
+                transitionProps?.onEntering?.(node, isAppearing);
+            },
+        });
+        return typeof transition === "function"
+            ? (ownerState) => withInitialFocus(transition(ownerState))
+            : withInitialFocus(transition);
+    }, [transition, preferSelected]);
+    const menuSlotProps = useMemo(() => ({ ...slotProps, transition: transitionWithInitialFocus }), [slotProps, transitionWithInitialFocus]);
+    return (_jsx(PopupMenuRoot, { ...props, elevation: elevation, ref: ref, slotProps: menuSlotProps }));
+});
+export default React.memo(PopupMenu);

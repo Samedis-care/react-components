@@ -4,9 +4,17 @@ import { getI18n, I18nextProvider } from "react-i18next";
 import ccI18n from "../i18n";
 import getCurrentLocale, { getCurrentLanguage, } from "../utils/getCurrentLocale";
 import moment from "moment";
+/**
+ * Keeps moment's global locale and, unless disabled, `<html lang>` on
+ * `ComponentsCareI18n`'s language, and re-renders its children once a
+ * language change is applied. The `Framework` renders it.
+ */
 const CCI18nProvider = (props) => {
+    const { disableHtmlLanguageAttributeSetter } = props;
     const [updating, setUpdating] = useState(false);
     const [, setMomentLocale] = useState(getCurrentLocale(ccI18n));
+    // the language of the update applied last, null until the first one applies
+    const [appliedLanguage, setAppliedLanguage] = useState(null);
     useEffect(() => {
         // The moment locales load in any order, so only the latest update
         // applies its locale and ends `updating`. Loading a locale also makes it
@@ -21,12 +29,13 @@ const CCI18nProvider = (props) => {
             void (async () => {
                 setUpdating(true);
                 const lang = getCurrentLocale(ccI18n) ?? "en-US"; // fallback
+                const language = getCurrentLanguage(ccI18n);
                 try {
                     await import("moment/locale/" + lang.toLowerCase());
                 }
                 catch {
                     try {
-                        await import("moment/locale/" + getCurrentLanguage(ccI18n).toLowerCase());
+                        await import("moment/locale/" + language.toLowerCase());
                     }
                     catch {
                         // locale not found
@@ -40,9 +49,7 @@ const CCI18nProvider = (props) => {
                 }
                 appliedLocale = moment.locale(lang);
                 setMomentLocale(lang);
-                const htmlTag = document.querySelector("html");
-                if (htmlTag)
-                    htmlTag.lang = getCurrentLanguage(ccI18n);
+                setAppliedLanguage(language);
                 setUpdating(false);
             })();
         };
@@ -53,6 +60,11 @@ const CCI18nProvider = (props) => {
             ccI18n.off("languageChanged", updateLocale);
         };
     }, []);
+    useEffect(() => {
+        if (disableHtmlLanguageAttributeSetter || appliedLanguage === null)
+            return;
+        document.documentElement.lang = appliedLanguage;
+    }, [appliedLanguage, disableHtmlLanguageAttributeSetter]);
     return (_jsx(I18nextProvider, { i18n: getI18n() ?? ccI18n, 
         // defaultNS used to force refresh
         defaultNS: updating

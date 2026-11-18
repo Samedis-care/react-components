@@ -48,18 +48,19 @@ export class CachedServerStorageProvider extends StorageProvider {
     };
     debounceTable = {};
     cleanupTable = {};
-    async getItem(key) {
-        try {
-            return ModelDataStore.fetchQuery({
-                queryKey: ["cc-css", key],
-                queryFn: () => this.getItemFromServer(key),
-                ...this.cacheOptions,
-            });
-        }
-        catch {
-            // on failure return null
-            return null;
-        }
+    /**
+     * Reads the value of key through the react-query cache (see cacheOptions)
+     * @param key The key to load
+     * @returns The stored value, or null when the server has nothing stored.
+     *          Rejects with getItemFromServer's error when the read fails; the
+     *          next read asks the server again.
+     */
+    getItem(key) {
+        return ModelDataStore.fetchQuery({
+            queryKey: ["cc-css", key],
+            queryFn: () => this.getItemFromServer(key),
+            ...this.cacheOptions,
+        });
     }
     async setItem(key, value) {
         if (key in this.debounceTable) {
@@ -113,7 +114,9 @@ export class StorageManager {
      * Loads a record from storage
      * @param id Unique identifier, should be used to determine storage class
      * @param keys Identifiers which separate storage (think namespaces, such as tenant id)
-     * @returns The value or null if not present
+     * @returns The value, or null only when nothing is stored. Throws or
+     *          rejects when the storage cannot be read (see
+     *          StorageProvider.getItem).
      */
     static getItem(id, keys) {
         const [storageProvider, keysToUse] = this.storageProviderCallback(id, {

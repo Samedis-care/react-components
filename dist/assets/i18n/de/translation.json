@@ -164,7 +164,12 @@
 					"yes": "Ja",
 					"no": "Nein"
 				},
-				"remove-item": "{{ITEM}} entfernen"
+				"remove-item": "{{ITEM}} entfernen",
+				"restore-item": "{{ITEM}} wiederherstellen",
+				"change": {
+					"added": "Hinzugefügt",
+					"removed": "Entfernt"
+				}
 			},
 			"multi-select-with-tags": {
 				"group-input-label": "Alle Einträge einer Gruppe hinzufügen"

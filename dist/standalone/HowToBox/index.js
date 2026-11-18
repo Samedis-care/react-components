@@ -22,6 +22,21 @@ const HowToBox = (inProps) => {
         return _jsx(_Fragment, {});
     return (_jsx(GroupBoxStyled, { label: titleLabel ?? t("standalone.how-it-works.title"), className: combineClassNames([className, classes?.root]), children: _jsx(UnorderedList, { className: classes?.ul, children: entries.map((entry, i) => (_jsx(ListItem, { className: classes?.li, children: entry }, i))) }) }));
 };
+/** whether a value from the translation resources can be shown as an entry */
+const isTranslatedEntry = (value) => typeof value === "string" || typeof value === "number";
+/**
+ * The entries in what `t(key, { returnObjects: true })` returned: the strings
+ * and numbers of an array, or of an object's values, in order; a string or
+ * number is one entry. Nested groups and anything else are skipped, as React
+ * cannot render a plain object.
+ */
+const translatedEntries = (value) => {
+    if (isTranslatedEntry(value))
+        return [value];
+    if (value == null || typeof value !== "object")
+        return [];
+    return (Array.isArray(value) ? value : Object.values(value)).filter(isTranslatedEntry);
+};
 /**
  * i18n version of HowToBox
  * @param props The props
@@ -30,7 +45,7 @@ const HowToBox = (inProps) => {
 export const HowToBoxTranslate = (props) => {
     const { t, titleLabel, labels, ...other } = props;
     // memo content because it's an array which gets re-created every render
-    const content = useMemo(() => t(labels, { returnObjects: true }), [t, labels]);
+    const content = useMemo(() => translatedEntries(t(labels, { returnObjects: true })), [t, labels]);
     return (_jsx(HowToBox, { ...other, titleLabel: titleLabel ? t(titleLabel) : undefined, labels: content }));
 };
 export default React.memo(HowToBox);

@@ -586,11 +586,14 @@ const Form = (props) => {
         syncDirtyState();
     }, [serverData, syncDirtyState]);
     const handleBlur = useCallback((evt) => {
-        const fieldName = evt.currentTarget?.name ??
-            evt.currentTarget?.getAttribute("data-name") ??
-            evt.currentTarget?.id ??
-            evt.target?.name ??
-            evt.target?.getAttribute("data-name") ??
+        // an input's name and every element's id are "" when not set: an empty
+        // value names nothing, so the search goes on to the next attribute and on
+        // to the element that lost focus (e.g. the input inside a wrapper)
+        const fieldName = evt.currentTarget?.name ||
+            evt.currentTarget?.getAttribute("data-name") ||
+            evt.currentTarget?.id ||
+            evt.target?.name ||
+            evt.target?.getAttribute("data-name") ||
             evt.target?.id;
         if (!fieldName) {
             // eslint-disable-next-line no-console
@@ -856,10 +859,11 @@ const Form = (props) => {
                 // re-render after post submit handler, this way we avoid mounting new components before the form is fully saved
                 setValues(valuesRef.current);
                 setValuesStaged(valuesStagedRef.current);
-                // the record was saved, so the form is clean again. Announce it once the
-                // post submit handlers have had their say, and before onSubmit, so it
+                // the record was saved, so its model fields are clean again. Announce it once
+                // the post submit handlers have had their say, and before onSubmit, so it
                 // (and the caller awaiting submit) can navigate away without hitting the
-                // dirty guard
+                // dirty guard. A custom dirty field counts until its control clears it; one
+                // that does so in an effect catches up only once the save has rendered
                 syncDirtyState();
                 if (onSubmit) {
                     const interactive = typeof onSubmitUserInteractive === "function"

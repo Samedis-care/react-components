@@ -1,6 +1,6 @@
 import React from "react";
 import { LocaleSelectorDialogContentProps, LocaleSelectorEntryData } from "./LocaleSelectorDialogContent";
-export interface LocaleSelectorEntryProps extends Omit<LocaleSelectorDialogContentProps, "close"> {
+export interface LocaleSelectorEntryProps extends Omit<LocaleSelectorDialogContentProps, "handleSwitch" | "switching"> {
     locale: LocaleSelectorEntryData;
     currentLanguage: string;
     handleSwitch: (lang: string) => void;

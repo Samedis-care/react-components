@@ -1,5 +1,17 @@
 import matchPath from "../standalone/Routes/matchPath";
 export const doesRouteMatch = (route, path, exact = false, strict = false) => !!matchPath({ path: route, caseSensitive: strict, end: exact }, path);
+/**
+ * The params of a path read with a route, see matchPath
+ * @param route The route, e.g. `/apps/:app/roles`
+ * @param path The path, e.g. a location pathname
+ * @param exact The route has to match the whole path, not only a prefix
+ * (matchPath's `end`). Default: false
+ * @param strict Compare literal segments case-sensitively (matchPath's
+ * `caseSensitive`). Default: false
+ * @returns The param values by name, percent-decoded like matchPath's
+ * `PathMatch.params`
+ * @throws Error when the route does not match the path
+ */
 export const extractRouteParameters = (route, path, exact = false, strict = false) => {
     const match = matchPath({ path: route, caseSensitive: strict, end: exact }, path);
     if (!match)

@@ -13,8 +13,15 @@ export interface UseCrudSelectParams<M extends ModelUnknown, DataT extends BaseS
      * @param data The selector data to serialize
      * @returns Data to be passed to the backend connector, id may be null or data.value
      * @remarks Must stay pure: it runs for additions, updates and removals at
-     *   backend (POST/PUT/DELETE) time. Do NOT trigger UI side effects (dialogs,
+     *   backend (POST/PUT/DELETE) time, and on every change for each entry that stays
+     *   selected, to tell whether it changed. Do NOT trigger UI side effects (dialogs,
      *   prompts) here — use {@link prepareNewEntry} to collect extra data on add.
+     *
+     *   What it returns decides whether an entry is updated: an entry handed to
+     *   `handleSelect` is written only when its result differs, compared as JSON, from the
+     *   result for the listed entry. A new but equal object, array or Date is no change.
+     *   A field it leaves out (`label`, `titleTooltip`, `onClick`, …) never causes a
+     *   write; a change of a field it returns does, also of a render field such as `label`.
      */
     serialize: (data: DataT) => Promise<Partial<Record<string, unknown>>> | Partial<Record<string, unknown>>;
     /**
@@ -110,7 +117,28 @@ export interface UseCrudSelectResult<M extends ModelUnknown, DataT extends BaseS
      */
     selected: DataT[];
     /**
-     * Currently selected entries (raw data)
+     * The values of the selected entries whose create is queued and not sent yet
+     * @remarks Only with a LazyConnector, whose writes wait for the Form's save (empty
+     *          otherwise). An entry's queued write is looked up by its `value`, the record's
+     *          id.
+     */
+    added: string[];
+    /**
+     * The entries removed from the selection whose delete is queued and not sent yet, in the
+     * order they were removed; not part of `selected`
+     * @remarks Only with a LazyConnector (empty otherwise). They include the removals queued
+     *          while the control was unmounted before. An entry leaves the list when its
+     *          delete is sent, and is selected again by handleSelect with the entry added,
+     *          which cancels the delete instead of creating the record again.
+     */
+    removed: DataT[];
+    /**
+     * Does the LazyConnector hold writes of this control that are not sent yet (picks,
+     * removals or changes)? Always false with another connector, which writes at once.
+     */
+    pendingChanges: boolean;
+    /**
+     * The records the connector listed or created (raw data), including those of `removed`
      */
     initialRawData: Record<string, unknown>[];
     /**
@@ -119,7 +147,11 @@ export interface UseCrudSelectResult<M extends ModelUnknown, DataT extends BaseS
      * @param newSelected The new selected entries. A listed entry whose id is in `ids` but
      *        that is missing here stays as it is, in its place: BackendMultiSelect reports
      *        an entry that is still loading by its id only.
-     * @remarks Ignores the change while the control is disabled
+     * @remarks Ignores the change while the control is disabled. Creates the entries that
+     *          are not listed yet, deletes the listed ones that are left out, and updates a
+     *          listed entry only when `serialize` returns something else for it than for
+     *          the listed entry. An entry of `removed` added back is restored: its queued
+     *          delete is cancelled, nothing is created.
      */
     handleSelect: (ids: string[], newSelected: DataT[]) => Promise<void>;
     /**

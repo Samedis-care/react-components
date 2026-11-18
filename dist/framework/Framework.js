@@ -11,7 +11,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import ModelDataStore from "../backend-integration/Store";
 import MuiPickerUtils from "./MuiPickerUtils";
 import PermissionContextProvider from "./PermissionContextProvider";
-import MobileScalingFix from "../standalone/MobileScalingFix/MobileScalingFix";
+import MobileScalingFix from "../standalone/MobileScalingFix";
 import UnsafeToLeave from "./UnsafeToLeave";
 import DragAndDropPrevention from "./DragAndDropPrevention";
 import { StyledEngineProvider } from "@mui/material";

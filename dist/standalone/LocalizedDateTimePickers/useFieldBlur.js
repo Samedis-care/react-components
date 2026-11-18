@@ -95,7 +95,11 @@ const createPopupFocusWatch = (onLeave) => {
  * The mobile dialog is modal, so focus only leaves it by closing it.
  *
  * The handler receives the root's focus event: `currentTarget` is the input
- * root, `target` the section or button that lost focus. When focus leaves from
+ * root, `target` the section or button that lost focus. The input root carries
+ * the field's name as `data-name` (unless the caller set one on it), so a
+ * handler that reads the field from the event, as Form's `handleBlur` does,
+ * finds it there; the name itself sits on the hidden input, which never has
+ * focus. When focus leaves from
  * the popup, the event is made in that shape from the native `focusin` of the
  * element that got focus (`nativeEvent`): `target` is the element of the popup
  * that had focus, `relatedTarget` the element that got it. The `onBlur` of the
@@ -103,7 +107,7 @@ const createPopupFocusWatch = (onLeave) => {
  * (`slotProps.input.slotProps.root.onBlur`) is kept and still sees every blur
  * of the root.
  *
- * `onFieldFocus`, if given, is called from the input root's focus, whenever
+ * `options.onFieldFocus`, if given, is called from the input root's focus, whenever
  * focus enters the field or moves within it; a focus handler the caller set on
  * the input root is kept.
  * @returns The function to resolve the `textField` slot props with, the same
@@ -114,10 +118,11 @@ const useFieldBlur = () => {
     const onBlurRef = useRef(undefined);
     const [popupWatch] = useState(() => createPopupFocusWatch((event) => onBlurRef.current?.(event)));
     useEffect(() => popupWatch.stop, [popupWatch]);
-    return useCallback((ownerState, textFieldProps, onFieldFocus) => {
-        const { onBlur, slotProps: slotPropsProp } = textFieldProps;
+    return useCallback((ownerState, textFieldProps, options = {}) => {
+        const { onFieldFocus } = options;
+        const { onBlur, slotProps: slotPropsProp, name = options.name, } = textFieldProps;
         onBlurRef.current = onBlur;
-        if (!onBlur && !onFieldFocus)
+        if (!onBlur && !onFieldFocus && !name)
             return textFieldProps;
         const slotProps = slotPropsProp ?? {};
         const input = slotProps.input ?? {};
@@ -153,6 +158,8 @@ const useFieldBlur = () => {
                     slotProps: {
                         ...input.slotProps,
                         root: {
+                            // names the field in the blur event, see useFieldBlur
+                            "data-name": name,
                             ...root,
                             onBlur: handleRootBlur,
                             ...(onFieldFocus && {

@@ -1,4 +1,16 @@
 export declare const doesRouteMatch: (route: string, path: string, exact?: boolean, strict?: boolean) => boolean;
+/**
+ * The params of a path read with a route, see matchPath
+ * @param route The route, e.g. `/apps/:app/roles`
+ * @param path The path, e.g. a location pathname
+ * @param exact The route has to match the whole path, not only a prefix
+ * (matchPath's `end`). Default: false
+ * @param strict Compare literal segments case-sensitively (matchPath's
+ * `caseSensitive`). Default: false
+ * @returns The param values by name, percent-decoded like matchPath's
+ * `PathMatch.params`
+ * @throws Error when the route does not match the path
+ */
 export declare const extractRouteParameters: (route: string, path: string, exact?: boolean, strict?: boolean) => Record<string, string>;
 /**
  * The params of a route that have no value

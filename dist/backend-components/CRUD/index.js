@@ -2,6 +2,7 @@ import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-run
 import React, { Suspense, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState, } from "react";
 import BackendDataGrid from "../DataGrid";
 import { Form } from "../Form";
+import { FORM_PAGE_MOVE_STATE } from "../Form/FormPageGuard";
 import { hasPermission, usePermissionContext, } from "../../framework";
 import Loader from "../../standalone/Loader";
 import throwError from "../../utils/throwError";
@@ -126,8 +127,12 @@ const CRUD = (props, ref) => {
                 .split("/")
                 .filter((segment) => segment)
                 .slice(1);
+            // the Form stays (skipNextFormIdReset), so this moves the form page rather than
+            // leaving it, and its leave guard lets it pass: a control's own dirty state may
+            // not have caught up with the saved record yet
             navigate([`${routeUrl}/${id}`, ...subPath].join("/"), {
                 replace: true,
+                state: FORM_PAGE_MOVE_STATE,
             });
         }
         refreshGrid();

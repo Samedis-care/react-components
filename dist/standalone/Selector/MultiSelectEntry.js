@@ -1,8 +1,8 @@
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
-import { Divider, ListItem, ListItemSecondaryAction, ListItemText, styled, useThemeProps, } from "@mui/material";
+import { Chip, Divider, ListItem, ListItemSecondaryAction, ListItemText, styled, useThemeProps, } from "@mui/material";
 import { SmallIconButton, SmallListItemButton, SmallListItemIcon, } from "../Small";
-import { Cancel as RemoveIcon } from "@mui/icons-material";
+import { Cancel as RemoveIcon, RestoreFromTrash as RestoreIcon, } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 import useCCTranslations from "../../utils/useCCTranslations";
 const Root = styled(ListItem, { name: "CcMultiSelectEntry", slot: "root" })({
@@ -44,6 +44,21 @@ const Label = styled(ListItemText, {
         textOverflow: "ellipsis",
         overflow: "hidden",
     },
+    // the change's text follows, and keeps the room for the button
+    "&.CcMultiSelectEntry-added, &.CcMultiSelectEntry-removed": {
+        paddingRight: 8,
+    },
+    "&.CcMultiSelectEntry-removed > span": {
+        textDecoration: "line-through",
+    },
+});
+// the text of a change that is not saved yet, after the label
+const ChangeState = styled(Chip, {
+    name: "CcMultiSelectEntry",
+    slot: "changeState",
+})({
+    flexShrink: 0,
+    marginRight: 32,
 });
 const StyledRemoveButton = styled(SmallIconButton, {
     name: "CcMultiSelectEntry",
@@ -52,6 +67,10 @@ const StyledRemoveButton = styled(SmallIconButton, {
 const StyledRemoveIcon = styled(RemoveIcon, {
     name: "CcMultiSelectEntry",
     slot: "iconSvg",
+})({});
+const StyledRestoreIcon = styled(RestoreIcon, {
+    name: "CcMultiSelectEntry",
+    slot: "restoreIconSvg",
 })({});
 const StyledDivider = styled(Divider, {
     name: "CcMultiSelectEntry",
@@ -74,18 +93,26 @@ const StyledImage = styled("img", {
 /**
  * One selected entry of MultiSelect, rendered as a list item (`<li>`, the
  * `root` slot) of the list of selected entries: the row (`selected`) with the
- * optional icon and the label, and beside it the remove button (`icon`) when
- * `handleDelete` is set. With `data.onClick` the row is a button, otherwise
- * plain text.
+ * optional icon, the label and the text of a change that is not saved yet
+ * (`changeState`), and beside it the remove button (`icon`) when `handleDelete`
+ * is set, or for a removed entry the restore button when `handleRestore` is set.
+ * With `data.onClick` the row is a button, otherwise plain text.
  */
 const MultiSelectEntry = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiSelectEntry" });
     const { t } = useCCTranslations();
-    const { enableIcons, enableDivider, handleDelete, data, classes, iconSize, className, } = props;
-    const rowContent = (_jsxs(_Fragment, { children: [enableIcons && (_jsx(SmallListItemIcon, { children: typeof data.icon === "string" ? (_jsx(StyledImage, { ownerState: { iconSize }, src: data.icon, alt: "", className: classes?.image })) : (data.icon) })), _jsx(Label, { className: classes?.label, children: data.label })] }));
+    const { enableIcons, enableDivider, handleDelete, changeState, handleRestore, data, classes, iconSize, className, } = props;
+    const rowContent = (_jsxs(_Fragment, { children: [enableIcons && (_jsx(SmallListItemIcon, { children: typeof data.icon === "string" ? (_jsx(StyledImage, { ownerState: { iconSize }, src: data.icon, alt: "", className: classes?.image })) : (data.icon) })), _jsx(Label, { className: combineClassNames([
+                    classes?.label,
+                    changeState && `CcMultiSelectEntry-${changeState}`,
+                ]), children: data.label }), changeState && (_jsx(ChangeState, { size: "small", variant: "outlined", color: changeState === "added" ? "success" : "default", label: t(`standalone.selector.multi-select.change.${changeState}`), className: classes?.changeState }))] }));
+    // a removed entry is restored where it would be removed: one button, so that the
+    // focus stays on it when the entry changes from one to the other
+    const restorable = changeState === "removed";
+    const handleAction = restorable ? handleRestore : handleDelete;
     const rowOwnerState = { unClickable: !data.onClick, ignore: !!data.ignore };
-    return (_jsxs(Root, { className: combineClassNames([className, classes?.root]), children: [data.onClick ? (_jsx(Selected, { ownerState: rowOwnerState, onClick: data.onClick, className: classes?.selected, children: rowContent })) : (_jsx(SelectedText, { ownerState: rowOwnerState, className: classes?.selected, children: rowContent })), handleDelete && (_jsx(ListItemSecondaryAction, { children: _jsx(StyledRemoveButton, { className: classes?.icon, edge: "end", name: data.value, disabled: !handleDelete, onClick: handleDelete, "aria-label": t("standalone.selector.multi-select.remove-item", {
-                        ITEM: data.label,
-                    }), children: _jsx(StyledRemoveIcon, { className: classes?.iconSvg }) }) })), enableDivider && _jsx(StyledDivider, { className: classes?.divider })] }));
+    return (_jsxs(Root, { className: combineClassNames([className, classes?.root]), children: [data.onClick ? (_jsx(Selected, { ownerState: rowOwnerState, onClick: data.onClick, className: classes?.selected, children: rowContent })) : (_jsx(SelectedText, { ownerState: rowOwnerState, className: classes?.selected, children: rowContent })), handleAction && (_jsx(ListItemSecondaryAction, { children: _jsx(StyledRemoveButton, { className: classes?.icon, edge: "end", name: data.value, onClick: handleAction, "aria-label": t(restorable
+                        ? "standalone.selector.multi-select.restore-item"
+                        : "standalone.selector.multi-select.remove-item", { ITEM: data.label }), children: restorable ? (_jsx(StyledRestoreIcon, { className: classes?.restoreIconSvg })) : (_jsx(StyledRemoveIcon, { className: classes?.iconSvg })) }) })), enableDivider && _jsx(StyledDivider, { className: classes?.divider })] }));
 };
 export default React.memo(MultiSelectEntry);

@@ -79,6 +79,8 @@ class InfiniteScroll extends PureComponent {
         }
     }
     componentWillUnmount() {
+        this.cancelLoad("loadMoreTop");
+        this.cancelLoad("loadMoreBottom");
         if (!this.wrapper)
             throw new Error("Ref is null");
         this.wrapper.removeEventListener("scroll", this.handleScroll);
@@ -143,8 +145,7 @@ class InfiniteScroll extends PureComponent {
      * `callBackDebounce` (a request replaces the pending one), or right away for 0
      */
     requestLoad = (name) => {
-        window.clearTimeout(this.loadTimers[name]);
-        this.loadTimers[name] = 0;
+        this.cancelLoad(name);
         const wait = this.props.callBackDebounce ?? 100;
         if (wait === 0) {
             this.callLoad(name);
@@ -154,6 +155,14 @@ class InfiniteScroll extends PureComponent {
             this.loadTimers[name] = 0;
             this.callLoad(name);
         }, wait);
+    };
+    /**
+     * Drops the call of the `loadMoreTop` or `loadMoreBottom` prop that waits
+     * for `callBackDebounce`, if any
+     */
+    cancelLoad = (name) => {
+        window.clearTimeout(this.loadTimers[name]);
+        this.loadTimers[name] = 0;
     };
     /**
      * Makes a call requested by `requestLoad`. The callback is read from the

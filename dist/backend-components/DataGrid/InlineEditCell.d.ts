@@ -1,5 +1,5 @@
 import React from "react";
-import type { ModelFieldName, ModelRecord, ModelUnknown } from "../../backend-integration/Model/Model";
+import { ModelFieldName, ModelRecord, ModelUnknown } from "../../backend-integration/Model/Model";
 export interface InlineEditCellProps {
     /**
      * The model the record belongs to

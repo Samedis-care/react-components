@@ -164,7 +164,12 @@
 					"yes": "Ha",
 					"no": "Yo'q"
 				},
-				"remove-item": "{{ITEM}} o'chirish"
+				"remove-item": "{{ITEM}} o'chirish",
+				"restore-item": "{{ITEM}} tiklash",
+				"change": {
+					"added": "Qo'shildi",
+					"removed": "O'chirildi"
+				}
 			},
 			"multi-select-with-tags": {
 				"group-input-label": "Guruhning barcha yozuvlarini qo'shish"

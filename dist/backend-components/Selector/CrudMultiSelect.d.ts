@@ -4,7 +4,7 @@ import { ErrorComponentProps } from "../Form";
 import { MultiSelectorData } from "../../standalone";
 import { BackendMultiSelectProps } from "./BackendMultiSelect";
 import { CrudSelectDispatch, UseCrudSelectParams, UseCrudSelectResult } from "./useCrudSelect";
-export interface CrudMultiSelectProps<M extends ModelUnknown, DataT extends MultiSelectorData> extends Omit<BackendMultiSelectProps<M, DataT>, "modelToSelectorData" | "initialData" | "selected" | "onSelect" | "getIdOfData">, UseCrudSelectParams<M, DataT> {
+export interface CrudMultiSelectProps<M extends ModelUnknown, DataT extends MultiSelectorData> extends Omit<BackendMultiSelectProps<M, DataT>, "modelToSelectorData" | "initialData" | "selected" | "added" | "removed" | "onSelect" | "getIdOfData">, UseCrudSelectParams<M, DataT> {
     /**
      * The error component that is used to display errors
      */
@@ -18,6 +18,16 @@ export interface CrudMultiSelectProps<M extends ModelUnknown, DataT extends Mult
      * @default false
      */
     readOnly?: boolean;
+    /**
+     * Marks the field as modified (a dot after its label) while picks, removals or changes
+     * of entries are queued and not saved yet
+     * @remarks Only with a LazyConnector, whose writes wait for the Form's save; any other
+     *          connector writes at once, and nothing is marked. An explicit `dirty` wins.
+     *          The entries' own marks ("Added", "Removed" with a restore button) do not
+     *          depend on it: they are shown with every LazyConnector.
+     * @default false
+     */
+    showDirtyState?: boolean;
 }
 export declare const CrudSelectContext: React.Context<UseCrudSelectResult<ModelUnknown, MultiSelectorData> | undefined>;
 export declare const useCrudSelectContext: () => UseCrudSelectResult<ModelUnknown, MultiSelectorData>;

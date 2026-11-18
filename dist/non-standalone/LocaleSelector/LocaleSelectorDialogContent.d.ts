@@ -2,12 +2,15 @@ import React from "react";
 import { LocaleSelectorDialogCommonProps } from "./LocaleSelectorDialog";
 export interface LocaleSelectorDialogContentProps extends LocaleSelectorDialogCommonProps {
     /**
-     * Called once the picked language is loaded and applied. Not called when its
-     * texts fail to load or `changeLanguage` rejects: an error dialog shows
-     * instead, and the previous language stays. The dialog passes a function that
-     * closes it, and only it, and does nothing once it is closed.
+     * Called with the row's locale (`"<lang>-<COUNTRY>"`) when a row is picked. The
+     * dialog switches the language, reports the pick and closes.
      */
-    close: () => void;
+    handleSwitch: (locale: string) => void;
+    /**
+     * Whether a picked language loads: the rows are disabled, and a loader covers
+     * the list
+     */
+    switching: boolean;
     className?: string;
 }
 export interface LocaleSelectorEntryData {

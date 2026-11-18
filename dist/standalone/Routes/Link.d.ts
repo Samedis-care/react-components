@@ -17,6 +17,19 @@ export interface LinkProps extends Omit<React.DetailedHTMLProps<React.AnchorHTML
      */
     state?: unknown;
     /**
+     * Where the browser opens the link. A target other than `_self`
+     * (`_blank`, a window name) leaves a click to the browser, which opens the
+     * href there; `replace` and `state` don't apply. An empty target or
+     * `_self` routes as usual. Default: none (the current tab)
+     */
+    target?: React.AnchorHTMLAttributes<HTMLAnchorElement>["target"];
+    /**
+     * Downloads the href instead of opening it: `true`, or the file name to
+     * save it as. A click is then left to the browser, which downloads it.
+     * Default: none (no download)
+     */
+    download?: React.AnchorHTMLAttributes<HTMLAnchorElement>["download"];
+    /**
      * Called on every click, also with Ctrl, Meta, Shift or Alt, before the
      * link handles it. Calling `evt.preventDefault()` keeps the link from
      * navigating, e.g. to open a dialog instead; skip that for a click with a

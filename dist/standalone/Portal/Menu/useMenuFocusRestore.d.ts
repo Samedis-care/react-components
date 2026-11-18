@@ -5,9 +5,9 @@ import React from "react";
  * hid the entry. Focus then moves to the highlighted entry; if that cannot take
  * it, to the first focusable element of the menu, and if there is none, to the
  * menu's root. Focus that is already elsewhere (not on the page body) stays where
- * it is. If the highlight moves in the next commit of the menu (RoutedMenu sets it
- * in an effect after a navigation) while focus is still where it was put, focus
- * follows it.
+ * it is. If the highlight moves in the next commit of the menu (a `customState`
+ * set in an effect after a navigation) while focus is still where it was put,
+ * focus follows it.
  * @param rootRef The menu's root element; it must be focusable (tabindex -1)
  * @param entries The elements of the rendered entries by entry id (focusRef)
  * @param activeId The id of the highlighted entry

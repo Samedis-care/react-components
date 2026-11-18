@@ -20,6 +20,28 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-17 | [Leaving a date field marks it touched in a Form](2026-11-17-form-blur-marks-date-fields-touched.md) | behavior |
+| 2026-11-17 | [VerticalDivider, PopupMenu and the Small components take theme default props](2026-11-17-small-primitives-theme-slots.md) | behavior, type, theme |
+| 2026-11-17 | [The country flags load when the first flag is shown: loadCountryFlags and loadCountryFlag replace CountryFlags and getCountryFlag](2026-11-17-country-flags-load-when-shown.md) | type, behavior |
+| 2026-11-17 | [A form page without buttons ends where its body ends](2026-11-17-form-page-layout-no-footer-no-space.md) | behavior |
+| 2026-11-17 | [`disableHtmlLanguageAttributeSetter` leaves `<html lang>` to the app](2026-11-17-html-lang-setter-can-be-disabled.md) | behavior |
+| 2026-11-17 | [RoutedMenu's highlight follows the URL only](2026-11-17-routed-menu-highlight-follows-url.md) | behavior |
+| 2026-11-17 | [A lazy control reads its connector params once, for the list and the save alike](2026-11-17-lazy-crud-connector-params-read-once.md) | behavior |
+| 2026-11-17 | [CrudSelect updates an entry only when what serialize returns for it changed](2026-11-17-crud-select-updates-by-serialized-entry.md) | behavior |
+| 2026-11-17 | [Route params are percent-decoded, and literal route segments match the decoded location](2026-11-17-route-params-decoded.md) | behavior |
+| 2026-11-17 | [A keyboard-focused InfoBox header keeps its status color and draws a ring](2026-11-17-info-box-focus-ring.md) | behavior |
+| 2026-11-17 | [ComponentsCareI18n leads the UI language: apps change the language through it](2026-11-17-components-care-i18n-leads-the-language.md) | API |
+| 2026-11-17 | [LocaleSelectorDialog reports the picked locale and stays open while it loads](2026-11-17-locale-selector-dialog-reports-the-pick.md) | behavior, type |
+| 2026-11-17 | [LocaleSelectorDialog's supportedLocales match ignoring case, with _ read as -](2026-11-17-locale-selector-supported-locales-normalized.md) | behavior, type |
+| 2026-11-17 | [LocaleSelectorDialog's visible box is the paper slot](2026-11-17-locale-selector-dialog-paper-slot.md) | theme |
+| 2026-11-17 | [Theme style override functions of most CC components get no ownerState](2026-11-17-theme-style-overrides-without-owner-state.md) | type, theme |
+| 2026-11-17 | [A disabled selector disables its switch](2026-11-17-base-selector-disabled-disables-switch.md) | behavior |
+| 2026-11-17 | [A theme styles InlineSwitch's states through classes, not ownerState or variants](2026-11-17-inline-switch-state-classes.md) | type, theme |
+| 2026-11-17 | [An inline edit in BackendDataGrid is saved like any other update](2026-11-17-data-grid-inline-edit-through-model-mutation.md) | behavior |
+| 2026-11-17 | [Link leaves a click to the browser when it has target or download](2026-11-17-link-target-download-left-to-browser.md) | behavior |
+| 2026-11-17 | [useAsyncMemo returns `{ value, error }`, and a failing factory sets `error`](2026-11-17-use-async-memo-error-state.md) | type, behavior |
+| 2026-11-17 | [FormCrudMultiSelect shows which entries were added and removed until the form saves](2026-11-17-crud-multi-select-pending-changes.md) | behavior, type |
+| 2026-11-17 | [PopupMenu breaks a word too long for a line](2026-11-17-popup-menu-breaks-long-words.md) | behavior |
 | 2026-11-13 | [SignalPortlet shows no "Last refresh" label for 0 or an invalid time](2026-11-13-signal-portlet-no-label-without-time.md) | behavior |
 | 2026-11-13 | [The date pickers report a blur when focus leaves the open calendar](2026-11-13-picker-blur-on-leaving-the-calendar.md) | behavior |
 | 2026-11-13 | [Matrix columns are 56px wide by default, and the add chip is 24x24](2026-11-13-matrix-targets-24px.md) | behavior |
@@ -35,7 +57,6 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [DialogTitle with noTitle renders no heading; an untitled FullFormDialog is named by aria-label](2026-11-13-dialog-title-no-title-no-heading.md) | behavior, type |
 | 2026-11-13 | [IntegerInputField flags numbers it can't hold, and never shows exponent form](2026-11-13-integer-input-out-of-range.md) | behavior |
 | 2026-11-13 | [DecimalInputField flags a separator without a digit instead of reporting NaN](2026-11-13-decimal-input-parse-error-message.md) | behavior |
-| 2026-11-13 | [A dialog button's handler may navigate, and the confirm helpers settle once their dialog is closed](2026-11-13-dialog-button-handler-may-navigate.md) | behavior |
 | 2026-11-13 | [Open dialogs no longer block navigation or closing the tab](2026-11-13-dialogs-no-longer-block-navigation.md) | behavior, i18n |
 | 2026-11-13 | [A date picker keeps a rejected entry when focus leaves it](2026-11-13-picker-keeps-rejected-entry.md) | behavior |
 | 2026-11-13 | [InputWithHelp and OutlinedInputWithHelp are removed](2026-11-13-input-with-help-removed.md) | type |
@@ -49,7 +70,6 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [The locale selector's search box is named "Search", and a status announces its result](2026-11-13-locale-selector-search-named.md) | behavior |
 | 2026-11-13 | [RoutedMenu highlights the most specific entry of the whole menu](2026-11-13-routed-menu-most-specific-match.md) | behavior |
 | 2026-11-13 | [MultiGrid sets its header's overflow, and a scroll of the header moves the body](2026-11-13-multi-grid-header-scroll-moves-body.md) | behavior |
-| 2026-11-13 | [FormCrudMultiSelect is read-only in a read-only form, and a save leaves it as it is](2026-11-13-form-crud-multi-select-read-only.md) | behavior |
 | 2026-11-13 | [FormCrudMultiSelect is read-only in a read-only form, listing only its entries, and a save leaves it as it is](2026-11-13-form-crud-multi-select-read-only.md) | behavior, theme |
 | 2026-11-13 | [The locale selector's rows draw a keyboard focus ring](2026-11-13-locale-selector-row-focus-ring.md) | behavior |
 | 2026-11-13 | [InlineSwitch applies classes.switch](2026-11-13-inline-switch-classes-switch.md) | behavior |
@@ -75,7 +95,6 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [A signature field's button is named by its label, described by its message, and marked required and invalid](2026-11-13-signature-field-labelled-and-described.md) | behavior |
 | 2026-11-13 | [FormDialog renders a button's color](2026-11-13-form-dialog-button-color.md) | behavior |
 | 2026-11-13 | [A Toast rendered closed calls onExited right away](2026-11-13-toast-rendered-closed-calls-on-exited.md) | behavior |
-| 2026-11-13 | [FlowEngineBackButton is labelled "Cancel" by default](2026-11-13-flow-engine-back-button-cancel-label.md) | behavior |
 | 2026-11-13 | [FlowEngineBackButton has no default label: children are required](2026-11-13-flow-engine-back-button-label-required.md) | type |
 | 2026-11-13 | [InputDialog describes a rejected value in text and moves focus to the field](2026-11-13-input-dialog-error-text.md) | behavior |
 | 2026-11-13 | [TreeView's scrollTo waits until its entry is visible and the list is measured](2026-11-13-tree-view-scroll-to-waits.md) | behavior |
@@ -83,6 +102,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-13 | [TreeViewCheckboxSelectionRenderer disables a locked leaf's checkbox](2026-11-13-tree-checkbox-renderer-locked-leaf-disabled.md) | behavior |
 | 2026-11-13 | [CurrencyInput reports an emptied field once, on blur](2026-11-13-currency-input-reports-emptied-field-on-blur.md) | behavior |
 | 2026-11-13 | [A linked SignalPortlet row is a list item, with its button inside](2026-11-13-signal-portlet-linked-rows-are-list-items.md) | behavior, theme |
+| 2026-11-13 | [A number whose . and , don't fit the locale's format is invalid](2026-11-13-localized-numbers-mixed-separators-invalid.md) | behavior |
 | 2026-11-12 | [The Loader's status text is a paragraph, not a heading](2026-11-12-loader-status-text-is-no-heading.md) | behavior |
 | 2026-11-12 | [PopupMenu item labels wrap instead of being cut off](2026-11-12-popup-menu-labels-wrap.md) | behavior |
 | 2026-11-12 | [CountryFlags, CountryCodes and CountryOption.value are typed by CountryCode, and CountryFlags is frozen](2026-11-12-country-flags-typed-by-country-code.md) | type, behavior |

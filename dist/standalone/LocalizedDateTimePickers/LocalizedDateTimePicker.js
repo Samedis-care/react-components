@@ -48,7 +48,9 @@ const LocalizedDateTimePicker = (props) => {
                             onBlur?.(event);
                         },
                     }));
-                    return withFieldBlur(ownerState, fieldProps);
+                    return withFieldBlur(ownerState, fieldProps, {
+                        name: otherProps.name,
+                    });
                 },
             } }) }));
 };

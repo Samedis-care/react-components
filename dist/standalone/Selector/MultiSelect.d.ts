@@ -27,6 +27,23 @@ export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
      */
     selected: DataT[];
     /**
+     * The values of the entries in `selected` that were added but are not saved yet: each is
+     * marked "Added" (MultiSelectEntryProps.changeState)
+     * @default none
+     */
+    added?: string[];
+    /**
+     * Entries that were removed from the selection but are not saved yet. They are listed
+     * after `selected` (sorted together with them by `selectedSort`), struck through and
+     * marked "Removed", with a restore button where an entry's remove button is: restoring
+     * one calls `onSelect` with the selection and the entry appended. Not part of the
+     * selection otherwise: `onSelect` does not report them, and they are not offered as
+     * options.
+     * @remarks No restore button while disabled or read-only, as no remove button
+     * @default none
+     */
+    removed?: DataT[];
+    /**
      * Shows the selection without a way to change it, as the read-only file upload does:
      * the label, then the selected entries without remove buttons, or "No entries" when
      * none is selected. There is no search field, so nothing that looks editable: no
@@ -40,6 +57,9 @@ export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
      * Specify a custom component for displaying multi select items. The entries
      * are the items of one list (`<ul>`), so its root must be an `<li>`, e.g.
      * MUI's ListItem, as MultiSelectEntry renders.
+     * @remarks With `added` or `removed` it has to show `changeState` and render
+     *          `handleRestore`, as MultiSelectEntry does: a removed entry otherwise looks
+     *          selected and cannot be restored.
      */
     selectedEntryRenderer?: React.ComponentType<MultiSelectEntryProps<DataT>>;
     /**

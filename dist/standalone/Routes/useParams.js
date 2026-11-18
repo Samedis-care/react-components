@@ -4,6 +4,8 @@ import { RouteContext } from "./Route";
 import matchPath from "./matchPath";
 /**
  * Use route params
+ * Each value is percent-decoded: "foo bar" at "foo%20bar", see
+ * `PathMatch.params`.
  */
 const useParams = () => {
     const location = useLocation();

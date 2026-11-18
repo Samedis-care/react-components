@@ -12,7 +12,8 @@ import { Loader } from "../../../standalone";
 export const useImportStep3Logic = (props) => {
     const { model, state, setState, validate } = props;
     const { t } = useCCTranslations();
-    const records = useAsyncMemo(() => Promise.all(state.data.map(async (record) => {
+    // the factory never rejects: what fails for a record is kept in its row
+    const { value: records } = useAsyncMemo(() => Promise.all(state.data.map(async (record) => {
         const modelRecord = {};
         let isModelRecordComplete = false;
         try {

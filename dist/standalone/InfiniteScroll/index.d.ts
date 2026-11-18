@@ -42,7 +42,8 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
      * after mount.
      *
      * A call is made with the callback of the latest render: a callback that is
-     * replaced or removed while a call waits is not called.
+     * replaced or removed while a call waits is not called. A call that still
+     * waits when the component unmounts is not made.
      * @default 100
      */
     callBackDebounce?: number;
@@ -120,6 +121,11 @@ declare class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> 
      * `callBackDebounce` (a request replaces the pending one), or right away for 0
      */
     private requestLoad;
+    /**
+     * Drops the call of the `loadMoreTop` or `loadMoreBottom` prop that waits
+     * for `callBackDebounce`, if any
+     */
+    private cancelLoad;
     /**
      * Makes a call requested by `requestLoad`. The callback is read from the
      * props now, so it is the one of the latest render. `loadMoreBottom` is only

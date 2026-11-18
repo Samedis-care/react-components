@@ -1,7 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { ErrorOutlined, InfoOutlined, ReportProblemOutlined, TaskAlt, } from "@mui/icons-material";
-import { Accordion, AccordionDetails, AccordionSummary, styled, Typography, useThemeProps, } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, accordionSummaryClasses, styled, Typography, useThemeProps, } from "@mui/material";
 import { useControlled } from "@mui/material/utils";
 import combineClassNames from "../../utils/combineClassNames";
 const AccordionStyled = styled(Accordion, { name: "CcInfoBox", slot: "root" })({
@@ -10,10 +10,36 @@ const AccordionStyled = styled(Accordion, { name: "CcInfoBox", slot: "root" })({
         overflow: "hidden",
     },
 });
+/**
+ * The header's colors for one status. A keyboard-focused header
+ * (`Mui-focusVisible`) keeps them, where MUI's AccordionSummary would replace
+ * the background with `palette.action.focus`, and shows a 2px outline in the
+ * text color, 2px inside its edges: the text color contrasts with the status
+ * color as the heading does (`palette.primary.main` would vanish on the info
+ * header), the status color around it sets it off from the page, the root's
+ * `overflow: hidden` cannot clip it, and forced colors keep outlines. It also
+ * replaces the ring of the theme's `focusVisible` option, which the root
+ * would clip.
+ * @param color The palette color of the status
+ * @returns The header's color styles
+ */
+const headerColors = (color) => ({
+    backgroundColor: color.main,
+    borderColor: color.main,
+    color: color.contrastText,
+    [`&.${accordionSummaryClasses.focusVisible}`]: {
+        backgroundColor: color.main,
+        outline: "2px solid currentColor",
+        outlineOffset: -4,
+    },
+});
 const AccordionSummaryStyled = styled(AccordionSummary, {
     name: "CcInfoBox",
     slot: "summary",
 })(({ theme, ownerState: { status, alwaysExpanded } }) => ({
+    // a stacking context for the icon column (zIndex -1), so the focus ring
+    // is drawn over the column instead of under its shade
+    isolation: "isolate",
     minHeight: 48,
     "&.Mui-expanded": {
         minHeight: 48,
@@ -29,26 +55,11 @@ const AccordionSummaryStyled = styled(AccordionSummary, {
             cursor: "default",
         },
     }),
-    ...((status == null || status === "info") && {
-        backgroundColor: theme.palette.primary.main,
-        borderColor: theme.palette.primary.main,
-        color: theme.palette.primary.contrastText,
-    }),
-    ...(status === "error" && {
-        backgroundColor: theme.palette.error.main,
-        borderColor: theme.palette.error.main,
-        color: theme.palette.error.contrastText,
-    }),
-    ...(status === "warning" && {
-        backgroundColor: theme.palette.warning.main,
-        borderColor: theme.palette.warning.main,
-        color: theme.palette.warning.contrastText,
-    }),
-    ...(status === "success" && {
-        backgroundColor: theme.palette.success.main,
-        borderColor: theme.palette.success.main,
-        color: theme.palette.success.contrastText,
-    }),
+    ...((status == null || status === "info") &&
+        headerColors(theme.palette.primary)),
+    ...(status === "error" && headerColors(theme.palette.error)),
+    ...(status === "warning" && headerColors(theme.palette.warning)),
+    ...(status === "success" && headerColors(theme.palette.success)),
 }));
 const SummaryRoot = styled("div", { name: "CcInfoBox", slot: "summaryRoot" })(({ theme }) => ({
     margin: 0,
@@ -63,6 +74,8 @@ const SpanIconButton = styled("span", {
     slot: "iconButton",
 })(({ theme }) => ({
     position: "absolute",
+    // below the header's focus ring (the header isolates it)
+    zIndex: -1,
     left: 0,
     top: 0,
     bottom: 0,

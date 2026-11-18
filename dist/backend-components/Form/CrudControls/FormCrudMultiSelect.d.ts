@@ -21,6 +21,15 @@ export interface FormCrudMultiSelectProps<M extends ModelUnknown, DataT extends 
      * @default false
      */
     readOnly?: boolean;
+    /**
+     * Marks the field as modified (a dot after its label) while picks, removals or changes
+     * of entries are queued, until the Form saves them
+     * @remarks Follows the Form's `showDirtyState` unless set. The entries' own marks
+     *          ("Added", "Removed" with a restore button) are always shown.
+     * @see CrudMultiSelectProps.showDirtyState
+     * @default the Form's showDirtyState
+     */
+    showDirtyState?: boolean;
 }
 export declare const ForwardedCrudMultiSelect: <M extends ModelUnknown, DataT extends MultiSelectorData>(props: FormCrudMultiSelectProps<M, DataT> & RefAttributes<CrudSelectDispatch<DataT>>) => React.ReactElement;
 declare const _default: typeof ForwardedCrudMultiSelect;

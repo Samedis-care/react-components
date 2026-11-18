@@ -14,7 +14,11 @@ export declare abstract class StorageProvider {
     /**
      * Get item in key value store
      * @param key The key to load
-     * @returns The stored value or null if nothing is stored
+     * @returns The stored value, or null only when nothing is stored under the
+     *          key. A read that fails (a server error, a timeout, offline, a
+     *          blocked storage) throws or rejects instead: callers treat null
+     *          as "nothing stored" and may write their defaults over the key,
+     *          as DataGrid's StorageManagerPersist does.
      */
     abstract getItem(key: StorageKeyType): Promise<StorageValueType> | StorageValueType;
     /**
@@ -45,6 +49,10 @@ export declare abstract class CachedServerStorageProvider extends StorageProvide
     /**
      * Receive value of key from server
      * @param key The key
+     * @returns The stored value, or null only when the server has nothing
+     *          stored under the key. Reject on every other failure: a null is
+     *          cached as "nothing stored" (see cacheOptions) and returned by
+     *          getItem, a rejection is not cached.
      * @protected
      */
     protected abstract getItemFromServer(key: StorageKeyType): Promise<string | null>;
@@ -60,6 +68,13 @@ export declare abstract class CachedServerStorageProvider extends StorageProvide
      * @protected
      */
     protected abstract clearFromServer(): Promise<void>;
+    /**
+     * Reads the value of key through the react-query cache (see cacheOptions)
+     * @param key The key to load
+     * @returns The stored value, or null when the server has nothing stored.
+     *          Rejects with getItemFromServer's error when the read fails; the
+     *          next read asks the server again.
+     */
     getItem(key: StorageKeyType): Promise<string | null>;
     setItem(key: StorageKeyType, value: StorageValueType): Promise<void>;
     clear(): Promise<void>;
@@ -87,7 +102,9 @@ export declare class StorageManager {
      * Loads a record from storage
      * @param id Unique identifier, should be used to determine storage class
      * @param keys Identifiers which separate storage (think namespaces, such as tenant id)
-     * @returns The value or null if not present
+     * @returns The value, or null only when nothing is stored. Throws or
+     *          rejects when the storage cannot be read (see
+     *          StorageProvider.getItem).
      */
     static getItem(id: StorageKeyType, keys: Record<string, string>): Promise<StorageValueType> | StorageValueType;
     /**

@@ -57,6 +57,21 @@ const getStageComponent = (children, stage) => Object.prototype.hasOwnProperty.c
  * @param stage The stage name
  */
 const unknownStageError = (stage) => new Error(`FlowEngine: children has no component for stage "${stage}"`);
+/**
+ * Multi-step form: renders the component of the current stage from `children` and gives it
+ * the stage API (goToStage, safeGoToStage, stage) and the page props; useFlowStageContext
+ * gives the components below it the same API. Render it in the page component of a Form
+ * with `flowEngine`.
+ *
+ * The stage is component state, like the active step of MUI's Stepper: it is not in the
+ * URL, and a stage change adds no entry to the browser history. The browser's Back and
+ * Forward therefore never go to another stage: they leave the page the Form is on, guarded
+ * like any other navigation away from the Form (a form page's leave guard asks first while
+ * the form is dirty). A reload or a new mount starts at defaultStage again; what the stages
+ * staged and did not save is gone then, as every unsaved value of a Form is. An app that
+ * wants its steps in the history puts them on routes below the Form's route instead of
+ * stages: the leave guard lets a navigation inside the Form's route through.
+ */
 const FlowEngine = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcFlowEngine" });
     const { defaultStage, formProps, children, stageLabels, disableAutoFocus } = props;

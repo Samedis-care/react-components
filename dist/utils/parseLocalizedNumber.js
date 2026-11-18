@@ -5,7 +5,8 @@ import delocalizeNumber from "./delocalizeNumber";
  * @param value The number string
  * @param options The number formatting options used to format the number
  * @returns The number, null for a text without a digit or separator, NaN for a separator
- * without a digit (".")
+ * without a digit (".") and for a text whose . and , don't fit the locale's format ("1.234.5" in
+ * de)
  */
 const parseLocalizedNumber = (value, options) => {
     const num = delocalizeNumber(value, options);

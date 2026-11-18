@@ -73,9 +73,10 @@ export declare const useBackendDataGridDeleteHandler: <M extends ModelUnknown>(p
  * Turns a record from model.index into a grid row: `row.id` is the record's id,
  * `row[field]` the rendered cell of each model field and `row[field + "_raw"]` its
  * value. A field with an editable overview visibility (ModelVisibilityGridEdit) is
- * edited in its cell, which saves every change at once through
- * model.connector.update, then calls refreshGrid; a refused save is shown in an error
- * dialog (the cell needs the Framework), and refreshGrid is called as well.
+ * edited in its cell, which saves every change at once through the model's mutation
+ * (useModelMutation, so the model's cache, hooks and "mutate" listeners hear of it), then
+ * calls refreshGrid; a refused save is shown in an error dialog (the cell needs the
+ * Framework), and refreshGrid is called as well.
  * @param model The model the record belongs to
  * @param refreshGrid Called after an inline edit was saved or refused, to reload the
  *                    rows

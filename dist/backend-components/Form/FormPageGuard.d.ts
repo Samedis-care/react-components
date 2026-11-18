@@ -44,8 +44,18 @@ export interface UseFormPageGuardParams {
     removeEventListener: FormEventTarget["removeEventListener"];
 }
 /**
+ * The history state of a navigation that moves a form page to another url rather than
+ * leaving it: CRUD's REPLACE from the create form to the record it has just saved
+ * (<url>/new → <url>/<id>), which keeps the Form and everything on it. The leave guard lets
+ * it pass, whatever the form's dirty state, and keeps guarding the page at its new url.
+ */
+export declare const FORM_PAGE_MOVE_STATE: Readonly<{
+    formPageMove: true;
+}>;
+/**
  * The leave guard of a Form's unsaved changes: while the form is dirty, a navigation asks
- * "Leave form page?" (a navigation inside the form's Route passes, unless disableRouting),
+ * "Leave form page?" (a navigation inside the form's Route passes, unless disableRouting, and
+ * so does a move of the page marked with FORM_PAGE_MOVE_STATE),
  * closing the browser tab asks (UnsafeToLeave), and so does closing the FullFormDialog the
  * Form is in. A form that is read-only for a reason other than a save takes no guard.
  *

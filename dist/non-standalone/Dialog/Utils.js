@@ -5,26 +5,7 @@ import { InfoDialog } from "./InfoDialog";
 import i18n from "../../i18n";
 import { ErrorDialog } from "./ErrorDialog";
 import { isValidationError } from "../../backend-components";
-/**
- * Pushes the dialog `render` returns and returns its result as a DialogPromise
- * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
- * @param render Returns the dialog, given the promise's resolve and reject
- * @param dismiss Settles the promise when `close` closes the dialog, as dismissing it does
- */
-const pushDialogPromise = (pushDialog, render, dismiss) => {
-    let closeDialog;
-    let settle;
-    const promise = new Promise((resolve, reject) => {
-        settle = () => dismiss(resolve, reject);
-        closeDialog = pushDialog(render(resolve, reject));
-    });
-    return Object.assign(promise, {
-        close: () => {
-            closeDialog?.();
-            settle?.();
-        },
-    });
-};
+import { pushDialogPromise } from "./pushDialogPromise";
 /**
  * Shows an awaitable confirm dialog
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
