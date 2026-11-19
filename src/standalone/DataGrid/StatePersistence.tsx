@@ -49,6 +49,12 @@ export type DataGridPersistentStateContextType = [
 	 * so what that version stores elsewhere starts from the defaults. The
 	 * first auto-fit of the column widths does not write it either: only one
 	 * of the other changes does, in this version's format.
+	 *
+	 * Throw, or return a promise which rejects, when the data could not be
+	 * stored. The grid logs the error to the console and calls the setter
+	 * again with its next state update (a page of rows loaded, a selection,
+	 * a change), with its current data, changed or not. The grid does not
+	 * wait for a returned promise before it calls the setter with a change.
 	 */
 	(data: DataGridPersistentState) => Promise<void> | void,
 ];
@@ -157,8 +163,10 @@ const StatePersistence = () => {
 	// write before writing it - persistence may well be a request to a server.
 	// The first run sees the state the grid opened with, decoded from what is
 	// stored. It is the baseline, not written: writing it would only replace
-	// what this visit could not read (a column it doesn't have, a newer format)
-	const lastWritten = useRef<string>(undefined);
+	// what this visit could not read (a column it doesn't have, a newer format).
+	// null after a failed write: what is stored is unknown then, so the next
+	// run writes, whether the data changed or not
+	const lastWritten = useRef<string | null>(undefined);
 
 	// data a newer library version wrote may keep the column widths where this
 	// version doesn't look. The auto-fit then fills them in, and writing that
@@ -201,7 +209,17 @@ const StatePersistence = () => {
 		if (keepNewer.current && autoFit) return;
 		keepNewer.current = false;
 
-		void setPersisted(data);
+		// the setter may throw or reject: the storage is full, the server fails.
+		// What is stored is unknown then, also when a newer write has started
+		// since: that one may have left a part to this one (as
+		// DataGridStorageManagerPersist skips a bucket being written already)
+		new Promise<void>((resolve) => resolve(setPersisted(data))).catch(
+			(err: unknown) => {
+				// eslint-disable-next-line no-console
+				console.error("[Components-Care] [DataGrid] Persist: ", err);
+				lastWritten.current = null;
+			},
+		);
 	}, [
 		setPersisted,
 		state,

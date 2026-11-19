@@ -358,6 +358,34 @@ const localKeyOf = (id: string, keys: Record<string, string>) =>
 	"cc-lsp-" + keyOf(id, keys);
 
 describe("persistence provider bugs", () => {
+	/** The part of Node's process this file uses (the test config has no Node types) */
+	interface RejectionEvents {
+		listeners(event: "unhandledRejection"): ((reason: unknown) => void)[];
+		removeAllListeners(event: "unhandledRejection"): void;
+		on(event: "unhandledRejection", listener: (reason: unknown) => void): void;
+		off(event: "unhandledRejection", listener: (reason: unknown) => void): void;
+	}
+	const nodeProcess = (globalThis as unknown as { process: RejectionEvents })
+		.process;
+	let rejections: unknown[] = [];
+	let savedListeners: ((reason: unknown) => void)[] = [];
+	const collectRejection = (reason: unknown) => {
+		rejections.push(reason);
+	};
+	beforeEach(() => {
+		rejections = [];
+		savedListeners = nodeProcess.listeners("unhandledRejection");
+		nodeProcess.removeAllListeners("unhandledRejection");
+		nodeProcess.on("unhandledRejection", collectRejection);
+	});
+	afterEach(async () => {
+		await new Promise((resolve) => setTimeout(resolve, 0));
+		nodeProcess.off("unhandledRejection", collectRejection);
+		savedListeners.forEach((listener) =>
+			nodeProcess.on("unhandledRejection", listener),
+		);
+	});
+
 	const smp = (keys: Record<string, string>, child = <Grid />) => (
 		<ThemeProvider theme={theme}>
 			<StorageManagerPersist storageKeys={keys}>{child}</StorageManagerPersist>
@@ -922,6 +950,158 @@ describe("persistence provider bugs", () => {
 		]);
 		act(() => grid!.setState((prev) => ({ ...prev, search: "s" })));
 		expect(save.mock.lastCall![0].sort).toEqual([["name", -1]]);
+	});
+	it("[ISSUE-3496-ITEM-9] a sizing bucket that cannot be written does not keep the filters bucket from being written", async () => {
+		const server = new (class extends MemoryProvider {
+			setItem(key: string, value: string | null): Promise<void> {
+				// LocalStorageProviderInstance throws like this when localStorage is full
+				if (key.startsWith(SIZING))
+					throw new DOMException("full", "QuotaExceededError");
+				return super.setItem(key, value);
+			}
+		})();
+		StorageManager.configure((_id, keys) => [server, keys]);
+		const keys = { model: "m" };
+		render(smp(keys));
+		await gridIdle();
+		act(() => grid!.setState((prev) => ({ ...prev, search: "q" })));
+		await act(async () => {});
+		expect(server.data[keyOf(FILTERS, keys)]).toBeDefined();
+		expect(persisted(server.data[keyOf(FILTERS, keys)]).search).toBe("q");
+	});
+	it("[ISSUE-3496-ITEM-9] a failing write is handled, not an unhandled rejection", async () => {
+		const server = new (class extends MemoryProvider {
+			setItem(key: string, value: string | null): Promise<void> {
+				if (key.startsWith(FILTERS)) return Promise.reject(new Error("503"));
+				return super.setItem(key, value);
+			}
+		})();
+		StorageManager.configure((_id, keys) => [server, keys]);
+		render(smp({ model: "m" }));
+		await gridIdle();
+		act(() => grid!.setState((prev) => ({ ...prev, search: "q" })));
+		await act(async () => {
+			await new Promise((resolve) => setTimeout(resolve, 0));
+		});
+		expect(rejections).toEqual([]);
+	});
+	it("[ISSUE-3496-ITEM-9] a bucket that cannot be written is logged, naming the bucket", async () => {
+		const log = vi.spyOn(console, "error").mockImplementation(() => {});
+		const full = new DOMException("full", "QuotaExceededError");
+		const server = new (class extends MemoryProvider {
+			setItem(key: string, value: string | null): Promise<void> {
+				if (key.startsWith(SIZING)) throw full;
+				return super.setItem(key, value);
+			}
+		})();
+		StorageManager.configure((_id, keys) => [server, keys]);
+		render(smp({ model: "m" }));
+		await gridIdle();
+		act(() => grid!.setState((prev) => ({ ...prev, search: "q" })));
+		await act(async () => {});
+		const logged = log.mock.calls.flat().filter((arg) => arg instanceof Error);
+		expect(logged).toHaveLength(1);
+		expect(logged[0].message).toContain(SIZING);
+		expect(logged[0].message).not.toContain(FILTERS);
+		expect(logged[0].cause).toBe(full);
+		expect(rejections).toEqual([]);
+	});
+	it("[ISSUE-3496-ITEM-9] two buckets that cannot be written are both logged", async () => {
+		const log = vi.spyOn(console, "error").mockImplementation(() => {});
+		const server = new (class extends MemoryProvider {
+			setItem(): Promise<void> {
+				return Promise.reject(new Error("503"));
+			}
+		})();
+		StorageManager.configure((_id, keys) => [server, keys]);
+		render(smp({ model: "m" }));
+		await gridIdle();
+		act(() => grid!.setState((prev) => ({ ...prev, search: "q" })));
+		await act(async () => {});
+		const logged = log.mock.calls
+			.flat()
+			.filter((arg) => arg instanceof AggregateError);
+		expect(logged).toHaveLength(1);
+		expect(
+			(logged[0].errors as Error[]).map((error) => error.message).join(),
+		).toMatch(new RegExp(`${SIZING}.*${FILTERS}`));
+	});
+	it("[ISSUE-3496-ITEM-9] a bucket whose write failed is written again with the grid's next state update, also when nothing persisted changed", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const server = new (class extends MemoryProvider {
+			failures = 1;
+			setItem(key: string, value: string | null): Promise<void> {
+				if (key.startsWith(FILTERS) && this.failures > 0) {
+					this.failures--;
+					return Promise.reject(new Error("503"));
+				}
+				return super.setItem(key, value);
+			}
+		})();
+		StorageManager.configure((_id, keys) => [server, keys]);
+		const keys = { model: "m" };
+		render(smp(keys));
+		await gridIdle();
+		act(() => grid!.setState((prev) => ({ ...prev, search: "q" })));
+		await act(async () => {});
+		expect(server.failures).toBe(0);
+		expect(server.data[keyOf(FILTERS, keys)]).toBeUndefined();
+		// a state update that changes nothing persisted, like a page of rows loaded
+		act(() => grid!.setState((prev) => ({ ...prev })));
+		await act(async () => {});
+		expect(server.data[keyOf(FILTERS, keys)]).toBeDefined();
+		expect(persisted(server.data[keyOf(FILTERS, keys)]).search).toBe("q");
+	});
+	it("[ISSUE-3496-ITEM-9] a bucket whose write fails after the next change was written is written again with the grid's next state update", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		let fail: (error: Error) => void = () => {};
+		const server = new (class extends MemoryProvider {
+			failures = 1;
+			setItem(key: string, value: string | null): Promise<void> {
+				if (key.startsWith(FILTERS) && this.failures > 0) {
+					this.failures--;
+					// a server which answers late
+					return new Promise((_resolve, reject) => (fail = reject));
+				}
+				return super.setItem(key, value);
+			}
+		})();
+		StorageManager.configure((_id, keys) => [server, keys]);
+		const keys = { model: "m" };
+		render(smp(keys));
+		await gridIdle();
+		act(() => grid!.setState((prev) => ({ ...prev, search: "q" })));
+		// the next change is to the widths only, so it leaves the filters bucket
+		// to the write still running
+		act(() => grid!.setWidths((prev) => ({ ...prev, name: 321 })));
+		act(() => fail(new Error("503")));
+		await act(async () => {});
+		expect(server.data[keyOf(FILTERS, keys)]).toBeUndefined();
+		act(() => grid!.setState((prev) => ({ ...prev })));
+		await act(async () => {});
+		expect(server.data[keyOf(FILTERS, keys)]).toBeDefined();
+		expect(persisted(server.data[keyOf(FILTERS, keys)]).search).toBe("q");
+	});
+	it("[ISSUE-3496-ITEM-9] a setter that throws is logged, keeps the grid working and gets the data again with the grid's next state update", async () => {
+		const log = vi.spyOn(console, "error").mockImplementation(() => {});
+		const quota = new DOMException("full", "QuotaExceededError");
+		const save = vi.fn<DataGridPersistentStateContextType[1]>(() => {
+			if (save.mock.calls.length === 1) throw quota;
+		});
+		render(
+			<ValueProvider stored={undefined} save={save}>
+				<Grid />
+			</ValueProvider>,
+		);
+		await gridIdle();
+		act(() => grid!.setState((prev) => ({ ...prev, search: "q" })));
+		await act(async () => {});
+		expect(log.mock.calls.flat()).toContain(quota);
+		expect(screen.getByRole("textbox")).toBeInTheDocument();
+		act(() => grid!.setState((prev) => ({ ...prev })));
+		expect(save).toHaveBeenCalledTimes(2);
+		expect(save.mock.calls[1][0]).toEqual(save.mock.calls[0][0]);
+		expect(save.mock.calls[1][0].search).toBe("q");
 	});
 	it("[ISSUE-3496-ITEM-10] LocalStoragePersist renders when localStorage cannot be read", () => {
 		vi.spyOn(console, "error").mockImplementation(() => {});

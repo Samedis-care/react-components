@@ -44,8 +44,12 @@ export const DATA_GRID_STORAGE_KEY_FILTERS =
  *
  * A bucket is only written when its part of the state differs from what it
  * holds, as read or last written: a column resize writes the sizing bucket
- * alone, the search the filters bucket alone. A bucket whose write failed is
- * written again with the next change.
+ * alone, the search the filters bucket alone. A bucket which cannot be
+ * written (the storage throws or rejects) does not keep the other one from
+ * being written. The setter then rejects, once both writes are done, with an
+ * error naming the bucket (an AggregateError of both when both failed); the
+ * grid logs it and hands its data over again with its next state update,
+ * which writes the failed bucket again.
  * @remarks The data it provides is what was written last, so a grid mounted
  *          later (or anything else reading the context) starts from the
  *          current state, not from the state loaded on mount
@@ -158,15 +162,33 @@ const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 				try {
 					await StorageManager.setItem(storageKey, storageKeys, value);
 				} catch (e) {
-					// what the bucket holds is unknown now, the next change writes it
+					// what the bucket holds is unknown now, the next call writes it
 					if (values.get(storageKey) === value) values.delete(storageKey);
-					throw e;
+					throw new Error(
+						"Failed writing DataGrid config to StorageManager." +
+							storageKey +
+							" " +
+							storageKeysJson,
+						{ cause: e },
+					);
 				}
 			};
-			await Promise.all([
-				write(DATA_GRID_STORAGE_KEY_COLUMN_SIZING, sizing),
-				write(DATA_GRID_STORAGE_KEY_FILTERS, rest),
-			]);
+			// one bucket which cannot be written does not keep the other from
+			// being written, and the caller hears of each that failed
+			const failures = (
+				await Promise.allSettled([
+					write(DATA_GRID_STORAGE_KEY_COLUMN_SIZING, sizing),
+					write(DATA_GRID_STORAGE_KEY_FILTERS, rest),
+				])
+			).flatMap((result) =>
+				result.status === "rejected" ? [result.reason as unknown] : [],
+			);
+			if (failures.length > 1)
+				throw new AggregateError(
+					failures,
+					"Failed writing DataGrid config to StorageManager",
+				);
+			if (failures.length > 0) throw failures[0];
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[storageKeysJson, unreadable, read],
