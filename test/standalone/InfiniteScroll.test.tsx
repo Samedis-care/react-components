@@ -851,6 +851,23 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 			expect(bottom).toHaveBeenCalledTimes(1);
 		});
 
+		it("[ISSUE-3471-ITEM-5] calls loadMoreBottom at the bottom when scrollTop is fractional", () => {
+			const bottom = vi.fn();
+			const { container } = render(
+				<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+					<div />
+				</InfiniteScroll>,
+			);
+			const scroller = getScroller(container);
+			// the bottom is at 1000 - 300 = 700; zoomed pages report offsets such as these
+			scrollTo(scroller, 699.78);
+			advance(100);
+			expect(bottom).toHaveBeenCalledTimes(1);
+			scrollTo(scroller, 700.4);
+			advance(100);
+			expect(bottom).toHaveBeenCalledTimes(2);
+		});
+
 		it("[ISSUE-3471-ITEM-9] passes role, aria-label, tabIndex and id to the scroll container", () => {
 			const { container } = render(
 				<InfiniteScroll

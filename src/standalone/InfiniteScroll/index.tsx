@@ -28,6 +28,10 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	/**
 	 * Callback to load more elements at the bottom.
 	 *
+	 * Called when the container is scrolled to the bottom. An offset less than
+	 * 1px from the bottom counts as the bottom, because browsers can report a
+	 * fractional `scrollTop` there, e.g. inside an ancestor with CSS `zoom`.
+	 *
 	 * A call that waits for `callBackDebounce` is only made if, once the wait is
 	 * over, the content still does not fill the container or the container is
 	 * still scrolled to the bottom.
@@ -88,10 +92,14 @@ const isFilled = (wrapper: HTMLElement): boolean =>
 	wrapper.scrollHeight > wrapper.clientHeight + 24;
 
 /**
- * Is the scroll container scrolled to the bottom?
+ * Is the scroll container scrolled to the bottom? `scrollTop` can be
+ * fractional (e.g. inside an ancestor with CSS `zoom`) while `scrollHeight`
+ * and `clientHeight` are rounded to whole pixels, so at the bottom it can be a
+ * fraction of a pixel short of their difference or past it. An offset less
+ * than 1px short of the difference, or past it, counts as the bottom.
  */
 const isAtBottom = (wrapper: HTMLElement): boolean =>
-	wrapper.scrollTop === wrapper.scrollHeight - wrapper.clientHeight;
+	wrapper.scrollHeight - wrapper.clientHeight - wrapper.scrollTop < 1;
 
 /**
  * Has the scroll container no layout box, because it or an ancestor is

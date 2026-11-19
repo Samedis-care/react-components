@@ -32,6 +32,12 @@ const Scroller = styled(InfiniteScroll)({
 	overflow: "auto",
 });
 
+const ZoomedScroller = styled(InfiniteScroll)({
+	height: 301,
+	width: 300,
+	overflow: "auto",
+});
+
 const Row = styled("div")({
 	height: 30,
 	boxSizing: "border-box",
@@ -40,6 +46,8 @@ const Row = styled("div")({
 	borderBottom: "1px solid #eee",
 	fontSize: 14,
 });
+
+const FractionalRow = styled(Row)({ height: 33.3, lineHeight: "33.3px" });
 
 const renderItems = (items: number[]) =>
 	items.map((n) => <Row key={n}>Item {n}</Row>);
@@ -279,6 +287,44 @@ export const Issue3471Item4EmptyListWithMaxHeightFills: StoryObj<
 		);
 		await expect(scroller.clientHeight).toBe(300);
 		await expect(args.loadMoreBottom).toHaveBeenCalledTimes(2);
+	},
+};
+
+// ─── Fractional scroll offsets ────────────────────────────────────────────────
+
+const ZoomedStory = ({ onLoadBottom }: { onLoadBottom?: () => void }) => {
+	const loadMoreBottom = useCallback(() => onLoadBottom?.(), [onLoadBottom]);
+	return (
+		<Box sx={{ zoom: 1.25 }}>
+			<ZoomedScroller className="" loadMoreBottom={loadMoreBottom}>
+				{makeItems(1, 40).map((n) => (
+					<FractionalRow key={n}>Item {n}</FractionalRow>
+				))}
+			</ZoomedScroller>
+		</Box>
+	);
+};
+
+export const Issue3471Item5LoadsAtBottomWhenZoomed: Story = {
+	args: { loadMoreBottom: fn() },
+	render: (args) => <ZoomedStory onLoadBottom={args.loadMoreBottom} />,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"The list is inside an ancestor with CSS `zoom: 1.25`, so at the bottom the browser reports a fractional `scrollTop` (e.g. 1031.2 in Chromium, while `scrollHeight - clientHeight` is 1031). An offset less than 1px from the bottom counts as the bottom, so scrolling to the end calls `loadMoreBottom`.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ args, canvasElement }) => {
+		const scroller = getScroller(canvasElement, "Item 1");
+		scroller.scrollTop = scroller.scrollHeight;
+		// precondition: the zoom makes the bottom offset fractional
+		await waitFor(() =>
+			expect(Number.isInteger(scroller.scrollTop)).toBe(false),
+		);
+		await waitFor(() => expect(args.loadMoreBottom).toHaveBeenCalledTimes(1));
 	},
 };
 
