@@ -1,9 +1,18 @@
-import React, { Dispatch, SetStateAction, useEffect, useRef } from "react";
+import React, {
+	Dispatch,
+	SetStateAction,
+	useContext,
+	useEffect,
+	useRef,
+} from "react";
+import { parsePath } from "history";
 import {
 	getMissingRouteParameters,
 	insertRouteParameters,
 } from "../../../utils/routeUtils";
 import matchPath, { normalizePath } from "../../../standalone/Routes/matchPath";
+import joinRoutePath from "../../../standalone/Routes/joinRoutePath";
+import { RouteContext, useRoutePrefix } from "../../../standalone/Routes/Route";
 import MenuBase, {
 	IMenuItemDefinition,
 	MenuProps,
@@ -20,17 +29,35 @@ export interface IRoutedMenuItemDefinition extends Omit<
 	/**
 	 * The URL to navigate to in case the menu item is clicked
 	 *
-	 * The route also decides when the entry is highlighted. It matches the
-	 * current URL as a prefix: `/devices` matches `/devices/5/edit` (`/`
-	 * matches only `/`). When several entries of the menu tree match, at any
-	 * level and in any group, the most specific one is highlighted and the
-	 * groups above it are expanded: an exact match before a prefix match, then
-	 * the route with more segments, then, segment by segment from the left, a
-	 * literal before a `:name` param (`/apps/new` before `/apps/:app`). On a
-	 * tie the deeper entry wins (a group's entry with the group's own route),
-	 * then the earlier one. The highlight follows the URL only: on a path that
-	 * no entry matches, nothing is highlighted, and an entry without `route`
-	 * (an action such as "Log out") is never highlighted.
+	 * A path of the app, such as `/devices`, `/apps/:app/roles`, `/devices/*`
+	 * or `/tasks?tab=open`, not a URL (open an external page from `onClick`).
+	 * Its path decides when the entry is highlighted, and the same path, with
+	 * its params filled in, is where a click goes:
+	 * - A trailing `/*`, the form a parent Route's path takes, is not part of
+	 *   the target: `/devices/*` is highlighted where `/devices` is and
+	 *   navigates to `/devices`.
+	 * - A search and a hash go into the target and play no part in the
+	 *   highlight: `/tasks?tab=open` navigates to `/tasks?tab=open` and is
+	 *   highlighted on `/tasks` with any search, so entries that differ only in
+	 *   their search or hash match the same pages. The current URL's search and
+	 *   hash are not kept.
+	 * - A route without a leading slash is relative to the Route the menu is
+	 *   rendered in. Inside `<Route path="/apps/:app/*">`, `users` is
+	 *   highlighted on `/apps/a1/users` and navigates there from every page
+	 *   below `/apps/a1`, including pages that no entry matches. Outside of any
+	 *   Route it is the same as `/users`.
+	 *
+	 * The route matches the current URL as a prefix: `/devices` matches
+	 * `/devices/5/edit` (`/` matches only `/`). When several entries of the
+	 * menu tree match, at any level and in any group, the most specific one is
+	 * highlighted and the groups above it are expanded: an exact match before
+	 * a prefix match, then the route with more segments, then, segment by
+	 * segment from the left, a literal before a `:name` param (`/apps/new`
+	 * before `/apps/:app`), then a route without a trailing `/*` before one
+	 * with. On a tie the deeper entry wins (a group's entry with the group's
+	 * own route), then the earlier one. The highlight follows the URL only: on
+	 * a path that no entry matches, nothing is highlighted, and an entry
+	 * without `route` (an action such as "Log out") is never highlighted.
 	 *
 	 * Its `:name` params are filled from the current URL, read with the route
 	 * of that best-matching entry: on `/projects/42/review`,
@@ -40,7 +67,9 @@ export interface IRoutedMenuItemDefinition extends Omit<
 	 * (with its children), as if `shouldRender` were false, and in development
 	 * a `console.error` names the entry and the param (once per menu, entry
 	 * and param). An entry meant only for pages that provide its params gets
-	 * `shouldRender: false` on the other pages from the app.
+	 * `shouldRender: false` on the other pages from the app. The part of a
+	 * relative route that stands for the enclosing Route is taken from the
+	 * current URL as that Route matched it.
 	 */
 	route?: string;
 	/**
@@ -81,6 +110,69 @@ interface MenuRouteMatch {
 	 */
 	params: Record<string, string>;
 }
+
+/**
+ * What a relative route is resolved against: the Route the menu is rendered
+ * in, or the root outside of any Route
+ */
+interface RouteBase {
+	/**
+	 * The Route's path pattern as a prefix (useRoutePrefix): "/apps/:app/"
+	 * for the Route "/apps/:app/*", "/" outside of any Route
+	 */
+	path: string;
+	/**
+	 * The part of the current path the Route matched, percent-encoded as in
+	 * the location: "/apps/a1"; "/" outside of any Route
+	 */
+	url: string;
+}
+
+/**
+ * An entry's route, read the same way for the highlight and the navigation
+ */
+interface ResolvedRoute {
+	/**
+	 * The absolute path pattern the entry is highlighted by, without search
+	 * and hash
+	 */
+	pattern: string;
+	/**
+	 * The path of the navigation target, its `:name` params still to fill in:
+	 * the route's path without search, hash and a trailing `/*`; relative to
+	 * `base` for a relative route
+	 */
+	path: string;
+	/**
+	 * The path that `path` is appended to: the enclosing Route's url for a
+	 * relative route, null for an absolute one
+	 */
+	base: string | null;
+	/**
+	 * The route's search and hash, appended to the target
+	 */
+	suffix: string;
+}
+
+/**
+ * Reads an entry's route: the pattern it matches the current path with and
+ * the parts of its navigation target, see IRoutedMenuItemDefinition's `route`
+ * @param route The entry's route, e.g. `/devices/*`, `/tasks?tab=open` or
+ * `users`
+ * @param base What a relative route is resolved against
+ */
+const resolveRoute = (route: string, base: RouteBase): ResolvedRoute => {
+	const { pathname = "", search = "", hash = "" } = parsePath(route);
+	const relative = !pathname.startsWith("/");
+	// a trailing "*" segment matches any rest, it is no part of a target
+	const path = pathname.replace(/(^|\/)\*$/, "");
+	return {
+		pattern: relative ? joinRoutePath(base.path, pathname) : pathname,
+		path: relative || path ? path : "/",
+		base: relative ? base.url : null,
+		suffix: search + hash,
+	};
+};
 
 /**
  * How specific a matching route is, see compareSpecificity
@@ -173,16 +265,24 @@ const compareSpecificity = (
  * order, with their menu item ids
  * @param definitions The menu item definitions
  * @param groups The menu item ids of the groups above `definitions`
+ * @param base What a relative route is resolved against
+ * @return Each entry's id, the ids of the groups above it and the path
+ * pattern of its route (resolveRoute)
  */
 const flattenRoutes = (
 	definitions: IRoutedMenuItemDefinition[],
 	groups: string[],
-): { id: string; groups: string[]; route: string }[] =>
+	base: RouteBase,
+): { id: string; groups: string[]; pattern: string }[] =>
 	definitions.flatMap((def) => {
 		const id = getItemId(groups[groups.length - 1] ?? null, def.title);
 		return [
-			...(def.route ? [{ id, groups, route: def.route }] : []),
-			...(def.children ? flattenRoutes(def.children, [...groups, id]) : []),
+			...(def.route
+				? [{ id, groups, pattern: resolveRoute(def.route, base).pattern }]
+				: []),
+			...(def.children
+				? flattenRoutes(def.children, [...groups, id], base)
+				: []),
 		];
 	});
 
@@ -209,20 +309,22 @@ const encodeRouteParameters = (
  * the routes of all entries. Entries with `shouldRender: false` take part.
  * @param definitions The menu item definitions (the top level)
  * @param path The current location.pathname
+ * @param base What a relative route is resolved against
  * @return The best match, or null if no entry matches
  */
 const resolveLocation = (
 	definitions: IRoutedMenuItemDefinition[],
 	path: string,
+	base: RouteBase,
 ): MenuRouteMatch | null => {
 	const pathLength = splitSegments(path).length;
 	let best: { match: MenuRouteMatch; specificity: RouteSpecificity } | null =
 		null;
-	for (const entry of flattenRoutes(definitions, [])) {
-		const match = matchPath({ path: entry.route, end: false }, path);
+	for (const entry of flattenRoutes(definitions, [], base)) {
+		const match = matchPath({ path: entry.pattern, end: false }, path);
 		if (!match) continue;
 		const specificity = getSpecificity(
-			entry.route,
+			entry.pattern,
 			pathLength,
 			entry.groups.length,
 		);
@@ -244,16 +346,24 @@ const resolveLocation = (
  * The navigation target of an entry
  * @param definition The routed menu item definition
  * @param params The params of the current URL (resolveLocation)
- * @return The route with the params filled in; undefined for an entry without
- * route, null when `params` lacks one of the route's params
+ * @param base What a relative route is resolved against
+ * @return The route's path with the params filled in, without a trailing
+ * `/*`, below the enclosing Route's url for a relative route, and with the
+ * route's search and hash; undefined for an entry without route, null when
+ * `params` lacks one of the route's params
  */
 const getTarget = (
 	definition: IRoutedMenuItemDefinition,
 	params: Record<string, string>,
-): string | null | undefined =>
-	definition.route
-		? insertRouteParameters(definition.route, params)
-		: undefined;
+	base: RouteBase,
+): string | null | undefined => {
+	if (!definition.route) return undefined;
+	const route = resolveRoute(definition.route, base);
+	const path = insertRouteParameters(route.path, params);
+	if (path === null) return null;
+	if (route.base === null) return path + route.suffix;
+	return (path ? joinRoutePath(route.base, path) : route.base) + route.suffix;
+};
 
 /**
  * The entries hidden because the current URL cannot fill their route: only
@@ -261,24 +371,26 @@ const getTarget = (
  * such an entry
  * @param definitions The menu item definitions
  * @param params The params of the current URL (resolveLocation)
+ * @param base What a relative route is resolved against
  * @param parent The title path of the parent entry, null on the top level
  * @return Each entry's title path (`Group > Entry`), route and missing params
  */
 const getUnresolvedEntries = (
 	definitions: IRoutedMenuItemDefinition[],
 	params: Record<string, string>,
+	base: RouteBase,
 	parent: string | null,
 ): { titlePath: string; route: string; missing: string[] }[] =>
 	definitions.flatMap((def) => {
 		if (!def.shouldRender) return [];
 		const titlePath = parent ? `${parent} > ${def.title}` : def.title;
 		const missing = def.route
-			? getMissingRouteParameters(def.route, params)
+			? getMissingRouteParameters(resolveRoute(def.route, base).path, params)
 			: [];
 		if (def.route && missing.length > 0)
 			return [{ titlePath, route: def.route, missing }];
 		return def.children
-			? getUnresolvedEntries(def.children, params, titlePath)
+			? getUnresolvedEntries(def.children, params, base, titlePath)
 			: [];
 	});
 
@@ -287,6 +399,7 @@ const getUnresolvedEntries = (
  * @param params The params of the current URL (resolveLocation)
  * @param expanded The menu item ids of the groups to expand: the groups above
  * the entry of the current URL (resolveLocation)
+ * @param base What a relative route is resolved against
  * @param definition The routed menu item definition
  * @param id The menu item id of the definition
  * @param navigate The react-router navigate function
@@ -295,6 +408,7 @@ const getUnresolvedEntries = (
 const convertDefinition = (
 	params: Record<string, string>,
 	expanded: string[],
+	base: RouteBase,
 	definition: IRoutedMenuItemDefinition,
 	id: string,
 	navigate: NavigateFunction,
@@ -302,12 +416,13 @@ const convertDefinition = (
 	...definition,
 	// an entry whose route the current URL cannot fill has nowhere to go
 	shouldRender:
-		definition.shouldRender && getTarget(definition, params) !== null,
+		definition.shouldRender && getTarget(definition, params, base) !== null,
 	forceExpand: definition.children && expanded.includes(id),
 	children: definition.children?.map((entry) =>
 		convertDefinition(
 			params,
 			expanded,
+			base,
 			entry,
 			getItemId(id, entry.title),
 			navigate,
@@ -318,7 +433,7 @@ const convertDefinition = (
 			definition.onClick(evt);
 		}
 		// keep URL parameters
-		const target = getTarget(definition, params);
+		const target = getTarget(definition, params, base);
 		if (target) {
 			if (evt.ctrlKey || evt.metaKey || evt.shiftKey)
 				window.open(target, "_blank");
@@ -334,7 +449,7 @@ const convertDefinition = (
 			definition.onAuxClick(evt);
 		}
 		// keep URL parameters
-		const target = getTarget(definition, params);
+		const target = getTarget(definition, params, base);
 		if (target) window.open(target);
 	},
 });
@@ -348,7 +463,9 @@ const ignoreActiveChange: Dispatch<SetStateAction<string>> = () => undefined;
 
 /**
  * The routing logic of RoutedMenu, for a menu the app renders itself. Must be
- * called inside a HistoryRouter.
+ * called inside a HistoryRouter; called inside a Route, the routes without a
+ * leading slash are relative to that Route (see IRoutedMenuItemDefinition's
+ * `route`).
  * @param props The menu definition
  * @return `definition`: the entries converted for MenuBase, with
  * `forceExpand` set on the groups above the entry of the current URL and
@@ -366,11 +483,19 @@ export const useRoutedMenuLogic = (
 	const navigate = useNavigate();
 	const rawDef = props.definition;
 
+	// the enclosing Route, which the relative routes are resolved against
+	const routePrefix = useRoutePrefix();
+	const routeUrl = useContext(RouteContext)?.url ?? "/";
+	const base = React.useMemo(
+		(): RouteBase => ({ path: routePrefix, url: routeUrl }),
+		[routePrefix, routeUrl],
+	);
+
 	// the entry of the current URL: the active item, the groups to expand and
 	// the params
 	const current = React.useMemo(
-		() => resolveLocation(rawDef, path),
-		[rawDef, path],
+		() => resolveLocation(rawDef, path, base),
+		[rawDef, path, base],
 	);
 
 	// the active item is derived from the URL, so it is never left over from an
@@ -392,12 +517,13 @@ export const useRoutedMenuLogic = (
 				convertDefinition(
 					params,
 					current?.groups ?? [],
+					base,
 					entry,
 					getItemId(null, entry.title),
 					navigate,
 				),
 			),
-		[rawDef, params, current, navigate],
+		[rawDef, params, current, base, navigate],
 	);
 
 	// development: name the entries hidden for a param the URL lacks, once per
@@ -410,6 +536,7 @@ export const useRoutedMenuLogic = (
 		for (const { titlePath, route, missing } of getUnresolvedEntries(
 			rawDef,
 			params,
+			base,
 			null,
 		)) {
 			for (const name of missing) {
@@ -422,7 +549,7 @@ export const useRoutedMenuLogic = (
 				);
 			}
 		}
-	}, [rawDef, params, path]);
+	}, [rawDef, params, base, path]);
 	return { definition, controlledState };
 };
 
@@ -433,7 +560,8 @@ export const useRoutedMenuLogic = (
  * `onClick` and navigates to its route. The highlight follows the URL only:
  * on a path that matches no entry nothing is highlighted, and a click
  * highlights nothing by itself, only the navigation it starts does. Must be
- * rendered inside a HistoryRouter.
+ * rendered inside a HistoryRouter; rendered inside a Route, its routes
+ * without a leading slash are relative to that Route.
  */
 const RoutedMenu = (props: IRoutedMenuProps) => {
 	const { definition, controlledState } = useRoutedMenuLogic(props);

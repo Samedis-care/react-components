@@ -9,10 +9,12 @@ import {
 	screen,
 } from "@testing-library/react";
 import { createTheme, List, ThemeProvider } from "@mui/material";
-import { createMemoryHistory, History } from "history";
+import { createBrowserHistory, createMemoryHistory, History } from "history";
 import MaterialMenuItem from "../../src/standalone/Portal/MenuItem/Material";
 import type { MenuItemProps } from "../../src/standalone/Portal/Menu";
 import HistoryRouter from "../../src/standalone/Routes/HistoryRouter";
+import Route from "../../src/standalone/Routes/Route";
+import Routes from "../../src/standalone/Routes/Routes";
 import useLocation from "../../src/standalone/Routes/useLocation";
 import RoutedMenu, {
 	IRoutedMenuItemDefinition,
@@ -524,6 +526,125 @@ describe("RoutedMenu bugs", () => {
 		);
 		expect(selected()).toEqual(["General"]);
 		expect(chevron(entry("Settings"))).toBe("less");
+	});
+	it("[ISSUE-3498-ITEM-4] a route ending in /* navigates to the path, not to a literal *", () => {
+		const { history } = mount(
+			[leaf("Home", "/"), leaf("Devices", "/devices/*")],
+			"/devices/5",
+		);
+		expect(selected()).toEqual(["Devices"]);
+		fireEvent.click(entry("Devices"));
+		expect(history.location.pathname).toBe("/devices");
+	});
+});
+
+describe("RoutedMenu: one reading of a route for the highlight and the navigation", () => {
+	it("[ISSUE-3498-ITEM-4] a route ending in /* fills its params and opens the path without * in a new tab", () => {
+		const open = vi.spyOn(window, "open").mockImplementation(() => null);
+		mount(
+			[
+				leaf("Devices", "/devices"),
+				leaf("Device", "/devices/:id/*"),
+				leaf("Everything", "/*"),
+			],
+			"/devices/5/edit",
+		);
+		expect(selected()).toEqual(["Device"]);
+		middleClick(entry("Device"));
+		fireEvent.click(entry("Everything"), { ctrlKey: true });
+		expect(open.mock.calls).toEqual([["/devices/5"], ["/", "_blank"]]);
+	});
+	it("[ISSUE-3498-ITEM-4] a route with a query string or hash is highlighted by its path and navigates with them", () => {
+		// Device is hidden (and reported in development) where the URL has no
+		// value for :id
+		vi.spyOn(console, "error").mockImplementation(() => undefined);
+		const { history } = mount(
+			[
+				leaf("Home", "/"),
+				leaf("Open tasks", "/tasks?tab=open#list"),
+				leaf("Device", "/devices/:id?tab=info"),
+			],
+			"/tasks?tab=open",
+		);
+		expect(selected()).toEqual(["Open tasks"]);
+		act(() => history.push("/devices/5"));
+		expect(selected()).toEqual(["Device"]);
+		fireEvent.click(entry("Device"));
+		expect(history.location).toMatchObject({
+			pathname: "/devices/5",
+			search: "?tab=info",
+			hash: "",
+		});
+		fireEvent.click(entry("Open tasks"));
+		expect(history.location).toMatchObject({
+			pathname: "/tasks",
+			search: "?tab=open",
+			hash: "#list",
+		});
+		expect(selected()).toEqual(["Open tasks"]);
+	});
+	it("[ISSUE-3498-ITEM-4] outside of a Route, a route without a leading slash is read from the root for the highlight and the click alike", () => {
+		window.history.replaceState(null, "", "/apps/a1");
+		try {
+			const { history } = mountWith(
+				[leaf("Apps", "/apps/:app"), leaf("Users", "users")],
+				createBrowserHistory(),
+			);
+			expect(selected()).toEqual(["Apps"]);
+			fireEvent.click(entry("Users"));
+			expect(history.location.pathname).toBe("/users");
+			expect(selected()).toEqual(["Users"]);
+		} finally {
+			cleanup();
+			window.history.replaceState(null, "", "/");
+		}
+	});
+	it("[ISSUE-3498-ITEM-4] inside a Route, a route without a leading slash is resolved against the Route, also on a page without an entry", () => {
+		// Role is hidden (and reported in development) where the URL has no
+		// value for :role
+		vi.spyOn(console, "error").mockImplementation(() => undefined);
+		const menu = [
+			leaf("Apps", "/apps"),
+			leaf("Roles", "roles"),
+			leaf("Role", "roles/:role/*"),
+			leaf("Users", "users?sort=name"),
+		];
+		const history = createMemoryHistory({
+			initialEntries: ["/apps/a%2Fb/roles"],
+		});
+		render(
+			<ThemeProvider theme={theme}>
+				<HistoryRouter history={history}>
+					<Routes>
+						{[
+							<Route
+								key={"app"}
+								path={"/apps/:app/*"}
+								element={
+									<RoutedMenu
+										definition={menu}
+										wrapper={Wrap}
+										menuItem={MaterialMenuItem}
+									/>
+								}
+							/>,
+						]}
+					</Routes>
+				</HistoryRouter>
+			</ThemeProvider>,
+		);
+		expect(selected()).toEqual(["Roles"]);
+		expect(titles()).toEqual(["Apps", "Roles", "Users"]);
+		act(() => history.push("/apps/a%2Fb/roles/r9/edit"));
+		expect(selected()).toEqual(["Role"]);
+		act(() => history.push("/apps/a%2Fb/settings"));
+		expect(selected()).toEqual(["Apps"]);
+		fireEvent.click(entry("Users"));
+		expect(history.location).toMatchObject({
+			pathname: "/apps/a%2Fb/users",
+			search: "?sort=name",
+		});
+		expect(selected()).toEqual(["Users"]);
 	});
 });
 
