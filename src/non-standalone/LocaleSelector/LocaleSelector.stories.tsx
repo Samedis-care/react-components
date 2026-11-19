@@ -350,6 +350,134 @@ export const Issue3499Item5RowFocusRingContrast: Story = {
 	},
 };
 
+export const Issue3499Item6FocusStaysInListWhenScrolled: Story = {
+	args: { supportedLocales: SCF },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-6: the first row has keyboard focus, then the list scrolls (the wheel, a touch swipe, or the arrow and page keys, which scroll the list natively). The row is unrendered, and the list takes focus, so it does not fall out of the list to the dialog container.",
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ canvasElement }) => {
+		await reset();
+		const dialog = await openDialog(canvasElement);
+		const list = within(dialog).getByRole("list");
+		const row = rowButton(dialog, 1);
+		row.focus();
+		await expect(row).toHaveFocus();
+		list.scrollTop = 2000;
+		// precondition: the focused row is no longer rendered
+		await waitFor(() => expect(row.isConnected).toBe(false));
+		await frames(2);
+		await expect(list).toContainElement(
+			document.activeElement as HTMLElement | null,
+		);
+	},
+};
+
+/**
+ * Gives the first row keyboard focus and scrolls the list until that row is
+ * unrendered
+ * @returns The list and the first row's (now removed) control
+ */
+const scrollFocusedRowAway = async (dialog: HTMLElement) => {
+	const list = within(dialog).getByRole("list");
+	const row = rowButton(dialog, 1);
+	row.focus();
+	await expect(row).toHaveFocus();
+	list.scrollTop = 2000;
+	await waitFor(() => expect(row.isConnected).toBe(false));
+	await waitFor(() => expect(list).toHaveFocus());
+	return { list, row };
+};
+
+export const Issue3499Item6FocusReturnsToRowWhenScrolledBack: Story = {
+	args: { supportedLocales: SCF },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-6: while the focused row is scrolled away, the list holds keyboard focus and shows the focus ring. Scrolled back, the row is rendered again and gets focus back.",
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ canvasElement }) => {
+		await reset();
+		const dialog = await openDialog(canvasElement);
+		const { list, row } = await scrollFocusedRowAway(dialog);
+		await expect(list).toHaveAttribute("tabindex", "-1");
+		const ring = getComputedStyle(list);
+		await expect(`${ring.outlineStyle} ${ring.outlineWidth}`).toBe("solid 2px");
+		const country = row.textContent ?? "";
+		list.scrollTop = 0;
+		await waitFor(() => expect(rowButton(dialog, 1)).toHaveFocus());
+		// a new element for the same row
+		await expect(rowButton(dialog, 1)).not.toBe(row);
+		await expect(rowButton(dialog, 1)).toHaveTextContent(country);
+	},
+};
+
+export const Issue3499Item6TabFromListGoesToRows: Story = {
+	args: { supportedLocales: SCF },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-6: while the list holds focus for a row that is scrolled away, Shift+Tab goes back to the search box, and Tab goes on to the rows, not back to the close button.",
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ canvasElement }) => {
+		await reset();
+		const dialog = await openDialog(canvasElement);
+		let { list } = await scrollFocusedRowAway(dialog);
+		await userEvent.tab({ shift: true });
+		await expect(within(dialog).getByRole("textbox")).toHaveFocus();
+		list.scrollTop = 0;
+		await waitFor(() => rowButton(dialog, 1));
+		({ list } = await scrollFocusedRowAway(dialog));
+		await userEvent.tab();
+		const focused = document.activeElement as HTMLElement | null;
+		await expect(list).toContainElement(focused);
+		await expect(focused).not.toBe(list);
+		await expect(focused).toHaveAttribute("role", "button");
+	},
+};
+
+export const Issue3499Item6FocusMovedOnStaysWhenScrolledBack: Story = {
+	args: { supportedLocales: SCF },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-6: the list holds focus for a row that is scrolled away, then the user moves on to the search box. Scrolling the row back into view leaves focus in the search box.",
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ canvasElement }) => {
+		await reset();
+		const dialog = await openDialog(canvasElement);
+		const { list } = await scrollFocusedRowAway(dialog);
+		const input = within(dialog).getByRole("textbox");
+		await userEvent.click(input);
+		await expect(input).toHaveFocus();
+		list.scrollTop = 0;
+		await waitFor(() => expect(rowButton(dialog, 1)).toBeVisible());
+		await frames(2);
+		await expect(input).toHaveFocus();
+	},
+};
+
 export const Issue3466Item8FlagsOutlined: Story = {
 	args: { supportedLocales: SCF },
 	parameters: {

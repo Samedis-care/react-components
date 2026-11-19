@@ -6,6 +6,7 @@ import {
 import { ListItemButton, styled, useThemeProps } from "@mui/material";
 import CountryFlag from "../../standalone/CountryFlag";
 import focusRing from "../../utils/internal/focusRing";
+import { useListFocusTarget } from "./useListFocusKeeper";
 
 export interface LocaleSelectorEntryProps extends Omit<
 	LocaleSelectorDialogContentProps,
@@ -85,9 +86,12 @@ const LocaleSelectorEntry = (
 	const handleClick = useCallback(() => {
 		handleSwitch(locale.locale);
 	}, [locale, handleSwitch]);
+	// keyboard focus waits on the list while this row is scrolled away
+	const focusRef = useListFocusTarget(locale.locale);
 
 	return (
 		<ListItemRoot
+			ref={focusRef}
 			onClick={handleClick}
 			disabled={disabled}
 			className={className}

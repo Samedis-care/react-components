@@ -190,6 +190,13 @@ const hasTexts = (locale: string) => {
  * the order of that list, then the rest by number of speakers. A search box filters
  * the rows by their names and locale code, ignoring case.
  *
+ * The list renders only the rows in view. When the row with keyboard focus is
+ * scrolled away (the wheel, a swipe, or the arrow, page, Home and End keys, which
+ * scroll the list), the list itself takes focus and shows a focus ring: the keys
+ * keep scrolling it, Tab goes on to the rows and Shift+Tab back to the search box.
+ * Scrolled back to that row, the row gets focus back, unless focus moved elsewhere
+ * meanwhile.
+ *
  * Picking a row calls `ComponentsCareI18n.changeLanguage("<lang>-<COUNTRY>")`
  * (regional: the country also decides date and number formats). While the language
  * loads, the rows are disabled, and the close button, Escape and a backdrop click

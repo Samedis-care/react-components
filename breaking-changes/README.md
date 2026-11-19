@@ -41,6 +41,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-19 | [The busy overlay is a status message, and a busy form is `aria-busy`](2026-11-19-form-loader-overlay-status-message.md) | behavior, theme |
 | 2026-11-19 | [The form footer stays within its container, and its buttons wrap](2026-11-19-form-footer-fits-its-container.md) | behavior, theme |
 | 2026-11-19 | [RoutedMenu reads a route the same way for the highlight and the click](2026-11-19-routed-menu-route-one-reading.md) | behavior |
+| 2026-11-19 | [The locale selector keeps keyboard focus in its list while it scrolls](2026-11-19-locale-selector-list-keeps-focus.md) | behavior |
 | 2026-11-17 | [Leaving a date field marks it touched in a Form](2026-11-17-form-blur-marks-date-fields-touched.md) | behavior |
 | 2026-11-17 | [VerticalDivider, PopupMenu and the Small components take theme default props](2026-11-17-small-primitives-theme-slots.md) | behavior, type, theme |
 | 2026-11-17 | [The country flags load when the first flag is shown: loadCountryFlags and loadCountryFlag replace CountryFlags and getCountryFlag](2026-11-17-country-flags-load-when-shown.md) | type, behavior |

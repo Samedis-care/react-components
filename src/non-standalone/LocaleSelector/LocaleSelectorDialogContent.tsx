@@ -6,7 +6,12 @@ import {
 	styled,
 	useThemeProps,
 } from "@mui/material";
-import { List, RowComponentProps, useDynamicRowHeight } from "react-window";
+import {
+	List,
+	RowComponentProps,
+	useDynamicRowHeight,
+	useListRef,
+} from "react-window";
 import supportedLanguages from "../../assets/data/supported-languages.json";
 import countryLanguages from "../../assets/data/country-languages.json";
 import LocaleSelectorEntry from "./LocaleSelectorEntry";
@@ -20,6 +25,9 @@ import TextFieldWithHelp from "../../standalone/UIKit/TextFieldWithHelp";
 import Loader from "../../standalone/Loader";
 import { LocaleSelectorDialogCommonProps } from "./LocaleSelectorDialog";
 import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
+import useListFocusKeeper, {
+	ListFocusKeeperContext,
+} from "./useListFocusKeeper";
 
 export interface LocaleSelectorDialogContentProps extends LocaleSelectorDialogCommonProps {
 	/**
@@ -65,6 +73,12 @@ const LocaleList = styled(Grid, {
 		flex: "1 1 auto",
 		minHeight: 70,
 	},
+	// the list holds keyboard focus while the focused row is scrolled out of the
+	// rendered range; inside its edges, because the dialog content clips its sides
+	'& [role="list"]:focus-visible': {
+		outline: `2px solid ${theme.palette.primary.main}`,
+		outlineOffset: -2,
+	},
 }));
 
 const NoLocalesMessage = styled("div", {
@@ -96,7 +110,9 @@ const SearchStatus = styled("div", {
 /**
  * Theme style slots of LocaleSelectorDialogContent
  * (`components.CcLocaleSelectorDialogContent.styleOverrides.<slot>`):
- * - `localeList`: the area below the search box that holds the rows
+ * - `localeList`: the area below the search box that holds the rows. It also
+ *   draws the list's keyboard focus ring (`& [role="list"]:focus-visible`), shown
+ *   while the list holds focus for a row that is scrolled out of view
  * - `noLocalesMessage`: the message that replaces the rows when none match
  * - `searchStatus`: the visually hidden status region (`role="status"`) that
  *   states the number of rows, or that none match the search
@@ -241,6 +257,19 @@ const LocaleSelectorDialogContent = (
 		key: rowHeightKey,
 	});
 
+	// react-window renders only the rows in view: keyboard focus waits on the list
+	// while the focused row is scrolled away, and goes back to it once it is there
+	const listRef = useListRef(null);
+	const getListElement = useCallback(
+		() => listRef.current?.element ?? null,
+		[listRef],
+	);
+	const {
+		keeper: focusKeeper,
+		onFocus: handleListFocus,
+		onBlur: handleListBlur,
+	} = useListFocusKeeper(getListElement);
+
 	const searchLabel = t("standalone.data-grid.header.search");
 	const searchSlotProps = useMemo(
 		() => ({
@@ -277,13 +306,20 @@ const LocaleSelectorDialogContent = (
 						{t("non-standalone.language-switcher.no-locales")}
 					</NoLocalesMessage>
 				) : (
-					<List
-						overscanCount={2}
-						rowCount={filteredData.length}
-						rowHeight={rowHeight}
-						rowComponent={LocaleEntryRenderer}
-						rowProps={{ filteredData }}
-					/>
+					<ListFocusKeeperContext.Provider value={focusKeeper}>
+						<List
+							listRef={listRef}
+							// focusable for the focus keeper, but no tab stop of its own
+							tabIndex={-1}
+							onFocus={handleListFocus}
+							onBlur={handleListBlur}
+							overscanCount={2}
+							rowCount={filteredData.length}
+							rowHeight={rowHeight}
+							rowComponent={LocaleEntryRenderer}
+							rowProps={{ filteredData }}
+						/>
+					</ListFocusKeeperContext.Provider>
 				)}
 			</LocaleList>
 		</Grid>

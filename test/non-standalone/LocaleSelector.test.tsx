@@ -464,6 +464,18 @@ describe("LocaleSelectorDialog", () => {
 				await waitFor(() => expect(dialogEls()).toHaveLength(0));
 			},
 		);
+
+		it("[ISSUE-3499-ITEM-6] the picked row keeps keyboard focus, also when it is rendered anew", async () => {
+			holdSwitch();
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			const target = await rowBtn("Austria");
+			act(() => target.focus());
+			fireEvent.keyDown(target, { key: "Enter" });
+			await flush();
+			// the row's element, whether it is the same or a new one
+			expect(document.activeElement).toBe(await rowBtn("Austria"));
+		});
 	});
 
 	describe("showLocaleSelectorDialog", () => {
