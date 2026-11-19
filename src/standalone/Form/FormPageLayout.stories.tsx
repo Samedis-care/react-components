@@ -169,6 +169,11 @@ const bodyIn = (scope: ParentNode) => {
 	if (!body) throw new Error("FormPageLayout not rendered");
 	return body;
 };
+const layoutIn = (scope: ParentNode) => {
+	const layout = scope.querySelector('[class*="CcFormPageLayout-root"]');
+	if (!layout) throw new Error("FormPageLayout not rendered");
+	return layout;
+};
 const overlayIn = (scope: ParentNode) => {
 	const overlay = scope.querySelector('[class*="CcFormLoaderOverlay-root"]');
 	if (!overlay) throw new Error("FormLoaderOverlay not rendered");
@@ -1021,11 +1026,84 @@ export const Issue3473Item11FooterFitsPhoneDialog: Story = {
 	play: async () => {
 		const screen = within(document.body);
 		await screen.findByRole("button", { name: "Back" });
-		const paperEl = screen.getByRole("dialog");
-		const paper = rectOf(paperEl);
-		const footer = rectOf(buttonBar(paperEl));
-		await expect(footer.right).toBeLessThanOrEqual(paper.right);
-		await expect(paperEl.scrollWidth).toBeLessThanOrEqual(paperEl.clientWidth);
+		const content = screen.getByTestId("content");
+		const layout = rectOf(layoutIn(content));
+		const footer = rectOf(buttonBar(content));
+		await expect(footer.left).toBeGreaterThanOrEqual(layout.left);
+		await expect(footer.right).toBeLessThanOrEqual(layout.right);
+		// the element that scrolls sideways in a dialog is its DialogContent, not the
+		// paper, which clips what sticks out
+		await expect(content.scrollWidth).toBeLessThanOrEqual(content.clientWidth);
+	},
+};
+
+/**
+ * A page whose document scrolls, with a third action button. The labels are the
+ * reported ones, long enough that the three buttons do not share a line at 320px.
+ */
+const PageWithThreeButtons = ({ dir }: { dir?: "rtl" }) => (
+	<Box dir={dir}>
+		<FormPageLayout
+			body={<Fields count={3} />}
+			footer={
+				<FormButtons>
+					<ActionButton>Speichern</ActionButton>
+					<ActionButton>Exportieren</ActionButton>
+					<ActionButton>Zurück</ActionButton>
+				</FormButtons>
+			}
+			other={<FormLoaderOverlay visible={false} />}
+		/>
+	</Box>
+);
+
+export const Issue3473Item11FooterFitsPhonePage: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-11: a page whose document scrolls, with Speichern, Exportieren and Zurück at 320px. The footer is as wide as its buttons and shifted 36px to the right, so it reaches past the layout, and focusing the last button scrolls the whole page sideways (WCAG 1.4.10).",
+			},
+		},
+	},
+	render: () => <PageWithThreeButtons />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const layout = rectOf(layoutIn(canvasElement));
+		const footer = rectOf(buttonBar(canvasElement));
+		await expect(footer.left).toBeGreaterThanOrEqual(layout.left);
+		await expect(footer.right).toBeLessThanOrEqual(layout.right);
+		canvas.getByRole("button", { name: "Zurück" }).focus();
+		await nextFrame();
+		await expect(window.scrollX).toBe(0);
+		await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+			document.documentElement.clientWidth,
+		);
+	},
+};
+
+export const Issue3473Item11FooterFitsPhonePageRtl: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-11: the same page in a right-to-left layout: the 36px shift moves the footer further right, past the layout's right edge, so the footer sticks out and the page scrolls sideways (WCAG 1.4.10).",
+			},
+		},
+	},
+	render: () => <PageWithThreeButtons dir={"rtl"} />,
+	play: async ({ canvasElement }) => {
+		const layout = rectOf(layoutIn(canvasElement));
+		const footer = rectOf(buttonBar(canvasElement));
+		await expect(footer.left).toBeGreaterThanOrEqual(layout.left);
+		await expect(footer.right).toBeLessThanOrEqual(layout.right);
+		await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+			document.documentElement.clientWidth,
+		);
 	},
 };
 
@@ -1035,14 +1113,14 @@ export const Issue3473Item11FooterButtonsWrap: Story = {
 		docs: {
 			description: {
 				story:
-					"ISSUE-3473-ITEM-11: a form page with a third button (DefaultFormPage's `extraButtons`) at 320px: the footer stays within the dialog paper, and the buttons that do not fit on its line wrap onto another instead of reaching past it.",
+					"ISSUE-3473-ITEM-11: a form in a dialog at 320px with a third button. The footer has no width limit and FormButtons keeps its buttons on one line, so the bar is wider than the dialog content and the content scrolls sideways (WCAG 1.4.10).",
 			},
 		},
 	},
 	render: () => (
 		<Dialog open maxWidth={"sm"} fullWidth aria-labelledby={"form-title"}>
 			<DialogTitle id={"form-title"}>Edit device</DialogTitle>
-			<DialogContent>
+			<DialogContent data-testid={"content"}>
 				<FormPageLayout
 					body={<Fields count={3} />}
 					footer={
@@ -1059,25 +1137,25 @@ export const Issue3473Item11FooterButtonsWrap: Story = {
 	play: async () => {
 		const screen = within(document.body);
 		await screen.findByRole("button", { name: "Back" });
-		const paperEl = screen.getByRole("dialog");
-		const paper = rectOf(paperEl);
+		const content = screen.getByTestId("content");
+		const layout = rectOf(layoutIn(content));
 		const buttons = ["Save", "Export", "Back"].map((name) => ({
 			name,
 			rect: rectOf(screen.getByRole("button", { name })),
 		}));
 		for (const { name, rect } of buttons) {
 			await expect(rect.left, `${name} left`).toBeGreaterThanOrEqual(
-				paper.left,
+				layout.left,
 			);
 			await expect(rect.right, `${name} right`).toBeLessThanOrEqual(
-				paper.right,
+				layout.right,
 			);
 		}
-		// wrapped onto more than one line rather than running out of the paper
+		// wrapped onto more than one line rather than running out of the layout
 		await expect(
 			new Set(buttons.map(({ rect }) => rect.top)).size,
 		).toBeGreaterThan(1);
-		await expect(paperEl.scrollWidth).toBeLessThanOrEqual(paperEl.clientWidth);
+		await expect(content.scrollWidth).toBeLessThanOrEqual(content.clientWidth);
 	},
 };
 

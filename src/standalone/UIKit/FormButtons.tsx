@@ -44,10 +44,6 @@ export interface FormButtonsProps {
 	classes?: Partial<Record<FormButtonsClassKey, string>>;
 }
 
-/**
- * A bar of form action buttons, each in its own slot, in order. The buttons share
- * one line and wrap onto further lines when they do not fit, as on a 320px phone.
- */
 const FormButtons = (inProps: FormButtonsProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcFormButtons" });
 	// flat, without null, undefined and booleans, each element keyed by its own key
@@ -78,4 +74,8 @@ const FormButtons = (inProps: FormButtonsProps) => {
 	);
 };
 
+/**
+ * A bar of form action buttons, each in its own slot, in order. The buttons share
+ * one line and wrap onto further lines when they do not fit, as on a 320px phone.
+ */
 export default React.memo(FormButtons);
