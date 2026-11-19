@@ -335,6 +335,63 @@ describe("LazyConnector workQueue", () => {
 	});
 });
 
+describe("LazyConnector deleteAdvanced", () => {
+	/**
+	 * A connector whose advanced delete logs the request it is sent, with the ids it would
+	 * give the backend
+	 */
+	const makeAdvancedDeletingConnector = () => {
+		const { connector, calls } = makeRealConnector();
+		(
+			connector as unknown as {
+				deleteAdvanced: (req: AdvancedDeleteRequest) => Promise<unknown>;
+			}
+		).deleteAdvanced = vi.fn(([invert, ids]: AdvancedDeleteRequest) => {
+			calls.push(`deleteAdvanced:${String(invert)}:${ids.join("+")}`);
+			return Promise.resolve();
+		});
+		return { lazy: new LazyConnector(connector, true), calls };
+	};
+
+	const filter = {
+		quickFilter: "",
+		additionalFilters: {},
+		fieldFilter: {},
+	};
+
+	it("[ISSUE-3505-ITEM-21] an inverted deleteAdvanced queued after a create excludes the created record by its server id", async () => {
+		const { lazy, calls } = makeAdvancedDeletingConnector();
+
+		const [created] = lazy.create({ name: "a" }, undefined);
+		const fakeId = (created as Record<"id", string>).id;
+		// everything the filter matches, except the record created in this batch
+		const request: AdvancedDeleteRequest = [true, [fakeId], filter];
+		void lazy.deleteAdvanced!(request, undefined);
+		await lazy.workQueue();
+
+		// the id the create handed out means nothing to the backend: the request has to
+		// name the record by the id its create got when that ran, or the backend keeps
+		// nothing out and deletes what was just created
+		expect(lazy.mapId(fakeId)).toBe("real-a");
+		expect(calls).toStrictEqual(["create:a", "deleteAdvanced:true:real-a"]);
+		// the caller's request still names the record as the caller knows it
+		expect(request).toStrictEqual([true, [fakeId], filter]);
+	});
+
+	it("[ISSUE-3505-ITEM-21] an advanced delete queued after a create names the created record by its server id", async () => {
+		const { lazy, calls } = makeAdvancedDeletingConnector();
+
+		const [created] = lazy.create({ name: "a" }, undefined);
+		const fakeId = (created as Record<"id", string>).id;
+		void lazy.deleteAdvanced!([false, [fakeId], filter], undefined);
+		await lazy.workQueue();
+
+		// deleting the record the batch just created reaches it: the fake id would match
+		// nothing on the backend
+		expect(calls).toStrictEqual(["create:a", "deleteAdvanced:false:real-a"]);
+	});
+});
+
 describe("LazyConnector update", () => {
 	/**
 	 * A real connector whose updates are logged with the data they carry

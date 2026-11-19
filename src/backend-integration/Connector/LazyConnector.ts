@@ -332,8 +332,8 @@ class LazyConnector extends Connector {
 		req: AdvancedDeleteRequest,
 		model?: ModelUnknown,
 	): void => {
-		if (!this.realConnector.deleteAdvanced)
-			throw new Error("deleteAdvanced got undefined!");
+		const deleteAdvanced = this.realConnector.deleteAdvanced;
+		if (!deleteAdvanced) throw new Error("deleteAdvanced got undefined!");
 		// the ids as the queue and the backend know them, in a copy: the caller's request
 		// keeps naming the records the way the caller does
 		const ids = req[1].map((id) => this.mapId(id));
@@ -351,24 +351,33 @@ class LazyConnector extends Connector {
 					!id.startsWith(this.FAKE_ID_PREFIX) ||
 					this.queue.find((entry) => entry.id === id),
 			);
-			req[1] = req[1].filter(
-				(id) =>
-					!id.startsWith(this.FAKE_ID_PREFIX) ||
-					this.queue.find((entry) => entry.id === id),
-			);
 			if (!invert && req[1].length === 0) {
 				this.onAfterOperation();
 				return;
 			}
 		}
+		/**
+		 * The request with its ids as the backend knows them, keeping its length so a
+		 * connector can tell a request without a filter from one with
+		 */
+		const mapRequest = (
+			request: AdvancedDeleteRequest,
+		): AdvancedDeleteRequest =>
+			request.length === 2
+				? [request[0], request[1].map((id) => this.mapId(id))]
+				: [request[0], request[1].map((id) => this.mapId(id)), request[2]];
+		const queuedRequest = req;
 		this.queue.push({
 			type: "delete",
 			id: null,
-			func: this.realConnector.deleteAdvanced.bind(
-				this.realConnector,
-				req,
-				model,
-			),
+			// a record created in this batch has no server id when its delete is queued,
+			// so the ids are mapped again when the request is sent, as update does
+			func: () =>
+				deleteAdvanced.call(
+					this.realConnector,
+					mapRequest(queuedRequest),
+					model,
+				),
 			result: null,
 		});
 		this.onAfterOperation();
