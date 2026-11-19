@@ -131,6 +131,17 @@ const searchInput = () => {
 };
 const noLocalesText = () =>
 	ccI18n.t("non-standalone.language-switcher.no-locales");
+/**
+ * The dialog's search status. The dialog has two status regions: the search's, which
+ * always has a text, and the busy overlay's, which is empty until a locale is picked
+ */
+const searchStatus = () => {
+	const statuses = within(screen.getByRole("dialog"))
+		.getAllByRole("status")
+		.filter((status) => status.textContent !== "");
+	expect(statuses).toHaveLength(1);
+	return statuses[0];
+};
 
 type ChangeLanguage = typeof ccI18n.changeLanguage;
 /** replaces ccI18n.changeLanguage with a call that stays pending until released */
@@ -698,9 +709,7 @@ describe("LocaleSelectorDialog", () => {
 			open(<LocaleSelectorDialog supportedLocales={DE} />);
 			await waitRows();
 			await search("xyz");
-			expect(
-				within(screen.getByRole("dialog")).getByRole("status"),
-			).toHaveTextContent(noLocalesText());
+			expect(searchStatus()).toHaveTextContent(noLocalesText());
 		});
 
 		it("[ISSUE-3499-ITEM-3] the status region states the number of rows, and stays the same element while the search changes", async () => {
@@ -708,7 +717,7 @@ describe("LocaleSelectorDialog", () => {
 			open(<LocaleSelectorDialog supportedLocales={DE} />);
 			await waitRows();
 			// a live region announces changes of its text, not its insertion
-			const status = within(screen.getByRole("dialog")).getByRole("status");
+			const status = searchStatus();
 			const all = rows()[0].getAttribute("aria-setsize");
 			expect(Number(all)).toBeGreaterThan(1);
 			expect(status.textContent).toBe(`Results: ${all}`);
@@ -719,9 +728,7 @@ describe("LocaleSelectorDialog", () => {
 			expect(status.textContent).toBe(noLocalesText());
 			await search("");
 			expect(status.textContent).toBe(`Results: ${all}`);
-			expect(within(screen.getByRole("dialog")).getByRole("status")).toBe(
-				status,
-			);
+			expect(searchStatus()).toBe(status);
 		});
 	});
 });

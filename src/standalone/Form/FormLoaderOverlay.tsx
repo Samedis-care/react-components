@@ -1,6 +1,8 @@
-import React, { useLayoutEffect, useRef } from "react";
-import Loader from "../Loader";
+import React, { useId, useLayoutEffect, useRef } from "react";
 import { styled, useThemeProps } from "@mui/material";
+import { useTranslation } from "react-i18next";
+import Loader from "../Loader";
+import ccI18n from "../../i18n";
 
 export interface FormLoaderOverlayRootOwnerState {
 	visible: boolean;
@@ -74,6 +76,37 @@ const FormLoaderOverlayContent = styled("div", {
 	slot: "content",
 })({});
 
+// the status message: outside the wash, which is `visibility: hidden` while the overlay
+// is idle and would take it out of the accessibility tree, so that it stays the same
+// element in the tree and only its text changes (a live region that appears together
+// with its text is not announced by every screen reader)
+const FormLoaderOverlayStatus = styled("div", {
+	name: "CcFormLoaderOverlay",
+	slot: "status",
+})({
+	// visually hidden, as MUI's visuallyHidden
+	border: 0,
+	clipPath: "inset(50%)",
+	height: 1,
+	margin: -1,
+	overflow: "hidden",
+	padding: 0,
+	position: "absolute",
+	whiteSpace: "nowrap",
+	width: 1,
+});
+
+/**
+ * The default status message while the library's translations are still loading
+ */
+const DEFAULT_MESSAGE = "Loading…";
+
+/**
+ * The overlay does not suspend, like the Loader it shows: until the translations have
+ * loaded it uses {@link DEFAULT_MESSAGE}, then re-renders
+ */
+const TRANSLATION_OPTIONS = { i18n: ccI18n, useSuspense: false };
+
 /**
  * Theme style slots of {@link FormLoaderOverlay}
  * (`components.CcFormLoaderOverlay.styleOverrides.<slot>`):
@@ -81,14 +114,19 @@ const FormLoaderOverlayContent = styled("div", {
  *   container)
  * - `loaderAnchor`: a line of zero height inside the wash, `position: sticky` in the
  *   middle of the visible area, that the spinner is centered on
- * - `loader`: the spinner (a Loader)
+ * - `loader`: the spinner (a Loader). It is no status region of its own
+ *   (`role="none"`): the `status` slot is, and its message names the spinner
  * - `container`: with `children` only, the `position: relative` block around the
  *   content and the wash
  * - `content`: with `children` only, the block around the children that is `inert`
- *   while the overlay is visible
+ *   and `aria-busy` while the overlay is visible
+ * - `status`: the status region (`role="status"`) with the `message` while the
+ *   overlay is visible, visually hidden. It is rendered also while the overlay is
+ *   not visible, outside the wash: right after it, inside the container with
+ *   `children`
  */
 export type FormLoaderOverlayClassKey =
-	"root" | "loaderAnchor" | "loader" | "container" | "content";
+	"root" | "loaderAnchor" | "loader" | "container" | "content" | "status";
 
 export interface FormLoaderOverlayProps {
 	/**
@@ -100,16 +138,28 @@ export interface FormLoaderOverlayProps {
 	 */
 	className?: string;
 	/**
+	 * The status message that screen readers announce while the overlay is visible,
+	 * already translated, such as "The form is currently being saved" (BasicFormPage)
+	 * or "Importing devices…". It is not shown on screen: it is the text of the
+	 * overlay's status region (slot `status`), and it names the spinner's
+	 * progressbar. It is announced when `visible` turns true (at once, not only when
+	 * the wash fades in), and again when it changes while the overlay is visible.
+	 * Without it (`undefined` or `""`), the message is "Loading…" in the library's
+	 * current language.
+	 * @default "Loading…", translated
+	 */
+	message?: string;
+	/**
 	 * The content the overlay covers. With `children`, the overlay wraps them: it
 	 * renders a `position: relative` container (slot `container`) that holds the
 	 * children in a block of their own (slot `content`) and the wash over them, so
 	 * the wash covers the children and nothing else.
 	 *
-	 * While `visible`, the content is `inert`: pointer and keyboard reach none of its
-	 * controls, and assistive technology skips it. If keyboard focus is in the content
-	 * when `visible` turns true, it moves to the wash; when `visible` turns false, it
-	 * goes back to the element that had it, unless it was moved out of the wash
-	 * meanwhile or that element is gone.
+	 * While `visible`, the content is `inert` and `aria-busy`: pointer and keyboard
+	 * reach none of its controls, and assistive technology skips it. If keyboard focus
+	 * is in the content when `visible` turns true, it moves to the wash; when `visible`
+	 * turns false, it goes back to the element that had it, unless it was moved out of
+	 * the wash meanwhile or that element is gone.
 	 *
 	 * Without `children` (`undefined`), the overlay is the wash alone, over the nearest
 	 * positioned ancestor, and makes nothing inert (see {@link FormLoaderOverlay}).
@@ -120,8 +170,12 @@ export interface FormLoaderOverlayProps {
 
 const FormLoaderOverlay = (inProps: FormLoaderOverlayProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcFormLoaderOverlay" });
-	const { visible, className, children } = props;
+	const { visible, className, message, children } = props;
 	const wraps = children !== undefined;
+	const { t, ready } = useTranslation("translation", TRANSLATION_OPTIONS);
+	const statusMessage =
+		message || (ready ? t("standalone.loader.label") : DEFAULT_MESSAGE);
+	const statusId = useId();
 
 	const rootRef = useRef<HTMLDivElement>(null);
 	const contentRef = useRef<HTMLDivElement>(null);
@@ -156,6 +210,8 @@ const FormLoaderOverlay = (inProps: FormLoaderOverlayProps) => {
 		returnFocus.focus();
 	}, [visible, wraps]);
 
+	// the status region below is the overlay's one status: the Loader in the wash is no
+	// status region of its own, and the message names its spinner
 	const overlay = (
 		<FormLoaderOverlayRoot
 			ref={rootRef}
@@ -165,18 +221,35 @@ const FormLoaderOverlay = (inProps: FormLoaderOverlayProps) => {
 		>
 			{visible && (
 				<FormLoaderOverlayLoaderAnchor>
-					<FormLoaderOverlayLoader />
+					<FormLoaderOverlayLoader role={"none"} aria-labelledby={statusId} />
 				</FormLoaderOverlayLoaderAnchor>
 			)}
 		</FormLoaderOverlayRoot>
 	);
-	if (!wraps) return overlay;
+	const status = (
+		// not busy itself, so that a screen reader that holds back the messages of a busy
+		// area (an aria-busy form around the overlay) still announces this one
+		<FormLoaderOverlayStatus id={statusId} role={"status"} aria-busy={false}>
+			{visible ? statusMessage : ""}
+		</FormLoaderOverlayStatus>
+	);
+	if (!wraps)
+		return (
+			<>
+				{overlay}
+				{status}
+			</>
+		);
 	return (
 		<FormLoaderOverlayContainer>
-			<FormLoaderOverlayContent ref={contentRef}>
+			<FormLoaderOverlayContent
+				ref={contentRef}
+				aria-busy={visible || undefined}
+			>
 				{children}
 			</FormLoaderOverlayContent>
 			{overlay}
+			{status}
 		</FormLoaderOverlayContainer>
 	);
 };
@@ -197,6 +270,17 @@ const FormLoaderOverlay = (inProps: FormLoaderOverlayProps) => {
  * operable by keyboard under the wash. With no positioned ancestor, the wash covers the
  * initial viewport, and the page under it stays operable by keyboard.
  *
+ * Accessibility: the overlay is a polite status message. Its status region
+ * (`role="status"`, slot `status`, visually hidden) is rendered whether the overlay is
+ * visible or not, so that screen readers know it before it speaks. While `visible`,
+ * its text is `message` ("Loading…" by default), which is announced when `visible`
+ * turns true: at once, as the controls a form makes read-only while it is busy change
+ * at once too, not only when the wash fades in. When `visible` turns false the text is
+ * emptied, which is not announced. The spinner's progressbar is named by the message;
+ * the spinner is no status region of its own. With `children`, the wrapped content is
+ * `aria-busy` while visible. Without `children`, mark the busy area yourself
+ * (`aria-busy="true"`); Form does so on its `<form>` while it submits.
+ *
  * The spinner is kept on the middle line of the visible area of the nearest scroll
  * container (or the viewport), as far as the wash reaches: on a wash taller than
  * what is shown of it, such as a long form scrolled to any point, the spinner stays
@@ -215,7 +299,7 @@ const FormLoaderOverlay = (inProps: FormLoaderOverlayProps) => {
  *
  * @example
  * // the import form is inert while it is busy; the steps' buttons below stay usable
- * <FormLoaderOverlay visible={busy}>
+ * <FormLoaderOverlay visible={busy} message={t("import.busy")}>
  * 	<ImportForm />
  * </FormLoaderOverlay>
  * <StepButtons />

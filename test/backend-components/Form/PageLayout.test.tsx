@@ -139,6 +139,54 @@ const editAndSave = async (input: HTMLElement) => {
 };
 
 describe("FormPageLayout and FormLoaderOverlay in a form page", () => {
+	it("[ISSUE-3473-ITEM-7] announces the save in a status region while the form is submitting", async () => {
+		const model = createTestModel();
+		const updates = holdUpdates(model);
+		renderPage(model);
+		const input = await screen.findByDisplayValue("Alice", undefined, LOAD);
+
+		await editAndSave(input);
+		await waitFor(() =>
+			expect(within(onlyOverlay()).getByRole("progressbar")).toBeVisible(),
+		);
+		const statuses = screen.queryAllByRole("status");
+		expect(
+			statuses.some((s) => /\S/.test(s.textContent ?? "")),
+			"no status region with a message while saving",
+		).toBe(true);
+		updates.release();
+		await act(async () => {});
+	});
+
+	it("[ISSUE-3473-ITEM-7] marks the form busy while it saves and says that it is being saved, then falls silent", async () => {
+		const model = createTestModel();
+		const updates = holdUpdates(model);
+		const { container } = renderPage(model);
+		const input = await screen.findByDisplayValue("Alice", undefined, LOAD);
+		const form = container.querySelector("form")!;
+		const status = screen.getByRole("status");
+		expect(form).not.toHaveAttribute("aria-busy");
+		expect(status).toHaveTextContent(/^$/);
+
+		await editAndSave(input);
+		await waitFor(() =>
+			expect(within(onlyOverlay()).getByRole("progressbar")).toBeVisible(),
+		);
+		expect(form).toHaveAttribute("aria-busy", "true");
+		expect(screen.getByRole("status")).toBe(status);
+		expect(status).toHaveTextContent(/^The form is currently being saved$/);
+		expect(screen.getByRole("progressbar")).toHaveAccessibleName(
+			"The form is currently being saved",
+		);
+		// not busy itself, so that the busy form around it does not hold it back
+		expect(status).toHaveAttribute("aria-busy", "false");
+
+		updates.release();
+		await act(async () => {});
+		await waitFor(() => expect(form).not.toHaveAttribute("aria-busy"));
+		expect(status).toHaveTextContent(/^$/);
+	});
+
 	it("[ISSUE-3473-ITEM-10] keeps keyboard focus in the form page when Save is pressed", async () => {
 		const user = userEvent.setup();
 		const model = createTestModel();

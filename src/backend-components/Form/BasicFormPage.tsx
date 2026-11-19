@@ -289,7 +289,12 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 					)
 				}
 				other={
-					childActive ? undefined : <FormLoaderOverlay visible={isSubmitting} />
+					childActive ? undefined : (
+						<FormLoaderOverlay
+							visible={isSubmitting}
+							message={t("backend-components.form.read-only.submitting")}
+						/>
+					)
 				}
 			/>
 		</BasicFormPageNestingContext.Provider>

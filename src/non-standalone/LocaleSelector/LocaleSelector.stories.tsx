@@ -157,7 +157,13 @@ export const Issue3499Item3SearchBoxIsNamed: Story = {
 		const input = within(dialog).getByRole("textbox");
 		await expect(input).toHaveAccessibleName("Search");
 		await expect(input).toHaveAttribute("placeholder", "Search");
-		const status = within(dialog).getByRole("status");
+		// the search's status region; the dialog's other one, the busy overlay's, is
+		// empty until a locale is picked
+		const statuses = within(dialog)
+			.getAllByRole("status")
+			.filter((region) => region.textContent !== "");
+		await expect(statuses).toHaveLength(1);
+		const status = statuses[0];
 		await expect(status).toHaveTextContent(/^Results: 220$/);
 		await userEvent.type(input, "xyz");
 		await expect(status).toHaveTextContent(

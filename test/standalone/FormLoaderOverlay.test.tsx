@@ -49,6 +49,64 @@ describe("FormLoaderOverlay", () => {
 		expect(styled.some((el) => el.contains(progressbar))).toBe(true);
 	});
 
+	it("[ISSUE-3473-ITEM-7] exposes the visible overlay as a status message", () => {
+		const { rerender } = renderOverlay(<FormLoaderOverlay visible={false} />);
+		rerender(withTheme(<FormLoaderOverlay visible />));
+		expect(screen.getByRole("status")).toHaveTextContent(/\S/);
+	});
+
+	it("[ISSUE-3473-ITEM-7] keeps its status region in the accessibility tree while hidden, and changes only its text", () => {
+		const { rerender } = renderOverlay(<FormLoaderOverlay visible={false} />);
+		// a live region announces a change of its text, not its insertion: it has to be
+		// there, empty, before the overlay shows
+		const status = screen.getByRole("status");
+		expect(status).toHaveTextContent(/^$/);
+		rerender(withTheme(<FormLoaderOverlay visible />));
+		expect(screen.getByRole("status")).toBe(status);
+		expect(status).toHaveTextContent(/^Loading…$/);
+		rerender(withTheme(<FormLoaderOverlay visible={false} />));
+		expect(screen.getByRole("status")).toBe(status);
+		expect(status).toHaveTextContent(/^$/);
+	});
+
+	it("[ISSUE-3473-ITEM-7] states the message it is given, which names the spinner, in its only status region", () => {
+		const { rerender } = renderOverlay(
+			<FormLoaderOverlay visible message={"Importing devices…"} />,
+		);
+		const status = screen.getByRole("status");
+		expect(status).toHaveTextContent(/^Importing devices…$/);
+		expect(screen.getByRole("progressbar")).toHaveAccessibleName(
+			"Importing devices…",
+		);
+		rerender(
+			withTheme(<FormLoaderOverlay visible message={"Checking devices…"} />),
+		);
+		expect(screen.getByRole("status")).toBe(status);
+		expect(status).toHaveTextContent(/^Checking devices…$/);
+		expect(screen.getByRole("progressbar")).toHaveAccessibleName(
+			"Checking devices…",
+		);
+	});
+
+	it("[ISSUE-3473-ITEM-7] marks the children busy while visible, and keeps its status region outside them", () => {
+		const Step = ({ visible }: { visible: boolean }) => (
+			<FormLoaderOverlay visible={visible}>
+				<button>Start</button>
+			</FormLoaderOverlay>
+		);
+		const { rerender } = renderOverlay(<Step visible={false} />);
+		const start = screen.getByRole("button", { name: "Start" });
+		const busy = (el: Element) => el.closest('[aria-busy="true"]') !== null;
+		expect(busy(start)).toBe(false);
+		rerender(withTheme(<Step visible />));
+		expect(busy(start)).toBe(true);
+		const status = screen.getByRole("status");
+		expect(status).toHaveTextContent(/\S/);
+		expect([busy(status), status.closest("[inert]")]).toEqual([false, null]);
+		rerender(withTheme(<Step visible={false} />));
+		expect(busy(start)).toBe(false);
+	});
+
 	it("[ISSUE-3473-ITEM-6] exports FormLoaderOverlay from the package root", async () => {
 		const root = (await import("../../src")) as Record<string, unknown>;
 		expect(

@@ -620,7 +620,10 @@ export interface FormContextData<
 	 */
 	readOnlyReasons: Partial<Record<"form-legacy" | string, string | null>>;
 	/**
-	 * Is the form being submitted
+	 * Is the form being submitted, or busy (see addBusyReason)? While it is, the form's
+	 * root element (the `<form>`, or the `<div>` of a nested form and with
+	 * `renderFormAsDiv`) has `aria-busy="true"`, which tells assistive technology that
+	 * its content is changing.
 	 */
 	submitting: boolean;
 	/**
@@ -2689,6 +2692,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 					<StyledForm
 						onSubmit={handleSubmit}
 						className={formClass}
+						aria-busy={submitting || undefined}
 						data-form-submitting={submitting}
 						data-form-dirty={dirty}
 						data-form-recordid={id}
@@ -2699,6 +2703,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 				) : (
 					<StyledFormDiv
 						className={formClass}
+						aria-busy={submitting || undefined}
 						data-form-submitting={submitting}
 						data-form-dirty={dirty}
 						data-form-recordid={id}

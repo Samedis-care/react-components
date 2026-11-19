@@ -42,6 +42,11 @@ const overlayMeta: Meta<typeof WrappedFormLoaderOverlay> = {
 	parameters: { layout: "centered" },
 	argTypes: {
 		visible: { control: "boolean" },
+		message: {
+			control: "text",
+			description:
+				'The status message screen readers announce while the overlay is visible, already translated; not shown on screen. "Loading…" (translated) without it.',
+		},
 	},
 };
 export default overlayMeta;
@@ -190,6 +195,28 @@ export const Issue3473Item3BusyOverlayCoversRaisedContent: OverlayStory = {
 			label: covered(label),
 			buttonBar: covered(canvas.getByRole("button", { name: "Save" })),
 		}).toEqual({ label: true, buttonBar: true });
+	},
+};
+
+export const Issue3473Item7BusyOverlayIsNamed: OverlayStory = {
+	args: { visible: true, message: "Importing devices…" },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-7: the visible overlay is a polite status message: its status region, visually hidden, says the `message`, which also names the spinner's progressbar (axe `aria-progressbar-name`).",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(canvas.getByRole("status")).toHaveTextContent(
+			/^Importing devices…$/,
+		);
+		await expect(canvas.getByRole("progressbar")).toHaveAccessibleName(
+			"Importing devices…",
+		);
 	},
 };
 
