@@ -44,6 +44,10 @@ export interface FormButtonsProps {
 	classes?: Partial<Record<FormButtonsClassKey, string>>;
 }
 
+/**
+ * A bar of form action buttons, each in its own slot, in order. The buttons share
+ * one line and wrap onto further lines when they do not fit, as on a 320px phone.
+ */
 const FormButtons = (inProps: FormButtonsProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcFormButtons" });
 	// flat, without null, undefined and booleans, each element keyed by its own key
@@ -57,7 +61,9 @@ const FormButtons = (inProps: FormButtonsProps) => {
 			container
 			direction="row"
 			spacing={2}
-			wrap={"nowrap"}
+			// buttons that do not fit on one line wrap onto the next, rather than
+			// running out of their container (a form page's footer on a 320px phone)
+			wrap={"wrap"}
 			className={combineClassNames([props.classes?.root, props.className])}
 		>
 			{children.map((child, index) => (

@@ -84,12 +84,14 @@ const Footer = styled("div", { name: "CcFormPageLayout", slot: "footer" })({
 	position: "sticky",
 	bottom: 36,
 	flexShrink: 0,
-	// as wide as its buttons
+	// as wide as its buttons, but never wider than the layout: on a narrow screen the
+	// buttons wrap inside it (FormButtons) instead of the bar sticking out of its
+	// container and making the page scroll sideways
 	alignSelf: "flex-start",
+	maxWidth: "100%",
 	// 30px between the body's content and the footer, plus the up to 36px the footer
 	// is lifted by where the layout ends at the bottom of the visible area
 	margin: "66px 0 0",
-	transform: "translateX(36px)",
 	padding: 0,
 	// a footer that renders nothing (a FormButtons without a button left) keeps no
 	// space below the body
@@ -227,7 +229,7 @@ const FormPageLayout = (inProps: FormPageLayoutProps) => {
  * flex column it grows into the space the other children leave (`flex-grow: 1`), and
  * as the only element of a parent of definite height it is at least as tall as that
  * parent (`min-height: 100%`). The body grows, and the footer follows it at the
- * bottom of the layout, 36px right of its start. The footer is `position: sticky`
+ * bottom of the layout. The footer is `position: sticky`
  * with `bottom: 36px`, so it never sits lower than 36px above the bottom of the
  * visible area of whatever scrolls (the scroll container's content area, inside its
  * padding, or the viewport):

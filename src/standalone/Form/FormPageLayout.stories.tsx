@@ -34,6 +34,8 @@ export default meta;
 
 type Story = StoryObj<typeof FormPageLayout>;
 
+const MOBILE = { viewport: { value: "mobile1", isRotated: false } };
+
 export const Default: Story = {
 	render: () => (
 		<Box
@@ -1002,6 +1004,80 @@ export const Issue3473Item9FooterInFlowOnShortScreen: Story = {
 		await expect(
 			distance(rectOf(buttonBar(mainEl)).bottom, main.bottom - 36),
 		).toBeLessThanOrEqual(EPS);
+	},
+};
+
+export const Issue3473Item11FooterFitsPhoneDialog: Story = {
+	globals: MOBILE,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-11: at 320px the footer is shifted 36px to the right and sticks out of the dialog paper, which then scrolls sideways (WCAG 1.4.10).",
+			},
+		},
+	},
+	render: () => <DialogForm count={3} />,
+	play: async () => {
+		const screen = within(document.body);
+		await screen.findByRole("button", { name: "Back" });
+		const paperEl = screen.getByRole("dialog");
+		const paper = rectOf(paperEl);
+		const footer = rectOf(buttonBar(paperEl));
+		await expect(footer.right).toBeLessThanOrEqual(paper.right);
+		await expect(paperEl.scrollWidth).toBeLessThanOrEqual(paperEl.clientWidth);
+	},
+};
+
+export const Issue3473Item11FooterButtonsWrap: Story = {
+	globals: MOBILE,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-11: a form page with a third button (DefaultFormPage's `extraButtons`) at 320px: the footer stays within the dialog paper, and the buttons that do not fit on its line wrap onto another instead of reaching past it.",
+			},
+		},
+	},
+	render: () => (
+		<Dialog open maxWidth={"sm"} fullWidth aria-labelledby={"form-title"}>
+			<DialogTitle id={"form-title"}>Edit device</DialogTitle>
+			<DialogContent>
+				<FormPageLayout
+					body={<Fields count={3} />}
+					footer={
+						<FormButtons>
+							<ActionButton>Save</ActionButton>
+							<ActionButton>Export</ActionButton>
+							<ActionButton>Back</ActionButton>
+						</FormButtons>
+					}
+				/>
+			</DialogContent>
+		</Dialog>
+	),
+	play: async () => {
+		const screen = within(document.body);
+		await screen.findByRole("button", { name: "Back" });
+		const paperEl = screen.getByRole("dialog");
+		const paper = rectOf(paperEl);
+		const buttons = ["Save", "Export", "Back"].map((name) => ({
+			name,
+			rect: rectOf(screen.getByRole("button", { name })),
+		}));
+		for (const { name, rect } of buttons) {
+			await expect(rect.left, `${name} left`).toBeGreaterThanOrEqual(
+				paper.left,
+			);
+			await expect(rect.right, `${name} right`).toBeLessThanOrEqual(
+				paper.right,
+			);
+		}
+		// wrapped onto more than one line rather than running out of the paper
+		await expect(
+			new Set(buttons.map(({ rect }) => rect.top)).size,
+		).toBeGreaterThan(1);
+		await expect(paperEl.scrollWidth).toBeLessThanOrEqual(paperEl.clientWidth);
 	},
 };
 
