@@ -8,6 +8,7 @@ import {
 	useThemeProps,
 } from "@mui/material";
 import focusRing from "../../utils/internal/focusRing";
+import wrapperRootShouldForwardProp from "../../utils/internal/wrapperRootShouldForwardProp";
 
 /**
  * Theme style slots of {@link PopupMenu}
@@ -16,41 +17,43 @@ import focusRing from "../../utils/internal/focusRing";
  * paper through `"& .MuiMenu-paper"`.
  */
 export type PopupMenuClassKey = "root";
-const PopupMenuRoot = styled(Menu, { name: "CcPopupMenu", slot: "root" })(
-	({ theme }) => ({
-		"& .MuiMenu-paper": {
-			border: `1px solid ${theme.palette.divider}`,
-			// as wide as the widest item, up to MUI's max-width: MUI measures the paper
-			// where it sat before, so with wrapping labels a menu kept mounted would
-			// shrink to the room between that spot and the window's right edge
-			width: "max-content",
-		},
-		// MUI's items don't wrap and the paper clips them, so a label wider than the
-		// screen allows was cut off; it wraps inside the paper instead
-		[`& .${menuItemClasses.root}`]: {
-			whiteSpace: "normal",
-			// a word too long for a line breaks where it has to. The item is a flex
-			// container, so its own text (the label of every library menu) can't get
-			// narrower than its longest word unless that word may break anywhere;
-			// "break-word" doesn't lower that minimum
-			overflowWrap: "anywhere",
-		},
-		// its elements break a word only when it doesn't fit on a line of its own:
-		// each one stays as wide as its longest word, so a shortcut hint beside a
-		// long label isn't broken mid-word, while a ListItemText label (min-width 0)
-		// gets narrower and breaks its too-long word
-		[`& .${menuItemClasses.root} > *`]: {
-			overflowWrap: "break-word",
-		},
-		// MUI marks the keyboard-focused item with a faint tint only (unless the theme
-		// sets its focusVisible ring), which forced colors drop; inset, because the
-		// paper clips the item's sides
-		[`& .${menuItemClasses.root}.${menuItemClasses.focusVisible}`]: focusRing(
-			theme,
-			-2,
-		),
-	}),
-) as typeof Menu;
+const PopupMenuRoot = styled(Menu, {
+	name: "CcPopupMenu",
+	slot: "root",
+	shouldForwardProp: wrapperRootShouldForwardProp,
+})(({ theme }) => ({
+	"& .MuiMenu-paper": {
+		border: `1px solid ${theme.palette.divider}`,
+		// as wide as the widest item, up to MUI's max-width: MUI measures the paper
+		// where it sat before, so with wrapping labels a menu kept mounted would
+		// shrink to the room between that spot and the window's right edge
+		width: "max-content",
+	},
+	// MUI's items don't wrap and the paper clips them, so a label wider than the
+	// screen allows was cut off; it wraps inside the paper instead
+	[`& .${menuItemClasses.root}`]: {
+		whiteSpace: "normal",
+		// a word too long for a line breaks where it has to. The item is a flex
+		// container, so its own text (the label of every library menu) can't get
+		// narrower than its longest word unless that word may break anywhere;
+		// "break-word" doesn't lower that minimum
+		overflowWrap: "anywhere",
+	},
+	// its elements break a word only when it doesn't fit on a line of its own:
+	// each one stays as wide as its longest word, so a shortcut hint beside a
+	// long label isn't broken mid-word, while a ListItemText label (min-width 0)
+	// gets narrower and breaks its too-long word
+	[`& .${menuItemClasses.root} > *`]: {
+		overflowWrap: "break-word",
+	},
+	// MUI marks the keyboard-focused item with a faint tint only (unless the theme
+	// sets its focusVisible ring), which forced colors drop; inset, because the
+	// paper clips the item's sides
+	[`& .${menuItemClasses.root}.${menuItemClasses.focusVisible}`]: focusRing(
+		theme,
+		-2,
+	),
+})) as typeof Menu;
 
 type TransitionSlotProps = NonNullable<MenuProps["slotProps"]>["transition"];
 type TransitionOnEntering = (node: HTMLElement, isAppearing: boolean) => void;

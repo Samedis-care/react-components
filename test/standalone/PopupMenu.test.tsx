@@ -152,6 +152,44 @@ describe("[ISSUE-3459-ITEM-14] PopupMenu theme slot", () => {
 	});
 });
 
+describe("[ISSUE-3459-ITEM-17] PopupMenu classes", () => {
+	it("[ISSUE-3459-ITEM-17] puts each key of its classes prop on the Menu's element", () => {
+		wrap(
+			<PopupMenu
+				open
+				anchorEl={anchor}
+				classes={{ root: "x-root", paper: "x-paper", list: "x-list" }}
+			>
+				{items}
+			</PopupMenu>,
+		);
+		const list = screen.getByRole("menu");
+		const paper = list.closest(".MuiMenu-paper")!;
+		const root = paper.closest(".MuiMenu-root")!;
+		expect({
+			root: root.classList.contains("x-root"),
+			paper: paper.classList.contains("x-paper"),
+			list: list.classList.contains("x-list"),
+		}).toEqual({ root: true, paper: true, list: true });
+	});
+
+	it("[ISSUE-3459-ITEM-17] puts the classes of the theme's CcPopupMenu default props on the Menu's paper", () => {
+		const themed = createTheme({
+			components: {
+				CcPopupMenu: { defaultProps: { classes: { paper: "x-theme-paper" } } },
+			},
+		});
+		wrap(
+			<PopupMenu open anchorEl={anchor}>
+				{items}
+			</PopupMenu>,
+			themed,
+		);
+		const paper = screen.getByRole("menu").closest(".MuiMenu-paper");
+		expect(paper).toHaveClass("x-theme-paper");
+	});
+});
+
 // importing the whole package (or the DataGrid) takes ~20s in jsdom
 const importTimeout = 90000;
 
