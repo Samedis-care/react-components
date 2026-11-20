@@ -43,10 +43,11 @@ const SignaturePadCanvas = (
 		...dialogProps
 	} = props;
 	const [pushDialog] = useDialogContext();
+	// the tile calls it only while enabled, so a disabled default in the theme's
+	// CcSignPad props keeps the dialog closed too
 	const showSignDialog = useCallback(() => {
-		if (disabled) return;
 		pushDialog(<SignDialog signature={signature} {...dialogProps} />);
-	}, [pushDialog, disabled, signature, dialogProps]);
+	}, [pushDialog, signature, dialogProps]);
 	return (
 		<SignPad
 			openSignPad={showSignDialog}

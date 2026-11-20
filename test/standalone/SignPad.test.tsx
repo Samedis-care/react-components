@@ -29,6 +29,78 @@ const rootOf = (container: HTMLElement) => {
 };
 
 describe("SignPad tile", () => {
+	it("[ISSUE-3467-ITEM-6] a disabled tile does not call openSignPad", () => {
+		const open = vi.fn();
+		const { container } = render(
+			<SignPad signature={null} disabled openSignPad={open} />,
+		);
+		fireEvent.click(rootOf(container));
+		expect(
+			open,
+			"openSignPad called on a disabled tile",
+		).not.toHaveBeenCalled();
+	});
+	it("[ISSUE-3467-ITEM-6] a disabled tile opens nothing by click, Enter or Space, signed or not, and opens again once enabled; its info button keeps working", async () => {
+		const user = userEvent.setup();
+		const open = vi.fn();
+		const info = vi.fn();
+		const { container, rerender } = render(
+			<SignPad signature={null} disabled openSignPad={open} openInfo={info} />,
+		);
+		const button = screen.getByRole("button", { name: prompt() });
+		await user.click(button);
+		await user.click(screen.getByText(prompt()));
+		button.focus();
+		await user.keyboard("{Enter}");
+		await user.keyboard(" ");
+		expect(
+			open,
+			"openSignPad called on a disabled tile",
+		).not.toHaveBeenCalled();
+		expect(rootOf(container)).toHaveClass("CcSignPad-disabled");
+
+		rerender(
+			<SignPad signature={SIG} disabled openSignPad={open} openInfo={info} />,
+		);
+		fireEvent.click(container.querySelector("img")!);
+		expect(
+			open,
+			"openSignPad called on a disabled tile",
+		).not.toHaveBeenCalled();
+
+		await user.click(screen.getByRole("button", { name: "More information" }));
+		expect(info).toHaveBeenCalledTimes(1);
+
+		rerender(<SignPad signature={SIG} openSignPad={open} openInfo={info} />);
+		expect(rootOf(container)).not.toHaveClass("CcSignPad-disabled");
+		await user.click(screen.getByRole("button", { name: "Signature" }));
+		expect(open).toHaveBeenCalledTimes(1);
+	});
+	it("[ISSUE-3467-ITEM-6] a tile disabled by the theme's default props does not call openSignPad, and its own disabled={false} wins over the theme", () => {
+		const theme = createTheme({
+			components: { CcSignPad: { defaultProps: { disabled: true } } },
+		});
+		const open = vi.fn();
+		const { container, rerender } = render(
+			<ThemeProvider theme={theme}>
+				<SignPad signature={null} openSignPad={open} />
+			</ThemeProvider>,
+		);
+		fireEvent.click(screen.getByRole("button"));
+		expect(
+			open,
+			"openSignPad called on a disabled tile",
+		).not.toHaveBeenCalled();
+		expect(rootOf(container)).toHaveClass("CcSignPad-disabled");
+
+		rerender(
+			<ThemeProvider theme={theme}>
+				<SignPad signature={null} openSignPad={open} disabled={false} />
+			</ThemeProvider>,
+		);
+		fireEvent.click(screen.getByRole("button"));
+		expect(open).toHaveBeenCalledTimes(1);
+	});
 	it("[ISSUE-3467-ITEM-5] the unsigned prompt asks to sign instead of saying the field is signed", async () => {
 		// the past participle ("signed") in each locale that uses it today
 		const signedWords: Record<string, RegExp> = {

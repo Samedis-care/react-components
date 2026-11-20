@@ -30,6 +30,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-20 | [RoutedTabs' panels are tab panels, named and controlled by their tabs](2026-11-20-routed-tabs-panels-are-tab-panels.md) | behavior, theme |
 | 2026-11-20 | [Notifications: the popover is 400px wide by default](2026-11-20-notifications-default-paper-width.md) | behavior, theme |
 | 2026-11-20 | [The corner of a diagonal Matrix pair is drawn in its entry's text color](2026-11-20-matrix-diagonal-corner-entry-color.md) | behavior |
+| 2026-11-20 | [A disabled SignPad tile opens nothing, also when the theme disables it](2026-11-20-sign-pad-disabled-opens-nothing.md) | behavior |
 | 2026-11-19 | [PopupMenu applies its `classes`](2026-11-19-popup-menu-classes.md) | behavior, theme |
 | 2026-11-19 | [A data grid logs a failed write of its persisted state and writes it again](2026-11-19-data-grid-failed-persist-write-logged-and-retried.md) | behavior |
 | 2026-11-17 | [Leaving a date field marks it touched in a Form](2026-11-17-form-blur-marks-date-fields-touched.md) | behavior |

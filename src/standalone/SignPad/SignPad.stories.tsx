@@ -193,3 +193,40 @@ export const Issue3467Item15DisabledWhileFocusedKeepsFocus: Story = {
 		await expect(tile, "Tab reaches the disabled tile").toHaveFocus();
 	},
 };
+
+export const Issue3467Item6DisabledTileOpensNothing: Story = {
+	args: {
+		signature: "",
+		disabled: true,
+		openInfo: fn(),
+		openSignPad: fn(),
+	},
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3467-ITEM-6: a disabled tile shows the default cursor, and neither a click nor Enter or Space calls `openSignPad`. Its info button keeps working.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ canvas, userEvent, args }) => {
+		const tile = canvas.getByRole("button", { name: /sign/i });
+		const root = tile.parentElement;
+		if (!root) throw new Error("the tile has no root");
+		await expect(getComputedStyle(root).cursor).toBe("default");
+		await expect(getComputedStyle(tile).cursor).toBe("default");
+
+		await userEvent.click(tile);
+		await userEvent.click(canvas.getByText(/sign/i));
+		tile.focus();
+		await userEvent.keyboard("{Enter}");
+		await userEvent.keyboard(" ");
+		await expect(args.openSignPad).not.toHaveBeenCalled();
+
+		const info = canvas.getByRole("button", { name: "More information" });
+		await expect(getComputedStyle(info).cursor).toBe("pointer");
+		await userEvent.click(info);
+		await expect(args.openInfo).toHaveBeenCalledTimes(1);
+	},
+};

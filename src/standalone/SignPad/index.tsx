@@ -12,10 +12,15 @@ import combineClassNames from "../../utils/combineClassNames";
 
 export interface SignPadProps {
 	/**
-	 * Shows the tile as disabled: greys the pen icon and marks its button
-	 * `aria-disabled`, so assistive technology announces it as unavailable.
-	 * The button stays focusable, so a focused tile that gets disabled keeps
-	 * the focus. Default `false`.
+	 * Disables the tile: neither a click nor Enter or Space calls
+	 * `openSignPad`, the cursor is the default one instead of a pointer, the
+	 * pen icon is greyed and the button is marked `aria-disabled`, so
+	 * assistive technology announces it as unavailable. The button stays
+	 * focusable, so a focused tile that gets disabled keeps the focus, and the
+	 * info button keeps working. While disabled, the root has the class
+	 * `CcSignPad-disabled`. Set in the theme's
+	 * `components.CcSignPad.defaultProps`, it disables every tile,
+	 * SignaturePad's included. Default `false`.
 	 */
 	disabled?: boolean;
 	/**
@@ -44,8 +49,8 @@ export interface SignPadProps {
 	/**
 	 * Called with the click event when the tile is clicked anywhere except on
 	 * the info button, and when its button is activated by keyboard (Enter or
-	 * Space). The button keeps the focus, so a dialog opened from here returns
-	 * focus to the tile when it closes.
+	 * Space). Not called while `disabled`. The button keeps the focus, so a
+	 * dialog opened from here returns focus to the tile when it closes.
 	 */
 	openSignPad?: () => void;
 	/**
@@ -88,6 +93,9 @@ export interface SignPadProps {
 	required?: boolean;
 }
 
+// state class of the root, see SignPadProps.disabled
+const DISABLED_CLASS = "CcSignPad-disabled";
+
 const SignPadDiv = styled("div", { name: "CcSignPad", slot: "root" })(
 	({ theme }) => ({
 		position: "relative",
@@ -99,6 +107,10 @@ const SignPadDiv = styled("div", { name: "CcSignPad", slot: "root" })(
 		color: theme.palette.grey[700],
 		display: "inline-block",
 		backgroundColor: theme.palette.action.hover,
+		// the button inherits it; the info button keeps its pointer
+		[`&.${DISABLED_CLASS}`]: {
+			cursor: "default",
+		},
 	}),
 );
 
@@ -217,9 +229,13 @@ const SignPad = (inProps: SignPadProps) => {
 	);
 	return (
 		<SignPadDiv
-			className={combineClassNames([className, classes?.root])}
+			className={combineClassNames([
+				className,
+				classes?.root,
+				disabled && DISABLED_CLASS,
+			])}
 			// also gets the button's clicks, Enter and Space included
-			onClick={openSignPad}
+			onClick={disabled ? undefined : openSignPad}
 		>
 			<SignPadButton
 				type="button"

@@ -22,6 +22,7 @@ import DialogContextProvider, {
 	useDialogContext,
 } from "../../src/framework/DialogContextProvider";
 import ccI18n from "../../src/i18n";
+import { ThemeProvider, createTheme } from "@mui/material";
 
 import SignaturePad from "../../src/non-standalone/SignaturePad/SignaturePad";
 import {
@@ -128,6 +129,44 @@ describe("SignaturePad", () => {
 		);
 		expect(activator).toHaveAttribute("aria-invalid", "true");
 		expect(activator).not.toHaveAttribute("aria-required");
+	});
+	it("[ISSUE-3467-ITEM-6] SignaturePad opens its dialog exactly while the tile is enabled: by its disabled prop, else by the theme's CcSignPad default", () => {
+		const plain = createTheme();
+		const disabledByTheme = createTheme({
+			components: { CcSignPad: { defaultProps: { disabled: true } } },
+		});
+		const field = (theme: typeof plain, disabled?: boolean) => (
+			<ThemeProvider theme={theme}>
+				<DialogContextProvider>
+					<SignaturePad
+						signature={null}
+						setSignature={() => {}}
+						disabled={disabled}
+					/>
+				</DialogContextProvider>
+			</ThemeProvider>
+		);
+		const { rerender } = render(field(plain, true));
+		const activator = screen.getByRole("button");
+		fireEvent.click(activator);
+		expect(
+			screen.queryByRole("dialog"),
+			"dialog of a disabled field",
+		).toBeNull();
+
+		rerender(field(disabledByTheme));
+		// the tile shows the theme's default as disabled, and SignaturePad agrees
+		expect(activator).toHaveAttribute("aria-disabled", "true");
+		fireEvent.click(activator);
+		expect(
+			screen.queryByRole("dialog"),
+			"dialog of a field disabled by the theme",
+		).toBeNull();
+
+		rerender(field(disabledByTheme, false));
+		expect(activator).not.toHaveAttribute("aria-disabled");
+		fireEvent.click(activator);
+		expect(dialog()).toBeInTheDocument();
 	});
 });
 
