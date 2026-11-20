@@ -436,6 +436,20 @@ describe("DateInput bugs", () => {
 		expectTypeOf<DateInputProps>().not.toHaveProperty("defaultValue");
 	});
 
+	it("[ISSUE-3485-ITEM-3] renders the slots the consumer passes", async () => {
+		const Icon = () => <span data-testid="own-icon" />;
+		wrap(
+			<DateInput
+				label="Day"
+				value={DAY}
+				onChange={noop}
+				slots={{ openPickerIcon: Icon }}
+			/>,
+		);
+		await screen.findByRole("button", { name: /choose date/i });
+		expect(screen.queryByTestId("own-icon")).not.toBeNull();
+	});
+
 	it("[ISSUE-3485-ITEM-13] links a helperText prop to the field group", async () => {
 		wrap(
 			<DateInput

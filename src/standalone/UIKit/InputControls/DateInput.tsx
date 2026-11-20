@@ -314,8 +314,11 @@ const DateInput = (
 			error={error}
 			fullWidth={fullWidth}
 			onBlur={onBlur}
+			// the consumer's slots come last, so one it passes wins over the default
+			// text field (as for DateTimeInput); slotProps are merged below
 			slots={{
 				textField: PickersTextFieldWithHelp,
+				...muiProps.slots,
 			}}
 			slotProps={{
 				...muiProps.slotProps,
