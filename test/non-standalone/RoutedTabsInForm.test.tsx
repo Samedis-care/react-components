@@ -15,6 +15,7 @@ import {
 	render,
 	screen,
 	waitFor,
+	within,
 } from "@testing-library/react";
 import { Tab } from "@mui/material";
 import { createMemoryHistory, MemoryHistory } from "history";
@@ -153,6 +154,67 @@ const FormPageInsideMorePanel: Page = (props) => {
 				]}
 			</RoutedTabPanelWrapper>
 		</>
+	);
+};
+
+/** A form page with the first name only */
+const FieldPage: Page = (props) => (
+	<DefaultFormPage
+		{...props}
+		customProps={pageCustomProps(props)}
+		autoBack={false}
+	>
+		<FormField name="first_name" />
+	</DefaultFormPage>
+);
+
+/**
+ * The Form itself sits in the default panel, the tabs outside of it: the route renders
+ * the tabs and the panels, and the Form is the default tab's panel
+ */
+const FormInsideDefaultPanel = (props: { model: TestModel }) => {
+	const tab = useRoutedTabPanel();
+	return (
+		<>
+			<RoutedTabs aria-label="Record">
+				<Tab label="General" value="" />
+				<Tab label="More" value="more" />
+			</RoutedTabs>
+			<RoutedTabPanelWrapper>
+				{[
+					tab("more", <div>MORE PANEL</div>),
+					tab(
+						"",
+						<Form
+							model={props.model}
+							id={"1"}
+							errorComponent={DefaultErrorComponent}
+							customProps={{ goBack: () => {} }}
+						>
+							{FieldPage}
+						</Form>,
+					),
+				]}
+			</RoutedTabPanelWrapper>
+		</>
+	);
+};
+
+/** The tabs and the panels with the Form in the default one under the route /rec/* */
+const renderFormInPanel = (history: MemoryHistory) => {
+	setFrameworkHistory(history);
+	return render(
+		<Framework>
+			<Routes>
+				{[
+					<Route
+						key="rec"
+						path="/rec/*"
+						element={<FormInsideDefaultPanel model={createTestModel()} />}
+					/>,
+				]}
+			</Routes>
+		</Framework>,
 	);
 };
 
@@ -322,5 +384,58 @@ describe("RoutedTabs in a form", () => {
 		await act(async () => {});
 		expect(h.location.pathname).toBe("/other");
 		expect(screen.queryByText("Leave form page?")).toBeNull();
+	});
+
+	it("[ISSUE-3500-ITEM-24] a routed Form in the default panel: a tab switch on a dirty form is prompted", async () => {
+		const h = createMemoryHistory({ initialEntries: ["/rec"] });
+		renderFormInPanel(h);
+		await makeDirty();
+		fireEvent.click(tabEl("More"));
+		const prompt = await screen.findByRole("dialog", {
+			name: "Leave form page?",
+		});
+		expect(h.location.pathname).toBe("/rec");
+		expect(screen.queryByText("MORE PANEL")).toBeNull();
+		expect(screen.getByDisplayValue("AliceX")).toBeInTheDocument();
+
+		// No stays on the tab with the edit
+		fireEvent.click(within(prompt).getByRole("button", { name: "No" }));
+		await waitFor(() =>
+			expect(
+				screen.queryByRole("dialog", { name: "Leave form page?" }),
+			).toBeNull(),
+		);
+		expect(h.location.pathname).toBe("/rec");
+		expect(screen.getByDisplayValue("AliceX")).toBeInTheDocument();
+
+		// Yes opens the tab, and the edit is gone with the Form
+		fireEvent.click(tabEl("More"));
+		fireEvent.click(
+			within(
+				await screen.findByRole("dialog", { name: "Leave form page?" }),
+			).getByRole("button", { name: "Yes" }),
+		);
+		expect(await screen.findByText("MORE PANEL")).toBeInTheDocument();
+		expect(h.location.pathname).toBe("/rec/more");
+		fireEvent.click(tabEl("General"));
+		expect(
+			await screen.findByDisplayValue("Alice", undefined, LOAD),
+		).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3500-ITEM-24] a routed Form in the default panel: a navigation that keeps the default panel passes without a prompt", async () => {
+		const h = createMemoryHistory({ initialEntries: ["/rec"] });
+		renderFormInPanel(h);
+		await makeDirty();
+		// no tab claims /rec/details, so the default panel and the Form stay
+		act(() => h.push("/rec/details"));
+		await act(async () => {});
+		expect(h.location.pathname).toBe("/rec/details");
+		expect(screen.queryByText("Leave form page?")).toBeNull();
+		expect(screen.getByDisplayValue("AliceX")).toBeInTheDocument();
+		// and leaving the Form still asks
+		act(() => h.push("/rec/more"));
+		expect(await screen.findByText("Leave form page?")).toBeInTheDocument();
+		expect(h.location.pathname).toBe("/rec/details");
 	});
 });

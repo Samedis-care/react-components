@@ -175,3 +175,140 @@ describe("useParams", () => {
 		window.history.replaceState(null, "", "/");
 	});
 });
+
+describe("RouteContext rendersAt", () => {
+	/** shows, as JSON, whether its route renders at each of the paths */
+	const RendersAt = (props: { id: string; paths: string[] }) => {
+		const { rendersAt } = useRouteInfo();
+		return (
+			<div data-testid={props.id}>
+				{JSON.stringify(
+					Object.fromEntries(
+						props.paths.map((path) => [path, rendersAt(path)]),
+					),
+				)}
+			</div>
+		);
+	};
+	const rendersAtOf = (id: string) =>
+		JSON.parse(screen.getByTestId(id).textContent ?? "null") as Record<
+			string,
+			boolean
+		>;
+	const PATHS = [
+		"/rec",
+		"/rec/details",
+		"/rec/more",
+		"/rec/more/x",
+		"/rec/new",
+		"/other",
+	];
+
+	it("[ISSUE-3500-ITEM-24] a route renders at a path only where every Routes around it still picks it", () => {
+		// tab panels: the default panel ("/*", listed last) under a record route that
+		// an earlier sibling (/rec/new) takes over at its own path
+		renderAt(
+			"/rec",
+			<Routes>
+				{[
+					<Route key="new" path="/rec/new" element={<div>NEW</div>} />,
+					<Route
+						key="rec"
+						path="/rec/*"
+						element={
+							<>
+								<RendersAt id="record" paths={PATHS} />
+								<Routes>
+									{[
+										<Route
+											key="more"
+											path="more/*"
+											element={<div>MORE</div>}
+										/>,
+										<Route
+											key=""
+											path="/*"
+											element={<RendersAt id="default" paths={PATHS} />}
+										/>,
+									]}
+								</Routes>
+							</>
+						}
+					/>,
+				]}
+			</Routes>,
+		);
+		expect(rendersAtOf("record")).toEqual({
+			"/rec": true,
+			"/rec/details": true,
+			"/rec/more": true,
+			"/rec/more/x": true,
+			"/rec/new": false,
+			"/other": false,
+		});
+		expect(rendersAtOf("default")).toEqual({
+			"/rec": true,
+			"/rec/details": true,
+			"/rec/more": false,
+			"/rec/more/x": false,
+			"/rec/new": false,
+			"/other": false,
+		});
+	});
+
+	it("[ISSUE-3500-ITEM-24] a route outside of any Routes renders wherever its path matches", () => {
+		renderAt(
+			"/rec",
+			<Route path="/rec/*" element={<RendersAt id="bare" paths={PATHS} />} />,
+		);
+		expect(rendersAtOf("bare")).toEqual({
+			"/rec": true,
+			"/rec/details": true,
+			"/rec/more": true,
+			"/rec/more/x": true,
+			"/rec/new": true,
+			"/other": false,
+		});
+	});
+
+	it("[ISSUE-3500-ITEM-24] follows the entries of the latest render without changing the context", () => {
+		const seen: ((pathname: string) => boolean)[] = [];
+		const Probe = () => {
+			seen.push(useRouteInfo().rendersAt);
+			return null;
+		};
+		const MemoProbe = React.memo(Probe);
+		const Panels = (props: { withDetails: boolean }) => (
+			<Routes>
+				{[
+					...(props.withDetails
+						? [
+								<Route
+									key="details"
+									path="details"
+									element={<div>DETAILS</div>}
+								/>,
+							]
+						: []),
+					<Route key="" path="/*" element={<MemoProbe />} />,
+				]}
+			</Routes>
+		);
+		const { rerender, history } = renderAt(
+			"/start",
+			<Panels withDetails={false} />,
+		);
+		expect(seen).toHaveLength(1);
+		expect(seen[0]("/details")).toBe(true);
+		rerender(
+			<HistoryRouter history={history}>
+				<Panels withDetails={true} />
+			</HistoryRouter>,
+		);
+		// the memoized consumer was not rendered again: its context is unchanged
+		expect(seen).toHaveLength(1);
+		// and it answers for the entries rendered now
+		expect(seen[0]("/details")).toBe(false);
+		expect(seen[0]("/other")).toBe(true);
+	});
+});

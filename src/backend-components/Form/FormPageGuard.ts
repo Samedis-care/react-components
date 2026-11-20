@@ -76,26 +76,33 @@ export const FORM_PAGE_MOVE_STATE = Object.freeze({
 
 /**
  * Does a navigation to pathname stay inside the form page (routed tab panels, a routed
- * stepper)? It does when the Form's nearest Route still renders at pathname with the same
- * url: the url itself or a path below it (/rec/1 → /rec/1/more), not one that only starts
- * with the same characters (/rec/10, /rec/1-archive).
- * At the root this follows the Route too: a Route "/" renders only at "/", so every other
- * path leaves the page; a Route "/*" renders at every path, so for it no path leaves the
- * page.
+ * stepper)? It does when the Form's nearest Route is still rendered at pathname, so the
+ * Form stays mounted, with the same url: the url itself or a path below it
+ * (/rec/1 → /rec/1/more), not one that only starts with the same characters (/rec/10,
+ * /rec/1-archive).
+ * A Route "/" renders only at "/", so every other path leaves the page. A Route "/*", such
+ * as the default panel of routed tabs (tab("", …)), renders at every path below its parent,
+ * except where the Routes it is an entry of renders an entry listed before it: opening
+ * another tab unmounts a Form in the default panel, so that leaves the page.
  * @param routePath The full path of the Form's nearest Route (RouteContext path)
  * @param routeUrl The url the Route currently matches (RouteContext url)
+ * @param routeRendersAt Is the Route rendered at a pathname (RouteContext rendersAt)
  * @param pathname The navigation's target
  */
 const isInsideFormPage = (
 	routePath: string,
 	routeUrl: string,
+	routeRendersAt: (pathname: string) => boolean,
 	pathname: string,
-): boolean => matchPath({ path: routePath }, pathname)?.url === routeUrl;
+): boolean =>
+	routeRendersAt(pathname) &&
+	matchPath({ path: routePath }, pathname)?.url === routeUrl;
 
 /**
  * The leave guard of a Form's unsaved changes: while the form is dirty, a navigation asks
- * "Leave form page?" (a navigation inside the form's Route passes, unless disableRouting, and
- * so does a move of the page marked with FORM_PAGE_MOVE_STATE),
+ * "Leave form page?" (a navigation that keeps the form's Route rendered at the same url
+ * passes, unless disableRouting, and so does a move of the page marked with
+ * FORM_PAGE_MOVE_STATE),
  * closing the browser tab asks (UnsafeToLeave), and so does closing the FullFormDialog the
  * Form is in. A form that is read-only for a reason other than a save takes no guard.
  *
@@ -119,6 +126,7 @@ const useFormPageGuard = (params: UseFormPageGuardParams): FormPageGuard => {
 	const routeCtx = useContext(RouteContext);
 	const routeUrl = routeCtx ? routeCtx.url : null;
 	const routePath = routeCtx ? routeCtx.path : null;
+	const routeRendersAt = routeCtx ? routeCtx.rendersAt : null;
 	// the rendered dirty state is one render behind the form engine, which breaks "submit,
 	// then navigate away": the record is saved, but the guards below still see a dirty form.
 	// The dirty event fires as soon as the form engine sees the change, so this ref is
@@ -193,7 +201,13 @@ const useFormPageGuard = (params: UseFormPageGuardParams): FormPageGuard => {
 				!disableRouting &&
 				routePath != null &&
 				routeUrl != null &&
-				isInsideFormPage(routePath, routeUrl, transition.location.pathname)
+				routeRendersAt != null &&
+				isInsideFormPage(
+					routePath,
+					routeUrl,
+					routeRendersAt,
+					transition.location.pathname,
+				)
 			) {
 				passThrough();
 				return;
@@ -254,6 +268,7 @@ const useFormPageGuard = (params: UseFormPageGuardParams): FormPageGuard => {
 		formDialog,
 		routePath,
 		routeUrl,
+		routeRendersAt,
 		pushDialog,
 		disableRouting,
 		addEventListener,

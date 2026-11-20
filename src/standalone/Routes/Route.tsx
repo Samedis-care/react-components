@@ -1,8 +1,9 @@
-import React, { useContext, useEffect, useMemo } from "react";
+import React, { useCallback, useContext, useEffect, useMemo } from "react";
 import useLocation from "./useLocation";
 import matchPath from "./matchPath";
 import joinRoutePath from "./joinRoutePath";
 import { sentrySetRoutePath } from "./SentryRoutingInstrumentation";
+import RoutesEntryContext from "./RoutesEntryContext";
 
 export interface RouteProps {
 	/**
@@ -32,6 +33,18 @@ export interface RouteContextType {
 	 * How many routes this route is nested in, 0 for a top-level route
 	 */
 	depth: number;
+	/**
+	 * Would this route still be rendered at pathname, so that a navigation there keeps it
+	 * and its element mounted? It would when its path matches pathname, the Routes it is an
+	 * entry of picks it there (no entry listed before it matches first, e.g. another tab's
+	 * panel before the default one) and the same holds for every Route around it. Its url
+	 * may differ there (another value of a param).
+	 * It stays the same function as long as the route's path does, and answers for the
+	 * routes as they are rendered at the time of the call.
+	 * @param pathname A location pathname, e.g. the target of a navigation
+	 * @returns true if the route is rendered at pathname
+	 */
+	rendersAt: (pathname: string) => boolean;
 }
 
 /**
@@ -73,12 +86,21 @@ const Route = (props: RouteProps) => {
 	const routePrefix = useRoutePrefix();
 	const parentCtx = useContext(RouteContext);
 	const depth = parentCtx ? parentCtx.depth + 1 : 0;
+	const finalPath = joinRoutePath(routePrefix, path);
+	const parentRendersAt = parentCtx ? parentCtx.rendersAt : null;
+	const entryRenderedAt = useContext(RoutesEntryContext);
+	const rendersAt = useCallback(
+		(target: string) =>
+			!!matchPath({ path: finalPath }, target) &&
+			(!entryRenderedAt || entryRenderedAt(target)) &&
+			(!parentRendersAt || parentRendersAt(target)),
+		[finalPath, entryRenderedAt, parentRendersAt],
+	);
 	const ctx = useMemo((): RouteContextType | null => {
-		const finalPath = joinRoutePath(routePrefix, path);
 		const match = matchPath({ path: finalPath }, pathname);
 		if (!match) return null; // this one is about to be unmounted
-		return { url: match.url, path: finalPath, depth };
-	}, [path, pathname, routePrefix, depth]);
+		return { url: match.url, path: finalPath, depth, rendersAt };
+	}, [finalPath, pathname, depth, rendersAt]);
 
 	// every location, not only every route change: a navigation within this route needs its name too
 	useEffect(() => {

@@ -159,6 +159,43 @@ describe("Form page leave guard", () => {
 		expect(leavePrompts()).toHaveLength(0);
 		expect(screen.getByDisplayValue("AliceX")).toBeInTheDocument();
 	});
+
+	it("[ISSUE-3500-ITEM-24] a form page on a route /rec/* asks before a path that an entry listed before it takes over (/rec/new)", async () => {
+		const history = createMemoryHistory({ initialEntries: ["/rec"] });
+		setFrameworkHistory(history);
+		render(
+			<Framework>
+				<Routes>
+					{[
+						<Route key="new" path="/rec/new" element={<div>NEW RECORD</div>} />,
+						<Route
+							key="rec"
+							path="/rec/*"
+							element={
+								<Form
+									model={makePeopleModel()}
+									id={"1"}
+									errorComponent={DefaultErrorComponent}
+									customProps={{ goBack: () => {} }}
+								>
+									{FieldPage}
+								</Form>
+							}
+						/>,
+					]}
+				</Routes>
+			</Framework>,
+		);
+		await makeDirty();
+		await navigate("/rec/more");
+		expect(history.location.pathname).toBe("/rec/more");
+		expect(leavePrompts()).toHaveLength(0);
+		await navigate("/rec/new");
+		expect(screen.queryByText("NEW RECORD")).toBeNull();
+		expect(history.location.pathname).toBe("/rec/more");
+		expect(leavePrompts()).toHaveLength(1);
+		expect(screen.getByDisplayValue("AliceX")).toBeInTheDocument();
+	});
 });
 
 describe("Form page leave guard while the form saves", () => {
