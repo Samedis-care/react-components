@@ -1,9 +1,28 @@
 import React from "react";
-import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
-import { render, act, cleanup } from "@testing-library/react";
+import {
+	describe,
+	it,
+	expect,
+	beforeAll,
+	afterAll,
+	afterEach,
+	vi,
+} from "vitest";
+import {
+	render,
+	act,
+	cleanup,
+	fireEvent,
+	screen,
+} from "@testing-library/react";
 import * as Sentry from "@sentry/react";
 import { createBrowserHistory, History } from "history";
-import { HistoryRouter, Route, Routes } from "../../src/standalone/Routes";
+import {
+	HistoryRouter,
+	Link,
+	Route,
+	Routes,
+} from "../../src/standalone/Routes";
 import { componentsCareBrowserTracingIntegration } from "../../src/sentry";
 
 afterEach(cleanup);
@@ -150,6 +169,27 @@ describe("componentsCareBrowserTracingIntegration (span streaming)", () => {
 			source: "url",
 			urlTemplate: undefined,
 		});
+	});
+
+	it("[ISSUE-3475-ITEM-19] starts no navigation span for a click on a Link to the current location", () => {
+		// useNavigate resets the scroll position; jsdom does not implement scrollTo
+		const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+		const rootSpanId = () => {
+			const span = Sentry.getActiveSpan();
+			return span && Sentry.spanToJSON(Sentry.getRootSpan(span)).span_id;
+		};
+		render(
+			<HistoryRouter history={history}>
+				<Link to="/tenant/1/settings">settings</Link>
+			</HistoryRouter>,
+		);
+		act(() => history.push("/tenant/1/settings"));
+		const navigationSpan = rootSpanId();
+		expect(navigationSpan).toBeDefined();
+		fireEvent.click(screen.getByRole("link", { name: "settings" }));
+		expect(history.location.pathname).toBe("/tenant/1/settings");
+		expect(rootSpanId()).toBe(navigationSpan);
+		scrollTo.mockRestore();
 	});
 });
 

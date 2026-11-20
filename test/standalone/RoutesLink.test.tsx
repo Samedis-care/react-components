@@ -8,7 +8,13 @@ import {
 	cleanup,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { createMemoryHistory, createPath } from "history";
+import {
+	Action,
+	createBrowserHistory,
+	createMemoryHistory,
+	createPath,
+	type History,
+} from "history";
 import {
 	Button,
 	IconButton,
@@ -493,5 +499,112 @@ describe("Link: targets", () => {
 		expect(next).toHaveAttribute("href", "/devices?page=2");
 		act(() => history.push("/settings"));
 		expect(next).toHaveAttribute("href", "/settings?page=2");
+	});
+});
+
+describe("Link: a link to the current location", () => {
+	/**
+	 * Records the action of every navigation of the history
+	 * @param history The router's history
+	 * @returns The actions so far, oldest first
+	 */
+	const recordActions = (history: History) => {
+		const actions: Action[] = [];
+		history.listen(({ action }) => actions.push(action));
+		return actions;
+	};
+
+	it("[ISSUE-3475-ITEM-19] replaces the entry, so a single Back leaves the page", () => {
+		const history = createMemoryHistory({
+			initialEntries: ["/devices", "/x"],
+		});
+		render(
+			<HistoryRouter history={history}>
+				<ShowPath />
+				<Link to="/x">current page</Link>
+			</HistoryRouter>,
+		);
+		const actions = recordActions(history);
+		const link = screen.getByRole("link", { name: "current page" });
+		expect(fireEvent.click(link)).toBe(false);
+		expect(fireEvent.click(link)).toBe(false);
+		expect(actions).toEqual([Action.Replace, Action.Replace]);
+		expect(history.index).toBe(1);
+		expect(renderedPath()).toBe("/x");
+		act(() => history.back());
+		expect(renderedPath()).toBe("/devices");
+	});
+
+	it.each([
+		["/devices?page=2#notes", Action.Replace],
+		["?page=2#notes", Action.Replace],
+		[{ search: "?page=2", hash: "#notes" }, Action.Replace],
+		["//devices?page=2#notes", Action.Replace],
+		["/devices?page=2", Action.Push],
+		["/devices#notes", Action.Push],
+		["/devices", Action.Push],
+		["#notes", Action.Push],
+		["/devices/?page=2#notes", Action.Push],
+	])(
+		"[ISSUE-3475-ITEM-19] compares pathname, search and hash: at /devices?page=2#notes, a link to %j makes a %s",
+		(to, action) => {
+			const { history } = renderAt(
+				"/devices?page=2#notes",
+				<Link to={to}>go</Link>,
+			);
+			const actions = recordActions(history);
+			fireEvent.click(screen.getByRole("link", { name: "go" }));
+			expect(actions).toEqual([action]);
+		},
+	);
+
+	it("[ISSUE-3475-ITEM-19] stores the link's state in the replaced entry", () => {
+		const Show = () => (
+			<div data-testid="state">{JSON.stringify(useLocation().state)}</div>
+		);
+		const { history } = renderAt(
+			"/x",
+			<>
+				<Link to="/x" state={{ s: 1 }}>
+					current page
+				</Link>
+				<Show />
+			</>,
+		);
+		const actions = recordActions(history);
+		fireEvent.click(screen.getByRole("link", { name: "current page" }));
+		expect(actions).toEqual([Action.Replace]);
+		expect(screen.getByTestId("state")).toHaveTextContent('{"s":1}');
+	});
+
+	it("[ISSUE-3475-ITEM-19] pushes a link to the current location with replace={false}", () => {
+		const { history } = renderAt(
+			"/x",
+			<Link to="/x" replace={false}>
+				current page
+			</Link>,
+		);
+		const actions = recordActions(history);
+		fireEvent.click(screen.getByRole("link", { name: "current page" }));
+		expect(actions).toEqual([Action.Push]);
+		expect(history.index).toBe(1);
+	});
+
+	it("[ISSUE-3475-ITEM-19] recognizes the current location in a browser history, which keeps it percent-encoded", () => {
+		window.history.replaceState(null, "", "/search/foo bar/über?q=a b#c d");
+		const history = createBrowserHistory();
+		expect(createPath(history.location)).toBe(
+			"/search/foo%20bar/%C3%BCber?q=a%20b#c%20d",
+		);
+		render(
+			<HistoryRouter history={history}>
+				<Link to="/search/foo bar/über?q=a b#c d">current page</Link>
+				<Link to="/search/foo bar/über?q=a b">other page</Link>
+			</HistoryRouter>,
+		);
+		const actions = recordActions(history);
+		fireEvent.click(screen.getByRole("link", { name: "current page" }));
+		fireEvent.click(screen.getByRole("link", { name: "other page" }));
+		expect(actions).toEqual([Action.Replace, Action.Push]);
 	});
 });
