@@ -1,8 +1,8 @@
-# An aborted index or fetchAll request is not reported to Sentry
+# An aborted index, fetchAll or getRaw request is not reported to Sentry
 
 - **Date:** 2026-11-20
 - **Kind:** behavior
-- **Scope:** `backend-integration/Model`: `Model.index`, `Model.fetchAll`
+- **Scope:** `backend-integration/Model`: `Model.index`, `Model.fetchAll`, `Model.getRaw`
 
 ## What changed
 
@@ -10,6 +10,8 @@
 request was aborted: when `params.signal` is aborted, or the connector rejects with an error
 named `AbortError`. The rejection still reaches the caller unchanged, so a caller that
 ignores the result of an aborted request (as `DataGrid` does) sees no difference.
+`Model.getRaw` takes no signal, but it too skips an error named `AbortError`, so the model
+has one rule for what counts as unexpected.
 
 An abort is asked for. `BackendDataGrid` passes the grid's `params.signal` to `Model.index`,
 and the grid aborts it when a reload (search, filters, sort, custom data,
@@ -26,7 +28,4 @@ dropped on purpose.
 
 ## Migration
 
-Nothing to do. An app that wants aborted requests reported can do it in its connector,
-which receives the abort as the signal's reason (an `AbortError` DOMException unless the
-signal was aborted with a reason of its own) and can report it through its own exception
-hook.
+Nothing to do.

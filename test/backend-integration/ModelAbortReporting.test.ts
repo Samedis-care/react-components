@@ -36,6 +36,22 @@ class FailingConnector extends MockConnector {
 	}
 }
 
+/**
+ * A connector whose read throws the given error
+ */
+class FailingReadConnector extends MockConnector {
+	private readonly error: Error;
+
+	constructor(error: Error) {
+		super(RECORDS);
+		this.error = error;
+	}
+
+	read(): never {
+		throw this.error;
+	}
+}
+
 const createModel = (connector: MockConnector) =>
 	new Model(
 		"abort-reporting-" + Math.random().toString(16),
@@ -56,17 +72,20 @@ const createModel = (connector: MockConnector) =>
 
 /**
  * Model takes captureException from the promise of its optional @sentry/react import, which
- * resolves after a first call could run. A report that must happen proves the wiring first,
- * so the tests that expect no report can't pass because Sentry was not loaded yet.
+ * resolves after a first call could run. The report is checked on each retry, so the call is
+ * repeated until the import has loaded; a report that then happens proves the wiring, so the
+ * tests that expect no report can't pass because Sentry was not loaded yet.
  */
 beforeAll(async () => {
-	await expect(
-		createModel(new FailingConnector(new Error("warm-up"))).index({
-			page: 1,
-			rows: 10,
-		}),
-	).rejects.toThrow("warm-up");
-	await vi.waitFor(() => expect(captureException).toHaveBeenCalled());
+	await vi.waitFor(async () => {
+		await expect(
+			createModel(new FailingConnector(new Error("warm-up"))).index({
+				page: 1,
+				rows: 10,
+			}),
+		).rejects.toThrow("warm-up");
+		expect(captureException).toHaveBeenCalled();
+	});
 });
 
 beforeEach(() => {
@@ -118,7 +137,7 @@ describe("Model error reporting", () => {
 		expect(captureException).not.toHaveBeenCalled();
 	});
 
-	it("[ISSUE-3506-ITEM-19] doesn't report a fetchAll that was aborted", async () => {
+	it("[ISSUE-3506-ITEM-19] doesn't report a fetchAll request whose signal was already aborted, and the abort reaches the caller", async () => {
 		const controller = new AbortController();
 		controller.abort();
 		const error = controller.signal.reason as Error;
@@ -128,6 +147,37 @@ describe("Model error reporting", () => {
 			error,
 		);
 		expect(captureException).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3506-ITEM-19] doesn't report a fetchAll request aborted while it was loading, whatever it then rejects with", async () => {
+		const controller = new AbortController();
+		const error = new TypeError("socket closed");
+		const model = createModel(
+			new FailingConnector(error, () => controller.abort()),
+		);
+
+		await expect(model.fetchAll({ signal: controller.signal })).rejects.toBe(
+			error,
+		);
+		expect(captureException).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3506-ITEM-19] doesn't report an AbortError of a get, and the abort reaches the caller", async () => {
+		const controller = new AbortController();
+		controller.abort();
+		const error = controller.signal.reason as Error;
+		const model = createModel(new FailingReadConnector(error));
+
+		await expect(model.getRaw("1")).rejects.toBe(error);
+		expect(captureException).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3506-ITEM-19] reports an unexpected get error to Sentry", async () => {
+		const error = new TypeError("Unexpected response");
+		const model = createModel(new FailingReadConnector(error));
+
+		await expect(model.getRaw("1")).rejects.toBe(error);
+		expect(captureException).toHaveBeenCalledWith(error);
 	});
 
 	it("[ISSUE-3506-ITEM-19] reports an unexpected fetchAll error to Sentry", async () => {

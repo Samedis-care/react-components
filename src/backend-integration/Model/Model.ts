@@ -37,22 +37,8 @@ import("@sentry/react")
 	.catch(() => {}); // ignore
 
 /**
- * Was the request aborted? An abort was asked for, it is not a failure
- * @param err What the request failed with
- * @param signal The signal the caller passed to the request, if any
- * @returns true if that signal was aborted, or the request failed with an AbortError
- * @remarks Like the rest of the library, errors are discriminated by their name, not by
- *          instanceof
- */
-const isAbort = (err: unknown, signal: AbortSignal | undefined): boolean =>
-	!!signal?.aborted ||
-	(typeof err === "object" &&
-		err !== null &&
-		(err as { name?: unknown }).name === "AbortError");
-
-/**
- * Reports an error to Sentry, if it is loaded, unless the network, the backend or an
- * aborted request caused it
+ * Reports an error to Sentry, if it is loaded, unless the network or the backend caused it
+ * or the request was aborted
  * @param err The error
  * @param signal The signal of the request that failed, if any
  */
@@ -60,8 +46,9 @@ const reportUnexpectedError = (err: unknown, signal?: AbortSignal) => {
 	if (
 		captureException &&
 		err instanceof Error &&
-		!["NetworkError", "BackendError"].includes(err.name) &&
-		!isAbort(err, signal)
+		// an aborted request was dropped on purpose, whatever it then failed with
+		!signal?.aborted &&
+		!["NetworkError", "BackendError", "AbortError"].includes(err.name)
 	) {
 		captureException(err);
 	}
@@ -847,9 +834,9 @@ class Model<
 	/**
 	 * Loads a list of data entries by the given search params
 	 * @param params The search params, the connector gets a copy of them
-	 * @remarks When params.signal was aborted (the caller superseded the request or went
-	 *          away) the request still rejects, but it is not reported as an unexpected
-	 *          error: it was dropped on purpose.
+	 * @remarks A failure is reported to Sentry (if loaded), unless the network or the
+	 *          backend caused it or the request was aborted (params.signal aborted, or an
+	 *          AbortError). The caller gets the rejection either way.
 	 */
 	public async index(
 		params: Partial<IDataGridLoadDataParameters> | undefined,
@@ -925,8 +912,9 @@ class Model<
 	 * @param params The params to pass to index
 	 * @returns ModelIndexResponse where userMeta and meta is taken from the last call
 	 * @remarks The records of fetchAllRaw, deserialized and cached as index does it. A
-	 *          request whose params.signal was aborted rejects, but is not reported as an
-	 *          unexpected error, as with index.
+	 *          failure is reported to Sentry (if loaded), unless the network or the backend
+	 *          caused it or the request was aborted (params.signal aborted, or an
+	 *          AbortError). The caller gets the rejection either way, as with index.
 	 * @see index
 	 */
 	public async fetchAll(
@@ -1205,16 +1193,12 @@ class Model<
 				return this.deserializeResponse(rawData);
 			}
 		} catch (err) {
-			if (
-				captureException &&
+			if (!(
+				options?.dontReportNotFoundInBatch &&
 				err instanceof Error &&
-				!["NetworkError", "BackendError"].includes(err.name) &&
-				!(
-					options?.dontReportNotFoundInBatch &&
-					err.name === "RequestBatchingError"
-				)
-			) {
-				captureException(err);
+				err.name === "RequestBatchingError"
+			)) {
+				reportUnexpectedError(err);
 			}
 			throw err;
 		}
