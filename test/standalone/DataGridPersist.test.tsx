@@ -1198,6 +1198,109 @@ describe("restored column widths", () => {
 	});
 });
 
+describe("custom data on the next visit", () => {
+	type Wrap = (child: React.ReactElement) => React.ReactElement;
+	function underLocalStorage(child: React.ReactElement) {
+		return (
+			<LocalStoragePersist storageKey={"custom-data"}>
+				{child}
+			</LocalStoragePersist>
+		);
+	}
+	/** the filters go to a "server", as in samedis.care */
+	function underStorageManager(child: React.ReactElement) {
+		return (
+			<StorageManagerPersist storageKeys={{ model: "m" }}>
+				{child}
+			</StorageManagerPersist>
+		);
+	}
+	/** each provider as an app sets it up: [name, set up the storage and return the wrapper] */
+	const providers: [name: string, setUp: () => Wrap][] = [
+		["LocalStoragePersist", () => underLocalStorage],
+		[
+			"StorageManagerPersist",
+			() => {
+				const server = new MemoryProvider();
+				StorageManager.configure((_id, keys) => [server, keys]);
+				return underStorageManager;
+			},
+		],
+	];
+
+	/**
+	 * Sets the custom data in a grid, then opens the grid again under a new
+	 * provider, which reads the storage as after a reload
+	 * @returns the custom data the grid opens with then
+	 */
+	const nextVisit = async (wrap: Wrap, customData: Record<string, unknown>) => {
+		render(wrap(<Grid />));
+		await gridIdle();
+		act(() => grid!.setState((prev) => ({ ...prev, customData })));
+		cleanup();
+		grid = null;
+		render(wrap(<Grid />));
+		await gridIdle();
+		return grid!.state.customData;
+	};
+
+	it.each(providers)(
+		"[ISSUE-3496-ITEM-19] %s: custom data of JSON values comes back as it was set",
+		async (_name, setUp) => {
+			const customData = {
+				"filter[status]": "open",
+				"filter[ids]": ["a", "b"],
+				"filter[min]": 0,
+				"filter[archived]": false,
+				"filter[team]": null,
+				period: { from: "2026-01-01", to: null, weekdays: [1, 5] },
+			};
+			expect(await nextVisit(setUp(), customData)).toStrictEqual(customData);
+		},
+	);
+
+	it.each(providers)(
+		"[ISSUE-3496-ITEM-19] %s: other values in the custom data come back in their JSON form, as DataGridCustomDataType documents",
+		async (_name, setUp) => {
+			class DateRange {
+				constructor(readonly from: string) {}
+				get label() {
+					return "from " + this.from;
+				}
+			}
+			/** like a Moment or a Dayjs */
+			class Day {
+				constructor(readonly iso: string) {}
+				toJSON() {
+					return this.iso;
+				}
+			}
+			const restored = await nextVisit(setUp(), {
+				date: new Date("2026-01-02T00:00:00.000Z"),
+				day: new Day("2026-01-03"),
+				map: new Map([["a", 1]]),
+				set: new Set(["a"]),
+				range: new DateRange("2026-01-01"),
+				nan: NaN,
+				infinity: Infinity,
+				list: [1, undefined, () => 2],
+				fn: () => 1,
+				undef: undefined,
+			});
+			expect(restored).toStrictEqual({
+				date: "2026-01-02T00:00:00.000Z",
+				day: "2026-01-03",
+				map: {},
+				set: {},
+				range: { from: "2026-01-01" },
+				nan: null,
+				infinity: null,
+				list: [1, null, null],
+			});
+		},
+	);
+});
+
 describe("StorageManagerPersist bucket writes", () => {
 	const smp = (keys: Record<string, string>, child = <Grid />) => (
 		<ThemeProvider theme={theme}>

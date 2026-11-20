@@ -97,9 +97,10 @@ export interface DataGridProps
 	 *   user has already seen (columns added later start out with the hidden and
 	 *   pinned state from their definition)
 	 * - sort: sorting state
-	 * - filters: customData, search, column filter. What an override
-	 *   (overrideCustomData, overrideFilter, overrideSearch) replaced stays
-	 *   persisted as it was stored until the filters are reset.
+	 * - filters: customData (as JSON, see DataGridCustomDataType), search,
+	 *   column filter. What an override (overrideCustomData, overrideFilter,
+	 *   overrideSearch) replaced stays persisted as it was stored until the
+	 *   filters are reset.
 	 * @default ["columns", "sort", "filters"]
 	 */
 	persist?: ("columns" | "sort" | "filters")[];
@@ -244,7 +245,9 @@ export interface IDataGridCallbacks {
 	forceRefreshToken?: string;
 	/**
 	 * Extracts additional filters from the provided custom data
-	 * @param customData The custom user-defined state-stored data
+	 * @param customData The custom user-defined state-stored data. Restored
+	 *                   from storage, it holds JSON values only: see
+	 *                   DataGridCustomDataType
 	 * @remarks If not set, the custom data are the additional filters
 	 */
 	getAdditionalFilters?: (
@@ -644,6 +647,31 @@ export type DataGridRowData = { id: string } & Record<
 	string,
 	string | number | { toString: () => string } | React.ReactElement | null
 >;
+/**
+ * The custom data: the filter state the app's filter bar keeps in the grid
+ * (IDataGridFilterBarProps.setCustomData, DataGridProps.defaultCustomData),
+ * keyed by the app. getAdditionalFilters turns it into filters.
+ *
+ * When the grid persists its filters (DataGridProps.persist "filters", the
+ * default), DataGridLocalStoragePersist and DataGridStorageManagerPersist
+ * store it as JSON. So set JSON values only: strings, finite numbers,
+ * booleans, null, and arrays and plain objects of these. A grid that restores
+ * them from storage (on the next visit) gets them back as they were set. Any
+ * other value comes back in its JSON form:
+ * - a Date as its ISO string, an object with a toJSON method (a Moment, a
+ *   Dayjs) as what that returns
+ * - a Map or a Set as an empty object
+ * - another class instance as a plain object of its own enumerable
+ *   properties, without its class and methods
+ * - NaN and Infinity as null
+ * - undefined and a function are left out (null in an array)
+ *
+ * Keep such a value in a JSON form (a date as an ISO string, a set as an
+ * array) and convert it where it is used: in getAdditionalFilters and in the
+ * filter bar's controls.
+ * @remarks Only the storage turns the values into JSON: a grid mounted again
+ *          while its provider stays mounted gets them as they were set.
+ */
 export type DataGridCustomDataType = Record<string, unknown>;
 
 /**
