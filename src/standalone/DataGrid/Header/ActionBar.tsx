@@ -12,7 +12,7 @@ import ActionBarView from "./ActionBarView";
 import { useTheme } from "@mui/material";
 import { useDataGridResetFilters } from "../DataGridUtils";
 const ActionBar = () => {
-	const [, setState] = useDataGridState();
+	const [{ columnHidden }, setState] = useDataGridState();
 	const [, setColumnState] = useDataGridColumnState();
 	const [, setColumnWidth] = useDataGridColumnsWidthState();
 	const {
@@ -63,6 +63,9 @@ const ActionBar = () => {
 			),
 		);
 	}, [columns, defaultFilter, defaultSort, setColumnState]);
+	// Reset column settings: hidden and pinned go back to the column
+	// definitions. A column this hides again drops its filter, as unticking
+	// "Visible" in the settings does: no header would show that filter anymore.
 	const handleResetColumn = useCallback(() => {
 		const defaultState = getDataGridDefaultState(columns, defaultCustomData);
 		setState((state) => ({
@@ -70,7 +73,22 @@ const ActionBar = () => {
 			columnHidden: defaultState.columnHidden,
 			columnPinned: defaultState.columnPinned,
 		}));
-	}, [columns, defaultCustomData, setState]);
+		const hiddenAgain = columns
+			.map((column) => column.field)
+			.filter(
+				(field) => defaultState.columnHidden[field] && !columnHidden[field],
+			);
+		if (hiddenAgain.length === 0) return;
+		setColumnState((colState) => {
+			const filtered = hiddenAgain.filter((field) => colState[field]?.filter);
+			if (filtered.length === 0) return colState;
+			const next = { ...colState };
+			for (const field of filtered) {
+				next[field] = { ...colState[field], filter: undefined };
+			}
+			return next;
+		});
+	}, [columnHidden, columns, defaultCustomData, setColumnState, setState]);
 	const handleResetWidth = useCallback(() => {
 		setColumnWidth(getDefaultColumnWidths(columns, theme));
 		setState((state) => ({ ...state, initialResize: false }));

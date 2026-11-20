@@ -28,6 +28,7 @@ import DataGrid, {
 	DataGridRowData,
 	IDataGridColumnDef,
 	IDataGridColumnsState,
+	IDataGridLoadDataParameters,
 	IDataGridState,
 	useDataGridColumnState,
 	useDataGridColumnsWidthState,
@@ -137,6 +138,9 @@ const ROWS: DataGridRowData[] = [
 ];
 
 const ok = (): DataGridData => ({ rowsTotal: 2, rows: ROWS });
+const loadSpy = (impl: (p: IDataGridLoadDataParameters) => DataGridData = ok) =>
+	vi.fn<(p: IDataGridLoadDataParameters) => DataGridData>(impl);
+const NAME_FILTER = { type: "contains" as const, value1: "b", value2: "" };
 
 type Probe = {
 	state: IDataGridState;
@@ -186,6 +190,8 @@ const Grid = ({ classes, ...props }: Partial<DataGridProps>) => (
 /** no load running or queued */
 const idle = () =>
 	waitFor(() => expect(probe?.state.refreshData).toBe(0), { timeout: 3000 });
+/** past the 500ms debounce of the reload after a query change */
+const passDebounce = () => act(() => void vi.advanceTimersByTime(700));
 
 const deferred = <T,>() => {
 	let resolve!: (v: T) => void;
@@ -557,6 +563,116 @@ const openMenu = async (trigger: string, item?: string) => {
 	if (item)
 		fireEvent.click(await screen.findByRole("menuitem", { name: item }));
 };
+
+describe("reset menu", () => {
+	it("[ISSUE-3495-ITEM-3] Reset column settings that hides a filtered column again drops its filter, as hiding it in the settings does", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		const loadData = loadSpy();
+		const columns = [COLUMNS[0], { ...COLUMNS[1], hidden: true }];
+		render(<Grid loadData={loadData} columns={columns} />);
+		await idle();
+		// the user shows "role" in the settings and filters it
+		act(() =>
+			probe!.setState((p) => ({
+				...p,
+				columnHidden: { ...p.columnHidden, role: false },
+			})),
+		);
+		act(() =>
+			probe!.setColumnState((p) => ({
+				...p,
+				role: {
+					...p.role,
+					filter: { type: "contains", value1: "adm", value2: "" },
+				},
+			})),
+		);
+		passDebounce();
+		await idle();
+
+		await openMenu("Reset", "Reset column settings");
+		passDebounce();
+		await idle();
+		expect(probe!.state.columnHidden.role).toBe(true);
+		// what the next load asks for: nothing of the column the user can't see
+		expect(probe!.columnState.role.filter).toBeUndefined();
+	});
+
+	it("[ISSUE-3495-ITEM-3] after Reset column settings drops a filter, the grid loads once, without the filter of the column hidden again", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		const loadData = loadSpy();
+		const columns = [COLUMNS[0], { ...COLUMNS[1], hidden: true }];
+		render(<Grid loadData={loadData} columns={columns} />);
+		await idle();
+		// the user shows "role" and filters it and "name"
+		act(() =>
+			probe!.setState((p) => ({
+				...p,
+				columnHidden: { ...p.columnHidden, role: false },
+			})),
+		);
+		act(() =>
+			probe!.setColumnState((p) => ({
+				...p,
+				name: { ...p.name, filter: NAME_FILTER },
+				role: {
+					...p.role,
+					filter: { type: "contains", value1: "adm", value2: "" },
+				},
+			})),
+		);
+		passDebounce();
+		await idle();
+		expect(Object.keys(loadData.mock.lastCall![0].fieldFilter)).toEqual([
+			"name",
+			"role",
+		]);
+		loadData.mockClear();
+
+		await openMenu("Reset", "Reset column settings");
+		passDebounce();
+		await idle();
+		passDebounce();
+		await idle();
+		expect(loadData).toHaveBeenCalledOnce();
+		expect(Object.keys(loadData.mock.lastCall![0].fieldFilter)).toEqual([
+			"name",
+		]);
+	});
+
+	it("[ISSUE-3495-ITEM-3] Reset column settings keeps the filters of the columns it leaves visible, and does not reload when it drops no filter", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		const loadData = loadSpy();
+		const columns = [COLUMNS[0], { ...COLUMNS[1], hidden: true }];
+		render(<Grid loadData={loadData} columns={columns} />);
+		await idle();
+		// the user shows "role" without filtering it, pins "name" and filters it
+		act(() =>
+			probe!.setState((p) => ({
+				...p,
+				columnHidden: { ...p.columnHidden, role: false },
+				columnPinned: { ...p.columnPinned, name: true },
+			})),
+		);
+		act(() =>
+			probe!.setColumnState((p) => ({
+				...p,
+				name: { ...p.name, filter: NAME_FILTER },
+			})),
+		);
+		passDebounce();
+		await idle();
+		loadData.mockClear();
+
+		await openMenu("Reset", "Reset column settings");
+		passDebounce();
+		await idle();
+		expect(probe!.state.columnHidden.role).toBe(true);
+		expect(probe!.state.columnPinned.name).toBe(false);
+		expect(probe!.columnState.name.filter).toEqual(NAME_FILTER);
+		expect(loadData).not.toHaveBeenCalled();
+	});
+});
 
 const makeExporter = (
 	over: Partial<IDataGridExporter<unknown>> = {},
