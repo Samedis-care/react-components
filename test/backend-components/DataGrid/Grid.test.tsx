@@ -19,6 +19,7 @@ import { Framework } from "../../../src/framework";
 import { renderDataGridRecordUsingModel } from "../../../src/backend-components/DataGrid";
 import {
 	Model,
+	ModelDataTypeBooleanCheckboxRendererCC,
 	ModelDataTypeBooleanCheckboxRendererMUI,
 	ModelDataTypeImageRenderer,
 	ModelDataTypeStringRendererMUI,
@@ -469,6 +470,57 @@ describe("renderDataGridRecordUsingModel", () => {
 		expect(update.mock.calls[0][0]).toEqual({ id: "1", active: false });
 		const [cached] = await model.getCached("1");
 		expect(cached.active).toBe(false);
+	});
+
+	it("[ISSUE-3506-ITEM-9] names an inline checkbox by its field's label", async () => {
+		const { model } = makeModel();
+		renderCell((await rowOf(model)).active);
+		expect(screen.getByRole("checkbox")).toHaveAccessibleName(/Active/);
+	});
+
+	it("[ISSUE-3506-ITEM-9] an inline checkbox also names its row: getRowLabel when given, else the first visible text field", async () => {
+		const { model } = makeModel();
+		renderCell((await rowOf(model)).active);
+		expect(screen.getByRole("checkbox")).toHaveAccessibleName("Active, One");
+		cleanup();
+
+		const [record] = (await model.index({ page: 1, rows: 25 }))[0];
+		const row = renderDataGridRecordUsingModel(
+			model,
+			vi.fn(),
+			(entry) => `row ${entry.id}`,
+		)(record) as Record<string, unknown>;
+		renderCell(row.active);
+		expect(screen.getByRole("checkbox")).toHaveAccessibleName("Active, row 1");
+	});
+
+	it("[ISSUE-3506-ITEM-9] names the UIKit renderer's inline checkbox too", async () => {
+		const model = new Model(
+			"bdg-grid-cc-" + Math.random().toString(16),
+			{
+				id: {
+					type: str(),
+					getLabel: () => "ID",
+					visibility: vis(ModelVisibilityDisabled),
+					customData: null,
+				},
+				title: {
+					type: str(),
+					getLabel: () => "Title",
+					visibility: vis(ModelVisibilityGridView),
+					customData: null,
+				},
+				active: {
+					type: new ModelDataTypeBooleanCheckboxRendererCC(),
+					getLabel: () => "Active",
+					visibility: vis(ModelVisibilityGridEdit),
+					customData: null,
+				},
+			},
+			new MockConnector([{ id: "1", title: "One", active: true }]),
+		);
+		renderCell((await rowOf(model)).active);
+		expect(screen.getByRole("checkbox")).toHaveAccessibleName("Active, One");
 	});
 });
 

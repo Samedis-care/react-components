@@ -219,7 +219,11 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 						rowsTotal: reportsFiltered ? dataMeta.totalRows : matchCount,
 						rowsFiltered: reportsFiltered ? matchCount : undefined,
 						rows: [...relationshipRecordsFiltered, ...dataRecords].map(
-							renderDataGridRecordUsingModel(model, refreshGrid),
+							renderDataGridRecordUsingModel(
+								model,
+								refreshGrid,
+								getRecordLabel,
+							),
 						),
 					};
 				}}

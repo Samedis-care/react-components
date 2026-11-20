@@ -14,6 +14,8 @@ import { getValueByDot } from "../../utils/dotUtils";
  * @param field The field, a key of model.fields (dotted for a nested value)
  * @param record The record of the row, as model.index returned it
  * @param handleChange The change handler the renderer's control calls
+ * @param gridCellLabel The accessible name of the cell's control: the field's label and
+ *                      the row's label (see ModelRenderParams.gridCellLabel)
  * @returns The cell
  * @throws Error "Not supported" from a renderer that has no grid editor, for an
  *         editable overview visibility
@@ -23,6 +25,7 @@ const renderModelCell = (
 	field: ModelFieldName,
 	record: ModelRecord<ModelUnknown>,
 	handleChange: ModelRenderParams<unknown>["handleChange"],
+	gridCellLabel?: string,
 ): React.ReactElement => {
 	const definition = model.fields[field];
 	const value = getValueByDot(field, record);
@@ -35,6 +38,7 @@ const renderModelCell = (
 		autoFocus: false,
 		initialValue: value,
 		label: definition.getLabel(),
+		gridCellLabel,
 		visibility: Object.assign({}, definition.visibility.overview, {
 			hidden: false,
 		}),

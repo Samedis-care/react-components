@@ -25,6 +25,11 @@ export interface InlineEditCellProps {
 	 */
 	record: ModelRecord<ModelUnknown>;
 	/**
+	 * The accessible name of the cell's control: the field's label and the row's label,
+	 * e.g. "Active, example.com" (ModelRenderParams.gridCellLabel)
+	 */
+	gridCellLabel?: string;
+	/**
 	 * Called once a change was saved or refused, to reload the rows
 	 */
 	refreshGrid: () => void;
@@ -41,7 +46,7 @@ export interface InlineEditCellProps {
  * Needs the Framework (dialogs, translations, the model's query client).
  */
 const InlineEditCell = (props: InlineEditCellProps) => {
-	const { model, field, record, refreshGrid } = props;
+	const { model, field, record, gridCellLabel, refreshGrid } = props;
 	const [pushDialog] = useDialogContext();
 	const { t } = useCCTranslations();
 	const { mutateAsync: updateRecord } = useModelMutation(model, "overview");
@@ -77,7 +82,7 @@ const InlineEditCell = (props: InlineEditCellProps) => {
 		[model, field, record, refreshGrid, pushDialog, t, updateRecord],
 	);
 
-	return renderModelCell(model, field, record, handleChange);
+	return renderModelCell(model, field, record, handleChange, gridCellLabel);
 };
 
 export default React.memo(InlineEditCell);

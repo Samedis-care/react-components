@@ -41,6 +41,7 @@ class RendererBooleanCheckbox extends TypeBoolean {
 			field,
 			value,
 			label,
+			gridCellLabel,
 			handleChange,
 			handleBlur,
 			errorMsg,
@@ -84,6 +85,10 @@ class RendererBooleanCheckbox extends TypeBoolean {
 						input: {
 							"aria-invalid": !!errorMsg,
 							"aria-describedby": describedBy,
+							// a grid cell has no label element to name the control
+							"aria-label": visibility.grid
+								? (gridCellLabel ?? label)
+								: undefined,
 						},
 					}}
 				/>

@@ -45,6 +45,16 @@ export interface RenderParams<T> {
 	 */
 	label: string;
 	/**
+	 * The accessible name of a control rendered in a data grid cell: the field's label
+	 * and the row's label, e.g. "Active, example.com"
+	 * @remarks Set by `renderDataGridRecordUsingModel` for a field edited in its cell, so
+	 *          that a screen reader user can tell which row the control edits; a control
+	 *          in a grid cell has no label element to point at it. undefined where there
+	 *          is no grid row behind the control (forms, import previews) and for a
+	 *          field shown read-only in the cell.
+	 */
+	gridCellLabel?: string;
+	/**
 	 * Has the field been touched before?
 	 */
 	touched: boolean;

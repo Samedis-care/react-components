@@ -191,6 +191,23 @@ const selectBoxes = (root: HTMLElement) =>
 		),
 	);
 
+/** ISSUE-3506-ITEM-9: the inline checkboxes have no accessible name (axe `label`) */
+export const Issue3506Item9InlineCheckboxIsNamed: StoryObj = {
+	render: () => <InlineEditStory />,
+	parameters: {
+		a11y: {
+			test: "error",
+			// the row checkboxes and the search field are ISSUE-3493-ITEM-13 and ISSUE-3492-ITEM-25
+			context: { include: [".column-active"] },
+			options: { runOnly: { type: "rule", values: ["label"] } },
+		},
+	},
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice")).toBeVisible();
+		await waitFor(() => expect(inlineBoxes(canvasElement)).toHaveLength(3));
+	},
+};
+
 /**
  * ISSUE-3506-ITEM-12: Tab to an inline checkbox: MUI marks it focus-visible, but the only
  * cue is the ripple's faint tint
