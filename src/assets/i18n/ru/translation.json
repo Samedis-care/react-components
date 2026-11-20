@@ -359,6 +359,7 @@
 				}
 			},
 			"inline-edit": {
+				"cell-control-label": "{{FIELD}}, {{ROW}}",
 				"error-dialog": {
 					"message": "Изменение поля «{{LABEL}}» не сохранено: {{ERROR}}"
 				}

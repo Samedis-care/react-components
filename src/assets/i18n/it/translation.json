@@ -358,6 +358,7 @@
 				}
 			},
 			"inline-edit": {
+				"cell-control-label": "{{FIELD}}, {{ROW}}",
 				"error-dialog": {
 					"message": "La modifica di «{{LABEL}}» non è stata salvata: {{ERROR}}"
 				}
