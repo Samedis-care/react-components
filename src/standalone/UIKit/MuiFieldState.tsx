@@ -205,6 +205,17 @@ export const withMuiFieldState = <T extends MuiFieldStateSourceProps>(
 				{
 					marginInlineEnd: DIRTY_MARKER_WIDTH,
 				},
+			// The pickers draw their own outlined input, with its own class names. Their
+			// legend holds the same copy of the label, but set at the legend's font size
+			// instead of through the label's transform, so its text comes out a little
+			// narrower than the label it stands in for and the gap has to reach that much
+			// further past the dot. Padding rather than a margin here: the copy's own 5px
+			// side padding is part of what is measured, and the two together leave the
+			// same gap in the border MUI's own legend has.
+			"& > .MuiPickersOutlinedInput-root .MuiPickersOutlinedInput-notchedOutline legend > span:not(.notranslate)":
+				{
+					paddingInlineEnd: DIRTY_MARKER_WIDTH + 5,
+				},
 		}),
 		...(warning && {
 			"& > .MuiFormLabel-root": {
@@ -222,8 +233,11 @@ export const withMuiFieldState = <T extends MuiFieldStateSourceProps>(
 			// standard and filled inputs are drawn as MUI draws an error: the idle 1px
 			// underline and the 2px focus underline take the colour, the latter still
 			// only while focused, so focus stays visible. With an error MUI's own
-			// error styles apply.
-			"& > .MuiInput-underline:not(.Mui-error), & > .MuiFilledInput-underline:not(.Mui-error)":
+			// error styles apply. The date pickers draw their own standard and filled
+			// inputs, which share `MuiPickersInputBase-root`; x-date-pickers leaves the
+			// standard one without its `MuiPickersInput-underline` class, so the base
+			// class is what both are selected by.
+			"& > .MuiInput-underline:not(.Mui-error), & > .MuiFilledInput-underline:not(.Mui-error), & > .MuiPickersInputBase-root:not(.MuiPickersOutlinedInput-root, .Mui-error)":
 				{
 					"&::before, &::after": {
 						borderBottomColor: theme.palette.warning.main,
@@ -231,7 +245,7 @@ export const withMuiFieldState = <T extends MuiFieldStateSourceProps>(
 				},
 			// and hovering keeps the idle underline, as it does on an error. MUI's own
 			// hover rule, which exempts errors only, would draw it in the text colour.
-			"& > .MuiInput-underline:hover:not(.Mui-disabled, .Mui-error)::before, & > .MuiFilledInput-underline:hover:not(.Mui-disabled, .Mui-error)::before":
+			"& > .MuiInput-underline:hover:not(.Mui-disabled, .Mui-error)::before, & > .MuiFilledInput-underline:hover:not(.Mui-disabled, .Mui-error)::before, & > .MuiPickersInputBase-root:not(.MuiPickersOutlinedInput-root):hover:not(.Mui-disabled, .Mui-error)::before":
 				{
 					borderBottom: `1px solid ${theme.palette.warning.main}`,
 				},
@@ -247,12 +261,14 @@ export const withMuiFieldState = <T extends MuiFieldStateSourceProps>(
 			"&.MuiFormHelperText-root.Mui-error": {
 				color: theme.palette.error.main,
 			},
-			"& > .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
-				borderColor: theme.palette.warning.main,
-			},
-			"& > .MuiOutlinedInput-root.Mui-error .MuiOutlinedInput-notchedOutline": {
-				borderColor: theme.palette.error.main,
-			},
+			"& > .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline, & > .MuiPickersOutlinedInput-root .MuiPickersOutlinedInput-notchedOutline":
+				{
+					borderColor: theme.palette.warning.main,
+				},
+			"& > .MuiOutlinedInput-root.Mui-error .MuiOutlinedInput-notchedOutline, & > .MuiPickersOutlinedInput-root.Mui-error .MuiPickersOutlinedInput-notchedOutline":
+				{
+					borderColor: theme.palette.error.main,
+				},
 		}),
 	}));
 };

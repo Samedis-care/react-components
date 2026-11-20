@@ -284,6 +284,102 @@ export const Issue3474Item19WarningTextContrastInAYellowTheme: StoryObj = {
 	),
 };
 
+export const Issue3474Item9WarningOutlinesThePicker: StoryObj = {
+	name: "ISSUE-3474-ITEM-9: warning and dirty style the picker's outline",
+	parameters: {
+		a11y: {
+			test: "error",
+			config: {
+				// the warning label's contrast is ISSUE-3474-ITEM-19 (Issue3474Item19WarningLabelContrast)
+				rules: [{ id: "color-contrast", enabled: false }],
+			},
+		},
+		docs: {
+			description: {
+				story:
+					"ISSUE-3474-ITEM-9: with `warning` the label turns orange but the outline stays grey, and with `dirty` the dot after the label sits on the border, because the field-state styles target `MuiOutlinedInput` and the pickers render `MuiPickersOutlinedInput`.",
+			},
+		},
+	},
+	render: () => (
+		<LocalizedKeyboardDatePicker
+			label="Due date"
+			value={moment("2026-08-01")}
+			onChange={() => {}}
+			warning
+			dirty
+		/>
+	),
+	play: async ({ canvasElement }) => {
+		const outline = canvasElement.querySelector(
+			".MuiPickersOutlinedInput-notchedOutline",
+		)!;
+		const label = canvasElement.querySelector(".MuiFormLabel-root")!;
+		const gap = outline.querySelector("legend > span")!;
+		// both halves in one assertion, so the failure shows each of them
+		await expect({
+			outline: getComputedStyle(outline).borderColor,
+			// the gap in the border has to be as wide as the label with its dot
+			labelOverhangsGap:
+				label.getBoundingClientRect().right > gap.getBoundingClientRect().right,
+		}).toEqual({ outline: "rgb(237, 108, 2)", labelOverhangsGap: false });
+	},
+};
+
+export const Issue3474Item9WarningStylesTheUnderlines: StoryObj = {
+	name: "ISSUE-3474-ITEM-9: warning colours a standard and a filled picker's underline",
+	parameters: {
+		a11y: {
+			test: "error",
+			config: {
+				rules: [{ id: "color-contrast", enabled: false }],
+			},
+		},
+		docs: {
+			description: {
+				story:
+					"ISSUE-3474-ITEM-9: the pickers draw their own standard and filled inputs (`MuiPickersInput`, `MuiPickersFilledInput`), so the warning styles left both underlines in the text colour while the label turned orange.",
+			},
+		},
+	},
+	render: () => (
+		<div>
+			<LocalizedKeyboardDatePicker
+				label="Standard warning"
+				value={moment("2026-08-01")}
+				onChange={() => {}}
+				slotProps={{ textField: { variant: "standard" } }}
+				warning
+			/>
+			<LocalizedKeyboardDatePicker
+				label="Filled warning"
+				value={moment("2026-08-01")}
+				onChange={() => {}}
+				slotProps={{ textField: { variant: "filled" } }}
+				warning
+			/>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const underlines = [
+			...canvasElement.querySelectorAll(
+				".MuiPickersInputBase-root:not(.MuiPickersOutlinedInput-root)",
+			),
+		];
+		await expect(underlines).toHaveLength(2);
+		// the idle 1px underline and the 2px focus underline, in warning.main
+		await expect(
+			underlines.map((underline) => [
+				getComputedStyle(underline, "::before").borderBottomColor,
+				getComputedStyle(underline, "::after").borderBottomColor,
+			]),
+		).toEqual([
+			["rgb(237, 108, 2)", "rgb(237, 108, 2)"],
+			["rgb(237, 108, 2)", "rgb(237, 108, 2)"],
+		]);
+	},
+};
+
 /**
  * Opens the picker of a story and waits until its popup or dialog has finished
  * growing or fading in, so what is measured is its final size
