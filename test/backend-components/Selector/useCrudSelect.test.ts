@@ -8,6 +8,8 @@ import useCrudSelect, {
 import { Connector, ModelUnknown } from "../../../src/backend-integration";
 import { BaseSelectorData, getStringLabel } from "../../../src/standalone";
 import PartialApplyError from "../../../src/backend-components/Form/PartialApplyError";
+import LazyConnector from "../../../src/backend-integration/Connector/LazyConnector";
+import type ApiConnector from "../../../src/backend-integration/Connector/ApiConnector";
 
 afterEach(cleanup);
 
@@ -657,6 +659,52 @@ describe("useCrudSelect bugs", () => {
 		expect(be.calls).toEqual(["create:s1"]);
 	});
 
+	it("[ISSUE-3505-ITEM-10] a mount lists the connector's rows and writes nothing, also under StrictMode and with an initialSelected passed from untyped code", async () => {
+		const be = makeBackend([{ id: "j1", source_id: "s1" }]);
+		const { result } = renderHook(
+			() =>
+				useCrudSelect(
+					joinParams(be.connector, {
+						// @ts-expect-error initialSelected was removed: the selection is the connector's rows
+						initialSelected: [{ value: "j1", label: "Ls1", source_id: "s1" }],
+					}),
+					{ current: null },
+				),
+			{ wrapper: React.StrictMode },
+		);
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		await flush();
+		expect(be.index).toHaveBeenCalled();
+		expect(be.calls).toEqual([]);
+		expect(values(result.current.selected)).toEqual(["j1"]);
+		expect(result.current.error).toBeNull();
+	});
+
+	it("[ISSUE-3505-ITEM-10] with a LazyConnector, as in a Form, a mount queues nothing: the untouched control has no pending changes", async () => {
+		const be = makeBackend([{ id: "j1", source_id: "s1" }]);
+		const lazy = new LazyConnector(
+			be.connector as unknown as ApiConnector,
+			false,
+		);
+		const { result } = renderHook(
+			() =>
+				useCrudSelect(
+					joinParams(lazy, {
+						// @ts-expect-error initialSelected was removed: the selection is the connector's rows
+						initialSelected: [{ value: "j1", label: "Ls1", source_id: "s1" }],
+					}),
+					{ current: null },
+				),
+			{ wrapper: React.StrictMode },
+		);
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		await flush();
+		expect(lazy.isQueueEmpty()).toBe(true);
+		expect(result.current.pendingChanges).toBe(false);
+		expect(result.current.added).toEqual([]);
+		expect(values(result.current.selected)).toEqual(["j1"]);
+	});
+
 	it("[ISSUE-3509-ITEM-11] an entry that differs only in titleTooltip or freeSolo writes nothing", async () => {
 		const be = makeBackend([{ id: "j1", source_id: "s1" }]);
 		const { result } = mountJoins(be);
@@ -820,25 +868,6 @@ describe("useCrudSelect: a disabled control", () => {
 
 		expect(be.calls).toEqual(["create:s2", "delete:j1"]);
 		expect(values(result.current.selected)).toEqual(["100"]);
-	});
-
-	it("[ISSUE-3505-ITEM-5] still lists its initialSelected", async () => {
-		const be = makeBackend();
-		const { result } = renderHook(() =>
-			useCrudSelect(
-				joinParams(be.connector, {
-					disabled: true,
-					initialSelected: [pick("s1")],
-				}),
-				{ current: null },
-			),
-		);
-		await waitFor(() => expect(result.current.loading).toBe(false));
-		await flush();
-
-		expect(result.current.selected.map((entry) => entry.label)).toEqual([
-			"Ls1",
-		]);
 	});
 });
 

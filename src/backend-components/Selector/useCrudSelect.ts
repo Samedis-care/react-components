@@ -90,10 +90,6 @@ export interface UseCrudSelectParams<
 	 */
 	onChange?: (selected: DataT[]) => void;
 	/**
-	 * The initial selection (override). If set backend isn't consulted for data
-	 */
-	initialSelected?: DataT[];
-	/**
 	 * Validation callback for integration with form engine
 	 * @param data The currently selected data
 	 * @returns object Validation errors (Key => Values)
@@ -283,7 +279,6 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 		deserializeModel,
 		prepareNewEntry,
 		onChange,
-		initialSelected,
 		validate,
 		field,
 		getIdOfData,
@@ -419,9 +414,9 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [loading, addToSelectionQueue]);
 
-	// writes the change, whether the control is disabled or not: the initial load uses it
-	const applySelection = useCallback(
+	const handleSelect = useCallback(
 		async (ids: string[], reported: DataT[]) => {
+			if (disabledRef.current) return;
 			// an id reported without its entry (still loading in the field) keeps its entry
 			const kept = selected.filter(
 				(entry) =>
@@ -592,13 +587,6 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 			serialize,
 		],
 	);
-	const handleSelect = useCallback(
-		async (ids: string[], newSelected: DataT[]) => {
-			if (disabledRef.current) return;
-			await applySelection(ids, newSelected);
-		},
-		[applySelection],
-	);
 
 	const modelToSelectorData = useCallback(
 		async (data: ModelRecord<M>): Promise<DataT> => {
@@ -618,19 +606,10 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 		[deserialize, deserializeModel, getIdOfData, initialRawData],
 	);
 
-	// initial load
+	// initial load: the selection is the connector's rows, and loading it writes nothing
 	useEffect(() => {
 		void (async () => {
 			setLoading(true);
-
-			if (initialSelected) {
-				await applySelection(
-					initialSelected.map((entry) => entry.value),
-					initialSelected,
-				);
-				setLoading(false);
-				return;
-			}
 
 			try {
 				const currentlySelected = await connector.index({

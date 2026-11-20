@@ -39,6 +39,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-20 | [LocaleSelectorDialog requires supportedLocales](2026-11-20-locale-selector-supported-locales-required.md) | behavior, type |
 | 2026-11-20 | [A lazy control's onParentIdChange is called after the control mounted, not while it renders](2026-11-20-lazy-crud-connector-parent-id-after-mount.md) | behavior |
 | 2026-11-20 | [The locale selector marks the row of the current locale](2026-11-20-locale-selector-marks-current-locale.md) | behavior, theme |
+| 2026-11-20 | [The CRUD selects no longer take initialSelected](2026-11-20-crud-select-initial-selected-removed.md) | type, behavior |
 | 2026-11-20 | [A lazy control's queue keeps the Form dirty when onlySubmitMounted changes while it is shown](2026-11-20-lazy-crud-connector-only-submit-mounted-change.md) | behavior |
 | 2026-11-20 | [A control in a DataGrid cell is named after its field and row](2026-11-20-data-grid-inline-checkbox-names.md) | behavior |
 | 2026-11-20 | [InlineSwitch takes aria props for its switch, and a selector's switch requires switchLabel](2026-11-20-inline-switch-name-and-switch-label.md) | behavior, type |
