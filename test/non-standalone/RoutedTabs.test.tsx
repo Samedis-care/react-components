@@ -482,4 +482,99 @@ describe("RoutedTabs: bugs", () => {
 		expect(screen.getByText("MAIN PANEL")).toBeInTheDocument();
 		expect(screen.queryByText("AUDIT PANEL")).toBeNull();
 	});
+
+	/** The Tabs root of the bar */
+	const tabsRoot = () => document.querySelector(".MuiTabs-root") as HTMLElement;
+
+	it("[ISSUE-3500-ITEM-10] the bar scrolls by default instead of cutting off the tabs that do not fit", () => {
+		renderAt(mem("/settings"));
+		const scroller = document.querySelector(".MuiTabs-scroller");
+		expect(scroller).toHaveClass("MuiTabs-scrollableX");
+		expect(scroller).not.toHaveClass("MuiTabs-fixed");
+	});
+
+	it("[ISSUE-3500-ITEM-10] centered works with the scrolling default and logs no MUI error", () => {
+		renderAt(mem("/settings"), <Demo tabsProps={{ centered: true }} />);
+		const root = tabsRoot();
+		expect(root).toHaveClass("CcRoutedTabs-centered");
+		expect(root.querySelector(".MuiTabs-scroller")).toHaveClass(
+			"MuiTabs-scrollableX",
+		);
+		expect(muiErrors()).toEqual([]);
+	});
+
+	it("[ISSUE-3500-ITEM-10] fullWidth is a scrolling bar whose tabs grow; a vertical one stays MUI's", () => {
+		renderAt(mem("/settings"), <Demo tabsProps={{ variant: "fullWidth" }} />);
+		let root = tabsRoot();
+		expect(root).toHaveClass("CcRoutedTabs-fullWidth");
+		expect(root.querySelector(".MuiTabs-scroller")).toHaveClass(
+			"MuiTabs-scrollableX",
+		);
+		cleanup();
+		renderAt(
+			mem("/settings"),
+			<Demo tabsProps={{ variant: "fullWidth", orientation: "vertical" }} />,
+		);
+		root = tabsRoot();
+		expect(root).not.toHaveClass("CcRoutedTabs-fullWidth");
+		expect(root.querySelector(".MuiTabs-scroller")).toHaveClass(
+			"MuiTabs-fixed",
+		);
+		expect(tabEl("Main")).toHaveClass("MuiTab-fullWidth");
+	});
+
+	it("[ISSUE-3500-ITEM-10] the theme sets the defaults under CcRoutedTabs, and a prop overrides them", () => {
+		const theme = createTheme({
+			components: {
+				CcRoutedTabs: {
+					defaultProps: { variant: "fullWidth", centered: true },
+				},
+			},
+		});
+		const root = tabsRoot;
+		render(
+			<ThemeProvider theme={theme}>
+				{routed(mem("/settings"), <Demo />)}
+			</ThemeProvider>,
+		);
+		expect(root()).toHaveClass("CcRoutedTabs-fullWidth");
+		expect(root()).toHaveClass("CcRoutedTabs-centered");
+		cleanup();
+		render(
+			<ThemeProvider theme={theme}>
+				{routed(
+					mem("/settings"),
+					<Demo tabsProps={{ variant: "standard", centered: false }} />,
+				)}
+			</ThemeProvider>,
+		);
+		expect(root()).not.toHaveClass("CcRoutedTabs-fullWidth");
+		expect(root()).not.toHaveClass("CcRoutedTabs-centered");
+		expect(root().querySelector(".MuiTabs-scroller")).toHaveClass(
+			"MuiTabs-fixed",
+		);
+	});
+
+	it("[ISSUE-3500-ITEM-10] a focused tab is scrolled fully into view, and the bar's onFocus still runs", () => {
+		// jsdom has no scrollIntoView
+		const scrollIntoView = vi.fn();
+		Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+			value: scrollIntoView,
+			configurable: true,
+		});
+		try {
+			const onFocus = vi.fn();
+			renderAt(mem("/settings"), <Demo tabsProps={{ onFocus }} />);
+			act(() => tabEl("Security").focus());
+			expect(scrollIntoView).toHaveBeenCalledTimes(1);
+			expect(scrollIntoView).toHaveBeenCalledWith({
+				block: "nearest",
+				inline: "nearest",
+			});
+			expect(scrollIntoView.mock.contexts[0]).toBe(tabEl("Security"));
+			expect(onFocus).toHaveBeenCalledTimes(1);
+		} finally {
+			delete (HTMLElement.prototype as Partial<HTMLElement>).scrollIntoView;
+		}
+	});
 });

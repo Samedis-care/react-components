@@ -28,7 +28,6 @@ const meta: Meta<Args> = {
 	parameters: { layout: "fullscreen" },
 	args: {
 		"aria-label": "Settings",
-		variant: "standard",
 	},
 };
 
@@ -168,6 +167,35 @@ const SettingsTabs = (props: {
 						"",
 						<Panel name="General" text="General settings and preferences." />,
 					),
+				]}
+			</RoutedTabPanelWrapper>
+			<UrlCaption />
+		</Box>
+	);
+};
+
+/** IMF's user form: five tabs with German labels, wider than a phone */
+const UserTabs = (props: { tabsProps: Args }) => {
+	const tab = useRoutedTabPanel();
+	const panel = (name: string) => (
+		<Panel name={name} text={`Inhalt von ${name}.`} />
+	);
+	return (
+		<Box sx={{ width: "100%" }}>
+			<RoutedTabs {...props.tabsProps}>
+				<Tab label="Hauptseite" value="" />
+				<Tab label="Mandanten" value="tenants" />
+				<Tab label="Akteure" value="actors" />
+				<Tab label="Rollen" value="roles" />
+				<Tab label="Berechtigungen" value="permissions" />
+			</RoutedTabs>
+			<RoutedTabPanelWrapper>
+				{[
+					tab("tenants", panel("Mandanten")),
+					tab("actors", panel("Akteure")),
+					tab("roles", panel("Rollen")),
+					tab("permissions", panel("Berechtigungen")),
+					tab("", panel("Hauptseite")),
 				]}
 			</RoutedTabPanelWrapper>
 			<UrlCaption />
@@ -522,6 +550,214 @@ export const Issue3500Item8FocusDoesNotPulse: Story = {
 				await expect(pulse, `${name}, second tab`).toBeNull();
 			}
 			tabs[1].blur();
+		}
+	},
+};
+
+export const Issue3500Item10AllTabsReachableOnPhone: Story = {
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	args: { "aria-label": "Benutzer" },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3500-ITEM-10: IMF's user form (five German tabs, 609px) at 320px with the default variant. The scroller has `overflow-x: hidden`, so Rollen and Berechtigungen are off screen and touch users cannot reach them. Expected: every tab can be scrolled into view (e.g. `scrollable` by default).",
+			},
+		},
+	},
+	render: (args) => (
+		<Host at="/users/1" path="/users/1/*">
+			<UserTabs tabsProps={args} />
+		</Host>
+	),
+	play: async ({ canvasElement }) => {
+		const tabs = tabsOf(canvasElement, "Benutzer");
+		await expect(tabs).toHaveLength(5);
+		const scroller = canvasElement.querySelector<HTMLElement>(
+			".MuiTabs-scroller",
+		) as HTMLElement;
+		const overflowX = getComputedStyle(scroller).overflowX;
+		const overflows = scroller.scrollWidth > scroller.clientWidth;
+		await expect(
+			!overflows || overflowX === "auto" || overflowX === "scroll",
+			`tabs ${scroller.scrollWidth}px in a ${scroller.clientWidth}px scroller with overflow-x ${overflowX}`,
+		).toBe(true);
+	},
+};
+
+/**
+ * The bars of ISSUE-3500-ITEM-10, each under its own route and without
+ * panels: IMF's user form (the default variant), IMF's former profile page
+ * (`centered`) and SCF's facility form (`fullWidth`)
+ */
+const ITEM10_BARS: { name: string; props: Partial<Args>; labels: string[] }[] =
+	[
+		{
+			name: "Benutzer",
+			props: {},
+			labels: [
+				"Hauptseite",
+				"Mandanten",
+				"Akteure",
+				"Rollen",
+				"Berechtigungen",
+			],
+		},
+		{
+			name: "Profil",
+			props: { centered: true },
+			labels: ["Konto", "Apps", "Anmeldungen", "Aktivität"],
+		},
+		{
+			name: "Einrichtung",
+			props: { variant: "fullWidth" },
+			labels: [
+				"Einrichtung",
+				"Kontakte",
+				"Einstellungen",
+				"Sync-Einstellungen",
+				"Abonnement",
+			],
+		},
+	];
+
+const Item10Bars = () => (
+	<>
+		{ITEM10_BARS.map((bar) => {
+			const route = `/${bar.name.toLowerCase()}`;
+			return (
+				<Host key={bar.name} at={route} path={`${route}/*`}>
+					<RoutedTabs
+						aria-label={bar.name}
+						linkTabsToPanels={false}
+						{...bar.props}
+					>
+						{bar.labels.map((label, index) => (
+							<Tab
+								key={label}
+								label={label}
+								value={index === 0 ? "" : label.toLowerCase()}
+							/>
+						))}
+					</RoutedTabs>
+				</Host>
+			);
+		})}
+	</>
+);
+
+/** The parts of a bar of {@link Item10Bars} */
+const item10Bar = (canvasElement: HTMLElement, name: string) => {
+	const tabs = tabsOf(canvasElement, name);
+	const root = tabs[0].closest(".MuiTabs-root") as HTMLElement;
+	return {
+		tabs,
+		scroller: root.querySelector(".MuiTabs-scroller") as HTMLElement,
+		scrollButtons: Array.from(
+			root.querySelectorAll<HTMLElement>(".MuiTabs-scrollButtons"),
+		),
+	};
+};
+
+export const Issue3500Item10EveryTabComesIntoViewOnPhone: Story = {
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3500-ITEM-10: three bars at 320px, none of which fits: the default variant, `centered` and `fullWidth`. Each one scrolls and shows its scroll buttons, its first tab starts inside the bar (a centered bar used to push it past the start edge), no label is cut off inside its tab (`fullWidth` used to squeeze the tabs to 90px), and the arrow keys bring every tab fully into view.",
+			},
+		},
+	},
+	render: () => <Item10Bars />,
+	play: async ({ canvasElement }) => {
+		for (const { name } of ITEM10_BARS) {
+			const { tabs, scroller } = item10Bar(canvasElement, name);
+			await expect(getComputedStyle(scroller).overflowX, name).toBe("auto");
+			await expect(
+				scroller.scrollWidth,
+				`${name}: the tabs overflow the bar`,
+			).toBeGreaterThan(scroller.clientWidth);
+			await waitFor(async () => {
+				const buttons = item10Bar(canvasElement, name).scrollButtons;
+				await expect(buttons, `${name}: scroll buttons`).toHaveLength(2);
+				await expect(getComputedStyle(buttons[1]).display).not.toBe("none");
+			});
+			const inBar = (tab: HTMLElement) => {
+				const box = tab.getBoundingClientRect();
+				const bar = scroller.getBoundingClientRect();
+				return (
+					box.left >= bar.left - 1 &&
+					box.right <= bar.right + 1 &&
+					bar.left >= 0 &&
+					bar.right <= window.innerWidth
+				);
+			};
+			await expect(inBar(tabs[0]), `${name}: first tab`).toBe(true);
+			for (const tab of tabs) {
+				await expect(
+					tab.scrollWidth,
+					`${name}: label of "${tab.textContent}" fits its tab`,
+				).toBeLessThanOrEqual(tab.clientWidth);
+			}
+			tabs[0].focus();
+			for (const tab of tabs.slice(1)) {
+				await userEvent.keyboard("{ArrowRight}");
+				await expect(tab).toHaveFocus();
+				await waitFor(() =>
+					expect(inBar(tab), `${name}: "${tab.textContent}" in view`).toBe(
+						true,
+					),
+				);
+			}
+			tabs[tabs.length - 1].blur();
+		}
+	},
+};
+
+export const Issue3500Item10WideBarsLookAsBefore: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3500-ITEM-10: the same three bars at 1200px, where they fit, look as MUI draws them: no scroll buttons, the default bar's tabs at the start, the centered bar's tabs in the middle and the `fullWidth` bar's tabs sharing its width equally.",
+			},
+		},
+	},
+	render: () => <Item10Bars />,
+	play: async ({ canvasElement }) => {
+		const near = (a: number, b: number) => Math.abs(a - b) <= 1;
+		for (const { name } of ITEM10_BARS) {
+			const { tabs, scroller, scrollButtons } = item10Bar(canvasElement, name);
+			await expect(scrollButtons, `${name}: scroll buttons`).toHaveLength(0);
+			await expect(scroller.scrollWidth).toBe(scroller.clientWidth);
+			const bar = scroller.getBoundingClientRect();
+			const first = tabs[0].getBoundingClientRect();
+			const last = tabs[tabs.length - 1].getBoundingClientRect();
+			const before = first.left - bar.left;
+			const after = bar.right - last.right;
+			if (name === "Benutzer") {
+				await expect(near(before, 0), `${name}: starts at ${before}`).toBe(
+					true,
+				);
+				await expect(after, name).toBeGreaterThan(100);
+			} else if (name === "Profil") {
+				await expect(before, name).toBeGreaterThan(100);
+				await expect(
+					near(before, after),
+					`${name}: ${before}px before, ${after}px after`,
+				).toBe(true);
+			} else {
+				await expect(near(before, 0) && near(after, 0), name).toBe(true);
+				const widths = tabs.map((tab) => tab.getBoundingClientRect().width);
+				await expect(
+					widths.every((width) => near(width, widths[0])),
+					`${name}: ${widths.join(", ")}`,
+				).toBe(true);
+			}
 		}
 	},
 };

@@ -66,6 +66,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-20 | [A text field's helper text stays in its description when slotProps.htmlInput adds to it](2026-11-20-text-field-helper-text-stays-in-description.md) | behavior |
 | 2026-11-20 | [While a dialog button's handler runs, the buttons stay focusable and the pressed one shows a spinner](2026-11-20-dialog-busy-buttons-keep-focus.md) | behavior |
 | 2026-11-20 | [showErrorDialog accepts any value and no longer throws](2026-11-20-show-error-dialog-accepts-any-value.md) | behavior, type, i18n |
+| 2026-11-20 | [RoutedTabs scrolls when its tabs do not fit, with scroll buttons on phones](2026-11-20-routed-tabs-scroll-when-tabs-do-not-fit.md) | behavior, theme |
 | 2026-11-20 | [A lazy control's queue keeps the Form dirty when onlySubmitMounted changes while it is shown](2026-11-20-lazy-crud-connector-only-submit-mounted-change.md) | behavior |
 | 2026-11-20 | [A control in a DataGrid cell is named after its field and row](2026-11-20-data-grid-inline-checkbox-names.md) | behavior |
 | 2026-11-20 | [InlineSwitch takes aria props for its switch, and a selector's switch requires switchLabel](2026-11-20-inline-switch-name-and-switch-label.md) | behavior, type |

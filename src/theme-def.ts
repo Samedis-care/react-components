@@ -253,7 +253,10 @@ import {
 } from "./standalone/UIKit/MuiFieldState";
 import { CrudClassKey } from "./backend-components/CRUD";
 import { FormTabClassKey } from "./backend-components/Form/FormTab";
-import { RoutedTabsClassKey } from "./non-standalone/RoutedTabs/RoutedTabs";
+import {
+	RoutedTabsClassKey,
+	RoutedTabsProps,
+} from "./non-standalone/RoutedTabs/RoutedTabs";
 import { RoutedTabPanelWrapperClassKey } from "./non-standalone/RoutedTabs/RoutedTabPanelWrapper";
 import {
 	CrudLoadStatusClassKey,
@@ -546,6 +549,7 @@ declare module "@mui/material/styles" {
 		>;
 		CcBasicFormPage: Partial<BasicFormPageProps<never, never>>;
 		CcFlowEngine: Partial<FlowEngineThemeProps>;
+		CcRoutedTabs: Partial<RoutedTabsProps>;
 	}
 
 	interface Components {
@@ -992,6 +996,7 @@ declare module "@mui/material/styles" {
 			styleOverrides?: StyleOverridesWithoutOwnerState<CrudClassKey>;
 		};
 		CcRoutedTabs?: {
+			defaultProps?: ComponentsPropsList["CcRoutedTabs"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<RoutedTabsClassKey>;
 		};
 		CcRoutedTabPanelWrapper?: {

@@ -4,12 +4,15 @@ import {
 	styled,
 	tabClasses,
 	Tabs,
+	tabsClasses,
 	TabsProps,
+	useThemeProps,
 } from "@mui/material";
 import useLocation from "../../standalone/Routes/useLocation";
 import { useRouteInfo } from "../../standalone";
 import useNavigate from "../../standalone/Routes/useNavigate";
 import focusRing from "../../utils/internal/focusRing";
+import combineClassNames from "../../utils/combineClassNames";
 import { getTabId, getTabPanelId } from "./tabPanelIds";
 
 export interface RoutedTabsProps extends Omit<TabsProps, "value" | "onChange"> {
@@ -44,6 +47,44 @@ export interface RoutedTabsProps extends Omit<TabsProps, "value" | "onChange"> {
 	 * `aria-labelledby={getTabId(url, value)}` on it.
 	 */
 	linkTabsToPanels?: boolean;
+	/**
+	 * How the tabs share the bar. Default: `"scrollable"`, unlike MUI's
+	 * `Tabs`, so that every tab can be reached at any width (a phone, or 400%
+	 * zoom).
+	 * - `"scrollable"`: each tab as wide as its label, starting at the bar's
+	 *   start edge. When the tabs do not fit, the bar scrolls (swipe, the
+	 *   arrow keys, or the scroll buttons, see `scrollButtons` and
+	 *   `allowScrollButtonsMobile`).
+	 * - `"fullWidth"`: the tabs share the bar's width equally, as in MUI.
+	 *   A tab never gets narrower than its longest word: when the tabs do not
+	 *   fit, the bar scrolls like the `"scrollable"` one instead of cutting
+	 *   them off. A vertical bar keeps MUI's `fullWidth`.
+	 * - `"standard"`: MUI's fixed bar. It does not scroll, so tabs that do not
+	 *   fit are cut off and cannot be swiped into view: only for a bar that
+	 *   fits at 320px.
+	 *
+	 * A theme sets another default under `CcRoutedTabs.defaultProps`. This
+	 * component always passes `variant`, `centered` and
+	 * `allowScrollButtonsMobile` to MUI's `Tabs`, so the theme's
+	 * `MuiTabs.defaultProps` for those three do not reach it.
+	 */
+	variant?: TabsProps["variant"];
+	/**
+	 * Centers the tabs while they fit; when they do not, they start at the
+	 * bar's start edge, so the first one is not cut off. Works with every
+	 * variant, also with the default `"scrollable"` (MUI's own `centered` takes
+	 * effect only with `"standard"`). Default: `false`. The list has no
+	 * `MuiTabs-centered` class.
+	 */
+	centered?: boolean;
+	/**
+	 * Shows the scroll buttons of a scrolling bar on phones (below `sm`) too,
+	 * so that its tabs can be scrolled without swiping and it shows that more
+	 * tabs exist. Default: `true`, unlike MUI's `Tabs`. With
+	 * `scrollButtons="auto"` (MUI's default) they appear only while the tabs
+	 * do not fit; `scrollButtons={false}` hides them at every width.
+	 */
+	allowScrollButtonsMobile?: boolean;
 }
 
 export type RoutedTabsClassKey = "root";
@@ -57,6 +98,13 @@ export type RoutedTabsClassKey = "root";
  * the ring takes the tab's text color, which contrasts with the bar where the
  * primary color may not, and the focused tab is fully opaque, as MUI's ring
  * makes it. When the theme sets `focusVisible`, MUI's ring is the one shown.
+ *
+ * `CcRoutedTabs-centered` centers the tabs only while they fit (`safe
+ * center`), so overflow goes to the end edge, where the bar scrolls, and not
+ * past the start edge, where nothing can scroll to it.
+ * `CcRoutedTabs-fullWidth` is a scrollable bar whose tabs share its width
+ * equally, as MUI's `fullWidth` tabs do, but no tab gets narrower than its
+ * longest word.
  */
 const RoutedTabsRoot = styled(Tabs, { name: "CcRoutedTabs", slot: "root" })(
 	({ theme }) => ({
@@ -70,6 +118,15 @@ const RoutedTabsRoot = styled(Tabs, { name: "CcRoutedTabs", slot: "root" })(
 				opacity: 1,
 			},
 		}),
+		[`&.CcRoutedTabs-centered .${tabsClasses.list}`]: {
+			justifyContent: "safe center",
+		},
+		[`&.CcRoutedTabs-fullWidth .${tabClasses.root}`]: {
+			flexGrow: 1,
+			flexBasis: 0,
+			maxWidth: "none",
+			minWidth: "min-content",
+		},
 	}),
 );
 
@@ -141,14 +198,30 @@ const withTabProps = (
 
 /**
  * MUI `Tabs` whose selected tab is a segment of the URL (see `children`).
+ * The bar scrolls when its tabs do not fit, with scroll buttons also on
+ * phones (see `variant`, `centered` and `allowScrollButtonsMobile`), so every
+ * tab can be reached at 320px.
  * A keyboard-focused tab shows a 2px focus ring inside its edge, in the
  * primary color, or in the tab's text color with `textColor="inherit"` (tabs
  * on an AppBar); MUI's own ring when the theme sets `focusVisible`. The
- * theme styles it under `CcRoutedTabs` (`root` is the Tabs root).
- * @param props The props
+ * theme sets default props under `CcRoutedTabs.defaultProps` and styles it
+ * under `CcRoutedTabs` (`root` is the Tabs root).
+ * @param inProps The props
  */
-const RoutedTabs = (props: RoutedTabsProps) => {
-	const { linkTabsToPanels = true, ...tabsProps } = props;
+const RoutedTabs = (inProps: RoutedTabsProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcRoutedTabs" });
+	const {
+		linkTabsToPanels = true,
+		variant = "scrollable",
+		centered = false,
+		allowScrollButtonsMobile = true,
+		className,
+		onFocus,
+		...tabsProps
+	} = props;
+	// MUI's fullWidth bar never scrolls: a scrollable one whose tabs grow
+	const fullWidth =
+		variant === "fullWidth" && tabsProps.orientation !== "vertical";
 	const { pathname, search, hash } = useLocation();
 	let { url } = useRouteInfo();
 	if (url.endsWith("/")) url = url.substring(0, url.length - 1);
@@ -162,6 +235,18 @@ const RoutedTabs = (props: RoutedTabsProps) => {
 			});
 		},
 		[navigate, url, search, hash],
+	);
+	// The browser scrolls a focused tab only until part of it shows, so the
+	// edge of the bar or a scroll button could cut it off. (jsdom has no
+	// scrollIntoView.)
+	const handleFocus = useCallback(
+		(evt: React.FocusEvent<HTMLDivElement>) => {
+			onFocus?.(evt);
+			if (evt.target.getAttribute("role") === "tab") {
+				evt.target.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+			}
+		},
+		[onFocus],
 	);
 	const segment =
 		pathname
@@ -178,7 +263,21 @@ const RoutedTabs = (props: RoutedTabsProps) => {
 			? ""
 			: false;
 	return (
-		<RoutedTabsRoot {...tabsProps} value={current} onChange={handleChange}>
+		<RoutedTabsRoot
+			{...tabsProps}
+			className={combineClassNames([
+				className,
+				centered && "CcRoutedTabs-centered",
+				fullWidth && "CcRoutedTabs-fullWidth",
+			])}
+			variant={fullWidth ? "scrollable" : variant}
+			// centered by the class above, which also works with "scrollable"
+			centered={false}
+			allowScrollButtonsMobile={allowScrollButtonsMobile}
+			value={current}
+			onChange={handleChange}
+			onFocus={handleFocus}
+		>
 			{withTabProps(entries, url, linkTabsToPanels)}
 		</RoutedTabsRoot>
 	);
