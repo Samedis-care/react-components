@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from "react";
+import { flushSync } from "react-dom";
 import {
 	ListItemIcon,
 	MenuItem,
@@ -84,17 +85,21 @@ const ActionBarMenu = (props: ActionBarMenuProps) => {
 		},
 		[toggleSettings, onClose],
 	);
+	// "Reset" and "Export" open another menu. This menu closes first, so its
+	// focus trap returns focus to the "More options" button before the other
+	// menu opens: that menu then returns focus to the button when it closes,
+	// instead of to this menu's entry, which is hidden by then
 	const openResetDialogWrap = useCallback(
 		(evt: React.MouseEvent) => {
+			flushSync(onClose);
 			if (openResetDialog) openResetDialog(evt);
-			onClose();
 		},
 		[openResetDialog, onClose],
 	);
 	const openExportMenuWrap = useCallback(
 		(evt: React.MouseEvent) => {
+			flushSync(onClose);
 			if (openExportMenu) openExportMenu(evt);
-			onClose();
 		},
 		[openExportMenu, onClose],
 	);

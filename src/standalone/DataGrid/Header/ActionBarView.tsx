@@ -115,6 +115,11 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 	const closeResetMenu = useCallback(() => {
 		setResetAnchorEl(null);
 	}, []);
+	// from the phone's "More options" menu: anchored to its button, as the
+	// menu's entry closes with that menu
+	const openResetDialogFromMoreOptions = useCallback(() => {
+		setResetAnchorEl(moreOptionsRef.current);
+	}, []);
 
 	const [settingsAnchorEl, setSettingsAnchorEl] =
 		useState<MenuProps["anchorEl"]>(undefined);
@@ -176,7 +181,9 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 					<ActionBarMenu
 						anchorEl={settingsAnchorEl}
 						toggleSettings={toggleSettings}
-						openResetDialog={hideReset ? undefined : openResetDialog}
+						openResetDialog={
+							hideReset ? undefined : openResetDialogFromMoreOptions
+						}
 						openExportMenu={
 							exporters ? openExportMenuFromMoreOptions : undefined
 						}

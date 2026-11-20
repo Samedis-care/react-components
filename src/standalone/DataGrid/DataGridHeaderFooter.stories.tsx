@@ -519,3 +519,122 @@ export const Issue3495Item1PhoneExportFromMoreOptions: Story = {
 		});
 	},
 };
+
+/**
+ * ISSUE-3495-ITEM-20: on a phone with a filter bar, More options → Reset opens the Reset
+ * menu away from the button, and Escape drops focus to the page
+ */
+export const Issue3495Item20PhoneResetMenuReturnsFocus: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadPeople,
+		filterBar: SimpleFilterBar,
+	},
+	globals: PHONE,
+	play: async ({ canvas }) => {
+		const body = within(document.body);
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		const more = canvas.getByRole("button", { name: "More options" });
+		more.focus();
+		await userEvent.keyboard("{Enter}");
+		const resetItem = await body.findByRole("menuitem", { name: "Reset" });
+		await waitFor(() =>
+			expect(body.getByRole("menuitem", { name: "Columns" })).toHaveFocus(),
+		);
+		await userEvent.keyboard("{ArrowDown}");
+		await expect(resetItem).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		const refresh = await body.findByRole("menuitem", { name: "Refresh" });
+		await waitFor(() => expect(refresh).toHaveFocus());
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() =>
+			expect(
+				body.queryByRole("menuitem", { name: "Refresh" }),
+			).not.toBeInTheDocument(),
+		);
+		await waitFor(() =>
+			expect(
+				more,
+				`focus is on ${document.activeElement?.tagName}`,
+			).toHaveFocus(),
+		);
+	},
+};
+
+/**
+ * ISSUE-3495-ITEM-20: on a phone with a filter bar, More options → Reset opens the Reset
+ * menu below the More options button
+ */
+export const Issue3495Item20PhoneResetMenuBelowMoreOptions: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadPeople,
+		filterBar: SimpleFilterBar,
+	},
+	globals: PHONE,
+	play: async ({ canvas }) => {
+		const body = within(document.body);
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		const more = canvas.getByRole("button", { name: "More options" });
+		await userEvent.click(more);
+		await userEvent.click(await body.findByRole("menuitem", { name: "Reset" }));
+		const refresh = await body.findByRole("menuitem", { name: "Refresh" });
+		await waitFor(() => expect(refresh).toBeVisible());
+		const menu = body.getByRole("menu", { name: "Reset" });
+		await expect(menu).toContainElement(refresh);
+		const paper = refresh.closest<HTMLElement>(".MuiPaper-root");
+		if (!paper) throw new Error("the Refresh entry is not in a menu paper");
+		await waitFor(async () => {
+			const menuRect = paper.getBoundingClientRect();
+			const buttonRect = more.getBoundingClientRect();
+			// anchored to the button, not to the closed menu's Reset entry
+			await expect(
+				Math.abs(menuRect.top - buttonRect.bottom),
+			).toBeLessThanOrEqual(2);
+			await expect(menuRect.left).toBeLessThan(buttonRect.right);
+			await expect(menuRect.right).toBeGreaterThan(buttonRect.left);
+		});
+	},
+};
+
+/**
+ * ISSUE-3495-ITEM-20: on a phone with a filter bar, the Export menu opened from More
+ * options returns focus to the More options button when it closes
+ */
+export const Issue3495Item20PhoneExportMenuReturnsFocus: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadPeople,
+		filterBar: SimpleFilterBar,
+		exporters: [EXCEL],
+	},
+	globals: PHONE,
+	play: async ({ canvas }) => {
+		const body = within(document.body);
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		const more = canvas.getByRole("button", { name: "More options" });
+		more.focus();
+		await userEvent.keyboard("{Enter}");
+		const exportItem = await body.findByRole("menuitem", { name: "Export" });
+		await waitFor(() =>
+			expect(body.getByRole("menuitem", { name: "Columns" })).toHaveFocus(),
+		);
+		await userEvent.keyboard("{ArrowDown}{ArrowDown}");
+		await expect(exportItem).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		const excel = await body.findByRole("menuitem", { name: "Excel" });
+		await waitFor(() => expect(excel).toHaveFocus());
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() =>
+			expect(
+				body.queryByRole("menuitem", { name: "Excel" }),
+			).not.toBeInTheDocument(),
+		);
+		await waitFor(() =>
+			expect(
+				more,
+				`focus is on ${document.activeElement?.tagName}`,
+			).toHaveFocus(),
+		);
+	},
+};
