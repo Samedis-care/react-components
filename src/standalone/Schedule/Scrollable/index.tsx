@@ -26,12 +26,14 @@ import throwError from "../../../utils/throwError";
 /**
  * Callback to load week data from a data source
  *
- * ScrollableSchedule calls it for each week it adds to the list. When it is
- * passed a new function, it calls the new one for every week in the list; each
- * week keeps its rows until the new result arrives, and a result or error of
- * an earlier call that arrives later is ignored. Pass a function that changes
- * only when the data source does (`useCallback`): a new function on every
- * render reloads the list on every render.
+ * ScrollableSchedule calls it for each week it adds to the list. A filter
+ * change and a components-care language change start the list over as on
+ * mount: it is emptied and filled again from the current week (offset 0) on.
+ * When it is passed a new function, it calls the new one for every week in
+ * the list; each week keeps its rows until the new result arrives, and a
+ * result or error of an earlier call that arrives later is ignored. Pass a
+ * function that changes only when the data source does (`useCallback`): a new
+ * function on every render reloads the list on every render.
  * @param weekOffset The week relative to the current week of year
  * 					 Example: -1 for last week, 0 for this week, 1 for next week
  * @param filter The filter selected by the user
@@ -55,7 +57,8 @@ export interface ScrollableScheduleProps {
 	loadWeekCallback: LoadWeekCallback;
 
 	/**
-	 * Optional filter
+	 * Optional filter. A change calls the filter's `onChange` and starts the
+	 * list over at the current week, as on mount (see LoadWeekCallback).
 	 */
 	filters?: Record<string, ScheduleFilterDefinition>;
 	/**
@@ -101,6 +104,14 @@ interface ScrollableScheduleState<
 	filterValues: {
 		[FilterName in keyof Filters]: Filters[FilterName]["defaultValue"];
 	};
+	/**
+	 * Key of the scroll container. Starting the list over gives it a new key,
+	 * so the new container is filled as on mount, at its top. Emptying the old
+	 * one instead would make the browser clamp its scroll position to 0 and
+	 * fire a scroll event, which counts as reaching the top and loads last week
+	 * first.
+	 */
+	listKey: number;
 }
 
 const TodayButtonWrapper = styled(Grid, {
@@ -164,6 +175,11 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 	const { t, i18n } = useCCTranslations();
 	const todayElem = useRef<HTMLElement | null>(null);
 	const scrollElem = useRef<InfiniteScroll | null>(null);
+	/**
+	 * Set when the list is started over while focus is inside it, so that the
+	 * new scroll container takes the focus instead of the page
+	 */
+	const refocusList = useRef(false);
 
 	const getDefaultState = useCallback(
 		(): ScrollableScheduleState<typeof filters> => ({
@@ -178,6 +194,7 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 						]),
 					)
 				: {},
+			listKey: 0,
 		}),
 		[filters],
 	);
@@ -185,18 +202,41 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 	const [state, setState] =
 		useState<ScrollableScheduleState<typeof filters>>(getDefaultState);
 
-	useEffect(() => {
-		const onLanguageChanged = () => {
+	/**
+	 * Starts the list over as on mount: from the current week, in a new scroll
+	 * container (see `listKey`)
+	 * @param changedFilters The filter values to change; the others are kept
+	 */
+	const startOver = useCallback(
+		(changedFilters?: Record<string, string | boolean>) => {
+			const list = scrollElem.current?.wrapper;
+			refocusList.current =
+				!!list && list.contains(list.ownerDocument.activeElement);
 			setState((prev) => ({
 				...getDefaultState(),
-				filterValues: prev.filterValues,
+				filterValues: { ...prev.filterValues, ...changedFilters },
+				listKey: prev.listKey + 1,
 			}));
+		},
+		[getDefaultState],
+	);
+
+	useEffect(() => {
+		if (!refocusList.current) return;
+		refocusList.current = false;
+		scrollElem.current?.wrapper?.focus();
+	}, [state.listKey]);
+
+	useEffect(() => {
+		// not startOver itself: i18next passes the language, not filter values
+		const onLanguageChanged = () => {
+			startOver();
 		};
 		i18n.on("languageChanged", onLanguageChanged);
 		return () => {
 			i18n.off("languageChanged", onLanguageChanged);
 		};
-	}, [getDefaultState, i18n]);
+	}, [startOver, i18n]);
 
 	/**
 	 * Loads more data in the infinite scroll
@@ -245,20 +285,14 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 		(evt: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
 			const value =
 				evt.target.type === "checkbox" ? evt.target.checked : evt.target.value;
-			setState((prev) => ({
-				...getDefaultState(),
-				filterValues: {
-					...prev.filterValues,
-					[evt.target.name]: value,
-				},
-			}));
+			startOver({ [evt.target.name]: value });
 			if (!props.filters) return;
 			const changeHandler = props.filters[evt.target.name].onChange as (
 				newFilter: string | boolean,
 			) => void;
 			if (changeHandler) changeHandler(value);
 		},
-		[getDefaultState, props.filters],
+		[startOver, props.filters],
 	);
 
 	const [filterSettingsAnchorEl, setFilterSettingsAnchorEl] =
@@ -407,6 +441,7 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 			</TodayButtonWrapper>
 			<Grid size={12}>
 				<StyledInfiniteScroll
+					key={state.listKey}
 					className={combineClassNames([wrapperClass, classes?.scroller])}
 					loadMoreTop={loadMoreTop}
 					loadMoreBottom={loadMoreBottom}

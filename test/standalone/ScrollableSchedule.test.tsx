@@ -9,7 +9,13 @@ import {
 	it,
 	vi,
 } from "vitest";
-import { act, cleanup, render } from "@testing-library/react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+} from "@testing-library/react";
 import moment from "moment";
 import ccI18n from "../../src/i18n";
 import ScrollableSchedule from "../../src/standalone/Schedule/Scrollable";
@@ -158,6 +164,15 @@ const scrollTo = (el: HTMLElement, top: number) => {
 };
 const scrollToBottom = (el: HTMLElement) =>
 	scrollTo(el, el.scrollHeight - el.clientHeight);
+/**
+ * What a browser does when the content of a scrolled container gets shorter
+ * than its scroll position (jsdom does not): it clamps scrollTop to the new
+ * maximum and fires a scroll event
+ */
+const clampScroll = (el: HTMLElement) => {
+	const max = Math.max(0, el.scrollHeight - el.clientHeight);
+	if (el.scrollTop > max) scrollTo(el, max);
+};
 const weekLabels = (container: HTMLElement) =>
 	Array.from(scrollerOf(container).querySelectorAll(".MuiGrid-container > div"))
 		.map((d) => d.textContent ?? "")
@@ -333,5 +348,113 @@ describe("fill and weeks", () => {
 		);
 		await advance(400);
 		expect(cb.mock.calls.map((c) => c[0])).toEqual([0, 1, -1]);
+	});
+});
+
+describe("header filters and actions", () => {
+	it("[ISSUE-3478-ITEM-2] a filter change starts the list over at the current week, as on mount, also when emptying the scrolled list fires a scroll event at its top", async () => {
+		const cb = vi.fn<LoadWeekCallback>((o) => week(`w${o}`));
+		const { container } = render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={cb}
+				filters={{
+					mine: { type: "checkbox", label: "Mine", defaultValue: false },
+				}}
+			/>,
+		);
+		await advance(400);
+		expect(cb.mock.calls.map((c) => c[0])).toEqual([0, 1]);
+		const labelsOnMount = weekLabels(container);
+		const scrollTopOnMount = scrollerOf(container).scrollTop;
+		// the user has scrolled down into the list
+		scrollTo(scrollerOf(container), 50);
+		await advance(200);
+		const box = screen.getByRole("checkbox", { name: "Mine" });
+		act(() => box.focus());
+		fireEvent.click(box);
+		// the browser clamps the scroll position once the list is emptied
+		act(() => clampScroll(scrollerOf(container)));
+		await advance(400);
+		expect(cb.mock.calls.slice(2)).toEqual([
+			[0, { mine: true }],
+			[1, { mine: true }],
+		]);
+		expect(weekLabels(container)).toEqual(labelsOnMount);
+		expect(scrollerOf(container).scrollTop).toBe(scrollTopOnMount);
+		// the focus stays on the filter
+		expect(box).toHaveFocus();
+	});
+});
+
+describe("language change", () => {
+	it("[ISSUE-3478-ITEM-2] a language change starts the list over at the current week, as on mount, also when emptying the scrolled list fires a scroll event at its top", async () => {
+		const cb = vi.fn<LoadWeekCallback>((o) => week(`w${o}`));
+		const { container } = render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={cb}
+				filters={{
+					mine: { type: "checkbox", label: "Mine", defaultValue: true },
+				}}
+			/>,
+		);
+		await advance(400);
+		expect(cb.mock.calls.map((c) => c[0])).toEqual([0, 1]);
+		const scrollTopOnMount = scrollerOf(container).scrollTop;
+		// the user has scrolled down into the list
+		scrollTo(scrollerOf(container), 50);
+		await advance(200);
+		// the app switches moment first, as SCF does
+		moment.locale("de");
+		await act(async () => {
+			await ccI18n.changeLanguage("de");
+		});
+		// the browser clamps the scroll position once the list is emptied
+		act(() => clampScroll(scrollerOf(container)));
+		await advance(400);
+		expect(cb.mock.calls.slice(2)).toEqual([
+			[0, { mine: true }],
+			[1, { mine: true }],
+		]);
+		expect(weekLabels(container)).toEqual([
+			"Woche 42, 12 Okt. - 18 Okt.",
+			"Woche 43, 19 Okt. - 25 Okt.",
+		]);
+		expect(scrollerOf(container).scrollTop).toBe(scrollTopOnMount);
+	});
+
+	it("[ISSUE-3478-ITEM-2] when a language change starts the list over, focus on the list stays on it", async () => {
+		const { container } = render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) => week(`w${o}`)}
+			/>,
+		);
+		await advance(400);
+		act(() => scrollerOf(container).focus());
+		await act(async () => {
+			await ccI18n.changeLanguage("de");
+		});
+		await advance(400);
+		expect(scrollerOf(container)).toHaveFocus();
+	});
+
+	it("[ISSUE-3478-ITEM-2] when a language change starts the list over, focus on an entry moves to the list instead of the page", async () => {
+		const { container } = render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) => week(`w${o}`)}
+			/>,
+		);
+		await advance(400);
+		const entry = scrollerOf(container).querySelector("button")!;
+		act(() => entry.focus());
+		expect(entry).toHaveFocus();
+		await act(async () => {
+			await ccI18n.changeLanguage("de");
+		});
+		await advance(400);
+		expect(scrollerOf(container)).toHaveFocus();
 	});
 });
