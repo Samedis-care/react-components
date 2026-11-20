@@ -12,7 +12,8 @@ color: its `textColor`, or the black or white derived from its `backgroundColor`
 color picked for its faded fill when it is `dimmed`. That is the color of the entry's label,
 and the color its corners already get in the split layout. It used to inherit the text
 color around the grid, for example `rgba(0, 0, 0, 0.87)` on a light page and near-white in
-a dark theme.
+a dark theme. It still does when the entry has no text color (a `var()` fill without
+`textColor`), as its label does.
 
 ## Why
 

@@ -931,6 +931,85 @@ export const Issue3481Item6DiagonalCornerTakesItsEntryColorInDarkMode: Story = {
 	},
 };
 
+/** ISSUE-3481-ITEM-6: an entry with a var() fill and no textColor keeps the surrounding text color in a diagonal pair, whatever the other entry's color. */
+const SURROUNDING_COLOR = "rgb(10, 20, 30)";
+
+const UNRESOLVED_FILL: MatrixTileItem = {
+	key: "unresolved",
+	label: "N",
+	backgroundColor: "var(--story-fill)",
+};
+
+const FALLBACK_CORNER_ROWS: MatrixRow<TileCell>[] = [
+	{
+		key: "a",
+		label: "Alice Weber",
+		cells: {
+			// the first entry has a label color, the second one has none
+			t2: {
+				items: [
+					{ ...EARLY, corners: { bottomLeft: <span>{"●"}</span> } },
+					UNRESOLVED_FILL,
+				],
+				diagonal: true,
+			},
+			// the first entry, whose corner it is, has none
+			t3: {
+				items: [
+					{ ...UNRESOLVED_FILL, corners: { bottomLeft: <span>{"●"}</span> } },
+					LATE,
+				],
+				diagonal: true,
+			},
+		},
+	},
+];
+
+const FALLBACK_SURROUNDINGS = {
+	color: SURROUNDING_COLOR,
+	"--story-fill": "#fff59d",
+};
+
+export const Issue3481Item6DiagonalPairFallsBackToTheSurroundingColor: Story = {
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<Box sx={FALLBACK_SURROUNDINGS}>
+			<TileRoster onItemClick={args.onItemClick} rows={FALLBACK_CORNER_ROWS} />
+		</Box>
+	),
+	play: async ({ canvasElement }) => {
+		const colorsIn = (column: number) => {
+			const pair = tileCell(
+				canvasElement,
+				0,
+				column,
+			).querySelector<HTMLElement>("[role=button]");
+			const colorOf = (className: string) => {
+				const element = pair?.querySelector<HTMLElement>(`.${className}`);
+				if (!element) throw new Error(`no ${className} in column ${column}`);
+				return getComputedStyle(element).color;
+			};
+			return {
+				start: colorOf(matrixClasses.diagonalLabelStart),
+				corner: colorOf(matrixClasses.cornerBottomLeft),
+				end: colorOf(matrixClasses.diagonalLabelEnd),
+			};
+		};
+		// the first entry's color stays on its label and its corner
+		await expect(colorsIn(1)).toEqual({
+			start: "rgb(255, 255, 255)",
+			corner: "rgb(255, 255, 255)",
+			end: SURROUNDING_COLOR,
+		});
+		// a corner whose entry has no label color inherits, as the label does
+		await expect(colorsIn(2)).toEqual({
+			start: SURROUNDING_COLOR,
+			corner: SURROUNDING_COLOR,
+			end: "rgb(255, 255, 255)",
+		});
+	},
+};
+
 /** ISSUE-3481-ITEM-8: a dimmed entry with a percentage rgb() or a color() fill turns darker, and a modern color is not faded. */
 const DIMMED_FILLS: [fill: string, shown: Rgba][] = [
 	["rgb(50%, 20%, 10%)", { r: 128, g: 51, b: 26, a: 1 }],

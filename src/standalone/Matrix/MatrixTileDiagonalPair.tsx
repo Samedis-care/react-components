@@ -21,10 +21,6 @@ export const MatrixTileDiagonalRoot = styled("div", {
 	background: `linear-gradient(to bottom right, ${cssVar(
 		matrixVars.tileBackgroundA,
 	)} 0 49.5%, ${cssVar(matrixVars.tileBackgroundB)} 50.5% 100%)`,
-	// the corner drawn here is the first entry's (DIAGONAL_CORNERS): it takes
-	// that entry's text color, as the corners of a split entry take theirs;
-	// each label sets its own
-	color: cssVar(matrixVars.tileForegroundA),
 	[`&.${matrixClasses.itemClickable}`]: {
 		cursor: "pointer",
 		"&:focus-visible": entryFocusRing(theme),
@@ -49,6 +45,19 @@ export const MatrixTileDiagonalLabel = styled("div", {
 		right: 3,
 		color: cssVar(matrixVars.tileForegroundB),
 	},
+});
+
+/**
+ * Gives the corner the first entry's text color, as a split entry's root gives
+ * its corners theirs. The pair's root must not set it: a label whose entry has
+ * no text color (a var() fill without textColor, see tileColors) inherits the
+ * surrounding color, so the second label would take the first entry's. If the
+ * first entry has none, its corner inherits the surrounding color, as its
+ * label does. It draws no box, so the corner is still placed by the pair.
+ */
+const MatrixTileDiagonalCorners = styled("div")({
+	display: "contents",
+	color: cssVar(matrixVars.tileForegroundA),
 });
 
 /** The only corner a diagonal pair draws — the others would land on a label. */
@@ -133,11 +142,13 @@ const MatrixTileDiagonalPair = (props: MatrixTileDiagonalPairProps) => {
 				{b.label}
 			</MatrixTileDiagonalLabel>
 			{/* only this corner: the other three would land on top of a label */}
-			<MatrixTileCorners
-				item={a}
-				only={DIAGONAL_CORNERS}
-				className={classes?.corner}
-			/>
+			<MatrixTileDiagonalCorners>
+				<MatrixTileCorners
+					item={a}
+					only={DIAGONAL_CORNERS}
+					className={classes?.corner}
+				/>
+			</MatrixTileDiagonalCorners>
 		</MatrixTileDiagonalRoot>
 	);
 
