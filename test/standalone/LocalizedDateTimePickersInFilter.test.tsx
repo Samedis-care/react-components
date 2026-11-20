@@ -87,22 +87,38 @@ describe("date pickers in the DataGrid column filter", () => {
 			value1: "2026-08-01T12:00:00.000Z",
 			value2: "2026-08-31T12:00:00.000Z",
 		});
-		// the accessible names of the field groups, in document order. The name
-		// is matched before hidden elements are left out, so it is also asked
-		// for each outline's aria-hidden <fieldset> (a group too): only the
-		// groups the query returns count
-		const names = new Map<Element | null, string>();
-		const groups = screen.getAllByRole("group", {
-			name: (name, element) => {
-				names.set(element, name);
-				return true;
-			},
-		});
-		const [from, to] = groups.map((group) => names.get(group));
-		expect(from).not.toBe("");
-		expect(to).not.toBe("");
-		expect(from).not.toBe(to);
+		// the field groups of the two pickers come first; the chained filter's
+		// combinator and picker follow them
+		const groups = screen.getAllByRole("group");
+		expect(groups[0]).toHaveAccessibleName("From");
+		expect(groups[1]).toHaveAccessibleName("To");
 	});
+
+	it("[ISSUE-3474-ITEM-21] names the two pickers of a date/time range filter", () => {
+		renderFilter("datetime", {
+			type: "inRange",
+			value1: "2026-08-01T10:00:00.000Z",
+			value2: "2026-08-31T18:00:00.000Z",
+		});
+		const groups = screen.getAllByRole("group");
+		expect(groups[0]).toHaveAccessibleName("From");
+		expect(groups[1]).toHaveAccessibleName("To");
+	});
+
+	it.each([
+		["date", "Date"],
+		["datetime", "Date and time"],
+	] as const)(
+		"[ISSUE-3474-ITEM-21] names the picker of a single %s filter",
+		(valueType, name) => {
+			renderFilter(valueType, {
+				type: "equals",
+				value1: "2026-08-01T12:00:00.000Z",
+				value2: "",
+			});
+			expect(screen.getAllByRole("group")[0]).toHaveAccessibleName(name);
+		},
+	);
 
 	it("[ISSUE-3474-ITEM-4] writes the upper bound of a date/time range from the second picker", () => {
 		const from = moment("2026-08-01T10:00").toISOString();

@@ -6,6 +6,7 @@ import {
 	fireEvent,
 	render,
 	screen,
+	within,
 } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -139,6 +140,54 @@ describe.each(PICKERS)("%s name", (_name, Picker, title) => {
 		const dialog = await openCalendar();
 		expect(dialog.closest(".MuiDialog-root")).not.toBeNull();
 		expect(dialog).toHaveAccessibleName("Due");
+	});
+
+	it("[ISSUE-3474-ITEM-21] names the mobile dialog after aria-label, also where it shows its title", async () => {
+		stubMobile();
+		render(
+			<Wrap>
+				<Picker aria-label="Due" value={VALUE} onChange={vi.fn()} />
+			</Wrap>,
+		);
+		const dialog = await openCalendar();
+		expect(dialog.closest(".MuiDialog-root")).not.toBeNull();
+		expect(within(dialog).getByText(title)).toBeInTheDocument();
+		expect(dialog).toHaveAccessibleName("Due");
+	});
+
+	it("[ISSUE-3474-ITEM-21] names the desktop popup after aria-label, also where it shows its title", async () => {
+		render(
+			<Wrap>
+				<Picker
+					aria-label="Due"
+					value={VALUE}
+					onChange={vi.fn()}
+					slotProps={{ toolbar: { hidden: false } }}
+				/>
+			</Wrap>,
+		);
+		const dialog = await openCalendar();
+		expect(dialog.closest(".MuiDialog-root")).toBeNull();
+		expect(within(dialog).getByText(title)).toBeInTheDocument();
+		expect(dialog).toHaveAccessibleName("Due");
+	});
+
+	it("[ISSUE-3474-ITEM-21] names the mobile dialog of a labelled picker after its title, as MUI does, also when aria-label is set", async () => {
+		stubMobile();
+		render(
+			<Wrap>
+				<Picker
+					label="Due date"
+					aria-label="Due"
+					value={VALUE}
+					onChange={vi.fn()}
+				/>
+			</Wrap>,
+		);
+		expect(screen.getByRole("group")).toHaveAccessibleName("Due date");
+		const dialog = await openCalendar();
+		expect(dialog.closest(".MuiDialog-root")).not.toBeNull();
+		expect(dialog).toHaveAccessibleName(title);
 	});
 
 	it("[ISSUE-3474-ITEM-21] keeps the names the caller set in the slot props", async () => {

@@ -8,14 +8,16 @@
 
 ## What changed
 
-- `aria-label` is now a documented prop of the three pickers. It names the field group
-  (`role="group"`, which holds the sections) and the open calendar dialog, the desktop
-  popup as well as the mobile dialog where it shows no title. Before, MUI put it on the
-  field's outer `<div>`, where it named nothing; it is no longer there. A visible `label`
-  still names both instead, and the mobile dialog's title still names the mobile dialog.
-  An `aria-label` set in `slotProps.textField.slotProps.input`, `slotProps.popper` or
-  `slotProps.mobilePaper` is kept for that element. `DateInput` and `DateTimeInput` hand
-  `aria-label` on to their picker.
+- `aria-label` is now a documented prop of the three pickers, for a picker without a
+  visible `label`. It names the field group (`role="group"`, which holds the sections)
+  and the open calendar dialog: the desktop popup and the mobile dialog, also while the
+  mobile dialog shows its title ("Select date"). Before, MUI put it on the field's outer
+  `<div>`, where it named nothing; it is no longer there. A visible `label` takes its
+  place, as in MUI: the label names the field and the desktop popup, and the mobile
+  dialog's title names the mobile dialog. An `aria-label` set in
+  `slotProps.textField.slotProps.input`, `slotProps.popper` or `slotProps.mobilePaper` is
+  kept for that element. `DateInput` and `DateTimeInput` hand `aria-label` on to their
+  picker.
 - A picker with neither `label` nor `aria-label` opens a calendar named after MUI's title
   of the mobile dialog, in the components-care language: "Select date" for the date
   pickers, "Select date & time" for `LocalizedDateTimePicker` (the picker's
@@ -27,11 +29,12 @@
 
 ## Why
 
-MUI names a picker's field and its calendar only after the visible `label`. A picker
-without one, such as the DataGrid's date filters, had an unnamed field, so a screen
-reader said "Month, spin button" with nothing telling what the date is for; the two
-pickers of a "Between" filter could not be told apart; and the open calendar was an
-unnamed dialog.
+MUI names a picker's field and its desktop calendar only after the visible `label`, and
+its mobile dialog after the dialog's title. A picker without a label, such as the
+DataGrid's date filters, had an unnamed field, so a screen reader said "Month, spin
+button" with nothing telling what the date is for; the two pickers of a "Between"
+filter, and their calendars, could not be told apart; and the open desktop calendar was
+an unnamed dialog.
 
 ## Migration
 

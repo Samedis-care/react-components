@@ -47,10 +47,13 @@ export interface LocalizedKeyboardDatePickerProps
 	 * The accessible name of the picker, for a picker without a visible
 	 * `label`, such as the translated purpose of the date ("From", "To"). It
 	 * names the field (its `role="group"`, which a screen reader announces when
-	 * focus enters a section) and the open calendar dialog. A visible `label`
-	 * names both instead. Default: none. A picker with neither has an unnamed
-	 * field, and its calendar is named after MUI's title of the mobile dialog,
-	 * "Select date".
+	 * focus enters a section) and the open calendar dialog: the desktop popup
+	 * and the mobile dialog, also while the mobile dialog shows its title
+	 * ("Select date"). A visible `label` takes its place, as in MUI: the label
+	 * names the field and the desktop popup, and the mobile dialog's title
+	 * names the mobile dialog. Default: none. A picker with neither has an
+	 * unnamed field, and its calendar is named after MUI's title of the mobile
+	 * dialog, "Select date".
 	 */
 	"aria-label"?: string;
 	/**

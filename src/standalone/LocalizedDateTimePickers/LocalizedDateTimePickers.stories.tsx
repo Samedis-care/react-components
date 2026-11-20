@@ -442,7 +442,7 @@ export const Issue3474Item21PickerNamedByAriaLabel: StoryObj = {
 		docs: {
 			description: {
 				story:
-					'ISSUE-3474-ITEM-21: `aria-label` names a picker that shows no label, as the DataGrid\'s date filters do ("From", "To"): a screen reader announces the field group by it when focus enters a section, and the open calendar is a dialog named after it. A visible `label` names both instead.',
+					'ISSUE-3474-ITEM-21: `aria-label` names a picker that shows no label, as the DataGrid\'s date filters do ("From", "To"): a screen reader announces the field group by it when focus enters a section, and the open calendar is a dialog named after it, the desktop popup as well as the mobile dialog. A visible `label` takes its place, as in MUI.',
 			},
 		},
 	},
