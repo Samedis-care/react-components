@@ -84,14 +84,19 @@ const FormLoaderOverlayStatus = styled("div", {
 	name: "CcFormLoaderOverlay",
 	slot: "status",
 })({
-	// visually hidden, as MUI's visuallyHidden
+	// visually hidden, as MUI's visuallyHidden, but inside the area the wash covers: in
+	// its top left corner, without visuallyHidden's -1px margin. Where it would follow
+	// the content, that margin put it 1px past the area's start edge, which in a
+	// right-to-left layout on a left-to-right page (the right edge) scrolled the page
+	// sideways
 	border: 0,
 	clipPath: "inset(50%)",
 	height: 1,
-	margin: -1,
 	overflow: "hidden",
 	padding: 0,
 	position: "absolute",
+	top: 0,
+	left: 0,
 	whiteSpace: "nowrap",
 	width: 1,
 });
@@ -121,9 +126,10 @@ const TRANSLATION_OPTIONS = { i18n: ccI18n, useSuspense: false };
  * - `content`: with `children` only, the block around the children that is `inert`
  *   and `aria-busy` while the overlay is visible
  * - `status`: the status region (`role="status"`) with the `message` while the
- *   overlay is visible, visually hidden. It is rendered also while the overlay is
- *   not visible, outside the wash: right after it, inside the container with
- *   `children`
+ *   overlay is visible, visually hidden: a 1px box in the top left corner of the area
+ *   the wash covers, inside it, so that it makes no page scroll in either direction.
+ *   It is rendered also while the overlay is not visible, outside the wash: right
+ *   after it, inside the container with `children`
  */
 export type FormLoaderOverlayClassKey =
 	"root" | "loaderAnchor" | "loader" | "container" | "content" | "status";

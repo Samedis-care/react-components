@@ -221,6 +221,73 @@ export const Issue3473Item7BusyOverlayIsNamed: OverlayStory = {
 };
 
 /**
+ * A box of the given direction that an idle overlay covers: the wash alone over the
+ * box, or, with `wraps`, wrapping the box's content. The box has no padding, like a
+ * form page's layout, so the content starts at its edges.
+ */
+const CoveredBox = ({
+	dir,
+	wraps,
+}: {
+	dir: "ltr" | "rtl";
+	wraps?: boolean;
+}) => (
+	<Box dir={dir} sx={{ position: "relative", width: 200 }}>
+		{wraps ? (
+			<FormLoaderOverlay visible={false}>
+				<Typography>Wrapped content</Typography>
+			</FormLoaderOverlay>
+		) : (
+			<>
+				<Typography>Covered content</Typography>
+				<FormLoaderOverlay visible={false} />
+			</>
+		)}
+	</Box>
+);
+
+export const Issue3473Item15StatusInsideTheWash: OverlayStory = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-15: the visually hidden status region lies inside the area the wash covers, left to right and right to left, with and without wrapped content. With MUI's -1px margin it stuck out 1px at the start edge, so a right-to-left form page on a left-to-right page scrolled sideways.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	render: () => (
+		<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+			<CoveredBox dir={"ltr"} />
+			<CoveredBox dir={"rtl"} />
+			<CoveredBox dir={"rtl"} wraps />
+		</Box>
+	),
+	play: async ({ canvasElement }) => {
+		const statuses = within(canvasElement).getAllByRole("status");
+		await expect(statuses).toHaveLength(3);
+		const cases = ["ltr", "rtl", "rtl wrapped"];
+		// the edges of the area the wash covers that a status region sticks out of
+		const outside = statuses.flatMap((status, i) => {
+			// the wash is the element right before its status region
+			const wash = status.previousElementSibling;
+			if (!wash) throw new Error("wash not rendered");
+			const area = rectOf(wash);
+			const box = rectOf(status);
+			return [
+				box.left < area.left && "left",
+				box.right > area.right && "right",
+				box.top < area.top && "top",
+				box.bottom > area.bottom && "bottom",
+			]
+				.filter(Boolean)
+				.map((edge) => `${cases[i]}: ${edge}`);
+		});
+		await expect(outside).toEqual([]);
+	},
+};
+
+/**
  * An import step: a file name and a Start button that makes the step busy until "Finish
  * import", outside the busy area, is pressed. The overlay wraps the step.
  */
