@@ -46,6 +46,24 @@ export interface IDataGridSearchViewProps {
 	className?: string;
 }
 
+// the class of the search box's root element, see focusDataGridSearch
+const SEARCH_CLASS = "CcDataGrid-search";
+
+/**
+ * Moves keyboard focus to a grid's search box: its field or, below sm, the
+ * button that opens it. For a control of the grid that is about to go away,
+ * so that focus doesn't fall to the page.
+ * @param root The grid's root element (useDataGridRootRef); null does nothing
+ */
+export const focusDataGridSearch = (root: HTMLElement | null) => {
+	root
+		?.querySelector(`.${SEARCH_CLASS}`)
+		// the field comes first; below sm there is only the button (the
+		// popover's field is not in the grid)
+		?.querySelector<HTMLElement>("input, button")
+		?.focus();
+};
+
 const anchorOrigin: PopoverOrigin = {
 	vertical: "bottom",
 	horizontal: "center",
@@ -117,7 +135,13 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 	const smDown = useMediaQuery((theme) => theme.breakpoints.down("sm"));
 
 	return (
-		<div className={combineClassNames([props.className, classes?.search])}>
+		<div
+			className={combineClassNames([
+				props.className,
+				SEARCH_CLASS,
+				classes?.search,
+			])}
+		>
 			{!smDown ? (
 				renderTextField(false)
 			) : (

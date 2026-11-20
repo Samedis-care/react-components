@@ -1303,3 +1303,68 @@ export const Issue3493Item13RowCheckboxesAreNamed: Story = {
 		).toHaveLength(PEOPLE.length);
 	},
 };
+
+/**
+ * ISSUE-3493-ITEM-17: search for "zzz", then press Enter on "Clear filters" in the
+ * empty grid. The button goes with the filters it clears, so focus moves to the
+ * (now empty) search field first, and stays there while the rows come back.
+ */
+export const Issue3493Item17ClearFiltersFocusesSearch: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: makeLoadData(),
+		searchPlaceholder: "Search people",
+	},
+	play: async ({ canvas }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		const search = canvas.getByPlaceholderText("Search people");
+		await userEvent.type(search, "zzz");
+		const clear = await canvas.findByRole(
+			"button",
+			{ name: "Clear filters" },
+			{ timeout: 3000 },
+		);
+		clear.focus();
+		await userEvent.keyboard("{Enter}");
+		await expect(search).toHaveFocus();
+		await expect(search).toHaveValue("");
+		await expect(
+			await canvas.findByText("Alice Müller", {}, { timeout: 3000 }),
+		).toBeVisible();
+		await expect(search).toHaveFocus();
+	},
+};
+
+/**
+ * The same on a phone, where the search box is a button that opens the field
+ * in a popover: focus moves to that button
+ */
+export const Issue3493Item17ClearFiltersFocusesSearchOnPhone: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: makeLoadData(),
+	},
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	play: async ({ canvas, canvasElement }) => {
+		await canvas.findByText("Alice Müller");
+		const searchButton = canvas.getByRole("button", { name: "Search" });
+		await userEvent.click(searchButton);
+		// the popover's field is portaled out of the canvas and takes focus
+		const field = await within(canvasElement.ownerDocument.body).findByRole(
+			"textbox",
+		);
+		await waitFor(() => expect(field).toHaveFocus());
+		await userEvent.keyboard("zzz");
+		await userEvent.keyboard("{Escape}");
+		const clear = await canvas.findByRole(
+			"button",
+			{ name: "Clear filters" },
+			{ timeout: 3000 },
+		);
+		clear.focus();
+		await userEvent.keyboard("{Enter}");
+		await expect(searchButton).toHaveFocus();
+		await canvas.findByText("Alice Müller", {}, { timeout: 3000 });
+		await expect(searchButton).toHaveFocus();
+	},
+};

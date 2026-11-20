@@ -11,6 +11,7 @@ import {
 	IDataGridColumnProps,
 	useDataGridColumnsWidthState,
 	useDataGridProps,
+	useDataGridRootRef,
 	useDataGridState,
 } from "../DataGrid";
 import { AutoSizer, Size } from "react-virtualized-auto-sizer";
@@ -28,6 +29,7 @@ import {
 import ActionButton from "../../UIKit/ActionButton";
 import { Clear as ResetFilterIcon } from "@mui/icons-material";
 import useDocumentBody from "../../../utils/useDocumentBody";
+import { focusDataGridSearch } from "../Header/SearchView";
 
 export interface IDataGridContentProps
 	extends IDataGridColumnProps, Pick<DataGridProps, "globalScrollListener"> {
@@ -186,6 +188,14 @@ const Content = (props: IDataGridContentProps) => {
 
 	const filtersActive = useDataGridFiltersActive();
 	const resetFilters = useDataGridResetFilters();
+	const gridRoot = useDataGridRootRef();
+	// "Clear filters" goes with the filters it clears. Focus moves to the (now
+	// empty) search field first, which stays while the grid reloads, so it
+	// doesn't fall to the page
+	const handleResetFilters = useCallback(() => {
+		focusDataGridSearch(gridRoot.current);
+		resetFilters();
+	}, [gridRoot, resetFilters]);
 
 	const noContentRenderer = useCallback(
 		() => (
@@ -217,7 +227,7 @@ const Content = (props: IDataGridContentProps) => {
 							{filtersActive && (
 								<Grid>
 									<ActionButton
-										onClick={resetFilters}
+										onClick={handleResetFilters}
 										fullWidth={false}
 										icon={<ResetFilterIcon />}
 									>
@@ -233,7 +243,7 @@ const Content = (props: IDataGridContentProps) => {
 		[
 			classes?.centeredStickyTypography,
 			filtersActive,
-			resetFilters,
+			handleResetFilters,
 			state.dataLoadError,
 			state.refreshData,
 			t,

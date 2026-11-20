@@ -607,3 +607,66 @@ describe("Cell: ARIA structure", () => {
 		).not.toBeNull();
 	});
 });
+
+describe("Content: no rows", () => {
+	it("[ISSUE-3493-ITEM-17] Clear filters in the empty state keeps keyboard focus on the grid", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		render(
+			<Grid
+				loadData={(p) => {
+					const rows = ROWS.filter((r) =>
+						(r.name as string).toLowerCase().includes(p.quickFilter),
+					);
+					return { rowsTotal: ROWS.length, rowsFiltered: rows.length, rows };
+				}}
+			/>,
+		);
+		await screen.findByText("Alice");
+		await idle();
+		act(() => probe!.setState((p) => ({ ...p, search: "zzz" })));
+		passDebounce();
+		await idle();
+		const clear = await screen.findByRole("button", { name: "Clear filters" });
+		act(() => clear.focus());
+		expect(clear).toHaveFocus();
+		fireEvent.click(clear);
+		expect(document.activeElement, "focus fell to the page").not.toBe(
+			document.body,
+		);
+		passDebounce();
+		await idle();
+		await screen.findByText("Alice");
+		expect(document.activeElement, "focus fell to the page").not.toBe(
+			document.body,
+		);
+	});
+
+	it("[ISSUE-3493-ITEM-17] Clear filters moves focus to the search field it has emptied", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		render(
+			<Grid
+				loadData={(p) => {
+					const rows = ROWS.filter((r) =>
+						(r.name as string).toLowerCase().includes(p.quickFilter),
+					);
+					return { rowsTotal: ROWS.length, rowsFiltered: rows.length, rows };
+				}}
+			/>,
+		);
+		await screen.findByText("Alice");
+		await idle();
+		const search = screen.getByRole("textbox");
+		fireEvent.change(search, { target: { value: "zzz" } });
+		passDebounce();
+		await idle();
+		const clear = await screen.findByRole("button", { name: "Clear filters" });
+		act(() => clear.focus());
+		fireEvent.click(clear);
+		expect(search).toHaveFocus();
+		expect(search).toHaveValue("");
+		passDebounce();
+		await idle();
+		await screen.findByText("Alice");
+		expect(search).toHaveFocus();
+	});
+});
