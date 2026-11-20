@@ -249,3 +249,76 @@ export const Issue3473Item10SaveKeepsFocus: StoryObj<PageArgs> = {
 		);
 	},
 };
+
+/**
+ * ISSUE-3503-ITEM-16: while a save is pending Back is disabled, and it looks disabled: its
+ * background is no longer the grey of the enabled Back.
+ */
+export const Issue3503Item16DisabledBackLooksDisabled: StoryObj<PageArgs> = {
+	args: { goBack: fn() },
+	parameters: { a11y: { test: "error" } },
+	render: (args) => <HeldSaveStory goBack={args.goBack} />,
+	play: async ({ canvas, userEvent }) => {
+		const first = await canvas.findByDisplayValue("Alice", undefined, LOAD);
+		const idle = getComputedStyle(
+			canvas.getByRole("button", { name: "Back" }),
+		).backgroundColor;
+		await userEvent.type(first, "X");
+		await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+		await waitFor(() =>
+			expect(canvas.getByRole("button", { name: "Back" })).toBeDisabled(),
+		);
+		// waitFor: Back fades to its disabled colors (MUI's transition)
+		await waitFor(() =>
+			expect(
+				getComputedStyle(canvas.getByRole("button", { name: "Back" }))
+					.backgroundColor,
+				"the disabled Back has the background of the enabled one",
+			).not.toBe(idle),
+		);
+	},
+};
+
+/**
+ * The background and text of a button as drawn
+ */
+const buttonLook = (button: HTMLElement) => {
+	const style = getComputedStyle(button);
+	return { background: style.backgroundColor, text: style.color };
+};
+
+/**
+ * ISSUE-3503-ITEM-16: while a save is pending the disabled Back looks like the disabled Save,
+ * background and text, and once the save is done it has its own grey again.
+ */
+export const Issue3503Item16DisabledBackLooksLikeDisabledSave: StoryObj<PageArgs> =
+	{
+		args: { goBack: fn() },
+		parameters: { a11y: { test: "error" } },
+		render: (args) => <HeldSaveStory goBack={args.goBack} />,
+		play: async ({ canvas, userEvent }) => {
+			const first = await canvas.findByDisplayValue("Alice", undefined, LOAD);
+			const back = canvas.getByRole("button", { name: "Back" });
+			const save = canvas.getByRole("button", { name: "Save" });
+			const idle = buttonLook(back);
+			await userEvent.type(first, "X");
+			await userEvent.click(save);
+			await waitFor(() => expect(back).toBeDisabled());
+			// waitFor: both buttons fade to their disabled colors (MUI's transition)
+			await waitFor(() =>
+				expect(
+					buttonLook(back),
+					"the disabled Back looks like the disabled Save",
+				).toEqual(buttonLook(save)),
+			);
+			await expect(buttonLook(back).text).not.toBe(idle.text);
+
+			await fireEvent.click(
+				canvas.getByRole("button", { name: "Finish saving" }),
+			);
+			await waitFor(() => expect(back).toBeEnabled());
+			await waitFor(() =>
+				expect(buttonLook(back), "Back has its grey again").toEqual(idle),
+			);
+		},
+	};
