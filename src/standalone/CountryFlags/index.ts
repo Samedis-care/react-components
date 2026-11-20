@@ -7,10 +7,10 @@
  * (its URL: `loadCountryFlags()`), the name
  * `useCCCountryTranslations().t(code)`.
  *
- * `CountryCodes` lists the countries a country select offers, all of them
- * country codes. A code known only at runtime, such as user or backend data,
- * is a `string`: test it with `isCountryCode(code)`, or look up its flag with
- * `loadCountryFlag(code)`.
+ * `CountryCodes` lists the countries a country select offers: every
+ * ISO 3166-1 country, so every country code but `"XK"`. A code known only at
+ * runtime, such as user or backend data, is a `string`: test it with
+ * `isCountryCode(code)`, or look up its flag with `loadCountryFlag(code)`.
  */
 export type CountryCode =
 	| "AD"
@@ -46,6 +46,7 @@ export type CountryCode =
 	| "BR"
 	| "BS"
 	| "BT"
+	| "BV"
 	| "BW"
 	| "BY"
 	| "BZ"
@@ -107,6 +108,7 @@ export type CountryCode =
 	| "GW"
 	| "GY"
 	| "HK"
+	| "HM"
 	| "HN"
 	| "HR"
 	| "HT"
@@ -300,6 +302,7 @@ const FlagCodes: readonly CountryCode[] = Object.freeze([
 	"BR",
 	"BS",
 	"BT",
+	"BV",
 	"BW",
 	"BY",
 	"BZ",
@@ -361,6 +364,7 @@ const FlagCodes: readonly CountryCode[] = Object.freeze([
 	"GW",
 	"GY",
 	"HK",
+	"HM",
 	"HN",
 	"HR",
 	"HT",

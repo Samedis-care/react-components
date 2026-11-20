@@ -35,6 +35,7 @@ import flag_BQ from "../../assets/img/countries/BQ.svg";
 import flag_BR from "../../assets/img/countries/BR.svg";
 import flag_BS from "../../assets/img/countries/BS.svg";
 import flag_BT from "../../assets/img/countries/BT.svg";
+import flag_BV from "../../assets/img/countries/BV.svg";
 import flag_BW from "../../assets/img/countries/BW.svg";
 import flag_BY from "../../assets/img/countries/BY.svg";
 import flag_BZ from "../../assets/img/countries/BZ.svg";
@@ -96,6 +97,7 @@ import flag_GU from "../../assets/img/countries/GU.svg";
 import flag_GW from "../../assets/img/countries/GW.svg";
 import flag_GY from "../../assets/img/countries/GY.svg";
 import flag_HK from "../../assets/img/countries/HK.svg";
+import flag_HM from "../../assets/img/countries/HM.svg";
 import flag_HN from "../../assets/img/countries/HN.svg";
 import flag_HR from "../../assets/img/countries/HR.svg";
 import flag_HT from "../../assets/img/countries/HT.svg";
@@ -286,6 +288,7 @@ const flags: Record<CountryCode, string> = {
 	BR: flag_BR,
 	BS: flag_BS,
 	BT: flag_BT,
+	BV: flag_BV,
 	BW: flag_BW,
 	BY: flag_BY,
 	BZ: flag_BZ,
@@ -347,6 +350,7 @@ const flags: Record<CountryCode, string> = {
 	GW: flag_GW,
 	GY: flag_GY,
 	HK: flag_HK,
+	HM: flag_HM,
 	HN: flag_HN,
 	HR: flag_HR,
 	HT: flag_HT,

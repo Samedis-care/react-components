@@ -192,10 +192,10 @@ COUNTRY_CODE_JSDOC = """/**
  * (its URL: `loadCountryFlags()`), the name
  * `useCCCountryTranslations().t(code)`.
  *
- * `CountryCodes` lists the countries a country select offers, all of them
- * country codes. A code known only at runtime, such as user or backend data,
- * is a `string`: test it with `isCountryCode(code)`, or look up its flag with
- * `loadCountryFlag(code)`.
+ * `CountryCodes` lists the countries a country select offers: every
+ * ISO 3166-1 country, so every country code but `"XK"`. A code known only at
+ * runtime, such as user or backend data, is a `string`: test it with
+ * `isCountryCode(code)`, or look up its flag with `loadCountryFlag(code)`.
  */"""
 
 # JSDoc of the list of codes in src/standalone/CountryFlags/index.ts
@@ -259,8 +259,18 @@ def write_country_flags(country_codes: [str]):
         f.write("};" + os.linesep)
         f.write(COUNTRY_FLAGS_TAIL.replace("\n", os.linesep))
 
+# the countries a country select offers (countries.json, CountryCodes), in code order: every
+# country and territory ISO 3166-1 assigns an alpha-2 code to (249 codes). From CLDR's code
+# mappings: a code with an ISO numeric code below 900 (900-999 are user-assigned, like Kosovo's
+# XK and the EU's EU) that is not a withdrawn code (CLDR's deprecated aliases: AN, YU, ...)
 def get_country_list() -> [str]:
-    return list(requests.get("https://raw.githubusercontent.com/esosedi/3166/master/i18n/dispute/UN/en.json").json().keys())
+    with open(CLDR_CORE + "codeMappings.json", "r") as f:
+        code_mappings = json.load(f)["supplemental"]["codeMappings"]
+    with open(CLDR_CORE + "aliases.json", "r") as f:
+        withdrawn = json.load(f)["supplemental"]["metadata"]["alias"]["territoryAlias"]
+    return sorted(code for code, mapping in code_mappings.items()
+                  if len(code) == 2 and code.isalpha() and int(mapping.get("_numeric", "999")) < 900
+                  and code not in withdrawn)
 
 # currency (lower case) -> {code: str, alphaCode: str, numericCode: str, name: str, rate: float, data: str, inverseRate: float }
 def get_currency_exchange_rates():
@@ -277,7 +287,7 @@ if __name__ == "__main__":
     country_list = get_country_list()
     download_flags(country_list)
     # the country codes with a flag: the country list plus every country of a locale-switcher
-    # entry, so each LocaleSelector row has its flag (AW, CW, SX, ... are not in the country list)
+    # entry, so each LocaleSelector row has its flag (Kosovo's XK is not in the country list)
     flag_countries = set(country_list)
     relevance = locale_relevance()
     supported_locales = set()

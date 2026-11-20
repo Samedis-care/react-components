@@ -98,13 +98,13 @@ export const German: Story = {
 	play: async ({ canvas, userEvent }) => {
 		const input = canvas.getByRole("combobox", { name: "Country" });
 		await userEvent.click(input);
-		// sorted by the German name, Ä among the A
+		// sorted by the German name, Ä and Å among the A
 		await waitFor(() =>
 			expect(optionNames().slice(0, 4)).toEqual([
 				"Afghanistan",
 				"Ägypten",
+				"Ålandinseln",
 				"Albanien",
-				"Algerien",
 			]),
 		);
 		await userEvent.type(input, "Österr");
@@ -131,9 +131,9 @@ export const English: Story = {
 		await waitFor(() =>
 			expect(optionNames().slice(0, 4)).toEqual([
 				"Afghanistan",
+				"Åland Islands",
 				"Albania",
 				"Algeria",
-				"American Samoa",
 			]),
 		);
 	},
@@ -176,5 +176,33 @@ export const Issue3466Item8FlagsKeepTheirShape: Story = {
 		const adornment = canvasElement.querySelector("img")!;
 		await waitFor(() => expect(adornment.naturalWidth).toBeGreaterThan(0));
 		await expect(flagLook(adornment)).toBe(`solid 1px ${divider} 24x16`);
+	},
+};
+
+export const Issue3466Item7EveryIsoCountry: Story = {
+	args: { language: "en" },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3466-ITEM-7: the select offers every country and territory ISO 3166-1 assigns a code to, also Aruba, Curaçao, Sint Maarten, Åland, New Caledonia and French Polynesia, each with its flag. Bouvet Island flies Norway's flag.",
+			},
+		},
+	},
+	play: async ({ canvas, userEvent }) => {
+		const input = canvas.getByRole("combobox", { name: "Country" });
+		await userEvent.click(input);
+		for (const name of ["Curaçao", "Bouvet Island"]) {
+			await userEvent.clear(input);
+			await userEvent.type(input, name);
+			const option = await within(document.body).findByRole("option", {
+				name,
+			});
+			// the flag has loaded and drawn
+			await waitFor(async () => {
+				const img = option.querySelector("img");
+				await expect(img?.naturalWidth).toBeGreaterThan(0);
+			});
+		}
 	},
 };

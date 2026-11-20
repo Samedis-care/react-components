@@ -16,6 +16,7 @@ import countryLanguages from "../../src/assets/data/country-languages.json";
 import supportedLanguages from "../../src/assets/data/supported-languages.json";
 import supportedLocales from "../../src/assets/data/supported-locales.json";
 import flagAW from "../../src/assets/img/countries/AW.svg";
+import flagXK from "../../src/assets/img/countries/XK.svg";
 import LocaleSelectorEntry from "../../src/non-standalone/LocaleSelector/LocaleSelectorEntry";
 import type { LocaleSelectorEntryData } from "../../src/non-standalone/LocaleSelector/LocaleSelectorDialogContent";
 
@@ -320,18 +321,18 @@ describe("CountryFlags", () => {
 			);
 
 		it("[ISSUE-3466-ITEM-1] shows the flag of a country that is not in countries.json", () => {
-			const aruba: LocaleSelectorEntryData = {
-				locale: "nl-AW",
-				language_short: "nl",
-				country_short: "AW",
-				country: "Aruba",
-				language: "Dutch",
-				native_country: "Aruba",
-				native_language: "Nederlands",
+			const kosovo: LocaleSelectorEntryData = {
+				locale: "sq-XK",
+				language_short: "sq",
+				country_short: "XK",
+				country: "Kosovo",
+				language: "Albanian",
+				native_country: "Kosovë",
+				native_language: "shqip",
 			};
-			const { container } = renderEntry(aruba);
-			expect(flagAW).toBeTruthy();
-			expect(container.querySelector("img")?.getAttribute("src")).toBe(flagAW);
+			const { container } = renderEntry(kosovo);
+			expect(flagXK).toBeTruthy();
+			expect(container.querySelector("img")?.getAttribute("src")).toBe(flagXK);
 		});
 
 		it("[ISSUE-3466-ITEM-6] the flag next to the country name is decorative: empty alt, the row names the country once", () => {
