@@ -57,6 +57,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-20 | [The SignPad tile is a block, as tall as its min-height without a sized parent](2026-11-20-sign-pad-tile-is-a-block.md) | behavior |
 | 2026-11-20 | [SignaturePad's dialog is part of the field: it follows the field's props and closes with it](2026-11-20-signature-pad-dialog-part-of-the-field.md) | behavior |
 | 2026-11-20 | [A press on a clickable Matrix entry reaches the elements around it](2026-11-20-matrix-entry-press-reaches-wrappers.md) | behavior |
+| 2026-11-20 | [DateInput has no timezone prop and ignores a timezone set in the theme](2026-11-20-date-input-no-timezone.md) | type, behavior |
 | 2026-11-20 | [A lazy control's queue keeps the Form dirty when onlySubmitMounted changes while it is shown](2026-11-20-lazy-crud-connector-only-submit-mounted-change.md) | behavior |
 | 2026-11-20 | [A control in a DataGrid cell is named after its field and row](2026-11-20-data-grid-inline-checkbox-names.md) | behavior |
 | 2026-11-20 | [InlineSwitch takes aria props for its switch, and a selector's switch requires switchLabel](2026-11-20-inline-switch-name-and-switch-label.md) | behavior, type |

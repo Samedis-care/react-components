@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, expectTypeOf, it, vi } from "vitest";
-import React from "react";
+import React, { useState } from "react";
 import {
 	act,
 	cleanup,
@@ -75,6 +75,51 @@ const DAY = new Date("2026-08-13T12:00:00.000Z");
 const noop = () => {};
 
 type DateInputProps = React.ComponentProps<typeof DateInput>;
+
+/** Holds the value the way a form does and records every report */
+const DateHost = ({
+	initial,
+	report,
+	...rest
+}: {
+	initial: Date | null;
+	report: (date: Date | null) => void;
+} & Partial<DateInputProps>) => {
+	const [value, setValue] = useState<Date | null>(initial);
+	return (
+		<DateInput
+			label="Day"
+			{...rest}
+			value={value}
+			onChange={(next) => {
+				report(next);
+				setValue(next);
+			}}
+		/>
+	);
+};
+
+/** What the field shows, one entry per section */
+const sections = () =>
+	screen
+		.getAllByRole("spinbutton")
+		.map((section) => section.textContent)
+		.join("|");
+
+/** One key on a section, the way the other picker tests drive the field */
+const press = (index: number, key: string) => {
+	const section = screen.getAllByRole("spinbutton")[index];
+	act(() => section.focus());
+	act(() => {
+		fireEvent.keyDown(section, { key });
+	});
+};
+
+/** The ISO strings of the date-only values a report spy received */
+const reported = (report: ReturnType<typeof vi.fn>) =>
+	report.mock.calls.map(
+		(call) => (call[0] as Date | null)?.toISOString() ?? null,
+	);
 
 /** The date the picker's text field currently shows, as MM/DD/YYYY */
 const shownDate = (container: HTMLElement) =>
@@ -479,6 +524,41 @@ describe("DateInput bugs", () => {
 		expect(
 			container.querySelector('[class*="CcUiKitPickersTextField"]'),
 		).not.toBeNull();
+	});
+
+	it("[ISSUE-3485-ITEM-5] shows and reports the stored day when a timezone is passed", async () => {
+		vi.stubEnv("TZ", "Europe/Berlin");
+		const report = vi.fn();
+		// timezone is not in DateInput's props; the cast stands in for a caller
+		// that passes it anyway
+		const zone = { timezone: "UTC" } as object;
+		wrap(<DateHost initial={DAY} report={report} {...zone} />);
+		await screen.findByRole("button", { name: /choose date/i });
+		expect(sections()).toBe("08|13|2026");
+		press(1, "ArrowUp");
+		expect(reported(report)).toEqual(["2026-08-14T12:00:00.000Z"]);
+		expect(sections()).toBe("08|14|2026");
+	});
+
+	it.each(["CcLocalizedKeyboardDatePicker", "MuiDatePicker"])(
+		"[ISSUE-3485-ITEM-5] shows and reports the stored day when the theme sets a timezone for the date pickers (%s)",
+		async (name) => {
+			vi.stubEnv("TZ", "Europe/Berlin");
+			const utc = createTheme({
+				components: { [name]: { defaultProps: { timezone: "UTC" } } },
+			});
+			const report = vi.fn();
+			wrap(<DateHost initial={DAY} report={report} />, utc);
+			await screen.findByRole("button", { name: /choose date/i });
+			expect(sections()).toBe("08|13|2026");
+			press(1, "ArrowUp");
+			expect(reported(report)).toEqual(["2026-08-14T12:00:00.000Z"]);
+			expect(sections()).toBe("08|14|2026");
+		},
+	);
+
+	it("[ISSUE-3485-ITEM-5] has no timezone prop", () => {
+		expectTypeOf<DateInputProps>().not.toHaveProperty("timezone");
 	});
 
 	it("[ISSUE-3485-ITEM-13] links a helperText prop to the field group", async () => {

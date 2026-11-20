@@ -172,6 +172,13 @@ type PickerDateProps =
 	| "dayOfWeekFormatter";
 
 /**
+ * MUI's DatePicker props DateInput does not take. `timezone`: a date-only
+ * value is a calendar day, the same in every timezone, so the field always
+ * shows and reports the stored day.
+ */
+type PickerOmittedProps = PickerDateProps | "timezone";
+
+/**
  * Hands a date-only value to the picker
  * @param day the date-only value
  * @returns the picker's day: a Moment at local midnight of the same day
@@ -234,10 +241,14 @@ const useDayCallback = <T,>(
  * `slots.textField` defaults to the components-care text field
  * (`PickersTextFieldWithHelp`, with the Clear button on touch devices and the
  * label always above the field), and one passed by the consumer replaces it.
- * There is no `defaultValue`: the input is always controlled.
+ * There is no `defaultValue`: the input is always controlled. There is no
+ * `timezone` either: the field shows and reports the stored calendar day in
+ * every timezone, also when the theme sets one for the date pickers (the
+ * `defaultProps.timezone` of `CcLocalizedKeyboardDatePicker` or
+ * `MuiDatePicker`).
  */
 const DateInput = (
-	props: DateInputProps & Omit<DatePickerProps, PickerDateProps>,
+	props: DateInputProps & Omit<DatePickerProps, PickerOmittedProps>,
 ) => {
 	const {
 		value,
@@ -314,6 +325,10 @@ const DateInput = (
 			onMonthChange={pickerOnMonthChange}
 			onYearChange={pickerOnYearChange}
 			dayOfWeekFormatter={pickerDayOfWeekFormatter}
+			// the picker's days are local (toPickerDay, fromPickerDay); another
+			// timezone, passed in spite of the type or set in the theme's
+			// defaultProps, would shift the day shown and the day reported
+			timezone="system"
 			hideDisabledIcon={hideDisabledIcon}
 			required={required}
 			error={error}
