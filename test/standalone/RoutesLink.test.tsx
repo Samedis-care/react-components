@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import React from "react";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import {
+	render,
+	screen,
+	fireEvent,
+	act,
+	cleanup,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryHistory } from "history";
 import {
@@ -385,6 +391,38 @@ describe("Link: clicks", () => {
 		);
 		expect(fireEvent.click(link)).toBe(false);
 		expect(renderedPath()).toBe("/x");
+	});
+
+	it("[ISSUE-3475-ITEM-9] points href at the location a click navigates to, for a target without pathname", () => {
+		const { history } = renderAt(
+			"/devices?page=1",
+			<>
+				<Link to={{ search: "?page=2" }}>next page</Link>
+				<Link to={{ hash: "#notes" }}>notes</Link>
+			</>,
+		);
+		const next = screen.getByRole("link", { name: "next page" });
+		const notes = screen.getByRole("link", { name: "notes" });
+		// a click keeps the pathname
+		fireEvent.click(next);
+		expect(history.location.pathname + history.location.search).toBe(
+			"/devices?page=2",
+		);
+		act(() => history.back());
+		expect(next).toHaveAttribute("href", "/devices?page=2");
+		// push({ hash }) keeps the pathname and drops the search
+		expect(notes).toHaveAttribute("href", "/devices#notes");
+	});
+
+	it("[ISSUE-3475-ITEM-9] follows the current location when the target has no pathname", () => {
+		const { history } = renderAt(
+			"/devices?page=1",
+			<Link to={{ search: "?page=2" }}>next page</Link>,
+		);
+		const next = screen.getByRole("link", { name: "next page" });
+		expect(next).toHaveAttribute("href", "/devices?page=2");
+		act(() => history.push("/settings"));
+		expect(next).toHaveAttribute("href", "/settings?page=2");
 	});
 });
 
