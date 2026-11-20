@@ -10,6 +10,7 @@ import useLocation from "../../standalone/Routes/useLocation";
 import { useRouteInfo } from "../../standalone";
 import useNavigate from "../../standalone/Routes/useNavigate";
 import focusRing from "../../utils/internal/focusRing";
+import { getTabId, getTabPanelId } from "./tabPanelIds";
 
 export interface RoutedTabsProps extends Omit<TabsProps, "value" | "onChange"> {
 	/**
@@ -23,6 +24,12 @@ export interface RoutedTabsProps extends Omit<TabsProps, "value" | "onChange"> {
 	 * Each Tab gets `disableFocusRipple` unless it sets the prop itself: a
 	 * keyboard-focused tab shows the focus ring, and MUI's pulsating focus
 	 * ripple would cover its label. A click still shows the ripple.
+	 *
+	 * Each Tab also gets an `id` and an `aria-controls` naming the panel that
+	 * `RoutedTabPanelWrapper` renders for its value, so a screen reader reads
+	 * the panel as the tab's ("Security tab panel"). A Tab that sets those
+	 * props itself has them replaced: the wrapper derives them from the route's
+	 * url and the value.
 	 */
 	children: React.ReactNode;
 }
@@ -55,32 +62,62 @@ const RoutedTabsRoot = styled(Tabs, { name: "CcRoutedTabs", slot: "root" })(
 );
 
 /**
- * The values MUI's `Tabs` gives its children: each element's `value`, or its
- * index among the elements when it has none
- * @param children The Tabs' children
- * @returns The values, in order
+ * The props of a Tab that this component reads, and the `id` and
+ * `aria-controls` it sets
  */
-const getTabValues = (children: React.ReactNode): unknown[] =>
-	React.Children.toArray(children)
-		.filter(React.isValidElement)
-		.map((child, index) => {
-			const value = (child.props as { value?: unknown }).value;
-			return value === undefined ? index : value;
-		});
+interface TabChildProps extends React.AriaAttributes {
+	/** The id that a panel's `aria-labelledby` points at */
+	id?: string;
+	/** MUI's value of the Tab; its index in the bar when it has none */
+	value?: unknown;
+	/** Set by the Tab itself to keep MUI's pulsating focus ripple */
+	disableFocusRipple?: boolean;
+}
 
 /**
- * Turns MUI's focus ripple off on each child that does not set
- * `disableFocusRipple` itself
- * @param children The Tabs' children
- * @returns The children, each element among them with the prop set
+ * A child of the Tabs that MUI renders, with the value MUI gives it
  */
-const withoutFocusRipple = (children: React.ReactNode): React.ReactNode =>
-	React.Children.map(children, (child) =>
-		React.isValidElement<{ disableFocusRipple?: boolean }>(child) &&
-		child.type !== React.Fragment &&
-		child.props.disableFocusRipple === undefined
-			? React.cloneElement(child, { disableFocusRipple: true })
-			: child,
+interface TabEntry {
+	/** The element */
+	child: React.ReactElement<TabChildProps>;
+	/** Its `value`, or its index among the elements when it has none */
+	value: unknown;
+}
+
+/**
+ * The children MUI's `Tabs` renders, in its order, with the value it gives
+ * each: the element's `value`, or its index among the elements when it has
+ * none.
+ * @param children The Tabs' children
+ * @returns The elements with their values
+ */
+const getTabEntries = (children: React.ReactNode): TabEntry[] =>
+	React.Children.toArray(children)
+		.filter(React.isValidElement<TabChildProps>)
+		.map((child, index) => ({
+			child,
+			value: child.props.value === undefined ? index : child.props.value,
+		}));
+
+/**
+ * Adds to each Tab the `id` its panel's `aria-labelledby` points at and the
+ * `aria-controls` of that panel, and turns MUI's focus ripple off on each Tab
+ * that does not set `disableFocusRipple` itself.
+ * @param entries The Tabs' children with their values
+ * @param url The url of the enclosing Route, for the ids
+ * @returns The Tab elements with the props set
+ */
+const withTabProps = (entries: TabEntry[], url: string): React.ReactNode =>
+	entries.map(({ child, value }) =>
+		child.type === React.Fragment
+			? child
+			: React.cloneElement(child, {
+					id: getTabId(url, value),
+					"aria-controls": getTabPanelId(url, value),
+					...(child.props.disableFocusRipple === undefined && {
+						disableFocusRipple: true,
+					}),
+				}),
 	);
 
 /**
@@ -111,7 +148,8 @@ const RoutedTabs = (props: RoutedTabsProps) => {
 			.substring(url.length)
 			.split("/")
 			.filter((entry) => entry)[0] ?? "";
-	const values = getTabValues(props.children);
+	const entries = getTabEntries(props.children);
+	const values = entries.map((entry) => entry.value);
 	// MUI logs an error for a value no Tab has. With such a segment the default
 	// panel (the catch-all) is the one shown, so its Tab is the selected one.
 	const current = values.includes(segment)
@@ -121,7 +159,7 @@ const RoutedTabs = (props: RoutedTabsProps) => {
 			: false;
 	return (
 		<RoutedTabsRoot {...props} value={current} onChange={handleChange}>
-			{withoutFocusRipple(props.children)}
+			{withTabProps(entries, url)}
 		</RoutedTabsRoot>
 	);
 };

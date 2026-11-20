@@ -233,6 +233,79 @@ describe("RoutedTabs: bugs", () => {
 		expect(screen.getByText("MAIN PANEL")).toBeInTheDocument();
 	});
 
+	it("[ISSUE-3500-ITEM-6] the current panel is a tabpanel named and controlled by its tab, and takes focus when it has no focusable content", () => {
+		renderAt(mem("/settings/security"));
+		const panel = screen.getByRole("tabpanel", { name: "Security" });
+		expect(panel).toHaveTextContent("SECURITY PANEL");
+		expect(panel.id).not.toBe("");
+		expect(tabEl("Security")).toHaveAttribute("aria-controls", panel.id);
+		expect(panel).toHaveAttribute("tabindex", "0");
+	});
+
+	it("[ISSUE-3500-ITEM-6] the tabpanel is labelled by its tab, and every tab names and controls its own panel", () => {
+		renderAt(mem("/settings/security"));
+		const panel = screen.getByRole("tabpanel", { name: "Security" });
+		const tabs = screen.getAllByRole("tab");
+		expect(panel).toHaveAttribute("aria-labelledby", tabEl("Security").id);
+		// every Tab is identifiable and points at its panel, also the one not shown
+		for (const tab of tabs) expect(tab.id).not.toBe("");
+		expect(new Set(tabs.map((tab) => tab.id)).size).toBe(tabs.length);
+		const controls = tabs.map((tab) => tab.getAttribute("aria-controls"));
+		expect(controls.every((id) => !!id)).toBe(true);
+		expect(new Set(controls).size).toBe(tabs.length);
+		expect(tabEl("Security")).toHaveAttribute("aria-controls", panel.id);
+	});
+
+	it("[ISSUE-3500-ITEM-6] the default panel is a tabpanel named by the default tab, and the wiring follows the tab that opens", () => {
+		const h = mem("/settings");
+		renderAt(h);
+		const main = screen.getByRole("tabpanel", { name: "Main" });
+		expect(main).toHaveTextContent("MAIN PANEL");
+		expect(tabEl("Main")).toHaveAttribute("aria-controls", main.id);
+		const mainId = main.id;
+		fireEvent.click(tabEl("Security"));
+		const security = screen.getByRole("tabpanel", { name: "Security" });
+		expect(security.id).not.toBe(mainId);
+		expect(tabEl("Security")).toHaveAttribute("aria-controls", security.id);
+		expect(tabEl("Security").id).not.toBe(tabEl("Main").id);
+	});
+
+	it("[ISSUE-3500-ITEM-6] a panel with focusable content is no tab stop, so Tab reaches its first control", () => {
+		renderAt(
+			mem("/settings/security"),
+			<Demo securityPanel={<button type="button">Edit security</button>} />,
+		);
+		const panel = screen.getByRole("tabpanel", { name: "Security" });
+		expect(panel).not.toHaveAttribute("tabindex");
+		expect(panel).toContainElement(
+			screen.getByRole("button", { name: "Edit security" }),
+		);
+	});
+
+	it("[ISSUE-3500-ITEM-6] nested bar: each panel is named and controlled by the tab of its own bar", () => {
+		const Inner = () => {
+			const tab = useRoutedTabPanel();
+			return (
+				<>
+					<RoutedTabs aria-label="Security">
+						<Tab label="Password" value="" />
+						<Tab label="2FA" value="2fa" />
+					</RoutedTabs>
+					<RoutedTabPanelWrapper>
+						{[tab("2fa", <div>2FA PANEL</div>), tab("", <div>PW PANEL</div>)]}
+					</RoutedTabPanelWrapper>
+				</>
+			);
+		};
+		renderAt(mem("/settings/security/2fa"), <Demo securityPanel={<Inner />} />);
+		const outer = screen.getByRole("tabpanel", { name: "Security" });
+		const inner = screen.getByRole("tabpanel", { name: "2FA" });
+		expect(outer).toContainElement(inner);
+		expect(outer.id).not.toBe(inner.id);
+		expect(tabEl("Security")).toHaveAttribute("aria-controls", outer.id);
+		expect(tabEl("2FA")).toHaveAttribute("aria-controls", inner.id);
+	});
+
 	it("[ISSUE-3500-ITEM-14] the panel wrapper takes conditional entries as separate JSX children, and tab takes any element", () => {
 		const Sync = (props: { interval: number }) => (
 			<div>SYNC PANEL {props.interval}</div>

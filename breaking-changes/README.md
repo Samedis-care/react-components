@@ -27,6 +27,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-20 | [An aborted index, fetchAll or getRaw request is not reported to Sentry](2026-11-20-model-index-abort-not-reported.md) | behavior |
 | 2026-11-20 | [The router's internals are no longer exported from the package root](2026-11-20-routes-internals-not-exported.md) | type |
 | 2026-11-20 | [The InfoBox header announces a warning, success or error status](2026-11-20-info-box-announces-status.md) | behavior |
+| 2026-11-20 | [RoutedTabs' panels are tab panels, named and controlled by their tabs](2026-11-20-routed-tabs-panels-are-tab-panels.md) | behavior |
 | 2026-11-19 | [PopupMenu applies its `classes`](2026-11-19-popup-menu-classes.md) | behavior, theme |
 | 2026-11-19 | [A data grid logs a failed write of its persisted state and writes it again](2026-11-19-data-grid-failed-persist-write-logged-and-retried.md) | behavior |
 | 2026-11-17 | [Leaving a date field marks it touched in a Form](2026-11-17-form-blur-marks-date-fields-touched.md) | behavior |

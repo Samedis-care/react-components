@@ -216,6 +216,78 @@ export const SecurityTab: StoryObj = {
 
 // ─── Bug stories (fail until the bug is fixed) ──────────────────────────────
 
+/** A bar whose General panel has text only and whose Security panel has a button */
+const TabStopTabs = () => {
+	const tab = useRoutedTabPanel();
+	return (
+		<Box sx={{ width: "100%" }}>
+			<RoutedTabs aria-label="Settings">
+				<Tab label="General" value="" />
+				<Tab label="Security" value="security" />
+			</RoutedTabs>
+			<RoutedTabPanelWrapper>
+				{[
+					tab(
+						"security",
+						<Panel
+							name="Security"
+							text="Password and two-factor authentication."
+						/>,
+					),
+					tab(
+						"",
+						<Typography sx={{ p: 2 }}>
+							General settings and preferences.
+						</Typography>,
+					),
+				]}
+			</RoutedTabPanelWrapper>
+			<Button sx={{ m: 2 }}>After the panels</Button>
+		</Box>
+	);
+};
+
+export const Issue3500Item6PanelTakesFocus: Story = {
+	name: "Panel is a tab stop when it has no focusable content",
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3500-ITEM-6: the content below the bar is a tabpanel named by its tab. A text-only panel is a tab stop, so Tab from the selected tab reaches the panel and the next Tab leaves it. A panel with a button is no tab stop, so Tab goes from the tab straight to that button.",
+			},
+		},
+	},
+	render: () => (
+		<Host at="/settings">
+			<TabStopTabs />
+		</Host>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const [general, security] = tabsOf(canvasElement);
+		const generalPanel = canvas.getByRole("tabpanel", { name: "General" });
+		await expect(generalPanel).toHaveAttribute("tabindex", "0");
+
+		general.focus();
+		await userEvent.tab();
+		await expect(generalPanel).toHaveFocus();
+		await userEvent.tab();
+		await expect(
+			canvas.getByRole("button", { name: "After the panels" }),
+		).toHaveFocus();
+
+		await userEvent.click(security);
+		const securityPanel = canvas.getByRole("tabpanel", { name: "Security" });
+		await expect(securityPanel).not.toHaveAttribute("tabindex");
+		await expect(security).toHaveFocus();
+		await userEvent.tab();
+		await expect(
+			canvas.getByRole("button", { name: "Edit security" }),
+		).toHaveFocus();
+	},
+};
+
 export const Issue3500Item8FocusShowsVisibleRing: Story = {
 	parameters: {
 		a11y: { test: "error" },
@@ -287,7 +359,29 @@ const imfTheme = createTheme({
 
 const focusVisibleTheme = createTheme({ focusVisible: true });
 
-/** A tab bar (no panels) with a button before it to Tab from */
+/** The panels of a {@link Bar}: a Tab's `aria-controls` names one of them */
+const BarPanels = () => {
+	const tab = useRoutedTabPanel();
+	return (
+		<RoutedTabPanelWrapper>
+			{[
+				tab(
+					"security",
+					<Panel
+						name="Security"
+						text="Password and two-factor authentication."
+					/>,
+				),
+				tab(
+					"",
+					<Panel name="General" text="General settings and preferences." />,
+				),
+			]}
+		</RoutedTabPanelWrapper>
+	);
+};
+
+/** A tab bar with its panels and a button before it to Tab from */
 const Bar = (props: {
 	name: string;
 	tabsProps?: Omit<Args, "aria-label">;
@@ -311,6 +405,7 @@ const Bar = (props: {
 				) : (
 					tabs
 				)}
+				<BarPanels />
 			</Box>
 		</Host>
 	);
