@@ -451,6 +451,95 @@ describe("UIKit", () => {
 			);
 			expect(input.indeterminate).toBe(false);
 		});
+
+		/**
+		 * The colors the page's styles give `element` in forced colors. jsdom
+		 * matches no media feature, so the rules of every
+		 * `@media (forced-colors: active)` block are applied as if it matched.
+		 * Browsers force no background or border color on an `<svg>`
+		 * (forced-color-adjust: preserve-parent-color), so these rules are what
+		 * makes them system colors.
+		 */
+		const forcedColors = (element: Element) => {
+			const rules = Array.from(document.styleSheets)
+				.flatMap((sheet) => Array.from(sheet.cssRules))
+				.filter(
+					(rule): rule is CSSMediaRule =>
+						rule instanceof window.CSSMediaRule &&
+						rule.media.mediaText.includes("forced-colors: active"),
+				)
+				.flatMap((rule) => Array.from(rule.cssRules, (inner) => inner.cssText));
+			const sheet = document.createElement("style");
+			sheet.textContent = rules.join("\n");
+			document.head.append(sheet);
+			try {
+				const style = getComputedStyle(element);
+				return {
+					box: style.backgroundColor,
+					border: style.borderTopColor,
+					tick: style.color,
+				};
+			} finally {
+				sheet.remove();
+			}
+		};
+		/** A CSS system color, as getComputedStyle resolves it */
+		const systemColor = (name: string) => {
+			const probe = document.createElement("div");
+			probe.style.color = name;
+			document.body.append(probe);
+			try {
+				return getComputedStyle(probe).color;
+			} finally {
+				probe.remove();
+			}
+		};
+		const iconOf = (input: HTMLElement) => {
+			const icon = input.parentElement?.querySelector(":scope > svg");
+			if (!icon) throw new Error("the checkbox has no icon next to its input");
+			return icon;
+		};
+
+		it.each(["light", "dark"] as const)(
+			"[ISSUE-3482-ITEM-4] paints the box Canvas and its border and tick CanvasText in forced colors (%s theme)",
+			(mode) => {
+				render(
+					<ThemeProvider theme={createTheme({ palette: { mode } })}>
+						<Checkbox
+							checked
+							readOnly
+							slotProps={{ input: { "aria-label": "Stay signed in" } }}
+						/>
+					</ThemeProvider>,
+				);
+				const icon = iconOf(
+					screen.getByRole("checkbox", { name: "Stay signed in" }),
+				);
+				expect(forcedColors(icon)).toEqual({
+					box: systemColor("Canvas"),
+					border: systemColor("CanvasText"),
+					tick: systemColor("CanvasText"),
+				});
+			},
+		);
+
+		it("[ISSUE-3482-ITEM-4] paints a disabled box's border and tick GrayText in forced colors", () => {
+			wrap(
+				<Checkbox
+					checked
+					disabled
+					slotProps={{ input: { "aria-label": "Stay signed in" } }}
+				/>,
+			);
+			const icon = iconOf(
+				screen.getByRole("checkbox", { name: "Stay signed in" }),
+			);
+			expect(forcedColors(icon)).toEqual({
+				box: systemColor("Canvas"),
+				border: systemColor("GrayText"),
+				tick: systemColor("GrayText"),
+			});
+		});
 	});
 
 	describe("MuiFieldState (withMuiFieldState HOC)", () => {
