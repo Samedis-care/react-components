@@ -21,6 +21,10 @@ export const MatrixTileDiagonalRoot = styled("div", {
 	background: `linear-gradient(to bottom right, ${cssVar(
 		matrixVars.tileBackgroundA,
 	)} 0 49.5%, ${cssVar(matrixVars.tileBackgroundB)} 50.5% 100%)`,
+	// the corner drawn here is the first entry's (DIAGONAL_CORNERS): it takes
+	// that entry's text color, as the corners of a split entry take theirs;
+	// each label sets its own
+	color: cssVar(matrixVars.tileForegroundA),
 	[`&.${matrixClasses.itemClickable}`]: {
 		cursor: "pointer",
 		"&:focus-visible": entryFocusRing(theme),
@@ -65,7 +69,8 @@ export interface MatrixTileDiagonalPairProps {
  * Two entries as one diagonally cut box: space-saving, but one click target and
  * one drag handle (MatrixCellTile passes it to renderItem as the first entry),
  * and of each entry only the label, the colors and the tooltip survive, plus
- * the first entry's bottomLeft corner (see MatrixCellTileProps.pairLayout).
+ * the first entry's bottomLeft corner, in that entry's text color (see
+ * MatrixCellTileProps.pairLayout).
  */
 const MatrixTileDiagonalPair = (props: MatrixTileDiagonalPairProps) => {
 	const { a, b } = props;

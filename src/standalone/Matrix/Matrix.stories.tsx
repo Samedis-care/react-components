@@ -814,6 +814,123 @@ export const Issue3480Item15HeaderLabelsHaveContrastInOtherPalettes: Story = {
 
 const WHITE: Rgba = { r: 255, g: 255, b: 255, a: 1 };
 
+/** ISSUE-3481-ITEM-6: the corner of a diagonal pair takes the page's text color, not its entry's. */
+const DIAGONAL_CORNER_ROWS: MatrixRow<TileCell>[] = [
+	{
+		key: "a",
+		label: "Alice Weber",
+		cells: {
+			t2: {
+				items: [
+					{
+						...EARLY,
+						corners: {
+							bottomLeft: <span data-testid={"corner-bl"}>{"●"}</span>,
+						},
+					},
+					LATE,
+				],
+				diagonal: true,
+			},
+		},
+	},
+];
+
+export const Issue3481Item6DiagonalCornerTakesItsEntryColor: Story = {
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<TileRoster onItemClick={args.onItemClick} rows={DIAGONAL_CORNER_ROWS} />
+	),
+	play: async ({ canvas }) => {
+		// in a split entry the corner takes the entry's textColor; here too
+		await expect(getComputedStyle(canvas.getByTestId("corner-bl")).color).toBe(
+			"rgb(255, 255, 255)",
+		);
+	},
+};
+
+/** ISSUE-3481-ITEM-6: in a dark theme the corner is near-white on a light fill whose label is dark. */
+const DARK_THEME = createTheme({ palette: { mode: "dark" } });
+
+const LIGHT_FILL_CORNERS: [
+	name: string,
+	first: MatrixTileItem,
+	shown: string,
+][] = [
+	[
+		"textColor",
+		{
+			key: "light",
+			label: "N",
+			backgroundColor: "#fff59d",
+			textColor: "#3e2723",
+		},
+		"rgb(62, 39, 35)",
+	],
+	[
+		"derived",
+		{ key: "light", label: "N", backgroundColor: "#ffcc80" },
+		"rgb(0, 0, 0)",
+	],
+	[
+		"dimmed",
+		{ key: "light", label: "N", backgroundColor: "#ffcc80", dimmed: true },
+		"rgb(0, 0, 0)",
+	],
+];
+
+const LIGHT_FILL_CORNER_ROWS: MatrixRow<TileCell>[] = [
+	{
+		key: "a",
+		label: "Alice Weber",
+		cells: Object.fromEntries(
+			LIGHT_FILL_CORNERS.map(([, first], index): [string, TileCell] => [
+				`t${index + 2}`,
+				{
+					items: [
+						{ ...first, corners: { bottomLeft: <span>{"●"}</span> } },
+						LATE,
+					],
+					diagonal: true,
+				},
+			]),
+		),
+	},
+];
+
+export const Issue3481Item6DiagonalCornerTakesItsEntryColorInDarkMode: Story = {
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<ThemeProvider theme={DARK_THEME}>
+			<Box sx={{ bgcolor: "background.default", color: "text.primary", p: 1 }}>
+				<TileRoster
+					onItemClick={args.onItemClick}
+					rows={LIGHT_FILL_CORNER_ROWS}
+				/>
+			</Box>
+		</ThemeProvider>
+	),
+	play: async ({ canvasElement }) => {
+		for (const [index, [name, , shown]] of LIGHT_FILL_CORNERS.entries()) {
+			const pair = tileCell(
+				canvasElement,
+				0,
+				index + 1,
+			).querySelector<HTMLElement>("[role=button]");
+			const corner = pair?.querySelector<HTMLElement>(
+				`.${matrixClasses.cornerBottomLeft}`,
+			);
+			const start = pair?.querySelector<HTMLElement>(
+				`.${matrixClasses.diagonalLabelStart}`,
+			);
+			if (!corner || !start) throw new Error(`no cornered pair for ${name}`);
+			// the corner and the label of the first entry share its text color
+			await expect(getComputedStyle(start).color, name).toBe(shown);
+			await expect(getComputedStyle(corner).color, name).toBe(shown);
+		}
+	},
+};
+
 /** ISSUE-3481-ITEM-8: a dimmed entry with a percentage rgb() or a color() fill turns darker, and a modern color is not faded. */
 const DIMMED_FILLS: [fill: string, shown: Rgba][] = [
 	["rgb(50%, 20%, 10%)", { r: 128, g: 51, b: 26, a: 1 }],

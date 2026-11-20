@@ -219,9 +219,11 @@ export interface MatrixTileItem {
 	highlighted?: boolean;
 	/**
 	 * Small adornments pinned into the entry's corners. Keep them to a single
-	 * icon each — a cell is tiny.
+	 * icon each — a cell is tiny. An adornment that sets no color of its own
+	 * (MUI icons inherit theirs) is drawn in the entry's text color, as its
+	 * label is (see textColor).
 	 * @remarks A diagonal pair renders only the first entry's bottomLeft corner,
-	 * see MatrixCellTileProps.pairLayout.
+	 * in that entry's text color, see MatrixCellTileProps.pairLayout.
 	 */
 	corners?: Partial<Record<MatrixTileCorner, React.ReactNode>>;
 	/**
