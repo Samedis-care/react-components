@@ -190,6 +190,103 @@ export const Issue3495Item13SettingsCheckboxesAreNamed: Story = {
 };
 
 /**
+ * ISSUE-3495-ITEM-14: Enter on an export entry drops keyboard focus to the page: the
+ * entry is replaced by another one for each status
+ */
+export const Issue3495Item14ExportEntryKeepsFocus: Story = {
+	args: { columns: COLUMNS, loadData: loadPeople, exporters: [EXCEL] },
+	play: async ({ canvas }) => {
+		const body = within(document.body);
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		canvas.getByRole("button", { name: "Export" }).focus();
+		await userEvent.keyboard("{Enter}");
+		const excel = await body.findByRole("menuitem", { name: "Excel" });
+		await waitFor(() => expect(excel).toHaveFocus());
+		await userEvent.keyboard("{Enter}");
+		await expect(
+			document.activeElement?.getAttribute("role"),
+			`focus is on ${document.activeElement?.tagName}`,
+		).toBe("menuitem");
+		await waitFor(() =>
+			expect(body.getByRole("menuitem", { name: "Download" })).toHaveFocus(),
+		);
+	},
+};
+
+/** An exporter whose request fails after 100ms */
+const FAILING: IDataGridExporter<unknown> = {
+	...EXCEL,
+	id: "failing",
+	onRequest: () =>
+		new Promise((_resolve, reject) =>
+			setTimeout(() => reject(new Error("story: export failed")), 100),
+		),
+};
+
+/**
+ * ISSUE-3495-ITEM-14: by keyboard, a failed export keeps focus on its entry,
+ * Enter on the failed entry turns it back to idle with focus on it, and Escape
+ * still closes the menu
+ */
+export const Issue3495Item14FailedExportKeepsFocus: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadPeople,
+		exporters: [FAILING],
+		onError: fn(),
+	},
+	play: async ({ args, canvas }) => {
+		const body = within(document.body);
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		const button = canvas.getByRole("button", { name: "Export" });
+		button.focus();
+		await userEvent.keyboard("{Enter}");
+		const entry = await body.findByRole("menuitem", { name: "Excel" });
+		await waitFor(() => expect(entry).toHaveFocus());
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() => expect(args.onError).toHaveBeenCalledOnce());
+		await expect(entry).toHaveAccessibleName("Export failed");
+		await expect(entry).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		await expect(entry).toHaveAccessibleName("Excel");
+		await expect(entry).toHaveFocus();
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() => expect(button).toHaveFocus());
+	},
+};
+
+/**
+ * ISSUE-3495-ITEM-14: an export by keyboard alone: Enter requests it, Enter on
+ * the ready entry downloads it, and in a menu kept open after the download
+ * focus stays on the entry
+ */
+export const Issue3495Item14DownloadByKeyboard: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadPeople,
+		exporters: [{ ...EXCEL, onDownload: fn() }],
+		keepExportMenuOpenAfterDownload: true,
+	},
+	play: async ({ args, canvas }) => {
+		const body = within(document.body);
+		const onDownload = args.exporters?.[0].onDownload;
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		canvas.getByRole("button", { name: "Export" }).focus();
+		await userEvent.keyboard("{Enter}");
+		const entry = await body.findByRole("menuitem", { name: "Excel" });
+		await waitFor(() => expect(entry).toHaveFocus());
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() => expect(entry).toHaveAccessibleName("Download"));
+		await expect(entry).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		await expect(onDownload).toHaveBeenCalledOnce();
+		await expect(onDownload).toHaveBeenCalledWith("file.xlsx", undefined);
+		await expect(entry).toHaveAccessibleName("Excel");
+		await expect(entry).toHaveFocus();
+	},
+};
+
+/**
  * ISSUE-3495-ITEM-16: Enter on Delete drops keyboard focus to the page once the deleted
  * rows are unselected, because Delete turns disabled
  */

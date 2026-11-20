@@ -125,41 +125,40 @@ const ExportMenuEntry = React.forwardRef(
 			setStatus(DataGridExportStatus.Idle);
 		}, [setStatus]);
 
+		// one item for every status, so the item keeps keyboard focus while its
+		// icon, label and click handler change
+		let icon: React.ReactNode;
+		let label: string;
+		// startExport returns a promise; it catches a failed request itself
+		let onClick: (() => Promise<void> | void) | undefined;
+		switch (status) {
+			case DataGridExportStatus.Idle:
+				icon = <IdleIcon />;
+				label = exporter.getLabel();
+				onClick = startExport;
+				break;
+			case DataGridExportStatus.Working:
+				icon = <CircularProgress size={24} />;
+				label = exporter.getWorkingLabel();
+				onClick = undefined;
+				break;
+			case DataGridExportStatus.Ready:
+				icon = <DoneIcon />;
+				label = exporter.getReadyLabel();
+				onClick = finishExport;
+				break;
+			case DataGridExportStatus.Error:
+				icon = <ErrorIcon />;
+				label = exporter.getErrorLabel();
+				onClick = cancelExport;
+				break;
+		}
+
 		return (
-			<>
-				{status === DataGridExportStatus.Idle && (
-					<MenuItem onClick={startExport} ref={ref}>
-						<ListItemIcon>
-							<IdleIcon />
-						</ListItemIcon>
-						<ListItemText primary={exporter.getLabel()} />
-					</MenuItem>
-				)}
-				{status === DataGridExportStatus.Working && (
-					<MenuItem ref={ref}>
-						<ListItemIcon>
-							<CircularProgress size={24} />
-						</ListItemIcon>
-						<ListItemText primary={exporter.getWorkingLabel()} />
-					</MenuItem>
-				)}
-				{status === DataGridExportStatus.Ready && (
-					<MenuItem onClick={finishExport} ref={ref}>
-						<ListItemIcon>
-							<DoneIcon />
-						</ListItemIcon>
-						<ListItemText primary={exporter.getReadyLabel()} />
-					</MenuItem>
-				)}
-				{status === DataGridExportStatus.Error && (
-					<MenuItem onClick={cancelExport} ref={ref}>
-						<ListItemIcon>
-							<ErrorIcon />
-						</ListItemIcon>
-						<ListItemText primary={exporter.getErrorLabel()} />
-					</MenuItem>
-				)}
-			</>
+			<MenuItem onClick={onClick} ref={ref}>
+				<ListItemIcon>{icon}</ListItemIcon>
+				<ListItemText primary={label} />
+			</MenuItem>
 		);
 	},
 );
