@@ -473,6 +473,7 @@
 		},
 		"dialogs": {
 			"error-title": "Ein Fehler ist aufgetreten",
+			"error-no-details": "Es sind keine weiteren Details verfügbar. Versuche es noch einmal.",
 			"validation-error-title": "Fehler bei der Validierung",
 			"info": "Info",
 			"are-you-sure": "Bist du sicher?",

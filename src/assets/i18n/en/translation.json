@@ -473,6 +473,7 @@
 		},
 		"dialogs": {
 			"error-title": "An error occurred",
+			"error-no-details": "No further details are available. Try again.",
 			"validation-error-title": "Error on validation",
 			"info": "Info",
 			"are-you-sure": "Are you sure?",

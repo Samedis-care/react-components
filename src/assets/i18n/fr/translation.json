@@ -474,6 +474,7 @@
 		},
 		"dialogs": {
 			"error-title": "Une erreur s'est produite",
+			"error-no-details": "Aucun détail supplémentaire n'est disponible. Réessayez.",
 			"validation-error-title": "Erreur de validation",
 			"info": "Info",
 			"are-you-sure": "Es-tu sûr ?",

@@ -293,7 +293,7 @@ const LocaleSelectorDialog = (inProps: LocaleSelectorDialogProps) => {
 				onChangeRef.current?.(locale);
 				close();
 			} catch (e) {
-				await showErrorDialog(pushDialog, e as Error);
+				await showErrorDialog(pushDialog, e);
 			} finally {
 				if (mounted.current) setSwitching(false);
 			}

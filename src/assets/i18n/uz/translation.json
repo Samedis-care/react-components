@@ -473,6 +473,7 @@
 		},
 		"dialogs": {
 			"error-title": "Xatolik yuz berdi",
+			"error-no-details": "Qo'shimcha ma'lumot mavjud emas. Yana urinib ko'ring.",
 			"validation-error-title": "Tasdiqlashda xato",
 			"info": "Ma'lumot",
 			"are-you-sure": "Ishonchingiz komilmi?",

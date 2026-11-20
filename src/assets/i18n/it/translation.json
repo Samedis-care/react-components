@@ -474,6 +474,7 @@
 		},
 		"dialogs": {
 			"error-title": "Si è verificato un errore",
+			"error-no-details": "Non sono disponibili ulteriori dettagli. Riprova.",
 			"validation-error-title": "Errore durante la validazione",
 			"info": "Info",
 			"are-you-sure": "Sei sicuro?",

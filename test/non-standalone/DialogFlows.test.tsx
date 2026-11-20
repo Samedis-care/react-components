@@ -1,19 +1,20 @@
 import React, { useState } from "react";
 import {
-	describe,
-	it,
-	expect,
-	vi,
 	afterEach,
 	beforeAll,
 	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
 } from "vitest";
 import {
+	act,
+	cleanup,
+	fireEvent,
 	render,
 	screen,
-	fireEvent,
-	cleanup,
-	act,
+	within,
 } from "@testing-library/react";
 import { Typography } from "@mui/material";
 import { createMemoryHistory, MemoryHistory } from "history";
@@ -38,44 +39,57 @@ import { InputDialog } from "../../src/non-standalone/Dialog/InputDialog";
 import { FormDialog } from "../../src/non-standalone/Dialog/FormDialog";
 import type { IDialogConfigInput } from "../../src/non-standalone/Dialog/Types";
 import FullFormDialog from "../../src/backend-components/Form/FormDialog";
+import { runInNewContext } from "node:vm";
+import ValidationError from "../../src/backend-components/Form/ValidationError";
 
 let history: MemoryHistory;
+
 beforeAll(async () => {
 	await ccI18n.loadNamespaces("translation");
 });
+
 beforeEach(() => {
 	history = createMemoryHistory();
 	setFrameworkHistory(history);
 });
+
 afterEach(() => {
 	cleanup();
 	vi.restoreAllMocks();
 });
 
 let ctx: DialogContextType;
+
 const Grab = () => {
 	ctx = useDialogContext();
 	return null;
 };
+
 const mount = () =>
 	render(
 		<DialogContextProvider>
 			<Grab />
 		</DialogContextProvider>,
 	);
+
 /** lets pending handler continuations and their state updates settle */
 const flush = async () => {
 	for (let i = 0; i < 10; i++) await act(() => Promise.resolve());
 };
+
 const push = (dialog: React.ReactNode) =>
 	act(() => {
 		ctx[0](dialog);
 	});
+
 const btn = (name: string) => screen.getByRole("button", { name });
+
 /** all mounted dialogs, including the ones a dialog on top hides */
 const dialogEls = () =>
 	Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]'));
+
 const dialogCount = () => dialogEls().length;
+
 /** the title texts of the mounted dialogs, bottom to top */
 const openTitles = () =>
 	dialogEls().map(
@@ -508,6 +522,90 @@ describe("rendered without pushDialog", () => {
 	});
 });
 
+describe("showErrorDialog and showInfoDialog", () => {
+	it("[ISSUE-3497-ITEM-5] showErrorDialog(undefined) shows the generic error dialog instead of throwing", () => {
+		mount();
+		let thrown: unknown = null;
+		act(() => {
+			try {
+				void showErrorDialog(ctx[0], undefined);
+			} catch (e) {
+				thrown = e;
+			}
+		});
+		expect(thrown).toBeNull();
+		expect(screen.getByRole("dialog")).toHaveAccessibleName(
+			"An error occurred",
+		);
+	});
+
+	it.each([
+		["undefined", undefined],
+		["null", null],
+		["a number", 500],
+		[
+			"an object with a value that is not a string",
+			{ status: 500, message: "Internal" },
+		],
+		["an empty object", {}],
+	])(
+		"[ISSUE-3497-ITEM-5] %s gets the generic error title and a fallback message",
+		(_name, value) => {
+			mount();
+			act(() => {
+				void showErrorDialog(ctx[0], value);
+			});
+			const dialog = screen.getByRole("dialog");
+			expect(dialog).toHaveAccessibleName("An error occurred");
+			expect(dialog).toHaveAccessibleDescription(
+				"No further details are available. Try again.",
+			);
+			expect(within(dialog).queryByRole("list")).toBeNull();
+		},
+	);
+
+	it("[ISSUE-3497-ITEM-5] an Error from another realm shows its message under the generic title", () => {
+		mount();
+		const error: unknown = runInNewContext('new Error("Connection lost")');
+		expect(error instanceof Error).toBe(false);
+		act(() => {
+			void showErrorDialog(ctx[0], error);
+		});
+		const dialog = screen.getByRole("dialog");
+		expect(dialog).toHaveAccessibleName("An error occurred");
+		expect(dialog).toHaveAccessibleDescription("Connection lost");
+	});
+
+	it.each([
+		[
+			"an object of messages",
+			{ name: "Name is required", email: "Email is invalid" },
+		],
+		[
+			"a ValidationError",
+			new ValidationError("error", {
+				name: "Name is required",
+				email: "Email is invalid",
+			}),
+		],
+	])(
+		"[ISSUE-3497-ITEM-5] %s lists its messages under the validation title",
+		(_name, value) => {
+			mount();
+			act(() => {
+				void showErrorDialog(ctx[0], value);
+			});
+			const dialog = screen.getByRole("dialog");
+			expect(dialog).toHaveAccessibleName("Error on validation");
+			expect(
+				within(dialog)
+					.getAllByRole("listitem")
+					.map((item) => item.textContent),
+			).toEqual(["Name is required", "Email is invalid"]);
+		},
+	);
+});
+
 describe("FormDialog", () => {
 	it("[ISSUE-3497-ITEM-9] renders a button's color", () => {
 		mount();
@@ -529,7 +627,6 @@ describe("message content and description", () => {
 	/** React reports each invalid nesting once per module, so check the DOM */
 	const pAncestorOfBlock = () =>
 		screen.getByText(blockText).parentElement?.closest("p")?.tagName ?? null;
-
 	it.each([
 		["InputDialog", () => <InputDialog {...inputProps({ message: block })} />],
 		[
@@ -553,7 +650,6 @@ describe("message content and description", () => {
 			expect(pAncestorOfBlock()).toBeNull();
 		},
 	);
-
 	it.each([
 		[
 			"ConfirmDialog",
@@ -592,7 +688,6 @@ describe("message content and description", () => {
 			);
 		},
 	);
-
 	it("[ISSUE-3497-ITEM-15] showErrorDialog: the error message is the dialog's accessible description", () => {
 		mount();
 		act(() => {
@@ -605,7 +700,6 @@ describe("message content and description", () => {
 			"Request failed (500)",
 		);
 	});
-
 	it("[ISSUE-3497-ITEM-15] two open dialogs are each described by their own message", () => {
 		mount();
 		push(

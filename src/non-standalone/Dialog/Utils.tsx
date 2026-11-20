@@ -160,20 +160,45 @@ export const showInfoDialog = (
 	);
 };
 
+/** whether `e` is an Error, also one from another realm (an iframe, a VM context) */
+const isError = (e: unknown): e is Error =>
+	e instanceof Error || Object.prototype.toString.call(e) === "[object Error]";
+
+/** whether `e` is a ValidationResult: an object with at least one entry, all strings */
+const isValidationResult = (e: unknown): e is ValidationResult => {
+	if (typeof e !== "object" || e === null) return false;
+	const messages = Object.values(e);
+	return (
+		messages.length > 0 &&
+		messages.every((message) => typeof message === "string")
+	);
+};
+
 /**
  * Shows an error dialog
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
- * @param e The error or validation error
+ * @param e What went wrong, typically the value a `catch` received. Any value is shown:
+ *          - an Error (also one from another realm) shows its `message` under the title
+ *            `common.dialogs.error-title` ("An error occurred"), a ValidationError lists its
+ *            `result` as below
+ *          - a string is shown as it is, under the same title
+ *          - a ValidationResult (an object with at least one entry, all of them strings)
+ *            lists its values, not its keys, under `common.dialogs.validation-error-title`
+ *            ("Error on validation"). So does `{ title, message }`: for an error dialog with
+ *            a title of your own, use showInfoDialog, which renders the same dialog.
+ *          - anything else (`null`, `undefined`, a number, an empty object, an object with a
+ *            value that is not a string) shows `common.dialogs.error-no-details` ("No
+ *            further details are available. Try again.") under the error title
  * @returns A DialogPromise that resolves when the dialog is closed (OK, Escape, a backdrop
  *          click). Its `close()` closes the dialog and resolves it at once.
  */
 export const showErrorDialog = (
 	pushDialog: DialogContextType[0],
-	e: Error | ValidationResult | string,
+	e: unknown,
 ): DialogPromise<void> => {
 	// display generic errors and validation errors
-	let errorTitle = "";
-	let errorMsg: React.ReactNode = "";
+	let errorTitle = i18n.t("common.dialogs.error-title");
+	let errorMsg: React.ReactNode = i18n.t("common.dialogs.error-no-details");
 
 	const setValuesForValidationError = (e: ValidationResult) => {
 		// validation error
@@ -186,17 +211,15 @@ export const showErrorDialog = (
 			</ul>
 		);
 	};
-	if (e instanceof Error) {
-		if (isValidationError(e)) {
+	if (isError(e)) {
+		if (isValidationError(e) && isValidationResult(e.result)) {
 			setValuesForValidationError(e.result);
 		} else {
-			errorTitle = i18n.t("common.dialogs.error-title");
 			errorMsg = e.message;
 		}
 	} else if (typeof e === "string") {
-		errorTitle = i18n.t("common.dialogs.error-title");
 		errorMsg = e;
-	} else {
+	} else if (isValidationResult(e)) {
 		setValuesForValidationError(e);
 	}
 	return pushDialogPromise<void>(

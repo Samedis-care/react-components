@@ -240,7 +240,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 				await postSubmitHandler();
 			} catch (e) {
 				captureError(e, { source: "BasicFormPage.postSubmitHandler" });
-				await showErrorDialog(pushDialog, e as Error);
+				await showErrorDialog(pushDialog, e);
 			}
 		}
 	}, [submit, postSubmitHandler, pushDialog]);

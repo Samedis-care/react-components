@@ -473,6 +473,7 @@
 		},
 		"dialogs": {
 			"error-title": "Er is een fout opgetreden",
+			"error-no-details": "Er zijn geen verdere details beschikbaar. Probeer het nog eens.",
 			"validation-error-title": "Fout bij validatie",
 			"info": "Info",
 			"are-you-sure": "Weet je het zeker?",
