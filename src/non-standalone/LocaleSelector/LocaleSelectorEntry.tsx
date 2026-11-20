@@ -10,7 +10,7 @@ import { useListFocusTarget } from "./useListFocusKeeper";
 
 export interface LocaleSelectorEntryProps extends Omit<
 	LocaleSelectorDialogContentProps,
-	"handleSwitch" | "switching"
+	"handleSwitch" | "switching" | "supportedLocales"
 > {
 	locale: LocaleSelectorEntryData;
 	currentLanguage: string;

@@ -89,7 +89,14 @@ export type LocaleSelectorDialogClassKey =
  */
 export interface LocaleSelectorDialogCommonProps {
 	/**
-	 * Restricts the locales the dialog offers. Each entry is either
+	 * The locales the dialog offers: the languages your app has translations for,
+	 * e.g. `["fr", "ru", "de", "en", "nl"]`. Required, because Components-Care ships
+	 * languages your app may lack: picking one switches only the Components-Care
+	 * widgets, your app's own texts fall back (to English, say), and your app's
+	 * language detector stores that fallback in `localStorage.i18nextLng`, so the
+	 * pick is lost on the next page load.
+	 *
+	 * Each entry is either
 	 * - a language, e.g. `"de"`: every country where it is an official language
 	 *   (Germany, Austria, Switzerland, … 11 rows), or
 	 * - a `language-COUNTRY` locale, e.g. `"de-AT"`: that one row.
@@ -104,15 +111,9 @@ export interface LocaleSelectorDialogCommonProps {
 	 * {@link LocaleSelectorDialog} for the row order). A readonly array (`as const`)
 	 * works too.
 	 *
-	 * Default (undefined): every country of every Components-Care language (261
-	 * rows), including languages your app may not have translations for, so pass
-	 * your app's languages. `[]` offers nothing. To set it once for the whole app,
-	 * use the theme: `components.CcLocaleSelectorDialog.defaultProps.supportedLocales`.
-	 * That is the theme where the dialog renders: for a pushed dialog the one around
-	 * the `DialogContextProvider` (the Framework's), not one around the `pushDialog`
-	 * call.
+	 * `[]` offers nothing, and so does a missing value (e.g. from JavaScript).
 	 */
-	supportedLocales?: readonly string[];
+	supportedLocales: readonly string[];
 }
 
 /**
@@ -176,16 +177,17 @@ const hasTexts = (locale: string) => {
  * with `pushDialog` from `useDialogContext()`, resolves to the picked locale, or
  * `null` when the dialog is dismissed. `pushDialog(<LocaleSelectorDialog
  * supportedLocales={["de", "en"]} />)` shows it too; it then closes itself.
- * Rendered without `pushDialog`, e.g. `{open && <LocaleSelectorDialog onClose={() =>
- * setOpen(false)} />}`, it is open while it is rendered and closes through
- * `onClose`. Either way it needs the Framework (or a `DialogContextProvider`) around
- * it: it shows errors with `showErrorDialog`.
+ * Rendered without `pushDialog`, e.g. `{open && <LocaleSelectorDialog
+ * supportedLocales={["de", "en"]} onClose={() => setOpen(false)} />}`, it is open
+ * while it is rendered and closes through `onClose`. Either way it needs the
+ * Framework (or a `DialogContextProvider`) around it: it shows errors with
+ * `showErrorDialog`.
  *
  * Below the theme's `sm` breakpoint it is full screen, from `sm` up 400px wide (the
  * `paper` slot); names that don't fit their column wrap.
  *
  * Rows: one per country and each of its official languages that Components-Care
- * ships (`de-AT`, `en-IN`, …), restricted by `supportedLocales`. Rows whose locale
+ * ships (`de-AT`, `en-IN`, …), restricted to `supportedLocales`. Rows whose locale
  * (or else whose language) is in the browser's `navigator.languages` come first, in
  * the order of that list, then the rest by number of speakers. A search box filters
  * the rows by their names and locale code, ignoring case.

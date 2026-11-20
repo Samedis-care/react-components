@@ -7,6 +7,7 @@ import {
 	afterEach,
 	beforeAll,
 	beforeEach,
+	expectTypeOf,
 } from "vitest";
 import {
 	render,
@@ -29,7 +30,9 @@ import ccI18n from "../../src/i18n";
 // Dialog/Utils must come before the component modules: importing the Dialog
 // index first runs into an import cycle
 import "../../src/non-standalone/Dialog/Utils";
-import LocaleSelectorDialog from "../../src/non-standalone/LocaleSelector/LocaleSelectorDialog";
+import LocaleSelectorDialog, {
+	type LocaleSelectorDialogProps,
+} from "../../src/non-standalone/LocaleSelector/LocaleSelectorDialog";
 import { showLocaleSelectorDialog } from "../../src/non-standalone/LocaleSelector/showLocaleSelectorDialog";
 import type { DialogPromise } from "../../src/non-standalone/Dialog/Utils";
 import type { showLocaleSelectorDialog as RootShowLocaleSelectorDialog } from "../../src";
@@ -546,6 +549,26 @@ describe("LocaleSelectorDialog", () => {
 	});
 
 	describe("supportedLocales", () => {
+		it("[ISSUE-3499-ITEM-12] is required: the app names the languages it can show", () => {
+			expectTypeOf<
+				Omit<LocaleSelectorDialogProps, "supportedLocales">
+			>().not.toExtend<LocaleSelectorDialogProps>();
+			type ShowProps = Parameters<typeof showLocaleSelectorDialog>[1];
+			expectTypeOf<
+				Omit<ShowProps, "supportedLocales">
+			>().not.toExtend<ShowProps>();
+		});
+
+		it("[ISSUE-3499-ITEM-12] a dialog that gets none at all offers no language, not every Components-Care language", async () => {
+			mount();
+			// @ts-expect-error supportedLocales is required
+			open(<LocaleSelectorDialog />);
+			await waitFor(() =>
+				expect(searchStatus()).toHaveTextContent(noLocalesText()),
+			);
+			expect(rows()).toHaveLength(0);
+		});
+
 		it.each([["de-at"], ["de_AT"], ["DE-at"], ["De_aT"]])(
 			"[ISSUE-3499-ITEM-17] %s is read as de-AT, ignoring case and with _ for -",
 			async (entry) => {

@@ -164,12 +164,10 @@ const LocaleSelectorDialogContent = (
 	const supportedLangs = supportedLanguages;
 	const countryLanguageMapping = countryLanguages as Record<string, string[]>;
 
-	// the entries of supportedLocales as the rows' locales and languages are compared
+	// the entries of supportedLocales as the rows' locales and languages are compared;
+	// none at all (a JavaScript caller) offers nothing, as [] does
 	const supported = useMemo(
-		() =>
-			appSupportedLocales
-				? new Set(appSupportedLocales.map(normalizeLocale))
-				: null,
+		() => new Set((appSupportedLocales ?? []).map(normalizeLocale)),
 		[appSupportedLocales],
 	);
 	const data: LocaleSelectorEntryFilterData[] = useMemo(
@@ -186,7 +184,6 @@ const LocaleSelectorDialogContent = (
 				.flat()
 				.filter(
 					(locale) =>
-						!supported ||
 						supported.has(locale.toLowerCase()) ||
 						supported.has(locale.split("-")[0]),
 				)

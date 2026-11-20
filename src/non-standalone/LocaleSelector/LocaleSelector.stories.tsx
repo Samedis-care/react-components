@@ -18,6 +18,7 @@ import { showLocaleSelectorDialog } from "./showLocaleSelectorDialog";
 import { setFrameworkHistory } from "../../framework/History";
 import { createMemoryHistory } from "history";
 import ccI18n from "../../i18n";
+import supportedLanguages from "../../assets/data/supported-languages.json";
 
 setFrameworkHistory(createMemoryHistory());
 
@@ -101,12 +102,13 @@ const rowButton = (dialog: HTMLElement, position: number) => {
 	return button;
 };
 
-// ─── Default (all locales) ───────────────────────────────────────────────────
+// ─── All locales ─────────────────────────────────────────────────────────────
 
+/** every language Components-Care ships; an app passes the languages it has */
 const LocaleSelectorAllDemo = () => {
 	const [pushDialog] = useDialogContext();
 	const open = useCallback(() => {
-		pushDialog(<LocaleSelectorDialog />);
+		pushDialog(<LocaleSelectorDialog supportedLocales={supportedLanguages} />);
 	}, [pushDialog]);
 	return (
 		<Button variant="contained" onClick={open}>

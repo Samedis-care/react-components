@@ -36,6 +36,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-20 | [The busy overlay's spinner sits on a disc of its own](2026-11-20-form-loader-overlay-spinner-disc.md) | behavior, theme |
 | 2026-11-20 | [RoutedMenu honors forceExpand on its entries](2026-11-20-routed-menu-force-expand.md) | behavior |
 | 2026-11-20 | [A grid keeps keyboard focus when its persistence provider's storage keys change](2026-11-20-data-grid-persist-key-change-keeps-focus.md) | behavior |
+| 2026-11-20 | [LocaleSelectorDialog requires supportedLocales](2026-11-20-locale-selector-supported-locales-required.md) | behavior, type |
 | 2026-11-20 | [A lazy control's queue keeps the Form dirty when onlySubmitMounted changes while it is shown](2026-11-20-lazy-crud-connector-only-submit-mounted-change.md) | behavior |
 | 2026-11-20 | [A control in a DataGrid cell is named after its field and row](2026-11-20-data-grid-inline-checkbox-names.md) | behavior |
 | 2026-11-20 | [InlineSwitch takes aria props for its switch, and a selector's switch requires switchLabel](2026-11-20-inline-switch-name-and-switch-label.md) | behavior, type |
