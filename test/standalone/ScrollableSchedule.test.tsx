@@ -1,30 +1,11 @@
 import React, { useCallback } from "react";
-import {
-	afterAll,
-	afterEach,
-	beforeAll,
-	beforeEach,
-	describe,
-	expect,
-	it,
-	vi,
-} from "vitest";
-import {
-	act,
-	cleanup,
-	fireEvent,
-	render,
-	screen,
-	within,
-} from "@testing-library/react";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import moment from "moment";
 import ccI18n from "../../src/i18n";
 import ScrollableSchedule from "../../src/standalone/Schedule/Scrollable";
 import type { LoadWeekCallback } from "../../src/standalone/Schedule/Scrollable";
-import type {
-	IDayData,
-	ScheduleFilterDefinition,
-} from "../../src/standalone/Schedule/Common/DayContents";
+import type { IDayData, ScheduleFilterDefinition } from "../../src/standalone/Schedule/Common/DayContents";
 
 // ScrollableSchedule with its weeks (ScrollableScheduleWeek), day rows
 // (ScrollableScheduleDay), and the shared DayContents / ScheduleFilterRenderer
@@ -195,10 +176,20 @@ const weekLabels = (container: HTMLElement) =>
 		.map((d) => d.textContent ?? "")
 		.filter(isWeekLabel);
 
+const dayRows = (container: HTMLElement) =>
+	Array.from(
+		scrollerOf(container).querySelectorAll<HTMLElement>(
+			"[class*=CcScrollableScheduleDay-root]",
+		),
+	);
+
 const allEntries = (container: HTMLElement) =>
 	Array.from(scrollerOf(container).querySelectorAll("button")).map(
 		(b) => b.textContent,
 	);
+
+const todayRow = (container: HTMLElement) =>
+	container.querySelector<HTMLElement>(".CcScrollableScheduleDay-today");
 
 /** one checkbox filter, checked by default */
 const ONE_CHECKBOX: Record<string, ScheduleFilterDefinition> = {
@@ -496,7 +487,6 @@ describe("accessibility", () => {
 		expect(announcer).toHaveTextContent("Network failure");
 		expect(weekLabels(container)).toContain("Week 42, 11 Oct - 17 Oct");
 	});
-
 	it("[ISSUE-3478-ITEM-16] Retry loads the failed week again with the filter values; its rows replace the error", async () => {
 		let fail = true;
 		const cb = vi.fn<LoadWeekCallback>((o) =>
@@ -526,7 +516,6 @@ describe("accessibility", () => {
 		expect(weekLabels(container)).toContain("Week 42, 11 Oct - 17 Oct");
 		expect(allEntries(container)).toContain("w0-idx0");
 	});
-
 	it("[ISSUE-3478-ITEM-16] the error is announced once: the failed week re-renders with the same alert", async () => {
 		const failing: LoadWeekCallback = (o) =>
 			o === 0 ? Promise.reject(new Error("Network failure")) : week("w" + o);
@@ -552,7 +541,6 @@ describe("accessibility", () => {
 		});
 		expect(screen.getByRole("alert")).toBe(alert);
 	});
-
 	it("[ISSUE-3478-ITEM-16] the error names the week, and each Retry button is described by its week's error", async () => {
 		render(
 			<ScrollableSchedule
@@ -575,7 +563,6 @@ describe("accessibility", () => {
 			).toHaveAccessibleDescription(`${title} Server error ${offset}`);
 		}
 	});
-
 	it("[ISSUE-3478-ITEM-16] Retry moves the focus to the week line, which keeps it when the week loads", async () => {
 		let fail = true;
 		const pending = deferred<IDayData[][]>();
@@ -611,7 +598,6 @@ describe("accessibility", () => {
 		expect(line).toHaveFocus();
 		expect(line.isConnected).toBe(true);
 	});
-
 	it("[ISSUE-3478-ITEM-16] a retry that fails again shows a new alert with the new error", async () => {
 		const errors = ["Network failure", "Still down"];
 		render(
@@ -633,7 +619,6 @@ describe("accessibility", () => {
 		expect(second).toHaveTextContent("Still down");
 		expect(first.isConnected).toBe(false);
 	});
-
 	it("[ISSUE-3478-ITEM-16] de: the error and the Retry button are in German", async () => {
 		moment.locale("de");
 		await act(async () => {
@@ -653,5 +638,44 @@ describe("accessibility", () => {
 		expect(
 			within(alert).getByRole("button", { name: "Erneut versuchen" }),
 		).toBeInTheDocument();
+	});
+	it("[ISSUE-3478-ITEM-19] today's row is marked as the current date", async () => {
+		const { container } = render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) => week("w" + o)}
+			/>,
+		);
+		await advance(400);
+		const current = container.querySelectorAll("[aria-current='date']");
+		expect(current).toHaveLength(1);
+		const today = todayRow(container)!;
+		expect(today.contains(current[0]) || current[0].contains(today)).toBe(true);
+	});
+	it("[ISSUE-3478-ITEM-19] by default today's row has a bar on its left edge and a bold label; the other rows have neither", async () => {
+		const { container } = render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) => week("w" + o)}
+			/>,
+		);
+		await advance(400);
+		const rows = dayRows(container);
+		expect(rows).toHaveLength(14);
+		const today = todayRow(container)!;
+		// a border survives forced-colors mode, which replaces backgrounds
+		const marked = rows.filter(
+			(r) =>
+				getComputedStyle(r).borderLeftStyle === "solid" &&
+				getComputedStyle(r).borderLeftWidth === "4px",
+		);
+		expect(marked).toEqual([today]);
+		const bold = rows.filter((r) => getComputedStyle(r).fontWeight === "700");
+		expect(bold).toEqual([today]);
+		// the padding shrinks by the bar's width: every label stays in line
+		const inset = (r: HTMLElement) =>
+			(parseFloat(getComputedStyle(r).borderLeftWidth) || 0) +
+			parseFloat(getComputedStyle(r).paddingLeft);
+		expect(rows.map(inset)).toEqual(rows.map(() => 8));
 	});
 });
