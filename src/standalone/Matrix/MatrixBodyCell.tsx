@@ -273,8 +273,8 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 	//
 	// On a touch device the chip is used even in overlay mode, and it is visible
 	// at rest: the overlay only ever appears on hover, so on a tablet an
-	// occupied cell would otherwise have no way to add at all — the entry's own
-	// press handler blocks the cell press.
+	// occupied cell would otherwise have no way to add at all — a press on a
+	// clickable entry is the entry's, never the cell's.
 	const chip =
 		cellSelectable && occupied && (occupiedAddAffordance === "chip" || touch);
 	const overlay =

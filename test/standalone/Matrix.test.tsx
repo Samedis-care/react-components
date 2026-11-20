@@ -1501,6 +1501,63 @@ describe("MatrixGrid body cells", () => {
 			fireEvent.mouseUp(window, { button: 0 });
 			expect(onSelectRange).not.toHaveBeenCalled();
 		});
+
+		it("[ISSUE-3481-ITEM-7] lets mousedown reach the wrappers of a clickable entry, whose press still starts no range", () => {
+			const onSelectRange = vi.fn();
+			const onItemClick = vi.fn<(item: MatrixTileItem) => void>();
+			const onItemMouseDown = vi.fn();
+			const onCellMouseDown = vi.fn();
+			const items: MatrixTileItem[] = [
+				{ key: "a", label: "F", backgroundColor: "#2e7d32" },
+				{ key: "b", label: "S", backgroundColor: "#1565c0" },
+			];
+			for (const pairLayout of ["split", "diagonal"] as const) {
+				render(
+					grid({
+						selectable: true,
+						onSelectRange,
+						isCellSelectable: acceptAll,
+						rows: BUSY_C2,
+						renderCell: (cell) => (
+							<MatrixCellTile
+								items={cell ? items : []}
+								pairLayout={pairLayout}
+								onItemClick={onItemClick}
+								// e.g. a drag handle or a long-press timer
+								renderItem={(_item, node) => (
+									<div onMouseDown={onItemMouseDown}>{node}</div>
+								)}
+							/>
+						),
+						// e.g. a drop target that listens for mouse events
+						renderCellWrapper: (node) => (
+							<div onMouseDown={onCellMouseDown}>{node}</div>
+						),
+					}),
+				);
+				const target = screen.getAllByRole("button", { name: /F/ })[0];
+				// not prevented: the entry keeps focus-on-click
+				expect(fireEvent.mouseDown(target, { button: 0 }), pairLayout).toBe(
+					true,
+				);
+				expect(onItemMouseDown, pairLayout).toHaveBeenCalledTimes(1);
+				expect(onCellMouseDown, pairLayout).toHaveBeenCalledTimes(1);
+				// the press is the entry's: no range starts, and sweeping on from
+				// the entry extends none
+				expect(painted(0), pairLayout).toEqual([]);
+				fireEvent.mouseOver(cellAt(0, 2));
+				expect(painted(0), pairLayout).toEqual([]);
+				fireEvent.mouseUp(window, { button: 0 });
+				fireEvent.click(target);
+				expect(onSelectRange, pairLayout).not.toHaveBeenCalled();
+				expect(onItemClick, pairLayout).toHaveBeenCalledTimes(1);
+				expect(onItemClick.mock.calls[0][0].key, pairLayout).toBe("a");
+				cleanup();
+				onItemClick.mockClear();
+				onItemMouseDown.mockClear();
+				onCellMouseDown.mockClear();
+			}
+		});
 	});
 });
 
@@ -1845,6 +1902,22 @@ describe("MatrixCellTile entries", () => {
 			act(() => {
 				vi.advanceTimersByTime(2000);
 			});
+		});
+
+		it("[ISSUE-3481-ITEM-7] lets mousedown reach a renderItem wrapper of a clickable entry", () => {
+			const onMouseDown = vi.fn();
+			render(
+				tile({
+					items: [entry()],
+					onItemClick: vi.fn(),
+					// e.g. a drag handle that listens for mouse events
+					renderItem: (_tileItem, node) => (
+						<div onMouseDown={onMouseDown}>{node}</div>
+					),
+				}),
+			);
+			fireEvent.mouseDown(screen.getByRole("button"), { button: 0 });
+			expect(onMouseDown).toHaveBeenCalledTimes(1);
 		});
 	});
 });

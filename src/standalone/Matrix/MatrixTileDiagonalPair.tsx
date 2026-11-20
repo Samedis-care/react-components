@@ -88,10 +88,8 @@ const MatrixTileDiagonalPair = (props: MatrixTileDiagonalPairProps) => {
 	const activate = useCallback(() => {
 		onItemClick?.(a);
 	}, [onItemClick, a]);
+	// its role keeps a press from starting a range, see MatrixTileItem
 	const activation = useMatrixActivation(onItemClick ? activate : undefined);
-	const handleMouseDown = useCallback((event: React.MouseEvent) => {
-		event.stopPropagation();
-	}, []);
 	// a dimmed half fades its fill, not its label, as a dimmed entry does
 	const style = useMemo(() => {
 		const colorsA = tileColors(theme, a.backgroundColor, a.textColor, a.dimmed);
@@ -121,7 +119,6 @@ const MatrixTileDiagonalPair = (props: MatrixTileDiagonalPairProps) => {
 			])}
 			style={style}
 			{...activation}
-			onMouseDown={onItemClick ? handleMouseDown : undefined}
 		>
 			<MatrixTileDiagonalLabel
 				className={combineClassNames([

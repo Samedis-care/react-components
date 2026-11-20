@@ -91,14 +91,11 @@ const MatrixTileItem = (props: MatrixTileItemProps) => {
 		onItemClick?.(item);
 	}, [onItemClick, item]);
 	// An entry one can click has to be one a keyboard can reach too. The name
-	// comes from the label it renders; the tooltip is its description.
+	// comes from the label it renders; the tooltip is its description. Its
+	// role is also what keeps a press on it from starting a range in the grid
+	// below (the cell skips presses inside [role=button]), so the press still
+	// reaches the consumer's renderItem and renderCellWrapper wrappers.
 	const activation = useMatrixActivation(onItemClick ? activate : undefined);
-	// A clickable entry must not also start a range selection in the grid
-	// below it: without this, pressing an entry would both open it and begin
-	// dragging a new range.
-	const handleMouseDown = useCallback((event: React.MouseEvent) => {
-		event.stopPropagation();
-	}, []);
 	const horizontal = (item.flow ?? "vertical") === "horizontal";
 	const style = useMemo(() => {
 		const colors = tileColors(
@@ -136,7 +133,6 @@ const MatrixTileItem = (props: MatrixTileItemProps) => {
 			])}
 			style={style}
 			{...activation}
-			onMouseDown={onItemClick ? handleMouseDown : undefined}
 		>
 			<MatrixTileItemContent
 				className={combineClassNames([
