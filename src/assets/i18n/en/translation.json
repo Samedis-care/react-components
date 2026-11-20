@@ -379,6 +379,10 @@
 			},
 			"read-only": {
 				"submitting": "The form is currently being saved"
+			},
+			"tab": {
+				"invalid": "Contains invalid fields.",
+				"modified": "Contains modified fields."
 			}
 		},
 		"selector": {

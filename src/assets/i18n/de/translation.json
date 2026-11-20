@@ -379,6 +379,10 @@
 			},
 			"read-only": {
 				"submitting": "Das Formular wird gerade gespeichert"
+			},
+			"tab": {
+				"invalid": "Enthält ungültige Felder.",
+				"modified": "Enthält geänderte Felder."
 			}
 		},
 		"selector": {

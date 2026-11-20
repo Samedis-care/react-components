@@ -90,10 +90,24 @@ const DirtyMarkerRoot = styled("span", {
 export type DirtyMarkerClassKey = "root";
 
 /**
+ * Props of {@link DirtyMarker}
+ */
+export interface DirtyMarkerProps {
+	/**
+	 * CSS class of the dot, applied after the `CcDirtyMarker` styles, e.g. from
+	 * `styled(DirtyMarker)`
+	 */
+	className?: string;
+}
+
+/**
  * The same marker as an element rather than a pseudo element, for controls that build
  * their own label instead of rendering a MUI FormLabel
+ * @param props The props
  */
-const DirtyMarkerInner = () => <DirtyMarkerRoot aria-hidden={"true"} />;
+const DirtyMarkerInner = (props: DirtyMarkerProps) => (
+	<DirtyMarkerRoot aria-hidden={"true"} className={props.className} />
+);
 export const DirtyMarker = React.memo(DirtyMarkerInner);
 
 /**

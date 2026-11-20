@@ -252,6 +252,7 @@ import {
 	FieldStateClassKey,
 } from "./standalone/UIKit/MuiFieldState";
 import { CrudClassKey } from "./backend-components/CRUD";
+import { FormTabClassKey } from "./backend-components/Form/FormTab";
 import { RoutedTabsClassKey } from "./non-standalone/RoutedTabs/RoutedTabs";
 import { RoutedTabPanelWrapperClassKey } from "./non-standalone/RoutedTabs/RoutedTabPanelWrapper";
 import {
@@ -425,6 +426,7 @@ declare module "@mui/material/styles" {
 		CcFlowEngine: FlowEngineClassKey;
 		CcFieldState: FieldStateClassKey;
 		CcDirtyMarker: DirtyMarkerClassKey;
+		CcFormTab: FormTabClassKey;
 		CcCrud: CrudClassKey;
 		CcRoutedTabs: RoutedTabsClassKey;
 		CcRoutedTabPanelWrapper: RoutedTabPanelWrapperClassKey;
@@ -975,6 +977,9 @@ declare module "@mui/material/styles" {
 		};
 		CcDirtyMarker?: {
 			styleOverrides?: StyleOverridesWithoutOwnerState<DirtyMarkerClassKey>;
+		};
+		CcFormTab?: {
+			styleOverrides?: StyleOverridesWithoutOwnerState<FormTabClassKey>;
 		};
 		CcBasicFormPage?: {
 			defaultProps?: ComponentsPropsList["CcBasicFormPage"];

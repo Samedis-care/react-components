@@ -380,6 +380,10 @@
 			},
 			"read-only": {
 				"submitting": "El formulario se está guardando"
+			},
+			"tab": {
+				"invalid": "Contiene campos no válidos.",
+				"modified": "Contiene campos modificados."
 			}
 		},
 		"selector": {

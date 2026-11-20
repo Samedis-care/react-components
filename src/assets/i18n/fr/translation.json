@@ -380,6 +380,10 @@
 			},
 			"read-only": {
 				"submitting": "Le formulaire est en cours d'enregistrement"
+			},
+			"tab": {
+				"invalid": "Contient des champs non valides.",
+				"modified": "Contient des champs modifiés."
 			}
 		},
 		"selector": {

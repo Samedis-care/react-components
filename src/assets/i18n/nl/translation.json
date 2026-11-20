@@ -379,6 +379,10 @@
 			},
 			"read-only": {
 				"submitting": "Het formulier wordt momenteel opgeslagen"
+			},
+			"tab": {
+				"invalid": "Bevat ongeldige velden.",
+				"modified": "Bevat gewijzigde velden."
 			}
 		},
 		"selector": {

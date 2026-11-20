@@ -559,6 +559,38 @@ never inherits the marks of the form around it.
   *field* is marked is `useDirtyState`'s question, and a `DirtyStateProvider` can answer it
   differently.
 
+#### Marking tabs
+
+`RoutedTabs` renders only the panel of the open tab, so the fields of the other tabs show
+nothing: neither their marker nor their error. `FormTab`, a MUI `Tab` with the fields of
+its panel listed, shows both on the tab's label: the modified marker while one of its
+fields is marked (the same marks as the fields, so it follows `showDirtyState` and a
+`DirtyStateProvider`), and an error icon while one of its fields shows a validation error
+(touched and invalid, as `FormField` shows it; a save touches every field, so after a save
+that failed validation every tab holding an invalid field is marked). The tab's accessible
+description says the same in words.
+
+<details>
+	<summary>TypeScript</summary>
+
+```tsx
+const CONDITION_FIELDS = ["price", "discount", "payment_terms"];
+
+<RoutedTabs aria-label={t("tabs.label")}>
+	<FormTab value="" label={t("tabs.contract")} fields={CONTRACT_FIELDS} />
+	<FormTab value="conditions" label={t("tabs.conditions")} fields={CONDITION_FIELDS} />
+</RoutedTabs>;
+```
+
+</details>
+
+`dirty` and `error` mark a tab regardless of its fields, for a custom field or a form that
+computes its own marks; they also work outside a Form. Every other prop goes to MUI's
+`Tab`, so `FormTab` works in a state-driven MUI `Tabs` as well. On a coloured tab bar
+(`textColor="inherit"`, e.g. in an `AppBar`) both markers take the tab's text colour.
+The `Backend-Components/Form/FormTab` stories show it in a routed form and every
+combination of the markers.
+
 #### Restyling the marker
 
 Two theme slots, depending on which half you want. `CcFieldState` is shared by every
@@ -607,6 +639,10 @@ set it to 0.
 
 For a custom renderer, `DirtyMarker` (an element) and `dirtyMarkerStyles` (for a pseudo
 element) are both exported, so a control can draw the same marker wherever its label is.
+
+A `FormTab`'s dot is the `CcDirtyMarker` element too, so restyling that one restyles the
+tab's. Its own parts are styled under `CcFormTab`: `label` (the label with its markers),
+`dirtyMarker` and `errorIcon`.
 
 The `Backend-Components/Form` stories show all three modes: `DirtyState` marks the form's
 own diff across a text field, an outlined multiline one, a searchable select, a date, an
