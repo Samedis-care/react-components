@@ -126,8 +126,11 @@ export interface GroupBoxProps extends GroupBoxHTMLProps {
 	 */
 	className?: string;
 	/**
-	 * Additional class names: `root` is added to the `<fieldset>`,
-	 * `smallLabel` to the legend while `smallLabel` is set
+	 * Additional class names per {@link GroupBoxClassKey}: `root` is added to
+	 * the `<fieldset>`, `legend` to the `<legend>`, and `smallLabel` to the
+	 * legend while `smallLabel` is set. As on MUI components, a `classes` prop
+	 * replaces the `classes` of the theme's `defaultProps` rather than adding
+	 * to them.
 	 */
 	classes?: Partial<Record<GroupBoxClassKey, string>>;
 	/**
@@ -161,6 +164,7 @@ const GroupBox = React.forwardRef(function GroupBox(
 			{label && (
 				<GroupBoxLegend
 					className={combineClassNames([
+						classes?.legend,
 						smallLabel && SMALL_LABEL_CLASS,
 						smallLabel && classes?.smallLabel,
 					])}

@@ -318,6 +318,47 @@ describe("GroupBox", () => {
 			}
 		});
 
+		it("[ISSUE-3462-ITEM-4] puts classes.legend on the legend, also from theme defaultProps", () => {
+			const themed = createTheme({
+				components: {
+					CcGroupBox: { defaultProps: { classes: { legend: "theme-legend" } } },
+				},
+			});
+			const { container } = renderGroupBox(
+				<GroupBox label="L" classes={{ root: "r", legend: "l" }} />,
+			);
+			expect(container.querySelector("fieldset")).toHaveClass("r");
+			expect(container.querySelector("fieldset")).not.toHaveClass("l");
+			expect(container.querySelector("legend")).toHaveClass("l");
+			cleanup();
+			const themedRender = renderGroupBox(<GroupBox label="L" />, themed);
+			expect(themedRender.container.querySelector("legend")).toHaveClass(
+				"theme-legend",
+			);
+		});
+
+		it("[ISSUE-3462-ITEM-4] keeps classes.legend on the small legend next to classes.smallLabel, and follows classes changing after mount", () => {
+			const { container, rerender } = renderGroupBox(
+				<GroupBox
+					label="L"
+					smallLabel
+					classes={{ legend: "l", smallLabel: "s" }}
+				/>,
+			);
+			const legend = container.querySelector("legend") as Element;
+			expect(legend).toHaveClass("l", "s", "CcGroupBox-smallLabel");
+
+			rerender(
+				<ThemeProvider theme={theme}>
+					<GroupBox label="L" classes={{ legend: "l2" }} />
+				</ThemeProvider>,
+			);
+			expect(container.querySelector("legend")).toBe(legend);
+			expect(legend).toHaveClass("l2");
+			expect(legend).not.toHaveClass("l");
+			expect(legend).not.toHaveClass("s");
+		});
+
 		it("[ISSUE-3462-ITEM-8] passes aria-describedby, aria-labelledby, data-* and ref to the fieldset", () => {
 			const ref = React.createRef<HTMLFieldSetElement>();
 			renderGroupBox(
