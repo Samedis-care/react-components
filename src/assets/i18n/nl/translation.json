@@ -88,6 +88,12 @@
 					"or": "OF",
 					"and": "EN"
 				},
+				"filter-value": {
+					"date": "Datum",
+					"date-time": "Datum en tijd",
+					"from": "Van",
+					"to": "Tot"
+				},
 				"no-data-filters": "Er zijn geen gegevens die aan uw filters voldoen.",
 				"no-data-reset-filters": "Filters wissen",
 				"select-row": "{{ROW}} selecteren",

@@ -553,6 +553,11 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 						<Grid size={12}>
 							{props.valueType === "date" ? (
 								<LocalizedKeyboardDatePicker
+									aria-label={
+										filterType === "inRange"
+											? t("standalone.data-grid.content.filter-value.from")
+											: t("standalone.data-grid.content.filter-value.date")
+									}
 									value={dateFilterValue(filterValue)}
 									onChange={onFilterValueChangeDate}
 									fullWidth
@@ -560,6 +565,11 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 								/>
 							) : props.valueType === "datetime" ? (
 								<LocalizedDateTimePicker
+									aria-label={
+										filterType === "inRange"
+											? t("standalone.data-grid.content.filter-value.from")
+											: t("standalone.data-grid.content.filter-value.date-time")
+									}
 									value={filterValue === "" ? null : moment(filterValue)}
 									onChange={onFilterValueChangeDateTime}
 									fullWidth
@@ -579,11 +589,13 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 						<Grid size={12}>
 							{props.valueType === "date" ? (
 								<LocalizedKeyboardDatePicker
+									aria-label={t("standalone.data-grid.content.filter-value.to")}
 									value={dateFilterValue(filterValue2)}
 									onChange={onFilterValue2ChangeDate}
 								/>
 							) : props.valueType === "datetime" ? (
 								<LocalizedDateTimePicker
+									aria-label={t("standalone.data-grid.content.filter-value.to")}
 									value={filterValue2 === "" ? null : moment(filterValue2)}
 									onChange={onFilterValue2ChangeDateTime}
 								/>

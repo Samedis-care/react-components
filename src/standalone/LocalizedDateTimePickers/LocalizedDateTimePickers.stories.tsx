@@ -407,3 +407,55 @@ export const Issue3474Item20CallerMediaQueryWins: StoryObj = {
 		await expect(dialog).toHaveClass("MuiPickerPopper-root");
 	},
 };
+
+export const Issue3474Item21PickerWithoutLabelIsNamed: StoryObj = {
+	name: "ISSUE-3474-ITEM-21: a picker without a label is named",
+	parameters: {
+		a11y: {
+			test: "error",
+			options: { runOnly: { type: "rule", values: ["aria-dialog-name"] } },
+		},
+		docs: {
+			description: {
+				story:
+					'ISSUE-3474-ITEM-21: without `label` and without `aria-label` the field has nothing to be named after, but the open calendar is still a named dialog: it takes MUI\'s title of the mobile dialog, "Select date" (axe `aria-dialog-name`, checked after the play opened it).',
+			},
+		},
+	},
+	render: () => (
+		<LocalizedKeyboardDatePicker
+			value={moment("2026-08-01")}
+			onChange={() => {}}
+			fullWidth
+		/>
+	),
+	play: async ({ canvas, userEvent }) => {
+		// axe runs after this, with the calendar open
+		await openedPicker(canvas, userEvent);
+	},
+};
+
+export const Issue3474Item21PickerNamedByAriaLabel: StoryObj = {
+	name: "ISSUE-3474-ITEM-21: aria-label names a picker without a label",
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3474-ITEM-21: `aria-label` names a picker that shows no label, as the DataGrid\'s date filters do ("From", "To"): a screen reader announces the field group by it when focus enters a section, and the open calendar is a dialog named after it. A visible `label` names both instead.',
+			},
+		},
+	},
+	render: () => (
+		<LocalizedKeyboardDatePicker
+			aria-label="Due date"
+			value={moment("2026-08-01")}
+			onChange={() => {}}
+		/>
+	),
+	play: async ({ canvas, userEvent }) => {
+		await expect(canvas.getByRole("group")).toHaveAccessibleName("Due date");
+		const dialog = await openedPicker(canvas, userEvent);
+		await expect(dialog).toHaveAccessibleName("Due date");
+	},
+};

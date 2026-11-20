@@ -81,6 +81,29 @@ describe("date pickers in the DataGrid column filter", () => {
 		},
 	);
 
+	it("[ISSUE-3474-ITEM-21] names the two pickers of a date range filter", () => {
+		renderFilter("date", {
+			type: "inRange",
+			value1: "2026-08-01T12:00:00.000Z",
+			value2: "2026-08-31T12:00:00.000Z",
+		});
+		// the accessible names of the field groups, in document order. The name
+		// is matched before hidden elements are left out, so it is also asked
+		// for each outline's aria-hidden <fieldset> (a group too): only the
+		// groups the query returns count
+		const names = new Map<Element | null, string>();
+		const groups = screen.getAllByRole("group", {
+			name: (name, element) => {
+				names.set(element, name);
+				return true;
+			},
+		});
+		const [from, to] = groups.map((group) => names.get(group));
+		expect(from).not.toBe("");
+		expect(to).not.toBe("");
+		expect(from).not.toBe(to);
+	});
+
 	it("[ISSUE-3474-ITEM-4] writes the upper bound of a date/time range from the second picker", () => {
 		const from = moment("2026-08-01T10:00").toISOString();
 		const to = moment("2026-08-31T18:00").toISOString();

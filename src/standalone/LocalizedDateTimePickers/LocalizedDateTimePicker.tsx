@@ -14,6 +14,8 @@ import usePickerValidationError from "./usePickerValidationError";
 import withAccessibleError from "./withAccessibleError";
 import withRequiredSections from "./withRequiredSections";
 import useFieldBlur from "./useFieldBlur";
+import withFieldName from "./withFieldName";
+import calendarNameSlotProps from "./calendarNameSlotProps";
 
 /**
  * When the picker opens its desktop popup rather than MUI's mobile dialog: with
@@ -64,6 +66,16 @@ export interface LocalizedDateTimePickerProps extends Omit<
 	 */
 	publishIntermediateValues?: boolean;
 	/**
+	 * The accessible name of the picker, for a picker without a visible
+	 * `label`, such as the translated purpose of the date ("From", "To"). It
+	 * names the field (its `role="group"`, which a screen reader announces when
+	 * focus enters a section) and the open calendar dialog. A visible `label`
+	 * names both instead. Default: none. A picker with neither has an unnamed
+	 * field, and its calendar is named after MUI's title of the mobile dialog,
+	 * "Select date & time".
+	 */
+	"aria-label"?: string;
+	/**
 	 * The CSS media query that selects the desktop popup; where it does not
 	 * match, the picker opens MUI's mobile dialog. Defaults to
 	 * `"@media (pointer: fine) and (min-width: 600px)"`: a fine pointer, as in
@@ -80,6 +92,7 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 		fullWidth,
 		onBlur,
 		publishIntermediateValues,
+		"aria-label": ariaLabel,
 		...otherProps
 	} = props;
 	const localeText = useMuiLocaleData();
@@ -113,6 +126,13 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 				}
 				slotProps={{
 					...otherProps.slotProps,
+					...calendarNameSlotProps(otherProps.slotProps, {
+						name: ariaLabel,
+						hasLabel: !!otherProps.label,
+						fallbackName:
+							otherProps.localeText?.toolbarTitle ??
+							localeText?.dateTimePickerToolbarTitle,
+					}),
 					textField: (ownerState) => {
 						const orgSlotProps = accessSlotProps(
 							ownerState,
@@ -134,9 +154,13 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 								},
 							}),
 						);
-						return withFieldBlur(ownerState, fieldProps, {
-							name: otherProps.name,
-						});
+						return withFieldBlur(
+							ownerState,
+							withFieldName(fieldProps, ariaLabel),
+							{
+								name: otherProps.name,
+							},
+						);
 					},
 				}}
 			/>

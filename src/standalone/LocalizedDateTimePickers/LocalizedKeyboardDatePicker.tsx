@@ -15,6 +15,8 @@ import usePickerErrorMessage from "./usePickerErrorMessage";
 import withAccessibleError from "./withAccessibleError";
 import withRequiredSections from "./withRequiredSections";
 import useFieldBlur from "./useFieldBlur";
+import withFieldName from "./withFieldName";
+import calendarNameSlotProps from "./calendarNameSlotProps";
 
 /**
  * Props of a date picker typed into with the keyboard (MUI's `DatePicker`
@@ -41,6 +43,16 @@ export interface LocalizedKeyboardDatePickerProps
 	 * Boolean flag to hide Calendar Icon (only used if disabled is truthy)
 	 */
 	hideDisabledIcon?: boolean;
+	/**
+	 * The accessible name of the picker, for a picker without a visible
+	 * `label`, such as the translated purpose of the date ("From", "To"). It
+	 * names the field (its `role="group"`, which a screen reader announces when
+	 * focus enters a section) and the open calendar dialog. A visible `label`
+	 * names both instead. Default: none. A picker with neither has an unnamed
+	 * field, and its calendar is named after MUI's title of the mobile dialog,
+	 * "Select date".
+	 */
+	"aria-label"?: string;
 	/**
 	 * Marks the field required: an asterisk after the label, `required` on the
 	 * hidden input and `aria-required` on every section, so screen readers
@@ -99,6 +111,7 @@ const LocalizedKeyboardDatePicker = (
 		onBlur,
 		disableClearable,
 		publishIntermediateValues,
+		"aria-label": ariaLabel,
 		...otherProps
 	} = props;
 	const slotOverrideHideIcon = {
@@ -143,6 +156,13 @@ const LocalizedKeyboardDatePicker = (
 				}
 				slotProps={{
 					...otherProps.slotProps,
+					...calendarNameSlotProps(otherProps.slotProps, {
+						name: ariaLabel,
+						hasLabel: !!otherProps.label,
+						fallbackName:
+							otherProps.localeText?.toolbarTitle ??
+							localeText?.datePickerToolbarTitle,
+					}),
 					textField: (ownerState) => {
 						const textFieldProps = accessSlotProps(
 							ownerState,
@@ -172,10 +192,14 @@ const LocalizedKeyboardDatePicker = (
 							}),
 							errorMessage,
 						);
-						return withFieldBlur(ownerState, fieldProps, {
-							name: otherProps.name,
-							onFieldFocus: validation.onFieldFocus,
-						});
+						return withFieldBlur(
+							ownerState,
+							withFieldName(fieldProps, ariaLabel),
+							{
+								name: otherProps.name,
+								onFieldFocus: validation.onFieldFocus,
+							},
+						);
 					},
 				}}
 			/>

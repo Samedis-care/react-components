@@ -92,6 +92,12 @@
 					"and": "E",
 					"or": "O"
 				},
+				"filter-value": {
+					"date": "Data",
+					"date-time": "Data e ora",
+					"from": "Dal",
+					"to": "Al"
+				},
 				"no-data-reset-filters": "Cancella filtri",
 				"no-data-filters": "Nessun dato corrisponde ai filtri impostati.",
 				"select-row": "Seleziona {{ROW}}",

@@ -88,6 +88,12 @@
 					"and": "VA",
 					"or": "YOKI"
 				},
+				"filter-value": {
+					"date": "Sana",
+					"date-time": "Sana va vaqt",
+					"from": "Dan",
+					"to": "Gacha"
+				},
 				"no-data-filters": "Filtrlaringizga mos keladigan maʼlumotlar topilmadi.",
 				"no-data-reset-filters": "Filtrlarni tozalash",
 				"select-row": "{{ROW}} belgilash",

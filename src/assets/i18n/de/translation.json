@@ -88,6 +88,12 @@
 					"and": "UND",
 					"or": "ODER"
 				},
+				"filter-value": {
+					"date": "Datum",
+					"date-time": "Datum und Uhrzeit",
+					"from": "Von",
+					"to": "Bis"
+				},
 				"no-data-reset-filters": "Filter löschen",
 				"no-data-filters": "Mit den eingestellten Filtern wurden keine Daten gefunden.",
 				"select-row": "{{ROW}} auswählen",

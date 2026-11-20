@@ -33,6 +33,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-20 | [A disabled SignPad tile opens nothing, also when the theme disables it](2026-11-20-sign-pad-disabled-opens-nothing.md) | behavior |
 | 2026-11-20 | [The grid's focus ring is drawn above its cells](2026-11-20-multi-grid-focus-ring-above-cells.md) | behavior, theme |
 | 2026-11-20 | [A signature field's label is a `<label>`, not a `<legend>`](2026-11-20-signature-field-label-not-legend.md) | behavior |
+| 2026-11-20 | [A date picker's `aria-label` names its field and calendar, and the calendar is always named](2026-11-20-picker-aria-label-names-field-and-calendar.md) | behavior |
 | 2026-11-19 | [PopupMenu applies its `classes`](2026-11-19-popup-menu-classes.md) | behavior, theme |
 | 2026-11-19 | [A data grid logs a failed write of its persisted state and writes it again](2026-11-19-data-grid-failed-persist-write-logged-and-retried.md) | behavior |
 | 2026-11-17 | [Leaving a date field marks it touched in a Form](2026-11-17-form-blur-marks-date-fields-touched.md) | behavior |

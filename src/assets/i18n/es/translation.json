@@ -92,6 +92,12 @@
 					"and": "Y",
 					"or": "O"
 				},
+				"filter-value": {
+					"date": "Fecha",
+					"date-time": "Fecha y hora",
+					"from": "Desde",
+					"to": "Hasta"
+				},
 				"no-data-reset-filters": "Borrar filtros",
 				"no-data-filters": "Ningún dato coincide con sus filtros.",
 				"select-row": "Seleccionar {{ROW}}",
