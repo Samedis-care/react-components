@@ -1,37 +1,44 @@
-import React from "react";
+import React, { useCallback, useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Box, Grow, Typography } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
-import { fn, expect, within } from "storybook/test";
-import Notifications, { Notification } from "./index";
+import { fn, expect, userEvent, waitFor, within } from "storybook/test";
+import Notifications, { Notification, NotificationsProps } from "./index";
 
-const now = new Date("2026-03-17T12:00:00Z");
+// ─── Fixtures ─────────────────────────────────────────────────────────────────
+
+const MINUTE = 60 * 1000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+/** Dates relative to the time the stories load, so the ages read as commented */
+const ago = (ms: number) => new Date(Date.now() - ms);
 
 const sampleNotifications: Notification[] = [
 	{
 		id: "1",
 		message: "Your report is ready",
 		origin: "Reports",
-		created: new Date(now.getTime() - 2 * 60 * 1000), // 2 min ago
+		created: ago(2 * MINUTE), // 2 minutes ago
 		read: false,
 	},
 	{
 		id: "2",
 		message: "New user registered: john.doe@example.com",
 		origin: "Users",
-		created: new Date(now.getTime() - 45 * 60 * 1000), // 45 min ago
+		created: ago(45 * MINUTE), // 45 minutes ago
 		read: false,
 	},
 	{
 		id: "3",
 		message: "Scheduled maintenance tonight at 22:00",
-		created: new Date(now.getTime() - 3 * 3600 * 1000), // 3 hours ago
+		created: ago(3 * HOUR), // 3 hours ago
 		read: true,
 	},
 	{
 		id: "4",
 		message: "Invoice #1042 was paid",
 		origin: "Billing",
-		created: new Date(now.getTime() - 2 * 86400 * 1000), // 2 days ago
+		created: ago(2 * DAY), // 2 days ago
 		read: true,
 	},
 ];
@@ -39,10 +46,31 @@ const sampleNotifications: Notification[] = [
 const expiredNotification: Notification = {
 	id: "expired",
 	message: "This notification should not show",
-	created: new Date(now.getTime() - 100000),
-	expires: new Date(now.getTime() - 1000), // already expired
+	created: ago(100 * 1000),
+	expires: ago(1000), // already expired
 	read: false,
 };
+
+const paperEl = () => document.querySelector<HTMLElement>(".MuiPopover-paper");
+const body = () => within(document.body);
+/** Waits until the popover's paper exists and its Grow transition has ended */
+const openPaper = async () => {
+	await waitFor(async () => {
+		const paper = paperEl();
+		await expect(paper).not.toBeNull();
+		await expect(paper?.style.transform).toBe("none");
+	});
+	const paper = paperEl();
+	if (!paper) throw new Error("popover paper not found");
+	return paper;
+};
+/** Lets React commit and MUI's post-render effects (popover positioning) run */
+const nextFrames = async () => {
+	await new Promise((resolve) => requestAnimationFrame(resolve));
+	await new Promise((resolve) => requestAnimationFrame(resolve));
+};
+
+const MOBILE = { viewport: { value: "mobile1", isRotated: false } };
 
 const meta: Meta<typeof Notifications> = {
 	title: "Standalone/Notifications",
@@ -139,10 +167,170 @@ export const WithImage: Story = {
 				id: "img-1",
 				message: "Profile picture updated",
 				image: "https://picsum.photos/seed/notif/96/96",
-				created: new Date(now.getTime() - 5 * 60 * 1000),
+				created: ago(5 * MINUTE),
 				read: false,
 			},
 			...sampleNotifications,
 		],
+	},
+};
+
+// ─── Bug stories (fail until the bug is fixed) ────────────────────────────────
+
+const LONG_MESSAGE =
+	"Maintenance of the inspection devices in building 4 is due next week; please confirm the slot.";
+
+/**
+ * Bell at the right end of a full-width header. The list is empty when the
+ * popover opens; the first loadRead (the fill) adds 8 rows, and every
+ * loadLatest (window focus) sets a new array, as SCF's does.
+ */
+const HeaderWithLateRows = (
+	args: Omit<NotificationsProps, "notifications" | "loadRead" | "loadLatest">,
+) => {
+	const [rows, setRows] = useState<Notification[]>([]);
+	const [polls, setPolls] = useState(0);
+	const filled = useRef(false);
+	const loadRead = useCallback(() => {
+		if (filled.current) return;
+		filled.current = true;
+		setRows(
+			Array.from({ length: 8 }, (_, i) => ({
+				id: `w${i}`,
+				message: `${i + 1}. ${LONG_MESSAGE}`,
+				created: ago((i + 1) * HOUR),
+				read: true,
+			})),
+		);
+	}, []);
+	const loadLatest = useCallback(() => {
+		setPolls((prev) => prev + 1);
+		setRows((prev) => [...prev]);
+	}, []);
+	return (
+		<Box
+			sx={{
+				display: "flex",
+				justifyContent: "flex-end",
+				alignItems: "center",
+				gap: 2,
+				px: 1,
+			}}
+		>
+			<Typography>Polls: {polls}</Typography>
+			<Notifications
+				{...args}
+				notifications={rows}
+				loadRead={loadRead}
+				loadLatest={loadLatest}
+			/>
+		</Box>
+	);
+};
+
+export const Issue3468Item7WidthStaysStable: Story = {
+	parameters: {
+		layout: "fullscreen",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3468-ITEM-7: without a paper width the popover opens as a narrow strip, and every re-render while it is open (here: rows arriving, then six polls) makes it 16px wider and moves it 16px left. Expected: a stable width that keeps 16px from the screen edge.",
+			},
+		},
+	},
+	render: (args) => <HeaderWithLateRows {...args} />,
+	play: async ({ canvas }) => {
+		await userEvent.click(canvas.getByRole("button"));
+		const paper = await openPaper();
+		await nextFrames();
+		const width = () => Math.round(paper.getBoundingClientRect().width);
+		const widths = [width()];
+		await body().findByText(`1. ${LONG_MESSAGE}`);
+		await nextFrames();
+		widths.push(width());
+		for (let poll = 2; poll <= 7; poll++) {
+			window.dispatchEvent(new Event("focus"));
+			await canvas.findByText(`Polls: ${poll}`);
+			await nextFrames();
+			widths.push(width());
+		}
+		await expect(
+			widths,
+			"paper width at open, after the rows arrive, after each poll",
+		).toEqual(widths.map(() => widths[0]));
+		await expect(paper.getBoundingClientRect().right).toBeLessThanOrEqual(
+			window.innerWidth - 16,
+		);
+	},
+};
+
+export const Issue3468Item7WidthStaysStableOnPhone: Story = {
+	...Issue3468Item7WidthStaysStable,
+	globals: MOBILE,
+	parameters: {
+		...Issue3468Item7WidthStaysStable.parameters,
+		docs: {
+			description: {
+				story:
+					"ISSUE-3468-ITEM-7 at 320x568: the paper is as wide as the screen less 16px on each side from the start, instead of growing by 16px with every re-render.",
+			},
+		},
+	},
+	play: async (context) => {
+		await Issue3468Item7WidthStaysStable.play?.(context);
+		const rect = (paperEl() as HTMLElement).getBoundingClientRect();
+		await expect(rect.left).toBeGreaterThanOrEqual(16);
+		await expect(Math.round(rect.width)).toBe(window.innerWidth - 32);
+	},
+};
+
+/** A paper width set through `PopoverProps`, as SCF sets its own */
+const POPOVER_WIDTH_SM: NotificationsProps["PopoverProps"] = {
+	slotProps: {
+		paper: { sx: (theme) => ({ width: theme.breakpoints.values.sm }) },
+	},
+};
+
+export const Issue3468Item7PopoverPropsSetTheWidth: Story = {
+	args: { PopoverProps: POPOVER_WIDTH_SM },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3468-ITEM-7: a paper width set through `PopoverProps` (here the theme's `sm` breakpoint, 600px) replaces the default width of 400px.",
+			},
+		},
+	},
+	play: async ({ canvas }) => {
+		await userEvent.click(canvas.getByRole("button"));
+		const paper = await openPaper();
+		await nextFrames();
+		await expect(Math.round(paper.getBoundingClientRect().width)).toBe(600);
+	},
+};
+
+/** `slots` without a paper: merged into the defaults, so the default paper stays */
+const POPOVER_GROW_SLOT: NotificationsProps["PopoverProps"] = {
+	slots: { transition: Grow },
+};
+
+export const Issue3468Item7OtherPopoverSlotsKeepTheWidth: Story = {
+	args: { PopoverProps: POPOVER_GROW_SLOT },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3468-ITEM-7: `slots` in `PopoverProps` that don't name a paper keep the default paper and its width of 400px.",
+			},
+		},
+	},
+	play: async ({ canvas }) => {
+		await userEvent.click(canvas.getByRole("button"));
+		const paper = await openPaper();
+		await nextFrames();
+		await expect(Math.round(paper.getBoundingClientRect().width)).toBe(400);
 	},
 };

@@ -3,6 +3,7 @@ import React, {
 	useCallback,
 	useEffect,
 	useId,
+	useMemo,
 	useState,
 } from "react";
 import { Notifications as NotificationsIcon } from "@mui/icons-material";
@@ -16,6 +17,7 @@ import {
 	IconButtonProps,
 	Popover,
 	PopoverOrigin,
+	PopoverPaper,
 	PopoverProps,
 	styled,
 	Tooltip,
@@ -64,7 +66,19 @@ export interface NotificationsProps {
 	 */
 	BadgeProps?: BadgeProps;
 	/**
-	 * Properties to pass to the popover showing the notifications
+	 * Props for the MUI `Popover` that lists the notifications, spread over the
+	 * defaults `anchorOrigin` bottom/right and `transformOrigin` top/right (the
+	 * popover opens below the bell, right edges aligned). `open`, `anchorEl`
+	 * and `onClose` are managed internally.
+	 *
+	 * The paper is `min(400px, 100% - 32px)` wide by default: 400px, and on a
+	 * window narrower than 432px the window's width less 16px on each side.
+	 * Set another width with e.g. `{ slotProps: { paper: { sx: { width: 600 } } } }`;
+	 * MUI keeps it 16px from the window edges. Keep it a fixed width: MUI
+	 * repositions the paper after every render while it is open, and a paper
+	 * sized by its content (`width: "auto"`) gets wider each time. `slots` is
+	 * merged into the defaults, so only a `slots.paper` of your own replaces
+	 * the default paper and its width.
 	 */
 	PopoverProps?: Omit<PopoverProps, "open" | "onClose" | "anchorEl">;
 	/**
@@ -152,6 +166,18 @@ const transformOrigin: PopoverOrigin = {
 	horizontal: "right",
 };
 
+/**
+ * The popover's paper: MUI's own (its styles, theme overrides and
+ * `.MuiPopover-paper` class stay) with a fixed width. Without one the paper
+ * shrinks to fit between its left edge and the window edge, and MUI's
+ * repositioning after every render while it is open moves that edge 16px
+ * further left: the paper would grow with every render and touch the window
+ * edge.
+ */
+const NotificationsPaper = styled(PopoverPaper)({
+	width: "min(400px, 100% - 32px)",
+});
+
 const defaultImageStyle: CSSProperties = {
 	width: "auto",
 	height: 96,
@@ -237,7 +263,17 @@ const Notifications = (inProps: NotificationsProps) => {
 		classes,
 		className,
 		IconButtonProps,
+		PopoverProps: popoverProps,
 	} = props;
+
+	const customPopoverSlots = popoverProps?.slots;
+	const popoverSlots = useMemo(
+		() => ({
+			...customPopoverSlots,
+			paper: customPopoverSlots?.paper ?? NotificationsPaper,
+		}),
+		[customPopoverSlots],
+	);
 
 	const onIconClick = useCallback(
 		(evt: React.MouseEvent<HTMLButtonElement>) => {
@@ -303,7 +339,8 @@ const Notifications = (inProps: NotificationsProps) => {
 				anchorOrigin={anchorOrigin}
 				transformOrigin={transformOrigin}
 				onClose={onClose}
-				{...props.PopoverProps}
+				{...popoverProps}
+				slots={popoverSlots}
 			>
 				<Box sx={{ p: 2 }}>
 					<Grid container spacing={2}>
