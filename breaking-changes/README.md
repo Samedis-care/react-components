@@ -24,6 +24,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-20 | [A control in a DataGrid cell is named after its field and row](2026-11-20-data-grid-inline-checkbox-names.md) | behavior |
 | 2026-11-20 | [InlineSwitch takes aria props for its switch, and a selector's switch requires switchLabel](2026-11-20-inline-switch-name-and-switch-label.md) | behavior, type |
 | 2026-11-20 | [A Link to a location without pathname points at the current page](2026-11-20-link-href-without-pathname.md) | behavior |
+| 2026-11-20 | [An aborted index or fetchAll request is not reported to Sentry](2026-11-20-model-index-abort-not-reported.md) | behavior |
 | 2026-11-19 | [PopupMenu applies its `classes`](2026-11-19-popup-menu-classes.md) | behavior, theme |
 | 2026-11-19 | [A data grid logs a failed write of its persisted state and writes it again](2026-11-19-data-grid-failed-persist-write-logged-and-retried.md) | behavior |
 | 2026-11-17 | [Leaving a date field marks it touched in a Form](2026-11-17-form-blur-marks-date-fields-touched.md) | behavior |

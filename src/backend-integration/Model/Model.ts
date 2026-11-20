@@ -37,14 +37,31 @@ import("@sentry/react")
 	.catch(() => {}); // ignore
 
 /**
- * Reports an error to Sentry, if it is loaded, unless the network or the backend caused it
- * @param err The error
+ * Was the request aborted? An abort was asked for, it is not a failure
+ * @param err What the request failed with
+ * @param signal The signal the caller passed to the request, if any
+ * @returns true if that signal was aborted, or the request failed with an AbortError
+ * @remarks Like the rest of the library, errors are discriminated by their name, not by
+ *          instanceof
  */
-const reportUnexpectedError = (err: unknown) => {
+const isAbort = (err: unknown, signal: AbortSignal | undefined): boolean =>
+	!!signal?.aborted ||
+	(typeof err === "object" &&
+		err !== null &&
+		(err as { name?: unknown }).name === "AbortError");
+
+/**
+ * Reports an error to Sentry, if it is loaded, unless the network, the backend or an
+ * aborted request caused it
+ * @param err The error
+ * @param signal The signal of the request that failed, if any
+ */
+const reportUnexpectedError = (err: unknown, signal?: AbortSignal) => {
 	if (
 		captureException &&
 		err instanceof Error &&
-		!["NetworkError", "BackendError"].includes(err.name)
+		!["NetworkError", "BackendError"].includes(err.name) &&
+		!isAbort(err, signal)
 	) {
 		captureException(err);
 	}
@@ -830,6 +847,9 @@ class Model<
 	/**
 	 * Loads a list of data entries by the given search params
 	 * @param params The search params, the connector gets a copy of them
+	 * @remarks When params.signal was aborted (the caller superseded the request or went
+	 *          away) the request still rejects, but it is not reported as an unexpected
+	 *          error: it was dropped on purpose.
 	 */
 	public async index(
 		params: Partial<IDataGridLoadDataParameters> | undefined,
@@ -842,7 +862,8 @@ class Model<
 			);
 			return [await this.deserializeIndexRecords(rawData), meta, userData];
 		} catch (err) {
-			reportUnexpectedError(err);
+			// an abort is not a failure: the caller dropped the request (params.signal)
+			reportUnexpectedError(err, params?.signal);
 			throw err;
 		}
 	}
@@ -903,7 +924,10 @@ class Model<
 	 * Fetches all records using index calls
 	 * @param params The params to pass to index
 	 * @returns ModelIndexResponse where userMeta and meta is taken from the last call
-	 * @remarks The records of fetchAllRaw, deserialized and cached as index does it
+	 * @remarks The records of fetchAllRaw, deserialized and cached as index does it. A
+	 *          request whose params.signal was aborted rejects, but is not reported as an
+	 *          unexpected error, as with index.
+	 * @see index
 	 */
 	public async fetchAll(
 		params?: ModelFetchAllParams,
@@ -912,7 +936,7 @@ class Model<
 			const [rawData, meta, userMeta] = await this.fetchAllRaw(params);
 			return [await this.deserializeIndexRecords(rawData), meta, userMeta];
 		} catch (err) {
-			reportUnexpectedError(err);
+			reportUnexpectedError(err, params?.signal);
 			throw err;
 		}
 	}
