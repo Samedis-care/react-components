@@ -71,6 +71,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-20 | [A toast's keyboard-focused close button draws a focus ring](2026-11-20-toast-close-button-focus-ring.md) | behavior |
 | 2026-11-20 | [A CRUD without a record page applies gridProps.onAddNew and shows newPermissionHint only to users who may not create](2026-11-20-crud-without-record-page-add-new.md) | behavior |
 | 2026-11-20 | [SignalPortlet's linked rows and Refresh button draw a keyboard focus ring](2026-11-20-signal-portlet-focus-ring.md) | behavior |
+| 2026-11-20 | [TreeView is exposed as a tree: levels, positions among siblings and expanded state](2026-11-20-tree-view-is-a-tree.md) | behavior, type |
 | 2026-11-20 | [A lazy control's queue keeps the Form dirty when onlySubmitMounted changes while it is shown](2026-11-20-lazy-crud-connector-only-submit-mounted-change.md) | behavior |
 | 2026-11-20 | [A control in a DataGrid cell is named after its field and row](2026-11-20-data-grid-inline-checkbox-names.md) | behavior |
 | 2026-11-20 | [InlineSwitch takes aria props for its switch, and a selector's switch requires switchLabel](2026-11-20-inline-switch-name-and-switch-label.md) | behavior, type |

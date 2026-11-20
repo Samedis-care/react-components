@@ -679,6 +679,106 @@ describe("TreeView accessibility bugs", () => {
 		],
 	});
 
+	it("[ISSUE-3476-ITEM-10] exposes a tree with levels, expanded state and per-sibling positions", () => {
+		render(
+			<TreeView
+				data={TREE}
+				onToggleExpanded={vi.fn()}
+				onLoadChildren={vi.fn()}
+			/>,
+		);
+		expect(screen.getByRole("tree")).toBeInTheDocument();
+		const items = screen.getAllByRole("treeitem");
+		expect(items).toHaveLength(4);
+		const aria = (item: HTMLElement) => ({
+			level: item.getAttribute("aria-level"),
+			expanded: item.getAttribute("aria-expanded"),
+			setsize: item.getAttribute("aria-setsize"),
+			posinset: item.getAttribute("aria-posinset"),
+		});
+		expect(items.map(aria)).toEqual([
+			{ level: "1", expanded: "true", setsize: "1", posinset: "1" },
+			{ level: "2", expanded: "false", setsize: "3", posinset: "1" },
+			{ level: "2", expanded: null, setsize: "3", posinset: "2" },
+			{ level: "2", expanded: null, setsize: "3", posinset: "3" },
+		]);
+	});
+
+	it("[ISSUE-3476-ITEM-10] counts levels and positions per sibling group in a forest of flat data", () => {
+		render(
+			<TreeView
+				data={FOREST_FLAT}
+				onToggleExpanded={noop}
+				onLoadChildren={noopAsync}
+			/>,
+		);
+		const aria = (item: HTMLElement) => [
+			item.textContent,
+			item.getAttribute("aria-level"),
+			item.getAttribute("aria-posinset"),
+			item.getAttribute("aria-setsize"),
+			item.getAttribute("aria-expanded"),
+		];
+		expect(screen.getAllByRole("treeitem").map(aria)).toEqual([
+			["Root A", "1", "1", "2", "true"],
+			["A 1", "2", "1", "2", null],
+			["A 2", "2", "2", "2", "true"],
+			["A 2 1", "3", "1", "1", null],
+			// after the deeper rows of root A, the roots' count goes on
+			["Root B", "1", "2", "2", "false"],
+		]);
+	});
+
+	it("[ISSUE-3476-ITEM-10] marks the checkbox renderer's tree multi-selectable and its leaves checked", () => {
+		const tree = node("root", {
+			hasChildren: true,
+			expanded: true,
+			children: [
+				node("folder", { hasChildren: true, expanded: true, children: [] }),
+				node("checked", { expanded: true }),
+				node("unchecked"),
+			],
+		});
+		const { rerender } = render(
+			<TreeView
+				data={tree}
+				renderer={TreeViewCheckboxSelectionRenderer}
+				onToggleExpanded={noop}
+				onLoadChildren={noopAsync}
+			/>,
+		);
+		expect(screen.getByRole("tree")).toHaveAttribute(
+			"aria-multiselectable",
+			"true",
+		);
+		const checked = (item: HTMLElement) => item.getAttribute("aria-checked");
+		// only the leaves are selectable; a folder's `expanded` stays aria-expanded
+		expect(screen.getAllByRole("treeitem").map(checked)).toEqual([
+			null,
+			null,
+			"true",
+			"false",
+		]);
+		expect(screen.getByRole("treeitem", { name: "checked" })).toBeChecked();
+
+		rerender(
+			<TreeView
+				data={tree}
+				onToggleExpanded={noop}
+				onLoadChildren={noopAsync}
+			/>,
+		);
+		expect(screen.getByRole("tree")).not.toHaveAttribute(
+			"aria-multiselectable",
+		);
+		expect(screen.getAllByRole("treeitem").map(checked)).toEqual([
+			null,
+			null,
+			null,
+			null,
+		]);
+	});
+
 	it("[ISSUE-3476-ITEM-12] names every checkbox after its entry's label", () => {
 		render(
 			<TreeView

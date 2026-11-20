@@ -4,7 +4,7 @@ import {
 	KeyboardArrowUp as ClosedIcon,
 	KeyboardArrowDown as ExpandedIcon,
 } from "@mui/icons-material";
-import { TreeViewRendererProps } from "./TreeView";
+import type { TreeViewRenderer, TreeViewRendererProps } from "./TreeView";
 
 const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 	const {
@@ -113,4 +113,7 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 	);
 };
 
-export default React.memo(TreeViewCheckboxSelectionRenderer);
+export default Object.assign(React.memo(TreeViewCheckboxSelectionRenderer), {
+	// a leaf's checkbox shows its `expanded` flag: TreeView exposes it as aria-checked
+	checkableLeaves: true,
+}) satisfies TreeViewRenderer;

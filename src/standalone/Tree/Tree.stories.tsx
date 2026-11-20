@@ -638,3 +638,41 @@ export const Issue3476Item13LockedLeafCheckboxDisabled: Story = {
 		await expect(ventilator).toHaveFocus();
 	},
 };
+
+export const Issue3476Item10ExposesATree: Story = {
+	render: () => <DefaultTreeStory />,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3476-ITEM-10: the list is a `tree` and every row a `treeitem` with its level, its position among its siblings and, for a folder, whether it is expanded.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ canvas }) => {
+		// the last row: react-window renders every row once it has measured the list
+		await canvas.findByRole(
+			"treeitem",
+			{ name: "package.json" },
+			{ timeout: 5000 },
+		);
+		await expect(canvas.getByRole("tree")).not.toHaveAttribute(
+			"aria-multiselectable",
+		);
+		const aria = (name: string) => {
+			const item = canvas.getByRole("treeitem", { name });
+			return [
+				item.getAttribute("aria-level"),
+				item.getAttribute("aria-posinset"),
+				item.getAttribute("aria-setsize"),
+				item.getAttribute("aria-expanded"),
+			];
+		};
+		await expect(aria("Project root")).toEqual(["1", "1", "1", "true"]);
+		await expect(aria("src")).toEqual(["2", "1", "3", "true"]);
+		await expect(aria("utils")).toEqual(["3", "2", "2", "false"]);
+		await expect(aria("public")).toEqual(["2", "2", "3", "false"]);
+		await expect(aria("package.json")).toEqual(["2", "3", "3", null]);
+	},
+};
