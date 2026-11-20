@@ -9,6 +9,10 @@ import focusRing from "./focusRing";
 export interface CollapsibleMenuProps {
 	/**
 	 * The actual menu (Menu/RoutedMenu)
+	 *
+	 * Hidden (`display: none`) while collapsed on desktop. The mobile layout has no
+	 * collapse button, so there it is always shown; a menu collapsed on desktop is
+	 * collapsed again when the layout returns to desktop.
 	 */
 	children: React.ReactNode;
 	/**
@@ -68,6 +72,9 @@ const CollapsibleMenu = (inProps: CollapsibleMenuProps) => {
 	const [collapsed, setCollapsed] = useState(false);
 	const { t } = useCCTranslations();
 	const { mobile } = usePortalLayoutContext();
+	// the mobile layout renders no button to expand the menu, so it is never hidden
+	// there; `collapsed` stays as it is for the return to desktop
+	const hidden = collapsed && !mobile;
 
 	const toggleCollapsed = useCallback(
 		() => setCollapsed((prev) => !prev),
@@ -81,12 +88,12 @@ const CollapsibleMenu = (inProps: CollapsibleMenuProps) => {
 			container
 			sx={{ justifyContent: "flex-start", alignItems: "stretch" }}
 			wrap={"nowrap"}
-			style={collapsed ? { overflow: "visible" } : undefined} // this is needed to force update the scrollbar, otherwise we're wasting space with a scrollbar placeholder
+			style={hidden ? { overflow: "visible" } : undefined} // this is needed to force update the scrollbar, otherwise we're wasting space with a scrollbar placeholder
 			className={combineClassNames([className, classes?.root])}
 		>
 			<Content
 				size={"grow"}
-				style={{ width: props.width, display: collapsed ? "none" : undefined }}
+				style={{ width: props.width, display: hidden ? "none" : undefined }}
 				className={classes?.content}
 				key={"content"}
 			>
@@ -114,4 +121,13 @@ const CollapsibleMenu = (inProps: CollapsibleMenuProps) => {
 	);
 };
 
+/**
+ * Desktop collapse for a menu, e.g. around the menu in PortalLayout's
+ * `menuContent`: a button right of the menu ("Collapse menu" / "Expand menu")
+ * hides the menu, leaving only the 48px button bar. In the mobile layout the
+ * button is not rendered and the menu is always shown.
+ *
+ * Must be rendered inside a PortalLayout (it reads `usePortalLayoutContext`);
+ * outside one it throws "PortalLayoutContext not set".
+ */
 export default React.memo(CollapsibleMenu);
