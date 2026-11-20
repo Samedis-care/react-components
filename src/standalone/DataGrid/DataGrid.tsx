@@ -51,6 +51,7 @@ import StatePersistence, {
 	DataGridPersistentStateContext,
 } from "./StatePersistence";
 import { decodePersistedState, normalizeFilterDef } from "./PersistFormat";
+import { useDataGridFocusHandoff } from "./FocusHandoff";
 import { IDataGridContentSelectRowViewProps } from "./Content/SelectRowView";
 import combineClassNames from "../../utils/combineClassNames";
 import Checkbox from "../UIKit/Checkbox";
@@ -1527,6 +1528,9 @@ const DataGrid = (
 	const lastRefreshData = useRef<number>(0);
 
 	const gridRoot = useRef<HTMLDivElement>(null);
+	// a persistence provider mounts the grid again when its storage keys
+	// change: keyboard focus in the grid moves on to the new one
+	useDataGridFocusHandoff(gridRoot);
 
 	const visibleColumns = useMemo(
 		() => getActiveDataGridColumns(columns, columnHidden, columnPinned),

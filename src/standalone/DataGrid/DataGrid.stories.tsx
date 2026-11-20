@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useContext, useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, mocked, userEvent, waitFor, within } from "storybook/test";
@@ -21,6 +21,7 @@ import type {
 	IDataGridColumnDef,
 	IDataGridLoadDataParameters,
 } from "./DataGrid";
+import type { IDataGridFilterBarProps } from "./Header/FilterBar";
 import {
 	DATA_GRID_PERSIST_VERSION,
 	type DataGridPersistentState,
@@ -1092,6 +1093,134 @@ export const Issue3496Item7NewerFormatIsKeptUntilAChange: Story = {
 		});
 		await expect(sizing.width?.name).toBeGreaterThan(400);
 		await expect(sizing).not.toHaveProperty("sizing");
+	},
+};
+
+/** A storage that answers after a delay, like a server */
+class DelayedStorage extends StorageProvider {
+	data: Record<string, string> = {};
+	getItem(key: string): Promise<string | null> {
+		return new Promise((resolve) =>
+			window.setTimeout(() => resolve(this.data[key] ?? null), 500),
+		);
+	}
+	setItem(key: string, value: string | null): void {
+		if (value == null) delete this.data[key];
+		else this.data[key] = value;
+	}
+	clear(): void {
+		this.data = {};
+	}
+}
+const tenantStorage = new DelayedStorage();
+const TENANTS = ["North", "South"];
+/** The storage keys of a tenant's grid */
+const tenantKeys = (tenant: string) => ({ model: "people", tenant });
+/** The tenant shown, and how to show the next one */
+const TenantContext = React.createContext<[string, () => void]>(["", () => {}]);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const TenantFilterBar = (_props: IDataGridFilterBarProps) => {
+	const [tenant, nextTenant] = useContext(TenantContext);
+	return (
+		<Button variant={"outlined"} onClick={nextTenant}>
+			Tenant: {tenant}
+		</Button>
+	);
+};
+
+/**
+ * ISSUE-3496-ITEM-15: the page keeps each tenant's grid state under its own
+ * storage keys, and the grid's filter bar switches the tenant. Pressing
+ * "Tenant: North" (Enter here) changes the storage keys: a Loader takes the grid's place
+ * while the next tenant's state loads (half a second here), then the grid
+ * opens with it (South's search is "Bo"). Keyboard focus stays on the way:
+ * on the Loader while it loads, and then on the tenant button of the new
+ * grid, so pressing it again switches back.
+ */
+export const Issue3496Item15StorageKeyChangeKeepsFocus: Story = {
+	parameters: {
+		a11y: {
+			test: "error",
+			config: {
+				rules: [
+					// the virtualized rows have no cells (ISSUE-3472-ITEM-11)
+					{ id: "aria-required-children", enabled: false },
+				],
+			},
+		},
+	},
+	beforeEach: () => {
+		tenantStorage.clear();
+		tenantStorage.data[
+			DATA_GRID_STORAGE_KEY_FILTERS + "-" + JSON.stringify(tenantKeys("South"))
+		] = JSON.stringify({ v: DATA_GRID_PERSIST_VERSION, search: "Bo" });
+		StorageManager.configure((_id, keys) => [tenantStorage, keys]);
+		return () => StorageManager.configure(DefaultGetStorageProviderCallback);
+	},
+	render: () => {
+		const [tenant, setTenant] = useState(0);
+		const nextTenant = useCallback(
+			() => setTenant((prev) => (prev + 1) % TENANTS.length),
+			[],
+		);
+		const name = TENANTS[tenant];
+		const tenantCtx = React.useMemo(
+			(): [string, () => void] => [name, nextTenant],
+			[name, nextTenant],
+		);
+		const storageKeys = React.useMemo(() => tenantKeys(name), [name]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		const loadData = useCallback(makeLoadData(), []);
+		return (
+			<TenantContext.Provider value={tenantCtx}>
+				<DataGridStorageManagerPersist storageKeys={storageKeys}>
+					<DataGrid
+						columns={COLUMNS}
+						loadData={loadData}
+						searchPlaceholder={"Search people"}
+						filterBar={TenantFilterBar}
+					/>
+				</DataGridStorageManagerPersist>
+			</TenantContext.Provider>
+		);
+	},
+	play: async ({ canvas }) => {
+		const north = await canvas.findByRole(
+			"button",
+			{ name: "Tenant: North" },
+			{ timeout: 3000 },
+		);
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		north.focus();
+		await expect(north).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+
+		// the Loader takes focus from the grid it replaces
+		const progress = await canvas.findByRole("progressbar");
+		await expect(north).not.toBeInTheDocument();
+		await expect(progress.closest('[role="status"]')).toHaveFocus();
+
+		// and hands it to the grid mounted for the new keys
+		const south = await canvas.findByRole(
+			"button",
+			{ name: "Tenant: South" },
+			{ timeout: 3000 },
+		);
+		await expect(south).toHaveFocus();
+		await expect(canvas.getByPlaceholderText("Search people")).toHaveValue(
+			"Bo",
+		);
+		await expect(await canvas.findByText("Bob Smith")).toBeVisible();
+
+		// the keyboard switches back
+		await userEvent.keyboard("{Enter}");
+		await expect(
+			await canvas.findByRole(
+				"button",
+				{ name: "Tenant: North" },
+				{ timeout: 3000 },
+			),
+		).toHaveFocus();
 	},
 };
 

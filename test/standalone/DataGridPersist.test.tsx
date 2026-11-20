@@ -1,4 +1,4 @@
-import React, { StrictMode, useContext, useMemo } from "react";
+import React, { StrictMode, useContext, useMemo, useState } from "react";
 import {
 	afterEach,
 	beforeAll,
@@ -1153,6 +1153,20 @@ describe("persistence provider bugs", () => {
 		expect(screen.getByTestId("a")).toHaveTextContent("none");
 		expect(error).toHaveBeenCalledWith(expect.any(String), denied);
 	});
+
+	it("[ISSUE-3496-ITEM-15] keyboard focus in the grid survives a storageKeys change", async () => {
+		const { rerender } = render(smp({ model: "a" }));
+		await gridIdle();
+		const search = screen.getByRole("textbox");
+		act(() => search.focus());
+		expect(search).toHaveFocus();
+		rerender(smp({ model: "a", tenant: "t2" }));
+		await waitFor(() =>
+			expect(screen.getByRole("textbox")).toBeInTheDocument(),
+		);
+		await gridIdle();
+		expect(document.activeElement).not.toBe(document.body);
+	});
 });
 
 describe("restored column widths", () => {
@@ -1499,5 +1513,225 @@ describe("StorageManagerPersist bucket writes", () => {
 			await write!({ ...WRITTEN, width: { name: 200 } });
 		});
 		expect(server.data[keyOf(FILTERS, keys)]).toBe(writtenFilters());
+	});
+});
+
+describe("keyboard focus across a storage key change", () => {
+	/** A storage whose reads wait for release() while it is held */
+	class HeldProvider extends MemoryProvider {
+		held = false;
+		waiting: (() => void)[] = [];
+		getItem(key: string): Promise<string | null> {
+			if (!this.held) return super.getItem(key);
+			return new Promise((resolve) => {
+				this.waiting.push(() => resolve(this.data[key] ?? null));
+			});
+		}
+		release() {
+			this.held = false;
+			this.waiting.splice(0).forEach((resume) => resume());
+		}
+	}
+	let storage = new HeldProvider();
+	beforeEach(() => {
+		storage = new HeldProvider();
+		StorageManager.configure((_id, keys) => [storage, keys]);
+	});
+
+	const smp = (keys: Record<string, string>, child = <Grid />) => (
+		<ThemeProvider theme={theme}>
+			<button>Outside</button>
+			<StorageManagerPersist storageKeys={keys}>{child}</StorageManagerPersist>
+		</ThemeProvider>
+	);
+	/** the search field of the grid mounted in place of the given one */
+	const nextSearch = async (previous: HTMLElement) => {
+		await waitFor(() => {
+			expect(screen.getByRole("textbox")).not.toBe(previous);
+			expect(previous).not.toBeInTheDocument();
+		});
+		await gridIdle();
+		return screen.getByRole("textbox");
+	};
+	const focusSearch = async () => {
+		await gridIdle();
+		const search = screen.getByRole("textbox");
+		act(() => search.focus());
+		expect(search).toHaveFocus();
+		return search;
+	};
+
+	it("[ISSUE-3496-ITEM-15] the search field of the grid mounted for the new storage keys has keyboard focus", async () => {
+		const { rerender } = render(smp({ model: "a" }));
+		const search = await focusSearch();
+		rerender(smp({ model: "a", tenant: "t2" }));
+		expect(await nextSearch(search)).toHaveFocus();
+	});
+
+	it("[ISSUE-3496-ITEM-15] in StrictMode, the search field of the grid mounted for the new storage keys has keyboard focus", async () => {
+		const { rerender } = render(<StrictMode>{smp({ model: "a" })}</StrictMode>);
+		const search = await focusSearch();
+		rerender(<StrictMode>{smp({ model: "a", tenant: "t2" })}</StrictMode>);
+		expect(await nextSearch(search)).toHaveFocus();
+	});
+
+	it("[ISSUE-3496-ITEM-15] the Loader has keyboard focus while the new storage keys load", async () => {
+		const { rerender } = render(smp({ model: "a" }));
+		const search = await focusSearch();
+		storage.held = true;
+		rerender(smp({ model: "a", tenant: "t2" }));
+		await waitFor(() => expect(storage.waiting).toHaveLength(2));
+		expect(screen.getByRole("progressbar")).toBeInTheDocument();
+		expect(screen.getByRole("status")).toHaveFocus();
+		await act(async () => {
+			storage.release();
+			await Promise.resolve();
+		});
+		expect(await nextSearch(search)).toHaveFocus();
+	});
+
+	it("[ISSUE-3496-ITEM-15] focus moved from the Loader to another element while the new storage keys load stays there", async () => {
+		const { rerender } = render(smp({ model: "a" }));
+		const search = await focusSearch();
+		storage.held = true;
+		rerender(smp({ model: "a", tenant: "t2" }));
+		await waitFor(() => expect(screen.getByRole("status")).toHaveFocus());
+		const outside = screen.getByRole("button", { name: "Outside" });
+		act(() => outside.focus());
+		await act(async () => {
+			storage.release();
+			await Promise.resolve();
+		});
+		expect(await nextSearch(search)).not.toHaveFocus();
+		expect(outside).toHaveFocus();
+	});
+
+	it("[ISSUE-3496-ITEM-15] focus moved from the Loader to the page while the new storage keys load stays there", async () => {
+		const { rerender } = render(smp({ model: "a" }));
+		const search = await focusSearch();
+		storage.held = true;
+		rerender(smp({ model: "a", tenant: "t2" }));
+		await waitFor(() => expect(screen.getByRole("status")).toHaveFocus());
+		act(() => screen.getByRole("status").blur());
+		// what blurring leaves the Loader's blur handler to check
+		await act(async () => {});
+		await act(async () => {
+			storage.release();
+			await Promise.resolve();
+		});
+		expect(await nextSearch(search)).not.toHaveFocus();
+		expect(document.activeElement).toBe(document.body);
+	});
+
+	it("[ISSUE-3496-ITEM-15] focus outside the grid stays there when the storage keys change", async () => {
+		const { rerender } = render(smp({ model: "a" }));
+		const search = await focusSearch();
+		const outside = screen.getByRole("button", { name: "Outside" });
+		act(() => outside.focus());
+		rerender(smp({ model: "a", tenant: "t2" }));
+		expect(await nextSearch(search)).not.toHaveFocus();
+		expect(outside).toHaveFocus();
+	});
+
+	// the filter bar of a grid shows the buttons it mounted with
+	let mountWith = ["One", "Two"];
+	const Buttons = (props: IDataGridFilterBarProps) => {
+		const [names] = useState(mountWith);
+		return (
+			<>
+				<ProbeBar {...props} />
+				{names.map((name) => (
+					<button key={name}>{name}</button>
+				))}
+			</>
+		);
+	};
+
+	it("[ISSUE-3496-ITEM-15] focus on a filter bar control moves to the same control of the grid mounted for the new storage keys", async () => {
+		mountWith = ["One", "Two"];
+		const { rerender } = render(
+			smp({ model: "a" }, <Grid filterBar={Buttons} />),
+		);
+		await gridIdle();
+		const two = screen.getByRole("button", { name: "Two" });
+		act(() => two.focus());
+		const search = screen.getByRole("textbox");
+		rerender(smp({ model: "a", tenant: "t2" }, <Grid filterBar={Buttons} />));
+		await nextSearch(search);
+		expect(two).not.toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Two" })).toHaveFocus();
+	});
+
+	it("[ISSUE-3496-ITEM-15] focus on a control which the grid mounted for the new storage keys lacks moves to the grid's first control", async () => {
+		mountWith = ["One", "Two"];
+		const { rerender } = render(
+			smp({ model: "a" }, <Grid filterBar={Buttons} />),
+		);
+		await gridIdle();
+		const two = screen.getByRole("button", { name: "Two" });
+		act(() => two.focus());
+		expect(two).toHaveFocus();
+		const search = screen.getByRole("textbox");
+		mountWith = ["One"];
+		rerender(smp({ model: "a", tenant: "t2" }, <Grid filterBar={Buttons} />));
+		// the search field comes first in the grid
+		expect(await nextSearch(search)).toHaveFocus();
+		expect(
+			screen.queryByRole("button", { name: "Two" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("[ISSUE-3496-ITEM-15] the Loader keeps keyboard focus while the storage keys change again, and the grid mounted for the last ones gets it", async () => {
+		const { rerender } = render(smp({ model: "a" }));
+		const search = await focusSearch();
+		storage.held = true;
+		rerender(smp({ model: "a", tenant: "t2" }));
+		await waitFor(() => expect(screen.getByRole("status")).toHaveFocus());
+		rerender(smp({ model: "a", tenant: "t3" }));
+		await waitFor(() => expect(storage.waiting).toHaveLength(4));
+		expect(screen.getByRole("status")).toHaveFocus();
+		await act(async () => {
+			storage.release();
+			await Promise.resolve();
+		});
+		expect(await nextSearch(search)).toHaveFocus();
+	});
+
+	it("[ISSUE-3496-ITEM-15] a grid that the app unmounts and shows again under the same storage keys does not take focus", async () => {
+		const { rerender } = render(smp({ model: "a" }));
+		const search = await focusSearch();
+		rerender(smp({ model: "a" }, <></>));
+		expect(search).not.toBeInTheDocument();
+		expect(document.activeElement).toBe(document.body);
+		rerender(smp({ model: "a" }));
+		expect(await nextSearch(search)).not.toHaveFocus();
+		expect(document.activeElement).toBe(document.body);
+	});
+
+	const lsp = (storageKey: string, child = <Grid />) => (
+		<ThemeProvider theme={theme}>
+			<LocalStoragePersist storageKey={storageKey}>{child}</LocalStoragePersist>
+		</ThemeProvider>
+	);
+
+	it("[ISSUE-3496-ITEM-15] keyboard focus in the grid survives a LocalStoragePersist storageKey change", async () => {
+		const { rerender } = render(lsp("a"));
+		const search = await focusSearch();
+		rerender(lsp("b"));
+		expect(await nextSearch(search)).toHaveFocus();
+	});
+
+	it("[ISSUE-3496-ITEM-15] a control that the grid mounted for the new storageKey focuses itself keeps focus", async () => {
+		const AutoFocus = (props: IDataGridFilterBarProps) => (
+			<>
+				<ProbeBar {...props} />
+				<button autoFocus>Mine</button>
+			</>
+		);
+		const { rerender } = render(lsp("a"));
+		const search = await focusSearch();
+		rerender(lsp("b", <Grid filterBar={AutoFocus} />));
+		expect(await nextSearch(search)).not.toHaveFocus();
+		expect(screen.getByRole("button", { name: "Mine" })).toHaveFocus();
 	});
 });

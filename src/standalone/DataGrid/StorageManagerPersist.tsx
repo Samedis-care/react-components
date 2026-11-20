@@ -1,4 +1,12 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+	useCallback,
+	useId,
+	useLayoutEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
+import { styled } from "@mui/material";
 import {
 	DataGridPersistedData,
 	DataGridPersistentState,
@@ -9,6 +17,11 @@ import { mergePersistedState, splitPersistedState } from "./PersistFormat";
 import { StorageManager } from "../../framework/Storage";
 import useAsyncMemo from "../../utils/useAsyncMemo";
 import Loader from "../Loader";
+import {
+	DataGridFocusHandoff,
+	DataGridFocusHandoffContext,
+	DataGridFocusHandoffContextType,
+} from "./FocusHandoff";
 
 export interface StorageManagerPersistProps {
 	/**
@@ -22,6 +35,18 @@ export interface StorageManagerPersistProps {
 }
 
 const DATA_GRID_STORAGE_KEY_BASE = "data-grid-";
+
+/**
+ * The Loader shown while the buckets load. It takes keyboard focus from a
+ * grid that it replaces, and shows the library's focus ring then, inside its
+ * edge because an ancestor may clip it.
+ */
+const FocusableLoader = styled(Loader)(({ theme }) => ({
+	"&:focus-visible": {
+		outline: `2px solid ${theme.palette.primary.main}`,
+		outlineOffset: -2,
+	},
+}));
 
 // recommended default: localStorage
 export const DATA_GRID_STORAGE_KEY_COLUMN_SIZING =
@@ -50,6 +75,12 @@ export const DATA_GRID_STORAGE_KEY_FILTERS =
  * error naming the bucket (an AggregateError of both when both failed); the
  * grid logs it and hands its data over again with its next state update,
  * which writes the failed bucket again.
+ *
+ * When the storage keys change, a Loader replaces the children until both
+ * buckets are loaded for the new keys, and the children mount again then.
+ * Keyboard focus in a grid inside moves to the Loader meanwhile, and then to
+ * the same control of the grid mounted again (to its first control, if that
+ * one is not there), unless focus was moved elsewhere in between.
  * @remarks The data it provides is what was written last, so a grid mounted
  *          later (or anything else reading the context) starts from the
  *          current state, not from the state loaded on mount
@@ -194,6 +225,51 @@ const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 		[storageKeysJson, unreadable, read],
 	);
 
+	// where focus was in a grid that the Loader replaced, until the grid
+	// mounted in its place takes it over (see DataGridFocusHandoffContext)
+	const focusHandoff = useRef<DataGridFocusHandoff | null>(null);
+	// the children are mounted anew for each load
+	const focusCtx = useMemo(
+		(): DataGridFocusHandoffContextType => ({
+			handoff: focusHandoff,
+			mount: data,
+		}),
+		[data],
+	);
+	const loaderId = useId();
+	// layout effects of the children run first: a grid that unmounted for the
+	// Loader has handed focus over, a grid that mounted in place of the Loader
+	// has taken it
+	useLayoutEffect(() => {
+		if (!focusHandoff.current) return;
+		// loaded, or the keys changed while the children are mounted: what is
+		// left (no grid mounted, a grid the app unmounted) is for no later grid
+		if (data) {
+			focusHandoff.current = null;
+			return;
+		}
+		const loader = document.getElementById(loaderId);
+		const active = document.activeElement;
+		// the Loader keeps it while the keys change again
+		if (loader && active === loader) return;
+		// focus that is elsewhere already stays there
+		if (loader && (!active || active === document.body)) loader.focus();
+		else focusHandoff.current = null;
+	}, [data, storageKeysJson, loaderId]);
+	const handleLoaderBlur = useCallback(
+		(evt: React.FocusEvent<HTMLDivElement>) => {
+			const loader = evt.currentTarget;
+			// once the update is done: the Loader is removed when the buckets are
+			// loaded, and the grid takes focus. Focus moved elsewhere (not the
+			// window losing focus) stays there.
+			queueMicrotask(() => {
+				if (loader.isConnected && loader.ownerDocument.activeElement !== loader)
+					focusHandoff.current = null;
+			});
+		},
+		[],
+	);
+
 	const persistCtx = useMemo(
 		() =>
 			[
@@ -203,11 +279,20 @@ const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 		[written, storageKeysJson, data, setData],
 	);
 
-	if (!data) return <Loader />;
 	return (
-		<DataGridPersistentStateContext.Provider value={persistCtx}>
-			{children}
-		</DataGridPersistentStateContext.Provider>
+		<DataGridFocusHandoffContext.Provider value={focusCtx}>
+			{data ? (
+				<DataGridPersistentStateContext.Provider value={persistCtx}>
+					{children}
+				</DataGridPersistentStateContext.Provider>
+			) : (
+				<FocusableLoader
+					id={loaderId}
+					tabIndex={-1}
+					onBlur={handleLoaderBlur}
+				/>
+			)}
+		</DataGridFocusHandoffContext.Provider>
 	);
 };
 

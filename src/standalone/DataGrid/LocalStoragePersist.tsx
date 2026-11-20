@@ -1,10 +1,21 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, {
+	useCallback,
+	useLayoutEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import {
 	DataGridPersistedData,
 	DataGridPersistentState,
 	DataGridPersistentStateContext,
 	DataGridPersistentStateContextType,
 } from "./StatePersistence";
+import {
+	DataGridFocusHandoff,
+	DataGridFocusHandoffContext,
+	DataGridFocusHandoffContextType,
+} from "./FocusHandoff";
 
 export interface LocalStoragePersistProps {
 	/**
@@ -13,8 +24,9 @@ export interface LocalStoragePersistProps {
 	 *
 	 * When it changes, the children are mounted again, so the grids open with
 	 * what is stored under the new key. Everything else inside is mounted
-	 * again as well: it loses its state, and keyboard focus inside it falls
-	 * back to the page.
+	 * again as well and loses its state. Keyboard focus in a grid moves to
+	 * the same control of the grid mounted again (to its first control, if
+	 * that one is not there); focus elsewhere inside falls back to the page.
 	 */
 	storageKey: string;
 	/**
@@ -105,6 +117,23 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 		return data;
 	}, [storageKey]);
 
+	// where focus was in a grid mounted for the previous key, until the grid
+	// mounted for this one takes it over (see DataGridFocusHandoffContext)
+	const focusHandoff = useRef<DataGridFocusHandoff | null>(null);
+	// the children are mounted anew for each key
+	const focusCtx = useMemo(
+		(): DataGridFocusHandoffContextType => ({
+			handoff: focusHandoff,
+			mount: storageKey,
+		}),
+		[storageKey],
+	);
+	// layout effects of the children run first: the grids mounted for this key
+	// have taken focus over; what is left had no grid to take it
+	useLayoutEffect(() => {
+		focusHandoff.current = null;
+	}, [storageKey]);
+
 	const persistCtx = useMemo(
 		() =>
 			[
@@ -118,9 +147,11 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 	// previous key would keep showing that key's state, and write it under
 	// this one
 	return (
-		<DataGridPersistentStateContext.Provider value={persistCtx}>
-			<React.Fragment key={storageKey}>{children}</React.Fragment>
-		</DataGridPersistentStateContext.Provider>
+		<DataGridFocusHandoffContext.Provider value={focusCtx}>
+			<DataGridPersistentStateContext.Provider value={persistCtx}>
+				<React.Fragment key={storageKey}>{children}</React.Fragment>
+			</DataGridPersistentStateContext.Provider>
+		</DataGridFocusHandoffContext.Provider>
 	);
 };
 
