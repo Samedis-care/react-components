@@ -8,7 +8,14 @@ import {
 	beforeAll,
 	beforeEach,
 } from "vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import {
+	render,
+	screen,
+	fireEvent,
+	cleanup,
+	within,
+} from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { createMemoryHistory } from "history";
 import { setFrameworkHistory } from "../../src/framework/History";
 import DialogContextProvider, {
@@ -79,8 +86,16 @@ afterEach(() => {
 const withDialogs = (ui: React.ReactNode) =>
 	render(<DialogContextProvider>{ui}</DialogContextProvider>);
 
+/** the tile root; SignPad's root is the only element with an onClick */
+const tile = () => {
+	const el = document.querySelector('[class*="CcSignPad-root"]');
+	if (!(el instanceof HTMLElement)) throw new Error("tile missing");
+	return el;
+};
+const openPad = () => fireEvent.click(tile());
 const dialog = () => screen.getByRole("dialog");
 const button = (name: string) => screen.getByRole("button", { name });
+const canvasIn = (el: HTMLElement) => el.querySelector("canvas");
 
 /** pushes a SignDialog, as SignaturePad and SCF's auto-open do */
 const Opener = (props: SignPadDialogProps) => {
@@ -167,5 +182,49 @@ describe("SignDialog in a dialog stack", () => {
 		fireEvent.keyDown(dialog(), { key: "Escape" });
 		// the open sign dialog hides the rest of the page from the role queries
 		expect(screen.queryByText("other dialog")).not.toBeNull();
+	});
+});
+
+describe("SignDialog accessibility", () => {
+	it("[ISSUE-3467-ITEM-16] Tab from the close button goes to Save Changes, and the off-screen input is hidden from assistive technology", async () => {
+		const user = userEvent.setup();
+		withDialogs(<SignaturePad signature={SIG} name="sig" />);
+		openPad();
+		button("Close").focus();
+		await user.tab();
+		expect(document.activeElement, "focus after Tab from Close").toBe(
+			button("Save Changes"),
+		);
+		// aria-hidden, type="hidden" and no input at all each leave no textbox
+		expect(
+			within(dialog()).queryByRole("textbox"),
+			"the off-screen input is exposed to assistive technology",
+		).toBeNull();
+	});
+
+	it("[ISSUE-3467-ITEM-16] over an empty canvas too, Tab skips the off-screen input, and closing still reports a blur named after the field", async () => {
+		// what a Form's handleBlur reads: the name or data-name of currentTarget
+		const names: (string | null)[] = [];
+		const onBlur = vi.fn((evt: React.FocusEvent<HTMLElement>) => {
+			names.push(
+				evt.currentTarget.getAttribute("name") ??
+					evt.currentTarget.getAttribute("data-name"),
+			);
+		});
+		const user = userEvent.setup();
+		withDialogs(<SignaturePad signature="" name="sig" onBlur={onBlur} />);
+		openPad();
+		expect(canvasIn(dialog())).not.toBeNull();
+		button("Close").focus();
+		await user.tab();
+		expect(document.activeElement, "focus after Tab from Close").toBe(
+			button("Save Changes"),
+		);
+		expect(within(dialog()).queryByRole("textbox")).toBeNull();
+		fireEvent.click(button("Save Changes"));
+		expect(screen.queryByRole("dialog")).toBeNull();
+		expect(names, "field names of the blurs reported on close").toContain(
+			"sig",
+		);
 	});
 });

@@ -251,6 +251,10 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 					</ImageDiv>
 				)}
 				<HiddenDiv className={classes?.hiddenDiv}>
+					{/* only the target of the blur the dialog reports when it closes,
+					    carrying the field's name: not a control, so it is out of the
+					    tab order and hidden from assistive technology, as MUI
+					    Select's native input is */}
 					<input
 						type="text"
 						value={signature ?? ""}
@@ -258,6 +262,8 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 						ref={hiddenRef}
 						name={name}
 						onBlur={onBlur}
+						tabIndex={-1}
+						aria-hidden
 					/>
 				</HiddenDiv>
 			</SignDiv>

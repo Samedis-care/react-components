@@ -311,6 +311,24 @@ export const Issue3467Item14MouseCloseReturnsFocusToTile: Story = {
 	},
 };
 
+export const Issue3467Item16OpenDialogPassesAxe: Story = {
+	args: { initial: SAMPLE_SIGNATURE },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					'ISSUE-3467-ITEM-16: the open dialog contains an off-screen text input holding the whole data URL; it is a Tab stop and has no label (axe "label", critical). Expected: no focusable or exposed hidden input.',
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ canvasElement }) => {
+		tileIn(canvasElement).click();
+		await waitFor(() => expect(dialogEl()).not.toBeNull());
+		// axe runs after the play, with the dialog open
+	},
+};
+
 export const Issue3467Item1ResizeAfterDrawingNeverSavesBlankImage: Story = {
 	parameters: {
 		docs: {
