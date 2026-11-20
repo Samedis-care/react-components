@@ -35,6 +35,11 @@ type Story = StoryObj<typeof InfoBox>;
 
 const WHITE = "rgb(255, 255, 255)";
 
+const elementOf = (el: Element | null): HTMLElement => {
+	if (!(el instanceof HTMLElement)) throw new Error("element missing");
+	return el;
+};
+
 /** waits until no CSS transition runs in or below el (the header's colors, the Collapse) */
 const transitionsDone = (el: Element) =>
 	waitFor(() =>
@@ -72,7 +77,7 @@ export const Success: Story = {
 	},
 };
 
-export const Error: Story = {
+export const ErrorStatus: Story = {
 	args: {
 		status: "error",
 		heading: "An error occurred",
@@ -185,6 +190,111 @@ export const Controlled: Story = {
 		await expect(header).toHaveAttribute("aria-expanded", "true");
 		await waitFor(() => expect(message).toBeVisible());
 		await expect(args.onChange).toHaveBeenCalledTimes(1);
+	},
+};
+
+const BetweenSiblingsDemo = ({ expanded }: { expanded: boolean }) => (
+	<div style={{ width: 600 }}>
+		<div>Above</div>
+		<InfoBox
+			heading={"Heading"}
+			message={"Message"}
+			defaultExpanded={expanded}
+		/>
+		<div>Below</div>
+	</div>
+);
+
+export const Issue3464Item3HeaderAndMarginsStayWhenExpanded: StoryObj<
+	typeof BetweenSiblingsDemo
+> = {
+	render: () => <BetweenSiblingsDemo expanded={false} />,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3464-ITEM-3: opening the box grows the 48px header to 60px and gives the box 16px margins above and below, so it and the content below it jump.",
+			},
+		},
+	},
+	play: async ({ canvasElement, canvas }) => {
+		const btn = canvas.getByRole("button", { name: /Heading/ });
+		const root = elementOf(canvasElement.querySelector(".MuiAccordion-root"));
+		const margins = () => {
+			const cs = getComputedStyle(root);
+			return [cs.marginTop, cs.marginBottom];
+		};
+		await expect(btn.getBoundingClientRect().height).toBe(48);
+		await expect(margins()).toEqual(["0px", "0px"]);
+		// a click without moving focus, so no focus styling is involved
+		btn.click();
+		await waitFor(() =>
+			expect(canvasElement.querySelector(".MuiCollapse-root")).toHaveClass(
+				"MuiCollapse-entered",
+			),
+		);
+		await transitionsDone(root);
+		await expect(btn.getBoundingClientRect().height).toBe(48);
+		await expect(margins()).toEqual(["0px", "0px"]);
+	},
+};
+
+export const Issue3464Item3CornersRoundedBetweenSiblings: StoryObj<
+	typeof BetweenSiblingsDemo
+> = {
+	render: () => <BetweenSiblingsDemo expanded />,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3464-ITEM-3: the root of a box between two other `div`s has no rounded corners, so its colored header has square top corners. MUI rounds the top of only the first `div` among siblings and the bottom of only the last.",
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const cs = getComputedStyle(
+			elementOf(canvasElement.querySelector(".MuiAccordion-root")),
+		);
+		await expect([
+			cs.borderTopLeftRadius,
+			cs.borderTopRightRadius,
+			cs.borderBottomRightRadius,
+			cs.borderBottomLeftRadius,
+		]).toEqual(["4px", "4px", "4px", "4px"]);
+	},
+};
+
+export const Issue3464Item3StackedBoxesRoundedWithoutMargins: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3464-ITEM-3: three InfoBoxes stacked directly, the middle one open. MUI styles accordions as a group: it rounds only the top of the first and the bottom of the last, and gives an open one a 16px margin. Every InfoBox is rounded on all four corners and has no margin of its own.",
+			},
+		},
+	},
+	render: () => (
+		<div style={{ width: 600 }}>
+			<InfoBox heading={"First"} message={"Message"} />
+			<InfoBox heading={"Second"} message={"Message"} defaultExpanded />
+			<InfoBox heading={"Third"} message={"Message"} />
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const roots = canvasElement.querySelectorAll(".MuiAccordion-root");
+		await expect(roots).toHaveLength(3);
+		for (const root of roots) {
+			const cs = getComputedStyle(root);
+			await expect([
+				cs.borderTopLeftRadius,
+				cs.borderTopRightRadius,
+				cs.borderBottomRightRadius,
+				cs.borderBottomLeftRadius,
+				cs.marginTop,
+				cs.marginBottom,
+			]).toEqual(["4px", "4px", "4px", "4px", "0px", "0px"]);
+		}
 	},
 };
 

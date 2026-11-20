@@ -43,6 +43,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-20 | [GroupBox applies `classes.legend`](2026-11-20-group-box-classes-legend.md) | behavior, theme |
 | 2026-11-20 | [A selector's switch takes the label's row alone when the label does not fit beside it](2026-11-20-selector-switch-own-row-when-label-does-not-fit.md) | behavior |
 | 2026-11-20 | [A theme that shows a selector's switch must set switchLabel](2026-11-20-selector-theme-switch-label.md) | type |
+| 2026-11-20 | [An open InfoBox keeps its 48px header and has no margin; every InfoBox is rounded](2026-11-20-info-box-no-gutters-rounded-corners.md) | behavior |
 | 2026-11-20 | [A lazy control's queue keeps the Form dirty when onlySubmitMounted changes while it is shown](2026-11-20-lazy-crud-connector-only-submit-mounted-change.md) | behavior |
 | 2026-11-20 | [A control in a DataGrid cell is named after its field and row](2026-11-20-data-grid-inline-checkbox-names.md) | behavior |
 | 2026-11-20 | [InlineSwitch takes aria props for its switch, and a selector's switch requires switchLabel](2026-11-20-inline-switch-name-and-switch-label.md) | behavior, type |

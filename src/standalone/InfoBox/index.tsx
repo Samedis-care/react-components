@@ -30,12 +30,21 @@ import ccI18n from "../../i18n";
  */
 const TRANSLATION_OPTIONS = { i18n: ccI18n, useSuspense: false };
 
-const AccordionStyled = styled(Accordion, { name: "CcInfoBox", slot: "root" })({
-	boxShadow: "none",
-	"&.MuiAccordion-rounded": {
-		overflow: "hidden",
-	},
-});
+/**
+ * The box. MUI's Accordion styles accordions as a group: it rounds only the
+ * top corners of the first of its element type among its siblings and the
+ * bottom corners of the last. Every InfoBox is rounded on all four corners
+ * instead, and clips its header to them.
+ */
+const AccordionStyled = styled(Accordion, { name: "CcInfoBox", slot: "root" })(
+	({ theme }) => ({
+		boxShadow: "none",
+		"&.MuiAccordion-rounded": {
+			borderRadius: theme.shape.borderRadius,
+			overflow: "hidden",
+		},
+	}),
+);
 
 /**
  * The header's colors for one status. A keyboard-focused header
@@ -74,14 +83,6 @@ const AccordionSummaryStyled = styled(AccordionSummary, {
 		// is drawn over the column instead of under its shade
 		isolation: "isolate",
 		minHeight: 48,
-		"&.Mui-expanded": {
-			minHeight: 48,
-		},
-		"&.MuiAccordionSummary-content": {
-			"&.Mui-expanded": {
-				margin: "12px 0",
-			},
-		},
 		...(alwaysExpanded && {
 			cursor: "default",
 			"&:hover:not(.Mui-disabled)": {
@@ -285,8 +286,7 @@ const statusName = (
 			return undefined;
 	}
 };
-// .MuiAccordionSummary-content.Mui-expanded => margin => unset
-// .MuiAccordionSummary-root.Mui-expanded => min-height => unset
+
 const InfoBox = (inProps: InfoBoxProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcInfoBox" });
 	const {
@@ -341,6 +341,9 @@ const InfoBox = (inProps: InfoBoxProps) => {
 	return (
 		<AccordionStyled
 			className={combineClassNames([className, classes?.root])}
+			// opening the box keeps the header at 48px and adds no margin around
+			// the box, where MUI's gutters grow both
+			disableGutters
 			expanded={!!alwaysExpanded || !!expanded}
 			onChange={handleChange}
 		>
