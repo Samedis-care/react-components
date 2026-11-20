@@ -42,10 +42,6 @@ export const FormPageGuardContext = React.createContext<FormPageGuard | null>(
 
 export interface UseFormPageGuardParams {
 	/**
-	 * The Form's disableRouting: every navigation leaves the form
-	 */
-	disableRouting: boolean;
-	/**
 	 * Is the form read-only for a reason other than a save? Then it takes no guard.
 	 */
 	readOnlyBesidesSaving: boolean;
@@ -84,6 +80,10 @@ export const FORM_PAGE_MOVE_STATE = Object.freeze({
  * as the default panel of routed tabs (tab("", …)), renders at every path below its parent,
  * except where the Routes it is an entry of renders an entry listed before it: opening
  * another tab unmounts a Form in the default panel, so that leaves the page.
+ * The nearest Route of a disableRouting Form is the one of the page around it, as the Form
+ * has no url of its own; it stays mounted all the same while that Route is rendered, e.g.
+ * when routed tabs in its form page switch. A Form outside of every Route has none, so
+ * every navigation leaves it.
  * @param routePath The full path of the Form's nearest Route (RouteContext path)
  * @param routeUrl The url the Route currently matches (RouteContext url)
  * @param routeRendersAt Is the Route rendered at a pathname (RouteContext rendersAt)
@@ -101,7 +101,7 @@ const isInsideFormPage = (
 /**
  * The leave guard of a Form's unsaved changes: while the form is dirty, a navigation asks
  * "Leave form page?" (a navigation that keeps the form's Route rendered at the same url
- * passes, unless disableRouting, and so does a move of the page marked with
+ * passes, also for a disableRouting Form, and so does a move of the page marked with
  * FORM_PAGE_MOVE_STATE),
  * closing the browser tab asks (UnsafeToLeave), and so does closing the FullFormDialog the
  * Form is in. A form that is read-only for a reason other than a save takes no guard.
@@ -114,7 +114,6 @@ const isInsideFormPage = (
  */
 const useFormPageGuard = (params: UseFormPageGuardParams): FormPageGuard => {
 	const {
-		disableRouting,
 		readOnlyBesidesSaving,
 		dirty,
 		addEventListener,
@@ -198,7 +197,6 @@ const useFormPageGuard = (params: UseFormPageGuardParams): FormPageGuard => {
 			}
 			// special handling: routing inside form page (e.g. routed tab panels, routed stepper)
 			if (
-				!disableRouting &&
 				routePath != null &&
 				routeUrl != null &&
 				routeRendersAt != null &&
@@ -270,7 +268,6 @@ const useFormPageGuard = (params: UseFormPageGuardParams): FormPageGuard => {
 		routeUrl,
 		routeRendersAt,
 		pushDialog,
-		disableRouting,
 		addEventListener,
 		removeEventListener,
 		releaseHistoryBlock,

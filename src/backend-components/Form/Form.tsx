@@ -364,7 +364,10 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
 	formClass?: string;
 	/**
 	 * Disable routing for form
-	 * @remarks This is used to prevent errors when using forms in dialogs which don't support routing
+	 * @remarks This is used to prevent errors when using forms in dialogs which don't support routing.
+	 *          It does not change what the leave guard of a dirty form asks: a navigation that
+	 *          keeps the nearest Route around the Form rendered at the same url passes without
+	 *          "Leave form page?" (e.g. routed tabs in the form page), as the Form stays mounted.
 	 */
 	disableRouting?: boolean;
 	/**
@@ -2437,7 +2440,6 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 	// another tab is open). A save makes the form read-only too, but its changes are unsaved
 	// until it succeeds, so only a form which is read-only for another reason goes unguarded.
 	const pageGuard = useFormPageGuard({
-		disableRouting: !!props.disableRouting,
 		readOnlyBesidesSaving: Object.keys(readOnlyReasons).some(
 			(reason) => reason !== FORM_SUBMITTING_READ_ONLY_REASON,
 		),

@@ -218,6 +218,39 @@ const renderFormInPanel = (history: MemoryHistory) => {
 	);
 };
 
+/**
+ * The tabs outside of a disableRouting Form, which sits in the default panel
+ * (a disableRouting CRUD placed in a tab): a tab switch unmounts the Form
+ */
+const FormInsidePanel = (props: { model: TestModel }) => {
+	const tab = useRoutedTabPanel();
+	return (
+		<>
+			<RoutedTabs aria-label="Page">
+				<Tab label="General" value="" />
+				<Tab label="More" value="more" />
+			</RoutedTabs>
+			<RoutedTabPanelWrapper>
+				{[
+					tab("more", <div>MORE PANEL</div>),
+					tab(
+						"",
+						<Form
+							model={props.model}
+							id={"1"}
+							errorComponent={DefaultErrorComponent}
+							customProps={{ goBack: () => {} }}
+							disableRouting
+						>
+							{FieldPage}
+						</Form>,
+					),
+				]}
+			</RoutedTabPanelWrapper>
+		</>
+	);
+};
+
 /** A Form for record 1 under the route /rec/*, plus a page /other to leave to */
 const renderForm = (
 	history: MemoryHistory,
@@ -286,6 +319,37 @@ describe("RoutedTabs in a form", () => {
 		expect(await screen.findByText("Leave form page?")).toBeInTheDocument();
 		expect(h.location.pathname).not.toBe("/other");
 		expect(screen.queryByText("OTHER PAGE")).toBeNull();
+	});
+
+	it("disableRouting form inside a tab panel: a tab switch on a dirty form is prompted, because it unmounts the form and loses the edit", async () => {
+		const h = createMemoryHistory({ initialEntries: ["/rec"] });
+		setFrameworkHistory(h);
+		const model = createTestModel();
+		render(
+			<Framework>
+				<Routes>
+					{[
+						<Route
+							key="rec"
+							path="/rec/*"
+							element={<FormInsidePanel model={model} />}
+						/>,
+					]}
+				</Routes>
+			</Framework>,
+		);
+		await makeDirty();
+		fireEvent.click(tabEl("More"));
+		expect(await screen.findByText("Leave form page?")).toBeInTheDocument();
+		expect(h.location.pathname).toBe("/rec");
+		fireEvent.click(screen.getByRole("button", { name: "Yes" }));
+		expect(await screen.findByText("MORE PANEL")).toBeInTheDocument();
+		expect(h.location.pathname).toBe("/rec/more");
+		fireEvent.click(tabEl("General"));
+		expect(
+			await screen.findByDisplayValue("Alice", undefined, LOAD),
+		).toBeInTheDocument();
+		expect(screen.queryByDisplayValue("AliceX")).toBeNull();
 	});
 
 	it("[ISSUE-3500-ITEM-4] a form page inside a tab panel keeps guarding its unsaved changes after another tab was opened", async () => {
@@ -437,5 +501,52 @@ describe("RoutedTabs in a form", () => {
 		act(() => h.push("/rec/more"));
 		expect(await screen.findByText("Leave form page?")).toBeInTheDocument();
 		expect(h.location.pathname).toBe("/rec/details");
+	});
+
+	it("[ISSUE-3500-ITEM-5] disableRouting form: a tab switch on a dirty form is not prompted", async () => {
+		const h = createMemoryHistory({ initialEntries: ["/rec"] });
+		renderForm(h, TabsInsideFormPage, true);
+		await makeDirty();
+		fireEvent.click(tabEl("More"));
+		await act(async () => {});
+		expect(screen.queryByText("Leave form page?")).toBeNull();
+		expect(h.location.pathname).toBe("/rec/more");
+		expect(screen.getByText("MORE PANEL")).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3500-ITEM-5] disableRouting form: the edit is still there after a tab switch and the browser's back, and leaving the page asks", async () => {
+		const h = createMemoryHistory({ initialEntries: ["/rec"] });
+		renderForm(h, TabsInsideFormPage, true);
+		await makeDirty();
+		fireEvent.click(tabEl("More"));
+		await waitFor(() => expect(h.location.pathname).toBe("/rec/more"));
+		act(() => h.back());
+		await act(async () => {});
+		expect(h.location.pathname).toBe("/rec");
+		expect(screen.queryByText("Leave form page?")).toBeNull();
+		expect(await screen.findByDisplayValue("AliceX")).toBeInTheDocument();
+
+		act(() => h.push("/other"));
+		expect(await screen.findByText("Leave form page?")).toBeInTheDocument();
+		expect(h.location.pathname).toBe("/rec");
+		expect(screen.queryByText("OTHER PAGE")).toBeNull();
+	});
+
+	it("[ISSUE-3500-ITEM-5] disableRouting form with its form page in the default panel: a tab switch keeps the edit without asking, leaving the Form asks", async () => {
+		const h = createMemoryHistory({ initialEntries: ["/rec"] });
+		renderForm(h, FormPageInsidePanel, true);
+		await makeDirty();
+		fireEvent.click(tabEl("More"));
+		await act(async () => {});
+		expect(screen.queryByText("Leave form page?")).toBeNull();
+		expect(h.location.pathname).toBe("/rec/more");
+		expect(screen.getByText("MORE PANEL")).toBeInTheDocument();
+
+		fireEvent.click(tabEl("General"));
+		expect(await screen.findByDisplayValue("AliceX")).toBeInTheDocument();
+		act(() => h.push("/other"));
+		expect(await screen.findByText("Leave form page?")).toBeInTheDocument();
+		expect(h.location.pathname).not.toBe("/other");
+		expect(screen.queryByText("OTHER PAGE")).toBeNull();
 	});
 });

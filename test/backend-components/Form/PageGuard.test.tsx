@@ -196,6 +196,66 @@ describe("Form page leave guard", () => {
 		expect(leavePrompts()).toHaveLength(1);
 		expect(screen.getByDisplayValue("AliceX")).toBeInTheDocument();
 	});
+
+	it("[ISSUE-3500-ITEM-5] a disableRouting form in the catch-all entry of a page's Routes keeps its edit below the page, and asks before another entry takes over", async () => {
+		const history = createMemoryHistory({ initialEntries: ["/account"] });
+		setFrameworkHistory(history);
+		const accountPages = (
+			<Routes>
+				{[
+					<Route
+						key="security"
+						path="security/*"
+						element={<div>SECURITY PAGE</div>}
+					/>,
+					<Route
+						key="profile"
+						path="*"
+						element={
+							<Form
+								model={makePeopleModel()}
+								id={"1"}
+								errorComponent={DefaultErrorComponent}
+								customProps={{ goBack: () => {} }}
+								disableRouting
+							>
+								{FieldPage}
+							</Form>
+						}
+					/>,
+				]}
+			</Routes>
+		);
+		render(
+			<Framework>
+				<Routes>
+					{[
+						<Route key="account" path="/account/*" element={accountPages} />,
+						<Route key="other" path="/other" element={<div>OTHER PAGE</div>} />,
+					]}
+				</Routes>
+			</Framework>,
+		);
+		await makeDirty();
+		await navigate("/account/details");
+		expect(history.location.pathname).toBe("/account/details");
+		expect(leavePrompts()).toHaveLength(0);
+		expect(screen.getByDisplayValue("AliceX")).toBeInTheDocument();
+
+		await navigate("/account/security");
+		expect(screen.queryByText("SECURITY PAGE")).toBeNull();
+		expect(history.location.pathname).toBe("/account/details");
+		expect(leavePrompts()).toHaveLength(1);
+		fireEvent.click(
+			within(await findLeavePrompt()).getByRole("button", { name: "No" }),
+		);
+		await waitFor(() => expect(leavePrompts()).toHaveLength(0));
+
+		await navigate("/other");
+		expect(screen.queryByText("OTHER PAGE")).toBeNull();
+		expect(history.location.pathname).toBe("/account/details");
+		expect(leavePrompts()).toHaveLength(1);
+	});
 });
 
 describe("Form page leave guard while the form saves", () => {
