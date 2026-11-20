@@ -187,11 +187,10 @@ const LocalizedKeyboardDatePicker = (
 									onBlur?.(event);
 								},
 								// disableClearable suppresses the clear button that our
-								// TextFieldWithHelp based fields render on touch devices. MUI's
-								// own PickersTextField has no such button and forwards the prop
-								// it does not know to the DOM, so it is only sent on to a text
-								// field that was actually swapped in for it.
-								...(otherProps.slots?.textField ? { disableClearable } : {}),
+								// TextFieldWithHelp based fields render on touch devices. It is
+								// sent only when the caller set it, so a text field swapped in
+								// for ours is not handed a prop it would pass on to the DOM.
+								...(disableClearable === undefined ? {} : { disableClearable }),
 							}),
 							errorMessage,
 						);

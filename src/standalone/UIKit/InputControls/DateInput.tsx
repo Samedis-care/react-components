@@ -230,8 +230,11 @@ const useDayCallback = <T,>(
  * date it takes or gives: `value`, `onChange`, `minDate`, `maxDate`,
  * `referenceDate`, `shouldDisableDate`/`Month`/`Year`, `onAccept`, `onError`,
  * `onMonthChange`, `onYearChange` and `dayOfWeekFormatter`. `slots`,
- * `slotProps` and `viewRenderers` are MUI's and see `Moment`s. There is no
- * `defaultValue`: the input is always controlled.
+ * `slotProps` and `viewRenderers` are MUI's and see `Moment`s;
+ * `slots.textField` defaults to the components-care text field
+ * (`PickersTextFieldWithHelp`, with the Clear button on touch devices and the
+ * label always above the field), and one passed by the consumer replaces it.
+ * There is no `defaultValue`: the input is always controlled.
  */
 const DateInput = (
 	props: DateInputProps & Omit<DatePickerProps, PickerDateProps>,
@@ -290,6 +293,8 @@ const DateInput = (
 				onError(reason, fromPickerValue(validated))),
 		[onError],
 	);
+	// an explicit `textField: undefined` means the default, as it does to MUI
+	const textField = muiProps.slots?.textField ?? PickersTextFieldWithHelp;
 
 	return (
 		<LocalizedKeyboardDatePicker
@@ -317,8 +322,8 @@ const DateInput = (
 			// the consumer's slots come last, so one it passes wins over the default
 			// text field (as for DateTimeInput); slotProps are merged below
 			slots={{
-				textField: PickersTextFieldWithHelp,
 				...muiProps.slots,
+				textField,
 			}}
 			slotProps={{
 				...muiProps.slotProps,
@@ -328,9 +333,12 @@ const DateInput = (
 						muiProps.slotProps?.textField,
 					) as PickersTextFieldProps;
 					return {
-						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-						// @ts-ignore This just passes props down to the text field component, TS defs don't support custom props here, but the implementation does.
-						customHandleClear: () => onChange(null),
+						// customHandleClear is the components-care text field's own prop, so
+						// only the field that reads it gets it; another one would pass it on
+						// to the DOM and React would log an error
+						...(textField === PickersTextFieldWithHelp
+							? { customHandleClear: () => onChange(null) }
+							: {}),
 						...textFieldSlotPropsProp,
 						// only where the caller gave one, so a helper text passed through
 						// slotProps.textField is not overwritten with undefined

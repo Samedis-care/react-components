@@ -9,7 +9,7 @@ import {
 	waitFor,
 } from "@testing-library/react";
 import { ThemeProvider, createTheme } from "@mui/material";
-import { LocalizationProvider } from "@mui/x-date-pickers";
+import { LocalizationProvider, PickersTextField } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import DateInput from "../../src/standalone/UIKit/InputControls/DateInput";
 
@@ -448,6 +448,37 @@ describe("DateInput bugs", () => {
 		);
 		await screen.findByRole("button", { name: /choose date/i });
 		expect(screen.queryByTestId("own-icon")).not.toBeNull();
+	});
+
+	it("[ISSUE-3485-ITEM-3] renders a consumer's text field without a console error", async () => {
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => {});
+		wrap(
+			<DateInput
+				label="Day"
+				value={DAY}
+				onChange={noop}
+				slots={{ textField: PickersTextField }}
+			/>,
+		);
+		await screen.findByRole("button", { name: /choose date/i });
+		expect(consoleError).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3485-ITEM-3] keeps the components-care text field for an explicit undefined textField slot", async () => {
+		const { container } = wrap(
+			<DateInput
+				label="Day"
+				value={DAY}
+				onChange={noop}
+				slots={{ textField: undefined }}
+			/>,
+		);
+		await screen.findByRole("button", { name: /choose date/i });
+		expect(
+			container.querySelector('[class*="CcUiKitPickersTextField"]'),
+		).not.toBeNull();
 	});
 
 	it("[ISSUE-3485-ITEM-13] links a helperText prop to the field group", async () => {

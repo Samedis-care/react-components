@@ -2,7 +2,7 @@
 
 - **Date:** 2026-11-20
 - **Kind:** behavior
-- **Scope:** `standalone/UIKit/InputControls`
+- **Scope:** `standalone/UIKit/InputControls`, `backend-integration/Model/Types/Renderers`
 
 ## What changed
 
@@ -13,10 +13,18 @@ Before, `DateInput` built its own `slots` object with only the text field in it,
 slot the app passed was dropped without a word, although the prop is typed and documented
 as MUI's.
 
-The app's slots come after `DateInput`'s own, so `slots.textField` replaces
-`PickersTextFieldWithHelp` too. That text field carries the touch Clear button, the
-`warning` and `dirty` states and the link from a helper text to the field group; an app that
-swaps it in gets MUI's `PickersTextField` and loses those.
+The model date renderers (`ModelDataTypeDateRendererCC` and
+`ModelDataTypeDateNullableRendererCC`) pass their constructor props on to `DateInput`, so a
+`slots` given to one of them now takes effect in the same way.
+
+`DateInput`'s own slots come first, so `slots.textField` replaces the components-care text
+field (`PickersTextFieldWithHelp`) with the text field the app passed. Compared with the
+components-care field, the app's field loses the Clear button on touch devices, the label
+that is always raised above the field (the components-care field sets `shrink: true`; MUI's
+own leaves an empty field's label inside it) and the components-care input styling
+(`CcUiKitPickersTextField`: the input's padding and, with `important`, the red placeholder).
+The `warning` and `dirty` states and the helper text's link to the field group do not depend
+on the text field and stay either way.
 
 `DateInput` without a `slots` prop renders as before.
 
@@ -28,7 +36,16 @@ bar, layout) never showed and nothing said why. MUI's picker takes these slots, 
 
 ## Migration
 
-Nothing to do for an app that passes no `slots` to `DateInput`. An app that passed them and
-worked around their being ignored can drop the workaround: its slots now render. An app
-that passed `slots.textField` gets it now, in place of the components-care text field; drop
-that slot to keep the Clear button, `warning`/`dirty` and the linked helper text.
+Nothing to do for an app that passes no `slots` to `DateInput` or to a model date renderer.
+An app that passed them and worked around their being ignored can drop the workaround: its
+slots now render. Required for apps that pass `slots.textField` to `DateInput` (also through
+`ModelDataTypeDateRendererCC` or `ModelDataTypeDateNullableRendererCC`) and want to keep the
+components-care text field (Clear button on touch devices, label always above the field):
+remove `slots.textField`.
+
+```tsx
+// before
+<DateInput value={day} onChange={setDay} slots={{ textField: MyTextField }} />
+// after: the components-care text field, with the Clear button and the raised label
+<DateInput value={day} onChange={setDay} />
+```
