@@ -11,6 +11,10 @@ import useNavigate from "./useNavigate";
 import useLocation from "./useLocation";
 import toAppPath from "./toAppPath";
 
+/**
+ * Props of {@link Link}: the target and every `<a>` attribute except `href`,
+ * which Link computes from `to`
+ */
 export interface LinkProps extends Omit<
 	React.DetailedHTMLProps<
 		React.AnchorHTMLAttributes<HTMLAnchorElement>,

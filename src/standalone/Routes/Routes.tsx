@@ -4,7 +4,14 @@ import useLocation from "./useLocation";
 import matchPath from "./matchPath";
 import joinRoutePath from "./joinRoutePath";
 
+/**
+ * Props of {@link Routes}
+ */
 export interface RoutesProps {
+	/**
+	 * The Route elements; the first whose path matches the current location is
+	 * rendered, none if no path matches
+	 */
 	children: React.ReactElement<RouteProps>[];
 }
 

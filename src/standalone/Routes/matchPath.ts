@@ -1,3 +1,6 @@
+/**
+ * The route pattern {@link matchPath} matches a location against
+ */
 export interface PathPattern {
 	/**
 	 * The route path
@@ -15,6 +18,9 @@ export interface PathPattern {
 	end?: boolean;
 }
 
+/**
+ * A successful match of {@link matchPath}
+ */
 export interface PathMatch {
 	/**
 	 * The url portion matching the route path (route path with parameter values inserted)

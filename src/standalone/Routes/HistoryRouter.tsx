@@ -4,8 +4,21 @@ import { sentryHandleNavigation } from "./SentryRoutingInstrumentation";
 import { LocationContext } from "./useLocation";
 import DocumentTitleProvider, { DocumentTitleFormatter } from "./DocumentTitle";
 
+/**
+ * Props of {@link HistoryRouter}
+ */
 export interface HistoryRouterProps {
+	/**
+	 * The history to route with, a `History` of the history package (v5):
+	 * `createBrowserHistory()` in an app, `createMemoryHistory()` in tests and
+	 * stories. Framework renders a HistoryRouter with `FrameworkHistory`, so an
+	 * app inside Framework doesn't add one.
+	 */
 	history: History;
+	/**
+	 * The routed content: `Routes`, `Route`, `Link` and everything that uses
+	 * the routing hooks
+	 */
 	children: React.ReactNode;
 	/**
 	 * Builds the document title from the page titles that `PageTitle` headings
@@ -22,15 +35,34 @@ export interface HistoryRouterProps {
 	formatDocumentTitle?: DocumentTitleFormatter;
 }
 
+/**
+ * The value of {@link HistoryRouterContext}
+ */
 export interface HistoryRouterContextType {
+	/**
+	 * The history of the nearest HistoryRouter
+	 */
 	history: History;
 }
 
+/**
+ * The history of the nearest HistoryRouter, null outside of one. Read it with
+ * {@link useHistoryRouterContext}.
+ */
 export const HistoryRouterContext =
 	React.createContext<HistoryRouterContextType | null>(null);
-export const useHistoryRouterContext = () => {
+/**
+ * The history of the nearest HistoryRouter, e.g. for `history.back()`, which
+ * `useNavigate` has no counterpart for.
+ * Throws outside a HistoryRouter; Framework renders one.
+ * @returns The context of the nearest HistoryRouter
+ */
+export const useHistoryRouterContext = (): HistoryRouterContextType => {
 	const ctx = useContext(HistoryRouterContext);
-	if (!ctx) throw new Error("HistoryRouterContext missing");
+	if (!ctx)
+		throw new Error(
+			"HistoryRouterContext missing, did you forget to add Components-Care Framework or HistoryRouter?",
+		);
 	return ctx;
 };
 

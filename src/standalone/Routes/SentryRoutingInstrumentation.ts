@@ -3,6 +3,7 @@ import { Location, Update } from "history";
 /**
  * Follows the routing of HistoryRouter and Route. Registered by componentsCareBrowserTracingIntegration
  * (components-care/dist/sentry), so this module doesn't depend on Sentry, an optional peer dependency.
+ * This module is internal: none of it is exported from the package root.
  */
 export interface RoutingInstrumentation {
 	/**
@@ -20,7 +21,8 @@ export interface RoutingInstrumentation {
 let instrumentation: RoutingInstrumentation | null = null;
 
 /**
- * Sets the instrumentation that follows the routing
+ * Sets the instrumentation that follows the routing. Called by
+ * componentsCareBrowserTracingIntegration.
  * @param value The instrumentation, null to remove it
  */
 export function setRoutingInstrumentation(
@@ -35,7 +37,7 @@ let namedBy: { location: Location; depth: number } | null = null;
 /**
  * Names the current location after a matched route. Every matched Route reports itself for every
  * location, and the deepest one wins, so nested routes name it after the full route (parent
- * effects run after child effects).
+ * effects run after child effects). Called by Route.
  * @param routePath The full route path (including parent routes)
  * @param depth How many routes the route is nested in
  * @param location The location the route matched
@@ -52,7 +54,7 @@ export function sentrySetRoutePath(
 }
 
 /**
- * Reports a history update
+ * Reports a history update. Called by HistoryRouter.
  * @param update The update
  */
 export function sentryHandleNavigation(update: Update): void {

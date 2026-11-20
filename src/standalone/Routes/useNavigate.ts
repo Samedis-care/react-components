@@ -3,11 +3,26 @@ import type { To } from "history";
 import { useCallback } from "react";
 import toAppPath from "./toAppPath";
 
+/**
+ * Options of a {@link NavigateFunction} call
+ */
 export interface NavigateOptions {
+	/**
+	 * Replace the current history entry instead of pushing a new one.
+	 * Default: false (push)
+	 */
 	replace?: boolean;
+	/**
+	 * State stored with the new history entry, read with
+	 * `useLocation().state`. Default: none (the state is null)
+	 */
 	state?: unknown;
 }
 
+/**
+ * Navigates to `to`, a path of the app or a location object, as
+ * {@link useNavigate} describes
+ */
 export interface NavigateFunction {
 	(to: To, options?: NavigateOptions): void;
 }
