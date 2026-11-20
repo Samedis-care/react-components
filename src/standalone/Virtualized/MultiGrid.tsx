@@ -42,6 +42,21 @@ export interface MultiGridProps {
 	styleTopRightGrid: CSSProperties;
 	styleBottomLeftGrid: CSSProperties;
 	styleBottomRightGrid: CSSProperties;
+	/**
+	 * Renders one cell. It gets react-window's cell props, with grid-wide
+	 * `columnIndex`/`rowIndex` in every pane, and returns the cell's element.
+	 * Apply `style` to that element: it positions and sizes the cell.
+	 *
+	 * MultiGrid puts `ariaAttributes` (`role="gridcell"` and `aria-colindex`) on
+	 * the returned element unless the element sets them itself, so every row
+	 * has its cells for assistive technology whether or not the renderer
+	 * spreads them. When the returned element is one of a component of your
+	 * own, that component has to pass them on to its DOM element, as it does
+	 * `style`.
+	 *
+	 * All four panes call it as a function, so its hooks belong to the pane's
+	 * own cell component, which react-window memoizes.
+	 */
 	children: (props: CellComponentProps) => React.ReactElement;
 	noContentRenderer: React.ComponentType;
 	/**
@@ -138,6 +153,29 @@ const NO_SCROLLBARS: ScrollbarSizes = { vertical: 0, horizontal: 0 };
 
 const SCROLL_DETECTION_DELAY_MS = 100; // ms to consider scroll events caused by JS code
 
+/** the attributes of a cell that make it one of its row's cells */
+interface CellAria {
+	role?: string;
+	"aria-colindex"?: number;
+}
+
+/**
+ * The cell element a cell renderer returned, with react-window's
+ * `ariaAttributes` on it: react-window renders the `role="row"` elements and
+ * leaves the cell role to the renderer. A role or column index the element
+ * sets itself (e.g. `role="columnheader"`) stays.
+ */
+const withCellAria = (
+	cell: React.ReactElement,
+	ariaAttributes: CellComponentProps["ariaAttributes"],
+): React.ReactElement => {
+	const own = cell.props as CellAria;
+	return React.cloneElement(cell as React.ReactElement<CellAria>, {
+		role: own.role ?? ariaAttributes.role,
+		"aria-colindex": own["aria-colindex"] ?? ariaAttributes["aria-colindex"],
+	});
+};
+
 const MultiGrid = (inProps: MultiGridProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcMultiGrid" });
 	const {
@@ -177,32 +215,45 @@ const MultiGrid = (inProps: MultiGridProps) => {
 		[fixedRowCount, rowHeight],
 	);
 
+	// The cell components of the four panes: each calls the renderer with
+	// grid-wide indices and makes what it returns a cell of its row
+	const CellRendererTopLeft = useCallback(
+		(props: CellComponentProps) =>
+			withCellAria(CellRenderer(props), props.ariaAttributes),
+		[CellRenderer],
+	);
 	const CellRendererTopRight = useCallback(
-		(props: CellComponentProps) => {
-			return CellRenderer({
-				...props,
-				columnIndex: props.columnIndex + fixedColumnCount,
-			});
-		},
+		(props: CellComponentProps) =>
+			withCellAria(
+				CellRenderer({
+					...props,
+					columnIndex: props.columnIndex + fixedColumnCount,
+				}),
+				props.ariaAttributes,
+			),
 		[CellRenderer, fixedColumnCount],
 	);
 	const CellRendererBottomLeft = useCallback(
-		(props: CellComponentProps) => {
-			return CellRenderer({
-				...props,
-				rowIndex: props.rowIndex + fixedRowCount,
-			});
-		},
+		(props: CellComponentProps) =>
+			withCellAria(
+				CellRenderer({
+					...props,
+					rowIndex: props.rowIndex + fixedRowCount,
+				}),
+				props.ariaAttributes,
+			),
 		[CellRenderer, fixedRowCount],
 	);
 	const CellRendererBottomRight = useCallback(
-		(props: CellComponentProps) => {
-			return CellRenderer({
-				...props,
-				columnIndex: props.columnIndex + fixedColumnCount,
-				rowIndex: props.rowIndex + fixedRowCount,
-			});
-		},
+		(props: CellComponentProps) =>
+			withCellAria(
+				CellRenderer({
+					...props,
+					columnIndex: props.columnIndex + fixedColumnCount,
+					rowIndex: props.rowIndex + fixedRowCount,
+				}),
+				props.ariaAttributes,
+			),
 		[CellRenderer, fixedColumnCount, fixedRowCount],
 	);
 
@@ -412,7 +463,7 @@ const MultiGrid = (inProps: MultiGridProps) => {
 					width: Math.min(fixedWidth, width),
 					height: fixedHeight,
 				}}
-				cellComponent={CellRenderer}
+				cellComponent={CellRendererTopLeft}
 				cellProps={{}}
 			/>
 			{/* top right */}

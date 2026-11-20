@@ -359,3 +359,55 @@ describe("MultiGrid focus ring", () => {
 		);
 	});
 });
+
+/**
+ * Sets its own role and grid-wide column index on the header row's cells, and
+ * neither on the others
+ */
+const HeaderRoleCellRenderer = ({
+	columnIndex,
+	rowIndex,
+	style,
+}: CellComponentProps) => (
+	<div
+		style={style}
+		{...(rowIndex === 0 && {
+			role: "columnheader",
+			"aria-colindex": columnIndex + 1,
+		})}
+		data-testid={`cell-${rowIndex}-${columnIndex}`}
+	>
+		R{rowIndex}C{columnIndex}
+	</div>
+);
+
+describe("MultiGrid ARIA structure", () => {
+	it("[ISSUE-3472-ITEM-11] every row of every pane has its cells, though the renderer drops ariaAttributes", () => {
+		const { container } = render(<MultiGrid {...props()} />);
+		const { tl, tr, bl, br } = panes(container);
+		for (const [name, pane] of Object.entries({ tl, tr, bl, br })) {
+			const rows = Array.from(pane.querySelectorAll("[role='row']"));
+			expect(rows.length, name).toBeGreaterThan(0);
+			for (const row of rows) {
+				// what react-window put into the row: its cells
+				const cells = Array.from(row.children);
+				expect(cells.length, name).toBeGreaterThan(0);
+				for (const cell of cells) {
+					expect(cell, name).toHaveAttribute("role", "gridcell");
+					expect(cell, name).toHaveAttribute("aria-colindex");
+				}
+			}
+		}
+	});
+
+	it("[ISSUE-3472-ITEM-11] keeps the role and column index a renderer sets itself", () => {
+		const { getByTestId } = render(
+			<MultiGrid {...props({ children: HeaderRoleCellRenderer })} />,
+		);
+		expect(getByTestId("cell-0-2")).toHaveAttribute("role", "columnheader");
+		expect(getByTestId("cell-0-2")).toHaveAttribute("aria-colindex", "3");
+		expect(getByTestId("cell-0-0")).toHaveAttribute("role", "columnheader");
+		expect(getByTestId("cell-1-2")).toHaveAttribute("role", "gridcell");
+		expect(getByTestId("cell-1-0")).toHaveAttribute("role", "gridcell");
+	});
+});

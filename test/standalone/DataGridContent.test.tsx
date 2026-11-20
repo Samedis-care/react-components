@@ -418,3 +418,27 @@ describe("Content / ColumnHeader: widths", () => {
 		expect(probe!.widths.role).toBe(start + 100);
 	});
 });
+
+describe("Cell: ARIA structure", () => {
+	it("[ISSUE-3472-ITEM-11] every row of the grid has its cells: headers, row checkboxes and values sit in gridcells", async () => {
+		const { container } = render(<Grid />);
+		await screen.findByText("Alice");
+		const rows = Array.from(container.querySelectorAll("[role='row']"));
+		// the header row and three data rows, each split over two panes
+		expect(rows.length).toBeGreaterThanOrEqual(8);
+		for (const row of rows) {
+			// what react-window put into the row: its cells
+			const cells = Array.from(row.children);
+			expect(cells.length).toBeGreaterThan(0);
+			for (const cell of cells)
+				expect(cell).toHaveAttribute("role", "gridcell");
+		}
+		expect(cellOf(container, "Alice")).toHaveAttribute("role", "gridcell");
+		expect(
+			rowCheckbox(container, "Alice")!.closest("[role='gridcell']"),
+		).not.toBeNull();
+		expect(
+			headerWrapper(container, "name").closest("[role='gridcell']"),
+		).not.toBeNull();
+	});
+});

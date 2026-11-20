@@ -442,8 +442,6 @@ const GRID_A11Y = {
 		rules: [
 			// the search field and the row checkboxes have no name (ISSUE-3492-ITEM-25, ISSUE-3493-ITEM-13)
 			{ id: "label", enabled: false },
-			// the virtualized rows have no cells (ISSUE-3472-ITEM-11)
-			{ id: "aria-required-children", enabled: false },
 			// the indeterminate "All" checkbox (ISSUE-3482-ITEM-2)
 			{ id: "aria-conditional-attr", enabled: false },
 		],

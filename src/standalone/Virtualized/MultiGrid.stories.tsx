@@ -92,6 +92,17 @@ const CellRenderer = ({
 	);
 };
 
+/** like DataGrid's Cell: drops `ariaAttributes` */
+const PlainCellRenderer = ({
+	columnIndex,
+	rowIndex,
+	style,
+}: CellComponentProps) => (
+	<div style={{ ...style, ...CELL_STYLE }}>
+		{rowLabel(rowIndex, columnIndex)}
+	</div>
+);
+
 /** header cells hold a button, as DataGrid's column headers do (filter) */
 const HeaderButtonCellRenderer = (props: CellComponentProps) => {
 	const { columnIndex, rowIndex, style, ariaAttributes } = props;
@@ -546,5 +557,41 @@ export const Issue3472Item10HeaderFocusRingAboveTheCells: StoryObj<
 		await expect(pane).toHaveFocus();
 		await waitFor(() => expect(pane.matches(":focus-visible")).toBe(true));
 		await expectFocusRingAboveCells(root, pane);
+	},
+};
+
+const PLAIN_CELLS_PROPS: MultiGridProps = {
+	...GRID_PROPS,
+	children: PlainCellRenderer,
+};
+
+/**
+ * The cell renderer ignores `ariaAttributes`, as DataGrid's `Cell` does. MultiGrid
+ * gives the cells their role itself, so every `role="row"` of every pane has its
+ * cells (axe `aria-required-children`).
+ */
+export const Issue3472Item11RowsHaveCells: StoryObj<typeof MultiGrid> = {
+	render: () => <GridBox {...PLAIN_CELLS_PROPS} />,
+	parameters: {
+		a11y: {
+			test: "error",
+			options: {
+				runOnly: { type: "rule", values: ["aria-required-children"] },
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const { topLeft, topRight, bottomLeft, bottomRight } =
+			getPanes(canvasElement);
+		for (const pane of [topLeft, topRight, bottomLeft, bottomRight]) {
+			const rows = within(pane).getAllByRole("row");
+			for (const row of rows) {
+				// every element react-window put into the row is one of its cells
+				await expect(row.children.length).toBeGreaterThan(0);
+				await expect(within(row).getAllByRole("gridcell")).toHaveLength(
+					row.children.length,
+				);
+			}
+		}
 	},
 };
