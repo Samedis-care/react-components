@@ -117,6 +117,21 @@ describe("UIKit", () => {
 			fireEvent.click(screen.getByRole("button"));
 			expect(onClick).toHaveBeenCalledOnce();
 		});
+
+		it("[ISSUE-3482-ITEM-8] renders a color whose hover fill it cannot measure", () => {
+			// main is too light for white text, so its fill moves; dark stays a variable
+			const varDark = createTheme({
+				palette: {
+					warning: { main: "#ed6c02", dark: "var(--app-warning-dark)" },
+				},
+			});
+			render(
+				<ThemeProvider theme={varDark}>
+					<ActionButton color="warning">Save</ActionButton>
+				</ThemeProvider>,
+			);
+			expect(screen.getByRole("button", { name: "Save" })).toBeTruthy();
+		});
 	});
 
 	describe("SubActionButton", () => {

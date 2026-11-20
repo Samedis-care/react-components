@@ -23,6 +23,9 @@ import {
 	createTheme,
 	decomposeColor,
 	getContrastRatio,
+	getLuminance,
+	PaletteColor,
+	recomposeColor,
 	ThemeProvider,
 } from "@mui/material";
 
@@ -256,6 +259,228 @@ export const Issue3482Item3ThemeFocusVisibleRing: ActionButtonStory = {
 				style: "solid",
 				color: "rgb(0, 128, 0)",
 			});
+	},
+};
+
+// Synthetic pointer events never set :hover. Copies every :hover rule of the page
+// next to itself, with :hover replaced by this class, so a play can read hover styles.
+const FORCED_HOVER = "story-forced-hover";
+const copyHoverRules = (
+	rules: CSSRuleList,
+	insert: (rule: string, index: number) => void,
+) => {
+	for (let index = rules.length - 1; index >= 0; index--) {
+		const rule = rules[index];
+		if (rule instanceof CSSStyleRule && rule.selectorText.includes(":hover"))
+			insert(
+				`${rule.selectorText.replaceAll(":hover", `.${FORCED_HOVER}`)}{${rule.style.cssText}}`,
+				index + 1,
+			);
+		else if (rule instanceof CSSGroupingRule)
+			copyHoverRules(rule.cssRules, (text, at) => rule.insertRule(text, at));
+	}
+};
+const forceHoverRules = () => {
+	for (const sheet of Array.from(document.styleSheets))
+		copyHoverRules(sheet.cssRules, (text, at) => sheet.insertRule(text, at));
+};
+
+/** The fill and text color an element shows now */
+const colorsOf = (element: HTMLElement) => {
+	const { backgroundColor, color } = getComputedStyle(element);
+	return { backgroundColor, color };
+};
+
+/** The fill and text color an element shows under the pointer */
+const hoverColors = (element: HTMLElement) => {
+	// MUI's transition would report the fill it starts from
+	element.style.transition = "none";
+	element.classList.add(FORCED_HOVER);
+	const hover = colorsOf(element);
+	element.classList.remove(FORCED_HOVER);
+	colorsOf(element); // back at rest before the transition returns
+	element.style.transition = "";
+	return hover;
+};
+
+// a palette color as getComputedStyle reports it
+const computed = (color: string) => recomposeColor(decomposeColor(color));
+
+// the contrast of a text color, also a translucent one, laid over its fill
+const textContrast = ({
+	color,
+	backgroundColor,
+}: {
+	color: string;
+	backgroundColor: string;
+}) => {
+	const [r, g, b, a = 1] = decomposeColor(color).values;
+	const fill = decomposeColor(backgroundColor).values;
+	const shown = [r, g, b].map((channel, i) =>
+		Math.round(channel * a + fill[i] * (1 - a)),
+	);
+	return getContrastRatio(`rgb(${shown.join(", ")})`, backgroundColor);
+};
+
+// an app theme that recolors every ActionButton, its orange readable in both states
+const ORANGE_ACTION_BUTTONS = createTheme({
+	palette: { secondary: { main: "#b8501a" }, contrastThreshold: 4.5 },
+	components: { CcActionButton: { defaultProps: { color: "secondary" } } },
+});
+
+export const Issue3482Item8RecolorWithColor: ActionButtonStory = {
+	parameters: {
+		layout: "padded",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3482-ITEM-8: recolor an ActionButton with `color`, or for every ActionButton with the theme's `CcActionButton.defaultProps.color` (right: an orange `secondary` with `contrastThreshold: 4.5`). Fill, text and hover then come from that palette color (`main`, `contrastText`, `dark`), as on MUI's Button, where the text reaches 4.5:1 on them (otherwise see Issue3482Item8ReadableFills). Overriding only the background keeps primary's text color and hover.",
+			},
+		},
+	},
+	render: (args) => (
+		<Box sx={{ display: "flex", gap: 3, alignItems: "center" }}>
+			<ActionButton
+				color="error"
+				fullWidth={false}
+				icon={<DeleteIcon />}
+				onClick={args.onClick}
+			>
+				Delete
+			</ActionButton>
+			<ThemeProvider theme={ORANGE_ACTION_BUTTONS}>
+				<ActionButton
+					fullWidth={false}
+					icon={<SaveIcon />}
+					onClick={args.onClick}
+				>
+					Save
+				</ActionButton>
+			</ThemeProvider>
+		</Box>
+	),
+	play: async ({ canvas }) => {
+		forceHoverRules();
+		const buttons: [HTMLElement, PaletteColor][] = [
+			[
+				canvas.getByRole("button", { name: "Delete" }),
+				createTheme().palette.error,
+			],
+			[
+				canvas.getByRole("button", { name: "Save" }),
+				ORANGE_ACTION_BUTTONS.palette.secondary,
+			],
+		];
+		for (const [button, palette] of buttons) {
+			const name = button.textContent;
+			const rest = colorsOf(button);
+			await expect(rest.backgroundColor, `${name}'s fill`).toBe(
+				computed(palette.main),
+			);
+			await expect(rest.color, `${name}'s text`).toBe(
+				computed(palette.contrastText),
+			);
+			const hover = hoverColors(button);
+			await expect(hover.backgroundColor, `${name}'s hover fill`).toBe(
+				computed(palette.dark),
+			);
+			await expect(hover.color, `${name}'s hover text`).toBe(
+				computed(palette.contrastText),
+			);
+			for (const [state, colors] of [
+				["resting", rest],
+				["hovered", hover],
+			] as const)
+				await expect(
+					textContrast(colors),
+					`${name}'s text while ${state}`,
+				).toBeGreaterThanOrEqual(4.5);
+		}
+	},
+};
+
+// palette colors whose contrastText has less than 4.5:1 on MUI's fills
+const LIGHT_GREEN_SUCCESS = createTheme({
+	palette: { success: { main: "#4caf50" } },
+});
+const ORANGE_SECONDARY_ACTION_BUTTONS = createTheme({
+	palette: { secondary: { main: "#eb6a28" } },
+	components: { CcActionButton: { defaultProps: { color: "secondary" } } },
+});
+const ORANGE_PRIMARY = createTheme({
+	palette: { primary: { main: "#ed6c02" } },
+});
+
+export const Issue3482Item8ReadableFills: ActionButtonStory = {
+	parameters: {
+		layout: "padded",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3482-ITEM-8: palette colors whose `contrastText` has less than 4.5:1 on MUI's fills: MUI's default warning (on `main` and `dark`) and info (on `main`), a light green success with dark text (on `dark`), an orange secondary set through `defaultProps.color`, and an orange primary without `color`. ActionButton darkens those fills (behind dark text: lightens them) just enough, in their own hue. The text keeps the palette's `contrastText`, and the hover fill stays darker than the resting one.",
+			},
+		},
+	},
+	render: (args) => (
+		<Box
+			sx={{ display: "flex", flexWrap: "wrap", gap: 3, alignItems: "center" }}
+		>
+			<ActionButton color="warning" fullWidth={false} onClick={args.onClick}>
+				Warning
+			</ActionButton>
+			<ActionButton color="info" fullWidth={false} onClick={args.onClick}>
+				Info
+			</ActionButton>
+			<ThemeProvider theme={LIGHT_GREEN_SUCCESS}>
+				<ActionButton color="success" fullWidth={false} onClick={args.onClick}>
+					Success
+				</ActionButton>
+			</ThemeProvider>
+			<ThemeProvider theme={ORANGE_SECONDARY_ACTION_BUTTONS}>
+				<ActionButton fullWidth={false} onClick={args.onClick}>
+					Secondary
+				</ActionButton>
+			</ThemeProvider>
+			<ThemeProvider theme={ORANGE_PRIMARY}>
+				<ActionButton fullWidth={false} onClick={args.onClick}>
+					Primary
+				</ActionButton>
+			</ThemeProvider>
+		</Box>
+	),
+	play: async ({ canvas }) => {
+		forceHoverRules();
+		const defaults = createTheme().palette;
+		const buttons: [string, PaletteColor][] = [
+			["Warning", defaults.warning],
+			["Info", defaults.info],
+			["Success", LIGHT_GREEN_SUCCESS.palette.success],
+			["Secondary", ORANGE_SECONDARY_ACTION_BUTTONS.palette.secondary],
+			["Primary", ORANGE_PRIMARY.palette.primary],
+		];
+		for (const [name, palette] of buttons) {
+			const button = canvas.getByRole("button", { name });
+			const rest = colorsOf(button);
+			const hover = hoverColors(button);
+			for (const [state, colors] of [
+				["resting", rest],
+				["hovered", hover],
+			] as const) {
+				await expect(colors.color, `${name}'s text while ${state}`).toBe(
+					computed(palette.contrastText),
+				);
+				await expect(
+					textContrast(colors),
+					`${name}'s text contrast while ${state}`,
+				).toBeGreaterThanOrEqual(4.5);
+			}
+			await expect(
+				getLuminance(hover.backgroundColor),
+				`${name}'s hover fill is darker than its resting fill`,
+			).toBeLessThan(getLuminance(rest.backgroundColor));
+		}
 	},
 };
 

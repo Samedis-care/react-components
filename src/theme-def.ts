@@ -563,6 +563,13 @@ declare module "@mui/material/styles" {
 			styleOverrides?: ComponentsOverrides<Theme>["CcSignalPortletItem"];
 			variants?: ComponentsVariants["CcSignalPortletItem"];
 		};
+		/**
+		 * ActionButton. Recolor it with `defaultProps.color` (a palette color):
+		 * fill, text and hover then come from that color, the fill darkened or
+		 * lightened where the text would miss 4.5:1. A `backgroundColor` in
+		 * `styleOverrides.button` changes only the fill, and the text and hover
+		 * stay primary's.
+		 */
 		CcActionButton?: {
 			defaultProps?: ComponentsPropsList["CcActionButton"];
 			styleOverrides?: StyleOverridesWithOwnerState<
