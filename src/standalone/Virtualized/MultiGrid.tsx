@@ -13,7 +13,7 @@ import {
 	GridProps,
 	GridImperativeAPI,
 } from "react-window";
-import { CSSObject, styled, Theme, useThemeProps } from "@mui/material";
+import { CSSObject, styled, useThemeProps } from "@mui/material";
 
 /**
  * Most props do the same as in react-virtualized MultiGrid component
@@ -60,18 +60,22 @@ const Root = styled("div", { name: "CcMultiGrid", slot: "root" })({
 	position: "absolute",
 });
 
-// the scrolling pane is a tab stop, so it needs a visible focus indicator
-const scrollPaneFocusRing = (theme: Theme): CSSObject => ({
-	"&:focus-visible": {
-		outline: `2px solid ${theme.palette.primary.main}`,
-		outlineOffset: -2,
+// the class of the pane that is the tab stop
+const TAB_STOP_CLASS = "CcMultiGrid-tabStop";
+
+// The tab stop draws no outline of its own: the browser paints the outline of
+// a scroll container under its cells, which are positioned, so opaque cells
+// hide it. The focusRing slot draws the ring above them instead.
+const tabStopStyles: CSSObject = {
+	[`&.${TAB_STOP_CLASS}:focus-visible`]: {
+		outline: "none",
 	},
-});
+};
 
 const TopRightVariableSizeGrid = styled(VGrid, {
 	name: "CcMultiGrid",
 	slot: "topRightGrid",
-})(({ theme }) => scrollPaneFocusRing(theme));
+})(tabStopStyles);
 
 const BottomLeftVariableSizeGrid = styled(VGrid, {
 	name: "CcMultiGrid",
@@ -89,10 +93,35 @@ const BottomLeftVariableSizeGrid = styled(VGrid, {
 const BottomRightVariableSizeGrid = styled(VGrid, {
 	name: "CcMultiGrid",
 	slot: "bottomRightGrid",
-})(({ theme }) => scrollPaneFocusRing(theme));
+})(tabStopStyles);
 
+// The focus ring of the tab stop: a box over the pane, so the ring is painted
+// above the pane's cells, shown while the pane has keyboard focus. It is an
+// outline (forced colors keep outlines) inside the pane's edges, where no
+// ancestor can clip it, and it lets clicks through to the cells.
+const FocusRing = styled("div", { name: "CcMultiGrid", slot: "focusRing" })(
+	({ theme }) => ({
+		position: "absolute",
+		pointerEvents: "none",
+		outline: `2px solid ${theme.palette.primary.main}`,
+		outlineOffset: -2,
+		display: "none",
+		[`.${TAB_STOP_CLASS}:focus-visible ~ &`]: {
+			display: "block",
+		},
+	}),
+);
+
+/**
+ * Theme slots of `CcMultiGrid` (`theme.components.CcMultiGrid.styleOverrides`):
+ * `root`, `topRightGrid` (the pinned rows, i.e. the header), `bottomLeftGrid`
+ * (the pinned columns), `bottomRightGrid` (the scrolling pane) and `focusRing`
+ * (the focus ring of the pane that is the tab stop: a 2px outline in
+ * `palette.primary.main` inside that pane's edges, drawn by a box over the
+ * pane while the pane has keyboard focus; restyle it with e.g. `outlineColor`).
+ */
 export type MultiGridClassKey =
-	"root" | "topRightGrid" | "bottomLeftGrid" | "bottomRightGrid";
+	"root" | "topRightGrid" | "bottomLeftGrid" | "bottomRightGrid" | "focusRing";
 
 /**
  * Room in px that the body pane's scrollbars (and borders, if any) take from
@@ -351,6 +380,21 @@ const MultiGrid = (inProps: MultiGridProps) => {
 		return () => observer.disconnect();
 	}, [bodyPane, bottomRightRendered]);
 
+	// the boxes of the two panes that can be the tab stop; the focus ring
+	// covers the one that is
+	const topRightBox = {
+		top: 0,
+		left: fixedWidth,
+		width: Math.max(width - fixedWidth - bodyScrollbars.vertical, 0),
+		height: fixedHeight,
+	};
+	const bottomRightBox = {
+		top: fixedHeight,
+		left: fixedWidth,
+		width: Math.max(width - fixedWidth, 0),
+		height: height - fixedHeight,
+	};
+
 	return (
 		<Root style={{ width, height }}>
 			{/* top left */}
@@ -381,6 +425,7 @@ const MultiGrid = (inProps: MultiGridProps) => {
 				// without rows the bottom right pane doesn't exist and this one
 				// takes over as the horizontal scroller, so it's the tab stop then
 				tabIndex={bottomRightRendered ? undefined : 0}
+				className={bottomRightRendered ? undefined : TAB_STOP_CLASS}
 				aria-label={bottomRightRendered ? undefined : label}
 				onScroll={handleScrollHeader}
 				style={{
@@ -390,10 +435,7 @@ const MultiGrid = (inProps: MultiGridProps) => {
 					overflowX: bottomRightRendered ? "hidden" : "auto",
 					overflowY: "hidden",
 					position: "absolute",
-					top: 0,
-					left: fixedWidth,
-					width: Math.max(width - fixedWidth - bodyScrollbars.vertical, 0),
-					height: fixedHeight,
+					...topRightBox,
 				}}
 				cellComponent={CellRendererTopRight}
 				cellProps={{}}
@@ -431,16 +473,14 @@ const MultiGrid = (inProps: MultiGridProps) => {
 					// tab stop is what gives the grid a keyboard scrolling path, and
 					// its onScroll keeps the two pinned panes in sync
 					tabIndex={0}
+					className={TAB_STOP_CLASS}
 					aria-label={label}
 					style={{
 						...styleBottomRightGrid,
 						overflowX: "auto",
 						overflowY: "auto",
 						position: "absolute",
-						top: fixedHeight,
-						left: fixedWidth,
-						width: Math.max(width - fixedWidth, 0),
-						height: height - fixedHeight,
+						...bottomRightBox,
 					}}
 					onCellsRendered={onCellsRendered ? handleCellsRendered : undefined}
 					cellComponent={CellRendererBottomRight}
@@ -460,6 +500,8 @@ const MultiGrid = (inProps: MultiGridProps) => {
 					<NoContentRenderer />
 				</div>
 			)}
+			{/* last, so it is painted above the panes and follows the tab stop */}
+			<FocusRing style={bottomRightRendered ? bottomRightBox : topRightBox} />
 		</Root>
 	);
 };

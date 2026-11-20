@@ -9,6 +9,7 @@ import {
 	afterEach,
 } from "vitest";
 import { render, cleanup, fireEvent, act } from "@testing-library/react";
+import { createTheme, ThemeProvider } from "@mui/material";
 import MultiGrid, {
 	MultiGridProps,
 } from "../../src/standalone/Virtualized/MultiGrid";
@@ -112,7 +113,7 @@ const props = (overrides: Partial<MultiGridProps> = {}): MultiGridProps => ({
 });
 
 /**
- * The four children of the root, in the order the JSX fixes: top left, top
+ * The first four children of the root, in the order the JSX fixes: top left, top
  * right (pinned rows), bottom left (pinned columns), bottom right (the scrolling
  * pane, or the no-content placeholder while there are no data rows).
  */
@@ -310,5 +311,51 @@ describe("MultiGrid scroll sync", () => {
 		);
 		// no body: the header is the horizontal scroller (and the tab stop)
 		expect(tr).toHaveStyle({ overflowX: "auto", overflowY: "hidden" });
+	});
+});
+
+describe("MultiGrid focus ring", () => {
+	/** the box that draws the tab stop's focus ring: last, so painted above the panes */
+	const focusRing = (container: HTMLElement) =>
+		container.firstElementChild?.lastElementChild as HTMLElement;
+
+	it("[ISSUE-3472-ITEM-10] covers the pane that is the tab stop, and the header pane once the rows go", () => {
+		const { container, rerender } = render(<MultiGrid {...props()} />);
+		expect(focusRing(container)).not.toBe(panes(container).br);
+		// the scrolling pane: below the 35px header, right of the 100px pinned column
+		expect(focusRing(container)).toHaveStyle({
+			top: "35px",
+			left: "100px",
+			width: "500px",
+			height: "365px",
+		});
+
+		rerender(<MultiGrid {...props({ rowCount: 1 })} />);
+		expect(panes(container).tr).toHaveAttribute("tabindex", "0");
+		expect(focusRing(container)).toHaveStyle({
+			top: "0px",
+			left: "100px",
+			width: "500px",
+			height: "35px",
+		});
+	});
+
+	it("[ISSUE-3472-ITEM-10] takes the theme's focusRing style overrides", () => {
+		const theme = createTheme({
+			components: {
+				CcMultiGrid: {
+					styleOverrides: { focusRing: { outlineColor: "rgb(1, 2, 3)" } },
+				},
+			},
+		});
+		const { container } = render(
+			<ThemeProvider theme={theme}>
+				<MultiGrid {...props()} />
+			</ThemeProvider>,
+		);
+		expect(focusRing(container)).not.toBe(panes(container).br);
+		expect(getComputedStyle(focusRing(container)).outlineColor).toBe(
+			"rgb(1, 2, 3)",
+		);
 	});
 });

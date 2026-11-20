@@ -404,3 +404,147 @@ export const Issue3472Item1HeaderFocusKeepsColumnsAligned: StoryObj<
 		);
 	},
 };
+
+/**
+ * The elements in the grid that are shown with an outline: the focus ring of
+ * the tab stop while it has keyboard focus, nothing otherwise
+ */
+const findFocusRings = (root: HTMLElement) =>
+	[root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))].filter(
+		(element) => {
+			const style = getComputedStyle(element);
+			return (
+				element.checkVisibility({
+					opacityProperty: true,
+					visibilityProperty: true,
+				}) &&
+				style.outlineStyle !== "none" &&
+				parseFloat(style.outlineWidth) > 0
+			);
+		},
+	);
+
+/**
+ * Expects the focus ring of the keyboard-focused tab stop `pane`: one 2px
+ * outline around the pane, drawn inside its edges, which is painted above the
+ * pane's cells on all four sides and lets clicks through to them.
+ */
+const expectFocusRingAboveCells = async (
+	root: HTMLElement,
+	pane: HTMLElement,
+) => {
+	const rings = findFocusRings(root);
+	await expect(rings).toHaveLength(1);
+	const [ring] = rings;
+	const style = getComputedStyle(ring);
+	await expect(`${style.outlineStyle} ${style.outlineWidth}`).toBe("solid 2px");
+	const box = pane.getBoundingClientRect();
+	const ringBox = ring.getBoundingClientRect();
+	await expect([
+		ringBox.left,
+		ringBox.top,
+		ringBox.width,
+		ringBox.height,
+	]).toEqual([box.left, box.top, box.width, box.height]);
+	// the middle of the ring's 2px band, from the edge of the box inwards: the
+	// ring is inside the pane, where an ancestor cannot clip it
+	const inset = -(
+		parseFloat(style.outlineOffset) +
+		parseFloat(style.outlineWidth) / 2
+	);
+	await expect(inset).toBeGreaterThan(0);
+	const middleX = box.left + box.width / 2;
+	const middleY = box.top + box.height / 2;
+	const sides: Record<string, [number, number]> = {
+		top: [middleX, box.top + inset],
+		right: [box.right - inset, middleY],
+		bottom: [middleX, box.bottom - inset],
+		left: [box.left + inset, middleY],
+	};
+	// a click on the ring reaches the cell under it
+	for (const [side, [x, y]] of Object.entries(sides))
+		await expect(document.elementFromPoint(x, y), side).not.toBe(ring);
+	// elementFromPoint returns the topmost element in paint order: once the
+	// ring takes hits, it is the one painted above the cells on every side
+	const pointerEvents = ring.style.pointerEvents;
+	ring.style.pointerEvents = "auto";
+	try {
+		for (const [side, [x, y]] of Object.entries(sides))
+			await expect(document.elementFromPoint(x, y), side).toBe(ring);
+	} finally {
+		ring.style.pointerEvents = pointerEvents;
+	}
+};
+
+/**
+ * Tab enters the grid on the scrolling pane. Its focus ring is drawn above the
+ * pane's cells, which are opaque (white here, colored in samedis.care's
+ * DataGrid), so it shows on all four sides; it goes when Tab leaves the grid.
+ */
+export const Issue3472Item10FocusRingAboveTheCells: StoryObj<typeof MultiGrid> =
+	{
+		render: () => (
+			<Box>
+				<button type={"button"}>Before the grid</button>
+				<GridBox {...GRID_PROPS} />
+				<button type={"button"}>After the grid</button>
+			</Box>
+		),
+		parameters: { a11y: GRID_A11Y },
+		play: async ({ canvas, canvasElement }) => {
+			const { root, bottomRight } = getPanes(canvasElement);
+			const pane = canvas.getByRole("grid", { name: GRID_LABEL });
+			// precondition: with data rows the scrolling pane is the tab stop
+			await expect(pane).toBe(bottomRight);
+
+			canvas.getByRole("button", { name: "Before the grid" }).focus();
+			await expect(findFocusRings(root)).toHaveLength(0);
+
+			await userEvent.tab();
+			await expect(pane).toHaveFocus();
+			await waitFor(() => expect(pane.matches(":focus-visible")).toBe(true));
+			await expectFocusRingAboveCells(root, pane);
+
+			await userEvent.tab();
+			await expect(
+				canvas.getByRole("button", { name: "After the grid" }),
+			).toHaveFocus();
+			await expect(findFocusRings(root)).toHaveLength(0);
+		},
+	};
+
+const NO_ROWS_PROPS: MultiGridProps = {
+	...GRID_PROPS,
+	height: 200,
+	rowCount: FIXED_ROWS,
+};
+
+/**
+ * Without data rows the header pane is the tab stop. Its focus ring is drawn
+ * above the header cells, which are opaque (as DataGrid's are), on all four
+ * sides.
+ */
+export const Issue3472Item10HeaderFocusRingAboveTheCells: StoryObj<
+	typeof MultiGrid
+> = {
+	render: () => (
+		<Box>
+			<button type={"button"}>Before the grid</button>
+			<GridBox {...NO_ROWS_PROPS} />
+		</Box>
+	),
+	parameters: { a11y: GRID_A11Y },
+	play: async ({ canvas, canvasElement }) => {
+		const { root, topRight } = getPanes(canvasElement);
+		await canvas.findByText("No content");
+		const pane = canvas.getByRole("grid", { name: GRID_LABEL });
+		// precondition: without data rows the header pane is the tab stop
+		await expect(pane).toBe(topRight);
+
+		canvas.getByRole("button", { name: "Before the grid" }).focus();
+		await userEvent.tab();
+		await expect(pane).toHaveFocus();
+		await waitFor(() => expect(pane.matches(":focus-visible")).toBe(true));
+		await expectFocusRingAboveCells(root, pane);
+	},
+};

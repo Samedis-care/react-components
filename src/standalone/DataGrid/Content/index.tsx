@@ -48,8 +48,8 @@ const CenteredStickyTypography = styled(CenteredTypography, {
 const SELECT_ROW_WIDTH = 57;
 const DEFAULT_COLUMN_WIDTH = 200;
 const STYLE_TOP_LEFT = { overflow: "hidden" };
-// the scrolling pane is a tab stop and draws its own focus ring; the object stays
-// because MultiGrid also spreads it over the no-content placeholder
+// the scrolling pane is a tab stop and MultiGrid draws its focus ring; the object
+// stays because MultiGrid also spreads it over the no-content placeholder
 const STYLE_BOTTOM_RIGHT = {};
 
 const Content = (props: IDataGridContentProps) => {
