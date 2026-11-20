@@ -387,6 +387,9 @@
 			"tab": {
 				"invalid": "Contiene campi non validi.",
 				"modified": "Contiene campi modificati."
+			},
+			"form-dialog": {
+				"open-in-new-tab": "Apri in una nuova scheda"
 			}
 		},
 		"selector": {

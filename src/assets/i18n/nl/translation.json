@@ -386,6 +386,9 @@
 			"tab": {
 				"invalid": "Bevat ongeldige velden.",
 				"modified": "Bevat gewijzigde velden."
+			},
+			"form-dialog": {
+				"open-in-new-tab": "Openen in nieuw tabblad"
 			}
 		},
 		"selector": {

@@ -386,6 +386,9 @@
 			"tab": {
 				"invalid": "Enthält ungültige Felder.",
 				"modified": "Enthält geänderte Felder."
+			},
+			"form-dialog": {
+				"open-in-new-tab": "In neuem Tab öffnen"
 			}
 		},
 		"selector": {

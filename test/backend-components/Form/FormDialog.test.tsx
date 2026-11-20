@@ -2,6 +2,7 @@ import "@testing-library/jest-dom/vitest";
 import React, { useState } from "react";
 import { describe, it, expect, vi } from "vitest";
 import {
+	act,
 	fireEvent,
 	render,
 	screen,
@@ -24,6 +25,7 @@ import FormDialog, {
 	IsInFormDialogContext,
 } from "../../../src/backend-components/Form/FormDialog";
 import { BasicFormPageNestingContext } from "../../../src/backend-components/Form/BasicFormPage";
+import ccI18n, { langs } from "../../../src/i18n";
 import {
 	findLeavePrompt,
 	leavePrompts,
@@ -358,6 +360,126 @@ describe("FullFormDialog", () => {
 		expect(await within(inline).findByText(/^caught: /)).toHaveTextContent(
 			/useCloseThisDialog/,
 		);
+	});
+
+	it("[ISSUE-3503-ITEM-18] the open-in-new action is a named button", () => {
+		const link = vi.fn();
+		render(
+			<Framework>
+				<FormDialog dialogTitle={"Edit person"} openInNewLink={link}>
+					<div>content</div>
+				</FormDialog>
+			</Framework>,
+		);
+		const dialog = screen.getByRole("dialog", { name: /Edit person/ });
+		const actions = within(dialog)
+			.getAllByRole("button")
+			.filter((b) => b.getAttribute("aria-label") !== "Close");
+		expect(actions, "no button for the open-in-new action").toHaveLength(1);
+		expect(actions[0]).toHaveAccessibleName(/\S/);
+		fireEvent.click(actions[0]);
+		expect(link).toHaveBeenCalledTimes(1);
+	});
+
+	it("[ISSUE-3503-ITEM-18] the open-in-new button is outside the heading, before the close button, so the dialog is named by its title alone", () => {
+		render(
+			<Framework>
+				<FormDialog dialogTitle={"Edit person"} openInNewLink={() => {}}>
+					<div>content</div>
+				</FormDialog>
+			</Framework>,
+		);
+		const dialog = screen.getByRole("dialog");
+		const button = within(dialog).getByRole("button", {
+			name: "Open in new tab",
+		});
+		// jsdom leaves a button in the heading out of the name, Chromium does not
+		const label = document.getElementById(
+			dialog.getAttribute("aria-labelledby") ?? "",
+		);
+		expect({
+			name: computeAccessibleName(dialog),
+			buttonInLabel: !!label?.contains(button),
+			buttons: within(dialog)
+				.getAllByRole("button")
+				.map((b) => b.getAttribute("aria-label")),
+		}).toEqual({
+			name: "Edit person",
+			buttonInLabel: false,
+			buttons: ["Open in new tab", "Close"],
+		});
+	});
+
+	it("[ISSUE-3503-ITEM-18] without openInNewLink the title row has only the close button", () => {
+		render(
+			<Framework>
+				<FormDialog dialogTitle={"Edit person"}>
+					<div>content</div>
+				</FormDialog>
+			</Framework>,
+		);
+		expect(
+			within(screen.getByRole("dialog"))
+				.getAllByRole("button")
+				.map((b) => b.getAttribute("aria-label")),
+		).toEqual(["Close"]);
+	});
+
+	it("[ISSUE-3503-ITEM-18] the open-in-new button calls a link set through the dispatch, without arguments", () => {
+		const fromProp = vi.fn();
+		const fromDispatch = vi.fn();
+		const SetLink = () => {
+			const dispatch = React.useContext(FormDialogDispatchContext)!;
+			React.useEffect(() => {
+				dispatch.setOpenInNewLink(() => fromDispatch);
+			}, [dispatch]);
+			return null;
+		};
+		render(
+			<Framework>
+				<FormDialog dialogTitle={"Edit person"} openInNewLink={fromProp}>
+					<SetLink />
+				</FormDialog>
+			</Framework>,
+		);
+		fireEvent.click(screen.getByRole("button", { name: "Open in new tab" }));
+		expect(fromDispatch.mock.calls).toEqual([[]]);
+		expect(fromProp).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3503-ITEM-18] the open-in-new button is named in the current language", async () => {
+		const initial = ccI18n.language;
+		try {
+			await act(() => ccI18n.changeLanguage("de"));
+			render(
+				<Framework>
+					<FormDialog
+						dialogTitle={"Person bearbeiten"}
+						openInNewLink={() => {}}
+					>
+						<div>content</div>
+					</FormDialog>
+				</Framework>,
+			);
+			expect(
+				await screen.findByRole("button", { name: "In neuem Tab öffnen" }),
+			).toBeInTheDocument();
+		} finally {
+			await act(() => ccI18n.changeLanguage(initial));
+		}
+	});
+
+	it("[ISSUE-3503-ITEM-18] every locale names the open-in-new button", async () => {
+		await ccI18n.loadLanguages(langs);
+		const missing = langs.filter(
+			(lng) =>
+				!ccI18n.getResource(
+					lng.split("-")[0],
+					"translation",
+					"backend-components.form.form-dialog.open-in-new-tab",
+				),
+		);
+		expect(missing, "locales without the name").toEqual([]);
 	});
 
 	it("[ISSUE-3503-ITEM-15] the FullFormDialog and form page contexts are exported from the package root", async () => {

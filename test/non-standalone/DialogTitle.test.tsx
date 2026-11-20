@@ -142,6 +142,61 @@ describe("DialogTitle", () => {
 		}).toEqual({ buttonInLabel: false, headings: ["H2"] });
 	});
 
+	it("[ISSUE-3503-ITEM-18] shows action in the title row after the heading and before the close button, outside the element naming the dialog", () => {
+		const { rerender } = render(
+			<Dialog open>
+				<DialogTitle
+					onClose={() => {}}
+					classes={{ action: "act" }}
+					action={<button type="button">Open in new tab</button>}
+				>
+					My Title
+				</DialogTitle>
+			</Dialog>,
+		);
+		const action = screen.getByRole("button", { name: "Open in new tab" });
+		expect({
+			buttons: within(screen.getByRole("dialog"))
+				.getAllByRole("button")
+				.map((b) => b.getAttribute("aria-label") ?? b.textContent),
+			inLabel: !!dialogLabel()?.contains(action),
+			slotClass: !!action.parentElement?.classList.contains("act"),
+		}).toEqual({
+			buttons: ["Open in new tab", "Close"],
+			inLabel: false,
+			slotClass: true,
+		});
+		expect(screen.getByRole("dialog")).toHaveAccessibleName("My Title");
+		rerender(
+			<Dialog open>
+				<DialogTitle onClose={() => {}} classes={{ action: "act" }}>
+					My Title
+				</DialogTitle>
+			</Dialog>,
+		);
+		expect(document.querySelector(".act")).toBeNull();
+	});
+
+	it("[ISSUE-3503-ITEM-18] with noTitle, action is shown beside the close button and does not name the dialog", () => {
+		render(
+			<Dialog open>
+				<DialogTitle
+					noTitle
+					onClose={() => {}}
+					action={<button type="button">Act</button>}
+				>
+					{null}
+				</DialogTitle>
+			</Dialog>,
+		);
+		expect(
+			within(screen.getByRole("dialog"))
+				.getAllByRole("button")
+				.map((b) => b.getAttribute("aria-label") ?? b.textContent),
+		).toEqual(["Act", "Close"]);
+		expect(dialogLabel()).toBeNull();
+	});
+
 	it("[ISSUE-3497-ITEM-14] with noTitle the dialog is not named by the close button and has no empty heading", () => {
 		render(
 			<Dialog open>

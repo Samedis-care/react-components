@@ -2,13 +2,7 @@ import React, { useCallback, useMemo } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fireEvent, fn, waitFor, within } from "storybook/test";
-import {
-	Button,
-	createTheme,
-	CssBaseline,
-	Grid,
-	ThemeProvider,
-} from "@mui/material";
+import { Button, createTheme, CssBaseline, Grid, ThemeProvider, Typography } from "@mui/material";
 import { createMemoryHistory } from "history";
 import { Framework } from "../../framework";
 import { setFrameworkHistory } from "../../framework/History";
@@ -16,15 +10,10 @@ import Form, { PageProps } from "./Form";
 import FormField from "./Field";
 import DefaultFormPage from "./DefaultFormPage";
 import DefaultErrorComponent from "./DefaultErrorComponent";
-import createTestModel, {
-	sampleData,
-} from "../../stories/test-utils/TestModel";
+import createTestModel, { sampleData } from "../../stories/test-utils/TestModel";
 import MockConnector from "../../stories/test-utils/MockConnector";
-import {
-	Model,
-	ModelGetResponse,
-	ModelUnknown,
-} from "../../backend-integration";
+import { Model, ModelGetResponse, ModelUnknown } from "../../backend-integration";
+import FullFormDialog from "./FormDialog";
 
 // a dirty form page blocks the history; keep that away from the Storybook frame's own
 setFrameworkHistory(createMemoryHistory({ initialEntries: ["/page"] }));
@@ -385,3 +374,69 @@ export const Issue3503Item29SaveTooltipKeepsTextWhileClosing: StoryObj<PageArgs>
 			);
 		},
 	};
+
+const LONG_DIALOG_TITLE =
+	"Hochfrequenzchirurgiegerät Modell XYZ-2000 Sicherheitsmeldung Rückruf Charge 2026-17 Ersatzteile";
+
+interface OpenInNewArgs {
+	/**
+	 * FullFormDialog's openInNewLink, called by the "Open in new tab" button
+	 */
+	openInNewLink: () => void;
+}
+
+/**
+ * ISSUE-3503-ITEM-18: with `openInNewLink` a FullFormDialog shows an "Open in new tab" button in
+ * its title row, before the close button. Tab reaches it and Enter activates it. It is not part
+ * of the heading, so the dialog is named by its title alone, and at 320px a long title does not
+ * push it out of the dialog.
+ */
+export const Issue3503Item18OpenInNewIsAButton: StoryObj<OpenInNewArgs> = {
+	args: { openInNewLink: fn() },
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<FullFormDialog
+			dialogTitle={LONG_DIALOG_TITLE}
+			openInNewLink={args.openInNewLink}
+			maxWidth="md"
+		>
+			<Typography>The form.</Typography>
+		</FullFormDialog>
+	),
+	play: async ({ args, userEvent }) => {
+		// the dialog is in a portal, outside the story's canvas
+		const dialog = await within(document.body).findByRole(
+			"dialog",
+			{ name: LONG_DIALOG_TITLE },
+			LOAD,
+		);
+		await waitFor(() => expect(dialog).toBeVisible());
+		const button = within(dialog).getByRole("button", {
+			name: "Open in new tab",
+		});
+		await expect(
+			within(dialog).getByRole("heading", { name: LONG_DIALOG_TITLE }),
+		).not.toContainElement(button);
+		// inside the dialog, and nothing scrolls sideways
+		const paperBox = dialog.getBoundingClientRect();
+		const buttonBox = button.getBoundingClientRect();
+		await expect({
+			left: buttonBox.left >= paperBox.left,
+			right: buttonBox.right <= paperBox.right,
+		}).toEqual({ left: true, right: true });
+		await expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth);
+
+		// MUI's focus trap focuses the dialog's container when it opens; Tab goes to the button
+		// first
+		await waitFor(() =>
+			expect(document.activeElement?.contains(dialog)).toBe(true),
+		);
+		await userEvent.tab();
+		await expect(button).toHaveFocus();
+		await waitFor(() => expect(button).toHaveClass("Mui-focusVisible"));
+		await expect(getComputedStyle(button).outlineStyle).toBe("solid");
+		await userEvent.keyboard("{Enter}");
+		await expect(args.openInNewLink).toHaveBeenCalledTimes(1);
+	},
+};

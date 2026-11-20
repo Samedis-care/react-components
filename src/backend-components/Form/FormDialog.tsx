@@ -8,7 +8,14 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import { Dialog, DialogContent, styled, useThemeProps } from "@mui/material";
+import {
+	buttonBaseClasses,
+	Dialog,
+	DialogContent,
+	IconButton,
+	styled,
+	useThemeProps,
+} from "@mui/material";
 import { OpenInNew } from "@mui/icons-material";
 import { useDialogContext } from "../../framework/DialogContextProvider";
 import {
@@ -21,6 +28,7 @@ import { DialogTitle } from "../../non-standalone/Dialog/DialogTitle";
 import useCCTranslations from "../../utils/useCCTranslations";
 import Loader from "../../standalone/Loader";
 import combineClassNames from "../../utils/combineClassNames";
+import focusRing from "../../utils/internal/focusRing";
 
 export type FormDialogRendererProps = Omit<FormDialogProps, "renderer">;
 
@@ -51,7 +59,13 @@ export interface FormDialogProps {
 	 */
 	useCustomClasses?: boolean;
 	/**
-	 * Add link button option
+	 * Shows an "Open in new tab" button (the open-in-new icon, named by
+	 * `backend-components.form.form-dialog.open-in-new-tab`) in the title row,
+	 * before the close button, and calls this, without arguments, when it is
+	 * activated. Open the dialog's content in a new tab there, e.g. with
+	 * `window.open(url, "_blank")`. A link set through
+	 * `FormDialogDispatch.setOpenInNewLink` wins over this prop. Default none: no
+	 * button.
 	 */
 	openInNewLink?: () => void;
 	/**
@@ -88,16 +102,27 @@ const TallDialogContent = styled(DialogContent, {
 	height: "80vh",
 });
 
+// the size of DialogTitle's close button, which it stands next to
+const OpenInNewButton = styled(IconButton, {
+	name: "CcFormDialog",
+	slot: "openInNewButton",
+})(({ theme }) => ({
+	padding: `calc(${theme.spacing(1)} / 2)`,
+	[`&.${buttonBaseClasses.focusVisible}`]: focusRing(theme, 0),
+}));
+
 const OpenInNewIcon = styled(OpenInNew, {
 	name: "CcFormDialog",
 	slot: "openInNewIcon",
-})({
-	verticalAlign: "middle",
-	cursor: "pointer",
-	marginLeft: 10,
-});
+})({});
 
-export type FormDialogClassKey = "content" | "openInNewIcon";
+/**
+ * Slot names of `CcFormDialog`, for theme `styleOverrides`: `content` (the
+ * content area with useCustomClasses), `openInNewButton` (the "Open in new tab"
+ * button) and `openInNewIcon` (its icon)
+ */
+export type FormDialogClassKey =
+	"content" | "openInNewButton" | "openInNewIcon";
 
 export type FormDialogTitlePriorityMode = "prop" | "dispatch";
 
@@ -131,6 +156,7 @@ export const FormDialogDefaultRenderer = (props: FormDialogRendererProps) => {
 		children,
 		"aria-label": ariaLabel,
 	} = props;
+	const { t } = useCCTranslations();
 	const ContentComp = useCustomClasses ? TallDialogContent : DialogContent;
 	// the paper is the element with role="dialog"; a shown title names it through MUI's
 	// aria-labelledby, which wins over aria-label
@@ -138,6 +164,20 @@ export const FormDialogDefaultRenderer = (props: FormDialogRendererProps) => {
 		() => ({ paper: { "aria-label": ariaLabel } }),
 		[ariaLabel],
 	);
+	// a button outside the heading: reachable by Tab, named, and not part of the
+	// dialog's name
+	const openInNewAction = useMemo(() => {
+		if (!openInNewLink) return null;
+		const openInNew = () => openInNewLink();
+		return (
+			<OpenInNewButton
+				aria-label={t("backend-components.form.form-dialog.open-in-new-tab")}
+				onClick={openInNew}
+			>
+				<OpenInNewIcon />
+			</OpenInNewButton>
+		);
+	}, [openInNewLink, t]);
 	return (
 		<Dialog
 			maxWidth={maxWidth ?? "lg"}
@@ -147,9 +187,12 @@ export const FormDialogDefaultRenderer = (props: FormDialogRendererProps) => {
 			className={combineClassNames(["CcFormDialog", className])}
 			slotProps={slotProps}
 		>
-			<DialogTitle onClose={onClose} noTitle={!dialogTitle}>
+			<DialogTitle
+				onClose={onClose}
+				noTitle={!dialogTitle}
+				action={openInNewAction}
+			>
 				{dialogTitle}
-				{openInNewLink && <OpenInNewIcon onClick={openInNewLink} />}
 			</DialogTitle>
 			<ContentComp>
 				<Suspense fallback={<Loader />}>{children}</Suspense>

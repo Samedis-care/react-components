@@ -386,6 +386,9 @@
 			"tab": {
 				"invalid": "Contains invalid fields.",
 				"modified": "Contains modified fields."
+			},
+			"form-dialog": {
+				"open-in-new-tab": "Open in new tab"
 			}
 		},
 		"selector": {
