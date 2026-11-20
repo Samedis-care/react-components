@@ -1263,4 +1263,104 @@ describe("persisted format bugs", () => {
 			])?.v,
 		).toBe(newer);
 	});
+
+	it("[ISSUE-3496-ITEM-12] a default filter re-emitted by the filter popup is not stored as the user's own", () => {
+		const defaultFilter = [{ field: "name", filter: filter("a") }];
+		const defs = defaults(COLUMNS, undefined, defaultFilter);
+		// what the popup emits after any edit that ends on the same condition
+		const reEmitted: IFilterDef = {
+			...filter("a"),
+			nextFilterType: "and",
+			nextFilter: undefined,
+		};
+		const data = encodePersistedState(
+			getDataGridDefaultState(COLUMNS, undefined),
+			{ ...defs, name: { ...defs.name, filter: reEmitted } },
+			{},
+			defs,
+			COLUMNS,
+			undefined,
+		);
+		expect(data.filter).toBeUndefined();
+	});
+
+	/** what is stored for the name column, filtered by own while its default is def */
+	const storedFilter = (def: IFilterDef, own: IFilterDef) => {
+		const defs = defaults(COLUMNS, undefined, [{ field: "name", filter: def }]);
+		return encode(
+			{},
+			{ ...defs, name: { ...defs.name, filter: own } },
+			{ defaultColumnState: defs },
+		).filter;
+	};
+
+	it('[ISSUE-3496-ITEM-12] a default filter chain without a combinator, re-emitted by the filter popup with "and", is not stored as the user\'s own', () => {
+		const chain: IFilterDef = { ...filter("a"), nextFilter: filter("b") };
+		expect(
+			storedFilter(chain, { ...chain, nextFilterType: "and" }),
+		).toBeUndefined();
+	});
+
+	it("[ISSUE-3496-ITEM-12] a combinator without a next condition does not make the default filter the user's own", () => {
+		expect(
+			storedFilter(filter("a"), { ...filter("a"), nextFilterType: "or" }),
+		).toBeUndefined();
+		// the user picked "or" and emptied the second condition again
+		expect(
+			storedFilter(filter("a"), {
+				...filter("a"),
+				nextFilterType: "or",
+				nextFilter: filter(""),
+			}),
+		).toBeUndefined();
+	});
+
+	const CHAIN: IFilterDef = {
+		...filter("a"),
+		nextFilterType: "and",
+		nextFilter: filter("b"),
+	};
+
+	it.each<[string, IFilterDef, IFilterDef]>([
+		["its value", filter("a"), filter("b")],
+		["its type", filter("a"), { ...filter("a"), type: "startsWith" }],
+		["its second value", filter("a"), { ...filter("a"), value2: "z" }],
+		["one condition more", filter("a"), CHAIN],
+		["one condition less", CHAIN, filter("a")],
+		["its combinator", CHAIN, { ...CHAIN, nextFilterType: "or" }],
+		[
+			'"or" where the default has no combinator',
+			{ ...CHAIN, nextFilterType: undefined },
+			{ ...CHAIN, nextFilterType: "or" },
+		],
+	])(
+		"[ISSUE-3496-ITEM-12] a filter which differs from the default filter by %s is stored",
+		(_, def, own) => {
+			expect(storedFilter(def, own)).toEqual({ name: own });
+		},
+	);
+
+	it("[ISSUE-3496-ITEM-12] a default filter which an earlier version stored as the user's own is left out on the next write", () => {
+		const defs = defaults(COLUMNS, undefined, [
+			{ field: "name", filter: filter("a") },
+		]);
+		const old = JSON.parse(
+			JSON.stringify({
+				v: DATA_GRID_PERSIST_VERSION,
+				filter: {
+					name: {
+						...filter("a"),
+						nextFilterType: "and",
+						nextFilter: undefined,
+					},
+				},
+			}),
+		) as DataGridPersistentState;
+		const decoded = decodePersistedState(old, COLUMNS, defs, undefined);
+		expect(decoded.columnState.name.filter).toMatchObject(filter("a"));
+		expect(
+			encode(decoded.state, decoded.columnState, { defaultColumnState: defs })
+				.filter,
+		).toBeUndefined();
+	});
 });

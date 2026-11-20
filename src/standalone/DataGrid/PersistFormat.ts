@@ -7,7 +7,6 @@ import type {
 	IDataGridColumnState,
 	IDataGridState,
 } from "./DataGrid";
-import deepEqual from "../../utils/deepEqual";
 import isPlainObject from "../../utils/isPlainObject";
 
 /**
@@ -92,7 +91,8 @@ export interface DataGridPersistentState {
 	 */
 	sort?: DataGridPersistedSortList | Record<string, DataGridPersistedSort>;
 	/**
-	 * Filter per column, only for columns which deviate from the default.
+	 * Filter per column, only for columns whose filter is another condition
+	 * than the default one (see isSameFilterDef).
 	 * null records that the user cleared a filter which is set by default.
 	 */
 	filter?: Record<string, IFilterDef | null>;
@@ -186,6 +186,45 @@ export const normalizeFilterDef = (
 };
 
 /**
+ * Whether two filters are the same condition. Only the conditions carrying a
+ * value count (see normalizeFilterDef), and the spellings of one condition are
+ * equal: a key set to undefined and a missing one, a missing value2 and "", a
+ * missing nextFilterType and "and" (as the filter popup reads it), and any
+ * nextFilterType of a condition without a nextFilter, which combines nothing.
+ * Keys IFilterDef does not define are not compared. The filter popup emits
+ * a filter in its own spelling, also when the user ends on the condition they
+ * started with, e.g. a default filter.
+ * @param a The one filter
+ * @param b The other filter
+ * @returns true if both are the same condition, or both are no filter
+ */
+export const isSameFilterDef = (
+	a: IFilterDef | null | undefined,
+	b: IFilterDef | null | undefined,
+): boolean => {
+	let left = normalizeFilterDef(a);
+	let right = normalizeFilterDef(b);
+	// normalizeFilterDef ends both chains within MAX_FILTER_CHAIN conditions
+	while (left && right) {
+		if (
+			left.type !== right.type ||
+			left.value1 !== right.value1 ||
+			(left.value2 ?? "") !== (right.value2 ?? "")
+		)
+			return false;
+		if (
+			left.nextFilter &&
+			right.nextFilter &&
+			(left.nextFilterType ?? "and") !== (right.nextFilterType ?? "and")
+		)
+			return false;
+		left = left.nextFilter;
+		right = right.nextFilter;
+	}
+	return !left && !right;
+};
+
+/**
  * Persisted data is whatever sits in a user's storage - it may have been written
  * by an older version, hand edited, or truncated. Everything coming out of it
  * goes through these, and anything unexpected is treated as not stored at all.
@@ -261,7 +300,9 @@ const encodeSort = (
 		.map(([field, entry]) => [field, entry.sort as -1 | 1]);
 
 /**
- * Reduces the column filters to what deviates from the defaults
+ * Reduces the column filters to what deviates from the defaults: a filter
+ * which is the same condition as the default one (isSameFilterDef) is left
+ * out, however the filter popup spelled it
  * @param columnState The current column state
  * @param defaultColumnState The column state the grid would start out with
  */
@@ -274,10 +315,8 @@ const encodeFilterDiff = (
 		const entry: IDataGridColumnState | undefined = columnState[field];
 		if (!isPlainObject(entry)) continue;
 		const def: IDataGridColumnState | undefined = defaultColumnState[field];
-		const entryFilter = normalizeFilterDef(entry.filter) ?? null;
-		const defFilter = normalizeFilterDef(def?.filter) ?? null;
-		if (!deepEqual(entryFilter, defFilter, "equals")) {
-			filter[field] = entryFilter;
+		if (!isSameFilterDef(entry.filter, def?.filter)) {
+			filter[field] = normalizeFilterDef(entry.filter) ?? null;
 		}
 	}
 	return filter;
