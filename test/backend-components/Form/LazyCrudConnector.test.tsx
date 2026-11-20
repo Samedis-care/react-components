@@ -12,6 +12,7 @@ import React, { useState } from "react";
 import { afterAll, beforeEach, describe, expect, it, Mock, vi } from "vitest";
 import {
 	act,
+	configure,
 	fireEvent,
 	screen,
 	waitFor,
@@ -1236,6 +1237,98 @@ describe("useLazyCrudConnector: params and record changes after mount", () => {
 		act(() => sink.ctx!.setFieldValue("title", "T2 edited"));
 		await settle();
 		expect(await trySubmit(sink)).toBeNull();
+	});
+
+	it("[ISSUE-3505-ITEM-8] an onParentIdChange that sets state does not update a component during render", async () => {
+		const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+		const model = makeModel();
+		const env = makeEnv({ "joins/1": [] });
+		const sink: Sink = {};
+		const Page = () => {
+			sink.ctx = useFormContext<ModelUnknown>();
+			const [, setParent] = useState<string | null>(null);
+			return (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					{...selectorProps(model, env)}
+					onParentIdChange={setParent}
+				/>
+			);
+		};
+		mountForm(model, Page);
+		await loaded(sink);
+		await ready();
+
+		const renderWarnings = errors.mock.calls.filter((call) =>
+			String(call[0]).includes("Cannot update a component"),
+		);
+		expect(renderWarnings).toEqual([]);
+	});
+
+	it("[ISSUE-3505-ITEM-8] in StrictMode the connector is built and configured once, and onParentIdChange gets the parent id once", async () => {
+		configure({ reactStrictMode: true });
+		try {
+			const model = makeModel();
+			const env = makeEnv({ "joins/1": [{ id: "j1", source_id: "s1" }] });
+			const sink: Sink = {};
+			const configureConnector = vi.fn();
+			const onParentIdChange = vi.fn();
+			mountForm(
+				model,
+				makePage(sink, () => (
+					<FormCrudMultiSelect<ModelUnknown, JoinData>
+						{...selectorProps(model, env)}
+						configureConnector={configureConnector}
+						onParentIdChange={onParentIdChange}
+					/>
+				)),
+			);
+			await loaded(sink);
+			await ready();
+
+			expect(env.getConnector).toHaveBeenCalledTimes(1);
+			expect(configureConnector.mock.calls).toEqual([[env.connectors[0]]]);
+			expect(onParentIdChange.mock.calls).toEqual([["1"]]);
+			expect(labels()).toEqual(["Ls1"]);
+		} finally {
+			configure({ reactStrictMode: false });
+		}
+	});
+
+	it('[ISSUE-3505-ITEM-8] onParentIdChange gets "null" once the control of a new record mounted, not again when it mounts again, and the created record\'s id on the save', async () => {
+		const model = makeModel();
+		const env = makeEnv({});
+		const sink: Sink = {};
+		const ref = React.createRef<CrudSelectDispatch<JoinData>>();
+		const onParentIdChange = vi.fn();
+		mountForm(
+			model,
+			makePage(sink, () => (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					ref={ref}
+					{...selectorProps(model, env)}
+					initialId={null}
+					onParentIdChange={onParentIdChange}
+				/>
+			)),
+			{ id: null },
+		);
+		await loaded(sink, "");
+		await ready();
+		expect(onParentIdChange.mock.calls).toEqual([["null"]]);
+
+		await hideAndShow();
+		expect(onParentIdChange.mock.calls).toEqual([["null"]]);
+
+		await add(ref);
+		act(() => sink.ctx!.setFieldValue("title", "New"));
+		await settle();
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		expect(onParentIdChange).toHaveBeenCalledTimes(2);
+		const createdId = onParentIdChange.mock.calls[1][0] as string;
+		expect(createdId).not.toBe("null");
+		expect(env.calls).toContain(`create:joins/${createdId}:s2`);
 	});
 });
 

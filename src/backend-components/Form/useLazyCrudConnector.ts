@@ -17,6 +17,13 @@ import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
  *          also when a param changes later or the control mounts again with other ones.
  *          Another collection takes another field name and a new mount of the control,
  *          e.g. `key={field}`.
+ *
+ *          getEndpoint, getConnector and configureConnector build the connector while the
+ *          control renders, so they must not set state or start work that needs cleaning up.
+ *          A render React discards before it commits builds a connector that is never used:
+ *          React 18's StrictMode discards the first render of every mount in development,
+ *          so these run twice there. onParentIdChange is never called during render: it
+ *          gets the id once the control that built the connector has mounted.
  */
 export interface UseLazyCrudConnectorParams<ExtraT = undefined> {
 	/**
@@ -40,14 +47,18 @@ export interface UseLazyCrudConnectorParams<ExtraT = undefined> {
 	 *        "null" for a new record), the saved record's id on every save
 	 * @returns The endpoint, e.g. `v1/orgs/${id}/roles`
 	 * @remarks Read once, when the connector is built: its reads and every save use this
-	 *          function, a later one is never called.
+	 *          function, a later one is never called. Called during render when the
+	 *          connector is built, so it must not set state.
 	 */
 	getEndpoint: (id: string) => string;
 	/**
-	 * Called with the parent record's id whenever getEndpoint is: when the connector is
-	 * built and on every save
+	 * Called with the parent record's id: initialId (the string "null" for a new record)
+	 * once the control that built the connector has mounted, and the saved record's id on
+	 * every save, right before getEndpoint gets it. Never during render, so it may set state.
 	 * @param id The parent record id
-	 * @remarks Read once, when the connector is built; a later one is never called.
+	 * @remarks Read once, when the connector is built; a later one is never called. Called
+	 *          with initialId once per connector: not again when the control mounts again
+	 *          under its field, nor when StrictMode runs its effects again.
 	 */
 	onParentIdChange?: (id: string) => void;
 	/**
@@ -57,7 +68,9 @@ export interface UseLazyCrudConnectorParams<ExtraT = undefined> {
 	 * @param extraParams The extraParams param
 	 * @default DefaultConnector.getApi (set by setDefaultConnectorAPI); with neither, building
 	 *          the connector throws "No default connector set"
-	 * @remarks Read once, when the connector is built; a later one is never called.
+	 * @remarks Read once, when the connector is built; a later one is never called. Called
+	 *          during render, so it must not set state; it runs again for a render React
+	 *          discards (see UseLazyCrudConnectorParams).
 	 */
 	getConnector?: (
 		initialEndpoint: string,
@@ -67,7 +80,9 @@ export interface UseLazyCrudConnectorParams<ExtraT = undefined> {
 	 * Called with the connector getConnector (or the default factory) created, right after
 	 * it was created, e.g. to set request options
 	 * @param connector The connector which was created by getConnector
-	 * @remarks Read once, when the connector is built; a later one is never called.
+	 * @remarks Read once, when the connector is built; a later one is never called. Called
+	 *          during render, so it must not set state; it runs again for a render React
+	 *          discards (see UseLazyCrudConnectorParams).
 	 */
 	configureConnector?: (connector: ApiConnector) => void;
 	/**
@@ -123,20 +138,48 @@ export const extractLazyCrudConnectorParams = <
  *          sends the queue where the reads go, also from a control that mounted again
  */
 class FormLazyConnector extends LazyConnector {
+	private readonly getEndpoint: (id: string) => string;
+	private readonly onParentIdChange: ((id: string) => void) | undefined;
 	/**
-	 * Calls onParentIdChange with a parent record id, then returns getEndpoint(id), as the
-	 * connector was built with
+	 * The parent record id the connector was built for, until onParentIdChange got it
 	 */
-	public readonly getParentEndpoint: (id: string) => string;
+	private unreportedParentId: string | null;
 
 	constructor(
 		connector: ApiConnector,
 		fakeReads: boolean,
 		onQueueChange: ConstructorParameters<typeof LazyConnector>[2],
-		getParentEndpoint: (id: string) => string,
+		getEndpoint: (id: string) => string,
+		onParentIdChange: ((id: string) => void) | undefined,
+		parentId: string,
 	) {
 		super(connector, fakeReads, onQueueChange);
-		this.getParentEndpoint = getParentEndpoint;
+		this.getEndpoint = getEndpoint;
+		this.onParentIdChange = onParentIdChange;
+		this.unreportedParentId = parentId;
+	}
+
+	/**
+	 * Calls onParentIdChange with a parent record id, then returns getEndpoint(id), as the
+	 * connector was built with
+	 */
+	public getParentEndpoint(id: string): string {
+		this.unreportedParentId = null;
+		if (this.onParentIdChange) this.onParentIdChange(id);
+		return this.getEndpoint(id);
+	}
+
+	/**
+	 * Calls onParentIdChange with the parent record id the connector was built for, unless
+	 * it got an id already
+	 * @remarks Called by the effects of the control that mounts with the connector, so the
+	 *          callback runs once per connector and never during render
+	 */
+	public reportParentId(): void {
+		const id = this.unreportedParentId;
+		if (id === null) return;
+		this.unreportedParentId = null;
+		if (this.onParentIdChange) this.onParentIdChange(id);
 	}
 }
 
@@ -145,6 +188,8 @@ class FormLazyConnector extends LazyConnector {
  * @param params The hook's params
  * @param onQueueChange Called with the queue whenever it changes
  * @throws "No default connector set" without params.getConnector and a default API connector
+ * @remarks Runs during render: it calls getEndpoint, getConnector and configureConnector,
+ *          but not onParentIdChange (see FormLazyConnector.reportParentId)
  */
 const buildConnector = <ExtraT>(
 	params: UseLazyCrudConnectorParams<ExtraT>,
@@ -165,20 +210,16 @@ const buildConnector = <ExtraT>(
 		| null;
 	if (!getConnector) throw new Error("No default connector set");
 
-	const getParentEndpoint = (id: string) => {
-		if (onParentIdChange) onParentIdChange(id);
-		return getEndpoint(id);
-	};
-	const connector = getConnector(
-		getParentEndpoint(initialId ?? "null"),
-		extraParams,
-	);
+	const parentId = initialId ?? "null";
+	const connector = getConnector(getEndpoint(parentId), extraParams);
 	if (configureConnector) configureConnector(connector);
 	return new FormLazyConnector(
 		connector,
 		initialId === null,
 		onQueueChange,
-		getParentEndpoint,
+		getEndpoint,
+		onParentIdChange,
+		parentId,
 	);
 };
 
@@ -193,6 +234,8 @@ const buildConnector = <ExtraT>(
  *   onParentIdChange, extraParams, getConnector, configureConnector or field changes
  *   neither the reads nor the save. Another collection takes another field and a new
  *   mount of the control, e.g. `key={field}`.
+ * - getEndpoint, getConnector and configureConnector run while the control renders, so they
+ *   must not set state; onParentIdChange runs after the control mounted and on every save.
  * - While the queue holds writes the Form is dirty (a custom dirty flag named `field`).
  * - A Form given another record (id or model) starts over: the control mounts again with a
  *   new connector for that record, and a queue left for the previous record is dropped,
@@ -242,6 +285,12 @@ const useLazyCrudConnector = <ExtraT = undefined>(
 			});
 	}
 	const connector = uploadConnector.current;
+	// the parent id the connector was built for goes to onParentIdChange once the control
+	// mounted, not while it renders: a state update there would update another component
+	// during render. Once per connector, also when StrictMode runs the effect again.
+	useEffect(() => {
+		connector.reportParentId();
+	}, [connector]);
 	/**
 	 * Has a flow form's submit staged the queue since the control mounted?
 	 * @remarks Set by the submit (the pre-submit handler below), cleared once the queue is
