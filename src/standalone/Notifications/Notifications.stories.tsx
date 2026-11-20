@@ -1,6 +1,12 @@
 import React, { useCallback, useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Box, Grow, Typography } from "@mui/material";
+import {
+	Box,
+	createTheme,
+	Grow,
+	ThemeProvider,
+	Typography,
+} from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { fn, expect, userEvent, waitFor, within } from "storybook/test";
 import Notifications, { Notification, NotificationsProps } from "./index";
@@ -332,5 +338,56 @@ export const Issue3468Item7OtherPopoverSlotsKeepTheWidth: Story = {
 		const paper = await openPaper();
 		await nextFrames();
 		await expect(Math.round(paper.getBoundingClientRect().width)).toBe(400);
+	},
+};
+
+/**
+ * App-wide paper settings in the theme: a width for every Notifications, and
+ * settings for every MUI popover's paper (SCF's theme sets a border this way)
+ */
+const THEME_PAPER = createTheme({
+	components: {
+		CcNotifications: {
+			defaultProps: {
+				PopoverProps: { slotProps: { paper: { sx: { width: 360 } } } },
+			},
+		},
+		MuiPopover: {
+			defaultProps: {
+				slotProps: {
+					paper: { style: { border: "2px solid rgb(0, 128, 0)" } },
+				},
+			},
+			styleOverrides: { paper: { borderRadius: 12 } },
+		},
+	},
+});
+
+export const Issue3468Item7ThemeSettingsReachThePaper: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3468-ITEM-7: a paper width for every Notifications in the theme's `CcNotifications.defaultProps.PopoverProps` (here 360px) replaces the default width of 400px, and the theme's `MuiPopover` paper settings (here a green border and a 12px corner radius) still apply to the default paper.",
+			},
+		},
+	},
+	decorators: [
+		(Story) => (
+			<ThemeProvider theme={THEME_PAPER}>
+				<Story />
+			</ThemeProvider>
+		),
+	],
+	play: async ({ canvas }) => {
+		await userEvent.click(canvas.getByRole("button"));
+		const paper = await openPaper();
+		await nextFrames();
+		await expect(Math.round(paper.getBoundingClientRect().width)).toBe(360);
+		const style = getComputedStyle(paper);
+		await expect(style.borderTopWidth).toBe("2px");
+		await expect(style.borderTopColor).toBe("rgb(0, 128, 0)");
+		await expect(style.borderTopLeftRadius).toBe("12px");
 	},
 };

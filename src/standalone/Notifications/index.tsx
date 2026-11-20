@@ -73,12 +73,18 @@ export interface NotificationsProps {
 	 *
 	 * The paper is `min(400px, 100% - 32px)` wide by default: 400px, and on a
 	 * window narrower than 432px the window's width less 16px on each side.
-	 * Set another width with e.g. `{ slotProps: { paper: { sx: { width: 600 } } } }`;
-	 * MUI keeps it 16px from the window edges. Keep it a fixed width: MUI
-	 * repositions the paper after every render while it is open, and a paper
-	 * sized by its content (`width: "auto"`) gets wider each time. `slots` is
-	 * merged into the defaults, so only a `slots.paper` of your own replaces
-	 * the default paper and its width.
+	 * Set another width with e.g. `{ slotProps: { paper: { sx: { width: 600 } } } }`,
+	 * here or, for every Notifications that passes no `PopoverProps` of its
+	 * own, in the theme's `CcNotifications.defaultProps.PopoverProps`; MUI
+	 * keeps it 16px from the window edges. A paper width in the theme's
+	 * `MuiPopover.styleOverrides.paper` does not apply: the default width
+	 * outranks it. The theme's other `MuiPopover` paper settings do apply
+	 * (`styleOverrides.paper`, `defaultProps.slotProps.paper`). Keep it a
+	 * fixed width: MUI repositions the paper after every render while it is
+	 * open, and a paper sized by its content (`width: "auto"`) gets wider each
+	 * time. `slots` is merged into the defaults, so only a `slots.paper` of
+	 * your own replaces the default paper and its width; one in the theme's
+	 * `MuiPopover.defaultProps.slots` does not.
 	 */
 	PopoverProps?: Omit<PopoverProps, "open" | "onClose" | "anchorEl">;
 	/**
@@ -167,12 +173,18 @@ const transformOrigin: PopoverOrigin = {
 };
 
 /**
- * The popover's paper: MUI's own (its styles, theme overrides and
- * `.MuiPopover-paper` class stay) with a fixed width. Without one the paper
- * shrinks to fit between its left edge and the window edge, and MUI's
- * repositioning after every render while it is open moves that edge 16px
- * further left: the paper would grow with every render and touch the window
- * edge.
+ * The popover's paper: MUI's own `PopoverPaper` with a fixed width. Without
+ * one the paper shrinks to fit between its left edge and the window edge, and
+ * MUI's repositioning after every render while it is open moves that edge
+ * 16px further left: the paper would grow with every render and touch the
+ * window edge.
+ *
+ * Built on `PopoverPaper` on purpose, as MUI's `Menu` builds its paper: MUI's
+ * paper styles, the `.MuiPopover-paper` class and the theme's `MuiPopover`
+ * paper overrides stay, except a `width` there, which this default outranks
+ * (as `Menu`'s `maxHeight` outranks one). It is not a `CcNotifications` theme
+ * slot: a width for every Notifications goes through
+ * `CcNotifications.defaultProps.PopoverProps`.
  */
 const NotificationsPaper = styled(PopoverPaper)({
 	width: "min(400px, 100% - 32px)",
