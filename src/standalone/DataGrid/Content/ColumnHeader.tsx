@@ -216,7 +216,13 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 
 		let width = 0;
 
-		root.querySelectorAll(".column-" + field).forEach((entry) => {
+		// the column's rendered data cells, by their data-field (see Cell). A
+		// string comparison, not a selector built from the field: a field may
+		// contain dots, spaces, quotes and other characters selectors treat specially
+		const cells = Array.from(
+			root.querySelectorAll<HTMLElement>(".CcDataGrid-dataCell"),
+		).filter((cell) => cell.dataset.field === field);
+		cells.forEach((entry) => {
 			const widthMeasurement = document.createElement("div");
 			widthMeasurement.style.display = "inline";
 			widthMeasurement.style.position = "absolute";

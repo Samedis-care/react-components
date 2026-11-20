@@ -147,6 +147,9 @@ const Cell = (props: CellComponentProps): React.ReactElement => {
 	return (
 		<DataGridCell
 			style={props.style}
+			// the column of a data cell, as it is: a field may contain any character,
+			// so the class below is no reliable way to find a column's cells
+			data-field={props.rowIndex !== 0 && column ? column.field : undefined}
 			onMouseEnter={startHover}
 			onMouseLeave={endHover}
 			onClick={

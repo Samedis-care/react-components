@@ -208,6 +208,23 @@ const mouseMove = (movementX: number, buttons = 1) => {
 };
 const mouseUp = () =>
 	act(() => void document.dispatchEvent(new MouseEvent("mouseup")));
+/**
+ * a column's resize handle, by the header's label: the header's
+ * `column-header-<field>` class splits in two when the field has a space
+ */
+const resizerOfLabel = (c: HTMLElement, label: string) =>
+	Array.from(c.querySelectorAll<HTMLElement>(".CcDataGrid-headerCell"))
+		.find((cell) => within(cell).queryByText(label))!
+		.querySelector<HTMLElement>(".probe-resizer")!;
+/** jsdom has no layout: let auto-fit's measuring div report 20px per character */
+const mockMeasureWidth = () =>
+	vi
+		.spyOn(HTMLElement.prototype, "clientWidth", "get")
+		.mockImplementation(function (this: HTMLElement) {
+			return this.style.left === "-99999px"
+				? (this.textContent ?? "").length * 20
+				: 0;
+		});
 
 describe("Cell / SelectRow: selection", () => {
 	it("[ISSUE-3493-ITEM-13] every row checkbox has a name, and the rows' checkboxes can be told apart", async () => {
@@ -416,6 +433,118 @@ describe("Content / ColumnHeader: widths", () => {
 		act(() => void document.dispatchEvent(evt));
 		mouseUp();
 		expect(probe!.widths.role).toBe(start + 100);
+	});
+
+	it("[ISSUE-3493-ITEM-3] a double click on the resizer fits a column whose field contains a dot", async () => {
+		mockMeasureWidth();
+		// the same values under a dotted and a plain field
+		const cols: IDataGridColumnDef[] = [
+			{
+				field: "target.title",
+				headerName: "Target",
+				type: "string",
+				width: [0, 9999, 300],
+			},
+			{
+				field: "plain",
+				headerName: "Plain",
+				type: "string",
+				width: [0, 9999, 300],
+			},
+		];
+		const { container } = render(
+			<Grid
+				columns={cols}
+				loadData={() => ({
+					rowsTotal: 2,
+					rows: [
+						{ id: "1", "target.title": "Alice", plain: "Alice" },
+						{ id: "2", "target.title": "Bob", plain: "Bob" },
+					],
+				})}
+			/>,
+		);
+		await screen.findAllByText("Alice");
+		await sized();
+		fireEvent.doubleClick(resizer(container, "plain"));
+		fireEvent.doubleClick(resizer(container, "target.title"));
+		// the plain column fits "Alice" (5 * 20 + 32 = 132 today)
+		expect(probe!.widths.plain).toBeLessThan(300);
+		expect(probe!.widths["target.title"]).toBe(probe!.widths.plain);
+	});
+
+	it("[ISSUE-3493-ITEM-3] a double click on the resizer fits a column whose field contains any other character", async () => {
+		mockMeasureWidth();
+		// characters that end a class selector, make it invalid or split the
+		// class attribute
+		const fields = ["a:b", "fn(x)", "a/b", "a*b", 'say "hi"', "a b", "#id"];
+		const cols: IDataGridColumnDef[] = ["plain", ...fields].map((field) => ({
+			field,
+			headerName: "H" + field,
+			type: "string",
+			width: [0, 9999, 300],
+		}));
+		const row = (id: string, value: string) =>
+			Object.fromEntries([
+				["id", id],
+				...["plain", ...fields].map((field) => [field, value]),
+			]) as DataGridRowData;
+		const { container } = render(
+			<Grid
+				columns={cols}
+				loadData={() => ({
+					rowsTotal: 2,
+					rows: [row("1", "Alice"), row("2", "Bob")],
+				})}
+				// all columns side by side, none left unrendered
+				disableSelection
+			/>,
+		);
+		await screen.findAllByText("Alice");
+		await sized();
+		fireEvent.doubleClick(resizer(container, "plain"));
+		expect(probe!.widths.plain).toBeLessThan(300);
+		for (const field of fields) {
+			fireEvent.doubleClick(resizerOfLabel(container, "H" + field));
+			expect({ field, width: probe!.widths[field] }).toEqual({
+				field,
+				width: probe!.widths.plain,
+			});
+		}
+	});
+
+	it("[ISSUE-3493-ITEM-3] a double click on the resizer measures only the column's own cells, not those of a field that starts the same up to a space", async () => {
+		mockMeasureWidth();
+		const cols: IDataGridColumnDef[] = [
+			{
+				field: "first",
+				headerName: "First",
+				type: "string",
+				width: [0, 9999, 300],
+			},
+			{
+				field: "first name",
+				headerName: "First name",
+				type: "string",
+				width: [0, 9999, 300],
+			},
+		];
+		const { container } = render(
+			<Grid
+				columns={cols}
+				loadData={() => ({
+					rowsTotal: 1,
+					rows: [{ id: "1", first: "Al", "first name": "Alexandra" }],
+				})}
+			/>,
+		);
+		await screen.findByText("Alexandra");
+		await sized();
+		fireEvent.doubleClick(resizerOfLabel(container, "First"));
+		fireEvent.doubleClick(resizerOfLabel(container, "First name"));
+		// "Al": 2 * 20 + 32; "Alexandra": 9 * 20 + 32
+		expect(probe!.widths.first).toBe(72);
+		expect(probe!.widths["first name"]).toBe(212);
 	});
 });
 
