@@ -1,5 +1,5 @@
 import React, { useId, useLayoutEffect, useRef } from "react";
-import { styled, useThemeProps } from "@mui/material";
+import { circularProgressClasses, styled, useThemeProps } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Loader from "../Loader";
 import ccI18n from "../../i18n";
@@ -60,7 +60,22 @@ const FormLoaderOverlayLoaderAnchor = styled("div", {
 const FormLoaderOverlayLoader = styled(Loader, {
 	name: "CcFormLoaderOverlay",
 	slot: "loader",
-})({});
+})(({ theme }) => ({
+	// the spinner sits on a disc of its own, paper with the edge of an outlined Paper, so
+	// that it keeps its contrast over whatever lies under the wash, also a primary-colored
+	// button, tab or banner. The disc reaches theme.spacing(1) beyond the spinner, into
+	// the space the Loader keeps above and below it, and leaves the Loader's size as it
+	// is. It is the spinner's own box, which turns: disc and edge are even all around, so
+	// that the turning does not show, and the edge is a shadow, which takes no room
+	[`& .${circularProgressClasses.root}`]: {
+		boxSizing: "content-box",
+		padding: theme.spacing(1),
+		margin: theme.spacing(-1),
+		borderRadius: "50%",
+		backgroundColor: theme.palette.background.paper,
+		boxShadow: `0 0 0 1px ${theme.palette.divider}`,
+	},
+}));
 
 const FormLoaderOverlayContainer = styled("div", {
 	name: "CcFormLoaderOverlay",
@@ -120,7 +135,12 @@ const TRANSLATION_OPTIONS = { i18n: ccI18n, useSuspense: false };
  * - `loaderAnchor`: a line of zero height inside the wash, `position: sticky` in the
  *   middle of the visible area, that the spinner is centered on
  * - `loader`: the spinner (a Loader). It is no status region of its own
- *   (`role="none"`): the `status` slot is, and its message names the spinner
+ *   (`role="none"`): the `status` slot is, and its message names the spinner. Its
+ *   styles give the spinner (`& .MuiCircularProgress-root`) its disc: the theme's
+ *   `palette.background.paper` with a 1px `palette.divider` edge (a `box-shadow`),
+ *   `theme.spacing(1)` wider than the spinner all around. A theme restyles or removes
+ *   the disc with the same selector, such as
+ *   `loader: { "& .MuiCircularProgress-root": { backgroundColor: "transparent", boxShadow: "none" } }`
  * - `container`: with `children` only, the `position: relative` block around the
  *   content and the wash
  * - `content`: with `children` only, the block around the children that is `inert`
@@ -261,7 +281,7 @@ const FormLoaderOverlay = (inProps: FormLoaderOverlayProps) => {
 };
 
 /**
- * Busy overlay: a translucent wash with a spinner over the nearest positioned
+ * Busy overlay: a translucent wash with a spinner on a disc over the nearest positioned
  * ancestor (`position: absolute`, `inset: 0`), or, with `children`, over them.
  * BasicFormPage shows it over the form page while the form is submitting, through
  * FormPageLayout's `other`, which makes it cover the form layout.
@@ -292,6 +312,13 @@ const FormLoaderOverlay = (inProps: FormLoaderOverlayProps) => {
  * what is shown of it, such as a long form scrolled to any point, the spinner stays
  * in the middle of what is shown. On a wash shown whole, it moves toward that line
  * as far as the wash allows, and stays inside the wash.
+ *
+ * The spinner sits on a disc of its own, the theme's `palette.background.paper` with a
+ * 1px `palette.divider` edge, `theme.spacing(1)` wider than the spinner all around
+ * (56px across at the Loader's default size and MUI's default spacing), so that the
+ * spinner keeps its contrast whatever lies under it, also a primary-colored button,
+ * tab or banner. The disc hides the content under it. A theme restyles it through
+ * the `loader` slot (see {@link FormLoaderOverlayClassKey}).
  *
  * Stacking: the wash's z-index is one below `theme.zIndex.mobileStepper` (999 with
  * MUI's defaults), the lowest of the theme's app-level layers. It covers the content

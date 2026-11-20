@@ -49,6 +49,38 @@ describe("FormLoaderOverlay", () => {
 		expect(styled.some((el) => el.contains(progressbar))).toBe(true);
 	});
 
+	it("[ISSUE-3473-ITEM-12] puts the spinner on a disc of the theme's paper, which the theme's loader slot restyles", () => {
+		const spinnerBackground = (t: Theme) => {
+			renderOverlay(<FormLoaderOverlay visible />, t);
+			const color = getComputedStyle(
+				screen.getByRole("progressbar"),
+			).backgroundColor;
+			cleanup();
+			return color;
+		};
+		const paper = createTheme({
+			palette: { background: { paper: "rgb(1, 2, 3)" } },
+		});
+		const restyled = createTheme({
+			palette: { background: { paper: "rgb(1, 2, 3)" } },
+			components: {
+				CcFormLoaderOverlay: {
+					styleOverrides: {
+						loader: {
+							"& .MuiCircularProgress-root": {
+								backgroundColor: "rgb(4, 5, 6)",
+							},
+						},
+					},
+				},
+			},
+		});
+		expect([spinnerBackground(paper), spinnerBackground(restyled)]).toEqual([
+			"rgb(1, 2, 3)",
+			"rgb(4, 5, 6)",
+		]);
+	});
+
 	it("[ISSUE-3473-ITEM-7] exposes the visible overlay as a status message", () => {
 		const { rerender } = renderOverlay(<FormLoaderOverlay visible={false} />);
 		rerender(withTheme(<FormLoaderOverlay visible />));

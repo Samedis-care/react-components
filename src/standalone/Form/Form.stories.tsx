@@ -4,11 +4,16 @@ import {
 	AppBar,
 	Box,
 	Button,
+	createTheme,
+	decomposeColor,
 	Dialog,
 	DialogContent,
 	DialogTitle,
+	getContrastRatio,
 	Snackbar,
 	TextField,
+	Theme,
+	ThemeProvider,
 	Toolbar,
 	Tooltip,
 	Typography,
@@ -369,5 +374,125 @@ export const Issue3473Item8WrappedContentIsInert: OverlayStory = {
 		);
 		await waitFor(() => expect(start).toHaveFocus());
 		await expect(start.closest("[inert]")).toBeNull();
+	},
+};
+
+/**
+ * The color seen at a point of the page: the background colors of the elements there,
+ * from the topmost down to the first opaque one, laid over each other (over white if
+ * none is opaque)
+ */
+const colorSeenAt = (x: number, y: number) => {
+	const layers: number[][] = [];
+	for (const el of document.elementsFromPoint(x, y)) {
+		const [r, g, b, a = 1] = decomposeColor(
+			getComputedStyle(el).backgroundColor,
+		).values;
+		if (a === 0) continue;
+		layers.push([r, g, b, a]);
+		if (a === 1) break;
+	}
+	const seen = layers.reduceRight(
+		(below, [r, g, b, a]) =>
+			[r, g, b].map((channel, i) => channel * a + below[i] * (1 - a)),
+		[255, 255, 255],
+	);
+	return `rgb(${seen.map(Math.round).join(", ")})`;
+};
+
+/**
+ * The lowest contrast of a spinner's arc against what lies right next to its ring, inside
+ * and outside of it, all around
+ */
+const spinnerContrast = (progressbar: HTMLElement) => {
+	const circle = progressbar.querySelector("circle");
+	if (!circle) throw new Error("the spinner has no circle");
+	const arc = getComputedStyle(circle).stroke;
+	// CircularProgress sets its `size` as inline width; its ring is 3.6 of 44 units wide
+	const size = parseFloat(progressbar.style.width);
+	const outer = size / 2;
+	const inner = outer - (size * 3.6) / 44;
+	// the spinner turns about its middle, which stays the middle of its bounding box
+	const r = rectOf(progressbar);
+	const cx = (r.left + r.right) / 2;
+	const cy = (r.top + r.bottom) / 2;
+	const contrasts: number[] = [];
+	for (let angle = 0; angle < 360; angle += 45) {
+		const rad = (angle * Math.PI) / 180;
+		for (const radius of [inner - 2, outer + 2]) {
+			const seen = colorSeenAt(
+				cx + radius * Math.cos(rad),
+				cy + radius * Math.sin(rad),
+			);
+			contrasts.push(getContrastRatio(arc, seen));
+		}
+	}
+	return Math.min(...contrasts);
+};
+
+const lightTheme = createTheme();
+const darkTheme = createTheme({ palette: { mode: "dark" } });
+
+/**
+ * A busy area in the given theme whose content, also under the spinner, is a
+ * primary-colored banner
+ */
+const BusyBanner = ({
+	theme,
+	name,
+	overlay,
+}: {
+	theme: Theme;
+	name: string;
+	overlay: FormLoaderOverlayProps;
+}) => (
+	<ThemeProvider theme={theme}>
+		<Box
+			data-testid={name}
+			sx={{ position: "relative", width: 300, height: 200 }}
+		>
+			<Box
+				sx={{
+					height: "100%",
+					p: 2,
+					bgcolor: "primary.main",
+					color: "primary.contrastText",
+				}}
+			>
+				<Typography>{name}: device recalled</Typography>
+			</Box>
+			<FormLoaderOverlay {...overlay} />
+		</Box>
+	</ThemeProvider>
+);
+
+export const Issue3473Item12SpinnerOnItsOwnSurface: OverlayStory = {
+	args: { visible: true },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-12: the spinner sits on a surface of its own, so it keeps a contrast of at least 3:1 against what is next to it (WCAG 1.4.11), also where a primary-colored banner, button or tab lies under it, in a light and in a dark theme.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	render: (args) => (
+		<Box sx={{ display: "flex", gap: 2 }}>
+			<BusyBanner theme={lightTheme} name={"Light theme"} overlay={args} />
+			<BusyBanner theme={darkTheme} name={"Dark theme"} overlay={args} />
+		</Box>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		for (const name of ["Light theme", "Dark theme"]) {
+			const progressbar = within(canvas.getByTestId(name)).getByRole(
+				"progressbar",
+			);
+			await expect(
+				spinnerContrast(progressbar),
+				`${name}: the spinner's contrast against what is next to it`,
+			).toBeGreaterThanOrEqual(3);
+		}
 	},
 };
