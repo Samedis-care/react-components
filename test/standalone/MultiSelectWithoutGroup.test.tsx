@@ -213,3 +213,72 @@ describe("MultiSelectWithoutGroup bugs", () => {
 		expect(setSwitchValue).toHaveBeenCalledWith(true);
 	});
 });
+
+describe("MultiSelectWithoutGroup: changes that are not saved yet", () => {
+	const [, , CHERRY] = FRUITS;
+
+	/** each chip's text with its mark ("ZetaAdded"), in the order shown */
+	const chips = () =>
+		screen
+			.queryAllByRole("button", { name: /^(Remove|Restore) / })
+			.map((button) => button.parentElement!.textContent);
+
+	it("[ISSUE-3505-ITEM-23] marks the added entries, and lists the removed ones after the selection with a restore button instead of the remove button", async () => {
+		const onSel = vi.fn<(value: MultiSelectorData[]) => void>();
+		renderUi(
+			<Host
+				initial={[APPLE, ZETA]}
+				added={["zeta"]}
+				removed={[CHERRY]}
+				onSel={onSel}
+			/>,
+		);
+		await flush();
+
+		expect(chips()).toEqual(["Apple", "ZetaAdded", "CherryRemoved"]);
+		expect(screen.queryByRole("button", { name: "Remove Cherry" })).toBeNull();
+		expect(
+			screen.getByText("Cherry").closest(".CcMultiSelectWithoutGroup-removed"),
+		).not.toBeNull();
+
+		fireEvent.click(screen.getByRole("button", { name: "Restore Cherry" }));
+		expect(values(onSel)).toEqual([["apple", "zeta", "cherry"]]);
+		expect(onSel.mock.calls[0][0][2]).toBe(CHERRY);
+	});
+
+	it("[ISSUE-3505-ITEM-23] sorts the removed entries in with sortCompareFn", async () => {
+		renderUi(
+			<Host
+				initial={[ZETA, APPLE]}
+				removed={[CHERRY]}
+				sortCompareFn={byLabel}
+			/>,
+		);
+		await flush();
+
+		expect(chips()).toEqual(["Apple", "CherryRemoved", "Zeta"]);
+	});
+
+	it("[ISSUE-3505-ITEM-23] does not offer a removed entry, and has no restore button while disabled", async () => {
+		const { rerender } = renderUi(
+			<Host initial={[APPLE]} removed={[CHERRY]} />,
+		);
+		await flush();
+		await open();
+		const offered = screen
+			.getAllByRole("option")
+			.map((option) => option.textContent);
+
+		rerender(
+			<ThemeProvider theme={createTheme()}>
+				<Host initial={[APPLE]} removed={[CHERRY]} disabled />
+			</ThemeProvider>,
+		);
+		await flush();
+
+		expect(offered).toContain("Banana");
+		expect(offered).not.toContain("Cherry");
+		expect(screen.getByText("Cherry")).toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: "Restore Cherry" })).toBeNull();
+	});
+});

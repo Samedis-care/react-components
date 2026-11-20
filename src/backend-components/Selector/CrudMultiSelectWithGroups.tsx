@@ -24,7 +24,13 @@ export type CrudMultiSelectWithGroupsProps<
 		GroupDataT,
 		DataDataT
 	>,
-	"selected" | "onChange" | "convData" | "initialData" | "getIdOfData"
+	| "selected"
+	| "added"
+	| "removed"
+	| "onChange"
+	| "convData"
+	| "initialData"
+	| "getIdOfData"
 > &
 	UseCrudSelectParams<DataModelT, DataDataT> & {
 		/**
@@ -42,6 +48,16 @@ export type CrudMultiSelectWithGroupsProps<
 				DataDataT
 			>["getIdOfData"]
 		>;
+		/**
+		 * Marks the title as modified (a dot after it) while picks, removals or changes of
+		 * entries are queued and not saved yet
+		 * @remarks Only with a LazyConnector, whose writes wait for the Form's save; any other
+		 *          connector writes at once, and nothing is marked. An explicit `dirty` wins.
+		 *          The entries' own marks ("Added", "Removed" with a restore button) do not
+		 *          depend on it: they are shown with every LazyConnector.
+		 * @default false
+		 */
+		showDirtyState?: boolean;
 	};
 
 const CrudMultiSelectWithGroups = <
@@ -66,10 +82,16 @@ const CrudMultiSelectWithGroups = <
 		error,
 		loadError,
 		selected,
+		added,
+		removed,
+		pendingChanges,
 		initialRawData,
 		handleSelect,
 		modelToSelectorData,
 	} = useCrudSelect(props, ref);
+	// an explicit prop wins, as over the other states the field takes from its props
+	const dirty =
+		props.dirty ?? (props.showDirtyState ? pendingChanges : undefined);
 
 	// until the selection is loaded nothing can be picked or removed
 	const locked = loading || !!loadError;
@@ -87,6 +109,9 @@ const CrudMultiSelectWithGroups = <
 					{...props}
 					disabled={props.disabled || locked}
 					selected={selected.map((entry) => entry.value)}
+					added={added}
+					removed={removed}
+					dirty={dirty}
 					onChange={handleSelect}
 					convData={modelToSelectorData}
 					// the connector's records seed the selected cache: modelToSelectorData tells them apart

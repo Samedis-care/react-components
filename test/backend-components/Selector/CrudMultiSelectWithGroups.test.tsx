@@ -5,11 +5,13 @@
  */
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import CrudMultiSelectWithGroups from "../../../src/backend-components/Selector/CrudMultiSelectWithGroups";
 import type { ErrorComponentProps } from "../../../src/backend-components/Form";
 import type { Connector, ModelUnknown } from "../../../src/backend-integration";
 import type { ResponseMeta } from "../../../src/backend-integration/Connector/Connector";
+import type ApiConnector from "../../../src/backend-integration/Connector/ApiConnector";
+import LazyConnector from "../../../src/backend-integration/Connector/LazyConnector";
 import { Framework } from "../../../src/framework";
 import createTestModel from "../../../src/stories/test-utils/TestModel";
 import type {
@@ -18,6 +20,7 @@ import type {
 } from "../../../src/standalone";
 import { settle, setupFormTests } from "../Form/formFixture";
 import {
+	flush,
 	openList,
 	pickOption,
 	removeButtons,
@@ -212,5 +215,235 @@ describe("CrudMultiSelectWithGroups", () => {
 		await settle();
 		// j1 is listed from its row once the field has built its entry
 		expect(removeButtons()[0]).toBe("Remove L1");
+	});
+});
+
+describe("CrudMultiSelectWithGroups with a LazyConnector", () => {
+	/**
+	 * The join rows on the server behind the LazyConnector; `calls` logs every write that
+	 * reaches them (`create:<source_id>`, `update:<id>`, `delete:<id>`)
+	 */
+	class JoinBackend {
+		readonly calls: string[] = [];
+		private counter = 0;
+
+		constructor(private rows: Rows) {}
+
+		index = () =>
+			Promise.resolve([
+				this.rows.map((row) => ({ ...row })),
+				{ totalRows: this.rows.length, filteredRows: this.rows.length },
+			]);
+
+		create = (data: Record<string, unknown>) => {
+			this.calls.push("create:" + String(data.source_id));
+			const record = { ...data, id: "srv-" + String(++this.counter) };
+			this.rows.push(record);
+			return Promise.resolve([record, {}]);
+		};
+
+		update = (data: Record<string, unknown>) => {
+			this.calls.push("update:" + String(data.id));
+			return Promise.resolve([data, {}]);
+		};
+
+		delete = (id: string) => {
+			this.calls.push("delete:" + id);
+			this.rows = this.rows.filter((row) => row.id !== id);
+			return Promise.resolve();
+		};
+	}
+
+	type Props = React.ComponentProps<
+		typeof CrudMultiSelectWithGroups<
+			ModelUnknown,
+			ModelUnknown,
+			BaseSelectorData,
+			JoinData
+		>
+	>;
+
+	/** j1 (person 1, "L1") and j2 (person 2, "L2") */
+	const TWO_ROWS = (): Rows => [
+		{ id: "j1", source_id: "1" },
+		{ id: "j2", source_id: "2" },
+	];
+
+	/** renders the control on a LazyConnector over the rows, as SCF's wrapper does */
+	const mountLazy = async (
+		rows: Rows,
+		extra: Partial<Pick<Props, "showDirtyState" | "getGroupDataEntries">> = {},
+	) => {
+		const backend = new JoinBackend(rows);
+		const lazy = new LazyConnector(backend as unknown as ApiConnector, false);
+		const ui = render(
+			<Framework>
+				<CrudMultiSelectWithGroups<
+					ModelUnknown,
+					ModelUnknown,
+					BaseSelectorData,
+					JoinData
+				>
+					title={"Members"}
+					searchInputLabel={"Add a person"}
+					groupModel={model}
+					dataModel={model}
+					connector={lazy}
+					errorComponent={ErrorSink}
+					convGroup={convGroup}
+					getGroupDataEntries={getGroupDataEntries}
+					serialize={serialize}
+					deserialize={deserialize}
+					deserializeModel={deserializeModel}
+					getIdOfData={getIdOfData}
+					groupSearchDebounceTime={0}
+					dataSearchDebounceTime={0}
+					{...extra}
+				/>
+			</Framework>,
+		);
+		await flush();
+		await screen.findAllByRole("button", { name: /^Remove L/ });
+		return { backend, lazy, ...ui };
+	};
+
+	/** each entry's text with its mark ("L2Added"), in the order shown */
+	const entries = () =>
+		screen
+			.queryAllByRole("button", { name: /^(Remove|Restore) / })
+			.map((button) => button.parentElement!.textContent);
+
+	const personField = () =>
+		screen.getAllByRole<HTMLInputElement>("combobox")[1];
+
+	// picked from the whole list: a typed search text would be added again when the field
+	// loses focus, a defect of the search field of its own
+	const pickPerson = async (name: string) => {
+		await openList(personField());
+		await pickOption(name);
+	};
+
+	const click = async (name: string) => {
+		fireEvent.click(screen.getByRole("button", { name }));
+		await flush();
+	};
+
+	/** sends the queue, as the Form's save does */
+	const save = async (lazy: LazyConnector) => {
+		await act(async () => {
+			await lazy.workQueue();
+		});
+		await flush();
+	};
+
+	it("[ISSUE-3505-ITEM-23] marks a queued pick as added, in text, until the queue is sent", async () => {
+		const { backend, lazy } = await mountLazy([{ id: "j1", source_id: "1" }]);
+
+		await pickPerson("Bob");
+		const queued = entries();
+		const sentBefore = [...backend.calls];
+		await save(lazy);
+
+		expect({
+			queued,
+			sentBefore,
+			saved: entries(),
+			sent: backend.calls,
+		}).toEqual({
+			queued: ["L1", "L2Added"],
+			sentBefore: [],
+			saved: ["L1", "L2"],
+			sent: ["create:2"],
+		});
+	});
+
+	it("[ISSUE-3505-ITEM-23] keeps a queued removal listed after the selection, marked removed, with a restore button instead of the remove button, until the queue is sent", async () => {
+		const { backend, lazy } = await mountLazy(TWO_ROWS());
+
+		await click("Remove L1");
+
+		expect(entries()).toEqual(["L2", "L1Removed"]);
+		expect(screen.queryByRole("button", { name: "Remove L1" })).toBeNull();
+		expect(
+			screen.getByRole("button", { name: "Restore L1" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText("L1").closest(".CcMultiSelectWithoutGroup-removed"),
+		).not.toBeNull();
+		expect(backend.calls).toEqual([]);
+
+		await save(lazy);
+		expect(backend.calls).toEqual(["delete:j1"]);
+		expect(entries()).toEqual(["L2"]);
+	});
+
+	it("[ISSUE-3505-ITEM-23] restoring a queued removal selects the entry again and sends nothing", async () => {
+		const { backend, lazy } = await mountLazy(TWO_ROWS());
+		await click("Remove L1");
+
+		await click("Restore L1");
+
+		expect(entries()).toEqual(["L2", "L1"]);
+		expect(
+			screen.getByRole("button", { name: "Remove L1" }),
+		).toBeInTheDocument();
+		expect(lazy.isQueueEmpty()).toBe(true);
+		await save(lazy);
+		expect(backend.calls).toEqual([]);
+	});
+
+	it("[ISSUE-3505-ITEM-23] does not offer a removed entry in the search: it comes back through its restore button", async () => {
+		await mountLazy(TWO_ROWS());
+		await click("Remove L1");
+
+		await openList(personField());
+
+		const offered = screen
+			.getAllByRole("option")
+			.map((option) => option.textContent);
+		expect(offered).toContain("Carol");
+		expect(offered).not.toContain("Alice");
+	});
+
+	it("[ISSUE-3505-ITEM-23] a group pick restores a removed entry of the group instead of adding it a second time", async () => {
+		const { backend, lazy } = await mountLazy(TWO_ROWS(), {
+			getGroupDataEntries: () => [
+				{ value: "to-create-1", label: "Alice", source_id: "1" },
+				{ value: "to-create-3", label: "Carol", source_id: "3" },
+			],
+		});
+		await click("Remove L1");
+
+		await openList(screen.getAllByRole<HTMLInputElement>("combobox")[0]);
+		await pickOption("Team of Alice");
+		await save(lazy);
+
+		expect(backend.calls).toEqual(["create:3"]);
+		expect(entries()).toEqual(["L2", "L1", "L3"]);
+	});
+
+	it("[ISSUE-3505-ITEM-23] with showDirtyState the title is marked while changes are queued, and not without it", async () => {
+		/** the title's dirty marker (an element after the text), if any */
+		const marked = () =>
+			screen.getByText("Members").querySelector("span") !== null;
+
+		const first = await mountLazy(TWO_ROWS(), { showDirtyState: true });
+		const before = marked();
+		await click("Remove L1");
+		const queued = marked();
+		await save(first.lazy);
+		const saved = marked();
+		first.unmount();
+
+		await mountLazy(TWO_ROWS());
+		await click("Remove L1");
+		const withoutShowDirtyState = marked();
+
+		expect({ before, queued, saved, withoutShowDirtyState }).toEqual({
+			before: false,
+			queued: true,
+			saved: false,
+			withoutShowDirtyState: false,
+		});
 	});
 });

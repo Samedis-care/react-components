@@ -80,6 +80,8 @@ export type MultiSelectWithTagsProps<
 	 * Callback which loads the data entries for the given group
 	 * @remarks While they load, the control is busy (`aria-busy`) and the group
 	 * field is read-only: it keeps focus, but nothing can be typed or picked.
+	 * An entry of `removed` among them (the same id, see `getIdOfData`) is selected again
+	 * as the entry of `removed`, so that `onChange` restores it rather than adding it anew.
 	 * @param group The group which was selected
 	 * @returns The data entries to add for this group
 	 */
@@ -181,6 +183,8 @@ const MultiSelectWithTags = <
 		searchInputLabel,
 		groupInputLabel,
 		selected,
+		added,
+		removed,
 		disabled,
 		autocompleteId,
 		enableIcons,
@@ -256,7 +260,11 @@ const MultiSelectWithTags = <
 				groupInput === groupInput.ownerDocument.activeElement;
 			try {
 				setLoadingGroupRecords(true);
-				const groupEntries = await loadGroupEntries(selectedGroup);
+				// a removed entry comes back as itself: a caller with pending changes restores it
+				const groupEntries = (await loadGroupEntries(selectedGroup)).map(
+					(entry) =>
+						removed?.find((other) => getId(other) === getId(entry)) ?? entry,
+				);
 				const groupEntryIds = groupEntries.map(getId);
 				const combinedArray = [...selected, ...groupEntries];
 				setSelectedGroups((prevState) => [
@@ -282,7 +290,7 @@ const MultiSelectWithTags = <
 				setLoadingGroupRecords(false);
 			}
 		},
-		[onChange, loadGroupEntries, getId, selected, getGroupInput],
+		[onChange, loadGroupEntries, getId, selected, removed, getGroupInput],
 	);
 
 	// gives focus back to the group field after a group pick, but only from the page:
@@ -383,6 +391,8 @@ const MultiSelectWithTags = <
 				<MultiSelectWithoutGroup<DataT>
 					autocompleteId={autocompleteId}
 					selected={selected}
+					added={added}
+					removed={removed}
 					disabled={disabled}
 					label={searchInputLabel}
 					enableIcons={enableIcons}

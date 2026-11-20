@@ -509,6 +509,49 @@ export const MultiSelectWithTagsWithInitialValues: StoryObj = {
 	},
 };
 
+export const MultiSelectWithTagsPendingChanges: StoryObj = {
+	name: "MultiSelectWithTags — changes not saved yet",
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"`added` marks chips of the selection that are not saved yet, and `removed` lists entries removed from it: struck through, after the selection, with a restore button that selects them again. A group pick selects a removed entry of the group again as that entry. Here the saved selection is Apple and Cherry: Banana was picked and Cherry removed. Remove or restore entries to see the marks follow.",
+			},
+		},
+	},
+	render: () => {
+		const [selected, setSelected] = useState<MultiSelectorData[]>([
+			SAVED_FRUITS[0],
+			FRUITS.find((f) => f.value === "banana")!,
+		]);
+		const isSelected = (fruit: MultiSelectorData) =>
+			selected.some((entry) => entry.value === fruit.value);
+		const added = selected
+			.filter((entry) => !SAVED_FRUITS.some((s) => s.value === entry.value))
+			.map((entry) => entry.value);
+		const removed = SAVED_FRUITS.filter((fruit) => !isSelected(fruit));
+		return (
+			<div style={{ width: 400 }}>
+				<MultiSelectWithTags<MultiSelectorData, BaseSelectorData>
+					title="Fruits by category"
+					searchInputLabel="Search individual fruits"
+					selected={selected}
+					added={added}
+					removed={removed}
+					onChange={setSelected}
+					loadGroupOptions={selectorLocalLoadHandler(CATEGORIES)}
+					loadDataOptions={selectorLocalLoadHandler(FRUITS)}
+					loadGroupEntries={(group) =>
+						FRUITS.filter((fruit) => fruit.group?.toLowerCase() === group.value)
+					}
+					dirty={added.length > 0 || removed.length > 0}
+				/>
+			</div>
+		);
+	},
+};
+
 // ---------------------------------------------------------------------------
 // MultiSelect family: keyboard, removal and the entry renderer
 // ---------------------------------------------------------------------------

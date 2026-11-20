@@ -26,13 +26,24 @@ import type { BaseSelectorData, MultiSelectorData } from "../../standalone";
 import type { IDataGridLoadDataParameters } from "../../standalone/DataGrid/DataGrid";
 import type { ErrorComponentProps } from "../Form";
 import { Model } from "../../backend-integration";
-import type { ModelUnknown } from "../../backend-integration";
+import type {
+	ModelGetResponse,
+	ModelRecord,
+	ModelUnknown,
+} from "../../backend-integration";
+import ApiConnector from "../../backend-integration/Connector/ApiConnector";
+import LazyConnector from "../../backend-integration/Connector/LazyConnector";
+import type { ResponseMeta } from "../../backend-integration/Connector/Connector";
 import type BackendDataGridMultiSelectType from "./BackendDataGridMultiSelect";
+import type CrudMultiSelectWithGroupsType from "./CrudMultiSelectWithGroups";
 
 // Lazy-import to avoid circular dependency at module evaluation time
 const BackendSingleSelect = lazy(() => import("./BackendSingleSelect"));
 const BackendMultiSelect = lazy(() => import("./BackendMultiSelect"));
 const CrudMultiSelect = lazy(() => import("./CrudMultiSelect"));
+const CrudMultiSelectWithGroups = lazy(
+	() => import("./CrudMultiSelectWithGroups"),
+) as unknown as typeof CrudMultiSelectWithGroupsType;
 const BackendDataGridMultiSelect = lazy(
 	() => import("./BackendDataGridMultiSelect"),
 ) as unknown as typeof BackendDataGridMultiSelectType;
@@ -570,5 +581,281 @@ export const Issue3465Item7SingleSelectSwitchFilter: StoryObj = {
 		await userEvent.click(input);
 		await expect(await body.findByText("Henry Taylor")).toBeVisible();
 		await expect(body.getByText("Grace Lee")).toBeVisible();
+	},
+};
+
+// ---------------------------------------------------------------------------
+// CrudMultiSelectWithGroups on a LazyConnector: changes wait for the save
+// ---------------------------------------------------------------------------
+
+/** A team member as the selector holds it: value is the join row's id */
+interface MemberData extends MultiSelectorData {
+	/** id of the person (a TestModel record) */
+	person_id: string;
+}
+
+/** The departments of TestModel's people, the groups whose pick adds all their people */
+const createDepartmentModel = () =>
+	new Model(
+		"u52-story-departments-" + String(++storyModelCounter),
+		createTestModel().fields,
+		new MockConnector(
+			Array.from(
+				new Set(sampleData.map((person) => person.department as string)),
+				(department) => ({ id: department, department }),
+			),
+		),
+	) as unknown as ModelUnknown;
+
+/** The team's join rows, in memory; reports every request that reaches them to the log */
+class MemberConnector extends ApiConnector {
+	private counter = 100;
+
+	constructor(
+		private rows: Record<string, unknown>[],
+		private log: (request: string) => void,
+	) {
+		super();
+	}
+
+	setApiEndpoint(): void {}
+
+	index(): Promise<[Record<string, unknown>[], ResponseMeta]> {
+		this.log("GET members");
+		return Promise.resolve([
+			this.rows.map((row) => ({ ...row })),
+			{ totalRows: this.rows.length, filteredRows: this.rows.length },
+		]);
+	}
+
+	create(
+		data: Record<string, unknown>,
+	): Promise<ModelGetResponse<ModelUnknown>> {
+		this.log(`POST members (person ${data.person_id as string})`);
+		const record = { ...data, id: String(this.counter++) };
+		this.rows.push(record);
+		return Promise.resolve([record, {}]);
+	}
+
+	read(id: string): Promise<ModelGetResponse<ModelUnknown>> {
+		return Promise.resolve([{ id }, {}]);
+	}
+
+	update(
+		data: Record<string, unknown>,
+	): Promise<ModelGetResponse<ModelUnknown>> {
+		this.log(`PUT members/${data.id as string}`);
+		return Promise.resolve([data, {}]);
+	}
+
+	delete(id: string): Promise<void> {
+		this.log(`DELETE members/${id}`);
+		this.rows = this.rows.filter((row) => row.id !== id);
+		return Promise.resolve();
+	}
+}
+
+// a new entry's value is "to-create-…": leave it out, the backend assigns the id
+const serializeMember = (data: MemberData) => ({
+	id: data.value.startsWith("to-create-") ? undefined : data.value,
+	person_id: data.person_id,
+	label: data.label,
+});
+const deserializeMember = (record: Record<string, unknown>): MemberData => ({
+	value: record.id as string,
+	label: record.label as string,
+	person_id: record.person_id as string,
+});
+const deserializeMemberModel = (record: ModelRecord<ModelUnknown>) => ({
+	label: `${record.first_name as string} ${record.last_name as string}`,
+	person_id: record.id as string,
+});
+const getIdOfMember = (data: MemberData) => data.person_id;
+const convDepartment = (
+	record: ModelRecord<ModelUnknown>,
+): BaseSelectorData => ({
+	value: record.id as string,
+	label: record.department as string,
+});
+const getDepartmentMembers = ([
+	department,
+]: ModelGetResponse<ModelUnknown>): MemberData[] =>
+	sampleData
+		.filter((person) => person.department === department.department)
+		.map((person) => ({
+			value: "to-create-" + (person.id as string),
+			label: `${person.first_name as string} ${person.last_name as string}`,
+			person_id: person.id as string,
+		}));
+
+/**
+ * A team edited through a LazyConnector, as a form does it: picks and removals are queued
+ * until Save sends them. The request log shows what reaches the backend.
+ */
+const QueuedTeamStory = () => {
+	const personModel = useMemo(createTestModel, []);
+	const departmentModel = useMemo(createDepartmentModel, []);
+	const [log, setLog] = useState<string[]>([]);
+	const [saves, setSaves] = useState(0);
+	const connector = useMemo(
+		() =>
+			new LazyConnector(
+				new MemberConnector(
+					[
+						{ id: "1", person_id: "3", label: "Carol Jones" },
+						{ id: "2", person_id: "4", label: "Dave Brown" },
+					],
+					(request) => setLog((prev) => [...prev, request]),
+				),
+				false,
+			),
+		[],
+	);
+	const handleSave = useCallback(() => {
+		void connector.workQueue().then(() => setSaves((prev) => prev + 1));
+	}, [connector]);
+	return (
+		<>
+			{/* the entries float: keep Save below them */}
+			<div style={{ display: "flow-root" }}>
+				<CrudMultiSelectWithGroups<
+					ModelUnknown,
+					ModelUnknown,
+					BaseSelectorData,
+					MemberData
+				>
+					title={"Team"}
+					searchInputLabel={"Add a person"}
+					groupInputLabel={"Add a department"}
+					groupModel={departmentModel}
+					dataModel={personModel}
+					connector={connector}
+					errorComponent={ErrorComponent}
+					convGroup={convDepartment}
+					getGroupDataEntries={getDepartmentMembers}
+					serialize={serializeMember}
+					deserialize={deserializeMember}
+					deserializeModel={deserializeMemberModel}
+					getIdOfData={getIdOfMember}
+					groupSearchDebounceTime={0}
+					dataSearchDebounceTime={0}
+					showDirtyState
+				/>
+			</div>
+			<Button type={"button"} variant={"contained"} onClick={handleSave}>
+				Save
+			</Button>
+			<p>
+				Saved: <span data-testid={"saves"}>{saves}</span> times
+			</p>
+			<p>Requests sent:</p>
+			<ol data-testid={"requests"}>
+				{log.map((request, index) => (
+					<li key={index}>{request}</li>
+				))}
+			</ol>
+		</>
+	);
+};
+
+/** each entry's text with its mark ("Grace LeeAdded"), in the order shown */
+const teamEntries = (canvasElement: HTMLElement) =>
+	within(canvasElement)
+		.queryAllByRole("button", { name: /^(Remove|Restore) / })
+		.map((button) => button.parentElement?.textContent);
+
+/**
+ * ISSUE-3505-ITEM-23: on a LazyConnector a pick is marked "Added", a removed entry stays
+ * listed, struck through and marked "Removed", with a restore button instead of its remove
+ * button, and with showDirtyState the title has the dirty marker. Nothing is sent before
+ * Save. The story ends with the marks shown, so axe checks them.
+ */
+export const Issue3505Item23QueuedChangesAreMarked: StoryObj = {
+	parameters: { a11y: { test: "error" } },
+	render: () => <QueuedTeamStory />,
+	play: async ({ canvas, canvasElement, userEvent }) => {
+		await canvas.findByRole(
+			"button",
+			{ name: "Remove Carol Jones" },
+			{ timeout: 5000 },
+		);
+		await expect(canvas.getByText("Team").querySelector("span")).toBeNull();
+
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Remove Carol Jones" }),
+		);
+		await userEvent.click(canvas.getAllByRole("combobox")[1]);
+		await userEvent.click(
+			await within(document.body).findByRole(
+				"option",
+				{ name: "Grace Lee" },
+				{ timeout: 5000 },
+			),
+		);
+		await canvas.findByText("Added");
+
+		await expect(teamEntries(canvasElement)).toEqual([
+			"Dave Brown",
+			"Grace LeeAdded",
+			"Carol JonesRemoved",
+		]);
+		await expect(
+			getComputedStyle(canvas.getByText("Carol Jones")).textDecorationLine,
+		).toBe("line-through");
+		await expect(
+			getComputedStyle(canvas.getByText("Grace Lee")).textDecorationLine,
+		).toBe("none");
+		await expect(canvas.getByText("Team").querySelector("span")).not.toBeNull();
+		await expect(
+			canvas.getByRole("button", { name: "Restore Carol Jones" }),
+		).toBeVisible();
+		await expect(
+			canvas.queryByRole("button", { name: "Remove Carol Jones" }),
+		).toBeNull();
+		await expect(
+			Array.from(
+				canvas.getByTestId("requests").querySelectorAll("li"),
+				(item) => item.textContent,
+			),
+		).toEqual(["GET members"]);
+	},
+};
+
+/**
+ * ISSUE-3505-ITEM-23: a restored entry is selected again, without its marks, and Save sends
+ * nothing for it
+ */
+export const Issue3505Item23RestoreSendsNothing: StoryObj = {
+	parameters: { a11y: { test: "error" } },
+	render: () => <QueuedTeamStory />,
+	play: async ({ canvas, canvasElement, userEvent }) => {
+		await userEvent.click(
+			await canvas.findByRole(
+				"button",
+				{ name: "Remove Carol Jones" },
+				{ timeout: 5000 },
+			),
+		);
+		await userEvent.click(
+			await canvas.findByRole("button", { name: "Restore Carol Jones" }),
+		);
+		await canvas.findByRole("button", { name: "Remove Carol Jones" });
+		await expect(canvas.queryByText("Removed")).toBeNull();
+		await expect(canvas.getByText("Team").querySelector("span")).toBeNull();
+
+		await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+		await waitFor(() =>
+			expect(canvas.getByTestId("saves")).toHaveTextContent("1"),
+		);
+		await expect(
+			Array.from(
+				canvas.getByTestId("requests").querySelectorAll("li"),
+				(item) => item.textContent,
+			),
+		).toEqual(["GET members"]);
+		await expect(teamEntries(canvasElement)).toEqual([
+			"Dave Brown",
+			"Carol Jones",
+		]);
 	},
 };

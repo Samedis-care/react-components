@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	Cancel as RemoveIcon,
+	RestoreFromTrash as RestoreIcon,
 	Search as SearchIcon,
 } from "@mui/icons-material";
 import {
@@ -10,9 +11,11 @@ import {
 import BaseSelector, { BaseSelectorLoadHandler } from "./BaseSelector";
 import { SmallIconButton, SmallListItemIcon } from "../Small";
 import InlineSwitch from "../InlineSwitch";
-import { styled, Typography, useThemeProps } from "@mui/material";
+import { Chip, styled, Typography, useThemeProps } from "@mui/material";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import combineClassNames from "../../utils/combineClassNames";
+import { MultiSelectChangeState } from "./MultiSelectEntry";
 
 export type MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> =
 	DistributiveOmit<
@@ -34,6 +37,23 @@ export type MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> =
 		 * The currently selected values
 		 */
 		selected: DataT[];
+		/**
+		 * The values of the entries in `selected` that were added but are not saved yet: each
+		 * of their chips is marked "Added"
+		 * @default none
+		 */
+		added?: string[];
+		/**
+		 * Entries that were removed from the selection but are not saved yet. Their chips
+		 * follow the selected ones (sorted together with them by `sortCompareFn`), the label
+		 * struck through and marked "Removed", with a restore button where a chip's remove
+		 * button is: restoring one calls `onSelect` with the selection and the entry
+		 * appended. Not part of the selection otherwise: `onSelect` does not report them, and
+		 * they are not offered as options.
+		 * @remarks No restore button while disabled, as no remove button
+		 * @default none
+		 */
+		removed?: DataT[];
 		/**
 		 * State of the switch control
 		 */
@@ -74,7 +94,21 @@ const Outlined = styled("div", {
 	borderColor: "#cce1f6",
 	margin: "5px",
 	lineHeight: "30px",
+	// the label of a removed entry
+	"&.CcMultiSelectWithoutGroup-removed > span": {
+		textDecoration: "line-through",
+	},
 });
+
+// the text of a change that is not saved yet, after the label
+const ChangeState = styled(Chip, {
+	name: "CcMultiSelectWithoutGroup",
+	slot: "changeState",
+})(({ theme }) => ({
+	marginInlineStart: 8,
+	// on the paper rather than the chip's tint, where the text has its contrast
+	backgroundColor: theme.palette.background.paper,
+}));
 
 const StyledInlineSwitch = styled(InlineSwitch, {
 	name: "CcMultiSelectWithoutGroup",
@@ -88,7 +122,25 @@ const StyledInlineSwitch = styled(InlineSwitch, {
 	},
 });
 
-export type MultiSelectWithoutGroupClassKey = "outlined" | "switch";
+/**
+ * Slots of MultiSelectWithoutGroup (theme `CcMultiSelectWithoutGroup`, `classes`):
+ * - `outlined`: a chip of a selected or removed entry; a removed entry's chip also has the
+ *   class `CcMultiSelectWithoutGroup-removed`, an added entry's `CcMultiSelectWithoutGroup-added`
+ * - `changeState`: the text of a change that is not saved yet ("Added", "Removed") in a chip
+ * - `switch`: the switch beside the chips
+ */
+export type MultiSelectWithoutGroupClassKey =
+	"outlined" | "changeState" | "switch";
+
+const NO_ENTRIES: never[] = [];
+
+/**
+ * An entry as MultiSelectWithoutGroup lists it: a selected or a removed one
+ */
+interface ListedEntry<DataT extends MultiSelectorData> {
+	data: DataT;
+	changeState: MultiSelectChangeState | undefined;
+}
 
 const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 	inProps: MultiSelectWithoutGroupProps<DataT>,
@@ -100,6 +152,8 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 	const {
 		onSelect,
 		selected,
+		added,
+		removed: removedProp,
 		disabled,
 		enableIcons,
 		loadDataOptions,
@@ -118,13 +172,32 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
 	const getId = getIdOfData ?? getIdDefault;
 
-	const selectedIds = useMemo(() => selected.map(getId), [selected, getId]);
+	const removed = removedProp ?? NO_ENTRIES;
 
-	// the selected entries are filtered out of the options on top of whatever the caller wants filtered
+	const selectedIds = useMemo(() => selected.map(getId), [selected, getId]);
+	const removedIds = useMemo(() => removed.map(getId), [removed, getId]);
+
+	// the selected entries are filtered out of the options on top of whatever the caller
+	// wants filtered, and so are the removed ones: they come back through their restore button
 	const combinedFilterIds = useMemo(
-		() => [...(filterIds ?? []), ...selectedIds],
-		[filterIds, selectedIds],
+		() => [...(filterIds ?? []), ...selectedIds, ...removedIds],
+		[filterIds, selectedIds, removedIds],
 	);
+
+	const listed = useMemo((): ListedEntry<DataT>[] => {
+		const entries: ListedEntry<DataT>[] = [
+			...selected.map((data) => ({
+				data,
+				changeState: added?.includes(data.value)
+					? ("added" as const)
+					: undefined,
+			})),
+			...removed.map((data) => ({ data, changeState: "removed" as const })),
+		];
+		return sortCompareFn
+			? entries.sort((a, b) => sortCompareFn(a.data, b.data))
+			: entries;
+	}, [added, removed, selected, sortCompareFn]);
 
 	useEffect(() => {
 		selected.map((selectedOption) => {
@@ -165,6 +238,16 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 		[onSelect, setDataOptions, dataOptions, selected],
 	);
 
+	const handleRestore = useCallback(
+		(evt: React.MouseEvent<HTMLButtonElement>) => {
+			evt.stopPropagation();
+			const entry = removed.find((s) => s.value === evt.currentTarget.name);
+			if (!entry || !onSelect) return;
+			onSelect([...selected, entry]);
+		},
+		[onSelect, removed, selected],
+	);
+
 	const multiSelectHandler = useCallback(
 		(data: DataT | null) => {
 			if (!data) return;
@@ -179,14 +262,18 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 			const result = await loadDataOptions(query, !!switchValue);
 			return {
 				...result,
-				options: result.options.map((entry) =>
-					selectedIds.includes(getId(entry))
-						? { ...entry, isDisabled: true, selected: true }
-						: entry,
-				),
+				options: result.options.map((entry) => {
+					const id = getId(entry);
+					if (selectedIds.includes(id))
+						return { ...entry, isDisabled: true, selected: true };
+					// a removed entry comes back through its restore button; hidden here by this
+					// field's ids, as the search field compares filterIds by value
+					if (removedIds.includes(id)) return { ...entry, hidden: true };
+					return entry;
+				}),
 			};
 		},
-		[getId, loadDataOptions, selectedIds, switchValue],
+		[getId, loadDataOptions, removedIds, selectedIds, switchValue],
 	);
 
 	return (
@@ -219,32 +306,51 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 				className={classes?.switch}
 			>
 				<>
-					{(sortCompareFn ? [...selected].sort(sortCompareFn) : selected).map(
-						(data: MultiSelectorData, index: number) => {
-							return (
-								<Outlined key={index} className={classes?.outlined}>
-									{enableIcons && (
-										<SmallListItemIcon>{data.icon}</SmallListItemIcon>
-									)}
-									<span>{data.label}</span>
-									{!disabled && (
-										<SmallIconButton
-											edge={"end"}
-											name={data.value}
-											disabled={disabled}
-											onClick={handleDelete}
-											aria-label={t(
-												"standalone.selector.multi-select.remove-item",
-												{ ITEM: data.label },
-											)}
-										>
-											<RemoveIcon />
-										</SmallIconButton>
-									)}
-								</Outlined>
-							);
-						},
-					)}
+					{listed.map(({ data, changeState }, index: number) => {
+						// a removed entry is restored where it would be removed
+						const restorable = changeState === "removed";
+						return (
+							<Outlined
+								key={index}
+								className={combineClassNames([
+									classes?.outlined,
+									changeState && `CcMultiSelectWithoutGroup-${changeState}`,
+								])}
+							>
+								{enableIcons && (
+									<SmallListItemIcon>{data.icon}</SmallListItemIcon>
+								)}
+								<span>{data.label}</span>
+								{changeState && (
+									<ChangeState
+										size={"small"}
+										variant={"outlined"}
+										color={changeState === "added" ? "success" : "default"}
+										label={t(
+											`standalone.selector.multi-select.change.${changeState}`,
+										)}
+										className={classes?.changeState}
+									/>
+								)}
+								{!disabled && (
+									<SmallIconButton
+										edge={"end"}
+										name={data.value}
+										disabled={disabled}
+										onClick={restorable ? handleRestore : handleDelete}
+										aria-label={t(
+											restorable
+												? "standalone.selector.multi-select.restore-item"
+												: "standalone.selector.multi-select.remove-item",
+											{ ITEM: data.label },
+										)}
+									>
+										{restorable ? <RestoreIcon /> : <RemoveIcon />}
+									</SmallIconButton>
+								)}
+							</Outlined>
+						);
+					})}
 				</>
 			</StyledInlineSwitch>
 		</Typography>

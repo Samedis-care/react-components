@@ -284,3 +284,31 @@ describe("MultiSelectWithTags bugs", () => {
 		expect(document.body).toHaveFocus();
 	});
 });
+
+describe("MultiSelectWithTags: changes that are not saved yet", () => {
+	it("[ISSUE-3505-ITEM-23] a group pick selects a removed entry of the group again as the removed entry, not as the group's copy of it", async () => {
+		// as a CRUD caller lists it: its own object, which it restores rather than adds
+		const removedApple: MultiSelectorData = { ...APPLE };
+		const onChg = vi.fn<(value: MultiSelectorData[]) => void>();
+		renderUi(
+			<Host initial={[BANANA]} removed={[removedApple]} onChg={onChg} />,
+		);
+		await flush();
+
+		await pickGroup("Red fruits");
+
+		expect(values(onChg)).toEqual([["banana", "apple", "cherry"]]);
+		expect(onChg.mock.calls[0][0][1]).toBe(removedApple);
+	});
+
+	it("[ISSUE-3505-ITEM-23] shows the added and removed entries in its data field", async () => {
+		renderUi(<Host initial={[BANANA]} added={["banana"]} removed={[APPLE]} />);
+		await flush();
+
+		expect(
+			screen
+				.getAllByRole("button", { name: /^(Remove|Restore) / })
+				.map((button) => button.parentElement!.textContent),
+		).toEqual(["BananaAdded", "AppleRemoved"]);
+	});
+});

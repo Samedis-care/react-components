@@ -658,8 +658,10 @@ Things to know about the queue:
   with a restore. `FormCrudMultiSelect` marks a queued pick "Added" and lists a queued
   removal after the selected entries, struck through and marked "Removed", with a restore
   button where its remove button was; it finds an entry's queued write by the entry's
-  `value`, the record's id. `FormCrudMultiImage` shows queued changes as if they were saved:
-  there are no marks, no restore and no dirty marker.
+  `value`, the record's id. `CrudMultiSelectWithGroups` given a `LazyConnector` (from
+  `useLazyCrudConnector`) marks its chips the same way, and takes `showDirtyState` itself; a
+  group pick restores a removed entry of the group. `FormCrudMultiImage` shows queued changes
+  as if they were saved: there are no marks, no restore and no dirty marker.
 - An entry created through the queue has a client-side id (`fake-id-N`). It keeps it in
   `onChange`, and in the multi image's `onPrimaryChange`, also after the save;
   `LazyConnector.mapId` gives the server's id once the queue is sent. The record is saved
