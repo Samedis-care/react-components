@@ -73,6 +73,15 @@ export interface IRoutedMenuItemDefinition extends Omit<
 	 */
 	route?: string;
 	/**
+	 * Keeps the group expanded on every page
+	 *
+	 * Default `false`: RoutedMenu expands a group by itself while the entry of
+	 * the current URL is inside it. With `true` the group is expanded on the
+	 * other pages too. While a group is expanded this way, a click on it does
+	 * not collapse it (MenuBase). No effect on an entry without children.
+	 */
+	forceExpand?: boolean;
+	/**
 	 * An additional onClick action to be executed
 	 */
 	onClick?: React.MouseEventHandler;
@@ -397,8 +406,9 @@ const getUnresolvedEntries = (
 /**
  * Converts the routed menu item definitions to normal menu item definitions
  * @param params The params of the current URL (resolveLocation)
- * @param expanded The menu item ids of the groups to expand: the groups above
- * the entry of the current URL (resolveLocation)
+ * @param expanded The menu item ids of the groups the current URL expands:
+ * the groups above the entry of the current URL (resolveLocation). A group
+ * with its own `forceExpand` is expanded too
  * @param base What a relative route is resolved against
  * @param definition The routed menu item definition
  * @param id The menu item id of the definition
@@ -417,7 +427,9 @@ const convertDefinition = (
 	// an entry whose route the current URL cannot fill has nowhere to go
 	shouldRender:
 		definition.shouldRender && getTarget(definition, params, base) !== null,
-	forceExpand: definition.children && expanded.includes(id),
+	// the entry's own flag, and the groups above the entry of the current URL
+	forceExpand:
+		definition.forceExpand || (definition.children && expanded.includes(id)),
 	children: definition.children?.map((entry) =>
 		convertDefinition(
 			params,
@@ -468,8 +480,9 @@ const ignoreActiveChange: Dispatch<SetStateAction<string>> = () => undefined;
  * `route`).
  * @param props The menu definition
  * @return `definition`: the entries converted for MenuBase, with
- * `forceExpand` set on the groups above the entry of the current URL and
- * handlers that navigate to the entries' routes. `controlledState`: for
+ * `forceExpand` set on the groups above the entry of the current URL (and
+ * kept on the entries that set it themselves) and handlers that navigate to
+ * the entries' routes. `controlledState`: for
  * MenuBase's `customState` or a `MenuContext.Provider`, the id of the entry
  * of the current URL (the titles from the top level joined by `@`, `""` when
  * no entry matches the URL) and a setter that does nothing, because the
@@ -556,7 +569,8 @@ export const useRoutedMenuLogic = (
 /**
  * A MenuBase driven by the URL: the entry whose `route` matches the current
  * path best is highlighted and the groups above it are expanded (see
- * IRoutedMenuItemDefinition's `route`), and a click on an entry runs its
+ * IRoutedMenuItemDefinition's `route`; groups with `forceExpand` are
+ * expanded on every page), and a click on an entry runs its
  * `onClick` and navigates to its route. The highlight follows the URL only:
  * on a path that matches no entry nothing is highlighted, and a click
  * highlights nothing by itself, only the navigation it starts does. Must be

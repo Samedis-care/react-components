@@ -536,6 +536,29 @@ describe("RoutedMenu bugs", () => {
 		fireEvent.click(entry("Devices"));
 		expect(history.location.pathname).toBe("/devices");
 	});
+	it("[ISSUE-3498-ITEM-5] forceExpand on a routed group keeps it expanded", () => {
+		mount(
+			[
+				leaf("Home", "/"),
+				group("Pinned", [leaf("Child", "/child")], { forceExpand: true }),
+			],
+			"/",
+		);
+		expect(chevron(entry("Pinned"))).toBe("less");
+	});
+	it("[ISSUE-3498-ITEM-5] forceExpand: false on a group does not keep the group of the current URL collapsed", () => {
+		mount(
+			[
+				leaf("Home", "/"),
+				group("Settings", [leaf("Profile", "/settings/profile")], {
+					forceExpand: false,
+				}),
+			],
+			"/settings/profile",
+		);
+		expect(selected()).toEqual(["Profile"]);
+		expect(chevron(entry("Settings"))).toBe("less");
+	});
 });
 
 describe("RoutedMenu: one reading of a route for the highlight and the navigation", () => {
