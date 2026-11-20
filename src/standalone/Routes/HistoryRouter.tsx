@@ -3,6 +3,8 @@ import { Action, History, Location } from "history";
 import { sentryHandleNavigation } from "./SentryRoutingInstrumentation";
 import { LocationContext } from "./useLocation";
 import DocumentTitleProvider, { DocumentTitleFormatter } from "./DocumentTitle";
+import NavigationFocus from "./NavigationFocus";
+import { NavigationFocusManager } from "./NavigationFocusManager";
 
 /**
  * Props of {@link HistoryRouter}
@@ -95,12 +97,28 @@ const resetPageScroll = () => {
  * A navigation its children make while it mounts, e.g. a redirect in a mount
  * effect, shows right away, not only after the next navigation; so does the
  * location of a history passed after mount.
+ *
+ * After a push or back/forward navigation (not after a replace), it keeps the
+ * keyboard focus and screen readers with the new page:
+ * - When the focus is on no element (the focused link was part of the content
+ *   the navigation replaced) or on one out of view (the navigation scrolled
+ *   the window to the top), it moves to the heading of the new page: the
+ *   `PageTitle` of the deepest route, else the first `<h1>` of the main
+ *   landmark (`<main>`). The heading gets `tabindex="-1"`, which makes it
+ *   focusable without adding it to the tab order. A `PageTitle` that renders
+ *   later (a lazy route, a record that is still loading) gets the focus then,
+ *   unless the user clicked, typed or scrolled meanwhile.
+ * - When the focus stays on an element in view (a navigation menu, a tab),
+ *   the new page title (see `usePageTitle`) is announced in a visually hidden
+ *   polite live region, which the router renders after its children, if it
+ *   differs from the one before.
  * @param props The props
  */
 const HistoryRouter = (props: HistoryRouterProps) => {
 	const { history, children, formatDocumentTitle } = props;
 	const [location, setLocation] = useState<Location>(history.location);
 	const ctx = useMemo((): HistoryRouterContextType => ({ history }), [history]);
+	const [navigationFocus] = useState(() => new NavigationFocusManager());
 	// a layout effect, so the router listens before the passive effects of its
 	// children run (a redirect in a mount effect)
 	useLayoutEffect(() => {
@@ -109,17 +127,19 @@ const HistoryRouter = (props: HistoryRouterProps) => {
 			if (update.action !== Action.Pop) resetPageScroll();
 			setLocation(update.location);
 			sentryHandleNavigation(update);
+			navigationFocus.navigated(update.action);
 		});
 		// the layout effects of the children ran before this one and may have
 		// navigated already; no re-render if the location is unchanged
 		setLocation(history.location);
 		return unlisten;
-	}, [history]);
+	}, [history, navigationFocus]);
 	return (
 		<HistoryRouterContext.Provider value={ctx}>
 			<LocationContext.Provider value={location}>
 				<DocumentTitleProvider formatDocumentTitle={formatDocumentTitle}>
 					{children}
+					<NavigationFocus manager={navigationFocus} location={location} />
 				</DocumentTitleProvider>
 			</LocationContext.Provider>
 		</HistoryRouterContext.Provider>

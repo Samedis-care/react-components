@@ -1,13 +1,17 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, waitFor, within } from "storybook/test";
-import { Box, Typography } from "@mui/material";
+import { expect, userEvent, waitFor, within } from "storybook/test";
+import { Box, Link as MuiLink, Typography } from "@mui/material";
 import { createMemoryHistory } from "history";
 import { Framework } from "../../framework";
 import { setFrameworkHistory } from "../../framework/History";
 import FullFormDialog from "../../backend-components/Form/FormDialog";
 import PageTitle, { PageTitleProps } from "./PageTitle";
+import HistoryRouter from "../../standalone/Routes/HistoryRouter";
+import Routes from "../../standalone/Routes/Routes";
+import Route from "../../standalone/Routes/Route";
+import Link from "../../standalone/Routes/Link";
 
 setFrameworkHistory(createMemoryHistory({ initialEntries: ["/devices/4711"] }));
 
@@ -109,5 +113,148 @@ export const DisableAutoTitleInADialog: Story = {
 		});
 		// MUI's dialog fades in
 		await waitFor(() => expect(heading).toBeVisible());
+	},
+};
+
+// ─── Focus after navigation ─────────────────────────────────────────────────
+
+/** How long the device page loads before it shows its title, in ms */
+const LOAD_TIME = 300;
+
+/** A device page that shows its PageTitle once its record has loaded */
+const LoadingDevicePage = () => {
+	const [loaded, setLoaded] = useState(false);
+	useEffect(() => {
+		const timer = setTimeout(() => setLoaded(true), LOAD_TIME);
+		return () => clearTimeout(timer);
+	}, []);
+	return loaded ? (
+		<PageTitle>Device 2</PageTitle>
+	) : (
+		<Typography>Loading the device</Typography>
+	);
+};
+
+const DeviceList = () => (
+	<MuiLink component={Link} to="/devices/2">
+		Open device 2
+	</MuiLink>
+);
+
+/**
+ * A device list whose link opens a device page in a nested route, inside a
+ * HistoryRouter of its own
+ * @param props.withListTitle Render a PageTitle "Devices" around the nested route
+ * @param props.devicePage The device page
+ */
+const DeviceNavigation = (props: {
+	withListTitle: boolean;
+	devicePage: React.ReactElement;
+}) => {
+	const history = useMemo(
+		() => createMemoryHistory({ initialEntries: ["/devices"] }),
+		[],
+	);
+	return (
+		<HistoryRouter history={history}>
+			<Box sx={{ p: 2 }}>
+				<Routes>
+					{[
+						<Route
+							key="devices"
+							path="/devices/*"
+							element={
+								<>
+									{props.withListTitle && <PageTitle>Devices</PageTitle>}
+									<Routes>
+										{[
+											<Route key="id" path=":id" element={props.devicePage} />,
+											<Route key="list" path="" element={<DeviceList />} />,
+										]}
+									</Routes>
+								</>
+							}
+						/>,
+					]}
+				</Routes>
+			</Box>
+		</HistoryRouter>
+	);
+};
+
+export const Issue3475Item22FocusWaitsForThePageTitle: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3475-ITEM-22: the link that opened the device is gone and the device page shows its PageTitle only once the record has loaded: the focus moves to the PageTitle when it appears.",
+			},
+		},
+	},
+	render: () => (
+		<DeviceNavigation
+			withListTitle={false}
+			devicePage={<LoadingDevicePage />}
+		/>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		canvas.getByRole("link", { name: "Open device 2" }).focus();
+		await userEvent.keyboard("{Enter}");
+		await canvas.findByText("Loading the device");
+		const heading = await canvas.findByRole("heading", { name: "Device 2" });
+		await waitFor(() => expect(heading).toHaveFocus());
+		await expect(heading).toHaveAttribute("tabindex", "-1");
+	},
+};
+
+export const Issue3475Item22ClickWhileLoadingKeepsThePlace: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3475-ITEM-22: the user clicks into the page while it loads; the PageTitle that appears afterwards does not take the focus.",
+			},
+		},
+	},
+	render: () => (
+		<DeviceNavigation
+			withListTitle={false}
+			devicePage={<LoadingDevicePage />}
+		/>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		canvas.getByRole("link", { name: "Open device 2" }).focus();
+		await userEvent.keyboard("{Enter}");
+		await userEvent.click(await canvas.findByText("Loading the device"));
+		const heading = await canvas.findByRole("heading", { name: "Device 2" });
+		await expect(heading).not.toHaveFocus();
+		await expect(document.activeElement).toBe(document.body);
+	},
+};
+
+export const Issue3475Item22FocusGoesToTheDeepestPageTitle: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					'ISSUE-3475-ITEM-22: the device list route shows a PageTitle "Devices" above its nested routes; the device page has its own. After the navigation the focus moves to the device page\'s PageTitle, the one of the deepest route.',
+			},
+		},
+	},
+	render: () => (
+		<DeviceNavigation
+			withListTitle
+			devicePage={<PageTitle variant="h2">Device 2</PageTitle>}
+		/>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		canvas.getByRole("link", { name: "Open device 2" }).focus();
+		await userEvent.keyboard("{Enter}");
+		await expect(
+			await canvas.findByRole("heading", { name: "Device 2" }),
+		).toHaveFocus();
 	},
 };

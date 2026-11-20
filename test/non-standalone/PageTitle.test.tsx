@@ -8,12 +8,13 @@ import {
 	beforeEach,
 } from "vitest";
 import React, { useState } from "react";
-import { render, act, cleanup, screen } from "@testing-library/react";
+import { render, act, cleanup, screen, waitFor } from "@testing-library/react";
 import { createMemoryHistory } from "history";
 import { createTheme, ThemeProvider } from "@mui/material";
 import HistoryRouter from "../../src/standalone/Routes/HistoryRouter";
 import Routes from "../../src/standalone/Routes/Routes";
 import Route from "../../src/standalone/Routes/Route";
+import useParams from "../../src/standalone/Routes/useParams";
 import PageTitle from "../../src/non-standalone/PageTitle/PageTitle";
 import FullFormDialog from "../../src/backend-components/Form/FormDialog";
 import useSetFormDialogTitle from "../../src/backend-components/Form/useSetFormDialogTitle";
@@ -179,6 +180,58 @@ describe("PageTitle on a page", () => {
 		expect(
 			screen.getByRole("heading", { level: 3, name: "Devices" }),
 		).toBeInTheDocument();
+	});
+});
+
+describe("PageTitle after a navigation", () => {
+	it("[ISSUE-3475-ITEM-22] the router announces the new page's PageTitle, not the enclosing route's title it shows in between", async () => {
+		const history = mem("/devices/1");
+		const DevicePage = () => {
+			const { id } = useParams<"id">();
+			// a new heading for every device, which names the page a few renders
+			// after it mounts
+			return (
+				<PageTitle key={id} variant="h2">
+					{`Device ${id}`}
+				</PageTitle>
+			);
+		};
+		const { container } = render(
+			<HistoryRouter history={history}>
+				<Routes>
+					{[
+						<Route
+							key="devices"
+							path="/devices/*"
+							element={
+								<>
+									<PageTitle>Devices</PageTitle>
+									<Routes>
+										{[<Route key="id" path=":id" element={<DevicePage />} />]}
+									</Routes>
+								</>
+							}
+						/>,
+					]}
+				</Routes>
+			</HistoryRouter>,
+		);
+		const region = container.querySelector("[aria-live]");
+		if (!region) throw new Error("no live region");
+		const announced: string[] = [];
+		const observer = new MutationObserver(() =>
+			announced.push(region.textContent ?? ""),
+		);
+		observer.observe(region, {
+			subtree: true,
+			childList: true,
+			characterData: true,
+		});
+		expect(document.title).toBe("Device 1 – Test App");
+		act(() => history.push("/devices/2"));
+		await waitFor(() => expect(region).toHaveTextContent(/^Device 2$/));
+		observer.disconnect();
+		expect(announced.filter(Boolean)).toEqual(["Device 2"]);
 	});
 });
 
