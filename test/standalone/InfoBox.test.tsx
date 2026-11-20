@@ -6,11 +6,13 @@ import {
 	fireEvent,
 	cleanup,
 	waitFor,
+	act,
 } from "@testing-library/react";
 import { ThemeProvider, createTheme, Theme } from "@mui/material";
 import { TaskAlt } from "@mui/icons-material";
 import type { SvgIconComponent } from "@mui/icons-material";
 import InfoBox from "../../src/standalone/InfoBox";
+import ccI18n from "../../src/i18n";
 
 afterEach(() => {
 	cleanup();
@@ -301,6 +303,54 @@ describe("InfoBox", () => {
 			expect(header("Closed")).toHaveAttribute("aria-expanded", "true");
 			fireEvent.click(header("Open"));
 			expect(header("Open")).toHaveAttribute("aria-expanded", "false");
+		});
+
+		it.each([
+			["warning", /warning/i],
+			["success", /success/i],
+			["error", /error/i],
+		] as const)(
+			"[ISSUE-3464-ITEM-7] the header announces the %s status",
+			(status, word) => {
+				renderInfoBox(
+					<InfoBox
+						heading="Upload finished"
+						message="M"
+						expanded
+						status={status}
+					/>,
+				);
+				const announced =
+					screen.queryByRole("button", { name: word }) ??
+					screen.queryByRole("button", { description: word });
+				expect(
+					announced,
+					`the ${status} status is in neither the name nor the description of the header`,
+				).not.toBeNull();
+			},
+		);
+
+		it("[ISSUE-3464-ITEM-7] the announced status follows the library's language", async () => {
+			const language = ccI18n.language;
+			renderInfoBox(
+				<InfoBox
+					heading="Upload finished"
+					message="M"
+					expanded
+					status="warning"
+				/>,
+			);
+			try {
+				await act(() => ccI18n.changeLanguage("de"));
+				expect(screen.getByRole("button")).toHaveAccessibleName(
+					"Warnung: Upload finished",
+				);
+			} finally {
+				await act(() => ccI18n.changeLanguage(language));
+			}
+			expect(screen.getByRole("button")).toHaveAccessibleName(
+				"Warning: Upload finished",
+			);
 		});
 	});
 });

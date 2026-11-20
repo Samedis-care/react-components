@@ -18,8 +18,12 @@ import {
 	useThemeProps,
 } from "@mui/material";
 import { useControlled } from "@mui/material/utils";
-import combineClassNames from "../../utils/combineClassNames";
 import { TypographyVariant } from "@mui/material/styles";
+import { useTranslation } from "react-i18next";
+import combineClassNames from "../../utils/combineClassNames";
+import ccI18n from "../../i18n";
+
+const TRANSLATION_OPTIONS = { i18n: ccI18n, useSuspense: false };
 
 const AccordionStyled = styled(Accordion, { name: "CcInfoBox", slot: "root" })({
 	boxShadow: "none",
@@ -99,6 +103,24 @@ const SummaryHeading = styled(Typography, {
 	name: "CcInfoBox",
 	slot: "heading",
 })({});
+
+/**
+ * The status name in front of the heading. It is only read out: the header
+ * announces "Warning: Please review" (or the icon and the color would be the
+ * only sign of the status).
+ */
+const StatusName = styled("span")({
+	// visually hidden, as MUI's visuallyHidden
+	border: 0,
+	clipPath: "inset(50%)",
+	height: 1,
+	margin: -1,
+	overflow: "hidden",
+	padding: 0,
+	position: "absolute",
+	whiteSpace: "nowrap",
+	width: 1,
+});
 
 const SpanIconButton = styled("span", {
 	name: "CcInfoBox",
@@ -210,10 +232,44 @@ export interface InfoBoxProps {
 	/**
 	 * For which status InfoBox used. It sets the header's color, which stays
 	 * while the header has keyboard focus; the focused header shows a 2px
-	 * ring in its text color, 2px inside its edges.
+	 * ring in its text color, 2px inside its edges. `warning`, `success` and
+	 * `error` also put the translated status in front of the heading, read
+	 * out with it (e.g. "Warning: Please review"), so the status is not
+	 * conveyed by color and icon alone. `info` and an unset status announce
+	 * nothing: they are the neutral default.
 	 */
 	status?: "info" | "warning" | "success" | "error";
 }
+
+/**
+ * The translated name of a status for the header. `undefined` for `info` and
+ * an unset status: they are the neutral default, so announcing "Info" on
+ * every notice would only add noise.
+ * @param status The `status` prop
+ * @param t The library's translate function
+ * @returns The status name, or `undefined` when the status is not announced
+ */
+const statusName = (
+	status: InfoBoxProps["status"],
+	t: (key: string, options: { defaultValue: string }) => string,
+) => {
+	switch (status) {
+		case "warning":
+			return t("standalone.info-box.status.warning", {
+				defaultValue: "Warning",
+			});
+		case "success":
+			return t("standalone.info-box.status.success", {
+				defaultValue: "Success",
+			});
+		case "error":
+			return t("standalone.info-box.status.error", {
+				defaultValue: "Error",
+			});
+		default:
+			return undefined;
+	}
+};
 // .MuiAccordionSummary-content.Mui-expanded => margin => unset
 // .MuiAccordionSummary-root.Mui-expanded => min-height => unset
 const InfoBox = (inProps: InfoBoxProps) => {
@@ -230,6 +286,11 @@ const InfoBox = (inProps: InfoBoxProps) => {
 		className,
 		classes,
 	} = props;
+
+	const { t } = useTranslation("translation", TRANSLATION_OPTIONS);
+	// The header announces the status in front of the heading, so a screen
+	// reader gets what sighted users read from the color and the icon.
+	const statusLabel = statusName(status, t);
 
 	const getIcon = useCallback(() => {
 		switch (status) {
@@ -280,6 +341,11 @@ const InfoBox = (inProps: InfoBoxProps) => {
 						variant={headingVariant ?? "caption"}
 						className={classes?.heading}
 					>
+						{statusLabel && (
+							<>
+								<StatusName>{statusLabel}:</StatusName>{" "}
+							</>
+						)}
 						{heading}
 					</SummaryHeading>
 				</SummaryRoot>

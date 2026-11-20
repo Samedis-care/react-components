@@ -250,6 +250,13 @@
 		"toast": {
 			"close": "Закрыть"
 		},
+		"info-box": {
+			"status": {
+				"warning": "Предупреждение",
+				"success": "Успех",
+				"error": "Ошибка"
+			}
+		},
 		"loader": {
 			"label": "Загрузка…"
 		}

@@ -250,6 +250,13 @@
 		"toast": {
 			"close": "Yoping"
 		},
+		"info-box": {
+			"status": {
+				"warning": "Ogohlantirish",
+				"success": "Muvaffaqiyat",
+				"error": "Xato"
+			}
+		},
 		"loader": {
 			"label": "Yuklanmoqda…"
 		}
