@@ -17,6 +17,7 @@ import {
 import MatrixGrid from "../../src/standalone/Matrix/MatrixGrid";
 import MatrixCellTile from "../../src/standalone/Matrix/MatrixCellTile";
 import buildDateColumns from "../../src/standalone/Matrix/buildDateColumns";
+import { labelFontSize } from "../../src/standalone/Matrix/MatrixTileItem";
 import useMatrixActivation from "../../src/standalone/Matrix/useMatrixActivation";
 import {
 	matrixClasses,
@@ -1533,6 +1534,52 @@ describe("MatrixCellTile entries", () => {
 			const [pair] = slotsOf(container, "diagonal");
 			expect(pair.parentElement).toHaveClass(TILE_CLASSES.highlight);
 			expect(pair.parentElement?.parentElement).toHaveClass("x-drag");
+		});
+	});
+
+	describe("what an entry draws", () => {
+		it("[ISSUE-3481-ITEM-9] sizes a numeric label like its digits, and draws a corner of zero", () => {
+			expect(labelFontSize(1234)).toBe(labelFontSize("1234"));
+			render(
+				tile({ items: [entry({ corners: { topRight: 0, bottomLeft: "x" } })] }),
+			);
+			expect(screen.getByText("x")).toBeInTheDocument();
+			// like placeholder and secondaryLabel, which render 0
+			expect(screen.getByText("0")).toBeInTheDocument();
+		});
+
+		it("[ISSUE-3481-ITEM-9] draws a numeric label and secondary label at the size of their digits", () => {
+			expect(labelFontSize(BigInt(1234))).toBe(labelFontSize("1234"));
+			const { container, rerender } = render(
+				tile({ items: [entry({ label: 1234 })] }),
+			);
+			const [item] = slotsOf(container, "item");
+			expect(item.style.getPropertyValue(matrixVars.tileFontSize)).toBe("10px");
+			rerender(tile({ items: [entry({ secondaryLabel: 1234 })] }));
+			// "F" keeps 14px, the four digits after the arrow get 10px
+			expect(item.style.getPropertyValue(matrixVars.tileFontSize)).toBe("14px");
+			expect(
+				item.style.getPropertyValue(matrixVars.tileSecondaryFontSize),
+			).toBe("10px");
+		});
+
+		it("[ISSUE-3481-ITEM-9] draws no corner for a boolean or an empty string", () => {
+			const { container } = render(
+				tile({
+					items: [
+						entry({
+							// flag && <Icon />, the usual JSX idiom, gives false
+							corners: {
+								topLeft: false,
+								topRight: true,
+								bottomLeft: "",
+								bottomRight: null,
+							},
+						}),
+					],
+				}),
+			);
+			expect(slotsOf(container, "corner")).toHaveLength(0);
 		});
 	});
 

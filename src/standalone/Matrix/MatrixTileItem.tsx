@@ -60,11 +60,20 @@ const FlowArrowHorizontal = styled(ArrowRightAlt)({ fontSize: 16 });
 
 /**
  * Font size for a short code: the shorter it is, the bigger it can be. Only a
- * plain string can be measured this way — a ReactNode label keeps the default.
+ * plain string or a number can be measured this way — a number counts as the
+ * digits React writes for it, so 1234 is sized like "1234". Any other
+ * ReactNode keeps the default.
+ * @param label The label to size
+ * @returns The font size in px: 14 up to two characters, 12 for three, 10
+ * for more
  */
 export const labelFontSize = (label: React.ReactNode): number => {
-	if (typeof label !== "string") return 14;
-	return label.length <= 2 ? 14 : label.length === 3 ? 12 : 10;
+	const text =
+		typeof label === "number" || typeof label === "bigint"
+			? String(label)
+			: label;
+	if (typeof text !== "string") return 14;
+	return text.length <= 2 ? 14 : text.length === 3 ? 12 : 10;
 };
 
 export interface MatrixTileItemProps {

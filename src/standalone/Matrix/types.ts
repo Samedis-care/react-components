@@ -165,6 +165,9 @@ export interface MatrixTileItem {
 	key: string;
 	/**
 	 * The entry's main label (a short code)
+	 * @remarks Outside a diagonal pair, a string or a number is drawn the
+	 * smaller the more characters it has (a number counts its digits, so 1234
+	 * is drawn like "1234"); any other node at the largest size.
 	 */
 	label: React.ReactNode;
 	/**
@@ -219,9 +222,11 @@ export interface MatrixTileItem {
 	highlighted?: boolean;
 	/**
 	 * Small adornments pinned into the entry's corners. Keep them to a single
-	 * icon each — a cell is tiny. An adornment that sets no color of its own
-	 * (MUI icons inherit theirs) is drawn in the entry's text color, as its
-	 * label is (see textColor).
+	 * icon each — a cell is tiny. A corner is drawn for any value but null,
+	 * undefined, a boolean and an empty string, so 0 (a counter) shows, and
+	 * `flag && <Icon />` leaves the corner empty. An adornment that sets no
+	 * color of its own (MUI icons inherit theirs) is drawn in the entry's text
+	 * color, as its label is (see textColor).
 	 * @remarks A diagonal pair renders only the first entry's bottomLeft corner,
 	 * in that entry's text color, see MatrixCellTileProps.pairLayout.
 	 */

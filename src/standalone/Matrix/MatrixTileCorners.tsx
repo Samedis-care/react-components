@@ -31,6 +31,16 @@ const ALL_CORNERS: MatrixTileCorner[] = [
 	"bottomRight",
 ];
 
+/**
+ * Whether a corner value draws anything. 0 does, as it does as a label,
+ * secondary label or placeholder. null, undefined, a boolean (`flag && <Icon />`)
+ * and an empty string draw nothing, so they get no corner element either.
+ * @param value The corner's adornment
+ * @returns true if the corner is to be drawn
+ */
+const drawsCorner = (value: React.ReactNode): boolean =>
+	value != null && typeof value !== "boolean" && value !== "";
+
 export interface MatrixTileCornersProps {
 	/**
 	 * The entry whose corners are drawn
@@ -53,7 +63,7 @@ const MatrixTileCorners = (props: MatrixTileCornersProps) => {
 	return (
 		<>
 			{(props.only ?? ALL_CORNERS).map((corner) =>
-				corners[corner] ? (
+				drawsCorner(corners[corner]) ? (
 					<MatrixTileCornerRoot
 						key={corner}
 						className={combineClassNames([
