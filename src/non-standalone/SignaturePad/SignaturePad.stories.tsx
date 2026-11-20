@@ -765,7 +765,7 @@ export const Issue3467Item4StoredSignaturesScaledAndCentered: Story = {
 	},
 };
 
-/** a signature field as a Form renders it: a legend, the pad and its message, tied by ids */
+/** a signature field as a Form renders it: a label, the pad and its message, tied by ids */
 const LabelledField = ({
 	fieldId,
 	label,
@@ -773,9 +773,7 @@ const LabelledField = ({
 	...props
 }: PadHostProps & { fieldId: string; label: string; message?: string }) => (
 	<FormControl required error={!!message} fullWidth>
-		<FormLabel component={"legend"} id={`${fieldId}-label`}>
-			{label}
-		</FormLabel>
+		<FormLabel id={`${fieldId}-label`}>{label}</FormLabel>
 		<PadHost
 			{...props}
 			id={fieldId}

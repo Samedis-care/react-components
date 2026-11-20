@@ -36,7 +36,7 @@ describe("RendererSignature", () => {
 		await loaded(sink, "");
 		const button = document.getElementById("sig")!;
 		expect(button).toHaveRole("button");
-		// the legend's asterisk is hidden from assistive technology
+		// the label's asterisk is hidden from assistive technology
 		expect(button).toHaveAccessibleName(
 			"Trainer signature Sign here digitally",
 		);
@@ -49,5 +49,36 @@ describe("RendererSignature", () => {
 		await settle();
 		expect(button).toHaveAccessibleDescription("Required Please sign");
 		expect(button).toHaveAttribute("aria-invalid", "true");
+	});
+
+	it("[ISSUE-3467-ITEM-30] a signature field's label is a label element, not a legend outside a fieldset", async () => {
+		const sink: Sink = {};
+		mountForm(
+			makeModel({}, undefined, {
+				signature: {
+					type: new ModelDataTypeSignatureRenderer(),
+					getLabel: () => "Trainer signature",
+					visibility: editRequired,
+					customData: null,
+				},
+			}),
+			capture(sink, () => <FormField name={"signature"} id={"sig"} />),
+			{ id: null },
+		);
+		await loaded(sink, "");
+		const label = document.getElementById("sig-label")!;
+		// MUI's FormLabel with its own element: the field is one control, not a group
+		expect(label.tagName).toBe("LABEL");
+		expect(label).toHaveClass("MuiFormLabel-root");
+		expect(label).toHaveTextContent("Trainer signature");
+		// a legend names only the fieldset it opens
+		const legends = Array.from(document.querySelectorAll("legend"));
+		expect(
+			legends.filter((legend) => legend.parentElement?.tagName !== "FIELDSET"),
+		).toEqual([]);
+		// and the label still names the tile's button
+		expect(document.getElementById("sig")).toHaveAccessibleName(
+			"Trainer signature Sign here digitally",
+		);
 	});
 });

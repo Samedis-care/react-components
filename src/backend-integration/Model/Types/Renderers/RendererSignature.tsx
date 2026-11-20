@@ -44,7 +44,9 @@ class RendererSignature extends TypeSignature {
 		if (visibility.editable) {
 			if (visibility.grid) throw new Error("Not supported");
 
-			// the tile's button is named by the label, so it points at it by id
+			// the tile's button is named by the label, so it points at it by id. The
+			// field is one control, not a group: a plain label, as in MUI's radio
+			// group, rather than a legend, which names only the fieldset it opens
 			const labelId = id && `${id}-label`;
 			return (
 				<FormControlCC
@@ -56,9 +58,7 @@ class RendererSignature extends TypeSignature {
 					onBlur={handleBlur}
 					data-name={field}
 				>
-					<FormLabel component={"legend"} id={labelId}>
-						{label}
-					</FormLabel>
+					<FormLabel id={labelId}>{label}</FormLabel>
 					<SignatureNameContext.Consumer>
 						{(signerName) => (
 							<SignaturePad
