@@ -391,3 +391,81 @@ export const Issue3468Item7ThemeSettingsReachThePaper: Story = {
 		await expect(style.borderTopLeftRadius).toBe("12px");
 	},
 };
+
+// ─── Loading unread notifications on top ──────────────────────────────────────
+
+const olderNotifications: Notification[] = Array.from(
+	{ length: 8 },
+	(_, i) => ({
+		id: `older-${i}`,
+		message: `Inspection ${i + 1} of the infusion pumps is due next week`,
+		origin: "Devices",
+		created: ago((i + 1) * HOUR),
+		read: i > 1,
+	}),
+);
+
+const newerNotifications: Notification[] = Array.from(
+	{ length: 3 },
+	(_, i) => ({
+		id: `newer-${i}`,
+		message: `Newer notification ${3 - i}`,
+		origin: "Reports",
+		created: ago((3 - i) * MINUTE),
+		read: false,
+	}),
+);
+
+/**
+ * The list opens with eight notifications; the first loadUnread adds three
+ * newer ones above them.
+ */
+const UnreadAboveList = (
+	args: Omit<NotificationsProps, "notifications" | "loadUnread"> & {
+		onLoadUnread?: () => void;
+	},
+) => {
+	const { onLoadUnread, ...props } = args;
+	const [rows, setRows] = useState(olderNotifications);
+	const added = useRef(false);
+	const loadUnread = useCallback(() => {
+		onLoadUnread?.();
+		if (added.current) return;
+		added.current = true;
+		setRows((prev) => [...newerNotifications, ...prev]);
+	}, [onLoadUnread]);
+	return (
+		<Notifications {...props} notifications={rows} loadUnread={loadUnread} />
+	);
+};
+
+export const Issue3471Item6OpensAtTheFirstNotification: StoryObj<
+	typeof UnreadAboveList
+> = {
+	args: { onLoadUnread: fn() },
+	render: (args) => <UnreadAboveList {...args} />,
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"The popover opens with the first notification fully visible at the top of the list. The notifications fill the list, so `loadUnread` is called while the popover opens and adds three newer ones above; they stay out of view above the first notification until the user scrolls up, also while the popover's opening transition still scales the list.",
+			},
+		},
+	},
+	play: async ({ args, canvas }) => {
+		await userEvent.click(canvas.getByRole("button"));
+		await openPaper();
+		const list = body().getByRole("region", { name: "Notifications" });
+		await body().findByText("Newer notification 1");
+		await nextFrames();
+		const first = Array.from(list.children).find((row) =>
+			row.textContent?.includes(olderNotifications[0].message as string),
+		);
+		if (!first) throw new Error("first notification not found");
+		const listTop = list.getBoundingClientRect().top + list.clientTop;
+		// measured while the transition scaled the list: allow subpixel rounding
+		await expect(first.getBoundingClientRect().top).toBeCloseTo(listTop, 0);
+		await expect(args.onLoadUnread).toHaveBeenCalledTimes(1);
+	},
+};

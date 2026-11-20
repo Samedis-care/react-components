@@ -328,6 +328,196 @@ export const Issue3471Item5LoadsAtBottomWhenZoomed: Story = {
 	},
 };
 
+// ─── Loading on top ───────────────────────────────────────────────────────────
+
+const TOP_LOADING_CLASS = "story-top-loading-scroll";
+
+const InjectTopLoadingStyle = () => (
+	<style>{`.${TOP_LOADING_CLASS} { height: 300px; overflow: auto; width: 300px; }`}</style>
+);
+
+const RowButton = styled("button")({
+	display: "block",
+	width: "100%",
+	height: 30,
+	boxSizing: "border-box",
+	textAlign: "left",
+	fontSize: 14,
+});
+
+interface TopLoadingListProps {
+	/** The number of the first row */
+	first: number;
+	/** The number of rows shown at first */
+	count: number;
+	/** Rows are buttons? */
+	focusable?: boolean;
+	/** Load at the bottom too? */
+	withBottom?: boolean;
+	onLoadTop?: () => void;
+	onLoadBottom?: () => void;
+}
+
+/**
+ * Rows of 30px. loadMoreTop adds 10 rows above, down to Row 1; loadMoreBottom,
+ * if enabled, adds 10 rows below.
+ */
+const TopLoadingList = ({
+	first,
+	count,
+	focusable,
+	withBottom,
+	onLoadTop,
+	onLoadBottom,
+}: TopLoadingListProps) => {
+	const [items, setItems] = useState(() => makeItems(first, count));
+	const loadMoreTop = useCallback(() => {
+		onLoadTop?.();
+		setItems((prev) =>
+			prev[0] <= 1
+				? prev
+				: [
+						...makeItems(Math.max(1, prev[0] - 10), Math.min(10, prev[0] - 1)),
+						...prev,
+					],
+		);
+	}, [onLoadTop]);
+	const loadMoreBottom = useCallback(() => {
+		onLoadBottom?.();
+		setItems((prev) => [...prev, ...makeItems(prev[prev.length - 1] + 1, 10)]);
+	}, [onLoadBottom]);
+
+	return (
+		<Box sx={{ width: 300 }}>
+			<InjectTopLoadingStyle />
+			<InfiniteScroll
+				className={TOP_LOADING_CLASS}
+				role="region"
+				aria-label="Rows"
+				loadMoreTop={loadMoreTop}
+				loadMoreBottom={withBottom ? loadMoreBottom : undefined}
+			>
+				{items.map((n) =>
+					focusable ? (
+						<RowButton key={n} type="button">
+							Row {n}
+						</RowButton>
+					) : (
+						<Row key={n}>Row {n}</Row>
+					),
+				)}
+			</InfiniteScroll>
+		</Box>
+	);
+};
+
+/** The scroll container's visible top and bottom edges, in viewport coordinates */
+const getViewEdges = (scroller: HTMLElement) => {
+	const top = scroller.getBoundingClientRect().top + scroller.clientTop;
+	return { top, bottom: top + scroller.clientHeight };
+};
+
+export const Issue3471Item6OpensAtTheFirstRow: Story = {
+	args: { loadMoreTop: fn(), loadMoreBottom: fn() },
+	render: (args) => (
+		<TopLoadingList
+			first={100}
+			count={20}
+			withBottom
+			onLoadTop={args.loadMoreTop}
+			onLoadBottom={args.loadMoreBottom}
+		/>
+	),
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"The list starts with Row 100 to Row 119 and loads 10 rows above per `loadMoreTop` call. It opens at Row 100, fully visible at the top edge: once the rows fill the container, `loadMoreTop` is called, and the rows it adds stay out of view above Row 100, so scrolling up shows them.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ args, canvasElement }) => {
+		const canvas = within(canvasElement);
+		const scroller = canvas.getByRole("region", { name: "Rows" });
+		// the rows above were loaded at once
+		await canvas.findByText("Row 90");
+		const firstRow = canvas.getByText("Row 100").getBoundingClientRect();
+		await expect(firstRow.top).toBe(getViewEdges(scroller).top);
+		await expect(scroller.scrollTop).toBe(300);
+		await expect(args.loadMoreTop).toHaveBeenCalledTimes(1);
+		await expect(args.loadMoreBottom).not.toHaveBeenCalled();
+	},
+};
+
+export const Issue3471Item6FocusedRowStaysInView: Story = {
+	args: { loadMoreTop: fn(), loadMoreBottom: fn() },
+	render: (args) => (
+		<TopLoadingList
+			first={100}
+			count={20}
+			focusable
+			withBottom
+			onLoadTop={args.loadMoreTop}
+			onLoadBottom={args.loadMoreBottom}
+		/>
+	),
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"The rows are buttons. Tab reaches the scroll container, then the first row, which scrolls the list to its top and so loads 10 rows above it. The focused row stays where it is, fully visible at the top edge, with the new rows out of view above it.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const scroller = canvas.getByRole("region", { name: "Rows" });
+		await userEvent.tab();
+		await expect(scroller).toHaveFocus();
+		await userEvent.tab();
+		const focused = document.activeElement as HTMLElement;
+		await expect(scroller).toContainElement(focused);
+		// focusing the row scrolled the list to its top, which loads 10 rows above it
+		await waitFor(() =>
+			expect(Array.from(scroller.children).indexOf(focused)).toBe(10),
+		);
+		await expect(focused).toHaveFocus();
+		const row = focused.getBoundingClientRect();
+		const view = getViewEdges(scroller);
+		await expect(row.top).toBeGreaterThanOrEqual(view.top);
+		await expect(row.bottom).toBeLessThanOrEqual(view.bottom);
+		await expect(scroller.scrollTop).toBe(300);
+	},
+};
+
+export const Issue3471Item6FillsAListThatOnlyLoadsOnTop: Story = {
+	args: { loadMoreTop: fn() },
+	render: (args) => (
+		<TopLoadingList first={96} count={5} onLoadTop={args.loadMoreTop} />
+	),
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"A list that only grows upwards, like a chat history: it has `loadMoreTop` and no `loadMoreBottom`. It starts with the five newest rows, which do not fill the container, so it is filled through `loadMoreTop`; the rows in view stay where they are, so the newest row stays in view at the bottom.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ args, canvasElement }) => {
+		const canvas = within(canvasElement);
+		const scroller = canvas.getByRole("region", { name: "Rows" });
+		await waitFor(() => expect(isFilled(scroller)).toBe(true));
+		await expect(args.loadMoreTop).toHaveBeenCalledTimes(1);
+		const newest = canvas.getByText("Row 100").getBoundingClientRect();
+		const view = getViewEdges(scroller);
+		await expect(newest.top).toBeGreaterThanOrEqual(view.top);
+		await expect(newest.bottom).toBeLessThanOrEqual(view.bottom);
+	},
+};
+
 // ─── Keyboard access and naming ───────────────────────────────────────────────
 
 export const Issue3471Item9ScrollerReachableByKeyboard: Story = {

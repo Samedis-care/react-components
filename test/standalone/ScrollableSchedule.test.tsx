@@ -28,7 +28,8 @@ import type {
 // jsdom has no layout. Elements with class SCROLLER get clientHeight 300 and a
 // scrollHeight computed from the weeks in the list: a loaded week (its
 // "Week N, …" label) counts WEEK_PX, so InfiniteScroll's fill check loads
-// exactly weeks 0 and 1. A pending week (spinner) and a failed week (one text
+// exactly weeks 0 and 1, and then week -1 above them, as the list is at its
+// top once they fill it. A pending week (spinner) and a failed week (one text
 // line) count WEEK_PX too, unless a test sets geometry.pendingPx/errorPx to the
 // heights they have in a browser. scrollTop is writable per element. Today's
 // day label (the jumpToToday target) reports offsetTop TODAY_TOP.
@@ -190,7 +191,7 @@ describe("fill and weeks", () => {
 		};
 		const { container, rerender } = render(<Harness tag="A" />);
 		await advance(400);
-		expect(calls).toEqual(["A0", "A1"]);
+		expect(calls).toEqual(["A0", "A1", "A-1"]);
 		rerender(<Harness tag="B" />);
 		await advance(400);
 		const scroller = scrollerOf(container);
@@ -230,14 +231,22 @@ describe("fill and weeks", () => {
 		await advance(400);
 		const labels = weekLabels(container);
 		expect(labels).toEqual([
+			"Week 41, 04 Oct - 10 Oct",
 			"Week 42, 11 Oct - 17 Oct",
 			"Week 43, 18 Oct - 24 Oct",
 		]);
 		rerender(<Harness tag="B" />);
 		await advance(400);
-		expect(calls.map(([tag, o]) => tag + o)).toEqual(["A0", "A1", "B0", "B1"]);
+		expect(calls.map(([tag, o]) => tag + o)).toEqual([
+			"A0",
+			"A1",
+			"A-1",
+			"B-1",
+			"B0",
+			"B1",
+		]);
 		expect(calls.map(([, , filters]) => filters)).toEqual(
-			Array(4).fill({ f: true }),
+			Array(6).fill({ f: true }),
 		);
 		// B is pending: the weeks keep A's rows, no spinner, no reset
 		expect(
@@ -245,17 +254,24 @@ describe("fill and weeks", () => {
 		).toHaveLength(0);
 		expect(weekLabels(container)).toEqual(labels);
 		expect(allEntries(container).filter((t) => t?.endsWith("-idx0"))).toEqual([
+			"A-1-idx0",
 			"A0-idx0",
 			"A1-idx0",
 		]);
 		await act(async () => {
 			pendingB[1].resolve(week("B1"));
+			pendingB[-1].resolve(week("B-1"));
 			pendingB[0].resolve(week("B0"));
-			await Promise.all([pendingB[0].promise, pendingB[1].promise]);
+			await Promise.all([
+				pendingB[-1].promise,
+				pendingB[0].promise,
+				pendingB[1].promise,
+			]);
 		});
 		expect(weekLabels(container)).toEqual(labels);
 		const entries = allEntries(container);
 		expect(entries.filter((t) => t?.endsWith("-idx0"))).toEqual([
+			"B-1-idx0",
 			"B0-idx0",
 			"B1-idx0",
 		]);
@@ -274,25 +290,27 @@ describe("fill and weeks", () => {
 			<ScrollableSchedule wrapperClass={SCROLLER} loadWeekCallback={a} />,
 		);
 		await advance(400);
-		expect(a).toHaveBeenCalledTimes(2);
+		expect(a).toHaveBeenCalledTimes(3);
 		rerender(
 			<ScrollableSchedule wrapperClass={SCROLLER} loadWeekCallback={b} />,
 		);
 		await advance(400);
-		expect(b.mock.calls.map((c) => c[0])).toEqual([0, 1]);
+		expect(b.mock.calls.map((c) => c[0])).toEqual([-1, 0, 1]);
 		await act(async () => {
 			pendingA[0].resolve(week("A0"));
 			pendingA[1].reject(new Error("A failed"));
+			pendingA[2].resolve(week("A-1"));
 			await Promise.allSettled(pendingA.map((d) => d.promise));
 		});
 		expect(scrollerOf(container).textContent).not.toContain("A failed");
 		const entries = allEntries(container);
 		expect(entries.filter((t) => t?.endsWith("-idx0"))).toEqual([
+			"B-1-idx0",
 			"B0-idx0",
 			"B1-idx0",
 		]);
 		expect(entries.filter((t) => !t?.startsWith("B"))).toEqual([]);
-		expect(a).toHaveBeenCalledTimes(2);
+		expect(a).toHaveBeenCalledTimes(3);
 	});
 
 	it("[ISSUE-3478-ITEM-1] a re-render with the same loadWeekCallback loads no week again", async () => {
@@ -314,6 +332,6 @@ describe("fill and weeks", () => {
 			/>,
 		);
 		await advance(400);
-		expect(cb.mock.calls.map((c) => c[0])).toEqual([0, 1]);
+		expect(cb.mock.calls.map((c) => c[0])).toEqual([0, 1, -1]);
 	});
 });

@@ -107,10 +107,16 @@ export interface NotificationsProps {
 	/**
 	 * Callback which is fired by the infinite scroll to load old notifications
 	 */
-	loadRead: InfiniteScrollProps["loadMoreBottom"];
+	loadRead: NonNullable<InfiniteScrollProps["loadMoreBottom"]>;
 	/**
 	 * Callback which is fired by the infinite scroll to load new (unread) notifications
 	 * Should load the oldest unread notifications
+	 *
+	 * Called when the list is scrolled to its top, and once when the popover
+	 * opens and the notifications fill the list (see InfiniteScroll's
+	 * `loadMoreTop`). Add what it loads to the start of `notifications`: the
+	 * new notifications stay out of view above the ones shown until the user
+	 * scrolls up. Pass `undefined` while there is nothing more to load.
 	 */
 	loadUnread: InfiniteScrollProps["loadMoreTop"] | undefined;
 	/**

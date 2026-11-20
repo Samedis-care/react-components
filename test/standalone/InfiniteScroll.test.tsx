@@ -330,8 +330,12 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 					<div />
 				</InfiniteScroll>,
 			);
-			scrollTo(getScroller(container), 0);
+			const scroller = getScroller(container);
+			// the list opens at its top and fills the container: it loads on top at once
 			expect(top).toHaveBeenCalledTimes(1);
+			scrollTo(scroller, 300);
+			scrollTo(scroller, 0);
+			expect(top).toHaveBeenCalledTimes(2);
 		});
 
 		it("[ISSUE-3471-ITEM-1] keeps debouncing loadMoreBottom after the callback prop changes", () => {
@@ -866,6 +870,475 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 			scrollTo(scroller, 700.4);
 			advance(100);
 			expect(bottom).toHaveBeenCalledTimes(2);
+		});
+
+		it("[ISSUE-3471-ITEM-6] opens at the top of the list with loadMoreTop set", () => {
+			const { container } = render(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={vi.fn()}
+					loadMoreBottom={vi.fn()}
+				>
+					<div />
+				</InfiniteScroll>,
+			);
+			advance(200);
+			expect(getScroller(container).scrollTop).toBe(0);
+		});
+
+		it("[ISSUE-3471-ITEM-6] leaves a list that is scrolled to its top there, so its first pixel row can be reached", () => {
+			const top = vi.fn();
+			const { container } = render(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={top}
+					loadMoreBottom={vi.fn()}
+				>
+					<div />
+				</InfiniteScroll>,
+			);
+			const scroller = getScroller(container);
+			advance(100);
+			// the list opens at its top
+			expect(top).toHaveBeenCalledTimes(1);
+			scrollTo(scroller, 300);
+			scrollTo(scroller, 0);
+			expect(scroller.scrollTop).toBe(0);
+			advance(100);
+			expect(top).toHaveBeenCalledTimes(2);
+		});
+
+		it("[ISSUE-3471-ITEM-6] loads on top once the content fills the container at the top, and not again on every render", () => {
+			const top = vi.fn();
+			const bottom = vi.fn();
+			const { rerender } = render(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={top}
+					loadMoreBottom={bottom}
+				>
+					<div>page 1</div>
+				</InfiniteScroll>,
+			);
+			advance(100);
+			expect(top).toHaveBeenCalledTimes(1);
+			// a render with new children while the list stays at its top
+			rerender(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={top}
+					loadMoreBottom={bottom}
+				>
+					<div>page 1, rendered again</div>
+				</InfiniteScroll>,
+			);
+			advance(200);
+			expect(top).toHaveBeenCalledTimes(1);
+			expect(bottom).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3471-ITEM-6] loads on top once the rows loaded at the bottom fill the container", () => {
+			let height = 300;
+			scrollHeightOf = () => height;
+			const top = vi.fn();
+			const bottom = vi.fn(() => {
+				height += 300;
+			});
+			const { rerender } = render(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={top}
+					loadMoreBottom={bottom}
+				>
+					<div>page 1</div>
+				</InfiniteScroll>,
+			);
+			advance(100);
+			// a short list is filled at the bottom first
+			expect(bottom).toHaveBeenCalledTimes(1);
+			expect(top).not.toHaveBeenCalled();
+			rerender(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={top}
+					loadMoreBottom={bottom}
+				>
+					<div>pages 1 and 2</div>
+				</InfiniteScroll>,
+			);
+			advance(100);
+			expect(top).toHaveBeenCalledTimes(1);
+			expect(bottom).toHaveBeenCalledTimes(1);
+		});
+
+		it("[ISSUE-3471-ITEM-6] loads on top once under StrictMode", () => {
+			const top = vi.fn();
+			// StrictMode unmounts and mounts again right after the first mount
+			render(
+				<React.StrictMode>
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreTop={top}
+						loadMoreBottom={vi.fn()}
+					>
+						<div />
+					</InfiniteScroll>
+				</React.StrictMode>,
+			);
+			advance(200);
+			expect(top).toHaveBeenCalledTimes(1);
+		});
+
+		it("[ISSUE-3471-ITEM-6] loads on top when rows that grew on their own fill the container", () => {
+			// e.g. a row that shows a spinner until its data arrive
+			let height = 300;
+			scrollHeightOf = () => height;
+			const top = vi.fn();
+			const bottom = vi.fn();
+			render(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={top}
+					loadMoreBottom={bottom}
+				>
+					<div />
+				</InfiniteScroll>,
+			);
+			// the rows grow without a render of InfiniteScroll
+			height = 1000;
+			advance(100);
+			// the waiting fill call finds the container filled
+			expect(bottom).not.toHaveBeenCalled();
+			advance(100);
+			expect(top).toHaveBeenCalledTimes(1);
+		});
+
+		it("[ISSUE-3471-ITEM-6] loads on top when loadMoreTop is passed after mount while the list is at its top", () => {
+			const top = vi.fn();
+			const bottom = vi.fn();
+			const children = <div />;
+			const { rerender } = render(
+				<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+					{children}
+				</InfiniteScroll>,
+			);
+			advance(200);
+			rerender(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={top}
+					loadMoreBottom={bottom}
+				>
+					{children}
+				</InfiniteScroll>,
+			);
+			advance(100);
+			expect(top).toHaveBeenCalledTimes(1);
+		});
+
+		it("[ISSUE-3471-ITEM-6] loads on top again once an emptied list fills the container again", () => {
+			let height = 1000;
+			scrollHeightOf = () => height;
+			const top = vi.fn();
+			const bottom = vi.fn();
+			const { rerender } = render(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={top}
+					loadMoreBottom={bottom}
+				>
+					<div>page 1</div>
+				</InfiniteScroll>,
+			);
+			advance(100);
+			expect(top).toHaveBeenCalledTimes(1);
+
+			// e.g. a filter change: the parent empties the list and fills it again
+			height = 0;
+			rerender(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={top}
+					loadMoreBottom={bottom}
+				>
+					{null}
+				</InfiniteScroll>,
+			);
+			advance(100);
+			expect(bottom).toHaveBeenCalledTimes(1);
+			height = 1000;
+			rerender(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={top}
+					loadMoreBottom={bottom}
+				>
+					<div>new page 1</div>
+				</InfiniteScroll>,
+			);
+			advance(100);
+			expect(top).toHaveBeenCalledTimes(2);
+		});
+
+		it("[ISSUE-3471-ITEM-6] loads on top when a hidden list is shown again at its top", () => {
+			const top = vi.fn();
+			const bottom = vi.fn();
+			const { rerender } = render(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={top}
+					loadMoreBottom={bottom}
+				>
+					<div>page 1</div>
+				</InfiniteScroll>,
+			);
+			advance(100);
+			expect(top).toHaveBeenCalledTimes(1);
+
+			// the panel is hidden and the list renders meanwhile
+			clientHeight = 0;
+			scrollHeightOf = () => 0;
+			rerender(
+				<InfiniteScroll
+					className={SCROLLER}
+					loadMoreTop={top}
+					loadMoreBottom={bottom}
+				>
+					<div>page 1, rendered again</div>
+				</InfiniteScroll>,
+			);
+			advance(100);
+			expect(top).toHaveBeenCalledTimes(1);
+
+			// shown again, at its top
+			clientHeight = 300;
+			scrollHeightOf = () => 1000;
+			act(() => {
+				lastResizeObserver().callback([], {} as ResizeObserver);
+			});
+			advance(100);
+			expect(top).toHaveBeenCalledTimes(2);
+			expect(bottom).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3471-ITEM-6] fills a list without loadMoreBottom through loadMoreTop", () => {
+			let height = 0;
+			scrollHeightOf = () => height;
+			const top = vi.fn(() => {
+				height += 150;
+			});
+			const { rerender } = render(
+				<InfiniteScroll className={SCROLLER} loadMoreTop={top}>
+					<div>page 1</div>
+				</InfiniteScroll>,
+			);
+			advance(100);
+			expect(top).toHaveBeenCalledTimes(1);
+			// 150px do not fill the 300px container yet
+			rerender(
+				<InfiniteScroll className={SCROLLER} loadMoreTop={top}>
+					<div>pages 1 and 2</div>
+				</InfiniteScroll>,
+			);
+			advance(100);
+			expect(top).toHaveBeenCalledTimes(2);
+		});
+
+		describe("rows added above the rows in view", () => {
+			const ROW_PX = 30;
+			/** Rows of 30px in a wrapper, as ScrollableSchedule wraps its weeks */
+			const Rows = ({
+				from,
+				placeholderPx,
+			}: {
+				from: number;
+				/** Height of a row "Loading" above the rows, if any */
+				placeholderPx?: number;
+			}) => (
+				<div className="rows">
+					{placeholderPx !== undefined && (
+						<div className="row" data-px={placeholderPx}>
+							Loading
+						</div>
+					)}
+					{range(from, 40 - from).map((n) => (
+						<div className="row" key={n}>
+							Row {n}
+						</div>
+					))}
+				</div>
+			);
+			const rowPx = (row: Element) =>
+				Number(row.getAttribute("data-px") ?? ROW_PX);
+			const rowsPx = (rows: Element[]) =>
+				rows.reduce((sum, row) => sum + rowPx(row), 0);
+			const rect = (top: number, height: number) =>
+				({
+					top,
+					bottom: top + height,
+					height,
+					left: 0,
+					right: 300,
+					width: 300,
+					x: 0,
+					y: top,
+				}) as DOMRect;
+			/** Calls the observer of the container's children, as a size change would */
+			const notifyContentResize = () =>
+				act(() => {
+					lastResizeObserver().callback([], {} as ResizeObserver);
+				});
+
+			beforeEach(() => {
+				scrollHeightOf = (el) =>
+					rowsPx(Array.from(el.querySelectorAll(".row")));
+				// lay the rows out one below the other, from the container's scrollTop
+				vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
+					function (this: Element) {
+						const scroller = this.closest<HTMLElement>(`.${SCROLLER}`);
+						if (!scroller) return rect(0, 0);
+						if (scroller === this) return rect(0, clientHeight);
+						const rows = this.closest(".rows");
+						if (!rows) return rect(0, 0);
+						const all = Array.from(rows.children);
+						if (rows === this) return rect(-scroller.scrollTop, rowsPx(all));
+						const above = all.slice(0, all.indexOf(this));
+						return rect(rowsPx(above) - scroller.scrollTop, rowPx(this));
+					},
+				);
+			});
+
+			it("[ISSUE-3471-ITEM-6] keeps the rows in view in place when rows are added above them at the top", () => {
+				const top = vi.fn();
+				const { container, rerender } = render(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreTop={top}
+						loadMoreBottom={vi.fn()}
+					>
+						<Rows from={10} />
+					</InfiniteScroll>,
+				);
+				const scroller = getScroller(container);
+				advance(100);
+				expect(top).toHaveBeenCalledTimes(1);
+				expect(scroller.scrollTop).toBe(0);
+
+				// loadMoreTop adds rows 0 to 9 above row 10
+				rerender(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreTop={top}
+						loadMoreBottom={vi.fn()}
+					>
+						<Rows from={0} />
+					</InfiniteScroll>,
+				);
+				expect(scroller.scrollTop).toBe(10 * ROW_PX);
+				const row10 = screen.getByText("Row 10");
+				expect(row10.getBoundingClientRect().top).toBe(0);
+			});
+
+			it("[ISSUE-3471-ITEM-6] keeps the rows in view in place while a row added above them grows", () => {
+				const { container, rerender } = render(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreTop={vi.fn()}
+						loadMoreBottom={vi.fn()}
+					>
+						<Rows from={10} />
+					</InfiniteScroll>,
+				);
+				const scroller = getScroller(container);
+				// a placeholder is added above row 10, as ScrollableSchedule adds a week
+				rerender(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreTop={vi.fn()}
+						loadMoreBottom={vi.fn()}
+					>
+						<Rows from={10} placeholderPx={56} />
+					</InfiniteScroll>,
+				);
+				expect(scroller.scrollTop).toBe(56);
+
+				// its data arrive: it grows without a render of InfiniteScroll
+				screen.getByText("Loading").setAttribute("data-px", "490");
+				notifyContentResize();
+				expect(scroller.scrollTop).toBe(490);
+				expect(screen.getByText("Row 10").getBoundingClientRect().top).toBe(0);
+			});
+
+			it("[ISSUE-3471-ITEM-6] keeps the rows in view in place when the offset it set moved by less than 1px", () => {
+				const { container, rerender } = render(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreTop={vi.fn()}
+						loadMoreBottom={vi.fn()}
+					>
+						<Rows from={10} />
+					</InfiniteScroll>,
+				);
+				const scroller = getScroller(container);
+				rerender(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreTop={vi.fn()}
+						loadMoreBottom={vi.fn()}
+					>
+						<Rows from={10} placeholderPx={56} />
+					</InfiniteScroll>,
+				);
+				// the browser snaps the offset to a device pixel (e.g. inside CSS zoom)
+				scrollTo(scroller, 55.6);
+				screen.getByText("Loading").setAttribute("data-px", "490");
+				notifyContentResize();
+				expect(scroller.scrollTop).toBe(490);
+				expect(screen.getByText("Row 10").getBoundingClientRect().top).toBe(0);
+			});
+
+			it("[ISSUE-3471-ITEM-6] stops keeping the rows in view in place once the list is scrolled", () => {
+				const { container, rerender } = render(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreTop={vi.fn()}
+						loadMoreBottom={vi.fn()}
+					>
+						<Rows from={10} />
+					</InfiniteScroll>,
+				);
+				const scroller = getScroller(container);
+				rerender(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreTop={vi.fn()}
+						loadMoreBottom={vi.fn()}
+					>
+						<Rows from={10} placeholderPx={56} />
+					</InfiniteScroll>,
+				);
+				expect(scroller.scrollTop).toBe(56);
+
+				// the user (or the consumer, e.g. a "today" button) scrolls the list
+				scrollTo(scroller, 200);
+				screen.getByText("Loading").setAttribute("data-px", "490");
+				notifyContentResize();
+				expect(scroller.scrollTop).toBe(200);
+			});
+
+			it("[ISSUE-3471-ITEM-6] without loadMoreTop, leaves rows added above the rows in view at the top in view, as browsers do", () => {
+				const { container, rerender } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={vi.fn()}>
+						<Rows from={10} />
+					</InfiniteScroll>,
+				);
+				rerender(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={vi.fn()}>
+						<Rows from={0} />
+					</InfiniteScroll>,
+				);
+				expect(getScroller(container).scrollTop).toBe(0);
+			});
 		});
 
 		it("[ISSUE-3471-ITEM-9] passes role, aria-label, tabIndex and id to the scroll container", () => {
