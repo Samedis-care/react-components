@@ -15,6 +15,7 @@ import {
 	cleanup,
 	act,
 } from "@testing-library/react";
+import { Typography } from "@mui/material";
 import { createMemoryHistory, MemoryHistory } from "history";
 import { setFrameworkHistory } from "../../src/framework/History";
 import DialogContextProvider, {
@@ -523,6 +524,36 @@ describe("FormDialog", () => {
 });
 
 describe("message content and description", () => {
+	const blockText = "Type your e-mail address to confirm.";
+	const block = <Typography color="error">{blockText}</Typography>;
+	/** React reports each invalid nesting once per module, so check the DOM */
+	const pAncestorOfBlock = () =>
+		screen.getByText(blockText).parentElement?.closest("p")?.tagName ?? null;
+
+	it.each([
+		["InputDialog", () => <InputDialog {...inputProps({ message: block })} />],
+		[
+			"FormDialog",
+			() => (
+				<FormDialog
+					title="T"
+					message={block}
+					inputs={null}
+					buttons={[{ text: "OK" }]}
+				/>
+			),
+		],
+	])(
+		"[ISSUE-3497-ITEM-7] %s renders a block message outside a <p>",
+		(_label, make) => {
+			mount();
+			push(make());
+			// a <p> inside a <p> is invalid HTML, React logs "In HTML, <p> cannot be
+			// a descendant of <p>"
+			expect(pAncestorOfBlock()).toBeNull();
+		},
+	);
+
 	it.each([
 		[
 			"ConfirmDialog",

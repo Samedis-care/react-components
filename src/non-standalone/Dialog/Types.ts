@@ -58,8 +58,9 @@ export interface IDialogConfigSimple {
 	 */
 	title: string;
 	/**
-	 * The message contents of the dialog. They are the dialog's accessible
-	 * description (`aria-describedby`).
+	 * The message contents of the dialog: text, or any React content, also block
+	 * elements such as a `Typography`, a list or a `Grid`. They are the dialog's
+	 * accessible description (`aria-describedby`).
 	 */
 	message: React.ReactNode;
 	/**
@@ -81,8 +82,9 @@ export interface IDialogConfigConfirm {
 	 */
 	title: string;
 	/**
-	 * The message contents. They are the dialog's accessible description
-	 * (`aria-describedby`).
+	 * The message contents: text, or any React content, also block elements such
+	 * as a `Typography`, a list or a `Grid`. They are the dialog's accessible
+	 * description (`aria-describedby`).
 	 */
 	message: React.ReactNode;
 	/**

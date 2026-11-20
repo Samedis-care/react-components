@@ -72,7 +72,10 @@ const InputDialogRaw = (props: IDialogConfigInput) => {
 		<Dialog open={true} onClose={removeDialog} aria-describedby={messageId}>
 			<DialogTitle>{props.title}</DialogTitle>
 			<DialogContent>
-				<DialogContentText id={messageId}>{props.message}</DialogContentText>
+				{/* a <div>, not MUI's <p>: the message may be block content */}
+				<DialogContentText component={"div"} id={messageId}>
+					{props.message}
+				</DialogContentText>
 				<TextField
 					autoFocus
 					margin="dense"
