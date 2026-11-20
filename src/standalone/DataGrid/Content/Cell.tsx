@@ -17,6 +17,7 @@ import SelectRow, { isSelected } from "./SelectRow";
 import SelectAllHeader from "./SelectAllHeader";
 import { Skeleton } from "@mui/material";
 import combineClassNames from "../../../utils/combineClassNames";
+import { RowLabelContext, getRowLabelDefault } from "./RowLabel";
 
 export interface CellContextType {
 	/**
@@ -49,6 +50,7 @@ const Cell = (props: CellComponentProps): React.ReactElement => {
 		canSelectRow,
 		enableSelectAll,
 		classes,
+		getRowLabel,
 	} = useDataGridProps();
 	const [state, setState] = useDataGridState();
 	const [hover, setHover] = hoverState;
@@ -77,6 +79,18 @@ const Cell = (props: CellComponentProps): React.ReactElement => {
 
 	const column: IDataGridColumnDef | undefined =
 		columns[columnIndex - (disableSelection ? 0 : 1)];
+
+	// the label of the row's checkbox, for a control in one of the row's cells; only
+	// computed once a cell asks for it (useRowLabel)
+	const getRowLabelOfRow = useCallback(
+		() =>
+			record
+				? getRowLabel
+					? getRowLabel(record)
+					: getRowLabelDefault(record, columns)
+				: "",
+		[getRowLabel, record, columns],
+	);
 
 	let content: React.ReactNode = null;
 	if (rowIndex === 0 && columnIndex === 0 && !disableSelection) {
@@ -109,6 +123,15 @@ const Cell = (props: CellComponentProps): React.ReactElement => {
 			content = content2.toString();
 		} else {
 			content = content2;
+		}
+
+		// a control in the cell names itself after the row (see RowLabel)
+		if (record) {
+			content = (
+				<RowLabelContext.Provider value={getRowLabelOfRow}>
+					{content}
+				</RowLabelContext.Provider>
+			);
 		}
 	}
 

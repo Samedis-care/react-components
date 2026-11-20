@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
 	ModelFieldName,
 	ModelRecord,
@@ -9,6 +9,7 @@ import { useDialogContext } from "../../framework/DialogContextProvider";
 import { ErrorDialog } from "../../non-standalone/Dialog";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { dotToObject } from "../../utils/dotUtils";
+import { useRowLabel } from "../../standalone/DataGrid/Content/RowLabel";
 import renderModelCell from "./renderModelCell";
 
 export interface InlineEditCellProps {
@@ -25,11 +26,6 @@ export interface InlineEditCellProps {
 	 */
 	record: ModelRecord<ModelUnknown>;
 	/**
-	 * The accessible name of the cell's control: the field's label and the row's label,
-	 * e.g. "Active, example.com" (ModelRenderParams.gridCellLabel)
-	 */
-	gridCellLabel?: string;
-	/**
 	 * Called once a change was saved or refused, to reload the rows
 	 */
 	refreshGrid: () => void;
@@ -42,14 +38,29 @@ export interface InlineEditCellProps {
  * (useModelMutation), like any other update: the model's cache of the record then holds
  * the saved record, and hooks.onCreateOrUpdate and the "mutate" listeners hear of it.
  * Saved or refused, refreshGrid is called. A refused save is shown in an error dialog
- * naming the field and the error, and the reload shows the stored value again.
+ * naming the field and the error, and the reload shows the stored value again. The
+ * control is named after its field and the row ("Active, Carol Jones"), with the row
+ * label its checkbox uses (RowLabel), since a grid cell has no label element to name it.
  * Needs the Framework (dialogs, translations, the model's query client).
  */
 const InlineEditCell = (props: InlineEditCellProps) => {
-	const { model, field, record, gridCellLabel, refreshGrid } = props;
+	const { model, field, record, refreshGrid } = props;
 	const [pushDialog] = useDialogContext();
 	const { t } = useCCTranslations();
 	const { mutateAsync: updateRecord } = useModelMutation(model, "overview");
+	// the row's label as its checkbox uses it, composed here so that the name follows
+	// a language switch and a getRowLabel replaced after mount
+	const rowLabel = useRowLabel();
+	const gridCellLabel = useMemo(
+		() =>
+			rowLabel
+				? t("backend-components.data-grid.inline-edit.cell-control-label", {
+						FIELD: model.fields[field].getLabel(),
+						ROW: rowLabel,
+					})
+				: undefined,
+		[model, field, rowLabel, t],
+	);
 
 	const handleChange = useCallback(
 		(changed: ModelFieldName, value: unknown) => {

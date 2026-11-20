@@ -67,4 +67,20 @@ describe("ModelDataTypeEnumSelectRendererMUI", () => {
 			).toBeInTheDocument();
 		},
 	);
+
+	it("[ISSUE-3506-ITEM-9] in an editable data grid cell, gridCellLabel names the combobox and its options", async () => {
+		render(
+			renderer.render(
+				renderParams({
+					visibility: { ...renderParams().visibility, grid: true },
+					gridCellLabel: "Priority, Alice",
+				}),
+			),
+		);
+		const combobox = screen.getByRole("combobox", { name: "Priority, Alice" });
+		fireEvent.mouseDown(combobox);
+		expect(
+			await screen.findByRole("listbox", { name: "Priority, Alice" }),
+		).toBeInTheDocument();
+	});
 });

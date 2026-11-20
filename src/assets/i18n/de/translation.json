@@ -343,6 +343,7 @@
 				}
 			},
 			"inline-edit": {
+				"cell-control-label": "{{FIELD}}, {{ROW}}",
 				"error-dialog": {
 					"message": "Die Änderung an „{{LABEL}}“ wurde nicht gespeichert: {{ERROR}}"
 				}

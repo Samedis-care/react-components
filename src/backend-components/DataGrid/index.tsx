@@ -34,12 +34,14 @@ export interface BackendDataGridProps<M extends ModelUnknown> extends Omit<
 	model: M;
 	/**
 	 * The text that identifies a row to assistive technology, e.g. a person's
-	 * name: the row's checkbox is named after it ("Select Carol Jones"), and a
-	 * customSelectionControl gets it as rowLabel.
+	 * name: the row's checkbox is named after it ("Select Carol Jones"), a
+	 * customSelectionControl gets it as rowLabel, and a control edited in a cell
+	 * is named after it and its field ("Active, Carol Jones").
 	 * Defaults to DataGridProps.getRowLabel's default: the text the first
 	 * visible text column shows.
 	 * @param record The row's record, as the model's index returned it
-	 * @return The label; an empty string names the checkbox "Select row"
+	 * @return The label; an empty string names the checkbox "Select row" and
+	 *         leaves a control edited in a cell named after its field alone
 	 */
 	getRowLabel?: (record: ModelRecord<M>) => string;
 	/**
@@ -266,28 +268,6 @@ const notEditableInGrid = () => {
 };
 
 /**
- * The text that identifies a record for the accessible name of an inline control: the
- * value of its first visible text field, the default of DataGridProps.getRowLabel
- * @param model The model the record belongs to
- * @param entry The record
- * @returns The text; an empty string if no visible text field has one
- */
-const getRecordText = (
-	model: ModelUnknown,
-	entry: ModelRecord<ModelUnknown>,
-): string => {
-	for (const key of Object.keys(model.fields)) {
-		const definition = model.fields[key];
-		const overview = definition.visibility.overview;
-		if (overview.disabled || overview.hidden) continue;
-		if (definition.type.getFilterType() !== "string") continue;
-		const value = getValueByDot(key, entry);
-		if (typeof value === "string" && value.trim() !== "") return value;
-	}
-	return "";
-};
-
-/**
  * Turns a record from model.index into a grid row: `row.id` is the record's id,
  * `row[field]` the rendered cell of each model field and `row[field + "_raw"]` its
  * value. A field with an editable overview visibility (ModelVisibilityGridEdit) is
@@ -295,35 +275,20 @@ const getRecordText = (
  * (useModelMutation, so the model's cache, hooks and "mutate" listeners hear of it), then
  * calls refreshGrid; a refused save is shown in an error dialog (the cell needs the
  * Framework), and refreshGrid is called as well. The cell's control is named after its
- * field and the row ("Active, example.com"), since a grid cell has no label element and
- * the renderer knows neither the row nor a name for it.
+ * field and the row ("Active, example.com"), since a grid cell has no label element to
+ * name it (InlineEditCell).
  * @param model The model the record belongs to
  * @param refreshGrid Called after an inline edit was saved or refused, to reload the
  *                    rows
- * @param getRowLabel The row's label for the cells' accessible names, as
- *                    BackendDataGridProps.getRowLabel; without it the first visible text
- *                    field identifies the row
  * @returns A function that builds the row of one record. It throws "Not supported"
  *          for an editable field whose renderer has no grid editor.
  */
-export const renderDataGridRecordUsingModel = <M extends ModelUnknown>(
-	model: M,
-	refreshGrid: () => void,
-	getRowLabel?: (record: ModelRecord<M>) => string,
-) => {
-	return (
-		entry: ModelRecord<M>,
-	): { id: string } & Record<string, string | null> => {
-		// computed once, when the first editable field asks for it
-		let rowLabel: string | undefined;
-		const gridCellLabel = (label: string): string => {
-			rowLabel ??= getRowLabel
-				? getRowLabel(entry)
-				: getRecordText(model, entry);
-			return rowLabel ? `${label}, ${rowLabel}` : label;
-		};
-
-		return Object.fromEntries(
+export const renderDataGridRecordUsingModel =
+	(model: ModelUnknown, refreshGrid: () => void) =>
+	(
+		entry: ModelRecord<ModelUnknown>,
+	): { id: string } & Record<string, string | null> =>
+		Object.fromEntries(
 			Object.keys(model.fields)
 				.map((key) => {
 					// we cannot render the ID, this will cause issues with the selection
@@ -356,7 +321,6 @@ export const renderDataGridRecordUsingModel = <M extends ModelUnknown>(
 									model={model}
 									field={key}
 									record={entry}
-									gridCellLabel={gridCellLabel(field.getLabel())}
 									refreshGrid={refreshGrid}
 								/>
 							) : (
@@ -368,8 +332,6 @@ export const renderDataGridRecordUsingModel = <M extends ModelUnknown>(
 				})
 				.flat(),
 		) as { id: string } & Record<string, string | null>;
-	};
-};
 
 /**
  * The record a row of renderDataGridRecordUsingModel was rendered from: the
@@ -418,7 +380,7 @@ const BackendDataGrid = <M extends ModelUnknown>(
 	props: BackendDataGridProps<M>,
 	ref: React.Ref<DataGridDispatch>,
 ) => {
-	const { model, getRowLabel: getRecordLabel } = props;
+	const { model } = props;
 	const [refreshToken, setRefreshToken] = useState("");
 
 	const refreshGrid = useCallback(
@@ -433,17 +395,15 @@ const BackendDataGrid = <M extends ModelUnknown>(
 			return {
 				rowsTotal: meta.totalRows,
 				rowsFiltered: meta.filteredRows,
-				rows: result.map(
-					renderDataGridRecordUsingModel(model, refreshGrid, getRecordLabel),
-				),
+				rows: result.map(renderDataGridRecordUsingModel(model, refreshGrid)),
 			};
 		},
-		[model, getRecordLabel, refreshGrid],
+		[model, refreshGrid],
 	);
 
 	const addNewButtons = useBackendDataGridAddNewButtons(props);
 	const handleDelete = useBackendDataGridDeleteHandler(props, refreshGrid);
-	const getRowLabel = useBackendDataGridRowLabel(model, getRecordLabel);
+	const getRowLabel = useBackendDataGridRowLabel(model, props.getRowLabel);
 
 	return (
 		<DataGrid

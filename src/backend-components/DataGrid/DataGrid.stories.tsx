@@ -205,6 +205,10 @@ export const Issue3506Item9InlineCheckboxIsNamed: StoryObj = {
 	play: async ({ canvas, canvasElement }) => {
 		await expect(await canvas.findByText("Alice")).toBeVisible();
 		await waitFor(() => expect(inlineBoxes(canvasElement)).toHaveLength(3));
+		// named after the field and the row, not the column alone
+		await expect(inlineBoxes(canvasElement)[0]).toHaveAccessibleName(
+			"Active, Alice",
+		);
 	},
 };
 

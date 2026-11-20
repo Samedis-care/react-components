@@ -81,11 +81,14 @@ export interface BackendDataGridMultiSelectProps<
 	model: M;
 	/**
 	 * The text that identifies a row to assistive technology, e.g. a person's
-	 * name: the row's checkbox is named after it ("Select Carol Jones").
+	 * name: the row's checkbox is named after it ("Select Carol Jones") and a
+	 * control edited in a cell is named after it and its field
+	 * ("Active, Carol Jones").
 	 * Defaults to DataGridProps.getRowLabel's default: the text the first
 	 * visible text column shows.
 	 * @param record The row's record, as the model's index returned it
-	 * @return The label; an empty string names the checkbox "Select row"
+	 * @return The label; an empty string names the checkbox "Select row" and
+	 *         leaves a control edited in a cell named after its field alone
 	 */
 	getRowLabel?: (record: ModelRecord<M>) => string;
 	/**
@@ -219,11 +222,7 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 						rowsTotal: reportsFiltered ? dataMeta.totalRows : matchCount,
 						rowsFiltered: reportsFiltered ? matchCount : undefined,
 						rows: [...relationshipRecordsFiltered, ...dataRecords].map(
-							renderDataGridRecordUsingModel(
-								model,
-								refreshGrid,
-								getRecordLabel,
-							),
+							renderDataGridRecordUsingModel(model, refreshGrid),
 						),
 					};
 				}}

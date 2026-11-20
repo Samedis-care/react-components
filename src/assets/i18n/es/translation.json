@@ -344,6 +344,7 @@
 				}
 			},
 			"inline-edit": {
+				"cell-control-label": "{{FIELD}}, {{ROW}}",
 				"error-dialog": {
 					"message": "No se guardó el cambio en «{{LABEL}}»: {{ERROR}}"
 				}

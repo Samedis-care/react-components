@@ -33,6 +33,7 @@ import {
 	ModelVisibilityGridViewHidden,
 	PageVisibility,
 } from "../../../src/backend-integration";
+import { RowLabelContext } from "../../../src/standalone/DataGrid/Content/RowLabel";
 import BackendError from "../../../src/backend-integration/Connector/BackendError";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import ccI18n from "../../../src/i18n";
@@ -195,6 +196,16 @@ const rowOf = async (
 /** Renders one cell of a row the way the grid does: inside the Framework */
 const renderCell = (cell: unknown) =>
 	render(<Framework>{cell as React.ReactElement}</Framework>);
+
+/** Renders one cell of a row, inside a grid cell that provides the row's label */
+const renderCellWithRowLabel = (cell: unknown, rowLabel: string) =>
+	render(
+		<Framework>
+			<RowLabelContext.Provider value={() => rowLabel}>
+				{cell as React.ReactElement}
+			</RowLabelContext.Provider>
+		</Framework>,
+	);
 
 /** The part of Node's process this file uses (the test config has no Node types) */
 interface RejectionEvents {
@@ -475,23 +486,13 @@ describe("renderDataGridRecordUsingModel", () => {
 	it("[ISSUE-3506-ITEM-9] names an inline checkbox by its field's label", async () => {
 		const { model } = makeModel();
 		renderCell((await rowOf(model)).active);
-		expect(screen.getByRole("checkbox")).toHaveAccessibleName(/Active/);
+		expect(screen.getByRole("checkbox")).toHaveAccessibleName("Active");
 	});
 
-	it("[ISSUE-3506-ITEM-9] an inline checkbox also names its row: getRowLabel when given, else the first visible text field", async () => {
+	it("[ISSUE-3506-ITEM-9] an inline checkbox also names the row its cell is in", async () => {
 		const { model } = makeModel();
-		renderCell((await rowOf(model)).active);
+		renderCellWithRowLabel((await rowOf(model)).active, "One");
 		expect(screen.getByRole("checkbox")).toHaveAccessibleName("Active, One");
-		cleanup();
-
-		const [record] = (await model.index({ page: 1, rows: 25 }))[0];
-		const row = renderDataGridRecordUsingModel(
-			model,
-			vi.fn(),
-			(entry) => `row ${entry.id}`,
-		)(record) as Record<string, unknown>;
-		renderCell(row.active);
-		expect(screen.getByRole("checkbox")).toHaveAccessibleName("Active, row 1");
 	});
 
 	it("[ISSUE-3506-ITEM-9] names the UIKit renderer's inline checkbox too", async () => {
@@ -519,7 +520,7 @@ describe("renderDataGridRecordUsingModel", () => {
 			},
 			new MockConnector([{ id: "1", title: "One", active: true }]),
 		);
-		renderCell((await rowOf(model)).active);
+		renderCellWithRowLabel((await rowOf(model)).active, "One");
 		expect(screen.getByRole("checkbox")).toHaveAccessibleName("Active, One");
 	});
 });

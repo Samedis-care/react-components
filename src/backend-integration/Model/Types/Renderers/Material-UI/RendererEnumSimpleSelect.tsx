@@ -21,6 +21,7 @@ class RendererEnumSelect<T extends string = string> extends TypeEnum<T> {
 			field,
 			value,
 			label,
+			gridCellLabel,
 			handleChange,
 			handleBlur,
 			errorMsg,
@@ -47,9 +48,11 @@ class RendererEnumSelect<T extends string = string> extends TypeEnum<T> {
 		if (visibility.editable) {
 			// the combobox is a div, which a label's htmlFor cannot reach: it and its list of
 			// options point at the label by id, else (no form behind them, e.g. a data grid
-			// cell) take its text
+			// cell) take its text, and in a grid cell the field and row label
 			const labelId = id && `${id}-label`;
-			const nameProps = labelId ? undefined : { "aria-label": label };
+			const nameProps = labelId
+				? undefined
+				: { "aria-label": gridCellLabel ?? label };
 			return (
 				<FormControlFieldsetCC
 					component={"fieldset"}

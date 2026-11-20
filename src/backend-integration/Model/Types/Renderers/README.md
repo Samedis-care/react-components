@@ -52,7 +52,8 @@ class RendererYourType extends ModelDataTypeYourType {
 		}
 		// if the visibility is editable we show the edit control and an validation error message display (FormHelperText)
 		if (visibility.editable) {
-			// you can implement your own editable grid renderer here, no need to show labels in that case
+			// you can implement your own editable grid renderer here; a cell has no label
+			// element, so name the control with gridCellLabel ?? label instead
 			if (visibility.grid) throw new Error("Not supported");
 
 			return (
@@ -119,5 +120,10 @@ do that on their own. A control the label cannot point at, such as MUI's `Select
 combobox is a `div`, points at the label instead: give the label the id `` `${id}-label` `` and
 the control `labelId` (or `aria-labelledby`) with it, and where `id` is undefined, give the
 control `aria-label={label}`. `RendererEnumSimpleSelect` does both.
+
+In a data grid cell nothing labels the control but `gridCellLabel` (or `label` where there
+is none): give it to the control as `aria-label`, i.e. `gridCellLabel ?? label`. It is the
+field's label and the row's label ("Active, Carol Jones"), so a screen reader user can tell
+the rows apart.
 
 If you implement an editable grid control you need to make sure that handleChange is only called when needed. Calling handleChange will send a update request to the backend and refresh the grid.
