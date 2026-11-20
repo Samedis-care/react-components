@@ -107,6 +107,15 @@ const MIXED_SEPARATORS: [string, string][] = [
 	["en", "1.234,5"],
 ];
 
+/** text without a digit that the user typed in place of a number */
+const TEXT_WITHOUT_NUMBER: [string, string][] = [
+	["en", "abc"],
+	["de", "x"],
+	// a minus or separators without their digits
+	["en", "-"],
+	["de", ".."],
+];
+
 describe("IntegerInputField", () => {
 	it("[ISSUE-3484-ITEM-8] does not join the digits on both sides of a decimal separator", () => {
 		const onValue: ValueSpy = vi.fn();
@@ -706,6 +715,82 @@ describe("CurrencyInput", () => {
 				);
 			},
 		);
+
+		it("[ISSUE-3484-ITEM-21] flags text without a number instead of silently clearing the amount", () => {
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={3} onValue={onValue}>
+					{(value, onChange) => (
+						<CurrencyInput
+							label="Amount"
+							currency="EUR"
+							value={value}
+							onChange={onChange}
+						/>
+					)}
+				</Controlled>,
+			);
+			fireEvent.change(field("Amount"), { target: { value: "abc" } });
+			fireEvent.blur(field("Amount"));
+			expect(field("Amount")).toHaveAttribute("aria-invalid", "true");
+		});
+
+		it.each(TEXT_WITHOUT_NUMBER)(
+			"[ISSUE-3484-ITEM-21] keeps the amount and says why for %s text %j without a number",
+			async (lng, text) => {
+				await setLanguage(lng);
+				const onValue: ValueSpy = vi.fn();
+				render(
+					<Controlled initial={3} onValue={onValue}>
+						{(value, onChange) => (
+							<CurrencyInput
+								label="Amount"
+								currency="EUR"
+								value={value}
+								onChange={onChange}
+							/>
+						)}
+					</Controlled>,
+				);
+				fireEvent.change(field("Amount"), { target: { value: text } });
+				fireEvent.blur(field("Amount"));
+				expect(reported(onValue)).toEqual([]);
+				expect(field("Amount")).toHaveValue(text);
+				expect(field("Amount")).toHaveAttribute("aria-invalid", "true");
+				expect(field("Amount")).toHaveAccessibleDescription(
+					invalidMessage(lng, fmt(lng, 1234.56, EUR)),
+				);
+			},
+		);
+
+		it.each([
+			["en", "€"],
+			["de", " €"],
+			["en", " "],
+		])(
+			"[ISSUE-3484-ITEM-21] empties the amount when only %s text %j is left",
+			async (lng, text) => {
+				await setLanguage(lng);
+				const onValue: ValueSpy = vi.fn();
+				render(
+					<Controlled initial={3} onValue={onValue}>
+						{(value, onChange) => (
+							<CurrencyInput
+								label="Amount"
+								currency="EUR"
+								value={value}
+								onChange={onChange}
+							/>
+						)}
+					</Controlled>,
+				);
+				fireEvent.change(field("Amount"), { target: { value: text } });
+				fireEvent.blur(field("Amount"));
+				expect(reported(onValue)).toEqual([null]);
+				expect(field("Amount")).toHaveValue("");
+				expect(field("Amount")).toHaveAttribute("aria-invalid", "false");
+			},
+		);
 	});
 });
 
@@ -1045,7 +1130,6 @@ describe("DecimalInputField", () => {
 			["en", "-3.5", -3.5],
 			["en", "-5", -5],
 			["en", "-.5", -0.5],
-			["en", "-", null],
 			["en", "-0", 0],
 			["de", "-1.234,5", -1234.5],
 			["de", "-7.5", -7.5],
@@ -1227,6 +1311,51 @@ describe("DecimalInputField", () => {
 				const onValue: ValueSpy = vi.fn();
 				render(
 					<Controlled initial={1234} onValue={onValue}>
+						{(value, onChange) => (
+							<DecimalInputField
+								label="Hours"
+								value={value}
+								onChange={onChange}
+							/>
+						)}
+					</Controlled>,
+				);
+				fireEvent.change(field("Hours"), { target: { value: text } });
+				fireEvent.blur(field("Hours"));
+				expect(reported(onValue)).toEqual([]);
+				expect(field("Hours")).toHaveValue(text);
+				expect(field("Hours")).toHaveAttribute("aria-invalid", "true");
+				expect(field("Hours")).toHaveAccessibleDescription(
+					invalidMessage(lng, fmt(lng, 1234.56)),
+				);
+			},
+		);
+
+		it("[ISSUE-3484-ITEM-21] flags text without a number instead of keeping it over an empty value", () => {
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={null} onValue={onValue}>
+					{(value, onChange) => (
+						<DecimalInputField
+							label="Hours"
+							value={value}
+							onChange={onChange}
+						/>
+					)}
+				</Controlled>,
+			);
+			fireEvent.change(field("Hours"), { target: { value: "abc" } });
+			fireEvent.blur(field("Hours"));
+			expect(field("Hours")).toHaveAttribute("aria-invalid", "true");
+		});
+
+		it.each(TEXT_WITHOUT_NUMBER)(
+			"[ISSUE-3484-ITEM-21] keeps the value and says why for %s text %j without a number",
+			async (lng, text) => {
+				await setLanguage(lng);
+				const onValue: ValueSpy = vi.fn();
+				render(
+					<Controlled initial={3} onValue={onValue}>
 						{(value, onChange) => (
 							<DecimalInputField
 								label="Hours"

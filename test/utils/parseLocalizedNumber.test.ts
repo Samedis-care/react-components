@@ -137,7 +137,6 @@ describe("parseLocalizedNumber", () => {
 
 	it.each<[string, string, number | null]>([
 		["fr", "\u22121 234,5", -1234.5],
-		["en", "-", null],
 		["en", "-.", NaN],
 		["en", "-0", 0],
 		["en", "-0.00", 0],
@@ -176,12 +175,40 @@ describe("parseLocalizedNumber", () => {
 		["en", "1,234.5", 1234.5],
 		["en", "1,234,567", 1234567],
 		["en-IN", "12,34,567.5", 1234567.5],
-		// a single one keeps its rule, and text without a digit isn't affected
+		// a single one keeps its rule
 		["de", "1.234", 1234],
 		["en", "1.234", 1.234],
-		["de", "..", null],
 	])(
 		"[ISSUE-3484-ITEM-5] reads %s text %j as %s",
+		async (locale, text, expected, options) => {
+			await ccI18n.changeLanguage(locale);
+			expect(parseLocalizedNumber(text, options)).toBe(expected);
+		},
+	);
+
+	it.each<[string, string, number | null, Intl.NumberFormatOptions?]>([
+		// text without a digit is no number
+		["en", "abc", NaN],
+		["en", "abc", NaN, EUR],
+		["de", "x €", NaN, EUR],
+		["en", "EUR", NaN, EUR],
+		["en", "%", NaN],
+		["en", "-", NaN],
+		["en", "-€", NaN, EUR],
+		["de", "..", NaN],
+		// unless nothing but blanks and the format's own symbols are left
+		["en", "", null],
+		["en", " \u00a0", null],
+		["en", "€", null, EUR],
+		["de", " €", null, EUR],
+		["nl", "€\u00a0", null, EUR],
+		["de-CH", "CHF", null, { style: "currency", currency: "CHF" }],
+		["uz", "soʻm", null, { style: "currency", currency: "UZS" }],
+		["en", "Cg.", null, { style: "currency", currency: "XCG" }],
+		["en", "%", null, { style: "percent" }],
+		["de", "kg", null, { style: "unit", unit: "kilogram" }],
+	])(
+		"[ISSUE-3484-ITEM-21] reads %s text %j without a digit as %s",
 		async (locale, text, expected, options) => {
 			await ccI18n.changeLanguage(locale);
 			expect(parseLocalizedNumber(text, options)).toBe(expected);
