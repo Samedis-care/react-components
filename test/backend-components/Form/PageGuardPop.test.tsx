@@ -7,6 +7,7 @@ import {
 	render,
 	screen,
 	waitFor,
+	within,
 } from "@testing-library/react";
 import { Tab } from "@mui/material";
 import { createBrowserHistory } from "history";
@@ -25,9 +26,13 @@ import {
 } from "../../../src/non-standalone/RoutedTabs";
 import {
 	findLeavePrompt,
+	leavePrompts,
+	LOAD,
 	makeDirty,
+	makePage,
 	makePeopleModel,
 	PeopleModel,
+	saveButton,
 	setupPageTests,
 	TestCustomProps,
 	wait,
@@ -163,6 +168,80 @@ describe("Form page leave guard with the browser history", () => {
 			expect(history.location.pathname).toBe("/rec/more");
 			expect(screen.queryByText("OTHER PAGE")).not.toBeInTheDocument();
 		} finally {
+			unmount();
+			await wait(20);
+			window.history.replaceState(null, "", startUrl);
+		}
+	});
+
+	it("[ISSUE-3503-ITEM-3] browser Back out of a page with two dirty forms asks once, and Yes goes back once", async () => {
+		const startUrl = window.location.pathname;
+		window.history.replaceState(null, "", "/list");
+		const history = createBrowserHistory();
+		setFrameworkHistory(history);
+		history.push("/rec");
+		const InnerPage = makePage();
+		const innerModel = makePeopleModel();
+		const Inner = () => (
+			<Form
+				model={innerModel}
+				id={"2"}
+				errorComponent={DefaultErrorComponent}
+				customProps={{ goBack: () => {} }}
+				disableRouting
+			>
+				{InnerPage}
+			</Form>
+		);
+		const OuterPage = makePage({}, <Inner />);
+		let pops = 0;
+		const onPop = () => pops++;
+		const { unmount } = render(
+			<Framework>
+				<Routes>
+					{[
+						<Route key="list" path="/list" element={<div>LIST PAGE</div>} />,
+						<Route
+							key="rec"
+							path="/rec/*"
+							element={
+								<Form
+									model={makePeopleModel()}
+									id={"1"}
+									errorComponent={DefaultErrorComponent}
+									customProps={{ goBack: () => {} }}
+								>
+									{OuterPage}
+								</Form>
+							}
+						/>,
+					]}
+				</Routes>
+			</Framework>,
+		);
+		try {
+			const outer = await screen.findByDisplayValue("Alice", undefined, LOAD);
+			const inner = await screen.findByDisplayValue("Bob", undefined, LOAD);
+			fireEvent.change(outer, { target: { value: "AliceX" } });
+			fireEvent.change(inner, { target: { value: "BobX" } });
+			await waitFor(() => expect(saveButton()).toBeEnabled());
+
+			window.addEventListener("popstate", onPop);
+			act(() => window.history.back());
+			const prompt = await findLeavePrompt();
+			await wait(20);
+			expect(leavePrompts()).toHaveLength(1);
+			expect(history.location.pathname).toBe("/rec");
+
+			fireEvent.click(within(prompt).getByRole("button", { name: "Yes" }));
+			expect(await screen.findByText("LIST PAGE")).toBeInTheDocument();
+			// bounded: a guard that blocks again before the retried POP has arrived reverts it
+			await wait(300);
+			expect(pops, "popstate events after one browser Back").toBeLessThan(5);
+			expect(history.location.pathname).toBe("/list");
+			expect(window.location.pathname).toBe("/list");
+		} finally {
+			window.removeEventListener("popstate", onPop);
 			unmount();
 			await wait(20);
 			window.history.replaceState(null, "", startUrl);

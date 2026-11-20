@@ -10,7 +10,7 @@ import {
 	within,
 } from "@testing-library/react";
 import { createMemoryHistory } from "history";
-import { Framework } from "../../../src/framework";
+import { Framework, useDialogContext } from "../../../src/framework";
 import {
 	FrameworkHistory,
 	setFrameworkHistory,
@@ -26,6 +26,7 @@ import BasicFormPage, {
 } from "../../../src/backend-components/Form/BasicFormPage";
 import { ModelUnknown } from "../../../src/backend-integration";
 import DefaultErrorComponent from "../../../src/backend-components/Form/DefaultErrorComponent";
+import FormDialog from "../../../src/backend-components/Form/FormDialog";
 import Routes from "../../../src/standalone/Routes/Routes";
 import Route from "../../../src/standalone/Routes/Route";
 import {
@@ -44,6 +45,7 @@ import {
 	setupPageTests,
 	TestCustomProps,
 	unloadIsBlocked,
+	wait,
 } from "./pageFixture";
 
 setupPageTests();
@@ -158,6 +160,275 @@ describe("Form page leave guard", () => {
 		expect(history.location.pathname).toBe("/other");
 		expect(leavePrompts()).toHaveLength(0);
 		expect(screen.getByDisplayValue("AliceX")).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3503-ITEM-3] a dirty form in a FullFormDialog: leaving gives one prompt or one alert, not both", async () => {
+		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
+		const { open } = mountDialogPage(FieldPage);
+		const input = await open();
+		fireEvent.change(input, { target: { value: "AliceX" } });
+		await waitFor(() => expect(saveButton()).toBeEnabled());
+		await navigate("/other");
+		await wait(20);
+		expect(
+			alert.mock.calls.length + leavePrompts().length,
+			`alerts: ${alert.mock.calls.length}, leave prompts: ${leavePrompts().length}`,
+		).toBe(1);
+	});
+
+	it("[ISSUE-3503-ITEM-3] two dirty form pages, one inside the other: leaving asks once", async () => {
+		const InnerPage = makePage();
+		const Inner = () => (
+			<Form
+				model={makePeopleModel()}
+				id={"2"}
+				errorComponent={DefaultErrorComponent}
+				customProps={{ goBack: () => {} }}
+				disableRouting
+			>
+				{InnerPage}
+			</Form>
+		);
+		const OuterPage = makePage({}, <Inner />);
+		mountPage(OuterPage);
+		const outer = await screen.findByDisplayValue("Alice", undefined, LOAD);
+		const inner = await screen.findByDisplayValue("Bob", undefined, LOAD);
+		fireEvent.change(outer, { target: { value: "AliceX" } });
+		fireEvent.change(inner, { target: { value: "BobX" } });
+		await waitFor(() => expect(saveButton()).toBeEnabled());
+		await wait(20);
+		await navigate("/other");
+		await findLeavePrompt();
+		expect(leavePrompts()).toHaveLength(1);
+	});
+
+	it("[ISSUE-3503-ITEM-3] two dirty form pages, one inside the other: after No both stay guarded, after Yes the page is left", async () => {
+		const InnerPage = makePage();
+		const innerModel = makePeopleModel();
+		const Inner = () => (
+			<Form
+				model={innerModel}
+				id={"2"}
+				errorComponent={DefaultErrorComponent}
+				customProps={{ goBack: () => {} }}
+				disableRouting
+			>
+				{InnerPage}
+			</Form>
+		);
+		const { history } = mountPage(makePage({}, <Inner />));
+		const outer = await screen.findByDisplayValue("Alice", undefined, LOAD);
+		const inner = await screen.findByDisplayValue("Bob", undefined, LOAD);
+		fireEvent.change(outer, { target: { value: "AliceX" } });
+		fireEvent.change(inner, { target: { value: "BobX" } });
+		await waitFor(() => expect(saveButton()).toBeEnabled());
+
+		await navigate("/other");
+		fireEvent.click(
+			within(await findLeavePrompt()).getByRole("button", { name: "No" }),
+		);
+		await waitFor(() => expect(leavePrompts()).toHaveLength(0));
+		expect(history.location.pathname).toBe("/page");
+
+		// the outer form is clean again, the inner one still has its edit
+		fireEvent.change(outer, { target: { value: "Alice" } });
+		await navigate("/other");
+		expect(history.location.pathname, "the inner edit is guarded").toBe(
+			"/page",
+		);
+		expect(leavePrompts()).toHaveLength(1);
+		fireEvent.click(
+			within(await findLeavePrompt()).getByRole("button", { name: "Yes" }),
+		);
+		await waitFor(() => expect(history.location.pathname).toBe("/other"));
+		expect(leavePrompts()).toHaveLength(0);
+	});
+
+	it("[ISSUE-3503-ITEM-3] a dirty form page and a dirty form in a FullFormDialog opened from it: leaving asks once", async () => {
+		const InnerPage = makePage();
+		const innerModel = makePeopleModel();
+		const DialogForm = () => {
+			const [, popDialog] = useDialogContext();
+			return (
+				<FormDialog dialogTitle={"Inner record"}>
+					<Form
+						model={innerModel}
+						id={"2"}
+						errorComponent={DefaultErrorComponent}
+						customProps={{ goBack: popDialog }}
+						disableRouting
+					>
+						{InnerPage}
+					</Form>
+				</FormDialog>
+			);
+		};
+		const PushButton = () => {
+			const [pushDialog] = useDialogContext();
+			return (
+				<button type={"button"} onClick={() => pushDialog(<DialogForm />)}>
+					Open inner record
+				</button>
+			);
+		};
+		const { history } = mountPage(makePage({}, <PushButton />));
+		await makeDirty();
+		fireEvent.click(screen.getByRole("button", { name: "Open inner record" }));
+		const inner = await screen.findByDisplayValue("Bob", undefined, LOAD);
+		fireEvent.change(inner, { target: { value: "BobX" } });
+		const dialog = screen.getByRole("dialog", { name: "Inner record" });
+		await waitFor(() =>
+			expect(
+				within(dialog).getByRole("button", { name: "Save" }),
+			).toBeEnabled(),
+		);
+
+		await navigate("/other");
+		await findLeavePrompt();
+		expect(leavePrompts()).toHaveLength(1);
+		expect(history.location.pathname).toBe("/page");
+	});
+
+	it("[ISSUE-3503-ITEM-3] a navigation while the leave prompt is open adds no prompt, and Yes goes where the last one led", async () => {
+		const { history } = mountPage(FieldPage);
+		await makeDirty();
+		await navigate("/first");
+		await findLeavePrompt();
+		await navigate("/second");
+		expect(leavePrompts()).toHaveLength(1);
+		fireEvent.click(
+			within(await findLeavePrompt()).getByRole("button", { name: "Yes" }),
+		);
+		await waitFor(() => expect(history.location.pathname).toBe("/second"));
+		expect(history.index, "one history entry was added").toBe(1);
+		expect(leavePrompts()).toHaveLength(0);
+	});
+
+	it("[ISSUE-3503-ITEM-3] Yes on a navigation that another history blocker stops keeps the form guarded", async () => {
+		const { history } = mountPage(FieldPage);
+		await makeDirty();
+		const unblockOther = history.block(() => {});
+		await navigate("/other");
+		fireEvent.click(
+			within(await findLeavePrompt()).getByRole("button", { name: "Yes" }),
+		);
+		await waitFor(() => expect(leavePrompts()).toHaveLength(0));
+		expect(history.location.pathname).toBe("/page");
+
+		unblockOther();
+		await navigate("/other");
+		expect(history.location.pathname).toBe("/page");
+		expect(leavePrompts()).toHaveLength(1);
+	});
+
+	it("[ISSUE-3503-ITEM-3] Yes in the prompt of the footer's Back keeps the form guarded when goBack stays on the page", async () => {
+		const goBack = vi.fn();
+		const { history } = mountPage(FieldPage, { goBack });
+		await makeDirty();
+		fireEvent.click(backButton());
+		fireEvent.click(
+			within(await findLeavePrompt()).getByRole("button", { name: "Yes" }),
+		);
+		await waitFor(() => expect(goBack).toHaveBeenCalledTimes(1));
+		await waitFor(() => expect(leavePrompts()).toHaveLength(0));
+
+		await navigate("/other");
+		expect(history.location.pathname).toBe("/page");
+		expect(leavePrompts()).toHaveLength(1);
+	});
+
+	it("[ISSUE-3503-ITEM-3] the inner page's Back, confirmed, asks once about the dirty outer page it leaves too; No keeps the inner form guarded", async () => {
+		const goToList = () => FrameworkHistory.push("/list");
+		const InnerPage = makePage();
+		const innerModel = makePeopleModel();
+		const Inner = () => (
+			<Form
+				model={innerModel}
+				id={"2"}
+				errorComponent={DefaultErrorComponent}
+				customProps={{ goBack: goToList }}
+				disableRouting
+			>
+				{InnerPage}
+			</Form>
+		);
+		const { history } = mountPage(makePage({}, <Inner />));
+		const outer = await screen.findByDisplayValue("Alice", undefined, LOAD);
+		const inner = await screen.findByDisplayValue("Bob", undefined, LOAD);
+		fireEvent.change(outer, { target: { value: "AliceX" } });
+		fireEvent.change(inner, { target: { value: "BobX" } });
+		await waitFor(() => expect(saveButton()).toBeEnabled());
+
+		// the outer page's footer is hidden: this is the inner page's Back
+		fireEvent.click(backButton());
+		const innerPrompt = await findLeavePrompt();
+		fireEvent.click(within(innerPrompt).getByRole("button", { name: "Yes" }));
+		await waitFor(() => expect(leavePrompts()).not.toContain(innerPrompt));
+		await findLeavePrompt();
+		expect(leavePrompts(), "the outer page asks").toHaveLength(1);
+		fireEvent.click(
+			within(await findLeavePrompt()).getByRole("button", { name: "No" }),
+		);
+		await waitFor(() => expect(leavePrompts()).toHaveLength(0));
+		expect(history.location.pathname).toBe("/page");
+
+		// the outer form is clean again, the inner one still has its edit
+		fireEvent.change(outer, { target: { value: "Alice" } });
+		await navigate("/other");
+		expect(history.location.pathname, "the inner edit is guarded").toBe(
+			"/page",
+		);
+		expect(leavePrompts()).toHaveLength(1);
+	});
+
+	it("[ISSUE-3503-ITEM-3] two dirty forms on one routed page: a navigation inside the page adds one history entry", async () => {
+		const InnerPage = makePage();
+		const innerModel = makePeopleModel();
+		const Inner = () => (
+			<Form
+				model={innerModel}
+				id={"2"}
+				errorComponent={DefaultErrorComponent}
+				customProps={{ goBack: () => {} }}
+			>
+				{InnerPage}
+			</Form>
+		);
+		const OuterPage = makePage({}, <Inner />);
+		const history = createMemoryHistory({ initialEntries: ["/rec/1"] });
+		setFrameworkHistory(history);
+		render(
+			<Framework>
+				<Routes>
+					{[
+						<Route
+							key="rec"
+							path="/rec/:id/*"
+							element={
+								<Form
+									model={makePeopleModel()}
+									id={"1"}
+									errorComponent={DefaultErrorComponent}
+									customProps={{ goBack: () => {} }}
+								>
+									{OuterPage}
+								</Form>
+							}
+						/>,
+					]}
+				</Routes>
+			</Framework>,
+		);
+		const outer = await screen.findByDisplayValue("Alice", undefined, LOAD);
+		const inner = await screen.findByDisplayValue("Bob", undefined, LOAD);
+		fireEvent.change(outer, { target: { value: "AliceX" } });
+		fireEvent.change(inner, { target: { value: "BobX" } });
+		await waitFor(() => expect(saveButton()).toBeEnabled());
+
+		await navigate("/rec/1/more");
+		expect(history.location.pathname).toBe("/rec/1/more");
+		expect(history.index, "one history entry was added").toBe(1);
+		expect(leavePrompts()).toHaveLength(0);
 	});
 
 	it("[ISSUE-3500-ITEM-24] a form page on a route /rec/* asks before a path that an entry listed before it takes over (/rec/new)", async () => {

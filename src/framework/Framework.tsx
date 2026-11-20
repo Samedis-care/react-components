@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useState } from "react";
 import Loader from "../standalone/Loader";
 import DialogContextProvider from "./DialogContextProvider";
 import ToastContextProvider from "./ToastContextProvider";
@@ -17,6 +17,7 @@ import MobileScalingFix, {
 	MobileScalingFixProps,
 } from "../standalone/MobileScalingFix";
 import UnsafeToLeave from "./UnsafeToLeave";
+import { NavigationGuard, NavigationGuardContext } from "./NavigationGuard";
 import DragAndDropPrevention from "./DragAndDropPrevention";
 import { StyledEngineProvider } from "@mui/material";
 import HistoryRouter from "../standalone/Routes/HistoryRouter";
@@ -83,6 +84,8 @@ const toastOutlet = <ToastOutlet />;
  * Provides:
  * - react-router instance
  * - dialog context
+ * - one history block for the leave guards of all Forms inside, so that a navigation which
+ *   leaves several dirty forms asks once
  * - toast context (non-blocking notices), whose toasts can use the dialog context
  * - i18n context (for components-care)
  * - react-query cache
@@ -99,6 +102,7 @@ const toastOutlet = <ToastOutlet />;
  * Framework shows its Loader.
  */
 const ComponentsCareFramework = (props: ICompleteFrameworkProps) => {
+	const [navigationGuard] = useState(() => new NavigationGuard());
 	return (
 		<>
 			{!props.disableMobileScalingFix && (
@@ -127,10 +131,15 @@ const ComponentsCareFramework = (props: ICompleteFrameworkProps) => {
 												 beside the children, and the toasts render inside the
 												 DialogContextProvider, so their content can push dialogs */}
 												<ToastContextProvider disableDefaultOutlet>
-													<DialogContextProvider>
-														{props.children}
-														{toastOutlet}
-													</DialogContextProvider>
+													{/* reaches the pushed dialogs too, so the Forms in them share it */}
+													<NavigationGuardContext.Provider
+														value={navigationGuard}
+													>
+														<DialogContextProvider>
+															{props.children}
+															{toastOutlet}
+														</DialogContextProvider>
+													</NavigationGuardContext.Provider>
 												</ToastContextProvider>
 											</HistoryRouter>
 										</UnsafeToLeave>
