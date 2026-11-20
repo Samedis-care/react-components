@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
 	DateTimePicker,
 	DateTimePickerProps,
@@ -16,6 +16,8 @@ import withRequiredSections from "./withRequiredSections";
 import useFieldBlur from "./useFieldBlur";
 import withFieldName from "./withFieldName";
 import calendarNameSlotProps from "./calendarNameSlotProps";
+import calendarFocusRingSlotProps from "./calendarFocusRingSlotProps";
+import OpenPickerButton from "./OpenPickerButton";
 
 /**
  * When the picker opens its desktop popup rather than MUI's mobile dialog: with
@@ -27,6 +29,19 @@ import calendarNameSlotProps from "./calendarNameSlotProps";
 const DESKTOP_MODE_MEDIA_QUERY =
 	"@media (pointer: fine) and (min-width: 600px)";
 
+/**
+ * Props of a date and time picker (MUI's `DateTimePicker` with the `L LT`
+ * format of the current language).
+ *
+ * Keyboard focus shows as a 2px ring in `palette.primary.main` on the button
+ * that opens the calendar and on every control of the open calendar, the
+ * desktop popup and the mobile dialog alike, where MUI shows only a faint
+ * tint or a ripple (see `calendarFocusRingSlotProps`). When the theme sets
+ * MUI's `focusVisible` ring, that ring is the one shown. The ring comes with
+ * the default `slots.openPickerButton`, which a caller's own button replaces,
+ * and goes into `slotProps.layout.sx`, which keeps a caller's layout slot
+ * props and puts a caller's `sx` after it.
+ */
 export interface LocalizedDateTimePickerProps extends Omit<
 	DateTimePickerProps,
 	"format"
@@ -115,6 +130,13 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 		settle();
 		consumerOnOpen?.();
 	}, [settle, consumerOnOpen]);
+	const consumerSlots = otherProps.slots;
+	// the caller's slots come after the open button with its focus ring, so a
+	// button it passes wins
+	const slots = useMemo(
+		() => ({ openPickerButton: OpenPickerButton, ...consumerSlots }),
+		[consumerSlots],
+	);
 	return (
 		<LocalizationProvider localeText={localeText}>
 			<DateTimePicker
@@ -127,6 +149,7 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 				desktopModeMediaQuery={
 					otherProps.desktopModeMediaQuery ?? DESKTOP_MODE_MEDIA_QUERY
 				}
+				slots={slots}
 				slotProps={{
 					...otherProps.slotProps,
 					...calendarNameSlotProps(otherProps.slotProps, {
@@ -136,6 +159,7 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 							otherProps.localeText?.toolbarTitle ??
 							localeText?.dateTimePickerToolbarTitle,
 					}),
+					...calendarFocusRingSlotProps(otherProps.slotProps),
 					textField: (ownerState) => {
 						const orgSlotProps = accessSlotProps(
 							ownerState,

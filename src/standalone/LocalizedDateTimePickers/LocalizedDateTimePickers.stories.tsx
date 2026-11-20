@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, screen, waitFor } from "storybook/test";
+import { expect, screen, waitFor, within } from "storybook/test";
 import i18next from "i18next";
 import LocalizedKeyboardDatePicker from "./LocalizedKeyboardDatePicker";
 import LocalizedDatePicker from "./LocalizedDatePicker";
@@ -423,6 +423,294 @@ const openedPicker = async (
 		).toEqual([]),
 	);
 	return dialog;
+};
+
+/** Relative luminance of an sRGB color given as 0-255 channels */
+const luminance = ([r, g, b]: number[]) => {
+	const channel = (value: number) => {
+		const c = value / 255;
+		return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+	};
+	return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+};
+
+/** A computed rgb()/rgba() color laid over white */
+const overWhite = (color: string) => {
+	const [r, g, b, a = 1] = (color.match(/[\d.]+/g) ?? []).map(Number);
+	return [r, g, b].map((c) => c * a + 255 * (1 - a));
+};
+
+const contrastWithWhite = (color: string) =>
+	1.05 / (luminance(overWhite(color)) + 0.05);
+
+export const Issue3474Item18FocusedDayIsVisible: StoryObj = {
+	name: "ISSUE-3474-ITEM-18: the keyboard focus in the calendar is visible",
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3474-ITEM-18: after an arrow key in the calendar, the focused day differs from the other days only by a 12% tint of the primary color (about 1.2:1 against white) and has no outline. WCAG 1.4.11 asks for at least 3:1.",
+			},
+		},
+	},
+	render: () => (
+		<LocalizedKeyboardDatePicker
+			label="Date"
+			value={moment("2026-08-01")}
+			onChange={() => {}}
+		/>
+	),
+	play: async ({ canvas, userEvent }) => {
+		await openedPicker(canvas, userEvent);
+		await userEvent.keyboard("{ArrowRight}");
+		const focused = document.activeElement as HTMLElement;
+		await expect(focused).toHaveTextContent("2");
+		await expect(focused).toHaveClass("Mui-focusVisible");
+		// the day fades its background in: measure where it ends up
+		await Promise.all(focused.getAnimations().map((anim) => anim.finished));
+
+		// a 2px outline, or a background at 3:1 against the unfocused (white) days
+		const style = getComputedStyle(focused);
+		const outlined =
+			style.outlineStyle !== "none" && parseFloat(style.outlineWidth) >= 2;
+		const contrast = contrastWithWhite(style.backgroundColor);
+		await expect(
+			outlined || contrast >= 3,
+			`focus shown by background ${style.backgroundColor} (${contrast.toFixed(2)}:1 on white) and outline "${style.outlineStyle} ${style.outlineWidth}"`,
+		).toBe(true);
+	},
+};
+
+/** The contrast ratio of two computed colors, each laid over white */
+const contrastBetween = (a: string, b: string) => {
+	const [lighter, darker] = [luminance(overWhite(a)), luminance(overWhite(b))]
+		.sort((x, y) => x - y)
+		.reverse();
+	return (lighter + 0.05) / (darker + 0.05);
+};
+
+/**
+ * How a control shows its keyboard focus once it has it: "a ring" for a 2px
+ * outline at 3:1 against what it is drawn on (the white calendar for a ring
+ * outside the control, the control's own fill for one inside it), otherwise
+ * what it shows instead
+ */
+const focusShownBy = async (control: HTMLElement) => {
+	control.focus();
+	await waitFor(() =>
+		expect(
+			control.matches(
+				".Mui-focusVisible, .MuiYearCalendar-button:focus-visible, .MuiMonthCalendar-button:focus-visible",
+			),
+		).toBe(true),
+	);
+	// a day and a time option fade their background in: measure where it ends up
+	await Promise.all(control.getAnimations().map((anim) => anim.finished));
+	const style = getComputedStyle(control);
+	const drawnOn =
+		parseFloat(style.outlineOffset) < 0
+			? style.backgroundColor
+			: "rgb(255, 255, 255)";
+	if (style.outlineStyle === "none") {
+		return `no outline, background ${style.backgroundColor}`;
+	}
+	const contrast = contrastBetween(style.outlineColor, drawnOn);
+	return style.outlineStyle === "solid" &&
+		parseFloat(style.outlineWidth) >= 2 &&
+		contrast >= 3
+		? "a ring"
+		: `outline "${style.outlineStyle} ${style.outlineWidth}" at ${contrast.toFixed(2)}:1 on ${drawnOn}`;
+};
+
+/** The day button of the open calendar that shows the given day of the month */
+const dayButton = (day: string) =>
+	screen.getAllByRole("gridcell").find((cell) => cell.textContent === day)!;
+
+export const Issue3474Item18EveryControlShowsFocus: StoryObj = {
+	name: "ISSUE-3474-ITEM-18: every control of the date/time popup shows keyboard focus",
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3474-ITEM-18: the open button, the header's view switch and month arrows, the days, the time options and the action bar's buttons each show keyboard focus by a 2px ring at 3:1 against what it is drawn on: outside a button, along the edge of a day, a time option or the view switch (their containers clip), and in the text colour, 2px inside the edge, on a selected day or time option, which is filled in the ring's colour. MUI marks them only by a faint tint or a pulsing ripple (1.2:1 to 1.6:1).",
+			},
+		},
+	},
+	render: () => (
+		<LocalizedDateTimePicker
+			label="Date & time"
+			value={moment("2026-08-12T10:30")}
+			onChange={() => {}}
+		/>
+	),
+	play: async ({ canvas, userEvent }) => {
+		const shown: Record<string, string> = {
+			"open button": await focusShownBy(openButton(canvas)),
+		};
+		await openedPicker(canvas, userEvent);
+		const controls: [string, HTMLElement][] = [
+			[
+				"view switch",
+				screen.getByRole("button", { name: /calendar view is open/ }),
+			],
+			[
+				"previous month",
+				screen.getByRole("button", { name: "Previous month" }),
+			],
+			["next month", screen.getByRole("button", { name: "Next month" })],
+			["day", dayButton("13")],
+			["selected day", dayButton("12")],
+			["hour", screen.getByRole("option", { name: "11 hours" })],
+			["selected hour", screen.getByRole("option", { name: "10 hours" })],
+			["selected meridiem", screen.getByRole("option", { name: "AM" })],
+			["cancel", screen.getByRole("button", { name: "Cancel" })],
+			["ok", screen.getByRole("button", { name: "OK" })],
+		];
+		for (const [name, control] of controls) {
+			shown[name] = await focusShownBy(control);
+		}
+		// all of them in one assertion, so the failure shows each of them
+		await expect(shown).toEqual(
+			Object.fromEntries(Object.keys(shown).map((name) => [name, "a ring"])),
+		);
+	},
+};
+
+export const Issue3474Item18YearsAndMonthsShowFocus: StoryObj = {
+	name: "ISSUE-3474-ITEM-18: the year and month buttons show keyboard focus",
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3474-ITEM-18: a keyboard-focused year or month shows a 2px ring outside it, also the selected one, whose fill MUI only darkens. MUI marks a focused year by a 12% grey tint and a month by 4%.",
+			},
+		},
+	},
+	render: () => (
+		<LocalizedKeyboardDatePicker
+			label="Date"
+			value={moment("2026-08-12")}
+			onChange={() => {}}
+			views={["year", "month", "day"]}
+			openTo="year"
+		/>
+	),
+	play: async ({ canvas, userEvent }) => {
+		await userEvent.click(openButton(canvas));
+		const year = (name: string) => screen.getByRole("radio", { name });
+		await screen.findByRole("radio", { name: "2026" });
+		const shown: Record<string, string> = {
+			year: await focusShownBy(year("2027")),
+			"selected year": await focusShownBy(year("2026")),
+		};
+		// picking a year goes on to the months
+		await userEvent.click(year("2026"));
+		const month = (name: string) => screen.findByRole("radio", { name });
+		shown.month = await focusShownBy(await month("September"));
+		shown["selected month"] = await focusShownBy(await month("August"));
+		await expect(shown).toEqual({
+			year: "a ring",
+			"selected year": "a ring",
+			month: "a ring",
+			"selected month": "a ring",
+		});
+	},
+};
+
+export const Issue3474Item18MobileDialogShowsFocus: StoryObj = {
+	name: "ISSUE-3474-ITEM-18: the controls of the mobile date/time dialog show keyboard focus",
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3474-ITEM-18: in the mobile dialog (here at 320px) the toolbar's buttons, the date and time tabs (ringed inside, clear of the tab indicator) and the action bar's buttons show keyboard focus by a 2px ring, where MUI shows only a pulsing ripple.",
+			},
+		},
+	},
+	render: () => (
+		<LocalizedDateTimePicker
+			label="Date & time"
+			value={moment("2026-08-12T10:30")}
+			onChange={() => {}}
+			fullWidth
+		/>
+	),
+	play: async ({ canvas, userEvent }) => {
+		const dialog = await openedPicker(canvas, userEvent);
+		const button = (name: string) =>
+			within(dialog).getByRole("button", { name });
+		const shown: Record<string, string> = {};
+		for (const [name, control] of [
+			["hours", button("10")],
+			["date tab", within(dialog).getByRole("tab", { name: "pick date" })],
+			["time tab", within(dialog).getByRole("tab", { name: "pick time" })],
+			["selected day", dayButton("12")],
+			["cancel", button("Cancel")],
+			["next", button("Next")],
+		] as const) {
+			shown[name] = await focusShownBy(control);
+		}
+		await expect(shown).toEqual(
+			Object.fromEntries(Object.keys(shown).map((name) => [name, "a ring"])),
+		);
+	},
+};
+
+// an app's theme ring, as MUI's createTheme({ focusVisible }) takes it
+const GREEN_RING = createTheme({
+	focusVisible: { outlineColor: "rgb(0, 128, 0)" },
+});
+
+export const Issue3474Item18ThemeRingIsShown: StoryObj = {
+	name: "ISSUE-3474-ITEM-18: a theme's focusVisible ring is the one shown",
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3474-ITEM-18: a theme that sets MUI's `focusVisible` ring (here `outlineColor: rgb(0, 128, 0)`) styles the focus ring of the open button and of the calendar's controls, as on every MUI button.",
+			},
+		},
+	},
+	decorators: [
+		(Story) => (
+			<ThemeProvider theme={GREEN_RING}>
+				<Story />
+			</ThemeProvider>
+		),
+	],
+	render: () => (
+		<LocalizedKeyboardDatePicker
+			label="Date"
+			value={moment("2026-08-12")}
+			onChange={() => {}}
+		/>
+	),
+	play: async ({ canvas, userEvent }) => {
+		const ringColor = async (control: HTMLElement) => {
+			control.focus();
+			await waitFor(() => expect(control).toHaveClass("Mui-focusVisible"));
+			return getComputedStyle(control).outlineColor;
+		};
+		const colors = { "open button": await ringColor(openButton(canvas)) };
+		await openedPicker(canvas, userEvent);
+		await expect({
+			...colors,
+			day: await ringColor(dayButton("13")),
+			"next month": await ringColor(
+				screen.getByRole("button", { name: "Next month" }),
+			),
+		}).toEqual({
+			"open button": "rgb(0, 128, 0)",
+			day: "rgb(0, 128, 0)",
+			"next month": "rgb(0, 128, 0)",
+		});
+	},
 };
 
 export const Issue3474Item20DateTimePopupFitsPhone: StoryObj = {

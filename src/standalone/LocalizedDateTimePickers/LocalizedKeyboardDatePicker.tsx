@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
 	DatePicker,
 	DatePickerProps,
@@ -17,6 +17,8 @@ import withRequiredSections from "./withRequiredSections";
 import useFieldBlur from "./useFieldBlur";
 import withFieldName from "./withFieldName";
 import calendarNameSlotProps from "./calendarNameSlotProps";
+import calendarFocusRingSlotProps from "./calendarFocusRingSlotProps";
+import OpenPickerButton from "./OpenPickerButton";
 
 /**
  * Props of a date picker typed into with the keyboard (MUI's `DatePicker`
@@ -34,6 +36,15 @@ import calendarNameSlotProps from "./calendarNameSlotProps";
  * valid. A caller that sets `error` (also to `false`) decides the error state
  * and its text itself, and gets no message: to show a text of its own, set
  * `error` from `onError` and pass that text as `helperText`.
+ *
+ * Keyboard focus shows as a 2px ring in `palette.primary.main` on the button
+ * that opens the calendar and on every control of the open calendar, the
+ * desktop popup and the mobile dialog alike, where MUI shows only a faint
+ * tint or a ripple (see `calendarFocusRingSlotProps`). When the theme sets
+ * MUI's `focusVisible` ring, that ring is the one shown. The ring comes with
+ * the default `slots.openPickerButton`, which a caller's own button replaces,
+ * and goes into `slotProps.layout.sx`, which keeps a caller's layout slot
+ * props and puts a caller's `sx` after it.
  */
 export interface LocalizedKeyboardDatePickerProps
 	extends
@@ -117,10 +128,18 @@ const LocalizedKeyboardDatePicker = (
 		"aria-label": ariaLabel,
 		...otherProps
 	} = props;
-	const slotOverrideHideIcon = {
-		...otherProps.slots,
-		openPickerIcon: NoIcon,
-	};
+	const hideIcon = !!otherProps.disabled && !!hideDisabledIcon;
+	const consumerSlots = otherProps.slots;
+	// the caller's slots come after the open button with its focus ring, so a
+	// button it passes wins
+	const slots = useMemo(
+		() => ({
+			openPickerButton: OpenPickerButton,
+			...consumerSlots,
+			...(hideIcon && { openPickerIcon: NoIcon }),
+		}),
+		[consumerSlots, hideIcon],
+	);
 	const localeText = useMuiLocaleData();
 	const draft = usePickerDraft(
 		otherProps.value,
@@ -152,11 +171,7 @@ const LocalizedKeyboardDatePicker = (
 				onChange={draft.onChange}
 				onOpen={handleOpen}
 				onError={validation.onError}
-				slots={
-					otherProps.disabled && hideDisabledIcon
-						? slotOverrideHideIcon
-						: otherProps.slots
-				}
+				slots={slots}
 				slotProps={{
 					...otherProps.slotProps,
 					...calendarNameSlotProps(otherProps.slotProps, {
@@ -166,6 +181,7 @@ const LocalizedKeyboardDatePicker = (
 							otherProps.localeText?.toolbarTitle ??
 							localeText?.datePickerToolbarTitle,
 					}),
+					...calendarFocusRingSlotProps(otherProps.slotProps),
 					textField: (ownerState) => {
 						const textFieldProps = accessSlotProps(
 							ownerState,
