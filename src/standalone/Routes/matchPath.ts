@@ -30,7 +30,9 @@ export interface PathMatch {
 	 */
 	url: string;
 	/**
-	 * The route parameters
+	 * The route parameters, one per `:name` of the pattern. A name the pattern
+	 * repeats has the value of its last segment: "/t/:id/:id" (the full path of
+	 * ":id" nested in "/t/:id/*") gives `{ id: "R9" }` at "/t/T1/R9".
 	 * Each value is its location segment percent-decoded, as `decodeURIComponent`
 	 * decodes it: "foo bar" for "foo%20bar", "a/b" for "a%2Fb" (an encoded slash
 	 * stays inside its param). A segment with a malformed escape ("100%") is

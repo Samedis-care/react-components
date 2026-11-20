@@ -174,6 +174,38 @@ describe("useParams", () => {
 		expect(screen.getByText("ÜBER")).toBeInTheDocument();
 		window.history.replaceState(null, "", "/");
 	});
+
+	/** a parent route "/t/:<param>/*" whose element nests a route ":id" */
+	const nested = (parentParam: string) => (
+		<Routes>
+			{[
+				<Route
+					key="t"
+					path={`/t/:${parentParam}/*`}
+					element={
+						<>
+							<Info id="parent" />
+							<Routes>
+								{[<Route key="r" path=":id" element={<Info id="nested" />} />]}
+							</Routes>
+						</>
+					}
+				/>,
+			]}
+		</Routes>
+	);
+
+	it("[ISSUE-3475-ITEM-18] gives a nested param the nearest Route's value, and the parent's element the parent's", () => {
+		renderAt("/t/T1/R9", nested("id"));
+		expect(infoOf("nested").params).toEqual({ id: "R9" });
+		expect(infoOf("parent").params).toEqual({ id: "T1" });
+	});
+
+	it("[ISSUE-3475-ITEM-18] gives a nested Route the params of its parents that have other names", () => {
+		renderAt("/t/T1/R9", nested("tenantId"));
+		expect(infoOf("nested").params).toEqual({ tenantId: "T1", id: "R9" });
+		expect(infoOf("parent").params).toEqual({ tenantId: "T1" });
+	});
 });
 
 describe("RouteContext rendersAt", () => {

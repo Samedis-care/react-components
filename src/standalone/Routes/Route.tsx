@@ -9,6 +9,8 @@ export interface RouteProps {
 	/**
 	 * Path of the route. Nested in another Route it is relative to that
 	 * Route's path: "info" under "/devices/*" or "/devices" is "/devices/info".
+	 * A `:name` param named like a param of a Route around it hides that
+	 * Route's value in `useParams` below this Route.
 	 */
 	path: string;
 	/**

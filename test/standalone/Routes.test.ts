@@ -100,6 +100,16 @@ describe("matchPath – named parameters", () => {
 	it("returns null when a param segment is missing", () => {
 		expect(matchPath({ path: "/users/:id/settings" }, "/users")).toBeNull();
 	});
+
+	it("[ISSUE-3475-ITEM-18] gives a repeated param name the value of its last segment", () => {
+		// the full path of ":id" nested in "/t/:id/*"
+		expect(matchPath({ path: "/t/:id/:id" }, "/t/T1/R9")?.params).toEqual({
+			id: "R9",
+		});
+		expect(matchPath({ path: "/a/:x/b/:x/*" }, "/a/1/b/2/c")?.params).toEqual({
+			x: "2",
+		});
+	});
 });
 
 describe("matchPath – case sensitivity", () => {
