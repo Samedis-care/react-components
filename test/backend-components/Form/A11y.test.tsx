@@ -273,4 +273,39 @@ describe("Form accessibility: bugs", () => {
 			expect(within(listbox).getAllByRole("option")).toHaveLength(2);
 		},
 	);
+
+	it.each([
+		[
+			"a decimal field",
+			new ModelDataTypeDecimalRendererCC(),
+			".",
+			"Enter a number, such as 1,234.56",
+		],
+		[
+			"a currency field",
+			new ModelDataTypeDecimalCurrencyRendererCC({ currency: "EUR" }),
+			".",
+			"Enter a number, such as €1,234.56",
+		],
+		[
+			"an integer field",
+			new ModelDataTypeIntegerRendererCC(),
+			"99999999999999999",
+			"Enter a number from -9,007,199,254,740,991 to 9,007,199,254,740,991",
+		],
+	] as const)(
+		"[ISSUE-3484-ITEM-33] %s: its own message about the typed text and the form's message both describe it",
+		async (_, type, text, ownMessage) => {
+			const control = await submitProbe(type);
+			expect(control).toHaveAccessibleDescription("Probe is wrong");
+			fireEvent.focus(control);
+			fireEvent.change(control, { target: { value: text } });
+			fireEvent.blur(control);
+			await settle();
+			expect(control).toHaveAttribute("aria-invalid", "true");
+			expect(control).toHaveAccessibleDescription(
+				`${ownMessage} Probe is wrong`,
+			);
+		},
+	);
 });

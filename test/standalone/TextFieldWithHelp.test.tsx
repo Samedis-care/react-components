@@ -289,3 +289,139 @@ describe("TextFieldWithHelp", () => {
 		});
 	});
 });
+
+describe("TextFieldWithHelp: the input's description", () => {
+	it.each([
+		["the field's id", "timeout"],
+		["a generated id", undefined],
+	] as const)(
+		"[ISSUE-3484-ITEM-33] an aria-describedby in slotProps.htmlInput is added after the helper text, with %s",
+		async (_, id) => {
+			wrap(
+				<>
+					<TextFieldWithHelp
+						id={id}
+						label="Timeout"
+						value="30"
+						onChange={noop}
+						helperText="Between 1 and 60"
+						slotProps={{ htmlInput: { "aria-describedby": "unit" } }}
+					/>
+					<span id="unit">seconds</span>
+				</>,
+			);
+			const input = await screen.findByRole("textbox", { name: "Timeout" });
+			if (id) expect(input.id).toBe(id);
+			expect(input).toHaveAccessibleDescription("Between 1 and 60 seconds");
+		},
+	);
+
+	it("[ISSUE-3484-ITEM-33] keeps the helper text when slotProps.htmlInput is a function", async () => {
+		wrap(
+			<>
+				<TextFieldWithHelp
+					label="Timeout"
+					value="30"
+					onChange={noop}
+					helperText="Between 1 and 60"
+					slotProps={{ htmlInput: () => ({ "aria-describedby": "unit" }) }}
+				/>
+				<span id="unit">seconds</span>
+			</>,
+		);
+		const input = await screen.findByRole("textbox", { name: "Timeout" });
+		expect(input).toHaveAccessibleDescription("Between 1 and 60 seconds");
+	});
+
+	it("[ISSUE-3484-ITEM-33] keeps the helper text in a select's description", async () => {
+		wrap(
+			<>
+				<TextFieldWithHelp
+					label="Status"
+					select
+					value="active"
+					onChange={noop}
+					helperText="Who can see it"
+					slotProps={{ htmlInput: { "aria-describedby": "note" } }}
+				>
+					<MenuItem value="active">Active</MenuItem>
+				</TextFieldWithHelp>
+				<span id="note">Changes apply tomorrow</span>
+			</>,
+		);
+		const combobox = await screen.findByRole("combobox", { name: "Status" });
+		expect(combobox).toHaveAccessibleDescription(
+			"Who can see it Changes apply tomorrow",
+		);
+	});
+
+	it("[ISSUE-3484-ITEM-33] names the helper text once when slotProps.htmlInput already references it", async () => {
+		wrap(
+			<>
+				<span id="unit">seconds</span>
+				<TextFieldWithHelp
+					id="timeout"
+					label="Timeout"
+					value="30"
+					onChange={noop}
+					helperText="Between 1 and 60"
+					slotProps={{
+						htmlInput: { "aria-describedby": "unit timeout-helper-text" },
+					}}
+				/>
+			</>,
+		);
+		const input = await screen.findByRole("textbox", { name: "Timeout" });
+		expect(input).toHaveAttribute(
+			"aria-describedby",
+			"unit timeout-helper-text",
+		);
+	});
+
+	it("[ISSUE-3484-ITEM-33] without helper text only the given ids describe the input, and without them only the helper text", async () => {
+		wrap(
+			<>
+				<TextFieldWithHelp
+					label="Timeout"
+					value="30"
+					onChange={noop}
+					slotProps={{ htmlInput: { "aria-describedby": "unit" } }}
+				/>
+				<span id="unit">seconds</span>
+				<TextFieldWithHelp
+					label="Retries"
+					value="3"
+					onChange={noop}
+					helperText="At most 5"
+				/>
+			</>,
+		);
+		expect(
+			await screen.findByRole("textbox", { name: "Timeout" }),
+		).toHaveAttribute("aria-describedby", "unit");
+		expect(
+			screen.getByRole("textbox", { name: "Retries" }),
+		).toHaveAccessibleDescription("At most 5");
+	});
+
+	it.each([
+		["an empty", ""],
+		["an undefined", undefined],
+	] as const)(
+		"[ISSUE-3484-ITEM-33] %s aria-describedby in slotProps.htmlInput keeps the helper text",
+		async (_, describedBy) => {
+			wrap(
+				<TextFieldWithHelp
+					label="Retries"
+					value="3"
+					onChange={noop}
+					helperText="At most 5"
+					slotProps={{ htmlInput: { "aria-describedby": describedBy } }}
+				/>,
+			);
+			expect(
+				await screen.findByRole("textbox", { name: "Retries" }),
+			).toHaveAccessibleDescription("At most 5");
+		},
+	);
+});

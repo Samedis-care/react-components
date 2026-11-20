@@ -1,4 +1,10 @@
-import React, { ForwardedRef, useCallback, useRef, useState } from "react";
+import React, {
+	ForwardedRef,
+	useCallback,
+	useId,
+	useRef,
+	useState,
+} from "react";
 import {
 	IconButton,
 	InputAdornment,
@@ -47,6 +53,13 @@ export interface TextFieldWithHelpProps extends UIInputProps {
 export const UiKitTextFieldWithState = withMuiFieldState(
 	UiKitTextField,
 ) as typeof UiKitTextField;
+/**
+ * MUI's `TextField` with an optional info button, a Clear button on touch devices and the
+ * field states of {@link withMuiFieldState} (`warning`, `dirty`).
+ *
+ * An `aria-describedby` in `slotProps.htmlInput` describes the input after the helper text,
+ * where MUI's `TextField` would let it replace the helper text's id.
+ */
 const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 	props: TextFieldWithHelpProps & TextFieldProps,
 	ref: ForwardedRef<HTMLDivElement>,
@@ -61,6 +74,14 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 		...muiProps
 	} = props;
 	const { t } = useCCTranslations();
+
+	// MUI's TextField ties the helper text to the input with aria-describedby, which an
+	// aria-describedby in slotProps.htmlInput replaces: the field gets MUI's id (the given
+	// one, else React's) so the helper text's id is known and can be kept
+	const generatedId = useId();
+	const id = muiProps.id ?? generatedId;
+	const helperTextId =
+		muiProps.helperText && id ? `${id}-helper-text` : undefined;
 
 	// handle clear
 
@@ -130,6 +151,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 		<UiKitTextFieldWithState
 			ref={ref}
 			{...muiProps}
+			id={id}
 			warning={warning}
 			dirty={dirty}
 			onChange={handleChange}
@@ -197,14 +219,27 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 						) : undefined,
 					};
 				},
-				htmlInput: (props) => ({
-					...accessSlotProps(props, muiProps.slotProps?.htmlInput),
-					ref: composeRef(
-						inputRef,
-						accessSlotProps(props, muiProps.slotProps?.htmlInput)
-							?.ref as typeof inputRef,
-					),
-				}),
+				htmlInput: (props) => {
+					const htmlInputProps = accessSlotProps(
+						props,
+						muiProps.slotProps?.htmlInput,
+					);
+					const ids =
+						(htmlInputProps?.["aria-describedby"] as string | undefined)
+							?.split(/\s+/)
+							.filter(Boolean) ?? [];
+					return {
+						...htmlInputProps,
+						// the helper text first, as it is shown, then the given ids
+						...(helperTextId && {
+							"aria-describedby": (ids.includes(helperTextId)
+								? ids
+								: [helperTextId, ...ids]
+							).join(" "),
+						}),
+						ref: composeRef(inputRef, htmlInputProps?.ref as typeof inputRef),
+					};
+				},
 				inputLabel: (props) =>
 					({
 						...InputLabelConfig,

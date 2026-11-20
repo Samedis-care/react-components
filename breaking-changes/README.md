@@ -63,6 +63,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-20 | [The touch Clear button leaves focus in the field](2026-11-20-clear-keeps-focus-in-field.md) | behavior |
 | 2026-11-20 | [Text without a number is invalid in the number inputs](2026-11-20-number-inputs-flag-text-without-a-number.md) | behavior |
 | 2026-11-20 | [IntegerInputField's root is its text field, without a wrapper div](2026-11-20-integer-input-field-root-is-its-text-field.md) | behavior |
+| 2026-11-20 | [A text field's helper text stays in its description when slotProps.htmlInput adds to it](2026-11-20-text-field-helper-text-stays-in-description.md) | behavior |
 | 2026-11-20 | [A lazy control's queue keeps the Form dirty when onlySubmitMounted changes while it is shown](2026-11-20-lazy-crud-connector-only-submit-mounted-change.md) | behavior |
 | 2026-11-20 | [A control in a DataGrid cell is named after its field and row](2026-11-20-data-grid-inline-checkbox-names.md) | behavior |
 | 2026-11-20 | [InlineSwitch takes aria props for its switch, and a selector's switch requires switchLabel](2026-11-20-inline-switch-name-and-switch-label.md) | behavior, type |
