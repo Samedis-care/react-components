@@ -10,7 +10,10 @@ import {
 import ModelRenderParams from "../../../RenderParams";
 import TypeEnum, { EnumValue } from "../../TypeEnum";
 import ccI18n from "../../../../../i18n";
-import { FormControlFieldsetCC } from "../../../../../standalone";
+import {
+	FormControlFieldsetCC,
+	labelWithDirtyText,
+} from "../../../../../standalone";
 
 export type WrapButtonFunc = (
 	btn: React.ReactElement,
@@ -87,7 +90,9 @@ class RendererEnumRadio<T extends string = string> extends TypeEnum<T> {
 					warning={!!warningMsg}
 					dirty={dirty}
 				>
-					<FormLabel component={"legend"}>{label}</FormLabel>
+					<FormLabel component={"legend"}>
+						{labelWithDirtyText(label, dirty)}
+					</FormLabel>
 					<RadioGroup
 						id={id}
 						name={field}

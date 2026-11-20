@@ -17,6 +17,9 @@
 		"uikit": {
 			"info": "Plus d'informations",
 			"clear": "Effacer",
+			"field-state": {
+				"dirty": "(modifié)"
+			},
 			"multi-language-input": {
 				"language": "Langue",
 				"language-of": "Langue de {{label}}",

@@ -17,6 +17,9 @@
 		"uikit": {
 			"info": "Meer informatie",
 			"clear": "Wissen",
+			"field-state": {
+				"dirty": "(gewijzigd)"
+			},
 			"multi-language-input": {
 				"language": "Taal",
 				"language-of": "Taal van {{label}}",

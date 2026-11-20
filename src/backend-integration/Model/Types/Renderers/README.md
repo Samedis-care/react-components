@@ -96,8 +96,11 @@ export default RendererYourType;
 `dirty` says the field should be marked as modified — false unless the application asked
 for the marker, so a renderer can always forward it. Hand it to any control built on a MUI
 `FormControl` or `TextField` and the marker — a small blue dot — appears after the label on
-its own. A control that labels itself some other way should render `DirtyMarker` next to its
-label instead. See
+its own. A text field's label also gets the visually hidden "(modified)" that puts the state
+into the field's name; a label the renderer renders itself inside `FormControlCC` or
+`FormControlFieldsetCC` (a legend, a `FormControlLabel`) gets it through
+`labelWithDirtyText(label, dirty)`. A control that labels itself some other way should
+render `DirtyMarker` next to its label instead, which brings the text along. See
 [Showing dirty state](../../../../../docs/FormEngine.md#showing-dirty-state).
 
 `autoFocus` is true while the field mounts if the form should start in it

@@ -9,7 +9,10 @@ import {
 import ModelRenderParams from "../../../RenderParams";
 import TypeBoolean from "../../TypeBoolean";
 import ccI18n from "../../../../../i18n";
-import { FormControlFieldsetCC } from "../../../../../standalone";
+import {
+	FormControlFieldsetCC,
+	labelWithDirtyText,
+} from "../../../../../standalone";
 import focusRing from "../../../../../utils/internal/focusRing";
 
 /**
@@ -104,7 +107,10 @@ class RendererBooleanCheckbox extends TypeBoolean {
 					dirty={dirty}
 					component={"fieldset"}
 				>
-					<FormControlLabel control={control} label={label} />
+					<FormControlLabel
+						control={control}
+						label={labelWithDirtyText(label, dirty)}
+					/>
 					<FormHelperText id={messageId}>
 						{errorMsg || warningMsg}
 					</FormHelperText>

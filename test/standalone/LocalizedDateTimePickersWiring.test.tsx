@@ -439,6 +439,36 @@ describe("accessibility", () => {
 			"off",
 		);
 	});
+
+	it("[ISSUE-3474-ITEM-26] exposes the dirty state, not only a dot", () => {
+		const { rerender } = render(
+			<Wrap>
+				<LocalizedKeyboardDatePicker
+					label="Due"
+					value={moment(STORED)}
+					onChange={vi.fn()}
+					dirty={false}
+				/>
+			</Wrap>,
+		);
+		expect(
+			screen.getByRole("group", { name: "Due", description: "" }),
+		).toBeInTheDocument();
+		rerender(
+			<Wrap>
+				<LocalizedKeyboardDatePicker
+					label="Due"
+					value={moment(STORED)}
+					onChange={vi.fn()}
+					dirty
+				/>
+			</Wrap>,
+		);
+		// the modified state has to show up in the name or the description
+		expect(
+			screen.queryByRole("group", { name: "Due", description: "" }),
+		).toBeNull();
+	});
 });
 
 const PICKERS = [

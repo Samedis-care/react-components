@@ -192,14 +192,83 @@ export const Issue3483Item22DirtyDotAfterEllipsis: Story = {
 				parseFloat(getComputedStyle(label).width),
 			);
 		}
-		// a label that fits keeps the dot 4px after its text
+		// a label that fits keeps the dot 4px after its text: the label's own text, not
+		// the visually hidden text after it that says the field is modified
 		const text = document.createRange();
-		text.selectNodeContents(short);
+		text.selectNodeContents(short.firstChild!);
 		const box = short.getBoundingClientRect();
 		const textEnd =
 			(text.getBoundingClientRect().right - box.left) *
 			(short.offsetWidth / box.width);
 		await expect(dirtyDot(short).left - textEnd).toBeCloseTo(4, 0);
+	},
+};
+
+/** The visually hidden text in a label that says the field is modified */
+const dirtyText = (label: HTMLElement) =>
+	Array.from(label.children).find(
+		(child) => getComputedStyle(child).position === "absolute",
+	)!;
+
+export const Issue3474Item26DirtyStateInTheName: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					'ISSUE-3474-ITEM-26: a modified field says so in its name, not only with the dot: its label ends in a visually hidden "(modified)", so a screen reader reads "Serial (modified)". The text takes no room: the label, the dot and the gap in an outlined field\'s border look as they did.',
+			},
+		},
+	},
+	render: (args) => (
+		<Box sx={{ width: 220, display: "grid", gap: 4 }}>
+			<TextFieldWithHelp {...args} dirty label="Serial" value="x" />
+			<TextFieldWithHelp
+				{...args}
+				variant="outlined"
+				dirty
+				label="Serial"
+				value="x"
+			/>
+			<TextFieldWithHelp
+				{...args}
+				variant="outlined"
+				label="Serial"
+				value="x"
+			/>
+			<Box dir="rtl">
+				<TextFieldWithHelp {...args} dirty label="Serial" value="x" />
+			</Box>
+		</Box>
+	),
+	play: async ({ canvas, canvasElement }) => {
+		await expect(
+			canvas.getAllByRole("textbox", { name: "Serial (modified)" }),
+		).toHaveLength(3);
+		await expect(
+			canvas.getByRole("textbox", { name: "Serial" }),
+		).toBeInTheDocument();
+
+		const labels = Array.from(canvasElement.querySelectorAll("label")).filter(
+			(label) => label.closest("[data-cc-dirty='true']"),
+		);
+		await expect(labels).toHaveLength(3);
+		for (const label of labels) {
+			// within the label's own text, in either direction, so it neither widens the
+			// label nor sticks out of it
+			const own = document.createRange();
+			own.selectNodeContents(label.firstChild!);
+			const textBox = own.getBoundingClientRect();
+			const box = dirtyText(label).getBoundingClientRect();
+			await expect(box.left).toBeGreaterThanOrEqual(textBox.left - 0.5);
+			await expect(box.right).toBeLessThanOrEqual(textBox.right + 0.5);
+		}
+
+		// the border's gap holds a copy of the label: it makes room for the dot only
+		const notches = Array.from(
+			canvasElement.querySelectorAll(".MuiOutlinedInput-notchedOutline legend"),
+		).map((legend) => legend.getBoundingClientRect().width);
+		await expect(notches).toHaveLength(2);
+		await expect(notches[0] - notches[1]).toBeCloseTo(10, 0);
 	},
 };
 

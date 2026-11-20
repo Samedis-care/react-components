@@ -573,7 +573,8 @@ const StyledInlineSwitch = styled(InlineSwitch, {
 
 // the selector renders its label as a sibling of the Autocomplete rather than inside
 // the text field, so the dirty marker has to be attached here: withMuiFieldState matches
-// the label itself ("&.MuiFormLabel-root::after") and swallows the flag on the way
+// the label itself ("&.MuiFormLabel-root::after"), adds the text that says the field is
+// modified to the label's children and swallows the flag on the way
 const StyledLabel = withMuiFieldState(
 	styled(InputLabel, {
 		name: "CcBaseSelector",
@@ -589,6 +590,7 @@ const StyledLabel = withMuiFieldState(
 		width: "max-content",
 		maxWidth: "100%",
 	}),
+	"children",
 );
 
 export interface BaseSelectorIconOwnerState {

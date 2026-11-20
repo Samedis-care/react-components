@@ -17,6 +17,9 @@
 		"uikit": {
 			"info": "Qo'shimcha ma'lumot",
 			"clear": "Tozalash",
+			"field-state": {
+				"dirty": "(o'zgartirilgan)"
+			},
 			"multi-language-input": {
 				"language": "Til",
 				"language-of": "{{label}} tili",

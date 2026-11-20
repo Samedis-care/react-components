@@ -9,7 +9,10 @@ import {
 import ModelRenderParams from "../../../RenderParams";
 import TypeBoolean from "../../TypeBoolean";
 import ccI18n from "../../../../../i18n";
-import { FormControlFieldsetCC } from "../../../../../standalone/UIKit/MuiFieldState";
+import {
+	FormControlFieldsetCC,
+	labelWithDirtyText,
+} from "../../../../../standalone/UIKit/MuiFieldState";
 import addSlotAttributes from "../../../../../utils/internal/addSlotAttributes";
 
 export interface ModelDataTypeBooleanSwitchRendererMUIProps {
@@ -106,7 +109,7 @@ class RendererBooleanSwitch extends TypeBoolean {
 								)}
 							/>
 						}
-						label={label}
+						label={labelWithDirtyText(label, dirty)}
 					/>
 					<FormHelperText id={messageId}>
 						{errorMsg || warningMsg}

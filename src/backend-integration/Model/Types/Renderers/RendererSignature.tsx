@@ -3,7 +3,10 @@ import { FormControl, FormHelperText, FormLabel } from "@mui/material";
 import ModelRenderParams from "../../RenderParams";
 import ccI18n from "../../../../i18n";
 import TypeSignature from "../TypeSignature";
-import { FormControlCC } from "../../../../standalone/UIKit/MuiFieldState";
+import {
+	FormControlCC,
+	labelWithDirtyText,
+} from "../../../../standalone/UIKit/MuiFieldState";
 import SignaturePad from "../../../../non-standalone/SignaturePad/SignaturePad";
 
 export const SignatureNameContext = React.createContext<string | null>(null);
@@ -58,7 +61,7 @@ class RendererSignature extends TypeSignature {
 					onBlur={handleBlur}
 					data-name={field}
 				>
-					<FormLabel id={labelId}>{label}</FormLabel>
+					<FormLabel id={labelId}>{labelWithDirtyText(label, dirty)}</FormLabel>
 					<SignatureNameContext.Consumer>
 						{(signerName) => (
 							<SignaturePad

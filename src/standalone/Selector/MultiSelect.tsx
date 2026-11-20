@@ -157,6 +157,7 @@ const ReadOnlyLabel = withMuiFieldState(
 		transform: "translate(0,0) scale(0.75)",
 		zIndex: "unset",
 	}),
+	"children",
 );
 
 // "No entries" of an empty read-only selector, where an entry's text would be

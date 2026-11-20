@@ -17,6 +17,9 @@
 		"uikit": {
 			"info": "Подробнее",
 			"clear": "Очистить",
+			"field-state": {
+				"dirty": "(изменено)"
+			},
 			"multi-language-input": {
 				"language": "Язык",
 				"language-of": "Язык поля «{{label}}»",

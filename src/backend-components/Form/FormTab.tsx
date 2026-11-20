@@ -190,7 +190,7 @@ const FormTab = (
 				) : (
 					<Label>
 						{label}
-						{dirty && <TabDirtyMarker />}
+						{dirty && <TabDirtyMarker text={false} />}
 						{error && <StyledErrorIcon aria-hidden={"true"} />}
 						{error && (
 							<span id={errorId} hidden>

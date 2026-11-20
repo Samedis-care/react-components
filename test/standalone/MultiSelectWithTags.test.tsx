@@ -155,8 +155,11 @@ describe("MultiSelectWithTags bugs", () => {
 	it("[ISSUE-3488-ITEM-26] names the group field with a translated default, or with groupInputLabel, and its listbox likewise", async () => {
 		renderUi(<Host dirty />);
 		await flush();
-		// the dirty marker does not change the group's name
-		expect(screen.getByRole("group", { name: "Fruits" })).toBeInTheDocument();
+		// the dirty marker's dot adds nothing to the group's name, its hidden text the
+		// state
+		expect(
+			screen.getByRole("group", { name: "Fruits (modified)" }),
+		).toBeInTheDocument();
 		expect(groupField()).toHaveAccessibleName("Add all entries of a group");
 		cleanup();
 		renderUi(<Host groupInputLabel="Add a fruit family" />);

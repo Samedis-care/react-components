@@ -11,7 +11,10 @@ import ModelRenderParams from "../../../RenderParams";
 import TypeEnumMulti from "../../TypeEnumMulti";
 import ccI18n from "../../../../../i18n";
 import { EnumValue } from "../../TypeEnum";
-import { FormControlFieldsetCC } from "../../../../../standalone";
+import {
+	FormControlFieldsetCC,
+	labelWithDirtyText,
+} from "../../../../../standalone";
 
 export type WrapButtonFunc = (
 	btn: React.ReactElement,
@@ -84,7 +87,9 @@ class RendererEnumRadio<T extends string = string> extends TypeEnumMulti<T> {
 					id={id}
 					aria-describedby={describedBy}
 				>
-					<FormLabel component={"legend"}>{label}</FormLabel>
+					<FormLabel component={"legend"}>
+						{labelWithDirtyText(label, dirty)}
+					</FormLabel>
 					<FormGroup
 						onBlur={handleBlur}
 						row={this.horizontal}

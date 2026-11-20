@@ -406,10 +406,12 @@ export const LazyPendingChanges: StoryObj = {
 			el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
 
 		// the control's own label carries the field level dirty marker, which for a
-		// custom field like this one comes from the connector queue rather than the form
+		// custom field like this one comes from the connector queue rather than the form:
+		// its dot, hidden from assistive technology (the text after it says it in words)
 		const labelMarkers = () =>
-			canvasElement.querySelector("legend")?.querySelectorAll("span").length ??
-			0;
+			canvasElement
+				.querySelector("legend")
+				?.querySelectorAll('span[aria-hidden="true"]').length ?? 0;
 
 		const pending = () => canvas.getByTestId("pending").textContent;
 

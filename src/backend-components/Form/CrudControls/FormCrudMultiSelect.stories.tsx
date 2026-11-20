@@ -330,7 +330,10 @@ export const Issue3505Item12QueuedChangesAreMarked: StoryObj = {
 		await userEvent.click(
 			canvas.getByRole("button", { name: "Remove Carol Jones" }),
 		);
-		await userEvent.click(canvas.getByRole("combobox", { name: "Friends" }));
+		// the queued removal makes the field modified, which its name says too
+		await userEvent.click(
+			await canvas.findByRole("combobox", { name: "Friends (modified)" }),
+		);
 		await userEvent.keyboard("Grace");
 		await userEvent.click(
 			await within(document.body).findByRole(

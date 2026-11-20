@@ -505,6 +505,16 @@ The dot is deliberately not an asterisk (that means required) and not a tint of 
 (yellow is a warning, red an error, blue the focus ring) — it sits beside the label so it
 stacks with all three.
 
+The dot is for the eye. For a screen reader the label also ends in a visually hidden
+"(modified)" in the user's language (`DirtyMarkerText`, translation key
+`standalone.uikit.field-state.dirty`), which makes it part of the field's name: a modified
+"Due" field is read as "Due (modified)". It takes no room, so nothing moves on screen.
+`withMuiFieldState` adds it to the label of the control it wraps, and `DirtyMarker` renders
+it after its dot. A label rendered as a child of `FormControlCC` or
+`FormControlFieldsetCC` — a legend, a `FormControlLabel` — gets its dot from the wrapper
+but not the text: render it as `labelWithDirtyText(label, dirty)`, as the library's
+checkbox, switch, radio and select renderers do.
+
 #### Marking fields yourself
 
 Where the application knows better than the diff does, wrap the fields in a
@@ -639,6 +649,12 @@ set it to 0.
 
 For a custom renderer, `DirtyMarker` (an element) and `dirtyMarkerStyles` (for a pseudo
 element) are both exported, so a control can draw the same marker wherever its label is.
+`DirtyMarker` brings the hidden text along; with `dirtyMarkerStyles` add
+`DirtyMarkerText` to the label yourself.
+
+The hidden text is the `text` slot of `CcDirtyMarker`, wherever it is rendered. Removing
+the dot leaves it in place, which keeps the state in the field's name;
+`CcDirtyMarker: { styleOverrides: { text: { display: "none" } } }` removes it too.
 
 A `FormTab`'s dot is the `CcDirtyMarker` element too, so restyling that one restyles the
 tab's. Its own parts are styled under `CcFormTab`: `label` (the label with its markers),

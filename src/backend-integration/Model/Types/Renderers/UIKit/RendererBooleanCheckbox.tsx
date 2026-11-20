@@ -4,7 +4,10 @@ import ModelRenderParams from "../../../RenderParams";
 import TypeBoolean from "../../TypeBoolean";
 import ccI18n from "../../../../../i18n";
 import Checkbox from "../../../../../standalone/UIKit/Checkbox";
-import { FormControlFieldsetCC } from "../../../../../standalone";
+import {
+	FormControlFieldsetCC,
+	labelWithDirtyText,
+} from "../../../../../standalone";
 
 /**
  * Renders a TypeBoolean field as Checkbox
@@ -88,7 +91,10 @@ class RendererBooleanCheckbox extends TypeBoolean {
 					component={"fieldset"}
 					data-name={field}
 				>
-					<FormControlLabel control={control} label={label} />
+					<FormControlLabel
+						control={control}
+						label={labelWithDirtyText(label, dirty)}
+					/>
 					<FormHelperText id={messageId}>
 						{errorMsg || warningMsg}
 					</FormHelperText>

@@ -9,7 +9,10 @@ import {
 import ModelRenderParams from "../../../RenderParams";
 import TypeEnum from "../../TypeEnum";
 import ccI18n from "../../../../../i18n";
-import { FormControlFieldsetCC } from "../../../../../standalone";
+import {
+	FormControlFieldsetCC,
+	labelWithDirtyText,
+} from "../../../../../standalone";
 
 /**
  * Renders TypeEnum as drop-down selector (without search)
@@ -67,7 +70,7 @@ class RendererEnumSelect<T extends string = string> extends TypeEnum<T> {
 					dirty={dirty}
 				>
 					<InputLabel id={labelId} shrink>
-						{label}
+						{labelWithDirtyText(label, dirty)}
 					</InputLabel>
 					<Select
 						name={inputName}
