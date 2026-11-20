@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { createTheme, Theme } from "@mui/material";
-import type {} from "../src/theme-def";
+import { createTheme, Theme, ThemeProvider } from "@mui/material";
+import type {  } from "../src/theme-def";
+import { createElement } from "react";
+import { render, screen } from "@testing-library/react";
+import {
+	selectorLocalLoadHandler,
+	SingleSelect,
+} from "../src/standalone/Selector";
 
 /** the style override functions of every slot of every component in the theme */
 const overrideFunctions = (theme: Theme) =>
@@ -379,7 +385,6 @@ describe("theme-def", () => {
 			Array(55).fill(expect.any(Function)),
 		);
 	});
-
 	it("[ISSUE-3462-ITEM-17] keeps ownerState in the function styleOverrides of the components whose every slot receives one", () => {
 		// each of these has a single slot, and it is rendered with an ownerState
 		const theme = createTheme({
@@ -418,7 +423,6 @@ describe("theme-def", () => {
 			Array(4).fill(expect.any(Function)),
 		);
 	});
-
 	it("[ISSUE-3482-ITEM-15] types the ownerState of CcActionButton and CcSubActionButton as the flags their button slot gets", () => {
 		const theme = createTheme({
 			components: {
@@ -452,7 +456,6 @@ describe("theme-def", () => {
 			Array(2).fill(expect.any(Function)),
 		);
 	});
-
 	it("[ISSUE-3482-ITEM-15] types the variants of the UIKit components as what their slots match", () => {
 		const variants = (theme: Theme) =>
 			Object.values(theme.components ?? {}).flatMap(
@@ -532,5 +535,121 @@ describe("theme-def", () => {
 			},
 		});
 		expect(variants(theme)).toHaveLength(17);
+	});
+	it("[ISSUE-3465-ITEM-19] a theme cannot show a selector's switch without its switchLabel", () => {
+		// switchLabel is the switch's visible text and its only accessible name, so default
+		// props that show the switch need it, as the selector's own props do
+		createTheme({
+			components: {
+				CcBaseSelector: {
+					// @ts-expect-error displaySwitch shows the switch, which needs switchLabel
+					defaultProps: { displaySwitch: true },
+				},
+				CcMultiSelect: {
+					// @ts-expect-error displaySwitch shows the switch, which needs switchLabel
+					defaultProps: { displaySwitch: true },
+				},
+				CcMultiSelectWithoutGroup: {
+					// @ts-expect-error displaySwitch shows the switch, which needs switchLabel
+					defaultProps: { displaySwitch: true },
+				},
+				CcMultiSelectWithTags: {
+					// @ts-expect-error displaySwitch shows the switch, which needs switchLabel
+					defaultProps: { displaySwitch: true },
+				},
+				CcBackendSingleSelect: {
+					// @ts-expect-error switchFilterName shows the switch, which needs switchLabel
+					defaultProps: { switchFilterName: "include_inactive" },
+				},
+				CcBackendMultiSelect: {
+					// @ts-expect-error switchFilterName shows the switch, which needs switchLabel
+					defaultProps: { switchFilterName: "include_inactive" },
+				},
+				CcBackendMultipleSelect: {
+					// @ts-expect-error switchFilterName shows the switch, which needs switchLabel
+					defaultProps: { switchFilterName: "include_inactive" },
+				},
+				CcBackendMultiSelectWithTags: {
+					// @ts-expect-error switchFilterNameData shows the switch, which needs switchLabel
+					defaultProps: { switchFilterNameData: "include_inactive" },
+				},
+				CcGridSingleSelectFilterBackend: {
+					// @ts-expect-error switchFilterName shows the switch, which needs switchLabel
+					defaultProps: { switchFilterName: "include_inactive" },
+				},
+				CcGridMultiSelectFilterBackend: {
+					// @ts-expect-error switchFilterName shows the switch, which needs switchLabel
+					defaultProps: { switchFilterName: "include_inactive" },
+				},
+			},
+		});
+		createTheme({
+			components: {
+				CcBackendMultiSelectWithTags: {
+					// @ts-expect-error switchFilterNameGroup shows the switch, which needs switchLabel
+					defaultProps: { switchFilterNameGroup: "include_inactive" },
+				},
+			},
+		});
+	});
+	it("[ISSUE-3465-ITEM-19] a theme can show a selector's switch with its switchLabel, and set the label or other defaults alone", () => {
+		const switchLabel = "Show inactive";
+		const theme = createTheme({
+			components: {
+				CcBaseSelector: {
+					defaultProps: { displaySwitch: true, switchLabel },
+					// a variant only matches props, so the switch alone selects it
+					variants: [
+						{ props: { displaySwitch: true }, style: { marginTop: 8 } },
+					],
+				},
+				CcMultiSelect: {
+					defaultProps: { confirmDelete: true },
+				},
+				CcMultiSelectWithoutGroup: {
+					defaultProps: { switchLabel },
+				},
+				CcMultiSelectWithTags: {
+					defaultProps: { displaySwitch: true, switchLabel },
+				},
+				CcBackendSingleSelect: {
+					defaultProps: { switchFilterName: "include_inactive", switchLabel },
+				},
+				CcBackendMultiSelect: {
+					defaultProps: { switchLabel },
+				},
+				CcBackendMultipleSelect: {
+					defaultProps: { switchFilterName: "include_inactive", switchLabel },
+				},
+				CcBackendMultiSelectWithTags: {
+					defaultProps: {
+						switchFilterNameGroup: "include_inactive",
+						switchLabel,
+					},
+				},
+				CcGridSingleSelectFilterBackend: {
+					defaultProps: { switchFilterName: "include_inactive", switchLabel },
+				},
+				CcGridMultiSelectFilterBackend: {
+					defaultProps: { searchResultLimit: 50 },
+				},
+			},
+		});
+		const { unmount } = render(
+			createElement(
+				ThemeProvider,
+				{ theme },
+				createElement(SingleSelect, {
+					label: "Device type",
+					selected: null,
+					onSelect: () => {},
+					onLoad: selectorLocalLoadHandler([]),
+				}),
+			),
+		);
+		expect(
+			screen.getByRole("switch", { name: switchLabel }),
+		).toBeInTheDocument();
+		unmount();
 	});
 });

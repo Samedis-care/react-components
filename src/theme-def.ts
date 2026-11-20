@@ -263,6 +263,7 @@ import { BackendMultiSelectThemeProps } from "./backend-components/Selector/Back
 import { BackendMultipleSelectThemeProps } from "./backend-components/Selector/BackendMultipleSelect";
 import { BackendMultiSelectWithTagsThemeProps } from "./backend-components/Selector/BackendMultiSelectWithTags";
 import { BackendDataGridMultiSelectClassKey } from "./backend-components/Selector/BackendDataGridMultiSelect";
+import { PartialExcept } from "./utils/internal/distributiveOmit";
 import {
 	GridSingleSelectFilterBackendClassKey,
 	GridSingleSelectFilterBackendProps,
@@ -456,13 +457,33 @@ declare module "@mui/material/styles" {
 		CcInfoBox: Partial<InfoBoxProps>;
 		CcFormPageLayout: Partial<FormPageLayoutProps>;
 		CcInlineSwitch: Partial<InlineSwitchProps>;
-		CcBaseSelector: Partial<BaseSelectorThemeProps>;
-		CcBackendSingleSelect: Partial<BackendSingleSelectThemeProps>;
-		CcBackendMultiSelect: Partial<BackendMultiSelectThemeProps>;
-		CcBackendMultipleSelect: Partial<BackendMultipleSelectThemeProps>;
-		CcBackendMultiSelectWithTags: Partial<BackendMultiSelectWithTagsThemeProps>;
+		// The selectors' defaults keep switchLabel required while they show the switch
+		// (displaySwitch, switchFilterName…), as their props do: it is the switch's name.
+		CcBaseSelector: PartialExcept<
+			BaseSelectorThemeProps,
+			"displaySwitch" | "switchLabel"
+		>;
+		CcBackendSingleSelect: PartialExcept<
+			BackendSingleSelectThemeProps,
+			"switchFilterName" | "switchLabel"
+		>;
+		CcBackendMultiSelect: PartialExcept<
+			BackendMultiSelectThemeProps,
+			"switchFilterName" | "switchLabel"
+		>;
+		CcBackendMultipleSelect: PartialExcept<
+			BackendMultipleSelectThemeProps,
+			"switchFilterName" | "switchLabel"
+		>;
+		CcBackendMultiSelectWithTags: PartialExcept<
+			BackendMultiSelectWithTagsThemeProps,
+			"switchFilterNameGroup" | "switchFilterNameData" | "switchLabel"
+		>;
 		CcMultiSelectEntry: Partial<MultiSelectEntryProps<MultiSelectorData>>;
-		CcMultiSelect: Partial<MultiSelectProps<MultiSelectorData>>;
+		CcMultiSelect: PartialExcept<
+			MultiSelectProps<MultiSelectorData>,
+			"displaySwitch" | "switchLabel"
+		>;
 		CcImageDots: Partial<ImageDotsProps>;
 		CcImageBox: Partial<ImageBoxProps>;
 		CcImageDialogEntry: Partial<ImageDialogEntryProps>;
@@ -497,11 +518,13 @@ declare module "@mui/material/styles" {
 		CcPortalLayout: Partial<PortalLayoutProps>;
 		CcNotifications: Partial<NotificationsProps>;
 		CcToast: Partial<ToastProps>;
-		CcMultiSelectWithTags: Partial<
-			MultiSelectWithTagsProps<MultiSelectorData, BaseSelectorData>
+		CcMultiSelectWithTags: PartialExcept<
+			MultiSelectWithTagsProps<MultiSelectorData, BaseSelectorData>,
+			"displaySwitch" | "switchLabel"
 		>;
-		CcMultiSelectWithoutGroup: Partial<
-			MultiSelectWithoutGroupProps<BaseSelectorData>
+		CcMultiSelectWithoutGroup: PartialExcept<
+			MultiSelectWithoutGroupProps<BaseSelectorData>,
+			"displaySwitch" | "switchLabel"
 		>;
 		CcDayContents: Partial<DayContentsProps>;
 		CcWeekViewDay: Partial<WeekViewDayProps>;
@@ -510,12 +533,14 @@ declare module "@mui/material/styles" {
 		CcWeekView: Partial<WeekViewProps>;
 		CcDataGrid: Partial<DataGridProps>;
 		CcGridMultiSelectFilter: Partial<GridMultiSelectFilterProps>;
-		CcGridMultiSelectFilterBackend: Partial<
-			GridMultiSelectFilterBackendProps<ModelUnknown, MultiSelectorData>
+		CcGridMultiSelectFilterBackend: PartialExcept<
+			GridMultiSelectFilterBackendProps<ModelUnknown, MultiSelectorData>,
+			"switchFilterName" | "switchLabel"
 		>;
 		CcGridSingleSelectFilter: Partial<GridSingleSelectFilterProps>;
-		CcGridSingleSelectFilterBackend: Partial<
-			GridSingleSelectFilterBackendProps<ModelUnknown>
+		CcGridSingleSelectFilterBackend: PartialExcept<
+			GridSingleSelectFilterBackendProps<ModelUnknown>,
+			"switchFilterName" | "switchLabel"
 		>;
 		CcBasicFormPage: Partial<BasicFormPageProps<never, never>>;
 		CcFlowEngine: Partial<FlowEngineThemeProps>;
