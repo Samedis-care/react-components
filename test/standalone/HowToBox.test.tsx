@@ -22,8 +22,8 @@ beforeAll(async () => {
 
 const theme = createTheme();
 
-const renderHowToBox = (ui: React.ReactElement) =>
-	render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+const renderHowToBox = (ui: React.ReactElement, t: Theme = theme) =>
+	render(<ThemeProvider theme={t}>{ui}</ThemeProvider>);
 
 const withTheme = (ui: React.ReactElement, t: Theme = theme) => (
 	<ThemeProvider theme={t}>{ui}</ThemeProvider>
@@ -199,6 +199,161 @@ describe("HowToBox", () => {
 			expect(itemTexts()).toEqual(["first", "3", "last"]);
 			rerender(withTheme(<HowToBoxTranslate t={app.t} labels="groups" />));
 			expect(container).toBeEmptyDOMElement();
+		});
+
+		it("[ISSUE-3463-ITEM-6] types function styleOverrides and variant props functions without an ownerState, which no slot receives", () => {
+			const themed = createTheme({
+				components: {
+					CcHowToBox: {
+						styleOverrides: {
+							// @ts-expect-error HowToBox's slots get no ownerState; style by props with variants
+							li: ({ ownerState }) => ({
+								color: ownerState ? "red" : "blue",
+							}),
+						},
+						variants: [
+							{
+								// @ts-expect-error a variant's props function gets HowToBox's props directly
+								props: ({ ownerState }) => !!ownerState,
+								style: { color: "red" },
+							},
+						],
+					},
+				},
+			});
+			expect(themed.components?.CcHowToBox?.styleOverrides?.li).toEqual(
+				expect.any(Function),
+			);
+		});
+
+		it("[ISSUE-3463-ITEM-6] renders with function styleOverrides of the theme for every slot", () => {
+			const themed = createTheme({
+				components: {
+					CcHowToBox: {
+						styleOverrides: {
+							root: ({ theme: t }) => ({ padding: t.spacing(2) }),
+							ul: ({ theme: t }) => ({ paddingLeft: t.spacing(3) }),
+							li: ({ theme: t }) => ({ marginTop: t.spacing(1) }),
+						},
+					},
+				},
+			});
+			const { container } = renderHowToBox(
+				<HowToBox titleLabel="T" labels={["a", "b"]} />,
+				themed,
+			);
+			const list = container.querySelector("ul");
+			if (!list) throw new Error("no list rendered");
+			expect(getComputedStyle(fieldsetOf(container)).paddingTop).toBe("16px");
+			expect(getComputedStyle(list).paddingLeft).toBe("24px");
+			const items = Array.from(container.querySelectorAll("li"));
+			expect(items).toHaveLength(2);
+			for (const item of items)
+				expect(getComputedStyle(item).marginTop).toBe("8px");
+		});
+
+		it("[ISSUE-3463-ITEM-6] applies theme variants keyed on titleLabel", () => {
+			const themed = createTheme({
+				components: {
+					CcHowToBox: {
+						variants: [
+							{ props: { titleLabel: "V" }, style: { outlineStyle: "dotted" } },
+						],
+					},
+				},
+			});
+			const { container } = renderHowToBox(
+				<>
+					<HowToBox titleLabel="V" labels={["a"]} />
+					<HowToBox titleLabel="W" labels={["b"]} />
+				</>,
+				themed,
+			);
+			const [matching, other] = Array.from(
+				container.querySelectorAll("fieldset"),
+			);
+			expect(getComputedStyle(other).outlineStyle).not.toBe("dotted");
+			expect(getComputedStyle(matching).outlineStyle).toBe("dotted");
+		});
+
+		it("[ISSUE-3463-ITEM-6] calls a variant's props function with titleLabel and labels after the theme's default props, and styles the entries through a nested selector over styleOverrides.li", () => {
+			const themed = createTheme({
+				components: {
+					CcHowToBox: {
+						defaultProps: { titleLabel: "Default" },
+						styleOverrides: { li: { color: "rgb(0, 0, 255)" } },
+						variants: [
+							{
+								props: ({ titleLabel }) => titleLabel === "Default",
+								style: { "& li": { color: "rgb(255, 0, 0)" } },
+							},
+							{
+								props: ({ labels }) =>
+									Array.isArray(labels) && labels.length > 1,
+								style: { outlineStyle: "dotted" },
+							},
+						],
+					},
+				},
+			});
+			const { container } = renderHowToBox(
+				<>
+					<HowToBox labels={["a", "b"]} />
+					<HowToBox titleLabel="Own" labels="c" />
+				</>,
+				themed,
+			);
+			const [byDefault, own] = Array.from(
+				container.querySelectorAll("fieldset"),
+			);
+			expect(byDefault.querySelector("legend")).toHaveTextContent("Default");
+			expect(getComputedStyle(byDefault).outlineStyle).toBe("dotted");
+			expect(getComputedStyle(own).outlineStyle).not.toBe("dotted");
+			const [a, b] = Array.from(byDefault.querySelectorAll("li"));
+			expect(getComputedStyle(a).color).toBe("rgb(255, 0, 0)");
+			expect(getComputedStyle(b).color).toBe("rgb(255, 0, 0)");
+			const c = own.querySelector("li");
+			if (!c) throw new Error("no list item rendered");
+			expect(getComputedStyle(c).color).toBe("rgb(0, 0, 255)");
+		});
+
+		it("[ISSUE-3463-ITEM-6] matches HowToBoxTranslate's variants against the translated title", async () => {
+			const app = await makeAppI18n({
+				en: { translation: { title: "Import", steps: ["Step one"] } },
+			});
+			const themed = createTheme({
+				components: {
+					CcHowToBox: {
+						variants: [
+							{
+								props: { titleLabel: "Import" },
+								style: { outlineStyle: "dotted" },
+							},
+						],
+					},
+				},
+			});
+			const { container } = renderHowToBox(
+				<HowToBoxTranslate t={app.t} titleLabel="title" labels="steps" />,
+				themed,
+			);
+			expect(getComputedStyle(fieldsetOf(container)).outlineStyle).toBe(
+				"dotted",
+			);
+		});
+
+		it("[ISSUE-3463-ITEM-6] keeps titleLabel and labels off the frame's DOM", () => {
+			const consoleError = vi
+				.spyOn(console, "error")
+				.mockImplementation(() => {});
+			const { container } = renderHowToBox(
+				<HowToBox titleLabel="T" labels={["a"]} />,
+			);
+			const fieldset = fieldsetOf(container);
+			expect(fieldset).not.toHaveAttribute("titlelabel");
+			expect(fieldset).not.toHaveAttribute("titleLabel");
+			expect(fieldset).not.toHaveAttribute("labels");
+			expect(consoleError).not.toHaveBeenCalled();
 		});
 	});
 });

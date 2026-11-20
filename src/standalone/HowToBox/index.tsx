@@ -35,9 +35,31 @@ export interface HowToBoxProps {
 	classes?: Partial<Record<HowToBoxClassKey, string>>;
 }
 
-const GroupBoxStyled = styled(GroupBox, { name: "CcHowToBox", slot: "root" })(
-	{},
-);
+/**
+ * The props the root slot gets besides GroupBox's: HowToBox's `titleLabel`
+ * and `labels`, so that theme `variants` can match them. They do not reach
+ * the GroupBox.
+ */
+type HowToBoxRootProps = Pick<HowToBoxProps, "titleLabel" | "labels">;
+
+/**
+ * What MUI keeps off a root slot, plus HowToBox's own props
+ */
+const ROOT_PROPS_NOT_FORWARDED = new Set<PropertyKey>([
+	"titleLabel",
+	"labels",
+	"ownerState",
+	"theme",
+	"sx",
+	"as",
+	"classes",
+]);
+
+const GroupBoxStyled = styled(GroupBox, {
+	name: "CcHowToBox",
+	slot: "root",
+	shouldForwardProp: (prop) => !ROOT_PROPS_NOT_FORWARDED.has(prop),
+})<HowToBoxRootProps>({});
 
 const UnorderedList = styled("ul", { name: "CcHowToBox", slot: "ul" })({
 	paddingLeft: "1.5rem",
@@ -47,6 +69,17 @@ const ListItem = styled("li", { name: "CcHowToBox", slot: "li" })({
 	whiteSpace: "pre-line",
 });
 
+/**
+ * Keys of the theme's `components.CcHowToBox.styleOverrides`, also the keys
+ * of the `classes` prop:
+ * - `root`: the GroupBox `<fieldset>` frame
+ * - `ul`: the list
+ * - `li`: each entry
+ *
+ * No slot receives an `ownerState`: a function override is called with the
+ * theme. To style a box by its props, use theme `variants`, which apply to
+ * the frame and reach the list and its entries through nested selectors.
+ */
 export type HowToBoxClassKey = "root" | "ul" | "li";
 
 /** whether React renders the entry as nothing */
@@ -65,6 +98,8 @@ const HowToBox = (inProps: HowToBoxProps) => {
 
 	return (
 		<GroupBoxStyled
+			titleLabel={titleLabel}
+			labels={labels}
 			label={titleLabel ?? t("standalone.how-it-works.title")}
 			className={combineClassNames([className, classes?.root])}
 		>
@@ -144,4 +179,23 @@ export const HowToBoxTranslate = (props: HowToBoxTranslateProps) => {
 	);
 };
 
+/**
+ * Instructions in a frame: a {@link GroupBox} titled "How it works" (or
+ * `titleLabel`) around a bulleted list with one item per entry of `labels`.
+ *
+ * Theme: `components.CcHowToBox.defaultProps` ({@link HowToBoxProps}),
+ * `styleOverrides` per {@link HowToBoxClassKey} slot, and `variants`, which
+ * apply to the frame. A variant's `props` match `titleLabel` and `labels` as
+ * HowToBox gets them, after the theme's default props; from
+ * {@link HowToBoxTranslate} these are the translated title and entries. A
+ * `props` function gets these props directly: there is no `ownerState`. A
+ * variant reaches the list and its entries through nested selectors.
+ *
+ * @example
+ * // a theme that sets the entries of boxes with their own title in bold
+ * createTheme({ components: { CcHowToBox: { variants: [{
+ *   props: ({ titleLabel }) => titleLabel != null,
+ *   style: { "& li": { fontWeight: "bold" } },
+ * }] } } });
+ */
 export default React.memo(HowToBox);

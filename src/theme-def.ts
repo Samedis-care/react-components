@@ -690,8 +690,10 @@ declare module "@mui/material/styles" {
 		};
 		CcHowToBox?: {
 			defaultProps?: ComponentsPropsList["CcHowToBox"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcHowToBox"];
-			variants?: ComponentsVariants["CcHowToBox"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<HowToBoxClassKey>;
+			variants?: VariantsWithoutOwnerState<
+				Pick<HowToBoxProps, "titleLabel" | "labels">
+			>;
 		};
 		CcInfoBox?: {
 			defaultProps?: ComponentsPropsList["CcInfoBox"];
