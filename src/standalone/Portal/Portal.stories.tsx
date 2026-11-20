@@ -731,3 +731,85 @@ export const Issue3479Item2LongTitleDrawerLeavesRoomToClose: LayoutStory = {
 		);
 	},
 };
+
+// the menu's own element: MenuBase's root, around the List
+const menuRootIn = (container: HTMLElement) => {
+	const root = within(container).getByRole("list", {
+		hidden: true,
+	}).parentElement;
+	if (!root) throw new Error("no menu rendered");
+	return root;
+};
+
+const LayoutWithModeSwitch = (args: LayoutArgs) => {
+	const [mobile, setMobile] = React.useState(false);
+	const toggle = React.useCallback(() => setMobile((prev) => !prev), []);
+	return (
+		<div style={fullHeight}>
+			<PortalLayout
+				{...args}
+				variant="no-top-left"
+				collapseMenu={mobile}
+				headerContent={pageTitle()}
+				menuContent={menu()}
+				content={
+					<div style={{ padding: 16 }}>
+						<Button variant="contained" onClick={toggle}>
+							{mobile ? "Switch to desktop view" : "Switch to mobile view"}
+						</Button>
+					</div>
+				}
+				menuId={"mnu"}
+			/>
+		</div>
+	);
+};
+
+export const Issue3479Item25MenuKeepsStateAcrossViews: LayoutStory = {
+	args: { drawerWidth: 240 },
+	parameters: {
+		a11y: A11Y_OPEN_DRAWER_EXCEPTION,
+		docs: {
+			description: {
+				story:
+					"ISSUE-3479-ITEM-25: the menu stays mounted when the layout switches between desktop and mobile view (the button sets `collapseMenu`, as crossing the breakpoint does): an expanded group and the highlighted entry are still there in the drawer. The menu fills the paper in both views.",
+			},
+		},
+	},
+	render: (args) => <LayoutWithModeSwitch {...args} />,
+	play: async ({ canvas, canvasElement }) => {
+		await userEvent.click(canvas.getByRole("button", { name: "Reports" }));
+		const monthly = await canvas.findByRole("button", { name: "Monthly" });
+		await userEvent.click(monthly);
+		const columnPaper = document
+			.getElementById("mnu")!
+			.querySelector<HTMLElement>(".MuiPaper-root")!;
+		await expect(menuRootIn(columnPaper).getBoundingClientRect().height).toBe(
+			columnPaper.getBoundingClientRect().height,
+		);
+
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Switch to mobile view" }),
+		);
+		await openDrawer(canvasElement);
+		const dialog = within(drawerPaper());
+		await expect(
+			dialog
+				.getByRole("button", { name: "Reports" })
+				.querySelector("[data-testid=ExpandLessIcon]"),
+		).not.toBeNull();
+		const monthlyInDrawer = dialog.getByRole("button", { name: "Monthly" });
+		await expect(monthlyInDrawer).toHaveClass("Mui-selected");
+		await expect(menuRootIn(drawerPaper()).getBoundingClientRect().height).toBe(
+			drawerPaper().getBoundingClientRect().height,
+		);
+
+		// Escape on an entry closes the drawer, as on the drawer itself
+		monthlyInDrawer.focus();
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() => expect(drawerRoot()).toHaveAttribute("aria-hidden"));
+		await waitFor(() =>
+			expect(document.activeElement).toBe(burgerIn(canvasElement)),
+		);
+	},
+};
