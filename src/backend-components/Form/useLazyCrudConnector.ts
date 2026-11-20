@@ -198,6 +198,9 @@ const buildConnector = <ExtraT>(
  *   by the next save.
  * - With onlySubmitMounted an unmounted control's queue is neither sent nor counted as
  *   dirty, like the value of an unmounted model field, until the control mounts again.
+ * - What counts is the onlySubmitMounted the Form has when the control unmounts. A mounted
+ *   control's queue keeps the Form dirty and is sent by the next save, also when the Form's
+ *   onlySubmitMounted changes meanwhile (its prop, or a flow stage config).
  * - Flow mode with onlySubmitMounted: a submit, such as the one goToStage makes before it
  *   changes the stage, stages the queue of every mounted control, like the values of the
  *   mounted fields. The queue stays staged until it is empty (sent or undone). A control
@@ -240,8 +243,28 @@ const useLazyCrudConnector = <ExtraT = undefined>(
 	 *          empty (sent or undone)
 	 */
 	const staged = useRef(false);
+	/**
+	 * The Form's onlySubmitMounted as of the control's latest render
+	 * @remarks Read when the control unmounts, not when it changes: while the control is
+	 *          mounted its queue counts whatever the value, and the value the Form has when
+	 *          the control unmounts decides what becomes of the queue
+	 */
+	const onlySubmitMountedRef = useRef(onlySubmitMounted);
+	onlySubmitMountedRef.current = onlySubmitMounted;
+	/**
+	 * Does an unmount leave the queue to be saved, and counted as dirty?
+	 * @remarks Without onlySubmitMounted always. With it only a staged one: a stage that is
+	 *          left was submitted first, a control hidden within its stage was not
+	 */
+	const savedWhenUnmounted = useCallback(
+		() =>
+			!onlySubmitMountedRef.current ||
+			(staged.current && !connector.isQueueEmpty()),
+		[connector],
+	);
 	// the connector's queue change handler belongs to the mounted control: it keeps the
-	// Form's dirty flag and the staged state
+	// Form's dirty flag and the staged state. The dependencies are pinned or stable, so this
+	// runs when the control mounts and unmounts, not when onlySubmitMounted changes.
 	useEffect(() => {
 		connector.setQueueChangeHandler((queue) => {
 			if (queue.length === 0) staged.current = false;
@@ -249,7 +272,11 @@ const useLazyCrudConnector = <ExtraT = undefined>(
 		});
 		// a queue kept from an earlier mount is listed again, and the next save sends it
 		setCustomFieldDirty(field, !connector.isQueueEmpty());
-	}, [connector, setCustomFieldDirty, field]);
+		return () => {
+			// a queue the save leaves out does not keep the Form dirty either
+			if (!savedWhenUnmounted()) setCustomFieldDirty(field, false);
+		};
+	}, [connector, setCustomFieldDirty, field, savedWhenUnmounted]);
 
 	// in flow mode every submit stages the values of the mounted fields (goToStage makes one
 	// before it changes the stage), and with them the queue of a mounted lazy control
@@ -263,16 +290,6 @@ const useLazyCrudConnector = <ExtraT = undefined>(
 		};
 	}, [flowEngine, field, setPreSubmitHandler, removePreSubmitHandler]);
 
-	/**
-	 * Does an unmount with onlySubmitMounted leave the queue to be saved anyway?
-	 * @remarks Only a staged one: a stage that is left was submitted first, a control hidden
-	 *          within its stage was not
-	 */
-	const savedWhenUnmounted = useCallback(
-		() => staged.current && !connector.isQueueEmpty(),
-		[connector],
-	);
-
 	// set post submit handler for lazy connector
 	useEffect(() => {
 		setCustomState<LazyConnector>(field, () => connector);
@@ -285,9 +302,7 @@ const useLazyCrudConnector = <ExtraT = undefined>(
 		};
 		setPostSubmitHandler(field, submitHandler);
 		return () => {
-			if (onlySubmitMounted && !savedWhenUnmounted()) {
-				removePostSubmitHandler(field);
-			}
+			if (!savedWhenUnmounted()) removePostSubmitHandler(field);
 		};
 	}, [
 		connector,
@@ -295,18 +310,8 @@ const useLazyCrudConnector = <ExtraT = undefined>(
 		setCustomState,
 		setPostSubmitHandler,
 		removePostSubmitHandler,
-		onlySubmitMounted,
 		savedWhenUnmounted,
 	]);
-
-	// mark not dirty when unmounted and onlySubmitMounted
-	useEffect(() => {
-		if (!onlySubmitMounted) return;
-		return () => {
-			if (savedWhenUnmounted()) return;
-			setCustomFieldDirty(field, false);
-		};
-	}, [field, onlySubmitMounted, setCustomFieldDirty, savedWhenUnmounted]);
 
 	return { connector };
 };

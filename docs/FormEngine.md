@@ -669,7 +669,10 @@ Things to know about the queue:
   picked file where the backend would send a URL.
 - A control that unmounts keeps its queue, and lists it again when it mounts again. With
   `onlySubmitMounted` the queue of an unmounted control is neither saved nor counted as dirty,
-  like the value of an unmounted field, until the control mounts again.
+  like the value of an unmounted field, until the control mounts again. What counts is the
+  `onlySubmitMounted` the form has when the control unmounts: while the control is mounted its
+  queue keeps the form dirty and is saved, also when `onlySubmitMounted` changes meanwhile (the
+  form's prop, or the config of a flow stage).
 - In a flow form, a submit (`goToStage` makes one before it changes the stage) stages the queue
   of every mounted control, like the values of the mounted fields, until the queue is empty
   again. A control that unmounts with a staged queue, as it does when its stage is left, keeps

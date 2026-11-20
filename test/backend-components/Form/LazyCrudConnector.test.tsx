@@ -633,6 +633,141 @@ describe("useLazyCrudConnector: unmount and remount", () => {
 		await settle();
 		expect(env.calls).not.toContain("create:joins/1:s3");
 	});
+
+	it("[ISSUE-3505-ITEM-7] turning onlySubmitMounted off while the selector stays mounted keeps the form dirty", async () => {
+		const { sink, ref, rerenderWith } = await mountSelector(
+			undefined,
+			{},
+			{
+				onlySubmitMounted: true,
+			},
+		);
+		await add(ref);
+		expect(sink.ctx!.dirty).toBe(true);
+
+		rerenderWith({ onlySubmitMounted: false });
+		await settle();
+
+		// the queue still holds the pick
+		expect(sink.ctx!.dirty).toBe(true);
+	});
+
+	it("[ISSUE-3505-ITEM-7] after onlySubmitMounted was turned off while the selector stays mounted, the next save sends the pick", async () => {
+		const { env, sink, ref, rerenderWith } = await mountSelector(
+			undefined,
+			{},
+			{ onlySubmitMounted: true },
+		);
+		await add(ref);
+		rerenderWith({ onlySubmitMounted: false });
+		await settle();
+
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+		expect(env.calls).toContain("create:joins/1:s2");
+		expect(sink.ctx!.dirty).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-7] turned off while the selector was shown, onlySubmitMounted no longer drops its pick when it is hidden: the form stays dirty and the save sends it", async () => {
+		const { env, sink, ref, rerenderWith } = await mountSelector(
+			undefined,
+			{},
+			{ onlySubmitMounted: true },
+		);
+		await add(ref);
+		rerenderWith({ onlySubmitMounted: false });
+		await settle();
+
+		act(() => ctl.setShow(false));
+		await settle();
+		expect(sink.ctx!.dirty).toBe(true);
+
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+		expect(env.calls).toContain("create:joins/1:s2");
+		expect(sink.ctx!.dirty).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-7] turned on while the selector was shown, onlySubmitMounted drops its pick when it is hidden: the form is clean and the save leaves it out", async () => {
+		const { env, sink, ref, rerenderWith } = await mountSelector(
+			undefined,
+			{},
+			{ onlySubmitMounted: false },
+		);
+		await add(ref);
+		rerenderWith({ onlySubmitMounted: true });
+		await settle();
+		expect(sink.ctx!.dirty).toBe(true);
+
+		act(() => ctl.setShow(false));
+		await settle();
+		expect(sink.ctx!.dirty).toBe(false);
+
+		await act(async () => {
+			await sink.ctx!.submit({ ignoreDirtyCheck: true });
+		});
+		await settle();
+		expect(env.calls).not.toContain("create:joins/1:s2");
+	});
+
+	it("[ISSUE-3505-ITEM-7] in a flow form, a selector outside the stages keeps the form dirty in a stage that turns onlySubmitMounted off, and the next save sends its pick", async () => {
+		const model = makeModel();
+		const env = makeEnv({ "joins/1": [] });
+		const sink: Sink = {};
+		const ref = React.createRef<CrudSelectDispatch<JoinData>>();
+		type St = "a" | "b";
+		const flow: { props?: FlowStageProps<ModelUnknown, St, undefined> } = {};
+		const configB = { onlySubmitMounted: false };
+		const StageA = (props: FlowStageProps<ModelUnknown, St, undefined>) => {
+			flow.props = props;
+			return null;
+		};
+		const StageB = (props: FlowStageProps<ModelUnknown, St, undefined>) => {
+			flow.props = props;
+			useFormFlowEngineStageConfig(configB);
+			return null;
+		};
+		const stages = { a: StageA, b: StageB };
+		const Page = (formProps: PageProps<ModelUnknown, undefined>) => {
+			sink.ctx = useFormContext<ModelUnknown>();
+			return (
+				<>
+					<FlowEngine<ModelUnknown, St, undefined>
+						defaultStage={"a"}
+						formProps={formProps}
+					>
+						{stages}
+					</FlowEngine>
+					<FormCrudMultiSelect<ModelUnknown, JoinData>
+						ref={ref}
+						{...selectorProps(model, env)}
+					/>
+				</>
+			);
+		};
+		mountForm(model, Page, { flowEngine: true });
+		await loaded(sink);
+		await ready();
+
+		// stage "a" saves its pick, so nothing is staged when stage "b" is shown
+		await add(ref);
+		await act(async () => {
+			await flow.props!.goToStage("b", true);
+		});
+		await settle();
+		expect(env.calls).toContain("create:joins/1:s2");
+		expect(sink.ctx!.dirty).toBe(false);
+
+		await add(ref, "s3");
+		expect(sink.ctx!.dirty).toBe(true);
+
+		await act(async () => {
+			await sink.ctx!.submit({ submitToServer: true });
+		});
+		await settle();
+		expect(env.calls).toContain("create:joins/1:s3");
+		expect(sink.ctx!.dirty).toBe(false);
+	});
 });
 
 describe("useLazyCrudConnector: re-renders of the form", () => {

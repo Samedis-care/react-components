@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-20 | [A lazy control's queue keeps the Form dirty when onlySubmitMounted changes while it is shown](2026-11-20-lazy-crud-connector-only-submit-mounted-change.md) | behavior |
 | 2026-11-19 | [PopupMenu applies its `classes`](2026-11-19-popup-menu-classes.md) | behavior, theme |
 | 2026-11-19 | [A data grid logs a failed write of its persisted state and writes it again](2026-11-19-data-grid-failed-persist-write-logged-and-retried.md) | behavior |
 | 2026-11-17 | [Leaving a date field marks it touched in a Form](2026-11-17-form-blur-marks-date-fields-touched.md) | behavior |

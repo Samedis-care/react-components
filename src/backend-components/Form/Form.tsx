@@ -271,6 +271,8 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
 	 *          one that is not mounted are neither saved nor counted as dirty until it mounts
 	 *          again. In flow mode, the queue a submit staged before the control unmounted (a
 	 *          stage that was left) is saved like the staged values, see useLazyCrudConnector.
+	 *          What counts for such a control is the value when it unmounts: while it is
+	 *          mounted its queue keeps the Form dirty and is saved, also when this changes.
 	 */
 	onlySubmitMounted?: boolean;
 	/**
