@@ -50,10 +50,16 @@ export interface MenuItemProps {
 	expandable: boolean;
 	/**
 	 * Is this menu item currently selected/active
+	 *
+	 * For the visual highlight. Assistive technology learns it from
+	 * `ariaAttributes` (`aria-current="page"`).
 	 */
 	active?: boolean; // set if expandable == false
 	/**
 	 * Is this menu item currently expanded
+	 *
+	 * For the visual state (e.g. the chevron). Assistive technology learns it
+	 * from `ariaAttributes` (`aria-expanded`).
 	 */
 	expanded?: boolean; // set if expandable == true
 	/**
@@ -71,6 +77,19 @@ export interface MenuItemProps {
 	 * MenuBase.
 	 */
 	focusRef?: React.RefCallback<HTMLElement>;
+	/**
+	 * The state of the entry for assistive technology; spread it on the element
+	 * of the entry that takes keyboard focus (the one with `onClick` and
+	 * `focusRef`)
+	 *
+	 * `{ "aria-expanded": true }` or `{ "aria-expanded": false }` for a group,
+	 * `{ "aria-current": "page" }` for the active entry, and `{}` for any other
+	 * entry. It carries `expanded` and `active` as ARIA attributes, so screen
+	 * readers say whether a group is open and which entry is the current page.
+	 * Optional for a renderer: without it, that state is visual only. Always
+	 * passed by MenuBase.
+	 */
+	ariaAttributes?: Pick<React.AriaAttributes, "aria-expanded" | "aria-current">;
 }
 
 /**
@@ -163,6 +182,10 @@ export type PortalMenuProps = MenuProps; // alias
 /**
  * A menu tree rendered with the given wrapper and entry renderer. A click on an
  * entry highlights it (a group expands or collapses instead).
+ *
+ * Screen readers are told which groups are expanded (`aria-expanded`) and
+ * which entry is highlighted (`aria-current="page"`), through the renderer's
+ * `ariaAttributes`.
  *
  * Keyboard focus stays in the menu when the focused entry is removed (the
  * definition changed, e.g. after a navigation, or `shouldRender` turned false):

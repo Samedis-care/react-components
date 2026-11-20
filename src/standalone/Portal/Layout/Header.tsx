@@ -10,6 +10,7 @@ import { Menu as MenuIcon } from "@mui/icons-material";
 import React from "react";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import focusRing from "../focusRing";
+import { usePortalLayoutContext } from "./index";
 
 export interface PortalLayoutHeaderProps {
 	/**
@@ -18,6 +19,9 @@ export interface PortalLayoutHeaderProps {
 	toggleMenu: () => void;
 	/**
 	 * Show mobile view?
+	 *
+	 * true renders the burger button, which tells assistive technology whether
+	 * the drawer is open (`aria-expanded`, from the layout's `menuOpen`).
 	 */
 	mobile: boolean;
 	/**
@@ -41,6 +45,7 @@ const MenuButton = styled(IconButton)(({ theme }) =>
 const PortalLayoutHeader = (props: PortalLayoutHeaderProps) => {
 	const { mobile, customClasses, toggleMenu, contents } = props;
 	const { t } = useCCTranslations();
+	const { menuOpen } = usePortalLayoutContext();
 
 	return (
 		<AppBar position={"relative"} classes={customClasses?.appBar}>
@@ -50,6 +55,7 @@ const PortalLayoutHeader = (props: PortalLayoutHeaderProps) => {
 						onClick={toggleMenu}
 						size="large"
 						aria-label={t("standalone.portal.menu-toggle")}
+						aria-expanded={menuOpen}
 					>
 						<MenuIcon />
 					</MenuButton>

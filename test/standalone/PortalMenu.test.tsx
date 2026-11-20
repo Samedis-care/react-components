@@ -9,6 +9,8 @@ import MenuBase, {
 	MenuItemProps,
 } from "../../src/standalone/Portal/Menu";
 import MaterialMenuItem from "../../src/standalone/Portal/MenuItem/Material";
+import JumboReactLightMenuItem from "../../src/standalone/Portal/MenuItem/JumboReact/Light";
+import JumboReactDarkMenuItem from "../../src/standalone/Portal/MenuItem/JumboReact/Dark";
 
 afterEach(cleanup);
 
@@ -116,6 +118,85 @@ describe("MenuBase: onAuxClick", () => {
 			button: 1,
 		});
 		expect(d[2].onClick).not.toHaveBeenCalled();
+	});
+});
+
+describe("MenuBase: accessibility", () => {
+	it("[ISSUE-3479-ITEM-14] a group tells assistive technology whether it is expanded", () => {
+		renderUi(
+			<MenuBase
+				definition={defs()}
+				wrapper={Wrap}
+				menuItem={MaterialMenuItem}
+			/>,
+		);
+		expect(entry("Reports")).toHaveAttribute("aria-expanded", "false");
+		fireEvent.click(entry("Reports"));
+		expect(entry("Reports")).toHaveAttribute("aria-expanded", "true");
+	});
+
+	it("[ISSUE-3479-ITEM-14] the active entry is marked as the current page", () => {
+		renderUi(
+			<MenuBase
+				definition={defs()}
+				wrapper={Wrap}
+				menuItem={MaterialMenuItem}
+			/>,
+		);
+		fireEvent.click(entry("Users"));
+		expect(entry("Users")).toHaveAttribute("aria-current", "page");
+		expect(entry("Dashboard")).not.toHaveAttribute("aria-current");
+	});
+
+	it.each([
+		["JumboReactLightMenuItem", JumboReactLightMenuItem],
+		["JumboReactDarkMenuItem", JumboReactDarkMenuItem],
+	] as const)(
+		"[ISSUE-3479-ITEM-14] %s exposes the expanded group and the current page too",
+		(_name, Renderer) => {
+			renderUi(
+				<MenuBase definition={defs()} wrapper={Wrap} menuItem={Renderer} />,
+			);
+			expect(entry("Reports")).toHaveAttribute("aria-expanded", "false");
+			fireEvent.click(entry("Reports"));
+			expect(entry("Reports")).toHaveAttribute("aria-expanded", "true");
+			fireEvent.click(entry("Monthly"));
+			expect(entry("Monthly")).toHaveAttribute("aria-current", "page");
+			expect(entry("Dashboard")).not.toHaveAttribute("aria-current");
+		},
+	);
+
+	it("[ISSUE-3479-ITEM-14] a custom renderer gets the state as ariaAttributes for its focusable element", () => {
+		// spreads ariaAttributes and nothing else ARIA-related, as an app's renderer would
+		const Custom = (p: MenuItemProps) => (
+			<button type={"button"} onClick={p.onClick} {...p.ariaAttributes}>
+				{p.title}
+			</button>
+		);
+		renderUi(
+			<MenuBase
+				definition={defs({ Reports: { forceExpand: true } })}
+				wrapper={Wrap}
+				menuItem={Custom}
+			/>,
+		);
+		// a force-expanded group is expanded from the first render
+		expect(entry("Reports")).toHaveAttribute("aria-expanded", "true");
+		expect(entry("Annual")).toHaveAttribute("aria-expanded", "false");
+		fireEvent.click(entry("Annual"));
+		expect(entry("Annual")).toHaveAttribute("aria-expanded", "true");
+		fireEvent.click(entry("Annual"));
+		expect(entry("Annual")).toHaveAttribute("aria-expanded", "false");
+		// leaves have no expanded state; no entry is current before a click
+		expect(entry("Dashboard")).not.toHaveAttribute("aria-expanded");
+		expect(document.querySelectorAll("[aria-current]")).toHaveLength(0);
+		fireEvent.click(entry("Monthly"));
+		expect(entry("Monthly")).toHaveAttribute("aria-current", "page");
+		fireEvent.click(entry("Users"));
+		// one current page at a time, and never a group
+		expect(entry("Users")).toHaveAttribute("aria-current", "page");
+		expect(document.querySelectorAll("[aria-current]")).toHaveLength(1);
+		expect(entry("Reports")).not.toHaveAttribute("aria-current");
 	});
 });
 

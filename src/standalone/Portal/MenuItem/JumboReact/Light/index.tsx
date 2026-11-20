@@ -71,6 +71,7 @@ const MenuItemJumboReactLight = (
 			ref={props.focusRef}
 			onClick={props.onClick}
 			onAuxClick={props.onAuxClick}
+			{...props.ariaAttributes}
 			className={combineClassNames([
 				props.active && "Mui-active",
 				props.expandable && "Cc-expandable",

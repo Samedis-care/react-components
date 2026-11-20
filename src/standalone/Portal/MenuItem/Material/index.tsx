@@ -31,6 +31,7 @@ const MenuItemMaterial = (inProps: MenuItemProps & MenuItemMaterialProps) => {
 			ref={props.focusRef}
 			onClick={props.onClick}
 			onAuxClick={props.onAuxClick}
+			{...props.ariaAttributes}
 			selected={props.active}
 		>
 			<ListItemIcon>{Icon && <Icon />}</ListItemIcon>

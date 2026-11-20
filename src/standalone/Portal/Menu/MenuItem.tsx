@@ -11,7 +11,7 @@ import { Collapse } from "@mui/material";
 
 interface MenuItemControllerProps extends Omit<
 	MenuItemProps,
-	"expanded" | "active"
+	"expanded" | "active" | "ariaAttributes"
 > {
 	/**
 	 * The menu item renderer properties
@@ -50,6 +50,13 @@ export const MenuEntryElementsContext = React.createContext<Map<
 	string,
 	HTMLElement
 > | null>(null);
+
+// the renderers' ariaAttributes, static so their memo holds
+type EntryAriaAttributes = NonNullable<MenuItemProps["ariaAttributes"]>;
+const GROUP_EXPANDED: EntryAriaAttributes = { "aria-expanded": true };
+const GROUP_COLLAPSED: EntryAriaAttributes = { "aria-expanded": false };
+const CURRENT_PAGE: EntryAriaAttributes = { "aria-current": "page" };
+const NO_STATE: EntryAriaAttributes = {};
 
 const MenuItem = (props: MenuItemControllerProps) => {
 	const {
@@ -104,6 +111,7 @@ const MenuItem = (props: MenuItemControllerProps) => {
 		setExpanded(true);
 	}
 
+	const active = !expandable && menuState === menuItemId;
 	const Renderer = props.menuProps.menuItem;
 	return (
 		<>
@@ -112,11 +120,20 @@ const MenuItem = (props: MenuItemControllerProps) => {
 				title={title}
 				expandable={expandable}
 				expanded={expandable ? expanded : undefined}
-				active={expandable ? undefined : menuState === menuItemId}
+				active={expandable ? undefined : active}
 				onClick={clickProxy}
 				onAuxClick={auxClickProxy}
 				depth={depth}
 				focusRef={focusRef}
+				ariaAttributes={
+					expandable
+						? expanded
+							? GROUP_EXPANDED
+							: GROUP_COLLAPSED
+						: active
+							? CURRENT_PAGE
+							: NO_STATE
+				}
 			/>
 			{expandable && (
 				<Collapse in={expanded} className={props.childWrapperClassName}>
