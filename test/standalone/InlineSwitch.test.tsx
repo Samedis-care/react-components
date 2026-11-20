@@ -108,6 +108,43 @@ describe("InlineSwitch", () => {
 	});
 });
 
+describe("InlineSwitch label and name", () => {
+	it("[ISSUE-3465-ITEM-10] an aria-label given to InlineSwitch names a switch without label", () => {
+		renderSwitch(
+			<InlineSwitch
+				value={false}
+				visible
+				aria-label="Show inactive entries"
+				onChange={vi.fn()}
+			/>,
+		);
+		expect(screen.getByRole("switch")).toHaveAccessibleName(
+			"Show inactive entries",
+		);
+	});
+
+	it("[ISSUE-3465-ITEM-10] inputProps reach the switch input, so it can have an id, a name and a description", () => {
+		renderSwitch(
+			<>
+				<span id="switch-help">Only inactive entries are listed</span>
+				<InlineSwitch
+					value={false}
+					visible
+					inputProps={{
+						id: "show-inactive",
+						name: "inactive",
+						"aria-describedby": "switch-help",
+					}}
+				/>
+			</>,
+		);
+		const sw = screen.getByRole("switch");
+		expect(sw).toHaveAttribute("id", "show-inactive");
+		expect(sw).toHaveAttribute("name", "inactive");
+		expect(sw).toHaveAccessibleDescription("Only inactive entries are listed");
+	});
+});
+
 describe("InlineSwitch styling and theme", () => {
 	it("[ISSUE-3465-ITEM-3] classes.switch lands on the switch", () => {
 		const { container } = renderSwitch(

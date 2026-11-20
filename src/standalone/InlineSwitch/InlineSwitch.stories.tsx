@@ -86,6 +86,21 @@ export const NoLabel: Story = {
 	},
 };
 
+export const Issue3465Item10SwitchWithoutLabelIsNamed: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3465-ITEM-10: a switch without `label` has no accessible name (axe "label", critical), and an `aria-label` given to InlineSwitch is dropped. Expected: a way to name the switch without a visible label (or a required label).',
+			},
+		},
+	},
+	render: (args) => (
+		<InlineSwitch {...args} aria-label="Show inactive entries" />
+	),
+};
+
 // Controlled interactive story
 const ControlledTemplate = () => {
 	const [checked, setChecked] = useState(false);

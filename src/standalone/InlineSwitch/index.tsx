@@ -19,7 +19,9 @@ export interface InlineSwitchProps {
 	 */
 	visible: boolean;
 	/**
-	 * Label for switch control (only used if visible is truthy)
+	 * Label for switch control (only used if visible is truthy). It is also the
+	 * switch's accessible name; without a label, name the switch through
+	 * `inputProps` or an `aria-label` prop.
 	 */
 	label?: React.ReactNode;
 	/**
@@ -41,6 +43,15 @@ export interface InlineSwitchProps {
 	 * switch's root, MUI's `.MuiSwitch-root`)
 	 */
 	classes?: Partial<Record<InlineSwitchClassKey, string>>;
+	/**
+	 * Attributes for the switch's `<input>` (the element with role `switch`):
+	 * `aria-label` names a switch that has no `label`, `aria-describedby` links
+	 * help text, and `id` and `name` identify it in a form. Props that are not
+	 * InlineSwitch's own are forwarded here as well, so
+	 * `<InlineSwitch aria-label="Show inactive entries" />` names the switch
+	 * too.
+	 */
+	inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
 }
 
 const AntSwitch = styled(Switch, { name: "CcInlineSwitch", slot: "switch" })(
@@ -142,6 +153,8 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 		children,
 		classes,
 		className,
+		inputProps,
+		...inputAttributes
 	} = props;
 
 	const handleSwitchChange = useCallback(
@@ -186,6 +199,10 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 								disabled={disabled}
 								// the focus ring shows focus; the ripple would pulse under it endlessly
 								disableFocusRipple
+								// name, description and form identity belong to the input, not
+								// the switch's root span; props InlineSwitch does not know (a
+								// JSX `aria-label`) land here too
+								slotProps={{ input: { ...inputAttributes, ...inputProps } }}
 							/>
 						</Grid>
 						<Grid>{label}</Grid>
