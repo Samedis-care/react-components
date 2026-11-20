@@ -10,7 +10,7 @@ import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import moment, { type Moment } from "moment";
 import { ThemeProvider, createTheme } from "@mui/material";
-import { FormHelperTextCC } from "../UIKit/MuiFieldState";
+import { FormHelperTextCC, TextFieldCC } from "../UIKit/MuiFieldState";
 
 // Minimal i18next initialisation so that useCCTranslations does not throw.
 // Only initialise once; Storybook hot-reloads the module so guard with isInitialized.
@@ -287,35 +287,40 @@ export const Issue3474Item19WarningTextContrastInAYellowTheme: StoryObj = {
 export const Issue3474Item9WarningOutlinesThePicker: StoryObj = {
 	name: "ISSUE-3474-ITEM-9: warning and dirty style the picker's outline",
 	parameters: {
-		a11y: {
-			test: "error",
-			config: {
-				// the warning label's contrast is ISSUE-3474-ITEM-19 (Issue3474Item19WarningLabelContrast)
-				rules: [{ id: "color-contrast", enabled: false }],
-			},
-		},
+		a11y: { test: "error" },
 		docs: {
 			description: {
 				story:
-					"ISSUE-3474-ITEM-9: with `warning` the label turns orange but the outline stays grey, and with `dirty` the dot after the label sits on the border, because the field-state styles target `MuiOutlinedInput` and the pickers render `MuiPickersOutlinedInput`.",
+					"ISSUE-3474-ITEM-9: with `warning` the label turns orange but the outline stays grey, and with `dirty` the dot after the label sits on the border, because the field-state styles target `MuiOutlinedInput` and the pickers render `MuiPickersOutlinedInput`. The outline keeps the warning colour while the field is focused, as a text field's does.",
 			},
 		},
 	},
 	render: () => (
-		<LocalizedKeyboardDatePicker
-			label="Due date"
-			value={moment("2026-08-01")}
-			onChange={() => {}}
-			warning
-			dirty
-		/>
+		<div>
+			<LocalizedKeyboardDatePicker
+				label="Due date"
+				value={moment("2026-08-01")}
+				onChange={() => {}}
+				warning
+				dirty
+			/>
+			{/* the text field the picker has to look like */}
+			<TextFieldCC
+				label="Text field"
+				value="08/01/2026"
+				onChange={() => {}}
+				warning
+			/>
+		</div>
 	),
-	play: async ({ canvasElement }) => {
+	play: async ({ canvas, canvasElement, userEvent }) => {
 		const outline = canvasElement.querySelector(
 			".MuiPickersOutlinedInput-notchedOutline",
 		)!;
 		const label = canvasElement.querySelector(".MuiFormLabel-root")!;
-		const gap = outline.querySelector("legend > span")!;
+		// the legend is the gap in the border; the span inside it is only its copy
+		// of the label, and a margin on that copy sits outside the span's own box
+		const gap = outline.querySelector("legend")!;
 		// both halves in one assertion, so the failure shows each of them
 		await expect({
 			outline: getComputedStyle(outline).borderColor,
@@ -323,6 +328,20 @@ export const Issue3474Item9WarningOutlinesThePicker: StoryObj = {
 			labelOverhangsGap:
 				label.getBoundingClientRect().right > gap.getBoundingClientRect().right,
 		}).toEqual({ outline: "rgb(237, 108, 2)", labelOverhangsGap: false });
+
+		// a focused warning field keeps the warning colour, on the text field and
+		// on the picker alike; the input's own focus rule would paint it primary
+		const focused = (notchedOutline: Element) => ({
+			color: getComputedStyle(notchedOutline).borderColor,
+			width: getComputedStyle(notchedOutline).borderWidth,
+		});
+		const WARNING_2PX = { color: "rgb(237, 108, 2)", width: "2px" };
+		await userEvent.click(canvas.getByRole("textbox", { name: "Text field" }));
+		await expect(
+			focused(canvasElement.querySelector(".MuiOutlinedInput-notchedOutline")!),
+		).toEqual(WARNING_2PX);
+		await userEvent.click(canvas.getAllByRole("spinbutton")[0]);
+		await expect(focused(outline)).toEqual(WARNING_2PX);
 	},
 };
 
@@ -332,6 +351,11 @@ export const Issue3474Item9WarningStylesTheUnderlines: StoryObj = {
 		a11y: {
 			test: "error",
 			config: {
+				// the filled picker's warning label sits on the input's grey fill:
+				// #c15801 on rgba(0, 0, 0, 0.06) over white is 3.95:1, below the
+				// 4.5:1 text needs. That is the filled variant's own contrast, not
+				// the underline this story is about; listed as a follow-up on
+				// ISSUE-3474, and the same on a filled TextFieldCC
 				rules: [{ id: "color-contrast", enabled: false }],
 			},
 		},

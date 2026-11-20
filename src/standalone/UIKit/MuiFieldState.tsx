@@ -201,20 +201,11 @@ export const withMuiFieldState = <T extends MuiFieldStateSourceProps>(
 			// way, and the empty one — a control whose label sits outside the input, as
 			// every selector's does — would become a gap in the border with nothing in
 			// it. Margin rather than padding, to leave MUI's own side padding alone.
-			"& > .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline legend > span:not(.notranslate)":
+			// The pickers draw their own outlined input and legend, which hold the same
+			// copy with the same 5px side padding, so the same margin leaves the same gap.
+			"& > .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline legend > span:not(.notranslate), & > .MuiPickersOutlinedInput-root .MuiPickersOutlinedInput-notchedOutline legend > span:not(.notranslate)":
 				{
 					marginInlineEnd: DIRTY_MARKER_WIDTH,
-				},
-			// The pickers draw their own outlined input, with its own class names. Their
-			// legend holds the same copy of the label, but set at the legend's font size
-			// instead of through the label's transform, so its text comes out a little
-			// narrower than the label it stands in for and the gap has to reach that much
-			// further past the dot. Padding rather than a margin here: the copy's own 5px
-			// side padding is part of what is measured, and the two together leave the
-			// same gap in the border MUI's own legend has.
-			"& > .MuiPickersOutlinedInput-root .MuiPickersOutlinedInput-notchedOutline legend > span:not(.notranslate)":
-				{
-					paddingInlineEnd: DIRTY_MARKER_WIDTH + 5,
 				},
 		}),
 		...(warning && {
@@ -261,7 +252,13 @@ export const withMuiFieldState = <T extends MuiFieldStateSourceProps>(
 			"&.MuiFormHelperText-root.Mui-error": {
 				color: theme.palette.error.main,
 			},
-			"& > .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline, & > .MuiPickersOutlinedInput-root .MuiPickersOutlinedInput-notchedOutline":
+			// Outranks the input's own focus and hover rules, as MUI's error rule
+			// outranks its colour variants. Without that, the warning rule and MUI's
+			// focus rule would weigh the same, and the one emotion inserted last would
+			// win — x-date-pickers' focus rule weighs more already, so a focused picker
+			// would go back to the primary outline. `:not(.Mui-error)` leaves error
+			// red, which the rule below draws.
+			"& > .MuiInputBase-root.MuiOutlinedInput-root:not(.Mui-error) .MuiOutlinedInput-notchedOutline, & > .MuiPickersInputBase-root.MuiPickersOutlinedInput-root:not(.Mui-error) .MuiPickersOutlinedInput-notchedOutline":
 				{
 					borderColor: theme.palette.warning.main,
 				},
