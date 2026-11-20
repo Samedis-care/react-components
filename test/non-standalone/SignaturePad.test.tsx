@@ -1,37 +1,18 @@
 import React from "react";
 import fs from "node:fs";
 import path from "node:path";
-import {
-	describe,
-	it,
-	expect,
-	vi,
-	afterEach,
-	beforeAll,
-	beforeEach,
-} from "vitest";
-import {
-	render,
-	screen,
-	fireEvent,
-	cleanup,
-	waitFor,
-	within,
-} from "@testing-library/react";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryHistory } from "history";
 import { setFrameworkHistory } from "../../src/framework/History";
-import DialogContextProvider, {
-	useDialogContext,
-} from "../../src/framework/DialogContextProvider";
+import DialogContextProvider, { useDialogContext } from "../../src/framework/DialogContextProvider";
 import ccI18n from "../../src/i18n";
-import { ThemeProvider, createTheme } from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material";
 
 import SignaturePad from "../../src/non-standalone/SignaturePad/SignaturePad";
-import {
-	SignDialog,
-	SignPadDialogProps,
-} from "../../src/non-standalone/Dialog/SignPadDialog";
+import { SignDialog, SignPadDialogProps } from "../../src/non-standalone/Dialog/SignPadDialog";
+import React, { useState } from "react";
 
 // The real canvas wrapper cannot mount in jsdom (its CJS build does not
 // interoperate with signature_pad's UMD), and jsdom has no 2d context. The fake
@@ -43,6 +24,7 @@ const pad = vi.hoisted(() => ({
 	touch: false,
 	props: [] as Record<string, unknown>[],
 }));
+
 vi.mock("react-signature-pad-wrapper", async () => {
 	const R = await import("react");
 	class FakePad extends R.Component<Record<string, unknown>> {
@@ -66,6 +48,7 @@ vi.mock("react-signature-pad-wrapper", async () => {
 	}
 	return { default: FakePad };
 });
+
 // jsdom is a touch device ("ontouchstart" in window), which disables backdrop clicks
 vi.mock("../../src/utils/isTouchDevice", () => ({ default: () => pad.touch }));
 
@@ -76,12 +59,14 @@ beforeAll(async () => {
 	setFrameworkHistory(createMemoryHistory());
 	await ccI18n.loadNamespaces("translation");
 });
+
 beforeEach(() => {
 	pad.empty = true;
 	pad.clears = 0;
 	pad.touch = false;
 	pad.props.length = 0;
 });
+
 afterEach(() => {
 	cleanup();
 	vi.restoreAllMocks();
@@ -96,9 +81,15 @@ const tile = () => {
 	if (!(el instanceof HTMLElement)) throw new Error("tile missing");
 	return el;
 };
+
 const openPad = () => fireEvent.click(tile());
+
 const dialog = () => screen.getByRole("dialog");
+
+const title = () => within(dialog()).getByRole("heading", { level: 2 });
+
 const button = (name: string) => screen.getByRole("button", { name });
+
 const canvasIn = (el: HTMLElement) => el.querySelector("canvas");
 
 /** The part of a locale's translation.json with the sign dialog's texts */
@@ -107,6 +98,8 @@ interface SignPadTranslation {
 		"signature-pad": { dialog: Record<string, string | undefined> };
 	};
 }
+
+const lastPadProps = () => pad.props[pad.props.length - 1];
 
 /** pushes a SignDialog, as SignaturePad and SCF's auto-open do */
 const Opener = (props: SignPadDialogProps) => {
@@ -177,6 +170,25 @@ describe("SignaturePad", () => {
 		expect(activator).not.toHaveAttribute("aria-disabled");
 		fireEvent.click(activator);
 		expect(dialog()).toBeInTheDocument();
+	});
+	it("[ISSUE-3467-ITEM-10] the open dialog follows a signer name that arrives after it opened", () => {
+		const Host = () => {
+			const [name, setName] = useState<string | null>(null);
+			return (
+				<>
+					<button onClick={() => setName("Bob")}>load name</button>
+					<SignaturePad signature="" signerName={name} />
+				</>
+			);
+		};
+		withDialogs(<Host />);
+		openPad();
+		expect(title()).toHaveTextContent("Sign Here");
+		// the modal makes the rest of the page inert for user-event, not for fireEvent
+		fireEvent.click(screen.getByText("load name"));
+		expect(title().textContent, "title after the name arrived").toBe(
+			"Sign here (Bob)",
+		);
 	});
 });
 
@@ -250,7 +262,6 @@ describe("SignDialog accessibility", () => {
 			"the off-screen input is exposed to assistive technology",
 		).toBeNull();
 	});
-
 	it("[ISSUE-3467-ITEM-16] over an empty canvas too, Tab skips the off-screen input, and closing still reports a blur named after the field", async () => {
 		// what a Form's handleBlur reads: the name or data-name of currentTarget
 		const names: (string | null)[] = [];
@@ -276,7 +287,6 @@ describe("SignDialog accessibility", () => {
 			"sig",
 		);
 	});
-
 	it("[ISSUE-3467-ITEM-18] the drawing area is an image named Signature area, and the dialog says how to sign", () => {
 		withDialogs(<SignaturePad signature={null} />);
 		openPad();
@@ -287,7 +297,6 @@ describe("SignDialog accessibility", () => {
 			"Draw your signature in the signature area with a mouse, pen or finger.",
 		);
 	});
-
 	it("[ISSUE-3467-ITEM-18] over a stored signature, the dialog says to clear it before signing again, and once cleared how to sign", async () => {
 		withDialogs(<SignaturePad signature={SIG} />);
 		openPad();
@@ -306,7 +315,6 @@ describe("SignDialog accessibility", () => {
 			"Draw your signature in the signature area with a mouse, pen or finger.",
 		);
 	});
-
 	it("[ISSUE-3467-ITEM-18] every locale names the sign area and has both instructions", () => {
 		const i18nDir = path.resolve(__dirname, "../../src/assets/i18n");
 		const keys = ["sign-area", "instructions", "instructions-signed"];
@@ -326,5 +334,136 @@ describe("SignDialog accessibility", () => {
 					.map((key) => `${entry.name}: ${key}`);
 			});
 		expect(missing).toEqual([]);
+	});
+});
+
+describe("SignDialog with props changing while open", () => {
+	it("[ISSUE-3467-ITEM-10] the open dialog closes when its pad unmounts", async () => {
+		const Host = () => {
+			const [show, setShow] = useState(true);
+			return (
+				<>
+					<button onClick={() => setShow(false)}>hide</button>
+					{show && <SignaturePad signature={SIG} />}
+				</>
+			);
+		};
+		withDialogs(<Host />);
+		openPad();
+		expect(dialog()).toBeInTheDocument();
+		// the modal makes the rest of the page inert for user-event, not for fireEvent
+		fireEvent.click(screen.getByText("hide"));
+		await waitFor(() =>
+			expect(document.querySelector('[class*="CcSignPad-root"]')).toBeNull(),
+		);
+		expect(
+			screen.queryByRole("dialog"),
+			"the sign dialog is still open after its pad unmounted",
+		).toBeNull();
+	});
+
+	it("[ISSUE-3467-ITEM-10] Save in the open dialog stores through the current setSignature, and the dialog shows the current value", () => {
+		const SIG2 = "data:image/png;base64,U0VDT05E";
+		const setOld = vi.fn();
+		const setNew = vi.fn();
+		const { rerender } = withDialogs(
+			<SignaturePad signature={SIG} setSignature={setOld} />,
+		);
+		openPad();
+		rerender(
+			<DialogContextProvider>
+				<SignaturePad signature={SIG2} setSignature={setNew} />
+			</DialogContextProvider>,
+		);
+		expect(
+			within(dialog()).getByRole("img", { name: "Signature" }),
+			"the stored signature the open dialog shows",
+		).toHaveAttribute("src", SIG2);
+		fireEvent.click(button("Save Changes"));
+		expect(setOld, "the setSignature of the click").not.toHaveBeenCalled();
+		expect(setNew).toHaveBeenCalledExactlyOnceWith(SIG2);
+	});
+
+	it("[ISSUE-3467-ITEM-10] a pad disabled while its dialog is open closes the dialog with nothing saved, returns focus to the tile and stays closed when enabled again", () => {
+		const set = vi.fn();
+		const { rerender } = withDialogs(
+			<SignaturePad signature="" setSignature={set} />,
+		);
+		const activator = screen.getByRole("button");
+		activator.focus();
+		fireEvent.click(activator);
+		expect(dialog()).toBeInTheDocument();
+		pad.empty = false;
+		rerender(
+			<DialogContextProvider>
+				<SignaturePad signature="" setSignature={set} disabled />
+			</DialogContextProvider>,
+		);
+		expect(
+			screen.queryByRole("dialog"),
+			"the dialog of a disabled pad",
+		).toBeNull();
+		expect(set).not.toHaveBeenCalled();
+		expect(document.activeElement, "focus after the dialog closed").toBe(
+			activator,
+		);
+		rerender(
+			<DialogContextProvider>
+				<SignaturePad signature="" setSignature={set} />
+			</DialogContextProvider>,
+		);
+		expect(screen.queryByRole("dialog")).toBeNull();
+	});
+
+	it("[ISSUE-3467-ITEM-10] contexts around the pad reach its dialog: a theme's CcSignPadDialog defaults", () => {
+		const theme = createTheme({
+			components: { CcSignPadDialog: { defaultProps: { penColor: "green" } } },
+		});
+		withDialogs(
+			<ThemeProvider theme={theme}>
+				<SignaturePad signature="" />
+			</ThemeProvider>,
+		);
+		openPad();
+		expect(lastPadProps().options).toEqual({ penColor: "green" });
+	});
+
+	it("[ISSUE-3467-ITEM-10] the Clear confirmation closes with its pad too", async () => {
+		const Host = () => {
+			const [show, setShow] = useState(true);
+			return (
+				<>
+					<button onClick={() => setShow(false)}>hide</button>
+					{show && <SignaturePad signature={SIG} />}
+				</>
+			);
+		};
+		withDialogs(<Host />);
+		openPad();
+		fireEvent.click(button("Clear signature"));
+		await screen.findByRole("dialog", { name: "Clear signature" });
+		fireEvent.click(screen.getByText("hide"));
+		await waitFor(() =>
+			expect(document.querySelector('[class*="CcSignPad-root"]')).toBeNull(),
+		);
+		expect(
+			document.querySelectorAll('[role="dialog"]'),
+			"dialogs left open after the pad unmounted",
+		).toHaveLength(0);
+	});
+
+	it("[ISSUE-3467-ITEM-10] needs no DialogContextProvider: the dialog and its Clear confirmation render from the pad", async () => {
+		const set = vi.fn();
+		render(<SignaturePad signature={SIG} setSignature={set} />);
+		openPad();
+		fireEvent.click(button("Clear signature"));
+		const confirm = await screen.findByRole("dialog", {
+			name: "Clear signature",
+		});
+		fireEvent.click(within(confirm).getByRole("button", { name: "Yes" }));
+		await waitFor(() => expect(canvasIn(dialog())).not.toBeNull());
+		fireEvent.click(button("Save Changes"));
+		expect(set).toHaveBeenCalledExactlyOnceWith("");
+		expect(screen.queryByRole("dialog")).toBeNull();
 	});
 });
