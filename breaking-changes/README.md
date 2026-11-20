@@ -46,6 +46,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-20 | [An open InfoBox keeps its 48px header and has no margin; every InfoBox is rounded](2026-11-20-info-box-no-gutters-rounded-corners.md) | behavior |
 | 2026-11-20 | [Model reports its errors through configureErrorReporting](2026-11-20-model-reports-through-error-reporting.md) | behavior |
 | 2026-11-20 | [CrudMultiSelectWithGroups shows which entries were added and removed until they are saved](2026-11-20-crud-multi-select-with-groups-pending-changes.md) | behavior, type |
+| 2026-11-20 | [SentryHistory is removed](2026-11-20-sentry-history-removed.md) | type |
 | 2026-11-20 | [A lazy control's queue keeps the Form dirty when onlySubmitMounted changes while it is shown](2026-11-20-lazy-crud-connector-only-submit-mounted-change.md) | behavior |
 | 2026-11-20 | [A control in a DataGrid cell is named after its field and row](2026-11-20-data-grid-inline-checkbox-names.md) | behavior |
 | 2026-11-20 | [InlineSwitch takes aria props for its switch, and a selector's switch requires switchLabel](2026-11-20-inline-switch-name-and-switch-label.md) | behavior, type |

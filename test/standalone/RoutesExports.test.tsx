@@ -72,6 +72,14 @@ describe("Routes exports", () => {
 		}
 	}, 90000);
 
+	it("[ISSUE-3475-ITEM-29] no longer exports SentryHistory from the package root", async () => {
+		const root = (await import("../../src")) as Record<string, unknown>;
+		expect(root).not.toHaveProperty("SentryHistory");
+		// FrameworkHistory, which it wrapped, stays
+		expect(root).toHaveProperty("FrameworkHistory");
+		expect(root).toHaveProperty("setFrameworkHistory");
+	}, 90000);
+
 	it("[ISSUE-3475-ITEM-27] exports the props, option and context types from the package root", () => {
 		// checked by tsc (tsconfig-test.json), not at runtime
 		expectTypeOf<PackageRoot.RouteProps>().toEqualTypeOf<RouteProps>();
