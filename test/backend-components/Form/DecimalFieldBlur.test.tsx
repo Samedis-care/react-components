@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import React from "react";
-import { fireEvent } from "@testing-library/react";
+import { fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import FormField from "../../../src/backend-components/Form/Field";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import { ModelDataTypeDecimalRendererCC } from "../../../src/backend-integration";
@@ -85,5 +86,35 @@ describe("Form with a decimal field", () => {
 
 		expect(sink.ctx!.values.hours).toBe(10);
 		expect(input).toHaveValue("10");
+	});
+
+	it("[ISSUE-3484-ITEM-19] Enter in the form's only text field saves the typed number", async () => {
+		const user = userEvent.setup();
+		const [first, ...rest] = recordData();
+		const connector = new MockConnector([{ ...first, hours: 1 }, ...rest]);
+		const update = vi.spyOn(connector, "update");
+		const model = makeModel({}, connector, {
+			hours: {
+				type: new ModelDataTypeDecimalRendererCC(),
+				getLabel: () => "Hours",
+				visibility: editRequired,
+				customData: null,
+			},
+		});
+		const sink: Sink = {};
+		const { container } = mountForm(
+			model,
+			capture(sink, () => <FormField name={"hours"} />),
+		);
+		await loaded(sink);
+		const input = inputOf(container, "hours");
+
+		// a form with one text field submits on Enter, without a blur
+		await user.clear(input);
+		await user.type(input, "7.5{Enter}");
+		await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+
+		expect(update.mock.calls[0][0].hours).toBe(7.5);
+		expect(input).toHaveFocus();
 	});
 });

@@ -1395,7 +1395,136 @@ describe("DecimalInputField", () => {
 	});
 });
 
+type CommonProps = Omit<
+	React.ComponentProps<typeof DecimalInputField>,
+	"format"
+>;
+const INPUTS: [
+	string,
+	(props: CommonProps) => React.ReactElement,
+	"decimal" | "numeric",
+][] = [
+	[
+		"CurrencyInput",
+		(props) => <CurrencyInput currency="EUR" {...props} />,
+		"decimal",
+	],
+	["DecimalInputField", (props) => <DecimalInputField {...props} />, "decimal"],
+	["IntegerInputField", (props) => <IntegerInputField {...props} />, "numeric"],
+];
+
 describe("all three number inputs", () => {
+	describe("Enter in a form", () => {
+		/** a form with a submit button that records the value it submits */
+		const SubmitHost = function SubmitHost(props: {
+			make: (props: CommonProps) => React.ReactElement;
+			onSubmit: (value: number | null) => void;
+		}) {
+			const { make, onSubmit } = props;
+			const [value, setValue] = useState<number | null>(1);
+			return (
+				<form
+					onSubmit={(evt) => {
+						evt.preventDefault();
+						onSubmit(value);
+					}}
+				>
+					{make({
+						label: "Qty",
+						value,
+						onChange: (_evt, next) => setValue(next),
+					})}
+					<button type="submit">Save</button>
+				</form>
+			);
+		};
+
+		it("IntegerInputField submits the typed number", async () => {
+			const user = userEvent.setup();
+			const onSubmit = vi.fn();
+			render(<SubmitHost make={INPUTS[2][1]} onSubmit={onSubmit} />);
+			await user.clear(field("Qty"));
+			await user.type(field("Qty"), "75{Enter}");
+			expect(onSubmit).toHaveBeenCalledWith(75);
+		});
+
+		it.each(INPUTS.slice(0, 2))(
+			"[ISSUE-3484-ITEM-19] %s submits the typed number",
+			async (_name, make) => {
+				const user = userEvent.setup();
+				const onSubmit = vi.fn();
+				render(<SubmitHost make={make} onSubmit={onSubmit} />);
+				await user.clear(field("Qty"));
+				await user.type(field("Qty"), "7.5{Enter}");
+				expect(onSubmit).toHaveBeenCalledWith(7.5);
+			},
+		);
+
+		const COMMITTED: [
+			string,
+			(props: CommonProps) => React.ReactElement,
+			string,
+		][] = [
+			["CurrencyInput", INPUTS[0][1], "€7.50"],
+			["DecimalInputField", INPUTS[1][1], "7.5"],
+		];
+
+		it.each(COMMITTED)(
+			"[ISSUE-3484-ITEM-19] %s commits an edit once on Enter, without onBlur, and shows the value the parent keeps",
+			(_name, make, shown) => {
+				const onValue: ValueSpy = vi.fn();
+				const onBlur = vi.fn();
+				render(
+					<Controlled initial={1} onValue={onValue}>
+						{(value, onChange) =>
+							make({ label: "Qty", name: "qty", value, onChange, onBlur })
+						}
+					</Controlled>,
+				);
+				const input = field("Qty");
+				fireEvent.focus(input);
+				fireEvent.change(input, { target: { value: "7.5" } });
+				fireEvent.keyDown(input, { key: "Enter" });
+				// the event's target is the input, as the model renderers read its name
+				expect(onValue.mock.calls).toEqual([[7.5, "qty"]]);
+				expect(onBlur).not.toHaveBeenCalled();
+				expect(input).toHaveValue(shown);
+				// a second Enter and the blur after it have no edit to commit
+				fireEvent.keyDown(input, { key: "Enter" });
+				fireEvent.blur(input);
+				expect(reported(onValue)).toEqual([7.5]);
+				expect(onBlur).toHaveBeenCalledTimes(1);
+			},
+		);
+
+		it.each(INPUTS.slice(0, 2))(
+			"[ISSUE-3484-ITEM-19] %s commits nothing on Enter that ends an IME composition or presses the touch Clear, and passes every keydown on",
+			(_name, make) => {
+				env.touch = true;
+				const onValue: ValueSpy = vi.fn();
+				const onKeyDown = vi.fn();
+				render(
+					<Controlled initial={1} onValue={onValue}>
+						{(value, onChange) =>
+							make({ label: "Qty", value, onChange, onKeyDown })
+						}
+					</Controlled>,
+				);
+				const input = field("Qty");
+				fireEvent.change(input, { target: { value: "7.5" } });
+				fireEvent.keyDown(input, { key: "Enter", isComposing: true });
+				fireEvent.keyDown(screen.getByRole("button", { name: "Clear" }), {
+					key: "Enter",
+				});
+				expect(reported(onValue)).toEqual([]);
+				expect(input).toHaveValue("7.5");
+				fireEvent.keyDown(input, { key: "Enter" });
+				expect(reported(onValue)).toEqual([7.5]);
+				expect(onKeyDown).toHaveBeenCalledTimes(3);
+			},
+		);
+	});
+
 	it("[ISSUE-3484-ITEM-23] shows no Clear button on a touch device while the input is disabled through slotProps.htmlInput", () => {
 		env.touch = true;
 		// SCF's display-only cost total (DeviceTaskCostFields)

@@ -6,6 +6,7 @@ import TextFieldWithHelp, {
 import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
 import useCurrentLocale from "../../../utils/useCurrentLocale";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import useCommitOnEnter from "../../../utils/internal/useCommitOnEnter";
 
 export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 	/**
@@ -24,13 +25,17 @@ export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 	 */
 	format?: Intl.NumberFormatOptions;
 	/**
-	 * Called on the blur after the user edited the text, with the parsed text.
-	 * Typing alone, and a blur without an edit, never call it. Not called when
-	 * the text does not parse (a separator without a digit, such as `"."`):
-	 * the field keeps the text and the previous value, and shows a message in
-	 * place of `helperText` until a valid edit or a new `value`.
-	 * @param evt The blur event, although typed as a change event;
-	 * `evt.target.name` is the input's `name`
+	 * Called on the blur after the user edited the text, with the parsed text,
+	 * and on Enter after an edit, before a form around the field submits (the
+	 * field then shows the value the parent keeps, as after a blur, and the
+	 * next blur calls it only after a further edit). Typing alone, and a blur
+	 * or Enter without an edit, never call it. Not called when the text does
+	 * not parse (a separator without a digit, such as `"."`): the field keeps
+	 * the text and the previous value, and shows a message in place of
+	 * `helperText` until a valid edit or a new `value`.
+	 * @param evt The blur event, or the keydown event of Enter, although typed
+	 * as a change event; `evt.target` is the input, so `evt.target.name` is its
+	 * `name`
 	 * @param value The number; `null` for an empty field or text without a digit
 	 */
 	onChange?: (
@@ -42,7 +47,7 @@ export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 const DecimalInputField = (
 	props: DecimalInputFieldProps & Omit<TextFieldProps, "onChange" | "value">,
 ) => {
-	const { value, onChange, onBlur, format, ...muiProps } = props;
+	const { value, onChange, onBlur, onKeyDown, format, ...muiProps } = props;
 	const { t } = useCCTranslations();
 	const locale = useCurrentLocale();
 	// the text typed since the last commit, or null while the field is not edited. Only
@@ -64,9 +69,14 @@ const DecimalInputField = (
 	const text =
 		draft ?? (value !== null ? value.toLocaleString(locale, format) : "");
 
-	const handleBlur = useCallback(
-		(event: React.FocusEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-			if (onBlur) onBlur(event);
+	// commits an edit: on the blur after it, and on Enter, as Enter in a form's input submits
+	// the form without a blur
+	const commit = useCallback(
+		(
+			event: React.SyntheticEvent & {
+				target: HTMLTextAreaElement | HTMLInputElement;
+			},
+		) => {
 			if (draft === null || !onChange) return;
 			const parsed = parseLocalizedNumber(event.target.value);
 			if (parsed !== null && Number.isNaN(parsed)) {
@@ -77,10 +87,23 @@ const DecimalInputField = (
 			setParseError(false);
 			// shows the value the parent keeps from here on, even when it does not change
 			setDraft(null);
-			onChange(event, parsed);
+			onChange(
+				event as React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+				parsed,
+			);
 		},
-		[draft, onBlur, onChange],
+		[draft, onChange],
 	);
+
+	const handleBlur = useCallback(
+		(event: React.FocusEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+			if (onBlur) onBlur(event);
+			commit(event);
+		},
+		[commit, onBlur],
+	);
+
+	const handleKeyDown = useCommitOnEnter(commit, onKeyDown);
 
 	// on change handling
 	const handleChange = useCallback(
@@ -96,6 +119,7 @@ const DecimalInputField = (
 			value={text}
 			onChange={handleChange}
 			onBlur={handleBlur}
+			onKeyDown={handleKeyDown}
 			error={parseError || muiProps.error}
 			helperText={
 				parseError

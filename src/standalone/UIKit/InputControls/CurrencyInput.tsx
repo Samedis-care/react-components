@@ -6,6 +6,7 @@ import TextFieldWithHelp, {
 import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
 import useCurrentLocale from "../../../utils/useCurrentLocale";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import useCommitOnEnter from "../../../utils/internal/useCommitOnEnter";
 
 export interface CurrencyInputProps extends TextFieldWithHelpProps {
 	/**
@@ -20,12 +21,16 @@ export interface CurrencyInputProps extends TextFieldWithHelpProps {
 	 * Called once on the blur after the user edited the text, with the amount
 	 * rounded to the currency's minor units, or `null` for an emptied field
 	 * (nothing but the currency symbol left counts as empty).
+	 * Enter after an edit calls it too, before a form around the field submits:
+	 * the field then shows the amount the parent keeps, as after a blur, and
+	 * the next blur calls it only after a further edit.
 	 * Typing does not call it, emptying the field and the touch Clear button
-	 * included, and neither does a blur without an edit. `onBlur`, if given,
-	 * runs first. Not called when the text is no number (`"abc"`, `"-"`, `"."`):
-	 * the field keeps the previous amount and shows a message in place of
-	 * `helperText` until a valid edit or a new `value`, `currency` or language.
-	 * @param evt The last change event of the edit, not the blur event
+	 * included, and neither does a blur or Enter without an edit. `onBlur`, if
+	 * given, runs first on a blur. Not called when the text is no number
+	 * (`"abc"`, `"-"`, `"."`): the field keeps the previous amount and shows a
+	 * message in place of `helperText` until a valid edit or a new `value`,
+	 * `currency` or language.
+	 * @param evt The last change event of the edit, not the blur or keydown event
 	 * @param value The amount, or `null` for an empty field
 	 */
 	onChange?: (
@@ -37,7 +42,7 @@ export interface CurrencyInputProps extends TextFieldWithHelpProps {
 const CurrencyInput = (
 	props: CurrencyInputProps & Omit<TextFieldProps, "onChange" | "value">,
 ) => {
-	const { value, onChange, onBlur, currency, ...muiProps } = props;
+	const { value, onChange, onBlur, onKeyDown, currency, ...muiProps } = props;
 	const { t } = useCCTranslations();
 	const locale = useCurrentLocale();
 	const numberFormatOptions: Intl.NumberFormatOptions = useMemo(
@@ -76,34 +81,41 @@ const CurrencyInput = (
 		[onChange],
 	);
 
+	// commits an edit: on the blur after it, and on Enter, as Enter in a form's input submits
+	// the form without a blur
+	const commit = useCallback(() => {
+		if (lastChangeEvent) {
+			const value = parseLocalizedNumber(valueInternal, numberFormatOptions);
+			if (value != null && isNaN(value)) {
+				setParseError(true);
+			} else if (onChange) {
+				setParseError(false);
+				const formatted = formatNumber(value);
+				// we parse here so decimal points are limited and view always matches data
+				onChange(
+					lastChangeEvent,
+					parseLocalizedNumber(formatted, numberFormatOptions),
+				);
+				setLastChangeEvent(null);
+			}
+		}
+	}, [
+		formatNumber,
+		lastChangeEvent,
+		numberFormatOptions,
+		onChange,
+		valueInternal,
+	]);
+
 	const handleBlur = useCallback(
 		(evt: React.FocusEvent<HTMLTextAreaElement | HTMLInputElement>) => {
 			if (onBlur) onBlur(evt);
-			if (lastChangeEvent) {
-				const value = parseLocalizedNumber(valueInternal, numberFormatOptions);
-				if (value != null && isNaN(value)) {
-					setParseError(true);
-				} else if (onChange) {
-					setParseError(false);
-					const formatted = formatNumber(value);
-					// we parse here so decimal points are limited and view always matches data
-					onChange(
-						lastChangeEvent,
-						parseLocalizedNumber(formatted, numberFormatOptions),
-					);
-					setLastChangeEvent(null);
-				}
-			}
+			commit();
 		},
-		[
-			formatNumber,
-			lastChangeEvent,
-			numberFormatOptions,
-			onBlur,
-			onChange,
-			valueInternal,
-		],
+		[commit, onBlur],
 	);
+
+	const handleKeyDown = useCommitOnEnter(commit, onKeyDown);
 
 	// component rendering
 	return (
@@ -112,6 +124,7 @@ const CurrencyInput = (
 			value={lastChangeEvent ? valueInternal : valueFormatted}
 			onChange={handleChange}
 			onBlur={handleBlur}
+			onKeyDown={handleKeyDown}
 			error={parseError || muiProps.error}
 			helperText={
 				parseError
