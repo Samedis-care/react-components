@@ -22,6 +22,7 @@ import { DialogContext } from "../../framework/DialogContextProvider";
 import useCCTranslations from "../../utils/useCCTranslations";
 import combineClassNames from "../../utils/combineClassNames";
 import { withMuiFieldState } from "../UIKit/MuiFieldState";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 
 export interface MultiSelectorData extends BaseSelectorData {
 	/**
@@ -42,79 +43,80 @@ export interface MultiSelectorData extends BaseSelectorData {
 	noDelete?: boolean;
 }
 
-export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
-	BaseSelectorProps<DataT, false>,
-	"multiple" | "onSelect" | "selected" | "classes"
-> {
-	/**
-	 * Extended selection change handler
-	 * @param data The selected data entry/entries
-	 */
-	onSelect?: (value: DataT[]) => void;
-	/**
-	 * The currently selected values
-	 */
-	selected: DataT[];
-	/**
-	 * The values of the entries in `selected` that were added but are not saved yet: each is
-	 * marked "Added" (MultiSelectEntryProps.changeState)
-	 * @default none
-	 */
-	added?: string[];
-	/**
-	 * Entries that were removed from the selection but are not saved yet. They are listed
-	 * after `selected` (sorted together with them by `selectedSort`), struck through and
-	 * marked "Removed", with a restore button where an entry's remove button is: restoring
-	 * one calls `onSelect` with the selection and the entry appended. Not part of the
-	 * selection otherwise: `onSelect` does not report them, and they are not offered as
-	 * options.
-	 * @remarks No restore button while disabled or read-only, as no remove button
-	 * @default none
-	 */
-	removed?: DataT[];
-	/**
-	 * Shows the selection without a way to change it, as the read-only file upload does:
-	 * the label, then the selected entries without remove buttons, or "No entries" when
-	 * none is selected. There is no search field, so nothing that looks editable: no
-	 * placeholder, popup button, end adornments or info button. The entries keep their
-	 * onClick, and the list is named by the label. Takes precedence over disabled, which
-	 * instead keeps the search field, greyed out and out of the tab order.
-	 * @default false
-	 */
-	readOnly?: boolean;
-	/**
-	 * Specify a custom component for displaying multi select items. The entries
-	 * are the items of one list (`<ul>`), so its root must be an `<li>`, e.g.
-	 * MUI's ListItem, as MultiSelectEntry renders.
-	 * @remarks With `added` or `removed` it has to show `changeState` and render
-	 *          `handleRestore`, as MultiSelectEntry does: a removed entry otherwise looks
-	 *          selected and cannot be restored.
-	 */
-	selectedEntryRenderer?: React.ComponentType<MultiSelectEntryProps<DataT>>;
-	/**
-	 * CSS class for root
-	 */
-	className?: string;
-	/**
-	 * CSS classes to apply
-	 */
-	classes?: Partial<Record<MultiSelectClassKey, string>>;
-	/**
-	 * Comparison function (as for Array.sort) for the order in which the
-	 * selected entries are listed. It sorts a copy for display only: `selected`
-	 * is not changed (it may be frozen), and `onSelect` reports the entries in
-	 * `selected`'s order. Without it the entries are listed in `selected`'s
-	 * order.
-	 * @remarks This is a comparison function
-	 * @see Array.sort
-	 */
-	selectedSort?: (a: DataT, b: DataT) => number;
-	/**
-	 * Provide generic confirm remove/delete dialog when set to true.
-	 * @default false
-	 */
-	confirmDelete?: boolean;
-}
+export type MultiSelectProps<DataT extends MultiSelectorData> =
+	DistributiveOmit<
+		BaseSelectorProps<DataT, false>,
+		"multiple" | "onSelect" | "selected" | "classes"
+	> & {
+		/**
+		 * Extended selection change handler
+		 * @param data The selected data entry/entries
+		 */
+		onSelect?: (value: DataT[]) => void;
+		/**
+		 * The currently selected values
+		 */
+		selected: DataT[];
+		/**
+		 * The values of the entries in `selected` that were added but are not saved yet: each is
+		 * marked "Added" (MultiSelectEntryProps.changeState)
+		 * @default none
+		 */
+		added?: string[];
+		/**
+		 * Entries that were removed from the selection but are not saved yet. They are listed
+		 * after `selected` (sorted together with them by `selectedSort`), struck through and
+		 * marked "Removed", with a restore button where an entry's remove button is: restoring
+		 * one calls `onSelect` with the selection and the entry appended. Not part of the
+		 * selection otherwise: `onSelect` does not report them, and they are not offered as
+		 * options.
+		 * @remarks No restore button while disabled or read-only, as no remove button
+		 * @default none
+		 */
+		removed?: DataT[];
+		/**
+		 * Shows the selection without a way to change it, as the read-only file upload does:
+		 * the label, then the selected entries without remove buttons, or "No entries" when
+		 * none is selected. There is no search field, so nothing that looks editable: no
+		 * placeholder, popup button, end adornments or info button. The entries keep their
+		 * onClick, and the list is named by the label. Takes precedence over disabled, which
+		 * instead keeps the search field, greyed out and out of the tab order.
+		 * @default false
+		 */
+		readOnly?: boolean;
+		/**
+		 * Specify a custom component for displaying multi select items. The entries
+		 * are the items of one list (`<ul>`), so its root must be an `<li>`, e.g.
+		 * MUI's ListItem, as MultiSelectEntry renders.
+		 * @remarks With `added` or `removed` it has to show `changeState` and render
+		 *          `handleRestore`, as MultiSelectEntry does: a removed entry otherwise looks
+		 *          selected and cannot be restored.
+		 */
+		selectedEntryRenderer?: React.ComponentType<MultiSelectEntryProps<DataT>>;
+		/**
+		 * CSS class for root
+		 */
+		className?: string;
+		/**
+		 * CSS classes to apply
+		 */
+		classes?: Partial<Record<MultiSelectClassKey, string>>;
+		/**
+		 * Comparison function (as for Array.sort) for the order in which the
+		 * selected entries are listed. It sorts a copy for display only: `selected`
+		 * is not changed (it may be frozen), and `onSelect` reports the entries in
+		 * `selected`'s order. Without it the entries are listed in `selected`'s
+		 * order.
+		 * @remarks This is a comparison function
+		 * @see Array.sort
+		 */
+		selectedSort?: (a: DataT, b: DataT) => number;
+		/**
+		 * Provide generic confirm remove/delete dialog when set to true.
+		 * @default false
+		 */
+		confirmDelete?: boolean;
+	};
 
 const Root = styled(Grid, {
 	name: "CcMultiSelect",
@@ -207,9 +209,6 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 		error,
 		dirty,
 		getIdOfData,
-		displaySwitch,
-		switchLabel,
-		defaultSwitchValue,
 		selectedSort,
 		confirmDelete,
 		className,
@@ -436,9 +435,6 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 					// not by the removed entries: the token remounts the search field, and a save
 					// that sends a removal must leave the focus and the typed text in it
 					refreshToken={(refreshToken ?? "") + selectedIds.join(",")}
-					displaySwitch={displaySwitch}
-					switchLabel={switchLabel}
-					defaultSwitchValue={defaultSwitchValue}
 					filterIds={combinedFilterIds}
 				/>
 			</Grid>

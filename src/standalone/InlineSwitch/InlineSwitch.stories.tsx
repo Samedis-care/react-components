@@ -80,9 +80,19 @@ export const SwitchHidden: Story = {
 };
 
 export const NoLabel: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"Without `label`, the switch is named by `aria-label`, so it still has an accessible name.",
+			},
+		},
+	},
 	args: {
 		value: false,
 		visible: true,
+		"aria-label": "Show inactive entries",
 	},
 };
 
@@ -92,7 +102,7 @@ export const Issue3465Item10SwitchWithoutLabelIsNamed: Story = {
 		docs: {
 			description: {
 				story:
-					'ISSUE-3465-ITEM-10: a switch without `label` has no accessible name (axe "label", critical), and an `aria-label` given to InlineSwitch is dropped. Expected: a way to name the switch without a visible label (or a required label).',
+					"ISSUE-3465-ITEM-10: a switch without `label` is named by the `aria-label` given to InlineSwitch, so axe's `label` rule passes.",
 			},
 		},
 	},

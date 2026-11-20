@@ -17,6 +17,10 @@ import MultiSelectWithoutGroup, {
 	MultiSelectWithoutGroupProps,
 } from "../../src/standalone/Selector/MultiSelectWithoutGroup";
 import ccI18n from "../../src/i18n";
+import {
+	DistributiveOmit,
+	PartialExcept,
+} from "../../src/utils/internal/distributiveOmit";
 
 // jsdom has "ontouchstart" on window, so TextFieldWithHelp would add its touch
 // Clear button next to Autocomplete's own one
@@ -74,8 +78,12 @@ const chipLabels = () =>
 const byLabel = (a: MultiSelectorData, b: MultiSelectorData) =>
 	getStringLabel(a).localeCompare(getStringLabel(b));
 
-type HostProps = Partial<
-	Omit<MultiSelectWithoutGroupProps<MultiSelectorData>, "selected" | "onSelect">
+type HostProps = PartialExcept<
+	DistributiveOmit<
+		MultiSelectWithoutGroupProps<MultiSelectorData>,
+		"selected" | "onSelect"
+	>,
+	"displaySwitch" | "switchLabel" | "defaultSwitchValue"
 > & {
 	initial?: MultiSelectorData[];
 	onSel?: (value: MultiSelectorData[]) => void;

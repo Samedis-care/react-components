@@ -11,6 +11,7 @@ import {
 	MultiSelectorData,
 } from "../../../../standalone";
 import TypeIds from "../TypeIds";
+import { DistributiveOmit } from "../../../../utils/internal/distributiveOmit";
 
 type OmitProperties =
 	| "selected"
@@ -31,7 +32,7 @@ class RendererBackendMultiSelectWithTags<
 	DataDataT extends MultiSelectorData,
 > extends TypeIds {
 	idFilter?: ModelIdFilterData;
-	private readonly props: Omit<
+	private readonly props: DistributiveOmit<
 		BackendMultiSelectWithTagsProps<
 			GroupModelT,
 			DataModelT,
@@ -42,7 +43,7 @@ class RendererBackendMultiSelectWithTags<
 	>;
 
 	constructor(
-		props: Omit<
+		props: DistributiveOmit<
 			BackendMultiSelectWithTagsProps<
 				GroupModelT,
 				DataModelT,

@@ -12,8 +12,9 @@ import {
 } from "../../../../standalone";
 import MultiSelect from "../../../../standalone/Selector/MultiSelect";
 import uniqueArray from "../../../../utils/uniqueArray";
+import { DistributiveOmit } from "../../../../utils/internal/distributiveOmit";
 
-export type RendererEnumMultiSelectProps = Omit<
+export type RendererEnumMultiSelectProps = DistributiveOmit<
 	MultiSelectProps<MultiSelectorData>,
 	"label" | "selected" | "onLoad" | "onSelect" | "disabled" | "autoFocus"
 >;

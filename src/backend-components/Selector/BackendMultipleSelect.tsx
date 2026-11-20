@@ -13,18 +13,22 @@ import {
 } from "./BackendMultiSelect";
 import BaseSelector from "../../standalone/Selector/BaseSelector";
 import useDebouncedLoad from "./useDebouncedLoad";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 
 export type BackendMultipleSelectProps<
 	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
-> = Omit<BackendMultiSelectProps<M, DataT>, "classes" | "readOnly"> &
+> = DistributiveOmit<
+	BackendMultiSelectProps<M, DataT>,
+	"classes" | "readOnly"
+> &
 	Pick<BaseSelectorProps<DataT, true>, "classes">;
 
 /**
  * Themable subset of BackendMultipleSelectProps (used for theme defaultProps)
  * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)
  */
-export type BackendMultipleSelectThemeProps = Omit<
+export type BackendMultipleSelectThemeProps = DistributiveOmit<
 	BackendMultipleSelectProps<ModelUnknown, MultiSelectorData>,
 	| "model"
 	| "modelFetch"
@@ -124,7 +128,9 @@ const BackendMultipleSelect = <
 			onLoad={debouncedLoad}
 			onSelect={handleSelect}
 			selected={selected}
-			displaySwitch={!!switchFilterName}
+			{...(switchFilterName
+				? { displaySwitch: true as const, switchLabel: props.switchLabel }
+				: { displaySwitch: false as const })}
 			lru={lruConfig}
 		/>
 	);

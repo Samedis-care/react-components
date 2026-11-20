@@ -19,6 +19,10 @@ import MultiSelect, {
 } from "../../src/standalone/Selector/MultiSelect";
 import ccI18n from "../../src/i18n";
 import MultiSelectEntry from "../../src/standalone/Selector/MultiSelectEntry";
+import {
+	DistributiveOmit,
+	PartialExcept,
+} from "../../src/utils/internal/distributiveOmit";
 
 // jsdom has "ontouchstart" on window, so TextFieldWithHelp would add its touch
 // Clear button next to Autocomplete's own one
@@ -97,8 +101,12 @@ const rowGutters = (row: Element) => {
 	return [parseFloat(style.paddingLeft), parseFloat(style.paddingRight)];
 };
 
-type HostProps = Partial<
-	Omit<MultiSelectProps<MultiSelectorData>, "selected" | "onSelect">
+type HostProps = PartialExcept<
+	DistributiveOmit<
+		MultiSelectProps<MultiSelectorData>,
+		"selected" | "onSelect"
+	>,
+	"displaySwitch" | "switchLabel" | "defaultSwitchValue"
 > & {
 	initial?: MultiSelectorData[];
 	onSel?: (value: MultiSelectorData[]) => void;

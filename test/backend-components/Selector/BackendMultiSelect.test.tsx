@@ -16,6 +16,7 @@ import BackendMultipleSelect from "../../../src/backend-components/Selector/Back
 import BackendMultiSelectWithTags from "../../../src/backend-components/Selector/BackendMultiSelectWithTags";
 import type { ModelUnknown } from "../../../src/backend-integration";
 import type { MultiSelectorData } from "../../../src/standalone";
+import { PartialExcept } from "../../../src/utils/internal/distributiveOmit";
 import { setupFormTests } from "../Form/formFixture";
 import {
 	combobox,
@@ -35,8 +36,9 @@ vi.mock("../../../src/utils/isTouchDevice", () => ({ default: () => false }));
 
 setupFormTests();
 
-type Props = Partial<
-	BackendMultiSelectProps<ModelUnknown, MultiSelectorData>
+type Props = PartialExcept<
+	BackendMultiSelectProps<ModelUnknown, MultiSelectorData>,
+	"switchFilterName" | "switchLabel" | "defaultSwitchValue"
 > & {
 	model: ModelUnknown;
 };

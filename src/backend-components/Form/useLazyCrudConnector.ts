@@ -4,6 +4,7 @@ import { ModelUnknown } from "../../backend-integration/Model/Model";
 import ApiConnector from "../../backend-integration/Connector/ApiConnector";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
 import { useFormContext } from "./Form";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 
 /**
  * Params of useLazyCrudConnector, which FormCrudMultiSelect, FormCrudFileUpload,
@@ -88,7 +89,7 @@ export const extractLazyCrudConnectorParams = <
 	data: T,
 ): [
 	UseLazyCrudConnectorParams<ExtraT>,
-	Omit<T, keyof UseLazyCrudConnectorParams<ExtraT>>,
+	DistributiveOmit<T, keyof UseLazyCrudConnectorParams<ExtraT>>,
 ] => {
 	const {
 		getEndpoint,
@@ -109,7 +110,11 @@ export const extractLazyCrudConnectorParams = <
 		extraParams,
 		field,
 	};
-	return [params, otherProps];
+	// the props a union keeps apart stay apart: only the connector params are left out
+	return [
+		params,
+		otherProps as DistributiveOmit<T, keyof UseLazyCrudConnectorParams<ExtraT>>,
+	];
 };
 
 /**

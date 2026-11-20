@@ -60,6 +60,7 @@ import ComponentWithLabel, {
 import deepClone from "../../utils/deepClone";
 import { BackendMultiSelectProps } from "../../backend-components/Selector/BackendMultiSelect";
 import { MultiSelectorData } from "../Selector";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 
 export interface DataGridProps
 	extends IDataGridHeaderProps, IDataGridColumnProps, IDataGridCallbacks {
@@ -523,7 +524,7 @@ export interface DataGridSetFilterDataEntry {
 }
 
 export type DataGridSetFilterData = DataGridSetFilterDataEntry[];
-export type DataGridIdFilterData = Omit<
+export type DataGridIdFilterData = DistributiveOmit<
 	BackendMultiSelectProps<ModelUnknown, MultiSelectorData>,
 	"selected" | "onSelect"
 >;

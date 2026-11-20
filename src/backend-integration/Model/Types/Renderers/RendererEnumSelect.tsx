@@ -11,8 +11,9 @@ import {
 } from "../../../../standalone/Selector";
 import { FormControlFieldsetCC } from "../../../../standalone";
 import uniqueArray from "../../../../utils/uniqueArray";
+import { DistributiveOmit } from "../../../../utils/internal/distributiveOmit";
 
-export type RendererEnumSelectProps = Omit<
+export type RendererEnumSelectProps = DistributiveOmit<
 	BaseSelectorProps<BaseSelectorData, false>,
 	"selected" | "onLoad" | "onSelect" | "disabled" | "autoFocus"
 >;

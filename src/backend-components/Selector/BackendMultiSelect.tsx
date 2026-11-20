@@ -15,6 +15,7 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 import getSelectedLoadErrorLabel from "./getSelectedLoadErrorLabel";
 import useDebouncedLoad from "./useDebouncedLoad";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 
 export type BackendMultiSelectLruOptions<DataT extends MultiSelectorData> =
 	Omit<SelectorLruOptions<DataT>, "loadData">;
@@ -37,81 +38,107 @@ const makeLoadingPlaceholder = (
 const isLoadingPlaceholder = (entry: MultiSelectorData): boolean =>
 	LOADING_PLACEHOLDER in entry;
 
-export interface BackendMultiSelectProps<
+/**
+ * The switch of a backend multi select. `switchLabel` is required while a
+ * `switchFilterName` shows the switch: the visible label is its accessible name.
+ */
+export type BackendMultiSelectSwitchProps =
+	| {
+			/**
+			 * Name of the switch filter or undefined if disabled
+			 * @default undefined (no switch, searches send no additionalFilters)
+			 */
+			switchFilterName?: undefined;
+			/**
+			 * Label of the switch, which is also its accessible name: pass one with
+			 * `switchFilterName`. Ignored without `switchFilterName`.
+			 */
+			switchLabel?: React.ReactNode;
+	  }
+	| {
+			/**
+			 * Name of the switch filter: with it the field shows a switch, and searches
+			 * send `additionalFilters: { [switchFilterName]: switchValue }`.
+			 */
+			switchFilterName: string;
+			/**
+			 * Label of the switch: its visible text and its accessible name.
+			 */
+			switchLabel: React.ReactNode;
+	  };
+
+export type BackendMultiSelectProps<
 	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
-> extends Omit<
+> = DistributiveOmit<
 	MultiSelectProps<DataT>,
-	"onLoad" | "selected" | "onSelect" | "lru"
-> {
-	/**
-	 * The model to use
-	 */
-	model: M;
-	/**
-	 * The model to use for fetch requests (to enable request batching)
-	 */
-	modelFetch?: M;
-	/**
-	 * Disable the use of request batching
-	 */
-	disableRequestBatching?: boolean;
-	/**
-	 * The debounce time for search in ms
-	 * @default 500
-	 */
-	searchDebounceTime?: number;
-	/**
-	 * Callback that converts the model data to the actual data displayed in the selector
-	 * @param modelData The model data
-	 */
-	modelToSelectorData: (modelData: ModelRecord<M>) => Promise<DataT> | DataT;
-	/**
-	 * The amount of search results to load (defaults to 25)
-	 */
-	searchResultLimit?: number;
-	/**
-	 * Selection change handler
-	 * @param value The ids of the new selection, in order
-	 * @param raw The entries of these ids, in the same order. An id whose record is still
-	 *        loading (listed as "Loading…") has no entry yet and is left out, so match the
-	 *        entries to the ids by `value`, not by position.
-	 */
-	onSelect?: (value: string[], raw: DataT[]) => void;
-	/**
-	 * The ids of the selected records, listed in this order. An id is shown from a
-	 * matching `additionalOptions` entry (never looked up, never dropped by
-	 * `onLoadError`), an `initialData` record or an entry picked in this field without a
-	 * request, otherwise loaded through `modelFetch`; until then it is listed as a
-	 * translated "Loading…" entry.
-	 */
-	selected: string[];
-	/**
-	 * Initial data (model format) used for selected cache
-	 */
-	initialData?: ModelRecord<M>[];
-	/**
-	 * Sort settings
-	 */
-	sort?: DataGridSortSetting[];
-	/**
-	 * Name of the switch filter or undefined if disabled
-	 */
-	switchFilterName?: string;
-	/**
-	 * LRU config
-	 */
-	lru?: BackendMultiSelectLruOptions<DataT>;
-	/**
-	 * Load error event
-	 * @param error The error that has been raised while loading
-	 * @return string Label for entry which failed loading
-	 * @return null To remove entry from selected entries
-	 * @remarks Without it, the entry is labelled "Unknown entry" if the backend did not
-	 *          return its record, else "Error while fetching data".
-	 */
-	onLoadError?: (error: Error) => string | null;
-}
+	"onLoad" | "selected" | "onSelect" | "lru" | "displaySwitch" | "switchLabel"
+> &
+	BackendMultiSelectSwitchProps & {
+		/**
+		 * The model to use
+		 */
+		model: M;
+		/**
+		 * The model to use for fetch requests (to enable request batching)
+		 */
+		modelFetch?: M;
+		/**
+		 * Disable the use of request batching
+		 */
+		disableRequestBatching?: boolean;
+		/**
+		 * The debounce time for search in ms
+		 * @default 500
+		 */
+		searchDebounceTime?: number;
+		/**
+		 * Callback that converts the model data to the actual data displayed in the selector
+		 * @param modelData The model data
+		 */
+		modelToSelectorData: (modelData: ModelRecord<M>) => Promise<DataT> | DataT;
+		/**
+		 * The amount of search results to load (defaults to 25)
+		 */
+		searchResultLimit?: number;
+		/**
+		 * Selection change handler
+		 * @param value The ids of the new selection, in order
+		 * @param raw The entries of these ids, in the same order. An id whose record is still
+		 *        loading (listed as "Loading…") has no entry yet and is left out, so match the
+		 *        entries to the ids by `value`, not by position.
+		 */
+		onSelect?: (value: string[], raw: DataT[]) => void;
+		/**
+		 * The ids of the selected records, listed in this order. An id is shown from a
+		 * matching `additionalOptions` entry (never looked up, never dropped by
+		 * `onLoadError`), an `initialData` record or an entry picked in this field without a
+		 * request, otherwise loaded through `modelFetch`; until then it is listed as a
+		 * translated "Loading…" entry.
+		 */
+		selected: string[];
+		/**
+		 * Initial data (model format) used for selected cache
+		 */
+		initialData?: ModelRecord<M>[];
+		/**
+		 * Sort settings
+		 */
+		sort?: DataGridSortSetting[];
+		/**
+		 * LRU config
+		 */
+		lru?: BackendMultiSelectLruOptions<DataT>;
+		/**
+		 * Load error event
+		 * @param error The error that has been raised while loading
+		 * @return string Label for entry which failed loading
+		 * @return null To remove entry from selected entries
+		 * @remarks Without it, the entry is labelled "Unknown entry" if the backend did not
+		 *          return its record, else "Error while fetching data".
+		 */
+		onLoadError?: (error: Error) => string | null;
+	};
 
 interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
 	/**
@@ -274,7 +301,7 @@ export const useSelectedCache = <
  * Themable subset of BackendMultiSelectProps (used for theme defaultProps)
  * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)
  */
-export type BackendMultiSelectThemeProps = Omit<
+export type BackendMultiSelectThemeProps = DistributiveOmit<
 	BackendMultiSelectProps<ModelUnknown, MultiSelectorData>,
 	| "model"
 	| "modelFetch"
@@ -375,7 +402,9 @@ const BackendMultiSelect = <
 			onLoad={debouncedLoad}
 			onSelect={handleSelect}
 			selected={selected}
-			displaySwitch={!!switchFilterName}
+			{...(switchFilterName
+				? { displaySwitch: true as const, switchLabel: props.switchLabel }
+				: { displaySwitch: false as const })}
 			lru={lruConfig}
 		/>
 	);

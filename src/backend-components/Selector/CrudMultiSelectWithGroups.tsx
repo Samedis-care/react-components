@@ -10,40 +10,39 @@ import useCrudSelect, {
 	UseCrudSelectParams,
 } from "./useCrudSelect";
 import CrudSelectLoadState from "./CrudSelectLoadState";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 
-export interface CrudMultiSelectWithGroupsProps<
+export type CrudMultiSelectWithGroupsProps<
 	GroupModelT extends ModelUnknown,
 	DataModelT extends ModelUnknown,
 	GroupDataT extends BaseSelectorData,
 	DataDataT extends MultiSelectorData,
->
-	extends
-		Omit<
+> = DistributiveOmit<
+	BackendMultiSelectWithTagsProps<
+		GroupModelT,
+		DataModelT,
+		GroupDataT,
+		DataDataT
+	>,
+	"selected" | "onChange" | "convData" | "initialData" | "getIdOfData"
+> &
+	UseCrudSelectParams<DataModelT, DataDataT> & {
+		/**
+		 * The error component that is used to display errors
+		 */
+		errorComponent: React.ComponentType<ErrorComponentProps>;
+		/**
+		 * Get ID of data
+		 */
+		getIdOfData: NonNullable<
 			BackendMultiSelectWithTagsProps<
 				GroupModelT,
 				DataModelT,
 				GroupDataT,
 				DataDataT
-			>,
-			"selected" | "onChange" | "convData" | "initialData" | "getIdOfData"
-		>,
-		UseCrudSelectParams<DataModelT, DataDataT> {
-	/**
-	 * The error component that is used to display errors
-	 */
-	errorComponent: React.ComponentType<ErrorComponentProps>;
-	/**
-	 * Get ID of data
-	 */
-	getIdOfData: NonNullable<
-		BackendMultiSelectWithTagsProps<
-			GroupModelT,
-			DataModelT,
-			GroupDataT,
-			DataDataT
-		>["getIdOfData"]
-	>;
-}
+			>["getIdOfData"]
+		>;
+	};
 
 const CrudMultiSelectWithGroups = <
 	GroupModelT extends ModelUnknown,

@@ -55,6 +55,7 @@ import type { MultiSelectorData } from "../../../src/standalone";
 import MultiSelectEntry, {
 	MultiSelectEntryProps,
 } from "../../../src/standalone/Selector/MultiSelectEntry";
+import { PartialExcept } from "../../../src/utils/internal/distributiveOmit";
 
 setupFormTests();
 
@@ -310,7 +311,10 @@ const makePage = (
  */
 const mountSelector = async (
 	stores: Record<string, Rows> = { "joins/1": [{ id: "j1", source_id: "s1" }] },
-	props: Partial<SelectProps> = {},
+	props: PartialExcept<
+		SelectProps,
+		"switchFilterName" | "switchLabel" | "defaultSwitchValue"
+	> = {},
 	formProps: Parameters<typeof mountForm>[2] = {},
 ) => {
 	const model = makeModel();

@@ -9,21 +9,23 @@ import {
 	FormBackendSingleSelect,
 	FormBackendSingleSelectProps,
 } from "../../../../backend-components/Selector/FormSelectors";
+import { DistributiveOmit } from "../../../../utils/internal/distributiveOmit";
 
 type OmitProperties =
 	"selected" | "onSelect" | "disabled" | "model" | "initialData" | "autoFocus";
 
-export type RendererBackendSingleSelectProps<M extends ModelUnknown> = Omit<
-	FormBackendSingleSelectProps<M>,
-	OmitProperties | "modelFetch"
-> & {
-	// model fetch with callback for current values, works similar to ModelFieldDefinition getRelationModel
-	modelFetch?:
-		| BackendSingleSelectProps<M>["modelFetch"]
-		| ((
-				data: Record<string, unknown>,
-		  ) => BackendSingleSelectProps<M>["modelFetch"]);
-};
+export type RendererBackendSingleSelectProps<M extends ModelUnknown> =
+	DistributiveOmit<
+		FormBackendSingleSelectProps<M>,
+		OmitProperties | "modelFetch"
+	> & {
+		// model fetch with callback for current values, works similar to ModelFieldDefinition getRelationModel
+		modelFetch?:
+			| BackendSingleSelectProps<M>["modelFetch"]
+			| ((
+					data: Record<string, unknown>,
+			  ) => BackendSingleSelectProps<M>["modelFetch"]);
+	};
 
 /**
  * Renders TypeEnum as drop-down selector (with search)

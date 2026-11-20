@@ -9,11 +9,12 @@ import BackendMultipleSelect, {
 } from "../../backend-components/Selector/BackendMultipleSelect";
 import BackendMultiSelect from "../../backend-components/Selector/BackendMultiSelect";
 import { ModelUnknown } from "../../backend-integration";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 
-export interface GridMultiSelectFilterBackendProps<
+export type GridMultiSelectFilterBackendProps<
 	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
-> extends Omit<BackendMultipleSelectProps<M, DataT>, "classes"> {
+> = DistributiveOmit<BackendMultipleSelectProps<M, DataT>, "classes"> & {
 	/**
 	 * Is the grid filter rendered in a dialog?
 	 */
@@ -26,7 +27,7 @@ export interface GridMultiSelectFilterBackendProps<
 	 * Breakpoints used in filter bar
 	 */
 	barBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
-}
+};
 
 export const DataGridCustomFilterMultiBackend = styled(BackendMultipleSelect, {
 	name: "CcDataGrid",

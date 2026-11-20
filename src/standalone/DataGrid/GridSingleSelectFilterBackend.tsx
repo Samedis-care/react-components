@@ -7,38 +7,38 @@ import BackendSingleSelect, {
 	BackendSingleSelectProps,
 } from "../../backend-components/Selector/BackendSingleSelect";
 import { ModelUnknown } from "../../backend-integration";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 
-export interface GridSingleSelectFilterBackendProps<
-	M extends ModelUnknown,
-> extends Omit<
-	BackendSingleSelectProps<M>,
-	"classes" | "className" | "disableClearable"
-> {
-	/**
-	 * Optional label for the filter
-	 */
-	label?: string;
-	/**
-	 * Non-optional selection handler
-	 */
-	onSelect: NonNullable<BackendSingleSelectProps<M>["onSelect"]>;
-	/**
-	 * Is the grid filter rendered in a dialog?
-	 */
-	dialog: boolean;
-	/**
-	 * Autocomplete ID passed to selector
-	 */
-	autocompleteId?: string;
-	/**
-	 * Breakpoints used in dialog
-	 */
-	dialogBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
-	/**
-	 * Breakpoints used in filter bar
-	 */
-	barBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
-}
+export type GridSingleSelectFilterBackendProps<M extends ModelUnknown> =
+	DistributiveOmit<
+		BackendSingleSelectProps<M>,
+		"classes" | "className" | "disableClearable"
+	> & {
+		/**
+		 * Optional label for the filter
+		 */
+		label?: string;
+		/**
+		 * Non-optional selection handler
+		 */
+		onSelect: NonNullable<BackendSingleSelectProps<M>["onSelect"]>;
+		/**
+		 * Is the grid filter rendered in a dialog?
+		 */
+		dialog: boolean;
+		/**
+		 * Autocomplete ID passed to selector
+		 */
+		autocompleteId?: string;
+		/**
+		 * Breakpoints used in dialog
+		 */
+		dialogBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
+		/**
+		 * Breakpoints used in filter bar
+		 */
+		barBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
+	};
 
 const GridSingleSelectFilterBackendDialogRoot = styled(Grid, {
 	name: "CcGridSingleSelectFilterBackend",

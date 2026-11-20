@@ -28,6 +28,7 @@ import isPlainObject from "../../utils/isPlainObject";
 import throwError from "../../utils/throwError";
 import RequestBatching from "./RequestBatching";
 import { blobsToDataUris } from "../Connector/bodyFiles";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 
 // optional import
 let captureException: ((e: Error) => void) | null = null;
@@ -55,7 +56,7 @@ export interface PageVisibility {
 	create: VisibilityCallback;
 }
 
-export type ModelIdFilterData = Omit<DataGridIdFilterData, "model">;
+export type ModelIdFilterData = DistributiveOmit<DataGridIdFilterData, "model">;
 export type ModelCustomFilterData = DataGridCustomFilterData;
 
 export interface ModelFieldDefinition<

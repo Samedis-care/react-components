@@ -1,6 +1,7 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { Grid, styled, Switch, Typography, useThemeProps } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
+import addSlotAttributes from "../../utils/internal/addSlotAttributes";
 
 export interface InlineSwitchProps {
 	/**
@@ -20,10 +21,29 @@ export interface InlineSwitchProps {
 	visible: boolean;
 	/**
 	 * Label for switch control (only used if visible is truthy). It is also the
-	 * switch's accessible name; without a label, name the switch through
-	 * `inputProps` or an `aria-label` prop.
+	 * switch's accessible name; without a label, name the switch with `aria-label`
+	 * or `aria-labelledby`.
 	 */
 	label?: React.ReactNode;
+	/**
+	 * Accessible name of the switch, replacing the text of `label` as its name. Use it
+	 * for a switch without `label`; with a visible label, this text should contain the
+	 * label's words (WCAG 2.5.3 Label in Name).
+	 * @default none
+	 */
+	"aria-label"?: string;
+	/**
+	 * Ids (space separated) of the elements that name the switch, replacing the text
+	 * of `label` as its name. It wins over `aria-label`.
+	 * @default none
+	 */
+	"aria-labelledby"?: string;
+	/**
+	 * Ids (space separated) of the elements that describe the switch, such as its help
+	 * text or an error message; they become its accessible description.
+	 * @default none
+	 */
+	"aria-describedby"?: string;
 	/**
 	 * Disables the switch: it cannot be focused or toggled, also not through
 	 * its label, `onChange` is not called, and switch and label are greyed out.
@@ -44,14 +64,16 @@ export interface InlineSwitchProps {
 	 */
 	classes?: Partial<Record<InlineSwitchClassKey, string>>;
 	/**
-	 * Attributes for the switch's `<input>` (the element with role `switch`):
-	 * `aria-label` names a switch that has no `label`, `aria-describedby` links
-	 * help text, and `id` and `name` identify it in a form. Props that are not
-	 * InlineSwitch's own are forwarded here as well, so
-	 * `<InlineSwitch aria-label="Show inactive entries" />` names the switch
-	 * too.
+	 * Attributes for the switch's slots, as on MUI's `Switch`. `input` is the
+	 * `<input role="switch">`: `id` and `name` give it its form identity, and it takes
+	 * any other input attribute. It can override `checked`, `disabled` and `role`; the
+	 * `aria-label`, `aria-labelledby` and `aria-describedby` props above win over it,
+	 * replacing its own values, and `aria-describedby` is appended to its own.
+	 * @default none
 	 */
-	inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+	slotProps?: {
+		input?: React.InputHTMLAttributes<HTMLInputElement>;
+	};
 }
 
 const AntSwitch = styled(Switch, { name: "CcInlineSwitch", slot: "switch" })(
@@ -153,9 +175,24 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 		children,
 		classes,
 		className,
-		inputProps,
-		...inputAttributes
+		"aria-label": ariaLabel,
+		"aria-labelledby": ariaLabelledBy,
+		"aria-describedby": ariaDescribedBy,
+		slotProps,
 	} = props;
+
+	// name, description and form identity belong to the input, not the switch's root
+	// span; the typed aria props win over the caller's input slot props
+	const switchSlotProps = useMemo(
+		() => ({
+			input: addSlotAttributes(slotProps, "input", {
+				"aria-label": ariaLabel,
+				"aria-labelledby": ariaLabelledBy,
+				"aria-describedby": ariaDescribedBy,
+			})?.input,
+		}),
+		[slotProps, ariaLabel, ariaLabelledBy, ariaDescribedBy],
+	);
 
 	const handleSwitchChange = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
@@ -199,10 +236,7 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 								disabled={disabled}
 								// the focus ring shows focus; the ripple would pulse under it endlessly
 								disableFocusRipple
-								// name, description and form identity belong to the input, not
-								// the switch's root span; props InlineSwitch does not know (a
-								// JSX `aria-label`) land here too
-								slotProps={{ input: { ...inputAttributes, ...inputProps } }}
+								slotProps={switchSlotProps}
 							/>
 						</Grid>
 						<Grid>{label}</Grid>

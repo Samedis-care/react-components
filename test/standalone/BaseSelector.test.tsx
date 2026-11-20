@@ -15,6 +15,10 @@ import {
 } from "../../src/standalone/Selector/BaseSelector";
 import SingleSelect from "../../src/standalone/Selector/SingleSelect";
 import ccI18n from "../../src/i18n";
+import {
+	DistributiveOmit,
+	PartialExcept,
+} from "../../src/utils/internal/distributiveOmit";
 
 // jsdom has "ontouchstart" on window, so TextFieldWithHelp would add its touch
 // Clear button next to Autocomplete's own one
@@ -49,7 +53,10 @@ const FRANCE = COUNTRIES[1];
 const loadCountries = selectorLocalLoadHandler(COUNTRIES);
 
 type SingleProps = BaseSelectorProps<BaseSelectorData, false>;
-type HostProps = Partial<Omit<SingleProps, "selected" | "onSelect">> & {
+type HostProps = PartialExcept<
+	DistributiveOmit<SingleProps, "selected" | "onSelect">,
+	"displaySwitch" | "switchLabel" | "defaultSwitchValue"
+> & {
 	initial?: BaseSelectorData | null;
 	onSel?: (value: BaseSelectorData | null) => void;
 };

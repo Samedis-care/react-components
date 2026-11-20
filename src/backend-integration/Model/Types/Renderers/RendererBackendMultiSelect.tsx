@@ -11,6 +11,7 @@ import {
 	FormBackendMultiSelectProps,
 } from "../../../../backend-components/Selector/FormSelectors";
 import TypeIds from "../TypeIds";
+import { DistributiveOmit } from "../../../../utils/internal/distributiveOmit";
 
 type OmitProperties =
 	"selected" | "onSelect" | "disabled" | "model" | "initialData" | "autoFocus";
@@ -20,13 +21,13 @@ type OmitProperties =
  */
 class RendererBackendMultiSelect<M extends ModelUnknown> extends TypeIds {
 	idFilter?: ModelIdFilterData;
-	private readonly props: Omit<
+	private readonly props: DistributiveOmit<
 		FormBackendMultiSelectProps<M, MultiSelectorData>,
 		OmitProperties
 	>;
 
 	constructor(
-		props: Omit<
+		props: DistributiveOmit<
 			FormBackendMultiSelectProps<M, MultiSelectorData>,
 			OmitProperties
 		>,

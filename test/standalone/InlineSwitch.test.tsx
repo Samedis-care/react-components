@@ -8,12 +8,17 @@ import {
 	screen,
 } from "@testing-library/react";
 import { createTheme, Theme, ThemeProvider } from "@mui/material";
-import InlineSwitch from "../../src/standalone/InlineSwitch";
+import InlineSwitch, {
+	InlineSwitchProps,
+} from "../../src/standalone/InlineSwitch";
 import BaseSelector, {
 	BaseSelectorData,
 	BaseSelectorLoadHandler,
 } from "../../src/standalone/Selector/BaseSelector";
-import { selectorLocalLoadHandler } from "../../src/standalone/Selector";
+import {
+	selectorLocalLoadHandler,
+	SingleSelect,
+} from "../../src/standalone/Selector";
 
 afterEach(cleanup);
 
@@ -123,17 +128,19 @@ describe("InlineSwitch label and name", () => {
 		);
 	});
 
-	it("[ISSUE-3465-ITEM-10] inputProps reach the switch input, so it can have an id, a name and a description", () => {
+	it("[ISSUE-3465-ITEM-10] slotProps.input reaches the switch input, so it can have an id, a name and a description", () => {
 		renderSwitch(
 			<>
 				<span id="switch-help">Only inactive entries are listed</span>
 				<InlineSwitch
 					value={false}
 					visible
-					inputProps={{
-						id: "show-inactive",
-						name: "inactive",
-						"aria-describedby": "switch-help",
+					slotProps={{
+						input: {
+							id: "show-inactive",
+							name: "inactive",
+							"aria-describedby": "switch-help",
+						},
 					}}
 				/>
 			</>,
@@ -142,6 +149,53 @@ describe("InlineSwitch label and name", () => {
 		expect(sw).toHaveAttribute("id", "show-inactive");
 		expect(sw).toHaveAttribute("name", "inactive");
 		expect(sw).toHaveAccessibleDescription("Only inactive entries are listed");
+	});
+
+	it("[ISSUE-3465-ITEM-10] aria-label, aria-labelledby and aria-describedby are typed props of InlineSwitch", () => {
+		const name: Partial<InlineSwitchProps> = {
+			"aria-label": "Show inactive entries",
+		};
+		const description: Partial<InlineSwitchProps> = {
+			"aria-describedby": "switch-help",
+		};
+		renderSwitch(
+			<>
+				<span id="switch-help">Only inactive entries are listed</span>
+				<InlineSwitch value={false} visible {...name} {...description} />
+			</>,
+		);
+		const sw = screen.getByRole("switch");
+		expect(sw).toHaveAccessibleName("Show inactive entries");
+		expect(sw).toHaveAccessibleDescription("Only inactive entries are listed");
+	});
+
+	it("[ISSUE-3465-ITEM-10] a selector's switch is named by switchLabel", () => {
+		renderSwitch(
+			<SingleSelect
+				label="Device type"
+				selected={null}
+				onSelect={() => {}}
+				onLoad={selectorLocalLoadHandler([])}
+				displaySwitch
+				switchLabel="Show inactive"
+			/>,
+		);
+		expect(
+			screen.getByRole("switch", { name: "Show inactive" }),
+		).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3465-ITEM-10] displaySwitch without switchLabel does not compile", () => {
+		renderSwitch(
+			// @ts-expect-error displaySwitch needs switchLabel: it is the switch's visible text and its name
+			<SingleSelect
+				label="Device type"
+				selected={null}
+				onSelect={() => {}}
+				onLoad={selectorLocalLoadHandler([])}
+				displaySwitch
+			/>,
+		);
 	});
 });
 

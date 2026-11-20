@@ -14,7 +14,6 @@ import MultiSelectWithoutGroup, {
 import {
 	BaseSelectorData,
 	BaseSelectorLoadHandler,
-	BaseSelectorProps,
 	SelectorLruOptions,
 } from "./BaseSelector";
 import uniqueArray from "../../utils/uniqueArray";
@@ -23,36 +22,22 @@ import { MultiSelectorData } from "./MultiSelect";
 import combineClassNames from "../../utils/combineClassNames";
 import { labelWithDirtyMarker } from "../UIKit/MuiFieldState";
 import useCCTranslations from "../../utils/useCCTranslations";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 
-export interface MultiSelectWithTagsProps<
+export type MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,
 	GroupT extends BaseSelectorData,
->
-	extends
-		Pick<
-			BaseSelectorProps<GroupT, false>,
-			| "disabled"
-			| "noOptionsText"
-			| "loadingText"
-			| "closeText"
-			| "openText"
-			| "displaySwitch"
-			| "defaultSwitchValue"
-			| "switchLabel"
-			| "forceQuery"
-			| "startTypingToSearchText"
-		>,
-		Omit<
-			MultiSelectWithoutGroupProps<DataT>,
-			// additionalOptions is not offered: this renders two selectors, so which one the
-			// entries belong to is ambiguous - better absent than silently ignored
-			| "additionalOptions"
-			| "classes"
-			| "onChange"
-			| "dataOptions"
-			| "setDataOptions"
-			| "label"
-		> {
+> = DistributiveOmit<
+	MultiSelectWithoutGroupProps<DataT>,
+	// additionalOptions is not offered: this renders two selectors, so which one the
+	// entries belong to is ambiguous - better absent than silently ignored
+	| "additionalOptions"
+	| "classes"
+	| "onChange"
+	| "dataOptions"
+	| "setDataOptions"
+	| "label"
+> & {
 	// UI Props
 	/**
 	 * Title of the control, shown above both fields; names the group they form
@@ -123,7 +108,7 @@ export interface MultiSelectWithTagsProps<
 	 * Custom CSS classes
 	 */
 	classes?: Partial<Record<MultiSelectWithTagsClassKey, string>>;
-}
+};
 
 interface SelectedGroup {
 	/**
@@ -211,7 +196,6 @@ const MultiSelectWithTags = <
 		onChange,
 		openInfo,
 		getIdOfData,
-		switchLabel,
 		lruGroup,
 		lruData,
 		sortCompareFn,
@@ -404,8 +388,9 @@ const MultiSelectWithTags = <
 					enableIcons={enableIcons}
 					switchValue={switchValue}
 					setSwitchValue={setSwitchValue}
-					switchLabel={switchLabel}
-					displaySwitch={props.displaySwitch}
+					{...(props.displaySwitch
+						? { displaySwitch: true as const, switchLabel: props.switchLabel }
+						: { displaySwitch: false as const })}
 					loadDataOptions={loadDataOptions}
 					openInfo={openInfo}
 					onSelect={onChange}

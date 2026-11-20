@@ -12,56 +12,56 @@ import { SmallIconButton, SmallListItemIcon } from "../Small";
 import InlineSwitch from "../InlineSwitch";
 import { styled, Typography, useThemeProps } from "@mui/material";
 import useCCTranslations from "../../utils/useCCTranslations";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 
-export interface MultiSelectWithoutGroupProps<
-	DataT extends MultiSelectorData,
-> extends Omit<
-	BaseSelectorProps<DataT, false>,
-	"onSelect" | "selected" | "classes" | "onLoad"
-> {
-	// UI Props
-	/**
-	 * Extended selection change handler
-	 * @param data The selected data entry/entries
-	 */
-	onSelect?: (value: DataT[]) => void;
-	/**
-	 * Custom styles
-	 */
-	classes?: Partial<Record<MultiSelectWithoutGroupClassKey, string>>;
-	// Data management props
-	/**
-	 * The currently selected values
-	 */
-	selected: DataT[];
-	/**
-	 * State of the switch control
-	 */
-	switchValue?: boolean;
-	/**
-	 * Set value for switch position
-	 * @param checked The value of switch input
-	 */
-	setSwitchValue?: (checked: boolean) => void;
-	/**
-	 * Search callback which is called to load available data entries
-	 */
-	loadDataOptions: BaseSelectorLoadHandler<DataT>;
-	/**
-	 * Optional callback for customizing the unique identifier of data
-	 * @param data The data struct
-	 * @returns A unique ID extracted from data
-	 * @default returns data.value
-	 */
-	getIdOfData?: (data: DataT) => string;
-	/**
-	 * Comparison function (as for Array.sort) for the order of the chips. It
-	 * sorts a copy for display only: `selected` is not changed (it may be
-	 * frozen), and `onSelect` reports the entries in `selected`'s order.
-	 * Without it the chips are shown in `selected`'s order.
-	 */
-	sortCompareFn?: (value1: DataT, value2: DataT) => number;
-}
+export type MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> =
+	DistributiveOmit<
+		BaseSelectorProps<DataT, false>,
+		"onSelect" | "selected" | "classes" | "onLoad"
+	> & {
+		// UI Props
+		/**
+		 * Extended selection change handler
+		 * @param data The selected data entry/entries
+		 */
+		onSelect?: (value: DataT[]) => void;
+		/**
+		 * Custom styles
+		 */
+		classes?: Partial<Record<MultiSelectWithoutGroupClassKey, string>>;
+		// Data management props
+		/**
+		 * The currently selected values
+		 */
+		selected: DataT[];
+		/**
+		 * State of the switch control
+		 */
+		switchValue?: boolean;
+		/**
+		 * Set value for switch position
+		 * @param checked The value of switch input
+		 */
+		setSwitchValue?: (checked: boolean) => void;
+		/**
+		 * Search callback which is called to load available data entries
+		 */
+		loadDataOptions: BaseSelectorLoadHandler<DataT>;
+		/**
+		 * Optional callback for customizing the unique identifier of data
+		 * @param data The data struct
+		 * @returns A unique ID extracted from data
+		 * @default returns data.value
+		 */
+		getIdOfData?: (data: DataT) => string;
+		/**
+		 * Comparison function (as for Array.sort) for the order of the chips. It
+		 * sorts a copy for display only: `selected` is not changed (it may be
+		 * frozen), and `onSelect` reports the entries in `selected`'s order.
+		 * Without it the chips are shown in `selected`'s order.
+		 */
+		sortCompareFn?: (value1: DataT, value2: DataT) => number;
+	};
 
 const Outlined = styled("div", {
 	name: "CcMultiSelectWithoutGroup",

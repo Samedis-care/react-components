@@ -19,6 +19,10 @@ import MultiSelectWithTags, {
 	MultiSelectWithTagsProps,
 } from "../../src/standalone/Selector/MultiSelectWithTags";
 import ccI18n from "../../src/i18n";
+import {
+	DistributiveOmit,
+	PartialExcept,
+} from "../../src/utils/internal/distributiveOmit";
 
 // jsdom has "ontouchstart" on window, so TextFieldWithHelp would add its touch
 // Clear button next to Autocomplete's own one
@@ -90,11 +94,12 @@ const pickGroup = async (label: string) => {
 	await flush();
 };
 
-type HostProps = Partial<
-	Omit<
+type HostProps = PartialExcept<
+	DistributiveOmit<
 		MultiSelectWithTagsProps<MultiSelectorData, BaseSelectorData>,
 		"selected" | "onChange"
-	>
+	>,
+	"displaySwitch" | "switchLabel" | "defaultSwitchValue"
 > & {
 	initial?: MultiSelectorData[];
 	onChg?: (value: MultiSelectorData[]) => void;

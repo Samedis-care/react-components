@@ -56,6 +56,7 @@ import { OutlinedInputProps } from "@mui/material/OutlinedInput";
 import { InputProps as StandardInputProps } from "@mui/material/Input";
 import Checkbox from "../UIKit/Checkbox";
 import { withMuiFieldState } from "../UIKit/MuiFieldState";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 
 export interface BaseSelectorData {
 	/**
@@ -274,11 +275,48 @@ export type BaseSelectorVariants<
 		? BaseSelectorSingle<DataT>
 		: never;
 
+/**
+ * The switch above a selector's field. `switchLabel` is required while `displaySwitch`
+ * shows the switch: the visible label is the switch's only accessible name, and a switch
+ * without one is unnamed for everyone.
+ */
+export type BaseSelectorSwitchProps = {
+	/**
+	 * Default value for switch position
+	 * @default false
+	 */
+	defaultSwitchValue?: boolean;
+} & (
+	| {
+			/**
+			 * Display switch control?
+			 * @default false
+			 */
+			displaySwitch?: false;
+			/**
+			 * Label for switch control (only used if displaySwitch is truthy). It is the
+			 * switch's visible text and its accessible name; required with `displaySwitch`.
+			 */
+			switchLabel?: React.ReactNode;
+	  }
+	| {
+			/**
+			 * Display switch control? Its label (`switchLabel`) is required.
+			 */
+			displaySwitch: true;
+			/**
+			 * Label for switch control: the switch's visible text and its accessible name.
+			 */
+			switchLabel: React.ReactNode;
+	  }
+);
+
 export type BaseSelectorProps<
 	DataT extends BaseSelectorData,
 	Multi extends boolean,
 > = TextFieldWithHelpProps &
-	BaseSelectorVariants<DataT, Multi> & {
+	BaseSelectorVariants<DataT, Multi> &
+	BaseSelectorSwitchProps & {
 		/**
 		 * Refresh token used to force refreshing data.
 		 */
@@ -439,18 +477,6 @@ export type BaseSelectorProps<
 		textFieldInputClasses?:
 			OutlinedInputProps["classes"] | StandardInputProps["classes"];
 		/**
-		 * Display switch control?
-		 */
-		displaySwitch?: boolean;
-		/**
-		 * Default value for switch position
-		 */
-		defaultSwitchValue?: boolean;
-		/**
-		 * Label for switch control (only used if displaySwitch is truthy)
-		 */
-		switchLabel?: React.ReactNode;
-		/**
 		 * Last recently used (LRU) cache options
 		 * LRU shows the user the previous items he selected when no search term is entered
 		 */
@@ -511,7 +537,7 @@ export type BaseSelectorProps<
  * @remarks Excludes the variant specific props (multiple/selected/onSelect), which depend on
  * whether the selector is a single or multi select and can't be set as a theme default.
  */
-export type BaseSelectorThemeProps = Omit<
+export type BaseSelectorThemeProps = DistributiveOmit<
 	BaseSelectorProps<BaseSelectorData, false>,
 	keyof BaseSelectorVariants<BaseSelectorData, false>
 >;

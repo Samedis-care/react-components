@@ -15,6 +15,7 @@ import {
 } from "./index";
 import type { MultiSelectorData } from "./MultiSelect";
 import debouncePromise from "../../utils/debouncePromise";
+import { PartialExcept } from "../../utils/internal/distributiveOmit";
 
 // ---------------------------------------------------------------------------
 // Shared sample data
@@ -522,7 +523,10 @@ const loadFruitOptions = selectorLocalLoadHandler(FRUITS);
 const MultiBetweenButtons = ({
 	initial = [],
 	...other
-}: Partial<React.ComponentProps<typeof MultiSelect<MultiSelectorData>>> & {
+}: PartialExcept<
+	React.ComponentProps<typeof MultiSelect<MultiSelectorData>>,
+	"displaySwitch" | "switchLabel" | "defaultSwitchValue"
+> & {
 	initial?: MultiSelectorData[];
 }) => {
 	const [selected, setSelected] = useState<MultiSelectorData[]>(initial);

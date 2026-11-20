@@ -17,47 +17,46 @@ import useCrudSelect, {
 } from "./useCrudSelect";
 import DialogContextProvider from "../../framework/DialogContextProvider";
 import CrudSelectLoadState from "./CrudSelectLoadState";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 
-export interface CrudMultiSelectProps<
+export type CrudMultiSelectProps<
 	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
->
-	extends
-		Omit<
-			BackendMultiSelectProps<M, DataT>,
-			| "modelToSelectorData"
-			| "initialData"
-			| "selected"
-			| "added"
-			| "removed"
-			| "onSelect"
-			| "getIdOfData"
-		>,
-		UseCrudSelectParams<M, DataT> {
-	/**
-	 * The error component that is used to display errors
-	 */
-	errorComponent: React.ComponentType<ErrorComponentProps>;
-	/**
-	 * Shows the selection without a way to change it (MultiSelectProps.readOnly): the label
-	 * and the entries, without search field, end adornments or remove buttons. Nothing is
-	 * written, as if disabled: handleSelect ignores every change and addToSelection rejects,
-	 * also when an end adornment or the caller's ref calls them. While the selection loads
-	 * the field is shown disabled, as without readOnly.
-	 * @default false
-	 */
-	readOnly?: boolean;
-	/**
-	 * Marks the field as modified (a dot after its label) while picks, removals or changes
-	 * of entries are queued and not saved yet
-	 * @remarks Only with a LazyConnector, whose writes wait for the Form's save; any other
-	 *          connector writes at once, and nothing is marked. An explicit `dirty` wins.
-	 *          The entries' own marks ("Added", "Removed" with a restore button) do not
-	 *          depend on it: they are shown with every LazyConnector.
-	 * @default false
-	 */
-	showDirtyState?: boolean;
-}
+> = DistributiveOmit<
+	BackendMultiSelectProps<M, DataT>,
+	| "modelToSelectorData"
+	| "initialData"
+	| "selected"
+	| "added"
+	| "removed"
+	| "onSelect"
+	| "getIdOfData"
+> &
+	UseCrudSelectParams<M, DataT> & {
+		/**
+		 * The error component that is used to display errors
+		 */
+		errorComponent: React.ComponentType<ErrorComponentProps>;
+		/**
+		 * Shows the selection without a way to change it (MultiSelectProps.readOnly): the label
+		 * and the entries, without search field, end adornments or remove buttons. Nothing is
+		 * written, as if disabled: handleSelect ignores every change and addToSelection rejects,
+		 * also when an end adornment or the caller's ref calls them. While the selection loads
+		 * the field is shown disabled, as without readOnly.
+		 * @default false
+		 */
+		readOnly?: boolean;
+		/**
+		 * Marks the field as modified (a dot after its label) while picks, removals or changes
+		 * of entries are queued and not saved yet
+		 * @remarks Only with a LazyConnector, whose writes wait for the Form's save; any other
+		 *          connector writes at once, and nothing is marked. An explicit `dirty` wins.
+		 *          The entries' own marks ("Added", "Removed" with a restore button) do not
+		 *          depend on it: they are shown with every LazyConnector.
+		 * @default false
+		 */
+		showDirtyState?: boolean;
+	};
 
 export const CrudSelectContext = React.createContext<
 	UseCrudSelectResult<ModelUnknown, MultiSelectorData> | undefined

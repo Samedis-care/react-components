@@ -12,6 +12,7 @@ import BackendMultiSelect, {
 	BackendMultiSelectProps,
 } from "./BackendMultiSelect";
 import { ModelUnknown } from "../../backend-integration";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 
 interface WithoutFormContext<DataT extends BaseSelectorData> {
 	onAddNew?: BaseSelectorProps<DataT, false>["onAddNew"];
@@ -26,7 +27,8 @@ interface WithFormContext<DataT extends BaseSelectorData> {
 export type WithSelectorFormContextProps<
 	PropsT,
 	DataT extends BaseSelectorData,
-> = Omit<PropsT, keyof WithoutFormContext<DataT>> & WithFormContext<DataT>;
+> = DistributiveOmit<PropsT, keyof WithoutFormContext<DataT>> &
+	WithFormContext<DataT>;
 
 const WithSelectorFormContext = <
 	DataT extends BaseSelectorData,
@@ -47,10 +49,12 @@ const WithSelectorFormContext = <
 				return onAddNew(getFieldValues());
 			}, [getFieldValues, onAddNew]);
 
-		const patchedProps: PropsT = {
+		// PropsT can be a union (the switch props), which the spread keeps apart; the cast
+		// puts the form-aware onAddNew back in place
+		const patchedProps = {
 			...props,
 			onAddNew: onAddNew ? handleAddNew : undefined,
-		} as PropsT;
+		} as unknown as PropsT;
 
 		return <SelectorComponent {...patchedProps} />;
 	};

@@ -30,6 +30,7 @@ import Connector from "../../../src/backend-integration/Connector/Connector";
 import ModelDataStore from "../../../src/backend-integration/Store";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import { MultiSelectorData } from "../../../src/standalone";
+import { PartialExcept } from "../../../src/utils/internal/distributiveOmit";
 
 // jsdom does not implement matchMedia, which the Framework's ThemeProvider needs.
 beforeAll(async () => {
@@ -133,7 +134,10 @@ const serverError = () =>
 	);
 
 const renderMulti = (
-	props: Partial<BackendMultiSelectProps<ModelUnknown, MultiSelectorData>> &
+	props: PartialExcept<
+		BackendMultiSelectProps<ModelUnknown, MultiSelectorData>,
+		"switchFilterName" | "switchLabel" | "defaultSwitchValue"
+	> &
 		Pick<BackendMultiSelectProps<ModelUnknown, MultiSelectorData>, "model">,
 ) => {
 	const onSelect = vi.fn();
@@ -151,7 +155,10 @@ const renderMulti = (
 };
 
 const renderSingle = (
-	props: Partial<BackendSingleSelectProps<ModelUnknown>> &
+	props: PartialExcept<
+		BackendSingleSelectProps<ModelUnknown>,
+		"switchFilterName" | "switchLabel" | "defaultSwitchValue"
+	> &
 		Pick<BackendSingleSelectProps<ModelUnknown>, "model">,
 ) => {
 	const onSelect = vi.fn();

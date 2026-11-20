@@ -15,11 +15,49 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 import getSelectedLoadErrorLabel from "./getSelectedLoadErrorLabel";
 import useDebouncedLoad from "./useDebouncedLoad";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 
 export type BackendSingleSelectLruOptions<DataT extends BaseSelectorData> =
 	Omit<SelectorLruOptions<DataT>, "loadData">;
 
-export interface BackendSingleSelectProps<M extends ModelUnknown> extends Omit<
+/**
+ * The switch of a backend single select. `switchLabel` is required while a
+ * `switchFilterName` shows the switch: the visible label is its accessible name.
+ */
+export type BackendSingleSelectSwitchProps = {
+	/**
+	 * Whether the switch is on when the field mounts with `switchFilterName`; later
+	 * changes are ignored, from then on the user sets it.
+	 * @default false
+	 */
+	defaultSwitchValue?: boolean;
+} & (
+	| {
+			/**
+			 * Name of the filter a switch above the field sets, e.g. `"include_inactive"` for a
+			 * "Show inactive" switch. With it the field shows the switch, and every search sends
+			 * `additionalFilters: { [switchFilterName]: true }` to `model.index` while the switch
+			 * is on (`false` while it is off), so toggling it reloads the options. A new name
+			 * applies from the next search.
+			 * @default undefined (no switch, searches send no additionalFilters)
+			 */
+			switchFilterName?: undefined;
+			/**
+			 * Label of the switch, which is also its accessible name: pass one with
+			 * `switchFilterName`. Ignored without `switchFilterName`.
+			 */
+			switchLabel?: React.ReactNode;
+	  }
+	| {
+			switchFilterName: string;
+			/**
+			 * Label of the switch: its visible text and its accessible name.
+			 */
+			switchLabel: React.ReactNode;
+	  }
+);
+
+export type BackendSingleSelectProps<M extends ModelUnknown> = DistributiveOmit<
 	BaseSelectorProps<BaseSelectorData, false>,
 	| "onLoad"
 	| "selected"
@@ -28,107 +66,88 @@ export interface BackendSingleSelectProps<M extends ModelUnknown> extends Omit<
 	| "displaySwitch"
 	| "switchLabel"
 	| "defaultSwitchValue"
-> {
-	/**
-	 * The model to use
-	 */
-	model: M;
-	/**
-	 * The model to use for fetch requests (to enable request batching)
-	 */
-	modelFetch?: M;
-	/**
-	 * The debounce time for search in ms
-	 * @default 500
-	 */
-	searchDebounceTime?: number;
-	/**
-	 * Callback that converts the model data to the actual data displayed in the selector
-	 * @param modelData The model data
-	 */
-	modelToSelectorData: (
-		modelData: ModelRecord<M>,
-	) => Promise<BaseSelectorData> | BaseSelectorData;
-	/**
-	 * The amount of search results to load (defaults to 25)
-	 */
-	searchResultLimit?: number;
-	/**
-	 * Selection change handler
-	 * @param data The selected data entry/entries values
-	 */
-	onSelect?: (value: string | null) => void;
-	/**
-	 * The id of the selected record, or null (undefined counts as null). Shown from a
-	 * matching `additionalOptions` entry or `initialData` record without a request,
-	 * otherwise loaded through `modelFetch`. Until the record of this id is there, the
-	 * field shows the translated "Loading…" (`backend-components.selector.loading`), never
-	 * the record of an earlier id, and a lookup of an earlier id that finishes later is
-	 * discarded (also its error: no `onLoadError`, no `onSelect(null)`). Not shown while
-	 * `selectedFreeSolo` is a non-empty string.
-	 */
-	selected: string | null;
-	/**
-	 * Sort settings
-	 */
-	sort?: DataGridSortSetting[];
-	/**
-	 * Name of the filter a switch above the field sets, e.g. `"include_inactive"` for a
-	 * "Show inactive" switch. With it the field shows the switch, and every search sends
-	 * `additionalFilters: { [switchFilterName]: true }` to `model.index` while the switch
-	 * is on (`false` while it is off), so toggling it reloads the options. A new name
-	 * applies from the next search.
-	 * @default undefined (no switch, searches send no additionalFilters)
-	 */
-	switchFilterName?: string;
-	/**
-	 * Label of the switch, which is also its accessible name: pass one with
-	 * `switchFilterName`. Ignored without `switchFilterName`.
-	 */
-	switchLabel?: React.ReactNode;
-	/**
-	 * Whether the switch is on when the field mounts with `switchFilterName`; later
-	 * changes are ignored, from then on the user sets it.
-	 * @default false
-	 */
-	defaultSwitchValue?: boolean;
-	/**
-	 * Initial data (model format) used for selected cache
-	 */
-	initialData?: ModelRecord<M>[];
-	/**
-	 * LRU settings
-	 */
-	lru?: BackendSingleSelectLruOptions<BaseSelectorData>;
-	/**
-	 * Load error event
-	 * @param error The error that has been raised while loading
-	 * @return string Label for entry which failed loading
-	 * @return null To remove entry from selected entries
-	 * @remarks Without it, the entry is labelled "Unknown entry" if the backend did not
-	 *          return its record, else "Error while fetching data".
-	 */
-	onLoadError?: (error: Error) => string | null;
-	/**
-	 * Disable request batching
-	 */
-	disableRequestBatching?: boolean;
-	/**
-	 * onSelect handler for free solo values
-	 * @param value The value selected
-	 */
-	onSelectFreeSolo?: (value: string) => void;
-	/**
-	 * Currently selected freeSolo value
-	 */
-	selectedFreeSolo?: string | null;
-}
+> &
+	BackendSingleSelectSwitchProps & {
+		/**
+		 * The model to use
+		 */
+		model: M;
+		/**
+		 * The model to use for fetch requests (to enable request batching)
+		 */
+		modelFetch?: M;
+		/**
+		 * The debounce time for search in ms
+		 * @default 500
+		 */
+		searchDebounceTime?: number;
+		/**
+		 * Callback that converts the model data to the actual data displayed in the selector
+		 * @param modelData The model data
+		 */
+		modelToSelectorData: (
+			modelData: ModelRecord<M>,
+		) => Promise<BaseSelectorData> | BaseSelectorData;
+		/**
+		 * The amount of search results to load (defaults to 25)
+		 */
+		searchResultLimit?: number;
+		/**
+		 * Selection change handler
+		 * @param data The selected data entry/entries values
+		 */
+		onSelect?: (value: string | null) => void;
+		/**
+		 * The id of the selected record, or null (undefined counts as null). Shown from a
+		 * matching `additionalOptions` entry or `initialData` record without a request,
+		 * otherwise loaded through `modelFetch`. Until the record of this id is there, the
+		 * field shows the translated "Loading…" (`backend-components.selector.loading`), never
+		 * the record of an earlier id, and a lookup of an earlier id that finishes later is
+		 * discarded (also its error: no `onLoadError`, no `onSelect(null)`). Not shown while
+		 * `selectedFreeSolo` is a non-empty string.
+		 */
+		selected: string | null;
+		/**
+		 * Sort settings
+		 */
+		sort?: DataGridSortSetting[];
+		/**
+		 * Initial data (model format) used for selected cache
+		 */
+		initialData?: ModelRecord<M>[];
+		/**
+		 * LRU settings
+		 */
+		lru?: BackendSingleSelectLruOptions<BaseSelectorData>;
+		/**
+		 * Load error event
+		 * @param error The error that has been raised while loading
+		 * @return string Label for entry which failed loading
+		 * @return null To remove entry from selected entries
+		 * @remarks Without it, the entry is labelled "Unknown entry" if the backend did not
+		 *          return its record, else "Error while fetching data".
+		 */
+		onLoadError?: (error: Error) => string | null;
+		/**
+		 * Disable request batching
+		 */
+		disableRequestBatching?: boolean;
+		/**
+		 * onSelect handler for free solo values
+		 * @param value The value selected
+		 */
+		onSelectFreeSolo?: (value: string) => void;
+		/**
+		 * Currently selected freeSolo value
+		 */
+		selectedFreeSolo?: string | null;
+	};
 
 /**
  * Themable subset of BackendSingleSelectProps (used for theme defaultProps)
  * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)
  */
-export type BackendSingleSelectThemeProps = Omit<
+export type BackendSingleSelectThemeProps = DistributiveOmit<
 	BackendSingleSelectProps<ModelUnknown>,
 	| "model"
 	| "modelFetch"
@@ -334,7 +353,9 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 			{...otherProps}
 			freeSolo={freeSolo}
 			onLoad={debouncedLoad}
-			displaySwitch={!!switchFilterName}
+			{...(switchFilterName
+				? { displaySwitch: true as const, switchLabel: props.switchLabel }
+				: { displaySwitch: false as const })}
 			additionalOptions={additionalOptions}
 			onSelect={handleSelect}
 			selected={
