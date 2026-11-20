@@ -4,11 +4,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { Box, Grid } from "@mui/material";
 import { DataGrid, DataGridNoPersist } from "./index";
-import type {
-	DataGridData,
-	IDataGridColumnDef,
-	IDataGridLoadDataParameters,
-} from "./DataGrid";
+import type { DataGridData, IDataGridColumnDef, IDataGridLoadDataParameters } from "./DataGrid";
 import type { IDataGridExporter } from "./Header";
 
 // ─── Sample data ────────────────────────────────────────────────────────────
@@ -480,6 +476,48 @@ export const Issue3495Item17SettingsShowFocus: Story = {
 		await waitFor(() => expect(close).toHaveClass("Mui-focusVisible"));
 		// outside the button, so the ring stands out against the panel, not the fill
 		await expectFocusRing(close, 2);
+	},
+};
+
+/**
+ * ISSUE-3506-ITEM-11: `deleting`, set while a delete request runs: Delete shows its
+ * progress in place of its icon, keeps focus but cannot be pressed again, and the
+ * footer's actions are busy
+ */
+export const Issue3506Item11DeletingShowsProgress: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadPeople,
+		onDelete: fn(),
+		deleting: true,
+		classes: { footer: "story-footer" },
+	},
+	// the footer only: the rest of the grid has violations of its own
+	parameters: {
+		a11y: {
+			test: "error",
+			context: { include: [".story-footer"] },
+			options: {
+				rules: {
+					// the caption of the unavailable Delete: an inactive control,
+					// which WCAG 1.4.3 exempts
+					"color-contrast": { enabled: false },
+				},
+			},
+		},
+	},
+	play: async ({ args, canvas }) => {
+		await userEvent.click(await canvas.findByText("Bob Smith"));
+		const del = canvas.getByRole("button", { name: "Delete" });
+		await expect(del).toHaveAttribute("aria-disabled", "true");
+		await expect(within(del).getByRole("progressbar")).toHaveAccessibleName(
+			"Delete",
+		);
+		await expect(del.closest("[aria-busy=true]")).not.toBeNull();
+		del.focus();
+		await userEvent.keyboard("{Enter}");
+		await expect(args.onDelete).not.toHaveBeenCalled();
+		await expect(del).toHaveFocus();
 	},
 };
 

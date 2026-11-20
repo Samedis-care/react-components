@@ -25,6 +25,7 @@ const DataActionBar = () => {
 		enableSelectAll,
 		enableDeleteAll,
 		disableDeleteHint,
+		deleting,
 	} = useDataGridProps();
 	const { selectAll, selectedRows } = state;
 	const { onEdit, onDelete } = useDataGridProps();
@@ -121,12 +122,13 @@ const DataActionBar = () => {
 	);
 
 	return (
-		<Grid container>
+		<Grid container aria-busy={deleting || undefined}>
 			<DataActionBarView
 				numSelected={Math.min(numSelected, 2) as 0 | 1 | 2}
 				selectAll={selectAll}
 				handleEdit={onEdit ? handleEdit : undefined}
 				handleDelete={onDelete ? handleDelete : undefined}
+				deleting={!!deleting}
 				enableDeleteAll={!!enableDeleteAll}
 				disableDeleteHint={disableDeleteHint}
 				customButtons={customDataActionButtons}

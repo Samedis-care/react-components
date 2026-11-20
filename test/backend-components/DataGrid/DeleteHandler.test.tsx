@@ -1,6 +1,8 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import React from "react";
-import { act, cleanup, renderHook } from "@testing-library/react";
+import fs from "node:fs";
+import path from "node:path";
+import { act, cleanup, renderHook, screen } from "@testing-library/react";
 import { Framework } from "../../../src/framework";
 import { useBackendDataGridDeleteHandler } from "../../../src/backend-components/DataGrid";
 import {
@@ -10,9 +12,10 @@ import {
 } from "../../../src/backend-integration";
 import BackendError from "../../../src/backend-integration/Connector/BackendError";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
+import ccI18n from "../../../src/i18n";
 
 // jsdom does not implement matchMedia, which the Framework's ThemeProvider needs.
-beforeAll(() => {
+beforeAll(async () => {
 	if (!window.matchMedia) {
 		window.matchMedia = (query: string) => ({
 			matches: false,
@@ -25,6 +28,7 @@ beforeAll(() => {
 			dispatchEvent: () => false,
 		});
 	}
+	await ccI18n.loadNamespaces("translation");
 });
 
 afterEach(() => {
@@ -58,10 +62,22 @@ const createModel = () => {
 	return { model, connector };
 };
 
+type DeleteHandlerProps = Parameters<typeof useBackendDataGridDeleteHandler>[0];
+
+/**
+ * Renders the hook under the Framework (dialogs, translations, query client).
+ * The confirmation is skipped unless the props replace customDeleteConfirm
+ * (customDeleteConfirm: undefined shows the built-in dialog).
+ * @param props Overrides of the hook's props
+ * @param prepare Called with the connector before the first render, e.g. to give it
+ *                deleteAdvanced
+ */
 const renderDeleteHandler = (
-	props: Partial<Parameters<typeof useBackendDataGridDeleteHandler>[0]>,
+	props: Partial<DeleteHandlerProps>,
+	prepare?: (connector: MockConnector) => void,
 ) => {
 	const { model, connector } = createModel();
+	prepare?.(connector);
 	const refreshGrid = vi.fn();
 	const { result } = renderHook(
 		() =>
@@ -81,7 +97,13 @@ const renderDeleteHandler = (
 			),
 		},
 	);
-	return { handleDelete: result.current!, connector, refreshGrid };
+	return {
+		handleDelete: result.current!,
+		result,
+		connector,
+		model,
+		refreshGrid,
+	};
 };
 
 describe("useBackendDataGridDeleteHandler onDeleteSettled", () => {
@@ -194,5 +216,119 @@ describe("useBackendDataGridDeleteHandler result", () => {
 		await expect(act(() => handleDelete(false, ["2"], FILTER))).resolves.toBe(
 			true,
 		);
+	});
+});
+
+describe("useBackendDataGridDeleteHandler announcement", () => {
+	it("[ISSUE-3506-ITEM-11] announces a finished delete politely, with the number of entries", async () => {
+		const { handleDelete } = renderDeleteHandler({});
+
+		await act(() => handleDelete(false, ["1", "2"], FILTER));
+		expect(await screen.findByRole("status")).toHaveTextContent(
+			"2 entries deleted",
+		);
+	});
+
+	it("[ISSUE-3506-ITEM-11] says one entry for a single one", async () => {
+		const { handleDelete } = renderDeleteHandler({});
+
+		await act(() => handleDelete(false, ["1"], FILTER));
+		expect(await screen.findByRole("status")).toHaveTextContent(
+			"1 entry deleted",
+		);
+	});
+
+	it("[ISSUE-3506-ITEM-11] says that the selected entries were deleted after a delete of everything except some", async () => {
+		const deleteAdvanced = vi.fn();
+		const { handleDelete } = renderDeleteHandler(
+			{ enableDeleteAll: true },
+			(connector) => {
+				connector.deleteAdvanced = deleteAdvanced;
+			},
+		);
+
+		await act(() => handleDelete(true, ["1"], FILTER));
+		expect(deleteAdvanced).toHaveBeenCalledOnce();
+		expect(await screen.findByRole("status")).toHaveTextContent(
+			"The selected entries have been deleted",
+		);
+	});
+
+	it("[ISSUE-3506-ITEM-11] announces nothing when the user cancels or the delete fails", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const customDeleteErrorHandler = vi.fn();
+		const { handleDelete } = renderDeleteHandler({
+			customDeleteConfirm: () => {
+				throw new Error("cancelled");
+			},
+			customDeleteErrorHandler,
+		});
+		await act(() => handleDelete(false, ["1"], FILTER));
+		expect(screen.queryByRole("status"), "after a cancel").toBeNull();
+		cleanup();
+
+		const failing = renderDeleteHandler({ customDeleteErrorHandler });
+		vi.spyOn(failing.connector, "deleteMultiple").mockRejectedValue(
+			new BackendError("conflict", "conflict"),
+		);
+		await act(() => failing.handleDelete(false, ["1"], FILTER));
+		expect(customDeleteErrorHandler).toHaveBeenCalledOnce();
+		expect(screen.queryByRole("status"), "after a failure").toBeNull();
+	});
+
+	it("[ISSUE-3506-ITEM-11] customDeleteSuccessHandler replaces the toast, before onDeleteSettled", async () => {
+		const customDeleteSuccessHandler = vi.fn();
+		const onDeleteSettled = vi.fn();
+		const { handleDelete } = renderDeleteHandler({
+			customDeleteSuccessHandler,
+			onDeleteSettled,
+		});
+
+		await act(() => handleDelete(false, ["1", "2"], FILTER));
+		expect(customDeleteSuccessHandler).toHaveBeenCalledExactlyOnceWith(
+			false,
+			["1", "2"],
+			FILTER,
+		);
+		expect(customDeleteSuccessHandler.mock.invocationCallOrder[0]).toBeLessThan(
+			onDeleteSettled.mock.invocationCallOrder[0],
+		);
+		expect(screen.queryByRole("status")).toBeNull();
+	});
+
+	it("[ISSUE-3506-ITEM-11] has the message in every locale, for each of its plural forms", () => {
+		const i18nDir = path.resolve(__dirname, "../../../src/assets/i18n");
+		const missing = fs
+			.readdirSync(i18nDir, { withFileTypes: true })
+			.filter((entry) => entry.isDirectory())
+			.flatMap((entry) => {
+				const translation = JSON.parse(
+					fs.readFileSync(
+						path.join(i18nDir, entry.name, "translation.json"),
+						"utf8",
+					),
+				) as {
+					"backend-components": {
+						"data-grid": {
+							delete: { "success-toast"?: Record<string, string> };
+						};
+					};
+				};
+				const toast =
+					translation["backend-components"]["data-grid"].delete[
+						"success-toast"
+					] ?? {};
+				return [
+					...new Intl.PluralRules(entry.name)
+						.resolvedOptions()
+						.pluralCategories.filter(
+							(category) =>
+								!toast[`message_${category}`]?.includes("{{count}}"),
+						)
+						.map((category) => `${entry.name}: message_${category}`),
+					...(toast.messageInverted ? [] : [`${entry.name}: messageInverted`]),
+				];
+			});
+		expect(missing).toEqual([]);
 	});
 });

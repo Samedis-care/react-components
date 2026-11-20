@@ -360,6 +360,11 @@
 					"buttons": {
 						"okay": "xop"
 					}
+				},
+				"success-toast": {
+					"message_one": "{{count}} ta yozuv o'chirildi",
+					"message_other": "{{count}} ta yozuv o'chirildi",
+					"messageInverted": "Tanlangan yozuvlar o'chirildi"
 				}
 			},
 			"inline-edit": {

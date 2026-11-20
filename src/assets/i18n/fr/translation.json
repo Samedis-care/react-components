@@ -361,6 +361,12 @@
 					"buttons": {
 						"okay": "OK"
 					}
+				},
+				"success-toast": {
+					"message_one": "{{count}} entrée supprimée",
+					"message_many": "{{count}} entrées supprimées",
+					"message_other": "{{count}} entrées supprimées",
+					"messageInverted": "Les entrées sélectionnées ont été supprimées"
 				}
 			},
 			"inline-edit": {

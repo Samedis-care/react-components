@@ -361,6 +361,12 @@
 					"buttons": {
 						"okay": "OK"
 					}
+				},
+				"success-toast": {
+					"message_one": "{{count}} entrada eliminada",
+					"message_many": "{{count}} entradas eliminadas",
+					"message_other": "{{count}} entradas eliminadas",
+					"messageInverted": "Se eliminaron las entradas seleccionadas"
 				}
 			},
 			"inline-edit": {

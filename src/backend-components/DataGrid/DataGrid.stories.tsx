@@ -270,6 +270,64 @@ export const Issue3495Item16DeleteByKeyboardKeepsFocusAfterYes: StoryObj = {
 	},
 };
 
+/** A connector whose deletes can be slowed down or refused */
+class StoryConnector extends MockConnector {
+	deleteDelay = 0;
+	deleteError: Error | null = null;
+
+	async deleteMultiple(ids: string[]): Promise<void> {
+		await new Promise((resolve) => setTimeout(resolve, this.deleteDelay));
+		if (this.deleteError) throw this.deleteError;
+		ids.forEach((id) => this.delete(id));
+	}
+}
+
+const SlowDeleteStory = () => {
+	const model = useMemo(() => {
+		const connector = new StoryConnector(PEOPLE);
+		connector.deleteDelay = 3000;
+		return makeModel("slow-delete", connector);
+	}, []);
+	return <BackendDataGrid model={model} enableDelete />;
+};
+
+/**
+ * ISSUE-3506-ITEM-11: while a delete runs nothing is busy or disabled, and when it is done
+ * nothing is announced
+ */
+export const Issue3506Item11DeleteProgressIsAnnounced: StoryObj = {
+	render: () => <SlowDeleteStory />,
+	play: async ({ canvas }) => {
+		const body = within(document.body);
+		const statusTexts = () =>
+			body.queryAllByRole("status").map((status) => status.textContent ?? "");
+		await userEvent.click(await canvas.findByText("Alice"));
+		// what status regions say before the delete, e.g. a live region for the counts
+		// (taken before the confirmation, whose modal hides the rest of the page)
+		const before = statusTexts();
+		await userEvent.click(canvas.getByRole("button", { name: "Delete" }));
+		const confirm = await body.findByRole("dialog", { name: "Delete" });
+		await userEvent.click(within(confirm).getByRole("button", { name: "Yes" }));
+		await waitFor(() => expect(body.queryByRole("dialog")).toBeNull());
+		// the delete takes 3 s
+		await waitFor(
+			() =>
+				expect(
+					document.querySelector("[aria-busy=true], [role=progressbar]"),
+					"a busy state while the delete runs",
+				).not.toBeNull(),
+			{ timeout: 1000 },
+		);
+		await waitFor(() => expect(canvas.queryByText("Alice")).toBeNull(), {
+			timeout: 5000,
+		});
+		await expect(
+			statusTexts().some((text) => text.trim() && !before.includes(text)),
+			"a status message once the delete is done",
+		).toBe(true);
+	},
+};
+
 const FilesStory = () => {
 	const model = useMemo(
 		() =>

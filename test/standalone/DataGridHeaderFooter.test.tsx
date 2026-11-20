@@ -1,38 +1,12 @@
 import React from "react";
-import {
-	afterEach,
-	beforeAll,
-	beforeEach,
-	describe,
-	expect,
-	it,
-	vi,
-} from "vitest";
-import {
-	act,
-	cleanup,
-	fireEvent,
-	render,
-	screen,
-	waitFor,
-	within,
-} from "@testing-library/react";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { Refresh, Tune } from "@mui/icons-material";
 import type { SvgIconComponent } from "@mui/icons-material";
 import { computeAccessibleName } from "dom-accessibility-api";
 import ccI18n from "../../src/i18n";
-import DataGrid, {
-	DataGridData,
-	DataGridProps,
-	DataGridRowData,
-	IDataGridColumnDef,
-	IDataGridColumnsState,
-	IDataGridState,
-	useDataGridColumnState,
-	useDataGridColumnsWidthState,
-	useDataGridState,
-} from "../../src/standalone/DataGrid/DataGrid";
+import DataGrid, { DataGridData, DataGridProps, DataGridRowData, IDataGridColumnDef, IDataGridColumnsState, IDataGridState, useDataGridColumnState, useDataGridColumnsWidthState, useDataGridState } from "../../src/standalone/DataGrid/DataGrid";
 import type { IDataGridFilterBarProps } from "../../src/standalone/DataGrid/Header/FilterBar";
 import type { IDataGridExporter } from "../../src/standalone/DataGrid/Header";
 import userEvent from "@testing-library/user-event";
@@ -284,6 +258,27 @@ describe("footer actions", () => {
 			["1", "3"],
 			expect.objectContaining({ count: 2, rows: [people[0], people[2]] }),
 		);
+	});
+	it("[ISSUE-3506-ITEM-11] while deleting, Delete keeps focus but is unavailable and shows its progress, and the footer's actions are busy", async () => {
+		const onDelete = vi.fn();
+		const { rerender } = render(<Grid onDelete={onDelete} deleting />);
+		await idle();
+		select(["1"]);
+		const del = screen.getByRole("button", { name: "Delete" });
+		del.focus();
+		expect(del).toHaveAttribute("aria-disabled", "true");
+		expect(within(del).getByRole("progressbar")).toHaveAccessibleName("Delete");
+		expect(del.closest("[aria-busy=true]")).not.toBeNull();
+		fireEvent.click(del);
+		expect(onDelete).not.toHaveBeenCalled();
+
+		rerender(<Grid onDelete={onDelete} deleting={false} />);
+		expect(del).toHaveFocus();
+		expect(del).not.toHaveAttribute("aria-disabled");
+		expect(within(del).queryByRole("progressbar")).toBeNull();
+		expect(document.querySelector("[aria-busy=true]")).toBeNull();
+		fireEvent.click(del);
+		expect(onDelete).toHaveBeenCalledOnce();
 	});
 });
 

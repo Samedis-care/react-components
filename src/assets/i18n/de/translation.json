@@ -360,6 +360,11 @@
 					"buttons": {
 						"okay": "OK"
 					}
+				},
+				"success-toast": {
+					"message_one": "{{count}} Eintrag gelöscht",
+					"message_other": "{{count}} Einträge gelöscht",
+					"messageInverted": "Die ausgewählten Einträge wurden gelöscht"
 				}
 			},
 			"inline-edit": {

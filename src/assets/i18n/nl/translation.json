@@ -360,6 +360,11 @@
 					"buttons": {
 						"okay": "OK"
 					}
+				},
+				"success-toast": {
+					"message_one": "{{count}} item verwijderd",
+					"message_other": "{{count}} items verwijderd",
+					"messageInverted": "De geselecteerde items zijn verwijderd"
 				}
 			},
 			"inline-edit": {

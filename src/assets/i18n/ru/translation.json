@@ -362,6 +362,13 @@
 					"buttons": {
 						"okay": "OK"
 					}
+				},
+				"success-toast": {
+					"message_one": "{{count}} запись удалена",
+					"message_few": "{{count}} записи удалены",
+					"message_many": "{{count}} записей удалено",
+					"message_other": "{{count}} записи удалено",
+					"messageInverted": "Выбранные записи удалены"
 				}
 			},
 			"inline-edit": {

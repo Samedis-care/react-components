@@ -360,6 +360,11 @@
 					"buttons": {
 						"okay": "OK"
 					}
+				},
+				"success-toast": {
+					"message_one": "{{count}} entry deleted",
+					"message_other": "{{count}} entries deleted",
+					"messageInverted": "The selected entries have been deleted"
 				}
 			},
 			"inline-edit": {

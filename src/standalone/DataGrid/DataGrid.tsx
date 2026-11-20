@@ -416,6 +416,15 @@ export interface IDataGridColumnProps {
 		filter?: DataGridFilterParameters,
 	) => Promise<boolean | void> | boolean | void;
 	/**
+	 * Is a delete running? Delete is then unavailable (it keeps keyboard focus)
+	 * and shows a progress indicator in place of its icon, and the footer's
+	 * actions are marked busy (`aria-busy`). Set it while the request onDelete
+	 * started runs, not while onDelete waits for a confirmation; BackendDataGrid
+	 * sets it while its delete request runs.
+	 * @default false
+	 */
+	deleting?: boolean;
+	/**
 	 * Reason why delete is disabled
 	 */
 	disableDeleteHint?: string;

@@ -1,5 +1,6 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useId, useState } from "react";
 import {
+	CircularProgress,
 	Grid,
 	MenuProps,
 	Tooltip,
@@ -46,6 +47,12 @@ export interface DataActionBarViewProps {
 	 * If not defined: Disables delete button
 	 */
 	handleDelete?: React.MouseEventHandler;
+	/**
+	 * Is a delete running? Delete is then unavailable and shows a progress
+	 * indicator in place of its icon
+	 * @see DataGridProps.deleting
+	 */
+	deleting: boolean;
 	/**
 	 * Does handleDelete handle an inverted selection? Otherwise the delete button
 	 * is disabled while everything is selected
@@ -100,8 +107,10 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 		setExtendedMenuAnchor(undefined);
 	}, []);
 	const extendedMenu = useMenuButton(!!extendedMenuAnchor);
+	const deleteId = useId();
 
 	const deleteDisabled =
+		props.deleting ||
 		props.numSelected === 0 ||
 		!props.handleDelete ||
 		(props.selectAll && !props.enableDeleteAll);
@@ -111,12 +120,22 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 		<ComponentWithLabel
 			control={
 				<FocusableWhenDisabledIconButton
+					id={deleteId}
 					color={"primary"}
 					disabled={deleteDisabled}
 					onClick={props.handleDelete}
 					aria-label={t("standalone.data-grid.footer.delete")}
 				>
-					<DeleteIcon />
+					{props.deleting ? (
+						// named after the button, as MUI's IconButton names its loading indicator
+						<CircularProgress
+							size={20}
+							color={"inherit"}
+							aria-labelledby={deleteId}
+						/>
+					) : (
+						<DeleteIcon />
+					)}
 				</FocusableWhenDisabledIconButton>
 			}
 			labelText={t("standalone.data-grid.footer.delete")}

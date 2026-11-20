@@ -361,6 +361,12 @@
 					"buttons": {
 						"okay": "OK"
 					}
+				},
+				"success-toast": {
+					"message_one": "{{count}} voce eliminata",
+					"message_many": "{{count}} voci eliminate",
+					"message_other": "{{count}} voci eliminate",
+					"messageInverted": "Le voci selezionate sono state eliminate"
 				}
 			},
 			"inline-edit": {
