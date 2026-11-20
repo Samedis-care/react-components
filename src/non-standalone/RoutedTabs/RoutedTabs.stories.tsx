@@ -394,8 +394,11 @@ const Bar = (props: {
 			<Tab label="Security" value="security" {...props.lastTabProps} />
 		</RoutedTabs>
 	);
+	// Each bar needs its own Route: two bars under one Route would give their
+	// tabs and panels the same ids
+	const route = `/${props.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 	return (
-		<Host at="/settings">
+		<Host at={route} path={`${route}/*`}>
 			<Box sx={{ p: 1, bgcolor: "background.paper" }}>
 				<Button>Before {props.name}</Button>
 				{props.appBar ? (

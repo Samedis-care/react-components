@@ -29,9 +29,21 @@ export interface RoutedTabsProps extends Omit<TabsProps, "value" | "onChange"> {
 	 * `RoutedTabPanelWrapper` renders for its value, so a screen reader reads
 	 * the panel as the tab's ("Security tab panel"). A Tab that sets those
 	 * props itself has them replaced: the wrapper derives them from the route's
-	 * url and the value.
+	 * url and the value. See `linkTabsToPanels` for a bar without a wrapper.
 	 */
 	children: React.ReactNode;
+	/**
+	 * Whether a `RoutedTabPanelWrapper` under the same Route renders this bar's
+	 * panels. When `true` (the default) each Tab gets the `id` and
+	 * `aria-controls` of its panel. Set `false` for a bar that only navigates
+	 * (no panels, or panels not rendered by the wrapper): the Tabs then get
+	 * neither, so no `aria-controls` points at an element that does not exist.
+	 * The wrapper itself still gives its panel an `id` and `aria-labelledby`;
+	 * for a panel of your own, keep the default and set
+	 * `id={getTabPanelId(url, value)}` and
+	 * `aria-labelledby={getTabId(url, value)}` on it.
+	 */
+	linkTabsToPanels?: boolean;
 }
 
 export type RoutedTabsClassKey = "root";
@@ -105,15 +117,22 @@ const getTabEntries = (children: React.ReactNode): TabEntry[] =>
  * that does not set `disableFocusRipple` itself.
  * @param entries The Tabs' children with their values
  * @param url The url of the enclosing Route, for the ids
+ * @param linkTabsToPanels Whether the Tabs get the `id` and `aria-controls`
  * @returns The Tab elements with the props set
  */
-const withTabProps = (entries: TabEntry[], url: string): React.ReactNode =>
+const withTabProps = (
+	entries: TabEntry[],
+	url: string,
+	linkTabsToPanels: boolean,
+): React.ReactNode =>
 	entries.map(({ child, value }) =>
 		child.type === React.Fragment
 			? child
 			: React.cloneElement(child, {
-					id: getTabId(url, value),
-					"aria-controls": getTabPanelId(url, value),
+					...(linkTabsToPanels && {
+						id: getTabId(url, value),
+						"aria-controls": getTabPanelId(url, value),
+					}),
 					...(child.props.disableFocusRipple === undefined && {
 						disableFocusRipple: true,
 					}),
@@ -129,6 +148,7 @@ const withTabProps = (entries: TabEntry[], url: string): React.ReactNode =>
  * @param props The props
  */
 const RoutedTabs = (props: RoutedTabsProps) => {
+	const { linkTabsToPanels = true, ...tabsProps } = props;
 	const { pathname, search, hash } = useLocation();
 	let { url } = useRouteInfo();
 	if (url.endsWith("/")) url = url.substring(0, url.length - 1);
@@ -148,7 +168,7 @@ const RoutedTabs = (props: RoutedTabsProps) => {
 			.substring(url.length)
 			.split("/")
 			.filter((entry) => entry)[0] ?? "";
-	const entries = getTabEntries(props.children);
+	const entries = getTabEntries(tabsProps.children);
 	const values = entries.map((entry) => entry.value);
 	// MUI logs an error for a value no Tab has. With such a segment the default
 	// panel (the catch-all) is the one shown, so its Tab is the selected one.
@@ -158,8 +178,8 @@ const RoutedTabs = (props: RoutedTabsProps) => {
 			? ""
 			: false;
 	return (
-		<RoutedTabsRoot {...props} value={current} onChange={handleChange}>
-			{withTabProps(entries, url)}
+		<RoutedTabsRoot {...tabsProps} value={current} onChange={handleChange}>
+			{withTabProps(entries, url, linkTabsToPanels)}
 		</RoutedTabsRoot>
 	);
 };

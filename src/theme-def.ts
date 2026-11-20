@@ -251,6 +251,7 @@ import {
 } from "./standalone/UIKit/MuiFieldState";
 import { CrudClassKey } from "./backend-components/CRUD";
 import { RoutedTabsClassKey } from "./non-standalone/RoutedTabs/RoutedTabs";
+import { RoutedTabPanelWrapperClassKey } from "./non-standalone/RoutedTabs/RoutedTabPanelWrapper";
 import {
 	CrudLoadStatusClassKey,
 	CrudLoadStatusProps,
@@ -381,6 +382,7 @@ declare module "@mui/material/styles" {
 		CcDirtyMarker: DirtyMarkerClassKey;
 		CcCrud: CrudClassKey;
 		CcRoutedTabs: RoutedTabsClassKey;
+		CcRoutedTabPanelWrapper: RoutedTabPanelWrapperClassKey;
 	}
 
 	interface ComponentsPropsList {
@@ -892,6 +894,9 @@ declare module "@mui/material/styles" {
 		};
 		CcRoutedTabs?: {
 			styleOverrides?: StyleOverridesWithoutOwnerState<RoutedTabsClassKey>;
+		};
+		CcRoutedTabPanelWrapper?: {
+			styleOverrides?: StyleOverridesWithoutOwnerState<RoutedTabPanelWrapperClassKey>;
 		};
 	}
 }

@@ -1,8 +1,7 @@
 import React, { useMemo } from "react";
 import { RouteProps, useRoutePrefix } from "./Route";
 import useLocation from "./useLocation";
-import matchPath from "./matchPath";
-import joinRoutePath from "./joinRoutePath";
+import findMatchingRoute from "./findMatchingRoute";
 
 /**
  * Props of {@link Routes}
@@ -24,14 +23,11 @@ const Routes = (props: RoutesProps) => {
 			React.cloneElement(child, { key: child.props.path }),
 		);
 	}, [children]);
-	const matchedRoutes = childrenWithKeys.filter(
-		(child) =>
-			!!matchPath(
-				{ ...child.props, path: joinRoutePath(routePrefix, child.props.path) },
-				pathname,
-			),
+	const matchedRoute = findMatchingRoute(
+		childrenWithKeys,
+		routePrefix,
+		pathname,
 	);
-	const matchedRoute = matchedRoutes[0];
 	return matchedRoute ? matchedRoute : <React.Fragment />;
 };
 

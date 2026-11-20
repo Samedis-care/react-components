@@ -14,13 +14,16 @@ import {
 	fireEvent,
 	render,
 	screen,
+	waitFor,
 } from "@testing-library/react";
-import { Tab } from "@mui/material";
+import { createTheme, Tab, ThemeProvider } from "@mui/material";
 import { createMemoryHistory, History, InitialEntry } from "history";
 import HistoryRouter from "../../src/standalone/Routes/HistoryRouter";
 import Routes from "../../src/standalone/Routes/Routes";
 import Route from "../../src/standalone/Routes/Route";
 import {
+	getTabId,
+	getTabPanelId,
 	RoutedTabPanelWrapper,
 	RoutedTabPanelWrapperProps,
 	RoutedTabs,
@@ -304,6 +307,155 @@ describe("RoutedTabs: bugs", () => {
 		expect(outer.id).not.toBe(inner.id);
 		expect(tabEl("Security")).toHaveAttribute("aria-controls", outer.id);
 		expect(tabEl("2FA")).toHaveAttribute("aria-controls", inner.id);
+	});
+
+	it("[ISSUE-3500-ITEM-6] a panel that gains or loses its control after mount follows it in the tab order", async () => {
+		let setControl: (value: boolean) => void = () => undefined;
+		const Content = () => {
+			const [control, set] = React.useState(false);
+			setControl = set;
+			return control ? (
+				<button type="button">Edit</button>
+			) : (
+				<div>TEXT ONLY</div>
+			);
+		};
+		const OnlyPanel = () => {
+			const tab = useRoutedTabPanel();
+			return (
+				<RoutedTabPanelWrapper>{[tab("", <Content />)]}</RoutedTabPanelWrapper>
+			);
+		};
+		renderAt(mem("/settings"), <OnlyPanel />);
+		const panel = screen.getByRole("tabpanel");
+		expect(panel).toHaveAttribute("tabindex", "0");
+
+		// the content changes by itself: the wrapper does not re-render
+		act(() => setControl(true));
+		await waitFor(() => expect(panel).not.toHaveAttribute("tabindex"));
+
+		act(() => setControl(false));
+		await waitFor(() => expect(panel).toHaveAttribute("tabindex", "0"));
+	});
+
+	it("[ISSUE-3500-ITEM-6] a focused panel keeps its tab stop until it loses focus", async () => {
+		let setControl: (value: boolean) => void = () => undefined;
+		const Content = () => {
+			const [control, set] = React.useState(false);
+			setControl = set;
+			return control ? (
+				<button type="button">Edit</button>
+			) : (
+				<div>TEXT ONLY</div>
+			);
+		};
+		const OnlyPanel = () => {
+			const tab = useRoutedTabPanel();
+			return (
+				<RoutedTabPanelWrapper>{[tab("", <Content />)]}</RoutedTabPanelWrapper>
+			);
+		};
+		renderAt(mem("/settings"), <OnlyPanel />);
+		const panel = screen.getByRole("tabpanel");
+		panel.focus();
+		expect(panel).toHaveFocus();
+
+		act(() => setControl(true));
+		await screen.findByRole("button", { name: "Edit" });
+		await act(async () => {
+			await Promise.resolve();
+		});
+		// dropping the tab stop now would drop focus to the body
+		expect(panel).toHaveAttribute("tabindex", "0");
+
+		panel.blur();
+		await waitFor(() => expect(panel).not.toHaveAttribute("tabindex"));
+	});
+
+	it("[ISSUE-3500-ITEM-6] controls Tab does not reach do not take the panel out of the tab order", () => {
+		const OnlyPanel = () => {
+			const tab = useRoutedTabPanel();
+			return (
+				<RoutedTabPanelWrapper>
+					{[
+						tab(
+							"",
+							<>
+								<button type="button" tabIndex={-1}>
+									Skipped
+								</button>
+								<button type="button" tabIndex={-2}>
+									Skipped too
+								</button>
+								<div hidden>
+									<button type="button">Hidden</button>
+								</div>
+								<div inert>
+									<input />
+								</div>
+								<fieldset disabled>
+									<input />
+								</fieldset>
+							</>,
+						),
+					]}
+				</RoutedTabPanelWrapper>
+			);
+		};
+		renderAt(mem("/settings"), <OnlyPanel />);
+		expect(screen.getByRole("tabpanel")).toHaveAttribute("tabindex", "0");
+	});
+
+	it("[ISSUE-3500-ITEM-6] the panel is a CcRoutedTabPanelWrapper root that takes a className and the theme's styles", () => {
+		const theme = createTheme({
+			components: {
+				CcRoutedTabPanelWrapper: {
+					styleOverrides: { root: { display: "flex" } },
+				},
+			},
+		});
+		const Styled = () => {
+			const tab = useRoutedTabPanel();
+			return (
+				<RoutedTabPanelWrapper className="panel-extra">
+					{[tab("", <div>MAIN PANEL</div>)]}
+				</RoutedTabPanelWrapper>
+			);
+		};
+		render(
+			<ThemeProvider theme={theme}>
+				{routed(mem("/settings"), <Styled />)}
+			</ThemeProvider>,
+		);
+		const panel = screen.getByRole("tabpanel");
+		expect(panel.className).toContain("CcRoutedTabPanelWrapper-root");
+		expect(panel).toHaveClass("panel-extra");
+		expect(panel).toHaveStyle({ display: "flex" });
+	});
+
+	it("[ISSUE-3500-ITEM-6] linkTabsToPanels={false} leaves the tabs without an id or aria-controls", () => {
+		const Navigation = () => (
+			<RoutedTabs aria-label="Navigation" linkTabsToPanels={false}>
+				<Tab label="Main" value="" />
+				<Tab label="Security" value="security" />
+			</RoutedTabs>
+		);
+		renderAt(mem("/settings"), <Navigation />);
+		for (const tab of screen.getAllByRole("tab")) {
+			expect(tab).not.toHaveAttribute("id");
+			expect(tab).not.toHaveAttribute("aria-controls");
+		}
+	});
+
+	it("[ISSUE-3500-ITEM-6] the ids encode the url and the value so that different pairs never collide", () => {
+		// an outer tab "security-2fa" and a nested "2fa" under "security" used to share an id
+		expect(getTabPanelId("/settings", "security-2fa")).not.toBe(
+			getTabPanelId("/settings/security", "2fa"),
+		);
+		expect(getTabId("/a-b", "")).not.toBe(getTabId("/a/b", ""));
+		expect(getTabId("/settings", "über")).not.toBe(
+			getTabId("/settings", "uber"),
+		);
 	});
 
 	it("[ISSUE-3500-ITEM-14] the panel wrapper takes conditional entries as separate JSX children, and tab takes any element", () => {
