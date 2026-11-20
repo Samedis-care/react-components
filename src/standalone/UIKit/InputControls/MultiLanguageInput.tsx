@@ -321,6 +321,15 @@ const LanguageLabel = styled(ToggleButton, {
 	"&.Mui-focusVisible": focusRing(theme, -2),
 }));
 
+/**
+ * The translate button of a single-line field. MUI shows its keyboard focus
+ * only as a faint ripple, which forced colors drop, so it draws the library's
+ * focus ring (MUI's own when the theme sets `focusVisible`).
+ */
+const TranslateButton = styled(IconButton)(({ theme }) => ({
+	"&.Mui-focusVisible": focusRing(theme, 0),
+}));
+
 /** The field's language name, read with its label but not shown */
 const LabelLanguageName = styled("span")({
 	// visually hidden, as MUI's visuallyHidden
@@ -531,7 +540,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 						defaultLanguage === lang && !textFieldProps.multiline ? (
 							<InputAdornment position={"end"}>
 								<Tooltip title={toggleLabel}>
-									<IconButton
+									<TranslateButton
 										onClick={toggleExpanded}
 										size="large"
 										aria-label={toggleLabel}
@@ -543,7 +552,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 												expanded ? "primary" : incomplete ? "error" : undefined
 											}
 										/>
-									</IconButton>
+									</TranslateButton>
 								</Tooltip>
 							</InputAdornment>
 						) : undefined,

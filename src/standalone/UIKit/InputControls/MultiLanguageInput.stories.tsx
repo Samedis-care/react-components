@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, waitFor } from "storybook/test";
-import { Box, Button } from "@mui/material";
+import { Box, Button, decomposeColor, getContrastRatio } from "@mui/material";
 import ccI18n from "../../../i18n";
 import MultiLanguageInput from "./MultiLanguageInput";
 
@@ -165,6 +165,21 @@ const field = (root: HTMLElement, name: string) =>
 		`input[name="${name}"], textarea[name="${name}"]`,
 	);
 
+// an outline colour composited over white paper
+const overPaper = (color: string) => {
+	const [r, g, b, a = 1] = decomposeColor(color).values;
+	const over = (channel: number) => Math.round(channel * a + 255 * (1 - a));
+	return `rgb(${over(r)}, ${over(g)}, ${over(b)})`;
+};
+
+const focusRing = (el: Element) => {
+	const style = getComputedStyle(el);
+	if (style.outlineStyle !== "none" && parseFloat(style.outlineWidth) > 0)
+		return { outline: style.outlineColor };
+	if (style.boxShadow !== "none") return { shadow: style.boxShadow };
+	return null;
+};
+
 export const Issue3486Item9MultilineLanguageByKeyboard: Story = {
 	parameters: {
 		docs: {
@@ -279,5 +294,49 @@ export const Issue3486Item10FieldNames: Story = {
 		const french = canvas.getByRole("textbox", { name: "Title (French)" });
 		await expect(group).toContainElement(german);
 		await expect(group).toContainElement(french);
+	},
+};
+
+export const Issue3486Item12ToggleFocusRing: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3486-ITEM-12: keyboard focus on the translate button shows only MUI's faint ripple; there is no outline or ring (WCAG 2.4.7, 1.4.11).",
+			},
+		},
+	},
+	play: async ({ canvas, userEvent }) => {
+		const input = await canvas.findByRole("textbox", {
+			name: "Title (English)",
+		});
+		input.focus();
+		await userEvent.tab();
+		const toggle = canvas.getByRole("button", { name: TOGGLE });
+		// keyboard focus as MUI sees it, so the ring is the only open question
+		await waitFor(() => expect(toggle).toHaveClass("Mui-focusVisible"));
+		const ring = focusRing(toggle);
+		await expect(ring, "the toggle shows no focus ring").not.toBeNull();
+		if (ring?.outline)
+			await expect(
+				getContrastRatio(overPaper(ring.outline), "#fff"),
+				"the toggle's focus ring is too faint",
+			).toBeGreaterThanOrEqual(3);
+	},
+};
+
+/** The toggle's ring is an outline, which forced colors keep (they drop box-shadows) */
+export const Issue3486Item12ToggleFocusRingIsAnOutline: Story = {
+	play: async ({ canvas, userEvent }) => {
+		const input = await canvas.findByRole("textbox", {
+			name: "Title (English)",
+		});
+		input.focus();
+		await userEvent.tab();
+		const toggle = canvas.getByRole("button", { name: TOGGLE });
+		await waitFor(() => expect(toggle).toHaveClass("Mui-focusVisible"));
+		const style = getComputedStyle(toggle);
+		await expect(style.outlineStyle).toBe("solid");
+		await expect(parseFloat(style.outlineWidth)).toBeGreaterThanOrEqual(2);
 	},
 };
