@@ -11,6 +11,12 @@ const theme = createTheme();
 const renderGroupBox = (ui: React.ReactElement, t: Theme = theme) =>
 	render(<ThemeProvider theme={t}>{ui}</ThemeProvider>);
 
+const fieldsetOf = (container: HTMLElement) => {
+	const fieldset = container.querySelector("fieldset");
+	if (!fieldset) throw new Error("no fieldset rendered");
+	return fieldset;
+};
+
 describe("GroupBox", () => {
 	it("renders the label as a legend", () => {
 		renderGroupBox(<GroupBox label="Personal Information" />);
@@ -179,6 +185,137 @@ describe("GroupBox", () => {
 			expect(themed.components?.CcGroupBox?.styleOverrides?.legend).toEqual(
 				expect.any(Function),
 			);
+		});
+
+		it("[ISSUE-3462-ITEM-3] applies theme variants keyed on smallLabel", () => {
+			const themed = createTheme({
+				components: {
+					CcGroupBox: {
+						variants: [
+							{
+								props: { smallLabel: true },
+								style: { outlineStyle: "dotted" },
+							},
+						],
+					},
+				},
+			});
+			const { container } = renderGroupBox(
+				<>
+					<GroupBox label="Normal" />
+					<GroupBox label="Small" smallLabel />
+				</>,
+				themed,
+			);
+			const [normal, small] = Array.from(
+				container.querySelectorAll("fieldset"),
+			);
+			expect(getComputedStyle(normal).outlineStyle).not.toBe("dotted");
+			expect(getComputedStyle(small).outlineStyle).toBe("dotted");
+		});
+
+		it("[ISSUE-3462-ITEM-3] matches function variants on smallLabel and label, with smallLabel false when it is not set", () => {
+			const themed = createTheme({
+				components: {
+					CcGroupBox: {
+						variants: [
+							{
+								props: (p) => !!p.smallLabel,
+								style: { outlineStyle: "dotted" },
+							},
+							{
+								props: { smallLabel: false },
+								style: { borderTopStyle: "dashed" },
+							},
+							{
+								props: ({ label }) => !label,
+								style: { paddingTop: "2px" },
+							},
+						],
+					},
+				},
+			});
+			const { container } = renderGroupBox(
+				<>
+					<GroupBox label="Normal" />
+					<GroupBox label="Small" smallLabel />
+					<GroupBox label={null} />
+				</>,
+				themed,
+			);
+			const [normal, small, untitled] = Array.from(
+				container.querySelectorAll("fieldset"),
+			).map((el) => getComputedStyle(el));
+			expect(normal.outlineStyle).not.toBe("dotted");
+			expect(normal.borderTopStyle).toBe("dashed");
+			expect(normal.paddingTop).toBe("8px");
+			expect(small.outlineStyle).toBe("dotted");
+			expect(small.borderTopStyle).toBe("solid");
+			expect(small.paddingTop).toBe("8px");
+			expect(untitled.outlineStyle).not.toBe("dotted");
+			expect(untitled.borderTopStyle).toBe("dashed");
+			expect(untitled.paddingTop).toBe("2px");
+		});
+
+		it("[ISSUE-3462-ITEM-3] matches variants on a smallLabel from the theme's defaultProps, and follows smallLabel changing after mount", () => {
+			const themed = createTheme({
+				components: {
+					CcGroupBox: {
+						defaultProps: { smallLabel: true },
+						variants: [
+							{
+								props: { smallLabel: true },
+								style: { outlineStyle: "dotted" },
+							},
+						],
+					},
+				},
+			});
+			const { container, rerender } = renderGroupBox(
+				<GroupBox label="L" />,
+				themed,
+			);
+			const fieldset = fieldsetOf(container);
+			expect(getComputedStyle(fieldset).outlineStyle).toBe("dotted");
+
+			rerender(
+				<ThemeProvider theme={themed}>
+					<GroupBox label="L" smallLabel={false} />
+				</ThemeProvider>,
+			);
+			expect(fieldsetOf(container)).toBe(fieldset);
+			expect(getComputedStyle(fieldset).outlineStyle).not.toBe("dotted");
+		});
+
+		it("[ISSUE-3462-ITEM-3] sizes the small legend through a smallLabel variant under a theme legend font size, and keeps label off the fieldset", () => {
+			const themed = createTheme({
+				components: {
+					CcGroupBox: {
+						styleOverrides: { legend: { fontSize: "12px" } },
+						variants: [
+							{
+								props: { smallLabel: true },
+								style: { "& > legend": { fontSize: "9px" } },
+							},
+						],
+					},
+				},
+			});
+			const { container } = renderGroupBox(
+				<>
+					<GroupBox label="Normal" />
+					<GroupBox label="Small" smallLabel />
+				</>,
+				themed,
+			);
+			const [normal, small] = Array.from(container.querySelectorAll("legend"));
+			expect(getComputedStyle(normal).fontSize).toBe("12px");
+			expect(getComputedStyle(small).fontSize).toBe("9px");
+			for (const fieldset of Array.from(
+				container.querySelectorAll("fieldset"),
+			)) {
+				expect(fieldset).not.toHaveAttribute("label");
+			}
 		});
 
 		it("[ISSUE-3462-ITEM-8] passes aria-describedby, aria-labelledby, data-* and ref to the fieldset", () => {

@@ -2,29 +2,52 @@ import React from "react";
 import combineClassNames from "../../utils/combineClassNames";
 import { styled, SxProps, Theme, useThemeProps } from "@mui/material";
 
-const GroupBoxRoot = styled("fieldset", { name: "CcGroupBox", slot: "root" })(
-	({ theme }) => ({
-		padding: "8px",
-		borderStyle: "solid",
-		borderColor: "lightgrey",
-		borderRadius: theme.shape.borderRadius,
-		borderWidth: 1,
-		position: "relative",
-		maxHeight: "inherit",
-		// Fills the parent only as its only child: a full-height frame would push
-		// a heading or helper text next to it out of the parent. :where() keeps
-		// the rule at zero specificity, so a height from the theme or a styled()
-		// wrapper wins. The leading * stops emotion from reading the selector as
-		// a pseudo-class of the frame (which would add the frame's class again).
-		"*:where(&:only-child)": {
-			height: "100%",
-		},
-		marginLeft: 0,
-		marginRight: 0,
-		minWidth: 0,
-		width: "100%",
-	}),
-);
+/**
+ * The props the root slot gets besides the fieldset's attributes: GroupBox's
+ * `label` and `smallLabel`, so that theme `variants` can match them. They do
+ * not reach the DOM.
+ */
+type GroupBoxRootProps = Pick<GroupBoxProps, "label"> &
+	Required<Pick<GroupBoxProps, "smallLabel">>;
+
+/**
+ * What MUI keeps off the DOM of a root slot, plus GroupBox's own props
+ */
+const ROOT_PROPS_NOT_FORWARDED = new Set<PropertyKey>([
+	"label",
+	"smallLabel",
+	"ownerState",
+	"theme",
+	"sx",
+	"as",
+	"classes",
+]);
+
+const GroupBoxRoot = styled("fieldset", {
+	name: "CcGroupBox",
+	slot: "root",
+	shouldForwardProp: (prop) => !ROOT_PROPS_NOT_FORWARDED.has(prop),
+})<GroupBoxRootProps>(({ theme }) => ({
+	padding: "8px",
+	borderStyle: "solid",
+	borderColor: "lightgrey",
+	borderRadius: theme.shape.borderRadius,
+	borderWidth: 1,
+	position: "relative",
+	maxHeight: "inherit",
+	// Fills the parent only as its only child: a full-height frame would push
+	// a heading or helper text next to it out of the parent. :where() keeps
+	// the rule at zero specificity, so a height from the theme or a styled()
+	// wrapper wins. The leading * stops emotion from reading the selector as
+	// a pseudo-class of the frame (which would add the frame's class again).
+	"*:where(&:only-child)": {
+		height: "100%",
+	},
+	marginLeft: 0,
+	marginRight: 0,
+	minWidth: 0,
+	width: "100%",
+}));
 
 /**
  * State class of the legend while `smallLabel` is set
@@ -89,7 +112,8 @@ export interface GroupBoxProps extends GroupBoxHTMLProps {
 	 * Renders the legend at 0.75em of the inherited font size. The legend
 	 * then has the class `CcGroupBox-smallLabel` and `classes.smallLabel`, and
 	 * gets the theme's `styleOverrides.smallLabel`; a font size from the theme
-	 * replaces the 0.75em.
+	 * replaces the 0.75em. Theme `variants` keyed on `smallLabel` match, and
+	 * style the fieldset (the legend through `"& > legend"`).
 	 * @default false
 	 */
 	smallLabel?: boolean;
@@ -118,12 +142,20 @@ const GroupBox = React.forwardRef(function GroupBox(
 	ref: React.ForwardedRef<HTMLFieldSetElement>,
 ) {
 	const props = useThemeProps({ props: inProps, name: "CcGroupBox" });
-	const { label, children, smallLabel, className, classes, ...fieldsetProps } =
-		props;
+	const {
+		label,
+		children,
+		smallLabel = false,
+		className,
+		classes,
+		...fieldsetProps
+	} = props;
 	return (
 		<GroupBoxRoot
 			{...fieldsetProps}
 			ref={ref}
+			label={label}
+			smallLabel={smallLabel}
 			className={combineClassNames([className, classes?.root])}
 		>
 			{label && (
@@ -158,8 +190,23 @@ const GroupBox = React.forwardRef(function GroupBox(
  * readers read it when focus enters the group. A frame without a title can be
  * named by a heading inside it with `aria-labelledby`.
  *
+ * Theme: `components.CcGroupBox.defaultProps` ({@link GroupBoxProps}),
+ * `styleOverrides` per {@link GroupBoxClassKey} slot, and `variants`, which
+ * apply to the fieldset. A variant's `props` match `label`, `smallLabel` and
+ * the fieldset's HTML attributes after the theme's default props, with
+ * `smallLabel` `false` when it is not set. A `props` function gets these
+ * props directly: there is no `ownerState`. A variant reaches the legend
+ * through a nested selector.
+ *
  * @example
  * <GroupBox label={t("files")} aria-describedby={"files-error"}>…</GroupBox>
  * <FormHelperTextCC id={"files-error"} error>{errorMsg}</FormHelperTextCC>
+ *
+ * @example
+ * // a theme that gives frames with a small legend a tighter frame
+ * createTheme({ components: { CcGroupBox: { variants: [{
+ *   props: { smallLabel: true },
+ *   style: { padding: 4, "& > legend": { paddingInline: 2 } },
+ * }] } } });
  */
 export default React.memo(GroupBox);
