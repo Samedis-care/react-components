@@ -9,6 +9,7 @@ import {
 	DialogContent,
 	DialogContentText,
 	TextField,
+	Typography,
 } from "@mui/material";
 import DialogContextProvider from "../../framework/DialogContextProvider";
 import { useDialogContext } from "../../framework";
@@ -20,6 +21,7 @@ import { FormDialog } from "./FormDialog";
 import { DialogTitle } from "./DialogTitle";
 import { setFrameworkHistory } from "../../framework/History";
 import { createMemoryHistory } from "history";
+import FullFormDialog from "../../backend-components/Form/FormDialog";
 
 // Framework needs a history to be set for DialogContextProvider to work
 setFrameworkHistory(createMemoryHistory());
@@ -45,6 +47,7 @@ export default meta;
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const page = () => within(document.body);
+
 const nextFrame = () =>
 	new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
@@ -598,3 +601,94 @@ export const Issue3497Item17BusyDialogWithKeyboard: StoryObj<BusyKeyboardArgs> =
 			await expect(no).toHaveFocus();
 		},
 	};
+
+const LONG_TITLE =
+	"Hochfrequenzchirurgiegerät Modell XYZ-2000 Sicherheitsmeldung Rückruf Charge 2026-17 Ersatzteile";
+
+export const Issue3497Item19LongTitleReadableOnPhone: StoryObj<DialogTitleArgs> =
+	{
+		args: { onClose: fn() },
+		globals: { viewport: { value: "mobile1", isRotated: false } },
+		parameters: {
+			a11y: { test: "error" },
+			docs: {
+				description: {
+					story:
+						"ISSUE-3497-ITEM-19: at 320px a long title wraps onto more lines, like MUI's `DialogTitle`, and a word wider than the line breaks, so the whole title can be read. The close button stays beside it, inside the dialog.",
+				},
+			},
+		},
+		render: (args) => (
+			<Dialog open fullWidth maxWidth="md">
+				<DialogTitle onClose={args.onClose}>{LONG_TITLE}</DialogTitle>
+				<DialogContent>
+					<DialogContentText>Dialog content.</DialogContentText>
+				</DialogContent>
+			</Dialog>
+		),
+		play: async () => {
+			await page().findByRole("dialog");
+			const text = page().getByText(LONG_TITLE);
+			const close = page().getByRole("button", { name: "Close" });
+			const paper = page().getByRole("dialog");
+			// the close button stays inside the paper
+			await expect(close.getBoundingClientRect().right).toBeLessThanOrEqual(
+				paper.getBoundingClientRect().right,
+			);
+			const readable =
+				text.scrollWidth <= text.clientWidth ||
+				text.getAttribute("title") === LONG_TITLE;
+			await expect(
+				readable,
+				`text scrollWidth ${text.scrollWidth} > clientWidth ${text.clientWidth}, title ${text.getAttribute("title")}`,
+			).toBe(true);
+		},
+	};
+
+interface OpenInNewArgs {
+	onOpenInNew: () => void;
+}
+
+export const Issue3497Item19OpenInNewStaysInDialog: StoryObj<OpenInNewArgs> = {
+	args: { onOpenInNew: fn() },
+	argTypes: {
+		onOpenInNew: {
+			description:
+				"FullFormDialog's `openInNewLink`: shows the open-in-new icon after the title",
+		},
+	},
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3497-ITEM-19: a FullFormDialog with a long title and `openInNewLink` at 320px. The open-in-new icon follows the title inside the heading, so a long title must not push it out of the dialog.",
+			},
+		},
+	},
+	render: (args) => (
+		<FullFormDialog
+			dialogTitle={LONG_TITLE}
+			openInNewLink={args.onOpenInNew}
+			maxWidth="md"
+		>
+			<Typography>The form.</Typography>
+		</FullFormDialog>
+	),
+	play: async () => {
+		const dialog = await page().findByRole("dialog", { name: LONG_TITLE });
+		await waitFor(() => expect(dialog).toBeVisible());
+		const heading = within(dialog).getByRole("heading", { name: LONG_TITLE });
+		const icon = within(heading).getByTestId("OpenInNewIcon");
+		const headingBox = heading.getBoundingClientRect();
+		const iconBox = icon.getBoundingClientRect();
+		// inside the heading box, which the paper holds
+		await expect({
+			left: iconBox.left >= headingBox.left,
+			right: iconBox.right <= headingBox.right,
+			bottom: iconBox.bottom <= headingBox.bottom,
+		}).toEqual({ left: true, right: true, bottom: true });
+		await expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth);
+	},
+};

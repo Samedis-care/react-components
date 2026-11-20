@@ -23,7 +23,8 @@ export interface DialogTitleProps {
 	id?: string;
 	/**
 	 * The title. It is the content of the heading (an `h2`) that names the
-	 * dialog, rendered on one line and cut with an ellipsis when too long.
+	 * dialog. A title too long for one line wraps onto more lines, like MUI's
+	 * `DialogTitle`, and a word too long for a line breaks where it has to.
 	 * With `noTitle` it is rendered next to the close button, not as a heading.
 	 */
 	children: React.ReactNode;
@@ -87,11 +88,12 @@ const TextWrapper = styled("div", {
 	minWidth: 0,
 });
 
-// MUI's DialogTitle: the h2 that MUI's Dialog is labelled by
+// MUI's DialogTitle: the h2 that MUI's Dialog is labelled by. A long title
+// wraps, as MUI's does; a word wider than the dialog (a German compound on a
+// phone) breaks too, also inside a flex row an app passes as the title
 const Text = styled(MuiDialogTitle, { name: "CcDialogTitle", slot: "text" })({
 	padding: 0,
-	textOverflow: "ellipsis",
-	overflow: "hidden",
+	overflowWrap: "anywhere",
 });
 
 const CloseButton = styled(IconButton, {
@@ -127,7 +129,7 @@ const DialogTitleRaw = (inProps: DialogTitleProps) => {
 				{noTitle ? (
 					children
 				) : (
-					<Text id={id} noWrap className={classes?.text}>
+					<Text id={id} className={classes?.text}>
 						{children}
 					</Text>
 				)}
