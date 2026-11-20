@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { useThemeProps } from "@mui/material";
 import {
 	BaseSelectorLoadResult,
@@ -133,7 +139,9 @@ export type BackendMultiSelectProps<
 		 * Load error event
 		 * @param error The error that has been raised while loading
 		 * @return string Label for entry which failed loading
-		 * @return null To remove entry from selected entries
+		 * @return null To remove the entry: `onSelect` reports the current selection without
+		 *         its id, so a pick or removal made while it loaded is kept (an id picked
+		 *         again meanwhile stays). Not reported once the field has unmounted.
 		 * @remarks Without it, the entry is labelled "Unknown entry" if the backend did not
 		 *          return its record, else "Error while fetching data".
 		 */
@@ -182,6 +190,19 @@ export const useSelectedCache = <
 	const modelFetch = props.modelFetch ?? model;
 
 	const [selectedCache, setSelectedCache] = useState<Record<string, DataT>>({});
+
+	// the selection, entries and handler of the latest render: a drop by onLoadError
+	// removes its ids from this selection, not from the one its lookup started with
+	const latest = useRef({ selected, selectedCache, onSelect });
+	latest.current = { selected, selectedCache, onSelect };
+	// lookups that end after unmount neither report a drop nor fill the cache
+	const mounted = useRef(false);
+	useEffect(() => {
+		mounted.current = true;
+		return () => {
+			mounted.current = false;
+		};
+	}, []);
 
 	const { t } = useCCTranslations();
 
@@ -259,16 +280,28 @@ export const useSelectedCache = <
 				}),
 			);
 
-			// now that everything has loaded ensure we actually drop records
-			// if we can update and we have something to drop
-			if (onSelect && selected.filter(isIdNotInCache).length > 0) {
-				// call onSelect with new array
-				const newSelection = selected.filter((id) => !isIdNotInCache(id));
-				onSelect(
+			if (!mounted.current) return;
+
+			// the ids onLoadError dropped leave the current selection, so a pick or removal
+			// made while they loaded is kept; an id picked again meanwhile has an entry and stays
+			const dropped = selected.filter(isIdNotInCache);
+			const current = latest.current;
+			const newSelection = current.selected.filter((id) => {
+				if (!dropped.includes(id)) return true;
+				const entry = current.selectedCache[id] as DataT | undefined;
+				return entry !== undefined && !isLoadingPlaceholder(entry);
+			});
+			if (current.onSelect && newSelection.length < current.selected.length) {
+				// a second drop before the parent has rendered this one starts from it
+				latest.current = { ...current, selected: newSelection };
+				current.onSelect(
 					newSelection,
 					newSelection
-						.map((id) => selectedCache[id] ?? newCache[id])
-						.filter((entry) => !isLoadingPlaceholder(entry)),
+						.map((id) => newCache[id] ?? current.selectedCache[id])
+						.filter(
+							(entry): entry is DataT =>
+								entry !== undefined && !isLoadingPlaceholder(entry),
+						),
 				);
 			}
 

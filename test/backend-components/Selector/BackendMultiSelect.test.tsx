@@ -87,6 +87,122 @@ const lookups = (connector: SelectorTestConnector) =>
 // ---------------------------------------------------------------------------
 
 describe("BackendMultiSelect bugs", () => {
+	it("[ISSUE-3510-ITEM-2] an id dropped by onLoadError does not undo a pick made while it loaded", async () => {
+		const { model, connector } = peopleModel();
+		connector.fail["1"] = new Error("gone");
+		const release = connector.hold("1");
+		const { Parent, state } = makeParent();
+		render(
+			<Framework>
+				<Parent
+					model={model}
+					initial={["1"]}
+					onLoadError={() => null}
+					disableRequestBatching
+				/>
+			</Framework>,
+		);
+		await flush();
+		await openList();
+		await typeText("Bo");
+		await pickOption("Bob");
+		expect(state.current).toEqual(["1", "2"]);
+		await release();
+		expect(state.current).toEqual(["2"]);
+	});
+
+	it("[ISSUE-3510-ITEM-2] an id dropped by onLoadError does not bring back an entry removed while it loaded", async () => {
+		const { model, connector } = peopleModel();
+		connector.fail["1"] = new Error("gone");
+		const release = connector.hold("1");
+		const { Parent, state } = makeParent();
+		render(
+			<Framework>
+				<Parent
+					model={model}
+					initial={["1", "2"]}
+					onLoadError={() => null}
+					disableRequestBatching
+				/>
+			</Framework>,
+		);
+		await flush();
+		// the second entry is Bob's (by position: while 1 loads it may read "Loading…" too)
+		fireEvent.click(screen.getAllByRole("button", { name: /^Remove / })[1]);
+		await flush();
+		expect(state.current).toEqual(["1"]);
+		await release();
+		expect(state.current).toEqual([]);
+	});
+
+	it("[ISSUE-3510-ITEM-2] a record picked again while its earlier lookup failed is not dropped", async () => {
+		const { model, connector } = peopleModel();
+		// reading 1 fails (e.g. modelFetch is another endpoint), the search still lists Alice
+		connector.fail["1"] = new Error("gone");
+		const release = connector.hold("1");
+		const { Parent, state } = makeParent();
+		render(
+			<Framework>
+				<Parent
+					model={model}
+					initial={["1"]}
+					onLoadError={() => null}
+					disableRequestBatching
+				/>
+			</Framework>,
+		);
+		await flush();
+		fireEvent.click(screen.getByRole("button", { name: /^Remove / }));
+		await flush();
+		expect(state.current).toEqual([]);
+		await openList();
+		await typeText("Al");
+		await pickOption("Alice");
+		expect(state.current).toEqual(["1"]);
+		await release();
+		expect(state.current).toEqual(["1"]);
+		expect(removeButtons()).toEqual(["Remove Alice"]);
+	});
+
+	it("[ISSUE-3510-ITEM-2] an id that two lookups drop before the parent renders is reported once", async () => {
+		const { model, connector } = peopleModel();
+		const release = connector.hold("9");
+		const onSelect = vi.fn<(ids: string[], raw: MultiSelectorData[]) => void>();
+		const props = {
+			model,
+			onSelect,
+			onLoadError: () => null,
+			disableRequestBatching: true,
+		};
+		const { rerender } = render(ui({ ...props, selected: ["9"] }));
+		await flush();
+		// an outside change while 9 loads: the field looks 9 up for the new selection too
+		rerender(ui({ ...props, selected: ["9", "2"] }));
+		await flush();
+		await release();
+		expect(onSelect.mock.calls.map(([ids]) => ids)).toEqual([["2"]]);
+	});
+
+	it("[ISSUE-3510-ITEM-2] an id dropped after the field unmounted is not reported", async () => {
+		const { model, connector } = peopleModel();
+		connector.fail["1"] = new Error("gone");
+		const release = connector.hold("1");
+		const onSelect = vi.fn();
+		const { unmount } = render(
+			ui({
+				model,
+				selected: ["1", "2"],
+				onSelect,
+				onLoadError: () => null,
+				disableRequestBatching: true,
+			}),
+		);
+		await flush();
+		unmount();
+		await release();
+		expect(onSelect).not.toHaveBeenCalled();
+	});
+
 	it("[ISSUE-3510-ITEM-6] an id that matches an additionalOptions entry is listed from that entry, without a lookup", async () => {
 		const { model, connector } = peopleModel();
 		render(

@@ -123,7 +123,8 @@ export type BackendSingleSelectProps<M extends ModelUnknown> = DistributiveOmit<
 		 * Load error event
 		 * @param error The error that has been raised while loading
 		 * @return string Label for entry which failed loading
-		 * @return null To remove entry from selected entries
+		 * @return null To remove the entry: `onSelect(null)`, unless `selected` changed
+		 *         meanwhile (a pick, a clear) or the field has unmounted.
 		 * @remarks Without it, the entry is labelled "Unknown entry" if the backend did not
 		 *          return its record, else "Error while fetching data".
 		 */

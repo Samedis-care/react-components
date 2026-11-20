@@ -178,6 +178,51 @@ describe("BackendSingleSelect bugs", () => {
 		expect(combobox().value).toBe("No one");
 		expect(titles()).toEqual(["Bob", "No one"]);
 	});
+
+	it("[ISSUE-3510-ITEM-2] a record dropped by onLoadError does not undo a pick made while it loaded", async () => {
+		const { model, connector } = peopleModel();
+		connector.fail["1"] = new Error("gone");
+		const release = connector.hold("1");
+		const onSelect = vi.fn();
+		render(
+			<Framework>
+				<Parent
+					model={model}
+					initial={"1"}
+					onSelect={onSelect}
+					onLoadError={() => null}
+					disableRequestBatching
+				/>
+			</Framework>,
+		);
+		await flush();
+		await openList();
+		await pickOption("Bob");
+		expect(combobox().value).toBe("Bob");
+		await release();
+		expect(onSelect.mock.calls).toEqual([["2"]]);
+		expect(combobox().value).toBe("Bob");
+	});
+
+	it("[ISSUE-3510-ITEM-2] a record dropped after the field unmounted is not reported", async () => {
+		const { model, connector } = peopleModel();
+		connector.fail["1"] = new Error("gone");
+		const release = connector.hold("1");
+		const onSelect = vi.fn();
+		const { unmount } = render(
+			ui({
+				model,
+				selected: "1",
+				onSelect,
+				onLoadError: () => null,
+				disableRequestBatching: true,
+			}),
+		);
+		await flush();
+		unmount();
+		await release();
+		expect(onSelect).not.toHaveBeenCalled();
+	});
 });
 
 describe("BackendSingleSelect bugs (debounced search)", () => {
