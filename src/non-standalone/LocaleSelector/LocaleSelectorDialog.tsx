@@ -189,8 +189,11 @@ const hasTexts = (locale: string) => {
  * Rows: one per country and each of its official languages that Components-Care
  * ships (`de-AT`, `en-IN`, …), restricted to `supportedLocales`. Rows whose locale
  * (or else whose language) is in the browser's `navigator.languages` come first, in
- * the order of that list, then the rest by number of speakers. A search box filters
- * the rows by their names and locale code, ignoring case.
+ * the order of that list, then the rest by number of speakers. The row of the
+ * current locale stays in its place and is marked: MUI's selected tint, a check at
+ * its end and `aria-current="true"` (a locale without a region, e.g. `"de"`, marks
+ * the row of its most likely region, `de-DE`). A search box filters the rows by
+ * their names and locale code, ignoring case.
  *
  * The list renders only the rows in view. When the row with keyboard focus is
  * scrolled away (the wheel, a swipe, or the arrow, page, Home and End keys, which

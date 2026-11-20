@@ -480,6 +480,129 @@ export const Issue3499Item6FocusMovedOnStaysWhenScrolledBack: Story = {
 	},
 };
 
+/**
+ * Opens the dialog with the UI in `locale` and checks the marked row: the only one
+ * with `aria-current`, MUI's selected class, and a check of at least 3:1 against
+ * the tint that neither covers the language name nor leaves the row. The language
+ * column stays where the other rows have it. `place` then checks where the check
+ * is, while the dialog is still open.
+ */
+const checkCurrentRow = async (
+	canvasElement: HTMLElement,
+	locale: string,
+	country: string,
+	place: (check: DOMRect, language: HTMLElement) => Promise<void>,
+) => {
+	await reset();
+	await ccI18n.changeLanguage(locale);
+	try {
+		const dialog = await openDialog(canvasElement);
+		const marked = dialog.querySelectorAll('[aria-current="true"]');
+		await expect(marked).toHaveLength(1);
+		const row = marked[0] as HTMLElement;
+		await expect(row).toHaveTextContent(new RegExp("^" + country));
+		await expect(row).toHaveClass("Mui-selected");
+		const check = row.querySelector<SVGElement>('[data-testid="CheckIcon"]');
+		if (!check) throw new Error("the current row shows no check");
+		const box = check.getBoundingClientRect();
+		const rowBox = row.getBoundingClientRect();
+		await expect(box.width).toBeGreaterThanOrEqual(20);
+		await expect(box.left).toBeGreaterThanOrEqual(rowBox.left);
+		await expect(box.right).toBeLessThanOrEqual(rowBox.right);
+		await expect(box.top).toBeGreaterThanOrEqual(rowBox.top);
+		await expect(box.bottom).toBeLessThanOrEqual(rowBox.bottom);
+		const language = row.querySelectorAll("span[title]")[1];
+		const name = language.getBoundingClientRect();
+		const overlaps =
+			box.left < name.right &&
+			name.left < box.right &&
+			box.top < name.bottom &&
+			name.top < box.bottom;
+		await expect(overlaps, "the check covers the language name").toBe(false);
+		// the selected tint fades in
+		await Promise.all(row.getAnimations().map((anim) => anim.finished));
+		const over = (color: number[], below: number[]) =>
+			below.map((value, i) => color[3] * color[i] + (1 - color[3]) * value);
+		const behind = over(
+			rgba(getComputedStyle(row).backgroundColor),
+			rgba(getComputedStyle(dialog).backgroundColor),
+		);
+		const checkColor = getComputedStyle(check).color;
+		await expect(
+			contrast(over(rgba(checkColor), behind), behind),
+			`${checkColor} on ${getComputedStyle(row).backgroundColor}`,
+		).toBeGreaterThanOrEqual(3);
+		const other = Array.from(
+			dialog.querySelectorAll('[role="listitem"] [role="button"]'),
+		).find((button) => button !== row);
+		if (!other) throw new Error("no other row");
+		await expect(name.left).toBe(
+			other.querySelectorAll("span[title]")[1].getBoundingClientRect().left,
+		);
+		await place(box, language as HTMLElement);
+	} finally {
+		await reset();
+	}
+};
+
+export const Issue3499Item8CurrentRowMarked: Story = {
+	args: { supportedLocales: ["de"] },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-8: with the UI in de-AT, the Österreich row is marked as the current one: MUI's selected tint, a check at the row's end (at least 3:1 against the tint, so not by color alone) and `aria-current`. The check sits in the language column after the name, so the other rows keep their room and the columns stay aligned.",
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ canvasElement }) => {
+		await checkCurrentRow(
+			canvasElement,
+			"de-AT",
+			"Österreich",
+			async (check, language) => {
+				// on the name's line
+				await expect(check.top).toBeLessThan(
+					language.getBoundingClientRect().bottom,
+				);
+			},
+		);
+	},
+};
+
+export const Issue3499Item8CurrentRowMarkedOnPhone: Story = {
+	args: { supportedLocales: ["nl"] },
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3499-ITEM-8: at 320px with the UI in nl-NL, "Nederlands" and the check don\'t fit in the language column side by side: the check moves to the second line, which the current row has free, rather than breaking the name.',
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ canvasElement }) => {
+		await checkCurrentRow(
+			canvasElement,
+			"nl-NL",
+			"Nederland",
+			async (check, language) => {
+				await expect(check.top).toBeGreaterThanOrEqual(
+					language.getBoundingClientRect().bottom,
+				);
+				// the name stays on one line
+				const range = document.createRange();
+				range.selectNodeContents(language);
+				await expect(range.getClientRects()).toHaveLength(1);
+			},
+		);
+	},
+};
+
 export const Issue3466Item8FlagsOutlined: Story = {
 	args: { supportedLocales: SCF },
 	parameters: {

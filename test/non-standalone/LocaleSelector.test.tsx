@@ -619,6 +619,69 @@ describe("LocaleSelectorDialog", () => {
 		});
 	});
 
+	describe("rows", () => {
+		it("[ISSUE-3499-ITEM-8] marks the row of the current locale", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={["en-US", "en-GB"]} />);
+			const us = await rowBtn("United States");
+			const uk = await rowBtn("United Kingdom");
+			const current =
+				'[aria-current="true"], [aria-current="page"], [aria-selected="true"]';
+			// either the row control itself or its list entry may carry the state
+			const marked = (el: HTMLElement) =>
+				el.matches(current) ||
+				el.closest(current) !== null ||
+				el.querySelector(current) !== null;
+			expect(marked(us)).toBe(true);
+			expect(marked(uk)).toBe(false);
+		});
+
+		/** the country names of the rendered rows marked as current */
+		const currentRows = () =>
+			Array.from(
+				document.querySelectorAll<HTMLElement>(
+					'[role="listitem"] [aria-current="true"]',
+				),
+			).map((el) => el.querySelector("span[title]")?.textContent);
+
+		it("[ISSUE-3499-ITEM-8] the current row shows a check, not only a color, hidden from assistive technology", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={["en-US", "en-GB"]} />);
+			const us = await rowBtn("United States");
+			const uk = await rowBtn("United Kingdom");
+			const checks = (el: HTMLElement) =>
+				el.querySelectorAll('[data-testid="CheckIcon"]');
+			expect(checks(us)).toHaveLength(1);
+			expect(checks(us)[0]).toHaveAttribute("aria-hidden", "true");
+			expect(checks(uk)).toHaveLength(0);
+			// the check adds nothing to the name, the row's texts; the state is
+			// aria-current
+			expect(us).toHaveAccessibleName(/^United States\s*English$/);
+		});
+
+		it("[ISSUE-3499-ITEM-8] a current locale without a region marks the row of its likely region", async () => {
+			await act(async () => {
+				await ccI18n.changeLanguage("de");
+			});
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			await rowBtn("Österreich");
+			expect(currentRows()).toEqual(["Deutschland"]);
+		});
+
+		it("[ISSUE-3499-ITEM-8] the mark follows a locale change made elsewhere while open", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={["en-US", "en-GB"]} />);
+			await rowBtn("United Kingdom");
+			expect(currentRows()).toEqual(["United States"]);
+			await act(async () => {
+				await ccI18n.changeLanguage("en-GB");
+			});
+			await flush();
+			expect(currentRows()).toEqual(["United Kingdom"]);
+		});
+	});
+
 	describe("switching", () => {
 		it("[ISSUE-3499-ITEM-1] a language that fails to load shows an error and keeps the previous language", async () => {
 			// e.g. offline, or the old chunk hashes return 404 after a deploy.
