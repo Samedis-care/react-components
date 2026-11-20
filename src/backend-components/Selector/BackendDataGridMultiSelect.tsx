@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId, useState } from "react";
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 import { FormLabel, styled } from "@mui/material";
 import { ModelRecord, ModelUnknown } from "../../backend-integration";
 import DataGrid, {
@@ -13,6 +13,7 @@ import {
 } from "../DataGrid";
 import { DataGridNoPersist } from "../../standalone";
 import useCCTranslations from "../../utils/useCCTranslations";
+import toComparisonJson from "../../utils/toComparisonJson";
 
 /**
  * The field: a fieldset named by the legend (label), described by the count of selected
@@ -102,7 +103,10 @@ export interface BackendDataGridMultiSelectProps<
 	 */
 	readOnly?: boolean;
 	/**
-	 * The current selection
+	 * The ids of the selected records. The grid lists the records selected when it loads
+	 * (when it mounts, and after a search, a filter, a sort or forceRefreshToken changed)
+	 * first, ticked, and the others after them. A tick or an untick does not move a row:
+	 * an unticked record stays at the top until the grid loads again.
 	 */
 	selected: string[];
 	/**
@@ -142,6 +146,17 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 	);
 	const [initialSelectionChangeReceived, setInitialSelectionChangeReceived] =
 		useState(false);
+	const forceRefreshToken = `${
+		gridProps.forceRefreshToken || "undefined"
+	}${refreshToken}`;
+	/**
+	 * The selection the pages of the grid's current load are split by (the selected
+	 * records first, then the others), and that load: its query and refresh token. A tick
+	 * or an untick does not reload the grid, so the pages it loads later must be split
+	 * like the loaded ones to continue where they stopped; a new query or refresh token
+	 * starts a new load, split by the selection of its time.
+	 */
+	const loadSplit = useRef<{ load: string; selected: string[] } | null>(null);
 
 	// developer warning
 	useEffect(() => {
@@ -161,9 +176,7 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 			<DataGrid
 				{...gridProps}
 				columns={model.toDataGridColumnDefinition()}
-				forceRefreshToken={`${
-					gridProps.forceRefreshToken || "undefined"
-				}${refreshToken}`}
+				forceRefreshToken={forceRefreshToken}
 				disableSelection={false}
 				prohibitMultiSelect={false}
 				customSelectionControl={undefined}
@@ -179,15 +192,26 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 				loadData={async (
 					params: IDataGridLoadDataParameters,
 				): Promise<DataGridData> => {
+					const load = toComparisonJson([
+						params.rows,
+						params.quickFilter,
+						params.sort,
+						params.fieldFilter,
+						params.additionalFilters,
+						forceRefreshToken,
+					]);
+					if (loadSplit.current?.load !== load)
+						loadSplit.current = { load, selected };
+					const split = loadSplit.current.selected;
 					const [relationshipRecordsFiltered, relationshipRecordFilteredMeta] =
-						selected.length > 0
+						split.length > 0
 							? await model.index({
 									...params,
 									fieldFilter: {
 										...params.fieldFilter,
 										id: {
 											type: "inSet",
-											value1: selected.join(","),
+											value1: split.join(","),
 											value2: "",
 										},
 									},
@@ -204,7 +228,7 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 							...params.fieldFilter,
 							id: {
 								type: "notInSet",
-								value1: selected.join(","),
+								value1: split.join(","),
 								value2: "",
 							},
 						},

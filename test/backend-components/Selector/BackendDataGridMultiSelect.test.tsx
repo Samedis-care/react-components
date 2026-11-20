@@ -201,6 +201,68 @@ describe("BackendDataGridMultiSelect bugs", () => {
 		expect(search.rowsFiltered).toBeUndefined();
 	});
 
+	it("[ISSUE-3510-ITEM-11] after an untick the next page continues where the loaded ones stopped", async () => {
+		const { model } = gridModel();
+		const { rerender } = await mount({ model, selected: ["3", "23"] });
+		const page1 = await gridProps().loadData(query(1));
+		expect(idsOf(page1)).toEqual([
+			"3",
+			"23",
+			"1",
+			"2",
+			"4",
+			"5",
+			"6",
+			"7",
+			"8",
+			"9",
+		]);
+		// the user unticks 23; the grid keeps the loaded page and loads the next one
+		rerender(ui({ model, selected: ["3"] }));
+		await flush();
+		const page2 = idsOf(await gridProps().loadData(query(2)));
+		expect(page2[0]).toBe("10");
+		expect(page2).not.toContain("23");
+	});
+
+	it("[ISSUE-3510-ITEM-11] a reload (a search or a refresh) lists the records selected at its start first", async () => {
+		const { model } = gridModel();
+		const { rerender } = await mount({ model, selected: ["3", "23"] });
+		await gridProps().loadData(query(1));
+		// the user unticks 23 and searches "P2" (P2 and P20..P29): 23 is listed in its place
+		rerender(ui({ model, selected: ["3"] }));
+		await flush();
+		const search = await gridProps().loadData(query(1, "P2"));
+		expect(idsOf(search)).toEqual([
+			"2",
+			"20",
+			"21",
+			"22",
+			"23",
+			"24",
+			"25",
+			"26",
+			"27",
+			"28",
+		]);
+		// the user ticks 23 again; a refresh of the same search lists it first
+		rerender(ui({ model, selected: ["3", "23"], forceRefreshToken: "r1" }));
+		await flush();
+		const refreshed = await gridProps().loadData(query(1, "P2"));
+		expect(idsOf(refreshed)).toEqual([
+			"23",
+			"2",
+			"20",
+			"21",
+			"22",
+			"24",
+			"25",
+			"26",
+			"27",
+			"28",
+		]);
+	});
+
 	it("[ISSUE-3510-ITEM-16] as a form field the grid is labelled with the field's label", async () => {
 		const { model: people } = gridModel();
 		store.real = true;
