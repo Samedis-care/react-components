@@ -45,6 +45,20 @@ export default meta;
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const page = () => within(document.body);
+const nextFrame = () =>
+	new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+/** A button that pushes the given dialog element */
+const Opener = (props: { label: string; dialog: React.ReactNode }) => {
+	const { label, dialog } = props;
+	const [pushDialog] = useDialogContext();
+	const open = useCallback(() => pushDialog(dialog), [pushDialog, dialog]);
+	return (
+		<Button variant="contained" onClick={open}>
+			{label}
+		</Button>
+	);
+};
 
 // ─── ErrorDialog ─────────────────────────────────────────────────────────────
 
@@ -175,7 +189,7 @@ export const AsyncButtonHandlerStory: StoryObj<AsyncButtonHandlerArgs> = {
 		const yesButton = await body.findByRole("button", { name: "Yes" });
 		await userEvent.dblClick(yesButton);
 
-		await expect(yesButton).toBeDisabled();
+		await expect(yesButton).toHaveAttribute("aria-disabled", "true");
 		await expect(args.onYes).toHaveBeenCalledTimes(1);
 
 		// dialog closes once the handler resolves
@@ -421,3 +435,166 @@ export const Issue3497Item14NoTitleDialogHasName: StoryObj<DialogTitleArgs> = {
 		await expect(args.onClose).toHaveBeenCalledTimes(1);
 	},
 };
+
+let releaseCopy: () => void = () => {};
+
+interface BusyArgs {
+	onCopy: () => Promise<void>;
+}
+
+export const Issue3497Item17BusyButtonKeepsFocus: StoryObj<BusyArgs> = {
+	args: {
+		onCopy: fn(
+			() =>
+				new Promise<void>((resolve) => {
+					releaseCopy = resolve;
+				}),
+		),
+	},
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3497-ITEM-17: activate Copy (an async `dontClose` button). While its handler runs, the dialog is `aria-busy`, its buttons are `aria-disabled` and ignore clicks, and Copy shows a spinner before its label. The buttons stay focusable, so focus stays on Copy while the handler runs and after it.",
+			},
+		},
+	},
+	render: (args) => (
+		<Opener
+			label="Open busy dialog"
+			dialog={
+				<InfoDialog
+					title="Backup codes"
+					message="Copy the codes before you close this dialog."
+					buttons={[
+						{
+							text: "Copy",
+							autoFocus: true,
+							dontClose: true,
+							onClick: args.onCopy,
+						},
+						{ text: "Close" },
+					]}
+				/>
+			}
+		/>
+	),
+	play: async ({ args, canvas }) => {
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Open busy dialog" }),
+		);
+		const dialog = await page().findByRole("dialog", { name: "Backup codes" });
+		const copy = within(dialog).getByRole("button", { name: "Copy" });
+		const close = within(dialog).getByRole("button", { name: "Close" });
+		const focused = () => {
+			const active = document.activeElement;
+			return active === copy
+				? "Copy"
+				: `${active?.tagName} ${active?.getAttribute("role") ?? ""} ${active?.className ?? ""}`;
+		};
+		const spinner = (button: HTMLElement) =>
+			within(button).queryByRole("progressbar", { hidden: true });
+		await waitFor(() => expect(copy).toHaveFocus());
+		copy.click();
+		await expect(args.onCopy).toHaveBeenCalledTimes(1);
+		await waitFor(() => expect(copy).toHaveAttribute("aria-disabled", "true"));
+		// two rendering updates: the browser's focus fixup for a disabled
+		// button has run
+		await nextFrame();
+		await nextFrame();
+		const focusWhileRunning = focused();
+		const busyWhileRunning = dialog.getAttribute("aria-busy");
+		await expect(close).toHaveAttribute("aria-disabled", "true");
+		await expect(spinner(copy)).not.toBeNull();
+		await expect(spinner(close)).toBeNull();
+		// the busy buttons stay clickable for the browser, the dialog ignores them
+		copy.click();
+		close.click();
+		await nextFrame();
+		await expect(args.onCopy).toHaveBeenCalledTimes(1);
+		await expect(dialog).toBeInTheDocument();
+		releaseCopy();
+		await waitFor(() => expect(copy).not.toHaveAttribute("aria-disabled"));
+		await expect(dialog).not.toHaveAttribute("aria-busy");
+		await expect(spinner(copy)).toBeNull();
+		// MUI's focus trap checks every 50ms for focus on the page body and
+		// moves it into the dialog: measure after that has settled
+		await new Promise((resolve) => setTimeout(resolve, 200));
+		await expect({
+			busyWhileRunning,
+			focusWhileRunning,
+			focusAfter: focused(),
+		}).toEqual({
+			busyWhileRunning: "true",
+			focusWhileRunning: "Copy",
+			focusAfter: "Copy",
+		});
+	},
+};
+
+interface BusyKeyboardArgs {
+	onYes: () => Promise<void>;
+	onNo: () => void;
+}
+
+export const Issue3497Item17BusyDialogWithKeyboard: StoryObj<BusyKeyboardArgs> =
+	{
+		args: {
+			// never settles: the story ends with the dialog busy, so axe checks that state
+			onYes: fn(() => new Promise<void>(() => {})),
+			onNo: fn(),
+		},
+		parameters: {
+			a11y: { test: "error" },
+			docs: {
+				description: {
+					story:
+						"ISSUE-3497-ITEM-17: Enter on Yes starts a handler that does not end. Focus stays on Yes, Tab still moves between the busy buttons, and Enter on No and Escape do nothing while the handler runs.",
+				},
+			},
+		},
+		render: (args) => (
+			<Opener
+				label="Open busy confirmation"
+				dialog={
+					<InfoDialog
+						title="Create data export?"
+						message="The export is prepared on the server."
+						buttons={[
+							{ text: "Yes", autoFocus: true, onClick: args.onYes },
+							{ text: "No", color: "secondary", onClick: args.onNo },
+						]}
+					/>
+				}
+			/>
+		),
+		play: async ({ args, canvas }) => {
+			await userEvent.click(
+				canvas.getByRole("button", { name: "Open busy confirmation" }),
+			);
+			const dialog = await page().findByRole("dialog", {
+				name: "Create data export?",
+			});
+			const yes = within(dialog).getByRole("button", { name: "Yes" });
+			const no = within(dialog).getByRole("button", { name: "No" });
+			await waitFor(() => expect(yes).toHaveFocus());
+			await userEvent.keyboard("{Enter}");
+			await expect(args.onYes).toHaveBeenCalledTimes(1);
+			await waitFor(() => expect(dialog).toHaveAttribute("aria-busy", "true"));
+			// two rendering updates: the browser's focus fixup for a disabled
+			// button has run
+			await nextFrame();
+			await nextFrame();
+			await expect(yes).toHaveFocus();
+			await userEvent.tab();
+			await expect(no).toHaveFocus();
+			await expect(no).toHaveAttribute("aria-disabled", "true");
+			await userEvent.keyboard("{Enter}");
+			await userEvent.keyboard("{Escape}");
+			await nextFrame();
+			await expect(args.onNo).not.toHaveBeenCalled();
+			await expect(dialog).toBeInTheDocument();
+			await expect(no).toHaveFocus();
+		},
+	};

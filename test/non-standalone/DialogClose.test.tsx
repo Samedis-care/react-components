@@ -457,7 +457,7 @@ describe("[ISSUE-3497-ITEM-27] a button's onClick gets the dialog's close", () =
 		fireEvent.click(btn("Go"));
 		await flush();
 		expect(openTitles()).toEqual(["Dialog"]);
-		expect(btn("Go")).toBeDisabled();
+		expect(btn("Go")).toHaveAttribute("aria-disabled", "true");
 		expect(onClose).not.toHaveBeenCalled();
 		work.release();
 		await flush();
@@ -649,5 +649,82 @@ describe("[ISSUE-3497-ITEM-27] a button's onClick gets the dialog's close", () =
 		await flush();
 		expect(openTitles()).toEqual([]);
 		expect(screen.queryByText("pushed dialog")).not.toBeNull();
+	});
+});
+
+describe("[ISSUE-3497-ITEM-17] while a button's async handler runs", () => {
+	/** pushes an InfoDialog titled "Dialog" with the buttons "Go" and "Other" */
+	const pushBusy = (
+		onGo: () => Promise<void>,
+		onOther: () => void,
+		onClose?: () => void,
+	) =>
+		push(
+			<InfoDialog
+				title="Dialog"
+				message="m"
+				onClose={onClose}
+				buttons={[
+					{ text: "Go", dontClose: true, onClick: onGo },
+					{ text: "Other", onClick: onOther },
+				]}
+			/>,
+		);
+	const spinner = (name: string) =>
+		btn(name).querySelector('[role="progressbar"]');
+
+	it("[ISSUE-3497-ITEM-17] the dialog is aria-busy, its buttons are aria-disabled but not disabled, and the pressed one shows a hidden spinner, until the handler ends", async () => {
+		mount();
+		const work = gate();
+		pushBusy(() => work.promise, vi.fn());
+		const dialog = screen.getByRole("dialog");
+		expect(dialog).not.toHaveAttribute("aria-busy");
+		expect(btn("Go")).not.toHaveAttribute("aria-disabled");
+		expect(spinner("Go")).toBeNull();
+		fireEvent.click(btn("Go"));
+		await flush();
+		expect(dialog).toHaveAttribute("aria-busy", "true");
+		for (const name of ["Go", "Other"]) {
+			expect(btn(name)).toHaveAttribute("aria-disabled", "true");
+			expect(btn(name)).not.toBeDisabled();
+			expect(btn(name)).toHaveClass("Mui-disabled");
+		}
+		expect(spinner("Go")).toHaveAttribute("aria-hidden", "true");
+		expect(spinner("Other")).toBeNull();
+		expect(btn("Go")).toHaveAccessibleName("Go");
+		work.release();
+		await flush();
+		expect(dialog).not.toHaveAttribute("aria-busy");
+		for (const name of ["Go", "Other"]) {
+			expect(btn(name)).not.toHaveAttribute("aria-disabled");
+			expect(btn(name)).not.toHaveClass("Mui-disabled");
+		}
+		expect(spinner("Go")).toBeNull();
+	});
+
+	it("[ISSUE-3497-ITEM-17] clicks on the busy buttons and Escape are ignored", async () => {
+		mount();
+		const work = gate();
+		const onGo = vi.fn(() => work.promise);
+		const onOther = vi.fn();
+		const onClose = vi.fn();
+		pushBusy(onGo, onOther, onClose);
+		fireEvent.click(btn("Go"));
+		await flush();
+		fireEvent.click(btn("Go"));
+		fireEvent.click(btn("Other"));
+		fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+		await flush();
+		expect(onGo).toHaveBeenCalledTimes(1);
+		expect(onOther).not.toHaveBeenCalled();
+		expect(openTitles()).toEqual(["Dialog"]);
+		expect(onClose).not.toHaveBeenCalled();
+		work.release();
+		await flush();
+		fireEvent.click(btn("Other"));
+		await flush();
+		expect(onOther).toHaveBeenCalledTimes(1);
+		expect(openTitles()).toEqual([]);
+		expect(onClose).toHaveBeenCalledTimes(1);
 	});
 });

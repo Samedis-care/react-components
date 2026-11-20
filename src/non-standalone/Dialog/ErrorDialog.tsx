@@ -1,7 +1,9 @@
-import React, { useContext, useId } from "react";
+import React, { useContext, useId, useMemo } from "react";
 import { PushedDialogCloseContext } from "../../framework/PushedDialogCloseContext";
 import {
 	Button,
+	buttonClasses,
+	CircularProgress,
 	Dialog,
 	DialogActions,
 	DialogContent,
@@ -12,19 +14,26 @@ import { IDialogConfigSimple } from "./Types";
 import useRefState from "../../utils/useRefState";
 import { dialogButtonClose } from "./dialogButtonClose";
 
+// shown before the label of the button whose handler runs; the button's aria-disabled and
+// the dialog's aria-busy tell assistive technology
+const busyIndicator = (
+	<CircularProgress color="inherit" size={16} aria-hidden />
+);
+
 const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 	const { onClose } = props;
 	// not useCloseThisDialog, which throws: rendered without pushDialog (or in a
 	// FullFormDialog's content, pushed: false), the dialog closes through onClose
 	const pushedClose = useContext(PushedDialogCloseContext);
 	const closeThisDialog = pushedClose?.pushed ? pushedClose.close : null;
-	// pending state of an async button handler. the ref part guards against a
-	// second click landing before the re-render which disables the buttons.
+	// the index of the button whose async handler runs, null while none runs. the ref part
+	// guards against a second click landing before the re-render which disables the buttons.
 	const {
-		get: getBusy,
-		set: setBusy,
-		state: busy,
-	} = useRefState<boolean>(false);
+		get: getBusyButton,
+		set: setBusyButton,
+		state: busyButton,
+	} = useRefState<number | null>(null);
+	const busy = busyButton !== null;
 	// the message is the dialog's description
 	const messageId = useId();
 
@@ -34,12 +43,22 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 	}, [closeThisDialog, onClose]);
 
 	const handleClose = React.useCallback(() => {
-		if (getBusy()) return;
+		if (getBusyButton() !== null) return;
 		removeDialog();
-	}, [getBusy, removeDialog]);
+	}, [getBusyButton, removeDialog]);
+
+	const slotProps = useMemo(
+		() => ({ paper: { "aria-busy": busy || undefined } }),
+		[busy],
+	);
 
 	return (
-		<Dialog open={true} onClose={handleClose} aria-describedby={messageId}>
+		<Dialog
+			open={true}
+			onClose={handleClose}
+			aria-describedby={messageId}
+			slotProps={slotProps}
+		>
 			<DialogTitle>{props.title}</DialogTitle>
 			<DialogContent>
 				<DialogContentText component={"span"} id={messageId}>
@@ -51,18 +70,18 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 					<Button
 						key={index}
 						onClick={async () => {
-							if (getBusy()) return;
+							if (getBusyButton() !== null) return;
 							const { close, end } = dialogButtonClose(
 								closeThisDialog,
 								onClose,
 							);
 							try {
 								if (data.onClick) {
-									setBusy(true);
+									setBusyButton(index);
 									try {
 										await data.onClick(close);
 									} finally {
-										setBusy(false);
+										setBusyButton(null);
 									}
 								}
 							} finally {
@@ -74,7 +93,11 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 						}}
 						color={data.color || "primary"}
 						autoFocus={data.autoFocus}
-						disabled={busy}
+						// while busy the buttons look and act disabled but stay focusable (not
+						// `disabled`), so the focused one keeps focus; clicks are ignored above
+						aria-disabled={busy || undefined}
+						className={busy ? buttonClasses.disabled : undefined}
+						startIcon={busyButton === index ? busyIndicator : undefined}
 					>
 						{data.text}
 					</Button>
@@ -89,11 +112,13 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
  * render it. Show it with `pushDialog(<ErrorDialog … />)`, or use `showErrorDialog` /
  * `showInfoDialog`.
  *
- * A button runs its `onClick` while the dialog is open (a returned promise is awaited with the
- * buttons disabled and Escape and the backdrop ignored), then, unless `dontClose`, closes the
- * dialog and calls `onClose`. `onClick` gets a `close` that closes the dialog at once;
- * `onClose` is then called once the handler has ended, also with `dontClose`. Escape and a
- * backdrop click close it and call `onClose`.
+ * A button runs its `onClick` while the dialog is open, then, unless `dontClose`, closes the
+ * dialog and calls `onClose`. While a returned promise is awaited, the dialog is `aria-busy`,
+ * its buttons are `aria-disabled` and ignore clicks, the pressed one shows a progress spinner
+ * before its label, and Escape and the backdrop are ignored. The buttons stay focusable, so
+ * keyboard focus stays on the pressed button. `onClick` gets a `close` that closes the dialog
+ * at once; `onClose` is then called once the handler has ended, also with `dontClose`. Escape
+ * and a backdrop click close it and call `onClose`.
  * It closes the dialog it was pushed in, and only that one, also when dialogs were pushed
  * after it. Rendered without pushDialog, it is always open: it closes through `onClose`,
  * which has to stop rendering it.
