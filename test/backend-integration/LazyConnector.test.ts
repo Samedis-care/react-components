@@ -683,6 +683,33 @@ describe("LazyConnector after a first save", () => {
 		expect(rows.map((row) => row.id)).toStrictEqual(["b", fakeId]);
 	});
 
+	it("[ISSUE-3505-ITEM-22] read hands out a record created there under the id index lists it by", async () => {
+		const { lazy, fakeId } = await makeSavedHere();
+
+		const [rows] = await lazy.index(undefined, undefined);
+		const [byFakeId] = await lazy.read(fakeId, undefined);
+		const [byRealId] = await lazy.read(lazy.mapId(fakeId), undefined);
+
+		expect({ listed: rows[1], byFakeId, byRealId }).toStrictEqual({
+			listed: { id: fakeId, name: "a" },
+			byFakeId: { id: fakeId, name: "a" },
+			byRealId: { id: fakeId, name: "a" },
+		});
+	});
+
+	it("[ISSUE-3505-ITEM-22] read hands out a record created there under its fake id when a queued update names its real one", async () => {
+		const { lazy, fakeId } = await makeSavedHere();
+
+		void lazy.update({ id: lazy.mapId(fakeId), note: "n" }, undefined);
+		const [rows] = await lazy.index(undefined, undefined);
+		const [read] = await lazy.read(fakeId, undefined);
+
+		expect({ listed: rows[1], read }).toStrictEqual({
+			listed: { id: fakeId, name: "a", note: "n" },
+			read: { id: fakeId, name: "a", note: "n" },
+		});
+	});
+
 	it("[ISSUE-3505-ITEM-19] a delete replaces a queued update of a record created there, and deleting it again queues nothing more", async () => {
 		const single = await makeSavedHere();
 		void single.lazy.update({ id: single.fakeId, note: "n" }, undefined);
