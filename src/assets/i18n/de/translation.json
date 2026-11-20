@@ -18,6 +18,7 @@
 			"multi-language-input": {
 				"language": "Sprache",
 				"language-of": "Sprache für {{label}}",
+				"show-translations-of": "Übersetzungen für {{label}} anzeigen",
 				"toggle-languages": "Spracheingaben umschalten"
 			},
 			"number-input": {

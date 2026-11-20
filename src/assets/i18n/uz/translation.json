@@ -18,6 +18,7 @@
 			"multi-language-input": {
 				"language": "Til",
 				"language-of": "{{label}} tili",
+				"show-translations-of": "{{label}} tarjimalarini ko'rsatish",
 				"toggle-languages": "Til maydonlarini almashtirish"
 			},
 			"number-input": {

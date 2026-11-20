@@ -18,6 +18,7 @@
 			"multi-language-input": {
 				"language": "Язык",
 				"language-of": "Язык поля «{{label}}»",
+				"show-translations-of": "Показать переводы поля «{{label}}»",
 				"toggle-languages": "Переключить языковые поля"
 			},
 			"number-input": {

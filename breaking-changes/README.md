@@ -38,6 +38,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-20 | [A date picker with a warning or a dirty value shows both, like a text field](2026-11-20-picker-field-states.md) | behavior |
 | 2026-11-20 | [GroupBox's theme variants match smallLabel and label](2026-11-20-group-box-variants-match-small-label.md) | behavior, theme |
 | 2026-11-20 | [DateInput passes the slots a consumer gives it on to the picker](2026-11-20-date-input-consumer-slots.md) | behavior |
+| 2026-11-20 | [MultiLanguageInput's translate button is named after its field and says whether the other languages are shown](2026-11-20-multi-language-input-toggle-names-its-field.md) | behavior, i18n |
 | 2026-11-19 | [PopupMenu applies its `classes`](2026-11-19-popup-menu-classes.md) | behavior, theme |
 | 2026-11-19 | [A data grid logs a failed write of its persisted state and writes it again](2026-11-19-data-grid-failed-persist-write-logged-and-retried.md) | behavior |
 | 2026-11-19 | [The busy overlay is a status message, and a busy form is `aria-busy`](2026-11-19-form-loader-overlay-status-message.md) | behavior, theme |

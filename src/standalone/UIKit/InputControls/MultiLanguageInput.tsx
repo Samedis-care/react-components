@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useId, useState } from "react";
 import {
 	Grid,
 	IconButton,
@@ -254,6 +254,9 @@ export type MultiLanguageInputProps = Omit<
 	 * the labelled field reads the language with its label (visually hidden),
 	 * the other languages' fields, which show only their code, carry the name as
 	 * `aria-label`. Without a label each field is named with its language only.
+	 * In single-line mode the toggle is named and tooltipped after the label,
+	 * e.g. "Show translations of Title"; without a label it keeps the generic
+	 * name.
 	 */
 	label?: string;
 	/**
@@ -338,6 +341,16 @@ const LanguageLabelInputAdornment = styled(Typography, {
 })({});
 
 /**
+ * Groups the other languages' fields for the toggle's `aria-controls`.
+ * `display: contents` keeps the fields the grid items of the container, so
+ * the wrapper takes no space of its own while it is empty and the expanded
+ * fields keep the spacing they have.
+ */
+const OtherLanguages = styled("div")({
+	display: "contents",
+});
+
+/**
  * Theme slots of `CcMultiLanguageInput`:
  * - `languageSwitcher`: the group of language buttons below a multiline field
  *   (a `ToggleButtonGroup`);
@@ -389,6 +402,16 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 			? pickedLanguage
 			: defaultLanguage;
 	const toggleExpanded = useCallback(() => setExpanded((prev) => !prev), []);
+	// names the fields the toggle shows, for its aria-controls; unique per
+	// instance, so two fields on a form don't claim the same id
+	const otherLanguagesId = useId();
+	// the toggle says which field it belongs to: a form with a localized title
+	// and description has two buttons that would otherwise read the same
+	const toggleLabel = label
+		? tCC("standalone.uikit.multi-language-input.show-translations-of", {
+				label,
+			})
+		: tCC("standalone.uikit.multi-language-input.toggle-languages");
 
 	const incomplete =
 		!textFieldProps.disabled &&
@@ -507,19 +530,21 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 					endAdornment:
 						defaultLanguage === lang && !textFieldProps.multiline ? (
 							<InputAdornment position={"end"}>
-								<IconButton
-									onClick={toggleExpanded}
-									size="large"
-									aria-label={tCC(
-										"standalone.uikit.multi-language-input.toggle-languages",
-									)}
-								>
-									<Translate
-										color={
-											expanded ? "primary" : incomplete ? "error" : undefined
-										}
-									/>
-								</IconButton>
+								<Tooltip title={toggleLabel}>
+									<IconButton
+										onClick={toggleExpanded}
+										size="large"
+										aria-label={toggleLabel}
+										aria-expanded={expanded}
+										aria-controls={otherLanguagesId}
+									>
+										<Translate
+											color={
+												expanded ? "primary" : incomplete ? "error" : undefined
+											}
+										/>
+									</IconButton>
+								</Tooltip>
 							</InputAdornment>
 						) : undefined,
 				},
@@ -572,15 +597,18 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 					</LanguageSwitcher>
 				)}
 			</Grid>
-			{expanded &&
-				!textFieldProps.multiline &&
-				enabledLanguages
-					.filter((lang) => lang !== defaultLanguage)
-					.map((lang) => (
-						<Grid key={lang} size={12}>
-							{renderLanguage(lang, false)}
-						</Grid>
-					))}
+			{!textFieldProps.multiline && (
+				<OtherLanguages id={otherLanguagesId}>
+					{expanded &&
+						enabledLanguages
+							.filter((lang) => lang !== defaultLanguage)
+							.map((lang) => (
+								<Grid key={lang} size={12}>
+									{renderLanguage(lang, false)}
+								</Grid>
+							))}
+				</OtherLanguages>
+			)}
 		</Grid>
 	);
 };

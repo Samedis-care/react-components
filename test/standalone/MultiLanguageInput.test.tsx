@@ -89,8 +89,11 @@ const fieldNames = () =>
 		),
 	).map((el) => el.name);
 
+/** the translate toggle: named after its field, or generically without a label */
 const toggle = () =>
-	screen.getByRole("button", { name: "Toggle language inputs" });
+	screen.getByRole("button", {
+		name: /Show translations|Toggle language inputs/,
+	});
 
 /**
  * The name of a field whose label reads its language: "Title (German)". jsdom
@@ -473,6 +476,87 @@ describe("bugs", () => {
 		expect(group).toContainElement(field("desc-en"));
 		expect(group).toContainElement(
 			screen.getByRole("group", { name: "Language of Desc" }),
+		);
+	});
+
+	it("[ISSUE-3486-ITEM-11] tells whether the other languages are shown, and which fields it controls", () => {
+		render(
+			<MultiLanguageInput
+				enabledLanguages={["en", "de"]}
+				label="Title"
+				name="title"
+				values={{}}
+				onChange={noop}
+			/>,
+		);
+		const button = screen.getByRole("button");
+		expect(button).toHaveAttribute("aria-expanded", "false");
+		fireEvent.click(button);
+		expect(button).toHaveAttribute("aria-expanded", "true");
+		const controls = button.getAttribute("aria-controls");
+		expect(controls).toBeTruthy();
+		expect(document.getElementById(controls!)).toContainElement(
+			field("title-de"),
+		);
+	});
+
+	it("[ISSUE-3486-ITEM-11] names each toggle after its field", () => {
+		render(
+			<>
+				<MultiLanguageInput
+					enabledLanguages={["en", "de"]}
+					label="Title"
+					name="title"
+					values={{}}
+					onChange={noop}
+				/>
+				<MultiLanguageInput
+					enabledLanguages={["en", "de"]}
+					label="Description"
+					name="description"
+					values={{}}
+					onChange={noop}
+				/>
+			</>,
+		);
+		const [first, second] = screen
+			.getAllByRole("button")
+			.map((button) => computeAccessibleName(button));
+		expect(first).toMatch(/Title/);
+		expect(second).toMatch(/Description/);
+	});
+
+	it("[ISSUE-3486-ITEM-11] shows the toggle's name as its tooltip", async () => {
+		render(
+			<MultiLanguageInput
+				enabledLanguages={["en", "de"]}
+				label="Title"
+				name="title"
+				values={{}}
+				onChange={noop}
+			/>,
+		);
+		fireEvent.mouseOver(screen.getByRole("button"));
+		const tooltip = await screen.findByRole("tooltip");
+		expect(tooltip).toHaveTextContent("Show translations of Title");
+	});
+
+	it("[ISSUE-3486-ITEM-11] names the toggle in the UI language", async () => {
+		render(
+			<MultiLanguageInput
+				enabledLanguages={["en", "de"]}
+				label="Title"
+				name="title"
+				values={{}}
+				onChange={noop}
+			/>,
+		);
+		expect(screen.getByRole("button")).toHaveAccessibleName(
+			"Show translations of Title",
+		);
+		await setLanguage("de");
+		expect(screen.getByRole("button")).toHaveAccessibleName(
+			"Übersetzungen für Title anzeigen",
 		);
 	});
 });

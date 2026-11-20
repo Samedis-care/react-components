@@ -18,6 +18,7 @@
 			"multi-language-input": {
 				"language": "Taal",
 				"language-of": "Taal van {{label}}",
+				"show-translations-of": "Vertalingen van {{label}} tonen",
 				"toggle-languages": "Talinvoer wisselen"
 			},
 			"number-input": {

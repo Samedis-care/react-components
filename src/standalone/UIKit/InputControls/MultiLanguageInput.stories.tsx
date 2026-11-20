@@ -44,7 +44,9 @@ const BetweenButtons = function BetweenButtons(props: Props) {
  * - **Single-line** shows the default language's field, with its code as start
  *   adornment. The translate button at its end shows the other enabled
  *   languages' fields below it; while any enabled language is empty, the
- *   button is red.
+ *   button is red. The button says which field it belongs to ("Show
+ *   translations of Title") as its name and its tooltip, and reports whether
+ *   the fields are shown with `aria-expanded`.
  * - **Multiline** (`multiline`) shows one textarea; the language buttons
  *   below it switch the language it edits (the pressed one is shown).
  *
@@ -155,7 +157,8 @@ export default meta;
 
 type Story = StoryObj<typeof MultiLanguageInput>;
 
-const TOGGLE = "Toggle language inputs";
+// the toggle is named after its field, e.g. "Show translations of Title"
+const TOGGLE = /Show translations of Title/;
 
 const field = (root: HTMLElement, name: string) =>
 	root.querySelector<HTMLInputElement & HTMLTextAreaElement>(

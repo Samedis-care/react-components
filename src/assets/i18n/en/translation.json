@@ -18,6 +18,7 @@
 			"multi-language-input": {
 				"language": "Language",
 				"language-of": "Language of {{label}}",
+				"show-translations-of": "Show translations of {{label}}",
 				"toggle-languages": "Toggle language inputs"
 			},
 			"number-input": {
