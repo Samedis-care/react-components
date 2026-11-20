@@ -161,6 +161,112 @@ const idle = () =>
 	waitFor(() => expect(probe?.state.refreshData).toBe(0), { timeout: 3000 });
 
 describe("filters active / reset filters", () => {
+	const DEFAULT_FILTER = [
+		{
+			field: "name",
+			filter: { type: "contains" as const, value1: "a", value2: "" },
+		},
+	];
+
+	it.each([
+		[
+			"a column filter emptied in the filter popup",
+			{ type: "contains" as const, value1: "", value2: "" },
+			undefined,
+		],
+		[
+			"the default filter with an empty chained condition",
+			{
+				...DEFAULT_FILTER[0].filter,
+				nextFilterType: "and" as const,
+				nextFilter: undefined,
+			},
+			DEFAULT_FILTER,
+		],
+	])(
+		"[ISSUE-3492-ITEM-10] does not count %s as an active filter",
+		async (_name, filter, defaultFilter) => {
+			render(<Grid defaultFilter={defaultFilter} />);
+			await idle();
+			act(() =>
+				probe!.setColumnState((p) => ({
+					...p,
+					name: { ...p.name, filter },
+				})),
+			);
+			expect(probe!.filtersActive).toBe(false);
+		},
+	);
+
+	it.each([
+		["a key set to undefined", { k: "v" }, { k: "v", x: undefined }],
+		["a default key set to undefined", { k: "v", x: undefined }, { k: "v" }],
+	])(
+		"[ISSUE-3492-ITEM-10] does not count custom data with %s as an active filter",
+		async (_name, defaultCustomData, customData) => {
+			render(<Grid defaultCustomData={defaultCustomData} />);
+			await idle();
+			act(() => probe!.setState((p) => ({ ...p, customData })));
+			expect(probe!.filtersActive).toBe(false);
+		},
+	);
+
+	const setNameFilter =
+		(filter: IDataGridColumnsState[string]["filter"]) => () =>
+			act(() =>
+				probe!.setColumnState((p) => ({
+					...p,
+					name: { ...p.name, filter },
+				})),
+			);
+
+	it.each([
+		[
+			"a column filter with a value",
+			undefined,
+			setNameFilter({ type: "contains", value1: "b", value2: "" }),
+		],
+		[
+			"an emptied default filter",
+			DEFAULT_FILTER,
+			setNameFilter({ type: "contains", value1: "", value2: "" }),
+		],
+		[
+			"the default filter with a chained condition that has a value",
+			DEFAULT_FILTER,
+			setNameFilter({
+				...DEFAULT_FILTER[0].filter,
+				nextFilterType: "and",
+				nextFilter: { type: "contains", value1: "b", value2: "" },
+			}),
+		],
+		[
+			"the default filter with another type",
+			DEFAULT_FILTER,
+			setNameFilter({ ...DEFAULT_FILTER[0].filter, type: "equals" }),
+		],
+		[
+			"custom data with a value next to a key set to undefined",
+			undefined,
+			() =>
+				act(() =>
+					probe!.setState((p) => ({
+						...p,
+						customData: { x: undefined, y: "w" },
+					})),
+				),
+		],
+	])(
+		"[ISSUE-3492-ITEM-10] still counts %s as an active filter",
+		async (_name, defaultFilter, change) => {
+			render(<Grid defaultFilter={defaultFilter} />);
+			await idle();
+			expect(probe!.filtersActive).toBe(false);
+			change();
+			expect(probe!.filtersActive).toBe(true);
+		},
+	);
+
 	it("[ISSUE-3492-ITEM-6] a class instance in the custom data does not crash the grid", async () => {
 		class DateRange {
 			constructor(public from: string) {}
