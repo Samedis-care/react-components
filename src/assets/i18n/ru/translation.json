@@ -252,9 +252,9 @@
 		},
 		"info-box": {
 			"status": {
-				"warning": "Предупреждение",
-				"success": "Успех",
-				"error": "Ошибка"
+				"warning": "Предупреждение:",
+				"success": "Успех:",
+				"error": "Ошибка:"
 			}
 		},
 		"loader": {

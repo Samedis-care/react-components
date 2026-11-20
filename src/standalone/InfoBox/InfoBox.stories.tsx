@@ -231,6 +231,41 @@ export const Issue3464Item6FocusKeepsStatusColorAndShowsRing: Story = {
 	},
 };
 
+export const Issue3464Item7HeaderStatusIsVisuallyHidden: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3464-ITEM-7: the header and the heading read the status before the heading text, and the prefix is visually hidden, so it takes no room in the header.",
+			},
+		},
+	},
+	args: {
+		status: "error",
+		heading: "Upload finished",
+		message: "The file is too large.",
+		defaultExpanded: false,
+	},
+	play: async ({ canvas }) => {
+		const header = canvas.getByRole("button", {
+			name: "Error: Upload finished",
+		});
+		await expect(header).toHaveAccessibleName("Error: Upload finished");
+		await expect(
+			canvas.getByRole("heading", { name: "Error: Upload finished" }),
+		).toBeInTheDocument();
+		// the prefix is in the DOM but clipped to 1x1, as MUI's visuallyHidden
+		const prefix = canvas.getByText("Error:");
+		const cs = getComputedStyle(prefix);
+		await expect([cs.clipPath, cs.width, cs.height, cs.position]).toEqual([
+			"inset(50%)",
+			"1px",
+			"1px",
+			"absolute",
+		]);
+	},
+};
+
 const STATUSES: InfoBoxProps["status"][] = [
 	undefined,
 	"info",

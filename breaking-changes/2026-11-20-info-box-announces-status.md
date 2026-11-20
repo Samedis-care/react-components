@@ -18,14 +18,18 @@ word "Info" on every ordinary notice would only add noise.
 
 The status was conveyed only by the header's color and its icon, which assistive
 technology does not announce (WCAG 1.3.1 Info and Relationships, 1.1.1 Non-text Content).
-A caller could not add the status either, because `heading` is a plain string.
+A caller could not add hidden text either: `heading` is a plain string, so a workaround
+could only show the status in the heading.
 
 ## Migration
 
-- Where the status was put into `heading` as a workaround
-  (`heading={`${t("status.warning")}: ${title}`}`), remove it, or the status is read
+- Required where the status was put into `heading` as a workaround
+  (``heading={`${t("status.warning")}: ${title}`}``): remove it, or the status is read
   twice.
-- Tests that match the header button or the heading by their exact text now see the
-  prefix: match the name with a substring/regex (`name: /Please review/`), or expect
-  `"Warning: Please review"`.
+- Required where a test finds the header button or the heading by its accessible name:
+  the name now includes the status, so `getByRole("button", { name: "Please review" })`
+  no longer finds it. Match a substring or a regex (`name: /Please review/`), or expect
+  `"Warning: Please review"`. `getByText("Please review")` still finds the heading,
+  because the prefix is its own element; the header's `textContent` now starts with the
+  prefix.
 - Nothing to do for the look of the box.

@@ -252,9 +252,9 @@
 		},
 		"info-box": {
 			"status": {
-				"warning": "Ogohlantirish",
-				"success": "Muvaffaqiyat",
-				"error": "Xato"
+				"warning": "Ogohlantirish:",
+				"success": "Muvaffaqiyat:",
+				"error": "Xato:"
 			}
 		},
 		"loader": {

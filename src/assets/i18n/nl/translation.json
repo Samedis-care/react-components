@@ -252,9 +252,9 @@
 		},
 		"info-box": {
 			"status": {
-				"warning": "Waarschuwing",
-				"success": "Succes",
-				"error": "Fout"
+				"warning": "Waarschuwing:",
+				"success": "Succes:",
+				"error": "Fout:"
 			}
 		},
 		"loader": {

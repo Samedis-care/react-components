@@ -330,6 +330,23 @@ describe("InfoBox", () => {
 			},
 		);
 
+		it.each([undefined, "info"] as const)(
+			"[ISSUE-3464-ITEM-7] announces no status for %s",
+			(status) => {
+				renderInfoBox(
+					<InfoBox
+						heading="Upload finished"
+						message="M"
+						expanded
+						status={status}
+					/>,
+				);
+				expect(screen.getByRole("button")).toHaveAccessibleName(
+					"Upload finished",
+				);
+			},
+		);
+
 		it("[ISSUE-3464-ITEM-7] the announced status follows the library's language", async () => {
 			const language = ccI18n.language;
 			renderInfoBox(

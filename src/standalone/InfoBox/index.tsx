@@ -23,6 +23,11 @@ import { useTranslation } from "react-i18next";
 import combineClassNames from "../../utils/combineClassNames";
 import ccI18n from "../../i18n";
 
+/**
+ * InfoBox never suspended, and the status it reads out is only heard: while
+ * the translations load it uses the English defaults, then re-renders, like the
+ * Loader's non-suspending options
+ */
 const TRANSLATION_OPTIONS = { i18n: ccI18n, useSuspense: false };
 
 const AccordionStyled = styled(Accordion, { name: "CcInfoBox", slot: "root" })({
@@ -105,11 +110,15 @@ const SummaryHeading = styled(Typography, {
 })({});
 
 /**
- * The status name in front of the heading. It is only read out: the header
- * announces "Warning: Please review" (or the icon and the color would be the
- * only sign of the status).
+ * The status name in front of the heading, with the separator the translation
+ * carries. It is only read out and visually hidden (`statusName` slot): the
+ * header announces "Warning: Please review", where the icon and the color
+ * would be the only sign of the status.
  */
-const StatusName = styled("span")({
+const StatusName = styled("span", {
+	name: "CcInfoBox",
+	slot: "statusName",
+})({
 	// visually hidden, as MUI's visuallyHidden
 	border: 0,
 	clipPath: "inset(50%)",
@@ -159,12 +168,16 @@ export type InfoBoxClassKey =
 	| "summaryRoot"
 	| "iconButton"
 	| "heading"
+	/** The visually hidden status name read before the heading */
+	| "statusName"
 	| "details"
 	| "detailsText";
 
 export interface InfoBoxProps {
 	/**
-	 * Title of the info box
+	 * Title of the info box. For a `warning`, `success` or `error` status the
+	 * translated status is read before it (e.g. "Warning: Please review"), so
+	 * don't repeat the status here.
 	 */
 	heading: string;
 	/**
@@ -242,12 +255,14 @@ export interface InfoBoxProps {
 }
 
 /**
- * The translated name of a status for the header. `undefined` for `info` and
- * an unset status: they are the neutral default, so announcing "Info" on
- * every notice would only add noise.
+ * The translated name of a status for the header, with the separator the
+ * translation carries (so a locale can set it). `undefined` for `info` and an
+ * unset status: they are the neutral default, so announcing "Info" on every
+ * notice would only add noise.
  * @param status The `status` prop
  * @param t The library's translate function
- * @returns The status name, or `undefined` when the status is not announced
+ * @returns The status name and separator, or `undefined` when the status is
+ * not announced
  */
 const statusName = (
 	status: InfoBoxProps["status"],
@@ -256,15 +271,15 @@ const statusName = (
 	switch (status) {
 		case "warning":
 			return t("standalone.info-box.status.warning", {
-				defaultValue: "Warning",
+				defaultValue: "Warning:",
 			});
 		case "success":
 			return t("standalone.info-box.status.success", {
-				defaultValue: "Success",
+				defaultValue: "Success:",
 			});
 		case "error":
 			return t("standalone.info-box.status.error", {
-				defaultValue: "Error",
+				defaultValue: "Error:",
 			});
 		default:
 			return undefined;
@@ -343,7 +358,9 @@ const InfoBox = (inProps: InfoBoxProps) => {
 					>
 						{statusLabel && (
 							<>
-								<StatusName>{statusLabel}:</StatusName>{" "}
+								<StatusName className={classes?.statusName}>
+									{statusLabel}
+								</StatusName>{" "}
 							</>
 						)}
 						{heading}
