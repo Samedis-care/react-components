@@ -8,7 +8,7 @@ import {
 	cleanup,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { createMemoryHistory } from "history";
+import { createMemoryHistory, createPath } from "history";
 import {
 	Button,
 	IconButton,
@@ -54,6 +54,26 @@ const renderAt = (path: string, ui: React.ReactNode) => {
 };
 
 const MODIFIERS = ["ctrlKey", "metaKey", "shiftKey", "altKey"] as const;
+
+/**
+ * For each link, click it and check that the href is where the click landed,
+ * i.e. that Ctrl-click, middle-click, "copy link address" and a new tab open
+ * the same location a plain click navigates to. Going back restores the start
+ * location for the next link.
+ * @param history The router's history
+ * @param names Accessible names of the links to check
+ */
+const expectHrefsMatchClicks = (
+	history: ReturnType<typeof createMemoryHistory>,
+	names: string[],
+) => {
+	for (const name of names) {
+		const link = screen.getByRole("link", { name });
+		fireEvent.click(link);
+		expect(link).toHaveAttribute("href", createPath(history.location));
+		act(() => history.back());
+	}
+};
 
 describe("Link: clicks", () => {
 	it("routes a plain click as a push", () => {
@@ -392,38 +412,6 @@ describe("Link: clicks", () => {
 		expect(fireEvent.click(link)).toBe(false);
 		expect(renderedPath()).toBe("/x");
 	});
-
-	it("[ISSUE-3475-ITEM-9] points href at the location a click navigates to, for a target without pathname", () => {
-		const { history } = renderAt(
-			"/devices?page=1",
-			<>
-				<Link to={{ search: "?page=2" }}>next page</Link>
-				<Link to={{ hash: "#notes" }}>notes</Link>
-			</>,
-		);
-		const next = screen.getByRole("link", { name: "next page" });
-		const notes = screen.getByRole("link", { name: "notes" });
-		// a click keeps the pathname
-		fireEvent.click(next);
-		expect(history.location.pathname + history.location.search).toBe(
-			"/devices?page=2",
-		);
-		act(() => history.back());
-		expect(next).toHaveAttribute("href", "/devices?page=2");
-		// push({ hash }) keeps the pathname and drops the search
-		expect(notes).toHaveAttribute("href", "/devices#notes");
-	});
-
-	it("[ISSUE-3475-ITEM-9] follows the current location when the target has no pathname", () => {
-		const { history } = renderAt(
-			"/devices?page=1",
-			<Link to={{ search: "?page=2" }}>next page</Link>,
-		);
-		const next = screen.getByRole("link", { name: "next page" });
-		expect(next).toHaveAttribute("href", "/devices?page=2");
-		act(() => history.push("/settings"));
-		expect(next).toHaveAttribute("href", "/settings?page=2");
-	});
 });
 
 describe("Link: targets", () => {
@@ -472,5 +460,38 @@ describe("Link: targets", () => {
 		expect(fireEvent.click(mail)).toBe(true);
 		expect(history.index).toBe(0);
 		expect(renderedPath()).toBe("/");
+	});
+
+	it("[ISSUE-3475-ITEM-9] points href at the location a click navigates to, for a target without pathname", () => {
+		const { history } = renderAt(
+			"/devices?page=1",
+			<>
+				<Link to={{ search: "?page=2" }}>next page</Link>
+				<Link to={{ hash: "#notes" }}>notes</Link>
+			</>,
+		);
+		expectHrefsMatchClicks(history, ["next page", "notes"]);
+	});
+
+	it("[ISSUE-3475-ITEM-9] points href at the location a click navigates to, for a string target without pathname", () => {
+		const { history } = renderAt(
+			"/devices?page=1",
+			<>
+				<Link to="?page=2">next page</Link>
+				<Link to="#notes">notes</Link>
+			</>,
+		);
+		expectHrefsMatchClicks(history, ["next page", "notes"]);
+	});
+
+	it("[ISSUE-3475-ITEM-9] follows the current location when the target has no pathname", () => {
+		const { history } = renderAt(
+			"/devices?page=1",
+			<Link to={{ search: "?page=2" }}>next page</Link>,
+		);
+		const next = screen.getByRole("link", { name: "next page" });
+		expect(next).toHaveAttribute("href", "/devices?page=2");
+		act(() => history.push("/settings"));
+		expect(next).toHaveAttribute("href", "/settings?page=2");
 	});
 });

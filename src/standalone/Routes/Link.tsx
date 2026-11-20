@@ -1,5 +1,11 @@
 import React, { useCallback, useMemo } from "react";
-import { createPath, type History, type Location, type To } from "history";
+import {
+	createPath,
+	parsePath,
+	type History,
+	type Location,
+	type To,
+} from "history";
 import { useHistoryRouterContext } from "./HistoryRouter";
 import useNavigate from "./useNavigate";
 import useLocation from "./useLocation";
@@ -15,10 +21,11 @@ export interface LinkProps extends Omit<
 	/**
 	 * Target location: a path of the app or a location object. Leading slashes
 	 * collapse into one, as with `useNavigate`: "//7" links to "/7".
-	 * A location object that leaves out `pathname` keeps the current one, and
-	 * one that leaves out `search` or `hash` drops them, as a push does: at
-	 * "/devices?page=1", `{ search: "?page=2" }` links to "/devices?page=2"
-	 * and `{ hash: "#notes" }` to "/devices#notes".
+	 * A target that leaves out `pathname` (a location object, or a string such
+	 * as "?page=2") keeps the current one; a target that leaves out `search` or
+	 * `hash` drops them, as a push does: at "/devices?page=1",
+	 * `{ search: "?page=2" }` and "?page=2" link to "/devices?page=2", and
+	 * `{ hash: "#notes" }` and "#notes" to "/devices#notes".
 	 * A URL with a scheme ("https://…", "mailto:…") makes a plain link that
 	 * the browser follows; `replace` and `state` don't apply to it.
 	 */
@@ -54,31 +61,23 @@ export interface LinkProps extends Omit<
 }
 
 /**
- * The href a click navigates to. A location object that leaves out
- * `pathname`, `search` or `hash` is completed from the current location the
- * way `history.push` completes it: a missing pathname stays the current one,
- * a missing search and hash become empty. `history.createHref` alone fills a
- * missing pathname with "/", so `{ search: "?page=2" }` at "/devices" showed
- * "/?page=2" while a click went to "/devices?page=2", and a new tab or "copy
- * link address" opened the start page.
+ * The href a click navigates to. A target that leaves out `pathname`, `search`
+ * or `hash` is completed from the current location the way `history.push`
+ * completes it: a missing pathname stays the current one, a missing search and
+ * hash become empty. `history.createHref` alone fills a missing pathname with
+ * "/".
  * @param history The router's history
  * @param location The current location
  * @param to The target, with leading slashes already collapsed
  * @returns The href for the target
  */
-const navigationHref = (
-	history: History,
-	location: Location,
-	to: To,
-): string =>
-	typeof to === "string"
-		? history.createHref(to)
-		: history.createHref({
-				pathname: location.pathname,
-				search: "",
-				hash: "",
-				...to,
-			});
+const navigationHref = (history: History, location: Location, to: To): string =>
+	history.createHref({
+		pathname: location.pathname,
+		search: "",
+		hash: "",
+		...(typeof to === "string" ? parsePath(to) : to),
+	});
 
 /**
  * Does the browser open the link in another tab or window, or download it?
