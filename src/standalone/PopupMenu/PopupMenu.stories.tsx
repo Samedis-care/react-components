@@ -188,6 +188,10 @@ const menuClosed = () =>
 		expect(within(document.body).queryByRole("menu")).not.toBeInTheDocument(),
 	);
 
+// The right edge of a 320px window's 16px margin. MUI's Popover rounds the paper's position
+// to whole pixels, so a paper with a fractional width can end up to half a pixel past it.
+const PHONE_MARGIN_RIGHT = 304.5;
+
 // --- bugs ---
 
 const DefaultsDemo = () => {
@@ -563,7 +567,7 @@ export const Issue3459Item10LongLabelsReadableOnPhone: MenuDemoStory = {
 		);
 		const paper = paperEl.getBoundingClientRect();
 		await expect(paper.left).toBeGreaterThanOrEqual(16);
-		await expect(paper.right).toBeLessThanOrEqual(304);
+		await expect(paper.right).toBeLessThanOrEqual(PHONE_MARGIN_RIGHT);
 		const clipped = items
 			.filter((item) => item.scrollWidth > item.clientWidth)
 			.map((item) => item.textContent);
@@ -659,7 +663,7 @@ export const Issue3459Item10KeepMountedMenuWidensForLongerLabels: Story = {
 		// the English labels fit, so the menu sits right of the window's margin
 		const english = await openedPaper();
 		await expect(english.paper.left).toBeGreaterThan(16);
-		await expect(english.paper.right).toBeLessThanOrEqual(304);
+		await expect(english.paper.right).toBeLessThanOrEqual(PHONE_MARGIN_RIGHT);
 		await userEvent.keyboard("{Escape}");
 		await menuClosed();
 
@@ -669,7 +673,7 @@ export const Issue3459Item10KeepMountedMenuWidensForLongerLabels: Story = {
 			"Réinitialiser les paramètres de la colonne",
 		);
 		await expect(french.paper.left).toBeGreaterThanOrEqual(16);
-		await expect(french.paper.right).toBeLessThanOrEqual(304);
+		await expect(french.paper.right).toBeLessThanOrEqual(PHONE_MARGIN_RIGHT);
 		await expect(french.paper.width).toBeCloseTo(288, 0);
 		const clipped = french.items
 			.filter((item) => item.scrollWidth > item.clientWidth)
@@ -841,7 +845,7 @@ export const Issue3459Item16LongWordReadableOnPhone: StoryObj<
 		);
 		const paper = paperEl.getBoundingClientRect();
 		await expect(paper.left).toBeGreaterThanOrEqual(16);
-		await expect(paper.right).toBeLessThanOrEqual(304);
+		await expect(paper.right).toBeLessThanOrEqual(PHONE_MARGIN_RIGHT);
 		await expect(items.flatMap(textOutsideItem)).toEqual([]);
 		// the word is longer than a line in every item, so the test covers it
 		const wordLines = items.map(
