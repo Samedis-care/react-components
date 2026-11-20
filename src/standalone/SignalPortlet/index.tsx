@@ -1,6 +1,7 @@
 import React from "react";
 import SignalPortletItem, { SignalPortletItemProps } from "./SignalPortletItem";
 import {
+	buttonBaseClasses,
 	Divider,
 	Grid,
 	IconButton,
@@ -17,6 +18,7 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import useCurrentLocale from "../../utils/useCurrentLocale";
 import useAgeTick from "../../utils/useAgeTick";
 import combineClassNames from "../../utils/combineClassNames";
+import focusRing from "../../utils/internal/focusRing";
 
 export interface SignalPortletProps {
 	/**
@@ -90,7 +92,13 @@ const SignalPortletItemStyled = styled(SignalPortletItem, {
 const SignalPortletRefreshIconButton = styled(IconButton, {
 	name: "CcSignalPortlet",
 	slot: "refreshIconButton",
-})({});
+})(({ theme }) => ({
+	// MUI shows keyboard focus on an IconButton only as a faint pulsating ripple
+	// (unless the theme sets its focusVisible ring), which forced colors drop.
+	// The ring is inside the button, which sits flush in the card's bottom right
+	// corner; the button has no focus ripple, which would cover the ring
+	[`&.${buttonBaseClasses.focusVisible}`]: focusRing(theme, -2),
+}));
 const SignalPortletRefreshIcon = styled(RefreshIcon, {
 	name: "CcSignalPortlet",
 	slot: "refreshIcon",
@@ -193,6 +201,7 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 								<Grid>
 									<SignalPortletRefreshIconButton
 										onClick={props.onRefresh}
+										disableFocusRipple
 										size={"small"}
 										color={"primary"}
 										aria-label={t("standalone.signal-portlet.refresh")}

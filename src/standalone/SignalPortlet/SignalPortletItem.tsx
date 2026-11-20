@@ -4,6 +4,7 @@ import {
 	ListItem,
 	ListItemAvatar,
 	ListItemButton,
+	listItemButtonClasses,
 	ListItemText,
 	styled,
 	TypographyProps,
@@ -12,6 +13,7 @@ import {
 import Loader from "../Loader";
 import useNavigate from "../Routes/useNavigate";
 import combineClassNames from "../../utils/combineClassNames";
+import focusRing from "../../utils/internal/focusRing";
 
 export interface SignalPortletItemProps {
 	/**
@@ -108,7 +110,11 @@ const ListRoot = styled(ListItem, {
 const ListRootButton = styled(ListItemButton, {
 	name: "CcSignalPortletItem",
 	slot: "rootBtn",
-})({});
+})(({ theme }) => ({
+	// MUI marks the keyboard-focused row with a faint tint only, which forced
+	// colors drop; inside the row, which spans the card from edge to edge
+	[`&.${listItemButtonClasses.focusVisible}`]: focusRing(theme, -2),
+}));
 
 /**
  * Slots of a SignalPortlet row, for an item's `classes` and for the theme's
@@ -116,7 +122,9 @@ const ListRootButton = styled(ListItemButton, {
  * - `root`: the ListItem (`<li>`) of every row. A row with link has no
  *   padding here (MUI's `disablePadding`), its ListItemButton has it.
  * - `rootBtn`: the ListItemButton (a `div` with role button) inside the
- *   `<li>` of a row with link
+ *   `<li>` of a row with link. Keyboard focus draws a 2px outline in
+ *   `palette.primary.main` inside its edges, or the ring of the theme's
+ *   `focusVisible` option when the theme sets one.
  * - `listAvatar`: the ListItemAvatar around the count
  * - `itemColorLoading`, `itemColorActive`, `itemColorInactive`: the 40px
  *   Avatar while the count is `null` or `undefined`, when it is non-zero, and

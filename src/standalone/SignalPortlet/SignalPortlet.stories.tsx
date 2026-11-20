@@ -1,9 +1,9 @@
 import React, { useMemo } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Box } from "@mui/material";
+import { Box, createTheme, ThemeProvider } from "@mui/material";
 import { createMemoryHistory } from "history";
 // eslint-disable-next-line import/no-unresolved
-import { expect } from "storybook/test";
+import { expect, fn, userEvent, waitFor } from "storybook/test";
 import SignalPortlet from "./index";
 import { HistoryRouter } from "../Routes";
 
@@ -15,6 +15,8 @@ const meta: Meta<typeof SignalPortlet> = {
 export default meta;
 
 type Story = StoryObj<typeof SignalPortlet>;
+
+const MINUTE = 60 * 1000;
 
 const WithRouter = ({ children }: { children: React.ReactNode }) => {
 	const history = useMemo(() => createMemoryHistory(), []);
@@ -192,5 +194,151 @@ export const Issue3469Item13RowsAreListItems: Story = {
 			};
 		};
 		await expect(layout(linked)).toEqual(layout(plain));
+	},
+};
+
+type Rgba = { r: number; g: number; b: number; a: number };
+const parseRgba = (color: string): Rgba => {
+	const p = (color.match(/[\d.]+/g) ?? []).map(Number);
+	return { r: p[0], g: p[1], b: p[2], a: p[3] ?? 1 };
+};
+/** fg composited over an opaque bg */
+const over = (fg: Rgba, bg: Rgba): Rgba => ({
+	r: fg.r * fg.a + bg.r * (1 - fg.a),
+	g: fg.g * fg.a + bg.g * (1 - fg.a),
+	b: fg.b * fg.a + bg.b * (1 - fg.a),
+	a: 1,
+});
+const luminance = ({ r, g, b }: Rgba) =>
+	[r, g, b]
+		.map((v) => {
+			const c = v / 255;
+			return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+		})
+		.reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i], 0);
+const contrast = (a: Rgba, b: Rgba) => {
+	const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+	return (hi + 0.05) / (lo + 0.05);
+};
+
+const focusStyle = (el: Element) => {
+	const cs = getComputedStyle(el);
+	return `outline ${cs.outlineStyle} ${cs.outlineWidth} ${cs.outlineColor}; box-shadow ${cs.boxShadow}`;
+};
+/** A focus ring: an outline of 2px or more with 3:1 against white, or a box-shadow */
+const hasFocusRing = (el: Element) => {
+	const cs = getComputedStyle(el);
+	if (cs.outlineStyle !== "none" && parseFloat(cs.outlineWidth) >= 2) {
+		const white = { r: 255, g: 255, b: 255, a: 1 };
+		return contrast(over(parseRgba(cs.outlineColor), white), white) >= 3;
+	}
+	return cs.boxShadow !== "none";
+};
+
+export const Issue3469Item14RowAndRefreshShowFocusRing: Story = {
+	args: {
+		title: "Focus",
+		items: [{ count: 5, text: "Open", link: "/open" }],
+		updatedAt: Date.now() - 5 * MINUTE,
+		onRefresh: fn(),
+	},
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3469-ITEM-14: a keyboard-focused row only turns light grey (1.32:1 against the card) and the focused Refresh button only shows MUI's faint focus ripple; neither has an outline, so in forced-colors mode focus is not shown at all. Expected: a focus ring of at least 2px and 3:1 on both.",
+			},
+		},
+	},
+	render: (args) => (
+		<WithRouter>
+			<SignalPortlet {...args} />
+		</WithRouter>
+	),
+	play: async ({ canvas }) => {
+		const row = canvas.getByText("Open").closest(".MuiListItemButton-root");
+		if (!row) throw new Error("no linked row");
+		const refresh = canvas.getByRole("button", { name: "Refresh" });
+		await userEvent.tab();
+		await expect(row).toHaveFocus();
+		await waitFor(() => expect(row).toHaveClass("Mui-focusVisible"));
+		const rowRing = hasFocusRing(row);
+		const rowStyle = focusStyle(row);
+		await userEvent.tab();
+		await expect(refresh).toHaveFocus();
+		await waitFor(() => expect(refresh).toHaveClass("Mui-focusVisible"));
+		await expect(
+			{ row: rowRing, refresh: hasFocusRing(refresh) },
+			`row: ${rowStyle} | Refresh: ${focusStyle(refresh)}`,
+		).toEqual({ row: true, refresh: true });
+	},
+};
+
+/**
+ * The focused Refresh button shows the ring alone: MUI's pulsating focus
+ * ripple, which would cover the ring inside the button, is off
+ */
+export const Issue3469Item14RefreshRingIsNotCovered: Story = {
+	args: {
+		title: "Focus",
+		items: [{ count: 5, text: "Open" }],
+		onRefresh: fn(),
+	},
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<WithRouter>
+			<SignalPortlet {...args} />
+		</WithRouter>
+	),
+	play: async ({ canvas }) => {
+		const refresh = canvas.getByRole("button", { name: "Refresh" });
+		await userEvent.tab();
+		await expect(refresh).toHaveFocus();
+		await waitFor(() => expect(refresh).toHaveClass("Mui-focusVisible"));
+		await expect(
+			refresh.querySelectorAll(".MuiTouchRipple-ripplePulsate"),
+		).toHaveLength(0);
+	},
+};
+
+// an app's theme ring, as MUI's createTheme({ focusVisible }) takes it
+const GREEN_RING = createTheme({
+	focusVisible: { outlineColor: "rgb(0, 128, 0)" },
+});
+
+/**
+ * With MUI's `focusVisible` theme ring, the row and Refresh show the theme's
+ * ring, as every MUI ListItemButton and IconButton does, and no ring of
+ * their own
+ */
+export const Issue3469Item14ThemeFocusVisibleRing: Story = {
+	args: {
+		title: "Focus",
+		items: [{ count: 5, text: "Open", link: "/open" }],
+		onRefresh: fn(),
+	},
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<ThemeProvider theme={GREEN_RING}>
+			<WithRouter>
+				<SignalPortlet {...args} />
+			</WithRouter>
+		</ThemeProvider>
+	),
+	play: async ({ canvas }) => {
+		const row = canvas.getByRole("button", { name: "5 Open" });
+		const refresh = canvas.getByRole("button", { name: "Refresh" });
+		await userEvent.tab();
+		await expect(row).toHaveFocus();
+		await waitFor(() => expect(row).toHaveClass("Mui-focusVisible"));
+		const rowRing = getComputedStyle(row).outlineColor;
+		await userEvent.tab();
+		await expect(refresh).toHaveFocus();
+		await waitFor(() => expect(refresh).toHaveClass("Mui-focusVisible"));
+		await expect({
+			row: rowRing,
+			refresh: getComputedStyle(refresh).outlineColor,
+		}).toEqual({ row: "rgb(0, 128, 0)", refresh: "rgb(0, 128, 0)" });
 	},
 };
