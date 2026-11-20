@@ -69,6 +69,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-20 | [RoutedTabs scrolls when its tabs do not fit, with scroll buttons on phones](2026-11-20-routed-tabs-scroll-when-tabs-do-not-fit.md) | behavior, theme |
 | 2026-11-20 | [DialogTitle wraps a long title instead of cutting it off](2026-11-20-dialog-title-wraps.md) | behavior |
 | 2026-11-20 | [A toast's keyboard-focused close button draws a focus ring](2026-11-20-toast-close-button-focus-ring.md) | behavior |
+| 2026-11-20 | [A CRUD without a record page applies gridProps.onAddNew and shows newPermissionHint only to users who may not create](2026-11-20-crud-without-record-page-add-new.md) | behavior |
 | 2026-11-20 | [A lazy control's queue keeps the Form dirty when onlySubmitMounted changes while it is shown](2026-11-20-lazy-crud-connector-only-submit-mounted-change.md) | behavior |
 | 2026-11-20 | [A control in a DataGrid cell is named after its field and row](2026-11-20-data-grid-inline-checkbox-names.md) | behavior |
 | 2026-11-20 | [InlineSwitch takes aria props for its switch, and a selector's switch requires switchLabel](2026-11-20-inline-switch-name-and-switch-label.md) | behavior, type |
