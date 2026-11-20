@@ -352,3 +352,124 @@ export const Issue3470Item10FilledTextContrastCustomPalette: Story = {
 		),
 	],
 };
+
+/** "ok" for an outline of 2px or more with 3:1 against the alert, else what is there */
+const focusRingOf = (button: Element, alert: Element) => {
+	const cs = getComputedStyle(button);
+	if (cs.outlineStyle === "none" || parseFloat(cs.outlineWidth) < 2)
+		return `outline ${cs.outlineStyle} ${cs.outlineWidth}`;
+	const bg = alertBackground(alert);
+	const ratio = contrast(over(parseRgba(cs.outlineColor), bg), bg);
+	return ratio >= 3 ? "ok" : `outline at ${ratio.toFixed(2)}:1`;
+};
+
+export const Issue3470Item11CloseButtonShowsFocusRing: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"A keyboard-focused close button shows a 2px ring in the toast's text color, at least 3:1 against the toast in every severity, next to MUI's pulsating focus ripple. The ring is an outline, which forced-colors mode keeps; it drops the ripple.",
+			},
+		},
+	},
+	render: (args) => (
+		<>
+			<Button>Before</Button>
+			<AllSeverities onClose={args.onClose} />
+		</>
+	),
+	play: async ({ canvas, userEvent }) => {
+		await waitFor(() => expect(allToasts()).toHaveLength(4));
+		canvas.getByRole("button", { name: "Before" }).focus();
+		const rings: Record<string, string> = {};
+		for (const alert of allToasts()) {
+			await userEvent.tab();
+			const close = within(alert).getByRole("button", { name: "Close" });
+			await expect(close).toHaveFocus();
+			await waitFor(() => expect(close).toHaveClass("Mui-focusVisible"));
+			rings[alert.textContent ?? ""] = focusRingOf(close, alert);
+		}
+		await expect(rings, "focus ring of each close button").toEqual({
+			"Title successMessage success": "ok",
+			"Title infoMessage info": "ok",
+			"Title warningMessage warning": "ok",
+			"Title errorMessage error": "ok",
+		});
+	},
+};
+
+export const Issue3470Item11CloseButtonShowsFocusRingStandard: Story = {
+	...Issue3470Item11CloseButtonShowsFocusRing,
+	args: { variant: "standard" },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"The `standard` variant: the ring takes the toast's text color here too.",
+			},
+		},
+	},
+	render: (args) => (
+		<>
+			<Button>Before</Button>
+			<AllSeverities onClose={args.onClose} variant={args.variant} />
+		</>
+	),
+};
+
+export const Issue3470Item11CloseButtonShowsFocusRingOutlined: Story = {
+	...Issue3470Item11CloseButtonShowsFocusRingStandard,
+	args: { variant: "outlined" },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"The `outlined` variant: the ring takes the toast's text color here too.",
+			},
+		},
+	},
+};
+
+/** MUI's opt-in focus ring */
+const focusVisibleTheme = createTheme({ focusVisible: true });
+
+export const Issue3470Item11CloseButtonKeepsThemeFocusRing: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"With the theme's `focusVisible` option MUI draws its own ring, a 2px `primary.main` outline on a 4px `background.default` halo inside filled toasts, and the toast adds none of its own.",
+			},
+		},
+	},
+	render: Issue3470Item11CloseButtonShowsFocusRing.render,
+	play: async ({ canvas, userEvent }) => {
+		await waitFor(() => expect(allToasts()).toHaveLength(4));
+		canvas.getByRole("button", { name: "Before" }).focus();
+		const rings: Record<string, string> = {};
+		for (const alert of allToasts()) {
+			await userEvent.tab();
+			const close = within(alert).getByRole("button", { name: "Close" });
+			await expect(close).toHaveFocus();
+			await waitFor(() => expect(close).toHaveClass("Mui-focusVisible"));
+			const cs = getComputedStyle(close);
+			rings[alert.textContent ?? ""] =
+				`${cs.outlineWidth} ${cs.outlineStyle} ${cs.outlineColor} on ${cs.boxShadow}`;
+		}
+		const muiRing =
+			"2px solid rgb(25, 118, 210) on rgb(255, 255, 255) 0px 0px 0px 4px";
+		await expect(rings, "focus ring of each close button").toEqual({
+			"Title successMessage success": muiRing,
+			"Title infoMessage info": muiRing,
+			"Title warningMessage warning": muiRing,
+			"Title errorMessage error": muiRing,
+		});
+	},
+	decorators: [
+		(Story) => (
+			<ThemeProvider theme={focusVisibleTheme}>
+				<Story />
+			</ThemeProvider>
+		),
+	],
+};
