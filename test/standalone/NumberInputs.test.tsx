@@ -429,6 +429,23 @@ describe("IntegerInputField", () => {
 			);
 		});
 	});
+
+	it("[ISSUE-3484-ITEM-18] renders the TextField as its root, which className, sx and ref reach", () => {
+		const ref = React.createRef<HTMLDivElement>();
+		const { container } = render(
+			<IntegerInputField
+				label="Count"
+				value={1}
+				className="custom"
+				sx={{ marginTop: "7px" }}
+				ref={ref}
+			/>,
+		);
+		const root = container.firstElementChild;
+		expect(root).toHaveClass("MuiFormControl-root", "custom");
+		expect(root).toHaveStyle({ marginTop: "7px" });
+		expect(ref.current).toBe(root);
+	});
 });
 
 describe("CurrencyInput", () => {

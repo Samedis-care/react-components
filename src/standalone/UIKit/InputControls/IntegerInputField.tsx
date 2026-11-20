@@ -85,6 +85,12 @@ interface TypedText {
 	base: number | null;
 }
 
+/**
+ * A text field for a whole number, grouped in the components-care language
+ * unless `noFormat`. Its root is the root of the TextFieldWithHelp it renders
+ * (MUI's `FormControl`), as in DecimalInputField and CurrencyInput:
+ * `className`, `sx` and `fullWidth` (also in a flex row) apply to it.
+ */
 const IntegerInputField = (
 	props: IntegerInputFieldProps & Omit<TextFieldProps, "onChange" | "value">,
 ) => {
@@ -145,32 +151,30 @@ const IntegerInputField = (
 
 	// component rendering
 	return (
-		<div>
-			<TextFieldWithHelp
-				{...muiProps}
-				value={shownText}
-				onChange={handleChange}
-				onBlur={handleBlur}
-				error={outOfRange || muiProps.error}
-				helperText={
-					outOfRange
-						? t("standalone.uikit.number-input.out-of-range", {
-								MIN: format(Number.MIN_SAFE_INTEGER),
-								MAX: format(Number.MAX_SAFE_INTEGER),
-							})
-						: muiProps.helperText
-				}
-				slotProps={{
-					...muiProps.slotProps,
-					htmlInput: {
-						...muiProps.slotProps?.htmlInput,
-						ref: cursorInputRef,
-						inputMode: "numeric",
-					},
-				}}
-				inputMode={"numeric"}
-			/>
-		</div>
+		<TextFieldWithHelp
+			{...muiProps}
+			value={shownText}
+			onChange={handleChange}
+			onBlur={handleBlur}
+			error={outOfRange || muiProps.error}
+			helperText={
+				outOfRange
+					? t("standalone.uikit.number-input.out-of-range", {
+							MIN: format(Number.MIN_SAFE_INTEGER),
+							MAX: format(Number.MAX_SAFE_INTEGER),
+						})
+					: muiProps.helperText
+			}
+			slotProps={{
+				...muiProps.slotProps,
+				htmlInput: {
+					...muiProps.slotProps?.htmlInput,
+					ref: cursorInputRef,
+					inputMode: "numeric",
+				},
+			}}
+			inputMode={"numeric"}
+		/>
 	);
 };
 
