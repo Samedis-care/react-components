@@ -1,4 +1,4 @@
-import React, { ForwardedRef, useCallback, useState } from "react";
+import React, { ForwardedRef, useCallback, useRef, useState } from "react";
 import { IconButton, InputAdornment, InputAdornmentProps } from "@mui/material";
 import { Clear as ClearIcon, Info as InfoIcon } from "@mui/icons-material";
 import {
@@ -10,7 +10,11 @@ import isTouchDevice from "../../utils/isTouchDevice";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 import { withMuiFieldState } from "./MuiFieldState";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { PickersTextFieldProps } from "@mui/x-date-pickers";
+import {
+	PickersSectionListRef,
+	PickersTextFieldProps,
+} from "@mui/x-date-pickers";
+import { useRefComposer } from "react-ref-composer";
 
 export interface PickersTextFieldWithHelpProps extends UIInputProps {
 	/**
@@ -18,7 +22,10 @@ export interface PickersTextFieldWithHelpProps extends UIInputProps {
 	 */
 	openInfo?: () => void;
 	/**
-	 * custom clear handler if clear button is pressed
+	 * Clears the picker's value, e.g. `() => onChange(null)`: called without
+	 * arguments when the touch Clear button is pressed. Focus then moves to the
+	 * date's first section, as after the clear button of MUI X's own fields,
+	 * since the Clear button goes away with the value.
 	 */
 	customHandleClear: () => void;
 	/**
@@ -59,12 +66,16 @@ const TextFieldWithHelp: React.ForwardRefExoticComponent<
 	);
 	const hasValue = muiProps.value == null ? hasInputValue : !!muiProps.value;
 
+	const composeSectionListRef = useRefComposer<PickersSectionListRef>();
+	const sectionListRef = useRef<PickersSectionListRef>(null);
+
 	const handleClear = useCallback(
 		(evt: React.MouseEvent) => {
 			evt.stopPropagation();
-			if (customHandleClear) {
-				return customHandleClear();
-			}
+			if (!customHandleClear) return;
+			customHandleClear();
+			// the Clear button unmounts with the value: keep focus in the field
+			sectionListRef.current?.getSectionContent(0)?.focus();
 		},
 		[customHandleClear],
 	);
@@ -98,6 +109,10 @@ const TextFieldWithHelp: React.ForwardRefExoticComponent<
 			warning={warning}
 			dirty={dirty}
 			onChange={handleChange}
+			sectionListRef={composeSectionListRef(
+				sectionListRef,
+				muiProps.sectionListRef,
+			)}
 			slotProps={{
 				...muiProps.slotProps,
 				input: {

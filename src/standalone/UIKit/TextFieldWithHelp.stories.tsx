@@ -1,8 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, fn, waitFor } from "storybook/test";
-import { Box, createTheme, hexToRgb, MenuItem, TextField } from "@mui/material";
+import { expect, fn, waitFor, within } from "storybook/test";
+import {
+	Box,
+	Button,
+	createTheme,
+	hexToRgb,
+	InputAdornment,
+	MenuItem,
+	TextField,
+} from "@mui/material";
 import TextFieldWithHelp from "./TextFieldWithHelp";
 import DateInput from "./InputControls/DateInput";
 import MuiPickerUtils from "../../framework/MuiPickerUtils";
@@ -57,7 +65,61 @@ export default meta;
 
 type Story = StoryObj<typeof TextFieldWithHelp>;
 
+/** headless Chromium has no touch screen; isTouchDevice() reads maxTouchPoints */
+const emulateTouch = () => {
+	Object.defineProperty(navigator, "maxTouchPoints", {
+		configurable: true,
+		get: () => 5,
+	});
+	return () => {
+		delete (navigator as unknown as Record<string, unknown>).maxTouchPoints;
+	};
+};
+
 const noop = () => {};
+
+/** A text field whose value the story owns, so Clear can empty it */
+const ControlledField = function ControlledField(props: {
+	label: string;
+	initial?: string;
+	openInfo?: () => void;
+	customClear?: boolean;
+	adornment?: boolean;
+}) {
+	const { label, initial = "abc", openInfo, customClear, adornment } = props;
+	const [value, setValue] = useState(initial);
+	return (
+		<TextFieldWithHelp
+			variant="standard"
+			label={label}
+			value={value}
+			onChange={(e) => setValue(e.target.value)}
+			openInfo={openInfo}
+			customHandleClear={customClear ? () => setValue("") : undefined}
+			slotProps={
+				adornment
+					? {
+							input: {
+								endAdornment: (
+									<InputAdornment position="end">
+										<Button size="small">Unit</Button>
+									</InputAdornment>
+								),
+							},
+						}
+					: undefined
+			}
+		/>
+	);
+};
+
+/** A DateInput whose value the story owns */
+const ControlledDate = function ControlledDate() {
+	const [value, setValue] = useState<Date | null>(
+		new Date("2026-08-01T12:00:00.000Z"),
+	);
+	return <DateInput label="Day" value={value} onChange={setValue} />;
+};
 
 /** The dot drawn after a label, in the label's own (unscaled) coordinates */
 const dirtyDot = (label: HTMLElement) => {
@@ -305,5 +367,86 @@ export const Issue3482Item13RequiredSaidInText: Story = {
 		await expect(placeholderLook(field)).toEqual(
 			placeholderLook(canvas.getByRole("textbox", { name: "MUI" })),
 		);
+	},
+};
+
+export const Issue3483Item15ClearKeepsFocusInField: Story = {
+	beforeEach: emulateTouch,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3483-ITEM-15: Clear in a date field (and any customHandleClear) unmounts the focused button and leaves keyboard focus on the page body; the default clear of a text field moves it to the input (WCAG 2.4.3).",
+			},
+		},
+	},
+	render: () => (
+		<MuiPickerUtils>
+			<Box sx={{ width: 360, display: "grid", gap: 4 }}>
+				<ControlledDate />
+				<ControlledField label="Custom" customClear />
+			</Box>
+		</MuiPickerUtils>
+	),
+	play: async ({ canvas, userEvent }) => {
+		const field = await canvas.findByRole("group", { name: "Day" });
+		const root = field.closest<HTMLElement>(".MuiFormControl-root")!;
+		within(root).getByRole("button", { name: "Clear" }).focus();
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() =>
+			expect(within(root).queryByRole("button", { name: "Clear" })).toBeNull(),
+		);
+		await expect(
+			root.contains(document.activeElement),
+			"focus left the date field",
+		).toBe(true);
+
+		const custom = canvas.getByRole("textbox", { name: "Custom" });
+		const customClear = within(
+			custom.closest<HTMLElement>(".MuiFormControl-root")!,
+		).getByRole("button", { name: "Clear" });
+		customClear.focus();
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() => expect(custom).toHaveValue(""));
+		await expect(custom).toHaveFocus();
+	},
+};
+
+/** A select whose value the story owns, cleared through customHandleClear */
+const ControlledSelect = function ControlledSelect() {
+	const [value, setValue] = useState("active");
+	return (
+		<TextFieldWithHelp
+			variant="standard"
+			label="Status"
+			select
+			value={value}
+			onChange={(e) => setValue(e.target.value)}
+			customHandleClear={() => setValue("")}
+		>
+			<MenuItem value="active">Active</MenuItem>
+		</TextFieldWithHelp>
+	);
+};
+
+export const Issue3483Item15ClearKeepsFocusInSelect: Story = {
+	beforeEach: emulateTouch,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3483-ITEM-15: Clear in a select (which only has one with customHandleClear) moves keyboard focus to the select, since the button goes away with the value.",
+			},
+		},
+	},
+	render: () => <ControlledSelect />,
+	play: async ({ canvas, userEvent }) => {
+		const select = await canvas.findByRole("combobox", { name: "Status" });
+		canvas.getByRole("button", { name: "Clear" }).focus();
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() =>
+			expect(canvas.queryByRole("button", { name: "Clear" })).toBeNull(),
+		);
+		await expect(select).toHaveFocus();
 	},
 };

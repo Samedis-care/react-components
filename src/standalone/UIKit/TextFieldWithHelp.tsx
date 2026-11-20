@@ -26,6 +26,9 @@ export interface TextFieldWithHelpProps extends UIInputProps {
 	 * when it is pressed. Without it, the button empties the text input, so
 	 * `onChange` receives an event whose `target.value` is `""`.
 	 *
+	 * Either way, focus then moves to the input (in a `select`, to the
+	 * select), since the Clear button goes away with the value.
+	 *
 	 * A `select` has no such default: it shows the Clear button only when
 	 * this is set.
 	 */
@@ -73,7 +76,11 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 		(evt: React.MouseEvent) => {
 			evt.stopPropagation();
 			if (customHandleClear) {
-				return customHandleClear();
+				customHandleClear();
+				// the Clear button unmounts with the value: keep focus in the field,
+				// as the default clear below does
+				inputRef.current?.focus();
+				return;
 			}
 			if (!inputRef.current) {
 				throw new Error("InputRef not set");
