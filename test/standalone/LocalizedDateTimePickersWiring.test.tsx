@@ -823,6 +823,62 @@ describe.each(PICKERS)("%s wiring", (_name, Picker) => {
 			changes: onChange.mock.calls.length,
 		}).toEqual({ invalid: "true", errors: ["invalidDate"], changes: 0 });
 	});
+
+	it("[ISSUE-3474-ITEM-8] shows and reports the date in UTC once the consumer hands it in as UTC", () => {
+		// 23:30 UTC is 01:30 the next day in Berlin, so the date shows the switch
+		vi.stubEnv("TZ", "Europe/Berlin");
+		try {
+			const onChange = vi.fn<(value: Moment | null) => void>();
+			/** A consumer with a "show in UTC" switch */
+			const ShowInUtc = (props: { utc: boolean }) => {
+				const [value, setValue] = useState<Moment | null>(() =>
+					moment("2026-08-01T23:30:00Z"),
+				);
+				return (
+					<Picker
+						label="Due"
+						// a fresh Moment in every render, in the timezone the switch asks for
+						value={value && (props.utc ? moment.utc(value) : moment(value))}
+						onChange={(newValue) => {
+							setValue(newValue);
+							onChange(newValue);
+						}}
+					/>
+				);
+			};
+			const { rerender } = render(
+				<Wrap>
+					<ShowInUtc utc={false} />
+				</Wrap>,
+			);
+			const local = datePart();
+
+			rerender(
+				<Wrap>
+					<ShowInUtc utc />
+				</Wrap>,
+			);
+			const utc = datePart();
+			// one day on: the field builds the new date in the timezone it shows
+			const day = screen.getAllByRole("spinbutton")[1];
+			focus(day);
+			act(() => {
+				fireEvent.keyDown(day, { key: "ArrowUp" });
+			});
+
+			expect({
+				local,
+				utc,
+				reported: onChange.mock.calls.map(([value]) => value?.format()),
+			}).toEqual({
+				local: "08|02|2026",
+				utc: "08|01|2026",
+				reported: ["2026-08-02T23:30:00Z"],
+			});
+		} finally {
+			vi.unstubAllEnvs();
+		}
+	});
 });
 
 describe("leaving the field", () => {

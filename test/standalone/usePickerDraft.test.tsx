@@ -225,4 +225,58 @@ describe("usePickerDraft", () => {
 		rerender({ value: moment("2024-06-15") });
 		expect(shown(result)).toBe("2024-06-15");
 	});
+
+	it("[ISSUE-3474-ITEM-8] hands the field the consumer's new representation of the same instant", () => {
+		const { result, rerender } = renderDraft(
+			moment("2026-08-01T10:00:00Z"),
+			vi.fn(),
+		);
+
+		// e.g. a "show in UTC" switch: same instant, different display timezone
+		rerender({ value: moment.utc("2026-08-01T10:00:00Z") });
+
+		expect((result.current.value as Moment).isUTC()).toBe(true);
+	});
+
+	it("[ISSUE-3474-ITEM-8] hands the field local time again when the consumer switches back from UTC", () => {
+		const { result, rerender } = renderDraft(
+			moment.utc("2026-08-01T10:00:00Z"),
+			vi.fn(),
+		);
+
+		rerender({ value: moment("2026-08-01T10:00:00Z") });
+
+		expect((result.current.value as Moment).isUTC()).toBe(false);
+	});
+
+	it("[ISSUE-3474-ITEM-8] keeps the held object for a fresh value in the new representation", () => {
+		const { result, rerender } = renderDraft(
+			moment("2026-08-01T10:00:00Z"),
+			vi.fn(),
+		);
+		const utc = moment.utc("2026-08-01T10:00:00Z");
+		rerender({ value: utc });
+
+		// `moment.utc(...)` in render: a fresh instance in the same timezone each
+		// time. The field compares by reference, so a new object would rebuild its
+		// sections.
+		rerender({ value: moment.utc("2026-08-01T10:00:00Z") });
+
+		expect(result.current.value).toBe(utc);
+	});
+
+	it("[ISSUE-3474-ITEM-8] drops a rejected draft when the consumer's value changes representation", () => {
+		const { result, rerender } = renderDraft(
+			moment("2026-08-01T10:00:00Z"),
+			vi.fn(),
+		);
+
+		emit(result, moment("0020-08-01T10:00:00Z"), INVALID);
+		rerender({ value: moment.utc("2026-08-01T10:00:00Z") });
+
+		expect({
+			utc: (result.current.value as Moment).isUTC(),
+			shown: shown(result),
+		}).toEqual({ utc: true, shown: "2026-08-01" });
+	});
 });

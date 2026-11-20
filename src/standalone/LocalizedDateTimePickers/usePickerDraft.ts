@@ -19,11 +19,18 @@ interface PickerDraftState {
 }
 
 /**
- * Whether two picker values are the same, compared as MUI's own value manager
- * does: the same object, the same instant, or both an invalid date. The adapter
- * alone says an invalid date differs even from itself, which would make the
+ * Whether two picker values are the same to the field: the same object, the
+ * same instant in the same timezone, or both an invalid date.
+ *
+ * The instant is compared as MUI's own value manager does. The adapter alone
+ * says an invalid date differs even from itself, which would make the
  * render-phase reset below fire on every render. `null` and an invalid date
  * stay different.
+ *
+ * The timezone (`adapter.getTimezone`: local, UTC or a named zone) counts as
+ * well, because a picker without a `timezone` prop takes it from its value: it
+ * shows the date in it and builds the dates the user enters in it. The same
+ * instant handed in as UTC rather than local time is another value to the field.
  * @param adapter The picker adapter
  * @param a One value
  * @param b The other value
@@ -35,10 +42,11 @@ const isSameValue = (
 	b: PickerValidDate | null,
 ): boolean => {
 	if (a === b) return true;
-	if (a != null && b != null && !adapter.isValid(a) && !adapter.isValid(b)) {
-		return true;
-	}
-	return adapter.isEqual(a, b);
+	if (a == null || b == null) return false;
+	if (!adapter.isValid(a) && !adapter.isValid(b)) return true;
+	return (
+		adapter.isEqual(a, b) && adapter.getTimezone(a) === adapter.getTimezone(b)
+	);
 };
 
 export type PickerDraftChangeHandler<TError> = (
@@ -83,8 +91,11 @@ export interface PickerDraftResult<TError> {
  * the error, until the user changes it, the consumer hands in another date, or
  * the calendar opens (`settle`). Handing in the date the consumer already holds,
  * as a form reset of a field whose value never changed does, is not another
- * date. Meanwhile the consumer holds the last value it accepted, so a consumer
- * that acts on the value checks `onError` first.
+ * date. Handing it in another timezone is (a `moment.utc(...)` where it was a
+ * `moment(...)`, as a "show in UTC" switch does): the field shows it in that
+ * timezone from then on, and reports the dates the user enters in it.
+ * Meanwhile the consumer holds the last value it accepted, so a consumer that
+ * acts on the value checks `onError` first.
  *
  * What it cannot separate is an intermediate that is a plausible date in its own
  * right: retyping the day of a stored date reports the day passed through on the
@@ -93,7 +104,8 @@ export interface PickerDraftResult<TError> {
  * The draft doubles as the stable object the field wants: consumers derive
  * `value` with `moment(...)` during render and so hand us a fresh instance every
  * time, while the field compares its external value **by reference**. Holding the
- * draft keeps those section rebuilds from firing mid-entry.
+ * draft keeps those section rebuilds from firing mid-entry. A fresh instance of
+ * the same instant in the same timezone keeps the held object.
  * @param value The value held by the consumer
  * @param onChange The consumer's change handler
  * @param publishIntermediateValues Escape hatch: report every keystroke instead,
@@ -118,10 +130,11 @@ const usePickerDraft = <TError>(
 	});
 
 	// The consumer's value now means a different moment in time than the one the
-	// draft was typed over, so the draft is stale. Comparing by value rather than
-	// by reference is what tolerates the `moment(...)`-in-render idiom (also for
-	// an invalid date, `moment(null)` in render); deriving during render rather
-	// than in an effect keeps the stale draft from being painted once first.
+	// draft was typed over, or the same one in another timezone, so the draft is
+	// stale. Comparing by value rather than by reference is what tolerates the
+	// `moment(...)`-in-render idiom (also for an invalid date, `moment(null)` in
+	// render); deriving during render rather than in an effect keeps the stale
+	// draft from being painted once first.
 	if (
 		holdsDraft &&
 		!isSameValue(adapter, state.committed ?? null, value ?? null)
