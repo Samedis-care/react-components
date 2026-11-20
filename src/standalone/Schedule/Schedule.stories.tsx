@@ -1,7 +1,7 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 /* eslint-disable import/no-unresolved */
-import { expect, fn, userEvent, waitFor } from "storybook/test";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 /* eslint-enable import/no-unresolved */
 import { Box } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
@@ -332,6 +332,77 @@ export const Issue3471Item6OpensAtTheCurrentWeek: ScrollableStory = {
 				previousWeek.offsetTop,
 			),
 		);
+	},
+};
+
+/** loads like loadWeekData, but the current week fails on its first load */
+const FailingOnceWrapper = () => {
+	const failed = useRef(false);
+	const load = useCallback<LoadWeekCallback>(async (weekOffset) => {
+		await new Promise((r) => setTimeout(r, 50));
+		if (weekOffset === 0 && !failed.current) {
+			failed.current = true;
+			throw new Error("Request failed with status code 500");
+		}
+		return SAMPLE_DAY_DATA;
+	}, []);
+	// the scroll container gets a height, so the list stops loading once it is full
+	return (
+		<Box sx={{ "& .failing-week-wrapper": { height: 400 } }}>
+			<ScrollableSchedule
+				wrapperClass="failing-week-wrapper"
+				loadWeekCallback={load}
+			/>
+		</Box>
+	);
+};
+
+// a focus indicator: an outline on the element
+const outlineOf = (el: Element) => {
+	const style = getComputedStyle(el);
+	return style.outlineStyle !== "none" && parseFloat(style.outlineWidth) > 0
+		? style.outlineColor
+		: null;
+};
+
+export const Issue3478Item16FailedWeekCanBeRetried: ScrollableStory = {
+	render: () => <FailingOnceWrapper />,
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3478-ITEM-16: a week whose load fails keeps its week line and shows an alert naming the week, with the error's message and a Retry button. Retry loads the week again; the focus moves to the week line, which stays when the week's rows arrive.",
+			},
+		},
+	},
+	play: async ({ canvas, canvasElement, userEvent }) => {
+		const alert = await canvas.findByRole("alert", {}, { timeout: 3000 });
+		await expect(alert).toHaveTextContent(/^Week \d+ could not be loaded/);
+		await expect(alert).toHaveTextContent(
+			"Request failed with status code 500",
+		);
+		const weekNo = /^Week (\d+)/.exec(alert.textContent ?? "")![1];
+		const weekLine = canvas.getByText(new RegExp(`^Week ${weekNo}, `));
+		const retry = within(alert).getByRole("button", { name: "Retry" });
+		await expect(retry).toHaveAccessibleDescription(
+			`Week ${weekNo} could not be loaded Request failed with status code 500`,
+		);
+		retry.focus();
+		await waitFor(() => expect(retry).toHaveClass("Mui-focusVisible"));
+		await expect(outlineOf(retry), "Retry shows no focus ring").not.toBeNull();
+		await userEvent.keyboard("{Enter}");
+		await expect(weekLine).toHaveFocus();
+		await waitFor(() => expect(canvas.queryByRole("alert")).toBeNull());
+		await waitFor(() =>
+			expect(within(canvasElement).queryByRole("progressbar")).toBeNull(),
+		);
+		await expect(weekLine).toHaveFocus();
+		await expect(weekLine.isConnected).toBe(true);
+		await expect(
+			outlineOf(weekLine),
+			"the week line shows no focus ring",
+		).not.toBeNull();
 	},
 };
 

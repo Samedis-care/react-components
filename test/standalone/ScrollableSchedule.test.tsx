@@ -15,6 +15,7 @@ import {
 	fireEvent,
 	render,
 	screen,
+	within,
 } from "@testing-library/react";
 import moment from "moment";
 import ccI18n from "../../src/i18n";
@@ -40,10 +41,15 @@ import type {
 // heights they have in a browser. scrollTop is writable per element. Today's
 // day label (the jumpToToday target) reports offsetTop TODAY_TOP.
 const SCROLLER = "sched";
+
 const WEEK_PX = 200;
+
 const TODAY_TOP = 777;
+
 const geometry = { pendingPx: WEEK_PX, errorPx: WEEK_PX };
+
 const saved = new Map<string, PropertyDescriptor | undefined>();
+
 const scrollTops = new WeakMap<Element, number>();
 
 const isWeekLabel = (text: string) => /^(Week|Woche) \d+, /.test(text);
@@ -65,6 +71,7 @@ const listHeight = (scroller: Element) => {
 
 // a side-effect import of a moment locale has no type declarations (TS2882)
 const MOMENT_DE = "moment/locale/de";
+
 beforeAll(async () => {
 	await import(/* @vite-ignore */ MOMENT_DE);
 	moment.locale("en");
@@ -105,6 +112,7 @@ beforeAll(async () => {
 		},
 	});
 });
+
 afterAll(() => {
 	saved.forEach((d, key) => {
 		const proto =
@@ -116,12 +124,14 @@ afterAll(() => {
 
 // Wed 2026-10-14 12:00 local
 const WED = new Date(2026, 9, 14, 12);
+
 beforeEach(() => {
 	moment.locale("en");
 	geometry.pendingPx = WEEK_PX;
 	geometry.errorPx = WEEK_PX;
 	vi.useFakeTimers({ now: WED });
 });
+
 afterEach(async () => {
 	cleanup();
 	vi.useRealTimers();
@@ -142,11 +152,13 @@ const advance = async (ms: number, step = 20) => {
 		});
 	}
 };
+
 /** 7 days, one entry each, titled `<tag>-idx<i>` (i = index in the result) */
 const week = (tag: string): IDayData[][] =>
 	Array.from({ length: 7 }, (_, i) => [
 		{ id: `${tag}-${i}`, title: `${tag}-idx${i}` },
 	]);
+
 const deferred = <T,>() => {
 	let resolve!: (v: T) => void;
 	let reject!: (e: unknown) => void;
@@ -156,14 +168,18 @@ const deferred = <T,>() => {
 	});
 	return { promise, resolve, reject };
 };
+
 const scrollerOf = (container: HTMLElement) =>
 	container.querySelector<HTMLElement>("." + SCROLLER)!;
+
 const scrollTo = (el: HTMLElement, top: number) => {
 	el.scrollTop = top;
 	el.dispatchEvent(new Event("scroll"));
 };
+
 const scrollToBottom = (el: HTMLElement) =>
 	scrollTo(el, el.scrollHeight - el.clientHeight);
+
 /**
  * What a browser does when the content of a scrolled container gets shorter
  * than its scroll position (jsdom does not): it clamps scrollTop to the new
@@ -173,10 +189,12 @@ const clampScroll = (el: HTMLElement) => {
 	const max = Math.max(0, el.scrollHeight - el.clientHeight);
 	if (el.scrollTop > max) scrollTo(el, max);
 };
+
 const weekLabels = (container: HTMLElement) =>
 	Array.from(scrollerOf(container).querySelectorAll(".MuiGrid-container > div"))
 		.map((d) => d.textContent ?? "")
 		.filter(isWeekLabel);
+
 const allEntries = (container: HTMLElement) =>
 	Array.from(scrollerOf(container).querySelectorAll("button")).map(
 		(b) => b.textContent,
@@ -217,7 +235,6 @@ describe("fill and weeks", () => {
 		expect(entries.length).toBeGreaterThan(0);
 		expect(entries.filter((t) => !t?.startsWith("B"))).toEqual([]);
 	});
-
 	it("[ISSUE-3478-ITEM-1] a new loadWeekCallback reloads the weeks in the list with the filter values; their rows stay until the new result arrives", async () => {
 		const calls: [string, number, Record<string, string | boolean>][] = [];
 		const pendingB: Record<
@@ -292,7 +309,6 @@ describe("fill and weeks", () => {
 		]);
 		expect(entries.filter((t) => !t?.startsWith("B"))).toEqual([]);
 	});
-
 	it("[ISSUE-3478-ITEM-1] a result or rejection of the previous loadWeekCallback that arrives late is dropped", async () => {
 		const pendingA: ReturnType<typeof deferred<IDayData[][]>>[] = [];
 		const a = vi.fn<LoadWeekCallback>(() => {
@@ -327,7 +343,6 @@ describe("fill and weeks", () => {
 		expect(entries.filter((t) => !t?.startsWith("B"))).toEqual([]);
 		expect(a).toHaveBeenCalledTimes(3);
 	});
-
 	it("[ISSUE-3478-ITEM-1] a re-render with the same loadWeekCallback loads no week again", async () => {
 		const cb = vi.fn<LoadWeekCallback>((o) => week(`w${o}`));
 		const { rerender } = render(
@@ -456,5 +471,183 @@ describe("language change", () => {
 		});
 		await advance(400);
 		expect(scrollerOf(container)).toHaveFocus();
+	});
+});
+
+describe("accessibility", () => {
+	it("[ISSUE-3478-ITEM-16] a failed week keeps its week label and announces the error", async () => {
+		const { container } = render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) =>
+					o === 0 ? Promise.reject(new Error("Network failure")) : week("w" + o)
+				}
+			/>,
+		);
+		await advance(400);
+		// announced through an alert or a polite status region
+		const announcer =
+			screen.queryByRole("alert") ?? screen.queryByRole("status");
+		expect(announcer, "no alert or status region").not.toBeNull();
+		expect(announcer).toHaveTextContent("Network failure");
+		expect(weekLabels(container)).toContain("Week 42, 11 Oct - 17 Oct");
+	});
+
+	it("[ISSUE-3478-ITEM-16] Retry loads the failed week again with the filter values; its rows replace the error", async () => {
+		let fail = true;
+		const cb = vi.fn<LoadWeekCallback>((o) =>
+			o === 0 && fail
+				? Promise.reject(new Error("Network failure"))
+				: week("w" + o),
+		);
+		const { container } = render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={cb}
+				filters={ONE_CHECKBOX}
+			/>,
+		);
+		await advance(400);
+		const alert = screen.getByRole("alert");
+		const callsOfWeek0 = () => cb.mock.calls.filter(([o]) => o === 0);
+		expect(callsOfWeek0()).toEqual([[0, { f: true }]]);
+		fail = false;
+		fireEvent.click(within(alert).getByRole("button", { name: "Retry" }));
+		await advance(400);
+		expect(callsOfWeek0()).toEqual([
+			[0, { f: true }],
+			[0, { f: true }],
+		]);
+		expect(screen.queryByRole("alert")).toBeNull();
+		expect(weekLabels(container)).toContain("Week 42, 11 Oct - 17 Oct");
+		expect(allEntries(container)).toContain("w0-idx0");
+	});
+
+	it("[ISSUE-3478-ITEM-16] the error is announced once: the failed week re-renders with the same alert", async () => {
+		const failing: LoadWeekCallback = (o) =>
+			o === 0 ? Promise.reject(new Error("Network failure")) : week("w" + o);
+		const reload = deferred<IDayData[][]>();
+		const { rerender } = render(
+			<ScrollableSchedule wrapperClass={SCROLLER} loadWeekCallback={failing} />,
+		);
+		await advance(400);
+		const alert = screen.getByRole("alert");
+		// a new loadWeekCallback re-renders the week; the error stays until the
+		// new result arrives
+		rerender(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) => (o === 0 ? reload.promise : week("w" + o))}
+			/>,
+		);
+		await advance(400);
+		expect(screen.getByRole("alert")).toBe(alert);
+		await act(async () => {
+			reload.reject(new Error("Network failure"));
+			await reload.promise.catch(() => {});
+		});
+		expect(screen.getByRole("alert")).toBe(alert);
+	});
+
+	it("[ISSUE-3478-ITEM-16] the error names the week, and each Retry button is described by its week's error", async () => {
+		render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) => Promise.reject(new Error(`Server error ${o}`))}
+			/>,
+		);
+		await advance(400);
+		const alerts = screen.getAllByRole("alert");
+		for (const [weekNo, offset] of [
+			[42, 0],
+			[43, 1],
+		]) {
+			const title = `Week ${weekNo} could not be loaded`;
+			const alert = alerts.find((a) => a.textContent?.startsWith(title));
+			expect(alert, title).toBeDefined();
+			expect(alert).toHaveTextContent(`Server error ${offset}`);
+			expect(
+				within(alert!).getByRole("button", { name: "Retry" }),
+			).toHaveAccessibleDescription(`${title} Server error ${offset}`);
+		}
+	});
+
+	it("[ISSUE-3478-ITEM-16] Retry moves the focus to the week line, which keeps it when the week loads", async () => {
+		let fail = true;
+		const pending = deferred<IDayData[][]>();
+		const { container } = render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) =>
+					o !== 0
+						? week("w" + o)
+						: fail
+							? Promise.reject(new Error("Network failure"))
+							: pending.promise
+				}
+			/>,
+		);
+		await advance(400);
+		const retry = screen.getByRole("button", { name: "Retry" });
+		retry.focus();
+		fail = false;
+		fireEvent.click(retry);
+		await advance(100);
+		const line = document.activeElement as HTMLElement;
+		expect(line.textContent).toBe("Week 42, 11 Oct - 17 Oct");
+		// the retry is pending: a spinner below the week line, no alert
+		expect(screen.queryByRole("alert")).toBeNull();
+		expect(screen.getAllByRole("progressbar")).toHaveLength(1);
+		await act(async () => {
+			pending.resolve(week("w0"));
+			await pending.promise;
+		});
+		expect(screen.queryAllByRole("progressbar")).toHaveLength(0);
+		expect(allEntries(container)).toContain("w0-idx0");
+		expect(line).toHaveFocus();
+		expect(line.isConnected).toBe(true);
+	});
+
+	it("[ISSUE-3478-ITEM-16] a retry that fails again shows a new alert with the new error", async () => {
+		const errors = ["Network failure", "Still down"];
+		render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) =>
+					o === 0 ? Promise.reject(new Error(errors.shift())) : week("w" + o)
+				}
+			/>,
+		);
+		await advance(400);
+		const first = screen.getByRole("alert");
+		expect(first).toHaveTextContent("Network failure");
+		fireEvent.click(within(first).getByRole("button", { name: "Retry" }));
+		await advance(400);
+		const second = screen.getByRole("alert");
+		// inserted anew, so a screen reader announces it again
+		expect(second).not.toBe(first);
+		expect(second).toHaveTextContent("Still down");
+		expect(first.isConnected).toBe(false);
+	});
+
+	it("[ISSUE-3478-ITEM-16] de: the error and the Retry button are in German", async () => {
+		moment.locale("de");
+		await act(async () => {
+			await ccI18n.changeLanguage("de");
+		});
+		render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) =>
+					o === 0 ? Promise.reject(new Error("Network failure")) : week("w" + o)
+				}
+			/>,
+		);
+		await advance(400);
+		const alert = screen.getByRole("alert");
+		expect(alert).toHaveTextContent("Woche 42 konnte nicht geladen werden");
+		expect(
+			within(alert).getByRole("button", { name: "Erneut versuchen" }),
+		).toBeInTheDocument();
 	});
 });

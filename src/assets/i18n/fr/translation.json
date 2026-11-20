@@ -5,7 +5,9 @@
 			"today": "Aujourd'hui",
 			"prev-week": "Semaine précédente",
 			"next-week": "Semaine suivante",
-			"filter-settings": "Paramètres de filtre"
+			"filter-settings": "Paramètres de filtre",
+			"week-load-error": "Impossible de charger la semaine {{WEEK}}",
+			"retry": "Réessayer"
 		},
 		"portal": {
 			"menu-toggle": "Basculer le menu",

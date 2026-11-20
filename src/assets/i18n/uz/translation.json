@@ -5,7 +5,9 @@
 			"today": "Bugun",
 			"prev-week": "Oldingi hafta",
 			"next-week": "Keyingi hafta",
-			"filter-settings": "Filtr sozlamalari"
+			"filter-settings": "Filtr sozlamalari",
+			"week-load-error": "{{WEEK}}-haftani yuklab bo‘lmadi",
+			"retry": "Qayta urinish"
 		},
 		"portal": {
 			"menu-toggle": "Menyuni ochish",

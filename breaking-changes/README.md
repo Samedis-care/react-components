@@ -92,6 +92,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-20 | [PortalLayout keeps the menu mounted when it switches between desktop and mobile view](2026-11-20-portal-menu-kept-across-breakpoint.md) | behavior |
 | 2026-11-20 | [ActionButton darkens a fill until its text reaches 4.5:1](2026-11-20-action-button-readable-fill.md) | behavior |
 | 2026-11-20 | [ComponentWithLabel captions wrap when they have too little room](2026-11-20-component-with-label-captions-wrap.md) | behavior |
+| 2026-11-20 | [A failed week of ScrollableSchedule keeps its week line and offers Retry](2026-11-20-scrollable-schedule-failed-week-retry.md) | behavior |
 | 2026-11-20 | [A lazy control's queue keeps the Form dirty when onlySubmitMounted changes while it is shown](2026-11-20-lazy-crud-connector-only-submit-mounted-change.md) | behavior |
 | 2026-11-20 | [A control in a DataGrid cell is named after its field and row](2026-11-20-data-grid-inline-checkbox-names.md) | behavior |
 | 2026-11-20 | [InlineSwitch takes aria props for its switch, and a selector's switch requires switchLabel](2026-11-20-inline-switch-name-and-switch-label.md) | behavior, type |

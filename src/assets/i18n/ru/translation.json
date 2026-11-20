@@ -5,7 +5,9 @@
 			"today": "Сегодня",
 			"prev-week": "Предыдущая неделя",
 			"next-week": "Следующая неделя",
-			"filter-settings": "Настройки фильтра"
+			"filter-settings": "Настройки фильтра",
+			"week-load-error": "Не удалось загрузить неделю {{WEEK}}",
+			"retry": "Повторить"
 		},
 		"portal": {
 			"menu-toggle": "Открыть меню",

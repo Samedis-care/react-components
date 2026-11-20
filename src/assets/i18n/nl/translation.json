@@ -5,7 +5,9 @@
 			"today": "Vandaag",
 			"prev-week": "Vorige week",
 			"next-week": "Volgende week",
-			"filter-settings": "Filterinstellingen"
+			"filter-settings": "Filterinstellingen",
+			"week-load-error": "Week {{WEEK}} kon niet worden geladen",
+			"retry": "Opnieuw proberen"
 		},
 		"portal": {
 			"menu-toggle": "Menu wisselen",
