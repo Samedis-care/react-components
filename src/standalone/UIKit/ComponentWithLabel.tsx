@@ -14,7 +14,9 @@ export interface ComponentWithLabelProps extends Omit<
 	"label"
 > {
 	/**
-	 * The text of the label
+	 * The caption, as a plain string. It wraps at its spaces where it has less
+	 * room than its text needs (e.g. in a row of captioned buttons on a phone),
+	 * and a `"\n"` in it starts a new line (`white-space: pre-line`).
 	 */
 	labelText: string;
 	/**
@@ -48,7 +50,9 @@ const Label = styled(Typography, {
 	name: "CcComponentWithLabel",
 	slot: "label",
 })({
-	whiteSpace: "pre",
+	// wraps at spaces where the caption has less room than its text needs;
+	// keeps the line breaks of the text
+	whiteSpace: "pre-line",
 });
 
 /**
