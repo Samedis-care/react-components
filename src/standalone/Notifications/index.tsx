@@ -17,6 +17,7 @@ import {
 	IconButtonProps,
 	Popover,
 	PopoverOrigin,
+	PopoverOwnerState,
 	PopoverPaper,
 	PopoverProps,
 	styled,
@@ -85,12 +86,24 @@ export interface NotificationsProps {
 	 * time. `slots` is merged into the defaults, so only a `slots.paper` of
 	 * your own replaces the default paper and its width; one in the theme's
 	 * `MuiPopover.defaultProps.slots` does not.
+	 *
+	 * The paper is a modal dialog named by the popover's "Notifications"
+	 * heading: `role="dialog"`, `aria-modal` and `aria-labelledby` (the
+	 * heading's id). A `slotProps.paper` of your own (an object, or a function
+	 * of the owner state) is spread over these, so it can change them, e.g.
+	 * name the dialog by another element with `aria-labelledby`. The paper's
+	 * `id` is managed internally: the bell's `aria-controls` refers to it.
 	 */
 	PopoverProps?: Omit<PopoverProps, "open" | "onClose" | "anchorEl">;
 	/**
-	 * Props to pass to the icon button
+	 * Props to pass to the icon button. `aria-haspopup`, `aria-expanded` and
+	 * `aria-controls` are managed internally: the bell says that it opens a
+	 * dialog, whether that is open, and while it is, which element it is.
 	 */
-	IconButtonProps?: Omit<IconButtonProps, "onClick">;
+	IconButtonProps?: Omit<
+		IconButtonProps,
+		"onClick" | "aria-haspopup" | "aria-expanded" | "aria-controls"
+	>;
 	/**
 	 * Callback which is fired by the infinite scroll to load old notifications
 	 */
@@ -263,8 +276,10 @@ const Notifications = (inProps: NotificationsProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcNotifications" });
 	const { t } = useCCTranslations();
 	const headerId = useId();
+	const dialogId = useId();
 
 	const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+	const open = anchor !== null;
 	const {
 		onOpen,
 		loadLatest,
@@ -286,6 +301,30 @@ const Notifications = (inProps: NotificationsProps) => {
 		}),
 		[customPopoverSlots],
 	);
+
+	const customPopoverSlotProps = popoverProps?.slotProps;
+	// the paper is a modal dialog (focus trap, the page behind is hidden from
+	// assistive technology) named by its heading. The caller's paper props go
+	// over these, except the id the bell's aria-controls refers to.
+	const popoverSlotProps = useMemo((): PopoverProps["slotProps"] => {
+		const customPaper = customPopoverSlotProps?.paper;
+		const dialogProps = {
+			role: "dialog",
+			"aria-modal": true,
+			"aria-labelledby": headerId,
+		};
+		return {
+			...customPopoverSlotProps,
+			paper:
+				typeof customPaper === "function"
+					? (ownerState: PopoverOwnerState) => ({
+							...dialogProps,
+							...customPaper(ownerState),
+							id: dialogId,
+						})
+					: { ...dialogProps, ...customPaper, id: dialogId },
+		};
+	}, [customPopoverSlotProps, headerId, dialogId]);
 
 	const onIconClick = useCallback(
 		(evt: React.MouseEvent<HTMLButtonElement>) => {
@@ -333,6 +372,9 @@ const Notifications = (inProps: NotificationsProps) => {
 				aria-label={t("standalone.notifications.title")}
 				{...IconButtonProps}
 				onClick={onIconClick}
+				aria-haspopup="dialog"
+				aria-expanded={open}
+				aria-controls={open ? dialogId : undefined}
 			>
 				<Badge
 					badgeContent={
@@ -346,13 +388,14 @@ const Notifications = (inProps: NotificationsProps) => {
 				</Badge>
 			</IconButton>
 			<Popover
-				open={!!anchor}
+				open={open}
 				anchorEl={anchor}
 				anchorOrigin={anchorOrigin}
 				transformOrigin={transformOrigin}
 				onClose={onClose}
 				{...popoverProps}
 				slots={popoverSlots}
+				slotProps={popoverSlotProps}
 			>
 				<Box sx={{ p: 2 }}>
 					<Grid container spacing={2}>

@@ -262,6 +262,13 @@ describe("timestampToAge utility", () => {
 
 const MINUTE = 60_000;
 
+const mk = (over: Partial<Notification> & { id: string }): Notification => ({
+	message: `Message ${over.id}`,
+	created: new Date(Date.now() - 5 * MINUTE),
+	read: false,
+	...over,
+});
+
 const base = (over: Partial<NotificationsProps> = {}): NotificationsProps => ({
 	notifications: [],
 	loadLatest: vi.fn(),
@@ -400,6 +407,79 @@ describe("Notifications: polling with loadLatest", () => {
 		rerenderN({ ...props, refreshInterval: 1000 });
 		advance(1000);
 		expect(loadLatest).toHaveBeenCalledTimes(3);
+	});
+});
+
+describe("Notifications: accessibility", () => {
+	afterEach(() => {
+		cleanup();
+		vi.restoreAllMocks();
+	});
+
+	it("[ISSUE-3468-ITEM-11] exposes the popover as a dialog named by its heading, and the bell's popup state", () => {
+		const { bell } = renderN(base({ notifications: [mk({ id: "1" })] }));
+		expect(bell, "bell before opening").toHaveAttribute(
+			"aria-haspopup",
+			"dialog",
+		);
+		expect(bell, "bell before opening").toHaveAttribute(
+			"aria-expanded",
+			"false",
+		);
+		fireEvent.click(bell);
+		const dialog = screen.getByRole("dialog", { name: "Notifications" });
+		expect(dialog).toContainElement(screen.getByText("Message 1"));
+		expect(bell).toHaveAttribute("aria-expanded", "true");
+		expect(bell).toHaveAttribute("aria-controls", dialog.id);
+	});
+
+	it("[ISSUE-3468-ITEM-11] moves focus to the dialog when it opens, and the bell reports it closed again after Escape", async () => {
+		const { bell } = renderN(base({ notifications: [mk({ id: "1" })] }));
+		bell.focus();
+		fireEvent.click(bell);
+		const dialog = screen.getByRole("dialog", { name: "Notifications" });
+		expect(dialog).toHaveAttribute("aria-modal", "true");
+		await waitFor(() => expect(dialog).toHaveFocus());
+		fireEvent.keyDown(dialog, { key: "Escape" });
+		expect(bell).toHaveAttribute("aria-expanded", "false");
+		expect(bell).not.toHaveAttribute("aria-controls");
+	});
+
+	it.each([
+		[
+			"an object",
+			{ id: "own-id", className: "own-paper", sx: { color: "red" } },
+		],
+		["a function", () => ({ id: "own-id", className: "own-paper" })],
+	])(
+		"[ISSUE-3468-ITEM-11] keeps the dialog and the bell's aria-controls with the caller's paper props as %s",
+		(_label, paper) => {
+			const { bell } = renderN(
+				base({
+					notifications: [mk({ id: "1" })],
+					PopoverProps: { slotProps: { paper } },
+				}),
+			);
+			fireEvent.click(bell);
+			const dialog = screen.getByRole("dialog", { name: "Notifications" });
+			expect(dialog, "the caller's paper props apply").toHaveClass("own-paper");
+			expect(bell).toHaveAttribute("aria-controls", dialog.id);
+		},
+	);
+
+	it("[ISSUE-3468-ITEM-11] lets the caller's paper props name the dialog by another element", () => {
+		const { bell } = renderN(
+			base({
+				PopoverProps: {
+					slotProps: { paper: { "aria-labelledby": "other-name" } },
+				},
+			}),
+		);
+		fireEvent.click(bell);
+		expect(screen.getByRole("dialog")).toHaveAttribute(
+			"aria-labelledby",
+			"other-name",
+		);
 	});
 });
 
