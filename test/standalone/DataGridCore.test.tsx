@@ -705,3 +705,157 @@ describe("loading: the signal", () => {
 		);
 	});
 });
+
+describe("limited select all: the signal", () => {
+	type LoadData = (p: IDataGridLoadDataParameters) => Promise<DataGridData>;
+
+	/** the promise chains of the loads settle (they run in microtasks) */
+	const settle = () =>
+		act(() => new Promise<void>((resolve) => setTimeout(resolve, 0)));
+
+	/** the first request of page 2 waits for release(), the others answer */
+	const holdPage2 = () => {
+		const page2 = deferred<DataGridData>();
+		let held = false;
+		const loadData = vi.fn<LoadData>((p) => {
+			if (p.page !== 2 || held) return Promise.resolve(paged(p));
+			held = true;
+			return page2.promise;
+		});
+		const release = async () => {
+			await act(async () => {
+				page2.resolve(paged({ page: 2 } as IDataGridLoadDataParameters));
+				await page2.promise;
+			});
+			await settle();
+		};
+		return { loadData, release };
+	};
+
+	/**
+	 * Clicks "First 60" of the 75 rows: the grid has page 1, so select all
+	 * requests page 2 and then page 3
+	 * @returns The signal page 2 is requested with
+	 */
+	const selectFirst60 = async (
+		loadData: ReturnType<typeof vi.fn<LoadData>>,
+	) => {
+		await idle();
+		fireEvent.click(screen.getByRole("checkbox", { name: "First 60" }));
+		await waitFor(() =>
+			expect(loadData).toHaveBeenCalledWith(
+				expect.objectContaining({ page: 2 }),
+			),
+		);
+		const { signal } = loadData.mock.lastCall![0];
+		expect(signal).toBeInstanceOf(AbortSignal);
+		expect(signal!.aborted).toBe(false);
+		return signal!;
+	};
+
+	const requestedPage3 = (
+		loadData: ReturnType<typeof vi.fn<LoadData>>,
+		quickFilter = "",
+	) =>
+		loadData.mock.calls.some(
+			([p]) => p.page === 3 && p.quickFilter === quickFilter,
+		);
+
+	it("[ISSUE-3492-ITEM-30] an unmount aborts the request of the limited select all, which requests no further page", async () => {
+		const { loadData, release } = holdPage2();
+		const { unmount } = render(
+			<Grid loadData={loadData} enableSelectAll limitSelectAll={60} />,
+		);
+		const signal = await selectFirst60(loadData);
+		unmount();
+		expect(signal.aborted).toBe(true);
+		await release();
+		expect(requestedPage3(loadData)).toBe(false);
+	});
+
+	it("[ISSUE-3492-ITEM-30] a later click aborts the request of the limited select all, which requests no further page", async () => {
+		const { loadData, release } = holdPage2();
+		render(<Grid loadData={loadData} enableSelectAll limitSelectAll={60} />);
+		const signal = await selectFirst60(loadData);
+		const selectAll = screen.getByRole("checkbox", { name: "First 60" });
+		expect(selectAll).toHaveAttribute("aria-busy", "true");
+		fireEvent.click(selectAll);
+		expect(signal.aborted).toBe(true);
+		expect(selectAll).not.toBeChecked();
+		expect(selectAll).not.toHaveAttribute("aria-busy");
+		await release();
+		expect(requestedPage3(loadData)).toBe(false);
+		expect(probe!.state.selectedRows).toEqual([]);
+
+		// the click after it loads its rows to the end and selects them
+		fireEvent.click(selectAll);
+		await waitFor(() => expect(probe!.state.selectedRows).toHaveLength(60));
+		expect(probe!.state.selectedRows).toEqual(
+			Array.from({ length: 60 }, (_, i) => String(i)),
+		);
+		expect(selectAll).toBeChecked();
+		expect(selectAll).not.toHaveAttribute("aria-busy");
+	});
+
+	it("[ISSUE-3492-ITEM-30] a reload aborts the request of the limited select all, which requests no further page of the old query", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		const { loadData, release } = holdPage2();
+		// the selection is kept over the reload (controlled)
+		render(
+			<ControlledGrid
+				loadData={loadData}
+				enableSelectAll
+				limitSelectAll={60}
+			/>,
+		);
+		const signal = await selectFirst60(loadData);
+		const selectAll = screen.getByRole("checkbox", { name: "First 60" });
+		setSearch("b");
+		passDebounce();
+		await waitFor(() =>
+			expect(loadData).toHaveBeenCalledWith(
+				expect.objectContaining({ quickFilter: "b" }),
+			),
+		);
+		expect(signal.aborted).toBe(true);
+		// the click is dropped: the checkbox shows the selection it started from
+		expect(selectAll).not.toHaveAttribute("aria-busy");
+		expect(selectAll).not.toBeChecked();
+		await release();
+		await idle();
+		expect(requestedPage3(loadData)).toBe(false);
+		expect(probe!.state.selectedRows).toEqual([]);
+	});
+
+	it("[ISSUE-3492-ITEM-30] the request a later click aborted rejects, which is neither logged nor reported", async () => {
+		const error = vi.spyOn(console, "error");
+		const onError = vi.fn();
+		// a backend that honours the signal, as fetch does
+		const loadData = vi.fn<LoadData>((p) =>
+			p.page === 2
+				? new Promise((_resolve, reject) =>
+						p.signal?.addEventListener("abort", () =>
+							reject(new DOMException("aborted", "AbortError")),
+						),
+					)
+				: Promise.resolve(paged(p)),
+		);
+		render(
+			<Grid
+				loadData={loadData}
+				enableSelectAll
+				limitSelectAll={60}
+				onError={onError}
+			/>,
+		);
+		const signal = await selectFirst60(loadData);
+		fireEvent.click(screen.getByRole("checkbox", { name: "First 60" }));
+		expect(signal.aborted).toBe(true);
+		await settle();
+		expect(onError).not.toHaveBeenCalled();
+		expect(error).not.toHaveBeenCalledWith(
+			"[Components-Care] [DataGrid] Select all: ",
+			expect.anything(),
+		);
+	});
+});

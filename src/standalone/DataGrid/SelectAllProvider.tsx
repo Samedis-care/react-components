@@ -1,10 +1,4 @@
-import React, {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	DATA_GRID_DEFAULT_ROWS_PER_PAGE,
 	DataGridSelectAll,
@@ -28,7 +22,20 @@ export interface DataGridSelectAllProviderProps {
 	children: React.ReactNode;
 }
 
-type Selection = Pick<IDataGridState, "selectAll" | "selectedRows">;
+/**
+ * A limited select all loading its rows: the selection and the query it
+ * started from, and what ends its load
+ */
+interface LimitedSelectAllLoad extends Pick<
+	IDataGridState,
+	"selectAll" | "selectedRows" | "refreshDataInstance"
+> {
+	/**
+	 * Aborts the load: it requests no further page, and the signal loadData
+	 * got aborts
+	 */
+	controller: AbortController;
+}
 
 /**
  * Provides the select all checkbox state (DataGridSelectAllContext), so the
@@ -58,24 +65,33 @@ const SelectAllProvider = (props: DataGridSelectAllProviderProps) => {
 		customData,
 		refreshDataInstance,
 	} = state;
-	// the selection a limited select all started from while it loads its rows
-	const [loadingFrom, setLoadingFrom] = useState<Selection | null>(null);
-	// counts the clicks: a later click, or the unmount, drops what an earlier
-	// click still loads
-	const clicks = useRef(0);
-	useEffect(
-		() => () => {
-			clicks.current++;
-		},
-		[],
-	);
+	// the limited select all loading its rows
+	const [loading, setLoading] = useState<LimitedSelectAllLoad | null>(null);
+	// that load while it is for the query the grid shows
+	const load =
+		loading?.refreshDataInstance === refreshDataInstance ? loading : null;
+	// a reload or the unmount ends it, a later click too (onSelect). A row
+	// (un)ticked meanwhile drops only the selection it would make: the rows it
+	// loads still land in the grid
+	useEffect(() => {
+		if (!load) return;
+		return () => load.controller.abort();
+	}, [load]);
 
 	const onSelect = useCallback(
 		(_evt: React.ChangeEvent, newChecked: boolean) => {
-			const click = ++clicks.current;
+			// a later click ends what an earlier one still loads
+			loading?.controller.abort();
 			if (limitSelectAll !== undefined && newChecked) {
-				const from: Selection = { selectAll, selectedRows };
-				setLoadingFrom(from);
+				const controller = new AbortController();
+				const { signal } = controller;
+				const from: LimitedSelectAllLoad = {
+					selectAll,
+					selectedRows,
+					refreshDataInstance,
+					controller,
+				};
+				setLoading(from);
 				void (async () => {
 					let result: DataGridFirstRows;
 					try {
@@ -90,17 +106,19 @@ const SelectAllProvider = (props: DataGridSelectAllProviderProps) => {
 							rows,
 							limitSelectAll,
 							canSelectRow,
+							signal,
 						);
 					} catch (err) {
-						if (click !== clicks.current) return;
-						setLoadingFrom(null);
+						// ended meanwhile (this may be the abort itself): dropped
+						if (signal.aborted) return;
+						setLoading(null);
 						// eslint-disable-next-line no-console
 						console.error("[Components-Care] [DataGrid] Select all: ", err);
 						if (onError) onError(err as Error);
 						return;
 					}
-					if (click !== clicks.current) return;
-					setLoadingFrom(null);
+					if (signal.aborted) return;
+					setLoading(null);
 					const ids = result.rows.map((row) => row.id);
 					setState((prevState) => {
 						// the grid shows another query since
@@ -127,7 +145,7 @@ const SelectAllProvider = (props: DataGridSelectAllProviderProps) => {
 				})();
 				return;
 			}
-			setLoadingFrom(null);
+			setLoading(null);
 			// all or nothing: the rows (un)ticked one by one don't carry over, else
 			// they would turn into the exceptions and invert the selection
 			setState((prevState) => ({
@@ -152,14 +170,16 @@ const SelectAllProvider = (props: DataGridSelectAllProviderProps) => {
 			refreshDataInstance,
 			selectAll,
 			selectedRows,
+			loading,
 		],
 	);
 
-	// until the selection changes, which makes it drop the rows it loads
+	// until the selection or the query changes, which makes it drop the rows
+	// it loads
 	const busy =
-		loadingFrom !== null &&
-		loadingFrom.selectAll === selectAll &&
-		loadingFrom.selectedRows === selectedRows;
+		load !== null &&
+		load.selectAll === selectAll &&
+		load.selectedRows === selectedRows;
 	// the rows the limited select all selected, in any order: a row unticked and
 	// ticked again moves to the end
 	const limitedSelected = useMemo(() => {

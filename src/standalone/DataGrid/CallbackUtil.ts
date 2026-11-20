@@ -111,7 +111,11 @@ export interface DataGridFirstRows {
  * @param rows The rows the grid has loaded (row index -> row)
  * @param limit How many rows to return at most
  * @param canSelectRow The grid's canSelectRow: the rows it refuses are skipped
- * @returns The rows and the pages loaded for them, rejects if loadData rejects
+ * @param signal Ends the load, passed on to loadData: once it aborted, no
+ *               further page is requested
+ * @returns The rows and the pages loaded for them, rejects if loadData
+ *          rejects, or with the signal's reason (an AbortError) where the
+ *          load would request a page after the abort
  * @remarks Loads one page after the other, until the limit is reached or a
  *          page with less than rowsPerPage rows (the last one) was read
  */
@@ -122,6 +126,7 @@ export const dataGridLoadFirstRows = async (
 	rows: Record<number, DataGridRowData>,
 	limit: number,
 	canSelectRow: IDataGridCallbacks["canSelectRow"],
+	signal?: AbortSignal,
 ): Promise<DataGridFirstRows> => {
 	const selectable: DataGridRowData[] = [];
 	const loadedRows: Record<number, DataGridRowData> = {};
@@ -136,8 +141,9 @@ export const dataGridLoadFirstRows = async (
 				pageRows.push(rows[index]);
 			}
 		} else {
+			signal?.throwIfAborted();
 			pageRows = (
-				await loadData({ page: page + 1, rows: rowsPerPage, ...query })
+				await loadData({ page: page + 1, rows: rowsPerPage, ...query, signal })
 			).rows;
 			pageRows.forEach((row, offset) => {
 				loadedRows[start + offset] = row;

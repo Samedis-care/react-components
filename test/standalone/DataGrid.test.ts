@@ -410,4 +410,32 @@ describe("dataGridLoadFirstRows", () => {
 			),
 		).rejects.toBe(error);
 	});
+
+	it("[ISSUE-3492-ITEM-30] passes the signal to loadData and requests no further page once it aborted", async () => {
+		const controller = new AbortController();
+		const load = makeLoadData();
+		// the signal aborts while page 2 loads, which the backend still delivers
+		const loadData = vi.fn((params: IDataGridLoadDataParameters) => {
+			if (params.page === 2) controller.abort();
+			return load(params);
+		});
+		const result = dataGridLoadFirstRows(
+			loadData,
+			QUERY,
+			5,
+			loaded(0),
+			12,
+			undefined,
+			controller.signal,
+		);
+		await expect(result).rejects.toBe(controller.signal.reason);
+		expect(controller.signal.reason).toHaveProperty("name", "AbortError");
+		expect(loadData).toHaveBeenCalledTimes(1);
+		expect(loadData).toHaveBeenCalledWith({
+			page: 2,
+			rows: 5,
+			...QUERY,
+			signal: controller.signal,
+		});
+	});
 });
