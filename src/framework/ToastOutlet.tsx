@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { Suspense, useContext, useMemo } from "react";
 import { Toast } from "../standalone/Toast";
 import type { ToastState } from "./toastReducer";
 import ToastErrorBoundary from "./ToastErrorBoundary";
@@ -40,18 +40,36 @@ export const ToastOutletContext =
  * does not reach the app: the toast is dropped, the next one shows as usual,
  * and the error is reported (see configureErrorReporting, source
  * "ToastOutlet").
+ *
+ * A title or message that suspends (e.g. a React.lazy component in it) does not
+ * reach the app's Suspense either: the toast shows right away, and that title
+ * or message stays empty until it has loaded. A toast still loading closes and
+ * gives way to the next one like any other.
  */
 const ToastOutlet = () => {
 	const outlet = useContext(ToastOutletContext);
 	const toast = outlet?.state.current;
+	const title = toast?.title;
+	const message = toast?.message;
+	// around the content only, not the whole Toast: a Toast suspended before it
+	// opened does not call onExited when it is closed meanwhile, and every
+	// later toast waits for that. A falsy title is passed on as it is
+	const suspensefulTitle = useMemo(
+		() => (title ? <Suspense>{title}</Suspense> : title),
+		[title],
+	);
+	const suspensefulMessage = useMemo(
+		() => <Suspense>{message}</Suspense>,
+		[message],
+	);
 	if (!outlet || !toast) return null;
 	return (
 		<ToastErrorBoundary onError={outlet.exited} resetKey={outlet.state}>
 			<Toast
 				open={outlet.state.open}
 				severity={toast.severity}
-				title={toast.title}
-				message={toast.message}
+				title={suspensefulTitle}
+				message={suspensefulMessage}
 				autoHideDuration={toast.autoHideDuration}
 				anchorOrigin={toast.anchorOrigin}
 				onClose={outlet.close}

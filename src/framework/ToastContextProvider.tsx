@@ -62,7 +62,9 @@ const defaultOutlet = <ToastOutlet />;
  * provider: their title and message can use the contexts provided around it
  * (or the outlet), not those around the component that showed them. An error
  * thrown while rendering a toast drops the toast and is reported
- * (configureErrorReporting, source "ToastOutlet"), the app stays
+ * (configureErrorReporting, source "ToastOutlet"), the app stays. A title or
+ * message that suspends (e.g. a React.lazy component) leaves the app shown:
+ * the toast shows right away and that part of it fills in once loaded
  */
 const ToastContextProvider = (props: ToastContextProviderProps) => {
 	const { children, disableDefaultOutlet } = props;

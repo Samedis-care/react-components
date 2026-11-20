@@ -477,6 +477,157 @@ describe("Toast: bugs", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Save device" }));
 		expect(screen.getAllByRole("status")).toHaveLength(1);
 	});
+
+	it("[ISSUE-3470-ITEM-26] a toast whose message suspends leaves the app's content visible, and its message shows once loaded", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => undefined);
+		const details = lazyLater();
+		const SaveDevice = () => {
+			const [showToast] = useToastContext();
+			const save = useCallback(
+				() =>
+					showToast({
+						message: (
+							<>
+								Device saved. <details.Component />
+							</>
+						),
+						autoHideDuration: null,
+					}),
+				[showToast],
+			);
+			return <button onClick={save}>Save device</button>;
+		};
+		renderInFramework(<SaveDevice />);
+		const save = await screen.findByRole("button", { name: "Save device" });
+		fireEvent.click(save);
+		expect(save).toBeVisible();
+		expect(screen.queryByRole("progressbar")).toBeNull();
+
+		await details.load(() => <>Device 1042 is due for inspection.</>);
+		await waitFor(() =>
+			expect(screen.getByRole("status")).toHaveTextContent(
+				"Device saved. Device 1042 is due for inspection.",
+			),
+		);
+		expect(save).toBeVisible();
+	});
+
+	it("[ISSUE-3470-ITEM-26] a toast whose title suspends leaves the app's content visible, and its title shows once loaded", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => undefined);
+		const deviceName = lazyLater();
+		const SaveDevice = () => {
+			const [showToast] = useToastContext();
+			const save = useCallback(
+				() =>
+					showToast({
+						title: <deviceName.Component />,
+						message: "Saved.",
+						autoHideDuration: null,
+					}),
+				[showToast],
+			);
+			return <button onClick={save}>Save device</button>;
+		};
+		renderInFramework(<SaveDevice />);
+		const save = await screen.findByRole("button", { name: "Save device" });
+		fireEvent.click(save);
+		expect(save).toBeVisible();
+
+		await deviceName.load(() => <>Device 1042</>);
+		await waitFor(() =>
+			expect(screen.getByRole("status")).toHaveTextContent("Device 1042Saved."),
+		);
+	});
+
+	it.each([
+		["the first toast", false],
+		["a toast that replaced another one", true],
+	])(
+		"[ISSUE-3470-ITEM-26] %s, its message still loading, gives way to the next toast",
+		async (_name, afterAnother) => {
+			vi.spyOn(console, "error").mockImplementation(() => undefined);
+			const loading = lazyLater();
+			const SaveDevices = () => {
+				const [showToast] = useToastContext();
+				const saveA = useCallback(
+					() => showToast({ message: "A saved.", autoHideDuration: null }),
+					[showToast],
+				);
+				const saveB = useCallback(
+					() =>
+						showToast({
+							message: (
+								<>
+									B saved. <loading.Component />
+								</>
+							),
+							autoHideDuration: null,
+						}),
+					[showToast],
+				);
+				const saveC = useCallback(
+					() => showToast({ message: "C saved.", autoHideDuration: null }),
+					[showToast],
+				);
+				return (
+					<>
+						<button onClick={saveA}>Save A</button>
+						<button onClick={saveB}>Save B</button>
+						<button onClick={saveC}>Save C</button>
+					</>
+				);
+			};
+			renderInFramework(<SaveDevices />);
+			const saveC = await screen.findByRole("button", { name: "Save C" });
+			vi.useFakeTimers();
+			if (afterAnother) {
+				fireEvent.click(screen.getByRole("button", { name: "Save A" }));
+				expect(screen.getByRole("status")).toHaveTextContent("A saved.");
+			}
+			fireEvent.click(screen.getByRole("button", { name: "Save B" }));
+			// A has closed: B is the toast now, its message loading
+			advance(EXIT_MS + 300);
+			expect(saveC).toBeVisible();
+
+			fireEvent.click(saveC);
+			advance(EXIT_MS + 300);
+			expect(screen.getByRole("status")).toHaveTextContent("C saved.");
+		},
+	);
+
+	it("[ISSUE-3470-ITEM-26] a toast whose message fails to load is dropped and reported, and the app carries on", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => undefined);
+		const details = lazyLater();
+		const SaveDevice = () => {
+			const [showToast] = useToastContext();
+			const save = useCallback(
+				() =>
+					showToast({
+						message: <details.Component />,
+						autoHideDuration: null,
+					}),
+				[showToast],
+			);
+			return <button onClick={save}>Save device</button>;
+		};
+		await withErrorReports(async (report) => {
+			renderInFramework(<SaveDevice />);
+			const save = await screen.findByRole("button", { name: "Save device" });
+			fireEvent.click(save);
+			expect(save).toBeVisible();
+
+			const failure = new Error("Loading chunk DeviceDetails failed");
+			await details.fail(failure);
+			expect(screen.queryByText(/^App crashed/)).toBeNull();
+			expect(report).toHaveBeenCalledTimes(1);
+			expect(report).toHaveBeenCalledWith(
+				failure,
+				expect.objectContaining({ source: "ToastOutlet" }),
+			);
+			expect(screen.queryByRole("status")).toBeNull();
+			expect(save).toBeVisible();
+		});
+	});
 });
 
 /** Renders children in the Framework, inside an app error boundary */
@@ -511,6 +662,41 @@ const withErrorReports = async (test: (report: Spy) => Promise<void>) => {
 	} finally {
 		configureErrorReporting(before);
 	}
+};
+
+/**
+ * A React.lazy component whose module loads (or fails to) when the test says so
+ */
+const lazyLater = () => {
+	let settle:
+		| {
+				resolve: (module: { default: React.ComponentType }) => void;
+				reject: (error: unknown) => void;
+		  }
+		| undefined;
+	const Component = React.lazy(
+		() =>
+			new Promise<{ default: React.ComponentType }>((resolve, reject) => {
+				settle = { resolve, reject };
+			}),
+	);
+	const loading = () => {
+		if (!settle) throw new Error("the lazy component has not rendered yet");
+		return settle;
+	};
+	return {
+		Component,
+		load: (component: React.ComponentType) =>
+			act(async () => {
+				loading().resolve({ default: component });
+				await Promise.resolve();
+			}),
+		fail: (error: unknown) =>
+			act(async () => {
+				loading().reject(error);
+				await Promise.resolve();
+			}),
+	};
 };
 
 /** Like an app's error boundary: shows that the app crashed instead of the app */
