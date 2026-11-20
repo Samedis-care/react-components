@@ -9,6 +9,7 @@ import { useFormContextLite } from "./Form";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { ModelUnknown } from "../../backend-integration/Model/Model";
 import combineClassNames from "../../utils/combineClassNames";
+import FormPageSaveButtonTransition from "./FormPageSaveButtonTransition";
 
 /**
  * Props of FormPageSaveButton: ActionButton's, with an optional label
@@ -32,6 +33,9 @@ export interface FormPageSaveButtonProps extends Omit<
 	disabled?: boolean;
 }
 
+// the reason tooltip's transition, which keeps the reason while the tooltip closes
+const TOOLTIP_SLOTS = { transition: FormPageSaveButtonTransition };
+
 /**
  * The Save button of a form page's footer, as DefaultFormPage and FlowEngineSaveButton
  * render it: an ActionButton that says why the form is read-only.
@@ -40,7 +44,9 @@ export interface FormPageSaveButtonProps extends Omit<
  * (FormProps.readOnlyReasons, a CRUD's editPermissionHint, "The form is currently being
  * saved" while it saves), those texts, joined with ", ", are the button's accessible
  * description and show in a tooltip while the pointer is on the button. Reasons without a
- * text are left out; with none left, the button has no description and no tooltip.
+ * text are left out; with none left, the button has no description and no tooltip. A tooltip
+ * that is open when its reasons go away (a save ends) closes, and keeps its text while it
+ * fades out.
  *
  * It neither saves nor disables itself: pass `onClick` and `disabled` (DefaultFormPage and
  * FlowEngineSaveButton disable it while the form is not dirty, saves or is read-only). A
@@ -73,7 +79,11 @@ const FormPageSaveButton = (props: FormPageSaveButtonProps) => {
 		// a title that is no string, with describeChild: MUI puts no aria-label on the span,
 		// which as a generic element cannot be named; the button has the reason as its own
 		// description, also while the tooltip is closed
-		<Tooltip title={reason ? <>{reason}</> : ""} describeChild>
+		<Tooltip
+			title={reason ? <>{reason}</> : ""}
+			describeChild
+			slots={TOOLTIP_SLOTS}
+		>
 			<span>
 				<ActionButton
 					{...buttonProps}

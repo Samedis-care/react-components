@@ -97,4 +97,25 @@ describe("FormPageSaveButton in DefaultFormPage", () => {
 		expect(saveButton()).toHaveFocus();
 		expect(saveButton()).toHaveAccessibleDescription("You may not edit people");
 	});
+
+	it("[ISSUE-3503-ITEM-29] the reason tooltip that is open when a save ends keeps its text and name while it closes", async () => {
+		const { model } = mountPage(FieldPage);
+		const updates = holdUpdates(model);
+		const input = await makeDirty();
+		const save = saveButton();
+		fireEvent.mouseOver(save);
+		fireEvent.click(save);
+		expect(await screen.findByRole("tooltip")).toHaveTextContent(
+			"The form is currently being saved",
+		);
+
+		updates.release();
+		await waitFor(() => expect(save).toHaveAccessibleDescription(""));
+		expect(input).toBeEnabled();
+		// closing, but still there for its exit transition
+		const closing = screen.getByRole("tooltip");
+		expect(closing).toHaveTextContent("The form is currently being saved");
+		expect(closing).toHaveAccessibleName("The form is currently being saved");
+		await waitFor(() => expect(screen.queryByRole("tooltip")).toBeNull());
+	});
 });

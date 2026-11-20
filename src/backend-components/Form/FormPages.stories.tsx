@@ -322,3 +322,66 @@ export const Issue3503Item16DisabledBackLooksLikeDisabledSave: StoryObj<PageArgs
 			);
 		},
 	};
+
+/**
+ * Tooltips appear at once and, when they close, stay fully opaque for a minute before they
+ * vanish, so the play and the accessibility check after it see a tooltip that is closing
+ */
+const SLOW_TOOLTIP_EXIT_THEME = createTheme({
+	components: {
+		MuiTooltip: {
+			defaultProps: {
+				slotProps: {
+					transition: {
+						timeout: { enter: 0, exit: 60000 },
+						easing: { exit: "step-end" },
+					},
+				},
+			},
+		},
+	},
+});
+
+/**
+ * ISSUE-3503-ITEM-29: the reason tooltip that is open when a save ends keeps its text while
+ * it closes, so it never fades out as an empty bubble without a name (axe
+ * `aria-tooltip-name`, which runs after the play while the tooltip is still closing).
+ */
+export const Issue3503Item29SaveTooltipKeepsTextWhileClosing: StoryObj<PageArgs> =
+	{
+		args: { goBack: fn() },
+		parameters: { a11y: { test: "error" } },
+		render: (args) => (
+			<ThemeProvider theme={SLOW_TOOLTIP_EXIT_THEME}>
+				<HeldSaveStory goBack={args.goBack} />
+			</ThemeProvider>
+		),
+		play: async ({ canvas, userEvent }) => {
+			const input = await canvas.findByDisplayValue("Alice", undefined, LOAD);
+			await userEvent.type(input, "X");
+			const save = canvas.getByRole("button", { name: "Save" });
+			await waitFor(() => expect(save).not.toHaveAttribute("aria-disabled"));
+			save.focus();
+			await userEvent.keyboard("{Enter}");
+			// the tooltip is in a portal, outside the story's canvas
+			await expect(
+				await within(document.body).findByRole("tooltip", undefined, LOAD),
+			).toHaveAccessibleName("The form is currently being saved");
+
+			// a click on Finish saving that leaves the focus where it is
+			await fireEvent.click(
+				canvas.getByRole("button", { name: "Finish saving" }),
+			);
+			// saved: Save has no reason left, and its tooltip closes
+			await waitFor(() => expect(save).toHaveAccessibleDescription(""));
+			await expect(save.parentElement).not.toHaveAttribute("aria-describedby");
+			// still on the page while it closes, with the text it showed
+			const closing = within(document.body).getByRole("tooltip");
+			await expect(closing).toHaveTextContent(
+				"The form is currently being saved",
+			);
+			await expect(closing).toHaveAccessibleName(
+				"The form is currently being saved",
+			);
+		},
+	};
