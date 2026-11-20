@@ -229,6 +229,10 @@ export interface MatrixTileItem {
 	 * color, as its label is (see textColor).
 	 * @remarks A diagonal pair renders only the first entry's bottomLeft corner,
 	 * in that entry's text color, see MatrixCellTileProps.pairLayout.
+	 *
+	 * In a cell that shows MatrixGrid's add chip, the chip lies over the last
+	 * entry's bottomRight corner while it shows (see
+	 * MatrixGridProps.occupiedAddAffordance).
 	 */
 	corners?: Partial<Record<MatrixTileCorner, React.ReactNode>>;
 	/**

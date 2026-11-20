@@ -1328,3 +1328,95 @@ export const Issue3481Item16StackedTargetsMeetTheMinimumSize: Story = {
 	),
 	play: Issue3481Item16TargetsMeetTheMinimumSize.play,
 };
+
+/** ISSUE-3481-ITEM-17: the overlay hint over an entry is unreadable, and Escape does not dismiss it. */
+export const Issue3481Item17OverlayHintLeavesTheEntryReadable: Story = {
+	args: { occupiedAddAffordance: "overlay" },
+	render: (args) => (
+		<TileRoster
+			onSelectRange={args.onSelectRange}
+			onItemClick={args.onItemClick}
+			occupiedAddAffordance={args.occupiedAddAffordance}
+		/>
+	),
+	play: async ({ canvasElement }) => {
+		const cell = tileCell(canvasElement, 0, 1);
+		await userEvent.hover(cell);
+		const hint = tileSlotIn(cell, "addHint");
+		await expect(hint).not.toBeNull();
+		const entry = cell.querySelector<HTMLElement>("[role=button]");
+		if (!entry) throw new Error("no entry in the cell");
+		const style = getComputedStyle(hint);
+		const behind = over(
+			parseColor(style.backgroundColor),
+			parseColor(getComputedStyle(entry).backgroundColor),
+		);
+		// 0.8rem text: 4.5:1 against what is under it
+		await expect(
+			contrast(parseColor(style.color), behind),
+		).toBeGreaterThanOrEqual(4.5);
+		// content that hover adds over other content can be dismissed (1.4.13)
+		await userEvent.keyboard("{Escape}");
+		await expect(
+			cell.querySelector(`.${TILE_CLASSES.addHint}`),
+		).not.toBeInTheDocument();
+	},
+};
+
+const ITEM_17_THEMES = [
+	createTheme(),
+	createTheme({ palette: { mode: "dark" } }),
+];
+
+/** what an element's background shows over an opaque color: its color, then a one-color gradient layered on it */
+const backgroundOver = (element: Element, under: Rgba): Rgba => {
+	const style = getComputedStyle(element);
+	const base = over(parseColor(style.backgroundColor), under);
+	const layer = /linear-gradient\((rgba?\([^)]+\))/.exec(
+		style.backgroundImage,
+	)?.[1];
+	return layer ? over(parseColor(layer), base) : base;
+};
+
+/** ISSUE-3481-ITEM-17: the overlay hint's text has 4.5:1 on what the hint shows, in a light and a dark theme. */
+export const Issue3481Item17OverlayHintIsReadableInBothThemes: Story = {
+	args: { occupiedAddAffordance: "overlay" },
+	render: (args) => (
+		<>
+			{ITEM_17_THEMES.map((theme, index) => (
+				<ThemeProvider key={index} theme={theme}>
+					<Box data-palette={index} sx={{ mb: 2 }}>
+						<TileRoster
+							onSelectRange={args.onSelectRange}
+							onItemClick={args.onItemClick}
+							occupiedAddAffordance={args.occupiedAddAffordance}
+						/>
+					</Box>
+				</ThemeProvider>
+			))}
+		</>
+	),
+	play: async ({ canvasElement }) => {
+		const palettes = Array.from(
+			canvasElement.querySelectorAll<HTMLElement>("[data-palette]"),
+		);
+		await expect(palettes).toHaveLength(ITEM_17_THEMES.length);
+		for (const palette of palettes) {
+			const cell = tileCell(palette, 0, 1);
+			await userEvent.hover(cell);
+			const hint = tileSlotIn(cell, "addHint");
+			// what shows behind the text: the entry through whatever of the
+			// hint's background is clear, and the hint's tint layered over it
+			const entry = cell.querySelector<HTMLElement>("[role=button]");
+			if (!entry) throw new Error("no entry in the cell");
+			const behind = backgroundOver(
+				hint,
+				parseColor(getComputedStyle(entry).backgroundColor),
+			);
+			await expect(
+				contrast(parseColor(getComputedStyle(hint).color), behind),
+			).toBeGreaterThanOrEqual(4.5);
+			await userEvent.unhover(cell);
+		}
+	},
+};

@@ -1417,6 +1417,48 @@ describe("MatrixGrid body cells", () => {
 			).toBe("2");
 		});
 	});
+	describe("the add hint", () => {
+		const hintIn = (cell: HTMLElement) =>
+			cell.querySelector<HTMLElement>(`.${CELL_CLASSES.addHint}`);
+		const busy = {
+			selectable: true,
+			addLabel: "Add",
+			isCellSelectable: acceptAll,
+			rows: BUSY_C2,
+			occupiedAddAffordance: "overlay" as const,
+		};
+
+		it("[ISSUE-3481-ITEM-17] hides the hover hint on Escape, until the pointer comes back", () => {
+			render(grid(busy));
+			for (const column of [1, 0]) {
+				// the hint over the entry (overlay mode), and on a blank cell
+				const cell = cellAt(0, column);
+				fireEvent.mouseOver(cell);
+				expect(hintIn(cell)).toBeInTheDocument();
+				fireEvent.keyDown(window, { key: "Escape" });
+				expect(hintIn(cell)).not.toBeInTheDocument();
+				// moving on and coming back shows it again
+				fireEvent.mouseOver(cellAt(0, 2));
+				expect(hintIn(cellAt(0, 2))).toBeInTheDocument();
+				fireEvent.mouseOver(cell);
+				expect(hintIn(cell)).toBeInTheDocument();
+				// other keys leave it alone
+				fireEvent.keyDown(window, { key: "Enter" });
+				expect(hintIn(cell)).toBeInTheDocument();
+			}
+		});
+
+		it("[ISSUE-3481-ITEM-17] shows the hint again once the pointer left the cell and returned", () => {
+			render(grid(busy));
+			const cell = cellAt(0, 1);
+			fireEvent.mouseOver(cell);
+			fireEvent.keyDown(window, { key: "Escape" });
+			expect(hintIn(cell)).not.toBeInTheDocument();
+			fireEvent.mouseOut(cell, { relatedTarget: document.body });
+			fireEvent.mouseOver(cell, { relatedTarget: document.body });
+			expect(hintIn(cell)).toBeInTheDocument();
+		});
+	});
 	const painted = (row: number, columns = 4) =>
 		Array.from({ length: columns }, (_, i) => i).filter((i) =>
 			cellAt(row, i, columns).classList.contains(matrixClasses.cellSelected),

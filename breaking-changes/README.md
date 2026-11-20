@@ -50,6 +50,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-20 | [MultiLanguageInput's translate button draws a keyboard focus ring](2026-11-20-multi-language-input-translate-button-focus-ring.md) | behavior |
 | 2026-11-20 | [A dirty disableRouting Form switches routed tabs without asking](2026-11-20-disable-routing-form-tab-switch.md) | behavior |
 | 2026-11-20 | [A drop by onLoadError removes the id from the current selection](2026-11-20-backend-multi-select-drop-keeps-current-selection.md) | behavior |
+| 2026-11-20 | [The Matrix overlay hint is opaque, and Escape hides the add hint](2026-11-20-matrix-add-hint-opaque-escape.md) | behavior |
 | 2026-11-20 | [A lazy control's queue keeps the Form dirty when onlySubmitMounted changes while it is shown](2026-11-20-lazy-crud-connector-only-submit-mounted-change.md) | behavior |
 | 2026-11-20 | [A control in a DataGrid cell is named after its field and row](2026-11-20-data-grid-inline-checkbox-names.md) | behavior |
 | 2026-11-20 | [InlineSwitch takes aria props for its switch, and a selector's switch requires switchLabel](2026-11-20-inline-switch-name-and-switch-label.md) | behavior, type |

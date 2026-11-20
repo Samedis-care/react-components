@@ -184,7 +184,9 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 			store.cancel();
 		};
 		const onKey = (event: KeyboardEvent) => {
-			if (event.key === "Escape") store.cancel();
+			if (event.key !== "Escape") return;
+			store.cancel();
+			store.dismissHint();
 		};
 		window.addEventListener("mouseup", onUp);
 		window.addEventListener("keydown", onKey);

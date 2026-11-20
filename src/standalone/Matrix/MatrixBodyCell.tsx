@@ -56,45 +56,54 @@ export const MatrixBodyCellRoot = styled("div", {
 
 /**
  * The hover hint on a cell that can start a range: a dashed box saying what a
- * click would do.
+ * click would do. Escape hides it until the pointer moves to another cell.
  */
 export const MatrixAddHint = styled("div", {
 	name: "CcMatrixGrid",
 	slot: "addHint",
-})(({ theme }) => ({
-	position: "absolute",
-	zIndex: 3,
-	inset: 5,
-	pointerEvents: "none",
-	display: "flex",
-	alignItems: "center",
-	justifyContent: "center",
-	borderRadius: theme.shape.borderRadius,
-	border: `2px dashed ${theme.palette.success.main}`,
-	backgroundColor: alpha(
+})(({ theme }) => {
+	const tint = alpha(
 		theme.palette.success.main,
 		theme.palette.mode === "dark" ? 0.2 : 0.12,
-	),
-	color:
-		theme.palette.mode === "dark"
-			? theme.palette.success.light
-			: theme.palette.success.dark,
-	fontSize: "0.8rem",
-	fontWeight: 600,
-	whiteSpace: "nowrap",
-	overflow: "hidden",
-	// The cell has contents, and occupiedAddAffordance says "overlay": the hint
-	// takes the lower half and CATCHES the pointer there, so a press lands on it
-	// instead of on the entry underneath. One big target that reads like the
-	// blank-cell hint — and the entries' lower halves belong to it, which is
-	// the trade the consumer opts into.
-	[`&.${matrixClasses.addHintHalf}`]: {
-		inset: "auto 5px 5px 5px",
-		height: "calc(50% - 5px)",
-		pointerEvents: "auto",
-		cursor: "pointer",
-	},
-}));
+	);
+	return {
+		position: "absolute",
+		zIndex: 3,
+		inset: 5,
+		pointerEvents: "none",
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center",
+		borderRadius: theme.shape.borderRadius,
+		border: `2px dashed ${theme.palette.success.main}`,
+		backgroundColor: tint,
+		color:
+			theme.palette.mode === "dark"
+				? theme.palette.success.light
+				: theme.palette.success.dark,
+		fontSize: "0.8rem",
+		fontWeight: 600,
+		whiteSpace: "nowrap",
+		overflow: "hidden",
+		// The cell has contents, and occupiedAddAffordance says "overlay": the
+		// hint takes the lower half and CATCHES the pointer there, so a press
+		// lands on it instead of on the entry underneath. One big target that
+		// reads like the blank-cell hint — and while the pointer is on the cell
+		// the entries' lower halves belong to it (Escape gives them back), which
+		// is the trade the consumer opts into.
+		[`&.${matrixClasses.addHintHalf}`]: {
+			inset: "auto 5px 5px 5px",
+			height: "calc(50% - 5px)",
+			pointerEvents: "auto",
+			cursor: "pointer",
+			// Opaque: the same tint over the grid's background, not over the
+			// entries, whose fills would show through and take the text below
+			// 4.5:1.
+			backgroundColor: theme.palette.background.paper,
+			backgroundImage: `linear-gradient(${tint}, ${tint})`,
+		},
+	};
+});
 
 /**
  * The add affordance on a cell that is selectable but not blank.
@@ -106,6 +115,10 @@ export const MatrixAddHint = styled("div", {
  * strip that overlays the entries either steals their clicks or, if it is thin
  * enough not to, is too thin to hit. It is 24x24px, the smallest target WCAG
  * 2.5.8 allows for a control that lies on another one.
+ *
+ * While it shows (the cell hovered, the chip focused, or at rest on a touch
+ * device), it lies over the bottom right of the cell's last entry, that
+ * entry's bottomRight corner included, and a press there adds.
  */
 export const MatrixAddChip = styled("div", {
 	name: "CcMatrixGrid",
