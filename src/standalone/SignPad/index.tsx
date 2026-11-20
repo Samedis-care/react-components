@@ -105,7 +105,11 @@ const SignPadDiv = styled("div", { name: "CcSignPad", slot: "root" })(
 		width: "100%",
 		minHeight: "100px",
 		color: theme.palette.grey[700],
-		display: "inline-block",
+		// block-level, so the tile does not sit on a line of text whose strut
+		// adds space next to it in a block parent; a column, so the button
+		// grows to the min-height inside the bottom border
+		display: "flex",
+		flexDirection: "column",
 		backgroundColor: theme.palette.action.hover,
 		// the button inherits it; the info button keeps its pointer
 		[`&.${DISABLED_CLASS}`]: {
@@ -122,8 +126,10 @@ const SignPadButton = styled("button", { name: "CcSignPad", slot: "button" })(
 		display: "flex",
 		flexDirection: "column",
 		width: "100%",
+		// a parent of definite height sets it; otherwise the button grows to
+		// fill the tile's min-height
 		height: "100%",
-		minHeight: "inherit",
+		flexGrow: 1,
 		margin: 0,
 		padding: 0,
 		border: 0,

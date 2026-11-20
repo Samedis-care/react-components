@@ -14,6 +14,12 @@ const WrappedSignPad = (props: SignPadProps) => (
 	</Box>
 );
 
+const tileIn = (canvasElement: HTMLElement) => {
+	const el = canvasElement.querySelector('[class*="CcSignPad-root"]');
+	if (!(el instanceof HTMLElement)) throw new Error("tile missing");
+	return el;
+};
+
 const meta: Meta<typeof WrappedSignPad> = {
 	title: "Standalone/SignPad",
 	component: WrappedSignPad,
@@ -228,5 +234,29 @@ export const Issue3467Item6DisabledTileOpensNothing: Story = {
 		await expect(getComputedStyle(info).cursor).toBe("pointer");
 		await userEvent.click(info);
 		await expect(args.openInfo).toHaveBeenCalledTimes(1);
+	},
+};
+
+export const Issue3467Item12TileAddsNoGapBelow: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3467-ITEM-12: in a block parent without a height the tile is 100px tall (its min-height), but the parent is 107px: the tile is `display: inline-block`, so the line box adds a descender gap below it. Expected: the parent is exactly as tall as the tile.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	args: { signature: "" },
+	render: (args) => (
+		<div data-testid="parent" style={{ width: 400 }}>
+			<SignPad {...args} />
+		</div>
+	),
+	play: async ({ canvas, canvasElement }) => {
+		const parent = canvas.getByTestId("parent").getBoundingClientRect();
+		const tile = tileIn(canvasElement).getBoundingClientRect();
+		await expect(tile.height).toBe(100);
+		await expect(parent.height, "height of the block parent").toBe(tile.height);
 	},
 };
