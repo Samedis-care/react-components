@@ -138,7 +138,8 @@ const ColumnHeaderContent = (
 						<span>
 							{typeof props.headerName === "string"
 								? props.headerName.split("\n").map((text, index, arr) => (
-										<React.Fragment key={text}>
+										// keyed by position: two lines can have the same text
+										<React.Fragment key={index}>
 											{text}
 											{index == arr.length - 1 ? undefined : <br />}
 										</React.Fragment>

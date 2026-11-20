@@ -347,6 +347,42 @@ describe("Cell / SelectRow: selection", () => {
 	});
 });
 
+describe("ColumnHeader: labels", () => {
+	it("[ISSUE-3493-ITEM-10] a header with two identical lines renders both without a duplicate key", async () => {
+		const error = vi.spyOn(console, "error").mockImplementation(() => {});
+		const cols: IDataGridColumnDef[] = [
+			{ field: "a", headerName: "Total\nTotal", type: "string" },
+		];
+		const { container } = render(
+			<Grid
+				columns={cols}
+				loadData={() => ({ rowsTotal: 1, rows: [{ id: "1", a: "x" }] })}
+			/>,
+		);
+		await screen.findByText("x");
+		expect(headerWrapper(container, "a")).toHaveTextContent("TotalTotal");
+		expect(
+			error.mock.calls.filter((c) => String(c[0]).includes("same key")),
+		).toEqual([]);
+	});
+
+	it("[ISSUE-3493-ITEM-10] a header whose lines change after mount shows exactly its new lines", async () => {
+		const cols = (headerName: string): IDataGridColumnDef[] => [
+			{ field: "a", headerName, type: "string" },
+		];
+		const loadData = () => ({ rowsTotal: 1, rows: [{ id: "1", a: "x" }] });
+		const { container, rerender } = render(
+			<Grid columns={cols("Total\nTotal")} loadData={loadData} />,
+		);
+		await screen.findByText("x");
+		// e.g. a language switch that gives the header another line
+		rerender(<Grid columns={cols("Sum\nTotal\nTotal")} loadData={loadData} />);
+		const header = headerWrapper(container, "a");
+		expect(header).toHaveTextContent(/^SumTotalTotal$/);
+		expect(header.querySelectorAll("br")).toHaveLength(2);
+	});
+});
+
 describe("Content / ColumnHeader: widths", () => {
 	it("[ISSUE-3493-ITEM-2] a resize that ends over the column's own header does not sort it", async () => {
 		vi.useFakeTimers({ shouldAdvanceTime: true });
