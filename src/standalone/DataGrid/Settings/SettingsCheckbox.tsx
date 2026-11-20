@@ -1,5 +1,6 @@
 import React, { ChangeEvent, useMemo } from "react";
-import { Checkbox } from "@mui/material";
+import { Checkbox, styled } from "@mui/material";
+import focusRing from "../../../utils/internal/focusRing";
 
 export interface IDataGridSettingsCheckboxProps {
 	/**
@@ -34,9 +35,21 @@ export interface IDataGridSettingsCheckboxProps {
 	describedBy?: string;
 }
 
+// MUI shows keyboard focus on a checkbox only as a faint ripple (unless the
+// theme sets its focusVisible ring), which forced colors drop: the ring goes
+// around the box, where MUI draws the theme's ring
+const FocusRingCheckbox = styled(Checkbox)(({ theme }) => ({
+	"&.Mui-focusVisible > svg": {
+		borderRadius: theme.shape.borderRadius,
+		...focusRing(theme, 2),
+	},
+}));
+
 /**
  * A "Visible" or "Pin" checkbox of the column settings table, named by its
- * table column and row headers
+ * table column and row headers. Keyboard focus shows a 2px outline in
+ * `theme.palette.primary.main` around the box, or the ring of the theme's
+ * `focusVisible` option when the theme sets one.
  */
 const SettingsCheckbox = (props: IDataGridSettingsCheckboxProps) => {
 	const { field, checked, disabled, onChange, labelledBy, describedBy } = props;
@@ -50,7 +63,7 @@ const SettingsCheckbox = (props: IDataGridSettingsCheckboxProps) => {
 		[labelledBy, describedBy],
 	);
 	return (
-		<Checkbox
+		<FocusRingCheckbox
 			checked={checked}
 			disabled={disabled}
 			onChange={onChange}

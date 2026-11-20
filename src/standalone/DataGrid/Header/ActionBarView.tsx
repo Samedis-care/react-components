@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
 	Grid,
-	IconButton,
 	MenuProps,
 	Tooltip,
 	useMediaQuery,
@@ -26,6 +25,7 @@ import ResetMenu, { ResetCallbacks } from "./ResetMenu";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import ActionBarMenu, { type ActionBarMenuSlotProps } from "./ActionBarMenu";
 import useMenuButton from "../../../utils/internal/useMenuButton";
+import HeaderIconButton from "./HeaderIconButton";
 
 export interface IDataGridActionBarViewProps extends ResetCallbacks {
 	/**
@@ -163,7 +163,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 					<Grid key={"divider-1"}>
 						<VerticalDivider />
 					</Grid>
-					<IconButton
+					<HeaderIconButton
 						ref={moreOptionsRef}
 						{...moreOptionsMenu.buttonProps}
 						color={"primary"}
@@ -172,7 +172,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 						aria-label={t("standalone.data-grid.header.more-options")}
 					>
 						<MenuIcon />
-					</IconButton>
+					</HeaderIconButton>
 					<ActionBarMenu
 						anchorEl={settingsAnchorEl}
 						toggleSettings={toggleSettings}
@@ -211,14 +211,14 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 									/>
 								) : (
 									<Tooltip title={t("standalone.data-grid.header.settings")}>
-										<IconButton
+										<HeaderIconButton
 											color={"primary"}
 											onClick={handleToggleSettings}
 											size="large"
 											aria-label={t("standalone.data-grid.header.settings")}
 										>
 											<TuneIcon />
-										</IconButton>
+										</HeaderIconButton>
 									</Tooltip>
 								)}
 							</Grid>
@@ -247,7 +247,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 									/>
 								) : (
 									<Tooltip title={t("standalone.data-grid.header.reset")}>
-										<IconButton
+										<HeaderIconButton
 											{...resetMenu.buttonProps}
 											color={"primary"}
 											onClick={openResetDialog}
@@ -255,7 +255,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 											aria-label={t("standalone.data-grid.header.reset")}
 										>
 											<RefreshIcon />
-										</IconButton>
+										</HeaderIconButton>
 									</Tooltip>
 								)}
 							</Grid>
@@ -284,7 +284,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 									/>
 								) : (
 									<Tooltip title={t("standalone.data-grid.header.export")}>
-										<IconButton
+										<HeaderIconButton
 											{...exportMenu.buttonProps}
 											color={"primary"}
 											onClick={openExportMenu}
@@ -292,7 +292,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 											aria-label={t("standalone.data-grid.header.export")}
 										>
 											<ExportIcon />
-										</IconButton>
+										</HeaderIconButton>
 									</Tooltip>
 								)}
 							</Grid>
@@ -320,14 +320,14 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 									/>
 								) : (
 									<Tooltip title={t("standalone.data-grid.header.import")}>
-										<IconButton
+										<HeaderIconButton
 											color={"primary"}
 											onClick={handleImport}
 											size="large"
 											aria-label={t("standalone.data-grid.header.import")}
 										>
 											<ImportIcon />
-										</IconButton>
+										</HeaderIconButton>
 									</Tooltip>
 								)}
 							</Grid>

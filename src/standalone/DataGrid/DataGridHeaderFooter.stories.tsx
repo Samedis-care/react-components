@@ -86,6 +86,21 @@ const SimpleFilterBar = () => (
 
 const PHONE = { viewport: { value: "mobile1", isRotated: false } };
 
+/**
+ * ISSUE-3495-ITEM-17: asserts the library's keyboard focus ring on an element: a
+ * 2px solid outline in the theme's primary.main (the default theme's, 4.6:1
+ * against white), at least minOffset px outside the element
+ */
+const expectFocusRing = async (element: Element, minOffset: number) => {
+	const style = getComputedStyle(element);
+	await expect(style.outlineStyle, "no outline").toBe("solid");
+	await expect(parseFloat(style.outlineWidth)).toBeGreaterThanOrEqual(2);
+	await expect(style.outlineColor).toBe("rgb(25, 118, 210)");
+	await expect(parseFloat(style.outlineOffset)).toBeGreaterThanOrEqual(
+		minOffset,
+	);
+};
+
 // ─── Meta ─────────────────────────────────────────────────────────────────────
 
 /**
@@ -362,6 +377,109 @@ export const Issue3495Item16UnavailableDeleteKeepsFocus: Story = {
 		await expect(args.onDelete).toHaveBeenCalledOnce();
 		await waitFor(() => expect(del).toHaveAttribute("aria-disabled", "true"));
 		await expect(del).toHaveFocus();
+	},
+};
+
+/**
+ * ISSUE-3495-ITEM-17: below md the header's buttons are MUI IconButtons whose keyboard
+ * focus shows only as a faint ripple (here: Reset on a tablet)
+ */
+export const Issue3495Item17HeaderIconButtonShowsFocus: Story = {
+	args: { columns: COLUMNS, loadData: loadPeople },
+	globals: { viewport: { value: "tablet", isRotated: false } },
+	play: async ({ canvas }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		canvas.getByRole("button", { name: "Columns" }).focus();
+		await userEvent.tab();
+		const reset = canvas.getByRole("button", { name: "Reset" });
+		await expect(reset).toHaveFocus();
+		await waitFor(() => expect(reset).toHaveClass("Mui-focusVisible"));
+		const style = getComputedStyle(reset);
+		await expect(
+			(style.outlineStyle !== "none" && parseFloat(style.outlineWidth) >= 2) ||
+				style.boxShadow !== "none",
+			"no outline or ring on the focused button",
+		).toBe(true);
+	},
+};
+
+/**
+ * ISSUE-3495-ITEM-17: on a tablet, Columns, Reset, Export and Import show a focus
+ * ring around the button when reached by keyboard
+ */
+export const Issue3495Item17TabletHeaderButtonsShowFocus: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadPeople,
+		exporters: [EXCEL],
+		onImport: fn(),
+	},
+	globals: { viewport: { value: "tablet", isRotated: false } },
+	play: async ({ canvas }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		const columns = canvas.getByRole("button", { name: "Columns" });
+		columns.focus();
+		await waitFor(() => expect(columns).toHaveClass("Mui-focusVisible"));
+		await expectFocusRing(columns, 2);
+		for (const name of ["Reset", "Export", "Import"]) {
+			await userEvent.tab();
+			const button = canvas.getByRole("button", { name });
+			await expect(button).toHaveFocus();
+			await waitFor(() => expect(button).toHaveClass("Mui-focusVisible"));
+			await expectFocusRing(button, 2);
+		}
+	},
+};
+
+/**
+ * ISSUE-3495-ITEM-17: on a phone with a filter bar, Search and More options show a
+ * focus ring around the button when reached by keyboard
+ */
+export const Issue3495Item17PhoneHeaderButtonsShowFocus: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadPeople,
+		filterBar: SimpleFilterBar,
+		exporters: [EXCEL],
+	},
+	globals: PHONE,
+	play: async ({ canvas }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		const search = canvas.getByRole("button", { name: "Search" });
+		search.focus();
+		await waitFor(() => expect(search).toHaveClass("Mui-focusVisible"));
+		await expectFocusRing(search, 2);
+		await userEvent.tab();
+		const more = canvas.getByRole("button", { name: "More options" });
+		await expect(more).toHaveFocus();
+		await waitFor(() => expect(more).toHaveClass("Mui-focusVisible"));
+		await expectFocusRing(more, 2);
+	},
+};
+
+/**
+ * ISSUE-3495-ITEM-17: in the column settings, a checkbox shows a focus ring around
+ * its box and "Close" a ring outside its filled background when reached by
+ * keyboard
+ */
+export const Issue3495Item17SettingsShowFocus: Story = {
+	args: { columns: COLUMNS, loadData: loadPeople },
+	play: async ({ canvas }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		await userEvent.click(canvas.getByRole("button", { name: "Columns" }));
+		const close = await canvas.findByRole("button", { name: "Close" });
+		const visible = canvas.getAllByRole("checkbox", { name: /^Visible / })[0];
+		visible.focus();
+		const root = visible.closest(".MuiCheckbox-root");
+		if (!root) throw new Error("the checkbox has no MUI root");
+		await waitFor(() => expect(root).toHaveClass("Mui-focusVisible"));
+		const box = root.querySelector(":scope > svg");
+		if (!box) throw new Error("the checkbox has no box icon");
+		await expectFocusRing(box, 2);
+		close.focus();
+		await waitFor(() => expect(close).toHaveClass("Mui-focusVisible"));
+		// outside the button, so the ring stands out against the panel, not the fill
+		await expectFocusRing(close, 2);
 	},
 };
 

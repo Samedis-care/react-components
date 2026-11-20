@@ -77,6 +77,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-20 | [FullFormDialog's open-in-new action is a named button beside the close button](2026-11-20-full-form-dialog-open-in-new-button.md) | behavior, theme |
 | 2026-11-20 | [InfiniteScroll opens at its first row and loads on top without hiding any of it](2026-11-20-infinite-scroll-loads-on-top-without-offset.md) | behavior, type |
 | 2026-11-20 | ["Clear filters" in an empty DataGrid moves focus to the search box](2026-11-20-data-grid-clear-filters-focuses-search.md) | behavior |
+| 2026-11-20 | [The DataGrid's header buttons on tablets and phones and its column settings draw a focus ring](2026-11-20-data-grid-header-settings-focus-ring.md) | behavior |
 | 2026-11-20 | [A lazy control's queue keeps the Form dirty when onlySubmitMounted changes while it is shown](2026-11-20-lazy-crud-connector-only-submit-mounted-change.md) | behavior |
 | 2026-11-20 | [A control in a DataGrid cell is named after its field and row](2026-11-20-data-grid-inline-checkbox-names.md) | behavior |
 | 2026-11-20 | [InlineSwitch takes aria props for its switch, and a selector's switch requires switchLabel](2026-11-20-inline-switch-name-and-switch-label.md) | behavior, type |

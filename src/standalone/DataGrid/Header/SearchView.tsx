@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import {
 	Box,
-	IconButton,
 	InputAdornment,
 	Popover,
 	PopoverOrigin,
@@ -18,6 +17,7 @@ import { DataGridQuickFilterIcon, useDataGridProps } from "../DataGrid";
 import TextFieldWithHelp from "../../UIKit/TextFieldWithHelp";
 import combineClassNames from "../../../utils/combineClassNames";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import HeaderIconButton from "./HeaderIconButton";
 
 export interface IDataGridSearchViewProps {
 	/**
@@ -146,7 +146,7 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 				renderTextField(false)
 			) : (
 				<>
-					<IconButton
+					<HeaderIconButton
 						id={buttonId}
 						onClick={openPopover}
 						size="large"
@@ -161,7 +161,7 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 								props.search && "CcDataGrid-quickFilterActiveIcon",
 							])}
 						/>
-					</IconButton>
+					</HeaderIconButton>
 					<Popover
 						open={open}
 						anchorEl={anchorEl}

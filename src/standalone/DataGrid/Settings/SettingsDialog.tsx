@@ -20,6 +20,7 @@ import {
 	useDataGridProps,
 } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import focusRing from "../../../utils/internal/focusRing";
 import SettingsCheckbox from "./SettingsCheckbox";
 
 export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
@@ -91,6 +92,14 @@ const StyledStatus = styled("span", {
 	whiteSpace: "nowrap",
 	width: 1,
 });
+
+// "Close": MUI shows keyboard focus on a contained button only as a ripple and
+// a deeper shadow (unless the theme sets its focusVisible ring), which forced
+// colors drop; the ring keeps 2px clear of the filled background, so it stands
+// out against the panel
+const CloseButton = styled(Button)(({ theme }) => ({
+	"&.Mui-focusVisible": focusRing(theme, 2),
+}));
 
 const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 	const { classes } = useDataGridProps();
@@ -209,9 +218,12 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 				<Grid container sx={{ justifyContent: "flex-end" }}>
 					<Grid>
 						<Box sx={{ m: 2 }}>
-							<Button onClick={props.closeGridSettings} variant={"contained"}>
+							<CloseButton
+								onClick={props.closeGridSettings}
+								variant={"contained"}
+							>
 								{t("standalone.data-grid.settings.close") || ""}
-							</Button>
+							</CloseButton>
 						</Box>
 					</Grid>
 				</Grid>
