@@ -246,7 +246,10 @@
 					"no": "Nee"
 				},
 				"close": "Sluiten",
-				"signature": "Handtekening"
+				"signature": "Handtekening",
+				"sign-area": "Handtekeningvak",
+				"instructions": "Teken je handtekening in het handtekeningvak met een muis, pen of vinger.",
+				"instructions-signed": "De opgeslagen handtekening wordt getoond. Verwijder de handtekening eerst om opnieuw te tekenen."
 			},
 			"sign-here": "Teken hier digitaal",
 			"required": "Verplicht"

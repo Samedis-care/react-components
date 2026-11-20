@@ -250,7 +250,10 @@
 					"no": "No"
 				},
 				"close": "Chiudi",
-				"signature": "Firma"
+				"signature": "Firma",
+				"sign-area": "Area della firma",
+				"instructions": "Disegna la tua firma nell'area della firma con il mouse, una penna o il dito.",
+				"instructions-signed": "Viene mostrata la firma salvata. Per firmare di nuovo, cancellala prima."
 			},
 			"sign-here": "Firma qui digitalmente",
 			"required": "Obbligatorio"

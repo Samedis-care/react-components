@@ -246,7 +246,10 @@
 					"no": "Non"
 				},
 				"close": "Fermer",
-				"signature": "Signature"
+				"signature": "Signature",
+				"sign-area": "Zone de signature",
+				"instructions": "Dessinez votre signature dans la zone de signature avec la souris, un stylet ou le doigt.",
+				"instructions-signed": "La signature enregistrée est affichée. Pour signer à nouveau, effacez-la d'abord."
 			},
 			"sign-here": "Signez ici numériquement",
 			"required": "Obligatoire"

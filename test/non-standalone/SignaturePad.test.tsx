@@ -1,4 +1,6 @@
 import React from "react";
+import fs from "node:fs";
+import path from "node:path";
 import {
 	describe,
 	it,
@@ -13,6 +15,7 @@ import {
 	screen,
 	fireEvent,
 	cleanup,
+	waitFor,
 	within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -97,6 +100,13 @@ const openPad = () => fireEvent.click(tile());
 const dialog = () => screen.getByRole("dialog");
 const button = (name: string) => screen.getByRole("button", { name });
 const canvasIn = (el: HTMLElement) => el.querySelector("canvas");
+
+/** The part of a locale's translation.json with the sign dialog's texts */
+interface SignPadTranslation {
+	standalone: {
+		"signature-pad": { dialog: Record<string, string | undefined> };
+	};
+}
 
 /** pushes a SignDialog, as SignaturePad and SCF's auto-open do */
 const Opener = (props: SignPadDialogProps) => {
@@ -265,5 +275,56 @@ describe("SignDialog accessibility", () => {
 		expect(names, "field names of the blurs reported on close").toContain(
 			"sig",
 		);
+	});
+
+	it("[ISSUE-3467-ITEM-18] the drawing area is an image named Signature area, and the dialog says how to sign", () => {
+		withDialogs(<SignaturePad signature={null} />);
+		openPad();
+		expect(within(dialog()).getByRole("img", { name: "Signature area" })).toBe(
+			canvasIn(dialog()),
+		);
+		expect(dialog()).toHaveAccessibleDescription(
+			"Draw your signature in the signature area with a mouse, pen or finger.",
+		);
+	});
+
+	it("[ISSUE-3467-ITEM-18] over a stored signature, the dialog says to clear it before signing again, and once cleared how to sign", async () => {
+		withDialogs(<SignaturePad signature={SIG} />);
+		openPad();
+		expect(canvasIn(dialog())).toBeNull();
+		expect(dialog()).toHaveAccessibleDescription(
+			"The saved signature is shown. To sign again, clear it first.",
+		);
+		fireEvent.click(button("Clear signature"));
+		fireEvent.click(await screen.findByRole("button", { name: "Yes" }));
+		await waitFor(() =>
+			expect(
+				within(dialog()).getByRole("img", { name: "Signature area" }),
+			).toBe(canvasIn(dialog())),
+		);
+		expect(dialog()).toHaveAccessibleDescription(
+			"Draw your signature in the signature area with a mouse, pen or finger.",
+		);
+	});
+
+	it("[ISSUE-3467-ITEM-18] every locale names the sign area and has both instructions", () => {
+		const i18nDir = path.resolve(__dirname, "../../src/assets/i18n");
+		const keys = ["sign-area", "instructions", "instructions-signed"];
+		const missing = fs
+			.readdirSync(i18nDir, { withFileTypes: true })
+			.filter((entry) => entry.isDirectory())
+			.flatMap((entry) => {
+				const translation = JSON.parse(
+					fs.readFileSync(
+						path.join(i18nDir, entry.name, "translation.json"),
+						"utf8",
+					),
+				) as SignPadTranslation;
+				const texts = translation.standalone["signature-pad"].dialog;
+				return keys
+					.filter((key) => !texts[key]?.trim())
+					.map((key) => `${entry.name}: ${key}`);
+			});
+		expect(missing).toEqual([]);
 	});
 });

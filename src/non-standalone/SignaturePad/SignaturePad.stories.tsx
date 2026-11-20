@@ -329,6 +329,44 @@ export const Issue3467Item16OpenDialogPassesAxe: Story = {
 	},
 };
 
+export const Issue3467Item18SignAreaIsNamedAndExplained: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3467-ITEM-18: the drawing area has no role, name or instructions, so assistive technology finds nothing between the title and the buttons, and the dialog has no description of what to do. Expected: the canvas (or the sign area) has a role and a name, and the dialog an accessible description.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ canvasElement }) => {
+		tileIn(canvasElement).click();
+		const c = await signCanvas();
+		const area = [c, signDivEl()].find((el) => el.hasAttribute("role"));
+		await expect(area, "role on the canvas or the sign area").toBeDefined();
+		await expect(area).toHaveAccessibleName(/\S/);
+		await expect(dialogEl()).toHaveAccessibleDescription(/\S/);
+		await closeDialog();
+	},
+};
+
+export const Issue3467Item18OpenDrawingDialogPassesAxe: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3467-ITEM-18: the dialog open over an empty pad, with the canvas as a named image and the instructions as the dialog's description, passes axe.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ canvasElement }) => {
+		tileIn(canvasElement).click();
+		await expect(await signCanvas()).toHaveAttribute("role", "img");
+		// axe runs after the play, with the dialog open
+	},
+};
+
 export const Issue3467Item1ResizeAfterDrawingNeverSavesBlankImage: Story = {
 	parameters: {
 		docs: {

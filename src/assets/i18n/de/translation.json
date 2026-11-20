@@ -246,7 +246,10 @@
 					"no": "Nein"
 				},
 				"close": "Schließen",
-				"signature": "Unterschrift"
+				"signature": "Unterschrift",
+				"sign-area": "Unterschriftsfeld",
+				"instructions": "Zeichne Deine Unterschrift mit Maus, Stift oder Finger in das Unterschriftsfeld.",
+				"instructions-signed": "Die gespeicherte Unterschrift wird angezeigt. Um neu zu unterschreiben, setze sie zuerst zurück."
 			},
 			"sign-here": "Hier digital unterschreiben",
 			"required": "Erforderlich"

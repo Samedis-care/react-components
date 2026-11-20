@@ -246,7 +246,10 @@
 					"no": "Yo'q"
 				},
 				"close": "Yoping",
-				"signature": "Imzo"
+				"signature": "Imzo",
+				"sign-area": "Imzo maydoni",
+				"instructions": "Imzongizni imzo maydoniga sichqoncha, qalam yoki barmoq bilan chizing.",
+				"instructions-signed": "Saqlangan imzo ko'rsatilgan. Qayta imzolash uchun avval uni tozalang."
 			},
 			"sign-here": "Bu yerda raqamli imzolang",
 			"required": "Majburiy"

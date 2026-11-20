@@ -250,7 +250,10 @@
 					"no": "No"
 				},
 				"close": "Close",
-				"signature": "Signature"
+				"signature": "Signature",
+				"sign-area": "Signature area",
+				"instructions": "Draw your signature in the signature area with a mouse, pen or finger.",
+				"instructions-signed": "The saved signature is shown. To sign again, clear it first."
 			},
 			"sign-here": "Sign here digitally",
 			"required": "Required"

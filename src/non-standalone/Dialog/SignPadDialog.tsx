@@ -1,4 +1,11 @@
-import React, { useCallback, useContext, useRef, useState } from "react";
+import React, {
+	useCallback,
+	useContext,
+	useId,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import {
 	Button,
 	Dialog,
@@ -51,6 +58,24 @@ const StyledCloseButton = styled(IconButton, {
 	top: theme.spacing(1),
 	color: theme.palette.grey[500],
 }));
+
+// how to sign, the dialog's description: read by screen readers when the dialog
+// opens. Sighted users have the title and the dotted sign area
+const Instructions = styled("div", {
+	name: "CcSignPadDialog",
+	slot: "instructions",
+})({
+	// visually hidden, as MUI's visuallyHidden
+	border: 0,
+	clipPath: "inset(50%)",
+	height: 1,
+	margin: -1,
+	overflow: "hidden",
+	padding: 0,
+	position: "absolute",
+	whiteSpace: "nowrap",
+	width: 1,
+});
 
 const SignDiv = styled("div", {
 	name: "CcSignPadDialog",
@@ -117,6 +142,7 @@ export type SignPadDialogClassKey =
 	| "root"
 	| "dialogTitle"
 	| "closeButton"
+	| "instructions"
 	| "signDiv"
 	| "imageDiv"
 	| "signatureImage"
@@ -143,6 +169,16 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 	const pushedClose = useContext(PushedDialogCloseContext);
 	const closeThisDialog = pushedClose?.pushed ? pushedClose.close : null;
 	const signCanvas = useRef<SignaturePad>(null);
+	const instructionsId = useId();
+	// the canvas is drawn on with a pointer only, not operated by keyboard: an image
+	// with a name, so screen readers find it, also when exploring by touch
+	const canvasProps = useMemo(
+		() => ({
+			role: "img",
+			"aria-label": t("standalone.signature-pad.dialog.sign-area"),
+		}),
+		[t],
+	);
 	const hiddenRef = useRef<HTMLInputElement>(null);
 	const clearCanvas = useCallback(async () => {
 		if (
@@ -211,6 +247,7 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 			maxWidth="sm"
 			onClose={closeCanvas}
 			className={combineClassNames([className, classes?.root])}
+			aria-describedby={instructionsId}
 		>
 			<StyledDialogTitle className={classes?.dialogTitle}>
 				{signerName
@@ -227,10 +264,16 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 					<Close />
 				</StyledCloseButton>
 			</StyledDialogTitle>
+			<Instructions id={instructionsId} className={classes?.instructions}>
+				{resetCanvas
+					? t("standalone.signature-pad.dialog.instructions-signed")
+					: t("standalone.signature-pad.dialog.instructions")}
+			</Instructions>
 			<SignDiv className={classes?.signDiv} data-name={name} onBlur={onBlur}>
 				{!resetCanvas ? (
 					<SignaturePad
 						ref={signCanvas}
+						canvasProps={canvasProps}
 						options={{
 							penColor: penColor || "blue",
 						}}
