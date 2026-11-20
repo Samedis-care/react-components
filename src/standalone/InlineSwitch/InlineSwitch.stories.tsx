@@ -4,6 +4,8 @@ import { createTheme, ThemeProvider } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { fn, expect, waitFor } from "storybook/test";
 import InlineSwitch from "./index";
+import BaseSelector, { BaseSelectorData } from "../Selector/BaseSelector";
+import { selectorLocalLoadHandler } from "../Selector";
 
 const meta: Meta<typeof InlineSwitch> = {
 	title: "Standalone/InlineSwitch",
@@ -18,6 +20,8 @@ const meta: Meta<typeof InlineSwitch> = {
 export default meta;
 
 type Story = StoryObj<typeof InlineSwitch>;
+
+const MOBILE = { viewport: { value: "mobile1", isRotated: false } };
 
 const elementOf = (el: Element | null | undefined): HTMLElement => {
 	if (!(el instanceof HTMLElement)) throw new Error("element missing");
@@ -127,6 +131,12 @@ const ControlledTemplate = () => {
 export const Controlled: Story = {
 	render: () => <ControlledTemplate />,
 };
+
+const SELECTOR_OPTIONS: BaseSelectorData[] = [
+	{ value: "a", label: "Alpha" },
+	{ value: "b", label: "Beta" },
+];
+const loadOptions = selectorLocalLoadHandler(SELECTOR_OPTIONS);
 
 const ringTheme = createTheme({ focusVisible: true });
 
@@ -264,5 +274,139 @@ export const Issue3465Item9FocusDoesNotPulse: StoryObj<typeof FocusRingDemo> = {
 			canvasElement.querySelector(".MuiTouchRipple-ripplePulsate"),
 		).toBeNull();
 		sw.blur();
+	},
+};
+
+export const Issue3465Item11SelectorLabelFitsOnPhone: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		// BaseSelector's own combobox is unnamed (Selector unit); check the switch
+		a11y: { context: { include: [".MuiSwitch-root"] } },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3465-ITEM-11: at 320px the switch takes the right part of the selector's label row, and a field label that fits on its own is cut to an ellipsis. Expected: the field label stays readable (the switch moves to its own row when both do not fit).",
+			},
+		},
+	},
+	render: () => (
+		<div style={{ padding: "16px 16px 0" }}>
+			<div data-testid="plain">
+				<BaseSelector
+					label="Verantwortliche Person"
+					selected={null}
+					onSelect={() => {}}
+					onLoad={loadOptions}
+				/>
+			</div>
+			<div data-testid="switch">
+				<BaseSelector
+					label="Verantwortliche Person"
+					selected={null}
+					onSelect={() => {}}
+					onLoad={loadOptions}
+					displaySwitch
+					switchLabel="Inaktive Einträge anzeigen"
+				/>
+			</div>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const fieldLabel = (id: string) => {
+			const box = elementOf(canvasElement.querySelector(`[data-testid=${id}]`));
+			return elementOf(
+				Array.from(box.querySelectorAll("label")).find(
+					(el) => el.textContent === "Verantwortliche Person",
+				),
+			);
+		};
+		const plain = fieldLabel("plain");
+		// the label fits the field when no switch shares its row
+		await expect(plain.scrollWidth).toBeLessThanOrEqual(plain.clientWidth);
+		const withSwitch = fieldLabel("switch");
+		await expect(
+			withSwitch.scrollWidth,
+			"field label width needed vs. shown",
+		).toBeLessThanOrEqual(withSwitch.clientWidth);
+	},
+};
+
+export const Issue3465Item11SwitchMovesOnlyWhenTheLabelDoesNotFit: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		// BaseSelector's own combobox is unnamed (Selector unit); check the switches
+		a11y: { context: { include: [".MuiSwitch-root"] } },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3465-ITEM-11: at 320px a short field label keeps the switch on its row. A field label that does not fit beside the switch starts below it, on the full width, and nothing scrolls sideways.",
+			},
+		},
+	},
+	render: () => (
+		<div style={{ padding: "16px 16px 0" }}>
+			{["Typ", "Verantwortliche Person"].map((label) => (
+				<div data-testid={label} key={label}>
+					<BaseSelector
+						label={label}
+						selected={null}
+						onSelect={() => {}}
+						onLoad={loadOptions}
+						displaySwitch
+						switchLabel={`${label}: inaktive anzeigen`}
+					/>
+				</div>
+			))}
+		</div>
+	),
+	play: async ({ canvas, canvasElement }) => {
+		const parts = (label: string) => {
+			const box = elementOf(
+				canvasElement.querySelector(`[data-testid="${label}"]`),
+			);
+			const fieldLabel = elementOf(
+				Array.from(box.querySelectorAll("label")).find(
+					(el) => el.textContent === label,
+				),
+			);
+			const switchRow = elementOf(
+				canvas
+					.getByRole("switch", { name: `${label}: inaktive anzeigen` })
+					.closest("label"),
+			);
+			return {
+				box: box.getBoundingClientRect(),
+				fieldLabel: fieldLabel.getBoundingClientRect(),
+				switchRow: switchRow.getBoundingClientRect(),
+				input: elementOf(
+					box.querySelector("[role=combobox]"),
+				).getBoundingClientRect(),
+			};
+		};
+		const short = parts("Typ");
+		await expect(
+			Math.abs(short.switchRow.top - short.fieldLabel.top),
+			"short label: on the switch's row",
+		).toBeLessThan(8);
+		await expect(short.switchRow.bottom).toBeLessThanOrEqual(short.input.top);
+		const long = parts("Verantwortliche Person");
+		await expect(
+			long.switchRow.bottom,
+			"long label: below the switch's row",
+		).toBeLessThanOrEqual(long.fieldLabel.top);
+		await expect(Math.abs(long.fieldLabel.left - long.box.left)).toBeLessThan(
+			1,
+		);
+		await expect(
+			Math.abs(long.switchRow.right - long.box.right),
+			"switch flush right",
+		).toBeLessThan(2);
+		await expect(long.fieldLabel.bottom).toBeLessThanOrEqual(long.input.top);
+		const page = canvasElement.ownerDocument.documentElement;
+		await expect(page.scrollWidth, "no sideways scroll").toBeLessThanOrEqual(
+			page.clientWidth,
+		);
 	},
 };

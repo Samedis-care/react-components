@@ -279,6 +279,11 @@ export type BaseSelectorVariants<
  * The switch above a selector's field. `switchLabel` is required while `displaySwitch`
  * shows the switch: the visible label is the switch's only accessible name, and a switch
  * without one is unnamed for everyone.
+ *
+ * The switch sits at the right end of the row of the selector's `label`. When the label
+ * does not fit beside it (a long label, a narrow field, a phone), the switch keeps that
+ * row to itself and the label starts on the next one, so the label is never cut shorter
+ * than it is without a switch.
  */
 export type BaseSelectorSwitchProps = {
 	/**
@@ -301,7 +306,9 @@ export type BaseSelectorSwitchProps = {
 	  }
 	| {
 			/**
-			 * Display switch control? Its label (`switchLabel`) is required.
+			 * Display switch control? Its label (`switchLabel`) is required. The switch
+			 * shares the row of the selector's `label` while both fit there; otherwise it
+			 * takes that row alone and the label moves below it.
 			 */
 			displaySwitch: true;
 			/**
@@ -575,6 +582,12 @@ const StyledLabel = withMuiFieldState(
 		position: "relative",
 		transform: "translate(0,0) scale(0.75)",
 		zIndex: "unset",
+		// the switch (displaySwitch) floats on this row. MUI's label clips its overflow,
+		// so as wide as the row it would shrink beside the switch and cut its text with
+		// an ellipsis; as wide as its text it shares the row only if it fits there and
+		// otherwise starts below the switch, with the whole row as it has without one
+		width: "max-content",
+		maxWidth: "100%",
 	}),
 );
 
