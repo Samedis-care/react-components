@@ -4,10 +4,18 @@
  * row, what is validated, how errors are reported and when the step lets the import start.
  * Also GenericDataPreview, the grid of the review and of step 1's preview.
  */
+import React, { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { createMemoryHistory } from "history";
 import { useImportStep3Logic } from "../../../src/backend-components/CRUD/Import/Step3ValidateReview";
+import GenericDataPreview, {
+	GenericDataPreviewProps,
+} from "../../../src/backend-components/CRUD/Import/GenericDataPreview";
 import type { CrudImporterStepProps } from "../../../src/backend-components/CRUD/Import";
+import { ModelDataTypeEnumSelectRenderer } from "../../../src/backend-integration";
+import { Framework } from "../../../src/framework";
+import { setFrameworkHistory } from "../../../src/framework/History";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import { LOAD, setupCrudTests } from "./crudFixture";
 import {
@@ -70,5 +78,120 @@ describe("Step 3: the records it validates", () => {
 			first_name: "Alice",
 			born: new Date("2024-03-31T12:00:00.000Z"),
 		});
+	});
+});
+
+describe("GenericDataPreview", () => {
+	it("[ISSUE-3508-ITEM-20] shows the rows of new data", async () => {
+		setFrameworkHistory(createMemoryHistory({ initialEntries: ["/page"] }));
+		const Swap = () => {
+			const [data, setData] = useState([{ a: "A-one" }]);
+			return (
+				<div style={{ height: 500, width: 1000 }}>
+					<button type={"button"} onClick={() => setData([{ a: "B-one" }])}>
+						Swap
+					</button>
+					<GenericDataPreview data={data} />
+				</div>
+			);
+		};
+		render(
+			<Framework>
+				<Swap />
+			</Framework>,
+		);
+		expect(await screen.findByText("A-one", undefined, LOAD)).toBeVisible();
+		fireEvent.click(screen.getByRole("button", { name: "Swap" }));
+		expect(
+			await screen.findByText("B-one", undefined, { timeout: 3000 }),
+		).toBeVisible();
+	});
+
+	it("[ISSUE-3508-ITEM-20] renders the rows with a new model", async () => {
+		setFrameworkHistory(createMemoryHistory({ initialEntries: ["/page"] }));
+		// the same rows: only the model changes, as after a language change
+		const rows = [{ dept: "eng" }];
+		const deptModel = (label: string) => {
+			const fields = baseFields();
+			fields.dept = {
+				...fields.dept,
+				type: new ModelDataTypeEnumSelectRenderer(
+					[{ value: "eng", getLabel: () => label }],
+					"eng",
+				),
+			};
+			return importModel(new MockConnector([]), fields);
+		};
+		const Swap = () => {
+			const [model, setModel] = useState(() => deptModel("Engineering"));
+			return (
+				<div style={{ height: 500, width: 1000 }}>
+					<button
+						type={"button"}
+						onClick={() => setModel(deptModel("Technik"))}
+					>
+						Swap
+					</button>
+					<GenericDataPreview data={rows} model={model} />
+				</div>
+			);
+		};
+		render(
+			<Framework>
+				<Swap />
+			</Framework>,
+		);
+		expect(
+			await screen.findByText("Engineering", undefined, LOAD),
+		).toBeVisible();
+		fireEvent.click(screen.getByRole("button", { name: "Swap" }));
+		expect(
+			await screen.findByText("Technik", undefined, { timeout: 3000 }),
+		).toBeVisible();
+		expect(screen.queryByText("Engineering")).toBeNull();
+	});
+
+	it("[ISSUE-3508-ITEM-20] keeps its filter on new data", async () => {
+		setFrameworkHistory(createMemoryHistory({ initialEntries: ["/page"] }));
+		// the review's filter on the rows with errors, rebuilt in another language
+		const filter: GenericDataPreviewProps["defaultFilter"] = [
+			{ field: "e", filter: { type: "notEqual", value1: "-", value2: "" } },
+		];
+		const Swap = () => {
+			const [data, setData] = useState([
+				{ n: "Alice", e: "-" },
+				{ n: "Bob", e: "Name: ungültig" },
+			]);
+			return (
+				<div style={{ height: 500, width: 1000 }}>
+					<button
+						type={"button"}
+						onClick={() =>
+							setData([
+								{ n: "Alice", e: "-" },
+								{ n: "Bob", e: "Name: invalid" },
+							])
+						}
+					>
+						Swap
+					</button>
+					<GenericDataPreview data={data} defaultFilter={filter} />
+				</div>
+			);
+		};
+		render(
+			<Framework>
+				<Swap />
+			</Framework>,
+		);
+		expect(
+			await screen.findByText("Name: ungültig", undefined, LOAD),
+		).toBeVisible();
+		fireEvent.click(screen.getByRole("button", { name: "Swap" }));
+		expect(
+			await screen.findByText("Name: invalid", undefined, { timeout: 3000 }),
+		).toBeVisible();
+		expect(screen.queryByText("Alice")).toBeNull();
+		expect(screen.getByText(/Filtered: 1/)).toBeInTheDocument();
 	});
 });
