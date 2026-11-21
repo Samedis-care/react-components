@@ -168,7 +168,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 
 	const { name } = props;
 	const value = getValueByDot(name, values);
-	const initialValue = initialValues[name];
+	const initialValue = getValueByDot(name, initialValues);
 	const hasId = "id" in values && (values["id"] as string | null);
 	const label = fieldDef.getLabel();
 	const touch = touched[props.name] || false;

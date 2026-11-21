@@ -38,6 +38,9 @@ export interface RenderParams<T> {
 	value: T;
 	/**
 	 * The initial value (server side value)
+	 * @remarks In a form, the field's value in the form's initial values (the record as
+	 *          loaded or last saved), read like `value` (dot notation for nested fields);
+	 *          what the user types does not change it.
 	 */
 	initialValue: T;
 	/**
