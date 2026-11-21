@@ -253,3 +253,43 @@ describe("load lifecycle and navigation", () => {
 		expect(screen.queryByText("previous-idx0")).toBeNull();
 	});
 });
+
+describe("entries", () => {
+	it("[ISSUE-3477-ITEM-5] a right click does not call onAuxClick", async () => {
+		const onAuxClick = vi.fn();
+		const data = week("w");
+		data[2] = [{ id: "x", title: "Entry", onClick: vi.fn(), onAuxClick }];
+		render(<WeekView loadData={() => data} />);
+		await flush();
+		const entry = screen.getByRole("button", { name: "Entry" });
+		// browsers fire auxclick for every non-primary button, right click included
+		fireEvent(entry, new MouseEvent("auxclick", { bubbles: true, button: 2 }));
+		expect(onAuxClick).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3477-ITEM-5] a middle click calls onAuxClick with its event, not onClick", async () => {
+		const onClick = vi.fn();
+		const onAuxClick = vi.fn<(evt: React.MouseEvent) => void>();
+		const data = week("w");
+		data[2] = [{ id: "x", title: "Entry", onClick, onAuxClick }];
+		render(<WeekView loadData={() => data} />);
+		await flush();
+		const entry = screen.getByRole("button", { name: "Entry" });
+		fireEvent(entry, new MouseEvent("auxclick", { bubbles: true, button: 1 }));
+		expect(onAuxClick).toHaveBeenCalledTimes(1);
+		expect(onAuxClick.mock.calls[0][0].button).toBe(1);
+		expect(onClick).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3477-ITEM-5] the back and forward buttons do not call onAuxClick", async () => {
+		const onAuxClick = vi.fn();
+		const data = week("w");
+		data[2] = [{ id: "x", title: "Entry", onAuxClick }];
+		render(<WeekView loadData={() => data} />);
+		await flush();
+		const entry = screen.getByRole("button", { name: "Entry" });
+		fireEvent(entry, new MouseEvent("auxclick", { bubbles: true, button: 3 }));
+		fireEvent(entry, new MouseEvent("auxclick", { bubbles: true, button: 4 }));
+		expect(onAuxClick).not.toHaveBeenCalled();
+	});
+});

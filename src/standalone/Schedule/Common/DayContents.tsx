@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Button, Grid, styled, useThemeProps } from "@mui/material";
 import combineColors from "../../../utils/combineColors";
 
@@ -16,7 +16,10 @@ export interface IDayData {
 	 */
 	onClick?: React.MouseEventHandler;
 	/**
-	 * Optional middle click handler
+	 * Optional middle click handler: called with the `auxclick` event when the
+	 * entry is clicked with the middle button (`event.button === 1`), not for
+	 * the right, back or forward button, for which browsers fire `auxclick`
+	 * too. There is no keyboard equivalent.
 	 */
 	onAuxClick?: React.MouseEventHandler;
 }
@@ -129,12 +132,34 @@ const StyledButton = styled(Button, { name: "CcDayContents", slot: "button" })<{
 
 export type DayContentsClassKey = "button";
 
+/**
+ * Wraps an entry's `onAuxClick` so it runs for the middle button only:
+ * browsers fire `auxclick` for every non-primary button, the right one (which
+ * opens the context menu), back and forward included.
+ * @param handler the entry's `onAuxClick`
+ * @returns the handler for the entry's `auxclick` event
+ */
+const middleButtonOnly =
+	(handler: React.MouseEventHandler): React.MouseEventHandler =>
+	(evt) => {
+		if (evt.button !== 1) return;
+		handler(evt);
+	};
+
 const DayContents = (inProps: DayContentsProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcDayContents" });
 	const { data, altBorder, className, classes } = props;
+	// the entries' auxclick handlers, by index in data
+	const auxClickHandlers = useMemo(
+		() =>
+			data.map(
+				(entry) => entry.onAuxClick && middleButtonOnly(entry.onAuxClick),
+			),
+		[data],
+	);
 	return (
 		<Grid container spacing={2} className={className}>
-			{data.map((entry) => (
+			{data.map((entry, idx) => (
 				<Grid key={entry.id} size={12}>
 					<StyledButton
 						variant={"outlined"}
@@ -146,7 +171,7 @@ const DayContents = (inProps: DayContentsProps) => {
 						}}
 						className={classes?.button}
 						onClick={entry.onClick}
-						onAuxClick={entry.onAuxClick}
+						onAuxClick={auxClickHandlers[idx]}
 						disableRipple={!entry.onClick && !entry.onAuxClick}
 					>
 						{entry.title}
