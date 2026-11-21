@@ -2,7 +2,12 @@ import React, { useCallback, useMemo } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, waitFor, within } from "storybook/test";
-import { Grid } from "@mui/material";
+import {
+	createTheme,
+	getContrastRatio,
+	Grid,
+	ThemeProvider,
+} from "@mui/material";
 import { Framework } from "../../framework";
 import { Form } from "./index";
 import FormField from "./Field";
@@ -10,7 +15,16 @@ import DefaultFormPage from "./DefaultFormPage";
 import DefaultErrorComponent from "./DefaultErrorComponent";
 import createTestModel from "../../stories/test-utils/TestModel";
 import createMixedControlModel from "../../stories/test-utils/MixedControlModel";
-import { ModelFieldName } from "../../backend-integration";
+import MockConnector from "../../stories/test-utils/MockConnector";
+import {
+	Model,
+	ModelDataTypeEnumMultiCheckboxRendererMUI,
+	ModelDataTypeStringRendererMUI,
+	ModelFieldName,
+	ModelVisibilityDisabled,
+	ModelVisibilityEdit,
+	ModelVisibilityHidden,
+} from "../../backend-integration";
 import { PageProps } from "./Form";
 import DirtyStateProvider from "./DirtyStateProvider";
 import { DirtyStateMarks } from "./DirtyStateContext";
@@ -408,5 +422,184 @@ export const Issue3506Item12FormCheckboxShowsFocus: StoryObj = {
 			{ style: style.outlineStyle, width: parseFloat(style.outlineWidth) },
 			"the outline around the focused checkbox's box",
 		).toEqual({ style: "solid", width: 2 });
+	},
+};
+
+/**
+ * The options of the multi-checkbox field "Channels"
+ */
+const CHANNELS = [
+	{ value: "email", getLabel: () => "Email" },
+	{ value: "sms", getLabel: () => "SMS" },
+	{ value: "phone", getLabel: () => "Phone" },
+];
+
+/**
+ * A model with a name and the enum multi-checkbox field "Channels"
+ * (ModelDataTypeEnumMultiCheckboxRendererMUI), and one record with Email checked
+ */
+const createChannelsModel = () =>
+	new Model(
+		"channels-model-" + Date.now().toString(16),
+		{
+			id: {
+				type: new ModelDataTypeStringRendererMUI(),
+				getLabel: () => "ID",
+				visibility: {
+					overview: ModelVisibilityDisabled,
+					edit: ModelVisibilityHidden,
+					create: ModelVisibilityDisabled,
+				},
+				customData: null,
+			},
+			name: {
+				type: new ModelDataTypeStringRendererMUI(),
+				getLabel: () => "Name",
+				visibility: {
+					overview: ModelVisibilityDisabled,
+					edit: ModelVisibilityEdit,
+					create: ModelVisibilityEdit,
+				},
+				customData: null,
+			},
+			channels: {
+				type: new ModelDataTypeEnumMultiCheckboxRendererMUI(CHANNELS),
+				getLabel: () => "Channels",
+				visibility: {
+					overview: ModelVisibilityDisabled,
+					edit: ModelVisibilityEdit,
+					create: ModelVisibilityEdit,
+				},
+				customData: null,
+			},
+		},
+		new MockConnector([{ id: "1", name: "Alice", channels: ["email"] }]),
+	);
+
+type ChannelsModel = ReturnType<typeof createChannelsModel>;
+
+const CHANNELS_CUSTOM_PROPS: FormCustomProps = {
+	goBack: () => {
+		// eslint-disable-next-line no-console
+		console.log("Go back");
+	},
+};
+
+const ChannelsFormContent = (
+	props: PageProps<ChannelsModel, FormCustomProps>,
+) => (
+	<DefaultFormPage
+		{...props}
+		customProps={{
+			...props.customProps,
+			open: () => {},
+			hasCustomSubmitHandler: false,
+		}}
+		autoBack={false}
+	>
+		<Grid container spacing={2}>
+			<Grid size={{ xs: 12 }}>
+				<FormField name="name" />
+			</Grid>
+			<Grid size={{ xs: 12 }}>
+				<FormField name="channels" />
+			</Grid>
+		</Grid>
+	</DefaultFormPage>
+);
+
+const ChannelsFormStory = () => {
+	const model = useMemo(createChannelsModel, []);
+	return (
+		<Form
+			model={model}
+			id="1"
+			errorComponent={DefaultErrorComponent}
+			customProps={CHANNELS_CUSTOM_PROPS}
+			disableRouting
+		>
+			{ChannelsFormContent}
+		</Form>
+	);
+};
+
+type PlayContext = Parameters<NonNullable<StoryObj["play"]>>[0];
+
+/**
+ * Tabs from Name to the options Email (checked) and SMS (unchecked) of "Channels" and
+ * reads the outline around each focused option's box
+ * @returns per option its outline's style, width in px and color
+ */
+const tabToChannelRings = async ({ canvas, userEvent }: PlayContext) => {
+	const name = await canvas.findByDisplayValue("Alice", undefined, {
+		timeout: 10000,
+	});
+	name.focus();
+	const rings = [];
+	for (const option of ["Email", "SMS"]) {
+		await userEvent.tab();
+		const input = canvas.getByRole("checkbox", { name: option });
+		await expect(input).toHaveFocus();
+		const root = input.parentElement!;
+		// keyboard focus as MUI sees it, so the ring is the only open question
+		await waitFor(() => expect(root).toHaveClass("Mui-focusVisible"));
+		const style = getComputedStyle(root.querySelector(":scope > svg")!);
+		rings.push({
+			option,
+			style: style.outlineStyle,
+			width: parseFloat(style.outlineWidth),
+			color: style.outlineColor,
+		});
+	}
+	return rings;
+};
+
+/**
+ * [ISSUE-3501-ITEM-47] Tab to the options of an enum multi-checkbox field
+ * (ModelDataTypeEnumMultiCheckboxRendererMUI): the focused option's box gets an outline
+ * of at least 3:1 against the form, which forced colors keep, not only the ripple's
+ * faint tint
+ */
+export const Issue3501Item47EnumMultiCheckboxShowsFocus: StoryObj = {
+	render: () => <ChannelsFormStory />,
+	parameters: { a11y: { test: "error" } },
+	play: async (context) => {
+		for (const ring of await tabToChannelRings(context)) {
+			await expect(
+				{ style: ring.style, width: ring.width },
+				`the outline around the box of the focused option ${ring.option}`,
+			).toEqual({ style: "solid", width: 2 });
+			await expect(
+				getContrastRatio(ring.color, "#fff"),
+				`the contrast of ${ring.option}'s outline against the form`,
+			).toBeGreaterThanOrEqual(3);
+		}
+	},
+};
+
+/**
+ * An app's theme ring, as MUI's createTheme({ focusVisible }) takes it
+ */
+const GREEN_RING = createTheme({
+	focusVisible: { outlineColor: "rgb(0, 128, 0)" },
+});
+
+/**
+ * [ISSUE-3501-ITEM-47] With a theme that sets MUI's `focusVisible` ring (here
+ * `outlineColor: rgb(0, 128, 0)`), the focused option's box shows that ring
+ */
+export const Issue3501Item47EnumMultiCheckboxThemeRing: StoryObj = {
+	render: () => (
+		<ThemeProvider theme={GREEN_RING}>
+			<ChannelsFormStory />
+		</ThemeProvider>
+	),
+	parameters: { a11y: { test: "error" } },
+	play: async (context) => {
+		for (const ring of await tabToChannelRings(context))
+			await expect(
+				{ style: ring.style, color: ring.color },
+				`the theme's ring around the box of the focused option ${ring.option}`,
+			).toEqual({ style: "solid", color: "rgb(0, 128, 0)" });
 	},
 };

@@ -4,12 +4,12 @@ import {
 	FormHelperText,
 	FormLabel,
 	Typography,
-	Checkbox,
 	FormGroup,
 } from "@mui/material";
 import ModelRenderParams from "../../../RenderParams";
 import TypeEnumMulti from "../../TypeEnumMulti";
 import ccI18n from "../../../../../i18n";
+import FocusRingCheckbox from "../../../../../utils/internal/FocusRingCheckbox";
 import { EnumValue } from "../../TypeEnum";
 import {
 	FormControlFieldsetCC,
@@ -103,7 +103,7 @@ class RendererEnumRadio<T extends string = string> extends TypeEnumMulti<T> {
 										key={entry.value}
 										value={entry.value}
 										control={
-											<Checkbox
+											<FocusRingCheckbox
 												checked={value.includes(entry.value)}
 												autoFocus={entry.value === focusValue}
 												name={entry.value}

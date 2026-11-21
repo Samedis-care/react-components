@@ -1,11 +1,5 @@
 import React from "react";
-import {
-	Checkbox,
-	FormControlLabel,
-	FormHelperText,
-	styled,
-	Typography,
-} from "@mui/material";
+import { FormControlLabel, FormHelperText, Typography } from "@mui/material";
 import ModelRenderParams from "../../../RenderParams";
 import TypeBoolean from "../../TypeBoolean";
 import ccI18n from "../../../../../i18n";
@@ -13,18 +7,7 @@ import {
 	FormControlFieldsetCC,
 	labelWithDirtyText,
 } from "../../../../../standalone";
-import focusRing from "../../../../../utils/internal/focusRing";
-
-/**
- * MUI's Checkbox with CC's keyboard focus ring around its box, where MUI draws
- * the ring of the theme's `focusVisible`
- */
-const FocusRingCheckbox = styled(Checkbox)(({ theme }) => ({
-	"&.Mui-focusVisible > svg": {
-		borderRadius: theme.shape.borderRadius,
-		...focusRing(theme, 2),
-	},
-}));
+import FocusRingCheckbox from "../../../../../utils/internal/FocusRingCheckbox";
 
 /**
  * Renders a TypeBoolean field as Checkbox
