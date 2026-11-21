@@ -171,7 +171,8 @@ export interface MultiImageProps {
 	 */
 	disableRotation?: boolean;
 	/**
-	 * Additional dialog content (e.g. how-to-box)
+	 * Additional dialog content (e.g. how-to-box), each element a tile after the images and
+	 * the add tile, not an item of the images' list
 	 */
 	additionalDialogContent?: React.ReactNode[];
 	/**
@@ -248,6 +249,16 @@ const TileButton = styled(ButtonBase, {
 		pointerEvents: "none",
 	},
 })) as typeof ButtonBase;
+
+/**
+ * The edit dialog's images as a list (role list, the entries are its items), so a screen
+ * reader says how many there are. It draws no box: the entries stay items of the dialog's
+ * Grid container, and the add and camera tiles, which are not in the list, still follow the
+ * last image in the same row.
+ */
+const DialogImageList = styled("div")({
+	display: "contents",
+});
 
 /**
  * Slots of MultiImage (theme CcMultiImage): root (outer div), uploadInput (the hidden file
@@ -578,22 +589,26 @@ const MultiImage = (inProps: MultiImageProps) => {
 						<DialogContent>
 							{dialogMessage}
 							<Grid container spacing={2}>
-								{images.map((img, i) => (
-									<ImageDialogEntry
-										img={img}
-										previewSize={previewSize}
-										isPrimary={img === primaryImg}
-										processFile={processFile}
-										onImageError={handleImageError}
-										changeImages={manipulateImages}
-										changePrimary={changePrimary}
-										onDelete={onDelete}
-										disableRotation={disableRotation}
-										key={`img-${i}`}
-										classes={subClasses?.imageDialogEntry}
-										subClasses={subClasses?.imageDialogEntrySubClasses}
-									/>
-								))}
+								{images.length > 0 && (
+									<DialogImageList role={"list"}>
+										{images.map((img, i) => (
+											<ImageDialogEntry
+												img={img}
+												previewSize={previewSize}
+												isPrimary={img === primaryImg}
+												processFile={processFile}
+												onImageError={handleImageError}
+												changeImages={manipulateImages}
+												changePrimary={changePrimary}
+												onDelete={onDelete}
+												disableRotation={disableRotation}
+												key={`img-${i}`}
+												classes={subClasses?.imageDialogEntry}
+												subClasses={subClasses?.imageDialogEntrySubClasses}
+											/>
+										))}
+									</DialogImageList>
+								)}
 								{!readOnly && remainingFiles > 0 && (
 									<>
 										<Grid

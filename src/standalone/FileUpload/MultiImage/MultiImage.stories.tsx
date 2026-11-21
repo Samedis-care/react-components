@@ -754,3 +754,32 @@ export const Issue3490Item8FullScreenToolbarFitsAPhone: Story = {
 		await expectFullScreenToolbarRow(dialog);
 	},
 };
+
+export const Issue3491Item29EditDialogEntriesFormAList: Story = {
+	parameters: {
+		...AXE_GATE,
+		docs: {
+			description: {
+				story:
+					"ISSUE-3491-ITEM-29: the edit dialog's images form a list, so a screen reader says how many there are. The add tile is not an item of it, and still follows the last image in the same row.",
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const dialog = await openEditDialog(canvasElement);
+		const list = within(dialog).getByRole("list");
+		const items = within(list).getAllByRole("listitem");
+		await expect(items).toHaveLength(3);
+		const add = within(dialog).getByRole("button", { name: "Add image" });
+		await expect(list.contains(add)).toBe(false);
+		// the dialog fades in
+		await waitFor(() => expect(add).toBeVisible());
+		const first = items[0].getBoundingClientRect();
+		const last = items[2].getBoundingClientRect();
+		const tile = add.getBoundingClientRect();
+		await expect(last.top).toBe(first.top);
+		await expect(last.left).toBeGreaterThan(first.right);
+		await expect(tile.top).toBe(first.top);
+		await expect(tile.left).toBeGreaterThan(last.right);
+	},
+};

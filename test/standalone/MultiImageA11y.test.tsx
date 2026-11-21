@@ -430,4 +430,23 @@ describe("MultiImage a11y — bugs", () => {
 		});
 		expect(missing, "locales without both texts").toEqual([]);
 	});
+
+	it("[ISSUE-3491-ITEM-29] the shown image's position and the number of images are exposed, and the edit dialog's entries form a list", () => {
+		const { container } = renderPlain({
+			images: [mk("a"), mk("b"), mk("c")],
+			primary: "b",
+			onChange: vi.fn(),
+		});
+		const position = /\b2\b\D+\b3\b/;
+		const exposed =
+			within(container).queryAllByText(position).length > 0 ||
+			within(container).queryAllByRole("button", { name: position }).length >
+				0 ||
+			container.querySelector('[aria-current]:not([aria-current="false"])') !==
+				null;
+		expect(exposed).toBe(true);
+		const dialog = openEdit();
+		expect(within(dialog).getByRole("list")).toBeInTheDocument();
+		expect(within(dialog).getAllByRole("listitem")).toHaveLength(3);
+	});
 });

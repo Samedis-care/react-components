@@ -265,6 +265,8 @@ const ImageDialogEntry = (inProps: ImageDialogEntryProps) => {
 		<Root
 			size={previewSize ? undefined : { xs: 12, md: 6, lg: 3 }}
 			className={combineClassNames([className, classes?.root])}
+			// an item of the dialog's list of images (MultiImage)
+			role={"listitem"}
 		>
 			<div>
 				<ImageBox
