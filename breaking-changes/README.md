@@ -22,6 +22,7 @@ One file per change, so this never grows into a single unreadable log.
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
 | 2026-11-21 | [The date pickers report a blur when focus leaves a calendar opened from outside the field](2026-11-21-picker-blur-on-leaving-a-calendar-opened-from-outside.md) | behavior |
 | 2026-11-21 | [The page scrolls to the top after a navigation, not before](2026-11-21-scroll-reset-after-navigation.md) | behavior |
+| 2026-11-21 | [UIKit theme types match what the slots get, and button variants apply](2026-11-21-ui-kit-theme-owner-state-and-variants.md) | behavior, type, theme |
 | 2026-11-20 | [A lazy control's queue keeps the Form dirty when onlySubmitMounted changes while it is shown](2026-11-20-lazy-crud-connector-only-submit-mounted-change.md) | behavior |
 | 2026-11-20 | [A control in a DataGrid cell is named after its field and row](2026-11-20-data-grid-inline-checkbox-names.md) | behavior |
 | 2026-11-20 | [InlineSwitch takes aria props for its switch, and a selector's switch requires switchLabel](2026-11-20-inline-switch-name-and-switch-label.md) | behavior, type |

@@ -56,10 +56,12 @@ import {
 import { CheckboxClassKey } from "./standalone/UIKit/Checkbox";
 import {
 	ActionButtonClassKey,
+	ActionButtonOwnerState,
 	ActionButtonProps,
 } from "./standalone/UIKit/ActionButton";
 import {
 	SubActionButtonClassKey,
+	SubActionButtonOwnerState,
 	SubActionButtonProps,
 } from "./standalone/UIKit/SubActionButton";
 import {
@@ -297,6 +299,48 @@ type StyleOverridesWithoutOwnerState<ClassKey extends string> = Partial<
 	Record<ClassKey, Interpolation<{ theme: Theme }>>
 >;
 
+/**
+ * `variants` of a component whose root gets `Props` directly and no
+ * `ownerState`. MUI matches a variant's `props` against them and calls a
+ * `props` function with them.
+ */
+type VariantsWithoutOwnerState<Props> = Array<{
+	props: Partial<Props> | ((props: Partial<Props>) => boolean);
+	style: Interpolation<{ theme: Theme }>;
+}>;
+
+/**
+ * `styleOverrides` of a component that passes `OwnerState` to its slots as
+ * their `ownerState`. MUI calls each function in it while styling every slot
+ * of the component, with that slot's props.
+ */
+type StyleOverridesWithOwnerState<
+	ClassKey extends string,
+	OwnerState,
+> = Partial<
+	Record<ClassKey, Interpolation<{ theme: Theme; ownerState: OwnerState }>>
+>;
+
+/**
+ * `variants` of a component whose root gets `Props` and `OwnerState` as its
+ * `ownerState`. MUI matches each key of a variant's `props` against both,
+ * and calls a `props` function with the props, the fields of `ownerState`
+ * (which replace props of the same name) and `ownerState` itself.
+ */
+type VariantsWithOwnerState<Props, OwnerState> = Array<{
+	props:
+		| {
+				[Key in keyof Props | keyof OwnerState]?:
+					| (Key extends keyof Props ? Props[Key] : never)
+					| (Key extends keyof OwnerState ? OwnerState[Key] : never);
+		  }
+		| ((
+				props: Partial<Omit<Props, keyof OwnerState>> &
+					OwnerState & { ownerState: OwnerState },
+		  ) => boolean);
+	style: Interpolation<{ theme: Theme }>;
+}>;
+
 declare module "@mui/material/styles" {
 	interface ComponentNameToClassKey {
 		CcSignalPortlet: SignalPortletClassKey;
@@ -490,8 +534,15 @@ declare module "@mui/material/styles" {
 		};
 		CcActionButton?: {
 			defaultProps?: ComponentsPropsList["CcActionButton"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcActionButton"];
-			variants?: ComponentsVariants["CcActionButton"];
+			styleOverrides?: StyleOverridesWithOwnerState<
+				ActionButtonClassKey,
+				ActionButtonOwnerState
+			>;
+			// the button gets every prop but icon, small and children
+			variants?: VariantsWithOwnerState<
+				Omit<ActionButtonProps, "icon" | "small" | "children">,
+				ActionButtonOwnerState
+			>;
 		};
 		CcFormLoaderOverlay?: {
 			defaultProps?: ComponentsPropsList["CcFormLoaderOverlay"];
@@ -558,10 +609,11 @@ declare module "@mui/material/styles" {
 			styleOverrides?: ComponentsOverrides<Theme>["CcMultiLanguageInput"];
 			variants?: ComponentsVariants["CcMultiLanguageInput"];
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of FormButtons' props.
 		CcFormButtons?: {
 			defaultProps?: ComponentsPropsList["CcFormButtons"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcFormButtons"];
-			variants?: ComponentsVariants["CcFormButtons"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<FormButtonsClassKey>;
 		};
 		CcDefaultFormPageButtons?: {
 			defaultProps?: ComponentsPropsList["CcDefaultFormPageButtons"];
@@ -570,8 +622,18 @@ declare module "@mui/material/styles" {
 		};
 		CcSubActionButton?: {
 			defaultProps?: ComponentsPropsList["CcSubActionButton"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcSubActionButton"];
-			variants?: ComponentsVariants["CcSubActionButton"];
+			styleOverrides?: StyleOverridesWithOwnerState<
+				SubActionButtonClassKey,
+				SubActionButtonOwnerState
+			>;
+			// the button gets every prop but icon, small, disableDivider and children
+			variants?: VariantsWithOwnerState<
+				Omit<
+					SubActionButtonProps,
+					"icon" | "small" | "disableDivider" | "children"
+				>,
+				SubActionButtonOwnerState
+			>;
 		};
 		CcGroupBox?: {
 			defaultProps?: ComponentsPropsList["CcGroupBox"];
@@ -660,10 +722,11 @@ declare module "@mui/material/styles" {
 			styleOverrides?: StyleOverridesWithoutOwnerState<CollapsibleMenuClassKey>;
 			variants?: ComponentsVariants["CcCollapsibleMenu"];
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of CenteredTypography's props.
 		CcCenteredTypography?: {
 			defaultProps?: ComponentsPropsList["CcCenteredTypography"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcCenteredTypography"];
-			variants?: ComponentsVariants["CcCenteredTypography"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<CenteredTypographyClassKey>;
 		};
 		CcMultiImage?: {
 			defaultProps?: ComponentsPropsList["CcMultiImage"];
@@ -737,13 +800,19 @@ declare module "@mui/material/styles" {
 		};
 		CcComponentWithLabel?: {
 			defaultProps?: ComponentsPropsList["CcComponentWithLabel"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcComponentWithLabel"];
-			variants?: ComponentsVariants["CcComponentWithLabel"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<ComponentWithLabelClassKey>;
+			// the root gets every prop but the caption's, which make up its label
+			variants?: VariantsWithoutOwnerState<
+				Omit<
+					ComponentWithLabelProps,
+					"labelText" | "labelVariant" | "labelDisplay" | "labelAlign"
+				>
+			>;
 		};
 		CcCheckbox?: {
 			defaultProps?: ComponentsPropsList["CcCheckbox"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcCheckbox"];
-			variants?: ComponentsVariants["CcCheckbox"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<CheckboxClassKey>;
+			variants?: VariantsWithoutOwnerState<CheckboxProps>;
 		};
 		CcUiKitInput?: {
 			defaultProps?: ComponentsPropsList["CcUiKitInput"];

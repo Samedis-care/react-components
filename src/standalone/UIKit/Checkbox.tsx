@@ -31,6 +31,12 @@ const StyledCheckbox = styled(MuiCheckbox, {
 	"&.Mui-focusVisible > svg": focusRing(theme, 2),
 }));
 
+/**
+ * Key of the theme's `components.CcCheckbox.styleOverrides`: `root`, MUI's
+ * Checkbox root. It receives no `ownerState`: a function override is called
+ * with the theme. Theme `variants` match Checkbox's props, and a `props`
+ * function gets them directly.
+ */
 export type CheckboxClassKey = "root";
 
 const _uncheckedIcon = (

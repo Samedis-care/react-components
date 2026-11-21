@@ -51,6 +51,17 @@ const Label = styled(Typography, {
 	whiteSpace: "pre",
 });
 
+/**
+ * Keys of the theme's `components.CcComponentWithLabel.styleOverrides`, also
+ * the keys of the `classes` prop:
+ * - `root`: the `<label>` (MUI's FormControlLabel)
+ * - `label`: the caption shown for `labelText`
+ *
+ * No slot receives an `ownerState`: a function override is called with the
+ * theme. Theme `variants` style the root and match its props, which are all
+ * of ComponentWithLabel's but `labelText`, `labelVariant`, `labelDisplay`
+ * and `labelAlign`; a `props` function gets them directly.
+ */
 export type ComponentWithLabelClassKey = "root" | "label";
 
 const ComponentWithLabel = (

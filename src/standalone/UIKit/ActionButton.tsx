@@ -10,16 +10,38 @@ import {
 import combineColors from "../../utils/combineColors";
 import focusRing from "../../utils/internal/focusRing";
 
+/**
+ * Key of the theme's `components.CcActionButton.styleOverrides`: `button`,
+ * the MUI `Button`, ActionButton's only slot. A function override gets its
+ * {@link ActionButtonOwnerState}. Theme `variants` style the button too.
+ */
 export type ActionButtonClassKey = "button";
 
+/**
+ * The `ownerState` of the `button` slot: two flags, not ActionButton's
+ * props. A function in the theme's `styleOverrides` gets it. A theme
+ * variant's `props` object matches each key against the button's props
+ * (every ActionButton prop but `icon`, `small` and `children`, `fullWidth`
+ * as applied) and against these flags; a `props` function gets the button's
+ * props with these flags in place of `small` and `color`.
+ */
 export interface ActionButtonOwnerState {
+	/**
+	 * Whether the `small` prop is set (`"true"` included)
+	 */
 	small: boolean;
+	/**
+	 * Whether a `color` prop is set, whatever its value (`"primary"`
+	 * included); not the color itself
+	 */
 	color: boolean;
 }
 
 const StyledButton = styled(Button, {
 	name: "CcActionButton",
 	slot: "button",
+	// the only slot, so the theme's variants apply to it as to a root
+	skipVariantsResolver: false,
 })<{ ownerState: ActionButtonOwnerState }>(({
 	theme,
 	ownerState: { small, color },

@@ -50,6 +50,18 @@ const StyledTypography = styled(Typography, {
 	slot: "typography",
 })({});
 
+/**
+ * Keys of the theme's `components.CcCenteredTypography.styleOverrides`, also
+ * the keys of the `classes` prop:
+ * - `root`: the outer box
+ * - `inner`: the box centred in it
+ * - `typography`: the text
+ *
+ * No slot receives an `ownerState`: a function override is called with the
+ * theme. CenteredTypography has no theme `variants`; to style the text of
+ * one Typography variant, use a nested selector such as
+ * `"& .MuiTypography-h6"` in `styleOverrides.root`.
+ */
 export type CenteredTypographyClassKey = "root" | "inner" | "typography";
 
 const CenteredTypography = (inProps: CenteredTypographyProps) => {

@@ -349,10 +349,34 @@ describe("theme-def", () => {
 						root: ({ ownerState }) => ({ color: ownerState ? "red" : "blue" }),
 					},
 				},
+				CcFormButtons: {
+					styleOverrides: {
+						// @ts-expect-error no slot of FormButtons receives an ownerState
+						root: ({ ownerState }) => ({ color: ownerState ? "red" : "blue" }),
+					},
+				},
+				CcCenteredTypography: {
+					styleOverrides: {
+						// @ts-expect-error no slot of CenteredTypography receives an ownerState
+						root: ({ ownerState }) => ({ color: ownerState ? "red" : "blue" }),
+					},
+				},
+				CcCheckbox: {
+					styleOverrides: {
+						// @ts-expect-error no slot of Checkbox receives an ownerState
+						root: ({ ownerState }) => ({ color: ownerState ? "red" : "blue" }),
+					},
+				},
+				CcComponentWithLabel: {
+					styleOverrides: {
+						// @ts-expect-error no slot of ComponentWithLabel receives an ownerState
+						root: ({ ownerState }) => ({ color: ownerState ? "red" : "blue" }),
+					},
+				},
 			},
 		});
 		expect(overrideFunctions(theme)).toEqual(
-			Array(51).fill(expect.any(Function)),
+			Array(55).fill(expect.any(Function)),
 		);
 	});
 
@@ -393,5 +417,120 @@ describe("theme-def", () => {
 		expect(overrideFunctions(theme)).toEqual(
 			Array(4).fill(expect.any(Function)),
 		);
+	});
+
+	it("[ISSUE-3482-ITEM-15] types the ownerState of CcActionButton and CcSubActionButton as the flags their button slot gets", () => {
+		const theme = createTheme({
+			components: {
+				CcActionButton: {
+					styleOverrides: {
+						button: ({ ownerState }) => {
+							// whether small and color are set, not the props themselves
+							const flags: { small: boolean; color: boolean } = ownerState;
+							// @ts-expect-error the ownerState holds small and color only
+							const disabled: unknown = ownerState.disabled;
+							return { color: flags.color || disabled ? "red" : "blue" };
+						},
+					},
+				},
+				CcSubActionButton: {
+					styleOverrides: {
+						button: ({ ownerState }) => {
+							const flags: { small: boolean; disableDivider: boolean } =
+								ownerState;
+							// @ts-expect-error the ownerState holds small and disableDivider only
+							const disabled: unknown = ownerState.disabled;
+							return {
+								color: flags.disableDivider || disabled ? "red" : "blue",
+							};
+						},
+					},
+				},
+			},
+		});
+		expect(overrideFunctions(theme)).toEqual(
+			Array(2).fill(expect.any(Function)),
+		);
+	});
+
+	it("[ISSUE-3482-ITEM-15] types the variants of the UIKit components as what their slots match", () => {
+		const variants = (theme: Theme) =>
+			Object.values(theme.components ?? {}).flatMap(
+				(component) => (component as { variants?: unknown[] }).variants ?? [],
+			);
+		const theme = createTheme({
+			components: {
+				CcActionButton: {
+					variants: [
+						// the button's props, and small and color as booleans from the ownerState
+						{ props: { color: "error", small: true }, style: {} },
+						{ props: { disabled: true, fullWidth: false }, style: {} },
+						// @ts-expect-error small is matched as the ownerState's boolean
+						{ props: { small: "true" }, style: {} },
+						// @ts-expect-error icon does not reach the button
+						{ props: { icon: null }, style: {} },
+						{
+							// a props function gets the ownerState's flags over the props
+							props: ({ small, color, disabled, ownerState }) =>
+								small && color === ownerState.color && !disabled,
+							style: {},
+						},
+						{
+							// @ts-expect-error color is the ownerState's flag here; a props object matches the color
+							props: ({ color }) => color === "error",
+							style: {},
+						},
+					],
+				},
+				CcSubActionButton: {
+					variants: [
+						{ props: { disableDivider: true, small: false }, style: {} },
+						// @ts-expect-error disableDivider is matched as the ownerState's boolean
+						{ props: { disableDivider: "true" }, style: {} },
+						{
+							props: ({ disableDivider, ownerState }) =>
+								disableDivider === ownerState.disableDivider,
+							style: {},
+						},
+					],
+				},
+				CcCheckbox: {
+					variants: [
+						{ props: { size: "small" }, style: {} },
+						{
+							// a props function gets Checkbox's props directly
+							props: ({ checked }) => checked === true,
+							style: {},
+						},
+						{
+							// @ts-expect-error Checkbox's slot gets no ownerState
+							props: ({ ownerState }) => !!ownerState,
+							style: {},
+						},
+					],
+				},
+				CcComponentWithLabel: {
+					variants: [
+						{ props: { labelPlacement: "start" }, style: {} },
+						// @ts-expect-error labelText does not reach the root
+						{ props: { labelText: "Caption" }, style: {} },
+						{
+							// @ts-expect-error ComponentWithLabel's slots get no ownerState
+							props: ({ ownerState }) => !!ownerState,
+							style: {},
+						},
+					],
+				},
+				CcFormButtons: {
+					// @ts-expect-error the root gets none of FormButtons' props, a variant could match none
+					variants: [{ props: { className: "bar" }, style: {} }],
+				},
+				CcCenteredTypography: {
+					// @ts-expect-error the root gets none of CenteredTypography's props, a variant could match none
+					variants: [{ props: { variant: "h6" }, style: {} }],
+				},
+			},
+		});
+		expect(variants(theme)).toHaveLength(17);
 	});
 });

@@ -22,6 +22,15 @@ const ButtonWrapper = styled(Grid, {
 	},
 }));
 
+/**
+ * Keys of the theme's `components.CcFormButtons.styleOverrides`, also the
+ * keys of the `classes` prop:
+ * - `root`: the bar, a Grid container
+ * - `buttonWrapper`: the Grid item around each button
+ *
+ * No slot receives an `ownerState`: a function override is called with the
+ * theme. FormButtons has no theme `variants`.
+ */
 export type FormButtonsClassKey = "root" | "buttonWrapper";
 
 export interface FormButtonsProps {

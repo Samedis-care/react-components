@@ -7,7 +7,7 @@ import {
 	cleanup,
 	act,
 } from "@testing-library/react";
-import { ThemeProvider, createTheme, Button } from "@mui/material";
+import { ThemeProvider, createTheme, Button, Theme } from "@mui/material";
 import { Save as SaveIcon } from "@mui/icons-material";
 import ActionButton from "../../src/standalone/UIKit/ActionButton";
 import SubActionButton from "../../src/standalone/UIKit/SubActionButton";
@@ -17,18 +17,67 @@ import TextFieldWithHelp from "../../src/standalone/UIKit/TextFieldWithHelp";
 import NumberFormatter from "../../src/standalone/UIKit/NumberFormatter";
 import CenteredTypography from "../../src/standalone/UIKit/CenteredTypography";
 import Checkbox from "../../src/standalone/UIKit/Checkbox";
+import ComponentWithLabel from "../../src/standalone/UIKit/ComponentWithLabel";
 import { TextFieldCC } from "../../src/standalone/UIKit/MuiFieldState";
 import DecimalInputField from "../../src/standalone/UIKit/InputControls/DecimalInputField";
 import CurrencyInput from "../../src/standalone/UIKit/InputControls/CurrencyInput";
 import IntegerInputField from "../../src/standalone/UIKit/InputControls/IntegerInputField";
 
 const theme = createTheme();
-const wrap = (ui: React.ReactNode) =>
-	render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+const wrap = (ui: React.ReactNode, withTheme: Theme = theme) =>
+	render(<ThemeProvider theme={withTheme}>{ui}</ThemeProvider>);
+// the theme types only know the registered Cc slots and their props
+const themeWith = (components: object, mode?: "dark") =>
+	createTheme({ palette: mode ? { mode } : undefined, components });
 
 afterEach(() => {
 	cleanup();
 });
+
+/** every emitted style rule: emotion's text nodes and the parsed CSSOM */
+const allCss = () =>
+	Array.from(document.querySelectorAll("style"))
+		.map(
+			(style) =>
+				(style.textContent ?? "") +
+				Array.from(style.sheet?.cssRules ?? [])
+					.map((rule) => rule.cssText)
+					.join("\n"),
+		)
+		.join("\n");
+
+/**
+ * Values of `property` from every emitted rule whose selector matches `el`.
+ * jsdom has no cascade for emotion's rules, so this lists candidates rather
+ * than the winner; selectors jsdom cannot match (pseudo-elements, invalid
+ * selectors) are skipped.
+ */
+const applied = (el: Element, property: string): string[] => {
+	const values: string[] = [];
+	const rule = /([^{}]+)\{([^{}]*)\}/g;
+	const css = allCss();
+	let match: RegExpExecArray | null;
+	while ((match = rule.exec(css)) !== null) {
+		let matches = false;
+		try {
+			matches = el.matches(match[1].trim());
+		} catch {
+			// not a selector jsdom can evaluate
+		}
+		if (!matches) continue;
+		for (const declaration of match[2].split(";")) {
+			const colon = declaration.indexOf(":");
+			if (colon > 0 && declaration.slice(0, colon).trim() === property)
+				values.push(
+					declaration
+						.slice(colon + 1)
+						.trim()
+						.toLowerCase(),
+				);
+		}
+	}
+	return values;
+};
 
 describe("UIKit", () => {
 	describe("ActionButton", () => {
@@ -455,6 +504,119 @@ describe("UIKit", () => {
 				"inputmode",
 				"numeric",
 			);
+		});
+	});
+
+	describe("theme slots", () => {
+		it("[ISSUE-3482-ITEM-15] applies theme variants of CcActionButton and CcSubActionButton", () => {
+			wrap(
+				<>
+					<ActionButton color={"error"}>A</ActionButton>
+					<SubActionButton disableDivider>B</SubActionButton>
+				</>,
+				themeWith({
+					CcActionButton: {
+						variants: [
+							{ props: { color: "error" }, style: { outlineOffset: "7px" } },
+						],
+					},
+					CcSubActionButton: {
+						variants: [
+							{
+								props: { disableDivider: true },
+								style: { outlineOffset: "8px" },
+							},
+						],
+					},
+				}),
+			);
+			expect(
+				applied(screen.getByRole("button", { name: "A" }), "outline-offset"),
+			).toContain("7px");
+			expect(
+				applied(screen.getByRole("button", { name: "B" }), "outline-offset"),
+			).toContain("8px");
+		});
+
+		it("[ISSUE-3482-ITEM-15] matches CcActionButton and CcSubActionButton variants against the flags of their ownerState", () => {
+			wrap(
+				<>
+					<ActionButton small={"true"} icon={<SaveIcon />} aria-label={"A"}>
+						A
+					</ActionButton>
+					<ActionButton>B</ActionButton>
+					<SubActionButton disableDivider={"true"}>C</SubActionButton>
+					<SubActionButton>D</SubActionButton>
+				</>,
+				themeWith({
+					CcActionButton: {
+						variants: [
+							{ props: { small: true }, style: { outlineOffset: "5px" } },
+						],
+					},
+					CcSubActionButton: {
+						variants: [
+							{
+								props: ({
+									ownerState,
+								}: {
+									ownerState: { disableDivider: boolean };
+								}) => ownerState.disableDivider,
+								style: { outlineOffset: "6px" },
+							},
+						],
+					},
+				}),
+			);
+			const offset = (name: string) =>
+				applied(screen.getByRole("button", { name }), "outline-offset");
+			expect(offset("A")).toContain("5px");
+			expect(offset("B")).not.toContain("5px");
+			expect(offset("C")).toContain("6px");
+			expect(offset("D")).not.toContain("6px");
+		});
+
+		it("[ISSUE-3482-ITEM-15] matches CcCheckbox and CcComponentWithLabel variants against their props, which a props function gets directly", () => {
+			const { container } = wrap(
+				<>
+					<Checkbox
+						size={"small"}
+						slotProps={{ input: { "aria-label": "A" } }}
+					/>
+					<Checkbox slotProps={{ input: { "aria-label": "B" } }} />
+					<ComponentWithLabel
+						control={<Checkbox />}
+						labelText={"C"}
+						labelPlacement={"start"}
+					/>
+					<ComponentWithLabel control={<Checkbox />} labelText={"D"} />
+				</>,
+				themeWith({
+					CcCheckbox: {
+						variants: [
+							{ props: { size: "small" }, style: { outlineOffset: "3px" } },
+						],
+					},
+					CcComponentWithLabel: {
+						variants: [
+							{
+								props: ({ labelPlacement }: { labelPlacement?: string }) =>
+									labelPlacement === "start",
+								style: { outlineOffset: "4px" },
+							},
+						],
+					},
+				}),
+			);
+			const box = (name: string) =>
+				screen.getByRole("checkbox", { name }).closest(".MuiCheckbox-root")!;
+			expect(applied(box("A"), "outline-offset")).toContain("3px");
+			expect(applied(box("B"), "outline-offset")).not.toContain("3px");
+			const [start, end] = Array.from(container.querySelectorAll("label"));
+			expect(start).toHaveTextContent("C");
+			expect(applied(start, "outline-offset")).toContain("4px");
+			expect(end).toHaveTextContent("D");
+			expect(applied(end, "outline-offset")).not.toContain("4px");
 		});
 	});
 });

@@ -8,13 +8,29 @@ import {
 } from "@mui/material";
 import focusRing from "../../utils/internal/focusRing";
 
+/**
+ * The `ownerState` of the `button` slot: two flags. A function in the
+ * theme's `styleOverrides` gets it. A theme variant's `props` object matches
+ * each key against the button's props (every SubActionButton prop but
+ * `icon`, `small`, `disableDivider` and `children`, `fullWidth` as applied)
+ * and against these flags; a `props` function gets the button's props and
+ * these flags.
+ */
 export interface SubActionButtonOwnerState {
+	/**
+	 * Whether the `small` prop is set
+	 */
 	small: boolean;
+	/**
+	 * Whether the `disableDivider` prop is set (`"true"` included)
+	 */
 	disableDivider: boolean;
 }
 const StyledButton = styled(Button, {
 	name: "CcSubActionButton",
 	slot: "button",
+	// the only slot, so the theme's variants apply to it as to a root
+	skipVariantsResolver: false,
 })<{ ownerState: SubActionButtonOwnerState }>(
 	({ theme, ownerState: { small, disableDivider } }) => ({
 		padding: small ? theme.spacing(1) : theme.spacing(1, 3),
@@ -98,6 +114,12 @@ const StyledButton = styled(Button, {
 	}),
 );
 
+/**
+ * Key of the theme's `components.CcSubActionButton.styleOverrides`:
+ * `button`, the MUI `Button`, SubActionButton's only slot. A function
+ * override gets its {@link SubActionButtonOwnerState}. Theme `variants` style
+ * the button too.
+ */
 export type SubActionButtonClassKey = "button";
 
 export interface SubActionButtonProps extends Omit<ButtonProps, "children"> {
