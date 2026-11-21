@@ -92,6 +92,10 @@ const openEditDialog = async (canvasElement: HTMLElement) => {
 	within(canvasElement).getByText("Edit").click();
 	return within(document.body).findByRole("dialog");
 };
+const rectOf = (element: Element | null) => {
+	if (!element) throw new Error("element not found");
+	return element.getBoundingClientRect();
+};
 
 const meta: Meta<OwnerArgs> = {
 	title: "Standalone/FileUpload/MultiImage",
@@ -425,5 +429,168 @@ export const Issue3491Item2ImageBoxOpensByKeyboard: StoryObj = {
 			expect(within(document.body).queryByRole("dialog")).toBeNull(),
 		);
 		await expect(opener).toHaveFocus();
+	},
+};
+
+export const Issue3491Item37ActiveDotStaysVisible: Story = {
+	args: {
+		readOnly: true,
+		initialImages: makeImages(30),
+		initialPrimary: "img-25",
+	},
+	parameters: {
+		...AXE_GATE,
+		docs: {
+			description: {
+				story:
+					'ISSUE-3491-ITEM-37: with 30 images in a 300px field the dots do not fit in one row, so a counter shows the position of the shown image instead ("26 / 30", read as "Image 26 of 30") and Next moves it on. In a field wide enough for all of them the dots come back, the shown image\'s dot filled and in view.',
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const dots = () =>
+			Array.from(
+				canvasElement.querySelectorAll('[class*="CcImageDots-imageDot"]'),
+			);
+		const root = () =>
+			rectOf(canvasElement.querySelector('[class*="CcImageDots-root"]'));
+		await expect(dots()).toHaveLength(30);
+		for (const dot of dots()) await expect(dot).not.toBeVisible();
+		await expect(canvas.queryAllByRole("button", { name: /^Image / })).toEqual(
+			[],
+		);
+		const counter = canvas.getByText("26 / 30");
+		await expect(counter).toBeVisible();
+		await expect(counter).toHaveAttribute("aria-hidden", "true");
+		await expect(canvas.getByText("Image 26 of 30")).toBeInTheDocument();
+		const text = rectOf(counter);
+		await expect(text.left).toBeGreaterThanOrEqual(root().left);
+		await expect(text.right).toBeLessThanOrEqual(root().right);
+
+		await userEvent.click(canvas.getByRole("button", { name: "Next image" }));
+		await expect(await canvas.findByText("27 / 30")).toBeVisible();
+		await expect(canvas.getByText("Image 27 of 30")).toBeInTheDocument();
+
+		// a field wide enough for 30 dots shows them again
+		const field = canvasElement.querySelector<HTMLElement>(
+			'[class*="CcMultiImage-root"]',
+		)?.parentElement;
+		if (!field) throw new Error("no field box");
+		field.style.width = "900px";
+		await waitFor(() => expect(dots()[26]).toBeVisible());
+		await expect(canvas.queryByText("27 / 30")).toBeNull();
+		await expect(
+			canvas.getByRole("button", { name: "Image 27 of 30" }),
+		).toHaveAttribute("aria-current", "true");
+		const active = rectOf(dots()[26]);
+		await expect(active.left).toBeGreaterThanOrEqual(root().left);
+		await expect(active.right).toBeLessThanOrEqual(root().right);
+		const last = rectOf(dots()[29]);
+		await expect(last.right).toBeLessThanOrEqual(root().right);
+
+		// and narrowed again, the counter
+		field.style.width = "300px";
+		await expect(await canvas.findByText("27 / 30")).toBeVisible();
+		await expect(dots()[26]).not.toBeVisible();
+	},
+};
+
+/** The full-screen view the page preview opens */
+const openPageFullScreen = async (canvasElement: HTMLElement) => {
+	await userEvent.click(
+		within(canvasElement).getByRole("button", { name: /in full screen$/ }),
+	);
+	return within(document.body).findByRole("dialog");
+};
+
+export const Issue3491Item37FullScreenDotsFitTheView: Story = {
+	args: {
+		readOnly: true,
+		initialImages: makeImages(30),
+		initialPrimary: "img-25",
+	},
+	parameters: {
+		// the full-screen view fails scrollable-region-focusable (ISSUE-3491-ITEM-30)
+		a11y: { test: "todo" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3491-ITEM-37: the full-screen view is wider than the field: the 30 dots fit in it, all inside the view, the shown image's filled.",
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const dialog = await openPageFullScreen(canvasElement);
+		const view = rectOf(
+			dialog.querySelector('[class*="CcImageBox-fullScreenImageWrapper"]'),
+		);
+		const dots = Array.from(
+			dialog.querySelectorAll('[class*="CcImageDots-imageDot"]'),
+		);
+		await expect(dots).toHaveLength(30);
+		await waitFor(() => expect(dots[25]).toBeVisible());
+		await expect(dots[25]).toHaveAttribute("aria-current", "true");
+		await expect(rectOf(dots[0]).left).toBeGreaterThanOrEqual(view.left);
+		await expect(rectOf(dots[29]).right).toBeLessThanOrEqual(view.right);
+		await expect(within(dialog).queryByText("26 / 30")).toBeNull();
+		// the row spans the view, but beside the dots the pointer reaches the image's pane
+		const dot = rectOf(dots[0]);
+		const y = (dot.top + dot.bottom) / 2;
+		const beside = document.elementFromPoint(view.left + 8, y);
+		await expect(
+			beside?.closest('[class*="CcImageBox-imageDotsWrapper"]'),
+		).toBeNull();
+		await expect(document.elementFromPoint((dot.left + dot.right) / 2, y)).toBe(
+			dots[0],
+		);
+	},
+};
+
+export const Issue3491Item37FullScreenCounterWhenDotsDoNotFit: Story = {
+	args: {
+		readOnly: true,
+		initialImages: makeImages(80),
+		initialPrimary: "img-25",
+	},
+	parameters: {
+		// the full-screen view fails scrollable-region-focusable (ISSUE-3491-ITEM-30)
+		a11y: { test: "todo" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3491-ITEM-37: 80 dots do not fit in the full-screen view either: its counter, centred under the image, shows "26 / 80", and the hidden dots do not make the view scroll sideways.',
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const dialog = await openPageFullScreen(canvasElement);
+		const view = rectOf(
+			dialog.querySelector('[class*="CcImageBox-fullScreenImageWrapper"]'),
+		);
+		const counter = await within(dialog).findByText("26 / 80");
+		// the dialog fades in
+		await waitFor(() => expect(counter).toBeVisible());
+		await expect(
+			within(dialog).getByText("Image 26 of 80"),
+		).toBeInTheDocument();
+		const text = rectOf(counter);
+		const centre = (text.left + text.right) / 2;
+		await expect(
+			Math.abs(centre - (view.left + view.width / 2)),
+		).toBeLessThanOrEqual(1);
+		for (const dot of dialog.querySelectorAll(
+			'[class*="CcImageDots-imageDot"]',
+		))
+			await expect(dot).not.toBeVisible();
+		const content = dialog.querySelector<HTMLElement>(
+			'[class*="MuiDialogContent-root"]',
+		);
+		if (!content) throw new Error("no dialog content");
+		await expect(content.scrollWidth).toBeLessThanOrEqual(content.clientWidth);
+		await userEvent.click(
+			within(dialog).getByRole("button", { name: "Next image" }),
+		);
+		await expect(await within(dialog).findByText("27 / 80")).toBeVisible();
 	},
 };

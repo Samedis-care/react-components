@@ -306,23 +306,24 @@ const ImageDotsWrapper = styled("div", {
 	name: "CcImageBox",
 	slot: "imageDotsWrapper",
 })({
+	// the width of the view: the dots that fit in it, or their counter, centred
 	position: "absolute",
 	bottom: 16,
-	left: "50%",
+	left: 0,
+	right: 0,
 	height: 16,
-	transform: "translateX(-50%)",
+	// the swipe pane and the image below stay draggable beside the dots
+	pointerEvents: "none",
+	"& button": {
+		pointerEvents: "auto",
+	},
 });
 
 const StyledImageDots = styled(ImageDots, {
 	name: "CcImageBox",
 	slot: "imageDots",
 })({
-	position: "unset",
-	overflow: "unset",
-	"& .CcImageDots-container": {
-		position: "unset",
-		overflow: "unset",
-	},
+	justifyContent: "center",
 });
 
 export type ImageBoxClassKey =
