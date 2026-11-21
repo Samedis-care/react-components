@@ -95,11 +95,13 @@ const focusRing = (el: Element | null) => {
 	return null;
 };
 
-// an outline colour composited over white paper
-const overPaper = (color: string) => {
+// a colour composited over the paper below it, white by default
+const overPaper = (color: string, paper = "#fff") => {
 	const [r, g, b, a = 1] = decomposeColor(color).values;
-	const over = (channel: number) => Math.round(channel * a + 255 * (1 - a));
-	return `rgb(${over(r)}, ${over(g)}, ${over(b)})`;
+	const below = decomposeColor(paper).values;
+	const over = (channel: number, index: number) =>
+		Math.round(channel * a + below[index] * (1 - a));
+	return `rgb(${over(r, 0)}, ${over(g, 1)}, ${over(b, 2)})`;
 };
 
 export const Issue3482Item3KeyboardFocusRing: ActionButtonStory = {
@@ -280,6 +282,90 @@ export const SubActionButtonDisabled: ActionButtonStory = {
 		</SubActionButton>
 	),
 };
+
+const FORCED_HOVER = "cc-story-hover";
+
+/**
+ * Shows the `:hover` style of `element` without a pointer: userEvent.hover is
+ * synthetic and never matches `:hover`. Every `:hover` rule of the page is
+ * copied right after itself, with `:hover` replaced by a class that `element`
+ * then gets, so the cascade stays as it is. Returns the cleanup.
+ */
+const forceHover = (element: Element) => {
+	const copies: [CSSStyleSheet | CSSGroupingRule, CSSRule][] = [];
+	const copyHoverRules = (parent: CSSStyleSheet | CSSGroupingRule) => {
+		for (let index = parent.cssRules.length - 1; index >= 0; index--) {
+			const rule = parent.cssRules[index];
+			if (
+				rule instanceof CSSStyleRule &&
+				rule.selectorText.includes(":hover")
+			) {
+				parent.insertRule(
+					rule.cssText.replaceAll(":hover", `.${FORCED_HOVER}`),
+					index + 1,
+				);
+				copies.push([parent, parent.cssRules[index + 1]]);
+			} else if (rule instanceof CSSGroupingRule) copyHoverRules(rule);
+		}
+	};
+	for (const sheet of Array.from(document.styleSheets)) copyHoverRules(sheet);
+	element.classList.add(FORCED_HOVER);
+	return () => {
+		element.classList.remove(FORCED_HOVER);
+		for (const [parent, copy] of copies)
+			parent.deleteRule(Array.from(parent.cssRules).indexOf(copy));
+	};
+};
+
+export const Issue3482Item12SmallSubActionButtonHoverContrast: ActionButtonStory =
+	{
+		parameters: {
+			a11y: { test: "error" },
+			docs: {
+				description: {
+					story:
+						"ISSUE-3482-ITEM-12: hovering a `small` SubActionButton fills it `primary.light` and paints its icon white, 2.65:1 (WCAG 1.4.11).",
+				},
+			},
+		},
+		render: (args) => (
+			<Box sx={{ display: "flex" }}>
+				<SubActionButton small icon={<HomeIcon />} onClick={args.onClick}>
+					Home
+				</SubActionButton>
+				<SubActionButton small icon={<SaveIcon />} onClick={args.onClick}>
+					Save
+				</SubActionButton>
+			</Box>
+		),
+		play: async ({ canvas }) => {
+			const home = canvas.getByRole("button", { name: "Home" });
+			const icon = home.querySelector("svg");
+			if (!icon) throw new Error("the button has no icon");
+			const unhover = forceHover(home);
+			try {
+				// the fill and the background colour fade in
+				await Promise.all(
+					home
+						.getAnimations({ subtree: true })
+						.map((animation) => animation.finished),
+				);
+				const background = getComputedStyle(home).backgroundColor;
+				await expect(background, "the hover fills the cell primary.light").toBe(
+					"rgb(66, 165, 245)",
+				);
+				await expect(
+					getContrastRatio(
+						overPaper(getComputedStyle(icon).fill, background),
+						background,
+					),
+					"the hovered icon is too faint on the hover fill",
+				).toBeGreaterThanOrEqual(3);
+			} finally {
+				unhover();
+			}
+		},
+	};
 
 export const FormButtonsSaveCancelDelete: ActionButtonStory = {
 	render: () => (

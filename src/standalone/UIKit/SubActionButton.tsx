@@ -74,7 +74,10 @@ const StyledButton = styled(Button, {
 				marginRight: small ? undefined : theme.spacing(3),
 			},
 			"&:hover svg": {
-				fill: small ? theme.palette.background.default : undefined,
+				// the label colour of the hover rule above: legible on primary.light
+				fill: small
+					? theme.palette.getContrastText(theme.palette.primary.light)
+					: undefined,
 			},
 			borderRadius: small ? 0 : undefined,
 			borderLeftWidth: 0,
