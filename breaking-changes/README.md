@@ -33,6 +33,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-21 | [MultiImage's edit dialog tells the primary image apart by star shape and text](2026-11-21-multi-image-primary-told-apart.md) | behavior, theme |
 | 2026-11-21 | [compareArrayContent counts falsy entries and duplicates](2026-11-21-compare-array-content-counts-entries.md) | behavior |
 | 2026-11-21 | [MatrixGrid is a grid with rows, header cells and cells for assistive technology](2026-11-21-matrix-grid-semantics.md) | behavior |
+| 2026-11-21 | [MultiSelect's remove and restore handlers are bound to their entry](2026-11-21-multi-select-entry-handlers-bound.md) | behavior, type |
 | 2026-11-20 | [CountryCodes and useCountryOptions list every ISO 3166-1 country: Aruba, Curaçao, Sint Maarten and 12 more territories](2026-11-20-country-codes-every-iso-3166-1-country.md) | behavior, type |
 | 2026-11-20 | [ColorInput reports a blur once focus leaves the field and its picker, and a picker opened from the keyboard shows its focus](2026-11-20-color-input-blur-on-leaving-the-field.md) | behavior, type |
 | 2026-11-20 | [The busy overlay's spinner sits on a disc of its own](2026-11-20-form-loader-overlay-spinner-disc.md) | behavior, theme |

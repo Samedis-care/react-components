@@ -32,10 +32,13 @@ export interface MultiSelectorData extends BaseSelectorData {
 	/**
 	 * Can the entry be unselected?
 	 * @param data The data entry to be unselected
+	 * @param evt The click or key event that asks to remove it: the remove button's click,
+	 *            or whatever a selectedEntryRenderer calls handleDelete from, e.g. a Chip's
+	 *            Delete key
 	 */
 	canUnselect?: (
 		data: MultiSelectorData,
-		evt: React.MouseEvent<HTMLElement>,
+		evt: React.MouseEvent | React.KeyboardEvent,
 	) => boolean | Promise<boolean>;
 	/**
 	 * Disable delete button
@@ -87,7 +90,9 @@ export type MultiSelectProps<DataT extends MultiSelectorData> =
 		/**
 		 * Specify a custom component for displaying multi select items. The entries
 		 * are the items of one list (`<ul>`), so its root must be an `<li>`, e.g.
-		 * MUI's ListItem, as MultiSelectEntry renders.
+		 * MUI's ListItem, as MultiSelectEntry renders. Its `handleDelete` and
+		 * `handleRestore` are bound to its entry: call them from any element's click
+		 * or key event, e.g. a Chip's `onDelete`.
 		 * @remarks With `added` or `removed` it has to show `changeState` and render
 		 *          `handleRestore`, as MultiSelectEntry does: a removed entry otherwise looks
 		 *          selected and cannot be restored.
@@ -283,7 +288,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 		);
 	}
 	const genericDeleteConfirm = useCallback(
-		async (evt: React.MouseEvent<HTMLElement>): Promise<boolean> => {
+		async (evt: React.MouseEvent | React.KeyboardEvent): Promise<boolean> => {
 			if (evt.shiftKey) return true;
 			if (!dialogContext) return true;
 			const [pushDialog] = dialogContext;
@@ -298,18 +303,10 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 	);
 
 	const handleDelete = useCallback(
-		(evt: React.MouseEvent<HTMLButtonElement>) => {
+		(entry: DataT, evt: React.MouseEvent | React.KeyboardEvent) => {
 			evt.stopPropagation(); // don't trigger onClick event on item itself
 
 			let canDelete = true;
-			const entry: MultiSelectorData | null | undefined = selected.find(
-				(s) => s.value === evt.currentTarget.name,
-			);
-			if (!entry) {
-				throw new Error(
-					"[Components-Care] [MultiSelect] Entry couldn't be found. Either entry.value is not set, or the entity renderer does not correctly set the name attribute",
-				);
-			}
 			void (async () => {
 				if (entry.canUnselect) {
 					canDelete = await entry.canUnselect(entry, evt);
@@ -328,13 +325,27 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 	);
 
 	const handleRestore = useCallback(
-		(evt: React.MouseEvent<HTMLButtonElement>) => {
+		(entry: DataT, evt: React.MouseEvent | React.KeyboardEvent) => {
 			evt.stopPropagation(); // don't trigger onClick event on item itself
-			const entry = removed.find((s) => s.value === evt.currentTarget.name);
-			if (!entry || !onSelect) return;
+			if (!onSelect) return;
 			onSelect([...selected, entry]);
 		},
-		[onSelect, removed, selected],
+		[onSelect, selected],
+	);
+
+	// each listed entry's handlers, bound to it, so that an entry can call them from any
+	// element (a Chip's onDelete, a menu item), not only from a button that names it
+	const entryHandlers = useMemo(
+		() =>
+			listed.map(({ data }) => ({
+				remove: (evt: React.MouseEvent | React.KeyboardEvent) => {
+					handleDelete(data, evt);
+				},
+				restore: (evt: React.MouseEvent | React.KeyboardEvent) => {
+					handleRestore(data, evt);
+				},
+			})),
+		[handleDelete, handleRestore, listed],
 	);
 
 	const handleSetData = useCallback(
@@ -363,11 +374,13 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 					handleDelete={
 						locked || data.noDelete || changeState === "removed"
 							? undefined
-							: handleDelete
+							: entryHandlers[index].remove
 					}
 					changeState={changeState}
 					handleRestore={
-						locked || changeState !== "removed" ? undefined : handleRestore
+						locked || changeState !== "removed"
+							? undefined
+							: entryHandlers[index].restore
 					}
 					data={data}
 					setData={handleSetData}

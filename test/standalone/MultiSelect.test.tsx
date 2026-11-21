@@ -8,7 +8,7 @@ import {
 	screen,
 	within,
 } from "@testing-library/react";
-import { createTheme, List, Theme, ThemeProvider } from "@mui/material";
+import { Chip, createTheme, List, Theme, ThemeProvider } from "@mui/material";
 import {
 	getStringLabel,
 	selectorLocalLoadHandler,
@@ -18,7 +18,9 @@ import MultiSelect, {
 	MultiSelectProps,
 } from "../../src/standalone/Selector/MultiSelect";
 import ccI18n from "../../src/i18n";
-import MultiSelectEntry from "../../src/standalone/Selector/MultiSelectEntry";
+import MultiSelectEntry, {
+	MultiSelectEntryProps,
+} from "../../src/standalone/Selector/MultiSelectEntry";
 import {
 	DistributiveOmit,
 	PartialExcept,
@@ -183,6 +185,86 @@ describe("MultiSelect bugs", () => {
 		expect(entryLabels()).toEqual(["Zeta", "Cherry", "Banana", "Apple"]);
 		rerenderUi(rerender, ui(undefined));
 		expect(entryLabels()).toEqual(["Zeta", "Cherry", "Apple", "Banana"]);
+	});
+	it("[ISSUE-3488-ITEM-9] removes an entry through a selectedEntryRenderer built on Chip", async () => {
+		const ChipEntry = (props: MultiSelectEntryProps<MultiSelectorData>) => (
+			<Chip label={props.data.label as string} onDelete={props.handleDelete} />
+		);
+		const errors: unknown[] = [];
+		const onError = (evt: ErrorEvent) => {
+			errors.push(evt.error);
+			evt.preventDefault();
+		};
+		window.addEventListener("error", onError);
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const onSel = vi.fn();
+		const { container } = renderUi(
+			<Host
+				initial={[APPLE, BANANA]}
+				onSel={onSel}
+				selectedEntryRenderer={ChipEntry}
+			/>,
+		);
+		await flush();
+		const deleteIcon = container.querySelector(".MuiChip-deleteIcon");
+		if (!deleteIcon) throw new Error("no delete icon");
+		fireEvent.click(deleteIcon);
+		await flush();
+		window.removeEventListener("error", onError);
+		expect(errors).toEqual([]);
+		expect(values(onSel)).toEqual([["banana"]]);
+	});
+	it("[ISSUE-3488-ITEM-9] removes an entry by a Chip's Delete key, and passes the key event to canUnselect", async () => {
+		const ChipEntry = (props: MultiSelectEntryProps<MultiSelectorData>) => (
+			<Chip label={props.data.label as string} onDelete={props.handleDelete} />
+		);
+		const canUnselect = vi.fn(() => true);
+		const onSel = vi.fn();
+		renderUi(
+			<Host
+				initial={[{ ...APPLE, canUnselect }, BANANA]}
+				onSel={onSel}
+				selectedEntryRenderer={ChipEntry}
+			/>,
+		);
+		await flush();
+		const chip = screen.getByRole("button", { name: "Apple" });
+		fireEvent.keyDown(chip, { key: "Delete" });
+		fireEvent.keyUp(chip, { key: "Delete" });
+		await flush();
+		expect(canUnselect).toHaveBeenCalledWith(
+			expect.objectContaining({ value: "apple" }),
+			expect.objectContaining({ type: "keyup", key: "Delete" }),
+		);
+		expect(values(onSel)).toEqual([["banana"]]);
+	});
+	it("[ISSUE-3488-ITEM-9] restores a removed entry through a selectedEntryRenderer built on Chip", async () => {
+		const ChipEntry = (props: MultiSelectEntryProps<MultiSelectorData>) => (
+			<Chip
+				label={props.data.label as string}
+				onDelete={
+					props.changeState === "removed"
+						? props.handleRestore
+						: props.handleDelete
+				}
+			/>
+		);
+		const onSel = vi.fn();
+		renderUi(
+			<Host
+				initial={[APPLE]}
+				removed={[CHERRY]}
+				onSel={onSel}
+				selectedEntryRenderer={ChipEntry}
+			/>,
+		);
+		await flush();
+		const cherry = screen.getByRole("button", { name: "Cherry" });
+		const restoreIcon = cherry.querySelector(".MuiChip-deleteIcon");
+		if (!restoreIcon) throw new Error("no delete icon");
+		fireEvent.click(restoreIcon);
+		await flush();
+		expect(values(onSel)).toEqual([["apple", "cherry"]]);
 	});
 	it("[ISSUE-3488-ITEM-22] exposes the selected entries as one list with an item per entry", async () => {
 		renderUi(
