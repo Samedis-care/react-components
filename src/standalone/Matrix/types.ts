@@ -28,7 +28,9 @@ export interface MatrixColumn {
 	 * The column in words, for assistive technology: the full date in a
 	 * calendar ("Thursday, March 5, 2026"), where label and subLabel only show
 	 * "5" and "Thu". The add chips of the column's cells say it in their
-	 * accessible name (see MatrixGridProps.addLabel). buildDateColumns sets it.
+	 * accessible name (see MatrixGridProps.addLabel), as do the cells of an
+	 * aggregate row without getCellLabel (see MatrixExtraRow.label).
+	 * buildDateColumns sets it.
 	 * @default label, if that is a string or a number; nothing otherwise
 	 */
 	name?: string;
@@ -81,14 +83,22 @@ export interface MatrixExtraRow {
 	 */
 	header: React.ReactNode;
 	/**
-	 * Accessible name of the row, used for its cells when they report clicks
-	 * (and as the fallback when getCellLabel is not given)
+	 * Accessible name of the row ("Open demand"), used for its cells when they
+	 * report clicks. Without getCellLabel, a cell is named by this and the
+	 * column's name (MatrixColumn.name), joined with a comma: "Open demand,
+	 * Thursday, March 5, 2026".
+	 * @default header, if that is a string or a number; nothing otherwise
 	 */
 	label?: string;
 	/**
 	 * Accessible name of one cell of this row — the row's subject plus the
-	 * column it stands for ("post a request for March 5th"). Falls back to
-	 * label.
+	 * column it stands for ("post a request for March 5th"). A cell that shows
+	 * a badge is announced with the badge first: "2 post a request for March
+	 * 5th".
+	 * @default label and the column's name, see label. A cell whose row and
+	 * column have no name either is named by its badge, or "Add" (in the
+	 * current language) for the "+" it shows without one. Used as well when
+	 * this returns an empty string.
 	 */
 	getCellLabel?: (columnKey: string) => string;
 	/**

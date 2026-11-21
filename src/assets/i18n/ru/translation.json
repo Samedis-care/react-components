@@ -281,7 +281,8 @@
 			"label": "Загрузка…"
 		},
 		"matrix": {
-			"tile-more": "ещё {{count}}:"
+			"tile-more": "ещё {{count}}:",
+			"extra-cell-add": "Добавить"
 		}
 	},
 	"non-standalone": {

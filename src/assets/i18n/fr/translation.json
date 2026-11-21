@@ -281,7 +281,8 @@
 			"label": "Chargement…"
 		},
 		"matrix": {
-			"tile-more": "{{count}} de plus :"
+			"tile-more": "{{count}} de plus :",
+			"extra-cell-add": "Ajouter"
 		}
 	},
 	"non-standalone": {

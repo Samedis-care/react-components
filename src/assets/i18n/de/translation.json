@@ -281,7 +281,8 @@
 			"label": "Lädt…"
 		},
 		"matrix": {
-			"tile-more": "noch {{count}}:"
+			"tile-more": "noch {{count}}:",
+			"extra-cell-add": "Hinzufügen"
 		}
 	},
 	"non-standalone": {

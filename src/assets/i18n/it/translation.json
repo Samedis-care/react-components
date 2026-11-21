@@ -281,7 +281,8 @@
 			"label": "Caricamento…"
 		},
 		"matrix": {
-			"tile-more": "{{count}} in più:"
+			"tile-more": "{{count}} in più:",
+			"extra-cell-add": "Aggiungi"
 		}
 	},
 	"non-standalone": {

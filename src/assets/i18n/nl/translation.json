@@ -281,7 +281,8 @@
 			"label": "Laadt…"
 		},
 		"matrix": {
-			"tile-more": "nog {{count}}:"
+			"tile-more": "nog {{count}}:",
+			"extra-cell-add": "Toevoegen"
 		}
 	},
 	"non-standalone": {

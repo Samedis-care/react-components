@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useId, useRef } from "react";
 import { styled } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
@@ -12,6 +12,7 @@ import { cellBorders, columnTintStyles } from "./matrixTints";
 import { useMatrixConfig } from "./MatrixGridContext";
 import MatrixContents from "./MatrixContents";
 import useMatrixActivation from "./useMatrixActivation";
+import { columnNameOf, extraRowNameOf, isNamePart } from "./matrixNames";
 import { MatrixColumn, MatrixExtraRow } from "./types";
 
 export const MatrixExtraCellRoot = styled("div", {
@@ -92,19 +93,44 @@ export interface MatrixExtraRowCellProps {
 	 * This cell took the focus, so its row remembers it as the tab stop
 	 */
 	onFocusColumn: (columnKey: string) => void;
+	/**
+	 * The name of a clickable cell that has nothing else to be named by: no
+	 * getCellLabel, no text for its row or its column, and no badge. It shows
+	 * the "+" hint, so this says "Add" in the current language.
+	 */
+	addName: string;
 }
 
 const MatrixExtraRowCell = (props: MatrixExtraRowCellProps) => {
-	const { extraRow, column } = props;
+	const { extraRow, column, addName } = props;
 	const { classes, touch } = useMatrixConfig<unknown>();
 	const onCellClick = extraRow.onCellClick;
 	const activate = useCallback(() => {
 		onCellClick?.(column.key);
 	}, [onCellClick, column.key]);
+	// Zero is a value: only a missing (or null) badge means "nothing known".
+	const badge = extraRow.badges?.[column.key];
+	const hasBadge = badge != null;
+	// The cell in words: getCellLabel, else the row's and the column's names
+	// ("Open demand, Thursday, March 5, 2026"), so that the cells of a row do
+	// not all sound alike. Without any of them a cell with a badge is named by
+	// its badge, and one without by addName, for its "+".
+	const name =
+		extraRow.getCellLabel?.(column.key) ||
+		[extraRowNameOf(extraRow), columnNameOf(column)]
+			.filter(isNamePart)
+			.join(", ") ||
+		(hasBadge ? undefined : addName);
 	const activation = useMatrixActivation(
 		onCellClick ? activate : undefined,
-		extraRow.getCellLabel?.(column.key) ?? extraRow.label,
+		name,
 	);
+	// The aria-label replaces the cell's content, badge included. A named cell
+	// that shows a badge is labelled by the badge and then by itself (whose
+	// part of that is its aria-label): "9 Open demand, Thursday, March 5, 2026".
+	const id = useId();
+	const badgeId = `${id}-badge`;
+	const labelledByBadge = !!activation && !!name && hasBadge;
 	const ref = useRef<HTMLDivElement>(null);
 	const { tabStop, pullFocus, onNavigate, onFocusColumn } = props;
 	useEffect(() => {
@@ -135,8 +161,6 @@ const MatrixExtraRowCell = (props: MatrixExtraRowCellProps) => {
 		},
 		[activation, onNavigate, column.key],
 	);
-	// Zero is a value: only a missing (or null) badge means "nothing known".
-	const badge = extraRow.badges?.[column.key];
 	const clickable = !!onCellClick;
 	// The grid cell is a wrapper of its own: a clickable cell is a button,
 	// which cannot be the grid cell too. Always there, so the cell is not
@@ -151,13 +175,20 @@ const MatrixExtraRowCell = (props: MatrixExtraRowCellProps) => {
 					touch && matrixClasses.touch,
 				])}
 				{...activation}
+				id={labelledByBadge ? id : undefined}
+				aria-labelledby={labelledByBadge ? `${badgeId} ${id}` : undefined}
 				ref={ref}
 				tabIndex={clickable ? (tabStop ? 0 : -1) : undefined}
 				onKeyDown={clickable ? handleKeyDown : undefined}
 				onFocus={clickable ? handleFocus : undefined}
 			>
-				{badge != null ? (
-					<MatrixBadge className={classes?.badge}>{badge}</MatrixBadge>
+				{hasBadge ? (
+					<MatrixBadge
+						id={labelledByBadge ? badgeId : undefined}
+						className={classes?.badge}
+					>
+						{badge}
+					</MatrixBadge>
 				) : (
 					clickable && (
 						<MatrixExtraCellAddHint className={classes?.extraCellAddHint} />

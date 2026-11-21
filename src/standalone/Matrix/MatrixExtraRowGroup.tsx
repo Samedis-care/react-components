@@ -1,4 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import ccI18n from "../../i18n";
 import { useMatrixConfig } from "./MatrixGridContext";
 import MatrixContents from "./MatrixContents";
 import MatrixExtraRowHeader from "./MatrixExtraRowHeader";
@@ -13,6 +15,12 @@ export interface MatrixExtraRowGroupProps {
 }
 
 /**
+ * The grid never suspended, and the one text it translates is only heard:
+ * while the translations load it uses the English default, then re-renders
+ */
+const TRANSLATION_OPTIONS = { i18n: ccI18n, useSuspense: false };
+
+/**
  * One aggregate row of the grid.
  *
  * Its cells are buttons, but only ONE of them is in the tab order at a time and
@@ -23,6 +31,10 @@ export interface MatrixExtraRowGroupProps {
  */
 const MatrixExtraRowGroup = (props: MatrixExtraRowGroupProps) => {
 	const { columns } = useMatrixConfig<unknown>();
+	const { t } = useTranslation("translation", TRANSLATION_OPTIONS);
+	const addName = t("standalone.matrix.extra-cell-add", {
+		defaultValue: "Add",
+	});
 	const [activeKey, setActiveKey] = useState<string | null>(null);
 	// only true right after an arrow key, so the row does not steal the focus
 	// when it renders
@@ -76,6 +88,7 @@ const MatrixExtraRowGroup = (props: MatrixExtraRowGroupProps) => {
 					pullFocus={pullFocus && column.key === remembered}
 					onNavigate={navigate}
 					onFocusColumn={focusColumn}
+					addName={addName}
 				/>
 			))}
 		</MatrixContents>

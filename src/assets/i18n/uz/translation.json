@@ -281,7 +281,8 @@
 			"label": "Yuklanmoqda…"
 		},
 		"matrix": {
-			"tile-more": "yana {{count}} ta:"
+			"tile-more": "yana {{count}} ta:",
+			"extra-cell-add": "Qo'shish"
 		}
 	},
 	"non-standalone": {

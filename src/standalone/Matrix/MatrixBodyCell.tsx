@@ -16,6 +16,7 @@ import {
 	MATRIX_CELL_SELECTED,
 	useMatrixInteraction,
 } from "./MatrixInteractionContext";
+import { columnNameOf, isNamePart } from "./matrixNames";
 import { MatrixCellContext, MatrixColumn, MatrixRow } from "./types";
 
 export const MatrixBodyCellRoot = styled("div", {
@@ -172,22 +173,6 @@ export const MatrixAddChipLabel = styled("span", {
 	whiteSpace: "nowrap",
 	width: 1,
 });
-
-/**
- * Is this part of the add chip's name there at all? React renders nothing for
- * null, undefined and booleans, and an empty string says nothing.
- */
-const isNamePart = (part: React.ReactNode): boolean =>
-	part != null && typeof part !== "boolean" && part !== "";
-
-/**
- * MatrixColumn.name, or the label when that is text
- */
-const columnNameOf = (column: MatrixColumn): string | undefined =>
-	column.name ??
-	(typeof column.label === "string" || typeof column.label === "number"
-		? String(column.label)
-		: undefined);
 
 export interface MatrixBodyCellProps<TCell> {
 	/**

@@ -535,6 +535,8 @@ const PlainRoster = (props: PlainRosterProps) => {
 	);
 };
 
+const plainScroller = (canvasElement: HTMLElement) =>
+	within(canvasElement).getByRole("region", { name: PLAIN_LABEL });
 const plainSlot = (
 	canvasElement: HTMLElement,
 	slot: keyof typeof PLAIN_CLASSES,
@@ -742,6 +744,28 @@ const backgroundOf = (element: Element): Rgba => {
 	return layer ? over(parseColor(layer), base) : base;
 };
 
+/** an aggregate row that reports clicks but names none of its cells */
+const UNNAMED_DEMAND: MatrixExtraRow = {
+	key: "demand",
+	header: "Open",
+	badges: { "2026-02-05": 2 },
+};
+
+/** ISSUE-3480-ITEM-11: aggregate cells without label or getCellLabel are nameless buttons (axe aria-command-name). */
+export const Issue3480Item11AggregateCellsHaveNames: Story = {
+	// no exception: axe fails "aria-command-name" on every cell without a badge
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<PlainRoster
+			onExtraCellClick={args.onExtraCellClick}
+			extraRow={UNNAMED_DEMAND}
+		/>
+	),
+	play: async ({ canvasElement }) => {
+		await expect(plainScroller(canvasElement)).toBeVisible();
+	},
+};
+
 /** ISSUE-3480-ITEM-15: the labels of the "current" and "accent" column headers are below 4.5:1. */
 export const Issue3480Item15HeaderLabelsHaveContrast: Story = {
 	render: (args) => <PlainRoster onExtraCellClick={args.onExtraCellClick} />,
@@ -831,7 +855,7 @@ export const Issue3480Item9GridHasRowsAndHeaderCells: Story = {
 		}
 		// the aggregate cells are buttons, each inside its grid cell
 		const demand = within(rows[1]).getAllByRole("button", {
-			name: /^Open demand on/,
+			name: /Open demand on/,
 		});
 		await expect(demand).toHaveLength(headers.length - 1);
 		for (const button of demand)

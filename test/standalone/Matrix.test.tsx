@@ -979,7 +979,7 @@ describe("MatrixGrid", () => {
 			);
 			expect(screen.getByRole("grid", { name: "Roster" })).toBeInTheDocument();
 			// every aggregate cell is a button, but inside its grid cell
-			expect(screen.getAllByRole("button", { name: "Open" })).toHaveLength(4);
+			expect(screen.getAllByRole("button", { name: /Open, / })).toHaveLength(4);
 			const header = Array<string>(5).fill("columnheader");
 			const body = ["rowheader", ...Array<string>(4).fill("gridcell")];
 			expect(screen.getAllByRole("row").map(ownedRoles)).toEqual([
@@ -1117,6 +1117,107 @@ describe("MatrixGrid", () => {
 			]);
 			expect(document.activeElement).toBe(outside);
 		});
+
+		it("[ISSUE-3480-ITEM-11] puts a cell's badge into what the cell is announced as", () => {
+			render(gridElement({ extraRows: demandRow() }));
+			// the c2 cell shows 9; its aria-label must not hide that
+			const c2 = screen.getByRole("button", { name: /c2/ });
+			expect(c2).toHaveTextContent("9");
+			// in its name or its description, on that cell only
+			const withNine = new Set([
+				...screen.queryAllByRole("button", { name: /\b9\b/ }),
+				...screen.queryAllByRole("button", { description: /\b9\b/ }),
+			]);
+			expect(Array.from(withNine)).toEqual([c2]);
+		});
+
+		it("[ISSUE-3480-ITEM-11] names every clickable cell, even without label or getCellLabel", () => {
+			render(
+				gridElement({
+					extraRows: [
+						{
+							key: "demand",
+							header: <span>{"demand-header"}</span>,
+							badges: { c2: 9 },
+							onCellClick: vi.fn(),
+						},
+					],
+				}),
+			);
+			const cells = screen
+				.getAllByRole("button")
+				.filter((cell) => cell.textContent !== "outside");
+			expect(cells).toHaveLength(4);
+			for (const cell of cells) expect(cell).toHaveAccessibleName();
+		});
+
+		const extraCellNames = () =>
+			screen
+				.getAllByRole("button")
+				.filter((cell) => cell.textContent !== "outside")
+				.map((cell) => computeAccessibleName(cell));
+
+		it("[ISSUE-3480-ITEM-11] names a cell by its badge, then by getCellLabel", () => {
+			render(gridElement({ extraRows: demandRow({ badges: { c2: 9 } }) }));
+			expect(extraCellNames()).toEqual([
+				"Open demand on c1",
+				"9 Open demand on c2",
+				"Open demand on c3",
+				"Open demand on c4",
+			]);
+		});
+
+		it("[ISSUE-3480-ITEM-11] names a cell after its row and its column without getCellLabel", () => {
+			render(
+				gridElement({
+					extraRows: demandRow({
+						getCellLabel: undefined,
+						badges: { c2: 9, c3: 0 },
+					}),
+				}),
+			);
+			expect(extraCellNames()).toEqual([
+				"Open demand, 1",
+				"9 Open demand, 2",
+				"0 Open demand, 3",
+				"Open demand, 4",
+			]);
+		});
+
+		it("[ISSUE-3480-ITEM-11] takes a text header as the row's name without label", () => {
+			render(
+				gridElement({
+					extraRows: demandRow({
+						header: "Open",
+						label: undefined,
+						getCellLabel: undefined,
+					}),
+				}),
+			);
+			expect(extraCellNames()).toEqual([
+				"Open, 1",
+				"9 Open, 2",
+				"Open, 3",
+				"Open, 4",
+			]);
+		});
+
+		it("[ISSUE-3480-ITEM-11] names a cell by its badge or as Add when its row and column have no text", () => {
+			render(
+				gridElement({
+					// node labels and no name: the column says nothing
+					columns: COLUMNS.map((column) => ({
+						key: column.key,
+						label: <b>{column.label}</b>,
+					})),
+					extraRows: demandRow({
+						label: undefined,
+						getCellLabel: undefined,
+					}),
+				}),
+			);
+			expect(extraCellNames()).toEqual(["Add", "9", "Add", "Add"]);
+		});
 	});
 	describe("touch mode", () => {
 		beforeEach(() => {
@@ -1165,8 +1266,8 @@ describe("MatrixGrid", () => {
 					},
 				],
 			});
-			// every column of the row carries the row's name
-			const cell = screen.getAllByLabelText("Open demand")[0];
+			// the first column's cell: the row's name and the column's
+			const cell = screen.getByLabelText("Open demand, 1");
 			expect(cell.className).toContain(matrixClasses.touch);
 		});
 		it("fires the row action once, not once per auto-repeat tick", () => {
