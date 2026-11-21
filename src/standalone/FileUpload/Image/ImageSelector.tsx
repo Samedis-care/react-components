@@ -406,7 +406,12 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 	const handleFileChange = useCallback(
 		async (evt: React.ChangeEvent<HTMLInputElement>) => {
 			const elem = evt.currentTarget;
-			const file = elem.files && elem.files[0];
+			const file = elem.files?.[0];
+			// cleared on every pick, before anything is awaited: browsers fire no change event
+			// for a selection equal to the input's current one, so picking the same image again
+			// (after a cancelled edit, an error or a change the owner did not apply) would do
+			// nothing
+			elem.value = "";
 			if (!file) return;
 			await processFile(file);
 		},
