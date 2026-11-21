@@ -40,6 +40,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-21 | [The import upload replaces its file with a new pick](2026-11-21-import-upload-replaces-file.md) | behavior |
 | 2026-11-21 | [The filter panel's GridSingleSelectFilter and GridMultiSelectFilter honor hidden, isDisabled and [text, node] labels](2026-11-21-grid-select-filters-panel-option-flags.md) | behavior |
 | 2026-11-21 | [A DataGrid filter bar narrower than 600px opens as a panel by default](2026-11-21-data-grid-filter-bar-default-dialog-width.md) | behavior |
+| 2026-11-21 | [buildDateColumns shows the month on the first column and on every 1st](2026-11-21-matrix-date-columns-show-month.md) | behavior |
 | 2026-11-20 | [CountryCodes and useCountryOptions list every ISO 3166-1 country: Aruba, Curaçao, Sint Maarten and 12 more territories](2026-11-20-country-codes-every-iso-3166-1-country.md) | behavior, type |
 | 2026-11-20 | [ColorInput reports a blur once focus leaves the field and its picker, and a picker opened from the keyboard shows its focus](2026-11-20-color-input-blur-on-leaving-the-field.md) | behavior, type |
 | 2026-11-20 | [The busy overlay's spinner sits on a disc of its own](2026-11-20-form-loader-overlay-spinner-disc.md) | behavior, theme |

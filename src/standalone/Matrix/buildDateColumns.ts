@@ -12,7 +12,7 @@ export interface BuildDateColumnsParams {
 	 */
 	to: string;
 	/**
-	 * Locale for the weekday names and the full dates
+	 * Locale for the weekday and month names and the full dates
 	 * @default the browser's locale
 	 * @remarks Inside a component use useCurrentLocale() to pass the locale the
 	 * rest of the app uses.
@@ -41,6 +41,16 @@ export interface BuildDateColumnsParams {
 	 */
 	mutedWeekdays?: number[];
 	/**
+	 * Show the month next to the day number on the first column and on the
+	 * first day of every month ("26 Feb | 27 | 28 | 1 Mar | 2" in en-GB), so
+	 * the header says which month each day is in. False labels every column
+	 * with the day number alone, for a grid that shows its month elsewhere.
+	 * @default true
+	 * @remarks In narrow columns a long label ("28. Sept.") wraps onto a
+	 * second line.
+	 */
+	showMonths?: boolean;
+	/**
 	 * Hard cap on the number of columns, so a bad range cannot lock up the
 	 * browser
 	 * @default 400
@@ -63,10 +73,12 @@ const dayKeyOf = (value: string): string =>
  * Builds the columns of a day-per-column matrix.
  * @param params The range, and how to mark the days in it
  * @returns One column per day, keyed by ISO date, labeled with the day number
- * and the localized short weekday, and named with the localized full date
- * ("Thursday, March 5, 2026")
- * @remarks The weekday names come from Intl, not from moment, so a consumer
- * does not have to bundle moment's locale files to get localized headers.
+ * (with the localized short month on the first column and on the first day of
+ * every month, see showMonths) and the localized short weekday, and named
+ * with the localized full date ("Thursday, March 5, 2026")
+ * @remarks The weekday and month names come from Intl, not from moment, so a
+ * consumer does not have to bundle moment's locale files to get localized
+ * headers.
  */
 const buildDateColumns = (params: BuildDateColumnsParams): MatrixColumn[] => {
 	const {
@@ -75,6 +87,7 @@ const buildDateColumns = (params: BuildDateColumnsParams): MatrixColumn[] => {
 		locale,
 		accent,
 		mutedWeekdays = [0, 6],
+		showMonths = true,
 		maxColumns = 400,
 	} = params;
 	// Normalized rather than compared as given: a caller that hands over a
@@ -90,6 +103,10 @@ const buildDateColumns = (params: BuildDateColumnsParams): MatrixColumn[] => {
 		Array.isArray(accent) ? accent : accent ? [accent] : []
 	).map(dayKeyOf);
 	const weekdayFormat = new Intl.DateTimeFormat(locale, { weekday: "short" });
+	const dayMonthFormat = new Intl.DateTimeFormat(locale, {
+		day: "numeric",
+		month: "short",
+	});
 	const nameFormat = new Intl.DateTimeFormat(locale, { dateStyle: "full" });
 	const columns: MatrixColumn[] = [];
 	const end = moment(to);
@@ -102,7 +119,10 @@ const buildDateColumns = (params: BuildDateColumnsParams): MatrixColumn[] => {
 		const key = day.format("YYYY-MM-DD");
 		columns.push({
 			key,
-			label: day.date(),
+			label:
+				showMonths && (i === 0 || day.date() === 1)
+					? dayMonthFormat.format(day.toDate())
+					: day.date(),
 			subLabel: weekdayFormat.format(day.toDate()),
 			name: nameFormat.format(day.toDate()),
 			variant: accentDays.includes(key)

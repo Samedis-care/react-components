@@ -841,6 +841,51 @@ export const Issue3480Item9GridHasRowsAndHeaderCells: Story = {
 
 // ---- Bug stories: cells and tiles -------------------------------------------
 
+/** ISSUE-3480-ITEM-31: 46px columns in German, a range from September 27th, so its first label is long */
+const ITEM_31_COLUMNS = buildDateColumns({
+	from: "2026-09-27",
+	to: "2026-10-10",
+	locale: "de-DE",
+	today: null,
+});
+
+/** ISSUE-3480-ITEM-31: the first column and the first day of a month show the month, inside their column. */
+export const Issue3480Item31DayColumnsShowTheMonth: Story = {
+	parameters: { a11y: { test: "error" } },
+	render: () => (
+		<MatrixGrid<PlainCell>
+			columns={ITEM_31_COLUMNS}
+			rows={PLAIN_ROWS.slice(0, 3)}
+			label={PLAIN_LABEL}
+			corner={"Ward B"}
+			columnWidth={46}
+			maxHeight={420}
+			classes={PLAIN_CLASSES}
+			renderRowHeader={renderPlainRowHeader}
+			renderCell={renderPlainCell}
+		/>
+	),
+	play: async ({ canvas, canvasElement }) => {
+		await expect(canvas.getByText("27. Sept.")).toBeVisible();
+		await expect(canvas.getByText("1. Okt.")).toBeVisible();
+		const headers = plainSlot(canvasElement, "columnHeader");
+		await expect(headers).toHaveLength(ITEM_31_COLUMNS.length);
+		for (const header of headers) {
+			const box = header.getBoundingClientRect();
+			for (const line of Array.from(header.children)) {
+				const rect = line.getBoundingClientRect();
+				const what = `"${line.textContent}" in its column header`;
+				await expect(rect.left, what).toBeGreaterThanOrEqual(box.left);
+				await expect(rect.right, what).toBeLessThanOrEqual(box.right);
+				await expect(rect.top, what).toBeGreaterThanOrEqual(box.top);
+				await expect(rect.bottom, what).toBeLessThanOrEqual(box.bottom);
+			}
+		}
+	},
+};
+
+// ---- Bug stories: cells and tiles -------------------------------------------
+
 const WHITE: Rgba = { r: 255, g: 255, b: 255, a: 1 };
 
 /** ISSUE-3481-ITEM-6: the corner of a diagonal pair takes the page's text color, not its entry's. */

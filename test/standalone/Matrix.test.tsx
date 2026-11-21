@@ -60,7 +60,7 @@ describe("buildDateColumns", () => {
 		expect(columns).toHaveLength(7);
 		expect(columns[0].key).toBe("2026-03-02");
 		expect(columns[6].key).toBe("2026-03-08");
-		expect(columns[0].label).toBe(2);
+		expect(columns[1].label).toBe(3);
 	});
 	it("mutes the weekend, marks today, and lets accent win", () => {
 		const columns = buildDateColumns({
@@ -115,6 +115,40 @@ describe("buildDateColumns", () => {
 		} finally {
 			vi.unstubAllEnvs();
 		}
+	});
+	it("[ISSUE-3480-ITEM-31] shows the month on the first column and on the first day of every month", () => {
+		const columnsIn = (locale: string) =>
+			buildDateColumns({
+				from: "2026-02-26",
+				to: "2026-03-03",
+				locale,
+				today: null,
+			});
+		const labelsIn = (locale: string) =>
+			columnsIn(locale).map((column) => column.label);
+		expect(labelsIn("en-GB")).toEqual(["26 Feb", 27, 28, "1 Mar", 2, 3]);
+		expect(labelsIn("en-US")).toEqual(["Feb 26", 27, 28, "Mar 1", 2, 3]);
+		expect(labelsIn("de-DE")).toEqual(["26. Feb.", 27, 28, "1. März", 2, 3]);
+		// the weekday stays on every column
+		expect(columnsIn("en-GB").map((column) => column.subLabel)).toEqual([
+			"Thu",
+			"Fri",
+			"Sat",
+			"Sun",
+			"Mon",
+			"Tue",
+		]);
+	});
+	it("[ISSUE-3480-ITEM-31] keeps the plain day numbers with showMonths false", () => {
+		expect(
+			buildDateColumns({
+				from: "2026-02-26",
+				to: "2026-03-03",
+				locale: "en-GB",
+				today: null,
+				showMonths: false,
+			}).map((column) => column.label),
+		).toEqual([26, 27, 28, 1, 2, 3]);
 	});
 	it("says so when the range is reversed or unparseable", () => {
 		const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
@@ -202,6 +236,22 @@ describe("buildDateColumns", () => {
 					tz,
 				).toEqual(["2026-03-04:current", `${viewersDay[tz]}:accent`]);
 			}
+		});
+
+		it("[ISSUE-3480-ITEM-31] shows each month on its first day in every timezone", () => {
+			const labels: Record<string, React.ReactNode[]> = {};
+			for (const tz of ZONES) {
+				vi.stubEnv("TZ", tz);
+				labels[tz] = buildDateColumns({
+					// across a month start and Santiago's skipped midnight (Sept 6th)
+					from: "2026-08-31",
+					to: "2026-09-07",
+					locale: "en-GB",
+					today: null,
+				}).map((column) => column.label);
+			}
+			for (const tz of ZONES)
+				expect(labels[tz], tz).toEqual(["31 Aug", "1 Sept", 2, 3, 4, 5, 6, 7]);
 		});
 
 		it("[ISSUE-3480-ITEM-1] marks no day for an unparseable today or accent", () => {
