@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { useMatrixConfig } from "./MatrixGridContext";
+import MatrixContents from "./MatrixContents";
 import MatrixExtraRowHeader from "./MatrixExtraRowHeader";
 import MatrixExtraRowCell from "./MatrixExtraRowCell";
 import { MatrixExtraRow } from "./types";
@@ -62,7 +63,7 @@ const MatrixExtraRowGroup = (props: MatrixExtraRowGroupProps) => {
 	}, []);
 
 	return (
-		<React.Fragment>
+		<MatrixContents role={"row"}>
 			<MatrixExtraRowHeader extraRow={props.extraRow} />
 			{columns.map((column) => (
 				<MatrixExtraRowCell
@@ -77,7 +78,7 @@ const MatrixExtraRowGroup = (props: MatrixExtraRowGroupProps) => {
 					onFocusColumn={focusColumn}
 				/>
 			))}
-		</React.Fragment>
+		</MatrixContents>
 	);
 };
 

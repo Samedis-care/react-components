@@ -10,6 +10,7 @@ import {
 } from "./matrixClasses";
 import { cellBorders, columnTintStyles } from "./matrixTints";
 import { useMatrixConfig } from "./MatrixGridContext";
+import MatrixContents from "./MatrixContents";
 import useMatrixActivation from "./useMatrixActivation";
 import { MatrixColumn, MatrixExtraRow } from "./types";
 
@@ -137,28 +138,33 @@ const MatrixExtraRowCell = (props: MatrixExtraRowCellProps) => {
 	// Zero is a value: only a missing (or null) badge means "nothing known".
 	const badge = extraRow.badges?.[column.key];
 	const clickable = !!onCellClick;
+	// The grid cell is a wrapper of its own: a clickable cell is a button,
+	// which cannot be the grid cell too. Always there, so the cell is not
+	// re-created when onCellClick comes or goes.
 	return (
-		<MatrixExtraCellRoot
-			className={combineClassNames([
-				classes?.extraCell,
-				columnVariantClass(column.variant),
-				clickable && matrixClasses.extraCellClickable,
-				touch && matrixClasses.touch,
-			])}
-			{...activation}
-			ref={ref}
-			tabIndex={clickable ? (tabStop ? 0 : -1) : undefined}
-			onKeyDown={clickable ? handleKeyDown : undefined}
-			onFocus={clickable ? handleFocus : undefined}
-		>
-			{badge != null ? (
-				<MatrixBadge className={classes?.badge}>{badge}</MatrixBadge>
-			) : (
-				clickable && (
-					<MatrixExtraCellAddHint className={classes?.extraCellAddHint} />
-				)
-			)}
-		</MatrixExtraCellRoot>
+		<MatrixContents role={"gridcell"}>
+			<MatrixExtraCellRoot
+				className={combineClassNames([
+					classes?.extraCell,
+					columnVariantClass(column.variant),
+					clickable && matrixClasses.extraCellClickable,
+					touch && matrixClasses.touch,
+				])}
+				{...activation}
+				ref={ref}
+				tabIndex={clickable ? (tabStop ? 0 : -1) : undefined}
+				onKeyDown={clickable ? handleKeyDown : undefined}
+				onFocus={clickable ? handleFocus : undefined}
+			>
+				{badge != null ? (
+					<MatrixBadge className={classes?.badge}>{badge}</MatrixBadge>
+				) : (
+					clickable && (
+						<MatrixExtraCellAddHint className={classes?.extraCellAddHint} />
+					)
+				)}
+			</MatrixExtraCellRoot>
+		</MatrixContents>
 	);
 };
 

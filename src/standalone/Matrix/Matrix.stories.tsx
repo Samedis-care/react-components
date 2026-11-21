@@ -810,6 +810,35 @@ export const Issue3480Item15HeaderLabelsHaveContrastInOtherPalettes: Story = {
 	},
 };
 
+/** ISSUE-3480-ITEM-9: the grid exposes its rows, header cells and cells, and axe checks how they nest. */
+export const Issue3480Item9GridHasRowsAndHeaderCells: Story = {
+	args: { extraRowsPosition: "top" },
+	parameters: { a11y: { test: "error" } },
+	play: async ({ canvasElement }) => {
+		const grid = within(canvasElement).getByRole("grid", {
+			name: "Ward A duty roster",
+		});
+		const rows = within(grid).getAllByRole("row");
+		// the header row, the aggregate row, one row per person
+		await expect(rows).toHaveLength(2 + PEOPLE.length);
+		const headers = within(rows[0]).getAllByRole("columnheader");
+		await expect(headers[0]).toHaveTextContent("Ward A");
+		for (const row of rows.slice(1)) {
+			await expect(within(row).getAllByRole("rowheader")).toHaveLength(1);
+			await expect(within(row).getAllByRole("gridcell")).toHaveLength(
+				headers.length - 1,
+			);
+		}
+		// the aggregate cells are buttons, each inside its grid cell
+		const demand = within(rows[1]).getAllByRole("button", {
+			name: /^Open demand on/,
+		});
+		await expect(demand).toHaveLength(headers.length - 1);
+		for (const button of demand)
+			await expect(button.closest("[role=gridcell]")).not.toBeNull();
+	},
+};
+
 // ---- Bug stories: cells and tiles -------------------------------------------
 
 const WHITE: Rgba = { r: 255, g: 255, b: 255, a: 1 };

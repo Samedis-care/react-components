@@ -100,6 +100,7 @@ const MatrixColumnHeader = (props: MatrixColumnHeaderProps) => {
 	return (
 		<MatrixColumnHeaderRoot
 			ref={props.innerRef}
+			role={"columnheader"}
 			className={combineClassNames([
 				classes?.columnHeader,
 				columnVariantClass(column.variant),

@@ -4,6 +4,7 @@ import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
 import { cellBorders } from "./matrixTints";
 import { useMatrixConfig } from "./MatrixGridContext";
+import MatrixContents from "./MatrixContents";
 import useMatrixActivation from "./useMatrixActivation";
 import { MatrixRow } from "./types";
 
@@ -59,16 +60,22 @@ const MatrixRowHeader = <TCell,>(props: MatrixRowHeaderProps<TCell>) => {
 		() => renderRowHeader(row, context),
 		[renderRowHeader, row, context],
 	);
+	// The row's header cell is a wrapper of its own: on touch the header is a
+	// button, which cannot be the header cell too. Always there, so the
+	// contents do not remount when the header becomes a button or stops being
+	// one.
 	return (
-		<MatrixRowHeaderRoot
-			className={combineClassNames([
-				classes?.rowHeader,
-				button && matrixClasses.rowHeaderButton,
-			])}
-			{...activation}
-		>
-			{content}
-		</MatrixRowHeaderRoot>
+		<MatrixContents role={"rowheader"}>
+			<MatrixRowHeaderRoot
+				className={combineClassNames([
+					classes?.rowHeader,
+					button && matrixClasses.rowHeaderButton,
+				])}
+				{...activation}
+			>
+				{content}
+			</MatrixRowHeaderRoot>
+		</MatrixContents>
 	);
 };
 

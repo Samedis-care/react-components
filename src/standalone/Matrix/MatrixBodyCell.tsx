@@ -307,6 +307,7 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 
 	return (
 		<MatrixBodyCellRoot
+			role={"gridcell"}
 			className={combineClassNames([
 				classes?.cell,
 				columnVariantClass(column.variant),

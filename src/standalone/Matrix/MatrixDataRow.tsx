@@ -1,5 +1,6 @@
 import React from "react";
 import { useMatrixConfig } from "./MatrixGridContext";
+import MatrixContents from "./MatrixContents";
 import MatrixRowHeader from "./MatrixRowHeader";
 import MatrixBodyCell from "./MatrixBodyCell";
 import { MatrixRow } from "./types";
@@ -19,7 +20,7 @@ export interface MatrixDataRowProps<TCell> {
 const MatrixDataRow = <TCell,>(props: MatrixDataRowProps<TCell>) => {
 	const { columns } = useMatrixConfig<TCell>();
 	return (
-		<React.Fragment>
+		<MatrixContents role={"row"}>
 			<MatrixRowHeader row={props.row} />
 			{columns.map((column, columnIndex) => (
 				<MatrixBodyCell
@@ -29,7 +30,7 @@ const MatrixDataRow = <TCell,>(props: MatrixDataRowProps<TCell>) => {
 					columnIndex={columnIndex}
 				/>
 			))}
-		</React.Fragment>
+		</MatrixContents>
 	);
 };
 

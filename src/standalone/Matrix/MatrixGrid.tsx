@@ -23,6 +23,7 @@ import {
 	MatrixInteractionStore,
 } from "./MatrixInteractionContext";
 import MatrixColumnHeader from "./MatrixColumnHeader";
+import MatrixContents from "./MatrixContents";
 import MatrixDataRow from "./MatrixDataRow";
 import MatrixExtraRowGroup from "./MatrixExtraRowGroup";
 
@@ -270,6 +271,9 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 			)),
 		[extraRows],
 	);
+	// what React renders nothing for, and an empty string
+	const hasCorner =
+		corner != null && typeof corner !== "boolean" && corner !== "";
 
 	return (
 		// the cast is one-directional: reading it back is type-safe (see
@@ -288,15 +292,29 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 					role={label ? "region" : undefined}
 					aria-label={label}
 				>
-					<MatrixGridRoot className={classes?.grid} style={gridStyle}>
-						<MatrixCorner className={classes?.corner}>{corner}</MatrixCorner>
-						{columns.map((column) => (
-							<MatrixColumnHeader
-								key={column.key}
-								column={column}
-								innerRef={column.key === target ? scrollTargetRef : undefined}
-							/>
-						))}
+					<MatrixGridRoot
+						className={classes?.grid}
+						style={gridStyle}
+						role={"grid"}
+						aria-label={label || undefined}
+					>
+						<MatrixContents role={"row"}>
+							<MatrixCorner
+								className={classes?.corner}
+								// heads the row header column; without contents it
+								// would be an empty column header
+								role={hasCorner ? "columnheader" : "gridcell"}
+							>
+								{corner}
+							</MatrixCorner>
+							{columns.map((column) => (
+								<MatrixColumnHeader
+									key={column.key}
+									column={column}
+									innerRef={column.key === target ? scrollTargetRef : undefined}
+								/>
+							))}
+						</MatrixContents>
 						{extraRowsPosition === "top" && extra}
 						{rows.map((row) => (
 							<MatrixDataRow key={row.key} row={row} />

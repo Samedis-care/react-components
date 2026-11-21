@@ -879,6 +879,77 @@ describe("MatrixGrid", () => {
 		});
 		expect(screen.getByTestId("wrapper-r1-c1")).toBeInTheDocument();
 	});
+
+	describe("accessibility", () => {
+		it("[ISSUE-3480-ITEM-9] exposes table semantics: rows, column headers and row headers", () => {
+			render(
+				gridElement({
+					label: "Roster",
+					extraRows: [{ key: "x", header: "Total", badges: { c1: 1 } }],
+				}),
+			);
+			expect(
+				screen.queryByRole("grid") ?? screen.queryByRole("table"),
+			).not.toBeNull();
+			// the header row, two people, the aggregate row
+			expect(screen.getAllByRole("row")).toHaveLength(4);
+			expect(
+				screen.getAllByRole("columnheader").map((header) => header.textContent),
+			).toEqual(expect.arrayContaining(["1", "2", "3", "4"]));
+			expect(
+				screen.getAllByRole("rowheader").map((header) => header.textContent),
+			).toEqual(["header-r1", "header-r2", "Total"]);
+		});
+
+		/** The roles an element owns: its nearest descendants that have one */
+		const ownedRoles = (element: Element): string[] =>
+			Array.from(element.children).flatMap((child) => {
+				const role = child.getAttribute("role");
+				return role ? [role] : ownedRoles(child);
+			});
+
+		it("[ISSUE-3480-ITEM-9] names the grid, and puts only header cells and cells into its rows", () => {
+			render(
+				gridElement({
+					label: "Roster",
+					extraRows: [
+						{
+							key: "x",
+							header: "Total",
+							label: "Open",
+							badges: { c1: 1 },
+							onCellClick: vi.fn(),
+						},
+					],
+				}),
+			);
+			expect(screen.getByRole("grid", { name: "Roster" })).toBeInTheDocument();
+			// every aggregate cell is a button, but inside its grid cell
+			expect(screen.getAllByRole("button", { name: "Open" })).toHaveLength(4);
+			const header = Array<string>(5).fill("columnheader");
+			const body = ["rowheader", ...Array<string>(4).fill("gridcell")];
+			expect(screen.getAllByRole("row").map(ownedRoles)).toEqual([
+				header,
+				body,
+				body,
+				body,
+			]);
+		});
+
+		it("[ISSUE-3480-ITEM-9] makes an empty corner a cell, not an empty column header", () => {
+			const { rerender } = render(gridElement({ corner: undefined }));
+			const roles = () => ownedRoles(screen.getAllByRole("row")[0]);
+			const columns = Array<string>(4).fill("columnheader");
+			expect(roles()).toEqual(["gridcell", ...columns]);
+			for (const corner of [null, false, ""]) {
+				rerender(gridElement({ corner }));
+				expect(roles(), String(corner)).toEqual(["gridcell", ...columns]);
+			}
+			rerender(gridElement({ corner: "Ward A" }));
+			expect(roles()).toEqual(["columnheader", ...columns]);
+		});
+	});
+
 	describe("extra rows", () => {
 		const extraRows = [
 			{
@@ -1020,6 +1091,14 @@ describe("MatrixGrid", () => {
 			expect(onRowHeaderActions).toHaveBeenCalledWith("r1");
 			fireEvent.click(header);
 			expect(onRowHeaderActions).toHaveBeenCalledTimes(2);
+		});
+		it("[ISSUE-3480-ITEM-9] keeps the row header a header cell while it is a button", () => {
+			renderGrid({ onRowHeaderActions: vi.fn() });
+			const headers = screen.getAllByRole("rowheader");
+			expect(headers).toHaveLength(2);
+			expect(headers[0]).toContainElement(
+				screen.getByRole("button", { name: "Row one" }),
+			);
 		});
 		it("shows the aggregate row's add hint outright", () => {
 			renderGrid({

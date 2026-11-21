@@ -34,7 +34,10 @@ export interface MatrixExtraRowHeaderProps {
 const MatrixExtraRowHeader = (props: MatrixExtraRowHeaderProps) => {
 	const { classes } = useMatrixConfig<unknown>();
 	return (
-		<MatrixExtraRowHeaderRoot className={classes?.extraRowHeader}>
+		<MatrixExtraRowHeaderRoot
+			role={"rowheader"}
+			className={classes?.extraRowHeader}
+		>
 			{props.extraRow.header}
 		</MatrixExtraRowHeaderRoot>
 	);

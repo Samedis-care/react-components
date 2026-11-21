@@ -35,7 +35,9 @@ export interface MatrixGridProps<TCell> {
 	 */
 	rows: MatrixRow<TCell>[];
 	/**
-	 * Contents of the sticky top-left cell
+	 * Contents of the sticky top-left cell. It is the column header of the row
+	 * headers' column, so it should say what they show (e.g. "Staff"). Without
+	 * contents (undefined, null, a boolean or "") it is a plain cell.
 	 */
 	corner?: React.ReactNode;
 	/**
