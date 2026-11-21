@@ -519,6 +519,13 @@ export interface FormContextData<
 		data: Dispatch<SetStateAction<T | undefined>>,
 	) => void;
 	/**
+	 * Tells whether custom field state is stored under the name
+	 * @param field custom field name (must not be in model)
+	 * @returns true once setCustomState wrote the name, also when it wrote null or
+	 *          undefined; false before
+	 */
+	hasCustomState: (field: string) => boolean;
+	/**
 	 * Set custom field dirty state
 	 * @param field The unique field name
 	 * @param dirty The dirty state
@@ -1177,6 +1184,11 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 					? value(customFieldState.current[field] as T | undefined)
 					: value;
 		},
+		[],
+	);
+	const hasCustomState = useCallback(
+		(field: string) =>
+			Object.prototype.hasOwnProperty.call(customFieldState.current, field),
 		[],
 	);
 
@@ -2457,6 +2469,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 			showDirtyState: !!showDirtyState,
 			getCustomState,
 			setCustomState,
+			hasCustomState,
 			setPreSubmitHandler,
 			removePreSubmitHandler,
 			setPostSubmitHandler,
@@ -2518,6 +2531,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 			showDirtyState,
 			getCustomState,
 			setCustomState,
+			hasCustomState,
 			setPreSubmitHandler,
 			removePreSubmitHandler,
 			setPostSubmitHandler,
