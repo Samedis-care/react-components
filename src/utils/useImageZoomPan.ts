@@ -1,7 +1,24 @@
-import React, { useCallback, useLayoutEffect, useMemo, useRef } from "react";
+import React, {
+	useCallback,
+	useLayoutEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 10;
+/** The factor of one step of zoomIn and zoomOut (and of the + and - keys) */
+const ZOOM_STEP = 1.5;
+/** The share of the view's width or height one arrow key press pans by */
+const PAN_STEP = 0.1;
+/** The direction an arrow key moves the view in, as [x, y] */
+const ARROW_KEYS = new Map<string, [number, number]>([
+	["ArrowLeft", [-1, 0]],
+	["ArrowRight", [1, 0]],
+	["ArrowUp", [0, -1]],
+	["ArrowDown", [0, 1]],
+]);
 
 /**
  * The scale that fits the image back into its box after a quarter turn.
@@ -66,17 +83,49 @@ export interface UseImageZoomPanResult {
 	 * Turns the image a quarter turn clockwise
 	 */
 	rotateRight: () => void;
+	/**
+	 * Zooms in one step (by 1.5, up to 10×), keeping the centre of the view in view
+	 */
+	zoomIn: () => void;
+	/**
+	 * Zooms out one step (by 1.5, down to 1×), keeping the centre of the view in view
+	 * as far as the image still covers it
+	 */
+	zoomOut: () => void;
+	/**
+	 * Goes back to 1×, the whole image in view and centred. Keeps the rotation.
+	 */
+	resetZoom: () => void;
+	/**
+	 * Whether the image is zoomed in (above 1×), so that dragging pans it. Changes only when
+	 * the image goes from fitted to zoomed in and back, not on every zoom step.
+	 */
+	zoomed: boolean;
+	/**
+	 * Keyboard handler for the element that holds the focus while the view is open, e.g. the
+	 * dialog: `+` (or `=`) zooms in, `-` zooms out, `0` resets the zoom, and while zoomed in
+	 * the arrow keys pan by a tenth of the view. Calls `preventDefault()` on the keys it
+	 * handles; leaves the arrow keys alone at 1×, and every key pressed with Ctrl, Alt or
+	 * Meta (the browser's own zoom).
+	 */
+	handleKeyDown: React.KeyboardEventHandler;
 }
 
 /**
- * Hook providing zoom (mouse wheel / pinch), pan (drag) and rotation (quarter
- * turns) for an image element inside a container. Updates are imperative
- * (ref-based) so no React re-renders occur during interaction.
+ * Hook providing zoom (mouse wheel / pinch / keys / buttons), pan (drag / arrow
+ * keys) and rotation (quarter turns) for an image element inside a container.
+ * Updates are imperative (ref-based) so no React re-renders occur during
+ * interaction; only `zoomed` re-renders, when the image goes from fitted to
+ * zoomed in and back.
  *
  * At zoom 1x, single-finger touch and single-pointer drag events are not
  * intercepted, allowing parent scroll-based interactions (e.g. swipe
  * navigation) to work normally. Pinch gestures and mouse wheel zoom always
  * work regardless of zoom level.
+ *
+ * Keyboard and buttons: attach `handleKeyDown` to the element that holds the
+ * focus (the dialog), and offer `zoomIn`, `zoomOut` and `resetZoom` as buttons,
+ * so the view can be zoomed and panned without a pointer.
  *
  * A turned image is scaled to fit its box again, so the image is expected to
  * fill its box with `object-fit: contain`.
@@ -100,11 +149,15 @@ const useImageZoomPan = (
 	const lastPointer = useRef({ x: 0, y: 0 });
 	const lastPinchDist = useRef<number | null>(null);
 	const lastTouchCenter = useRef({ x: 0, y: 0 });
+	const [zoomed, setZoomed] = useState(false);
 
 	const syncContainerStyle = useCallback(() => {
+		const isZoomed = zoomRef.current > 1;
+		// the same value again does not re-render
+		setZoomed(isZoomed);
 		const el = containerElRef.current;
 		if (!el) return;
-		el.style.touchAction = zoomRef.current > 1 ? "none" : "";
+		el.style.touchAction = isZoomed ? "none" : "";
 	}, []);
 
 	const render = useCallback(() => {
@@ -197,6 +250,55 @@ const useImageZoomPan = (
 	);
 	const rotateLeft = useCallback(() => rotate(-1), [rotate]);
 	const rotateRight = useCallback(() => rotate(1), [rotate]);
+
+	const zoomBy = useCallback(
+		(factor: number) => {
+			const zoom = zoomRef.current;
+			const next = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom * factor));
+			// the pan grows with the zoom, so the point in the view's centre stays there
+			const ratio = next / zoom;
+			update(next, panRef.current.x * ratio, panRef.current.y * ratio);
+		},
+		[update],
+	);
+	const zoomIn = useCallback(() => zoomBy(ZOOM_STEP), [zoomBy]);
+	const zoomOut = useCallback(() => zoomBy(1 / ZOOM_STEP), [zoomBy]);
+	const resetZoom = useCallback(() => update(MIN_ZOOM, 0, 0), [update]);
+
+	const handleKeyDown = useCallback(
+		(evt: React.KeyboardEvent) => {
+			if (evt.defaultPrevented || evt.ctrlKey || evt.altKey || evt.metaKey)
+				return;
+			switch (evt.key) {
+				case "+":
+				case "=":
+					zoomIn();
+					break;
+				case "-":
+					zoomOut();
+					break;
+				case "0":
+					resetZoom();
+					break;
+				default: {
+					const direction = ARROW_KEYS.get(evt.key);
+					// at 1× there is nothing to pan to
+					if (!direction || zoomRef.current <= 1) return;
+					const container = containerElRef.current;
+					if (!container) return;
+					const { width, height } = container.getBoundingClientRect();
+					// the view moves the given way, so the image moves the other
+					update(
+						zoomRef.current,
+						panRef.current.x - direction[0] * width * PAN_STEP,
+						panRef.current.y - direction[1] * height * PAN_STEP,
+					);
+				}
+			}
+			evt.preventDefault();
+		},
+		[zoomIn, zoomOut, resetZoom, update],
+	);
 
 	// Callback ref for the container — attaches a native wheel listener with
 	// { passive: false } so preventDefault actually stops the parent
@@ -359,7 +461,18 @@ const useImageZoomPan = (
 		],
 	);
 
-	return { imgRef, containerRef, containerProps, rotateLeft, rotateRight };
+	return {
+		imgRef,
+		containerRef,
+		containerProps,
+		rotateLeft,
+		rotateRight,
+		zoomIn,
+		zoomOut,
+		resetZoom,
+		zoomed,
+		handleKeyDown,
+	};
 };
 
 export default useImageZoomPan;

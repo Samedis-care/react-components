@@ -195,6 +195,9 @@
 			"close": "Close",
 			"rotate-left": "Rotate left",
 			"rotate-right": "Rotate right",
+			"zoom-in": "Zoom in",
+			"zoom-out": "Zoom out",
+			"reset-zoom": "Reset zoom",
 			"upload": "Upload",
 			"restore": "Restore",
 			"upload-capture": {

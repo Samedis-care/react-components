@@ -364,3 +364,166 @@ export const Issue3490Item7OpenPreviewPassesAxe: Story = {
 		).toBeInTheDocument();
 	},
 };
+
+export const Issue3490Item8ZoomsByKeyboard: Story = {
+	args: { open: true },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3490-ITEM-8: zoom and pan work by wheel, pinch, double-click and drag only. A keyboard user can rotate the image but never enlarge it. Expected: a zoom-in button, or the + key, zooms in.",
+			},
+		},
+	},
+	play: async ({ userEvent }) => {
+		const { dialog, image } = await getDialogImage();
+		const zoomIn = dialog.queryByRole("button", { name: /zoom in/i });
+		if (zoomIn) {
+			zoomIn.focus();
+			await userEvent.keyboard("{Enter}");
+		} else {
+			dialog.getByRole("button", { name: "Close" }).focus();
+			await userEvent.keyboard("+");
+		}
+		await expect(readTransform(image).scale).toBeGreaterThan(1);
+	},
+};
+
+const TOOLBAR = [
+	"Rotate left",
+	"Rotate right",
+	"Zoom in",
+	"Zoom out",
+	"Reset zoom",
+];
+
+/** The toolbar's buttons sit in one row, in this order, apart from each other and from Close */
+const expectToolbarRow = async (
+	dialog: Awaited<ReturnType<typeof getDialogImage>>["dialog"],
+) => {
+	const boxes = TOOLBAR.map((name) =>
+		dialog.getByRole("button", { name }).getBoundingClientRect(),
+	);
+	const close = dialog
+		.getByRole("button", { name: "Close" })
+		.getBoundingClientRect();
+	for (let i = 1; i < boxes.length; i++) {
+		await expect(boxes[i].top, TOOLBAR[i]).toBeCloseTo(boxes[0].top);
+		await expect(boxes[i].left, TOOLBAR[i]).toBeGreaterThanOrEqual(
+			boxes[i - 1].right,
+		);
+	}
+	await expect(boxes[0].left).toBeGreaterThanOrEqual(0);
+	await expect(boxes[boxes.length - 1].right).toBeLessThanOrEqual(close.left);
+	await expect(close.right).toBeLessThanOrEqual(window.innerWidth);
+};
+
+/** Dispatches a keydown on the focused element, as the keyboard would */
+const pressKey = (key: string, init?: KeyboardEventInit) => {
+	const evt = new KeyboardEvent("keydown", {
+		key,
+		bubbles: true,
+		cancelable: true,
+		...init,
+	});
+	(document.activeElement ?? document.body).dispatchEvent(evt);
+	return evt;
+};
+
+/**
+ * With the focus anywhere in the open preview, + and - zoom by 1.5 and keep the centre of the
+ * view in view, the arrow keys pan by a tenth of the view while zoomed in, and 0 resets. The
+ * grab cursor shows only while zoomed in. At 1× the arrow keys are left to the page, and
+ * Ctrl with + to the browser.
+ */
+export const Issue3490Item8KeysZoomAndPan: Story = {
+	args: { open: true },
+	parameters: { a11y: { test: "error" } },
+	play: async ({ userEvent }) => {
+		const { image } = await getDialogImage();
+		const dialog = within(document.body).getByRole("dialog");
+		const container = image.parentElement;
+		if (!container) throw new Error("container not found");
+		// the dialog takes the focus when it opens
+		await waitFor(() =>
+			expect(dialog.parentElement?.contains(document.activeElement)).toBe(true),
+		);
+		await expect(getComputedStyle(container).cursor).not.toBe("grab");
+		await expect(pressKey("ArrowRight").defaultPrevented).toBe(false);
+		await expect(pressKey("+", { ctrlKey: true }).defaultPrevented).toBe(false);
+		let transform = readTransform(image);
+		await expect([transform.scale, transform.x, transform.y]).toEqual([
+			1, 0, 0,
+		]);
+
+		await userEvent.keyboard("+");
+		await expect(readTransform(image).scale).toBeCloseTo(1.5);
+		await expect(getComputedStyle(container).cursor).toBe("grab");
+		await userEvent.keyboard("+");
+		await expect(readTransform(image).scale).toBeCloseTo(2.25);
+
+		const { width, height } = container.getBoundingClientRect();
+		// the view moves right and down, so the image moves left and up
+		await userEvent.keyboard("{ArrowRight}{ArrowDown}");
+		transform = readTransform(image);
+		await expect(transform.x).toBeCloseTo(-width / 10);
+		await expect(transform.y).toBeCloseTo(-height / 10);
+		await userEvent.keyboard("{ArrowLeft}{ArrowLeft}{ArrowUp}");
+		transform = readTransform(image);
+		await expect(transform.x).toBeCloseTo(width / 10);
+		await expect(transform.y).toBeCloseTo(0);
+		await expect(pressKey("ArrowDown").defaultPrevented).toBe(true);
+
+		// the point in the centre of the view stays there
+		await userEvent.keyboard("-");
+		transform = readTransform(image);
+		await expect(transform.scale).toBeCloseTo(1.5);
+		await expect(transform.x).toBeCloseTo(width / 15);
+
+		await userEvent.keyboard("0");
+		transform = readTransform(image);
+		await expect([transform.scale, transform.x, transform.y]).toEqual([
+			1, 0, 0,
+		]);
+		await expect(getComputedStyle(container).cursor).not.toBe("grab");
+	},
+};
+
+/**
+ * Zoom in, Zoom out and Reset zoom sit right of the rotate buttons, across from Close. Each
+ * click zooms one step, between 1× and 10×, and the focus stays on the button.
+ */
+export const Issue3490Item8ZoomButtons: Story = {
+	args: { open: true },
+	parameters: { a11y: { test: "error" } },
+	play: async ({ userEvent }) => {
+		const { dialog, image } = await getDialogImage();
+		await expectToolbarRow(dialog);
+		const zoomIn = dialog.getByRole("button", { name: "Zoom in" });
+		const zoomOut = dialog.getByRole("button", { name: "Zoom out" });
+		await userEvent.click(zoomOut);
+		await expect(readTransform(image).scale).toBe(1);
+		await userEvent.click(zoomIn);
+		await expect(readTransform(image).scale).toBeCloseTo(1.5);
+		for (let i = 0; i < 10; i++) await userEvent.click(zoomIn);
+		await expect(readTransform(image).scale).toBeCloseTo(10);
+		await userEvent.click(zoomOut);
+		await expect(readTransform(image).scale).toBeCloseTo(10 / 1.5);
+		await expect(zoomOut).toHaveFocus();
+		await userEvent.click(dialog.getByRole("button", { name: "Reset zoom" }));
+		await expect(readTransform(image).scale).toBe(1);
+	},
+};
+
+/** At phone width the toolbar fits in one row left of Close, and nothing scrolls sideways */
+export const Issue3490Item8ToolbarFitsAPhone: Story = {
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	args: { open: true },
+	parameters: { a11y: { test: "error" } },
+	play: async () => {
+		const { dialog } = await getDialogImage();
+		await expect(window.innerWidth).toBe(320);
+		await expectToolbarRow(dialog);
+		await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(320);
+	},
+};

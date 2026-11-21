@@ -231,7 +231,10 @@
 			},
 			"close": "Sluiten",
 			"rotate-left": "Naar links draaien",
-			"rotate-right": "Naar rechts draaien"
+			"rotate-right": "Naar rechts draaien",
+			"zoom-in": "Inzoomen",
+			"zoom-out": "Uitzoomen",
+			"reset-zoom": "Zoom herstellen"
 		},
 		"phone-number": {
 			"invalid": "Voer het juiste telefoonnummer in"

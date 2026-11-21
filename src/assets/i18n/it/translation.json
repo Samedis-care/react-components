@@ -195,6 +195,9 @@
 			"close": "Chiudi",
 			"rotate-left": "Ruota a sinistra",
 			"rotate-right": "Ruota a destra",
+			"zoom-in": "Ingrandisci",
+			"zoom-out": "Riduci",
+			"reset-zoom": "Reimposta zoom",
 			"upload": "Carica",
 			"restore": "Ripristina",
 			"upload-capture": {

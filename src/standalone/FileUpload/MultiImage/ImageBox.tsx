@@ -20,8 +20,11 @@ import {
 	ArrowBack as PrevIcon,
 	ArrowForward as NextIcon,
 	Close as CloseIcon,
+	FitScreenOutlined as ResetZoomIcon,
 	RotateLeft as RotateLeftIcon,
 	RotateRight as RotateRightIcon,
+	ZoomIn as ZoomInIcon,
+	ZoomOut as ZoomOutIcon,
 } from "@mui/icons-material";
 import combineClassNames from "../../../utils/combineClassNames";
 import useCCTranslations from "../../../utils/useCCTranslations";
@@ -52,7 +55,9 @@ export interface ImageBoxProps {
 	 * The custom onClick handler.
 	 * If not set, the image is a button named after fileName ("Open photo.jpg in full
 	 * screen") that opens a fullscreen preview by click, Enter or Space; focus returns to it
-	 * when the preview closes
+	 * when the preview closes. The preview zooms by wheel, pinch, double-click, its zoom
+	 * buttons and the keys +, - and 0, and pans while zoomed in by dragging and by the arrow
+	 * keys
 	 * If set the onClick handler will be called when the box is clicked, and there is no
 	 * button and no fullscreen preview
 	 * If set to null explicitly no action will be performed and the cursor won't show clickable
@@ -89,6 +94,10 @@ export interface ImageBoxProps {
 	/**
 	 * Custom CSS styles. openButton is the button around the image that opens the
 	 * fullscreen preview (only rendered while onClick is not set).
+	 * fullScreenToolbar holds the rotate buttons (fullScreenRotateButtons) and the zoom
+	 * buttons (fullScreenZoomButtons) in the top left corner of the fullscreen preview.
+	 * While the image is zoomed in, fullScreenZoomContainer also carries the class
+	 * CcImageBox-zoomed (and shows the grab cursor).
 	 */
 	classes?: Partial<Record<ImageBoxClassKey, string>>;
 	/**
@@ -199,13 +208,20 @@ const OpenButton = styled(ButtonBase, {
 	"&.Mui-focusVisible": focusRing(theme, -2),
 }));
 
-const FullScreenRotateButtons = styled("div", {
+const FullScreenToolbar = styled("div", {
 	name: "CcImageBox",
-	slot: "fullScreenRotateButtons",
+	slot: "fullScreenToolbar",
 })({
 	position: "absolute",
 	top: 0,
 	left: 0,
+	display: "flex",
+});
+
+const FullScreenRotateButtons = styled("div", {
+	name: "CcImageBox",
+	slot: "fullScreenRotateButtons",
+})({
 	display: "flex",
 });
 
@@ -219,6 +235,34 @@ const RotateLeftButton = styled(IconButton, {
 const RotateRightButton = styled(IconButton, {
 	name: "CcImageBox",
 	slot: "rotateRightBtn",
+})(({ theme }) => ({
+	padding: theme.spacing(1),
+}));
+
+const FullScreenZoomButtons = styled("div", {
+	name: "CcImageBox",
+	slot: "fullScreenZoomButtons",
+})({
+	display: "flex",
+});
+
+const ZoomInButton = styled(IconButton, {
+	name: "CcImageBox",
+	slot: "zoomInBtn",
+})(({ theme }) => ({
+	padding: theme.spacing(1),
+}));
+
+const ZoomOutButton = styled(IconButton, {
+	name: "CcImageBox",
+	slot: "zoomOutBtn",
+})(({ theme }) => ({
+	padding: theme.spacing(1),
+}));
+
+const ResetZoomButton = styled(IconButton, {
+	name: "CcImageBox",
+	slot: "resetZoomBtn",
 })(({ theme }) => ({
 	padding: theme.spacing(1),
 }));
@@ -286,15 +330,24 @@ const FullScreenImageWrapper = styled("div", {
 	position: "relative",
 });
 
+/**
+ * State class of the fullscreen zoom container: the image is zoomed in, so dragging pans it
+ */
+const zoomContainerClasses = {
+	zoomed: "CcImageBox-zoomed",
+};
+
 const FullScreenZoomContainer = styled("div", {
 	name: "CcImageBox",
 	slot: "fullScreenZoomContainer",
 })({
 	width: "100%",
 	height: "100%",
-	cursor: "grab",
-	"&:active": {
-		cursor: "grabbing",
+	[`&.${zoomContainerClasses.zoomed}`]: {
+		cursor: "grab",
+		"&:active": {
+			cursor: "grabbing",
+		},
 	},
 	"& img": {
 		pointerEvents: "none",
@@ -332,9 +385,14 @@ export type ImageBoxClassKey =
 	| "prevBtn"
 	| "nextBtn"
 	| "openButton"
+	| "fullScreenToolbar"
 	| "fullScreenRotateButtons"
 	| "rotateLeftBtn"
 	| "rotateRightBtn"
+	| "fullScreenZoomButtons"
+	| "zoomInBtn"
+	| "zoomOutBtn"
+	| "resetZoomBtn"
 	| "swipeListener"
 	| "image"
 	| "fullScreenDialog"
@@ -463,6 +521,11 @@ const ImageBox = (inProps: ImageBoxProps) => {
 		containerProps: zoomContainerProps,
 		rotateLeft,
 		rotateRight,
+		zoomIn,
+		zoomOut,
+		resetZoom,
+		zoomed,
+		handleKeyDown: handleZoomKeyDown,
 	} = useImageZoomPan(dialogOpen, src);
 
 	const boxImage = (
@@ -552,7 +615,12 @@ const ImageBox = (inProps: ImageBoxProps) => {
 				)}
 			</Root>
 			{!onClick && (
-				<StyledDialog open={dialogOpen} fullScreen onClose={closeDialog}>
+				<StyledDialog
+					open={dialogOpen}
+					fullScreen
+					onClose={closeDialog}
+					onKeyDown={handleZoomKeyDown}
+				>
 					<DialogContent>
 						<FullScreenImageWrapper className={classes?.fullScreenImageWrapper}>
 							<SwipeListener
@@ -564,7 +632,10 @@ const ImageBox = (inProps: ImageBoxProps) => {
 								<FullScreenZoomContainer
 									ref={zoomContainerRef}
 									{...zoomContainerProps}
-									className={classes?.fullScreenZoomContainer}
+									className={combineClassNames([
+										classes?.fullScreenZoomContainer,
+										zoomed && zoomContainerClasses.zoomed,
+									])}
 								>
 									<StyledImage
 										ref={zoomImgRef}
@@ -588,28 +659,58 @@ const ImageBox = (inProps: ImageBoxProps) => {
 							>
 								<CloseIcon />
 							</RemoveButton>
-							{!disableRotation && (
-								<FullScreenRotateButtons
-									className={classes?.fullScreenRotateButtons}
+							<FullScreenToolbar className={classes?.fullScreenToolbar}>
+								{!disableRotation && (
+									<FullScreenRotateButtons
+										className={classes?.fullScreenRotateButtons}
+									>
+										<RotateLeftButton
+											onClick={rotateLeft}
+											className={classes?.rotateLeftBtn}
+											size="large"
+											aria-label={t("standalone.file-upload.rotate-left")}
+										>
+											<RotateLeftIcon />
+										</RotateLeftButton>
+										<RotateRightButton
+											onClick={rotateRight}
+											className={classes?.rotateRightBtn}
+											size="large"
+											aria-label={t("standalone.file-upload.rotate-right")}
+										>
+											<RotateRightIcon />
+										</RotateRightButton>
+									</FullScreenRotateButtons>
+								)}
+								<FullScreenZoomButtons
+									className={classes?.fullScreenZoomButtons}
 								>
-									<RotateLeftButton
-										onClick={rotateLeft}
-										className={classes?.rotateLeftBtn}
+									<ZoomInButton
+										onClick={zoomIn}
+										className={classes?.zoomInBtn}
 										size="large"
-										aria-label={t("standalone.file-upload.rotate-left")}
+										aria-label={t("standalone.file-upload.zoom-in")}
 									>
-										<RotateLeftIcon />
-									</RotateLeftButton>
-									<RotateRightButton
-										onClick={rotateRight}
-										className={classes?.rotateRightBtn}
+										<ZoomInIcon />
+									</ZoomInButton>
+									<ZoomOutButton
+										onClick={zoomOut}
+										className={classes?.zoomOutBtn}
 										size="large"
-										aria-label={t("standalone.file-upload.rotate-right")}
+										aria-label={t("standalone.file-upload.zoom-out")}
 									>
-										<RotateRightIcon />
-									</RotateRightButton>
-								</FullScreenRotateButtons>
-							)}
+										<ZoomOutIcon />
+									</ZoomOutButton>
+									<ResetZoomButton
+										onClick={resetZoom}
+										className={classes?.resetZoomBtn}
+										size="large"
+										aria-label={t("standalone.file-upload.reset-zoom")}
+									>
+										<ResetZoomIcon />
+									</ResetZoomButton>
+								</FullScreenZoomButtons>
+							</FullScreenToolbar>
 							{onPrevImage && (
 								<PrevButton
 									onClick={handlePrevImage}

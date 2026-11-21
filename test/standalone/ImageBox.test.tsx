@@ -102,6 +102,66 @@ describe("ImageBox", () => {
 	});
 });
 
+describe("ImageBox full-screen zoom", () => {
+	it("[ISSUE-3490-ITEM-8] the full-screen view has named zoom in, zoom out and reset zoom buttons, also without rotation, and they take their classes", () => {
+		renderBox({
+			classes: {
+				fullScreenToolbar: "my-toolbar",
+				fullScreenZoomButtons: "my-zoom-buttons",
+				zoomInBtn: "my-zoom-in",
+				zoomOutBtn: "my-zoom-out",
+				resetZoomBtn: "my-reset-zoom",
+			},
+		});
+		fireEvent.click(screen.getByRole("button", { name: /walk\.png/ }));
+		const zoomIn = screen.getByRole("button", { name: "Zoom in" });
+		expect(zoomIn).toHaveClass("my-zoom-in");
+		expect(screen.getByRole("button", { name: "Zoom out" })).toHaveClass(
+			"my-zoom-out",
+		);
+		expect(screen.getByRole("button", { name: "Reset zoom" })).toHaveClass(
+			"my-reset-zoom",
+		);
+		expect(zoomIn.parentElement).toHaveClass("my-zoom-buttons");
+		const toolbar = zoomIn.parentElement?.parentElement;
+		expect(toolbar).toHaveClass("my-toolbar");
+		expect(toolbar).toContainElement(
+			screen.getByRole("button", { name: "Rotate right" }),
+		);
+		cleanup();
+		renderBox({ disableRotation: true });
+		fireEvent.click(screen.getByRole("button", { name: /walk\.png/ }));
+		expect(screen.queryByRole("button", { name: "Rotate right" })).toBeNull();
+		expect(
+			screen.getByRole("button", { name: "Reset zoom" }),
+		).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3490-ITEM-8] the buttons and keys zoom the full-screen image, and its container is marked zoomed while it is", () => {
+		renderBox({ classes: { fullScreenZoomContainer: "my-container" } });
+		fireEvent.click(screen.getByRole("button", { name: /walk\.png/ }));
+		const dialog = screen.getByRole("dialog");
+		const image = dialog.querySelector("img")!;
+		const container = image.parentElement!;
+		expect(container).toHaveClass("my-container");
+		expect(container).not.toHaveClass("CcImageBox-zoomed");
+		fireEvent.click(screen.getByRole("button", { name: "Zoom in" }));
+		expect(image.style.transform).toContain("scale(1.5)");
+		expect(container).toHaveClass("my-container");
+		expect(container).toHaveClass("CcImageBox-zoomed");
+		fireEvent.keyDown(dialog, { key: "+" });
+		expect(image.style.transform).toContain("scale(2.25)");
+		fireEvent.click(screen.getByRole("button", { name: "Zoom out" }));
+		expect(image.style.transform).toContain("scale(1.5)");
+		fireEvent.click(screen.getByRole("button", { name: "Reset zoom" }));
+		expect(image.style.transform).toContain("scale(1)");
+		expect(container).not.toHaveClass("CcImageBox-zoomed");
+		fireEvent.keyDown(dialog, { key: "+" });
+		fireEvent.keyDown(dialog, { key: "0" });
+		expect(image.style.transform).toContain("scale(1)");
+	});
+});
+
 describe("ImageDots", () => {
 	it("[ISSUE-3491-ITEM-2] the dots are buttons named after their image's position, the active one marked current", () => {
 		const { dots } = renderDots();

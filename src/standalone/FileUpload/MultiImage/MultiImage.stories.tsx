@@ -10,6 +10,7 @@ const svg = (width: number, height: number, body: string) =>
 	btoa(
 		`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">${body}</svg>`,
 	);
+
 const solid = (color: string, width = 160, height = 120) =>
 	svg(
 		width,
@@ -23,12 +24,15 @@ const ADD_TILE = svg(
 	64,
 	'<rect width="64" height="64" fill="#eeeeee"/><path d="M32 16v32M16 32h32" stroke="#616161" stroke-width="6"/>',
 );
+
 const CAMERA_TILE = svg(
 	64,
 	64,
 	'<rect width="64" height="64" fill="#eeeeee"/><circle cx="32" cy="34" r="12" fill="#616161"/>',
 );
+
 const COLORS = ["#e53935", "#43a047", "#1e88e5", "#fdd835", "#8e24aa"];
+
 const makeImages = (count: number): MultiImageImage[] =>
 	Array.from({ length: count }, (_, i) => ({
 		id: `img-${i}`,
@@ -88,13 +92,36 @@ const AXE_GATE = {
 	},
 } as const;
 
+const pageBox = (canvasElement: HTMLElement) => {
+	const box = canvasElement.querySelector<HTMLElement>(
+		'[class*="CcMultiImage-root"] [class*="CcImageBox-root"]',
+	);
+	if (!box) throw new Error("no page preview");
+	return box;
+};
+
+const openFullScreen = async (canvasElement: HTMLElement) => {
+	pageBox(canvasElement).click();
+	return within(document.body).findByRole("dialog");
+};
+
 const openEditDialog = async (canvasElement: HTMLElement) => {
 	within(canvasElement).getByText("Edit").click();
 	return within(document.body).findByRole("dialog");
 };
+
 const rectOf = (element: Element | null) => {
 	if (!element) throw new Error("element not found");
 	return element.getBoundingClientRect();
+};
+
+/**
+ * Reads back what the zoom hook wrote into the image's transform. Browsers may shorten
+ * `translate(x, 0px)` to `translate(x)`.
+ */
+const readScale = (image: HTMLImageElement) => {
+	const match = /scale\(([-\d.e]+)\)/.exec(image.style.transform);
+	return match ? parseFloat(match[1]) : 1;
 };
 
 const meta: Meta<OwnerArgs> = {
@@ -592,5 +619,138 @@ export const Issue3491Item37FullScreenCounterWhenDotsDoNotFit: Story = {
 			within(dialog).getByRole("button", { name: "Next image" }),
 		);
 		await expect(await within(dialog).findByText("27 / 80")).toBeVisible();
+	},
+};
+
+export const Issue3491Item12ZoomsByKeyboard: Story = {
+	args: { readOnly: true },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3491-ITEM-12: the full-screen view zooms and pans by wheel, pinch and drag only. A keyboard user can rotate the image but never enlarge it, e.g. to read a type plate. Expected: a zoom-in button, or the + key, zooms in.",
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const dialog = await openFullScreen(canvasElement);
+		const image = dialog.querySelector("img");
+		if (!image) throw new Error("no image");
+		const zoomIn = within(dialog).queryByRole("button", { name: /zoom in/i });
+		if (zoomIn) {
+			zoomIn.focus();
+			await userEvent.keyboard("{Enter}");
+		} else {
+			within(dialog).getByRole("button", { name: "Close" }).focus();
+			await userEvent.keyboard("+");
+		}
+		await expect(readScale(image)).toBeGreaterThan(1);
+	},
+};
+
+const FULL_SCREEN_TOOLBAR = [
+	"Rotate left",
+	"Rotate right",
+	"Zoom in",
+	"Zoom out",
+	"Reset zoom",
+];
+
+/** The full-screen toolbar's buttons sit in one row, apart from each other and from Close */
+const expectFullScreenToolbarRow = async (dialog: HTMLElement) => {
+	const view = within(dialog);
+	const boxes = FULL_SCREEN_TOOLBAR.map((name) =>
+		view.getByRole("button", { name }).getBoundingClientRect(),
+	);
+	const close = view
+		.getByRole("button", { name: "Close" })
+		.getBoundingClientRect();
+	for (let i = 1; i < boxes.length; i++) {
+		await expect(boxes[i].top, FULL_SCREEN_TOOLBAR[i]).toBeCloseTo(
+			boxes[0].top,
+		);
+		await expect(boxes[i].left, FULL_SCREEN_TOOLBAR[i]).toBeGreaterThanOrEqual(
+			boxes[i - 1].right,
+		);
+	}
+	await expect(boxes[0].left).toBeGreaterThanOrEqual(0);
+	await expect(boxes[boxes.length - 1].right).toBeLessThanOrEqual(close.left);
+	await expect(close.right).toBeLessThanOrEqual(window.innerWidth);
+};
+
+const readTranslateX = (image: HTMLImageElement) => {
+	const match = /translate\(([-\d.e]+)px/.exec(image.style.transform);
+	return match ? parseFloat(match[1]) : 0;
+};
+
+/**
+ * The full-screen view zooms and pans like the image preview: Zoom in, Zoom out and Reset
+ * zoom right of the rotate buttons, + and - zoom, the arrow keys pan while zoomed in (and
+ * leave the shown image alone), 0 resets. The grab cursor shows only while zoomed in, and
+ * the next image starts at 1× again.
+ */
+export const Issue3490Item8FullScreenZoomsAndPansByKeyboard: Story = {
+	args: { readOnly: true },
+	parameters: {
+		a11y: {
+			test: "error",
+			options: { runOnly: { type: "rule", values: ["button-name"] } },
+		},
+	},
+	play: async ({ canvasElement }) => {
+		const dialog = await openFullScreen(canvasElement);
+		const view = within(dialog);
+		const image = dialog.querySelector("img");
+		if (!image?.parentElement) throw new Error("no image");
+		const container = image.parentElement;
+		// the dialog fades in and takes focus
+		await waitFor(() =>
+			expect(dialog.parentElement?.contains(document.activeElement)).toBe(true),
+		);
+		await expectFullScreenToolbarRow(dialog);
+		await expect(getComputedStyle(container).cursor).not.toBe("grab");
+
+		await userEvent.keyboard("+");
+		await expect(readScale(image)).toBeCloseTo(1.5);
+		await expect(getComputedStyle(container).cursor).toBe("grab");
+		await userEvent.keyboard("{ArrowRight}");
+		await expect(readTranslateX(image)).toBeLessThan(0);
+		await expect(
+			view.getByRole("button", { name: "Image 1 of 3" }),
+		).toHaveAttribute("aria-current", "true");
+		await userEvent.keyboard("-");
+		await expect(readScale(image)).toBe(1);
+		await expect(getComputedStyle(container).cursor).not.toBe("grab");
+
+		await userEvent.click(view.getByRole("button", { name: "Zoom in" }));
+		await userEvent.click(view.getByRole("button", { name: "Zoom in" }));
+		await expect(readScale(image)).toBeCloseTo(2.25);
+		await userEvent.click(view.getByRole("button", { name: "Zoom out" }));
+		await expect(readScale(image)).toBeCloseTo(1.5);
+		await userEvent.click(view.getByRole("button", { name: "Reset zoom" }));
+		await expect(readScale(image)).toBe(1);
+
+		await userEvent.keyboard("+");
+		await userEvent.click(view.getByRole("button", { name: "Next image" }));
+		await waitFor(() =>
+			expect(
+				view.getByRole("button", { name: "Image 2 of 3" }),
+			).toHaveAttribute("aria-current", "true"),
+		);
+		const next = dialog.querySelector("img");
+		if (!next?.parentElement) throw new Error("no image");
+		await expect(readScale(next)).toBe(1);
+		await expect(getComputedStyle(next.parentElement).cursor).not.toBe("grab");
+	},
+};
+
+/** At phone width the full-screen toolbar fits in one row left of Close */
+export const Issue3490Item8FullScreenToolbarFitsAPhone: Story = {
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	args: { readOnly: true },
+	play: async ({ canvasElement }) => {
+		const dialog = await openFullScreen(canvasElement);
+		await expect(window.innerWidth).toBe(320);
+		await expectFullScreenToolbarRow(dialog);
 	},
 };

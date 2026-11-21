@@ -2,11 +2,15 @@ import React, { useId } from "react";
 import { Dialog, IconButton, styled, useThemeProps } from "@mui/material";
 import {
 	Close as CloseIcon,
+	FitScreenOutlined as ResetZoomIcon,
 	RotateLeft as RotateLeftIcon,
 	RotateRight as RotateRightIcon,
+	ZoomIn as ZoomInIcon,
+	ZoomOut as ZoomOutIcon,
 } from "@mui/icons-material";
 import useImageZoomPan from "../../../utils/useImageZoomPan";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import combineClassNames from "../../../utils/combineClassNames";
 
 export interface ImagePreviewDialogProps {
 	/**
@@ -32,7 +36,10 @@ export interface ImagePreviewDialogProps {
 	 */
 	disableRotation?: boolean;
 	/**
-	 * Custom styles
+	 * Custom styles. `toolbar` holds the rotate buttons (`rotateButtons`) and the zoom
+	 * buttons (`zoomButtons`) in the top left corner. While the image is zoomed in,
+	 * `container` also carries the class `CcImagePreviewDialog-zoomed` (and shows the grab
+	 * cursor).
 	 */
 	classes?: Partial<Record<ImagePreviewDialogClassKey, string>>;
 }
@@ -52,9 +59,9 @@ const CloseButton = styled(IconButton, {
 	zIndex: 1,
 }));
 
-const RotateButtons = styled("div", {
+const Toolbar = styled("div", {
 	name: "CcImagePreviewDialog",
-	slot: "rotateButtons",
+	slot: "toolbar",
 })(({ theme }) => ({
 	position: "absolute",
 	top: theme.spacing(2),
@@ -62,6 +69,13 @@ const RotateButtons = styled("div", {
 	zIndex: 1,
 	display: "flex",
 }));
+
+const RotateButtons = styled("div", {
+	name: "CcImagePreviewDialog",
+	slot: "rotateButtons",
+})({
+	display: "flex",
+});
 
 const RotateLeftButton = styled(IconButton, {
 	name: "CcImagePreviewDialog",
@@ -73,6 +87,35 @@ const RotateRightButton = styled(IconButton, {
 	slot: "rotateRightButton",
 })({});
 
+const ZoomButtons = styled("div", {
+	name: "CcImagePreviewDialog",
+	slot: "zoomButtons",
+})({
+	display: "flex",
+});
+
+const ZoomInButton = styled(IconButton, {
+	name: "CcImagePreviewDialog",
+	slot: "zoomInButton",
+})({});
+
+const ZoomOutButton = styled(IconButton, {
+	name: "CcImagePreviewDialog",
+	slot: "zoomOutButton",
+})({});
+
+const ResetZoomButton = styled(IconButton, {
+	name: "CcImagePreviewDialog",
+	slot: "resetZoomButton",
+})({});
+
+/**
+ * State class of the container: the image is zoomed in, so dragging pans it
+ */
+const containerClasses = {
+	zoomed: "CcImagePreviewDialog-zoomed",
+};
+
 const Container = styled("div", {
 	name: "CcImagePreviewDialog",
 	slot: "container",
@@ -82,9 +125,11 @@ const Container = styled("div", {
 	display: "flex",
 	alignItems: "center",
 	justifyContent: "center",
-	cursor: "grab",
-	"&:active": {
-		cursor: "grabbing",
+	[`&.${containerClasses.zoomed}`]: {
+		cursor: "grab",
+		"&:active": {
+			cursor: "grabbing",
+		},
 	},
 });
 
@@ -103,12 +148,23 @@ const PreviewImage = styled("img", {
 export type ImagePreviewDialogClassKey =
 	| "root"
 	| "closeButton"
+	| "toolbar"
 	| "rotateButtons"
 	| "rotateLeftButton"
 	| "rotateRightButton"
+	| "zoomButtons"
+	| "zoomInButton"
+	| "zoomOutButton"
+	| "resetZoomButton"
 	| "container"
 	| "image";
 
+/**
+ * A full-screen preview of an image. It zooms by wheel, pinch, double-click, the zoom
+ * buttons and the keys `+`, `-` and `0`; while zoomed in it pans by dragging and by the
+ * arrow keys; and it turns by the rotate buttons. The keys work wherever the focus is in
+ * the dialog.
+ */
 const ImagePreviewDialog = (inProps: ImagePreviewDialogProps) => {
 	const props = useThemeProps({
 		props: inProps,
@@ -116,8 +172,18 @@ const ImagePreviewDialog = (inProps: ImagePreviewDialogProps) => {
 	});
 	const { src, alt, open, onClose, disableRotation, classes } = props;
 	const { t } = useCCTranslations();
-	const { imgRef, containerRef, containerProps, rotateLeft, rotateRight } =
-		useImageZoomPan(open, src);
+	const {
+		imgRef,
+		containerRef,
+		containerProps,
+		rotateLeft,
+		rotateRight,
+		zoomIn,
+		zoomOut,
+		resetZoom,
+		zoomed,
+		handleKeyDown,
+	} = useImageZoomPan(open, src);
 	// the dialog is named by the image's alt: without a DialogTitle, MUI's own aria-labelledby
 	// would point at an id no element carries
 	const imageId = useId();
@@ -127,6 +193,7 @@ const ImagePreviewDialog = (inProps: ImagePreviewDialogProps) => {
 			open={open}
 			fullScreen
 			onClose={onClose}
+			onKeyDown={handleKeyDown}
 			aria-labelledby={imageId}
 			className={classes?.root}
 		>
@@ -137,28 +204,56 @@ const ImagePreviewDialog = (inProps: ImagePreviewDialogProps) => {
 			>
 				<CloseIcon />
 			</CloseButton>
-			{!disableRotation && (
-				<RotateButtons className={classes?.rotateButtons}>
-					<RotateLeftButton
-						onClick={rotateLeft}
-						aria-label={t("standalone.file-upload.rotate-left")}
-						className={classes?.rotateLeftButton}
+			<Toolbar className={classes?.toolbar}>
+				{!disableRotation && (
+					<RotateButtons className={classes?.rotateButtons}>
+						<RotateLeftButton
+							onClick={rotateLeft}
+							aria-label={t("standalone.file-upload.rotate-left")}
+							className={classes?.rotateLeftButton}
+						>
+							<RotateLeftIcon />
+						</RotateLeftButton>
+						<RotateRightButton
+							onClick={rotateRight}
+							aria-label={t("standalone.file-upload.rotate-right")}
+							className={classes?.rotateRightButton}
+						>
+							<RotateRightIcon />
+						</RotateRightButton>
+					</RotateButtons>
+				)}
+				<ZoomButtons className={classes?.zoomButtons}>
+					<ZoomInButton
+						onClick={zoomIn}
+						aria-label={t("standalone.file-upload.zoom-in")}
+						className={classes?.zoomInButton}
 					>
-						<RotateLeftIcon />
-					</RotateLeftButton>
-					<RotateRightButton
-						onClick={rotateRight}
-						aria-label={t("standalone.file-upload.rotate-right")}
-						className={classes?.rotateRightButton}
+						<ZoomInIcon />
+					</ZoomInButton>
+					<ZoomOutButton
+						onClick={zoomOut}
+						aria-label={t("standalone.file-upload.zoom-out")}
+						className={classes?.zoomOutButton}
 					>
-						<RotateRightIcon />
-					</RotateRightButton>
-				</RotateButtons>
-			)}
+						<ZoomOutIcon />
+					</ZoomOutButton>
+					<ResetZoomButton
+						onClick={resetZoom}
+						aria-label={t("standalone.file-upload.reset-zoom")}
+						className={classes?.resetZoomButton}
+					>
+						<ResetZoomIcon />
+					</ResetZoomButton>
+				</ZoomButtons>
+			</Toolbar>
 			<Container
 				ref={containerRef}
 				{...containerProps}
-				className={classes?.container}
+				className={combineClassNames([
+					classes?.container,
+					zoomed && containerClasses.zoomed,
+				])}
 			>
 				<PreviewImage
 					ref={imgRef}

@@ -231,7 +231,10 @@
 			},
 			"close": "Schliessen",
 			"rotate-left": "Nach links drehen",
-			"rotate-right": "Nach rechts drehen"
+			"rotate-right": "Nach rechts drehen",
+			"zoom-in": "Vergrößern",
+			"zoom-out": "Verkleinern",
+			"reset-zoom": "Zoom zurücksetzen"
 		},
 		"phone-number": {
 			"invalid": "Korrekte Rufnummer eingeben"
