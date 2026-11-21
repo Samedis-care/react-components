@@ -45,6 +45,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-21 | [A Matrix tile marks the entries it leaves out with "+N"](2026-11-21-matrix-tile-marks-left-out-entries.md) | behavior |
 | 2026-11-21 | [A file's remove and restore are buttons named after the file](2026-11-21-file-upload-remove-restore-buttons.md) | behavior, type, theme |
 | 2026-11-21 | [Schedule entries call onAuxClick for the middle button only](2026-11-21-schedule-entry-aux-click-middle-button-only.md) | behavior |
+| 2026-11-21 | [WeeklySchedule reloads the shown week when the language changes](2026-11-21-weekly-schedule-reloads-on-language-change.md) | behavior |
 | 2026-11-20 | [CountryCodes and useCountryOptions list every ISO 3166-1 country: Aruba, Curaçao, Sint Maarten and 12 more territories](2026-11-20-country-codes-every-iso-3166-1-country.md) | behavior, type |
 | 2026-11-20 | [ColorInput reports a blur once focus leaves the field and its picker, and a picker opened from the keyboard shows its focus](2026-11-20-color-input-blur-on-leaving-the-field.md) | behavior, type |
 | 2026-11-20 | [The busy overlay's spinner sits on a disc of its own](2026-11-20-form-loader-overlay-spinner-disc.md) | behavior, theme |

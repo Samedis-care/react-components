@@ -33,9 +33,11 @@ import ScheduleFilterRenderer from "../Common/ScheduleFilterRenderers";
 export interface WeekViewProps {
 	/**
 	 * Callback to load data of this week. Called on mount and again when the
-	 * week, the filter values or this function change; only the result or
-	 * error of the latest call is shown, one of an earlier call that arrives
-	 * later is ignored.
+	 * week, the filter values, this function or the language of
+	 * `ComponentsCareI18n` change, so entries in the app's or the backend's
+	 * words follow the language. A spinner replaces the week until the result
+	 * or error arrives; only the one of the latest call is shown, one of an
+	 * earlier call that arrives later is ignored.
 	 * @param weekOffset The offset to the current week
 	 * @param filter The selected filter(s)
 	 */
@@ -111,6 +113,7 @@ const WeekView = (inProps: WeekViewProps) => {
 	const actions = props.actions ?? NO_ACTIONS;
 	const filterCount = Object.keys(filters).length;
 	const { t, i18n } = useCCTranslations();
+	const language = i18n.language;
 	const locale = useCurrentLocale();
 	/**
 	 * The offset to the current week
@@ -205,17 +208,8 @@ const WeekView = (inProps: WeekViewProps) => {
 		setDatePickerAnchorEl(null);
 	}, []);
 
-	useEffect(() => {
-		const langChangeHandler = () => {
-			setData(null);
-			setLoadError(null);
-		};
-		i18n.on("languageChanged", langChangeHandler);
-		return () => {
-			i18n.off("languageChanged", langChangeHandler);
-		};
-	}, [i18n]);
-
+	// `language` is not read here: it is listed so that a language change
+	// loads the shown week again
 	useEffect(() => {
 		/**
 		 * Set by the cleanup when a newer load starts or the view unmounts, so
@@ -240,7 +234,7 @@ const WeekView = (inProps: WeekViewProps) => {
 		return () => {
 			stale = true;
 		};
-	}, [filterValues, loadData, weekOffset]);
+	}, [filterValues, language, loadData, weekOffset]);
 
 	const now = moment();
 	const weekday = now.weekday();

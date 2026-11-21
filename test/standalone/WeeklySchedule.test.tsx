@@ -25,6 +25,10 @@ const flush = async () => {
 	});
 };
 
+/** the 7 day columns in DOM order (portals such as the menu are outside container) */
+const columns = (container: HTMLElement) =>
+	Array.from(container.querySelectorAll<HTMLElement>(".MuiPaper-root"));
+
 const click = (name: string | RegExp) =>
 	fireEvent.click(screen.getByRole("button", { name }));
 
@@ -251,6 +255,62 @@ describe("load lifecycle and navigation", () => {
 		});
 		expect(screen.getByText("current source failed")).toBeInTheDocument();
 		expect(screen.queryByText("previous-idx0")).toBeNull();
+	});
+
+	it("[ISSUE-3477-ITEM-3] a language change does not leave the view on the spinner", async () => {
+		const loadData = vi.fn(() => week("w"));
+		const { container } = render(<WeekView loadData={loadData} />);
+		await flush();
+		expect(columns(container)).toHaveLength(7);
+		await act(async () => {
+			await ccI18n.changeLanguage("de");
+		});
+		await flush();
+		expect(screen.queryByRole("progressbar")).toBeNull();
+		expect(columns(container)).toHaveLength(7);
+	});
+
+	it("[ISSUE-3477-ITEM-3] a language change reloads the shown week and shows the new result", async () => {
+		const loadData = vi.fn((offset: number) => week(ccI18n.language + offset));
+		render(<WeekView loadData={loadData} />);
+		await flush();
+		click("Next week");
+		await flush();
+		expect(screen.getByText("en1-idx0")).toBeInTheDocument();
+		loadData.mockClear();
+		await act(async () => {
+			await ccI18n.changeLanguage("de");
+		});
+		await flush();
+		expect(loadData).toHaveBeenCalledTimes(1);
+		expect(loadData).toHaveBeenLastCalledWith(1, {});
+		expect(screen.getByText("de1-idx0")).toBeInTheDocument();
+		expect(screen.queryByText("en1-idx0")).toBeNull();
+	});
+
+	it("[ISSUE-3477-ITEM-3] a result of the previous language that arrives after the change is not shown", async () => {
+		const pending: Record<
+			string,
+			ReturnType<typeof deferred<IDayData[][]>>
+		> = {};
+		const loadData = vi.fn(() => {
+			pending[ccI18n.language] = deferred<IDayData[][]>();
+			return pending[ccI18n.language].promise;
+		});
+		render(<WeekView loadData={loadData} />);
+		await act(async () => {
+			await ccI18n.changeLanguage("de");
+		});
+		await act(async () => {
+			pending.de.resolve(week("de"));
+			await pending.de.promise;
+		});
+		await act(async () => {
+			pending.en.resolve(week("en"));
+			await pending.en.promise;
+		});
+		expect(screen.getByText("de-idx0")).toBeInTheDocument();
+		expect(screen.queryByText("en-idx0")).toBeNull();
 	});
 });
 
