@@ -227,35 +227,39 @@ export const useImportStep2Logic = (props: CrudImporterStepProps) => {
 				},
 			}));
 
+			const name = evt.target.name;
+			// the result belongs to this script only: once the field holds another one, a
+			// check of this one that finishes later (e.g. a slow validate) is outdated
+			const setCheckResult = (
+				status: "okay" | "error",
+				error: Error | null,
+			) => {
+				setState((prev) =>
+					prev.conversionScripts[name]?.scriptFn === scriptFn
+						? {
+								...prev,
+								conversionScripts: {
+									...prev.conversionScripts,
+									[name]: {
+										...prev.conversionScripts[name],
+										status,
+										error,
+									},
+								},
+							}
+						: prev,
+				);
+			};
+
 			try {
-				await conversionScriptUpdates.current[evt.target.name](
+				await conversionScriptUpdates.current[name](
 					state.data,
-					model.fields[evt.target.name],
+					model.fields[name],
 					scriptFn,
 				);
-				setState((prev) => ({
-					...prev,
-					conversionScripts: {
-						...prev.conversionScripts,
-						[evt.target.name]: {
-							...prev.conversionScripts[evt.target.name],
-							status: "okay",
-							error: null,
-						},
-					},
-				}));
+				setCheckResult("okay", null);
 			} catch (e) {
-				setState((prev) => ({
-					...prev,
-					conversionScripts: {
-						...prev.conversionScripts,
-						[evt.target.name]: {
-							...prev.conversionScripts[evt.target.name],
-							status: "error",
-							error: e as Error,
-						},
-					},
-				}));
+				setCheckResult("error", e as Error);
 			}
 		},
 		[model.fields, setState, state.data],
