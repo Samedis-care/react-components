@@ -1,13 +1,6 @@
 import React from "react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import {
-	act,
-	cleanup,
-	fireEvent,
-	render,
-	screen,
-	within,
-} from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import ccI18n from "../../src/i18n";
 import WeekView from "../../src/standalone/Schedule/Weekly";
 import type { IDayData } from "../../src/standalone/Schedule/Common/DayContents";
@@ -46,12 +39,14 @@ const setNow = (date: Date) => {
 	vi.useFakeTimers({ toFake: ["Date"] });
 	vi.setSystemTime(date);
 };
+
 // Wed 2026-10-14 12:00 local
 const WED = new Date(2026, 9, 14, 12);
 
 beforeAll(async () => {
 	await ccI18n.changeLanguage("en");
 });
+
 afterEach(async () => {
 	cleanup();
 	vi.useRealTimers();
@@ -213,7 +208,6 @@ describe("load lifecycle and navigation", () => {
 		expect(screen.queryByText("w1-idx0")).toBeNull();
 		expect(screen.getByText("w2-idx0")).toBeInTheDocument();
 	});
-
 	it("[ISSUE-3477-ITEM-2] a late rejection of an earlier week does not show an error over the shown week", async () => {
 		const pending: Record<
 			number,
@@ -237,7 +231,6 @@ describe("load lifecycle and navigation", () => {
 		expect(screen.getByText("w1-idx0")).toBeInTheDocument();
 		expect(screen.queryByText("week 0 failed")).toBeNull();
 	});
-
 	it("[ISSUE-3477-ITEM-2] after loadData changes, a late result of the previous function does not replace the new one's error", async () => {
 		const previous = deferred<IDayData[][]>();
 		const current = deferred<IDayData[][]>();
@@ -256,7 +249,6 @@ describe("load lifecycle and navigation", () => {
 		expect(screen.getByText("current source failed")).toBeInTheDocument();
 		expect(screen.queryByText("previous-idx0")).toBeNull();
 	});
-
 	it("[ISSUE-3477-ITEM-3] a language change does not leave the view on the spinner", async () => {
 		const loadData = vi.fn(() => week("w"));
 		const { container } = render(<WeekView loadData={loadData} />);
@@ -269,7 +261,6 @@ describe("load lifecycle and navigation", () => {
 		expect(screen.queryByRole("progressbar")).toBeNull();
 		expect(columns(container)).toHaveLength(7);
 	});
-
 	it("[ISSUE-3477-ITEM-3] a language change reloads the shown week and shows the new result", async () => {
 		const loadData = vi.fn((offset: number) => week(ccI18n.language + offset));
 		render(<WeekView loadData={loadData} />);
@@ -287,7 +278,6 @@ describe("load lifecycle and navigation", () => {
 		expect(screen.getByText("de1-idx0")).toBeInTheDocument();
 		expect(screen.queryByText("en1-idx0")).toBeNull();
 	});
-
 	it("[ISSUE-3477-ITEM-3] a result of the previous language that arrives after the change is not shown", async () => {
 		const pending: Record<
 			string,
@@ -351,5 +341,31 @@ describe("entries", () => {
 		fireEvent(entry, new MouseEvent("auxclick", { bubbles: true, button: 3 }));
 		fireEvent(entry, new MouseEvent("auxclick", { bubbles: true, button: 4 }));
 		expect(onAuxClick).not.toHaveBeenCalled();
+	});
+});
+
+describe("accessibility", () => {
+	it("[ISSUE-3477-ITEM-28] today's column is marked as the current date", async () => {
+		setNow(WED);
+		const { container } = render(<WeekView loadData={() => week("w")} />);
+		await flush();
+		const current = container.querySelectorAll("[aria-current='date']");
+		expect(current).toHaveLength(1);
+		// on today's column (Wednesday, the 4th in an en week) or inside it
+		const today = columns(container)[3];
+		expect(today.contains(current[0]) || current[0].contains(today)).toBe(true);
+	});
+
+	it("[ISSUE-3477-ITEM-28] in another week no column is marked as the current date", async () => {
+		setNow(WED);
+		const { container } = render(<WeekView loadData={() => week("w")} />);
+		await flush();
+		click("Next week");
+		await flush();
+		expect(columns(container)).toHaveLength(7);
+		expect(container.querySelectorAll("[aria-current]")).toHaveLength(0);
+		click(/^Today/);
+		await flush();
+		expect(container.querySelectorAll("[aria-current='date']")).toHaveLength(1);
 	});
 });

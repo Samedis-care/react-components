@@ -232,3 +232,80 @@ export const Issue3477Item4LongWordsKeepColumnWidths: Story = {
 		for (const width of widths) await expect(width).toBeCloseTo(widths[0], 0);
 	},
 };
+
+export const Issue3477Item28TodayColumnIsNotMarkedByColorOnly: Story = {
+	args: {
+		loadData: fn(
+			(weekOffset: number, filter: Record<string, string | boolean>) =>
+				loadSampleWeek(weekOffset, filter).map((day, idx) =>
+					day.length > 0
+						? day
+						: [{ id: `${weekOffset}-extra-${idx}`, title: "Inventory check" }],
+				),
+		),
+	},
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3477-ITEM-28: today's column is marked by more than its color: a bar on its top edge and a bold weekday and date, which forced-colors mode keeps, and `aria-current=\"date\"`. Its labels stay in line with the other columns' labels, and its entries keep their weight.",
+			},
+		},
+	},
+	play: async ({ canvas, canvasElement }) => {
+		await canvas.findAllByRole("button", { name: "Inventory check" });
+		const columns = Array.from(
+			canvasElement.querySelectorAll<HTMLElement>(".MuiPaper-root"),
+		);
+		await expect(columns).toHaveLength(7);
+		const today = canvasElement.querySelector<HTMLElement>(
+			"[aria-current='date']",
+		);
+		if (!today) throw new Error("no column is marked as the current date");
+		const others = columns.filter((column) => column !== today);
+		await expect(others).toHaveLength(6);
+		/** the weekday header and the date line of a column */
+		const labelsOf = (column: HTMLElement) => {
+			const date =
+				column.querySelector(".MuiDivider-root")?.parentElement
+					?.nextElementSibling?.firstElementChild;
+			if (!date) throw new Error("no date line");
+			return [column.querySelector("p")!, date];
+		};
+		const weightOf = (el: Element) => Number(getComputedStyle(el).fontWeight);
+		const barOf = (column: HTMLElement) => {
+			const bar = getComputedStyle(column, "::before");
+			return `${bar.borderTopStyle} ${bar.borderTopWidth}`;
+		};
+
+		// the bar on the top edge, across the whole column; no other column has one
+		await expect(barOf(today)).toBe("solid 4px");
+		await expect(
+			Number.parseFloat(getComputedStyle(today, "::before").width),
+		).toBeCloseTo(rectOf(today).width, 0);
+		for (const column of others) await expect(barOf(column)).toBe("none 0px");
+
+		// bold weekday and date in today's column only
+		for (const label of labelsOf(today))
+			await expect(weightOf(label)).toBeGreaterThanOrEqual(700);
+		for (const column of others)
+			for (const label of labelsOf(column))
+				await expect(weightOf(label)).toBeLessThan(700);
+
+		// the entries keep their own weight
+		await expect(weightOf(today.querySelector("button")!)).toBe(
+			weightOf(others[0].querySelector("button")!),
+		);
+
+		// today's labels line up with the other columns' labels
+		const [weekday, date] = labelsOf(today).map((el) => rectOf(el).top);
+		for (const column of others) {
+			const [otherWeekday, otherDate] = labelsOf(column).map(
+				(el) => rectOf(el).top,
+			);
+			await expect(otherWeekday).toBeCloseTo(weekday, 0);
+			await expect(otherDate).toBeCloseTo(date, 0);
+		}
+	},
+};
