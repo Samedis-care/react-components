@@ -12,7 +12,7 @@ import { useDataGridProps } from "./DataGrid";
 import { isDataGridCustomFilterActive } from "./DataGridUtils";
 import { Breakpoint } from "@mui/material/styles";
 import { GridSize } from "@mui/material/Grid";
-import { MultiSelectorData } from "../Selector";
+import { getReactLabel, MultiSelectorData } from "../Selector";
 import BaseSelector from "../Selector/BaseSelector";
 
 /**
@@ -25,7 +25,12 @@ export interface GridMultiSelectFilterProps {
 	 */
 	label?: string;
 	/**
-	 * All available options
+	 * All available options. The bar and the panel treat them alike, as
+	 * BaseSelector does: an entry with hidden is not listed, one with
+	 * isDisabled is shown but cannot be ticked or unticked, a `[text, node]`
+	 * label shows its node, an isDivider entry is drawn as a separator and an
+	 * isSmallLabel entry as a text between the others. A selected hidden or
+	 * disabled value stays selected while the user changes the others.
 	 */
 	options: MultiSelectorData[];
 	/**
@@ -137,6 +142,11 @@ const GridMultiSelectFilter = (inProps: GridMultiSelectFilterProps) => {
 	);
 
 	const getOptions = useCallback(() => ({ options }), [options]);
+	// the panel's checkboxes: hidden entries are left out, as in the bar's list
+	const shownOptions = useMemo(
+		() => options.filter((option) => !option.hidden),
+		[options],
+	);
 
 	const selectedData = useMemo(
 		(): MultiSelectorData[] =>
@@ -171,12 +181,12 @@ const GridMultiSelectFilter = (inProps: GridMultiSelectFilterProps) => {
 							<Typography>{label}</Typography>
 						</Grid>
 					)}
-					{options.map((option) => (
+					{shownOptions.map((option) => (
 						<Grid key={option.value} size={12}>
 							{option.isDivider ? (
 								<Divider />
 							) : option.isSmallLabel ? (
-								<Typography>{option.label}</Typography>
+								<Typography>{getReactLabel(option)}</Typography>
 							) : (
 								<FormControlLabel
 									control={
@@ -186,7 +196,8 @@ const GridMultiSelectFilter = (inProps: GridMultiSelectFilterProps) => {
 											onChange={handleDialogCheckboxToggle}
 										/>
 									}
-									label={option.label}
+									label={getReactLabel(option)}
+									disabled={option.isDisabled}
 								/>
 							)}
 						</Grid>

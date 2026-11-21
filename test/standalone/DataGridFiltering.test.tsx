@@ -234,6 +234,140 @@ describe("GridSingleSelectFilter", () => {
 		await user.tab();
 		expect(radios[3]).toHaveFocus();
 	});
+	it("[ISSUE-3494-ITEM-12] dialog: hidden options are not listed, disabled ones cannot be picked, a [text, node] label shows once", () => {
+		const onSelect = vi.fn();
+		render(
+			<Ctx>
+				<GridSingleSelectFilter
+					options={[
+						{ value: "a", label: ["Alpha", <b key="n">ALPHA-NODE</b>] },
+						{ value: "h", label: "Hidden one", hidden: true },
+						{ value: "d", label: "Disabled one", isDisabled: true },
+					]}
+					selected="a"
+					field="status"
+					onSelect={onSelect}
+					dialog
+				/>
+			</Ctx>,
+		);
+		expect(screen.queryByText("Hidden one")).toBeNull();
+		expect(screen.getByRole("radio", { name: "Disabled one" })).toBeDisabled();
+		// the text part is not printed before the node (an element whose whole
+		// text is both: the default matcher reads only an element's own text)
+		expect(
+			screen.queryAllByText((_, el) => el?.textContent === "AlphaALPHA-NODE"),
+		).toHaveLength(0);
+		// the radio is named by the node alone, as the bar's list shows it
+		expect(screen.getByRole("radio", { name: "ALPHA-NODE" })).toBeChecked();
+		expect(screen.getAllByRole("radio")).toHaveLength(2);
+		fireEvent.click(screen.getByText("Disabled one"));
+		expect(onSelect).not.toHaveBeenCalled();
+	});
+	it("[ISSUE-3494-ITEM-12] dialog: a small label with a [text, node] label shows its node", () => {
+		render(
+			<Ctx>
+				<GridSingleSelectFilter
+					options={[
+						{
+							value: "g",
+							label: ["Group", <b key="n">GROUP-NODE</b>],
+							isSmallLabel: true,
+						},
+						{ value: "a", label: "A" },
+					]}
+					selected="a"
+					field="status"
+					onSelect={vi.fn()}
+					dialog
+				/>
+			</Ctx>,
+		);
+		expect(screen.getByText("GROUP-NODE")).toBeInTheDocument();
+		expect(screen.queryByText("Group")).toBeNull();
+	});
+});
+
+describe("GridMultiSelectFilter", () => {
+	it("[ISSUE-3494-ITEM-12] dialog: hidden options are not listed, disabled ones cannot be picked, a [text, node] label shows once", () => {
+		const onSelect = vi.fn();
+		render(
+			<Ctx>
+				<GridMultiSelectFilter
+					options={[
+						{ value: "a", label: ["Alpha", <b key="n">ALPHA-NODE</b>] },
+						{ value: "h", label: "Hidden one", hidden: true },
+						{ value: "d", label: "Disabled one", isDisabled: true },
+					]}
+					selected={[]}
+					field="kinds"
+					onSelect={onSelect}
+					dialog
+				/>
+			</Ctx>,
+		);
+		expect(screen.queryByText("Hidden one")).toBeNull();
+		expect(
+			screen.getByRole("checkbox", { name: "Disabled one" }),
+		).toBeDisabled();
+		// the text part is not printed before the node (an element whose whole
+		// text is both: the default matcher reads only an element's own text)
+		expect(
+			screen.queryAllByText((_, el) => el?.textContent === "AlphaALPHA-NODE"),
+		).toHaveLength(0);
+		// the checkbox is named by the node alone, as the bar's list shows it
+		expect(
+			screen.getByRole("checkbox", { name: "ALPHA-NODE" }),
+		).toBeInTheDocument();
+		expect(screen.getAllByRole("checkbox")).toHaveLength(2);
+		fireEvent.click(screen.getByText("Disabled one"));
+		expect(onSelect).not.toHaveBeenCalled();
+	});
+	it("[ISSUE-3494-ITEM-12] dialog: a small label with a [text, node] label shows its node", () => {
+		render(
+			<Ctx>
+				<GridMultiSelectFilter
+					options={[
+						{
+							value: "g",
+							label: ["Group", <b key="n">GROUP-NODE</b>],
+							isSmallLabel: true,
+						},
+						{ value: "a", label: "A" },
+					]}
+					selected={[]}
+					field="kinds"
+					onSelect={vi.fn()}
+					dialog
+				/>
+			</Ctx>,
+		);
+		expect(screen.getByText("GROUP-NODE")).toBeInTheDocument();
+		expect(screen.queryByText("Group")).toBeNull();
+	});
+	it("[ISSUE-3494-ITEM-12] dialog: a selected hidden or disabled value stays selected when another value is ticked", () => {
+		const onSelect = vi.fn();
+		render(
+			<Ctx>
+				<GridMultiSelectFilter
+					options={[
+						{ value: "a", label: "A" },
+						{ value: "h", label: "Hidden one", hidden: true },
+						{ value: "d", label: "Disabled one", isDisabled: true },
+					]}
+					selected={["h", "d"]}
+					field="kinds"
+					onSelect={onSelect}
+					dialog
+				/>
+			</Ctx>,
+		);
+		expect(
+			screen.getByRole("checkbox", { name: "Disabled one" }),
+		).toBeChecked();
+		fireEvent.click(screen.getByRole("checkbox", { name: "A" }));
+		expect(onSelect).toHaveBeenLastCalledWith(["h", "d", "a"]);
+	});
 });
 
 // --- FilterEntry harness ---------------------------------------------------

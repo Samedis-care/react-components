@@ -450,6 +450,129 @@ export const FilterPanelHelpers: Story = {
 	},
 };
 
+/** Status options with a [text, node] label, a disabled and a hidden entry */
+const FLAGGED_STATUS_OPTIONS: BaseSelectorData[] = [
+	{ value: "", label: "All" },
+	{
+		value: "open",
+		label: [
+			"Open",
+			<span key="open">
+				<b>Open</b> <i>(new tasks)</i>
+			</span>,
+		],
+	},
+	{ value: "done", label: "Done" },
+	{ value: "lost", label: "Lost", isDisabled: true },
+	{ value: "archived", label: "Archived", hidden: true },
+];
+
+/** Kinds options with a [text, node] label, a disabled and a hidden entry */
+const FLAGGED_KIND_OPTIONS: MultiSelectorData[] = [
+	{
+		value: "alpha",
+		label: [
+			"Alpha",
+			<span key="alpha">
+				<b>Alpha</b> <i>(main)</i>
+			</span>,
+		],
+	},
+	{ value: "beta", label: "Beta", isDisabled: true },
+	{ value: "gamma", label: "Gamma" },
+	{ value: "legacy", label: "Legacy", hidden: true },
+];
+
+/** The two plain helpers with the flagged options above */
+const FlaggedOptionsBar = (props: IDataGridFilterBarProps) => {
+	const { customData, setCustomData, inDialog } = props;
+	return (
+		<>
+			<GridSingleSelectFilter
+				label="Status"
+				options={FLAGGED_STATUS_OPTIONS}
+				field="status"
+				selected={customData.status as string | undefined}
+				onSelect={(status) => setCustomData((prev) => ({ ...prev, status }))}
+				dialog={inDialog}
+			/>
+			<GridMultiSelectFilter
+				label="Kinds"
+				options={FLAGGED_KIND_OPTIONS}
+				field="kinds"
+				selected={customData.kinds as string[] | undefined}
+				onSelect={(kinds) => setCustomData((prev) => ({ ...prev, kinds }))}
+				dialog={inDialog}
+			/>
+		</>
+	);
+};
+
+/**
+ * ISSUE-3494-ITEM-12: the panel lists the options as the bar's dropdown does.
+ * An entry with hidden ("Archived", "Legacy") is left out, one with isDisabled
+ * ("Lost", "Beta") is shown greyed and cannot be picked, and a `[text, node]`
+ * label shows only its node ("Open (new tasks)", "Alpha (main)").
+ */
+export const Issue3494Item12PanelOptionsLikeTheBar: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: fn(loadTasks),
+		filterBar: FlaggedOptionsBar,
+		enableFilterDialogWidth: 100000,
+		classes: { contentOverlayPaper: "story-filter-panel" },
+	},
+	parameters: {
+		a11y: {
+			test: "error",
+			// the grid behind the panel has violations of its own
+			context: { include: [".story-filter-panel"] },
+		},
+	},
+	play: async ({ args, canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		await userEvent.click(panelButtonOf(canvasElement));
+		const panel = await waitFor(() => {
+			const element = Array.from(
+				canvasElement.querySelectorAll<HTMLElement>(".story-filter-panel"),
+			).find((paper) => paper.textContent.includes("Filter selection"));
+			if (!element) throw new Error("the panel is not open");
+			return element;
+		});
+		await expect(within(panel).getAllByRole("radio")).toHaveLength(4);
+		await expect(within(panel).getAllByRole("checkbox")).toHaveLength(3);
+		await expect(within(panel).queryByText("Archived")).toBeNull();
+		await expect(within(panel).queryByText("Legacy")).toBeNull();
+		// named by the node alone (the native inputs are transparent)
+		await expect(
+			within(panel).getByRole("radio", { name: "Open (new tasks)" }),
+		).toBeEnabled();
+		await expect(
+			within(panel).getByRole("checkbox", { name: "Alpha (main)" }),
+		).toBeEnabled();
+		await expect(within(panel).getByText("Open")).toBeVisible();
+		const lost = within(panel).getByRole("radio", { name: "Lost" });
+		const beta = within(panel).getByRole("checkbox", { name: "Beta" });
+		await expect(lost).toBeDisabled();
+		await expect(beta).toBeDisabled();
+		// a click on a disabled entry's text changes nothing
+		await userEvent.click(within(panel).getByText("Lost"));
+		await userEvent.click(within(panel).getByText("Beta"));
+		await expect(lost).not.toBeChecked();
+		await expect(beta).not.toBeChecked();
+		await userEvent.click(
+			within(panel).getByRole("radio", { name: "Open (new tasks)" }),
+		);
+		await waitFor(
+			() =>
+				expect(lastLoad(args.loadData)?.additionalFilters).toEqual({
+					status: "open",
+				}),
+			{ timeout: 3000 },
+		);
+	},
+};
+
 const OWNER_TO_DATA = (data: Record<string, unknown>): BaseSelectorData => ({
 	value: data.id as string,
 	label: `${data.first_name as string} ${data.last_name as string}`,

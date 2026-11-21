@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from "react";
-import { BaseSelectorData } from "../../standalone/Selector";
+import { BaseSelectorData, getReactLabel } from "../../standalone/Selector";
 import {
 	Divider,
 	FormControl,
@@ -28,7 +28,11 @@ export interface GridSingleSelectFilterProps {
 	label?: string;
 	/**
 	 * All available options. There is no built-in "no filter" choice: add an
-	 * option for it (for example with the value "")
+	 * option for it (for example with the value ""). The bar and the panel
+	 * treat them alike, as BaseSelector does: an entry with hidden is not
+	 * listed, one with isDisabled is shown but cannot be picked, a
+	 * `[text, node]` label shows its node, an isDivider entry is drawn as a
+	 * separator and an isSmallLabel entry as a text between the others.
 	 */
 	options: BaseSelectorData[];
 	/**
@@ -143,6 +147,11 @@ const GridSingleSelectFilter = (inProps: GridSingleSelectFilterProps) => {
 	);
 
 	const getOptions = useCallback(() => ({ options }), [options]);
+	// the panel's radios: hidden entries are left out, as in the bar's list
+	const shownOptions = useMemo(
+		() => options.filter((option) => !option.hidden),
+		[options],
+	);
 	const selectorStyles = useMemo(
 		() => ({
 			autocomplete: isActive ? "Mui-active" : undefined,
@@ -163,17 +172,18 @@ const GridSingleSelectFilter = (inProps: GridSingleSelectFilterProps) => {
 									<Typography>{label}</Typography>
 								</Grid>
 							)}
-							{options.map((option) => (
+							{shownOptions.map((option) => (
 								<Grid key={option.value} size={12}>
 									{option.isDivider ? (
 										<Divider />
 									) : option.isSmallLabel ? (
-										<Typography>{option.label}</Typography>
+										<Typography>{getReactLabel(option)}</Typography>
 									) : (
 										<FormControlLabel
 											control={<Radio />}
 											value={option.value}
-											label={option.label}
+											label={getReactLabel(option)}
+											disabled={option.isDisabled}
 										/>
 									)}
 								</Grid>
