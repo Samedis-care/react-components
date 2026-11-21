@@ -276,7 +276,9 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		const split = filterValue.split(",");
 		const hasEmpty = split.includes(ENUM_FILTER_MAGIC_EMPTY);
 		const isInverted = ["notEmpty", "notInSet"].includes(filterType);
-		if (split.length === 1) {
+		// a single entry, or no empty entry: one condition, so an empty/notEmpty
+		// condition chained while the empty entry was ticked goes with it
+		if (split.length === 1 || !hasEmpty) {
 			filterType = isInverted
 				? hasEmpty
 					? "notEmpty"
@@ -285,7 +287,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 					? "empty"
 					: "inSet";
 			subFilter = undefined;
-		} else if (hasEmpty) {
+		} else {
 			filterType = isInverted ? "notInSet" : "inSet";
 			subFilterComboType = isInverted ? "and" : "or";
 			subFilter = {

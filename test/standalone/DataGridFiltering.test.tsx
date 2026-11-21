@@ -303,6 +303,45 @@ const ENUM6: DataGridSetFilterData = [
 ];
 
 describe("FilterEntry: enum", () => {
+	it("[ISSUE-3494-ITEM-2] unticking None after A, B and None leaves no empty condition", () => {
+		renderEntry({ valueType: "enum", valueData: ENUM3 });
+		fireEvent.click(box("a"));
+		fireEvent.click(box("b"));
+		fireEvent.click(box(MAGIC));
+		expect(last).toMatchObject({
+			value1: `a,b,${MAGIC}`,
+			nextFilterType: "or",
+			nextFilter: { type: "empty" },
+		});
+		fireEvent.click(box(MAGIC));
+		expect(last).toMatchObject({ type: "inSet", value1: "a,b" });
+		expect(last!.nextFilter).toBeUndefined();
+	});
+	it("[ISSUE-3494-ITEM-2] Select all, then unticking None, leaves no empty condition", () => {
+		renderEntry({ valueType: "enum", valueData: ENUM6 });
+		fireEvent.click(
+			screen.getByText("Select all").closest("li")!.querySelector("input")!,
+		);
+		fireEvent.click(box(MAGIC));
+		expect(last).toMatchObject({ type: "inSet", value1: "a,b,c,d,e" });
+		expect(last!.nextFilter).toBeUndefined();
+	});
+	it("[ISSUE-3494-ITEM-2] inverted: unticking None after A, B and None leaves no notEmpty condition", () => {
+		renderEntry({
+			valueType: "enum",
+			valueData: ENUM3,
+			initial: {
+				type: "notInSet",
+				value1: `a,b,${MAGIC}`,
+				value2: "",
+				nextFilterType: "and",
+				nextFilter: { type: "notEmpty", value1: "notEmpty", value2: "" },
+			},
+		});
+		fireEvent.click(box(MAGIC));
+		expect(last).toMatchObject({ type: "notInSet", value1: "a,b" });
+		expect(last!.nextFilter).toBeUndefined();
+	});
 	it("[ISSUE-3494-ITEM-16] every checkbox of the list is named by its text", () => {
 		renderEntry({ valueType: "enum", valueData: ENUM6 });
 		expect(screen.getByRole("checkbox", { name: "A" })).toBe(box("a"));
