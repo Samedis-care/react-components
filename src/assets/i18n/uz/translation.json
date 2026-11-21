@@ -189,7 +189,8 @@
 		},
 		"file-upload": {
 			"upload": "Yuklash",
-			"restore": "Tiklash",
+			"remove-file": "«{{NAME}}» faylini o‘chirish",
+			"restore-file": "«{{NAME}}» faylini tiklash",
 			"upload-modern": "Faylni bu yerga sudrab olib tashlang yoki yuklash oynasi uchun bosing",
 			"no-files": "Qo'shimchalar mavjud emas",
 			"formats": "Fayl formatlari",

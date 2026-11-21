@@ -122,4 +122,81 @@ describe("FileUpload — accessible names and roles", () => {
 		expect(open).toHaveBeenCalledTimes(1);
 		expect(click).not.toHaveBeenCalled();
 	});
+	it("[ISSUE-3489-ITEM-4] remove and restore are buttons that name their file", () => {
+		for (const variant of ["classic", "modern"] as const) {
+			renderUpload({
+				variant,
+				files: [stored("a.pdf"), stored("b.pdf", { delete: true })],
+			});
+			expect(
+				screen.getByRole("button", {
+					name: (n) => /remove/i.test(n) && n.includes("a.pdf"),
+				}),
+			).toBeInTheDocument();
+			expect(
+				screen.getByRole("button", {
+					name: (n) => /restore/i.test(n) && n.includes("b.pdf"),
+				}),
+			).toBeInTheDocument();
+			cleanup();
+		}
+	});
+	it("[ISSUE-3489-ITEM-4] keyboard focus stays with the file's button after a remove, and moves on when a removed pick leaves the list", () => {
+		const picked = (name: string): FileData => ({
+			file: new File(["x"], name),
+			canBeUploaded: true,
+		});
+		const press = (name: string) => {
+			const btn = screen.getByRole("button", { name });
+			btn.focus();
+			fireEvent.click(btn);
+		};
+		for (const [variant, upload] of [
+			["classic", "Upload"],
+			["modern", "Drag & drop file here or click for an upload dialog"],
+		] as const) {
+			renderUpload({
+				variant,
+				files: [picked("a.txt"), stored("b.pdf"), picked("c.txt")],
+			});
+			// a stored file stays listed: its button turns into the restore
+			press("Remove b.pdf");
+			expect(document.activeElement, variant).toBe(
+				screen.getByRole("button", { name: "Restore b.pdf" }),
+			);
+			// a pick leaves: on to the next file's button
+			press("Remove a.txt");
+			expect(screen.queryByText("a.txt"), variant).toBe(null);
+			expect(document.activeElement, variant).toBe(
+				screen.getByRole("button", { name: "Restore b.pdf" }),
+			);
+			// the last file: on to the upload control
+			press("Remove c.txt");
+			expect(screen.queryByText("c.txt"), variant).toBe(null);
+			expect(document.activeElement, variant).toBe(
+				screen.getByRole("button", { name: upload }),
+			);
+			cleanup();
+		}
+	});
+	it("[ISSUE-3489-ITEM-4] a remove by mouse, with focus elsewhere, does not move focus", () => {
+		render(
+			<Framework>
+				<input aria-label={"elsewhere"} />
+				<FileUpload
+					previewSize={24}
+					handleError={() => {}}
+					files={[
+						{ file: new File(["x"], "a.txt"), canBeUploaded: true },
+						stored("b.pdf"),
+					]}
+				/>
+			</Framework>,
+		);
+		const elsewhere = screen.getByRole("textbox", { name: "elsewhere" });
+		elsewhere.focus();
+		fireEvent.click(screen.getByRole("button", { name: "Remove a.txt" }));
+		expect(screen.queryByText("a.txt")).toBe(null);
+		expect(document.activeElement).toBe(elsewhere);
+	});
 });

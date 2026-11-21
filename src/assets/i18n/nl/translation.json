@@ -189,7 +189,8 @@
 		},
 		"file-upload": {
 			"upload": "Uploaden",
-			"restore": "Herstellen",
+			"remove-file": "{{NAME}} verwijderen",
+			"restore-file": "{{NAME}} herstellen",
 			"upload-modern": "Bestand via drag & drop of klik hier",
 			"no-files": "Geen bijlagen beschikbaar",
 			"formats": "Bestandsindelingen",

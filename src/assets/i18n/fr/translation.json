@@ -189,7 +189,8 @@
 		},
 		"file-upload": {
 			"upload": "Télécharger",
-			"restore": "Restaurer",
+			"remove-file": "Supprimer {{NAME}}",
+			"restore-file": "Restaurer {{NAME}}",
 			"upload-modern": "Déposer le fichier par glisser-déposer ou cliquer ici",
 			"no-files": "Aucune pièce jointe disponible",
 			"formats": "Formats de fichiers",

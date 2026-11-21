@@ -199,7 +199,8 @@
 			"zoom-out": "Alejar",
 			"reset-zoom": "Restablecer zoom",
 			"upload": "Subir",
-			"restore": "Restaurar",
+			"remove-file": "Quitar {{NAME}}",
+			"restore-file": "Restaurar {{NAME}}",
 			"upload-capture": {
 				"image": "Tomar foto"
 			},

@@ -199,7 +199,8 @@
 			"zoom-out": "Zoom out",
 			"reset-zoom": "Reset zoom",
 			"upload": "Upload",
-			"restore": "Restore",
+			"remove-file": "Remove {{NAME}}",
+			"restore-file": "Restore {{NAME}}",
 			"upload-capture": {
 				"image": "Take photo"
 			},

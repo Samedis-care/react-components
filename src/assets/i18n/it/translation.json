@@ -199,7 +199,8 @@
 			"zoom-out": "Riduci",
 			"reset-zoom": "Reimposta zoom",
 			"upload": "Carica",
-			"restore": "Ripristina",
+			"remove-file": "Rimuovi {{NAME}}",
+			"restore-file": "Ripristina {{NAME}}",
 			"upload-capture": {
 				"image": "Scatta foto"
 			},

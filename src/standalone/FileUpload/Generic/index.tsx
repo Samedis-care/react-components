@@ -4,6 +4,7 @@ import React, {
 	useCallback,
 	useEffect,
 	useImperativeHandle,
+	useLayoutEffect,
 	useRef,
 } from "react";
 import {
@@ -251,6 +252,10 @@ export interface FileUploadRendererProps extends Omit<
 	/**
 	 * Remove a file
 	 * @param file The file to remove
+	 * @remarks A picked file leaves the list, and its remove button with it. The built-in
+	 *          variants then move keyboard focus to the next file's remove or restore
+	 *          button, or else to the upload control; a custom variant moves it itself (see
+	 *          `FileProps.actionButtonRef`).
 	 */
 	removeFile: (file: FileData) => void;
 	/**
@@ -869,6 +874,44 @@ const FileUpload = (
 		},
 		[onChange, onRestoreFile, setFiles],
 	);
+
+	// Keyboard focus on a file's remove or restore button that goes away, as it does when a
+	// removed pick leaves the list, moves on to the next file's button, or else to the
+	// upload control, instead of falling to the page. One ref callback per position, so
+	// that React calls it only when the button at that position changes.
+	const actionButtonsRef = useRef<(HTMLButtonElement | null)[]>([]);
+	const actionButtonRefsRef = useRef<
+		((elem: HTMLButtonElement | null) => void)[]
+	>([]);
+	const refocusFromRef = useRef<number | null>(null);
+	const uploadControlRef = useRef<HTMLButtonElement | null>(null);
+	const getActionButtonRef = useCallback((index: number) => {
+		const refs = actionButtonRefsRef.current;
+		refs[index] ??= (elem: HTMLButtonElement | null) => {
+			const buttons = actionButtonsRef.current;
+			const prev = buttons[index];
+			buttons[index] = elem;
+			// React detaches a ref before it removes the element, so the focus is still on it here
+			if (!elem && prev && prev.ownerDocument.activeElement === prev) {
+				refocusFromRef.current = index;
+			}
+		};
+		return refs[index];
+	}, []);
+	useLayoutEffect(() => {
+		const index = refocusFromRef.current;
+		if (index == null) return;
+		refocusFromRef.current = null;
+		const target =
+			actionButtonsRef.current.slice(index).find((btn) => btn != null) ??
+			uploadControlRef.current;
+		if (!target) return;
+		// only take over focus that was lost with the button, never move it away from elsewhere
+		const active = target.ownerDocument.activeElement;
+		if (active && active !== target.ownerDocument.body && active.isConnected)
+			return;
+		target.focus();
+	});
 	const { handleDrop, handleDragOver, dragging } = useDropZone(
 		readOnly ? undefined : processFiles,
 	);
@@ -935,6 +978,7 @@ const FileUpload = (
 								onClick={() => handleUpload()}
 								name={name}
 								onBlur={onBlur}
+								ref={uploadControlRef}
 							>
 								{uploadLabel || t("standalone.file-upload.upload")}
 							</Button>
@@ -970,7 +1014,6 @@ const FileUpload = (
 											preview={previewImages ? data.preview : undefined}
 											disabled={data.delete || false}
 											changeState={getChangeState(data)}
-											restoreLabel={t("standalone.file-upload.restore")}
 											onRemove={
 												readOnly || data.preventDelete
 													? undefined
@@ -981,6 +1024,7 @@ const FileUpload = (
 													? undefined
 													: () => restoreFile(data)
 											}
+											actionButtonRef={getActionButtonRef(index)}
 											variant={"box"}
 										/>
 									),
@@ -1040,6 +1084,7 @@ const FileUpload = (
 							{/* no click handler of its own: its click, by mouse or by Enter and
 							    Space, reaches the drop zone's, which opens the picker */}
 							<ModernUploadButton
+								ref={uploadControlRef}
 								type={"button"}
 								name={name}
 								onBlur={onBlur}
@@ -1089,7 +1134,6 @@ const FileUpload = (
 													preview={previewImages ? data.preview : undefined}
 													disabled={data.delete || false}
 													changeState={getChangeState(data)}
-													restoreLabel={t("standalone.file-upload.restore")}
 													onRemove={
 														readOnly || data.preventDelete
 															? undefined
@@ -1100,6 +1144,7 @@ const FileUpload = (
 															? undefined
 															: () => restoreFile(data)
 													}
+													actionButtonRef={getActionButtonRef(index)}
 													variant={"list"}
 												/>
 											),

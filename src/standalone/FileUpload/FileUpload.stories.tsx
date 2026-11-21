@@ -1169,3 +1169,138 @@ export const Issue3489Item3FilesOpenByKeyboard: StoryObj<{
 		}
 	},
 };
+
+/**
+ * Removing and restoring files by keyboard: each file's remove button is a tab stop named
+ * after the file, with a tooltip, a focus outline and a target of at least 24 x 24 px.
+ * Removing a stored file keeps it listed, and the same button, still focused, restores it.
+ * A removed pick leaves the list: focus moves on to the next file's button, or after the
+ * last file to the upload control.
+ */
+export const Issue3489Item4RemoveAndRestoreByKeyboard: StoryObj = {
+	name: "FileUploadGeneric — removing and restoring files by keyboard",
+	parameters: {
+		a11y: {
+			test: "error",
+			// the modern texts' contrast is ISSUE-3489-ITEM-10, not what this story is about
+			config: { rules: [{ id: "color-contrast", enabled: false }] },
+		},
+	},
+	render: () => {
+		const stored = (name: string, type: string, del = false): FileData => ({
+			file: { name, type, downloadLink: "https://example.com/" + name },
+			delete: del,
+		});
+		const picked = (name: string): FileData => ({
+			file: new File(["x"], name, { type: "application/msword" }),
+			canBeUploaded: true,
+		});
+		return (
+			<div style={{ width: 480 }}>
+				<button type="button">before</button>
+				<ControlledUpload
+					label="Modern"
+					variant="modern"
+					initial={[
+						stored("contract.pdf", "application/pdf"),
+						picked("addendum.docx"),
+						stored("budget.xlsx", "application/vnd.ms-excel", true),
+						picked("summary.docx"),
+					]}
+				/>
+				<ControlledUpload
+					label="Classic"
+					initial={[stored("contract.pdf", "application/pdf")]}
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const modern = within(canvas.getByRole("group", { name: "Modern" }));
+		const classic = within(canvas.getByRole("group", { name: "Classic" }));
+		const expectUsable = async (btn: HTMLElement) => {
+			await expect(btn).toHaveFocus();
+			const cs = getComputedStyle(btn);
+			await expect(
+				cs.outlineStyle !== "none" && parseFloat(cs.outlineWidth) >= 2,
+				`outline ${cs.outlineStyle} ${cs.outlineWidth}`,
+			).toBe(true);
+			const { width, height } = btn.getBoundingClientRect();
+			await expect(
+				width >= 24 && height >= 24,
+				`target ${width} x ${height}`,
+			).toBe(true);
+			// the tooltip with the button's name opens on keyboard focus too
+			await waitFor(() =>
+				expect(
+					[...document.querySelectorAll('[role="tooltip"]')].map(
+						(el) => el.textContent,
+					),
+				).toContain(btn.getAttribute("aria-label")),
+			);
+		};
+
+		canvas.getByRole("button", { name: "before" }).focus();
+		// the upload control, contract.pdf's link, its remove button
+		await userEvent.tab();
+		await userEvent.tab();
+		await userEvent.tab();
+		const remove = modern.getByRole("button", { name: "Remove contract.pdf" });
+		await expectUsable(remove);
+
+		// a stored file stays listed, struck through: the same button restores it
+		await userEvent.keyboard("{Enter}");
+		await expect(modern.getByText("contract.pdf")).toHaveAttribute(
+			"data-cc-change",
+			"removed",
+		);
+		await expect(
+			modern.getByRole("button", { name: "Restore contract.pdf" }),
+		).toBe(remove);
+		await expectUsable(remove);
+		await userEvent.keyboard(" ");
+		await expect(modern.getByText("contract.pdf")).not.toHaveAttribute(
+			"data-cc-change",
+		);
+		await expect(remove).toHaveAccessibleName("Remove contract.pdf");
+		await expect(remove).toHaveFocus();
+
+		// a pick leaves the list: on to the next file's button
+		await userEvent.tab();
+		await expectUsable(
+			modern.getByRole("button", { name: "Remove addendum.docx" }),
+		);
+		await userEvent.keyboard("{Enter}");
+		await expect(modern.queryByText("addendum.docx")).toBe(null);
+		await expect(
+			modern.getByRole("button", { name: "Restore budget.xlsx" }),
+		).toHaveFocus();
+
+		// the last file: on to the upload control
+		await userEvent.tab();
+		await expectUsable(
+			modern.getByRole("button", { name: "Remove summary.docx" }),
+		);
+		await userEvent.keyboard("{Enter}");
+		await expect(modern.queryByText("summary.docx")).toBe(null);
+		await expect(
+			modern.getByRole("button", {
+				name: "Drag & drop file here or click for an upload dialog",
+			}),
+		).toHaveFocus();
+
+		// classic: the button lies over the top left corner of the file icon, before the
+		// file's name and link
+		classic.getByRole("button", { name: "Upload" }).focus();
+		await userEvent.tab();
+		const classicRemove = classic.getByRole("button", {
+			name: "Remove contract.pdf",
+		});
+		await expectUsable(classicRemove);
+		await userEvent.keyboard("{Enter}");
+		await expect(
+			classic.getByRole("button", { name: "Restore contract.pdf" }),
+		).toBe(classicRemove);
+		await expectUsable(classicRemove);
+	},
+};

@@ -189,7 +189,8 @@
 		},
 		"file-upload": {
 			"upload": "Hochladen",
-			"restore": "Wiederherstellen",
+			"remove-file": "{{NAME}} entfernen",
+			"restore-file": "{{NAME}} wiederherstellen",
 			"upload-modern": "Datei per Drag & Drop ablegen oder hier klicken",
 			"no-files": "Keine Anhänge verfügbar",
 			"formats": "Dateiformate",

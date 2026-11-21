@@ -2522,6 +2522,43 @@ describe("CrudFileUpload: accessibility bugs", () => {
 		await waitFor(() => expect(ui.names()).toEqual(["image.png", "notes.txt"]));
 		expect(connector.deleteCalls).toEqual(["1"]);
 	});
+
+	it("[ISSUE-3489-ITEM-4] keyboard focus stays on a file's button while its removal is queued and restored, and moves on when a direct connector deletes the file", async () => {
+		/** Activates the focused button, as Enter does */
+		const activate = async () => {
+			await act(async () => {
+				fireEvent.click(document.activeElement!);
+				await Promise.resolve();
+			});
+		};
+		const lazy = renderUpload({
+			connector: lazyOver(new RecordingConnector(SERVER_FILES)),
+		});
+		await loaded(lazy);
+		screen.getByRole("button", { name: "Remove document.pdf" }).focus();
+		await activate();
+		await waitFor(() => expect(lazy.changeOf("document.pdf")).toBe("removed"));
+		expect(document.activeElement).toBe(
+			screen.getByRole("button", { name: "Restore document.pdf" }),
+		);
+		await activate();
+		await waitFor(() => expect(lazy.changeOf("document.pdf")).toBe(null));
+		expect(document.activeElement).toBe(
+			screen.getByRole("button", { name: "Remove document.pdf" }),
+		);
+		lazy.unmount();
+
+		const direct = renderUpload({
+			connector: new RecordingConnector(SERVER_FILES),
+		});
+		await loaded(direct);
+		screen.getByRole("button", { name: "Remove document.pdf" }).focus();
+		await activate();
+		await waitFor(() => expect(direct.names()).toEqual(["image.png"]));
+		expect(document.activeElement).toBe(
+			screen.getByRole("button", { name: "Remove image.png" }),
+		);
+	});
 });
 
 describe("CrudFileUpload: API traps", () => {
