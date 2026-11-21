@@ -13,7 +13,6 @@ import React from "react";
 import { PickersTextField, PickersTextFieldProps } from "@mui/x-date-pickers";
 
 export interface UIInputProps {
-	important?: boolean;
 	warning?: boolean;
 	/**
 	 * Does the value differ from the server-side value?
@@ -30,22 +29,13 @@ export type UiKitTextFieldClassKey = "root";
 export type UiKitTextFieldProps = UIInputProps & TextFieldProps;
 export type UiKitPickersTextFieldProps = UIInputProps & PickersTextFieldProps;
 
-const inputStyles = ({
-	theme,
-	important,
-}: {
-	theme: Theme;
-	important?: boolean;
-}) => ({
+const inputStyles = ({ theme }: { theme: Theme }) => ({
 	paddingTop: 0,
 	paddingRight: theme.spacing(2),
 	paddingBottom: 0,
 	paddingLeft: theme.spacing(2),
 	"& .MuiAutocomplete-endAdornment": {
 		right: theme.spacing(2),
-	},
-	"& .MuiInput-input::placeholder": {
-		color: important ? theme.palette.error.main : undefined,
 	},
 	"& .MuiInput-multiline": {
 		padding: theme.spacing(2),
@@ -67,16 +57,16 @@ export const UiKitTextField: React.ComponentType<UiKitTextFieldProps> = styled(
 		name: "CcUiKitTextField",
 		slot: "root",
 	},
-)<UiKitTextFieldProps>(({ theme, important }) => ({
-	"& .MuiInput-root": inputStyles({ theme, important }),
+)<UiKitTextFieldProps>(({ theme }) => ({
+	"& .MuiInput-root": inputStyles({ theme }),
 }));
 
 export const UiKitPickersTextField: React.ComponentType<UiKitPickersTextFieldProps> =
 	styled(PickersTextField, {
 		name: "CcUiKitPickersTextField",
 		slot: "root",
-	})<UiKitPickersTextFieldProps>(({ theme, important }) => ({
-		"& .MuiInput-root": inputStyles({ theme, important }),
+	})<UiKitPickersTextFieldProps>(({ theme }) => ({
+		"& .MuiInput-root": inputStyles({ theme }),
 	}));
 
 export const InputLabelConfig: InputLabelProps = {

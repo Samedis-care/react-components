@@ -2,7 +2,7 @@ import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, waitFor } from "storybook/test";
-import { Box, createTheme, hexToRgb, MenuItem } from "@mui/material";
+import { Box, createTheme, hexToRgb, MenuItem, TextField } from "@mui/material";
 import TextFieldWithHelp from "./TextFieldWithHelp";
 import DateInput from "./InputControls/DateInput";
 import MuiPickerUtils from "../../framework/MuiPickerUtils";
@@ -49,11 +49,6 @@ const meta: Meta<typeof TextFieldWithHelp> = {
 		dirty: {
 			description:
 				"Marks a modified field with a dot after its label and data-cc-dirty on the root",
-			control: "boolean",
-		},
-		important: {
-			description:
-				"Colours the placeholder in palette.error.main (standard variant only)",
 			control: "boolean",
 		},
 	},
@@ -264,6 +259,51 @@ export const Issue3483Item17WarningUnderlineDrawnLikeError: Story = {
 				width: "2px",
 				transform: "matrix(1, 0, 0, 1, 0, 0)",
 			}),
+		);
+	},
+};
+
+/** What the browser draws for an input's placeholder */
+const placeholderLook = (input: HTMLElement) => {
+	const style = getComputedStyle(input, "::placeholder");
+	return { color: style.color, opacity: style.opacity };
+};
+
+export const Issue3482Item13RequiredSaidInText: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3482-ITEM-13: a field that must be filled says so with MUI's `required`: an asterisk after its label and the required state of its input. Its placeholder looks like the placeholder of MUI's own field; no prop paints it red.",
+			},
+		},
+	},
+	render: (args) => (
+		<Box sx={{ width: 300, display: "grid", gap: 4 }}>
+			<TextFieldWithHelp
+				{...args}
+				// @ts-expect-error important is no longer a prop: its pale red placeholder was the only sign
+				important
+				required
+				label="Name"
+				placeholder="Enter a name"
+			/>
+			<TextField
+				variant="standard"
+				label="MUI"
+				placeholder="Enter a name"
+				slotProps={{ inputLabel: { shrink: true } }}
+			/>
+		</Box>
+	),
+	play: async ({ canvas }) => {
+		const field = await canvas.findByRole<HTMLInputElement>("textbox", {
+			name: "Name",
+		});
+		await expect(field).toBeRequired();
+		await expect(field.labels?.[0]).toHaveTextContent(/^Name\s*\*$/);
+		await expect(placeholderLook(field)).toEqual(
+			placeholderLook(canvas.getByRole("textbox", { name: "MUI" })),
 		);
 	},
 };

@@ -41,7 +41,6 @@ export interface DateTimeInputProps extends UIInputProps {
 const DateTimeInput = (props: DateTimeInputProps & DateTimePickerProps) => {
 	const {
 		openInfo,
-		important,
 		required,
 		error,
 		fullWidth,
@@ -72,7 +71,6 @@ const DateTimeInput = (props: DateTimeInputProps & DateTimePickerProps) => {
 					);
 					return {
 						// @ts-expect-error custom properties in TextFieldWithHelp
-						important,
 						openInfo,
 						...orgSlotProps,
 						// only where the caller gave one, so a helper text passed through
