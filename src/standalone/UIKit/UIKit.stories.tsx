@@ -687,6 +687,26 @@ export const NumberFormatterCurrency: ActionButtonStory = {
 	),
 };
 
+/**
+ * A currency that is missing or not three letters (here `""`): the amount is
+ * shown without a currency, with two decimals, and the error is reported once
+ * (console and error reporter).
+ */
+export const NumberFormatterInvalidCurrency: ActionButtonStory = {
+	render: () => (
+		<NumberFormatter
+			value={9999.5}
+			options={{ style: "currency", currency: "" }}
+		/>
+	),
+	parameters: {
+		a11y: { test: "error" },
+	},
+	play: async ({ canvasElement }) => {
+		await expect(canvasElement).toHaveTextContent(/^9[.,]?999[.,]50$/);
+	},
+};
+
 export const NumberFormatterPercent: ActionButtonStory = {
 	render: () => <NumberFormatter value={0.75} options={{ style: "percent" }} />,
 };

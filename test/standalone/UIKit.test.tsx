@@ -23,6 +23,11 @@ import { TextFieldCC } from "../../src/standalone/UIKit/MuiFieldState";
 import DecimalInputField from "../../src/standalone/UIKit/InputControls/DecimalInputField";
 import CurrencyInput from "../../src/standalone/UIKit/InputControls/CurrencyInput";
 import IntegerInputField from "../../src/standalone/UIKit/InputControls/IntegerInputField";
+import ccI18n from "../../src/i18n";
+import {
+	configureErrorReporting,
+	getErrorReportingConfig,
+} from "../../src/framework/ErrorReporting";
 
 const theme = createTheme();
 
@@ -33,8 +38,15 @@ const wrap = (ui: React.ReactNode, withTheme: Theme = theme) =>
 const themeWith = (components: object, mode?: "dark") =>
 	createTheme({ palette: mode ? { mode } : undefined, components });
 
-afterEach(() => {
+afterEach(async () => {
 	cleanup();
+	vi.restoreAllMocks();
+	vi.unstubAllGlobals();
+	if (ccI18n.language !== "en") {
+		await act(async () => {
+			await ccI18n.changeLanguage("en");
+		});
+	}
 });
 
 /** every emitted style rule: emotion's text nodes and the parsed CSSOM */
@@ -402,6 +414,113 @@ describe("UIKit", () => {
 		it("renders with percent options", () => {
 			wrap(<NumberFormatter value={0.5} options={{ style: "percent" }} />);
 			expect(screen.getByText(/%/).textContent).toBeTruthy();
+		});
+
+		it("[ISSUE-3482-ITEM-26] renders instead of throwing when the currency is missing or malformed", () => {
+			// React reports the render error through console.error before rethrowing
+			vi.spyOn(console, "error").mockImplementation(() => {});
+			expect(() =>
+				wrap(<NumberFormatter value={1} options={{ style: "currency" }} />),
+			).not.toThrow();
+			cleanup();
+			expect(() =>
+				wrap(
+					<NumberFormatter
+						value={1}
+						options={{ style: "currency", currency: "" }}
+					/>,
+				),
+			).not.toThrow();
+		});
+
+		it("[ISSUE-3482-ITEM-26] shows the amount without a currency, with two decimals, while the currency is missing or malformed", async () => {
+			vi.spyOn(console, "error").mockImplementation(() => {});
+			await act(async () => {
+				await ccI18n.changeLanguage("en");
+			});
+			const amount = (options: Intl.NumberFormatOptions) => (
+				<NumberFormatter value={1234.5} options={options} />
+			);
+			const { container } = wrap(
+				<>
+					{amount({ style: "currency" })}|
+					{amount({ style: "currency", currency: "" })}|
+					{amount({ style: "currency", currency: "EURO" })}|
+					{amount({
+						style: "currency",
+						currency: "EURO",
+						maximumFractionDigits: 0,
+					})}
+					|
+					{amount({
+						style: "currency",
+						currency: "EURO",
+						minimumFractionDigits: 3,
+					})}
+					|{amount({ style: "currency", currency: "XYZ" })}
+				</>,
+			);
+			// Intl puts a no-break space between a code and the number
+			const text = () => container.textContent.replace(/\s/g, " ");
+			expect(text()).toBe(
+				"1,234.50|1,234.50|1,234.50|1,235|1,234.500|XYZ 1,234.50",
+			);
+			await act(async () => {
+				await ccI18n.changeLanguage("de");
+			});
+			expect(text()).toBe(
+				"1.234,50|1.234,50|1.234,50|1.235|1.234,500|1.234,50 XYZ",
+			);
+		});
+
+		it("[ISSUE-3482-ITEM-26] reports a missing or malformed currency once, not on every render", () => {
+			const error = vi.spyOn(console, "error").mockImplementation(() => {});
+			const before = { ...getErrorReportingConfig() };
+			const report = vi.fn();
+			configureErrorReporting({ report, shouldReport: () => true });
+			try {
+				const ui = (value: number, currency?: string) => (
+					<React.StrictMode>
+						<NumberFormatter
+							value={value}
+							options={{ style: "currency", currency }}
+						/>
+					</React.StrictMode>
+				);
+				const logged = () =>
+					error.mock.calls.filter(
+						([message]) =>
+							typeof message === "string" &&
+							message.startsWith("[Components-Care] [NumberFormatter]"),
+					);
+				const { rerender } = render(ui(1, ""));
+				expect(report).toHaveBeenCalledTimes(1);
+				expect(report).toHaveBeenLastCalledWith(
+					expect.objectContaining({ name: "RangeError" }),
+					{
+						source: "NumberFormatter",
+						extra: { style: "currency", currency: "" },
+					},
+				);
+				rerender(ui(2, ""));
+				expect(report).toHaveBeenCalledTimes(1);
+				rerender(ui(2));
+				expect(report).toHaveBeenCalledTimes(2);
+				expect(report).toHaveBeenLastCalledWith(
+					expect.objectContaining({ name: "TypeError" }),
+					{
+						source: "NumberFormatter",
+						extra: { style: "currency", currency: undefined },
+					},
+				);
+				rerender(ui(3));
+				rerender(ui(3, "EUR"));
+				expect(report).toHaveBeenCalledTimes(2);
+				expect(logged()).toHaveLength(2);
+				expect(logged()[1][1]).toBe(report.mock.calls[1][0]);
+			} finally {
+				configureErrorReporting(before);
+			}
 		});
 	});
 	describe("CenteredTypography", () => {
