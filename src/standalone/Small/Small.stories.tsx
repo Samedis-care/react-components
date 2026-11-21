@@ -404,3 +404,59 @@ export const Issue3459Item14ThemeFocusVisibleRing: StoryObj<
 		}
 	},
 };
+
+export const Issue3488Item28SmallListItemButtonFocusRing: StoryObj<
+	typeof SmallListItemButton
+> = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3488-ITEM-28: a keyboard-focused `SmallListItemButton` (the clickable entry rows of the Selector's MultiSelect) draws a 2px `primary.main` outline just inside its edges, over MUI's focus tint; forced colors keep outlines. A theme that sets MUI's `focusVisible` ring (here `outlineColor: rgb(0, 128, 0)`) styles it instead, as on every MUI `ListItemButton`.",
+			},
+		},
+	},
+	render: () => (
+		<div style={{ width: 300 }}>
+			<List>
+				<ListItem disablePadding>
+					<SmallListItemButton>
+						<ListItemText primary="Default theme" />
+					</SmallListItemButton>
+				</ListItem>
+			</List>
+			<ThemeProvider theme={GREEN_RING}>
+				<List>
+					<ListItem disablePadding>
+						<SmallListItemButton>
+							<ListItemText primary="Theme ring" />
+						</SmallListItemButton>
+					</ListItem>
+				</List>
+			</ThemeProvider>
+		</div>
+	),
+	play: async ({ canvas }) => {
+		const plain = canvas.getByRole("button", { name: "Default theme" });
+		await userEvent.tab();
+		await expect(plain).toHaveFocus();
+		await waitFor(() => expect(plain).toHaveClass("Mui-focusVisible"));
+		const style = getComputedStyle(plain);
+		// MUI's default primary.main, inside the button
+		await expect([
+			style.outlineStyle,
+			style.outlineWidth,
+			style.outlineColor,
+			style.outlineOffset,
+		]).toEqual(["solid", "2px", "rgb(25, 118, 210)", "-2px"]);
+		const themed = canvas.getByRole("button", { name: "Theme ring" });
+		await userEvent.tab();
+		await expect(themed).toHaveFocus();
+		await waitFor(() => expect(themed).toHaveClass("Mui-focusVisible"));
+		const themedStyle = getComputedStyle(themed);
+		await expect(themedStyle.outlineColor).toBe("rgb(0, 128, 0)");
+		// inside the button too, as MUI draws it on its list items
+		await expect(parseFloat(themedStyle.outlineOffset)).toBeLessThan(0);
+	},
+};
