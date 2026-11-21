@@ -727,6 +727,8 @@ const Grid = (p: Partial<DataGridProps>) => (
 			columns={COLS}
 			loadData={ok}
 			filterBar={Bar}
+			// the bar has no width in jsdom: 0 keeps it in the header
+			enableFilterDialogWidth={0}
 			classes={{ header: "my-header" }}
 			{...p}
 		/>
@@ -1128,5 +1130,83 @@ describe("isDataGridCustomFilterActive, areDataGridCustomFiltersActive", () => {
 				{ status: "a", kinds: ["x", "y"] },
 			),
 		).toBe(false);
+	});
+});
+
+describe("FilterBar: the default of enableFilterDialogWidth", () => {
+	/** the width the filter bar's container reports (jsdom lays nothing out) */
+	const barWidth = (width: () => number) =>
+		vi
+			.spyOn(Element.prototype, "clientWidth", "get")
+			.mockImplementation(function (this: Element) {
+				return this.firstElementChild?.classList.contains(
+					"components-care-data-grid-filter-bar",
+				)
+					? width()
+					: 0;
+			});
+	/** a matchMedia that matches the given query only */
+	const media = (matching: string) =>
+		vi.stubGlobal(
+			"matchMedia",
+			(query: string) =>
+				({
+					matches: query === matching,
+					media: query,
+					onchange: null,
+					addListener: () => {},
+					removeListener: () => {},
+					addEventListener: () => {},
+					removeEventListener: () => {},
+					dispatchEvent: () => false,
+				}) as MediaQueryList,
+		);
+	const resize = () => act(() => observers.forEach((observer) => observer()));
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it("[ISSUE-3494-ITEM-22] without enableFilterDialogWidth, a bar narrower than 600px is the Filter button, and from 600px on it shows its filters", async () => {
+		let width = 165;
+		barWidth(() => width);
+		render(<Grid enableFilterDialogWidth={undefined} />);
+		await filterButton();
+		expect(barSelectors()).toHaveLength(0);
+		width = 600;
+		resize();
+		await waitFor(() => expect(barSelectors()).toHaveLength(1));
+		expect(document.querySelector(FILTER_BUTTON)).toBeNull();
+		width = 599;
+		resize();
+		await filterButton();
+		expect(barSelectors()).toHaveLength(0);
+	});
+	it("[ISSUE-3494-ITEM-22] enableFilterDialogWidth 0 shows the bar at any width", async () => {
+		barWidth(() => 1);
+		render(<Grid enableFilterDialogWidth={0} />);
+		await flush();
+		expect(barSelectors()).toHaveLength(1);
+		expect(document.querySelector(FILTER_BUTTON)).toBeNull();
+	});
+	it("[ISSUE-3494-ITEM-22] with only the deprecated enableFilterDialogMediaQuery set, the media query alone decides", async () => {
+		barWidth(() => 165);
+		media("(max-width: 899.95px)");
+		render(
+			<Grid
+				enableFilterDialogWidth={undefined}
+				enableFilterDialogMediaQuery="(max-width: 1199.95px)"
+			/>,
+		);
+		await flush();
+		expect(barSelectors()).toHaveLength(1);
+		cleanup();
+		render(
+			<Grid
+				enableFilterDialogWidth={undefined}
+				enableFilterDialogMediaQuery="(max-width: 899.95px)"
+			/>,
+		);
+		await filterButton();
+		expect(barSelectors()).toHaveLength(0);
 	});
 });

@@ -189,8 +189,8 @@ const withGrid = (Story: React.ComponentType) => (
  * filterable column's "Filter" button), and the filter bar for the grid's
  * custom data with its helpers GridSingleSelectFilter, GridMultiSelectFilter,
  * GridSingleSelectFilterBackend and GridMultiSelectFilterBackend. Below
- * `enableFilterDialogWidth` the bar turns into a "Filter" button that opens it
- * in a panel over the rows.
+ * `enableFilterDialogWidth` (600px unless set) the bar turns into a "Filter"
+ * button that opens it in a panel over the rows.
  */
 const meta: Meta<typeof DataGrid> = {
 	title: "Standalone/DataGrid/Filters",
@@ -734,5 +734,101 @@ export const Issue3494Item4HelpersFollowDefaultCustomData: Story = {
 			await expect(canvas.getByText("Carol Jones")).toBeVisible();
 			await expect(canvas.queryByText("Bob Smith")).toBeNull();
 		});
+	},
+};
+
+/**
+ * ISSUE-3494-ITEM-22: on a 320px phone, without enableFilterDialogWidth, the bar's
+ * filters are about 44px wide: neither "Open" nor "Beta" can be read
+ */
+export const Issue3494Item22FilterBarIsReadableOnAPhone: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadTasks,
+		filterBar: StatusKindsBar,
+		defaultCustomData: { status: "open", kinds: ["beta"] },
+	},
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	play: async ({ canvas, canvasElement }) => {
+		// open and beta: Carol only
+		await expect(await canvas.findByText("Carol Jones")).toBeVisible();
+		// either the panel's button replaces the bar, or the bar can be read
+		if (
+			canvasElement.querySelector(
+				".components-care-data-grid-filter-bar .MuiButton-root",
+			)
+		)
+			return;
+		const inputs = within(
+			canvasElement.querySelector<HTMLElement>(
+				".components-care-data-grid-filter-bar",
+			)!,
+		).getAllByRole<HTMLInputElement>("combobox");
+		await waitFor(() => expect(inputs[0]).toHaveValue("Open"));
+		for (const input of inputs)
+			await expect(
+				input.scrollWidth,
+				`"${input.value}" is cut to ${input.clientWidth}px`,
+			).toBeLessThanOrEqual(input.clientWidth);
+	},
+};
+
+/**
+ * On a 320px phone, the grid's default enableFilterDialogWidth turns the bar
+ * into the "Filter" button. Its panel shows each filter at full width: the
+ * radio "Open" and the checkbox "Beta" of the defaults can be read, and the
+ * page does not scroll sideways.
+ */
+export const Issue3494Item22FilterPanelOnAPhone: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadTasks,
+		filterBar: StatusKindsBar,
+		defaultCustomData: STATUS_KINDS_DEFAULTS,
+		// the settings panel shares this slot; it is hidden and has no violations
+		classes: { contentOverlayPaper: "story-filter-panel" },
+	},
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		a11y: {
+			test: "error",
+			// the grid behind the panel has violations of its own
+			context: { include: [".story-filter-panel"] },
+		},
+	},
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Carol Jones")).toBeVisible();
+		await expect(canvasElement.querySelector("[role=combobox]")).toBeNull();
+		await userEvent.click(panelButtonOf(canvasElement));
+		const panel = await waitFor(() => {
+			const element = Array.from(
+				canvasElement.querySelectorAll<HTMLElement>(".story-filter-panel"),
+			).find((paper) => paper.textContent.includes("Filter selection"));
+			if (!element) throw new Error("the panel is not open");
+			return element;
+		});
+		await waitFor(() => expect(panel).toBeVisible());
+		const open = within(panel).getByRole("radio", { name: "Open" });
+		const beta = within(panel).getByRole("checkbox", { name: "Beta" });
+		await expect(open).toBeChecked();
+		await expect(beta).toBeChecked();
+		const panelRight = panel.getBoundingClientRect().right;
+		for (const text of ["Status", "Open", "Kinds", "Beta"]) {
+			const element = within(panel).getByText(text);
+			await expect(element).toBeVisible();
+			// an ellipsis cuts a block; an inline label would overflow the panel
+			await expect(
+				element.scrollWidth,
+				`"${text}" is cut to ${element.clientWidth}px`,
+			).toBeLessThanOrEqual(element.clientWidth);
+			const { width, right } = element.getBoundingClientRect();
+			await expect(width, `"${text}" has no width`).toBeGreaterThan(0);
+			await expect(right, `"${text}" overflows the panel`).toBeLessThanOrEqual(
+				panelRight,
+			);
+		}
+		await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+			document.documentElement.clientWidth,
+		);
 	},
 };

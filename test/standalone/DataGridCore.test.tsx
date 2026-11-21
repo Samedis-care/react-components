@@ -150,6 +150,8 @@ const Grid = (
 				columns={COLUMNS}
 				loadData={ok}
 				filterBar={ProbeBar}
+				// the bar has no width in jsdom: 0 keeps it in the header
+				enableFilterDialogWidth={0}
 				{...rest}
 			/>
 		</ThemeProvider>

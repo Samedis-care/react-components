@@ -288,6 +288,8 @@ const Grid = (props: Partial<DataGridProps>) => (
 			columns={GRID_COLUMNS}
 			loadData={noRows}
 			filterBar={ProbeBar}
+			// the bar has no width in jsdom: 0 keeps it in the header
+			enableFilterDialogWidth={0}
 			{...props}
 		/>
 	</ThemeProvider>

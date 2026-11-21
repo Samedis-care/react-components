@@ -34,9 +34,23 @@ export interface IDataGridFilterBarProps {
 	inDialog: boolean;
 }
 
+/**
+ * The default of DataGridProps.enableFilterDialogWidth (in px), used while the
+ * grid has a filterBar and sets neither enableFilterDialogWidth nor
+ * enableFilterDialogMediaQuery. The helpers (GridSingleSelectFilter and the
+ * like) take a third of the bar each by default, so each of them is about
+ * 190px wide at this width.
+ */
+const DEFAULT_FILTER_DIALOG_WIDTH = 600;
+
 const FilterBar = () => {
 	const props = useDataGridProps();
-	const { enableFilterDialogMediaQuery, enableFilterDialogWidth } = props;
+	const { enableFilterDialogMediaQuery, filterBar } = props;
+	const enableFilterDialogWidth =
+		props.enableFilterDialogWidth ??
+		(filterBar && enableFilterDialogMediaQuery == null
+			? DEFAULT_FILTER_DIALOG_WIDTH
+			: undefined);
 	const { classes } = props;
 	const [state, setState] = useDataGridState();
 	const filterBarContainer = useRef<HTMLDivElement>(null);
@@ -111,7 +125,7 @@ const FilterBar = () => {
 		}
 	}, [enableDialog, setState]);
 
-	const FilterBarView = props.filterBar;
+	const FilterBarView = filterBar;
 
 	return (
 		<DataGridFilterBarBox
