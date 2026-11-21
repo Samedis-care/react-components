@@ -1,14 +1,15 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import React from "react";
 import {
+	act,
+	cleanup,
+	fireEvent,
+	isInaccessible,
 	render,
 	screen,
-	fireEvent,
-	cleanup,
-	act,
 } from "@testing-library/react";
-import { ThemeProvider, createTheme, Button, Theme } from "@mui/material";
-import { Save as SaveIcon } from "@mui/icons-material";
+import { Button, createTheme, Theme, ThemeProvider } from "@mui/material";
+import { Home as HomeIcon, Save as SaveIcon } from "@mui/icons-material";
 import ActionButton from "../../src/standalone/UIKit/ActionButton";
 import SubActionButton from "../../src/standalone/UIKit/SubActionButton";
 import FormButtons from "../../src/standalone/UIKit/FormButtons";
@@ -24,8 +25,10 @@ import CurrencyInput from "../../src/standalone/UIKit/InputControls/CurrencyInpu
 import IntegerInputField from "../../src/standalone/UIKit/InputControls/IntegerInputField";
 
 const theme = createTheme();
+
 const wrap = (ui: React.ReactNode, withTheme: Theme = theme) =>
 	render(<ThemeProvider theme={withTheme}>{ui}</ThemeProvider>);
+
 // the theme types only know the registered Cc slots and their props
 const themeWith = (components: object, mode?: "dark") =>
 	createTheme({ palette: mode ? { mode } : undefined, components });
@@ -85,12 +88,10 @@ describe("UIKit", () => {
 			wrap(<ActionButton>Save</ActionButton>);
 			expect(screen.getByRole("button", { name: /save/i })).toBeTruthy();
 		});
-
 		it("renders disabled", () => {
 			wrap(<ActionButton disabled>Save</ActionButton>);
 			expect(screen.getByRole("button", { name: /save/i })).toBeDisabled();
 		});
-
 		it("renders with icon", () => {
 			wrap(
 				<ActionButton icon={<SaveIcon data-testid="icon" />}>
@@ -99,7 +100,6 @@ describe("UIKit", () => {
 			);
 			expect(screen.getByTestId("icon")).toBeTruthy();
 		});
-
 		it("shows only icon when small=true", () => {
 			wrap(
 				<ActionButton icon={<SaveIcon data-testid="icon" />} small>
@@ -110,14 +110,12 @@ describe("UIKit", () => {
 			expect(screen.queryByText("Save")).toBeNull();
 			expect(screen.getByTestId("icon")).toBeTruthy();
 		});
-
 		it("calls onClick", () => {
 			const onClick = vi.fn();
 			wrap(<ActionButton onClick={onClick}>Save</ActionButton>);
 			fireEvent.click(screen.getByRole("button"));
 			expect(onClick).toHaveBeenCalledOnce();
 		});
-
 		it("[ISSUE-3482-ITEM-8] renders a color whose hover fill it cannot measure", () => {
 			// main is too light for white text, so its fill moves; dark stays a variable
 			const varDark = createTheme({
@@ -133,7 +131,6 @@ describe("UIKit", () => {
 			expect(screen.getByRole("button", { name: "Save" })).toBeTruthy();
 		});
 	});
-
 	describe("SubActionButton", () => {
 		it("renders with text", () => {
 			wrap(<SubActionButton>Delete</SubActionButton>);
@@ -163,7 +160,6 @@ describe("UIKit", () => {
 			expect(onClick).toHaveBeenCalledOnce();
 		});
 	});
-
 	describe("FormButtons", () => {
 		it("renders children", () => {
 			wrap(
@@ -269,7 +265,6 @@ describe("UIKit", () => {
 			expect(container).toBeEmptyDOMElement();
 		});
 	});
-
 	describe("IconButtonWithText", () => {
 		it("renders icon and text", () => {
 			wrap(
@@ -281,7 +276,6 @@ describe("UIKit", () => {
 			expect(screen.getByTestId("ibwt-icon")).toBeTruthy();
 			expect(screen.getByText("Save")).toBeTruthy();
 		});
-
 		it("calls onClick when icon is clicked", () => {
 			const onClick = vi.fn();
 			wrap(
@@ -294,8 +288,40 @@ describe("UIKit", () => {
 			fireEvent.click(screen.getByRole("button"));
 			expect(onClick).toHaveBeenCalled();
 		});
+		it("[ISSUE-3482-ITEM-11] names the button by a node text", () => {
+			wrap(<IconButtonWithText icon={<HomeIcon />} text={<span>Home</span>} />);
+			expect(screen.getByRole("button")).toHaveAccessibleName("Home");
+		});
+		it("[ISSUE-3482-ITEM-11] reads a string text once, as the button's name", () => {
+			wrap(<IconButtonWithText icon={<HomeIcon />} text={"Home"} />);
+			expect(screen.getByRole("button")).toHaveAccessibleName("Home");
+			expect(isInaccessible(screen.getByText("Home"))).toBe(true);
+		});
+		it("[ISSUE-3482-ITEM-11] names the button by a caption with its own id", () => {
+			wrap(
+				<IconButtonWithText
+					icon={<HomeIcon />}
+					text={<span>Home</span>}
+					TypographyProps={{ id: "home-caption" }}
+				/>,
+			);
+			expect(screen.getByRole("button")).toHaveAccessibleName("Home");
+			expect(document.getElementById("home-caption")).toHaveTextContent("Home");
+		});
+		it("[ISSUE-3482-ITEM-11] takes the name from IconButtonProps' aria-label and keeps the caption readable", () => {
+			wrap(
+				<IconButtonWithText
+					icon={<HomeIcon />}
+					text={"Home"}
+					IconButtonProps={{ "aria-label": "Go to the start page" }}
+				/>,
+			);
+			expect(screen.getByRole("button")).toHaveAccessibleName(
+				"Go to the start page",
+			);
+			expect(isInaccessible(screen.getByText("Home"))).toBe(false);
+		});
 	});
-
 	describe("TextFieldWithHelp", () => {
 		it("renders with label", () => {
 			wrap(<TextFieldWithHelp label="Name" />);
@@ -323,7 +349,6 @@ describe("UIKit", () => {
 			expect(screen.getByLabelText("Disabled")).toBeDisabled();
 		});
 	});
-
 	describe("NumberFormatter", () => {
 		it("renders a number", () => {
 			wrap(<NumberFormatter value={42} />);
@@ -379,7 +404,6 @@ describe("UIKit", () => {
 			expect(screen.getByText(/%/).textContent).toBeTruthy();
 		});
 	});
-
 	describe("CenteredTypography", () => {
 		it("renders text content", () => {
 			wrap(
@@ -418,32 +442,27 @@ describe("UIKit", () => {
 			expect(screen.queryByRole("heading")).toBeNull();
 		});
 	});
-
 	describe("Checkbox", () => {
 		it("renders unchecked by default", () => {
 			wrap(<Checkbox />);
 			const checkbox = screen.getByRole("checkbox");
 			expect(checkbox).not.toBeChecked();
 		});
-
 		it("renders checked when prop is set", () => {
 			wrap(<Checkbox checked readOnly />);
 			const checkbox = screen.getByRole("checkbox");
 			expect(checkbox).toBeChecked();
 		});
-
 		it("renders disabled", () => {
 			wrap(<Checkbox disabled />);
 			expect(screen.getByRole("checkbox")).toBeDisabled();
 		});
-
 		it("calls onChange when clicked", () => {
 			const onChange = vi.fn();
 			wrap(<Checkbox onChange={onChange} />);
 			fireEvent.click(screen.getByRole("checkbox"));
 			expect(onChange).toHaveBeenCalled();
 		});
-
 		it("[ISSUE-3482-ITEM-2] puts the native checkbox into the indeterminate state, and takes it out again", () => {
 			const { rerender } = wrap(
 				<Checkbox
@@ -514,7 +533,6 @@ describe("UIKit", () => {
 			if (!icon) throw new Error("the checkbox has no icon next to its input");
 			return icon;
 		};
-
 		it.each(["light", "dark"] as const)(
 			"[ISSUE-3482-ITEM-4] paints the box Canvas and its border and tick CanvasText in forced colors (%s theme)",
 			(mode) => {
@@ -537,7 +555,6 @@ describe("UIKit", () => {
 				});
 			},
 		);
-
 		it("[ISSUE-3482-ITEM-4] paints a disabled box's border and tick GrayText in forced colors", () => {
 			wrap(
 				<Checkbox
@@ -556,7 +573,6 @@ describe("UIKit", () => {
 			});
 		});
 	});
-
 	describe("MuiFieldState (withMuiFieldState HOC)", () => {
 		it("renders TextFieldCC normally", () => {
 			wrap(<TextFieldCC label="Normal" />);
@@ -582,7 +598,6 @@ describe("UIKit", () => {
 			expect(ref.current!.contains(screen.getByLabelText("Ref"))).toBe(true);
 		});
 	});
-
 	describe("number inputs", () => {
 		// touch keyboards pick their keypad by inputmode: "numeric" has digits only,
 		// "decimal" adds the decimal separator
@@ -610,7 +625,6 @@ describe("UIKit", () => {
 			);
 		});
 	});
-
 	describe("theme slots", () => {
 		it("[ISSUE-3482-ITEM-15] applies theme variants of CcActionButton and CcSubActionButton", () => {
 			wrap(
