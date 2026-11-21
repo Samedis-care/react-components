@@ -1494,3 +1494,110 @@ export const Issue3481Item17OverlayHintIsReadableInBothThemes: Story = {
 		}
 	},
 };
+
+/** ISSUE-3481-ITEM-26: a third entry in a cell disappears without a trace. */
+const NIGHT: MatrixTileItem = {
+	key: "night",
+	label: "N",
+	backgroundColor: "#4527a0",
+	textColor: "#ffffff",
+	tooltip: "Night shift",
+};
+
+const ON_CALL: MatrixTileItem = {
+	key: "onCall",
+	label: "RD",
+	backgroundColor: "#ef6c00",
+	textColor: "#000000",
+	tooltip: "On call",
+	highlighted: true,
+};
+
+const LEFT_OUT_ROWS: MatrixRow<TileCell>[] = [
+	{
+		key: "a",
+		label: "Alice Weber",
+		cells: {
+			t2: { items: [EARLY, LATE, NIGHT] },
+			t3: { items: [EARLY, LATE, NIGHT], column: true },
+			t4: { items: [EARLY, LATE, NIGHT, ON_CALL], diagonal: true },
+		},
+	},
+];
+
+export const Issue3481Item26LeftOutEntriesAreMarked: Story = {
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<TileRoster
+			onSelectRange={args.onSelectRange}
+			onItemClick={args.onItemClick}
+			rows={LEFT_OUT_ROWS}
+		/>
+	),
+	play: async ({ canvasElement }) => {
+		const markerIn = (column: number, count: string) => {
+			const cell = tileCell(canvasElement, 0, column);
+			const marker = within(cell).getByText(count).parentElement;
+			if (!marker) throw new Error(`no marker in column ${column}`);
+			return { cell, marker };
+		};
+		const inside = (inner: DOMRect, outer: DOMRect) =>
+			inner.left >= outer.left &&
+			inner.right <= outer.right &&
+			inner.top >= outer.top &&
+			inner.bottom <= outer.bottom;
+		const overlaps = (a: DOMRect, b: DOMRect) =>
+			a.left < b.right &&
+			b.left < a.right &&
+			a.top < b.bottom &&
+			b.top < a.bottom;
+		const fills = [EARLY, LATE].map((entry) =>
+			parseColor(
+				`rgb(${[1, 3, 5]
+					.map((at) => parseInt(entry.backgroundColor.slice(at, at + 2), 16))
+					.join(", ")})`,
+			),
+		);
+		for (const [column, count, name] of [
+			[1, "+1", "split"],
+			[2, "+1", "stacked"],
+			[3, "+2", "diagonal"],
+		] as const) {
+			const { cell, marker } = markerIn(column, count);
+			const box = marker.getBoundingClientRect();
+			await expect(box.width, name).toBeGreaterThan(0);
+			// within its cell, and on none of the labels the cell draws
+			await expect(inside(box, cell.getBoundingClientRect()), name).toBe(true);
+			for (const label of ["F", "S"]) {
+				const drawn = within(cell).getByText(label).getBoundingClientRect();
+				await expect(overlaps(box, drawn), `${name}: ${label}`).toBe(false);
+			}
+			// its count readable on it, and the marker apart from any fill it
+			// lies on: its border or its body (WCAG 1.4.3, 1.4.11)
+			const style = getComputedStyle(marker);
+			const body = parseColor(style.backgroundColor);
+			const border = parseColor(style.borderTopColor);
+			await expect(
+				contrast(parseColor(style.color), body),
+				name,
+			).toBeGreaterThanOrEqual(4.5);
+			for (const fill of fills)
+				await expect(
+					Math.max(contrast(border, fill), contrast(body, fill)),
+					name,
+				).toBeGreaterThanOrEqual(3);
+		}
+		// the highlighted entry is one of those left out: the marker is ringed
+		await expect(getComputedStyle(markerIn(3, "+2").marker).boxShadow).not.toBe(
+			"none",
+		);
+		await expect(getComputedStyle(markerIn(1, "+1").marker).boxShadow).toBe(
+			"none",
+		);
+		// and pointing at it shows what it stands for
+		await userEvent.hover(markerIn(3, "+2").marker);
+		const tooltip = await within(document.body).findByRole("tooltip");
+		await expect(within(tooltip).getByText("RD")).toBeInTheDocument();
+		await expect(within(tooltip).getByText("On call")).toBeInTheDocument();
+	},
+};

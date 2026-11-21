@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import React from "react";
+import fs from "node:fs";
+import path from "node:path";
 import {
 	act,
 	cleanup,
@@ -8,6 +10,7 @@ import {
 	renderHook,
 	screen,
 	waitFor,
+	within,
 } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import {
@@ -39,6 +42,7 @@ import {
 } from "../../src/standalone/Matrix/types";
 import { decomposeColor, getContrastRatio } from "@mui/material/styles";
 import type { MatrixCellTileProps } from "../../src/standalone/Matrix/MatrixCellTileContext";
+import ccI18n from "../../src/i18n";
 
 afterEach(() => {
 	cleanup();
@@ -1705,6 +1709,7 @@ describe("MatrixCellTile entries", () => {
 		diagonalLabel: "x-dlabel",
 		placeholder: "x-placeholder",
 		corner: "x-corner",
+		overflow: "x-overflow",
 	};
 	const entry = (overrides: Partial<MatrixTileItem> = {}): MatrixTileItem => ({
 		key: "a",
@@ -2047,6 +2052,147 @@ describe("MatrixCellTile entries", () => {
 			);
 			fireEvent.mouseDown(screen.getByRole("button"), { button: 0 });
 			expect(onMouseDown).toHaveBeenCalledTimes(1);
+		});
+	});
+
+	describe("more entries than a tile draws", () => {
+		const third = (overrides: Partial<MatrixTileItem> = {}) =>
+			entry({ key: "c", label: "N", backgroundColor: "#4527a0", ...overrides });
+		const fourth = (overrides: Partial<MatrixTileItem> = {}) =>
+			entry({
+				key: "d",
+				label: "RD",
+				backgroundColor: "#ef6c00",
+				...overrides,
+			});
+		/** the tile in a grid cell, which is named by what it contains */
+		const inCell = (
+			props: Partial<MatrixCellTileProps> & { items: MatrixTileItem[] },
+		) => render(<div role={"gridcell"}>{tile(props)}</div>);
+		/** what the marker draws, as opposed to what it says */
+		const drawnText = (marker: HTMLElement) =>
+			Array.from(marker.querySelectorAll("[aria-hidden=true]"))
+				.map((part) => part.textContent)
+				.join("");
+
+		it("[ISSUE-3481-ITEM-26] marks the entries it leaves out with their count", () => {
+			const { container } = render(
+				tile({ items: [entry(), second(), third(), fourth()] }),
+			);
+			expect(slotsOf(container, "item")).toHaveLength(2);
+			const markers = slotsOf(container, "overflow");
+			expect(markers).toHaveLength(1);
+			expect(drawnText(markers[0])).toBe("+2");
+			cleanup();
+			const { container: pair } = render(tile({ items: [entry(), second()] }));
+			expect(slotsOf(pair, "overflow")).toHaveLength(0);
+		});
+
+		it("[ISSUE-3481-ITEM-26] marks the entries a diagonal pair leaves out", () => {
+			const { container } = render(
+				tile({ items: [entry(), second(), third()], pairLayout: "diagonal" }),
+			);
+			expect(slotsOf(container, "diagonal")).toHaveLength(1);
+			const markers = slotsOf(container, "overflow");
+			expect(markers).toHaveLength(1);
+			expect(drawnText(markers[0])).toBe("+1");
+		});
+
+		it("[ISSUE-3481-ITEM-26] names the entries it leaves out with the cell, each by its label and tooltip", () => {
+			inCell({
+				items: [
+					entry(),
+					second(),
+					third({ tooltip: "Night shift, Alice Weber" }),
+					fourth(),
+				],
+			});
+			expect(computeAccessibleName(screen.getByRole("gridcell"))).toBe(
+				"F S 2 more: N (Night shift, Alice Weber), RD",
+			);
+		});
+
+		it("[ISSUE-3481-ITEM-26] shows the entries it leaves out in the marker's tooltip", () => {
+			vi.useFakeTimers();
+			const { container } = render(
+				tile({
+					items: [
+						entry(),
+						second(),
+						third({ tooltip: "Night shift" }),
+						fourth(),
+					],
+				}),
+			);
+			const [marker] = slotsOf(container, "overflow");
+			fireEvent.mouseOver(marker);
+			act(() => {
+				vi.advanceTimersByTime(500);
+			});
+			const tooltip = screen.getByRole("tooltip");
+			expect(within(tooltip).getByText("N")).toBeInTheDocument();
+			expect(within(tooltip).getByText("Night shift")).toBeInTheDocument();
+			expect(within(tooltip).getByText("RD")).toBeInTheDocument();
+			// only the ones left out: the drawn entries speak for themselves
+			expect(within(tooltip).queryByText("F")).toBeNull();
+			expect(within(tooltip).queryByText("S")).toBeNull();
+			// close it and let MUI's "a tooltip was just open" window (800ms)
+			// run out, or the next tooltip opens without its delay
+			fireEvent.mouseOut(marker);
+			act(() => {
+				vi.advanceTimersByTime(2000);
+			});
+		});
+
+		it("[ISSUE-3481-ITEM-26] rings the marker when an entry it leaves out is highlighted", () => {
+			const { container } = render(
+				tile({ items: [entry(), second(), third({ highlighted: true })] }),
+			);
+			const [ringed] = slotsOf(container, "overflow");
+			expect(getComputedStyle(ringed).boxShadow).toContain(
+				theme.palette.warning.main,
+			);
+			cleanup();
+			// a highlighted entry that is drawn rings itself, not the marker
+			const { container: drawn } = render(
+				tile({ items: [entry({ highlighted: true }), second(), third()] }),
+			);
+			const [plain] = slotsOf(drawn, "overflow");
+			expect(getComputedStyle(plain).boxShadow).not.toContain(
+				theme.palette.warning.main,
+			);
+		});
+
+		it("[ISSUE-3481-ITEM-26] says how many are left out in the language of the page", async () => {
+			await act(() => ccI18n.changeLanguage("de"));
+			try {
+				inCell({ items: [entry(), second(), third()] });
+				expect(computeAccessibleName(screen.getByRole("gridcell"))).toBe(
+					"F S noch 1: N",
+				);
+			} finally {
+				await act(() => ccI18n.changeLanguage("en"));
+			}
+		});
+
+		it("[ISSUE-3481-ITEM-26] has the count of the entries left out in every locale", () => {
+			const i18nDir = path.resolve(__dirname, "../../src/assets/i18n");
+			const missing = fs
+				.readdirSync(i18nDir, { withFileTypes: true })
+				.filter((locale) => locale.isDirectory())
+				.filter((locale) => {
+					const translation = JSON.parse(
+						fs.readFileSync(
+							path.join(i18nDir, locale.name, "translation.json"),
+							"utf8",
+						),
+					) as { standalone?: { matrix?: Record<string, string> } };
+					return !translation.standalone?.matrix?.["tile-more"]?.includes(
+						"{{count}}",
+					);
+				})
+				.map((locale) => locale.name);
+			expect(missing).toEqual([]);
 		});
 	});
 });

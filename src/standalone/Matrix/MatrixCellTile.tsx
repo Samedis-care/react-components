@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
-import { alpha, styled, useThemeProps } from "@mui/material";
+import { styled, useThemeProps } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 import { matrixClasses } from "./matrixClasses";
+import { highlightRing } from "./matrixTints";
 import {
 	MatrixCellTileContextValue,
 	MatrixCellTileProps,
@@ -9,12 +10,15 @@ import {
 } from "./MatrixCellTileContext";
 import MatrixTileItem from "./MatrixTileItem";
 import MatrixTileDiagonalPair from "./MatrixTileDiagonalPair";
+import MatrixTileOverflow from "./MatrixTileOverflow";
 import { MatrixTileItem as MatrixTileItemData } from "./types";
 
 export const MatrixCellTileRoot = styled("div", {
 	name: "CcMatrixCellTile",
 	slot: "root",
 })({
+	// the "+N" marker is placed in it
+	position: "relative",
 	boxSizing: "border-box",
 	width: "100%",
 	height: "100%",
@@ -26,10 +30,7 @@ export const MatrixCellTileRoot = styled("div", {
 });
 
 /**
- * The attention ring around a highlighted entry.
- * @remarks A STATIC ring on purpose: an infinite CSS animation keeps the
- * compositor awake and drains battery on tablets as long as the grid is open.
- * A solid ring highlights just as clearly at zero cost.
+ * The attention ring around a highlighted entry (see highlightRing).
  */
 export const MatrixTileHighlight = styled("div", {
 	name: "CcMatrixCellTile",
@@ -38,13 +39,7 @@ export const MatrixTileHighlight = styled("div", {
 	width: "100%",
 	height: "100%",
 	borderRadius: theme.shape.borderRadius,
-	// alpha(), not a hex-alpha suffix: the palette value can be rgb(), hsl() or
-	// a CSS variable, and appending to those invalidates the whole declaration
-	// — which would drop the ring entirely instead of just its glow.
-	boxShadow: `0 0 0 3px ${theme.palette.warning.main}, 0 0 6px 1px ${alpha(
-		theme.palette.warning.main,
-		0.5,
-	)}`,
+	boxShadow: highlightRing(theme),
 }));
 
 export const MatrixTilePlaceholder = styled("div", {
@@ -118,6 +113,9 @@ const MatrixCellTile = (inProps: MatrixCellTileProps) => {
 		);
 	}
 
+	// The entries the tile has no room for, drawn as one "+N" marker
+	const leftOut = useMemo(() => items.slice(2), [items]);
+
 	// Only what an entry reads, so a consumer mapping its items fresh on every
 	// render (the normal case) does not invalidate this and re-render them.
 	const context = useMemo<MatrixCellTileContextValue>(
@@ -135,6 +133,7 @@ const MatrixCellTile = (inProps: MatrixCellTileProps) => {
 				])}
 			>
 				{content}
+				{leftOut.length > 0 && <MatrixTileOverflow items={leftOut} />}
 			</MatrixCellTileRoot>
 		</MatrixCellTilePropsContext.Provider>
 	);

@@ -278,6 +278,9 @@
 		},
 		"loader": {
 			"label": "Yuklanmoqda…"
+		},
+		"matrix": {
+			"tile-more": "yana {{count}} ta:"
 		}
 	},
 	"non-standalone": {

@@ -278,6 +278,9 @@
 		},
 		"loader": {
 			"label": "Lädt…"
+		},
+		"matrix": {
+			"tile-more": "noch {{count}}:"
 		}
 	},
 	"non-standalone": {

@@ -278,6 +278,9 @@
 		},
 		"loader": {
 			"label": "Chargement…"
+		},
+		"matrix": {
+			"tile-more": "{{count}} de plus :"
 		}
 	},
 	"non-standalone": {
