@@ -16,10 +16,28 @@ const noop = () => {
 };
 
 /**
- * A string list field holding two entries, editable, as a form renders it
+ * The entries a demo list starts with
  */
-const StringListDemo = () => {
-	const [value, setValue] = useState(["Red", "Blue"]);
+const DEMO_ENTRIES = ["Red", "Blue"];
+
+/**
+ * A string list field, editable, as a form renders it: by default holding two
+ * entries and optional
+ */
+const StringListDemo = (props: {
+	/**
+	 * The entries the list starts with
+	 * @default ["Red", "Blue"]
+	 */
+	initial?: string[];
+	/**
+	 * The field's visibility is required
+	 * @default false
+	 */
+	required?: boolean;
+}) => {
+	const { initial = DEMO_ENTRIES, required = false } = props;
+	const [value, setValue] = useState(initial);
 	const renderer = useMemo(() => new RendererStringArray(), []);
 	const handleChange = useCallback(
 		(_field: string, next: string[]) => setValue(next),
@@ -40,7 +58,7 @@ const StringListDemo = () => {
 			hidden: false,
 			editable: true,
 			readOnly: false,
-			required: false,
+			required,
 			grid: false,
 		},
 		handleChange,
@@ -83,5 +101,36 @@ export const Issue3501Item43EntriesNamed: StoryObj = {
 		await expect(
 			canvas.getByRole("textbox", { name: "Colors: new entry" }),
 		).toHaveValue("");
+	},
+};
+
+/**
+ * No entries yet: a required list starts empty
+ */
+const NO_ENTRIES: string[] = [];
+
+export const Issue3501Item45RequiredOnlyWhileEmpty: StoryObj = {
+	render: () => <StringListDemo initial={NO_ENTRIES} required />,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3501-ITEM-45: a required string list needs at least one entry. While it is empty, its new entry is required; once it has an entry, no input is required, the empty one for the next entry neither.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ canvas, userEvent }) => {
+		const newEntry = await canvas.findByRole("textbox", {
+			name: "Colors: new entry",
+		});
+		await expect(newEntry).toBeRequired();
+		await userEvent.type(newEntry, "Green");
+		await expect(
+			canvas.getByRole("textbox", { name: "Colors 1" }),
+		).not.toBeRequired();
+		await expect(
+			canvas.getByRole("textbox", { name: "Colors: new entry" }),
+		).not.toBeRequired();
 	},
 };

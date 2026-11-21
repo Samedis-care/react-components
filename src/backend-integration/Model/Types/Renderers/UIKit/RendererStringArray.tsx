@@ -30,6 +30,9 @@ export type ModelDataTypeStringArrayRendererCCParams = Omit<
 
 /**
  * Renders text fields inside a group box
+ *
+ * A required field needs at least one entry: while the list is empty, its only
+ * input, the one for a new entry, is required; once it has entries, no input is.
  */
 class RendererStringArray extends TypeStringArray {
 	props?: ModelDataTypeStringArrayRendererCCParams;
@@ -102,7 +105,9 @@ const RendererStringArrayComponent = (
 			name={`${field}`}
 			value={value[idx] ?? ""}
 			disabled={visibility.readOnly}
-			required={visibility.required}
+			// A required list needs at least one entry, not every input filled: only the
+			// new entry of an empty list, then the list's only input, is required.
+			required={visibility.required && value.length === 0}
 			onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
 				const newValue = [...value];
 				newValue[idx] = evt.target.value;

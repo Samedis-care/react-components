@@ -31,6 +31,7 @@ afterEach(async () => {
 const renderParams = (
 	value: string[],
 	handleChange: ModelRenderParams<string[]>["handleChange"],
+	required = false,
 ): ModelRenderParams<string[]> => ({
 	field: "tags",
 	value,
@@ -44,7 +45,7 @@ const renderParams = (
 		hidden: false,
 		editable: true,
 		readOnly: false,
-		required: false,
+		required,
 		grid: false,
 	},
 	handleChange,
@@ -63,6 +64,10 @@ const renderParams = (
 const StringList = (props: {
 	initial: string[];
 	options?: ModelDataTypeStringArrayRendererCCParams;
+	/**
+	 * The field's visibility is required
+	 */
+	required?: boolean;
 }) => {
 	const [renderer] = useState(() => new RendererStringArray(props.options));
 	const [value, setValue] = useState(props.initial);
@@ -70,7 +75,7 @@ const StringList = (props: {
 		(_field: string, next: string[]) => setValue(next),
 		[],
 	);
-	return renderer.render(renderParams(value, handleChange));
+	return renderer.render(renderParams(value, handleChange, props.required));
 };
 
 /**
@@ -129,5 +134,44 @@ describe("ModelDataTypeStringArrayRendererCC", () => {
 		expect(
 			screen.getByRole("textbox", { name: "Tags: new entry" }),
 		).toHaveAttribute("maxlength", "5");
+	});
+
+	it("[ISSUE-3501-ITEM-45] a required list with entries marks none of its inputs required, the empty one for a new entry neither", () => {
+		render(<StringList initial={["a", "b"]} required />);
+		expectNames(["Tags 1", "Tags 2", "Tags: new entry"]);
+		screen
+			.getAllByRole("textbox")
+			.forEach((input) => expect(input).not.toBeRequired());
+	});
+
+	it("[ISSUE-3501-ITEM-45] a required empty list marks its new entry required, an optional one does not", () => {
+		render(<StringList initial={[]} required />);
+		expect(
+			screen.getByRole("textbox", { name: "Tags: new entry" }),
+		).toBeRequired();
+		cleanup();
+		render(<StringList initial={[]} />);
+		expect(
+			screen.getByRole("textbox", { name: "Tags: new entry" }),
+		).not.toBeRequired();
+	});
+
+	it("[ISSUE-3501-ITEM-45] the new entry is required only while a required list is empty", () => {
+		render(<StringList initial={[]} required />);
+		fireEvent.change(screen.getByRole("textbox", { name: "Tags: new entry" }), {
+			target: { value: "a" },
+		});
+		expect(screen.getByRole("textbox", { name: "Tags 1" })).not.toBeRequired();
+		expect(
+			screen.getByRole("textbox", { name: "Tags: new entry" }),
+		).not.toBeRequired();
+		// clearing the only entry and leaving it drops it: the list is empty again
+		const first = screen.getByRole("textbox", { name: "Tags 1" });
+		fireEvent.change(first, { target: { value: "" } });
+		fireEvent.blur(first);
+		expectNames(["Tags: new entry"]);
+		expect(
+			screen.getByRole("textbox", { name: "Tags: new entry" }),
+		).toBeRequired();
 	});
 });
