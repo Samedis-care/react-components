@@ -40,7 +40,9 @@ export interface ImageDialogEntryProps extends Pick<
 	 */
 	isPrimary: boolean;
 	/**
-	 * Function to update images
+	 * Applies a change to the field's images: the callback gets them as they are when this is
+	 * called, after a removal (once onDelete agreed) or a replacement (once the file is
+	 * processed), and returns the new list, or the list it got when nothing changes
 	 */
 	changeImages: (cb: MultiImageManipulationCallback) => void;
 	/**
@@ -198,8 +200,11 @@ const ImageDialogEntry = (inProps: ImageDialogEntryProps) => {
 				return;
 			}
 		}
+		// applied to the images as they are now, which may have changed while onDelete asked
 		changeImages((images) => {
-			return images.filter((image) => image !== img);
+			const rest = images.filter((image) => image.id !== img.id);
+			// already removed, e.g. by a second click on Remove
+			return rest.length === images.length ? images : rest;
 		});
 	}, [onDelete, changeImages, img]);
 
@@ -214,10 +219,15 @@ const ImageDialogEntry = (inProps: ImageDialogEntryProps) => {
 				return;
 			}
 
+			// applied to the images as they are now, which may have changed while the file
+			// was processed
 			changeImages((images) =>
-				images.map((image) =>
-					image === img ? { ...image, image: imageData } : image,
-				),
+				// removed meanwhile: there is nothing left to replace
+				images.some((image) => image.id === img.id)
+					? images.map((image) =>
+							image.id === img.id ? { ...image, image: imageData } : image,
+						)
+					: images,
 			);
 		},
 		[changeImages, img, processFile, onImageError],

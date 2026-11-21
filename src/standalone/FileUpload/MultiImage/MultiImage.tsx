@@ -30,7 +30,7 @@ import useImageError, { ImageErrorHandler } from "../useImageError";
 
 export interface MultiImageImage {
 	/**
-	 * A unique identifier for the image
+	 * A unique identifier for the image: a removal or replacement finds its image by it
 	 */
 	id: string;
 	/**
@@ -47,6 +47,12 @@ export interface MultiImageImage {
 	readOnly?: boolean;
 }
 
+/**
+ * Derives the new images from the current ones. Used between MultiImage and its edit dialog
+ * entries.
+ * @param images The images as they are when the change is applied
+ * @returns The new images, or `images` itself when nothing changes (nothing is reported then)
+ */
 export type MultiImageManipulationCallback = (
 	images: MultiImageImage[],
 ) => MultiImageImage[];
@@ -93,9 +99,12 @@ export interface MultiImageProps {
 	 */
 	primary: string | null;
 	/**
-	 * Change event
+	 * Called with the whole new list after the user added, removed or replaced images
 	 * @param name The name of this field
-	 * @param newImages The new images
+	 * @param newImages The images of the latest render with the change applied. A change
+	 *                  that finishes later (a pick being processed, a removal waiting for
+	 *                  onDelete) is applied to the images passed in by then, so changes that
+	 *                  overlap keep each other.
 	 */
 	onChange?: (name: string | undefined, newImages: MultiImageImage[]) => void;
 	/**
@@ -253,7 +262,13 @@ export type MultiImageClassKey =
 	| "editLabel"
 	| "tileButton";
 
+/**
+ * Prefix of the id of an image the user added. The rest of the id is the time it was added
+ * and a number, which keep it unique on the page.
+ */
 export const MultiImageNewIdPrefix = "MultiImage-New-";
+// numbers the added images, so that two added in the same millisecond get different ids
+let addedImageCount = 0;
 
 const MultiImage = (inProps: MultiImageProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcMultiImage" });
@@ -371,7 +386,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 			const fileArr = Array.from(files);
 			return (await Promise.all(fileArr.map(processFile))).map(
 				(img, index) => ({
-					id: `${MultiImageNewIdPrefix}${new Date().getTime()}-${index}`,
+					id: `${MultiImageNewIdPrefix}${new Date().getTime()}-${addedImageCount++}`,
 					image: img,
 					name: fileArr[index].name,
 				}),
@@ -380,9 +395,27 @@ const MultiImage = (inProps: MultiImageProps) => {
 		[processFile],
 	);
 
+	// The props of the latest render. A change that finishes after an await (a pick being
+	// processed, a delete confirmation) is applied to the images as they are by then and
+	// reported to the handlers passed last, so changes that overlap keep each other.
+	const latest = useRef({ name, images, onChange, onPrimaryChange });
+	latest.current = { name, images, onChange, onPrimaryChange };
+
+	const manipulateImages = useCallback(
+		(process: MultiImageManipulationCallback) => {
+			const current = latest.current;
+			if (!current.onChange) return;
+			const newImages = process(current.images);
+			// e.g. a replacement that finished after its image was removed
+			if (newImages === current.images) return;
+			current.onChange(current.name, newImages);
+		},
+		[],
+	);
+
 	const handleUploadViaDrop = useCallback(
 		async (files: FileList) => {
-			if (!onChange) return;
+			if (!latest.current.onChange) return;
 			let newImages: MultiImageImage[];
 			try {
 				newImages = await processFiles(files);
@@ -392,14 +425,14 @@ const MultiImage = (inProps: MultiImageProps) => {
 				return;
 			}
 
-			onChange(name, images.concat(newImages));
+			manipulateImages((current) => current.concat(newImages));
 		},
-		[processFiles, name, images, onChange, handleImageError],
+		[processFiles, manipulateImages, handleImageError],
 	);
 
 	const handlePreviewDrop = useCallback(
 		async (files: FileList) => {
-			if (!onChange) return;
+			if (!latest.current.onChange) return;
 			if (files.length === 0) return;
 
 			let newImages: MultiImageImage[];
@@ -410,10 +443,11 @@ const MultiImage = (inProps: MultiImageProps) => {
 				handleImageError(e);
 				return;
 			}
-			onChange(name, images.concat(newImages));
-			if (onPrimaryChange) onPrimaryChange(name, newImages[0].id);
+			manipulateImages((current) => current.concat(newImages));
+			const current = latest.current;
+			current.onPrimaryChange?.(current.name, newImages[0].id);
 		},
-		[onChange, name, images, processFiles, onPrimaryChange, handleImageError],
+		[processFiles, manipulateImages, handleImageError],
 	);
 
 	const handleUpload = useCallback(
@@ -441,14 +475,6 @@ const MultiImage = (inProps: MultiImageProps) => {
 	const showNextImage = useCallback(() => {
 		setCurrentImage((prev) => prev + 1);
 	}, []);
-
-	const manipulateImages = useCallback(
-		(process: MultiImageManipulationCallback) => {
-			if (!onChange) return;
-			onChange(name, process(images));
-		},
-		[onChange, name, images],
-	);
 
 	const changePrimary = useCallback(
 		(id: string) => {
