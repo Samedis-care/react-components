@@ -99,6 +99,17 @@ const renderUpload = (props?: Partial<FileUploadProps>) => {
 	};
 };
 
+/** Records accept and capture of the file input whenever the picker would open */
+const spyInputClick = () => {
+	const seen: { accept: string; capture: string | null }[] = [];
+	vi.spyOn(HTMLInputElement.prototype, "click").mockImplementation(function (
+		this: HTMLInputElement,
+	) {
+		seen.push({ accept: this.accept, capture: this.getAttribute("capture") });
+	});
+	return seen;
+};
+
 describe("FileUpload — picking through the input", () => {
 	it("[ISSUE-3489-ITEM-5] clears the input after a pick, so the same file can be picked again", async () => {
 		const user = userEventLib.setup({ applyAccept: false });
@@ -148,5 +159,53 @@ describe("FileUpload — picking the same file again", () => {
 		});
 		expect(ui.value().map((f) => f.file.name)).toEqual(["a.txt", "b.txt"]);
 		expect(input.value).toBe("");
+	});
+});
+
+describe("FileUpload — maxFiles", () => {
+	it("[ISSUE-3489-ITEM-6] two files added at the same time cannot both take the last slot", async () => {
+		const ui = renderUpload({ maxFiles: 1 });
+		await act(async () => {
+			await Promise.all([
+				ui.ref.current!.addFile(pick("a.txt")),
+				ui.ref.current!.addFile(pick("b.txt")),
+			]);
+		});
+		expect(ui.kept()).toHaveLength(1);
+		expect(ui.handleError).toHaveBeenCalledWith(
+			"files.selector.too-many",
+			expect.any(String),
+		);
+	});
+
+	it("[ISSUE-3489-ITEM-6] a handle kept across calls checks the limit against the current list", async () => {
+		const ui = renderUpload({ maxFiles: 1 });
+		const dispatch = ui.ref.current!;
+		await act(async () => {
+			await dispatch.addFile(pick("a.txt"));
+		});
+		await act(async () => {
+			await dispatch.addFile(pick("b.txt"));
+		});
+		expect(ui.kept()).toEqual(["a.txt"]);
+		expect(ui.handleError).toHaveBeenCalledWith(
+			"files.selector.too-many",
+			expect.any(String),
+		);
+	});
+
+	it("[ISSUE-3489-ITEM-6] a kept handle's openUploadDialog sees the slot its addFile took", async () => {
+		const seen = spyInputClick();
+		const ui = renderUpload({ maxFiles: 1 });
+		const dispatch = ui.ref.current!;
+		await act(async () => {
+			await dispatch.addFile(pick("a.txt"));
+		});
+		act(() => dispatch.openUploadDialog());
+		expect(ui.handleError).toHaveBeenCalledWith(
+			"files.selector.limit-reached",
+			"Maximum amount of allowed files reached",
+		);
+		expect(seen).toEqual([]);
 	});
 });

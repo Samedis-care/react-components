@@ -44,7 +44,11 @@ export interface FileUploadProps {
 	/**
 	 * Maximum amount of files allowed
 	 * @remarks Counts every listed file that is not removed, except one with
-	 *          `excludeFromLimits`.
+	 *          `excludeFromLimits`. A selection (pick, drop or `addFile`) with more files
+	 *          than slots are free is refused as a whole (`files.selector.too-many`). The
+	 *          free slots are counted on the list as it is when the selection is added,
+	 *          after its images are processed, so selections added at the same time
+	 *          cannot share a slot.
 	 */
 	maxFiles?: number;
 	/**
@@ -372,6 +376,13 @@ const getUploadSize = (file: FileData): number =>
 		: (file.file.size ?? 0);
 
 /**
+ * The number of files that count towards maxFiles: those not removed and not excluded
+ * @param files The list
+ */
+const countLimitedFiles = (files: FileData[]): number =>
+	files.filter((file) => !file.delete && !file.excludeFromLimits).length;
+
+/**
  * The size of all files that are not removed, in bytes
  * @param files The list
  */
@@ -544,10 +555,7 @@ const FileUpload = (
 		if (!maxFiles)
 			throw new Error("max files isn't set, this function shouldn't be called");
 
-		return (
-			maxFiles -
-			files.filter((file) => !file.delete && !file.excludeFromLimits).length
-		);
+		return maxFiles - countLimitedFiles(files);
 	}, [maxFiles, files]);
 
 	const processFiles = useCallback(
@@ -558,15 +566,23 @@ const FileUpload = (
 				previewImages
 			);
 
-			if (maxFiles) {
-				if (files.length > getRemainingFileCount()) {
-					handleError(
-						"files.selector.too-many",
-						t("standalone.file-upload.error.too-many"),
-					);
-					return;
-				}
-			}
+			// counted on the list as it is now, not as the render that made this function
+			// saw it: the caller may keep the ref's handle across calls, and other files may
+			// be added while this selection's images are processed
+			const refuseIfTooMany = (): boolean => {
+				if (
+					!maxFiles ||
+					files.length <= maxFiles - countLimitedFiles(getFiles())
+				)
+					return false;
+				handleError(
+					"files.selector.too-many",
+					t("standalone.file-upload.error.too-many"),
+				);
+				return true;
+			};
+
+			if (refuseIfTooMany()) return;
 
 			const newFiles: FileData<File>[] = [];
 			for (let i = 0; i < files.length; i++) {
@@ -682,6 +698,9 @@ const FileUpload = (
 				}
 			}
 
+			// again, as files added while the images above were processed took slots too
+			if (refuseIfTooMany()) return;
+
 			const newNames = new Set(newFiles.map((newFile) => newFile.file.name));
 			const addNewFiles = (prev: FileData[]): FileData[] => [
 				...(allowDuplicates
@@ -721,7 +740,6 @@ const FileUpload = (
 			allowDuplicates,
 			convertImagesTo,
 			getFiles,
-			getRemainingFileCount,
 			handleError,
 			imageDownscaleOptions,
 			locale,
@@ -749,7 +767,8 @@ const FileUpload = (
 			}
 
 			if (maxFiles) {
-				if (getRemainingFileCount() === 0) {
+				// the list as it is now, also for a handle kept from an earlier render
+				if (maxFiles - countLimitedFiles(getFiles()) === 0) {
 					handleError(
 						"files.selector.limit-reached",
 						t("standalone.file-upload.error.limit-reached"),
@@ -767,7 +786,7 @@ const FileUpload = (
 				else elem.removeAttribute("accept");
 			}
 		},
-		[maxFiles, getRemainingFileCount, handleError, t],
+		[maxFiles, getFiles, handleError, t],
 	);
 
 	const handleFileChange = useCallback(
