@@ -134,8 +134,8 @@
 				"title": "Выбор фильтра"
 			},
 			"footer": {
-				"total": "Общий:",
-				"filtered": "Отфильтровано:",
+				"counts": "Всего: {{TOTAL}}",
+				"counts-filtered": "Отфильтровано: {{FILTERED}} Всего: {{TOTAL}}",
 				"edit": "Редактировать",
 				"delete": "Удалить",
 				"more": "Больше",

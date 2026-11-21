@@ -25,6 +25,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-21 | [UIKit theme types match what the slots get, and button variants apply](2026-11-21-ui-kit-theme-owner-state-and-variants.md) | behavior, type, theme |
 | 2026-11-21 | [MultiImage shows "2 / 30" instead of dots that do not fit in one row](2026-11-21-image-dots-counter-when-they-do-not-fit.md) | behavior, theme |
 | 2026-11-21 | [filterSortPaginate ends a filter chain at its first condition without a value](2026-11-21-filter-sort-paginate-ends-chain-at-empty-condition.md) | behavior |
+| 2026-11-21 | [The DataGrid footer formats its row counts for the language](2026-11-21-data-grid-row-counts-formatted.md) | behavior |
 | 2026-11-20 | [A lazy control's queue keeps the Form dirty when onlySubmitMounted changes while it is shown](2026-11-20-lazy-crud-connector-only-submit-mounted-change.md) | behavior |
 | 2026-11-20 | [A control in a DataGrid cell is named after its field and row](2026-11-20-data-grid-inline-checkbox-names.md) | behavior |
 | 2026-11-20 | [InlineSwitch takes aria props for its switch, and a selector's switch requires switchLabel](2026-11-20-inline-switch-name-and-switch-label.md) | behavior, type |

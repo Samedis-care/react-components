@@ -134,8 +134,8 @@
 				"title": "Filtrni tanlash"
 			},
 			"footer": {
-				"total": "Jami:",
-				"filtered": "Filtrlangan:",
+				"counts": "Jami: {{TOTAL}}",
+				"counts-filtered": "Filtrlangan: {{FILTERED}} Jami: {{TOTAL}}",
 				"edit": "Tahrirlash",
 				"delete": "O'chirish",
 				"more": "Ko'proq",

@@ -134,8 +134,8 @@
 				"title": "Sélection de filtre"
 			},
 			"footer": {
-				"total": "Total:",
-				"filtered": "Filtré:",
+				"counts": "Total : {{TOTAL}}",
+				"counts-filtered": "Filtré : {{FILTERED}} Total : {{TOTAL}}",
 				"edit": "Éditer",
 				"delete": "Effacer",
 				"more": "Plus",

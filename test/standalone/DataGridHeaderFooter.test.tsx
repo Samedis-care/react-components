@@ -288,6 +288,7 @@ describe("footer actions", () => {
 });
 
 const header = () => document.querySelector<HTMLElement>(".test-header")!;
+const footer = () => document.querySelector<HTMLElement>(".test-footer")!;
 
 describe("search", () => {
 	it("[ISSUE-3495-ITEM-18] on a phone the search popover puts focus into its field and the button exposes the popover", async () => {
@@ -815,5 +816,47 @@ describe("menu buttons", () => {
 				"Archive",
 			),
 		).toEqual(menuButtonExpected("More"));
+	});
+});
+
+describe("row counts", () => {
+	const counts =
+		(rowsTotal: number, rowsFiltered?: number) => (): DataGridData => ({
+			rowsTotal,
+			rowsFiltered,
+			rows: ROWS,
+		});
+	const countText = () => footer().querySelector(".my-count")!.textContent;
+	const CLASSES = { paginationText: "my-count" };
+
+	it("[ISSUE-3495-ITEM-11] groups the digits of large counts", async () => {
+		render(<Grid loadData={counts(12345, 1234)} classes={CLASSES} />);
+		await idle();
+		expect(countText()).toBe("Filtered: 1,234 Total: 12,345");
+	});
+
+	it("[ISSUE-3495-ITEM-11] groups the digits of the total alone", async () => {
+		render(<Grid loadData={counts(12345)} classes={CLASSES} />);
+		await idle();
+		expect(countText()).toBe("Total: 12,345");
+	});
+
+	it("[ISSUE-3495-ITEM-11] each language groups the digits and spaces the text its own way", async () => {
+		render(<Grid loadData={counts(12345, 1234)} classes={CLASSES} />);
+		await idle();
+		await act(() => ccI18n.changeLanguage("de"));
+		expect(countText()).toBe("Gefiltert: 1.234 Gesamt: 12.345");
+		// a no-break space before the colon, a narrow one between the groups
+		await act(() => ccI18n.changeLanguage("fr"));
+		expect(countText()).toBe(
+			"Filtré\u00a0: 1\u202f234 Total\u00a0: 12\u202f345",
+		);
+	});
+
+	it("[ISSUE-3495-ITEM-11] on a phone the digits are grouped too", async () => {
+		stubViewport(320);
+		render(<Grid loadData={counts(12345, 1234)} classes={CLASSES} />);
+		await idle();
+		expect(screen.getByText("#1,234/12,345")).toBeVisible();
 	});
 });
