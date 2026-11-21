@@ -256,6 +256,33 @@ You need to define all additional fields required for your model yourself. A fie
 
 </details>
 
+#### Required fields
+
+A visibility with `required: true`, such as `ModelVisibilityEditRequired`, marks the field as
+required with MUI's `required`: its label gets an asterisk and, on most controls, its input
+is required. Like MUI's `required`, it doesn't validate. A required field without a
+`validate` of its own can be saved empty. To refuse an empty value, give the field a
+validator next to the visibility:
+
+```typescript
+title: {
+    type: new ModelDataTypeStringRendererMUI(),
+    visibility: {
+        overview: ModelVisibilityGridView,
+        edit: ModelVisibilityEditRequired,
+        create: ModelVisibilityEditRequired,
+    },
+    getLabel: () => "Title",
+    validate: validatePresence, // "The Title field is required"
+    customData: null,
+},
+```
+
+`validatePresence` refuses every falsy value, `0` and `false` included. A number or a switch
+that may be `0` or `false` needs a validator of its own. Without a validator, the asterisk
+suits a field that may be saved incomplete, such as a draft that is checked when it is
+submitted.
+
 #### Defining your own Types and Renderers
 
 Sometimes you need custom controls which aren't included in the default type library. In these cases you need to create your own Renderers or even Types.

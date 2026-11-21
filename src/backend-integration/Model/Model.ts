@@ -119,6 +119,9 @@ export interface ModelFieldDefinition<
 	 * @param value The value of this field
 	 * @param values All field values
 	 * @param field This field
+	 * @remarks A `required` visibility doesn't validate (see Visibility.required): a field
+	 *          that must not be saved empty refuses an empty value here, e.g. with
+	 *          `validatePresence`.
 	 */
 	validate?(
 		value: TypeT,
