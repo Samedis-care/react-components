@@ -1,3 +1,4 @@
+import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import RendererEnumSimpleSelect from "../../src/backend-integration/Model/Types/Renderers/Material-UI/RendererEnumSimpleSelect";
@@ -82,5 +83,40 @@ describe("ModelDataTypeEnumSelectRendererMUI", () => {
 		expect(
 			await screen.findByRole("listbox", { name: "Priority, Alice" }),
 		).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3501-ITEM-44] two editable data grid cells of the field share no id", () => {
+		const cell = (row: string) =>
+			renderer.render(
+				renderParams({
+					visibility: { ...renderParams().visibility, grid: true },
+					gridCellLabel: `Priority, ${row}`,
+				}),
+			);
+		const { container } = render(
+			<>
+				{cell("Alice")}
+				{cell("Bob")}
+			</>,
+		);
+		expect(screen.getAllByRole("combobox")).toHaveLength(2);
+		const ids = Array.from(
+			container.querySelectorAll("[id]"),
+			(element) => element.id,
+		);
+		expect(ids).toEqual([...new Set(ids)]);
+	});
+
+	it("[ISSUE-3501-ITEM-44] with a field id, the combobox has that id and the select the field's name", () => {
+		const { container } = render(
+			renderer.render(renderParams({ id: "priority-field" })),
+		);
+		expect(screen.getByRole("combobox")).toHaveAttribute(
+			"id",
+			"priority-field",
+		);
+		expect(container.querySelector('input[name="priority"]')).toHaveValue(
+			"low",
+		);
 	});
 });

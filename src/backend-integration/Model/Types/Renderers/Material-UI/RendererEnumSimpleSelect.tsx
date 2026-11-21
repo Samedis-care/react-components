@@ -53,6 +53,10 @@ class RendererEnumSelect<T extends string = string> extends TypeEnum<T> {
 			const nameProps = labelId
 				? undefined
 				: { "aria-label": gridCellLabel ?? label };
+			// MUI gives a combobox without an id one made from the select's name
+			// (mui-component-select-<name>), the same in every row of a data grid: with no
+			// form behind it the select has no name, so its combobox has no id
+			const inputName = id ? field : undefined;
 			return (
 				<FormControlFieldsetCC
 					component={"fieldset"}
@@ -66,7 +70,7 @@ class RendererEnumSelect<T extends string = string> extends TypeEnum<T> {
 						{label}
 					</InputLabel>
 					<Select
-						name={field}
+						name={inputName}
 						value={value}
 						disabled={visibility.readOnly}
 						// the options are the enum's values

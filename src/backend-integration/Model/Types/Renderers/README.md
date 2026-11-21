@@ -119,7 +119,9 @@ The label must name the control. A MUI `TextField` and a `<label>` around or `fo
 do that on their own. A control the label cannot point at, such as MUI's `Select`, whose
 combobox is a `div`, points at the label instead: give the label the id `` `${id}-label` `` and
 the control `labelId` (or `aria-labelledby`) with it, and where `id` is undefined, give the
-control `aria-label={label}`. `RendererEnumSimpleSelect` does both.
+control `aria-label={label}`. `RendererEnumSimpleSelect` does both. Give a MUI `Select` the
+field as `name` only together with `id`: without an id MUI makes the combobox's id from the
+name (`mui-component-select-<name>`), which every row of a data grid would share.
 
 In a data grid cell nothing labels the control but `gridCellLabel` (or `label` where there
 is none): give it to the control as `aria-label`, i.e. `gridCellLabel ?? label`. It is the
