@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { CrudImporterStepProps, isFieldImportable } from "./index";
-import normalizeImportValue from "./normalizeImportValue";
+import { CrudImporterStepProps } from "./index";
+import convertImportRow from "./convertImportRow";
 import { Grid, TextField, Typography } from "@mui/material";
 import Model, {
 	useModelMutation,
 } from "../../../backend-integration/Model/Model";
 import ModelVisibilityHidden from "../../../backend-integration/Model/Visibilities/VisibilityHidden";
-import deepAssign from "../../../utils/deepAssign";
-import { dotToObject, getValueByDot } from "../../../utils/dotUtils";
+import { getValueByDot } from "../../../utils/dotUtils";
 import sleep from "../../../utils/sleep";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
@@ -72,18 +71,13 @@ export const useImportStep4Logic = (props: CrudImporterStepProps) => {
 					while (activeRequests >= 10) await sleep(50);
 					activeRequests++;
 
-					const modelRecord: Record<string, unknown> = {};
+					let modelRecord: Record<string, unknown> = {};
 					try {
-						Object.entries(model.fields)
-							.filter(([name, field]) => isFieldImportable(name, field))
-							.forEach(([name, field]) => {
-								const value: unknown = normalizeImportValue(
-									field,
-									state.conversionScripts[name]?.scriptFn(record),
-								);
-								if (value === undefined) return;
-								deepAssign(modelRecord, dotToObject(name, value));
-							});
+						modelRecord = convertImportRow(
+							model,
+							state.conversionScripts,
+							record,
+						);
 
 						if (updateKey) {
 							const filterKey = model.fields[updateKey].type.stringify(

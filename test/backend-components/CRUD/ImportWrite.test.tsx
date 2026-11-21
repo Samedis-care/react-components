@@ -143,4 +143,29 @@ describe("Step 4: what a row writes", () => {
 			}),
 		);
 	});
+
+	it("[ISSUE-3508-ITEM-1] writes the record the review validates: null, empty, 0 and false are sent, undefined is left out", async () => {
+		const connector = new MockConnector([]);
+		const create = vi.spyOn(connector, "create");
+		await importRows(connector, [{ n: "Alice" }], {
+			first_name: script(() => null),
+			email: script(() => ""),
+			count: script(() => 0),
+			active: script(() => false),
+			dept: script(() => undefined),
+		});
+		const sent = create.mock.calls[0][0];
+		expect(Object.keys(sent).sort()).toEqual([
+			"active",
+			"count",
+			"email",
+			"first_name",
+		]);
+		expect(sent).toEqual({
+			first_name: null,
+			email: "",
+			count: 0,
+			active: false,
+		});
+	});
 });

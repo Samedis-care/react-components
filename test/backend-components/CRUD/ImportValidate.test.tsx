@@ -79,6 +79,26 @@ describe("Step 3: the records it validates", () => {
 			born: new Date("2024-03-31T12:00:00.000Z"),
 		});
 	});
+
+	it("[ISSUE-3508-ITEM-1] validates the record the import writes: falsy results are kept and checked", async () => {
+		const { result } = await validateRows([{ a: "" }], {
+			first_name: script((r) => r.a || null),
+			active: script(() => false),
+			count: script(() => 0),
+		});
+		const [record, validation] = result.current.result.records![0];
+		expect(record).toEqual({ first_name: null, active: false, count: 0 });
+		expect(validation).toEqual({
+			first_name: expect.stringMatching(/First Name/) as string,
+		});
+		expect(result.current.result.everythingOkay).toBe(false);
+	});
+
+	it("[ISSUE-3508-ITEM-1] runs each conversion once per row", async () => {
+		const convert = vi.fn((r: Record<string, unknown>) => r.n);
+		await validateRows([{ n: "Alice" }], { first_name: script(convert) });
+		expect(convert).toHaveBeenCalledTimes(1);
+	});
 });
 
 describe("GenericDataPreview", () => {

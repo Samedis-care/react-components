@@ -25,6 +25,10 @@ import { useCrudDispatchContext } from "../index";
  * (`new Date(record.Born)` of a date cell, which arrives as local time without an offset,
  * `"2024-03-31T00:00:00"`). In UTC+12 local midnight is 12:00 UTC, so there use
  * `new Date(record.Born.slice(0, 10))`, which names the cell's day in every timezone.
+ *
+ * `undefined` leaves the field out of the record. Every other result, `null`, `""`, `0` and
+ * `false` included, is validated in step 3 (Validation & Review) and written in step 4
+ * (Import data). Each of the two steps calls the function once per row.
  */
 export type ConversionScriptFn = (record: Record<string, unknown>) => unknown;
 export interface CrudImportProps<M extends ModelUnknown> {
@@ -53,7 +57,8 @@ export interface CrudImportProps<M extends ModelUnknown> {
 	howTo?: (string | React.ReactNode)[];
 	/**
 	 * Additional validation callback for imported records
-	 * @param record The record to validate
+	 * @param record The model record the row is written as: every conversion result
+	 *        except `undefined` (see ConversionScriptFn), dotted fields nested
 	 * @returns Validation errors
 	 */
 	validate?: (

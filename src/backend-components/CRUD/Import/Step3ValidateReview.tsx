@@ -1,9 +1,7 @@
 import React, { useEffect, useMemo } from "react";
-import { CrudImporterStepProps, isFieldImportable } from "./index";
+import { CrudImporterStepProps } from "./index";
 import GenericDataPreview from "./GenericDataPreview";
-import normalizeImportValue from "./normalizeImportValue";
-import deepAssign from "../../../utils/deepAssign";
-import { dotToObject } from "../../../utils/dotUtils";
+import convertImportRow from "./convertImportRow";
 import isObjectEmpty from "../../../utils/isObjectEmpty";
 import useAsyncMemo from "../../../utils/useAsyncMemo";
 import useCCTranslations from "../../../utils/useCCTranslations";
@@ -21,29 +19,14 @@ export const useImportStep3Logic = (props: CrudImporterStepProps) => {
 		() =>
 			Promise.all(
 				state.data.map(async (record): Promise<RecordT> => {
-					const modelRecord: Record<string, unknown> = {};
-					let isModelRecordComplete = false;
+					// the record step 4 writes; a row whose conversion throws shows the row
+					let modelRecord: Record<string, unknown> | null = null;
 					try {
-						Object.entries(model.fields)
-							.filter(
-								([name, field]) =>
-									isFieldImportable(name, field) &&
-									state.conversionScripts[name]?.scriptFn(record),
-							)
-							.forEach(([name, field]) => {
-								deepAssign(
-									modelRecord,
-									dotToObject(
-										name,
-										normalizeImportValue(
-											field,
-											state.conversionScripts[name].scriptFn(record) ?? null,
-										),
-									),
-								);
-							});
-						// noinspection JSUnusedAssignment
-						isModelRecordComplete = true;
+						modelRecord = convertImportRow(
+							model,
+							state.conversionScripts,
+							record,
+						);
 						const validation = await model.validate(modelRecord);
 						return [
 							modelRecord,
@@ -53,11 +36,7 @@ export const useImportStep3Logic = (props: CrudImporterStepProps) => {
 							null,
 						];
 					} catch (e) {
-						return [
-							isModelRecordComplete ? modelRecord : record,
-							{},
-							e as Error,
-						];
+						return [modelRecord ?? record, {}, e as Error];
 					}
 				}),
 			),
