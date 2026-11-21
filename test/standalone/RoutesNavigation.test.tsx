@@ -5,6 +5,7 @@ import {
 	createBrowserHistory,
 	createMemoryHistory,
 	MemoryHistory,
+	Transition,
 } from "history";
 import HistoryRouter from "../../src/standalone/Routes/HistoryRouter";
 import Routes from "../../src/standalone/Routes/Routes";
@@ -244,6 +245,56 @@ describe("HistoryRouter", () => {
 
 describe("useNavigate", () => {
 	const location = () => screen.getByTestId("location").textContent;
+
+	it("[ISSUE-3475-ITEM-10] does not scroll the page when a blocker cancels the navigation", () => {
+		const history = mem("/form");
+		const { ref } = renderNavigate(history);
+		document.documentElement.scrollTop = 50;
+		// e.g. the unsaved-changes guard, where the user chooses to stay
+		const unblock = history.block(() => {});
+		act(() => ref.navigate!("/elsewhere"));
+		unblock();
+		expect(location()).toBe("/form|||null");
+		expect(scrollTo).not.toHaveBeenCalled();
+		expect(document.documentElement.scrollTop).toBe(50);
+		document.documentElement.scrollTop = 0;
+	});
+
+	it.each([false, true])(
+		"[ISSUE-3475-ITEM-10] scrolls the page to the top once a blocked navigation goes ahead (replace: %s)",
+		(replace) => {
+			const history = mem("/form");
+			const { ref } = renderNavigate(history);
+			document.documentElement.scrollTop = 50;
+			// the unsaved-changes guard, where the user confirms leaving
+			let transition: Transition | null = null;
+			const unblock = history.block((tx) => (transition = tx));
+			act(() => ref.navigate!("/elsewhere", { replace }));
+			expect(transition).not.toBeNull();
+			expect(document.documentElement.scrollTop).toBe(50);
+			unblock();
+			act(() => transition!.retry());
+			expect(location()).toBe("/elsewhere|||null");
+			expect(history.index).toBe(replace ? 0 : 1);
+			expect(scrollTo).toHaveBeenCalledWith(0, 0);
+			expect(document.documentElement.scrollTop).toBe(0);
+		},
+	);
+
+	it("[ISSUE-3475-ITEM-10] leaves the scroll position of a back or forward navigation to the browser", () => {
+		const history = mem("/a");
+		const { ref } = renderNavigate(history);
+		act(() => ref.navigate!("/b"));
+		expect(scrollTo).toHaveBeenCalledTimes(1);
+		document.documentElement.scrollTop = 50;
+		act(() => history.back());
+		expect(location()).toBe("/a|||null");
+		act(() => history.forward());
+		expect(location()).toBe("/b|||null");
+		expect(scrollTo).toHaveBeenCalledTimes(1);
+		expect(document.documentElement.scrollTop).toBe(50);
+		document.documentElement.scrollTop = 0;
+	});
 
 	it("[ISSUE-3475-ITEM-6] keeps a child link built from the root route's url inside the app", () => {
 		// what CRUD does for its edit, new and import pages: `${url}/${id}`

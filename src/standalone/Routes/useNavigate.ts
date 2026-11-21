@@ -35,6 +35,10 @@ export interface NavigateFunction {
  * route that matches at the root. A target with a scheme ("https://…",
  * "mailto:…", "javascript:…") throws an Error and nothing happens; leave the
  * app with `window.location` instead.
+ *
+ * Blockers on the history apply (inside Framework: a form with unsaved
+ * changes). Once the navigation happens, the HistoryRouter scrolls the page
+ * to the top; a navigation that a blocker cancels keeps the scroll position.
  */
 const useNavigate = (): NavigateFunction => {
 	const { history } = useHistoryRouterContext();
@@ -45,12 +49,6 @@ const useNavigate = (): NavigateFunction => {
 				throw new Error(
 					`useNavigate: ${JSON.stringify(to)} is not a path of this app, use window.location to leave the app`,
 				);
-			// reset scroll position - resetting all elements would break DataGrid scroll state restore
-			window.scrollTo(0, 0);
-			document.documentElement.scrollTop = 0;
-			document.documentElement.scrollLeft = 0;
-			document.body.scrollTop = 0;
-			document.body.scrollLeft = 0;
 			options ??= {};
 			if (options.replace) history.replace(target, options.state);
 			else history.push(target, options.state);
