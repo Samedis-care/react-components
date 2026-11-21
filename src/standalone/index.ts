@@ -4,6 +4,8 @@ export { default as FormLoaderOverlay } from "./Form/FormLoaderOverlay";
 export * from "./Form/FormPageLayout";
 export { default as FormPageLayout } from "./Form/FormPageLayout";
 export { default as InfiniteScroll } from "./InfiniteScroll";
+export * from "./InlineSwitch";
+export { default as InlineSwitch } from "./InlineSwitch";
 export * from "./Loader";
 export { default as Loader } from "./Loader";
 export * from "./Portal";

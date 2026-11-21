@@ -3,6 +3,10 @@ import { Grid, styled, Switch, Typography, useThemeProps } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 import addSlotAttributes from "../../utils/internal/addSlotAttributes";
 
+/**
+ * Props of {@link InlineSwitch}. Theme defaults go in
+ * `theme.components.CcInlineSwitch.defaultProps`.
+ */
 export interface InlineSwitchProps {
 	/**
 	 * Value for switch position. While true, the root has the class
@@ -248,4 +252,13 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 	);
 };
 
+/**
+ * A container with an optional compact switch (35x16) and its label, floated
+ * at the top right of `children`. `BaseSelector` renders every selector field
+ * inside one (its `displaySwitch`/`switchLabel`), and `MultiSelectWithoutGroup`
+ * one around its chips, mostly with `visible={false}`.
+ *
+ * The switch is controlled: pass `value` and `onChange`. The root has a 15px
+ * top margin (`styled(InlineSwitch)` or `styleOverrides.root` can change it).
+ */
 export default React.memo(InlineSwitch) as typeof InlineSwitch;

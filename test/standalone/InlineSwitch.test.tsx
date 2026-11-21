@@ -1,5 +1,5 @@
 import React from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 import {
 	act,
 	cleanup,
@@ -9,8 +9,10 @@ import {
 } from "@testing-library/react";
 import { createTheme, Theme, ThemeProvider } from "@mui/material";
 import InlineSwitch, {
+	InlineSwitchClassKey,
 	InlineSwitchProps,
 } from "../../src/standalone/InlineSwitch";
+import type * as PackageRoot from "../../src";
 import BaseSelector, {
 	BaseSelectorData,
 	BaseSelectorLoadHandler,
@@ -302,6 +304,26 @@ describe("InlineSwitch styling and theme", () => {
 		expect(t.components?.CcInlineSwitch?.styleOverrides?.root).toEqual(
 			expect.any(Function),
 		);
+	});
+});
+
+describe("InlineSwitch exports", () => {
+	const importTimeout = 90000;
+	it(
+		"[ISSUE-3465-ITEM-5] exports InlineSwitch from the package root",
+		async () => {
+			const root = (await import("../../src")) as Record<string, unknown>;
+			expect(
+				root.InlineSwitch,
+				"InlineSwitch is missing from the package root",
+			).toBe(InlineSwitch);
+		},
+		importTimeout,
+	);
+	it("[ISSUE-3465-ITEM-5] exports its props and class key types from the package root", () => {
+		// checked by tsc (tsconfig-test.json), not at runtime
+		expectTypeOf<PackageRoot.InlineSwitchProps>().toEqualTypeOf<InlineSwitchProps>();
+		expectTypeOf<PackageRoot.InlineSwitchClassKey>().toEqualTypeOf<InlineSwitchClassKey>();
 	});
 });
 
