@@ -205,7 +205,8 @@
 			},
 			"multi-image": {
 				"edit": "Bewerken",
-				"primary": "Primair",
+				"is-primary": "Hoofdafbeelding",
+				"make-primary": "Instellen als hoofdafbeelding",
 				"remove": "Afbeelding verwijderen",
 				"add": "Afbeelding toevoegen",
 				"replace": "Afbeelding vervangen",

@@ -12,7 +12,7 @@ import {
 import {
 	Delete as DeleteIcon,
 	Star as StarredIcon,
-	StarOutlined as NotStarredIcon,
+	StarBorder as NotStarredIcon,
 	SwapHoriz as ReplaceIcon,
 } from "@mui/icons-material";
 import {
@@ -34,7 +34,9 @@ export interface ImageDialogEntryProps extends Pick<
 	 */
 	img: MultiImageImage;
 	/**
-	 * Is the image set to primary
+	 * Is the image set to primary? The primary image's toggle button is pressed and shows a
+	 * filled star and "Primary image", the others show an outline star and "Set as primary
+	 * image"
 	 */
 	isPrimary: boolean;
 	/**
@@ -99,13 +101,26 @@ const PrimaryButton = styled(ButtonBase, {
 	name: "CcImageDialogEntry",
 	slot: "primaryButton",
 })(({ theme }) => ({
-	marginRight: "auto",
+	// takes the room Replace and Remove leave and wraps its text there; they move to a row of
+	// their own only when its longest word does not fit beside them
+	flex: "1 1 0",
+	justifyContent: "flex-start",
+	textAlign: "start",
 	padding: theme.spacing(0.5),
 	borderRadius: theme.shape.borderRadius,
 	// the primary image's button does nothing
 	"&[aria-pressed='true']": {
 		cursor: "default",
 	},
+}));
+const ChangeButtons = styled("span", {
+	name: "CcImageDialogEntry",
+	slot: "changeButtons",
+})(({ theme }) => ({
+	// Replace and Remove wrap together, and stay at the end of the row
+	display: "flex",
+	gap: theme.spacing(0.5),
+	marginLeft: "auto",
 }));
 const primaryLabelStyles = ({ theme }: { theme: Theme }) => ({
 	display: "inline-flex",
@@ -123,18 +138,28 @@ const IsPrimary = styled("span", {
 
 /**
  * Slots of ImageDialogEntry (theme CcImageDialogEntry): root (the Grid item), actions (the
- * row of buttons under the image), primaryButton (the make-primary toggle button), and the
- * star and text inside that button: makePrimary for an image that is not the primary one,
- * isPrimary for the primary image
+ * row of buttons under the image), primaryButton (the make-primary toggle button), the star
+ * and text inside that button: makePrimary for an image that is not the primary one
+ * (outline star, "Set as primary image"), isPrimary for the primary image (filled star in
+ * the primary colour, "Primary image"), and changeButtons (Replace and Remove, which wrap
+ * together; not rendered for a readOnly image)
  */
 export type ImageDialogEntryClassKey =
-	"root" | "actions" | "primaryButton" | "makePrimary" | "isPrimary";
+	| "root"
+	| "actions"
+	| "primaryButton"
+	| "makePrimary"
+	| "isPrimary"
+	| "changeButtons";
 
 /**
  * One image in MultiImage's edit dialog: the image (a click opens the full-screen view, a
  * file dropped onto it replaces it), and under it a make-primary toggle button
  * (`aria-pressed`) and, unless the image is readOnly, Replace (opens the file picker) and
- * Remove. Each button is named after the image's file name. Internal to MultiImage.
+ * Remove. The toggle button reads "Primary image" with a filled star on the primary image,
+ * and "Set as primary image" with an outline star on the others, so the primary image is
+ * told apart by more than colour. Each button is named after its text and the image's file
+ * name. Internal to MultiImage.
  */
 const ImageDialogEntry = (inProps: ImageDialogEntryProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcImageDialogEntry" });
@@ -222,8 +247,8 @@ const ImageDialogEntry = (inProps: ImageDialogEntryProps) => {
 		[replaceWith],
 	);
 
-	// only the label's slot follows the state: the button stays, and keeps focus when its
-	// image becomes primary
+	// only the label's slot, star and text follow the state: the button stays, and keeps
+	// focus when its image becomes primary
 	const PrimaryLabel = isPrimary ? IsPrimary : MakePrimary;
 
 	return (
@@ -255,12 +280,14 @@ const ImageDialogEntry = (inProps: ImageDialogEntryProps) => {
 					>
 						{isPrimary ? <StarredIcon color={"primary"} /> : <NotStarredIcon />}
 						<Typography component={"span"}>
-							{t("standalone.file-upload.multi-image.primary")}
+							{isPrimary
+								? t("standalone.file-upload.multi-image.is-primary")
+								: t("standalone.file-upload.multi-image.make-primary")}
 						</Typography>
 					</PrimaryLabel>
 				</PrimaryButton>
 				{!img.readOnly && (
-					<>
+					<ChangeButtons className={classes?.changeButtons}>
 						<IconButton
 							id={replaceId}
 							aria-label={t("standalone.file-upload.multi-image.replace")}
@@ -277,7 +304,7 @@ const ImageDialogEntry = (inProps: ImageDialogEntryProps) => {
 						>
 							<DeleteIcon />
 						</IconButton>
-					</>
+					</ChangeButtons>
 				)}
 			</Actions>
 			<span id={nameId} hidden>

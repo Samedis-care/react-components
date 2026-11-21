@@ -220,7 +220,8 @@
 			},
 			"multi-image": {
 				"edit": "Edit",
-				"primary": "Primary",
+				"is-primary": "Primary image",
+				"make-primary": "Set as primary image",
 				"remove": "Remove image",
 				"add": "Add image",
 				"replace": "Replace image",

@@ -205,7 +205,8 @@
 			},
 			"multi-image": {
 				"edit": "Tahrirlash",
-				"primary": "Birlamchi",
+				"is-primary": "Asosiy rasm",
+				"make-primary": "Asosiy rasm sifatida belgilash",
 				"remove": "Rasmni o'chirish",
 				"add": "Rasm qo'shish",
 				"replace": "Rasmni almashtirish",

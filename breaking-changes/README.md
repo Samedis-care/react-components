@@ -30,6 +30,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-21 | [The text and date fields no longer take `important`](2026-11-21-text-field-important-removed.md) | type |
 | 2026-11-21 | [GenericDataPreview shows the rows of new data](2026-11-21-generic-data-preview-reloads-new-data.md) | behavior |
 | 2026-11-21 | [useFormState restores a stored null and follows a changed name](2026-11-21-use-form-state-restores-null.md) | behavior, type |
+| 2026-11-21 | [MultiImage's edit dialog tells the primary image apart by star shape and text](2026-11-21-multi-image-primary-told-apart.md) | behavior, theme |
 | 2026-11-20 | [A lazy control's queue keeps the Form dirty when onlySubmitMounted changes while it is shown](2026-11-20-lazy-crud-connector-only-submit-mounted-change.md) | behavior |
 | 2026-11-20 | [A control in a DataGrid cell is named after its field and row](2026-11-20-data-grid-inline-checkbox-names.md) | behavior |
 | 2026-11-20 | [InlineSwitch takes aria props for its switch, and a selector's switch requires switchLabel](2026-11-20-inline-switch-name-and-switch-label.md) | behavior, type |

@@ -255,9 +255,9 @@ const focusRingWidth = (element: Element) => {
 
 const EDIT_DIALOG_STOPS = [
 	"Close",
-	...["Primary", "Replace image", "Remove image"],
-	...["Primary", "Replace image", "Remove image"],
-	...["Primary", "Replace image", "Remove image"],
+	...["Primary image", "Replace image", "Remove image"],
+	...["Set as primary image", "Replace image", "Remove image"],
+	...["Set as primary image", "Replace image", "Remove image"],
 	"Add image",
 ];
 
@@ -301,7 +301,7 @@ export const Issue3491Item1EveryActionIsATabStop: Story = {
 		}
 		await expect(reached).toEqual(EDIT_DIALOG_STOPS);
 
-		const star = within(dialog).getAllByRole("button", { name: /Primary/ })[1];
+		const star = within(dialog).getAllByRole("button", { name: /primary/i })[1];
 		await expect(star).toHaveAttribute("aria-pressed", "false");
 		star.focus();
 		await userEvent.keyboard(" ");

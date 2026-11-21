@@ -15,7 +15,7 @@ import MultiImage, {
 	MultiImageImage,
 	MultiImageProps,
 } from "../../src/standalone/FileUpload/MultiImage/MultiImage";
-import ccI18n from "../../src/i18n";
+import ccI18n, { langs } from "../../src/i18n";
 
 // jsdom has no canvas: the image pipeline is replaced
 const processImageMock = vi.hoisted(() => vi.fn());
@@ -77,6 +77,10 @@ const openEdit = () => {
 	fireEvent.click(screen.getByText(EDIT()));
 	return screen.getByRole("dialog");
 };
+const primaryRow = (entry: HTMLElement) =>
+	entry.querySelector<HTMLElement>(
+		'[class*="CcImageDialogEntry-isPrimary"], [class*="CcImageDialogEntry-makePrimary"]',
+	)!;
 
 const renderPlain = (props: Partial<MultiImageProps>) =>
 	render(
@@ -364,5 +368,66 @@ describe("MultiImage a11y — bugs", () => {
 		expect(
 			within(dialog).getByRole("button", { name: CLOSE() }),
 		).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3491-ITEM-10] which image is primary is shown by more than colour, and exposed as a state", () => {
+		renderPlain({
+			images: [mk("a"), mk("b")],
+			primary: "a",
+			onChange: vi.fn(),
+			onPrimaryChange: vi.fn(),
+		});
+		const dialog = openEdit();
+		const [primary, other] = entries(dialog).map(primaryRow);
+		const starPath = (row: HTMLElement) =>
+			row.querySelector("svg path")!.getAttribute("d");
+		expect(starPath(primary)).not.toBe(starPath(other));
+		expect(primary.textContent).not.toBe(other.textContent);
+		expect(
+			entries(dialog)[0].querySelector(
+				'[aria-pressed="true"], [aria-checked="true"], input:checked',
+			),
+		).not.toBeNull();
+	});
+
+	it("[ISSUE-3491-ITEM-10] the primary image reads Primary image, the others Set as primary image, and text and star move with the primary", () => {
+		renderOwner({ initial: [mk("a"), mk("b")] });
+		const dialog = openEdit();
+		const [a, b] = entries(dialog).map((entry) =>
+			within(entry).getByRole("button", { name: /primary/i }),
+		);
+		const star = (button: HTMLElement) =>
+			button.querySelector("svg path")!.getAttribute("d");
+		const filled = star(a);
+		const outline = star(b);
+		expect(outline).not.toBe(filled);
+		expect(a).toHaveAccessibleName("Primary image a.png");
+		expect(a).toHaveAttribute("aria-pressed", "true");
+		expect(b).toHaveAccessibleName("Set as primary image b.png");
+		expect(b).toHaveAttribute("aria-pressed", "false");
+
+		fireEvent.click(b);
+		expect(b).toHaveAccessibleName("Primary image b.png");
+		expect(b).toHaveAttribute("aria-pressed", "true");
+		expect(star(b)).toBe(filled);
+		expect(a).toHaveAccessibleName("Set as primary image a.png");
+		expect(a).toHaveAttribute("aria-pressed", "false");
+		expect(star(a)).toBe(outline);
+	});
+
+	it("[ISSUE-3491-ITEM-10] every locale has its own texts for the primary image and for making an image primary", async () => {
+		await ccI18n.loadLanguages(langs);
+		const text = (lng: string, key: string) =>
+			ccI18n.getResource(
+				lng.split("-")[0],
+				"translation",
+				`standalone.file-upload.multi-image.${key}`,
+			) as string | undefined;
+		const missing = langs.filter((lng) => {
+			const isPrimary = text(lng, "is-primary");
+			const makePrimary = text(lng, "make-primary");
+			return !isPrimary || !makePrimary || isPrimary === makePrimary;
+		});
+		expect(missing, "locales without both texts").toEqual([]);
 	});
 });
