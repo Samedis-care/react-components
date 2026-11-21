@@ -312,3 +312,38 @@ describe("RouteContext rendersAt", () => {
 		expect(seen[0]("/other")).toBe(true);
 	});
 });
+
+describe("Routes: invalid children", () => {
+	it("[ISSUE-3475-ITEM-14] never matches a child without a path prop", () => {
+		renderAt(
+			"/undefined/x",
+			<Routes>
+				{[
+					<div key="d">NOT A ROUTE</div>,
+					<Route key="404" path="*" element={<div>NOT FOUND</div>} />,
+				]}
+			</Routes>,
+		);
+		expect(screen.queryByText("NOT A ROUTE")).toBeNull();
+		expect(screen.getByText("NOT FOUND")).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3475-ITEM-14] leaves /undefined to the next child in rendersAt as well", () => {
+		const RendersAt = () => (
+			<div data-testid="renders-at">
+				{String(useRouteInfo().rendersAt("/undefined/x"))}
+			</div>
+		);
+		renderAt(
+			"/other",
+			<Routes>
+				{[
+					<div key="d">NOT A ROUTE</div>,
+					<Route key="404" path="*" element={<RendersAt />} />,
+				]}
+			</Routes>,
+		);
+		// the not-found route would stay mounted at /undefined/x
+		expect(screen.getByTestId("renders-at")).toHaveTextContent("true");
+	});
+});
