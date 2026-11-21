@@ -37,6 +37,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-21 | [SmallListItemButton draws a keyboard focus ring](2026-11-21-small-list-item-button-focus-ring.md) | behavior |
 | 2026-11-21 | [ImageSelector clears its file input after every pick](2026-11-21-image-selector-clears-input-after-pick.md) | behavior |
 | 2026-11-21 | [The import review validates the record the import writes](2026-11-21-import-review-validates-written-record.md) | behavior |
+| 2026-11-21 | [The import upload replaces its file with a new pick](2026-11-21-import-upload-replaces-file.md) | behavior |
 | 2026-11-20 | [CountryCodes and useCountryOptions list every ISO 3166-1 country: Aruba, Curaçao, Sint Maarten and 12 more territories](2026-11-20-country-codes-every-iso-3166-1-country.md) | behavior, type |
 | 2026-11-20 | [ColorInput reports a blur once focus leaves the field and its picker, and a picker opened from the keyboard shows its focus](2026-11-20-color-input-blur-on-leaving-the-field.md) | behavior, type |
 | 2026-11-20 | [The busy overlay's spinner sits on a disc of its own](2026-11-20-form-loader-overlay-spinner-disc.md) | behavior, theme |

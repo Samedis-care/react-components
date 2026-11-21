@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { Grid } from "@mui/material";
 import XLSX from "xlsx";
 import GenericDataPreview from "./GenericDataPreview";
@@ -81,13 +81,48 @@ const readRows = (file: File): Promise<Record<string, unknown>[]> =>
 			.flat(),
 	);
 
+/**
+ * The title of the dialog that reports a refused selection, by the reason the upload gives
+ * @param err The reason
+ * @returns The translation key: a selection of more than one file is refused for its count,
+ *          any other for the file
+ */
+const getRefusalTitle = (err: FileSelectorError) =>
+	err === "files.selector.too-many" || err === "files.selector.limit-reached"
+		? "backend-components.crud.import.errors.file_count"
+		: "backend-components.crud.import.errors.file_select";
+
+/**
+ * The upload of step 1 (Upload data): the props for a FileUploadGeneric that reads one .xlsx
+ * file into `state.files` and `state.data`
+ * @param props The step's props: the wizard's state and its setter
+ * @returns The upload's `handleError`, `files`, `accept`, `maxFiles` and `onChange`
+ * @remarks One file: a new pick or drop replaces the listed file (the listed file is
+ *          passed with `excludeFromLimits`, so `maxFiles` 1 refuses only a selection of
+ *          several files). The replaced file and its rows leave `state` at once, so Next
+ *          waits for the new file's rows; the new file is listed meanwhile.
+ */
 export const useImportStep1FileUploadProps = (props: ImportStep1Props) => {
 	const { state, setState } = props;
 	const [pushDialog] = useDialogContext();
 	const { t } = useCCTranslations();
+	// the picked file while it is read: listed in the upload until its rows are in state
+	const [reading, setReading] = useState<FileData[] | null>(null);
 
 	const handleChange = useCallback(
-		(files: FileData[]) => {
+		(changed: FileData[]) => {
+			// one file: a new pick is listed after the file it replaces. The listed file
+			// never counts towards maxFiles, so a pick is never refused for it.
+			const files = changed
+				.slice(-1)
+				.map((file) => ({ ...file, excludeFromLimits: true }));
+			setReading(files);
+			// the replaced or removed file and its rows go now, not when the new one is read
+			setState((prev) =>
+				prev.files.length === 0 && prev.data.length === 0
+					? prev
+					: { ...prev, files: [], data: [] },
+			);
 			void (async () => {
 				// a file that cannot be read is dropped and named in a dialog
 				const results = await Promise.allSettled(
@@ -107,6 +142,7 @@ export const useImportStep1FileUploadProps = (props: ImportStep1Props) => {
 						result.status === "fulfilled" ? result.value : [],
 					),
 				}));
+				setReading(null);
 				if (unreadable.length === 0) return;
 				void showInfoDialog(pushDialog, {
 					title: t("backend-components.crud.import.errors.file_select"),
@@ -126,9 +162,9 @@ export const useImportStep1FileUploadProps = (props: ImportStep1Props) => {
 	);
 
 	const handleError = useCallback(
-		(_: FileSelectorError, err: string) => {
+		(reason: FileSelectorError, err: string) => {
 			void showInfoDialog(pushDialog, {
-				title: t("backend-components.crud.import.errors.file_select"),
+				title: t(getRefusalTitle(reason)),
 				message: err,
 				buttons: [
 					{
@@ -143,7 +179,7 @@ export const useImportStep1FileUploadProps = (props: ImportStep1Props) => {
 
 	return {
 		handleError,
-		files: state.files,
+		files: reading ?? state.files,
 		accept: ".xlsx",
 		maxFiles: 1,
 		onChange: handleChange,
