@@ -35,6 +35,7 @@ import DataGrid, {
 } from "../../src/standalone/DataGrid/DataGrid";
 import type { IDataGridFilterBarProps } from "../../src/standalone/DataGrid/Header/FilterBar";
 import type { IDataGridExporter } from "../../src/standalone/DataGrid/Header";
+import userEvent from "@testing-library/user-event";
 
 // The header, the footer and the column settings: what the user sees around
 // the rows. MultiGrid reports the rendered rows as state.pages on every
@@ -247,7 +248,6 @@ describe("footer actions", () => {
 		// unavailable, but still focusable since ISSUE-3495-ITEM-16
 		expect(del).toHaveAttribute("aria-disabled", "true");
 	});
-
 	it("[ISSUE-3495-ITEM-24] a page load does not re-render the action bar, and a custom button still gets the rows loaded meanwhile", async () => {
 		const people: DataGridRowData[] = [
 			...ROWS,
@@ -288,6 +288,7 @@ describe("footer actions", () => {
 });
 
 const header = () => document.querySelector<HTMLElement>(".test-header")!;
+
 const footer = () => document.querySelector<HTMLElement>(".test-footer")!;
 
 describe("search", () => {
@@ -347,7 +348,6 @@ const typeSearch = (value: string) =>
 describe("column settings", () => {
 	const openSettings = () =>
 		fireEvent.click(screen.getByRole("button", { name: "Columns" }));
-
 	it("[ISSUE-3495-ITEM-2] the column search ignores case", async () => {
 		render(<Grid />);
 		await idle();
@@ -355,7 +355,6 @@ describe("column settings", () => {
 		typeSearch("Name");
 		expect(settingsRows()).toEqual(["Name"]);
 	});
-
 	it("[ISSUE-3495-ITEM-2] the column search ignores leading and trailing spaces, and case in letters with umlauts", async () => {
 		const columns: IDataGridColumnDef[] = [
 			{ field: "device", headerName: "Gerätename", type: "string" },
@@ -445,7 +444,6 @@ describe("column settings", () => {
 			"Ausgeblendete Spalten können nicht angeheftet werden",
 		);
 	});
-
 	it("[ISSUE-3495-ITEM-19] in settings mode the search box says that it searches the columns", async () => {
 		render(<Grid searchPlaceholder={"Search people"} />);
 		await idle();
@@ -457,7 +455,6 @@ describe("column settings", () => {
 		}`;
 		expect(purpose).toMatch(/column/i);
 	});
-
 	it("[ISSUE-3495-ITEM-19] the search box is named and labelled Search columns while the settings are open, and gets the grid's placeholder back when they close", async () => {
 		render(<Grid searchPlaceholder={"Search people"} />);
 		await idle();
@@ -470,7 +467,6 @@ describe("column settings", () => {
 		expect(searchBox()).toHaveAttribute("placeholder", "Search people");
 		expect(searchBox()).not.toHaveAccessibleName("Search columns");
 	});
-
 	it("[ISSUE-3495-ITEM-19] a column search without a match shows a row that says so, announced by a polite status", async () => {
 		render(<Grid />);
 		await idle();
@@ -491,7 +487,6 @@ describe("column settings", () => {
 		).toBeNull();
 		expect(status).toBeEmptyDOMElement();
 	});
-
 	it("[ISSUE-3495-ITEM-19] applies classes.settingsStatus to the status", async () => {
 		render(<Grid classes={{ settingsStatus: "my-status" }} />);
 		await idle();
@@ -500,7 +495,6 @@ describe("column settings", () => {
 			"my-status",
 		);
 	});
-
 	it("[ISSUE-3495-ITEM-19] on a phone the Search button says that it searches the columns while the settings are open", async () => {
 		stubViewport(320);
 		render(<Grid filterBar={undefined} />);
@@ -512,7 +506,6 @@ describe("column settings", () => {
 		});
 		expect(field).toHaveAttribute("placeholder", "Search columns");
 	});
-
 	it("[ISSUE-3495-ITEM-24] the closed settings panel does not re-sort its columns while the user types a search", async () => {
 		render(<Grid />);
 		await idle();
@@ -520,7 +513,6 @@ describe("column settings", () => {
 		for (const value of ["a", "ab", "abc"]) typeSearch(value);
 		expect(compare).not.toHaveBeenCalled();
 	});
-
 	it("[ISSUE-3495-ITEM-24] the closed settings panel does not re-render its table while the user types a search", async () => {
 		let reads = 0;
 		// each row of the settings table shows its column's headerName
@@ -858,5 +850,76 @@ describe("row counts", () => {
 		render(<Grid loadData={counts(12345, 1234)} classes={CLASSES} />);
 		await idle();
 		expect(screen.getByText("#1,234/12,345")).toBeVisible();
+	});
+});
+
+describe("select all", () => {
+	it("[ISSUE-3495-ITEM-6] with disableSelection the hidden select all cannot be ticked", async () => {
+		const onDelete = vi.fn();
+		render(
+			<Grid
+				disableSelection
+				enableSelectAll
+				enableDeleteAll
+				onDelete={onDelete}
+			/>,
+		);
+		await idle();
+		const all = screen.queryByRole("checkbox", { name: "All" });
+		if (all) expect(all).toBeDisabled();
+	});
+
+	it("[ISSUE-3495-ITEM-6] with prohibitMultiSelect the disabled select all looks disabled", async () => {
+		render(<Grid enableSelectAll prohibitMultiSelect />);
+		await idle();
+		const label = screen
+			.getByRole("checkbox", { name: "All" })
+			.closest("label")!;
+		expect(label).toHaveClass("Mui-disabled");
+	});
+
+	it("[ISSUE-3495-ITEM-6] with disableSelection Space cannot tick the hidden select all, so Delete does not delete everything", async () => {
+		const user = userEvent.setup();
+		const onDelete = vi.fn();
+		render(
+			<Grid
+				disableSelection
+				enableSelectAll
+				enableDeleteAll
+				onDelete={onDelete}
+			/>,
+		);
+		await idle();
+		const all = screen.getByRole("checkbox", { name: "All" });
+		all.focus();
+		expect(all).not.toHaveFocus();
+		await user.keyboard(" ");
+		expect(all).not.toBeChecked();
+		expect(probe!.state.selectAll).toBe(false);
+		const del = screen.getByRole("button", { name: "Delete" });
+		expect(del).toHaveAttribute("aria-disabled", "true");
+		fireEvent.click(del);
+		expect(onDelete).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3495-ITEM-6] the select all and its caption follow disableSelection and prohibitMultiSelect changed after mount", async () => {
+		const all = () => screen.getByRole("checkbox", { name: "All" });
+		const caption = () => all().closest("label")!;
+		const { rerender } = render(<Grid enableSelectAll disableSelection />);
+		await idle();
+		expect(all()).toBeDisabled();
+		expect(caption()).toHaveClass("Mui-disabled");
+
+		rerender(<Grid enableSelectAll />);
+		expect(all()).toBeEnabled();
+		expect(caption()).not.toHaveClass("Mui-disabled");
+
+		rerender(<Grid enableSelectAll prohibitMultiSelect />);
+		expect(all()).toBeDisabled();
+		expect(caption()).toHaveClass("Mui-disabled");
+
+		rerender(<Grid enableSelectAll />);
+		expect(all()).toBeEnabled();
+		expect(caption()).not.toHaveClass("Mui-disabled");
 	});
 });

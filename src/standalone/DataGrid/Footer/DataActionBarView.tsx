@@ -65,7 +65,8 @@ export interface DataActionBarViewProps {
 	 */
 	handleCustomButtonClick: (label: string) => void;
 	/**
-	 * Disable select all button
+	 * Hides the select all checkbox (it keeps its place). It is disabled then
+	 * too, see selectAllDisabled
 	 */
 	disableSelection: boolean;
 	/**
@@ -73,6 +74,12 @@ export interface DataActionBarViewProps {
 	 * select all selects only part of the rows matching the filter
 	 */
 	selectAllLabel: string;
+	/**
+	 * Is the select all checkbox disabled? Its caption is dimmed then, like
+	 * the captions of the disabled actions
+	 * @see DataGridSelectAll.disabled
+	 */
+	selectAllDisabled: boolean;
 }
 
 const DataActionBarView = (props: DataActionBarViewProps) => {
@@ -133,6 +140,9 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 					control={<SelectAll />}
 					labelText={props.selectAllLabel}
 					labelPlacement={"bottom"}
+					// the checkbox reads its disabled state from the select all
+					// context, so the label can't take it from its control
+					disabled={props.selectAllDisabled}
 					className={classes?.selectAllWrapper}
 					style={
 						props.disableSelection

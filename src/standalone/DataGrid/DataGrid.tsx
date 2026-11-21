@@ -460,7 +460,9 @@ export interface IDataGridColumnProps {
 	 */
 	prohibitMultiSelect?: boolean;
 	/**
-	 * Hide checkbox column
+	 * Hides the selection column: the row checkboxes and the select all
+	 * checkbox in its header. The footer's select all checkbox is hidden too
+	 * (it keeps its place) and disabled.
 	 */
 	disableSelection?: boolean;
 	/**
@@ -863,7 +865,8 @@ export interface DataGridSelectAll {
 	 */
 	busy: boolean;
 	/**
-	 * Is the select all checkbox disabled?
+	 * Is the select all checkbox disabled? It is without enableSelectAll, with
+	 * prohibitMultiSelect and with disableSelection
 	 */
 	disabled: boolean;
 	/**

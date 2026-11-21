@@ -39,6 +39,7 @@ const SelectAllProvider = (props: DataGridSelectAllProviderProps) => {
 		enableSelectAll,
 		limitSelectAll,
 		prohibitMultiSelect,
+		disableSelection,
 		loadData,
 		rowsPerPage,
 		getAdditionalFilters,
@@ -175,7 +176,10 @@ const SelectAllProvider = (props: DataGridSelectAllProviderProps) => {
 	const checked =
 		busy || (selectAll ? selectedRows.length === 0 : limitedSelected);
 	const indeterminate = !checked && selectedRows.length > 0;
-	const disabled = !enableSelectAll || !!prohibitMultiSelect;
+	// disableSelection hides the footer's checkbox: hidden, it must not be
+	// focused or ticked either
+	const disabled =
+		!enableSelectAll || !!prohibitMultiSelect || !!disableSelection;
 	const limited =
 		limitSelectAll !== undefined &&
 		(state.rowsFiltered ?? state.rowsTotal) > limitSelectAll;

@@ -28,7 +28,8 @@ const DataActionBar = () => {
 	} = useDataGridProps();
 	const { selectAll, selectedRows } = state;
 	const { onEdit, onDelete } = useDataGridProps();
-	const { label: selectAllLabel } = useDataGridSelectAll();
+	const { label: selectAllLabel, disabled: selectAllDisabled } =
+		useDataGridSelectAll();
 
 	const numSelected = selectAll
 		? (state.rowsFiltered ?? state.rowsTotal) - selectedRows.length
@@ -132,6 +133,7 @@ const DataActionBar = () => {
 				handleCustomButtonClick={handleCustomButtonCLick}
 				disableSelection={disableSelection || !enableSelectAll}
 				selectAllLabel={selectAllLabel}
+				selectAllDisabled={selectAllDisabled}
 			/>
 		</Grid>
 	);
