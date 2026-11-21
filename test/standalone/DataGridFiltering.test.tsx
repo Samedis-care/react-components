@@ -907,6 +907,42 @@ describe("GridSingleSelectFilter, GridMultiSelectFilter: default and highlight f
 		expect(screen.getByRole("checkbox", { name: "A" })).toBeChecked();
 		expect(screen.getByRole("checkbox", { name: "B" })).toBeChecked();
 	});
+	it("[ISSUE-3494-ITEM-11] a default selection that contains the empty value is not counted active", async () => {
+		/** a multi-select with a "None" option whose value is "" */
+		const NoneBar = (p: IDataGridFilterBarProps) => (
+			<GridMultiSelectFilter
+				label="Kinds"
+				options={[
+					{ value: "", label: "None" },
+					{ value: "a", label: "A" },
+				]}
+				field="kinds"
+				selected={p.customData.kinds as string[] | undefined}
+				onSelect={(v) => p.setCustomData((o) => ({ ...o, kinds: v }))}
+				dialog={p.inDialog}
+			/>
+		);
+		// the bar does not outline it
+		render(<Grid filterBar={NoneBar} defaultCustomData={{ kinds: [""] }} />);
+		await flush();
+		expect(barSelectors()[0]).not.toHaveClass(OUTLINED);
+		cleanup();
+		// the panel ticks "None", and its Filter button is not marked
+		render(
+			<Grid
+				filterBar={NoneBar}
+				enableFilterDialogWidth={500}
+				defaultCustomData={{ kinds: [""] }}
+			/>,
+		);
+		const button = await filterButton();
+		fireEvent.click(button);
+		expect(screen.getByRole("checkbox", { name: "None" })).toBeChecked();
+		expect(screen.getByRole("checkbox", { name: "A" })).not.toBeChecked();
+		fireEvent.click(screen.getByRole("button", { name: "Close" }));
+		await flush();
+		expect(button.querySelector("svg")).not.toHaveClass(ACTIVE_ICON);
+	});
 });
 
 describe("isDataGridCustomFilterActive, areDataGridCustomFiltersActive", () => {
