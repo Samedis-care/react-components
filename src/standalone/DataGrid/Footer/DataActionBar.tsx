@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import { Grid } from "@mui/material";
 import {
 	useDataGridColumnState,
@@ -13,6 +13,10 @@ import { isSelected } from "../Content/SelectRow";
 const DataActionBar = () => {
 	const [state, setState] = useDataGridState();
 	const { search, customData, rows } = state;
+	// the loaded rows, read by the custom buttons' click handler when clicked,
+	// so a page load doesn't re-create it and re-render the action bar
+	const rowsRef = useRef(rows);
+	rowsRef.current = rows;
 	const [columnState] = useDataGridColumnState();
 	const {
 		getAdditionalFilters,
@@ -98,7 +102,7 @@ const DataActionBar = () => {
 					getAdditionalFilters,
 				),
 				count: numSelected,
-				rows: Object.values(rows).filter((row) =>
+				rows: Object.values(rowsRef.current).filter((row) =>
 					isSelected(selectAll, selectedRows, row),
 				),
 			});
@@ -112,7 +116,6 @@ const DataActionBar = () => {
 			columnState,
 			getAdditionalFilters,
 			numSelected,
-			rows,
 		],
 	);
 

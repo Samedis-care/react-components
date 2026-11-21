@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useCallback } from "react";
+import React, { ChangeEvent, useCallback, useMemo } from "react";
 import {
 	DataGridContentOverlayCollapse,
 	IDataGridColumnProps,
@@ -9,9 +9,13 @@ import {
 import Dialog from "./SettingsDialog";
 
 const DataGridSettings = (props: IDataGridColumnProps) => {
+	const { columns } = props;
 	const { classes } = useDataGridProps();
 
-	const [state, setState] = useDataGridState();
+	const [
+		{ showSettings, settingsSearch, columnPinned, columnHidden },
+		setState,
+	] = useDataGridState();
 	const [, setColumnState] = useDataGridColumnState();
 
 	const closeGridSettings = useCallback(() => {
@@ -55,23 +59,31 @@ const DataGridSettings = (props: IDataGridColumnProps) => {
 		[setColumnState, setState],
 	);
 	// the column search ignores case and the spaces around the query
-	const columnQuery = state.settingsSearch.trim().toLowerCase();
+	const columnQuery = settingsSearch.trim().toLowerCase();
+	// a new list only when the columns or the column search change, so the
+	// table (memoized, it sorts the list) skips every other grid state change
+	const matchingColumns = useMemo(
+		() =>
+			columnQuery
+				? columns.filter((col) =>
+						col.headerName.toLowerCase().includes(columnQuery),
+					)
+				: columns,
+		[columns, columnQuery],
+	);
 
 	return (
 		<DataGridContentOverlayCollapse
 			className={classes?.contentOverlayCollapse}
-			in={state.showSettings}
+			in={showSettings}
 		>
 			<Dialog
-				columns={props.columns.filter(
-					(col) =>
-						!columnQuery || col.headerName.toLowerCase().includes(columnQuery),
-				)}
+				columns={matchingColumns}
 				closeGridSettings={closeGridSettings}
 				toggleColumnLock={toggleColumnLock}
 				toggleColumnVisibility={toggleColumnVisibility}
-				columnPinned={state.columnPinned}
-				columnHidden={state.columnHidden}
+				columnPinned={columnPinned}
+				columnHidden={columnHidden}
 			/>
 		</DataGridContentOverlayCollapse>
 	);

@@ -247,6 +247,44 @@ describe("footer actions", () => {
 		// unavailable, but still focusable since ISSUE-3495-ITEM-16
 		expect(del).toHaveAttribute("aria-disabled", "true");
 	});
+
+	it("[ISSUE-3495-ITEM-24] a page load does not re-render the action bar, and a custom button still gets the rows loaded meanwhile", async () => {
+		const people: DataGridRowData[] = [
+			...ROWS,
+			{ id: "3", name: "Carol", role: "user" },
+			{ id: "4", name: "Dave", role: "admin" },
+		];
+		const loadData: DataGridProps["loadData"] = ({ page, rows }) => ({
+			rowsTotal: people.length,
+			rows: people.slice((page - 1) * rows, page * rows),
+		});
+		// the action bar asks on every render
+		const isDisabled = vi.fn(() => false);
+		const onClick = vi.fn();
+		render(
+			<Grid
+				rowsPerPage={2}
+				loadData={loadData}
+				customDataActionButtons={[
+					{ icon: <Tune />, label: "Archive", isDisabled, onClick },
+				]}
+			/>,
+		);
+		await idle();
+		select(["1", "3"]);
+		isDisabled.mockClear();
+		// the user scrolls down to the second page
+		act(() => probe!.setState((p) => ({ ...p, pages: [0, 1] })));
+		await waitFor(() => expect(Object.keys(probe!.state.rows)).toHaveLength(4));
+		await idle();
+		expect(isDisabled).not.toHaveBeenCalled();
+		fireEvent.click(screen.getByRole("button", { name: "Archive" }));
+		expect(onClick).toHaveBeenCalledExactlyOnceWith(
+			false,
+			["1", "3"],
+			expect.objectContaining({ count: 2, rows: [people[0], people[2]] }),
+		);
+	});
 });
 
 const header = () => document.querySelector<HTMLElement>(".test-header")!;
@@ -472,6 +510,31 @@ describe("column settings", () => {
 			name: "Search columns",
 		});
 		expect(field).toHaveAttribute("placeholder", "Search columns");
+	});
+
+	it("[ISSUE-3495-ITEM-24] the closed settings panel does not re-sort its columns while the user types a search", async () => {
+		render(<Grid />);
+		await idle();
+		const compare = vi.spyOn(String.prototype, "localeCompare");
+		for (const value of ["a", "ab", "abc"]) typeSearch(value);
+		expect(compare).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3495-ITEM-24] the closed settings panel does not re-render its table while the user types a search", async () => {
+		let reads = 0;
+		// each row of the settings table shows its column's headerName
+		const columns: IDataGridColumnDef[] = COLUMNS.map((column) => ({
+			...column,
+			get headerName() {
+				reads++;
+				return column.headerName;
+			},
+		}));
+		render(<Grid columns={columns} />);
+		await idle();
+		reads = 0;
+		for (const value of ["a", "ab", "abc"]) typeSearch(value);
+		expect(reads).toBe(0);
 	});
 });
 
