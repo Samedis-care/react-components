@@ -1,4 +1,11 @@
-import React, { Dispatch, SetStateAction, useCallback, useState } from "react";
+import React, {
+	Dispatch,
+	SetStateAction,
+	useCallback,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from "react";
 import { Button, Grid, Step, StepLabel, Stepper, styled } from "@mui/material";
 import Step1LoadData from "./Step1LoadData";
 import Step2ConnectData from "./Step2ConnectData";
@@ -82,6 +89,11 @@ const Wrapper = styled(Grid, { name: "CcCrudImport", slot: "wrapper" })({
 	height: "100%",
 });
 
+const StepContainer = styled(Grid, { name: "CcCrudImport", slot: "step" })({
+	// takes the focus on a step change only (tabIndex -1, not a tab stop): no focus ring
+	outline: "none",
+});
+
 interface ConversionScript {
 	script?: string; // optional string version of scriptFn for eval. stored for text field
 	scriptFn: ConversionScriptFn;
@@ -127,6 +139,13 @@ export const isFieldImportable = (
 	return name !== "id" && visibilityOkay && typeOkay;
 };
 
+/**
+ * Whether the element can keep the keyboard focus: it is in the document and not disabled
+ * @param el The element
+ */
+const canHoldFocus = (el: HTMLElement): boolean =>
+	el.isConnected && !el.matches(":disabled");
+
 export const useCrudImportLogic = <M extends ModelUnknown>(
 	props: CrudImportProps<M>,
 ) => {
@@ -158,14 +177,55 @@ export const useCrudImportLogic = <M extends ModelUnknown>(
 		importDone: false,
 	});
 	const hasImportConfig = !!importConfig;
-	const next = useCallback(
-		() => setActiveStep((prev) => prev + (prev == 0 && guided ? 2 : 1)),
-		[guided],
-	);
-	const prev = useCallback(
-		() => setActiveStep((prev) => prev - (prev == 2 && guided ? 2 : 1)),
-		[guided],
-	);
+
+	// Keyboard focus on a step change. A step change can disable the Back or Next that
+	// was pressed (Back on the first step, Next until the review passed, Finish until the
+	// import is done), and a disabled button loses the focus to the page. Then the step
+	// takes the focus, and the button gets it back once it is enabled again in the same step,
+	// unless the focus has moved on.
+	const stepRef = useRef<HTMLDivElement>(null);
+	// the element that had the focus when the step was changed (the pressed Back or Next)
+	const pressedRef = useRef<HTMLElement | null>(null);
+	// the button whose focus the step took
+	const restoreRef = useRef<HTMLElement | null>(null);
+	const rememberFocus = useCallback(() => {
+		const doc = stepRef.current?.ownerDocument ?? document;
+		const active = doc.activeElement;
+		pressedRef.current =
+			active instanceof HTMLElement && active !== doc.body ? active : null;
+		restoreRef.current = null;
+	}, []);
+	// every commit: a button can be disabled after the step change (a review run again)
+	useLayoutEffect(() => {
+		const step = stepRef.current;
+		if (!step) return;
+		const active = step.ownerDocument.activeElement;
+		const pressed = pressedRef.current;
+		if (pressed && !canHoldFocus(pressed)) {
+			pressedRef.current = null;
+			// the focus is still on the button (the browser moves it later) or fell to the page
+			// or to a container around the wizard; focus the user moved elsewhere stays there
+			if (!active || active === pressed || active.contains(step)) {
+				step.focus({ preventScroll: true });
+				restoreRef.current = pressed.isConnected ? pressed : null;
+			}
+			return;
+		}
+		const restore = restoreRef.current;
+		if (restore && canHoldFocus(restore)) {
+			restoreRef.current = null;
+			if (active === step) restore.focus();
+		}
+	});
+
+	const next = useCallback(() => {
+		rememberFocus();
+		setActiveStep((prev) => prev + (prev == 0 && guided ? 2 : 1));
+	}, [guided, rememberFocus]);
+	const prev = useCallback(() => {
+		rememberFocus();
+		setActiveStep((prev) => prev - (prev == 2 && guided ? 2 : 1));
+	}, [guided, rememberFocus]);
 	const finish = useCallback(() => {
 		crudCtx.showOverview(true);
 	}, [crudCtx]);
@@ -179,6 +239,16 @@ export const useCrudImportLogic = <M extends ModelUnknown>(
 		next,
 		prev,
 		finish,
+		/**
+		 * For the element that holds the current step, which takes the keyboard focus when a
+		 * step change disables the focused Back or Next (Back on the first step, Next until the
+		 * review passed, Finish until the import is done). Give it `tabIndex={-1}`,
+		 * `role="group"` and the step's label as `aria-label`, so screen readers announce the
+		 * step. Once that Next or Finish is enabled again, and the focus is still on the step,
+		 * it gets the focus back. A focused button that stays enabled keeps the focus.
+		 * Without the ref, focus is left to the browser.
+		 */
+		stepRef,
 	};
 };
 
@@ -195,6 +265,7 @@ const CrudImport = <M extends ModelUnknown>(props: CrudImportProps<M>) => {
 		next,
 		prev,
 		finish,
+		stepRef,
 	} = useCrudImportLogic(props);
 
 	return (
@@ -221,7 +292,13 @@ const CrudImport = <M extends ModelUnknown>(props: CrudImportProps<M>) => {
 					)}
 				</Stepper>
 			</Grid>
-			<Grid size="grow">
+			<StepContainer
+				size="grow"
+				ref={stepRef}
+				tabIndex={-1}
+				role="group"
+				aria-label={t(IMPORT_STEPS[activeStep])}
+			>
 				{activeStep === 0 && (
 					<Step1LoadData
 						model={model}
@@ -267,7 +344,7 @@ const CrudImport = <M extends ModelUnknown>(props: CrudImportProps<M>) => {
 						setState={setState}
 					/>
 				)}
-			</Grid>
+			</StepContainer>
 			<Grid>
 				<Grid container spacing={2}>
 					{activeStep !== 3 && (
