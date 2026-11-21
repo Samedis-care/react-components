@@ -10,7 +10,13 @@ interface TextFieldPropsWithBlur {
 	onBlur?: FocusHandler;
 	slotProps?: {
 		input?: {
-			slotProps?: { root?: { onBlur?: FocusHandler; onFocus?: FocusHandler } };
+			slotProps?: {
+				root?: {
+					ref?: React.Ref<HTMLDivElement>;
+					onBlur?: FocusHandler;
+					onFocus?: FocusHandler;
+				};
+			};
 		};
 	};
 }
@@ -56,34 +62,40 @@ const popupBlurEvent = (
 });
 
 /**
- * Follows focus inside a picker's open desktop popup, see
+ * Follows focus in a picker's open desktop popup, see
  * {@link createPopupFocusWatch}
  */
 interface PopupFocusWatch {
 	/**
-	 * Starts following focus, which has just moved from the field into the popup
-	 * @param field The field's input root
-	 * @param popup The root of the open popup
-	 * @param entered The element of the popup that got focus
+	 * Listens to focus in a document
+	 * @param doc The document the field is in
+	 * @returns Stops listening, and following, without a report
 	 */
-	start: (field: HTMLDivElement, popup: Element, entered: Element) => void;
-	/** Stops following focus, without a report */
-	stop: () => void;
+	listen: (doc: Document) => () => void;
 }
 
 /**
- * Follows focus once it has moved from a picker's field into its open desktop
- * popup, and reports when it arrives somewhere outside both.
+ * Follows focus once it has entered a picker's open desktop popup, and reports
+ * when it arrives somewhere outside the field and the popup.
  *
- * Focus that moves inside the popup keeps it following, and so does focus that
- * goes to no element (the window losing focus): the next element to get focus
- * decides. Focus that comes back to the field (the popup hands it back when it
- * closes) ends it without a report, the field's own blur taking over.
+ * It follows focus that enters the popup from anywhere: from the field, and
+ * from outside it, as when a controlled `open` opens the popup while focus is
+ * elsewhere. A picker popup that gets focus while the picker's own popup is
+ * open is taken to be that popup. Focus that moves inside the popup keeps it
+ * following, and so does focus that goes to no element (the window losing
+ * focus): the next element to get focus decides. Focus that comes back to the
+ * field (the popup hands it back when it closes) ends it without a report, the
+ * field's own blur taking over.
+ * @param getOpenField Returns the field's input root while the picker's
+ * desktop popup is open, `null` otherwise
  * @param onLeave Called once focus arrives outside the field and the popup,
  * with the blur event to report
- * @returns The watch, following nothing yet
+ * @returns The watch, listening to nothing yet
  */
-const createPopupFocusWatch = (onLeave: FocusHandler): PopupFocusWatch => {
+const createPopupFocusWatch = (
+	getOpenField: () => HTMLDivElement | null,
+	onLeave: FocusHandler,
+): PopupFocusWatch => {
 	let watched: {
 		field: HTMLDivElement;
 		popup: Element;
@@ -91,37 +103,65 @@ const createPopupFocusWatch = (onLeave: FocusHandler): PopupFocusWatch => {
 	} | null = null;
 
 	const handleFocusIn = (event: FocusEvent) => {
-		if (!watched) return;
-		const { field, popup, lastFocused } = watched;
 		const next = event.target;
+		if (!watched) {
+			if (!(next instanceof Element)) return;
+			const popup = next.closest(POPPER_ROOT_SELECTOR);
+			const field = popup && getOpenField();
+			if (popup && field) watched = { field, popup, lastFocused: next };
+			return;
+		}
+		const { field, popup, lastFocused } = watched;
 		if (next instanceof Element && popup.contains(next)) {
 			watched.lastFocused = next;
 			return;
 		}
-		stop();
+		watched = null;
 		if (next instanceof Node && field.contains(next)) return;
 		onLeave(popupBlurEvent(field, lastFocused, event));
 	};
 
-	const stop = () => {
-		if (!watched) return;
-		watched.field.ownerDocument.removeEventListener(
-			"focusin",
-			handleFocusIn,
-			true,
-		);
-		watched = null;
-	};
-
 	return {
-		start: (field, popup, entered) => {
-			stop();
-			watched = { field, popup, lastFocused: entered };
-			field.ownerDocument.addEventListener("focusin", handleFocusIn, true);
+		listen: (doc) => {
+			doc.addEventListener("focusin", handleFocusIn, true);
+			return () => {
+				doc.removeEventListener("focusin", handleFocusIn, true);
+				watched = null;
+			};
 		},
-		stop,
 	};
 };
+
+/**
+ * A callback ref that hands the element to the field's own ref and to a ref
+ * the caller set, each as React would hand it to that ref alone: a cleanup
+ * the caller's callback returns runs on detach, otherwise the callback gets
+ * `null`.
+ * @param fieldRef The field's own ref
+ * @param callerRef The caller's ref
+ * @returns The ref to set on the element
+ */
+const forkFieldRef =
+	(
+		fieldRef: React.RefObject<HTMLDivElement | null>,
+		callerRef: NonNullable<React.Ref<HTMLDivElement>>,
+	): React.RefCallback<HTMLDivElement> =>
+	(element) => {
+		fieldRef.current = element;
+		if (typeof callerRef !== "function") {
+			callerRef.current = element;
+			return () => {
+				fieldRef.current = null;
+				callerRef.current = null;
+			};
+		}
+		const cleanup = callerRef(element);
+		return () => {
+			fieldRef.current = null;
+			if (typeof cleanup === "function") cleanup();
+			else callerRef(null);
+		};
+	};
 
 /**
  * What {@link WithFieldBlur} needs besides the slot props
@@ -146,7 +186,8 @@ export interface FieldBlurOptions {
  * @param textFieldProps The props for MUI's `textField` slot
  * @param options The field's name, and a focus callback
  * @returns The same props, with `onBlur` moved to the input root, the name as
- * the input root's `data-name`, and `onFieldFocus` called from the input root
+ * the input root's `data-name`, `onFieldFocus` called from the input root, and
+ * a ref on the input root
  */
 export type WithFieldBlur = <P extends object>(
 	ownerState: PickerOwnerState,
@@ -170,6 +211,9 @@ export type WithFieldBlur = <P extends object>(
  * open desktop popup for another element (a click on another control while the
  * calendar is open) calls `onBlur` too, once that element gets focus; focus
  * that goes to no element meanwhile (the window losing focus) is not leaving.
+ * That holds however the popup was opened: a controlled `open` that opens it
+ * while focus is outside the field, too. When such a popup closes, it hands
+ * focus back to the element that had it, which is leaving as well.
  * The mobile dialog is modal, so focus only leaves it by closing it.
  *
  * The handler receives the root's focus event: `currentTarget` is the input
@@ -183,7 +227,7 @@ export type WithFieldBlur = <P extends object>(
  * that had focus, `relatedTarget` the element that got it. The `onBlur` of the
  * latest render is called. A blur handler the caller set on the input root
  * (`slotProps.input.slotProps.root.onBlur`) is kept and still sees every blur
- * of the root.
+ * of the root, and so is a ref the caller set there.
  *
  * `options.onFieldFocus`, if given, is called from the input root's focus, whenever
  * focus enters the field or moves within it; a focus handler the caller set on
@@ -194,10 +238,24 @@ export type WithFieldBlur = <P extends object>(
 const useFieldBlur = (): WithFieldBlur => {
 	// focus that leaves from the popup is reported later, to the latest onBlur
 	const onBlurRef = useRef<FocusHandler | undefined>(undefined);
+	// the field's input root, and whether its desktop popup is open, as of the
+	// latest render
+	const fieldRef = useRef<HTMLDivElement | null>(null);
+	const popupOpenRef = useRef(false);
 	const [popupWatch] = useState(() =>
-		createPopupFocusWatch((event) => onBlurRef.current?.(event)),
+		createPopupFocusWatch(
+			() => (popupOpenRef.current ? fieldRef.current : null),
+			(event) => onBlurRef.current?.(event),
+		),
 	);
-	useEffect(() => popupWatch.stop, [popupWatch]);
+	useEffect(
+		() => popupWatch.listen(fieldRef.current?.ownerDocument ?? document),
+		[popupWatch],
+	);
+	// one ref per ref the caller set on the input root, so it stays the same
+	const [forkedFieldRefs] = useState(
+		() => new WeakMap<object, React.RefCallback<HTMLDivElement>>(),
+	);
 
 	return useCallback(
 		<P extends object>(
@@ -212,10 +270,19 @@ const useFieldBlur = (): WithFieldBlur => {
 				name = options.name,
 			} = textFieldProps as TextFieldPropsWithBlur;
 			onBlurRef.current = onBlur;
+			popupOpenRef.current =
+				ownerState.isPickerOpen && ownerState.pickerVariant !== "mobile";
 			if (!onBlur && !onFieldFocus && !name) return textFieldProps;
 			const slotProps = slotPropsProp ?? {};
 			const input = slotProps.input ?? {};
 			const root = input.slotProps?.root;
+			const callerRef = root?.ref;
+			let rootRef: React.Ref<HTMLDivElement> = fieldRef;
+			if (callerRef) {
+				rootRef =
+					forkedFieldRefs.get(callerRef) ?? forkFieldRef(fieldRef, callerRef);
+				forkedFieldRefs.set(callerRef, rootRef);
+			}
 
 			const handleRootBlur = (event: React.FocusEvent<HTMLDivElement>) => {
 				root?.onBlur?.(event);
@@ -227,11 +294,9 @@ const useFieldBlur = (): WithFieldBlur => {
 					// the mobile dialog is modal: while it is open, focus can only go
 					// into it, and it hands focus back to the field when it closes
 					if (ownerState.pickerVariant === "mobile") return;
-					const popup = next?.closest(POPPER_ROOT_SELECTOR);
-					if (next && popup) {
-						popupWatch.start(field, popup, next);
-						return;
-					}
+					// focus that goes into the open popup is followed from there, see
+					// createPopupFocusWatch
+					if (next?.closest(POPPER_ROOT_SELECTOR)) return;
 				}
 				onBlur(event);
 			};
@@ -249,6 +314,8 @@ const useFieldBlur = (): WithFieldBlur => {
 								// names the field in the blur event, see useFieldBlur
 								"data-name": name,
 								...root,
+								// the field the popup's focus watch reports for
+								ref: rootRef,
 								onBlur: handleRootBlur,
 								...(onFieldFocus && {
 									onFocus: (event: React.FocusEvent<HTMLDivElement>) => {
@@ -262,7 +329,7 @@ const useFieldBlur = (): WithFieldBlur => {
 				},
 			};
 		},
-		[popupWatch],
+		[forkedFieldRefs],
 	);
 };
 

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import React from "react";
+import React, { useState } from "react";
 import {
 	act,
 	cleanup,
@@ -215,3 +215,218 @@ describe.each([
 		);
 	});
 });
+
+describe.each(PICKERS)(
+	"%s, leaving a calendar opened from outside the field",
+	(_name, Picker) => {
+		/** A picker whose calendar a button outside the field opens */
+		const Field = (props: {
+			onBlur?: BlurHandler;
+			label?: string;
+			initiallyOpen?: boolean;
+		}) => {
+			const [open, setOpen] = useState(props.initiallyOpen ?? false);
+			return (
+				<>
+					<button type="button" onClick={() => setOpen(true)}>
+						pick {props.label ?? "Due"}
+					</button>
+					<Picker
+						label={props.label ?? "Due"}
+						value={moment("2026-08-01T10:00")}
+						onChange={vi.fn()}
+						open={open}
+						onOpen={() => setOpen(true)}
+						onClose={() => setOpen(false)}
+						slotProps={{ textField: { onBlur: props.onBlur } }}
+					/>
+				</>
+			);
+		};
+		const Page = (props: { children: React.ReactNode }) => (
+			<ThemeProvider theme={theme}>
+				<LocalizationProvider dateAdapter={AdapterMoment}>
+					{props.children}
+					<button type="button">outside</button>
+				</LocalizationProvider>
+			</ThemeProvider>
+		);
+		const pickButton = (label = "Due") =>
+			screen.getByRole("button", { name: `pick ${label}` });
+
+		/** Opens the calendar from the button outside the field, as a mouse does */
+		const openFromOutside = async (label = "Due") => {
+			focus(pickButton(label));
+			act(() => {
+				fireEvent.click(pickButton(label));
+			});
+			const popup = await screen.findByRole("dialog");
+			await waitFor(() => {
+				expect(popup).toContainElement(document.activeElement as HTMLElement);
+			});
+			return popup;
+		};
+
+		it("[ISSUE-3474-ITEM-33] calls onBlur once when focus goes from the calendar to another control, with the event of the field group", async () => {
+			const { seen, onBlur } = recordBlurs();
+			render(
+				<Page>
+					<Field onBlur={onBlur} />
+				</Page>,
+			);
+			await openFromOutside();
+			const lostFocus = document.activeElement;
+
+			focus(outside());
+
+			expect(seen).toEqual([
+				{
+					currentTarget: screen.getByRole("group", { name: "Due" }),
+					target: lostFocus,
+					relatedTarget: outside(),
+				},
+			]);
+		});
+
+		it("[ISSUE-3474-ITEM-33] calls onBlur once when the closing calendar hands focus back to the control that opened it", async () => {
+			const { seen, onBlur } = recordBlurs();
+			render(
+				<Page>
+					<Field onBlur={onBlur} />
+				</Page>,
+			);
+			await openFromOutside();
+			const lostFocus = document.activeElement;
+
+			act(() => {
+				fireEvent.keyDown(document.activeElement as HTMLElement, {
+					key: "Escape",
+				});
+			});
+			await waitFor(() => {
+				expect(pickButton()).toHaveFocus();
+			});
+
+			expect(seen).toEqual([
+				{
+					currentTarget: screen.getByRole("group", { name: "Due" }),
+					target: lostFocus,
+					relatedTarget: pickButton(),
+				},
+			]);
+		});
+
+		it("[ISSUE-3474-ITEM-33] calls onBlur once when focus leaves a calendar that is open from the start", async () => {
+			const { onBlur } = recordBlurs();
+			render(
+				<Page>
+					<Field onBlur={onBlur} initiallyOpen />
+				</Page>,
+			);
+			const popup = await screen.findByRole("dialog");
+			await waitFor(() => {
+				expect(popup).toContainElement(document.activeElement as HTMLElement);
+			});
+
+			focus(outside());
+
+			expect(onBlur).toHaveBeenCalledTimes(1);
+		});
+
+		it("[ISSUE-3474-ITEM-33] reports no blur while focus moves from the calendar into the field, and one when it leaves the field", async () => {
+			const { onBlur } = recordBlurs();
+			render(
+				<Page>
+					<Field onBlur={onBlur} />
+				</Page>,
+			);
+			await openFromOutside();
+			focus(openButton());
+			const blursInField = onBlur.mock.calls.length;
+
+			focus(outside());
+
+			expect({ blursInField, blursInAll: onBlur.mock.calls.length }).toEqual({
+				blursInField: 0,
+				blursInAll: 1,
+			});
+		});
+
+		it("[ISSUE-3474-ITEM-33] reports nothing to a closed picker when focus leaves another picker's calendar", async () => {
+			const first = vi.fn<BlurHandler>();
+			const second = vi.fn<BlurHandler>();
+			render(
+				<Page>
+					<Field label="Start" onBlur={first} />
+					<Field label="End" onBlur={second} />
+				</Page>,
+			);
+			await openFromOutside("End");
+
+			focus(outside());
+
+			expect({
+				first: first.mock.calls.length,
+				second: second.mock.calls.length,
+			}).toEqual({ first: 0, second: 1 });
+		});
+	},
+);
+
+describe.each(PICKERS)(
+	"%s, a ref on the field's input root",
+	(_name, Picker) => {
+		const Field = (props: { rootRef: React.Ref<HTMLDivElement> }) => (
+			<ThemeProvider theme={theme}>
+				<LocalizationProvider dateAdapter={AdapterMoment}>
+					<Picker
+						label="Due"
+						value={moment("2026-08-01T10:00")}
+						onChange={vi.fn()}
+						slotProps={{
+							textField: {
+								onBlur: vi.fn(),
+								slotProps: {
+									input: { slotProps: { root: { ref: props.rootRef } } },
+								},
+							},
+						}}
+					/>
+				</LocalizationProvider>
+			</ThemeProvider>
+		);
+
+		it("[ISSUE-3474-ITEM-33] keeps an object ref the caller set on the input root", () => {
+			const rootRef = React.createRef<HTMLDivElement>();
+			render(<Field rootRef={rootRef} />);
+
+			expect(rootRef.current).toBe(screen.getByRole("group", { name: "Due" }));
+		});
+
+		it("[ISSUE-3474-ITEM-33] keeps a callback ref the caller set on the input root: attached once across renders, detached on unmount", () => {
+			const rootRef = vi.fn<(element: HTMLDivElement | null) => void>();
+			const { rerender, unmount } = render(<Field rootRef={rootRef} />);
+			const group = screen.getByRole("group", { name: "Due" });
+			rerender(<Field rootRef={rootRef} />);
+			unmount();
+
+			expect(rootRef.mock.calls).toEqual([[group], [null]]);
+		});
+
+		it("[ISSUE-3474-ITEM-33] runs the cleanup a callback ref the caller set on the input root returns", () => {
+			const cleanup = vi.fn();
+			const rootRef = vi.fn((element: HTMLDivElement | null) => {
+				void element;
+				return cleanup;
+			});
+			const { unmount } = render(<Field rootRef={rootRef} />);
+			const group = screen.getByRole("group", { name: "Due" });
+			unmount();
+
+			expect({
+				refCalls: rootRef.mock.calls,
+				cleanups: cleanup.mock.calls.length,
+			}).toEqual({ refCalls: [[group]], cleanups: 1 });
+		});
+	},
+);

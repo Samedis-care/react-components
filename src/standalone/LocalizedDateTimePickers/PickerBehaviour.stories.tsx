@@ -6,7 +6,7 @@ import i18next from "i18next";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import moment, { type Moment } from "moment";
-import { TextField } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 import LocalizedKeyboardDatePicker from "./LocalizedKeyboardDatePicker";
 
 /**
@@ -295,6 +295,66 @@ export const Issue3474Item31ClickAnotherControlWhileOpen: StoryObj<LeaveArgs> =
 		),
 		play: async ({ args, canvas, userEvent }) => {
 			await openCalendar(canvas, userEvent);
+			// the calendar is part of the field
+			await expect(args.onBlur).not.toHaveBeenCalled();
+
+			const other = canvas.getByRole("textbox", { name: "Other" });
+			await userEvent.click(other);
+
+			await expect(other).toHaveFocus();
+			await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+			await expect(args.onBlur).toHaveBeenCalledTimes(1);
+		},
+	};
+
+/** A picker whose calendar a button outside the field opens, by `open` */
+const OpenedFromOutside = (props: LeaveArgs) => {
+	const [value, setValue] = useState<Moment | null>(() =>
+		props.initialValue ? moment(props.initialValue) : null,
+	);
+	const [open, setOpen] = useState(false);
+	const handleOpen = () => setOpen(true);
+	const handleClose = () => setOpen(false);
+	return (
+		<LocalizationProvider dateAdapter={AdapterMoment}>
+			<Button onClick={handleOpen}>Pick a date</Button>
+			<LocalizedKeyboardDatePicker
+				label="Date"
+				value={value}
+				onChange={(newValue) => {
+					setValue(newValue);
+					props.onChange(newValue);
+				}}
+				onBlur={props.onBlur}
+				open={open}
+				onOpen={handleOpen}
+				onClose={handleClose}
+			/>
+		</LocalizationProvider>
+	);
+};
+
+export const Issue3474Item33LeaveCalendarOpenedFromOutside: StoryObj<LeaveArgs> =
+	{
+		name: "Leaving a calendar a button outside the field opened leaves the field",
+		args: { onChange: fn(), onBlur: fn(), initialValue: "2026-08-01" },
+		parameters: { a11y: { test: "error" } },
+		render: (args) => (
+			<>
+				<OpenedFromOutside {...args} />
+				<TextField label="Other" />
+			</>
+		),
+		play: async ({ args, canvas, userEvent }) => {
+			await userEvent.click(
+				canvas.getByRole("button", { name: "Pick a date" }),
+			);
+			const calendar = await screen.findByRole("dialog");
+			await waitFor(() =>
+				expect(calendar).toContainElement(
+					document.activeElement as HTMLElement,
+				),
+			);
 			// the calendar is part of the field
 			await expect(args.onBlur).not.toHaveBeenCalled();
 
