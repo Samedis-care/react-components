@@ -19,7 +19,7 @@ the type.
 ## Why
 
 Components-Care ships languages an app may not have translations for: it has ru, fr, de,
-it, es, uz, en and nl, samedis.care and identity management have fr, ru, de, en and nl.
+it, es, uz, en and nl, while an app may have only some of them.
 Picking such a language switched only the Components-Care widgets, while the app's own
 texts fell back to English. The app's language detector then stored `en` in
 `localStorage.i18nextLng`, which both i18next instances read, so after a reload everything
@@ -28,8 +28,7 @@ was English again and the pick was lost. Only the app knows which languages it c
 ## Migration
 
 Required for every `LocaleSelectorDialog` and `showLocaleSelectorDialog` call without
-`supportedLocales`; in identity-management-frontend that is
-`src/pages/Account/components/AccountHeader.tsx` (`pushDialog(<LocaleSelectorDialog />)`).
+`supportedLocales` (e.g. `pushDialog(<LocaleSelectorDialog />)`).
 Pass the languages the app has translations for, e.g. its `supported-languages.json`:
 
 ```tsx
@@ -39,6 +38,3 @@ pushDialog(<LocaleSelectorDialog supportedLocales={supportedLanguages} />);
 ```
 
 Without it the call no longer compiles, and a dialog rendered anyway offers no language.
-
-Nothing to do for samedis-ui: `ProfileMenu.tsx` and `LandingPageShell.tsx` pass its
-`supported-languages.json`.
