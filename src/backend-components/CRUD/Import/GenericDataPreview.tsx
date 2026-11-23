@@ -45,7 +45,7 @@ const GenericDataPreview = (props: GenericDataPreviewProps) => {
 	// its query or forceRefreshToken changes: count the data and models the preview got
 	const [source, setSource] = useState({ data, model, version: 0 });
 	if (source.data !== data || source.model !== model) {
-		setSource({ data, model, version: source.version + 1 });
+		setSource((prev) => ({ data, model, version: prev.version + 1 }));
 	}
 
 	const columns: string[] = useMemo(
