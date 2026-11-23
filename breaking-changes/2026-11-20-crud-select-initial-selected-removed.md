@@ -28,3 +28,18 @@ switch), so a remount shows them again.
 - **Required for code that passes `initialSelected`:** remove the prop. The control lists
   the rows the connector's `index` returns; an entry that should be selected has to be a
   row there, picked by the user or created by the backend, not passed in.
+- **Code that used `initialSelected` to add records automatically:** call `addToSelection`
+  on the control's ref (`CrudSelectDispatch`) instead, at the moment the records should be
+  added. It creates each record through the connector, as a pick does, and resolves once the
+  entry is selected:
+
+  ```tsx
+  import { CrudSelectDispatch } from "components-care/dist/backend-components/Selector/useCrudSelect";
+
+  const selectRef = useRef<CrudSelectDispatch<MyData>>(null);
+  const addDefaults = useCallback(async () => {
+  	for (const entry of defaults) await selectRef.current?.addToSelection(entry);
+  }, [defaults]);
+
+  <CrudMultiSelect ref={selectRef} … />
+  ```
