@@ -22,8 +22,5 @@ RoutedMenu.
 
 ## Migration
 
-Nothing to do for SCF, IMF and hlth.care: none of them sets `forceExpand` in a routed menu
-definition.
-
 An app that sets `forceExpand: true` on a routed group now sees that group expanded on every
 page. Remove the flag to keep the old behavior.
