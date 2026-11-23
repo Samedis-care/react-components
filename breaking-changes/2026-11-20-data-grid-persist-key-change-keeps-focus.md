@@ -34,6 +34,6 @@ after a key change (WCAG 2.4.3).
 
 ## Migration
 
-Nothing to do. samedis.care and IMF do not change the keys of a mounted provider. An app that moved
+Nothing to do for an app that does not change the keys of a mounted provider. An app that moved
 focus back into the grid itself after changing the keys can drop that. Expect the Loader's focus
 ring in screenshots taken while the buckets of new keys load after keyboard use.
