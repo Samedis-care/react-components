@@ -28,5 +28,5 @@ const data = useMemo(() => rows.map(toPreviewRow), [rows]);
 return <GenericDataPreview data={data} />;
 ```
 
-SCF's `ImportSteps/Step1` passes `state.data`, which changes only when a file is loaded:
-nothing to do there.
+A caller that passes data kept in state, which changes only when a file is loaded, has
+nothing to do.
