@@ -34,5 +34,4 @@ or its siblings, and the space around it is the layout's.
   can drop that override; it still applies when kept.
 - Expect the change in screenshots: open boxes have a 12px shorter header, content below an
   open box between siblings moves up by 16px, and corners are rounded where they were
-  square. In identity-management-frontend every InfoBox is open, so all of their headers
-  get shorter.
+  square. In an app whose InfoBoxes are all open, every header gets shorter.
