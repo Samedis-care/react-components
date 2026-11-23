@@ -269,7 +269,7 @@ describe("CrudMultiSelectWithGroups with a LazyConnector", () => {
 		{ id: "j2", source_id: "2" },
 	];
 
-	/** renders the control on a LazyConnector over the rows, as SCF's wrapper does */
+	/** renders the control on a LazyConnector over the rows, as an app's wrapper does */
 	const mountLazy = async (
 		rows: Rows,
 		extra: Partial<Pick<Props, "showDirtyState" | "getGroupDataEntries">> = {},

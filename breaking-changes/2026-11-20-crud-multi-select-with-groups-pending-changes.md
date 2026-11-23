@@ -9,8 +9,8 @@
 
 ## What changed
 
-A `CrudMultiSelectWithGroups` given a `LazyConnector` (as SCF's
-`SamedisCrudMultiSelectWithGroups` builds it with `useLazyCrudConnector`) queues its picks and
+A `CrudMultiSelectWithGroups` given a `LazyConnector` (e.g. one built with
+`useLazyCrudConnector`) queues its picks and
 removals until the form saves. It now shows them, as `FormCrudMultiSelect` does:
 
 - A queued pick's chip is marked **Added** (an outlined chip after its label).
