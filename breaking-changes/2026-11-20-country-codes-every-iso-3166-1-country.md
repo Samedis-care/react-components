@@ -31,13 +31,6 @@ codes refuse it. It keeps its flag and name for the language dialog.
 Nothing to do in code. Expect the 15 territories in every country select built from
 `CountryCodes` or `useCountryOptions()`:
 
-- samedis-ui: the country selects of `COUNTRY_OPTIONS` (contact, tenant, tenant billing, the
-  billing address fields, quote request) offer them, `validateBillingContact` accepts them, and
-  the device models' `available_in_countries` (`RegionSelector`, `getCountries`) lists them under
-  their regions (Aruba, Curaçao and Sint Maarten under the Caribbean, Åland under Northern
-  Europe, …). The samedis backend accepts all 249 codes for these fields.
-- A `Record<CountryCode, …>` that lists every code needs entries for `BV` and `HM` (neither app
-  has one).
-
-identity-management-frontend uses neither `CountryCodes` nor `useCountryOptions`: nothing to do
-there.
+- Country selects, validators and region lists built on them offer and accept them; a backend
+  that validates these fields must accept all 249 codes.
+- A `Record<CountryCode, …>` that lists every code needs entries for `BV` and `HM`.
