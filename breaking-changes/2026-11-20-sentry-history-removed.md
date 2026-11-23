@@ -17,8 +17,6 @@ shape of Sentry's old react-router instrumentation, which Sentry 11 no longer ha
 
 ## Migration
 
-Nothing to do for SCF, IMF and the hlth.care frontend: none of them imports it.
-
 - **Required for code that passes `new SentryHistory()` to a Sentry routing
   instrumentation:** remove it and add `componentsCareBrowserTracingIntegration()` from
   `components-care/dist/sentry` to `Sentry.init({ integrations })`, which names the
