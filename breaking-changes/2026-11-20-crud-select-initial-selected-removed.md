@@ -25,8 +25,6 @@ switch), so a remount shows them again.
 
 ## Migration
 
-Nothing to do for SCF, IMF and hlth.care: none of them passes `initialSelected`.
-
 - **Required for code that passes `initialSelected`:** remove the prop. The control lists
   the rows the connector's `index` returns; an entry that should be selected has to be a
   row there, picked by the user or created by the backend, not passed in.
