@@ -615,15 +615,17 @@ export const Issue3476Item13LockedLeafCheckboxDisabled: Story = {
 		a11y: { test: "error" },
 	},
 	play: async ({ canvas, userEvent }) => {
-		const pump = await canvas.findByRole(
+		// the virtualized list draws the rows that fit its first size estimate and
+		// the rest once it has measured itself, so wait for the last row
+		const monitor = await canvas.findByRole(
 			"checkbox",
-			{ name: "Infusion pump" },
+			{ name: "Monitor (locked)" },
 			{ timeout: 5000 },
 		);
+		const pump = canvas.getByRole("checkbox", { name: "Infusion pump" });
 		const defibrillator = canvas.getByRole("checkbox", {
 			name: "Defibrillator (locked)",
 		});
-		const monitor = canvas.getByRole("checkbox", { name: "Monitor (locked)" });
 		const ventilator = canvas.getByRole("checkbox", { name: "Ventilator" });
 		await expect(defibrillator).toBeDisabled();
 		await expect(defibrillator).toBeChecked();
