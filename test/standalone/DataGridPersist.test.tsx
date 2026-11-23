@@ -1207,7 +1207,7 @@ describe("custom data on the next visit", () => {
 			</LocalStoragePersist>
 		);
 	}
-	/** the filters go to a "server", as in samedis.care */
+	/** the filters go to a "server", as in an app that filters on its backend */
 	function underStorageManager(child: React.ReactElement) {
 		return (
 			<StorageManagerPersist storageKeys={{ model: "m" }}>
