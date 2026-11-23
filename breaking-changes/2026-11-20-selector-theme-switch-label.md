@@ -14,8 +14,6 @@ and a `variants` entry can still match `{ displaySwitch: true }`.
 
 Nothing changes at runtime or visually.
 
-Neither samedis-ui nor identity-management-frontend sets these switch props in a theme.
-
 ## Why
 
 `switchLabel` is the switch's visible text and its only accessible name. A theme default that

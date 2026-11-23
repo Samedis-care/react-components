@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createTheme, Theme, ThemeProvider } from "@mui/material";
-import type {  } from "../src/theme-def";
+import type {} from "../src/theme-def";
 import { createElement } from "react";
 import { render, screen } from "@testing-library/react";
 import {
