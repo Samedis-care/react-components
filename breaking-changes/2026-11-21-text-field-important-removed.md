@@ -26,8 +26,6 @@ required state on the input, where assistive technology reports it.
 
 ## Migration
 
-Nothing to do for samedis.care and identity-management, which never pass `important`.
-
 Required for any app that passes `important`: remove it, or replace it with `required`
 where the field must be filled. Without this the TypeScript build fails; an untyped caller
 that keeps passing it gets no red placeholder anymore.
