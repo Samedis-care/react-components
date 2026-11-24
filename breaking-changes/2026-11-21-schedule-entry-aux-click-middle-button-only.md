@@ -20,10 +20,9 @@ next to the browser's context menu.
 
 ## Migration
 
-Nothing to do for SCF: the dashboard schedule (`Home/components/Schedule.tsx`) passes the
-link opener from `useLinkOpener` to `onClick` and `onAuxClick`, and that opener already
-ignores right, back and forward clicks, so a middle click still opens the entry in a new
-tab. IMF does not render a schedule.
+Nothing to do for an app that passes the link opener from `useLinkOpener` to `onClick` and
+`onAuxClick`: that opener already ignores right, back and forward clicks, so a middle click
+still opens the entry in a new tab.
 
 An `onAuxClick` that relied on the right, back or forward button no longer sees them; an
 entry offers no other handler for these buttons.
