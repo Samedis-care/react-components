@@ -663,7 +663,7 @@ export const Issue3497Item19OpenInNewStaysInDialog: StoryObj<OpenInNewArgs> = {
 		docs: {
 			description: {
 				story:
-					"ISSUE-3497-ITEM-19: a FullFormDialog with a long title and `openInNewLink` at 320px. The open-in-new icon follows the title inside the heading, so a long title must not push it out of the dialog.",
+					"ISSUE-3497-ITEM-19: a FullFormDialog with a long title and `openInNewLink` at 320px. The title wraps, and the open-in-new button beside the close button stays inside the dialog.",
 			},
 		},
 	},
@@ -679,15 +679,16 @@ export const Issue3497Item19OpenInNewStaysInDialog: StoryObj<OpenInNewArgs> = {
 	play: async () => {
 		const dialog = await page().findByRole("dialog", { name: LONG_TITLE });
 		await waitFor(() => expect(dialog).toBeVisible());
-		const heading = within(dialog).getByRole("heading", { name: LONG_TITLE });
-		const icon = within(heading).getByTestId("OpenInNewIcon");
-		const headingBox = heading.getBoundingClientRect();
-		const iconBox = icon.getBoundingClientRect();
-		// inside the heading box, which the paper holds
+		const button = within(dialog).getByRole("button", {
+			name: "Open in new tab",
+		});
+		const dialogBox = dialog.getBoundingClientRect();
+		const buttonBox = button.getBoundingClientRect();
+		// inside the paper
 		await expect({
-			left: iconBox.left >= headingBox.left,
-			right: iconBox.right <= headingBox.right,
-			bottom: iconBox.bottom <= headingBox.bottom,
+			left: buttonBox.left >= dialogBox.left,
+			right: buttonBox.right <= dialogBox.right,
+			bottom: buttonBox.bottom <= dialogBox.bottom,
 		}).toEqual({ left: true, right: true, bottom: true });
 		await expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth);
 	},

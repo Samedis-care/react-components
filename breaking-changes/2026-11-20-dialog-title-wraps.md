@@ -11,9 +11,7 @@
   has `white-space: nowrap`, `overflow: hidden` or `text-overflow: ellipsis`.
 - A word wider than the line breaks where it has to (`overflow-wrap: anywhere` on the
   heading). Titles without such a word wrap between words only.
-- Content after the title text inside the heading wraps with it. FullFormDialog's
-  open-in-new icon (`openInNewLink`) follows the last line of the title, or starts a line of
-  its own, where it used to be pushed out of the dialog and hidden. A title that is a row of
+- Content after the title text inside the heading wraps with it: a title that is a row of
   elements (e.g. one set with `useSetFormDialogTitle`) is no longer clipped at the heading's
   edge.
 
@@ -25,8 +23,7 @@ longer titles (device names in a FullFormDialog, for example) now take more line
 
 At 320px wide (a phone, or a desktop browser zoomed to 400%) the title had about 176px next
 to the close button, so a long title showed only its first word or two, and nothing showed
-the rest (WCAG 1.4.10 Reflow, 1.4.4 Resize Text). FullFormDialog's open-in-new icon was cut
-off with it.
+the rest (WCAG 1.4.10 Reflow, 1.4.4 Resize Text).
 
 ## Migration
 
