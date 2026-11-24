@@ -1,7 +1,7 @@
 /**
- * The import wizard (CrudImport, samedis-care-issues#3508) inside a CRUD: its steps and their labels, the
+ * The import wizard (CrudImport, audit issue #3508) inside a CRUD: its steps and their labels, the
  * guided and unguided flows, which state enables Back, Next and Finish, how it finishes,
- * useCrudImportLogic (the hook SCF's own layout builds on), and the wizard's accessibility.
+ * useCrudImportLogic (the hook an app's own layout builds on), and the wizard's accessibility.
  */
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";

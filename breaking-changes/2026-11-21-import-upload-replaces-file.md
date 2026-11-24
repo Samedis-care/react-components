@@ -34,6 +34,6 @@ all (WCAG 2.1.1).
 
 ## Migration
 
-Nothing to do. SCF's own upload step spreads `useImportStep1FileUploadProps`, so it
+Nothing to do for an upload step that spreads `useImportStep1FileUploadProps`: it
 replaces the file as well. Code that calls the hook's `onChange` itself gets only the last
 file of the list kept.
