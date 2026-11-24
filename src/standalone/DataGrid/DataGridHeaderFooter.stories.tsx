@@ -443,12 +443,19 @@ export const Issue3495Item17PhoneHeaderButtonsShowFocus: Story = {
 		exporters: [EXCEL],
 	},
 	globals: PHONE,
-	play: async ({ canvas }) => {
+	play: async ({ canvas, canvasElement }) => {
 		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
 		const search = canvas.getByRole("button", { name: "Search" });
 		search.focus();
 		await waitFor(() => expect(search).toHaveClass("Mui-focusVisible"));
 		await expectFocusRing(search, 2);
+		// below enableFilterDialogWidth (600px by default) the filter bar moves into
+		// the panel, so its "Filter" button comes between Search and More options
+		await userEvent.tab();
+		// the panel's button, by its text: the column filter buttons share its name
+		await expect(canvasElement.ownerDocument.activeElement).toHaveTextContent(
+			/^Filter$/,
+		);
 		await userEvent.tab();
 		const more = canvas.getByRole("button", { name: "More options" });
 		await expect(more).toHaveFocus();
