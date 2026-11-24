@@ -28,23 +28,22 @@ whether that was open (WCAG 4.1.2 Name, Role, Value; 1.3.1 Info and Relationship
 
 ## Migration
 
-**Required for SCF** (`src/utils/markdownLinks.ts`): the markdown link handler opens an
-in-app link that sits inside `[role="dialog"]` in a new tab, because a dialog would stay
-open over the page the link routed to. The notification messages are inside such an
-element now, so without a change an in-app link in a notification opens a new tab instead
-of routing in place and closing the popover (`closeAutoClosablePopovers`). Treat the
-notification popover, whose root has the class `popover-auto-closable`, as not a dialog
-there:
+**Required for an app whose link handler treats a link inside `[role="dialog"]` as a link in
+a dialog** (e.g. opens an in-app link there in a new tab, because a dialog would stay open over
+the page the link routed to): the notification messages are inside such an element now, so
+without a change an in-app link in a notification is handled as one in a dialog. If the app
+closes the popover after routing, give the popover a class (`PopoverProps.classes.root`) and
+treat it as not a dialog there:
 
 ```ts
 const dialog = anchor.closest('[role="dialog"]');
-// the auto-closable popovers close after routing, so their links route in place
-const inDialog = !!dialog && !dialog.closest(".popover-auto-closable");
+// the notification popover closes after routing, so its links route in place
+const inDialog = !!dialog && !dialog.closest(".notifications-popover");
 ```
 
 **Required for apps that pass `aria-haspopup`, `aria-expanded` or `aria-controls` in
 `IconButtonProps`**: remove them; they no longer compile, and the component's own values
-replace them. SCF and IMF pass none.
+replace them.
 
 Tests that look up a dialog by its role find the notification popover too while it is
 open.
