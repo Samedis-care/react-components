@@ -28,6 +28,5 @@ and it treated arrays with different duplicates as equal.
 
 ## Migration
 
-Nothing to do for SCF, IMF and the HLth-care frontend: none of them calls
-`compareArrayContent`. Code that does call it gets the results above, so a
+Code that calls `compareArrayContent` gets the results above, so a
 selection that contains `""` or `0` now compares equal to itself.
