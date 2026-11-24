@@ -28,9 +28,8 @@ took a line of its own.
 
 ## Migration
 
-- Nothing to do where IntegerInputField has `fullWidth` outside a flex row (every
-  IntegerInputField in SCF, and the integer model renderer): it looks the same. In a flex row
-  it now fills the row.
+- Nothing to do where IntegerInputField has `fullWidth` outside a flex row (the integer model
+  renderer, for one): it looks the same. In a flex row it now fills the row.
 - Required for an IntegerInputField without `fullWidth` that has to sit on a line of its own:
   put it in a block container of its own, or pass `fullWidth`. Otherwise it now sits next to
   the inline content and fields around it.

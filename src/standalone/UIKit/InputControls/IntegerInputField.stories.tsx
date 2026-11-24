@@ -31,8 +31,8 @@ const StatefulIntegerInputField = function StatefulIntegerInputField(
  * digits of the text. The stories hold the value in state, as a form would;
  * `value` in the controls sets the starting number.
  *
- * Apps render TextFieldWithHelp with `variant="standard"` (theme default in SCF
- * and IMF); the stories pass it.
+ * Apps usually render TextFieldWithHelp with `variant="standard"` (as their theme
+ * default); the stories pass it.
  */
 const meta: Meta<typeof IntegerInputField> = {
 	title: "Standalone/UIKit/InputControls/IntegerInputField",
