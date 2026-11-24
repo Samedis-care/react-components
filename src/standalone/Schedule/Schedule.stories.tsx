@@ -4,8 +4,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 /* eslint-enable import/no-unresolved */
 import { Box } from "@mui/material";
-// eslint-disable-next-line import/no-unresolved
-import { expect, waitFor } from "storybook/test";
 import { ScrollableSchedule, WeeklySchedule } from "./index";
 import type { IDayData, ScheduleFilterDefinition } from "./Common/DayContents";
 import type { LoadWeekCallback, ScrollableScheduleProps } from "./Scrollable";

@@ -379,7 +379,9 @@ describe("header filters and actions", () => {
 			/>,
 		);
 		await advance(400);
-		expect(cb.mock.calls.map((c) => c[0])).toEqual([0, 1]);
+		// the current week first; below lg the list then loads the week above it
+		const offsetsOnMount = cb.mock.calls.map((c) => c[0]);
+		expect(offsetsOnMount.slice(0, 2)).toEqual([0, 1]);
 		const labelsOnMount = weekLabels(container);
 		const scrollTopOnMount = scrollerOf(container).scrollTop;
 		// the user has scrolled down into the list
@@ -391,10 +393,9 @@ describe("header filters and actions", () => {
 		// the browser clamps the scroll position once the list is emptied
 		act(() => clampScroll(scrollerOf(container)));
 		await advance(400);
-		expect(cb.mock.calls.slice(2)).toEqual([
-			[0, { mine: true }],
-			[1, { mine: true }],
-		]);
+		expect(cb.mock.calls.slice(offsetsOnMount.length)).toEqual(
+			offsetsOnMount.map((offset) => [offset, { mine: true }]),
+		);
 		expect(weekLabels(container)).toEqual(labelsOnMount);
 		expect(scrollerOf(container).scrollTop).toBe(scrollTopOnMount);
 		// the focus stays on the filter
@@ -415,7 +416,9 @@ describe("language change", () => {
 			/>,
 		);
 		await advance(400);
-		expect(cb.mock.calls.map((c) => c[0])).toEqual([0, 1]);
+		// the current week first; below lg the list then loads the week above it
+		const offsetsOnMount = cb.mock.calls.map((c) => c[0]);
+		expect(offsetsOnMount.slice(0, 2)).toEqual([0, 1]);
 		const scrollTopOnMount = scrollerOf(container).scrollTop;
 		// the user has scrolled down into the list
 		scrollTo(scrollerOf(container), 50);
@@ -428,11 +431,12 @@ describe("language change", () => {
 		// the browser clamps the scroll position once the list is emptied
 		act(() => clampScroll(scrollerOf(container)));
 		await advance(400);
-		expect(cb.mock.calls.slice(2)).toEqual([
-			[0, { mine: true }],
-			[1, { mine: true }],
-		]);
+		expect(cb.mock.calls.slice(offsetsOnMount.length)).toEqual(
+			offsetsOnMount.map((offset) => [offset, { mine: true }]),
+		);
+		// as on mount: the current week, the next one, and the week above them
 		expect(weekLabels(container)).toEqual([
+			"Woche 41, 05 Okt. - 11 Okt.",
 			"Woche 42, 12 Okt. - 18 Okt.",
 			"Woche 43, 19 Okt. - 25 Okt.",
 		]);
