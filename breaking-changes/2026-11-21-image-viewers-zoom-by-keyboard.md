@@ -39,7 +39,7 @@ image needed a drag. The grab cursor promised dragging at 1×, where dragging do
 
 ## Migration
 
-Nothing to do for SCF and IMF; expect the three buttons in screenshots of the full-screen
+Nothing to do in general; expect the three buttons in screenshots of the full-screen
 views.
 
 - Required for an app whose theme positions the rotate buttons through
