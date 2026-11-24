@@ -19,4 +19,4 @@ expand it, so its menu could not be reached until the window was wide again.
 
 ## Migration
 
-Nothing to do. No app (SCF, IMF, hlth.care) renders a CollapsibleMenu.
+Nothing to do.
