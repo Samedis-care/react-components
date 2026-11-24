@@ -115,6 +115,7 @@
 				"search": "Qidirish",
 				"more-options": "Ko'proq parametrlar",
 				"custom-filter-button": "Filtr",
+				"custom-filter-button-label": "Filtr: filtrlarni tanlash",
 				"delete": "O'chirish",
 				"edit": "Tahrirlash",
 				"reset-options": {

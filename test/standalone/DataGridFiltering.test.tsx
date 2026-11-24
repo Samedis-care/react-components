@@ -12,7 +12,8 @@ import {
 import { createTheme, ThemeProvider } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
-import ccI18n from "../../src/i18n";
+import { computeAccessibleName } from "dom-accessibility-api";
+import ccI18n, { langs } from "../../src/i18n";
 import FilterEntry, {
 	type IFilterDef,
 } from "../../src/standalone/DataGrid/Content/FilterEntry";
@@ -28,6 +29,7 @@ import DataGrid, {
 } from "../../src/standalone/DataGrid/DataGrid";
 import type { ModelFilterType } from "../../src/backend-integration/Model";
 import type { IDataGridFilterBarProps } from "../../src/standalone/DataGrid/Header/FilterBar";
+import CustomFiltersButton from "../../src/standalone/DataGrid/Header/CustomFiltersButton";
 import userEvent from "@testing-library/user-event";
 import fs from "node:fs";
 import path from "node:path";
@@ -933,6 +935,70 @@ describe("FilterBar, CustomFiltersButton, CustomFilterDialog", () => {
 			).toBe(marked);
 			cleanup();
 		}
+	});
+	it("[ISSUE-3494-ITEM-25] the panel's Filter button exposes whether the panel is open, under a name of its own", async () => {
+		render(<Grid enableFilterDialogWidth={500} />);
+		const button = await filterButton();
+		// "Filter" is also the name of every column header's filter button
+		expect(computeAccessibleName(button)).not.toBe(
+			ccI18n.t("standalone.data-grid.content.filter"),
+		);
+		expect(button).toHaveAttribute("aria-expanded", "false");
+	});
+	it("[ISSUE-3494-ITEM-25] the panel's button keeps its text Filter, is named Filter selection, and is expanded while the panel is open", async () => {
+		render(<Grid enableFilterDialogWidth={500} />);
+		const button = await filterButton();
+		expect(button).toHaveTextContent(/^Filter$/);
+		expect(button).toHaveAccessibleName("Filter selection");
+		fireEvent.click(button);
+		expect(panelOpen()).toBe(true);
+		expect(button).toHaveAttribute("aria-expanded", "true");
+		fireEvent.click(screen.getByRole("button", { name: "Close" }));
+		expect(panelOpen()).toBe(false);
+		expect(button).toHaveAttribute("aria-expanded", "false");
+	});
+	it("[ISSUE-3494-ITEM-25] in every locale, the panel button's name starts with its text and is not the column filter buttons' name", async () => {
+		await ccI18n.loadLanguages(langs);
+		const resource = (lng: string, key: string) =>
+			ccI18n.getResource(lng.split("-")[0], "translation", key) as
+				string | undefined;
+		const wrong = langs.filter((lng) => {
+			const text = resource(
+				lng,
+				"standalone.data-grid.header.custom-filter-button",
+			);
+			const name = resource(
+				lng,
+				"standalone.data-grid.header.custom-filter-button-label",
+			);
+			const columnName = resource(lng, "standalone.data-grid.content.filter");
+			if (!text || !name || !columnName) return true;
+			// the visible text comes first, as a word of its own (WCAG 2.5.3)
+			const startsWithText =
+				name.toLowerCase().startsWith(text.toLowerCase()) &&
+				!/\p{L}/u.test(name.charAt(text.length));
+			return !startsWithText || name.toLowerCase() === columnName.toLowerCase();
+		});
+		expect(wrong, "locales with a wrong name").toEqual([]);
+	});
+	it("[ISSUE-3494-ITEM-25] an aria-label or aria-expanded given to the button replaces its own", async () => {
+		const goBack = vi.fn();
+		/** an app's bar that uses the button for an action of its own */
+		const BackBar = () => (
+			<CustomFiltersButton
+				onClick={goBack}
+				aria-label="Filter: change the filters"
+				aria-expanded={undefined}
+			/>
+		);
+		render(<Grid filterBar={BackBar} />);
+		const button = await screen.findByRole("button", {
+			name: "Filter: change the filters",
+		});
+		expect(button).toHaveTextContent(/^Filter$/);
+		expect(button).not.toHaveAttribute("aria-expanded");
+		fireEvent.click(button);
+		expect(goBack).toHaveBeenCalledTimes(1);
 	});
 });
 

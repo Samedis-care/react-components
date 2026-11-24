@@ -115,6 +115,7 @@
 				"search": "Поиск",
 				"more-options": "Другие параметры",
 				"custom-filter-button": "Фильтр",
+				"custom-filter-button-label": "Фильтр: выбор фильтров",
 				"delete": "Удалить",
 				"edit": "Редактировать",
 				"reset-options": {

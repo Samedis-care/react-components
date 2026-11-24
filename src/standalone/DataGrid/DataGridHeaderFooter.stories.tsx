@@ -452,10 +452,9 @@ export const Issue3495Item17PhoneHeaderButtonsShowFocus: Story = {
 		// below enableFilterDialogWidth (600px by default) the filter bar moves into
 		// the panel, so its "Filter" button comes between Search and More options
 		await userEvent.tab();
-		// the panel's button, by its text: the column filter buttons share its name
-		await expect(canvasElement.ownerDocument.activeElement).toHaveTextContent(
-			/^Filter$/,
-		);
+		await expect(
+			canvasElement.ownerDocument.activeElement,
+		).toHaveAccessibleName("Filter selection");
 		await userEvent.tab();
 		const more = canvas.getByRole("button", { name: "More options" });
 		await expect(more).toHaveFocus();

@@ -119,6 +119,7 @@
 				"search": "Buscar",
 				"more-options": "Más opciones",
 				"custom-filter-button": "Filtrar",
+				"custom-filter-button-label": "Filtrar: selección de filtros",
 				"delete": "Eliminar",
 				"edit": "Editar",
 				"reset-options": {

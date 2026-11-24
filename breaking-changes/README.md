@@ -25,6 +25,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-24 | [PortalLayout's mobile drawer has a close button for screen readers and keyboard users](2026-11-24-portal-drawer-close-button.md) | behavior |
 | 2026-11-24 | [An image field's placeholder is no longer its value: assistive technology skips it, and a click opens the file dialog](2026-11-24-image-placeholder-not-the-value.md) | behavior |
 | 2026-11-24 | [The DataGrid's filter panel has a row count, Reset and "Show results", and shows the bar's selects on a phone](2026-11-24-data-grid-filter-panel-footer-and-phone-selects.md) | behavior |
+| 2026-11-24 | [The DataGrid's filter panel button is named "Filter selection" and says whether the panel is open](2026-11-24-data-grid-filter-panel-button-name.md) | behavior, i18n |
 | 2026-11-21 | [The date pickers report a blur when focus leaves a calendar opened from outside the field](2026-11-21-picker-blur-on-leaving-a-calendar-opened-from-outside.md) | behavior |
 | 2026-11-21 | [The page scrolls to the top after a navigation, not before](2026-11-21-scroll-reset-after-navigation.md) | behavior |
 | 2026-11-21 | [UIKit theme types match what the slots get, and button variants apply](2026-11-21-ui-kit-theme-owner-state-and-variants.md) | behavior, type, theme |

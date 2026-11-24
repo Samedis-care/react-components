@@ -418,6 +418,12 @@ export const FilterPanelHelpers: Story = {
 		await expect(canvasElement.querySelector("[role=combobox]")).toBeNull();
 		const button = panelButtonOf(canvasElement);
 		await expect(button).toHaveTextContent("Filter");
+		// named apart from the column filter buttons, which keep "Filter"
+		await expect(button).toHaveAccessibleName("Filter selection");
+		await expect(
+			canvas.getAllByRole("button", { name: "Filter" }),
+		).not.toContain(button);
+		await expect(button).toHaveAttribute("aria-expanded", "false");
 		const icon = button.querySelector("svg");
 		await expect(icon).not.toHaveClass("CcDataGrid-customFilterActiveIcon");
 		const panel = await openPanel(canvasElement);
@@ -454,12 +460,14 @@ export const FilterPanelHelpers: Story = {
 		await waitFor(() => expect(panel).not.toBeVisible());
 		await expect(await canvas.findByText("Carol Jones")).toBeVisible();
 		await expect(button).toBeVisible();
+		await expect(button).toHaveAttribute("aria-expanded", "false");
 		await expect(button.querySelector("svg")).toHaveClass(
 			"CcDataGrid-customFilterActiveIcon",
 		);
 		// reopened, the panel shows the same selection; Reset clears it
 		await userEvent.click(button);
 		await waitFor(() => expect(panel).toBeVisible());
+		await expect(button).toHaveAttribute("aria-expanded", "true");
 		await expect(
 			within(panel).getByRole("radio", { name: "Open" }),
 		).toBeChecked();
