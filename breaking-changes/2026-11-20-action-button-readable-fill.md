@@ -15,16 +15,16 @@ palette color of `color` (MUI's fill `main`, hover fill `dark`) and, without `co
 end up no darker than the resting fill is darkened from the resting fill instead, as MUI
 derives `dark` from `main` (`palette.tonalOffset`), so hovering still shows.
 
-| Palette                      | Color     | Fill before                                  | Fill now                                   |
-| ---------------------------- | --------- | -------------------------------------------- | ------------------------------------------ |
-| MUI default, light           | warning   | `#ed6c02` (3.12:1), hover `#e65100` (3.79:1) | `rgb(193, 88, 1)`, hover `rgb(135, 61, 0)` |
-| MUI default, light (and SCF) | info      | `#0288d1` (3.86:1)                           | `rgb(1, 124, 192)`, hover unchanged        |
-| MUI default, dark            | error     | `#f44336` (3.68:1)                           | `rgb(218, 59, 48)`, hover unchanged        |
-| MUI default, dark            | secondary | hover `#ab47bc` (4.04:1)                     | hover `rgb(177, 86, 193)`                  |
-| SCF                          | error     | `rgb(230, 45, 75)` (4.34:1)                  | `rgb(225, 44, 73)`, hover unchanged        |
-| SCF                          | success   | hover `rgb(53, 122, 56)` (3.70:1)            | hover `rgb(75, 137, 78)`                   |
-| IMF, dark                    | error     | hover `rgb(178, 74, 90)` (3.72:1)            | hover `rgb(187, 95, 109)`                  |
-| IMF, light                   | warning   | hover `rgb(169, 125, 0)` (4.39:1)            | hover `rgb(170, 128, 5)`                   |
+| Palette            | Color     | Fill before                                  | Fill now                                   |
+| ------------------ | --------- | -------------------------------------------- | ------------------------------------------ |
+| MUI default, light | warning   | `#ed6c02` (3.12:1), hover `#e65100` (3.79:1) | `rgb(193, 88, 1)`, hover `rgb(135, 61, 0)` |
+| MUI default, light | info      | `#0288d1` (3.86:1)                           | `rgb(1, 124, 192)`, hover unchanged        |
+| MUI default, dark  | error     | `#f44336` (3.68:1)                           | `rgb(218, 59, 48)`, hover unchanged        |
+| MUI default, dark  | secondary | hover `#ab47bc` (4.04:1)                     | hover `rgb(177, 86, 193)`                  |
+| Custom, light      | error     | `rgb(230, 45, 75)` (4.34:1)                  | `rgb(225, 44, 73)`, hover unchanged        |
+| Custom, light      | success   | hover `rgb(53, 122, 56)` (3.70:1)            | hover `rgb(75, 137, 78)`                   |
+| Custom, dark       | error     | hover `rgb(178, 74, 90)` (3.72:1)            | hover `rgb(187, 95, 109)`                  |
+| Custom, light      | warning   | hover `rgb(169, 125, 0)` (4.39:1)            | hover `rgb(170, 128, 5)`                   |
 
 Every other color of these palettes is unchanged, and so is an ActionButton in MUI's default
 `primary`. A palette color the button cannot measure (a CSS variable, a keyword) is used as
@@ -34,8 +34,8 @@ it is, and so is a fill set through `styleOverrides.button`, `styled()` or `sx`.
 
 An ActionButton's label is 14px text, which needs a contrast of at least 4.5:1 (WCAG 1.4.3).
 MUI picks `contrastText` against 3:1 on `main` and does not check it on `dark`, so buttons
-in MUI's default `warning` and `info`, SCF's red and several hover fills were below
-that.
+in MUI's default `warning` and `info`, some custom reds and several hover fills were
+below that.
 
 ## Migration
 
@@ -66,6 +66,4 @@ const theme = createTheme({
 
 For a color outside the palette, add it to the palette (`palette.augmentColor` and MUI's
 `ButtonPropsColorOverrides`), or set `color` and the `&:hover` fill together with
-`backgroundColor`. In SCF this applies to `DangerActionButton`
-(`NotificationBroadcastFormPageButtons`), `ConfirmActionButton` (`SubscriptionConfirmDialog`)
-and `CancelSubscribeButton` (`SubscriptionPlanFormPageButtons`).
+`backgroundColor`.
