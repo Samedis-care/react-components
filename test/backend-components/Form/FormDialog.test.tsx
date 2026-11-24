@@ -24,6 +24,7 @@ import FormDialog, {
 	FormDialogDispatchContext,
 	IsInFormDialogContext,
 } from "../../../src/backend-components/Form/FormDialog";
+import useSetFormDialogTitle from "../../../src/backend-components/Form/useSetFormDialogTitle";
 import { BasicFormPageNestingContext } from "../../../src/backend-components/Form/BasicFormPage";
 import ccI18n, { langs } from "../../../src/i18n";
 import {
@@ -554,6 +555,167 @@ describe("FullFormDialog", () => {
 			expect(within(dialog()).getByRole("heading")).toHaveTextContent(
 				/^Set Title$/,
 			);
+		});
+	});
+
+	describe("[FOLLOWUP-DIALOG-LATE-TITLE] a title the content sets after the dialog opened", () => {
+		/**
+		 * A promise and the function that resolves it, inside act
+		 */
+		const gate = () => {
+			let open = () => {};
+			const passed = new Promise<void>((resolve) => {
+				open = resolve;
+			});
+			const pass = () =>
+				act(async () => {
+					open();
+					await passed;
+				});
+			return { passed, pass };
+		};
+		/**
+		 * Content that goes through its steps as the promises resolve, one after the other: a
+		 * page that loads (no title, "Loading…"), then shows with its title, set through
+		 * useSetFormDialogTitle as a form page does once its record has loaded. With more steps:
+		 * the next page loads (no title again), then shows with its own title.
+		 */
+		const Pages = (props: { steps: Promise<void>[]; titles: string[] }) => {
+			const { steps, titles } = props;
+			const [step, setStep] = useState(0);
+			React.useEffect(() => {
+				let mounted = true;
+				void steps[step]?.then(() => {
+					if (mounted) setStep(step + 1);
+				});
+				return () => {
+					mounted = false;
+				};
+			}, [steps, step]);
+			// odd steps show a loaded page
+			const title = step % 2 === 1 ? titles[(step - 1) / 2] : null;
+			useSetFormDialogTitle(title !== null, title);
+			return title ? <p>{title} content</p> : <p>Loading…</p>;
+		};
+		/**
+		 * Resolves in the next animation frame
+		 */
+		const nextFrame = () =>
+			act(
+				() =>
+					new Promise<void>((resolve) =>
+						requestAnimationFrame(() => resolve()),
+					),
+			);
+		/**
+		 * Pushes a FullFormDialog with Pages, waits until it has the focus and has been shown
+		 * for a frame without a title
+		 * @returns The dialog and the gates of its steps
+		 */
+		const openLoading = async (
+			titles: string[],
+			dialogProps: Partial<React.ComponentProps<typeof FormDialog>> = {},
+		) => {
+			const gates = titles.flatMap(() => [gate(), gate()]);
+			renderPushed(
+				<FormDialog {...dialogProps}>
+					<Pages steps={gates.map((g) => g.passed)} titles={titles} />
+				</FormDialog>,
+			);
+			await screen.findByText("Loading…");
+			const dialog = screen.getByRole("dialog");
+			// MUI's focus trap focuses the dialog (its paper) when it opens
+			await waitFor(() => expect(dialog).toHaveFocus());
+			await nextFrame();
+			return { dialog, gates };
+		};
+
+		it("[FOLLOWUP-DIALOG-LATE-TITLE] the focus moves from the dialog to its title once the content sets it, so a screen reader reads the title", async () => {
+			const { dialog, gates } = await openLoading(["Edit person"]);
+			expect(dialog).toHaveAccessibleName("");
+			await gates[0].pass();
+			const heading = within(dialog).getByRole("heading", {
+				name: "Edit person",
+			});
+			expect(dialog).toHaveAccessibleName("Edit person");
+			expect(heading).toHaveFocus();
+			// focusable by script, not a stop of Tab
+			expect(heading).toHaveAttribute("tabindex", "-1");
+		});
+
+		it("[FOLLOWUP-DIALOG-LATE-TITLE] the title also takes the focus from a dialog named by aria-label", async () => {
+			const { dialog, gates } = await openLoading(["Edit person"], {
+				"aria-label": "Person",
+			});
+			expect(dialog).toHaveAccessibleName("Person");
+			await gates[0].pass();
+			expect(dialog).toHaveAccessibleName("Edit person");
+			expect(
+				within(dialog).getByRole("heading", { name: "Edit person" }),
+			).toHaveFocus();
+		});
+
+		it("[FOLLOWUP-DIALOG-LATE-TITLE] a focus the user moved before the title came stays where it is", async () => {
+			const { dialog, gates } = await openLoading(["Edit person"]);
+			const close = within(dialog).getByRole("button", { name: "Close" });
+			act(() => close.focus());
+			await gates[0].pass();
+			expect(dialog).toHaveAccessibleName("Edit person");
+			expect(close).toHaveFocus();
+		});
+
+		it("[FOLLOWUP-DIALOG-LATE-TITLE] when the title goes away with the focus on it, the dialog gets the focus, and the next title takes it again", async () => {
+			const { dialog, gates } = await openLoading(["Page 1", "Page 2"]);
+			await gates[0].pass();
+			expect(
+				within(dialog).getByRole("heading", { name: "Page 1" }),
+			).toHaveFocus();
+			// the next page loads: no title, the heading is gone
+			await gates[1].pass();
+			expect(within(dialog).queryByRole("heading")).toBeNull();
+			expect(dialog, "the focus fell to the page").toHaveFocus();
+			await nextFrame();
+			await gates[2].pass();
+			expect(
+				within(dialog).getByRole("heading", { name: "Page 2" }),
+			).toHaveFocus();
+		});
+
+		it("[FOLLOWUP-DIALOG-LATE-TITLE] a dialog that opens with its title keeps the focus on itself, as MUI's Dialog does", async () => {
+			const { unmount } = renderPushed(
+				<FormDialog dialogTitle={"Edit person"}>
+					<p>content</p>
+				</FormDialog>,
+			);
+			const titled = await screen.findByRole("dialog", { name: "Edit person" });
+			await waitFor(() => expect(titled).toHaveFocus());
+			await nextFrame();
+			expect(titled).toHaveFocus();
+			unmount();
+
+			// a title the content sets as it mounts shows before the dialog is first drawn
+			const TitleOnMount = () => {
+				useSetFormDialogTitle(true, "Set Title");
+				return <p>content</p>;
+			};
+			renderPushed(
+				<FormDialog>
+					<TitleOnMount />
+				</FormDialog>,
+			);
+			const setByContent = await screen.findByRole("dialog", {
+				name: "Set Title",
+			});
+			await waitFor(() => expect(setByContent).toHaveFocus());
+			await nextFrame();
+			expect(setByContent).toHaveFocus();
+		});
+
+		it("[FOLLOWUP-DIALOG-LATE-TITLE] a dialog that never gets a title keeps the focus on itself and its aria-label", async () => {
+			const { dialog } = await openLoading([], { "aria-label": "Pick users" });
+			await nextFrame();
+			expect(dialog).toHaveFocus();
+			expect(dialog).toHaveAccessibleName("Pick users");
 		});
 	});
 });

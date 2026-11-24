@@ -4,6 +4,8 @@ import React, {
 	Suspense,
 	useCallback,
 	useContext,
+	useEffect,
+	useLayoutEffect,
 	useMemo,
 	useRef,
 	useState,
@@ -41,7 +43,9 @@ export interface FormDialogProps {
 	 * Accessible name of the dialog while it shows no title (no `dialogTitle` and none set
 	 * through `FormDialogDispatch.setTitle`), e.g. the translated purpose of a picker. A shown
 	 * title names the dialog instead. Without either the dialog has no name, like an MUI `Dialog`
-	 * without `DialogTitle`: screen readers announce only "dialog".
+	 * without `DialogTitle`: screen readers announce only "dialog". Content that sets its title
+	 * only once it has loaded needs none: the title takes the focus when it shows, so screen
+	 * readers read it (see `FullFormDialog`).
 	 */
 	"aria-label"?: string;
 	/**
@@ -127,6 +131,11 @@ export type FormDialogClassKey =
 export type FormDialogTitlePriorityMode = "prop" | "dispatch";
 
 export interface FormDialogDispatch {
+	/**
+	 * Shows this title in the dialog's title bar (see `useSetFormDialogTitle`), null for none.
+	 * A title that shows only after the dialog opened takes the keyboard focus if it is still on
+	 * the dialog itself (see `FullFormDialog`).
+	 */
 	setTitle: (title: React.ReactNode) => void;
 	setOpenInNewLink: Dispatch<SetStateAction<null | (() => void)>>;
 	blockClosing: () => void;
@@ -144,6 +153,90 @@ export const FormDialogDispatchContext = React.createContext<
 	FormDialogDispatch | undefined
 >(undefined);
 
+/**
+ * The keyboard focus of a dialog whose title can show after it opened. MUI's Dialog focuses
+ * its paper (the element with role="dialog") when it opens, and screen readers then announce
+ * the dialog with its name, which is its title. A title that shows only later (content that
+ * sets it once it has loaded) is not announced. So when the title shows after the dialog has
+ * been on screen for a frame with the focus on its paper and no title, the focus moves on to
+ * the title heading, and screen readers read the title. Focus the user moved elsewhere stays
+ * there, and a title shown when the dialog opens (from the dialogTitle prop, or set by the
+ * content as it mounts) leaves the focus on the paper. When the title goes away while it holds
+ * the focus (the content that set it unmounts), the paper gets the focus back, rather than the
+ * page.
+ * @param titleShown Whether the dialog shows a title heading, which its paper's
+ * aria-labelledby points at
+ * @returns The ref and the focus handler for the dialog's paper
+ */
+const useLateTitleFocus = (titleShown: boolean) => {
+	const paperRef = useRef<HTMLDivElement>(null);
+	// titleShown as of the last commit
+	const titleShownRef = useRef(titleShown);
+	// the dialog has been on screen for a frame with the focus on its paper and no title: a
+	// screen reader has announced it without its title
+	const untitledRef = useRef(false);
+	// the frame requested when the paper took the focus without a title
+	const frameRef = useRef<{ win: Window; id: number } | null>(null);
+
+	const onPaperFocus = useCallback((evt: React.FocusEvent<HTMLElement>) => {
+		if (evt.target !== evt.currentTarget) return;
+		if (titleShownRef.current || frameRef.current) return;
+		const win = evt.currentTarget.ownerDocument.defaultView;
+		if (!win) return;
+		const id = win.requestAnimationFrame(() => {
+			frameRef.current = null;
+			if (!titleShownRef.current) untitledRef.current = true;
+		});
+		frameRef.current = { win, id };
+	}, []);
+
+	useEffect(
+		() => () => {
+			const frame = frameRef.current;
+			frameRef.current = null;
+			frame?.win.cancelAnimationFrame(frame.id);
+		},
+		[],
+	);
+
+	// a layout effect: it runs before the browser paints, and after React has put back the
+	// focus it saved around the commit, which it does not for a removed heading
+	useLayoutEffect(() => {
+		const wasShown = titleShownRef.current;
+		titleShownRef.current = titleShown;
+		const paper = paperRef.current;
+		if (!paper) return;
+		const doc = paper.ownerDocument;
+		const focused = doc.activeElement;
+		if (!titleShown) {
+			// the title went away, and the focus with it
+			if (wasShown && (!focused || focused === doc.body)) paper.focus();
+			return;
+		}
+		const late = untitledRef.current;
+		untitledRef.current = false;
+		if (!late || focused !== paper) return;
+		const heading = doc.getElementById(
+			paper.getAttribute("aria-labelledby") ?? "",
+		);
+		if (!heading || !paper.contains(heading)) return;
+		// focusable by script, not a stop of Tab
+		if (!heading.hasAttribute("tabindex"))
+			heading.setAttribute("tabindex", "-1");
+		heading.focus();
+	}, [titleShown]);
+
+	return { paperRef, onPaperFocus };
+};
+
+/**
+ * The dialog FullFormDialog renders by default (its `renderer`): an MUI `Dialog` with a
+ * `DialogTitle` (the title, the open-in-new button and the close button) and the content. The
+ * title names the dialog, else `aria-label` does. A title that shows only after the dialog
+ * opened takes the keyboard focus if it is still on the dialog itself, so screen readers read
+ * it (see `FullFormDialog`). A custom renderer can render it with changed props.
+ * @param props The props of FullFormDialog, with the title to show as `dialogTitle`
+ */
 export const FormDialogDefaultRenderer = (props: FormDialogRendererProps) => {
 	const {
 		maxWidth,
@@ -158,11 +251,14 @@ export const FormDialogDefaultRenderer = (props: FormDialogRendererProps) => {
 	} = props;
 	const { t } = useCCTranslations();
 	const ContentComp = useCustomClasses ? TallDialogContent : DialogContent;
+	const { paperRef, onPaperFocus } = useLateTitleFocus(!!dialogTitle);
 	// the paper is the element with role="dialog"; a shown title names it through MUI's
 	// aria-labelledby, which wins over aria-label
 	const slotProps = useMemo(
-		() => ({ paper: { "aria-label": ariaLabel } }),
-		[ariaLabel],
+		() => ({
+			paper: { "aria-label": ariaLabel, ref: paperRef, onFocus: onPaperFocus },
+		}),
+		[ariaLabel, paperRef, onPaperFocus],
 	);
 	// a button outside the heading: reachable by Tab, named, and not part of the
 	// dialog's name
@@ -201,6 +297,20 @@ export const FormDialogDefaultRenderer = (props: FormDialogRendererProps) => {
 	);
 };
 
+/**
+ * A dialog for a form page or other content, opened with `pushDialog`: a title bar with the
+ * title, an optional "Open in new tab" button and the close button, and the content below.
+ * The content can set the title (`useSetFormDialogTitle`, `PageTitle`), guard closing while it
+ * has unsaved changes, and close the dialog (`useCloseThisDialog`).
+ *
+ * The title names the dialog for screen readers, else `aria-label` does. MUI's Dialog puts the
+ * keyboard focus on the dialog when it opens, and screen readers announce it with its name. A
+ * title that the content sets only once it has loaded comes after that announcement: when it
+ * shows while the focus is still on the dialog itself, the focus moves on to the title, so
+ * screen readers read it. Focus the user moved elsewhere stays there.
+ * Theme: `CcFormDialog` (default props, the slots of `FormDialogClassKey`).
+ * @param inProps The props
+ */
 const FormDialog = (inProps: FormDialogProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcFormDialog" });
 	const {

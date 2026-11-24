@@ -11,7 +11,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { createMemoryHistory } from "history";
-import { Framework } from "../../framework";
+import { Framework, useDialogContext } from "../../framework";
 import { setFrameworkHistory } from "../../framework/History";
 import Form, { PageProps } from "./Form";
 import FormField from "./Field";
@@ -27,6 +27,7 @@ import {
 	ModelUnknown,
 } from "../../backend-integration";
 import FullFormDialog from "./FormDialog";
+import { PageTitle } from "../../non-standalone/PageTitle";
 
 // a dirty form page blocks the history; keep that away from the Storybook frame's own
 setFrameworkHistory(createMemoryHistory({ initialEntries: ["/page"] }));
@@ -451,5 +452,126 @@ export const Issue3503Item18OpenInNewIsAButton: StoryObj<OpenInNewArgs> = {
 		await expect(getComputedStyle(button).outlineStyle).toBe("solid");
 		await userEvent.keyboard("{Enter}");
 		await expect(args.openInNewLink).toHaveBeenCalledTimes(1);
+	},
+};
+
+/**
+ * The people connector, whose read answers after `delay` milliseconds
+ */
+class SlowReadConnector extends MockConnector {
+	private readonly delay: number;
+
+	constructor(data: Record<string, unknown>[], delay: number) {
+		super(data);
+		this.delay = delay;
+	}
+
+	// MockConnector's read is typed as synchronous, Connector's may return a promise
+	read(id: string) {
+		const delayed = new Promise<void>((resolve) =>
+			setTimeout(resolve, this.delay),
+		);
+		return delayed.then(() => super.read(id)) as never;
+	}
+}
+
+/**
+ * PersonPage with a PageTitle, which inside a FullFormDialog becomes the dialog's title
+ */
+const TitledPersonPage = (props: PageProps<PeopleModel, PageArgs>) => (
+	<DefaultFormPage {...props} customProps={crudProps(props)}>
+		<PageTitle>Edit person</PageTitle>
+		<PersonFields />
+	</DefaultFormPage>
+);
+
+interface LateTitleArgs extends PageArgs {
+	/**
+	 * How long the record takes to load, in milliseconds
+	 */
+	loadDelay: number;
+	/**
+	 * FullFormDialog's onClose
+	 */
+	onClose: () => void;
+}
+
+/**
+ * A FullFormDialog without dialogTitle around a form whose page sets the title once the record
+ * has loaded
+ */
+const LateTitleDialog = (props: LateTitleArgs) => {
+	const { loadDelay, goBack, onClose } = props;
+	const model = useMemo(
+		() =>
+			new Model(
+				"u45-story-people-" + String(modelCounter++),
+				createTestModel().fields,
+				new SlowReadConnector(sampleData, loadDelay),
+			),
+		[loadDelay],
+	);
+	const customProps = useMemo(() => ({ goBack }), [goBack]);
+	return (
+		<FullFormDialog onClose={onClose}>
+			<Form
+				model={model}
+				id={"1"}
+				errorComponent={DefaultErrorComponent}
+				customProps={customProps}
+				disableRouting
+			>
+				{TitledPersonPage}
+			</Form>
+		</FullFormDialog>
+	);
+};
+
+/**
+ * A button "Open person" that pushes the LateTitleDialog
+ */
+const LateTitleOpener = (props: LateTitleArgs) => {
+	const [pushDialog] = useDialogContext();
+	const open = useCallback(
+		() => pushDialog(<LateTitleDialog {...props} />),
+		[pushDialog, props],
+	);
+	return <Button onClick={open}>Open person</Button>;
+};
+
+/**
+ * FOLLOWUP-DIALOG-LATE-TITLE: a FullFormDialog without `dialogTitle` whose form page sets the
+ * dialog's title with a `PageTitle` once its record has loaded (after `loadDelay` ms). The dialog
+ * opens with the focus on itself and no name, as the form is still loading, so a screen reader
+ * says only "dialog". Once the title shows, the focus moves on to it and the screen reader reads
+ * the title. Tab goes on to the close button, as it does from the dialog.
+ */
+export const FollowupDialogLateTitleTakesFocus: StoryObj<LateTitleArgs> = {
+	args: { loadDelay: 2000, goBack: fn(), onClose: fn() },
+	parameters: { a11y: { test: "error" } },
+	render: (args) => <LateTitleOpener {...args} />,
+	play: async ({ canvas, userEvent }) => {
+		await userEvent.click(canvas.getByRole("button", { name: "Open person" }));
+		// the dialog is in a portal, outside the story's canvas
+		const dialog = await within(document.body).findByRole(
+			"dialog",
+			undefined,
+			LOAD,
+		);
+		// while the record loads, the dialog has the focus and no name
+		await waitFor(() => expect(dialog).toHaveFocus());
+		await expect(dialog).toHaveAccessibleName("");
+
+		const heading = await within(dialog).findByRole(
+			"heading",
+			{ name: "Edit person" },
+			LOAD,
+		);
+		await expect(dialog).toHaveAccessibleName("Edit person");
+		await waitFor(() => expect(heading).toHaveFocus());
+		await userEvent.tab();
+		await expect(
+			within(dialog).getByRole("button", { name: "Close" }),
+		).toHaveFocus();
 	},
 };
