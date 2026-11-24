@@ -1,18 +1,37 @@
-import React from "react";
+import React, { useState } from "react";
 import fs from "node:fs";
 import path from "node:path";
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import {
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vitest";
+import {
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryHistory } from "history";
 import { setFrameworkHistory } from "../../src/framework/History";
-import DialogContextProvider, { useDialogContext } from "../../src/framework/DialogContextProvider";
+import DialogContextProvider, {
+	useDialogContext,
+} from "../../src/framework/DialogContextProvider";
 import ccI18n from "../../src/i18n";
 import { createTheme, ThemeProvider } from "@mui/material";
 
 import SignaturePad from "../../src/non-standalone/SignaturePad/SignaturePad";
-import { SignDialog, SignPadDialogProps } from "../../src/non-standalone/Dialog/SignPadDialog";
-import React, { useState } from "react";
+import {
+	SignDialog,
+	SignPadDialogProps,
+} from "../../src/non-standalone/Dialog/SignPadDialog";
 
 // The real canvas wrapper cannot mount in jsdom (its CJS build does not
 // interoperate with signature_pad's UMD), and jsdom has no 2d context. The fake

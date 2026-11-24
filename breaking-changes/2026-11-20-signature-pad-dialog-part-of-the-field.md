@@ -38,8 +38,8 @@ after its field was gone.
 
 ## Migration
 
-Nothing to do for SCF and IMF. A form's signature field reports blurs from inside the dialog
-to the field's `handleBlur`, which only marks the field touched again.
+Nothing to do for a form's signature field: it reports blurs from inside the dialog to the
+field's `handleBlur`, which only marks the field touched again.
 
 **Required for** an app that puts a SignaturePad inside an element whose React handlers
 (`onClick`, `onKeyDown`, `onMouseDown`, …) must not react to the dialog: without a change,
