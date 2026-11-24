@@ -10,7 +10,17 @@ import React, {
 import Header, { PortalLayoutHeaderProps } from "./Header";
 import Menu from "./Menu";
 import { Breakpoint } from "@mui/material/styles";
-import { styled, useMediaQuery, useTheme, useThemeProps } from "@mui/material";
+import {
+	buttonBaseClasses,
+	IconButton,
+	styled,
+	useMediaQuery,
+	useTheme,
+	useThemeProps,
+} from "@mui/material";
+import { Close as CloseIcon } from "@mui/icons-material";
+import useCCTranslations from "../../../utils/useCCTranslations";
+import focusRing from "../focusRing";
 
 interface PortalLayoutBasic {
 	/**
@@ -19,6 +29,10 @@ interface PortalLayoutBasic {
 	variant: "basic";
 	/**
 	 * Content displayed on the top-left corner of the screen
+	 *
+	 * In mobile view it is the first row of the drawer, 56px high. The drawer's
+	 * close button, shown while it has keyboard focus, sits over that row and
+	 * comes before it in the Tab order.
 	 */
 	topLeft: React.ReactNode;
 }
@@ -37,6 +51,15 @@ interface PortalLayoutPropsBase {
 	headerContent: React.ReactNode;
 	/**
 	 * Content displayed in the menu area (usually a Menu)
+	 *
+	 * In mobile view it is shown in a drawer that the burger button opens.
+	 * Escape, a click on the backdrop and the drawer's close button ("Close
+	 * menu", `standalone.portal.close-menu`) close it; focus then returns to the
+	 * element that had it before the drawer opened, usually the burger. The
+	 * close button is for screen readers and keyboard users: it is visually
+	 * hidden and takes no space, is the first stop of Tab in the drawer, and is
+	 * shown at the top of the drawer, over the content, only while it has
+	 * keyboard focus.
 	 */
 	menuContent: React.ReactNode;
 	/**
@@ -148,8 +171,47 @@ const RenderLayoutMobileTopLeft = styled("div", {
 	name: "CcPortalRenderLayout",
 	slot: "mobileTopLeft",
 })({ height: 56 });
+// The drawer's close button, for screen readers and keyboard users. Visually
+// hidden and out of the flow, so the drawer looks as without it; shown only while
+// it has keyboard focus (as a skip link), at the top of the drawer, over the
+// content. The X lines up with the end of the menu entries (16px inset).
+const RenderLayoutCloseMenuButton = styled(IconButton, {
+	name: "CcPortalRenderLayout",
+	slot: "closeMenuButton",
+})(
+	({ theme }) => ({
+		position: "absolute",
+		top: theme.spacing(0.5),
+		insetInlineEnd: theme.spacing(0.5),
+		zIndex: 1,
+		[`&.${buttonBaseClasses.focusVisible}`]: {
+			// the drawer's surface, with its overlay in a dark theme, so the
+			// content it covers does not show through
+			backgroundColor: (theme.vars || theme).palette.background.paper,
+			backgroundImage: "var(--Paper-overlay)",
+		},
+		[`&:not(.${buttonBaseClasses.focusVisible})`]: {
+			// visually hidden, as MUI's visuallyHidden
+			border: 0,
+			clipPath: "inset(50%)",
+			height: 1,
+			margin: -1,
+			overflow: "hidden",
+			padding: 0,
+			whiteSpace: "nowrap",
+			width: 1,
+		},
+	}),
+	({ theme }) => focusRing((theme.vars || theme).palette.primary.main),
+);
+/**
+ * Style slots of the layout's areas (theme name `CcPortalRenderLayout`):
+ * `header`, `topLeft`, `menu`, `main`; in mobile view, `mobileTopLeft` (the
+ * `topLeft` row at the top of the drawer) and `closeMenuButton` (the drawer's
+ * close button, shown while it has keyboard focus).
+ */
 export type PortalRenderLayoutClassKey =
-	"header" | "topLeft" | "menu" | "main" | "mobileTopLeft";
+	"header" | "topLeft" | "menu" | "main" | "mobileTopLeft" | "closeMenuButton";
 
 export interface PortalLayoutContextType {
 	mobile: boolean;
@@ -170,11 +232,14 @@ export const usePortalLayoutContext = (): PortalLayoutContextType => {
 const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 	const { mobile, headerContent, drawerWidth, menuContent, content } = props;
 	const [menuOpen, setMenuOpen] = useState(false);
+	const { t } = useCCTranslations();
 
 	const toggleMenu = useCallback(
 		() => setMenuOpen((prevState) => !prevState),
 		[setMenuOpen],
 	);
+	// closes, never toggles: a second click while the drawer slides out keeps it closed
+	const closeMenu = useCallback(() => setMenuOpen(false), [setMenuOpen]);
 
 	const portalContext = useMemo(
 		() => ({
@@ -209,6 +274,15 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 						mobile={mobile}
 						items={
 							<>
+								{mobile && (
+									<RenderLayoutCloseMenuButton
+										onClick={closeMenu}
+										size={"large"}
+										aria-label={t("standalone.portal.close-menu")}
+									>
+										<CloseIcon />
+									</RenderLayoutCloseMenuButton>
+								)}
 								{mobile && props.variant === "basic" && (
 									<RenderLayoutMobileTopLeft>
 										{props.topLeft}

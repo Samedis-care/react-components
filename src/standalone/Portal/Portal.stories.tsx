@@ -813,3 +813,147 @@ export const Issue3479Item25MenuKeepsStateAcrossViews: LayoutStory = {
 		);
 	},
 };
+
+// by role and name, as a screen reader finds it
+const closeMenuButton = () =>
+	within(drawerPaper()).getByRole("button", { name: "Close menu" });
+
+// in the accessibility tree, but no more than a clipped 1px box on screen
+const expectVisuallyHidden = async (el: HTMLElement) => {
+	await waitFor(() =>
+		expect(el.getBoundingClientRect().width).toBeLessThanOrEqual(1),
+	);
+	await expect(el.getBoundingClientRect().height).toBeLessThanOrEqual(1);
+};
+
+// shown at the top of the drawer, over its content: a full-size target with a
+// focus ring that a pointer at its center would hit
+const expectShownAtTop = async (el: HTMLElement) => {
+	await expectFocusRing(el);
+	const box = el.getBoundingClientRect();
+	const paper = drawerPaper().getBoundingClientRect();
+	await expect(box.width).toBeGreaterThanOrEqual(44);
+	await expect(box.height).toBeGreaterThanOrEqual(44);
+	await expect(box.left).toBeGreaterThanOrEqual(paper.left);
+	await expect(box.right).toBeLessThanOrEqual(paper.right);
+	await expect(box.top).toBeGreaterThanOrEqual(paper.top);
+	await expect(box.bottom).toBeLessThanOrEqual(paper.top + 56);
+	await expect(
+		el.contains(
+			document.elementFromPoint(
+				box.left + box.width / 2,
+				box.top + box.height / 2,
+			),
+		),
+	).toBe(true);
+};
+
+/**
+ * Opens the drawer with a pointer click and checks the close button: there for
+ * screen readers, not on screen; Tab shows it without moving the entries, the
+ * next Tab hides it again; on it again, Enter closes the drawer.
+ * @param canvasElement The story's canvas
+ * @param firstStop The element that has to start at the top of the drawer and
+ * stay there (the menu, or topLeft in variant basic)
+ * @param secondStop The drawer's Tab stop after the close button
+ */
+const checkCloseMenuButton = async (
+	canvasElement: HTMLElement,
+	firstStop: () => HTMLElement,
+	secondStop: () => HTMLElement,
+) => {
+	await openDrawer(canvasElement);
+	const close = closeMenuButton();
+	await expect(document.activeElement).not.toBe(close);
+	await expectVisuallyHidden(close);
+	const paperTop = drawerPaper().getBoundingClientRect().top;
+	await expect(firstStop().getBoundingClientRect().top).toBe(paperTop);
+
+	await userEvent.tab();
+	await expect(document.activeElement).toBe(close);
+	await expectShownAtTop(close);
+	await expect(firstStop().getBoundingClientRect().top).toBe(paperTop);
+
+	await userEvent.tab();
+	await expect(document.activeElement).toBe(secondStop());
+	await expectVisuallyHidden(close);
+
+	await userEvent.tab({ shift: true });
+	await expect(document.activeElement).toBe(close);
+	await expectShownAtTop(close);
+	await userEvent.keyboard("{Enter}");
+	await waitFor(() => expect(drawerRoot()).toHaveAttribute("aria-hidden"));
+	await waitFor(() =>
+		expect(document.activeElement).toBe(burgerIn(canvasElement)),
+	);
+};
+
+export const Issue3479Item11CloseButtonShownOnKeyboardFocus: LayoutStory = {
+	globals: MOBILE,
+	args: { drawerWidth: 320 },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3479-ITEM-11: the drawer has a close button for screen readers and keyboard users. Opened with a pointer, the drawer looks as before: the button is visually hidden and the entries start at the top. It is the first stop of Tab in the drawer and shown, at the top of the drawer over the entries, only while it has keyboard focus. It closes the drawer and focus returns to the burger, also for touch screen-reader users, whose dismiss gestures do not send Escape.",
+			},
+		},
+	},
+	render: (args) => (
+		<div style={fullHeight}>
+			<PortalLayout
+				{...args}
+				variant="no-top-left"
+				headerContent={pageTitle()}
+				menuContent={menu()}
+				content={<div style={{ padding: 16 }}>Content</div>}
+			/>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		await checkCloseMenuButton(
+			canvasElement,
+			() => menuRootIn(drawerPaper()),
+			() => within(drawerPaper()).getByRole("button", { name: "Dashboard" }),
+		);
+	},
+};
+
+export const Issue3479Item11CloseButtonOverTopLeft: LayoutStory = {
+	globals: MOBILE,
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3479-ITEM-11: in variant `basic` the drawer starts with the `topLeft` row as before; the close button, shown while it has keyboard focus, sits over that row. It comes before a focusable `topLeft` in the Tab order.",
+			},
+		},
+	},
+	render: (args) => (
+		<div style={fullHeight}>
+			<PortalLayout
+				{...args}
+				variant="basic"
+				topLeft={
+					<a href={"#home"} style={{ display: "block", padding: 8 }}>
+						MyApp
+					</a>
+				}
+				headerContent={pageTitle()}
+				menuContent={menu()}
+				content={<div style={{ padding: 16 }}>Content</div>}
+			/>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const home = () =>
+			within(drawerPaper()).getByRole("link", { name: "MyApp" });
+		await checkCloseMenuButton(
+			canvasElement,
+			() => home().parentElement!,
+			home,
+		);
+	},
+};

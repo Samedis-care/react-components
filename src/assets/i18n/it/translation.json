@@ -12,7 +12,8 @@
 		"portal": {
 			"menu-toggle": "Attiva/disattiva menu",
 			"collapse-menu": "Comprimi menu",
-			"expand-menu": "Espandi menu"
+			"expand-menu": "Espandi menu",
+			"close-menu": "Chiudi menu"
 		},
 		"uikit": {
 			"info": "Ulteriori informazioni",

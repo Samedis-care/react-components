@@ -22,6 +22,7 @@ One file per change, so this never grows into a single unreadable log.
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
 | 2026-11-24 | [A FullFormDialog title that shows after loading takes the focus](2026-11-24-full-form-dialog-late-title-takes-focus.md) | behavior |
 | 2026-11-24 | [A flow form has a second dirty flag, stagedDirty, for staged edits](2026-11-24-flow-form-staged-dirty.md) | behavior, type |
+| 2026-11-24 | [PortalLayout's mobile drawer has a close button for screen readers and keyboard users](2026-11-24-portal-drawer-close-button.md) | behavior |
 | 2026-11-21 | [The date pickers report a blur when focus leaves a calendar opened from outside the field](2026-11-21-picker-blur-on-leaving-a-calendar-opened-from-outside.md) | behavior |
 | 2026-11-21 | [The page scrolls to the top after a navigation, not before](2026-11-21-scroll-reset-after-navigation.md) | behavior |
 | 2026-11-21 | [UIKit theme types match what the slots get, and button variants apply](2026-11-21-ui-kit-theme-owner-state-and-variants.md) | behavior, type, theme |

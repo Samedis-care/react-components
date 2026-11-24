@@ -12,7 +12,8 @@
 		"portal": {
 			"menu-toggle": "Открыть меню",
 			"collapse-menu": "Свернуть меню",
-			"expand-menu": "Развернуть меню"
+			"expand-menu": "Развернуть меню",
+			"close-menu": "Закрыть меню"
 		},
 		"uikit": {
 			"info": "Подробнее",

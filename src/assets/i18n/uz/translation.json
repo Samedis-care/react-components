@@ -12,7 +12,8 @@
 		"portal": {
 			"menu-toggle": "Menyuni ochish",
 			"collapse-menu": "Menyuni yig'ish",
-			"expand-menu": "Menyuni yoyish"
+			"expand-menu": "Menyuni yoyish",
+			"close-menu": "Menyuni yopish"
 		},
 		"uikit": {
 			"info": "Qo'shimcha ma'lumot",

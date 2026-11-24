@@ -1,4 +1,6 @@
 import "@testing-library/jest-dom/vitest";
+import fs from "fs";
+import path from "path";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -182,6 +184,87 @@ describe("PortalLayout: bugs", () => {
 		fireEvent.keyDown(document.activeElement!, { key: "Escape" });
 		await waitFor(() => expect(drawerIsOpen()).toBe(false));
 		expect(burger()).toHaveAttribute("aria-expanded", "false");
+	});
+
+	it("[ISSUE-3479-ITEM-11] the open drawer has a close button that closes it and returns focus to the burger", async () => {
+		renderLayout({ collapseMenu: true });
+		await openDrawer();
+		fireEvent.click(
+			within(screen.getByRole("dialog")).getByRole("button", {
+				name: "Close menu",
+			}),
+		);
+		await waitFor(() => expect(drawerIsOpen()).toBe(false));
+		await waitFor(() => expect(document.activeElement).toBe(burger()));
+	});
+	it("[ISSUE-3479-ITEM-11] the close button is the first stop of Tab in the drawer, also before a focusable topLeft in variant basic", async () => {
+		renderLayout({
+			collapseMenu: true,
+			variant: "basic",
+			topLeft: <a href={"#home"}>Home</a>,
+		});
+		await openDrawer();
+		const dialog = screen.getByRole("dialog");
+		const tabbable = dialog.querySelectorAll(
+			"a[href], button:not([disabled]), [tabindex='0']",
+		);
+		expect(tabbable[0]).toBe(
+			within(dialog).getByRole("button", { name: "Close menu" }),
+		);
+		expect(tabbable[1]).toBe(
+			within(dialog).getByRole("link", { name: "Home" }),
+		);
+		expect(tabbable[2]).toBe(
+			within(dialog).getByRole("button", { name: "Dashboard" }),
+		);
+	});
+	it("[ISSUE-3479-ITEM-11] a second click on the close button while the drawer slides out leaves it closed", async () => {
+		renderLayout({ collapseMenu: true });
+		await openDrawer();
+		const close = within(screen.getByRole("dialog")).getByRole("button", {
+			name: "Close menu",
+		});
+		fireEvent.click(close);
+		fireEvent.click(close);
+		expect(probe()).toBe("true/false");
+		await waitFor(() => expect(drawerIsOpen()).toBe(false));
+	});
+	it("[ISSUE-3479-ITEM-11] the desktop menu has no close button", () => {
+		stubViewport(1200);
+		renderLayout();
+		expect(probe()).toBe("false/false");
+		expect(
+			screen.getByRole("button", { name: "Dashboard" }),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: "Close menu", hidden: true }),
+		).not.toBeInTheDocument();
+	});
+	it("[ISSUE-3479-ITEM-11] the close button's label is translated in every locale", () => {
+		const i18nDir = path.resolve(__dirname, "../../src/assets/i18n");
+		const labels = Object.fromEntries(
+			fs
+				.readdirSync(i18nDir, { withFileTypes: true })
+				.filter((entry) => entry.isDirectory())
+				.map((entry) => {
+					const translation = JSON.parse(
+						fs.readFileSync(
+							path.join(i18nDir, entry.name, "translation.json"),
+							"utf8",
+						),
+					) as {
+						standalone: { portal: Record<string, string | undefined> };
+					};
+					return [entry.name, translation.standalone.portal["close-menu"]];
+				}),
+		);
+		expect(Object.keys(labels)).toHaveLength(8);
+		expect(labels.en).toBe("Close menu");
+		for (const [lng, label] of Object.entries(labels)) {
+			if (lng === "en") continue;
+			expect(label, lng).toMatch(/\S/);
+			expect(label, lng).not.toBe(labels.en);
+		}
 	});
 	it("[ISSUE-3479-ITEM-25] crossing the breakpoint keeps the menu's active entry and expanded groups", async () => {
 		stubViewport(1200);
