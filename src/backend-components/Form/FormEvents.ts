@@ -9,6 +9,12 @@ export interface FormDirtyEvent {
 	 * @see FormContextData.dirty
 	 */
 	dirty: boolean;
+	/**
+	 * The new staged dirty state of the form (flow mode, always false without it)
+	 * @remarks The form holds unsaved changes while `dirty || stagedDirty`.
+	 * @see FormContextData.stagedDirty
+	 */
+	stagedDirty: boolean;
 }
 
 /**
@@ -16,7 +22,7 @@ export interface FormDirtyEvent {
  */
 export interface FormEvents extends Record<string, unknown> {
 	/**
-	 * The form's dirty state changed
+	 * The form's dirty state changed: dirty, stagedDirty or both. The event carries both.
 	 */
 	dirty: FormDirtyEvent;
 }

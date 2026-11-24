@@ -49,7 +49,8 @@ const TOOLTIP_SLOTS = { transition: FormPageSaveButtonTransition };
  * fades out.
  *
  * It neither saves nor disables itself: pass `onClick` and `disabled` (DefaultFormPage and
- * FlowEngineSaveButton disable it while the form is not dirty, saves or is read-only). A
+ * FlowEngineSaveButton disable it while the form has nothing to save, saves or is
+ * read-only). A
  * disabled Save stays focusable (see `disabled`), so keyboard focus stays on it during and
  * after a save, and keyboard users reach the reasons too: the tooltip also shows while the
  * button has keyboard focus. An `aria-describedby` of the caller is kept, before the

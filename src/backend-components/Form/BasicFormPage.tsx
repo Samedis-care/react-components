@@ -47,6 +47,7 @@ export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<
 	safeSubmit: () => Promise<boolean>;
 	/**
 	 * Is the form dirty?
+	 * @see FormContextData.dirty
 	 */
 	dirty: boolean;
 	/**
@@ -143,6 +144,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		safeSubmit: unusedSafeSubmit, // replaced by handleSafeSubmit below, must not reach the renderer
 		dirty,
+		stagedDirty,
 		disableRouting,
 		postSubmitHandler,
 		isSubmitting,
@@ -162,14 +164,15 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	const readOnlyBesidesSaving = Object.keys(readOnlyReasons).some(
 		(reason) => reason !== FORM_SUBMITTING_READ_ONLY_REASON,
 	);
-	// the dirty prop is one render behind the form engine, which breaks "submit, then
+	// the dirty props are one render behind the form engine, which breaks "submit, then
 	// go back": the record is saved, but goBack below would still see a dirty form.
 	// The dirty event fires as soon as the form engine sees the change, so this ref is
-	// current even while a re-render is still pending.
-	const dirtyRef = useRef(dirty);
+	// current even while a re-render is still pending. The changes goBack asks about are the
+	// shown values and, in flow mode, the staged ones.
+	const dirtyRef = useRef(dirty || stagedDirty);
 	useEffect(() => {
 		const handleDirtyChange = (event: FormDirtyEvent) => {
-			dirtyRef.current = event.dirty;
+			dirtyRef.current = event.dirty || event.stagedDirty;
 		};
 		addEventListener("dirty", handleDirtyChange);
 		return () => removeEventListener("dirty", handleDirtyChange);
@@ -282,6 +285,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 							readOnlyReasons={readOnlyReasons}
 							isSubmitting={isSubmitting}
 							dirty={dirty}
+							stagedDirty={stagedDirty}
 							disableRouting={disableRouting}
 							submit={handleSubmit}
 							safeSubmit={handleSafeSubmit}

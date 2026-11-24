@@ -10,8 +10,17 @@
  */
 import "@testing-library/jest-dom/vitest";
 import React, { useState } from "react";
-import { assertType, describe, expect, it, MockInstance, vi } from "vitest";
+import {
+	assertType,
+	describe,
+	expect,
+	it,
+	MockInstance,
+	onTestFinished,
+	vi,
+} from "vitest";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import { createMemoryHistory } from "history";
 import FormField from "../../../src/backend-components/Form/Field";
 import {
 	PageProps,
@@ -25,8 +34,14 @@ import FlowEngine, {
 } from "../../../src/backend-components/Form/FlowEngine/FlowEngine";
 import FlowEngineFormPage from "../../../src/backend-components/Form/FlowEngine/FlowEngineFormPage";
 import FlowEngineSaveButton from "../../../src/backend-components/Form/FlowEngine/FlowEngineSaveButton";
+import FlowEngineBackButton from "../../../src/backend-components/Form/FlowEngine/FlowEngineBackButton";
+import { FormDirtyEvent } from "../../../src/backend-components/Form/FormEvents";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import { ModelUnknown } from "../../../src/backend-integration";
+import {
+	FrameworkHistory,
+	setFrameworkHistory,
+} from "../../../src/framework/History";
 import {
 	FieldExtras,
 	inputOf,
@@ -40,6 +55,7 @@ import {
 	TestFormProps,
 	wait,
 } from "./formFixture";
+import { leavePrompts, unloadIsBlocked } from "./pageFixture";
 import ActionButton from "../../../src/standalone/UIKit/ActionButton";
 import {
 	configureErrorReporting,
@@ -334,7 +350,169 @@ const setupSave = (
 		{ formProps: { readOnlyReasons } },
 	);
 
+/**
+ * Footer buttons of a stage: a FlowEngineSaveButton
+ */
+const saveOnly = () => [<FlowEngineSaveButton key={"s"} />];
+
+/**
+ * Makes the Framework navigate in a memory history at /page for the rest of the test (set
+ * before the Form mounts), so a navigation can be started and a leave prompt observed
+ * @returns The history
+ */
+const memoryHistory = () => {
+	const previous = FrameworkHistory;
+	const history = createMemoryHistory({ initialEntries: ["/page"] });
+	setFrameworkHistory(history);
+	onTestFinished(() => setFrameworkHistory(previous));
+	// a navigation scrolls to the top, which jsdom does not implement
+	vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
+	return history;
+};
+
 describe("FlowEngine: bugs", () => {
+	it("[ISSUE-3504-ITEM-1] staged edits of an earlier stage set stagedDirty and keep the form guarded and savable", async () => {
+		const history = memoryHistory();
+		const { sink, flow } = setup(
+			{ a: pageStage("title", saveOnly), b: pageStage("note", saveOnly) },
+			{
+				formProps: {
+					customProps: { goBack: vi.fn(), hasCustomSubmitHandler: false },
+				},
+			},
+		);
+		await loaded(sink);
+		await set(sink, "title", "typed in a");
+		expect(sink.ctx!.dirty).toBe(true);
+		expect(sink.ctx!.stagedDirty, "nothing staged yet").toBe(false);
+		expect(unloadIsBlocked()).toBe(true);
+		expect(await go(flow, "b", false)).toBeNull();
+		expect(sink.ctx!.values.title).toBe("typed in a");
+
+		expect(sink.ctx!.dirty, "stage b's own values are unchanged").toBe(false);
+		expect(sink.ctx!.stagedDirty, "stage a's edit is staged, not saved").toBe(
+			true,
+		);
+		expect(unloadIsBlocked(), "the browser asks before unload").toBe(true);
+		expect(screen.getByRole("button", { name: "Save" })).not.toHaveAttribute(
+			"aria-disabled",
+		);
+		act(() => history.push("/other"));
+		await waitFor(() => expect(leavePrompts()).toHaveLength(1));
+	});
+	it("[ISSUE-3504-ITEM-1] the page props and the dirty event carry both flags", async () => {
+		const events: FormDirtyEvent[] = [];
+		const { sink, flow } = setup({ a: TITLE, b: NOTE });
+		await loaded(sink);
+		sink.ctx!.addEventListener("dirty", (event) => events.push(event));
+		await set(sink, "title", "typed in a");
+		expect(flow.pageProps).toMatchObject({ dirty: true, stagedDirty: false });
+		expect(await go(flow, "b", false)).toBeNull();
+		expect(flow.pageProps).toMatchObject({ dirty: false, stagedDirty: true });
+		expect(flow.props!.formProps).toMatchObject({
+			dirty: false,
+			stagedDirty: true,
+		});
+		expect(events.at(-1)).toEqual({ dirty: false, stagedDirty: true });
+
+		await set(sink, "note", "typed in b");
+		expect(events.at(-1)).toEqual({ dirty: true, stagedDirty: true });
+		expect(await go(flow, "c", true)).toBeNull();
+		expect(events.at(-1)).toEqual({ dirty: false, stagedDirty: false });
+		expect(flow.pageProps).toMatchObject({ dirty: false, stagedDirty: false });
+	});
+	it("[ISSUE-3504-ITEM-1] the flow's Cancel button asks before it leaves staged edits", async () => {
+		const history = memoryHistory();
+		// a CRUD's goBack navigates to the list
+		const goBack = vi.fn(() => history.push("/list"));
+		const { sink, flow } = setup(
+			{
+				a: pageStage("title", saveOnly),
+				b: pageStage("note", () => [
+					<FlowEngineBackButton key={"c"}>{"Cancel"}</FlowEngineBackButton>,
+				]),
+			},
+			{ formProps: { customProps: { goBack, hasCustomSubmitHandler: false } } },
+		);
+		await loaded(sink);
+		await set(sink, "title", "typed in a");
+		expect(await go(flow, "b", false)).toBeNull();
+		fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+		await waitFor(() => expect(leavePrompts()).toHaveLength(1));
+		expect(goBack).toHaveBeenCalledTimes(1);
+		expect(history.location.pathname, "not left before the answer").toBe(
+			"/page",
+		);
+	});
+	it("[ISSUE-3504-ITEM-1] a new record: what the first stage staged keeps the second stage's Save enabled and saves with it", async () => {
+		const { sink, flow, create } = setup(
+			{ a: pageStage("title", saveOnly), b: pageStage("note", saveOnly) },
+			{ formProps: { id: null } },
+		);
+		await loaded(sink, "");
+		await set(sink, "title", "new title");
+		expect(await go(flow, "b", false)).toBeNull();
+		expect(sink.ctx!.dirty).toBe(false);
+		expect(sink.ctx!.stagedDirty).toBe(true);
+		expect(unloadIsBlocked()).toBe(true);
+		const save = screen.getByRole("button", { name: "Save" });
+		expect(save).not.toHaveAttribute("aria-disabled");
+		fireEvent.click(save);
+		await waitFor(() => expect(create).toHaveBeenCalledTimes(1));
+		expect(sent(create)[0]).toMatchObject({ title: "new title" });
+	});
+	it("[ISSUE-3504-ITEM-1] Save in a later stage saves the staged edit of an earlier stage, then both flags are clear", async () => {
+		const { sink, flow, update } = setup({
+			a: pageStage("title", saveOnly),
+			b: pageStage("note", saveOnly),
+		});
+		await loaded(sink);
+		await set(sink, "title", "typed in a");
+		expect(await go(flow, "b", false)).toBeNull();
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+		await waitFor(() =>
+			expect(sent(update)).toEqual([{ id: "1", title: "typed in a" }]),
+		);
+		await settle();
+		expect(flow.props!.stage).toBe("b");
+		expect(sink.ctx!.dirty).toBe(false);
+		expect(sink.ctx!.stagedDirty).toBe(false);
+		expect(unloadIsBlocked()).toBe(false);
+		expect(screen.getByRole("button", { name: "Save" })).toHaveAttribute(
+			"aria-disabled",
+			"true",
+		);
+	});
+	it("[ISSUE-3504-ITEM-1] a staged edit taken back in its stage leaves stagedDirty clear in the next stage", async () => {
+		const { sink, flow } = setup({ a: TITLE, b: NOTE });
+		await loaded(sink);
+		await set(sink, "title", "typed in a");
+		expect(await go(flow, "b", false)).toBeNull();
+		expect(sink.ctx!.stagedDirty).toBe(true);
+		expect(await go(flow, "a", false)).toBeNull();
+		expect(sink.ctx!.dirty, "stage a shows the staged edit").toBe(true);
+		await set(sink, "title", "T1");
+		expect(sink.ctx!.dirty).toBe(false);
+		expect(await go(flow, "b", false)).toBeNull();
+		expect(sink.ctx!.values.title).toBe("T1");
+		expect(sink.ctx!.dirty).toBe(false);
+		expect(sink.ctx!.stagedDirty).toBe(false);
+		expect(unloadIsBlocked()).toBe(false);
+	});
+	it("[ISSUE-3504-ITEM-1] a form without flowEngine never sets stagedDirty", async () => {
+		const sink: Sink = {};
+		const props: { current?: PageProps<ModelUnknown, undefined> } = {};
+		mountForm(makeModel(), (p) => {
+			props.current = p;
+			sink.ctx = useFormContext<ModelUnknown>();
+			return <FormField name={"title"} />;
+		});
+		await loaded(sink);
+		await set(sink, "title", "typed");
+		expect(sink.ctx!.dirty).toBe(true);
+		expect(sink.ctx!.stagedDirty).toBe(false);
+		expect(props.current).toMatchObject({ dirty: true, stagedDirty: false });
+	});
 	it("[ISSUE-3504-ITEM-2] a refetch with a server change elsewhere keeps the staged values of a stage that is not shown", async () => {
 		const { sink, flow, update, connector } = setup({ a: TITLE, b: NOTE });
 		await loaded(sink);

@@ -44,7 +44,7 @@ import uniqueArray from "../../utils/uniqueArray";
 import { hashKey, QueryObserverBaseResult } from "@tanstack/react-query";
 import ValidationError from "./ValidationError";
 import TypedEventTarget from "../../utils/TypedEventTarget";
-import { FormEvents, FormEventTarget } from "./FormEvents";
+import { FormDirtyEvent, FormEvents, FormEventTarget } from "./FormEvents";
 import { DirtyStateContext, NO_DIRTY_STATE } from "./DirtyStateContext";
 import useFormPageGuard, { FormPageGuardContext } from "./FormPageGuard";
 import deepEqual from "../../utils/deepEqual";
@@ -142,8 +142,15 @@ export interface PageProps<M extends ModelUnknown, CustomPropsT> {
 	isSubmitting: boolean;
 	/**
 	 * Is the form dirty?
+	 * @see FormContextData.dirty
 	 */
 	dirty: boolean;
+	/**
+	 * Flow mode: do values that stages staged and the flow has not saved yet differ from the
+	 * server record?
+	 * @see FormContextData.stagedDirty
+	 */
+	stagedDirty: boolean;
 	/**
 	 * Has the form disableRouting flag?
 	 * @see FormProps disableRouting
@@ -385,6 +392,9 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
 	showDirtyState?: boolean;
 	/**
 	 * Enable flow engine mode
+	 * @remarks The form has two dirty flags then: `dirty` for the values of the shown stage,
+	 *          `stagedDirty` for the values that stages staged and the flow has not saved yet.
+	 *          See FormContextData.dirty and FormContextData.stagedDirty.
 	 */
 	flowEngine?: boolean;
 	/**
@@ -566,12 +576,41 @@ export interface FormContextData<
 	 */
 	removeEventListener: FormEventTarget["removeEventListener"];
 	/**
-	 * Is the form dirty?
+	 * Is the form dirty? Do the values it submits differ from the server record, is a custom
+	 * field dirty (setCustomFieldDirty), or is the record deleted on submit (deleteOnSubmit)?
+	 *
+	 * In flow mode (FormProps.flowEngine) the values are those the shown stage submits: the
+	 * fields it renders, alwaysSubmitFields and hidden fields, or every field when its stage
+	 * config turns onlySubmitMounted off. What earlier stages staged (goToStage without
+	 * submitToServer) and the stage does not submit again is not counted here but in
+	 * stagedDirty. A button that goes on to the next stage without saving (Next) follows this
+	 * flag. A button that saves (FlowEngineSaveButton, goToStage with submitToServer) saves the
+	 * shown stage's values and the staged ones, so it follows `dirty || stagedDirty`, and so
+	 * does every check whether the form holds unsaved changes.
 	 * @remarks This is rendered state, so it lags behind by a render. Subscribe to the
 	 *          "dirty" event to be notified the moment the form engine sees the change.
 	 * @see addEventListener
+	 * @see stagedDirty
 	 */
 	dirty: boolean;
+	/**
+	 * Flow mode (FormProps.flowEngine): do the values that stages staged (goToStage without
+	 * submitToServer) differ from the server record? They are what the next save sends besides
+	 * the values of the shown stage, also while the stage that renders them is not shown.
+	 *
+	 * Set from the moment a stage change stages an edit until the flow saves it (goToStage
+	 * with submitToServer, FlowEngineSaveButton, submit with submitToServer), or until the
+	 * staged value is the server's again. Always false without flowEngine.
+	 *
+	 * The form holds unsaved changes while `dirty || stagedDirty`: the leave guard asks then
+	 * (closing the browser tab, a navigation away, closing a FullFormDialog, the form page's
+	 * goBack), and a Save button is enabled then. A Next button follows `dirty` alone.
+	 * @remarks This is rendered state, so it lags behind by a render; the "dirty" event
+	 *          carries it too.
+	 * @see dirty
+	 * @see addEventListener
+	 */
+	stagedDirty: boolean;
 	/**
 	 * Per-field dirty state: does the field's value differ from the server-side one?
 	 * @remarks One entry per model field, and nothing else. Custom (non-model) fields
@@ -863,6 +902,7 @@ export type FormContextDataLite<
 	| "safeSubmit"
 	| "submitting"
 	| "dirty"
+	| "stagedDirty"
 	| "showDirtyState"
 	| "flowEngineConfig"
 	| "refetchForm"
@@ -1495,6 +1535,58 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 		[getCustomDirtyFields, getDeleted, deleteOnSubmit, id],
 	);
 	const dirty = getDirty(formDirty);
+	/**
+	 * Do the staged values differ from the baseline? Compares the fields the flow's save
+	 * sends, as the save picks them: those a stage staged as modified, alwaysSubmitFields and
+	 * hidden fields, every field of a new record
+	 * @param staged The staged values
+	 * @param stagedModified The fields a stage staged as modified
+	 * @param baseline The server record (initialValues), undefined before it loaded
+	 * @returns false without flowEngine and before the baseline and the default record loaded
+	 * @see FormContextData.stagedDirty
+	 */
+	const getStagedDirty = useCallback(
+		(
+			staged: Record<string, unknown>,
+			stagedModified: Record<string, boolean>,
+			baseline: Record<string, unknown> | undefined,
+		): boolean => {
+			if (!flowEngine || !baseline || !defaultRecord) return false;
+			const config: DirtyDetectionConfig = {
+				ignoreFields: dirtyIgnoreFields,
+				model,
+				defaultRecord: defaultRecord[0],
+				onlySubmitMountedBehaviour,
+				onlySubmitMounted: id === null ? false : (onlySubmitMounted ?? false),
+				alwaysSubmitFields,
+				mountedFields: stagedModified,
+			};
+			return (
+				toComparisonJson(normalizeValues(staged, config)) !==
+				toComparisonJson(normalizeValues(baseline, config))
+			);
+		},
+		[
+			flowEngine,
+			defaultRecord,
+			dirtyIgnoreFields,
+			model,
+			onlySubmitMountedBehaviour,
+			id,
+			onlySubmitMounted,
+			alwaysSubmitFields,
+		],
+	);
+	/**
+	 * @see FormContextData.stagedDirty
+	 */
+	const stagedDirty = useMemo(
+		// the baseline is passed as the state, like for dirtyFields, so that replacing it
+		// after a save or a refetch recomputes the flag
+		() =>
+			getStagedDirty(valuesStaged, valuesStagedModified, initialValuesState),
+		[getStagedDirty, valuesStaged, valuesStagedModified, initialValuesState],
+	);
 
 	// main form handling - dirty state events
 	// dirty is derived from state, so a listener relying on the rendered flag only learns
@@ -1502,27 +1594,48 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 	// the form is clean the moment submit resolves, but React hasn't re-rendered yet.
 	// So the last dispatched value is kept in a ref and compared against the freshly
 	// computed one, which lets the form engine announce the change right when it happens.
-	const dispatchedDirtyRef = useRef<boolean | null>(null);
+	const dispatchedDirtyRef = useRef<FormDirtyEvent | null>(null);
 	const dispatchDirtyEvent = useCallback(
-		(dirty: boolean) => {
-			if (dispatchedDirtyRef.current === dirty) return;
-			dispatchedDirtyRef.current = dirty;
-			formEvents.dispatchEvent("dirty", { dirty });
+		(dirty: boolean, stagedDirty: boolean) => {
+			const dispatched = dispatchedDirtyRef.current;
+			if (
+				dispatched &&
+				dispatched.dirty === dirty &&
+				dispatched.stagedDirty === stagedDirty
+			)
+				return;
+			const event: FormDirtyEvent = { dirty, stagedDirty };
+			dispatchedDirtyRef.current = event;
+			formEvents.dispatchEvent("dirty", event);
 		},
 		[formEvents],
 	);
 	/**
-	 * Recomputes the dirty state from the refs and dispatches the dirty event if it changed
-	 * @remarks Call this after synchronously mutating values/initial values, to notify
-	 *          listeners without waiting for the re-render.
+	 * Recomputes the dirty state (dirty and stagedDirty) from the refs and dispatches the
+	 * dirty event if it changed
+	 * @remarks Call this after synchronously mutating values/staged values/initial values, to
+	 *          notify listeners without waiting for the re-render.
 	 */
 	const syncDirtyState = useCallback(() => {
-		dispatchDirtyEvent(getDirty(getFormDirty(valuesRef.current)));
-	}, [dispatchDirtyEvent, getDirty, getFormDirty]);
+		dispatchDirtyEvent(
+			getDirty(getFormDirty(valuesRef.current)),
+			getStagedDirty(
+				valuesStagedRef.current,
+				valuesStagedModifiedRef.current,
+				getInitialValues(),
+			),
+		);
+	}, [
+		dispatchDirtyEvent,
+		getDirty,
+		getFormDirty,
+		getStagedDirty,
+		getInitialValues,
+	]);
 	// catch-all for every dirty change that isn't announced by an explicit syncDirtyState
 	useEffect(() => {
-		dispatchDirtyEvent(dirty);
-	}, [dirty, dispatchDirtyEvent]);
+		dispatchDirtyEvent(dirty, stagedDirty);
+	}, [dirty, stagedDirty, dispatchDirtyEvent]);
 	// syncDirtyState changes with the dirty baseline (initial values, mounted fields, a flow
 	// stage's alwaysSubmitFields), setCustomFieldDirty must not
 	const syncDirtyStateRef = useRef(syncDirtyState);
@@ -2396,6 +2509,14 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 			);
 			console.log("Custom Dirty State:", getCustomDirtyFields().length > 0);
 			console.log("Custom Dirty Fields:", getCustomDirtyFields());
+			console.log(
+				"Staged Dirty State:",
+				getStagedDirty(
+					valuesStagedRef.current,
+					valuesStagedModifiedRef.current,
+					getInitialValues(),
+				),
+			);
 
 			console.log("Server Data:", remoteData);
 			console.log("Form Data:", localData);
@@ -2428,6 +2549,8 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 			getNormalizedData,
 			getDirtyFields,
 			getCustomDirtyFields,
+			getStagedDirty,
+			getInitialValues,
 			model.fields,
 		],
 	);
@@ -2439,11 +2562,12 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 	// as the changes do, also while no form page is mounted (one in a routed tab panel when
 	// another tab is open). A save makes the form read-only too, but its changes are unsaved
 	// until it succeeds, so only a form which is read-only for another reason goes unguarded.
+	// The changes are the shown values and, in flow mode, the staged ones.
 	const pageGuard = useFormPageGuard({
 		readOnlyBesidesSaving: Object.keys(readOnlyReasons).some(
 			(reason) => reason !== FORM_SUBMITTING_READ_ONLY_REASON,
 		),
-		dirty,
+		unsaved: dirty || stagedDirty,
 		addEventListener: formEvents.addEventListener,
 		removeEventListener: formEvents.removeEventListener,
 	});
@@ -2467,6 +2591,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 			markFieldMounted,
 			setCustomFieldDirty,
 			dirty,
+			stagedDirty,
 			dirtyFields,
 			showDirtyState: !!showDirtyState,
 			getCustomState,
@@ -2529,6 +2654,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 			markFieldMounted,
 			setCustomFieldDirty,
 			dirty,
+			stagedDirty,
 			dirtyFields,
 			showDirtyState,
 			getCustomState,
@@ -2609,6 +2735,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 			safeSubmit: safeSubmitForm,
 			submitting,
 			dirty,
+			stagedDirty,
 			showDirtyState: !!showDirtyState,
 			flowEngineConfig,
 			refetchForm: refetch,
@@ -2637,6 +2764,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 			safeSubmitForm,
 			submitting,
 			dirty,
+			stagedDirty,
 			showDirtyState,
 			refetch,
 		],
@@ -2692,6 +2820,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 						safeSubmit={safeSubmitForm}
 						reset={resetForm}
 						dirty={dirty}
+						stagedDirty={stagedDirty}
 						id={id}
 						customProps={customProps}
 						disableRouting={!!props.disableRouting}

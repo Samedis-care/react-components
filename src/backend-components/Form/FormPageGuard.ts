@@ -53,10 +53,10 @@ export interface UseFormPageGuardParams {
 	 */
 	readOnlyBesidesSaving: boolean;
 	/**
-	 * The Form's rendered dirty state, read once as the start value; the "dirty" event
-	 * keeps the guard current from then on
+	 * Does the Form hold unsaved changes (its rendered dirty || stagedDirty)? Read once as
+	 * the start value; the "dirty" event keeps the guard current from then on
 	 */
-	dirty: boolean;
+	unsaved: boolean;
 	/**
 	 * The Form's addEventListener
 	 */
@@ -106,7 +106,8 @@ const isInsideFormPage = (
 	matchPath({ path: routePath }, pathname)?.url === routeUrl;
 
 /**
- * The leave guard of a Form's unsaved changes: while the form is dirty, a navigation asks
+ * The leave guard of a Form's unsaved changes: while the form is dirty or, in flow mode,
+ * holds staged changes (FormContextData.stagedDirty), a navigation asks
  * "Leave form page?" (a navigation that keeps the form's Route rendered at the same url
  * passes, also for a disableRouting Form, and so does a move of the page marked with
  * FORM_PAGE_MOVE_STATE),
@@ -127,7 +128,7 @@ const isInsideFormPage = (
 const useFormPageGuard = (params: UseFormPageGuardParams): FormPageGuard => {
 	const {
 		readOnlyBesidesSaving,
-		dirty,
+		unsaved,
 		addEventListener,
 		removeEventListener,
 	} = params;
@@ -147,10 +148,10 @@ const useFormPageGuard = (params: UseFormPageGuardParams): FormPageGuard => {
 	// then navigate away": the record is saved, but the guards below still see a dirty form.
 	// The dirty event fires as soon as the form engine sees the change, so this ref is
 	// current even while a re-render is still pending.
-	const dirtyRef = useRef(dirty);
+	const dirtyRef = useRef(unsaved);
 	useEffect(() => {
 		const handleDirtyChange = (event: FormDirtyEvent) => {
-			dirtyRef.current = event.dirty;
+			dirtyRef.current = event.dirty || event.stagedDirty;
 		};
 		addEventListener("dirty", handleDirtyChange);
 		return () => removeEventListener("dirty", handleDirtyChange);
@@ -240,7 +241,7 @@ const useFormPageGuard = (params: UseFormPageGuardParams): FormPageGuard => {
 			}
 		};
 		const handleDirtyChange = (event: FormDirtyEvent) => {
-			if (enabled.current) applyGuards(event.dirty);
+			if (enabled.current) applyGuards(event.dirty || event.stagedDirty);
 		};
 		applyGuardsRef.current = applyGuards;
 		if (enabled.current) applyGuards(dirtyRef.current);
