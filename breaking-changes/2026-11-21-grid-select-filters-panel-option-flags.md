@@ -32,11 +32,6 @@ the panel by its width, so the filter's choices depended on the window size.
 
 ## Migration
 
-Nothing to do for SCF, IMF and the hlth.care frontend: IMF and hlth.care do not use the
-helpers, and SCF passes no `hidden` option and no `[text, node]` label. SCF's one
-`isDisabled` source (the device task filter's issue types) is already overridden with
-`isDisabled: false`, so those types stay pickable in both places.
-
 Required for an app that marks an option `isDisabled` or `hidden` for its forms but wants it
 pickable in a grid filter: without a change, the panel now behaves like the bar and the option
 cannot be picked there either. Clear the flags when building the filter's options:
