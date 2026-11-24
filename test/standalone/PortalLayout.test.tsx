@@ -1,10 +1,23 @@
 import "@testing-library/jest-dom/vitest";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	within,
+} from "@testing-library/react";
 import { createTheme, List, Theme, ThemeProvider } from "@mui/material";
-import PortalLayout, { PortalLayoutProps, usePortalLayoutContext } from "../../src/standalone/Portal/Layout";
-import MenuBase, { IMenuItemDefinition } from "../../src/standalone/Portal/Menu";
+import PortalLayout, {
+	PortalLayoutProps,
+	usePortalLayoutContext,
+} from "../../src/standalone/Portal/Layout";
+import MenuBase, {
+	IMenuItemDefinition,
+} from "../../src/standalone/Portal/Menu";
 import MaterialMenuItem from "../../src/standalone/Portal/MenuItem/Material";
 import CollapsibleMenu from "../../src/standalone/Portal/CollapsibleMenu";
 

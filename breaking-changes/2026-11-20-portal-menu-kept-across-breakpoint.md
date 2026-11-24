@@ -36,7 +36,7 @@ returned to desktop.
 
 - Required for apps that style or query the menu through a direct-child selector of the
   menu paper or the drawer's paper (`> `) or through `firstElementChild`: use a
-  descendant selector or a class of the menu itself. IMF, SCF and hlth.care do not.
+  descendant selector or a class of the menu itself.
 - Required for apps that relied on the switch to reset part of the menu: key that part on
   the layout's mode, from a component inside `menuContent`:
 
