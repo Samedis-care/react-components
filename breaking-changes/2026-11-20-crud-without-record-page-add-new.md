@@ -28,10 +28,6 @@ no permission.
 
 ## Migration
 
-Nothing to do for SCF and IMF: none of their CRUDs without a record page passes
-`gridProps.onAddNew`, and SamedisCrud sets `newPermissionHint` only together with
-`newPermission={false}`.
-
 Required for an app that passes `gridProps.onAddNew` to a CRUD without a record page and
 expects no New there: that grid now shows a New to users with `newPermission`. Remove
 `onAddNew` from such a list, or set `newPermission={false}`.
