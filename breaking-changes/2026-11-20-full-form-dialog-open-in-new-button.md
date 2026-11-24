@@ -37,9 +37,8 @@ of view.
 
 ## Migration
 
-Nothing to do for SCF and IMF. SCF's security message dialog passes `openInNewLink` and
-now shows the button; SCF's FullFormDialog renderer renders `FormDialogDefaultRenderer`
-on desktop, so it gets the button too. Neither app styles `openInNewIcon`.
+Nothing to do for a dialog that passes `openInNewLink`: it now shows the button, also when an
+app's renderer renders `FormDialogDefaultRenderer`.
 
 Required for an app whose theme places or sizes the icon through
 `components.CcFormDialog.styleOverrides.openInNewIcon` (a margin, a cursor): those styles
