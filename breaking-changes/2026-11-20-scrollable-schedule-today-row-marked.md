@@ -31,9 +31,10 @@ column by default.
 
 Nothing is required.
 
-SCF styles `&.CcScrollableScheduleDay-today` in `components.CcScrollableScheduleDay.styleOverrides.root`
-with a `secondary` background; its today row now also shows the bar and the bold label.
-A theme can restyle the mark in the same place, e.g. its color:
+A theme that already styles `&.CcScrollableScheduleDay-today` in
+`components.CcScrollableScheduleDay.styleOverrides.root` (e.g. with a background) now also
+shows the bar and the bold label there. A theme can restyle the mark in the same place,
+e.g. its color:
 
 ```ts
 CcScrollableScheduleDay: {

@@ -1,11 +1,30 @@
 import React, { useCallback } from "react";
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vitest";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	within,
+} from "@testing-library/react";
 import moment from "moment";
 import ccI18n from "../../src/i18n";
 import ScrollableSchedule from "../../src/standalone/Schedule/Scrollable";
 import type { LoadWeekCallback } from "../../src/standalone/Schedule/Scrollable";
-import type { IDayData, ScheduleFilterDefinition } from "../../src/standalone/Schedule/Common/DayContents";
+import type {
+	IDayData,
+	ScheduleFilterDefinition,
+} from "../../src/standalone/Schedule/Common/DayContents";
 
 // ScrollableSchedule with its weeks (ScrollableScheduleWeek), day rows
 // (ScrollableScheduleDay), and the shared DayContents / ScheduleFilterRenderer
@@ -661,7 +680,10 @@ describe("accessibility", () => {
 		);
 		await advance(400);
 		const rows = dayRows(container);
-		expect(rows).toHaveLength(14);
+		// whole weeks of 7 day rows: at least the current and the next one (mount
+		// also loads the week above, through InfiniteScroll)
+		expect(rows.length % 7).toBe(0);
+		expect(rows.length).toBeGreaterThanOrEqual(14);
 		const today = todayRow(container)!;
 		// a border survives forced-colors mode, which replaces backgrounds
 		const marked = rows.filter(
