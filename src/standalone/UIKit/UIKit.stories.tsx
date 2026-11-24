@@ -508,8 +508,6 @@ export const SubActionButtonDisabled: ActionButtonStory = {
 	),
 };
 
-const FORCED_HOVER = "cc-story-hover";
-
 /**
  * Shows the `:hover` style of `element` without a pointer: userEvent.hover is
  * synthetic and never matches `:hover`. Every `:hover` rule of the page is
