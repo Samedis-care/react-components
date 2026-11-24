@@ -237,7 +237,7 @@ describe("FilePreview — remove and restore", () => {
 		for (const variant of VARIANTS) {
 			const onRemove = vi.fn();
 			const onRestore = vi.fn();
-			// a visible label (SCF's chat shows the file type) does not replace the file name
+			// a visible label (e.g. the file type) does not replace the file name
 			const { rerender } = renderFile({
 				variant,
 				label: "TXT",
