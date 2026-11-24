@@ -33,24 +33,17 @@ scrolled sideways (WCAG 1.4.10 Reflow). Users who widen letter and word spacing
 Nothing to do where captions have room. Expect two-line captions in crowded rows, also
 in screenshots.
 
-**Required for samedis.care's `SamedisMobileBackendDataGrid`**: its row actions
-(`ItemRendererInnerActions`, `flexBasis: "0%"` and `flexShrink: 0` inside the row's
-horizontal swipe scroller) are as narrow as their captions allow. Without a change, every
-caption with a space or hyphen wraps there, and the 60px row cuts off its second line:
-"Einweisung dokumentieren" shows as "Einweisung", "QR-Code drucken" as "QR-". Size the
-panel by its content, which keeps each caption on one line as before:
+**Required for a box of `ComponentWithLabel`s that is sized to its min-content width**,
+such as row actions in a horizontal swipe scroller with `flexBasis: "0%"` and
+`flexShrink: 0`: the box is as narrow as the captions allow, so every caption with a space
+or hyphen now wraps there, and a row of fixed height cuts off the second line ("Print QR
+code" shows as "Print"). Size the box by its content (`flex-basis: auto` or
+`width: max-content`), which keeps each caption on one line as before:
 
 ```ts
-const ItemRendererInnerActions = styled("div")(({ theme }) => ({
+const RowActions = styled("div")({
 	display: "flex",
 	flexBasis: "auto", // was "0%"
 	flexShrink: 0,
-	flexGrow: 1,
-	scrollSnapAlign: "start",
-	verticalAlign: "top",
-	backgroundColor: theme.palette.secondary.light,
-}));
+});
 ```
-
-The same applies to any other box of `ComponentWithLabel`s that is sized to its
-min-content width: give it `flex-basis: auto` or `width: max-content`.
