@@ -1,6 +1,13 @@
 import React from "react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	within,
+} from "@testing-library/react";
 import ccI18n from "../../src/i18n";
 import WeekView from "../../src/standalone/Schedule/Weekly";
 import type { IDayData } from "../../src/standalone/Schedule/Common/DayContents";

@@ -30,10 +30,10 @@ mode (Windows contrast themes), which replaces background colors.
 
 Nothing is required.
 
-SCF styles `&.CcWeekViewDay-today` in `components.CcWeekViewDay.styleOverrides.paper`
-with a `secondary` background; its today column now also shows the bar (in SCF's primary
-blue) and the bold weekday and date. A theme can restyle the mark in the same place, e.g.
-the bar's color:
+A theme that already styles `&.CcWeekViewDay-today` in
+`components.CcWeekViewDay.styleOverrides.paper` (e.g. with a background) now also shows the
+bar and the bold weekday and date there. A theme can restyle the mark in the same place,
+e.g. the bar's color:
 
 ```ts
 CcWeekViewDay: {
