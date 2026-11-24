@@ -28,10 +28,8 @@ each filter at full width.
 
 ## Migration
 
-Nothing to do for SCF and IMF. Every SCF grid with a filter bar sets
-`enableFilterDialogWidth`, through `SamedisCrud`'s `useDefaultGridProps` or itself
-(`TrainingMatrixGrid`). IMF sets `enableFilterDialogMediaQuery` in its
-`useDefaultGridProps` and has no filter bars.
+Nothing to do for a grid that sets `enableFilterDialogWidth` or
+`enableFilterDialogMediaQuery`, or has no filter bar.
 
 Required for an app with a `filterBar` that sets neither prop and needs the bar in the
 header below 600px (for example a single filter that `barBreakpoints` makes full width):
