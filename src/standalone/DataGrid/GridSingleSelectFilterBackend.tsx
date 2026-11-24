@@ -23,7 +23,9 @@ export type GridSingleSelectFilterBackendProps<M extends ModelUnknown> =
 		 */
 		onSelect: NonNullable<BackendSingleSelectProps<M>["onSelect"]>;
 		/**
-		 * Is the grid filter rendered in a dialog?
+		 * Whether the filter is in the filter panel: pass
+		 * IDataGridFilterBarProps.inDialog. The panel shows the same selector
+		 * as the bar, sized by dialogBreakpoints instead of barBreakpoints.
 		 */
 		dialog: boolean;
 		/**

@@ -23,11 +23,14 @@ import DataGrid, {
 	type DataGridSetFilterData,
 	type IDataGridColumnDef,
 	type IDataGridState,
+	useDataGridColumnState,
 	useDataGridState,
 } from "../../src/standalone/DataGrid/DataGrid";
 import type { ModelFilterType } from "../../src/backend-integration/Model";
 import type { IDataGridFilterBarProps } from "../../src/standalone/DataGrid/Header/FilterBar";
 import userEvent from "@testing-library/user-event";
+import fs from "node:fs";
+import path from "node:path";
 import GridSingleSelectFilter from "../../src/standalone/DataGrid/GridSingleSelectFilter";
 import {
 	areDataGridCustomFiltersActive,
@@ -826,7 +829,7 @@ describe("FilterBar, CustomFiltersButton, CustomFilterDialog", () => {
 		// with the panel's helper mounted
 		fireEvent.click(button);
 		expect(screen.getByRole("radio", { name: "A" })).toBeChecked();
-		fireEvent.click(screen.getByRole("button", { name: "Close" }));
+		fireEvent.click(screen.getByRole("button", { name: "Show results" }));
 		await flush();
 		expect(icon()).not.toHaveClass(ACTIVE_ICON);
 		expect(gridState!.customData).toEqual({ status: "a" });
@@ -838,7 +841,7 @@ describe("FilterBar, CustomFiltersButton, CustomFilterDialog", () => {
 		const pickInPanel = async (label: string) => {
 			fireEvent.click(button);
 			fireEvent.click(screen.getByRole("radio", { name: label }));
-			fireEvent.click(screen.getByRole("button", { name: "Close" }));
+			fireEvent.click(screen.getByRole("button", { name: "Show results" }));
 			await flush();
 		};
 		await pickInPanel("A");
@@ -856,7 +859,7 @@ describe("FilterBar, CustomFiltersButton, CustomFilterDialog", () => {
 		fireEvent.click(button);
 		expect(panelOpen()).toBe(true);
 		fireEvent.click(screen.getByRole("button", { name: "Show archived" }));
-		fireEvent.click(screen.getByRole("button", { name: "Close" }));
+		fireEvent.click(screen.getByRole("button", { name: "Show results" }));
 		expect(panelOpen()).toBe(false);
 		await flush();
 		expect(icon()).toHaveClass(ACTIVE_ICON);
@@ -874,7 +877,7 @@ describe("FilterBar, CustomFiltersButton, CustomFilterDialog", () => {
 		// open the panel once, so the helper is mounted (and stays mounted)
 		fireEvent.click(button);
 		expect(idSelectorProps.current).toMatchObject({ selected: ["x"] });
-		fireEvent.click(screen.getByRole("button", { name: "Close" }));
+		fireEvent.click(screen.getByRole("button", { name: "Show results" }));
 		await flush();
 		expect(icon()).not.toHaveClass(ACTIVE_ICON);
 		// a changed selection marks it
@@ -1075,7 +1078,7 @@ describe("GridSingleSelectFilter, GridMultiSelectFilter: default and highlight f
 		fireEvent.click(button);
 		expect(screen.getByRole("checkbox", { name: "None" })).toBeChecked();
 		expect(screen.getByRole("checkbox", { name: "A" })).not.toBeChecked();
-		fireEvent.click(screen.getByRole("button", { name: "Close" }));
+		fireEvent.click(screen.getByRole("button", { name: "Show results" }));
 		await flush();
 		expect(button.querySelector("svg")).not.toHaveClass(ACTIVE_ICON);
 	});
@@ -1208,5 +1211,483 @@ describe("FilterBar: the default of enableFilterDialogWidth", () => {
 		);
 		await filterButton();
 		expect(barSelectors()).toHaveLength(0);
+	});
+});
+
+// --- ISSUE-3494-ITEM-32: the panel's footer; its lists, or the bar's selects on a phone
+/** the theme's phone breakpoint (xs), as useMediaQuery hands it to matchMedia */
+const PHONE_QUERY = theme.breakpoints.only("xs").replace(/^@media ?/, "");
+
+/**
+ * Sets the viewport to a phone's (it matches PHONE_QUERY) or a wider one.
+ * Returns a function that changes it later and tells the listeners, as a
+ * turned phone does.
+ */
+const viewport = (phone: boolean) => {
+	const listeners = new Set<() => void>();
+	vi.stubGlobal(
+		"matchMedia",
+		(query: string) =>
+			({
+				get matches() {
+					return phone && query === PHONE_QUERY;
+				},
+				media: query,
+				onchange: null,
+				addListener: (listener: () => void) => listeners.add(listener),
+				removeListener: (listener: () => void) => listeners.delete(listener),
+				addEventListener: (_type: string, listener: () => void) =>
+					listeners.add(listener),
+				removeEventListener: (_type: string, listener: () => void) =>
+					listeners.delete(listener),
+				dispatchEvent: () => false,
+			}) as unknown as MediaQueryList,
+	);
+	return (next: boolean) => {
+		phone = next;
+		act(() => listeners.forEach((listener) => listener()));
+	};
+};
+
+/** the combobox of a bar or panel filter (its label names it) */
+const filterCombobox = (container: HTMLElement, label: string) =>
+	within(container).getByRole<HTMLInputElement>("combobox", { name: label });
+
+/** opens a bar or panel filter's select and picks an option */
+const pickInSelect = async (combobox: HTMLElement, option: string) => {
+	act(() => combobox.focus());
+	fireEvent.mouseDown(combobox);
+	await flush();
+	fireEvent.click(screen.getByRole("option", { name: option }));
+	await flush();
+};
+
+let panelGrid: {
+	state: IDataGridState;
+	columnState: ReturnType<typeof useDataGridColumnState>[0];
+} | null = null;
+
+/** Status (single), Kinds (multi) and Teams (Backend multi), as an app's bar */
+const PanelBar = (p: IDataGridFilterBarProps) => {
+	const [state] = useDataGridState();
+	const [columnState] = useDataGridColumnState();
+	panelGrid = { state, columnState };
+	return (
+		<>
+			<GridSingleSelectFilter
+				label="Status"
+				options={OPTIONS}
+				field="status"
+				selected={p.customData.status as string | undefined}
+				onSelect={(v) => p.setCustomData((o) => ({ ...o, status: v }))}
+				dialog={p.inDialog}
+			/>
+			<GridMultiSelectFilter
+				label="Kinds"
+				options={OPTIONS.slice(1)}
+				field="kinds"
+				selected={p.customData.kinds as string[] | undefined}
+				onSelect={(v) => p.setCustomData((o) => ({ ...o, kinds: v }))}
+				dialog={p.inDialog}
+			/>
+			<GridMultiSelectFilterBackend
+				model={{} as never}
+				modelToSelectorData={(() => ({})) as never}
+				label="Teams"
+				selected={(p.customData.teams as string[] | undefined) ?? []}
+				onSelect={(v) => p.setCustomData((o) => ({ ...o, teams: v }))}
+				dialog={p.inDialog}
+			/>
+		</>
+	);
+};
+
+/** three rows; a status filter leaves one */
+const countedLoad = vi.fn(
+	({ additionalFilters }: { additionalFilters: Record<string, unknown> }) =>
+		({
+			rowsTotal: 3,
+			rowsFiltered: additionalFilters.status ? 1 : null,
+			rows: [{ id: "1", name: "x" }],
+		}) as DataGridData,
+);
+
+const PanelGrid = (p: Partial<DataGridProps>) => (
+	<Grid
+		filterBar={PanelBar}
+		loadData={countedLoad}
+		enableFilterDialogWidth={500}
+		classes={{ header: "my-header", contentOverlayPaper: "my-panel" }}
+		{...p}
+	/>
+);
+
+/** opens the panel and returns it */
+const openPanel = async () => {
+	fireEvent.click(await filterButton());
+	await flush();
+	const panel = Array.from(
+		document.querySelectorAll<HTMLElement>(".my-panel"),
+	).find((paper) => within(paper).queryByText("Filter selection"));
+	if (!panel) throw new Error("the panel is not open");
+	return panel;
+};
+
+describe("CustomFilterDialog: lists where there is room, the bar's selects on a phone", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it("[ISSUE-3494-ITEM-32] wider than a phone the panel keeps its lists, so an option is one click: radios, checkboxes, and the picked records below the Backend selector", async () => {
+		viewport(false);
+		render(
+			<PanelGrid
+				overrideCustomData={{ status: "a", kinds: ["b"], teams: ["t1"] }}
+			/>,
+		);
+		const panel = await openPanel();
+		expect(within(panel).queryAllByRole("combobox")).toHaveLength(0);
+		expect(within(panel).getAllByRole("radio")).toHaveLength(3);
+		expect(within(panel).getByRole("radio", { name: "A" })).toBeChecked();
+		expect(within(panel).getAllByRole("checkbox")).toHaveLength(2);
+		expect(within(panel).getByRole("checkbox", { name: "B" })).toBeChecked();
+		// GridMultiSelectFilterBackend: the selector with the list of records
+		expect(within(panel).getByTestId("backend-multi-select")).toBeTruthy();
+		expect(within(panel).queryByTestId("backend-multiple-select")).toBeNull();
+		expect(idSelectorProps.current).toMatchObject({ selected: ["t1"] });
+		// a click on an option applies it
+		fireEvent.click(within(panel).getByRole("radio", { name: "B" }));
+		fireEvent.click(within(panel).getByRole("checkbox", { name: "A" }));
+		await flush();
+		expect(panelGrid!.state.customData).toEqual({
+			status: "b",
+			kinds: ["b", "a"],
+			teams: ["t1"],
+		});
+	});
+	it("[ISSUE-3494-ITEM-32] on a phone the panel shows each helper with the bar's select: one row per filter, no lists", async () => {
+		viewport(true);
+		render(<PanelGrid overrideCustomData={{ status: "a", kinds: ["b"] }} />);
+		const panel = await openPanel();
+		expect(within(panel).queryAllByRole("radio")).toHaveLength(0);
+		expect(within(panel).queryAllByRole("checkbox")).toHaveLength(0);
+		expect(filterCombobox(panel, "Status")).toHaveValue("A");
+		expect(filterCombobox(panel, "Kinds").value.trim()).toBe("B");
+		// GridMultiSelectFilterBackend: the bar's selector, not the list of records
+		expect(within(panel).queryByTestId("backend-multi-select")).toBeNull();
+		expect(within(panel).getByTestId("backend-multiple-select")).toBeTruthy();
+		expect(idSelectorProps.current).toBeNull();
+		// a pick applies it, and the select is outlined as in the bar
+		await pickInSelect(filterCombobox(panel, "Status"), "B");
+		expect(panelGrid!.state.customData).toMatchObject({ status: "b" });
+		expect(filterCombobox(panel, "Status")).toHaveValue("B");
+		expect(
+			filterCombobox(panel, "Status").closest(".MuiAutocomplete-root"),
+		).toHaveClass(OUTLINED);
+	});
+	it("[ISSUE-3494-ITEM-32] on a phone the bar and the panel render the same selector for each helper", async () => {
+		viewport(true);
+		// the selects by name and value, and the (mocked) Backend selectors
+		const selectorsOf = (container: HTMLElement) =>
+			Array.from(
+				container.querySelectorAll<HTMLElement>(
+					"[role=combobox], [data-testid^=backend-]",
+				),
+			).map((element) =>
+				element instanceof HTMLInputElement
+					? `select: ${element.value.trim()}`
+					: element.getAttribute("data-testid"),
+			);
+		const custom = { status: "a", kinds: ["b"] };
+		render(
+			<PanelGrid enableFilterDialogWidth={0} overrideCustomData={custom} />,
+		);
+		await flush();
+		const bar = document.querySelector<HTMLElement>(
+			".components-care-data-grid-filter-bar",
+		)!;
+		const inBar = selectorsOf(bar);
+		expect(inBar).toHaveLength(3);
+		cleanup();
+		render(<PanelGrid overrideCustomData={custom} />);
+		const panel = await openPanel();
+		expect(selectorsOf(panel)).toEqual(inBar);
+	});
+	it("[ISSUE-3494-ITEM-32] the open panel follows the viewport: turned wide it shows the lists, turned back the selects, and the picks stay", async () => {
+		const setPhone = viewport(true);
+		render(<PanelGrid overrideCustomData={{ status: "a", kinds: ["b"] }} />);
+		const panel = await openPanel();
+		expect(filterCombobox(panel, "Status")).toHaveValue("A");
+		expect(within(panel).getByTestId("backend-multiple-select")).toBeTruthy();
+		setPhone(false);
+		await flush();
+		expect(within(panel).queryAllByRole("combobox")).toHaveLength(0);
+		expect(within(panel).getByRole("radio", { name: "A" })).toBeChecked();
+		expect(within(panel).getByRole("checkbox", { name: "B" })).toBeChecked();
+		expect(within(panel).getByTestId("backend-multi-select")).toBeTruthy();
+		setPhone(true);
+		await flush();
+		expect(within(panel).queryAllByRole("radio")).toHaveLength(0);
+		expect(filterCombobox(panel, "Status")).toHaveValue("A");
+		expect(filterCombobox(panel, "Kinds").value.trim()).toBe("B");
+		expect(panelGrid!.state.customData).toEqual({ status: "a", kinds: ["b"] });
+	});
+	it("[ISSUE-3494-ITEM-32] dialog on a phone: GridSingleSelectFilter and GridMultiSelectFilter alone are the bar's selects, named by their labels", () => {
+		viewport(true);
+		render(
+			<Ctx>
+				<GridSingleSelectFilter
+					label="Status"
+					options={OPTIONS}
+					selected="a"
+					field="status"
+					onSelect={vi.fn()}
+					dialog
+				/>
+				<GridMultiSelectFilter
+					label="Kinds"
+					options={OPTIONS.slice(1)}
+					selected={["a", "b"]}
+					field="kinds"
+					onSelect={vi.fn()}
+					dialog
+				/>
+			</Ctx>,
+		);
+		expect(screen.queryAllByRole("radio")).toHaveLength(0);
+		expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
+		expect(screen.getByRole("combobox", { name: "Status" })).toHaveValue("A");
+		expect(
+			screen
+				.getByRole<HTMLInputElement>("combobox", { name: "Kinds" })
+				.value.trim(),
+		).toBe("A, B");
+	});
+	it("[ISSUE-3494-ITEM-32] on a phone the panel leaves autocompleteId to the bar: a panel still mounted after the grid widened does not repeat the id", async () => {
+		viewport(true);
+		const IdBar = (p: IDataGridFilterBarProps) => (
+			<GridSingleSelectFilter
+				label="Status"
+				options={OPTIONS}
+				field="status"
+				selected={p.customData.status as string | undefined}
+				onSelect={(v) => p.setCustomData((o) => ({ ...o, status: v }))}
+				dialog={p.inDialog}
+				autocompleteId="status-filter"
+			/>
+		);
+		render(
+			<PanelGrid
+				filterBar={IdBar}
+				classes={{
+					header: "my-header",
+					contentOverlayPaper: "my-panel",
+					filterBarBox: "my-bar-box",
+				}}
+			/>,
+		);
+		const panel = await openPanel();
+		expect(filterCombobox(panel, "Status")).toBeTruthy();
+		// the grid gets wider than enableFilterDialogWidth: the bar is back
+		Object.defineProperty(
+			document.querySelector(".my-bar-box")!,
+			"clientWidth",
+			{
+				configurable: true,
+				get: () => 1000,
+			},
+		);
+		act(() => observers.forEach((observe) => observe()));
+		await flush();
+		expect(panelOpen()).toBe(false);
+		expect(document.querySelectorAll("#status-filter")).toHaveLength(1);
+		expect(
+			document.querySelector(
+				".components-care-data-grid-filter-bar #status-filter",
+			),
+		).toBeTruthy();
+	});
+});
+
+describe("CustomFilterDialog: the footer with the row count, Reset and Show results", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it("[ISSUE-3494-ITEM-32] a click in the panel applies at once, and the panel shows the grid's row count", async () => {
+		render(<PanelGrid />);
+		const panel = await openPanel();
+		const count = within(panel).getByRole("status");
+		await waitFor(() => expect(count).toHaveTextContent("Total: 3"));
+		expect(count).not.toHaveTextContent("Filtered");
+		fireEvent.click(within(panel).getByRole("radio", { name: "A" }));
+		await flush();
+		expect(panelGrid!.state.customData).toMatchObject({ status: "a" });
+		await waitFor(() =>
+			expect(
+				countedLoad.mock.calls.at(-1)?.[0].additionalFilters,
+			).toMatchObject({ status: "a" }),
+		);
+		await waitFor(() =>
+			expect(count).toHaveTextContent("Filtered: 1 Total: 3"),
+		);
+		expect(panelOpen()).toBe(true);
+	});
+	it("[ISSUE-3494-ITEM-32] the panel's count groups the digits as the footer does", async () => {
+		render(
+			<PanelGrid
+				loadData={() => ({
+					rowsTotal: 12345,
+					rowsFiltered: 1234,
+					rows: [{ id: "1", name: "x" }],
+				})}
+			/>,
+		);
+		const panel = await openPanel();
+		await waitFor(() =>
+			expect(within(panel).getByRole("status")).toHaveTextContent(
+				"Filtered: 1,234 Total: 12,345",
+			),
+		);
+	});
+	it("[ISSUE-3494-ITEM-32] while the grid reloads, the panel's count stays at the last one and is busy, instead of counting 0 rows", async () => {
+		let release: (() => void) | null = null;
+		const load = vi.fn(
+			({
+				additionalFilters,
+			}: {
+				additionalFilters: Record<string, unknown>;
+			}) =>
+				additionalFilters.status
+					? new Promise<DataGridData>((resolve) => {
+							release = () =>
+								resolve({
+									rowsTotal: 3,
+									rowsFiltered: 1,
+									rows: [{ id: "1", name: "x" }],
+								});
+						})
+					: { rowsTotal: 3, rows: [{ id: "1", name: "x" }] },
+		);
+		render(<PanelGrid loadData={load} />);
+		const panel = await openPanel();
+		const count = within(panel).getByRole("status");
+		await waitFor(() => expect(count).toHaveTextContent("Total: 3"));
+		expect(count).toHaveAttribute("aria-busy", "false");
+		fireEvent.click(within(panel).getByRole("radio", { name: "A" }));
+		// the reload is under way: the grid counts 0 rows until it is done
+		await waitFor(() => expect(release).not.toBeNull());
+		await flush();
+		expect(panelGrid!.state.rowsTotal).toBe(0);
+		expect(count).toHaveTextContent("Total: 3");
+		expect(count).not.toHaveTextContent("Total: 0");
+		expect(count).toHaveAttribute("aria-busy", "true");
+		act(() => release!());
+		await waitFor(() =>
+			expect(count).toHaveTextContent("Filtered: 1 Total: 3"),
+		);
+		expect(count).toHaveAttribute("aria-busy", "false");
+	});
+	it("[ISSUE-3494-ITEM-32] after a failed load the panel shows no count, not the last one", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		// the first load works; the reload with a status filter fails
+		const load = ({
+			additionalFilters,
+		}: {
+			additionalFilters: Record<string, unknown>;
+		}): DataGridData => {
+			if (additionalFilters.status) throw new Error("offline");
+			return { rowsTotal: 3, rows: [{ id: "1", name: "x" }] };
+		};
+		render(<PanelGrid loadData={load} />);
+		const panel = await openPanel();
+		const count = within(panel).getByRole("status");
+		await waitFor(() => expect(count).toHaveTextContent("Total: 3"));
+		fireEvent.click(within(panel).getByRole("radio", { name: "A" }));
+		await waitFor(() => expect(panelGrid!.state.dataLoadError).not.toBeNull());
+		await flush();
+		expect(count).toHaveTextContent(/^$/);
+		expect(count).toHaveAttribute("aria-busy", "false");
+	});
+	it('[ISSUE-3494-ITEM-32] "Show results" closes the panel and keeps the picks', async () => {
+		render(<PanelGrid />);
+		const panel = await openPanel();
+		expect(within(panel).queryByRole("button", { name: "Close" })).toBeNull();
+		act(() =>
+			(idSelectorProps.current!.onSelect as (v: string[]) => void)(["t1"]),
+		);
+		fireEvent.click(
+			within(panel).getByRole("button", { name: "Show results" }),
+		);
+		await flush();
+		expect(panelOpen()).toBe(false);
+		expect(panelGrid!.state.customData).toEqual({ teams: ["t1"] });
+	});
+	it("[ISSUE-3494-ITEM-32] the panel's Reset sets the custom data back to defaultCustomData, and leaves the search and the column filters alone", async () => {
+		const nameFilter: IFilterDef = {
+			type: "contains",
+			value1: "x",
+			value2: "",
+		};
+		render(
+			<PanelGrid
+				defaultCustomData={{ status: "a" }}
+				overrideCustomData={{ status: "b", kinds: ["a"], teams: ["t1"] }}
+				overrideSearch="foo"
+				overrideFilter={[{ field: "name", filter: nameFilter }]}
+			/>,
+		);
+		const panel = await openPanel();
+		fireEvent.click(within(panel).getByRole("button", { name: "Reset" }));
+		await flush();
+		expect(panelGrid!.state.customData).toEqual({ status: "a" });
+		expect(within(panel).getByRole("radio", { name: "A" })).toBeChecked();
+		expect(
+			within(panel).getByRole("checkbox", { name: "A" }),
+		).not.toBeChecked();
+		expect(idSelectorProps.current).toMatchObject({ selected: [] });
+		expect(panelGrid!.state.search).toBe("foo");
+		expect(panelGrid!.columnState.name.filter).toEqual(nameFilter);
+		// the panel stays open
+		expect(panelOpen()).toBe(true);
+		// without defaultCustomData, Reset empties the custom data
+		cleanup();
+		render(<PanelGrid overrideCustomData={{ status: "b" }} />);
+		fireEvent.click(
+			within(await openPanel()).getByRole("button", { name: "Reset" }),
+		);
+		await flush();
+		expect(panelGrid!.state.customData).toEqual({});
+	});
+	it("[ISSUE-3494-ITEM-32] with hideReset the panel has no Reset either", async () => {
+		render(<PanelGrid hideReset overrideCustomData={{ status: "b" }} />);
+		const panel = await openPanel();
+		expect(within(panel).queryByRole("button", { name: "Reset" })).toBeNull();
+		expect(
+			within(panel).getByRole("button", { name: "Show results" }),
+		).toBeTruthy();
+	});
+	it("[ISSUE-3494-ITEM-32] every locale has the panel's Reset and Show results", () => {
+		const i18nDir = path.resolve(__dirname, "../../src/assets/i18n");
+		const missing = fs
+			.readdirSync(i18nDir, { withFileTypes: true })
+			.filter((entry) => entry.isDirectory())
+			.flatMap((entry) => {
+				const translation = JSON.parse(
+					fs.readFileSync(
+						path.join(i18nDir, entry.name, "translation.json"),
+						"utf8",
+					),
+				) as {
+					standalone: {
+						"data-grid": { "custom-filters": Record<string, string> };
+					};
+				};
+				const keys = translation.standalone["data-grid"]["custom-filters"];
+				return ["reset", "show-results"]
+					.filter((key) => !keys[key]?.trim())
+					.map((key) => `${entry.name}: custom-filters.${key}`);
+			});
+		expect(missing).toEqual([]);
 	});
 });

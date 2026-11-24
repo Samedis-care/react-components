@@ -137,7 +137,9 @@
 				"close": "Yoping"
 			},
 			"custom-filters": {
-				"title": "Filtrni tanlash"
+				"title": "Filtrni tanlash",
+				"reset": "Qayta o'rnatish",
+				"show-results": "Natijalarni ko'rsatish"
 			},
 			"footer": {
 				"counts": "Jami: {{TOTAL}}",

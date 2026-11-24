@@ -137,7 +137,9 @@
 				"close": "Закрыть"
 			},
 			"custom-filters": {
-				"title": "Выбор фильтра"
+				"title": "Выбор фильтра",
+				"reset": "Сбросить",
+				"show-results": "Показать результаты"
 			},
 			"footer": {
 				"counts": "Всего: {{TOTAL}}",

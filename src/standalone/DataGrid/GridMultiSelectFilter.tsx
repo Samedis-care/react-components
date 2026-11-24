@@ -14,14 +14,15 @@ import { Breakpoint } from "@mui/material/styles";
 import { GridSize } from "@mui/material/Grid";
 import { getReactLabel, MultiSelectorData } from "../Selector";
 import BaseSelector from "../Selector/BaseSelector";
+import useFilterPanelLists from "./CustomFilterDialog/useFilterPanelLists";
 
 /**
  * Props of GridMultiSelectFilter
  */
 export interface GridMultiSelectFilterProps {
 	/**
-	 * The filter's label: the selector's label in the bar, a text above the
-	 * checkboxes in the panel
+	 * The filter's label: the select's label in the bar (and in the panel on a
+	 * phone), a text above the checkboxes in the panel
 	 */
 	label?: string;
 	/**
@@ -36,9 +37,11 @@ export interface GridMultiSelectFilterProps {
 	/**
 	 * The key of the grid's custom data this filter edits. Its value in
 	 * DataGridProps.defaultCustomData is the filter's default: shown while
-	 * selected is unset, and restored by "Reset filter". While the selection
-	 * has other entries (isDataGridCustomFilterActive: in any order, undefined,
-	 * null and [] count as unset), the bar outlines the filter.
+	 * selected is unset, and restored by "Reset filter" and by the filter
+	 * panel's "Reset". While the selection has other entries
+	 * (isDataGridCustomFilterActive: in any order, undefined, null and [] count
+	 * as unset), the select is outlined, in the bar and in the panel on a
+	 * phone.
 	 */
 	field: string;
 	/**
@@ -54,7 +57,11 @@ export interface GridMultiSelectFilterProps {
 	 */
 	onSelect: (selected: string[]) => void;
 	/**
-	 * Renders the filter panel's variant: pass IDataGridFilterBarProps.inDialog
+	 * Whether the filter is in the filter panel: pass
+	 * IDataGridFilterBarProps.inDialog. The panel lists the options as
+	 * checkboxes, so one click ticks one. On a phone (the theme's xs
+	 * breakpoint) it shows the bar's multi-select instead, one row instead of
+	 * every option. Both are sized by dialogBreakpoints.
 	 */
 	dialog: boolean;
 	/**
@@ -102,10 +109,11 @@ const EMPTY_SELECTION: string[] = [];
 /**
  * A multi-select for a DataGrid filter bar (DataGridProps.filterBar): a
  * dropdown without search in the header's bar, a checkbox list in the filter
- * panel. It edits the custom data key `field` and takes its default from
- * DataGridProps.defaultCustomData; while its selection differs from that
- * default, the bar outlines it. Only inside a DataGrid (it reads the grid's
- * props context). Theme name CcGridMultiSelectFilter.
+ * panel, and the bar's dropdown in the panel on a phone (the theme's xs
+ * breakpoint). It edits the custom data key `field` and takes its default
+ * from DataGridProps.defaultCustomData; while its selection differs from that
+ * default, the dropdown is outlined. Only inside a DataGrid (it reads the
+ * grid's props context). Theme name CcGridMultiSelectFilter.
  */
 const GridMultiSelectFilter = (inProps: GridMultiSelectFilterProps) => {
 	const props = useThemeProps({
@@ -129,6 +137,7 @@ const GridMultiSelectFilter = (inProps: GridMultiSelectFilterProps) => {
 			? (defaultValue as string[])
 			: EMPTY_SELECTION);
 	const isActive = isDataGridCustomFilterActive(selected, defaultValue);
+	const showList = useFilterPanelLists(dialog);
 
 	const handleDialogCheckboxToggle = useCallback(
 		(evt: React.ChangeEvent<{ name: string }>, checked: boolean) => {
@@ -170,7 +179,7 @@ const GridMultiSelectFilter = (inProps: GridMultiSelectFilterProps) => {
 		[isActive],
 	);
 
-	if (dialog) {
+	if (showList) {
 		return (
 			<GridMultiSelectFilterDialogRoot
 				size={{ xs: 12, md: 6, lg: 3, ...dialogBreakpoints }}
@@ -205,23 +214,34 @@ const GridMultiSelectFilter = (inProps: GridMultiSelectFilterProps) => {
 				</Grid>
 			</GridMultiSelectFilterDialogRoot>
 		);
-	} else {
-		return (
-			<GridMultiSelectFilterBarRoot size={{ xs: 4, ...barBreakpoints }}>
-				<DataGridCustomFilterMulti<MultiSelectorData, true>
-					multiple
-					label={label}
-					disableSearch
-					disableClearable
-					onLoad={getOptions}
-					selected={selectedData}
-					onSelect={handleSelectorChange}
-					classes={selectorClasses}
-					className={classes?.customFilterMulti}
-				/>
-			</GridMultiSelectFilterBarRoot>
-		);
 	}
+
+	// the bar's select, also in the panel on a phone
+	const selector = (
+		<DataGridCustomFilterMulti<MultiSelectorData, true>
+			multiple
+			label={label}
+			disableSearch
+			disableClearable
+			onLoad={getOptions}
+			selected={selectedData}
+			onSelect={handleSelectorChange}
+			classes={selectorClasses}
+			className={classes?.customFilterMulti}
+		/>
+	);
+
+	return dialog ? (
+		<GridMultiSelectFilterDialogRoot
+			size={{ xs: 12, md: 6, lg: 3, ...dialogBreakpoints }}
+		>
+			{selector}
+		</GridMultiSelectFilterDialogRoot>
+	) : (
+		<GridMultiSelectFilterBarRoot size={{ xs: 4, ...barBreakpoints }}>
+			{selector}
+		</GridMultiSelectFilterBarRoot>
+	);
 };
 
 export default React.memo(GridMultiSelectFilter);

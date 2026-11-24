@@ -375,11 +375,26 @@ export const FilterBarHelpers: Story = {
 	},
 };
 
+/** Opens the filter panel with the bar's "Filter" button and returns it */
+const openPanel = async (canvasElement: HTMLElement) => {
+	await userEvent.click(panelButtonOf(canvasElement));
+	return waitFor(() => {
+		const element = Array.from(
+			canvasElement.querySelectorAll<HTMLElement>(".story-filter-panel"),
+		).find((paper) => paper.textContent.includes("Filter selection"));
+		if (!element) throw new Error("the panel is not open");
+		return element;
+	});
+};
+
 /**
  * Narrower than enableFilterDialogWidth, the bar is a "Filter" button. It
  * opens the panel over the rows, where the helpers render as a radio list
- * and a checkbox list. A pick applies at once; "Close" hides the panel, and
- * the button's icon marks the changed custom filters.
+ * and a checkbox list, so an option is one click. A pick applies at once, as
+ * in the bar, and the panel's footer shows the rows it leaves. "Reset" sets
+ * the panel's filters back to defaultCustomData; "Show results" hides the
+ * panel, and the button's icon marks the changed custom filters. On a phone
+ * the panel shows the bar's selects instead (Issue3494Item32FilterPanelOnAPhone).
  */
 export const FilterPanelHelpers: Story = {
 	args: {
@@ -405,17 +420,15 @@ export const FilterPanelHelpers: Story = {
 		await expect(button).toHaveTextContent("Filter");
 		const icon = button.querySelector("svg");
 		await expect(icon).not.toHaveClass("CcDataGrid-customFilterActiveIcon");
-		await userEvent.click(button);
-		const panel = await waitFor(() => {
-			const element = Array.from(
-				canvasElement.querySelectorAll<HTMLElement>(".story-filter-panel"),
-			).find((paper) => paper.textContent.includes("Filter selection"));
-			if (!element) throw new Error("the panel is not open");
-			return element;
-		});
+		const panel = await openPanel(canvasElement);
 		await expect(
 			within(panel).getByRole("heading", { name: "Filter selection" }),
 		).toBeVisible();
+		// the options are listed: no selects
+		await expect(within(panel).queryAllByRole("combobox")).toHaveLength(0);
+		const count = within(panel).getByRole("status");
+		await waitFor(() => expect(count).toHaveTextContent("Total: 6"));
+		await expect(count).not.toHaveTextContent("Filtered");
 		await userEvent.click(within(panel).getByRole("radio", { name: "Open" }));
 		await userEvent.click(
 			within(panel).getByRole("checkbox", { name: "Beta" }),
@@ -431,14 +444,20 @@ export const FilterPanelHelpers: Story = {
 				}),
 			{ timeout: 3000 },
 		);
-		await userEvent.click(within(panel).getByRole("button", { name: "Close" }));
+		// the rows behind the panel are filtered already, and the panel says so
+		await waitFor(() =>
+			expect(count).toHaveTextContent("Filtered: 1 Total: 6"),
+		);
+		await userEvent.click(
+			within(panel).getByRole("button", { name: "Show results" }),
+		);
 		await waitFor(() => expect(panel).not.toBeVisible());
 		await expect(await canvas.findByText("Carol Jones")).toBeVisible();
 		await expect(button).toBeVisible();
 		await expect(button.querySelector("svg")).toHaveClass(
 			"CcDataGrid-customFilterActiveIcon",
 		);
-		// reopened, the panel shows the same selection
+		// reopened, the panel shows the same selection; Reset clears it
 		await userEvent.click(button);
 		await waitFor(() => expect(panel).toBeVisible());
 		await expect(
@@ -447,6 +466,16 @@ export const FilterPanelHelpers: Story = {
 		await expect(
 			within(panel).getByRole("checkbox", { name: "Beta" }),
 		).toBeChecked();
+		await userEvent.click(within(panel).getByRole("button", { name: "Reset" }));
+		await waitFor(() =>
+			expect(within(panel).getByRole("radio", { name: "All" })).toBeChecked(),
+		);
+		await expect(
+			within(panel).getByRole("checkbox", { name: "Beta" }),
+		).not.toBeChecked();
+		await waitFor(() => expect(count).not.toHaveTextContent("Filtered"));
+		await expect(count).toHaveTextContent("Total: 6");
+		await expect(panel).toBeVisible();
 	},
 };
 
@@ -531,14 +560,7 @@ export const Issue3494Item12PanelOptionsLikeTheBar: Story = {
 	},
 	play: async ({ args, canvas, canvasElement }) => {
 		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
-		await userEvent.click(panelButtonOf(canvasElement));
-		const panel = await waitFor(() => {
-			const element = Array.from(
-				canvasElement.querySelectorAll<HTMLElement>(".story-filter-panel"),
-			).find((paper) => paper.textContent.includes("Filter selection"));
-			if (!element) throw new Error("the panel is not open");
-			return element;
-		});
+		const panel = await openPanel(canvasElement);
 		await expect(within(panel).getAllByRole("radio")).toHaveLength(4);
 		await expect(within(panel).getAllByRole("checkbox")).toHaveLength(3);
 		await expect(within(panel).queryByText("Archived")).toBeNull();
@@ -776,8 +798,8 @@ export const Issue3494Item22FilterBarIsReadableOnAPhone: Story = {
 /**
  * On a 320px phone, the grid's default enableFilterDialogWidth turns the bar
  * into the "Filter" button. Its panel shows each filter at full width: the
- * radio "Open" and the checkbox "Beta" of the defaults can be read, and the
- * page does not scroll sideways.
+ * selects with "Open" and "Beta" of the defaults can be read, and the page
+ * does not scroll sideways.
  */
 export const Issue3494Item22FilterPanelOnAPhone: Story = {
 	args: {
@@ -799,36 +821,122 @@ export const Issue3494Item22FilterPanelOnAPhone: Story = {
 	play: async ({ canvas, canvasElement }) => {
 		await expect(await canvas.findByText("Carol Jones")).toBeVisible();
 		await expect(canvasElement.querySelector("[role=combobox]")).toBeNull();
-		await userEvent.click(panelButtonOf(canvasElement));
-		const panel = await waitFor(() => {
-			const element = Array.from(
-				canvasElement.querySelectorAll<HTMLElement>(".story-filter-panel"),
-			).find((paper) => paper.textContent.includes("Filter selection"));
-			if (!element) throw new Error("the panel is not open");
-			return element;
-		});
+		const panel = await openPanel(canvasElement);
 		await waitFor(() => expect(panel).toBeVisible());
-		const open = within(panel).getByRole("radio", { name: "Open" });
-		const beta = within(panel).getByRole("checkbox", { name: "Beta" });
-		await expect(open).toBeChecked();
-		await expect(beta).toBeChecked();
+		const status = within(panel).getByRole<HTMLInputElement>("combobox", {
+			name: "Status",
+		});
+		const kinds = within(panel).getByRole<HTMLInputElement>("combobox", {
+			name: "Kinds",
+		});
+		await expect(status).toHaveValue("Open");
+		await expect(kinds.value.trim()).toBe("Beta");
 		const panelRight = panel.getBoundingClientRect().right;
-		for (const text of ["Status", "Open", "Kinds", "Beta"]) {
-			const element = within(panel).getByText(text);
+		const shown: Array<[string, HTMLElement]> = [
+			["Open", status],
+			["Beta", kinds],
+			["Status", within(panel).getByText("Status")],
+			["Kinds", within(panel).getByText("Kinds")],
+		];
+		for (const [name, element] of shown) {
 			await expect(element).toBeVisible();
 			// an ellipsis cuts a block; an inline label would overflow the panel
 			await expect(
 				element.scrollWidth,
-				`"${text}" is cut to ${element.clientWidth}px`,
+				`"${name}" is cut to ${element.clientWidth}px`,
 			).toBeLessThanOrEqual(element.clientWidth);
 			const { width, right } = element.getBoundingClientRect();
-			await expect(width, `"${text}" has no width`).toBeGreaterThan(0);
-			await expect(right, `"${text}" overflows the panel`).toBeLessThanOrEqual(
+			await expect(width, `"${name}" has no width`).toBeGreaterThan(0);
+			await expect(right, `"${name}" overflows the panel`).toBeLessThanOrEqual(
 				panelRight,
 			);
 		}
 		await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
 			document.documentElement.clientWidth,
 		);
+	},
+};
+
+/**
+ * ISSUE-3494-ITEM-32: on a 320px phone the panel holds the bar's selects (one
+ * row each, not a list of every option). A pick applies at once, and the
+ * footer with the row count, "Reset" and "Show results" fits the width and
+ * the first screen without scrolling the page sideways.
+ */
+export const Issue3494Item32FilterPanelOnAPhone: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: fn(loadTasks),
+		filterBar: StatusKindsBar,
+		enableFilterDialogWidth: 100000,
+		// a filter is set, so the panel shows values
+		overrideCustomData: { status: "open", kinds: ["beta"] },
+		classes: { contentOverlayPaper: "story-filter-panel" },
+	},
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		a11y: {
+			test: "error",
+			// the grid behind the panel has violations of its own
+			context: { include: [".story-filter-panel"] },
+		},
+	},
+	play: async ({ args, canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Carol Jones")).toBeVisible();
+		const panel = await openPanel(canvasElement);
+		await waitFor(() => expect(panel).toBeVisible());
+		await expect(within(panel).queryAllByRole("radio")).toHaveLength(0);
+		await expect(within(panel).queryAllByRole("checkbox")).toHaveLength(0);
+		const status = within(panel).getByRole("combobox", { name: "Status" });
+		const kinds = within(panel).getByRole("combobox", { name: "Kinds" });
+		await expect(status).toHaveValue("Open");
+		await expect((kinds as HTMLInputElement).value.trim()).toBe("Beta");
+		const reset = within(panel).getByRole("button", { name: "Reset" });
+		const show = within(panel).getByRole("button", { name: "Show results" });
+		const count = within(panel).getByRole("status");
+		await waitFor(() =>
+			expect(count).toHaveTextContent("Filtered: 1 Total: 6"),
+		);
+		const box = panel.getBoundingClientRect();
+		for (const element of [status, kinds, reset, show, count]) {
+			const rect = element.getBoundingClientRect();
+			await expect(rect.left, element.outerHTML).toBeGreaterThanOrEqual(
+				box.left,
+			);
+			await expect(rect.right, element.outerHTML).toBeLessThanOrEqual(
+				box.right,
+			);
+		}
+		// the two filters and the buttons are all on the first screen
+		await expect(show.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+			window.innerHeight,
+		);
+		await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+			document.documentElement.clientWidth,
+		);
+		// a pick in the select applies at once, and the count follows
+		await pickInBar(status, "Lost");
+		await waitFor(
+			() =>
+				expect(lastLoad(args.loadData)?.additionalFilters).toEqual({
+					status: "lost",
+					kinds: ["beta"],
+				}),
+			{ timeout: 3000 },
+		);
+		await expect(status).toHaveValue("Lost");
+		await expect(status.closest(".MuiAutocomplete-root")).toHaveClass(
+			"Mui-active",
+		);
+		await waitFor(() =>
+			expect(count).toHaveTextContent("Filtered: 0 Total: 6"),
+		);
+		await userEvent.click(reset);
+		await waitFor(() => expect(status).toHaveValue("All"));
+		await expect((kinds as HTMLInputElement).value.trim()).toBe("");
+		await waitFor(() => expect(count).toHaveTextContent(/^Total: 6$/));
+		await userEvent.click(show);
+		await waitFor(() => expect(panel).not.toBeVisible());
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
 	},
 };

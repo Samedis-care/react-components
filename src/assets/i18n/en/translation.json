@@ -141,7 +141,9 @@
 				"close": "Close"
 			},
 			"custom-filters": {
-				"title": "Filter selection"
+				"title": "Filter selection",
+				"reset": "Reset",
+				"show-results": "Show results"
 			},
 			"footer": {
 				"counts": "Total: {{TOTAL}}",

@@ -137,7 +137,9 @@
 				"close": "Schließen"
 			},
 			"custom-filters": {
-				"title": "Filterauswahl"
+				"title": "Filterauswahl",
+				"reset": "Zurücksetzen",
+				"show-results": "Ergebnisse anzeigen"
 			},
 			"footer": {
 				"counts": "Gesamt: {{TOTAL}}",

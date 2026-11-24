@@ -10,13 +10,18 @@ import BackendMultipleSelect, {
 import BackendMultiSelect from "../../backend-components/Selector/BackendMultiSelect";
 import { ModelUnknown } from "../../backend-integration";
 import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import useFilterPanelLists from "./CustomFilterDialog/useFilterPanelLists";
 
 export type GridMultiSelectFilterBackendProps<
 	M extends ModelUnknown,
 	DataT extends MultiSelectorData,
 > = DistributiveOmit<BackendMultipleSelectProps<M, DataT>, "classes"> & {
 	/**
-	 * Is the grid filter rendered in a dialog?
+	 * Whether the filter is in the filter panel: pass
+	 * IDataGridFilterBarProps.inDialog. The panel shows a selector with the
+	 * picked records listed below it (BackendMultiSelect). On a phone (the
+	 * theme's xs breakpoint) it shows the bar's selector instead
+	 * (BackendMultipleSelect). Both are sized by dialogBreakpoints.
 	 */
 	dialog: boolean;
 	/**
@@ -72,6 +77,7 @@ const GridMultiSelectFilterBackend = <
 	const selected = selectorProps.selected ?? EMPTY_STRING_ARRAY;
 	const { classes } = useDataGridProps();
 	const isActive = selected.length > 0;
+	const showList = useFilterPanelLists(dialog);
 	const selectorClasses = useMemo(
 		() => ({
 			autocomplete: isActive ? "Mui-active" : undefined,
@@ -79,7 +85,7 @@ const GridMultiSelectFilterBackend = <
 		[isActive],
 	);
 
-	if (dialog) {
+	if (showList) {
 		return (
 			<GridMultiSelectFilterDialogRoot
 				size={{ xs: 12, md: 6, lg: 3, ...dialogBreakpoints }}
@@ -93,18 +99,29 @@ const GridMultiSelectFilterBackend = <
 				</Grid>
 			</GridMultiSelectFilterDialogRoot>
 		);
-	} else {
-		return (
-			<GridMultiSelectFilterBarRoot size={{ xs: 4, ...barBreakpoints }}>
-				<DataGridCustomFilterMultiBackend
-					{...selectorProps}
-					classes={selectorClasses}
-					className={classes?.customFilterMulti}
-					selected={selected}
-				/>
-			</GridMultiSelectFilterBarRoot>
-		);
 	}
+
+	// the bar's selector, also in the panel on a phone
+	const selector = (
+		<DataGridCustomFilterMultiBackend
+			{...selectorProps}
+			classes={selectorClasses}
+			className={classes?.customFilterMulti}
+			selected={selected}
+		/>
+	);
+
+	return dialog ? (
+		<GridMultiSelectFilterDialogRoot
+			size={{ xs: 12, md: 6, lg: 3, ...dialogBreakpoints }}
+		>
+			{selector}
+		</GridMultiSelectFilterDialogRoot>
+	) : (
+		<GridMultiSelectFilterBarRoot size={{ xs: 4, ...barBreakpoints }}>
+			{selector}
+		</GridMultiSelectFilterBarRoot>
+	);
 };
 
 export default React.memo(

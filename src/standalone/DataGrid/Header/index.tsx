@@ -49,7 +49,8 @@ export interface IDataGridHeaderProps {
 	 */
 	hideSettings?: boolean;
 	/**
-	 * Hide user reset button
+	 * Hide user reset button: the header's "Reset" menu, and the filter
+	 * panel's "Reset"
 	 */
 	hideReset?: boolean;
 }
