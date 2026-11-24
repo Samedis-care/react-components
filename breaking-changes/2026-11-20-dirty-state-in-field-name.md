@@ -35,14 +35,11 @@ tell which fields hold changes (WCAG 1.3.1 Info and Relationships).
 ## Migration
 
 - **Required for tests that find a marked field or tab by its exact name:** the name now
-  ends in " (modified)". In samedis.care, `src/components/Tabs.test.tsx` finds the
-  marked "Documents" tab with `getByRole("tab", { name: "Documents" })`, which no longer
-  matches: use `{ name: "Documents (modified)" }`, and drop the comment that the marker
-  is not part of the name. The same goes for `getByLabelText` with the exact label text
-  of a marked field.
+  ends in " (modified)". `getByRole("tab", { name: "Documents" })` no longer finds a
+  marked "Documents" tab: use `{ name: "Documents (modified)" }`. The same goes for
+  `getByLabelText` with the exact label text of a marked field.
 - **Required for an app control that renders its own label inside `FormControlCC` or
   `FormControlFieldsetCC` and passes `dirty`** (a legend, a `FormControlLabel`): render
-  the label as `labelWithDirtyText(label, dirty)`, or the dot has no text. None in
-  samedis.care or im.care today.
+  the label as `labelWithDirtyText(label, dirty)`, or the dot has no text.
 - To remove the text for the whole application, hide it through the theme:
   `CcDirtyMarker: { styleOverrides: { text: { display: "none" } } }`.
