@@ -29,8 +29,7 @@ click on it does nothing, with no visible reason.
 Nothing to do. A theme that restyles the default Back button in
 `components.CcDefaultFormPageButtons.styleOverrides.backButton` with
 `&.${BackButtonDefaultColorClass}` alone keeps its color while the button is disabled:
-restrict that rule with `:not(.Mui-disabled)`, as the themes of samedis.care and
-identity-management-frontend already do, to get the disabled look.
+restrict that rule with `:not(.Mui-disabled)` to get the disabled look.
 
 Expect the disabled Back in the colors of a disabled Save in screenshots taken during a
 save.
