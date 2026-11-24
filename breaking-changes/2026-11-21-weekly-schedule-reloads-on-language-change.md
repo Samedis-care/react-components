@@ -16,11 +16,11 @@ until the user moved to another week or `loadData` changed.
 
 After switching between two languages that start the week on the same day (de, fr, nl),
 the dashboard calendar kept spinning. Entries whose texts the app or its backend
-translates (SCF's event types come from the backend in the request's
-`Accept-Language`) now follow the language.
+translates (e.g. texts a backend picks by the request's `Accept-Language`) now follow the
+language.
 
 ## Migration
 
 Nothing to do. `loadData` is called once more per language change. An app whose
-`loadData` also changes with the language (SCF's changes when moment's first day of the
-week does) may get two calls for one change; only the result of the latest one is shown.
+`loadData` also changes with the language (e.g. when moment's first day of the week does)
+may get two calls for one change; only the result of the latest one is shown.
