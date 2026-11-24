@@ -37,14 +37,13 @@ Status Messages), and sighted users could press Delete again.
 ## Migration
 
 Nothing to do for the progress and the toast themselves: every `BackendDataGrid` and
-`CRUD` delete shows them, and SCF's `SamedisMobileBackendDataGrid` shows the toast
-because it uses `useBackendDataGridDeleteHandler`.
+`CRUD` delete shows them, and so does any grid that uses
+`useBackendDataGridDeleteHandler`.
 
 - Required for a grid whose delete the user knows as something other than deleting, so
   that the toast does not say "deleted": pass `customDeleteSuccessHandler` and show your
-  own wording. In SCF this is `ProjectExpectedDevicesGrid` (its confirmation says
-  "Remove {{count}} devices from the project?"), with a new translation such as
-  "{{count}} devices removed from the project":
+  own wording, e.g. for a delete whose confirmation says "Remove {{count}} devices from
+  the project?", a new translation such as "{{count}} devices removed from the project":
 
   ```tsx
   const [showToast] = useToastContext();

@@ -1,12 +1,38 @@
 import React from "react";
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import {
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vitest";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	within,
+} from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { Refresh, Tune } from "@mui/icons-material";
 import type { SvgIconComponent } from "@mui/icons-material";
 import { computeAccessibleName } from "dom-accessibility-api";
 import ccI18n from "../../src/i18n";
-import DataGrid, { DataGridData, DataGridProps, DataGridRowData, IDataGridColumnDef, IDataGridColumnsState, IDataGridState, useDataGridColumnState, useDataGridColumnsWidthState, useDataGridState } from "../../src/standalone/DataGrid/DataGrid";
+import DataGrid, {
+	DataGridData,
+	DataGridProps,
+	DataGridRowData,
+	IDataGridColumnDef,
+	IDataGridColumnsState,
+	IDataGridState,
+	useDataGridColumnState,
+	useDataGridColumnsWidthState,
+	useDataGridState,
+} from "../../src/standalone/DataGrid/DataGrid";
 import type { IDataGridFilterBarProps } from "../../src/standalone/DataGrid/Header/FilterBar";
 import type { IDataGridExporter } from "../../src/standalone/DataGrid/Header";
 import userEvent from "@testing-library/user-event";

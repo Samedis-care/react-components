@@ -4,7 +4,11 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { Box, Grid } from "@mui/material";
 import { DataGrid, DataGridNoPersist } from "./index";
-import type { DataGridData, IDataGridColumnDef, IDataGridLoadDataParameters } from "./DataGrid";
+import type {
+	DataGridData,
+	IDataGridColumnDef,
+	IDataGridLoadDataParameters,
+} from "./DataGrid";
 import type { IDataGridExporter } from "./Header";
 
 // ─── Sample data ────────────────────────────────────────────────────────────
