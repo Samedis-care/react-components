@@ -9,7 +9,8 @@ import { captureError } from "../../framework/ErrorReporting";
 export interface NumberFormatterProps {
 	/**
 	 * The number to format. `null` and `undefined` render nothing, without a
-	 * placeholder; `NaN` and `Infinity` are printed as "NaN" and "∞".
+	 * placeholder; `NaN` and `Infinity` are printed as `Intl` prints them,
+	 * "NaN" and "∞" (with a currency: "€NaN" in en, "NaN €" in de).
 	 */
 	value: number | null | undefined;
 	/**
@@ -18,17 +19,31 @@ export interface NumberFormatterProps {
 	 * shown. The locale cannot be set here.
 	 *
 	 * `currency` is an ISO 4217 code (`"EUR"`); a well-formed code `Intl` does
-	 * not know (`"XYZ"`) is printed as it is. While it is missing with
-	 * `style: "currency"`, or is not three letters (`""`, `"EURO"`), the number
-	 * is shown without a currency, with two fraction digits unless
-	 * `minimumFractionDigits` or `maximumFractionDigits` set others
-	 * ("1,234.50"). The error is reported through `console.error` and the
-	 * error reporter (source "NumberFormatter", see `configureErrorReporting`),
-	 * once, not again on a re-render with the same currency. Options that are
-	 * invalid for another reason throw while rendering, as `toLocaleString`
-	 * does.
+	 * not know (`"XYZ"`) is printed as the code. With `style: "currency"`, a
+	 * currency that `Intl` rejects does not throw:
+	 * - a text that is not three letters (`"EURO"`, `"€"`) is printed as if it
+	 *   were a code, where the language puts one ("EURO 1,234.50" in en,
+	 *   "1.234,50 EURO" in de);
+	 * - a missing one (`undefined`, `null` or `""`) leaves the currency out:
+	 *   the plain amount ("1,234.50").
+	 *
+	 * Both get two fraction digits unless `minimumFractionDigits` or
+	 * `maximumFractionDigits` set others, and are reported (see
+	 * `disableErrorReporting`). Options that are invalid for another reason
+	 * throw while rendering, as `toLocaleString` does.
 	 */
 	options?: Intl.NumberFormatOptions;
+	/**
+	 * Don't report a currency that `Intl` rejects (see `options`), for a value
+	 * whose currency may be missing on purpose.
+	 *
+	 * By default (`false`) each NumberFormatter reports it once, not again on a
+	 * re-render with the same currency: to the error reporter (source
+	 * "NumberFormatter", extra `{ style, currency }`; Sentry unless the app
+	 * calls `configureErrorReporting`) and through `console.error`. With
+	 * `true` it does neither; the output is the same.
+	 */
+	disableErrorReporting?: boolean;
 }
 
 /**
@@ -39,7 +54,7 @@ export interface NumberFormatterProps {
  * an `aria-label`), call `value.toLocaleString(useCurrentLocale(), options)`.
  */
 const NumberFormatter = (props: NumberFormatterProps) => {
-	const { value, options } = props;
+	const { value, options, disableErrorReporting } = props;
 	const locale = useCurrentLocale();
 	const formatted = useMemo(
 		() =>
@@ -54,7 +69,7 @@ const NumberFormatter = (props: NumberFormatterProps) => {
 	const style = options?.style;
 	const currency = options?.currency;
 	useEffect(() => {
-		if (!currencyError) return;
+		if (!currencyError || disableErrorReporting) return;
 		const key = String(currencyError);
 		if (reportedRef.current === key) return;
 		reportedRef.current = key;
@@ -64,10 +79,10 @@ const NumberFormatter = (props: NumberFormatterProps) => {
 		});
 		// eslint-disable-next-line no-console
 		console.error(
-			"[Components-Care] [NumberFormatter] Invalid currency, the number is shown without it:",
+			"[Components-Care] [NumberFormatter] Missing or malformed currency, an ISO 4217 code is expected:",
 			currencyError,
 		);
-	}, [currencyError, style, currency]);
+	}, [currencyError, disableErrorReporting, style, currency]);
 
 	return <>{formatted ? formatted.text : ""}</>;
 };

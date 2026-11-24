@@ -688,22 +688,45 @@ export const NumberFormatterCurrency: ActionButtonStory = {
 };
 
 /**
- * A currency that is missing or not three letters (here `""`): the amount is
- * shown without a currency, with two decimals, and the error is reported once
- * (console and error reporter).
+ * A currency that is not three letters (`"EURO"`) is printed as if it were a
+ * code, a missing one (`""`) leaves the currency out. Both are reported once,
+ * unless `disableErrorReporting` is set (the third).
  */
 export const NumberFormatterInvalidCurrency: ActionButtonStory = {
 	render: () => (
-		<NumberFormatter
-			value={9999.5}
-			options={{ style: "currency", currency: "" }}
-		/>
+		<ul>
+			<li>
+				<NumberFormatter
+					value={9999.5}
+					options={{ style: "currency", currency: "EURO" }}
+				/>
+			</li>
+			<li>
+				<NumberFormatter
+					value={9999.5}
+					options={{ style: "currency", currency: "" }}
+				/>
+			</li>
+			<li>
+				<NumberFormatter
+					value={9999.5}
+					options={{ style: "currency", currency: "" }}
+					disableErrorReporting
+				/>
+			</li>
+		</ul>
 	),
 	parameters: {
 		a11y: { test: "error" },
 	},
 	play: async ({ canvasElement }) => {
-		await expect(canvasElement).toHaveTextContent(/^9[.,]?999[.,]50$/);
+		const items = canvasElement.querySelectorAll("li");
+		// "EURO 9,999.50" in en, "9.999,50 EURO" in de
+		await expect(items[0]).toHaveTextContent(
+			/^(EURO\s9[.,]?999[.,]50|9[.,]?999[.,]50\sEURO)$/,
+		);
+		await expect(items[1]).toHaveTextContent(/^9[.,]?999[.,]50$/);
+		await expect(items[2]).toHaveTextContent(/^9[.,]?999[.,]50$/);
 	},
 };
 

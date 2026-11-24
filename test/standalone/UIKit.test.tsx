@@ -433,44 +433,108 @@ describe("UIKit", () => {
 			).not.toThrow();
 		});
 
-		it("[ISSUE-3482-ITEM-26] shows the amount without a currency, with two decimals, while the currency is missing or malformed", async () => {
+		it("[ISSUE-3482-ITEM-26] prints a malformed currency where the language puts a code, and the plain amount while the currency is missing", async () => {
 			vi.spyOn(console, "error").mockImplementation(() => {});
 			await act(async () => {
 				await ccI18n.changeLanguage("en");
 			});
-			const amount = (options: Intl.NumberFormatOptions) => (
-				<NumberFormatter value={1234.5} options={options} />
-			);
+			// the options, the text in en, the text in de
+			const cases: [Intl.NumberFormatOptions, string, string][] = [
+				[{ style: "currency" }, "1,234.50", "1.234,50"],
+				[{ style: "currency", currency: "" }, "1,234.50", "1.234,50"],
+				[
+					// untyped data
+					{ style: "currency", currency: null as unknown as string },
+					"1,234.50",
+					"1.234,50",
+				],
+				[
+					{ style: "currency", currency: "EURO" },
+					"EURO 1,234.50",
+					"1.234,50 EURO",
+				],
+				[{ style: "currency", currency: "€" }, "€ 1,234.50", "1.234,50 €"],
+				[
+					{ style: "currency", currency: "EURO", maximumFractionDigits: 0 },
+					"EURO 1,235",
+					"1.235 EURO",
+				],
+				[
+					{ style: "currency", currency: "EURO", minimumFractionDigits: 3 },
+					"EURO 1,234.500",
+					"1.234,500 EURO",
+				],
+				[
+					{ style: "currency", currency: "EURO", currencyDisplay: "name" },
+					"1,234.50 EURO",
+					"1.234,50 EURO",
+				],
+				[
+					{ style: "currency", currency: "XYZ" },
+					"XYZ 1,234.50",
+					"1.234,50 XYZ",
+				],
+				[{ style: "currency", currency: "EUR" }, "€1,234.50", "1.234,50 €"],
+				[{ currency: "EURO" }, "1,234.5", "1.234,5"],
+			];
 			const { container } = wrap(
-				<>
-					{amount({ style: "currency" })}|
-					{amount({ style: "currency", currency: "" })}|
-					{amount({ style: "currency", currency: "EURO" })}|
-					{amount({
-						style: "currency",
-						currency: "EURO",
-						maximumFractionDigits: 0,
-					})}
-					|
-					{amount({
-						style: "currency",
-						currency: "EURO",
-						minimumFractionDigits: 3,
-					})}
-					|{amount({ style: "currency", currency: "XYZ" })}
-				</>,
+				cases.map(([options], index) => (
+					<React.Fragment key={index}>
+						{index > 0 && "|"}
+						<NumberFormatter value={1234.5} options={options} />
+					</React.Fragment>
+				)),
 			);
 			// Intl puts a no-break space between a code and the number
 			const text = () => container.textContent.replace(/\s/g, " ");
-			expect(text()).toBe(
-				"1,234.50|1,234.50|1,234.50|1,235|1,234.500|XYZ 1,234.50",
-			);
+			expect(text()).toBe(cases.map(([, en]) => en).join("|"));
 			await act(async () => {
 				await ccI18n.changeLanguage("de");
 			});
-			expect(text()).toBe(
-				"1.234,50|1.234,50|1.234,50|1.235|1.234,500|1.234,50 XYZ",
+			expect(text()).toBe(cases.map(([, , de]) => de).join("|"));
+		});
+
+		it("[ISSUE-3482-ITEM-26] prints NaN and Infinity as Intl does", () => {
+			vi.spyOn(console, "error").mockImplementation(() => {});
+			const { container } = wrap(
+				<>
+					<NumberFormatter value={NaN} />|
+					<NumberFormatter value={Infinity} />|
+					<NumberFormatter
+						value={NaN}
+						options={{ style: "currency", currency: "EUR" }}
+					/>
+					|
+					<NumberFormatter
+						value={-Infinity}
+						options={{ style: "currency", currency: "EURO" }}
+					/>
+				</>,
 			);
+			expect(container.textContent.replace(/\s/g, " ")).toBe(
+				"NaN|∞|€NaN|-EURO∞",
+			);
+		});
+
+		it("[ISSUE-3482-ITEM-26] still throws for options that are invalid without the currency too", () => {
+			// React reports the render error through console.error before rethrowing
+			vi.spyOn(console, "error").mockImplementation(() => {});
+			for (const currency of [undefined, "", "EURO", "EUR"]) {
+				cleanup();
+				expect(() =>
+					wrap(
+						<NumberFormatter
+							value={1}
+							options={{
+								style: "currency",
+								currency,
+								minimumFractionDigits: 3,
+								maximumFractionDigits: 1,
+							}}
+						/>,
+					),
+				).toThrow();
+			}
 		});
 
 		it("[ISSUE-3482-ITEM-26] reports a missing or malformed currency once, not on every render", () => {
@@ -516,8 +580,58 @@ describe("UIKit", () => {
 				rerender(ui(3));
 				rerender(ui(3, "EUR"));
 				expect(report).toHaveBeenCalledTimes(2);
-				expect(logged()).toHaveLength(2);
+				rerender(ui(4, "EURO"));
+				rerender(ui(5, "EURO"));
+				expect(report).toHaveBeenCalledTimes(3);
+				expect(report).toHaveBeenLastCalledWith(
+					expect.objectContaining({ name: "RangeError" }),
+					{
+						source: "NumberFormatter",
+						extra: { style: "currency", currency: "EURO" },
+					},
+				);
+				expect(logged()).toHaveLength(3);
 				expect(logged()[1][1]).toBe(report.mock.calls[1][0]);
+			} finally {
+				configureErrorReporting(before);
+			}
+		});
+
+		it("[ISSUE-3482-ITEM-26] reports nothing with disableErrorReporting, until it is turned off", async () => {
+			const error = vi.spyOn(console, "error").mockImplementation(() => {});
+			await act(async () => {
+				await ccI18n.changeLanguage("en");
+			});
+			const before = { ...getErrorReportingConfig() };
+			const report = vi.fn();
+			configureErrorReporting({ report, shouldReport: () => true });
+			try {
+				// the same options on every render: only the prop changes
+				const options: Record<string, Intl.NumberFormatOptions> = {
+					EURO: { style: "currency", currency: "EURO" },
+					"": { style: "currency", currency: "" },
+				};
+				const ui = (disableErrorReporting: boolean, currency: string) => (
+					<React.StrictMode>
+						<NumberFormatter
+							value={1234.5}
+							options={options[currency]}
+							disableErrorReporting={disableErrorReporting}
+						/>
+					</React.StrictMode>
+				);
+				const { container, rerender } = render(ui(true, "EURO"));
+				expect(container.textContent.replace(/\s/g, " ")).toBe("EURO 1,234.50");
+				rerender(ui(true, ""));
+				expect(container.textContent).toBe("1,234.50");
+				expect(report).not.toHaveBeenCalled();
+				expect(error).not.toHaveBeenCalled();
+				rerender(ui(false, ""));
+				expect(report).toHaveBeenCalledTimes(1);
+				expect(error).toHaveBeenCalledTimes(1);
+				rerender(ui(true, "EURO"));
+				expect(report).toHaveBeenCalledTimes(1);
+				expect(error).toHaveBeenCalledTimes(1);
 			} finally {
 				configureErrorReporting(before);
 			}
