@@ -26,9 +26,9 @@ own height in any parent, like the other fields.
 
 ## Migration
 
-Nothing to do for SCF and IMF: TrainingSignForm's 200px wrapper keeps its height, and the
-signature field of a model form (a flex column, where the line gap never appeared) is 1px
-shorter.
+Nothing to do where the tile sits in a wrapper of a fixed height: the wrapper keeps its
+height. The signature field of a model form (a flex column, where the line gap never
+appeared) is 1px shorter.
 
 A layout that relied on the space next to the tile, e.g. two tiles stacked in a plain
 `div`, adds the space itself: a `Stack` with `spacing` around the tiles, or a margin on
