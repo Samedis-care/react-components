@@ -192,8 +192,8 @@ export const normalizeFilterDef = (
  * missing nextFilterType and "and" (as the filter popup reads it), and any
  * nextFilterType of a condition without a nextFilter, which combines nothing.
  * Keys IFilterDef does not define are not compared. The filter popup emits
- * a filter in its own spelling, also when the user ends on the condition they
- * started with, e.g. a default filter.
+ * a filter in its own spelling, also when the user empties it or ends on the
+ * condition they started with, e.g. a default filter.
  * @param a The one filter
  * @param b The other filter
  * @returns true if both are the same condition, or both are no filter

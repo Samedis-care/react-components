@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from "react";
-import type { IFilterDef } from "./Content/FilterEntry";
-import { normalizeFilterDef } from "./PersistFormat";
+import { isSameFilterDef } from "./PersistFormat";
 import {
 	DataGridCustomDataType,
 	getDataGridDefaultColumnsState,
@@ -49,45 +48,6 @@ export const useDataGridFiltersActive = () => {
 		state.customData,
 		state.search,
 	]);
-};
-
-/**
- * Whether two filters are the same condition. Only the conditions carrying a
- * value count (see normalizeFilterDef), and the spellings of one condition are
- * equal: a key set to undefined and a missing one, a missing value2 and "", a
- * missing nextFilterType and "and" (as the filter popup reads it), and any
- * nextFilterType of a condition without a nextFilter, which combines nothing.
- * Keys IFilterDef does not define are not compared. The filter popup emits a
- * filter in its own spelling, also when the user empties it or ends on the
- * condition they started with, e.g. a default filter.
- * @param a The one filter
- * @param b The other filter
- * @returns true if both are the same condition, or both are no filter
- */
-const isSameFilterDef = (
-	a: IFilterDef | null | undefined,
-	b: IFilterDef | null | undefined,
-): boolean => {
-	let left = normalizeFilterDef(a);
-	let right = normalizeFilterDef(b);
-	// normalizeFilterDef ends both chains within a bounded number of conditions
-	while (left && right) {
-		if (
-			left.type !== right.type ||
-			left.value1 !== right.value1 ||
-			(left.value2 ?? "") !== (right.value2 ?? "")
-		)
-			return false;
-		if (
-			left.nextFilter &&
-			right.nextFilter &&
-			(left.nextFilterType ?? "and") !== (right.nextFilterType ?? "and")
-		)
-			return false;
-		left = left.nextFilter;
-		right = right.nextFilter;
-	}
-	return !left && !right;
 };
 
 /**
