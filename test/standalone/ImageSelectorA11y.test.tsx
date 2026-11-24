@@ -207,3 +207,169 @@ describe("ImageSelector — roles and names", () => {
 		expect(screen.getByRole("textbox", { name: "next" })).toHaveFocus();
 	});
 });
+
+describe("ImageSelector — placeholder", () => {
+	const PLACEHOLDER =
+		"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E";
+	const placeholders = (container: HTMLElement) =>
+		Array.from(container.querySelectorAll("img")).filter(
+			(img) => img.getAttribute("src") === PLACEHOLDER,
+		);
+	const VARIANTS = ["normal", "modern", "profile_picture"] as const;
+
+	it("[ISSUE-3490-ITEM-31] an empty field draws the placeholder, hidden from assistive technology, in every variant, also read-only", () => {
+		for (const variant of VARIANTS) {
+			for (const readOnly of [false, true]) {
+				const what = `${variant}${readOnly ? ", read-only" : ""}`;
+				const { container } = renderSel({
+					variant,
+					value: "",
+					placeholder: PLACEHOLDER,
+					readOnly,
+				});
+				const drawn = placeholders(container);
+				expect(drawn, what).toHaveLength(1);
+				expect(drawn[0], what).toHaveAttribute("alt", "");
+				expect(drawn[0], what).toHaveAccessibleName("");
+				expect(screen.queryByRole("img"), what).toBe(null);
+				cleanup();
+			}
+		}
+	});
+
+	it("[ISSUE-3490-ITEM-31] a stored image is shown instead of the placeholder", () => {
+		for (const variant of VARIANTS) {
+			const { container } = renderSel({
+				variant,
+				value: PIXEL,
+				placeholder: PLACEHOLDER,
+			});
+			expect(placeholders(container), variant).toHaveLength(0);
+			expect(container.querySelector("img")?.getAttribute("src"), variant).toBe(
+				PIXEL,
+			);
+			cleanup();
+		}
+	});
+
+	it("[ISSUE-3490-ITEM-31] modern, empty with a placeholder: drawn where the picture would be with the picture's upload and camera buttons, and a click on it opens the file dialog, not the preview", () => {
+		canCapture.value = true;
+		const ui = renderSel({
+			variant: "modern",
+			value: "",
+			placeholder: PLACEHOLDER,
+			capture: "environment",
+		});
+		const input = ui.input()!;
+		const captures: (string | null)[] = [];
+		vi.spyOn(input, "click").mockImplementation(() => {
+			captures.push(input.getAttribute("capture"));
+		});
+		// as with a picture: no call to action, the buttons in the corner
+		expect(
+			screen.queryByRole("button", {
+				name: t("standalone.file-upload.upload-modern"),
+			}),
+		).toBe(null);
+		fireEvent.click(
+			screen.getByRole("button", {
+				name: t("standalone.file-upload.upload-modern-btn-capture.image"),
+			}),
+		);
+		expect(captures).toEqual(["environment"]);
+		fireEvent.click(
+			screen.getByRole("button", {
+				name: t("standalone.file-upload.upload-modern-btn"),
+			}),
+		);
+		expect(captures).toEqual(["environment", null]);
+		fireEvent.click(placeholders(ui.container)[0]);
+		expect(captures).toEqual(["environment", null, null]);
+		expect(screen.queryByRole("dialog")).toBe(null);
+	});
+
+	it("[ISSUE-3490-ITEM-31] modern, read-only with a placeholder: a click on it opens no preview", () => {
+		const { container } = renderSel({
+			variant: "modern",
+			value: "",
+			placeholder: PLACEHOLDER,
+			readOnly: true,
+		});
+		fireEvent.click(placeholders(container)[0]);
+		expect(screen.queryByRole("dialog")).toBe(null);
+	});
+
+	it("[ISSUE-3490-ITEM-31] modern: a pick from the upload button next to the placeholder keeps focus on that button", async () => {
+		vi.spyOn(HTMLInputElement.prototype, "click").mockImplementation(() => {});
+		processImageMock.mockImplementation((file: File) => Promise.resolve(file));
+		const Controlled = () => {
+			const [value, setValue] = React.useState("");
+			return (
+				<ThemeProvider theme={theme}>
+					<ImageSelector
+						name={"photo"}
+						value={value}
+						placeholder={PLACEHOLDER}
+						capture={false}
+						alt={"Employee photo"}
+						label={"Photo"}
+						readOnly={false}
+						variant={"modern"}
+						onChange={() => setValue(PIXEL)}
+					/>
+				</ThemeProvider>
+			);
+		};
+		const { container } = render(<Controlled />);
+		const upload = screen.getByRole("button", {
+			name: t("standalone.file-upload.upload-modern-btn"),
+		});
+		act(() => upload.focus());
+		fireEvent.click(upload);
+		await act(async () => {
+			fireEvent.change(
+				container.querySelector<HTMLInputElement>('input[type="file"]')!,
+				{
+					target: {
+						files: [new File(["x"], "pic.png", { type: "image/png" })],
+					},
+				},
+			);
+			await new Promise((resolve) => setTimeout(resolve, 0));
+		});
+		expect(container.querySelector("img")).toHaveAttribute("src", PIXEL);
+		expect(upload).toHaveFocus();
+	});
+
+	it("[ISSUE-3490-ITEM-31] modern: a placeholder set while the empty field's button has focus moves focus to the upload button", () => {
+		const props: ImageSelectorProps = {
+			name: "photo",
+			value: "",
+			capture: false,
+			alt: "Employee photo",
+			label: "Photo",
+			readOnly: false,
+			variant: "modern",
+		};
+		const { rerender } = render(
+			<ThemeProvider theme={theme}>
+				<ImageSelector {...props} />
+			</ThemeProvider>,
+		);
+		const cta = screen.getByRole("button", {
+			name: t("standalone.file-upload.upload-modern"),
+		});
+		act(() => cta.focus());
+		rerender(
+			<ThemeProvider theme={theme}>
+				<ImageSelector {...props} placeholder={PLACEHOLDER} />
+			</ThemeProvider>,
+		);
+		expect(cta).not.toBeInTheDocument();
+		expect(
+			screen.getByRole("button", {
+				name: t("standalone.file-upload.upload-modern-btn"),
+			}),
+		).toHaveFocus();
+	});
+});

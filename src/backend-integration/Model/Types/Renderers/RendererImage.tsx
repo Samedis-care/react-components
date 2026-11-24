@@ -43,7 +43,8 @@ class RendererImage extends TypeImage {
 				<>
 					<ImageSelector
 						name={field}
-						value={value || (this.params?.placeholder ?? "")}
+						value={value || ""}
+						placeholder={this.params?.placeholder}
 						label={label}
 						dirty={dirty}
 						readOnly={visibility.readOnly}

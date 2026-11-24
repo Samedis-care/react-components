@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, fn, userEvent, waitFor } from "storybook/test";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import ImageSelector, { ImageSelectorProps } from "./ImageSelector";
 
 /**
@@ -98,6 +98,11 @@ const meta: Meta<typeof ImageSelector> = {
 			control: "text",
 			description:
 				'A URL or a Blob/File. `""` for no image. The stories hold the picked File in state, like a form.',
+		},
+		placeholder: {
+			control: "text",
+			description:
+				"A URL or data URI drawn where the picture would be while the field is empty: hidden from assistive technology, and a click opens the file dialog, never the preview.",
 		},
 		convertImagesTo: { control: "text" },
 		onChange: {
@@ -229,5 +234,77 @@ export const Issue3490Item1ModernPickKeepsFocusInTheField: Story = {
 				canvas.getByRole("button", { name: "Click for an upload dialog" }),
 			).toHaveFocus(),
 		);
+	},
+};
+
+const PLACEHOLDER =
+	"data:image/svg+xml," +
+	encodeURIComponent(
+		"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='240' height='240'><rect width='24' height='24' fill='#eeeeee'/><path fill='#bdbdbd' d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4m0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4'/></svg>",
+	);
+
+/**
+ * The empty modern field with a placeholder (left) looks like a field with a picture (right):
+ * the placeholder fills the frame, with the upload button in its corner. It is no image for
+ * assistive technology, its hover hint does not name it, and a click on it opens the file
+ * picker, never the preview.
+ */
+export const Issue3490Item31PlaceholderWhereThePictureWouldBe: Story = {
+	args: { variant: "modern", placeholder: PLACEHOLDER },
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<div style={{ display: "flex", gap: 16 }}>
+			<Controlled {...args} box={{ width: 300, height: 200 }} />
+			<Controlled
+				{...args}
+				value={PLACEHOLDER}
+				placeholder={undefined}
+				box={{ width: 300, height: 200 }}
+			/>
+		</div>
+	),
+	play: async ({ canvas, canvasElement }) => {
+		const [empty, stored] = Array.from(
+			canvasElement.querySelectorAll("fieldset"),
+		);
+		const drawn = empty.querySelector("img");
+		const picture = stored.querySelector("img");
+		if (!drawn || !picture) throw new Error("no placeholder or picture");
+		await expect(drawn.getAttribute("src")).toBe(PLACEHOLDER);
+		// only the stored picture is an image for assistive technology
+		await expect(canvas.getAllByRole("img")).toEqual([picture]);
+		// where the picture would be, with the same button in its corner and no call to action
+		const box = (img: HTMLImageElement) => {
+			const rect = img.getBoundingClientRect();
+			return { top: rect.top, width: rect.width, height: rect.height };
+		};
+		await expect(box(drawn)).toEqual(box(picture));
+		await expect(
+			within(empty).getByRole("button", { name: "Click for an upload dialog" }),
+		).toBeVisible();
+		await expect(
+			within(empty).queryByRole("button", {
+				name: "Drag & drop file here or click for an upload dialog",
+			}),
+		).toBe(null);
+
+		// the hover hint shows and leaves the placeholder unnamed
+		await userEvent.hover(drawn);
+		await expect(
+			await within(canvasElement.ownerDocument.body).findByRole("tooltip"),
+		).toHaveTextContent("Drag & drop file here");
+		await expect(drawn).toHaveAccessibleName("");
+		await userEvent.unhover(drawn);
+
+		const picker = countPickerOpens(canvasElement);
+		try {
+			await userEvent.click(drawn);
+			await expect(picker.clicks()).toBe(1);
+			await expect(
+				canvasElement.ownerDocument.querySelector('[role="dialog"]'),
+			).toBe(null);
+		} finally {
+			picker.stop();
+		}
 	},
 };

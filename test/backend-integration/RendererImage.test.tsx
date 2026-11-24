@@ -1,5 +1,5 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import RendererImage from "../../src/backend-integration/Model/Types/Renderers/RendererImage";
 import type ModelRenderParams from "../../src/backend-integration/Model/RenderParams";
 import ccI18n from "../../src/i18n";
@@ -88,4 +88,40 @@ describe("ModelDataTypeImageRenderer", () => {
 			);
 		},
 	);
+});
+
+describe("ModelDataTypeImageRenderer — editable", () => {
+	it("[ISSUE-3490-ITEM-31] an empty field draws the placeholder where the picture would be, not as its value", () => {
+		const click = vi
+			.spyOn(HTMLInputElement.prototype, "click")
+			.mockImplementation(() => {});
+		const renderer = new RendererImage({
+			placeholder: PLACEHOLDER,
+			variant: "modern",
+		});
+
+		const { container } = render(
+			renderer.render({
+				...renderParams("", false),
+				visibility: {
+					disabled: false,
+					hidden: false,
+					editable: true,
+					readOnly: false,
+					required: false,
+					grid: false,
+				},
+			}),
+		);
+		// not announced as the field's picture
+		expect(screen.queryByRole("img")).toBeNull();
+		const img = container.querySelector("img");
+		expect(img).toHaveAttribute("src", PLACEHOLDER);
+		expect(img).toHaveAttribute("alt", "");
+		// a click opens the file dialog, not the preview
+		fireEvent.click(img!);
+		expect(click).toHaveBeenCalledTimes(1);
+		expect(screen.queryByRole("dialog")).toBeNull();
+		click.mockRestore();
+	});
 });
