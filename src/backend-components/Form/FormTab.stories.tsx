@@ -94,7 +94,7 @@ type PeopleModel = ReturnType<typeof makeModel>;
 const PERSON_FIELDS = ["first_name", "last_name"];
 const CONTACT_FIELDS = ["email", "department"];
 
-/** The form page: the tabs and their panels, as SCF's contract form has them */
+/** The form page: the tabs and their panels, as an app's contract form has them */
 const TabbedPage = (props: PageProps<PeopleModel, { goBack: () => void }>) => {
 	const tab = useRoutedTabPanel();
 	return (

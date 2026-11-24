@@ -46,7 +46,7 @@ type Page = React.ComponentType<
 >;
 
 /**
- * The consumer shape of SCF's contract form: the form page wraps the tabs and
+ * The consumer shape of an app's contract form: the form page wraps the tabs and
  * the panels, and each tab lists the fields of its panel. Record 1 has an
  * empty "other", which the model requires, on the tab "More".
  */
