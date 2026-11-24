@@ -953,7 +953,8 @@ describe("FilterBar, CustomFiltersButton, CustomFilterDialog", () => {
 		fireEvent.click(button);
 		expect(panelOpen()).toBe(true);
 		expect(button).toHaveAttribute("aria-expanded", "true");
-		fireEvent.click(screen.getByRole("button", { name: "Close" }));
+		// the panel closes through its footer's "Show results" (ISSUE-3494-ITEM-32)
+		fireEvent.click(screen.getByRole("button", { name: "Show results" }));
 		expect(panelOpen()).toBe(false);
 		expect(button).toHaveAttribute("aria-expanded", "false");
 	});
