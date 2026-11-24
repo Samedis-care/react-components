@@ -405,7 +405,7 @@ describe("language change", () => {
 		// the user has scrolled down into the list
 		scrollTo(scrollerOf(container), 50);
 		await advance(200);
-		// the app switches moment first, as SCF does
+		// the app switches moment first, as apps do
 		moment.locale("de");
 		await act(async () => {
 			await ccI18n.changeLanguage("de");
