@@ -30,5 +30,5 @@ entry when a plain `<a>` leads to the current URL, and so does react-router's Li
 
 ## Migration
 
-Nothing to do: neither SCF nor IMF passes `replace` to `Link`. A `Link` that has to add
-an entry also for the current location sets `replace={false}`.
+Nothing to do in most apps. A `Link` that has to add an entry also for the current location
+sets `replace={false}`.
