@@ -10,9 +10,12 @@ import {
 	waitFor,
 } from "@testing-library/react";
 import {
+	alertClasses,
+	alertTitleClasses,
 	Button,
 	createTheme,
 	Dialog,
+	skeletonClasses,
 	Theme,
 	ThemeProvider,
 } from "@mui/material";
@@ -628,7 +631,103 @@ describe("Toast: bugs", () => {
 			expect(save).toBeVisible();
 		});
 	});
+
+	it("[ISSUE-3470-ITEM-26] while a toast's title and message load, skeleton text lines hidden from screen readers stand in for them, and the loaded text replaces them in the same live region", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => undefined);
+		const deviceName = lazyLater();
+		const details = lazyLater();
+		const SaveDevice = () => {
+			const [showToast] = useToastContext();
+			const save = useCallback(
+				() =>
+					showToast({
+						title: <deviceName.Component />,
+						message: <details.Component />,
+						autoHideDuration: null,
+					}),
+				[showToast],
+			);
+			return <button onClick={save}>Save device</button>;
+		};
+		renderInFramework(<SaveDevice />);
+		fireEvent.click(await screen.findByRole("button", { name: "Save device" }));
+		const toast = screen.getByRole("status");
+		const title = () => toast.querySelector(`.${alertTitleClasses.root}`);
+		// the Alert's message slot holds the title too
+		const messageLines = () =>
+			skeletonLines(toast.querySelector(`.${alertClasses.message}`)).filter(
+				(line) => !title()?.contains(line),
+			);
+		expect(skeletonLines(title())).toHaveLength(1);
+		expect(messageLines()).toHaveLength(2);
+		for (const line of skeletonLines(toast)) {
+			expect(line).toHaveClass(skeletonClasses.text);
+			expect(line.closest("[aria-hidden='true']")).not.toBeNull();
+		}
+		// nothing for a screen reader to read yet
+		expect(toast.textContent).toBe("");
+
+		await deviceName.load(() => <>Device 1042</>);
+		expect(title()).toHaveTextContent("Device 1042");
+		expect(skeletonLines(title())).toHaveLength(0);
+		expect(messageLines()).toHaveLength(2);
+
+		await details.load(() => <>Saved.</>);
+		expect(toast).toHaveTextContent("Device 1042Saved.");
+		expect(skeletonLines(toast)).toHaveLength(0);
+		// the live region that was in the page while the text loaded: the text
+		// is added to it, which is what screen readers announce
+		expect(screen.getByRole("status")).toBe(toast);
+	});
+
+	it("[ISSUE-3470-ITEM-26] a toast that replaced another one shows skeleton lines while its message loads, not the other toast's message, and gets its text in the same live region", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => undefined);
+		const details = lazyLater();
+		const SaveDevices = () => {
+			const [showToast] = useToastContext();
+			const saveA = useCallback(
+				() => showToast({ message: "A saved.", autoHideDuration: null }),
+				[showToast],
+			);
+			const saveB = useCallback(
+				() =>
+					showToast({
+						message: <details.Component />,
+						autoHideDuration: null,
+					}),
+				[showToast],
+			);
+			return (
+				<>
+					<button onClick={saveA}>Save A</button>
+					<button onClick={saveB}>Save B</button>
+				</>
+			);
+		};
+		renderInFramework(<SaveDevices />);
+		const saveB = await screen.findByRole("button", { name: "Save B" });
+		vi.useFakeTimers();
+		fireEvent.click(screen.getByRole("button", { name: "Save A" }));
+		const toast = screen.getByRole("status");
+		expect(toast).toHaveTextContent("A saved.");
+
+		fireEvent.click(saveB);
+		// A has closed: B is the toast now, its message loading
+		advance(EXIT_MS + 300);
+		expect(screen.getByRole("status")).toBe(toast);
+		expect(toast.textContent).toBe("");
+		expect(skeletonLines(toast)).toHaveLength(2);
+
+		await details.load(() => <>B saved.</>);
+		expect(toast).toHaveTextContent("B saved.");
+		expect(skeletonLines(toast)).toHaveLength(0);
+		expect(screen.getByRole("status")).toBe(toast);
+	});
 });
+
+/** The skeleton lines in element */
+const skeletonLines = (element: Element | null) =>
+	Array.from(element?.querySelectorAll(`.${skeletonClasses.root}`) ?? []);
 
 /** Renders children in the Framework, inside an app error boundary */
 const renderInFramework = (children: React.ReactNode) => {

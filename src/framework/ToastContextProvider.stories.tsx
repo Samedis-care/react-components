@@ -271,3 +271,118 @@ export const AtAnOutlet: StoryObj = {
 		await expect(body.getByRole("status")).toHaveTextContent("Device saved.");
 	},
 };
+
+/** A React.lazy component whose module loads once load is called */
+const lazyLater = () => {
+	let resolve: (module: { default: React.ComponentType }) => void = () =>
+		undefined;
+	const module = new Promise<{ default: React.ComponentType }>((r) => {
+		resolve = r;
+	});
+	return {
+		Component: React.lazy(() => module),
+		load: (component: React.ComponentType) => resolve({ default: component }),
+	};
+};
+
+const DeviceName = () => <>Device 1042</>;
+const DeviceDetails = () => <>Saved. The next inspection is due in March.</>;
+
+const LoadingContentDemo = () => {
+	const [showToast] = useToastContext();
+	// per mount, so the story shows the loading toast again after a reload
+	const [content] = useState(() => ({
+		title: lazyLater(),
+		message: lazyLater(),
+	}));
+	const save = useCallback(
+		() =>
+			showToast({
+				severity: "success",
+				title: <content.title.Component />,
+				message: <content.message.Component />,
+				autoHideDuration: null,
+			}),
+		[showToast, content],
+	);
+	const finishLoading = useCallback(() => {
+		content.title.load(DeviceName);
+		content.message.load(DeviceDetails);
+	}, [content]);
+	return (
+		<Stack direction={"row"} spacing={2}>
+			<Button variant={"contained"} onClick={save}>
+				Save device
+			</Button>
+			<Button variant={"outlined"} onClick={finishLoading}>
+				Finish loading
+			</Button>
+		</Stack>
+	);
+};
+
+/** a computed color, `rgb()`/`rgba()` or `color(srgb …)`, as 0-255 channels */
+const parseColor = (color: string) => {
+	const [r, g, b, a = 1] = (color.match(/[\d.]+/g) ?? []).map(Number);
+	const scale = color.startsWith("color(srgb") ? 255 : 1;
+	return {
+		r: Math.round(r * scale),
+		g: Math.round(g * scale),
+		b: Math.round(b * scale),
+		a: Math.round(a * 1000) / 1000,
+	};
+};
+
+/**
+ * A toast whose title and message are still loading (e.g. a `React.lazy`
+ * component in them) shows right away, with skeleton text lines in the
+ * toast's text color in their place, and leaves the page as it is. The text
+ * replaces the lines once loaded ("Finish loading"); screen readers announce
+ * it then. At phone width the lines fit the toast.
+ */
+export const Issue3470Item26LoadingContent: StoryObj = {
+	render: () => <LoadingContentDemo />,
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: { a11y: { test: "error" } },
+	play: async ({ canvas, userEvent }) => {
+		await userEvent.click(canvas.getByRole("button", { name: "Save device" }));
+		const toast = await body.findByRole("status");
+		const lines = Array.from(
+			toast.querySelectorAll<HTMLElement>(".MuiSkeleton-root"),
+		);
+		await expect(lines).toHaveLength(3);
+		await expect(toast.textContent).toBe("");
+
+		// MUI's skeleton tint (11% of the text color), of the toast's text color
+		const text = parseColor(getComputedStyle(toast).color);
+		for (const line of lines) {
+			await expect(parseColor(getComputedStyle(line).backgroundColor)).toEqual({
+				...text,
+				a: 0.11,
+			});
+		}
+
+		// the toast and its lines fit the 320 px screen
+		const toastBox = toast.getBoundingClientRect();
+		await expect(toastBox.left).toBeGreaterThanOrEqual(0);
+		await expect(toastBox.right).toBeLessThanOrEqual(window.innerWidth);
+		const message = toast.querySelector<HTMLElement>(".MuiAlert-message");
+		const messageRight = message?.getBoundingClientRect().right ?? 0;
+		for (const line of lines) {
+			const box = line.getBoundingClientRect();
+			await expect(box.width).toBeGreaterThan(0);
+			await expect(box.right).toBeLessThanOrEqual(messageRight);
+		}
+
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Finish loading" }),
+		);
+		await waitFor(() =>
+			expect(toast).toHaveTextContent(
+				"Device 1042Saved. The next inspection is due in March.",
+			),
+		);
+		await expect(toast.querySelectorAll(".MuiSkeleton-root")).toHaveLength(0);
+		await expect(body.getByRole("status")).toBe(toast);
+	},
+};

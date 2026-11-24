@@ -1,4 +1,11 @@
 import React, { Suspense, useContext, useMemo } from "react";
+import {
+	CSSObject,
+	Skeleton,
+	skeletonClasses,
+	styled,
+	Theme,
+} from "@mui/material";
 import { Toast } from "../standalone/Toast";
 import type { ToastState } from "./toastReducer";
 import ToastErrorBoundary from "./ToastErrorBoundary";
@@ -29,6 +36,53 @@ export const ToastOutletContext =
 	React.createContext<ToastOutletContextType | null>(null);
 
 /**
+ * Skeleton text lines that stand in for a toast's title or message while it
+ * loads, as wide as such a text usually is and never wider than the toast
+ * @param theme The theme
+ * @param width The width of the lines, a CSS length; a second line is 60% of it
+ * @returns The styles of the lines' wrapper
+ */
+const loadingTextStyles = (theme: Theme, width: string): CSSObject => ({
+	// a grid track that may shrink to nothing: a block of that width would keep
+	// the toast from getting narrower than it, and push it off a phone's screen
+	display: "grid",
+	gridTemplateColumns: `minmax(0, ${width})`,
+	[`& > .${skeletonClasses.root}`]: {
+		// MUI's tint (11% of the text color, 13% in a dark palette), but of the
+		// toast's text color: the page's barely shows on a filled toast
+		backgroundColor: "color-mix(in srgb, currentColor 11%, transparent)",
+		...theme.applyStyles("dark", {
+			backgroundColor: "color-mix(in srgb, currentColor 13%, transparent)",
+		}),
+	},
+	[`& > .${skeletonClasses.root}:nth-of-type(2)`]: {
+		width: "60%",
+	},
+});
+
+const LoadingTitle = styled("span")(({ theme }) =>
+	loadingTextStyles(theme, "8em"),
+);
+const LoadingMessage = styled("span")(({ theme }) =>
+	loadingTextStyles(theme, "20em"),
+);
+
+// shown while a toast's title or message loads: a line for a short title, a
+// line and a half for a message. Hidden from assistive technology: the toast's
+// live region, in the page all along, announces the text once it is in
+const titleFallback = (
+	<LoadingTitle aria-hidden>
+		<Skeleton variant="text" />
+	</LoadingTitle>
+);
+const messageFallback = (
+	<LoadingMessage aria-hidden>
+		<Skeleton variant="text" />
+		<Skeleton variant="text" />
+	</LoadingMessage>
+);
+
+/**
  * Renders the toasts of the ToastContextProvider around it, one at a time, when
  * that provider has disableDefaultOutlet. A toast's title and message render
  * here, so they can use every context provided around the outlet (the
@@ -42,9 +96,10 @@ export const ToastOutletContext =
  * "ToastOutlet").
  *
  * A title or message that suspends (e.g. a React.lazy component in it) does not
- * reach the app's Suspense either: the toast shows right away, and that title
- * or message stays empty until it has loaded. A toast still loading closes and
- * gives way to the next one like any other.
+ * reach the app's Suspense either: the toast shows right away, with skeleton
+ * text lines in place of that title or message until it has loaded. Screen
+ * readers announce the toast's text once it is in. A toast still loading
+ * closes and gives way to the next one like any other.
  */
 const ToastOutlet = () => {
 	const outlet = useContext(ToastOutletContext);
@@ -55,11 +110,12 @@ const ToastOutlet = () => {
 	// opened does not call onExited when it is closed meanwhile, and every
 	// later toast waits for that. A falsy title is passed on as it is
 	const suspensefulTitle = useMemo(
-		() => (title ? <Suspense>{title}</Suspense> : title),
+		() =>
+			title ? <Suspense fallback={titleFallback}>{title}</Suspense> : title,
 		[title],
 	);
 	const suspensefulMessage = useMemo(
-		() => <Suspense>{message}</Suspense>,
+		() => <Suspense fallback={messageFallback}>{message}</Suspense>,
 		[message],
 	);
 	if (!outlet || !toast) return null;
