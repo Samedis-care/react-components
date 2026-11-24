@@ -42,13 +42,12 @@ buttons is MUI's own pattern for a tab bar that can be wider than the screen.
 
 ## Migration
 
-- **samedis-ui:** nothing to do. `TenantContractForm` (`variant="scrollable"`) now shows
-  scroll buttons on phones while its tabs do not fit. `FacilityDataForm`
-  (`variant="fullWidth"`) looks the same on wide screens; on a phone its bar scrolls, with
-  scroll buttons, and every label is readable.
-- **identity-management-frontend:** nothing to do. Its theme sets `MuiTabs.defaultProps`
-  `variant: "scrollable"` and `scrollButtons: false`; RoutedTabs' default variant is the
-  same, and `scrollButtons: false` still reaches it, so its bars do not change.
+- Nothing to do for a bar with `variant="scrollable"`: it now shows scroll buttons on phones
+  while its tabs do not fit. A `fullWidth` bar looks the same on wide screens; on a phone it
+  scrolls, with scroll buttons, and every label is readable.
+- Nothing to do for an app whose theme sets `MuiTabs.defaultProps` `variant: "scrollable"` and
+  `scrollButtons: false`: RoutedTabs' default variant is the same, and `scrollButtons: false`
+  still reaches it, so its bars do not change.
 - **Required for an app that sets `variant` or `centered` under `MuiTabs.defaultProps` and
   wants them for its routed tabs:** set them under `CcRoutedTabs.defaultProps` as well,
   otherwise its RoutedTabs use the defaults above:

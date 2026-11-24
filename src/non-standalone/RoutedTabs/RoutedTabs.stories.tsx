@@ -174,7 +174,7 @@ const SettingsTabs = (props: {
 	);
 };
 
-/** IMF's user form: five tabs with German labels, wider than a phone */
+/** A user form: five tabs with German labels, wider than a phone */
 const UserTabs = (props: { tabsProps: Args }) => {
 	const tab = useRoutedTabPanel();
 	const panel = (name: string) => (
@@ -562,7 +562,7 @@ export const Issue3500Item10AllTabsReachableOnPhone: Story = {
 		docs: {
 			description: {
 				story:
-					"ISSUE-3500-ITEM-10: IMF's user form (five German tabs, 609px) at 320px with the default variant. The scroller has `overflow-x: hidden`, so Rollen and Berechtigungen are off screen and touch users cannot reach them. Expected: every tab can be scrolled into view (e.g. `scrollable` by default).",
+					"ISSUE-3500-ITEM-10: a user form (five German tabs, 609px) at 320px with the default variant. The scroller has `overflow-x: hidden`, so Rollen and Berechtigungen are off screen and touch users cannot reach them. Expected: every tab can be scrolled into view (e.g. `scrollable` by default).",
 			},
 		},
 	},
@@ -588,8 +588,8 @@ export const Issue3500Item10AllTabsReachableOnPhone: Story = {
 
 /**
  * The bars of ISSUE-3500-ITEM-10, each under its own route and without
- * panels: IMF's user form (the default variant), IMF's former profile page
- * (`centered`) and SCF's facility form (`fullWidth`)
+ * panels: a user form (the default variant), a profile page (`centered`) and
+ * a facility form (`fullWidth`)
  */
 const ITEM10_BARS: { name: string; props: Partial<Args>; labels: string[] }[] =
 	[
