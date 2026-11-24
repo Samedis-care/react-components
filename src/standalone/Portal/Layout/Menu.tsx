@@ -30,6 +30,15 @@ export interface PortalLayoutMenuProps {
 	 */
 	drawerWidth?: number;
 	/**
+	 * The id of the drawer's paper in mobile view
+	 *
+	 * The paper is the drawer's dialog element, which holds the items; the
+	 * burger names it in its `aria-controls`. The drawer is kept mounted while
+	 * closed, so the id is in the document for as long as the drawer is
+	 * rendered. Not set on the desktop Paper. Undefined: no id.
+	 */
+	drawerId?: string;
+	/**
 	 * Callback to toggle the menu open/closed
 	 */
 	toggleMenu: () => void;
@@ -55,7 +64,9 @@ export interface PortalLayoutMenuProps {
 }
 
 const modalProps = {
-	keepMounted: true, // Better open performance on mobile.
+	// Better open performance on mobile. It also keeps the drawer's paper, which
+	// the burger names in its aria-controls, in the document while closed.
+	keepMounted: true,
 };
 
 const MenuPaper = styled(Paper, {
@@ -102,6 +113,7 @@ const PortalLayoutMenu = (inProps: PortalLayoutMenuProps) => {
 		classes,
 		mobile,
 		items,
+		drawerId,
 	} = props;
 	const theme = useTheme();
 
@@ -138,8 +150,8 @@ const PortalLayoutMenu = (inProps: PortalLayoutMenuProps) => {
 		[drawerWidth],
 	);
 	const drawerSlotProps = useMemo(
-		() => ({ paper: { ...paperProps, ref: hostRef } }),
-		[paperProps, hostRef],
+		() => ({ paper: { ...paperProps, id: drawerId, ref: hostRef } }),
+		[paperProps, drawerId, hostRef],
 	);
 
 	return (

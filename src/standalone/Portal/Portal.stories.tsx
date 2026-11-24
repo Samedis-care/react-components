@@ -957,3 +957,51 @@ export const Issue3479Item11CloseButtonOverTopLeft: LayoutStory = {
 		);
 	},
 };
+
+export const Issue3479Item14BurgerControlsDrawer: LayoutStory = {
+	globals: MOBILE,
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3479-ITEM-14: the burger names the drawer it opens (`aria-controls`) and says whether it is open (`aria-expanded`). The drawer stays mounted while closed, so the reference always resolves, to the drawer that holds the close button and the menu.",
+			},
+		},
+	},
+	render: (args) => (
+		<div style={fullHeight}>
+			<PortalLayout
+				{...args}
+				variant="no-top-left"
+				headerContent={pageTitle()}
+				menuContent={menu()}
+				content={<div style={{ padding: 16 }}>Content</div>}
+			/>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const burger = burgerIn(canvasElement);
+		const id = burger.getAttribute("aria-controls");
+		await expect(id).toMatch(/\S/);
+		await expect(document.getElementById(id!)).toBe(drawerPaper());
+
+		await openDrawer(canvasElement);
+		await expect(burger).toHaveAttribute("aria-expanded", "true");
+		await expect(burger).toHaveAttribute("aria-controls", id);
+		const drawer = document.getElementById(id!)!;
+		await expect(drawer).toBe(drawerPaper());
+		await expect(drawer).toHaveAttribute("role", "dialog");
+		await expect(
+			within(drawer).getByRole("button", { name: "Close menu" }),
+		).toBeInTheDocument();
+		await expect(
+			within(drawer).getByRole("button", { name: "Dashboard" }),
+		).toBeVisible();
+
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() => expect(drawerRoot()).toHaveAttribute("aria-hidden"));
+		await expect(burger).toHaveAttribute("aria-expanded", "false");
+		await expect(document.getElementById(id!)).toBe(drawerPaper());
+	},
+};

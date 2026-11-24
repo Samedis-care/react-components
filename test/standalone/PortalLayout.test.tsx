@@ -185,6 +185,56 @@ describe("PortalLayout: bugs", () => {
 		await waitFor(() => expect(drawerIsOpen()).toBe(false));
 		expect(burger()).toHaveAttribute("aria-expanded", "false");
 	});
+	it("[ISSUE-3479-ITEM-14] the burger names the drawer it opens, which holds the close button and the menu", async () => {
+		renderLayout({ collapseMenu: true });
+		const id = burger().getAttribute("aria-controls");
+		expect(id).toMatch(/\S/);
+		// closed, the drawer is kept mounted, so the reference resolves
+		expect(document.getElementById(id!)).toBe(
+			screen.getByRole("dialog", { hidden: true }),
+		);
+		await openDrawer();
+		expect(burger()).toHaveAttribute("aria-controls", id);
+		const dialog = screen.getByRole("dialog");
+		expect(dialog).toHaveAttribute("id", id);
+		expect(
+			within(dialog).getByRole("button", { name: "Close menu" }),
+		).toBeInTheDocument();
+		expect(
+			within(dialog).getByRole("button", { name: "Dashboard" }),
+		).toBeInTheDocument();
+	});
+	it("[ISSUE-3479-ITEM-14] after a trip to desktop, the burger names the drawer by the same id", () => {
+		stubViewport(600);
+		renderLayout();
+		const id = burger().getAttribute("aria-controls");
+		resizeTo(1200);
+		expect(
+			screen.queryByRole("button", { name: "Toggle menu", hidden: true }),
+		).not.toBeInTheDocument();
+		resizeTo(600);
+		expect(burger()).toHaveAttribute("aria-controls", id);
+		expect(document.getElementById(id!)).toBe(
+			screen.getByRole("dialog", { hidden: true }),
+		);
+	});
+	it("[ISSUE-3479-ITEM-14] two layouts on one page name their own drawers", () => {
+		const ids = { headerId: undefined, menuId: undefined, mainId: undefined };
+		renderUi(
+			<>
+				<PortalLayout {...layoutProps({ collapseMenu: true, ...ids })} />
+				<PortalLayout {...layoutProps({ collapseMenu: true, ...ids })} />
+			</>,
+		);
+		const controlled = screen
+			.getAllByRole("button", { name: "Toggle menu", hidden: true })
+			.map((button) => button.getAttribute("aria-controls"));
+		expect(new Set(controlled).size).toBe(2);
+		const drawers = screen.getAllByRole("dialog", { hidden: true });
+		for (const id of controlled) {
+			expect(drawers).toContain(document.getElementById(id!));
+		}
+	});
 
 	it("[ISSUE-3479-ITEM-11] the open drawer has a close button that closes it and returns focus to the burger", async () => {
 		renderLayout({ collapseMenu: true });

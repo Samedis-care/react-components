@@ -21,9 +21,19 @@ export interface PortalLayoutHeaderProps {
 	 * Show mobile view?
 	 *
 	 * true renders the burger button, which tells assistive technology whether
-	 * the drawer is open (`aria-expanded`, from the layout's `menuOpen`).
+	 * the drawer is open (`aria-expanded`, from the layout's `menuOpen`) and
+	 * which element the drawer is (`aria-controls`, `drawerId`).
 	 */
 	mobile: boolean;
+	/**
+	 * The id of the drawer the burger opens, named by the burger's
+	 * `aria-controls`
+	 *
+	 * Set on the drawer's paper (PortalLayoutMenu's `drawerId`), which stays
+	 * mounted while the drawer is closed, so the reference resolves whenever the
+	 * burger is shown.
+	 */
+	drawerId: string;
 	/**
 	 * The actual user-specified contents to display
 	 */
@@ -43,7 +53,7 @@ const MenuButton = styled(IconButton)(({ theme }) =>
 );
 
 const PortalLayoutHeader = (props: PortalLayoutHeaderProps) => {
-	const { mobile, customClasses, toggleMenu, contents } = props;
+	const { mobile, customClasses, toggleMenu, contents, drawerId } = props;
 	const { t } = useCCTranslations();
 	const { menuOpen } = usePortalLayoutContext();
 
@@ -56,6 +66,7 @@ const PortalLayoutHeader = (props: PortalLayoutHeaderProps) => {
 						size="large"
 						aria-label={t("standalone.portal.menu-toggle")}
 						aria-expanded={menuOpen}
+						aria-controls={drawerId}
 					>
 						<MenuIcon />
 					</MenuButton>

@@ -4,6 +4,7 @@ import React, {
 	SetStateAction,
 	useCallback,
 	useContext,
+	useId,
 	useMemo,
 	useState,
 } from "react";
@@ -52,7 +53,9 @@ interface PortalLayoutPropsBase {
 	/**
 	 * Content displayed in the menu area (usually a Menu)
 	 *
-	 * In mobile view it is shown in a drawer that the burger button opens.
+	 * In mobile view it is shown in a drawer that the burger button opens. The
+	 * burger says whether the drawer is open (`aria-expanded`) and names it
+	 * (`aria-controls`, an id the layout generates).
 	 * Escape, a click on the backdrop and the drawer's close button ("Close
 	 * menu", `standalone.portal.close-menu`) close it; focus then returns to the
 	 * element that had it before the drawer opened, usually the burger. The
@@ -232,6 +235,8 @@ export const usePortalLayoutContext = (): PortalLayoutContextType => {
 const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 	const { mobile, headerContent, drawerWidth, menuContent, content } = props;
 	const [menuOpen, setMenuOpen] = useState(false);
+	// the mobile drawer's paper, named by the burger's aria-controls
+	const drawerId = useId();
 	const { t } = useCCTranslations();
 
 	const toggleMenu = useCallback(
@@ -261,6 +266,7 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 						contents={headerContent}
 						toggleMenu={toggleMenu}
 						mobile={mobile && !!menuContent}
+						drawerId={drawerId}
 						customClasses={props.customClasses?.header}
 					/>
 				)}
@@ -272,6 +278,7 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 						drawerWidth={drawerWidth}
 						toggleMenu={toggleMenu}
 						mobile={mobile}
+						drawerId={drawerId}
 						items={
 							<>
 								{mobile && (
