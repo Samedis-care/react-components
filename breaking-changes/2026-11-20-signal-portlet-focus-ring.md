@@ -20,7 +20,7 @@ ListItemButton and IconButton, and the card adds none of its own.
 ## Why
 
 A focused row only turned light grey (1.32:1 against the card), close to a hovered row and
-paler than one under a darker `action.hover` such as samedis.care's. The only sign of a
+paler than one under a theme's darker `action.hover`. The only sign of a
 focused Refresh button was the faint pulsating ripple (about 1.44:1). Forced colors (Windows
 High Contrast) drop both, so nothing showed which counter Enter opens (WCAG 2.4.7, 1.4.11).
 An outline contrasts with the card like `primary.main` does (4.6:1 with MUI's default blue on
@@ -30,7 +30,7 @@ bottom right corner.
 
 ## Migration
 
-Nothing to do, but expect the ring in screenshots of SignalPortlet cards (SCF's Home page)
-after keyboard use. To restyle it, override `&.Mui-focusVisible` in
+Nothing to do, but expect the ring in screenshots of SignalPortlet cards after keyboard
+use. To restyle it, override `&.Mui-focusVisible` in
 `CcSignalPortletItem`'s `rootBtn` and `CcSignalPortlet`'s `refreshIconButton`
 `styleOverrides`, or set MUI's `focusVisible` theme option.
