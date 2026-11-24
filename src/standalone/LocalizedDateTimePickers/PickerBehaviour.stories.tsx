@@ -176,7 +176,7 @@ export const CalendarAfterHalfTypedYear: StoryObj<BehaviourArgs> = {
 };
 
 export const ArrowKeysStepTheValue: StoryObj<BehaviourArgs> = {
-	name: "Arrow keys step a section and report each step",
+	name: "Arrow keys step a section, and the date is reported once the user is done",
 	args: { onChange: fn(), initialValue: "2026-08-01" },
 	render: (args) => <Controlled {...args} />,
 	play: async ({ args, canvas, userEvent }) => {
@@ -184,13 +184,15 @@ export const ArrowKeysStepTheValue: StoryObj<BehaviourArgs> = {
 
 		await userEvent.keyboard("{ArrowUp}");
 		await expect(fieldText(canvas)).toBe("08|01|2027");
-		await expect(lastReported(args.onChange, "YYYY-MM-DD")).toBe("2027-08-01");
 
 		await userEvent.keyboard("{ArrowDown}{ArrowDown}");
 		await expect(fieldText(canvas)).toBe("08|01|2025");
+		// every step is a whole date, and none is reported on the way
+		await expect(args.onChange).not.toHaveBeenCalled();
+
+		await userEvent.keyboard("{Enter}");
+		await expect(args.onChange).toHaveBeenCalledTimes(1);
 		await expect(lastReported(args.onChange, "YYYY-MM-DD")).toBe("2025-08-01");
-		// every step is a whole date, so every step is reported
-		await expect(args.onChange).toHaveBeenCalledTimes(3);
 	},
 };
 
@@ -203,7 +205,9 @@ export const DeleteASection: StoryObj<BehaviourArgs> = {
 		await userEvent.keyboard("{Backspace}");
 
 		// an incomplete date is no date, and an empty value is valid — so it is
-		// reported straight away rather than held back
+		// reported like a date, once the user is done
+		await expect(args.onChange).not.toHaveBeenCalled();
+		await userEvent.keyboard("{Enter}");
 		await expect(args.onChange).toHaveBeenCalledTimes(1);
 		await expect(args.onChange).toHaveBeenLastCalledWith(null);
 	},
@@ -225,6 +229,9 @@ export const DraftSurvivesSectionHopping: StoryObj<BehaviourArgs> = {
 
 		await typeSlowly(userEvent, "30");
 		await expect(fieldText(canvas)).toBe("08|01|2030");
+		await expect(args.onChange).not.toHaveBeenCalled();
+
+		await userEvent.keyboard("{Enter}");
 		await expect(args.onChange).toHaveBeenCalledTimes(1);
 		await expect(lastReported(args.onChange, "YYYY-MM-DD")).toBe("2030-08-01");
 	},
@@ -242,6 +249,8 @@ export const GermanFormat: StoryObj<BehaviourArgs> = {
 		await typeSlowly(userEvent, "12082030");
 
 		await expect(fieldText(canvas)).toBe("12|08|2030");
+		await userEvent.keyboard("{Enter}");
+		await expect(args.onChange).toHaveBeenCalledTimes(1);
 		await expect(lastReported(args.onChange, "YYYY-MM-DD")).toBe("2030-08-12");
 	},
 };

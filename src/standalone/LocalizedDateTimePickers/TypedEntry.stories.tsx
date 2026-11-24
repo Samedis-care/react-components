@@ -15,8 +15,9 @@ import LocalizedDateTimePicker from "./LocalizedDateTimePicker";
  * it back as `value`, which is what `DateInput` and the model renderers do.
  *
  * Two things have to hold at once, and they pull against each other: the field
- * must follow every keystroke, and the consumer must only hear about dates the
- * user finished entering. See `usePickerDraft`.
+ * must follow every keystroke, and the consumer must only hear about a date once
+ * the user is done with it (leaves the field, presses Enter). See
+ * `usePickerDraft`.
  *
  * These stories drive real keystrokes with a pause between them. A test that
  * sends the whole string in one burst passes even with the bug present, because
@@ -89,10 +90,6 @@ interface TypedEntryArgs {
 const reported = (onChange: TypedEntryArgs["onChange"], format: string) =>
 	onChange.mock.calls.map((call) => call[0]?.format(format) ?? "null");
 
-/** The value the last reported change carried, formatted for comparison */
-const lastReported = (onChange: TypedEntryArgs["onChange"], format: string) =>
-	reported(onChange, format).at(-1);
-
 /**
  * The years of every reported value.
  *
@@ -151,13 +148,13 @@ export const OverwriteStoredDate: StoryObj<TypedEntryArgs> = {
 		await userEvent.click(month);
 		await typeSlowly(userEvent, "12082030");
 
-		// every keystroke landed, none was taken back
+		// every keystroke landed, none was taken back, and none was reported
 		await expect(fieldText(canvas)).toBe("12|08|2030");
-		await expect(lastReported(args.onChange, "YYYY-MM-DD")).toBe("2030-12-08");
-		// no half-typed year ever reached the consumer
-		for (const year of reportedYears(args.onChange)) {
-			await expect([2026, 2030]).toContain(year);
-		}
+		await expect(args.onChange).not.toHaveBeenCalled();
+
+		// the date the user is done with, and nothing on the way to it
+		await userEvent.keyboard("{Enter}");
+		await expect(reported(args.onChange, "YYYY-MM-DD")).toEqual(["2030-12-08"]);
 	},
 };
 
@@ -207,15 +204,13 @@ export const SurvivesUnrelatedRerenders: StoryObj<TypedEntryArgs> = {
 
 		await typeSlowly(userEvent, "030");
 		await expect(fieldText(canvas)).toBe("08|01|2030");
-		await expect(lastReported(args.onChange, "YYYY-MM-DD")).toBe("2030-08-01");
-		for (const year of reportedYears(args.onChange)) {
-			await expect([2026, 2030]).toContain(year);
-		}
+		await userEvent.keyboard("{Enter}");
+		await expect(reported(args.onChange, "YYYY-MM-DD")).toEqual(["2030-08-01"]);
 	},
 };
 
 export const YearGrowsDigitByDigit: StoryObj<TypedEntryArgs> = {
-	name: "A year is not reported until it is whole",
+	name: "A date is reported once the user is done, never with a half-typed year",
 	args: { onChange: fn() },
 	render: (args) => <ControlledKeyboardDatePicker {...args} />,
 	play: async ({ args, canvas, userEvent }) => {
@@ -240,24 +235,32 @@ export const YearGrowsDigitByDigit: StoryObj<TypedEntryArgs> = {
 
 		await typeSlowly(userEvent, "6");
 		await expect(year).toHaveTextContent("2026");
-		await expect(args.onChange).toHaveBeenCalledTimes(1);
-		await expect(lastReported(args.onChange, "YYYY-MM-DD")).toBe("2026-08-12");
+		await expect(args.onChange).not.toHaveBeenCalled();
+
+		await userEvent.keyboard("{Enter}");
+		await expect(reported(args.onChange, "YYYY-MM-DD")).toEqual(["2026-08-12"]);
+		for (const reportedYear of reportedYears(args.onChange)) {
+			await expect(reportedYear).toBe(2026);
+		}
 	},
 };
 
-export const ClearingIsReportedAtOnce: StoryObj<TypedEntryArgs> = {
-	name: "Clearing the field reports null right away",
+export const ClearingIsReportedWhenDone: StoryObj<TypedEntryArgs> = {
+	name: "Clearing the field reports null once the user is done",
 	args: { onChange: fn(), initialValue: "2026-08-01" },
 	render: (args) => <ControlledKeyboardDatePicker {...args} />,
 	play: async ({ args, canvas, userEvent }) => {
 		await userEvent.click(sections(canvas).month);
 		await clearField(userEvent);
 
-		// an empty value is valid, so it is not held back as a draft
-		await expect(args.onChange).toHaveBeenCalledTimes(1);
-		await expect(args.onChange).toHaveBeenLastCalledWith(null);
 		// nothing of the old date is left in the field
 		await expect(canvas.getByRole("group")).not.toHaveTextContent(/\d/);
+		await expect(args.onChange).not.toHaveBeenCalled();
+
+		// an empty value is valid, so it is reported like a date
+		await userEvent.keyboard("{Enter}");
+		await expect(args.onChange).toHaveBeenCalledTimes(1);
+		await expect(args.onChange).toHaveBeenLastCalledWith(null);
 	},
 };
 
@@ -340,10 +343,9 @@ export const DatePickerOverwriteStoredDate: StoryObj<TypedEntryArgs> = {
 		await typeSlowly(userEvent, "12082030");
 
 		await expect(fieldText(canvas)).toBe("12|08|2030");
-		await expect(lastReported(args.onChange, "YYYY-MM-DD")).toBe("2030-12-08");
-		for (const year of reportedYears(args.onChange)) {
-			await expect([2026, 2030]).toContain(year);
-		}
+		await expect(args.onChange).not.toHaveBeenCalled();
+		await userEvent.keyboard("{Enter}");
+		await expect(reported(args.onChange, "YYYY-MM-DD")).toEqual(["2030-12-08"]);
 	},
 };
 
@@ -356,10 +358,11 @@ export const DateTimePickerOverwriteStoredDate: StoryObj<TypedEntryArgs> = {
 		await userEvent.click(year);
 		await typeSlowly(userEvent, "2030");
 
-		await expect(args.onChange).toHaveBeenCalledTimes(1);
-		await expect(lastReported(args.onChange, "YYYY-MM-DD HH:mm")).toBe(
+		await expect(args.onChange).not.toHaveBeenCalled();
+		await userEvent.keyboard("{Enter}");
+		await expect(reported(args.onChange, "YYYY-MM-DD HH:mm")).toEqual([
 			"2030-08-01 10:30",
-		);
+		]);
 	},
 };
 
@@ -425,7 +428,7 @@ export const Issue3474Item11RetypedImpossibleDayStays: StoryObj<TypedEntryArgs> 
 			docs: {
 				description: {
 					story:
-						"ISSUE-3474-ITEM-11: Over a stored 2026-03-02 the user types 02/31/2026. The month and the first day digit make real dates (Feb 2, Feb 3), which are reported; Feb 31 is not. Leaving the field keeps 02/31/2026 in it, marked invalid, as MUI's field does, rather than showing Feb 3, a day the user never meant.",
+						"ISSUE-3474-ITEM-11: Over a stored 2026-03-02 the user types 02/31/2026. The month and the first day digit make real dates (Feb 2, Feb 3), which are not reported while the user types (ISSUE-3474-ITEM-12); Feb 31 is rejected, so leaving the field reports nothing. It keeps 02/31/2026 in the field, marked invalid, as MUI's field does, rather than showing Feb 3, a day the user never meant.",
 				},
 			},
 		},
@@ -436,10 +439,6 @@ export const Issue3474Item11RetypedImpossibleDayStays: StoryObj<TypedEntryArgs> 
 			await userEvent.click(sections(canvas).month);
 			await typeSlowly(userEvent, "02312026");
 			await expect(fieldText(canvas)).toBe("02|31|2026");
-			await expect(reported(args.onChange, "YYYY-MM-DD")).toEqual([
-				"2026-02-02",
-				"2026-02-03",
-			]);
 
 			await userEvent.click(canvas.getByRole("button", { name: "elsewhere" }));
 			await expect(fieldText(canvas)).toBe("02|31|2026");
@@ -447,7 +446,7 @@ export const Issue3474Item11RetypedImpossibleDayStays: StoryObj<TypedEntryArgs> 
 				"aria-invalid",
 				"true",
 			);
-			await expect(args.onChange).toHaveBeenCalledTimes(2);
+			await expect(args.onChange).not.toHaveBeenCalled();
 		},
 	};
 
@@ -515,3 +514,60 @@ export const Issue3474Item11SubmitAfterRejectedEntry: StoryObj<SubmitArgs> = {
 		await expect(fieldText(canvas)).toBe("08|01|1899");
 	},
 };
+
+export const Issue3474Item12RetypedDayReportedWhenDone: StoryObj<TypedEntryArgs> =
+	{
+		name: "ISSUE-3474-ITEM-12: a retyped day is reported once focus leaves the field",
+		args: { onChange: fn(), initialValue: "2026-08-05" },
+		parameters: {
+			docs: {
+				description: {
+					story:
+						"ISSUE-3474-ITEM-12: Over a stored 2026-08-05 the user retypes the day as 12. The field passes through Aug 1, a real date, which is not reported: nothing is reported while the user types, and Aug 12 once focus leaves the field.",
+				},
+			},
+		},
+		render: (args) => (
+			<ControlledWithElsewhere {...args} Picker={LocalizedKeyboardDatePicker} />
+		),
+		play: async ({ args, canvas, userEvent }) => {
+			await userEvent.click(sections(canvas).day);
+			await typeSlowly(userEvent, "1");
+			await expect(fieldText(canvas)).toBe("08|01|2026");
+			await typeSlowly(userEvent, "2");
+			await expect(fieldText(canvas)).toBe("08|12|2026");
+			await expect(args.onChange).not.toHaveBeenCalled();
+
+			await userEvent.click(canvas.getByRole("button", { name: "elsewhere" }));
+			await expect(reported(args.onChange, "YYYY-MM-DD")).toEqual([
+				"2026-08-12",
+			]);
+		},
+	};
+
+export const Issue3474Item12RetypedMinutesReportedOnEnter: StoryObj<TypedEntryArgs> =
+	{
+		name: "ISSUE-3474-ITEM-12: retyped minutes are reported on Enter",
+		args: { onChange: fn(), initialValue: "2026-08-01T22:30:00" },
+		parameters: {
+			docs: {
+				description: {
+					story:
+						"ISSUE-3474-ITEM-12: Over a stored 22:30 the user retypes the minutes as 45, passing through 22:04. Nothing is reported while the user types, and 22:45 on Enter.",
+				},
+			},
+		},
+		render: (args) => <ControlledDateTimePicker {...args} />,
+		play: async ({ args, canvas, userEvent }) => {
+			// month, day, year, hours, minutes, AM/PM
+			await userEvent.click(canvas.getAllByRole("spinbutton")[4]);
+			await typeSlowly(userEvent, "45");
+			await expect(fieldText(canvas)).toBe("08|01|2026|10|45|PM");
+			await expect(args.onChange).not.toHaveBeenCalled();
+
+			await userEvent.keyboard("{Enter}");
+			await expect(reported(args.onChange, "YYYY-MM-DD HH:mm")).toEqual([
+				"2026-08-01 22:45",
+			]);
+		},
+	};

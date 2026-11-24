@@ -14,7 +14,8 @@ import moment, { type Moment } from "moment";
  * UTC parts carry the day, see `src/utils/dateOnlyUtils.ts`.
  *
  * This is the call site the model renderers use, so it crosses two boundaries at
- * once: the draft that keeps a half-typed date out of `onChange`, and the
+ * once: the draft that keeps a half-typed date out of `onChange` and reports a
+ * date once the user is done with it (leaves the field, presses Enter), and the
  * `Date` ⇄ `Moment` conversion around it.
  */
 
@@ -97,12 +98,11 @@ export const TypeOverAStoredDate: StoryObj<DateInputArgs> = {
 		await typeSlowly(userEvent, "12082030");
 
 		await expect(fieldText(canvas)).toBe("12|08|2030");
+		await userEvent.keyboard("{Enter}");
 		// the day the user typed, anchored at noon UTC — not shifted, and not a 19xx
 		// date from a half-typed year having gone through normalizeDate
+		await expect(args.onChange).toHaveBeenCalledTimes(1);
 		await expect(lastReported(args.onChange)).toBe("2030-12-08T12:00:00.000Z");
-		for (const call of args.onChange.mock.calls) {
-			await expect(call[0]?.getUTCFullYear()).toBeGreaterThanOrEqual(2026);
-		}
 	},
 };
 
@@ -113,15 +113,17 @@ export const NoIntermediateYearReachesTheForm: StoryObj<DateInputArgs> = {
 	play: async ({ args, canvas, userEvent }) => {
 		await userEvent.click(canvas.getAllByRole("spinbutton")[2]);
 
-		// 2 → 20 → 202 on the way to 2026. Reported, each would have been recorded
-		// as 1902, 1920 and 0202 once normalizeDate got hold of it.
-		await typeSlowly(userEvent, "202");
-		await expect(fieldText(canvas)).toBe("08|01|0202");
+		// 2 → 20 → 203 on the way to 2030. Reported, each would have been recorded
+		// as 1902, 1920 and 0203 once normalizeDate got hold of it.
+		await typeSlowly(userEvent, "203");
+		await expect(fieldText(canvas)).toBe("08|01|0203");
 		await expect(args.onChange).not.toHaveBeenCalled();
 
-		await typeSlowly(userEvent, "6");
+		await typeSlowly(userEvent, "0");
+		await expect(fieldText(canvas)).toBe("08|01|2030");
+		await userEvent.keyboard("{Enter}");
 		await expect(args.onChange).toHaveBeenCalledTimes(1);
-		await expect(lastReported(args.onChange)).toBe("2026-08-01T12:00:00.000Z");
+		await expect(lastReported(args.onChange)).toBe("2030-08-01T12:00:00.000Z");
 	},
 };
 
@@ -135,6 +137,7 @@ export const ClearReportsNull: StoryObj<DateInputArgs> = {
 		await userEvent.click(canvas.getAllByRole("spinbutton")[0]);
 		await userEvent.keyboard("{Control>}a{/Control}");
 		await userEvent.keyboard("{Delete}");
+		await userEvent.keyboard("{Enter}");
 
 		await expect(args.onChange).toHaveBeenCalledTimes(1);
 		await expect(args.onChange).toHaveBeenLastCalledWith(null);
@@ -168,6 +171,7 @@ export const DateTimeInputTypedEntry: StoryObj<{
 	play: async ({ args, canvas, userEvent }) => {
 		await userEvent.click(canvas.getAllByRole("spinbutton")[2]);
 		await typeSlowly(userEvent, "2030");
+		await userEvent.keyboard("{Enter}");
 
 		await expect(args.onChange).toHaveBeenCalledTimes(1);
 		const reported = args.onChange.mock.calls[0][0];

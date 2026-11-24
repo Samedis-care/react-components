@@ -536,6 +536,8 @@ describe("DateInput bugs", () => {
 		await screen.findByRole("button", { name: /choose date/i });
 		expect(sections()).toBe("08|13|2026");
 		press(1, "ArrowUp");
+		// the day is reported once the user is done with it
+		press(1, "Enter");
 		expect(reported(report)).toEqual(["2026-08-14T12:00:00.000Z"]);
 		expect(sections()).toBe("08|14|2026");
 	});
@@ -552,6 +554,8 @@ describe("DateInput bugs", () => {
 			await screen.findByRole("button", { name: /choose date/i });
 			expect(sections()).toBe("08|13|2026");
 			press(1, "ArrowUp");
+			// the day is reported once the user is done with it
+			press(1, "Enter");
 			expect(reported(report)).toEqual(["2026-08-14T12:00:00.000Z"]);
 			expect(sections()).toBe("08|14|2026");
 		},

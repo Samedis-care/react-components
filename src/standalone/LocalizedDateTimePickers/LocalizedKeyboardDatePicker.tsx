@@ -16,6 +16,7 @@ import withAccessibleError from "./withAccessibleError";
 import withRequiredSections from "./withRequiredSections";
 import useFieldBlur from "./useFieldBlur";
 import withFieldName from "./withFieldName";
+import withReportWhenDone from "./withReportWhenDone";
 import calendarNameSlotProps from "./calendarNameSlotProps";
 import calendarFocusRingSlotProps from "./calendarFocusRingSlotProps";
 import OpenPickerButton from "./OpenPickerButton";
@@ -98,8 +99,32 @@ export interface LocalizedKeyboardDatePickerProps
 	 */
 	onBlur?: TextFieldProps["onBlur"];
 	/**
-	 * Report every keystroke, rather than only dates the user finished entering.
-	 * See {@link usePickerDraft}.
+	 * Called once the user is done with the date: when focus leaves the field
+	 * (right before `onBlur`), on Enter in the field, and when the calendar
+	 * accepts a date (a day picked in the desktop calendar, OK in the mobile
+	 * dialog, or the calendar closed with Escape or a click outside it, which
+	 * keeps the date picked in it, as in MUI). It gets the date the field
+	 * shows, if the picker accepts it, or `null` for an empty field, and only if
+	 * that differs from the date reported last or handed in as `value` since.
+	 * Not reported are the dates the field passes through while the user types
+	 * (a half-typed year, the dates on the way while a day, month or year is
+	 * retyped, the `null` of a section deleted to retype it), an entry the
+	 * picker rejects (see `onError`), and a day picked in the mobile dialog
+	 * until OK; Cancel there reports nothing. So a form, its dirty state and its
+	 * save button see a typed date once the user leaves the field or presses
+	 * Enter. Moving to a button of the field (the open-picker button, an
+	 * adornment) is not leaving it. With `publishIntermediateValues` it is
+	 * called for every change instead.
+	 * @param value The date, or `null`
+	 * @param context MUI's context: `validationError` (`null`, the date being
+	 * accepted) and `source`
+	 */
+	onChange?: DatePickerProps["onChange"];
+	/**
+	 * Report every change at once, rather than a date once the user is done
+	 * with it (see `onChange`): every keystroke, entries the picker rejects
+	 * included, as MUI's own picker does. Default `false`. See
+	 * {@link usePickerDraft}.
 	 */
 	publishIntermediateValues?: boolean;
 }
@@ -145,6 +170,7 @@ const LocalizedKeyboardDatePicker = (
 		otherProps.value,
 		otherProps.onChange,
 		publishIntermediateValues,
+		otherProps.defaultValue,
 	);
 	const validation = usePickerValidationError(otherProps.onError);
 	const errorMessage = usePickerErrorMessage(validation.shownError, {
@@ -153,7 +179,7 @@ const LocalizedKeyboardDatePicker = (
 	});
 	const withFieldBlur = useFieldBlur();
 
-	const { settle } = draft;
+	const { settle, accept } = draft;
 	const consumerOnOpen = otherProps.onOpen;
 	const handleOpen = useCallback(() => {
 		// the calendar renders from the value it is given, so a half-typed date
@@ -161,6 +187,15 @@ const LocalizedKeyboardDatePicker = (
 		settle();
 		consumerOnOpen?.();
 	}, [settle, consumerOnOpen]);
+	const consumerOnAccept = otherProps.onAccept;
+	const handleAccept: NonNullable<DatePickerProps["onAccept"]> = useCallback(
+		(value, context) => {
+			// a date the calendar accepted is reported at once, see onChange
+			accept(value, context);
+			consumerOnAccept?.(value, context);
+		},
+		[accept, consumerOnAccept],
+	);
 
 	return (
 		<LocalizationProvider localeText={localeText}>
@@ -170,6 +205,7 @@ const LocalizedKeyboardDatePicker = (
 				value={draft.value}
 				onChange={draft.onChange}
 				onOpen={handleOpen}
+				onAccept={handleAccept}
 				onError={validation.onError}
 				slots={slots}
 				slotProps={{
@@ -212,7 +248,7 @@ const LocalizedKeyboardDatePicker = (
 						);
 						return withFieldBlur(
 							ownerState,
-							withFieldName(fieldProps, ariaLabel),
+							withFieldName(withReportWhenDone(fieldProps, draft), ariaLabel),
 							{
 								name: otherProps.name,
 								onFieldFocus: validation.onFieldFocus,

@@ -24,8 +24,15 @@ export interface DateInputProps extends Omit<
 	 */
 	value: Date | null;
 	/**
-	 * Set new value of the input
-	 * @param date new value, as a date-only value (12:00 UTC, see normalizeDate)
+	 * Called with the new day once the user is done with it: when focus leaves
+	 * the field (before `onBlur`), on Enter in the field, and when the calendar
+	 * accepts a day (see `LocalizedKeyboardDatePickerProps.onChange`); and with
+	 * `null` at once when the touch Clear button is pressed. Only a day the
+	 * picker accepts, or `null` for an empty field, is reported, and only when
+	 * it differs from the day reported last or handed in as `value` since; the
+	 * days the field passes through while the user types are not.
+	 * @param date new value, as a date-only value (12:00 UTC, see normalizeDate),
+	 * or `null`
 	 */
 	onChange: (date: Date | null) => void;
 	/**

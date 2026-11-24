@@ -948,3 +948,87 @@ export const Issue3494Item32FilterPanelOnAPhone: Story = {
 		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
 	},
 };
+
+// ─── Date column filter ──────────────────────────────────────────────────────
+
+/** The columns above, and a date column whose filter is a date picker */
+const COLUMNS_WITH_DATE: IDataGridColumnDef[] = [
+	...COLUMNS,
+	{ field: "updated", headerName: "Updated", type: "date", filterable: true },
+];
+
+/**
+ * The date of the "updated" column filter each load asked for, in order, a
+ * load with the same filter as the one before left out ("" for none)
+ */
+const updatedFilters = (loadData: unknown) =>
+	loadCalls(loadData)
+		.map(([params]) => params.fieldFilter.updated?.value1 ?? "")
+		.filter((value, index, all) => index === 0 || value !== all[index - 1]);
+
+/**
+ * Types into the focused field one key at a time, each key a separate event
+ * as a person types
+ * @param keys The keys to type
+ * @param pauseMs The pause after each key
+ */
+const typeKeys = async (keys: string, pauseMs = 300) => {
+	for (const key of keys) {
+		await userEvent.keyboard(key);
+		await new Promise((resolve) => {
+			setTimeout(resolve, pauseMs);
+		});
+	}
+};
+
+/**
+ * ISSUE-3474-ITEM-12: a date column's filter takes the date once the user is
+ * done with it. Typing 08/05/2026 and Enter loads the rows of Aug 5. Retyping
+ * the day as 12 passes through Aug 1, a real date, and the user pauses after
+ * the 1 for longer than the grid's 500ms debounce: no load asks for Aug 1. Escape
+ * closes the popup, which moves focus out of the field, and the grid loads the
+ * rows of Aug 12 once.
+ */
+export const Issue3474Item12DateFilterTakesTheDateWhenDone: Story = {
+	args: {
+		columns: COLUMNS_WITH_DATE,
+		loadData: fn(loadTasks),
+		classes: STORY_CLASSES,
+	},
+	play: async ({ args, canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		await userEvent.click(filterButtonOf(canvasElement, "updated"));
+		const paper = await openPopup();
+		const [month, day] = within(paper).getAllByRole("spinbutton");
+
+		await userEvent.click(month);
+		await typeKeys("08052026");
+		await userEvent.keyboard("{Enter}");
+		await waitFor(
+			() =>
+				expect(updatedFilters(args.loadData).at(-1)).toBe(
+					"2026-08-05T12:00:00.000Z",
+				),
+			{ timeout: 3000 },
+		);
+
+		await userEvent.click(day);
+		// longer than the grid's debounce, so a reported Aug 1 would be loaded
+		await typeKeys("1", 700);
+		await typeKeys("2", 700);
+		await expect(day).toHaveTextContent("12");
+		await userEvent.keyboard("{Escape}");
+		await waitFor(
+			() =>
+				expect(updatedFilters(args.loadData).at(-1)).toBe(
+					"2026-08-12T12:00:00.000Z",
+				),
+			{ timeout: 3000 },
+		);
+		await expect(updatedFilters(args.loadData)).toEqual([
+			"",
+			"2026-08-05T12:00:00.000Z",
+			"2026-08-12T12:00:00.000Z",
+		]);
+	},
+};

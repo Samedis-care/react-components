@@ -9,7 +9,8 @@ import usePickerDraft from "../../src/standalone/LocalizedDateTimePickers/usePic
 
 /**
  * The picker fields publish a value on every keystroke, so this hook keeps what
- * is being typed apart from what gets reported upstream.
+ * is being typed apart from what gets reported upstream, and reports a date once
+ * the user is done with it.
  *
  * These cover the state machine. Whether the two actually add up to a typable
  * field is a question about real keystrokes and real re-renders, which lives in
@@ -38,10 +39,16 @@ const renderDraft = (
 	value: Moment | null | undefined,
 	onChange: (value: Moment | null) => void,
 	publishIntermediateValues?: boolean,
+	defaultValue?: Moment | null,
 ) =>
 	renderHook(
 		(props: { value: Moment | null | undefined }) =>
-			usePickerDraft(props.value, onChange, publishIntermediateValues),
+			usePickerDraft(
+				props.value,
+				onChange,
+				publishIntermediateValues,
+				defaultValue,
+			),
 		{ wrapper, initialProps: { value } },
 	);
 
@@ -58,16 +65,53 @@ const emit = (
 const shown = (result: { current: Draft }) =>
 	(result.current.value as Moment | null)?.format("YYYY-MM-DD") ?? null;
 
-/**
- * Settles the draft, as the pickers do once focus leaves the field (which focus
- * moves count as leaving is `useFieldBlur`'s call, tested through the pickers in
- * `LocalizedDateTimePickersWiring.test.tsx`)
- */
+/** Settles the draft, as the pickers do when the calendar opens */
 const settle = (result: { current: Draft }) => {
 	act(() => {
 		result.current.settle();
 	});
 };
+
+/**
+ * The user is done with the field, as the pickers tell the hook once focus
+ * leaves the field and on Enter (which focus moves count as leaving is
+ * `useFieldBlur`'s call, tested through the pickers in
+ * `LocalizedDateTimePickersWiring.test.tsx`)
+ */
+const finish = (result: { current: Draft }) => {
+	act(() => {
+		result.current.finish();
+	});
+};
+
+/** The picker's onAccept */
+const accept = (
+	result: { current: Draft },
+	value: Moment | null,
+	context: PickerChangeHandlerContext<unknown>,
+) => {
+	act(() => {
+		result.current.accept(value, context);
+	});
+};
+
+/** A change the picker accepts, as its field reports it */
+const FROM_FIELD = {
+	validationError: null,
+	source: "unknown",
+} as PickerChangeHandlerContext<unknown>;
+
+/** A change the calendar accepted: a pick, OK */
+const FROM_VIEW = {
+	validationError: null,
+	source: "view",
+} as PickerChangeHandlerContext<unknown>;
+
+/** The days of every reported value, `"null"` for `null` */
+const reportedDays = (onChange: ReturnType<typeof vi.fn>) =>
+	onChange.mock.calls.map(
+		(call) => (call[0] as Moment | null)?.format("YYYY-MM-DD") ?? "null",
+	);
 
 describe("usePickerDraft", () => {
 	it("shows a rejected value but does not report it", () => {
@@ -80,7 +124,7 @@ describe("usePickerDraft", () => {
 		expect(shown(result)).toBe("0020-08-12");
 	});
 
-	it("reports a value the picker accepts", () => {
+	it("reports a value the picker accepts once the user is done", () => {
 		const onChange = vi.fn();
 		const { result, rerender } = renderDraft(null, onChange);
 
@@ -88,9 +132,10 @@ describe("usePickerDraft", () => {
 		emit(result, moment("0002-08-12"), INVALID);
 		emit(result, moment("0020-08-12"), INVALID);
 		emit(result, moment("0202-08-12"), INVALID);
+		emit(result, moment("2026-08-12"), VALID);
 		expect(onChange).not.toHaveBeenCalled();
 
-		emit(result, moment("2026-08-12"), VALID);
+		finish(result);
 
 		expect(onChange).toHaveBeenCalledTimes(1);
 		expect((onChange.mock.calls[0][0] as Moment).format("YYYY-MM-DD")).toBe(
@@ -101,12 +146,13 @@ describe("usePickerDraft", () => {
 		expect(shown(result)).toBe("2026-08-12");
 	});
 
-	it("reports a cleared value right away", () => {
+	it("reports a cleared value once the user is done", () => {
 		const onChange = vi.fn();
 		const { result, rerender } = renderDraft(moment("2026-08-12"), onChange);
 
 		// an empty value is valid, so the picker reports no error for it
 		emit(result, null, VALID);
+		finish(result);
 
 		expect(onChange).toHaveBeenCalledTimes(1);
 		expect(onChange.mock.calls[0][0]).toBeNull();
@@ -119,6 +165,7 @@ describe("usePickerDraft", () => {
 		const { result, rerender } = renderDraft(moment("2024-06-15"), onChange);
 
 		emit(result, moment("2030-01-01"), VALID);
+		finish(result);
 		expect(onChange).toHaveBeenCalledTimes(1);
 		// the consumer heard it and kept its own value, which is its call to make
 		rerender({ value: moment("2024-06-15") });
@@ -164,6 +211,7 @@ describe("usePickerDraft", () => {
 		const { result, rerender } = renderDraft(moment("2024-06-15"), onChange);
 
 		emit(result, moment("2030-01-01"), VALID);
+		finish(result);
 		rerender({ value: moment("2030-01-01") });
 		settle(result);
 
@@ -278,5 +326,188 @@ describe("usePickerDraft", () => {
 			utc: (result.current.value as Moment).isUTC(),
 			shown: shown(result),
 		}).toEqual({ utc: true, shown: "2026-08-01" });
+	});
+
+	it("[ISSUE-3474-ITEM-12] holds back the accepted dates and reports the last one when the user is done", () => {
+		const onChange = vi.fn();
+		const { result, rerender } = renderDraft(moment("2026-08-05"), onChange);
+
+		// retyping the day: an empty section, then 1, then 12
+		emit(result, null, FROM_FIELD);
+		emit(result, moment("2026-08-01"), FROM_FIELD);
+		emit(result, moment("2026-08-12"), FROM_FIELD);
+		const whileTyping = reportedDays(onChange);
+		const shownWhileTyping = shown(result);
+		finish(result);
+		// a controlled consumer stores it and hands it back
+		rerender({ value: moment("2026-08-12") });
+		// done twice, as Enter and then leaving the field are
+		finish(result);
+
+		expect({
+			whileTyping,
+			shownWhileTyping,
+			inAll: reportedDays(onChange),
+			shown: shown(result),
+		}).toEqual({
+			whileTyping: [],
+			shownWhileTyping: "2026-08-12",
+			inAll: ["2026-08-12"],
+			shown: "2026-08-12",
+		});
+	});
+
+	it("[ISSUE-3474-ITEM-12] reports nothing when the user is done with the date the consumer holds", () => {
+		const onChange = vi.fn();
+		const { result } = renderDraft(moment("2026-08-05"), onChange);
+
+		emit(result, moment("2026-08-06"), FROM_FIELD);
+		emit(result, moment("2026-08-05"), FROM_FIELD);
+		finish(result);
+
+		expect(onChange).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3474-ITEM-12] reports neither a rejected date nor the accepted one before it", () => {
+		const onChange = vi.fn();
+		const { result } = renderDraft(moment("2026-08-05"), onChange);
+
+		emit(result, moment("2026-08-06"), FROM_FIELD);
+		emit(result, moment("0020-08-06"), INVALID);
+		finish(result);
+
+		expect({ shown: shown(result), reported: reportedDays(onChange) }).toEqual({
+			shown: "0020-08-06",
+			reported: [],
+		});
+	});
+
+	it("[ISSUE-3474-ITEM-12] reports a date the calendar accepted at once, and leaves the field's to finish", () => {
+		const onChange = vi.fn();
+		const { result } = renderDraft(moment("2026-08-05"), onChange);
+
+		// MUI calls onAccept for every change of the field too
+		emit(result, moment("2026-08-06"), FROM_FIELD);
+		accept(result, moment("2026-08-06"), FROM_FIELD);
+		const fromField = reportedDays(onChange);
+		emit(result, moment("2026-08-20"), FROM_VIEW);
+		accept(result, moment("2026-08-20"), FROM_VIEW);
+		finish(result);
+
+		expect({ fromField, inAll: reportedDays(onChange) }).toEqual({
+			fromField: [],
+			inAll: ["2026-08-20"],
+		});
+	});
+
+	it("[ISSUE-3474-ITEM-12] reports no date the calendar hands over with a validation error", () => {
+		const onChange = vi.fn();
+		const { result } = renderDraft(moment("2026-08-05"), onChange);
+
+		accept(result, moment("2026-08-20"), {
+			validationError: "maxDate",
+			source: "view",
+		});
+
+		expect(onChange).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3474-ITEM-12] opens the calendar on the date held back", () => {
+		const onChange = vi.fn();
+		const { result } = renderDraft(moment("2026-08-05"), onChange);
+
+		emit(result, moment("2026-08-12"), FROM_FIELD);
+		settle(result);
+		const shownOnOpen = shown(result);
+		finish(result);
+
+		expect({ shownOnOpen, reported: reportedDays(onChange) }).toEqual({
+			shownOnOpen: "2026-08-12",
+			reported: ["2026-08-12"],
+		});
+	});
+
+	it("[ISSUE-3474-ITEM-12] drops the date held back when the consumer's value moves on", () => {
+		const onChange = vi.fn();
+		const { result, rerender } = renderDraft(moment("2026-08-05"), onChange);
+
+		emit(result, moment("2026-08-12"), FROM_FIELD);
+		// e.g. the filter's reset button
+		rerender({ value: null });
+		finish(result);
+
+		expect({ shown: shown(result), reported: reportedDays(onChange) }).toEqual({
+			shown: null,
+			reported: [],
+		});
+	});
+
+	it("[ISSUE-3474-ITEM-12] drops the draft and the date held back on clear, null counting as reported", () => {
+		const onChange = vi.fn();
+		const { result } = renderDraft(null, onChange);
+
+		emit(result, moment("2026-08-12"), FROM_FIELD);
+		act(() => {
+			result.current.clear();
+		});
+		const shownAfterClear = shown(result);
+		finish(result);
+
+		expect({ shownAfterClear, reported: reportedDays(onChange) }).toEqual({
+			shownAfterClear: null,
+			reported: [],
+		});
+	});
+
+	it("[ISSUE-3474-ITEM-12] shows the consumer's value again after clear when the consumer keeps it", () => {
+		const { result, rerender } = renderDraft(moment("2026-08-05"), vi.fn());
+
+		act(() => {
+			result.current.clear();
+		});
+		// the caller reported null, and the consumer kept its date
+		rerender({ value: moment("2026-08-05") });
+
+		expect(shown(result)).toBe("2026-08-05");
+	});
+
+	it("[ISSUE-3474-ITEM-12] reports an uncontrolled picker's date once the user is done, and nothing for its default", () => {
+		const onChange = vi.fn();
+		const { result } = renderDraft(
+			undefined,
+			onChange,
+			false,
+			moment("2026-08-05"),
+		);
+
+		emit(result, moment("2026-08-06"), FROM_FIELD);
+		emit(result, moment("2026-08-05"), FROM_FIELD);
+		finish(result);
+		const backToDefault = reportedDays(onChange);
+		emit(result, moment("2026-08-06"), FROM_FIELD);
+		const whileTyping = reportedDays(onChange);
+		finish(result);
+
+		expect({
+			backToDefault,
+			whileTyping,
+			inAll: reportedDays(onChange),
+		}).toEqual({
+			backToDefault: [],
+			whileTyping: [],
+			inAll: ["2026-08-06"],
+		});
+	});
+
+	it("[ISSUE-3474-ITEM-12] reports every change once and holds nothing back when publishIntermediateValues is set", () => {
+		const onChange = vi.fn();
+		const { result } = renderDraft(moment("2026-08-05"), onChange, true);
+
+		emit(result, moment("2026-08-01"), FROM_FIELD);
+		emit(result, moment("2026-08-20"), FROM_VIEW);
+		accept(result, moment("2026-08-20"), FROM_VIEW);
+		finish(result);
+
+		expect(reportedDays(onChange)).toEqual(["2026-08-01", "2026-08-20"]);
 	});
 });

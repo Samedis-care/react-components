@@ -327,6 +327,63 @@ describe.each(DATE_FIELDS)("%s in a Form", (_name, field, label) => {
 		expect(blurWithoutNameErrors(consoleError)).toEqual([]);
 		expect(sink.ctx?.touched[field]).toBe(true);
 	});
+
+	/**
+	 * Fills every section of the empty field from the keyboard, one ArrowUp
+	 * each, which makes a whole date once the last section has a value
+	 */
+	const fillSections = (container: HTMLElement) => {
+		const sections = within(fieldOf(container)).getAllByRole("spinbutton");
+		for (const section of sections) {
+			focus(section);
+			act(() => {
+				fireEvent.keyDown(section, { key: "ArrowUp" });
+			});
+		}
+		return sections;
+	};
+
+	it("[ISSUE-3474-ITEM-12] takes a typed date into the form's values and dirty state once focus leaves the field", async () => {
+		const { container, getByRole, sink } = renderDateForm();
+		await loaded(container);
+
+		fillSections(container);
+		await act(async () => {});
+		const whileInField = {
+			value: sink.ctx?.values[field],
+			dirty: sink.ctx?.dirty,
+		};
+		focus(getByRole("button", { name: "outside" }));
+		await act(async () => {});
+
+		expect({
+			whileInField,
+			hasValue: sink.ctx?.values[field] != null,
+			dirty: sink.ctx?.dirty,
+		}).toEqual({
+			whileInField: { value: null, dirty: false },
+			hasValue: true,
+			dirty: true,
+		});
+	});
+
+	it("[ISSUE-3474-ITEM-12] takes a typed date into the form's values on Enter, while focus stays in the field", async () => {
+		const { container, sink } = renderDateForm();
+		await loaded(container);
+
+		const sections = fillSections(container);
+		const last = sections[sections.length - 1];
+		act(() => {
+			fireEvent.keyDown(last, { key: "Enter" });
+		});
+		await act(async () => {});
+
+		expect({
+			hasValue: sink.ctx?.values[field] != null,
+			dirty: sink.ctx?.dirty,
+			focusInField: fieldOf(container).contains(document.activeElement),
+		}).toEqual({ hasValue: true, dirty: true, focusInField: true });
+	});
 });
 
 /**

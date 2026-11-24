@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import React from "react";
+import React, { useState } from "react";
 import {
 	act,
 	cleanup,
@@ -55,6 +55,62 @@ const renderFilter = (
 		</ThemeProvider>,
 	);
 	return onChange;
+};
+
+/**
+ * Renders the filter as the grid holds it: every change is stored and handed
+ * back as `value`, so the pickers see what they reported
+ */
+const renderStoredFilter = (
+	valueType: "date" | "datetime",
+	initial: IFilterDef,
+) => {
+	const onChange = vi.fn<(def: IFilterDef) => void>();
+	const Stored = () => {
+		const [value, setValue] = useState(initial);
+		return (
+			<FilterEntry
+				field="due"
+				valueType={valueType}
+				valueData={undefined}
+				value={value}
+				onChange={(def) => {
+					setValue(def);
+					onChange(def);
+				}}
+				close={vi.fn()}
+				depth={1}
+			/>
+		);
+	};
+	render(
+		<ThemeProvider theme={theme}>
+			<LocalizationProvider dateAdapter={AdapterMoment}>
+				<DataGridPropsContext.Provider value={GRID_PROPS}>
+					<Stored />
+				</DataGridPropsContext.Provider>
+			</LocalizationProvider>
+		</ThemeProvider>,
+	);
+	return onChange;
+};
+
+/**
+ * Types one digit into a field section, as MUI's field reads it: from the
+ * section's text after the browser's input event
+ */
+const typeDigit = (section: HTMLElement, digit: string) => {
+	act(() => {
+		section.textContent = digit;
+		fireEvent.input(section);
+	});
+};
+
+/** Moves focus from the date field to the filter type select */
+const leaveField = () => {
+	act(() => {
+		screen.getAllByRole("combobox")[0].focus();
+	});
 };
 
 describe("date pickers in the DataGrid column filter", () => {
@@ -136,6 +192,8 @@ describe("date pickers in the DataGrid column filter", () => {
 		act(() => {
 			fireEvent.keyDown(day, { key: "ArrowDown" });
 		});
+		// the filter takes the date once the user is done with the field
+		leaveField();
 		expect(onChange).toHaveBeenCalledTimes(1);
 		expect(onChange.mock.calls[0][0]).toMatchObject({
 			type: "inRange",
@@ -167,6 +225,8 @@ describe("date pickers in the DataGrid column filter", () => {
 		act(() => {
 			fireEvent.keyDown(day, { key: "Delete" });
 		});
+		// the filter takes the date once the user is done with the field
+		leaveField();
 		expect(onChange).toHaveBeenCalledTimes(1);
 		expect(onChange.mock.calls[0][0]).toMatchObject({
 			type: "inRange",
@@ -175,5 +235,69 @@ describe("date pickers in the DataGrid column filter", () => {
 			nextFilterType: "or",
 			nextFilter,
 		});
+	});
+
+	it("[ISSUE-3474-ITEM-12] keeps the filter and its chained filter while a day is retyped, and applies the new day when focus leaves", () => {
+		const nextFilter: IFilterDef = {
+			type: "equals",
+			value1: "2026-08-05T12:00:00.000Z",
+			value2: "",
+		};
+		const onChange = renderStoredFilter("date", {
+			type: "equals",
+			value1: "2026-08-01T12:00:00.000Z",
+			value2: "",
+			nextFilterType: "or",
+			nextFilter,
+		});
+		const day = within(screen.getAllByRole("group")[0]).getAllByRole(
+			"spinbutton",
+		)[1];
+		act(() => {
+			day.focus();
+		});
+		// delete the day, then type 1 and 2: the field passes through an empty
+		// day and Aug 1 on its way to Aug 12
+		act(() => {
+			fireEvent.keyDown(day, { key: "Delete" });
+		});
+		typeDigit(day, "1");
+		typeDigit(day, "2");
+		const whileTyping = onChange.mock.calls.map((call) => call[0].value1);
+		leaveField();
+		expect(whileTyping).toEqual([]);
+		expect(onChange).toHaveBeenCalledTimes(1);
+		expect(onChange.mock.calls[0][0]).toMatchObject({
+			type: "equals",
+			value1: "2026-08-12T12:00:00.000Z",
+			nextFilterType: "or",
+			nextFilter,
+		});
+	});
+
+	it("[ISSUE-3474-ITEM-12] applies the retyped minutes of a date/time filter once, on Enter", () => {
+		const onChange = renderStoredFilter("datetime", {
+			type: "equals",
+			value1: moment("2026-08-01T22:30").toISOString(),
+			value2: "",
+		});
+		// month, day, year, hours, minutes, AM/PM
+		const minutes = within(screen.getAllByRole("group")[0]).getAllByRole(
+			"spinbutton",
+		)[4];
+		act(() => {
+			minutes.focus();
+		});
+		// 4 makes 22:04 on the way to 22:45
+		typeDigit(minutes, "4");
+		typeDigit(minutes, "5");
+		const whileTyping = onChange.mock.calls.map((call) => call[0].value1);
+		act(() => {
+			fireEvent.keyDown(minutes, { key: "Enter" });
+		});
+		expect(whileTyping).toEqual([]);
+		expect(onChange.mock.calls.map((call) => call[0].value1)).toEqual([
+			moment("2026-08-01T22:45").toISOString(),
+		]);
 	});
 });

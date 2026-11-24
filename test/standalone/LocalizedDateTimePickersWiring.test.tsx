@@ -895,6 +895,10 @@ describe.each(PICKERS)("%s wiring", (_name, Picker) => {
 			act(() => {
 				fireEvent.keyDown(day, { key: "ArrowUp" });
 			});
+			// the date is reported once the user is done with it
+			act(() => {
+				fireEvent.keyDown(day, { key: "Enter" });
+			});
 
 			expect({
 				local,
