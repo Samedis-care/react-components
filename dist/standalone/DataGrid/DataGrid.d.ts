@@ -9,7 +9,7 @@ import Checkbox from "../UIKit/Checkbox";
 import ComponentWithLabel from "../UIKit/ComponentWithLabel";
 import { BackendMultiSelectProps } from "../../backend-components/Selector/BackendMultiSelect";
 import { MultiSelectorData } from "../Selector";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 export interface DataGridProps extends IDataGridHeaderProps, IDataGridColumnProps, IDataGridCallbacks {
     /**
      * Custom CSS class to apply to root

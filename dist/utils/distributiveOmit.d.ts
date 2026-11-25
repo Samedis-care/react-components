@@ -2,6 +2,16 @@
  * `Omit` for a union: the keys are left out of every member, so the union stays. A plain
  * `Omit` collapses the members into one object type, which loses the parts that differ
  * between them.
+ *
+ * Use it to derive a wrapper's props from props that are a union, such as the selectors'
+ * (`BackendSingleSelectProps`, `MultiSelectProps`, …: with or without a switch). Props built
+ * with `Omit` no longer fit back into the component. As an `interface` cannot extend a union,
+ * the wrapper's props become a `type` with an intersection:
+ * @example
+ * type DeviceSelectorProps = DistributiveOmit<
+ * 	BackendSingleSelectProps<DeviceModel>,
+ * 	"model" | "modelToSelectorData"
+ * > & { tenantId: string };
  */
 export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 /**

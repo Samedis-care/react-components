@@ -4,7 +4,7 @@ import { ModelGetResponse, ModelRecord, ModelUnknown } from "../../backend-integ
 import { BackendMultiSelectLruOptions } from "./BackendMultiSelect";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 import { BackendSingleSelectLruOptions } from "./BackendSingleSelect";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 /**
  * The switch of a backend multiselect with tags. `switchLabel` is required while
  * `switchFilterNameGroup` or `switchFilterNameData` shows the switch: the visible label

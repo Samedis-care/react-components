@@ -39,6 +39,15 @@ export interface FormDialogProps {
      */
     openInNewLink?: () => void;
     /**
+     * Controls for the dialog's content in the title row, e.g. `IconButton`s with an
+     * `aria-label`: shown after the title and before the "Open in new tab" and close buttons,
+     * outside the heading, so they are not part of the dialog's name (the `action` of
+     * `DialogTitle`). They are rendered in the title row, outside `children`: wrap them in the
+     * context providers they need. Controls set through `FormDialogDispatch.setTitleAction`
+     * (`useSetFormDialogTitleAction`) win over this prop. Default none.
+     */
+    titleAction?: React.ReactNode;
+    /**
      * Dialog contents
      */
     children?: React.ReactNode;
@@ -78,6 +87,12 @@ export interface FormDialogDispatch {
      * the dialog itself (see `FullFormDialog`).
      */
     setTitle: (title: React.ReactNode) => void;
+    /**
+     * Shows these controls in the dialog's title row, after the title and outside the heading
+     * (see `useSetFormDialogTitleAction`), null for none. They win over the dialog's
+     * `titleAction` prop.
+     */
+    setTitleAction: (action: React.ReactNode) => void;
     setOpenInNewLink: Dispatch<SetStateAction<null | (() => void)>>;
     blockClosing: () => void;
     unblockClosing: () => void;
@@ -92,10 +107,12 @@ export declare const IsInFormDialogContext: React.Context<boolean>;
 export declare const FormDialogDispatchContext: React.Context<FormDialogDispatch | undefined>;
 /**
  * The dialog FullFormDialog renders by default (its `renderer`): an MUI `Dialog` with a
- * `DialogTitle` (the title, the open-in-new button and the close button) and the content. The
- * title names the dialog, else `aria-label` does. A title that shows only after the dialog
- * opened takes the keyboard focus if it is still on the dialog itself, so screen readers read
- * it (see `FullFormDialog`). A custom renderer can render it with changed props.
+ * `DialogTitle` (the title, then in its `action` the content's controls (`titleAction`) and the
+ * open-in-new button, and the close button) and the content. The title names the dialog, else
+ * `aria-label` does. A title that shows only after the dialog opened takes the keyboard focus if
+ * it is still on the dialog itself, so screen readers read it (see `FullFormDialog`). When a
+ * control of the title row goes away while it holds the focus, the dialog gets the focus. A
+ * custom renderer can render it with changed props.
  * @param props The props of FullFormDialog, with the title to show as `dialogTitle`
  */
 export declare const FormDialogDefaultRenderer: (props: FormDialogRendererProps) => React.JSX.Element;

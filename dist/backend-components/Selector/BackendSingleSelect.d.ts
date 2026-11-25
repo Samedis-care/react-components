@@ -2,7 +2,7 @@ import React from "react";
 import { BaseSelectorData, BaseSelectorProps, SelectorLruOptions } from "../../standalone";
 import { ModelRecord, ModelUnknown } from "../../backend-integration/Model/Model";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 export type BackendSingleSelectLruOptions<DataT extends BaseSelectorData> = Omit<SelectorLruOptions<DataT>, "loadData">;
 /**
  * The switch of a backend single select. `switchLabel` is required while a

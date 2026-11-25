@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-25 | [DialogTitle: the action and the close button sit in a new box, and an action that doesn't fit moves below the title](2026-11-25-dialog-title-controls-box.md) | behavior |
 | 2026-11-24 | [A FullFormDialog title that shows after loading takes the focus](2026-11-24-full-form-dialog-late-title-takes-focus.md) | behavior |
 | 2026-11-24 | [A flow form has a second dirty flag, stagedDirty, for staged edits](2026-11-24-flow-form-staged-dirty.md) | behavior, type |
 | 2026-11-24 | [PortalLayout's mobile drawer has a close button for screen readers and keyboard users](2026-11-24-portal-drawer-close-button.md) | behavior |

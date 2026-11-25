@@ -3,7 +3,7 @@ import Visibility, { VisibilityCallback } from "./Visibility";
 import Connector, { ConnectorIndex2Params, ResponseMeta } from "../Connector/Connector";
 import { QueryKey, UseMutationResult, UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
 import { DataGridCustomFilterData, DataGridIdFilterData, IDataGridColumnDef, DataGridFilterParameters, IDataGridLoadDataParameters } from "../../standalone/DataGrid/DataGrid";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 export interface PageVisibility {
     overview: Visibility;
     edit: VisibilityCallback;

@@ -2,7 +2,7 @@ import React from "react";
 import { MultiSelectWithoutGroupProps } from "./MultiSelectWithoutGroup";
 import { BaseSelectorData, BaseSelectorLoadHandler, SelectorLruOptions } from "./BaseSelector";
 import { MultiSelectorData } from "./MultiSelect";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 export type MultiSelectWithTagsProps<DataT extends MultiSelectorData, GroupT extends BaseSelectorData> = DistributiveOmit<MultiSelectWithoutGroupProps<DataT>, "additionalOptions" | "classes" | "onChange" | "dataOptions" | "setDataOptions" | "label"> & {
     /**
      * Title of the control, shown above both fields; names the group they form

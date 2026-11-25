@@ -29,7 +29,10 @@ export interface DialogTitleProps {
      * `aria-label`, like the `action` of MUI's `CardHeader`. They are shown in
      * the title row after the title and before the close button, outside the
      * heading: they are not part of the dialog's name, and a long title does not
-     * push them out of the dialog. Default none.
+     * push them out of the dialog. When they don't fit beside the title (several
+     * controls on a phone), they move below it, with the close button, at the
+     * end of the row; direct children that don't fit on one line wrap. Default
+     * none.
      */
     action?: React.ReactNode;
     /**
@@ -51,14 +54,16 @@ export interface DialogTitleProps {
     /**
      * CSS classes per slot: `root` (the title row), `textWrapper` (the box
      * around the heading), `text` (the heading, not rendered with `noTitle`),
-     * `action` (the box around `action`, rendered only with it), `closeButton`
+     * `controls` (the box around `action` and the close button, rendered only
+     * with one of them), `action` (the box around `action`, rendered only with
+     * it), `closeButton`
      */
     classes?: Partial<Record<DialogTitleClassKey, string>>;
 }
 /**
  * Slot names of `CcDialogTitle`, for `classes` and theme `styleOverrides`
  */
-export type DialogTitleClassKey = "root" | "textWrapper" | "text" | "action" | "closeButton";
+export type DialogTitleClassKey = "root" | "textWrapper" | "text" | "controls" | "action" | "closeButton";
 /**
  * Title row for an MUI `Dialog`: a heading with the title, optional controls
  * (`action`) and an optional close (X) button next to it. Place it inside the
@@ -66,7 +71,7 @@ export type DialogTitleClassKey = "root" | "textWrapper" | "text" | "action" | "
  * the controls and the close button are not part of that name. With `noTitle`
  * there is no heading, only the controls and the close button, and the dialog
  * needs a name from elsewhere.
- * Theme: `CcDialogTitle` (slots `root`, `textWrapper`, `text`, `action`,
- * `closeButton`).
+ * Theme: `CcDialogTitle` (slots `root`, `textWrapper`, `text`, `controls`,
+ * `action`, `closeButton`).
  */
 export declare const DialogTitle: React.MemoExoticComponent<(inProps: DialogTitleProps) => React.JSX.Element>;

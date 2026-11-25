@@ -2,7 +2,7 @@ import React from "react";
 import ModelRenderParams from "../../RenderParams";
 import TypeEnumMulti, { AdvancedMultiEnumValue } from "../TypeEnumMulti";
 import { MultiSelectorData, MultiSelectProps } from "../../../../standalone";
-import { DistributiveOmit } from "../../../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../../../utils/distributiveOmit";
 export type RendererEnumMultiSelectProps = DistributiveOmit<MultiSelectProps<MultiSelectorData>, "label" | "selected" | "onLoad" | "onSelect" | "disabled" | "autoFocus">;
 /**
  * Renders TypeEnumMulti as selector

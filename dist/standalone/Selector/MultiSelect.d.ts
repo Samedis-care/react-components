@@ -1,7 +1,7 @@
 import React from "react";
 import { BaseSelectorData, BaseSelectorProps } from "./BaseSelector";
 import { MultiSelectEntryProps } from "./MultiSelectEntry";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 export interface MultiSelectorData extends BaseSelectorData {
     /**
      * Item click handler

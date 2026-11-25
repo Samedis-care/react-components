@@ -4,7 +4,7 @@ import ModelRenderParams from "../../RenderParams";
 import { BackendMultiSelectWithTagsProps } from "../../../../backend-components/Selector/BackendMultiSelectWithTags";
 import { BaseSelectorData, MultiSelectorData } from "../../../../standalone";
 import TypeIds from "../TypeIds";
-import { DistributiveOmit } from "../../../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../../../utils/distributiveOmit";
 type OmitProperties = "selected" | "onSelect" | "disabled" | "dataModel" | "initialData" | "title" | "autoFocus";
 /**
  * Renders TypeEnum as drop-down selector (with search)

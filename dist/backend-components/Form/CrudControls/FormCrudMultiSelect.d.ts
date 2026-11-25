@@ -4,7 +4,7 @@ import { CrudMultiSelectProps } from "../../Selector/CrudMultiSelect";
 import { UseLazyCrudConnectorParams } from "../useLazyCrudConnector";
 import { MultiSelectorData } from "../../../standalone";
 import { CrudSelectDispatch } from "../../Selector/useCrudSelect";
-import { DistributiveOmit } from "../../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../../utils/distributiveOmit";
 export type FormCrudMultiSelectProps<M extends ModelUnknown, DataT extends MultiSelectorData> = DistributiveOmit<CrudMultiSelectProps<M, DataT>, "errorComponent" | "connector" | "field"> & UseLazyCrudConnectorParams<Record<string, unknown>> & {
     /**
      * Disables the control: the search field is disabled, the entries have no remove button,

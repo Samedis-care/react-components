@@ -4,7 +4,7 @@ import { GridSize } from "@mui/material/Grid";
 import { MultiSelectorData } from "../Selector";
 import BackendMultipleSelect, { BackendMultipleSelectProps } from "../../backend-components/Selector/BackendMultipleSelect";
 import { ModelUnknown } from "../../backend-integration";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 export type GridMultiSelectFilterBackendProps<M extends ModelUnknown, DataT extends MultiSelectorData> = DistributiveOmit<BackendMultipleSelectProps<M, DataT>, "classes"> & {
     /**
      * Whether the filter is in the filter panel: pass

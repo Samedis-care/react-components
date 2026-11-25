@@ -26,5 +26,20 @@ for. A changed name overwrote whatever another component had stored under it.
 
 ## Migration
 
-Nothing to do for `useFormState` calls with a fixed name. A test that mocks `useFormContext`
-and renders a component using `useFormState` must add `hasCustomState` to the mocked context.
+Nothing to do for `useFormState` calls with a fixed name.
+
+**Required for any code that builds a `FormContextData` object itself** instead of passing on
+what the Form gives it, e.g. a form context simulated for a dialog without a `Form`, or a test
+that mocks `useFormContext` and renders a component using `useFormState`: add
+`hasCustomState`. TypeScript reports the missing property. It returns true for every name the
+context's `setCustomState` has written, also when it wrote `null` or `undefined`; a context that
+stores no custom state returns false:
+
+```ts
+const formContext: FormContextData = {
+	// …
+	getCustomState: () => undefined,
+	setCustomState: () => {},
+	hasCustomState: () => false,
+};
+```

@@ -4,7 +4,7 @@ import { ErrorComponentProps } from "../Form";
 import { MultiSelectorData } from "../../standalone";
 import { BackendMultiSelectProps } from "./BackendMultiSelect";
 import { CrudSelectDispatch, UseCrudSelectParams, UseCrudSelectResult } from "./useCrudSelect";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 export type CrudMultiSelectProps<M extends ModelUnknown, DataT extends MultiSelectorData> = DistributiveOmit<BackendMultiSelectProps<M, DataT>, "modelToSelectorData" | "initialData" | "selected" | "added" | "removed" | "onSelect" | "getIdOfData"> & UseCrudSelectParams<M, DataT> & {
     /**
      * The error component that is used to display errors

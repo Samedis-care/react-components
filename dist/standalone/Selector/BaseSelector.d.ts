@@ -3,7 +3,7 @@ import { InputProps, TextFieldProps } from "@mui/material";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
 import { OutlinedInputProps } from "@mui/material/OutlinedInput";
 import { InputProps as StandardInputProps } from "@mui/material/Input";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 export interface BaseSelectorData {
     /**
      * A unique value

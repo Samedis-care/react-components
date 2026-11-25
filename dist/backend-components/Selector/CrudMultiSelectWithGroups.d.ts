@@ -4,7 +4,7 @@ import { ErrorComponentProps } from "../Form";
 import { BaseSelectorData, MultiSelectorData } from "../../standalone";
 import { BackendMultiSelectWithTagsProps } from "./BackendMultiSelectWithTags";
 import { CrudSelectDispatch, UseCrudSelectParams } from "./useCrudSelect";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 export type CrudMultiSelectWithGroupsProps<GroupModelT extends ModelUnknown, DataModelT extends ModelUnknown, GroupDataT extends BaseSelectorData, DataDataT extends MultiSelectorData> = DistributiveOmit<BackendMultiSelectWithTagsProps<GroupModelT, DataModelT, GroupDataT, DataDataT>, "selected" | "added" | "removed" | "onChange" | "convData" | "initialData" | "getIdOfData"> & UseCrudSelectParams<DataModelT, DataDataT> & {
     /**
      * The error component that is used to display errors

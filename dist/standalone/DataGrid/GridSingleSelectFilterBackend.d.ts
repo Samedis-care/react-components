@@ -3,7 +3,7 @@ import { GridSize } from "@mui/material/Grid";
 import { Breakpoint } from "@mui/material/styles";
 import BackendSingleSelect, { BackendSingleSelectProps } from "../../backend-components/Selector/BackendSingleSelect";
 import { ModelUnknown } from "../../backend-integration";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 export type GridSingleSelectFilterBackendProps<M extends ModelUnknown> = DistributiveOmit<BackendSingleSelectProps<M>, "classes" | "className" | "disableClearable"> & {
     /**
      * Optional label for the filter

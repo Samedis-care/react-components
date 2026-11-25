@@ -2,7 +2,7 @@ import React from "react";
 import { MultiSelectProps, MultiSelectorData, SelectorLruOptions } from "../../standalone";
 import { ModelRecord, ModelUnknown } from "../../backend-integration/Model/Model";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 export type BackendMultiSelectLruOptions<DataT extends MultiSelectorData> = Omit<SelectorLruOptions<DataT>, "loadData">;
 /**
  * The switch of a backend multi select. `switchLabel` is required while a

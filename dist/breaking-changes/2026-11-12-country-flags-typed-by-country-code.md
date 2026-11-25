@@ -21,6 +21,11 @@
   `getCountryFlag(code: string): string | undefined`, which returns the flag of a code known only
   at runtime, or `undefined` if the library has none for it.
 
+Since 2026-11-17 the flags load when they are first shown, and `CountryFlags` and
+`getCountryFlag` are no longer exported: see
+[`2026-11-17-country-flags-load-when-shown.md`](2026-11-17-country-flags-load-when-shown.md). The
+migration below names what replaced them.
+
 ## Why
 
 The map's type said that every string has a flag. A lookup of a code without one (`"de"`,
@@ -30,10 +35,8 @@ literal code is a type error.
 
 ## Migration
 
-**Required for samedis-ui:** two calls of `CountryCodes.includes` with a `string` no longer
-compile, `getCountries` in `src/components/RegionSelector/RegionSelector.tsx` and
-`validateBillingContact` in `src/components-care/models/TenantBillingModel.tsx`. Narrow the code
-first; the check stays the same:
+**Required for code that calls `CountryCodes.includes` with a `string`:** it no longer
+compiles. Narrow the code first; the check stays the same:
 
 ```ts
 import { CountryCodes, isCountryCode } from "components-care";
@@ -46,17 +49,17 @@ if (isCountryCode(code) && CountryCodes.includes(code)) {
 `isCountryCode(code)` on its own is true for every code the library has a flag for, also for
 a country that `CountryCodes` does not list (Kosovo, `XK`).
 
-**Required for code that indexes `CountryFlags` with a `string`:** it no longer compiles. Use
-`getCountryFlag(code)` and handle `undefined`, or narrow with `isCountryCode(code)` first:
+**Required for code that indexes `CountryFlags` with a `string`:** it no longer compiles, and
+since 2026-11-17 `CountryFlags` is not exported at all. To show a flag, use
+`<CountryFlag code={code} />`, which takes any string and leaves its box empty for a code without
+a flag. For a flag's URL, await it; `loadCountryFlag` takes any string and resolves to
+`undefined` for a code without a flag:
 
 ```ts
-const flag = getCountryFlag(code); // string | undefined
+import { loadCountryFlag } from "components-care";
+
+const flag = await loadCountryFlag(code); // string | undefined
 ```
 
-To show a flag, `<CountryFlag code={code} />` takes any string and leaves its box empty for a
-code without a flag.
-
-Code that changes `CountryFlags` throws now; build a new map instead
-(`{ ...CountryFlags, DE: myFlag }`).
-
-identity-management-frontend uses neither `CountryFlags` nor `CountryCodes`: nothing to do there.
+The map `loadCountryFlags()` resolves to is frozen: changing it throws, so build a new map
+instead (`{ ...flags, DE: myFlag }`).

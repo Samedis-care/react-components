@@ -1,6 +1,6 @@
 import ApiConnector from "../../backend-integration/Connector/ApiConnector";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 /**
  * Params of useLazyCrudConnector, which FormCrudMultiSelect, FormCrudFileUpload,
  * FormCrudMultiImage and app wrappers take as props (extractLazyCrudConnectorParams splits

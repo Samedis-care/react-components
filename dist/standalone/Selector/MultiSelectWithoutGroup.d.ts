@@ -1,7 +1,7 @@
 import React from "react";
 import { BaseSelectorProps, MultiSelectorData } from "../../standalone/Selector";
 import { BaseSelectorLoadHandler } from "./BaseSelector";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 export type MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> = DistributiveOmit<BaseSelectorProps<DataT, false>, "onSelect" | "selected" | "classes" | "onLoad"> & {
     /**
      * Extended selection change handler
