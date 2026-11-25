@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { fn, expect, waitFor } from "storybook/test";
+import { fn, expect, waitFor, within } from "storybook/test";
 import {
 	Save as SaveIcon,
 	Delete as DeleteIcon,
@@ -85,6 +85,60 @@ export const SmallDisabled: ActionButtonStory = {
 export const NoIcon: ActionButtonStory = {
 	args: {
 		children: "Continue",
+	},
+};
+
+export const Issue3482Item1IconOnlyButtonsHaveNames: ActionButtonStory = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3482-ITEM-1: icon-only (`small`) buttons are named by their label in every state: with no tooltip open, while disabled, and with a node label (axe `button-name`). The label is visually hidden text inside the button.",
+			},
+		},
+	},
+	render: (args) => (
+		<Box sx={{ display: "flex", gap: 2 }}>
+			<ActionButton small icon={<SaveIcon />} onClick={args.onClick}>
+				Save
+			</ActionButton>
+			<ActionButton small disabled icon={<CancelIcon />}>
+				Discard
+			</ActionButton>
+			<SubActionButton small disabled icon={<DeleteIcon />}>
+				Delete
+			</SubActionButton>
+			<SubActionButton small icon={<HomeIcon />} onClick={args.onClick}>
+				<span>Go home</span>
+			</SubActionButton>
+		</Box>
+	),
+	play: async ({ canvas, canvasElement, userEvent }) => {
+		for (const name of ["Save", "Discard", "Delete", "Go home"]) {
+			const button = canvas.getByRole("button", { name });
+			// the box that holds the label inside the button shows none of it
+			const label = Array.from(button.children).find(
+				(child) => child.textContent === name,
+			);
+			await expect(label, `${name} has no label inside`).toBeDefined();
+			const { width, height } = label!.getBoundingClientRect();
+			await expect(width * height, `${name}'s label shows`).toBeLessThanOrEqual(
+				1,
+			);
+			await expect(getComputedStyle(label!).overflow).toBe("hidden");
+		}
+		// the tooltip shows the label on keyboard focus; the name does not change
+		const save = canvas.getByRole("button", { name: "Save" });
+		const page = within(canvasElement.ownerDocument.body);
+		await userEvent.tab();
+		await expect(save).toHaveFocus();
+		await expect(await page.findByRole("tooltip")).toHaveTextContent("Save");
+		await expect(save).toHaveAccessibleName("Save");
+		// axe then checks the buttons with no tooltip open
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() => expect(page.queryByRole("tooltip")).toBeNull());
+		await expect(save).toHaveAccessibleName("Save");
 	},
 };
 

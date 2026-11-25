@@ -88,6 +88,9 @@ const readableColorFills = (theme: Theme): CSSObject => {
 	return theme.applyStyles(theme.palette.mode, rules);
 };
 
+/** Class of the span that holds the label of a small button */
+const HIDDEN_LABEL_CLASS = "CcActionButton-hiddenLabel";
+
 const StyledButton = styled(Button, {
 	name: "CcActionButton",
 	slot: "button",
@@ -147,6 +150,19 @@ const StyledButton = styled(Button, {
 			padding: 0,
 			justifyContent: small ? "center" : "flex-start",
 		},
+		// the label of a small button: visually hidden, as MUI's visuallyHidden,
+		// so it names the button while only the icon shows
+		[`& > .${HIDDEN_LABEL_CLASS}`]: {
+			border: 0,
+			clipPath: "inset(50%)",
+			height: 1,
+			margin: -1,
+			overflow: "hidden",
+			padding: 0,
+			position: "absolute",
+			whiteSpace: "nowrap",
+			width: 1,
+		},
 	};
 });
 
@@ -160,11 +176,18 @@ export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
 	 */
 	fullWidth?: boolean;
 	/**
-	 * Show the compact version of the button (only icon)
+	 * Show only the icon, for a compact button. The label (`children`) stays
+	 * in the button as visually hidden text, which names it in every state,
+	 * and shows as a tooltip on hover and on keyboard focus (not while
+	 * disabled). Use it with `icon`. `"true"` is the same as `true`.
+	 * @default false
 	 */
 	small?: boolean | "true";
 	/**
-	 * The text of the button (used for tooltip if small is true)
+	 * The label, already translated: a string or any other node (no
+	 * interactive content). It names the button, also with `small`, where it
+	 * is visually hidden and shows as a tooltip. An `aria-label` or
+	 * `aria-labelledby` replaces that name, also while the tooltip is open.
 	 */
 	children: React.ReactNode;
 	/**
@@ -207,9 +230,17 @@ const ActionButton = (inProps: ActionButtonProps) => {
 			fullWidth={fullWidth ?? !small}
 			startIcon={icon}
 			ownerState={{ small: Boolean(small), color: Boolean(otherProps.color) }}
+			// named by its label: keeps the Tooltip from naming the button while
+			// it is open; an aria-label or aria-labelledby passed in still applies
+			aria-label={undefined}
+			aria-labelledby={undefined}
 			{...otherProps}
 		>
-			{!small && <Box>{children}</Box>}
+			{small ? (
+				<span className={HIDDEN_LABEL_CLASS}>{children}</span>
+			) : (
+				<Box>{children}</Box>
+			)}
 		</StyledButton>
 	);
 

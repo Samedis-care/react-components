@@ -24,6 +24,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-25 | [A routed menu entry opens a new tab at the URL a click navigates to](2026-11-25-routed-menu-new-tab-opens-history-href.md) | behavior |
 | 2026-11-25 | [On phones the DataGrid moves header and footer buttons into their menus, so both fit 320px](2026-11-25-data-grid-phone-header-footer-fit.md) | behavior |
 | 2026-11-25 | [HowToBox entries break long words](2026-11-25-how-to-box-breaks-long-words.md) | behavior |
+| 2026-11-25 | [A small ActionButton or SubActionButton is named by its label in every state](2026-11-25-small-action-button-named-by-label.md) | behavior |
 | 2026-11-25 | [showErrorDialog lists the messages of a ValidationError only](2026-11-25-show-error-dialog-lists-validation-errors-only.md) | behavior |
 | 2026-11-25 | [The DataGrid no longer takes `enableFilterDialogMediaQuery`](2026-11-25-data-grid-filter-dialog-media-query-removed.md) | type, behavior |
 | 2026-11-25 | [After the last file, focus steps back to the previous file's button; custom variants get the focus handling from useFileActionButtonFocus](2026-11-25-file-upload-focus-after-last-file.md) | behavior |

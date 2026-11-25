@@ -26,6 +26,10 @@ export interface SubActionButtonOwnerState {
 	 */
 	disableDivider: boolean;
 }
+
+/** Class of the span that holds the label of a small button */
+const HIDDEN_LABEL_CLASS = "CcSubActionButton-hiddenLabel";
+
 const StyledButton = styled(Button, {
 	name: "CcSubActionButton",
 	slot: "button",
@@ -67,6 +71,19 @@ const StyledButton = styled(Button, {
 		"&.Mui-focusVisible": focusRing(theme, -2),
 		"&.MuiButton-label": {
 			justifyContent: "flex-start",
+		},
+		// the label of a small button: visually hidden, as MUI's visuallyHidden,
+		// so it names the button while only the icon shows
+		[`& > .${HIDDEN_LABEL_CLASS}`]: {
+			border: 0,
+			clipPath: "inset(50%)",
+			height: 1,
+			margin: -1,
+			overflow: "hidden",
+			padding: 0,
+			position: "absolute",
+			whiteSpace: "nowrap",
+			width: 1,
 		},
 		"&.MuiButton-outlined": {
 			"& svg": {
@@ -131,11 +148,18 @@ export interface SubActionButtonProps extends Omit<ButtonProps, "children"> {
 	 */
 	icon?: React.ReactNode;
 	/**
-	 * Show the compact version of the button (only icon)
+	 * Show only the icon, for a compact button. The label (`children`) stays
+	 * in the button as visually hidden text, which names it in every state,
+	 * and shows as a tooltip on hover and on keyboard focus (not while
+	 * disabled). Use it with `icon`.
+	 * @default false
 	 */
 	small?: boolean;
 	/**
-	 * The text of the button (used for tooltip if small is true)
+	 * The label, already translated: a string or any other node (no
+	 * interactive content). It names the button, also with `small`, where it
+	 * is visually hidden and shows as a tooltip. An `aria-label` or
+	 * `aria-labelledby` replaces that name, also while the tooltip is open.
 	 */
 	children: NonNullable<React.ReactNode>;
 	/**
@@ -152,10 +176,19 @@ const SubActionButton = (inProps: SubActionButtonProps) => {
 		<StyledButton
 			variant={"outlined"}
 			fullWidth={!small}
+			// named by its label: keeps the Tooltip from naming the button while
+			// it is open; an aria-label or aria-labelledby passed in still applies
+			aria-label={undefined}
+			aria-labelledby={undefined}
 			{...otherProps}
 			ownerState={{ small: !!small, disableDivider: !!disableDivider }}
 		>
-			{icon} {!small && children}
+			{icon}{" "}
+			{small ? (
+				<span className={HIDDEN_LABEL_CLASS}>{children}</span>
+			) : (
+				children
+			)}
 		</StyledButton>
 	);
 

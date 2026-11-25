@@ -118,8 +118,10 @@ describe("UIKit", () => {
 					Save
 				</ActionButton>,
 			);
-			// Text is not rendered when small
-			expect(screen.queryByText("Save")).toBeNull();
+			// the label stays in the button as visually hidden text
+			expect(applied(screen.getByText("Save"), "clip-path")).toContain(
+				"inset(50%)",
+			);
 			expect(screen.getByTestId("icon")).toBeTruthy();
 		});
 		it("calls onClick", () => {
@@ -142,6 +144,54 @@ describe("UIKit", () => {
 			);
 			expect(screen.getByRole("button", { name: "Save" })).toBeTruthy();
 		});
+
+		it("[ISSUE-3482-ITEM-1] names an icon-only ActionButton by its label, also while disabled", () => {
+			wrap(
+				<>
+					<ActionButton small icon={<SaveIcon />}>
+						Save
+					</ActionButton>
+					<ActionButton small disabled icon={<SaveIcon />}>
+						Discard
+					</ActionButton>
+				</>,
+			);
+			// no tooltip is open: the name must not depend on it
+			expect(screen.queryByRole("tooltip")).toBeNull();
+			expect(screen.queryByRole("button", { name: "Save" })).not.toBeNull();
+			expect(screen.queryByRole("button", { name: "Discard" })).not.toBeNull();
+		});
+
+		it.each([
+			{
+				what: "a small ActionButton",
+				ui: () => (
+					<ActionButton small icon={<SaveIcon />}>
+						Save
+					</ActionButton>
+				),
+				name: "Save",
+			},
+			{
+				what: "a small ActionButton given an aria-label",
+				ui: () => (
+					<ActionButton small icon={<SaveIcon />} aria-label={"Save record"}>
+						Save
+					</ActionButton>
+				),
+				name: "Save record",
+			},
+		])(
+			"[ISSUE-3482-ITEM-1] keeps the name of $what while its tooltip is open",
+			async ({ ui, name }) => {
+				wrap(ui());
+				const button = screen.getByRole("button");
+				expect(button).toHaveAccessibleName(name);
+				fireEvent.mouseOver(button);
+				expect(await screen.findByRole("tooltip")).toBeInTheDocument();
+				expect(button).toHaveAccessibleName(name);
+			},
+		);
 	});
 	describe("SubActionButton", () => {
 		it("renders with text", () => {
@@ -160,8 +210,10 @@ describe("UIKit", () => {
 					Save
 				</SubActionButton>,
 			);
-			// In small mode text is not rendered
-			expect(screen.queryByText("Save")).toBeNull();
+			// the label stays in the button as visually hidden text
+			expect(applied(screen.getByText("Save"), "clip-path")).toContain(
+				"inset(50%)",
+			);
 			expect(screen.getByTestId("sub-icon")).toBeTruthy();
 		});
 
@@ -171,6 +223,56 @@ describe("UIKit", () => {
 			fireEvent.click(screen.getByRole("button"));
 			expect(onClick).toHaveBeenCalledOnce();
 		});
+
+		it("[ISSUE-3482-ITEM-1] names an icon-only SubActionButton when disabled or given a node label", () => {
+			wrap(
+				<>
+					<SubActionButton small disabled icon={<HomeIcon />}>
+						Home
+					</SubActionButton>
+					<SubActionButton small icon={<SaveIcon />}>
+						<span>Save</span>
+					</SubActionButton>
+				</>,
+			);
+			expect(screen.queryByRole("button", { name: "Home" })).not.toBeNull();
+			expect(screen.queryByRole("button", { name: "Save" })).not.toBeNull();
+		});
+
+		it.each([
+			{
+				what: "a small SubActionButton with a node label",
+				ui: () => (
+					<SubActionButton small icon={<HomeIcon />}>
+						<span>Home</span>
+					</SubActionButton>
+				),
+				name: "Home",
+			},
+			{
+				what: "a small SubActionButton given an aria-label",
+				ui: () => (
+					<SubActionButton
+						small
+						icon={<HomeIcon />}
+						aria-label={"Go to the start page"}
+					>
+						<span>Home</span>
+					</SubActionButton>
+				),
+				name: "Go to the start page",
+			},
+		])(
+			"[ISSUE-3482-ITEM-1] keeps the name of $what while its tooltip is open",
+			async ({ ui, name }) => {
+				wrap(ui());
+				const button = screen.getByRole("button");
+				expect(button).toHaveAccessibleName(name);
+				fireEvent.mouseOver(button);
+				expect(await screen.findByRole("tooltip")).toBeInTheDocument();
+				expect(button).toHaveAccessibleName(name);
+			},
+		);
 	});
 	describe("FormButtons", () => {
 		it("renders children", () => {
