@@ -211,6 +211,11 @@ export interface FileUploadRendererProps extends Omit<FileUploadProps, "variant"
     inputRef: React.MutableRefObject<HTMLInputElement | null>;
     /**
      * The current files
+     * @remarks Key each file's element by something that stays with the file while files
+     *          before it leave the list: its record id, or its name and how many files of
+     *          that name come before it, as the built-in variants do. A key by position
+     *          builds the files after a removed one anew, which takes the keyboard focus
+     *          off their remove buttons (see useFileActionButtonFocus).
      */
     files: FileData[];
     /**
@@ -218,8 +223,10 @@ export interface FileUploadRendererProps extends Omit<FileUploadProps, "variant"
      * @param file The file to remove
      * @remarks A picked file leaves the list, and its remove button with it. The built-in
      *          variants then move keyboard focus to the next file's remove or restore
-     *          button, or else to the upload control; a custom variant moves it itself (see
-     *          `FileProps.actionButtonRef`).
+     *          button, after the last file to the previous one, and once no file's button
+     *          is left to the upload control. A custom variant gets the same with
+     *          useFileActionButtonFocus, whose refs it passes to its FilePreviews as
+     *          `actionButtonRef`.
      */
     removeFile: (file: FileData) => void;
     /**

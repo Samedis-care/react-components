@@ -4,6 +4,7 @@ import { Box, Collapse, Divider, Grid, IconButton, ListItem, Paper, styled, Typo
 import { Apps as AppsIcon, FilterAlt as FilterAltIcon, FilterAltOutlined as FilterAltOutlinedIcon, Search as SearchIcon, } from "@mui/icons-material";
 import Header from "./Header";
 import Footer from "./Footer";
+import dataActionMargins from "./Footer/dataActionMargins";
 import Settings from "./Settings";
 import Content from "./Content";
 import debounce from "../../utils/debounce";
@@ -201,7 +202,7 @@ export const DataGridSelectAllHeader = styled("div", {
 export const DataGridSelectAllWrapper = styled(ComponentWithLabel, {
     name: "CcDataGrid",
     slot: "selectAllWrapper",
-})({});
+})(({ theme }) => dataActionMargins(theme));
 export const DataGridPaginationText = styled(Typography, {
     name: "CcDataGrid",
     slot: "paginationText",

@@ -20,6 +20,9 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-25 | [showErrorDialog lists the messages of a ValidationError only](2026-11-25-show-error-dialog-lists-validation-errors-only.md) | behavior |
+| 2026-11-25 | [The DataGrid no longer takes `enableFilterDialogMediaQuery`](2026-11-25-data-grid-filter-dialog-media-query-removed.md) | type, behavior |
+| 2026-11-25 | [After the last file, focus steps back to the previous file's button; custom variants get the focus handling from useFileActionButtonFocus](2026-11-25-file-upload-focus-after-last-file.md) | behavior |
 | 2026-11-25 | [DialogTitle: the action and the close button sit in a new box, and an action that doesn't fit moves below the title](2026-11-25-dialog-title-controls-box.md) | behavior |
 | 2026-11-24 | [A FullFormDialog title that shows after loading takes the focus](2026-11-24-full-form-dialog-late-title-takes-focus.md) | behavior |
 | 2026-11-24 | [A flow form has a second dirty flag, stagedDirty, for staged edits](2026-11-24-flow-form-staged-dirty.md) | behavior, type |

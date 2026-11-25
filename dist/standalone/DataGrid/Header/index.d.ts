@@ -10,20 +10,12 @@ export interface IDataGridHeaderProps {
      */
     filterBar?: React.ComponentType<IDataGridFilterBarProps>;
     /**
-     * Media query that enables the custom filter dialog mode (if matches)
-     * @deprecated use enableFilterDialogWidth
-     * @remarks not used if enableFilterDialogWidth is set. While this is set and
-     * enableFilterDialogWidth is not, enableFilterDialogWidth has no default.
-     */
-    enableFilterDialogMediaQuery?: string;
-    /**
      * The filter bar's minimum width in px: while the space for the filterBar in
      * the header is narrower, the header shows a button instead that opens the
      * filterBar in a panel over the rows (inDialog true). 0 shows the bar at any
      * width.
-     * @default 600 while enableFilterDialogMediaQuery is unset (the helpers take
-     * a third of the bar each, so each one is about 190px wide), else none
-     * @remarks Takes precedence over enableFilterDialogMediaQuery
+     * @default 600 (the helpers take a third of the bar each, so each one is
+     * about 190px wide)
      */
     enableFilterDialogWidth?: number;
     /**

@@ -22,7 +22,7 @@ export interface DataActionBarViewProps {
     handleDelete?: React.MouseEventHandler;
     /**
      * Is a delete running? Delete is then unavailable and shows a progress
-     * indicator in place of its icon
+     * indicator in place of its icon, and the bar is busy (aria-busy)
      * @see DataGridProps.deleting
      */
     deleting: boolean;

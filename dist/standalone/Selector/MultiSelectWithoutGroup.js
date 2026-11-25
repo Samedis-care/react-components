@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import { Cancel as RemoveIcon, RestoreFromTrash as RestoreIcon, Search as SearchIcon, } from "@mui/icons-material";
 import BaseSelector from "./BaseSelector";
 import { SmallIconButton, SmallListItemIcon } from "../Small";
@@ -51,7 +51,6 @@ const MultiSelectWithoutGroup = (inProps) => {
     });
     const { onSelect, selected, added, removed: removedProp, disabled, enableIcons, loadDataOptions, getIdOfData, refreshToken, switchValue, sortCompareFn, classes, className, filterIds, ...otherProps } = props;
     const { t } = useCCTranslations();
-    const [dataOptions, setDataOptions] = useState([]);
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
     const removed = removedProp ?? NO_ENTRIES;
@@ -74,11 +73,6 @@ const MultiSelectWithoutGroup = (inProps) => {
             ? entries.sort((a, b) => sortCompareFn(a.data, b.data))
             : entries;
     }, [added, removed, selected, sortCompareFn]);
-    useEffect(() => {
-        selected.map((selectedOption) => {
-            setDataOptions((oldOptions) => oldOptions.filter((option) => !getId(option).includes(getId(selectedOption))));
-        });
-    }, [getId, selected]);
     const handleDelete = useCallback(async (evt) => {
         evt.stopPropagation();
         if (!onSelect)
@@ -93,9 +87,8 @@ const MultiSelectWithoutGroup = (inProps) => {
             !(await entryToDelete.canUnselect(entryToDelete, evt))) {
             return;
         }
-        setDataOptions([...dataOptions, entryToDelete]);
         onSelect(selected.filter((entry) => entry !== entryToDelete));
-    }, [onSelect, setDataOptions, dataOptions, selected]);
+    }, [onSelect, selected]);
     const handleRestore = useCallback((evt) => {
         evt.stopPropagation();
         const entry = removed.find((s) => s.value === evt.currentTarget.name);

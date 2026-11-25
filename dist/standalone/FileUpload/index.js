@@ -1,4 +1,5 @@
 export { default as FileUploadGeneric } from "./Generic";
+export { default as useFileActionButtonFocus } from "./Generic/useFileActionButtonFocus";
 export { default as ImageSelector } from "./Image/ImageSelector";
 export { default as ImagePreviewDialog } from "./Image/ImagePreviewDialog";
 export { default as ObjectUrlImage } from "./Image/ObjectUrlImage";

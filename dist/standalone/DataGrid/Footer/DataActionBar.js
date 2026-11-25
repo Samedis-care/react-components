@@ -1,6 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useRef } from "react";
-import { Grid } from "@mui/material";
 import { useDataGridColumnState, useDataGridProps, useDataGridSelectAll, useDataGridState, } from "../DataGrid";
 import DataActionBarView from "./DataActionBarView";
 import { dataGridGetFilterParameters } from "../CallbackUtil";
@@ -89,6 +88,6 @@ const DataActionBar = () => {
         getAdditionalFilters,
         numSelected,
     ]);
-    return (_jsx(Grid, { container: true, "aria-busy": deleting || undefined, children: _jsx(DataActionBarView, { numSelected: Math.min(numSelected, 2), selectAll: selectAll, handleEdit: onEdit ? handleEdit : undefined, handleDelete: onDelete ? handleDelete : undefined, deleting: !!deleting, enableDeleteAll: !!enableDeleteAll, disableDeleteHint: disableDeleteHint, customButtons: customDataActionButtons, handleCustomButtonClick: handleCustomButtonCLick, disableSelection: disableSelection || !enableSelectAll, selectAllLabel: selectAllLabel, selectAllDisabled: selectAllDisabled }) }));
+    return (_jsx(DataActionBarView, { numSelected: Math.min(numSelected, 2), selectAll: selectAll, handleEdit: onEdit ? handleEdit : undefined, handleDelete: onDelete ? handleDelete : undefined, deleting: !!deleting, enableDeleteAll: !!enableDeleteAll, disableDeleteHint: disableDeleteHint, customButtons: customDataActionButtons, handleCustomButtonClick: handleCustomButtonCLick, disableSelection: disableSelection || !enableSelectAll, selectAllLabel: selectAllLabel, selectAllDisabled: selectAllDisabled }));
 };
 export default React.memo(DataActionBar);

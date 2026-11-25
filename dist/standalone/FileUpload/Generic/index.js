@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, } from "react";
+import React, { useCallback, useEffect, useImperativeHandle, useRef, } from "react";
 import { Box, Button, FormHelperText, styled, Tooltip, Typography, Grid, useThemeProps, } from "@mui/material";
 import { AttachFile } from "@mui/icons-material";
 import FilePreview, { getFileIconOrDefault } from "./File";
@@ -17,6 +17,7 @@ import useDropZone from "../../../utils/useDropZone";
 import useRefState from "../../../utils/useRefState";
 import { isImageLoadError } from "../../../utils/ImageLoadError";
 import { captureError } from "../../../framework/ErrorReporting";
+import useFileActionButtonFocus from "./useFileActionButtonFocus";
 /**
  * The file's pending change relative to the server side state
  * @param file The file
@@ -39,6 +40,25 @@ const removeFiles = (files, isRemoved) => files.flatMap((file) => !isRemoved(fil
     : "downloadLink" in file.file
         ? [{ ...file, delete: true }]
         : []);
+/**
+ * React keys for the listed files that stay with their files while other files leave
+ * @param files The list
+ * @returns A key per file: its name, and how many files of that name come before it
+ * @remarks A key by position changes for every file after one that leaves, which builds
+ *          their FilePreview anew and takes the keyboard focus off a remove button there.
+ *          CrudFileUpload with a LazyConnector drops a removed queued upload a render
+ *          after its button went, when the focus is on the next file's button already
+ *          (see useFileActionButtonFocus).
+ */
+const getFileKeys = (files) => {
+    const seen = new Map();
+    return files.map((data) => {
+        const name = data?.file.name ?? "";
+        const before = seen.get(name) ?? 0;
+        seen.set(name, before + 1);
+        return `${before}:${name}`;
+    });
+};
 /**
  * The size of what a file uploads, in bytes
  * @param file The file
@@ -381,41 +401,11 @@ const FileUpload = (inProps, ref) => {
         });
     }, [onChange, onRestoreFile, setFiles]);
     // Keyboard focus on a file's remove or restore button that goes away, as it does when a
-    // removed pick leaves the list, moves on to the next file's button, or else to the
-    // upload control, instead of falling to the page. One ref callback per position, so
-    // that React calls it only when the button at that position changes.
-    const actionButtonsRef = useRef([]);
-    const actionButtonRefsRef = useRef([]);
-    const refocusFromRef = useRef(null);
+    // removed pick leaves the list, moves on to another file's button, or else to the
+    // upload control, instead of falling to the page. Unused by a custom variant, which
+    // calls the hook itself.
     const uploadControlRef = useRef(null);
-    const getActionButtonRef = useCallback((index) => {
-        const refs = actionButtonRefsRef.current;
-        refs[index] ??= (elem) => {
-            const buttons = actionButtonsRef.current;
-            const prev = buttons[index];
-            buttons[index] = elem;
-            // React detaches a ref before it removes the element, so the focus is still on it here
-            if (!elem && prev && prev.ownerDocument.activeElement === prev) {
-                refocusFromRef.current = index;
-            }
-        };
-        return refs[index];
-    }, []);
-    useLayoutEffect(() => {
-        const index = refocusFromRef.current;
-        if (index == null)
-            return;
-        refocusFromRef.current = null;
-        const target = actionButtonsRef.current.slice(index).find((btn) => btn != null) ??
-            uploadControlRef.current;
-        if (!target)
-            return;
-        // only take over focus that was lost with the button, never move it away from elsewhere
-        const active = target.ownerDocument.activeElement;
-        if (active && active !== target.ownerDocument.body && active.isConnected)
-            return;
-        target.focus();
-    });
+    const getActionButtonRef = useFileActionButtonFocus(uploadControlRef);
     const { handleDrop, handleDragOver, dragging } = useDropZone(readOnly ? undefined : processFiles);
     // update files if necessary
     useEffect(() => {
@@ -444,7 +434,8 @@ const FileUpload = (inProps, ref) => {
             restoreFile,
         });
     }
-    else if (variant === "classic") {
+    const fileKeys = getFileKeys(files);
+    if (variant === "classic") {
         return (_jsx(StyledGroupBox, { ...slotProps?.root, "aria-busy": busy || slotProps?.root?.["aria-busy"], label: boxLabel, smallLabel: smallLabel, className: combineClassNames([
                 className,
                 classes?.root,
@@ -459,7 +450,7 @@ const FileUpload = (inProps, ref) => {
                                         ? undefined
                                         : () => removeFile(data), onRestore: readOnly || data.preventDelete
                                         ? undefined
-                                        : () => restoreFile(data), actionButtonRef: getActionButtonRef(index), variant: "box" }, `${index}-${data.file.name}`))), readOnly && files.length === 0 && (_jsx(Grid, { children: _jsx(Typography, { children: t("standalone.file-upload.no-files") }) }))] }) }, "files"), !readOnly && (_jsx(Grid, { size: 12, children: _jsxs(FormatText, { className: classes?.formatText, children: ["(", t("standalone.file-upload.formats"), ":", " ", acceptLabel ||
+                                        : () => restoreFile(data), actionButtonRef: getActionButtonRef(index), variant: "box" }, fileKeys[index]))), readOnly && files.length === 0 && (_jsx(Grid, { children: _jsx(Typography, { children: t("standalone.file-upload.no-files") }) }))] }) }, "files"), !readOnly && (_jsx(Grid, { size: 12, children: _jsxs(FormatText, { className: classes?.formatText, children: ["(", t("standalone.file-upload.formats"), ":", " ", acceptLabel ||
                                     accept ||
                                     t("standalone.file-upload.format.any"), ")"] }) }, "info"))] }) }));
     }
@@ -483,7 +474,7 @@ const FileUpload = (inProps, ref) => {
                                         ? undefined
                                         : () => removeFile(data), onRestore: readOnly || data.preventDelete
                                         ? undefined
-                                        : () => restoreFile(data), actionButtonRef: getActionButtonRef(index), variant: "list" }, `${index}-${data.file.name}`))) }) }) }, "files")), readOnly && files.length === 0 && (_jsx(Grid, { size: 12, children: _jsx(Typography, { children: t("standalone.file-upload.no-files") }) }, "no-files")), !readOnly && (_jsxs(Grid, { container: true, wrap: "nowrap", spacing: 1, size: 12, children: [_jsx(Grid, { size: "grow", children: _jsxs(FormatTextModern, { align: "right", className: classes?.formatTextModern, children: [t("standalone.file-upload.formats-modern"), " ", acceptFiles.length == 0 &&
+                                        : () => restoreFile(data), actionButtonRef: getActionButtonRef(index), variant: "list" }, fileKeys[index]))) }) }) }, "files")), readOnly && files.length === 0 && (_jsx(Grid, { size: 12, children: _jsx(Typography, { children: t("standalone.file-upload.no-files") }) }, "no-files")), !readOnly && (_jsxs(Grid, { container: true, wrap: "nowrap", spacing: 1, size: 12, children: [_jsx(Grid, { size: "grow", children: _jsxs(FormatTextModern, { align: "right", className: classes?.formatTextModern, children: [t("standalone.file-upload.formats-modern"), " ", acceptFiles.length == 0 &&
                                             t("standalone.file-upload.format.any")] }) }), acceptFiles.map((entry, idx) => (_jsx(FormatIconsModern, { className: classes?.formatIconsModern, children: _jsx(Tooltip, { title: acceptLabel || accept || "", children: _jsx("span", { children: React.createElement(getFileIconOrDefault(entry, entry)) }) }) }, idx.toString(16))))] }, "info"))] }) }));
     }
     else {

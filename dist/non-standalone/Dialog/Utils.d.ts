@@ -75,17 +75,19 @@ export declare const showInfoDialog: (pushDialog: DialogContextType[0], props: O
  * Shows an error dialog
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
  * @param e What went wrong, typically the value a `catch` received. Any value is shown:
- *          - an Error (also one from another realm) shows its `message` under the title
- *            `common.dialogs.error-title` ("An error occurred"), a ValidationError lists its
- *            `result` as below
+ *          - a ValidationError lists the messages of its `result` (its values, not its keys)
+ *            under `common.dialogs.validation-error-title` ("Error on validation"); one with
+ *            an empty result shows its `message` as any other Error does. To show the
+ *            ValidationResult a validate function returned, such as `validateForm()`, wrap
+ *            it: `new ValidationError("error", result)`
+ *          - any other Error (also one from another realm) shows its `message` under the
+ *            title `common.dialogs.error-title` ("An error occurred")
  *          - a string is shown as it is, under the same title
- *          - a ValidationResult (an object with at least one entry, all of them strings)
- *            lists its values, not its keys, under `common.dialogs.validation-error-title`
- *            ("Error on validation"). So does `{ title, message }`: for an error dialog with
- *            a title of your own, use showInfoDialog, which renders the same dialog.
- *          - anything else (`null`, `undefined`, a number, an empty object, an object with a
- *            value that is not a string) shows `common.dialogs.error-no-details` ("No
- *            further details are available. Try again.") under the error title
+ *          - anything else (`null`, `undefined`, a number, any plain object, also a
+ *            ValidationResult or `{ title, message }`) shows `common.dialogs.error-no-details`
+ *            ("No further details are available. Try again.") under the error title. For an
+ *            error dialog with a title of your own, use showInfoDialog, which renders the
+ *            same dialog.
  * @returns A DialogPromise that resolves when the dialog is closed (OK, Escape, a backdrop
  *          click). Its `close()` closes the dialog and resolves it at once.
  */
