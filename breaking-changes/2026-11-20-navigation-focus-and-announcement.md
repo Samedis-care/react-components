@@ -41,7 +41,7 @@ next Tab jumped back down the page, and the content changed elsewhere unannounce
 
 ## Migration
 
-Nothing required. What to expect:
+Nothing required in app code. What to expect:
 
 - Pages whose title is a `PageTitle` get the focus and the announcement without further
   work. A page without a visible heading names itself with `usePageTitle`: its title is
@@ -50,3 +50,20 @@ Nothing required. What to expect:
   the page heading.
 - Browser tests that check where the focus is after a navigation may find it on the
   page heading now.
+
+**Required for tests that render through `Framework` (or a `HistoryRouter`) and expect an empty
+`container`:** the router's live region, an empty `<div aria-live="polite" aria-atomic="true">`
+after the content, is in the rendered `container` from the first render on, so
+`expect(container).toBeEmptyDOMElement()` fails. Check an element of the test instead, e.g. a
+host element the test wraps the component in, or query for what must be absent:
+
+```tsx
+render(
+	<Framework>
+		<div data-testid="host">
+			<MaybeNothing />
+		</div>
+	</Framework>,
+);
+expect(screen.getByTestId("host")).toBeEmptyDOMElement();
+```
