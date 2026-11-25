@@ -17,6 +17,7 @@ export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<PageProps
     safeSubmit: () => Promise<boolean>;
     /**
      * Is the form dirty?
+     * @see FormContextData.dirty
      */
     dirty: boolean;
     /**
@@ -49,7 +50,11 @@ export type EnhancedGoBackType = {
      *                      pending save, as no dialog is shown then.
      * @returns A promise which resolves once the user confirmed (or the dialog was skipped) and navigation happened.
      *          Resolves without navigating if the user cancelled the confirmation dialog.
-     * @remarks Enhances CrudFormProps.goBack, which only takes forceRefresh and shows no confirmation dialog
+     * @remarks Enhances CrudFormProps.goBack, which only takes forceRefresh and shows no confirmation dialog.
+     *          A navigation the Form's goBack starts synchronously (CRUD's goBack does) passes without
+     *          asking about this form again; it asks once about other dirty forms it leaves. A
+     *          navigation it starts later asks again. When goBack does not leave the form, the form
+     *          stays guarded.
      * @see CrudFormProps.goBack
      */
     goBack: (forceRefresh?: boolean, forceNavigate?: boolean) => Promise<void> | void;

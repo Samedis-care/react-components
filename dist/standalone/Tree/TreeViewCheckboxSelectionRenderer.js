@@ -30,4 +30,7 @@ const TreeViewCheckboxSelectionRenderer = (props) => {
                     // a locked leaf cannot be toggled, so its checkbox says so
                     disabled: expandLocked, slotProps: checkboxSlotProps })) }, "expandable"), icon && (_jsx(Grid, { onClick: onClick, onAuxClick: onAuxClick, children: icon }, "icon")), _jsx(Grid, { onClick: onClick, onAuxClick: onAuxClick, size: "grow", children: _jsx(Typography, { noWrap: true, id: labelId, children: label }) }, "label")] }));
 };
-export default React.memo(TreeViewCheckboxSelectionRenderer);
+export default Object.assign(React.memo(TreeViewCheckboxSelectionRenderer), {
+    // a leaf's checkbox shows its `expanded` flag: TreeView exposes it as aria-checked
+    checkableLeaves: true,
+});

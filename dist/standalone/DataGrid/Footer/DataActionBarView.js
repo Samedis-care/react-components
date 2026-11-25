@@ -1,6 +1,6 @@
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useState } from "react";
-import { Grid, Tooltip, useMediaQuery, useTheme, } from "@mui/material";
+import React, { useCallback, useId, useState } from "react";
+import { CircularProgress, Grid, Tooltip, useMediaQuery, useTheme, } from "@mui/material";
 import { SmallestIconButton } from "../../Small";
 import VerticalDivider from "../../VerticalDivider";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
@@ -27,14 +27,19 @@ const DataActionBarView = (props) => {
         setExtendedMenuAnchor(undefined);
     }, []);
     const extendedMenu = useMenuButton(!!extendedMenuAnchor);
-    const deleteDisabled = props.numSelected === 0 ||
+    const deleteId = useId();
+    const deleteDisabled = props.deleting ||
+        props.numSelected === 0 ||
         !props.handleDelete ||
         (props.selectAll && !props.enableDeleteAll);
     // stays focusable while disabled: a delete clears the selection, which
     // disables Delete while it has keyboard focus
-    const deleteBtn = (_jsx(ComponentWithLabel, { control: _jsx(FocusableWhenDisabledIconButton, { color: "primary", disabled: deleteDisabled, onClick: props.handleDelete, "aria-label": t("standalone.data-grid.footer.delete"), children: _jsx(DeleteIcon, {}) }), labelText: t("standalone.data-grid.footer.delete"), labelPlacement: "bottom", disabled: deleteDisabled }));
+    const deleteBtn = (_jsx(ComponentWithLabel, { control: _jsx(FocusableWhenDisabledIconButton, { id: deleteId, color: "primary", disabled: deleteDisabled, onClick: props.handleDelete, "aria-label": t("standalone.data-grid.footer.delete"), children: props.deleting ? (_jsx(CircularProgress, { size: 20, color: "inherit", "aria-labelledby": deleteId })) : (_jsx(DeleteIcon, {})) }), labelText: t("standalone.data-grid.footer.delete"), labelPlacement: "bottom", disabled: deleteDisabled }));
     const allCustomButtonsDisabled = !!props.customButtons?.every((entry) => dataGridIsCustomDataActionDisabled(entry, props.numSelected, props.selectAll));
-    return (_jsxs(Grid, { container: true, wrap: "nowrap", children: [_jsx(Grid, { children: _jsx(DataGridSelectAllWrapper, { control: _jsx(SelectAll, {}), labelText: props.selectAllLabel, labelPlacement: "bottom", className: classes?.selectAllWrapper, style: props.disableSelection
+    return (_jsxs(Grid, { container: true, wrap: "nowrap", children: [_jsx(Grid, { children: _jsx(DataGridSelectAllWrapper, { control: _jsx(SelectAll, {}), labelText: props.selectAllLabel, labelPlacement: "bottom", 
+                    // the checkbox reads its disabled state from the select all
+                    // context, so the label can't take it from its control
+                    disabled: props.selectAllDisabled, className: classes?.selectAllWrapper, style: props.disableSelection
                         ? { opacity: 0, pointerEvents: "none" }
                         : undefined }) }, "select-all"), props.handleEdit && (_jsxs(_Fragment, { children: [_jsx(Grid, { children: _jsx(VerticalDivider, {}) }, "divider-1"), _jsx(Grid, { children: _jsx(ComponentWithLabel, { control: _jsx(SmallestIconButton, { color: "primary", disabled: props.numSelected !== 1, onClick: props.handleEdit, "aria-label": myEditLabel, children: _jsx(MyEditIcon, {}) }), labelText: myEditLabel, labelPlacement: "bottom", disabled: props.numSelected !== 1 }) }, "edit")] })), (props.handleDelete || props.disableDeleteHint) && (_jsxs(_Fragment, { children: [_jsx(Grid, { children: _jsx(VerticalDivider, {}) }, "divider-2"), _jsx(Grid, { children: !props.handleDelete && props.disableDeleteHint ? (_jsx(Tooltip, { title: props.disableDeleteHint, children: _jsx("span", { children: deleteBtn }) })) : (deleteBtn) }, "delete")] })), isXs && props.customButtons && props.customButtons.length > 1 ? (_jsxs(React.Fragment, { children: [_jsx(Grid, { children: _jsx(VerticalDivider, {}) }), _jsx(Grid, { children: _jsx(ComponentWithLabel, { control: _jsx(SmallestIconButton, { ...extendedMenu.buttonProps, color: "primary", disabled: allCustomButtonsDisabled, onClick: handleExtendedMenuOpen, "aria-label": t("standalone.data-grid.footer.more"), children: _jsx(MenuIcon, {}) }), labelText: t("standalone.data-grid.footer.more"), labelPlacement: "bottom", disabled: allCustomButtonsDisabled }) }), _jsx(DataActionBarMenu, { numSelected: props.numSelected, selectAll: props.selectAll, anchorEl: extendedMenuAnchor, onClose: handleExtendedMenuClose, customButtons: props.customButtons, handleCustomButtonClick: props.handleCustomButtonClick, slotProps: extendedMenu.slotProps })] }, "custom-buttons-menu")) : (props.customButtons?.map((entry) => {
                 const disabled = dataGridIsCustomDataActionDisabled(entry, props.numSelected, props.selectAll);

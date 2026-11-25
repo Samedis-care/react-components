@@ -48,8 +48,15 @@ const useDayCallback = (callback) => useMemo(() => callback && ((day) => callbac
  * date it takes or gives: `value`, `onChange`, `minDate`, `maxDate`,
  * `referenceDate`, `shouldDisableDate`/`Month`/`Year`, `onAccept`, `onError`,
  * `onMonthChange`, `onYearChange` and `dayOfWeekFormatter`. `slots`,
- * `slotProps` and `viewRenderers` are MUI's and see `Moment`s. There is no
- * `defaultValue`: the input is always controlled.
+ * `slotProps` and `viewRenderers` are MUI's and see `Moment`s;
+ * `slots.textField` defaults to the components-care text field
+ * (`PickersTextFieldWithHelp`, with the Clear button on touch devices and the
+ * label always above the field), and one passed by the consumer replaces it.
+ * There is no `defaultValue`: the input is always controlled. There is no
+ * `timezone` either: the field shows and reports the stored calendar day in
+ * every timezone, also when the theme sets one for the date pickers (the
+ * `defaultProps.timezone` of `CcLocalizedKeyboardDatePicker` or
+ * `MuiDatePicker`).
  */
 const DateInput = (props) => {
     const { value, onChange, hideDisabledIcon, required, error, fullWidth, onBlur, helperText, minDate, maxDate, referenceDate, shouldDisableDate, shouldDisableMonth, shouldDisableYear, onAccept, onError, onMonthChange, onYearChange, dayOfWeekFormatter, ...muiProps } = props;
@@ -69,16 +76,29 @@ const DateInput = (props) => {
         ((accepted, context) => onAccept(fromPickerValue(accepted), context)), [onAccept]);
     const pickerOnError = useMemo(() => onError &&
         ((reason, validated) => onError(reason, fromPickerValue(validated))), [onError]);
-    return (_jsx(LocalizedKeyboardDatePicker, { ...muiProps, value: pickerValue, onChange: (date) => date ? onChange(fromPickerDay(date)) : onChange(null), minDate: pickerMinDate, maxDate: pickerMaxDate, referenceDate: pickerReferenceDate, shouldDisableDate: pickerShouldDisableDate, shouldDisableMonth: pickerShouldDisableMonth, shouldDisableYear: pickerShouldDisableYear, onAccept: pickerOnAccept, onError: pickerOnError, onMonthChange: pickerOnMonthChange, onYearChange: pickerOnYearChange, dayOfWeekFormatter: pickerDayOfWeekFormatter, hideDisabledIcon: hideDisabledIcon, required: required, error: error, fullWidth: fullWidth, onBlur: onBlur, slots: {
-            textField: PickersTextFieldWithHelp,
+    // an explicit `textField: undefined` means the default, as it does to MUI
+    const textField = muiProps.slots?.textField ?? PickersTextFieldWithHelp;
+    return (_jsx(LocalizedKeyboardDatePicker, { ...muiProps, value: pickerValue, onChange: (date) => date ? onChange(fromPickerDay(date)) : onChange(null), minDate: pickerMinDate, maxDate: pickerMaxDate, referenceDate: pickerReferenceDate, shouldDisableDate: pickerShouldDisableDate, shouldDisableMonth: pickerShouldDisableMonth, shouldDisableYear: pickerShouldDisableYear, onAccept: pickerOnAccept, onError: pickerOnError, onMonthChange: pickerOnMonthChange, onYearChange: pickerOnYearChange, dayOfWeekFormatter: pickerDayOfWeekFormatter, 
+        // the picker's days are local (toPickerDay, fromPickerDay); another
+        // timezone, passed in spite of the type or set in the theme's
+        // defaultProps, would shift the day shown and the day reported
+        timezone: "system", hideDisabledIcon: hideDisabledIcon, required: required, error: error, fullWidth: fullWidth, onBlur: onBlur, 
+        // the consumer's slots come last, so one it passes wins over the default
+        // text field (as for DateTimeInput); slotProps are merged below
+        slots: {
+            ...muiProps.slots,
+            textField,
         }, slotProps: {
             ...muiProps.slotProps,
             textField: (ownerState) => {
                 const textFieldSlotPropsProp = accessSlotProps(ownerState, muiProps.slotProps?.textField);
                 return {
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore This just passes props down to the text field component, TS defs don't support custom props here, but the implementation does.
-                    customHandleClear: () => onChange(null),
+                    // customHandleClear is the components-care text field's own prop, so
+                    // only the field that reads it gets it; another one would pass it on
+                    // to the DOM and React would log an error
+                    ...(textField === PickersTextFieldWithHelp
+                        ? { customHandleClear: () => onChange(null) }
+                        : {}),
                     ...textFieldSlotPropsProp,
                     // only where the caller gave one, so a helper text passed through
                     // slotProps.textField is not overwritten with undefined

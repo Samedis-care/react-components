@@ -1,10 +1,15 @@
 import React from "react";
 export interface SignPadProps {
     /**
-     * Shows the tile as disabled: greys the pen icon and marks its button
-     * `aria-disabled`, so assistive technology announces it as unavailable.
-     * The button stays focusable, so a focused tile that gets disabled keeps
-     * the focus. Default `false`.
+     * Disables the tile: neither a click nor Enter or Space calls
+     * `openSignPad`, the cursor is the default one instead of a pointer, the
+     * pen icon is greyed and the button is marked `aria-disabled`, so
+     * assistive technology announces it as unavailable. The button stays
+     * focusable, so a focused tile that gets disabled keeps the focus, and the
+     * info button keeps working. While disabled, the root has the class
+     * `CcSignPad-disabled`. Set in the theme's
+     * `components.CcSignPad.defaultProps`, it disables every tile,
+     * SignaturePad's included. Default `false`.
      */
     disabled?: boolean;
     /**
@@ -33,8 +38,8 @@ export interface SignPadProps {
     /**
      * Called with the click event when the tile is clicked anywhere except on
      * the info button, and when its button is activated by keyboard (Enter or
-     * Space). The button keeps the focus, so a dialog opened from here returns
-     * focus to the tile when it closes.
+     * Space). Not called while `disabled`. The button keeps the focus, so a
+     * dialog opened from here returns focus to the tile when it closes.
      */
     openSignPad?: () => void;
     /**

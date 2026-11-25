@@ -17,6 +17,15 @@ export interface DateTimeInputProps extends UIInputProps {
      */
     onBlur?: LocalizedDateTimePickerProps["onBlur"];
     /**
+     * Called with the new date and time once the user is done with it: when
+     * focus leaves the field (before `onBlur`), on Enter in the field, and when
+     * the calendar accepts it. Only a date the picker accepts, or `null` for an
+     * empty field, is reported, and only when it differs from the date reported
+     * last or handed in as `value` since; the dates the field passes through
+     * while the user types are not. See `LocalizedDateTimePickerProps.onChange`.
+     */
+    onChange?: LocalizedDateTimePickerProps["onChange"];
+    /**
      * full width?
      */
     fullWidth?: LocalizedDateTimePickerProps["fullWidth"];

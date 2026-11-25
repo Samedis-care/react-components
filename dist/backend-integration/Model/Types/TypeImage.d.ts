@@ -8,6 +8,8 @@ export type TypeImageParams = Partial<Pick<ImageSelectorProps, "uploadLabel" | "
      * Fallback image to display when no image is stored: its URL or data URI.
      * Where the image is only shown (a grid cell, a read-only form field), the placeholder's
      * alt text is "No image present"; without a placeholder that text is shown instead.
+     * In an editable field it is the ImageSelector's `placeholder`, not the field's value: drawn
+     * where the picture would be, skipped by assistive technology, and never previewed.
      * Defaults to none.
      */
     placeholder?: string;

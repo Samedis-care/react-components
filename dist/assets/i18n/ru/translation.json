@@ -5,19 +5,26 @@
 			"today": "Сегодня",
 			"prev-week": "Предыдущая неделя",
 			"next-week": "Следующая неделя",
-			"filter-settings": "Настройки фильтра"
+			"filter-settings": "Настройки фильтра",
+			"week-load-error": "Не удалось загрузить неделю {{WEEK}}",
+			"retry": "Повторить"
 		},
 		"portal": {
 			"menu-toggle": "Открыть меню",
 			"collapse-menu": "Свернуть меню",
-			"expand-menu": "Развернуть меню"
+			"expand-menu": "Развернуть меню",
+			"close-menu": "Закрыть меню"
 		},
 		"uikit": {
 			"info": "Подробнее",
 			"clear": "Очистить",
+			"field-state": {
+				"dirty": "(изменено)"
+			},
 			"multi-language-input": {
 				"language": "Язык",
 				"language-of": "Язык поля «{{label}}»",
+				"show-translations-of": "Показать переводы поля «{{label}}»",
 				"toggle-languages": "Переключить языковые поля"
 			},
 			"number-input": {
@@ -88,6 +95,12 @@
 					"or": "ИЛИ",
 					"and": "И"
 				},
+				"filter-value": {
+					"date": "Дата",
+					"date-time": "Дата и время",
+					"from": "От",
+					"to": "До"
+				},
 				"no-data-reset-filters": "Очистить фильтры",
 				"no-data-filters": "Данные, соответствующие вашим фильтрам, не найдены.",
 				"select-row": "Выбрать {{ROW}}",
@@ -102,6 +115,7 @@
 				"search": "Поиск",
 				"more-options": "Другие параметры",
 				"custom-filter-button": "Фильтр",
+				"custom-filter-button-label": "Фильтр: выбор фильтров",
 				"delete": "Удалить",
 				"edit": "Редактировать",
 				"reset-options": {
@@ -124,11 +138,13 @@
 				"close": "Закрыть"
 			},
 			"custom-filters": {
-				"title": "Выбор фильтра"
+				"title": "Выбор фильтра",
+				"reset": "Сбросить",
+				"show-results": "Показать результаты"
 			},
 			"footer": {
-				"total": "Общий:",
-				"filtered": "Отфильтровано:",
+				"counts": "Всего: {{TOTAL}}",
+				"counts-filtered": "Отфильтровано: {{FILTERED}} Всего: {{TOTAL}}",
 				"edit": "Редактировать",
 				"delete": "Удалить",
 				"more": "Больше",
@@ -177,7 +193,8 @@
 		},
 		"file-upload": {
 			"upload": "Загрузить",
-			"restore": "Восстановить",
+			"remove-file": "Удалить {{NAME}}",
+			"restore-file": "Восстановить {{NAME}}",
 			"upload-modern": "Подайте файл с помощью перетаскивания или нажмите здесь",
 			"no-files": "Приложения отсутствуют",
 			"formats": "Форматы файлов",
@@ -198,7 +215,8 @@
 			},
 			"multi-image": {
 				"edit": "Редактировать",
-				"primary": "Начальный",
+				"is-primary": "Основное изображение",
+				"make-primary": "Сделать основным изображением",
 				"remove": "Удалить изображение",
 				"add": "Добавить изображение",
 				"replace": "Заменить изображение",
@@ -218,7 +236,10 @@
 			},
 			"close": "Закрыть",
 			"rotate-left": "Повернуть влево",
-			"rotate-right": "Повернуть вправо"
+			"rotate-right": "Повернуть вправо",
+			"zoom-in": "Увеличить",
+			"zoom-out": "Уменьшить",
+			"reset-zoom": "Сбросить масштаб"
 		},
 		"phone-number": {
 			"invalid": "Введите правильный номер телефона"
@@ -238,6 +259,9 @@
 					"no": "Нет"
 				},
 				"signature": "Подпись",
+				"sign-area": "Область подписи",
+				"instructions": "Нарисуйте свою подпись в области подписи мышью, пером или пальцем.",
+				"instructions-signed": "Показана сохранённая подпись. Чтобы подписать заново, сначала удалите её.",
 				"close": "Закрыть"
 			},
 			"sign-here": "Цифровая подпись здесь",
@@ -250,8 +274,19 @@
 		"toast": {
 			"close": "Закрыть"
 		},
+		"info-box": {
+			"status": {
+				"warning": "Предупреждение:",
+				"success": "Успех:",
+				"error": "Ошибка:"
+			}
+		},
 		"loader": {
 			"label": "Загрузка…"
+		},
+		"matrix": {
+			"tile-more": "ещё {{count}}:",
+			"extra-cell-add": "Добавить"
 		}
 	},
 	"non-standalone": {
@@ -342,9 +377,17 @@
 					"buttons": {
 						"okay": "OK"
 					}
+				},
+				"success-toast": {
+					"message_one": "{{count}} запись удалена",
+					"message_few": "{{count}} записи удалены",
+					"message_many": "{{count}} записей удалено",
+					"message_other": "{{count}} записи удалено",
+					"messageInverted": "Выбранные записи удалены"
 				}
 			},
 			"inline-edit": {
+				"cell-control-label": "{{FIELD}}, {{ROW}}",
 				"error-dialog": {
 					"message": "Изменение поля «{{LABEL}}» не сохранено: {{ERROR}}"
 				}
@@ -365,6 +408,13 @@
 			},
 			"read-only": {
 				"submitting": "Форма сейчас сохраняется"
+			},
+			"tab": {
+				"invalid": "Содержит недопустимые поля.",
+				"modified": "Содержит изменённые поля."
+			},
+			"form-dialog": {
+				"open-in-new-tab": "Открыть в новой вкладке"
 			}
 		},
 		"selector": {
@@ -392,6 +442,7 @@
 				"last_error": "Последняя ошибка",
 				"errors": {
 					"file_select": "Выбран недопустимый файл",
+					"file_count": "Можно импортировать только один файл",
 					"file_read": "Не удаётся прочитать файл {{FILE_NAME}}. Сохраните его как книгу Excel (.xlsx) без пароля и выберите снова.",
 					"update-key-not-uniq": "{{UPDATE_KEY}} не уникален в наборе данных импорта"
 				},
@@ -452,6 +503,7 @@
 		},
 		"dialogs": {
 			"error-title": "Произошла ошибка",
+			"error-no-details": "Дополнительные сведения отсутствуют. Попробуйте ещё раз.",
 			"validation-error-title": "Ошибка при проверке",
 			"info": "Информация",
 			"are-you-sure": "Вы уверены?",

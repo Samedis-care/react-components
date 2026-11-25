@@ -16,7 +16,7 @@ const FormDialogRaw = (props) => {
         if (onClose)
             onClose();
     }, [closeThisDialog, onClose]);
-    return (_jsxs(Dialog, { open: true, onClose: removeDialog, "aria-describedby": messageId, children: [_jsx(DialogTitle, { children: props.title }), _jsxs(DialogContent, { children: [_jsx(DialogContentText, { id: messageId, children: props.message }), _jsx(_Fragment, { children: props.inputs })] }), _jsx(DialogActions, { children: props.buttons.map((btn, index) => (_jsx(Button, { onClick: async () => {
+    return (_jsxs(Dialog, { open: true, onClose: removeDialog, "aria-describedby": messageId, children: [_jsx(DialogTitle, { children: props.title }), _jsxs(DialogContent, { children: [_jsx(DialogContentText, { component: "div", id: messageId, children: props.message }), _jsx(_Fragment, { children: props.inputs })] }), _jsx(DialogActions, { children: props.buttons.map((btn, index) => (_jsx(Button, { onClick: async () => {
                         const { close, end } = dialogButtonClose(closeThisDialog, onClose);
                         if (!btn.dontClose)
                             close();

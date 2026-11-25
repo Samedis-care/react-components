@@ -5,6 +5,8 @@ import focusRing from "../../utils/internal/focusRing";
 const StyledButton = styled(Button, {
     name: "CcSubActionButton",
     slot: "button",
+    // the only slot, so the theme's variants apply to it as to a root
+    skipVariantsResolver: false,
 })(({ theme, ownerState: { small, disableDivider } }) => ({
     padding: small ? theme.spacing(1) : theme.spacing(1, 3),
     borderRadius: small ? undefined : 0,
@@ -45,7 +47,10 @@ const StyledButton = styled(Button, {
             marginRight: small ? undefined : theme.spacing(3),
         },
         "&:hover svg": {
-            fill: small ? theme.palette.background.default : undefined,
+            // the label colour of the hover rule above: legible on primary.light
+            fill: small
+                ? theme.palette.getContrastText(theme.palette.primary.light)
+                : undefined,
         },
         borderRadius: small ? 0 : undefined,
         borderLeftWidth: 0,

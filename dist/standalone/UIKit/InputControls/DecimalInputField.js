@@ -4,8 +4,9 @@ import TextFieldWithHelp from "../TextFieldWithHelp";
 import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
 import useCurrentLocale from "../../../utils/useCurrentLocale";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import useCommitOnEnter from "../../../utils/internal/useCommitOnEnter";
 const DecimalInputField = (props) => {
-    const { value, onChange, onBlur, format, ...muiProps } = props;
+    const { value, onChange, onBlur, onKeyDown, format, ...muiProps } = props;
     const { t } = useCCTranslations();
     const locale = useCurrentLocale();
     // the text typed since the last commit, or null while the field is not edited. Only
@@ -25,9 +26,9 @@ const DecimalInputField = (props) => {
         setParseError(false);
     }
     const text = draft ?? (value !== null ? value.toLocaleString(locale, format) : "");
-    const handleBlur = useCallback((event) => {
-        if (onBlur)
-            onBlur(event);
+    // commits an edit: on the blur after it, and on Enter, as Enter in a form's input submits
+    // the form without a blur
+    const commit = useCallback((event) => {
         if (draft === null || !onChange)
             return;
         const parsed = parseLocalizedNumber(event.target.value);
@@ -40,12 +41,18 @@ const DecimalInputField = (props) => {
         // shows the value the parent keeps from here on, even when it does not change
         setDraft(null);
         onChange(event, parsed);
-    }, [draft, onBlur, onChange]);
+    }, [draft, onChange]);
+    const handleBlur = useCallback((event) => {
+        if (onBlur)
+            onBlur(event);
+        commit(event);
+    }, [commit, onBlur]);
+    const handleKeyDown = useCommitOnEnter(commit, onKeyDown);
     // on change handling
     const handleChange = useCallback((event) => {
         setDraft(event.target.value);
     }, []);
-    return (_jsx(TextFieldWithHelp, { ...muiProps, value: text, onChange: handleChange, onBlur: handleBlur, error: parseError || muiProps.error, helperText: parseError
+    return (_jsx(TextFieldWithHelp, { ...muiProps, value: text, onChange: handleChange, onBlur: handleBlur, onKeyDown: handleKeyDown, error: parseError || muiProps.error, helperText: parseError
             ? t("standalone.uikit.number-input.invalid", {
                 EXAMPLE: (1234.56).toLocaleString(locale, format),
             })

@@ -7,9 +7,9 @@ interface QueuedFunction {
     /**
      * The record's id as mapId gives it: the real id once the backend has one, the fake id
      * of a record whose create is still queued; null for an advanced delete
-     * @remarks Every lookup maps the id it is given before comparing, and index maps the
-     *          ids of the rows it hands out: a caller keeps the fake id of a record created
-     *          through this connector after the queue was worked.
+     * @remarks Every lookup maps the id it is given before comparing, and index and read
+     *          map the ids of the records they hand out: a caller keeps the fake id of a
+     *          record created through this connector after the queue was worked.
      */
     id: string | null;
     func: () => unknown;
@@ -77,10 +77,21 @@ declare class LazyConnector extends Connector {
      * @returns A record whose create is queued: what the queue will create. A record with a
      *          queued update: the backend's record with the update's fields laid over it
      *          (with fakeReads the update alone, as index lists it). Any other record: the
-     *          backend's.
+     *          backend's. A record from the backend carries the id index lists it by, which
+     *          for a record created through this connector stays its fake id after the
+     *          queue was worked, whichever of its ids it was read by.
      * @throws {Error} The record's delete is queued
      */
     read(id: string, model: ModelUnknown | undefined): Promise<ModelGetResponse<ModelUnknown>> | ModelGetResponse<ModelUnknown>;
+    /**
+     * Reads a record from the backend, as index lists it
+     * @param id The record's id as the backend knows it
+     * @param model The model performing the request
+     * @param update The fields of a queued update of the record, laid over it
+     * @returns The record under the id index lists it by: its fake id, if it was created
+     *          through this connector
+     */
+    private readFromBackend;
     /**
      * Queues an update of a record
      * @param data The record's data, including its id as index hands it out (a fake one for

@@ -5,19 +5,26 @@
 			"today": "Today",
 			"prev-week": "Previous week",
 			"next-week": "Next week",
-			"filter-settings": "Filter settings"
+			"filter-settings": "Filter settings",
+			"week-load-error": "Week {{WEEK}} could not be loaded",
+			"retry": "Retry"
 		},
 		"portal": {
 			"menu-toggle": "Toggle menu",
 			"collapse-menu": "Collapse menu",
-			"expand-menu": "Expand menu"
+			"expand-menu": "Expand menu",
+			"close-menu": "Close menu"
 		},
 		"uikit": {
 			"info": "More information",
 			"clear": "Clear",
+			"field-state": {
+				"dirty": "(modified)"
+			},
 			"multi-language-input": {
 				"language": "Language",
 				"language-of": "Language of {{label}}",
+				"show-translations-of": "Show translations of {{label}}",
 				"toggle-languages": "Toggle language inputs"
 			},
 			"number-input": {
@@ -92,6 +99,12 @@
 					"and": "AND",
 					"or": "OR"
 				},
+				"filter-value": {
+					"date": "Date",
+					"date-time": "Date and time",
+					"from": "From",
+					"to": "To"
+				},
 				"no-data-reset-filters": "Clear filters",
 				"no-data-filters": "No data matched your filters.",
 				"select-row": "Select {{ROW}}",
@@ -106,6 +119,7 @@
 				"search": "Search",
 				"more-options": "More options",
 				"custom-filter-button": "Filter",
+				"custom-filter-button-label": "Filter selection",
 				"delete": "Delete",
 				"edit": "Edit",
 				"reset-options": {
@@ -128,11 +142,13 @@
 				"close": "Close"
 			},
 			"custom-filters": {
-				"title": "Filter selection"
+				"title": "Filter selection",
+				"reset": "Reset",
+				"show-results": "Show results"
 			},
 			"footer": {
-				"total": "Total:",
-				"filtered": "Filtered:",
+				"counts": "Total: {{TOTAL}}",
+				"counts-filtered": "Filtered: {{FILTERED}} Total: {{TOTAL}}",
 				"edit": "Edit",
 				"delete": "Delete",
 				"more": "More",
@@ -183,8 +199,12 @@
 			"close": "Close",
 			"rotate-left": "Rotate left",
 			"rotate-right": "Rotate right",
+			"zoom-in": "Zoom in",
+			"zoom-out": "Zoom out",
+			"reset-zoom": "Reset zoom",
 			"upload": "Upload",
-			"restore": "Restore",
+			"remove-file": "Remove {{NAME}}",
+			"restore-file": "Restore {{NAME}}",
 			"upload-capture": {
 				"image": "Take photo"
 			},
@@ -213,7 +233,8 @@
 			},
 			"multi-image": {
 				"edit": "Edit",
-				"primary": "Primary",
+				"is-primary": "Primary image",
+				"make-primary": "Set as primary image",
 				"remove": "Remove image",
 				"add": "Add image",
 				"replace": "Replace image",
@@ -242,7 +263,10 @@
 					"no": "No"
 				},
 				"close": "Close",
-				"signature": "Signature"
+				"signature": "Signature",
+				"sign-area": "Signature area",
+				"instructions": "Draw your signature in the signature area with a mouse, pen or finger.",
+				"instructions-signed": "The saved signature is shown. To sign again, clear it first."
 			},
 			"sign-here": "Sign here digitally",
 			"required": "Required"
@@ -250,8 +274,19 @@
 		"toast": {
 			"close": "Close"
 		},
+		"info-box": {
+			"status": {
+				"warning": "Warning:",
+				"success": "Success:",
+				"error": "Error:"
+			}
+		},
 		"loader": {
 			"label": "Loading…"
+		},
+		"matrix": {
+			"tile-more": "{{count}} more:",
+			"extra-cell-add": "Add"
 		}
 	},
 	"non-standalone": {
@@ -340,9 +375,15 @@
 					"buttons": {
 						"okay": "OK"
 					}
+				},
+				"success-toast": {
+					"message_one": "{{count}} entry deleted",
+					"message_other": "{{count}} entries deleted",
+					"messageInverted": "The selected entries have been deleted"
 				}
 			},
 			"inline-edit": {
+				"cell-control-label": "{{FIELD}}, {{ROW}}",
 				"error-dialog": {
 					"message": "The change to \"{{LABEL}}\" was not saved: {{ERROR}}"
 				}
@@ -363,6 +404,13 @@
 			},
 			"read-only": {
 				"submitting": "The form is currently being saved"
+			},
+			"tab": {
+				"invalid": "Contains invalid fields.",
+				"modified": "Contains modified fields."
+			},
+			"form-dialog": {
+				"open-in-new-tab": "Open in new tab"
 			}
 		},
 		"selector": {
@@ -390,6 +438,7 @@
 				"last_error": "Last error",
 				"errors": {
 					"file_select": "Invalid file selected",
+					"file_count": "Only one file can be imported",
 					"file_read": "{{FILE_NAME}} cannot be read. Save it as an Excel workbook (.xlsx) without a password and pick it again.",
 					"update-key-not-uniq": "{{UPDATE_KEY}} is not unique in import dataset"
 				},
@@ -450,6 +499,7 @@
 		},
 		"dialogs": {
 			"error-title": "An error occurred",
+			"error-no-details": "No further details are available. Try again.",
 			"validation-error-title": "Error on validation",
 			"info": "Info",
 			"are-you-sure": "Are you sure?",

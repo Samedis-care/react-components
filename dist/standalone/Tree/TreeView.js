@@ -18,6 +18,8 @@ const enhanceData = (data, loading, ancestorLanes, index, depth, forest) => {
                 depth: depth,
                 hasPrev: idx !== 0,
                 hasNext,
+                siblingIndex: idx,
+                siblingCount: data.length,
                 childrenLoading: loading.includes(entry.id),
                 childrenLoaded: entry.children != null && entry.children.length > 0,
                 ancestorLanes,
@@ -100,8 +102,13 @@ const getRoots = (data) => {
     return entries;
 };
 const RendererWrapper = (props) => {
-    const { index, style, ariaAttributes, renderer: Renderer, rendererProps, data: itemData, } = props;
-    return (_jsx("div", { style: style, ...ariaAttributes, children: _jsx(Renderer, { ...rendererProps, ...itemData[index] }) }));
+    const { index, style, renderer: Renderer, rendererProps, data: itemData, } = props;
+    const entry = itemData[index];
+    // a treeitem instead of react-window's listitem (its `ariaAttributes`), whose
+    // position and set size count all visible rows instead of the siblings
+    return (_jsx("div", { style: style, role: "treeitem", "aria-level": entry.depth + 1, "aria-posinset": entry.siblingIndex + 1, "aria-setsize": entry.siblingCount, "aria-expanded": entry.hasChildren ? entry.expanded : undefined, "aria-checked": Renderer.checkableLeaves && !entry.hasChildren
+            ? entry.expanded
+            : undefined, children: _jsx(Renderer, { ...rendererProps, ...entry }) }));
 };
 const TreeView = React.forwardRef(function TreeView(props, ref) {
     const { data, renderer, rendererItemHeight, onLoadChildren, onToggleExpanded, ...rendererProps } = props;
@@ -175,6 +182,8 @@ const TreeView = React.forwardRef(function TreeView(props, ref) {
             setScrollToId(id);
         },
     }), []);
-    return (_jsx(List, { listRef: listRef, rowComponent: RendererWrapper, rowHeight: itemHeight, rowCount: enhancedData.length, rowProps: itemData, onResize: handleResize }));
+    return (_jsx(List, { 
+        // react-window spreads these after its own role="list"
+        role: "tree", "aria-multiselectable": itemData.renderer.checkableLeaves || undefined, listRef: listRef, rowComponent: RendererWrapper, rowHeight: itemHeight, rowCount: enhancedData.length, rowProps: itemData, onResize: handleResize }));
 });
 export default React.memo(TreeView);

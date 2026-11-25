@@ -2,7 +2,6 @@ import { InputLabelProps, InputProps, OutlinedInputProps, TextFieldProps } from 
 import React from "react";
 import { PickersTextFieldProps } from "@mui/x-date-pickers";
 export interface UIInputProps {
-    important?: boolean;
     warning?: boolean;
     /**
      * Does the value differ from the server-side value?

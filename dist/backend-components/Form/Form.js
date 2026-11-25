@@ -229,6 +229,7 @@ const Form = (props) => {
                 ? value(customFieldState.current[field])
                 : value;
     }, []);
+    const hasCustomState = useCallback((field) => Object.prototype.hasOwnProperty.call(customFieldState.current, field), []);
     // custom read-only
     const [customReadOnlyReasons, setCustomReadOnlyReasons] = useState({});
     const setCustomReadOnly = useCallback((ident, reason) => {
@@ -438,6 +439,47 @@ const Form = (props) => {
         getCustomDirtyFields().length > 0 ||
         !!(id && !getDeleted() && deleteOnSubmit), [getCustomDirtyFields, getDeleted, deleteOnSubmit, id]);
     const dirty = getDirty(formDirty);
+    /**
+     * Do the staged values differ from the baseline? Compares the fields the flow's save
+     * sends, as the save picks them: those a stage staged as modified, alwaysSubmitFields and
+     * hidden fields, every field of a new record
+     * @param staged The staged values
+     * @param stagedModified The fields a stage staged as modified
+     * @param baseline The server record (initialValues), undefined before it loaded
+     * @returns false without flowEngine and before the baseline and the default record loaded
+     * @see FormContextData.stagedDirty
+     */
+    const getStagedDirty = useCallback((staged, stagedModified, baseline) => {
+        if (!flowEngine || !baseline || !defaultRecord)
+            return false;
+        const config = {
+            ignoreFields: dirtyIgnoreFields,
+            model,
+            defaultRecord: defaultRecord[0],
+            onlySubmitMountedBehaviour,
+            onlySubmitMounted: id === null ? false : (onlySubmitMounted ?? false),
+            alwaysSubmitFields,
+            mountedFields: stagedModified,
+        };
+        return (toComparisonJson(normalizeValues(staged, config)) !==
+            toComparisonJson(normalizeValues(baseline, config)));
+    }, [
+        flowEngine,
+        defaultRecord,
+        dirtyIgnoreFields,
+        model,
+        onlySubmitMountedBehaviour,
+        id,
+        onlySubmitMounted,
+        alwaysSubmitFields,
+    ]);
+    /**
+     * @see FormContextData.stagedDirty
+     */
+    const stagedDirty = useMemo(
+    // the baseline is passed as the state, like for dirtyFields, so that replacing it
+    // after a save or a refetch recomputes the flag
+    () => getStagedDirty(valuesStaged, valuesStagedModified, initialValuesState), [getStagedDirty, valuesStaged, valuesStagedModified, initialValuesState]);
     // main form handling - dirty state events
     // dirty is derived from state, so a listener relying on the rendered flag only learns
     // about a change one render late. That's too late for "submit, then navigate away":
@@ -445,24 +487,35 @@ const Form = (props) => {
     // So the last dispatched value is kept in a ref and compared against the freshly
     // computed one, which lets the form engine announce the change right when it happens.
     const dispatchedDirtyRef = useRef(null);
-    const dispatchDirtyEvent = useCallback((dirty) => {
-        if (dispatchedDirtyRef.current === dirty)
+    const dispatchDirtyEvent = useCallback((dirty, stagedDirty) => {
+        const dispatched = dispatchedDirtyRef.current;
+        if (dispatched &&
+            dispatched.dirty === dirty &&
+            dispatched.stagedDirty === stagedDirty)
             return;
-        dispatchedDirtyRef.current = dirty;
-        formEvents.dispatchEvent("dirty", { dirty });
+        const event = { dirty, stagedDirty };
+        dispatchedDirtyRef.current = event;
+        formEvents.dispatchEvent("dirty", event);
     }, [formEvents]);
     /**
-     * Recomputes the dirty state from the refs and dispatches the dirty event if it changed
-     * @remarks Call this after synchronously mutating values/initial values, to notify
-     *          listeners without waiting for the re-render.
+     * Recomputes the dirty state (dirty and stagedDirty) from the refs and dispatches the
+     * dirty event if it changed
+     * @remarks Call this after synchronously mutating values/staged values/initial values, to
+     *          notify listeners without waiting for the re-render.
      */
     const syncDirtyState = useCallback(() => {
-        dispatchDirtyEvent(getDirty(getFormDirty(valuesRef.current)));
-    }, [dispatchDirtyEvent, getDirty, getFormDirty]);
+        dispatchDirtyEvent(getDirty(getFormDirty(valuesRef.current)), getStagedDirty(valuesStagedRef.current, valuesStagedModifiedRef.current, getInitialValues()));
+    }, [
+        dispatchDirtyEvent,
+        getDirty,
+        getFormDirty,
+        getStagedDirty,
+        getInitialValues,
+    ]);
     // catch-all for every dirty change that isn't announced by an explicit syncDirtyState
     useEffect(() => {
-        dispatchDirtyEvent(dirty);
-    }, [dirty, dispatchDirtyEvent]);
+        dispatchDirtyEvent(dirty, stagedDirty);
+    }, [dirty, stagedDirty, dispatchDirtyEvent]);
     // syncDirtyState changes with the dirty baseline (initial values, mounted fields, a flow
     // stage's alwaysSubmitFields), setCustomFieldDirty must not
     const syncDirtyStateRef = useRef(syncDirtyState);
@@ -1114,6 +1167,7 @@ const Form = (props) => {
         console.log("Form Dirty State:", toComparisonJson(localData) !== toComparisonJson(remoteData));
         console.log("Custom Dirty State:", getCustomDirtyFields().length > 0);
         console.log("Custom Dirty Fields:", getCustomDirtyFields());
+        console.log("Staged Dirty State:", getStagedDirty(valuesStagedRef.current, valuesStagedModifiedRef.current, getInitialValues()));
         console.log("Server Data:", remoteData);
         console.log("Form Data:", localData);
         console.log("Staged Data:", valuesStagedRef.current);
@@ -1133,6 +1187,8 @@ const Form = (props) => {
         getNormalizedData,
         getDirtyFields,
         getCustomDirtyFields,
+        getStagedDirty,
+        getInitialValues,
         model.fields,
     ]);
     useDevKeybinds(useMemo(() => ({ "ccform dirty?": () => debugDirty(true) }), [debugDirty]));
@@ -1140,10 +1196,10 @@ const Form = (props) => {
     // as the changes do, also while no form page is mounted (one in a routed tab panel when
     // another tab is open). A save makes the form read-only too, but its changes are unsaved
     // until it succeeds, so only a form which is read-only for another reason goes unguarded.
+    // The changes are the shown values and, in flow mode, the staged ones.
     const pageGuard = useFormPageGuard({
-        disableRouting: !!props.disableRouting,
         readOnlyBesidesSaving: Object.keys(readOnlyReasons).some((reason) => reason !== FORM_SUBMITTING_READ_ONLY_REASON),
-        dirty,
+        unsaved: dirty || stagedDirty,
         addEventListener: formEvents.addEventListener,
         removeEventListener: formEvents.removeEventListener,
     });
@@ -1161,10 +1217,12 @@ const Form = (props) => {
         markFieldMounted,
         setCustomFieldDirty,
         dirty,
+        stagedDirty,
         dirtyFields,
         showDirtyState: !!showDirtyState,
         getCustomState,
         setCustomState,
+        hasCustomState,
         setPreSubmitHandler,
         removePreSubmitHandler,
         setPostSubmitHandler,
@@ -1221,10 +1279,12 @@ const Form = (props) => {
         markFieldMounted,
         setCustomFieldDirty,
         dirty,
+        stagedDirty,
         dirtyFields,
         showDirtyState,
         getCustomState,
         setCustomState,
+        hasCustomState,
         setPreSubmitHandler,
         removePreSubmitHandler,
         setPostSubmitHandler,
@@ -1297,6 +1357,7 @@ const Form = (props) => {
         safeSubmit: safeSubmitForm,
         submitting,
         dirty,
+        stagedDirty,
         showDirtyState: !!showDirtyState,
         flowEngineConfig,
         refetchForm: refetch,
@@ -1324,6 +1385,7 @@ const Form = (props) => {
         safeSubmitForm,
         submitting,
         dirty,
+        stagedDirty,
         showDirtyState,
         refetch,
     ]);
@@ -1344,7 +1406,7 @@ const Form = (props) => {
         console.error("[Components-Care] [FormEngine] Data is faulty", serverData ? JSON.stringify(serverData, undefined, 4) : null);
         throw new Error("Data is not present, this should never happen");
     }
-    const innerForm = () => (_jsxs(DirtyStateContext.Provider, { value: showDirtyState ? dirtyFields : NO_DIRTY_STATE, children: [displayError && !nestedFormName && (_jsx(ErrorComponent, { error: displayError })), isLoading ? (_jsx("div", { style: loaderContainerStyles, children: _jsx(Loader, {}) })) : (_jsx(FormPageGuardContext.Provider, { value: pageGuard, children: _jsx(Children, { isSubmitting: submitting, values: props.renderConditionally ? asModelRecord(values) : undefined, submit: submitForm, safeSubmit: safeSubmitForm, reset: resetForm, dirty: dirty, id: id, customProps: customProps, disableRouting: !!props.disableRouting }) }))] }));
-    return (_jsx(FormContextLite.Provider, { value: formContextDataLite, children: _jsx(FormContext.Provider, { value: formContextData, children: !parentFormContext && !renderFormAsDiv ? (_jsx(StyledForm, { onSubmit: handleSubmit, className: formClass, "data-form-submitting": submitting, "data-form-dirty": dirty, "data-form-recordid": id, "data-form-modelid": model.modelId, children: innerForm() })) : (_jsx(StyledFormDiv, { className: formClass, "data-form-submitting": submitting, "data-form-dirty": dirty, "data-form-recordid": id, "data-form-modelid": model.modelId, children: innerForm() })) }) }));
+    const innerForm = () => (_jsxs(DirtyStateContext.Provider, { value: showDirtyState ? dirtyFields : NO_DIRTY_STATE, children: [displayError && !nestedFormName && (_jsx(ErrorComponent, { error: displayError })), isLoading ? (_jsx("div", { style: loaderContainerStyles, children: _jsx(Loader, {}) })) : (_jsx(FormPageGuardContext.Provider, { value: pageGuard, children: _jsx(Children, { isSubmitting: submitting, values: props.renderConditionally ? asModelRecord(values) : undefined, submit: submitForm, safeSubmit: safeSubmitForm, reset: resetForm, dirty: dirty, stagedDirty: stagedDirty, id: id, customProps: customProps, disableRouting: !!props.disableRouting }) }))] }));
+    return (_jsx(FormContextLite.Provider, { value: formContextDataLite, children: _jsx(FormContext.Provider, { value: formContextData, children: !parentFormContext && !renderFormAsDiv ? (_jsx(StyledForm, { onSubmit: handleSubmit, className: formClass, "aria-busy": submitting || undefined, "data-form-submitting": submitting, "data-form-dirty": dirty, "data-form-recordid": id, "data-form-modelid": model.modelId, children: innerForm() })) : (_jsx(StyledFormDiv, { className: formClass, "aria-busy": submitting || undefined, "data-form-submitting": submitting, "data-form-dirty": dirty, "data-form-recordid": id, "data-form-modelid": model.modelId, children: innerForm() })) }) }));
 };
 export default React.memo(Form);

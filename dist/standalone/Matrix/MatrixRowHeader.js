@@ -5,6 +5,7 @@ import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
 import { cellBorders } from "./matrixTints";
 import { useMatrixConfig } from "./MatrixGridContext";
+import MatrixContents from "./MatrixContents";
 import useMatrixActivation from "./useMatrixActivation";
 export const MatrixRowHeaderRoot = styled("div", {
     name: "CcMatrixGrid",
@@ -43,9 +44,13 @@ const MatrixRowHeader = (props) => {
     // only way to the row's actions
     const context = useMemo(() => ({ touch: button }), [button]);
     const content = useMemo(() => renderRowHeader(row, context), [renderRowHeader, row, context]);
-    return (_jsx(MatrixRowHeaderRoot, { className: combineClassNames([
-            classes?.rowHeader,
-            button && matrixClasses.rowHeaderButton,
-        ]), ...activation, children: content }));
+    // The row's header cell is a wrapper of its own: on touch the header is a
+    // button, which cannot be the header cell too. Always there, so the
+    // contents do not remount when the header becomes a button or stops being
+    // one.
+    return (_jsx(MatrixContents, { role: "rowheader", children: _jsx(MatrixRowHeaderRoot, { className: combineClassNames([
+                classes?.rowHeader,
+                button && matrixClasses.rowHeaderButton,
+            ]), ...activation, children: content }) }));
 };
 export default React.memo(MatrixRowHeader);

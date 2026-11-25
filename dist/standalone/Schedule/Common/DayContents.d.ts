@@ -13,7 +13,10 @@ export interface IDayData {
      */
     onClick?: React.MouseEventHandler;
     /**
-     * Optional middle click handler
+     * Optional middle click handler: called with the `auxclick` event when the
+     * entry is clicked with the middle button (`event.button === 1`), not for
+     * the right, back or forward button, for which browsers fire `auxclick`
+     * too. There is no keyboard equivalent.
      */
     onAuxClick?: React.MouseEventHandler;
 }

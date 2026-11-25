@@ -16,6 +16,7 @@ import CustomFilterDialog from "./CustomFilterDialog";
 import SelectAllProvider from "./SelectAllProvider";
 import StatePersistence, { DataGridPersistentStateContext, } from "./StatePersistence";
 import { decodePersistedState, normalizeFilterDef } from "./PersistFormat";
+import { useDataGridFocusHandoff } from "./FocusHandoff";
 import combineClassNames from "../../utils/combineClassNames";
 import Checkbox from "../UIKit/Checkbox";
 import ComponentWithLabel from "../UIKit/ComponentWithLabel";
@@ -471,6 +472,9 @@ const DataGrid = (inProps, ref) => {
     const { search, rows, pages, columnHidden, columnPinned, refreshDataInstance, refreshData, customData, selectAll, selectedRows, selectionUpdatedByProps, } = state;
     const lastRefreshData = useRef(0);
     const gridRoot = useRef(null);
+    // a persistence provider mounts the grid again when its storage keys
+    // change: keyboard focus in the grid moves on to the new one
+    useDataGridFocusHandoff(gridRoot);
     const visibleColumns = useMemo(() => getActiveDataGridColumns(columns, columnHidden, columnPinned), [columns, columnHidden, columnPinned]);
     const columnsStatePack = useState(() => {
         const ret = { ...persisted.columnState };

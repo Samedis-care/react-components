@@ -61,6 +61,11 @@ const ScrollableSchedule = (inProps) => {
     const { t, i18n } = useCCTranslations();
     const todayElem = useRef(null);
     const scrollElem = useRef(null);
+    /**
+     * Set when the list is started over while focus is inside it, so that the
+     * new scroll container takes the focus instead of the page
+     */
+    const refocusList = useRef(false);
     const getDefaultState = useCallback(() => ({
         dataOffsetTop: -1,
         dataOffsetBottom: 0,
@@ -71,20 +76,40 @@ const ScrollableSchedule = (inProps) => {
                 filter.defaultValue,
             ]))
             : {},
+        listKey: 0,
     }), [filters]);
     const [state, setState] = useState(getDefaultState);
+    /**
+     * Starts the list over as on mount: from the current week, in a new scroll
+     * container (see `listKey`)
+     * @param changedFilters The filter values to change; the others are kept
+     */
+    const startOver = useCallback((changedFilters) => {
+        const list = scrollElem.current?.wrapper;
+        refocusList.current =
+            !!list && list.contains(list.ownerDocument.activeElement);
+        setState((prev) => ({
+            ...getDefaultState(),
+            filterValues: { ...prev.filterValues, ...changedFilters },
+            listKey: prev.listKey + 1,
+        }));
+    }, [getDefaultState]);
     useEffect(() => {
+        if (!refocusList.current)
+            return;
+        refocusList.current = false;
+        scrollElem.current?.wrapper?.focus();
+    }, [state.listKey]);
+    useEffect(() => {
+        // not startOver itself: i18next passes the language, not filter values
         const onLanguageChanged = () => {
-            setState((prev) => ({
-                ...getDefaultState(),
-                filterValues: prev.filterValues,
-            }));
+            startOver();
         };
         i18n.on("languageChanged", onLanguageChanged);
         return () => {
             i18n.off("languageChanged", onLanguageChanged);
         };
-    }, [getDefaultState, i18n]);
+    }, [startOver, i18n]);
     /**
      * Loads more data in the infinite scroll
      * @param top load more data on top? (if false loads more data at bottom)
@@ -124,19 +149,13 @@ const ScrollableSchedule = (inProps) => {
     }, []);
     const handleFilterChange = useCallback((evt) => {
         const value = evt.target.type === "checkbox" ? evt.target.checked : evt.target.value;
-        setState((prev) => ({
-            ...getDefaultState(),
-            filterValues: {
-                ...prev.filterValues,
-                [evt.target.name]: value,
-            },
-        }));
+        startOver({ [evt.target.name]: value });
         if (!props.filters)
             return;
         const changeHandler = props.filters[evt.target.name].onChange;
         if (changeHandler)
             changeHandler(value);
-    }, [getDefaultState, props.filters]);
+    }, [startOver, props.filters]);
     const [filterSettingsAnchorEl, setFilterSettingsAnchorEl] = useState(null);
     const openFilterSettings = useCallback((evt) => {
         setFilterSettingsAnchorEl(evt.currentTarget);
@@ -159,6 +178,6 @@ const ScrollableSchedule = (inProps) => {
                                 })()) : actions.length > 0 ? ((() => {
                                     const action = actions[0];
                                     return (_jsx(Button, { onClick: action.onClick, disabled: action.disabled, children: action.label }, "action-" + action.id));
-                                })()) : (throwError("code should be unreachable")) })) })] }) }), _jsx(Grid, { size: 12, children: _jsx(StyledInfiniteScroll, { className: combineClassNames([wrapperClass, classes?.scroller]), loadMoreTop: loadMoreTop, loadMoreBottom: loadMoreBottom, ref: scrollElem, children: _jsx(Box, { sx: { m: 2 }, children: _jsx(Grid, { container: true, spacing: 2, children: weeks }) }) }) })] }));
+                                })()) : (throwError("code should be unreachable")) })) })] }) }), _jsx(Grid, { size: 12, children: _jsx(StyledInfiniteScroll, { className: combineClassNames([wrapperClass, classes?.scroller]), loadMoreTop: loadMoreTop, loadMoreBottom: loadMoreBottom, ref: scrollElem, children: _jsx(Box, { sx: { m: 2 }, children: _jsx(Grid, { container: true, spacing: 2, children: weeks }) }) }, state.listKey) })] }));
 };
 export default React.memo(ScrollableSchedule);

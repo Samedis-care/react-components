@@ -19,7 +19,7 @@ class RendererImage extends TypeImage {
         if (visibility.editable) {
             if (visibility.grid)
                 throw new Error("Not supported");
-            return (_jsxs(_Fragment, { children: [_jsx(ImageSelector, { name: field, value: value || (this.params?.placeholder ?? ""), label: label, dirty: dirty, readOnly: visibility.readOnly, onChange: (name, value) => {
+            return (_jsxs(_Fragment, { children: [_jsx(ImageSelector, { name: field, value: value || "", placeholder: this.params?.placeholder, label: label, dirty: dirty, readOnly: visibility.readOnly, onChange: (name, value) => {
                             handleChange(name, value);
                         }, onBlur: handleBlur, alt: label, capture: this.params?.capture ?? false, uploadLabel: this.params?.uploadLabel, convertImagesTo: this.params?.convertImagesTo, downscale: this.params?.downscale, variant: this.params?.variant, postEditCallback: this.params?.postEditCallback, disableRotation: this.params?.disableRotation }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
         }

@@ -22,6 +22,22 @@ const StyledCheckbox = styled(MuiCheckbox, {
     },
     // around the box, where MUI draws the theme's ring
     "&.Mui-focusVisible > svg": focusRing(theme, 2),
+    // Forced colors keep the theme's background and border on an <svg> and
+    // force only its text color, which the tick is drawn in
+    // (forced-color-adjust: preserve-parent-color): a dark forced palette
+    // drew a white tick on a white box. The box, its border and the tick
+    // take system colors instead, GrayText when disabled.
+    "@media (forced-colors: active)": {
+        "& > svg": {
+            backgroundColor: "Canvas",
+            borderColor: "CanvasText",
+            color: "CanvasText",
+        },
+        "&.Mui-disabled > svg": {
+            borderColor: "GrayText",
+            color: "GrayText",
+        },
+    },
 }));
 const _uncheckedIcon = (_jsx(SvgIcon, { viewBox: "-3.5 -4.5 24 24", children: _jsx("polyline", { id: "check", fill: "transparent", stroke: "transparent", strokeWidth: "3.5", points: "1 7 6 12 16.5 1.5" }) }));
 const _checkedIcon = (_jsx(SvgIcon, { viewBox: "-3.5 -4.5 24 24", children: _jsx("polyline", { id: "check", fill: "transparent", stroke: "currentColor", strokeWidth: "3.5", points: "1 7 6 12 16.5 1.5" }) }));

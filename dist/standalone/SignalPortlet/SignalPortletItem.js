@@ -1,9 +1,10 @@
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback } from "react";
-import { Avatar, ListItem, ListItemAvatar, ListItemButton, ListItemText, styled, useThemeProps, } from "@mui/material";
+import { Avatar, ListItem, ListItemAvatar, ListItemButton, listItemButtonClasses, ListItemText, styled, useThemeProps, } from "@mui/material";
 import Loader from "../Loader";
 import useNavigate from "../Routes/useNavigate";
 import combineClassNames from "../../utils/combineClassNames";
+import focusRing from "../../utils/internal/focusRing";
 const ListAvatar = styled(ListItemAvatar, {
     name: "CcSignalPortletItem",
     slot: "listAvatar",
@@ -61,7 +62,11 @@ const ListRoot = styled(ListItem, {
 const ListRootButton = styled(ListItemButton, {
     name: "CcSignalPortletItem",
     slot: "rootBtn",
-})({});
+})(({ theme }) => ({
+    // MUI marks the keyboard-focused row with a faint tint only, which forced
+    // colors drop; inside the row, which spans the card from edge to edge
+    [`&.${listItemButtonClasses.focusVisible}`]: focusRing(theme, -2),
+}));
 /** The highest count shown as it is; higher counts show as "999+" */
 const MAX_COUNT = 999;
 const SignalPortletItem = (inProps) => {

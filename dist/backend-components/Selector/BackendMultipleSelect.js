@@ -51,6 +51,8 @@ const BackendMultipleSelect = (inProps) => {
         }
         : undefined, [lru, handleLoadLruRecord]);
     const debouncedLoad = useDebouncedLoad(handleLoad, searchDebounceTime ?? 500);
-    return (_jsx(BaseSelector, { multiple: true, ...otherProps, onLoad: debouncedLoad, onSelect: handleSelect, selected: selected, displaySwitch: !!switchFilterName, lru: lruConfig }));
+    return (_jsx(BaseSelector, { multiple: true, ...otherProps, onLoad: debouncedLoad, onSelect: handleSelect, selected: selected, ...(switchFilterName
+            ? { displaySwitch: true, switchLabel: props.switchLabel }
+            : { displaySwitch: false }), lru: lruConfig }));
 };
 export default React.memo(BackendMultipleSelect);

@@ -6,6 +6,9 @@ import TypeStringArray from "../../TypeStringArray";
 export type ModelDataTypeStringArrayRendererCCParams = Omit<TextFieldProps, "name" | "value" | "label" | "multiline" | "placeholder" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "autoFocus"> & Omit<TextFieldWithHelpProps, "warning">;
 /**
  * Renders text fields inside a group box
+ *
+ * A required field needs at least one entry: while the list is empty, its only
+ * input, the one for a new entry, is required; once it has entries, no input is.
  */
 declare class RendererStringArray extends TypeStringArray {
     props?: ModelDataTypeStringArrayRendererCCParams;

@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useId, useRef, useState, } from "react";
 import { IconButton, InputAdornment, } from "@mui/material";
 import { Clear as ClearIcon, Info as InfoIcon } from "@mui/icons-material";
 import { InputLabelConfig, UiKitTextField } from "./CommonStyles";
@@ -9,9 +9,22 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import { useRefComposer } from "react-ref-composer";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 export const UiKitTextFieldWithState = withMuiFieldState(UiKitTextField);
+/**
+ * MUI's `TextField` with an optional info button, a Clear button on touch devices and the
+ * field states of {@link withMuiFieldState} (`warning`, `dirty`).
+ *
+ * An `aria-describedby` in `slotProps.htmlInput` describes the input after the helper text,
+ * where MUI's `TextField` would let it replace the helper text's id.
+ */
 const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props, ref) {
     const { openInfo, customHandleClear, disableClearable, warning, dirty, onChange, ...muiProps } = props;
     const { t } = useCCTranslations();
+    // MUI's TextField ties the helper text to the input with aria-describedby, which an
+    // aria-describedby in slotProps.htmlInput replaces: the field gets MUI's id (the given
+    // one, else React's) so the helper text's id is known and can be kept
+    const generatedId = useId();
+    const id = muiProps.id ?? generatedId;
+    const helperTextId = muiProps.helperText && id ? `${id}-helper-text` : undefined;
     // handle clear
     // what an uncontrolled field shows: its defaultValue, then what was typed
     const [uncontrolledValue, setUncontrolledValue] = useState(muiProps.defaultValue);
@@ -20,7 +33,11 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
     const handleClear = useCallback((evt) => {
         evt.stopPropagation();
         if (customHandleClear) {
-            return customHandleClear();
+            customHandleClear();
+            // the Clear button unmounts with the value: keep focus in the field,
+            // as the default clear below does
+            inputRef.current?.focus();
+            return;
         }
         if (!inputRef.current) {
             throw new Error("InputRef not set");
@@ -50,7 +67,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
         // the default clear empties the <input> or <textarea>; a select has
         // neither (its htmlInput ref holds MUI's handle), so it needs a handler
         (!muiProps.select || !!customHandleClear);
-    return (_jsx(UiKitTextFieldWithState, { ref: ref, ...muiProps, warning: warning, dirty: dirty, onChange: handleChange, slotProps: {
+    return (_jsx(UiKitTextFieldWithState, { ref: ref, ...muiProps, id: id, warning: warning, dirty: dirty, onChange: handleChange, slotProps: {
             input: (props) => {
                 const orgSlotProps = {
                     ...accessSlotProps(props, muiProps.slotProps?.input),
@@ -79,11 +96,22 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
                                     : orgSlotProps?.endAdornment?.props?.children, openInfo && (_jsx(IconButton, { onClick: openInfo, size: "small", "aria-label": t("standalone.uikit.info"), children: _jsx(InfoIcon, { color: "disabled" }) }))] }) })) : undefined,
                 };
             },
-            htmlInput: (props) => ({
-                ...accessSlotProps(props, muiProps.slotProps?.htmlInput),
-                ref: composeRef(inputRef, accessSlotProps(props, muiProps.slotProps?.htmlInput)
-                    ?.ref),
-            }),
+            htmlInput: (props) => {
+                const htmlInputProps = accessSlotProps(props, muiProps.slotProps?.htmlInput);
+                const ids = htmlInputProps?.["aria-describedby"]
+                    ?.split(/\s+/)
+                    .filter(Boolean) ?? [];
+                return {
+                    ...htmlInputProps,
+                    // the helper text first, as it is shown, then the given ids
+                    ...(helperTextId && {
+                        "aria-describedby": (ids.includes(helperTextId)
+                            ? ids
+                            : [helperTextId, ...ids]).join(" "),
+                    }),
+                    ref: composeRef(inputRef, htmlInputProps?.ref),
+                };
+            },
             inputLabel: (props) => ({
                 ...InputLabelConfig,
                 ...accessSlotProps(props, muiProps.slotProps?.inputLabel),

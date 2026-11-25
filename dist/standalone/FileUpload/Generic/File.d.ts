@@ -19,6 +19,9 @@ export interface FileProps {
     label?: string;
     /**
      * Optional callback for removing the file
+     * @remarks Called by the file's remove button, an IconButton named "Remove <name>" (see
+     *          actionButtonRef). The button is shown only with this callback, and not while
+     *          disabled or while the restore button is shown in its place.
      */
     onRemove?: () => void;
     /**
@@ -31,13 +34,19 @@ export interface FileProps {
     changeState?: FileChangeState;
     /**
      * Optional callback for undoing a pending removal
-     * @remarks Rendered in place of the remove button while changeState is "removed"
+     * @remarks Called by the file's restore button, an IconButton named "Restore <name>",
+     *          shown in place of the remove button while changeState is "removed". It is the
+     *          same button element: a remove or restore turns it into the other, and keyboard
+     *          focus stays on it.
      */
     onRestore?: () => void;
     /**
-     * Accessible name for the restore control
+     * Ref to the file's remove or restore button
+     * @remarks Set while one of the two is shown, null otherwise. A list that removes the
+     *          file uses it to move keyboard focus on when the focused button goes away;
+     *          FileUploadGeneric does so for its built-in variants.
      */
-    restoreLabel?: string;
+    actionButtonRef?: React.Ref<HTMLButtonElement>;
     /**
      * The size of the preview
      */
@@ -95,7 +104,7 @@ export interface FileProps {
      */
     onClick?: (name: string, url: string) => Promise<void> | void;
 }
-export type FileClassKey = "compactListWrapper" | "iconContainer" | "listEntryText" | "closeIconList" | "closeIcon" | "removeIcon" | "iconWrapperList" | "iconWrapper" | "listLabel" | "label" | "restoreIcon" | "restoreIconBox";
+export type FileClassKey = "actionButton" | "compactListWrapper" | "iconContainer" | "listEntryText" | "closeIconList" | "closeIcon" | "removeIcon" | "iconWrapperList" | "iconWrapper" | "listLabel" | "label" | "restoreIcon" | "restoreIconBox";
 export declare const ExcelFileExtensions: string[];
 export declare const ExcelMimeType: string[];
 export declare const WordFileExtensions: string[];

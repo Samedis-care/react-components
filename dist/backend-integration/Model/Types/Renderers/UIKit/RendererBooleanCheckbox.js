@@ -3,7 +3,7 @@ import { FormControlLabel, FormHelperText, Typography } from "@mui/material";
 import TypeBoolean from "../../TypeBoolean";
 import ccI18n from "../../../../../i18n";
 import Checkbox from "../../../../../standalone/UIKit/Checkbox";
-import { FormControlFieldsetCC } from "../../../../../standalone";
+import { FormControlFieldsetCC, labelWithDirtyText, } from "../../../../../standalone";
 /**
  * Renders a TypeBoolean field as Checkbox
  */
@@ -14,7 +14,7 @@ class RendererBooleanCheckbox extends TypeBoolean {
         this.invert = invert;
     }
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, id, messageId, describedBy, } = params;
+        const { visibility, field, value, label, gridCellLabel, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, id, messageId, describedBy, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -27,9 +27,13 @@ class RendererBooleanCheckbox extends TypeBoolean {
                     input: {
                         "aria-invalid": !!errorMsg,
                         "aria-describedby": describedBy,
+                        // a grid cell has no label element to name the control
+                        "aria-label": visibility.grid
+                            ? (gridCellLabel ?? label)
+                            : undefined,
                     },
                 } }));
-            return visibility.grid ? (control) : (_jsxs(FormControlFieldsetCC, { required: visibility.required, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, component: "fieldset", "data-name": field, children: [_jsx(FormControlLabel, { control: control, label: label }), _jsx(FormHelperText, { id: messageId, children: errorMsg || warningMsg })] }));
+            return visibility.grid ? (control) : (_jsxs(FormControlFieldsetCC, { required: visibility.required, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, component: "fieldset", "data-name": field, children: [_jsx(FormControlLabel, { control: control, label: labelWithDirtyText(label, dirty) }), _jsx(FormHelperText, { id: messageId, children: errorMsg || warningMsg })] }));
         }
         return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, value
                     ? ccI18n.t("backend-integration.model.types.renderers.boolean.true")

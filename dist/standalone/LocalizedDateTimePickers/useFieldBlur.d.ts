@@ -21,7 +21,8 @@ export interface FieldBlurOptions {
  * @param textFieldProps The props for MUI's `textField` slot
  * @param options The field's name, and a focus callback
  * @returns The same props, with `onBlur` moved to the input root, the name as
- * the input root's `data-name`, and `onFieldFocus` called from the input root
+ * the input root's `data-name`, `onFieldFocus` called from the input root, and
+ * a ref on the input root
  */
 export type WithFieldBlur = <P extends object>(ownerState: PickerOwnerState, textFieldProps: P, options?: FieldBlurOptions) => P;
 /**
@@ -40,6 +41,9 @@ export type WithFieldBlur = <P extends object>(ownerState: PickerOwnerState, tex
  * open desktop popup for another element (a click on another control while the
  * calendar is open) calls `onBlur` too, once that element gets focus; focus
  * that goes to no element meanwhile (the window losing focus) is not leaving.
+ * That holds however the popup was opened: a controlled `open` that opens it
+ * while focus is outside the field, too. When such a popup closes, it hands
+ * focus back to the element that had it, which is leaving as well.
  * The mobile dialog is modal, so focus only leaves it by closing it.
  *
  * The handler receives the root's focus event: `currentTarget` is the input
@@ -53,7 +57,7 @@ export type WithFieldBlur = <P extends object>(ownerState: PickerOwnerState, tex
  * that had focus, `relatedTarget` the element that got it. The `onBlur` of the
  * latest render is called. A blur handler the caller set on the input root
  * (`slotProps.input.slotProps.root.onBlur`) is kept and still sees every blur
- * of the root.
+ * of the root, and so is a ref the caller set there.
  *
  * `options.onFieldFocus`, if given, is called from the input root's focus, whenever
  * focus enters the field or moves within it; a focus handler the caller set on

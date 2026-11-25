@@ -1,6 +1,7 @@
 import React from "react";
 import { BaseSelectorData, BaseSelectorProps } from "./BaseSelector";
 import { MultiSelectEntryProps } from "./MultiSelectEntry";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 export interface MultiSelectorData extends BaseSelectorData {
     /**
      * Item click handler
@@ -9,14 +10,17 @@ export interface MultiSelectorData extends BaseSelectorData {
     /**
      * Can the entry be unselected?
      * @param data The data entry to be unselected
+     * @param evt The click or key event that asks to remove it: the remove button's click,
+     *            or whatever a selectedEntryRenderer calls handleDelete from, e.g. a Chip's
+     *            Delete key
      */
-    canUnselect?: (data: MultiSelectorData, evt: React.MouseEvent<HTMLElement>) => boolean | Promise<boolean>;
+    canUnselect?: (data: MultiSelectorData, evt: React.MouseEvent | React.KeyboardEvent) => boolean | Promise<boolean>;
     /**
      * Disable delete button
      */
     noDelete?: boolean;
 }
-export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<BaseSelectorProps<DataT, false>, "multiple" | "onSelect" | "selected" | "classes"> {
+export type MultiSelectProps<DataT extends MultiSelectorData> = DistributiveOmit<BaseSelectorProps<DataT, false>, "multiple" | "onSelect" | "selected" | "classes"> & {
     /**
      * Extended selection change handler
      * @param data The selected data entry/entries
@@ -56,7 +60,9 @@ export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
     /**
      * Specify a custom component for displaying multi select items. The entries
      * are the items of one list (`<ul>`), so its root must be an `<li>`, e.g.
-     * MUI's ListItem, as MultiSelectEntry renders.
+     * MUI's ListItem, as MultiSelectEntry renders. Its `handleDelete` and
+     * `handleRestore` are bound to its entry: call them from any element's click
+     * or key event, e.g. a Chip's `onDelete`.
      * @remarks With `added` or `removed` it has to show `changeState` and render
      *          `handleRestore`, as MultiSelectEntry does: a removed entry otherwise looks
      *          selected and cannot be restored.
@@ -85,7 +91,7 @@ export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
      * @default false
      */
     confirmDelete?: boolean;
-}
+};
 export interface MultiSelectSelectorOwnerState {
     selected: boolean;
 }

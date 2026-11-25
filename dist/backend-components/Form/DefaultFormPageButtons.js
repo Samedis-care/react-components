@@ -13,11 +13,13 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import { styled, useThemeProps } from "@mui/material";
 import FormPageSaveButton from "./FormPageSaveButton";
 /**
- * Class BackActionButton sets when it gets no `color`. It paints the button in MUI's grey for a
- * contained button without a palette color (`grey[300]` in the light palette, `grey[800]` in the
- * dark one) with the palette's contrast text for that grey. Restyle it through
- * `CcDefaultFormPageButtons.styleOverrides.backButton`, and set `color` together with
- * `backgroundColor` there, or the text keeps the contrast color of the grey.
+ * Class BackActionButton sets when it gets no `color`. While the button is enabled, it paints it
+ * in MUI's grey for a contained button without a palette color (`grey[300]` in the light palette,
+ * `grey[800]` in the dark one) with the palette's contrast text for that grey; a disabled one
+ * (e.g. during a save) looks like every disabled ActionButton, like Save next to it. Restyle it
+ * through `CcDefaultFormPageButtons.styleOverrides.backButton` with the selector
+ * `&.${BackButtonDefaultColorClass}:not(.Mui-disabled)`, which keeps that disabled look, and set
+ * `color` together with `backgroundColor` there, or the text keeps the contrast color of the grey.
  */
 export const BackButtonDefaultColorClass = "CcDefaultFormPageButtons-backButtonDefaultColor";
 const BackActionButtonRoot = styled(ActionButton, {
@@ -28,7 +30,8 @@ const BackActionButtonRoot = styled(ActionButton, {
         ? theme.palette.grey[300]
         : theme.palette.grey[800];
     return {
-        [`&.${BackButtonDefaultColorClass}`]: {
+        // not while disabled: it would outrank the disabled look ActionButton takes from MUI
+        [`&.${BackButtonDefaultColorClass}:not(.Mui-disabled)`]: {
             backgroundColor: background,
             color: theme.palette.getContrastText(background),
         },
@@ -46,7 +49,8 @@ const BackActionButtonInner = ({ color, className, ...props }) => (_jsx(BackActi
     ]), ...props }));
 /**
  * ActionButton styled as the secondary "back" action of a form footer: no shadow, no border, and
- * grey (BackButtonDefaultColorClass) unless a `color` is given. Takes ActionButton's props.
+ * grey (BackButtonDefaultColorClass) unless a `color` is given; disabled, it looks like any
+ * disabled ActionButton. Takes ActionButton's props.
  */
 export const BackActionButton = React.memo(BackActionButtonInner);
 const DefaultFormPageButtons = (inProps) => {

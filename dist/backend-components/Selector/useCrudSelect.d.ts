@@ -62,10 +62,6 @@ export interface UseCrudSelectParams<M extends ModelUnknown, DataT extends BaseS
      */
     onChange?: (selected: DataT[]) => void;
     /**
-     * The initial selection (override). If set backend isn't consulted for data
-     */
-    initialSelected?: DataT[];
-    /**
      * Validation callback for integration with form engine
      * @param data The currently selected data
      * @returns object Validation errors (Key => Values)

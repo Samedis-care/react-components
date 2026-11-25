@@ -31,6 +31,14 @@ export declare const cellBorders: (theme: Theme) => {
     borderBottom: string;
 };
 /**
+ * The attention ring around a highlighted entry, and around the "+N" marker
+ * when an entry it stands for is highlighted.
+ * @remarks A STATIC ring on purpose: an infinite CSS animation keeps the
+ * compositor awake and drains battery on tablets as long as the grid is open.
+ * A solid ring highlights just as clearly at zero cost.
+ */
+export declare const highlightRing: (theme: Theme) => string;
+/**
  * The focus ring of an entry (a split entry or a diagonal pair). It lies just
  * outside the entry, in the tile's padding, so it stands out from the grid's
  * background whatever the entry's fill is. A line of that background inside it

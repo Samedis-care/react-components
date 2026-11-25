@@ -1,7 +1,8 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { Grid, styled, Switch, Typography, useThemeProps } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
+import addSlotAttributes from "../../utils/internal/addSlotAttributes";
 const AntSwitch = styled(Switch, { name: "CcInlineSwitch", slot: "switch" })(({ theme }) => ({
     width: 35,
     height: 16,
@@ -69,7 +70,16 @@ const StyledSwitchWrapper = styled(Typography, {
 }));
 const InlineSwitch = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcInlineSwitch" });
-    const { label, value, onChange, visible, disabled, children, classes, className, } = props;
+    const { label, value, onChange, visible, disabled, children, classes, className, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy, "aria-describedby": ariaDescribedBy, slotProps, } = props;
+    // name, description and form identity belong to the input, not the switch's root
+    // span; the typed aria props win over the caller's input slot props
+    const switchSlotProps = useMemo(() => ({
+        input: addSlotAttributes(slotProps, "input", {
+            "aria-label": ariaLabel,
+            "aria-labelledby": ariaLabelledBy,
+            "aria-describedby": ariaDescribedBy,
+        })?.input,
+    }), [slotProps, ariaLabel, ariaLabelledBy, ariaDescribedBy]);
     const handleSwitchChange = useCallback((event) => {
         // a click event dispatched on the disabled input by a script can still reach React
         if (disabled)
@@ -88,6 +98,15 @@ const InlineSwitch = (inProps) => {
                     disabled && DISABLED_CLASS,
                 ]), variant: "caption", children: _jsxs(Grid, { component: "label", container: true, sx: { alignItems: "center" }, spacing: 1, children: [_jsx(Grid, { children: _jsx(AntSwitch, { className: classes?.switch, checked: value, onChange: handleSwitchChange, disabled: disabled, 
                                 // the focus ring shows focus; the ripple would pulse under it endlessly
-                                disableFocusRipple: true }) }), _jsx(Grid, { children: label })] }) })), _jsx("div", { children: children })] }));
+                                disableFocusRipple: true, slotProps: switchSlotProps }) }), _jsx(Grid, { children: label })] }) })), _jsx("div", { children: children })] }));
 };
+/**
+ * A container with an optional compact switch (35x16) and its label, floated
+ * at the top right of `children`. `BaseSelector` renders every selector field
+ * inside one (its `displaySwitch`/`switchLabel`), and `MultiSelectWithoutGroup`
+ * one around its chips, mostly with `visible={false}`.
+ *
+ * The switch is controlled: pass `value` and `onChange`. The root has a 15px
+ * top margin (`styled(InlineSwitch)` or `styleOverrides.root` can change it).
+ */
 export default React.memo(InlineSwitch);

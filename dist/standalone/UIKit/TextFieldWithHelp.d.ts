@@ -10,6 +10,9 @@ export interface TextFieldWithHelpProps extends UIInputProps {
      * when it is pressed. Without it, the button empties the text input, so
      * `onChange` receives an event whose `target.value` is `""`.
      *
+     * Either way, focus then moves to the input (in a `select`, to the
+     * select), since the Clear button goes away with the value.
+     *
      * A `select` has no such default: it shows the Clear button only when
      * this is set.
      */

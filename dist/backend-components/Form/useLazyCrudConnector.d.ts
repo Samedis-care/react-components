@@ -1,5 +1,6 @@
 import ApiConnector from "../../backend-integration/Connector/ApiConnector";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 /**
  * Params of useLazyCrudConnector, which FormCrudMultiSelect, FormCrudFileUpload,
  * FormCrudMultiImage and app wrappers take as props (extractLazyCrudConnectorParams splits
@@ -11,6 +12,13 @@ import LazyConnector from "../../backend-integration/Connector/LazyConnector";
  *          also when a param changes later or the control mounts again with other ones.
  *          Another collection takes another field name and a new mount of the control,
  *          e.g. `key={field}`.
+ *
+ *          getEndpoint, getConnector and configureConnector build the connector while the
+ *          control renders, so they must not set state or start work that needs cleaning up.
+ *          A render React discards before it commits builds a connector that is never used:
+ *          React 18's StrictMode discards the first render of every mount in development,
+ *          so these run twice there. onParentIdChange is never called during render: it
+ *          gets the id once the control that built the connector has mounted.
  */
 export interface UseLazyCrudConnectorParams<ExtraT = undefined> {
     /**
@@ -34,14 +42,18 @@ export interface UseLazyCrudConnectorParams<ExtraT = undefined> {
      *        "null" for a new record), the saved record's id on every save
      * @returns The endpoint, e.g. `v1/orgs/${id}/roles`
      * @remarks Read once, when the connector is built: its reads and every save use this
-     *          function, a later one is never called.
+     *          function, a later one is never called. Called during render when the
+     *          connector is built, so it must not set state.
      */
     getEndpoint: (id: string) => string;
     /**
-     * Called with the parent record's id whenever getEndpoint is: when the connector is
-     * built and on every save
+     * Called with the parent record's id: initialId (the string "null" for a new record)
+     * once the control that built the connector has mounted, and the saved record's id on
+     * every save, right before getEndpoint gets it. Never during render, so it may set state.
      * @param id The parent record id
-     * @remarks Read once, when the connector is built; a later one is never called.
+     * @remarks Read once, when the connector is built; a later one is never called. Called
+     *          with initialId once per connector: not again when the control mounts again
+     *          under its field, nor when StrictMode runs its effects again.
      */
     onParentIdChange?: (id: string) => void;
     /**
@@ -51,14 +63,18 @@ export interface UseLazyCrudConnectorParams<ExtraT = undefined> {
      * @param extraParams The extraParams param
      * @default DefaultConnector.getApi (set by setDefaultConnectorAPI); with neither, building
      *          the connector throws "No default connector set"
-     * @remarks Read once, when the connector is built; a later one is never called.
+     * @remarks Read once, when the connector is built; a later one is never called. Called
+     *          during render, so it must not set state; it runs again for a render React
+     *          discards (see UseLazyCrudConnectorParams).
      */
     getConnector?: (initialEndpoint: string, extraParams: ExtraT | undefined) => ApiConnector;
     /**
      * Called with the connector getConnector (or the default factory) created, right after
      * it was created, e.g. to set request options
      * @param connector The connector which was created by getConnector
-     * @remarks Read once, when the connector is built; a later one is never called.
+     * @remarks Read once, when the connector is built; a later one is never called. Called
+     *          during render, so it must not set state; it runs again for a render React
+     *          discards (see UseLazyCrudConnectorParams).
      */
     configureConnector?: (connector: ApiConnector) => void;
     /**
@@ -71,7 +87,7 @@ export interface UseLazyCrudConnectorParams<ExtraT = undefined> {
 export interface UseLazyCrudConnectorResult {
     connector: LazyConnector;
 }
-export declare const extractLazyCrudConnectorParams: <ExtraT, T extends UseLazyCrudConnectorParams<ExtraT>>(data: T) => [UseLazyCrudConnectorParams<ExtraT>, Omit<T, keyof UseLazyCrudConnectorParams<ExtraT>>];
+export declare const extractLazyCrudConnectorParams: <ExtraT, T extends UseLazyCrudConnectorParams<ExtraT>>(data: T) => [UseLazyCrudConnectorParams<ExtraT>, DistributiveOmit<T, keyof UseLazyCrudConnectorParams<ExtraT>>];
 /**
  * Gives a Crud* control (FormCrudMultiSelect, FormCrudFileUpload, FormCrudMultiImage, …) a
  * LazyConnector bound to the current Form: reads go to getEndpoint(initialId), writes are
@@ -83,6 +99,8 @@ export declare const extractLazyCrudConnectorParams: <ExtraT, T extends UseLazyC
  *   onParentIdChange, extraParams, getConnector, configureConnector or field changes
  *   neither the reads nor the save. Another collection takes another field and a new
  *   mount of the control, e.g. `key={field}`.
+ * - getEndpoint, getConnector and configureConnector run while the control renders, so they
+ *   must not set state; onParentIdChange runs after the control mounted and on every save.
  * - While the queue holds writes the Form is dirty (a custom dirty flag named `field`).
  * - A Form given another record (id or model) starts over: the control mounts again with a
  *   new connector for that record, and a queue left for the previous record is dropped,
@@ -93,6 +111,9 @@ export declare const extractLazyCrudConnectorParams: <ExtraT, T extends UseLazyC
  *   by the next save.
  * - With onlySubmitMounted an unmounted control's queue is neither sent nor counted as
  *   dirty, like the value of an unmounted model field, until the control mounts again.
+ * - What counts is the onlySubmitMounted the Form has when the control unmounts. A mounted
+ *   control's queue keeps the Form dirty and is sent by the next save, also when the Form's
+ *   onlySubmitMounted changes meanwhile (its prop, or a flow stage config).
  * - Flow mode with onlySubmitMounted: a submit, such as the one goToStage makes before it
  *   changes the stage, stages the queue of every mounted control, like the values of the
  *   mounted fields. The queue stays staged until it is empty (sent or undone). A control

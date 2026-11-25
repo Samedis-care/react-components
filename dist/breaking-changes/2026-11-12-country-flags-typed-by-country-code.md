@@ -44,7 +44,7 @@ if (isCountryCode(code) && CountryCodes.includes(code)) {
 ```
 
 `isCountryCode(code)` on its own is true for every code the library has a flag for, also for
-countries that `CountryCodes` does not list (Aruba, Curaçao, Sint Maarten, …).
+a country that `CountryCodes` does not list (Kosovo, `XK`).
 
 **Required for code that indexes `CountryFlags` with a `string`:** it no longer compiles. Use
 `getCountryFlag(code)` and handle `undefined`, or narrow with `isCountryCode(code)` first:

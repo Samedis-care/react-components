@@ -43,7 +43,9 @@ export interface SignalPortletItemProps {
  * - `root`: the ListItem (`<li>`) of every row. A row with link has no
  *   padding here (MUI's `disablePadding`), its ListItemButton has it.
  * - `rootBtn`: the ListItemButton (a `div` with role button) inside the
- *   `<li>` of a row with link
+ *   `<li>` of a row with link. Keyboard focus draws a 2px outline in
+ *   `palette.primary.main` inside its edges, or the ring of the theme's
+ *   `focusVisible` option when the theme sets one.
  * - `listAvatar`: the ListItemAvatar around the count
  * - `itemColorLoading`, `itemColorActive`, `itemColorInactive`: the 40px
  *   Avatar while the count is `null` or `undefined`, when it is non-zero, and

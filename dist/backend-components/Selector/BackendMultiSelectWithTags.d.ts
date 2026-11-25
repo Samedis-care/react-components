@@ -4,7 +4,45 @@ import { ModelGetResponse, ModelRecord, ModelUnknown } from "../../backend-integ
 import { BackendMultiSelectLruOptions } from "./BackendMultiSelect";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 import { BackendSingleSelectLruOptions } from "./BackendSingleSelect";
-export interface BackendMultiSelectWithTagsProps<GroupModelT extends ModelUnknown, DataModelT extends ModelUnknown, GroupDataT extends BaseSelectorData, DataDataT extends MultiSelectorData> extends Omit<MultiSelectWithTagsProps<DataDataT, GroupDataT>, "loadGroupEntries" | "loadDataOptions" | "loadGroupOptions" | "displaySwitch" | "selected" | "onChange" | "lruGroup" | "lruData"> {
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+/**
+ * The switch of a backend multiselect with tags. `switchLabel` is required while
+ * `switchFilterNameGroup` or `switchFilterNameData` shows the switch: the visible label
+ * is its accessible name.
+ */
+export type BackendMultiSelectWithTagsSwitchProps = {
+    /**
+     * Name of the switch filter for groups or undefined if disabled
+     * @default undefined
+     */
+    switchFilterNameGroup?: undefined;
+    /**
+     * Name of the switch filter for data or undefined if disabled
+     * @default undefined
+     */
+    switchFilterNameData?: undefined;
+    /**
+     * Label of the switch, which is also its accessible name: pass one with
+     * `switchFilterNameGroup` or `switchFilterNameData`.
+     */
+    switchLabel?: React.ReactNode;
+} | {
+    /**
+     * Name of the switch filter for groups: with it, or `switchFilterNameData`, the
+     * field shows a switch.
+     */
+    switchFilterNameGroup?: string;
+    /**
+     * Name of the switch filter for data: with it, or `switchFilterNameGroup`, the
+     * field shows a switch.
+     */
+    switchFilterNameData?: string;
+    /**
+     * Label of the switch: its visible text and its accessible name.
+     */
+    switchLabel: React.ReactNode;
+};
+export type BackendMultiSelectWithTagsProps<GroupModelT extends ModelUnknown, DataModelT extends ModelUnknown, GroupDataT extends BaseSelectorData, DataDataT extends MultiSelectorData> = DistributiveOmit<MultiSelectWithTagsProps<DataDataT, GroupDataT>, "loadGroupEntries" | "loadDataOptions" | "loadGroupOptions" | "displaySwitch" | "switchLabel" | "selected" | "onChange" | "lruGroup" | "lruData"> & BackendMultiSelectWithTagsSwitchProps & {
     /**
      * The selected data record IDs
      */
@@ -51,14 +89,6 @@ export interface BackendMultiSelectWithTagsProps<GroupModelT extends ModelUnknow
      */
     convData: (data: ModelRecord<DataModelT>) => Promise<DataDataT> | DataDataT;
     /**
-     * Name of the switch filter for groups or undefined if disabled
-     */
-    switchFilterNameGroup?: string;
-    /**
-     * Name of the switch filter for data or undefined if disabled
-     */
-    switchFilterNameData?: string;
-    /**
      * The debounce time in ms to wait for group searches
      * @default 500
      */
@@ -84,12 +114,12 @@ export interface BackendMultiSelectWithTagsProps<GroupModelT extends ModelUnknow
      * LRU options for data selector
      */
     lruData?: BackendMultiSelectLruOptions<DataDataT>;
-}
+};
 /**
  * Themable subset of BackendMultiSelectWithTagsProps (used for theme defaultProps)
  * @remarks Excludes the props which are specific to a single instance (models, selection, callbacks)
  */
-export type BackendMultiSelectWithTagsThemeProps = Omit<BackendMultiSelectWithTagsProps<ModelUnknown, ModelUnknown, BaseSelectorData, MultiSelectorData>, "groupModel" | "dataModel" | "convGroup" | "convData" | "getGroupDataEntries" | "selected" | "onChange" | "initialData" | "lruGroup" | "lruData">;
+export type BackendMultiSelectWithTagsThemeProps = DistributiveOmit<BackendMultiSelectWithTagsProps<ModelUnknown, ModelUnknown, BaseSelectorData, MultiSelectorData>, "groupModel" | "dataModel" | "convGroup" | "convData" | "getGroupDataEntries" | "selected" | "onChange" | "initialData" | "lruGroup" | "lruData">;
 /**
  * Backend connected MultiSelectWithTags
  * @remarks Doesn't support custom data

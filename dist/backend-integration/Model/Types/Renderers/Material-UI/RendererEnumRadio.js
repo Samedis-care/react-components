@@ -2,7 +2,7 @@ import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-run
 import { FormControlLabel, FormHelperText, FormLabel, Radio, RadioGroup, Typography, } from "@mui/material";
 import TypeEnum from "../../TypeEnum";
 import ccI18n from "../../../../../i18n";
-import { FormControlFieldsetCC } from "../../../../../standalone";
+import { FormControlFieldsetCC, labelWithDirtyText, } from "../../../../../standalone";
 /**
  * Renders TypeEnum as radio buttons
  */
@@ -30,7 +30,7 @@ class RendererEnumRadio extends TypeEnum {
                 ? (focusable.find((entry) => entry.value === value) ?? focusable[0])
                     ?.value
                 : undefined;
-            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, children: [_jsx(FormLabel, { component: "legend", children: label }), _jsx(RadioGroup, { id: id, name: field, value: value, 
+            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, children: [_jsx(FormLabel, { component: "legend", children: labelWithDirtyText(label, dirty) }), _jsx(RadioGroup, { id: id, name: field, value: value, 
                         // the radios are the enum's values
                         onChange: (evt) => handleChange(evt.target.name, evt.target.value), onBlur: handleBlur, "data-name": field, row: this.horizontal, "aria-invalid": !!errorMsg, "aria-required": !!visibility.required, "aria-describedby": describedBy, children: this.values
                             .filter((value) => !value.invisible)

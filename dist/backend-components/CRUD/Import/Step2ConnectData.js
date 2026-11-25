@@ -140,32 +140,30 @@ export const useImportStep2Logic = (props) => {
                 },
             },
         }));
-        try {
-            await conversionScriptUpdates.current[evt.target.name](state.data, model.fields[evt.target.name], scriptFn);
-            setState((prev) => ({
-                ...prev,
-                conversionScripts: {
-                    ...prev.conversionScripts,
-                    [evt.target.name]: {
-                        ...prev.conversionScripts[evt.target.name],
-                        status: "okay",
-                        error: null,
+        const name = evt.target.name;
+        // the result belongs to this script only: once the field holds another one, a
+        // check of this one that finishes later (e.g. a slow validate) is outdated
+        const setCheckResult = (status, error) => {
+            setState((prev) => prev.conversionScripts[name]?.scriptFn === scriptFn
+                ? {
+                    ...prev,
+                    conversionScripts: {
+                        ...prev.conversionScripts,
+                        [name]: {
+                            ...prev.conversionScripts[name],
+                            status,
+                            error,
+                        },
                     },
-                },
-            }));
+                }
+                : prev);
+        };
+        try {
+            await conversionScriptUpdates.current[name](state.data, model.fields[name], scriptFn);
+            setCheckResult("okay", null);
         }
         catch (e) {
-            setState((prev) => ({
-                ...prev,
-                conversionScripts: {
-                    ...prev.conversionScripts,
-                    [evt.target.name]: {
-                        ...prev.conversionScripts[evt.target.name],
-                        status: "error",
-                        error: e,
-                    },
-                },
-            }));
+            setCheckResult("error", e);
         }
     }, [model.fields, setState, state.data]);
     return { columns, conversionScriptUpdates, handleConversionScriptChange };

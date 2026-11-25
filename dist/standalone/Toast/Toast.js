@@ -1,7 +1,8 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { Alert, alertClasses, AlertTitle, Portal, Snackbar, styled, useThemeProps, } from "@mui/material";
+import { Alert, alertClasses, AlertTitle, buttonBaseClasses, Portal, Snackbar, styled, useThemeProps, } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
+import focusRing from "../../utils/internal/focusRing";
 import readableFill from "../../utils/internal/readableFill";
 import useCCTranslations from "../../utils/useCCTranslations";
 const DEFAULT_AUTO_HIDE_DURATIONS = {
@@ -51,6 +52,10 @@ const ToastAlert = styled(Alert, { name: "CcToast", slot: "alert" })(({ theme })
         minWidth: 288,
         maxWidth: 560,
     },
+    // the keyboard-focused close button: MUI shows only its focus ripple,
+    // faint and gone in forced colors. The ring takes the toast's text
+    // color, which contrasts with every fill, where the primary color may not
+    [`& .${alertClasses.action} .${buttonBaseClasses.focusVisible}`]: focusRing(theme, 2, "currentColor"),
     ...readableFilledFills(theme),
 }));
 const ToastRaw = (inProps) => {

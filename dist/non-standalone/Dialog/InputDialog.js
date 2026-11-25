@@ -40,7 +40,7 @@ const InputDialogRaw = (props) => {
             inputRef.current?.focus();
         }
     }, [value, handlerButtonYes, textFieldValidator, closeThisDialog, setValid]);
-    return (_jsxs(Dialog, { open: true, onClose: removeDialog, "aria-describedby": messageId, children: [_jsx(DialogTitle, { children: props.title }), _jsxs(DialogContent, { children: [_jsx(DialogContentText, { id: messageId, children: props.message }), _jsx(TextField, { autoFocus: true, margin: "dense", label: props.textFieldLabel, placeholder: props.textFieldPlaceholder, type: "text", value: value, onChange: updateValue, inputRef: inputRef, error: !valid, helperText: valid
+    return (_jsxs(Dialog, { open: true, onClose: removeDialog, "aria-describedby": messageId, children: [_jsx(DialogTitle, { children: props.title }), _jsxs(DialogContent, { children: [_jsx(DialogContentText, { component: "div", id: messageId, children: props.message }), _jsx(TextField, { autoFocus: true, margin: "dense", label: props.textFieldLabel, placeholder: props.textFieldPlaceholder, type: "text", value: value, onChange: updateValue, inputRef: inputRef, error: !valid, helperText: valid
                             ? undefined
                             : textFieldErrorText ||
                                 t("non-standalone.dialog.input-dialog.invalid"), fullWidth: true })] }), _jsxs(DialogActions, { children: [_jsx(Button, { onClick: handleNo, color: "primary", children: props.textButtonNo }), _jsx(Button, { onClick: handleYes, color: "primary", children: props.textButtonYes })] })] }));

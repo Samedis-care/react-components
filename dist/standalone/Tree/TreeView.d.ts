@@ -70,6 +70,16 @@ export interface TreeDataForRenderer extends Omit<TreeData, "children"> {
      */
     hasNext: boolean;
     /**
+     * The position of the entry among its siblings (the children of its parent,
+     * or the roots), starting at 0. TreeView sets `aria-posinset` from it.
+     */
+    siblingIndex: number;
+    /**
+     * The number of siblings, the entry included. TreeView sets `aria-setsize`
+     * from it.
+     */
+    siblingCount: number;
+    /**
      * The vertical connector lanes to draw in front of this entry, outermost first.
      * Draw one lane per element; a `true` element means a spine passes through this
      * row at that lane and gets a vertical line, a `false` one means the lane stays
@@ -107,6 +117,25 @@ export interface TreeViewRendererProps extends TreeDataForRenderer {
      */
     onToggleExpanded: (id: string) => void;
 }
+/**
+ * A component that draws the content of one TreeView row.
+ *
+ * TreeView wraps each row in its own `treeitem` element, which carries the
+ * entry's level, position among its siblings and, for an entry with
+ * `hasChildren`, its expanded state. The renderer draws only what is inside
+ * that element and must not add tree roles of its own.
+ */
+export type TreeViewRenderer = React.ComponentType<TreeViewRendererProps> & {
+    /**
+     * Set as a static property on a renderer whose leaves (entries without
+     * `hasChildren`) are selected with a checkbox that shows the leaf's
+     * `expanded` flag, as `TreeViewCheckboxSelectionRenderer` does. TreeView then
+     * marks the tree `aria-multiselectable` and gives every leaf's `treeitem`
+     * `aria-checked` with that flag.
+     * @default false
+     */
+    checkableLeaves?: boolean;
+};
 export type TreeViewRendererCallbacks = Pick<TreeViewRendererProps, "onToggleExpanded">;
 export interface TreeViewProps extends TreeViewRendererCallbacks {
     /**
@@ -124,10 +153,10 @@ export interface TreeViewProps extends TreeViewRendererCallbacks {
      */
     data: TreeData | TreeData[] | TreeDataFlat[];
     /**
-     * The tree renderer
+     * The tree renderer, see {@link TreeViewRenderer}
      * @default TreeViewDefaultRenderer
      */
-    renderer?: React.ComponentType<TreeViewRendererProps>;
+    renderer?: TreeViewRenderer;
     /**
      * Renderer item height
      */
@@ -151,7 +180,7 @@ export interface TreeViewProps extends TreeViewRendererCallbacks {
     onLoadChildren: (id: string) => Promise<void> | void;
 }
 export interface TreeViewContextType {
-    renderer: React.ComponentType<TreeViewRendererProps>;
+    renderer: TreeViewRenderer;
     rendererProps: TreeViewRendererCallbacks;
     data: TreeDataForRenderer[];
 }

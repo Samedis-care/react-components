@@ -10,6 +10,10 @@ export const MenuContext = React.createContext(undefined);
  * renderers' `focusRef`; MenuBase moves focus to them
  */
 export const MenuEntryElementsContext = React.createContext(null);
+const GROUP_EXPANDED = { "aria-expanded": true };
+const GROUP_COLLAPSED = { "aria-expanded": false };
+const CURRENT_PAGE = { "aria-current": "page" };
+const NO_STATE = {};
 const MenuItem = (props) => {
     const { depth, title, expandable, forceExpand, onClick, onAuxClick, menuItemId, } = props;
     const [expanded, setExpanded] = useState(false);
@@ -47,8 +51,15 @@ const MenuItem = (props) => {
     if (expandable && !expanded && forceExpand) {
         setExpanded(true);
     }
+    const active = !expandable && menuState === menuItemId;
     const Renderer = props.menuProps.menuItem;
-    return (_jsxs(_Fragment, { children: [_jsx(Renderer, { icon: props.icon, title: title, expandable: expandable, expanded: expandable ? expanded : undefined, active: expandable ? undefined : menuState === menuItemId, onClick: clickProxy, onAuxClick: auxClickProxy, depth: depth, focusRef: focusRef }), expandable && (_jsx(Collapse, { in: expanded, className: props.childWrapperClassName, children: props.childDefs?.map((child) => toMenuItemComponent(props.menuProps, child, depth + 1, menuItemId)) }))] }));
+    return (_jsxs(_Fragment, { children: [_jsx(Renderer, { icon: props.icon, title: title, expandable: expandable, expanded: expandable ? expanded : undefined, active: expandable ? undefined : active, onClick: clickProxy, onAuxClick: auxClickProxy, depth: depth, focusRef: focusRef, ariaAttributes: expandable
+                    ? expanded
+                        ? GROUP_EXPANDED
+                        : GROUP_COLLAPSED
+                    : active
+                        ? CURRENT_PAGE
+                        : NO_STATE }), expandable && (_jsx(Collapse, { in: expanded, className: props.childWrapperClassName, children: props.childDefs?.map((child) => toMenuItemComponent(props.menuProps, child, depth + 1, menuItemId)) }))] }));
 };
 export default React.memo(MenuItem);
 export const toMenuItemComponent = (menuProps, def, depth, menuItemId) => def.shouldRender && (_jsx(MenuItem, { menuItemId: menuItemId ? `${menuItemId}@${def.title}` : def.title, icon: def.icon, title: def.title, expandable: !!(def.children && def.children.length > 0), onClick: def.onClick, onAuxClick: def.onAuxClick ?? (() => undefined), menuProps: menuProps, childDefs: def.children, forceExpand: !!def.forceExpand, depth: depth, childWrapperClassName: menuProps.childWrapperClassName }, menuItemId ? `${menuItemId}@${def.title}` : def.title));

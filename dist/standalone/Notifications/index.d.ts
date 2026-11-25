@@ -37,20 +37,53 @@ export interface NotificationsProps {
      */
     BadgeProps?: BadgeProps;
     /**
-     * Properties to pass to the popover showing the notifications
+     * Props for the MUI `Popover` that lists the notifications, spread over the
+     * defaults `anchorOrigin` bottom/right and `transformOrigin` top/right (the
+     * popover opens below the bell, right edges aligned). `open`, `anchorEl`
+     * and `onClose` are managed internally.
+     *
+     * The paper is `min(400px, 100% - 32px)` wide by default: 400px, and on a
+     * window narrower than 432px the window's width less 16px on each side.
+     * Set another width with e.g. `{ slotProps: { paper: { sx: { width: 600 } } } }`,
+     * here or, for every Notifications that passes no `PopoverProps` of its
+     * own, in the theme's `CcNotifications.defaultProps.PopoverProps`; MUI
+     * keeps it 16px from the window edges. A paper width in the theme's
+     * `MuiPopover.styleOverrides.paper` does not apply: the default width
+     * outranks it. The theme's other `MuiPopover` paper settings do apply
+     * (`styleOverrides.paper`, `defaultProps.slotProps.paper`). Keep it a
+     * fixed width: MUI repositions the paper after every render while it is
+     * open, and a paper sized by its content (`width: "auto"`) gets wider each
+     * time. `slots` is merged into the defaults, so only a `slots.paper` of
+     * your own replaces the default paper and its width; one in the theme's
+     * `MuiPopover.defaultProps.slots` does not.
+     *
+     * The paper is a modal dialog named by the popover's "Notifications"
+     * heading: `role="dialog"`, `aria-modal` and `aria-labelledby` (the
+     * heading's id). A `slotProps.paper` of your own (an object, or a function
+     * of the owner state) is spread over these, so it can change them, e.g.
+     * name the dialog by another element with `aria-labelledby`. The paper's
+     * `id` is managed internally: the bell's `aria-controls` refers to it.
      */
     PopoverProps?: Omit<PopoverProps, "open" | "onClose" | "anchorEl">;
     /**
-     * Props to pass to the icon button
+     * Props to pass to the icon button. `aria-haspopup`, `aria-expanded` and
+     * `aria-controls` are managed internally: the bell says that it opens a
+     * dialog, whether that is open, and while it is, which element it is.
      */
-    IconButtonProps?: Omit<IconButtonProps, "onClick">;
+    IconButtonProps?: Omit<IconButtonProps, "onClick" | "aria-haspopup" | "aria-expanded" | "aria-controls">;
     /**
      * Callback which is fired by the infinite scroll to load old notifications
      */
-    loadRead: InfiniteScrollProps["loadMoreBottom"];
+    loadRead: NonNullable<InfiniteScrollProps["loadMoreBottom"]>;
     /**
      * Callback which is fired by the infinite scroll to load new (unread) notifications
      * Should load the oldest unread notifications
+     *
+     * Called when the list is scrolled to its top, and once when the popover
+     * opens and the notifications fill the list (see InfiniteScroll's
+     * `loadMoreTop`). Add what it loads to the start of `notifications`: the
+     * new notifications stay out of view above the ones shown until the user
+     * scrolls up. Pass `undefined` while there is nothing more to load.
      */
     loadUnread: InfiniteScrollProps["loadMoreTop"] | undefined;
     /**

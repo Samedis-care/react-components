@@ -3,6 +3,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import DataGrid from "../../standalone/DataGrid/DataGrid";
 import { useModelDeleteAdvanced, useModelDeleteMultiple, } from "../../backend-integration/Model/Model";
 import { useDialogContext } from "../../framework/DialogContextProvider";
+import { useToastContext } from "../../framework/ToastContextProvider";
 import { ErrorDialog, showConfirmDialog } from "../../non-standalone/Dialog";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { dotToObject, getValueByDot } from "../../utils/dotUtils";
@@ -48,26 +49,21 @@ export const useBackendDataGridAddNewButtons = (props) => {
     return addNewButtons;
 };
 /**
- * The delete handler BackendDataGrid passes to DataGrid as onDelete: it asks for
- * confirmation (customDeleteConfirm or the built-in dialog), deletes through the
- * model, calls refreshGrid and onDeleteSettled, and reports a failure
- * (customDeleteErrorHandler or the built-in error dialog).
+ * useBackendDataGridDeleteHandler, together with whether the handler's delete
+ * request runs (DataGridProps.deleting)
  * @param props The delete props of BackendDataGrid
  * @param refreshGrid Called after the delete ran, failed or not, to reload the rows
- * @returns The handler, or undefined without enableDelete. The handler resolves false
- *          when the user cancels the confirmation: nothing was deleted, so the grid
- *          keeps the selection. It resolves true once the delete ran, also when it
- *          failed (a failed delete may have deleted some of the records).
  */
-export const useBackendDataGridDeleteHandler = (props, refreshGrid) => {
-    const { model, enableDelete, enableDeleteAll, customDeleteConfirm, customDeleteErrorHandler, onDeleteSettled, } = props;
+const useBackendDataGridDelete = (props, refreshGrid) => {
+    const { model, enableDelete, enableDeleteAll, customDeleteConfirm, customDeleteErrorHandler, customDeleteSuccessHandler, onDeleteSettled, } = props;
     const { t } = useCCTranslations();
     const [pushDialog] = useDialogContext();
+    const [showToast] = useToastContext();
     if (enableDeleteAll && !model.doesSupportAdvancedDeletion()) {
         throw new Error("Delete All functionality requested, but not provided by model backend connector");
     }
-    const { mutateAsync: deleteAdvanced } = useModelDeleteAdvanced(model);
-    const { mutateAsync: deleteMultiple } = useModelDeleteMultiple(model);
+    const { mutateAsync: deleteAdvanced, isPending: deletingAdvanced } = useModelDeleteAdvanced(model);
+    const { mutateAsync: deleteMultiple, isPending: deletingMultiple } = useModelDeleteMultiple(model);
     const handleDelete = useCallback(async (invert, ids, filter) => {
         try {
             if (customDeleteConfirm) {
@@ -102,6 +98,22 @@ export const useBackendDataGridDeleteHandler = (props, refreshGrid) => {
             error = e;
         }
         refreshGrid();
+        if (!error) {
+            // before onDeleteSettled, which may throw
+            if (customDeleteSuccessHandler) {
+                customDeleteSuccessHandler(invert, ids, filter);
+            }
+            else {
+                showToast({
+                    severity: "success",
+                    message: invert
+                        ? t("backend-components.data-grid.delete.success-toast.messageInverted")
+                        : t("backend-components.data-grid.delete.success-toast.message", {
+                            count: ids.length,
+                        }),
+                });
+            }
+        }
         onDeleteSettled?.(invert, ids, filter, error);
         if (!error)
             return true;
@@ -119,16 +131,36 @@ export const useBackendDataGridDeleteHandler = (props, refreshGrid) => {
     }, [
         customDeleteConfirm,
         customDeleteErrorHandler,
+        customDeleteSuccessHandler,
         onDeleteSettled,
         pushDialog,
+        showToast,
         t,
         enableDeleteAll,
         refreshGrid,
         deleteAdvanced,
         deleteMultiple,
     ]);
-    return enableDelete ? handleDelete : undefined;
+    return {
+        handleDelete: enableDelete ? handleDelete : undefined,
+        deleting: deletingAdvanced || deletingMultiple,
+    };
 };
+/**
+ * The delete handler BackendDataGrid passes to DataGrid as onDelete: it asks for
+ * confirmation (customDeleteConfirm or the built-in dialog), deletes through the
+ * model, calls refreshGrid, announces the delete (customDeleteSuccessHandler or a
+ * toast such as "2 entries deleted"), calls onDeleteSettled, and reports a failure
+ * (customDeleteErrorHandler or the built-in error dialog). It needs the Framework
+ * (its dialogs and toasts).
+ * @param props The delete props of BackendDataGrid
+ * @param refreshGrid Called after the delete ran, failed or not, to reload the rows
+ * @returns The handler, or undefined without enableDelete. The handler resolves false
+ *          when the user cancels the confirmation: nothing was deleted, so the grid
+ *          keeps the selection. It resolves true once the delete ran, also when it
+ *          failed (a failed delete may have deleted some of the records).
+ */
+export const useBackendDataGridDeleteHandler = (props, refreshGrid) => useBackendDataGridDelete(props, refreshGrid).handleDelete;
 /**
  * A cell's change handler where the cell has no editor: its overview visibility is
  * not editable, so its renderer shows no control that could call it
@@ -143,7 +175,9 @@ const notEditableInGrid = () => {
  * edited in its cell, which saves every change at once through the model's mutation
  * (useModelMutation, so the model's cache, hooks and "mutate" listeners hear of it), then
  * calls refreshGrid; a refused save is shown in an error dialog (the cell needs the
- * Framework), and refreshGrid is called as well.
+ * Framework), and refreshGrid is called as well. The cell's control is named after its
+ * field and the row ("Active, example.com"), since a grid cell has no label element to
+ * name it (InlineEditCell).
  * @param model The model the record belongs to
  * @param refreshGrid Called after an inline edit was saved or refused, to reload the
  *                    rows
@@ -219,8 +253,8 @@ const BackendDataGrid = (props, ref) => {
         };
     }, [model, refreshGrid]);
     const addNewButtons = useBackendDataGridAddNewButtons(props);
-    const handleDelete = useBackendDataGridDeleteHandler(props, refreshGrid);
+    const { handleDelete, deleting } = useBackendDataGridDelete(props, refreshGrid);
     const getRowLabel = useBackendDataGridRowLabel(model, props.getRowLabel);
-    return (_jsx(DataGrid, { ...props, ref: ref, getRowLabel: getRowLabel, onAddNew: addNewButtons, onDelete: handleDelete, loadData: loadData, columns: useMemo(() => model.toDataGridColumnDefinition(), [model]), forceRefreshToken: `${props.forceRefreshToken || "undefined"}${refreshToken}`, exporters: props.disableExport ? undefined : model.connector.dataGridExporters }));
+    return (_jsx(DataGrid, { ...props, ref: ref, getRowLabel: getRowLabel, onAddNew: addNewButtons, onDelete: handleDelete, deleting: deleting, loadData: loadData, columns: useMemo(() => model.toDataGridColumnDefinition(), [model]), forceRefreshToken: `${props.forceRefreshToken || "undefined"}${refreshToken}`, exporters: props.disableExport ? undefined : model.connector.dataGridExporters }));
 };
 export default React.memo(React.forwardRef(BackendDataGrid));

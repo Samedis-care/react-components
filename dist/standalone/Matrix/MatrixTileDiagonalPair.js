@@ -42,13 +42,26 @@ export const MatrixTileDiagonalLabel = styled("div", {
         color: cssVar(matrixVars.tileForegroundB),
     },
 });
+/**
+ * Gives the corner the first entry's text color, as a split entry's root gives
+ * its corners theirs. The pair's root must not set it: a label whose entry has
+ * no text color (a var() fill without textColor, see tileColors) inherits the
+ * surrounding color, so the second label would take the first entry's. If the
+ * first entry has none, its corner inherits the surrounding color, as its
+ * label does. It draws no box, so the corner is still placed by the pair.
+ */
+const MatrixTileDiagonalCorners = styled("div")({
+    display: "contents",
+    color: cssVar(matrixVars.tileForegroundA),
+});
 /** The only corner a diagonal pair draws — the others would land on a label. */
 const DIAGONAL_CORNERS = ["bottomLeft"];
 /**
  * Two entries as one diagonally cut box: space-saving, but one click target and
  * one drag handle (MatrixCellTile passes it to renderItem as the first entry),
  * and of each entry only the label, the colors and the tooltip survive, plus
- * the first entry's bottomLeft corner (see MatrixCellTileProps.pairLayout).
+ * the first entry's bottomLeft corner, in that entry's text color (see
+ * MatrixCellTileProps.pairLayout).
  */
 const MatrixTileDiagonalPair = (props) => {
     const { a, b } = props;
@@ -57,10 +70,8 @@ const MatrixTileDiagonalPair = (props) => {
     const activate = useCallback(() => {
         onItemClick?.(a);
     }, [onItemClick, a]);
+    // its role keeps a press from starting a range, see MatrixTileItem
     const activation = useMatrixActivation(onItemClick ? activate : undefined);
-    const handleMouseDown = useCallback((event) => {
-        event.stopPropagation();
-    }, []);
     // a dimmed half fades its fill, not its label, as a dimmed entry does
     const style = useMemo(() => {
         const colorsA = tileColors(theme, a.backgroundColor, a.textColor, a.dimmed);
@@ -84,7 +95,7 @@ const MatrixTileDiagonalPair = (props) => {
     const pair = (_jsxs(MatrixTileDiagonalRoot, { className: combineClassNames([
             classes?.diagonal,
             onItemClick && matrixClasses.itemClickable,
-        ]), style: style, ...activation, onMouseDown: onItemClick ? handleMouseDown : undefined, children: [_jsx(MatrixTileDiagonalLabel, { className: combineClassNames([
+        ]), style: style, ...activation, children: [_jsx(MatrixTileDiagonalLabel, { className: combineClassNames([
                     classes?.diagonalLabel,
                     matrixClasses.diagonalLabelStart,
                     a.dimmed && matrixClasses.diagonalLabelDimmed,
@@ -92,7 +103,7 @@ const MatrixTileDiagonalPair = (props) => {
                     classes?.diagonalLabel,
                     matrixClasses.diagonalLabelEnd,
                     b.dimmed && matrixClasses.diagonalLabelDimmed,
-                ]), children: b.label }), _jsx(MatrixTileCorners, { item: a, only: DIAGONAL_CORNERS, className: classes?.corner })] }));
+                ]), children: b.label }), _jsx(MatrixTileDiagonalCorners, { children: _jsx(MatrixTileCorners, { item: a, only: DIAGONAL_CORNERS, className: classes?.corner }) })] }));
     // describeChild: both tooltips describe the pair, named by both labels
     // (see MatrixTileItem)
     return tooltip ? (_jsx(Tooltip, { title: tooltip, enterDelay: 400, describeChild: true, children: pair })) : (pair);

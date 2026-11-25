@@ -24,6 +24,6 @@ export const MatrixExtraRowHeaderRoot = styled("div", {
 }));
 const MatrixExtraRowHeader = (props) => {
     const { classes } = useMatrixConfig();
-    return (_jsx(MatrixExtraRowHeaderRoot, { className: classes?.extraRowHeader, children: props.extraRow.header }));
+    return (_jsx(MatrixExtraRowHeaderRoot, { role: "rowheader", className: classes?.extraRowHeader, children: props.extraRow.header }));
 };
 export default React.memo(MatrixExtraRowHeader);

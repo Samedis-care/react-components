@@ -2,7 +2,12 @@ import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useMemo } from "react";
 import { Menu, menuItemClasses, styled, useTheme, useThemeProps, } from "@mui/material";
 import focusRing from "../../utils/internal/focusRing";
-const PopupMenuRoot = styled(Menu, { name: "CcPopupMenu", slot: "root" })(({ theme }) => ({
+import wrapperRootShouldForwardProp from "../../utils/internal/wrapperRootShouldForwardProp";
+const PopupMenuRoot = styled(Menu, {
+    name: "CcPopupMenu",
+    slot: "root",
+    shouldForwardProp: wrapperRootShouldForwardProp,
+})(({ theme }) => ({
     "& .MuiMenu-paper": {
         border: `1px solid ${theme.palette.divider}`,
         // as wide as the widest item, up to MUI's max-width: MUI measures the paper

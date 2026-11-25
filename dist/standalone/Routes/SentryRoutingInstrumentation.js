@@ -1,6 +1,7 @@
 let instrumentation = null;
 /**
- * Sets the instrumentation that follows the routing
+ * Sets the instrumentation that follows the routing. Called by
+ * componentsCareBrowserTracingIntegration.
  * @param value The instrumentation, null to remove it
  */
 export function setRoutingInstrumentation(value) {
@@ -11,7 +12,7 @@ let namedBy = null;
 /**
  * Names the current location after a matched route. Every matched Route reports itself for every
  * location, and the deepest one wins, so nested routes name it after the full route (parent
- * effects run after child effects).
+ * effects run after child effects). Called by Route.
  * @param routePath The full route path (including parent routes)
  * @param depth How many routes the route is nested in
  * @param location The location the route matched
@@ -25,7 +26,7 @@ export function sentrySetRoutePath(routePath, depth, location) {
     instrumentation.setRoutePath(routePath);
 }
 /**
- * Reports a history update
+ * Reports a history update. Called by HistoryRouter.
  * @param update The update
  */
 export function sentryHandleNavigation(update) {

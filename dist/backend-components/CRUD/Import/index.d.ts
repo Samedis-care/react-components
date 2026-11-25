@@ -13,6 +13,10 @@ import { ValidationResult } from "../../Form";
  * (`new Date(record.Born)` of a date cell, which arrives as local time without an offset,
  * `"2024-03-31T00:00:00"`). In UTC+12 local midnight is 12:00 UTC, so there use
  * `new Date(record.Born.slice(0, 10))`, which names the cell's day in every timezone.
+ *
+ * `undefined` leaves the field out of the record. Every other result, `null`, `""`, `0` and
+ * `false` included, is validated in step 3 (Validation & Review) and written in step 4
+ * (Import data). Each of the two steps calls the function once per row.
  */
 export type ConversionScriptFn = (record: Record<string, unknown>) => unknown;
 export interface CrudImportProps<M extends ModelUnknown> {
@@ -41,7 +45,8 @@ export interface CrudImportProps<M extends ModelUnknown> {
     howTo?: (string | React.ReactNode)[];
     /**
      * Additional validation callback for imported records
-     * @param record The record to validate
+     * @param record The model record the row is written as: every conversion result
+     *        except `undefined` (see ConversionScriptFn), dotted fields nested
      * @returns Validation errors
      */
     validate?: (record: Record<string, unknown>) => Promise<ValidationResult> | ValidationResult;
@@ -83,6 +88,16 @@ export declare const useCrudImportLogic: <M extends ModelUnknown>(props: CrudImp
     next: () => void;
     prev: () => void;
     finish: () => void;
+    /**
+     * For the element that holds the current step, which takes the keyboard focus when a
+     * step change disables the focused Back or Next (Back on the first step, Next until the
+     * review passed, Finish until the import is done). Give it `tabIndex={-1}`,
+     * `role="group"` and the step's label as `aria-label`, so screen readers announce the
+     * step. Once that Next or Finish is enabled again, and the focus is still on the step,
+     * it gets the focus back. A focused button that stays enabled keeps the focus.
+     * Without the ref, focus is left to the browser.
+     */
+    stepRef: React.RefObject<HTMLDivElement | null>;
 };
 declare const CrudImport: <M extends ModelUnknown>(props: CrudImportProps<M>) => React.JSX.Element;
 declare const _default: typeof CrudImport;

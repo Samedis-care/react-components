@@ -1,10 +1,7 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useEffect, useMemo } from "react";
-import { isFieldImportable } from "./index";
 import GenericDataPreview from "./GenericDataPreview";
-import normalizeImportValue from "./normalizeImportValue";
-import deepAssign from "../../../utils/deepAssign";
-import { dotToObject } from "../../../utils/dotUtils";
+import convertImportRow from "./convertImportRow";
 import isObjectEmpty from "../../../utils/isObjectEmpty";
 import useAsyncMemo from "../../../utils/useAsyncMemo";
 import useCCTranslations from "../../../utils/useCCTranslations";
@@ -14,17 +11,10 @@ export const useImportStep3Logic = (props) => {
     const { t } = useCCTranslations();
     // the factory never rejects: what fails for a record is kept in its row
     const { value: records } = useAsyncMemo(() => Promise.all(state.data.map(async (record) => {
-        const modelRecord = {};
-        let isModelRecordComplete = false;
+        // the record step 4 writes; a row whose conversion throws shows the row
+        let modelRecord = null;
         try {
-            Object.entries(model.fields)
-                .filter(([name, field]) => isFieldImportable(name, field) &&
-                state.conversionScripts[name]?.scriptFn(record))
-                .forEach(([name, field]) => {
-                deepAssign(modelRecord, dotToObject(name, normalizeImportValue(field, state.conversionScripts[name].scriptFn(record) ?? null)));
-            });
-            // noinspection JSUnusedAssignment
-            isModelRecordComplete = true;
+            modelRecord = convertImportRow(model, state.conversionScripts, record);
             const validation = await model.validate(modelRecord);
             return [
                 modelRecord,
@@ -35,11 +25,7 @@ export const useImportStep3Logic = (props) => {
             ];
         }
         catch (e) {
-            return [
-                isModelRecordComplete ? modelRecord : record,
-                {},
-                e,
-            ];
+            return [modelRecord ?? record, {}, e];
         }
     })), [model, state.conversionScripts, state.data]);
     const recordsNormalized = useMemo(() => (records ?? []).map((record) => {

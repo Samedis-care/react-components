@@ -1,11 +1,12 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useEffect, useId, useState } from "react";
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 import { FormLabel, styled } from "@mui/material";
 import DataGrid from "../../standalone/DataGrid/DataGrid";
 import Connector from "../../backend-integration/Connector/Connector";
 import { renderDataGridRecordUsingModel, useBackendDataGridRowLabel, } from "../DataGrid";
 import { DataGridNoPersist } from "../../standalone";
 import useCCTranslations from "../../utils/useCCTranslations";
+import toComparisonJson from "../../utils/toComparisonJson";
 /**
  * The field: a fieldset named by the legend (label), described by the count of selected
  * rows, with the grid filling the rest of its height
@@ -58,6 +59,15 @@ const BackendDataGridMultiSelect = (props) => {
     const [refreshToken, setRefreshToken] = useState("");
     const refreshGrid = useCallback(() => setRefreshToken(new Date().toISOString()), []);
     const [initialSelectionChangeReceived, setInitialSelectionChangeReceived] = useState(false);
+    const forceRefreshToken = `${gridProps.forceRefreshToken || "undefined"}${refreshToken}`;
+    /**
+     * The selection the pages of the grid's current load are split by (the selected
+     * records first, then the others), and that load: its query and refresh token. A tick
+     * or an untick does not reload the grid, so the pages it loads later must be split
+     * like the loaded ones to continue where they stopped; a new query or refresh token
+     * starts a new load, split by the selection of its time.
+     */
+    const loadSplit = useRef(null);
     // developer warning
     useEffect(() => {
         if (process.env.NODE_ENV === "development" &&
@@ -66,21 +76,32 @@ const BackendDataGridMultiSelect = (props) => {
             console.warn("[Components-Care] [DataGridMultiSelectCRUD] Backend connector does not support index2 function, offset based pagination will be emulated (inefficient)");
         }
     }, [model]);
-    const grid = (_jsx(DataGridNoPersist, { children: _jsx(DataGrid, { ...gridProps, columns: model.toDataGridColumnDefinition(), forceRefreshToken: `${gridProps.forceRefreshToken || "undefined"}${refreshToken}`, disableSelection: false, prohibitMultiSelect: false, customSelectionControl: undefined, getRowLabel: getRowLabel, onSelectionChange: (invert, newIds) => {
+    const grid = (_jsx(DataGridNoPersist, { children: _jsx(DataGrid, { ...gridProps, columns: model.toDataGridColumnDefinition(), forceRefreshToken: forceRefreshToken, disableSelection: false, prohibitMultiSelect: false, customSelectionControl: undefined, getRowLabel: getRowLabel, onSelectionChange: (invert, newIds) => {
                 if (!initialSelectionChangeReceived) {
                     setInitialSelectionChangeReceived(true);
                     return;
                 }
                 onChange(readOnly ? [...selected] : newIds);
             }, selection: [false, selected], loadData: async (params) => {
-                const [relationshipRecordsFiltered, relationshipRecordFilteredMeta] = selected.length > 0
+                const load = toComparisonJson([
+                    params.rows,
+                    params.quickFilter,
+                    params.sort,
+                    params.fieldFilter,
+                    params.additionalFilters,
+                    forceRefreshToken,
+                ]);
+                if (loadSplit.current?.load !== load)
+                    loadSplit.current = { load, selected };
+                const split = loadSplit.current.selected;
+                const [relationshipRecordsFiltered, relationshipRecordFilteredMeta] = split.length > 0
                     ? await model.index({
                         ...params,
                         fieldFilter: {
                             ...params.fieldFilter,
                             id: {
                                 type: "inSet",
-                                value1: selected.join(","),
+                                value1: split.join(","),
                                 value2: "",
                             },
                         },
@@ -95,7 +116,7 @@ const BackendDataGridMultiSelect = (props) => {
                         ...params.fieldFilter,
                         id: {
                             type: "notInSet",
-                            value1: selected.join(","),
+                            value1: split.join(","),
                             value2: "",
                         },
                     },

@@ -1,13 +1,14 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import SignalPortletItem from "./SignalPortletItem";
-import { Divider, Grid, IconButton, List, Paper, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
+import { buttonBaseClasses, Divider, Grid, IconButton, List, Paper, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import { Sync as RefreshIcon } from "@mui/icons-material";
 import timestampToAge from "../../utils/timestampToAge";
 import useCCTranslations from "../../utils/useCCTranslations";
 import useCurrentLocale from "../../utils/useCurrentLocale";
 import useAgeTick from "../../utils/useAgeTick";
 import combineClassNames from "../../utils/combineClassNames";
+import focusRing from "../../utils/internal/focusRing";
 const SignalPortletRoot = styled("div", {
     name: "CcSignalPortlet",
     slot: "root",
@@ -45,7 +46,13 @@ const SignalPortletItemStyled = styled(SignalPortletItem, {
 const SignalPortletRefreshIconButton = styled(IconButton, {
     name: "CcSignalPortlet",
     slot: "refreshIconButton",
-})({});
+})(({ theme }) => ({
+    // MUI shows keyboard focus on an IconButton only as a faint pulsating ripple
+    // (unless the theme sets its focusVisible ring), which forced colors drop.
+    // The ring is inside the button, which sits flush in the card's bottom right
+    // corner; the button has no focus ripple, which would cover the ring
+    [`&.${buttonBaseClasses.focusVisible}`]: focusRing(theme, -2),
+}));
 const SignalPortletRefreshIcon = styled(RefreshIcon, {
     name: "CcSignalPortlet",
     slot: "refreshIcon",
@@ -70,6 +77,6 @@ const SignalPortlet = (inProps) => {
                             alignContent: "center",
                         }, children: [hasUpdatedAt && (_jsx(Grid, { children: _jsx(Tooltip, { title: new Date(updatedTime).toLocaleString(locale), children: _jsx(SignalPortletLastUpdatedAt, { children: t("standalone.signal-portlet.last-updated", {
                                             AGE: timestampToAge(new Date(updatedTime)),
-                                        }) }) }) })), props.onRefresh && (_jsx(Grid, { children: _jsx(SignalPortletRefreshIconButton, { onClick: props.onRefresh, size: "small", color: "primary", "aria-label": t("standalone.signal-portlet.refresh"), children: _jsx(SignalPortletRefreshIcon, {}) }) }))] }))] }) }) }));
+                                        }) }) }) })), props.onRefresh && (_jsx(Grid, { children: _jsx(SignalPortletRefreshIconButton, { onClick: props.onRefresh, disableFocusRipple: true, size: "small", color: "primary", "aria-label": t("standalone.signal-portlet.refresh"), children: _jsx(SignalPortletRefreshIcon, {}) }) }))] }))] }) }) }));
 };
 export default React.memo(SignalPortlet);

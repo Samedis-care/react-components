@@ -1,8 +1,9 @@
 import React from "react";
 export interface FormAutoSaveProps {
     /**
-     * Milliseconds without a change of the values before the form is saved
-     * @default 5000; 0 saves on every change, without waiting
+     * Milliseconds without a change of the values before the form is saved. A wait that
+     * ends while the form is busy starts over once it is idle again.
+     * @default 5000; 0 saves on every change, without waiting (once the form is idle)
      */
     debounceTime?: number;
 }

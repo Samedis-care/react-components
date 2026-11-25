@@ -123,6 +123,18 @@ export const cellBorders = (theme) => ({
     borderBottom: `1px solid ${theme.palette.divider}`,
 });
 /**
+ * The attention ring around a highlighted entry, and around the "+N" marker
+ * when an entry it stands for is highlighted.
+ * @remarks A STATIC ring on purpose: an infinite CSS animation keeps the
+ * compositor awake and drains battery on tablets as long as the grid is open.
+ * A solid ring highlights just as clearly at zero cost.
+ */
+export const highlightRing = (theme) => 
+// alpha(), not a hex-alpha suffix: the palette value can be rgb(), hsl() or
+// a CSS variable, and appending to those invalidates the whole declaration
+// — which would drop the ring entirely instead of just its glow.
+`0 0 0 3px ${theme.palette.warning.main}, 0 0 6px 1px ${alpha(theme.palette.warning.main, 0.5)}`;
+/**
  * The focus ring of an entry (a split entry or a diagonal pair). It lies just
  * outside the entry, in the tile's padding, so it stands out from the grid's
  * background whatever the entry's fill is. A line of that background inside it

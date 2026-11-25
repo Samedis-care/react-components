@@ -28,7 +28,14 @@ export interface MuiFieldStateProps {
      * @remarks Draws {@link dirtyMarkerStyles} after the control's label, and exposes a
      *          `data-cc-dirty` attribute for anything the marker doesn't reach. A text
      *          field's label too long for the field ends in an ellipsis, as MUI cuts
-     *          it, and the dot follows the ellipsis.
+     *          it, and the dot follows the ellipsis. The label also gets
+     *          {@link DirtyMarkerText}, which screen readers read as part of the field's
+     *          name ("Due (modified)"). Both need a label: a control without one shows
+     *          neither. Which prop holds the label is set by {@link withMuiFieldState}'s
+     *          `labelProp`; a control that renders its label as a child of a wrapped
+     *          `FormControl`, such as a fieldset's legend or a `FormControlLabel`, passes
+     *          it through {@link labelWithDirtyText} itself.
+     * @default undefined, not marked and no `data-cc-dirty`
      */
     dirty?: boolean;
 }
@@ -47,21 +54,65 @@ export interface MuiFieldStateProps {
  * ```ts
  * CcFieldState: { styleOverrides: { root: { "& > .MuiFormLabel-root::after": { display: "none" } } } }
  * ```
+ *
+ * That leaves {@link DirtyMarkerText} in the label, so the field's name still says it is
+ * modified; it has a theme slot of its own.
  */
 export declare const dirtyMarkerStyles: (theme: Theme) => CSSObject;
-export type DirtyMarkerClassKey = "root";
-export declare const DirtyMarker: React.MemoExoticComponent<() => React.JSX.Element>;
+export type DirtyMarkerClassKey = "root" | "text";
+export declare const DirtyMarkerText: React.MemoExoticComponent<() => React.JSX.Element>;
+/**
+ * Props of {@link DirtyMarker}
+ */
+export interface DirtyMarkerProps {
+    /**
+     * CSS class of the dot, applied after the `CcDirtyMarker` styles, e.g. from
+     * `styled(DirtyMarker)`
+     */
+    className?: string;
+    /**
+     * Whether the dot brings {@link DirtyMarkerText} along, the visually hidden
+     * "(modified)" that becomes part of the label's name. `false` for a label that
+     * says it another way, e.g. FormTab, whose description says "Contains modified
+     * fields." Default: true
+     */
+    text?: boolean;
+}
+export declare const DirtyMarker: React.MemoExoticComponent<(props: DirtyMarkerProps) => React.JSX.Element>;
 /**
  * Appends {@link DirtyMarker} to a label when the field is modified
  * @param label The label to mark
  * @param dirty Is the field modified?
+ * @returns The label followed by the dot and {@link DirtyMarkerText} where `dirty` is
+ *          set, else the label as it is
  */
 export declare const labelWithDirtyMarker: (label: React.ReactNode, dirty?: boolean) => React.ReactNode;
+/**
+ * Appends {@link DirtyMarkerText} to a label when the field is modified, for a label
+ * whose dot {@link withMuiFieldState} draws: a legend or `FormControlLabel` rendered as
+ * a child of {@link FormControlFieldsetCC} or {@link FormControlCC}, which the wrapper
+ * cannot hand the text to
+ * @param label The label to mark
+ * @param dirty Is the field modified?
+ * @returns The label followed by the text where `dirty` is set, else the label as it is
+ */
+export declare const labelWithDirtyText: (label: React.ReactNode, dirty?: boolean) => React.ReactNode;
 export type FieldStateClassKey = "root";
+/**
+ * Where a component wrapped by {@link withMuiFieldState} takes the label it renders:
+ * `"label"` for a text field or a date picker, `"children"` for a label component
+ * (`FormLabel`, `InputLabel`)
+ */
+export type MuiFieldStateLabelProp = "label" | "children";
 /**
  * Adds this library's field states — {@link MuiFieldStateProps} — to a MUI form component
  *
  * @param Component The component to wrap
+ * @param labelProp The prop that holds the label the component renders, which gets
+ * {@link DirtyMarkerText} while the field is dirty: `"label"` (the default) for a text
+ * field or a date picker, `"children"` for a label component. A component that gets no
+ * label through it, such as a `FormControl` around a legend, is left as it is; its label
+ * goes through {@link labelWithDirtyText} where it is rendered.
  * @remarks MUI covers error, required and disabled; warning and dirty are ours, and both
  * are presentational, so they are applied here rather than in every control. The wrapper
  * swallows both props so neither reaches the DOM, and forwards everything else including
@@ -70,7 +121,7 @@ export type FieldStateClassKey = "root";
  * Every wrapped component shares the `CcFieldState` theme slot, which is the one place to
  * restyle or remove either state for a whole application.
  */
-export declare const withMuiFieldState: <T extends MuiFieldStateSourceProps>(Component: React.ComponentType<T>) => React.ComponentType<T & MuiFieldStateProps>;
+export declare const withMuiFieldState: <T extends MuiFieldStateSourceProps>(Component: React.ComponentType<T>, labelProp?: MuiFieldStateLabelProp) => React.ComponentType<T & MuiFieldStateProps>;
 export declare const FormControlCC: React.ComponentType<import("@mui/material").FormControlOwnProps & import("@mui/material/OverridableComponent").CommonProps & Omit<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, "className" | "style" | "classes" | "children" | "color" | "sx" | "disabled" | "error" | "margin" | "size" | "variant" | "fullWidth" | "focused" | "hiddenLabel" | "required"> & {
     component?: React.ElementType | undefined;
 } & MuiFieldStateProps>;

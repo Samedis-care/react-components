@@ -7,6 +7,9 @@ import ActionButton from "../../standalone/UIKit/ActionButton";
 import { useFormContextLite } from "./Form";
 import useCCTranslations from "../../utils/useCCTranslations";
 import combineClassNames from "../../utils/combineClassNames";
+import FormPageSaveButtonTransition from "./FormPageSaveButtonTransition";
+// the reason tooltip's transition, which keeps the reason while the tooltip closes
+const TOOLTIP_SLOTS = { transition: FormPageSaveButtonTransition };
 /**
  * The Save button of a form page's footer, as DefaultFormPage and FlowEngineSaveButton
  * render it: an ActionButton that says why the form is read-only.
@@ -15,10 +18,13 @@ import combineClassNames from "../../utils/combineClassNames";
  * (FormProps.readOnlyReasons, a CRUD's editPermissionHint, "The form is currently being
  * saved" while it saves), those texts, joined with ", ", are the button's accessible
  * description and show in a tooltip while the pointer is on the button. Reasons without a
- * text are left out; with none left, the button has no description and no tooltip.
+ * text are left out; with none left, the button has no description and no tooltip. A tooltip
+ * that is open when its reasons go away (a save ends) closes, and keeps its text while it
+ * fades out.
  *
  * It neither saves nor disables itself: pass `onClick` and `disabled` (DefaultFormPage and
- * FlowEngineSaveButton disable it while the form is not dirty, saves or is read-only). A
+ * FlowEngineSaveButton disable it while the form has nothing to save, saves or is
+ * read-only). A
  * disabled Save stays focusable (see `disabled`), so keyboard focus stays on it during and
  * after a save, and keyboard users reach the reasons too: the tooltip also shows while the
  * button has keyboard focus. An `aria-describedby` of the caller is kept, before the
@@ -39,6 +45,6 @@ const FormPageSaveButton = (props) => {
     const describedBy = reason
         ? [buttonProps["aria-describedby"], descriptionId].filter(Boolean).join(" ")
         : buttonProps["aria-describedby"];
-    return (_jsx(Tooltip, { title: reason ? _jsx(_Fragment, { children: reason }) : "", describeChild: true, children: _jsxs("span", { children: [_jsx(ActionButton, { ...buttonProps, "aria-disabled": disabled || undefined, className: combineClassNames([className, disabled && "Mui-disabled"]), onClick: disabled ? undefined : onClick, "aria-describedby": describedBy, children: children ?? t("common.buttons.save") }), reason && (_jsx("span", { id: descriptionId, hidden: true, children: reason }))] }) }));
+    return (_jsx(Tooltip, { title: reason ? _jsx(_Fragment, { children: reason }) : "", describeChild: true, slots: TOOLTIP_SLOTS, children: _jsxs("span", { children: [_jsx(ActionButton, { ...buttonProps, "aria-disabled": disabled || undefined, className: combineClassNames([className, disabled && "Mui-disabled"]), onClick: disabled ? undefined : onClick, "aria-describedby": describedBy, children: children ?? t("common.buttons.save") }), reason && (_jsx("span", { id: descriptionId, hidden: true, children: reason }))] }) }));
 };
 export default React.memo(FormPageSaveButton);

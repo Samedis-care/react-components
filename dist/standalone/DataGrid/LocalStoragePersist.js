@@ -1,6 +1,7 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useLayoutEffect, useMemo, useRef, useState, } from "react";
 import { DataGridPersistentStateContext, } from "./StatePersistence";
+import { DataGridFocusHandoffContext, } from "./FocusHandoff";
 /**
  * A persistence provider for DataGrid.
  * Uses localStorage for storage.
@@ -65,6 +66,19 @@ const LocalStoragePersist = (props) => {
         }
         return data;
     }, [storageKey]);
+    // where focus was in a grid mounted for the previous key, until the grid
+    // mounted for this one takes it over (see DataGridFocusHandoffContext)
+    const focusHandoff = useRef(null);
+    // the children are mounted anew for each key
+    const focusCtx = useMemo(() => ({
+        handoff: focusHandoff,
+        mount: storageKey,
+    }), [storageKey]);
+    // layout effects of the children run first: the grids mounted for this key
+    // have taken focus over; what is left had no grid to take it
+    useLayoutEffect(() => {
+        focusHandoff.current = null;
+    }, [storageKey]);
     const persistCtx = useMemo(() => [
         written?.[0] === storageKey ? written[1] : stored,
         setData,
@@ -72,6 +86,6 @@ const LocalStoragePersist = (props) => {
     // a grid reads the persisted state when it mounts: one mounted for the
     // previous key would keep showing that key's state, and write it under
     // this one
-    return (_jsx(DataGridPersistentStateContext.Provider, { value: persistCtx, children: _jsx(React.Fragment, { children: children }, storageKey) }));
+    return (_jsx(DataGridFocusHandoffContext.Provider, { value: focusCtx, children: _jsx(DataGridPersistentStateContext.Provider, { value: persistCtx, children: _jsx(React.Fragment, { children: children }, storageKey) }) }));
 };
 export default React.memo(LocalStoragePersist);

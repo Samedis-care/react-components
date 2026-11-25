@@ -58,7 +58,7 @@ const MatrixColumnHeader = (props) => {
         classes?.columnHeaderLabel,
         classes?.columnHeaderSubLabel,
     ]);
-    return (_jsx(MatrixColumnHeaderRoot, { ref: props.innerRef, className: combineClassNames([
+    return (_jsx(MatrixColumnHeaderRoot, { ref: props.innerRef, role: "columnheader", className: combineClassNames([
             classes?.columnHeader,
             columnVariantClass(column.variant),
         ]), children: content }));

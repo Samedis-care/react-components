@@ -7,8 +7,8 @@ import { BaseSelectorClassKey, BaseSelectorData, BaseSelectorThemeProps, HowToBo
 import { SmallIconButtonClassKey, SmallIconButtonProps, SmallestIconButtonClassKey, SmallestIconButtonProps, SmallListItemClassKey, SmallListItemProps, SmallListItemButtonClassKey, SmallListItemButtonProps, SelectorSmallListItemClassKey, SelectorSmallListItemProps, SelectorSmallListItemButtonClassKey, SelectorSmallListItemButtonProps, SmallListItemIconClassKey, SmallListItemIconProps } from "./standalone/Small";
 import { ComponentWithLabelClassKey, ComponentWithLabelProps } from "./standalone/UIKit/ComponentWithLabel";
 import { CheckboxClassKey } from "./standalone/UIKit/Checkbox";
-import { ActionButtonClassKey, ActionButtonProps } from "./standalone/UIKit/ActionButton";
-import { SubActionButtonClassKey, SubActionButtonProps } from "./standalone/UIKit/SubActionButton";
+import { ActionButtonClassKey, ActionButtonOwnerState, ActionButtonProps } from "./standalone/UIKit/ActionButton";
+import { SubActionButtonClassKey, SubActionButtonOwnerState, SubActionButtonProps } from "./standalone/UIKit/SubActionButton";
 import { FormButtonsClassKey, FormButtonsProps } from "./standalone/UIKit/FormButtons";
 import { FormPageLayoutClassKey, FormPageLayoutProps } from "./standalone/Form/FormPageLayout";
 import { GroupBoxClassKey, GroupBoxProps } from "./standalone/GroupBox";
@@ -62,13 +62,16 @@ import { BasicFormPageProps } from "./backend-components/Form/BasicFormPage";
 import { FlowEngineClassKey, FlowEngineThemeProps } from "./backend-components/Form/FlowEngine/FlowEngine";
 import { DirtyMarkerClassKey, FieldStateClassKey } from "./standalone/UIKit/MuiFieldState";
 import { CrudClassKey } from "./backend-components/CRUD";
-import { RoutedTabsClassKey } from "./non-standalone/RoutedTabs/RoutedTabs";
+import { FormTabClassKey } from "./backend-components/Form/FormTab";
+import { RoutedTabsClassKey, RoutedTabsProps } from "./non-standalone/RoutedTabs/RoutedTabs";
+import { RoutedTabPanelWrapperClassKey } from "./non-standalone/RoutedTabs/RoutedTabPanelWrapper";
 import { CrudLoadStatusClassKey, CrudLoadStatusProps } from "./backend-components/FileUpload/CrudLoadStatus";
 import { BackendSingleSelectThemeProps } from "./backend-components/Selector/BackendSingleSelect";
 import { BackendMultiSelectThemeProps } from "./backend-components/Selector/BackendMultiSelect";
 import { BackendMultipleSelectThemeProps } from "./backend-components/Selector/BackendMultipleSelect";
 import { BackendMultiSelectWithTagsThemeProps } from "./backend-components/Selector/BackendMultiSelectWithTags";
 import { BackendDataGridMultiSelectClassKey } from "./backend-components/Selector/BackendDataGridMultiSelect";
+import { PartialExcept } from "./utils/internal/distributiveOmit";
 import { GridSingleSelectFilterBackendClassKey, GridSingleSelectFilterBackendProps } from "./standalone/DataGrid/GridSingleSelectFilterBackend";
 import { ModelUnknown } from "./backend-integration";
 import { GridMultiSelectFilterBackendClassKey, GridMultiSelectFilterBackendProps } from "./standalone/DataGrid/GridMultiSelectFilterBackend";
@@ -91,6 +94,42 @@ type Theme = Omit<MuiTheme, "components">;
 type StyleOverridesWithoutOwnerState<ClassKey extends string> = Partial<Record<ClassKey, Interpolation<{
     theme: Theme;
 }>>>;
+/**
+ * `variants` of a component whose root gets `Props` directly and no
+ * `ownerState`. MUI matches a variant's `props` against them and calls a
+ * `props` function with them.
+ */
+type VariantsWithoutOwnerState<Props> = Array<{
+    props: Partial<Props> | ((props: Partial<Props>) => boolean);
+    style: Interpolation<{
+        theme: Theme;
+    }>;
+}>;
+/**
+ * `styleOverrides` of a component that passes `OwnerState` to its slots as
+ * their `ownerState`. MUI calls each function in it while styling every slot
+ * of the component, with that slot's props.
+ */
+type StyleOverridesWithOwnerState<ClassKey extends string, OwnerState> = Partial<Record<ClassKey, Interpolation<{
+    theme: Theme;
+    ownerState: OwnerState;
+}>>>;
+/**
+ * `variants` of a component whose root gets `Props` and `OwnerState` as its
+ * `ownerState`. MUI matches each key of a variant's `props` against both,
+ * and calls a `props` function with the props, the fields of `ownerState`
+ * (which replace props of the same name) and `ownerState` itself.
+ */
+type VariantsWithOwnerState<Props, OwnerState> = Array<{
+    props: {
+        [Key in keyof Props | keyof OwnerState]?: (Key extends keyof Props ? Props[Key] : never) | (Key extends keyof OwnerState ? OwnerState[Key] : never);
+    } | ((props: Partial<Omit<Props, keyof OwnerState>> & OwnerState & {
+        ownerState: OwnerState;
+    }) => boolean);
+    style: Interpolation<{
+        theme: Theme;
+    }>;
+}>;
 declare module "@mui/material/styles" {
     interface ComponentNameToClassKey {
         CcSignalPortlet: SignalPortletClassKey;
@@ -174,8 +213,10 @@ declare module "@mui/material/styles" {
         CcFlowEngine: FlowEngineClassKey;
         CcFieldState: FieldStateClassKey;
         CcDirtyMarker: DirtyMarkerClassKey;
+        CcFormTab: FormTabClassKey;
         CcCrud: CrudClassKey;
         CcRoutedTabs: RoutedTabsClassKey;
+        CcRoutedTabPanelWrapper: RoutedTabPanelWrapperClassKey;
     }
     interface ComponentsPropsList {
         CcSignalPortlet: Partial<SignalPortletProps>;
@@ -204,13 +245,13 @@ declare module "@mui/material/styles" {
         CcInfoBox: Partial<InfoBoxProps>;
         CcFormPageLayout: Partial<FormPageLayoutProps>;
         CcInlineSwitch: Partial<InlineSwitchProps>;
-        CcBaseSelector: Partial<BaseSelectorThemeProps>;
-        CcBackendSingleSelect: Partial<BackendSingleSelectThemeProps>;
-        CcBackendMultiSelect: Partial<BackendMultiSelectThemeProps>;
-        CcBackendMultipleSelect: Partial<BackendMultipleSelectThemeProps>;
-        CcBackendMultiSelectWithTags: Partial<BackendMultiSelectWithTagsThemeProps>;
+        CcBaseSelector: PartialExcept<BaseSelectorThemeProps, "displaySwitch" | "switchLabel">;
+        CcBackendSingleSelect: PartialExcept<BackendSingleSelectThemeProps, "switchFilterName" | "switchLabel">;
+        CcBackendMultiSelect: PartialExcept<BackendMultiSelectThemeProps, "switchFilterName" | "switchLabel">;
+        CcBackendMultipleSelect: PartialExcept<BackendMultipleSelectThemeProps, "switchFilterName" | "switchLabel">;
+        CcBackendMultiSelectWithTags: PartialExcept<BackendMultiSelectWithTagsThemeProps, "switchFilterNameGroup" | "switchFilterNameData" | "switchLabel">;
         CcMultiSelectEntry: Partial<MultiSelectEntryProps<MultiSelectorData>>;
-        CcMultiSelect: Partial<MultiSelectProps<MultiSelectorData>>;
+        CcMultiSelect: PartialExcept<MultiSelectProps<MultiSelectorData>, "displaySwitch" | "switchLabel">;
         CcImageDots: Partial<ImageDotsProps>;
         CcImageBox: Partial<ImageBoxProps>;
         CcImageDialogEntry: Partial<ImageDialogEntryProps>;
@@ -245,8 +286,8 @@ declare module "@mui/material/styles" {
         CcPortalLayout: Partial<PortalLayoutProps>;
         CcNotifications: Partial<NotificationsProps>;
         CcToast: Partial<ToastProps>;
-        CcMultiSelectWithTags: Partial<MultiSelectWithTagsProps<MultiSelectorData, BaseSelectorData>>;
-        CcMultiSelectWithoutGroup: Partial<MultiSelectWithoutGroupProps<BaseSelectorData>>;
+        CcMultiSelectWithTags: PartialExcept<MultiSelectWithTagsProps<MultiSelectorData, BaseSelectorData>, "displaySwitch" | "switchLabel">;
+        CcMultiSelectWithoutGroup: PartialExcept<MultiSelectWithoutGroupProps<BaseSelectorData>, "displaySwitch" | "switchLabel">;
         CcDayContents: Partial<DayContentsProps>;
         CcWeekViewDay: Partial<WeekViewDayProps>;
         CcScrollableSchedule: Partial<ScrollableScheduleProps>;
@@ -254,11 +295,12 @@ declare module "@mui/material/styles" {
         CcWeekView: Partial<WeekViewProps>;
         CcDataGrid: Partial<DataGridProps>;
         CcGridMultiSelectFilter: Partial<GridMultiSelectFilterProps>;
-        CcGridMultiSelectFilterBackend: Partial<GridMultiSelectFilterBackendProps<ModelUnknown, MultiSelectorData>>;
+        CcGridMultiSelectFilterBackend: PartialExcept<GridMultiSelectFilterBackendProps<ModelUnknown, MultiSelectorData>, "switchFilterName" | "switchLabel">;
         CcGridSingleSelectFilter: Partial<GridSingleSelectFilterProps>;
-        CcGridSingleSelectFilterBackend: Partial<GridSingleSelectFilterBackendProps<ModelUnknown>>;
+        CcGridSingleSelectFilterBackend: PartialExcept<GridSingleSelectFilterBackendProps<ModelUnknown>, "switchFilterName" | "switchLabel">;
         CcBasicFormPage: Partial<BasicFormPageProps<never, never>>;
         CcFlowEngine: Partial<FlowEngineThemeProps>;
+        CcRoutedTabs: Partial<RoutedTabsProps>;
     }
     interface Components {
         CcSignalPortlet?: {
@@ -271,10 +313,17 @@ declare module "@mui/material/styles" {
             styleOverrides?: ComponentsOverrides<Theme>["CcSignalPortletItem"];
             variants?: ComponentsVariants["CcSignalPortletItem"];
         };
+        /**
+         * ActionButton. Recolor it with `defaultProps.color` (a palette color):
+         * fill, text and hover then come from that color, the fill darkened or
+         * lightened where the text would miss 4.5:1. A `backgroundColor` in
+         * `styleOverrides.button` changes only the fill, and the text and hover
+         * stay primary's.
+         */
         CcActionButton?: {
             defaultProps?: ComponentsPropsList["CcActionButton"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcActionButton"];
-            variants?: ComponentsVariants["CcActionButton"];
+            styleOverrides?: StyleOverridesWithOwnerState<ActionButtonClassKey, ActionButtonOwnerState>;
+            variants?: VariantsWithOwnerState<Omit<ActionButtonProps, "icon" | "small" | "children">, ActionButtonOwnerState>;
         };
         CcFormLoaderOverlay?: {
             defaultProps?: ComponentsPropsList["CcFormLoaderOverlay"];
@@ -343,8 +392,7 @@ declare module "@mui/material/styles" {
         };
         CcFormButtons?: {
             defaultProps?: ComponentsPropsList["CcFormButtons"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcFormButtons"];
-            variants?: ComponentsVariants["CcFormButtons"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<FormButtonsClassKey>;
         };
         CcDefaultFormPageButtons?: {
             defaultProps?: ComponentsPropsList["CcDefaultFormPageButtons"];
@@ -353,8 +401,8 @@ declare module "@mui/material/styles" {
         };
         CcSubActionButton?: {
             defaultProps?: ComponentsPropsList["CcSubActionButton"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcSubActionButton"];
-            variants?: ComponentsVariants["CcSubActionButton"];
+            styleOverrides?: StyleOverridesWithOwnerState<SubActionButtonClassKey, SubActionButtonOwnerState>;
+            variants?: VariantsWithOwnerState<Omit<SubActionButtonProps, "icon" | "small" | "disableDivider" | "children">, SubActionButtonOwnerState>;
         };
         CcGroupBox?: {
             defaultProps?: ComponentsPropsList["CcGroupBox"];
@@ -373,8 +421,8 @@ declare module "@mui/material/styles" {
         };
         CcHowToBox?: {
             defaultProps?: ComponentsPropsList["CcHowToBox"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcHowToBox"];
-            variants?: ComponentsVariants["CcHowToBox"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<HowToBoxClassKey>;
+            variants?: VariantsWithoutOwnerState<Pick<HowToBoxProps, "titleLabel" | "labels">>;
         };
         CcInfoBox?: {
             defaultProps?: ComponentsPropsList["CcInfoBox"];
@@ -442,8 +490,7 @@ declare module "@mui/material/styles" {
         };
         CcCenteredTypography?: {
             defaultProps?: ComponentsPropsList["CcCenteredTypography"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcCenteredTypography"];
-            variants?: ComponentsVariants["CcCenteredTypography"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<CenteredTypographyClassKey>;
         };
         CcMultiImage?: {
             defaultProps?: ComponentsPropsList["CcMultiImage"];
@@ -517,13 +564,13 @@ declare module "@mui/material/styles" {
         };
         CcComponentWithLabel?: {
             defaultProps?: ComponentsPropsList["CcComponentWithLabel"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcComponentWithLabel"];
-            variants?: ComponentsVariants["CcComponentWithLabel"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<ComponentWithLabelClassKey>;
+            variants?: VariantsWithoutOwnerState<Omit<ComponentWithLabelProps, "labelText" | "labelVariant" | "labelDisplay" | "labelAlign">>;
         };
         CcCheckbox?: {
             defaultProps?: ComponentsPropsList["CcCheckbox"];
-            styleOverrides?: ComponentsOverrides<Theme>["CcCheckbox"];
-            variants?: ComponentsVariants["CcCheckbox"];
+            styleOverrides?: StyleOverridesWithoutOwnerState<CheckboxClassKey>;
+            variants?: VariantsWithoutOwnerState<CheckboxProps>;
         };
         CcUiKitInput?: {
             defaultProps?: ComponentsPropsList["CcUiKitInput"];
@@ -662,6 +709,9 @@ declare module "@mui/material/styles" {
         CcDirtyMarker?: {
             styleOverrides?: StyleOverridesWithoutOwnerState<DirtyMarkerClassKey>;
         };
+        CcFormTab?: {
+            styleOverrides?: StyleOverridesWithoutOwnerState<FormTabClassKey>;
+        };
         CcBasicFormPage?: {
             defaultProps?: ComponentsPropsList["CcBasicFormPage"];
         };
@@ -673,7 +723,11 @@ declare module "@mui/material/styles" {
             styleOverrides?: StyleOverridesWithoutOwnerState<CrudClassKey>;
         };
         CcRoutedTabs?: {
+            defaultProps?: ComponentsPropsList["CcRoutedTabs"];
             styleOverrides?: StyleOverridesWithoutOwnerState<RoutedTabsClassKey>;
+        };
+        CcRoutedTabPanelWrapper?: {
+            styleOverrides?: StyleOverridesWithoutOwnerState<RoutedTabPanelWrapperClassKey>;
         };
     }
 }

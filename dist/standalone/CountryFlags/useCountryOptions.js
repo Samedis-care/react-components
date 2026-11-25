@@ -4,9 +4,10 @@ import CountryFlag from "../CountryFlag";
 import { useCCCountryTranslations } from "../../utils/useCCTranslations";
 import getCurrentLocale from "../../utils/getCurrentLocale";
 /**
- * The countries of `CountryCodes` as options for a select, sorted by their
- * name in components-care's current language with that language's collation
- * (in German "Ägypten" comes after "Afghanistan", "Österreich" after "Oman").
+ * The countries of `CountryCodes`, every ISO 3166-1 country, as options for a
+ * select, sorted by their name in components-care's current language with
+ * that language's collation (in German "Ägypten" comes after "Afghanistan",
+ * "Österreich" after "Oman").
  *
  * When the language changes, the component re-renders with renamed and
  * re-sorted options; until then the hook returns the same array. Like

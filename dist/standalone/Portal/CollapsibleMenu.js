@@ -40,10 +40,22 @@ const CollapsibleMenu = (inProps) => {
     const [collapsed, setCollapsed] = useState(false);
     const { t } = useCCTranslations();
     const { mobile } = usePortalLayoutContext();
+    // the mobile layout renders no button to expand the menu, so it is never hidden
+    // there; `collapsed` stays as it is for the return to desktop
+    const hidden = collapsed && !mobile;
     const toggleCollapsed = useCallback(() => setCollapsed((prev) => !prev), [setCollapsed]);
     const ArrowComp = collapsed ? IconOpen : IconClose;
-    return (_jsxs(Root, { container: true, sx: { justifyContent: "flex-start", alignItems: "stretch" }, wrap: "nowrap", style: collapsed ? { overflow: "visible" } : undefined, className: combineClassNames([className, classes?.root]), children: [_jsx(Content, { size: "grow", style: { width: props.width, display: collapsed ? "none" : undefined }, className: classes?.content, children: props.children }, "content"), !mobile && (_jsx(Bar, { className: classes?.bar, children: _jsx(StyledButton, { onClick: toggleCollapsed, className: classes?.button, size: "large", "aria-label": collapsed
+    return (_jsxs(Root, { container: true, sx: { justifyContent: "flex-start", alignItems: "stretch" }, wrap: "nowrap", style: hidden ? { overflow: "visible" } : undefined, className: combineClassNames([className, classes?.root]), children: [_jsx(Content, { size: "grow", style: { width: props.width, display: hidden ? "none" : undefined }, className: classes?.content, children: props.children }, "content"), !mobile && (_jsx(Bar, { className: classes?.bar, children: _jsx(StyledButton, { onClick: toggleCollapsed, className: classes?.button, size: "large", "aria-label": collapsed
                         ? t("standalone.portal.expand-menu")
                         : t("standalone.portal.collapse-menu"), children: _jsx(ArrowComp, { className: collapsed ? classes?.iconOpen : classes?.iconClose }) }) }, "bar"))] }));
 };
+/**
+ * Desktop collapse for a menu, e.g. around the menu in PortalLayout's
+ * `menuContent`: a button right of the menu ("Collapse menu" / "Expand menu")
+ * hides the menu, leaving only the 48px button bar. In the mobile layout the
+ * button is not rendered and the menu is always shown.
+ *
+ * Must be rendered inside a PortalLayout (it reads `usePortalLayoutContext`);
+ * outside one it throws "PortalLayoutContext not set".
+ */
 export default React.memo(CollapsibleMenu);

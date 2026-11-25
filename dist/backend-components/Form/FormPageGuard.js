@@ -2,7 +2,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, } from "rea
 import { Action } from "history";
 import { FormDialogDispatchContext } from "./FormDialog";
 import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
-import { FrameworkHistory } from "../../framework/History";
+import { NavigationGuard, NavigationGuardContext, } from "../../framework/NavigationGuard";
 import { useDialogContext } from "../../framework/DialogContextProvider";
 import { showConfirmDialogBool } from "../../non-standalone/Dialog/Utils";
 import { RouteContext } from "../../standalone/Routes/Route";
@@ -23,46 +23,64 @@ export const FORM_PAGE_MOVE_STATE = Object.freeze({
 });
 /**
  * Does a navigation to pathname stay inside the form page (routed tab panels, a routed
- * stepper)? It does when the Form's nearest Route still renders at pathname with the same
- * url: the url itself or a path below it (/rec/1 → /rec/1/more), not one that only starts
- * with the same characters (/rec/10, /rec/1-archive).
- * At the root this follows the Route too: a Route "/" renders only at "/", so every other
- * path leaves the page; a Route "/*" renders at every path, so for it no path leaves the
- * page.
+ * stepper)? It does when the Form's nearest Route is still rendered at pathname, so the
+ * Form stays mounted, with the same url: the url itself or a path below it
+ * (/rec/1 → /rec/1/more), not one that only starts with the same characters (/rec/10,
+ * /rec/1-archive).
+ * A Route "/" renders only at "/", so every other path leaves the page. A Route "/*", such
+ * as the default panel of routed tabs (tab("", …)), renders at every path below its parent,
+ * except where the Routes it is an entry of renders an entry listed before it: opening
+ * another tab unmounts a Form in the default panel, so that leaves the page.
+ * The nearest Route of a disableRouting Form is the one of the page around it, as the Form
+ * has no url of its own; it stays mounted all the same while that Route is rendered, e.g.
+ * when routed tabs in its form page switch. A Form outside of every Route has none, so
+ * every navigation leaves it.
  * @param routePath The full path of the Form's nearest Route (RouteContext path)
  * @param routeUrl The url the Route currently matches (RouteContext url)
+ * @param routeRendersAt Is the Route rendered at a pathname (RouteContext rendersAt)
  * @param pathname The navigation's target
  */
-const isInsideFormPage = (routePath, routeUrl, pathname) => matchPath({ path: routePath }, pathname)?.url === routeUrl;
+const isInsideFormPage = (routePath, routeUrl, routeRendersAt, pathname) => routeRendersAt(pathname) &&
+    matchPath({ path: routePath }, pathname)?.url === routeUrl;
 /**
- * The leave guard of a Form's unsaved changes: while the form is dirty, a navigation asks
- * "Leave form page?" (a navigation inside the form's Route passes, unless disableRouting, and
- * so does a move of the page marked with FORM_PAGE_MOVE_STATE),
+ * The leave guard of a Form's unsaved changes: while the form is dirty or, in flow mode,
+ * holds staged changes (FormContextData.stagedDirty), a navigation asks
+ * "Leave form page?" (a navigation that keeps the form's Route rendered at the same url
+ * passes, also for a disableRouting Form, and so does a move of the page marked with
+ * FORM_PAGE_MOVE_STATE),
  * closing the browser tab asks (UnsafeToLeave), and so does closing the FullFormDialog the
  * Form is in. A form that is read-only for a reason other than a save takes no guard.
  *
  * The Form holds it, because the changes are the Form's: once a form page has switched it on
  * (FormPageGuard.enable), it lasts until the Form unmounts, also while no form page is
  * mounted (a form page in a routed tab panel when another tab is open).
+ *
+ * The guards of all Forms in a Framework, those in pushed dialogs included, block the history
+ * together (the Framework's NavigationGuard): a navigation that leaves several dirty forms asks
+ * once, and after "Yes" the forms it did not leave stay guarded. A Form outside of a Framework
+ * blocks the history on its own.
  * @param params The Form's state
  * @returns The guard, which the Form provides to its pages through FormPageGuardContext
  */
 const useFormPageGuard = (params) => {
-    const { disableRouting, readOnlyBesidesSaving, dirty, addEventListener, removeEventListener, } = params;
+    const { readOnlyBesidesSaving, unsaved, addEventListener, removeEventListener, } = params;
     const { t } = useCCTranslations();
     const [pushDialog] = useDialogContext();
     const formDialog = useContext(FormDialogDispatchContext);
+    const frameworkNavigationGuard = useContext(NavigationGuardContext);
+    const navigationGuard = useMemo(() => frameworkNavigationGuard ?? new NavigationGuard(), [frameworkNavigationGuard]);
     const routeCtx = useContext(RouteContext);
     const routeUrl = routeCtx ? routeCtx.url : null;
     const routePath = routeCtx ? routeCtx.path : null;
+    const routeRendersAt = routeCtx ? routeCtx.rendersAt : null;
     // the rendered dirty state is one render behind the form engine, which breaks "submit,
     // then navigate away": the record is saved, but the guards below still see a dirty form.
     // The dirty event fires as soon as the form engine sees the change, so this ref is
     // current even while a re-render is still pending.
-    const dirtyRef = useRef(dirty);
+    const dirtyRef = useRef(unsaved);
     useEffect(() => {
         const handleDirtyChange = (event) => {
-            dirtyRef.current = event.dirty;
+            dirtyRef.current = event.dirty || event.stagedDirty;
         };
         addEventListener("dirty", handleDirtyChange);
         return () => removeEventListener("dirty", handleDirtyChange);
@@ -71,89 +89,60 @@ const useFormPageGuard = (params) => {
     const enabled = useRef(false);
     // applies or releases the guards; null while the form takes none
     const applyGuardsRef = useRef(null);
-    const unblock = useRef(undefined);
-    const releaseHistoryBlock = useCallback(() => {
-        if (unblock.current) {
-            unblock.current();
-            unblock.current = undefined;
-        }
-    }, []);
+    // the form's entry in the navigation guard; null while the form takes no guard
+    const entryRef = useRef(null);
     useEffect(() => {
         // if the form is read-only, don't annoy the user
         if (readOnlyBesidesSaving)
             return;
-        // set while the history block is lifted for a POP inside the form page, see passThrough
-        let stopWaitingForPop = null;
-        const blocker = (transition) => {
-            const allowTransition = () => {
-                // temp unblock to retry transaction
-                releaseHistoryBlock();
-                transition.retry();
-            };
-            // lets a navigation inside the form page through and keeps the page guarded
-            const passThrough = () => {
-                releaseHistoryBlock();
-                if (transition.action === Action.Pop) {
-                    // A browser history reverts every POP while a blocker is set and retries
-                    // it asynchronously (history.go), so block again only once the retried POP
-                    // has arrived: blocking at once would revert it again, and so on forever.
-                    stopWaitingForPop = FrameworkHistory.listen(() => applyGuards(dirtyRef.current));
-                    transition.retry();
-                }
-                else {
-                    // PUSH and REPLACE are retried synchronously
-                    transition.retry();
-                    applyGuards(dirtyRef.current);
-                }
-            };
+        // does a navigation leave the form's unsaved changes behind?
+        const leaves = (transition) => {
             // the form may have gone clean since the guards were applied (a submit resolves
             // before React re-renders), so never ask about changes which no longer exist
-            if (!dirtyRef.current) {
-                applyGuards(false);
-                transition.retry();
-                return;
-            }
+            if (!dirtyRef.current)
+                return false;
             // the form page moves to another url and stays (CRUD's move to the saved record):
             // nothing is left, even if a control's own dirty state lags behind the save. Only
             // the REPLACE counts: a later POP back to that history entry carries the state too.
             if (transition.action === Action.Replace &&
                 transition.location.state === FORM_PAGE_MOVE_STATE) {
-                passThrough();
-                return;
+                return false;
             }
             // special handling: routing inside form page (e.g. routed tab panels, routed stepper)
-            if (!disableRouting &&
-                routePath != null &&
+            if (routePath != null &&
                 routeUrl != null &&
-                isInsideFormPage(routePath, routeUrl, transition.location.pathname)) {
-                passThrough();
-                return;
+                routeRendersAt != null &&
+                isInsideFormPage(routePath, routeUrl, routeRendersAt, transition.location.pathname)) {
+                return false;
             }
-            // otherwise: ask user for confirmation
-            void (async () => {
-                const leave = await showConfirmDialogBool(pushDialog, {
-                    title: t("backend-components.form.back-on-dirty.title"),
-                    message: t("backend-components.form.back-on-dirty.message"),
-                    textButtonYes: t("backend-components.form.back-on-dirty.yes"),
-                    textButtonNo: t("backend-components.form.back-on-dirty.no"),
-                });
-                if (leave) {
-                    allowTransition();
-                }
-            })();
+            // otherwise the navigation leaves the form page
+            return true;
         };
+        // set while the navigation guard has the entry
+        let removeEntry = null;
+        const entry = {
+            leaves,
+            ask: () => showConfirmDialogBool(pushDialog, {
+                title: t("backend-components.form.back-on-dirty.title"),
+                message: t("backend-components.form.back-on-dirty.message"),
+                textButtonYes: t("backend-components.form.back-on-dirty.yes"),
+                textButtonNo: t("backend-components.form.back-on-dirty.no"),
+            }),
+            // a navigation the user confirmed has left the changes: the entry is added again by
+            // the form's next change of dirty state
+            onLeft: () => {
+                removeEntry = null;
+            },
+        };
+        entryRef.current = entry;
         // the guards are driven by the form engine's dirty event rather than by rendered
         // state, so that submitting and then leaving in one go isn't stopped by a dirty
         // flag which a pending re-render would have cleared. Idempotent in both directions.
         let releaseLocks = null;
         const applyGuards = (isDirty) => {
-            if (stopWaitingForPop) {
-                stopWaitingForPop();
-                stopWaitingForPop = null;
-            }
             if (isDirty) {
-                if (!unblock.current)
-                    unblock.current = FrameworkHistory.block(blocker);
+                if (!removeEntry)
+                    removeEntry = navigationGuard.add(entry);
                 if (releaseLocks)
                     return;
                 const safeToLeave = UnsafeToLeaveDispatch.lock("form-dirty");
@@ -166,7 +155,10 @@ const useFormPageGuard = (params) => {
                 };
             }
             else {
-                releaseHistoryBlock();
+                if (removeEntry) {
+                    removeEntry();
+                    removeEntry = null;
+                }
                 if (releaseLocks) {
                     releaseLocks();
                     releaseLocks = null;
@@ -175,7 +167,7 @@ const useFormPageGuard = (params) => {
         };
         const handleDirtyChange = (event) => {
             if (enabled.current)
-                applyGuards(event.dirty);
+                applyGuards(event.dirty || event.stagedDirty);
         };
         applyGuardsRef.current = applyGuards;
         if (enabled.current)
@@ -184,6 +176,8 @@ const useFormPageGuard = (params) => {
         return () => {
             removeEventListener("dirty", handleDirtyChange);
             applyGuardsRef.current = null;
+            if (entryRef.current === entry)
+                entryRef.current = null;
             applyGuards(false);
         };
     }, [
@@ -192,11 +186,11 @@ const useFormPageGuard = (params) => {
         formDialog,
         routePath,
         routeUrl,
+        routeRendersAt,
         pushDialog,
-        disableRouting,
         addEventListener,
         removeEventListener,
-        releaseHistoryBlock,
+        navigationGuard,
     ]);
     const enable = useCallback(() => {
         if (enabled.current)
@@ -206,6 +200,7 @@ const useFormPageGuard = (params) => {
         // above applies the guards then
         applyGuardsRef.current?.(dirtyRef.current);
     }, []);
-    return useMemo(() => ({ enable, releaseHistoryBlock }), [enable, releaseHistoryBlock]);
+    const leave = useCallback((go) => navigationGuard.leave(entryRef.current, go), [navigationGuard]);
+    return useMemo(() => ({ enable, leave }), [enable, leave]);
 };
 export default useFormPageGuard;

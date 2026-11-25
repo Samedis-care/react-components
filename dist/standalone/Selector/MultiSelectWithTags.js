@@ -44,7 +44,7 @@ const MultiSelectWithTags = (inProps) => {
         props: inProps,
         name: "CcMultiSelectWithTags",
     });
-    const { title, dirty, autoFocus, searchInputLabel, groupInputLabel, selected, disabled, autocompleteId, enableIcons, noOptionsText, loadingText, openText, closeText, forceQuery, startTypingToSearchText, loadGroupEntries, loadGroupOptions, loadDataOptions, onChange, openInfo, getIdOfData, switchLabel, lruGroup, lruData, sortCompareFn, className, classes, filterIds, } = props;
+    const { title, dirty, autoFocus, searchInputLabel, groupInputLabel, selected, added, removed, disabled, autocompleteId, enableIcons, noOptionsText, loadingText, openText, closeText, forceQuery, startTypingToSearchText, loadGroupEntries, loadGroupOptions, loadDataOptions, onChange, openInfo, getIdOfData, lruGroup, lruData, sortCompareFn, className, classes, filterIds, } = props;
     const { t } = useCCTranslations();
     const id = useId();
     const titleId = `${id}-title`;
@@ -86,7 +86,8 @@ const MultiSelectWithTags = (inProps) => {
                 groupInput === groupInput.ownerDocument.activeElement;
         try {
             setLoadingGroupRecords(true);
-            const groupEntries = await loadGroupEntries(selectedGroup);
+            // a removed entry comes back as itself: a caller with pending changes restores it
+            const groupEntries = (await loadGroupEntries(selectedGroup)).map((entry) => removed?.find((other) => getId(other) === getId(entry)) ?? entry);
             const groupEntryIds = groupEntries.map(getId);
             const combinedArray = [...selected, ...groupEntries];
             setSelectedGroups((prevState) => [
@@ -103,7 +104,7 @@ const MultiSelectWithTags = (inProps) => {
         finally {
             setLoadingGroupRecords(false);
         }
-    }, [onChange, loadGroupEntries, getId, selected, getGroupInput]);
+    }, [onChange, loadGroupEntries, getId, selected, removed, getGroupInput]);
     // gives focus back to the group field after a group pick, but only from the page:
     // focus the user moved elsewhere during the load stays there
     useLayoutEffect(() => {
@@ -141,6 +142,8 @@ const MultiSelectWithTags = (inProps) => {
     return (_jsxs(Root, { ref: rootRef, className: combineClassNames([className, classes?.root]), role: "group", "aria-labelledby": titleId, "aria-busy": loadingGroupRecords, onKeyDownCapture: handleKeyDownCapture, onPointerDownCapture: handlePointerDownCapture, children: [_jsx(LoadOverlay, { className: classes?.loadOverlay, style: loadingGroupRecords
                     ? { visibility: "visible", opacity: 1 }
                     : { visibility: "hidden", opacity: 0 }, children: _jsx(Loader, {}) }), _jsx(Typography, { id: titleId, variant: "caption", color: "textSecondary", children: labelWithDirtyMarker(title, dirty) }), _jsx(GroupInputLabel, { id: `${groupFieldId}-label`, htmlFor: groupFieldId, className: classes?.groupInputLabel, children: groupInputLabel ||
-                    t("standalone.selector.multi-select-with-tags.group-input-label") }), _jsx(SingleSelect, { autocompleteId: groupFieldId, selected: null, onSelect: handleGroupSelect, refreshToken: selectedGroups.length.toString(), onLoad: loadGroupOptionsAndProcess, disabled: disabled, disableSearch: loadingGroupRecords, enableIcons: enableIcons, noOptionsText: noOptionsText, loadingText: loadingText, openText: openText, closeText: closeText, forceQuery: forceQuery, startTypingToSearchText: startTypingToSearchText, lru: lruGroup, autoFocus: autoFocus }), _jsx(Box, { sx: { pt: 3 }, children: _jsx(MultiSelectWithoutGroup, { autocompleteId: autocompleteId, selected: selected, disabled: disabled, label: searchInputLabel, enableIcons: enableIcons, switchValue: switchValue, setSwitchValue: setSwitchValue, switchLabel: switchLabel, displaySwitch: props.displaySwitch, loadDataOptions: loadDataOptions, openInfo: openInfo, onSelect: onChange, getIdOfData: getId, noOptionsText: noOptionsText, loadingText: loadingText, forceQuery: forceQuery, startTypingToSearchText: startTypingToSearchText, lru: lruData, sortCompareFn: sortCompareFn, filterIds: filterIds }) })] }));
+                    t("standalone.selector.multi-select-with-tags.group-input-label") }), _jsx(SingleSelect, { autocompleteId: groupFieldId, selected: null, onSelect: handleGroupSelect, refreshToken: selectedGroups.length.toString(), onLoad: loadGroupOptionsAndProcess, disabled: disabled, disableSearch: loadingGroupRecords, enableIcons: enableIcons, noOptionsText: noOptionsText, loadingText: loadingText, openText: openText, closeText: closeText, forceQuery: forceQuery, startTypingToSearchText: startTypingToSearchText, lru: lruGroup, autoFocus: autoFocus }), _jsx(Box, { sx: { pt: 3 }, children: _jsx(MultiSelectWithoutGroup, { autocompleteId: autocompleteId, selected: selected, added: added, removed: removed, disabled: disabled, label: searchInputLabel, enableIcons: enableIcons, switchValue: switchValue, setSwitchValue: setSwitchValue, ...(props.displaySwitch
+                        ? { displaySwitch: true, switchLabel: props.switchLabel }
+                        : { displaySwitch: false }), loadDataOptions: loadDataOptions, openInfo: openInfo, onSelect: onChange, getIdOfData: getId, noOptionsText: noOptionsText, loadingText: loadingText, forceQuery: forceQuery, startTypingToSearchText: startTypingToSearchText, lru: lruData, sortCompareFn: sortCompareFn, filterIds: filterIds }) })] }));
 };
 export default React.memo(MultiSelectWithTags);

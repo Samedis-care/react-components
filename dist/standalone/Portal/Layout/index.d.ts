@@ -8,6 +8,10 @@ interface PortalLayoutBasic {
     variant: "basic";
     /**
      * Content displayed on the top-left corner of the screen
+     *
+     * In mobile view it is the first row of the drawer, 56px high. The drawer's
+     * close button, shown while it has keyboard focus, sits over that row and
+     * comes before it in the Tab order.
      */
     topLeft: React.ReactNode;
 }
@@ -24,6 +28,17 @@ interface PortalLayoutPropsBase {
     headerContent: React.ReactNode;
     /**
      * Content displayed in the menu area (usually a Menu)
+     *
+     * In mobile view it is shown in a drawer that the burger button opens. The
+     * burger says whether the drawer is open (`aria-expanded`) and names it
+     * (`aria-controls`, an id the layout generates).
+     * Escape, a click on the backdrop and the drawer's close button ("Close
+     * menu", `standalone.portal.close-menu`) close it; focus then returns to the
+     * element that had it before the drawer opened, usually the burger. The
+     * close button is for screen readers and keyboard users: it is visually
+     * hidden and takes no space, is the first stop of Tab in the drawer, and is
+     * shown at the top of the drawer, over the content, only while it has
+     * keyboard focus.
      */
     menuContent: React.ReactNode;
     /**
@@ -81,7 +96,13 @@ export interface PortalLayoutContainerOwnerState {
     drawerWidth: PortalLayoutProps["drawerWidth"];
 }
 export type PortalLayoutClassKey = "container";
-export type PortalRenderLayoutClassKey = "header" | "topLeft" | "menu" | "main" | "mobileTopLeft";
+/**
+ * Style slots of the layout's areas (theme name `CcPortalRenderLayout`):
+ * `header`, `topLeft`, `menu`, `main`; in mobile view, `mobileTopLeft` (the
+ * `topLeft` row at the top of the drawer) and `closeMenuButton` (the drawer's
+ * close button, shown while it has keyboard focus).
+ */
+export type PortalRenderLayoutClassKey = "header" | "topLeft" | "menu" | "main" | "mobileTopLeft" | "closeMenuButton";
 export interface PortalLayoutContextType {
     mobile: boolean;
     menuOpen: boolean;

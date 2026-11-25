@@ -144,24 +144,42 @@ class LazyConnector extends Connector {
      * @returns A record whose create is queued: what the queue will create. A record with a
      *          queued update: the backend's record with the update's fields laid over it
      *          (with fakeReads the update alone, as index lists it). Any other record: the
-     *          backend's.
+     *          backend's. A record from the backend carries the id index lists it by, which
+     *          for a record created through this connector stays its fake id after the
+     *          queue was worked, whichever of its ids it was read by.
      * @throws {Error} The record's delete is queued
      */
     read(id, model) {
         id = this.mapId(id);
         const localData = last(this.queue.filter((entry) => entry.id === id || (entry.deleteIds?.includes(id) ?? false)));
         if (!localData)
-            return this.realConnector.read(id, model);
+            return this.readFromBackend(id, model);
         const queued = localData.result;
         if (!queued)
             throw new Error("data has been deleted");
         if (localData.type === "create" || this.fakeReads)
             return queued;
         // an update may carry only the fields it changes
-        return (async () => {
-            const [backendRecord, ...rest] = await this.realConnector.read(id, model);
-            return [{ ...backendRecord, ...queued[0] }, ...rest];
-        })();
+        return this.readFromBackend(id, model, queued[0]);
+    }
+    /**
+     * Reads a record from the backend, as index lists it
+     * @param id The record's id as the backend knows it
+     * @param model The model performing the request
+     * @param update The fields of a queued update of the record, laid over it
+     * @returns The record under the id index lists it by: its fake id, if it was created
+     *          through this connector
+     */
+    async readFromBackend(id, model, update) {
+        const [backendRecord, ...rest] = await this.realConnector.read(id, model);
+        return [
+            {
+                ...backendRecord,
+                ...update,
+                id: this.unmapId(backendRecord.id),
+            },
+            ...rest,
+        ];
     }
     /**
      * Queues an update of a record
@@ -223,7 +241,8 @@ class LazyConnector extends Connector {
         this.onAfterOperation();
     }
     handleAdvancedDelete = (req, model) => {
-        if (!this.realConnector.deleteAdvanced)
+        const deleteAdvanced = this.realConnector.deleteAdvanced;
+        if (!deleteAdvanced)
             throw new Error("deleteAdvanced got undefined!");
         // the ids as the queue and the backend know them, in a copy: the caller's request
         // keeps naming the records the way the caller does
@@ -240,17 +259,25 @@ class LazyConnector extends Connector {
             });
             req[1] = req[1].filter((id) => !id.startsWith(this.FAKE_ID_PREFIX) ||
                 this.queue.find((entry) => entry.id === id));
-            req[1] = req[1].filter((id) => !id.startsWith(this.FAKE_ID_PREFIX) ||
-                this.queue.find((entry) => entry.id === id));
             if (!invert && req[1].length === 0) {
                 this.onAfterOperation();
                 return;
             }
         }
+        /**
+         * The request with its ids as the backend knows them, keeping its length so a
+         * connector can tell a request without a filter from one with
+         */
+        const mapRequest = (request) => request.length === 2
+            ? [request[0], request[1].map((id) => this.mapId(id))]
+            : [request[0], request[1].map((id) => this.mapId(id)), request[2]];
+        const queuedRequest = req;
         this.queue.push({
             type: "delete",
             id: null,
-            func: this.realConnector.deleteAdvanced.bind(this.realConnector, req, model),
+            // a record created in this batch has no server id when its delete is queued,
+            // so the ids are mapped again when the request is sent, as update does
+            func: () => deleteAdvanced.call(this.realConnector, mapRequest(queuedRequest), model),
             result: null,
         });
         this.onAfterOperation();

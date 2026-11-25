@@ -26,7 +26,9 @@ export interface MatrixColumn {
      * The column in words, for assistive technology: the full date in a
      * calendar ("Thursday, March 5, 2026"), where label and subLabel only show
      * "5" and "Thu". The add chips of the column's cells say it in their
-     * accessible name (see MatrixGridProps.addLabel). buildDateColumns sets it.
+     * accessible name (see MatrixGridProps.addLabel), as do the cells of an
+     * aggregate row without getCellLabel (see MatrixExtraRow.label).
+     * buildDateColumns sets it.
      * @default label, if that is a string or a number; nothing otherwise
      */
     name?: string;
@@ -77,14 +79,22 @@ export interface MatrixExtraRow {
      */
     header: React.ReactNode;
     /**
-     * Accessible name of the row, used for its cells when they report clicks
-     * (and as the fallback when getCellLabel is not given)
+     * Accessible name of the row ("Open demand"), used for its cells when they
+     * report clicks. Without getCellLabel, a cell is named by this and the
+     * column's name (MatrixColumn.name), joined with a comma: "Open demand,
+     * Thursday, March 5, 2026".
+     * @default header, if that is a string or a number; nothing otherwise
      */
     label?: string;
     /**
      * Accessible name of one cell of this row — the row's subject plus the
-     * column it stands for ("post a request for March 5th"). Falls back to
-     * label.
+     * column it stands for ("post a request for March 5th"). A cell that shows
+     * a badge is announced with the badge first: "2 post a request for March
+     * 5th".
+     * @default label and the column's name, see label. A cell whose row and
+     * column have no name either is named by its badge, or "Add" (in the
+     * current language) for the "+" it shows without one. Used as well when
+     * this returns an empty string.
      */
     getCellLabel?: (columnKey: string) => string;
     /**
@@ -157,6 +167,9 @@ export interface MatrixTileItem {
     key: string;
     /**
      * The entry's main label (a short code)
+     * @remarks Outside a diagonal pair, a string or a number is drawn the
+     * smaller the more characters it has (a number counts its digits, so 1234
+     * is drawn like "1234"); any other node at the largest size.
      */
     label: React.ReactNode;
     /**
@@ -211,9 +224,17 @@ export interface MatrixTileItem {
     highlighted?: boolean;
     /**
      * Small adornments pinned into the entry's corners. Keep them to a single
-     * icon each — a cell is tiny.
+     * icon each — a cell is tiny. A corner is drawn for any value but null,
+     * undefined, a boolean and an empty string, so 0 (a counter) shows, and
+     * `flag && <Icon />` leaves the corner empty. An adornment that sets no
+     * color of its own (MUI icons inherit theirs) is drawn in the entry's text
+     * color, as its label is (see textColor).
      * @remarks A diagonal pair renders only the first entry's bottomLeft corner,
-     * see MatrixCellTileProps.pairLayout.
+     * in that entry's text color, see MatrixCellTileProps.pairLayout.
+     *
+     * In a cell that shows MatrixGrid's add chip, the chip lies over the last
+     * entry's bottomRight corner while it shows (see
+     * MatrixGridProps.occupiedAddAffordance).
      */
     corners?: Partial<Record<MatrixTileCorner, React.ReactNode>>;
     /**

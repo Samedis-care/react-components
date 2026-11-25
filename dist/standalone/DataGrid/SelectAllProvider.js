@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DATA_GRID_DEFAULT_ROWS_PER_PAGE, DataGridSelectAllContext, useDataGridColumnState, useDataGridProps, useDataGridState, } from "./DataGrid";
 import { dataGridGetQuery, dataGridLoadFirstRows, } from "./CallbackUtil";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -8,42 +8,55 @@ import useCCTranslations from "../../utils/useCCTranslations";
  * checkbox in the footer and the one in the column header are one control
  */
 const SelectAllProvider = (props) => {
-    const { enableSelectAll, limitSelectAll, prohibitMultiSelect, loadData, rowsPerPage, getAdditionalFilters, canSelectRow, onError, } = useDataGridProps();
+    const { enableSelectAll, limitSelectAll, prohibitMultiSelect, disableSelection, loadData, rowsPerPage, getAdditionalFilters, canSelectRow, onError, } = useDataGridProps();
     const [state, setState] = useDataGridState();
     const [columnsState] = useDataGridColumnState();
     const { t } = useCCTranslations();
     const { selectAll, selectedRows, limitedSelectAll, rows, search, customData, refreshDataInstance, } = state;
-    // the selection a limited select all started from while it loads its rows
-    const [loadingFrom, setLoadingFrom] = useState(null);
-    // counts the clicks: a later click, or the unmount, drops what an earlier
-    // click still loads
-    const clicks = useRef(0);
-    useEffect(() => () => {
-        clicks.current++;
-    }, []);
+    // the limited select all loading its rows
+    const [loading, setLoading] = useState(null);
+    // that load while it is for the query the grid shows
+    const load = loading?.refreshDataInstance === refreshDataInstance ? loading : null;
+    // a reload or the unmount ends it, a later click too (onSelect). A row
+    // (un)ticked meanwhile drops only the selection it would make: the rows it
+    // loads still land in the grid
+    useEffect(() => {
+        if (!load)
+            return;
+        return () => load.controller.abort();
+    }, [load]);
     const onSelect = useCallback((_evt, newChecked) => {
-        const click = ++clicks.current;
+        // a later click ends what an earlier one still loads
+        loading?.controller.abort();
         if (limitSelectAll !== undefined && newChecked) {
-            const from = { selectAll, selectedRows };
-            setLoadingFrom(from);
+            const controller = new AbortController();
+            const { signal } = controller;
+            const from = {
+                selectAll,
+                selectedRows,
+                refreshDataInstance,
+                controller,
+            };
+            setLoading(from);
             void (async () => {
                 let result;
                 try {
-                    result = await dataGridLoadFirstRows(loadData, dataGridGetQuery({ search, customData }, columnsState, getAdditionalFilters), rowsPerPage || DATA_GRID_DEFAULT_ROWS_PER_PAGE, rows, limitSelectAll, canSelectRow);
+                    result = await dataGridLoadFirstRows(loadData, dataGridGetQuery({ search, customData }, columnsState, getAdditionalFilters), rowsPerPage || DATA_GRID_DEFAULT_ROWS_PER_PAGE, rows, limitSelectAll, canSelectRow, signal);
                 }
                 catch (err) {
-                    if (click !== clicks.current)
+                    // ended meanwhile (this may be the abort itself): dropped
+                    if (signal.aborted)
                         return;
-                    setLoadingFrom(null);
+                    setLoading(null);
                     // eslint-disable-next-line no-console
                     console.error("[Components-Care] [DataGrid] Select all: ", err);
                     if (onError)
                         onError(err);
                     return;
                 }
-                if (click !== clicks.current)
+                if (signal.aborted)
                     return;
-                setLoadingFrom(null);
+                setLoading(null);
                 const ids = result.rows.map((row) => row.id);
                 setState((prevState) => {
                     // the grid shows another query since
@@ -68,7 +81,7 @@ const SelectAllProvider = (props) => {
             })();
             return;
         }
-        setLoadingFrom(null);
+        setLoading(null);
         // all or nothing: the rows (un)ticked one by one don't carry over, else
         // they would turn into the exceptions and invert the selection
         setState((prevState) => ({
@@ -92,11 +105,13 @@ const SelectAllProvider = (props) => {
         refreshDataInstance,
         selectAll,
         selectedRows,
+        loading,
     ]);
-    // until the selection changes, which makes it drop the rows it loads
-    const busy = loadingFrom !== null &&
-        loadingFrom.selectAll === selectAll &&
-        loadingFrom.selectedRows === selectedRows;
+    // until the selection or the query changes, which makes it drop the rows
+    // it loads
+    const busy = load !== null &&
+        load.selectAll === selectAll &&
+        load.selectedRows === selectedRows;
     // the rows the limited select all selected, in any order: a row unticked and
     // ticked again moves to the end
     const limitedSelected = useMemo(() => {
@@ -111,7 +126,9 @@ const SelectAllProvider = (props) => {
     }, [selectedRows, limitedSelectAll]);
     const checked = busy || (selectAll ? selectedRows.length === 0 : limitedSelected);
     const indeterminate = !checked && selectedRows.length > 0;
-    const disabled = !enableSelectAll || !!prohibitMultiSelect;
+    // disableSelection hides the footer's checkbox: hidden, it must not be
+    // focused or ticked either
+    const disabled = !enableSelectAll || !!prohibitMultiSelect || !!disableSelection;
     const limited = limitSelectAll !== undefined &&
         (state.rowsFiltered ?? state.rowsTotal) > limitSelectAll;
     const label = limited

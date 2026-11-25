@@ -1,8 +1,9 @@
 import React from "react";
 import { MultiSelectWithoutGroupProps } from "./MultiSelectWithoutGroup";
-import { BaseSelectorData, BaseSelectorLoadHandler, BaseSelectorProps, SelectorLruOptions } from "./BaseSelector";
+import { BaseSelectorData, BaseSelectorLoadHandler, SelectorLruOptions } from "./BaseSelector";
 import { MultiSelectorData } from "./MultiSelect";
-export interface MultiSelectWithTagsProps<DataT extends MultiSelectorData, GroupT extends BaseSelectorData> extends Pick<BaseSelectorProps<GroupT, false>, "disabled" | "noOptionsText" | "loadingText" | "closeText" | "openText" | "displaySwitch" | "defaultSwitchValue" | "switchLabel" | "forceQuery" | "startTypingToSearchText">, Omit<MultiSelectWithoutGroupProps<DataT>, "additionalOptions" | "classes" | "onChange" | "dataOptions" | "setDataOptions" | "label"> {
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+export type MultiSelectWithTagsProps<DataT extends MultiSelectorData, GroupT extends BaseSelectorData> = DistributiveOmit<MultiSelectWithoutGroupProps<DataT>, "additionalOptions" | "classes" | "onChange" | "dataOptions" | "setDataOptions" | "label"> & {
     /**
      * Title of the control, shown above both fields; names the group they form
      * for assistive technology
@@ -43,6 +44,8 @@ export interface MultiSelectWithTagsProps<DataT extends MultiSelectorData, Group
      * Callback which loads the data entries for the given group
      * @remarks While they load, the control is busy (`aria-busy`) and the group
      * field is read-only: it keeps focus, but nothing can be typed or picked.
+     * An entry of `removed` among them (the same id, see `getIdOfData`) is selected again
+     * as the entry of `removed`, so that `onChange` restores it rather than adding it anew.
      * @param group The group which was selected
      * @returns The data entries to add for this group
      */
@@ -71,7 +74,7 @@ export interface MultiSelectWithTagsProps<DataT extends MultiSelectorData, Group
      * Custom CSS classes
      */
     classes?: Partial<Record<MultiSelectWithTagsClassKey, string>>;
-}
+};
 /**
  * Slots of MultiSelectWithTags (theme `CcMultiSelectWithTags`, `classes`):
  * - `root`: the outer element, a group named by the title

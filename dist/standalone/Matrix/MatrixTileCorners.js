@@ -27,11 +27,19 @@ const ALL_CORNERS = [
     "bottomLeft",
     "bottomRight",
 ];
+/**
+ * Whether a corner value draws anything. 0 does, as it does as a label,
+ * secondary label or placeholder. null, undefined, a boolean (`flag && <Icon />`)
+ * and an empty string draw nothing, so they get no corner element either.
+ * @param value The corner's adornment
+ * @returns true if the corner is to be drawn
+ */
+const drawsCorner = (value) => value != null && typeof value !== "boolean" && value !== "";
 const MatrixTileCorners = (props) => {
     const { corners } = props.item;
     if (!corners)
         return null;
-    return (_jsx(_Fragment, { children: (props.only ?? ALL_CORNERS).map((corner) => corners[corner] ? (_jsx(MatrixTileCornerRoot, { className: combineClassNames([
+    return (_jsx(_Fragment, { children: (props.only ?? ALL_CORNERS).map((corner) => drawsCorner(corners[corner]) ? (_jsx(MatrixTileCornerRoot, { className: combineClassNames([
                 props.className,
                 CORNER_CLASS[corner],
             ]), children: corners[corner] }, corner)) : null) }));

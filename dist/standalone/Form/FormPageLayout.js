@@ -45,12 +45,14 @@ const Footer = styled("div", { name: "CcFormPageLayout", slot: "footer" })({
     position: "sticky",
     bottom: 36,
     flexShrink: 0,
-    // as wide as its buttons
+    // as wide as its buttons, but never wider than the layout: on a narrow screen the
+    // buttons wrap inside it (FormButtons) instead of the bar sticking out of its
+    // container and making the page scroll sideways
     alignSelf: "flex-start",
+    maxWidth: "100%",
     // 30px between the body's content and the footer, plus the up to 36px the footer
     // is lifted by where the layout ends at the bottom of the visible area
     margin: "66px 0 0",
-    transform: "translateX(36px)",
     padding: 0,
     // a footer that renders nothing (a FormButtons without a button left) keeps no
     // space below the body
@@ -154,10 +156,9 @@ const FormPageLayout = (inProps) => {
  * flex column it grows into the space the other children leave (`flex-grow: 1`), and
  * as the only element of a parent of definite height it is at least as tall as that
  * parent (`min-height: 100%`). The body grows, and the footer follows it at the
- * bottom of the layout, 36px right of its start. The footer is `position: sticky`
- * with `bottom: 36px`, so it never sits lower than 36px above the bottom of the
- * visible area of whatever scrolls (the scroll container's content area, inside its
- * padding, or the viewport):
+ * bottom of the layout. The footer is `position: sticky` with `bottom: 36px`, so it
+ * never sits lower than 36px above the bottom of the visible area of whatever scrolls
+ * (the scroll container's content area, inside its padding, or the viewport):
  *
  * - A long form: while the body reaches below the visible area, the footer stays 36px
  *   above the visible area's bottom and the body scrolls under it. Scrolled to the
@@ -175,6 +176,12 @@ const FormPageLayout = (inProps) => {
  *   36px above the layout's end. That is where a floating footer rests at the end of a
  *   long form and on a short form that fills its parent; on a long form, Save is at
  *   the end.
+ *
+ * Horizontally, the footer is as wide as its content, but never wider than the layout
+ * (`align-self: flex-start` with `max-width: 100%`), and sits at the layout's start
+ * edge: the left edge, or the right edge in a right-to-left layout. A footer whose
+ * content can wrap or shrink to fit there, as FormButtons' buttons do, therefore stays
+ * within the layout on a narrow screen; one that can do neither still sticks out.
  *
  * Without buttons (`footer` `null`, `undefined` or `false`, as BasicFormPage passes
  * while a nested form page is open in its body) the layout renders no footer element

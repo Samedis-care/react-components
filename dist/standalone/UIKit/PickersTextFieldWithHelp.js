@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { IconButton, InputAdornment } from "@mui/material";
 import { Clear as ClearIcon, Info as InfoIcon } from "@mui/icons-material";
 import { InputLabelConfig, UiKitPickersTextField, } from "./CommonStyles";
@@ -7,6 +7,7 @@ import isTouchDevice from "../../utils/isTouchDevice";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 import { withMuiFieldState } from "./MuiFieldState";
 import useCCTranslations from "../../utils/useCCTranslations";
+import { useRefComposer } from "react-ref-composer";
 export const UiKitPickersTextFieldWithState = withMuiFieldState(UiKitPickersTextField);
 const TextFieldWithHelp = React.forwardRef(function PickersTextFieldWithHelpInner(props, ref) {
     const { openInfo, customHandleClear, disableClearable, warning, dirty, onChange, ...muiProps } = props;
@@ -14,11 +15,15 @@ const TextFieldWithHelp = React.forwardRef(function PickersTextFieldWithHelpInne
     // handle clear
     const [hasInputValue, setHasInputValue] = useState(!!muiProps.defaultValue);
     const hasValue = muiProps.value == null ? hasInputValue : !!muiProps.value;
+    const composeSectionListRef = useRefComposer();
+    const sectionListRef = useRef(null);
     const handleClear = useCallback((evt) => {
         evt.stopPropagation();
-        if (customHandleClear) {
-            return customHandleClear();
-        }
+        if (!customHandleClear)
+            return;
+        customHandleClear();
+        // the Clear button unmounts with the value: keep focus in the field
+        sectionListRef.current?.getSectionContent(0)?.focus();
     }, [customHandleClear]);
     // keep "hasValue" up to date
     const handleChange = useCallback((evt) => {
@@ -36,7 +41,7 @@ const TextFieldWithHelp = React.forwardRef(function PickersTextFieldWithHelpInne
         !inputSlotProps?.readOnly &&
         !disableClearable;
     const hasEndAdornment = !!(showClear || openInfo || existingEndAdornment);
-    return (_jsx(UiKitPickersTextFieldWithState, { ref: ref, ...muiProps, warning: warning, dirty: dirty, onChange: handleChange, slotProps: {
+    return (_jsx(UiKitPickersTextFieldWithState, { ref: ref, ...muiProps, warning: warning, dirty: dirty, onChange: handleChange, sectionListRef: composeSectionListRef(sectionListRef, muiProps.sectionListRef), slotProps: {
             ...muiProps.slotProps,
             input: {
                 ...inputSlotProps,

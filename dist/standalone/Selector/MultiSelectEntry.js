@@ -111,7 +111,7 @@ const MultiSelectEntry = (inProps) => {
     const restorable = changeState === "removed";
     const handleAction = restorable ? handleRestore : handleDelete;
     const rowOwnerState = { unClickable: !data.onClick, ignore: !!data.ignore };
-    return (_jsxs(Root, { className: combineClassNames([className, classes?.root]), children: [data.onClick ? (_jsx(Selected, { ownerState: rowOwnerState, onClick: data.onClick, className: classes?.selected, children: rowContent })) : (_jsx(SelectedText, { ownerState: rowOwnerState, className: classes?.selected, children: rowContent })), handleAction && (_jsx(ListItemSecondaryAction, { children: _jsx(StyledRemoveButton, { className: classes?.icon, edge: "end", name: data.value, onClick: handleAction, "aria-label": t(restorable
+    return (_jsxs(Root, { className: combineClassNames([className, classes?.root]), children: [data.onClick ? (_jsx(Selected, { ownerState: rowOwnerState, onClick: data.onClick, className: classes?.selected, children: rowContent })) : (_jsx(SelectedText, { ownerState: rowOwnerState, className: classes?.selected, children: rowContent })), handleAction && (_jsx(ListItemSecondaryAction, { children: _jsx(StyledRemoveButton, { className: classes?.icon, edge: "end", onClick: handleAction, "aria-label": t(restorable
                         ? "standalone.selector.multi-select.restore-item"
                         : "standalone.selector.multi-select.remove-item", { ITEM: data.label }), children: restorable ? (_jsx(StyledRestoreIcon, { className: classes?.restoreIconSvg })) : (_jsx(StyledRemoveIcon, { className: classes?.iconSvg })) }) })), enableDivider && _jsx(StyledDivider, { className: classes?.divider })] }));
 };

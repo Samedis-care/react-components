@@ -8,21 +8,26 @@ import SingleSelect from "../Selector/SingleSelect";
  */
 export interface GridSingleSelectFilterProps {
     /**
-     * The filter's label: the selector's label in the bar, a text above the
-     * radios in the panel
+     * The filter's label: the select's label in the bar (and in the panel on a
+     * phone), a text above the radios in the panel
      */
     label?: string;
     /**
      * All available options. There is no built-in "no filter" choice: add an
-     * option for it (for example with the value "")
+     * option for it (for example with the value ""). The bar and the panel
+     * treat them alike, as BaseSelector does: an entry with hidden is not
+     * listed, one with isDisabled is shown but cannot be picked, a
+     * `[text, node]` label shows its node, an isDivider entry is drawn as a
+     * separator and an isSmallLabel entry as a text between the others.
      */
     options: BaseSelectorData[];
     /**
      * The key of the grid's custom data this filter edits. Its value in
      * DataGridProps.defaultCustomData is the filter's default: shown while
-     * selected is unset, and restored by "Reset filter". While the selection
-     * differs from it (isDataGridCustomFilterActive: undefined, null and ""
-     * count as unset), the bar outlines the filter.
+     * selected is unset, and restored by "Reset filter" and by the filter
+     * panel's "Reset". While the selection differs from it
+     * (isDataGridCustomFilterActive: undefined, null and "" count as unset),
+     * the select is outlined, in the bar and in the panel on a phone.
      */
     field: string;
     /**
@@ -37,12 +42,16 @@ export interface GridSingleSelectFilterProps {
      */
     onSelect: (selected: string) => void;
     /**
-     * Renders the filter panel's variant: pass IDataGridFilterBarProps.inDialog
+     * Whether the filter is in the filter panel: pass
+     * IDataGridFilterBarProps.inDialog. The panel lists the options as radio
+     * buttons, so one click picks one. On a phone (the theme's xs breakpoint)
+     * it shows the bar's select instead, one row instead of every option. Both
+     * are sized by dialogBreakpoints.
      */
     dialog: boolean;
     /**
      * The id of the bar's input (SingleSelect autocompleteId); unused in the
-     * panel
+     * panel, also by its select on a phone
      */
     autocompleteId?: string;
     /**

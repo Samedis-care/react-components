@@ -5,19 +5,26 @@
 			"today": "Vandaag",
 			"prev-week": "Vorige week",
 			"next-week": "Volgende week",
-			"filter-settings": "Filterinstellingen"
+			"filter-settings": "Filterinstellingen",
+			"week-load-error": "Week {{WEEK}} kon niet worden geladen",
+			"retry": "Opnieuw proberen"
 		},
 		"portal": {
 			"menu-toggle": "Menu wisselen",
 			"collapse-menu": "Menu inklappen",
-			"expand-menu": "Menu uitklappen"
+			"expand-menu": "Menu uitklappen",
+			"close-menu": "Menu sluiten"
 		},
 		"uikit": {
 			"info": "Meer informatie",
 			"clear": "Wissen",
+			"field-state": {
+				"dirty": "(gewijzigd)"
+			},
 			"multi-language-input": {
 				"language": "Taal",
 				"language-of": "Taal van {{label}}",
+				"show-translations-of": "Vertalingen van {{label}} tonen",
 				"toggle-languages": "Talinvoer wisselen"
 			},
 			"number-input": {
@@ -88,6 +95,12 @@
 					"or": "OF",
 					"and": "EN"
 				},
+				"filter-value": {
+					"date": "Datum",
+					"date-time": "Datum en tijd",
+					"from": "Van",
+					"to": "Tot"
+				},
 				"no-data-filters": "Er zijn geen gegevens die aan uw filters voldoen.",
 				"no-data-reset-filters": "Filters wissen",
 				"select-row": "{{ROW}} selecteren",
@@ -102,6 +115,7 @@
 				"search": "Zoeken",
 				"more-options": "Meer opties",
 				"custom-filter-button": "Filter",
+				"custom-filter-button-label": "Filter selecteren",
 				"delete": "Verwijderen",
 				"edit": "Bewerken",
 				"reset-options": {
@@ -124,11 +138,13 @@
 				"close": "Sluiten"
 			},
 			"custom-filters": {
-				"title": "Filterselectie"
+				"title": "Filterselectie",
+				"reset": "Resetten",
+				"show-results": "Resultaten tonen"
 			},
 			"footer": {
-				"total": "Totaal:",
-				"filtered": "Gefilterd:",
+				"counts": "Totaal: {{TOTAL}}",
+				"counts-filtered": "Gefilterd: {{FILTERED}} Totaal: {{TOTAL}}",
 				"edit": "Bewerken",
 				"delete": "Verwijderen",
 				"more": "Meer",
@@ -177,7 +193,8 @@
 		},
 		"file-upload": {
 			"upload": "Uploaden",
-			"restore": "Herstellen",
+			"remove-file": "{{NAME}} verwijderen",
+			"restore-file": "{{NAME}} herstellen",
 			"upload-modern": "Bestand via drag & drop of klik hier",
 			"no-files": "Geen bijlagen beschikbaar",
 			"formats": "Bestandsindelingen",
@@ -198,7 +215,8 @@
 			},
 			"multi-image": {
 				"edit": "Bewerken",
-				"primary": "Primair",
+				"is-primary": "Hoofdafbeelding",
+				"make-primary": "Instellen als hoofdafbeelding",
 				"remove": "Afbeelding verwijderen",
 				"add": "Afbeelding toevoegen",
 				"replace": "Afbeelding vervangen",
@@ -218,7 +236,10 @@
 			},
 			"close": "Sluiten",
 			"rotate-left": "Naar links draaien",
-			"rotate-right": "Naar rechts draaien"
+			"rotate-right": "Naar rechts draaien",
+			"zoom-in": "Inzoomen",
+			"zoom-out": "Uitzoomen",
+			"reset-zoom": "Zoom herstellen"
 		},
 		"phone-number": {
 			"invalid": "Voer het juiste telefoonnummer in"
@@ -238,7 +259,10 @@
 					"no": "Nee"
 				},
 				"close": "Sluiten",
-				"signature": "Handtekening"
+				"signature": "Handtekening",
+				"sign-area": "Handtekeningvak",
+				"instructions": "Teken je handtekening in het handtekeningvak met een muis, pen of vinger.",
+				"instructions-signed": "De opgeslagen handtekening wordt getoond. Verwijder de handtekening eerst om opnieuw te tekenen."
 			},
 			"sign-here": "Teken hier digitaal",
 			"required": "Verplicht"
@@ -250,8 +274,19 @@
 		"toast": {
 			"close": "Sluiten"
 		},
+		"info-box": {
+			"status": {
+				"warning": "Waarschuwing:",
+				"success": "Succes:",
+				"error": "Fout:"
+			}
+		},
 		"loader": {
 			"label": "Laadt…"
+		},
+		"matrix": {
+			"tile-more": "nog {{count}}:",
+			"extra-cell-add": "Toevoegen"
 		}
 	},
 	"non-standalone": {
@@ -340,9 +375,15 @@
 					"buttons": {
 						"okay": "OK"
 					}
+				},
+				"success-toast": {
+					"message_one": "{{count}} item verwijderd",
+					"message_other": "{{count}} items verwijderd",
+					"messageInverted": "De geselecteerde items zijn verwijderd"
 				}
 			},
 			"inline-edit": {
+				"cell-control-label": "{{FIELD}}, {{ROW}}",
 				"error-dialog": {
 					"message": "De wijziging van ‘{{LABEL}}’ is niet opgeslagen: {{ERROR}}"
 				}
@@ -363,6 +404,13 @@
 			},
 			"read-only": {
 				"submitting": "Het formulier wordt momenteel opgeslagen"
+			},
+			"tab": {
+				"invalid": "Bevat ongeldige velden.",
+				"modified": "Bevat gewijzigde velden."
+			},
+			"form-dialog": {
+				"open-in-new-tab": "Openen in nieuw tabblad"
 			}
 		},
 		"selector": {
@@ -390,6 +438,7 @@
 				"last_error": "Laatste error",
 				"errors": {
 					"file_select": "Ongeldig bestand geselecteerd",
+					"file_count": "Er kan maar één bestand worden geïmporteerd",
 					"file_read": "{{FILE_NAME}} kan niet worden gelezen. Sla het bestand op als Excel-werkmap (.xlsx) zonder wachtwoord en kies het opnieuw.",
 					"update-key-not-uniq": "{{UPDATE_KEY}} is niet uniek in importdataset"
 				},
@@ -450,6 +499,7 @@
 		},
 		"dialogs": {
 			"error-title": "Er is een fout opgetreden",
+			"error-no-details": "Er zijn geen verdere details beschikbaar. Probeer het nog eens.",
 			"validation-error-title": "Fout bij validatie",
 			"info": "Info",
 			"are-you-sure": "Weet je het zeker?",

@@ -1,19 +1,21 @@
 import React from "react";
 import { DataGridDispatch, DataGridFilterParameters, DataGridProps, IDataGridAddButton } from "../../standalone/DataGrid/DataGrid";
 import { ModelRecord, ModelUnknown } from "../../backend-integration/Model/Model";
-export interface BackendDataGridProps<M extends ModelUnknown> extends Omit<DataGridProps, "loadData" | "columns" | "exporters" | "onDelete" | "getRowLabel"> {
+export interface BackendDataGridProps<M extends ModelUnknown> extends Omit<DataGridProps, "loadData" | "columns" | "exporters" | "onDelete" | "deleting" | "getRowLabel"> {
     /**
      * The model to use
      */
     model: M;
     /**
      * The text that identifies a row to assistive technology, e.g. a person's
-     * name: the row's checkbox is named after it ("Select Carol Jones"), and a
-     * customSelectionControl gets it as rowLabel.
+     * name: the row's checkbox is named after it ("Select Carol Jones"), a
+     * customSelectionControl gets it as rowLabel, and a control edited in a cell
+     * is named after it and its field ("Active, Carol Jones").
      * Defaults to DataGridProps.getRowLabel's default: the text the first
      * visible text column shows.
      * @param record The row's record, as the model's index returned it
-     * @return The label; an empty string names the checkbox "Select row"
+     * @return The label; an empty string names the checkbox "Select row" and
+     *         leaves a control edited in a cell named after its field alone
      */
     getRowLabel?: (record: ModelRecord<M>) => string;
     /**
@@ -43,6 +45,16 @@ export interface BackendDataGridProps<M extends ModelUnknown> extends Omit<DataG
      */
     customDeleteErrorHandler?: (error: Error) => Promise<void> | void;
     /**
+     * Custom delete success handler, called once a delete went through, instead
+     * of the built-in toast ("2 entries deleted", announced politely), e.g. to
+     * word it for what the grid's delete means to the user
+     * @param inverted IDs inverted? (all except ids)
+     * @param ids The IDs deleted (or not deleted)
+     * @param filter Complex filter (see DataGridProps.onDelete)
+     * @remarks Called after the grid refreshes and before onDeleteSettled
+     */
+    customDeleteSuccessHandler?: (inverted: boolean, ids: string[], filter: DataGridFilterParameters | undefined) => void;
+    /**
      * Called once a delete has run, whether it succeeded or failed, e.g. to
      * refresh data outside the grid that the delete changed
      * @param inverted IDs inverted? (all except ids)
@@ -57,10 +69,16 @@ export interface BackendDataGridProps<M extends ModelUnknown> extends Omit<DataG
 }
 export declare const useBackendDataGridAddNewButtons: (props: Pick<BackendDataGridProps<ModelUnknown>, "onAddNew" | "additionalNewButtons">) => string | IDataGridAddButton[] | (() => void) | undefined;
 /**
+ * The delete props of BackendDataGrid that useBackendDataGridDeleteHandler takes
+ */
+type BackendDataGridDeleteProps<M extends ModelUnknown> = Pick<BackendDataGridProps<M>, "model" | "enableDelete" | "enableDeleteAll" | "customDeleteConfirm" | "customDeleteErrorHandler" | "customDeleteSuccessHandler" | "onDeleteSettled">;
+/**
  * The delete handler BackendDataGrid passes to DataGrid as onDelete: it asks for
  * confirmation (customDeleteConfirm or the built-in dialog), deletes through the
- * model, calls refreshGrid and onDeleteSettled, and reports a failure
- * (customDeleteErrorHandler or the built-in error dialog).
+ * model, calls refreshGrid, announces the delete (customDeleteSuccessHandler or a
+ * toast such as "2 entries deleted"), calls onDeleteSettled, and reports a failure
+ * (customDeleteErrorHandler or the built-in error dialog). It needs the Framework
+ * (its dialogs and toasts).
  * @param props The delete props of BackendDataGrid
  * @param refreshGrid Called after the delete ran, failed or not, to reload the rows
  * @returns The handler, or undefined without enableDelete. The handler resolves false
@@ -68,7 +86,7 @@ export declare const useBackendDataGridAddNewButtons: (props: Pick<BackendDataGr
  *          keeps the selection. It resolves true once the delete ran, also when it
  *          failed (a failed delete may have deleted some of the records).
  */
-export declare const useBackendDataGridDeleteHandler: <M extends ModelUnknown>(props: Pick<BackendDataGridProps<M>, "model" | "enableDelete" | "enableDeleteAll" | "customDeleteConfirm" | "customDeleteErrorHandler" | "onDeleteSettled">, refreshGrid: () => void) => ((invert: boolean, ids: string[], filter?: DataGridFilterParameters) => Promise<boolean>) | undefined;
+export declare const useBackendDataGridDeleteHandler: <M extends ModelUnknown>(props: BackendDataGridDeleteProps<M>, refreshGrid: () => void) => ((invert: boolean, ids: string[], filter?: DataGridFilterParameters) => Promise<boolean>) | undefined;
 /**
  * Turns a record from model.index into a grid row: `row.id` is the record's id,
  * `row[field]` the rendered cell of each model field and `row[field + "_raw"]` its
@@ -76,7 +94,9 @@ export declare const useBackendDataGridDeleteHandler: <M extends ModelUnknown>(p
  * edited in its cell, which saves every change at once through the model's mutation
  * (useModelMutation, so the model's cache, hooks and "mutate" listeners hear of it), then
  * calls refreshGrid; a refused save is shown in an error dialog (the cell needs the
- * Framework), and refreshGrid is called as well.
+ * Framework), and refreshGrid is called as well. The cell's control is named after its
+ * field and the row ("Active, example.com"), since a grid cell has no label element to
+ * name it (InlineEditCell).
  * @param model The model the record belongs to
  * @param refreshGrid Called after an inline edit was saved or refused, to reload the
  *                    rows

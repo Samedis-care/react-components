@@ -80,8 +80,15 @@ export interface PageProps<M extends ModelUnknown, CustomPropsT> {
     isSubmitting: boolean;
     /**
      * Is the form dirty?
+     * @see FormContextData.dirty
      */
     dirty: boolean;
+    /**
+     * Flow mode: do values that stages staged and the flow has not saved yet differ from the
+     * server record?
+     * @see FormContextData.stagedDirty
+     */
+    stagedDirty: boolean;
     /**
      * Has the form disableRouting flag?
      * @see FormProps disableRouting
@@ -196,6 +203,8 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
      *          one that is not mounted are neither saved nor counted as dirty until it mounts
      *          again. In flow mode, the queue a submit staged before the control unmounted (a
      *          stage that was left) is saved like the staged values, see useLazyCrudConnector.
+     *          What counts for such a control is the value when it unmounts: while it is
+     *          mounted its queue keeps the Form dirty and is saved, also when this changes.
      */
     onlySubmitMounted?: boolean;
     /**
@@ -282,7 +291,10 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
     formClass?: string;
     /**
      * Disable routing for form
-     * @remarks This is used to prevent errors when using forms in dialogs which don't support routing
+     * @remarks This is used to prevent errors when using forms in dialogs which don't support routing.
+     *          It does not change what the leave guard of a dirty form asks: a navigation that
+     *          keeps the nearest Route around the Form rendered at the same url passes without
+     *          "Leave form page?" (e.g. routed tabs in the form page), as the Form stays mounted.
      */
     disableRouting?: boolean;
     /**
@@ -300,6 +312,9 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
     showDirtyState?: boolean;
     /**
      * Enable flow engine mode
+     * @remarks The form has two dirty flags then: `dirty` for the values of the shown stage,
+     *          `stagedDirty` for the values that stages staged and the flow has not saved yet.
+     *          See FormContextData.dirty and FormContextData.stagedDirty.
      */
     flowEngine?: boolean;
     /**
@@ -421,6 +436,13 @@ export interface FormContextData<M extends ModelUnknown, CustomPropsT = unknown>
      */
     setCustomState: <T>(field: string, data: Dispatch<SetStateAction<T | undefined>>) => void;
     /**
+     * Tells whether custom field state is stored under the name
+     * @param field custom field name (must not be in model)
+     * @returns true once setCustomState wrote the name, also when it wrote null or
+     *          undefined; false before
+     */
+    hasCustomState: (field: string) => boolean;
+    /**
      * Set custom field dirty state
      * @param field The unique field name
      * @param dirty The dirty state
@@ -458,12 +480,41 @@ export interface FormContextData<M extends ModelUnknown, CustomPropsT = unknown>
      */
     removeEventListener: FormEventTarget["removeEventListener"];
     /**
-     * Is the form dirty?
+     * Is the form dirty? Do the values it submits differ from the server record, is a custom
+     * field dirty (setCustomFieldDirty), or is the record deleted on submit (deleteOnSubmit)?
+     *
+     * In flow mode (FormProps.flowEngine) the values are those the shown stage submits: the
+     * fields it renders, alwaysSubmitFields and hidden fields, or every field when its stage
+     * config turns onlySubmitMounted off. What earlier stages staged (goToStage without
+     * submitToServer) and the stage does not submit again is not counted here but in
+     * stagedDirty. A button that goes on to the next stage without saving (Next) follows this
+     * flag. A button that saves (FlowEngineSaveButton, goToStage with submitToServer) saves the
+     * shown stage's values and the staged ones, so it follows `dirty || stagedDirty`, and so
+     * does every check whether the form holds unsaved changes.
      * @remarks This is rendered state, so it lags behind by a render. Subscribe to the
      *          "dirty" event to be notified the moment the form engine sees the change.
      * @see addEventListener
+     * @see stagedDirty
      */
     dirty: boolean;
+    /**
+     * Flow mode (FormProps.flowEngine): do the values that stages staged (goToStage without
+     * submitToServer) differ from the server record? They are what the next save sends besides
+     * the values of the shown stage, also while the stage that renders them is not shown.
+     *
+     * Set from the moment a stage change stages an edit until the flow saves it (goToStage
+     * with submitToServer, FlowEngineSaveButton, submit with submitToServer), or until the
+     * staged value is the server's again. Always false without flowEngine.
+     *
+     * The form holds unsaved changes while `dirty || stagedDirty`: the leave guard asks then
+     * (closing the browser tab, a navigation away, closing a FullFormDialog, the form page's
+     * goBack), and a Save button is enabled then. A Next button follows `dirty` alone.
+     * @remarks This is rendered state, so it lags behind by a render; the "dirty" event
+     *          carries it too.
+     * @see dirty
+     * @see addEventListener
+     */
+    stagedDirty: boolean;
     /**
      * Per-field dirty state: does the field's value differ from the server-side one?
      * @remarks One entry per model field, and nothing else. Custom (non-model) fields
@@ -522,7 +573,10 @@ export interface FormContextData<M extends ModelUnknown, CustomPropsT = unknown>
      */
     readOnlyReasons: Partial<Record<"form-legacy" | string, string | null>>;
     /**
-     * Is the form being submitted
+     * Is the form being submitted, or busy (see addBusyReason)? While it is, the form's
+     * root element (the `<form>`, or the `<div>` of a nested form and with
+     * `renderFormAsDiv`) has `aria-busy="true"`, which tells assistive technology that
+     * its content is changing.
      */
     submitting: boolean;
     /**
@@ -687,7 +741,7 @@ export type FormContextModelTypeRequired<M> = [M] extends [never] ? [modelTypeAr
  * @remarks M is not checked against the model the form actually uses
  */
 export declare const useFormContext: <M extends ModelUnknown = never, CustomPropsT = unknown>(..._modelTypeRequired: FormContextModelTypeRequired<M>) => FormContextData<M, CustomPropsT>;
-export type FormContextDataLite<M extends ModelUnknown, CustomPropsT = unknown> = Pick<FormContextData<M, CustomPropsT>, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "initialValues" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly" | "removeCustomReadOnly" | "addEventListener" | "removeEventListener" | "flowEngine" | "submit" | "safeSubmit" | "submitting" | "dirty" | "showDirtyState" | "flowEngineConfig" | "refetchForm">;
+export type FormContextDataLite<M extends ModelUnknown, CustomPropsT = unknown> = Pick<FormContextData<M, CustomPropsT>, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "initialValues" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly" | "removeCustomReadOnly" | "addEventListener" | "removeEventListener" | "flowEngine" | "submit" | "safeSubmit" | "submitting" | "dirty" | "stagedDirty" | "showDirtyState" | "flowEngineConfig" | "refetchForm">;
 export declare const FormContextLite: React.Context<FormContextDataLite<ModelUnknown, unknown> | null>;
 /**
  * The lite context of the form this component is rendered in

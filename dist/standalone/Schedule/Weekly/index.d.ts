@@ -3,9 +3,11 @@ import { IDayData, ScheduleAction, ScheduleFilterDefinition } from "../Common/Da
 export interface WeekViewProps {
     /**
      * Callback to load data of this week. Called on mount and again when the
-     * week, the filter values or this function change; only the result or
-     * error of the latest call is shown, one of an earlier call that arrives
-     * later is ignored.
+     * week, the filter values, this function or the language of
+     * `ComponentsCareI18n` change, so entries in the app's or the backend's
+     * words follow the language. A spinner replaces the week until the result
+     * or error arrives; only the one of the latest call is shown, one of an
+     * earlier call that arrives later is ignored.
      * @param weekOffset The offset to the current week
      * @param filter The selected filter(s)
      */

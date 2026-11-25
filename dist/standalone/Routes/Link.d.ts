@@ -1,15 +1,28 @@
 import React from "react";
 import { type To } from "history";
+/**
+ * Props of {@link Link}: the target and every `<a>` attribute except `href`,
+ * which Link computes from `to`
+ */
 export interface LinkProps extends Omit<React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>, "href"> {
     /**
      * Target location: a path of the app or a location object. Leading slashes
      * collapse into one, as with `useNavigate`: "//7" links to "/7".
+     * A target that leaves out `pathname` (a location object, or a string such
+     * as "?page=2") keeps the current one; a target that leaves out `search` or
+     * `hash` drops them, as a push does: at "/devices?page=1",
+     * `{ search: "?page=2" }` and "?page=2" link to "/devices?page=2", and
+     * `{ hash: "#notes" }` and "#notes" to "/devices#notes".
      * A URL with a scheme ("https://…", "mailto:…") makes a plain link that
      * the browser follows; `replace` and `state` don't apply to it.
      */
     to: To;
     /**
-     * Replace the current history entry?
+     * Replace the current history entry instead of pushing a new one.
+     * Default: replace when the link leads to the current location (the same
+     * pathname, search and hash, see `to`), so a click on the link of the
+     * current page adds no second entry for it; push otherwise. `false` always
+     * pushes, `true` always replaces.
      */
     replace?: boolean;
     /**

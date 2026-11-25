@@ -16,7 +16,13 @@ export interface Visibility {
      */
     readOnly: boolean;
     /**
-     * Is required field?
+     * Is the field required? Renderers mark it with MUI's `required`: an asterisk after the
+     * label and, on most controls, a required input.
+     * @remarks Display only, like MUI's `required`: the form engine doesn't validate it, so a
+     *          required field without a `validate` of its own can be saved empty. To refuse an
+     *          empty value, give the field a validator next to the visibility, e.g.
+     *          `validate: validatePresence`. Without one, the asterisk suits a field that may
+     *          be saved incomplete, such as a draft that is checked when it is submitted.
      */
     required: boolean;
     /**

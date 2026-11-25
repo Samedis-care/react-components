@@ -6,6 +6,7 @@ import SelectRow, { isSelected } from "./SelectRow";
 import SelectAllHeader from "./SelectAllHeader";
 import { Skeleton } from "@mui/material";
 import combineClassNames from "../../../utils/combineClassNames";
+import { RowLabelContext, getRowLabelDefault } from "./RowLabel";
 export const CellContext = React.createContext(undefined);
 export const useCellContext = () => {
     const ctx = useContext(CellContext);
@@ -16,7 +17,7 @@ export const useCellContext = () => {
 const Cell = (props) => {
     const { columnIndex, rowIndex } = props;
     const { columns, hoverState } = useCellContext();
-    const { onEdit, prohibitMultiSelect, onRowDoubleClick, disableSelection, isSelected: isSelectedHook, canSelectRow, enableSelectAll, classes, } = useDataGridProps();
+    const { onEdit, prohibitMultiSelect, onRowDoubleClick, disableSelection, isSelected: isSelectedHook, canSelectRow, enableSelectAll, classes, getRowLabel, } = useDataGridProps();
     const [state, setState] = useDataGridState();
     const [hover, setHover] = hoverState;
     const record = state.rows[props.rowIndex - 1];
@@ -44,6 +45,13 @@ const Cell = (props) => {
             onEdit(id);
     }, [id, onRowDoubleClick, onEdit, record]);
     const column = columns[columnIndex - (disableSelection ? 0 : 1)];
+    // the label of the row's checkbox, for a control in one of the row's cells; only
+    // computed once a cell asks for it (useRowLabel)
+    const getRowLabelOfRow = useCallback(() => record
+        ? getRowLabel
+            ? getRowLabel(record)
+            : getRowLabelDefault(record, columns)
+        : "", [getRowLabel, record, columns]);
     let content = null;
     if (rowIndex === 0 && columnIndex === 0 && !disableSelection) {
         if (enableSelectAll)
@@ -71,6 +79,10 @@ const Cell = (props) => {
         else {
             content = content2;
         }
+        // a control in the cell names itself after the row (see RowLabel)
+        if (record) {
+            content = (_jsx(RowLabelContext.Provider, { value: getRowLabelOfRow, children: content }));
+        }
     }
     const startHover = useCallback(() => {
         if (rowIndex === 0)
@@ -80,7 +92,7 @@ const Cell = (props) => {
     const endHover = useCallback(() => {
         setHover(null);
     }, [setHover]);
-    return (_jsx(DataGridCell, { style: props.style, onMouseEnter: startHover, onMouseLeave: endHover, onClick: disableSelection || !record || (canSelectRow && !canSelectRow(record))
+    return (_jsx(DataGridCell, { style: props.style, "data-field": props.rowIndex !== 0 && column ? column.field : undefined, onMouseEnter: startHover, onMouseLeave: endHover, onClick: disableSelection || !record || (canSelectRow && !canSelectRow(record))
             ? undefined
             : toggleSelection, onDoubleClick: editRecord, className: combineClassNames([
             classes?.cell,

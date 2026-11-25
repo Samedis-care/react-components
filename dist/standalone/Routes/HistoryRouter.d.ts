@@ -1,8 +1,21 @@
 import React from "react";
 import { History } from "history";
 import { DocumentTitleFormatter } from "./DocumentTitle";
+/**
+ * Props of {@link HistoryRouter}
+ */
 export interface HistoryRouterProps {
+    /**
+     * The history to route with, a `History` of the history package (v5):
+     * `createBrowserHistory()` in an app, `createMemoryHistory()` in tests and
+     * stories. Framework renders a HistoryRouter with `FrameworkHistory`, so an
+     * app inside Framework doesn't add one.
+     */
     history: History;
+    /**
+     * The routed content: `Routes`, `Route`, `Link` and everything that uses
+     * the routing hooks
+     */
     children: React.ReactNode;
     /**
      * Builds the document title from the page titles that `PageTitle` headings
@@ -18,10 +31,26 @@ export interface HistoryRouterProps {
      */
     formatDocumentTitle?: DocumentTitleFormatter;
 }
+/**
+ * The value of {@link HistoryRouterContext}
+ */
 export interface HistoryRouterContextType {
+    /**
+     * The history of the nearest HistoryRouter
+     */
     history: History;
 }
+/**
+ * The history of the nearest HistoryRouter, null outside of one. Read it with
+ * {@link useHistoryRouterContext}.
+ */
 export declare const HistoryRouterContext: React.Context<HistoryRouterContextType | null>;
+/**
+ * The history of the nearest HistoryRouter, e.g. for `history.back()`, which
+ * `useNavigate` has no counterpart for.
+ * Throws outside a HistoryRouter; Framework renders one.
+ * @returns The context of the nearest HistoryRouter
+ */
 export declare const useHistoryRouterContext: () => HistoryRouterContextType;
 declare const _default: React.MemoExoticComponent<(props: HistoryRouterProps) => React.JSX.Element>;
 export default _default;

@@ -4,8 +4,9 @@ import TextFieldWithHelp from "../TextFieldWithHelp";
 import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
 import useCurrentLocale from "../../../utils/useCurrentLocale";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import useCommitOnEnter from "../../../utils/internal/useCommitOnEnter";
 const CurrencyInput = (props) => {
-    const { value, onChange, onBlur, currency, ...muiProps } = props;
+    const { value, onChange, onBlur, onKeyDown, currency, ...muiProps } = props;
     const { t } = useCCTranslations();
     const locale = useCurrentLocale();
     const numberFormatOptions = useMemo(() => ({
@@ -31,9 +32,9 @@ const CurrencyInput = (props) => {
         event.persist();
         setLastChangeEvent(event);
     }, [onChange]);
-    const handleBlur = useCallback((evt) => {
-        if (onBlur)
-            onBlur(evt);
+    // commits an edit: on the blur after it, and on Enter, as Enter in a form's input submits
+    // the form without a blur
+    const commit = useCallback(() => {
         if (lastChangeEvent) {
             const value = parseLocalizedNumber(valueInternal, numberFormatOptions);
             if (value != null && isNaN(value)) {
@@ -51,12 +52,17 @@ const CurrencyInput = (props) => {
         formatNumber,
         lastChangeEvent,
         numberFormatOptions,
-        onBlur,
         onChange,
         valueInternal,
     ]);
+    const handleBlur = useCallback((evt) => {
+        if (onBlur)
+            onBlur(evt);
+        commit();
+    }, [commit, onBlur]);
+    const handleKeyDown = useCommitOnEnter(commit, onKeyDown);
     // component rendering
-    return (_jsx(TextFieldWithHelp, { ...muiProps, value: lastChangeEvent ? valueInternal : valueFormatted, onChange: handleChange, onBlur: handleBlur, error: parseError || muiProps.error, helperText: parseError
+    return (_jsx(TextFieldWithHelp, { ...muiProps, value: lastChangeEvent ? valueInternal : valueFormatted, onChange: handleChange, onBlur: handleBlur, onKeyDown: handleKeyDown, error: parseError || muiProps.error, helperText: parseError
             ? t("standalone.uikit.number-input.invalid", {
                 EXAMPLE: formatNumber(1234.56),
             })

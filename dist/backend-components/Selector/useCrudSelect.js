@@ -31,7 +31,7 @@ const nextTicket = () => {
     return ticketCounter;
 };
 const useCrudSelect = (params, ref) => {
-    const { connector, serialize, deserialize, deserializeModel, prepareNewEntry, onChange, initialSelected, validate, field, getIdOfData, } = params;
+    const { connector, serialize, deserialize, deserializeModel, prepareNewEntry, onChange, validate, field, getIdOfData, } = params;
     const disabled = !!params.disabled || !!params.blockWrites;
     // read when a write would start, so a change queued or a handleSelect kept from an
     // earlier render does not write after the control was disabled
@@ -141,8 +141,9 @@ const useCrudSelect = (params, ref) => {
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [loading, addToSelectionQueue]);
-    // writes the change, whether the control is disabled or not: the initial load uses it
-    const applySelection = useCallback(async (ids, reported) => {
+    const handleSelect = useCallback(async (ids, reported) => {
+        if (disabledRef.current)
+            return;
         // an id reported without its entry (still loading in the field) keeps its entry
         const kept = selected.filter((entry) => ids.includes(entry.value) &&
             !reported.some((other) => other.value === entry.value));
@@ -268,11 +269,6 @@ const useCrudSelect = (params, ref) => {
         selected,
         serialize,
     ]);
-    const handleSelect = useCallback(async (ids, newSelected) => {
-        if (disabledRef.current)
-            return;
-        await applySelection(ids, newSelected);
-    }, [applySelection]);
     const modelToSelectorData = useCallback(async (data) => {
         if (initialRawData.includes(data))
             return readFallbacks.current.get(data) ?? deserialize(data);
@@ -287,15 +283,10 @@ const useCrudSelect = (params, ref) => {
             value: "to-create-" + getIdOfData(deserialized),
         };
     }, [deserialize, deserializeModel, getIdOfData, initialRawData]);
-    // initial load
+    // initial load: the selection is the connector's rows, and loading it writes nothing
     useEffect(() => {
         void (async () => {
             setLoading(true);
-            if (initialSelected) {
-                await applySelection(initialSelected.map((entry) => entry.value), initialSelected);
-                setLoading(false);
-                return;
-            }
             try {
                 const currentlySelected = await connector.index({
                     page: 1,

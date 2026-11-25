@@ -6,7 +6,7 @@ import { ImageDialogEntryProps } from "./ImageDialogEntry";
 import { ImageErrorHandler } from "../useImageError";
 export interface MultiImageImage {
     /**
-     * A unique identifier for the image
+     * A unique identifier for the image: a removal or replacement finds its image by it
      */
     id: string;
     /**
@@ -22,6 +22,12 @@ export interface MultiImageImage {
      */
     readOnly?: boolean;
 }
+/**
+ * Derives the new images from the current ones. Used between MultiImage and its edit dialog
+ * entries.
+ * @param images The images as they are when the change is applied
+ * @returns The new images, or `images` itself when nothing changes (nothing is reported then)
+ */
 export type MultiImageManipulationCallback = (images: MultiImageImage[]) => MultiImageImage[];
 export type MultiImageProcessFile = (file: File) => Promise<File>;
 export interface MultiImageProps {
@@ -65,9 +71,12 @@ export interface MultiImageProps {
      */
     primary: string | null;
     /**
-     * Change event
+     * Called with the whole new list after the user added, removed or replaced images
      * @param name The name of this field
-     * @param newImages The new images
+     * @param newImages The images of the latest render with the change applied. A change
+     *                  that finishes later (a pick being processed, a removal waiting for
+     *                  onDelete) is applied to the images passed in by then, so changes that
+     *                  overlap keep each other.
      */
     onChange?: (name: string | undefined, newImages: MultiImageImage[]) => void;
     /**
@@ -134,7 +143,8 @@ export interface MultiImageProps {
      */
     disableRotation?: boolean;
     /**
-     * Additional dialog content (e.g. how-to-box)
+     * Additional dialog content (e.g. how-to-box), each element a tile after the images and
+     * the add tile, not an item of the images' list
      */
     additionalDialogContent?: React.ReactNode[];
     /**
@@ -172,6 +182,10 @@ export interface MultiImageProps {
  * preview), editLabel (the edit control), tileButton (the edit dialog's add and camera tiles)
  */
 export type MultiImageClassKey = "root" | "uploadInput" | "rootContainer" | "imageItem" | "editLabel" | "tileButton";
+/**
+ * Prefix of the id of an image the user added. The rest of the id is the time it was added
+ * and a number, which keep it unique on the page.
+ */
 export declare const MultiImageNewIdPrefix = "MultiImage-New-";
 declare const _default: React.MemoExoticComponent<(inProps: MultiImageProps) => React.JSX.Element>;
 export default _default;

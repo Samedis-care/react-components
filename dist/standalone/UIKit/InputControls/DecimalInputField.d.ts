@@ -18,13 +18,17 @@ export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
      */
     format?: Intl.NumberFormatOptions;
     /**
-     * Called on the blur after the user edited the text, with the parsed text.
-     * Typing alone, and a blur without an edit, never call it. Not called when
-     * the text does not parse (a separator without a digit, such as `"."`):
-     * the field keeps the text and the previous value, and shows a message in
-     * place of `helperText` until a valid edit or a new `value`.
-     * @param evt The blur event, although typed as a change event;
-     * `evt.target.name` is the input's `name`
+     * Called on the blur after the user edited the text, with the parsed text,
+     * and on Enter after an edit, before a form around the field submits (the
+     * field then shows the value the parent keeps, as after a blur, and the
+     * next blur calls it only after a further edit). Typing alone, and a blur
+     * or Enter without an edit, never call it. Not called when the text does
+     * not parse (a separator without a digit, such as `"."`): the field keeps
+     * the text and the previous value, and shows a message in place of
+     * `helperText` until a valid edit or a new `value`.
+     * @param evt The blur event, or the keydown event of Enter, although typed
+     * as a change event; `evt.target` is the input, so `evt.target.name` is its
+     * `name`
      * @param value The number; `null` for an empty field or text without a digit
      */
     onChange?: (evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, value: number | null) => void;

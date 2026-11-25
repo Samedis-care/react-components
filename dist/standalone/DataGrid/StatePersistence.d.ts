@@ -25,6 +25,12 @@ export type DataGridPersistentStateContextType = [
      * so what that version stores elsewhere starts from the defaults. The
      * first auto-fit of the column widths does not write it either: only one
      * of the other changes does, in this version's format.
+     *
+     * Throw, or return a promise which rejects, when the data could not be
+     * stored. The grid logs the error to the console and calls the setter
+     * again with its next state update (a page of rows loaded, a selection,
+     * a change), with its current data, changed or not. The grid does not
+     * wait for a returned promise before it calls the setter with a change.
      */
     (data: DataGridPersistentState) => Promise<void> | void
 ];

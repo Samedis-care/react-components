@@ -4,7 +4,8 @@ import { CrudMultiSelectProps } from "../../Selector/CrudMultiSelect";
 import { UseLazyCrudConnectorParams } from "../useLazyCrudConnector";
 import { MultiSelectorData } from "../../../standalone";
 import { CrudSelectDispatch } from "../../Selector/useCrudSelect";
-export interface FormCrudMultiSelectProps<M extends ModelUnknown, DataT extends MultiSelectorData> extends Omit<CrudMultiSelectProps<M, DataT>, "errorComponent" | "connector" | "field">, UseLazyCrudConnectorParams<Record<string, unknown>> {
+import { DistributiveOmit } from "../../../utils/internal/distributiveOmit";
+export type FormCrudMultiSelectProps<M extends ModelUnknown, DataT extends MultiSelectorData> = DistributiveOmit<CrudMultiSelectProps<M, DataT>, "errorComponent" | "connector" | "field"> & UseLazyCrudConnectorParams<Record<string, unknown>> & {
     /**
      * Disables the control: the search field is disabled, the entries have no remove button,
      * and nothing queues a write, neither the ref's addToSelection nor an end adornment's
@@ -30,7 +31,7 @@ export interface FormCrudMultiSelectProps<M extends ModelUnknown, DataT extends 
      * @default the Form's showDirtyState
      */
     showDirtyState?: boolean;
-}
+};
 export declare const ForwardedCrudMultiSelect: <M extends ModelUnknown, DataT extends MultiSelectorData>(props: FormCrudMultiSelectProps<M, DataT> & RefAttributes<CrudSelectDispatch<DataT>>) => React.ReactElement;
 declare const _default: typeof ForwardedCrudMultiSelect;
 export default _default;

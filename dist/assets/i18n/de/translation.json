@@ -5,19 +5,26 @@
 			"today": "Heute",
 			"prev-week": "Vorherige Woche",
 			"next-week": "Nächste Woche",
-			"filter-settings": "Filtereinstellungen"
+			"filter-settings": "Filtereinstellungen",
+			"week-load-error": "Woche {{WEEK}} konnte nicht geladen werden",
+			"retry": "Erneut versuchen"
 		},
 		"portal": {
 			"menu-toggle": "Menü öffnen",
 			"collapse-menu": "Menü einklappen",
-			"expand-menu": "Menü ausklappen"
+			"expand-menu": "Menü ausklappen",
+			"close-menu": "Menü schließen"
 		},
 		"uikit": {
 			"info": "Weitere Informationen",
 			"clear": "Löschen",
+			"field-state": {
+				"dirty": "(geändert)"
+			},
 			"multi-language-input": {
 				"language": "Sprache",
 				"language-of": "Sprache für {{label}}",
+				"show-translations-of": "Übersetzungen für {{label}} anzeigen",
 				"toggle-languages": "Spracheingaben umschalten"
 			},
 			"number-input": {
@@ -88,6 +95,12 @@
 					"and": "UND",
 					"or": "ODER"
 				},
+				"filter-value": {
+					"date": "Datum",
+					"date-time": "Datum und Uhrzeit",
+					"from": "Von",
+					"to": "Bis"
+				},
 				"no-data-reset-filters": "Filter löschen",
 				"no-data-filters": "Mit den eingestellten Filtern wurden keine Daten gefunden.",
 				"select-row": "{{ROW}} auswählen",
@@ -102,6 +115,7 @@
 				"search": "Suchen",
 				"more-options": "Weitere Optionen",
 				"custom-filter-button": "Filter",
+				"custom-filter-button-label": "Filter auswählen",
 				"delete": "Löschen",
 				"edit": "Bearbeiten",
 				"reset-options": {
@@ -124,11 +138,13 @@
 				"close": "Schließen"
 			},
 			"custom-filters": {
-				"title": "Filterauswahl"
+				"title": "Filterauswahl",
+				"reset": "Zurücksetzen",
+				"show-results": "Ergebnisse anzeigen"
 			},
 			"footer": {
-				"total": "Gesamt:",
-				"filtered": "Gefiltert:",
+				"counts": "Gesamt: {{TOTAL}}",
+				"counts-filtered": "Gefiltert: {{FILTERED}} Gesamt: {{TOTAL}}",
 				"edit": "Bearbeiten",
 				"delete": "Löschen",
 				"more": "Mehr",
@@ -177,7 +193,8 @@
 		},
 		"file-upload": {
 			"upload": "Hochladen",
-			"restore": "Wiederherstellen",
+			"remove-file": "{{NAME}} entfernen",
+			"restore-file": "{{NAME}} wiederherstellen",
 			"upload-modern": "Datei per Drag & Drop ablegen oder hier klicken",
 			"no-files": "Keine Anhänge verfügbar",
 			"formats": "Dateiformate",
@@ -198,7 +215,8 @@
 			},
 			"multi-image": {
 				"edit": "Bearbeiten",
-				"primary": "Primär",
+				"is-primary": "Hauptbild",
+				"make-primary": "Als Hauptbild festlegen",
 				"remove": "Bild entfernen",
 				"add": "Bild hinzufügen",
 				"replace": "Bild ersetzen",
@@ -218,7 +236,10 @@
 			},
 			"close": "Schliessen",
 			"rotate-left": "Nach links drehen",
-			"rotate-right": "Nach rechts drehen"
+			"rotate-right": "Nach rechts drehen",
+			"zoom-in": "Vergrößern",
+			"zoom-out": "Verkleinern",
+			"reset-zoom": "Zoom zurücksetzen"
 		},
 		"phone-number": {
 			"invalid": "Korrekte Rufnummer eingeben"
@@ -238,7 +259,10 @@
 					"no": "Nein"
 				},
 				"close": "Schließen",
-				"signature": "Unterschrift"
+				"signature": "Unterschrift",
+				"sign-area": "Unterschriftsfeld",
+				"instructions": "Zeichne Deine Unterschrift mit Maus, Stift oder Finger in das Unterschriftsfeld.",
+				"instructions-signed": "Die gespeicherte Unterschrift wird angezeigt. Um neu zu unterschreiben, setze sie zuerst zurück."
 			},
 			"sign-here": "Hier digital unterschreiben",
 			"required": "Erforderlich"
@@ -250,8 +274,19 @@
 		"toast": {
 			"close": "Schließen"
 		},
+		"info-box": {
+			"status": {
+				"warning": "Warnung:",
+				"success": "Erfolg:",
+				"error": "Fehler:"
+			}
+		},
 		"loader": {
 			"label": "Lädt…"
+		},
+		"matrix": {
+			"tile-more": "noch {{count}}:",
+			"extra-cell-add": "Hinzufügen"
 		}
 	},
 	"non-standalone": {
@@ -340,9 +375,15 @@
 					"buttons": {
 						"okay": "OK"
 					}
+				},
+				"success-toast": {
+					"message_one": "{{count}} Eintrag gelöscht",
+					"message_other": "{{count}} Einträge gelöscht",
+					"messageInverted": "Die ausgewählten Einträge wurden gelöscht"
 				}
 			},
 			"inline-edit": {
+				"cell-control-label": "{{FIELD}}, {{ROW}}",
 				"error-dialog": {
 					"message": "Die Änderung an „{{LABEL}}“ wurde nicht gespeichert: {{ERROR}}"
 				}
@@ -363,6 +404,13 @@
 			},
 			"read-only": {
 				"submitting": "Das Formular wird gerade gespeichert"
+			},
+			"tab": {
+				"invalid": "Enthält ungültige Felder.",
+				"modified": "Enthält geänderte Felder."
+			},
+			"form-dialog": {
+				"open-in-new-tab": "In neuem Tab öffnen"
 			}
 		},
 		"selector": {
@@ -390,6 +438,7 @@
 				"last_error": "Letzter Fehler",
 				"errors": {
 					"file_select": "Ungültige Datei ausgewählt",
+					"file_count": "Es kann nur eine Datei importiert werden",
 					"file_read": "{{FILE_NAME}} kann nicht gelesen werden. Speichere die Datei als Excel-Arbeitsmappe (.xlsx) ohne Kennwort und wähle sie erneut aus.",
 					"update-key-not-uniq": "{{UPDATE_KEY}} ist im Importdatensatz nicht eindeutig"
 				},
@@ -450,6 +499,7 @@
 		},
 		"dialogs": {
 			"error-title": "Ein Fehler ist aufgetreten",
+			"error-no-details": "Es sind keine weiteren Details verfügbar. Versuche es noch einmal.",
 			"validation-error-title": "Fehler bei der Validierung",
 			"info": "Info",
 			"are-you-sure": "Bist du sicher?",

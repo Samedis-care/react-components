@@ -21,6 +21,12 @@ export interface DataActionBarViewProps {
      */
     handleDelete?: React.MouseEventHandler;
     /**
+     * Is a delete running? Delete is then unavailable and shows a progress
+     * indicator in place of its icon
+     * @see DataGridProps.deleting
+     */
+    deleting: boolean;
+    /**
      * Does handleDelete handle an inverted selection? Otherwise the delete button
      * is disabled while everything is selected
      */
@@ -39,7 +45,8 @@ export interface DataActionBarViewProps {
      */
     handleCustomButtonClick: (label: string) => void;
     /**
-     * Disable select all button
+     * Hides the select all checkbox (it keeps its place). It is disabled then
+     * too, see selectAllDisabled
      */
     disableSelection: boolean;
     /**
@@ -47,6 +54,12 @@ export interface DataActionBarViewProps {
      * select all selects only part of the rows matching the filter
      */
     selectAllLabel: string;
+    /**
+     * Is the select all checkbox disabled? Its caption is dimmed then, like
+     * the captions of the disabled actions
+     * @see DataGridSelectAll.disabled
+     */
+    selectAllDisabled: boolean;
 }
 declare const _default: React.MemoExoticComponent<(props: DataActionBarViewProps) => React.JSX.Element>;
 export default _default;

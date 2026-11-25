@@ -9,12 +9,27 @@ import React, { useContext, useEffect, useLayoutEffect, useState } from "react";
  */
 const defaultFormatDocumentTitle = (pageTitles, appTitle) => [pageTitles[0], appTitle].filter(Boolean).join(" – ");
 /**
- * Collects the page titles of one HistoryRouter and writes the document title
- * from them. Owned by one DocumentTitleProvider instance.
+ * Sorts entries the most specific first: the highest rank, and of equally
+ * specific ones the one set last
+ * @param entries The entries, in the order they were set
+ * @returns The entries, the most specific first
  */
-class PageTitleRegistry {
+const mostSpecificFirst = (entries) => 
+// a stable sort of the reversed entries: of equally specific ones, the one
+// set last comes first
+Array.from(entries.values())
+    .reverse()
+    .sort((a, b) => b.rank - a.rank);
+/**
+ * Collects the page titles and the page headings of one HistoryRouter and
+ * writes the document title from the titles. Owned by one
+ * DocumentTitleProvider instance.
+ */
+export class PageTitleRegistry {
     appTitle;
     entries = new Map();
+    headings = new Map();
+    listeners = new Set();
     format = defaultFormatDocumentTitle;
     // written only between activate and deactivate (the provider's effect)
     active = false;
@@ -29,6 +44,47 @@ class PageTitleRegistry {
         else
             this.entries.delete(key);
         this.write();
+        this.notify();
+    }
+    /**
+     * Sets or removes the heading of a page
+     * @param key The component that sets it
+     * @param entry The heading, null to remove it
+     */
+    setHeading(key, entry) {
+        if (entry)
+            this.headings.set(key, entry);
+        else
+            this.headings.delete(key);
+        this.notify();
+    }
+    /**
+     * The page title: the most specific one, as the document title shows it
+     * @returns The title, null when none is set
+     */
+    pageTitle() {
+        return mostSpecificFirst(this.entries)[0]?.title ?? null;
+    }
+    /**
+     * The headings of the pages, the most specific first
+     * @returns The heading elements that are mounted
+     */
+    pageHeadings() {
+        return mostSpecificFirst(this.headings).flatMap((entry) => entry.heading.current ? [entry.heading.current] : []);
+    }
+    /**
+     * Calls listener whenever a page title or a page heading is set or removed
+     * @param listener The function to call
+     * @returns A function that stops the calls
+     */
+    subscribe(listener) {
+        this.listeners.add(listener);
+        return () => {
+            this.listeners.delete(listener);
+        };
+    }
+    notify() {
+        Array.from(this.listeners).forEach((listener) => listener());
     }
     setFormat(format) {
         this.format = format;
@@ -47,17 +103,19 @@ class PageTitleRegistry {
     write() {
         if (!this.active || (!this.wrote && this.entries.size === 0))
             return;
-        // a stable sort of the reversed entries: of equally specific titles, the
-        // one set last comes first
-        const titles = Array.from(this.entries.values())
-            .reverse()
-            .sort((a, b) => b.rank - a.rank)
-            .map((entry) => entry.title);
+        const titles = mostSpecificFirst(this.entries).map((entry) => entry.title);
         document.title = this.format(titles, this.appTitle);
         this.wrote = true;
     }
 }
 const PageTitleRegistryContext = React.createContext(null);
+/**
+ * The registry of the page titles and headings that the nearest HistoryRouter
+ * writes the document title from (the outermost one's, when HistoryRouters
+ * are nested), null outside of every HistoryRouter
+ * @returns The registry
+ */
+export const usePageTitleRegistry = () => useContext(PageTitleRegistryContext);
 /**
  * Sets a page title while the calling component is mounted. Used by
  * usePageTitle.
@@ -73,6 +131,25 @@ export const useRegisterPageTitle = (title, rank) => {
         registry.set(key, { title, rank });
         return () => registry.set(key, null);
     }, [registry, key, title, rank]);
+};
+/**
+ * Makes an element the page's heading while the calling component is mounted:
+ * after a navigation that leaves the focus on no element or out of view, the
+ * focus moves to the most specific page heading. Used by PageTitle.
+ * @param heading A ref to the heading element, null for none
+ * @param rank How specific the heading is, see PageTitleEntry
+ */
+export const useRegisterPageHeading = (heading, rank) => {
+    const registry = useContext(PageTitleRegistryContext);
+    const [key] = useState(() => ({}));
+    // a layout effect: the heading of a page counts in the commit that mounts
+    // it, before the router looks for it after the navigation
+    useLayoutEffect(() => {
+        if (!registry || !heading)
+            return;
+        registry.setHeading(key, { heading, rank });
+        return () => registry.setHeading(key, null);
+    }, [registry, key, heading, rank]);
 };
 /**
  * Writes the document title from the page titles of its children. Rendered by

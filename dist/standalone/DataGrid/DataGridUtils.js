@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from "react";
+import { isSameFilterDef } from "./PersistFormat";
 import { getDataGridDefaultColumnsState, getDataGridDefaultState, useDataGridColumnState, useDataGridProps, useDataGridState, } from "./DataGrid";
 import { deepEqual } from "../../utils";
 export const useDataGridFiltersActive = () => {
@@ -11,8 +12,10 @@ export const useDataGridFiltersActive = () => {
         return (state.search !== defaultState.search ||
             // a value deepEqual can't look into (a class instance, Map,
             // function) is compared by identity
-            !deepEqual(state.customData, defaultState.customData, "equals") ||
-            Object.entries(columnState).some(([key, value]) => !deepEqual(value.filter ?? {}, defaultColumnState[key]?.filter ?? {})));
+            !deepEqual(withoutUndefinedKeys(state.customData), withoutUndefinedKeys(defaultState.customData), "equals") ||
+            // a filter counts by the conditions that filter, not by how the
+            // filter popup spelled them
+            Object.entries(columnState).some(([key, value]) => !isSameFilterDef(value.filter, defaultColumnState[key]?.filter)));
     }, [
         columnState,
         columns,
@@ -23,6 +26,13 @@ export const useDataGridFiltersActive = () => {
         state.search,
     ]);
 };
+/**
+ * The custom data without its keys set to undefined: such a key filters
+ * nothing, as the query leaves it out
+ * @param customData The custom data
+ * @returns The keys of customData that hold a value (null counts as one)
+ */
+const withoutUndefinedKeys = (customData) => Object.fromEntries(Object.entries(customData).filter(([, value]) => value !== undefined));
 /**
  * Whether a custom data value counts as unset: undefined, null, "" and []
  * @param value The value of one custom data key

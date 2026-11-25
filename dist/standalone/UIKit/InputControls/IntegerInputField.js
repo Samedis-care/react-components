@@ -31,6 +31,12 @@ const parseInteger = (text) => {
 };
 /** `noFormat`: the locale's digits, minus sign and decimal separator, without grouping */
 const NO_GROUPING = { useGrouping: false };
+/**
+ * A text field for a whole number, grouped in the components-care language
+ * unless `noFormat`. Its root is the root of the TextFieldWithHelp it renders
+ * (MUI's `FormControl`), as in DecimalInputField and CurrencyInput:
+ * `className`, `sx` and `fullWidth` (also in a flex row) apply to it.
+ */
 const IntegerInputField = (props) => {
     const { value, onChange, onBlur, noFormat, ...muiProps } = props;
     const { t } = useCCTranslations();
@@ -84,18 +90,18 @@ const IntegerInputField = (props) => {
             onBlur(event);
     }, [onBlur, outOfRange]);
     // component rendering
-    return (_jsx("div", { children: _jsx(TextFieldWithHelp, { ...muiProps, value: shownText, onChange: handleChange, onBlur: handleBlur, error: outOfRange || muiProps.error, helperText: outOfRange
-                ? t("standalone.uikit.number-input.out-of-range", {
-                    MIN: format(Number.MIN_SAFE_INTEGER),
-                    MAX: format(Number.MAX_SAFE_INTEGER),
-                })
-                : muiProps.helperText, slotProps: {
-                ...muiProps.slotProps,
-                htmlInput: {
-                    ...muiProps.slotProps?.htmlInput,
-                    ref: cursorInputRef,
-                    inputMode: "numeric",
-                },
-            }, inputMode: "numeric" }) }));
+    return (_jsx(TextFieldWithHelp, { ...muiProps, value: shownText, onChange: handleChange, onBlur: handleBlur, error: outOfRange || muiProps.error, helperText: outOfRange
+            ? t("standalone.uikit.number-input.out-of-range", {
+                MIN: format(Number.MIN_SAFE_INTEGER),
+                MAX: format(Number.MAX_SAFE_INTEGER),
+            })
+            : muiProps.helperText, slotProps: {
+            ...muiProps.slotProps,
+            htmlInput: {
+                ...muiProps.slotProps?.htmlInput,
+                ref: cursorInputRef,
+                inputMode: "numeric",
+            },
+        }, inputMode: "numeric" }));
 };
 export default React.memo(IntegerInputField);

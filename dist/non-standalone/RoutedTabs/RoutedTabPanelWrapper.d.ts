@@ -10,6 +10,11 @@ export interface RoutedTabPanelWrapperProps {
      * panel is `{isAdmin && tab("sync", <Sync />)}`.
      */
     children: React.ReactNode;
+    /**
+     * CSS class of the panel element, after the theme's.
+     */
+    className?: string;
 }
-declare const _default: React.MemoExoticComponent<(props: RoutedTabPanelWrapperProps) => React.JSX.Element>;
+export type RoutedTabPanelWrapperClassKey = "root";
+declare const _default: React.MemoExoticComponent<(inProps: RoutedTabPanelWrapperProps) => React.JSX.Element | null>;
 export default _default;

@@ -8,6 +8,7 @@ import { cellBorders, columnLabelColorVars } from "./matrixTints";
 import { defaultIsCellOccupied, defaultIsCellSelectable, isCellSelectableIn, MatrixConfigContext, } from "./MatrixGridContext";
 import { MatrixInteractionContext, MatrixInteractionStore, } from "./MatrixInteractionContext";
 import MatrixColumnHeader from "./MatrixColumnHeader";
+import MatrixContents from "./MatrixContents";
 import MatrixDataRow from "./MatrixDataRow";
 import MatrixExtraRowGroup from "./MatrixExtraRowGroup";
 export const MatrixGridScroller = styled("div", {
@@ -123,8 +124,10 @@ const MatrixGrid = (inProps) => {
             store.cancel();
         };
         const onKey = (event) => {
-            if (event.key === "Escape")
-                store.cancel();
+            if (event.key !== "Escape")
+                return;
+            store.cancel();
+            store.dismissHint();
         };
         window.addEventListener("mouseup", onUp);
         window.addEventListener("keydown", onKey);
@@ -193,10 +196,15 @@ const MatrixGrid = (inProps) => {
             : px(rowHeaderWidth),
     }), [rowHeaderWidth, columns.length, columnWidth]);
     const extra = useMemo(() => (extraRows ?? []).map((extraRow) => (_jsx(MatrixExtraRowGroup, { extraRow: extraRow }, extraRow.key))), [extraRows]);
+    // what React renders nothing for, and an empty string
+    const hasCorner = corner != null && typeof corner !== "boolean" && corner !== "";
     return (_jsx(MatrixConfigContext.Provider, { value: config, children: _jsx(MatrixInteractionContext.Provider, { value: store, children: _jsx(MatrixGridScroller, { ref: scrollRef, className: combineClassNames([className, classes?.root]), style: rootStyle, 
                 // the grid scrolls further than one screen: without this it
                 // is unreachable past the first columns without a pointer
-                tabIndex: 0, role: label ? "region" : undefined, "aria-label": label, children: _jsxs(MatrixGridRoot, { className: classes?.grid, style: gridStyle, children: [_jsx(MatrixCorner, { className: classes?.corner, children: corner }), columns.map((column) => (_jsx(MatrixColumnHeader, { column: column, innerRef: column.key === target ? scrollTargetRef : undefined }, column.key))), extraRowsPosition === "top" && extra, rows.map((row) => (_jsx(MatrixDataRow, { row: row }, row.key))), extraRowsPosition === "bottom" && extra] }) }) }) }));
+                tabIndex: 0, role: label ? "region" : undefined, "aria-label": label, children: _jsxs(MatrixGridRoot, { className: classes?.grid, style: gridStyle, role: "grid", "aria-label": label || undefined, children: [_jsxs(MatrixContents, { role: "row", children: [_jsx(MatrixCorner, { className: classes?.corner, 
+                                    // heads the row header column; without contents it
+                                    // would be an empty column header
+                                    role: hasCorner ? "columnheader" : "gridcell", children: corner }), columns.map((column) => (_jsx(MatrixColumnHeader, { column: column, innerRef: column.key === target ? scrollTargetRef : undefined }, column.key)))] }), extraRowsPosition === "top" && extra, rows.map((row) => (_jsx(MatrixDataRow, { row: row }, row.key))), extraRowsPosition === "bottom" && extra] }) }) }) }));
 };
 // React.memo drops the generic parameter (its typing collapses TCell to
 // unknown), so the memoized component is cast back to the generic signature.

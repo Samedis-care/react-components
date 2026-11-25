@@ -1,7 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { Suspense, useCallback, useMemo, useState } from "react";
 import { Box, Grid, InputAdornment, styled, useThemeProps, } from "@mui/material";
-import { List, useDynamicRowHeight } from "react-window";
+import { List, useDynamicRowHeight, useListRef, } from "react-window";
 import supportedLanguages from "../../assets/data/supported-languages.json";
 import countryLanguages from "../../assets/data/country-languages.json";
 import LocaleSelectorEntry from "./LocaleSelectorEntry";
@@ -12,6 +12,7 @@ import sortByLocaleRelevance from "../../utils/sortByLocaleRelevance";
 import TextFieldWithHelp from "../../standalone/UIKit/TextFieldWithHelp";
 import Loader from "../../standalone/Loader";
 import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
+import useListFocusKeeper, { ListFocusKeeperContext, } from "./useListFocusKeeper";
 const LocaleList = styled(Grid, {
     name: "CcLocaleSelectorDialogContent",
     slot: "localeList",
@@ -23,6 +24,12 @@ const LocaleList = styled(Grid, {
         height: "auto",
         flex: "1 1 auto",
         minHeight: 70,
+    },
+    // the list holds keyboard focus while the focused row is scrolled out of the
+    // rendered range; inside its edges, because the dialog content clips its sides
+    '& [role="list"]:focus-visible': {
+        outline: `2px solid ${theme.palette.primary.main}`,
+        outlineOffset: -2,
     },
 }));
 const NoLocalesMessage = styled("div", {
@@ -73,10 +80,9 @@ const LocaleSelectorDialogContent = (inProps) => {
     }, [setFilter]);
     const supportedLangs = supportedLanguages;
     const countryLanguageMapping = countryLanguages;
-    // the entries of supportedLocales as the rows' locales and languages are compared
-    const supported = useMemo(() => appSupportedLocales
-        ? new Set(appSupportedLocales.map(normalizeLocale))
-        : null, [appSupportedLocales]);
+    // the entries of supportedLocales as the rows' locales and languages are compared;
+    // none at all (a JavaScript caller) offers nothing, as [] does
+    const supported = useMemo(() => new Set((appSupportedLocales ?? []).map(normalizeLocale)), [appSupportedLocales]);
     const data = useMemo(() => Object.entries(countryLanguageMapping)
         .map(([country, langs]) => [
         country,
@@ -84,8 +90,7 @@ const LocaleSelectorDialogContent = (inProps) => {
     ])
         .map(([country, langs]) => langs.map((lang) => lang + "-" + country))
         .flat()
-        .filter((locale) => !supported ||
-        supported.has(locale.toLowerCase()) ||
+        .filter((locale) => supported.has(locale.toLowerCase()) ||
         supported.has(locale.split("-")[0]))
         .map((locale) => ({
         locale: locale,
@@ -122,6 +127,11 @@ const LocaleSelectorDialogContent = (inProps) => {
         defaultRowHeight: 70,
         key: rowHeightKey,
     });
+    // react-window renders only the rows in view: keyboard focus waits on the list
+    // while the focused row is scrolled away, and goes back to it once it is there
+    const listRef = useListRef(null);
+    const getListElement = useCallback(() => listRef.current?.element ?? null, [listRef]);
+    const { keeper: focusKeeper, onFocus: handleListFocus, onBlur: handleListBlur, } = useListFocusKeeper(getListElement);
     const searchLabel = t("standalone.data-grid.header.search");
     const searchSlotProps = useMemo(() => ({
         input: SearchInputProps,
@@ -131,6 +141,8 @@ const LocaleSelectorDialogContent = (inProps) => {
                                 ? t("non-standalone.language-switcher.no-locales")
                                 : t("non-standalone.language-switcher.results", {
                                     COUNT: filteredData.length,
-                                }) })] }) }), _jsxs(LocaleList, { size: 12, children: [_jsx(FormLoaderOverlay, { visible: switching }), filteredData.length === 0 ? (_jsx(NoLocalesMessage, { children: t("non-standalone.language-switcher.no-locales") })) : (_jsx(List, { overscanCount: 2, rowCount: filteredData.length, rowHeight: rowHeight, rowComponent: LocaleEntryRenderer, rowProps: { filteredData } }))] })] }));
+                                }) })] }) }), _jsxs(LocaleList, { size: 12, children: [_jsx(FormLoaderOverlay, { visible: switching }), filteredData.length === 0 ? (_jsx(NoLocalesMessage, { children: t("non-standalone.language-switcher.no-locales") })) : (_jsx(ListFocusKeeperContext.Provider, { value: focusKeeper, children: _jsx(List, { listRef: listRef, 
+                            // focusable for the focus keeper, but no tab stop of its own
+                            tabIndex: -1, onFocus: handleListFocus, onBlur: handleListBlur, overscanCount: 2, rowCount: filteredData.length, rowHeight: rowHeight, rowComponent: LocaleEntryRenderer, rowProps: { filteredData } }) }))] })] }));
 };
 export default React.memo(LocaleSelectorDialogContent);

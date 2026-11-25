@@ -66,7 +66,7 @@ const Field = (props) => {
     const messageId = id + "-message";
     const { name } = props;
     const value = getValueByDot(name, values);
-    const initialValue = initialValues[name];
+    const initialValue = getValueByDot(name, initialValues);
     const hasId = "id" in values && values["id"];
     const label = fieldDef.getLabel();
     const touch = touched[props.name] || false;

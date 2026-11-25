@@ -8,20 +8,27 @@ import BaseSelector from "../Selector/BaseSelector";
  */
 export interface GridMultiSelectFilterProps {
     /**
-     * The filter's label: the selector's label in the bar, a text above the
-     * checkboxes in the panel
+     * The filter's label: the select's label in the bar (and in the panel on a
+     * phone), a text above the checkboxes in the panel
      */
     label?: string;
     /**
-     * All available options
+     * All available options. The bar and the panel treat them alike, as
+     * BaseSelector does: an entry with hidden is not listed, one with
+     * isDisabled is shown but cannot be ticked or unticked, a `[text, node]`
+     * label shows its node, an isDivider entry is drawn as a separator and an
+     * isSmallLabel entry as a text between the others. A selected hidden or
+     * disabled value stays selected while the user changes the others.
      */
     options: MultiSelectorData[];
     /**
      * The key of the grid's custom data this filter edits. Its value in
      * DataGridProps.defaultCustomData is the filter's default: shown while
-     * selected is unset, and restored by "Reset filter". While the selection
-     * has other entries (isDataGridCustomFilterActive: in any order, undefined,
-     * null and [] count as unset), the bar outlines the filter.
+     * selected is unset, and restored by "Reset filter" and by the filter
+     * panel's "Reset". While the selection has other entries
+     * (isDataGridCustomFilterActive: in any order, undefined, null and [] count
+     * as unset), the select is outlined, in the bar and in the panel on a
+     * phone.
      */
     field: string;
     /**
@@ -37,7 +44,11 @@ export interface GridMultiSelectFilterProps {
      */
     onSelect: (selected: string[]) => void;
     /**
-     * Renders the filter panel's variant: pass IDataGridFilterBarProps.inDialog
+     * Whether the filter is in the filter panel: pass
+     * IDataGridFilterBarProps.inDialog. The panel lists the options as
+     * checkboxes, so one click ticks one. On a phone (the theme's xs
+     * breakpoint) it shows the bar's multi-select instead, one row instead of
+     * every option. Both are sized by dialogBreakpoints.
      */
     dialog: boolean;
     /**

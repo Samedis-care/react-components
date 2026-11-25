@@ -1,8 +1,23 @@
 import type { To } from "history";
+/**
+ * Options of a {@link NavigateFunction} call
+ */
 export interface NavigateOptions {
+    /**
+     * Replace the current history entry instead of pushing a new one.
+     * Default: false (push)
+     */
     replace?: boolean;
+    /**
+     * State stored with the new history entry, read with
+     * `useLocation().state`. Default: none (the state is null)
+     */
     state?: unknown;
 }
+/**
+ * Navigates to `to`, a path of the app or a location object, as
+ * {@link useNavigate} describes
+ */
 export interface NavigateFunction {
     (to: To, options?: NavigateOptions): void;
 }
@@ -14,6 +29,10 @@ export interface NavigateFunction {
  * route that matches at the root. A target with a scheme ("https://…",
  * "mailto:…", "javascript:…") throws an Error and nothing happens; leave the
  * app with `window.location` instead.
+ *
+ * Blockers on the history apply (inside Framework: a form with unsaved
+ * changes). Once the navigation happens, the HistoryRouter scrolls the page
+ * to the top; a navigation that a blocker cancels keeps the scroll position.
  */
 declare const useNavigate: () => NavigateFunction;
 export default useNavigate;

@@ -9,6 +9,7 @@ import Checkbox from "../UIKit/Checkbox";
 import ComponentWithLabel from "../UIKit/ComponentWithLabel";
 import { BackendMultiSelectProps } from "../../backend-components/Selector/BackendMultiSelect";
 import { MultiSelectorData } from "../Selector";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 export interface DataGridProps extends IDataGridHeaderProps, IDataGridColumnProps, IDataGridCallbacks {
     /**
      * Custom CSS class to apply to root
@@ -43,9 +44,10 @@ export interface DataGridProps extends IDataGridHeaderProps, IDataGridColumnProp
      *   user has already seen (columns added later start out with the hidden and
      *   pinned state from their definition)
      * - sort: sorting state
-     * - filters: customData, search, column filter. What an override
-     *   (overrideCustomData, overrideFilter, overrideSearch) replaced stays
-     *   persisted as it was stored until the filters are reset.
+     * - filters: customData (as JSON, see DataGridCustomDataType), search,
+     *   column filter. What an override (overrideCustomData, overrideFilter,
+     *   overrideSearch) replaced stays persisted as it was stored until the
+     *   filters are reset.
      * @default ["columns", "sort", "filters"]
      */
     persist?: ("columns" | "sort" | "filters")[];
@@ -131,13 +133,13 @@ export interface IDataGridLoadDataParameters {
     /**
      * Aborts once the grid no longer needs the page: a reload replaced the
      * query (search, filters, sort, custom data or forceRefreshToken changed)
-     * or the grid unmounted. Pass it on to the request (fetch's `signal`) to
+     * or the grid unmounted, and for a page the limited select all
+     * (DataGridProps.limitSelectAll) loads, also when the select all checkbox
+     * is clicked again. Pass it on to the request (fetch's `signal`) to
      * cancel it. The grid ignores what a call resolves or rejects with after
      * its signal aborted, so an abort is never shown as a load error.
-     * @remarks Set when the grid loads the pages it shows; the pages the
-     *          limited select all (DataGridProps.limitSelectAll) loads come
-     *          without one. BackendDataGrid hands it on to the connector's
-     *          index as params.signal.
+     * @remarks Set on every call of the grid. BackendDataGrid hands it on to
+     *          the connector's index as params.signal.
      */
     signal?: AbortSignal;
 }
@@ -156,7 +158,9 @@ export interface IDataGridCallbacks {
      *
      * A reload (search, filters, sort, custom data or forceRefreshToken
      * changed) or the unmount ends the load of the old query: the grid
-     * requests none of its remaining pages and aborts params.signal.
+     * requests none of its remaining pages and aborts params.signal. The
+     * limited select all (DataGridProps.limitSelectAll) ends its load the same
+     * way, and also when its checkbox is clicked again.
      * @param params The load data parameters
      * @returns The loaded data (resolve) or an error (reject)
      */
@@ -172,7 +176,9 @@ export interface IDataGridCallbacks {
     forceRefreshToken?: string;
     /**
      * Extracts additional filters from the provided custom data
-     * @param customData The custom user-defined state-stored data
+     * @param customData The custom user-defined state-stored data. Restored
+     *                   from storage, it holds JSON values only: see
+     *                   DataGridCustomDataType
      * @remarks If not set, the custom data are the additional filters
      */
     getAdditionalFilters?: (customData: DataGridCustomDataType) => DataGridAdditionalFilters;
@@ -333,6 +339,15 @@ export interface IDataGridColumnProps {
      */
     onDelete?: (invert: boolean, ids: string[], filter?: DataGridFilterParameters) => Promise<boolean | void> | boolean | void;
     /**
+     * Is a delete running? Delete is then unavailable (it keeps keyboard focus)
+     * and shows a progress indicator in place of its icon, and the footer's
+     * actions are marked busy (`aria-busy`). Set it while the request onDelete
+     * started runs, not while onDelete waits for a confirmation; BackendDataGrid
+     * sets it while its delete request runs.
+     * @default false
+     */
+    deleting?: boolean;
+    /**
      * Reason why delete is disabled
      */
     disableDeleteHint?: string;
@@ -381,7 +396,9 @@ export interface IDataGridColumnProps {
      */
     prohibitMultiSelect?: boolean;
     /**
-     * Hide checkbox column
+     * Hides the selection column: the row checkboxes and the select all
+     * checkbox in its header. The footer's select all checkbox is hidden too
+     * (it keeps its place) and disabled.
      */
     disableSelection?: boolean;
     /**
@@ -444,7 +461,7 @@ export interface DataGridSetFilterDataEntry {
     isDivider?: boolean;
 }
 export type DataGridSetFilterData = DataGridSetFilterDataEntry[];
-export type DataGridIdFilterData = Omit<BackendMultiSelectProps<ModelUnknown, MultiSelectorData>, "selected" | "onSelect">;
+export type DataGridIdFilterData = DistributiveOmit<BackendMultiSelectProps<ModelUnknown, MultiSelectorData>, "selected" | "onSelect">;
 export interface DataGridCustomFilterDataComponentProps<T = unknown> {
     /**
      * What setFilter stored, parsed from the column filter's value1 (JSON).
@@ -553,6 +570,31 @@ export type DataGridRowData = {
 } & Record<string, string | number | {
     toString: () => string;
 } | React.ReactElement | null>;
+/**
+ * The custom data: the filter state the app's filter bar keeps in the grid
+ * (IDataGridFilterBarProps.setCustomData, DataGridProps.defaultCustomData),
+ * keyed by the app. getAdditionalFilters turns it into filters.
+ *
+ * When the grid persists its filters (DataGridProps.persist "filters", the
+ * default), DataGridLocalStoragePersist and DataGridStorageManagerPersist
+ * store it as JSON. So set JSON values only: strings, finite numbers,
+ * booleans, null, and arrays and plain objects of these. A grid that restores
+ * them from storage (on the next visit) gets them back as they were set. Any
+ * other value comes back in its JSON form:
+ * - a Date as its ISO string, an object with a toJSON method (a Moment, a
+ *   Dayjs) as what that returns
+ * - a Map or a Set as an empty object
+ * - another class instance as a plain object of its own enumerable
+ *   properties, without its class and methods
+ * - NaN and Infinity as null
+ * - undefined and a function are left out (null in an array)
+ *
+ * Keep such a value in a JSON form (a date as an ISO string, a set as an
+ * array) and convert it where it is used: in getAdditionalFilters and in the
+ * filter bar's controls.
+ * @remarks Only the storage turns the values into JSON: a grid mounted again
+ *          while its provider stays mounted gets them as they were set.
+ */
 export type DataGridCustomDataType = Record<string, unknown>;
 /**
  * The fields of a row to change, or a function which gets the current row data
@@ -723,7 +765,8 @@ export interface DataGridSelectAll {
      */
     busy: boolean;
     /**
-     * Is the select all checkbox disabled?
+     * Is the select all checkbox disabled? It is without enableSelectAll, with
+     * prohibitMultiSelect and with disableSelection
      */
     disabled: boolean;
     /**

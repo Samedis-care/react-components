@@ -1,12 +1,14 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useMemo } from "react";
-import { Grid, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
+import { Grid, IconButton, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import { Cancel as CancelIconList, CancelOutlined as CancelIcon, InsertDriveFile as DefaultFileIcon, RestoreFromTrash as RestoreIconSvg, } from "@mui/icons-material";
 import { ArchiveFileIcon, AudioFileIcon, CodeFileIcon, CsvFileIcon, ExcelFileIcon, ImageFileIcon, PdfFileIcon, PowerPointFileIcon, TextFileIcon, VideoFileIcon, WordFileIcon, } from "../FileIcons";
 import dataToFile from "../../../utils/dataToFile";
 import combineClassNames from "../../../utils/combineClassNames";
 import getFileExt from "../../../utils/getFileExt";
 import useObjectUrl from "../../../utils/useObjectUrl";
+import useCCTranslations from "../../../utils/useCCTranslations";
+import focusRing from "../../../utils/internal/focusRing";
 const CompactListWrapper = styled(Grid, {
     name: "CcFile",
     slot: "compactListWrapper",
@@ -20,29 +22,46 @@ const ListEntryText = styled(Grid, { name: "CcFile", slot: "listEntryText" })({
     minWidth: 0,
     position: "relative",
 });
+/**
+ * The remove or restore button of a file, around its icon slot (closeIcon, closeIconList,
+ * removeIcon, restoreIconBox or restoreIcon). One button for both, so that it keeps
+ * keyboard focus when a remove turns it into a restore and back.
+ * @remarks As large as its icon, but at least 24 x 24 px (WCAG 2.5.8); the icon slots
+ *          set the colour. In the box variant (`CcFile-actionButton-box`) it lies over
+ *          the top left corner of the file icon.
+ */
+const ActionButton = styled(IconButton, {
+    name: "CcFile",
+    slot: "actionButton",
+})(({ theme }) => ({
+    padding: 0,
+    minWidth: 24,
+    minHeight: 24,
+    // where the icon was without a button: at the top of its line, not in its middle
+    verticalAlign: "top",
+    "&.Mui-focusVisible": focusRing(theme, 2),
+    "&.CcFile-actionButton-box": {
+        position: "absolute",
+    },
+}));
 const CloseIconList = styled(CancelIconList, {
     name: "CcFile",
     slot: "closeIconList",
 })(({ theme }) => ({
     width: "auto",
     position: "static",
-    cursor: "pointer",
     color: theme.palette.action.active,
 }));
 const CloseIcon = styled(CancelIcon, {
     name: "CcFile",
     slot: "closeIcon",
 })(({ theme }) => ({
-    position: "absolute",
-    cursor: "pointer",
     color: theme.palette.error.main,
 }));
 const RemoveIcon = styled(CancelIcon, {
     name: "CcFile",
     slot: "removeIcon",
-})({
-    cursor: "pointer",
-});
+})({});
 /**
  * Makes the control that opens a file (a link, or a button with onClick, see
  * FileProps.downloadLink) look like the plain name or icon, and gives it an outline on
@@ -126,14 +145,12 @@ const StyledLabel = styled(Typography, {
     },
     ...changeStateStyles(theme),
 }));
-// mirrors the CloseIcon/CloseIconList pair: the box variant positions its action over
-// the icon, every other variant lays it out inline
+// the restore icon of the box variant and of every other variant, like the
+// CloseIcon/CloseIconList pair
 const RestoreIconBox = styled(RestoreIconSvg, {
     name: "CcFile",
     slot: "restoreIconBox",
 })(({ theme }) => ({
-    position: "absolute",
-    cursor: "pointer",
     color: theme.palette.action.active,
 }));
 const RestoreIcon = styled(RestoreIconSvg, {
@@ -142,7 +159,6 @@ const RestoreIcon = styled(RestoreIconSvg, {
 })(({ theme }) => ({
     width: "auto",
     position: "static",
-    cursor: "pointer",
     color: theme.palette.action.active,
 }));
 export const ExcelFileExtensions = [
@@ -395,13 +411,15 @@ const openInNewTab = (url) => {
 };
 /**
  * One file of FileUploadGeneric: its icon or image preview, its name, and its remove or
- * restore control. The default export of this module, imported as FilePreview by apps.
+ * restore button. The default export of this module, imported as FilePreview by apps.
  * @remarks A file with a link is opened by keyboard through its name (in icon-only its
- *          icon), see FileProps.downloadLink.
+ *          icon), see FileProps.downloadLink. The remove and restore buttons are named
+ *          after the file ("Remove contract.pdf"), see FileProps.onRemove and onRestore.
  */
 const File = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcFile" });
     const { name, downloadLink, variant, className, classes, onClick } = props;
+    const { t } = useCCTranslations();
     const FileIcon = getFileIconOrDefault(props.name, props.mimeType);
     const previewSrc = useObjectUrl(props.preview);
     const downloadUrl = useObjectUrl(downloadLink);
@@ -485,33 +503,18 @@ const File = (inProps) => {
         };
         return (_jsx(Tooltip, { title: props.name, children: openControl ? (_jsx(TypographyComp, { ...nameProps, component: openControl.component, ...openControl.props })) : (_jsx(TypographyComp, { ...nameProps })) }));
     };
-    const restoreBtn = props.changeState === "removed" &&
-        props.onRestore &&
-        React.createElement(variant === "box" ? RestoreIconBox : RestoreIcon, {
-            className: combineClassNames([
-                variant === "box" ? classes?.restoreIconBox : classes?.restoreIcon,
-            ]),
-            onClick: props.onRestore,
-            style: variant === "list" ? { height: props.size } : undefined,
-            titleAccess: props.restoreLabel,
-        });
-    const removeBtn = props.onRemove &&
-        !props.disabled &&
-        React.createElement(variant === "list"
-            ? CloseIconList
-            : variant === "box"
-                ? CloseIcon
-                : RemoveIcon, {
-            className: combineClassNames([
-                variant === "box" && classes?.closeIcon,
-                variant === "list" && classes?.closeIconList,
-                variant !== "box" && variant !== "list" && classes?.removeIcon,
-            ]),
-            onClick: props.onRemove,
-            style: variant === "list" ? { height: props.size } : undefined,
-        });
-    // a removed file offers a restore where it used to offer a remove
-    const actionBtn = restoreBtn || removeBtn;
+    // a removed file offers a restore where it used to offer a remove, in the same button:
+    // keyboard focus stays on it
+    const restoring = props.changeState === "removed" && !!props.onRestore;
+    const removing = !restoring && !!props.onRemove && !props.disabled;
+    const actionLabel = restoring
+        ? t("standalone.file-upload.restore-file", { NAME: name })
+        : t("standalone.file-upload.remove-file", { NAME: name });
+    const actionIconStyle = variant === "list" ? { height: props.size } : undefined;
+    const actionBtn = (restoring || removing) && (_jsx(Tooltip, { title: actionLabel, children: _jsx(ActionButton, { ref: props.actionButtonRef, color: "inherit", "aria-label": actionLabel, onClick: restoring ? props.onRestore : props.onRemove, className: combineClassNames([
+                classes?.actionButton,
+                variant === "box" && "CcFile-actionButton-box",
+            ]), children: restoring ? (variant === "box" ? (_jsx(RestoreIconBox, { className: classes?.restoreIconBox })) : (_jsx(RestoreIcon, { className: classes?.restoreIcon, style: actionIconStyle }))) : variant === "list" ? (_jsx(CloseIconList, { className: classes?.closeIconList, style: actionIconStyle })) : variant === "box" ? (_jsx(CloseIcon, { className: classes?.closeIcon })) : (_jsx(RemoveIcon, { className: classes?.removeIcon })) }) }));
     if (variant === "box") {
         return (_jsx(Grid, { className: className, style: { width: props.size }, children: _jsxs(Grid, { container: true, spacing: 2, children: [_jsxs(IconContainer, { size: 12, className: classes?.iconContainer, children: [actionBtn, renderIcon()] }), _jsx(Grid, { size: 12, children: renderName() })] }) }));
     }

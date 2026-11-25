@@ -73,7 +73,8 @@ export interface DataGridPersistentState {
      */
     sort?: DataGridPersistedSortList | Record<string, DataGridPersistedSort>;
     /**
-     * Filter per column, only for columns which deviate from the default.
+     * Filter per column, only for columns whose filter is another condition
+     * than the default one (see isSameFilterDef).
      * null records that the user cleared a filter which is set by default.
      */
     filter?: Record<string, IFilterDef | null>;
@@ -133,6 +134,20 @@ export interface DataGridDecodedState {
  * @returns The normalized filter, or undefined if it has no effect at all
  */
 export declare const normalizeFilterDef: (filter: IFilterDef | null | undefined) => IFilterDef | undefined;
+/**
+ * Whether two filters are the same condition. Only the conditions carrying a
+ * value count (see normalizeFilterDef), and the spellings of one condition are
+ * equal: a key set to undefined and a missing one, a missing value2 and "", a
+ * missing nextFilterType and "and" (as the filter popup reads it), and any
+ * nextFilterType of a condition without a nextFilter, which combines nothing.
+ * Keys IFilterDef does not define are not compared. The filter popup emits
+ * a filter in its own spelling, also when the user empties it or ends on the
+ * condition they started with, e.g. a default filter.
+ * @param a The one filter
+ * @param b The other filter
+ * @returns true if both are the same condition, or both are no filter
+ */
+export declare const isSameFilterDef: (a: IFilterDef | null | undefined, b: IFilterDef | null | undefined) => boolean;
 /**
  * Encodes the runtime state into the format we persist
  * @param state The grid state

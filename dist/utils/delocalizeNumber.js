@@ -84,26 +84,57 @@ const getDecimalSeparator = (value, options) => {
         after.length === 3;
     return isGroup ? decimal : mark;
 };
+/** The parts of a formatted number that are no part of the number itself */
+const FORMAT_SYMBOL_PARTS = [
+    "currency",
+    "percentSign",
+    "unit",
+    "literal",
+];
+/**
+ * Whether a value without a digit is empty: nothing but blanks and the symbols the format writes
+ * around a number ("€", "%", "kr", "Cg."), which is what is left when the user deletes the
+ * digits of a formatted number. Anything else, such as "abc", a separator or a minus sign, is text
+ * typed in place of a number.
+ * @param value The value, without a digit
+ * @param options The number formatting options used to format the number
+ */
+const isEmptyWithoutDigits = (value, options) => {
+    if (value.trim() === "")
+        return true;
+    const symbols = Intl.NumberFormat(getCurrentLocale(ccI18n), options)
+        .formatToParts(1)
+        .filter((part) => FORMAT_SYMBOL_PARTS.includes(part.type))
+        .map((part) => part.value);
+    return (symbols
+        .reduce((rest, symbol) => rest.split(symbol).join(""), value)
+        .trim() === "");
+};
 /**
  * Removes group separators from the given value and replaces the decimal separator with a dot for
- * usage with parseFloat(...). Returns an empty string if value is empty, and "NaN" if its . and ,
- * don't fit the locale's format (see fitsLocaleFormat), so that a typo such as "1.234.5" in de is
- * not read as another number.
+ * usage with parseFloat(...). Returns an empty string if value is empty, and "NaN" if it is no
+ * number:
+ * - text without a digit that is not empty ("abc", ".", "-"); blanks and the format's own symbols
+ *   ("€" of a currency format) count as empty (see isEmptyWithoutDigits)
+ * - a value whose . and , don't fit the locale's format (see fitsLocaleFormat), so that a typo
+ *   such as "1.234.5" in de is not read as another number.
+ *
  * The decimal separator is the locale's one, or a single . or , that can't be a group separator
  * (see getDecimalSeparator). A minus sign before the first digit ("-" or "−", also after a
- * currency symbol: "€ -5,00") becomes a leading "-"; without a digit there is no sign.
+ * currency symbol: "€ -5,00") becomes a leading "-".
  * @param value The value to "delocalize"
  * @param options The number formatting options used to format the number
  */
 const delocalizeNumber = (value, options) => {
+    if (!/[0-9]/.test(value)) {
+        return isEmptyWithoutDigits(value, options) ? "" : "NaN";
+    }
     if (!fitsLocaleFormat(value, options))
         return "NaN";
     const decimal = getDecimalSeparator(value, options);
     const unsigned = value
         .replace(new RegExp("[^0-9\\" + decimal + "]", "g"), "")
         .replace(new RegExp("\\" + decimal, "g"), ".");
-    return isNegativeNumberText(value) && /[0-9]/.test(unsigned)
-        ? "-" + unsigned
-        : unsigned;
+    return isNegativeNumberText(value) ? "-" + unsigned : unsigned;
 };
 export default delocalizeNumber;

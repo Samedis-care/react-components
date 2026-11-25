@@ -50,7 +50,22 @@ const TileButton = styled(ButtonBase, {
         pointerEvents: "none",
     },
 }));
+/**
+ * The edit dialog's images as a list (role list, the entries are its items), so a screen
+ * reader says how many there are. It draws no box: the entries stay items of the dialog's
+ * Grid container, and the add and camera tiles, which are not in the list, still follow the
+ * last image in the same row.
+ */
+const DialogImageList = styled("div")({
+    display: "contents",
+});
+/**
+ * Prefix of the id of an image the user added. The rest of the id is the time it was added
+ * and a number, which keep it unique on the page.
+ */
 export const MultiImageNewIdPrefix = "MultiImage-New-";
+// numbers the added images, so that two added in the same millisecond get different ids
+let addedImageCount = 0;
 const MultiImage = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiImage" });
     const { label, name, editLabel, additionalDialogContent, dialogMessage, onDialogOpenChange, images, primary, placeholderImage, uploadImage, captureImage, readOnly, busy, slotProps, maxImages, capture, convertImagesTo, downscale, onChange, onPrimaryChange, subClasses, onDelete, onError, disableRotation, className, classes, } = props;
@@ -121,13 +136,28 @@ const MultiImage = (inProps) => {
     const processFiles = useCallback(async (files) => {
         const fileArr = Array.from(files);
         return (await Promise.all(fileArr.map(processFile))).map((img, index) => ({
-            id: `${MultiImageNewIdPrefix}${new Date().getTime()}-${index}`,
+            id: `${MultiImageNewIdPrefix}${new Date().getTime()}-${addedImageCount++}`,
             image: img,
             name: fileArr[index].name,
         }));
     }, [processFile]);
+    // The props of the latest render. A change that finishes after an await (a pick being
+    // processed, a delete confirmation) is applied to the images as they are by then and
+    // reported to the handlers passed last, so changes that overlap keep each other.
+    const latest = useRef({ name, images, onChange, onPrimaryChange });
+    latest.current = { name, images, onChange, onPrimaryChange };
+    const manipulateImages = useCallback((process) => {
+        const current = latest.current;
+        if (!current.onChange)
+            return;
+        const newImages = process(current.images);
+        // e.g. a replacement that finished after its image was removed
+        if (newImages === current.images)
+            return;
+        current.onChange(current.name, newImages);
+    }, []);
     const handleUploadViaDrop = useCallback(async (files) => {
-        if (!onChange)
+        if (!latest.current.onChange)
             return;
         let newImages;
         try {
@@ -138,10 +168,10 @@ const MultiImage = (inProps) => {
             handleImageError(e);
             return;
         }
-        onChange(name, images.concat(newImages));
-    }, [processFiles, name, images, onChange, handleImageError]);
+        manipulateImages((current) => current.concat(newImages));
+    }, [processFiles, manipulateImages, handleImageError]);
     const handlePreviewDrop = useCallback(async (files) => {
-        if (!onChange)
+        if (!latest.current.onChange)
             return;
         if (files.length === 0)
             return;
@@ -154,10 +184,10 @@ const MultiImage = (inProps) => {
             handleImageError(e);
             return;
         }
-        onChange(name, images.concat(newImages));
-        if (onPrimaryChange)
-            onPrimaryChange(name, newImages[0].id);
-    }, [onChange, name, images, processFiles, onPrimaryChange, handleImageError]);
+        manipulateImages((current) => current.concat(newImages));
+        const current = latest.current;
+        current.onPrimaryChange?.(current.name, newImages[0].id);
+    }, [processFiles, manipulateImages, handleImageError]);
     const handleUpload = useCallback((evt) => {
         const files = evt.target.files;
         if (!files)
@@ -179,11 +209,6 @@ const MultiImage = (inProps) => {
     const showNextImage = useCallback(() => {
         setCurrentImage((prev) => prev + 1);
     }, []);
-    const manipulateImages = useCallback((process) => {
-        if (!onChange)
-            return;
-        onChange(name, process(images));
-    }, [onChange, name, images]);
     const changePrimary = useCallback((id) => {
         if (!onPrimaryChange)
             return;
@@ -193,7 +218,7 @@ const MultiImage = (inProps) => {
                                     total: images.length,
                                     active: currentImage,
                                     setActive: setCurrentImage,
-                                }, disableBackground: true }) }), _jsxs(Grid, { container: true, sx: { alignContent: "space-between" }, wrap: "nowrap", spacing: 1, size: 12, children: [_jsx(Grid, { size: "grow", children: _jsx(ImageDots, { total: images.length, active: currentImage, setActive: setCurrentImage }) }), !readOnly && (_jsx(Grid, { children: _jsx(EditLabel, { component: Link, variant: "body2", onClick: openDialog, href: "#", children: editLabel ?? t("standalone.file-upload.multi-image.edit") }) }))] })] }) }), _jsx(UploadInput, { type: "file", multiple: remainingFiles > 1, accept: "image/*", capture: capture, ref: fileUpload, onChange: handleUpload, className: classes?.uploadInput }), !readOnly && (_jsx(_Fragment, { children: _jsxs(Dialog, { open: dialogOpen, onClose: closeDialog, maxWidth: "lg", fullWidth: !previewSize, children: [_jsx(DialogTitle, { children: _jsx(Grid, { container: true, sx: { justifyContent: "flex-end" }, children: _jsx(Grid, { children: _jsx(IconButton, { onClick: closeDialog, size: "large", "aria-label": t("standalone.file-upload.close"), children: _jsx(CloseIcon, {}) }) }) }) }), _jsxs(DialogContent, { children: [dialogMessage, _jsxs(Grid, { container: true, spacing: 2, children: [images.map((img, i) => (_jsx(ImageDialogEntry, { img: img, previewSize: previewSize, isPrimary: img === primaryImg, processFile: processFile, onImageError: handleImageError, changeImages: manipulateImages, changePrimary: changePrimary, onDelete: onDelete, disableRotation: disableRotation, classes: subClasses?.imageDialogEntry, subClasses: subClasses?.imageDialogEntrySubClasses }, `img-${i}`))), !readOnly && remainingFiles > 0 && (_jsxs(_Fragment, { children: [_jsx(Grid, { size: {
+                                }, disableBackground: true }) }), _jsxs(Grid, { container: true, sx: { alignContent: "space-between" }, wrap: "nowrap", spacing: 1, size: 12, children: [_jsx(Grid, { size: "grow", children: _jsx(ImageDots, { total: images.length, active: currentImage, setActive: setCurrentImage }) }), !readOnly && (_jsx(Grid, { children: _jsx(EditLabel, { component: Link, variant: "body2", onClick: openDialog, href: "#", children: editLabel ?? t("standalone.file-upload.multi-image.edit") }) }))] })] }) }), _jsx(UploadInput, { type: "file", multiple: remainingFiles > 1, accept: "image/*", capture: capture, ref: fileUpload, onChange: handleUpload, className: classes?.uploadInput }), !readOnly && (_jsx(_Fragment, { children: _jsxs(Dialog, { open: dialogOpen, onClose: closeDialog, maxWidth: "lg", fullWidth: !previewSize, children: [_jsx(DialogTitle, { children: _jsx(Grid, { container: true, sx: { justifyContent: "flex-end" }, children: _jsx(Grid, { children: _jsx(IconButton, { onClick: closeDialog, size: "large", "aria-label": t("standalone.file-upload.close"), children: _jsx(CloseIcon, {}) }) }) }) }), _jsxs(DialogContent, { children: [dialogMessage, _jsxs(Grid, { container: true, spacing: 2, children: [images.length > 0 && (_jsx(DialogImageList, { role: "list", children: images.map((img, i) => (_jsx(ImageDialogEntry, { img: img, previewSize: previewSize, isPrimary: img === primaryImg, processFile: processFile, onImageError: handleImageError, changeImages: manipulateImages, changePrimary: changePrimary, onDelete: onDelete, disableRotation: disableRotation, classes: subClasses?.imageDialogEntry, subClasses: subClasses?.imageDialogEntrySubClasses }, `img-${i}`))) })), !readOnly && remainingFiles > 0 && (_jsxs(_Fragment, { children: [_jsx(Grid, { size: {
                                                         xs: previewSize ? undefined : 12,
                                                         md: previewSize ? undefined : 6,
                                                         lg: previewSize ? undefined : 3,

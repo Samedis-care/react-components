@@ -1,6 +1,5 @@
 import { DialogContextType } from "../../framework/DialogContextProvider";
 import { IDialogConfigConfirmAsync, IDialogConfigInputAsync, IDialogConfigSimple } from "./Types";
-import type { ValidationResult } from "../../backend-components/Form/Form";
 /**
  * What the `show…Dialog` helpers return: the promise of the dialog's result, with `close`,
  * which closes that dialog from outside it. Await it like any promise; only this promise has
@@ -75,8 +74,19 @@ export declare const showInfoDialog: (pushDialog: DialogContextType[0], props: O
 /**
  * Shows an error dialog
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
- * @param e The error or validation error
+ * @param e What went wrong, typically the value a `catch` received. Any value is shown:
+ *          - an Error (also one from another realm) shows its `message` under the title
+ *            `common.dialogs.error-title` ("An error occurred"), a ValidationError lists its
+ *            `result` as below
+ *          - a string is shown as it is, under the same title
+ *          - a ValidationResult (an object with at least one entry, all of them strings)
+ *            lists its values, not its keys, under `common.dialogs.validation-error-title`
+ *            ("Error on validation"). So does `{ title, message }`: for an error dialog with
+ *            a title of your own, use showInfoDialog, which renders the same dialog.
+ *          - anything else (`null`, `undefined`, a number, an empty object, an object with a
+ *            value that is not a string) shows `common.dialogs.error-no-details` ("No
+ *            further details are available. Try again.") under the error title
  * @returns A DialogPromise that resolves when the dialog is closed (OK, Escape, a backdrop
  *          click). Its `close()` closes the dialog and resolves it at once.
  */
-export declare const showErrorDialog: (pushDialog: DialogContextType[0], e: Error | ValidationResult | string) => DialogPromise<void>;
+export declare const showErrorDialog: (pushDialog: DialogContextType[0], e: unknown) => DialogPromise<void>;

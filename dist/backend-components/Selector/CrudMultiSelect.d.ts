@@ -4,7 +4,8 @@ import { ErrorComponentProps } from "../Form";
 import { MultiSelectorData } from "../../standalone";
 import { BackendMultiSelectProps } from "./BackendMultiSelect";
 import { CrudSelectDispatch, UseCrudSelectParams, UseCrudSelectResult } from "./useCrudSelect";
-export interface CrudMultiSelectProps<M extends ModelUnknown, DataT extends MultiSelectorData> extends Omit<BackendMultiSelectProps<M, DataT>, "modelToSelectorData" | "initialData" | "selected" | "added" | "removed" | "onSelect" | "getIdOfData">, UseCrudSelectParams<M, DataT> {
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+export type CrudMultiSelectProps<M extends ModelUnknown, DataT extends MultiSelectorData> = DistributiveOmit<BackendMultiSelectProps<M, DataT>, "modelToSelectorData" | "initialData" | "selected" | "added" | "removed" | "onSelect" | "getIdOfData"> & UseCrudSelectParams<M, DataT> & {
     /**
      * The error component that is used to display errors
      */
@@ -28,7 +29,7 @@ export interface CrudMultiSelectProps<M extends ModelUnknown, DataT extends Mult
      * @default false
      */
     showDirtyState?: boolean;
-}
+};
 export declare const CrudSelectContext: React.Context<UseCrudSelectResult<ModelUnknown, MultiSelectorData> | undefined>;
 export declare const useCrudSelectContext: () => UseCrudSelectResult<ModelUnknown, MultiSelectorData>;
 declare const ForwardedCrudMultiSelect: <M extends ModelUnknown, DataT extends MultiSelectorData>(props: CrudMultiSelectProps<M, DataT> & RefAttributes<CrudSelectDispatch<DataT>>) => React.ReactElement;

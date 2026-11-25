@@ -7,7 +7,10 @@ export interface PickersTextFieldWithHelpProps extends UIInputProps {
      */
     openInfo?: () => void;
     /**
-     * custom clear handler if clear button is pressed
+     * Clears the picker's value, e.g. `() => onChange(null)`: called without
+     * arguments when the touch Clear button is pressed. Focus then moves to the
+     * date's first section, as after the clear button of MUI X's own fields,
+     * since the Clear button goes away with the value.
      */
     customHandleClear: () => void;
     /**

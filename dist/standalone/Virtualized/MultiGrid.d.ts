@@ -27,6 +27,21 @@ export interface MultiGridProps {
     styleTopRightGrid: CSSProperties;
     styleBottomLeftGrid: CSSProperties;
     styleBottomRightGrid: CSSProperties;
+    /**
+     * Renders one cell. It gets react-window's cell props, with grid-wide
+     * `columnIndex`/`rowIndex` in every pane, and returns the cell's element.
+     * Apply `style` to that element: it positions and sizes the cell.
+     *
+     * MultiGrid puts `ariaAttributes` (`role="gridcell"` and `aria-colindex`) on
+     * the returned element unless the element sets them itself, so every row
+     * has its cells for assistive technology whether or not the renderer
+     * spreads them. When the returned element is one of a component of your
+     * own, that component has to pass them on to its DOM element, as it does
+     * `style`.
+     *
+     * All four panes call it as a function, so its hooks belong to the pane's
+     * own cell component, which react-window memoizes.
+     */
     children: (props: CellComponentProps) => React.ReactElement;
     noContentRenderer: React.ComponentType;
     /**
@@ -40,6 +55,14 @@ export interface MultiGridProps {
      */
     globalScrollListener?: boolean;
 }
-export type MultiGridClassKey = "root" | "topRightGrid" | "bottomLeftGrid" | "bottomRightGrid";
+/**
+ * Theme slots of `CcMultiGrid` (`theme.components.CcMultiGrid.styleOverrides`):
+ * `root`, `topRightGrid` (the pinned rows, i.e. the header), `bottomLeftGrid`
+ * (the pinned columns), `bottomRightGrid` (the scrolling pane) and `focusRing`
+ * (the focus ring of the pane that is the tab stop: a 2px outline in
+ * `palette.primary.main` inside that pane's edges, drawn by a box over the
+ * pane while the pane has keyboard focus; restyle it with e.g. `outlineColor`).
+ */
+export type MultiGridClassKey = "root" | "topRightGrid" | "bottomLeftGrid" | "bottomRightGrid" | "focusRing";
 declare const _default: React.MemoExoticComponent<(inProps: MultiGridProps) => React.JSX.Element>;
 export default _default;

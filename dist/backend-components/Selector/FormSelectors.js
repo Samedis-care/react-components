@@ -11,6 +11,8 @@ const WithSelectorFormContext = (SelectorComponent) => function WithSelectorForm
             return null;
         return onAddNew(getFieldValues());
     }, [getFieldValues, onAddNew]);
+    // PropsT can be a union (the switch props), which the spread keeps apart; the cast
+    // puts the form-aware onAddNew back in place
     const patchedProps = {
         ...props,
         onAddNew: onAddNew ? handleAddNew : undefined,

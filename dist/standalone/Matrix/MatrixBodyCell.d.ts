@@ -3,7 +3,7 @@ import { MatrixColumn, MatrixRow } from "./types";
 export declare const MatrixBodyCellRoot: import("@emotion/styled").StyledComponent<import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof React.ClassAttributes<HTMLDivElement> | keyof React.HTMLAttributes<HTMLDivElement>>, {}>;
 /**
  * The hover hint on a cell that can start a range: a dashed box saying what a
- * click would do.
+ * click would do. Escape hides it until the pointer moves to another cell.
  */
 export declare const MatrixAddHint: import("@emotion/styled").StyledComponent<import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof React.ClassAttributes<HTMLDivElement> | keyof React.HTMLAttributes<HTMLDivElement>>, {}>;
 /**
@@ -16,6 +16,10 @@ export declare const MatrixAddHint: import("@emotion/styled").StyledComponent<im
  * strip that overlays the entries either steals their clicks or, if it is thin
  * enough not to, is too thin to hit. It is 24x24px, the smallest target WCAG
  * 2.5.8 allows for a control that lies on another one.
+ *
+ * While it shows (the cell hovered, the chip focused, or at rest on a touch
+ * device), it lies over the bottom right of the cell's last entry, that
+ * entry's bottomRight corner included, and a press there adds.
  */
 export declare const MatrixAddChip: import("@emotion/styled").StyledComponent<import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof React.ClassAttributes<HTMLDivElement> | keyof React.HTMLAttributes<HTMLDivElement>>, {}>;
 /**

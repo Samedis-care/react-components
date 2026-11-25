@@ -15,6 +15,10 @@ const Root = styled("div", { name: "CcPortalMenu", slot: "root" })({
  * A menu tree rendered with the given wrapper and entry renderer. A click on an
  * entry highlights it (a group expands or collapses instead).
  *
+ * Screen readers are told which groups are expanded (`aria-expanded`) and
+ * which entry is highlighted (`aria-current="page"`), through the renderer's
+ * `ariaAttributes`.
+ *
  * Keyboard focus stays in the menu when the focused entry is removed (the
  * definition changed, e.g. after a navigation, or `shouldRender` turned false):
  * it moves to the highlighted entry, or, if that cannot take focus, to the first

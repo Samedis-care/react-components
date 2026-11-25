@@ -31,7 +31,8 @@ export interface GroupBoxProps extends GroupBoxHTMLProps {
      * Renders the legend at 0.75em of the inherited font size. The legend
      * then has the class `CcGroupBox-smallLabel` and `classes.smallLabel`, and
      * gets the theme's `styleOverrides.smallLabel`; a font size from the theme
-     * replaces the 0.75em.
+     * replaces the 0.75em. Theme `variants` keyed on `smallLabel` match, and
+     * style the fieldset (the legend through `"& > legend"`).
      * @default false
      */
     smallLabel?: boolean;
@@ -44,8 +45,11 @@ export interface GroupBoxProps extends GroupBoxHTMLProps {
      */
     className?: string;
     /**
-     * Additional class names: `root` is added to the `<fieldset>`,
-     * `smallLabel` to the legend while `smallLabel` is set
+     * Additional class names per {@link GroupBoxClassKey}: `root` is added to
+     * the `<fieldset>`, `legend` to the `<legend>`, and `smallLabel` to the
+     * legend while `smallLabel` is set. As on MUI components, a `classes` prop
+     * replaces the `classes` of the theme's `defaultProps` rather than adding
+     * to them.
      */
     classes?: Partial<Record<GroupBoxClassKey, string>>;
     /**
@@ -71,9 +75,24 @@ export interface GroupBoxProps extends GroupBoxHTMLProps {
  * readers read it when focus enters the group. A frame without a title can be
  * named by a heading inside it with `aria-labelledby`.
  *
+ * Theme: `components.CcGroupBox.defaultProps` ({@link GroupBoxProps}),
+ * `styleOverrides` per {@link GroupBoxClassKey} slot, and `variants`, which
+ * apply to the fieldset. A variant's `props` match `label`, `smallLabel` and
+ * the fieldset's HTML attributes after the theme's default props, with
+ * `smallLabel` `false` when it is not set. A `props` function gets these
+ * props directly: there is no `ownerState`. A variant reaches the legend
+ * through a nested selector.
+ *
  * @example
  * <GroupBox label={t("files")} aria-describedby={"files-error"}>…</GroupBox>
  * <FormHelperTextCC id={"files-error"} error>{errorMsg}</FormHelperTextCC>
+ *
+ * @example
+ * // a theme that gives frames with a small legend a tighter frame
+ * createTheme({ components: { CcGroupBox: { variants: [{
+ *   props: { smallLabel: true },
+ *   style: { padding: 4, "& > legend": { paddingInline: 2 } },
+ * }] } } });
  */
 declare const _default: React.NamedExoticComponent<GroupBoxProps & React.RefAttributes<HTMLFieldSetElement>>;
 export default _default;

@@ -1,8 +1,8 @@
-import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useId, useRef } from "react";
 import ImageBox from "./ImageBox";
 import { ButtonBase, Grid, IconButton, styled, Typography, useThemeProps, } from "@mui/material";
-import { Delete as DeleteIcon, Star as StarredIcon, StarOutlined as NotStarredIcon, SwapHoriz as ReplaceIcon, } from "@mui/icons-material";
+import { Delete as DeleteIcon, Star as StarredIcon, StarBorder as NotStarredIcon, SwapHoriz as ReplaceIcon, } from "@mui/icons-material";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import combineClassNames from "../../../utils/combineClassNames";
 const Root = styled(Grid, { name: "CcImageDialogEntry", slot: "root" })({});
@@ -28,13 +28,26 @@ const PrimaryButton = styled(ButtonBase, {
     name: "CcImageDialogEntry",
     slot: "primaryButton",
 })(({ theme }) => ({
-    marginRight: "auto",
+    // takes the room Replace and Remove leave and wraps its text there; they move to a row of
+    // their own only when its longest word does not fit beside them
+    flex: "1 1 0",
+    justifyContent: "flex-start",
+    textAlign: "start",
     padding: theme.spacing(0.5),
     borderRadius: theme.shape.borderRadius,
     // the primary image's button does nothing
     "&[aria-pressed='true']": {
         cursor: "default",
     },
+}));
+const ChangeButtons = styled("span", {
+    name: "CcImageDialogEntry",
+    slot: "changeButtons",
+})(({ theme }) => ({
+    // Replace and Remove wrap together, and stay at the end of the row
+    display: "flex",
+    gap: theme.spacing(0.5),
+    marginLeft: "auto",
 }));
 const primaryLabelStyles = ({ theme }) => ({
     display: "inline-flex",
@@ -53,7 +66,10 @@ const IsPrimary = styled("span", {
  * One image in MultiImage's edit dialog: the image (a click opens the full-screen view, a
  * file dropped onto it replaces it), and under it a make-primary toggle button
  * (`aria-pressed`) and, unless the image is readOnly, Replace (opens the file picker) and
- * Remove. Each button is named after the image's file name. Internal to MultiImage.
+ * Remove. The toggle button reads "Primary image" with a filled star on the primary image,
+ * and "Set as primary image" with an outline star on the others, so the primary image is
+ * told apart by more than colour. Each button is named after its text and the image's file
+ * name. Internal to MultiImage.
  */
 const ImageDialogEntry = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcImageDialogEntry" });
@@ -77,8 +93,11 @@ const ImageDialogEntry = (inProps) => {
                 return;
             }
         }
+        // applied to the images as they are now, which may have changed while onDelete asked
         changeImages((images) => {
-            return images.filter((image) => image !== img);
+            const rest = images.filter((image) => image.id !== img.id);
+            // already removed, e.g. by a second click on Remove
+            return rest.length === images.length ? images : rest;
         });
     }, [onDelete, changeImages, img]);
     const replaceWith = useCallback(async (file) => {
@@ -91,7 +110,13 @@ const ImageDialogEntry = (inProps) => {
             onImageError(e);
             return;
         }
-        changeImages((images) => images.map((image) => image === img ? { ...image, image: imageData } : image));
+        // applied to the images as they are now, which may have changed while the file
+        // was processed
+        changeImages((images) => 
+        // removed meanwhile: there is nothing left to replace
+        images.some((image) => image.id === img.id)
+            ? images.map((image) => image.id === img.id ? { ...image, image: imageData } : image)
+            : images);
     }, [changeImages, img, processFile, onImageError]);
     const replaceImage = useCallback(async (files) => {
         const file = files.item(0);
@@ -110,9 +135,13 @@ const ImageDialogEntry = (inProps) => {
             return;
         void replaceWith(file);
     }, [replaceWith]);
-    // only the label's slot follows the state: the button stays, and keeps focus when its
-    // image becomes primary
+    // only the label's slot, star and text follow the state: the button stays, and keeps
+    // focus when its image becomes primary
     const PrimaryLabel = isPrimary ? IsPrimary : MakePrimary;
-    return (_jsxs(Root, { size: previewSize ? undefined : { xs: 12, md: 6, lg: 3 }, className: combineClassNames([className, classes?.root]), children: [_jsx("div", { children: _jsx(ImageBox, { fileName: img.name, width: previewSize, height: previewSize, image: img.image, onFilesDropped: img.readOnly ? undefined : replaceImage, classes: subClasses?.imageBox, disableRotation: disableRotation }) }), _jsxs(Actions, { className: classes?.actions, children: [_jsx(PrimaryButton, { id: primaryId, "aria-labelledby": `${primaryId} ${nameId}`, "aria-pressed": isPrimary, onClick: isPrimary ? undefined : setPrimary, className: classes?.primaryButton, children: _jsxs(PrimaryLabel, { className: isPrimary ? classes?.isPrimary : classes?.makePrimary, children: [isPrimary ? _jsx(StarredIcon, { color: "primary" }) : _jsx(NotStarredIcon, {}), _jsx(Typography, { component: "span", children: t("standalone.file-upload.multi-image.primary") })] }) }), !img.readOnly && (_jsxs(_Fragment, { children: [_jsx(IconButton, { id: replaceId, "aria-label": t("standalone.file-upload.multi-image.replace"), "aria-labelledby": `${replaceId} ${nameId}`, onClick: pickReplacement, children: _jsx(ReplaceIcon, {}) }), _jsx(IconButton, { id: removeId, "aria-label": t("standalone.file-upload.multi-image.remove"), "aria-labelledby": `${removeId} ${nameId}`, onClick: removeImage, children: _jsx(DeleteIcon, {}) })] }))] }), _jsx("span", { id: nameId, hidden: true, children: img.name }), !img.readOnly && (_jsx("input", { ref: replaceInput, type: "file", accept: "image/*", hidden: true, onChange: handleReplacementPicked }))] }));
+    return (_jsxs(Root, { size: previewSize ? undefined : { xs: 12, md: 6, lg: 3 }, className: combineClassNames([className, classes?.root]), 
+        // an item of the dialog's list of images (MultiImage)
+        role: "listitem", children: [_jsx("div", { children: _jsx(ImageBox, { fileName: img.name, width: previewSize, height: previewSize, image: img.image, onFilesDropped: img.readOnly ? undefined : replaceImage, classes: subClasses?.imageBox, disableRotation: disableRotation }) }), _jsxs(Actions, { className: classes?.actions, children: [_jsx(PrimaryButton, { id: primaryId, "aria-labelledby": `${primaryId} ${nameId}`, "aria-pressed": isPrimary, onClick: isPrimary ? undefined : setPrimary, className: classes?.primaryButton, children: _jsxs(PrimaryLabel, { className: isPrimary ? classes?.isPrimary : classes?.makePrimary, children: [isPrimary ? _jsx(StarredIcon, { color: "primary" }) : _jsx(NotStarredIcon, {}), _jsx(Typography, { component: "span", children: isPrimary
+                                        ? t("standalone.file-upload.multi-image.is-primary")
+                                        : t("standalone.file-upload.multi-image.make-primary") })] }) }), !img.readOnly && (_jsxs(ChangeButtons, { className: classes?.changeButtons, children: [_jsx(IconButton, { id: replaceId, "aria-label": t("standalone.file-upload.multi-image.replace"), "aria-labelledby": `${replaceId} ${nameId}`, onClick: pickReplacement, children: _jsx(ReplaceIcon, {}) }), _jsx(IconButton, { id: removeId, "aria-label": t("standalone.file-upload.multi-image.remove"), "aria-labelledby": `${removeId} ${nameId}`, onClick: removeImage, children: _jsx(DeleteIcon, {}) })] }))] }), _jsx("span", { id: nameId, hidden: true, children: img.name }), !img.readOnly && (_jsx("input", { ref: replaceInput, type: "file", accept: "image/*", hidden: true, onChange: handleReplacementPicked }))] }));
 };
 export default React.memo(ImageDialogEntry);

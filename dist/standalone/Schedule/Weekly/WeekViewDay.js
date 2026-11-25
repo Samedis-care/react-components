@@ -9,11 +9,31 @@ import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import moment from "moment";
 import combineClassNames from "../../../utils/combineClassNames";
+/** thickness of the bar on the top edge of today's column, in px */
+const TODAY_BAR_THICKNESS = 4;
 const StyledPaper = styled(Paper, { name: "CcWeekViewDay", slot: "paper" })(({ theme }) => ({
     height: "100%",
     "&.CcWeekViewDay-today": {
         backgroundColor: theme.palette.primary.main,
         color: theme.palette.primary.contrastText,
+        // not a color only, so the mark stays in forced-colors mode, which
+        // replaces the background: bold labels and a bar on the top edge.
+        // The bar is a border (forced colors keep borders) on an overlay, so
+        // the column's labels stay in line with the other columns' labels.
+        position: "relative",
+        fontWeight: theme.typography.fontWeightBold,
+        "& .CcWeekViewDay-weekday": {
+            fontWeight: "inherit",
+        },
+        "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            borderTop: `${TODAY_BAR_THICKNESS}px solid ${theme.palette.primary.main}`,
+            pointerEvents: "none",
+        },
     },
     "&.CcWeekViewDay-first": {
         borderRadius: `0 0 0 ${theme.shape.borderRadius}px`,
@@ -39,6 +59,6 @@ const WeekViewDay = (inProps) => {
                 isToday && "CcWeekViewDay-today",
                 isFirst && "CcWeekViewDay-first",
                 isLast && "CcWeekViewDay-last",
-            ]), children: _jsxs(Grid, { container: true, children: [_jsx(Grid, { size: 12, children: _jsx(Typography, { align: "center", children: day.format("dddd") }) }), _jsx(Grid, { size: 12, children: _jsx(Divider, {}) }), _jsx(Grid, { size: 12, children: _jsx(Box, { sx: { m: 1 }, children: date }) }), _jsx(DayContentsWrapper, { size: 12, className: classes?.dayContents, children: _jsx(Box, { sx: { m: 1 }, children: _jsx(DayContents, { data: data, altBorder: isToday }) }) })] }) }) }));
+            ]), "aria-current": isToday ? "date" : undefined, children: _jsxs(Grid, { container: true, children: [_jsx(Grid, { size: 12, children: _jsx(Typography, { align: "center", className: "CcWeekViewDay-weekday", children: day.format("dddd") }) }), _jsx(Grid, { size: 12, children: _jsx(Divider, {}) }), _jsx(Grid, { size: 12, children: _jsx(Box, { sx: { m: 1 }, children: date }) }), _jsx(DayContentsWrapper, { size: 12, className: classes?.dayContents, children: _jsx(Box, { sx: { m: 1 }, children: _jsx(DayContents, { data: data, altBorder: isToday }) }) })] }) }) }));
 };
 export default React.memo(WeekViewDay);

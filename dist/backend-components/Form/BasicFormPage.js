@@ -16,21 +16,22 @@ const BasicFormPage = (inProps) => {
     const { submit, 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     safeSubmit: unusedSafeSubmit, // replaced by handleSafeSubmit below, must not reach the renderer
-    dirty, disableRouting, postSubmitHandler, isSubmitting, children: FormButtons, form, childrenProps, customProps: originalCustomProps, formPageLayoutComponent, ...otherProps } = props;
+    dirty, stagedDirty, disableRouting, postSubmitHandler, isSubmitting, children: FormButtons, form, childrenProps, customProps: originalCustomProps, formPageLayoutComponent, ...otherProps } = props;
     const { t } = useCCTranslations();
     const { readOnly, readOnlyReasons, addEventListener, removeEventListener } = useFormContextLite();
     // a save makes the form read-only too, but its changes are unsaved until it succeeds and
     // a failed save is shown in the form, so goBack asks while the form saves, like the
     // Form's leave guard. A form which is read-only for another reason is left without asking.
     const readOnlyBesidesSaving = Object.keys(readOnlyReasons).some((reason) => reason !== FORM_SUBMITTING_READ_ONLY_REASON);
-    // the dirty prop is one render behind the form engine, which breaks "submit, then
+    // the dirty props are one render behind the form engine, which breaks "submit, then
     // go back": the record is saved, but goBack below would still see a dirty form.
     // The dirty event fires as soon as the form engine sees the change, so this ref is
-    // current even while a re-render is still pending.
-    const dirtyRef = useRef(dirty);
+    // current even while a re-render is still pending. The changes goBack asks about are the
+    // shown values and, in flow mode, the staged ones.
+    const dirtyRef = useRef(dirty || stagedDirty);
     useEffect(() => {
         const handleDirtyChange = (event) => {
-            dirtyRef.current = event.dirty;
+            dirtyRef.current = event.dirty || event.stagedDirty;
         };
         addEventListener("dirty", handleDirtyChange);
         return () => removeEventListener("dirty", handleDirtyChange);
@@ -84,8 +85,12 @@ const BasicFormPage = (inProps) => {
                                 textButtonNo: t("backend-components.form.back-on-dirty.no"),
                             });
                         }
-                        pageGuard?.releaseHistoryBlock();
-                        orgGoBack(forceRefresh);
+                        // the navigation goBack starts does not ask about this form again, and
+                        // the form stays guarded if goBack does not leave it
+                        if (pageGuard)
+                            pageGuard.leave(() => orgGoBack(forceRefresh));
+                        else
+                            orgGoBack(forceRefresh);
                     }
                     catch {
                         // user cancelled
@@ -119,9 +124,9 @@ const BasicFormPage = (inProps) => {
     }, [handleSubmit]);
     const UsedFormPageLayout = formPageLayoutComponent ?? FormPageLayout;
     return (_jsx(BasicFormPageNestingContext.Provider, { value: setChildActive, children: _jsx(UsedFormPageLayout, { body: form, footer: childActive ? null : (_jsx(FormButtons, { ...childrenProps, ...otherProps, showBackButtonOnly: otherProps.showBackButtonOnly ||
-                    (readOnly && !Object.values(readOnlyReasons).find((e) => !!e)), readOnly: readOnly, readOnlyReasons: readOnlyReasons, isSubmitting: isSubmitting, dirty: dirty, disableRouting: disableRouting, submit: handleSubmit, safeSubmit: handleSafeSubmit, customProps: (typeof originalCustomProps === "object" &&
+                    (readOnly && !Object.values(readOnlyReasons).find((e) => !!e)), readOnly: readOnly, readOnlyReasons: readOnlyReasons, isSubmitting: isSubmitting, dirty: dirty, stagedDirty: stagedDirty, disableRouting: disableRouting, submit: handleSubmit, safeSubmit: handleSafeSubmit, customProps: (typeof originalCustomProps === "object" &&
                     originalCustomProps != null
                     ? customPropsWithGoBack
-                    : originalCustomProps) })), other: childActive ? undefined : _jsx(FormLoaderOverlay, { visible: isSubmitting }) }) }));
+                    : originalCustomProps) })), other: childActive ? undefined : (_jsx(FormLoaderOverlay, { visible: isSubmitting, message: t("backend-components.form.read-only.submitting") })) }) }));
 };
 export default React.memo(BasicFormPage);

@@ -1,8 +1,16 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import ccI18n from "../../i18n";
 import { useMatrixConfig } from "./MatrixGridContext";
+import MatrixContents from "./MatrixContents";
 import MatrixExtraRowHeader from "./MatrixExtraRowHeader";
 import MatrixExtraRowCell from "./MatrixExtraRowCell";
+/**
+ * The grid never suspended, and the one text it translates is only heard:
+ * while the translations load it uses the English default, then re-renders
+ */
+const TRANSLATION_OPTIONS = { i18n: ccI18n, useSuspense: false };
 /**
  * One aggregate row of the grid.
  *
@@ -14,6 +22,10 @@ import MatrixExtraRowCell from "./MatrixExtraRowCell";
  */
 const MatrixExtraRowGroup = (props) => {
     const { columns } = useMatrixConfig();
+    const { t } = useTranslation("translation", TRANSLATION_OPTIONS);
+    const addName = t("standalone.matrix.extra-cell-add", {
+        defaultValue: "Add",
+    });
     const [activeKey, setActiveKey] = useState(null);
     // only true right after an arrow key, so the row does not steal the focus
     // when it renders
@@ -44,9 +56,9 @@ const MatrixExtraRowGroup = (props) => {
         setActiveKey(columnKey);
         setPullFocus(false);
     }, []);
-    return (_jsxs(React.Fragment, { children: [_jsx(MatrixExtraRowHeader, { extraRow: props.extraRow }), columns.map((column) => (_jsx(MatrixExtraRowCell, { extraRow: props.extraRow, column: column, tabStop: column.key === active, 
+    return (_jsxs(MatrixContents, { role: "row", children: [_jsx(MatrixExtraRowHeader, { extraRow: props.extraRow }), columns.map((column) => (_jsx(MatrixExtraRowCell, { extraRow: props.extraRow, column: column, tabStop: column.key === active, 
                 // only the cell an arrow key moved to takes the focus, never
                 // the fallback
-                pullFocus: pullFocus && column.key === remembered, onNavigate: navigate, onFocusColumn: focusColumn }, column.key)))] }));
+                pullFocus: pullFocus && column.key === remembered, onNavigate: navigate, onFocusColumn: focusColumn, addName: addName }, column.key)))] }));
 };
 export default React.memo(MatrixExtraRowGroup);

@@ -14,8 +14,9 @@ export interface PageTitleProps extends TypographyProps {
     variant?: TypographyProps["variant"];
     /**
      * Only render the heading: it neither moves into an enclosing
-     * FullFormDialog's title bar nor names the document. For a heading that is
-     * not the page's title, or a page that names itself with `usePageTitle`.
+     * FullFormDialog's title bar nor names the document, and a navigation
+     * doesn't move the focus to it. For a heading that is not the page's title,
+     * or a page that names itself with `usePageTitle`.
      * @default false
      */
     disableAutoTitle?: boolean;

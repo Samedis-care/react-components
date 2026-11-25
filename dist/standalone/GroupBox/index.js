@@ -2,7 +2,23 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import combineClassNames from "../../utils/combineClassNames";
 import { styled, useThemeProps } from "@mui/material";
-const GroupBoxRoot = styled("fieldset", { name: "CcGroupBox", slot: "root" })(({ theme }) => ({
+/**
+ * What MUI keeps off the DOM of a root slot, plus GroupBox's own props
+ */
+const ROOT_PROPS_NOT_FORWARDED = new Set([
+    "label",
+    "smallLabel",
+    "ownerState",
+    "theme",
+    "sx",
+    "as",
+    "classes",
+]);
+const GroupBoxRoot = styled("fieldset", {
+    name: "CcGroupBox",
+    slot: "root",
+    shouldForwardProp: (prop) => !ROOT_PROPS_NOT_FORWARDED.has(prop),
+})(({ theme }) => ({
     padding: "8px",
     borderStyle: "solid",
     borderColor: "lightgrey",
@@ -50,8 +66,9 @@ const GroupBoxLegend = styled("legend", {
 });
 const GroupBox = React.forwardRef(function GroupBox(inProps, ref) {
     const props = useThemeProps({ props: inProps, name: "CcGroupBox" });
-    const { label, children, smallLabel, className, classes, ...fieldsetProps } = props;
-    return (_jsxs(GroupBoxRoot, { ...fieldsetProps, ref: ref, className: combineClassNames([className, classes?.root]), children: [label && (_jsx(GroupBoxLegend, { className: combineClassNames([
+    const { label, children, smallLabel = false, className, classes, ...fieldsetProps } = props;
+    return (_jsxs(GroupBoxRoot, { ...fieldsetProps, ref: ref, label: label, smallLabel: smallLabel, className: combineClassNames([className, classes?.root]), children: [label && (_jsx(GroupBoxLegend, { className: combineClassNames([
+                    classes?.legend,
                     smallLabel && SMALL_LABEL_CLASS,
                     smallLabel && classes?.smallLabel,
                 ]), children: label })), children] }));
@@ -73,8 +90,23 @@ const GroupBox = React.forwardRef(function GroupBox(inProps, ref) {
  * readers read it when focus enters the group. A frame without a title can be
  * named by a heading inside it with `aria-labelledby`.
  *
+ * Theme: `components.CcGroupBox.defaultProps` ({@link GroupBoxProps}),
+ * `styleOverrides` per {@link GroupBoxClassKey} slot, and `variants`, which
+ * apply to the fieldset. A variant's `props` match `label`, `smallLabel` and
+ * the fieldset's HTML attributes after the theme's default props, with
+ * `smallLabel` `false` when it is not set. A `props` function gets these
+ * props directly: there is no `ownerState`. A variant reaches the legend
+ * through a nested selector.
+ *
  * @example
  * <GroupBox label={t("files")} aria-describedby={"files-error"}>…</GroupBox>
  * <FormHelperTextCC id={"files-error"} error>{errorMsg}</FormHelperTextCC>
+ *
+ * @example
+ * // a theme that gives frames with a small legend a tighter frame
+ * createTheme({ components: { CcGroupBox: { variants: [{
+ *   props: { smallLabel: true },
+ *   style: { padding: 4, "& > legend": { paddingInline: 2 } },
+ * }] } } });
  */
 export default React.memo(GroupBox);

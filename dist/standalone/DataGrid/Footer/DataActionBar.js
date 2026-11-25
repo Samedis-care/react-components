@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import { Grid } from "@mui/material";
 import { useDataGridColumnState, useDataGridProps, useDataGridSelectAll, useDataGridState, } from "../DataGrid";
 import DataActionBarView from "./DataActionBarView";
@@ -8,11 +8,15 @@ import { isSelected } from "../Content/SelectRow";
 const DataActionBar = () => {
     const [state, setState] = useDataGridState();
     const { search, customData, rows } = state;
+    // the loaded rows, read by the custom buttons' click handler when clicked,
+    // so a page load doesn't re-create it and re-render the action bar
+    const rowsRef = useRef(rows);
+    rowsRef.current = rows;
     const [columnState] = useDataGridColumnState();
-    const { getAdditionalFilters, customDataActionButtons, disableSelection, enableSelectAll, enableDeleteAll, disableDeleteHint, } = useDataGridProps();
+    const { getAdditionalFilters, customDataActionButtons, disableSelection, enableSelectAll, enableDeleteAll, disableDeleteHint, deleting, } = useDataGridProps();
     const { selectAll, selectedRows } = state;
     const { onEdit, onDelete } = useDataGridProps();
-    const { label: selectAllLabel } = useDataGridSelectAll();
+    const { label: selectAllLabel, disabled: selectAllDisabled } = useDataGridSelectAll();
     const numSelected = selectAll
         ? (state.rowsFiltered ?? state.rowsTotal) - selectedRows.length
         : selectedRows.length;
@@ -73,7 +77,7 @@ const DataActionBar = () => {
         clickedButton.onClick(selectAll, selectedRows, {
             filter: dataGridGetFilterParameters({ search, customData }, columnState, getAdditionalFilters),
             count: numSelected,
-            rows: Object.values(rows).filter((row) => isSelected(selectAll, selectedRows, row)),
+            rows: Object.values(rowsRef.current).filter((row) => isSelected(selectAll, selectedRows, row)),
         });
     }, [
         customDataActionButtons,
@@ -84,8 +88,7 @@ const DataActionBar = () => {
         columnState,
         getAdditionalFilters,
         numSelected,
-        rows,
     ]);
-    return (_jsx(Grid, { container: true, children: _jsx(DataActionBarView, { numSelected: Math.min(numSelected, 2), selectAll: selectAll, handleEdit: onEdit ? handleEdit : undefined, handleDelete: onDelete ? handleDelete : undefined, enableDeleteAll: !!enableDeleteAll, disableDeleteHint: disableDeleteHint, customButtons: customDataActionButtons, handleCustomButtonClick: handleCustomButtonCLick, disableSelection: disableSelection || !enableSelectAll, selectAllLabel: selectAllLabel }) }));
+    return (_jsx(Grid, { container: true, "aria-busy": deleting || undefined, children: _jsx(DataActionBarView, { numSelected: Math.min(numSelected, 2), selectAll: selectAll, handleEdit: onEdit ? handleEdit : undefined, handleDelete: onDelete ? handleDelete : undefined, deleting: !!deleting, enableDeleteAll: !!enableDeleteAll, disableDeleteHint: disableDeleteHint, customButtons: customDataActionButtons, handleCustomButtonClick: handleCustomButtonCLick, disableSelection: disableSelection || !enableSelectAll, selectAllLabel: selectAllLabel, selectAllDisabled: selectAllDisabled }) }));
 };
 export default React.memo(DataActionBar);

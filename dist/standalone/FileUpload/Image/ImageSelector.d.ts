@@ -20,6 +20,17 @@ export interface ImageSelectorProps {
      */
     value: string | Blob;
     /**
+     * An image that stands in for the missing one while `value` is empty: its URL or data URI.
+     * It is drawn where the picture would be (modern: framed, with the upload and camera
+     * buttons in its corner; normal: below the buttons; profile_picture: in place of the person
+     * icon), but it is not the field's image: its alt is empty, so assistive technology skips
+     * it, and in modern a click on it opens the file dialog (read-only: nothing), never the
+     * preview.
+     * @default none: modern shows its call to action, normal an empty image area and
+     *          profile_picture a person icon
+     */
+    placeholder?: string;
+    /**
      * Allow capture?
      * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/capture
      */
@@ -51,14 +62,14 @@ export interface ImageSelectorProps {
      * The blur event handler of the input
      * @remarks normal: blur of the Upload and Take photo buttons. modern: blur of any element
      *          in the image area (the empty field's button, or the upload and camera buttons
-     *          shown with an image).
+     *          shown with an image or a placeholder).
      */
     onBlur?: React.FocusEventHandler<HTMLElement>;
     /**
      * Label overwrite for Upload label
      * @remarks normal: the Upload button's text. modern: the empty field's call to action,
      *          which is the text and accessible name of its button, and the tooltip of the
-     *          shown image.
+     *          shown image or placeholder.
      */
     uploadLabel?: string;
     /**

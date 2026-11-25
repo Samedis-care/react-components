@@ -3,6 +3,7 @@ import React, { useId, useMemo } from "react";
 import { Box, Button, Divider, Grid, Table, TableBody, TableCell, TableHead, TableRow, styled, } from "@mui/material";
 import { DataGridContentOverlayClosed, DataGridContentOverlayPaper, isDataGridColumnPinned, useDataGridProps, } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import focusRing from "../../../utils/internal/focusRing";
 import SettingsCheckbox from "./SettingsCheckbox";
 const StyledTable = styled(Table, {
     name: "CcDataGrid",
@@ -43,6 +44,13 @@ const StyledStatus = styled("span", {
     whiteSpace: "nowrap",
     width: 1,
 });
+// "Close": MUI shows keyboard focus on a contained button only as a ripple and
+// a deeper shadow (unless the theme sets its focusVisible ring), which forced
+// colors drop; the ring keeps 2px clear of the filled background, so it stands
+// out against the panel
+const CloseButton = styled(Button)(({ theme }) => ({
+    "&.Mui-focusVisible": focusRing(theme, 2),
+}));
 const SettingsDialog = (props) => {
     const { classes } = useDataGridProps();
     const { t } = useCCTranslations();
@@ -64,6 +72,6 @@ const SettingsDialog = (props) => {
                                         ? pinHiddenReasonId
                                         : undefined;
                                 return (_jsxs(StyledTableRow, { className: classes?.settingsTableRow, children: [_jsx(StyledTableCell, { component: "th", scope: "row", id: rowHeaderId, className: classes?.settingsTableCell, children: column.headerName }), _jsx(StyledTableCell, { className: classes?.settingsTableCell, children: _jsx(SettingsCheckbox, { field: column.field, checked: !hidden, onChange: props.toggleColumnVisibility, labelledBy: `${visibleHeaderId} ${rowHeaderId}` }) }), _jsx(StyledTableCell, { className: classes?.settingsTableCell, children: _jsx(SettingsCheckbox, { field: column.field, checked: isDataGridColumnPinned(column, props.columnPinned), disabled: !!pinReasonId, onChange: props.toggleColumnLock, labelledBy: `${pinHeaderId} ${rowHeaderId}`, describedBy: pinReasonId }) })] }, column.field));
-                            }), noMatch && (_jsx(StyledTableRow, { className: classes?.settingsTableRow, children: _jsx(StyledTableCell, { colSpan: 3, className: classes?.settingsTableCell, children: t("standalone.data-grid.settings.no-match") }) }))] })] }), _jsx(StyledStatus, { role: "status", className: classes?.settingsStatus, children: noMatch && t("standalone.data-grid.settings.no-match") }), _jsx("span", { hidden: true, id: pinHiddenReasonId, children: t("standalone.data-grid.settings.pin-hidden") }), _jsx("span", { hidden: true, id: pinForcedReasonId, children: t("standalone.data-grid.settings.pin-forced") }), _jsxs(DataGridContentOverlayClosed, { className: classes?.contentOverlayClosed, children: [_jsx(Divider, {}), _jsx(Grid, { container: true, sx: { justifyContent: "flex-end" }, children: _jsx(Grid, { children: _jsx(Box, { sx: { m: 2 }, children: _jsx(Button, { onClick: props.closeGridSettings, variant: "contained", children: t("standalone.data-grid.settings.close") || "" }) }) }) })] })] }));
+                            }), noMatch && (_jsx(StyledTableRow, { className: classes?.settingsTableRow, children: _jsx(StyledTableCell, { colSpan: 3, className: classes?.settingsTableCell, children: t("standalone.data-grid.settings.no-match") }) }))] })] }), _jsx(StyledStatus, { role: "status", className: classes?.settingsStatus, children: noMatch && t("standalone.data-grid.settings.no-match") }), _jsx("span", { hidden: true, id: pinHiddenReasonId, children: t("standalone.data-grid.settings.pin-hidden") }), _jsx("span", { hidden: true, id: pinForcedReasonId, children: t("standalone.data-grid.settings.pin-forced") }), _jsxs(DataGridContentOverlayClosed, { className: classes?.contentOverlayClosed, children: [_jsx(Divider, {}), _jsx(Grid, { container: true, sx: { justifyContent: "flex-end" }, children: _jsx(Grid, { children: _jsx(Box, { sx: { m: 2 }, children: _jsx(CloseButton, { onClick: props.closeGridSettings, variant: "contained", children: t("standalone.data-grid.settings.close") || "" }) }) }) })] })] }));
 };
 export default React.memo(SettingsDialog);

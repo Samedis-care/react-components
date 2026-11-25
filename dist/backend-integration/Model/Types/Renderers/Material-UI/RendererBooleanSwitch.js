@@ -2,7 +2,7 @@ import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-run
 import { FormControlLabel, FormHelperText, Switch, Typography, } from "@mui/material";
 import TypeBoolean from "../../TypeBoolean";
 import ccI18n from "../../../../../i18n";
-import { FormControlFieldsetCC } from "../../../../../standalone/UIKit/MuiFieldState";
+import { FormControlFieldsetCC, labelWithDirtyText, } from "../../../../../standalone/UIKit/MuiFieldState";
 import addSlotAttributes from "../../../../../utils/internal/addSlotAttributes";
 /**
  * Renders a TypeBoolean field as Switch
@@ -30,7 +30,7 @@ class RendererBooleanSwitch extends TypeBoolean {
                             }, onBlur: handleBlur, "data-name": field, autoFocus: autoFocus, id: id, slotProps: addSlotAttributes(this.props?.switchProps.slotProps, "input", {
                                 "aria-invalid": !!errorMsg,
                                 "aria-describedby": describedBy,
-                            }) }), label: label }), _jsx(FormHelperText, { id: messageId, children: errorMsg || warningMsg })] }));
+                            }) }), label: labelWithDirtyText(label, dirty) }), _jsx(FormHelperText, { id: messageId, children: errorMsg || warningMsg })] }));
         }
         return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, value
                     ? ccI18n.t("backend-integration.model.types.renderers.boolean.true")

@@ -5,6 +5,8 @@ import { SignIcon } from "../../standalone";
 import { Info as InfoIcon } from "@mui/icons-material";
 import useCCTranslations from "../../utils/useCCTranslations";
 import combineClassNames from "../../utils/combineClassNames";
+// state class of the root, see SignPadProps.disabled
+const DISABLED_CLASS = "CcSignPad-disabled";
 const SignPadDiv = styled("div", { name: "CcSignPad", slot: "root" })(({ theme }) => ({
     position: "relative",
     cursor: "pointer",
@@ -13,8 +15,16 @@ const SignPadDiv = styled("div", { name: "CcSignPad", slot: "root" })(({ theme }
     width: "100%",
     minHeight: "100px",
     color: theme.palette.grey[700],
-    display: "inline-block",
+    // block-level, so the tile does not sit on a line of text whose strut
+    // adds space next to it in a block parent; a column, so the button
+    // grows to the min-height inside the bottom border
+    display: "flex",
+    flexDirection: "column",
     backgroundColor: theme.palette.action.hover,
+    // the button inherits it; the info button keeps its pointer
+    [`&.${DISABLED_CLASS}`]: {
+        cursor: "default",
+    },
 }));
 // the tile's activator: fills the tile and resets the native button look,
 // the tile itself draws the field
@@ -23,8 +33,10 @@ const SignPadButton = styled("button", { name: "CcSignPad", slot: "button" })(({
     display: "flex",
     flexDirection: "column",
     width: "100%",
+    // a parent of definite height sets it; otherwise the button grows to
+    // fill the tile's min-height
     height: "100%",
-    minHeight: "inherit",
+    flexGrow: 1,
     margin: 0,
     padding: 0,
     border: 0,
@@ -99,8 +111,12 @@ const SignPad = (inProps) => {
         if (openInfo)
             openInfo();
     }, [openInfo]);
-    return (_jsxs(SignPadDiv, { className: combineClassNames([className, classes?.root]), 
+    return (_jsxs(SignPadDiv, { className: combineClassNames([
+            className,
+            classes?.root,
+            disabled && DISABLED_CLASS,
+        ]), 
         // also gets the button's clicks, Enter and Space included
-        onClick: openSignPad, children: [_jsxs(SignPadButton, { type: "button", id: buttonId, "aria-label": label, "aria-labelledby": buttonLabelledBy, "aria-describedby": describedBy, "aria-invalid": invalid, "aria-disabled": disabled || undefined, className: classes?.button, children: [_jsxs(SignTextDiv, { className: classes?.signTextDiv, children: [_jsx(SignIcon, { color: disabled ? "disabled" : "primary" }), !signature && _jsx("span", { children: prompt })] }), _jsx(ImageDiv, { className: classes?.imageDiv, children: signature && (_jsx(SignPreview, { className: classes?.signPreview, src: signature, alt: "" })) })] }), _jsx(InfoDiv, { className: classes?.infoDiv, children: openInfo && (_jsx(InputAdornment, { position: "end", children: _jsx(IconButton, { id: infoId, onClick: handelOpenInfo, size: "large", "aria-label": t("standalone.uikit.info"), "aria-labelledby": infoLabelledBy, children: _jsx(InfoIcon, { color: "disabled" }) }) })) }), required && (_jsx("span", { id: requiredId, hidden: true, children: t("standalone.signature-pad.required") }))] }));
+        onClick: disabled ? undefined : openSignPad, children: [_jsxs(SignPadButton, { type: "button", id: buttonId, "aria-label": label, "aria-labelledby": buttonLabelledBy, "aria-describedby": describedBy, "aria-invalid": invalid, "aria-disabled": disabled || undefined, className: classes?.button, children: [_jsxs(SignTextDiv, { className: classes?.signTextDiv, children: [_jsx(SignIcon, { color: disabled ? "disabled" : "primary" }), !signature && _jsx("span", { children: prompt })] }), _jsx(ImageDiv, { className: classes?.imageDiv, children: signature && (_jsx(SignPreview, { className: classes?.signPreview, src: signature, alt: "" })) })] }), _jsx(InfoDiv, { className: classes?.infoDiv, children: openInfo && (_jsx(InputAdornment, { position: "end", children: _jsx(IconButton, { id: infoId, onClick: handelOpenInfo, size: "large", "aria-label": t("standalone.uikit.info"), "aria-labelledby": infoLabelledBy, children: _jsx(InfoIcon, { color: "disabled" }) }) })) }), required && (_jsx("span", { id: requiredId, hidden: true, children: t("standalone.signature-pad.required") }))] }));
 };
 export default React.memo(SignPad);

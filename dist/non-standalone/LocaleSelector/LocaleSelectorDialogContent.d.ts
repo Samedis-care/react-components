@@ -25,7 +25,9 @@ export interface LocaleSelectorEntryData {
 /**
  * Theme style slots of LocaleSelectorDialogContent
  * (`components.CcLocaleSelectorDialogContent.styleOverrides.<slot>`):
- * - `localeList`: the area below the search box that holds the rows
+ * - `localeList`: the area below the search box that holds the rows. It also
+ *   draws the list's keyboard focus ring (`& [role="list"]:focus-visible`), shown
+ *   while the list holds focus for a row that is scrolled out of view
  * - `noLocalesMessage`: the message that replaces the rows when none match
  * - `searchStatus`: the visually hidden status region (`role="status"`) that
  *   states the number of rows, or that none match the search

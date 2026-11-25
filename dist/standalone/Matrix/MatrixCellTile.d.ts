@@ -2,10 +2,7 @@ import React from "react";
 import { MatrixCellTileProps } from "./MatrixCellTileContext";
 export declare const MatrixCellTileRoot: import("@emotion/styled").StyledComponent<import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof React.ClassAttributes<HTMLDivElement> | keyof React.HTMLAttributes<HTMLDivElement>>, {}>;
 /**
- * The attention ring around a highlighted entry.
- * @remarks A STATIC ring on purpose: an infinite CSS animation keeps the
- * compositor awake and drains battery on tablets as long as the grid is open.
- * A solid ring highlights just as clearly at zero cost.
+ * The attention ring around a highlighted entry (see highlightRing).
  */
 export declare const MatrixTileHighlight: import("@emotion/styled").StyledComponent<import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof React.ClassAttributes<HTMLDivElement> | keyof React.HTMLAttributes<HTMLDivElement>>, {}>;
 export declare const MatrixTilePlaceholder: import("@emotion/styled").StyledComponent<import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof React.ClassAttributes<HTMLDivElement> | keyof React.HTMLAttributes<HTMLDivElement>>, {}>;

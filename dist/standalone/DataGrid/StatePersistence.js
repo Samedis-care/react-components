@@ -51,7 +51,9 @@ const StatePersistence = () => {
     // write before writing it - persistence may well be a request to a server.
     // The first run sees the state the grid opened with, decoded from what is
     // stored. It is the baseline, not written: writing it would only replace
-    // what this visit could not read (a column it doesn't have, a newer format)
+    // what this visit could not read (a column it doesn't have, a newer format).
+    // null after a failed write: what is stored is unknown then, so the next
+    // run writes, whether the data changed or not
     const lastWritten = useRef(undefined);
     // data a newer library version wrote may keep the column widths where this
     // version doesn't look. The auto-fit then fills them in, and writing that
@@ -87,7 +89,15 @@ const StatePersistence = () => {
         if (keepNewer.current && autoFit)
             return;
         keepNewer.current = false;
-        void setPersisted(data);
+        // the setter may throw or reject: the storage is full, the server fails.
+        // What is stored is unknown then, also when a newer write has started
+        // since: that one may have left a part to this one (as
+        // DataGridStorageManagerPersist skips a bucket being written already)
+        new Promise((resolve) => resolve(setPersisted(data))).catch((err) => {
+            // eslint-disable-next-line no-console
+            console.error("[Components-Care] [DataGrid] Persist: ", err);
+            lastWritten.current = null;
+        });
     }, [
         setPersisted,
         state,

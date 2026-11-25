@@ -35,7 +35,7 @@ const ReadOnlyLabel = withMuiFieldState(styled(SpanLabel, {
     position: "relative",
     transform: "translate(0,0) scale(0.75)",
     zIndex: "unset",
-}));
+}), "children");
 // "No entries" of an empty read-only selector, where an entry's text would be
 const EmptyText = styled(Typography, {
     name: "CcMultiSelect",
@@ -57,7 +57,7 @@ const StyledBaseSelector = styled(BaseSelector, {
 const NO_ENTRIES = [];
 const MultiSelect = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiSelect" });
-    const { onLoad, onSelect, selected, added, enableIcons, selectedEntryRenderer, disabled, readOnly, label, error, dirty, getIdOfData, displaySwitch, switchLabel, defaultSwitchValue, selectedSort, confirmDelete, className, classes, filterIds, refreshToken, } = props;
+    const { onLoad, onSelect, selected, added, enableIcons, selectedEntryRenderer, disabled, readOnly, label, error, dirty, getIdOfData, selectedSort, confirmDelete, className, classes, filterIds, refreshToken, } = props;
     const { t } = useCCTranslations();
     const labelId = useId();
     const getIdDefault = useCallback((data) => data.value, []);
@@ -116,13 +116,9 @@ const MultiSelect = (inProps) => {
             textButtonNo: t("standalone.selector.multi-select.delete-confirm.no"),
         });
     }, [dialogContext, t]);
-    const handleDelete = useCallback((evt) => {
+    const handleDelete = useCallback((entry, evt) => {
         evt.stopPropagation(); // don't trigger onClick event on item itself
         let canDelete = true;
-        const entry = selected.find((s) => s.value === evt.currentTarget.name);
-        if (!entry) {
-            throw new Error("[Components-Care] [MultiSelect] Entry couldn't be found. Either entry.value is not set, or the entity renderer does not correctly set the name attribute");
-        }
         void (async () => {
             if (entry.canUnselect) {
                 canDelete = await entry.canUnselect(entry, evt);
@@ -136,13 +132,22 @@ const MultiSelect = (inProps) => {
             }
         })();
     }, [onSelect, selected, genericDeleteConfirm, confirmDelete]);
-    const handleRestore = useCallback((evt) => {
+    const handleRestore = useCallback((entry, evt) => {
         evt.stopPropagation(); // don't trigger onClick event on item itself
-        const entry = removed.find((s) => s.value === evt.currentTarget.name);
-        if (!entry || !onSelect)
+        if (!onSelect)
             return;
         onSelect([...selected, entry]);
-    }, [onSelect, removed, selected]);
+    }, [onSelect, selected]);
+    // each listed entry's handlers, bound to it, so that an entry can call them from any
+    // element (a Chip's onDelete, a menu item), not only from a button that names it
+    const entryHandlers = useMemo(() => listed.map(({ data }) => ({
+        remove: (evt) => {
+            handleDelete(data, evt);
+        },
+        restore: (evt) => {
+            handleRestore(data, evt);
+        },
+    })), [handleDelete, handleRestore, listed]);
     const handleSetData = useCallback((newValue) => {
         if (!onSelect)
             return;
@@ -151,7 +156,9 @@ const MultiSelect = (inProps) => {
     const locked = disabled || readOnly;
     const entries = listed.length > 0 && (_jsx(List, { disablePadding: true, "aria-labelledby": readOnly && label ? labelId : undefined, children: listed.map(({ data, changeState }, index) => (_jsx(EntryRender, { enableDivider: listed.length === index - 1, enableIcons: enableIcons, handleDelete: locked || data.noDelete || changeState === "removed"
                 ? undefined
-                : handleDelete, changeState: changeState, handleRestore: locked || changeState !== "removed" ? undefined : handleRestore, data: data, setData: handleSetData, iconSize: props.iconSize }, getId(data) || index.toString(16)))) }));
+                : entryHandlers[index].remove, changeState: changeState, handleRestore: locked || changeState !== "removed"
+                ? undefined
+                : entryHandlers[index].restore, data: data, setData: handleSetData, iconSize: props.iconSize }, getId(data) || index.toString(16)))) }));
     if (readOnly) {
         return (_jsxs(Root, { size: "grow", container: true, className: combineClassNames([className, classes?.root]), children: [label && (_jsx(Grid, { size: 12, children: _jsx(ReadOnlyLabel, { id: labelId, shrink: true, disableAnimation: true, error: !!error, dirty: dirty, className: classes?.label, children: label }) })), _jsx(SelectedEntry, { size: 12, className: combineClassNames([
                         classes?.selectedEntry,
@@ -163,6 +170,6 @@ const MultiSelect = (inProps) => {
                     ownerState: { selected: listed.length > 0 }, className: classes?.selector, onLoad: multiSelectLoadHandler, selected: null, onSelect: multiSelectHandler, 
                     // not by the removed entries: the token remounts the search field, and a save
                     // that sends a removal must leave the focus and the typed text in it
-                    refreshToken: (refreshToken ?? "") + selectedIds.join(","), displaySwitch: displaySwitch, switchLabel: switchLabel, defaultSwitchValue: defaultSwitchValue, filterIds: combinedFilterIds }) }), entries && (_jsx(SelectedEntry, { size: 12, className: classes?.selectedEntry, children: _jsx(Paper, { elevation: 0, children: entries }) }))] }));
+                    refreshToken: (refreshToken ?? "") + selectedIds.join(","), filterIds: combinedFilterIds }) }), entries && (_jsx(SelectedEntry, { size: 12, className: classes?.selectedEntry, children: _jsx(Paper, { elevation: 0, children: entries }) }))] }));
 };
 export default React.memo(MultiSelect);

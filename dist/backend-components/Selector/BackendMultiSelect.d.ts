@@ -2,8 +2,35 @@ import React from "react";
 import { MultiSelectProps, MultiSelectorData, SelectorLruOptions } from "../../standalone";
 import { ModelRecord, ModelUnknown } from "../../backend-integration/Model/Model";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 export type BackendMultiSelectLruOptions<DataT extends MultiSelectorData> = Omit<SelectorLruOptions<DataT>, "loadData">;
-export interface BackendMultiSelectProps<M extends ModelUnknown, DataT extends MultiSelectorData> extends Omit<MultiSelectProps<DataT>, "onLoad" | "selected" | "onSelect" | "lru"> {
+/**
+ * The switch of a backend multi select. `switchLabel` is required while a
+ * `switchFilterName` shows the switch: the visible label is its accessible name.
+ */
+export type BackendMultiSelectSwitchProps = {
+    /**
+     * Name of the switch filter or undefined if disabled
+     * @default undefined (no switch, searches send no additionalFilters)
+     */
+    switchFilterName?: undefined;
+    /**
+     * Label of the switch, which is also its accessible name: pass one with
+     * `switchFilterName`. Ignored without `switchFilterName`.
+     */
+    switchLabel?: React.ReactNode;
+} | {
+    /**
+     * Name of the switch filter: with it the field shows a switch, and searches
+     * send `additionalFilters: { [switchFilterName]: switchValue }`.
+     */
+    switchFilterName: string;
+    /**
+     * Label of the switch: its visible text and its accessible name.
+     */
+    switchLabel: React.ReactNode;
+};
+export type BackendMultiSelectProps<M extends ModelUnknown, DataT extends MultiSelectorData> = DistributiveOmit<MultiSelectProps<DataT>, "onLoad" | "selected" | "onSelect" | "lru" | "displaySwitch" | "switchLabel"> & BackendMultiSelectSwitchProps & {
     /**
      * The model to use
      */
@@ -55,10 +82,6 @@ export interface BackendMultiSelectProps<M extends ModelUnknown, DataT extends M
      */
     sort?: DataGridSortSetting[];
     /**
-     * Name of the switch filter or undefined if disabled
-     */
-    switchFilterName?: string;
-    /**
      * LRU config
      */
     lru?: BackendMultiSelectLruOptions<DataT>;
@@ -66,12 +89,14 @@ export interface BackendMultiSelectProps<M extends ModelUnknown, DataT extends M
      * Load error event
      * @param error The error that has been raised while loading
      * @return string Label for entry which failed loading
-     * @return null To remove entry from selected entries
+     * @return null To remove the entry: `onSelect` reports the current selection without
+     *         its id, so a pick or removal made while it loaded is kept (an id picked
+     *         again meanwhile stays). Not reported once the field has unmounted.
      * @remarks Without it, the entry is labelled "Unknown entry" if the backend did not
      *          return its record, else "Error while fetching data".
      */
     onLoadError?: (error: Error) => string | null;
-}
+};
 interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
     /**
      * The currently selected entries
@@ -88,7 +113,7 @@ export declare const useSelectedCache: <M extends ModelUnknown, DataT extends Mu
  * Themable subset of BackendMultiSelectProps (used for theme defaultProps)
  * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)
  */
-export type BackendMultiSelectThemeProps = Omit<BackendMultiSelectProps<ModelUnknown, MultiSelectorData>, "model" | "modelFetch" | "modelToSelectorData" | "selected" | "onSelect" | "initialData" | "lru">;
+export type BackendMultiSelectThemeProps = DistributiveOmit<BackendMultiSelectProps<ModelUnknown, MultiSelectorData>, "model" | "modelFetch" | "modelToSelectorData" | "selected" | "onSelect" | "initialData" | "lru">;
 /**
  * Backend connected MultiSelect
  * @remarks Doesn't support custom data

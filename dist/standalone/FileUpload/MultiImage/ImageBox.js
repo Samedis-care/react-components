@@ -2,7 +2,7 @@ import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-run
 import React, { useCallback, useEffect, useRef, useState, } from "react";
 import useDropZone from "../../../utils/useDropZone";
 import { ButtonBase, Dialog, DialogContent, IconButton, iconButtonClasses, styled, Tooltip, useThemeProps, } from "@mui/material";
-import { ArrowBack as PrevIcon, ArrowForward as NextIcon, Close as CloseIcon, RotateLeft as RotateLeftIcon, RotateRight as RotateRightIcon, } from "@mui/icons-material";
+import { ArrowBack as PrevIcon, ArrowForward as NextIcon, Close as CloseIcon, FitScreenOutlined as ResetZoomIcon, RotateLeft as RotateLeftIcon, RotateRight as RotateRightIcon, ZoomIn as ZoomInIcon, ZoomOut as ZoomOutIcon, } from "@mui/icons-material";
 import combineClassNames from "../../../utils/combineClassNames";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { useDebounce } from "../../../utils/useDebounce";
@@ -98,13 +98,19 @@ const OpenButton = styled(ButtonBase, {
     // inside the button: the swipe pane cuts off what lies outside it
     "&.Mui-focusVisible": focusRing(theme, -2),
 }));
-const FullScreenRotateButtons = styled("div", {
+const FullScreenToolbar = styled("div", {
     name: "CcImageBox",
-    slot: "fullScreenRotateButtons",
+    slot: "fullScreenToolbar",
 })({
     position: "absolute",
     top: 0,
     left: 0,
+    display: "flex",
+});
+const FullScreenRotateButtons = styled("div", {
+    name: "CcImageBox",
+    slot: "fullScreenRotateButtons",
+})({
     display: "flex",
 });
 const RotateLeftButton = styled(IconButton, {
@@ -116,6 +122,30 @@ const RotateLeftButton = styled(IconButton, {
 const RotateRightButton = styled(IconButton, {
     name: "CcImageBox",
     slot: "rotateRightBtn",
+})(({ theme }) => ({
+    padding: theme.spacing(1),
+}));
+const FullScreenZoomButtons = styled("div", {
+    name: "CcImageBox",
+    slot: "fullScreenZoomButtons",
+})({
+    display: "flex",
+});
+const ZoomInButton = styled(IconButton, {
+    name: "CcImageBox",
+    slot: "zoomInBtn",
+})(({ theme }) => ({
+    padding: theme.spacing(1),
+}));
+const ZoomOutButton = styled(IconButton, {
+    name: "CcImageBox",
+    slot: "zoomOutBtn",
+})(({ theme }) => ({
+    padding: theme.spacing(1),
+}));
+const ResetZoomButton = styled(IconButton, {
+    name: "CcImageBox",
+    slot: "resetZoomBtn",
 })(({ theme }) => ({
     padding: theme.spacing(1),
 }));
@@ -171,15 +201,23 @@ const FullScreenImageWrapper = styled("div", {
     height: "100%",
     position: "relative",
 });
+/**
+ * State class of the fullscreen zoom container: the image is zoomed in, so dragging pans it
+ */
+const zoomContainerClasses = {
+    zoomed: "CcImageBox-zoomed",
+};
 const FullScreenZoomContainer = styled("div", {
     name: "CcImageBox",
     slot: "fullScreenZoomContainer",
 })({
     width: "100%",
     height: "100%",
-    cursor: "grab",
-    "&:active": {
-        cursor: "grabbing",
+    [`&.${zoomContainerClasses.zoomed}`]: {
+        cursor: "grab",
+        "&:active": {
+            cursor: "grabbing",
+        },
     },
     "& img": {
         pointerEvents: "none",
@@ -190,22 +228,23 @@ const ImageDotsWrapper = styled("div", {
     name: "CcImageBox",
     slot: "imageDotsWrapper",
 })({
+    // the width of the view: the dots that fit in it, or their counter, centred
     position: "absolute",
     bottom: 16,
-    left: "50%",
+    left: 0,
+    right: 0,
     height: 16,
-    transform: "translateX(-50%)",
+    // the swipe pane and the image below stay draggable beside the dots
+    pointerEvents: "none",
+    "& button": {
+        pointerEvents: "auto",
+    },
 });
 const StyledImageDots = styled(ImageDots, {
     name: "CcImageBox",
     slot: "imageDots",
 })({
-    position: "unset",
-    overflow: "unset",
-    "& .CcImageDots-container": {
-        position: "unset",
-        overflow: "unset",
-    },
+    justifyContent: "center",
 });
 const useScrollSwipe = (params) => {
     const { onPrevImage, onNextImage } = params;
@@ -280,7 +319,7 @@ const ImageBox = (inProps) => {
     }, [onNextImage]);
     const { containerRef: containerRefImage, handleScroll: handleScrollImage, handleTouchEnd: handleTouchEndImage, } = useScrollSwipe(props);
     const { containerRef: containerRefFS, handleScroll: handleScrollFS, handleTouchEnd: handleTouchEndFS, } = useScrollSwipe(props);
-    const { imgRef: zoomImgRef, containerRef: zoomContainerRef, containerProps: zoomContainerProps, rotateLeft, rotateRight, } = useImageZoomPan(dialogOpen, src);
+    const { imgRef: zoomImgRef, containerRef: zoomContainerRef, containerProps: zoomContainerProps, rotateLeft, rotateRight, zoomIn, zoomOut, resetZoom, zoomed, handleKeyDown: handleZoomKeyDown, } = useImageZoomPan(dialogOpen, src);
     const boxImage = (_jsx(Tooltip, { title: fileName ?? "", disableTouchListener: !fileName, disableHoverListener: !fileName, disableFocusListener: !fileName, children: _jsx(StyledImage, { src: src, alt: "", ownerState: {
                 swipeLeft: !!onPrevImage,
                 swipeRight: !!onNextImage,
@@ -298,11 +337,14 @@ const ImageBox = (inProps) => {
                                 onPrevImage && openButtonClasses.swipeLeft,
                                 onNextImage && openButtonClasses.swipeRight,
                                 classes?.openButton,
-                            ]), children: boxImage })) : (boxImage) }), onPrevImage && (_jsx(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.prev-image"), children: _jsx(PrevIcon, {}) })), onNextImage && (_jsx(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.next-image"), children: _jsx(NextIcon, {}) }))] }), !onClick && (_jsx(StyledDialog, { open: dialogOpen, fullScreen: true, onClose: closeDialog, children: _jsx(DialogContent, { children: _jsxs(FullScreenImageWrapper, { className: classes?.fullScreenImageWrapper, children: [_jsx(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollFS, ref: containerRefFS, onTouchEnd: handleTouchEndFS, children: _jsx(FullScreenZoomContainer, { ref: zoomContainerRef, ...zoomContainerProps, className: classes?.fullScreenZoomContainer, children: _jsx(StyledImage, { ref: zoomImgRef, src: src, alt: "", draggable: false, ownerState: {
+                            ]), children: boxImage })) : (boxImage) }), onPrevImage && (_jsx(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.prev-image"), children: _jsx(PrevIcon, {}) })), onNextImage && (_jsx(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.next-image"), children: _jsx(NextIcon, {}) }))] }), !onClick && (_jsx(StyledDialog, { open: dialogOpen, fullScreen: true, onClose: closeDialog, onKeyDown: handleZoomKeyDown, children: _jsx(DialogContent, { children: _jsxs(FullScreenImageWrapper, { className: classes?.fullScreenImageWrapper, children: [_jsx(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollFS, ref: containerRefFS, onTouchEnd: handleTouchEndFS, children: _jsx(FullScreenZoomContainer, { ref: zoomContainerRef, ...zoomContainerProps, className: combineClassNames([
+                                        classes?.fullScreenZoomContainer,
+                                        zoomed && zoomContainerClasses.zoomed,
+                                    ]), children: _jsx(StyledImage, { ref: zoomImgRef, src: src, alt: "", draggable: false, ownerState: {
                                             swipeLeft: !!onPrevImage,
                                             swipeRight: !!onNextImage,
                                             imageDots: !imageDots,
-                                        }, className: classes?.image }) }) }), _jsx(RemoveButton, { onClick: closeDialog, className: classes?.removeBtn, size: "large", "aria-label": t("standalone.file-upload.close"), children: _jsx(CloseIcon, {}) }), !disableRotation && (_jsxs(FullScreenRotateButtons, { className: classes?.fullScreenRotateButtons, children: [_jsx(RotateLeftButton, { onClick: rotateLeft, className: classes?.rotateLeftBtn, size: "large", "aria-label": t("standalone.file-upload.rotate-left"), children: _jsx(RotateLeftIcon, {}) }), _jsx(RotateRightButton, { onClick: rotateRight, className: classes?.rotateRightBtn, size: "large", "aria-label": t("standalone.file-upload.rotate-right"), children: _jsx(RotateRightIcon, {}) })] })), onPrevImage && (_jsx(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.prev-image"), children: _jsx(PrevIcon, {}) })), onNextImage && (_jsx(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.next-image"), children: _jsx(NextIcon, {}) })), imageDots && (_jsx(ImageDotsWrapper, { className: classes?.imageDotsWrapper, children: _jsx(StyledImageDots, { ...imageDots, className: combineClassNames([
+                                        }, className: classes?.image }) }) }), _jsx(RemoveButton, { onClick: closeDialog, className: classes?.removeBtn, size: "large", "aria-label": t("standalone.file-upload.close"), children: _jsx(CloseIcon, {}) }), _jsxs(FullScreenToolbar, { className: classes?.fullScreenToolbar, children: [!disableRotation && (_jsxs(FullScreenRotateButtons, { className: classes?.fullScreenRotateButtons, children: [_jsx(RotateLeftButton, { onClick: rotateLeft, className: classes?.rotateLeftBtn, size: "large", "aria-label": t("standalone.file-upload.rotate-left"), children: _jsx(RotateLeftIcon, {}) }), _jsx(RotateRightButton, { onClick: rotateRight, className: classes?.rotateRightBtn, size: "large", "aria-label": t("standalone.file-upload.rotate-right"), children: _jsx(RotateRightIcon, {}) })] })), _jsxs(FullScreenZoomButtons, { className: classes?.fullScreenZoomButtons, children: [_jsx(ZoomInButton, { onClick: zoomIn, className: classes?.zoomInBtn, size: "large", "aria-label": t("standalone.file-upload.zoom-in"), children: _jsx(ZoomInIcon, {}) }), _jsx(ZoomOutButton, { onClick: zoomOut, className: classes?.zoomOutBtn, size: "large", "aria-label": t("standalone.file-upload.zoom-out"), children: _jsx(ZoomOutIcon, {}) }), _jsx(ResetZoomButton, { onClick: resetZoom, className: classes?.resetZoomBtn, size: "large", "aria-label": t("standalone.file-upload.reset-zoom"), children: _jsx(ResetZoomIcon, {}) })] })] }), onPrevImage && (_jsx(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.prev-image"), children: _jsx(PrevIcon, {}) })), onNextImage && (_jsx(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.next-image"), children: _jsx(NextIcon, {}) })), imageDots && (_jsx(ImageDotsWrapper, { className: classes?.imageDotsWrapper, children: _jsx(StyledImageDots, { ...imageDots, className: combineClassNames([
                                         classes?.imageDots,
                                         imageDots.className,
                                     ]) }) }))] }) }) }))] }));

@@ -1,6 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import { useMatrixConfig } from "./MatrixGridContext";
+import MatrixContents from "./MatrixContents";
 import MatrixRowHeader from "./MatrixRowHeader";
 import MatrixBodyCell from "./MatrixBodyCell";
 /**
@@ -10,6 +11,6 @@ import MatrixBodyCell from "./MatrixBodyCell";
  */
 const MatrixDataRow = (props) => {
     const { columns } = useMatrixConfig();
-    return (_jsxs(React.Fragment, { children: [_jsx(MatrixRowHeader, { row: props.row }), columns.map((column, columnIndex) => (_jsx(MatrixBodyCell, { row: props.row, column: column, columnIndex: columnIndex }, column.key)))] }));
+    return (_jsxs(MatrixContents, { role: "row", children: [_jsx(MatrixRowHeader, { row: props.row }), columns.map((column, columnIndex) => (_jsx(MatrixBodyCell, { row: props.row, column: column, columnIndex: columnIndex }, column.key)))] }));
 };
 export default React.memo(MatrixDataRow);

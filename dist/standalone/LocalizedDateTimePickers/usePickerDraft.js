@@ -1,11 +1,18 @@
 import { useCallback, useState } from "react";
 import { usePickerAdapter } from "@mui/x-date-pickers";
 /**
- * Whether two picker values are the same, compared as MUI's own value manager
- * does: the same object, the same instant, or both an invalid date. The adapter
- * alone says an invalid date differs even from itself, which would make the
+ * Whether two picker values are the same to the field: the same object, the
+ * same instant in the same timezone, or both an invalid date.
+ *
+ * The instant is compared as MUI's own value manager does. The adapter alone
+ * says an invalid date differs even from itself, which would make the
  * render-phase reset below fire on every render. `null` and an invalid date
  * stay different.
+ *
+ * The timezone (`adapter.getTimezone`: local, UTC or a named zone) counts as
+ * well, because a picker without a `timezone` prop takes it from its value: it
+ * shows the date in it and builds the dates the user enters in it. The same
+ * instant handed in as UTC rather than local time is another value to the field.
  * @param adapter The picker adapter
  * @param a One value
  * @param b The other value
@@ -14,92 +21,137 @@ import { usePickerAdapter } from "@mui/x-date-pickers";
 const isSameValue = (adapter, a, b) => {
     if (a === b)
         return true;
-    if (a != null && b != null && !adapter.isValid(a) && !adapter.isValid(b)) {
+    if (a == null || b == null)
+        return false;
+    if (!adapter.isValid(a) && !adapter.isValid(b))
         return true;
-    }
-    return adapter.isEqual(a, b);
+    return (adapter.isEqual(a, b) && adapter.getTimezone(a) === adapter.getTimezone(b));
 };
 /**
  * Makes a controlled picker typable, by keeping what is being typed apart from
- * what gets reported upstream.
+ * what gets reported upstream, and reports a date only once the user is done
+ * with it.
  *
  * The picker fields publish a value on **every** keystroke once all sections
- * hold something, so typing a year walks through `0002 → 0020 → 0202 → 2026`.
- * Each of those is a real date, which leaves a controlled consumer with no good
- * option: accepting them all commits — and in a filter refetches — three dates
- * the user never meant, while refusing them leaves `value` on the old date, which
+ * hold something, so typing a year walks through `0002 → 0020 → 0202 → 2026`,
+ * retyping the day of Aug 5 as `12` through Aug 1, retyping the minutes of 22:30
+ * as `45` through 22:04, and deleting a section to retype it through `null`.
+ * Most of those are real dates, which leaves a controlled consumer with no good
+ * option: accepting them all commits — and in a filter refetches — dates the
+ * user never meant, while refusing them leaves `value` on the old date, which
  * makes the field re-sync its sections from it and swallow the keystroke, so the
  * year can never grow past its first digit.
  *
  * This hook takes the third option. The field renders from a local draft, so it
- * follows every keystroke and never reverts, while `onChange` only fires for a
- * value that passes the picker's own validation — and a half-typed year fails it,
- * the picker's default `minDate` being 1900-01-01. Clearing the field still
- * reports `null` immediately, an empty value being valid.
+ * follows every keystroke and never reverts, while `onChange` only fires once
+ * the user is done with the field (`finish`: focus leaves it, Enter in it) or
+ * the calendar accepts a date (`accept`), with the last value the picker
+ * accepted, and only if that differs from the value reported last. A value the
+ * picker accepts passes its own validation, which a half-typed year fails, the
+ * picker's default `minDate` being 1900-01-01; an empty field is valid and
+ * reported as `null`. A day picked in the mobile dialog waits for OK, and Cancel,
+ * which hands the old date back, reports nothing.
  *
  * An entry the picker rejects stays in the field, as in MUI's own field, also
  * once focus leaves it: marked invalid, with the picker's `onError` reporting
  * the error, until the user changes it, the consumer hands in another date, or
- * the calendar opens (`settle`). Handing in the date the consumer already holds,
- * as a form reset of a field whose value never changed does, is not another
- * date. Meanwhile the consumer holds the last value it accepted, so a consumer
- * that acts on the value checks `onError` first.
- *
- * What it cannot separate is an intermediate that is a plausible date in its own
- * right: retyping the day of a stored date reports the day passed through on the
- * way, because nothing distinguishes it from that day being meant.
+ * the calendar opens (`settle`). Nothing is reported for it, nor for the date
+ * the picker accepted before it. Handing in the date the consumer already
+ * holds, as a form reset of a field whose value never changed does, is not
+ * another date. Handing it in another timezone is (a `moment.utc(...)` where it
+ * was a `moment(...)`, as a "show in UTC" switch does): the field shows it in
+ * that timezone from then on, and reports the dates the user enters in it.
+ * Meanwhile the consumer holds the last value it accepted, so a consumer that
+ * acts on the value checks `onError` first.
  *
  * The draft doubles as the stable object the field wants: consumers derive
  * `value` with `moment(...)` during render and so hand us a fresh instance every
  * time, while the field compares its external value **by reference**. Holding the
- * draft keeps those section rebuilds from firing mid-entry.
+ * draft keeps those section rebuilds from firing mid-entry. A fresh instance of
+ * the same instant in the same timezone keeps the held object.
  * @param value The value held by the consumer
  * @param onChange The consumer's change handler
- * @param publishIntermediateValues Escape hatch: report every keystroke instead,
- * i.e. the raw picker behaviour
+ * @param publishIntermediateValues Escape hatch: report every change at once,
+ * rejected ones included, i.e. the raw picker behaviour
+ * @param defaultValue The initial value of an uncontrolled picker, which counts
+ * as reported
  * @returns The value and handlers to hand to the picker
  */
-const usePickerDraft = (value, onChange, publishIntermediateValues) => {
+const usePickerDraft = (value, onChange, publishIntermediateValues, defaultValue) => {
     const adapter = usePickerAdapter();
     // An uncontrolled picker renders from the field's own state, which nothing
     // reverts, so it needs no draft to render from — and handing it one would turn
-    // it controlled mid-entry. Its `onChange` is still gated: a consumer listening
-    // to an uncontrolled picker wants the same "a date the user entered" contract.
+    // it controlled mid-entry. Its `onChange` is still held back: a consumer
+    // listening to an uncontrolled picker wants the same "a date the user
+    // entered" contract.
     const isControlled = value !== undefined;
     const holdsDraft = isControlled && !publishIntermediateValues;
-    const [state, setState] = useState({
+    const [state, setState] = useState(() => ({
         draft: value ?? null,
-        committed: value,
-    });
+        committed: isControlled ? value : defaultValue,
+        held: null,
+    }));
     // The consumer's value now means a different moment in time than the one the
-    // draft was typed over, so the draft is stale. Comparing by value rather than
-    // by reference is what tolerates the `moment(...)`-in-render idiom (also for
-    // an invalid date, `moment(null)` in render); deriving during render rather
-    // than in an effect keeps the stale draft from being painted once first.
+    // draft was typed over, or the same one in another timezone, so the draft is
+    // stale. Comparing by value rather than by reference is what tolerates the
+    // `moment(...)`-in-render idiom (also for an invalid date, `moment(null)` in
+    // render); deriving during render rather than in an effect keeps the stale
+    // draft from being painted once first.
     if (holdsDraft &&
         !isSameValue(adapter, state.committed ?? null, value ?? null)) {
-        setState({ draft: value ?? null, committed: value });
+        setState({ draft: value ?? null, committed: value, held: null });
     }
     const handleChange = useCallback((newValue, context) => {
         if (publishIntermediateValues) {
             onChange?.(newValue, context);
             return;
         }
-        // the field follows what was typed either way, so no keystroke is lost
-        setState((prev) => ({ ...prev, draft: newValue }));
-        if (context.validationError) {
-            return;
-        }
-        setState((prev) => ({ ...prev, committed: newValue }));
-        onChange?.(newValue, context);
+        // the field follows what was typed either way, so no keystroke is lost;
+        // an accepted value waits for the user to be done, see finish
+        setState((prev) => ({
+            ...prev,
+            draft: newValue,
+            held: context.validationError ? null : { value: newValue, context },
+        }));
     }, [onChange, publishIntermediateValues]);
+    const { committed, held } = state;
+    const report = useCallback((newValue, context) => {
+        setState((prev) => ({ ...prev, committed: newValue, held: null }));
+        if (isSameValue(adapter, committed ?? null, newValue))
+            return;
+        onChange?.(newValue, context);
+    }, [adapter, committed, onChange]);
+    // reads held from this render: focus leaving the field and Enter come after
+    // the change that set it has rendered
+    const finish = useCallback(() => {
+        if (!held)
+            return;
+        report(held.value, held.context);
+    }, [held, report]);
+    const accept = useCallback((newValue, context) => {
+        // MUI accepts each change of the field too; those wait for finish
+        if (publishIntermediateValues || context.source !== "view")
+            return;
+        if (context.validationError)
+            return;
+        report(newValue, context);
+    }, [publishIntermediateValues, report]);
     const settle = useCallback(() => {
-        setState((prev) => ({ ...prev, draft: prev.committed ?? null }));
+        setState((prev) => ({
+            ...prev,
+            draft: prev.held ? prev.held.value : (prev.committed ?? null),
+        }));
+    }, []);
+    const clear = useCallback(() => {
+        setState({ draft: null, committed: null, held: null });
     }, []);
     return {
         value: holdsDraft ? state.draft : value,
         onChange: handleChange,
         settle,
+        finish,
+        accept,
+        clear,
     };
 };
 export default usePickerDraft;

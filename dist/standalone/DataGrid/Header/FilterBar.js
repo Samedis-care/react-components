@@ -4,9 +4,21 @@ import { Grid, useMediaQuery } from "@mui/material";
 import { DataGridFilterBarBox, DataGridFilterBarGrid, useDataGridProps, useDataGridState, } from "../DataGrid";
 import CustomFiltersButton from "./CustomFiltersButton";
 import combineClassNames from "../../../utils/combineClassNames";
+/**
+ * The default of DataGridProps.enableFilterDialogWidth (in px), used while the
+ * grid has a filterBar and sets neither enableFilterDialogWidth nor
+ * enableFilterDialogMediaQuery. The helpers (GridSingleSelectFilter and the
+ * like) take a third of the bar each by default, so each of them is about
+ * 190px wide at this width.
+ */
+const DEFAULT_FILTER_DIALOG_WIDTH = 600;
 const FilterBar = () => {
     const props = useDataGridProps();
-    const { enableFilterDialogMediaQuery, enableFilterDialogWidth } = props;
+    const { enableFilterDialogMediaQuery, filterBar } = props;
+    const enableFilterDialogWidth = props.enableFilterDialogWidth ??
+        (filterBar && enableFilterDialogMediaQuery == null
+            ? DEFAULT_FILTER_DIALOG_WIDTH
+            : undefined);
     const { classes } = props;
     const [state, setState] = useDataGridState();
     const filterBarContainer = useRef(null);
@@ -67,7 +79,7 @@ const FilterBar = () => {
             }));
         }
     }, [enableDialog, setState]);
-    const FilterBarView = props.filterBar;
+    const FilterBarView = filterBar;
     return (_jsx(DataGridFilterBarBox, { sx: { ml: 4 }, className: classes?.filterBarBox, ref: filterBarContainer, children: _jsx(DataGridFilterBarGrid, { container: true, sx: { alignItems: "center", justifyContent: "flex-end" }, spacing: 2, className: combineClassNames([
                 classes?.filterBarGrid,
                 "components-care-data-grid-filter-bar",

@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { DateTimePicker, LocalizationProvider, } from "@mui/x-date-pickers";
 import { withMuiFieldState } from "../UIKit";
 import useMuiLocaleData from "./useMuiLocaleData";
@@ -9,6 +9,11 @@ import usePickerValidationError from "./usePickerValidationError";
 import withAccessibleError from "./withAccessibleError";
 import withRequiredSections from "./withRequiredSections";
 import useFieldBlur from "./useFieldBlur";
+import withFieldName from "./withFieldName";
+import withReportWhenDone from "./withReportWhenDone";
+import calendarNameSlotProps from "./calendarNameSlotProps";
+import calendarFocusRingSlotProps from "./calendarFocusRingSlotProps";
+import OpenPickerButton from "./OpenPickerButton";
 /**
  * When the picker opens its desktop popup rather than MUI's mobile dialog: with
  * a fine pointer, as in MUI, and only where the popup fits. The popup puts the
@@ -18,12 +23,12 @@ import useFieldBlur from "./useFieldBlur";
  */
 const DESKTOP_MODE_MEDIA_QUERY = "@media (pointer: fine) and (min-width: 600px)";
 const LocalizedDateTimePicker = (props) => {
-    const { required, error, fullWidth, onBlur, publishIntermediateValues, ...otherProps } = props;
+    const { required, error, fullWidth, onBlur, publishIntermediateValues, "aria-label": ariaLabel, ...otherProps } = props;
     const localeText = useMuiLocaleData();
-    const draft = usePickerDraft(otherProps.value, otherProps.onChange, publishIntermediateValues);
+    const draft = usePickerDraft(otherProps.value, otherProps.onChange, publishIntermediateValues, otherProps.defaultValue);
     const validation = usePickerValidationError(otherProps.onError);
     const withFieldBlur = useFieldBlur();
-    const { settle } = draft;
+    const { settle, accept } = draft;
     const consumerOnOpen = otherProps.onOpen;
     const handleOpen = useCallback(() => {
         // the calendar renders from the value it is given, so a half-typed date
@@ -31,8 +36,25 @@ const LocalizedDateTimePicker = (props) => {
         settle();
         consumerOnOpen?.();
     }, [settle, consumerOnOpen]);
-    return (_jsx(LocalizationProvider, { localeText: localeText, children: _jsx(DateTimePicker, { format: "L LT", ...otherProps, value: draft.value, onChange: draft.onChange, onOpen: handleOpen, onError: validation.onError, desktopModeMediaQuery: otherProps.desktopModeMediaQuery ?? DESKTOP_MODE_MEDIA_QUERY, slotProps: {
+    const consumerOnAccept = otherProps.onAccept;
+    const handleAccept = useCallback((value, context) => {
+        // a date the calendar accepted is reported at once, see onChange
+        accept(value, context);
+        consumerOnAccept?.(value, context);
+    }, [accept, consumerOnAccept]);
+    const consumerSlots = otherProps.slots;
+    // the caller's slots come after the open button with its focus ring, so a
+    // button it passes wins
+    const slots = useMemo(() => ({ openPickerButton: OpenPickerButton, ...consumerSlots }), [consumerSlots]);
+    return (_jsx(LocalizationProvider, { localeText: localeText, children: _jsx(DateTimePicker, { format: "L LT", ...otherProps, value: draft.value, onChange: draft.onChange, onOpen: handleOpen, onAccept: handleAccept, onError: validation.onError, desktopModeMediaQuery: otherProps.desktopModeMediaQuery ?? DESKTOP_MODE_MEDIA_QUERY, slots: slots, slotProps: {
                 ...otherProps.slotProps,
+                ...calendarNameSlotProps(otherProps.slotProps, {
+                    name: ariaLabel,
+                    hasLabel: !!otherProps.label,
+                    fallbackName: otherProps.localeText?.toolbarTitle ??
+                        localeText?.dateTimePickerToolbarTitle,
+                }),
+                ...calendarFocusRingSlotProps(otherProps.slotProps),
                 textField: (ownerState) => {
                     const orgSlotProps = accessSlotProps(ownerState, otherProps.slotProps?.textField);
                     const fieldProps = withAccessibleError(validation.hasValidationError, withRequiredSections({
@@ -48,7 +70,7 @@ const LocalizedDateTimePicker = (props) => {
                             onBlur?.(event);
                         },
                     }));
-                    return withFieldBlur(ownerState, fieldProps, {
+                    return withFieldBlur(ownerState, withFieldName(withReportWhenDone(fieldProps, draft), ariaLabel), {
                         name: otherProps.name,
                     });
                 },

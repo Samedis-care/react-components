@@ -11,7 +11,9 @@ export interface MatrixGridProps<TCell> {
      */
     rows: MatrixRow<TCell>[];
     /**
-     * Contents of the sticky top-left cell
+     * Contents of the sticky top-left cell. It is the column header of the row
+     * headers' column, so it should say what they show (e.g. "Staff"). Without
+     * contents (undefined, null, a boolean or "") it is a plain cell.
      */
     corner?: React.ReactNode;
     /**
@@ -95,15 +97,16 @@ export interface MatrixGridProps<TCell> {
      * @default cells the row has no entry for
      * @remarks A cell can be selectable AND non-empty: a cell holding only
      * entries that are none of the consumer's business still accepts a new one.
-     * The hover hint then shrinks to the cell's bottom half.
+     * It then offers "add" as occupiedAddAffordance says.
      *
      * A sweep stops at the first cell this rejects, so a reported range is
      * always contiguous and always exactly what was highlighted.
      */
     isCellSelectable?: (cell: TCell | undefined, context: MatrixCellContext<TCell>) => boolean;
     /**
-     * Whether a cell renders anything at all — decides whether the hover hint
-     * takes the whole cell or only its bottom half
+     * Whether a cell renders anything at all — decides whether a selectable
+     * cell offers "add" with the hover hint over the whole cell, or as
+     * occupiedAddAffordance says
      * @default cells the row has an entry for
      */
     isCellOccupied?: (cell: TCell | undefined, context: MatrixCellContext<TCell>) => boolean;
@@ -130,13 +133,18 @@ export interface MatrixGridProps<TCell> {
      * anywhere. A cell whose contents cover it cannot do that — an entry
      * swallows the press — so it needs an affordance of its own:
      *
-     * - chip: a small button in the corner. It overlaps nothing the contents
-     *   draw, so every entry keeps its whole clickable area, and it is reachable
-     *   by keyboard.
+     * - chip: a 24x24px button in the bottom right corner, shown while the cell
+     *   is hovered or the chip has the keyboard focus, and reachable by
+     *   keyboard. While it shows, it lies over the bottom right of the last
+     *   entry, that entry's bottomRight corner included, and takes the clicks
+     *   there; the rest of every entry stays clickable.
      * - overlay: the same dashed hint as on a blank cell, over the lower half of
      *   the cell, catching the pointer there. One big target that reads exactly
      *   like the blank-cell hint — at the price of the lower half of the entries
-     *   underneath, whose clicks it takes (both of them, in a split pair).
+     *   underneath, which it hides (it is opaque) and whose clicks it takes
+     *   (both of them, in a split pair) while the pointer is on the cell.
+     *   Escape hides it, as it does the blank-cell hint, until the pointer
+     *   moves to another cell, or leaves the cell and comes back.
      *
      * On a touch device the chip is used either way, and shown at rest: the
      * overlay needs a hover to appear, so there it would leave such a cell with

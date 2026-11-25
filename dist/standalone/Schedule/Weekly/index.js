@@ -45,6 +45,7 @@ const WeekView = (inProps) => {
     const actions = props.actions ?? NO_ACTIONS;
     const filterCount = Object.keys(filters).length;
     const { t, i18n } = useCCTranslations();
+    const language = i18n.language;
     const locale = useCurrentLocale();
     /**
      * The offset to the current week
@@ -114,16 +115,8 @@ const WeekView = (inProps) => {
     const closeDatePicker = useCallback(() => {
         setDatePickerAnchorEl(null);
     }, []);
-    useEffect(() => {
-        const langChangeHandler = () => {
-            setData(null);
-            setLoadError(null);
-        };
-        i18n.on("languageChanged", langChangeHandler);
-        return () => {
-            i18n.off("languageChanged", langChangeHandler);
-        };
-    }, [i18n]);
+    // `language` is not read here: it is listed so that a language change
+    // loads the shown week again
     useEffect(() => {
         /**
          * Set by the cleanup when a newer load starts or the view unmounts, so
@@ -149,7 +142,7 @@ const WeekView = (inProps) => {
         return () => {
             stale = true;
         };
-    }, [filterValues, loadData, weekOffset]);
+    }, [filterValues, language, loadData, weekOffset]);
     const now = moment();
     const weekday = now.weekday();
     const weekdays = [0, 1, 2, 3, 4, 5, 6].map((day) => day - weekday);

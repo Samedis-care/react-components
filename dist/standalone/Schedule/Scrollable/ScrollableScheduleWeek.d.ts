@@ -19,16 +19,20 @@ export interface IProps extends WithTranslation {
      */
     setTodayElement: (elem: HTMLElement | null) => void;
     /**
-     * Loads the week, called with `weekOffset` and `filterValues` on mount and
-     * again when one of the three changes. The rows shown stay until the new
-     * result arrives; the result of an earlier call that arrives later is
-     * ignored.
+     * Loads the week, called with `weekOffset` and `filterValues` on mount,
+     * again when one of the three changes, and when the user retries a failed
+     * week. The rows shown stay until the new result arrives; the result of an
+     * earlier call that arrives later is ignored.
      */
     loadWeekCallback: LoadWeekCallback;
     /**
      * The filter values passed to `loadWeekCallback`
      */
     filterValues: Record<string, string | boolean>;
+    /**
+     * Unique prefix for the ids of the week's elements (from `useId`)
+     */
+    idPrefix: string;
 }
-declare const ScrollableScheduleWeekWithTranslation: (props: Omit<IProps, keyof WithTranslation>) => React.ReactElement;
+declare const ScrollableScheduleWeekWithTranslation: (props: Omit<IProps, keyof WithTranslation | "idPrefix">) => React.ReactElement;
 export default ScrollableScheduleWeekWithTranslation;

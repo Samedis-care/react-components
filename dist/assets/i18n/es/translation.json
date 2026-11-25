@@ -5,19 +5,26 @@
 			"today": "Hoy",
 			"prev-week": "Semana anterior",
 			"next-week": "Semana siguiente",
-			"filter-settings": "Ajustes de filtro"
+			"filter-settings": "Ajustes de filtro",
+			"week-load-error": "No se pudo cargar la semana {{WEEK}}",
+			"retry": "Reintentar"
 		},
 		"portal": {
 			"menu-toggle": "Alternar menú",
 			"collapse-menu": "Contraer menú",
-			"expand-menu": "Expandir menú"
+			"expand-menu": "Expandir menú",
+			"close-menu": "Cerrar menú"
 		},
 		"uikit": {
 			"info": "Más información",
 			"clear": "Borrar",
+			"field-state": {
+				"dirty": "(modificado)"
+			},
 			"multi-language-input": {
 				"language": "Idioma",
 				"language-of": "Idioma de {{label}}",
+				"show-translations-of": "Mostrar traducciones de {{label}}",
 				"toggle-languages": "Alternar entradas de idioma"
 			},
 			"number-input": {
@@ -92,6 +99,12 @@
 					"and": "Y",
 					"or": "O"
 				},
+				"filter-value": {
+					"date": "Fecha",
+					"date-time": "Fecha y hora",
+					"from": "Desde",
+					"to": "Hasta"
+				},
 				"no-data-reset-filters": "Borrar filtros",
 				"no-data-filters": "Ningún dato coincide con sus filtros.",
 				"select-row": "Seleccionar {{ROW}}",
@@ -106,6 +119,7 @@
 				"search": "Buscar",
 				"more-options": "Más opciones",
 				"custom-filter-button": "Filtrar",
+				"custom-filter-button-label": "Filtrar: selección de filtros",
 				"delete": "Eliminar",
 				"edit": "Editar",
 				"reset-options": {
@@ -128,11 +142,13 @@
 				"close": "Cerrar"
 			},
 			"custom-filters": {
-				"title": "Selección de filtros"
+				"title": "Selección de filtros",
+				"reset": "Restablecer",
+				"show-results": "Mostrar resultados"
 			},
 			"footer": {
-				"total": "Total:",
-				"filtered": "Filtrado:",
+				"counts": "Total: {{TOTAL}}",
+				"counts-filtered": "Filtrado: {{FILTERED}} Total: {{TOTAL}}",
 				"edit": "Editar",
 				"delete": "Eliminar",
 				"more": "Más",
@@ -183,8 +199,12 @@
 			"close": "Cerrar",
 			"rotate-left": "Girar a la izquierda",
 			"rotate-right": "Girar a la derecha",
+			"zoom-in": "Acercar",
+			"zoom-out": "Alejar",
+			"reset-zoom": "Restablecer zoom",
 			"upload": "Subir",
-			"restore": "Restaurar",
+			"remove-file": "Quitar {{NAME}}",
+			"restore-file": "Restaurar {{NAME}}",
 			"upload-capture": {
 				"image": "Tomar foto"
 			},
@@ -213,7 +233,8 @@
 			},
 			"multi-image": {
 				"edit": "Editar",
-				"primary": "Principal",
+				"is-primary": "Imagen principal",
+				"make-primary": "Establecer como imagen principal",
 				"remove": "Quitar imagen",
 				"add": "Añadir imagen",
 				"replace": "Reemplazar imagen",
@@ -242,7 +263,10 @@
 					"no": "No"
 				},
 				"close": "Cerrar",
-				"signature": "Firma"
+				"signature": "Firma",
+				"sign-area": "Área de firma",
+				"instructions": "Dibuje su firma en el área de firma con el ratón, un lápiz o el dedo.",
+				"instructions-signed": "Se muestra la firma guardada. Para volver a firmar, bórrela primero."
 			},
 			"sign-here": "Firme aquí digitalmente",
 			"required": "Obligatorio"
@@ -250,8 +274,19 @@
 		"toast": {
 			"close": "Cerrar"
 		},
+		"info-box": {
+			"status": {
+				"warning": "Advertencia:",
+				"success": "Éxito:",
+				"error": "Error:"
+			}
+		},
 		"loader": {
 			"label": "Cargando…"
+		},
+		"matrix": {
+			"tile-more": "{{count}} más:",
+			"extra-cell-add": "Añadir"
 		}
 	},
 	"non-standalone": {
@@ -341,9 +376,16 @@
 					"buttons": {
 						"okay": "OK"
 					}
+				},
+				"success-toast": {
+					"message_one": "{{count}} entrada eliminada",
+					"message_many": "{{count}} entradas eliminadas",
+					"message_other": "{{count}} entradas eliminadas",
+					"messageInverted": "Se eliminaron las entradas seleccionadas"
 				}
 			},
 			"inline-edit": {
+				"cell-control-label": "{{FIELD}}, {{ROW}}",
 				"error-dialog": {
 					"message": "No se guardó el cambio en «{{LABEL}}»: {{ERROR}}"
 				}
@@ -364,6 +406,13 @@
 			},
 			"read-only": {
 				"submitting": "El formulario se está guardando"
+			},
+			"tab": {
+				"invalid": "Contiene campos no válidos.",
+				"modified": "Contiene campos modificados."
+			},
+			"form-dialog": {
+				"open-in-new-tab": "Abrir en una pestaña nueva"
 			}
 		},
 		"selector": {
@@ -391,6 +440,7 @@
 				"last_error": "Último error",
 				"errors": {
 					"file_select": "Archivo seleccionado no válido",
+					"file_count": "Solo se puede importar un archivo",
 					"file_read": "No se puede leer {{FILE_NAME}}. Guarde el archivo como libro de Excel (.xlsx) sin contraseña y vuelva a seleccionarlo.",
 					"update-key-not-uniq": "{{UPDATE_KEY}} no es único en el conjunto de datos de importación"
 				},
@@ -451,6 +501,7 @@
 		},
 		"dialogs": {
 			"error-title": "Se ha producido un error",
+			"error-no-details": "No hay más detalles disponibles. Inténtelo de nuevo.",
 			"validation-error-title": "Error de validación",
 			"info": "Información",
 			"are-you-sure": "¿Está seguro?",

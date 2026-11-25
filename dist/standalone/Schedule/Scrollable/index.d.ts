@@ -3,12 +3,14 @@ import { IDayData, ScheduleAction, ScheduleFilterDefinition } from "../Common/Da
 /**
  * Callback to load week data from a data source
  *
- * ScrollableSchedule calls it for each week it adds to the list. When it is
- * passed a new function, it calls the new one for every week in the list; each
- * week keeps its rows until the new result arrives, and a result or error of
- * an earlier call that arrives later is ignored. Pass a function that changes
- * only when the data source does (`useCallback`): a new function on every
- * render reloads the list on every render.
+ * ScrollableSchedule calls it for each week it adds to the list. A filter
+ * change and a components-care language change start the list over as on
+ * mount: it is emptied and filled again from the current week (offset 0) on.
+ * When it is passed a new function, it calls the new one for every week in
+ * the list; each week keeps its rows until the new result arrives, and a
+ * result or error of an earlier call that arrives later is ignored. Pass a
+ * function that changes only when the data source does (`useCallback`): a new
+ * function on every render reloads the list on every render.
  * @param weekOffset The week relative to the current week of year
  * 					 Example: -1 for last week, 0 for this week, 1 for next week
  * @param filter The filter selected by the user
@@ -27,7 +29,8 @@ export interface ScrollableScheduleProps {
      */
     loadWeekCallback: LoadWeekCallback;
     /**
-     * Optional filter
+     * Optional filter. A change calls the filter's `onChange` and starts the
+     * list over at the current week, as on mount (see LoadWeekCallback).
      */
     filters?: Record<string, ScheduleFilterDefinition>;
     /**

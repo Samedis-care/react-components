@@ -134,7 +134,9 @@ const BackendSingleSelect = (inProps) => {
                 ? picked
                 : (additionalOptions?.find((opt) => opt.value === selected) ?? null);
     const debouncedLoad = useDebouncedLoad(handleLoad, searchDebounceTime ?? 500);
-    return (_jsx(SingleSelect, { ...otherProps, freeSolo: freeSolo, onLoad: debouncedLoad, displaySwitch: !!switchFilterName, additionalOptions: additionalOptions, onSelect: handleSelect, selected: selectedFreeSolo
+    return (_jsx(SingleSelect, { ...otherProps, freeSolo: freeSolo, onLoad: debouncedLoad, ...(switchFilterName
+            ? { displaySwitch: true, switchLabel: props.switchLabel }
+            : { displaySwitch: false }), additionalOptions: additionalOptions, onSelect: handleSelect, selected: selectedFreeSolo
             ? { value: selectedFreeSolo, label: selectedFreeSolo, freeSolo: true }
             : selected != null
                 ? (selectedEntry ?? {

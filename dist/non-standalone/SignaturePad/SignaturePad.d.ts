@@ -18,7 +18,9 @@ export interface SignaturePadCanvasProps extends SignPadProps {
      */
     penColor?: string;
     /**
-     * Callback method which returns signature base64 string
+     * Callback method which returns signature base64 string. Save in the open
+     * dialog calls the function of the current render, not the one of the
+     * click that opened it.
      */
     setSignature?: (imageURL: string) => void;
 }

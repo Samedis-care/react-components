@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import filterSortPaginate from "../../../utils/filterSortPaginate";
 import uniqueArray from "../../../utils/uniqueArray";
 import { DataGrid, DataGridNoPersist } from "../../../standalone";
@@ -7,6 +7,12 @@ import throwError from "../../../utils/throwError";
 import { ModelVisibilityGridView, } from "../../../backend-integration";
 const GenericDataPreview = (props) => {
     const { model, data, existingDefinition, defaultFilter } = props;
+    // loadData reads the rows of the latest render, but the grid asks it again only when
+    // its query or forceRefreshToken changes: count the data and models the preview got
+    const [source, setSource] = useState({ data, model, version: 0 });
+    if (source.data !== data || source.model !== model) {
+        setSource((prev) => ({ data, model, version: prev.version + 1 }));
+    }
     const columns = useMemo(() => uniqueArray(data.map(Object.keys).flat()), [data]);
     const columnDef = useMemo(() => columns.map((column) => existingDefinition?.find((entry) => entry.field === column) ?? {
         field: column,
@@ -52,6 +58,6 @@ const GenericDataPreview = (props) => {
                         ])))
                         : processed[0],
                 };
-            }, defaultFilter: defaultFilter }) }));
+            }, defaultFilter: defaultFilter, forceRefreshToken: source.version.toString() }) }));
 };
 export default React.memo(GenericDataPreview);

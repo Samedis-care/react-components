@@ -1,5 +1,6 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useMemo } from "react";
+import { flushSync } from "react-dom";
 import { ListItemIcon, MenuItem, } from "@mui/material";
 import { ExportIcon } from "../../Icons";
 import { Publish as ImportIcon, Refresh as RefreshIcon, Tune as TuneIcon, } from "@mui/icons-material";
@@ -28,15 +29,19 @@ const ActionBarMenu = (props) => {
             toggleSettings(evt);
         onClose();
     }, [toggleSettings, onClose]);
+    // "Reset" and "Export" open another menu. This menu closes first, so its
+    // focus trap returns focus to the "More options" button before the other
+    // menu opens: that menu then returns focus to the button when it closes,
+    // instead of to this menu's entry, which is hidden by then
     const openResetDialogWrap = useCallback((evt) => {
+        flushSync(onClose);
         if (openResetDialog)
             openResetDialog(evt);
-        onClose();
     }, [openResetDialog, onClose]);
     const openExportMenuWrap = useCallback((evt) => {
+        flushSync(onClose);
         if (openExportMenu)
             openExportMenu(evt);
-        onClose();
     }, [openExportMenu, onClose]);
     const handleImportWrap = useCallback((evt) => {
         if (handleImport)

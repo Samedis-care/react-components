@@ -5,6 +5,8 @@ export * from "./Field";
 export { default as DirtyStateProvider } from "./DirtyStateProvider";
 export * from "./DirtyStateProvider";
 export * from "./DirtyStateContext";
+export { default as FormTab } from "./FormTab";
+export * from "./FormTab";
 export { default as FullFormDialog } from "./FormDialog";
 export * from "./FormDialog";
 export { default as useSetFormDialogTitle } from "./useSetFormDialogTitle";

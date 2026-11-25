@@ -63,19 +63,30 @@ const hasTexts = (locale) => {
  * with `pushDialog` from `useDialogContext()`, resolves to the picked locale, or
  * `null` when the dialog is dismissed. `pushDialog(<LocaleSelectorDialog
  * supportedLocales={["de", "en"]} />)` shows it too; it then closes itself.
- * Rendered without `pushDialog`, e.g. `{open && <LocaleSelectorDialog onClose={() =>
- * setOpen(false)} />}`, it is open while it is rendered and closes through
- * `onClose`. Either way it needs the Framework (or a `DialogContextProvider`) around
- * it: it shows errors with `showErrorDialog`.
+ * Rendered without `pushDialog`, e.g. `{open && <LocaleSelectorDialog
+ * supportedLocales={["de", "en"]} onClose={() => setOpen(false)} />}`, it is open
+ * while it is rendered and closes through `onClose`. Either way it needs the
+ * Framework (or a `DialogContextProvider`) around it: it shows errors with
+ * `showErrorDialog`.
  *
  * Below the theme's `sm` breakpoint it is full screen, from `sm` up 400px wide (the
  * `paper` slot); names that don't fit their column wrap.
  *
  * Rows: one per country and each of its official languages that Components-Care
- * ships (`de-AT`, `en-IN`, …), restricted by `supportedLocales`. Rows whose locale
+ * ships (`de-AT`, `en-IN`, …), restricted to `supportedLocales`. Rows whose locale
  * (or else whose language) is in the browser's `navigator.languages` come first, in
- * the order of that list, then the rest by number of speakers. A search box filters
- * the rows by their names and locale code, ignoring case.
+ * the order of that list, then the rest by number of speakers. The row of the
+ * current locale stays in its place and is marked: MUI's selected tint, a check at
+ * its end and `aria-current="true"` (a locale without a region, e.g. `"de"`, marks
+ * the row of its most likely region, `de-DE`). A search box filters the rows by
+ * their names and locale code, ignoring case.
+ *
+ * The list renders only the rows in view. When the row with keyboard focus is
+ * scrolled away (the wheel, a swipe, or the arrow, page, Home and End keys, which
+ * scroll the list), the list itself takes focus and shows a focus ring: the keys
+ * keep scrolling it, Tab goes on to the rows and Shift+Tab back to the search box.
+ * Scrolled back to that row, the row gets focus back, unless focus moved elsewhere
+ * meanwhile.
  *
  * Picking a row calls `ComponentsCareI18n.changeLanguage("<lang>-<COUNTRY>")`
  * (regional: the country also decides date and number formats). While the language

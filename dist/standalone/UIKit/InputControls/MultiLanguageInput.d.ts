@@ -37,6 +37,9 @@ export type MultiLanguageInputProps = Omit<TextFieldProps, "value" | "onChange" 
      * the labelled field reads the language with its label (visually hidden),
      * the other languages' fields, which show only their code, carry the name as
      * `aria-label`. Without a label each field is named with its language only.
+     * In single-line mode the toggle is named and tooltipped after the label,
+     * e.g. "Show translations of Title"; without a label it keeps the generic
+     * name.
      */
     label?: string;
     /**

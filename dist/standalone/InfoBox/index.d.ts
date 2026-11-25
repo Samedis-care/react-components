@@ -5,10 +5,14 @@ export interface InfoBoxSummaryOwnerState {
     status?: "info" | "warning" | "success" | "error";
     alwaysExpanded: boolean;
 }
-export type InfoBoxClassKey = "root" | "summary" | "summaryRoot" | "iconButton" | "heading" | "details" | "detailsText";
+export type InfoBoxClassKey = "root" | "summary" | "summaryRoot" | "iconButton" | "heading"
+/** The visually hidden status name read before the heading */
+ | "statusName" | "details" | "detailsText";
 export interface InfoBoxProps {
     /**
-     * Title of the info box
+     * Title of the info box. For a `warning`, `success` or `error` status the
+     * translated status is read before it (e.g. "Warning: Please review"), so
+     * don't repeat the status here.
      */
     heading: string;
     /**
@@ -76,7 +80,11 @@ export interface InfoBoxProps {
     /**
      * For which status InfoBox used. It sets the header's color, which stays
      * while the header has keyboard focus; the focused header shows a 2px
-     * ring in its text color, 2px inside its edges.
+     * ring in its text color, 2px inside its edges. `warning`, `success` and
+     * `error` also put the translated status in front of the heading, read
+     * out with it (e.g. "Warning: Please review"), so the status is not
+     * conveyed by color and icon alone. `info` and an unset status announce
+     * nothing: they are the neutral default.
      */
     status?: "info" | "warning" | "success" | "error";
 }

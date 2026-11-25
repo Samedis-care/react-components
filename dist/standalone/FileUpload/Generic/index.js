@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useEffect, useImperativeHandle, useRef, } from "react";
+import React, { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, } from "react";
 import { Box, Button, FormHelperText, styled, Tooltip, Typography, Grid, useThemeProps, } from "@mui/material";
 import { AttachFile } from "@mui/icons-material";
 import FilePreview, { getFileIconOrDefault } from "./File";
@@ -48,6 +48,11 @@ const removeFiles = (files, isRemoved) => files.flatMap((file) => !isRemoved(fil
 const getUploadSize = (file) => file.file instanceof Blob
     ? (file.preview instanceof Blob ? file.preview : file.file).size
     : (file.file.size ?? 0);
+/**
+ * The number of files that count towards maxFiles: those not removed and not excluded
+ * @param files The list
+ */
+const countLimitedFiles = (files) => files.filter((file) => !file.delete && !file.excludeFromLimits).length;
 /**
  * The size of all files that are not removed, in bytes
  * @param files The list
@@ -137,19 +142,24 @@ const FileUpload = (inProps, ref) => {
     const getRemainingFileCount = useCallback(() => {
         if (!maxFiles)
             throw new Error("max files isn't set, this function shouldn't be called");
-        return (maxFiles -
-            files.filter((file) => !file.delete && !file.excludeFromLimits).length);
+        return maxFiles - countLimitedFiles(files);
     }, [maxFiles, files]);
     const processFiles = useCallback(async (files) => {
         const processImages = !!(convertImagesTo ||
             imageDownscaleOptions ||
             previewImages);
-        if (maxFiles) {
-            if (files.length > getRemainingFileCount()) {
-                handleError("files.selector.too-many", t("standalone.file-upload.error.too-many"));
-                return;
-            }
-        }
+        // counted on the list as it is now, not as the render that made this function
+        // saw it: the caller may keep the ref's handle across calls, and other files may
+        // be added while this selection's images are processed
+        const refuseIfTooMany = () => {
+            if (!maxFiles ||
+                files.length <= maxFiles - countLimitedFiles(getFiles()))
+                return false;
+            handleError("files.selector.too-many", t("standalone.file-upload.error.too-many"));
+            return true;
+        };
+        if (refuseIfTooMany())
+            return;
         const newFiles = [];
         for (let i = 0; i < files.length; i++) {
             let file = files[i];
@@ -227,6 +237,9 @@ const FileUpload = (inProps, ref) => {
                 return;
             }
         }
+        // again, as files added while the images above were processed took slots too
+        if (refuseIfTooMany())
+            return;
         const newNames = new Set(newFiles.map((newFile) => newFile.file.name));
         const addNewFiles = (prev) => [
             ...(allowDuplicates
@@ -256,7 +269,6 @@ const FileUpload = (inProps, ref) => {
         allowDuplicates,
         convertImagesTo,
         getFiles,
-        getRemainingFileCount,
         handleError,
         imageDownscaleOptions,
         locale,
@@ -280,7 +292,8 @@ const FileUpload = (inProps, ref) => {
             elem.capture = capture.source;
         }
         if (maxFiles) {
-            if (getRemainingFileCount() === 0) {
+            // the list as it is now, also for a handle kept from an earlier render
+            if (maxFiles - countLimitedFiles(getFiles()) === 0) {
                 handleError("files.selector.limit-reached", t("standalone.file-upload.error.limit-reached"));
                 return;
             }
@@ -296,7 +309,7 @@ const FileUpload = (inProps, ref) => {
             else
                 elem.removeAttribute("accept");
         }
-    }, [maxFiles, getRemainingFileCount, handleError, t]);
+    }, [maxFiles, getFiles, handleError, t]);
     const handleFileChange = useCallback(async (evt) => {
         const input = evt.currentTarget;
         if (!input.files)
@@ -367,6 +380,42 @@ const FileUpload = (inProps, ref) => {
             return newValue;
         });
     }, [onChange, onRestoreFile, setFiles]);
+    // Keyboard focus on a file's remove or restore button that goes away, as it does when a
+    // removed pick leaves the list, moves on to the next file's button, or else to the
+    // upload control, instead of falling to the page. One ref callback per position, so
+    // that React calls it only when the button at that position changes.
+    const actionButtonsRef = useRef([]);
+    const actionButtonRefsRef = useRef([]);
+    const refocusFromRef = useRef(null);
+    const uploadControlRef = useRef(null);
+    const getActionButtonRef = useCallback((index) => {
+        const refs = actionButtonRefsRef.current;
+        refs[index] ??= (elem) => {
+            const buttons = actionButtonsRef.current;
+            const prev = buttons[index];
+            buttons[index] = elem;
+            // React detaches a ref before it removes the element, so the focus is still on it here
+            if (!elem && prev && prev.ownerDocument.activeElement === prev) {
+                refocusFromRef.current = index;
+            }
+        };
+        return refs[index];
+    }, []);
+    useLayoutEffect(() => {
+        const index = refocusFromRef.current;
+        if (index == null)
+            return;
+        refocusFromRef.current = null;
+        const target = actionButtonsRef.current.slice(index).find((btn) => btn != null) ??
+            uploadControlRef.current;
+        if (!target)
+            return;
+        // only take over focus that was lost with the button, never move it away from elsewhere
+        const active = target.ownerDocument.activeElement;
+        if (active && active !== target.ownerDocument.body && active.isConnected)
+            return;
+        target.focus();
+    });
     const { handleDrop, handleDragOver, dragging } = useDropZone(readOnly ? undefined : processFiles);
     // update files if necessary
     useEffect(() => {
@@ -404,13 +453,13 @@ const FileUpload = (inProps, ref) => {
                     "components-care-dropzone",
                     classes?.dropzone,
                     dragging && "Mui-active",
-                ]), children: [!readOnly && (_jsxs(Grid, { size: "grow", children: [_jsx(Button, { startIcon: _jsx(AttachFile, {}), variant: "contained", color: "primary", onClick: () => handleUpload(), name: name, onBlur: onBlur, children: uploadLabel || t("standalone.file-upload.upload") }), _jsx(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef })] }, "upload")), _jsx(Grid, { size: 12, children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignContent: "flex-start", alignItems: "flex-start" }, children: [files.map((data, index) => data && (_jsx(FilePreview, { name: data.file.name, mimeType: data.file.type, downloadLink: "downloadLink" in data.file
+                ]), children: [!readOnly && (_jsxs(Grid, { size: "grow", children: [_jsx(Button, { startIcon: _jsx(AttachFile, {}), variant: "contained", color: "primary", onClick: () => handleUpload(), name: name, onBlur: onBlur, ref: uploadControlRef, children: uploadLabel || t("standalone.file-upload.upload") }), _jsx(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef })] }, "upload")), _jsx(Grid, { size: 12, children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignContent: "flex-start", alignItems: "flex-start" }, children: [files.map((data, index) => data && (_jsx(FilePreview, { name: data.file.name, mimeType: data.file.type, downloadLink: "downloadLink" in data.file
                                         ? data.file.downloadLink
-                                        : undefined, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, changeState: getChangeState(data), restoreLabel: t("standalone.file-upload.restore"), onRemove: readOnly || data.preventDelete
+                                        : undefined, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, changeState: getChangeState(data), onRemove: readOnly || data.preventDelete
                                         ? undefined
                                         : () => removeFile(data), onRestore: readOnly || data.preventDelete
                                         ? undefined
-                                        : () => restoreFile(data), variant: "box" }, `${index}-${data.file.name}`))), readOnly && files.length === 0 && (_jsx(Grid, { children: _jsx(Typography, { children: t("standalone.file-upload.no-files") }) }))] }) }, "files"), !readOnly && (_jsx(Grid, { size: 12, children: _jsxs(FormatText, { className: classes?.formatText, children: ["(", t("standalone.file-upload.formats"), ":", " ", acceptLabel ||
+                                        : () => restoreFile(data), actionButtonRef: getActionButtonRef(index), variant: "box" }, `${index}-${data.file.name}`))), readOnly && files.length === 0 && (_jsx(Grid, { children: _jsx(Typography, { children: t("standalone.file-upload.no-files") }) }))] }) }, "files"), !readOnly && (_jsx(Grid, { size: 12, children: _jsxs(FormatText, { className: classes?.formatText, children: ["(", t("standalone.file-upload.formats"), ":", " ", acceptLabel ||
                                     accept ||
                                     t("standalone.file-upload.format.any"), ")"] }) }, "info"))] }) }));
     }
@@ -424,17 +473,17 @@ const FileUpload = (inProps, ref) => {
                     classes?.dropzone,
                     "components-care-dropzone",
                     dragging && "Mui-active",
-                ]), children: [!readOnly && (_jsxs(Grid, { size: "grow", children: [_jsx(ModernUploadButton, { type: "button", name: name, onBlur: onBlur, className: classes?.modernUploadButton, children: _jsx(ModernUploadLabel, { className: combineClassNames([
+                ]), children: [!readOnly && (_jsxs(Grid, { size: "grow", children: [_jsx(ModernUploadButton, { ref: uploadControlRef, type: "button", name: name, onBlur: onBlur, className: classes?.modernUploadButton, children: _jsx(ModernUploadLabel, { className: combineClassNames([
                                         classes?.modernUploadLabel,
                                         files.length === 0 &&
                                             "CcFileUpload-modernUploadLabel-empty",
                                     ]), children: uploadLabel || t("standalone.file-upload.upload-modern") }) }), _jsx(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef })] }, "upload")), files.length > 0 && (_jsx(Grid, { size: 12, children: _jsx(Box, { sx: { mx: 1 }, children: _jsx(Grid, { container: true, spacing: 1, sx: { alignContent: "flex-start", alignItems: "flex-start" }, children: files.map((data, index) => data && (_jsx(FilePreview, { name: data.file.name, mimeType: data.file.type, downloadLink: "downloadLink" in data.file
                                         ? data.file.downloadLink
-                                        : undefined, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, changeState: getChangeState(data), restoreLabel: t("standalone.file-upload.restore"), onRemove: readOnly || data.preventDelete
+                                        : undefined, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, changeState: getChangeState(data), onRemove: readOnly || data.preventDelete
                                         ? undefined
                                         : () => removeFile(data), onRestore: readOnly || data.preventDelete
                                         ? undefined
-                                        : () => restoreFile(data), variant: "list" }, `${index}-${data.file.name}`))) }) }) }, "files")), readOnly && files.length === 0 && (_jsx(Grid, { size: 12, children: _jsx(Typography, { children: t("standalone.file-upload.no-files") }) }, "no-files")), !readOnly && (_jsxs(Grid, { container: true, wrap: "nowrap", spacing: 1, size: 12, children: [_jsx(Grid, { size: "grow", children: _jsxs(FormatTextModern, { align: "right", className: classes?.formatTextModern, children: [t("standalone.file-upload.formats-modern"), " ", acceptFiles.length == 0 &&
+                                        : () => restoreFile(data), actionButtonRef: getActionButtonRef(index), variant: "list" }, `${index}-${data.file.name}`))) }) }) }, "files")), readOnly && files.length === 0 && (_jsx(Grid, { size: 12, children: _jsx(Typography, { children: t("standalone.file-upload.no-files") }) }, "no-files")), !readOnly && (_jsxs(Grid, { container: true, wrap: "nowrap", spacing: 1, size: 12, children: [_jsx(Grid, { size: "grow", children: _jsxs(FormatTextModern, { align: "right", className: classes?.formatTextModern, children: [t("standalone.file-upload.formats-modern"), " ", acceptFiles.length == 0 &&
                                             t("standalone.file-upload.format.any")] }) }), acceptFiles.map((entry, idx) => (_jsx(FormatIconsModern, { className: classes?.formatIconsModern, children: _jsx(Tooltip, { title: acceptLabel || accept || "", children: _jsx("span", { children: React.createElement(getFileIconOrDefault(entry, entry)) }) }) }, idx.toString(16))))] }, "info"))] }) }));
     }
     else {

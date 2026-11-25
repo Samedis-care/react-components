@@ -20,11 +20,49 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
      */
     className: string;
     /**
-     * Callback to load more elements on top. Optional, do not specify to disable up-scrolling
+     * Loads more items above the current ones. Leave it `undefined` to disable
+     * loading on top, and set it to `undefined` once there is nothing more
+     * above; otherwise it is called again each time the container is at its
+     * top.
+     *
+     * Called while the container is scrolled to its top (an offset less than
+     * 1px counts as the top):
+     * - once the content first fills the container: after mount, after the
+     *   list became short again (e.g. it was emptied), after the container was
+     *   hidden, and when `loadMoreTop` is passed after mount. So a list opens
+     *   at its first row with a page already loaded above it;
+     * - when a scroll event finds the container at its top;
+     * - to fill a short list that has no `loadMoreBottom` (see there).
+     *
+     * Prepend the new items to `children`. While the container is at its top,
+     * the component keeps the rows in view where they are, so the new items
+     * are added out of view above them and the user scrolls up into them;
+     * it keeps doing so while the new items still change their height (e.g. a
+     * placeholder replaced by its data), until the list is scrolled. Elsewhere
+     * the browser's scroll anchoring does the same (do not set
+     * `overflow-anchor: none` on the container). The list is never scrolled
+     * down to make loading on top possible: its first row and its first pixel
+     * stay reachable.
+     *
+     * A call that waits for `callBackDebounce` is only made if, once the wait
+     * is over, the content still does not fill the container or the container
+     * is still at its top; it is not made while the container is hidden. The
+     * return value is ignored.
      */
     loadMoreTop?: () => void;
     /**
-     * Callback to load more elements at the bottom.
+     * Loads more items below the current ones. Leave it `undefined` to disable
+     * loading at the bottom, e.g. for a list that only grows upwards (a chat
+     * history) or once there is nothing more below.
+     *
+     * Called when the container is scrolled to the bottom. An offset less than
+     * 1px from the bottom counts as the bottom, because browsers can report a
+     * fractional `scrollTop` there, e.g. inside an ancestor with CSS `zoom`.
+     *
+     * Also fills the container: after mount and after every render with new
+     * `children`, it is called while the content does not overflow the
+     * container by more than 24px. Without `loadMoreBottom` the container is
+     * filled through `loadMoreTop` instead.
      *
      * A call that waits for `callBackDebounce` is only made if, once the wait is
      * over, the content still does not fill the container or the container is
@@ -34,7 +72,7 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
      * ancestor (e.g. an inactive tab that stays mounted): the container is
      * filled once it is shown.
      */
-    loadMoreBottom: () => void;
+    loadMoreBottom?: () => void;
     /**
      * Debounce wait in milliseconds for `loadMoreTop` and `loadMoreBottom`: a
      * burst of triggers results in one call, made `callBackDebounce` ms after
@@ -65,18 +103,21 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
      */
     tabIndex?: number;
 }
-interface IState {
-    /**
-     * Initial scroll set? Used for infinite up-scrolling
-     */
-    initScroll: boolean;
+/**
+ * An element in the scroll container and its distance from the container's
+ * visible top edge, in the container's CSS pixels, taken before rows are
+ * added above it
+ */
+interface ScrollAnchor {
+    element: Element;
+    offset: number;
 }
 /**
  * Provides infinite scrolling to whatever is inside it. The scroll container
  * is a tab stop (see `tabIndex`) and takes the props of a `div`, such as a
  * role and an accessible name.
  */
-declare class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
+declare class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
     wrapper: HTMLElement | null;
     resizeObserver: ResizeObserver | null;
     /**
@@ -93,9 +134,43 @@ declare class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> 
      * `window` resize events without ResizeObserver)?
      */
     private observingSize;
+    /**
+     * The anchor that keeps the rows in view in place after rows were added
+     * above them while the container was at its top. It is held until the
+     * container is scrolled to another offset (by the user, the consumer or
+     * the browser's own scroll anchoring), because the rows above can still
+     * change their height after they were added, e.g. a placeholder that is
+     * replaced by its data.
+     */
+    private heldAnchor;
+    /**
+     * The `scrollTop` that holding the anchor left; any other offset means
+     * the container was scrolled since, which releases the anchor
+     */
+    private heldScrollTop;
+    /**
+     * Observes the size of the container's children while an anchor is held;
+     * created when an anchor is first held
+     */
+    private contentObserver;
+    /**
+     * Is `loadMoreTop` due once the content fills the container? Set at
+     * mount, while the content does not fill the container, while the
+     * container is hidden and when `loadMoreTop` is passed; cleared by the
+     * fill check that finds the container filled. A container that is at its
+     * top fires no scroll event when the user scrolls up, so this is how a
+     * list that is at its top gets the rows above it.
+     */
+    private topLoadDue;
     constructor(props: InfiniteScrollProps);
     componentDidMount(): void;
-    componentDidUpdate(prevProps: Readonly<InfiniteScrollProps>): void;
+    /**
+     * Takes the anchor that keeps the rows in view in place when `children`
+     * change while the container is at its top and loading on top is enabled:
+     * browsers' scroll anchoring does not apply to a container at its top.
+     */
+    getSnapshotBeforeUpdate(prevProps: Readonly<InfiniteScrollProps>): ScrollAnchor | null;
+    componentDidUpdate(prevProps: Readonly<InfiniteScrollProps>, _prevState: unknown, anchor: ScrollAnchor | null): void;
     componentWillUnmount(): void;
     render(): React.ReactElement;
     setScrollerRef: (ref: HTMLElement | null) => void;
@@ -117,6 +192,27 @@ declare class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> 
      */
     private pauseFillWhileHidden;
     /**
+     * Observes the size of the container's current children, so that the
+     * held anchor is kept in place when one of them changes its height
+     */
+    private observeContent;
+    /**
+     * Scrolls the container by as much as the held anchor moved, so the rows
+     * in view stay where they were. Releases the anchor instead once the
+     * container was scrolled to another offset, the anchor left the document
+     * or the container lost its layout box.
+     */
+    private holdAnchor;
+    /**
+     * Stops holding the anchor
+     */
+    private releaseAnchor;
+    /**
+     * Requests `loadMoreTop` if it is due (see `topLoadDue`) and the
+     * container is at its top. Called once the content fills the container.
+     */
+    private loadTopIfDue;
+    /**
      * Requests a call of the `loadMoreTop` or `loadMoreBottom` prop: debounced by
      * `callBackDebounce` (a request replaces the pending one), or right away for 0
      */
@@ -128,13 +224,22 @@ declare class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> 
     private cancelLoad;
     /**
      * Makes a call requested by `requestLoad`. The callback is read from the
-     * props now, so it is the one of the latest render. `loadMoreBottom` is only
-     * called if the content still needs it: a request made while the content was
-     * short, or while the container was at the bottom, is dropped once content
-     * that arrived in the meantime fills the container and moves the bottom away,
-     * and one is not made while the container is hidden (`pauseFillWhileHidden`).
+     * props now, so it is the one of the latest render. A call is only made if
+     * the content still needs it: a request made while the content was short,
+     * or while the container was at that end, is dropped once content that
+     * arrived in the meantime fills the container and moves that end away, and
+     * one is not made while the container is hidden (`pauseFillWhileHidden`).
+     * A fill call that is dropped because the content now fills the container
+     * (rows that grew on their own) lets the due `loadMoreTop` follow.
      */
     private callLoad;
+    /**
+     * The fill check, run after mount, after every render with new `children`
+     * or a callback that was added or removed, and on size changes that are
+     * observed: requests a fill call (`loadMoreBottom`, or `loadMoreTop`
+     * without it) while the content does not fill the container, and the due
+     * `loadMoreTop` once it does.
+     */
     handleResize: () => void;
     handleScroll: () => void;
 }

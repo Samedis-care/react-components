@@ -8,21 +8,28 @@ import isPlainObject from "../../utils/isPlainObject";
 import throwError from "../../utils/throwError";
 import RequestBatching from "./RequestBatching";
 import { blobsToDataUris } from "../Connector/bodyFiles";
-// optional import
-let captureException = null;
-import("@sentry/react")
-    .then((Sentry) => (captureException = Sentry.captureException))
-    .catch(() => { }); // ignore
+import { captureError, CcErrorNames } from "../../framework/ErrorReporting";
 /**
- * Reports an error to Sentry, if it is loaded, unless the network or the backend caused it
- * @param err The error
+ * Reports a failed load through captureError (see configureErrorReporting), unless its
+ * request was aborted
+ * @param err The value the load rejected with
+ * @param source The method that failed, e.g. "Model.index"
+ * @param modelId The id of the model that failed, reported as extra.model
+ * @param signal The signal of the request that failed, if any
+ * @remarks An error named BackendError or AbortError is expected here (ignoreNames): the
+ *          caller shows the backend's refusal, and an abort was asked for. The default
+ *          policy honors that and skips a NetworkError too; an app's shouldReport decides
+ *          for itself.
  */
-const reportUnexpectedError = (err) => {
-    if (captureException &&
-        err instanceof Error &&
-        !["NetworkError", "BackendError"].includes(err.name)) {
-        captureException(err);
-    }
+const reportUnexpectedError = (err, source, modelId, signal) => {
+    // an aborted request was dropped on purpose, whatever it then failed with
+    if (signal?.aborted)
+        return;
+    captureError(err, {
+        source,
+        ignoreNames: [CcErrorNames.BackendError, "AbortError"],
+        extra: { model: modelId },
+    });
 };
 /**
  * React-Query's useQuery for the given model and record ID
@@ -310,6 +317,11 @@ class Model {
     /**
      * Loads a list of data entries by the given search params
      * @param params The search params, the connector gets a copy of them
+     * @remarks A failure is reported through captureError (see configureErrorReporting,
+     *          source "Model.index"), unless the request was aborted (params.signal
+     *          aborted). The default policy also skips an error that the network or the
+     *          backend caused (NetworkError, BackendError) and an AbortError. The caller
+     *          gets the rejection either way.
      */
     async index(params) {
         try {
@@ -318,7 +330,8 @@ class Model {
             return [await this.deserializeIndexRecords(rawData), meta, userData];
         }
         catch (err) {
-            reportUnexpectedError(err);
+            // an abort is not a failure: the caller dropped the request (params.signal)
+            reportUnexpectedError(err, "Model.index", this.modelId, params?.signal);
             throw err;
         }
     }
@@ -356,7 +369,10 @@ class Model {
      * Fetches all records using index calls
      * @param params The params to pass to index
      * @returns ModelIndexResponse where userMeta and meta is taken from the last call
-     * @remarks The records of fetchAllRaw, deserialized and cached as index does it
+     * @remarks The records of fetchAllRaw, deserialized and cached as index does it. A
+     *          failure is reported as index reports it, with the source "Model.fetchAll".
+     *          The caller gets the rejection either way.
+     * @see index
      */
     async fetchAll(params) {
         try {
@@ -364,7 +380,7 @@ class Model {
             return [await this.deserializeIndexRecords(rawData), meta, userMeta];
         }
         catch (err) {
-            reportUnexpectedError(err);
+            reportUnexpectedError(err, "Model.fetchAll", this.modelId, params?.signal);
             throw err;
         }
     }
@@ -373,7 +389,7 @@ class Model {
      * @param params The params to pass to the connector's index, which gets a copy of them
      * @returns The records, neither deserialized nor cached, and the meta and user meta of the last call
      * @remarks RequestBatching loads its batches with it, so each record of a batch can be
-     *          deserialized for the get that asked for it. Errors are not reported to Sentry here,
+     *          deserialized for the get that asked for it. Errors are not reported here,
      *          fetchAll and getRaw report them.
      * @see fetchAll
      */
@@ -568,6 +584,9 @@ class Model {
      * Provides uncached access for the given data id
      * @param id The data record id or null to obtain the default values
      * @param options Request options
+     * @remarks A failure is reported as index reports it, with the source "Model.getRaw",
+     *          unless options.dontReportNotFoundInBatch skips a RequestBatchingError. The
+     *          caller gets the rejection either way.
      */
     async getRaw(id, options) {
         try {
@@ -584,12 +603,10 @@ class Model {
             }
         }
         catch (err) {
-            if (captureException &&
+            if (!(options?.dontReportNotFoundInBatch &&
                 err instanceof Error &&
-                !["NetworkError", "BackendError"].includes(err.name) &&
-                !(options?.dontReportNotFoundInBatch &&
-                    err.name === "RequestBatchingError")) {
-                captureException(err);
+                err.name === "RequestBatchingError")) {
+                reportUnexpectedError(err, "Model.getRaw", this.modelId);
             }
             throw err;
         }
@@ -795,6 +812,11 @@ class Model {
      * @param view Optional view filter (only applies validations on fields present in given view)
      * @param fieldsToValidate List of fields to validate
      * @param type The validation type (normal = validate, hint = validateHint]
+     * @remarks An error thrown while validating a field (by its type's or its own validate
+     *          function, or by its visibility callback) is logged and reported through
+     *          captureError (see configureErrorReporting, source "Model.validate", with the
+     *          model and the field as extra). A validate function's error message becomes the
+     *          field's validation error.
      */
     async validate(values, view, fieldsToValidate, type = "normal") {
         const errors = {};
@@ -823,8 +845,10 @@ class Model {
                 catch (e) {
                     // eslint-disable-next-line
                     console.error("[Components-Care] [Model.validate] Error during validation:", e);
-                    if (captureException)
-                        captureException(e);
+                    captureError(e, {
+                        source: "Model.validate",
+                        extra: { model: this.modelId, field },
+                    });
                     error = e.message;
                 }
                 // then apply custom field validation if present
@@ -836,8 +860,10 @@ class Model {
                     catch (e) {
                         // eslint-disable-next-line
                         console.error("[Components-Care] [Model.validate] Error during validation:", e);
-                        if (captureException)
-                            captureException(e);
+                        captureError(e, {
+                            source: "Model.validate",
+                            extra: { model: this.modelId, field },
+                        });
                         error = e.message;
                     }
                 }
@@ -847,8 +873,10 @@ class Model {
             catch (e) {
                 // eslint-disable-next-line no-console
                 console.error("[Components-Care] [Model.validate] Error during field validation:", field, value, e);
-                if (captureException)
-                    captureException(e);
+                captureError(e, {
+                    source: "Model.validate",
+                    extra: { model: this.modelId, field },
+                });
             }
         }));
         return errors;

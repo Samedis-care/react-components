@@ -28,6 +28,12 @@ export interface MatrixExtraRowCellProps {
      * This cell took the focus, so its row remembers it as the tab stop
      */
     onFocusColumn: (columnKey: string) => void;
+    /**
+     * The name of a clickable cell that has nothing else to be named by: no
+     * getCellLabel, no text for its row or its column, and no badge. It shows
+     * the "+" hint, so this says "Add" in the current language.
+     */
+    addName: string;
 }
 declare const _default: React.MemoExoticComponent<(props: MatrixExtraRowCellProps) => React.JSX.Element>;
 export default _default;

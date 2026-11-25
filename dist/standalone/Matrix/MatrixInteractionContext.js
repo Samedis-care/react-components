@@ -40,6 +40,8 @@ export class MatrixInteractionStore {
     to = -1;
     hoverRowKey = null;
     hoverColumnKey = null;
+    /** Escape hid the add hint of the hovered cell, see dismissHint() */
+    hintDismissed = false;
     /**
      * Publishes the current props to the store. Called by the grid on every
      * render, so a pointer event always sees the columns on screen.
@@ -76,6 +78,7 @@ export class MatrixInteractionStore {
         }
         if (!this.dragging &&
             !this.config.touch &&
+            !this.hintDismissed &&
             this.hoverRowKey === rowKey &&
             this.hoverColumnKey === columnKey &&
             // A hint on a cell where a range cannot start advertises an action
@@ -145,13 +148,15 @@ export class MatrixInteractionStore {
     }
     /**
      * Moves the pointer onto a cell: extends (or shrinks) the range if one is
-     * being swept, and remembers the hover for the add hint.
+     * being swept, and remembers the hover for the add hint (and shows it
+     * again, if Escape hid it).
      * @remarks A range stops at the first cell canSelect rejects, so what is
      * highlighted is exactly what gets reported.
      */
     enter(rowKey, columnKey) {
         this.hoverRowKey = rowKey;
         this.hoverColumnKey = columnKey;
+        this.hintDismissed = false;
         if (this.dragging && this.rowKey === rowKey) {
             const anchor = this.indexOf(this.anchorKey);
             const target = this.indexOf(columnKey);
@@ -171,6 +176,19 @@ export class MatrixInteractionStore {
             this.hoverColumnKey = null;
             this.notify();
         }
+    }
+    /**
+     * Hides the add hint of the hovered cell (Escape), until the pointer
+     * enters another cell, or leaves this one and comes back.
+     * @remarks The hint appears on hover, and in overlay mode it lies on the
+     * cell's entries: it can be dismissed without moving the pointer, as
+     * Escape closes a tooltip (WCAG 1.4.13).
+     */
+    dismissHint() {
+        if (this.hintDismissed || this.hoverRowKey === null)
+            return;
+        this.hintDismissed = true;
+        this.notify();
     }
     /**
      * Reports one cell as a range, without a press.

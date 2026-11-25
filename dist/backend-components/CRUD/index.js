@@ -163,9 +163,12 @@ const CRUD = (props, ref) => {
                     : undefined, editIcon: hasPermission(perms, props.editPermission) ? undefined : ViewIcon, editLabel: hasPermission(perms, props.editPermission)
                     ? undefined
                     : t("backend-components.crud.grid.view"), onAddNew: props.gridProps.forceAddNew ??
-                    (hasPermission(perms, props.newPermission) && props.children
+                    (hasPermission(perms, props.newPermission)
                         ? props.gridProps.onAddNew == null
-                            ? showNewPage
+                            ? // the default New opens the create form, which needs a record page
+                                props.children
+                                    ? showNewPage
+                                    : undefined
                             : typeof props.gridProps.onAddNew === "string"
                                 ? props.gridProps.onAddNew
                                 : typeof props.gridProps.onAddNew === "function"

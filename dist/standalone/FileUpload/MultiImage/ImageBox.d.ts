@@ -22,7 +22,9 @@ export interface ImageBoxProps {
      * The custom onClick handler.
      * If not set, the image is a button named after fileName ("Open photo.jpg in full
      * screen") that opens a fullscreen preview by click, Enter or Space; focus returns to it
-     * when the preview closes
+     * when the preview closes. The preview zooms by wheel, pinch, double-click, its zoom
+     * buttons and the keys +, - and 0, and pans while zoomed in by dragging and by the arrow
+     * keys
      * If set the onClick handler will be called when the box is clicked, and there is no
      * button and no fullscreen preview
      * If set to null explicitly no action will be performed and the cursor won't show clickable
@@ -59,6 +61,10 @@ export interface ImageBoxProps {
     /**
      * Custom CSS styles. openButton is the button around the image that opens the
      * fullscreen preview (only rendered while onClick is not set).
+     * fullScreenToolbar holds the rotate buttons (fullScreenRotateButtons) and the zoom
+     * buttons (fullScreenZoomButtons) in the top left corner of the fullscreen preview.
+     * While the image is zoomed in, fullScreenZoomContainer also carries the class
+     * CcImageBox-zoomed (and shows the grab cursor).
      */
     classes?: Partial<Record<ImageBoxClassKey, string>>;
     /**
@@ -76,6 +82,6 @@ export interface ImageBoxStyledImageOwnerState {
     swipeRight: boolean;
     imageDots: boolean;
 }
-export type ImageBoxClassKey = "root" | "removeBtn" | "prevBtn" | "nextBtn" | "openButton" | "fullScreenRotateButtons" | "rotateLeftBtn" | "rotateRightBtn" | "swipeListener" | "image" | "fullScreenDialog" | "fullScreenImageWrapper" | "fullScreenZoomContainer" | "imageDotsWrapper" | "imageDots";
+export type ImageBoxClassKey = "root" | "removeBtn" | "prevBtn" | "nextBtn" | "openButton" | "fullScreenToolbar" | "fullScreenRotateButtons" | "rotateLeftBtn" | "rotateRightBtn" | "fullScreenZoomButtons" | "zoomInBtn" | "zoomOutBtn" | "resetZoomBtn" | "swipeListener" | "image" | "fullScreenDialog" | "fullScreenImageWrapper" | "fullScreenZoomContainer" | "imageDotsWrapper" | "imageDots";
 declare const _default: React.MemoExoticComponent<(inProps: ImageBoxProps) => React.JSX.Element>;
 export default _default;

@@ -1,10 +1,11 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { DataGridContentOverlayCollapse, useDataGridColumnState, useDataGridProps, useDataGridState, } from "../DataGrid";
 import Dialog from "./SettingsDialog";
 const DataGridSettings = (props) => {
+    const { columns } = props;
     const { classes } = useDataGridProps();
-    const [state, setState] = useDataGridState();
+    const [{ showSettings, settingsSearch, columnPinned, columnHidden }, setState,] = useDataGridState();
     const [, setColumnState] = useDataGridColumnState();
     const closeGridSettings = useCallback(() => {
         setState((prevState) => ({
@@ -41,7 +42,12 @@ const DataGridSettings = (props) => {
         }));
     }, [setColumnState, setState]);
     // the column search ignores case and the spaces around the query
-    const columnQuery = state.settingsSearch.trim().toLowerCase();
-    return (_jsx(DataGridContentOverlayCollapse, { className: classes?.contentOverlayCollapse, in: state.showSettings, children: _jsx(Dialog, { columns: props.columns.filter((col) => !columnQuery || col.headerName.toLowerCase().includes(columnQuery)), closeGridSettings: closeGridSettings, toggleColumnLock: toggleColumnLock, toggleColumnVisibility: toggleColumnVisibility, columnPinned: state.columnPinned, columnHidden: state.columnHidden }) }));
+    const columnQuery = settingsSearch.trim().toLowerCase();
+    // a new list only when the columns or the column search change, so the
+    // table (memoized, it sorts the list) skips every other grid state change
+    const matchingColumns = useMemo(() => columnQuery
+        ? columns.filter((col) => col.headerName.toLowerCase().includes(columnQuery))
+        : columns, [columns, columnQuery]);
+    return (_jsx(DataGridContentOverlayCollapse, { className: classes?.contentOverlayCollapse, in: showSettings, children: _jsx(Dialog, { columns: matchingColumns, closeGridSettings: closeGridSettings, toggleColumnLock: toggleColumnLock, toggleColumnVisibility: toggleColumnVisibility, columnPinned: columnPinned, columnHidden: columnHidden }) }));
 };
 export default React.memo(DataGridSettings);

@@ -1,8 +1,9 @@
 import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { FormControlLabel, FormHelperText, FormLabel, Typography, Checkbox, FormGroup, } from "@mui/material";
+import { FormControlLabel, FormHelperText, FormLabel, Typography, FormGroup, } from "@mui/material";
 import TypeEnumMulti from "../../TypeEnumMulti";
 import ccI18n from "../../../../../i18n";
-import { FormControlFieldsetCC } from "../../../../../standalone";
+import FocusRingCheckbox from "../../../../../utils/internal/FocusRingCheckbox";
+import { FormControlFieldsetCC, labelWithDirtyText, } from "../../../../../standalone";
 /**
  * Renders TypeEnumMulti as checkboxes
  */
@@ -28,9 +29,9 @@ class RendererEnumRadio extends TypeEnumMulti {
                 ? this.values.find((entry) => !entry.invisible && !entry.disabled)
                     ?.value
                 : undefined;
-            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, id: id, "aria-describedby": describedBy, children: [_jsx(FormLabel, { component: "legend", children: label }), _jsx(FormGroup, { onBlur: handleBlur, row: this.horizontal, "data-name": field, children: this.values
+            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, id: id, "aria-describedby": describedBy, children: [_jsx(FormLabel, { component: "legend", children: labelWithDirtyText(label, dirty) }), _jsx(FormGroup, { onBlur: handleBlur, row: this.horizontal, "data-name": field, children: this.values
                             .filter((entry) => !entry.invisible)
-                            .map((entry) => this.wrapButton(_jsx(FormControlLabel, { value: entry.value, control: _jsx(Checkbox, { checked: value.includes(entry.value), autoFocus: entry.value === focusValue, name: entry.value, slotProps: {
+                            .map((entry) => this.wrapButton(_jsx(FormControlLabel, { value: entry.value, control: _jsx(FocusRingCheckbox, { checked: value.includes(entry.value), autoFocus: entry.value === focusValue, name: entry.value, slotProps: {
                                     input: { "aria-invalid": !!errorMsg },
                                 }, onChange: (evt) => handleChange(field, evt.target.checked
                                     ? value.concat([entry.value]) // add value

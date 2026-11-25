@@ -8,6 +8,10 @@ import { FormDialogDispatchContext } from "./FormDialog";
  * with buttons).
  * When the title is set again, the new one replaces it; when the caller
  * unmounts, the dialog shows its `dialogTitle` prop again.
+ * The shown title names the dialog for screen readers. A title that shows only
+ * after the dialog opened (e.g. once the page's record has loaded) takes the
+ * keyboard focus if it is still on the dialog itself, so screen readers read
+ * it; a title set as the caller mounts shows when the dialog opens.
  * @param enabled Whether to set the title; false sets nothing
  * @param title The title, any content. Every new value is set again, so keep
  * an element stable (useMemo).

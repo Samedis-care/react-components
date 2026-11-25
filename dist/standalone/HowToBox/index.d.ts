@@ -29,6 +29,17 @@ export interface HowToBoxProps {
      */
     classes?: Partial<Record<HowToBoxClassKey, string>>;
 }
+/**
+ * Keys of the theme's `components.CcHowToBox.styleOverrides`, also the keys
+ * of the `classes` prop:
+ * - `root`: the GroupBox `<fieldset>` frame
+ * - `ul`: the list
+ * - `li`: each entry
+ *
+ * No slot receives an `ownerState`: a function override is called with the
+ * theme. To style a box by its props, use theme `variants`, which apply to
+ * the frame and reach the list and its entries through nested selectors.
+ */
 export type HowToBoxClassKey = "root" | "ul" | "li";
 export interface HowToBoxTranslateProps extends Omit<HowToBoxProps, "titleLabel" | "labels"> {
     /**
@@ -58,5 +69,24 @@ export interface HowToBoxTranslateProps extends Omit<HowToBoxProps, "titleLabel"
  * @see HowToBox
  */
 export declare const HowToBoxTranslate: (props: HowToBoxTranslateProps) => React.JSX.Element;
+/**
+ * Instructions in a frame: a {@link GroupBox} titled "How it works" (or
+ * `titleLabel`) around a bulleted list with one item per entry of `labels`.
+ *
+ * Theme: `components.CcHowToBox.defaultProps` ({@link HowToBoxProps}),
+ * `styleOverrides` per {@link HowToBoxClassKey} slot, and `variants`, which
+ * apply to the frame. A variant's `props` match `titleLabel` and `labels` as
+ * HowToBox gets them, after the theme's default props; from
+ * {@link HowToBoxTranslate} these are the translated title and entries. A
+ * `props` function gets these props directly: there is no `ownerState`. A
+ * variant reaches the list and its entries through nested selectors.
+ *
+ * @example
+ * // a theme that sets the entries of boxes with their own title in bold
+ * createTheme({ components: { CcHowToBox: { variants: [{
+ *   props: ({ titleLabel }) => titleLabel != null,
+ *   style: { "& li": { fontWeight: "bold" } },
+ * }] } } });
+ */
 declare const _default: React.MemoExoticComponent<(inProps: HowToBoxProps) => React.JSX.Element>;
 export default _default;

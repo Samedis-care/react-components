@@ -8,8 +8,15 @@ export interface DateInputProps extends Omit<PickersTextFieldWithHelpProps, "cus
      */
     value: Date | null;
     /**
-     * Set new value of the input
-     * @param date new value, as a date-only value (12:00 UTC, see normalizeDate)
+     * Called with the new day once the user is done with it: when focus leaves
+     * the field (before `onBlur`), on Enter in the field, and when the calendar
+     * accepts a day (see `LocalizedKeyboardDatePickerProps.onChange`); and with
+     * `null` at once when the touch Clear button is pressed. Only a day the
+     * picker accepts, or `null` for an empty field, is reported, and only when
+     * it differs from the day reported last or handed in as `value` since; the
+     * days the field passes through while the user types are not.
+     * @param date new value, as a date-only value (12:00 UTC, see normalizeDate),
+     * or `null`
      */
     onChange: (date: Date | null) => void;
     /**
@@ -136,5 +143,11 @@ export interface DateInputProps extends Omit<PickersTextFieldWithHelpProps, "cus
  * drops: the input is always controlled.
  */
 type PickerDateProps = "value" | "onChange" | "defaultValue" | "minDate" | "maxDate" | "referenceDate" | "shouldDisableDate" | "shouldDisableMonth" | "shouldDisableYear" | "onAccept" | "onError" | "onMonthChange" | "onYearChange" | "dayOfWeekFormatter";
-declare const _default: React.MemoExoticComponent<(props: DateInputProps & Omit<DatePickerProps, PickerDateProps>) => React.JSX.Element>;
+/**
+ * MUI's DatePicker props DateInput does not take. `timezone`: a date-only
+ * value is a calendar day, the same in every timezone, so the field always
+ * shows and reports the stored day.
+ */
+type PickerOmittedProps = PickerDateProps | "timezone";
+declare const _default: React.MemoExoticComponent<(props: DateInputProps & Omit<DatePickerProps, PickerOmittedProps>) => React.JSX.Element>;
 export default _default;

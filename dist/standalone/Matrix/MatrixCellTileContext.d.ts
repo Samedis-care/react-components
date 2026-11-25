@@ -1,10 +1,19 @@
 import React from "react";
 import { MatrixTileItem } from "./types";
-export type MatrixCellTileClassKey = "root" | "item" | "itemContent" | "highlight" | "diagonal" | "diagonalLabel" | "placeholder" | "corner";
+export type MatrixCellTileClassKey = "root" | "item" | "itemContent" | "highlight" | "diagonal" | "diagonalLabel" | "placeholder" | "corner" | "overflow";
 export interface MatrixCellTileProps {
     /**
-     * The entries in this cell. At most two are rendered — a cell is too small
-     * for more, and the third entry would be unreadable.
+     * The entries in this cell. At most the first two are drawn — a cell is too
+     * small for more, and a third entry would be unreadable.
+     *
+     * The entries after them are not lost: a "+N" marker in the tile's top
+     * right corner counts them. It lies over the topRight corner of the entry
+     * beneath it. Pointing at it shows them in a tooltip (each by its label,
+     * in its colors, and its tooltip), screen readers read them with the cell
+     * ("2 more: N (Night shift), RD"), and it is ringed when one of them is
+     * highlighted. They cannot be clicked or dragged in the tile: to offer
+     * that, or to show them differently, collapse them yourself and pass at
+     * most two.
      */
     items: MatrixTileItem[];
     /**

@@ -4,7 +4,12 @@ export declare const MatrixTileItemRoot: import("@emotion/styled").StyledCompone
 export declare const MatrixTileItemContent: import("@emotion/styled").StyledComponent<import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof React.ClassAttributes<HTMLDivElement> | keyof React.HTMLAttributes<HTMLDivElement>>, {}>;
 /**
  * Font size for a short code: the shorter it is, the bigger it can be. Only a
- * plain string can be measured this way — a ReactNode label keeps the default.
+ * plain string or a number can be measured this way — a number counts as the
+ * digits React writes for it, so 1234 is sized like "1234". Any other
+ * ReactNode keeps the default.
+ * @param label The label to size
+ * @returns The font size in px: 14 up to two characters, 12 for three, 10
+ * for more
  */
 export declare const labelFontSize: (label: React.ReactNode) => number;
 export interface MatrixTileItemProps {

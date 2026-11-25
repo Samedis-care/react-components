@@ -20,6 +20,130 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-24 | [A FullFormDialog title that shows after loading takes the focus](2026-11-24-full-form-dialog-late-title-takes-focus.md) | behavior |
+| 2026-11-24 | [A flow form has a second dirty flag, stagedDirty, for staged edits](2026-11-24-flow-form-staged-dirty.md) | behavior, type |
+| 2026-11-24 | [PortalLayout's mobile drawer has a close button for screen readers and keyboard users](2026-11-24-portal-drawer-close-button.md) | behavior |
+| 2026-11-24 | [An image field's placeholder is no longer its value: assistive technology skips it, and a click opens the file dialog](2026-11-24-image-placeholder-not-the-value.md) | behavior |
+| 2026-11-24 | [The DataGrid's filter panel has a row count, Reset and "Show results", and shows the bar's selects on a phone](2026-11-24-data-grid-filter-panel-footer-and-phone-selects.md) | behavior |
+| 2026-11-24 | [The DataGrid's filter panel button is named "Filter selection" and says whether the panel is open](2026-11-24-data-grid-filter-panel-button-name.md) | behavior, i18n |
+| 2026-11-24 | [The date pickers report a date once the user is done with it](2026-11-24-pickers-report-when-done.md) | behavior |
+| 2026-11-21 | [The date pickers report a blur when focus leaves a calendar opened from outside the field](2026-11-21-picker-blur-on-leaving-a-calendar-opened-from-outside.md) | behavior |
+| 2026-11-21 | [The page scrolls to the top after a navigation, not before](2026-11-21-scroll-reset-after-navigation.md) | behavior |
+| 2026-11-21 | [UIKit theme types match what the slots get, and button variants apply](2026-11-21-ui-kit-theme-owner-state-and-variants.md) | behavior, type, theme |
+| 2026-11-21 | [MultiImage shows "2 / 30" instead of dots that do not fit in one row](2026-11-21-image-dots-counter-when-they-do-not-fit.md) | behavior, theme |
+| 2026-11-21 | [filterSortPaginate ends a filter chain at its first condition without a value](2026-11-21-filter-sort-paginate-ends-chain-at-empty-condition.md) | behavior |
+| 2026-11-21 | [The DataGrid footer formats its row counts for the language](2026-11-21-data-grid-row-counts-formatted.md) | behavior |
+| 2026-11-21 | [A hovered small SubActionButton paints its icon in the hover's text color](2026-11-21-small-sub-action-button-hover-icon-color.md) | behavior |
+| 2026-11-21 | [The text and date fields no longer take `important`](2026-11-21-text-field-important-removed.md) | type |
+| 2026-11-21 | [GenericDataPreview shows the rows of new data](2026-11-21-generic-data-preview-reloads-new-data.md) | behavior |
+| 2026-11-21 | [useFormState restores a stored null and follows a changed name](2026-11-21-use-form-state-restores-null.md) | behavior, type |
+| 2026-11-21 | [MultiImage's edit dialog tells the primary image apart by star shape and text](2026-11-21-multi-image-primary-told-apart.md) | behavior, theme |
+| 2026-11-21 | [compareArrayContent counts falsy entries and duplicates](2026-11-21-compare-array-content-counts-entries.md) | behavior |
+| 2026-11-21 | [MatrixGrid is a grid with rows, header cells and cells for assistive technology](2026-11-21-matrix-grid-semantics.md) | behavior |
+| 2026-11-21 | [MultiSelect's remove and restore handlers are bound to their entry](2026-11-21-multi-select-entry-handlers-bound.md) | behavior, type |
+| 2026-11-21 | [SmallListItemButton draws a keyboard focus ring](2026-11-21-small-list-item-button-focus-ring.md) | behavior |
+| 2026-11-21 | [ImageSelector clears its file input after every pick](2026-11-21-image-selector-clears-input-after-pick.md) | behavior |
+| 2026-11-21 | [The import review validates the record the import writes](2026-11-21-import-review-validates-written-record.md) | behavior |
+| 2026-11-21 | [The import upload replaces its file with a new pick](2026-11-21-import-upload-replaces-file.md) | behavior |
+| 2026-11-21 | [The filter panel's GridSingleSelectFilter and GridMultiSelectFilter honor hidden, isDisabled and [text, node] labels](2026-11-21-grid-select-filters-panel-option-flags.md) | behavior |
+| 2026-11-21 | [A DataGrid filter bar narrower than 600px opens as a panel by default](2026-11-21-data-grid-filter-bar-default-dialog-width.md) | behavior |
+| 2026-11-21 | [buildDateColumns shows the month on the first column and on every 1st](2026-11-21-matrix-date-columns-show-month.md) | behavior |
+| 2026-11-21 | [The image viewers zoom by buttons and keys](2026-11-21-image-viewers-zoom-by-keyboard.md) | behavior, theme |
+| 2026-11-21 | [A Matrix tile marks the entries it leaves out with "+N"](2026-11-21-matrix-tile-marks-left-out-entries.md) | behavior |
+| 2026-11-21 | [A file's remove and restore are buttons named after the file](2026-11-21-file-upload-remove-restore-buttons.md) | behavior, type, theme |
+| 2026-11-21 | [Schedule entries call onAuxClick for the middle button only](2026-11-21-schedule-entry-aux-click-middle-button-only.md) | behavior |
+| 2026-11-21 | [WeeklySchedule reloads the shown week when the language changes](2026-11-21-weekly-schedule-reloads-on-language-change.md) | behavior |
+| 2026-11-21 | [WeeklySchedule marks today's column by more than its color](2026-11-21-weekly-schedule-today-column-marked.md) | behavior |
+| 2026-11-21 | [The MUI multi-checkbox enum renderer draws a keyboard focus ring](2026-11-21-enum-multi-checkbox-focus-ring.md) | behavior |
+| 2026-11-21 | [Matrix aggregate cells say their badge and their column](2026-11-21-matrix-aggregate-cell-names.md) | behavior |
+| 2026-11-20 | [CountryCodes and useCountryOptions list every ISO 3166-1 country: Aruba, Curaçao, Sint Maarten and 12 more territories](2026-11-20-country-codes-every-iso-3166-1-country.md) | behavior, type |
+| 2026-11-20 | [ColorInput reports a blur once focus leaves the field and its picker, and a picker opened from the keyboard shows its focus](2026-11-20-color-input-blur-on-leaving-the-field.md) | behavior, type |
+| 2026-11-20 | [The busy overlay's spinner sits on a disc of its own](2026-11-20-form-loader-overlay-spinner-disc.md) | behavior, theme |
+| 2026-11-20 | [RoutedMenu honors forceExpand on its entries](2026-11-20-routed-menu-force-expand.md) | behavior |
+| 2026-11-20 | [A grid keeps keyboard focus when its persistence provider's storage keys change](2026-11-20-data-grid-persist-key-change-keeps-focus.md) | behavior |
+| 2026-11-20 | [LocaleSelectorDialog requires supportedLocales](2026-11-20-locale-selector-supported-locales-required.md) | behavior, type |
+| 2026-11-20 | [A lazy control's onParentIdChange is called after the control mounted, not while it renders](2026-11-20-lazy-crud-connector-parent-id-after-mount.md) | behavior |
+| 2026-11-20 | [The locale selector marks the row of the current locale](2026-11-20-locale-selector-marks-current-locale.md) | behavior, theme |
+| 2026-11-20 | [The CRUD selects no longer take initialSelected](2026-11-20-crud-select-initial-selected-removed.md) | type, behavior |
+| 2026-11-20 | [GroupBox applies `classes.legend`](2026-11-20-group-box-classes-legend.md) | behavior, theme |
+| 2026-11-20 | [A selector's switch takes the label's row alone when the label does not fit beside it](2026-11-20-selector-switch-own-row-when-label-does-not-fit.md) | behavior |
+| 2026-11-20 | [A theme that shows a selector's switch must set switchLabel](2026-11-20-selector-theme-switch-label.md) | type |
+| 2026-11-20 | [An open InfoBox keeps its 48px header and has no margin; every InfoBox is rounded](2026-11-20-info-box-no-gutters-rounded-corners.md) | behavior |
+| 2026-11-20 | [Model reports its errors through configureErrorReporting](2026-11-20-model-reports-through-error-reporting.md) | behavior |
+| 2026-11-20 | [CrudMultiSelectWithGroups shows which entries were added and removed until they are saved](2026-11-20-crud-multi-select-with-groups-pending-changes.md) | behavior, type |
+| 2026-11-20 | [SentryHistory is removed](2026-11-20-sentry-history-removed.md) | type |
+| 2026-11-20 | [MultiLanguageInput's translate button draws a keyboard focus ring](2026-11-20-multi-language-input-translate-button-focus-ring.md) | behavior |
+| 2026-11-20 | [A dirty disableRouting Form switches routed tabs without asking](2026-11-20-disable-routing-form-tab-switch.md) | behavior |
+| 2026-11-20 | [A drop by onLoadError removes the id from the current selection](2026-11-20-backend-multi-select-drop-keeps-current-selection.md) | behavior |
+| 2026-11-20 | [The Matrix overlay hint is opaque, and Escape hides the add hint](2026-11-20-matrix-add-hint-opaque-escape.md) | behavior |
+| 2026-11-20 | [A click on a Link to the current location replaces the history entry](2026-11-20-link-to-current-location-replaces.md) | behavior |
+| 2026-11-20 | [The sign dialog's drawing area is a named image, and the dialog says how to sign](2026-11-20-sign-dialog-sign-area-named-and-described.md) | behavior |
+| 2026-11-20 | [The date pickers draw a keyboard focus ring in the calendar and on the open button](2026-11-20-picker-focus-ring.md) | behavior |
+| 2026-11-20 | [The SignPad tile is a block, as tall as its min-height without a sized parent](2026-11-20-sign-pad-tile-is-a-block.md) | behavior |
+| 2026-11-20 | [SignaturePad's dialog is part of the field: it follows the field's props and closes with it](2026-11-20-signature-pad-dialog-part-of-the-field.md) | behavior |
+| 2026-11-20 | [A press on a clickable Matrix entry reaches the elements around it](2026-11-20-matrix-entry-press-reaches-wrappers.md) | behavior |
+| 2026-11-20 | [DateInput has no timezone prop and ignores a timezone set in the theme](2026-11-20-date-input-no-timezone.md) | type, behavior |
+| 2026-11-20 | [Notifications: the popover is a dialog, and the bell says it opens one](2026-11-20-notifications-popover-is-a-dialog.md) | behavior, type |
+| 2026-11-20 | [The grid's cells are cells of their rows](2026-11-20-multi-grid-cells-are-grid-cells.md) | behavior |
+| 2026-11-20 | [The touch Clear button leaves focus in the field](2026-11-20-clear-keeps-focus-in-field.md) | behavior |
+| 2026-11-20 | [Text without a number is invalid in the number inputs](2026-11-20-number-inputs-flag-text-without-a-number.md) | behavior |
+| 2026-11-20 | [IntegerInputField's root is its text field, without a wrapper div](2026-11-20-integer-input-field-root-is-its-text-field.md) | behavior |
+| 2026-11-20 | [A text field's helper text stays in its description when slotProps.htmlInput adds to it](2026-11-20-text-field-helper-text-stays-in-description.md) | behavior |
+| 2026-11-20 | [While a dialog button's handler runs, the buttons stay focusable and the pressed one shows a spinner](2026-11-20-dialog-busy-buttons-keep-focus.md) | behavior |
+| 2026-11-20 | [showErrorDialog accepts any value and no longer throws](2026-11-20-show-error-dialog-accepts-any-value.md) | behavior, type, i18n |
+| 2026-11-20 | [RoutedTabs scrolls when its tabs do not fit, with scroll buttons on phones](2026-11-20-routed-tabs-scroll-when-tabs-do-not-fit.md) | behavior, theme |
+| 2026-11-20 | [DialogTitle wraps a long title instead of cutting it off](2026-11-20-dialog-title-wraps.md) | behavior |
+| 2026-11-20 | [A toast's keyboard-focused close button draws a focus ring](2026-11-20-toast-close-button-focus-ring.md) | behavior |
+| 2026-11-20 | [A CRUD without a record page applies gridProps.onAddNew and shows newPermissionHint only to users who may not create](2026-11-20-crud-without-record-page-add-new.md) | behavior |
+| 2026-11-20 | [SignalPortlet's linked rows and Refresh button draw a keyboard focus ring](2026-11-20-signal-portlet-focus-ring.md) | behavior |
+| 2026-11-20 | [TreeView is exposed as a tree: levels, positions among siblings and expanded state](2026-11-20-tree-view-is-a-tree.md) | behavior, type |
+| 2026-11-20 | [Leaving several dirty forms asks once, and "Yes" keeps the forms it did not leave guarded](2026-11-20-leave-guards-ask-once.md) | behavior |
+| 2026-11-20 | [A disabled default Back button looks like every disabled ActionButton](2026-11-20-default-back-button-disabled-look.md) | behavior |
+| 2026-11-20 | [FullFormDialog's open-in-new action is a named button beside the close button](2026-11-20-full-form-dialog-open-in-new-button.md) | behavior, theme |
+| 2026-11-20 | [InfiniteScroll opens at its first row and loads on top without hiding any of it](2026-11-20-infinite-scroll-loads-on-top-without-offset.md) | behavior, type |
+| 2026-11-20 | ["Clear filters" in an empty DataGrid moves focus to the search box](2026-11-20-data-grid-clear-filters-focuses-search.md) | behavior |
+| 2026-11-20 | [The DataGrid's header buttons on tablets and phones and its column settings draw a focus ring](2026-11-20-data-grid-header-settings-focus-ring.md) | behavior |
+| 2026-11-20 | [FormAutoSave also saves when the form turns idle or dirty](2026-11-20-form-auto-save-when-idle-or-dirty.md) | behavior |
+| 2026-11-20 | [ScrollableSchedule starts over at the current week after a filter or language change](2026-11-20-scrollable-schedule-starts-over-at-current-week.md) | behavior |
+| 2026-11-20 | [Portal menu entries and the burger tell screen readers their state](2026-11-20-portal-menu-exposes-state.md) | behavior |
+| 2026-11-20 | [A collapsed CollapsibleMenu is shown in the mobile layout](2026-11-20-collapsible-menu-shown-in-mobile-layout.md) | behavior |
+| 2026-11-20 | [PortalLayout keeps the menu mounted when it switches between desktop and mobile view](2026-11-20-portal-menu-kept-across-breakpoint.md) | behavior |
+| 2026-11-20 | [ActionButton darkens a fill until its text reaches 4.5:1](2026-11-20-action-button-readable-fill.md) | behavior |
+| 2026-11-20 | [ComponentWithLabel captions wrap when they have too little room](2026-11-20-component-with-label-captions-wrap.md) | behavior |
+| 2026-11-20 | [A failed week of ScrollableSchedule keeps its week line and offers Retry](2026-11-20-scrollable-schedule-failed-week-retry.md) | behavior |
+| 2026-11-20 | [A running delete shows its progress, and a finished one is announced](2026-11-20-data-grid-delete-progress-and-success-toast.md) | behavior, type |
+| 2026-11-20 | [After a navigation the focus moves to the new page's heading, and the new page is announced](2026-11-20-navigation-focus-and-announcement.md) | behavior |
+| 2026-11-20 | [A modified field says so in its name](2026-11-20-dirty-state-in-field-name.md) | behavior, type, theme |
+| 2026-11-20 | [DecimalInputField and CurrencyInput commit an edit on Enter](2026-11-20-number-inputs-commit-on-enter.md) | behavior |
+| 2026-11-20 | [HowToBox's theme gets no ownerState, and its variants match titleLabel and labels](2026-11-20-how-to-box-theme-without-owner-state.md) | type, behavior, theme |
+| 2026-11-20 | [ScrollableSchedule marks today's row by default](2026-11-20-scrollable-schedule-today-row-marked.md) | behavior |
+| 2026-11-20 | [A lazy control's queue keeps the Form dirty when onlySubmitMounted changes while it is shown](2026-11-20-lazy-crud-connector-only-submit-mounted-change.md) | behavior |
+| 2026-11-20 | [A control in a DataGrid cell is named after its field and row](2026-11-20-data-grid-inline-checkbox-names.md) | behavior |
+| 2026-11-20 | [InlineSwitch takes aria props for its switch, and a selector's switch requires switchLabel](2026-11-20-inline-switch-name-and-switch-label.md) | behavior, type |
+| 2026-11-20 | [A Link to a location without pathname points at the current page](2026-11-20-link-href-without-pathname.md) | behavior |
+| 2026-11-20 | [An aborted index, fetchAll or getRaw request is not reported to Sentry](2026-11-20-model-index-abort-not-reported.md) | behavior |
+| 2026-11-20 | [The router's internals are no longer exported from the package root](2026-11-20-routes-internals-not-exported.md) | type |
+| 2026-11-20 | [The InfoBox header announces a warning, success or error status](2026-11-20-info-box-announces-status.md) | behavior |
+| 2026-11-20 | [RoutedTabs' panels are tab panels, named and controlled by their tabs](2026-11-20-routed-tabs-panels-are-tab-panels.md) | behavior, theme |
+| 2026-11-20 | [Notifications: the popover is 400px wide by default](2026-11-20-notifications-default-paper-width.md) | behavior, theme |
+| 2026-11-20 | [The corner of a diagonal Matrix pair is drawn in its entry's text color](2026-11-20-matrix-diagonal-corner-entry-color.md) | behavior |
+| 2026-11-20 | [A disabled SignPad tile opens nothing, also when the theme disables it](2026-11-20-sign-pad-disabled-opens-nothing.md) | behavior |
+| 2026-11-20 | [The grid's focus ring is drawn above its cells](2026-11-20-multi-grid-focus-ring-above-cells.md) | behavior, theme |
+| 2026-11-20 | [A signature field's label is a `<label>`, not a `<legend>`](2026-11-20-signature-field-label-not-legend.md) | behavior |
+| 2026-11-20 | [A date picker's `aria-label` names its field and calendar, and the calendar is always named](2026-11-20-picker-aria-label-names-field-and-calendar.md) | behavior |
+| 2026-11-20 | [A date picker follows a value handed in another timezone](2026-11-20-picker-follows-value-timezone.md) | behavior |
+| 2026-11-20 | [A date picker with a warning or a dirty value shows both, like a text field](2026-11-20-picker-field-states.md) | behavior |
+| 2026-11-20 | [GroupBox's theme variants match smallLabel and label](2026-11-20-group-box-variants-match-small-label.md) | behavior, theme |
+| 2026-11-20 | [DateInput passes the slots a consumer gives it on to the picker](2026-11-20-date-input-consumer-slots.md) | behavior |
+| 2026-11-20 | [MultiLanguageInput's translate button is named after its field and says whether the other languages are shown](2026-11-20-multi-language-input-toggle-names-its-field.md) | behavior, i18n |
+| 2026-11-20 | [A numeric Matrix label is sized like its digits, and a corner of 0 is drawn](2026-11-20-matrix-numeric-label-and-zero-corner.md) | behavior |
+| 2026-11-20 | [A dirty Form in a tab panel asks before another tab replaces it](2026-11-20-form-page-guard-follows-routes.md) | behavior, type |
+| 2026-11-19 | [PopupMenu applies its `classes`](2026-11-19-popup-menu-classes.md) | behavior, theme |
+| 2026-11-19 | [A data grid logs a failed write of its persisted state and writes it again](2026-11-19-data-grid-failed-persist-write-logged-and-retried.md) | behavior |
+| 2026-11-19 | [The busy overlay is a status message, and a busy form is `aria-busy`](2026-11-19-form-loader-overlay-status-message.md) | behavior, theme |
+| 2026-11-19 | [The form footer stays within its container, and its buttons wrap](2026-11-19-form-footer-fits-its-container.md) | behavior, theme |
+| 2026-11-19 | [RoutedMenu reads a route the same way for the highlight and the click](2026-11-19-routed-menu-route-one-reading.md) | behavior |
+| 2026-11-19 | [The locale selector keeps keyboard focus in its list while it scrolls](2026-11-19-locale-selector-list-keeps-focus.md) | behavior |
 | 2026-11-17 | [Leaving a date field marks it touched in a Form](2026-11-17-form-blur-marks-date-fields-touched.md) | behavior |
 | 2026-11-17 | [VerticalDivider, PopupMenu and the Small components take theme default props](2026-11-17-small-primitives-theme-slots.md) | behavior, type, theme |
 | 2026-11-17 | [The country flags load when the first flag is shown: loadCountryFlags and loadCountryFlag replace CountryFlags and getCountryFlag](2026-11-17-country-flags-load-when-shown.md) | type, behavior |

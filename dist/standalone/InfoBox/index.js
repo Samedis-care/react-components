@@ -1,15 +1,30 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { ErrorOutlined, InfoOutlined, ReportProblemOutlined, TaskAlt, } from "@mui/icons-material";
 import { Accordion, AccordionDetails, AccordionSummary, accordionSummaryClasses, styled, Typography, useThemeProps, } from "@mui/material";
 import { useControlled } from "@mui/material/utils";
+import { useTranslation } from "react-i18next";
 import combineClassNames from "../../utils/combineClassNames";
-const AccordionStyled = styled(Accordion, { name: "CcInfoBox", slot: "root" })({
+import ccI18n from "../../i18n";
+/**
+ * InfoBox never suspended, and the status it reads out is only heard: while
+ * the translations load it uses the English defaults, then re-renders, like the
+ * Loader's non-suspending options
+ */
+const TRANSLATION_OPTIONS = { i18n: ccI18n, useSuspense: false };
+/**
+ * The box. MUI's Accordion styles accordions as a group: it rounds only the
+ * top corners of the first of its element type among its siblings and the
+ * bottom corners of the last. Every InfoBox is rounded on all four corners
+ * instead, and clips its header to them.
+ */
+const AccordionStyled = styled(Accordion, { name: "CcInfoBox", slot: "root" })(({ theme }) => ({
     boxShadow: "none",
     "&.MuiAccordion-rounded": {
+        borderRadius: theme.shape.borderRadius,
         overflow: "hidden",
     },
-});
+}));
 /**
  * The header's colors for one status. A keyboard-focused header
  * (`Mui-focusVisible`) keeps them, where MUI's AccordionSummary would replace
@@ -41,14 +56,6 @@ const AccordionSummaryStyled = styled(AccordionSummary, {
     // is drawn over the column instead of under its shade
     isolation: "isolate",
     minHeight: 48,
-    "&.Mui-expanded": {
-        minHeight: 48,
-    },
-    "&.MuiAccordionSummary-content": {
-        "&.Mui-expanded": {
-            margin: "12px 0",
-        },
-    },
     ...(alwaysExpanded && {
         cursor: "default",
         "&:hover:not(.Mui-disabled)": {
@@ -69,6 +76,27 @@ const SummaryHeading = styled(Typography, {
     name: "CcInfoBox",
     slot: "heading",
 })({});
+/**
+ * The status name in front of the heading, with the separator the translation
+ * carries. It is only read out and visually hidden (`statusName` slot): the
+ * header announces "Warning: Please review", where the icon and the color
+ * would be the only sign of the status.
+ */
+const StatusName = styled("span", {
+    name: "CcInfoBox",
+    slot: "statusName",
+})({
+    // visually hidden, as MUI's visuallyHidden
+    border: 0,
+    clipPath: "inset(50%)",
+    height: 1,
+    margin: -1,
+    overflow: "hidden",
+    padding: 0,
+    position: "absolute",
+    whiteSpace: "nowrap",
+    width: 1,
+});
 const SpanIconButton = styled("span", {
     name: "CcInfoBox",
     slot: "iconButton",
@@ -95,11 +123,41 @@ const AccordionDetailsStyled = styled(AccordionDetails, {
     whiteSpace: "pre-line",
 }));
 const DetailsText = styled("div", { name: "CcInfoBox", slot: "detailsText" })({});
-// .MuiAccordionSummary-content.Mui-expanded => margin => unset
-// .MuiAccordionSummary-root.Mui-expanded => min-height => unset
+/**
+ * The translated name of a status for the header, with the separator the
+ * translation carries (so a locale can set it). `undefined` for `info` and an
+ * unset status: they are the neutral default, so announcing "Info" on every
+ * notice would only add noise.
+ * @param status The `status` prop
+ * @param t The library's translate function
+ * @returns The status name and separator, or `undefined` when the status is
+ * not announced
+ */
+const statusName = (status, t) => {
+    switch (status) {
+        case "warning":
+            return t("standalone.info-box.status.warning", {
+                defaultValue: "Warning:",
+            });
+        case "success":
+            return t("standalone.info-box.status.success", {
+                defaultValue: "Success:",
+            });
+        case "error":
+            return t("standalone.info-box.status.error", {
+                defaultValue: "Error:",
+            });
+        default:
+            return undefined;
+    }
+};
 const InfoBox = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcInfoBox" });
     const { heading, onChange, expanded: expandedProp, defaultExpanded = false, alwaysExpanded, message, status, headingVariant, className, classes, } = props;
+    const { t } = useTranslation("translation", TRANSLATION_OPTIONS);
+    // The header announces the status in front of the heading, so a screen
+    // reader gets what sighted users read from the color and the icon.
+    const statusLabel = statusName(status, t);
     const getIcon = useCallback(() => {
         switch (status) {
             case "warning":
@@ -126,6 +184,9 @@ const InfoBox = (inProps) => {
         setExpanded(newExpanded);
         onChange?.(event, newExpanded);
     }, [onChange, setExpanded]);
-    return (_jsxs(AccordionStyled, { className: combineClassNames([className, classes?.root]), expanded: !!alwaysExpanded || !!expanded, onChange: handleChange, children: [_jsx(AccordionSummaryStyled, { ownerState: { status, alwaysExpanded: !!alwaysExpanded }, className: classes?.summary, children: _jsxs(SummaryRoot, { className: classes?.summaryRoot, children: [_jsx(SpanIconButton, { className: classes?.iconButton, children: getIcon() }), _jsx(SummaryHeading, { variant: headingVariant ?? "caption", className: classes?.heading, children: heading })] }) }), _jsx(AccordionDetailsStyled, { className: classes?.details, children: _jsx(DetailsText, { className: classes?.detailsText, children: message }) })] }));
+    return (_jsxs(AccordionStyled, { className: combineClassNames([className, classes?.root]), 
+        // opening the box keeps the header at 48px and adds no margin around
+        // the box, where MUI's gutters grow both
+        disableGutters: true, expanded: !!alwaysExpanded || !!expanded, onChange: handleChange, children: [_jsx(AccordionSummaryStyled, { ownerState: { status, alwaysExpanded: !!alwaysExpanded }, className: classes?.summary, children: _jsxs(SummaryRoot, { className: classes?.summaryRoot, children: [_jsx(SpanIconButton, { className: classes?.iconButton, children: getIcon() }), _jsxs(SummaryHeading, { variant: headingVariant ?? "caption", className: classes?.heading, children: [statusLabel && (_jsxs(_Fragment, { children: [_jsx(StatusName, { className: classes?.statusName, children: statusLabel }), " "] })), heading] })] }) }), _jsx(AccordionDetailsStyled, { className: classes?.details, children: _jsx(DetailsText, { className: classes?.detailsText, children: message }) })] }));
 };
 export default React.memo(InfoBox);

@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useContext, useRef, useState } from "react";
+import React, { useCallback, useContext, useId, useMemo, useRef, useState, } from "react";
 import { Button, Dialog, DialogActions, IconButton, styled, useThemeProps, } from "@mui/material";
 import MuiDialogTitle from "@mui/material/DialogTitle";
 import { Close } from "@mui/icons-material";
@@ -28,6 +28,23 @@ const StyledCloseButton = styled(IconButton, {
     top: theme.spacing(1),
     color: theme.palette.grey[500],
 }));
+// how to sign, the dialog's description: read by screen readers when the dialog
+// opens. Sighted users have the title and the dotted sign area
+const Instructions = styled("div", {
+    name: "CcSignPadDialog",
+    slot: "instructions",
+})({
+    // visually hidden, as MUI's visuallyHidden
+    border: 0,
+    clipPath: "inset(50%)",
+    height: 1,
+    margin: -1,
+    overflow: "hidden",
+    padding: 0,
+    position: "absolute",
+    whiteSpace: "nowrap",
+    width: 1,
+});
 const SignDiv = styled("div", {
     name: "CcSignPadDialog",
     slot: "signDiv",
@@ -95,6 +112,13 @@ const SignPadDialog = (inProps) => {
     const pushedClose = useContext(PushedDialogCloseContext);
     const closeThisDialog = pushedClose?.pushed ? pushedClose.close : null;
     const signCanvas = useRef(null);
+    const instructionsId = useId();
+    // the canvas is drawn on with a pointer only, not operated by keyboard: an image
+    // with a name, so screen readers find it, also when exploring by touch
+    const canvasProps = useMemo(() => ({
+        role: "img",
+        "aria-label": t("standalone.signature-pad.dialog.sign-area"),
+    }), [t]);
     const hiddenRef = useRef(null);
     const clearCanvas = useCallback(async () => {
         if (!(await showConfirmDialogBool(pushDialog, {
@@ -148,11 +172,13 @@ const SignPadDialog = (inProps) => {
         closeThisDialog?.();
     }, [closeThisDialog]);
     const closeCanvasBtn = useCallback(() => closeCanvas({}, "closeBtn"), [closeCanvas]);
-    return (_jsxs(RootDialog, { open: true, maxWidth: "sm", onClose: closeCanvas, className: combineClassNames([className, classes?.root]), children: [_jsxs(StyledDialogTitle, { className: classes?.dialogTitle, children: [signerName
+    return (_jsxs(RootDialog, { open: true, maxWidth: "sm", onClose: closeCanvas, className: combineClassNames([className, classes?.root]), "aria-describedby": instructionsId, children: [_jsxs(StyledDialogTitle, { className: classes?.dialogTitle, children: [signerName
                         ? t("standalone.signature-pad.dialog.title-name", {
                             NAME: signerName,
                         })
-                        : t("standalone.signature-pad.dialog.title"), _jsx(StyledCloseButton, { "aria-label": t("standalone.signature-pad.dialog.close"), className: classes?.closeButton, onClick: closeCanvasBtn, size: "large", children: _jsx(Close, {}) })] }), _jsxs(SignDiv, { className: classes?.signDiv, "data-name": name, onBlur: onBlur, children: [!resetCanvas ? (_jsx(SignaturePad, { ref: signCanvas, options: {
+                        : t("standalone.signature-pad.dialog.title"), _jsx(StyledCloseButton, { "aria-label": t("standalone.signature-pad.dialog.close"), className: classes?.closeButton, onClick: closeCanvasBtn, size: "large", children: _jsx(Close, {}) })] }), _jsx(Instructions, { id: instructionsId, className: classes?.instructions, children: resetCanvas
+                    ? t("standalone.signature-pad.dialog.instructions-signed")
+                    : t("standalone.signature-pad.dialog.instructions") }), _jsxs(SignDiv, { className: classes?.signDiv, "data-name": name, onBlur: onBlur, children: [!resetCanvas ? (_jsx(SignaturePad, { ref: signCanvas, canvasProps: canvasProps, options: {
                             penColor: penColor || "blue",
                         }, 
                         // no width or height: the wrapper reads them only on mount.
@@ -161,6 +187,6 @@ const SignPadDialog = (inProps) => {
                         // window resize, so the ink lands under the pen.
                         // Re-dimensioning the canvas clears its bitmap: draw the
                         // strokes again, so the ink survives a resize
-                        redrawOnResize: true })) : (_jsx(ImageDiv, { className: classes?.imageDiv, children: _jsx(SignatureImage, { src: signature ?? undefined, alt: t("standalone.signature-pad.dialog.signature") }) })), _jsx(HiddenDiv, { className: classes?.hiddenDiv, children: _jsx("input", { type: "text", value: signature ?? "", readOnly: true, ref: hiddenRef, name: name, onBlur: onBlur }) })] }), _jsxs(DialogActions, { children: [_jsx(Button, { onClick: saveCanvas, color: "primary", children: t("standalone.signature-pad.dialog.save-changes") }), _jsx(Button, { onClick: clearCanvas, color: "error", children: t("standalone.signature-pad.dialog.reset") })] })] }));
+                        redrawOnResize: true })) : (_jsx(ImageDiv, { className: classes?.imageDiv, children: _jsx(SignatureImage, { src: signature ?? undefined, alt: t("standalone.signature-pad.dialog.signature") }) })), _jsx(HiddenDiv, { className: classes?.hiddenDiv, children: _jsx("input", { type: "text", value: signature ?? "", readOnly: true, ref: hiddenRef, name: name, onBlur: onBlur, tabIndex: -1, "aria-hidden": true }) })] }), _jsxs(DialogActions, { children: [_jsx(Button, { onClick: saveCanvas, color: "primary", children: t("standalone.signature-pad.dialog.save-changes") }), _jsx(Button, { onClick: clearCanvas, color: "error", children: t("standalone.signature-pad.dialog.reset") })] })] }));
 };
 export const SignDialog = React.memo(SignPadDialog);

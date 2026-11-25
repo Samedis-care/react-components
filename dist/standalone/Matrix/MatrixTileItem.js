@@ -56,12 +56,20 @@ const FlowArrowVertical = styled(ArrowDownward)({ fontSize: 13 });
 const FlowArrowHorizontal = styled(ArrowRightAlt)({ fontSize: 16 });
 /**
  * Font size for a short code: the shorter it is, the bigger it can be. Only a
- * plain string can be measured this way — a ReactNode label keeps the default.
+ * plain string or a number can be measured this way — a number counts as the
+ * digits React writes for it, so 1234 is sized like "1234". Any other
+ * ReactNode keeps the default.
+ * @param label The label to size
+ * @returns The font size in px: 14 up to two characters, 12 for three, 10
+ * for more
  */
 export const labelFontSize = (label) => {
-    if (typeof label !== "string")
+    const text = typeof label === "number" || typeof label === "bigint"
+        ? String(label)
+        : label;
+    if (typeof text !== "string")
         return 14;
-    return label.length <= 2 ? 14 : label.length === 3 ? 12 : 10;
+    return text.length <= 2 ? 14 : text.length === 3 ? 12 : 10;
 };
 const MatrixTileItem = (props) => {
     const { item } = props;
@@ -71,14 +79,11 @@ const MatrixTileItem = (props) => {
         onItemClick?.(item);
     }, [onItemClick, item]);
     // An entry one can click has to be one a keyboard can reach too. The name
-    // comes from the label it renders; the tooltip is its description.
+    // comes from the label it renders; the tooltip is its description. Its
+    // role is also what keeps a press on it from starting a range in the grid
+    // below (the cell skips presses inside [role=button]), so the press still
+    // reaches the consumer's renderItem and renderCellWrapper wrappers.
     const activation = useMatrixActivation(onItemClick ? activate : undefined);
-    // A clickable entry must not also start a range selection in the grid
-    // below it: without this, pressing an entry would both open it and begin
-    // dragging a new range.
-    const handleMouseDown = useCallback((event) => {
-        event.stopPropagation();
-    }, []);
     const horizontal = (item.flow ?? "vertical") === "horizontal";
     const style = useMemo(() => {
         const colors = tileColors(theme, item.backgroundColor, item.textColor, item.dimmed);
@@ -102,7 +107,7 @@ const MatrixTileItem = (props) => {
             classes?.item,
             item.dimmed && matrixClasses.itemDimmed,
             onItemClick && matrixClasses.itemClickable,
-        ]), style: style, ...activation, onMouseDown: onItemClick ? handleMouseDown : undefined, children: [_jsxs(MatrixTileItemContent, { className: combineClassNames([
+        ]), style: style, ...activation, children: [_jsxs(MatrixTileItemContent, { className: combineClassNames([
                     classes?.itemContent,
                     horizontal && matrixClasses.flowHorizontal,
                 ]), children: [_jsx("span", { children: item.label }), item.secondaryLabel != null && (_jsxs(_Fragment, { children: [horizontal ? _jsx(FlowArrowHorizontal, {}) : _jsx(FlowArrowVertical, {}), _jsx("span", { className: "CcMatrixCellTile-secondaryLabel", children: item.secondaryLabel })] }))] }), _jsx(MatrixTileCorners, { item: item, className: classes?.corner })] }));

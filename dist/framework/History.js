@@ -11,14 +11,3 @@ export let FrameworkHistory = createBrowserHistory();
 export const setFrameworkHistory = (history) => {
     FrameworkHistory = history;
 };
-// Helper for Sentry instrumentation
-export class SentryHistory {
-    get location() {
-        return FrameworkHistory.location;
-    }
-    listen(cb) {
-        FrameworkHistory.listen((update) => {
-            cb(update.location, update.action);
-        });
-    }
-}

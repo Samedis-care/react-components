@@ -1,6 +1,6 @@
 import React from "react";
 import type { IMenuItemDefinition, MenuItemProps, MenuProps } from "./index";
-interface MenuItemControllerProps extends Omit<MenuItemProps, "expanded" | "active"> {
+interface MenuItemControllerProps extends Omit<MenuItemProps, "expanded" | "active" | "ariaAttributes"> {
     /**
      * The menu item renderer properties
      */

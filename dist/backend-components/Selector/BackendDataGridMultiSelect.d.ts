@@ -13,11 +13,14 @@ export interface BackendDataGridMultiSelectProps<M extends ModelUnknown> extends
     model: M;
     /**
      * The text that identifies a row to assistive technology, e.g. a person's
-     * name: the row's checkbox is named after it ("Select Carol Jones").
+     * name: the row's checkbox is named after it ("Select Carol Jones") and a
+     * control edited in a cell is named after it and its field
+     * ("Active, Carol Jones").
      * Defaults to DataGridProps.getRowLabel's default: the text the first
      * visible text column shows.
      * @param record The row's record, as the model's index returned it
-     * @return The label; an empty string names the checkbox "Select row"
+     * @return The label; an empty string names the checkbox "Select row" and
+     *         leaves a control edited in a cell named after its field alone
      */
     getRowLabel?: (record: ModelRecord<M>) => string;
     /**
@@ -31,7 +34,10 @@ export interface BackendDataGridMultiSelectProps<M extends ModelUnknown> extends
      */
     readOnly?: boolean;
     /**
-     * The current selection
+     * The ids of the selected records. The grid lists the records selected when it loads
+     * (when it mounts, and after a search, a filter, a sort or forceRefreshToken changed)
+     * first, ticked, and the others after them. A tick or an untick does not move a row:
+     * an unticked record stays at the top until the grid loads again.
      */
     selected: string[];
     /**

@@ -13,7 +13,11 @@ export interface FileUploadProps {
     /**
      * Maximum amount of files allowed
      * @remarks Counts every listed file that is not removed, except one with
-     *          `excludeFromLimits`.
+     *          `excludeFromLimits`. A selection (pick, drop or `addFile`) with more files
+     *          than slots are free is refused as a whole (`files.selector.too-many`). The
+     *          free slots are counted on the list as it is when the selection is added,
+     *          after its images are processed, so selections added at the same time
+     *          cannot share a slot.
      */
     maxFiles?: number;
     /**
@@ -212,6 +216,10 @@ export interface FileUploadRendererProps extends Omit<FileUploadProps, "variant"
     /**
      * Remove a file
      * @param file The file to remove
+     * @remarks A picked file leaves the list, and its remove button with it. The built-in
+     *          variants then move keyboard focus to the next file's remove or restore
+     *          button, or else to the upload control; a custom variant moves it itself (see
+     *          `FileProps.actionButtonRef`).
      */
     removeFile: (file: FileData) => void;
     /**

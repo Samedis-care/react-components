@@ -19,10 +19,14 @@ export interface MultiSelectEntryProps<DataT extends MultiSelectorData> {
      */
     enableDivider: boolean;
     /**
-     * Delete handler (if undefined hide/disable delete button)
-     * @param evt
+     * Removes this entry from the selection, once `data.canUnselect` or MultiSelect's
+     * `confirmDelete` question allows it. It is bound to the entry, so it can be called
+     * from any element's click or key event: a button's `onClick`, a Chip's `onDelete`, a
+     * menu item. Without it the entry must not be removed and has no remove button.
+     * @param evt The click or key event that asks for the removal, passed on to
+     *            `data.canUnselect`; with Shift held it skips the `confirmDelete` question
      */
-    handleDelete?: (evt: React.MouseEvent<HTMLButtonElement>) => void;
+    handleDelete?: (evt: React.MouseEvent | React.KeyboardEvent) => void;
     /**
      * The entry's change that is not saved yet, if any
      * @remarks Shown as a text after the label ("Added", "Removed"), not by colour alone. A
@@ -34,10 +38,11 @@ export interface MultiSelectEntryProps<DataT extends MultiSelectorData> {
     /**
      * Restore handler of a removed entry (changeState "removed"): its restore button, named
      * "Restore <label>", takes the place of the remove button. Without it the removed entry
-     * has no button.
-     * @param evt The click on the restore button, whose `name` is the entry's value
+     * has no button. Bound to the entry like `handleDelete`, so it can be called from any
+     * element.
+     * @param evt The click or key event that asks for the restore
      */
-    handleRestore?: (evt: React.MouseEvent<HTMLButtonElement>) => void;
+    handleRestore?: (evt: React.MouseEvent | React.KeyboardEvent) => void;
     /**
      * The data entry to render
      */

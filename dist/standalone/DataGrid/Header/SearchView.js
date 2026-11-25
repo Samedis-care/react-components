@@ -1,10 +1,27 @@
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useId, useMemo, useState, } from "react";
-import { Box, IconButton, InputAdornment, Popover, useMediaQuery, } from "@mui/material";
+import { Box, InputAdornment, Popover, useMediaQuery, } from "@mui/material";
 import { DataGridQuickFilterIcon, useDataGridProps } from "../DataGrid";
 import TextFieldWithHelp from "../../UIKit/TextFieldWithHelp";
 import combineClassNames from "../../../utils/combineClassNames";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import HeaderIconButton from "./HeaderIconButton";
+// the class of the search box's root element, see focusDataGridSearch
+const SEARCH_CLASS = "CcDataGrid-search";
+/**
+ * Moves keyboard focus to a grid's search box: its field or, below sm, the
+ * button that opens it. For a control of the grid that is about to go away,
+ * so that focus doesn't fall to the page.
+ * @param root The grid's root element (useDataGridRootRef); null does nothing
+ */
+export const focusDataGridSearch = (root) => {
+    root
+        ?.querySelector(`.${SEARCH_CLASS}`)
+        // the field comes first; below sm there is only the button (the
+        // popover's field is not in the grid)
+        ?.querySelector("input, button")
+        ?.focus();
+};
 const anchorOrigin = {
     vertical: "bottom",
     horizontal: "center",
@@ -50,7 +67,11 @@ const SearchView = (props) => {
             },
         }, margin: "dense" }));
     const smDown = useMediaQuery((theme) => theme.breakpoints.down("sm"));
-    return (_jsx("div", { className: combineClassNames([props.className, classes?.search]), children: !smDown ? (renderTextField(false)) : (_jsxs(_Fragment, { children: [_jsx(IconButton, { id: buttonId, onClick: openPopover, size: "large", "aria-label": props.label ?? t("standalone.data-grid.header.search"), "aria-haspopup": "dialog", "aria-expanded": open, "aria-controls": open ? popoverId : undefined, children: _jsx(DataGridQuickFilterIcon, { className: combineClassNames([
+    return (_jsx("div", { className: combineClassNames([
+            props.className,
+            SEARCH_CLASS,
+            classes?.search,
+        ]), children: !smDown ? (renderTextField(false)) : (_jsxs(_Fragment, { children: [_jsx(HeaderIconButton, { id: buttonId, onClick: openPopover, size: "large", "aria-label": props.label ?? t("standalone.data-grid.header.search"), "aria-haspopup": "dialog", "aria-expanded": open, "aria-controls": open ? popoverId : undefined, children: _jsx(DataGridQuickFilterIcon, { className: combineClassNames([
                             classes?.quickFilterIcon,
                             props.search && "CcDataGrid-quickFilterActiveIcon",
                         ]) }) }), _jsx(Popover, { open: open, anchorEl: anchorEl, onClose: closePopover, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, slotProps: popoverSlotProps, children: _jsx(Box, { sx: { p: 1 }, children: renderTextField(true) }) })] })) }));

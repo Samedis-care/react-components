@@ -6,8 +6,9 @@ export interface LocalStoragePersistProps {
      *
      * When it changes, the children are mounted again, so the grids open with
      * what is stored under the new key. Everything else inside is mounted
-     * again as well: it loses its state, and keyboard focus inside it falls
-     * back to the page.
+     * again as well and loses its state. Keyboard focus in a grid moves to
+     * the same control of the grid mounted again (to its first control, if
+     * that one is not there); focus elsewhere inside falls back to the page.
      */
     storageKey: string;
     /**

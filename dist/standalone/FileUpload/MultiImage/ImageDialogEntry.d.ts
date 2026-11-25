@@ -8,11 +8,15 @@ export interface ImageDialogEntryProps extends Pick<MultiImageProps, "previewSiz
      */
     img: MultiImageImage;
     /**
-     * Is the image set to primary
+     * Is the image set to primary? The primary image's toggle button is pressed and shows a
+     * filled star and "Primary image", the others show an outline star and "Set as primary
+     * image"
      */
     isPrimary: boolean;
     /**
-     * Function to update images
+     * Applies a change to the field's images: the callback gets them as they are when this is
+     * called, after a removal (once onDelete agreed) or a replacement (once the file is
+     * processed), and returns the new list, or the list it got when nothing changes
      */
     changeImages: (cb: MultiImageManipulationCallback) => void;
     /**
@@ -51,10 +55,12 @@ export interface ImageDialogEntryProps extends Pick<MultiImageProps, "previewSiz
 }
 /**
  * Slots of ImageDialogEntry (theme CcImageDialogEntry): root (the Grid item), actions (the
- * row of buttons under the image), primaryButton (the make-primary toggle button), and the
- * star and text inside that button: makePrimary for an image that is not the primary one,
- * isPrimary for the primary image
+ * row of buttons under the image), primaryButton (the make-primary toggle button), the star
+ * and text inside that button: makePrimary for an image that is not the primary one
+ * (outline star, "Set as primary image"), isPrimary for the primary image (filled star in
+ * the primary colour, "Primary image"), and changeButtons (Replace and Remove, which wrap
+ * together; not rendered for a readOnly image)
  */
-export type ImageDialogEntryClassKey = "root" | "actions" | "primaryButton" | "makePrimary" | "isPrimary";
+export type ImageDialogEntryClassKey = "root" | "actions" | "primaryButton" | "makePrimary" | "isPrimary" | "changeButtons";
 declare const _default: React.MemoExoticComponent<(inProps: ImageDialogEntryProps) => React.JSX.Element>;
 export default _default;

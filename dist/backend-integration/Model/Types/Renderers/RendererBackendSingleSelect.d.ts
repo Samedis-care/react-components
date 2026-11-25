@@ -4,8 +4,9 @@ import ModelRenderParams from "../../RenderParams";
 import TypeId from "../TypeId";
 import { BackendSingleSelectProps } from "../../../../backend-components/Selector/BackendSingleSelect";
 import { FormBackendSingleSelectProps } from "../../../../backend-components/Selector/FormSelectors";
+import { DistributiveOmit } from "../../../../utils/internal/distributiveOmit";
 type OmitProperties = "selected" | "onSelect" | "disabled" | "model" | "initialData" | "autoFocus";
-export type RendererBackendSingleSelectProps<M extends ModelUnknown> = Omit<FormBackendSingleSelectProps<M>, OmitProperties | "modelFetch"> & {
+export type RendererBackendSingleSelectProps<M extends ModelUnknown> = DistributiveOmit<FormBackendSingleSelectProps<M>, OmitProperties | "modelFetch"> & {
     modelFetch?: BackendSingleSelectProps<M>["modelFetch"] | ((data: Record<string, unknown>) => BackendSingleSelectProps<M>["modelFetch"]);
 };
 /**

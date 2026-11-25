@@ -10,12 +10,15 @@
  * @param theme The theme
  * @param offset The outline offset in px: positive draws the ring outside the
  * element, -2 inside it (for an element whose container may clip it)
+ * @param color The ring's color, e.g. `currentColor` on a colored surface
+ * where the primary color may not show
+ * @default color theme.palette.primary.main
  * @returns The ring's styles, or undefined when the theme draws its own
  */
-const focusRing = (theme, offset) => theme.focusVisible
+const focusRing = (theme, offset, color = theme.palette.primary.main) => theme.focusVisible
     ? undefined
     : {
-        outline: `2px solid ${theme.palette.primary.main}`,
+        outline: `2px solid ${color}`,
         outlineOffset: offset,
     };
 export default focusRing;

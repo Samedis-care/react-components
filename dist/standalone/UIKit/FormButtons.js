@@ -25,6 +25,13 @@ const FormButtons = (inProps) => {
     const children = React.Children.toArray(props.children);
     if (children.length === 0)
         return _jsx(_Fragment, {});
-    return (_jsx(Container, { container: true, direction: "row", spacing: 2, wrap: "nowrap", className: combineClassNames([props.classes?.root, props.className]), children: children.map((child, index) => (_jsx(ButtonWrapper, { className: props.classes?.buttonWrapper, children: child }, React.isValidElement(child) ? child.key : index))) }));
+    return (_jsx(Container, { container: true, direction: "row", spacing: 2, 
+        // buttons that do not fit on one line wrap onto the next, rather than
+        // running out of their container (a form page's footer on a 320px phone)
+        wrap: "wrap", className: combineClassNames([props.classes?.root, props.className]), children: children.map((child, index) => (_jsx(ButtonWrapper, { className: props.classes?.buttonWrapper, children: child }, React.isValidElement(child) ? child.key : index))) }));
 };
+/**
+ * A bar of form action buttons, each in its own slot, in order. The buttons share
+ * one line and wrap onto further lines when they do not fit, as on a 320px phone.
+ */
 export default React.memo(FormButtons);

@@ -75,6 +75,8 @@ const BackendMultiSelectWithTags = (inProps) => {
         : undefined, [lruData, handleLoadDataRecord]);
     const debouncedGroupLoad = useDebouncedLoad(loadGroupOptions, groupSearchDebounceTime ?? 500);
     const debouncedDataLoad = useDebouncedLoad(loadDataOptions, dataSearchDebounceTime ?? 500);
-    return (_jsx(MultiSelectWithTags, { ...selectorProps, onChange: handleSelect, selected: selected, loadGroupEntries: loadGroupEntries, loadDataOptions: debouncedDataLoad, loadGroupOptions: debouncedGroupLoad, displaySwitch: !!(switchFilterNameGroup || switchFilterNameData), lruGroup: lruGroupConfig, lruData: lruDataConfig }));
+    return (_jsx(MultiSelectWithTags, { ...selectorProps, onChange: handleSelect, selected: selected, loadGroupEntries: loadGroupEntries, loadDataOptions: debouncedDataLoad, loadGroupOptions: debouncedGroupLoad, ...(switchFilterNameGroup || switchFilterNameData
+            ? { displaySwitch: true, switchLabel: props.switchLabel }
+            : { displaySwitch: false }), lruGroup: lruGroupConfig, lruData: lruDataConfig }));
 };
 export default React.memo(BackendMultiSelectWithTags);

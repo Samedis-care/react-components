@@ -16,7 +16,7 @@ export const matrixClasses = {
     columnCurrent: "CcMatrixGrid-columnCurrent",
     /** column variant "accent" */
     columnAccent: "CcMatrixGrid-columnAccent",
-    /** the add hint covers the lower half of a cell that has contents */
+    /** the add hint covers the lower half of a cell that has contents, opaque */
     addHintHalf: "CcMatrixGrid-addHintHalf",
     /** cell is part of the range the pointer is sweeping */
     cellSelected: "CcMatrixGrid-cellSelected",
@@ -42,6 +42,8 @@ export const matrixClasses = {
     diagonalLabelEnd: "CcMatrixCellTile-diagonalLabelEnd",
     /** a diagonal half whose entry is dimmed */
     diagonalLabelDimmed: "CcMatrixCellTile-diagonalLabelDimmed",
+    /** one of the entries the "+N" marker stands for is highlighted */
+    overflowHighlighted: "CcMatrixCellTile-overflowHighlighted",
     cornerTopLeft: "CcMatrixCellTile-cornerTopLeft",
     cornerTopRight: "CcMatrixCellTile-cornerTopRight",
     cornerBottomLeft: "CcMatrixCellTile-cornerBottomLeft",

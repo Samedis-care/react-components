@@ -8,6 +8,7 @@ import { cellBorders, columnTintStyles } from "./matrixTints";
 import { isCellSelectableIn, useMatrixConfig } from "./MatrixGridContext";
 import useMatrixActivation from "./useMatrixActivation";
 import { MATRIX_CELL_ADD_HINT, MATRIX_CELL_SELECTED, useMatrixInteraction, } from "./MatrixInteractionContext";
+import { columnNameOf, isNamePart } from "./matrixNames";
 export const MatrixBodyCellRoot = styled("div", {
     name: "CcMatrixGrid",
     slot: "cell",
@@ -41,41 +42,50 @@ export const MatrixBodyCellRoot = styled("div", {
 }));
 /**
  * The hover hint on a cell that can start a range: a dashed box saying what a
- * click would do.
+ * click would do. Escape hides it until the pointer moves to another cell.
  */
 export const MatrixAddHint = styled("div", {
     name: "CcMatrixGrid",
     slot: "addHint",
-})(({ theme }) => ({
-    position: "absolute",
-    zIndex: 3,
-    inset: 5,
-    pointerEvents: "none",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: theme.shape.borderRadius,
-    border: `2px dashed ${theme.palette.success.main}`,
-    backgroundColor: alpha(theme.palette.success.main, theme.palette.mode === "dark" ? 0.2 : 0.12),
-    color: theme.palette.mode === "dark"
-        ? theme.palette.success.light
-        : theme.palette.success.dark,
-    fontSize: "0.8rem",
-    fontWeight: 600,
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    // The cell has contents, and occupiedAddAffordance says "overlay": the hint
-    // takes the lower half and CATCHES the pointer there, so a press lands on it
-    // instead of on the entry underneath. One big target that reads like the
-    // blank-cell hint — and the entries' lower halves belong to it, which is
-    // the trade the consumer opts into.
-    [`&.${matrixClasses.addHintHalf}`]: {
-        inset: "auto 5px 5px 5px",
-        height: "calc(50% - 5px)",
-        pointerEvents: "auto",
-        cursor: "pointer",
-    },
-}));
+})(({ theme }) => {
+    const tint = alpha(theme.palette.success.main, theme.palette.mode === "dark" ? 0.2 : 0.12);
+    return {
+        position: "absolute",
+        zIndex: 3,
+        inset: 5,
+        pointerEvents: "none",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: theme.shape.borderRadius,
+        border: `2px dashed ${theme.palette.success.main}`,
+        backgroundColor: tint,
+        color: theme.palette.mode === "dark"
+            ? theme.palette.success.light
+            : theme.palette.success.dark,
+        fontSize: "0.8rem",
+        fontWeight: 600,
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        // The cell has contents, and occupiedAddAffordance says "overlay": the
+        // hint takes the lower half and CATCHES the pointer there, so a press
+        // lands on it instead of on the entry underneath. One big target that
+        // reads like the blank-cell hint — and while the pointer is on the cell
+        // the entries' lower halves belong to it (Escape gives them back), which
+        // is the trade the consumer opts into.
+        [`&.${matrixClasses.addHintHalf}`]: {
+            inset: "auto 5px 5px 5px",
+            height: "calc(50% - 5px)",
+            pointerEvents: "auto",
+            cursor: "pointer",
+            // Opaque: the same tint over the grid's background, not over the
+            // entries, whose fills would show through and take the text below
+            // 4.5:1.
+            backgroundColor: theme.palette.background.paper,
+            backgroundImage: `linear-gradient(${tint}, ${tint})`,
+        },
+    };
+});
 /**
  * The add affordance on a cell that is selectable but not blank.
  *
@@ -86,6 +96,10 @@ export const MatrixAddHint = styled("div", {
  * strip that overlays the entries either steals their clicks or, if it is thin
  * enough not to, is too thin to hit. It is 24x24px, the smallest target WCAG
  * 2.5.8 allows for a control that lies on another one.
+ *
+ * While it shows (the cell hovered, the chip focused, or at rest on a touch
+ * device), it lies over the bottom right of the cell's last entry, that
+ * entry's bottomRight corner included, and a press there adds.
  */
 export const MatrixAddChip = styled("div", {
     name: "CcMatrixGrid",
@@ -139,18 +153,6 @@ export const MatrixAddChipLabel = styled("span", {
     width: 1,
 });
 /**
- * Is this part of the add chip's name there at all? React renders nothing for
- * null, undefined and booleans, and an empty string says nothing.
- */
-const isNamePart = (part) => part != null && typeof part !== "boolean" && part !== "";
-/**
- * MatrixColumn.name, or the label when that is text
- */
-const columnNameOf = (column) => column.name ??
-    (typeof column.label === "string" || typeof column.label === "number"
-        ? String(column.label)
-        : undefined);
-/**
  * One body cell. Everything but its own row and column comes from the grid's
  * contexts, and its pointer state comes as a bit mask from the interaction
  * store — so a sweep re-renders the handful of cells whose state changed and
@@ -196,8 +198,8 @@ const MatrixBodyCell = (props) => {
     //
     // On a touch device the chip is used even in overlay mode, and it is visible
     // at rest: the overlay only ever appears on hover, so on a tablet an
-    // occupied cell would otherwise have no way to add at all — the entry's own
-    // press handler blocks the cell press.
+    // occupied cell would otherwise have no way to add at all — a press on a
+    // clickable entry is the entry's, never the cell's.
     const chip = cellSelectable && occupied && (occupiedAddAffordance === "chip" || touch);
     const overlay = cellSelectable && !touch && occupiedAddAffordance === "overlay"
         ? occupied
@@ -223,7 +225,7 @@ const MatrixBodyCell = (props) => {
         const node = renderCell(cell, context);
         return renderCellWrapper ? renderCellWrapper(node, context) : node;
     }, [renderCell, renderCellWrapper, cell, context]);
-    return (_jsxs(MatrixBodyCellRoot, { className: combineClassNames([
+    return (_jsxs(MatrixBodyCellRoot, { role: "gridcell", className: combineClassNames([
             classes?.cell,
             columnVariantClass(column.variant),
             cellSelectable && matrixClasses.cellSelectable,

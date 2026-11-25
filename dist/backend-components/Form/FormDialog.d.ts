@@ -9,7 +9,9 @@ export interface FormDialogProps {
      * Accessible name of the dialog while it shows no title (no `dialogTitle` and none set
      * through `FormDialogDispatch.setTitle`), e.g. the translated purpose of a picker. A shown
      * title names the dialog instead. Without either the dialog has no name, like an MUI `Dialog`
-     * without `DialogTitle`: screen readers announce only "dialog".
+     * without `DialogTitle`: screen readers announce only "dialog". Content that sets its title
+     * only once it has loaded needs none: the title takes the focus when it shows, so screen
+     * readers read it (see `FullFormDialog`).
      */
     "aria-label"?: string;
     /**
@@ -27,7 +29,13 @@ export interface FormDialogProps {
      */
     useCustomClasses?: boolean;
     /**
-     * Add link button option
+     * Shows an "Open in new tab" button (the open-in-new icon, named by
+     * `backend-components.form.form-dialog.open-in-new-tab`) in the title row,
+     * before the close button, and calls this, without arguments, when it is
+     * activated. Open the dialog's content in a new tab there, e.g. with
+     * `window.open(url, "_blank")`. A link set through
+     * `FormDialogDispatch.setOpenInNewLink` wins over this prop. Default none: no
+     * button.
      */
     openInNewLink?: () => void;
     /**
@@ -56,9 +64,19 @@ export interface FormDialogProps {
      */
     renderer?: React.ComponentType<FormDialogRendererProps>;
 }
-export type FormDialogClassKey = "content" | "openInNewIcon";
+/**
+ * Slot names of `CcFormDialog`, for theme `styleOverrides`: `content` (the
+ * content area with useCustomClasses), `openInNewButton` (the "Open in new tab"
+ * button) and `openInNewIcon` (its icon)
+ */
+export type FormDialogClassKey = "content" | "openInNewButton" | "openInNewIcon";
 export type FormDialogTitlePriorityMode = "prop" | "dispatch";
 export interface FormDialogDispatch {
+    /**
+     * Shows this title in the dialog's title bar (see `useSetFormDialogTitle`), null for none.
+     * A title that shows only after the dialog opened takes the keyboard focus if it is still on
+     * the dialog itself (see `FullFormDialog`).
+     */
     setTitle: (title: React.ReactNode) => void;
     setOpenInNewLink: Dispatch<SetStateAction<null | (() => void)>>;
     blockClosing: () => void;
@@ -72,6 +90,14 @@ export interface FormDialogDispatch {
 }
 export declare const IsInFormDialogContext: React.Context<boolean>;
 export declare const FormDialogDispatchContext: React.Context<FormDialogDispatch | undefined>;
+/**
+ * The dialog FullFormDialog renders by default (its `renderer`): an MUI `Dialog` with a
+ * `DialogTitle` (the title, the open-in-new button and the close button) and the content. The
+ * title names the dialog, else `aria-label` does. A title that shows only after the dialog
+ * opened takes the keyboard focus if it is still on the dialog itself, so screen readers read
+ * it (see `FullFormDialog`). A custom renderer can render it with changed props.
+ * @param props The props of FullFormDialog, with the title to show as `dialogTitle`
+ */
 export declare const FormDialogDefaultRenderer: (props: FormDialogRendererProps) => React.JSX.Element;
 declare const _default: React.MemoExoticComponent<(inProps: FormDialogProps) => React.JSX.Element>;
 export default _default;

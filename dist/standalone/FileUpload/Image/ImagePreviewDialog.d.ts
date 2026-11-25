@@ -23,10 +23,13 @@ export interface ImagePreviewDialogProps {
      */
     disableRotation?: boolean;
     /**
-     * Custom styles
+     * Custom styles. `toolbar` holds the rotate buttons (`rotateButtons`) and the zoom
+     * buttons (`zoomButtons`) in the top left corner. While the image is zoomed in,
+     * `container` also carries the class `CcImagePreviewDialog-zoomed` (and shows the grab
+     * cursor).
      */
     classes?: Partial<Record<ImagePreviewDialogClassKey, string>>;
 }
-export type ImagePreviewDialogClassKey = "root" | "closeButton" | "rotateButtons" | "rotateLeftButton" | "rotateRightButton" | "container" | "image";
+export type ImagePreviewDialogClassKey = "root" | "closeButton" | "toolbar" | "rotateButtons" | "rotateLeftButton" | "rotateRightButton" | "zoomButtons" | "zoomInButton" | "zoomOutButton" | "resetZoomButton" | "container" | "image";
 declare const _default: React.MemoExoticComponent<(inProps: ImagePreviewDialogProps) => React.JSX.Element>;
 export default _default;

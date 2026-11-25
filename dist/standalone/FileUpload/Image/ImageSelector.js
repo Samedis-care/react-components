@@ -166,7 +166,7 @@ const ModernUploadControlUpload = styled(IconButton, {
 const ImageSelector = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcImageSelector" });
     const boxLabel = labelWithDirtyMarker(props.label, props.dirty);
-    const { convertImagesTo, downscale, name, value, readOnly, capture, onChange, postEditCallback, onError, disableRotation, classes, className, } = props;
+    const { convertImagesTo, downscale, name, value, readOnly, capture, onChange, postEditCallback, onError, disableRotation, placeholder, classes, className, } = props;
     const variant = props.variant ?? "normal";
     const fileRef = useRef(null);
     const src = useObjectUrl(value);
@@ -214,7 +214,12 @@ const ImageSelector = (inProps) => {
     ]);
     const handleFileChange = useCallback(async (evt) => {
         const elem = evt.currentTarget;
-        const file = elem.files && elem.files[0];
+        const file = elem.files?.[0];
+        // cleared on every pick, before anything is awaited: browsers fire no change event
+        // for a selection equal to the input's current one, so picking the same image again
+        // (after a cancelled edit, an error or a change the owner did not apply) would do
+        // nothing
+        elem.value = "";
         if (!file)
             return;
         await processFile(file);
@@ -251,8 +256,9 @@ const ImageSelector = (inProps) => {
             return;
         evt.preventDefault();
     }, [readOnly]);
-    // The empty modern field's button is replaced by the image once a pick is applied. If it
-    // had focus then, focus moves on to the image's upload button instead of to the page.
+    // The empty modern field's button is replaced by the image once a pick is applied (or by
+    // the placeholder once one is set). If it had focus then, focus moves on to the image's
+    // upload button instead of to the page.
     const modernUploadButtonRef = useRef(null);
     const modernImageUploadRef = useRef(null);
     const refocusUploadRef = useRef(false);
@@ -264,7 +270,7 @@ const ImageSelector = (inProps) => {
             refocusUploadRef.current = true;
         }
     }, []);
-    const showsModernUploadButton = variant === "modern" && !value && !readOnly;
+    const showsModernUploadButton = variant === "modern" && !value && !placeholder && !readOnly;
     useLayoutEffect(() => {
         if (showsModernUploadButton || !refocusUploadRef.current)
             return;
@@ -294,7 +300,7 @@ const ImageSelector = (inProps) => {
                     alignItems: "stretch",
                     justifyContent: "center",
                 }, wrap: "nowrap", className: classes?.rootClassic, onDrop: handleDrop, onDragOver: handleDragOver, children: [!props.readOnly && (_jsxs(Grid, { container: true, spacing: 1, children: [_jsx(Grid, { children: _jsx(Button, { startIcon: _jsx(AttachFile, {}), variant: "contained", color: "primary", name: props.name, onClick: handleUpload, onBlur: props.onBlur, children: props.uploadLabel || t("standalone.file-upload.upload") }) }), captureEnabled && (_jsx(Grid, { children: _jsx(Button, { startIcon: _jsx(AttachFile, {}), variant: "contained", color: "primary", name: props.name, onClick: handleUploadCapture, onBlur: props.onBlur, children: props.uploadLabelCapture ||
-                                        t("standalone.file-upload.upload-capture.image") }) })), _jsx(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper })] }, "upload")), _jsx(ImageWrapper, { size: "grow", className: classes?.imgWrapper, children: value && (_jsx(PreviewClassic, { src: src, alt: props.alt, className: classes?.previewClassic })) }, "image")] }) }));
+                                        t("standalone.file-upload.upload-capture.image") }) })), _jsx(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper })] }, "upload")), _jsx(ImageWrapper, { size: "grow", className: classes?.imgWrapper, children: value ? (_jsx(PreviewClassic, { src: src, alt: props.alt, className: classes?.previewClassic })) : (placeholder && (_jsx(PreviewClassic, { src: placeholder, alt: "", className: classes?.previewClassic }))) }, "image")] }) }));
     }
     else if (variant === "modern") {
         const modernUploadLabel = (_jsx(ModernUploadLabel, { component: "span", variant: "h5", className: classes?.modernUploadLabel, align: "center", children: props.uploadLabel ?? t("standalone.file-upload.upload-modern") ?? "" }));
@@ -303,9 +309,9 @@ const ImageSelector = (inProps) => {
                             alignContent: "flex-start",
                             alignItems: "stretch",
                             justifyContent: "center",
-                        }, wrap: "nowrap", className: classes?.rootModern, onDrop: handleDrop, onDragOver: handleDragOver, children: [!props.readOnly && (_jsx(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper })), _jsx(ImageWrapper, { size: "grow", className: classes?.imgWrapper, onBlur: props.onBlur, "data-name": props.name, children: value ? (_jsxs(_Fragment, { children: [_jsx(Tooltip, { title: props.uploadLabel ??
+                        }, wrap: "nowrap", className: classes?.rootModern, onDrop: handleDrop, onDragOver: handleDragOver, children: [!props.readOnly && (_jsx(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper })), _jsx(ImageWrapper, { size: "grow", className: classes?.imgWrapper, onBlur: props.onBlur, "data-name": props.name, children: value || placeholder ? (_jsxs(_Fragment, { children: [_jsx(Tooltip, { title: props.uploadLabel ??
                                                 t("standalone.file-upload.upload-modern-dnd") ??
-                                                "", children: _jsx(PreviewModern, { src: src, alt: props.alt, onClick: handlePreviewDialog, className: classes?.previewModern }) }), _jsxs(ModernUploadControlsWrapper, { container: true, spacing: 1, children: [_jsx(Grid, { children: _jsx(Tooltip, { title: t("standalone.file-upload.upload-modern-btn"), children: _jsx(ModernUploadControlUpload, { ref: modernImageUploadRef, onClick: handleUpload, children: _jsx(UploadIcon, {}) }) }) }), captureEnabled && (_jsx(Grid, { children: _jsx(Tooltip, { title: t("standalone.file-upload.upload-modern-btn-capture.image"), children: _jsx(ModernUploadControlUpload, { onClick: handleUploadCapture, children: _jsx(CameraIcon, {}) }) }) }))] })] })) : (_jsx(ModernFullHeightBox, { sx: { px: 2 }, className: classes?.modernFullHeightBox, children: _jsxs(ModernFullHeightGrid, { container: true, onClick: handleUpload, sx: { flexDirection: "column" }, spacing: 0, className: classes?.modernFullHeightGrid, children: [_jsx(Grid, { container: true, sx: {
+                                                "", children: value ? (_jsx(PreviewModern, { src: src, alt: props.alt, onClick: handlePreviewDialog, className: classes?.previewModern })) : (_jsx(PreviewModern, { src: placeholder, alt: "", "aria-label": undefined, onClick: handleUpload, className: classes?.previewModern })) }), _jsxs(ModernUploadControlsWrapper, { container: true, spacing: 1, children: [_jsx(Grid, { children: _jsx(Tooltip, { title: t("standalone.file-upload.upload-modern-btn"), children: _jsx(ModernUploadControlUpload, { ref: modernImageUploadRef, onClick: handleUpload, children: _jsx(UploadIcon, {}) }) }) }), captureEnabled && (_jsx(Grid, { children: _jsx(Tooltip, { title: t("standalone.file-upload.upload-modern-btn-capture.image"), children: _jsx(ModernUploadControlUpload, { onClick: handleUploadCapture, children: _jsx(CameraIcon, {}) }) }) }))] })] })) : (_jsx(ModernFullHeightBox, { sx: { px: 2 }, className: classes?.modernFullHeightBox, children: _jsxs(ModernFullHeightGrid, { container: true, onClick: handleUpload, sx: { flexDirection: "column" }, spacing: 0, className: classes?.modernFullHeightGrid, children: [_jsx(Grid, { container: true, sx: {
                                                     flexDirection: "column",
                                                     justifyContent: "space-around",
                                                 }, wrap: "nowrap", size: "grow", children: _jsx(Grid, { children: readOnly ? (modernUploadLabel) : (_jsx(ModernUploadButton, { ref: setModernUploadButton, type: "button", name: props.name, className: classes?.modernUploadButton, children: modernUploadLabel })) }) }), _jsx(Grid, { children: _jsxs(Grid, { container: true, wrap: "nowrap", spacing: 0, sx: { justifyContent: "space-between" }, children: [_jsx(Grid, { children: _jsx(ModernFormatsLabel, { className: classes?.modernFormatsLabel, children: props.formatsLabel ??
@@ -313,7 +319,7 @@ const ImageSelector = (inProps) => {
                                                                     "" }) }), _jsx(Grid, { children: _jsx(ModernFormatIcon, { className: classes?.modernFormatIcon }) })] }) })] }) })) }, "image")] }) })] }));
     }
     else if (variant === "profile_picture") {
-        const image = value ? (_jsx(PfpImage, { src: src, className: classes?.pfpImg, alt: props.label })) : (_jsx(PfpImagePlaceholder, { className: classes?.pfpImgPlaceholder }));
+        const image = value ? (_jsx(PfpImage, { src: src, className: classes?.pfpImg, alt: props.label })) : placeholder ? (_jsx(PfpImage, { src: placeholder, className: classes?.pfpImg, alt: "" })) : (_jsx(PfpImagePlaceholder, { className: classes?.pfpImgPlaceholder }));
         return (_jsxs(PfpRoot, { onDrop: handleDrop, onDragOver: handleDragOver, className: combineClassNames([className, classes?.pfpRoot]), children: [_jsx(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper }), _jsx(PfpIconButton, { disabled: props.readOnly, onClick: captureEnabled ? handleUploadCapture : handleUpload, className: classes?.pfpIconBtn, size: "large", "aria-label": captureEnabled
                         ? t("standalone.file-upload.upload-capture.image")
                         : t("standalone.file-upload.upload"), children: image })] }));

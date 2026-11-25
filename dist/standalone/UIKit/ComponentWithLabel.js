@@ -10,7 +10,9 @@ const Label = styled(Typography, {
     name: "CcComponentWithLabel",
     slot: "label",
 })({
-    whiteSpace: "pre",
+    // wraps at spaces where the caption has less room than its text needs;
+    // keeps the line breaks of the text
+    whiteSpace: "pre-line",
 });
 const ComponentWithLabel = (inProps) => {
     let props = useThemeProps({ props: inProps, name: "CcComponentWithLabel" });

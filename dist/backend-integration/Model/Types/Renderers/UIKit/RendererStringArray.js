@@ -7,6 +7,9 @@ import useCCTranslations from "../../../../../utils/useCCTranslations";
 import addSlotAttributes from "../../../../../utils/internal/addSlotAttributes";
 /**
  * Renders text fields inside a group box
+ *
+ * A required field needs at least one entry: while the list is empty, its only
+ * input, the one for a new entry, is required; once it has entries, no input is.
  */
 class RendererStringArray extends TypeStringArray {
     props;
@@ -33,7 +36,10 @@ const RendererStringArrayComponent = (props) => {
     const { options, visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, autoFocus, id, messageId, describedBy, } = props;
     useMountLogging(RendererStringArrayComponent);
     const { t } = useCCTranslations();
-    const textField = (idx) => (_jsx(TextFieldWithHelp, { fullWidth: true, ...options, name: `${field}`, value: value[idx] ?? "", disabled: visibility.readOnly, required: visibility.required, onChange: (evt) => {
+    const textField = (idx) => (_jsx(TextFieldWithHelp, { fullWidth: true, ...options, name: `${field}`, value: value[idx] ?? "", disabled: visibility.readOnly, 
+        // A required list needs at least one entry, not every input filled: only the
+        // new entry of an empty list, then the list's only input, is required.
+        required: visibility.required && value.length === 0, onChange: (evt) => {
             const newValue = [...value];
             newValue[idx] = evt.target.value;
             handleChange(field, newValue);

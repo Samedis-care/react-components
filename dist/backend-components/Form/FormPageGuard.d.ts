@@ -11,10 +11,13 @@ export interface FormPageGuard {
      */
     enable: () => void;
     /**
-     * Lifts the history block, for a navigation the user has already confirmed (the form
-     * page's goBack). The block is set again by the form's next change of dirty state.
+     * Runs go, which leaves the form after the user has confirmed it (the form page's
+     * goBack): a navigation go starts while it runs passes without asking about this form's
+     * changes again. It still asks about the changes of other dirty forms it leaves. When go
+     * does not leave the form, the form stays guarded.
+     * @param go Starts the navigation, synchronously
      */
-    releaseHistoryBlock: () => void;
+    leave: (go: () => void) => void;
 }
 /**
  * The leave guard of the Form a form page is rendered in; null outside of a Form's page
@@ -22,18 +25,14 @@ export interface FormPageGuard {
 export declare const FormPageGuardContext: React.Context<FormPageGuard | null>;
 export interface UseFormPageGuardParams {
     /**
-     * The Form's disableRouting: every navigation leaves the form
-     */
-    disableRouting: boolean;
-    /**
      * Is the form read-only for a reason other than a save? Then it takes no guard.
      */
     readOnlyBesidesSaving: boolean;
     /**
-     * The Form's rendered dirty state, read once as the start value; the "dirty" event
-     * keeps the guard current from then on
+     * Does the Form hold unsaved changes (its rendered dirty || stagedDirty)? Read once as
+     * the start value; the "dirty" event keeps the guard current from then on
      */
-    dirty: boolean;
+    unsaved: boolean;
     /**
      * The Form's addEventListener
      */
@@ -53,15 +52,22 @@ export declare const FORM_PAGE_MOVE_STATE: Readonly<{
     formPageMove: true;
 }>;
 /**
- * The leave guard of a Form's unsaved changes: while the form is dirty, a navigation asks
- * "Leave form page?" (a navigation inside the form's Route passes, unless disableRouting, and
- * so does a move of the page marked with FORM_PAGE_MOVE_STATE),
+ * The leave guard of a Form's unsaved changes: while the form is dirty or, in flow mode,
+ * holds staged changes (FormContextData.stagedDirty), a navigation asks
+ * "Leave form page?" (a navigation that keeps the form's Route rendered at the same url
+ * passes, also for a disableRouting Form, and so does a move of the page marked with
+ * FORM_PAGE_MOVE_STATE),
  * closing the browser tab asks (UnsafeToLeave), and so does closing the FullFormDialog the
  * Form is in. A form that is read-only for a reason other than a save takes no guard.
  *
  * The Form holds it, because the changes are the Form's: once a form page has switched it on
  * (FormPageGuard.enable), it lasts until the Form unmounts, also while no form page is
  * mounted (a form page in a routed tab panel when another tab is open).
+ *
+ * The guards of all Forms in a Framework, those in pushed dialogs included, block the history
+ * together (the Framework's NavigationGuard): a navigation that leaves several dirty forms asks
+ * once, and after "Yes" the forms it did not leave stay guarded. A Form outside of a Framework
+ * blocks the history on its own.
  * @param params The Form's state
  * @returns The guard, which the Form provides to its pages through FormPageGuardContext
  */

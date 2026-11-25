@@ -1,6 +1,6 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useMemo, useState, } from "react";
-import { useDataGridColumnsWidthState, useDataGridProps, useDataGridState, } from "../DataGrid";
+import { useDataGridColumnsWidthState, useDataGridProps, useDataGridRootRef, useDataGridState, } from "../DataGrid";
 import { AutoSizer } from "react-virtualized-auto-sizer";
 import Cell, { CellContext } from "./Cell";
 import { applyColumnWidthLimits } from "./ColumnHeader";
@@ -13,6 +13,7 @@ import { useDataGridFiltersActive, useDataGridResetFilters, } from "../DataGridU
 import ActionButton from "../../UIKit/ActionButton";
 import { Clear as ResetFilterIcon } from "@mui/icons-material";
 import useDocumentBody from "../../../utils/useDocumentBody";
+import { focusDataGridSearch } from "../Header/SearchView";
 const CenteredStickyTypography = styled(CenteredTypography, {
     name: "CcDataGrid",
     slot: "centeredStickyTypography",
@@ -26,8 +27,8 @@ const CenteredStickyTypography = styled(CenteredTypography, {
 const SELECT_ROW_WIDTH = 57;
 const DEFAULT_COLUMN_WIDTH = 200;
 const STYLE_TOP_LEFT = { overflow: "hidden" };
-// the scrolling pane is a tab stop and draws its own focus ring; the object stays
-// because MultiGrid also spreads it over the no-content placeholder
+// the scrolling pane is a tab stop and MultiGrid draws its focus ring; the object
+// stays because MultiGrid also spreads it over the no-content placeholder
 const STYLE_BOTTOM_RIGHT = {};
 const Content = (props) => {
     const { rowsPerPage, columns, disableSelection, headerHeight: headerHeightOverride, globalScrollListener, } = props;
@@ -128,12 +129,20 @@ const Content = (props) => {
     }, [state.initialResize, width]);
     const filtersActive = useDataGridFiltersActive();
     const resetFilters = useDataGridResetFilters();
+    const gridRoot = useDataGridRootRef();
+    // "Clear filters" goes with the filters it clears. Focus moves to the (now
+    // empty) search field first, which stays while the grid reloads, so it
+    // doesn't fall to the page
+    const handleResetFilters = useCallback(() => {
+        focusDataGridSearch(gridRoot.current);
+        resetFilters();
+    }, [gridRoot, resetFilters]);
     const noContentRenderer = useCallback(() => (_jsx(_Fragment, { children: state.refreshData ? (_jsx(Loader, {})) : state.dataLoadError ? (_jsx(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h5", component: "div", role: "alert", children: state.dataLoadError.message })) : (_jsx(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h4", component: "div", children: _jsxs(Grid, { container: true, spacing: 2, sx: { flexDirection: "column" }, children: [_jsx(Grid, { role: "status", children: filtersActive
                             ? t("standalone.data-grid.content.no-data-filters")
-                            : t("standalone.data-grid.content.no-data") }), filtersActive && (_jsx(Grid, { children: _jsx(ActionButton, { onClick: resetFilters, fullWidth: false, icon: _jsx(ResetFilterIcon, {}), children: t("standalone.data-grid.content.no-data-reset-filters") }) }))] }) })) })), [
+                            : t("standalone.data-grid.content.no-data") }), filtersActive && (_jsx(Grid, { children: _jsx(ActionButton, { onClick: handleResetFilters, fullWidth: false, icon: _jsx(ResetFilterIcon, {}), children: t("standalone.data-grid.content.no-data-reset-filters") }) }))] }) })) })), [
         classes?.centeredStickyTypography,
         filtersActive,
-        resetFilters,
+        handleResetFilters,
         state.dataLoadError,
         state.refreshData,
         t,

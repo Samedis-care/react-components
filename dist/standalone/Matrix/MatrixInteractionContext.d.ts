@@ -47,6 +47,8 @@ export declare class MatrixInteractionStore {
     private to;
     private hoverRowKey;
     private hoverColumnKey;
+    /** Escape hid the add hint of the hovered cell, see dismissHint() */
+    private hintDismissed;
     /**
      * Publishes the current props to the store. Called by the grid on every
      * render, so a pointer event always sees the columns on screen.
@@ -83,13 +85,22 @@ export declare class MatrixInteractionStore {
     begin(rowKey: string, columnKey: string): void;
     /**
      * Moves the pointer onto a cell: extends (or shrinks) the range if one is
-     * being swept, and remembers the hover for the add hint.
+     * being swept, and remembers the hover for the add hint (and shows it
+     * again, if Escape hid it).
      * @remarks A range stops at the first cell canSelect rejects, so what is
      * highlighted is exactly what gets reported.
      */
     enter(rowKey: string, columnKey: string): void;
     /** The pointer left a cell. */
     leave(rowKey: string, columnKey: string): void;
+    /**
+     * Hides the add hint of the hovered cell (Escape), until the pointer
+     * enters another cell, or leaves this one and comes back.
+     * @remarks The hint appears on hover, and in overlay mode it lies on the
+     * cell's entries: it can be dismissed without moving the pointer, as
+     * Escape closes a tooltip (WCAG 1.4.13).
+     */
+    dismissHint(): void;
     /**
      * Reports one cell as a range, without a press.
      * @remarks For an affordance that is its own button (the add chip on a cell

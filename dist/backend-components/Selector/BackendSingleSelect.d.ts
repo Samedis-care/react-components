@@ -2,8 +2,42 @@ import React from "react";
 import { BaseSelectorData, BaseSelectorProps, SelectorLruOptions } from "../../standalone";
 import { ModelRecord, ModelUnknown } from "../../backend-integration/Model/Model";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
 export type BackendSingleSelectLruOptions<DataT extends BaseSelectorData> = Omit<SelectorLruOptions<DataT>, "loadData">;
-export interface BackendSingleSelectProps<M extends ModelUnknown> extends Omit<BaseSelectorProps<BaseSelectorData, false>, "onLoad" | "selected" | "onSelect" | "lru" | "displaySwitch" | "switchLabel" | "defaultSwitchValue"> {
+/**
+ * The switch of a backend single select. `switchLabel` is required while a
+ * `switchFilterName` shows the switch: the visible label is its accessible name.
+ */
+export type BackendSingleSelectSwitchProps = {
+    /**
+     * Whether the switch is on when the field mounts with `switchFilterName`; later
+     * changes are ignored, from then on the user sets it.
+     * @default false
+     */
+    defaultSwitchValue?: boolean;
+} & ({
+    /**
+     * Name of the filter a switch above the field sets, e.g. `"include_inactive"` for a
+     * "Show inactive" switch. With it the field shows the switch, and every search sends
+     * `additionalFilters: { [switchFilterName]: true }` to `model.index` while the switch
+     * is on (`false` while it is off), so toggling it reloads the options. A new name
+     * applies from the next search.
+     * @default undefined (no switch, searches send no additionalFilters)
+     */
+    switchFilterName?: undefined;
+    /**
+     * Label of the switch, which is also its accessible name: pass one with
+     * `switchFilterName`. Ignored without `switchFilterName`.
+     */
+    switchLabel?: React.ReactNode;
+} | {
+    switchFilterName: string;
+    /**
+     * Label of the switch: its visible text and its accessible name.
+     */
+    switchLabel: React.ReactNode;
+});
+export type BackendSingleSelectProps<M extends ModelUnknown> = DistributiveOmit<BaseSelectorProps<BaseSelectorData, false>, "onLoad" | "selected" | "onSelect" | "lru" | "displaySwitch" | "switchLabel" | "defaultSwitchValue"> & BackendSingleSelectSwitchProps & {
     /**
      * The model to use
      */
@@ -46,26 +80,6 @@ export interface BackendSingleSelectProps<M extends ModelUnknown> extends Omit<B
      */
     sort?: DataGridSortSetting[];
     /**
-     * Name of the filter a switch above the field sets, e.g. `"include_inactive"` for a
-     * "Show inactive" switch. With it the field shows the switch, and every search sends
-     * `additionalFilters: { [switchFilterName]: true }` to `model.index` while the switch
-     * is on (`false` while it is off), so toggling it reloads the options. A new name
-     * applies from the next search.
-     * @default undefined (no switch, searches send no additionalFilters)
-     */
-    switchFilterName?: string;
-    /**
-     * Label of the switch, which is also its accessible name: pass one with
-     * `switchFilterName`. Ignored without `switchFilterName`.
-     */
-    switchLabel?: React.ReactNode;
-    /**
-     * Whether the switch is on when the field mounts with `switchFilterName`; later
-     * changes are ignored, from then on the user sets it.
-     * @default false
-     */
-    defaultSwitchValue?: boolean;
-    /**
      * Initial data (model format) used for selected cache
      */
     initialData?: ModelRecord<M>[];
@@ -77,7 +91,8 @@ export interface BackendSingleSelectProps<M extends ModelUnknown> extends Omit<B
      * Load error event
      * @param error The error that has been raised while loading
      * @return string Label for entry which failed loading
-     * @return null To remove entry from selected entries
+     * @return null To remove the entry: `onSelect(null)`, unless `selected` changed
+     *         meanwhile (a pick, a clear) or the field has unmounted.
      * @remarks Without it, the entry is labelled "Unknown entry" if the backend did not
      *          return its record, else "Error while fetching data".
      */
@@ -95,12 +110,12 @@ export interface BackendSingleSelectProps<M extends ModelUnknown> extends Omit<B
      * Currently selected freeSolo value
      */
     selectedFreeSolo?: string | null;
-}
+};
 /**
  * Themable subset of BackendSingleSelectProps (used for theme defaultProps)
  * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)
  */
-export type BackendSingleSelectThemeProps = Omit<BackendSingleSelectProps<ModelUnknown>, "model" | "modelFetch" | "modelToSelectorData" | "selected" | "onSelect" | "initialData" | "lru" | "selectedFreeSolo" | "onSelectFreeSolo">;
+export type BackendSingleSelectThemeProps = DistributiveOmit<BackendSingleSelectProps<ModelUnknown>, "model" | "modelFetch" | "modelToSelectorData" | "selected" | "onSelect" | "initialData" | "lru" | "selectedFreeSolo" | "onSelectFreeSolo">;
 declare const BackendSingleSelect: <M extends ModelUnknown>(inProps: BackendSingleSelectProps<M>) => React.JSX.Element;
 declare const _default: typeof BackendSingleSelect;
 export default _default;

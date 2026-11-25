@@ -40,7 +40,7 @@ const ColumnHeaderContent = (props) => {
                 ? DataGridColumnHeaderFilterPopupId
                 : DataGridColumnHeaderFilterPopup;
     return (_jsxs(_Fragment, { children: [_jsxs(Grid, { container: true, sx: { justifyContent: "flex-start" }, wrap: "nowrap", children: [_jsx(DataGridColumnHeaderLabel, { className: classes?.columnHeaderLabel, children: _jsx(Tooltip, { title: props.headerName, children: _jsx("span", { children: typeof props.headerName === "string"
-                                    ? props.headerName.split("\n").map((text, index, arr) => (_jsxs(React.Fragment, { children: [text, index == arr.length - 1 ? undefined : _jsx("br", {})] }, text)))
+                                    ? props.headerName.split("\n").map((text, index, arr) => (_jsxs(React.Fragment, { children: [text, index == arr.length - 1 ? undefined : _jsx("br", {})] }, index)))
                                     : props.headerName }) }) }, "header"), _jsxs(DataGridColumnHeaderSortIcon, { className: classes?.columnHeaderSortIcon, children: [props.sort === -1 && _jsx(ArrowDownward, {}), props.sort === 1 && _jsx(ArrowUpward, {})] }), _jsx(Grid, { size: "grow", children: props.sort !== 0 && props.sortOrder?.toString() }), props.filterable && (_jsx(Grid, { children: _jsx(Tooltip, { title: t("standalone.data-grid.content.filter") || "", children: _jsx(DataGridColumnHeaderFilterButton, { className: combineClassNames([
                                     classes?.columnHeaderFilterButton,
                                     props.filter?.value1 &&

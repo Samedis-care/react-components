@@ -13,7 +13,11 @@ export const extractLazyCrudConnectorParams = (data) => {
         extraParams,
         field,
     };
-    return [params, otherProps];
+    // the props a union keeps apart stay apart: only the connector params are left out
+    return [
+        params,
+        otherProps,
+    ];
 };
 /**
  * The connector the hook keeps in the Form's custom state under `field`
@@ -21,14 +25,41 @@ export const extractLazyCrudConnectorParams = (data) => {
  *          sends the queue where the reads go, also from a control that mounted again
  */
 class FormLazyConnector extends LazyConnector {
+    getEndpoint;
+    onParentIdChange;
+    /**
+     * The parent record id the connector was built for, until onParentIdChange got it
+     */
+    unreportedParentId;
+    constructor(connector, fakeReads, onQueueChange, getEndpoint, onParentIdChange, parentId) {
+        super(connector, fakeReads, onQueueChange);
+        this.getEndpoint = getEndpoint;
+        this.onParentIdChange = onParentIdChange;
+        this.unreportedParentId = parentId;
+    }
     /**
      * Calls onParentIdChange with a parent record id, then returns getEndpoint(id), as the
      * connector was built with
      */
-    getParentEndpoint;
-    constructor(connector, fakeReads, onQueueChange, getParentEndpoint) {
-        super(connector, fakeReads, onQueueChange);
-        this.getParentEndpoint = getParentEndpoint;
+    getParentEndpoint(id) {
+        this.unreportedParentId = null;
+        if (this.onParentIdChange)
+            this.onParentIdChange(id);
+        return this.getEndpoint(id);
+    }
+    /**
+     * Calls onParentIdChange with the parent record id the connector was built for, unless
+     * it got an id already
+     * @remarks Called by the effects of the control that mounts with the connector, so the
+     *          callback runs once per connector and never during render
+     */
+    reportParentId() {
+        const id = this.unreportedParentId;
+        if (id === null)
+            return;
+        this.unreportedParentId = null;
+        if (this.onParentIdChange)
+            this.onParentIdChange(id);
     }
 }
 /**
@@ -36,21 +67,19 @@ class FormLazyConnector extends LazyConnector {
  * @param params The hook's params
  * @param onQueueChange Called with the queue whenever it changes
  * @throws "No default connector set" without params.getConnector and a default API connector
+ * @remarks Runs during render: it calls getEndpoint, getConnector and configureConnector,
+ *          but not onParentIdChange (see FormLazyConnector.reportParentId)
  */
 const buildConnector = (params, onQueueChange) => {
     const { getEndpoint, initialId, configureConnector, onParentIdChange, extraParams, } = params;
     const getConnector = (params.getConnector ?? DefaultConnector.getApi);
     if (!getConnector)
         throw new Error("No default connector set");
-    const getParentEndpoint = (id) => {
-        if (onParentIdChange)
-            onParentIdChange(id);
-        return getEndpoint(id);
-    };
-    const connector = getConnector(getParentEndpoint(initialId ?? "null"), extraParams);
+    const parentId = initialId ?? "null";
+    const connector = getConnector(getEndpoint(parentId), extraParams);
     if (configureConnector)
         configureConnector(connector);
-    return new FormLazyConnector(connector, initialId === null, onQueueChange, getParentEndpoint);
+    return new FormLazyConnector(connector, initialId === null, onQueueChange, getEndpoint, onParentIdChange, parentId);
 };
 /**
  * Gives a Crud* control (FormCrudMultiSelect, FormCrudFileUpload, FormCrudMultiImage, …) a
@@ -63,6 +92,8 @@ const buildConnector = (params, onQueueChange) => {
  *   onParentIdChange, extraParams, getConnector, configureConnector or field changes
  *   neither the reads nor the save. Another collection takes another field and a new
  *   mount of the control, e.g. `key={field}`.
+ * - getEndpoint, getConnector and configureConnector run while the control renders, so they
+ *   must not set state; onParentIdChange runs after the control mounted and on every save.
  * - While the queue holds writes the Form is dirty (a custom dirty flag named `field`).
  * - A Form given another record (id or model) starts over: the control mounts again with a
  *   new connector for that record, and a queue left for the previous record is dropped,
@@ -73,6 +104,9 @@ const buildConnector = (params, onQueueChange) => {
  *   by the next save.
  * - With onlySubmitMounted an unmounted control's queue is neither sent nor counted as
  *   dirty, like the value of an unmounted model field, until the control mounts again.
+ * - What counts is the onlySubmitMounted the Form has when the control unmounts. A mounted
+ *   control's queue keeps the Form dirty and is sent by the next save, also when the Form's
+ *   onlySubmitMounted changes meanwhile (its prop, or a flow stage config).
  * - Flow mode with onlySubmitMounted: a submit, such as the one goToStage makes before it
  *   changes the stage, stages the queue of every mounted control, like the values of the
  *   mounted fields. The queue stays staged until it is empty (sent or undone). A control
@@ -96,14 +130,36 @@ const useLazyCrudConnector = (params) => {
                 });
     }
     const connector = uploadConnector.current;
+    // the parent id the connector was built for goes to onParentIdChange once the control
+    // mounted, not while it renders: a state update there would update another component
+    // during render. Once per connector, also when StrictMode runs the effect again.
+    useEffect(() => {
+        connector.reportParentId();
+    }, [connector]);
     /**
      * Has a flow form's submit staged the queue since the control mounted?
      * @remarks Set by the submit (the pre-submit handler below), cleared once the queue is
      *          empty (sent or undone)
      */
     const staged = useRef(false);
+    /**
+     * The Form's onlySubmitMounted as of the control's latest render
+     * @remarks Read when the control unmounts, not when it changes: while the control is
+     *          mounted its queue counts whatever the value, and the value the Form has when
+     *          the control unmounts decides what becomes of the queue
+     */
+    const onlySubmitMountedRef = useRef(onlySubmitMounted);
+    onlySubmitMountedRef.current = onlySubmitMounted;
+    /**
+     * Does an unmount leave the queue to be saved, and counted as dirty?
+     * @remarks Without onlySubmitMounted always. With it only a staged one: a stage that is
+     *          left was submitted first, a control hidden within its stage was not
+     */
+    const savedWhenUnmounted = useCallback(() => !onlySubmitMountedRef.current ||
+        (staged.current && !connector.isQueueEmpty()), [connector]);
     // the connector's queue change handler belongs to the mounted control: it keeps the
-    // Form's dirty flag and the staged state
+    // Form's dirty flag and the staged state. The dependencies are pinned or stable, so this
+    // runs when the control mounts and unmounts, not when onlySubmitMounted changes.
     useEffect(() => {
         connector.setQueueChangeHandler((queue) => {
             if (queue.length === 0)
@@ -112,7 +168,12 @@ const useLazyCrudConnector = (params) => {
         });
         // a queue kept from an earlier mount is listed again, and the next save sends it
         setCustomFieldDirty(field, !connector.isQueueEmpty());
-    }, [connector, setCustomFieldDirty, field]);
+        return () => {
+            // a queue the save leaves out does not keep the Form dirty either
+            if (!savedWhenUnmounted())
+                setCustomFieldDirty(field, false);
+        };
+    }, [connector, setCustomFieldDirty, field, savedWhenUnmounted]);
     // in flow mode every submit stages the values of the mounted fields (goToStage makes one
     // before it changes the stage), and with them the queue of a mounted lazy control
     useEffect(() => {
@@ -125,12 +186,6 @@ const useLazyCrudConnector = (params) => {
             removePreSubmitHandler(field);
         };
     }, [flowEngine, field, setPreSubmitHandler, removePreSubmitHandler]);
-    /**
-     * Does an unmount with onlySubmitMounted leave the queue to be saved anyway?
-     * @remarks Only a staged one: a stage that is left was submitted first, a control hidden
-     *          within its stage was not
-     */
-    const savedWhenUnmounted = useCallback(() => staged.current && !connector.isQueueEmpty(), [connector]);
     // set post submit handler for lazy connector
     useEffect(() => {
         setCustomState(field, () => connector);
@@ -142,9 +197,8 @@ const useLazyCrudConnector = (params) => {
         };
         setPostSubmitHandler(field, submitHandler);
         return () => {
-            if (onlySubmitMounted && !savedWhenUnmounted()) {
+            if (!savedWhenUnmounted())
                 removePostSubmitHandler(field);
-            }
         };
     }, [
         connector,
@@ -152,19 +206,8 @@ const useLazyCrudConnector = (params) => {
         setCustomState,
         setPostSubmitHandler,
         removePostSubmitHandler,
-        onlySubmitMounted,
         savedWhenUnmounted,
     ]);
-    // mark not dirty when unmounted and onlySubmitMounted
-    useEffect(() => {
-        if (!onlySubmitMounted)
-            return;
-        return () => {
-            if (savedWhenUnmounted())
-                return;
-            setCustomFieldDirty(field, false);
-        };
-    }, [field, onlySubmitMounted, setCustomFieldDirty, savedWhenUnmounted]);
     return { connector };
 };
 export default useLazyCrudConnector;

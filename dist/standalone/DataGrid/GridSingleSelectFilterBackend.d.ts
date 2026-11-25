@@ -3,7 +3,8 @@ import { GridSize } from "@mui/material/Grid";
 import { Breakpoint } from "@mui/material/styles";
 import BackendSingleSelect, { BackendSingleSelectProps } from "../../backend-components/Selector/BackendSingleSelect";
 import { ModelUnknown } from "../../backend-integration";
-export interface GridSingleSelectFilterBackendProps<M extends ModelUnknown> extends Omit<BackendSingleSelectProps<M>, "classes" | "className" | "disableClearable"> {
+import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+export type GridSingleSelectFilterBackendProps<M extends ModelUnknown> = DistributiveOmit<BackendSingleSelectProps<M>, "classes" | "className" | "disableClearable"> & {
     /**
      * Optional label for the filter
      */
@@ -13,7 +14,9 @@ export interface GridSingleSelectFilterBackendProps<M extends ModelUnknown> exte
      */
     onSelect: NonNullable<BackendSingleSelectProps<M>["onSelect"]>;
     /**
-     * Is the grid filter rendered in a dialog?
+     * Whether the filter is in the filter panel: pass
+     * IDataGridFilterBarProps.inDialog. The panel shows the same selector
+     * as the bar, sized by dialogBreakpoints instead of barBreakpoints.
      */
     dialog: boolean;
     /**
@@ -28,7 +31,7 @@ export interface GridSingleSelectFilterBackendProps<M extends ModelUnknown> exte
      * Breakpoints used in filter bar
      */
     barBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
-}
+};
 export type GridSingleSelectFilterBackendClassKey = "dialogRoot" | "barRoot";
 export declare const DataGridCustomFilterSingleBackend: typeof BackendSingleSelect;
 declare const GridSingleSelectFilterBackend: <M extends ModelUnknown>(inProps: GridSingleSelectFilterBackendProps<M>) => React.JSX.Element;

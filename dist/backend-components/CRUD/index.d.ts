@@ -42,18 +42,39 @@ export interface CrudProps<M extends ModelUnknown> {
         customProps?: FormProps<M, CrudFormProps>["customProps"];
     };
     /**
-     * The renderer function which returns the form component
-     * @remarks Can be set to undefined to only render the Grid
+     * The page component of the record Form; it gets
+     * `PageProps<M, CrudFormProps>`.
+     * Pass `{undefined}` for a list without a record page: the grid then has
+     * no Edit/View, and no default New (it would open the create form);
+     * gridProps.onAddNew and gridProps.forceAddNew still apply.
      */
     children: FormProps<M, CrudFormProps>["children"] | undefined;
     /**
-     * The properties to pass to grid
-     * @remarks onAddNew can be used to overCrudImportTypewrite the new button action
+     * The properties to pass to the grid (BackendDataGrid, or gridComponent)
+     * @remarks `onAddNew` replaces what the grid's New does; see onAddNew and
+     *          forceAddNew below
      */
     gridProps: Omit<BackendDataGridProps<M>, "model" | "enableDelete" | "disableExport" | "onEdit" | "forceRefreshToken" | "onAddNew"> & Pick<Partial<BackendDataGridProps<M>>, never> & {
+        /**
+         * What the grid's New does, for users with newPermission (users
+         * without it get newPermissionHint instead), with or without a record
+         * page (`children`):
+         * - not set: New opens the create form ("new"), and there is no New
+         *   without a record page;
+         * - a function: New calls it with `showNew`, which opens the create
+         *   form (call it only with a record page);
+         * - a string: a disabled New with this string as its tooltip;
+         * - an array: one button per entry, whose onClick gets `showNew`
+         *   (`onClick: undefined` disables the button).
+         * Any other value throws "invalid type" while rendering.
+         */
         onAddNew?: ((showNew: () => void) => void) | string | (Omit<IDataGridAddButton, "onClick"> & {
             onClick: ((showNew: () => void) => void) | undefined;
         })[];
+        /**
+         * Passed to the grid's onAddNew as it is, without the newPermission
+         * check; replaces onAddNew and newPermissionHint when set
+         */
         forceAddNew?: BackendDataGridProps<M>["onAddNew"];
     };
     /**
@@ -88,11 +109,14 @@ export interface CrudProps<M extends ModelUnknown> {
      */
     editPermissionHint?: string;
     /**
-     * The record create permission
+     * Creating records: the grid's New (see gridProps.onAddNew), the "new"
+     * view and the importer
      */
     newPermission: Permission;
     /**
-     * Hint as to why create new permissions are not granted
+     * For users without newPermission: the grid shows a disabled New with this
+     * text as its tooltip. Without it they get no New. Users with
+     * newPermission never see it.
      */
     newPermissionHint?: string;
     /**
