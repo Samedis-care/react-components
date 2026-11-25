@@ -75,6 +75,10 @@ describe("a failed load", () => {
 		);
 		return await import("../../src/standalone");
 	};
+	// how long a test waits for the fresh library's flags chunk to fail or to load: one
+	// module per flag, which takes longer than waitFor's default second under a full
+	// parallel run (and less than the test's own 30s)
+	const chunkSettled = { timeout: 20000 };
 	afterEach(() => {
 		vi.doUnmock("../../src/standalone/CountryFlags/flags");
 		vi.restoreAllMocks();
@@ -100,11 +104,13 @@ describe("a failed load", () => {
 				<CountryFlag code="JP" />
 			</>,
 		);
-		await waitFor(() =>
-			expect(error).toHaveBeenCalledWith(
-				"[Components-Care] [CountryFlag] The flags failed to load:",
-				expect.any(Error),
-			),
+		await waitFor(
+			() =>
+				expect(error).toHaveBeenCalledWith(
+					"[Components-Care] [CountryFlag] The flags failed to load:",
+					expect.any(Error),
+				),
+			chunkSettled,
 		);
 		expect(error).toHaveBeenCalledTimes(1);
 		expect(first.container.querySelectorAll("span")).toHaveLength(2);
@@ -113,11 +119,13 @@ describe("a failed load", () => {
 
 		offline.current = false;
 		const second = render(<CountryFlag code="JP" />);
-		await waitFor(() =>
-			expect(second.container.querySelector("img")).toHaveAttribute(
-				"src",
-				"data:image/svg+xml,JP",
-			),
+		await waitFor(
+			() =>
+				expect(second.container.querySelector("img")).toHaveAttribute(
+					"src",
+					"data:image/svg+xml,JP",
+				),
+			chunkSettled,
 		);
 		expect(error).toHaveBeenCalledTimes(1);
 	});

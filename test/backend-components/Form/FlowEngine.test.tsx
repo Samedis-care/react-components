@@ -910,6 +910,10 @@ describe("FlowEngine: bugs", () => {
 				</React.Profiler>
 			);
 		});
+		// the Framework applies its language once moment's locale has loaded, which renders
+		// every translated text again (the button's label too); under load that comes after
+		// the first keystroke. It sets <html lang> then: wait for that before counting.
+		document.documentElement.lang = "";
 		const { sink, container } = setup({
 			a: () => (
 				<>
@@ -919,6 +923,9 @@ describe("FlowEngine: bugs", () => {
 			),
 		});
 		await loaded(sink);
+		await waitFor(() => expect(document.documentElement.lang).not.toBe(""), {
+			timeout: 10000,
+		});
 		const input = inputOf(container, "title");
 		fireEvent.change(input, { target: { value: "x" } });
 		await settle();

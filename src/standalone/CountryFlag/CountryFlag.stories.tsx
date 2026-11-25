@@ -30,13 +30,19 @@ const decoded = (imgs: HTMLImageElement[]) =>
 		{ timeout: 30000 },
 	);
 
+/**
+ * how long a story waits for the flags: the first flag shown loads the flags chunk, one
+ * module per flag, which takes longer than waitFor's default second under a full run
+ */
+const FLAGS_LOADED = { timeout: 15000 };
+
 /** the flag's image in an element, once the flags have loaded */
 const findImg = (element: Element) =>
 	waitFor(async () => {
 		const img = element.querySelector("img");
 		await expect(img).not.toBeNull();
 		return img!;
-	});
+	}, FLAGS_LOADED);
 
 /** the outline of an element, as `<style> <width> <color>` */
 const outlineOf = (element: Element) => {
@@ -124,7 +130,11 @@ export const Named: Story = {
 		},
 	},
 	play: async ({ canvas }) => {
-		const img = await canvas.findByRole("img", { name: "Germany" });
+		const img = await canvas.findByRole(
+			"img",
+			{ name: "Germany" },
+			FLAGS_LOADED,
+		);
 		await expect(img).toHaveAttribute("src", (await loadCountryFlags()).DE);
 	},
 };
@@ -177,8 +187,10 @@ export const Issue3466Item8EveryFlagFitsItsBox: Story = {
 		);
 		await expect(boxes).toHaveLength(CODES.length);
 		// the flags load with the first one shown
-		await waitFor(() =>
-			expect(boxes.filter((box) => !box.querySelector("img"))).toEqual([]),
+		await waitFor(
+			() =>
+				expect(boxes.filter((box) => !box.querySelector("img"))).toEqual([]),
+			FLAGS_LOADED,
 		);
 		const imgs = boxes.map((box) => box.querySelector("img")!);
 		await decoded(imgs);

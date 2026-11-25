@@ -167,6 +167,12 @@ const makeNoisePhoto = async (name: string, size = 400): Promise<File> => {
 };
 
 /**
+ * How long a story waits for a picked image: decoding and processing it can take longer
+ * than waitFor's default second on a loaded machine (a full run, CI)
+ */
+const IMAGE_PROCESSED = { timeout: 10000 };
+
+/**
  * Size limits per file and for all files together. A selection outside them is refused
  * as a whole, with a message naming the file and the limit. A photo counts at the size
  * it is uploaded with, after down-scaling.
@@ -209,7 +215,9 @@ export const SizeLimits: FUGStory = {
 		await expect(photo.size).toBeGreaterThan(100 * 1024);
 		await userEvent.upload(input, photo);
 		// listed: what is uploaded is the 32 px version
-		await expect(await canvas.findByText("photo.png")).toBeInTheDocument();
+		await expect(
+			await canvas.findByText("photo.png", undefined, IMAGE_PROCESSED),
+		).toBeInTheDocument();
 		await expect(canvas.getByRole("alert").textContent).toBe("");
 
 		await userEvent.upload(

@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, fn, userEvent, waitFor, within } from "storybook/test";
+import { expect, fn, mocked, userEvent, waitFor, within } from "storybook/test";
 import {
 	Box,
 	Button,
@@ -181,6 +181,15 @@ export const AsyncButtonHandlerStory: StoryObj<AsyncButtonHandlerArgs> = {
 	render: (args) => <AsyncConfirmDialogDemo onYes={args.onYes} />,
 	play: async ({ args }) => {
 		const body = within(document.body);
+		// the handler runs until the play function ends it: the 300ms of the canvas can
+		// pass between the two clicks on a loaded machine, and the second one starts it again
+		let finish = () => {};
+		mocked(args.onYes).mockImplementationOnce(
+			() =>
+				new Promise<void>((resolve) => {
+					finish = resolve;
+				}),
+		);
 
 		await userEvent.click(
 			body.getByRole("button", { name: "Open Async Confirm Dialog" }),
@@ -196,6 +205,7 @@ export const AsyncButtonHandlerStory: StoryObj<AsyncButtonHandlerArgs> = {
 		await expect(args.onYes).toHaveBeenCalledTimes(1);
 
 		// dialog closes once the handler resolves
+		finish();
 		await waitFor(() => expect(body.queryByRole("dialog")).toBeNull(), {
 			timeout: 3000,
 		});

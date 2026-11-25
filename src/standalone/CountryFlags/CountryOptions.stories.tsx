@@ -88,6 +88,12 @@ export default meta;
 
 type Story = StoryObj<CountrySelectArgs>;
 
+/**
+ * how long a story waits for an option's flag: the first flag shown loads the flags chunk,
+ * one module per flag, which takes longer than waitFor's default second under a full run
+ */
+const FLAGS_LOADED = { timeout: 15000 };
+
 /** the names of the listed options, in list order */
 const optionNames = () =>
 	within(document.body)
@@ -116,7 +122,7 @@ export const German: Story = {
 			const img = option.querySelector("img");
 			await expect(img).not.toBeNull();
 			return img;
-		});
+		}, FLAGS_LOADED);
 		await expect(flag).toHaveAttribute("src", (await loadCountryFlags()).AT);
 		await expect(flag).toHaveAttribute("alt", "");
 		await userEvent.keyboard("{ArrowDown}{Enter}");
@@ -168,7 +174,7 @@ export const Issue3466Item8FlagsKeepTheirShape: Story = {
 			const img = option.querySelector("img");
 			await expect(img?.naturalWidth).toBeGreaterThan(0);
 			return img!;
-		});
+		}, FLAGS_LOADED);
 		// Japan's flag is 3:2
 		await expect(flagLook(optionFlag)).toBe(`solid 1px ${divider} 24x16`);
 		await userEvent.keyboard("{ArrowDown}{Enter}");
@@ -202,7 +208,7 @@ export const Issue3466Item7EveryIsoCountry: Story = {
 			await waitFor(async () => {
 				const img = option.querySelector("img");
 				await expect(img?.naturalWidth).toBeGreaterThan(0);
-			});
+			}, FLAGS_LOADED);
 		}
 	},
 };
