@@ -23,6 +23,7 @@ class RendererImage extends TypeImage {
 			warningMsg,
 			dirty,
 		} = params;
+		const placeholder = this.getPlaceholder(params.values);
 
 		if (visibility.disabled) return <></>;
 		if (visibility.hidden) {
@@ -44,7 +45,7 @@ class RendererImage extends TypeImage {
 					<ImageSelector
 						name={field}
 						value={value || ""}
-						placeholder={this.params?.placeholder}
+						placeholder={placeholder}
 						label={label}
 						dirty={dirty}
 						readOnly={visibility.readOnly}
@@ -72,9 +73,9 @@ class RendererImage extends TypeImage {
 			"backend-integration.model.types.renderers.image.not-set",
 		);
 		const content =
-			value || this.params?.placeholder ? (
+			value || placeholder ? (
 				<ObjectUrlImage
-					src={value || (this.params?.placeholder ?? "")}
+					src={value || (placeholder ?? "")}
 					// the placeholder stands for a missing picture, so it says so instead
 					// of carrying the label a stored picture has
 					alt={value ? (label ?? "") : notSet}
