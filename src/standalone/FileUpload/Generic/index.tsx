@@ -4,7 +4,6 @@ import React, {
 	useCallback,
 	useEffect,
 	useImperativeHandle,
-	useLayoutEffect,
 	useRef,
 } from "react";
 import {
@@ -34,6 +33,7 @@ import useDropZone from "../../../utils/useDropZone";
 import useRefState from "../../../utils/useRefState";
 import { isImageLoadError } from "../../../utils/ImageLoadError";
 import { captureError } from "../../../framework/ErrorReporting";
+import useFileActionButtonFocus from "./useFileActionButtonFocus";
 
 export interface FileUploadProps {
 	/**
@@ -247,6 +247,11 @@ export interface FileUploadRendererProps extends Omit<
 	inputRef: React.MutableRefObject<HTMLInputElement | null>;
 	/**
 	 * The current files
+	 * @remarks Key each file's element by something that stays with the file while files
+	 *          before it leave the list: its record id, or its name and how many files of
+	 *          that name come before it, as the built-in variants do. A key by position
+	 *          builds the files after a removed one anew, which takes the keyboard focus
+	 *          off their remove buttons (see useFileActionButtonFocus).
 	 */
 	files: FileData[];
 	/**
@@ -254,8 +259,10 @@ export interface FileUploadRendererProps extends Omit<
 	 * @param file The file to remove
 	 * @remarks A picked file leaves the list, and its remove button with it. The built-in
 	 *          variants then move keyboard focus to the next file's remove or restore
-	 *          button, or else to the upload control; a custom variant moves it itself (see
-	 *          `FileProps.actionButtonRef`).
+	 *          button, after the last file to the previous one, and once no file's button
+	 *          is left to the upload control. A custom variant gets the same with
+	 *          useFileActionButtonFocus, whose refs it passes to its FilePreviews as
+	 *          `actionButtonRef`.
 	 */
 	removeFile: (file: FileData) => void;
 	/**
@@ -368,6 +375,26 @@ const removeFiles = (
 				? [{ ...file, delete: true }]
 				: [],
 	);
+
+/**
+ * React keys for the listed files that stay with their files while other files leave
+ * @param files The list
+ * @returns A key per file: its name, and how many files of that name come before it
+ * @remarks A key by position changes for every file after one that leaves, which builds
+ *          their FilePreview anew and takes the keyboard focus off a remove button there.
+ *          CrudFileUpload with a LazyConnector drops a removed queued upload a render
+ *          after its button went, when the focus is on the next file's button already
+ *          (see useFileActionButtonFocus).
+ */
+const getFileKeys = (files: FileData[]): string[] => {
+	const seen = new Map<string, number>();
+	return files.map((data) => {
+		const name = data?.file.name ?? "";
+		const before = seen.get(name) ?? 0;
+		seen.set(name, before + 1);
+		return `${before}:${name}`;
+	});
+};
 
 /**
  * The size of what a file uploads, in bytes
@@ -876,42 +903,11 @@ const FileUpload = (
 	);
 
 	// Keyboard focus on a file's remove or restore button that goes away, as it does when a
-	// removed pick leaves the list, moves on to the next file's button, or else to the
-	// upload control, instead of falling to the page. One ref callback per position, so
-	// that React calls it only when the button at that position changes.
-	const actionButtonsRef = useRef<(HTMLButtonElement | null)[]>([]);
-	const actionButtonRefsRef = useRef<
-		((elem: HTMLButtonElement | null) => void)[]
-	>([]);
-	const refocusFromRef = useRef<number | null>(null);
+	// removed pick leaves the list, moves on to another file's button, or else to the
+	// upload control, instead of falling to the page. Unused by a custom variant, which
+	// calls the hook itself.
 	const uploadControlRef = useRef<HTMLButtonElement | null>(null);
-	const getActionButtonRef = useCallback((index: number) => {
-		const refs = actionButtonRefsRef.current;
-		refs[index] ??= (elem: HTMLButtonElement | null) => {
-			const buttons = actionButtonsRef.current;
-			const prev = buttons[index];
-			buttons[index] = elem;
-			// React detaches a ref before it removes the element, so the focus is still on it here
-			if (!elem && prev && prev.ownerDocument.activeElement === prev) {
-				refocusFromRef.current = index;
-			}
-		};
-		return refs[index];
-	}, []);
-	useLayoutEffect(() => {
-		const index = refocusFromRef.current;
-		if (index == null) return;
-		refocusFromRef.current = null;
-		const target =
-			actionButtonsRef.current.slice(index).find((btn) => btn != null) ??
-			uploadControlRef.current;
-		if (!target) return;
-		// only take over focus that was lost with the button, never move it away from elsewhere
-		const active = target.ownerDocument.activeElement;
-		if (active && active !== target.ownerDocument.body && active.isConnected)
-			return;
-		target.focus();
-	});
+	const getActionButtonRef = useFileActionButtonFocus(uploadControlRef);
 	const { handleDrop, handleDragOver, dragging } = useDropZone(
 		readOnly ? undefined : processFiles,
 	);
@@ -944,7 +940,9 @@ const FileUpload = (
 			removeFile,
 			restoreFile,
 		});
-	} else if (variant === "classic") {
+	}
+	const fileKeys = getFileKeys(files);
+	if (variant === "classic") {
 		return (
 			<StyledGroupBox
 				{...slotProps?.root}
@@ -1009,7 +1007,7 @@ const FileUpload = (
 													? data.file.downloadLink
 													: undefined
 											}
-											key={`${index}-${data.file.name}`}
+											key={fileKeys[index]}
 											size={previewSize}
 											preview={previewImages ? data.preview : undefined}
 											disabled={data.delete || false}
@@ -1129,7 +1127,7 @@ const FileUpload = (
 															? data.file.downloadLink
 															: undefined
 													}
-													key={`${index}-${data.file.name}`}
+													key={fileKeys[index]}
 													size={previewSize}
 													preview={previewImages ? data.preview : undefined}
 													disabled={data.delete || false}

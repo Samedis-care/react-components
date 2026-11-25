@@ -6,7 +6,12 @@ import { Button } from "@mui/material";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
 import type ApiConnector from "../../backend-integration/Connector/ApiConnector";
 
-import type { FileUploadDispatch } from "../../standalone/FileUpload/Generic";
+import type {
+	FileUploadDispatch,
+	FileUploadRendererProps,
+} from "../../standalone/FileUpload/Generic";
+import FilePreview from "../../standalone/FileUpload/Generic/File";
+import { useFileActionButtonFocus } from "../../standalone/FileUpload";
 import { Framework } from "../../framework";
 import CrudFileUpload, { BackendFileMeta } from "./CrudFileUpload";
 import CrudMultiImage, { BackendMultiImageImage } from "./CrudMultiImage";
@@ -561,6 +566,138 @@ export const Issue3511Item17FailedLoadKeepsFieldLabel: StoryObj = {
 		const field = canvas.getByRole("group", { name: "Attachments" });
 		await expect(field).toContainElement(alert);
 		await expect(field).not.toHaveAttribute("aria-busy");
+	},
+};
+
+/**
+ * A custom variant as an app writes one: the files as a compact list without a restore
+ * button, keyed by record id, and its own upload button for after the last file
+ * (useFileActionButtonFocus)
+ */
+const CustomRecordListVariant = (props: FileUploadRendererProps) => {
+	const { files, label, previewSize, readOnly, handleUpload, removeFile } =
+		props;
+	const uploadRef = useRef<HTMLButtonElement>(null);
+	const getActionButtonRef = useFileActionButtonFocus(uploadRef);
+	return (
+		<div role={"group"} aria-label={label}>
+			<Button
+				ref={uploadRef}
+				variant={"outlined"}
+				onClick={() => handleUpload()}
+			>
+				Add files
+			</Button>
+			{files.map((data, index) => (
+				<FilePreview
+					// the record id stays with the file while files before it leave; a pick
+					// is replaced by its record as soon as its upload is queued
+					key={
+						"id" in data.file
+							? `id:${String(data.file.id)}`
+							: `pick:${data.file.name}`
+					}
+					name={data.file.name}
+					mimeType={data.file.type}
+					size={previewSize}
+					disabled={!!data.delete}
+					onRemove={
+						readOnly || data.preventDelete ? undefined : () => removeFile(data)
+					}
+					actionButtonRef={getActionButtonRef(index)}
+					variant={"compact-list"}
+				/>
+			))}
+		</div>
+	);
+};
+
+/**
+ * Two fields behind LazyConnectors that each have four uploads queued (a.txt to d.txt), as
+ * a form does after four picks: a custom variant and the classic one
+ */
+const LazyRemovalFocusStory = () => {
+	const makeLazy = () => {
+		const lazy = new LazyConnector(
+			new MockConnector(fileConnectorData) as unknown as ApiConnector,
+			false,
+		);
+		for (const name of ["a.txt", "b.txt", "c.txt", "d.txt"])
+			lazy.create({ name, type: "text/plain", downloadLink: "#" }, undefined);
+		return lazy;
+	};
+	const customLazy = useMemo(makeLazy, []);
+	const classicLazy = useMemo(makeLazy, []);
+	return (
+		<>
+			<CrudFileUpload
+				connector={customLazy}
+				errorComponent={DefaultErrorComponent}
+				serialize={serialize}
+				deserialize={deserialize}
+				previewSize={24}
+				variant={CustomRecordListVariant}
+				label={"Custom"}
+			/>
+			<CrudFileUpload
+				connector={classicLazy}
+				errorComponent={DefaultErrorComponent}
+				serialize={serialize}
+				deserialize={deserialize}
+				previewSize={64}
+				label={"Classic"}
+			/>
+		</>
+	);
+};
+
+/**
+ * FOLLOWUP-FILE-UPLOAD-CUSTOM-FOCUS: with a LazyConnector, removing a queued upload takes two
+ * renders. The removal is queued first, which takes the file's remove button (focus moves to
+ * the next file's), and the file leaves a render later, once the upload is cancelled. Focus
+ * stays on the next file's button then, in a custom variant keyed by record id (top) and in
+ * the built-in ones (bottom), which key by name.
+ */
+export const FollowupLazyRemovalKeepsFocus: StoryObj = {
+	name: "CrudFileUpload — keyboard focus when a queued upload is removed",
+	parameters: AXE_GATE,
+	render: () => <LazyRemovalFocusStory />,
+	play: async ({ canvas, userEvent }) => {
+		for (const label of ["Custom", "Classic"]) {
+			const field = within(
+				await canvas.findByRole("group", { name: label }, { timeout: 10000 }),
+			);
+			await field.findByRole(
+				"button",
+				{ name: "Remove d.txt" },
+				{ timeout: 10000 },
+			);
+			/** Removes the file whose button has the focus, and waits until it is gone */
+			const removeFocused = async (name: string) => {
+				await userEvent.keyboard("{Enter}");
+				await waitFor(async () => {
+					await expect(field.queryByText(name)).toBe(null);
+				});
+			};
+
+			field.getByRole("button", { name: "Remove b.txt" }).focus();
+			await removeFocused("b.txt");
+			await expect(
+				field.getByRole("button", { name: "Remove c.txt" }),
+				label,
+			).toHaveFocus();
+			await removeFocused("c.txt");
+			await expect(
+				field.getByRole("button", { name: "Remove d.txt" }),
+				label,
+			).toHaveFocus();
+			// the last file: back to the previous one
+			await removeFocused("d.txt");
+			await expect(
+				field.getByRole("button", { name: "Remove a.txt" }),
+				label,
+			).toHaveFocus();
+		}
 	},
 };
 

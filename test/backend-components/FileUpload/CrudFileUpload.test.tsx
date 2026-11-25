@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, beforeAll, vi } from "vitest";
-import React from "react";
+import React, { useRef } from "react";
 import {
 	act,
 	cleanup,
@@ -28,7 +28,10 @@ import type {
 	FileData,
 	FileMeta,
 	FileUploadDispatch,
+	FileUploadRendererProps,
 } from "../../../src/standalone/FileUpload/Generic";
+import FilePreview from "../../../src/standalone/FileUpload/Generic/File";
+import { useFileActionButtonFocus } from "../../../src/standalone/FileUpload";
 
 // jsdom does not implement matchMedia, which the Framework's ThemeProvider needs.
 beforeAll(async () => {
@@ -2558,6 +2561,84 @@ describe("CrudFileUpload: accessibility bugs", () => {
 		expect(document.activeElement).toBe(
 			screen.getByRole("button", { name: "Remove image.png" }),
 		);
+	});
+});
+
+/**
+ * A custom variant as an app writes one: its own upload button and the files as a list,
+ * keyed by record id, without a restore button, so a removed file loses its button at once
+ */
+const CustomVariant = (props: FileUploadRendererProps) => {
+	const { files, removeFile, handleUpload, previewSize } = props;
+	const uploadRef = useRef<HTMLButtonElement>(null);
+	const getActionButtonRef = useFileActionButtonFocus(uploadRef);
+	return (
+		<div>
+			<button type={"button"} ref={uploadRef} onClick={() => handleUpload()}>
+				Add files
+			</button>
+			{files.map((data, index) => (
+				<FilePreview
+					key={"id" in data.file ? String(data.file.id) : data.file.name}
+					name={data.file.name}
+					mimeType={data.file.type}
+					size={previewSize}
+					disabled={!!data.delete}
+					onRemove={() => removeFile(data)}
+					actionButtonRef={getActionButtonRef(index)}
+					variant={"compact-list"}
+				/>
+			))}
+		</div>
+	);
+};
+
+describe("CrudFileUpload: keyboard focus when a removed file leaves a render after its button", () => {
+	it("[FOLLOWUP-FILE-UPLOAD-CUSTOM-FOCUS] with a LazyConnector, removing a queued upload by keyboard moves focus to the next file's button and keeps it there, in the built-in variants and a custom one", async () => {
+		/** Activates the focused button, as Enter does */
+		const activate = async () => {
+			await act(async () => {
+				fireEvent.click(document.activeElement!);
+				await Promise.resolve();
+			});
+		};
+		const focused = () => document.activeElement?.getAttribute("aria-label");
+		for (const variant of ["classic", "modern", CustomVariant] as const) {
+			const label = typeof variant === "string" ? variant : "custom";
+			const ui = renderUpload({
+				connector: lazyOver(new RecordingConnector(SERVER_FILES)),
+				variant,
+			});
+			// by the buttons and texts: the harness reads the names off the box variant
+			await screen.findByRole("button", { name: "Remove document.pdf" });
+			await ui.addFile(pick("a.txt"));
+			await ui.addFile(pick("b.txt"));
+			await ui.addFile(pick("c.txt"));
+			await ui.addFile(pick("d.txt"));
+			await screen.findByRole("button", { name: "Remove d.txt" });
+			/** Removes the file whose button has the focus, and waits until it is gone */
+			const removeFocused = async (name: string) => {
+				await activate();
+				await waitFor(() =>
+					expect(screen.queryAllByText(name), label).toHaveLength(0),
+				);
+				await ui.settle();
+			};
+
+			// a middle file: its button goes as the removal is queued, and the file itself a
+			// render later, once the upload is cancelled. Focus stays on the next file's
+			// button, which is not built anew when the file before it leaves.
+			screen.getByRole("button", { name: "Remove b.txt" }).focus();
+			await removeFocused("b.txt");
+			expect(focused(), label).toBe("Remove c.txt");
+			await removeFocused("c.txt");
+			expect(focused(), label).toBe("Remove d.txt");
+
+			// the last file: back to the previous one
+			await removeFocused("d.txt");
+			expect(focused(), label).toBe("Remove a.txt");
+			ui.unmount();
+		}
 	});
 });
 

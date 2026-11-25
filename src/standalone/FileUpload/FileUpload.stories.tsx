@@ -1,9 +1,19 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, spyOn, userEvent, waitFor, within } from "storybook/test";
-import { FileUploadGeneric, ImageSelector } from "./index";
-import type { FileData, FileMeta, FileUploadProps } from "./Generic";
+import {
+	FileUploadGeneric,
+	ImageSelector,
+	useFileActionButtonFocus,
+} from "./index";
+import {
+	FileInput,
+	type FileData,
+	type FileMeta,
+	type FileUploadProps,
+	type FileUploadRendererProps,
+} from "./Generic";
 import type { MultiImageImage, MultiImageProps } from "./MultiImage/MultiImage";
 import { MultiImage } from "./MultiImage";
 import {
@@ -19,7 +29,13 @@ import {
 	VideoFileIcon,
 	WordFileIcon,
 } from "./FileIcons";
-import { Alert, Grid, type SvgIconProps, Typography } from "@mui/material";
+import {
+	Alert,
+	Button,
+	Grid,
+	type SvgIconProps,
+	Typography,
+} from "@mui/material";
 import FilePreview, { getFileIconOrDefault, getFileType } from "./Generic/File";
 
 // ---------------------------------------------------------------------------
@@ -1175,7 +1191,7 @@ export const Issue3489Item3FilesOpenByKeyboard: StoryObj<{
  * after the file, with a tooltip, a focus outline and a target of at least 24 x 24 px.
  * Removing a stored file keeps it listed, and the same button, still focused, restores it.
  * A removed pick leaves the list: focus moves on to the next file's button, or after the
- * last file to the upload control.
+ * last file back to the previous one.
  */
 export const Issue3489Item4RemoveAndRestoreByKeyboard: StoryObj = {
 	name: "FileUploadGeneric — removing and restoring files by keyboard",
@@ -1276,7 +1292,7 @@ export const Issue3489Item4RemoveAndRestoreByKeyboard: StoryObj = {
 			modern.getByRole("button", { name: "Restore budget.xlsx" }),
 		).toHaveFocus();
 
-		// the last file: on to the upload control
+		// the last file: back to the previous file's button
 		await userEvent.tab();
 		await expectUsable(
 			modern.getByRole("button", { name: "Remove summary.docx" }),
@@ -1284,9 +1300,7 @@ export const Issue3489Item4RemoveAndRestoreByKeyboard: StoryObj = {
 		await userEvent.keyboard("{Enter}");
 		await expect(modern.queryByText("summary.docx")).toBe(null);
 		await expect(
-			modern.getByRole("button", {
-				name: "Drag & drop file here or click for an upload dialog",
-			}),
+			modern.getByRole("button", { name: "Restore budget.xlsx" }),
 		).toHaveFocus();
 
 		// classic: the button lies over the top left corner of the file icon, before the
@@ -1302,5 +1316,142 @@ export const Issue3489Item4RemoveAndRestoreByKeyboard: StoryObj = {
 			classic.getByRole("button", { name: "Restore contract.pdf" }),
 		).toBe(classicRemove);
 		await expectUsable(classicRemove);
+	},
+};
+
+/**
+ * A custom variant as an app writes one: its own upload button and the files as a compact
+ * list, keyed by name (a picked file has no id). useFileActionButtonFocus gives it the
+ * built-in variants' keyboard focus handling, with its upload button for after the last
+ * file.
+ */
+const CustomListVariant = (props: FileUploadRendererProps) => {
+	const {
+		files,
+		label,
+		previewSize,
+		readOnly,
+		accept,
+		handleUpload,
+		handleFileChange,
+		inputRef,
+		removeFile,
+	} = props;
+	const uploadRef = useRef<HTMLButtonElement>(null);
+	const getActionButtonRef = useFileActionButtonFocus(uploadRef);
+	return (
+		<div role={"group"} aria-label={label}>
+			<Button
+				ref={uploadRef}
+				variant={"outlined"}
+				onClick={() => handleUpload()}
+			>
+				Add files
+			</Button>
+			<FileInput
+				type={"file"}
+				accept={accept || undefined}
+				multiple
+				onChange={handleFileChange}
+				ref={inputRef}
+			/>
+			<Grid container spacing={1} sx={{ mt: 1 }}>
+				{files.map((data, index) => (
+					<FilePreview
+						key={data.file.name}
+						name={data.file.name}
+						mimeType={data.file.type}
+						size={previewSize}
+						disabled={!!data.delete}
+						onRemove={
+							readOnly || data.preventDelete
+								? undefined
+								: () => removeFile(data)
+						}
+						actionButtonRef={getActionButtonRef(index)}
+						variant={"compact-list"}
+					/>
+				))}
+			</Grid>
+		</div>
+	);
+};
+
+/**
+ * FOLLOWUP-FILE-UPLOAD-CUSTOM-FOCUS: a custom variant (top) moves keyboard focus as the
+ * built-in ones (bottom) do. When a focused remove button goes away with its file, focus
+ * moves to the next file's button, after the last file back to the previous one, and once
+ * no file's button is left to the upload button.
+ */
+export const FollowupCustomVariantKeyboardFocus: StoryObj = {
+	name: "FileUploadGeneric — keyboard focus when a file leaves, custom variant",
+	parameters: { a11y: { test: "error" } },
+	render: () => {
+		const picked = (name: string): FileData => ({
+			file: new File(["x"], name, { type: "application/pdf" }),
+			canBeUploaded: true,
+		});
+		return (
+			<div style={{ width: 480 }}>
+				<ControlledUpload
+					label="Custom"
+					variant={CustomListVariant}
+					initial={[picked("a.pdf"), picked("b.pdf"), picked("c.pdf")]}
+				/>
+				<ControlledUpload
+					label="Classic"
+					initial={[picked("x.pdf"), picked("y.pdf")]}
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const custom = within(canvas.getByRole("group", { name: "Custom" }));
+		const classic = within(canvas.getByRole("group", { name: "Classic" }));
+
+		// the upload button, a.pdf's remove button, b.pdf's
+		custom.getByRole("button", { name: "Add files" }).focus();
+		await userEvent.tab();
+		await userEvent.tab();
+		await expect(
+			custom.getByRole("button", { name: "Remove b.pdf" }),
+		).toHaveFocus();
+
+		// the middle file: on to the next one
+		await userEvent.keyboard("{Enter}");
+		await expect(custom.queryByText("b.pdf")).toBe(null);
+		await expect(
+			custom.getByRole("button", { name: "Remove c.pdf" }),
+		).toHaveFocus();
+
+		// the last file: back to the previous one
+		await userEvent.keyboard("{Enter}");
+		await expect(custom.queryByText("c.pdf")).toBe(null);
+		await expect(
+			custom.getByRole("button", { name: "Remove a.pdf" }),
+		).toHaveFocus();
+
+		// no file's button left: the custom variant's upload button
+		await userEvent.keyboard(" ");
+		await expect(custom.queryByText("a.pdf")).toBe(null);
+		await expect(
+			custom.getByRole("button", { name: "Add files" }),
+		).toHaveFocus();
+
+		// the built-in variants do the same, with their upload control
+		classic.getByRole("button", { name: "Upload" }).focus();
+		await userEvent.tab();
+		await userEvent.tab();
+		await expect(
+			classic.getByRole("button", { name: "Remove y.pdf" }),
+		).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		await expect(classic.queryByText("y.pdf")).toBe(null);
+		await expect(
+			classic.getByRole("button", { name: "Remove x.pdf" }),
+		).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		await expect(classic.queryByText("x.pdf")).toBe(null);
+		await expect(classic.getByRole("button", { name: "Upload" })).toHaveFocus();
 	},
 };

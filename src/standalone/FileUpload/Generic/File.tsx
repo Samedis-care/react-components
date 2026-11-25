@@ -80,8 +80,16 @@ export interface FileProps {
 	/**
 	 * Ref to the file's remove or restore button
 	 * @remarks Set while one of the two is shown, null otherwise. A list that removes the
-	 *          file uses it to move keyboard focus on when the focused button goes away;
-	 *          FileUploadGeneric does so for its built-in variants.
+	 *          file passes the ref from useFileActionButtonFocus here, which moves keyboard
+	 *          focus on when the focused button goes away; FileUploadGeneric does so for its
+	 *          built-in variants.
+	 *
+	 *          That ref follows the button by its position in the list, so the list's keys
+	 *          must stay with their files while files before them leave: a record id, or
+	 *          the name and how many files of that name come before it, never the
+	 *          position. A key by position builds the next file's FilePreview anew when
+	 *          a removed file leaves a render after its button (CrudFileUpload with a
+	 *          LazyConnector), and the focus moves one file further.
 	 */
 	actionButtonRef?: React.Ref<HTMLButtonElement>;
 	/**
