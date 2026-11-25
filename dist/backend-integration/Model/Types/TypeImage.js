@@ -7,8 +7,25 @@ import ccI18n from "../../../i18n";
  */
 class TypeImage {
     params;
+    /**
+     * The fields a `placeholder` function reads re-render the field
+     */
+    settings;
     constructor(params) {
         this.params = params;
+        if (params?.placeholderValues?.length)
+            this.settings = { updateHooks: params.placeholderValues };
+    }
+    /**
+     * The placeholder for the record with `values`
+     * @param values The record's values (`RenderParams.values`)
+     * @returns The placeholder's URL or data URI, or `undefined` for none
+     */
+    getPlaceholder(values) {
+        const placeholder = this.params?.placeholder;
+        return typeof placeholder === "function"
+            ? placeholder(values)
+            : placeholder;
     }
     getParams() {
         return this.params ?? {};
