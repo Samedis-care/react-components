@@ -24,6 +24,11 @@ and shows a dialog for every value:
     `{ status: 500, message: "Internal" }`, or with no entries, which was listed under
     "Error on validation".
 
+Since 2026-11-25 only a `ValidationError` is listed under "Error on validation"; a plain object
+of messages, `{ title, message }` included, gets the generic dialog: see
+[`2026-11-25-show-error-dialog-lists-validation-errors-only.md`](2026-11-25-show-error-dialog-lists-validation-errors-only.md),
+whose migration is required.
+
 ## Why
 
 Callers pass the value their `catch` received. A promise rejected without a reason made the

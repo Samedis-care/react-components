@@ -576,32 +576,68 @@ describe("showErrorDialog and showInfoDialog", () => {
 		expect(dialog).toHaveAccessibleDescription("Connection lost");
 	});
 
+	it("[ISSUE-3497-ITEM-5] a ValidationError lists its messages under the validation title", () => {
+		mount();
+		act(() => {
+			void showErrorDialog(
+				ctx[0],
+				new ValidationError("error", {
+					name: "Name is required",
+					email: "Email is invalid",
+				}),
+			);
+		});
+		const dialog = screen.getByRole("dialog");
+		expect(dialog).toHaveAccessibleName("Error on validation");
+		expect(
+			within(dialog)
+				.getAllByRole("listitem")
+				.map((item) => item.textContent),
+		).toEqual(["Name is required", "Email is invalid"]);
+	});
+
+	it.each([
+		[
+			"a ValidationError with an empty result",
+			new ValidationError("error", {}),
+		],
+		[
+			"an Error named CcValidationError without a result",
+			Object.assign(new Error("Check the form"), { name: "CcValidationError" }),
+		],
+	])(
+		"[FOLLOWUP-VALIDATIONRESULT-LEGACY] %s shows its message under the generic error title",
+		(_name, error) => {
+			mount();
+			act(() => {
+				void showErrorDialog(ctx[0], error);
+			});
+			const dialog = screen.getByRole("dialog");
+			expect(dialog).toHaveAccessibleName("An error occurred");
+			// the accessible description drops the trailing space of an empty key list
+			expect(dialog).toHaveAccessibleDescription(error.message.trim());
+		},
+	);
+
 	it.each([
 		[
 			"an object of messages",
 			{ name: "Name is required", email: "Email is invalid" },
 		],
-		[
-			"a ValidationError",
-			new ValidationError("error", {
-				name: "Name is required",
-				email: "Email is invalid",
-			}),
-		],
+		["{ title, message }", { title: "Not saved", message: "Try again" }],
 	])(
-		"[ISSUE-3497-ITEM-5] %s lists its messages under the validation title",
+		"[FOLLOWUP-VALIDATIONRESULT-LEGACY] %s is no ValidationError: it gets the generic error title and the fallback message, not a list",
 		(_name, value) => {
 			mount();
 			act(() => {
 				void showErrorDialog(ctx[0], value);
 			});
 			const dialog = screen.getByRole("dialog");
-			expect(dialog).toHaveAccessibleName("Error on validation");
-			expect(
-				within(dialog)
-					.getAllByRole("listitem")
-					.map((item) => item.textContent),
-			).toEqual(["Name is required", "Email is invalid"]);
+			expect(dialog).toHaveAccessibleName("An error occurred");
+			expect(dialog).toHaveAccessibleDescription(
+				"No further details are available. Try again.",
+			);
+			expect(within(dialog).queryByRole("list")).toBeNull();
 		},
 	);
 });

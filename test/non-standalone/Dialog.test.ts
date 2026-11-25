@@ -262,7 +262,7 @@ describe("Dialog Utils", () => {
 			expect(element.props.message).toBe("Something broke");
 		});
 
-		it("handles ValidationResult (plain object)", () => {
+		it("[FOLLOWUP-VALIDATIONRESULT-LEGACY] shows a plain object of messages, which is no ValidationError, as an error without details", () => {
 			const validationResult = {
 				name: "Name is required",
 				email: "Email is invalid",
@@ -270,7 +270,8 @@ describe("Dialog Utils", () => {
 			void showErrorDialog(pushDialog, validationResult);
 			expect(pushDialog).toHaveBeenCalledTimes(1);
 			const element = pushed<IDialogConfigSimple>();
-			expect(element.props.title).toBe("common.dialogs.validation-error-title");
+			expect(element.props.title).toBe("common.dialogs.error-title");
+			expect(element.props.message).toBe("common.dialogs.error-no-details");
 		});
 
 		it("handles ValidationError (Error with CcValidationError name)", () => {

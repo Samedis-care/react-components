@@ -51,6 +51,15 @@ import deepEqual from "../../utils/deepEqual";
 import toComparisonJson from "../../utils/toComparisonJson";
 import { captureError } from "../../framework/ErrorReporting";
 
+/**
+ * The messages of a validation by field name, `{ [field]: message }`, as every validate
+ * function returns them: validateForm, a custom validation or warning handler, the model's
+ * validate, the validate of CrudImport and useCrudSelect. Empty when nothing failed.
+ * @remarks It is not an error. To throw it, or to show it with showErrorDialog, wrap it in a
+ *          ValidationError: `throw new ValidationError("error", result)`. showErrorDialog
+ *          lists the messages of a ValidationError only; a plain object gets the generic
+ *          error dialog without details.
+ */
 export type ValidationResult = Record<string, string>;
 /**
  * Pre submit handler for additional validations
