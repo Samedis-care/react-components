@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useContext, useMemo } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fireEvent, fn, waitFor, within } from "storybook/test";
@@ -7,13 +7,20 @@ import {
 	createTheme,
 	CssBaseline,
 	Grid,
+	IconButton,
 	ThemeProvider,
 	Typography,
 } from "@mui/material";
+import { Edit, MoreVert } from "@mui/icons-material";
 import { createMemoryHistory } from "history";
 import { Framework, useDialogContext } from "../../framework";
 import { setFrameworkHistory } from "../../framework/History";
-import Form, { PageProps } from "./Form";
+import Form, {
+	FormContext,
+	FormContextLite,
+	PageProps,
+	useFormContextLite,
+} from "./Form";
 import FormField from "./Field";
 import DefaultFormPage from "./DefaultFormPage";
 import DefaultErrorComponent from "./DefaultErrorComponent";
@@ -27,6 +34,8 @@ import {
 	ModelUnknown,
 } from "../../backend-integration";
 import FullFormDialog from "./FormDialog";
+import useSetFormDialogTitle from "./useSetFormDialogTitle";
+import useSetFormDialogTitleAction from "./useSetFormDialogTitleAction";
 import { PageTitle } from "../../non-standalone/PageTitle";
 
 // a dirty form page blocks the history; keep that away from the Storybook frame's own
@@ -573,5 +582,311 @@ export const FollowupDialogLateTitleTakesFocus: StoryObj<LateTitleArgs> = {
 		await expect(
 			within(dialog).getByRole("button", { name: "Close" }),
 		).toHaveFocus();
+	},
+};
+
+interface TitleActionArgs extends LateTitleArgs {
+	/**
+	 * Called by the Edit button in the dialog's title row, with the e-mail of the form's record
+	 */
+	onEdit: (email: unknown) => void;
+	/**
+	 * FullFormDialog's openInNewLink, called by the "Open in new tab" button
+	 */
+	openInNewLink: () => void;
+}
+
+/**
+ * The Edit button of the title row: it reads the form it is set by, through the context the
+ * page wraps it in
+ */
+const EditPersonButton = (props: { onEdit: (email: unknown) => void }) => {
+	const { onEdit } = props;
+	const { getFieldValue } = useFormContextLite<ModelUnknown>();
+	const edit = useCallback(
+		() => onEdit(getFieldValue("email")),
+		[onEdit, getFieldValue],
+	);
+	return (
+		<IconButton aria-label={"Edit"} onClick={edit}>
+			<Edit />
+		</IconButton>
+	);
+};
+
+/**
+ * Sets the Edit and More buttons as the dialog's title-row controls, in the form's contexts:
+ * the title row is rendered by the dialog, outside the form
+ */
+const PersonTitleActions = (props: { onEdit: (email: unknown) => void }) => {
+	const { onEdit } = props;
+	const formContext = useContext(FormContext);
+	const formContextLite = useContext(FormContextLite);
+	const action = useMemo(
+		() => (
+			<FormContext.Provider value={formContext}>
+				<FormContextLite.Provider value={formContextLite}>
+					<EditPersonButton onEdit={onEdit} />
+					<IconButton aria-label={"More"}>
+						<MoreVert />
+					</IconButton>
+				</FormContextLite.Provider>
+			</FormContext.Provider>
+		),
+		[formContext, formContextLite, onEdit],
+	);
+	useSetFormDialogTitleAction(true, action);
+	return null;
+};
+
+/**
+ * A FullFormDialog without dialogTitle around a form whose page sets the title (a PageTitle)
+ * and the title-row controls once the record has loaded
+ */
+const TitleActionDialog = (props: TitleActionArgs) => {
+	const { loadDelay, goBack, onClose, onEdit, openInNewLink } = props;
+	const model = useMemo(
+		() =>
+			new Model(
+				"u45-story-people-" + String(modelCounter++),
+				createTestModel().fields,
+				new SlowReadConnector(sampleData, loadDelay),
+			),
+		[loadDelay],
+	);
+	const customProps = useMemo(() => ({ goBack }), [goBack]);
+	const page = useCallback(
+		(pageProps: PageProps<PeopleModel, PageArgs>) => (
+			<DefaultFormPage {...pageProps} customProps={crudProps(pageProps)}>
+				<PageTitle>Edit person</PageTitle>
+				<PersonTitleActions onEdit={onEdit} />
+				<PersonFields />
+			</DefaultFormPage>
+		),
+		[onEdit],
+	);
+	return (
+		<FullFormDialog onClose={onClose} openInNewLink={openInNewLink}>
+			<Form
+				model={model}
+				id={"1"}
+				errorComponent={DefaultErrorComponent}
+				customProps={customProps}
+				disableRouting
+			>
+				{page}
+			</Form>
+		</FullFormDialog>
+	);
+};
+
+/**
+ * A button "Open person" that pushes the TitleActionDialog
+ */
+const TitleActionOpener = (props: TitleActionArgs) => {
+	const [pushDialog] = useDialogContext();
+	const open = useCallback(
+		() => pushDialog(<TitleActionDialog {...props} />),
+		[pushDialog, props],
+	);
+	return <Button onClick={open}>Open person</Button>;
+};
+
+/**
+ * FOLLOWUP-DIALOG-TITLE-ACTION: the form page in a FullFormDialog sets the dialog's title with a
+ * `PageTitle` and its Edit and More buttons with `useSetFormDialogTitleAction`, once its record
+ * has loaded (after `loadDelay` ms). The buttons show in the title row after the title, before
+ * "Open in new tab" and Close, outside the heading: the dialog is named "Edit person" alone, and
+ * the title takes the focus as it shows. Tab reaches Edit, More, "Open in new tab" and Close,
+ * in that order. Edit reads the form's record through the form contexts the page wraps it in.
+ */
+export const FollowupDialogTitleActionOutsideHeading: StoryObj<TitleActionArgs> =
+	{
+		args: {
+			loadDelay: 1000,
+			goBack: fn(),
+			onClose: fn(),
+			onEdit: fn(),
+			openInNewLink: fn(),
+		},
+		parameters: { a11y: { test: "error" } },
+		render: (args) => <TitleActionOpener {...args} />,
+		play: async ({ args, canvas, userEvent }) => {
+			await userEvent.click(
+				canvas.getByRole("button", { name: "Open person" }),
+			);
+			// the dialog is in a portal, outside the story's canvas
+			const dialog = await within(document.body).findByRole(
+				"dialog",
+				undefined,
+				LOAD,
+			);
+			const heading = await within(dialog).findByRole(
+				"heading",
+				{ name: "Edit person" },
+				LOAD,
+			);
+			const edit = within(dialog).getByRole("button", { name: "Edit" });
+			// the title takes the focus, and is read without the buttons
+			await waitFor(() => expect(heading).toHaveFocus());
+			await expect(dialog).toHaveAccessibleName("Edit person");
+			// Chromium names the dialog with the buttons inside the element it is labelled by too
+			await expect(
+				document.getElementById(dialog.getAttribute("aria-labelledby") ?? ""),
+			).toBe(heading);
+			await expect(heading).toHaveTextContent(/^Edit person$/);
+			await expect(within(heading).queryAllByRole("button")).toHaveLength(0);
+			// beside the title, on its line
+			const headingBox = heading.getBoundingClientRect();
+			const editBox = edit.getBoundingClientRect();
+			await expect({
+				right: editBox.left >= headingBox.right,
+				centered:
+					Math.abs(
+						editBox.top +
+							editBox.height / 2 -
+							(headingBox.top + headingBox.height / 2),
+					) < 1,
+			}).toEqual({ right: true, centered: true });
+
+			const order: (string | null)[] = [];
+			for (let i = 0; i < 4; i++) {
+				await userEvent.tab();
+				order.push(document.activeElement?.getAttribute("aria-label") ?? null);
+			}
+			await expect(order).toEqual(["Edit", "More", "Open in new tab", "Close"]);
+			await userEvent.tab({ shift: true });
+			await userEvent.tab({ shift: true });
+			await userEvent.tab({ shift: true });
+			await expect(edit).toHaveFocus();
+			await userEvent.keyboard("{Enter}");
+			await expect(args.onEdit).toHaveBeenCalledWith("alice@example.com");
+		},
+	};
+
+const titleRowActions = (
+	<>
+		<IconButton aria-label={"Edit"}>
+			<Edit />
+		</IconButton>
+		<IconButton aria-label={"More"}>
+			<MoreVert />
+		</IconButton>
+	</>
+);
+
+/**
+ * Content that sets the dialog's title and its Edit and More buttons
+ */
+const TitleAndActions = (props: { title: string }) => {
+	useSetFormDialogTitle(true, props.title);
+	useSetFormDialogTitleAction(true, titleRowActions);
+	return <Typography>The form.</Typography>;
+};
+
+/**
+ * FOLLOWUP-DIALOG-TITLE-ACTION: at 320px the Edit and More buttons the content sets, "Open in new
+ * tab" and Close don't fit beside the long title. They move below it, at the end of the row, so
+ * the title keeps the width of the dialog, and nothing scrolls sideways.
+ */
+export const FollowupDialogTitleActionWrapsOnPhone: StoryObj<OpenInNewArgs> = {
+	args: { openInNewLink: fn() },
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<FullFormDialog openInNewLink={args.openInNewLink} maxWidth="md">
+			<TitleAndActions title={"Hochfrequenzchirurgiegerät bearbeiten"} />
+		</FullFormDialog>
+	),
+	play: async () => {
+		// the dialog is in a portal, outside the story's canvas
+		const dialog = await within(document.body).findByRole(
+			"dialog",
+			{ name: "Hochfrequenzchirurgiegerät bearbeiten" },
+			LOAD,
+		);
+		await waitFor(() => expect(dialog).toBeVisible());
+		const heading = within(dialog).getByRole("heading");
+		const paperBox = dialog.getBoundingClientRect();
+		const headingBox = heading.getBoundingClientRect();
+		const boxes = ["Edit", "More", "Open in new tab", "Close"].map((name) =>
+			within(dialog).getByRole("button", { name }).getBoundingClientRect(),
+		);
+		const centerY = (box: DOMRect) => box.top + box.height / 2;
+		await expect({
+			// below the title, on one line, inside the dialog
+			below: boxes.every((box) => box.top >= headingBox.bottom),
+			oneLine: boxes.every(
+				(box) => Math.abs(centerY(box) - centerY(boxes[0])) < 1,
+			),
+			inside: boxes.every(
+				(box) => box.left >= paperBox.left && box.right <= paperBox.right,
+			),
+			// the title has the width of the dialog, less its padding
+			titleWidth: headingBox.width >= paperBox.width - 2 * 24 - 1,
+		}).toEqual({ below: true, oneLine: true, inside: true, titleWidth: true });
+		await expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth);
+	},
+};
+
+const MANY_ACTIONS = ["Edit", "Copy", "Print", "Share", "Archive", "More"];
+
+const manyTitleRowActions = (
+	<>
+		{MANY_ACTIONS.map((name) => (
+			<IconButton key={name} aria-label={name}>
+				<MoreVert />
+			</IconButton>
+		))}
+	</>
+);
+
+/**
+ * Content that sets the dialog's title and six buttons beside it
+ */
+const TitleAndManyActions = (props: { title: string }) => {
+	useSetFormDialogTitle(true, props.title);
+	useSetFormDialogTitleAction(true, manyTitleRowActions);
+	return <Typography>The form.</Typography>;
+};
+
+/**
+ * FOLLOWUP-DIALOG-TITLE-ACTION: at 320px six buttons the content sets and "Open in new tab" don't
+ * fit on one line below the title either: they wrap onto a second line, and Close stays beside
+ * them, inside the dialog.
+ */
+export const FollowupDialogTitleActionManyOnPhone: StoryObj<OpenInNewArgs> = {
+	args: { openInNewLink: fn() },
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<FullFormDialog openInNewLink={args.openInNewLink} maxWidth="md">
+			<TitleAndManyActions title={"Edit device"} />
+		</FullFormDialog>
+	),
+	play: async () => {
+		// the dialog is in a portal, outside the story's canvas
+		const dialog = await within(document.body).findByRole(
+			"dialog",
+			{ name: "Edit device" },
+			LOAD,
+		);
+		await waitFor(() => expect(dialog).toBeVisible());
+		const paperBox = dialog.getBoundingClientRect();
+		const box = (name: string) =>
+			within(dialog).getByRole("button", { name }).getBoundingClientRect();
+		const actions = [...MANY_ACTIONS, "Open in new tab"].map(box);
+		const close = box("Close");
+		await expect({
+			wrapped: new Set(actions.map((a) => Math.round(a.top))).size > 1,
+			// beside the buttons, not on a line of its own below them
+			closeBeside:
+				actions.every((a) => close.left >= a.right) &&
+				close.top < Math.max(...actions.map((a) => a.bottom)),
+			inside: [...actions, close].every(
+				(b) => b.left >= paperBox.left && b.right <= paperBox.right,
+			),
+		}).toEqual({ wrapped: true, closeBeside: true, inside: true });
+		await expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth);
 	},
 };

@@ -21,6 +21,11 @@ afterEach(() => {
 });
 
 const closeButton = () => screen.getByRole("button", { name: "Close" });
+/** the names of the buttons in the element, in DOM order */
+const buttonNames = (element: Element) =>
+	within(element as HTMLElement)
+		.getAllByRole("button")
+		.map((b) => b.getAttribute("aria-label") ?? b.textContent);
 /** the element the dialog's aria-labelledby points at */
 const dialogLabel = () =>
 	document.getElementById(
@@ -195,6 +200,25 @@ describe("DialogTitle", () => {
 				.map((b) => b.getAttribute("aria-label") ?? b.textContent),
 		).toEqual(["Act", "Close"]);
 		expect(dialogLabel()).toBeNull();
+	});
+
+	it("[FOLLOWUP-DIALOG-TITLE-ACTION] the controls slot holds the action and the close button, apart from the heading, and takes classes.controls", () => {
+		render(
+			<Dialog open>
+				<DialogTitle
+					onClose={() => {}}
+					classes={{ controls: "ctl" }}
+					action={<button type="button">Act</button>}
+				>
+					My Title
+				</DialogTitle>
+			</Dialog>,
+		);
+		const controls = document.querySelector(".ctl");
+		expect({
+			buttons: controls && buttonNames(controls),
+			heading: !!controls?.querySelector("h2"),
+		}).toEqual({ buttons: ["Act", "Close"], heading: false });
 	});
 
 	it("[ISSUE-3497-ITEM-14] with noTitle the dialog is not named by the close button and has no empty heading", () => {

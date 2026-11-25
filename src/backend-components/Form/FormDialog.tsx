@@ -73,6 +73,15 @@ export interface FormDialogProps {
 	 */
 	openInNewLink?: () => void;
 	/**
+	 * Controls for the dialog's content in the title row, e.g. `IconButton`s with an
+	 * `aria-label`: shown after the title and before the "Open in new tab" and close buttons,
+	 * outside the heading, so they are not part of the dialog's name (the `action` of
+	 * `DialogTitle`). They are rendered in the title row, outside `children`: wrap them in the
+	 * context providers they need. Controls set through `FormDialogDispatch.setTitleAction`
+	 * (`useSetFormDialogTitleAction`) win over this prop. Default none.
+	 */
+	titleAction?: React.ReactNode;
+	/**
 	 * Dialog contents
 	 */
 	children?: React.ReactNode;
@@ -137,6 +146,12 @@ export interface FormDialogDispatch {
 	 * the dialog itself (see `FullFormDialog`).
 	 */
 	setTitle: (title: React.ReactNode) => void;
+	/**
+	 * Shows these controls in the dialog's title row, after the title and outside the heading
+	 * (see `useSetFormDialogTitleAction`), null for none. They win over the dialog's
+	 * `titleAction` prop.
+	 */
+	setTitleAction: (action: React.ReactNode) => void;
 	setOpenInNewLink: Dispatch<SetStateAction<null | (() => void)>>;
 	blockClosing: () => void;
 	unblockClosing: () => void;
@@ -230,11 +245,41 @@ const useLateTitleFocus = (titleShown: boolean) => {
 };
 
 /**
+ * Keeps the keyboard focus in the dialog when a control of its title row goes away while it
+ * holds the focus, e.g. an action of content that unmounts or sets other actions, or the
+ * "Open in new tab" button: the dialog's paper gets the focus, rather than the page.
+ * @param paperRef The dialog's paper (the element with role="dialog")
+ * @param action The controls of the title row, as rendered
+ */
+const useTitleActionFocusFallback = (
+	paperRef: React.RefObject<HTMLDivElement | null>,
+	action: React.ReactNode,
+) => {
+	// action as of the last commit
+	const actionRef = useRef(action);
+
+	// a layout effect: the removed control has taken the focus with it, and the browser has
+	// not painted yet
+	useLayoutEffect(() => {
+		const previous = actionRef.current;
+		actionRef.current = action;
+		if (previous === action) return;
+		const paper = paperRef.current;
+		if (!paper) return;
+		const doc = paper.ownerDocument;
+		const focused = doc.activeElement;
+		if (!focused || focused === doc.body) paper.focus();
+	}, [paperRef, action]);
+};
+
+/**
  * The dialog FullFormDialog renders by default (its `renderer`): an MUI `Dialog` with a
- * `DialogTitle` (the title, the open-in-new button and the close button) and the content. The
- * title names the dialog, else `aria-label` does. A title that shows only after the dialog
- * opened takes the keyboard focus if it is still on the dialog itself, so screen readers read
- * it (see `FullFormDialog`). A custom renderer can render it with changed props.
+ * `DialogTitle` (the title, then in its `action` the content's controls (`titleAction`) and the
+ * open-in-new button, and the close button) and the content. The title names the dialog, else
+ * `aria-label` does. A title that shows only after the dialog opened takes the keyboard focus if
+ * it is still on the dialog itself, so screen readers read it (see `FullFormDialog`). When a
+ * control of the title row goes away while it holds the focus, the dialog gets the focus. A
+ * custom renderer can render it with changed props.
  * @param props The props of FullFormDialog, with the title to show as `dialogTitle`
  */
 export const FormDialogDefaultRenderer = (props: FormDialogRendererProps) => {
@@ -245,6 +290,7 @@ export const FormDialogDefaultRenderer = (props: FormDialogRendererProps) => {
 		className,
 		dialogTitle,
 		openInNewLink,
+		titleAction,
 		useCustomClasses,
 		children,
 		"aria-label": ariaLabel,
@@ -274,6 +320,21 @@ export const FormDialogDefaultRenderer = (props: FormDialogRendererProps) => {
 			</OpenInNewButton>
 		);
 	}, [openInNewLink, t]);
+	// the content's controls first, then the dialog's own (open in new tab, close), as the tab
+	// order goes
+	const hasTitleAction =
+		titleAction != null && typeof titleAction !== "boolean";
+	const action = useMemo(
+		() =>
+			hasTitleAction || openInNewAction ? (
+				<>
+					{titleAction}
+					{openInNewAction}
+				</>
+			) : null,
+		[hasTitleAction, titleAction, openInNewAction],
+	);
+	useTitleActionFocusFallback(paperRef, action);
 	return (
 		<Dialog
 			maxWidth={maxWidth ?? "lg"}
@@ -283,11 +344,7 @@ export const FormDialogDefaultRenderer = (props: FormDialogRendererProps) => {
 			className={combineClassNames(["CcFormDialog", className])}
 			slotProps={slotProps}
 		>
-			<DialogTitle
-				onClose={onClose}
-				noTitle={!dialogTitle}
-				action={openInNewAction}
-			>
+			<DialogTitle onClose={onClose} noTitle={!dialogTitle} action={action}>
 				{dialogTitle}
 			</DialogTitle>
 			<ContentComp>
@@ -299,9 +356,11 @@ export const FormDialogDefaultRenderer = (props: FormDialogRendererProps) => {
 
 /**
  * A dialog for a form page or other content, opened with `pushDialog`: a title bar with the
- * title, an optional "Open in new tab" button and the close button, and the content below.
- * The content can set the title (`useSetFormDialogTitle`, `PageTitle`), guard closing while it
- * has unsaved changes, and close the dialog (`useCloseThisDialog`).
+ * title, optional controls (`titleAction`), an optional "Open in new tab" button and the close
+ * button, and the content below.
+ * The content can set the title (`useSetFormDialogTitle`, `PageTitle`) and controls beside it
+ * (`useSetFormDialogTitleAction`), guard closing while it has unsaved changes, and close the
+ * dialog (`useCloseThisDialog`).
  *
  * The title names the dialog for screen readers, else `aria-label` does. MUI's Dialog puts the
  * keyboard focus on the dialog when it opens, and screen readers announce it with its name. A
@@ -318,6 +377,7 @@ const FormDialog = (inProps: FormDialogProps) => {
 		onClose,
 		disableFormDialogContext,
 		openInNewLink: openInNewLinkOverride,
+		titleAction: titleActionOverride,
 		renderer,
 	} = props;
 	const [pushDialog] = useDialogContext();
@@ -328,6 +388,7 @@ const FormDialog = (inProps: FormDialogProps) => {
 	const closeThisDialog = outerClose?.pushed ? outerClose.close : null;
 	const blockClosingCounter = useRef(0);
 	const [title, setTitle] = useState<React.ReactNode>(null);
+	const [titleAction, setTitleAction] = useState<React.ReactNode>(null);
 	const [openInNewLink, setOpenInNewLink] = useState<null | (() => void)>(null);
 	const [titlePriorityMode, setTitlePriorityMode] =
 		useState<FormDialogTitlePriorityMode>("prop");
@@ -374,6 +435,7 @@ const FormDialog = (inProps: FormDialogProps) => {
 			blockClosing,
 			unblockClosing,
 			setTitle,
+			setTitleAction,
 			setOpenInNewLink,
 			setTitlePriorityMode,
 		}),
@@ -402,6 +464,7 @@ const FormDialog = (inProps: FormDialogProps) => {
 						onClose={handleClose}
 						dialogTitle={dialogTitle}
 						openInNewLink={openInNewLink ?? openInNewLinkOverride}
+						titleAction={titleAction ?? titleActionOverride}
 					/>
 				</PushedDialogCloseContext.Provider>
 			</FormDialogDispatchContext.Provider>

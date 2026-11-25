@@ -5,8 +5,10 @@ import { FormDialogDispatchContext } from "./FormDialog";
  * Shows a title in the title bar of the enclosing `FullFormDialog` while the
  * calling component is mounted, e.g. the heading of a page that can open as a
  * page or in a dialog. `PageTitle` does this with its text; use the hook for
- * a page without a `PageTitle`, or for a title that is more than text (a row
- * with buttons).
+ * a page without a `PageTitle`, or for a title that is more than text (an icon
+ * beside it). Buttons don't belong in the title, which names the dialog with
+ * everything in it: set them with `useSetFormDialogTitleAction`, which shows
+ * them beside the title.
  * When the title is set again, the new one replaces it; when the caller
  * unmounts, the dialog shows its `dialogTitle` prop again.
  * The shown title names the dialog for screen readers. A title that shows only

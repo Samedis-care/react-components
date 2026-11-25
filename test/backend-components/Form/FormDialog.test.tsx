@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { describe, it, expect, vi } from "vitest";
 import {
 	act,
+	cleanup,
 	fireEvent,
 	render,
 	screen,
@@ -22,12 +23,15 @@ import {
 import FormDialog, {
 	FormDialogDefaultRenderer,
 	FormDialogDispatchContext,
+	FormDialogRendererProps,
 	IsInFormDialogContext,
 } from "../../../src/backend-components/Form/FormDialog";
 import useSetFormDialogTitle from "../../../src/backend-components/Form/useSetFormDialogTitle";
+import useSetFormDialogTitleAction from "../../../src/backend-components/Form/useSetFormDialogTitleAction";
 import { BasicFormPageNestingContext } from "../../../src/backend-components/Form/BasicFormPage";
 import ccI18n, { langs } from "../../../src/i18n";
 import {
+	buttonNames,
 	findLeavePrompt,
 	leavePrompts,
 	makePage,
@@ -718,4 +722,225 @@ describe("FullFormDialog", () => {
 			expect(dialog).toHaveAccessibleName("Pick users");
 		});
 	});
+});
+
+describe("[FOLLOWUP-DIALOG-TITLE-ACTION] controls the content sets in the title row", () => {
+	const editMore = (
+		<>
+			<button type={"button"} aria-label={"Edit"} />
+			<button type={"button"} aria-label={"More"} />
+		</>
+	);
+	const help = <button type={"button"} aria-label={"Help"} />;
+
+	/**
+	 * Content that sets the title and the title-row controls, as a page that can open as a page
+	 * or in a dialog does
+	 */
+	const Content = (props: {
+		title?: string;
+		action: React.ReactNode;
+		enabled?: boolean;
+		report?: (inDialog: boolean) => void;
+	}) => {
+		const { title, action, enabled, report } = props;
+		useSetFormDialogTitle(!!title, title);
+		const inDialog = useSetFormDialogTitleAction(enabled ?? true, action);
+		report?.(inDialog);
+		return <p>content</p>;
+	};
+
+	/**
+	 * The names of the dialog's buttons, in DOM order
+	 */
+	const dialogButtons = () => buttonNames(screen.getByRole("dialog"));
+
+	/**
+	 * The element the dialog's aria-labelledby points at
+	 */
+	const dialogLabel = () =>
+		document.getElementById(
+			screen.getByRole("dialog").getAttribute("aria-labelledby") ?? "",
+		);
+
+	it("[FOLLOWUP-DIALOG-TITLE-ACTION] shows them after the title, before Open in new tab and Close, outside the heading, so the title alone names the dialog", async () => {
+		render(
+			<Framework>
+				<FormDialog openInNewLink={() => {}}>
+					<Content title={"Edit person"} action={editMore} />
+				</FormDialog>
+			</Framework>,
+		);
+		const dialog = await screen.findByRole("dialog", { name: "Edit person" });
+		const edit = within(dialog).getByRole("button", { name: "Edit" });
+		// jsdom leaves a button in the heading out of the name, Chromium does not
+		expect({
+			name: computeAccessibleName(dialog),
+			heading: within(dialog).getByRole("heading").textContent,
+			actionInLabel: !!dialogLabel()?.contains(edit),
+			buttons: dialogButtons(),
+		}).toEqual({
+			name: "Edit person",
+			heading: "Edit person",
+			actionInLabel: false,
+			buttons: ["Edit", "More", "Open in new tab", "Close"],
+		});
+	});
+
+	it("[FOLLOWUP-DIALOG-TITLE-ACTION] they go away when the content passes enabled=false or unmounts", async () => {
+		const Dialog = (props: { mounted: boolean; enabled: boolean }) => (
+			<Framework>
+				<FormDialog dialogTitle={"Edit person"}>
+					{props.mounted && (
+						<Content action={editMore} enabled={props.enabled} />
+					)}
+				</FormDialog>
+			</Framework>
+		);
+		const { rerender } = render(<Dialog mounted enabled />);
+		await screen.findByRole("button", { name: "Edit" });
+		rerender(<Dialog mounted enabled={false} />);
+		expect(dialogButtons(), "enabled=false").toEqual(["Close"]);
+		rerender(<Dialog mounted enabled />);
+		expect(dialogButtons()).toEqual(["Edit", "More", "Close"]);
+		rerender(<Dialog mounted={false} enabled />);
+		expect(dialogButtons(), "unmounted").toEqual(["Close"]);
+	});
+
+	it("[FOLLOWUP-DIALOG-TITLE-ACTION] new controls replace the old ones", async () => {
+		const Dialog = (props: { action: React.ReactNode }) => (
+			<Framework>
+				<FormDialog dialogTitle={"Edit person"}>
+					<Content action={props.action} />
+				</FormDialog>
+			</Framework>
+		);
+		const { rerender } = render(<Dialog action={editMore} />);
+		await screen.findByRole("button", { name: "Edit" });
+		rerender(<Dialog action={help} />);
+		expect(dialogButtons()).toEqual(["Help", "Close"]);
+		rerender(<Dialog action={null} />);
+		expect(dialogButtons(), "null").toEqual(["Close"]);
+	});
+
+	it("[FOLLOWUP-DIALOG-TITLE-ACTION] the titleAction prop shows them too; the content's win over it until they go away", async () => {
+		const Dialog = (props: { mounted: boolean }) => (
+			<Framework>
+				<FormDialog dialogTitle={"Edit person"} titleAction={help}>
+					{props.mounted && <Content action={editMore} />}
+				</FormDialog>
+			</Framework>
+		);
+		const { rerender } = render(<Dialog mounted={false} />);
+		expect(dialogButtons(), "prop only").toEqual(["Help", "Close"]);
+		rerender(<Dialog mounted />);
+		await screen.findByRole("button", { name: "Edit" });
+		expect(dialogButtons(), "content").toEqual(["Edit", "More", "Close"]);
+		rerender(<Dialog mounted={false} />);
+		expect(dialogButtons(), "content gone").toEqual(["Help", "Close"]);
+	});
+
+	it("[FOLLOWUP-DIALOG-TITLE-ACTION] the hook reports whether the controls went to a dialog, and sets nothing when disabled", async () => {
+		const reports: boolean[] = [];
+		const report = (inDialog: boolean) => reports.push(inDialog);
+		render(<Content action={editMore} report={report} />);
+		expect(reports.at(-1), "outside a dialog").toBe(false);
+		expect(screen.queryByRole("button", { name: "Edit" })).toBeNull();
+		cleanup();
+		render(
+			<Framework>
+				<FormDialog dialogTitle={"Edit person"}>
+					<Content action={editMore} enabled={false} report={report} />
+				</FormDialog>
+			</Framework>,
+		);
+		await screen.findByText("content");
+		expect(reports.at(-1), "disabled").toBe(false);
+		expect(dialogButtons()).toEqual(["Close"]);
+		cleanup();
+		render(
+			<Framework>
+				<FormDialog dialogTitle={"Edit person"}>
+					<Content action={editMore} report={report} />
+				</FormDialog>
+			</Framework>,
+		);
+		await screen.findByRole("button", { name: "Edit" });
+		expect(reports.at(-1), "in a dialog").toBe(true);
+	});
+
+	it("[FOLLOWUP-DIALOG-TITLE-ACTION] a custom renderer gets them as titleAction", async () => {
+		const Renderer = (props: FormDialogRendererProps) => (
+			<div role={"dialog"} aria-label={"Custom"}>
+				<div data-testid={"row"}>{props.titleAction}</div>
+				{props.children}
+			</div>
+		);
+		render(
+			<Framework>
+				<FormDialog renderer={Renderer}>
+					<Content action={editMore} />
+				</FormDialog>
+			</Framework>,
+		);
+		const row = await screen.findByTestId("row");
+		expect(buttonNames(row)).toEqual(["Edit", "More"]);
+	});
+
+	it("[FOLLOWUP-DIALOG-TITLE-ACTION] when a control holding the focus goes away, the dialog gets the focus, rather than the page", async () => {
+		const Dialog = (props: { action: React.ReactNode }) => (
+			<Framework>
+				<FormDialog dialogTitle={"Edit person"}>
+					<Content action={props.action} />
+				</FormDialog>
+			</Framework>
+		);
+		const { rerender } = render(<Dialog action={editMore} />);
+		const edit = await screen.findByRole("button", { name: "Edit" });
+		act(() => edit.focus());
+		expect(edit).toHaveFocus();
+		// the content sets other controls, e.g. after Edit switched it to another mode
+		rerender(<Dialog action={help} />);
+		expect(
+			screen.getByRole("dialog"),
+			"the focus fell to the page",
+		).toHaveFocus();
+	});
+
+	it("[FOLLOWUP-DIALOG-TITLE-ACTION] when the Open in new tab button goes away with the focus on it, the dialog gets the focus", async () => {
+		const SetLink = (props: { link: boolean }) => {
+			const dispatch = React.useContext(FormDialogDispatchContext)!;
+			React.useEffect(() => {
+				if (!props.link) return;
+				dispatch.setOpenInNewLink(() => () => {});
+				return () => dispatch.setOpenInNewLink(null);
+			}, [dispatch, props.link]);
+			return null;
+		};
+		const Dialog = (props: { link: boolean }) => (
+			<Framework>
+				<FormDialog dialogTitle={"Edit person"}>
+					<SetLink link={props.link} />
+				</FormDialog>
+			</Framework>
+		);
+		const { rerender } = render(<Dialog link />);
+		const button = await screen.findByRole("button", {
+			name: "Open in new tab",
+		});
+		act(() => button.focus());
+		rerender(<Dialog link={false} />);
+		expect(
+			screen.queryByRole("button", { name: "Open in new tab" }),
+		).toBeNull();
+		expect(
+			screen.getByRole("dialog"),
+			"the focus fell to the page",
+		).toHaveFocus();
+	});
+
+	it("[FOLLOWUP-DIALOG-TITLE-ACTION] the hook is exported from the package root", async () => {
+		const root = (await import("../../../src")) as Record<string, unknown>;
+		expect(root.useSetFormDialogTitleAction).toBe(useSetFormDialogTitleAction);
+	}, 90000);
 });
