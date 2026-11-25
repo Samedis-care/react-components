@@ -7,7 +7,7 @@ import {
 	render,
 	screen,
 } from "@testing-library/react";
-import { createTheme, Theme, ThemeProvider } from "@mui/material";
+import { createTheme, styled, Theme, ThemeProvider } from "@mui/material";
 import InlineSwitch, {
 	InlineSwitchClassKey,
 	InlineSwitchProps,
@@ -18,6 +18,7 @@ import BaseSelector, {
 	BaseSelectorLoadHandler,
 } from "../../src/standalone/Selector/BaseSelector";
 import {
+	MultiSelectWithoutGroup,
 	selectorLocalLoadHandler,
 	SingleSelect,
 } from "../../src/standalone/Selector";
@@ -213,6 +214,31 @@ describe("InlineSwitch styling and theme", () => {
 		);
 		expect(switchRootOf(container)).toHaveClass("s");
 	});
+
+	it("[ISSUE-3465-ITEM-2] the slots carry static CcInlineSwitch-root, -switchWrapper and -switch classes", () => {
+		const { container } = renderSwitch(
+			<InlineSwitch value={false} visible label="L" />,
+		);
+		expect(rootOf(container)).toHaveClass("CcInlineSwitch-root");
+		expect(rootOf(container).firstElementChild).toHaveClass(
+			"CcInlineSwitch-switchWrapper",
+		);
+		expect(switchRootOf(container)).toHaveClass("CcInlineSwitch-switch");
+	});
+
+	it("[ISSUE-3465-ITEM-2] a parent's style reaches the switch wrapper and the switch by their static classes", () => {
+		const Parent = styled(InlineSwitch)({
+			"& .CcInlineSwitch-switchWrapper": { paddingLeft: 5 },
+			"& .CcInlineSwitch-switch": { marginLeft: 6 },
+		});
+		const { container } = renderSwitch(
+			<Parent value={false} visible label="L" />,
+		);
+		const wrapper = rootOf(container).firstElementChild!;
+		expect(getComputedStyle(wrapper).paddingLeft).toBe("5px");
+		expect(getComputedStyle(switchRootOf(container)).marginLeft).toBe("6px");
+	});
+
 	it("[ISSUE-3465-ITEM-4] marks the root with CcInlineSwitch-checked, -visible and -disabled while value, visible and disabled are set", () => {
 		const classes = { root: "r" };
 		const { container, rerender } = renderSwitch(
@@ -357,5 +383,42 @@ describe("InlineSwitch inside BaseSelector (displaySwitch)", () => {
 		await flush();
 		expect(sw).not.toBeChecked();
 		expect(onLoad).not.toHaveBeenCalledWith("", true);
+	});
+});
+
+describe("InlineSwitch in the selectors", () => {
+	it("[ISSUE-3465-ITEM-2] the selectors keep their switch's place: BaseSelector's is not moved up, MultiSelectWithoutGroup's label is not put before it", async () => {
+		renderSwitch(
+			<>
+				<BaseSelector
+					label="Device type"
+					selected={null}
+					onSelect={() => {}}
+					onLoad={selectorLocalLoadHandler([])}
+					displaySwitch
+					switchLabel="Show inactive"
+				/>
+				<MultiSelectWithoutGroup
+					label="Fruits"
+					selected={[]}
+					onSelect={() => {}}
+					loadDataOptions={selectorLocalLoadHandler([])}
+					displaySwitch
+					switchLabel="Show archived"
+				/>
+			</>,
+		);
+		await flush();
+		const wrapperOf = (name: string) => {
+			const el = screen
+				.getByRole("switch", { name })
+				.closest(".CcInlineSwitch-switchWrapper");
+			if (!(el instanceof HTMLElement)) throw new Error("wrapper missing");
+			return el;
+		};
+		expect(getComputedStyle(wrapperOf("Show inactive")).marginTop).toBe("0px");
+		expect(getComputedStyle(wrapperOf("Show archived")).direction).not.toBe(
+			"rtl",
+		);
 	});
 });

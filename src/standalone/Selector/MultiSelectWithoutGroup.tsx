@@ -115,11 +115,6 @@ const StyledInlineSwitch = styled(InlineSwitch, {
 	slot: "switch",
 })({
 	marginTop: 0,
-	"& .CcInlineSwitch-switchWrapper": {
-		lineHeight: "30px",
-		width: "100%",
-		direction: "rtl",
-	},
 });
 
 /**

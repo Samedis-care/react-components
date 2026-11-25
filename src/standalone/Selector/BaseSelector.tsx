@@ -566,9 +566,6 @@ const StyledInlineSwitch = styled(InlineSwitch, {
 	slot: "inlineSwitch",
 })({
 	marginTop: 0,
-	"& .CcInlineSwitch-switchWrapper": {
-		marginTop: -30,
-	},
 });
 
 // the selector renders its label as a sibling of the Autocomplete rather than inside

@@ -64,7 +64,8 @@ export interface InlineSwitchProps {
 	/**
 	 * Class names per slot: `root` (the outer div, combined with `className`),
 	 * `switchWrapper` (the wrapper of switch and label) and `switch` (the
-	 * switch's root, MUI's `.MuiSwitch-root`)
+	 * switch's root, MUI's `.MuiSwitch-root`). They are added to the slots' static
+	 * classes, see {@link InlineSwitchClassKey}.
 	 */
 	classes?: Partial<Record<InlineSwitchClassKey, string>>;
 	/**
@@ -131,7 +132,10 @@ const AntSwitch = styled(Switch, { name: "CcInlineSwitch", slot: "switch" })(
 	}),
 );
 
-// state classes of the root, see InlineSwitchClassKey
+// static classes of the slots and state classes of the root, see InlineSwitchClassKey
+const ROOT_CLASS = "CcInlineSwitch-root";
+const SWITCH_WRAPPER_CLASS = "CcInlineSwitch-switchWrapper";
+const SWITCH_CLASS = "CcInlineSwitch-switch";
 const CHECKED_CLASS = "CcInlineSwitch-checked";
 const VISIBLE_CLASS = "CcInlineSwitch-visible";
 const DISABLED_CLASS = "CcInlineSwitch-disabled";
@@ -157,6 +161,12 @@ const StyledSwitchWrapper = styled(Typography, {
  * - `root`: the outer `<div>`
  * - `switchWrapper`: the wrapper of switch and label
  * - `switch`: the switch's root (MUI's `.MuiSwitch-root`)
+ *
+ * Each slot also has the static class `CcInlineSwitch-<key>`
+ * (`CcInlineSwitch-root`, `CcInlineSwitch-switchWrapper`,
+ * `CcInlineSwitch-switch`), as MUI's slots have their `Mui<Name>-<slot>`
+ * classes, so a stylesheet or the style of a parent can select them, e.g.
+ * `styled(InlineSwitch)({ "& .CcInlineSwitch-switchWrapper": { … } })`.
  *
  * No slot receives an `ownerState`, and the theme has no `variants` for
  * InlineSwitch: a function override is called with the theme. The props are
@@ -210,6 +220,7 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 	return (
 		<StyledRoot
 			className={combineClassNames([
+				ROOT_CLASS,
 				className,
 				classes?.root,
 				value && CHECKED_CLASS,
@@ -221,6 +232,7 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 				<StyledSwitchWrapper
 					component="div"
 					className={combineClassNames([
+						SWITCH_WRAPPER_CLASS,
 						classes?.switchWrapper,
 						disabled && DISABLED_CLASS,
 					])}
@@ -234,7 +246,7 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 					>
 						<Grid>
 							<AntSwitch
-								className={classes?.switch}
+								className={combineClassNames([SWITCH_CLASS, classes?.switch])}
 								checked={value}
 								onChange={handleSwitchChange}
 								disabled={disabled}
