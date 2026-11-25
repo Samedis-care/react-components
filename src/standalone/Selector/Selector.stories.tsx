@@ -15,7 +15,7 @@ import {
 } from "./index";
 import type { MultiSelectorData } from "./MultiSelect";
 import debouncePromise from "../../utils/debouncePromise";
-import { PartialExcept } from "../../utils/internal/distributiveOmit";
+import { PartialExcept } from "../../utils/distributiveOmit";
 
 // ---------------------------------------------------------------------------
 // Shared sample data

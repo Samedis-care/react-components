@@ -22,7 +22,7 @@ import { DialogContext } from "../../framework/DialogContextProvider";
 import useCCTranslations from "../../utils/useCCTranslations";
 import combineClassNames from "../../utils/combineClassNames";
 import { withMuiFieldState } from "../UIKit/MuiFieldState";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 
 export interface MultiSelectorData extends BaseSelectorData {
 	/**

@@ -28,7 +28,7 @@ import isPlainObject from "../../utils/isPlainObject";
 import throwError from "../../utils/throwError";
 import RequestBatching from "./RequestBatching";
 import { blobsToDataUris } from "../Connector/bodyFiles";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 import { captureError, CcErrorNames } from "../../framework/ErrorReporting";
 
 /**

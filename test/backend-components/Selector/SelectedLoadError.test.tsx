@@ -30,7 +30,7 @@ import Connector from "../../../src/backend-integration/Connector/Connector";
 import ModelDataStore from "../../../src/backend-integration/Store";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import { MultiSelectorData } from "../../../src/standalone";
-import { PartialExcept } from "../../../src/utils/internal/distributiveOmit";
+import { PartialExcept } from "../../../src/utils/distributiveOmit";
 
 // jsdom does not implement matchMedia, which the Framework's ThemeProvider needs.
 beforeAll(async () => {

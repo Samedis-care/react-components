@@ -22,7 +22,7 @@ import ccI18n from "../../src/i18n";
 import {
 	DistributiveOmit,
 	PartialExcept,
-} from "../../src/utils/internal/distributiveOmit";
+} from "../../src/utils/distributiveOmit";
 
 // jsdom has "ontouchstart" on window, so TextFieldWithHelp would add its touch
 // Clear button next to Autocomplete's own one

@@ -20,7 +20,7 @@ import {
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 import { BackendSingleSelectLruOptions } from "./BackendSingleSelect";
 import useDebouncedLoad from "./useDebouncedLoad";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 
 /**
  * The switch of a backend multiselect with tags. `switchLabel` is required while

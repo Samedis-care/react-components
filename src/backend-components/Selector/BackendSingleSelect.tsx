@@ -15,7 +15,7 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 import getSelectedLoadErrorLabel from "./getSelectedLoadErrorLabel";
 import useDebouncedLoad from "./useDebouncedLoad";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 
 export type BackendSingleSelectLruOptions<DataT extends BaseSelectorData> =
 	Omit<SelectorLruOptions<DataT>, "loadData">;

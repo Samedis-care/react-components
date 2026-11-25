@@ -4,7 +4,7 @@ import { ModelUnknown } from "../../backend-integration/Model/Model";
 import ApiConnector from "../../backend-integration/Connector/ApiConnector";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
 import { useFormContext } from "./Form";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 
 /**
  * Params of useLazyCrudConnector, which FormCrudMultiSelect, FormCrudFileUpload,

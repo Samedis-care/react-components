@@ -10,7 +10,7 @@ import useLazyCrudConnector, {
 import { MultiSelectorData } from "../../../standalone";
 import { FORM_SUBMITTING_READ_ONLY_REASON, useFormContextLite } from "../Form";
 import { CrudSelectDispatch } from "../../Selector/useCrudSelect";
-import { DistributiveOmit } from "../../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../../utils/distributiveOmit";
 
 export type FormCrudMultiSelectProps<
 	M extends ModelUnknown,

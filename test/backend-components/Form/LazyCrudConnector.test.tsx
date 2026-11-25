@@ -56,7 +56,7 @@ import type { MultiSelectorData } from "../../../src/standalone";
 import MultiSelectEntry, {
 	MultiSelectEntryProps,
 } from "../../../src/standalone/Selector/MultiSelectEntry";
-import { PartialExcept } from "../../../src/utils/internal/distributiveOmit";
+import { PartialExcept } from "../../../src/utils/distributiveOmit";
 
 setupFormTests();
 

@@ -56,7 +56,7 @@ import { OutlinedInputProps } from "@mui/material/OutlinedInput";
 import { InputProps as StandardInputProps } from "@mui/material/Input";
 import Checkbox from "../UIKit/Checkbox";
 import { withMuiFieldState } from "../UIKit/MuiFieldState";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 
 export interface BaseSelectorData {
 	/**

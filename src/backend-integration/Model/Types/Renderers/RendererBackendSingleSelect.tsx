@@ -9,7 +9,7 @@ import {
 	FormBackendSingleSelect,
 	FormBackendSingleSelectProps,
 } from "../../../../backend-components/Selector/FormSelectors";
-import { DistributiveOmit } from "../../../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../../../utils/distributiveOmit";
 
 type OmitProperties =
 	"selected" | "onSelect" | "disabled" | "model" | "initialData" | "autoFocus";

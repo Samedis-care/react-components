@@ -61,7 +61,7 @@ import ComponentWithLabel, {
 import deepClone from "../../utils/deepClone";
 import { BackendMultiSelectProps } from "../../backend-components/Selector/BackendMultiSelect";
 import { MultiSelectorData } from "../Selector";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 
 export interface DataGridProps
 	extends IDataGridHeaderProps, IDataGridColumnProps, IDataGridCallbacks {

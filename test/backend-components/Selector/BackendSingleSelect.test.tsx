@@ -18,7 +18,7 @@ import BackendSingleSelect, {
 	BackendSingleSelectProps,
 } from "../../../src/backend-components/Selector/BackendSingleSelect";
 import type { ModelUnknown } from "../../../src/backend-integration";
-import { PartialExcept } from "../../../src/utils/internal/distributiveOmit";
+import { PartialExcept } from "../../../src/utils/distributiveOmit";
 import { setupFormTests } from "../Form/formFixture";
 import {
 	combobox,

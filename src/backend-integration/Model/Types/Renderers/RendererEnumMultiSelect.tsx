@@ -12,7 +12,7 @@ import {
 } from "../../../../standalone";
 import MultiSelect from "../../../../standalone/Selector/MultiSelect";
 import uniqueArray from "../../../../utils/uniqueArray";
-import { DistributiveOmit } from "../../../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../../../utils/distributiveOmit";
 
 export type RendererEnumMultiSelectProps = DistributiveOmit<
 	MultiSelectProps<MultiSelectorData>,

@@ -7,7 +7,7 @@ import BackendSingleSelect, {
 	BackendSingleSelectProps,
 } from "../../backend-components/Selector/BackendSingleSelect";
 import { ModelUnknown } from "../../backend-integration";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 
 export type GridSingleSelectFilterBackendProps<M extends ModelUnknown> =
 	DistributiveOmit<

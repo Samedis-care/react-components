@@ -12,7 +12,7 @@ import BackendMultiSelect, {
 	BackendMultiSelectProps,
 } from "./BackendMultiSelect";
 import { ModelUnknown } from "../../backend-integration";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 
 interface WithoutFormContext<DataT extends BaseSelectorData> {
 	onAddNew?: BaseSelectorProps<DataT, false>["onAddNew"];

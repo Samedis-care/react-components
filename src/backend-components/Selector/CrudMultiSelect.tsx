@@ -17,7 +17,7 @@ import useCrudSelect, {
 } from "./useCrudSelect";
 import DialogContextProvider from "../../framework/DialogContextProvider";
 import CrudSelectLoadState from "./CrudSelectLoadState";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 
 export type CrudMultiSelectProps<
 	M extends ModelUnknown,

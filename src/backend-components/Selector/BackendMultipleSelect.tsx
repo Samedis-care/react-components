@@ -13,7 +13,7 @@ import {
 } from "./BackendMultiSelect";
 import BaseSelector from "../../standalone/Selector/BaseSelector";
 import useDebouncedLoad from "./useDebouncedLoad";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 
 export type BackendMultipleSelectProps<
 	M extends ModelUnknown,

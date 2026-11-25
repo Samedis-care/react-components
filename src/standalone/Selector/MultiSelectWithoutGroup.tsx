@@ -13,7 +13,7 @@ import { SmallIconButton, SmallListItemIcon } from "../Small";
 import InlineSwitch from "../InlineSwitch";
 import { Chip, styled, Typography, useThemeProps } from "@mui/material";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 import combineClassNames from "../../utils/combineClassNames";
 import { MultiSelectChangeState } from "./MultiSelectEntry";
 

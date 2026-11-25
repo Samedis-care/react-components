@@ -10,7 +10,7 @@ import useCrudSelect, {
 	UseCrudSelectParams,
 } from "./useCrudSelect";
 import CrudSelectLoadState from "./CrudSelectLoadState";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 
 export type CrudMultiSelectWithGroupsProps<
 	GroupModelT extends ModelUnknown,

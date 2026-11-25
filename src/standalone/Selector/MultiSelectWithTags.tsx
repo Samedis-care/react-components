@@ -22,7 +22,7 @@ import { MultiSelectorData } from "./MultiSelect";
 import combineClassNames from "../../utils/combineClassNames";
 import { labelWithDirtyMarker } from "../UIKit/MuiFieldState";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 
 export type MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,

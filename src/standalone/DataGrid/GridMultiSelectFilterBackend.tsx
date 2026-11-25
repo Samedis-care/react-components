@@ -9,7 +9,7 @@ import BackendMultipleSelect, {
 } from "../../backend-components/Selector/BackendMultipleSelect";
 import BackendMultiSelect from "../../backend-components/Selector/BackendMultiSelect";
 import { ModelUnknown } from "../../backend-integration";
-import { DistributiveOmit } from "../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 import useFilterPanelLists from "./CustomFilterDialog/useFilterPanelLists";
 
 export type GridMultiSelectFilterBackendProps<

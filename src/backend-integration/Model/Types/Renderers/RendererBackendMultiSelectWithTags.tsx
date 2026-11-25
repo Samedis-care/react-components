@@ -11,7 +11,7 @@ import {
 	MultiSelectorData,
 } from "../../../../standalone";
 import TypeIds from "../TypeIds";
-import { DistributiveOmit } from "../../../../utils/internal/distributiveOmit";
+import { DistributiveOmit } from "../../../../utils/distributiveOmit";
 
 type OmitProperties =
 	| "selected"
