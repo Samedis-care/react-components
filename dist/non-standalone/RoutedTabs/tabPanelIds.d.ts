@@ -11,6 +11,9 @@
  * select it with `document.getElementById` or `CSS.escape`.
  *
  * Two bars under one Route with the same values still give the same ids.
+ *
+ * A trailing "/" of `url` is ignored, so a Route at `/*` (url "/") and the
+ * bar, which builds its tab urls without it, agree.
  * @param url The url of the Route, e.g. `/settings` or `/users/1`
  * @param value The Tab's `value`, `""` for the default tab
  * @returns The panel's id
