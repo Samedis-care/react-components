@@ -6,7 +6,7 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import { Grid, useMediaQuery } from "@mui/material";
+import { Grid } from "@mui/material";
 import {
 	DataGridCustomDataType,
 	DataGridFilterBarBox,
@@ -36,27 +36,21 @@ export interface IDataGridFilterBarProps {
 
 /**
  * The default of DataGridProps.enableFilterDialogWidth (in px), used while the
- * grid has a filterBar and sets neither enableFilterDialogWidth nor
- * enableFilterDialogMediaQuery. The helpers (GridSingleSelectFilter and the
- * like) take a third of the bar each by default, so each of them is about
- * 190px wide at this width.
+ * grid has a filterBar and sets no enableFilterDialogWidth. The helpers
+ * (GridSingleSelectFilter and the like) take a third of the bar each by
+ * default, so each of them is about 190px wide at this width.
  */
 const DEFAULT_FILTER_DIALOG_WIDTH = 600;
 
 const FilterBar = () => {
 	const props = useDataGridProps();
-	const { enableFilterDialogMediaQuery, filterBar } = props;
+	const { filterBar } = props;
 	const enableFilterDialogWidth =
 		props.enableFilterDialogWidth ??
-		(filterBar && enableFilterDialogMediaQuery == null
-			? DEFAULT_FILTER_DIALOG_WIDTH
-			: undefined);
+		(filterBar ? DEFAULT_FILTER_DIALOG_WIDTH : undefined);
 	const { classes } = props;
 	const [state, setState] = useDataGridState();
 	const filterBarContainer = useRef<HTMLDivElement>(null);
-	const enableDialogMediaQuery = useMediaQuery(
-		enableFilterDialogMediaQuery ?? "(false)",
-	);
 	const enableDialogWidthRef = useRef(false);
 	const [enableDialogWidth, setEnableDialogWidth] = useState<boolean>(
 		enableDialogWidthRef.current,
@@ -81,10 +75,7 @@ const FilterBar = () => {
 		};
 	}, [enableFilterDialogWidth]);
 
-	const enableDialog =
-		enableFilterDialogWidth != null
-			? enableDialogWidth
-			: enableDialogMediaQuery;
+	const enableDialog = enableFilterDialogWidth != null && enableDialogWidth;
 
 	const setCustomData = useCallback(
 		(

@@ -1258,21 +1258,26 @@ describe("FilterBar: the default of enableFilterDialogWidth", () => {
 		expect(barSelectors()).toHaveLength(1);
 		expect(document.querySelector(FILTER_BUTTON)).toBeNull();
 	});
-	it("[ISSUE-3494-ITEM-22] with only the deprecated enableFilterDialogMediaQuery set, the media query alone decides", async () => {
-		barWidth(() => 165);
-		media("(max-width: 899.95px)");
+	it("[FOLLOWUP-DROP-FILTER-DIALOG-MEDIAQUERY] a media query passed as enableFilterDialogMediaQuery neither hides nor shows the bar: the width decides", async () => {
+		let width = 600;
+		barWidth(() => width);
+		media("(max-width: 1199.95px)");
 		render(
 			<Grid
 				enableFilterDialogWidth={undefined}
+				// @ts-expect-error enableFilterDialogMediaQuery is no longer a prop
 				enableFilterDialogMediaQuery="(max-width: 1199.95px)"
 			/>,
 		);
 		await flush();
 		expect(barSelectors()).toHaveLength(1);
+		expect(document.querySelector(FILTER_BUTTON)).toBeNull();
 		cleanup();
+		width = 165;
 		render(
 			<Grid
 				enableFilterDialogWidth={undefined}
+				// @ts-expect-error enableFilterDialogMediaQuery is no longer a prop
 				enableFilterDialogMediaQuery="(max-width: 899.95px)"
 			/>,
 		);

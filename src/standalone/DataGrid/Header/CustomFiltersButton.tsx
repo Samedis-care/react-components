@@ -10,9 +10,9 @@ import combineClassNames from "../../../utils/combineClassNames";
 import { useDataGridCustomFiltersActive } from "../DataGridUtils";
 
 /**
- * The "Filter" button that replaces the filter bar in dialog mode
- * (enableFilterDialogWidth or enableFilterDialogMediaQuery) and opens or
- * closes the panel with the bar's filters. It shows
+ * The "Filter" button that replaces the filter bar in dialog mode (while the
+ * bar is narrower than enableFilterDialogWidth) and opens or closes the panel
+ * with the bar's filters. It shows
  * `standalone.data-grid.header.custom-filter-button` ("Filter"). Its accessible
  * name, `standalone.data-grid.header.custom-filter-button-label` ("Filter
  * selection"), starts with that text and sets it apart from the "Filter"
