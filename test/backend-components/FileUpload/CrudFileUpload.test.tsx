@@ -2775,3 +2775,59 @@ describe("CrudFileUpload: conventions", () => {
 		expect(connector.indexParams).toHaveLength(1);
 	});
 });
+
+describe("CrudFileUpload: several fields on one page", () => {
+	it("[ISSUE-3511-ITEM-26] two fields with their own LazyConnectors that get picks alternately list each of their picks once", async () => {
+		const connectors = [0, 1].map(() => lazyOver(new RecordingConnector([])));
+		const refs = connectors.map(() => React.createRef<FileUploadDispatch>());
+		// one Framework for both, as on a page: it may only be mounted once
+		render(
+			<Framework>
+				{connectors.map((connector, index) => (
+					<div key={index} data-testid={`field-${index}`}>
+						<CrudFileUpload
+							ref={refs[index]}
+							connector={connector}
+							errorComponent={ErrorSink}
+							serialize={serialize}
+							deserialize={deserialize}
+							previewSize={24}
+							label={`Attachments ${index + 1}`}
+						/>
+					</div>
+				))}
+			</Framework>,
+		);
+		const names = (index: number) =>
+			Array.from(
+				screen
+					.getByTestId(`field-${index}`)
+					.querySelectorAll('[class*="CcFile-label"]'),
+			).map((label) => label.textContent);
+		// nothing on the server: the ref is there once the empty list is loaded
+		await waitFor(() =>
+			refs.forEach((ref) => expect(ref.current).not.toBe(null)),
+		);
+
+		// Field 1 a.txt, field 2 a.txt, field 1 b.txt, …, each pick awaited. In a browser a
+		// field renders a task after the awaited picks that follow, so the upload of a
+		// field's pick can settle before the field has rendered it, while the other field
+		// takes its turn. One act scope holds every render back to its end, and a turn of
+		// the event loop after each pick lets its upload settle.
+		await act(async () => {
+			for (const name of ["a.txt", "b.txt", "c.txt"])
+				for (const ref of refs) {
+					await ref.current?.addFile(pick(name));
+					await new Promise((resolve) => setTimeout(resolve, 0));
+				}
+		});
+		await act(async () => {
+			await new Promise((resolve) => setTimeout(resolve, 0));
+		});
+
+		for (const [index, connector] of connectors.entries()) {
+			expect(await onServer(connector)).toEqual(["a.txt", "b.txt", "c.txt"]);
+			expect(names(index)).toEqual(["a.txt", "b.txt", "c.txt"]);
+		}
+	});
+});

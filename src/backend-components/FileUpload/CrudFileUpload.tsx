@@ -488,9 +488,14 @@ const CrudFileUpload = (
 			// `delete` or `canBeUploaded` of another control's list means nothing to this
 			// connector, where its id may even be a different record.
 			const ownFiles = newFiles.filter((file) => !isAdditionalFile(file));
-			// the picks the user has now, whichever change uploads them
+			// The picks the user has now that no change has uploaded yet, whichever change
+			// uploads them. One an earlier change has uploaded comes back as a pick until
+			// the standalone control has been handed that upload, which `files` lists
+			// already. Only the change that uploads a pick drops it from here, so carried
+			// along again it would be listed a second time, for good.
 			pendingPicks.current = ownFiles.filter(
-				(file) => file.canBeUploaded,
+				(file) =>
+					file.canBeUploaded && !uploadedPicks.current.has(file.file as File),
 			) as FileData<File>[];
 			setWriting((count) => count + 1);
 			const change = pendingChange.current.then(() => applyChange(ownFiles));
