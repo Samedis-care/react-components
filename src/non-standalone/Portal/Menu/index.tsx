@@ -5,7 +5,7 @@ import React, {
 	useEffect,
 	useRef,
 } from "react";
-import { parsePath } from "history";
+import { parsePath, type History } from "history";
 import {
 	getMissingRouteParameters,
 	insertRouteParameters,
@@ -13,6 +13,8 @@ import {
 import matchPath, { normalizePath } from "../../../standalone/Routes/matchPath";
 import joinRoutePath from "../../../standalone/Routes/joinRoutePath";
 import { RouteContext, useRoutePrefix } from "../../../standalone/Routes/Route";
+import { useHistoryRouterContext } from "../../../standalone/Routes/HistoryRouter";
+import toAppPath from "../../../standalone/Routes/toAppPath";
 import MenuBase, {
 	IMenuItemDefinition,
 	MenuProps,
@@ -375,6 +377,22 @@ const getTarget = (
 };
 
 /**
+ * The URL that a new tab opens for an entry: the URL a plain click on it
+ * navigates to. The target goes to the history as useNavigate hands it over,
+ * its leading slashes collapsed into one, and the history writes it as a URL,
+ * e.g. "#/users" for a hash history (a new tab at "/users" would be outside
+ * of the app).
+ * @param history The router's history
+ * @param target The entry's navigation target (getTarget)
+ * @return The href, or null for a target that is no path of the app, which
+ * useNavigate refuses too
+ */
+const getTargetHref = (history: History, target: string): string | null => {
+	const path = toAppPath(target);
+	return path === null ? null : history.createHref(path);
+};
+
+/**
  * The entries hidden because the current URL cannot fill their route: only
  * entries the definition renders (`shouldRender`), and not the entries below
  * such an entry
@@ -413,6 +431,7 @@ const getUnresolvedEntries = (
  * @param definition The routed menu item definition
  * @param id The menu item id of the definition
  * @param navigate The react-router navigate function
+ * @param history The router's history, which writes the URL a new tab opens
  * @return a normal menu item definition
  */
 const convertDefinition = (
@@ -422,6 +441,7 @@ const convertDefinition = (
 	definition: IRoutedMenuItemDefinition,
 	id: string,
 	navigate: NavigateFunction,
+	history: History,
 ): IMenuItemDefinition => ({
 	...definition,
 	// an entry whose route the current URL cannot fill has nowhere to go
@@ -438,6 +458,7 @@ const convertDefinition = (
 			entry,
 			getItemId(id, entry.title),
 			navigate,
+			history,
 		),
 	),
 	onClick: (evt) => {
@@ -446,11 +467,11 @@ const convertDefinition = (
 		}
 		// keep URL parameters
 		const target = getTarget(definition, params, base);
-		if (target) {
-			if (evt.ctrlKey || evt.metaKey || evt.shiftKey)
-				window.open(target, "_blank");
-			else navigate(target);
-		}
+		if (!target) return;
+		if (evt.ctrlKey || evt.metaKey || evt.shiftKey) {
+			const href = getTargetHref(history, target);
+			if (href) window.open(href, "_blank");
+		} else navigate(target);
 	},
 	onAuxClick: (evt) => {
 		// the middle button only: browsers fire auxclick for the right button too.
@@ -462,7 +483,8 @@ const convertDefinition = (
 		}
 		// keep URL parameters
 		const target = getTarget(definition, params, base);
-		if (target) window.open(target);
+		const href = target ? getTargetHref(history, target) : null;
+		if (href) window.open(href);
 	},
 });
 
@@ -482,7 +504,8 @@ const ignoreActiveChange: Dispatch<SetStateAction<string>> = () => undefined;
  * @return `definition`: the entries converted for MenuBase, with
  * `forceExpand` set on the groups above the entry of the current URL (and
  * kept on the entries that set it themselves) and handlers that navigate to
- * the entries' routes. `controlledState`: for
+ * the entries' routes, or, on a Ctrl, Meta or Shift click and a middle click,
+ * open the URL of that navigation in a new tab. `controlledState`: for
  * MenuBase's `customState` or a `MenuContext.Provider`, the id of the entry
  * of the current URL (the titles from the top level joined by `@`, `""` when
  * no entry matches the URL) and a setter that does nothing, because the
@@ -494,6 +517,7 @@ export const useRoutedMenuLogic = (
 	const location = useLocation();
 	const path = location.pathname;
 	const navigate = useNavigate();
+	const { history } = useHistoryRouterContext();
 	const rawDef = props.definition;
 
 	// the enclosing Route, which the relative routes are resolved against
@@ -534,9 +558,10 @@ export const useRoutedMenuLogic = (
 					entry,
 					getItemId(null, entry.title),
 					navigate,
+					history,
 				),
 			),
-		[rawDef, params, current, base, navigate],
+		[rawDef, params, current, base, navigate, history],
 	);
 
 	// development: name the entries hidden for a param the URL lacks, once per
@@ -571,11 +596,13 @@ export const useRoutedMenuLogic = (
  * path best is highlighted and the groups above it are expanded (see
  * IRoutedMenuItemDefinition's `route`; groups with `forceExpand` are
  * expanded on every page), and a click on an entry runs its
- * `onClick` and navigates to its route. The highlight follows the URL only:
- * on a path that matches no entry nothing is highlighted, and a click
- * highlights nothing by itself, only the navigation it starts does. Must be
- * rendered inside a HistoryRouter; rendered inside a Route, its routes
- * without a leading slash are relative to that Route.
+ * `onClick` and navigates to its route. A Ctrl, Meta or Shift click and a
+ * middle click open the URL of that navigation in a new tab instead, as the
+ * history writes it (`#/users` with a hash history). The highlight follows
+ * the URL only: on a path that matches no entry nothing is highlighted, and
+ * a click highlights nothing by itself, only the navigation it starts does.
+ * Must be rendered inside a HistoryRouter; rendered inside a Route, its
+ * routes without a leading slash are relative to that Route.
  */
 const RoutedMenu = (props: IRoutedMenuProps) => {
 	const { definition, controlledState } = useRoutedMenuLogic(props);

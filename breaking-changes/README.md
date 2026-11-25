@@ -21,6 +21,7 @@ One file per change, so this never grows into a single unreadable log.
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
 | 2026-11-26 | [The busy overlay fades in late on every show, also when it is mounted shown](2026-11-26-form-loader-overlay-every-show-fades-in-late.md) | behavior |
+| 2026-11-25 | [A routed menu entry opens a new tab at the URL a click navigates to](2026-11-25-routed-menu-new-tab-opens-history-href.md) | behavior |
 | 2026-11-25 | [showErrorDialog lists the messages of a ValidationError only](2026-11-25-show-error-dialog-lists-validation-errors-only.md) | behavior |
 | 2026-11-25 | [The DataGrid no longer takes `enableFilterDialogMediaQuery`](2026-11-25-data-grid-filter-dialog-media-query-removed.md) | type, behavior |
 | 2026-11-25 | [After the last file, focus steps back to the previous file's button; custom variants get the focus handling from useFileActionButtonFocus](2026-11-25-file-upload-focus-after-last-file.md) | behavior |

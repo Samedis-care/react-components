@@ -9,7 +9,13 @@ import {
 	screen,
 } from "@testing-library/react";
 import { createTheme, List, ThemeProvider } from "@mui/material";
-import { createBrowserHistory, createMemoryHistory, History } from "history";
+import {
+	createBrowserHistory,
+	createHashHistory,
+	createMemoryHistory,
+	createPath,
+	History,
+} from "history";
 import MaterialMenuItem from "../../src/standalone/Portal/MenuItem/Material";
 import type { MenuItemProps } from "../../src/standalone/Portal/Menu";
 import HistoryRouter from "../../src/standalone/Routes/HistoryRouter";
@@ -558,6 +564,63 @@ describe("RoutedMenu bugs", () => {
 		);
 		expect(selected()).toEqual(["Profile"]);
 		expect(chevron(entry("Settings"))).toBe("less");
+	});
+	it("[ISSUE-3498-ITEM-6] a Ctrl-click opens the history's href of the route (hash history)", () => {
+		const open = vi.spyOn(window, "open").mockImplementation(() => null);
+		window.history.replaceState(null, "", "/app/index.html#/users");
+		try {
+			const history = createHashHistory();
+			mountWith(
+				[leaf("Users", "/users"), leaf("Profile", "/profile")],
+				history,
+			);
+			expect(selected()).toEqual(["Users"]);
+			fireEvent.click(entry("Profile"), { ctrlKey: true });
+			expect(open.mock.calls).toEqual([
+				[history.createHref("/profile"), "_blank"],
+			]);
+		} finally {
+			cleanup();
+			window.history.replaceState(null, "", "/");
+		}
+	});
+	it("[ISSUE-3498-ITEM-6] Meta, Shift and middle click open the history's href too, e.g. below a base path", () => {
+		const open = vi.spyOn(window, "open").mockImplementation(() => null);
+		const history = createMemoryHistory({ initialEntries: ["/users"] });
+		// a history whose URLs lie below a base path
+		vi.spyOn(history, "createHref").mockImplementation(
+			(to) => `/base${typeof to === "string" ? to : createPath(to)}`,
+		);
+		mountWith(
+			[leaf("Users", "/users"), leaf("Profile", "/profile?tab=info")],
+			history,
+		);
+		fireEvent.click(entry("Profile"), { metaKey: true });
+		fireEvent.click(entry("Profile"), { shiftKey: true });
+		middleClick(entry("Profile"));
+		expect(open.mock.calls).toEqual([
+			["/base/profile?tab=info", "_blank"],
+			["/base/profile?tab=info", "_blank"],
+			["/base/profile?tab=info"],
+		]);
+		fireEvent.click(entry("Profile"));
+		expect(history.location).toMatchObject({
+			pathname: "/profile",
+			search: "?tab=info",
+		});
+	});
+	it("[ISSUE-3498-ITEM-6] a route with leading slashes opens the path a plain click navigates to, not a host", () => {
+		// what `${useRouteInfo().url}/devices` gives under a Route at the root
+		const open = vi.spyOn(window, "open").mockImplementation(() => null);
+		const { history } = mount(
+			[leaf("Users", "/users"), leaf("Devices", "//devices")],
+			"/users",
+		);
+		fireEvent.click(entry("Devices"), { ctrlKey: true });
+		middleClick(entry("Devices"));
+		expect(open.mock.calls).toEqual([["/devices", "_blank"], ["/devices"]]);
+		fireEvent.click(entry("Devices"));
+		expect(history.location.pathname).toBe("/devices");
 	});
 });
 
