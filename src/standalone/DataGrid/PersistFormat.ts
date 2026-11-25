@@ -564,8 +564,10 @@ const applySortRecord = (
 		}
 	}
 	for (const [field, [direction, order]] of sort) {
-		// sort of a column which no longer exists would be sent to the backend
-		if (!(field in columnState)) continue;
+		// sort of a column which no longer exists would be sent to the backend.
+		// Only own entries are columns: toString, __proto__ and the like are in
+		// every object
+		if (!Object.prototype.hasOwnProperty.call(columnState, field)) continue;
 		columnState[field] = {
 			...columnState[field],
 			sort: direction,
@@ -623,7 +625,8 @@ const decode = (
 		const filter = asRecord(data.filter);
 		for (const field in filter) {
 			// see above, a filter for a gone column would reach the backend
-			if (!(field in result.columnState)) continue;
+			if (!Object.prototype.hasOwnProperty.call(result.columnState, field))
+				continue;
 			// null is a deliberately cleared default, anything unusable is skipped
 			const value = filter[field];
 			if (value !== null && !isPlainObject(value)) continue;

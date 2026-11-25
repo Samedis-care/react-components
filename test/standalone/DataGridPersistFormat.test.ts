@@ -1363,4 +1363,87 @@ describe("persisted format bugs", () => {
 				.filter,
 		).toBeUndefined();
 	});
+
+	it.each([
+		['{"v":2,"sort":{"toString":[1,2]}}'],
+		[
+			'{"v":2,"filter":{"valueOf":{"type":"contains","value1":"x","value2":""}}}',
+		],
+	])("[ISSUE-3496-ITEM-13] %s does not reach the query", (json) => {
+		const result = decodePersistedState(
+			JSON.parse(json) as never,
+			COLUMNS,
+			defaults(),
+			undefined,
+		);
+		const [sorts, filters] = dataGridPrepareFiltersAndSorts(result.columnState);
+		expect(sorts.map((sort) => sort.field)).toEqual([]);
+		expect(Object.keys(filters)).toEqual([]);
+	});
+
+	it.each([
+		[
+			"v2",
+			{
+				v: DATA_GRID_PERSIST_VERSION,
+				sort: { valueOf: [1, 1], name: [-1, 2] },
+				filter: { hasOwnProperty: filter("x"), name: filter("bob") },
+			},
+		],
+		[
+			"legacy",
+			{
+				columnState: {
+					toString: { sort: 1, sortOrder: 1, filter: filter("x") },
+					name: { sort: -1, sortOrder: 2, filter: filter("bob") },
+				},
+			},
+		],
+	])(
+		"[ISSUE-3496-ITEM-13] %s: entries named like Object.prototype members are dropped, the columns' entries next to them are kept",
+		(_, stored) => {
+			const result = decodePersistedState(
+				JSON.parse(JSON.stringify(stored)) as never,
+				COLUMNS,
+				defaults(),
+				undefined,
+			);
+			expect(dataGridPrepareFiltersAndSorts(result.columnState)).toEqual([
+				[{ field: "name", direction: -1 }],
+				{ name: filter("bob") },
+			]);
+		},
+	);
+
+	it("[ISSUE-3496-ITEM-13] a column named toString keeps its stored sort and filter", () => {
+		const columns = [...COLUMNS, col("toString")];
+		const result = decodePersistedState(
+			JSON.parse(
+				JSON.stringify({
+					v: DATA_GRID_PERSIST_VERSION,
+					sort: { toString: [1, 1] },
+					filter: { toString: filter("x") },
+				}),
+			) as never,
+			columns,
+			defaults(columns),
+			undefined,
+		);
+		expect(dataGridPrepareFiltersAndSorts(result.columnState)).toEqual([
+			[{ field: "toString", direction: 1 }],
+			{ toString: filter("x") },
+		]);
+	});
+
+	it("[ISSUE-3496-ITEM-13] stored entries named __proto__ leave the column state's prototype alone", () => {
+		const result = decodePersistedState(
+			JSON.parse(
+				'{"v":2,"sort":{"__proto__":[1,1]},"filter":{"__proto__":{"type":"contains","value1":"x","value2":""}}}',
+			) as never,
+			COLUMNS,
+			defaults(),
+			undefined,
+		);
+		expect(Object.getPrototypeOf(result.columnState)).toBe(Object.prototype);
+	});
 });
