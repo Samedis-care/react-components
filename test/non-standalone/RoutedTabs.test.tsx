@@ -245,6 +245,19 @@ describe("RoutedTabs: bugs", () => {
 		expect(panel).toHaveAttribute("tabindex", "0");
 	});
 
+	it("[FOLLOWUP-ROUTED-TABS-ROOT-IDS] under a Route at /*, every tab and its panel reference each other", () => {
+		renderAt(mem("/security"), <Demo />, "/*");
+		const panel = screen.getByRole("tabpanel", { name: "Security" });
+		expect(tabEl("Security")).toHaveAttribute("aria-controls", panel.id);
+		expect(panel).toHaveAttribute("aria-labelledby", tabEl("Security").id);
+		// the exported helpers give the same ids for the url "/" and without it
+		expect(getTabPanelId("/", "security")).toBe(panel.id);
+		expect(getTabId("/", "security")).toBe(tabEl("Security").id);
+		expect(getTabPanelId("/settings/", "a")).toBe(
+			getTabPanelId("/settings", "a"),
+		);
+	});
+
 	it("[ISSUE-3500-ITEM-6] the tabpanel is labelled by its tab, and every tab names and controls its own panel", () => {
 		renderAt(mem("/settings/security"));
 		const panel = screen.getByRole("tabpanel", { name: "Security" });
