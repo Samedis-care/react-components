@@ -16,6 +16,8 @@ export default meta;
 
 type Story = StoryObj<typeof HowToBox>;
 
+const MOBILE = { viewport: { value: "mobile1", isRotated: false } };
+
 const rectOf = (el: Element | null) => {
 	if (!el) throw new Error("element missing");
 	return el.getBoundingClientRect();
@@ -102,6 +104,86 @@ export const Issue3463Item1LineBreaksInEntryAreShown: Story = {
 		const [multi, single] = entriesOf(canvasElement);
 		await expect(rectOf(multi).height).toBeGreaterThanOrEqual(
 			3 * rectOf(single).height - 1,
+		);
+	},
+};
+
+export const Issue3463Item7LongWordEntryWrapsOnPhone: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"ISSUE-3463-ITEM-7: at 320px an entry with a long compound word or a URL does not wrap: it runs over the frame's right border and the page scrolls sideways.",
+			},
+		},
+	},
+	render: (args) => (
+		<div style={{ padding: "0 16px" }}>
+			<HowToBox {...args} />
+		</div>
+	),
+	args: {
+		titleLabel: "Wie es funktioniert",
+		labels: [
+			"Lade die Importdatei über das untenstehende Upload-Feld hoch",
+			"Datenschutzgrundverordnungskonformitätsbescheinigung",
+			"Vorlage: https://example.com/download/staff_import.de.xlsx?version=2026-10-17",
+		],
+	},
+	play: async ({ canvasElement }) => {
+		await within(canvasElement).findByRole("group", {
+			name: "Wie es funktioniert",
+		});
+		for (const li of entriesOf(canvasElement)) {
+			await expect(li.scrollWidth).toBeLessThanOrEqual(li.clientWidth);
+		}
+		await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+			document.documentElement.clientWidth,
+		);
+	},
+};
+
+export const Issue3463Item7LongWordEntryWrapsInFlexRow: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"ISSUE-3463-ITEM-7: at 320px, in a flex row whose item keeps the default `min-width: auto`, an entry with a long compound word or a URL still wraps inside the frame: the box does not widen the row or the page.",
+			},
+		},
+	},
+	render: (args) => (
+		<div style={{ display: "flex", padding: "0 16px" }}>
+			<div>
+				<HowToBox {...args} />
+			</div>
+		</div>
+	),
+	args: {
+		titleLabel: "Wie es funktioniert",
+		labels: [
+			"Datenschutzgrundverordnungskonformitätsbescheinigung",
+			"Vorlage: https://example.com/download/staff_import.de.xlsx?version=2026-10-17",
+		],
+	},
+	play: async ({ canvasElement }) => {
+		const group = await within(canvasElement).findByRole("group", {
+			name: "Wie es funktioniert",
+		});
+		const viewport = document.documentElement.clientWidth;
+		// the frame stays inside the row's 16px gutter
+		await expect(group.getBoundingClientRect().right).toBeLessThanOrEqual(
+			viewport - 16,
+		);
+		for (const li of entriesOf(canvasElement)) {
+			await expect(li.scrollWidth).toBeLessThanOrEqual(li.clientWidth);
+		}
+		await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+			viewport,
 		);
 	},
 };

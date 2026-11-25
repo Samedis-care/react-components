@@ -26,6 +26,10 @@ export interface HowToBoxProps {
 	 * A line break `"\n"` in an entry starts a new line inside the same item,
 	 * which is the only way to break a line in a translated string. Other runs
 	 * of white space collapse to one space, as in normal text.
+	 *
+	 * An entry wraps at spaces. A word wider than the entry, such as a long
+	 * compound, a file name or a URL, breaks between any two characters, so it
+	 * stays inside the frame and the page does not scroll sideways on a phone.
 	 */
 	labels: string[] | React.ReactNode[] | string | React.ReactNode | undefined;
 	className?: string;
@@ -67,6 +71,10 @@ const UnorderedList = styled("ul", { name: "CcHowToBox", slot: "ul" })({
 
 const ListItem = styled("li", { name: "CcHowToBox", slot: "li" })({
 	whiteSpace: "pre-line",
+	// a word wider than the entry (a German compound, a file name or a URL on
+	// a phone) breaks inside, so it stays in the frame and does not widen the
+	// page, also where the box sits in a flex row or a grid cell
+	overflowWrap: "anywhere",
 });
 
 /**
@@ -74,7 +82,9 @@ const ListItem = styled("li", { name: "CcHowToBox", slot: "li" })({
  * of the `classes` prop:
  * - `root`: the GroupBox `<fieldset>` frame
  * - `ul`: the list
- * - `li`: each entry
+ * - `li`: each entry. It sets `white-space: pre-line` and
+ *   `overflow-wrap: anywhere`, so a word wider than the entry breaks inside
+ *   it.
  *
  * No slot receives an `ownerState`: a function override is called with the
  * theme. To style a box by its props, use theme `variants`, which apply to
