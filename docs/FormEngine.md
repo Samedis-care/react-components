@@ -279,7 +279,10 @@ title: {
 ```
 
 `validatePresence` refuses every falsy value, `0` and `false` included. A number or a switch
-that may be `0` or `false` needs a validator of its own. Without a validator, the asterisk
+that may be `0` or `false` needs a validator of its own. A localized string field's value is an
+object, which `validatePresence` always counts as present: use `validateLocalizedPresence`, which
+refuses it while no language holds text, or `validateLocalizedPresenceFor(["en"])` to require
+given languages. Without a validator, the asterisk
 suits a field that may be saved incomplete, such as a draft that is checked when it is
 submitted.
 
