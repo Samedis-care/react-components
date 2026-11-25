@@ -82,3 +82,7 @@ export { default as advancedEnumValueToBaseSelectorData } from "./advancedEnumVa
 export { default as getCanImageCapture } from "./getCanImageCapture";
 export { default as useDocumentBody } from "./useDocumentBody";
 export { default as useImageZoomPan } from "./useImageZoomPan";
+export type {
+	DistributiveOmit,
+	PartialExcept,
+} from "./internal/distributiveOmit";
