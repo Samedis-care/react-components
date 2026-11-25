@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
 	Cancel as RemoveIcon,
 	RestoreFromTrash as RestoreIcon,
@@ -167,7 +167,6 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 		...otherProps
 	} = props;
 	const { t } = useCCTranslations();
-	const [dataOptions, setDataOptions] = useState<DataT[]>([]);
 
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
 	const getId = getIdOfData ?? getIdDefault;
@@ -199,16 +198,6 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 			: entries;
 	}, [added, removed, selected, sortCompareFn]);
 
-	useEffect(() => {
-		selected.map((selectedOption) => {
-			setDataOptions((oldOptions) =>
-				oldOptions.filter(
-					(option) => !getId(option).includes(getId(selectedOption)),
-				),
-			);
-		});
-	}, [getId, selected]);
-
 	const handleDelete = useCallback(
 		async (evt: React.MouseEvent<HTMLButtonElement>) => {
 			evt.stopPropagation();
@@ -232,10 +221,9 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 				return;
 			}
 
-			setDataOptions([...dataOptions, entryToDelete]);
 			onSelect(selected.filter((entry) => entry !== entryToDelete));
 		},
-		[onSelect, setDataOptions, dataOptions, selected],
+		[onSelect, selected],
 	);
 
 	const handleRestore = useCallback(

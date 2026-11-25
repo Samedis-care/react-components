@@ -590,7 +590,7 @@ describe("FullFormDialog", () => {
 			React.useEffect(() => {
 				let mounted = true;
 				void steps[step]?.then(() => {
-					if (mounted) setStep(step + 1);
+					if (mounted) setStep((prev) => prev + 1);
 				});
 				return () => {
 					mounted = false;

@@ -10,6 +10,7 @@ import eslintPluginReact from "eslint-plugin-react";
 import eslintPluginReactHooks from "eslint-plugin-react-hooks";
 import { fixupConfigRules } from "@eslint/compat";
 import globals from "globals";
+import noOwnStateInSetter from "./eslint-rules/no-own-state-in-setter.mjs";
 
 eslintPluginReactHooks.configs.recommended.plugins = {
 	"react-hooks": eslintPluginReactHooks,
@@ -25,7 +26,11 @@ export default [
 	...fixupConfigRules(prettierConfig),
 	{
 		files: ["**/*.{js,mjs,cjs,ts,mts,jsx,tsx}"],
-		plugins: {},
+		plugins: {
+			local: {
+				rules: { "no-own-state-in-setter": noOwnStateInSetter },
+			},
+		},
 
 		languageOptions: {
 			parser: tsParser,
@@ -60,6 +65,10 @@ export default [
 			"import/no-named-as-default": "off",
 			"prettier/prettier": "warn",
 			"react/prop-types": "off",
+			// a state update computed from the state reads it through the updater's
+			// parameter: this.setState((prevState) => …), setX((prev) => …)
+			"react/no-access-state-in-setstate": "error",
+			"local/no-own-state-in-setter": "error",
 			"@typescript-eslint/no-redundant-type-constituents": "off",
 			"@typescript-eslint/no-misused-promises": [
 				"error",

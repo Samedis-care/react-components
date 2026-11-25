@@ -143,6 +143,10 @@ to the whole library; most items below come with a defect that audit found more 
 
 - The formatting is automatically set and corrected by prettier and enforced using git commit hooks.
 - Do not store non-mutable/read-only data in the component state. Use static class properties or static functions instead.
+- A state update computed from the state reads it through the updater's parameter, `setOpen((prev) => !prev)`,
+  not through the state variable, which holds the state of the render that created the callback. ESLint
+  reports a violation: `local/no-own-state-in-setter` (in `eslint-rules/`) for `useState`,
+  `react/no-access-state-in-setstate` for class components.
 - Use Material-UI Styles/Theme. Do not create global CSS styles. Avoid inline styles.
 
 ## Breaking changes
