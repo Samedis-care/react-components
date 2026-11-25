@@ -1,7 +1,9 @@
 import React, { useCallback, useMemo } from "react";
 import { flushSync } from "react-dom";
 import {
+	Divider,
 	ListItemIcon,
+	ListItemText,
 	MenuItem,
 	MenuItemProps,
 	MenuProps,
@@ -9,12 +11,14 @@ import {
 } from "@mui/material";
 import { ExportIcon } from "../../Icons";
 import {
+	Add as AddIcon,
 	Publish as ImportIcon,
 	Refresh as RefreshIcon,
 	Tune as TuneIcon,
 } from "@mui/icons-material";
 import PopupMenu from "../../PopupMenu";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import type { IDataGridAddButton } from "../DataGrid";
 
 /**
  * The props of the "More options" menu's slots: MUI Menu's `slotProps`, and
@@ -41,6 +45,13 @@ export interface ActionBarMenuProps {
 	openResetDialog?: (evt: React.MouseEvent) => void;
 	openExportMenu?: (evt: React.MouseEvent) => void;
 	handleImport?: (evt: React.MouseEvent) => void;
+	/**
+	 * The add buttons the header has no room for (on phones every one but the
+	 * first): an entry each, below the other entries, with its icon (MUI's Add
+	 * by default) and label. An entry without onClick is disabled and shows its
+	 * disableHint below the label.
+	 */
+	addButtons?: IDataGridAddButton[];
 	onClose: () => void;
 	/**
 	 * The props of the slots: the menu's (MUI Menu's `slotProps`; `list` gives
@@ -69,6 +80,7 @@ const ActionBarMenu = (props: ActionBarMenuProps) => {
 		openResetDialog,
 		openExportMenu,
 		handleImport,
+		addButtons,
 		slotProps,
 	} = props;
 	const menuSlotProps = useMemo((): MenuProps["slotProps"] => {
@@ -111,6 +123,12 @@ const ActionBarMenu = (props: ActionBarMenuProps) => {
 		[handleImport, onClose],
 	);
 	const { t } = useCCTranslations();
+	const hasOtherEntries = !!(
+		toggleSettings ||
+		openResetDialog ||
+		openExportMenu ||
+		handleImport
+	);
 	return (
 		<PopupMenu
 			anchorEl={anchorEl}
@@ -153,6 +171,26 @@ const ActionBarMenu = (props: ActionBarMenuProps) => {
 					{t("standalone.data-grid.header.import")}
 				</MenuItem>
 			)}
+			{hasOtherEntries && addButtons && addButtons.length > 0 && <Divider />}
+			{addButtons?.map((entry, index) => (
+				<MenuItem
+					key={index.toString()}
+					disabled={!entry.onClick}
+					onClick={() => {
+						if (entry.onClick) entry.onClick();
+						onClose();
+					}}
+				>
+					<ListItemIcon>
+						{entry.icon ?? <AddIcon fontSize={"small"} />}
+					</ListItemIcon>
+					{!entry.onClick && entry.disableHint ? (
+						<ListItemText primary={entry.label} secondary={entry.disableHint} />
+					) : (
+						entry.label
+					)}
+				</MenuItem>
+			))}
 		</PopupMenu>
 	);
 };

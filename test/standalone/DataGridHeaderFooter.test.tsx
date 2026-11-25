@@ -1062,3 +1062,152 @@ describe("select all", () => {
 		expect(caption()).not.toHaveClass("Mui-disabled");
 	});
 });
+
+describe("phone layout", () => {
+	const onAddNew = () => [
+		{ label: "New", onClick: vi.fn() },
+		{ label: "Invite", icon: <Tune />, onClick: vi.fn() },
+		{ label: "Import list", onClick: undefined, disableHint: "Not allowed" },
+	];
+	const headerButtons = () =>
+		within(header())
+			.getAllByRole("button")
+			.map((button) => computeAccessibleName(button));
+	const archive = customActions.slice(0, 1);
+
+	it("[ISSUE-3495-ITEM-22] on a phone the add buttons after the first are entries of More options, below its other entries", async () => {
+		stubViewport(320);
+		const buttons = onAddNew();
+		render(<Grid filterBar={undefined} onAddNew={buttons} />);
+		await screen.findByRole("button", { name: "Search" });
+		// the first one stays: its name is its tooltip's (ActionButton small)
+		expect(headerButtons()).toEqual(["Search", "More options", ""]);
+		await openMenu("More options");
+		const menu = await screen.findByRole("menu");
+		expect(
+			within(menu)
+				.getAllByRole("menuitem")
+				.map((item) => item.textContent),
+		).toEqual(["Columns", "Reset", "Invite", "Import listNot allowed"]);
+		expect(within(menu).getByRole("separator")).toBeInTheDocument();
+		expect(
+			within(menu).getByRole("menuitem", { name: /Import list/ }),
+		).toHaveAttribute("aria-disabled", "true");
+		fireEvent.click(within(menu).getByRole("menuitem", { name: "Invite" }));
+		expect(buttons[1].onClick).toHaveBeenCalledOnce();
+		expect(buttons[0].onClick).not.toHaveBeenCalled();
+		await waitFor(() =>
+			expect(screen.queryByRole("menu")).not.toBeInTheDocument(),
+		);
+	});
+
+	it("[ISSUE-3495-ITEM-22] on wider screens every add button is in the header", async () => {
+		stubViewport(700);
+		render(<Grid filterBar={undefined} onAddNew={onAddNew()} />);
+		expect(
+			await screen.findByRole("button", { name: "Invite" }),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: "More options" }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: "Import list" }),
+		).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3495-ITEM-22] on a phone Columns and Reset stay beside one add button, a third button beside it moves them into More options", async () => {
+		stubViewport(320);
+		const { rerender } = render(
+			<Grid filterBar={undefined} onAddNew={vi.fn<() => void>()} />,
+		);
+		await screen.findByRole("button", { name: "Search" });
+		expect(headerButtons()).toEqual(["Search", "Columns", "Reset", ""]);
+
+		rerender(
+			<Grid
+				filterBar={undefined}
+				onAddNew={vi.fn<() => void>()}
+				exporters={[makeExporter()]}
+			/>,
+		);
+		expect(headerButtons()).toEqual(["Search", "More options", ""]);
+
+		// without an add button all four fit
+		rerender(
+			<Grid
+				filterBar={undefined}
+				exporters={[makeExporter()]}
+				onImport={vi.fn()}
+			/>,
+		);
+		expect(headerButtons()).toEqual([
+			"Search",
+			"Columns",
+			"Reset",
+			"Export",
+			"Import",
+		]);
+	});
+
+	it("[ISSUE-3495-ITEM-22] on a phone one custom action is an entry of More when select all, Edit and Delete are in the bar too", async () => {
+		stubViewport(320);
+		const { rerender } = render(
+			<Grid
+				enableSelectAll
+				onEdit={vi.fn()}
+				onDelete={vi.fn()}
+				customDataActionButtons={archive}
+			/>,
+		);
+		await idle();
+		const bar = within(footer());
+		expect(bar.queryByRole("button", { name: "Archive" })).toBeNull();
+		await openMenu("More");
+		expect(
+			await screen.findByRole("menuitem", { name: "Archive" }),
+		).toBeInTheDocument();
+
+		// three actions leave room for it
+		rerender(
+			<Grid
+				onEdit={vi.fn()}
+				onDelete={vi.fn()}
+				customDataActionButtons={archive}
+			/>,
+		);
+		await waitFor(() =>
+			expect(bar.getByRole("button", { name: "Archive" })).toBeInTheDocument(),
+		);
+		expect(bar.queryByRole("button", { name: "More" })).toBeNull();
+	});
+
+	it("[ISSUE-3495-ITEM-22] the hidden select all takes no place on a phone, and keeps it on wider screens", async () => {
+		stubViewport(320);
+		render(<Grid onEdit={vi.fn()} customDataActionButtons={archive} />);
+		await idle();
+		expect(
+			within(footer()).queryByRole("checkbox", { name: "All" }),
+		).toBeNull();
+		// no divider before the first action
+		const bar = footer().querySelector("label")!.parentElement!;
+		expect(bar.firstElementChild).toBe(footer().querySelector("label"));
+
+		resizeTo(1200);
+		const all = within(footer()).getByRole("checkbox", { name: "All" });
+		expect(all.closest("label")).toHaveStyle({ opacity: "0" });
+	});
+
+	it("[ISSUE-3495-ITEM-22] on a phone the filtered count may break after the slash", async () => {
+		stubViewport(320);
+		render(
+			<Grid
+				loadData={() => ({ rowsTotal: 1234, rowsFiltered: 567, rows: ROWS })}
+				classes={{ paginationText: "my-count" }}
+			/>,
+		);
+		await idle();
+		const count = footer().querySelector(".my-count")!;
+		expect(count.textContent).toBe("#567/1,234");
+		expect(count.innerHTML).toBe("#567/<wbr>1,234");
+	});
+});

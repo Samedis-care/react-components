@@ -5,11 +5,15 @@ import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { Box, Grid } from "@mui/material";
 import {
 	Mail as MailIcon,
+	MenuBook as LogIcon,
+	PersonAdd as InviteIcon,
 	PlaylistAdd as PlaylistAddIcon,
 	School as SchoolIcon,
 } from "@mui/icons-material";
 import { DataGrid, DataGridNoPersist } from "./index";
+import ccI18n from "../../i18n";
 import type {
+	DataGridCustomDataActionButton,
 	DataGridData,
 	IDataGridColumnDef,
 	IDataGridLoadDataParameters,
@@ -88,6 +92,13 @@ const SimpleFilterBar = () => (
 		<span>Filters</span>
 	</Grid>
 );
+
+const LOG_BUTTON: DataGridCustomDataActionButton = {
+	icon: <LogIcon />,
+	label: "Medical device log",
+	isDisabled: (numSelected) => numSelected !== 1,
+	onClick: () => {},
+};
 
 const PHONE = { viewport: { value: "mobile1", isRotated: false } };
 
@@ -692,6 +703,43 @@ export const Issue3495Item20PhoneExportMenuReturnsFocus: Story = {
 	},
 };
 
+/**
+ * ISSUE-3495-ITEM-22: on a 320px phone, a header with two add buttons and a footer with
+ * Edit, Delete and one custom action are wider than the screen
+ */
+export const Issue3495Item22PhoneHeaderAndFooterFit: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadPeople,
+		exporters: [EXCEL],
+		onImport: fn(),
+		onAddNew: [
+			{ label: "New", onClick: fn() },
+			{ icon: <InviteIcon />, label: "Invite", onClick: fn() },
+		],
+		onEdit: fn(),
+		onDelete: fn(),
+		enableSelectAll: true,
+		customDataActionButtons: [LOG_BUTTON],
+		classes: { header: "story-header", footer: "story-footer" },
+	},
+	globals: PHONE,
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		const header = canvasElement.querySelector<HTMLElement>(".story-header")!;
+		const footer = canvasElement.querySelector<HTMLElement>(".story-footer")!;
+		await expect(header.scrollWidth, "header").toBeLessThanOrEqual(
+			header.clientWidth,
+		);
+		await expect(footer.scrollWidth, "footer").toBeLessThanOrEqual(
+			footer.clientWidth,
+		);
+		await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+			window.innerWidth,
+		);
+	},
+};
+
 // ─── Footer layout ────────────────────────────────────────────────────────────
 
 /** FOLLOWUP-DATAGRID-FOOTER-LAYOUT: three people, so the count is short ("#3" on a phone) */
@@ -904,7 +952,7 @@ export const FollowupDatagridFooterLayoutPhone: Story = {
 		onDelete: fn(),
 		customDataActionButtons: [
 			{
-				label: "Document safety briefing",
+				label: "Document the safety briefing",
 				icon: <SchoolIcon />,
 				isDisabled: () => false,
 				onClick: fn(),
@@ -917,10 +965,11 @@ export const FollowupDatagridFooterLayoutPhone: Story = {
 	play: async ({ canvas, canvasElement }) => {
 		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
 		await expect(canvas.getByText("#3")).toBeVisible();
-		await expect(lineCount(canvas.getByText("Document safety briefing"))).toBe(
-			2,
-		);
-		await expectFooterLayout(canvasElement, 11.5, 3);
+		await expect(
+			lineCount(canvas.getByText("Document the safety briefing")),
+		).toBe(2);
+		// the hidden select all takes no place on phones (ISSUE-3495-ITEM-22)
+		await expectFooterLayout(canvasElement, 11.5, 2);
 	},
 };
 
@@ -957,6 +1006,210 @@ export const FollowupDatagridFooterLayoutPhoneMore: Story = {
 	play: async ({ canvas, canvasElement }) => {
 		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
 		await expect(canvas.getByRole("button", { name: "More" })).toBeVisible();
+		await expectFooterLayout(canvasElement, 11.5, 3);
+	},
+};
+
+// ─── Phones ───────────────────────────────────────────────────────────────────
+
+/**
+ * ISSUE-3495-ITEM-22: checks that the header's buttons lie inside the header and that no two of
+ * them overlap, and that neither the header nor the page scrolls sideways
+ * @param canvasElement The story's canvas
+ */
+const expectHeaderButtonsFit = async (canvasElement: HTMLElement) => {
+	const header = canvasElement.querySelector<HTMLElement>(".story-header")!;
+	const box = header.getBoundingClientRect();
+	const buttons = Array.from(header.querySelectorAll("button")).map(
+		(button, index) => ({
+			name: button.getAttribute("aria-label") ?? `button ${index + 1}`,
+			rect: button.getBoundingClientRect(),
+		}),
+	);
+	for (const { name, rect } of buttons) {
+		await expect(
+			rect.left - box.left,
+			`${name} to the start`,
+		).toBeGreaterThanOrEqual(0);
+		await expect(
+			box.right - rect.right,
+			`${name} to the end`,
+		).toBeGreaterThanOrEqual(0);
+	}
+	for (let i = 1; i < buttons.length; i++) {
+		await expect(
+			horizontalGap(buttons[i - 1].rect, buttons[i].rect),
+			`${buttons[i - 1].name} and ${buttons[i].name} overlap`,
+		).toBeGreaterThanOrEqual(0);
+	}
+	await expect(header.scrollWidth).toBeLessThanOrEqual(header.clientWidth);
+	await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+		window.innerWidth,
+	);
+};
+
+/**
+ * ISSUE-3495-ITEM-22: on a 320px phone with two add buttons, the header shows Search, More
+ * options and the first add button side by side; More options holds Columns, Reset, Export,
+ * Import and the second add button
+ */
+export const Issue3495Item22PhoneHeaderMovesAddButtonsIntoMoreOptions: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadPeople,
+		exporters: [EXCEL],
+		onImport: fn(),
+		onAddNew: [
+			{ label: "New", onClick: fn() },
+			{ icon: <InviteIcon />, label: "Invite", onClick: fn() },
+		],
+		classes: { header: "story-header" },
+	},
+	globals: PHONE,
+	parameters: {
+		a11y: {
+			test: "error",
+			// the grid behind the menu has its own violations (ISSUE-3492-ITEM-25, ISSUE-3493-ITEM-13)
+			context: { include: ["[role=menu]"] },
+		},
+	},
+	play: async ({ args, canvas, canvasElement }) => {
+		const body = within(document.body);
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		await expectHeaderButtonsFit(canvasElement);
+		await userEvent.click(canvas.getByRole("button", { name: "More options" }));
+		const menu = await body.findByRole("menu");
+		await expect(
+			within(menu)
+				.getAllByRole("menuitem")
+				.map((item) => item.textContent),
+		).toEqual(["Columns", "Reset", "Export", "Import", "Invite"]);
+		await userEvent.click(
+			within(menu).getByRole("menuitem", { name: "Invite" }),
+		);
+		const addButtons = args.onAddNew as { onClick: () => void }[];
+		await expect(addButtons[1].onClick).toHaveBeenCalledOnce();
+		await waitFor(() => expect(body.queryByRole("menu")).toBeNull());
+		// open again for the axe check
+		await userEvent.click(canvas.getByRole("button", { name: "More options" }));
+		const reopened = await body.findByRole("menu");
+		await waitFor(() => expect(reopened).toBeVisible());
+	},
+};
+
+/**
+ * ISSUE-3495-ITEM-22: on a 320px phone with Columns, Reset, Export, Import and one add button,
+ * More options holds the four, so no button overlaps another
+ */
+export const Issue3495Item22PhoneHeaderOneAddButtonFits: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadPeople,
+		exporters: [EXCEL],
+		onImport: fn(),
+		onAddNew: fn(),
+		classes: { header: "story-header" },
+	},
+	globals: PHONE,
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		await expect(
+			canvas.getByRole("button", { name: "More options" }),
+		).toBeVisible();
+		await expectHeaderButtonsFit(canvasElement);
+	},
+};
+
+/**
+ * ISSUE-3495-ITEM-22: on a 320px phone with select all, Edit, Delete, one custom action and a
+ * filtered count, the custom action is an entry of More, and the footer keeps its layout
+ */
+export const Issue3495Item22PhoneFooterFourActionsFit: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadPeople,
+		enableSelectAll: true,
+		onEdit: fn(),
+		onDelete: fn(),
+		customDataActionButtons: [LOG_BUTTON],
+		classes: FOOTER_LAYOUT_CLASSES,
+	},
+	globals: PHONE,
+	parameters: FOOTER_LAYOUT_PARAMETERS,
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		await expect(canvas.getByRole("button", { name: "More" })).toBeVisible();
+		await expectFooterLayout(canvasElement, 11.5, 3);
+	},
+};
+
+/**
+ * ISSUE-3495-ITEM-22: on a 320px phone without select all, Edit, Delete, a custom action with
+ * a long word and a filtered count fit: the hidden select all takes no place, and the count
+ * takes two lines, breaking after the slash
+ */
+export const Issue3495Item22PhoneFooterWithoutSelectAllFits: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadPeople,
+		onEdit: fn(),
+		onDelete: fn(),
+		customDataActionButtons: [
+			{
+				label: "Einweisung dokumentieren",
+				icon: <SchoolIcon />,
+				isDisabled: () => false,
+				onClick: fn(),
+			},
+		],
+		classes: FOOTER_LAYOUT_CLASSES,
+	},
+	globals: PHONE,
+	parameters: FOOTER_LAYOUT_PARAMETERS,
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		const footer = within(
+			canvasElement.querySelector<HTMLElement>(".story-footer")!,
+		);
+		await expect(footer.queryByRole("checkbox")).toBeNull();
+		await expect(
+			footer.getByRole("button", { name: "Einweisung dokumentieren" }),
+		).toBeVisible();
+		const count = canvasElement.querySelector(".story-count")!;
+		await expect(count.textContent).toMatch(/^#567\/1\D?234$/);
+		await expect(lineCount(count)).toBe(2);
+		await expectFooterLayout(canvasElement, 11.5, 2);
+	},
+};
+
+/**
+ * ISSUE-3495-ITEM-22: in German, the longest captions of the footer's actions (Bearbeiten,
+ * Löschen) and a filtered count fit a 320px phone beside select all and More
+ */
+export const Issue3495Item22PhoneFooterInGermanFits: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadPeople,
+		enableSelectAll: true,
+		onEdit: fn(),
+		onDelete: fn(),
+		customDataActionButtons: [LOG_BUTTON],
+		classes: FOOTER_LAYOUT_CLASSES,
+	},
+	globals: PHONE,
+	parameters: FOOTER_LAYOUT_PARAMETERS,
+	beforeEach: async () => {
+		await ccI18n.changeLanguage("de");
+		return async () => {
+			await ccI18n.changeLanguage("en");
+		};
+	},
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		await expect(canvas.getByRole("button", { name: "Mehr" })).toBeVisible();
+		await expect(
+			canvas.getByRole("button", { name: "Bearbeiten" }),
+		).toBeVisible();
 		await expectFooterLayout(canvasElement, 11.5, 3);
 	},
 };

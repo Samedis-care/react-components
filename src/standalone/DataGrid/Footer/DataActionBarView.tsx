@@ -73,8 +73,9 @@ export interface DataActionBarViewProps {
 	 */
 	handleCustomButtonClick: (label: string) => void;
 	/**
-	 * Hides the select all checkbox (it keeps its place). It is disabled then
-	 * too, see selectAllDisabled
+	 * Hides the select all checkbox. It keeps its place, so the actions stay
+	 * where they are, except on phones (only xs), where the bar needs the
+	 * room. It is disabled then too, see selectAllDisabled
 	 */
 	disableSelection: boolean;
 	/**
@@ -171,6 +172,23 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 		/>
 	);
 
+	// On phones (only xs) the bar has to fit 320px: the hidden select all
+	// takes no place there, and the custom actions are entries of "More" when
+	// there are two or more, or when select all, Edit and Delete are in the bar
+	// too (four actions and the count don't fit)
+	const selectAllTakesPlace = !isXs || !props.disableSelection;
+	const hasEdit = !!props.handleEdit;
+	const hasDelete = !!(props.handleDelete || props.disableDeleteHint);
+	const numCustomButtons = props.customButtons?.length ?? 0;
+	const customButtonsInMenu =
+		isXs &&
+		(numCustomButtons > 1 ||
+			(numCustomButtons === 1 && selectAllTakesPlace && hasEdit && hasDelete));
+	// the dividers go between the actions: none before the first
+	const dividerBeforeEdit = selectAllTakesPlace;
+	const dividerBeforeDelete = dividerBeforeEdit || hasEdit;
+	const dividerBeforeCustom = dividerBeforeDelete || hasDelete;
+
 	const allCustomButtonsDisabled = !!props.customButtons?.every((entry) =>
 		dataGridIsCustomDataActionDisabled(
 			entry,
@@ -181,23 +199,25 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 
 	return (
 		<DataActionBarRoot aria-busy={props.deleting || undefined}>
-			<DataGridSelectAllWrapper
-				control={<SelectAll />}
-				labelText={props.selectAllLabel}
-				labelPlacement={"bottom"}
-				// the checkbox reads its disabled state from the select all
-				// context, so the label can't take it from its control
-				disabled={props.selectAllDisabled}
-				className={classes?.selectAllWrapper}
-				style={
-					props.disableSelection
-						? { opacity: 0, pointerEvents: "none" }
-						: undefined
-				}
-			/>
-			{props.handleEdit && (
+			{selectAllTakesPlace && (
+				<DataGridSelectAllWrapper
+					control={<SelectAll />}
+					labelText={props.selectAllLabel}
+					labelPlacement={"bottom"}
+					// the checkbox reads its disabled state from the select all
+					// context, so the label can't take it from its control
+					disabled={props.selectAllDisabled}
+					className={classes?.selectAllWrapper}
+					style={
+						props.disableSelection
+							? { opacity: 0, pointerEvents: "none" }
+							: undefined
+					}
+				/>
+			)}
+			{hasEdit && (
 				<>
-					<VerticalDivider flexItem />
+					{dividerBeforeEdit && <VerticalDivider flexItem />}
 					<DataActionBarAction
 						control={
 							<SmallestIconButton
@@ -215,9 +235,9 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 					/>
 				</>
 			)}
-			{(props.handleDelete || props.disableDeleteHint) && (
+			{hasDelete && (
 				<>
-					<VerticalDivider flexItem />
+					{dividerBeforeDelete && <VerticalDivider flexItem />}
 					{!props.handleDelete && props.disableDeleteHint ? (
 						<Tooltip title={props.disableDeleteHint}>
 							<DeleteHintAnchor>{deleteBtn}</DeleteHintAnchor>
@@ -227,9 +247,9 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 					)}
 				</>
 			)}
-			{isXs && props.customButtons && props.customButtons.length > 1 ? (
+			{customButtonsInMenu && props.customButtons ? (
 				<React.Fragment key={"custom-buttons-menu"}>
-					<VerticalDivider flexItem />
+					{dividerBeforeCustom && <VerticalDivider flexItem />}
 					<DataActionBarAction
 						control={
 							<SmallestIconButton
@@ -257,7 +277,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 					/>
 				</React.Fragment>
 			) : (
-				props.customButtons?.map((entry) => {
+				props.customButtons?.map((entry, index) => {
 					const disabled = dataGridIsCustomDataActionDisabled(
 						entry,
 						props.numSelected,
@@ -265,7 +285,9 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 					);
 					return (
 						<React.Fragment key={entry.label}>
-							<VerticalDivider flexItem />
+							{(index > 0 || dividerBeforeCustom) && (
+								<VerticalDivider flexItem />
+							)}
 							<DataActionBarAction
 								control={
 									<SmallestIconButton

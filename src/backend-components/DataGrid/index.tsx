@@ -66,7 +66,8 @@ export interface BackendDataGridProps<M extends ModelUnknown> extends Omit<
 		filter?: DataGridFilterParameters,
 	) => Promise<void> | void;
 	/**
-	 * Additional buttons next to new button
+	 * Additional buttons next to new button. On phones (xs) they are entries
+	 * of the header's "More options" menu (see DataGridProps.onAddNew).
 	 */
 	additionalNewButtons?: IDataGridAddButton[];
 	/**

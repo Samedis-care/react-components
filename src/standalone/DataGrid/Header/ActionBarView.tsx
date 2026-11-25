@@ -27,6 +27,9 @@ import ActionBarMenu, { type ActionBarMenuSlotProps } from "./ActionBarMenu";
 import useMenuButton from "../../../utils/internal/useMenuButton";
 import HeaderIconButton from "./HeaderIconButton";
 
+/** No add buttons in More options (wider screens) */
+const NO_ADD_BUTTONS: IDataGridAddButton[] = [];
+
 export interface IDataGridActionBarViewProps extends ResetCallbacks {
 	/**
 	 * Callback to toggle the settings popover
@@ -130,8 +133,8 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 		setSettingsAnchorEl(undefined);
 	}, []);
 
-	// on phones with a filter bar, the "Reset" and "Export" entries of "More
-	// options" open the reset and export menus instead of the buttons
+	// on phones with "More options" (see showMoreOptions), its "Reset" and
+	// "Export" entries open the reset and export menus instead of the buttons
 	const moreOptionsMenu = useMenuButton(!!settingsAnchorEl);
 	const resetMenu = useMenuButton(!!resetAnchorEl);
 	const exportMenu = useMenuButton(!!exportAnchorEl);
@@ -144,30 +147,58 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 		[moreOptionsMenu.slotProps, resetMenu.buttonProps, exportMenu.buttonProps],
 	);
 
-	const addButtons: IDataGridAddButton[] = Array.isArray(handleAddNew)
-		? handleAddNew
-		: handleAddNew == null
-			? []
-			: [
-					{
-						icon: undefined,
-						label: t("standalone.data-grid.header.new") ?? "",
-						onClick:
-							typeof handleAddNew === "function" ? handleAddNew : undefined,
-						disableHint:
-							typeof handleAddNew === "string" ? handleAddNew : undefined,
-					},
-				];
+	const addButtons = useMemo(
+		(): IDataGridAddButton[] =>
+			Array.isArray(handleAddNew)
+				? handleAddNew
+				: handleAddNew == null
+					? []
+					: [
+							{
+								icon: undefined,
+								label: t("standalone.data-grid.header.new") ?? "",
+								onClick:
+									typeof handleAddNew === "function" ? handleAddNew : undefined,
+								disableHint:
+									typeof handleAddNew === "string" ? handleAddNew : undefined,
+							},
+						],
+		[handleAddNew, t],
+	);
+	// on phones the header holds only the first add button, the others are
+	// entries of "More options"
+	const headerAddButtons = bpSmUp ? addButtons : addButtons.slice(0, 1);
+	const menuAddButtons = useMemo(
+		() => (bpSmUp ? NO_ADD_BUTTONS : addButtons.slice(1)),
+		[bpSmUp, addButtons],
+	);
+	// "Columns", "Reset", "Export" and "Import"
+	const numButtons = [
+		toggleSettings,
+		!hideReset,
+		exporters,
+		handleImport,
+	].filter(Boolean).length;
+	// On phones "More options" holds "Columns", "Reset", "Export" and "Import"
+	// where they don't fit: beside a filter bar, beside a second add button
+	// (in the menu too), or more than two of them beside an add button. A
+	// 320px phone fits Search, two of them and an add button, or all four.
+	const showMoreOptions =
+		!bpSmUp &&
+		(numButtons > 0 || menuAddButtons.length > 0) &&
+		(hasCustomFilterBar ||
+			menuAddButtons.length > 0 ||
+			(addButtons.length > 0 && numButtons > 2));
 
 	return (
 		<Grid container sx={{ alignItems: "stretch" }} wrap={"nowrap"}>
-			{hasCustomFilterBar &&
-			!bpSmUp &&
-			(toggleSettings || !hideReset || exporters || handleImport) ? (
+			{showMoreOptions ? (
 				<>
-					<Grid key={"divider-1"}>
-						<VerticalDivider />
-					</Grid>
+					{hasCustomFilterBar && (
+						<Grid key={"divider-1"}>
+							<VerticalDivider />
+						</Grid>
+					)}
 					<HeaderIconButton
 						ref={moreOptionsRef}
 						{...moreOptionsMenu.buttonProps}
@@ -188,6 +219,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 							exporters ? openExportMenuFromMoreOptions : undefined
 						}
 						handleImport={handleImport}
+						addButtons={menuAddButtons}
 						onClose={closeSettingsMenu}
 						slotProps={moreOptionsSlotProps}
 					/>
@@ -342,7 +374,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 					)}
 				</>
 			)}
-			{addButtons.length > 0 && (
+			{headerAddButtons.length > 0 && (
 				<>
 					<Grid key={"divider-2"} size="grow" />
 					<Grid
@@ -352,7 +384,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 						spacing={2}
 						wrap={"nowrap"}
 					>
-						{addButtons.map((entry, index) => {
+						{headerAddButtons.map((entry, index) => {
 							const btn = (
 								<ActionButton
 									small={!bpSmUp}

@@ -75,9 +75,10 @@ export interface DataGridProps
 	 */
 	classes?: Partial<Record<DataGridClassKey, string>>;
 	/**
-	 * Custom data action buttons
-	 * Rendered next to delete.
-	 * Max 1 extra button to fit on mobile screens
+	 * Custom data action buttons, in the footer after Delete. On phones (xs)
+	 * they are the entries of the footer's "More" menu instead when there are
+	 * two or more of them, or when select all, Edit and Delete are in the
+	 * footer too.
 	 */
 	customDataActionButtons?: DataGridCustomDataActionButton[];
 	/**
@@ -387,7 +388,9 @@ export interface IDataGridColumnProps {
 	 */
 	searchPlaceholder?: string;
 	/**
-	 * Add new handler(s), do not specify to disable add new button(s). Set to string to show disabled add new button with hint
+	 * Add new handler(s), do not specify to disable add new button(s). Set to string to show disabled add new button with hint.
+	 * On phones (xs) the header shows the first add button only: the others
+	 * are entries of its "More options" menu.
 	 */
 	onAddNew?: (() => void) | string | IDataGridAddButton[];
 	/**
@@ -478,7 +481,7 @@ export interface IDataGridColumnProps {
 	/**
 	 * Hides the selection column: the row checkboxes and the select all
 	 * checkbox in its header. The footer's select all checkbox is hidden too
-	 * (it keeps its place) and disabled.
+	 * (it keeps its place, except on phones) and disabled.
 	 */
 	disableSelection?: boolean;
 	/**

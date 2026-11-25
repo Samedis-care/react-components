@@ -17,11 +17,13 @@ export interface IDataGridPaginationViewProps {
 
 /**
  * Holds the count, centred in the footer's height, 16px (8px on phones) from
- * the footer's end and from the action bar
+ * the footer's end and from the action bar. A count that takes two lines (on
+ * phones, see PaginationView) keeps them at the footer's end.
  */
 const PaginationRoot = styled("div")(({ theme }) => ({
 	display: "flex",
 	alignItems: "center",
+	textAlign: "end",
 	margin: theme.spacing(0, 2),
 	[theme.breakpoints.only("xs")]: {
 		margin: theme.spacing(0, 1),
@@ -42,7 +44,8 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 		props.rowsFiltered !== null && props.rowsFiltered !== props.rowsTotal;
 	const text = isMobile
 		? showFiltered
-			? `#${filtered}/${total}`
+			? // may break after the slash where the footer is short of room
+				[`#${filtered}/`, <wbr key={"break"} />, total]
 			: `#${total}`
 		: showFiltered
 			? t("standalone.data-grid.footer.counts-filtered", {
