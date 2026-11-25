@@ -50,6 +50,4 @@ for it (`findBy…`, `waitFor`), or load the flags before rendering:
 beforeAll(() => loadCountryFlags());
 ```
 
-samedis-ui and identity-management-frontend use neither `CountryFlags` nor `getCountryFlag`, and
-their tests look for no flag image: nothing to do there. Their bundles get one more chunk, the
-flags.
+An app's bundle gets one more chunk, the flags.
