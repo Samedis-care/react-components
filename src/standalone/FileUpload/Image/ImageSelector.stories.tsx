@@ -228,7 +228,11 @@ export const Issue3490Item1ModernPickKeepsFocusInTheField: Story = {
 			fileInput(canvasElement),
 			await makePng(40, 30, "pic.png"),
 		);
-		await waitFor(() => expect(args.onChange).toHaveBeenCalledTimes(1));
+		// decoding and processing the picked image can take longer than waitFor's
+		// default second on a loaded machine (CI)
+		await waitFor(() => expect(args.onChange).toHaveBeenCalledTimes(1), {
+			timeout: 5000,
+		});
 		await waitFor(() =>
 			expect(
 				canvas.getByRole("button", { name: "Click for an upload dialog" }),
