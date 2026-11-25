@@ -9,7 +9,7 @@ import {
 	matrixVars,
 } from "./matrixClasses";
 import { cellBorders, columnTintStyles } from "./matrixTints";
-import { useMatrixConfig } from "./MatrixGridContext";
+import { ownEntryOf, useMatrixConfig } from "./MatrixGridContext";
 import MatrixContents from "./MatrixContents";
 import useMatrixActivation from "./useMatrixActivation";
 import { columnNameOf, extraRowNameOf, isNamePart } from "./matrixNames";
@@ -109,7 +109,7 @@ const MatrixExtraRowCell = (props: MatrixExtraRowCellProps) => {
 		onCellClick?.(column.key);
 	}, [onCellClick, column.key]);
 	// Zero is a value: only a missing (or null) badge means "nothing known".
-	const badge = extraRow.badges?.[column.key];
+	const badge = ownEntryOf(extraRow.badges, column.key);
 	const hasBadge = badge != null;
 	// The cell in words: getCellLabel, else the row's and the column's names
 	// ("Open demand, Thursday, March 5, 2026"), so that the cells of a row do

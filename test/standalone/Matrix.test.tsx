@@ -934,6 +934,45 @@ describe("MatrixGrid", () => {
 		expect(screen.getByTestId("wrapper-r1-c1")).toBeInTheDocument();
 	});
 
+	describe("structure", () => {
+		it("[ISSUE-3480-ITEM-8] treats column keys named like Object.prototype members as plain keys", () => {
+			const error = vi
+				.spyOn(console, "error")
+				.mockImplementation(() => undefined);
+			try {
+				const onSelectRange = vi.fn();
+				const renderCell = vi.fn(renderCellWithTestId);
+				render(
+					gridElement({
+						columns: [
+							{ key: "toString", label: "a" },
+							{ key: "constructor", label: "b" },
+						],
+						rows: [{ key: "r1", cells: {} }],
+						selectable: true,
+						onSelectRange,
+						renderCell,
+						extraRows: [{ key: "x", header: "x", label: "X", badges: {} }],
+					}),
+				);
+				// both cells are blank: the row has no entry for either key
+				expect(renderCell.mock.calls.map(([cell]) => cell)).toEqual([
+					undefined,
+					undefined,
+				]);
+				fireEvent.mouseDown(cellOf("r1", "constructor"));
+				fireEvent.mouseUp(window);
+				expect(onSelectRange).toHaveBeenCalledWith(
+					expect.objectContaining({ columnKeys: ["constructor"] }),
+				);
+				// no inherited function rendered as a badge
+				expect(error).not.toHaveBeenCalled();
+			} finally {
+				error.mockRestore();
+			}
+		});
+	});
+
 	describe("accessibility", () => {
 		it("[ISSUE-3480-ITEM-9] exposes table semantics: rows, column headers and row headers", () => {
 			render(

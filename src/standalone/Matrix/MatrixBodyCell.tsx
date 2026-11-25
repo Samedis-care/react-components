@@ -9,7 +9,11 @@ import {
 	matrixVars,
 } from "./matrixClasses";
 import { cellBorders, columnTintStyles } from "./matrixTints";
-import { isCellSelectableIn, useMatrixConfig } from "./MatrixGridContext";
+import {
+	isCellSelectableIn,
+	ownEntryOf,
+	useMatrixConfig,
+} from "./MatrixGridContext";
 import useMatrixActivation from "./useMatrixActivation";
 import {
 	MATRIX_CELL_ADD_HINT,
@@ -208,7 +212,7 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 		classes,
 	} = config;
 	const store = useMatrixInteraction();
-	const cell = row.cells[column.key];
+	const cell = ownEntryOf(row.cells, column.key);
 	const context = useMemo<MatrixCellContext<TCell>>(
 		() => ({ row, column, columnIndex }),
 		[row, column, columnIndex],
