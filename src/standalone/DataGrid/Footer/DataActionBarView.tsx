@@ -1,8 +1,8 @@
 import React, { useCallback, useId, useState } from "react";
 import {
 	CircularProgress,
-	Grid,
 	MenuProps,
+	styled,
 	Tooltip,
 	useMediaQuery,
 	useTheme,
@@ -26,6 +26,7 @@ import DataActionBarMenu from "./DataActionBarMenu";
 import FocusableWhenDisabledIconButton from "./FocusableWhenDisabledIconButton";
 import { dataGridIsCustomDataActionDisabled } from "../CallbackUtil";
 import useMenuButton from "../../../utils/internal/useMenuButton";
+import dataActionMargins from "./dataActionMargins";
 
 export interface DataActionBarViewProps {
 	/**
@@ -49,7 +50,7 @@ export interface DataActionBarViewProps {
 	handleDelete?: React.MouseEventHandler;
 	/**
 	 * Is a delete running? Delete is then unavailable and shows a progress
-	 * indicator in place of its icon
+	 * indicator in place of its icon, and the bar is busy (aria-busy)
 	 * @see DataGridProps.deleting
 	 */
 	deleting: boolean;
@@ -89,6 +90,32 @@ export interface DataActionBarViewProps {
 	selectAllDisabled: boolean;
 }
 
+/**
+ * The bar: its actions side by side, centred in its height, which is the
+ * footer's. The dividers between them (VerticalDivider flexItem) run from its
+ * top to its bottom.
+ */
+const DataActionBarRoot = styled("div")({
+	display: "flex",
+	alignItems: "center",
+});
+
+/**
+ * Edit, Delete, More or a custom action. The select all checkbox
+ * (DataGridSelectAllWrapper) has the same margins.
+ */
+const DataActionBarAction = styled(ComponentWithLabel)(({ theme }) =>
+	dataActionMargins(theme),
+);
+
+/**
+ * The element that shows the tooltip of an unavailable Delete: lays Delete
+ * out in the bar like the other actions
+ */
+const DeleteHintAnchor = styled("span")({
+	display: "flex",
+});
+
 const DataActionBarView = (props: DataActionBarViewProps) => {
 	const { classes, editIcon, editLabel } = useDataGridProps();
 	const { t } = useCCTranslations();
@@ -117,7 +144,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 	// stays focusable while disabled: a delete clears the selection, which
 	// disables Delete while it has keyboard focus
 	const deleteBtn = (
-		<ComponentWithLabel
+		<DataActionBarAction
 			control={
 				<FocusableWhenDisabledIconButton
 					id={deleteId}
@@ -153,86 +180,72 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 	);
 
 	return (
-		<Grid container wrap={"nowrap"}>
-			<Grid key={"select-all"}>
-				<DataGridSelectAllWrapper
-					control={<SelectAll />}
-					labelText={props.selectAllLabel}
-					labelPlacement={"bottom"}
-					// the checkbox reads its disabled state from the select all
-					// context, so the label can't take it from its control
-					disabled={props.selectAllDisabled}
-					className={classes?.selectAllWrapper}
-					style={
-						props.disableSelection
-							? { opacity: 0, pointerEvents: "none" }
-							: undefined
-					}
-				/>
-			</Grid>
+		<DataActionBarRoot aria-busy={props.deleting || undefined}>
+			<DataGridSelectAllWrapper
+				control={<SelectAll />}
+				labelText={props.selectAllLabel}
+				labelPlacement={"bottom"}
+				// the checkbox reads its disabled state from the select all
+				// context, so the label can't take it from its control
+				disabled={props.selectAllDisabled}
+				className={classes?.selectAllWrapper}
+				style={
+					props.disableSelection
+						? { opacity: 0, pointerEvents: "none" }
+						: undefined
+				}
+			/>
 			{props.handleEdit && (
 				<>
-					<Grid key={"divider-1"}>
-						<VerticalDivider />
-					</Grid>
-					<Grid key={"edit"}>
-						<ComponentWithLabel
-							control={
-								<SmallestIconButton
-									color={"primary"}
-									disabled={props.numSelected !== 1}
-									onClick={props.handleEdit}
-									aria-label={myEditLabel}
-								>
-									<MyEditIcon />
-								</SmallestIconButton>
-							}
-							labelText={myEditLabel}
-							labelPlacement={"bottom"}
-							disabled={props.numSelected !== 1}
-						/>
-					</Grid>
+					<VerticalDivider flexItem />
+					<DataActionBarAction
+						control={
+							<SmallestIconButton
+								color={"primary"}
+								disabled={props.numSelected !== 1}
+								onClick={props.handleEdit}
+								aria-label={myEditLabel}
+							>
+								<MyEditIcon />
+							</SmallestIconButton>
+						}
+						labelText={myEditLabel}
+						labelPlacement={"bottom"}
+						disabled={props.numSelected !== 1}
+					/>
 				</>
 			)}
 			{(props.handleDelete || props.disableDeleteHint) && (
 				<>
-					<Grid key={"divider-2"}>
-						<VerticalDivider />
-					</Grid>
-					<Grid key={"delete"}>
-						{!props.handleDelete && props.disableDeleteHint ? (
-							<Tooltip title={props.disableDeleteHint}>
-								<span>{deleteBtn}</span>
-							</Tooltip>
-						) : (
-							deleteBtn
-						)}
-					</Grid>
+					<VerticalDivider flexItem />
+					{!props.handleDelete && props.disableDeleteHint ? (
+						<Tooltip title={props.disableDeleteHint}>
+							<DeleteHintAnchor>{deleteBtn}</DeleteHintAnchor>
+						</Tooltip>
+					) : (
+						deleteBtn
+					)}
 				</>
 			)}
 			{isXs && props.customButtons && props.customButtons.length > 1 ? (
 				<React.Fragment key={"custom-buttons-menu"}>
-					<Grid>
-						<VerticalDivider />
-					</Grid>
-					<Grid>
-						<ComponentWithLabel
-							control={
-								<SmallestIconButton
-									{...extendedMenu.buttonProps}
-									color={"primary"}
-									disabled={allCustomButtonsDisabled}
-									onClick={handleExtendedMenuOpen}
-									aria-label={t("standalone.data-grid.footer.more")}
-								>
-									<MenuIcon />
-								</SmallestIconButton>
-							}
-							labelText={t("standalone.data-grid.footer.more")}
-							labelPlacement={"bottom"}
-							disabled={allCustomButtonsDisabled}
-						/>
-					</Grid>
+					<VerticalDivider flexItem />
+					<DataActionBarAction
+						control={
+							<SmallestIconButton
+								{...extendedMenu.buttonProps}
+								color={"primary"}
+								disabled={allCustomButtonsDisabled}
+								onClick={handleExtendedMenuOpen}
+								aria-label={t("standalone.data-grid.footer.more")}
+							>
+								<MenuIcon />
+							</SmallestIconButton>
+						}
+						labelText={t("standalone.data-grid.footer.more")}
+						labelPlacement={"bottom"}
+						disabled={allCustomButtonsDisabled}
+					/>
 					<DataActionBarMenu
 						numSelected={props.numSelected}
 						selectAll={props.selectAll}
@@ -252,33 +265,29 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 					);
 					return (
 						<React.Fragment key={entry.label}>
-							<Grid>
-								<VerticalDivider />
-							</Grid>
-							<Grid>
-								<ComponentWithLabel
-									control={
-										<SmallestIconButton
-											color={"primary"}
-											disabled={disabled}
-											onClick={() => {
-												props.handleCustomButtonClick(entry.label);
-											}}
-											aria-label={entry.label}
-										>
-											{entry.icon}
-										</SmallestIconButton>
-									}
-									labelText={entry.label}
-									labelPlacement={"bottom"}
-									disabled={disabled}
-								/>
-							</Grid>
+							<VerticalDivider flexItem />
+							<DataActionBarAction
+								control={
+									<SmallestIconButton
+										color={"primary"}
+										disabled={disabled}
+										onClick={() => {
+											props.handleCustomButtonClick(entry.label);
+										}}
+										aria-label={entry.label}
+									>
+										{entry.icon}
+									</SmallestIconButton>
+								}
+								labelText={entry.label}
+								labelPlacement={"bottom"}
+								disabled={disabled}
+							/>
 						</React.Fragment>
 					);
 				})
 			)}
-		</Grid>
+		</DataActionBarRoot>
 	);
 };
 

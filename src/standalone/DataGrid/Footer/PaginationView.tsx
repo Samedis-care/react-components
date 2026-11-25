@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, useMediaQuery, useTheme } from "@mui/material";
+import { styled, useMediaQuery, useTheme } from "@mui/material";
 import { DataGridPaginationText, useDataGridProps } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import getCurrentLocale from "../../../utils/getCurrentLocale";
@@ -14,6 +14,19 @@ export interface IDataGridPaginationViewProps {
 	 */
 	rowsFiltered: number | null;
 }
+
+/**
+ * Holds the count, centred in the footer's height, 16px (8px on phones) from
+ * the footer's end and from the action bar
+ */
+const PaginationRoot = styled("div")(({ theme }) => ({
+	display: "flex",
+	alignItems: "center",
+	margin: theme.spacing(0, 2),
+	[theme.breakpoints.only("xs")]: {
+		margin: theme.spacing(0, 1),
+	},
+}));
 
 const PaginationView = (props: IDataGridPaginationViewProps) => {
 	const { classes } = useDataGridProps();
@@ -39,11 +52,11 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 			: t("standalone.data-grid.footer.counts", { TOTAL: total });
 
 	return (
-		<Box sx={{ mx: 2 }}>
+		<PaginationRoot>
 			<DataGridPaginationText className={classes?.paginationText}>
 				{text}
 			</DataGridPaginationText>
-		</Box>
+		</PaginationRoot>
 	);
 };
 

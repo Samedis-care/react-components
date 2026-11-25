@@ -35,6 +35,7 @@ import {
 } from "@mui/icons-material";
 import Header, { IDataGridHeaderProps } from "./Header";
 import Footer from "./Footer";
+import dataActionMargins from "./Footer/dataActionMargins";
 import Settings from "./Settings";
 import Content from "./Content";
 import { FilterType, IFilterDef } from "./Content/FilterEntry";
@@ -1112,8 +1113,8 @@ export const DataGridSelectAllHeader: React.ComponentType<
 export const DataGridSelectAllWrapper = styled(ComponentWithLabel, {
 	name: "CcDataGrid",
 	slot: "selectAllWrapper",
-})<ComponentWithLabelProps | FormControlLabelProps>(
-	{},
+})<ComponentWithLabelProps | FormControlLabelProps>(({ theme }) =>
+	dataActionMargins(theme),
 ) as unknown as typeof ComponentWithLabel;
 
 export const DataGridPaginationText = styled(Typography, {

@@ -3,6 +3,11 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { Box, Grid } from "@mui/material";
+import {
+	Mail as MailIcon,
+	PlaylistAdd as PlaylistAddIcon,
+	School as SchoolIcon,
+} from "@mui/icons-material";
 import { DataGrid, DataGridNoPersist } from "./index";
 import type {
 	DataGridData,
@@ -684,5 +689,274 @@ export const Issue3495Item20PhoneExportMenuReturnsFocus: Story = {
 				`focus is on ${document.activeElement?.tagName}`,
 			).toHaveFocus(),
 		);
+	},
+};
+
+// ─── Footer layout ────────────────────────────────────────────────────────────
+
+/** FOLLOWUP-DATAGRID-FOOTER-LAYOUT: three people, so the count is short ("#3" on a phone) */
+const loadThree = (): DataGridData => ({
+	rowsTotal: 3,
+	rowsFiltered: 3,
+	rows: PEOPLE.slice(0, 3),
+});
+
+const FOOTER_LAYOUT_CLASSES = {
+	footer: "story-footer",
+	paginationText: "story-count",
+};
+
+/** FOLLOWUP-DATAGRID-FOOTER-LAYOUT: axe on the footer only, as in the footer stories above */
+const FOOTER_LAYOUT_PARAMETERS = {
+	a11y: {
+		test: "error",
+		context: { include: [".story-footer"] },
+		options: {
+			rules: {
+				// the captions of the unavailable Edit and Delete: inactive controls,
+				// which WCAG 1.4.3 exempts
+				"color-contrast": { enabled: false },
+			},
+		},
+	},
+};
+
+/**
+ * FOLLOWUP-DATAGRID-FOOTER-LAYOUT: what the user sees of an element: the boxes of its button
+ * or checkbox and of its text, one per line
+ */
+const visibleBoxes = (element: Element): DOMRect[] => {
+	const boxes: DOMRect[] = [];
+	const control = element.querySelector("button, .MuiCheckbox-root");
+	if (control) boxes.push(control.getBoundingClientRect());
+	const range = document.createRange();
+	const texts = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+	for (let text = texts.nextNode(); text; text = texts.nextNode()) {
+		range.selectNodeContents(text);
+		boxes.push(...Array.from(range.getClientRects()));
+	}
+	return boxes;
+};
+
+/** FOLLOWUP-DATAGRID-FOOTER-LAYOUT: the number of lines an element's text takes */
+const lineCount = (element: Element) =>
+	new Set(visibleBoxes(element).map((box) => Math.round(box.top))).size;
+
+/**
+ * FOLLOWUP-DATAGRID-FOOTER-LAYOUT: the space between two boxes side by side, negative where
+ * they overlap
+ */
+const horizontalGap = (a: DOMRect, b: DOMRect) =>
+	Math.max(b.left - a.right, a.left - b.right);
+
+/**
+ * FOLLOWUP-DATAGRID-FOOTER-LAYOUT: checks the footer bar (inside the footer's border and
+ * padding). Its actions and the count are centred in it (within 1px) and at least 4px clear of
+ * its top and bottom; its dividers run from its top to its bottom; the button or checkbox and
+ * the caption of every action keep at least minGap px to the dividers and to the count; nothing
+ * comes closer than 8px to the bar's ends or makes the page scroll sideways.
+ * @param canvasElement The story's canvas
+ * @param minGap The space the actions keep to the dividers beside them
+ * @param dividers The number of dividers the footer shows
+ */
+const expectFooterLayout = async (
+	canvasElement: HTMLElement,
+	minGap: number,
+	dividers: number,
+) => {
+	const footer = canvasElement.querySelector(".story-footer")!;
+	const style = getComputedStyle(footer);
+	const rect = footer.getBoundingClientRect();
+	const bar = {
+		top:
+			rect.top +
+			parseFloat(style.borderTopWidth) +
+			parseFloat(style.paddingTop),
+		bottom:
+			rect.bottom -
+			parseFloat(style.borderBottomWidth) -
+			parseFloat(style.paddingBottom),
+		left:
+			rect.left +
+			parseFloat(style.borderLeftWidth) +
+			parseFloat(style.paddingLeft),
+		right:
+			rect.right -
+			parseFloat(style.borderRightWidth) -
+			parseFloat(style.paddingRight),
+	};
+	const barCentre = (bar.top + bar.bottom) / 2;
+	const actions = Array.from(footer.querySelectorAll("label"));
+	const count = footer.querySelector(".story-count")!;
+	const lines = Array.from(footer.querySelectorAll("div")).filter(
+		(element) =>
+			element.childElementCount === 0 &&
+			getComputedStyle(element).borderRightStyle === "solid",
+	);
+	await expect(lines).toHaveLength(dividers);
+
+	for (const item of [...actions, count]) {
+		const name = item.textContent;
+		const box = item.getBoundingClientRect();
+		await expect(
+			Math.abs((box.top + box.bottom) / 2 - barCentre),
+			`${name} is not centred`,
+		).toBeLessThanOrEqual(1);
+		for (const visible of visibleBoxes(item)) {
+			await expect(
+				visible.top - bar.top,
+				`${name} to the top`,
+			).toBeGreaterThanOrEqual(3.5);
+			await expect(
+				bar.bottom - visible.bottom,
+				`${name} to the bottom`,
+			).toBeGreaterThanOrEqual(3.5);
+			await expect(
+				visible.left - bar.left,
+				`${name} to the start`,
+			).toBeGreaterThanOrEqual(8);
+			await expect(
+				bar.right - visible.right,
+				`${name} to the end`,
+			).toBeGreaterThanOrEqual(8);
+		}
+	}
+	for (const line of lines) {
+		const box = line.getBoundingClientRect();
+		await expect(
+			Math.abs(box.top - bar.top),
+			"divider top",
+		).toBeLessThanOrEqual(0.5);
+		await expect(
+			Math.abs(box.bottom - bar.bottom),
+			"divider bottom",
+		).toBeLessThanOrEqual(0.5);
+	}
+	const countBoxes = visibleBoxes(count);
+	for (const action of actions) {
+		for (const visible of visibleBoxes(action)) {
+			for (const other of [
+				...lines.map((line) => line.getBoundingClientRect()),
+				...countBoxes,
+			]) {
+				await expect(
+					horizontalGap(visible, other),
+					`${action.textContent} to its neighbour`,
+				).toBeGreaterThanOrEqual(minGap);
+			}
+		}
+	}
+	await expect(footer.scrollWidth).toBeLessThanOrEqual(footer.clientWidth);
+	await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+		window.innerWidth,
+	);
+};
+
+/**
+ * FOLLOWUP-DATAGRID-FOOTER-LAYOUT: the footer's actions, with one- and two-line captions, and
+ * the count sit in the middle of the footer, and every action keeps 20px to the dividers beside
+ * it
+ */
+export const FollowupDatagridFooterLayoutDesktop: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadThree,
+		enableSelectAll: true,
+		onEdit: fn(),
+		onDelete: fn(),
+		customDataActionButtons: [
+			{
+				label: "Invite",
+				icon: <MailIcon />,
+				isDisabled: () => false,
+				onClick: fn(),
+			},
+			{
+				label: "Create\nmaintenance order",
+				icon: <PlaylistAddIcon />,
+				isDisabled: () => false,
+				onClick: fn(),
+			},
+		],
+		classes: FOOTER_LAYOUT_CLASSES,
+	},
+	parameters: FOOTER_LAYOUT_PARAMETERS,
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		await expect(canvas.getByText("Total: 3")).toBeVisible();
+		await expect(lineCount(canvas.getByText("Create maintenance order"))).toBe(
+			2,
+		);
+		await expectFooterLayout(canvasElement, 19.5, 4);
+	},
+};
+
+/**
+ * FOLLOWUP-DATAGRID-FOOTER-LAYOUT: on a 320px phone, Edit, Delete, a custom action whose
+ * caption takes two lines there and the count fit into the footer, in its middle, and every
+ * action keeps 12px to the dividers beside it
+ */
+export const FollowupDatagridFooterLayoutPhone: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadThree,
+		onEdit: fn(),
+		onDelete: fn(),
+		customDataActionButtons: [
+			{
+				label: "Document safety briefing",
+				icon: <SchoolIcon />,
+				isDisabled: () => false,
+				onClick: fn(),
+			},
+		],
+		classes: FOOTER_LAYOUT_CLASSES,
+	},
+	globals: PHONE,
+	parameters: FOOTER_LAYOUT_PARAMETERS,
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		await expect(canvas.getByText("#3")).toBeVisible();
+		await expect(lineCount(canvas.getByText("Document safety briefing"))).toBe(
+			2,
+		);
+		await expectFooterLayout(canvasElement, 11.5, 3);
+	},
+};
+
+/**
+ * FOLLOWUP-DATAGRID-FOOTER-LAYOUT: on a 320px phone with select all and the custom actions in
+ * the More menu, the one-line captions sit in the middle of the footer and keep 12px to the
+ * dividers
+ */
+export const FollowupDatagridFooterLayoutPhoneMore: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadThree,
+		enableSelectAll: true,
+		onEdit: fn(),
+		onDelete: fn(),
+		customDataActionButtons: [
+			{
+				label: "Invite",
+				icon: <MailIcon />,
+				isDisabled: () => false,
+				onClick: fn(),
+			},
+			{
+				label: "Add to list",
+				icon: <PlaylistAddIcon />,
+				isDisabled: () => false,
+				onClick: fn(),
+			},
+		],
+		classes: FOOTER_LAYOUT_CLASSES,
+	},
+	globals: PHONE,
+	parameters: FOOTER_LAYOUT_PARAMETERS,
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		await expect(canvas.getByRole("button", { name: "More" })).toBeVisible();
+		await expectFooterLayout(canvasElement, 11.5, 3);
 	},
 };

@@ -1,18 +1,24 @@
 import React from "react";
-import { Grid } from "@mui/material";
+import { styled } from "@mui/material";
 import Pagination from "./Pagination";
 import StatusBar from "./DataActionBar";
 
+/**
+ * The footer's row: the action bar at its start, the count at its end. Both
+ * are as tall as the row, so the action bar's dividers run from its top to its
+ * bottom; neither shrinks below what its content needs, so they never overlap.
+ */
+const FooterRoot = styled("div")({
+	display: "flex",
+	justifyContent: "space-between",
+});
+
 const Footer = () => {
 	return (
-		<Grid container sx={{ justifyContent: "space-between" }} wrap={"nowrap"}>
-			<Grid>
-				<StatusBar />
-			</Grid>
-			<Grid>
-				<Pagination />
-			</Grid>
-		</Grid>
+		<FooterRoot>
+			<StatusBar />
+			<Pagination />
+		</FooterRoot>
 	);
 };
 

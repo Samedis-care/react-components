@@ -103,11 +103,11 @@ const VerticalDivider = React.forwardRef(function VerticalDivider(
  * Height: by default it is `height: 100%` of its parent, like MUI
  * `<Divider orientation="vertical" />`. So it needs a parent with a definite
  * height, or a block wrapper that a stretching flex row sizes, as in the
- * DataGrid action bars: `<Grid container wrap="nowrap">…<Grid><VerticalDivider /></Grid>…</Grid>`.
+ * DataGrid header's action bar: `<Grid container wrap="nowrap">…<Grid><VerticalDivider /></Grid>…</Grid>`.
  * Directly in a flex row without a height of its own, or in a MUI `Toolbar`,
- * pass `flexItem` instead. In a wrapper that the row does not stretch (e.g. in
- * a Grid container with `alignItems: "center"`), or inline in text, it is 0px
- * tall either way.
+ * pass `flexItem` instead, as the DataGrid footer's action bar does. In a
+ * wrapper that the row does not stretch (e.g. in a Grid container with
+ * `alignItems: "center"`), or inline in text, it is 0px tall either way.
  *
  * Theme: `components.CcVerticalDivider.defaultProps`
  * ({@link VerticalDividerProps}), `styleOverrides.root` (see
