@@ -18,7 +18,6 @@ import BaseSelector, {
 	BaseSelectorLoadHandler,
 } from "../../src/standalone/Selector/BaseSelector";
 import {
-	MultiSelectWithoutGroup,
 	selectorLocalLoadHandler,
 	SingleSelect,
 } from "../../src/standalone/Selector";
@@ -387,38 +386,21 @@ describe("InlineSwitch inside BaseSelector (displaySwitch)", () => {
 });
 
 describe("InlineSwitch in the selectors", () => {
-	it("[ISSUE-3465-ITEM-2] the selectors keep their switch's place: BaseSelector's is not moved up, MultiSelectWithoutGroup's label is not put before it", async () => {
+	it("[ISSUE-3465-ITEM-2] BaseSelector's switch keeps its place on the field label's row: no rule for its static class moves it up", () => {
 		renderSwitch(
-			<>
-				<BaseSelector
-					label="Device type"
-					selected={null}
-					onSelect={() => {}}
-					onLoad={selectorLocalLoadHandler([])}
-					displaySwitch
-					switchLabel="Show inactive"
-				/>
-				<MultiSelectWithoutGroup
-					label="Fruits"
-					selected={[]}
-					onSelect={() => {}}
-					loadDataOptions={selectorLocalLoadHandler([])}
-					displaySwitch
-					switchLabel="Show archived"
-				/>
-			</>,
+			<BaseSelector
+				label="Device type"
+				selected={null}
+				onSelect={() => {}}
+				onLoad={selectorLocalLoadHandler([])}
+				displaySwitch
+				switchLabel="Show inactive"
+			/>,
 		);
-		await flush();
-		const wrapperOf = (name: string) => {
-			const el = screen
-				.getByRole("switch", { name })
-				.closest(".CcInlineSwitch-switchWrapper");
-			if (!(el instanceof HTMLElement)) throw new Error("wrapper missing");
-			return el;
-		};
-		expect(getComputedStyle(wrapperOf("Show inactive")).marginTop).toBe("0px");
-		expect(getComputedStyle(wrapperOf("Show archived")).direction).not.toBe(
-			"rtl",
-		);
+		const wrapper = screen
+			.getByRole("switch", { name: "Show inactive" })
+			.closest(".CcInlineSwitch-switchWrapper");
+		if (!(wrapper instanceof HTMLElement)) throw new Error("wrapper missing");
+		expect(getComputedStyle(wrapper).marginTop).toBe("0px");
 	});
 });

@@ -32,6 +32,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-26 | [The persistence providers hold back and mount again only their grids](2026-11-26-data-grid-persist-holds-back-only-the-grids.md) | behavior |
 | 2026-11-26 | [A refused write no longer stops a LazyConnector's queue, and the error names what was refused](2026-11-26-lazy-connector-sends-past-refused-writes.md) | behavior, type |
 | 2026-11-26 | [The locale selector opens at the row of the current locale](2026-11-26-locale-selector-opens-at-current-locale.md) | behavior |
+| 2026-11-26 | [MultiSelectWithoutGroup's switch has a row of its own above the chips, at the right end, with its label before it](2026-11-26-multi-select-without-group-switch-row.md) | behavior |
 | 2026-11-25 | [A routed menu entry opens a new tab at the URL a click navigates to](2026-11-25-routed-menu-new-tab-opens-history-href.md) | behavior |
 | 2026-11-25 | [On phones the DataGrid moves header and footer buttons into their menus, so both fit 320px](2026-11-25-data-grid-phone-header-footer-fit.md) | behavior |
 | 2026-11-25 | [HowToBox entries break long words](2026-11-25-how-to-box-breaks-long-words.md) | behavior |

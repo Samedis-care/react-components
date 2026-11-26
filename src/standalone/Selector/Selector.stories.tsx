@@ -2,25 +2,12 @@ import React, { useMemo, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, waitFor, within } from "storybook/test";
-import {
-	BaseSelector,
-	BaseSelectorData,
-	BaseSelectorLoadResult,
-	MultiSelect,
-	MultiSelectWithoutGroup,
-	MultiSelectWithTags,
-	selectorLocalLoadHandler,
-	SelectorLruOptions,
-	SingleSelect,
-} from "./index";
+import { BaseSelector, BaseSelectorData, BaseSelectorLoadResult, MultiSelect, MultiSelectWithoutGroup, MultiSelectWithTags, selectorLocalLoadHandler, SelectorLruOptions, SingleSelect } from "./index";
 import type { MultiSelectorData } from "./MultiSelect";
 import { Box } from "@mui/material";
 import debouncePromise from "../../utils/debouncePromise";
 import { PartialExcept } from "../../utils/distributiveOmit";
-import {
-	edgesPast,
-	pageScrollsSideways,
-} from "../../stories/test-utils/hiddenTextLayout";
+import { edgesPast, pageScrollsSideways } from "../../stories/test-utils/hiddenTextLayout";
 
 // ---------------------------------------------------------------------------
 // Shared sample data
@@ -1417,5 +1404,87 @@ export const Issue3473Item16HiddenGroupLabelStaysInside: StoryObj = {
 		const label = within(canvasElement).getByText("Add all entries of a group");
 		await expect(edgesPast(label)).toEqual([]);
 		await expect(pageScrollsSideways()).toBe(false);
+	},
+};
+
+/** a MultiSelectWithoutGroup over three chips with a switch, filling a phone's width */
+const MultiWithoutGroupWithSwitch = () => {
+	const [selected, setSelected] = useState<MultiSelectorData[]>(
+		FRUITS.slice(0, 3),
+	);
+	const [inactive, setInactive] = useState(false);
+	return (
+		<div style={{ padding: "16px 16px 0" }}>
+			<MultiSelectWithoutGroup<MultiSelectorData>
+				label="Fruits"
+				selected={selected}
+				onSelect={setSelected}
+				loadDataOptions={loadFruitOptions}
+				displaySwitch
+				switchLabel="Show inactive fruits?"
+				switchValue={inactive}
+				setSwitchValue={setInactive}
+			/>
+		</div>
+	);
+};
+
+export const Issue3465Item2MultiSelectWithoutGroupSwitchRow: StoryObj = {
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		layout: "fullscreen",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3465-ITEM-2: MultiSelectWithoutGroup's switch has a row of its own above the chips, at the right end, with its label before it. The label reads in the direction of its own words, so the question mark stays at its end. At 320px nothing scrolls sideways.",
+			},
+		},
+	},
+	render: () => <MultiWithoutGroupWithSwitch />,
+	play: async ({ canvas, canvasElement }) => {
+		const sw = canvas.getByRole("switch", { name: "Show inactive fruits?" });
+		const rectOf = (el: Element | null | undefined) => {
+			if (!el) throw new Error("element missing");
+			return el.getBoundingClientRect();
+		};
+		const selector = rectOf(canvasElement.firstElementChild?.firstElementChild);
+		const track = rectOf(sw.closest(".MuiSwitch-root"));
+		const labelText = canvas.getByText("Show inactive fruits?");
+		const label = rectOf(labelText);
+		const switchRow = rectOf(sw.closest("label"));
+		for (const fruit of ["Apple", "Pear", "Banana"]) {
+			await expect(
+				rectOf(canvas.getByText(fruit).parentElement).top,
+				`${fruit}'s chip below the switch's row`,
+			).toBeGreaterThanOrEqual(switchRow.bottom);
+		}
+		await expect(
+			Math.abs(track.right - selector.right),
+			"switch at the right end",
+		).toBeLessThan(1);
+		await expect(label.right, "label before the switch").toBeLessThanOrEqual(
+			track.left,
+		);
+		await expect(
+			Math.abs((label.top + label.bottom) / 2 - (track.top + track.bottom) / 2),
+			"label on the switch's row",
+		).toBeLessThan(4);
+		const text = labelText.firstChild;
+		if (!(text instanceof Text)) throw new Error("label text missing");
+		const charRect = (index: number) => {
+			const range = document.createRange();
+			range.setStart(text, index);
+			range.setEnd(text, index + 1);
+			return range.getBoundingClientRect();
+		};
+		await expect(
+			charRect(text.length - 1).left,
+			"question mark after the words",
+		).toBeGreaterThan(charRect(0).right);
+		const page = canvasElement.ownerDocument.documentElement;
+		await expect(page.scrollWidth, "no sideways scroll").toBeLessThanOrEqual(
+			page.clientWidth,
+		);
 	},
 };
