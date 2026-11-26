@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-26 | [Routes takes any JSX children, and a key on a child takes effect](2026-11-26-routes-children-and-keys.md) | behavior, type |
 | 2026-11-26 | [The busy overlay fades in late on every show, also when it is mounted shown](2026-11-26-form-loader-overlay-every-show-fades-in-late.md) | behavior |
 | 2026-11-26 | [InfiniteScroll loads before the bottom, and holds its calls while `loading` is set](2026-11-26-infinite-scroll-loading-and-threshold.md) | behavior |
 | 2026-11-26 | [A HistoryRouter inside a Route starts a fresh routing scope: its routes resolve from "/"](2026-11-26-history-router-fresh-routing-scope.md) | behavior |

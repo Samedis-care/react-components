@@ -1,13 +1,10 @@
 import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { styled, useThemeProps } from "@mui/material";
 import Routes from "../../standalone/Routes/Routes";
-import {
-	RouteProps,
-	useRouteInfo,
-	useRoutePrefix,
-} from "../../standalone/Routes/Route";
+import { useRouteInfo, useRoutePrefix } from "../../standalone/Routes/Route";
 import useLocation from "../../standalone/Routes/useLocation";
 import findMatchingRoute from "../../standalone/Routes/findMatchingRoute";
+import routeEntries from "../../standalone/Routes/routeEntries";
 import { getTabId, getTabPanelId } from "./tabPanelIds";
 
 /**
@@ -18,7 +15,8 @@ export interface RoutedTabPanelWrapperProps {
 	 * The panels: the entries made with `tab(name, element)` from
 	 * `useRoutedTabPanel`, any number of them, as JSX children or as an
 	 * array. `false`, `null` and `undefined` are skipped, so a conditional
-	 * panel is `{isAdmin && tab("sync", <Sync />)}`.
+	 * panel is `{isAdmin && tab("sync", <Sync />)}`, and the entries of a
+	 * fragment take its place, as in `Routes`.
 	 */
 	children: React.ReactNode;
 	/**
@@ -138,9 +136,7 @@ const RoutedTabPanelWrapper = (inProps: RoutedTabPanelWrapperProps) => {
 		name: "CcRoutedTabPanelWrapper",
 	});
 	const { children, className } = props;
-	const entries = React.Children.toArray(children).filter(
-		React.isValidElement<RouteProps>,
-	);
+	const entries = routeEntries(children);
 	const { pathname } = useLocation();
 	const routePrefix = useRoutePrefix();
 	const matched = findMatchingRoute(entries, routePrefix, pathname);
