@@ -115,6 +115,24 @@ export interface BackendDataGridMultiSelectProps<
 	 * @remarks May return the same ID array in a different array instance to force re-rendering (only read-only mode)
 	 */
 	onChange: (selected: string[]) => void;
+	/**
+	 * Show the select all checkbox, in the grid's footer and in the header of its
+	 * selection column. Ticked, it selects every record matching the search and the
+	 * filters by its id: the grid loads the pages it hasn't loaded yet, one after another,
+	 * and then calls onChange with the ids of all of them (limitSelectAll bounds this).
+	 * Selected records that don't match are unselected. Unticked, it clears the
+	 * selection.
+	 * @default false
+	 */
+	enableSelectAll?: boolean;
+	/**
+	 * Make the select all checkbox (enableSelectAll) select only this many records (a
+	 * positive integer): the first ones matching the search and the filters, in the
+	 * grid's order (the records selected when it loaded first). While more records match,
+	 * the checkbox is labelled "First" and the limit instead of "All".
+	 * @default undefined (select all selects every matching record)
+	 */
+	limitSelectAll?: number;
 }
 
 /**
@@ -134,6 +152,7 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 		onChange,
 		label,
 		getRowLabel: getRecordLabel,
+		limitSelectAll,
 		...gridProps
 	} = props;
 	const getRowLabel = useBackendDataGridRowLabel(model, getRecordLabel);
@@ -180,6 +199,10 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 				disableSelection={false}
 				prohibitMultiSelect={false}
 				customSelectionControl={undefined}
+				// the value lists ids, so select all selects the matching records by their
+				// ids, all of them unless limitSelectAll bounds it, instead of the inverted
+				// selection (everything except the ids), which the value can't hold
+				limitSelectAll={limitSelectAll ?? Number.POSITIVE_INFINITY}
 				getRowLabel={getRowLabel}
 				onSelectionChange={(invert, newIds) => {
 					if (!initialSelectionChangeReceived) {

@@ -448,10 +448,10 @@ export interface IDataGridColumnProps {
 	enableSelectAll?: boolean;
 	/**
 	 * Make the select all checkbox (enableSelectAll) select only this many rows
-	 * (a positive integer): the first ones matching the filter, in the grid's
-	 * sort order. They are selected by their ids, as if the user had ticked
-	 * them: the selection isn't inverted, so delete and every custom data action
-	 * button handle it. loadData loads the pages of them the grid hasn't loaded
+	 * (a positive integer, or Infinity for every row): the first ones matching
+	 * the filter, in the grid's sort order. They are selected by their ids, as
+	 * if the user had ticked them: the selection isn't inverted, so delete and
+	 * every custom data action button handle it. loadData loads the pages of them the grid hasn't loaded
 	 * yet, and rows canSelectRow refuses are skipped.
 	 * @remarks While more rows match the filter than the limit, the checkbox is
 	 *          labelled "First" and the limit instead of "All"

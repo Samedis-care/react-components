@@ -159,6 +159,23 @@ const recipientsForm = (
 		},
 	);
 
+/** the field with its selection in a parent's state, starting with initial */
+const StatefulField = (props: Props & { initial: string[] }) => {
+	const { initial, ...fieldProps } = props;
+	const [selected, setSelected] = React.useState(initial);
+	return (
+		<Framework>
+			<div style={{ height: 500 }}>
+				<BackendDataGridMultiSelect
+					{...fieldProps}
+					selected={selected}
+					onChange={setSelected}
+				/>
+			</div>
+		</Framework>
+	);
+};
+
 // ---------------------------------------------------------------------------
 // Bugs (each test asserts the correct behavior and fails until it is fixed)
 // ---------------------------------------------------------------------------
@@ -261,6 +278,65 @@ describe("BackendDataGridMultiSelect bugs", () => {
 			"27",
 			"28",
 		]);
+	});
+
+	it("[ISSUE-3510-ITEM-12] 'Select all' does not empty the selection", async () => {
+		const { model } = gridModel();
+		const onChange = vi.fn();
+		store.real = true;
+		render(ui({ model, selected: ["1"], onChange, enableSelectAll: true }));
+		const all = await screen.findByRole("checkbox", { name: "All" });
+		await flush();
+		act(() => all.click());
+		await flush();
+		expect(onChange).not.toHaveBeenCalledWith([]);
+	});
+
+	it("[ISSUE-3510-ITEM-12] 'Select all' selects every record by its id, the pages the grid hasn't loaded too, and unticked it clears the selection", async () => {
+		const { model } = gridModel();
+		store.real = true;
+		render(<StatefulField model={model} initial={["7"]} enableSelectAll />);
+		const all = await screen.findByRole("checkbox", { name: "All" });
+		await flush();
+		// the grid shows the first page of 25 rows: select all loads the second
+		act(() => all.click());
+		await waitFor(() =>
+			expect(screen.getByRole("status")).toHaveTextContent("Selected: 30"),
+		);
+		const ids = gridProps().selection![1];
+		expect([...ids].sort((a, b) => Number(a) - Number(b))).toEqual(
+			rows30().map((row) => row.id),
+		);
+		expect(gridProps().selection![0]).toBe(false);
+		expect(all).toBeChecked();
+		act(() => all.click());
+		await waitFor(() =>
+			expect(screen.getByRole("status")).toHaveTextContent("Selected: 0"),
+		);
+		expect(all).not.toBeChecked();
+	});
+
+	it("[ISSUE-3510-ITEM-12] with limitSelectAll, 'Select all' selects the first records in the grid's order, the selected ones first", async () => {
+		const { model } = gridModel();
+		store.real = true;
+		render(
+			<StatefulField
+				model={model}
+				initial={["7"]}
+				enableSelectAll
+				limitSelectAll={5}
+			/>,
+		);
+		const first = await screen.findByRole("checkbox", { name: "First 5" });
+		await flush();
+		// 30 records match, more than the limit
+		expect(first).toHaveAccessibleName("First 5");
+		act(() => first.click());
+		await waitFor(() =>
+			expect(screen.getByRole("status")).toHaveTextContent("Selected: 5"),
+		);
+		expect(gridProps().selection).toEqual([false, ["7", "1", "2", "3", "4"]]);
+		expect(first).toBeChecked();
 	});
 
 	it("[ISSUE-3510-ITEM-16] as a form field the grid is labelled with the field's label", async () => {

@@ -504,6 +504,57 @@ export const Issue3510Item16LabelledFieldCountsSelection: StoryObj = {
 	},
 };
 
+const SelectAllDataGridMultiSelectStory = () => {
+	const model = useMemo(createGridModel, []);
+	const [selected, setSelected] = useState<string[]>(["2"]);
+	return (
+		<div style={{ height: 600 }}>
+			<BackendDataGridMultiSelect
+				model={model}
+				label={"Recipients"}
+				selected={selected}
+				onChange={setSelected}
+				enableSelectAll
+			/>
+		</div>
+	);
+};
+
+/**
+ * ISSUE-3510-ITEM-12: "All" ticks every record (the 8 people), and the field's value
+ * holds all their ids; unticking it clears the selection
+ */
+export const Issue3510Item12SelectAllSelectsEveryRecord: StoryObj = {
+	parameters: { a11y: GRID_A11Y },
+	render: () => <SelectAllDataGridMultiSelectStory />,
+	play: async ({ canvas, canvasElement, userEvent }) => {
+		const group = await canvas.findByRole(
+			"group",
+			{ name: "Recipients" },
+			{ timeout: 3000 },
+		);
+		await waitFor(
+			() => expect(rowCheckboxes(canvasElement).length).toBeGreaterThan(2),
+			{ timeout: 5000 },
+		);
+		const status = within(group).getByRole("status");
+		await expect(status).toHaveTextContent("Selected: 1");
+		// the one in the selection column's header; the footer has one too
+		const [all] = canvas.getAllByRole("checkbox", { name: "All" });
+		await userEvent.click(all);
+		await waitFor(() => expect(status).toHaveTextContent("Selected: 8"));
+		await waitFor(() => expect(all).toBeChecked());
+		for (const box of rowCheckboxes(canvasElement)) {
+			await expect(box).toBeChecked();
+		}
+		await userEvent.click(all);
+		await waitFor(() => expect(status).toHaveTextContent("Selected: 0"));
+		for (const box of rowCheckboxes(canvasElement)) {
+			await expect(box).not.toBeChecked();
+		}
+	},
+};
+
 // ---------------------------------------------------------------------------
 // BackendSingleSelect with switchFilterName: a switch that filters the options
 // ---------------------------------------------------------------------------
