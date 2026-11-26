@@ -1,12 +1,26 @@
 import { describe, expect, it } from "vitest";
 import { createTheme, Theme, ThemeProvider } from "@mui/material";
 import type {} from "../src/theme-def";
-import { createElement } from "react";
-import { render, screen } from "@testing-library/react";
+import React, { createElement } from "react";
+import { act, render, screen } from "@testing-library/react";
 import {
 	selectorLocalLoadHandler,
 	SingleSelect,
 } from "../src/standalone/Selector";
+import {
+	UiKitInput,
+	UiKitInputOutlined,
+	UiKitTextField,
+} from "../src/standalone/UIKit/CommonStyles";
+import PageTitle from "../src/non-standalone/PageTitle/PageTitle";
+import FileUpload from "../src/standalone/FileUpload/Generic";
+import ImagePreviewDialog from "../src/standalone/FileUpload/Image/ImagePreviewDialog";
+import type { MenuItemProps as PortalMenuItemProps } from "../src/standalone/Portal/Menu";
+import MenuItemMaterial from "../src/standalone/Portal/MenuItem/Material";
+import MenuItemJumboReactLight from "../src/standalone/Portal/MenuItem/JumboReact/Light";
+import MenuItemJumboReactDark from "../src/standalone/Portal/MenuItem/JumboReact/Dark";
+import LocaleSelectorEntry from "../src/non-standalone/LocaleSelector/LocaleSelectorEntry";
+import WeekView from "../src/standalone/Schedule/Weekly";
 
 /** the style override functions of every slot of every component in the theme */
 const overrideFunctions = (theme: Theme) =>
@@ -677,5 +691,605 @@ describe("theme-def", () => {
 			screen.getByRole("switch", { name: switchLabel }),
 		).toBeInTheDocument();
 		unmount();
+	});
+	it("[ISSUE-3462-ITEM-18] types the variants of the components whose root gets no ownerState as the props the root gets", () => {
+		// MUI applies theme variants to the root slot only, matches them against the
+		// props the root receives, and calls a props function with these props and
+		// the root's ownerState, which these roots never get: a function that read it
+		// threw on every instance. A root that gets none of its component's props
+		// leaves nothing for a variant to match.
+		const variants = (theme: Theme) =>
+			Object.values(theme.components ?? {}).flatMap(
+				(component) => (component as { variants?: unknown[] }).variants ?? [],
+			);
+		const onMenuClick = () => {};
+		const theme = createTheme({
+			components: {
+				CcLoader: {
+					variants: [
+						{ props: { size: 24, text: "Loading", role: "alert" }, style: {} },
+						// @ts-expect-error classes do not reach the root
+						{ props: { classes: {} }, style: {} },
+						// @ts-expect-error no slot of Loader gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcVerticalDivider: {
+					variants: [
+						{ props: ({ flexItem }) => flexItem === true, style: {} },
+						// @ts-expect-error no slot of VerticalDivider gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcSmallIconButton: {
+					variants: [
+						{ props: { size: "large" }, style: {} },
+						// @ts-expect-error no slot of SmallIconButton gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcSmallestIconButton: {
+					variants: [
+						{ props: { disabled: true }, style: {} },
+						// @ts-expect-error no slot of SmallestIconButton gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcSmallListItem: {
+					variants: [
+						{ props: { dense: true }, style: {} },
+						// @ts-expect-error no slot of SmallListItem gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcSmallListItemButton: {
+					variants: [
+						{ props: { selected: true }, style: {} },
+						// @ts-expect-error no slot of SmallListItemButton gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcSelectorSmallListItem: {
+					variants: [
+						{ props: { dense: true }, style: {} },
+						// @ts-expect-error no slot of SelectorSmallListItem gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcSelectorSmallListItemButton: {
+					variants: [
+						{ props: { selected: true }, style: {} },
+						// @ts-expect-error no slot of SelectorSmallListItemButton gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcSmallListItemIcon: {
+					variants: [
+						{ props: { id: "icon" }, style: {} },
+						// @ts-expect-error no slot of SmallListItemIcon gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcCountryFlag: {
+					variants: [
+						{ props: { code: "DE", named: true }, style: {} },
+						// @ts-expect-error the root gets style together with the size
+						{ props: { style: {} }, style: {} },
+						// @ts-expect-error no slot of CountryFlag gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcGroupBox: {
+					variants: [
+						{ props: { smallLabel: true, disabled: true }, style: {} },
+						// @ts-expect-error classes do not reach the root
+						{ props: { classes: {} }, style: {} },
+						// @ts-expect-error no slot of GroupBox gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcPageTitle: {
+					variants: [
+						{ props: { variant: "h2" }, style: {} },
+						// @ts-expect-error disableAutoTitle does not reach the root
+						{ props: { disableAutoTitle: true }, style: {} },
+						// @ts-expect-error no slot of PageTitle gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcPopupMenu: {
+					variants: [
+						{ props: { variant: "menu" }, style: {} },
+						// @ts-expect-error the root gets its own slotProps
+						{ props: { slotProps: {} }, style: {} },
+						// @ts-expect-error no slot of PopupMenu gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcUiKitInput: {
+					variants: [
+						{ props: { warning: true }, style: {} },
+						// @ts-expect-error no slot of UiKitInput gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcUiKitInputOutlined: {
+					variants: [
+						{ props: { dirty: true }, style: {} },
+						// @ts-expect-error no slot of UiKitInputOutlined gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcUiKitTextField: {
+					variants: [
+						{ props: { size: "small" }, style: {} },
+						// @ts-expect-error no slot of UiKitTextField gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcFileUpload: {
+					variants: [
+						{ props: { smallLabel: true }, style: {} },
+						// @ts-expect-error the root gets the label with its dirty marker
+						{ props: { label: "Files" }, style: {} },
+						// @ts-expect-error no slot of FileUpload gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcImagePreviewDialog: {
+					variants: [
+						{ props: { open: true }, style: {} },
+						// @ts-expect-error src does not reach the root
+						{ props: { src: "image.png" }, style: {} },
+						// @ts-expect-error no slot of ImagePreviewDialog gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcMenuItemMaterial: {
+					variants: [
+						{ props: { onClick: onMenuClick }, style: {} },
+						// @ts-expect-error typographyProps do not reach the root
+						{ props: { typographyProps: {} }, style: {} },
+						// @ts-expect-error no slot of MenuItemMaterial gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcMenuItemJumboReactLight: {
+					variants: [
+						{ props: ({ onAuxClick }) => onAuxClick != null, style: {} },
+						// @ts-expect-error typographyProps do not reach the root
+						{ props: { typographyProps: {} }, style: {} },
+						// @ts-expect-error no slot of MenuItemJumboReactLight gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcMenuItemJumboReactDark: {
+					variants: [
+						{ props: { onAuxClick: onMenuClick }, style: {} },
+						// @ts-expect-error typographyProps do not reach the root
+						{ props: { typographyProps: {} }, style: {} },
+						// @ts-expect-error no slot of MenuItemJumboReactDark gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcLocaleSelectorEntry: {
+					variants: [
+						{ props: { disabled: true }, style: {} },
+						// @ts-expect-error currentLanguage does not reach the root
+						{ props: { currentLanguage: "de" }, style: {} },
+						// @ts-expect-error no slot of LocaleSelectorEntry gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcWeekView: {
+					variants: [
+						{ props: { className: "compact" }, style: {} },
+						// @ts-expect-error loadData does not reach the root
+						{ props: ({ loadData }) => !!loadData, style: {} },
+						// @ts-expect-error no slot of WeekView gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+			},
+		});
+		expect(variants(theme)).toHaveLength(58);
+
+		// the roots of these get none of their component's props, or there is no root
+		const withoutVariants = createTheme({
+			components: {
+				CcMultiGrid: {
+					// @ts-expect-error the root gets none of MultiGrid's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcDefaultFormPageButtons: {
+					// @ts-expect-error DefaultFormPageButtons has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcMatrixGrid: {
+					// @ts-expect-error the root gets none of MatrixGrid's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcMatrixCellTile: {
+					// @ts-expect-error the root gets none of MatrixCellTile's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcFormPageLayout: {
+					// @ts-expect-error the root gets none of FormPageLayout's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcImageDots: {
+					// @ts-expect-error the root gets none of ImageDots' props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcImageDialogEntry: {
+					// @ts-expect-error the root gets none of ImageDialogEntry's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcCollapsibleMenu: {
+					// @ts-expect-error the root gets none of CollapsibleMenu's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcMultiImage: {
+					// @ts-expect-error the root gets none of MultiImage's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcPortalLayoutMenu: {
+					// @ts-expect-error PortalLayoutMenu has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcSignPadDialog: {
+					// @ts-expect-error the root gets none of SignPadDialog's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcFile: {
+					// @ts-expect-error File has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcDialogTitle: {
+					// @ts-expect-error the root gets none of DialogTitle's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcCrudLoadStatus: {
+					// @ts-expect-error CrudLoadStatus has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcImageSelector: {
+					// @ts-expect-error ImageSelector has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcPortalMenu: {
+					// @ts-expect-error the root gets none of PortalMenu's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcLocaleSelectorDialog: {
+					// @ts-expect-error the root gets none of LocaleSelectorDialog's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcLocaleSelectorDialogContent: {
+					// @ts-expect-error LocaleSelectorDialogContent has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcSignPad: {
+					// @ts-expect-error the root gets none of SignPad's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcFormDialog: {
+					// @ts-expect-error FormDialog has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcMultiSelectWithTags: {
+					// @ts-expect-error the root gets none of MultiSelectWithTags' props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcMultiSelectWithoutGroup: {
+					// @ts-expect-error MultiSelectWithoutGroup has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcWeekViewDay: {
+					// @ts-expect-error WeekViewDay has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcScrollableSchedule: {
+					// @ts-expect-error ScrollableSchedule has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcScrollableScheduleDay: {
+					// @ts-expect-error the root gets none of ScrollableScheduleDay's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcDataGrid: {
+					// @ts-expect-error the root gets none of DataGrid's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcGridMultiSelectFilter: {
+					// @ts-expect-error GridMultiSelectFilter has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcGridMultiSelectFilterBackend: {
+					// @ts-expect-error GridMultiSelectFilterBackend has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcGridSingleSelectFilter: {
+					// @ts-expect-error GridSingleSelectFilter has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcGridSingleSelectFilterBackend: {
+					// @ts-expect-error GridSingleSelectFilterBackend has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+			},
+		});
+		expect(variants(withoutVariants)).toHaveLength(30);
+	});
+	it("[ISSUE-3462-ITEM-18] applies the variants of the UIKit inputs, matched against their props", () => {
+		const theme = createTheme({
+			components: {
+				CcUiKitInput: {
+					variants: [
+						{
+							props: { disabled: true },
+							style: { outlineColor: "rgb(1, 2, 3)" },
+						},
+					],
+				},
+				CcUiKitInputOutlined: {
+					variants: [
+						{
+							props: ({ readOnly }) => readOnly === true,
+							style: { outlineColor: "rgb(4, 5, 6)" },
+						},
+					],
+				},
+				CcUiKitTextField: {
+					variants: [
+						{
+							props: { size: "small" },
+							style: { outlineColor: "rgb(7, 8, 9)" },
+						},
+					],
+				},
+			},
+		});
+		render(
+			createElement(
+				ThemeProvider,
+				{ theme },
+				createElement(UiKitInput, { inputProps: { "aria-label": "a" } }),
+				createElement(UiKitInput, {
+					disabled: true,
+					inputProps: { "aria-label": "b" },
+				}),
+				createElement(UiKitInputOutlined, {
+					inputProps: { "aria-label": "c" },
+				}),
+				createElement(UiKitInputOutlined, {
+					readOnly: true,
+					inputProps: { "aria-label": "d" },
+				}),
+				createElement(UiKitTextField, { label: "e" }),
+				createElement(UiKitTextField, { label: "f", size: "small" }),
+			),
+		);
+		const outline = (name: string, root: string) =>
+			getComputedStyle(
+				screen.getByRole("textbox", { name }).closest(root) as HTMLElement,
+			).outlineColor;
+		expect(outline("a", ".MuiInputBase-root")).not.toBe("rgb(1, 2, 3)");
+		expect(outline("b", ".MuiInputBase-root")).toBe("rgb(1, 2, 3)");
+		expect(outline("c", ".MuiInputBase-root")).not.toBe("rgb(4, 5, 6)");
+		expect(outline("d", ".MuiInputBase-root")).toBe("rgb(4, 5, 6)");
+		expect(outline("e", ".MuiTextField-root")).not.toBe("rgb(7, 8, 9)");
+		expect(outline("f", ".MuiTextField-root")).toBe("rgb(7, 8, 9)");
+	});
+	it("[ISSUE-3462-ITEM-18] applies the variants of PageTitle, matched against its props with variant h1 when it is not set", () => {
+		const theme = createTheme({
+			components: {
+				CcPageTitle: {
+					variants: [
+						{ props: { variant: "h1" }, style: { color: "rgb(1, 2, 3)" } },
+					],
+				},
+			},
+		});
+		render(
+			createElement(
+				ThemeProvider,
+				{ theme },
+				createElement(PageTitle, { disableAutoTitle: true }, "Devices"),
+				createElement(
+					PageTitle,
+					{ disableAutoTitle: true, variant: "h2" },
+					"Details",
+				),
+			),
+		);
+		expect(
+			getComputedStyle(screen.getByRole("heading", { name: "Devices" })).color,
+		).toBe("rgb(1, 2, 3)");
+		expect(
+			getComputedStyle(screen.getByRole("heading", { name: "Details" })).color,
+		).not.toBe("rgb(1, 2, 3)");
+	});
+	it("[ISSUE-3462-ITEM-18] applies the variants of FileUpload and ImagePreviewDialog, matched against their props", async () => {
+		const theme = createTheme({
+			components: {
+				CcFileUpload: {
+					variants: [
+						{
+							props: { smallLabel: true },
+							style: { outlineColor: "rgb(1, 2, 3)" },
+						},
+					],
+				},
+				CcImagePreviewDialog: {
+					variants: [
+						{ props: { open: true }, style: { outlineColor: "rgb(4, 5, 6)" } },
+						{
+							props: ({ onClose }) => onClose == null,
+							style: { borderTopColor: "rgb(7, 8, 9)" },
+						},
+					],
+				},
+			},
+		});
+		const upload = (label: string, smallLabel?: boolean) =>
+			createElement(FileUpload, {
+				label,
+				smallLabel,
+				previewSize: 24,
+				handleError: () => {},
+				files: [],
+			});
+		const { container } = render(
+			createElement(
+				ThemeProvider,
+				{ theme },
+				upload("Documents"),
+				upload("Attachments", true),
+				createElement(ImagePreviewDialog, {
+					src: "data:image/gif;base64,R0lGODlhAQABAAAAACw=",
+					alt: "Preview",
+					open: true,
+					onClose: () => {},
+				}),
+			),
+		);
+		const [normal, small] = Array.from(container.querySelectorAll("fieldset"));
+		expect(getComputedStyle(normal).outlineColor).not.toBe("rgb(1, 2, 3)");
+		expect(getComputedStyle(small).outlineColor).toBe("rgb(1, 2, 3)");
+		const dialogRoot = (await screen.findByRole("dialog")).closest(
+			".MuiDialog-root",
+		) as HTMLElement;
+		expect(getComputedStyle(dialogRoot).outlineColor).toBe("rgb(4, 5, 6)");
+		expect(getComputedStyle(dialogRoot).borderTopColor).not.toBe(
+			"rgb(7, 8, 9)",
+		);
+	});
+	it("[ISSUE-3462-ITEM-18] applies the variants of the menu items and LocaleSelectorEntry, matched against their props", () => {
+		const onDevices = () => {};
+		const theme = createTheme({
+			components: {
+				CcMenuItemMaterial: {
+					variants: [
+						{
+							props: { onClick: onDevices },
+							style: { outlineColor: "rgb(1, 2, 3)" },
+						},
+					],
+				},
+				CcMenuItemJumboReactLight: {
+					variants: [
+						{
+							props: { onClick: onDevices },
+							style: { outlineColor: "rgb(4, 5, 6)" },
+						},
+					],
+				},
+				CcMenuItemJumboReactDark: {
+					variants: [
+						{
+							props: ({ onAuxClick }) => onAuxClick === onDevices,
+							style: { outlineColor: "rgb(7, 8, 9)" },
+						},
+					],
+				},
+				CcLocaleSelectorEntry: {
+					variants: [
+						{
+							props: { disabled: true },
+							style: { outlineColor: "rgb(10, 11, 12)" },
+						},
+					],
+				},
+			},
+		});
+		const item = (
+			component: React.ComponentType<PortalMenuItemProps>,
+			title: string,
+			onClick: () => void,
+		) =>
+			createElement(component, {
+				title,
+				onClick,
+				onAuxClick: onClick,
+				expandable: false,
+				depth: 0,
+			});
+		const entry = (locale: string, country: string, disabled: boolean) =>
+			createElement(LocaleSelectorEntry, {
+				locale: {
+					locale,
+					language_short: "de",
+					country_short: country,
+					country,
+					language: "German",
+					native_country: country,
+					native_language: "Deutsch",
+				},
+				currentLanguage: "en",
+				handleSwitch: () => {},
+				disabled,
+			});
+		render(
+			createElement(
+				ThemeProvider,
+				{ theme },
+				createElement(
+					"ul",
+					null,
+					item(MenuItemMaterial, "Material devices", onDevices),
+					item(MenuItemMaterial, "Material home", () => {}),
+					item(MenuItemJumboReactLight, "Light devices", onDevices),
+					item(MenuItemJumboReactLight, "Light home", () => {}),
+					item(MenuItemJumboReactDark, "Dark devices", onDevices),
+					item(MenuItemJumboReactDark, "Dark home", () => {}),
+					entry("de-DE", "DE", false),
+					entry("de-AT", "AT", true),
+				),
+			),
+		);
+		const outline = (name: RegExp) =>
+			getComputedStyle(screen.getByRole("button", { name })).outlineColor;
+		expect(outline(/Material devices/)).toBe("rgb(1, 2, 3)");
+		expect(outline(/Material home/)).not.toBe("rgb(1, 2, 3)");
+		expect(outline(/Light devices/)).toBe("rgb(4, 5, 6)");
+		expect(outline(/Light home/)).not.toBe("rgb(4, 5, 6)");
+		expect(outline(/Dark devices/)).toBe("rgb(7, 8, 9)");
+		expect(outline(/Dark home/)).not.toBe("rgb(7, 8, 9)");
+		expect(outline(/DE/)).not.toBe("rgb(10, 11, 12)");
+		expect(outline(/AT/)).toBe("rgb(10, 11, 12)");
+	});
+	it("[ISSUE-3462-ITEM-18] applies the variants of WeekView, matched against its className", async () => {
+		const emptyWeek = () => Array.from({ length: 7 }, () => []);
+		const theme = createTheme({
+			components: {
+				CcWeekView: {
+					variants: [
+						{
+							props: { className: "compact" },
+							style: { outlineColor: "rgb(1, 2, 3)" },
+						},
+					],
+				},
+			},
+		});
+		const { container } = render(
+			createElement(
+				ThemeProvider,
+				{ theme },
+				createElement(WeekView, { loadData: emptyWeek, className: "compact" }),
+				createElement(WeekView, { loadData: emptyWeek, className: "wide" }),
+			),
+		);
+		expect(
+			getComputedStyle(container.querySelector(".compact") as HTMLElement)
+				.outlineColor,
+		).toBe("rgb(1, 2, 3)");
+		expect(
+			getComputedStyle(container.querySelector(".wide") as HTMLElement)
+				.outlineColor,
+		).not.toBe("rgb(1, 2, 3)");
+		// lets the weeks' loads settle
+		await act(async () => {});
 	});
 });

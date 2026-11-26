@@ -1,4 +1,8 @@
-import { PortalMenuClassKey, PortalMenuProps } from "./standalone/Portal/Menu";
+import {
+	MenuItemProps as PortalMenuItemProps,
+	PortalMenuClassKey,
+	PortalMenuProps,
+} from "./standalone/Portal/Menu";
 import {
 	FileUploadClassKey,
 	FileUploadProps,
@@ -593,57 +597,78 @@ declare module "@mui/material/styles" {
 		CcLoader?: {
 			defaultProps?: ComponentsPropsList["CcLoader"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<LoaderClassKey>;
-			variants?: ComponentsVariants["CcLoader"];
+			// the root gets every prop but className, classes, aria-label and
+			// aria-labelledby
+			variants?: VariantsWithoutOwnerState<
+				Omit<
+					LoaderProps,
+					"className" | "classes" | "aria-label" | "aria-labelledby"
+				>
+			>;
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of MultiGrid's props.
 		CcMultiGrid?: {
 			defaultProps?: ComponentsPropsList["CcMultiGrid"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<MultiGridClassKey>;
-			variants?: ComponentsVariants["CcMultiGrid"];
 		};
 		CcVerticalDivider?: {
 			defaultProps?: ComponentsPropsList["CcVerticalDivider"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<VerticalDividerClassKey>;
-			variants?: ComponentsVariants["CcVerticalDivider"];
+			// the root gets every prop but className
+			variants?: VariantsWithoutOwnerState<
+				Omit<VerticalDividerProps, "className">
+			>;
 		};
 		CcSmallIconButton?: {
 			defaultProps?: ComponentsPropsList["CcSmallIconButton"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<SmallIconButtonClassKey>;
-			variants?: ComponentsVariants["CcSmallIconButton"];
+			// the root gets every prop
+			variants?: VariantsWithoutOwnerState<SmallIconButtonProps>;
 		};
 		CcSmallestIconButton?: {
 			defaultProps?: ComponentsPropsList["CcSmallestIconButton"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<SmallestIconButtonClassKey>;
-			variants?: ComponentsVariants["CcSmallestIconButton"];
+			// the root gets every prop
+			variants?: VariantsWithoutOwnerState<SmallestIconButtonProps>;
 		};
 		CcSmallListItem?: {
 			defaultProps?: ComponentsPropsList["CcSmallListItem"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<SmallListItemClassKey>;
-			variants?: ComponentsVariants["CcSmallListItem"];
+			// the root gets every prop
+			variants?: VariantsWithoutOwnerState<SmallListItemProps>;
 		};
 		CcSmallListItemButton?: {
 			defaultProps?: ComponentsPropsList["CcSmallListItemButton"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<SmallListItemButtonClassKey>;
-			variants?: ComponentsVariants["CcSmallListItemButton"];
+			// the root gets every prop
+			variants?: VariantsWithoutOwnerState<SmallListItemButtonProps>;
 		};
 		CcSelectorSmallListItem?: {
 			defaultProps?: ComponentsPropsList["CcSelectorSmallListItem"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<SelectorSmallListItemClassKey>;
-			variants?: ComponentsVariants["CcSelectorSmallListItem"];
+			// the root gets every prop
+			variants?: VariantsWithoutOwnerState<SelectorSmallListItemProps>;
 		};
 		CcSelectorSmallListItemButton?: {
 			defaultProps?: ComponentsPropsList["CcSelectorSmallListItemButton"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<SelectorSmallListItemButtonClassKey>;
-			variants?: ComponentsVariants["CcSelectorSmallListItemButton"];
+			// the root gets every prop
+			variants?: VariantsWithoutOwnerState<SelectorSmallListItemButtonProps>;
 		};
 		CcSmallListItemIcon?: {
 			defaultProps?: ComponentsPropsList["CcSmallListItemIcon"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<SmallListItemIconClassKey>;
-			variants?: ComponentsVariants["CcSmallListItemIcon"];
+			// the root gets every prop
+			variants?: VariantsWithoutOwnerState<SmallListItemIconProps>;
 		};
 		CcCountryFlag?: {
 			defaultProps?: ComponentsPropsList["CcCountryFlag"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<CountryFlagClassKey>;
-			variants?: ComponentsVariants["CcCountryFlag"];
+			// the root gets every prop but className, classes and style
+			variants?: VariantsWithoutOwnerState<
+				Omit<CountryFlagProps, "className" | "classes" | "style">
+			>;
 		};
 		CcMultiLanguageInput?: {
 			defaultProps?: ComponentsPropsList["CcMultiLanguageInput"];
@@ -656,10 +681,11 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcFormButtons"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<FormButtonsClassKey>;
 		};
+		// No variants: MUI applies them to the root slot, and
+		// DefaultFormPageButtons has none.
 		CcDefaultFormPageButtons?: {
 			defaultProps?: ComponentsPropsList["CcDefaultFormPageButtons"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<DefaultFormPageButtonsClassKey>;
-			variants?: ComponentsVariants["CcDefaultFormPageButtons"];
 		};
 		CcSubActionButton?: {
 			defaultProps?: ComponentsPropsList["CcSubActionButton"];
@@ -679,17 +705,22 @@ declare module "@mui/material/styles" {
 		CcGroupBox?: {
 			defaultProps?: ComponentsPropsList["CcGroupBox"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<GroupBoxClassKey>;
-			variants?: ComponentsVariants["CcGroupBox"];
+			// the root gets every prop but children, className and classes
+			variants?: VariantsWithoutOwnerState<
+				Omit<GroupBoxProps, "children" | "className" | "classes">
+			>;
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of MatrixGrid's props.
 		CcMatrixGrid?: {
 			defaultProps?: ComponentsPropsList["CcMatrixGrid"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<MatrixGridClassKey>;
-			variants?: ComponentsVariants["CcMatrixGrid"];
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of MatrixCellTile's props.
 		CcMatrixCellTile?: {
 			defaultProps?: ComponentsPropsList["CcMatrixCellTile"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<MatrixCellTileClassKey>;
-			variants?: ComponentsVariants["CcMatrixCellTile"];
 		};
 		CcHowToBox?: {
 			defaultProps?: ComponentsPropsList["CcHowToBox"];
@@ -703,10 +734,11 @@ declare module "@mui/material/styles" {
 			styleOverrides?: ComponentsOverrides<Theme>["CcInfoBox"];
 			variants?: ComponentsVariants["CcInfoBox"];
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of FormPageLayout's props.
 		CcFormPageLayout?: {
 			defaultProps?: ComponentsPropsList["CcFormPageLayout"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<FormPageLayoutClassKey>;
-			variants?: ComponentsVariants["CcFormPageLayout"];
 		};
 		// No variants: MUI matches them against the root's own props and
 		// ownerState, which hold none of InlineSwitch's props. A theme reaches
@@ -745,25 +777,28 @@ declare module "@mui/material/styles" {
 			styleOverrides?: ComponentsOverrides<Theme>["CcMultiSelect"];
 			variants?: ComponentsVariants["CcMultiSelect"];
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of ImageDots' props.
 		CcImageDots?: {
 			defaultProps?: ComponentsPropsList["CcImageDots"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<ImageDotsClassKey>;
-			variants?: ComponentsVariants["CcImageDots"];
 		};
 		CcImageBox?: {
 			defaultProps?: ComponentsPropsList["CcImageBox"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcImageBox"];
 			variants?: ComponentsVariants["CcImageBox"];
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of ImageDialogEntry's props.
 		CcImageDialogEntry?: {
 			defaultProps?: ComponentsPropsList["CcImageDialogEntry"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<ImageDialogEntryClassKey>;
-			variants?: ComponentsVariants["CcImageDialogEntry"];
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of CollapsibleMenu's props.
 		CcCollapsibleMenu?: {
 			defaultProps?: ComponentsPropsList["CcCollapsibleMenu"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<CollapsibleMenuClassKey>;
-			variants?: ComponentsVariants["CcCollapsibleMenu"];
 		};
 		// No variants: MUI matches them against the root's own props, which
 		// hold none of CenteredTypography's props.
@@ -771,70 +806,93 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcCenteredTypography"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<CenteredTypographyClassKey>;
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of MultiImage's props.
 		CcMultiImage?: {
 			defaultProps?: ComponentsPropsList["CcMultiImage"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<MultiImageClassKey>;
-			variants?: ComponentsVariants["CcMultiImage"];
 		};
+		// No variants: MUI applies them to the root slot, and PortalLayoutMenu has
+		// none.
 		CcPortalLayoutMenu?: {
 			defaultProps?: ComponentsPropsList["CcPortalLayoutMenu"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<PortalLayoutMenuClassKey>;
-			variants?: ComponentsVariants["CcPortalLayoutMenu"];
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of SignPadDialog's props.
 		CcSignPadDialog?: {
 			defaultProps?: ComponentsPropsList["CcSignPadDialog"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<SignPadDialogClassKey>;
-			variants?: ComponentsVariants["CcSignPadDialog"];
 		};
 		CcMenuItemJumboReactLight?: {
 			defaultProps?: ComponentsPropsList["CcMenuItemJumboReactLight"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<MenuItemJumboReactLightClassKey>;
-			variants?: ComponentsVariants["CcMenuItemJumboReactLight"];
+			// the root gets the menu entry's onClick and onAuxClick, and none of
+			// the other props
+			variants?: VariantsWithoutOwnerState<
+				Pick<PortalMenuItemProps, "onClick" | "onAuxClick">
+			>;
 		};
 		CcMenuItemJumboReactDark?: {
 			defaultProps?: ComponentsPropsList["CcMenuItemJumboReactDark"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<MenuItemJumboReactDarkClassKey>;
-			variants?: ComponentsVariants["CcMenuItemJumboReactDark"];
+			// the root gets the menu entry's onClick and onAuxClick, and none of
+			// the other props
+			variants?: VariantsWithoutOwnerState<
+				Pick<PortalMenuItemProps, "onClick" | "onAuxClick">
+			>;
 		};
+		// No variants: MUI applies them to the root slot, and File has none.
 		CcFile?: {
 			defaultProps?: ComponentsPropsList["CcFile"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<FileClassKey>;
-			variants?: ComponentsVariants["CcFile"];
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of DialogTitle's props.
 		CcDialogTitle?: {
 			defaultProps?: ComponentsPropsList["CcDialogTitle"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<DialogTitleClassKey>;
-			variants?: ComponentsVariants["CcDialogTitle"];
 		};
 		CcFileUpload?: {
 			defaultProps?: ComponentsPropsList["CcFileUpload"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<FileUploadClassKey>;
-			variants?: ComponentsVariants["CcFileUpload"];
+			// the root gets smallLabel, and none of the other props
+			variants?: VariantsWithoutOwnerState<Pick<FileUploadProps, "smallLabel">>;
 		};
+		// No variants: MUI applies them to the root slot, and CrudLoadStatus has
+		// none.
 		CcCrudLoadStatus?: {
 			defaultProps?: ComponentsPropsList["CcCrudLoadStatus"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<CrudLoadStatusClassKey>;
-			variants?: ComponentsVariants["CcCrudLoadStatus"];
 		};
+		// No variants: MUI applies them to the root slot, and ImageSelector has
+		// none.
 		CcImageSelector?: {
 			defaultProps?: ComponentsPropsList["CcImageSelector"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<ImageSelectorClassKey>;
-			variants?: ComponentsVariants["CcImageSelector"];
 		};
 		CcImagePreviewDialog?: {
 			defaultProps?: ComponentsPropsList["CcImagePreviewDialog"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<ImagePreviewDialogClassKey>;
-			variants?: ComponentsVariants["CcImagePreviewDialog"];
+			// the root gets open and onClose, and none of the other props
+			variants?: VariantsWithoutOwnerState<
+				Pick<ImagePreviewDialogProps, "open" | "onClose">
+			>;
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of PortalMenu's props.
 		CcPortalMenu?: {
 			defaultProps?: ComponentsPropsList["CcPortalMenu"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<PortalMenuClassKey>;
-			variants?: ComponentsVariants["CcPortalMenu"];
 		};
 		CcMenuItemMaterial?: {
 			defaultProps?: ComponentsPropsList["CcMenuItemMaterial"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<MenuItemMaterialClassKey>;
-			variants?: ComponentsVariants["CcMenuItemMaterial"];
+			// the root gets the menu entry's onClick and onAuxClick, and none of
+			// the other props
+			variants?: VariantsWithoutOwnerState<
+				Pick<PortalMenuItemProps, "onClick" | "onAuxClick">
+			>;
 		};
 		CcLocalizedKeyboardDatePicker?: {
 			defaultProps?: ComponentsPropsList["CcLocalizedKeyboardDatePicker"];
@@ -860,52 +918,65 @@ declare module "@mui/material/styles" {
 		CcUiKitInput?: {
 			defaultProps?: ComponentsPropsList["CcUiKitInput"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<UiKitInputClassKey>;
-			variants?: ComponentsVariants["CcUiKitInput"];
+			// the root is the input, with every prop
+			variants?: VariantsWithoutOwnerState<UiKitInputProps>;
 		};
 		CcUiKitInputOutlined?: {
 			defaultProps?: ComponentsPropsList["CcUiKitInputOutlined"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<UiKitInputOutlinedClassKey>;
-			variants?: ComponentsVariants["CcUiKitInputOutlined"];
+			// the root is the input, with every prop
+			variants?: VariantsWithoutOwnerState<UiKitInputOutlinedProps>;
 		};
 		CcUiKitTextField?: {
 			defaultProps?: ComponentsPropsList["CcUiKitTextField"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<UiKitTextFieldClassKey>;
-			variants?: ComponentsVariants["CcUiKitTextField"];
+			// the root is the text field, with every prop
+			variants?: VariantsWithoutOwnerState<UiKitTextFieldProps>;
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of LocaleSelectorDialog's props.
 		CcLocaleSelectorDialog?: {
 			defaultProps?: ComponentsPropsList["CcLocaleSelectorDialog"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<LocaleSelectorDialogClassKey>;
-			variants?: ComponentsVariants["CcLocaleSelectorDialog"];
 		};
+		// No variants: MUI applies them to the root slot, and
+		// LocaleSelectorDialogContent has none.
 		CcLocaleSelectorDialogContent?: {
 			defaultProps?: ComponentsPropsList["CcLocaleSelectorDialogContent"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<LocaleSelectorDialogContentClassKey>;
-			variants?: ComponentsVariants["CcLocaleSelectorDialogContent"];
 		};
 		CcLocaleSelectorEntry?: {
 			defaultProps?: ComponentsPropsList["CcLocaleSelectorEntry"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<LocaleSelectorEntryClassKey>;
-			variants?: ComponentsVariants["CcLocaleSelectorEntry"];
+			// the root gets disabled and className, and none of the other props
+			variants?: VariantsWithoutOwnerState<
+				Pick<LocaleSelectorEntryProps, "disabled" | "className">
+			>;
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of SignPad's props.
 		CcSignPad?: {
 			defaultProps?: ComponentsPropsList["CcSignPad"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<SignPadClassKey>;
-			variants?: ComponentsVariants["CcSignPad"];
 		};
+		// No variants: MUI applies them to the root slot, and FormDialog has none.
 		CcFormDialog?: {
 			defaultProps?: ComponentsPropsList["CcFormDialog"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<FormDialogClassKey>;
-			variants?: ComponentsVariants["CcFormDialog"];
 		};
 		CcPageTitle?: {
 			defaultProps?: ComponentsPropsList["CcPageTitle"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<PageTitleClassKey>;
-			variants?: ComponentsVariants["CcPageTitle"];
+			// the root gets every prop but disableAutoTitle
+			variants?: VariantsWithoutOwnerState<
+				Omit<PageTitleProps, "disableAutoTitle">
+			>;
 		};
 		CcPopupMenu?: {
 			defaultProps?: ComponentsPropsList["CcPopupMenu"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<PopupMenuClassKey>;
-			variants?: ComponentsVariants["CcPopupMenu"];
+			// the root gets every prop but slotProps, which it extends
+			variants?: VariantsWithoutOwnerState<Omit<PopupMenuProps, "slotProps">>;
 		};
 		CcFilesGrid?: {
 			styleOverrides?: StyleOverridesWithoutOwnerState<FilesGridClassKey>;
@@ -925,65 +996,75 @@ declare module "@mui/material/styles" {
 			styleOverrides?: ComponentsOverrides<Theme>["CcToast"];
 			variants?: ComponentsVariants["CcToast"];
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of MultiSelectWithTags' props.
 		CcMultiSelectWithTags?: {
 			defaultProps?: ComponentsPropsList["CcMultiSelectWithTags"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<MultiSelectWithTagsClassKey>;
-			variants?: ComponentsVariants["CcMultiSelectWithTags"];
 		};
+		// No variants: MUI applies them to the root slot, and
+		// MultiSelectWithoutGroup has none.
 		CcMultiSelectWithoutGroup?: {
 			defaultProps?: ComponentsPropsList["CcMultiSelectWithoutGroup"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<MultiSelectWithoutGroupClassKey>;
-			variants?: ComponentsVariants["CcMultiSelectWithoutGroup"];
 		};
 		CcDayContents?: {
 			defaultProps?: ComponentsPropsList["CcDayContents"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcDayContents"];
 			variants?: ComponentsVariants["CcDayContents"];
 		};
+		// No variants: MUI applies them to the root slot, and WeekViewDay has none.
 		CcWeekViewDay?: {
 			defaultProps?: ComponentsPropsList["CcWeekViewDay"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<WeekViewDayClassKey>;
-			variants?: ComponentsVariants["CcWeekViewDay"];
 		};
+		// No variants: MUI applies them to the root slot, and ScrollableSchedule
+		// has none.
 		CcScrollableSchedule?: {
 			defaultProps?: ComponentsPropsList["CcScrollableSchedule"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<ScrollableScheduleClassKey>;
-			variants?: ComponentsVariants["CcScrollableSchedule"];
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of ScrollableScheduleDay's props.
 		CcScrollableScheduleDay?: {
 			defaultProps?: ComponentsPropsList["CcScrollableScheduleDay"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<ScrollableScheduleDayClassKey>;
-			variants?: ComponentsVariants["CcScrollableScheduleDay"];
 		};
 		CcWeekView?: {
 			defaultProps?: ComponentsPropsList["CcWeekView"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<WeekViewClassKey>;
-			variants?: ComponentsVariants["CcWeekView"];
+			// the root gets className, and none of the other props
+			variants?: VariantsWithoutOwnerState<Pick<WeekViewProps, "className">>;
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of DataGrid's props.
 		CcDataGrid?: {
 			defaultProps?: ComponentsPropsList["CcDataGrid"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<DataGridClassKey>;
-			variants?: ComponentsVariants["CcDataGrid"];
 		};
+		// No variants: MUI applies them to the root slot, and GridMultiSelectFilter
+		// has none.
 		CcGridMultiSelectFilter?: {
 			defaultProps?: ComponentsPropsList["CcGridMultiSelectFilter"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<GridMultiSelectFilterClassKey>;
-			variants?: ComponentsVariants["CcGridMultiSelectFilter"];
 		};
+		// No variants: MUI applies them to the root slot, and
+		// GridMultiSelectFilterBackend has none.
 		CcGridMultiSelectFilterBackend?: {
 			defaultProps?: ComponentsPropsList["CcGridMultiSelectFilterBackend"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<GridMultiSelectFilterBackendClassKey>;
-			variants?: ComponentsVariants["CcGridMultiSelectFilterBackend"];
 		};
+		// No variants: MUI applies them to the root slot, and
+		// GridSingleSelectFilter has none.
 		CcGridSingleSelectFilter?: {
 			defaultProps?: ComponentsPropsList["CcGridSingleSelectFilter"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<GridSingleSelectFilterClassKey>;
-			variants?: ComponentsVariants["CcGridSingleSelectFilter"];
 		};
+		// No variants: MUI applies them to the root slot, and
+		// GridSingleSelectFilterBackend has none.
 		CcGridSingleSelectFilterBackend?: {
 			defaultProps?: ComponentsPropsList["CcGridSingleSelectFilterBackend"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<GridSingleSelectFilterBackendClassKey>;
-			variants?: ComponentsVariants["CcGridSingleSelectFilterBackend"];
 		};
 		CcForm?: {
 			styleOverrides?: StyleOverridesWithoutOwnerState<FormClassKey>;
