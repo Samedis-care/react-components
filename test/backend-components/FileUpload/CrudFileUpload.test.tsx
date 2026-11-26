@@ -358,6 +358,8 @@ describe("CrudFileUpload", () => {
 			await waitFor(() => expect(ui.names()).not.toContain("document.pdf"));
 
 			expect(ui.dirtyMarker()).toBe(false);
+			// called with the current state on mount, and never with true
+			expect(onDirtyChange).toHaveBeenCalledWith(false);
 			expect(onDirtyChange.mock.calls.flat()).not.toContain(true);
 		});
 
@@ -966,6 +968,8 @@ describe("CrudFileUpload", () => {
 			// it is still on the server, so it is still in the list — once
 			expect(connector.deletes).toEqual([]);
 			expect(ui.names()).toEqual(["document.pdf", "image.png"]);
+			// ...and still shown as a removal that has not happened yet
+			expect(ui.changeOf("document.pdf")).toBe("removed");
 		});
 
 		it("does not upload a file twice when the delete alongside it is refused", async () => {

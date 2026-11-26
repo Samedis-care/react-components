@@ -350,17 +350,6 @@ export const UploadRace: StoryObj = {
 	name: "CrudFileUpload — removing during an upload",
 	render: () => <RaceFileUploadStory />,
 	play: async ({ canvas, canvasElement }) => {
-		const byTestId = (id: string) =>
-			Array.from(canvasElement.querySelectorAll(`[data-testid="${id}"]`));
-		const btnOf = (name: string, testId: string) => {
-			let el: Element | null = canvas.getByText(name);
-			while (el && !el.querySelector(`[data-testid="${testId}"]`))
-				el = el.parentElement;
-			const btn = el?.querySelector(`[data-testid="${testId}"]`);
-			if (!btn) throw new Error(`no ${testId} for ${name}`);
-			return btn;
-		};
-
 		await canvas.findByText("document.pdf", undefined, { timeout: 10000 });
 
 		// the upload starts and hangs
@@ -368,9 +357,7 @@ export const UploadRace: StoryObj = {
 		await canvas.findByText("race.txt");
 
 		// removing another file in the meantime hands the picked file back untouched
-		btnOf("document.pdf", "CancelIcon").dispatchEvent(
-			new MouseEvent("click", { bubbles: true }),
-		);
+		canvas.getByRole("button", { name: "Remove document.pdf" }).click();
 
 		canvas.getByRole("button", { name: "Finish upload" }).click();
 		await waitFor(async () => {
@@ -381,7 +368,9 @@ export const UploadRace: StoryObj = {
 		await expect(
 			canvasElement.querySelectorAll('[aria-label="race.txt"]'),
 		).toHaveLength(1);
-		await expect(byTestId("CancelIcon")).toHaveLength(2);
+		await expect(
+			canvas.getAllByRole("button", { name: /^Remove / }),
+		).toHaveLength(2);
 		// the list cannot show a second copy on the server, so ask the backend
 		await expect(canvas.getByTestId("creates").textContent).toBe("1");
 	},
@@ -393,22 +382,15 @@ export const LazyPendingChanges: StoryObj = {
 	play: async ({ canvas, canvasElement }) => {
 		const changeOf = (name: string) =>
 			canvas.getByText(name).getAttribute("data-cc-change");
-		const byTestId = (id: string) =>
-			Array.from(canvasElement.querySelectorAll(`[data-testid="${id}"]`));
-		// the modern variant renders its remove control as a filled Cancel icon
-		const restoreBtns = () => byTestId("RestoreFromTrashIcon");
-		// by file rather than by position: a file whose removal is pending is listed
-		// wherever the control has it, which is not where it started
-		const btnOf = (name: string, testId: string) => {
-			let el: Element | null = canvas.getByText(name);
-			while (el && !el.querySelector(`[data-testid="${testId}"]`))
-				el = el.parentElement;
-			const btn = el?.querySelector(`[data-testid="${testId}"]`);
-			if (!btn) throw new Error(`no ${testId} for ${name}`);
-			return btn;
-		};
-		const click = (el: Element) =>
-			el.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+		// a file's remove and restore are one button, named after the file: by name
+		// rather than by position, as a file whose removal is pending is listed wherever
+		// the control has it, which is not where it started
+		const restoreBtns = () =>
+			canvas.queryAllByRole("button", { name: /^Restore / });
+		const removeBtn = (name: string) =>
+			canvas.getByRole("button", { name: `Remove ${name}` });
+		const restoreBtn = (name: string) =>
+			canvas.getByRole("button", { name: `Restore ${name}` });
 
 		// the control's own label carries the field level dirty marker, which for a
 		// custom field like this one comes from the connector queue rather than the form:
@@ -441,7 +423,7 @@ export const LazyPendingChanges: StoryObj = {
 		});
 
 		// a queued removal stays in the list, struck through, and offers a restore
-		click(btnOf("document.pdf", "CancelIcon"));
+		removeBtn("document.pdf").click();
 		await waitFor(async () => {
 			await expect(changeOf("document.pdf")).toBe("removed");
 		});
@@ -463,7 +445,7 @@ export const LazyPendingChanges: StoryObj = {
 		).toHaveLength(1);
 
 		// restoring drops the queued delete
-		click(btnOf("document.pdf", "RestoreFromTrashIcon"));
+		restoreBtn("document.pdf").click();
 		await waitFor(async () => {
 			await expect(changeOf("document.pdf")).toBe(null);
 		});
@@ -483,7 +465,7 @@ export const LazyPendingChanges: StoryObj = {
 		// a removal which is actually submitted leaves the list: the file is gone from
 		// the server, and a row left behind reads as an existing file, so removing it
 		// again would send the same delete against an id the backend no longer knows
-		click(btnOf("document.pdf", "CancelIcon"));
+		removeBtn("document.pdf").click();
 		await waitFor(async () => {
 			await expect(changeOf("document.pdf")).toBe("removed");
 		});

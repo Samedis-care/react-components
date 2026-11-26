@@ -81,7 +81,7 @@ const gate = () => {
 	return { promise, release };
 };
 
-/** serialize as SCF writes it (`serializeImageData`): async, a Blob or a URL */
+/** serialize as an app writes it: async, the picked Blob or the stored URL */
 const serialize = vi.fn(async (data: MultiImageImage, id: string | null) => {
 	await Promise.resolve();
 	return {
@@ -226,8 +226,8 @@ const renderMI = (props: ControlProps) => {
 };
 
 /**
- * Holds the primary like SamedisCrudMultiImage: what onPrimaryChange reports is stored and
- * passed back (as it is, "" included)
+ * Holds the primary like an owner that stores it with the parent record: what
+ * onPrimaryChange reports is stored and passed back (as it is, "" included)
  */
 interface PrimaryLog {
 	/** every id onPrimaryChange reported, in order */

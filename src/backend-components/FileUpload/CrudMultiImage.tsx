@@ -176,11 +176,11 @@ interface ImageChange {
 
 /**
  * A MultiImage over a collection of image records behind `connector`, one record per image
- * @remarks It lists `connector.index` through `deserialize`, and writes each change of the
- *          user after the one before it: an added image is created, a replaced one
- *          updated, each through `serialize` and `deserialize`, and a removed one goes to
- *          `connector.deleteMultiple`. What went through is listed, what was refused is
- *          reported through `errorComponent`.
+ * @remarks It lists every record of `connector.index`, in one request, through
+ *          `deserialize`, and writes each change of the user after the one before it: an
+ *          added image is created, a replaced one updated, each through `serialize` and
+ *          `deserialize`, and a removed one goes to `connector.deleteMultiple`. What went
+ *          through is listed, what was refused is reported through `errorComponent`.
  *
  *          With a LazyConnector the writes are queued, but nothing marks them: there are
  *          no pending marks, no restore and no dirty marker. With any other connector a

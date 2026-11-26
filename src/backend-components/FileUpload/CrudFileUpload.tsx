@@ -59,6 +59,8 @@ export interface CrudFileUploadProps extends Omit<
 	 *          failed file, a refused selection (wrong type, too many or too large files,
 	 *          an image that cannot be read) as an Error with the translated message. The
 	 *          outcome of the next change replaces it: one that goes through clears it.
+	 *
+	 *          Outside a Form, DefaultErrorComponent shows each new error in a dialog.
 	 */
 	errorComponent: React.ComponentType<ErrorComponentProps>;
 	/**
@@ -93,6 +95,9 @@ export interface CrudFileUploadProps extends Omit<
 	 * @returns The file data which can be used by the control. Set `file.id`, and the
 	 *          `file.downloadLink` key even where it is undefined: a removal drops an
 	 *          entry without that key from the list instead of deleting its record.
+	 *          Leave `canBeUploaded` and `delete` unset or false: a file listed with
+	 *          either is shown added or removed, and the next change uploads it again or
+	 *          deletes it.
 	 * @remarks With `maxTotalFileSize`, set `file.size`: every file the control lists
 	 *          comes from here, a picked one too once its upload is created, and one
 	 *          without a size counts as 0 bytes.
@@ -170,16 +175,19 @@ export interface BackendFileMeta extends FileMeta {
 
 /**
  * A FileUpload over a collection of file records behind `connector`, one record per file
- * @remarks It lists `connector.index` through `deserialize`, and writes each change of the
- *          user after the one before it: a picked file goes through `serialize`,
- *          `connector.create` and `deserialize`, and a removed file, or a stored one that
- *          a pick of the same name replaces, goes to `connector.deleteMultiple`.
+ * @remarks It lists every record of `connector.index`, in one request, through
+ *          `deserialize`, and writes each change of the user after the one before it: a
+ *          picked file goes through `serialize`, `connector.create` and `deserialize`,
+ *          and a removed file, or a stored one that a pick of the same name replaces,
+ *          goes to `connector.deleteMultiple`.
  *
  *          With a LazyConnector the writes are queued: a queued upload is marked added, a
  *          queued removal stays listed struck through and can be restored, and
  *          `showDirtyState` and `onDirtyChange` follow the queue. With any other
  *          connector a removal deletes the file at once and cannot be undone; `onDelete`
- *          can ask first.
+ *          can ask first. Through such a connector, an upload the backend refuses leaves
+ *          the list; a file whose delete it refuses stays listed as removed, and the next
+ *          change sends the delete again.
  *
  *          It does not read the Form it is in: in a Form, use FormCrudFileUpload, which
  *          builds the LazyConnector and takes the Form's `readOnly`, `errorComponent`
