@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import {
 	ErrorOutlined,
 	InfoOutlined,
@@ -14,7 +14,9 @@ import {
 	CSSObject,
 	PaletteColor,
 	styled,
+	Theme,
 	Typography,
+	typographyClasses,
 	TypographyProps,
 	useThemeProps,
 } from "@mui/material";
@@ -72,16 +74,40 @@ const headerColors = (color: PaletteColor): CSSObject => ({
 	[HEADER_COLOR]: color.contrastText,
 });
 
-const AccordionSummaryStyled = styled(AccordionSummary, {
-	name: "CcInfoBox",
-	slot: "summary",
-})(({ theme }) => ({
-	// a stacking context for the icon column (zIndex -1), so the focus ring
-	// is drawn over the column instead of under its shade
+/**
+ * The look of the header, the same for the toggle and for the static header
+ * of a forced box: its height and its status colors
+ * @param theme The theme
+ * @returns The styles of the header
+ */
+const headerStyles = (theme: Theme): CSSObject => ({
+	// a stacking context for the icon column (zIndex -1), so the column is
+	// drawn over the header's background, and the focus ring over the column
+	// instead of under its shade
 	isolation: "isolate",
 	minHeight: 48,
 	backgroundColor: `var(${HEADER_BACKGROUND})`,
 	color: `var(${HEADER_COLOR})`,
+	[`&.${STATUS_CLASSES.info}`]: headerColors(theme.palette.primary),
+	[`&.${STATUS_CLASSES.error}`]: headerColors(theme.palette.error),
+	[`&.${STATUS_CLASSES.warning}`]: headerColors(theme.palette.warning),
+	[`&.${STATUS_CLASSES.success}`]: headerColors(theme.palette.success),
+});
+
+/**
+ * The keyboard focus ring of the header, 2px inside its edges, see the
+ * toggle's focus rule
+ */
+const HEADER_FOCUS_RING: CSSObject = {
+	outline: "2px solid currentColor",
+	outlineOffset: -4,
+};
+
+const AccordionSummaryStyled = styled(AccordionSummary, {
+	name: "CcInfoBox",
+	slot: "summary",
+})(({ theme }) => ({
+	...headerStyles(theme),
 	// MUI's content wrapper (and the summaryRoot in it) is never wider than
 	// the header: the heading wraps anywhere, and heading content that cannot
 	// wrap (e.g. `white-space: nowrap`) runs past the header's end, where the
@@ -102,20 +128,40 @@ const AccordionSummaryStyled = styled(AccordionSummary, {
 	// root would clip.
 	[`&.${accordionSummaryClasses.focusVisible}`]: {
 		backgroundColor: `var(${HEADER_BACKGROUND})`,
-		outline: "2px solid currentColor",
-		outlineOffset: -4,
+		...HEADER_FOCUS_RING,
 	},
-	[`&.${ALWAYS_EXPANDED_CLASS}`]: {
-		cursor: "default",
-		"&:hover:not(.Mui-disabled)": {
-			cursor: "default",
-		},
-	},
-	[`&.${STATUS_CLASSES.info}`]: headerColors(theme.palette.primary),
-	[`&.${STATUS_CLASSES.error}`]: headerColors(theme.palette.error),
-	[`&.${STATUS_CLASSES.warning}`]: headerColors(theme.palette.warning),
-	[`&.${STATUS_CLASSES.success}`]: headerColors(theme.palette.success),
 }));
+
+/**
+ * The header of a forced box (`alwaysExpanded`): the toggle's look without the
+ * button, so it is no tab stop, has no `aria-expanded`, and the heading can be
+ * selected and copied. It lays out its content as MUI's `AccordionSummary`
+ * and its content wrapper do: 16px at the sides, at least 12px above and
+ * below, centered vertically. A `span`, as the box's `<h3>` around it takes
+ * phrasing content. It is focusable but no tab stop (`tabIndex` -1), so it
+ * can take over the keyboard focus from the toggle when the box becomes
+ * forced.
+ */
+const StaticHeader = styled("span", { name: "CcInfoBox", slot: "summary" })(
+	({ theme }) => ({
+		...headerStyles(theme),
+		// the containing block of the icon column
+		position: "relative",
+		display: "flex",
+		alignItems: "center",
+		boxSizing: "border-box",
+		padding: theme.spacing(1.5, 2),
+		textAlign: "start",
+		"&:focus-visible": HEADER_FOCUS_RING,
+		// The heading's lines are as high as its variant's line height, as in
+		// the toggle. Inline, it would share each line with the header's
+		// content (summaryRoot), whose line height is the page's (e.g. 24px
+		// under CssBaseline): the toggle's content has the button's smaller one.
+		[`& > * > .${typographyClasses.root}`]: {
+			display: "block",
+		},
+	}),
+);
 
 const SummaryRoot = styled("div", { name: "CcInfoBox", slot: "summaryRoot" })(
 	({ theme }) => ({
@@ -185,8 +231,10 @@ const DetailsText = styled("div", { name: "CcInfoBox", slot: "detailsText" })(
  * Keys of the theme's `components.CcInfoBox.styleOverrides`, also the keys of
  * the `classes` prop:
  * - `root`: the MUI `Accordion` around everything
- * - `summary`: the header button (`AccordionSummary`), filled with the
- *   status color
+ * - `summary`: the header, filled with the status color: the toggle button
+ *   (`AccordionSummary`), or, while `alwaysExpanded` is `true`, a static
+ *   `<span>` that looks the same, without MUI's `MuiAccordionSummary-*` and
+ *   `MuiButtonBase-root` classes
  * - `summaryRoot`: the header content, the icon column and the heading. It
  *   has `min-width: 0`, as has MUI's content wrapper around it, so it never
  *   grows wider than the header
@@ -272,13 +320,20 @@ export interface InfoBoxProps {
 	defaultExpanded?: boolean;
 	/**
 	 * `true` keeps the box open: the message is shown and the user cannot
-	 * collapse it. `false` is the same as not set: the box shows `expanded`,
-	 * or, without it, the user opens and closes it starting at
-	 * `defaultExpanded`, so a condition can be passed directly
-	 * (`alwaysExpanded={isLocked}`). A change after mount takes effect: once
-	 * it is no longer `true`, the box shows `expanded`, or, without it, the
-	 * state the user last toggled to (initially `defaultExpanded`), and the
-	 * user can toggle it again.
+	 * collapse it. The header is static then: the heading, still the box's
+	 * `<h3>`, without a toggle button, so it has no `aria-expanded`, is no
+	 * tab stop, its text can be selected and copied, and a click on it calls
+	 * no `onChange`. For a box the user may close, pass `expanded` with
+	 * `onChange`, or `defaultExpanded`, instead.
+	 *
+	 * `false` is the same as not set: the box shows `expanded`, or, without
+	 * it, the user opens and closes it starting at `defaultExpanded`, so a
+	 * condition can be passed directly (`alwaysExpanded={isLocked}`). A
+	 * change after mount takes effect: once it is no longer `true`, the box
+	 * shows `expanded`, or, without it, the state the user last toggled to
+	 * (initially `defaultExpanded`), and the user can toggle it again. A
+	 * header that has keyboard focus when it changes passes the focus on to
+	 * the header that replaces it.
 	 * While it is `true`, the root and the header have the class
 	 * `CcInfoBox-alwaysExpanded`.
 	 * @default false
@@ -297,7 +352,8 @@ export interface InfoBoxProps {
 	 * Called when the user toggles the header (a click, or Enter or Space on
 	 * it), with the requested expanded state. Not called when `expanded`
 	 * changes. With `expanded` set, the box changes only once that new state
-	 * is passed back into `expanded`.
+	 * is passed back into `expanded`. Never called while `alwaysExpanded` is
+	 * `true`: the header is static then.
 	 * @param event The click event
 	 * @param expanded The requested expanded state: `true` to open the box
 	 */
@@ -423,6 +479,48 @@ const InfoBox = (inProps: InfoBoxProps) => {
 		[onChange, setExpanded],
 	);
 
+	// The header that has keyboard focus keeps it when alwaysExpanded replaces
+	// the toggle with the static header, or back: the header that unmounts
+	// notes that it had focus, the one that mounts takes it.
+	const headerElement = useRef<HTMLElement | null>(null);
+	const headerHadFocus = useRef(false);
+	const headerRef = useCallback((element: HTMLElement | null) => {
+		if (element) {
+			headerElement.current = element;
+			if (headerHadFocus.current) {
+				headerHadFocus.current = false;
+				element.focus();
+			}
+			return;
+		}
+		const previous = headerElement.current;
+		headerHadFocus.current =
+			!!previous && previous.contains(previous.ownerDocument.activeElement);
+		headerElement.current = null;
+	}, []);
+
+	const headerClassName = combineClassNames([classes?.summary, stateClasses]);
+	const headerContent = (
+		<SummaryRoot className={classes?.summaryRoot}>
+			<SpanIconButton className={classes?.iconButton}>
+				{getIcon()}
+			</SpanIconButton>
+			<SummaryHeading
+				variant={headingVariant ?? "caption"}
+				className={classes?.heading}
+			>
+				{statusLabel && (
+					<>
+						<StatusName className={classes?.statusName}>
+							{statusLabel}
+						</StatusName>{" "}
+					</>
+				)}
+				{heading}
+			</SummaryHeading>
+		</SummaryRoot>
+	);
+
 	return (
 		<AccordionStyled
 			className={combineClassNames([className, classes?.root, stateClasses])}
@@ -432,28 +530,24 @@ const InfoBox = (inProps: InfoBoxProps) => {
 			expanded={!!alwaysExpanded || !!expanded}
 			onChange={handleChange}
 		>
-			<AccordionSummaryStyled
-				className={combineClassNames([classes?.summary, stateClasses])}
-			>
-				<SummaryRoot className={classes?.summaryRoot}>
-					<SpanIconButton className={classes?.iconButton}>
-						{getIcon()}
-					</SpanIconButton>
-					<SummaryHeading
-						variant={headingVariant ?? "caption"}
-						className={classes?.heading}
-					>
-						{statusLabel && (
-							<>
-								<StatusName className={classes?.statusName}>
-									{statusLabel}
-								</StatusName>{" "}
-							</>
-						)}
-						{heading}
-					</SummaryHeading>
-				</SummaryRoot>
-			</AccordionSummaryStyled>
+			{alwaysExpanded ? (
+				// a forced box has nothing to toggle: its header is no button
+				<StaticHeader
+					ref={headerRef}
+					tabIndex={-1}
+					// MUI's state class of an open header, as the toggle has it
+					className={combineClassNames([
+						headerClassName,
+						accordionSummaryClasses.expanded,
+					])}
+				>
+					{headerContent}
+				</StaticHeader>
+			) : (
+				<AccordionSummaryStyled ref={headerRef} className={headerClassName}>
+					{headerContent}
+				</AccordionSummaryStyled>
+			)}
 			<AccordionDetailsStyled className={classes?.details}>
 				<DetailsText className={classes?.detailsText}>{message}</DetailsText>
 			</AccordionDetailsStyled>

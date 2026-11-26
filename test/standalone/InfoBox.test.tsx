@@ -9,6 +9,7 @@ import {
 	within,
 	act,
 } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import {
 	ThemeProvider,
 	createTheme,
@@ -50,6 +51,15 @@ const renderInfoBox = (ui: React.ReactElement, t: Theme = theme) =>
 /** the collapsible header (a disclosure button), named by the heading */
 const header = (heading: string) =>
 	screen.getByRole("button", { name: new RegExp(heading) });
+
+/** the static header of a forced box (alwaysExpanded), in the box's heading */
+const staticHeader = (heading: string) => {
+	const el = screen.getByRole("heading", {
+		name: new RegExp(heading),
+	}).firstElementChild;
+	if (!(el instanceof HTMLElement)) throw new Error("static header missing");
+	return el;
+};
 
 type OnChange = (event: React.SyntheticEvent, expanded: boolean) => void;
 
@@ -343,14 +353,16 @@ describe("InfoBox", () => {
 			);
 			const root = container.firstElementChild;
 			expect(root).toHaveClass("MuiAccordion-root", "c", "r");
-			const summary = header("H");
-			expect(summary).toHaveClass("s");
-			for (const el of [root, summary]) {
+			const forced = staticHeader("H");
+			expect(forced).toHaveClass("s");
+			for (const el of [root, forced]) {
 				expect(stateClassesOf(el)).toEqual([
 					"CcInfoBox-statusError",
 					"CcInfoBox-alwaysExpanded",
 				]);
 			}
+
+			let summary: HTMLElement | undefined;
 
 			for (const [status, statusClass] of [
 				["warning", "CcInfoBox-statusWarning"],
@@ -371,6 +383,8 @@ describe("InfoBox", () => {
 					),
 				);
 				expect(container.firstElementChild).toBe(root);
+				// the toggle, the same element across status changes
+				summary ??= header("H");
 				expect(header("H")).toBe(summary);
 				expect(root).toHaveClass("c", "r");
 				expect(summary).toHaveClass("s");
@@ -416,9 +430,9 @@ describe("InfoBox", () => {
 			expect(getComputedStyle(errorBox).outlineStyle).toBe("dotted");
 			expect(getComputedStyle(infoBox).outlineStyle).not.toBe("dotted");
 			expect(getComputedStyle(errorBox).paddingTop).toBe("8px");
-			expect(getComputedStyle(header("E")).outlineColor).toBe(red);
+			expect(getComputedStyle(staticHeader("E")).outlineColor).toBe(red);
 			expect(getComputedStyle(header("I")).outlineColor).not.toBe(red);
-			expect(getComputedStyle(header("E")).outlineWidth).toBe("3px");
+			expect(getComputedStyle(staticHeader("E")).outlineWidth).toBe("3px");
 			expect(getComputedStyle(header("I")).outlineWidth).not.toBe("3px");
 			expect(getComputedStyle(header("I")).paddingBottom).toBe("8px");
 			const slot = (box: Element, selector: string) => {
@@ -426,8 +440,8 @@ describe("InfoBox", () => {
 				if (!el) throw new Error(`${selector} missing`);
 				return getComputedStyle(el);
 			};
-			const summaryRoot = header("E").querySelector(
-				".MuiAccordionSummary-content > div",
+			const summaryRoot = staticHeader("E").querySelector(
+				"[class*=CcInfoBox-summaryRoot]",
 			);
 			if (!summaryRoot) throw new Error("summaryRoot missing");
 			expect(getComputedStyle(summaryRoot).paddingRight).toBe("16px");
@@ -561,6 +575,84 @@ describe("InfoBox", () => {
 				"Warning: Upload finished",
 			);
 		});
+
+		it("[ISSUE-3464-ITEM-9] a forced box has a static header: no button, no tab stop, and a click reports no change", async () => {
+			const user = userEvent.setup();
+			const onChange = vi.fn<OnChange>();
+			renderInfoBox(
+				<>
+					<button>Before</button>
+					<InfoBox
+						heading="Notice"
+						message="M"
+						expanded
+						alwaysExpanded
+						onChange={onChange}
+					/>
+					<button>After</button>
+				</>,
+			);
+			expect(screen.queryByRole("button", { name: /Notice/ })).toBeNull();
+			expect(
+				screen.getByRole("heading", { name: /Notice/ }),
+			).toBeInTheDocument();
+			screen.getByRole("button", { name: "Before" }).focus();
+			await user.tab();
+			expect(screen.getByRole("button", { name: "After" })).toHaveFocus();
+			await user.click(screen.getByText("Notice"));
+			expect(onChange).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3464-ITEM-9] the static header has the open header's classes, and no role or aria-expanded", () => {
+			renderInfoBox(
+				<InfoBox
+					heading="Notice"
+					message="M"
+					status="warning"
+					alwaysExpanded
+					classes={{ summary: "s" }}
+				/>,
+			);
+			const forced = staticHeader("Notice");
+			expect(forced).toHaveTextContent("Warning: Notice");
+			expect(forced).not.toHaveAttribute("role");
+			expect(forced).not.toHaveAttribute("aria-expanded");
+			expect(forced).toHaveClass(
+				"s",
+				"CcInfoBox-statusWarning",
+				"CcInfoBox-alwaysExpanded",
+				"Mui-expanded",
+			);
+			expect(screen.getByText("M")).toBeVisible();
+		});
+
+		it("[ISSUE-3464-ITEM-9] the header that has keyboard focus passes it on when alwaysExpanded swaps the toggle and the static header", () => {
+			const box = (locked: boolean) =>
+				themed(
+					<>
+						<button>Elsewhere</button>
+						<InfoBox
+							heading="Notice"
+							message="M"
+							defaultExpanded
+							alwaysExpanded={locked}
+						/>
+					</>,
+				);
+			const { rerender } = render(box(false));
+			// focus elsewhere stays there
+			screen.getByRole("button", { name: "Elsewhere" }).focus();
+			rerender(box(true));
+			expect(screen.getByRole("button", { name: "Elsewhere" })).toHaveFocus();
+			rerender(box(false));
+			expect(screen.getByRole("button", { name: "Elsewhere" })).toHaveFocus();
+
+			header("Notice").focus();
+			rerender(box(true));
+			expect(staticHeader("Notice")).toHaveFocus();
+			rerender(box(false));
+			expect(header("Notice")).toHaveFocus();
+		});
 	});
 });
 
@@ -610,7 +702,6 @@ describe("InfoBox props types and exports", () => {
 				components: { CcInfoBox: { defaultProps: { expanded: true } } },
 			}),
 		);
-		expect(header("Forced")).toHaveAttribute("aria-expanded", "true");
 		expect(header("Themed")).toHaveAttribute("aria-expanded", "true");
 		expect(screen.getByText("Forced message")).toBeVisible();
 		expect(screen.getByText("Themed message")).toBeVisible();

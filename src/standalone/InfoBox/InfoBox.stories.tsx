@@ -727,7 +727,10 @@ export const Issue3464Item4StatusStateClasses: Story = {
 				"pointer",
 			]);
 		}
-		const forced = canvas.getByRole("button", { name: /Forced open$/ });
+		// a forced box's header is static: in its heading, without a button
+		const forced = elementOf(
+			canvas.getByRole("heading", { name: /Forced open$/ }).firstElementChild,
+		);
 		await expect(forced).toHaveClass(
 			"CcInfoBox-statusSuccess",
 			"CcInfoBox-alwaysExpanded",
@@ -736,7 +739,7 @@ export const Issue3464Item4StatusStateClasses: Story = {
 			"CcInfoBox-statusSuccess",
 			"CcInfoBox-alwaysExpanded",
 		);
-		await expect(getComputedStyle(forced).cursor).toBe("default");
+		await expect(getComputedStyle(forced).cursor).toBe("auto");
 	},
 };
 
@@ -795,5 +798,169 @@ export const Issue3464Item4ThemeRecolorsOneStatus: Story = {
 			PURPLE,
 			"solid",
 		]);
+	},
+};
+
+/** where the parts of a header sit, relative to the header */
+const headerLayoutOf = (header: HTMLElement) => {
+	const box = header.getBoundingClientRect();
+	const icon = elementOf(
+		header.querySelector("[class*=CcInfoBox-iconButton]"),
+	).getBoundingClientRect();
+	const text = textRectOf(
+		elementOf(header.querySelector("[class*=CcInfoBox-heading]")),
+	);
+	const cs = getComputedStyle(header);
+	return {
+		height: box.height,
+		width: box.width,
+		icon: [icon.left - box.left, icon.top - box.top],
+		text: [text.left - box.left, text.top - box.top, text.height],
+		colors: [cs.backgroundColor, cs.color],
+	};
+};
+
+const FORCED_HEADING = "The import failed";
+
+export const Issue3464Item9ForcedHeaderIsStatic: Story = {
+	parameters: {
+		a11y: {
+			test: "error",
+			config: {
+				rules: [
+					// each open message is an unnamed region, so the two forced
+					// boxes repeat it; this story is about the headers
+					{ id: "landmark-unique", enabled: false },
+				],
+			},
+		},
+		docs: {
+			description: {
+				story:
+					"ISSUE-3464-ITEM-9: a forced box (`alwaysExpanded`, top) has a static header: its heading, in the box's `<h3>`, without a button. It is no tab stop, its text can be selected, and a click on it calls no `onChange`. It looks like the header of a box the user toggles (bottom), also with a heading of two lines.",
+			},
+		},
+	},
+	args: { onChange: fn() },
+	render: function ForcedAndToggled(args) {
+		const { onChange } = args;
+		return (
+			<Stack spacing={1} style={{ width: 360 }}>
+				<Button variant="outlined">Before</Button>
+				<InfoBox
+					heading={FORCED_HEADING}
+					message={"The file has no header row."}
+					alwaysExpanded
+					onChange={onChange}
+				/>
+				<InfoBox
+					heading={"The import failed: toggled"}
+					message={"The file has no header row."}
+				/>
+				<InfoBox
+					heading={"A heading long enough to wrap onto a second line here"}
+					message={"Message"}
+					alwaysExpanded
+				/>
+				<InfoBox
+					heading={"A heading long enough to wrap onto a second line, too"}
+					message={"Message"}
+				/>
+			</Stack>
+		);
+	},
+	play: async ({ args, canvas, userEvent }) => {
+		await expect(
+			canvas.queryByRole("button", { name: FORCED_HEADING }),
+		).toBeNull();
+		const forced = elementOf(
+			canvas.getByRole("heading", { name: FORCED_HEADING }).firstElementChild,
+		);
+		const toggle = canvas.getByRole("button", {
+			name: "The import failed: toggled",
+		});
+		// it looks like the toggle, also with two lines
+		await expect(headerLayoutOf(forced)).toEqual(headerLayoutOf(toggle));
+		const forcedTwoLines = headerLayoutOf(
+			elementOf(
+				canvas.getByRole("heading", { name: /second line here/ })
+					.firstElementChild,
+			),
+		);
+		const toggleTwoLines = headerLayoutOf(
+			canvas.getByRole("button", { name: /second line, too/ }),
+		);
+		await expect(forcedTwoLines.height).toBeGreaterThan(48);
+		await expect(forcedTwoLines).toEqual(toggleTwoLines);
+		// static text: no pointer, and it can be selected
+		const cs = getComputedStyle(forced);
+		await expect([cs.cursor, cs.userSelect]).toEqual(["auto", "auto"]);
+		// no tab stop: Tab goes from the button before it to the toggle
+		canvas.getByRole("button", { name: "Before" }).focus();
+		await userEvent.tab();
+		await expect(toggle).toHaveFocus();
+		// a click changes nothing and reports nothing
+		await userEvent.click(canvas.getByText(FORCED_HEADING));
+		await expect(args.onChange).not.toHaveBeenCalled();
+		await expect(
+			canvas.getAllByText("The file has no header row.")[0],
+		).toBeVisible();
+	},
+};
+
+/**
+ * A box whose first opening locks it open: the toggle that the user pressed
+ * becomes the static header
+ */
+const LocksWhenOpened = () => {
+	const [locked, setLocked] = useState(false);
+	const lock = useCallback(() => setLocked(true), []);
+	return (
+		<div style={{ width: 360 }}>
+			<InfoBox
+				status={"error"}
+				heading={"Upload failed"}
+				message={"The file is too large."}
+				alwaysExpanded={locked}
+				onChange={lock}
+			/>
+		</div>
+	);
+};
+
+export const Issue3464Item9FocusStaysWhenTheBoxBecomesForced: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3464-ITEM-9: Enter on the header of this box opens it and makes it forced (`alwaysExpanded`). The static header that replaces the toggle takes over the keyboard focus, so it does not fall to the page, and shows the toggle's focus ring.",
+			},
+		},
+	},
+	render: () => <LocksWhenOpened />,
+	play: async ({ canvas, userEvent }) => {
+		await userEvent.tab();
+		await expect(
+			canvas.getByRole("button", { name: /Upload failed/ }),
+		).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() =>
+			expect(
+				canvas.queryByRole("button", { name: /Upload failed/ }),
+			).toBeNull(),
+		);
+		const forced = elementOf(
+			canvas.getByRole("heading", { name: /Upload failed/ }).firstElementChild,
+		);
+		await expect(forced).toHaveFocus();
+		await expect(forced.matches(":focus-visible")).toBe(true);
+		const cs = getComputedStyle(forced);
+		await expect([cs.outlineStyle, cs.outlineWidth, cs.outlineColor]).toEqual([
+			"solid",
+			"2px",
+			cs.color,
+		]);
+		await expect(parseFloat(cs.outlineOffset)).toBe(-4);
 	},
 };
