@@ -325,7 +325,7 @@
 			"types": {
 				"renderers": {
 					"boolean": {
-						"true": "Qui",
+						"true": "Oui",
 						"false": "Non"
 					},
 					"date": {
