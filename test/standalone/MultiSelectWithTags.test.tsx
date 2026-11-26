@@ -11,6 +11,7 @@ import {
 import { createTheme, ThemeProvider } from "@mui/material";
 import {
 	BaseSelectorData,
+	BaseSelectorLoadHandler,
 	getStringLabel,
 	selectorLocalLoadHandler,
 } from "../../src/standalone/Selector/BaseSelector";
@@ -313,5 +314,69 @@ describe("MultiSelectWithTags: changes that are not saved yet", () => {
 				.getAllByRole("button", { name: /^(Remove|Restore) / })
 				.map((button) => button.parentElement!.textContent),
 		).toEqual(["BananaAdded", "AppleRemoved"]);
+	});
+});
+
+describe("MultiSelectWithTags: the switch", () => {
+	const ui = (
+		loadDataOptions: BaseSelectorLoadHandler<MultiSelectorData>,
+		show: boolean,
+		selected: MultiSelectorData[],
+		defaultOn?: boolean,
+	) => (
+		<ThemeProvider theme={createTheme()}>
+			<MultiSelectWithTags<MultiSelectorData, BaseSelectorData>
+				title="Fruits"
+				searchInputLabel="Search fruits"
+				loadGroupEntries={groupEntries}
+				loadGroupOptions={selectorLocalLoadHandler(GROUPS)}
+				loadDataOptions={loadDataOptions}
+				selected={selected}
+				onChange={() => {}}
+				defaultSwitchValue={defaultOn}
+				{...(show
+					? { displaySwitch: true as const, switchLabel: "Show inactive" }
+					: { displaySwitch: false as const })}
+			/>
+		</ThemeProvider>
+	);
+
+	it("[ISSUE-3465-ITEM-20] hiding the switch in the render that changes the selection loads nothing with the switch on", async () => {
+		const loadDataOptions =
+			vi.fn<BaseSelectorLoadHandler<MultiSelectorData>>(loadFruits);
+		const { rerender } = render(ui(loadDataOptions, true, []));
+		fireEvent.click(screen.getByRole("switch", { name: "Show inactive" }));
+		await flush();
+		expect(loadDataOptions).toHaveBeenLastCalledWith("", true);
+		loadDataOptions.mockClear();
+
+		rerender(ui(loadDataOptions, false, [APPLE]));
+		await flush();
+
+		expect(screen.queryByRole("switch")).toBeNull();
+		expect(loadDataOptions).toHaveBeenCalled();
+		expect(
+			loadDataOptions.mock.calls.filter(([, switchValue]) => switchValue),
+			"loads that still ask for the switched-on options",
+		).toEqual([]);
+	});
+
+	it("[ISSUE-3465-ITEM-20] showing the switch (defaultSwitchValue on) in the render that changes the selection loads nothing with the switch off", async () => {
+		const loadDataOptions =
+			vi.fn<BaseSelectorLoadHandler<MultiSelectorData>>(loadFruits);
+		const { rerender } = render(ui(loadDataOptions, false, [], true));
+		await flush();
+		expect(loadDataOptions).toHaveBeenLastCalledWith("", false);
+		loadDataOptions.mockClear();
+
+		rerender(ui(loadDataOptions, true, [APPLE], true));
+		await flush();
+
+		expect(screen.getByRole("switch", { name: "Show inactive" })).toBeChecked();
+		expect(loadDataOptions).toHaveBeenCalled();
+		expect(
+			loadDataOptions.mock.calls.filter(([, switchValue]) => !switchValue),
+			"loads that ignore the switch shown on",
+		).toEqual([]);
 	});
 });

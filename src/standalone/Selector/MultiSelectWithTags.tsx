@@ -203,11 +203,18 @@ const MultiSelectWithTags = <
 	const titleId = `${id}-title`;
 	const groupFieldId = `${autocompleteId || id}-group-select`;
 
-	const defaultSwitchValue = props.displaySwitch
-		? (props.defaultSwitchValue ?? false)
-		: false;
+	const switchShown = !!props.displaySwitch;
+	const defaultSwitchValue = !!(switchShown && props.defaultSwitchValue);
 	const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
 	const [switchValue, setSwitchValue] = useState<boolean>(defaultSwitchValue);
+	// hiding the switch turns its filter off, and showing it starts it at
+	// defaultSwitchValue again. Reset while rendering, not in an effect, so the loads this
+	// render starts (e.g. for a new selection) already get the new value.
+	const [switchWasShown, setSwitchWasShown] = useState(switchShown);
+	if (switchWasShown !== switchShown) {
+		setSwitchWasShown(switchShown);
+		setSwitchValue(defaultSwitchValue);
+	}
 	const [loadingGroupRecords, setLoadingGroupRecords] = useState(false);
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
 	const getId = getIdOfData ?? getIdDefault;
@@ -220,12 +227,6 @@ const MultiSelectWithTags = <
 		() => rootRef.current?.ownerDocument.getElementById(groupFieldId) ?? null,
 		[groupFieldId],
 	);
-
-	// set switch value if switch visibility is toggled
-	useEffect(() => {
-		setSwitchValue(defaultSwitchValue);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [!!props.displaySwitch]);
 
 	// remove selected groups if an item has been unselected
 	useEffect(() => {
