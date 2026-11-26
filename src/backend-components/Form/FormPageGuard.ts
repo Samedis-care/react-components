@@ -85,8 +85,8 @@ export const FORM_PAGE_MOVE_STATE = Object.freeze({
  * /rec/1-archive).
  * A Route "/" renders only at "/", so every other path leaves the page. A Route "/*", such
  * as the default panel of routed tabs (tab("", …)), renders at every path below its parent,
- * except where the Routes it is an entry of renders an entry listed before it: opening
- * another tab unmounts a Form in the default panel, so that leaves the page.
+ * except where the Routes it is an entry of renders a more specific entry: opening another
+ * tab unmounts a Form in the default panel, so that leaves the page.
  * The nearest Route of a disableRouting Form is the one of the page around it, as the Form
  * has no url of its own; it stays mounted all the same while that Route is rendered, e.g.
  * when routed tabs in its form page switch. A Form outside of every Route has none, so

@@ -10,8 +10,13 @@ import {
 	getMissingRouteParameters,
 	insertRouteParameters,
 } from "../../../utils/routeUtils";
-import matchPath, { normalizePath } from "../../../standalone/Routes/matchPath";
+import matchPath from "../../../standalone/Routes/matchPath";
 import joinRoutePath from "../../../standalone/Routes/joinRoutePath";
+import {
+	compareRouteSpecificity,
+	getRouteSpecificity,
+	RouteSpecificity,
+} from "../../../standalone/Routes/routeSpecificity";
 import { RouteContext, useRoutePrefix } from "../../../standalone/Routes/Route";
 import { useHistoryRouterContext } from "../../../standalone/Routes/HistoryRouter";
 import toAppPath from "../../../standalone/Routes/toAppPath";
@@ -56,8 +61,9 @@ export interface IRoutedMenuItemDefinition extends Omit<
 	 * a prefix match, then the route with more segments, then, segment by
 	 * segment from the left, a literal before a `:name` param (`/apps/new`
 	 * before `/apps/:app`), then a route without a trailing `/*` before one
-	 * with. On a tie the deeper entry wins (a group's entry with the group's
-	 * own route), then the earlier one. The highlight follows the URL only: on
+	 * with, the order by which `Routes` picks the route it renders. On a tie
+	 * the deeper entry wins (a group's entry with the group's own route), then
+	 * the earlier one. The highlight follows the URL only: on
 	 * a path that no entry matches, nothing is highlighted, and an entry
 	 * without `route` (an action such as "Log out") is never highlighted.
 	 *
@@ -186,29 +192,6 @@ const resolveRoute = (route: string, base: RouteBase): ResolvedRoute => {
 };
 
 /**
- * How specific a matching route is, see compareSpecificity
- */
-interface RouteSpecificity {
-	/**
-	 * The route covers every segment of the path
-	 */
-	exact: boolean;
-	/**
-	 * Per segment of the route (without a trailing `*`): 2 for a literal, 1 for
-	 * a `:name` param, 0 for a `*`
-	 */
-	segments: number[];
-	/**
-	 * The route ends in `*`
-	 */
-	splat: boolean;
-	/**
-	 * The depth of the entry in the menu tree, 0 on the top level
-	 */
-	depth: number;
-}
-
-/**
  * The menu item id of an entry, as MenuBase builds it
  * @param parent The menu item id of the group above the entry, null on the
  * top level
@@ -216,60 +199,6 @@ interface RouteSpecificity {
  */
 const getItemId = (parent: string | null, title: string): string =>
 	parent ? `${parent}@${title}` : title;
-
-/**
- * The segments of a route or path, as matchPath splits them
- * @param path The route or path
- */
-const splitSegments = (path: string): string[] =>
-	normalizePath(path)
-		.split("/")
-		.filter((segment) => !!segment);
-
-/**
- * How specific a route's match of a path is
- * @param route The route, which matches the path
- * @param pathLength The number of segments of the path
- * @param depth The depth of the entry in the menu tree
- */
-const getSpecificity = (
-	route: string,
-	pathLength: number,
-	depth: number,
-): RouteSpecificity => {
-	const segments = splitSegments(route);
-	const splat = segments[segments.length - 1] === "*";
-	if (splat) segments.pop();
-	return {
-		exact: segments.length === pathLength,
-		segments: segments.map((segment) =>
-			segment === "*" ? 0 : segment.startsWith(":") ? 1 : 2,
-		),
-		splat,
-		depth,
-	};
-};
-
-/**
- * Orders two matches of the same path, most specific first: an exact match
- * before a prefix match, more segments first, then segment by segment from
- * the left a literal before a param before a `*`, a route without a trailing
- * `*` before one with, and a deeper entry before a shallower one
- * @return Negative when `a` is more specific, positive when `b` is, 0 on a tie
- */
-const compareSpecificity = (
-	a: RouteSpecificity,
-	b: RouteSpecificity,
-): number => {
-	if (a.exact !== b.exact) return a.exact ? -1 : 1;
-	if (a.segments.length !== b.segments.length)
-		return b.segments.length - a.segments.length;
-	for (let i = 0; i < a.segments.length; ++i) {
-		if (a.segments[i] !== b.segments[i]) return b.segments[i] - a.segments[i];
-	}
-	if (a.splat !== b.splat) return a.splat ? 1 : -1;
-	return b.depth - a.depth;
-};
 
 /**
  * The entries of the menu tree that have a route, depth first in definition
@@ -315,7 +244,8 @@ const encodeRouteParameters = (
 /**
  * The entry of the whole menu tree whose route matches the path best: of all
  * entries whose route matches the path as a prefix, the most specific one
- * (compareSpecificity); on a full tie the earlier one in definition order.
+ * (compareRouteSpecificity), of equally specific ones the deepest in the menu
+ * tree; on a full tie the earlier one in definition order.
  * Its id is the active menu item, its groups are expanded, and its params fill
  * the routes of all entries. Entries with `shouldRender: false` take part.
  * @param definitions The menu item definitions (the top level)
@@ -328,18 +258,21 @@ const resolveLocation = (
 	path: string,
 	base: RouteBase,
 ): MenuRouteMatch | null => {
-	const pathLength = splitSegments(path).length;
-	let best: { match: MenuRouteMatch; specificity: RouteSpecificity } | null =
-		null;
+	let best: {
+		match: MenuRouteMatch;
+		specificity: RouteSpecificity;
+		depth: number;
+	} | null = null;
 	for (const entry of flattenRoutes(definitions, [], base)) {
 		const match = matchPath({ path: entry.pattern, end: false }, path);
 		if (!match) continue;
-		const specificity = getSpecificity(
-			entry.pattern,
-			pathLength,
-			entry.groups.length,
-		);
-		if (best && compareSpecificity(specificity, best.specificity) >= 0)
+		const specificity = getRouteSpecificity(entry.pattern);
+		const depth = entry.groups.length;
+		if (
+			best &&
+			(compareRouteSpecificity(specificity, best.specificity) ||
+				best.depth - depth) >= 0
+		)
 			continue;
 		best = {
 			match: {
@@ -348,6 +281,7 @@ const resolveLocation = (
 				params: encodeRouteParameters(match.params),
 			},
 			specificity,
+			depth,
 		};
 	}
 	return best ? best.match : null;

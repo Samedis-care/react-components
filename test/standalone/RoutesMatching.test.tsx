@@ -120,7 +120,8 @@ describe("Routes: nesting", () => {
 		];
 		for (const [parentPath, childPath, fullPath] of cases) {
 			renderAt(
-				"/devices/info",
+				// a child without segments matches only its parent's own url
+				fullPath === "/devices/" ? "/devices" : "/devices/info",
 				<Routes>
 					{[
 						<Route
@@ -482,5 +483,209 @@ describe("HistoryRouter nested in a Route", () => {
 		// /step1 is a location of the inner router: the outer Routes, which would
 		// render nothing there, has no say in it
 		expect(screen.getByTestId("renders-at")).toHaveTextContent("true");
+	});
+});
+
+describe("Routes: which child renders", () => {
+	afterEach(() => {
+		vi.unstubAllEnvs();
+	});
+
+	/** shows, as JSON, whether its route renders at each of the paths */
+	const RendersAt = (props: { id: string; paths: string[] }) => {
+		const { rendersAt } = useRouteInfo();
+		return (
+			<div data-testid={props.id}>
+				{JSON.stringify(props.paths.map((path) => rendersAt(path)))}
+			</div>
+		);
+	};
+
+	it("[ISSUE-3475-ITEM-16] renders the most specific matching child, whatever the order of the children", () => {
+		const routes = [
+			<Route key="all" path="*" element={<div>NOT FOUND</div>} />,
+			<Route key="list" path="/devices/*" element={<div>LIST</div>} />,
+			<Route key="record" path="/devices/:id/*" element={<div>RECORD</div>} />,
+			<Route key="new" path="/devices/new/*" element={<div>NEW</div>} />,
+			<Route key="edit" path="/devices/:id/edit" element={<div>EDIT</div>} />,
+		];
+		const pages: Record<string, string> = {
+			"/devices/new": "NEW",
+			"/devices/5": "RECORD",
+			"/devices/5/history": "RECORD",
+			"/devices/5/edit": "EDIT",
+			"/devices/new/edit": "EDIT",
+			"/devices": "LIST",
+			"/other": "NOT FOUND",
+		};
+		for (const children of [routes, [...routes].reverse()]) {
+			for (const [path, page] of Object.entries(pages)) {
+				const { container } = renderAt(path, <Routes>{children}</Routes>);
+				expect(container.textContent, path).toBe(page);
+				cleanup();
+			}
+		}
+	});
+
+	it("[ISSUE-3475-ITEM-16] prefers a path without a trailing /* to the same path with one, and the child listed first on a tie", () => {
+		const atDevice = (children: React.ReactElement[]) => {
+			const { container } = renderAt("/devices/1", <Routes>{children}</Routes>);
+			const text = container.textContent;
+			cleanup();
+			return text;
+		};
+		const plainAndSplat = [
+			<Route key="splat" path="/devices/*" element={<div>SPLAT</div>} />,
+			<Route key="plain" path="/devices" element={<div>PLAIN</div>} />,
+		];
+		expect(atDevice(plainAndSplat)).toBe("PLAIN");
+		expect(atDevice([...plainAndSplat].reverse())).toBe("PLAIN");
+		const tie = [
+			<Route key="a" path="/devices/:a" element={<div>A</div>} />,
+			<Route key="b" path="/devices/:b" element={<div>B</div>} />,
+		];
+		expect(atDevice(tie)).toBe("A");
+		expect(atDevice([...tie].reverse())).toBe("B");
+	});
+
+	it("[ISSUE-3475-ITEM-16] answers rendersAt with the ranking: a more specific child listed later takes over its path", () => {
+		renderAt(
+			"/rec/1",
+			<Routes>
+				{[
+					<Route
+						key="rec"
+						path="/rec/*"
+						element={<RendersAt id="rec" paths={["/rec/new", "/rec/2"]} />}
+					/>,
+					<Route key="new" path="/rec/new" element={<div>NEW</div>} />,
+				]}
+			</Routes>,
+		);
+		expect(screen.getByTestId("rec")).toHaveTextContent("[false,true]");
+	});
+
+	it("[ISSUE-3475-ITEM-16] a Route with end matches only the whole location, in Routes and on its own", () => {
+		const ui = (
+			<>
+				<Routes>
+					{[
+						<Route key="list" path="/devices" end element={<div>LIST</div>} />,
+						<Route key="all" path="*" element={<div>NOT FOUND</div>} />,
+					]}
+				</Routes>
+				<Route
+					path="/devices"
+					end
+					element={<RendersAt id="bare" paths={["/devices", "/devices/1"]} />}
+				/>
+			</>
+		);
+		const { history } = renderAt("/devices", ui);
+		expect(screen.getByText("LIST")).toBeInTheDocument();
+		expect(screen.getByTestId("bare")).toHaveTextContent("[true,false]");
+		act(() => history.push("/devices/"));
+		expect(screen.getByText("LIST")).toBeInTheDocument();
+		expect(screen.getByTestId("bare")).toBeInTheDocument();
+		act(() => history.push("/devices/1"));
+		expect(screen.getByText("NOT FOUND")).toBeInTheDocument();
+		expect(screen.queryByText("LIST")).toBeNull();
+		expect(screen.queryByTestId("bare")).toBeNull();
+	});
+
+	it('[ISSUE-3475-ITEM-16] a nested "" or "/" matches only the parent\'s own url, as "/" does at the top level, and * takes the rest', () => {
+		for (const index of ["", "/"]) {
+			const { history } = renderAt(
+				"/d",
+				<Routes>
+					{[
+						<Route key="home" path="/" element={<div>HOME</div>} />,
+						<Route
+							key="d"
+							path="/d/*"
+							element={
+								<Routes>
+									{[
+										<Route
+											key="index"
+											path={index}
+											element={<div>INDEX</div>}
+										/>,
+										<Route key="all" path="*" element={<div>NOT FOUND</div>} />,
+									]}
+								</Routes>
+							}
+						/>,
+					]}
+				</Routes>,
+			);
+			expect(screen.getByText("INDEX"), index).toBeInTheDocument();
+			act(() => history.push("/d/"));
+			expect(screen.getByText("INDEX"), index).toBeInTheDocument();
+			act(() => history.push("/d/x/y"));
+			expect(screen.getByText("NOT FOUND"), index).toBeInTheDocument();
+			expect(screen.queryByText("INDEX"), index).toBeNull();
+			act(() => history.push("/"));
+			expect(screen.getByText("HOME"), index).toBeInTheDocument();
+			act(() => history.push("/x"));
+			expect(screen.queryByText("HOME"), index).toBeNull();
+			cleanup();
+		}
+	});
+
+	it("[ISSUE-3475-ITEM-16] warns in development, once per path, when a Routes outside of every Route matches nothing", () => {
+		vi.stubEnv("NODE_ENV", "development");
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+		const history = mem("/nowhere");
+		// StrictMode around the router, where it runs the effects of the first mount twice
+		render(
+			<React.StrictMode>
+				<HistoryRouter history={history}>
+					<Routes>
+						{[<Route key="a" path="/a" element={<div>A</div>} />]}
+					</Routes>
+				</HistoryRouter>
+			</React.StrictMode>,
+		);
+		expect(warn).toHaveBeenCalledTimes(1);
+		expect(String(warn.mock.calls[0][0])).toContain('"/nowhere"');
+		act(() => history.push("/nowhere?tab=2"));
+		expect(warn).toHaveBeenCalledTimes(1);
+		act(() => history.push("/a"));
+		expect(warn).toHaveBeenCalledTimes(1);
+		act(() => history.push("/elsewhere"));
+		expect(warn).toHaveBeenCalledTimes(2);
+		expect(String(warn.mock.calls[1][0])).toContain('"/elsewhere"');
+		act(() => history.push("/nowhere"));
+		expect(warn).toHaveBeenCalledTimes(2);
+	});
+
+	it("[ISSUE-3475-ITEM-16] stays silent for a nested Routes that matches nothing, and in production", () => {
+		vi.stubEnv("NODE_ENV", "development");
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+		renderAt(
+			"/d",
+			<Routes>
+				{[
+					<Route
+						key="d"
+						path="/d/*"
+						element={
+							<Routes>
+								{[<Route key="x" path="x" element={<div>X</div>} />]}
+							</Routes>
+						}
+					/>,
+				]}
+			</Routes>,
+		);
+		expect(warn).not.toHaveBeenCalled();
+		cleanup();
+		vi.stubEnv("NODE_ENV", "production");
+		renderAt(
+			"/nowhere",
+			<Routes>{[<Route key="a" path="/a" element={<div>A</div>} />]}</Routes>,
+		);
+		expect(warn).not.toHaveBeenCalled();
 	});
 });

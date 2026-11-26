@@ -236,6 +236,30 @@ describe("RoutedTabs: bugs", () => {
 		expect(screen.getByText("MAIN PANEL")).toBeInTheDocument();
 	});
 
+	it("[ISSUE-3475-ITEM-16] the panel wrapper shows a tab's panel also when the default tab's entry is listed first", () => {
+		const DefaultFirst = () => {
+			const tab = useRoutedTabPanel();
+			return (
+				<>
+					<RoutedTabs aria-label="Settings">
+						<Tab label="Main" value="" />
+						<Tab label="Security" value="security" />
+					</RoutedTabs>
+					<RoutedTabPanelWrapper>
+						{[
+							tab("", <div>MAIN PANEL</div>),
+							tab("security", <div>SECURITY PANEL</div>),
+						]}
+					</RoutedTabPanelWrapper>
+				</>
+			);
+		};
+		renderAt(mem("/settings/security"), <DefaultFirst />);
+		const panel = screen.getByRole("tabpanel", { name: "Security" });
+		expect(panel).toHaveTextContent("SECURITY PANEL");
+		expect(screen.queryByText("MAIN PANEL")).toBeNull();
+	});
+
 	it("[ISSUE-3500-ITEM-6] the current panel is a tabpanel named and controlled by its tab, and takes focus when it has no focusable content", () => {
 		renderAt(mem("/settings/security"));
 		const panel = screen.getByRole("tabpanel", { name: "Security" });

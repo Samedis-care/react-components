@@ -106,11 +106,12 @@ const tabValue = (path: string): string =>
 	path.replace(/\/\*$/, "").replace(/^\//, "");
 
 /**
- * Renders the panel of the current tab: the first of its entries whose path
- * matches the URL, nothing when none does. A `div` with `role="tabpanel"`
- * wraps it, named by its tab (`aria-labelledby`), with matching `id` and the
- * `aria-controls` of that tab (see `RoutedTabs`). Place it under the same Route
- * as its `RoutedTabs`.
+ * Renders the panel of the current tab: the entry Routes renders, the most
+ * specific of those whose path matches the URL (another tab's entry before the
+ * default tab's, whatever their order), nothing when none does. A `div` with
+ * `role="tabpanel"` wraps it, named by its tab (`aria-labelledby`), with
+ * matching `id` and the `aria-controls` of that tab (see `RoutedTabs`). Place
+ * it under the same Route as its `RoutedTabs`.
  * - The panel is a tab stop (`tabindex="0"`) while it contains nothing
  *   focusable, as the APG asks: Tab from the selected tab then reaches the
  *   panel. With a focusable control in it, it is no tab stop, so Tab goes from
