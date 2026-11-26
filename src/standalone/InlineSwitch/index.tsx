@@ -56,7 +56,16 @@ export interface InlineSwitchProps {
 	 * @default false
 	 */
 	disabled?: boolean;
-	children?: React.ReactElement;
+	/**
+	 * Content of the container, rendered in a `<div>` whether or not `visible` is
+	 * set. Any React node, as on MUI's containers: an element, text, a number,
+	 * several children or a fragment; `false`, `null` and `undefined` render
+	 * nothing, so a conditional child is written `{show && <List />}`. The switch
+	 * and its label float at the top right of the content, so inline content flows
+	 * to their left.
+	 * @default none
+	 */
+	children?: React.ReactNode;
 	/**
 	 * custom styles
 	 */

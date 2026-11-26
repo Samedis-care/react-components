@@ -110,6 +110,67 @@ describe("InlineSwitch", () => {
 		expect(screen.getByTestId("child-content")).toBeInTheDocument();
 	});
 
+	// the JSX of the two tests below is also checked by tsc (tsconfig-test.json): children
+	// take any React node, as on any MUI container
+	it("[ISSUE-3465-ITEM-8] a conditional child is rendered while its condition holds, and the content stays empty while it does not", () => {
+		const Entries = ({ show }: { show: boolean }) => (
+			<InlineSwitch value={false} visible label="Show inactive">
+				{show && (
+					<ul aria-label="Entries">
+						<li>Alpha</li>
+					</ul>
+				)}
+			</InlineSwitch>
+		);
+		const { container, rerender } = renderSwitch(<Entries show />);
+		expect(screen.getByRole("list", { name: "Entries" })).toBeInTheDocument();
+
+		rerender(
+			<ThemeProvider theme={theme}>
+				<Entries show={false} />
+			</ThemeProvider>,
+		);
+		expect(screen.queryByRole("list")).not.toBeInTheDocument();
+		expect(rootOf(container).lastElementChild).toBeEmptyDOMElement();
+		expect(
+			screen.getByRole("switch", { name: "Show inactive" }),
+		).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3465-ITEM-8] takes text, a number, several sibling elements, null and undefined as children", () => {
+		const { container } = renderSwitch(
+			<>
+				<InlineSwitch value={false} visible={false}>
+					No entries
+				</InlineSwitch>
+				<InlineSwitch value={false} visible={false}>
+					{3}
+				</InlineSwitch>
+				<InlineSwitch value={false} visible={false}>
+					<span>Alpha</span>
+					<span>Beta</span>
+				</InlineSwitch>
+				<InlineSwitch value={false} visible={false}>
+					{null}
+				</InlineSwitch>
+				<InlineSwitch value={false} visible={false}>
+					{undefined}
+				</InlineSwitch>
+			</>,
+		);
+		const contents = Array.from(
+			container.children,
+			(root) => root.lastElementChild?.innerHTML,
+		);
+		expect(contents).toEqual([
+			"No entries",
+			"3",
+			"<span>Alpha</span><span>Beta</span>",
+			"",
+			"",
+		]);
+	});
+
 	it("does not throw when onChange is undefined and switch is clicked", () => {
 		renderSwitch(<InlineSwitch value={false} visible={true} />);
 		expect(() => fireEvent.click(screen.getByRole("switch"))).not.toThrow();

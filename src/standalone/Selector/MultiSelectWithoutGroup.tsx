@@ -303,53 +303,51 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 				disabled={disabled}
 				className={classes?.switch}
 			>
-				<>
-					{listed.map(({ data, changeState }, index: number) => {
-						// a removed entry is restored where it would be removed
-						const restorable = changeState === "removed";
-						return (
-							<Outlined
-								key={index}
-								className={combineClassNames([
-									classes?.outlined,
-									changeState && `CcMultiSelectWithoutGroup-${changeState}`,
-								])}
-							>
-								{enableIcons && (
-									<SmallListItemIcon>{data.icon}</SmallListItemIcon>
-								)}
-								<span>{data.label}</span>
-								{changeState && (
-									<ChangeState
-										size={"small"}
-										variant={"outlined"}
-										color={changeState === "added" ? "success" : "default"}
-										label={t(
-											`standalone.selector.multi-select.change.${changeState}`,
-										)}
-										className={classes?.changeState}
-									/>
-								)}
-								{!disabled && (
-									<SmallIconButton
-										edge={"end"}
-										name={data.value}
-										disabled={disabled}
-										onClick={restorable ? handleRestore : handleDelete}
-										aria-label={t(
-											restorable
-												? "standalone.selector.multi-select.restore-item"
-												: "standalone.selector.multi-select.remove-item",
-											{ ITEM: data.label },
-										)}
-									>
-										{restorable ? <RestoreIcon /> : <RemoveIcon />}
-									</SmallIconButton>
-								)}
-							</Outlined>
-						);
-					})}
-				</>
+				{listed.map(({ data, changeState }, index: number) => {
+					// a removed entry is restored where it would be removed
+					const restorable = changeState === "removed";
+					return (
+						<Outlined
+							key={index}
+							className={combineClassNames([
+								classes?.outlined,
+								changeState && `CcMultiSelectWithoutGroup-${changeState}`,
+							])}
+						>
+							{enableIcons && (
+								<SmallListItemIcon>{data.icon}</SmallListItemIcon>
+							)}
+							<span>{data.label}</span>
+							{changeState && (
+								<ChangeState
+									size={"small"}
+									variant={"outlined"}
+									color={changeState === "added" ? "success" : "default"}
+									label={t(
+										`standalone.selector.multi-select.change.${changeState}`,
+									)}
+									className={classes?.changeState}
+								/>
+							)}
+							{!disabled && (
+								<SmallIconButton
+									edge={"end"}
+									name={data.value}
+									disabled={disabled}
+									onClick={restorable ? handleRestore : handleDelete}
+									aria-label={t(
+										restorable
+											? "standalone.selector.multi-select.restore-item"
+											: "standalone.selector.multi-select.remove-item",
+										{ ITEM: data.label },
+									)}
+								>
+									{restorable ? <RestoreIcon /> : <RemoveIcon />}
+								</SmallIconButton>
+							)}
+						</Outlined>
+					);
+				})}
 			</StyledInlineSwitch>
 		</Typography>
 	);
