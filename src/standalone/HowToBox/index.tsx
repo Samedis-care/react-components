@@ -21,6 +21,15 @@ export interface HowToBoxProps extends GroupBoxHTMLProps {
 	 * `label` of the {@link GroupBox}: `null`, `""` and `false` show no title,
 	 * even with a theme default, and leave the group without a name, which
 	 * `aria-label` can give it.
+	 *
+	 * The default names no task. Where a page shows more than one box, or where
+	 * the title should say what the steps are for, pass a title that names the
+	 * task, e.g. "How to import", so each box has a name of its own.
+	 *
+	 * The title looks like the legend of a GroupBox, including the theme's
+	 * `CcGroupBox` overrides of `legend`. The `legend` slot of `CcHowToBox`
+	 * styles it apart, e.g. as a heading where GroupBox legends look like
+	 * form-field labels (see {@link HowToBoxClassKey}).
 	 * @default "How it works" (localized)
 	 */
 	titleLabel?: React.ReactNode;
@@ -61,7 +70,14 @@ export interface HowToBoxProps extends GroupBoxHTMLProps {
 	 */
 	className?: string;
 	/**
-	 * Custom CSS styles
+	 * Additional class names per {@link HowToBoxClassKey}: `root` is added to
+	 * the frame, the `<fieldset>`, `legend` to its title, `ul` to the list and
+	 * `li` to each entry.
+	 *
+	 * As on MUI components, a `classes` prop replaces the `classes` of the
+	 * theme's `defaultProps`. The title's class is passed on as the frame
+	 * GroupBox's `classes`, so `legend` also replaces the `classes` of
+	 * `CcGroupBox`'s `defaultProps` for this box's frame.
 	 */
 	classes?: Partial<Record<HowToBoxClassKey, string>>;
 	/**
@@ -79,7 +95,8 @@ export interface HowToBoxProps extends GroupBoxHTMLProps {
 type HowToBoxRootProps = Pick<HowToBoxProps, "titleLabel" | "labels">;
 
 /**
- * What MUI keeps off a root slot, plus HowToBox's own props
+ * What MUI keeps off a root slot, plus HowToBox's own props. `classes` is
+ * forwarded: it is the GroupBox's, which carries the class of the title.
  */
 const ROOT_PROPS_NOT_FORWARDED = new Set<PropertyKey>([
 	"titleLabel",
@@ -88,13 +105,20 @@ const ROOT_PROPS_NOT_FORWARDED = new Set<PropertyKey>([
 	"theme",
 	"sx",
 	"as",
-	"classes",
 ]);
 
 const GroupBoxStyled = styled(GroupBox, {
 	name: "CcHowToBox",
 	slot: "root",
 	shouldForwardProp: (prop) => !ROOT_PROPS_NOT_FORWARDED.has(prop),
+	// The GroupBox renders the title, so the legend overrides reach it through
+	// the frame, as MUI styles the parts of an inner component. The selector
+	// is more specific than the legend's own class, so these overrides win over
+	// the theme's CcGroupBox legend overrides.
+	overridesResolver: (_props, styles) => [
+		styles.root,
+		{ "& > legend": styles.legend },
+	],
 })<HowToBoxRootProps>({});
 
 const UnorderedList = styled("ul", { name: "CcHowToBox", slot: "ul" })({
@@ -113,6 +137,9 @@ const ListItem = styled("li", { name: "CcHowToBox", slot: "li" })({
  * Keys of the theme's `components.CcHowToBox.styleOverrides`, also the keys
  * of the `classes` prop:
  * - `root`: the GroupBox `<fieldset>` frame
+ * - `legend`: the title, the frame's `<legend>`. Its overrides apply over the
+ *   GroupBox's legend styles, including the theme's `CcGroupBox` overrides of
+ *   `legend`: what they leave out still comes from those.
  * - `ul`: the list
  * - `li`: each entry. It sets `white-space: pre-line` and
  *   `overflow-wrap: anywhere`, so a word wider than the entry breaks inside
@@ -122,7 +149,7 @@ const ListItem = styled("li", { name: "CcHowToBox", slot: "li" })({
  * theme. To style a box by its props, use theme `variants`, which apply to
  * the frame and reach the list and its entries through nested selectors.
  */
-export type HowToBoxClassKey = "root" | "ul" | "li";
+export type HowToBoxClassKey = "root" | "legend" | "ul" | "li";
 
 /** whether React renders the entry as nothing */
 const isEmptyEntry = (entry: React.ReactNode) =>
@@ -135,6 +162,13 @@ const HowToBox = React.forwardRef(function HowToBox(
 	const props = useThemeProps({ props: inProps, name: "CcHowToBox" });
 	const { titleLabel, labels, className, classes, ...frameProps } = props;
 	const { t } = useCCTranslations();
+	const legendClass = classes?.legend;
+	// without a class of its own, the GroupBox keeps the classes of its theme's
+	// defaultProps, which a classes object would replace
+	const groupBoxClasses = useMemo(
+		() => (legendClass ? { legend: legendClass } : undefined),
+		[legendClass],
+	);
 
 	const entries = (Array.isArray(labels) ? labels : [labels]).filter(
 		(entry: React.ReactNode) => !isEmptyEntry(entry),
@@ -153,6 +187,7 @@ const HowToBox = React.forwardRef(function HowToBox(
 					: titleLabel
 			}
 			className={combineClassNames([className, classes?.root])}
+			classes={groupBoxClasses}
 		>
 			<UnorderedList
 				id={frameProps.id ? `${frameProps.id}-list` : undefined}
@@ -266,5 +301,17 @@ export const HowToBoxTranslate = (props: HowToBoxTranslateProps) => {
  *   props: ({ titleLabel }) => titleLabel != null,
  *   style: { "& li": { fontWeight: "bold" } },
  * }] } } });
+ *
+ * @example
+ * // a theme whose GroupBox legends look like form-field labels gives the
+ * // how-to title the size of the entries in medium weight, as a heading
+ * createTheme({ components: {
+ *   CcGroupBox: { styleOverrides: { legend: { fontSize: "0.75rem" } } },
+ *   CcHowToBox: { styleOverrides: { legend: ({ theme }) => ({
+ *     fontSize: "inherit",
+ *     fontWeight: theme.typography.fontWeightMedium,
+ *     color: theme.palette.text.primary,
+ *   }) } },
+ * } });
  */
 export default React.memo(HowToBox);

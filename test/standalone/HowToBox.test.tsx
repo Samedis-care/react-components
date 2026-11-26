@@ -545,5 +545,94 @@ describe("HowToBox", () => {
 			expect(screen.getByRole("group")).toHaveAccessibleName("Import");
 			expect(itemTexts()).toEqual(["a"]);
 		});
+
+		it("[ISSUE-3463-ITEM-10] styles the title with the theme's styleOverrides.legend over CcGroupBox's legend overrides, which keep styling other GroupBoxes and what the HowToBox override leaves out", () => {
+			const themed = createTheme({
+				components: {
+					CcGroupBox: {
+						styleOverrides: {
+							legend: {
+								fontSize: "12px",
+								letterSpacing: "1px",
+								color: "rgb(1, 2, 3)",
+							},
+						},
+					},
+					CcHowToBox: {
+						styleOverrides: {
+							legend: ({ theme: t }) => ({
+								fontSize: "13px",
+								fontWeight: t.typography.fontWeightMedium,
+								color: "rgb(4, 5, 6)",
+							}),
+						},
+					},
+				},
+			});
+			const { container } = renderHowToBox(
+				<>
+					<GroupBox label="Files">x</GroupBox>
+					<HowToBox labels={["a"]} />
+				</>,
+				themed,
+			);
+			const [field, howTo] = Array.from(container.querySelectorAll("legend"));
+			expect(howTo).toHaveTextContent("How it works");
+			expect(getComputedStyle(field).fontSize).toBe("12px");
+			expect(getComputedStyle(field).color).toBe("rgb(1, 2, 3)");
+			expect(getComputedStyle(field).fontWeight).not.toBe("500");
+			expect(getComputedStyle(howTo).fontSize).toBe("13px");
+			expect(getComputedStyle(howTo).fontWeight).toBe("500");
+			expect(getComputedStyle(howTo).color).toBe("rgb(4, 5, 6)");
+			expect(getComputedStyle(howTo).letterSpacing).toBe("1px");
+		});
+
+		it("[ISSUE-3463-ITEM-10] adds classes.legend to the title, and without it leaves the title the classes of CcGroupBox's defaultProps", () => {
+			const themed = createTheme({
+				components: {
+					CcGroupBox: {
+						defaultProps: { classes: { legend: "theme-legend" } },
+					},
+				},
+			});
+			const { container, rerender } = renderHowToBox(
+				<>
+					<HowToBox labels={["a"]} classes={{ legend: "own-legend" }} />
+					<HowToBox labels={["b"]} classes={{ li: "own-li" }} />
+				</>,
+				themed,
+			);
+			const [own, plain] = Array.from(container.querySelectorAll("legend"));
+			expect(own).toHaveClass("own-legend");
+			expect(plain).toHaveClass("theme-legend");
+			expect(plain).not.toHaveClass("own-legend");
+			expect(container.querySelector("li.own-li")).toHaveTextContent("b");
+			// a class that changes after mount replaces the old one; without one
+			// the theme's classes come back
+			rerender(
+				withTheme(
+					<>
+						<HowToBox labels={["a"]} classes={{ legend: "next-legend" }} />
+						<HowToBox labels={["b"]} classes={{ li: "own-li" }} />
+					</>,
+					themed,
+				),
+			);
+			expect(container.querySelector("legend")).toBe(own);
+			expect(own).toHaveClass("next-legend");
+			expect(own).not.toHaveClass("own-legend");
+			rerender(
+				withTheme(
+					<>
+						<HowToBox labels={["a"]} />
+						<HowToBox labels={["b"]} classes={{ li: "own-li" }} />
+					</>,
+					themed,
+				),
+			);
+			expect(container.querySelector("legend")).toBe(own);
+			expect(own).toHaveClass("theme-legend");
+			expect(own).not.toHaveClass("next-legend");
+		});
 	});
 });

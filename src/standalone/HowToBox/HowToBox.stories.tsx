@@ -2,8 +2,9 @@ import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, within } from "storybook/test";
-import { Button } from "@mui/material";
+import { Button, createTheme, ThemeProvider } from "@mui/material";
 import HowToBox from "./index";
+import GroupBox from "../GroupBox";
 
 // Note: HowToBox internally calls useCCTranslations for the default title.
 // The story relies on i18next being initialised (it is, via the library's ccI18n instance).
@@ -249,5 +250,67 @@ export const Issue3463Item9NoTitle: Story = {
 		});
 		await expect(group.querySelector("legend")).toBeNull();
 		await expect(within(group).getAllByRole("listitem")).toHaveLength(2);
+	},
+};
+
+/** a theme that styles GroupBox legends as shrunk form-field labels, and gives the how-to title a look of its own */
+const fieldLabelLegendsTheme = createTheme({
+	components: {
+		CcGroupBox: {
+			styleOverrides: {
+				legend: { fontSize: "0.75rem", color: "rgba(0, 0, 0, 0.6)" },
+			},
+		},
+		CcHowToBox: {
+			styleOverrides: {
+				legend: ({ theme }) => ({
+					fontSize: "inherit",
+					fontWeight: theme.typography.fontWeightMedium,
+					color: theme.palette.text.primary,
+				}),
+			},
+		},
+	},
+});
+
+export const Issue3463Item10TitleStyledApartFromFieldLegends: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3463-ITEM-10: a theme that styles the legends of GroupBox as small grey form-field labels gives the title of the HowToBox its own look with `CcHowToBox.styleOverrides.legend`: here the size of the entries in medium weight, so it reads as the heading of the instructions. The framed field below keeps the label look. The title names the task, as a title of the caller's own can.",
+			},
+		},
+	},
+	render: (args) => (
+		<ThemeProvider theme={fieldLabelLegendsTheme}>
+			<div style={{ width: 400 }}>
+				<HowToBox {...args} />
+				<GroupBox label={"Files"}>
+					<Button variant={"outlined"}>Upload</Button>
+				</GroupBox>
+			</div>
+		</ThemeProvider>
+	),
+	args: {
+		titleLabel: "How to import",
+		labels: ["Download the template", "Upload it below"],
+	},
+	play: async ({ canvas }) => {
+		const howTo = await canvas.findByRole("group", { name: "How to import" });
+		const title = htmlElementOf(howTo.querySelector("legend"));
+		const [entry] = entriesOf(howTo);
+		const label = htmlElementOf(
+			canvas.getByRole("group", { name: "Files" }).querySelector("legend"),
+		);
+		await expect(getComputedStyle(title).fontSize).toBe(
+			getComputedStyle(entry).fontSize,
+		);
+		await expect(getComputedStyle(title).fontWeight).toBe("500");
+		await expect(getComputedStyle(title).color).toBe("rgba(0, 0, 0, 0.87)");
+		await expect(getComputedStyle(label).fontSize).toBe("12px");
+		await expect(getComputedStyle(label).fontWeight).toBe("400");
+		await expect(getComputedStyle(label).color).toBe("rgba(0, 0, 0, 0.6)");
 	},
 };
