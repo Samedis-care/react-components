@@ -29,6 +29,8 @@ export default meta;
 
 type Story = StoryObj<typeof GroupBox>;
 
+const MOBILE = { viewport: { value: "mobile1", isRotated: false } };
+
 const rectOf = (el: Element | null) => {
 	if (!el) throw new Error("element missing");
 	return el.getBoundingClientRect();
@@ -389,5 +391,73 @@ export const Issue3462Item7HeightWithoutBorderBox: Story = {
 		const box = rectOf(canvasElement.querySelector("#gb"));
 		await expectNear(box.top, parent.top);
 		await expectNear(box.bottom, parent.bottom);
+	},
+};
+
+export const Issue3462Item9LongWordLabelWrapsOnPhone: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"ISSUE-3462-ITEM-9: at 320px a title with a long compound word does not wrap: it runs over the frame's right border and the page scrolls sideways.",
+			},
+		},
+	},
+	render: () => (
+		<div style={{ padding: "0 16px" }}>
+			<GroupBox
+				id={"gb"}
+				label={"Medizinproduktebetreiberverordnungsanforderungen"}
+			>
+				<span>content</span>
+			</GroupBox>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const box = rectOf(canvasElement.querySelector("#gb"));
+		const legend = rectOf(canvasElement.querySelector("#gb > legend"));
+		await expect(legend.right).toBeLessThanOrEqual(box.right);
+		await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+			document.documentElement.clientWidth,
+		);
+	},
+};
+
+export const Issue3462Item9LongWordLabelWrapsInFlexRow: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"ISSUE-3462-ITEM-9: at 320px, in a flex row whose item keeps the default `min-width: auto`, a title with a long compound word or a file name still wraps inside the frame: the frame does not widen the row or the page.",
+			},
+		},
+	},
+	render: () => (
+		<div style={{ display: "flex", padding: "0 16px" }}>
+			<div>
+				<GroupBox
+					id={"gb"}
+					smallLabel
+					label={"Konformitätserklärung_Medizinproduktebetreiber.pdf"}
+				>
+					<span>content</span>
+				</GroupBox>
+			</div>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const viewport = document.documentElement.clientWidth;
+		const box = rectOf(canvasElement.querySelector("#gb"));
+		const legend = rectOf(canvasElement.querySelector("#gb > legend"));
+		// the frame stays inside the row's 16px gutter
+		await expect(box.right).toBeLessThanOrEqual(viewport - 16);
+		await expect(legend.right).toBeLessThanOrEqual(box.right);
+		await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+			viewport,
+		);
 	},
 };

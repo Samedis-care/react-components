@@ -70,6 +70,11 @@ const GroupBoxLegend = styled("legend", {
 })({
 	paddingInlineStart: 5,
 	paddingInlineEnd: 5,
+	// A word wider than the frame (a German compound, a file name or a URL on
+	// a phone) breaks inside, so the title stays in the frame and does not
+	// widen the page, also where the frame sits in a flex row or a grid cell.
+	// The element of a ReactNode label inherits it.
+	overflowWrap: "anywhere",
 	// :where() keeps the rule at zero specificity, so a font size from the
 	// theme (legend or smallLabel), from classes.smallLabel or from app CSS
 	// wins. The leading * stops emotion from reading the selector as a
@@ -83,7 +88,8 @@ const GroupBoxLegend = styled("legend", {
  * Keys of the theme's `components.CcGroupBox.styleOverrides`, also the keys
  * of the `classes` prop:
  * - `root`: the `<fieldset>` frame
- * - `legend`: the `<legend>` title
+ * - `legend`: the `<legend>` title. It sets `overflow-wrap: anywhere`, so a
+ *   word wider than the frame breaks inside it.
  * - `smallLabel`: the legend while `smallLabel` is set. Its theme overrides
  *   apply after those of `legend`.
  *
@@ -119,6 +125,11 @@ export interface GroupBoxProps extends GroupBoxHTMLProps {
 	 * as React renders it: `0` shows "0", `NaN` shows "NaN". An element always
 	 * renders a legend, even one that renders nothing, so a label that is only
 	 * the dirty marker of `labelWithDirtyMarker("", true)` keeps its legend.
+	 *
+	 * A title wider than the frame wraps at spaces. A word wider than the
+	 * frame, such as a long compound, a file name or a URL, breaks between any
+	 * two characters, so it stays inside the frame and the page does not
+	 * scroll sideways on a phone.
 	 */
 	label: React.ReactNode;
 	/**
