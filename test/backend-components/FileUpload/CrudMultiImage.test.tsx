@@ -510,6 +510,40 @@ describe("CrudMultiImage", () => {
 		).toEqual([["2", "second.png"]]);
 	});
 
+	it("[ISSUE-3511-ITEM-27] names each image the backend refuses when a LazyConnector's queue is worked, a replaced one as the image it was to replace", async () => {
+		usePassThroughImages();
+		const backend = new Backend(OWN);
+		backend.rejectCreates.add("bad.png");
+		backend.rejectUpdates.add("2");
+		const lazy = new LazyConnector(backend as unknown as ApiConnector, false);
+		const { container } = renderMI({ connector: lazy });
+		await ready(container);
+		await pick(container, [png("good.png")]);
+		await pick(container, [png("bad.png")]);
+		const dialog = openEdit();
+		await dropOn(entries(dialog)[1], [png("new.png")]);
+		await waitFor(() => expect(serialize).toHaveBeenCalledTimes(3));
+		await settle();
+
+		let error: unknown = null;
+		await act(async () => {
+			error = await lazy.workQueue().catch((e: unknown) => e);
+		});
+
+		expect(backend.creates.map((data) => data.name)).toEqual(["good.png"]);
+		expect((error as Error).message).toBe(
+			"Could not upload bad.png: upload of bad.png refused. Could not replace b: update of 2 refused.",
+		);
+		expect(
+			(error as PartialApplyError<BackendMultiImageImage>).failures.map(
+				(failure) => [failure.action, failure.entry.name],
+			),
+		).toEqual([
+			["create", "bad.png"],
+			["update", "b"],
+		]);
+	});
+
 	it("reports a refused upload through errorComponent", async () => {
 		usePassThroughImages();
 		const backend = new Backend(OWN);

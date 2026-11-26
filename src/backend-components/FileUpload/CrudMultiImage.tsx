@@ -12,11 +12,13 @@ import {
 	MultiImageProps,
 } from "../../standalone/FileUpload/MultiImage/MultiImage";
 import { Connector } from "../../backend-integration";
+import LazyConnector from "../../backend-integration/Connector/LazyConnector";
 import PartialDeleteError from "../../backend-integration/Connector/PartialDeleteError";
 import PartialApplyError, {
 	PartialApplyFailure,
 } from "../Form/PartialApplyError";
 import describeWriteFailures from "./describeWriteFailures";
+import namedQueueErrorFactory from "./namedQueueErrorFactory";
 import describeFrameBy from "./describeFrameBy";
 import { ErrorComponentProps } from "../Form";
 import { MultiImage } from "../../standalone";
@@ -48,7 +50,10 @@ export interface CrudMultiImageProps extends Omit<
 	 * The backend connector used as CRUD interface
 	 * @remarks A LazyConnector queues every write until its queue is written, which a Form
 	 *          does after saving. Any other connector is written at once. The field looks
-	 *          the same either way.
+	 *          the same either way. While the control is mounted, the queue of a
+	 *          LazyConnector rejects for the writes the backend refused (a Form's save)
+	 *          with a PartialApplyError that names each by its image, as a change through
+	 *          any other connector does.
 	 *
 	 *          Null renders a read-only control that lists `additionalImages`. Read once:
 	 *          the first connector passed (after null, if any) is listed and written for
@@ -241,6 +246,20 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 	// the changes handed in that have not settled yet: while there are any, the field is
 	// busy
 	const [writing, setWriting] = useState(0);
+
+	// A write the queue sends later (a Form's save) and the backend refuses is named by
+	// its image, as the control lists it under the record's id (the client-side one of a
+	// queued upload)
+	const lazyConnector = connector instanceof LazyConnector ? connector : null;
+	useEffect(() => {
+		if (!lazyConnector) return;
+		return lazyConnector.setQueueErrorFactory(
+			namedQueueErrorFactory(
+				(id) => imagesRef.current.find((img) => img.id === id),
+				(img) => img.name,
+			),
+		);
+	}, [lazyConnector]);
 
 	const applyChange = useCallback(
 		async ({ removed, replaced, added }: ImageChange) => {

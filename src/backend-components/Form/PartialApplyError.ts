@@ -29,7 +29,9 @@ export const isPartialApplyError = (e: Error): e is PartialApplyError => {
  * @remarks Handed to `errorComponent` by CrudMultiSelect, CrudMultiSelectWithGroups,
  *          CrudFileUpload and CrudMultiImage. The message says what failed and why, as
  *          the control words it; `failures` lists the writes for a component that wants
- *          to show them its own way.
+ *          to show them its own way. While one of them is mounted on a LazyConnector, it
+ *          is also what the connector's `workQueue`, and with it a Form's save, rejects
+ *          with for the queued writes the backend refused.
  */
 export default class PartialApplyError<EntryT = unknown> extends Error {
 	failures: PartialApplyFailure<EntryT>[];

@@ -1094,6 +1094,45 @@ describe("CrudFileUpload", () => {
 				expect(ui.names()).toEqual(["image.png", "notes.txt"]),
 			);
 		});
+
+		it("[ISSUE-3511-ITEM-27] names each refused file in the error of the submit while it is mounted, and leaves the backend's error once it is not", async () => {
+			const backend = new RejectingConnector(SERVER_FILES);
+			backend.rejectCreates.add("bad.txt").add("bad2.txt");
+			const lazy = lazyOver(backend);
+			const ui = renderUpload({ connector: lazy });
+			await loaded(ui);
+			await ui.addFile(pick("bad.txt"));
+			await waitFor(() => expect(ui.changeOf("bad.txt")).toBe("added"));
+			await ui.addFile(pick("good.txt"));
+			await waitFor(() => expect(ui.changeOf("good.txt")).toBe("added"));
+			await ui.addFile(pick("bad2.txt"));
+			await waitFor(() => expect(ui.changeOf("bad2.txt")).toBe("added"));
+
+			let mounted: unknown = null;
+			await act(async () => {
+				mounted = await lazy.workQueue().catch((e: unknown) => e);
+			});
+			ui.unmount();
+			const unmounted = await lazy.workQueue().catch((e: unknown) => e);
+
+			expect(namesCreated(backend)).toEqual(["good.txt"]);
+			expect((mounted as Error).message).toBe(
+				"Could not upload bad.txt: upload of bad.txt refused. Could not upload bad2.txt: upload of bad2.txt refused.",
+			);
+			expect(
+				(mounted as PartialApplyError<FileData<BackendFileMeta>>).failures.map(
+					(failure) => [failure.entry.file.name, failure.action],
+				),
+			).toEqual([
+				["bad.txt", "create"],
+				["bad2.txt", "create"],
+			]);
+			// the names come from the list the control shows, which is gone with it
+			expect(unmounted).toBeInstanceOf(AggregateError);
+			expect((unmounted as Error).message).toBe(
+				"upload of bad.txt refused; upload of bad2.txt refused",
+			);
+		});
 	});
 
 	describe("additional files", () => {

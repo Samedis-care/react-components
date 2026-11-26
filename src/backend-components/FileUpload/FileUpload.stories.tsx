@@ -1034,3 +1034,111 @@ export const InReadOnlyForm: StoryObj<InFormArgs> = {
 		await expect(canvas.queryByText("Edit")).toBeNull();
 	},
 };
+
+/**
+ * The API of a record's files whose backend refuses the uploads of the names it is given,
+ * the way a server's size limit does
+ */
+class RefusingCollectionApi extends CollectionApi {
+	constructor(
+		data: Record<string, unknown>[],
+		private refused: string[],
+	) {
+		super(data);
+	}
+
+	create(data: Record<string, unknown>) {
+		if (this.refused.includes(data.name as string))
+			return Promise.reject(new Error("File too large"));
+		return super.create(data);
+	}
+}
+
+/**
+ * The form page: the record's files and Save
+ */
+const RefusedUploadsPage = (
+	props: PageProps<ReturnType<typeof createTestModel>, RefusingCollectionApi>,
+) => {
+	const { customProps: api, submit } = props;
+	const getApi = useCallback(() => api as unknown as ApiConnector, [api]);
+	const handleSave = useCallback(() => {
+		// a failed save is shown by the form's error dialog
+		submit().catch(() => {});
+	}, [submit]);
+	return (
+		<>
+			<FormCrudFileUpload
+				field={"attachments"}
+				initialId={"1"}
+				getEndpoint={(id) => `records/${id}/attachments`}
+				getConnector={getApi}
+				serialize={serialize}
+				deserialize={deserialize}
+				accept="*/*"
+				previewSize={24}
+				label={"Attachments"}
+			/>
+			<Button type={"button"} variant={"contained"} onClick={handleSave}>
+				Save
+			</Button>
+		</>
+	);
+};
+
+const TOO_LARGE = ["bad.txt", "bad2.txt"];
+
+const RefusedUploadsStory = () => {
+	const model = useMemo(createTestModel, []);
+	const api = useMemo(
+		() => new RefusingCollectionApi(fileConnectorData, TOO_LARGE),
+		[],
+	);
+	return (
+		<Form
+			model={model}
+			id={"1"}
+			errorComponent={DefaultErrorComponent}
+			customProps={api}
+			disableRouting
+		>
+			{RefusedUploadsPage}
+		</Form>
+	);
+};
+
+/**
+ * ISSUE-3511-ITEM-27: the backend refuses two of three files picked in a Form. The save
+ * uploads the third all the same, and the error dialog names both refused files.
+ */
+export const Issue3511Item27RefusedUploadsAreNamed: StoryObj = {
+	name: "FormCrudFileUpload — a save that refuses some files names them",
+	parameters: AXE_GATE,
+	render: () => <RefusedUploadsStory />,
+	play: async ({ canvas, canvasElement }) => {
+		const field = await findField(canvasElement);
+		await within(field).findByText("document.pdf");
+		const input = field.querySelector<HTMLInputElement>('input[type="file"]');
+		if (!input) throw new Error("no file input");
+		for (const name of ["good.txt", "bad.txt", "bad2.txt"]) {
+			// what the browser hands over once the user chose a file in its dialog
+			const chosen = new DataTransfer();
+			chosen.items.add(new File(["content"], name, { type: "text/plain" }));
+			input.files = chosen.files;
+			input.dispatchEvent(new Event("change", { bubbles: true }));
+			await within(field).findByText(name, {}, { timeout: 5000 });
+		}
+
+		await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+
+		const dialog = await within(document.body).findByRole(
+			"dialog",
+			{ name: "An error occurred" },
+			{ timeout: 5000 },
+		);
+		await expect(dialog).toHaveTextContent(
+			"Could not upload bad.txt: File too large. Could not upload bad2.txt: File too large.",
+		);
+		await expect(dialog).not.toHaveTextContent("good.txt");
+	},
+};

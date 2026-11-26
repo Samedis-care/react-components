@@ -21,6 +21,7 @@ import PartialApplyError, {
 	PartialApplyFailure,
 } from "../Form/PartialApplyError";
 import describeWriteFailures from "./describeWriteFailures";
+import namedQueueErrorFactory from "./namedQueueErrorFactory";
 import describeFrameBy from "./describeFrameBy";
 import { ErrorComponentProps } from "../Form";
 import CrudLoadStatus from "./CrudLoadStatus";
@@ -41,6 +42,10 @@ export interface CrudFileUploadProps extends Omit<
 	 *          does after saving. Any other connector is written at once. The control tells
 	 *          the two apart with `instanceof LazyConnector`, so a connector that wraps a
 	 *          LazyConnector counts as written at once.
+	 *
+	 *          While the control is mounted, the queue of a LazyConnector rejects for the
+	 *          uploads the backend refused (a Form's save) with a PartialApplyError that
+	 *          names each by its file, as a change through any other connector does.
 	 *
 	 *          Null renders a read-only control that lists `additionalFiles`. Read once:
 	 *          the first connector passed (after null, if any) is listed and written for
@@ -254,6 +259,19 @@ const CrudFileUpload = (
 				return changed ? next : prev;
 			});
 		});
+	}, [lazyConnector]);
+	// An upload the queue sends later (a Form's save) and the backend refuses is named by
+	// its file, as the control lists it under the client-side id of the queued upload
+	const filesRef = useRef(files);
+	filesRef.current = files;
+	useEffect(() => {
+		if (!lazyConnector) return;
+		return lazyConnector.setQueueErrorFactory(
+			namedQueueErrorFactory(
+				(id) => filesRef.current.find((file) => file.file.id === id),
+				(file) => file.file.name,
+			),
+		);
 	}, [lazyConnector]);
 
 	// What each picked file became once it was uploaded, until the control lists that

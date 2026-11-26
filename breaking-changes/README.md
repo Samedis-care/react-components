@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-26 | [A Form's save names the files and images the backend refused](2026-11-26-file-controls-name-refused-queued-writes.md) | behavior |
 | 2026-11-26 | [Routes takes any JSX children, and a key on a child takes effect](2026-11-26-routes-children-and-keys.md) | behavior, type |
 | 2026-11-26 | [A nested form in a flow stage that was left keeps its edits for the flow's save; a stage change that only stages sends nothing](2026-11-26-flow-form-nested-form-staged.md) | behavior, type |
 | 2026-11-26 | [Pushed dialogs close when a navigation leads to another path](2026-11-26-dialogs-close-on-navigation.md) | behavior |

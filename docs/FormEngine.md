@@ -752,9 +752,10 @@ Things to know about the queue:
   replacement (`FormCrudFileUpload` uploads a file again under its name, then deletes the
   old one). The submit rejects although the record was saved, and the form's error component shows which
   writes were refused: `FormCrudMultiSelect` names each by its entry's label ("Frank Wilson:
-  Person 6 is archived", several joined with "; "), the file controls give the backend's
-  message (an `AggregateError` of several). A refused delete is dropped, as the record may be
-  gone already.
+  Person 6 is archived", several joined with "; "), `FormCrudFileUpload` and
+  `FormCrudMultiImage` by its file's or image's name ("Could not upload bad.txt: File too
+  large.", one sentence each), as they do for a refused write through any other connector.
+  A refused delete is dropped, as the record may be gone already.
 - An entry created through the queue has a client-side id (`fake-id-N`). It keeps it in
   `onChange`, and in the multi image's `onPrimaryChange`, also after the save;
   `LazyConnector.mapId` gives the server's id once the queue is sent. The record is saved

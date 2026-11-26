@@ -540,9 +540,10 @@ class LazyConnector extends Connector {
 	 * the backend refused writes
 	 * @param factory Makes the error of the refused writes, see QueueErrorFactory
 	 * @returns Removes this factory again; a factory set after it stays
-	 * @remarks One factory at a time: a later one replaces it. CrudMultiSelect and
-	 *          CrudMultiSelectWithGroups set one while they are mounted, which names each
-	 *          refused write by its entry's label in a PartialApplyError.
+	 * @remarks One factory at a time: a later one replaces it. CrudMultiSelect,
+	 *          CrudMultiSelectWithGroups, CrudFileUpload and CrudMultiImage set one while
+	 *          they are mounted, which names each refused write in a PartialApplyError: by
+	 *          its entry's label, or by its file's or image's name.
 	 */
 	public setQueueErrorFactory(factory: QueueErrorFactory): () => void {
 		this.queueErrorFactory = factory;

@@ -15,6 +15,9 @@ import type { FileData } from "../../../src/standalone/FileUpload/Generic";
 import type { MultiImageImage } from "../../../src/standalone/FileUpload/MultiImage/MultiImage";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import ccI18n from "../../../src/i18n";
+import PartialApplyError, {
+	isPartialApplyError,
+} from "../../../src/backend-components/Form/PartialApplyError";
 import {
 	capture,
 	loaded,
@@ -42,11 +45,14 @@ beforeAll(() => {
 
 /**
  * The collection's backend, as the API connector the LazyConnector writes to after the
- * save: it records the endpoint it is pointed at and every create
+ * save: it records the endpoint it is pointed at, every create and every delete, and
+ * refuses the creates and updates of the names in `refused` with "File too large"
  */
 class CollectionApi extends MockConnector {
 	public endpoints: string[] = [];
 	public creates: Record<string, unknown>[] = [];
+	public deletes: string[] = [];
+	public refused = new Set<string>();
 
 	setApiEndpoint(url: string) {
 		this.endpoints.push(url);
@@ -54,9 +60,35 @@ class CollectionApi extends MockConnector {
 
 	create(data: Record<string, unknown>) {
 		this.creates.push(data);
+		if (this.refused.has(data.name as string))
+			return Promise.reject(new Error("File too large"));
 		return super.create(data);
 	}
+
+	update(data: Record<string, unknown>) {
+		if (this.refused.has(data.name as string))
+			throw new Error("File too large");
+		return super.update(data);
+	}
+
+	delete(id: string) {
+		this.deletes.push(id);
+		super.delete(id);
+	}
 }
+
+/**
+ * What a save's PartialApplyError lists: each refused write's name, action and reason
+ */
+const failuresOf = <EntryT,>(
+	error: unknown,
+	nameOf: (entry: EntryT) => string,
+) =>
+	(error as PartialApplyError<EntryT>).failures.map((failure) => [
+		nameOf(failure.entry),
+		failure.action,
+		failure.error.message,
+	]);
 
 const lazyParams = (api: CollectionApi) => ({
 	field: "attachments",
@@ -202,6 +234,65 @@ describe("FormCrudFileUpload", () => {
 		expect(api.creates.map((data) => data.name)).toEqual(["notes.txt"]);
 		expect(api.endpoints).toContain("records/1/attachments");
 	});
+
+	it("[ISSUE-3511-ITEM-27] a save the backend refuses in part names each refused file, and not the stored one", async () => {
+		const api = new CollectionApi(STORED);
+		api.refused.add("bad.txt").add("bad2.txt");
+		const ui = mount(api);
+		await loaded(ui.sink);
+		await waitFor(() => expect(ui.names()).toEqual(["document.pdf"]));
+		await ui.pick("good.txt");
+		await ui.pick("bad.txt");
+		await ui.pick("bad2.txt");
+		await waitFor(() =>
+			expect(ui.names()).toEqual([
+				"document.pdf",
+				"good.txt",
+				"bad.txt",
+				"bad2.txt",
+			]),
+		);
+
+		const error = await trySubmit(ui.sink);
+
+		expect(api.creates.map((data) => data.name)).toEqual([
+			"good.txt",
+			"bad.txt",
+			"bad2.txt",
+		]);
+		const message =
+			"Could not upload bad.txt: File too large. Could not upload bad2.txt: File too large.";
+		expect((error as Error).message).toBe(message);
+		expect(isPartialApplyError(error as Error)).toBe(true);
+		expect(
+			failuresOf(error, (file: FileData<BackendFileMeta>) => file.file.name),
+		).toEqual([
+			["bad.txt", "create", "File too large"],
+			["bad2.txt", "create", "File too large"],
+		]);
+		// the Form shows it in its error dialog
+		expect(await screen.findByRole("dialog")).toHaveTextContent(message);
+	});
+
+	it("[ISSUE-3511-ITEM-27] a refused replacement is named, and the file it was to replace stays on the server", async () => {
+		const api = new CollectionApi(STORED);
+		api.refused.add("document.pdf");
+		const ui = mount(api);
+		await loaded(ui.sink);
+		await waitFor(() => expect(ui.names()).toEqual(["document.pdf"]));
+		await ui.pick("document.pdf");
+		await waitFor(() =>
+			expect(ui.names()).toEqual(["document.pdf", "document.pdf"]),
+		);
+
+		const error = await trySubmit(ui.sink);
+
+		expect((error as Error).message).toBe(
+			"Could not upload document.pdf: File too large.",
+		);
+		expect(api.deletes).toEqual([]);
+		expect((await api.index())[0].map((record) => record.id)).toEqual(["f1"]);
+	});
 });
 
 describe("FormCrudMultiImage", () => {
@@ -296,5 +387,40 @@ describe("FormCrudMultiImage", () => {
 
 		expect(api.creates.map((data) => data.name)).toEqual(["new.png"]);
 		expect(api.endpoints).toContain("records/1/attachments");
+	});
+
+	it("[ISSUE-3511-ITEM-27] a save the backend refuses in part names each refused image, and not the stored one", async () => {
+		processImageMock.mockImplementation((file: File) => Promise.resolve(file));
+		serialize.mockClear();
+		const api = new CollectionApi(OWN);
+		api.refused.add("bad.png").add("bad2.png");
+		const ui = mount(api);
+		await loaded(ui.sink);
+		await waitFor(() => expect(ui.edit()).not.toBe(null));
+		await ui.add("good.png");
+		await ui.add("bad.png");
+		await ui.add("bad2.png");
+		await waitFor(() => expect(serialize).toHaveBeenCalledTimes(3));
+		await act(async () => {});
+
+		const error = await trySubmit(ui.sink);
+
+		expect(api.creates.map((data) => data.name)).toEqual([
+			"good.png",
+			"bad.png",
+			"bad2.png",
+		]);
+		const message =
+			"Could not upload bad.png: File too large. Could not upload bad2.png: File too large.";
+		expect((error as Error).message).toBe(message);
+		expect(isPartialApplyError(error as Error)).toBe(true);
+		expect(
+			failuresOf(error, (image: BackendMultiImageImage) => image.name),
+		).toEqual([
+			["bad.png", "create", "File too large"],
+			["bad2.png", "create", "File too large"],
+		]);
+		// the Form shows it in its error dialog
+		expect(await screen.findByRole("dialog")).toHaveTextContent(message);
 	});
 });
