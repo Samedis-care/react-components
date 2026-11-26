@@ -42,6 +42,7 @@ beforeEach(() => {
 afterEach(() => {
 	cleanup();
 	vi.restoreAllMocks();
+	vi.unstubAllEnvs();
 });
 
 const mem = (...entries: InitialEntry[]) =>
@@ -254,6 +255,127 @@ describe("RoutedTabs: bugs", () => {
 		expect(selected()).toEqual(["Main"]);
 		expect(screen.getByText("MAIN PANEL")).toBeInTheDocument();
 		expect(muiErrors()).toEqual([]);
+	});
+
+	it("[ISSUE-3500-ITEM-3] a segment in other letter case selects the tab whose panel it shows", () => {
+		renderAt(mem("/settings/Security"));
+		expect(screen.getByText("SECURITY PANEL")).toBeInTheDocument();
+		expect(selected()).toEqual(["Security"]);
+	});
+
+	it('[ISSUE-3500-ITEM-3] a "//" in front of the route selects the tab whose panel it shows', () => {
+		renderAt(mem("//settings/security"));
+		expect(screen.getByText("SECURITY PANEL")).toBeInTheDocument();
+		expect(selected()).toEqual(["Security"]);
+	});
+
+	/** A bar with the Tabs given, the default tab first, and their panels */
+	const Values = (props: { tabs: React.ReactElement[]; panels: string[] }) => {
+		const tab = useRoutedTabPanel();
+		return (
+			<>
+				<RoutedTabs aria-label="Settings">
+					<Tab label="Main" value="" />
+					{props.tabs}
+				</RoutedTabs>
+				<RoutedTabPanelWrapper>
+					{[
+						...props.panels.map((name) =>
+							tab(name, <div>{`PANEL ${name}`}</div>),
+						),
+						tab("", <div>MAIN PANEL</div>),
+					]}
+				</RoutedTabPanelWrapper>
+			</>
+		);
+	};
+
+	it("[ISSUE-3500-ITEM-3] a percent-encoded segment selects the tab whose panel it shows, as a browser history keeps it", () => {
+		const h = mem("/settings/my%20tab");
+		renderAt(
+			h,
+			<Values
+				tabs={[<Tab key="m" label="My tab" value="my tab" />]}
+				panels={["my tab"]}
+			/>,
+		);
+		expect(screen.getByText("PANEL my tab")).toBeInTheDocument();
+		expect(selected()).toEqual(["My tab"]);
+	});
+
+	it("[ISSUE-3500-ITEM-3] a Tab without value is selected at its index, which a click on it opens", () => {
+		const h = mem("/settings");
+		renderAt(
+			h,
+			<Values tabs={[<Tab key="s" label="Second" />]} panels={["1"]} />,
+		);
+		fireEvent.click(tabEl("Second"));
+		expect(h.location.pathname).toBe("/settings/1");
+		expect(screen.getByText("PANEL 1")).toBeInTheDocument();
+		expect(selected()).toEqual(["Second"]);
+		expect(muiErrors()).toEqual([]);
+	});
+
+	it('[ISSUE-3500-ITEM-3] a value with "/" is not selected at an encoded "/", where the default panel shows', () => {
+		renderAt(
+			mem("/settings/a%2Fb"),
+			<Values
+				tabs={[<Tab key="ab" label="AB" value="a/b" />]}
+				panels={["a/b"]}
+			/>,
+		);
+		expect(screen.getByText("MAIN PANEL")).toBeInTheDocument();
+		expect(selected()).toEqual(["Main"]);
+	});
+
+	it("[ISSUE-3500-ITEM-3] warns in development, once per bar and Tab, about a value that is not one path segment", () => {
+		vi.stubEnv("NODE_ENV", "development");
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+		const h = mem("/settings");
+		// new elements on every call, as a parent's render makes them
+		const page = () => (
+			// StrictMode runs the effects of the first mount twice
+			<React.StrictMode>
+				{routed(
+					h,
+					<Values
+						tabs={[
+							<Tab key="ok" label="Fine" value="fine" />,
+							<Tab key="ab" label="AB" value="a/b" />,
+							<Tab key="none" label="None" />,
+							<Tab key="num" label="Number" value={4} />,
+						]}
+						panels={["fine", "a/b"]}
+					/>,
+				)}
+			</React.StrictMode>
+		);
+		const { rerender } = render(page());
+		expect(warn.mock.calls.map((call) => String(call[0]))).toEqual([
+			expect.stringMatching(/^RoutedTabs: the Tab value "a\/b" has a "\/"/),
+			expect.stringMatching(/^RoutedTabs: the Tab at index 3 has no value/),
+			expect.stringMatching(
+				/^RoutedTabs: the value of the Tab at index 4 is 4, not a string/,
+			),
+		]);
+		rerender(page());
+		act(() => h.push("/settings/fine"));
+		expect(warn).toHaveBeenCalledTimes(3);
+		expect(selected()).toEqual(["Fine"]);
+	});
+
+	it("[ISSUE-3500-ITEM-3] warns about no Tab whose value is one path segment, nor in production", () => {
+		vi.stubEnv("NODE_ENV", "development");
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+		renderAt(mem("/settings/security"));
+		expect(warn).not.toHaveBeenCalled();
+		cleanup();
+		vi.stubEnv("NODE_ENV", "production");
+		renderAt(
+			mem("/settings"),
+			<Values tabs={[<Tab key="ab" label="AB" value="a/b" />]} panels={[]} />,
+		);
+		expect(warn).not.toHaveBeenCalled();
 	});
 
 	it("[ISSUE-3500-ITEM-14] the panel wrapper renders a single tab entry", () => {

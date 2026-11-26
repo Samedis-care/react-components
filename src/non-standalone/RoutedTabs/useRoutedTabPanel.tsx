@@ -11,7 +11,8 @@ const useRoutedTabPanel = (): ((
 	element: React.ReactElement,
 ) => React.ReactElement<RouteProps>) => {
 	/**
-	 * @param name The `value` of the tab's `Tab`, `""` for the default tab
+	 * @param name The `value` of the tab's `Tab`: one path segment, a string
+	 * without "/" (see `RoutedTabsProps.children`); `""` for the default tab
 	 * @param element The panel content, any element, e.g. `<SecurityPanel />`.
 	 * Not a `Route`: the entry already is the route `<name>/*`, so a Route
 	 * passed here would match only below it (`<name>/<its path>`) and the tab

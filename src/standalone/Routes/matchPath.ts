@@ -52,12 +52,14 @@ export const normalizePath = (path: string): string => {
 };
 
 /**
- * Percent-decodes a path segment
+ * Percent-decodes a path segment, as {@link matchPath} reads the location's
+ * segments. RoutedTabs reads its segment with it too, so it selects the Tab
+ * whose panel a Route shows. Not exported from the package root.
  * @param segment The segment of a location pathname
  * @returns The decoded segment; the segment as it is if it has a malformed
  * escape
  */
-const decodeSegment = (segment: string): string => {
+export const decodeSegment = (segment: string): string => {
 	if (!segment.includes("%")) return segment;
 	try {
 		return decodeURIComponent(segment);

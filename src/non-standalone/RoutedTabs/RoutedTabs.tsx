@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
 	buttonBaseClasses,
 	styled,
@@ -11,20 +11,32 @@ import {
 import useLocation from "../../standalone/Routes/useLocation";
 import { useRouteInfo } from "../../standalone";
 import useNavigate from "../../standalone/Routes/useNavigate";
+import { decodeSegment } from "../../standalone/Routes/matchPath";
 import focusRing from "../../utils/internal/focusRing";
 import combineClassNames from "../../utils/combineClassNames";
 import { getTabId, getTabPanelId } from "./tabPanelIds";
 
 export interface RoutedTabsProps extends Omit<TabsProps, "value" | "onChange"> {
 	/**
-	 * The MUI `Tab` elements. The selected Tab is the one whose `value` is the
-	 * first path segment after the enclosing Route's url. The Tab with
+	 * The MUI `Tab` elements. Each Tab's `value` is one path segment, a string
+	 * without "/", equal to the `name` of its panel in
+	 * `useRoutedTabPanel()(name, element)`. The selected Tab is the one whose
+	 * `value` is the first path segment after the enclosing Route's url, read
+	 * as the panels' Routes read it, so the Tab whose panel is shown is the one
+	 * selected: percent-decoded and case-insensitive (`/settings/Security` and
+	 * `/settings/my%20tab` select the Tabs `"security"` and `"my tab"`), and a
+	 * "//" counts as one "/". The Tab with
 	 * `value=""` is the default tab: it is selected at the route's own url,
 	 * and also when no Tab has the segment (a stale link, a Tab that is not
 	 * rendered, a path inside the default panel). Without a default tab, no
 	 * tab is selected then. Opening a Tab navigates to the route's url
 	 * followed by its value (`/settings/security`); the default tab navigates
 	 * to the route's own url (`/settings`, without a trailing "/").
+	 *
+	 * In development, a Tab whose value is not one path segment logs a warning
+	 * (once per bar and Tab): a value with "/", which is never selected, and a
+	 * value that is not a string, such as the index MUI gives a Tab without
+	 * `value`.
 	 *
 	 * Each Tab gets `disableFocusRipple` unless it sets the prop itself: a
 	 * keyboard-focused tab shows the focus ring, and MUI's pulsating focus
@@ -199,6 +211,61 @@ const withTabProps = (
 	);
 
 /**
+ * The value of the Tab whose panel `RoutedTabPanelWrapper` shows, for MUI's
+ * `Tabs`. The location's first segment after the enclosing Route's url is read
+ * as the panels' Routes read it: empty segments ("//") are skipped, it is
+ * percent-decoded and compared case-insensitively. A value with "/" spans
+ * several segments, so its Tab is never selected. When no Tab has the segment,
+ * the default panel (the catch-all) is shown, so it is the default tab (`""`)
+ * if the bar has one, else `false`: no tab, and no error from MUI for a value
+ * no Tab has.
+ * @param entries The Tabs with their values
+ * @param pathname The location pathname
+ * @param url The enclosing Route's url, made of the location's segments that
+ * the Route matched
+ * @returns The value of the selected Tab, `false` for none
+ */
+const getCurrentValue = (
+	entries: TabEntry[],
+	pathname: string,
+	url: string,
+): unknown => {
+	const depth = url.split("/").filter((part) => part).length;
+	const segment = pathname.split("/").filter((part) => part)[depth];
+	const wanted =
+		segment === undefined ? "" : decodeSegment(segment).toLowerCase();
+	const match = entries.find(({ value }) => {
+		const text = String(value);
+		return !text.includes("/") && text.toLowerCase() === wanted;
+	});
+	if (match) return match.value;
+	return entries.some(({ value }) => value === "") ? "" : false;
+};
+
+/**
+ * The development warning for a Tab whose value is not one path segment, a
+ * string without "/". A fragment gets none: MUI logs an error for it.
+ * @param entry The Tab with its value
+ * @param index Its index among the Tabs, as MUI counts them
+ * @returns The warning, `null` for a value that is one segment
+ */
+const getTabValueWarning = (
+	{ child, value }: TabEntry,
+	index: number,
+): string | null => {
+	if (child.type === React.Fragment) return null;
+	const advice =
+		'Give each Tab a value that is one path segment, a string without "/", and its panel the same name: tab(value, …).';
+	if (child.props.value === undefined)
+		return `RoutedTabs: the Tab at index ${index} has no value, so MUI gives it its index. ${advice}`;
+	if (typeof value !== "string")
+		return `RoutedTabs: the value of the Tab at index ${index} is ${String(value)}, not a string. ${advice}`;
+	if (value.includes("/"))
+		return `RoutedTabs: the Tab value "${value}" has a "/", so the Tab is never selected. ${advice}`;
+	return null;
+};
+
+/**
  * MUI `Tabs` whose selected tab is a segment of the URL (see `children`).
  * Opening a tab pushes its URL (the route's own url for the default tab, see
  * `children`) and keeps the scroll position of the page
@@ -259,20 +326,24 @@ const RoutedTabs = (inProps: RoutedTabsProps) => {
 		},
 		[onFocus],
 	);
-	const segment =
-		pathname
-			.substring(url.length)
-			.split("/")
-			.filter((entry) => entry)[0] ?? "";
-	const entries = getTabEntries(tabsProps.children);
-	const values = entries.map((entry) => entry.value);
-	// MUI logs an error for a value no Tab has. With such a segment the default
-	// panel (the catch-all) is the one shown, so its Tab is the selected one.
-	const current = values.includes(segment)
-		? segment
-		: values.includes("")
-			? ""
-			: false;
+	const { children } = tabsProps;
+	const entries = getTabEntries(children);
+	const current = getCurrentValue(entries, pathname, url);
+	// development: name each Tab whose value is not one path segment, once per
+	// bar and Tab
+	const warnedTabs = useRef<Set<string> | null>(null);
+	useEffect(() => {
+		if (process.env.NODE_ENV !== "development") return;
+		if (!warnedTabs.current) warnedTabs.current = new Set();
+		const warned = warnedTabs.current;
+		getTabEntries(children).forEach((entry, index) => {
+			const warning = getTabValueWarning(entry, index);
+			if (warning === null || warned.has(warning)) return;
+			warned.add(warning);
+			// eslint-disable-next-line no-console
+			console.warn(warning);
+		});
+	}, [children]);
 	return (
 		<RoutedTabsRoot
 			{...tabsProps}
