@@ -62,10 +62,9 @@ export interface IRoutedMenuItemDefinition extends Omit<
 	 * segment from the left, a literal before a `:name` param (`/apps/new`
 	 * before `/apps/:app`), then a route without a trailing `/*` before one
 	 * with, the order by which `Routes` picks the route it renders. On a tie
-	 * the deeper entry wins (a group's entry with the group's own route), then
-	 * the earlier one. The highlight follows the URL only: on
-	 * a path that no entry matches, nothing is highlighted, and an entry
-	 * without `route` (an action such as "Log out") is never highlighted.
+	 * the deeper entry wins, then the earlier one. The highlight follows the
+	 * URL only: on a path that no entry matches, nothing is highlighted, and an
+	 * entry without `route` (an action such as "Log out") is never highlighted.
 	 *
 	 * Its `:name` params are filled from the current URL, read with the route
 	 * of that best-matching entry: on `/projects/42/review`,
@@ -78,6 +77,10 @@ export interface IRoutedMenuItemDefinition extends Omit<
 	 * `shouldRender: false` on the other pages from the app. The part of a
 	 * relative route that stands for the enclosing Route is taken from the
 	 * current URL as that Route matched it.
+	 *
+	 * Not for a group (an entry with `children`): a group only shows and hides
+	 * its entries, and its `route` is ignored. Give the group's page an entry
+	 * among its children instead, e.g. "Overview" with the route `/settings`.
 	 */
 	route?: string;
 	/**
@@ -95,6 +98,11 @@ export interface IRoutedMenuItemDefinition extends Omit<
 	onClick?: React.MouseEventHandler;
 	/**
 	 * Children of this menu entry
+	 *
+	 * An entry with at least one child is a group: a click, Enter or Space
+	 * expands or collapses it and runs its `onClick`, and nothing else. It
+	 * never navigates or opens a tab and is never the highlighted entry; its
+	 * `route` is ignored. An empty array makes no group.
 	 */
 	children?: IRoutedMenuItemDefinition[];
 }
@@ -144,8 +152,8 @@ export interface IRoutedMenuEntry extends Omit<
 	 * relative route, with the route's search and hash, e.g.
 	 * `/projects/42/review`, or `#/users` with a hash history. The URL a click
 	 * navigates to and a new tab opens. `undefined` for an entry without
-	 * `route` (an action or a group) and for an entry hidden because the
-	 * current URL has no value for one of its params.
+	 * `route` (an action), for a group (its `route` is ignored) and for an
+	 * entry hidden because the current URL has no value for one of its params.
 	 *
 	 * Render an entry with an `href` as a link (`<a href>`, or MUI's
 	 * `ListItemButton`, which renders a link when it gets an `href`) with the
@@ -157,9 +165,9 @@ export interface IRoutedMenuEntry extends Omit<
 	 * Is this the entry of the current URL, the one whose route matches it
 	 * best (see IRoutedMenuItemDefinition's `route`)? Put
 	 * `aria-current="page"` on its element, so screen readers announce it as
-	 * the current page. Also `true` for a group whose own route matches best,
-	 * and for an entry hidden with `shouldRender: false`. `false` for every
-	 * entry on a URL that no entry matches.
+	 * the current page. Also `true` for an entry hidden with
+	 * `shouldRender: false`. Always `false` for a group, and for every entry
+	 * on a URL that no entry matches.
 	 */
 	current: boolean;
 	/**
@@ -283,8 +291,22 @@ const getItemId = (parent: string | null, title: string): string =>
 	parent ? `${parent}@${title}` : title;
 
 /**
- * The entries of the menu tree that have a route, depth first in definition
- * order, with their menu item ids
+ * The route of an entry's page: its `route`, or none for a group (an entry
+ * with children, which MenuBase renders expandable), which only shows and
+ * hides its entries
+ * @param definition The routed menu item definition
+ * @return The route; undefined for a group and for an entry without route
+ */
+const getPageRoute = (
+	definition: IRoutedMenuItemDefinition,
+): string | undefined =>
+	definition.children && definition.children.length > 0
+		? undefined
+		: definition.route;
+
+/**
+ * The entries of the menu tree that have a page route (getPageRoute), depth
+ * first in definition order, with their menu item ids
  * @param definitions The menu item definitions
  * @param groups The menu item ids of the groups above `definitions`
  * @param base What a relative route is resolved against
@@ -298,9 +320,10 @@ const flattenRoutes = (
 ): { id: string; groups: string[]; pattern: string }[] =>
 	definitions.flatMap((def) => {
 		const id = getItemId(groups[groups.length - 1] ?? null, def.title);
+		const route = getPageRoute(def);
 		return [
-			...(def.route
-				? [{ id, groups, pattern: resolveRoute(def.route, base).pattern }]
+			...(route
+				? [{ id, groups, pattern: resolveRoute(route, base).pattern }]
 				: []),
 			...(def.children
 				? flattenRoutes(def.children, [...groups, id], base)
@@ -376,16 +399,17 @@ const resolveLocation = (
  * @param base What a relative route is resolved against
  * @return The route's path with the params filled in, without a trailing
  * `/*`, below the enclosing Route's url for a relative route, and with the
- * route's search and hash; undefined for an entry without route, null when
- * `params` lacks one of the route's params
+ * route's search and hash; undefined for an entry without route and for a
+ * group, null when `params` lacks one of the route's params
  */
 const getTarget = (
 	definition: IRoutedMenuItemDefinition,
 	params: Record<string, string>,
 	base: RouteBase,
 ): string | null | undefined => {
-	if (!definition.route) return undefined;
-	const route = resolveRoute(definition.route, base);
+	const pageRoute = getPageRoute(definition);
+	if (!pageRoute) return undefined;
+	const route = resolveRoute(pageRoute, base);
 	const path = insertRouteParameters(route.path, params);
 	if (path === null) return null;
 	if (route.base === null) return path + route.suffix;
@@ -427,11 +451,11 @@ const getUnresolvedEntries = (
 	definitions.flatMap((def) => {
 		if (!def.shouldRender) return [];
 		const titlePath = parent ? `${parent} > ${def.title}` : def.title;
-		const missing = def.route
-			? getMissingRouteParameters(resolveRoute(def.route, base).path, params)
+		const route = getPageRoute(def);
+		const missing = route
+			? getMissingRouteParameters(resolveRoute(route, base).path, params)
 			: [];
-		if (def.route && missing.length > 0)
-			return [{ titlePath, route: def.route, missing }];
+		if (route && missing.length > 0) return [{ titlePath, route, missing }];
 		return def.children
 			? getUnresolvedEntries(def.children, params, base, titlePath)
 			: [];
@@ -672,7 +696,9 @@ export const useRoutedMenuLogic = (
  * path best is highlighted and the groups above it are expanded (see
  * IRoutedMenuItemDefinition's `route`; groups with `forceExpand` are
  * expanded on every page), and a click on an entry runs its
- * `onClick` and navigates to its route. A Ctrl, Meta or Shift click and a
+ * `onClick` and navigates to its route. A click on a group only expands or
+ * collapses it (and runs its `onClick`): a group has no page of its own, its
+ * `route` is ignored. A Ctrl, Meta or Shift click and a
  * middle click open the URL of that navigation in a new tab instead, as the
  * history writes it (`#/users` with a hash history). The highlight follows
  * the URL only: on a path that matches no entry nothing is highlighted, and

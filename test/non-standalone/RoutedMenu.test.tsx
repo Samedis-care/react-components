@@ -226,15 +226,13 @@ describe("RoutedMenu bugs", () => {
 				// the URL has a value for :app, none for :appId
 				leaf("X", "/apps/:appId/x"),
 			]),
-			group("Project", [leaf("Review", "/projects/:id/review")], {
-				route: "/projects/:id",
-			}),
+			leaf("Project", "/projects/:id"),
 		];
 		mount(defs, "/apps/a1/y");
 		expect(titles()).toEqual(["Home", "Apps", "Y"]);
 		cleanup();
 		mount(defs, "/projects/7");
-		expect(titles()).toEqual(["Home", "Apps", "Project", "Review"]);
+		expect(titles()).toEqual(["Home", "Apps", "Project"]);
 	});
 	it("[ISSUE-3498-ITEM-1] useRoutedMenuLogic hides an entry with an unresolved param, and its handlers do not navigate", () => {
 		vi.spyOn(console, "error").mockImplementation(() => undefined);
@@ -276,8 +274,7 @@ describe("RoutedMenu bugs", () => {
 		leaf("Home", "/"),
 		leaf("Tenant page", "/:tenant/page"),
 		group("Project", [leaf("Capture", "/projects/:id/:step")]),
-		// hidden with its child; only the group is reported
-		group("Tenant", [leaf("Child", "/:tenant/child")], { route: "/:tenant" }),
+		leaf("Tenant", "/:tenant"),
 		leaf("Admin", "/:tenant/admin", { shouldRender: false }),
 		group("Hidden", [leaf("X", "/:tenant/x")], { shouldRender: false }),
 	];
@@ -519,15 +516,15 @@ describe("RoutedMenu bugs", () => {
 		expect(chevron(entry("Application"))).toBe("more");
 		expect(chevron(entry("Import"))).toBe("less");
 	});
-	it("[ISSUE-3498-ITEM-3] on a tie the deeper entry wins, so a group's entry with the group's own route is highlighted", () => {
+	it("[ISSUE-3498-ITEM-3] on a tie the deeper entry wins, also over an earlier one", () => {
 		mount(
 			[
 				leaf("Home", "/"),
-				group(
-					"Settings",
-					[leaf("General", "/settings"), leaf("Profile", "/settings/profile")],
-					{ route: "/settings" },
-				),
+				leaf("All settings", "/settings"),
+				group("Settings", [
+					leaf("General", "/settings"),
+					leaf("Profile", "/settings/profile"),
+				]),
 			],
 			"/settings",
 		);
@@ -785,14 +782,10 @@ describe("useRoutedMenuLogic: what a menu rendered by the app needs", () => {
 
 	const CURRENT_TREE = [
 		leaf("Home", "/"),
-		group(
-			"Settings",
-			[
-				leaf("Profile", "/settings/profile"),
-				group("Advanced", [leaf("Expert", "/settings/advanced/expert")]),
-			],
-			{ route: "/settings" },
-		),
+		group("Settings", [
+			leaf("Profile", "/settings/profile"),
+			group("Advanced", [leaf("Expert", "/settings/advanced/expert")]),
+		]),
 		leaf("Users", "/users"),
 	];
 	/** Each entry as `id current containsCurrent`, depth first */
@@ -815,16 +808,6 @@ describe("useRoutedMenuLogic: what a menu rendered by the app needs", () => {
 			"Settings@Profile false false",
 			"Settings@Advanced false true",
 			"Settings@Advanced@Expert true false",
-			"Users false false",
-		]);
-		// a group whose own route matches best is the current entry itself
-		act(() => history.push("/settings/other"));
-		expect(flags(result.current.definition)).toEqual([
-			"Home false false",
-			"Settings true false",
-			"Settings@Profile false false",
-			"Settings@Advanced false false",
-			"Settings@Advanced@Expert false false",
 			"Users false false",
 		]);
 		act(() => history.push("/elsewhere"));
@@ -912,6 +895,81 @@ describe("useRoutedMenuLogic: what a menu rendered by the app needs", () => {
 			window.removeEventListener("click", browser);
 			window.removeEventListener("auxclick", browser);
 		}
+	});
+});
+
+describe("RoutedMenu: a group only shows and hides its entries", () => {
+	/** "Settings" is a group with a route of its own, which it ignores */
+	const SETTINGS = (
+		extra: Partial<IRoutedMenuItemDefinition> = {},
+	): IRoutedMenuItemDefinition[] => [
+		leaf("Home", "/"),
+		group("Settings", [leaf("Profile", "/settings/profile")], {
+			route: "/settings",
+			...extra,
+		}),
+	];
+	it("[ISSUE-3498-ITEM-10] a click on a group with a route expands or collapses it, and neither navigates nor opens a tab", () => {
+		const open = vi.spyOn(window, "open").mockImplementation(() => null);
+		const onClick = vi.fn();
+		const onAuxClick = vi.fn();
+		const { history } = mount(SETTINGS({ onClick, onAuxClick }), "/");
+		const settings = entry("Settings");
+		fireEvent.click(settings);
+		expect(settings).toHaveAttribute("aria-expanded", "true");
+		fireEvent.click(settings);
+		expect(settings).toHaveAttribute("aria-expanded", "false");
+		fireEvent.click(settings, { ctrlKey: true });
+		middleClick(settings);
+		expect(history.index).toBe(0);
+		expect(history.location.pathname).toBe("/");
+		expect(open).not.toHaveBeenCalled();
+		// the definition's own handlers still run
+		expect(onClick).toHaveBeenCalledTimes(3);
+		expect(onAuxClick).toHaveBeenCalledTimes(1);
+	});
+	it("[ISSUE-3498-ITEM-10] a group's route takes no part in the highlight: on its path the group is not the current entry, and it has no href", () => {
+		const definition = SETTINGS();
+		const history = createMemoryHistory({ initialEntries: ["/settings"] });
+		const { result } = renderHook(() => useRoutedMenuLogic({ definition }), {
+			wrapper: ({ children }: { children: React.ReactNode }) => (
+				<HistoryRouter history={history}>{children}</HistoryRouter>
+			),
+		});
+		const settings = result.current.definition[1];
+		expect(settings.href).toBeUndefined();
+		expect(settings.current).toBe(false);
+		expect(result.current.controlledState[0]).toBe("");
+	});
+	it("[ISSUE-3498-ITEM-10] a param that a group's route lacks neither hides the group nor is reported", () => {
+		vi.stubEnv("NODE_ENV", "development");
+		const error = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
+		try {
+			mount(
+				[
+					leaf("Home", "/"),
+					group("Project", [leaf("Tasks", "/tasks")], {
+						route: "/projects/:id",
+					}),
+				],
+				"/",
+			);
+			expect(titles()).toEqual(["Home", "Project", "Tasks"]);
+			expect(error).not.toHaveBeenCalled();
+		} finally {
+			vi.unstubAllEnvs();
+		}
+	});
+	it("[ISSUE-3498-ITEM-10] an entry with an empty children array is no group: it navigates to its route", () => {
+		const { history } = mount(
+			[leaf("Home", "/"), leaf("Reports", "/reports", { children: [] })],
+			"/",
+		);
+		fireEvent.click(entry("Reports"));
+		expect(history.location.pathname).toBe("/reports");
+		expect(selected()).toEqual(["Reports"]);
 	});
 });
 

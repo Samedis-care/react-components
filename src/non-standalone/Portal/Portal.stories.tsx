@@ -120,9 +120,14 @@ const menuDefinition: IRoutedMenuItemDefinition[] = [
 	{
 		icon: Settings,
 		title: "Settings",
-		route: "/settings",
 		shouldRender: true,
+		// a group only shows and hides its entries; its page is an entry
 		children: [
+			{
+				title: "Overview",
+				route: "/settings",
+				shouldRender: true,
+			},
 			{
 				title: "Profile",
 				route: "/settings/profile",
@@ -322,6 +327,76 @@ export const Issue3498Item8FocusStaysWhenTheMenuIsSwapped: StoryObj = {
 		);
 		await expect(currentPath()).toBe("/apps");
 		await expect(document.activeElement).not.toBe(document.body);
+	},
+};
+
+// ─── A group only shows and hides its entries ────────────────────────────────
+
+// "Settings" keeps a route here to show that a group ignores it; the group's
+// page is its entry "Overview"
+const groupWithRouteMenu: IRoutedMenuItemDefinition[] = [
+	{ icon: Home, title: "Home", route: "/", shouldRender: true },
+	{
+		icon: Settings,
+		title: "Settings",
+		route: "/settings",
+		shouldRender: true,
+		children: [
+			{ title: "Overview", route: "/settings", shouldRender: true },
+			{ title: "Profile", route: "/settings/profile", shouldRender: true },
+		],
+	},
+];
+
+const GroupDemo = () => {
+	const [history] = useState(() =>
+		createMemoryHistory({ initialEntries: ["/"] }),
+	);
+	return (
+		<HistoryRouter history={history}>
+			<RoutedMenu
+				definition={groupWithRouteMenu}
+				wrapper={NavWrapper}
+				menuItem={MaterialMenuItem}
+			/>
+			<Box component="main">
+				<Page title="Content" />
+			</Box>
+		</HistoryRouter>
+	);
+};
+
+export const Issue3498Item10GroupOnlyExpands: StoryObj = {
+	name: "A group only shows and hides its entries",
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'A group is a disclosure button: a click, Enter or Space expands or collapses it (`aria-expanded`) and never navigates. "Settings" has a `route` here, which a group ignores; the group\'s page is its entry "Overview".',
+			},
+		},
+	},
+	render: () => <GroupDemo />,
+	play: async ({ canvas }) => {
+		const settings = canvas.getByRole("button", { name: "Settings" });
+		settings.focus();
+		await userEvent.keyboard("{Enter}");
+		await expect(settings).toHaveAttribute("aria-expanded", "true");
+		await expect(currentPath()).toBe("/");
+		await userEvent.keyboard(" ");
+		await expect(settings).toHaveAttribute("aria-expanded", "false");
+		await expect(currentPath()).toBe("/");
+		await expect(settings).toHaveFocus();
+
+		// the group's page is one of its entries
+		await userEvent.keyboard("{Enter}");
+		const overview = canvas.getByRole("button", { name: "Overview" });
+		await userEvent.click(overview);
+		await waitFor(() => expect(currentPath()).toBe("/settings"));
+		await expect(overview).toHaveAttribute("aria-current", "page");
+		await expect(settings).not.toHaveAttribute("aria-current");
+		await expect(settings).toHaveAttribute("aria-expanded", "true");
 	},
 };
 
