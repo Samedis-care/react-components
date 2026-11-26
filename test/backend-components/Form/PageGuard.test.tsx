@@ -674,9 +674,12 @@ describe("Form page leave guard: Yes leaves", () => {
 		);
 		await waitFor(() => expect(leavePrompts()).toHaveLength(0));
 		expect(history.location.pathname).toBe("/page");
-		expect(
-			screen.getByRole("dialog", { name: "Edit person" }),
-		).toContainElement(screen.getByDisplayValue("AliceX"));
+		// the prompt's modal hides the page from assistive technology until its exit ends
+		await waitFor(() =>
+			expect(
+				screen.getByRole("dialog", { name: "Edit person" }),
+			).toContainElement(screen.getByDisplayValue("AliceX")),
+		);
 
 		await navigate("/elsewhere");
 		fireEvent.click(
