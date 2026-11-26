@@ -271,6 +271,19 @@ const makeColorImage = (color: string, accent: string, size = 128): string => {
 	return canvas.toDataURL("image/png");
 };
 
+/**
+ * Resolves once a scroll made before the call has been handled: the browser dispatches its
+ * scroll event in the next frame (in the one after, for a scroll that layout causes), and
+ * React renders what the handler changed in a task before the frame after that. Counts
+ * frames, not time, so a loaded machine only makes it take longer.
+ */
+const scrollHandled = () =>
+	new Promise<void>((resolve) => {
+		const step = (left: number) =>
+			left <= 0 ? resolve() : requestAnimationFrame(() => step(left - 1));
+		step(3);
+	});
+
 // ---------------------------------------------------------------------------
 // ImageSelector stories
 // ---------------------------------------------------------------------------
@@ -595,10 +608,12 @@ export const MultiImageWheelDoesNotSwitchImage: StoryObj = {
 		if (!nextButton) throw new Error("next button not found");
 		await userEvent.click(nextButton);
 
-		// Wait for image to update and scroll reset to settle
-		await new Promise((r) => setTimeout(r, 500));
+		await waitFor(() =>
+			expect(dialogImg.getAttribute("src")).not.toBe(initialSrc),
+		);
 		const secondSrc = dialogImg.getAttribute("src");
-		await expect(secondSrc).not.toBe(initialSrc);
+		// for the new image, the swipe pane scrolls back to where a swipe starts
+		await scrollHandled();
 
 		// Fire a wheel-up event (zoom in) on the zoom container.
 		// stopPropagation prevents it from reaching the SwipeListener.
@@ -612,8 +627,10 @@ export const MultiImageWheelDoesNotSwitchImage: StoryObj = {
 			}),
 		);
 
-		// Wait for any scroll handlers to fire
-		await new Promise((r) => setTimeout(r, 500));
+		// the wheel reached the zoom, and React has rendered what it changed
+		await waitFor(() => expect(zoomContainer).toHaveClass("CcImageBox-zoomed"));
+		// a scroll of the swipe pane the wheel caused has been handled
+		await scrollHandled();
 
 		// The image src must still be the second image — not switched back
 		const srcAfterWheel = dialogImg.getAttribute("src");
