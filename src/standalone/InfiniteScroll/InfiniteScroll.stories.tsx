@@ -166,10 +166,12 @@ const DATA_SIZE = 200;
 
 const HIDDEN_PANEL_CLASS = "story-hidden-panel-scroll";
 const MAX_HEIGHT_CLASS = "story-max-height-scroll";
+const FULL_HEIGHT_CLASS = "story-full-height-scroll";
 
 const InjectContainerStyles = () => (
 	<style>{`.${HIDDEN_PANEL_CLASS} { height: 300px; overflow: auto; width: 300px; }
-.${MAX_HEIGHT_CLASS} { max-height: 300px; overflow: auto; width: 300px; }`}</style>
+.${MAX_HEIGHT_CLASS} { max-height: 300px; overflow: auto; width: 300px; }
+.${FULL_HEIGHT_CLASS} { height: 100%; overflow: auto; width: 300px; }`}</style>
 );
 
 interface AppendingListProps {
@@ -669,6 +671,65 @@ export const Issue3471Item7BusyWhileLoading: Story = {
 			{ timeout: 3000 },
 		);
 		await expect(args.loadMoreBottom).toHaveBeenCalledTimes(3);
+	},
+};
+
+// ─── Containers that change their size ────────────────────────────────────────
+
+/**
+ * A panel that is 300px or 750px high. The list in it takes the panel's
+ * height and is memoized, so a taller panel resizes its container without
+ * rendering it, as a height relative to the viewport (`50vh`) does on a window
+ * resize or device rotation.
+ */
+const GrowingPanelStory = ({ onLoadBottom }: { onLoadBottom?: () => void }) => {
+	const [tall, setTall] = useState(false);
+	const toggle = useCallback(() => setTall((prev) => !prev), []);
+
+	return (
+		<Box sx={{ width: 300 }}>
+			<InjectContainerStyles />
+			<button type="button" aria-pressed={tall} onClick={toggle}>
+				Tall panel
+			</button>
+			<Box sx={{ height: tall ? 750 : 300, outline: "1px solid #ccc" }}>
+				<AppendingList
+					className={FULL_HEIGHT_CLASS}
+					onLoadBottom={onLoadBottom}
+				/>
+			</Box>
+		</Box>
+	);
+};
+
+export const Issue3471Item8FillsAContainerThatGrows: Story = {
+	args: { loadMoreBottom: fn() },
+	render: (args) => <GrowingPanelStory onLoadBottom={args.loadMoreBottom} />,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					'The list fills a panel of 300px with two pages of 10 rows of 30px. "Tall panel" makes the panel 750px high without rendering the list, as `50vh` does when the window grows: the list notices that its container grew past its 20 rows and loads two more pages, until they overflow it by more than 250px again.',
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ args, canvasElement }) => {
+		const canvas = within(canvasElement);
+		const scroller = (await canvas.findByText("Item 1")).parentElement;
+		if (!scroller) throw new Error("scroll container not found");
+		await waitFor(() => expect(isFilled(scroller)).toBe(true), {
+			timeout: 3000,
+		});
+		await expect(args.loadMoreBottom).toHaveBeenCalledTimes(2);
+
+		await userEvent.click(canvas.getByRole("button", { name: "Tall panel" }));
+		await expect(scroller.clientHeight).toBe(750);
+		await waitFor(() => expect(isFilled(scroller)).toBe(true), {
+			timeout: 3000,
+		});
+		await expect(args.loadMoreBottom).toHaveBeenCalledTimes(4);
+		await expect(canvas.getByText("Item 40")).toBeInTheDocument();
 	},
 };
 

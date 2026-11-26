@@ -19,6 +19,10 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 * set `overflow: auto`. Without a bounded height the content never
 	 * overflows, so `loadMoreBottom` is called again after every page until
 	 * it stops changing `children`.
+	 *
+	 * The height may change after mount without a render, e.g. `50vh` on a
+	 * window resize or device rotation: the container's size is observed, and
+	 * a container that grows past its content is filled again.
 	 */
 	className: string;
 	/**
@@ -31,9 +35,9 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 * 1px counts as the top), whatever the `threshold`:
 	 * - once the content first fills the container (overflows it by more than
 	 *   `threshold`): after mount, after the list became short again (e.g. it
-	 *   was emptied), after the container was hidden, and when `loadMoreTop`
-	 *   is passed after mount. So a list opens at its first row with a page
-	 *   already loaded above it;
+	 *   was emptied, or its container grew), after the container was hidden,
+	 *   and when `loadMoreTop` is passed after mount. So a list opens at its
+	 *   first row with a page already loaded above it;
 	 * - when a scroll event finds the container at its top;
 	 * - to fill a short list that has no `loadMoreBottom` (see there).
 	 *
@@ -68,10 +72,12 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 * more counts too, because browsers can report a fractional `scrollTop`,
 	 * e.g. inside an ancestor with CSS `zoom`. This is checked:
 	 * - when the container is scrolled;
-	 * - after mount and after every render with new `children`. This also
-	 *   fills the container: a list whose content does not overflow it by more
-	 *   than `threshold` is extended until it does. Without `loadMoreBottom`
-	 *   the container is filled through `loadMoreTop` instead.
+	 * - after mount, after every render with new `children`, and whenever the
+	 *   container's size changes (e.g. a height relative to the viewport on a
+	 *   window resize). This also fills the container: a list whose content
+	 *   does not overflow it by more than `threshold` is extended until it
+	 *   does. Without `loadMoreBottom` the container is filled through
+	 *   `loadMoreTop` instead.
 	 *
 	 * A call that waits for `callBackDebounce` is only made if, once the wait is
 	 * over, `threshold` px or less are still left below the visible part; it
@@ -136,10 +142,6 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 * @default 100
 	 */
 	callBackDebounce?: number;
-	/**
-	 * Dynamic size mode (enables resize listener)
-	 */
-	dynamicallySized?: boolean;
 	/**
 	 * The scroll container's `tabIndex`. By default it is a tab stop, so
 	 * keyboard users can scroll it (and so load more) even when the rows
@@ -316,16 +318,6 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 		loadMoreBottom: 0,
 	};
 	/**
-	 * Did the last fill check find the scroll container without a layout box?
-	 * Its size is observed until it gets one, and the fill check runs again then.
-	 */
-	private awaitingLayoutBox = false;
-	/**
-	 * Is the scroll container's size observed (by `resizeObserver`, or through
-	 * `window` resize events without ResizeObserver)?
-	 */
-	private observingSize = false;
-	/**
 	 * The anchor that keeps the rows in view in place after rows were added
 	 * above them while the container was at its top. It is held until the
 	 * container is scrolled to another offset (by the user, the consumer or
@@ -379,7 +371,7 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 
 		this.wrapper.addEventListener("scroll", this.handleScroll);
 		this.handleResize();
-		this.observeSize();
+		this.observeSize(true);
 	}
 
 	/**
@@ -433,9 +425,6 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 		if (prevProps.loading && !this.props.loading) {
 			this.requestHeldLoads();
 		}
-		if (!!prevProps.dynamicallySized !== !!this.props.dynamicallySized) {
-			this.observeSize();
-		}
 	}
 
 	componentWillUnmount(): void {
@@ -456,8 +445,6 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 			loadMoreBottom,
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			callBackDebounce,
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			dynamicallySized,
 			loading,
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			threshold,
@@ -481,17 +468,15 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 	};
 
 	/**
-	 * Starts or stops observing the scroll container's size; every change runs
-	 * the fill check again. Without ResizeObserver, `window` resize events are
-	 * listened to instead.
-	 * @param observe Observe? By default while `dynamicallySized` is set or
-	 * the fill waits for a layout box.
+	 * Starts observing the scroll container's size at mount, and stops at
+	 * unmount. Every change runs the fill check again, so a container that
+	 * grows (a height relative to the viewport on a window resize or device
+	 * rotation, a resizable panel, a hidden container that is shown) is filled.
+	 * Without ResizeObserver, `window` resize events are listened to instead.
+	 * @param observe Start (true) or stop (false)?
 	 */
-	private observeSize = (
-		observe = !!this.props.dynamicallySized || this.awaitingLayoutBox,
-	): void => {
-		if (!this.wrapper || observe === this.observingSize) return;
-		this.observingSize = observe;
+	private observeSize = (observe: boolean): void => {
+		if (!this.wrapper) return;
 		if (this.resizeObserver) {
 			if (observe) this.resizeObserver.observe(this.wrapper);
 			else this.resizeObserver.unobserve(this.wrapper);
@@ -504,22 +489,19 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 
 	/**
 	 * Pauses the fill while the scroll container has no layout box: no
-	 * `loadMoreBottom` call is made, and the container is observed until it
-	 * gets a box, which runs the fill check again. Without ResizeObserver
-	 * nothing would notice the container being shown, so the fill is not
-	 * paused there.
+	 * `loadMoreBottom` call is made until the container gets a box, a size
+	 * change that runs the fill check again (see `observeSize`). Without
+	 * ResizeObserver nothing would notice the container being shown, so the
+	 * fill is not paused there.
 	 * @returns Whether the fill is paused
 	 */
 	private pauseFillWhileHidden = (): boolean => {
 		if (!this.wrapper || !this.resizeObserver) return false;
-		this.awaitingLayoutBox = hasNoLayoutBox(this.wrapper);
-		this.observeSize();
-		if (this.awaitingLayoutBox) {
-			// a container that is shown again starts at its top
-			this.topLoadDue = true;
-			this.releaseAnchor();
-		}
-		return this.awaitingLayoutBox;
+		if (!hasNoLayoutBox(this.wrapper)) return false;
+		// a container that is shown again starts at its top
+		this.topLoadDue = true;
+		this.releaseAnchor();
+		return true;
 	};
 
 	/**
@@ -660,12 +642,12 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 
 	/**
 	 * The fill check, run after mount, after every render with new `children`,
-	 * a callback that was added or removed or a new `threshold`, and on size
-	 * changes that are observed: requests `loadMoreBottom` while `threshold`
-	 * px or less are left below the visible part (which includes content that
-	 * does not fill the container), or `loadMoreTop` without it while the
-	 * content does not fill the container, and the due `loadMoreTop` once it
-	 * does.
+	 * a callback that was added or removed or a new `threshold`, and on every
+	 * change of the container's size: requests `loadMoreBottom` while
+	 * `threshold` px or less are left below the visible part (which includes
+	 * content that does not fill the container), or `loadMoreTop` without it
+	 * while the content does not fill the container, and the due `loadMoreTop`
+	 * once it does.
 	 */
 	handleResize = (): void => {
 		if (!this.wrapper || this.pauseFillWhileHidden()) return;

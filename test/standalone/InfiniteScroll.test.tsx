@@ -119,21 +119,6 @@ describe("InfiniteScroll", () => {
 			),
 		).not.toThrow();
 	});
-
-	it("accepts dynamicallySized prop without crashing", () => {
-		const loadMoreBottom = vi.fn();
-		expect(() =>
-			render(
-				<InfiniteScroll
-					className="test-scroll"
-					loadMoreBottom={loadMoreBottom}
-					dynamicallySized
-				>
-					<span>content</span>
-				</InfiniteScroll>,
-			),
-		).not.toThrow();
-	});
 });
 
 // ─── Behavior with stubbed layout ─────────────────────────────────────────────
@@ -753,7 +738,7 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 			expect(onLoad.mock.calls.length).toBeLessThanOrEqual(1);
 		});
 
-		it("[ISSUE-3471-ITEM-4] fills a hidden container once it is shown, then stops observing it", () => {
+		it("[ISSUE-3471-ITEM-4] fills a hidden container once it is shown", () => {
 			clientHeight = 0;
 			scrollHeightOf = () => 0;
 			const bottom = vi.fn();
@@ -776,7 +761,6 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 			});
 			advance(100);
 			expect(bottom).toHaveBeenCalledTimes(1);
-			expect(observer.unobserve).toHaveBeenCalledExactlyOnceWith(scroller);
 		});
 
 		it("[ISSUE-3471-ITEM-4] drops a waiting fill call when the container is hidden, and makes it once the container is shown", () => {
@@ -823,7 +807,6 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 			);
 			advance(100);
 			expect(bottom).toHaveBeenCalledTimes(1);
-			expect(lastResizeObserver().observe).not.toHaveBeenCalled();
 		});
 
 		it("[ISSUE-3471-ITEM-4] stops observing a hidden container on unmount", () => {
@@ -837,69 +820,6 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 			const scroller = getScroller(container);
 			const observer = lastResizeObserver();
 			unmount();
-			expect(observer.unobserve).toHaveBeenCalledExactlyOnceWith(scroller);
-		});
-
-		it("[ISSUE-3471-ITEM-4] with dynamicallySized, observes a hidden container once and keeps observing it after it is shown", () => {
-			clientHeight = 0;
-			scrollHeightOf = () => 0;
-			const bottom = vi.fn();
-			const { container } = render(
-				<InfiniteScroll
-					className={SCROLLER}
-					loadMoreBottom={bottom}
-					dynamicallySized
-				>
-					<div />
-				</InfiniteScroll>,
-			);
-			const observer = lastResizeObserver();
-			expect(observer.observe).toHaveBeenCalledExactlyOnceWith(
-				getScroller(container),
-			);
-			advance(200);
-			expect(bottom).not.toHaveBeenCalled();
-
-			clientHeight = 300;
-			scrollHeightOf = () => 300;
-			act(() => {
-				observer.callback([], {} as ResizeObserver);
-			});
-			advance(100);
-			expect(bottom).toHaveBeenCalledTimes(1);
-			expect(observer.unobserve).not.toHaveBeenCalled();
-		});
-
-		it("[ISSUE-3471-ITEM-4] keeps observing a hidden container when dynamicallySized is turned off", () => {
-			clientHeight = 0;
-			scrollHeightOf = () => 0;
-			const bottom = vi.fn();
-			const children = <div />;
-			const { container, rerender } = render(
-				<InfiniteScroll
-					className={SCROLLER}
-					loadMoreBottom={bottom}
-					dynamicallySized
-				>
-					{children}
-				</InfiniteScroll>,
-			);
-			const scroller = getScroller(container);
-			const observer = lastResizeObserver();
-			rerender(
-				<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
-					{children}
-				</InfiniteScroll>,
-			);
-			expect(observer.unobserve).not.toHaveBeenCalled();
-
-			clientHeight = 300;
-			scrollHeightOf = () => 300;
-			act(() => {
-				observer.callback([], {} as ResizeObserver);
-			});
-			advance(100);
-			expect(bottom).toHaveBeenCalledTimes(1);
 			expect(observer.unobserve).toHaveBeenCalledExactlyOnceWith(scroller);
 		});
 
@@ -1796,6 +1716,157 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 			});
 		});
 
+		describe("size changes of the container", () => {
+			/**
+			 * Calls the ResizeObservers that observe the element, as a change of
+			 * its size would
+			 */
+			const reportResize = (element: Element) => {
+				const callsWith = (mock: Mock) =>
+					mock.mock.calls.filter(([target]) => target === element).length;
+				for (const observer of resizeObservers) {
+					if (callsWith(observer.observe) > callsWith(observer.unobserve)) {
+						act(() => {
+							observer.callback([], {} as ResizeObserver);
+						});
+					}
+				}
+			};
+
+			it("[ISSUE-3471-ITEM-8] fills the container again when it grows past its content without a render", () => {
+				const bottom = vi.fn();
+				const { container } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						<div />
+					</InfiniteScroll>,
+				);
+				// 1000px of content overflow the 300px container by more than 250px
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+
+				// e.g. a height relative to the viewport, after a window resize
+				clientHeight = 900;
+				reportResize(getScroller(container));
+				advance(100);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-8] fills a list that only loads on top again when its container grows", () => {
+				const top = vi.fn();
+				const { container } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreTop={top}>
+						<div />
+					</InfiniteScroll>,
+				);
+				advance(200);
+				// the list opens at its top
+				expect(top).toHaveBeenCalledTimes(1);
+
+				clientHeight = 900;
+				reportResize(getScroller(container));
+				advance(100);
+				expect(top).toHaveBeenCalledTimes(2);
+			});
+
+			it("[ISSUE-3471-ITEM-8] observes the container's size, and makes no call when a change leaves its content filling it", () => {
+				const bottom = vi.fn();
+				const { container } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						<div />
+					</InfiniteScroll>,
+				);
+				const scroller = getScroller(container);
+				expect(lastResizeObserver().observe).toHaveBeenCalledExactlyOnceWith(
+					scroller,
+				);
+
+				clientHeight = 200;
+				reportResize(scroller);
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+			});
+
+			it("[ISSUE-3471-ITEM-8] keeps observing a container that was hidden once it is shown, so it fills again when it grows", () => {
+				clientHeight = 0;
+				scrollHeightOf = () => 0;
+				const bottom = vi.fn();
+				const { container } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						<div />
+					</InfiniteScroll>,
+				);
+				const scroller = getScroller(container);
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+
+				// the panel is shown, and the rows it then loads fill the container
+				clientHeight = 300;
+				scrollHeightOf = () => 300;
+				reportResize(scroller);
+				advance(100);
+				expect(bottom).toHaveBeenCalledTimes(1);
+				scrollHeightOf = () => 1000;
+
+				clientHeight = 900;
+				reportResize(scroller);
+				advance(100);
+				expect(bottom).toHaveBeenCalledTimes(2);
+			});
+
+			it("[ISSUE-3471-ITEM-8] observes the container under StrictMode, and stops on unmount", () => {
+				const bottom = vi.fn();
+				const { container, unmount } = render(
+					<React.StrictMode>
+						<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+							<div />
+						</InfiniteScroll>
+					</React.StrictMode>,
+				);
+				const scroller = getScroller(container);
+				advance(200);
+				clientHeight = 900;
+				reportResize(scroller);
+				advance(100);
+				expect(bottom).toHaveBeenCalledTimes(1);
+
+				unmount();
+				const observer = lastResizeObserver();
+				expect(observer.unobserve.mock.calls).toEqual(
+					observer.observe.mock.calls,
+				);
+			});
+
+			it("[ISSUE-3471-ITEM-8] without ResizeObserver, fills the container again on a window resize, and stops listening on unmount", () => {
+				vi.stubGlobal("ResizeObserver", undefined);
+				const addListener = vi.spyOn(window, "addEventListener");
+				const removeListener = vi.spyOn(window, "removeEventListener");
+				const resizeListeners = (spy: { mock: { calls: unknown[][] } }) =>
+					spy.mock.calls
+						.filter(([type]) => type === "resize")
+						.map(([, listener]) => listener);
+				const bottom = vi.fn();
+				const { unmount } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						<div />
+					</InfiniteScroll>,
+				);
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+
+				clientHeight = 900;
+				act(() => {
+					window.dispatchEvent(new Event("resize"));
+				});
+				advance(100);
+				expect(bottom).toHaveBeenCalledTimes(1);
+
+				const added = resizeListeners(addListener);
+				expect(added).toHaveLength(1);
+				unmount();
+				expect(resizeListeners(removeListener)).toEqual(added);
+			});
+		});
+
 		it("[ISSUE-3471-ITEM-9] passes role, aria-label, tabIndex and id to the scroll container", () => {
 			const { container } = render(
 				<InfiniteScroll
@@ -1827,7 +1898,6 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 					loadMoreTop={vi.fn()}
 					loadMoreBottom={vi.fn()}
 					callBackDebounce={0}
-					dynamicallySized
 				>
 					<div>Row 1</div>
 				</InfiniteScroll>,
