@@ -702,3 +702,19 @@ describe("accessibility", () => {
 		expect(rows.map(inset)).toEqual(rows.map(() => 8));
 	});
 });
+
+describe("scroll container", () => {
+	it("[ISSUE-3471-ITEM-12] the date button scrolls the list to today's row", async () => {
+		const { container } = render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) => week("w" + o)}
+			/>,
+		);
+		await advance(400);
+		const scroller = scrollerOf(container);
+		expect(scroller.scrollTop).not.toBe(TODAY_TOP);
+		fireEvent.click(screen.getByRole("button", { name: "Wed 14 October" }));
+		expect(scroller.scrollTop).toBe(TODAY_TOP);
+	});
+});

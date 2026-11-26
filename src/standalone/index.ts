@@ -1,5 +1,6 @@
 export * from "./FileUpload";
 export * from "./Form";
+export * from "./InfiniteScroll";
 export { default as InfiniteScroll } from "./InfiniteScroll";
 export * from "./InlineSwitch";
 export { default as InlineSwitch } from "./InlineSwitch";

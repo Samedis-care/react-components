@@ -1308,6 +1308,67 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 				expect(scroller.scrollTop).toBe(200);
 			});
 
+			it("[ISSUE-3471-ITEM-12] keeps the rows in view in place when rows are added above them after the first of them was replaced on its own", () => {
+				// e.g. a week whose spinner is replaced by its days, a render of the
+				// week only
+				let loadRow10 = () => {};
+				const Row10 = () => {
+					const [loaded, setLoaded] = useState(false);
+					useEffect(() => {
+						loadRow10 = () => setLoaded(true);
+					}, []);
+					return loaded ? (
+						<div key="loaded" className="row">
+							Row 10
+						</div>
+					) : (
+						<div key="loading" className="row">
+							Loading row 10
+						</div>
+					);
+				};
+				const rowsFrom = (from: number) => (
+					<div className="rows">
+						{range(from, 10 - from).map((n) => (
+							<div className="row" key={n}>
+								Row {n}
+							</div>
+						))}
+						<Row10 key={10} />
+						{range(11, 29).map((n) => (
+							<div className="row" key={n}>
+								Row {n}
+							</div>
+						))}
+					</div>
+				);
+				const loadMoreTop = vi.fn();
+				const loadMoreBottom = vi.fn();
+				const { container, rerender } = render(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreTop={loadMoreTop}
+						loadMoreBottom={loadMoreBottom}
+					>
+						{rowsFrom(10)}
+					</InfiniteScroll>,
+				);
+				const scroller = getScroller(container);
+				act(() => loadRow10());
+				// loadMoreTop adds rows 0 to 9 above row 10
+				rerender(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreTop={loadMoreTop}
+						loadMoreBottom={loadMoreBottom}
+					>
+						{rowsFrom(0)}
+					</InfiniteScroll>,
+				);
+				expect(scroller.scrollTop).toBe(10 * ROW_PX);
+				expect(screen.getByText("Row 10").getBoundingClientRect().top).toBe(0);
+			});
+
 			it("[ISSUE-3471-ITEM-6] without loadMoreTop, leaves rows added above the rows in view at the top in view, as browsers do", () => {
 				const { container, rerender } = render(
 					<InfiniteScroll className={SCROLLER} loadMoreBottom={vi.fn()}>
@@ -1931,6 +1992,18 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 				</InfiniteScroll>,
 			);
 			expect(scroller).toHaveAttribute("tabindex", "0");
+		});
+
+		it("[ISSUE-3471-ITEM-12] a ref to it is the scroll container element, until unmount", () => {
+			const ref = React.createRef<HTMLDivElement>();
+			const { container, unmount } = render(
+				<InfiniteScroll ref={ref} className={SCROLLER} loadMoreBottom={vi.fn()}>
+					<div>Row 1</div>
+				</InfiniteScroll>,
+			);
+			expect(ref.current).toBe(getScroller(container));
+			unmount();
+			expect(ref.current).toBeNull();
 		});
 
 		describe("focus on the last row", () => {

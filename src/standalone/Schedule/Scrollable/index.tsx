@@ -174,7 +174,7 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 	const actions = props.actions ?? NO_ACTIONS;
 	const { t, i18n } = useCCTranslations();
 	const todayElem = useRef<HTMLElement | null>(null);
-	const scrollElem = useRef<InfiniteScroll | null>(null);
+	const scrollElem = useRef<HTMLDivElement | null>(null);
 	/**
 	 * Set when the list is started over while focus is inside it, so that the
 	 * new scroll container takes the focus instead of the page
@@ -209,7 +209,7 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 	 */
 	const startOver = useCallback(
 		(changedFilters?: Record<string, string | boolean>) => {
-			const list = scrollElem.current?.wrapper;
+			const list = scrollElem.current;
 			refocusList.current =
 				!!list && list.contains(list.ownerDocument.activeElement);
 			setState((prev) => ({
@@ -224,7 +224,7 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 	useEffect(() => {
 		if (!refocusList.current) return;
 		refocusList.current = false;
-		scrollElem.current?.wrapper?.focus();
+		scrollElem.current?.focus();
 	}, [state.listKey]);
 
 	useEffect(() => {
@@ -270,15 +270,9 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 	}, []);
 
 	const jumpToToday = useCallback(() => {
-		if (
-			!todayElem.current ||
-			!scrollElem.current ||
-			!scrollElem.current.wrapper
-		) {
-			return;
-		}
+		if (!todayElem.current || !scrollElem.current) return;
 
-		scrollElem.current.wrapper.scrollTop = todayElem.current.offsetTop;
+		scrollElem.current.scrollTop = todayElem.current.offsetTop;
 	}, []);
 
 	const handleFilterChange = useCallback(

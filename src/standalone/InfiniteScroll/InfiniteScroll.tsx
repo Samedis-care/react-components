@@ -1,5 +1,7 @@
-import React, { PureComponent } from "react";
+import React, { useCallback, useLayoutEffect, useRef } from "react";
 import { styled } from "@mui/material";
+import { useForkRef } from "@mui/material/utils";
+import ScrollContent from "./ScrollContent";
 
 /**
  * The props of InfiniteScroll. Every prop of a `div` that is not listed here
@@ -394,6 +396,360 @@ const isFocusOnLastRow = (wrapper: HTMLElement): boolean => {
 };
 
 /**
+ * What an InfiniteScroll keeps from mount to unmount. Its listeners,
+ * observers and timers read the scroll container and the props of the latest
+ * commit from it, and keep the state of the loads and of the anchor in it.
+ */
+interface ScrollState {
+	/**
+	 * The scroll container; `null` before mount and after unmount
+	 */
+	wrapper: HTMLDivElement | null;
+	/**
+	 * The props of the latest commit
+	 */
+	props: InfiniteScrollProps;
+	/**
+	 * Observes the scroll container's size while it is mounted; `null` without
+	 * ResizeObserver, where `window` resize events are listened to instead
+	 */
+	sizeObserver: ResizeObserver | null;
+	/**
+	 * Timer of the pending debounced call per callback, 0 while none is pending
+	 */
+	loadTimers: Record<LoadCallbackName, number>;
+	/**
+	 * The anchor that keeps the rows in view in place after rows were added
+	 * above them while the container was at its top. It is held until the
+	 * container is scrolled to another offset (by the user, the consumer or
+	 * the browser's own scroll anchoring), because the rows above can still
+	 * change their height after they were added, e.g. a placeholder that is
+	 * replaced by its data.
+	 */
+	heldAnchor: ScrollAnchor | null;
+	/**
+	 * The `scrollTop` that holding the anchor left; any other offset means
+	 * the container was scrolled since, which releases the anchor
+	 */
+	heldScrollTop: number;
+	/**
+	 * Observes the size of the container's children while an anchor is held;
+	 * created when an anchor is first held
+	 */
+	contentObserver: ResizeObserver | null;
+	/**
+	 * The anchor taken before a commit changed `children` (see `takeAnchor`),
+	 * until that commit holds it
+	 */
+	takenAnchor: ScrollAnchor | null;
+	/**
+	 * Is `loadMoreTop` due once the content fills the container? Set at
+	 * mount, while the content does not fill the container, while the
+	 * container is hidden and when `loadMoreTop` is passed; cleared by the
+	 * fill check that finds the container filled. A container that is at its
+	 * top fires no scroll event when the user scrolls up, so this is how a
+	 * list that is at its top gets the rows above it.
+	 */
+	topLoadDue: boolean;
+	/**
+	 * The calls that came up while `loading` was set, per callback; they are
+	 * requested again once `loading` turns false
+	 */
+	heldLoads: Record<LoadCallbackName, boolean>;
+}
+
+/**
+ * The state of an InfiniteScroll that has not been mounted yet
+ * @param props The props of its first render
+ */
+const createScrollState = (props: InfiniteScrollProps): ScrollState => ({
+	wrapper: null,
+	props,
+	sizeObserver: null,
+	loadTimers: { loadMoreTop: 0, loadMoreBottom: 0 },
+	heldAnchor: null,
+	heldScrollTop: 0,
+	contentObserver: null,
+	takenAnchor: null,
+	topLoadDue: true,
+	heldLoads: { loadMoreTop: false, loadMoreBottom: false },
+});
+
+/**
+ * The `threshold` prop, with its default; a negative number or NaN counts
+ * as 0
+ */
+const getThreshold = (props: InfiniteScrollProps): number => {
+	const threshold = props.threshold ?? DEFAULT_THRESHOLD;
+	return threshold > 0 ? threshold : 0;
+};
+
+/**
+ * Stops holding the anchor
+ */
+const releaseAnchor = (scroll: ScrollState): void => {
+	scroll.heldAnchor = null;
+	scroll.contentObserver?.disconnect();
+};
+
+/**
+ * Scrolls the container by as much as the held anchor moved, so the rows
+ * in view stay where they were. Releases the anchor instead once the
+ * container was scrolled to another offset, the anchor left the document
+ * or the container lost its layout box.
+ */
+const holdAnchor = (scroll: ScrollState): void => {
+	const { wrapper, heldAnchor: anchor } = scroll;
+	if (!wrapper || !anchor) return;
+	if (
+		isScrolledFrom(wrapper, scroll.heldScrollTop) ||
+		!anchor.element.isConnected ||
+		hasNoLayoutBox(wrapper)
+	) {
+		releaseAnchor(scroll);
+		return;
+	}
+	const moved = getOffsetInView(wrapper, anchor.element) - anchor.offset;
+	if (moved !== 0) wrapper.scrollTop += moved;
+	scroll.heldScrollTop = wrapper.scrollTop;
+};
+
+/**
+ * Observes the size of the container's current children, so that the
+ * held anchor is kept in place when one of them changes its height
+ */
+const observeContent = (scroll: ScrollState): void => {
+	const { wrapper } = scroll;
+	if (!wrapper || !window.ResizeObserver) return;
+	if (!scroll.contentObserver) {
+		scroll.contentObserver = new ResizeObserver(() => holdAnchor(scroll));
+	}
+	scroll.contentObserver.disconnect();
+	for (const child of Array.from(wrapper.children)) {
+		scroll.contentObserver.observe(child);
+	}
+};
+
+/**
+ * Takes the anchor that keeps the rows in view in place when a commit
+ * changes `children` while the container is at its top and loading on top
+ * is enabled: browsers' scroll anchoring does not apply to a container at
+ * its top. Called in that commit before it changes the DOM (see
+ * `ScrollContent`); the commit's `handleUpdate` holds it.
+ */
+const takeAnchor = (scroll: ScrollState): void => {
+	const { wrapper } = scroll;
+	if (!wrapper || scroll.heldAnchor || !isAtTop(wrapper)) return;
+	const view = getView(wrapper);
+	const element = findAnchorElement(wrapper, view.top, view.bottom);
+	if (!element) return;
+	scroll.heldScrollTop = wrapper.scrollTop;
+	scroll.takenAnchor = { element, offset: getOffsetInView(wrapper, element) };
+};
+
+/**
+ * Pauses the fill while the scroll container has no layout box: no
+ * `loadMoreBottom` call is made until the container gets a box, a size
+ * change that runs the fill check again (see `sizeObserver`). Without
+ * ResizeObserver nothing would notice the container being shown, so the
+ * fill is not paused there.
+ * @returns Whether the fill is paused
+ */
+const pauseFillWhileHidden = (scroll: ScrollState): boolean => {
+	const { wrapper } = scroll;
+	if (!wrapper || !scroll.sizeObserver) return false;
+	if (!hasNoLayoutBox(wrapper)) return false;
+	// a container that is shown again starts at its top
+	scroll.topLoadDue = true;
+	releaseAnchor(scroll);
+	return true;
+};
+
+/**
+ * Drops the call of the `loadMoreTop` or `loadMoreBottom` prop that waits
+ * for `callBackDebounce`, if any
+ */
+const cancelLoad = (scroll: ScrollState, name: LoadCallbackName): void => {
+	window.clearTimeout(scroll.loadTimers[name]);
+	scroll.loadTimers[name] = 0;
+};
+
+/**
+ * Requests a call of the `loadMoreTop` or `loadMoreBottom` prop: debounced by
+ * `callBackDebounce` (a request replaces the pending one), or right away for 0
+ */
+const requestLoad = (scroll: ScrollState, name: LoadCallbackName): void => {
+	cancelLoad(scroll, name);
+	const wait = scroll.props.callBackDebounce ?? 100;
+	if (wait === 0) {
+		callLoad(scroll, name);
+		return;
+	}
+	scroll.loadTimers[name] = window.setTimeout(() => {
+		scroll.loadTimers[name] = 0;
+		callLoad(scroll, name);
+	}, wait);
+};
+
+/**
+ * Requests the calls held while `loading` was set (see `callLoad`) again,
+ * now that it turned false
+ */
+const requestHeldLoads = (scroll: ScrollState): void => {
+	for (const name of LOAD_CALLBACK_NAMES) {
+		if (!scroll.heldLoads[name]) continue;
+		scroll.heldLoads[name] = false;
+		requestLoad(scroll, name);
+	}
+};
+
+/**
+ * Requests `loadMoreTop` if it is due (see `topLoadDue`) and the
+ * container is at its top. Called once the content fills the container.
+ */
+const loadTopIfDue = (scroll: ScrollState): void => {
+	if (!scroll.wrapper || !scroll.topLoadDue) return;
+	scroll.topLoadDue = false;
+	if (scroll.props.loadMoreTop && isAtTop(scroll.wrapper)) {
+		requestLoad(scroll, "loadMoreTop");
+	}
+};
+
+/**
+ * Makes a call requested by `requestLoad`. The callback is read from the
+ * props now, so it is the one of the latest commit. A call is only made if
+ * the content still needs it: a request made while the content was short,
+ * or while the container was near that end (or focus on its last row), is
+ * dropped once content that arrived in the meantime fills the container and
+ * moves that end away (or focus moved on), and one is not made while the
+ * container is hidden (`pauseFillWhileHidden`).
+ * While `loading` is set, the call is held and requested again once it
+ * turns false. A fill call that is dropped because the content now fills
+ * the container (rows that grew on their own) lets the due `loadMoreTop`
+ * follow.
+ */
+const callLoad = (scroll: ScrollState, name: LoadCallbackName): void => {
+	const { wrapper } = scroll;
+	if (!wrapper || pauseFillWhileHidden(scroll)) return;
+	if (scroll.props.loading) {
+		scroll.heldLoads[name] = true;
+		return;
+	}
+	const threshold = getThreshold(scroll.props);
+	const atEnd =
+		name === "loadMoreTop"
+			? isAtTop(wrapper)
+			: isNearBottom(wrapper, threshold) || isFocusOnLastRow(wrapper);
+	if (isFilled(wrapper, threshold) && !atEnd) {
+		loadTopIfDue(scroll);
+		return;
+	}
+	const load = scroll.props[name];
+	if (load) load();
+};
+
+/**
+ * The fill check, run after mount, after every commit with new `children`,
+ * a callback that was added or removed or a new `threshold`, and on every
+ * change of the container's size: requests `loadMoreBottom` while
+ * `threshold` px or less are left below the visible part (which includes
+ * content that does not fill the container), or `loadMoreTop` without it
+ * while the content does not fill the container, and the due `loadMoreTop`
+ * once it does.
+ */
+const handleResize = (scroll: ScrollState): void => {
+	const { wrapper } = scroll;
+	if (!wrapper || pauseFillWhileHidden(scroll)) return;
+
+	const threshold = getThreshold(scroll.props);
+	const filled = isFilled(wrapper, threshold);
+	if (!filled) scroll.topLoadDue = true;
+	if (scroll.props.loadMoreBottom) {
+		if (isNearBottom(wrapper, threshold)) {
+			requestLoad(scroll, "loadMoreBottom");
+		}
+	} else if (!filled && scroll.props.loadMoreTop) {
+		requestLoad(scroll, "loadMoreTop");
+	}
+	if (filled) loadTopIfDue(scroll);
+};
+
+/**
+ * Requests `loadMoreBottom` when focus moves to the last row the keyboard
+ * reaches (see `isFocusOnLastRow`), so that the next Tab reaches the new
+ * rows rather than leaving the list
+ */
+const handleFocusIn = (scroll: ScrollState): void => {
+	if (
+		scroll.wrapper &&
+		scroll.props.loadMoreBottom &&
+		isFocusOnLastRow(scroll.wrapper)
+	) {
+		requestLoad(scroll, "loadMoreBottom");
+	}
+};
+
+/**
+ * Releases the held anchor once the container was scrolled away from it,
+ * and requests `loadMoreTop` at the top and `loadMoreBottom` near the bottom
+ */
+const handleScroll = (scroll: ScrollState): void => {
+	const { wrapper } = scroll;
+	if (!wrapper) return;
+
+	if (scroll.heldAnchor && isScrolledFrom(wrapper, scroll.heldScrollTop)) {
+		releaseAnchor(scroll);
+	}
+	if (scroll.props.loadMoreTop && isAtTop(wrapper)) {
+		requestLoad(scroll, "loadMoreTop");
+	}
+	if (
+		scroll.props.loadMoreBottom &&
+		isNearBottom(wrapper, getThreshold(scroll.props))
+	) {
+		requestLoad(scroll, "loadMoreBottom");
+	}
+};
+
+/**
+ * Applies a commit after the first one, whose props are already in
+ * `scroll.props`: holds the anchor taken before it changed the DOM (see
+ * `takeAnchor`), keeps a held anchor in place, and runs the fill check and
+ * the held calls where the new props need them
+ * @param scroll The state
+ * @param prevProps The props of the commit before
+ */
+const handleUpdate = (
+	scroll: ScrollState,
+	prevProps: InfiniteScrollProps,
+): void => {
+	const { props } = scroll;
+	const childrenChanged = prevProps.children !== props.children;
+	if (scroll.takenAnchor) {
+		scroll.heldAnchor = scroll.takenAnchor;
+		scroll.takenAnchor = null;
+	}
+	if (scroll.heldAnchor) {
+		if (childrenChanged) observeContent(scroll);
+		holdAnchor(scroll);
+	}
+	if (!prevProps.loadMoreTop && props.loadMoreTop) {
+		scroll.topLoadDue = true;
+	}
+	if (
+		childrenChanged ||
+		!prevProps.loadMoreTop !== !props.loadMoreTop ||
+		!prevProps.loadMoreBottom !== !props.loadMoreBottom ||
+		!Object.is(prevProps.threshold, props.threshold)
+	) {
+		handleResize(scroll);
+	}
+	if (prevProps.loading && !props.loading) {
+		requestHeldLoads(scroll);
+	}
+};
+
+/**
  * The scroll container. It is a tab stop, so it shows the library's focus
  * ring while it has keyboard focus, drawn inside its edge because an
  * ancestor may clip it.
@@ -414,400 +770,111 @@ const ScrollContainer = styled("div")(({ theme }) => ({
  * render those inside or around it, with the status as text in a polite live
  * region (`role="status"`) outside the container, and pass `loading` while a
  * load runs.
+ *
+ * A ref to it is the scroll container element, `null` before mount and after
+ * unmount. Set its `scrollTop` to scroll the list programmatically, e.g. to
+ * an item; a scroll to an end loads more, as a scroll by the user does.
+ * Scrolling moves the view, not the focus: to move the keyboard there too,
+ * focus the item.
+ * @param props The props, see `InfiniteScrollProps`
+ * @param ref The ref to the scroll container element
  */
-class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
-	public wrapper: HTMLElement | null = null;
-	public resizeObserver: ResizeObserver | null;
-	/**
-	 * Timer of the pending debounced call per callback, 0 while none is pending
-	 */
-	private loadTimers: Record<LoadCallbackName, number> = {
-		loadMoreTop: 0,
-		loadMoreBottom: 0,
-	};
-	/**
-	 * The anchor that keeps the rows in view in place after rows were added
-	 * above them while the container was at its top. It is held until the
-	 * container is scrolled to another offset (by the user, the consumer or
-	 * the browser's own scroll anchoring), because the rows above can still
-	 * change their height after they were added, e.g. a placeholder that is
-	 * replaced by its data.
-	 */
-	private heldAnchor: ScrollAnchor | null = null;
-	/**
-	 * The `scrollTop` that holding the anchor left; any other offset means
-	 * the container was scrolled since, which releases the anchor
-	 */
-	private heldScrollTop = 0;
-	/**
-	 * Observes the size of the container's children while an anchor is held;
-	 * created when an anchor is first held
-	 */
-	private contentObserver: ResizeObserver | null = null;
-	/**
-	 * Is `loadMoreTop` due once the content fills the container? Set at
-	 * mount, while the content does not fill the container, while the
-	 * container is hidden and when `loadMoreTop` is passed; cleared by the
-	 * fill check that finds the container filled. A container that is at its
-	 * top fires no scroll event when the user scrolls up, so this is how a
-	 * list that is at its top gets the rows above it.
-	 */
-	private topLoadDue = true;
-	/**
-	 * The calls that came up while `loading` was set, per callback; they are
-	 * requested again once `loading` turns false
-	 */
-	private heldLoads: Record<LoadCallbackName, boolean> = {
-		loadMoreTop: false,
-		loadMoreBottom: false,
-	};
+const InfiniteScroll = React.forwardRef(function InfiniteScroll(
+	props: InfiniteScrollProps,
+	ref: React.ForwardedRef<HTMLDivElement>,
+) {
+	const {
+		children,
+		loadMoreTop,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		loadMoreBottom,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		callBackDebounce,
+		loading,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		threshold,
+		tabIndex,
+		...containerProps
+	} = props;
 
-	constructor(props: InfiniteScrollProps) {
-		super(props);
+	const scrollRef = useRef<ScrollState | null>(null);
+	if (!scrollRef.current) scrollRef.current = createScrollState(props);
+	const scroll = scrollRef.current;
 
-		this.resizeObserver = window.ResizeObserver
-			? new ResizeObserver(this.handleResize)
+	const setWrapper = useCallback(
+		(element: HTMLDivElement | null) => {
+			scroll.wrapper = element;
+		},
+		[scroll],
+	);
+	const handleRef = useForkRef(ref, setWrapper);
+	const handleBeforeChildrenChange = useCallback(
+		() => takeAnchor(scroll),
+		[scroll],
+	);
+
+	// mount and unmount
+	useLayoutEffect(() => {
+		const wrapper = scroll.wrapper;
+		if (!wrapper) throw new Error("Ref is null");
+
+		// StrictMode mounts the component again after unmounting it
+		scroll.topLoadDue = true;
+		scroll.heldLoads = { loadMoreTop: false, loadMoreBottom: false };
+
+		const onScroll = () => handleScroll(scroll);
+		const onFocusIn = () => handleFocusIn(scroll);
+		// every change of the container's size runs the fill check again, so
+		// a container that grows (a height relative to the viewport on a window
+		// resize or device rotation, a resizable panel, a hidden container that
+		// is shown) is filled
+		const onResize = () => handleResize(scroll);
+		const sizeObserver = window.ResizeObserver
+			? new ResizeObserver(onResize)
 			: null;
-	}
+		scroll.sizeObserver = sizeObserver;
 
-	componentDidMount(): void {
-		if (!this.wrapper) throw new Error("Ref is null");
+		wrapper.addEventListener("scroll", onScroll);
+		wrapper.addEventListener("focusin", onFocusIn);
+		handleResize(scroll);
+		if (sizeObserver) sizeObserver.observe(wrapper);
+		else window.addEventListener("resize", onResize);
 
-		// StrictMode mounts the same instance again after unmounting it
-		this.topLoadDue = true;
-		this.heldLoads = { loadMoreTop: false, loadMoreBottom: false };
+		return () => {
+			cancelLoad(scroll, "loadMoreTop");
+			cancelLoad(scroll, "loadMoreBottom");
+			releaseAnchor(scroll);
+			wrapper.removeEventListener("scroll", onScroll);
+			wrapper.removeEventListener("focusin", onFocusIn);
+			if (sizeObserver) sizeObserver.unobserve(wrapper);
+			else window.removeEventListener("resize", onResize);
+			scroll.sizeObserver = null;
+		};
+	}, [scroll]);
 
-		this.wrapper.addEventListener("scroll", this.handleScroll);
-		this.wrapper.addEventListener("focusin", this.handleFocusIn);
-		this.handleResize();
-		this.observeSize(true);
-	}
+	// every commit, after the mount above (which reads the first props): the
+	// props for the listeners, observers and timers, and what changed with them
+	useLayoutEffect(() => {
+		const prevProps = scroll.props;
+		scroll.props = props;
+		if (prevProps !== props) handleUpdate(scroll, prevProps);
+	});
 
-	/**
-	 * Takes the anchor that keeps the rows in view in place when `children`
-	 * change while the container is at its top and loading on top is enabled:
-	 * browsers' scroll anchoring does not apply to a container at its top.
-	 */
-	getSnapshotBeforeUpdate(
-		prevProps: Readonly<InfiniteScrollProps>,
-	): ScrollAnchor | null {
-		const wrapper = this.wrapper;
-		if (
-			!wrapper ||
-			this.heldAnchor ||
-			prevProps.children === this.props.children ||
-			!(prevProps.loadMoreTop || this.props.loadMoreTop) ||
-			!isAtTop(wrapper)
-		) {
-			return null;
-		}
-		const view = getView(wrapper);
-		const element = findAnchorElement(wrapper, view.top, view.bottom);
-		if (!element) return null;
-		this.heldScrollTop = wrapper.scrollTop;
-		return { element, offset: getOffsetInView(wrapper, element) };
-	}
-
-	componentDidUpdate(
-		prevProps: Readonly<InfiniteScrollProps>,
-		_prevState: unknown,
-		anchor: ScrollAnchor | null,
-	): void {
-		if (anchor) this.heldAnchor = anchor;
-		if (this.heldAnchor) {
-			if (anchor || prevProps.children !== this.props.children) {
-				this.observeContent();
-			}
-			this.holdAnchor();
-		}
-		if (!prevProps.loadMoreTop && this.props.loadMoreTop) {
-			this.topLoadDue = true;
-		}
-		if (
-			prevProps.children !== this.props.children ||
-			!prevProps.loadMoreTop !== !this.props.loadMoreTop ||
-			!prevProps.loadMoreBottom !== !this.props.loadMoreBottom ||
-			!Object.is(prevProps.threshold, this.props.threshold)
-		) {
-			this.handleResize();
-		}
-		if (prevProps.loading && !this.props.loading) {
-			this.requestHeldLoads();
-		}
-	}
-
-	componentWillUnmount(): void {
-		this.cancelLoad("loadMoreTop");
-		this.cancelLoad("loadMoreBottom");
-		this.releaseAnchor();
-		if (!this.wrapper) throw new Error("Ref is null");
-		this.wrapper.removeEventListener("scroll", this.handleScroll);
-		this.wrapper.removeEventListener("focusin", this.handleFocusIn);
-		this.observeSize(false);
-	}
-
-	render(): React.ReactElement {
-		const {
-			children,
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			loadMoreTop,
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			loadMoreBottom,
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			callBackDebounce,
-			loading,
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			threshold,
-			tabIndex,
-			...containerProps
-		} = this.props;
-		return (
-			<ScrollContainer
-				{...containerProps}
-				aria-busy={containerProps["aria-busy"] ?? (loading || undefined)}
-				tabIndex={tabIndex ?? 0}
-				ref={this.setScrollerRef}
+	return (
+		<ScrollContainer
+			{...containerProps}
+			aria-busy={containerProps["aria-busy"] ?? (loading || undefined)}
+			tabIndex={tabIndex ?? 0}
+			ref={handleRef}
+		>
+			<ScrollContent
+				loadsOnTop={!!loadMoreTop}
+				onBeforeChange={handleBeforeChildrenChange}
 			>
 				{children}
-			</ScrollContainer>
-		);
-	}
+			</ScrollContent>
+		</ScrollContainer>
+	);
+});
 
-	setScrollerRef = (ref: HTMLElement | null): void => {
-		this.wrapper = ref;
-	};
-
-	/**
-	 * Starts observing the scroll container's size at mount, and stops at
-	 * unmount. Every change runs the fill check again, so a container that
-	 * grows (a height relative to the viewport on a window resize or device
-	 * rotation, a resizable panel, a hidden container that is shown) is filled.
-	 * Without ResizeObserver, `window` resize events are listened to instead.
-	 * @param observe Start (true) or stop (false)?
-	 */
-	private observeSize = (observe: boolean): void => {
-		if (!this.wrapper) return;
-		if (this.resizeObserver) {
-			if (observe) this.resizeObserver.observe(this.wrapper);
-			else this.resizeObserver.unobserve(this.wrapper);
-		} else if (observe) {
-			window.addEventListener("resize", this.handleResize);
-		} else {
-			window.removeEventListener("resize", this.handleResize);
-		}
-	};
-
-	/**
-	 * Pauses the fill while the scroll container has no layout box: no
-	 * `loadMoreBottom` call is made until the container gets a box, a size
-	 * change that runs the fill check again (see `observeSize`). Without
-	 * ResizeObserver nothing would notice the container being shown, so the
-	 * fill is not paused there.
-	 * @returns Whether the fill is paused
-	 */
-	private pauseFillWhileHidden = (): boolean => {
-		if (!this.wrapper || !this.resizeObserver) return false;
-		if (!hasNoLayoutBox(this.wrapper)) return false;
-		// a container that is shown again starts at its top
-		this.topLoadDue = true;
-		this.releaseAnchor();
-		return true;
-	};
-
-	/**
-	 * Observes the size of the container's current children, so that the
-	 * held anchor is kept in place when one of them changes its height
-	 */
-	private observeContent = (): void => {
-		if (!this.wrapper || !window.ResizeObserver) return;
-		if (!this.contentObserver) {
-			this.contentObserver = new ResizeObserver(this.holdAnchor);
-		}
-		this.contentObserver.disconnect();
-		for (const child of Array.from(this.wrapper.children)) {
-			this.contentObserver.observe(child);
-		}
-	};
-
-	/**
-	 * Scrolls the container by as much as the held anchor moved, so the rows
-	 * in view stay where they were. Releases the anchor instead once the
-	 * container was scrolled to another offset, the anchor left the document
-	 * or the container lost its layout box.
-	 */
-	private holdAnchor = (): void => {
-		const wrapper = this.wrapper;
-		const anchor = this.heldAnchor;
-		if (!wrapper || !anchor) return;
-		if (
-			isScrolledFrom(wrapper, this.heldScrollTop) ||
-			!anchor.element.isConnected ||
-			hasNoLayoutBox(wrapper)
-		) {
-			this.releaseAnchor();
-			return;
-		}
-		const moved = getOffsetInView(wrapper, anchor.element) - anchor.offset;
-		if (moved !== 0) wrapper.scrollTop += moved;
-		this.heldScrollTop = wrapper.scrollTop;
-	};
-
-	/**
-	 * Stops holding the anchor
-	 */
-	private releaseAnchor = (): void => {
-		this.heldAnchor = null;
-		this.contentObserver?.disconnect();
-	};
-
-	/**
-	 * Requests `loadMoreTop` if it is due (see `topLoadDue`) and the
-	 * container is at its top. Called once the content fills the container.
-	 */
-	private loadTopIfDue = (): void => {
-		if (!this.wrapper || !this.topLoadDue) return;
-		this.topLoadDue = false;
-		if (this.props.loadMoreTop && isAtTop(this.wrapper)) {
-			this.requestLoad("loadMoreTop");
-		}
-	};
-
-	/**
-	 * Requests a call of the `loadMoreTop` or `loadMoreBottom` prop: debounced by
-	 * `callBackDebounce` (a request replaces the pending one), or right away for 0
-	 */
-	private requestLoad = (name: LoadCallbackName): void => {
-		this.cancelLoad(name);
-		const wait = this.props.callBackDebounce ?? 100;
-		if (wait === 0) {
-			this.callLoad(name);
-			return;
-		}
-		this.loadTimers[name] = window.setTimeout(() => {
-			this.loadTimers[name] = 0;
-			this.callLoad(name);
-		}, wait);
-	};
-
-	/**
-	 * Drops the call of the `loadMoreTop` or `loadMoreBottom` prop that waits
-	 * for `callBackDebounce`, if any
-	 */
-	private cancelLoad = (name: LoadCallbackName): void => {
-		window.clearTimeout(this.loadTimers[name]);
-		this.loadTimers[name] = 0;
-	};
-
-	/**
-	 * Requests the calls held while `loading` was set (see `callLoad`) again,
-	 * now that it turned false
-	 */
-	private requestHeldLoads = (): void => {
-		for (const name of LOAD_CALLBACK_NAMES) {
-			if (!this.heldLoads[name]) continue;
-			this.heldLoads[name] = false;
-			this.requestLoad(name);
-		}
-	};
-
-	/**
-	 * The `threshold` prop, with its default; a negative number or NaN counts
-	 * as 0
-	 */
-	private getThreshold = (): number => {
-		const threshold = this.props.threshold ?? DEFAULT_THRESHOLD;
-		return threshold > 0 ? threshold : 0;
-	};
-
-	/**
-	 * Makes a call requested by `requestLoad`. The callback is read from the
-	 * props now, so it is the one of the latest render. A call is only made if
-	 * the content still needs it: a request made while the content was short,
-	 * or while the container was near that end (or focus on its last row), is
-	 * dropped once content that arrived in the meantime fills the container and
-	 * moves that end away (or focus moved on), and one is not made while the
-	 * container is hidden (`pauseFillWhileHidden`).
-	 * While `loading` is set, the call is held and requested again once it
-	 * turns false. A fill call that is dropped because the content now fills
-	 * the container (rows that grew on their own) lets the due `loadMoreTop`
-	 * follow.
-	 */
-	private callLoad = (name: LoadCallbackName): void => {
-		if (!this.wrapper || this.pauseFillWhileHidden()) return;
-		if (this.props.loading) {
-			this.heldLoads[name] = true;
-			return;
-		}
-		const threshold = this.getThreshold();
-		const atEnd =
-			name === "loadMoreTop"
-				? isAtTop(this.wrapper)
-				: isNearBottom(this.wrapper, threshold) ||
-					isFocusOnLastRow(this.wrapper);
-		if (isFilled(this.wrapper, threshold) && !atEnd) {
-			this.loadTopIfDue();
-			return;
-		}
-		const load = this.props[name];
-		if (load) load();
-	};
-
-	/**
-	 * The fill check, run after mount, after every render with new `children`,
-	 * a callback that was added or removed or a new `threshold`, and on every
-	 * change of the container's size: requests `loadMoreBottom` while
-	 * `threshold` px or less are left below the visible part (which includes
-	 * content that does not fill the container), or `loadMoreTop` without it
-	 * while the content does not fill the container, and the due `loadMoreTop`
-	 * once it does.
-	 */
-	handleResize = (): void => {
-		if (!this.wrapper || this.pauseFillWhileHidden()) return;
-
-		const threshold = this.getThreshold();
-		const filled = isFilled(this.wrapper, threshold);
-		if (!filled) this.topLoadDue = true;
-		if (this.props.loadMoreBottom) {
-			if (isNearBottom(this.wrapper, threshold)) {
-				this.requestLoad("loadMoreBottom");
-			}
-		} else if (!filled && this.props.loadMoreTop) {
-			this.requestLoad("loadMoreTop");
-		}
-		if (filled) this.loadTopIfDue();
-	};
-
-	/**
-	 * Requests `loadMoreBottom` when focus moves to the last row the keyboard
-	 * reaches (see `isFocusOnLastRow`), so that the next Tab reaches the new
-	 * rows rather than leaving the list
-	 */
-	handleFocusIn = (): void => {
-		if (
-			this.wrapper &&
-			this.props.loadMoreBottom &&
-			isFocusOnLastRow(this.wrapper)
-		) {
-			this.requestLoad("loadMoreBottom");
-		}
-	};
-
-	handleScroll = (): void => {
-		if (!this.wrapper) return;
-
-		if (this.heldAnchor && isScrolledFrom(this.wrapper, this.heldScrollTop)) {
-			this.releaseAnchor();
-		}
-		if (this.props.loadMoreTop && isAtTop(this.wrapper)) {
-			this.requestLoad("loadMoreTop");
-		}
-		if (
-			this.props.loadMoreBottom &&
-			isNearBottom(this.wrapper, this.getThreshold())
-		) {
-			this.requestLoad("loadMoreBottom");
-		}
-	};
-}
-
-export default InfiniteScroll;
+export default React.memo(InfiniteScroll);
