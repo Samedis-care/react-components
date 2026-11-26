@@ -2295,3 +2295,75 @@ describe("persist leaves what it leaves out as it is stored", () => {
 		});
 	});
 });
+
+describe("stored column filters are the user's whole filters", () => {
+	const NAME_D = { type: "contains", value1: "d", value2: "" } as const;
+	const ROLE_X = { type: "contains", value1: "x", value2: "" } as const;
+	const DEFAULT_FILTER: DataGridProps["defaultFilter"] = [
+		{ field: "name", filter: NAME_D },
+	];
+
+	it('[ISSUE-3496-ITEM-21] a grid opens with its stored filters whatever the defaultFilter, and "Reset filter" applies the defaultFilter', async () => {
+		const loadData = vi.fn<DataGridProps["loadData"]>(noRows);
+		const save = vi.fn<DataGridPersistentStateContextType[1]>();
+		const stored: DataGridPersistentState = {
+			v: DATA_GRID_PERSIST_VERSION,
+			filter: [["role", ROLE_X]],
+		};
+		render(
+			<ValueProvider stored={stored} save={save}>
+				<Grid loadData={loadData} defaultFilter={DEFAULT_FILTER} />
+			</ValueProvider>,
+		);
+		await gridIdle();
+		expect(loadData.mock.lastCall![0].fieldFilter).toEqual({ role: ROLE_X });
+
+		// the header is laid out for a phone here: the reset sits in "More options"
+		fireEvent.click(screen.getByRole("button", { name: "More options" }));
+		fireEvent.click(await screen.findByRole("menuitem", { name: "Reset" }));
+		fireEvent.click(
+			await screen.findByRole("menuitem", { name: "Reset filter" }),
+		);
+		await waitFor(() =>
+			expect(loadData.mock.lastCall![0].fieldFilter).toEqual({ name: NAME_D }),
+		);
+		expect(save.mock.lastCall![0].filter).toEqual([["name", NAME_D]]);
+	});
+	it("[ISSUE-3496-ITEM-21] a grid with nothing stored opens with the defaultFilter, and stores it as its filters", async () => {
+		const loadData = vi.fn<DataGridProps["loadData"]>(noRows);
+		const save = vi.fn<DataGridPersistentStateContextType[1]>();
+		render(
+			<ValueProvider stored={undefined} save={save}>
+				<Grid loadData={loadData} defaultFilter={DEFAULT_FILTER} />
+			</ValueProvider>,
+		);
+		await gridIdle();
+		expect(loadData.mock.lastCall![0].fieldFilter).toEqual({ name: NAME_D });
+		act(() => grid!.setState((prev) => ({ ...prev, search: "s" })));
+		expect(save.mock.lastCall![0].filter).toEqual([["name", NAME_D]]);
+	});
+	it("[ISSUE-3496-ITEM-21] a filter record stored before opens on top of the current defaultFilter, unchanged until the grid's next change stores its whole filters", async () => {
+		const loadData = vi.fn<DataGridProps["loadData"]>(noRows);
+		const save = vi.fn<DataGridPersistentStateContextType[1]>();
+		const stored: DataGridPersistentState = {
+			v: DATA_GRID_PERSIST_VERSION,
+			filter: { role: ROLE_X },
+		};
+		render(
+			<ValueProvider stored={stored} save={save}>
+				<Grid loadData={loadData} defaultFilter={DEFAULT_FILTER} />
+			</ValueProvider>,
+		);
+		await gridIdle();
+		expect(loadData.mock.lastCall![0].fieldFilter).toEqual({
+			name: NAME_D,
+			role: ROLE_X,
+		});
+		expect(save).not.toHaveBeenCalled();
+		act(() => grid!.setState((prev) => ({ ...prev, search: "s" })));
+		expect(save.mock.lastCall![0].filter).toEqual([
+			["name", NAME_D],
+			["role", ROLE_X],
+		]);
+	});
+});

@@ -5,6 +5,7 @@ import {
 	DataGridPersistentStateLegacy,
 	decodePersistedState,
 	encodePersistedState,
+	isSameFilterDef,
 	keepStoredParts,
 	mergePersistedState,
 	normalizeFilterDef,
@@ -17,6 +18,7 @@ import {
 	type IDataGridColumnDef,
 	type IDataGridColumnsState,
 	type IDataGridState,
+	DataGridFilterSetting,
 	DataGridSortSetting,
 } from "../../src/standalone/DataGrid/DataGrid";
 import type { IFilterDef } from "../../src/standalone/DataGrid/Content/FilterEntry";
@@ -57,17 +59,15 @@ const encode = (
 	{
 		columns = COLUMNS,
 		width = {},
-		defaultColumnState = defaults(),
 		config = undefined as DataGridPersistentState extends never
 			? never
-			: Parameters<typeof encodePersistedState>[5],
+			: Parameters<typeof encodePersistedState>[4],
 	} = {},
 ) =>
 	encodePersistedState(
 		{ ...getDataGridDefaultState(columns, undefined), ...state },
 		columnState,
 		width,
-		defaultColumnState,
 		columns,
 		config,
 	);
@@ -104,13 +104,14 @@ describe("encodePersistedState", () => {
 
 	it("writes nothing for columns which sit at their defaults", () => {
 		const data = encode({});
-		// the sort is stored as a whole: nothing is sorted
+		// the sort and the filters are stored as a whole: nothing is sorted or
+		// filtered
 		expect(data.sort).toEqual([]);
-		expect(data.filter).toBeUndefined();
+		expect(data.filter).toEqual([]);
 		expect(data.search).toBeUndefined();
 	});
 
-	it("writes the whole sort and only the filter deviations", () => {
+	it("writes the whole sort and the whole filters", () => {
 		const columnState: IDataGridColumnsState = {
 			...defaults(),
 			name: { sort: -1, sortOrder: 1, filter: undefined },
@@ -118,7 +119,7 @@ describe("encodePersistedState", () => {
 		};
 		const data = encode({}, columnState);
 		expect(data.sort).toEqual([["name", -1]]);
-		expect(data.filter).toEqual({ id: filter("42") });
+		expect(data.filter).toEqual([["id", filter("42")]]);
 	});
 
 	it("drops filters which carry no value", () => {
@@ -126,7 +127,7 @@ describe("encodePersistedState", () => {
 			...defaults(),
 			name: { sort: 0, sortOrder: undefined, filter: filter("") },
 		};
-		expect(encode({}, columnState).filter).toBeUndefined();
+		expect(encode({}, columnState).filter).toEqual([]);
 	});
 
 	it("stores a cleared default sort as no sort", () => {
@@ -142,14 +143,13 @@ describe("encodePersistedState", () => {
 			getDataGridDefaultState(COLUMNS, undefined),
 			columnState,
 			{},
-			defaultColumnState,
 			COLUMNS,
 			undefined,
 		);
 		expect(data.sort).toEqual([]);
 	});
 
-	it("records a cleared default filter as null", () => {
+	it("stores a cleared default filter as no filter", () => {
 		const defaultFilter = [{ field: "name", filter: filter("preset") }];
 		const defaultColumnState = defaults(COLUMNS, undefined, defaultFilter);
 		const columnState: IDataGridColumnsState = {
@@ -160,11 +160,10 @@ describe("encodePersistedState", () => {
 			getDataGridDefaultState(COLUMNS, undefined),
 			columnState,
 			{},
-			defaultColumnState,
 			COLUMNS,
 			undefined,
 		);
-		expect(data.filter).toEqual({ name: null });
+		expect(data.filter).toEqual([]);
 	});
 
 	it("leaves forced pins out, they come from the column definition", () => {
@@ -173,7 +172,6 @@ describe("encodePersistedState", () => {
 			getDataGridDefaultState(columns, undefined),
 			defaults(columns),
 			{},
-			defaults(columns),
 			columns,
 			undefined,
 		);
@@ -310,7 +308,6 @@ describe("decodePersistedState", () => {
 			},
 			defaults(),
 			{},
-			defaults(),
 			COLUMNS,
 			undefined,
 		);
@@ -532,7 +529,6 @@ describe("decodePersistedState (legacy format)", () => {
 			},
 			decoded.columnState,
 			decoded.columnWidth,
-			defaults(columns),
 			columns,
 			undefined,
 		);
@@ -597,7 +593,6 @@ describe("decodePersistedState (column set churn)", () => {
 				...Object.fromEntries(columns.map((column) => [column.field, 100])),
 				...decoded.columnWidth,
 			},
-			defaultColumnState,
 			columns,
 			undefined,
 		);
@@ -633,7 +628,8 @@ describe("decodePersistedState (column set churn)", () => {
 		// the grid has no column for
 		expect(second.decoded.columnState.gated).toBeUndefined();
 		expect(second.stored.sort).toEqual([]);
-		expect(second.stored.filter?.gated).toBeUndefined();
+		expect(first.stored.filter).toEqual([["gated", filter("x")]]);
+		expect(second.stored.filter).toEqual([]);
 	});
 
 	it("does not treat a returning column as new", () => {
@@ -831,7 +827,6 @@ describe("decodePersistedState (hostile input)", () => {
 			},
 			decoded.columnState,
 			decoded.columnWidth,
-			defaults(),
 			COLUMNS,
 			undefined,
 		);
@@ -1023,7 +1018,6 @@ describe("persisted format bugs", () => {
 				name: { sort: 1, sortOrder: 1, filter: undefined },
 			},
 			{},
-			defs1,
 			COLUMNS,
 			undefined,
 		);
@@ -1046,9 +1040,7 @@ describe("persisted format bugs", () => {
 		readWith: DataGridSortSetting[] | undefined,
 	) => {
 		const defsWritten = defaults(COLUMNS, writtenWith);
-		const stored = encode({}, columnState(defsWritten), {
-			defaultColumnState: defsWritten,
-		});
+		const stored = encode({}, columnState(defsWritten));
 		const result = decodePersistedState(
 			JSON.parse(JSON.stringify(stored)) as DataGridPersistentState,
 			COLUMNS,
@@ -1088,11 +1080,7 @@ describe("persisted format bugs", () => {
 			["name", 1],
 			["id", -1],
 		]);
-		expect(
-			encode({}, defaults(COLUMNS, BY_ID), {
-				defaultColumnState: defaults(COLUMNS, BY_ID),
-			}).sort,
-		).toEqual([["id", -1]]);
+		expect(encode({}, defaults(COLUMNS, BY_ID)).sort).toEqual([["id", -1]]);
 		expect(encode({}).sort).toEqual([]);
 	});
 
@@ -1265,55 +1253,36 @@ describe("persisted format bugs", () => {
 		).toBe(newer);
 	});
 
-	it("[ISSUE-3496-ITEM-12] a default filter re-emitted by the filter popup is not stored as the user's own", () => {
-		const defaultFilter = [{ field: "name", filter: filter("a") }];
-		const defs = defaults(COLUMNS, undefined, defaultFilter);
+	it("[ISSUE-3496-ITEM-12] a default filter re-emitted by the filter popup is the same condition as the default filter", () => {
 		// what the popup emits after any edit that ends on the same condition
-		const reEmitted: IFilterDef = {
-			...filter("a"),
-			nextFilterType: "and",
-			nextFilter: undefined,
-		};
-		const data = encodePersistedState(
-			getDataGridDefaultState(COLUMNS, undefined),
-			{ ...defs, name: { ...defs.name, filter: reEmitted } },
-			{},
-			defs,
-			COLUMNS,
-			undefined,
-		);
-		expect(data.filter).toBeUndefined();
+		expect(
+			isSameFilterDef(filter("a"), {
+				...filter("a"),
+				nextFilterType: "and",
+				nextFilter: undefined,
+			}),
+		).toBe(true);
 	});
 
-	/** what is stored for the name column, filtered by own while its default is def */
-	const storedFilter = (def: IFilterDef, own: IFilterDef) => {
-		const defs = defaults(COLUMNS, undefined, [{ field: "name", filter: def }]);
-		return encode(
-			{},
-			{ ...defs, name: { ...defs.name, filter: own } },
-			{ defaultColumnState: defs },
-		).filter;
-	};
-
-	it('[ISSUE-3496-ITEM-12] a default filter chain without a combinator, re-emitted by the filter popup with "and", is not stored as the user\'s own', () => {
+	it('[ISSUE-3496-ITEM-12] a default filter chain without a combinator, re-emitted by the filter popup with "and", is the same condition', () => {
 		const chain: IFilterDef = { ...filter("a"), nextFilter: filter("b") };
-		expect(
-			storedFilter(chain, { ...chain, nextFilterType: "and" }),
-		).toBeUndefined();
+		expect(isSameFilterDef(chain, { ...chain, nextFilterType: "and" })).toBe(
+			true,
+		);
 	});
 
-	it("[ISSUE-3496-ITEM-12] a combinator without a next condition does not make the default filter the user's own", () => {
+	it("[ISSUE-3496-ITEM-12] a combinator without a next condition does not make another condition", () => {
 		expect(
-			storedFilter(filter("a"), { ...filter("a"), nextFilterType: "or" }),
-		).toBeUndefined();
+			isSameFilterDef(filter("a"), { ...filter("a"), nextFilterType: "or" }),
+		).toBe(true);
 		// the user picked "or" and emptied the second condition again
 		expect(
-			storedFilter(filter("a"), {
+			isSameFilterDef(filter("a"), {
 				...filter("a"),
 				nextFilterType: "or",
 				nextFilter: filter(""),
 			}),
-		).toBeUndefined();
+		).toBe(true);
 	});
 
 	const CHAIN: IFilterDef = {
@@ -1335,35 +1304,11 @@ describe("persisted format bugs", () => {
 			{ ...CHAIN, nextFilterType: "or" },
 		],
 	])(
-		"[ISSUE-3496-ITEM-12] a filter which differs from the default filter by %s is stored",
+		"[ISSUE-3496-ITEM-12] a filter which differs from the default filter by %s is another condition",
 		(_, def, own) => {
-			expect(storedFilter(def, own)).toEqual({ name: own });
+			expect(isSameFilterDef(def, own)).toBe(false);
 		},
 	);
-
-	it("[ISSUE-3496-ITEM-12] a default filter which an earlier version stored as the user's own is left out on the next write", () => {
-		const defs = defaults(COLUMNS, undefined, [
-			{ field: "name", filter: filter("a") },
-		]);
-		const old = JSON.parse(
-			JSON.stringify({
-				v: DATA_GRID_PERSIST_VERSION,
-				filter: {
-					name: {
-						...filter("a"),
-						nextFilterType: "and",
-						nextFilter: undefined,
-					},
-				},
-			}),
-		) as DataGridPersistentState;
-		const decoded = decodePersistedState(old, COLUMNS, defs, undefined);
-		expect(decoded.columnState.name.filter).toMatchObject(filter("a"));
-		expect(
-			encode(decoded.state, decoded.columnState, { defaultColumnState: defs })
-				.filter,
-		).toBeUndefined();
-	});
 
 	it.each([
 		['{"v":2,"sort":{"toString":[1,2]}}'],
@@ -1447,6 +1392,194 @@ describe("persisted format bugs", () => {
 		);
 		expect(Object.getPrototypeOf(result.columnState)).toBe(Object.prototype);
 	});
+
+	// the column filters are stored as a whole, like the sort: defaultFilter
+	// applies when nothing is stored, and on a reset
+
+	const NAME_A: DataGridFilterSetting[] = [
+		{ field: "name", filter: filter("a") },
+	];
+	const NAME_B: DataGridFilterSetting[] = [
+		{ field: "name", filter: filter("b") },
+	];
+	const ID_42: DataGridFilterSetting[] = [
+		{ field: "id", filter: filter("42") },
+	];
+
+	/** The query's column filters after storing filters under one defaultFilter and reading them under another */
+	const filterReadBack = (
+		columnState: (defs: IDataGridColumnsState) => IDataGridColumnsState,
+		writtenWith: DataGridFilterSetting[] | undefined,
+		readWith: DataGridFilterSetting[] | undefined,
+	) => {
+		const defsWritten = defaults(COLUMNS, undefined, writtenWith);
+		const stored = encode({}, columnState(defsWritten));
+		const result = decodePersistedState(
+			JSON.parse(JSON.stringify(stored)) as DataGridPersistentState,
+			COLUMNS,
+			defaults(COLUMNS, undefined, readWith),
+			undefined,
+		);
+		return dataGridPrepareFiltersAndSorts(result.columnState)[1];
+	};
+	/** The query's column filters after reading the given filters, as stored, under a defaultFilter */
+	const filterRead = (
+		stored: unknown,
+		readWith: DataGridFilterSetting[] | undefined,
+	) => {
+		const result = decodePersistedState(
+			JSON.parse(
+				JSON.stringify({ v: DATA_GRID_PERSIST_VERSION, filter: stored }),
+			) as DataGridPersistentState,
+			COLUMNS,
+			defaults(COLUMNS, undefined, readWith),
+			undefined,
+		);
+		return dataGridPrepareFiltersAndSorts(result.columnState)[1];
+	};
+
+	it("[ISSUE-3496-ITEM-21] a user's own filters stay as they are when a defaultFilter is added later", () => {
+		expect(
+			filterReadBack(
+				(defs) => ({ ...defs, name: { ...defs.name, filter: filter("bob") } }),
+				undefined,
+				ID_42,
+			),
+		).toEqual({ name: filter("bob") });
+	});
+
+	it("[ISSUE-3496-ITEM-21] stored filters stay as they are when the defaultFilter is changed later", () => {
+		// the default filter of that time, which the user kept
+		expect(filterReadBack((defs) => defs, NAME_A, NAME_B)).toEqual({
+			name: filter("a"),
+		});
+		// a filter of the user's own next to the default filter of that time
+		expect(
+			filterReadBack(
+				(defs) => ({ ...defs, id: { ...defs.id, filter: filter("42") } }),
+				NAME_A,
+				NAME_B,
+			),
+		).toEqual({ id: filter("42"), name: filter("a") });
+		// the default filter of that time cleared
+		expect(
+			filterReadBack(
+				(defs) => ({ ...defs, name: { ...defs.name, filter: undefined } }),
+				NAME_A,
+				ID_42,
+			),
+		).toEqual({});
+	});
+
+	it("[ISSUE-3496-ITEM-21] the whole column filters are stored, also the default filters, and an empty list when no column is filtered", () => {
+		const defs = defaults(COLUMNS, undefined, NAME_A);
+		expect(encode({}, defs).filter).toEqual([["name", filter("a")]]);
+		expect(
+			encode(
+				{},
+				{
+					...defs,
+					id: { ...defs.id, filter: filter("42") },
+					pinme: { ...defs.pinme, filter: filter("") },
+				},
+			).filter,
+		).toEqual([
+			["id", filter("42")],
+			["name", filter("a")],
+		]);
+		expect(encode({}).filter).toEqual([]);
+	});
+
+	it("[ISSUE-3496-ITEM-21] with nothing stored, the grid opens with the current defaultFilter", () => {
+		const result = decodePersistedState(
+			undefined,
+			COLUMNS,
+			defaults(COLUMNS, undefined, NAME_B),
+			undefined,
+		);
+		expect(dataGridPrepareFiltersAndSorts(result.columnState)[1]).toEqual({
+			name: filter("b"),
+		});
+	});
+
+	it("[ISSUE-3496-ITEM-21] a stored filter list keeps its usable entries, a column listed twice its first one, and no other column has a filter", () => {
+		const result = decodePersistedState(
+			JSON.parse(
+				JSON.stringify({
+					v: DATA_GRID_PERSIST_VERSION,
+					filter: [
+						["gone", filter("x")],
+						["toString", filter("x")],
+						["__proto__", filter("x")],
+						["name", { type: "contains" }],
+						[3, filter("x")],
+						"id",
+						null,
+						["pinme", filter("p")],
+						["pinme", filter("q")],
+						["secret", filter("s")],
+					],
+				}),
+			) as DataGridPersistentState,
+			COLUMNS,
+			defaults(COLUMNS, undefined, [...NAME_A, ...ID_42]),
+			undefined,
+		);
+		expect(dataGridPrepareFiltersAndSorts(result.columnState)[1]).toEqual({
+			pinme: filter("p"),
+			secret: filter("s"),
+		});
+		expect(Object.getPrototypeOf(result.columnState)).toBe(Object.prototype);
+	});
+
+	it("[ISSUE-3496-ITEM-21] a filter record stored before reads as the deviations from the current defaultFilter, and the next write stores the whole filters", () => {
+		// a filter of the user's own next to the current default filter
+		expect(filterRead({ id: filter("42") }, NAME_B)).toEqual({
+			id: filter("42"),
+			name: filter("b"),
+		});
+		// a default filter cleared
+		expect(filterRead({ name: null }, NAME_B)).toEqual({});
+		// data without filters, written while they were the default ones
+		expect(filterRead(undefined, NAME_B)).toEqual({ name: filter("b") });
+
+		const defs = defaults(COLUMNS, undefined, NAME_B);
+		const decoded = decodePersistedState(
+			{ v: DATA_GRID_PERSIST_VERSION, filter: { id: filter("42") } },
+			COLUMNS,
+			defs,
+			undefined,
+		);
+		expect(
+			JSON.parse(
+				JSON.stringify(encode(decoded.state, decoded.columnState).filter),
+			),
+		).toEqual([
+			["id", filter("42")],
+			["name", filter("b")],
+		]);
+	});
+
+	it("[ISSUE-3496-ITEM-21] a legacy filter state is the user's whole filters: a defaultFilter of a column added later does not apply", () => {
+		const columns = [...COLUMNS, col("added")];
+		const result = decodePersistedState(
+			{
+				columnState: {
+					id: { sort: 0 },
+					name: { sort: 0, filter: filter("bob") },
+					secret: { sort: 0 },
+					pinme: { sort: 0 },
+				},
+				state: { hiddenColumns: [], lockedColumns: [] },
+			} as unknown as DataGridPersistentStateLegacy,
+			columns,
+			defaults(columns, undefined, [{ field: "added", filter: filter("x") }]),
+			undefined,
+		);
+		expect(dataGridPrepareFiltersAndSorts(result.columnState)[1]).toEqual({
+			name: filter("bob"),
+		});
+	});
 });
 
 describe("keepStoredParts", () => {
@@ -1506,7 +1639,7 @@ describe("keepStoredParts", () => {
 		).toStrictEqual({
 			v: DATA_GRID_PERSIST_VERSION,
 			sort: [["name", 1]],
-			filter: { name: null },
+			filter: [],
 			search: "legacy",
 		});
 	});

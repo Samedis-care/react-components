@@ -13,6 +13,7 @@ export {
 	type DataGridPersistentState,
 	type DataGridPersistentStateLegacy,
 	type DataGridPersistedData,
+	type DataGridPersistedFilterList,
 	type DataGridPersistedSort,
 	type DataGridPersistedSortList,
 } from "./StatePersistence";

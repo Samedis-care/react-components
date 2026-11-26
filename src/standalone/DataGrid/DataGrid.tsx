@@ -500,7 +500,11 @@ export interface IDataGridColumnProps {
 	 */
 	defaultSort?: DataGridSortSetting[];
 	/**
-	 * The default column filter settings
+	 * The column filters a grid opens with when nothing is stored for it (see
+	 * DataGridPersistentStateContext), and what "Reset filter", "Clear
+	 * filters" and "Reset all" go back to. Stored column filters are used as
+	 * they are: a default filter added or changed later does not change them.
+	 * To force column filters whatever is stored, use overrideFilter.
 	 */
 	defaultFilter?: DataGridFilterSetting[];
 	/**

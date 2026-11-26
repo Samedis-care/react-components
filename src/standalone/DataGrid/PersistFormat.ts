@@ -45,11 +45,18 @@ export type DataGridPersistedSort = [direction: -1 | 0 | 1, order?: number];
 export type DataGridPersistedSortList = [field: string, direction: -1 | 1][];
 
 /**
+ * A grid's whole column filters as persisted: the filtered columns as
+ * [field, filter], each filter without its conditions that carry no value
+ * (see normalizeFilterDef). Empty when no column is filtered.
+ */
+export type DataGridPersistedFilterList = [field: string, filter: IFilterDef][];
+
+/**
  * The persisted (wire) format of the DataGrid state.
  *
  * This is deliberately not the shape of the runtime state: it is stored per user
- * on a server, so apart from the sort it only carries what deviates from the
- * defaults. Keys are kept
+ * on a server, so apart from the sort and the column filters it only carries
+ * what deviates from the defaults. Keys are kept
  * short-ish and everything optional, which keeps a 70 column grid at well under
  * half the size of the legacy format.
  *
@@ -91,11 +98,19 @@ export interface DataGridPersistentState {
 	 */
 	sort?: DataGridPersistedSortList | Record<string, DataGridPersistedSort>;
 	/**
-	 * Filter per column, only for columns whose filter is another condition
-	 * than the default one (see isSameFilterDef).
-	 * null records that the user cleared a filter which is set by default.
+	 * The column filters, as a whole (DataGridPersistedFilterList). They are
+	 * what the grid opens with: DataGridProps.defaultFilter only applies when
+	 * nothing is stored, and on a reset, so a default filter added or changed
+	 * later leaves them as they are. The filter of a column which is not
+	 * currently defined is dropped on read.
+	 * @remarks Data of earlier versions holds a record instead (field ->
+	 *          filter) with only the columns whose filter was another
+	 *          condition than the default filter of that time (see
+	 *          isSameFilterDef), null for a default filter the user cleared,
+	 *          and no key at all when every column had its default filter. It
+	 *          is read on top of the current default filters.
 	 */
-	filter?: Record<string, IFilterDef | null>;
+	filter?: DataGridPersistedFilterList | Record<string, IFilterDef | null>;
 	/**
 	 * The quick filter (search) string, omitted when empty
 	 */
@@ -300,26 +315,20 @@ const encodeSort = (
 		.map(([field, entry]) => [field, entry.sort as -1 | 1]);
 
 /**
- * Reduces the column filters to what deviates from the defaults: a filter
- * which is the same condition as the default one (isSameFilterDef) is left
- * out, however the filter popup spelled it
- * @param columnState The current column state
- * @param defaultColumnState The column state the grid would start out with
+ * The filtered columns of a column state, each filter without its conditions
+ * that carry no value (normalizeFilterDef)
+ * @param columnState The column state
  */
-const encodeFilterDiff = (
-	columnState: IDataGridColumnsState,
-	defaultColumnState: IDataGridColumnsState,
-): Record<string, IFilterDef | null> => {
-	const filter: Record<string, IFilterDef | null> = {};
-	for (const field in columnState) {
-		const entry: IDataGridColumnState | undefined = columnState[field];
+const encodeFilter = (
+	columnState: Record<string, IDataGridColumnState | undefined>,
+): DataGridPersistedFilterList => {
+	const list: DataGridPersistedFilterList = [];
+	for (const [field, entry] of Object.entries(columnState)) {
 		if (!isPlainObject(entry)) continue;
-		const def: IDataGridColumnState | undefined = defaultColumnState[field];
-		if (!isSameFilterDef(entry.filter, def?.filter)) {
-			filter[field] = normalizeFilterDef(entry.filter) ?? null;
-		}
+		const filter = normalizeFilterDef(entry.filter);
+		if (filter) list.push([field, filter]);
 	}
-	return filter;
+	return list;
 };
 
 /**
@@ -327,7 +336,6 @@ const encodeFilterDiff = (
  * @param state The grid state
  * @param columnState The column state (sort and filter)
  * @param columnWidth The column widths
- * @param defaultColumnState The column state the grid would start out with
  * @param columns The column definitions
  * @param config What to persist (DataGridProps.persist)
  */
@@ -335,7 +343,6 @@ export const encodePersistedState = (
 	state: IDataGridState,
 	columnState: IDataGridColumnsState,
 	columnWidth: Record<string, number>,
-	defaultColumnState: IDataGridColumnsState,
 	columns: IDataGridColumnDef[],
 	config: DataGridProps["persist"],
 ): DataGridPersistentState => {
@@ -370,16 +377,12 @@ export const encodePersistedState = (
 		result.initialResize = state.initialResize;
 	}
 
-	// the whole sort, also when it is the default one: a default sort changed
-	// later must not change what the user has
+	// the whole sort and filters, also when they are the default ones: a
+	// default sort or filter changed later must not change what the user has
 	if (cfg.includes("sort")) result.sort = encodeSort(columnState);
 
 	if (cfg.includes("filters")) {
-		const filter = encodeFilterDiff(columnState, defaultColumnState);
-		if (Object.keys(filter).length) result.filter = filter;
-	}
-
-	if (cfg.includes("filters")) {
+		result.filter = encodeFilter(columnState);
 		// the default search is always empty, so omitting it is lossless
 		if (state.search) result.search = state.search;
 		// custom data is consumer defined, we can't tell a deviation from a default
@@ -411,9 +414,8 @@ export const isNewerPersistedState = (
  * mention) are exactly that set.
  *
  * The legacy columnState is the whole sort and filter state, not a deviation
- * from the defaults: its sort becomes the whole sort, and every column in it
- * gets a filter entry (an unfiltered one null). Applied to whatever the
- * defaults are when it is read, that gives back exactly the legacy state, so
+ * from the defaults: it becomes the whole sort and the whole column filters.
+ * They are read as they are, whatever the defaults are when they are read, so
  * the migration needs no defaults and a part of the data can be migrated on
  * its own (see mergePersistedState).
  * @param legacy The legacy data
@@ -444,16 +446,11 @@ const migrateLegacyPersistedState = (
 		}
 	}
 
-	const filter: Record<string, IFilterDef | null> = {};
-	for (const field in columnState) {
-		const entry: IDataGridColumnState | undefined = columnState[field];
-		if (!isPlainObject(entry)) continue;
-		filter[field] = normalizeFilterDef(entry.filter) ?? null;
-	}
-	// a column state without a usable entry says nothing about the sort
-	if (Object.keys(filter).length) {
+	// a column state without a usable entry says nothing about the sort and
+	// the filters
+	if (Object.values(columnState).some((entry) => isPlainObject(entry))) {
 		result.sort = encodeSort(columnState);
-		result.filter = filter;
+		result.filter = encodeFilter(columnState);
 	}
 
 	if (typeof state.search === "string" && state.search)
@@ -646,6 +643,59 @@ const applySortRecord = (
 	}
 };
 
+/**
+ * Applies stored whole column filters (DataGridPersistedFilterList): the
+ * default filters don't apply
+ * @param columnState The column state to change, starting with the defaults
+ * @param list The stored list
+ */
+const applyFilterList = (
+	columnState: IDataGridColumnsState,
+	list: unknown[],
+) => {
+	for (const field in columnState) {
+		columnState[field] = { ...columnState[field], filter: undefined };
+	}
+	const listed = new Set<string>();
+	for (const entry of list) {
+		if (!Array.isArray(entry) || typeof entry[0] !== "string") continue;
+		const [field, value] = entry as [string, unknown];
+		// a filter for a column which no longer exists would reach the backend.
+		// Only own entries are columns: toString, __proto__ and the like are in
+		// every object
+		if (!Object.prototype.hasOwnProperty.call(columnState, field)) continue;
+		// a column listed twice keeps its first entry
+		if (listed.has(field)) continue;
+		listed.add(field);
+		columnState[field] = { ...columnState[field], filter: asFilterDef(value) };
+	}
+};
+
+/**
+ * Applies a stored filter record, as written before the column filters were
+ * stored as a whole: the columns whose filter deviated from the default filter
+ * of that time
+ * @param columnState The column state to change, starting with the defaults
+ * @param record The stored record
+ */
+const applyFilterRecord = (
+	columnState: IDataGridColumnsState,
+	record: unknown,
+) => {
+	const filter = asRecord(record);
+	for (const field in filter) {
+		// see applyFilterList, a filter for a gone column would reach the backend
+		if (!Object.prototype.hasOwnProperty.call(columnState, field)) continue;
+		// null is a deliberately cleared default, anything unusable is skipped
+		const value = filter[field];
+		if (value !== null && !isPlainObject(value)) continue;
+		columnState[field] = {
+			...columnState[field],
+			filter: value === null ? undefined : asFilterDef(value),
+		};
+	}
+};
+
 const decode = (
 	persisted: DataGridPersistedData,
 	columns: IDataGridColumnDef[],
@@ -686,19 +736,9 @@ const decode = (
 	}
 
 	if (cfg.includes("filters")) {
-		const filter = asRecord(data.filter);
-		for (const field in filter) {
-			// see above, a filter for a gone column would reach the backend
-			if (!Object.prototype.hasOwnProperty.call(result.columnState, field))
-				continue;
-			// null is a deliberately cleared default, anything unusable is skipped
-			const value = filter[field];
-			if (value !== null && !isPlainObject(value)) continue;
-			result.columnState[field] = {
-				...result.columnState[field],
-				filter: value === null ? undefined : asFilterDef(value),
-			};
-		}
+		if (Array.isArray(data.filter))
+			applyFilterList(result.columnState, data.filter);
+		else applyFilterRecord(result.columnState, data.filter);
 		if (typeof data.search === "string") result.state.search = data.search;
 		if (isPlainObject(data.customData))
 			result.state.customData = data.customData;
@@ -761,9 +801,8 @@ export const splitPersistedState = (
  * Then every legacy part is migrated on its own, and the result is in the
  * current format, with the highest `v` of the parts stored in it, so data of
  * a newer format next to data of this one is not taken for this one's. A
- * migrated part has the whole sort and a filter entry for every column in its
- * legacy columnState, as the legacy format stored the whole state, not
- * deviations from the defaults.
+ * migrated part has the whole sort and the whole column filters, as the
+ * legacy format stored the whole state, not deviations from the defaults.
  * @param parts The parts, in the order they should be merged (a later part's
  *        keys win). Missing parts (undefined, null) are skipped.
  * @returns The merged data, undefined when no part is there. It is in the

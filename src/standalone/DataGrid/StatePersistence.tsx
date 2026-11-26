@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
 	DataGridCustomDataType,
 	getDataGridDefaultColumnsState,
@@ -20,6 +20,7 @@ import {
 
 export type {
 	DataGridPersistedData,
+	DataGridPersistedFilterList,
 	DataGridPersistedSort,
 	DataGridPersistedSortList,
 	DataGridPersistentState,
@@ -152,11 +153,6 @@ const StatePersistence = () => {
 		overrideSearch,
 	} = useDataGridProps();
 
-	const defaultColumnState = useMemo(
-		() => getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter),
-		[columns, defaultSort, defaultFilter],
-	);
-
 	// the grid only applies the overrides when it opens, so this is the moment
 	// to keep what they replaced: what a plain visit would have started with
 	const [replaced] = useState((): ReplacedFilters | null => {
@@ -170,7 +166,7 @@ const StatePersistence = () => {
 		const stored = decodePersistedState(
 			persistedContext?.[0],
 			columns,
-			defaultColumnState,
+			getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter),
 			config,
 		);
 		return {
@@ -225,7 +221,6 @@ const StatePersistence = () => {
 				? withColumnFilter(columnState, kept.columnFilter)
 				: columnState,
 			columnWidthState,
-			defaultColumnState,
 			columns,
 			config,
 		);
@@ -266,7 +261,6 @@ const StatePersistence = () => {
 		state,
 		columnState,
 		columnWidthState,
-		defaultColumnState,
 		columns,
 		config,
 		replaced,

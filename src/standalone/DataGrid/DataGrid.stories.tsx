@@ -903,9 +903,9 @@ export const OverrideIsNotPersisted: Story = {
 		// the grid has written (widths are new), keeping the user's filters
 		await waitFor(() => expect(stored().width).toBeDefined());
 		await expect(stored().customData).toEqual({ role: "user" });
-		await expect(stored().filter).toEqual({
-			name: { type: "contains", value1: "a", value2: "" },
-		});
+		await expect(stored().filter).toEqual([
+			["name", { type: "contains", value1: "a", value2: "" }],
+		]);
 
 		// no override touches the search, so it is the user's own
 		await userEvent.type(canvas.getByPlaceholderText("Search people"), "e");
@@ -920,7 +920,7 @@ export const OverrideIsNotPersisted: Story = {
 			}),
 		);
 		await waitFor(() => expect(stored().customData).toEqual({}));
-		await expect(stored().filter).toBeUndefined();
+		await expect(stored().filter).toEqual([]);
 		await expect(stored().search).toBeUndefined();
 		await expect(await canvas.findByText("Bob Smith")).toBeVisible();
 	},
