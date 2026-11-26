@@ -2,6 +2,7 @@ import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, within } from "storybook/test";
+import { Button } from "@mui/material";
 import HowToBox from "./index";
 
 // Note: HowToBox internally calls useCCTranslations for the default title.
@@ -184,6 +185,45 @@ export const Issue3463Item7LongWordEntryWrapsInFlexRow: Story = {
 		}
 		await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
 			viewport,
+		);
+	},
+};
+
+export const Issue3463Item8StepsDescribeTheUploadButton: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3463-ITEM-8: with an `id`, the list of entries gets the id `${id}-list`. The upload button below the box points its `aria-describedby` at it, so a screen reader that tabs straight to the button reads the steps after its name.",
+			},
+		},
+	},
+	render: (args) => (
+		<div style={{ width: 400 }}>
+			<HowToBox {...args} />
+			<Button
+				variant={"contained"}
+				aria-describedby={args.id ? `${args.id}-list` : undefined}
+			>
+				Upload
+			</Button>
+		</div>
+	),
+	args: {
+		id: "import-how-to",
+		titleLabel: "How to import",
+		labels: [
+			"Download the template",
+			"Fill in one row per record",
+			"Upload it below",
+		],
+	},
+	play: async ({ canvas }) => {
+		await expect(
+			await canvas.findByRole("button", { name: "Upload" }),
+		).toHaveAccessibleDescription(
+			"Download the template Fill in one row per record Upload it below",
 		);
 	},
 };

@@ -1,15 +1,30 @@
 import React, { useMemo } from "react";
-import GroupBox from "../GroupBox";
+import GroupBox, { GroupBoxHTMLProps } from "../GroupBox";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { TFunction } from "i18next";
-import { styled, useThemeProps } from "@mui/material";
+import { styled, SxProps, Theme, useThemeProps } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 
-export interface HowToBoxProps {
+/**
+ * @remarks Every HTML attribute the box does not take itself is set on its frame, the
+ *          `<fieldset>`, e.g. `aria-label` for a box without a title. A `ref` gets the
+ *          fieldset.
+ */
+export interface HowToBoxProps extends GroupBoxHTMLProps {
 	/**
 	 * Box title label
 	 */
 	titleLabel?: React.ReactNode;
+	/**
+	 * The id of the frame, the `<fieldset>`. The list of entries gets the id
+	 * `` `${id}-list` ``: point a control's `aria-describedby` at it, and screen
+	 * readers read the entries as the control's description, e.g. for an
+	 * upload button below the box. Pointed at the frame's id, the description
+	 * is only the frame's accessible name, its title, not the entries.
+	 *
+	 * Without an id, the list has none either.
+	 */
+	id?: string;
 	/**
 	 * How to entries. An array renders one list item per element; any other
 	 * value renders as a single item.
@@ -32,11 +47,19 @@ export interface HowToBoxProps {
 	 * stays inside the frame and the page does not scroll sideways on a phone.
 	 */
 	labels: string[] | React.ReactNode[] | string | React.ReactNode | undefined;
+	/**
+	 * CSS class to apply to the frame, the `<fieldset>`
+	 */
 	className?: string;
 	/**
 	 * Custom CSS styles
 	 */
 	classes?: Partial<Record<HowToBoxClassKey, string>>;
+	/**
+	 * System styles for the frame, the `<fieldset>`, as on MUI components.
+	 * They apply after the theme's `styleOverrides.root` and `variants`.
+	 */
+	sx?: SxProps<Theme>;
 }
 
 /**
@@ -96,9 +119,12 @@ export type HowToBoxClassKey = "root" | "ul" | "li";
 const isEmptyEntry = (entry: React.ReactNode) =>
 	entry == null || typeof entry === "boolean" || entry === "";
 
-const HowToBox = (inProps: HowToBoxProps) => {
+const HowToBox = React.forwardRef(function HowToBox(
+	inProps: HowToBoxProps,
+	ref: React.ForwardedRef<HTMLFieldSetElement>,
+) {
 	const props = useThemeProps({ props: inProps, name: "CcHowToBox" });
-	const { titleLabel, labels, className, classes } = props;
+	const { titleLabel, labels, className, classes, ...frameProps } = props;
 	const { t } = useCCTranslations();
 
 	const entries = (Array.isArray(labels) ? labels : [labels]).filter(
@@ -108,12 +134,17 @@ const HowToBox = (inProps: HowToBoxProps) => {
 
 	return (
 		<GroupBoxStyled
+			{...frameProps}
+			ref={ref}
 			titleLabel={titleLabel}
 			labels={labels}
 			label={titleLabel ?? t("standalone.how-it-works.title")}
 			className={combineClassNames([className, classes?.root])}
 		>
-			<UnorderedList className={classes?.ul}>
+			<UnorderedList
+				id={frameProps.id ? `${frameProps.id}-list` : undefined}
+				className={classes?.ul}
+			>
 				{entries.map((entry: React.ReactNode, i: number) => (
 					<ListItem key={i} className={classes?.li}>
 						{entry}
@@ -122,7 +153,7 @@ const HowToBox = (inProps: HowToBoxProps) => {
 			</UnorderedList>
 		</GroupBoxStyled>
 	);
-};
+});
 
 export interface HowToBoxTranslateProps extends Omit<
 	HowToBoxProps,
@@ -169,7 +200,8 @@ const translatedEntries = (value: unknown): (string | number)[] => {
 };
 
 /**
- * i18n version of HowToBox
+ * i18n version of HowToBox. Its other props, such as `id`, `aria-label` or
+ * `sx`, reach the HowToBox.
  * @param props The props
  * @see HowToBox
  */
@@ -193,6 +225,11 @@ export const HowToBoxTranslate = (props: HowToBoxTranslateProps) => {
  * Instructions in a frame: a {@link GroupBox} titled "How it works" (or
  * `titleLabel`) around a bulleted list with one item per entry of `labels`.
  *
+ * Every other HTML attribute, `sx` and `ref` reach the frame's `<fieldset>`,
+ * as they reach a {@link GroupBox}: `aria-label` names a box without a title.
+ * With an `id`, the list gets `` `${id}-list` ``, so a control can be
+ * described by the entries with `aria-describedby`.
+ *
  * Theme: `components.CcHowToBox.defaultProps` ({@link HowToBoxProps}),
  * `styleOverrides` per {@link HowToBoxClassKey} slot, and `variants`, which
  * apply to the frame. A variant's `props` match `titleLabel` and `labels` as
@@ -200,6 +237,11 @@ export const HowToBoxTranslate = (props: HowToBoxTranslateProps) => {
  * {@link HowToBoxTranslate} these are the translated title and entries. A
  * `props` function gets these props directly: there is no `ownerState`. A
  * variant reaches the list and its entries through nested selectors.
+ *
+ * @example
+ * // the upload button is described by the steps above it
+ * <HowToBox id={"import-how-to"} labels={steps} />
+ * <Button aria-describedby={"import-how-to-list"}>{t("upload")}</Button>
  *
  * @example
  * // a theme that sets the entries of boxes with their own title in bold

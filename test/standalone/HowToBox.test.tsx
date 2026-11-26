@@ -355,5 +355,104 @@ describe("HowToBox", () => {
 			expect(fieldset).not.toHaveAttribute("labels");
 			expect(consoleError).not.toHaveBeenCalled();
 		});
+
+		it("[ISSUE-3463-ITEM-8] lets a control be described by the steps and an untitled box be named", () => {
+			renderHowToBox(
+				<>
+					<HowToBox
+						labels={["Download the template", "Upload it below"]}
+						id="howto"
+					/>
+					<button aria-describedby="howto-list">Upload</button>
+					<HowToBox
+						titleLabel=""
+						labels={["Check the result"]}
+						aria-label="Import instructions"
+					/>
+				</>,
+			);
+			expect(
+				screen.getByRole("button", { name: "Upload" }),
+			).toHaveAccessibleDescription(/Download the template.*Upload it below/);
+			expect(
+				screen.getByRole("group", { name: "Import instructions" }),
+			).toBeInTheDocument();
+		});
+
+		it("[ISSUE-3463-ITEM-8] sets the id and other HTML attributes on the frame and the derived id on the list, which a box without an id leaves out", () => {
+			const { container } = renderHowToBox(
+				<>
+					<HowToBox
+						id="howto"
+						labels={["Download the template"]}
+						aria-describedby="hint"
+						data-testid="box"
+						style={{ outlineStyle: "dotted" }}
+					/>
+					<button aria-describedby="howto">To the frame</button>
+					<HowToBox labels={["No id"]} />
+				</>,
+			);
+			const [frame, plain] = Array.from(container.querySelectorAll("fieldset"));
+			expect(frame).toHaveAttribute("id", "howto");
+			expect(frame).toHaveAttribute("aria-describedby", "hint");
+			expect(frame).toHaveAttribute("data-testid", "box");
+			expect(frame.style.outlineStyle).toBe("dotted");
+			expect(within(frame).getByRole("list")).toHaveAttribute(
+				"id",
+				"howto-list",
+			);
+			// the frame's own text alternative is its title, not its entries
+			expect(
+				screen.getByRole("button", { name: "To the frame" }),
+			).toHaveAccessibleDescription("How it works");
+			expect(plain).not.toHaveAttribute("id");
+			expect(within(plain).getByRole("list")).not.toHaveAttribute("id");
+		});
+
+		it("[ISSUE-3463-ITEM-8] applies sx to the frame after the theme's styleOverrides and gives a ref the fieldset", () => {
+			const themed = createTheme({
+				components: {
+					CcHowToBox: {
+						styleOverrides: {
+							root: { outlineStyle: "dashed", outlineWidth: "3px" },
+						},
+					},
+				},
+			});
+			const ref = React.createRef<HTMLFieldSetElement>();
+			const { container } = renderHowToBox(
+				<HowToBox ref={ref} sx={{ outlineStyle: "dotted" }} labels={["a"]} />,
+				themed,
+			);
+			const fieldset = fieldsetOf(container);
+			expect(ref.current).toBe(fieldset);
+			expect(getComputedStyle(fieldset).outlineStyle).toBe("dotted");
+			expect(getComputedStyle(fieldset).outlineWidth).toBe("3px");
+			expect(fieldset).not.toHaveAttribute("sx");
+		});
+
+		it("[ISSUE-3463-ITEM-8] HowToBoxTranslate passes the id and aria-* to its box", async () => {
+			const app = await makeAppI18n({
+				en: { translation: { steps: ["Download the template"] } },
+			});
+			renderHowToBox(
+				<>
+					<HowToBoxTranslate
+						t={app.t}
+						labels="steps"
+						id="translated"
+						aria-label="Import instructions"
+					/>
+					<button aria-describedby="translated-list">Upload</button>
+				</>,
+			);
+			expect(
+				screen.getByRole("group", { name: "Import instructions" }),
+			).toHaveAttribute("id", "translated");
+			expect(
+				screen.getByRole("button", { name: "Upload" }),
+			).toHaveAccessibleDescription("Download the template");
+		});
 	});
 });
