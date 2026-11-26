@@ -1,18 +1,36 @@
 import React, { useState } from "react";
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, expectTypeOf, vi, afterEach } from "vitest";
 import {
 	render,
 	screen,
 	fireEvent,
 	cleanup,
 	waitFor,
+	within,
 	act,
 } from "@testing-library/react";
-import { ThemeProvider, createTheme, Theme } from "@mui/material";
+import {
+	ThemeProvider,
+	createTheme,
+	Theme,
+	TypographyProps,
+} from "@mui/material";
 import { TaskAlt } from "@mui/icons-material";
 import type { SvgIconComponent } from "@mui/icons-material";
-import InfoBox from "../../src/standalone/InfoBox";
+import InfoBox, {
+	InfoBoxClassKey,
+	InfoBoxProps,
+} from "../../src/standalone/InfoBox";
+import type * as PackageRoot from "../../src";
 import ccI18n from "../../src/i18n";
+
+// A Typography variant of the app's own, declared the way an app adds one to its theme.
+// tsc (tsconfig-test.json) checks the headingVariant test below against it.
+declare module "@mui/material/Typography" {
+	interface TypographyPropsVariantOverrides {
+		caption2: true;
+	}
+}
 
 afterEach(() => {
 	cleanup();
@@ -543,5 +561,64 @@ describe("InfoBox", () => {
 				"Warning: Upload finished",
 			);
 		});
+	});
+});
+
+describe("InfoBox props types and exports", () => {
+	// the JSX of the tests below is also checked by tsc (tsconfig-test.json)
+	it("[ISSUE-3464-ITEM-5] heading takes any node: emphasis in it renders in the header, which it names", () => {
+		renderInfoBox(
+			<InfoBox
+				status="warning"
+				heading={
+					<>
+						Please <strong>review</strong> the import
+					</>
+				}
+				message="M"
+			/>,
+		);
+		const button = screen.getByRole("button");
+		expect(button).toHaveAccessibleName("Warning: Please review the import");
+		expect(within(button).getByText("review").tagName).toBe("STRONG");
+	});
+
+	it("[ISSUE-3464-ITEM-5] headingVariant takes every variant Typography takes: one the app adds and inherit", () => {
+		renderInfoBox(
+			<>
+				<InfoBox heading="Own variant" message="M" headingVariant="caption2" />
+				<InfoBox heading="Inherited" message="M" headingVariant="inherit" />
+			</>,
+		);
+		expect(screen.getByText("Own variant")).toHaveClass(
+			"MuiTypography-caption2",
+		);
+		expect(screen.getByText("Inherited")).toHaveClass("MuiTypography-inherit");
+		// checked by tsc, not at runtime
+		expectTypeOf<InfoBoxProps["headingVariant"]>().toEqualTypeOf<
+			TypographyProps["variant"]
+		>();
+	});
+
+	it("[ISSUE-3464-ITEM-5] expanded is optional: a forced box needs none, and a theme's defaultProps value applies", () => {
+		renderInfoBox(
+			<InfoBox heading="Forced" message="Forced message" alwaysExpanded />,
+		);
+		renderInfoBox(
+			<InfoBox heading="Themed" message="Themed message" />,
+			createTheme({
+				components: { CcInfoBox: { defaultProps: { expanded: true } } },
+			}),
+		);
+		expect(header("Forced")).toHaveAttribute("aria-expanded", "true");
+		expect(header("Themed")).toHaveAttribute("aria-expanded", "true");
+		expect(screen.getByText("Forced message")).toBeVisible();
+		expect(screen.getByText("Themed message")).toBeVisible();
+	});
+
+	it("[ISSUE-3464-ITEM-5] exports its props and class key types from the package root", () => {
+		// checked by tsc, not at runtime
+		expectTypeOf<PackageRoot.InfoBoxProps>().toEqualTypeOf<InfoBoxProps>();
+		expectTypeOf<PackageRoot.InfoBoxClassKey>().toEqualTypeOf<InfoBoxClassKey>();
 	});
 });

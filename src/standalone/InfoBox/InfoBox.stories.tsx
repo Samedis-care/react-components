@@ -23,13 +23,23 @@ const meta: Meta<typeof InfoBox> = {
 		// without it switches the box to controlled, which MUI reports as an
 		// error
 		expanded: { control: false },
+		// a React node; the control edits it as text
+		heading: { control: "text" },
 		status: {
 			control: "select",
 			options: ["info", "warning", "success", "error"],
 		},
 		headingVariant: {
 			control: "select",
-			options: ["caption", "body1", "body2", "subtitle1", "subtitle2", "h6"],
+			options: [
+				"caption",
+				"body1",
+				"body2",
+				"subtitle1",
+				"subtitle2",
+				"h6",
+				"inherit",
+			],
 		},
 	},
 };

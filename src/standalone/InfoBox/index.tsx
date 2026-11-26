@@ -15,10 +15,10 @@ import {
 	PaletteColor,
 	styled,
 	Typography,
+	TypographyProps,
 	useThemeProps,
 } from "@mui/material";
 import { useControlled } from "@mui/material/utils";
-import { TypographyVariant } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import combineClassNames from "../../utils/combineClassNames";
 import ccI18n from "../../i18n";
@@ -205,11 +205,17 @@ export type InfoBoxClassKey =
 
 export interface InfoBoxProps {
 	/**
-	 * Title of the info box. For a `warning`, `success` or `error` status the
-	 * translated status is read before it (e.g. "Warning: Please review"), so
-	 * don't repeat the status here.
+	 * Title of the info box, shown in the header: text, or any node that may
+	 * stand inside a button, such as a `<Trans>` element or text with
+	 * emphasis. The whole header is a button, which must not hold a link or
+	 * another control (assistive technology reads its content as plain
+	 * text): put those into `message`. It names the header button, so it
+	 * must not be empty (`""`, `null`, `undefined`).
+	 * For a `warning`, `success` or `error` status the translated status is
+	 * read before it (e.g. "Warning: Please review"), so don't repeat the
+	 * status here.
 	 */
-	heading: string;
+	heading: React.ReactNode;
 	/**
 	 * Controlled expanded state, like MUI Accordion's `expanded`: `true`
 	 * shows the message, `false` shows only the header. The box shows this
@@ -262,10 +268,12 @@ export interface InfoBoxProps {
 	 */
 	onChange?: AccordionProps["onChange"];
 	/**
-	 * typography variant to use for heading
+	 * Typography variant of the heading: any variant MUI's `Typography`
+	 * takes, including `"inherit"` and the variants a theme adds through
+	 * `TypographyPropsVariantOverrides`.
 	 * @default "caption"
 	 */
-	headingVariant?: TypographyVariant;
+	headingVariant?: TypographyProps["variant"];
 	/**
 	 * custom class name to apply to root
 	 */

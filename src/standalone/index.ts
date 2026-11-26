@@ -17,6 +17,7 @@ export * from "./DataGrid";
 export * from "./VerticalDivider";
 export { default as VerticalDivider } from "./VerticalDivider";
 export * from "./LocalizedDateTimePickers";
+export * from "./InfoBox";
 export { default as InfoBox } from "./InfoBox";
 export * from "./HowToBox";
 export { default as HowToBox } from "./HowToBox";
