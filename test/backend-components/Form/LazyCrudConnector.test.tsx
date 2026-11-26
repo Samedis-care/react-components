@@ -60,6 +60,13 @@ import { PartialExcept } from "../../../src/utils/distributiveOmit";
 import PartialApplyError, {
 	isPartialApplyError,
 } from "../../../src/backend-components/Form/PartialApplyError";
+import NetworkError from "../../../src/backend-integration/Connector/NetworkError";
+import BackendError from "../../../src/backend-integration/Connector/BackendError";
+import {
+	configureErrorReporting,
+	defaultShouldReportError,
+	getErrorReportingConfig,
+} from "../../../src/framework/ErrorReporting";
 
 setupFormTests();
 
@@ -2139,5 +2146,34 @@ describe("FormCrudMultiSelect: a save the backend refuses in part", () => {
 			"delete:joins/1:j9",
 		]);
 		expect(listed()).toEqual(["Ls1", "Ls2"]);
+	});
+
+	it("[ISSUE-3505-ITEM-27] a save whose queued writes failed for the connection is not reported, one the backend refused is", async () => {
+		const before = { ...getErrorReportingConfig() };
+		const report = vi.fn();
+		configureErrorReporting({ report, shouldReport: defaultShouldReportError });
+		try {
+			const { env, sink, ref } = await mountSelector();
+			// the queue binds the real connector's create as the pick is queued
+			vi.spyOn(env.connectors[0], "create")
+				.mockRejectedValueOnce(new NetworkError("offline"))
+				.mockRejectedValueOnce(new BackendError("Person 2 is archived"));
+			await add(ref, "s2");
+
+			const offline = await trySubmit(sink);
+			await settle();
+			const refused = await trySubmit(sink);
+			await settle();
+
+			expect(isPartialApplyError(offline as Error)).toBe(true);
+			expect(isPartialApplyError(refused as Error)).toBe(true);
+			expect(report).toHaveBeenCalledTimes(1);
+			expect(report).toHaveBeenCalledWith(
+				refused,
+				expect.objectContaining({ source: "FormEngine.submit" }),
+			);
+		} finally {
+			configureErrorReporting(before);
+		}
 	});
 });

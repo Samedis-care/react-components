@@ -52,6 +52,11 @@ export const CcErrorNames = {
 	 */
 	ImageLoadError: "CcImageLoadError",
 	/**
+	 * @see PartialApplyError
+	 * @remarks the name is prefixed, to avoid collisions with app error classes
+	 */
+	PartialApplyError: "CcPartialApplyError",
+	/**
 	 * @see RequestBatchingError
 	 */
 	RequestBatchingError: "RequestBatchingError",
@@ -117,15 +122,50 @@ export const DefaultUnreportedErrorNames: string[] = [
 ];
 
 /**
- * The default reporting policy
+ * The errors of the failed writes a PartialApplyError lists, read by its name and its
+ * `failures`, so one from another copy of the library counts too
+ * @param error The error to read
+ * @returns The errors, one per failure; null if it is no PartialApplyError or lists no
+ *          failures
+ */
+const failedWriteErrorsOf = (error: Error): unknown[] | null => {
+	if (error.name !== CcErrorNames.PartialApplyError) return null;
+	const failures = (error as Error & Partial<Record<"failures", unknown>>)
+		.failures;
+	if (!Array.isArray(failures) || failures.length === 0) return null;
+	return failures.map(
+		(failure: unknown) =>
+			(failure as Partial<Record<"error", unknown>> | null)?.error,
+	);
+};
+
+/**
+ * The default reporting policy: every error except those named in
+ * DefaultUnreportedErrorNames or in the call site's `ignoreNames`
+ * @remarks A PartialApplyError (CcErrorNames.PartialApplyError) is judged by the errors of
+ *          its failed writes: it is reported if at least one of them would be reported on
+ *          its own, and not if none would, e.g. when all are NetworkErrors because the
+ *          connection dropped while a Form's save sent a lazy control's queue. A failure
+ *          whose error is no Error counts as reported.
  * @see DefaultUnreportedErrorNames
  */
 export const defaultShouldReportError: ShouldReportErrorCallback = (
 	error,
 	context,
-) =>
-	!DefaultUnreportedErrorNames.includes(error.name) &&
-	!(context.ignoreNames ?? []).includes(error.name);
+) => {
+	if (
+		DefaultUnreportedErrorNames.includes(error.name) ||
+		(context.ignoreNames ?? []).includes(error.name)
+	)
+		return false;
+	const failedWriteErrors = failedWriteErrorsOf(error);
+	if (!failedWriteErrors) return true;
+	return failedWriteErrors.some(
+		(failedWriteError) =>
+			!(failedWriteError instanceof Error) ||
+			defaultShouldReportError(failedWriteError, context),
+	);
+};
 
 /**
  * The default reporter: Sentry, if @sentry/react is installed, otherwise a no-op

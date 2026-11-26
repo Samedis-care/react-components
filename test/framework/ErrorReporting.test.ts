@@ -7,6 +7,9 @@ import {
 	defaultShouldReportError,
 	getErrorReportingConfig,
 } from "../../src/framework/ErrorReporting";
+import PartialApplyError, {
+	PartialApplyFailure,
+} from "../../src/backend-components/Form/PartialApplyError";
 
 const namedError = (name: string): Error => {
 	const e = new Error(`test ${name}`);
@@ -73,6 +76,90 @@ describe("defaultShouldReportError", () => {
 				ignoreNames: [CcErrorNames.BackendError],
 			}),
 		).toBe(false);
+	});
+});
+
+describe("defaultShouldReportError: a PartialApplyError", () => {
+	/** A PartialApplyError with one failed write per error */
+	const partialApplyError = (...errors: unknown[]) =>
+		new PartialApplyError(
+			"test",
+			errors.map((error, index): PartialApplyFailure => ({
+				entry: `entry ${index}`,
+				action: "create",
+				error: error as Error,
+			})),
+		);
+
+	it("[ISSUE-3505-ITEM-27] CcErrorNames.PartialApplyError is the name of a PartialApplyError", () => {
+		expect(CcErrorNames.PartialApplyError).toBe(
+			partialApplyError(new Error("boom")).name,
+		);
+	});
+
+	it("[ISSUE-3505-ITEM-27] doesn't report one whose writes all failed with NetworkErrors", () => {
+		expect(
+			defaultShouldReportError(
+				partialApplyError(
+					namedError(CcErrorNames.NetworkError),
+					namedError(CcErrorNames.NetworkError),
+				),
+				{ source: "test" },
+			),
+		).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-27] reports one with a write that failed with an error reported on its own", () => {
+		expect(
+			defaultShouldReportError(
+				partialApplyError(
+					namedError(CcErrorNames.NetworkError),
+					namedError(CcErrorNames.BackendError),
+				),
+				{ source: "test" },
+			),
+		).toBe(true);
+		expect(
+			defaultShouldReportError(partialApplyError(new TypeError("boom")), {
+				source: "test",
+			}),
+		).toBe(true);
+	});
+
+	it("[ISSUE-3505-ITEM-27] judges its writes' errors by context.ignoreNames too", () => {
+		expect(
+			defaultShouldReportError(
+				partialApplyError(
+					namedError(CcErrorNames.BackendError),
+					namedError(CcErrorNames.NetworkError),
+				),
+				{ source: "test", ignoreNames: [CcErrorNames.BackendError] },
+			),
+		).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-27] judges one from another copy of the library by its name and failures", () => {
+		const copy = Object.assign(namedError(CcErrorNames.PartialApplyError), {
+			failures: [{ error: namedError(CcErrorNames.NetworkError) }],
+		});
+		expect(defaultShouldReportError(copy, { source: "test" })).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-27] reports one without failures, or with a failure that is no Error", () => {
+		expect(
+			defaultShouldReportError(partialApplyError(), { source: "test" }),
+		).toBe(true);
+		expect(
+			defaultShouldReportError(
+				partialApplyError(namedError(CcErrorNames.NetworkError), "offline"),
+				{ source: "test" },
+			),
+		).toBe(true);
+		expect(
+			defaultShouldReportError(partialApplyError(undefined), {
+				source: "test",
+			}),
+		).toBe(true);
 	});
 });
 

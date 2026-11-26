@@ -784,7 +784,8 @@ Independently of what your error component displays, Components-Care forwards un
 error tracker. If `@sentry/react` is installed it is used automatically, otherwise nothing happens.
 By default a `ValidationError` and a `NetworkError` are **not** reported (neither is actionable —
 one is a normal part of the form flow, the other is usually the user's connection), while a
-`BackendError` and code errors (`Error`, `TypeError`, ...) are.
+`BackendError` and code errors (`Error`, `TypeError`, ...) are. A `PartialApplyError` is judged by
+the errors it wraps (see below).
 
 Both the policy and the destination are configurable from your application's startup code:
 
@@ -809,14 +810,24 @@ configureErrorReporting({
 Errors are matched by `Error.name`, not by `instanceof`, because the error classes may cross bundle
 boundaries. `CcErrorNames` holds the names of every error class the library raises:
 
-| Constant                            | `Error.name`         | Reported by default |
-| ----------------------------------- | -------------------- | ------------------- |
-| `CcErrorNames.ValidationError`      | `CcValidationError`  | no                  |
-| `CcErrorNames.NetworkError`         | `NetworkError`       | no                  |
-| `CcErrorNames.BackendError`         | `BackendError`       | yes                 |
-| `CcErrorNames.RequestBatchingError` | `RequestBatchingError` | yes               |
-| `CcErrorNames.ImageLoadError`       | `CcImageLoadError`   | yes                 |
+| Constant                            | `Error.name`           | Reported by default       |
+| ----------------------------------- | ---------------------- | ------------------------- |
+| `CcErrorNames.ValidationError`      | `CcValidationError`    | no                        |
+| `CcErrorNames.NetworkError`         | `NetworkError`         | no                        |
+| `CcErrorNames.BackendError`         | `BackendError`         | yes                       |
+| `CcErrorNames.RequestBatchingError` | `RequestBatchingError` | yes                       |
+| `CcErrorNames.ImageLoadError`       | `CcImageLoadError`     | yes                       |
+| `CcErrorNames.PartialApplyError`    | `CcPartialApplyError`  | if one of its failures is |
 
 An `ImageLoadError` is raised when the browser can't decode an image the user selected — an
 unsupported format (HEIC, TIFF) or a corrupt file. The user is always shown a message for it, so if
 you don't want these in your error tracker, filter the name out via `shouldReport`.
+
+A `PartialApplyError` lists the writes of a CRUD control's change that did not go through, each
+with its error (`failures[].error`). A Form's save rejects with it when the backend refused writes
+of a lazy control's queue (see above), and the form reports it. The default policy reports it if
+at least one of those errors would be reported on its own (a `BackendError`, a code error), and
+not if none would: when all of them are `NetworkError`s because the connection dropped while the
+queue was sent, or names in the call site's `ignoreNames`. A failure whose error is no `Error`
+counts as reported. A custom `shouldReport` gets the `PartialApplyError` itself; read its
+`failures` to filter by the errors inside, or hand it to `defaultShouldReportError`.
