@@ -42,7 +42,15 @@
 				"max-date": "Voer een datum in op of vóór {{DATE}}",
 				"past": "Voer de datum van vandaag of een latere datum in",
 				"future": "Voer de datum van vandaag of een eerdere datum in",
-				"unavailable": "Voer een datum in die geselecteerd kan worden"
+				"unavailable": "Voer een datum in die geselecteerd kan worden",
+				"min-date-time": "Voer een datum en tijd in op of na {{DATE}}",
+				"max-date-time": "Voer een datum en tijd in op of vóór {{DATE}}",
+				"min-time": "Voer een tijd in vanaf {{TIME}}",
+				"max-time": "Voer een tijd in tot en met {{TIME}}",
+				"past-date-time": "Voer de huidige datum en tijd of een later tijdstip in",
+				"future-date-time": "Voer de huidige datum en tijd of een eerder tijdstip in",
+				"unavailable-time": "Voer een tijd in die geselecteerd kan worden",
+				"minutes-step": "Voer de minuten in stappen van {{STEP}} in"
 			}
 		},
 		"notifications": {

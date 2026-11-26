@@ -42,7 +42,15 @@
 				"max-date": "{{DATE}} yoki undan oldingi sanani kiriting",
 				"past": "Bugungi yoki undan keyingi sanani kiriting",
 				"future": "Bugungi yoki undan oldingi sanani kiriting",
-				"unavailable": "Tanlash mumkin bo'lgan sanani kiriting"
+				"unavailable": "Tanlash mumkin bo'lgan sanani kiriting",
+				"min-date-time": "{{DATE}} yoki undan keyingi sana va vaqtni kiriting",
+				"max-date-time": "{{DATE}} yoki undan oldingi sana va vaqtni kiriting",
+				"min-time": "{{TIME}} yoki undan keyingi vaqtni kiriting",
+				"max-time": "{{TIME}} yoki undan oldingi vaqtni kiriting",
+				"past-date-time": "Hozirgi yoki undan keyingi sana va vaqtni kiriting",
+				"future-date-time": "Hozirgi yoki undan oldingi sana va vaqtni kiriting",
+				"unavailable-time": "Tanlash mumkin bo'lgan vaqtni kiriting",
+				"minutes-step": "Daqiqalarni {{STEP}} qadam bilan kiriting"
 			}
 		},
 		"notifications": {

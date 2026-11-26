@@ -42,7 +42,15 @@
 				"max-date": "Entrez une date égale ou antérieure au {{DATE}}",
 				"past": "Entrez la date du jour ou une date ultérieure",
 				"future": "Entrez la date du jour ou une date antérieure",
-				"unavailable": "Entrez une date qui peut être sélectionnée"
+				"unavailable": "Entrez une date qui peut être sélectionnée",
+				"min-date-time": "Entrez une date et une heure égales ou postérieures au {{DATE}}",
+				"max-date-time": "Entrez une date et une heure égales ou antérieures au {{DATE}}",
+				"min-time": "Entrez une heure égale ou postérieure à {{TIME}}",
+				"max-time": "Entrez une heure égale ou antérieure à {{TIME}}",
+				"past-date-time": "Entrez la date et l'heure actuelles ou un moment ultérieur",
+				"future-date-time": "Entrez la date et l'heure actuelles ou un moment antérieur",
+				"unavailable-time": "Entrez une heure qui peut être sélectionnée",
+				"minutes-step": "Entrez les minutes par pas de {{STEP}}"
 			}
 		},
 		"notifications": {

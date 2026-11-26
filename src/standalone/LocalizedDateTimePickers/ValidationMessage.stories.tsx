@@ -7,13 +7,15 @@ import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import moment, { type Moment } from "moment";
 import ccI18n from "../../i18n";
 import LocalizedKeyboardDatePicker from "./LocalizedKeyboardDatePicker";
+import LocalizedDateTimePicker from "./LocalizedDateTimePicker";
 
 /**
- * The text a date picker shows under the field while its own validation
- * (`minDate`, `maxDate`, `disablePast`, an impossible date, …) rejects the date
- * it shows. It takes the place of the helper text, is the field's description,
- * and waits until the user leaves the field before it appears, so a year typed
- * through 0002, 0020 and 0202 does not flash it.
+ * The text a date or date-time picker shows under the field while its own
+ * validation (`minDate`, `maxDate`, `minTime`, `minDateTime`, `disablePast`, an
+ * impossible date, …) rejects the value it shows. It takes the place of the
+ * helper text, is the field's description, and waits until the user leaves the
+ * field before it appears, so a year typed through 0002, 0020 and 0202 does
+ * not flash it.
  */
 const meta: Meta = {
 	title: "standalone/LocalizedDateTimePickers/Validation message",
@@ -152,5 +154,93 @@ export const LeavingARejectedEntry: StoryObj = {
 		await expect(canvas.getByRole("group")).toHaveAccessibleDescription(
 			"Enter a date on or after 01/01/2020",
 		);
+	},
+};
+
+const OPENING = moment("2026-08-01T09:00");
+const CLOSING = moment("2026-08-01T17:00");
+
+const ControlledDateTime = (props: { initial: string; hint?: string }) => {
+	const [value, setValue] = useState<Moment | null>(() =>
+		moment(props.initial),
+	);
+	return (
+		<LocalizedDateTimePicker
+			label="Starts"
+			value={value}
+			onChange={setValue}
+			minTime={OPENING}
+			maxTime={CLOSING}
+			fullWidth
+			slotProps={
+				props.hint ? { textField: { helperText: props.hint } } : undefined
+			}
+		/>
+	);
+};
+
+/**
+ * A date-time picker with a stored time before `minTime`: the message names the
+ * time, written as the field writes it
+ */
+export const RejectedTime: StoryObj = {
+	render: () => (
+		<ControlledDateTime
+			initial="2026-08-01T08:00"
+			hint="During the opening hours."
+		/>
+	),
+	play: async ({ canvas }) => {
+		await expect(canvas.getByRole("group")).toHaveAccessibleDescription(
+			"Enter a time at or after 09:00 AM",
+		);
+		await expect(
+			canvas.queryByText("During the opening hours."),
+		).not.toBeInTheDocument();
+	},
+};
+
+/**
+ * A date-time picker with `minDateTime`: an earlier day and an earlier time on
+ * its day both ask for a date and time on or after it
+ */
+export const RejectedDateTime: StoryObj = {
+	render: () => (
+		<LocalizedDateTimePicker
+			label="Starts"
+			value={moment("2026-08-01T09:30")}
+			minDateTime={moment("2026-08-01T10:00")}
+			fullWidth
+		/>
+	),
+	play: async ({ canvas }) => {
+		await expect(canvas.getByRole("group")).toHaveAccessibleDescription(
+			"Enter a date and time on or after 08/01/2026 10:00 AM",
+		);
+	},
+};
+
+/**
+ * Typing an hour after closing time: the field turns red, and the message
+ * appears once the user leaves it
+ */
+export const LeavingARejectedTime: StoryObj = {
+	render: () => (
+		<>
+			<ControlledDateTime initial="2026-08-01T10:00" />
+			<button type="button">Next</button>
+		</>
+	),
+	play: async ({ canvas, userEvent }) => {
+		const group = canvas.getByRole("group");
+		const message = "Enter a time at or before 05:00 PM";
+		await userEvent.click(canvas.getAllByRole("spinbutton")[5]);
+		await userEvent.keyboard("P");
+		await waitFor(() => expect(fieldText(canvas)).toBe("08|01|2026|10|00|PM"));
+		await expect(group).toHaveAttribute("aria-invalid", "true");
+		await expect(canvas.queryByText(message)).not.toBeInTheDocument();
+
+		await userEvent.click(canvas.getByRole("button", { name: "Next" }));
+		await expect(group).toHaveAccessibleDescription(message);
 	},
 };

@@ -42,7 +42,15 @@
 				"max-date": "Inserisci una data uguale o precedente al {{DATE}}",
 				"past": "Inserisci la data di oggi o una successiva",
 				"future": "Inserisci la data di oggi o una precedente",
-				"unavailable": "Inserisci una data selezionabile"
+				"unavailable": "Inserisci una data selezionabile",
+				"min-date-time": "Inserisci una data e un'ora uguali o successive al {{DATE}}",
+				"max-date-time": "Inserisci una data e un'ora uguali o precedenti al {{DATE}}",
+				"min-time": "Inserisci un'ora uguale o successiva alle {{TIME}}",
+				"max-time": "Inserisci un'ora uguale o precedente alle {{TIME}}",
+				"past-date-time": "Inserisci la data e l'ora attuali o un momento successivo",
+				"future-date-time": "Inserisci la data e l'ora attuali o un momento precedente",
+				"unavailable-time": "Inserisci un'ora selezionabile",
+				"minutes-step": "Inserisci i minuti a intervalli di {{STEP}}"
 			}
 		},
 		"signal-portlet": {

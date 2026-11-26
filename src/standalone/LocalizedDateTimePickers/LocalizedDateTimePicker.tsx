@@ -4,6 +4,7 @@ import {
 	DateTimePickerProps,
 	LocalizationProvider,
 	PickersTextFieldProps,
+	usePickerAdapter,
 } from "@mui/x-date-pickers";
 import { withMuiFieldState } from "../UIKit";
 import { TextFieldProps } from "@mui/material";
@@ -11,6 +12,7 @@ import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 import usePickerDraft from "./usePickerDraft";
 import usePickerValidationError from "./usePickerValidationError";
+import usePickerErrorMessage from "./usePickerErrorMessage";
 import withAccessibleError from "./withAccessibleError";
 import withRequiredSections from "./withRequiredSections";
 import useFieldBlur from "./useFieldBlur";
@@ -33,6 +35,23 @@ const DESKTOP_MODE_MEDIA_QUERY =
 /**
  * Props of a date and time picker (MUI's `DateTimePicker` with the `L LT`
  * format of the current language).
+ *
+ * While the picker's own validation rejects the date and time the field shows
+ * (`minDate`, `maxDate`, `minDateTime`, `maxDateTime`, `minTime`, `maxTime`,
+ * `minutesStep`, `disablePast`, `disableFuture`, `shouldDisableDate`,
+ * `shouldDisableTime`, an impossible date such as 02/31), the field says why
+ * in a message under it, in the components-care language: "Enter a time at or
+ * after 09:00 AM", "Enter a date and time on or after 08/01/2026 10:00 AM". A
+ * limit is written as the field writes it, a limit with a date in the
+ * timezone the field shows. The message takes the place of
+ * `slotProps.textField.helperText` and is the field's description. A
+ * rejection that comes up while the user is in the field shows once focus
+ * leaves it, so a year typed through 0002 does not flash it; one that comes up
+ * while the user is elsewhere (a date set from outside, a changed `minTime`)
+ * shows at once. It goes as soon as the value is valid. A caller that sets
+ * `error` (also to `false`) decides the error state and its text itself, and
+ * gets no message: to show a text of its own, set `error` from `onError` and
+ * pass that text as `helperText`.
  *
  * Keyboard focus shows as a 2px ring in `palette.primary.main` on the button
  * that opens the calendar and on every control of the open calendar, the
@@ -58,8 +77,9 @@ export interface LocalizedDateTimePickerProps extends Omit<
 	 * Forces the error state of the field: red outline and label, and
 	 * `aria-invalid` on the field group and on every section, so a screen reader
 	 * announces it while the user types. When set, also to `false`, it replaces
-	 * the picker's own validation state, which is used while it is undefined.
-	 * Takes precedence over `slotProps.textField.error` when set.
+	 * the picker's own validation state, which is used while it is undefined,
+	 * and with it the picker's own message under the field. Takes precedence
+	 * over `slotProps.textField.error` when set.
 	 */
 	error?: TextFieldProps["error"];
 	/**
@@ -146,6 +166,27 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 		otherProps.defaultValue,
 	);
 	const validation = usePickerValidationError(otherProps.onError);
+	const adapter = usePickerAdapter();
+	const errorMessage = usePickerErrorMessage(validation.shownError, {
+		minDate: otherProps.minDate,
+		maxDate: otherProps.maxDate,
+		minDateTime: otherProps.minDateTime,
+		maxDateTime: otherProps.maxDateTime,
+		minTime: otherProps.minTime,
+		maxTime: otherProps.maxTime,
+		minutesStep: otherProps.minutesStep,
+		disablePast: otherProps.disablePast,
+		disableFuture: otherProps.disableFuture,
+		withTime: true,
+		// the timezone the field shows the date in, as MUI picks it
+		timezone:
+			otherProps.timezone ||
+			(draft.value
+				? adapter.getTimezone(draft.value)
+				: otherProps.referenceDate
+					? adapter.getTimezone(otherProps.referenceDate)
+					: "default"),
+	});
 	const withFieldBlur = useFieldBlur();
 
 	const { settle, accept } = draft;
@@ -213,16 +254,19 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 								...(fullWidth === undefined ? {} : { fullWidth }),
 								// called once focus leaves the field, see withFieldBlur
 								onBlur: (event: React.FocusEvent<HTMLDivElement>) => {
+									validation.onFieldLeave();
 									orgSlotProps?.onBlur?.(event);
 									onBlur?.(event);
 								},
 							}),
+							errorMessage,
 						);
 						return withFieldBlur(
 							ownerState,
 							withFieldName(withReportWhenDone(fieldProps, draft), ariaLabel),
 							{
 								name: otherProps.name,
+								onFieldFocus: validation.onFieldFocus,
 							},
 						);
 					},

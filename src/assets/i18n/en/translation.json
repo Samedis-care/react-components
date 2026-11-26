@@ -42,7 +42,15 @@
 				"max-date": "Enter a date on or before {{DATE}}",
 				"past": "Enter today's date or a later one",
 				"future": "Enter today's date or an earlier one",
-				"unavailable": "Enter a date that can be selected"
+				"unavailable": "Enter a date that can be selected",
+				"min-date-time": "Enter a date and time on or after {{DATE}}",
+				"max-date-time": "Enter a date and time on or before {{DATE}}",
+				"min-time": "Enter a time at or after {{TIME}}",
+				"max-time": "Enter a time at or before {{TIME}}",
+				"past-date-time": "Enter the current date and time or a later one",
+				"future-date-time": "Enter the current date and time or an earlier one",
+				"unavailable-time": "Enter a time that can be selected",
+				"minutes-step": "Enter minutes in steps of {{STEP}}"
 			}
 		},
 		"signal-portlet": {

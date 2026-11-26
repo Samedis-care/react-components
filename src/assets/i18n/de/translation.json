@@ -42,7 +42,15 @@
 				"max-date": "Gib ein Datum bis zum {{DATE}} ein",
 				"past": "Gib das heutige oder ein späteres Datum ein",
 				"future": "Gib das heutige oder ein früheres Datum ein",
-				"unavailable": "Gib ein Datum ein, das ausgewählt werden kann"
+				"unavailable": "Gib ein Datum ein, das ausgewählt werden kann",
+				"min-date-time": "Gib ein Datum und eine Uhrzeit ab dem {{DATE}} ein",
+				"max-date-time": "Gib ein Datum und eine Uhrzeit bis zum {{DATE}} ein",
+				"min-time": "Gib eine Uhrzeit ab {{TIME}} ein",
+				"max-time": "Gib eine Uhrzeit bis {{TIME}} ein",
+				"past-date-time": "Gib den aktuellen oder einen späteren Zeitpunkt ein",
+				"future-date-time": "Gib den aktuellen oder einen früheren Zeitpunkt ein",
+				"unavailable-time": "Gib eine Uhrzeit ein, die ausgewählt werden kann",
+				"minutes-step": "Gib die Minuten in Schritten von {{STEP}} ein"
 			}
 		},
 		"notifications": {
