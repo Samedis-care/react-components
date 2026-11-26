@@ -220,18 +220,23 @@ const loadBuckets = (
  * provider mounts and when the storage keys change, and a grid writes the
  * parts it persists as it has them. So the tab that writes last decides
  * them, also those another tab changed meanwhile.
- * @remarks The data it provides is what was written last, so a grid mounted
- *          later (or anything else reading the context) starts from the
- *          current state, not from the state loaded on mount
+ * @remarks The data it provides is what was written last since the buckets
+ *          were read, so a grid mounted later (or anything else reading the
+ *          context) starts from the current state, not from the state loaded
+ *          on mount. Storage keys that come back are read again, and their
+ *          grids start from what is stored for them then, not from what was
+ *          written for them before.
  */
 const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 	const { storageKeys, children } = props;
 	const storageKeysJson = JSON.stringify(storageKeys);
 
 	// the storage is only read once per storage keys, so what was written since
-	// is kept here, together with the keys it was written for
+	// is kept here, together with the read it follows: storage keys read again
+	// start from what is stored for them then, which another tab or device may
+	// have changed meanwhile
 	const [written, setWritten] = useState<
-		[string, DataGridPersistentState] | null
+		[read: LoadedBuckets[2] | undefined, state: DataGridPersistentState] | null
 	>(null);
 
 	// read while rendering, once per storage keys: a storage that answers
@@ -269,7 +274,7 @@ const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 
 	const setData = useCallback(
 		async (data: DataGridPersistentState) => {
-			setWritten([storageKeysJson, data]);
+			setWritten([read, data]);
 			if (!stored.current || stored.current[0] !== read)
 				stored.current = [read, new Map(read)];
 			const values = stored.current[1];
@@ -333,10 +338,11 @@ const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 
 	const persistCtx = useMemo(
 		(): DataGridPersistentStateContextType | undefined =>
+			// what was written since this read of the buckets, else what they hold
 			data
-				? [written?.[0] === storageKeysJson ? written[1] : data[0], setData]
+				? [written?.[0] === data[2] ? written[1] : data[0], setData]
 				: undefined,
-		[written, storageKeysJson, data, setData],
+		[written, data, setData],
 	);
 
 	return (

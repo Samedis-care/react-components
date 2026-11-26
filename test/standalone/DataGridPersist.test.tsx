@@ -1589,6 +1589,82 @@ describe("StorageManagerPersist bucket writes", () => {
 		});
 		expect(server.data[keyOf(FILTERS, keys)]).toBe(writtenFilters());
 	});
+
+	/** each storage as it answers: [name, route both buckets to it] */
+	const storages: [name: string, setUp: () => void][] = [
+		[
+			"a server, which answers asynchronously",
+			() => {
+				const server = new MemoryProvider();
+				StorageManager.configure((_id, keys) => [server, keys]);
+			},
+		],
+		[
+			"localStorage, which answers synchronously",
+			() => StorageManager.configure(DefaultGetStorageProviderCallback),
+		],
+	];
+
+	/**
+	 * Opens a grid under storage keys a and changes its search and columns,
+	 * switches to storage keys b, has a's filters bucket changed elsewhere, and
+	 * switches back to a
+	 * @returns storage keys a
+	 */
+	const backToKeysChangedElsewhere = async () => {
+		const a = { model: "a" };
+		const b = { model: "b" };
+		const { rerender } = render(smp(a));
+		await gridIdle();
+		act(() =>
+			grid!.setState((prev) => ({
+				...prev,
+				search: "written",
+				columnHidden: { ...prev.columnHidden, role: true },
+			})),
+		);
+		grid = null;
+		rerender(smp(b));
+		await gridIdle();
+
+		// meanwhile another tab, or another device through the server, changes a's filters
+		await StorageManager.setItem(
+			FILTERS,
+			a,
+			JSON.stringify({
+				v: DATA_GRID_PERSIST_VERSION,
+				search: "elsewhere",
+				shown: ["name", "role"],
+				hidden: ["secret"],
+			}),
+		);
+		grid = null;
+		rerender(smp(a));
+		await gridIdle();
+		return a;
+	};
+
+	it.each(storages)(
+		"[ISSUE-3496-ITEM-23] %s: a grid under storage keys read again opens with what is stored for them then, not with what it wrote for them before",
+		async (_name, setUp) => {
+			setUp();
+			await backToKeysChangedElsewhere();
+			expect(grid!.state.search).toBe("elsewhere");
+			expect(grid!.state.columnHidden).toMatchObject({ role: false });
+		},
+	);
+
+	it.each(storages)(
+		"[ISSUE-3496-ITEM-23] %s: the next change of a grid under storage keys read again keeps what is stored for them then",
+		async (_name, setUp) => {
+			setUp();
+			const a = await backToKeysChangedElsewhere();
+			act(() => grid!.setWidths((prev) => ({ ...prev, name: 321 })));
+			const filters = persisted(await StorageManager.getItem(FILTERS, a));
+			expect(filters.search).toBe("elsewhere");
+			expect(filters.hidden).not.toContain("role");
+		},
+	);
 });
 
 describe("keyboard focus across a storage key change", () => {
