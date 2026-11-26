@@ -251,12 +251,14 @@ describe("LazyConnector.cancelQueuedOperation", () => {
 
 describe("LazyConnector workQueue", () => {
 	/**
-	 * A connector whose writes fail for whatever it is told to refuse
+	 * A connector whose writes fail for whatever it is told to refuse: a create or an update
+	 * by the name it carries, a delete by its id
 	 */
 	const makeRefusingConnector = (refused: string[]) => {
 		const { connector, calls } = makeRealConnector();
 		const real = connector as unknown as {
 			create: (data: Record<string, unknown>) => Promise<unknown>;
+			update: (data: Record<string, unknown>) => Promise<unknown>;
 			delete: (id: string) => Promise<unknown>;
 		};
 		real.create = vi.fn((data: Record<string, unknown>) => {
@@ -265,6 +267,13 @@ describe("LazyConnector workQueue", () => {
 			return refused.includes(name)
 				? Promise.reject(new Error(`create of ${name} refused`))
 				: Promise.resolve([{ id: `real-${name}` }, {}]);
+		});
+		real.update = vi.fn((data: Record<string, unknown>) => {
+			const name = String(data.name);
+			calls.push(`update:${String(data.id)}:${name}`);
+			return refused.includes(name)
+				? Promise.reject(new Error(`update to ${name} refused`))
+				: Promise.resolve([data, {}]);
 		});
 		real.delete = vi.fn((id: string) => {
 			calls.push(`delete:${id}`);
@@ -278,20 +287,141 @@ describe("LazyConnector workQueue", () => {
 		};
 	};
 
-	it("keeps what it could not send, and only that", async () => {
-		const { lazy, calls } = makeRefusingConnector(["b"]);
+	it("[ISSUE-3505-ITEM-11] sends the creates and updates queued after a refused write, and keeps only the refused ones", async () => {
+		const { lazy, calls } = makeRefusingConnector(["b", "x2", "d"]);
 		lazy.create({ name: "a" }, undefined);
 		lazy.create({ name: "b" }, undefined);
+		void lazy.update({ id: "x", name: "x2" }, undefined);
 		lazy.create({ name: "c" }, undefined);
+		lazy.create({ name: "d" }, undefined);
+		void lazy.update({ id: "y", name: "y2" }, undefined);
 
 		await expect(lazy.workQueue()).rejects.toThrow("refused");
 
-		// it stops at the one that failed, which stays queued with everything behind it
-		expect(calls).toStrictEqual(["create:a", "create:b"]);
-		expect(lazy.isQueueEmpty()).toBe(false);
-		expect(lazy.getQueuedOperation("fake-id-0")).toBe(null);
-		expect(lazy.getQueuedOperation("fake-id-1")).toBe("create");
-		expect(lazy.getQueuedOperation("fake-id-2")).toBe("create");
+		expect(calls).toStrictEqual([
+			"create:a",
+			"create:b",
+			"update:x:x2",
+			"create:c",
+			"create:d",
+			"update:y:y2",
+		]);
+		expect(
+			["fake-id-0", "fake-id-1", "x", "fake-id-2", "fake-id-3", "y"].map((id) =>
+				lazy.getQueuedOperation(id),
+			),
+		).toStrictEqual([null, "create", "update", null, "create", null]);
+	});
+
+	it("[ISSUE-3505-ITEM-11] holds back the deletes queued after a refused write until it went through, and sends the ones queued before it", async () => {
+		const refused = ["bad"];
+		const { lazy, calls } = makeRefusingConnector(refused);
+		lazy.delete("before", undefined);
+		lazy.create({ name: "bad" }, undefined);
+		lazy.delete("after", undefined);
+		lazy.deleteMultiple(["after2", "after3"], undefined);
+		lazy.create({ name: "c" }, undefined);
+
+		await expect(lazy.workQueue()).rejects.toThrow("create of bad refused");
+		const firstSave = [...calls];
+		const held = ["after", "after2", "after3"].map((id) =>
+			lazy.getQueuedOperation(id),
+		);
+		// the backend takes it the second time
+		refused.length = 0;
+		calls.length = 0;
+		await lazy.workQueue();
+
+		// a delete may be the second half of a replacement, which must not go while the
+		// record that replaces it is not stored
+		expect(firstSave).toStrictEqual([
+			"delete:before",
+			"create:bad",
+			"create:c",
+		]);
+		expect(held).toStrictEqual(["delete", "delete", "delete"]);
+		expect(calls).toStrictEqual([
+			"create:bad",
+			"delete:after",
+			"deleteMultiple:after2+after3",
+		]);
+		expect(lazy.isQueueEmpty()).toBe(true);
+	});
+
+	it("[ISSUE-3505-ITEM-11] rejects with the refusal itself when one write was refused, and with an AggregateError of all of them when several were", async () => {
+		const one = makeRefusingConnector(["b"]);
+		one.lazy.create({ name: "a" }, undefined);
+		one.lazy.create({ name: "b" }, undefined);
+		const several = makeRefusingConnector(["b", "x2"]);
+		several.lazy.create({ name: "b" }, undefined);
+		void several.lazy.update({ id: "x", name: "x2" }, undefined);
+
+		const single = await one.lazy.workQueue().catch((e: unknown) => e);
+		const aggregate = await several.lazy.workQueue().catch((e: unknown) => e);
+
+		expect(single).not.toBeInstanceOf(AggregateError);
+		expect((single as Error).message).toBe("create of b refused");
+		expect(aggregate).toBeInstanceOf(AggregateError);
+		expect((aggregate as AggregateError).message).toBe(
+			"create of b refused; update to x2 refused",
+		);
+		expect(
+			(aggregate as AggregateError).errors.map((e: Error) => e.message),
+		).toStrictEqual(["create of b refused", "update to x2 refused"]);
+	});
+
+	it("[ISSUE-3505-ITEM-11] rejects with the error the error factory makes of the refused writes, which carry the ids index hands out", async () => {
+		const refused: string[] = [];
+		const { lazy } = makeRefusingConnector(refused);
+		// created by an earlier save, so the backend has its own id for it
+		const [created] = lazy.create({ name: "a" }, undefined);
+		await lazy.workQueue();
+		refused.push("bad", "c");
+		void lazy.update({ ...created, name: "bad" }, undefined);
+		lazy.create({ name: "c" }, undefined);
+		const factory = vi.fn(() => new Error("named by the control"));
+		lazy.setQueueErrorFactory(factory);
+
+		await expect(lazy.workQueue()).rejects.toThrow("named by the control");
+
+		expect(factory).toHaveBeenCalledTimes(1);
+		expect(factory.mock.calls[0]).toStrictEqual([
+			[
+				{
+					id: created.id,
+					operation: "update",
+					error: new Error("update to bad refused"),
+				},
+				{
+					id: "fake-id-1",
+					operation: "create",
+					error: new Error("create of c refused"),
+				},
+			],
+		]);
+	});
+
+	it("[ISSUE-3505-ITEM-11] a factory that makes no error, or was removed, leaves the error as without one", async () => {
+		const { lazy } = makeRefusingConnector(["b"]);
+		lazy.create({ name: "b" }, undefined);
+		const removed = vi.fn(() => new Error("removed factory"));
+		const removeFirst = lazy.setQueueErrorFactory(removed);
+		const second = vi.fn(() => undefined);
+		const removeSecond = lazy.setQueueErrorFactory(second);
+		// removes the first factory only, which the second one replaced already
+		removeFirst();
+
+		const withSecond = await lazy.workQueue().catch((e: unknown) => e);
+		const secondsCalls = second.mock.calls.length;
+		removeSecond();
+		const withNone = await lazy.workQueue().catch((e: unknown) => e);
+
+		expect(removed).not.toHaveBeenCalled();
+		expect((withSecond as Error).message).toBe("create of b refused");
+		expect((withNone as Error).message).toBe("create of b refused");
+		// asked once, and not after it was removed
+		expect(secondsCalls).toBe(1);
+		expect(second).toHaveBeenCalledTimes(1);
 	});
 
 	it("does not write the same record twice when the submit is retried", async () => {

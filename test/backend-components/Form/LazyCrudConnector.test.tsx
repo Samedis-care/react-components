@@ -57,6 +57,9 @@ import MultiSelectEntry, {
 	MultiSelectEntryProps,
 } from "../../../src/standalone/Selector/MultiSelectEntry";
 import { PartialExcept } from "../../../src/utils/distributiveOmit";
+import PartialApplyError, {
+	isPartialApplyError,
+} from "../../../src/backend-components/Form/PartialApplyError";
 
 setupFormTests();
 
@@ -64,8 +67,8 @@ type Rows = Record<string, unknown>[];
 
 /**
  * What the real connectors of one test share: the join rows per endpoint, the request log,
- * the source ids whose create the backend refuses, and an index result that replaces the
- * store's (to hold or fail the load)
+ * the source ids whose create or update the backend refuses, and an index result that
+ * replaces the store's (to hold or fail the load)
  */
 interface Env {
 	stores: Record<string, Rows>;
@@ -131,6 +134,9 @@ class EndpointConnector extends ApiConnector {
 		this.env.calls.push(
 			`update:${this.endpoint}:${String(data.id)}:${String(data.note)}`,
 		);
+		const sourceId = String(data.source_id);
+		if (this.env.refuse.has(sourceId))
+			return Promise.reject(new Error(`refused ${sourceId}`));
 		return Promise.resolve([data, {}]);
 	}
 
@@ -2024,5 +2030,114 @@ describe("FormCrudMultiSelect: changes that are not saved yet", () => {
 		expect(env.calls).toContain("delete:joins/1:j1");
 		expect(listed()).toEqual(["Ls2Added"]);
 		expect(sink.ctx!.dirty).toBe(true);
+	});
+});
+
+describe("FormCrudMultiSelect: a save the backend refuses in part", () => {
+	/**
+	 * The entries' texts as listed, the mark of a change included (also while the error
+	 * dialog of the failed save hides the page)
+	 */
+	const listed = () =>
+		screen
+			.getAllByRole("listitem", { hidden: true })
+			.map((item) => item.textContent);
+
+	/** what a save's error lists: each refused write's entry, action and reason */
+	const failuresOf = (error: unknown) =>
+		(error as PartialApplyError<JoinData>).failures.map((failure) => [
+			failure.entry.label,
+			failure.action,
+			failure.error.message,
+		]);
+
+	it("[ISSUE-3505-ITEM-11] a refused pick does not stop the save: the picks after it are sent, and only the refused one stays queued and marked", async () => {
+		const { env, sink, ref } = await mountSelector();
+		env.refuse.add("s3");
+		await add(ref, "s2");
+		await add(ref, "s3");
+		await add(ref, "s4");
+
+		expect(await trySubmit(sink)).not.toBeNull();
+		await settle();
+
+		expect(env.calls).toEqual([
+			"index:joins/1",
+			"setApiEndpoint:joins/1",
+			"create:joins/1:s2",
+			"create:joins/1:s3",
+			"create:joins/1:s4",
+		]);
+		expect(listed()).toEqual(["Ls1", "Ls2", "Ls3Added", "Ls4"]);
+		expect(sink.ctx!.dirty).toBe(true);
+	});
+
+	it("[ISSUE-3505-ITEM-11] the save's error names every refused entry by its label, and the form shows it in one dialog", async () => {
+		const { env, sink, ref } = await mountSelector();
+		env.refuse.add("s2").add("s4");
+		await add(ref, "s2");
+		await add(ref, "s3");
+		await add(ref, "s4");
+
+		const error = await trySubmit(sink);
+		await screen.findByRole("dialog");
+		await settle();
+
+		expect(isPartialApplyError(error as Error)).toBe(true);
+		expect(failuresOf(error)).toEqual([
+			["Ls2", "create", "refused s2"],
+			["Ls4", "create", "refused s4"],
+		]);
+		// a second modal dialog would hide the first from assistive technology
+		const dialogs = screen.getAllByRole("dialog", { hidden: true });
+		expect(dialogs).toHaveLength(1);
+		expect(dialogs[0]).toHaveTextContent("Ls2: refused s2; Ls4: refused s4");
+	});
+
+	it("[ISSUE-3505-ITEM-11] a refused change of an entry is named too, as a refused update", async () => {
+		const { env, sink } = await mountSelector();
+		env.refuse.add("s1");
+		await select([{ ...selected()[0], note: "changed" }]);
+
+		const error = await trySubmit(sink);
+
+		expect(env.calls).toContain("update:joins/1:j1:changed");
+		expect((error as Error).message).toBe("Ls1: refused s1");
+		expect(failuresOf(error)).toEqual([["Ls1", "update", "refused s1"]]);
+	});
+
+	it("[ISSUE-3505-ITEM-11] a removal queued after a refused pick waits for it: it stays listed as removed, and the next save sends both", async () => {
+		const { env, sink, ref } = await mountSelector({
+			"joins/1": [
+				{ id: "j1", source_id: "s1" },
+				{ id: "j9", source_id: "s9" },
+			],
+		});
+		env.refuse.add("s2");
+		await add(ref, "s2");
+		fireEvent.click(screen.getByRole("button", { name: "Remove Ls9" }));
+		await settle();
+		await settle();
+
+		expect(await trySubmit(sink)).not.toBeNull();
+		await settle();
+		const sentFirst = [...env.calls];
+		const listedAfterRefusal = listed();
+		env.refuse.clear();
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		expect(sentFirst).toEqual([
+			"index:joins/1",
+			"setApiEndpoint:joins/1",
+			"create:joins/1:s2",
+		]);
+		expect(listedAfterRefusal).toEqual(["Ls1", "Ls2Added", "Ls9Removed"]);
+		expect(env.calls.slice(sentFirst.length)).toEqual([
+			"setApiEndpoint:joins/1",
+			"create:joins/1:s2",
+			"delete:joins/1:j9",
+		]);
+		expect(listed()).toEqual(["Ls1", "Ls2"]);
 	});
 });

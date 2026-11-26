@@ -237,6 +237,13 @@ const buildConnector = <ExtraT>(
  * - getEndpoint, getConnector and configureConnector run while the control renders, so they
  *   must not set state; onParentIdChange runs after the control mounted and on every save.
  * - While the queue holds writes the Form is dirty (a custom dirty flag named `field`).
+ * - The save sends the queue after the record was saved (LazyConnector.workQueue). A create
+ *   or update the backend refuses does not stop it: the creates and updates queued after it
+ *   are sent, the deletes queued after it stay queued until it went through. The refused
+ *   writes stay queued, so the Form stays dirty, and the submit rejects although the record
+ *   was saved, with an error that names them: CrudMultiSelect and CrudMultiSelectWithGroups
+ *   name each by its entry's label (a PartialApplyError); with a control that sets no error
+ *   factory it is the backend's refusal, or an AggregateError of several.
  * - A Form given another record (id or model) starts over: the control mounts again with a
  *   new connector for that record, and a queue left for the previous record is dropped,
  *   unsent, also when the new record's page does not show the control.

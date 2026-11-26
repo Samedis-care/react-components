@@ -66,6 +66,7 @@ class FriendConnector extends ApiConnector {
 		private endpoint: string,
 		private stores: Record<string, Rows>,
 		private log: (request: string) => void,
+		private refuse: string[],
 	) {
 		super();
 	}
@@ -86,7 +87,10 @@ class FriendConnector extends ApiConnector {
 	create(
 		data: Record<string, unknown>,
 	): Promise<ModelGetResponse<ModelUnknown>> {
-		this.log(`POST ${this.endpoint} (person ${data.person_id as string})`);
+		const personId = data.person_id as string;
+		this.log(`POST ${this.endpoint} (person ${personId})`);
+		if (this.refuse.includes(personId))
+			return Promise.reject(new Error(`Person ${personId} is archived`));
 		const record = { ...data, id: String(this.counter++) };
 		(this.stores[this.endpoint] ??= []).push(record);
 		return Promise.resolve([record, {}]);
@@ -191,10 +195,16 @@ interface FriendsFormProps {
 	friends: Rows;
 	readOnly?: boolean;
 	showDirtyState?: boolean;
+	/**
+	 * The people the backend refuses to add as friends
+	 */
+	refuse?: string[];
 }
 
+const NOBODY: string[] = [];
+
 const FriendsForm = (props: FriendsFormProps) => {
-	const { id, friends, readOnly, showDirtyState } = props;
+	const { id, friends, readOnly, showDirtyState, refuse = NOBODY } = props;
 	const model = useMemo(createTestModel, []);
 	const [log, setLog] = useState<string[]>([]);
 	const getConnector = useMemo(() => {
@@ -203,8 +213,9 @@ const FriendsForm = (props: FriendsFormProps) => {
 			[getEndpoint("1")]: friends.map((row) => ({ ...row })),
 		};
 		const append = (request: string) => setLog((prev) => [...prev, request]);
-		return (endpoint: string) => new FriendConnector(endpoint, stores, append);
-	}, [friends]);
+		return (endpoint: string) =>
+			new FriendConnector(endpoint, stores, append, refuse);
+	}, [friends, refuse]);
 	const customProps = useMemo(
 		(): StoryCustomProps => ({ getConnector, log }),
 		[getConnector, log],
@@ -415,5 +426,61 @@ export const Issue3505Item12RestoreKeepsFocusAndSendsNothing: StoryObj = {
 				),
 			).toEqual(["GET persons/1/friends"]),
 		);
+	},
+};
+
+const FRANK: string[] = ["6"];
+
+/**
+ * ISSUE-3505-ITEM-11: the backend refuses one of three picks. The save sends the other two
+ * all the same, the refused one stays queued and marked "Added", and the error dialog names
+ * it by its label.
+ */
+export const Issue3505Item11RefusedPickIsNamed: StoryObj = {
+	parameters: { a11y: { test: "error" } },
+	render: () => <FriendsForm id={"1"} friends={CAROL} refuse={FRANK} />,
+	play: async ({ canvasElement, userEvent }) => {
+		const canvas = within(canvasElement);
+		await canvas.findByText("Carol Jones", {}, { timeout: 5000 });
+		for (const name of ["Eve Davis", "Frank Wilson", "Grace Lee"]) {
+			await userEvent.click(canvas.getByRole("combobox", { name: "Friends" }));
+			await userEvent.keyboard(name.split(" ")[0]);
+			await userEvent.click(
+				await within(document.body).findByRole(
+					"option",
+					{ name: new RegExp(name) },
+					{ timeout: 5000 },
+				),
+			);
+			await canvas.findByText(name);
+		}
+
+		await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+
+		const dialog = await within(document.body).findByRole(
+			"dialog",
+			{},
+			{ timeout: 5000 },
+		);
+		await expect(dialog).toHaveTextContent(
+			"Frank Wilson: Person 6 is archived",
+		);
+		await expect(
+			Array.from(
+				canvas.getByTestId("requests").querySelectorAll("li"),
+				(item) => item.textContent,
+			),
+		).toEqual([
+			"GET persons/1/friends",
+			"POST persons/1/friends (person 5)",
+			"POST persons/1/friends (person 6)",
+			"POST persons/1/friends (person 7)",
+		]);
+		const list = canvas.getByText("Carol Jones").closest("ul")!;
+		await expect(
+			within(list)
+				.getAllByRole("listitem", { hidden: true })
+				.map((item) => item.textContent),
+		).toEqual(["Carol Jones", "Eve Davis", "Frank WilsonAdded", "Grace Lee"]);
 	},
 };

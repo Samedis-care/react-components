@@ -28,6 +28,10 @@ export interface UseCrudSelectParams<
 > {
 	/**
 	 * The backend connector used as CRUD interface
+	 * @remarks A LazyConnector queues the writes until its queue is sent (a Form's save). If
+	 *          the backend refuses a write of the queue while the control is mounted, the
+	 *          queue rejects with a PartialApplyError that names it by the entry's label, as
+	 *          a refused write is named in `error` with any other connector.
 	 */
 	connector: Connector;
 	/**
@@ -328,6 +332,26 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 	);
 	const pendingChanges = !!lazyConnector && !lazyConnector.isQueueEmpty();
 	const currentSelected = useRef<DataT[]>([]); // current state of selected, always set this and then use setSelected(currentSelected.current)
+	// A write the LazyConnector's queue sends later (a Form's save) and the backend refuses
+	// is named like a write through any other connector: by the label of the entry it was
+	// for, in a PartialApplyError. The entry is found by its value, the record's id; if one
+	// is not listed, the connector's own error stays.
+	useEffect(() => {
+		if (!lazyConnector) return;
+		return lazyConnector.setQueueErrorFactory((failures) => {
+			const entries = failures.map((failure) =>
+				currentSelected.current.find((entry) => entry.value === failure.id),
+			);
+			if (!entries.every((entry) => entry !== undefined)) return undefined;
+			return toPartialApplyError(
+				failures.map((failure, index) => ({
+					entry: entries[index],
+					action: failure.operation,
+					error: failure.error,
+				})),
+			);
+		});
+	}, [lazyConnector]);
 	const [initialRawData, setInitialRawData] = useState<
 		Record<string, unknown>[]
 	>([]);

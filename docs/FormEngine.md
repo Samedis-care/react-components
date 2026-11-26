@@ -744,6 +744,16 @@ Things to know about the queue:
   `useLazyCrudConnector`) marks its chips the same way, and takes `showDirtyState` itself; a
   group pick restores a removed entry of the group. `FormCrudMultiImage` shows queued changes
   as if they were saved: there are no marks, no restore and no dirty marker.
+- A write of the queue that the backend refuses does not stop the save: the creates and
+  updates queued after it are sent. The refused one stays queued, marked as not saved yet
+  where the control marks changes, so the form stays dirty. The deletes queued after a
+  refused write stay queued until it went through, as a delete may be the second half of a
+  replacement (`FormCrudFileUpload` uploads a file again under its name, then deletes the
+  old one). The submit rejects although the record was saved, and the form's error component shows which
+  writes were refused: `FormCrudMultiSelect` names each by its entry's label ("Frank Wilson:
+  Person 6 is archived", several joined with "; "), the file controls give the backend's
+  message (an `AggregateError` of several). A refused delete is dropped, as the record may be
+  gone already.
 - An entry created through the queue has a client-side id (`fake-id-N`). It keeps it in
   `onChange`, and in the multi image's `onPrimaryChange`, also after the save;
   `LazyConnector.mapId` gives the server's id once the queue is sent. The record is saved

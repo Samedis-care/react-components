@@ -48,6 +48,36 @@ interface QueuedFunction {
  */
 export type QueuedOperation = QueuedFunction["type"];
 
+/**
+ * A queued create or update the backend refused when workQueue sent it
+ */
+export interface QueuedWriteFailure {
+	/**
+	 * The record's id as index and read hand it out: the fake id of a record whose create
+	 * was refused, and of a record created through this connector by an earlier workQueue
+	 */
+	id: string;
+	/**
+	 * The write that was refused
+	 */
+	operation: "create" | "update";
+	/**
+	 * Why it was refused, as the real connector rejected
+	 */
+	error: Error;
+}
+
+/**
+ * Makes the error workQueue rejects with when the backend refused writes, e.g. one that
+ * names the records the way the control listing them does
+ * @param failures The refused writes, in the order they were queued
+ * @returns The error, or undefined to reject as without a factory
+ * @see LazyConnector.setQueueErrorFactory
+ */
+export type QueueErrorFactory = (
+	failures: QueuedWriteFailure[],
+) => Error | undefined;
+
 type QueueChangeHandler = (queue: QueuedFunction[]) => void;
 
 export enum IndexEnhancementLevel {
@@ -73,6 +103,7 @@ class LazyConnector extends Connector {
 	private queue: QueuedFunction[] = [];
 	private onQueueChange?: QueueChangeHandler;
 	private queueListeners = new Set<QueueChangeHandler>();
+	private queueErrorFactory: QueueErrorFactory | null = null;
 	// backend emulation
 	private readonly FAKE_ID_PREFIX = "fake-id-";
 	private fakeIdCounter = 0;
@@ -504,10 +535,46 @@ class LazyConnector extends Connector {
 		this.queueListeners.forEach((listener) => listener(this.queue));
 	}
 
+	/**
+	 * Lets the control that lists the records make the error workQueue rejects with when
+	 * the backend refused writes
+	 * @param factory Makes the error of the refused writes, see QueueErrorFactory
+	 * @returns Removes this factory again; a factory set after it stays
+	 * @remarks One factory at a time: a later one replaces it. CrudMultiSelect and
+	 *          CrudMultiSelectWithGroups set one while they are mounted, which names each
+	 *          refused write by its entry's label in a PartialApplyError.
+	 */
+	public setQueueErrorFactory(factory: QueueErrorFactory): () => void {
+		this.queueErrorFactory = factory;
+		return () => {
+			if (this.queueErrorFactory === factory) this.queueErrorFactory = null;
+		};
+	}
+
+	/**
+	 * Sends the queued writes to the real connector, in the order they were queued
+	 * @returns Resolves once every write went through. Rejects if the backend refused a
+	 *          create or update: with what the factory of setQueueErrorFactory makes of
+	 *          the refused writes, otherwise with the refusal itself, or for several with
+	 *          an AggregateError of them whose message joins theirs with "; ".
+	 * @remarks
+	 * - A refused create or update stays queued and does not stop the others: the creates
+	 *   and updates queued after it are sent. The deletes queued after it are not: a
+	 *   delete may be the second half of a replacement (a file uploaded again under its
+	 *   name), which must not go while its replacement is not stored. They stay queued and
+	 *   go once the writes before them went through.
+	 * - A refused delete is dropped, as the record may be gone already.
+	 * - What was sent leaves the queue, so a retry does not write it again. A write queued
+	 *   while this runs stays queued.
+	 * - The queue listeners hear of the queue once, when this is done, also when it rejects.
+	 */
 	public workQueue = async (): Promise<void> => {
 		const sent = new Set<QueuedFunction>();
+		const refused: QueuedWriteFailure[] = [];
 		try {
 			for (const entry of [...this.queue]) {
+				// a delete waits for the writes queued before it, see above
+				if (entry.type === "delete" && refused.length > 0) continue;
 				try {
 					const res: unknown = await entry.func();
 					if (entry.type === "create") {
@@ -518,21 +585,41 @@ class LazyConnector extends Connector {
 						this.fakeIdMappingRev[realId] = entry.id as string;
 					}
 				} catch (e) {
-					// we ignore failed deletes
 					if (entry.type !== "delete") {
-						throw e;
+						refused.push({
+							id: this.unmapId(entry.id as string),
+							operation: entry.type,
+							error: e as Error,
+						});
+						continue;
 					}
+					// a refused delete is dropped: the record may be gone already
 				}
 				sent.add(entry);
 			}
 		} finally {
 			// What has been sent leaves the queue even when something after it threw, so
 			// that a caller which fixes the problem and submits again does not write the
-			// same records a second time. The entry which threw stays queued, and so does
+			// same records a second time. A refused write stays queued, and so does
 			// anything queued while this was running.
 			this.queue = this.queue.filter((entry) => !sent.has(entry));
 			this.onAfterOperation();
 		}
+		if (refused.length === 0) return;
+		const errors = refused.map((failure) => failure.error);
+		throw (
+			this.queueErrorFactory?.(refused) ??
+			(errors.length === 1
+				? errors[0]
+				: new AggregateError(
+						errors,
+						errors
+							.map((error) =>
+								error instanceof Error ? error.message : String(error),
+							)
+							.join("; "),
+					))
+		);
 	};
 
 	/**
