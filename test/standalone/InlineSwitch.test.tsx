@@ -19,6 +19,8 @@ import BaseSelector, {
 	BaseSelectorLoadHandler,
 } from "../../src/standalone/Selector/BaseSelector";
 import {
+	MultiSelectWithoutGroup,
+	MultiSelectWithTags,
 	selectorLocalLoadHandler,
 	SingleSelect,
 } from "../../src/standalone/Selector";
@@ -578,6 +580,35 @@ describe("InlineSwitch inside BaseSelector (displaySwitch)", () => {
 			).toEqual([]);
 		});
 	});
+
+	it("[ISSUE-3465-ITEM-12] each selector's switch is described by the field it filters", () => {
+		const onLoad = selectorLocalLoadHandler(OPTIONS);
+		renderSwitch(
+			<>
+				<BaseSelector
+					label="Device type"
+					selected={null}
+					onSelect={() => {}}
+					onLoad={onLoad}
+					displaySwitch
+					switchLabel="Show inactive"
+				/>
+				<BaseSelector
+					label="Responsible person"
+					selected={null}
+					onSelect={() => {}}
+					onLoad={onLoad}
+					displaySwitch
+					switchLabel="Show inactive"
+				/>
+			</>,
+		);
+		const [first, second] = screen.getAllByRole("switch", {
+			name: "Show inactive",
+		});
+		expect(first).toHaveAccessibleDescription(/Device type/);
+		expect(second).toHaveAccessibleDescription(/Responsible person/);
+	});
 });
 
 describe("InlineSwitch in the selectors", () => {
@@ -597,5 +628,81 @@ describe("InlineSwitch in the selectors", () => {
 			.closest(".CcInlineSwitch-switchWrapper");
 		if (!(wrapper instanceof HTMLElement)) throw new Error("wrapper missing");
 		expect(getComputedStyle(wrapper).marginTop).toBe("0px");
+	});
+
+	it("[ISSUE-3465-ITEM-12] MultiSelectWithoutGroup's switch is described by the label of its search field, also with an autocompleteId of the caller", () => {
+		const ui = (label: string, autocompleteId?: string) => (
+			<MultiSelectWithoutGroup
+				label={label}
+				autocompleteId={autocompleteId}
+				selected={[]}
+				onSelect={() => {}}
+				loadDataOptions={selectorLocalLoadHandler([])}
+				displaySwitch
+				switchLabel="Show inactive"
+				switchValue={false}
+				setSwitchValue={() => {}}
+			/>
+		);
+		renderSwitch(
+			<>
+				{ui("Device types")}
+				{ui("Responsible persons", "responsible")}
+			</>,
+		);
+		const [first, second] = screen.getAllByRole("switch", {
+			name: "Show inactive",
+		});
+		expect(first).toHaveAccessibleDescription("Device types");
+		expect(second).toHaveAccessibleDescription("Responsible persons");
+		expect(
+			screen.getByRole("combobox", { name: "Responsible persons" }),
+		).toHaveAttribute("id", "responsible");
+	});
+
+	it("[ISSUE-3465-ITEM-12] MultiSelectWithTags's switch is described by the label of its search field", () => {
+		renderSwitch(
+			<MultiSelectWithTags
+				title="Responsible persons"
+				searchInputLabel="Search persons"
+				loadGroupEntries={() => []}
+				loadGroupOptions={selectorLocalLoadHandler([])}
+				loadDataOptions={selectorLocalLoadHandler([])}
+				selected={[]}
+				onChange={() => {}}
+				displaySwitch
+				switchLabel="Show inactive"
+			/>,
+		);
+		expect(
+			screen.getByRole("switch", { name: "Show inactive" }),
+		).toHaveAccessibleDescription("Search persons");
+	});
+
+	it("[ISSUE-3465-ITEM-12] the switch of a selector without label points at no description", () => {
+		renderSwitch(
+			<>
+				<BaseSelector
+					selected={null}
+					onSelect={() => {}}
+					onLoad={selectorLocalLoadHandler([])}
+					displaySwitch
+					switchLabel="Show inactive"
+				/>
+				<MultiSelectWithoutGroup
+					selected={[]}
+					onSelect={() => {}}
+					loadDataOptions={selectorLocalLoadHandler([])}
+					displaySwitch
+					switchLabel="Show archived"
+					switchValue={false}
+					setSwitchValue={() => {}}
+				/>
+			</>,
+		);
+		for (const name of ["Show inactive", "Show archived"])
+			expect(screen.getByRole("switch", { name })).not.toHaveAttribute(
+				"aria-describedby",
+			);
 	});
 });

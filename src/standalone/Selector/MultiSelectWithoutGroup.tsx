@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useId, useMemo } from "react";
 import {
 	Cancel as RemoveIcon,
 	RestoreFromTrash as RestoreIcon,
@@ -174,9 +174,13 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 		classes,
 		className,
 		filterIds,
+		autocompleteId,
 		...otherProps
 	} = props;
 	const { t } = useCCTranslations();
+	// the search field's id, so that its label (`<id>-label`) can describe the switch
+	const generatedId = useId();
+	const fieldId = autocompleteId || generatedId;
 
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
 	const getId = getIdOfData ?? getIdDefault;
@@ -278,6 +282,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 		<Typography component="div" className={className}>
 			<BaseSelector
 				{...otherProps}
+				autocompleteId={fieldId}
 				onLoad={onLoad}
 				disabled={disabled}
 				selected={null}
@@ -300,6 +305,8 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 				value={!!switchValue}
 				onChange={props.setSwitchValue}
 				label={props.switchLabel}
+				// the switch filters the search field's options, so the field's label describes it
+				aria-describedby={otherProps.label ? `${fieldId}-label` : undefined}
 				disabled={disabled}
 				className={classes?.switch}
 			>

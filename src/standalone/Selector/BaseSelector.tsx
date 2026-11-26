@@ -281,6 +281,11 @@ export type BaseSelectorVariants<
  * shows the switch: the visible label is the switch's only accessible name, and a switch
  * without one is unnamed for everyone.
  *
+ * The selector's `label` is the switch's accessible description (`aria-describedby`), so
+ * it says which field it filters: two selectors with a "Show inactive" switch are
+ * announced as "Show inactive, switch, off, Device type" and "…, Responsible person".
+ * Without a `label` the switch has no description.
+ *
  * The switch sits at the right end of the row of the selector's `label`. When the label
  * does not fit beside it (a long label, a narrow field, a phone), the switch keeps that
  * row to itself and the label starts on the next one, so the label is never cut shorter
@@ -328,6 +333,7 @@ export type BaseSelectorSwitchProps = {
 			displaySwitch: true;
 			/**
 			 * Label for switch control: the switch's visible text and its accessible name.
+			 * The selector's `label` describes the switch (see BaseSelectorSwitchProps).
 			 */
 			switchLabel: React.ReactNode;
 	  }
@@ -1328,6 +1334,8 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 			value={switchValue}
 			onChange={setSwitchValue}
 			label={switchLabel}
+			// the switch filters this field's options, so the field's label describes it
+			aria-describedby={label ? `${inputId}-label` : undefined}
 			disabled={disabled}
 			className={combineClassNames([className, classes?.inlineSwitch])}
 		>
