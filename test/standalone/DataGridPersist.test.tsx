@@ -1511,6 +1511,8 @@ describe("StorageManagerPersist bucket writes", () => {
 		const keys = { model: "m" };
 		render(probe(keys));
 		await screen.findByTestId("a");
+		// the probe shows before the buckets are read; the setter comes with the read
+		await waitFor(() => expect(write).not.toBeNull());
 		await act(async () => {
 			await Promise.resolve(write!(WRITTEN)).catch(() => {});
 		});
