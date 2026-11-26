@@ -27,6 +27,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-26 | [A localized value without text in the UI language shows another language's text](2026-11-26-localized-string-falls-back-to-another-language.md) | behavior |
 | 2026-11-26 | [A HistoryRouter inside another one leaves the page's scroll position and focus alone](2026-11-26-nested-history-router-keeps-page-scroll-and-focus.md) | behavior |
 | 2026-11-26 | [isPlainObject tells a plain object by its prototype; a record with an entry named constructor counts](2026-11-26-is-plain-object-by-prototype.md) | behavior |
+| 2026-11-26 | [An InlineSwitch without onChange is disabled](2026-11-26-inline-switch-without-on-change-disabled.md) | behavior |
 | 2026-11-26 | [A long InlineSwitch label wraps beside the switch, and the switch stays on screen](2026-11-26-inline-switch-long-label-wraps.md) | behavior |
 | 2026-11-26 | [On the page of a hidden entry, RoutedMenu highlights the closest shown entry](2026-11-26-routed-menu-hidden-entries-rank-last.md) | behavior |
 | 2026-11-26 | [A lazy control of a new record no longer reports the parent id "null"](2026-11-26-lazy-crud-connector-parent-id-not-null.md) | behavior |

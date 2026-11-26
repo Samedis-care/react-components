@@ -265,6 +265,70 @@ describe("InlineSwitch label and name", () => {
 	});
 });
 
+describe("InlineSwitch controlled value", () => {
+	it("[ISSUE-3465-ITEM-15] without onChange the switch is disabled instead of an operable-looking control that ignores input", () => {
+		renderSwitch(<InlineSwitch value={false} visible label="Inert" />);
+		expect(screen.getByRole("switch", { name: "Inert" })).toBeDisabled();
+	});
+
+	it("[ISSUE-3465-ITEM-15] without onChange the label is greyed out as a disabled switch's, while the root's disabled class still follows only disabled", () => {
+		const { container } = renderSwitch(
+			<InlineSwitch value visible label="Inert" />,
+		);
+		expect(rootOf(container).firstElementChild).toHaveClass(
+			"CcInlineSwitch-disabled",
+		);
+		expect(rootOf(container)).not.toHaveClass("CcInlineSwitch-disabled");
+		// the state is still shown
+		expect(screen.getByRole("switch", { name: "Inert" })).toBeChecked();
+	});
+
+	it("[ISSUE-3465-ITEM-15] an onChange given after mount enables the switch, and taking it away disables it again", () => {
+		const onChange = vi.fn();
+		const ui = (handler?: (checked: boolean) => void) => (
+			<ThemeProvider theme={theme}>
+				<InlineSwitch value={false} visible label="L" onChange={handler} />
+			</ThemeProvider>
+		);
+		const { rerender } = render(ui());
+		const sw = screen.getByRole("switch", { name: "L" });
+		expect(sw).toBeDisabled();
+
+		rerender(ui(onChange));
+		expect(sw).toBeEnabled();
+		fireEvent.click(sw);
+		expect(onChange).toHaveBeenCalledExactlyOnceWith(true);
+
+		rerender(ui());
+		expect(sw).toBeDisabled();
+	});
+
+	it("[ISSUE-3465-ITEM-15] MultiSelectWithoutGroup's switch is disabled without setSwitchValue, and enabled with it", () => {
+		const shared = {
+			label: "Departments",
+			selected: [],
+			onSelect: () => {},
+			loadDataOptions: selectorLocalLoadHandler([]),
+			displaySwitch: true as const,
+			switchValue: false,
+		};
+		renderSwitch(
+			<>
+				<MultiSelectWithoutGroup {...shared} switchLabel="Without setter" />
+				<MultiSelectWithoutGroup
+					{...shared}
+					switchLabel="With setter"
+					setSwitchValue={() => {}}
+				/>
+			</>,
+		);
+		expect(
+			screen.getByRole("switch", { name: "Without setter" }),
+		).toBeDisabled();
+		expect(screen.getByRole("switch", { name: "With setter" })).toBeEnabled();
+	});
+});
+
 describe("InlineSwitch styling and theme", () => {
 	it("[ISSUE-3465-ITEM-3] classes.switch lands on the switch", () => {
 		const { container } = renderSwitch(

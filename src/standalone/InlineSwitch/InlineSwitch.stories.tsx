@@ -848,3 +848,37 @@ export const Issue3465Item14LabelWrapsBesideTheSwitch: Story = {
 		);
 	},
 };
+
+const WithoutOnChangeDemo = () => (
+	<div style={{ width: 300 }}>
+		<button type="button">Before</button>
+		<InlineSwitch value visible label="Without onChange" />
+		<div style={{ clear: "both" }} />
+		<button type="button">After</button>
+	</div>
+);
+
+export const Issue3465Item15WithoutOnChangeIsDisabled: StoryObj<
+	typeof WithoutOnChangeDemo
+> = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3465-ITEM-15: a switch without `onChange` is disabled, as with `disabled`: switch and label are greyed out, Tab skips the switch, and a click on its label leaves it as it is. It still shows its state.",
+			},
+		},
+	},
+	render: () => <WithoutOnChangeDemo />,
+	play: async ({ canvas, userEvent }) => {
+		const sw = canvas.getByRole("switch", { name: "Without onChange" });
+		await expect(sw).toBeDisabled();
+		await expect(sw).toBeChecked();
+		canvas.getByRole("button", { name: "Before" }).focus();
+		await userEvent.tab();
+		await expect(canvas.getByRole("button", { name: "After" })).toHaveFocus();
+		await userEvent.click(canvas.getByText("Without onChange"));
+		await expect(sw).toBeChecked();
+	},
+};
