@@ -1,3 +1,4 @@
+import type { QueryKey } from "@tanstack/react-query";
 import { CacheOptions } from "../backend-integration/Model/Model";
 import ModelDataStore from "../backend-integration/Store/index";
 import debouncePromise from "../utils/debouncePromise";
@@ -24,7 +25,11 @@ export abstract class StorageProvider {
 	 * Get item in key value store
 	 * @param key The key to load
 	 * @returns The stored value, or null only when nothing is stored under the
-	 *          key. A read that fails (a server error, a timeout, offline, a
+	 *          key. Answer synchronously when the value is at hand (a browser
+	 *          storage, a cache), with a promise otherwise: a reader that takes
+	 *          a synchronous answer uses it in the same render, as DataGrid's
+	 *          StorageManagerPersist does, whose grids then open without a
+	 *          Loader. A read that fails (a server error, a timeout, offline, a
 	 *          blocked storage) throws or rejects instead: callers treat null
 	 *          as "nothing stored" and may write their defaults over the key,
 	 *          as DataGrid's StorageManagerPersist does.
@@ -131,16 +136,36 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 	/**
 	 * Reads the value of key through the react-query cache (see cacheOptions)
 	 * @param key The key to load
-	 * @returns The stored value, or null when the server has nothing stored.
-	 *          Rejects with getItemFromServer's error when the read fails; the
-	 *          next read asks the server again.
+	 * @returns The value the cache holds, synchronously, while it is fresh: read
+	 *          or written within cacheOptions.staleTime, and not invalidated
+	 *          since. Otherwise a promise of what the server holds. Either is
+	 *          null when the server has nothing stored. The promise rejects with
+	 *          getItemFromServer's error when the read fails; the next read asks
+	 *          the server again.
 	 */
-	getItem(key: StorageKeyType): Promise<string | null> {
-		return ModelDataStore.fetchQuery({
-			queryKey: ["cc-css", key],
+	getItem(key: StorageKeyType): StorageValueType | Promise<StorageValueType> {
+		const queryKey: QueryKey = ["cc-css", key];
+		const options = {
+			queryKey,
 			queryFn: () => this.getItemFromServer(key),
 			...this.cacheOptions,
+		};
+		// a fresh value is answered at once (fresh as fetchQuery decides it), so
+		// a reader that takes a synchronous answer, such as DataGrid's
+		// StorageManagerPersist, has it in the same render
+		const cached = ModelDataStore.getQueryCache().find<string | null>({
+			queryKey,
+			exact: true,
 		});
+		if (cached) {
+			const { staleTime } = ModelDataStore.defaultQueryOptions(options);
+			const fresh = !cached.isStaleByTime(
+				typeof staleTime === "function" ? staleTime(cached) : staleTime,
+			);
+			// a fresh query always holds data
+			if (fresh) return cached.state.data as string | null;
+		}
+		return ModelDataStore.fetchQuery(options);
 	}
 
 	async setItem(key: StorageKeyType, value: StorageValueType): Promise<void> {
@@ -227,8 +252,9 @@ export class StorageManager {
 	 * Loads a record from storage
 	 * @param id Unique identifier, should be used to determine storage class
 	 * @param keys Identifiers which separate storage (think namespaces, such as tenant id)
-	 * @returns The value, or null only when nothing is stored. Throws or
-	 *          rejects when the storage cannot be read (see
+	 * @returns The value, or null only when nothing is stored: synchronously
+	 *          when the storage provider answers synchronously, else as a
+	 *          promise. Throws or rejects when the storage cannot be read (see
 	 *          StorageProvider.getItem).
 	 */
 	public static getItem(

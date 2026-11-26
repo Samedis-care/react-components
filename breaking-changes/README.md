@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-26 | [CachedServerStorageProvider answers a fresh cached value synchronously](2026-11-26-cached-server-storage-answers-fresh-values-at-once.md) | type, behavior |
 | 2026-11-26 | [The delete confirmation counts with plural forms](2026-11-26-data-grid-delete-confirmation-plurals.md) | behavior, i18n |
 | 2026-11-26 | [The remaining CC theme entries offer the ownerState and variants their slots receive](2026-11-26-theme-owner-state-remaining-components.md) | type, theme |
 | 2026-11-26 | [A theme styles InfoBox's status through classes, not ownerState or variants](2026-11-26-info-box-state-classes.md) | type, theme |

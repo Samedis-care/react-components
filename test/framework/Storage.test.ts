@@ -190,4 +190,108 @@ describe("CachedServerStorageProvider", () => {
 		await expect(provider.getItem("key")).resolves.toBe("stored");
 		expect(provider.readFromServer).toHaveBeenCalledTimes(2);
 	});
+
+	it("[ISSUE-3496-ITEM-26] getItem answers a value its cache holds fresh at once, not through a promise, without asking the server again", async () => {
+		const provider = new TestServerStorageProvider();
+		provider.readFromServer.mockResolvedValue("stored");
+		await expect(provider.getItem("key")).resolves.toBe("stored");
+
+		expect(provider.getItem("key")).toBe("stored");
+		expect(provider.readFromServer).toHaveBeenCalledTimes(1);
+	});
+
+	it("[ISSUE-3496-ITEM-26] getItem answers a fresh 'nothing stored' at once, as null", async () => {
+		const provider = new TestServerStorageProvider();
+		provider.readFromServer.mockResolvedValue(null);
+		await expect(provider.getItem("key")).resolves.toBeNull();
+
+		expect(provider.getItem("key")).toBeNull();
+		expect(provider.readFromServer).toHaveBeenCalledTimes(1);
+	});
+
+	it("[ISSUE-3496-ITEM-26] once the cached value is stale, getItem asks the server again, through a promise", async () => {
+		vi.useFakeTimers({ toFake: ["Date"] });
+		try {
+			const provider = new TestServerStorageProvider();
+			provider.readFromServer
+				.mockResolvedValueOnce("old")
+				.mockResolvedValueOnce("new");
+			await expect(provider.getItem("key")).resolves.toBe("old");
+
+			// cacheOptions: the value is fresh for 5 minutes
+			vi.setSystemTime(Date.now() + 300001);
+			const answer = provider.getItem("key");
+			expect(answer).toBeInstanceOf(Promise);
+			await expect(answer).resolves.toBe("new");
+			expect(provider.readFromServer).toHaveBeenCalledTimes(2);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it("[ISSUE-3496-ITEM-26] a provider whose cacheOptions leave the stale time out answers at once by the query client's default stale time, as fetchQuery does", async () => {
+		const defaults = ModelDataStore.getDefaultOptions();
+		ModelDataStore.setDefaultOptions({
+			...defaults,
+			queries: { ...defaults.queries, staleTime: () => 60000 },
+		});
+		try {
+			const provider = new (class extends TestServerStorageProvider {
+				protected cacheOptions = {};
+			})();
+			provider.readFromServer.mockResolvedValue("stored");
+			await expect(provider.getItem("key")).resolves.toBe("stored");
+
+			expect(provider.getItem("key")).toBe("stored");
+			expect(provider.readFromServer).toHaveBeenCalledTimes(1);
+		} finally {
+			ModelDataStore.setDefaultOptions(defaults);
+		}
+	});
+
+	it("[ISSUE-3496-ITEM-26] a provider whose cacheOptions set a stale time of 0 reads every value from the server, through a promise", async () => {
+		const provider = new (class extends TestServerStorageProvider {
+			protected cacheOptions = { staleTime: 0 };
+		})();
+		provider.readFromServer
+			.mockResolvedValueOnce("old")
+			.mockResolvedValueOnce("new");
+		await expect(provider.getItem("key")).resolves.toBe("old");
+
+		const answer = provider.getItem("key");
+		expect(answer).toBeInstanceOf(Promise);
+		await expect(answer).resolves.toBe("new");
+	});
+
+	it("[ISSUE-3496-ITEM-26] after the app invalidates the query cache, getItem asks the server again, through a promise", async () => {
+		const provider = new TestServerStorageProvider();
+		provider.readFromServer
+			.mockResolvedValueOnce("old")
+			.mockResolvedValueOnce("new");
+		await expect(provider.getItem("key")).resolves.toBe("old");
+
+		await ModelDataStore.invalidateQueries();
+		const answer = provider.getItem("key");
+		expect(answer).toBeInstanceOf(Promise);
+		await expect(answer).resolves.toBe("new");
+		expect(provider.readFromServer).toHaveBeenCalledTimes(2);
+	});
+
+	it("[ISSUE-3496-ITEM-26] a value written with setItem is answered at once by the next read, without asking the server", async () => {
+		vi.useFakeTimers();
+		try {
+			const provider = new TestServerStorageProvider();
+			const written = provider.setItem("key", "written");
+			// setItem writes after a second without further writes
+			await vi.advanceTimersByTimeAsync(1000);
+			await written;
+
+			expect(provider.getItem("key")).toBe("written");
+			expect(provider.readFromServer).not.toHaveBeenCalled();
+		} finally {
+			// the timer which forgets the key's debounce after 5 minutes
+			vi.clearAllTimers();
+			vi.useRealTimers();
+		}
+	});
 });

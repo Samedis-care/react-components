@@ -203,9 +203,11 @@ const loadBuckets = (
  * state. A Loader takes the place of each grid until both buckets are
  * loaded, and the grid opens with what they hold then. A storage that answers
  * synchronously (localStorage and sessionStorage, StorageManager's default
- * routing) is read while rendering, so the grids open at once, without a
- * Loader. Until the buckets are loaded, DataGridPersistentStateContext is
- * undefined inside the provider, as outside of one.
+ * routing, and a CachedServerStorageProvider whose cache holds the bucket
+ * fresh, as on the next visit) is read while rendering, so the grids open at
+ * once, without a Loader. Until the buckets are loaded,
+ * DataGridPersistentStateContext is undefined inside the provider, as outside
+ * of one.
  *
  * When the storage keys change, the grids inside are mounted again for the
  * new keys, after a Loader in their place while those load; everything else

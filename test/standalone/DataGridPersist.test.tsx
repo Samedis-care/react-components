@@ -59,11 +59,13 @@ import {
 	type DataGridPersistMountContextType,
 } from "../../src/standalone/DataGrid";
 import {
+	CachedServerStorageProvider,
 	DefaultGetStorageProviderCallback,
 	LocalStorageProviderInstance,
 	StorageManager,
 	StorageProvider,
 } from "../../src/framework/Storage";
+import ModelDataStore from "../../src/backend-integration/Store";
 
 // MultiGrid renders the cells and reports the rendered rows; the grid tests
 // below only need the state the grid restores and writes
@@ -1908,6 +1910,51 @@ describe("only the grids wait for the stored state", () => {
 		expect(grid!.state.search).toBe("stored");
 		await gridIdle();
 		expect(setItem).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3496-ITEM-26] on the next visit, a grid whose filters bucket is on a CachedServerStorageProvider opens in the first render with the bucket the provider's cache holds fresh", async () => {
+		/** A server storage with an in-memory "server" which counts its reads */
+		const server = new (class extends CachedServerStorageProvider {
+			data: Record<string, string> = {};
+			reads = 0;
+			protected getItemFromServer(key: string): Promise<string | null> {
+				this.reads++;
+				return Promise.resolve(this.data[key] ?? null);
+			}
+			protected setItemOnServer(key: string, value: string | null) {
+				if (value == null) delete this.data[key];
+				else this.data[key] = value;
+				return Promise.resolve();
+			}
+			protected clearFromServer() {
+				this.data = {};
+				return Promise.resolve();
+			}
+		})();
+		server.data[keyOf(FILTERS, { model: "a" })] = JSON.stringify(STORED);
+		StorageManager.configure((id, keys) => [
+			id === FILTERS ? server : LocalStorageProviderInstance,
+			keys,
+		]);
+		try {
+			// the first visit waits for the server
+			const firstVisit = render(smp({ model: "a" }));
+			expect(screen.getByRole("progressbar")).toBeInTheDocument();
+			await gridIdle();
+			expect(grid!.state.search).toBe("stored");
+			firstVisit.unmount();
+			grid = null;
+
+			// the next one opens with what the provider's cache holds
+			render(smp({ model: "a" }));
+			expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+			expect(grid!.state.search).toBe("stored");
+			expect(gridSearch()).toHaveValue("stored");
+			expect(server.reads).toBe(1);
+		} finally {
+			// drops the cached reads together with their garbage collection timers
+			ModelDataStore.clear();
+		}
 	});
 
 	it("[ISSUE-3496-ITEM-16] a StorageManagerPersist storageKeys change mounts only the grids again: what else is inside keeps its state", async () => {
