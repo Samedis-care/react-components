@@ -73,6 +73,14 @@ export const Checked: Story = {
 };
 
 export const WithChildren: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					'The switch floats at the top right of the children, so their text flows to its left. A child with a frame of its own (a border or a background) gets `clear: "both"`, so it starts below the switch row instead of having the switch inside its frame.',
+			},
+		},
+	},
 	args: {
 		value: true,
 		visible: true,
@@ -80,6 +88,7 @@ export const WithChildren: Story = {
 		children: (
 			<div
 				style={{
+					clear: "both",
 					marginTop: 8,
 					padding: 8,
 					border: "1px solid #ccc",
@@ -851,5 +860,141 @@ export const Issue3465Item14LabelWrapsBesideTheSwitch: Story = {
 		await expect(page.scrollWidth, "no sideways scroll").toBeLessThanOrEqual(
 			page.clientWidth,
 		);
+	},
+};
+
+const CHIP_ENTRIES: MultiSelectorData[] = [
+	{ value: "1", label: "Cardiology" },
+	{ value: "2", label: "Radiology" },
+	{ value: "3", label: "Surgery" },
+	{ value: "4", label: "Pediatrics" },
+];
+const loadChipEntries = selectorLocalLoadHandler(CHIP_ENTRIES);
+const FOLLOWING_TEXT =
+	"This paragraph follows. It is long enough to run over several lines.";
+
+const ContainsFloatsDemo = () => (
+	<div style={{ width: 320 }}>
+		<div data-testid="alone">
+			<InlineSwitch
+				value={false}
+				visible
+				label="Show inactive"
+				onChange={ignore}
+			/>
+			<div data-testid="alone-after">{FOLLOWING_TEXT}</div>
+		</div>
+		<div data-testid="chips">
+			<MultiSelectWithoutGroup<MultiSelectorData>
+				label="Departments"
+				selected={CHIP_ENTRIES}
+				onSelect={ignore}
+				loadDataOptions={loadChipEntries}
+				displaySwitch
+				switchLabel="Show inactive departments"
+				switchValue={false}
+				setSwitchValue={ignore}
+			/>
+			<div data-testid="chips-after">{FOLLOWING_TEXT}</div>
+		</div>
+	</div>
+);
+
+export const Issue3465Item16RootHoldsTheSwitchAndFloatedChildren: StoryObj<
+	typeof ContainsFloatsDemo
+> = {
+	parameters: {
+		// MultiSelectWithoutGroup's search field is unnamed (Selector unit); check the rest
+		a11y: { test: "error", context: { exclude: [".MuiAutocomplete-root"] } },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3465-ITEM-16: InlineSwitch's box holds its floated switch row and floated children. Without children it is as high as the switch row, and around MultiSelectWithoutGroup's chips it ends below the last chip, so the paragraph after it starts below them instead of flowing beside the switch or the chips.",
+			},
+		},
+	},
+	render: () => <ContainsFloatsDemo />,
+	play: async ({ canvas, canvasElement }) => {
+		const rect = (selector: string, within: Element = canvasElement) =>
+			elementOf(within.querySelector(selector)).getBoundingClientRect();
+
+		const alone = elementOf(canvasElement.querySelector("[data-testid=alone]"));
+		const aloneRow = rect(".CcInlineSwitch-switchWrapper", alone);
+		await expect(
+			rect(".CcInlineSwitch-root", alone).bottom,
+			"alone: the root ends below the switch row",
+		).toBeGreaterThanOrEqual(aloneRow.bottom);
+		await expect(
+			rect("[data-testid=alone-after]").top,
+			"alone: the paragraph starts below the switch row",
+		).toBeGreaterThanOrEqual(aloneRow.bottom);
+
+		// a chip is the parent of its label's span
+		const chipList = CHIP_ENTRIES.map(({ label }) =>
+			elementOf(canvas.getByText(label as string).parentElement),
+		);
+		const chipsRoot = elementOf(chipList[0].closest(".CcInlineSwitch-root"));
+		const lastChip = Math.max(
+			...chipList.map((chip) => chip.getBoundingClientRect().bottom),
+		);
+		await expect(
+			chipsRoot.getBoundingClientRect().bottom,
+			"chips: the root ends below the last chip",
+		).toBeGreaterThanOrEqual(lastChip);
+		await expect(
+			rect("[data-testid=chips-after]").top,
+			"chips: the paragraph starts below the last chip",
+		).toBeGreaterThanOrEqual(lastChip);
+	},
+};
+
+const NoMarginDemo = () => (
+	<div style={{ width: 320 }}>
+		<div data-testid="hidden-before" style={{ height: 10 }} />
+		<InlineSwitch value={false} visible={false} onChange={ignore} />
+		<div data-testid="visible-before" style={{ height: 10 }} />
+		<InlineSwitch
+			value={false}
+			visible
+			label="Show inactive"
+			onChange={ignore}
+		/>
+	</div>
+);
+
+export const Issue3465Item16NoMarginAbove: StoryObj<typeof NoMarginDemo> = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3465-ITEM-16: InlineSwitch puts no margin around itself, as MUI's components do not: a hidden switch without children takes no space, and a shown switch row starts right below what comes before it. The spacing comes from the surrounding layout.",
+			},
+		},
+	},
+	render: () => <NoMarginDemo />,
+	play: async ({ canvasElement }) => {
+		const [hidden, shown] = Array.from(
+			canvasElement.querySelectorAll(".CcInlineSwitch-root"),
+		).map((el) => el.getBoundingClientRect());
+		const bottomOf = (id: string) =>
+			elementOf(
+				canvasElement.querySelector(`[data-testid=${id}]`),
+			).getBoundingClientRect().bottom;
+		await expect(
+			hidden.top - bottomOf("hidden-before"),
+			"hidden: no space above",
+		).toBe(0);
+		await expect(hidden.height, "hidden: no height").toBe(0);
+		await expect(
+			shown.top - bottomOf("visible-before"),
+			"shown: no space above",
+		).toBe(0);
+		await expect(
+			elementOf(
+				canvasElement.querySelector(".CcInlineSwitch-switchWrapper"),
+			).getBoundingClientRect().top - shown.top,
+			"shown: the switch row starts at the top",
+		).toBe(0);
 	},
 };

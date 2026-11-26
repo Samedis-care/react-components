@@ -68,6 +68,8 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [FormAutoSave announces the outcome of its saves in a status region](2026-11-27-form-auto-save-status-region.md) | behavior, theme |
 | 2026-11-27 | [The locale selector's search ignores accents, apostrophe variants and blanks around the query](2026-11-27-locale-selector-search-ignores-accents.md) | behavior |
 | 2026-11-27 | [FormCrudMultiSelect's module no longer exports ForwardedCrudMultiSelect](2026-11-27-forwarded-crud-multi-select-removed.md) | type |
+| 2026-11-26 | [InlineSwitch has no top margin](2026-11-26-inline-switch-no-top-margin.md) | behavior |
+| 2026-11-26 | [An InlineSwitch is as high as its switch row and its children](2026-11-26-inline-switch-holds-its-floats.md) | behavior |
 | 2026-11-26 | [A localized value without text in the UI language shows another language's text](2026-11-26-localized-string-falls-back-to-another-language.md) | behavior |
 | 2026-11-26 | [A HistoryRouter inside another one leaves the page's scroll position and focus alone](2026-11-26-nested-history-router-keeps-page-scroll-and-focus.md) | behavior |
 | 2026-11-26 | [isPlainObject tells a plain object by its prototype; a record with an entry named constructor counts](2026-11-26-is-plain-object-by-prototype.md) | behavior |

@@ -116,7 +116,6 @@ const StyledInlineSwitch = styled(InlineSwitch, {
 	name: "CcMultiSelectWithoutGroup",
 	slot: "switch",
 })({
-	marginTop: 0,
 	// the switch gets a row of its own above the chips, at the right end, with its label
 	// before it
 	"& .CcInlineSwitch-switchWrapper": {

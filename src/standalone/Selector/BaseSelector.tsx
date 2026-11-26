@@ -585,9 +585,7 @@ const StyledAutocomplete = styled(Autocomplete, {
 const StyledInlineSwitch = styled(InlineSwitch, {
 	name: "CcBaseSelector",
 	slot: "inlineSwitch",
-})({
-	marginTop: 0,
-});
+})({});
 
 // the selector renders its label as a sibling of the Autocomplete rather than inside
 // the text field, so the dirty marker has to be attached here: withMuiFieldState matches

@@ -58,6 +58,11 @@ export type InlineSwitchProps = {
 	 * to their left. They are never wider than the container: with a label too long
 	 * for the space, they take the container's width and the content starts below
 	 * them.
+	 * The container is as high as the switch row and the content together, so what
+	 * follows it starts below both, also below floated content. A child with a
+	 * border or a background of its own starts at the switch's top, so the switch
+	 * sits inside its frame; give such a child `clear: "both"` to start it below the
+	 * switch row.
 	 * @default none
 	 */
 	children?: React.ReactNode;
@@ -187,8 +192,11 @@ const CHECKED_CLASS = "CcInlineSwitch-checked";
 const VISIBLE_CLASS = "CcInlineSwitch-visible";
 const DISABLED_CLASS = "CcInlineSwitch-disabled";
 
+// the root holds the floated switch row and floated children, so what follows it
+// starts below them instead of flowing beside them. No margin: the surrounding layout
+// spaces it
 const StyledRoot = styled("div", { name: "CcInlineSwitch", slot: "root" })({
-	marginTop: 15,
+	display: "flow-root",
 });
 
 // the height of the switch's row: the switch and the first line of its label are
@@ -341,8 +349,11 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
  * one around its chips, mostly with `visible={false}`.
  *
  * The switch is controlled: pass `value` and `onChange`, or `disabled` for a
- * switch the user cannot toggle. The root has a 15px top margin
- * (`styled(InlineSwitch)` or `styleOverrides.root` can change it).
+ * switch the user cannot toggle.
+ *
+ * The root is as high as the switch row and the children together: what follows
+ * it starts below both. It has no margin of its own; the surrounding layout spaces
+ * it (`styled(InlineSwitch)` or `styleOverrides.root` can add one).
  *
  * The switch takes its colors from the theme's palette, through its CSS
  * variables if it has them: off, a `text.secondary` thumb on a
