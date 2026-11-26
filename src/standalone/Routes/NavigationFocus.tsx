@@ -28,6 +28,11 @@ export interface NavigationFocusProps {
 	 * The router's current location
 	 */
 	location: Location;
+	/**
+	 * Is the router inside another one? Then the focus moves only to a
+	 * PageTitle inside it.
+	 */
+	nested: boolean;
 }
 
 /**
@@ -41,25 +46,27 @@ export interface NavigationFocusProps {
  *   scrolled the window to the top), it moves to the heading of the new page:
  *   the most specific PageTitle, else the first `<h1>` of the main landmark.
  *   A PageTitle that renders later (a lazy route, a record that is still
- *   loading) gets the focus then.
+ *   loading) gets the focus then. The router inside another one moves it
+ *   only to a PageTitle inside it, and leaves it where it is without one.
  * - Otherwise the focus stays (a navigation menu, a tab), and the new page
- *   title (see usePageTitle) is announced in a polite live region when it
- *   differs from the one before.
+ *   title (see usePageTitle; of the router inside another one, the title set
+ *   inside it) is announced in a polite live region when it differs from the
+ *   one before.
  *
  * Both wait for the new page until the next navigation or the user's next
  * click, key press or scroll.
  * @param props The props
  */
 const NavigationFocus = (props: NavigationFocusProps) => {
-	const { manager, location } = props;
+	const { manager, location, nested } = props;
 	const registry = usePageTitleRegistry();
 	const [announcement, setAnnouncement] = useState("");
 	// a passive effect, after the children's: a navigation of their mount
 	// effects (a redirect) is part of loading the page, not one to handle
 	useEffect(() => {
-		manager.attach({ registry, announce: setAnnouncement });
+		manager.attach({ registry, nested, announce: setAnnouncement });
 		return () => manager.detach();
-	}, [manager, registry]);
+	}, [manager, registry, nested]);
 	// a layout effect: the focus moves in the commit that renders the new page,
 	// before it is painted, and after the layout effects of the children, in
 	// which PageTitle sets its heading

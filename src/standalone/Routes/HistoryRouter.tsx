@@ -101,6 +101,10 @@ export const useHistoryRouterContext = (): HistoryRouterContextType => {
  * - Back/forward navigations leave the scroll position to the browser.
  * - Other scroll containers keep their position, so that DataGrid can
  *   restore its own.
+ * - A HistoryRouter inside another one, e.g. a wizard on a memory history,
+ *   scrolls only the scroll containers registered with it (inside it) to the
+ *   top: its navigations leave the window, the document and the scroll
+ *   containers of the outer one where they are.
  *
  * A push or replace to a location with a hash ("#details"), e.g. a skip link
  * or the entry of a table of contents, then scrolls the element with that id
@@ -137,16 +141,22 @@ export const useHistoryRouterContext = (): HistoryRouterContextType => {
  *   focusable without adding it to the tab order. A `PageTitle` that renders
  *   later (a lazy route, a record that is still loading) gets the focus then,
  *   unless the user clicked, typed or scrolled meanwhile.
+ *   A HistoryRouter inside another one moves the focus only to a `PageTitle`
+ *   rendered inside it, e.g. one on the last step of a wizard, never to the
+ *   page's heading outside of it; without one, the focus stays where it is.
  * - When the focus stays on an element in view (a navigation menu, a tab, or
  *   the element of a hash, which got it as described above), the new page
  *   title (see `usePageTitle`) is announced in a visually hidden polite live
  *   region, which the router renders after its children, if it differs from
- *   the one before.
+ *   the one before. For a HistoryRouter inside another one, that is the
+ *   title set inside it.
  * @param props The props
  */
 const HistoryRouter = (props: HistoryRouterProps) => {
 	const { history, children, formatDocumentTitle } = props;
-	// inside another HistoryRouter: only the outermost one reports to Sentry
+	// inside another HistoryRouter, e.g. a wizard on a page: only the outermost
+	// one reports to Sentry; this one leaves the window where it is and moves
+	// the focus only to a heading inside it
 	const nested = useContext(HistoryRouterContext) !== null;
 	const [location, setLocation] = useState<Location>(history.location);
 	const ctx = useMemo((): HistoryRouterContextType => ({ history }), [history]);
@@ -157,7 +167,7 @@ const HistoryRouter = (props: HistoryRouterProps) => {
 	useLayoutEffect(() => {
 		const unlisten = history.listen((update) => {
 			// only now: a blocked navigation never gets here
-			navigationScroll.navigated(update);
+			navigationScroll.navigated(update, nested);
 			setLocation(update.location);
 			if (!nested) sentryHandleNavigation(update);
 			navigationFocus.navigated(update.action);
@@ -184,8 +194,16 @@ const HistoryRouter = (props: HistoryRouterProps) => {
 					</RouteContext.Provider>
 					{/* before NavigationFocus: the focus check finds the focus on the
 					    element a hash names */}
-					<NavigationScroll manager={navigationScroll} location={location} />
-					<NavigationFocus manager={navigationFocus} location={location} />
+					<NavigationScroll
+						manager={navigationScroll}
+						location={location}
+						nested={nested}
+					/>
+					<NavigationFocus
+						manager={navigationFocus}
+						location={location}
+						nested={nested}
+					/>
 				</DocumentTitleProvider>
 			</LocationContext.Provider>
 		</HistoryRouterContext.Provider>

@@ -14,6 +14,11 @@ export interface NavigationScrollProps {
 	 * The router's current location
 	 */
 	location: Location;
+	/**
+	 * Is the router inside another one? Then "#top" scrolls only the scroll
+	 * containers registered with it to the top.
+	 */
+	nested: boolean;
 }
 
 /**
@@ -24,14 +29,14 @@ export interface NavigationScrollProps {
  * @param props The props
  */
 const NavigationScroll = (props: NavigationScrollProps) => {
-	const { manager, location } = props;
+	const { manager, location, nested } = props;
 	// a layout effect: in the commit that renders the location, before it is
 	// painted, once the children's layout effects have run, and before the
 	// focus check of NavigationFocus, which then finds the focus on the
 	// element
 	useLayoutEffect(() => {
-		manager.rendered(location);
-	}, [manager, location]);
+		manager.rendered(location, nested);
+	}, [manager, location, nested]);
 	return null;
 };
 

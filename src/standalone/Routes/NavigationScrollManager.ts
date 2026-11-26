@@ -88,7 +88,9 @@ interface ScrollContainerEntry {
  * Sets the scroll positions after the navigations of one HistoryRouter:
  * - A push or replace scrolls the window, the document and the registered
  *   scroll containers to the top, unless useNavigate started it with
- *   `preventScrollReset`.
+ *   `preventScrollReset`. The one of a HistoryRouter inside another one
+ *   scrolls only the registered scroll containers, which are part of its
+ *   content: the window and the document belong to the page around it.
  * - One to a location with a hash then scrolls the element the hash names into
  *   view and focuses it, once the location has rendered. When the hash is all
  *   it changes, nothing scrolls to the top first, as a link to a fragment of
@@ -156,8 +158,10 @@ export class NavigationScrollManager {
 	 * changes the hash only; for one to a hash, rendered scrolls to its
 	 * element
 	 * @param update The navigation
+	 * @param nested Is the router inside another one? Then it resets only the
+	 * registered scroll containers, not the window and the document.
 	 */
-	public navigated(update: Update): void {
+	public navigated(update: Update, nested: boolean): void {
 		const keepScrollAt = this.keepScrollAt;
 		this.keepScrollAt = null;
 		this.anchor = null;
@@ -170,7 +174,7 @@ export class NavigationScrollManager {
 			this.anchor = { fragment, samePage };
 			if (samePage) return;
 		}
-		this.scrollToTop();
+		this.scrollToTop(nested);
 	}
 
 	/**
@@ -182,15 +186,17 @@ export class NavigationScrollManager {
 	 * navigation left it: at the top, or where it was when only the hash
 	 * changed; "#top" scrolls to the top then.
 	 * @param location The location the router rendered
+	 * @param nested Is the router inside another one? Then "#top" scrolls only
+	 * the registered scroll containers to the top.
 	 */
-	public rendered(location: Location): void {
+	public rendered(location: Location, nested: boolean): void {
 		this.shown = location;
 		const anchor = this.anchor;
 		this.anchor = null;
 		if (!anchor) return;
 		const target = findAnchor(anchor.fragment);
 		if (target === "top") {
-			if (anchor.samePage) this.scrollToTop();
+			if (anchor.samePage) this.scrollToTop(nested);
 		} else if (target) {
 			target.scrollIntoView({ block: "start", inline: "nearest" });
 			focusAnchor(target);
@@ -200,11 +206,16 @@ export class NavigationScrollManager {
 	/**
 	 * Scrolls the window, the document and the registered scroll containers
 	 * to the top
+	 * @param nested Is the router inside another one? Then only the registered
+	 * scroll containers: the window and the document belong to the page
+	 * around it.
 	 */
-	private scrollToTop(): void {
-		window.scrollTo(0, 0);
-		scrollToStart(document.documentElement);
-		scrollToStart(document.body);
+	private scrollToTop(nested: boolean): void {
+		if (!nested) {
+			window.scrollTo(0, 0);
+			scrollToStart(document.documentElement);
+			scrollToStart(document.body);
+		}
 		this.containers.forEach((entry) => {
 			if (entry.ref.current) scrollToStart(entry.ref.current);
 		});

@@ -8,12 +8,15 @@ export const NavigationScrollContext =
 	React.createContext<NavigationScrollManager | null>(null);
 
 /**
- * Scrolls an element to the top after each navigation that scrolls the window
- * to the top: a push or replace of the nearest HistoryRouter, but not a
- * back/forward navigation, a navigation a blocker cancels, one started with
- * `preventScrollReset` (see `useNavigate`; RoutedTabs' tab switches), or one
- * that changes only the hash. A navigation to a hash then scrolls the element
- * with that id into view, inside the container too.
+ * Scrolls an element to the top after each push or replace of the nearest
+ * HistoryRouter, but not after a back/forward navigation, a navigation a
+ * blocker cancels, one started with `preventScrollReset` (see `useNavigate`;
+ * RoutedTabs' tab switches), or one that changes only the hash: after the
+ * navigations that scroll the window to the top, and after those of a
+ * HistoryRouter inside another one (a wizard on a memory history), which
+ * leave the window where it is and scroll only the containers registered
+ * with it. A navigation to a hash then scrolls the element with that id into
+ * view, inside the container too.
  *
  * For a scroll container that stays on screen while the pages in it change,
  * such as the main pane of a layout: without it, the next page opens at the

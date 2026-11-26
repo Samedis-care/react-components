@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import React, { useEffect, useState } from "react";
-import { render, act, cleanup, fireEvent } from "@testing-library/react";
+import {
+	render,
+	act,
+	cleanup,
+	fireEvent,
+	screen,
+} from "@testing-library/react";
 import { createMemoryHistory, MemoryHistory } from "history";
 import HistoryRouter from "../../src/standalone/Routes/HistoryRouter";
 import Routes from "../../src/standalone/Routes/Routes";
@@ -186,5 +192,57 @@ describe("HistoryRouter: announcing the new page", () => {
 		act(() => history.push("/b"));
 		unmount();
 		expect(vi.getTimerCount()).toBe(0);
+	});
+});
+
+describe("[ISSUE-3475-ITEM-33] a HistoryRouter inside another one", () => {
+	/**
+	 * renders the page "Device 5" with a wizard on a memory history of its
+	 * own, whose two steps set the titles in titles (none for null)
+	 */
+	const renderWizardOnPage = (titles: [string, string | null]) => {
+		const wizard = mem("/step1");
+		const step = (title: string | null) =>
+			title ? <TitledPage title={title} /> : <p>A step without a title</p>;
+		const { container } = render(
+			<HistoryRouter history={mem("/devices/5")}>
+				<TitledPage title="Device 5" />
+				<div data-testid="wizard">
+					<HistoryRouter history={wizard}>
+						<Routes>
+							{[
+								<Route key="1" path="/step1" element={step(titles[0])} />,
+								<Route key="2" path="/step2" element={step(titles[1])} />,
+							]}
+						</Routes>
+					</HistoryRouter>
+				</div>
+			</HistoryRouter>,
+		);
+		const regions = container.querySelectorAll("[aria-live]");
+		return {
+			wizard,
+			wizardRegion: liveRegion(screen.getByTestId("wizard")),
+			pageRegion: regions[regions.length - 1],
+		};
+	};
+
+	it("[ISSUE-3475-ITEM-33] announces the title of its new step in its own live region, not in the page's", () => {
+		const { wizard, wizardRegion, pageRegion } = renderWizardOnPage([
+			"Step 1",
+			"Step 2",
+		]);
+		act(() => wizard.push("/step2"));
+		settle();
+		expect(wizardRegion).toHaveTextContent(/^Step 2$/);
+		expect(pageRegion).toHaveTextContent(/^$/);
+	});
+
+	it("[ISSUE-3475-ITEM-33] does not announce the title of the page around it after a step without a title", () => {
+		const { wizard, wizardRegion } = renderWizardOnPage(["Step 1", null]);
+		act(() => wizard.push("/step2"));
+		settle();
+		expect(document.title).toMatch(/^Device 5/);
+		expect(wizardRegion).toHaveTextContent(/^$/);
 	});
 });

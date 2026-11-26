@@ -57,8 +57,9 @@ export interface NavigateFunction {
  * changes). Once the navigation happens, the HistoryRouter scrolls the page
  * to the top: the window, the document and the scroll containers registered
  * with `useResetScrollOnNavigation` (PortalLayout's main pane), unless the
- * call passes `preventScrollReset`. A navigation that a blocker cancels keeps
- * the scroll position.
+ * call passes `preventScrollReset`. A HistoryRouter inside another one (a
+ * wizard on a memory history) scrolls only the scroll containers registered
+ * with it. A navigation that a blocker cancels keeps the scroll position.
  *
  * A target with a hash ("#details", "/devices/5#notes") then scrolls the
  * element with that id into view and moves the keyboard focus to it, as a

@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-26 | [A HistoryRouter inside another one leaves the page's scroll position and focus alone](2026-11-26-nested-history-router-keeps-page-scroll-and-focus.md) | behavior |
 | 2026-11-26 | [A RoutedMenu group only shows and hides its entries; its route is ignored](2026-11-26-routed-menu-group-ignores-route.md) | behavior |
 | 2026-11-26 | [InlineSwitch's colors reach 3:1 and follow the theme's color scheme](2026-11-26-inline-switch-colors-reach-3-to-1.md) | behavior |
 | 2026-11-26 | [The locale selector's list is a listbox: one tab stop, and the arrow, page, Home and End keys move between its rows](2026-11-26-locale-selector-list-is-a-listbox.md) | behavior, theme, type |

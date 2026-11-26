@@ -656,6 +656,66 @@ export const Issue3475Item13HistoryRouterInsideARoute: Story = {
 	},
 };
 
+/** a long device page with the wizard below its text */
+const LongDevicePage = () => {
+	const { id } = useParams<"id">();
+	return (
+		<Page title={`Device ${id ?? ""}`}>
+			<Box sx={LONG_PAGE_SPACER_SX} />
+			<Wizard />
+		</Page>
+	);
+};
+
+const LongPageWithWizardDemo = () => {
+	const history = useStoryHistory("/devices/5");
+	return (
+		<HistoryRouter history={history}>
+			<Box component="main" sx={{ p: 2 }}>
+				<Routes>
+					{[
+						<Route
+							key="d"
+							path="/devices/:id/*"
+							element={<LongDevicePage />}
+						/>,
+					]}
+				</Routes>
+			</Box>
+		</HistoryRouter>
+	);
+};
+
+export const Issue3475Item33WizardStepKeepsThePageWhereItIs: Story = {
+	parameters: {
+		layout: "fullscreen",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3475-ITEM-33: the wizard with a HistoryRouter of its own sits below the text of a long page. A step link of the wizard leaves the window where it is and the focus on the link: only a navigation of the page's router scrolls the page to the top and moves the focus to the page's heading.",
+			},
+		},
+	},
+	render: () => <LongPageWithWizardDemo />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const step2 = canvas.getByRole("link", { name: "Step 2" });
+		// scrolls the window down to the wizard
+		step2.focus();
+		const scrolledTo = window.scrollY;
+		await expect({ scrolledDown: scrolledTo > 0 }).toEqual({
+			scrolledDown: true,
+		});
+		await userEvent.keyboard("{Enter}");
+		await canvas.findByRole("heading", { name: "Step 2 of 2" });
+		await expect({
+			scrollY: window.scrollY,
+			focusOnTheStepLink: document.activeElement === step2,
+		}).toEqual({ scrollY: scrolledTo, focusOnTheStepLink: true });
+	},
+};
+
 // ─── The link to the current page ───────────────────────────────────────────
 
 /** the link to the current page: bold and not underlined, not only a color */

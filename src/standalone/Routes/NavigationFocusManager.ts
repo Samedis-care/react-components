@@ -58,13 +58,17 @@ const isUsableHeading = (heading: Element): boolean =>
  * that is rendered and has text, else the first `<h1>` of the main landmark
  * (`<main>` or `role="main"`) that is
  * @param registry The registry of the page headings
+ * @param nested Is the router inside another one? Then only a PageTitle of its
+ * registry, set inside it: the main landmark belongs to the page around it.
  * @returns The heading, null when the page has none (yet)
  */
 const findPageHeading = (
 	registry: PageTitleRegistry | null,
+	nested: boolean,
 ): HTMLElement | null => {
 	const registered = registry?.pageHeadings().find(isUsableHeading);
 	if (registered) return registered;
+	if (nested) return null;
 	for (const main of Array.from(
 		document.querySelectorAll("main, [role='main']"),
 	)) {
@@ -91,9 +95,14 @@ const focusHeading = (heading: HTMLElement): void => {
  */
 interface NavigationFocusTarget {
 	/**
-	 * The page titles and headings
+	 * The page titles and headings set inside the router
 	 */
 	registry: PageTitleRegistry | null;
+	/**
+	 * Is the router inside another one? Then the focus moves only to a
+	 * PageTitle of its registry, never to the `<h1>` of the main landmark.
+	 */
+	nested: boolean;
 	/**
 	 * Sets the text of the live region
 	 */
@@ -204,7 +213,10 @@ export class NavigationFocusManager {
 			if (focusIsInView()) {
 				this.focusDone = true;
 			} else {
-				const heading = findPageHeading(this.target.registry);
+				const heading = findPageHeading(
+					this.target.registry,
+					this.target.nested,
+				);
 				if (heading) {
 					focusHeading(heading);
 					this.focusDone = true;

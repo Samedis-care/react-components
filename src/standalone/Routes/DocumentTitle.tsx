@@ -68,10 +68,18 @@ const mostSpecificFirst = <T extends { rank: number }>(
 /**
  * Collects the page titles and the page headings of one HistoryRouter and
  * writes the document title from the titles. Owned by one
- * DocumentTitleProvider instance.
+ * DocumentTitleProvider instance. The registry of a HistoryRouter inside
+ * another one hands each title and heading on to the outer one's, which
+ * writes the document title; it keeps them for its own router, which moves
+ * the focus only to a heading set inside it.
  */
 export class PageTitleRegistry {
 	private readonly appTitle: string;
+	/**
+	 * The registry of the HistoryRouter around the one this registry belongs
+	 * to, null in the outermost one
+	 */
+	private readonly outer: PageTitleRegistry | null;
 	private readonly entries = new Map<object, PageTitleEntry>();
 	private readonly headings = new Map<object, PageHeadingEntry>();
 	private readonly listeners = new Set<() => void>();
@@ -81,30 +89,45 @@ export class PageTitleRegistry {
 	// the document title is left alone until the first page title is set
 	private wrote = false;
 
-	public constructor(appTitle: string) {
+	/**
+	 * @param appTitle The document's title when the HistoryRouter mounted
+	 * @param outer The registry of the HistoryRouter around the one this
+	 * registry belongs to, which gets every title and heading set here too;
+	 * null in the outermost one
+	 */
+	public constructor(appTitle: string, outer: PageTitleRegistry | null) {
 		this.appTitle = appTitle;
+		this.outer = outer;
 	}
 
+	/**
+	 * Sets or removes a page title, here and in the outer registries
+	 * @param key The component that sets it
+	 * @param entry The title, null to remove it
+	 */
 	public set(key: object, entry: PageTitleEntry | null): void {
 		if (entry) this.entries.set(key, entry);
 		else this.entries.delete(key);
+		this.outer?.set(key, entry);
 		this.write();
 		this.notify();
 	}
 
 	/**
-	 * Sets or removes the heading of a page
+	 * Sets or removes the heading of a page, here and in the outer registries
 	 * @param key The component that sets it
 	 * @param entry The heading, null to remove it
 	 */
 	public setHeading(key: object, entry: PageHeadingEntry | null): void {
 		if (entry) this.headings.set(key, entry);
 		else this.headings.delete(key);
+		this.outer?.setHeading(key, entry);
 		this.notify();
 	}
 
 	/**
-	 * The page title: the most specific one, as the document title shows it
+	 * The page title: the most specific one set inside the HistoryRouter, as
+	 * the document title shows it
 	 * @returns The title, null when none is set
 	 */
 	public pageTitle(): string | null {
@@ -112,7 +135,8 @@ export class PageTitleRegistry {
 	}
 
 	/**
-	 * The headings of the pages, the most specific first
+	 * The headings of the pages set inside the HistoryRouter, the most
+	 * specific first
 	 * @returns The heading elements that are mounted
 	 */
 	public pageHeadings(): HTMLElement[] {
@@ -174,9 +198,9 @@ const PageTitleRegistryContext = React.createContext<PageTitleRegistry | null>(
 const PageRankOffsetContext = React.createContext(0);
 
 /**
- * The registry of the page titles and headings that the nearest HistoryRouter
- * writes the document title from (the outermost one's, when HistoryRouters
- * are nested), null outside of every HistoryRouter
+ * The registry of the page titles and headings of the nearest HistoryRouter,
+ * null outside of every HistoryRouter. Inside another HistoryRouter, it hands
+ * them on to the outer one's, which writes the document title.
  * @returns The registry
  */
 export const usePageTitleRegistry = (): PageTitleRegistry | null =>
@@ -254,10 +278,13 @@ const DocumentTitleProvider = (props: DocumentTitleProviderProps) => {
 	const route = useContext(RouteContext);
 	const rankOffset =
 		useContext(PageRankOffsetContext) + (route ? route.depth : -1) + 1;
+	// the outer registry is the same for as long as this one is mounted: an
+	// ancestor's own registry, which never changes
 	const [registry] = useState(
 		() =>
 			new PageTitleRegistry(
 				typeof document === "undefined" ? "" : document.title,
+				outer,
 			),
 	);
 	// a layout effect: in place before the children's effects write with it
@@ -271,7 +298,7 @@ const DocumentTitleProvider = (props: DocumentTitleProviderProps) => {
 		return () => registry.deactivate();
 	}, [outer, registry]);
 	return (
-		<PageTitleRegistryContext.Provider value={outer ?? registry}>
+		<PageTitleRegistryContext.Provider value={registry}>
 			<PageRankOffsetContext.Provider value={rankOffset}>
 				{children}
 			</PageRankOffsetContext.Provider>

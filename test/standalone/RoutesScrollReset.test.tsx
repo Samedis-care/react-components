@@ -282,3 +282,88 @@ describe("[ISSUE-3475-ITEM-20] PortalLayout", () => {
 		expect(main.scrollTop).toBe(0);
 	});
 });
+
+describe("[ISSUE-3475-ITEM-33] a HistoryRouter inside another one", () => {
+	/** A scroll container registered with the inner router, e.g. a wizard's step pane */
+	const WizardPane = () => {
+		const ref = useRef<HTMLDivElement>(null);
+		useResetScrollOnNavigation(ref);
+		return (
+			<div data-testid="wizard-pane" ref={ref}>
+				<ShowPath />
+			</div>
+		);
+	};
+
+	/**
+	 * renders a page of the outer router, in its registered pane, with a wizard
+	 * on a memory history of its own, and hands out the wizard's navigate
+	 * function
+	 */
+	const renderWizardOnPage = () => {
+		const page = mem("/devices/5");
+		const wizard = mem("/step1");
+		const ref: { navigate: NavigateFunction | null } = { navigate: null };
+		const Grab = () => {
+			ref.navigate = useNavigate();
+			return null;
+		};
+		render(
+			<HistoryRouter history={page}>
+				<Pane>
+					<HistoryRouter history={wizard}>
+						<Grab />
+						<WizardPane />
+					</HistoryRouter>
+				</Pane>
+			</HistoryRouter>,
+		);
+		return { page, wizard, ref };
+	};
+
+	const wizardPane = () => screen.getByTestId("wizard-pane");
+
+	it.each([false, true])(
+		"[ISSUE-3475-ITEM-33] a push or replace of the inner router leaves the window, the document and the outer router's scroll containers where they are (replace: %s)",
+		(replace) => {
+			const { ref } = renderWizardOnPage();
+			scrollDown();
+			act(() => ref.navigate!("/step2", { replace }));
+			expect(path()).toBe("/step2");
+			expect(scrolled()).toEqual(KEPT);
+		},
+	);
+
+	it("[ISSUE-3475-ITEM-33] also for a push called on the inner history directly", () => {
+		const { wizard } = renderWizardOnPage();
+		scrollDown();
+		act(() => wizard.push("/step2"));
+		expect(path()).toBe("/step2");
+		expect(scrolled()).toEqual(KEPT);
+	});
+
+	it("[ISSUE-3475-ITEM-33] a push of the inner router scrolls the containers registered with it to the top", () => {
+		const { ref } = renderWizardOnPage();
+		wizardPane().scrollTop = 150;
+		wizardPane().scrollLeft = 15;
+		act(() => ref.navigate!("/step2"));
+		expect(wizardPane().scrollTop).toBe(0);
+		expect(wizardPane().scrollLeft).toBe(0);
+	});
+
+	it("[ISSUE-3475-ITEM-33] #top on the inner router's page scrolls only the containers registered with it to the top", () => {
+		const { ref } = renderWizardOnPage();
+		scrollDown();
+		wizardPane().scrollTop = 150;
+		act(() => ref.navigate!("#top"));
+		expect(scrolled()).toEqual(KEPT);
+		expect(wizardPane().scrollTop).toBe(0);
+	});
+
+	it("[ISSUE-3475-ITEM-33] a push of the outer router still scrolls the page and its scroll containers to the top", () => {
+		const { page } = renderWizardOnPage();
+		scrollDown();
+		act(() => page.push("/devices/6"));
+		expect(scrolled()).toEqual(AT_TOP);
+	});
+});

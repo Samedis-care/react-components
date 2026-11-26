@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, userEvent, waitFor, within } from "storybook/test";
-import { Box, Link as MuiLink, Typography } from "@mui/material";
+import { Box, Button, Link as MuiLink, Typography } from "@mui/material";
 import { createMemoryHistory } from "history";
 import { Framework } from "../../framework";
 import { setFrameworkHistory } from "../../framework/History";
@@ -12,6 +12,7 @@ import HistoryRouter from "../../standalone/Routes/HistoryRouter";
 import Routes from "../../standalone/Routes/Routes";
 import Route from "../../standalone/Routes/Route";
 import Link from "../../standalone/Routes/Link";
+import useNavigate from "../../standalone/Routes/useNavigate";
 
 setFrameworkHistory(createMemoryHistory({ initialEntries: ["/devices/4711"] }));
 
@@ -256,5 +257,90 @@ export const Issue3475Item22FocusGoesToTheDeepestPageTitle: Story = {
 		await expect(
 			await canvas.findByRole("heading", { name: "Device 2" }),
 		).toHaveFocus();
+	},
+};
+
+// ─── A HistoryRouter inside another one ─────────────────────────────────────
+
+/**
+ * A step of a wizard whose "Next" button belongs to the step: the step change
+ * removes the focused button
+ * @param props.text What the step asks
+ * @param props.next The path of the next step
+ */
+const WizardStep = (props: { text: string; next: string }) => {
+	const { next } = props;
+	const navigate = useNavigate();
+	const goNext = useCallback(() => navigate(next), [navigate, next]);
+	return (
+		<>
+			<Typography>{props.text}</Typography>
+			<Button onClick={goNext}>Next</Button>
+		</>
+	);
+};
+
+/**
+ * A device page (on the Framework's router) with a wizard that routes its
+ * steps with a HistoryRouter of its own; its last step has a PageTitle
+ */
+const DeviceWizardPage = () => {
+	const history = useMemo(
+		() => createMemoryHistory({ initialEntries: ["/step1"] }),
+		[],
+	);
+	return (
+		<Box sx={{ p: 2 }}>
+			<PageTitle>Device 4711</PageTitle>
+			<HistoryRouter history={history}>
+				<Routes>
+					{[
+						<Route
+							key="step1"
+							path="/step1"
+							element={<WizardStep text="Pick the type" next="/step2" />}
+						/>,
+						<Route
+							key="step2"
+							path="/step2"
+							element={<WizardStep text="Pick the location" next="/step3" />}
+						/>,
+						<Route
+							key="step3"
+							path="/step3"
+							element={<PageTitle variant="h2">Summary</PageTitle>}
+						/>,
+					]}
+				</Routes>
+			</HistoryRouter>
+		</Box>
+	);
+};
+
+export const Issue3475Item33WizardStepFocusStaysInTheWizard: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					'ISSUE-3475-ITEM-33: a wizard with a HistoryRouter of its own on a device page. Its "Next" button belongs to the step, so a step change removes the focused button. The focus moves only to a PageTitle of the wizard\'s own steps ("Summary"), never to the page\'s PageTitle outside of the wizard.',
+			},
+		},
+	},
+	render: () => <DeviceWizardPage />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const pageHeading = await canvas.findByRole("heading", {
+			name: "Device 4711",
+		});
+		canvas.getByRole("button", { name: "Next" }).focus();
+		await userEvent.keyboard("{Enter}");
+		await canvas.findByText("Pick the location");
+		await expect(pageHeading).not.toHaveFocus();
+		canvas.getByRole("button", { name: "Next" }).focus();
+		await userEvent.keyboard("{Enter}");
+		await expect(
+			await canvas.findByRole("heading", { name: "Summary" }),
+		).toHaveFocus();
+		await expect(pageHeading).not.toHaveFocus();
 	},
 };
