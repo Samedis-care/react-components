@@ -154,12 +154,29 @@ export type DataGridPersistedData =
 	DataGridPersistentState | DataGridPersistentStateLegacy;
 
 /**
- * The runtime pieces decodePersistedState produces
+ * The runtime pieces decodePersistedState produces. Only the parts the config
+ * passed to it names (DataGridProps.persist) are read from the persisted data,
+ * the others are at their defaults.
  */
 export interface DataGridDecodedState {
+	/**
+	 * Per column field, whether the column is hidden and whether it is pinned:
+	 * as stored for the columns the user has seen, from the column definition
+	 * for the others. The search, the custom data and initialResize are only
+	 * there when they are stored.
+	 */
 	state: Pick<IDataGridState, "columnHidden" | "columnPinned"> &
 		Partial<Pick<IDataGridState, "search" | "customData" | "initialResize">>;
+	/**
+	 * Per column field of the default column state passed in, its sort and
+	 * filter: as stored (see DataGridPersistentState.sort and .filter), else
+	 * as in the default column state
+	 */
 	columnState: IDataGridColumnsState;
+	/**
+	 * Per column field, the stored width in px. A column without a stored
+	 * width has no entry.
+	 */
 	columnWidth: Record<string, number>;
 }
 

@@ -2,6 +2,9 @@ import React from "react";
 import { DataGridPersistentStateContext } from "./StatePersistence";
 import { DataGridPersistMountContext } from "./PersistGate";
 
+/**
+ * Props of DataGridNoPersist
+ */
 export interface NoPersistProps {
 	/**
 	 * The children to render

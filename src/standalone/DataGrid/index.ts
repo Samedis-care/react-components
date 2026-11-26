@@ -4,9 +4,17 @@ export type {
 	DataGridQuery,
 	DataGridRowUpdate,
 } from "./DataGrid";
-export { default as DataGridLocalStoragePersist } from "./LocalStoragePersist";
-export { default as DataGridStorageManagerPersist } from "./StorageManagerPersist";
-export { default as DataGridNoPersist } from "./NoPersist";
+export {
+	default as DataGridLocalStoragePersist,
+	type LocalStoragePersistProps,
+} from "./LocalStoragePersist";
+export {
+	default as DataGridStorageManagerPersist,
+	type StorageManagerPersistProps,
+	DATA_GRID_STORAGE_KEY_COLUMN_SIZING,
+	DATA_GRID_STORAGE_KEY_FILTERS,
+} from "./StorageManagerPersist";
+export { default as DataGridNoPersist, type NoPersistProps } from "./NoPersist";
 export {
 	DataGridPersistentStateContext,
 	type DataGridPersistentStateContextType,
@@ -21,7 +29,13 @@ export {
 	DataGridPersistMountContext,
 	type DataGridPersistMountContextType,
 } from "./PersistGate";
-export { DATA_GRID_PERSIST_VERSION } from "./PersistFormat";
+export {
+	DATA_GRID_PERSIST_VERSION,
+	decodePersistedState,
+	splitPersistedState,
+	mergePersistedState,
+	type DataGridDecodedState,
+} from "./PersistFormat";
 export { default as GridMultiSelectFilter } from "./GridMultiSelectFilter";
 export { default as GridMultiSelectFilterBackend } from "./GridMultiSelectFilterBackend";
 export { default as GridSingleSelectFilter } from "./GridSingleSelectFilter";

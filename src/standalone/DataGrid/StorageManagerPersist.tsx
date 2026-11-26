@@ -13,6 +13,9 @@ import {
 	DataGridPersistMountContextType,
 } from "./PersistGate";
 
+/**
+ * Props of DataGridStorageManagerPersist
+ */
 export interface StorageManagerPersistProps {
 	/**
 	 * The storage keys to use for persisting. When they change (compared as
@@ -33,11 +36,31 @@ export interface StorageManagerPersistProps {
 
 const DATA_GRID_STORAGE_KEY_BASE = "data-grid-";
 
-// recommended default: localStorage
+/**
+ * The StorageManager id of the bucket in which DataGridStorageManagerPersist
+ * keeps the column widths and whether their first auto-fit has run (the
+ * sizing part of splitPersistedState).
+ *
+ * StorageManager.configure gets it as the id, to pick the storage of the
+ * bucket and the keys it is stored under. Recommended: localStorage, so the
+ * widths stay with the device; leave out the keys the widths should be shared
+ * across (the tenant, say). Without a configure call, both buckets go to
+ * localStorage.
+ */
 export const DATA_GRID_STORAGE_KEY_COLUMN_SIZING =
 	DATA_GRID_STORAGE_KEY_BASE + "column-sizing";
 
-// recommended default: server storage
+/**
+ * The StorageManager id of the bucket in which DataGridStorageManagerPersist
+ * keeps everything but the column widths: the columns seen, hidden and
+ * pinned, the sort, the column filters, the search and the custom data (the
+ * rest of splitPersistedState).
+ *
+ * StorageManager.configure gets it as the id, to pick the storage of the
+ * bucket and the keys it is stored under. Recommended: server storage, so the
+ * settings follow the user to other devices. Without a configure call, both
+ * buckets go to localStorage.
+ */
 export const DATA_GRID_STORAGE_KEY_FILTERS =
 	DATA_GRID_STORAGE_KEY_BASE + "filters";
 

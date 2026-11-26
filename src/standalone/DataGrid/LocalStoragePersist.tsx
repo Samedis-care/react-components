@@ -10,6 +10,9 @@ import {
 	DataGridPersistMountContextType,
 } from "./PersistGate";
 
+/**
+ * Props of DataGridLocalStoragePersist
+ */
 export interface LocalStoragePersistProps {
 	/**
 	 * The localStorage key the grids inside read their state from and write it
