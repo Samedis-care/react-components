@@ -28,7 +28,9 @@ const CLIENTS_WITH_INSTRUMENT_NAVIGATION: Client[] = [];
 
 /**
  * Sentry's browserTracingIntegration, with pageload and navigation spans that follow the
- * HistoryRouter and are named after the matched Route.
+ * outermost HistoryRouter (Framework's) and are named after its deepest matched Route. A
+ * HistoryRouter inside another one, e.g. a wizard on a memory history, starts no span and names
+ * none.
  * Not exported by the components-care index, import it from components-care/dist/sentry: it
  * imports Sentry, which is an optional peer dependency. It needs `@sentry/react` and the
  * `@sentry/core` and `@sentry/conventions` that `@sentry/react` depends on; with a node_modules

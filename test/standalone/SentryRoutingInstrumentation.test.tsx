@@ -6,6 +6,7 @@ import {
 	beforeAll,
 	afterAll,
 	afterEach,
+	beforeEach,
 	vi,
 } from "vitest";
 import {
@@ -16,7 +17,7 @@ import {
 	screen,
 } from "@testing-library/react";
 import * as Sentry from "@sentry/react";
-import { createBrowserHistory, History } from "history";
+import { createBrowserHistory, createMemoryHistory, History } from "history";
 import {
 	HistoryRouter,
 	Link,
@@ -65,6 +66,43 @@ const rootSpan = () => {
 		urlTemplate: json.attributes["url.template"],
 	};
 };
+
+const activeRootSpanId = () => {
+	const span = Sentry.getActiveSpan();
+	return span && Sentry.spanToJSON(Sentry.getRootSpan(span)).span_id;
+};
+
+const transactionName = () =>
+	Sentry.getCurrentScope().getScopeData().transactionName;
+
+/** a wizard on a memory history of its own, as a page may render one */
+const wizard = (wizardHistory: History) => (
+	<HistoryRouter history={wizardHistory}>
+		<Routes>
+			<Route path={"/step1"} element={<div>step 1</div>} />
+			<Route path={"/step2"} element={<div>step 2</div>} />
+		</Routes>
+	</HistoryRouter>
+);
+
+/** the app of renderApp with the wizard rendered on the device page */
+const appWithWizard = (history: History, wizardHistory: History | null) => (
+	<HistoryRouter history={history}>
+		<Routes>
+			<Route
+				path={"/tenant/:tenantId/*"}
+				element={
+					<Routes>
+						<Route
+							path={"devices/:deviceId"}
+							element={wizardHistory ? wizard(wizardHistory) : <div />}
+						/>
+					</Routes>
+				}
+			/>
+		</Routes>
+	</HistoryRouter>
+);
 
 const renderApp = (history: History) =>
 	render(
@@ -190,6 +228,77 @@ describe("componentsCareBrowserTracingIntegration (span streaming)", () => {
 		expect(history.location.pathname).toBe("/tenant/1/settings");
 		expect(rootSpanId()).toBe(navigationSpan);
 		scrollTo.mockRestore();
+	});
+
+	describe("a HistoryRouter inside a Route of another one", () => {
+		beforeEach(() => {
+			// a push resets the scroll position; jsdom does not implement scrollTo
+			vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+		});
+		afterEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		it("[ISSUE-3475-ITEM-31] starts no navigation span and keeps the transaction name when it navigates", () => {
+			const wizardHistory = createMemoryHistory({ initialEntries: ["/step1"] });
+			render(appWithWizard(history, wizardHistory));
+			act(() => history.push("/tenant/1/devices/7"));
+			expect(screen.getByText("step 1")).toBeInTheDocument();
+			const pageSpanId = activeRootSpanId();
+			const pageSpan = rootSpan();
+			expect(pageSpan).toMatchObject({
+				name: "/tenant/:tenantId/devices/:deviceId",
+				op: "navigation",
+				source: "route",
+			});
+			act(() => wizardHistory.push("/step2"));
+			expect(screen.getByText("step 2")).toBeInTheDocument();
+			expect(activeRootSpanId()).toBe(pageSpanId);
+			expect(rootSpan()).toEqual(pageSpan);
+			expect(transactionName()).toBe("/tenant/:tenantId/devices/:deviceId");
+			act(() => wizardHistory.back());
+			expect(screen.getByText("step 1")).toBeInTheDocument();
+			expect(activeRootSpanId()).toBe(pageSpanId);
+			expect(transactionName()).toBe("/tenant/:tenantId/devices/:deviceId");
+		});
+
+		it("[ISSUE-3475-ITEM-31] its routes keep the transaction name when it mounts after the page", () => {
+			const { rerender } = render(appWithWizard(history, null));
+			act(() => history.push("/tenant/1/devices/8"));
+			expect(transactionName()).toBe("/tenant/:tenantId/devices/:deviceId");
+			// the page opens its wizard, e.g. on a click
+			rerender(
+				appWithWizard(
+					history,
+					createMemoryHistory({ initialEntries: ["/step1"] }),
+				),
+			);
+			expect(screen.getByText("step 1")).toBeInTheDocument();
+			expect(transactionName()).toBe("/tenant/:tenantId/devices/:deviceId");
+			expect(rootSpan()).toMatchObject({
+				name: "/tenant/:tenantId/devices/:deviceId",
+				source: "route",
+			});
+		});
+
+		it("[ISSUE-3475-ITEM-31] leaves the outer one naming its navigations after its routes", () => {
+			render(
+				appWithWizard(
+					history,
+					createMemoryHistory({ initialEntries: ["/step1"] }),
+				),
+			);
+			act(() => history.push("/tenant/1/devices/9"));
+			const pageSpanId = activeRootSpanId();
+			act(() => history.push("/tenant/1/devices/10"));
+			expect(activeRootSpanId()).not.toBe(pageSpanId);
+			expect(rootSpan()).toMatchObject({
+				name: "/tenant/:tenantId/devices/:deviceId",
+				op: "navigation",
+				source: "route",
+			});
+			expect(transactionName()).toBe("/tenant/:tenantId/devices/:deviceId");
+		});
 	});
 });
 

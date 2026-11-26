@@ -23,6 +23,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-26 | [An empty navigation target keeps the current path](2026-11-26-empty-navigation-target-keeps-current-path.md) | behavior |
 | 2026-11-26 | [A data grid's stored column filters are its whole column filters; defaultFilter only applies when nothing is stored](2026-11-26-data-grid-stored-filters-are-whole.md) | behavior, type |
 | 2026-11-26 | [A selector's switch is described by the selector's label](2026-11-26-selector-switch-described-by-label.md) | behavior |
+| 2026-11-26 | [A HistoryRouter inside another one reports nothing to Sentry](2026-11-26-nested-history-router-not-reported-to-sentry.md) | behavior |
 | 2026-11-26 | [CachedServerStorageProvider answers a fresh cached value synchronously](2026-11-26-cached-server-storage-answers-fresh-values-at-once.md) | type, behavior |
 | 2026-11-26 | [A navigation to a hash scrolls to the element with that id and focuses it](2026-11-26-hash-navigation-scrolls-to-its-element.md) | behavior |
 | 2026-11-26 | [The delete confirmation counts with plural forms](2026-11-26-data-grid-delete-confirmation-plurals.md) | behavior, i18n |

@@ -4,6 +4,7 @@ import matchPath from "./matchPath";
 import routePattern from "./routePattern";
 import { sentrySetRoutePath } from "./SentryRoutingInstrumentation";
 import RoutesEntryContext from "./RoutesEntryContext";
+import NestedHistoryRouterContext from "./NestedHistoryRouterContext";
 
 export interface RouteProps {
 	/**
@@ -144,10 +145,12 @@ const Route = (props: RouteProps) => {
 		[url, routePath, depth, rendersAt],
 	);
 
+	// the routes of a HistoryRouter inside another one leave the Sentry name to the outer one's routes
+	const nestedRouter = useContext(NestedHistoryRouterContext);
 	// every location, not only every route change: a navigation within this route needs its name too
 	useEffect(() => {
-		if (ctx) sentrySetRoutePath(ctx.path, ctx.depth, location);
-	}, [ctx, location]);
+		if (ctx && !nestedRouter) sentrySetRoutePath(ctx.path, ctx.depth, location);
+	}, [ctx, location, nestedRouter]);
 
 	if (!ctx) return <React.Fragment />;
 	return <RouteContext.Provider value={ctx}>{element}</RouteContext.Provider>;

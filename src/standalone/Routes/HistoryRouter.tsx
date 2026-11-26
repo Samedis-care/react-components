@@ -8,6 +8,7 @@ import NavigationScroll from "./NavigationScroll";
 import { NavigationFocusManager } from "./NavigationFocusManager";
 import { RouteContext } from "./Route";
 import RoutesEntryContext from "./RoutesEntryContext";
+import NestedHistoryRouterContext from "./NestedHistoryRouterContext";
 import { NavigationScrollManager } from "./NavigationScrollManager";
 import { NavigationScrollContext } from "./useResetScrollOnNavigation";
 
@@ -81,7 +82,10 @@ export const useHistoryRouterContext = (): HistoryRouterContextType => {
  * and the routing hooks (`useLocation`, `useNavigate`, `useParams`), and
  * re-renders them on every navigation of the history. Each push and
  * back/forward navigation also starts a Sentry navigation span when
- * `componentsCareBrowserTracingIntegration` is set up.
+ * `componentsCareBrowserTracingIntegration` is set up. A HistoryRouter inside
+ * another one starts none, and its routes leave the Sentry transaction name
+ * to those of the outer one: errors and spans on a page with, e.g., a wizard
+ * on a memory history are named after the page's route, not the wizard's.
  *
  * A push or replace navigation (`useNavigate`, `Link`, or `history.push` and
  * `history.replace` called directly) scrolls the window, the document and the
@@ -142,6 +146,8 @@ export const useHistoryRouterContext = (): HistoryRouterContextType => {
  */
 const HistoryRouter = (props: HistoryRouterProps) => {
 	const { history, children, formatDocumentTitle } = props;
+	// inside another HistoryRouter: only the outermost one reports to Sentry
+	const nested = useContext(HistoryRouterContext) !== null;
 	const [location, setLocation] = useState<Location>(history.location);
 	const ctx = useMemo((): HistoryRouterContextType => ({ history }), [history]);
 	const [navigationFocus] = useState(() => new NavigationFocusManager());
@@ -153,14 +159,14 @@ const HistoryRouter = (props: HistoryRouterProps) => {
 			// only now: a blocked navigation never gets here
 			navigationScroll.navigated(update);
 			setLocation(update.location);
-			sentryHandleNavigation(update);
+			if (!nested) sentryHandleNavigation(update);
 			navigationFocus.navigated(update.action);
 		});
 		// the layout effects of the children ran before this one and may have
 		// navigated already; no re-render if the location is unchanged
 		setLocation(history.location);
 		return unlisten;
-	}, [history, navigationFocus, navigationScroll]);
+	}, [history, navigationFocus, navigationScroll, nested]);
 	return (
 		<HistoryRouterContext.Provider value={ctx}>
 			<LocationContext.Provider value={location}>
@@ -170,7 +176,9 @@ const HistoryRouter = (props: HistoryRouterProps) => {
 					<RouteContext.Provider value={null}>
 						<RoutesEntryContext.Provider value={null}>
 							<NavigationScrollContext.Provider value={navigationScroll}>
-								{children}
+								<NestedHistoryRouterContext.Provider value={nested}>
+									{children}
+								</NestedHistoryRouterContext.Provider>
 							</NavigationScrollContext.Provider>
 						</RoutesEntryContext.Provider>
 					</RouteContext.Provider>
