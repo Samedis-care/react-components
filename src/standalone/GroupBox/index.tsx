@@ -34,7 +34,6 @@ const GroupBoxRoot = styled("fieldset", {
 	borderRadius: theme.shape.borderRadius,
 	borderWidth: 1,
 	position: "relative",
-	maxHeight: "inherit",
 	// Fills the parent only as its only child: a full-height frame would push
 	// a heading or helper text next to it out of the parent. :where() keeps
 	// the rule at zero specificity, so a height from the theme or a styled()
@@ -201,7 +200,8 @@ const GroupBox = React.forwardRef(function GroupBox(
  * are equally tall. Next to other elements (a heading above it, helper text
  * below it) it is as tall as its content, and the siblings stay inside the
  * parent. A `height` set by the theme or a `styled(GroupBox)` wrapper
- * replaces this rule.
+ * replaces this rule. A `max-height` on the parent does not limit the frame:
+ * it encloses its content, and a parent with `overflow: auto` scrolls.
  *
  * Every other HTML attribute, `sx` and `ref` reach the fieldset. A framed
  * form control ties its error to the group with `aria-describedby`: screen

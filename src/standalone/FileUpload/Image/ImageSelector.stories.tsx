@@ -312,3 +312,48 @@ export const Issue3490Item31PlaceholderWhereThePictureWouldBe: Story = {
 		}
 	},
 };
+
+/** a 300 × 600 picture: as wide as the fields below, three times as tall as their parents */
+const TALL_PICTURE =
+	"data:image/svg+xml," +
+	encodeURIComponent(
+		"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 600' width='300' height='600'><rect width='300' height='600' fill='#90caf9'/></svg>",
+	);
+
+/**
+ * In a parent with `max-height: 200px`, the normal (left) and the modern field (right) stop
+ * at that height: the frame takes over the parent's max-height, and the 600px tall picture
+ * is shrunk to the space in it.
+ */
+export const Issue3462Item6FitsMaxHeightParent: Story = {
+	args: { value: TALL_PICTURE },
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+			<Controlled {...args} box={{ width: 300, maxHeight: 200 }} />
+			<Controlled
+				{...args}
+				variant={"modern"}
+				box={{ width: 300, maxHeight: 200 }}
+			/>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const fields = Array.from(canvasElement.querySelectorAll("fieldset"));
+		await expect(fields).toHaveLength(2);
+		for (const field of fields) {
+			const img = field.querySelector("img");
+			const parent = field.parentElement;
+			if (!img || !parent) throw new Error("no picture or parent");
+			await img.decode();
+			const parentRect = parent.getBoundingClientRect();
+			const fieldRect = field.getBoundingClientRect();
+			const imgRect = img.getBoundingClientRect();
+			await expect(fieldRect.bottom).toBeLessThanOrEqual(
+				parentRect.bottom + 0.5,
+			);
+			await expect(imgRect.top).toBeGreaterThan(fieldRect.top);
+			await expect(imgRect.height).toBeLessThan(200);
+		}
+	},
+};

@@ -151,6 +151,14 @@ export interface ImageSelectorProps {
 	onError?: ImageErrorHandler;
 }
 
+/**
+ * The frame of the normal and modern variants. It takes over its parent's `max-height`, so
+ * that in a parent with a max-height the frame stops there and the picture shrinks to fit it.
+ */
+const Frame = styled(GroupBox)({
+	maxHeight: "inherit",
+});
+
 const RootClassic = styled(Grid, {
 	name: "CcImageSelector",
 	slot: "rootClassic",
@@ -522,7 +530,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 	// render component
 	if (variant === "normal") {
 		return (
-			<GroupBox
+			<Frame
 				label={boxLabel}
 				smallLabel={props.smallLabel}
 				className={className}
@@ -602,7 +610,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 						)}
 					</ImageWrapper>
 				</RootClassic>
-			</GroupBox>
+			</Frame>
 		);
 	} else if (variant === "modern") {
 		const modernUploadLabel = (
@@ -618,7 +626,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 		return (
 			<>
 				{previewDialog}
-				<GroupBox
+				<Frame
 					label={boxLabel}
 					smallLabel={props.smallLabel}
 					className={className}
@@ -779,7 +787,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 							)}
 						</ImageWrapper>
 					</RootModern>
-				</GroupBox>
+				</Frame>
 			</>
 		);
 	} else if (variant === "profile_picture") {

@@ -210,6 +210,14 @@ const Root = styled("div", {
 	slot: "root",
 })({});
 
+/**
+ * The frame. It takes over the root's `max-height`, so that with a max-height on the root
+ * the frame stops there and the picture shrinks to fit it.
+ */
+const Frame = styled(GroupBox)({
+	maxHeight: "inherit",
+});
+
 const UploadInput = styled("input", {
 	name: "CcMultiImage",
 	slot: "uploadInput",
@@ -497,7 +505,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 
 	return (
 		<Root className={combineClassNames([className, classes?.root])}>
-			<GroupBox
+			<Frame
 				{...slotProps?.groupBox}
 				aria-busy={busy || slotProps?.groupBox?.["aria-busy"]}
 				label={label}
@@ -555,7 +563,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 						)}
 					</Grid>
 				</RootContainer>
-			</GroupBox>
+			</Frame>
 			<UploadInput
 				type={"file"}
 				multiple={remainingFiles > 1}

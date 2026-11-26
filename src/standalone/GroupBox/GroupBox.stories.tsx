@@ -300,3 +300,40 @@ export const Issue3462Item1HeightOverrideWinsAsOnlyChild: Story = {
 		}
 	},
 };
+
+export const Issue3462Item6EnclosesContentInMaxHeightParent: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3462-ITEM-6: in a scrolling parent with `max-height: 200px`, the frame inherits the max-height and stays 200px tall while its 400px content runs out of it; the paragraph after the frame is drawn over the content.",
+			},
+		},
+	},
+	render: () => (
+		<div
+			role={"region"}
+			aria-label={"Scrolling panel"}
+			tabIndex={0}
+			style={{ width: 300, maxHeight: 200, overflow: "auto" }}
+		>
+			<GroupBox id={"gb"} label={"Label"}>
+				<div data-testid={"content"} style={{ height: 400 }}>
+					tall
+				</div>
+			</GroupBox>
+			<p data-testid={"after"} style={{ margin: 0 }}>
+				after
+			</p>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const box = rectOf(canvasElement.querySelector("#gb"));
+		const content = rectOf(
+			canvasElement.querySelector("[data-testid=content]"),
+		);
+		const after = rectOf(canvasElement.querySelector("[data-testid=after]"));
+		await expect(box.bottom).toBeGreaterThanOrEqual(content.bottom);
+		await expect(after.top).toBeGreaterThanOrEqual(content.bottom);
+	},
+};

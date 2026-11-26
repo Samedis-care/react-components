@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
+import { styled } from "@mui/material";
 import MultiImage, { MultiImageImage, MultiImageProps } from "./MultiImage";
 import ImageBox from "./ImageBox";
 import {
@@ -815,5 +816,53 @@ export const Issue3473Item16HiddenCounterLabelStaysInside: Story = {
 		const label = await canvas.findByText("Image 26 of 80");
 		await expect(edgesPast(label)).toEqual([]);
 		await expect(pageScrollsSideways()).toBe(false);
+	},
+};
+
+/** a 300 × 600 picture: as wide as the field below, three times as tall as its root */
+const TALL_IMAGES: MultiImageImage[] = [
+	{
+		id: "tall",
+		image: svg(300, 600, '<rect width="300" height="600" fill="#1e88e5"/>'),
+		name: "tall.png",
+	},
+];
+
+const MaxHeightMultiImage = styled(MultiImage)({ maxHeight: 200 });
+
+export const Issue3462Item6FitsMaxHeightOfItsRoot: StoryObj = {
+	parameters: {
+		...AXE_GATE,
+		docs: {
+			description: {
+				story:
+					"With `max-height: 200px` on MultiImage's root (here from a `styled(MultiImage)` wrapper), the frame stops at that height, and the 600px tall picture is shrunk to the space in it.",
+			},
+		},
+	},
+	render: () => (
+		<div style={{ width: 300 }}>
+			<MaxHeightMultiImage
+				label={"Device photos"}
+				images={TALL_IMAGES}
+				primary={"tall"}
+				uploadImage={ADD_TILE}
+				captureImage={CAMERA_TILE}
+				readOnly
+			/>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const root = rectOf(
+			canvasElement.querySelector('[class*="CcMultiImage-root"]'),
+		);
+		const frame = rectOf(canvasElement.querySelector("fieldset"));
+		const img = canvasElement.querySelector("fieldset img");
+		if (!(img instanceof HTMLImageElement)) throw new Error("no picture");
+		await img.decode();
+		const picture = img.getBoundingClientRect();
+		await expect(frame.bottom).toBeLessThanOrEqual(root.bottom + 0.5);
+		await expect(picture.top).toBeGreaterThan(frame.top);
+		await expect(picture.height).toBeLessThan(200);
 	},
 };
