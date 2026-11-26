@@ -46,6 +46,43 @@ class FailingConnector extends MockConnector {
 }
 
 /**
+ * A connector with an index2 of its own, which rejects with the given error, after calling
+ * beforeReject if given
+ */
+class FailingIndex2Connector extends MockConnector {
+	private readonly error: Error;
+	private readonly beforeReject: (() => void) | undefined;
+
+	constructor(error: Error, beforeReject?: () => void) {
+		super(RECORDS);
+		this.error = error;
+		this.beforeReject = beforeReject;
+	}
+
+	index2(): Promise<never> {
+		this.beforeReject?.();
+		return Promise.reject(this.error);
+	}
+}
+
+/**
+ * The connectors index2 can fail through: the polyfill, which loads through the
+ * connector's index, and a connector's own index2
+ */
+const INDEX2_CONNECTORS = [
+	{
+		connector: "the index2 polyfill",
+		create: (error: Error, beforeReject?: () => void) =>
+			new FailingConnector(error, beforeReject),
+	},
+	{
+		connector: "a connector's own index2",
+		create: (error: Error, beforeReject?: () => void) =>
+			new FailingIndex2Connector(error, beforeReject),
+	},
+];
+
+/**
  * A connector whose index rejects with the given value, which is not an Error
  */
 class NonErrorRejectingConnector extends MockConnector {
@@ -374,4 +411,49 @@ describe("Model error reporting", () => {
 			}),
 		);
 	});
+
+	it.each(INDEX2_CONNECTORS)(
+		"[ISSUE-3506-ITEM-22] reports an unexpected index2 error of $connector once, with the source Model.index2 and the model",
+		async ({ create }) => {
+			const error = new TypeError("Unexpected response");
+			const model = createModel(create(error));
+
+			await expect(model.index2({ offset: 0, rows: 10 })).rejects.toBe(error);
+			expect(report).toHaveBeenCalledExactlyOnceWith(
+				error,
+				expect.objectContaining({
+					source: "Model.index2",
+					extra: { model: model.modelId },
+				}),
+			);
+		},
+	);
+
+	it.each(INDEX2_CONNECTORS)(
+		"[ISSUE-3506-ITEM-22] doesn't report an AbortError of $connector, and the abort reaches the caller",
+		async ({ create }) => {
+			// an AbortError as fetch rejects with it; the signal is not passed on
+			const controller = new AbortController();
+			controller.abort();
+			const error = controller.signal.reason as Error;
+			const model = createModel(create(error));
+
+			await expect(model.index2({ offset: 0, rows: 10 })).rejects.toBe(error);
+			expect(report).not.toHaveBeenCalled();
+		},
+	);
+
+	it.each(INDEX2_CONNECTORS)(
+		"[ISSUE-3506-ITEM-22] doesn't report an index2 request of $connector aborted while it was loading, whatever it then rejects with",
+		async ({ create }) => {
+			const controller = new AbortController();
+			const error = new TypeError("socket closed");
+			const model = createModel(create(error, () => controller.abort()));
+
+			await expect(
+				model.index2({ offset: 0, rows: 10, signal: controller.signal }),
+			).rejects.toBe(error);
+			expect(report).not.toHaveBeenCalled();
+		},
+	);
 });
