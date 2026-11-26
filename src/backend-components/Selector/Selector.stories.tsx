@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, waitFor, within } from "storybook/test";
+import { expect, fn, waitFor, within } from "storybook/test";
 import {
 	Button,
 	Dialog,
@@ -556,6 +556,131 @@ export const Issue3510Item12SelectAllSelectsEveryRecord: StoryObj = {
 		for (const box of rowCheckboxes(canvasElement)) {
 			await expect(box).not.toBeChecked();
 		}
+	},
+};
+
+/**
+ * axe for the read-only grid stories: GRID_A11Y without the rule that the pinned
+ * selection column breaks once its checkboxes are disabled
+ */
+const READ_ONLY_GRID_A11Y = {
+	...GRID_A11Y,
+	config: {
+		rules: [
+			...GRID_A11Y.config.rules,
+			// the pinned selection column scrolls with the grid but, its checkboxes
+			// disabled, holds nothing focusable (ISSUE-3472-ITEM-17)
+			{ id: "scrollable-region-focusable", enabled: false },
+		],
+	},
+};
+
+const DataGridMultiSelectStory = ({
+	readOnly = false,
+}: {
+	readOnly?: boolean;
+}) => {
+	const model = useMemo(createGridModel, []);
+	const [selected, setSelected] = useState<string[]>(["2", "5"]);
+	return (
+		<>
+			<div style={{ height: 500 }}>
+				<BackendDataGridMultiSelect
+					model={model}
+					selected={selected}
+					onChange={setSelected}
+					readOnly={readOnly}
+				/>
+			</div>
+			<p>
+				Selected ids:{" "}
+				<span data-testid={"selection"}>{selected.join(",")}</span>
+			</p>
+		</>
+	);
+};
+
+/** ISSUE-3510-ITEM-13: in read-only mode the row checkboxes are disabled */
+export const Issue3510Item13ReadOnlyGridCheckboxesAreDisabled: StoryObj = {
+	parameters: { a11y: READ_ONLY_GRID_A11Y },
+	render: () => <DataGridMultiSelectStory readOnly />,
+	play: async ({ canvasElement }) => {
+		await waitFor(() => expect(rowCheckboxes(canvasElement)).toHaveLength(8), {
+			timeout: 5000,
+		});
+		for (const box of rowCheckboxes(canvasElement)) {
+			await expect(
+				box.disabled || box.getAttribute("aria-disabled") === "true",
+			).toBe(true);
+		}
+	},
+};
+
+/** The selection of the read-only field: Bob and Eve */
+const READ_ONLY_SELECTION = ["2", "5"];
+
+const ReadOnlyDataGridMultiSelectStory = (props: {
+	onChange: (selected: string[]) => void;
+}) => {
+	const model = useMemo(createGridModel, []);
+	return (
+		<div style={{ height: 500 }}>
+			<BackendDataGridMultiSelect
+				model={model}
+				label={"Recipients"}
+				selected={READ_ONLY_SELECTION}
+				onChange={props.onChange}
+				readOnly
+				enableSelectAll
+			/>
+		</div>
+	);
+};
+
+/** The data cell that holds the element */
+const cellOf = (element: Element) => {
+	const cell = element.closest("[class*=CcDataGrid-dataCell]");
+	if (!cell) throw new Error("not in a data cell");
+	return cell;
+};
+
+/**
+ * ISSUE-3510-ITEM-13: a click on a row of a read-only field, or where its checkbox is,
+ * ticks or unticks nothing and calls no onChange; there is no select all to tick. The
+ * search still works, to read the selection.
+ */
+export const Issue3510Item13ReadOnlyGridRefusesATick: StoryObj<{
+	onChange: (selected: string[]) => void;
+}> = {
+	args: { onChange: fn() },
+	parameters: { a11y: READ_ONLY_GRID_A11Y },
+	render: (args) => (
+		<ReadOnlyDataGridMultiSelectStory onChange={args.onChange} />
+	),
+	play: async ({ args, canvas, canvasElement, userEvent }) => {
+		await waitFor(() => expect(rowCheckboxes(canvasElement)).toHaveLength(8), {
+			timeout: 5000,
+		});
+		const ticks = () => rowCheckboxes(canvasElement).map((box) => box.checked);
+		const unchanged = [true, true, false, false, false, false, false, false];
+		await expect(ticks()).toEqual(unchanged);
+		// Bob (selected) and Alice (the first unselected row): where their checkbox is
+		await userEvent.click(cellOf(rowCheckboxes(canvasElement)[0]));
+		await userEvent.click(cellOf(rowCheckboxes(canvasElement)[2]));
+		// and a cell of Alice's row
+		await userEvent.click(cellOf(canvas.getByText("Alice")));
+		await expect(ticks()).toEqual(unchanged);
+		await expect(args.onChange).not.toHaveBeenCalled();
+		const selectAll = canvas
+			.queryAllByRole("checkbox", { name: "All" })
+			.filter((box) => !(box as HTMLInputElement).disabled);
+		await expect(selectAll).toEqual([]);
+		// the search still lists the matches
+		await userEvent.type(canvas.getByRole("textbox"), "Alice");
+		await waitFor(() => expect(rowCheckboxes(canvasElement)).toHaveLength(1), {
+			timeout: 5000,
+		});
+		await expect(ticks()).toEqual([false]);
 	},
 };
 

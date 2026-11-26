@@ -1,4 +1,11 @@
-import React, { useCallback, useEffect, useId, useRef, useState } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useId,
+	useReducer,
+	useRef,
+	useState,
+} from "react";
 import { FormLabel, styled } from "@mui/material";
 import { ModelRecord, ModelUnknown } from "../../backend-integration";
 import DataGrid, {
@@ -56,6 +63,9 @@ const GridSlot = styled("div", {
 	minHeight: 0,
 });
 
+/** canSelectRow of a read-only field: no row can be ticked or unticked */
+const refuseRow = () => false;
+
 /** The slots of BackendDataGridMultiSelect, for the theme's styleOverrides */
 export type BackendDataGridMultiSelectClassKey =
 	"root" | "label" | "status" | "grid";
@@ -99,7 +109,12 @@ export interface BackendDataGridMultiSelectProps<
 	 */
 	label?: React.ReactNode;
 	/**
-	 * Selection read only?
+	 * Is the selection read-only? Then the grid shows it, but no row can be ticked or
+	 * unticked: the row checkboxes are disabled, a click on a row ticks nothing (the
+	 * grid's canSelectRow is not used), there is no select all checkbox
+	 * (enableSelectAll) and onChange is never called. The search, the filters, the
+	 * sorting and the scrolling still work, to read the selection.
+	 * @default false
 	 */
 	readOnly?: boolean;
 	/**
@@ -110,9 +125,9 @@ export interface BackendDataGridMultiSelectProps<
 	 */
 	selected: string[];
 	/**
-	 * Selection change handler
-	 * @param selected The new selected IDS
-	 * @remarks May return the same ID array in a different array instance to force re-rendering (only read-only mode)
+	 * Called when the user ticks or unticks a row or the select all checkbox (ticked, once
+	 * the records it selects are loaded). Not called in read-only mode (readOnly).
+	 * @param selected The ids of the selected records
 	 */
 	onChange: (selected: string[]) => void;
 	/**
@@ -121,7 +136,7 @@ export interface BackendDataGridMultiSelectProps<
 	 * filters by its id: the grid loads the pages it hasn't loaded yet, one after another,
 	 * and then calls onChange with the ids of all of them (limitSelectAll bounds this).
 	 * Selected records that don't match are unselected. Unticked, it clears the
-	 * selection.
+	 * selection. Not shown in read-only mode (readOnly).
 	 * @default false
 	 */
 	enableSelectAll?: boolean;
@@ -153,6 +168,8 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 		label,
 		getRowLabel: getRecordLabel,
 		limitSelectAll,
+		enableSelectAll,
+		canSelectRow,
 		...gridProps
 	} = props;
 	const getRowLabel = useBackendDataGridRowLabel(model, getRecordLabel);
@@ -165,6 +182,9 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 	);
 	const [initialSelectionChangeReceived, setInitialSelectionChangeReceived] =
 		useState(false);
+	// renders the field again, which hands the grid `selected` again: a new selection
+	// array, which the grid applies when its own selection differs
+	const [, showSelected] = useReducer((renders: number) => renders + 1, 0);
 	const forceRefreshToken = `${
 		gridProps.forceRefreshToken || "undefined"
 	}${refreshToken}`;
@@ -208,13 +228,24 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 				// ids, all of them unless limitSelectAll bounds it, instead of the inverted
 				// selection (everything except the ids), which the value can't hold
 				limitSelectAll={limitSelectAll ?? Number.POSITIVE_INFINITY}
+				// read-only: the row checkboxes are disabled, a click on a row ticks
+				// nothing, and there is no select all
+				enableSelectAll={readOnly ? false : enableSelectAll}
+				canSelectRow={readOnly ? refuseRow : canSelectRow}
 				getRowLabel={getRowLabel}
 				onSelectionChange={(invert, newIds) => {
 					if (!initialSelectionChangeReceived) {
 						setInitialSelectionChangeReceived(true);
 						return;
 					}
-					onChange(readOnly ? [...selected] : newIds);
+					// a change the grid still makes after the field turned read-only (a
+					// select all that was loading, e.g. when the form started to save) is
+					// not taken: the grid shows `selected` again
+					if (readOnly) {
+						showSelected();
+						return;
+					}
+					onChange(newIds);
 				}}
 				selection={[false, selected]}
 				loadData={async (

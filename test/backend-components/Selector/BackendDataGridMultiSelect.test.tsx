@@ -34,6 +34,7 @@ import type {
 	IDataGridLoadDataParameters,
 } from "../../../src/standalone/DataGrid/DataGrid";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
+import type { ConnectorIndex2Params } from "../../../src/backend-integration/Connector/Connector";
 import {
 	capture,
 	makeModel,
@@ -189,6 +190,16 @@ const StatefulField = (props: Props & { initial: string[] }) => {
 		</Framework>
 	);
 };
+
+/** GridTestConnector whose offset queries (index2) wait while gate is set */
+class HeldGridConnector extends GridTestConnector {
+	gate: Promise<void> | null = null;
+
+	async index2(params: ConnectorIndex2Params) {
+		if (this.gate) await this.gate;
+		return super.index2(params);
+	}
+}
 
 // ---------------------------------------------------------------------------
 // Bugs (each test asserts the correct behavior and fails until it is fixed)
@@ -553,5 +564,88 @@ describe("BackendDataGridMultiSelect bugs", () => {
 		fireEvent.blur(search);
 		await flush();
 		expect(sink.ctx?.touched.recipients).toBe(true);
+	});
+
+	it("[ISSUE-3510-ITEM-13] read-only: no row can be ticked, select all is disabled, and a change the grid reports does not reach onChange", async () => {
+		const { model } = gridModel();
+		const onChange = vi.fn();
+		store.real = true;
+		render(
+			ui({
+				model,
+				selected: ["3"],
+				onChange,
+				readOnly: true,
+				enableSelectAll: true,
+			}),
+		);
+		const all = await screen.findByRole("checkbox", { name: "All" });
+		await flush();
+		expect(all).toBeDisabled();
+		// the row checkboxes are drawn by MultiGrid (not rendered here) from canSelectRow
+		const canSelectRow = gridProps().canSelectRow;
+		expect(canSelectRow?.({ id: "3" })).toBe(false);
+		expect(canSelectRow?.({ id: "4" })).toBe(false);
+		act(() => gridProps().onSelectionChange!(false, ["3", "4"]));
+		await flush();
+		expect(onChange).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3510-ITEM-13] read-only turned on and off after mounting refuses and allows ticks again, with the canSelectRow passed", async () => {
+		const { model } = gridModel();
+		const onChange = vi.fn();
+		const canSelectRow = (record: Record<string, unknown>) => record.id !== "4";
+		const props = {
+			model,
+			selected: ["3"],
+			onChange,
+			canSelectRow,
+			enableSelectAll: true,
+		};
+		const { rerender } = await mount(props);
+		// the grid's first report after mounting
+		act(() => gridProps().onSelectionChange!(false, ["3"]));
+		expect(gridProps().canSelectRow?.({ id: "5" })).toBe(true);
+		expect(gridProps().canSelectRow?.({ id: "4" })).toBe(false);
+		expect(gridProps().enableSelectAll).toBe(true);
+		rerender(ui({ ...props, readOnly: true }));
+		await flush();
+		expect(gridProps().canSelectRow?.({ id: "5" })).toBe(false);
+		expect(gridProps().enableSelectAll).toBe(false);
+		act(() => gridProps().onSelectionChange!(false, ["3", "5"]));
+		expect(onChange).not.toHaveBeenCalled();
+		rerender(ui({ ...props, readOnly: false }));
+		await flush();
+		expect(gridProps().canSelectRow?.({ id: "5" })).toBe(true);
+		expect(gridProps().canSelectRow?.({ id: "4" })).toBe(false);
+		expect(gridProps().enableSelectAll).toBe(true);
+		act(() => gridProps().onSelectionChange!(false, ["3", "5"]));
+		expect(onChange.mock.calls).toEqual([[["3", "5"]]]);
+	});
+
+	it("[ISSUE-3510-ITEM-13] a select all still loading when the field turns read-only (as for a save) is not taken: the value and the grid keep the selection", async () => {
+		const connector = new HeldGridConnector(rows30());
+		const model = makeSelectorModel(connector);
+		store.real = true;
+		const { rerender } = render(
+			<StatefulField model={model} initial={["7"]} enableSelectAll />,
+		);
+		const all = await screen.findByRole("checkbox", { name: "All" });
+		await flush();
+		let release!: () => void;
+		connector.gate = new Promise<void>((resolve) => (release = resolve));
+		// the grid shows the first page of 25 rows: select all loads the second
+		act(() => all.click());
+		await flush();
+		expect(all).toHaveAttribute("aria-busy", "true");
+		rerender(
+			<StatefulField model={model} initial={["7"]} enableSelectAll readOnly />,
+		);
+		await flush();
+		connector.gate = null;
+		release();
+		await flush();
+		expect(screen.getByRole("status")).toHaveTextContent("Selected: 1");
+		expect(screen.getByRole("checkbox", { name: "All" })).not.toBeChecked();
 	});
 });
