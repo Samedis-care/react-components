@@ -80,6 +80,36 @@ const overlayIn = (scope: ParentNode) => {
 	return el;
 };
 
+/**
+ * The line in the wash that the spinner is centered on: it holds the spinner and its disc
+ */
+const spinnerLineIn = (overlay: HTMLElement) =>
+	overlay.querySelector<HTMLElement>(
+		'[class*="CcFormLoaderOverlay-loaderAnchor"]',
+	);
+
+/**
+ * How much of the wash is painted, from 0 (nothing) to 1: the alpha of its color and the
+ * opacity of its spinner, each times the opacity of the wash itself
+ */
+const paintOf = (overlay: HTMLElement) => {
+	const style = getComputedStyle(overlay);
+	const opacity = Number(style.opacity);
+	const [, , , alpha = 1] = decomposeColor(style.backgroundColor).values;
+	const line = spinnerLineIn(overlay);
+	const spinner = line ? Number(getComputedStyle(line).opacity) : 0;
+	return { color: alpha * opacity, spinner: spinner * opacity };
+};
+
+/**
+ * The transitions of the fade-in, in the wash and the elements in it (not the spinner's
+ * turning, an animation)
+ */
+const fadesIn = (overlay: HTMLElement) =>
+	overlay
+		.getAnimations({ subtree: true })
+		.filter((animation) => animation instanceof CSSTransition);
+
 export const Visible: OverlayStory = {
 	args: { visible: true },
 };
@@ -120,30 +150,23 @@ export const Controllable: OverlayStory = {
 		await userEvent.click(canvas.getByRole("button", { name: "Show overlay" }));
 		await nextFrame();
 		await expect(getComputedStyle(overlay).visibility).toBe("visible");
-		await expect(getComputedStyle(overlay).opacity).toBe("0");
+		await expect(paintOf(overlay)).toEqual({ color: 0, spinner: 0 });
 		await expect(overlay.contains(hitAtCenter(content))).toBe(true);
-		const fades = overlay.getAnimations();
-		await expect(fades).toHaveLength(1);
-		const fade = fades[0] as CSSTransition;
-		await expect(fade.transitionProperty).toBe("opacity");
-		await expect(fade.effect?.getTiming()).toMatchObject({
-			delay: 1000,
-			duration: 225,
-		});
+		await expect(transitionsOf(overlay)).toEqual(DEFAULT_FADE_IN);
 
 		// hide before the delay ends: the wash never painted, the pointer goes through
 		await userEvent.click(canvas.getByRole("button", { name: "Hide overlay" }));
 		await nextFrame();
 		await expect(getComputedStyle(overlay).visibility).toBe("hidden");
-		await expect(getComputedStyle(overlay).opacity).toBe("0");
+		await expect(paintOf(overlay)).toEqual({ color: 0, spinner: 0 });
 		await expect(canvas.queryByRole("progressbar")).toBeNull();
 		await expect(hitAtCenter(content)).toBe(content);
 
 		// show again and let the fade-in finish
 		await userEvent.click(canvas.getByRole("button", { name: "Show overlay" }));
 		await nextFrame();
-		overlay.getAnimations().forEach((animation) => animation.finish());
-		await expect(getComputedStyle(overlay).opacity).toBe("1");
+		fadesIn(overlay).forEach((fade) => fade.finish());
+		await expect(paintOf(overlay)).toEqual({ color: 0.3, spinner: 1 });
 		await expect(within(overlay).getAllByRole("progressbar")).toHaveLength(1);
 
 		await userEvent.click(canvas.getByRole("button", { name: "Hide overlay" }));
@@ -154,17 +177,27 @@ export const Controllable: OverlayStory = {
 };
 
 /**
- * The transitions running on the wash, by property, delay and duration
+ * The transitions of the fade-in (of the wash's color and its spinner's line), by
+ * property, delay and duration
  */
 const transitionsOf = (overlay: HTMLElement) =>
-	overlay.getAnimations().map((animation) => {
+	fadesIn(overlay).map((animation) => {
 		const timing = animation.effect?.getTiming();
 		return {
-			property: (animation as CSSTransition).transitionProperty,
+			property: animation.transitionProperty,
 			delay: timing?.delay,
 			duration: timing?.duration,
 		};
 	});
+
+/**
+ * The fade-in with MUI's default transitions: the wash's color and its spinner, 225ms
+ * after 1s
+ */
+const DEFAULT_FADE_IN = [
+	{ property: "background-color", delay: 1000, duration: 225 },
+	{ property: "opacity", delay: 1000, duration: 225 },
+];
 
 /**
  * An area that is loaded on a click and shows the overlay while it loads by mounting
@@ -204,13 +237,11 @@ export const Issue3473Item13MountedShownFadesInLate: OverlayStory = {
 		await nextFrame();
 		const overlay = overlayIn(canvasElement);
 		await expect(getComputedStyle(overlay).visibility).toBe("visible");
-		await expect(getComputedStyle(overlay).opacity).toBe("0");
+		await expect(paintOf(overlay)).toEqual({ color: 0, spinner: 0 });
 		await expect(
 			overlay.contains(hitAtCenter(canvas.getByText("Form Content"))),
 		).toBe(true);
-		await expect(transitionsOf(overlay)).toEqual([
-			{ property: "opacity", delay: 1000, duration: 225 },
-		]);
+		await expect(transitionsOf(overlay)).toEqual(DEFAULT_FADE_IN);
 	},
 };
 
@@ -233,8 +264,8 @@ export const Issue3473Item13ShownAgainFadesInLate: OverlayStory = {
 		// shown and faded in, then hidden
 		await userEvent.click(canvas.getByRole("button", { name: "Show overlay" }));
 		await nextFrame();
-		overlay.getAnimations().forEach((animation) => animation.finish());
-		await expect(getComputedStyle(overlay).opacity).toBe("1");
+		fadesIn(overlay).forEach((fade) => fade.finish());
+		await expect(paintOf(overlay)).toEqual({ color: 0.3, spinner: 1 });
 		await userEvent.click(canvas.getByRole("button", { name: "Hide overlay" }));
 		await nextFrame();
 		await expect(getComputedStyle(overlay).visibility).toBe("hidden");
@@ -243,10 +274,8 @@ export const Issue3473Item13ShownAgainFadesInLate: OverlayStory = {
 		await userEvent.click(canvas.getByRole("button", { name: "Show overlay" }));
 		await nextFrame();
 		await expect(getComputedStyle(overlay).visibility).toBe("visible");
-		await expect(getComputedStyle(overlay).opacity).toBe("0");
-		await expect(transitionsOf(overlay)).toEqual([
-			{ property: "opacity", delay: 1000, duration: 225 },
-		]);
+		await expect(paintOf(overlay)).toEqual({ color: 0, spinner: 0 });
+		await expect(transitionsOf(overlay)).toEqual(DEFAULT_FADE_IN);
 	},
 };
 
@@ -282,13 +311,17 @@ export const Issue3473Item14FadeFollowsTheme: OverlayStory = {
 		const overlay = overlayIn(canvasElement);
 		await userEvent.click(canvas.getByRole("button", { name: "Show overlay" }));
 		await nextFrame();
-		await expect(getComputedStyle(overlay).opacity).toBe("0");
+		await expect(paintOf(overlay)).toEqual({ color: 0, spinner: 0 });
 		await expect(transitionsOf(overlay)).toEqual([
+			{ property: "background-color", delay: 1000, duration: 400 },
 			{ property: "opacity", delay: 1000, duration: 400 },
 		]);
-		await expect(getComputedStyle(overlay).transitionTimingFunction).toBe(
-			"linear",
-		);
+		// the wash and its spinner's line, which takes the wash's transition
+		await expect(
+			[overlay, spinnerLineIn(overlay)].map(
+				(el) => el && getComputedStyle(el).transitionTimingFunction,
+			),
+		).toEqual(["linear, linear", "linear, linear"]);
 	},
 };
 
@@ -325,7 +358,7 @@ export const Issue3473Item14ThemeVariantKeyedOnVisible: OverlayStory = {
 		await userEvent.click(canvas.getByRole("button", { name: "Show overlay" }));
 		await nextFrame();
 		await expect(transitionsOf(overlay)).toEqual([]);
-		await expect(getComputedStyle(overlay).opacity).toBe("1");
+		await expect(paintOf(overlay)).toEqual({ color: 0.3, spinner: 1 });
 	},
 };
 
@@ -620,6 +653,152 @@ export const Issue3473Item8WrappedContentIsInert: OverlayStory = {
 		);
 		await waitFor(() => expect(start).toHaveFocus());
 		await expect(start.closest("[inert]")).toBeNull();
+	},
+};
+
+/**
+ * The keyboard focus ring of an element as it shows: its outline, and how opaque it is
+ * painted, from 0 (not at all) to 1: the alpha of its color times the opacity of the
+ * element and of each of its ancestors
+ */
+const ringOf = (el: HTMLElement) => {
+	const { outlineStyle, outlineWidth, outlineColor } = getComputedStyle(el);
+	let [, , , opaque = 1] = decomposeColor(outlineColor).values;
+	for (let node: Element | null = el; node; node = node.parentElement)
+		opaque *= Number(getComputedStyle(node).opacity);
+	return { style: outlineStyle, width: outlineWidth, opaque };
+};
+
+export const Issue3473Item17FocusRingShowsAtOnce: OverlayStory = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-17: keyboard focus that moves to the wash shows its ring at once, also in the 1s before the wash fades in (WCAG 2.4.7 Focus Visible): what fades in is the wash's color and its spinner, not the wash that carries the ring.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	render: () => <BusyImportStep />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		canvas.getByRole("button", { name: "Start" }).focus();
+		await userEvent.keyboard("{Enter}");
+		await canvas.findByRole("progressbar");
+		const overlay = overlayIn(canvasElement);
+		// held where it is, in the 1s before the wash fades in
+		const fades = fadesIn(overlay);
+		fades.forEach((fade) => fade.pause());
+		await expect(fades.length).toBeGreaterThan(0);
+		await expect(paintOf(overlay)).toEqual({ color: 0, spinner: 0 });
+
+		// the focus moved to the wash, and its ring shows
+		await expect(overlay).toHaveFocus();
+		await expect(overlay.matches(":focus-visible")).toBe(true);
+		await expect(ringOf(overlay)).toEqual({
+			style: "solid",
+			width: "2px",
+			opaque: 1,
+		});
+
+		// and keeps showing once the wash has faded in
+		fades.forEach((fade) => fade.finish());
+		await expect(paintOf(overlay)).toEqual({ color: 0.3, spinner: 1 });
+		await expect(ringOf(overlay)).toEqual({
+			style: "solid",
+			width: "2px",
+			opaque: 1,
+		});
+	},
+};
+
+/**
+ * Themes that give the shown wash a color of their own (a darker one), in each of the ways
+ * the overlay's documentation names
+ */
+const washColorThemes: Record<string, Theme> = {
+	"Root override": createTheme({
+		components: {
+			CcFormLoaderOverlay: {
+				styleOverrides: { root: { backgroundColor: "rgba(0, 0, 0, 0.2)" } },
+			},
+		},
+	}),
+	"Shown state override": createTheme({
+		components: {
+			CcFormLoaderOverlay: {
+				styleOverrides: {
+					root: {
+						"&.CcFormLoaderOverlay-visible": {
+							backgroundColor: "rgba(0, 0, 0, 0.2)",
+						},
+					},
+				},
+			},
+		},
+	}),
+	"Variant on visible": createTheme({
+		components: {
+			CcFormLoaderOverlay: {
+				variants: [
+					{
+						props: { visible: true },
+						style: { backgroundColor: "rgba(0, 0, 0, 0.2)" },
+					},
+				],
+			},
+		},
+	}),
+};
+
+export const Issue3473Item17ThemeWashColorFadesIn: OverlayStory = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-17: a wash whose color comes from the theme (the root's override, the shown state's override, a variant on `visible`) fades in late too, when it is shown and when it is mounted shown: the fade starts from a transparent wash whatever its color.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	render: () => (
+		<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+			{Object.entries(washColorThemes).map(([name, theme]) => (
+				<ThemeProvider key={name} theme={theme}>
+					<Box data-testid={name} sx={{ display: "flex", gap: 2 }}>
+						<ToggleOverlay visible={false} />
+						<LoadOnClick visible />
+					</Box>
+				</ThemeProvider>
+			))}
+		</Box>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const painted: Record<string, unknown> = {};
+		for (const name of Object.keys(washColorThemes)) {
+			const box = within(canvas.getByTestId(name));
+			await userEvent.click(box.getByRole("button", { name: "Show overlay" }));
+			await userEvent.click(box.getByRole("button", { name: "Load" }));
+			await nextFrame();
+			const overlays = Array.from(
+				canvas
+					.getByTestId(name)
+					.querySelectorAll<HTMLElement>('[class*="CcFormLoaderOverlay-root"]'),
+			);
+			const before = overlays.map((overlay) => paintOf(overlay).color);
+			overlays.forEach((overlay) =>
+				fadesIn(overlay).forEach((fade) => fade.finish()),
+			);
+			const after = overlays.map((overlay) => paintOf(overlay).color);
+			painted[name] = { before, after };
+		}
+		const fades = { before: [0, 0], after: [0.2, 0.2] };
+		await expect(painted).toEqual({
+			"Root override": fades,
+			"Shown state override": fades,
+			"Variant on visible": fades,
+		});
 	},
 };
 
