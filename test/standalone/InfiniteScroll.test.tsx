@@ -1932,5 +1932,202 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 			);
 			expect(scroller).toHaveAttribute("tabindex", "0");
 		});
+
+		describe("focus on the last row", () => {
+			interface RowsProps {
+				loadMoreBottom?: () => void;
+				loading?: boolean;
+				/** Rendered after the 20 rows */
+				after?: React.ReactNode;
+			}
+
+			/**
+			 * 20 rows that are buttons, then content without focusable elements, in
+			 * a list between two buttons. The stubbed layout leaves 700px below the
+			 * view, more than the threshold, and focusing an element scrolls nothing.
+			 */
+			const Rows = ({ loadMoreBottom, loading, after }: RowsProps) => (
+				<>
+					<button type="button">Before the list</button>
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreBottom={loadMoreBottom}
+						loading={loading}
+					>
+						{range(1, 20).map((n) => (
+							<button key={n} type="button">
+								Row {n}
+							</button>
+						))}
+						{after}
+						<div>Content without focusable elements</div>
+					</InfiniteScroll>
+					<button type="button">After the list</button>
+				</>
+			);
+
+			const focus = (element: HTMLElement) =>
+				act(() => {
+					element.focus();
+				});
+			const getRow = (n: number) =>
+				screen.getByRole("button", { name: `Row ${n}` });
+
+			it("[ISSUE-3471-ITEM-11] calls loadMoreBottom when focus moves to the last row, however much content without focusable elements follows it", () => {
+				const bottom = vi.fn();
+				render(<Rows loadMoreBottom={bottom} />);
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+
+				focus(getRow(19));
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+				focus(getRow(20));
+				advance(99);
+				expect(bottom).not.toHaveBeenCalled();
+				advance(1);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-11] calls nothing when focus moves to a row that a tab stop follows in the container", () => {
+				const bottom = vi.fn();
+				render(
+					<Rows
+						loadMoreBottom={bottom}
+						after={<a href="#all">Show all rows</a>}
+					/>,
+				);
+				focus(getRow(20));
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+
+				focus(screen.getByRole("link", { name: "Show all rows" }));
+				advance(200);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-11] calls nothing when focus moves to the scroll container, also when its rows contain nothing focusable", () => {
+				const bottom = vi.fn();
+				const { container } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						<div>Row 1</div>
+						<div>Row 2</div>
+					</InfiniteScroll>,
+				);
+				focus(getScroller(container));
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+			});
+
+			it("[ISSUE-3471-ITEM-11] does not postpone a waiting call when focus moves to a row that is not the last", () => {
+				const bottom = vi.fn();
+				render(<Rows loadMoreBottom={bottom} />);
+				// 250px below the view
+				scrollTo(getRow(1).parentElement as HTMLElement, 450);
+				advance(50);
+				focus(getRow(19));
+				advance(50);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-11] does not count what Tab skips after the last row: disabled, hidden or inert controls, hidden inputs and elements with a negative tabIndex", () => {
+				const bottom = vi.fn();
+				render(
+					<Rows
+						loadMoreBottom={bottom}
+						after={
+							<>
+								<button type="button" disabled>
+									Disabled
+								</button>
+								<fieldset disabled>
+									<input aria-label="In a disabled fieldset" />
+								</fieldset>
+								<div hidden>
+									<button type="button">Hidden</button>
+								</div>
+								<div inert>
+									<button type="button">Inert</button>
+								</div>
+								<input type="hidden" name="cursor" value="20" />
+								<div tabIndex={-1}>Focus target</div>
+							</>
+						}
+					/>,
+				);
+				focus(getRow(20));
+				advance(200);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-11] in a widget that moves focus with the arrow keys, calls loadMoreBottom for its last item only", () => {
+				const bottom = vi.fn();
+				render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						<div role="listbox" aria-label="Rows">
+							{range(1, 20).map((n) => (
+								<div
+									key={n}
+									role="option"
+									aria-selected={false}
+									tabIndex={n === 1 ? 0 : -1}
+								>
+									Option {n}
+								</div>
+							))}
+						</div>
+						{/* same tag, but no option: not an item of the widget */}
+						<div tabIndex={-1}>Focus target</div>
+					</InfiniteScroll>,
+				);
+				const options = screen.getAllByRole("option");
+				// the first option is the widget's tab stop; the arrow keys move focus
+				// from option to option, which keeps or takes the tab stop
+				for (const option of options.slice(0, 19)) {
+					option.tabIndex = 0;
+					focus(option);
+					advance(200);
+				}
+				expect(bottom).not.toHaveBeenCalled();
+				focus(options[19]);
+				advance(200);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-11] drops the call once focus left the last row before the wait is over", () => {
+				const bottom = vi.fn();
+				render(<Rows loadMoreBottom={bottom} />);
+				focus(getRow(20));
+				advance(50);
+				focus(screen.getByRole("button", { name: "After the list" }));
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+			});
+
+			it("[ISSUE-3471-ITEM-11] holds the call while loading, and makes it once loading ends with focus still on the last row", () => {
+				const bottom = vi.fn();
+				const { rerender } = render(<Rows loadMoreBottom={bottom} loading />);
+				focus(getRow(20));
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+
+				rerender(<Rows loadMoreBottom={bottom} loading={false} />);
+				advance(200);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-11] stops listening for focus on unmount", () => {
+				const { unmount } = render(<Rows loadMoreBottom={vi.fn()} />);
+				const scroller = getRow(1).parentElement as HTMLElement;
+				const addListener = vi.spyOn(scroller, "addEventListener");
+				const removeListener = vi.spyOn(scroller, "removeEventListener");
+				unmount();
+				expect(addListener).not.toHaveBeenCalled();
+				expect(removeListener).toHaveBeenCalledWith(
+					"focusin",
+					expect.any(Function),
+				);
+			});
+		});
 	});
 });

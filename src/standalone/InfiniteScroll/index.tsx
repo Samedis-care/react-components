@@ -79,9 +79,19 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 *   does. Without `loadMoreBottom` the container is filled through
 	 *   `loadMoreTop` instead.
 	 *
+	 * It is also called when focus moves to the last row the keyboard reaches
+	 * in the container, however much is left below the visible part: an
+	 * element after which the container has no tab stop, e.g. the last row's
+	 * button followed by a loader row, a footer or empty days. So the next
+	 * Tab reaches the new rows instead of leaving the list. In a widget that
+	 * moves focus with the arrow keys (a menu, listbox or grid whose items
+	 * have a negative `tabIndex`), that is its last item: an element after
+	 * the focused one with the same tag and `role` counts like a tab stop.
+	 * Focus on the scroll container itself does not count.
+	 *
 	 * A call that waits for `callBackDebounce` is only made if, once the wait is
-	 * over, `threshold` px or less are still left below the visible part; it
-	 * waits while `loading` is set.
+	 * over, `threshold` px or less are still left below the visible part, or
+	 * focus is still on that last row; it waits while `loading` is set.
 	 *
 	 * Not called while the container is hidden by `display: none` on it or an
 	 * ancestor (e.g. an inactive tab that stays mounted): the container is
@@ -123,8 +133,9 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 * How much content is kept ready below the visible part of the container,
 	 * in CSS pixels: `loadMoreBottom` is called while this much or less is
 	 * left below it, and the container is filled until its content overflows
-	 * it by more than this. `0` loads at the very bottom only. A negative
-	 * number or `NaN` counts as `0`. Can be changed after mount.
+	 * it by more than this. `0` loads at the very bottom only (or when focus
+	 * reaches the last row, see `loadMoreBottom`). A negative number or `NaN`
+	 * counts as `0`. Can be changed after mount.
 	 *
 	 * `loadMoreTop` is called at the top, whatever this value.
 	 * @default 250
@@ -286,6 +297,103 @@ const hasNoLayoutBox = (wrapper: HTMLElement): boolean =>
 	wrapper.clientHeight === 0 && wrapper.getClientRects().length === 0;
 
 /**
+ * The elements that can take focus: those MUI's focus trap looks for, and
+ * the `summary` of a `details`
+ */
+const FOCUSABLE_SELECTOR = [
+	"input",
+	"select",
+	"textarea",
+	"a[href]",
+	"button",
+	"summary",
+	"[tabindex]",
+	"audio[controls]",
+	"video[controls]",
+	'[contenteditable]:not([contenteditable="false"])',
+].join(",");
+
+/**
+ * The element's tab index, as MUI's focus trap reads it: that of its
+ * `tabindex` attribute, else the browser's (Chromium reports -1 for media and
+ * editable elements, which Tab reaches)
+ */
+const getTabIndex = (element: HTMLElement): number => {
+	const attribute = parseInt(element.getAttribute("tabindex") ?? "", 10);
+	if (!Number.isNaN(attribute)) return attribute;
+	if (element.isContentEditable || element instanceof HTMLMediaElement) {
+		return 0;
+	}
+	return element.tabIndex;
+};
+
+/**
+ * Can the element take focus? Not when it is disabled (also by a disabled
+ * `fieldset`), a hidden input, in a `[hidden]` or `[inert]` subtree, or not
+ * rendered (`display: none`, `visibility: hidden`; not checked where
+ * `checkVisibility` is missing, as in jsdom)
+ */
+const canTakeFocus = (element: HTMLElement): boolean =>
+	!element.matches(":disabled") &&
+	!(element instanceof HTMLInputElement && element.type === "hidden") &&
+	element.closest("[hidden], [inert]") === null &&
+	(typeof element.checkVisibility !== "function" ||
+		element.checkVisibility({ visibilityProperty: true }));
+
+/**
+ * Can the keyboard move focus from `focused` to an element after it in the
+ * scroll container? Tab reaches a tab stop (an element that can take focus,
+ * with a tab index of 0 or more); the arrow keys of a widget that moves focus
+ * itself (a menu, listbox or grid whose items have a negative `tabIndex`)
+ * reach its next item, an element with the same tag and `role` as `focused`.
+ */
+const hasFocusTargetAfter = (
+	wrapper: HTMLElement,
+	focused: Element,
+): boolean => {
+	const role = focused.getAttribute("role");
+	const candidates = wrapper.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+	// from the end, so that a long list is searched no further than its last
+	// tab stop
+	for (let i = candidates.length - 1; i >= 0; i--) {
+		const candidate = candidates[i];
+		if (
+			!(
+				focused.compareDocumentPosition(candidate) &
+				Node.DOCUMENT_POSITION_FOLLOWING
+			)
+		) {
+			return false;
+		}
+		if (!canTakeFocus(candidate)) continue;
+		if (getTabIndex(candidate) >= 0) return true;
+		if (
+			candidate.tagName === focused.tagName &&
+			candidate.getAttribute("role") === role
+		) {
+			return true;
+		}
+	}
+	return false;
+};
+
+/**
+ * Is focus on the last row the keyboard reaches in the scroll container: on
+ * an element in it (not the container itself) after which it has nothing the
+ * keyboard can move focus to (see `hasFocusTargetAfter`)? The next Tab leaves
+ * the list then.
+ */
+const isFocusOnLastRow = (wrapper: HTMLElement): boolean => {
+	const focused = wrapper.ownerDocument.activeElement;
+	return (
+		!!focused &&
+		focused !== wrapper &&
+		wrapper.contains(focused) &&
+		!hasFocusTargetAfter(wrapper, focused)
+	);
+};
+
+/**
  * The scroll container. It is a tab stop, so it shows the library's focus
  * ring while it has keyboard focus, drawn inside its edge because an
  * ancestor may clip it.
@@ -370,6 +478,7 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 		this.heldLoads = { loadMoreTop: false, loadMoreBottom: false };
 
 		this.wrapper.addEventListener("scroll", this.handleScroll);
+		this.wrapper.addEventListener("focusin", this.handleFocusIn);
 		this.handleResize();
 		this.observeSize(true);
 	}
@@ -433,6 +542,7 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 		this.releaseAnchor();
 		if (!this.wrapper) throw new Error("Ref is null");
 		this.wrapper.removeEventListener("scroll", this.handleScroll);
+		this.wrapper.removeEventListener("focusin", this.handleFocusIn);
 		this.observeSize(false);
 	}
 
@@ -613,9 +723,10 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 	 * Makes a call requested by `requestLoad`. The callback is read from the
 	 * props now, so it is the one of the latest render. A call is only made if
 	 * the content still needs it: a request made while the content was short,
-	 * or while the container was near that end, is dropped once content that
-	 * arrived in the meantime fills the container and moves that end away, and
-	 * one is not made while the container is hidden (`pauseFillWhileHidden`).
+	 * or while the container was near that end (or focus on its last row), is
+	 * dropped once content that arrived in the meantime fills the container and
+	 * moves that end away (or focus moved on), and one is not made while the
+	 * container is hidden (`pauseFillWhileHidden`).
 	 * While `loading` is set, the call is held and requested again once it
 	 * turns false. A fill call that is dropped because the content now fills
 	 * the container (rows that grew on their own) lets the due `loadMoreTop`
@@ -631,7 +742,8 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 		const atEnd =
 			name === "loadMoreTop"
 				? isAtTop(this.wrapper)
-				: isNearBottom(this.wrapper, threshold);
+				: isNearBottom(this.wrapper, threshold) ||
+					isFocusOnLastRow(this.wrapper);
 		if (isFilled(this.wrapper, threshold) && !atEnd) {
 			this.loadTopIfDue();
 			return;
@@ -663,6 +775,21 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 			this.requestLoad("loadMoreTop");
 		}
 		if (filled) this.loadTopIfDue();
+	};
+
+	/**
+	 * Requests `loadMoreBottom` when focus moves to the last row the keyboard
+	 * reaches (see `isFocusOnLastRow`), so that the next Tab reaches the new
+	 * rows rather than leaving the list
+	 */
+	handleFocusIn = (): void => {
+		if (
+			this.wrapper &&
+			this.props.loadMoreBottom &&
+			isFocusOnLastRow(this.wrapper)
+		) {
+			this.requestLoad("loadMoreBottom");
+		}
 	};
 
 	handleScroll = (): void => {

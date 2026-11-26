@@ -790,3 +790,150 @@ export const Issue3471Item9ClickInDialogKeepsFocusInList: Story = {
 		);
 	},
 };
+
+// ─── Focusable rows ───────────────────────────────────────────────────────────
+
+/** Content without focusable elements after the last row, e.g. empty schedule days */
+const TrailingBlock = styled("div")({
+	height: 200,
+	padding: 8,
+	boxSizing: "border-box",
+	fontSize: 14,
+});
+
+/** More content without focusable elements than the default threshold of 250px */
+const TallTrailingBlock = styled(TrailingBlock)({ height: 400 });
+
+/**
+ * 20 rows that are buttons of 30px in a 300px container, optionally followed
+ * by 200px ("short") or 400px ("tall") of content without focusable elements;
+ * loadMoreBottom adds 10 rows
+ */
+const FocusableRowsStory = ({
+	onLoadBottom,
+	trailing,
+}: {
+	onLoadBottom?: () => void;
+	trailing?: "short" | "tall";
+}) => {
+	const [items, setItems] = useState<number[]>(() => makeItems(1, 20));
+
+	const loadMoreBottom = useCallback(() => {
+		onLoadBottom?.();
+		setItems((prev) => [...prev, ...makeItems(prev.length + 1, 10)]);
+	}, [onLoadBottom]);
+
+	return (
+		<Box sx={{ width: 300 }}>
+			<button type="button">Before the list</button>
+			<Scroller
+				className=""
+				role="region"
+				aria-label="Items"
+				loadMoreBottom={loadMoreBottom}
+			>
+				{items.map((n) => (
+					<RowButton key={n} type="button">
+						Item {n}
+					</RowButton>
+				))}
+				{trailing === "short" && (
+					<TrailingBlock>Content without focusable elements</TrailingBlock>
+				)}
+				{trailing === "tall" && (
+					<TallTrailingBlock>
+						Content without focusable elements
+					</TallTrailingBlock>
+				)}
+			</Scroller>
+			<button type="button">After the list</button>
+		</Box>
+	);
+};
+
+export const TabThroughFocusableRows: Story = {
+	args: { loadMoreBottom: fn() },
+	render: (args) => <FocusableRowsStory onLoadBottom={args.loadMoreBottom} />,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"The rows are buttons and the last one ends flush with the bottom. Tabbing through them scrolls the list down, which calls `loadMoreBottom` before the last row is reached; focus stays on the row while the page is appended, and the Tab after the last loaded row reaches the first new row.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ args, canvasElement }) => {
+		const canvas = within(canvasElement);
+		canvas.getByRole("button", { name: "Before the list" }).focus();
+		// the scroll container, then each row, which is scrolled into view
+		for (let i = 0; i < 21; i++) await userEvent.tab();
+		await expect(canvas.getByRole("button", { name: "Item 20" })).toHaveFocus();
+		await waitFor(() => expect(args.loadMoreBottom).toHaveBeenCalledTimes(1));
+		await canvas.findByRole("button", { name: "Item 21" });
+		await expect(canvas.getByRole("button", { name: "Item 20" })).toHaveFocus();
+		await userEvent.tab();
+		await expect(canvas.getByRole("button", { name: "Item 21" })).toHaveFocus();
+	},
+};
+
+export const Issue3471Item11LoadsWhenTabbingPastTrailingContent: Story = {
+	args: { loadMoreBottom: fn() },
+	render: (args) => (
+		<FocusableRowsStory onLoadBottom={args.loadMoreBottom} trailing="short" />
+	),
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"The rows are buttons, followed by 200px without focusable elements, as a loader row, a footer or the empty days at the end of a schedule week. Tabbing to the last row does not scroll the list to its very bottom, but the next page is loaded before focus can leave the list, and the next Tab reaches the first new row.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ args, canvasElement }) => {
+		const canvas = within(canvasElement);
+		canvas.getByRole("button", { name: "Before the list" }).focus();
+		for (let i = 0; i < 21; i++) await userEvent.tab();
+		await expect(canvas.getByRole("button", { name: "Item 20" })).toHaveFocus();
+		// reaching the last loaded row by keyboard loads the next page before focus can leave
+		await waitFor(() => expect(args.loadMoreBottom).toHaveBeenCalledTimes(1));
+		await canvas.findByRole("button", { name: "Item 21" });
+		await userEvent.tab();
+		await expect(canvas.getByRole("button", { name: "Item 21" })).toHaveFocus();
+	},
+};
+
+export const Issue3471Item11LoadsWhenTabbingPastTallTrailingContent: Story = {
+	args: { loadMoreBottom: fn() },
+	render: (args) => (
+		<FocusableRowsStory onLoadBottom={args.loadMoreBottom} trailing="tall" />
+	),
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"The rows are buttons, followed by 400px without focusable elements, more than the default `threshold` of 250px. Tabbing to the last row leaves more than the threshold below the view, so scrolling does not load; focus on the last row the keyboard reaches does, and the next Tab reaches the first new row instead of leaving the list.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ args, canvasElement }) => {
+		const canvas = within(canvasElement);
+		const scroller = canvas.getByRole("region", { name: "Items" });
+		canvas.getByRole("button", { name: "Before the list" }).focus();
+		for (let i = 0; i < 21; i++) await userEvent.tab();
+		await expect(canvas.getByRole("button", { name: "Item 20" })).toHaveFocus();
+		// precondition: scrolling did not load, and the list is scrolled as far as
+		// it gets, with more than the threshold left below the view
+		await expect(canvas.queryByRole("button", { name: "Item 21" })).toBeNull();
+		await expect(
+			scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop,
+		).toBeGreaterThan(250);
+		await waitFor(() => expect(args.loadMoreBottom).toHaveBeenCalledTimes(1));
+		await canvas.findByRole("button", { name: "Item 21" });
+		await expect(canvas.getByRole("button", { name: "Item 20" })).toHaveFocus();
+		await userEvent.tab();
+		await expect(canvas.getByRole("button", { name: "Item 21" })).toHaveFocus();
+	},
+};
