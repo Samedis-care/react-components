@@ -662,6 +662,30 @@ describe("Form page leave guard while the form saves", () => {
 });
 
 describe("Form page leave guard: Yes leaves", () => {
+	it("[ISSUE-3475-ITEM-21] a navigation out of a dirty form in a FullFormDialog asks first: No keeps the dialog open, Yes goes there and closes it", async () => {
+		const { open, history } = mountDialogPage(FieldPage);
+		const input = await open();
+		fireEvent.change(input, { target: { value: "AliceX" } });
+		await waitFor(() => expect(saveButton()).toBeEnabled());
+
+		await navigate("/elsewhere");
+		fireEvent.click(
+			within(await findLeavePrompt()).getByRole("button", { name: "No" }),
+		);
+		await waitFor(() => expect(leavePrompts()).toHaveLength(0));
+		expect(history.location.pathname).toBe("/page");
+		expect(
+			screen.getByRole("dialog", { name: "Edit person" }),
+		).toContainElement(screen.getByDisplayValue("AliceX"));
+
+		await navigate("/elsewhere");
+		fireEvent.click(
+			within(await findLeavePrompt()).getByRole("button", { name: "Yes" }),
+		);
+		await waitFor(() => expect(history.location.pathname).toBe("/elsewhere"));
+		await waitFor(() => expect(screen.queryAllByRole("dialog")).toEqual([]));
+	});
+
 	it("[ISSUE-3497-ITEM-2] Yes in the prompt of a link out of a dirty routed form page goes there", async () => {
 		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
 		const history = mountRoutedPage("/rec/:id/*", "/rec/1");
@@ -694,11 +718,13 @@ describe("Form page leave guard: Yes leaves", () => {
 	it("[ISSUE-3497-ITEM-2] a form in a FullFormDialog lets a navigation through while it is clean; once dirty it asks and closing the tab is blocked", async () => {
 		const alert = vi.spyOn(window, "alert").mockImplementation(() => {});
 		const { open, history } = mountDialogPage(FieldPage);
-		const input = await open();
+		await open();
 		await navigate("/clean");
 		expect(history.location.pathname).toBe("/clean");
 		expect(leavePrompts()).toHaveLength(0);
 
+		// the navigation closed the dialog (ISSUE-3475-ITEM-21)
+		const input = await open();
 		fireEvent.change(input, { target: { value: "AliceX" } });
 		await waitFor(() => expect(saveButton()).toBeEnabled());
 		expect(unloadIsBlocked(), "closing the tab is not guarded").toBe(true);

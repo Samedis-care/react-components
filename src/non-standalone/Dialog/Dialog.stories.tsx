@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, mocked, userEvent, waitFor, within } from "storybook/test";
@@ -22,6 +22,11 @@ import { DialogTitle } from "./DialogTitle";
 import { setFrameworkHistory } from "../../framework/History";
 import { createMemoryHistory } from "history";
 import FullFormDialog from "../../backend-components/Form/FormDialog";
+import HistoryRouter from "../../standalone/Routes/HistoryRouter";
+import Routes from "../../standalone/Routes/Routes";
+import Route from "../../standalone/Routes/Route";
+import Link from "../../standalone/Routes/Link";
+import PageTitle from "../PageTitle/PageTitle";
 
 // Framework needs a history to be set for DialogContextProvider to work
 setFrameworkHistory(createMemoryHistory());
@@ -701,5 +706,89 @@ export const Issue3497Item19OpenInNewStaysInDialog: StoryObj<OpenInNewArgs> = {
 			bottom: buttonBox.bottom <= dialogBox.bottom,
 		}).toEqual({ left: true, right: true, bottom: true });
 		await expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth);
+	},
+};
+
+// ─── Navigation ──────────────────────────────────────────────────────────────
+
+/** A device page whose button shows a dialog with a link to the device's manufacturer */
+const NavigationDevicePage = () => {
+	const [pushDialog] = useDialogContext();
+	const open = useCallback(() => {
+		pushDialog(
+			<InfoDialog
+				title="Manufacturer"
+				message={
+					<>
+						{"Device 4711 is made by ACME Medical. "}
+						<Link to="/manufacturers/7">Open the manufacturer</Link>
+					</>
+				}
+				buttons={[{ text: "OK" }]}
+			/>,
+		);
+	}, [pushDialog]);
+	return (
+		<Box component="main" sx={{ p: 2 }}>
+			<PageTitle>Device 4711</PageTitle>
+			<Button variant="contained" onClick={open}>
+				Show manufacturer
+			</Button>
+		</Box>
+	);
+};
+
+const NavigationManufacturerPage = () => (
+	<Box component="main" sx={{ p: 2 }}>
+		<PageTitle>Manufacturer ACME Medical</PageTitle>
+		<Typography>Address, contacts, devices</Typography>
+	</Box>
+);
+
+/** Two pages in a router of their own, whose DialogContextProvider follows its history */
+const NavigationDemo = () => {
+	const [history] = useState(() =>
+		createMemoryHistory({ initialEntries: ["/devices/4711"] }),
+	);
+	return (
+		<HistoryRouter history={history}>
+			<DialogContextProvider>
+				<Routes>
+					<Route path="/devices/:id" element={<NavigationDevicePage />} />
+					<Route
+						path="/manufacturers/:id"
+						element={<NavigationManufacturerPage />}
+					/>
+				</Routes>
+			</DialogContextProvider>
+		</HistoryRouter>
+	);
+};
+
+export const Issue3475Item21LinkInDialogOpensItsPage: StoryObj = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3475-ITEM-21: a link in a pushed dialog. A navigation to another path closes the dialogs, so the new page shows, and the focus moves to its heading.",
+			},
+		},
+	},
+	render: () => <NavigationDemo />,
+	play: async () => {
+		await userEvent.click(
+			await page().findByRole("button", { name: "Show manufacturer" }),
+		);
+		const dialog = await page().findByRole("dialog", { name: "Manufacturer" });
+		await waitFor(() => expect(dialog).toBeVisible());
+		await userEvent.click(
+			within(dialog).getByRole("link", { name: "Open the manufacturer" }),
+		);
+		await waitFor(() => expect(page().queryByRole("dialog")).toBeNull());
+		const heading = await page().findByRole("heading", {
+			name: "Manufacturer ACME Medical",
+		});
+		await waitFor(() => expect(heading).toHaveFocus());
 	},
 };

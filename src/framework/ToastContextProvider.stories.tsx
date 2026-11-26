@@ -19,7 +19,8 @@ import DialogContextProvider, {
 import { useCloseThisDialog } from "./PushedDialogCloseContext";
 import { setFrameworkHistory } from "./History";
 
-// DialogContextProvider blocks navigation through the FrameworkHistory while a dialog is open
+// DialogContextProvider follows the FrameworkHistory, outside a HistoryRouter, to close its
+// dialogs on a navigation to another path
 setFrameworkHistory(createMemoryHistory());
 
 // The toast renders in a portal, so query from the document body

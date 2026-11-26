@@ -7,8 +7,8 @@ export interface PushedDialogClose {
 	/**
 	 * Closes the dialog, and only that one, also while dialogs pushed after it are open; what
 	 * useCloseThisDialog returns. Around a pushed dialog it is the function pushDialog
-	 * returned: calling it again, or after the dialog was closed another way (popDialog), does
-	 * nothing.
+	 * returned: calling it again, or after the dialog was closed another way (popDialog, a
+	 * navigation to another path), does nothing.
 	 */
 	close: () => void;
 	/**
@@ -45,7 +45,8 @@ export const PushedDialogCloseContext = createContext<PushedDialogClose | null>(
  * Returns a function that closes the dialog the calling component was pushed in (pushDialog),
  * and only that one, also while dialogs pushed after it are open. Inside a FullFormDialog it
  * closes that dialog, without "Leave form page?" and without calling its onClose. Calling the
- * function again, or after the dialog was closed another way (popDialog), does nothing.
+ * function again, or after the dialog was closed another way (popDialog, a navigation to
+ * another path), does nothing.
  * @returns The close function; the same one for the life of the dialog, and the one
  *          pushDialog returned when it showed the dialog
  * @throws Error when the calling component is not inside a dialog shown with pushDialog, or is
