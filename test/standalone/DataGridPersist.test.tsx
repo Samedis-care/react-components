@@ -1439,6 +1439,9 @@ describe("StorageManagerPersist bucket writes", () => {
 		server.data[keyOf(FILTERS, b)] = JSON.stringify(STORED);
 		const { rerender } = render(probe(a));
 		expect(await screen.findByTestId("a")).toHaveTextContent("none");
+		// the children render at once and show "none" before the buckets are read
+		// (ISSUE-3496-ITEM-16): the setter comes with the read
+		await waitFor(() => expect(write).not.toBeNull());
 		await act(async () => {
 			await write!(WRITTEN);
 		});
@@ -1466,6 +1469,9 @@ describe("StorageManagerPersist bucket writes", () => {
 		server.data[keyOf(FILTERS, b)] = JSON.stringify(STORED);
 		const { rerender } = render(probe(a));
 		expect(await screen.findByTestId("a")).toHaveTextContent("none");
+		// the children render at once and show "none" before the buckets are read
+		// (ISSUE-3496-ITEM-16): the setter comes with the read
+		await waitFor(() => expect(write).not.toBeNull());
 		await act(async () => {
 			await write!(WRITTEN);
 		});
