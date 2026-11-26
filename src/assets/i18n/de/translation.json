@@ -370,8 +370,10 @@
 			"delete": {
 				"confirm-dialog": {
 					"title": "Löschen",
-					"message": "Wirklich {{NUM}}-Einträge löschen?",
-					"messageInverted": "Wirklich alles außer {{NUM}}-Einträge löschen?",
+					"message_one": "Wirklich {{count}} Eintrag löschen?",
+					"message_other": "Wirklich {{count}} Einträge löschen?",
+					"messageInverted_one": "Wirklich alles außer {{count}} Eintrag löschen?",
+					"messageInverted_other": "Wirklich alles außer {{count}} Einträgen löschen?",
 					"buttons": {
 						"yes": "Ja",
 						"no": "Nein"

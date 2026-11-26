@@ -371,8 +371,12 @@
 			"delete": {
 				"confirm-dialog": {
 					"title": "Elimina",
-					"message": "Vuoi davvero eliminare {{NUM}} voci?",
-					"messageInverted": "Vuoi davvero eliminare tutto tranne {{NUM}} voci?",
+					"message_one": "Vuoi davvero eliminare {{count}} voce?",
+					"message_many": "Vuoi davvero eliminare {{count}} voci?",
+					"message_other": "Vuoi davvero eliminare {{count}} voci?",
+					"messageInverted_one": "Vuoi davvero eliminare tutto tranne {{count}} voce?",
+					"messageInverted_many": "Vuoi davvero eliminare tutto tranne {{count}} voci?",
+					"messageInverted_other": "Vuoi davvero eliminare tutto tranne {{count}} voci?",
 					"buttons": {
 						"yes": "Sì",
 						"no": "No"

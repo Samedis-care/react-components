@@ -2,7 +2,14 @@ import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import React from "react";
 import fs from "node:fs";
 import path from "node:path";
-import { act, cleanup, renderHook, screen } from "@testing-library/react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	renderHook,
+	screen,
+	within,
+} from "@testing-library/react";
 import { Framework } from "../../../src/framework";
 import { useBackendDataGridDeleteHandler } from "../../../src/backend-components/DataGrid";
 import {
@@ -106,6 +113,13 @@ const renderDeleteHandler = (
 	};
 };
 
+/** Keeps the console clean of the cancel that the handler logs (ISSUE-3497-ITEM-4) */
+const silenceConsoleError = () =>
+	vi.spyOn(console, "error").mockImplementation(() => {});
+
+const CONFIRM = "backend-components.data-grid.delete.confirm-dialog.";
+const ERROR_DIALOG = "backend-components.data-grid.delete.error-dialog.";
+
 describe("useBackendDataGridDeleteHandler onDeleteSettled", () => {
 	it("is called after a delete, once the grid refreshed", async () => {
 		const onDeleteSettled = vi.fn();
@@ -182,6 +196,150 @@ describe("useBackendDataGridDeleteHandler onDeleteSettled", () => {
 			"callback bug",
 		);
 		expect(customDeleteErrorHandler).not.toHaveBeenCalled();
+	});
+});
+
+describe("useBackendDataGridDeleteHandler", () => {
+	it("[ISSUE-3506-ITEM-5] the confirmation uses the singular for one entry", async () => {
+		silenceConsoleError();
+		const { handleDelete } = renderDeleteHandler({
+			customDeleteConfirm: undefined,
+		});
+		let pending!: Promise<boolean>;
+		act(() => {
+			pending = handleDelete(false, ["1"], FILTER);
+		});
+		const dialog = await screen.findByRole("dialog", { name: "Delete" });
+		const shown = dialog.textContent;
+		fireEvent.click(within(dialog).getByRole("button", { name: "No" }));
+		await act(() => pending.catch(() => undefined));
+
+		await ccI18n.loadLanguages(["de"]);
+		const german = ccI18n.getFixedT("de")(CONFIRM + "message", {
+			NUM: 1,
+			count: 1,
+		});
+		expect(
+			{
+				en: /\b1 entry\b/.test(shown ?? ""),
+				de: /\b1 Eintrag\b/.test(german),
+			},
+			`singular in ${JSON.stringify({ en: shown, de: german })}`,
+		).toEqual({ en: true, de: true });
+	});
+
+	it("[ISSUE-3506-ITEM-5] French Yes reads Oui, the Dutch error title is Dutch and the Uzbek OK is spelled right", async () => {
+		await ccI18n.loadLanguages(["fr", "nl", "uz"]);
+		const text = (lang: string, key: string) =>
+			ccI18n.getResource(lang, "translation", key) as unknown;
+		expect({
+			fr: text("fr", CONFIRM + "buttons.yes"),
+			nl: text("nl", ERROR_DIALOG + "title"),
+			uz: text("uz", ERROR_DIALOG + "buttons.okay"),
+		}).toEqual({
+			fr: "Oui",
+			// "Fout" is what the other Dutch error titles use
+			nl: expect.stringMatching(/^Fout\b/) as unknown,
+			// "OK" as in the other Uzbek dialogs, or the word spelled with its apostrophe
+			uz: expect.stringMatching(/^(OK|xo['ʻ‘’]p)$/i) as unknown,
+		});
+	});
+
+	it("[ISSUE-3506-ITEM-5] the inverted confirmation after select all counts the kept entries in their plural form", async () => {
+		silenceConsoleError();
+		const { handleDelete } = renderDeleteHandler({
+			customDeleteConfirm: undefined,
+		});
+		let pending!: Promise<boolean>;
+		act(() => {
+			pending = handleDelete(true, ["1"], FILTER);
+		});
+		const dialog = await screen.findByRole("dialog", { name: "Delete" });
+		expect(dialog).toHaveTextContent(
+			"Do you really want to delete everything except 1 entry?",
+		);
+		fireEvent.click(within(dialog).getByRole("button", { name: "No" }));
+		await act(() => pending.catch(() => undefined));
+	});
+
+	it("[ISSUE-3506-ITEM-5] each language puts the number where it belongs and uses the form the number needs", async () => {
+		const langs = ["de", "fr", "ru", "uz"];
+		await ccI18n.loadLanguages(langs);
+		const confirm = (
+			lang: string,
+			key: "message" | "messageInverted",
+			count: number,
+		) => ccI18n.getFixedT(lang)(CONFIRM + key, { count });
+		expect({
+			de: confirm("de", "message", 3),
+			deInverted: confirm("de", "messageInverted", 3),
+			fr: confirm("fr", "message", 3),
+			frInverted: confirm("fr", "messageInverted", 1),
+			ru1: confirm("ru", "message", 1),
+			ru3: confirm("ru", "message", 3),
+			ru5: confirm("ru", "message", 5),
+			ru21: confirm("ru", "message", 21),
+			ruInverted1: confirm("ru", "messageInverted", 1),
+			ruInverted3: confirm("ru", "messageInverted", 3),
+			uz: confirm("uz", "message", 3),
+		}).toEqual({
+			de: "Wirklich 3 Einträge löschen?",
+			// dative after "außer"
+			deInverted: "Wirklich alles außer 3 Einträgen löschen?",
+			fr: "Souhaitez-vous vraiment supprimer 3 entrées ?",
+			frInverted: "Voulez-vous vraiment tout supprimer sauf 1 entrée ?",
+			ru1: "Вы действительно хотите удалить 1 запись?",
+			ru3: "Вы действительно хотите удалить 3 записи?",
+			ru5: "Вы действительно хотите удалить 5 записей?",
+			ru21: "Вы действительно хотите удалить 21 запись?",
+			// genitive after "кроме"
+			ruInverted1: "Вы действительно хотите удалить все, кроме 1 записи?",
+			ruInverted3: "Вы действительно хотите удалить все, кроме 3 записей?",
+			uz: "Haqiqatan ham 3 ta yozuvni o'chirmoqchimisiz?",
+		});
+	});
+
+	it("[ISSUE-3506-ITEM-5] has both confirmations in every locale, for each of their plural forms", () => {
+		const i18nDir = path.resolve(__dirname, "../../../src/assets/i18n");
+		const missing = fs
+			.readdirSync(i18nDir, { withFileTypes: true })
+			.filter((entry) => entry.isDirectory())
+			.flatMap((entry) => {
+				const translation = JSON.parse(
+					fs.readFileSync(
+						path.join(i18nDir, entry.name, "translation.json"),
+						"utf8",
+					),
+				) as {
+					"backend-components": {
+						"data-grid": {
+							delete: { "confirm-dialog": Record<string, unknown> };
+						};
+					};
+				};
+				const dialog =
+					translation["backend-components"]["data-grid"].delete[
+						"confirm-dialog"
+					];
+				const categories = new Intl.PluralRules(entry.name).resolvedOptions()
+					.pluralCategories;
+				return ["message", "messageInverted"].flatMap((key) => [
+					...categories
+						.map((category) => `${key}_${category}`)
+						.filter((plural) => {
+							const text = dialog[plural];
+							return !(
+								typeof text === "string" &&
+								text.includes("{{count}}") &&
+								!text.includes("{{NUM}}")
+							);
+						})
+						.map((plural) => `${entry.name}: ${plural}`),
+					// the old key without a plural suffix is gone
+					...(key in dialog ? [`${entry.name}: ${key} (unsuffixed)`] : []),
+				]);
+			});
+		expect(missing).toEqual([]);
 	});
 });
 

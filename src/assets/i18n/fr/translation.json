@@ -371,16 +371,20 @@
 			"delete": {
 				"confirm-dialog": {
 					"title": "Supprimer",
-					"message": "Souhaitez-vous vraiment supprimer les entrées {{NUM}} ?",
-					"messageInverted": "Voulez-vous vraiment tout supprimer sauf les entrées {{NUM}} ?",
+					"message_one": "Souhaitez-vous vraiment supprimer {{count}} entrée ?",
+					"message_many": "Souhaitez-vous vraiment supprimer {{count}} entrées ?",
+					"message_other": "Souhaitez-vous vraiment supprimer {{count}} entrées ?",
+					"messageInverted_one": "Voulez-vous vraiment tout supprimer sauf {{count}} entrée ?",
+					"messageInverted_many": "Voulez-vous vraiment tout supprimer sauf {{count}} entrées ?",
+					"messageInverted_other": "Voulez-vous vraiment tout supprimer sauf {{count}} entrées ?",
 					"buttons": {
-						"yes": "Qui",
+						"yes": "Oui",
 						"no": "Non"
 					}
 				},
 				"error-dialog": {
 					"title": "Erreur",
-					"message": "Echec de la suppression des entrées sélectionnées : {{ERROR}}",
+					"message": "Échec de la suppression des entrées sélectionnées : {{ERROR}}",
 					"buttons": {
 						"okay": "OK"
 					}

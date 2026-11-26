@@ -218,7 +218,7 @@ const useBackendDataGridDelete = <M extends ModelUnknown>(
 						message: t(
 							"backend-components.data-grid.delete.confirm-dialog." +
 								(invert ? "messageInverted" : "message"),
-							{ NUM: ids.length },
+							{ count: ids.length },
 						),
 						textButtonYes: t(
 							"backend-components.data-grid.delete.confirm-dialog.buttons.yes",

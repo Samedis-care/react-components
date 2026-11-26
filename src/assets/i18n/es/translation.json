@@ -371,8 +371,12 @@
 			"delete": {
 				"confirm-dialog": {
 					"title": "Eliminar",
-					"message": "¿Desea realmente eliminar {{NUM}} entradas?",
-					"messageInverted": "¿Desea realmente eliminar todo excepto {{NUM}} entradas?",
+					"message_one": "¿Desea realmente eliminar {{count}} entrada?",
+					"message_many": "¿Desea realmente eliminar {{count}} entradas?",
+					"message_other": "¿Desea realmente eliminar {{count}} entradas?",
+					"messageInverted_one": "¿Desea realmente eliminar todo excepto {{count}} entrada?",
+					"messageInverted_many": "¿Desea realmente eliminar todo excepto {{count}} entradas?",
+					"messageInverted_other": "¿Desea realmente eliminar todo excepto {{count}} entradas?",
 					"buttons": {
 						"yes": "Sí",
 						"no": "No"

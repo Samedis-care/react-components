@@ -370,15 +370,17 @@
 			"delete": {
 				"confirm-dialog": {
 					"title": "Verwijderen",
-					"message": "Wilt u echt {{NUM}} items verwijderen?",
-					"messageInverted": "Wilt u echt alles verwijderen, behalve {{NUM}} items?",
+					"message_one": "Wilt u echt {{count}} item verwijderen?",
+					"message_other": "Wilt u echt {{count}} items verwijderen?",
+					"messageInverted_one": "Wilt u echt alles verwijderen, behalve {{count}} item?",
+					"messageInverted_other": "Wilt u echt alles verwijderen, behalve {{count}} items?",
 					"buttons": {
 						"yes": "Ja",
 						"no": "Nee"
 					}
 				},
 				"error-dialog": {
-					"title": "Error",
+					"title": "Fout",
 					"message": "Kan de geselecteerde items niet verwijderen: {{ERROR}}",
 					"buttons": {
 						"okay": "OK"

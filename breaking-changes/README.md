@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-26 | [The delete confirmation counts with plural forms](2026-11-26-data-grid-delete-confirmation-plurals.md) | behavior, i18n |
 | 2026-11-26 | [A theme styles InfoBox's status through classes, not ownerState or variants](2026-11-26-info-box-state-classes.md) | type, theme |
 | 2026-11-26 | [A selected initialData record whose conversion fails is listed as a failed load](2026-11-26-backend-multi-select-initial-data-conversion-error.md) | behavior |
 | 2026-11-26 | [The date pickers call `onAccept` with the dates they report to `onChange`](2026-11-26-picker-on-accept-when-done.md) | behavior |

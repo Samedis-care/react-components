@@ -370,8 +370,10 @@
 			"delete": {
 				"confirm-dialog": {
 					"title": "O'chirish",
-					"message": "Haqiqatan ham {{NUM}} ta yozuvni o'chirmoqchimisiz?",
-					"messageInverted": "Haqiqatan ham {{NUM}} ta yozuvdan boshqasini o'chirishni xohlaysizmi?",
+					"message_one": "Haqiqatan ham {{count}} ta yozuvni o'chirmoqchimisiz?",
+					"message_other": "Haqiqatan ham {{count}} ta yozuvni o'chirmoqchimisiz?",
+					"messageInverted_one": "Haqiqatan ham {{count}} ta yozuvdan boshqasini o'chirishni xohlaysizmi?",
+					"messageInverted_other": "Haqiqatan ham {{count}} ta yozuvdan boshqasini o'chirishni xohlaysizmi?",
 					"buttons": {
 						"yes": "Ha",
 						"no": "Yo'q"
@@ -381,7 +383,7 @@
 					"title": "Xato",
 					"message": "Tanlangan yozuvlarni o'chirib bo'lmadi: {{ERROR}}",
 					"buttons": {
-						"okay": "xop"
+						"okay": "OK"
 					}
 				},
 				"success-toast": {

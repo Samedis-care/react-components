@@ -370,8 +370,10 @@
 			"delete": {
 				"confirm-dialog": {
 					"title": "Delete",
-					"message": "Do you really want to delete {{NUM}} entries?",
-					"messageInverted": "Do you really want to delete everything except {{NUM}} entries?",
+					"message_one": "Do you really want to delete {{count}} entry?",
+					"message_other": "Do you really want to delete {{count}} entries?",
+					"messageInverted_one": "Do you really want to delete everything except {{count}} entry?",
+					"messageInverted_other": "Do you really want to delete everything except {{count}} entries?",
 					"buttons": {
 						"yes": "Yes",
 						"no": "No"
