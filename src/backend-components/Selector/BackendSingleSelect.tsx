@@ -14,6 +14,10 @@ import {
 import useCCTranslations from "../../utils/useCCTranslations";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 import getSelectedLoadErrorLabel from "./getSelectedLoadErrorLabel";
+import {
+	isSelectedLoadErrorEntry,
+	makeSelectedLoadErrorEntry,
+} from "./selectedLoadErrorEntry";
 import useDebouncedLoad from "./useDebouncedLoad";
 import { DistributiveOmit } from "../../utils/distributiveOmit";
 
@@ -129,7 +133,9 @@ export type BackendSingleSelectProps<M extends ModelUnknown> = DistributiveOmit<
 		 * @return null To remove the entry: `onSelect(null)`, unless `selected` changed
 		 *         meanwhile (a pick, a clear) or the field has unmounted.
 		 * @remarks Without it, the entry is labelled "Unknown entry" if the backend did not
-		 *          return its record, else "Error while fetching data".
+		 *          return its record, else "Error while fetching data". While an entry
+		 *          that failed to load is shown, with either label, the field is marked as
+		 *          erroneous (`error`, so `aria-invalid="true"`).
 		 */
 		onLoadError?: (error: Error) => string | null;
 		/**
@@ -189,6 +195,7 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 		freeSolo,
 		selectedFreeSolo,
 		onSelectFreeSolo,
+		error,
 		...otherProps
 	} = props;
 	const modelFetch = modelFetchProp ?? model;
@@ -324,10 +331,7 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 						if (onSelect) onSelect(null);
 						return;
 					}
-					newCache = {
-						value: selected,
-						label,
-					};
+					newCache = makeSelectedLoadErrorEntry(selected, label);
 				}
 			}
 			if (discarded) return;
@@ -353,11 +357,19 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 					? picked
 					: (additionalOptions?.find((opt) => opt.value === selected) ?? null);
 
+	// the entry of a record that failed to load names no record: the field is in error
+	// while it is shown
+	const loadError =
+		!selectedFreeSolo &&
+		selectedEntry != null &&
+		isSelectedLoadErrorEntry(selectedEntry);
+
 	const debouncedLoad = useDebouncedLoad(handleLoad, searchDebounceTime ?? 500);
 
 	return (
 		<SingleSelect
 			{...otherProps}
+			error={error || loadError}
 			freeSolo={freeSolo}
 			onLoad={debouncedLoad}
 			{...(switchFilterName

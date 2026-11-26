@@ -225,10 +225,11 @@ const BackendMultiSelectWithTags = <
 		groupSort,
 		lruGroup,
 		lruData,
+		error,
 		...selectorProps
 	} = props;
 
-	const { handleSelect, selected } = useSelectedCache({
+	const { handleSelect, selected, loadError } = useSelectedCache({
 		model: dataModel,
 		modelToSelectorData: convData,
 		initialData,
@@ -337,6 +338,7 @@ const BackendMultiSelectWithTags = <
 	return (
 		<MultiSelectWithTags
 			{...selectorProps}
+			error={error || loadError}
 			onChange={handleSelect}
 			selected={selected}
 			loadGroupEntries={loadGroupEntries}

@@ -68,11 +68,12 @@ const BackendMultipleSelect = <
 		sort,
 		switchFilterName,
 		lru,
+		error,
 		...otherProps
 	} = props;
 	const modelFetch = props.modelFetch ?? model;
 
-	const { selected, handleSelect } = useSelectedCache(props);
+	const { selected, handleSelect, loadError } = useSelectedCache(props);
 
 	const handleLoad = useCallback(
 		async (
@@ -125,6 +126,7 @@ const BackendMultipleSelect = <
 		<BaseSelector<DataT, true>
 			multiple={true}
 			{...otherProps}
+			error={error || loadError}
 			onLoad={debouncedLoad}
 			onSelect={handleSelect}
 			selected={selected}

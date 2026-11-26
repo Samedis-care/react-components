@@ -908,3 +908,70 @@ export const Issue3505Item23RestoreSendsNothing: StoryObj = {
 		]);
 	},
 };
+
+// ---------------------------------------------------------------------------
+// A selected record that cannot be loaded
+// ---------------------------------------------------------------------------
+
+const UnloadableRecordStory = () => {
+	const singleModel = useMemo(createTestModel, []);
+	const multiModel = useMemo(createTestModel, []);
+	const [head, setHead] = useState<string | null>("deleted");
+	const [team, setTeam] = useState<string[]>(["deleted", "2"]);
+	return (
+		<>
+			<BackendSingleSelect
+				model={singleModel}
+				modelToSelectorData={modelToSelectorData}
+				selected={head}
+				onSelect={setHead}
+				label={"Department head"}
+			/>
+			<BackendMultiSelect
+				model={multiModel}
+				modelToSelectorData={modelToMultiSelectorData}
+				selected={team}
+				onSelect={setTeam}
+				label={"Team"}
+			/>
+		</>
+	);
+};
+
+/**
+ * ISSUE-3510-ITEM-5: an id whose record the backend no longer returns is shown as
+ * "Unknown entry", and its field is marked as erroneous for as long as it is selected
+ */
+export const Issue3510Item5UnloadableRecordMarksField: StoryObj = {
+	parameters: { a11y: { test: "error" } },
+	render: () => <UnloadableRecordStory />,
+	play: async ({ canvas, userEvent }) => {
+		const head = await canvas.findByRole(
+			"combobox",
+			{ name: "Department head" },
+			{ timeout: 3000 },
+		);
+		await waitFor(() => expect(head).toHaveValue("Unknown entry"), {
+			timeout: 5000,
+		});
+		await expect(head).toHaveAttribute("aria-invalid", "true");
+		const team = canvas.getByRole("combobox", { name: "Team" });
+		const remove = await canvas.findByRole(
+			"button",
+			{ name: "Remove Unknown entry" },
+			{ timeout: 5000 },
+		);
+		await expect(team).toHaveAttribute("aria-invalid", "true");
+		await userEvent.click(remove);
+		// a removal remounts the search field
+		await waitFor(() =>
+			expect(canvas.getByRole("combobox", { name: "Team" })).toHaveAttribute(
+				"aria-invalid",
+				"false",
+			),
+		);
+		await expect(
+			canvas.getByRole("button", { name: "Remove Bob Smith" }),
+		).toBeVisible();
+	},
+};

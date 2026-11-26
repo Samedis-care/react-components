@@ -290,6 +290,52 @@ describe("BackendSingleSelect bugs", () => {
 		expect(lookups(connector)).toEqual([]);
 	});
 
+	it("[ISSUE-3510-ITEM-5] a record that cannot be loaded and has no onLoadError shows the translated error text, not the developer message", async () => {
+		const { model } = peopleModel();
+		render(ui({ model, selected: "9" }));
+		await waitFor(() => expect(combobox().value).not.toBe("Loading…"));
+		expect(combobox().value).not.toMatch(/\[Components-Care\]/);
+		expect(combobox().value).toBe("Unknown entry");
+	});
+
+	it("[ISSUE-3510-ITEM-5] a record that cannot be loaded marks the field invalid", async () => {
+		const { model, connector } = peopleModel();
+		render(ui({ model, selected: "9", disableRequestBatching: true }));
+		await flush();
+		expect(connector.log).toContain("read:9");
+		expect(combobox().value).not.toBe("Loading…");
+		expect(combobox()).toHaveAttribute("aria-invalid", "true");
+	});
+
+	it("[ISSUE-3510-ITEM-5] a record labelled by onLoadError marks the field invalid too", async () => {
+		const { model } = peopleModel();
+		render(ui({ model, selected: "9", onLoadError: () => "Access denied" }));
+		await waitFor(() => expect(combobox().value).toBe("Access denied"));
+		expect(combobox()).toHaveAttribute("aria-invalid", "true");
+	});
+
+	it("[ISSUE-3510-ITEM-5] picking a record ends the error state of one that could not be loaded", async () => {
+		const { model } = peopleModel();
+		render(
+			<Framework>
+				<Parent model={model} initial={"9"} />
+			</Framework>,
+		);
+		await waitFor(() => expect(combobox().value).toBe("Unknown entry"));
+		expect(combobox()).toHaveAttribute("aria-invalid", "true");
+		await openList();
+		await pickOption("Bob");
+		expect(combobox().value).toBe("Bob");
+		expect(combobox()).toHaveAttribute("aria-invalid", "false");
+	});
+
+	it("[ISSUE-3510-ITEM-5] the owner's error marks the field while its record is shown", async () => {
+		const { model } = peopleModel();
+		render(ui({ model, selected: "2", error: true }));
+		await waitFor(() => expect(combobox().value).toBe("Bob"));
+		expect(combobox()).toHaveAttribute("aria-invalid", "true");
+	});
+
 	it("[ISSUE-3510-ITEM-8] a new selection replaces the shown entry: fields the new entry leaves out are not kept", async () => {
 		const rows: Row[] = [
 			{ id: "1", name: "Alice", tip: "Inactive since 2020" },

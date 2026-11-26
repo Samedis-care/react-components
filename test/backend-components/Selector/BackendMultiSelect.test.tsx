@@ -262,6 +262,71 @@ describe("BackendMultiSelect bugs", () => {
 		expect(onSelect).not.toHaveBeenCalled();
 	});
 
+	it("[ISSUE-3510-ITEM-5] an entry that cannot be loaded is not named by the developer message", async () => {
+		const { model } = peopleModel();
+		render(ui({ model, selected: ["9", "2"] }));
+		await waitFor(() => expect(removeButtons()).toContain("Remove Bob"));
+		removeButtons().forEach((name) =>
+			expect(name).not.toMatch(/\[Components-Care\]/),
+		);
+	});
+
+	it("[ISSUE-3510-ITEM-5] an entry that cannot be loaded marks the field invalid until it is removed", async () => {
+		const { model } = peopleModel();
+		const { Parent, state } = makeParent();
+		render(
+			<Framework>
+				<Parent model={model} initial={["9", "2"]} />
+			</Framework>,
+		);
+		await waitFor(() =>
+			expect(removeButtons()).toEqual(["Remove Unknown entry", "Remove Bob"]),
+		);
+		expect(combobox()).toHaveAttribute("aria-invalid", "true");
+		fireEvent.click(
+			screen.getByRole("button", { name: "Remove Unknown entry" }),
+		);
+		await flush();
+		expect(state.current).toEqual(["2"]);
+		expect(combobox()).toHaveAttribute("aria-invalid", "false");
+	});
+
+	it("[ISSUE-3510-ITEM-5] onSelect's raw reports an entry that cannot be loaded as its id and label", async () => {
+		const { model } = peopleModel();
+		const onSelect = vi.fn();
+		const { Parent } = makeParent();
+		render(
+			<Framework>
+				<Parent model={model} initial={["9", "2"]} onSelect={onSelect} />
+			</Framework>,
+		);
+		await waitFor(() => expect(removeButtons()).toContain("Remove Bob"));
+		fireEvent.click(screen.getByRole("button", { name: "Remove Bob" }));
+		await flush();
+		expect(onSelect.mock.calls).toEqual([
+			[["9"], [{ value: "9", label: "Unknown entry" }]],
+		]);
+		expect(combobox()).toHaveAttribute("aria-invalid", "true");
+	});
+
+	it("[ISSUE-3510-ITEM-5] BackendMultipleSelect: an entry that cannot be loaded marks the field invalid", async () => {
+		const { model } = peopleModel();
+		render(
+			<Framework>
+				<BackendMultipleSelect<ModelUnknown, MultiSelectorData>
+					model={model}
+					modelToSelectorData={conv}
+					label={"Departments"}
+					searchDebounceTime={0}
+					selected={["9", "2"]}
+				/>
+			</Framework>,
+		);
+		await waitFor(() => expect(combobox().value).toMatch(/Bob/));
+		expect(combobox().value.trim()).toBe("Unknown entry, Bob");
+		expect(combobox()).toHaveAttribute("aria-invalid", "true");
+	});
+
 	it("[ISSUE-3510-ITEM-6] an id that matches an additionalOptions entry is listed from that entry, without a lookup", async () => {
 		const { model, connector } = peopleModel();
 		render(

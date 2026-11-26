@@ -20,6 +20,10 @@ import {
 import useCCTranslations from "../../utils/useCCTranslations";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 import getSelectedLoadErrorLabel from "./getSelectedLoadErrorLabel";
+import {
+	isSelectedLoadErrorEntry,
+	makeSelectedLoadErrorEntry,
+} from "./selectedLoadErrorEntry";
 import useDebouncedLoad from "./useDebouncedLoad";
 import { DistributiveOmit } from "../../utils/distributiveOmit";
 
@@ -149,7 +153,9 @@ export type BackendMultiSelectProps<
 		 *         its id, so a pick or removal made while it loaded is kept (an id picked
 		 *         again meanwhile stays). Not reported once the field has unmounted.
 		 * @remarks Without it, the entry is labelled "Unknown entry" if the backend did not
-		 *          return its record, else "Error while fetching data".
+		 *          return its record, else "Error while fetching data". While an entry
+		 *          that failed to load is listed, with either label, the field is marked as
+		 *          erroneous (`error`, so `aria-invalid="true"`).
 		 */
 		onLoadError?: (error: Error) => string | null;
 	};
@@ -164,6 +170,12 @@ interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
 	 * their ids and the entries, without the "Loading…" ones
 	 */
 	handleSelect: (selected: DataT[]) => void;
+	/**
+	 * Whether a selected entry is listed for a record that failed to load (labelled
+	 * "Unknown entry", "Error while fetching data" or by `onLoadError`): the field is then
+	 * to be marked as erroneous
+	 */
+	loadError: boolean;
 }
 
 export const useSelectedCache = <
@@ -271,10 +283,7 @@ export const useSelectedCache = <
 						if (!label) {
 							return;
 						}
-						newCache[value] = {
-							value,
-							label,
-						};
+						newCache[value] = makeSelectedLoadErrorEntry(value, label);
 					}
 				}),
 			);
@@ -326,6 +335,7 @@ export const useSelectedCache = <
 	return {
 		selected: selectedData,
 		handleSelect,
+		loadError: selectedData.some(isSelectedLoadErrorEntry),
 	};
 };
 
@@ -374,11 +384,12 @@ const BackendMultiSelect = <
 		sort,
 		switchFilterName,
 		lru,
+		error,
 		...otherProps
 	} = props;
 	const modelFetch = props.modelFetch ?? model;
 
-	const { selected, handleSelect } = useSelectedCache(props);
+	const { selected, handleSelect, loadError } = useSelectedCache(props);
 
 	const handleLoad = useCallback(
 		async (
@@ -431,6 +442,7 @@ const BackendMultiSelect = <
 	return (
 		<MultiSelect
 			{...otherProps}
+			error={error || loadError}
 			onLoad={debouncedLoad}
 			onSelect={handleSelect}
 			selected={selected}
