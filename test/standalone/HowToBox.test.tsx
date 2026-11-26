@@ -4,6 +4,7 @@ import { render, screen, cleanup, within } from "@testing-library/react";
 import { ThemeProvider, createTheme, Theme } from "@mui/material";
 import i18next, { Resource } from "i18next";
 import HowToBox, { HowToBoxTranslate } from "../../src/standalone/HowToBox";
+import GroupBox from "../../src/standalone/GroupBox";
 import ccI18n from "../../src/i18n";
 
 afterEach(() => {
@@ -453,6 +454,96 @@ describe("HowToBox", () => {
 			expect(
 				screen.getByRole("button", { name: "Upload" }),
 			).toHaveAccessibleDescription("Download the template");
+		});
+
+		it("[ISSUE-3463-ITEM-9] shows no title for every value that hides GroupBox's label, and the default only for undefined", () => {
+			const noTitle = [null, "", false] as const;
+			for (const titleLabel of noTitle) {
+				const { container } = renderHowToBox(
+					<>
+						<GroupBox label={titleLabel}>x</GroupBox>
+						<HowToBox titleLabel={titleLabel} labels={["a"]} />
+					</>,
+				);
+				const [groupBox, howToBox] = Array.from(
+					container.querySelectorAll("fieldset"),
+				);
+				expect(
+					groupBox.querySelector("legend"),
+					JSON.stringify(titleLabel),
+				).toBeNull();
+				expect(
+					howToBox.querySelector("legend"),
+					JSON.stringify(titleLabel),
+				).toBeNull();
+				expect(howToBox, JSON.stringify(titleLabel)).toHaveAccessibleName("");
+				cleanup();
+			}
+			const { container } = renderHowToBox(
+				<HowToBox titleLabel={undefined} labels={["a"]} />,
+			);
+			expect(container.querySelector("legend")).toHaveTextContent(
+				"How it works",
+			);
+			expect(screen.getByRole("group")).toHaveAccessibleName("How it works");
+		});
+
+		it("[ISSUE-3463-ITEM-9] lets a theme's defaultProps.titleLabel replace the default title, which null still hides", () => {
+			const themed = createTheme({
+				components: {
+					CcHowToBox: { defaultProps: { titleLabel: "Theme title" } },
+				},
+			});
+			const { container } = renderHowToBox(
+				<>
+					<HowToBox labels={["a"]} />
+					<HowToBox titleLabel={null} labels={["b"]} />
+				</>,
+				themed,
+			);
+			const [themedBox, untitled] = Array.from(
+				container.querySelectorAll("fieldset"),
+			);
+			expect(themedBox).toHaveAccessibleName("Theme title");
+			expect(untitled.querySelector("legend")).toBeNull();
+			expect(untitled).toHaveAccessibleName("");
+		});
+
+		it("[ISSUE-3463-ITEM-9] HowToBoxTranslate shows the default title when titleLabel is omitted and none for '' or null, as HowToBox does", async () => {
+			const app = await makeAppI18n({
+				en: { translation: { title: "Import", steps: ["a"] } },
+			});
+			const { container, rerender } = renderHowToBox(
+				<HowToBoxTranslate t={app.t} labels="steps" />,
+			);
+			expect(screen.getByRole("group")).toHaveAccessibleName("How it works");
+			const noTitle: (string | null)[] = ["", null];
+			for (const titleLabel of noTitle) {
+				rerender(
+					withTheme(
+						<HowToBoxTranslate
+							t={app.t}
+							labels="steps"
+							titleLabel={titleLabel}
+						/>,
+					),
+				);
+				expect(
+					container.querySelector("legend"),
+					JSON.stringify(titleLabel),
+				).toBeNull();
+				expect(
+					screen.getByRole("group"),
+					JSON.stringify(titleLabel),
+				).toHaveAccessibleName("");
+			}
+			rerender(
+				withTheme(
+					<HowToBoxTranslate t={app.t} labels="steps" titleLabel="title" />,
+				),
+			);
+			expect(screen.getByRole("group")).toHaveAccessibleName("Import");
+			expect(itemTexts()).toEqual(["a"]);
 		});
 	});
 });

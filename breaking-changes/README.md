@@ -35,6 +35,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-26 | [A GroupBox label of `0` is its legend, and `label={true}` draws none](2026-11-26-group-box-zero-label-is-the-legend.md) | behavior |
 | 2026-11-26 | [Routes renders the most specific matching route, `""` and `"/"` match only the parent's url, and Route takes `end`](2026-11-26-routes-rank-by-specificity.md) | behavior, type |
 | 2026-11-26 | [InfiniteScroll loads more when focus reaches its last row](2026-11-26-infinite-scroll-loads-on-focus-of-last-row.md) | behavior |
+| 2026-11-26 | [HowToBox shows its default title only for an omitted `titleLabel`; `null` and `""` show no title](2026-11-26-how-to-box-null-hides-title.md) | behavior, type |
 | 2026-11-26 | [InfiniteScroll fills its container again when it grows, and `dynamicallySized` is removed](2026-11-26-infinite-scroll-observes-its-size.md) | behavior, type |
 | 2026-11-26 | [HowToBox takes any fieldset attribute, `sx` and `ref`, and its list gets an id from `id`](2026-11-26-how-to-box-html-attributes.md) | behavior, type |
 | 2026-11-26 | [A Form's save names the files and images the backend refused](2026-11-26-file-controls-name-refused-queued-writes.md) | behavior |

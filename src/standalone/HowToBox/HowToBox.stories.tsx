@@ -227,3 +227,27 @@ export const Issue3463Item8StepsDescribeTheUploadButton: Story = {
 		);
 	},
 };
+
+export const Issue3463Item9NoTitle: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3463-ITEM-9: `titleLabel={null}` shows no title, as `""` and `false` do, like the `label` of GroupBox; only an omitted (`undefined`) `titleLabel` shows the default "How it works". The untitled box is a group without a name, so it is named with `aria-label` here.',
+			},
+		},
+	},
+	args: {
+		titleLabel: null,
+		"aria-label": "Import instructions",
+		labels: ["Download the template", "Upload it below"],
+	},
+	play: async ({ canvas }) => {
+		const group = await canvas.findByRole("group", {
+			name: "Import instructions",
+		});
+		await expect(group.querySelector("legend")).toBeNull();
+		await expect(within(group).getAllByRole("listitem")).toHaveLength(2);
+	},
+};

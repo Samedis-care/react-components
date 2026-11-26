@@ -12,7 +12,16 @@ import combineClassNames from "../../utils/combineClassNames";
  */
 export interface HowToBoxProps extends GroupBoxHTMLProps {
 	/**
-	 * Box title label
+	 * Title of the box, drawn as the frame's `<legend>` and naming its group,
+	 * already translated.
+	 *
+	 * Omitted (`undefined`), it is the default "How it works", translated by
+	 * components-care (key `standalone.how-it-works.title`); a theme's
+	 * `defaultProps.titleLabel` replaces that default. Any other value is the
+	 * `label` of the {@link GroupBox}: `null`, `""` and `false` show no title,
+	 * even with a theme default, and leave the group without a name, which
+	 * `aria-label` can give it.
+	 * @default "How it works" (localized)
 	 */
 	titleLabel?: React.ReactNode;
 	/**
@@ -138,7 +147,11 @@ const HowToBox = React.forwardRef(function HowToBox(
 			ref={ref}
 			titleLabel={titleLabel}
 			labels={labels}
-			label={titleLabel ?? t("standalone.how-it-works.title")}
+			label={
+				titleLabel === undefined
+					? t("standalone.how-it-works.title")
+					: titleLabel
+			}
 			className={combineClassNames([className, classes?.root])}
 		>
 			<UnorderedList
@@ -164,9 +177,12 @@ export interface HowToBoxTranslateProps extends Omit<
 	 */
 	t: TFunction;
 	/**
-	 * i18n key passed to t function
+	 * Translation key of the title, passed to `t`. Omitted (`undefined`), the
+	 * box shows HowToBox's default title; `null` or `""` shows no title, as
+	 * on HowToBox.
+	 * @default the default title of HowToBox
 	 */
-	titleLabel?: string;
+	titleLabel?: string | null;
 	/**
 	 * i18n key passed to t function, used in combination with return object to obtain array of strings.
 	 * Empty strings in that array are skipped, and a key that holds an empty array renders nothing,
@@ -215,7 +231,7 @@ export const HowToBoxTranslate = (props: HowToBoxTranslateProps) => {
 	return (
 		<HowToBox
 			{...other}
-			titleLabel={titleLabel ? t(titleLabel) : undefined}
+			titleLabel={titleLabel ? t(titleLabel) : titleLabel}
 			labels={content}
 		/>
 	);
@@ -223,7 +239,8 @@ export const HowToBoxTranslate = (props: HowToBoxTranslateProps) => {
 
 /**
  * Instructions in a frame: a {@link GroupBox} titled "How it works" (or
- * `titleLabel`) around a bulleted list with one item per entry of `labels`.
+ * `titleLabel`, or untitled for `titleLabel={null}`) around a bulleted list
+ * with one item per entry of `labels`.
  *
  * Every other HTML attribute, `sx` and `ref` reach the frame's `<fieldset>`,
  * as they reach a {@link GroupBox}: `aria-label` names a box without a title.
