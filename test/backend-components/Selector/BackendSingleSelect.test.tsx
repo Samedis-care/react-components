@@ -336,6 +336,21 @@ describe("BackendSingleSelect bugs", () => {
 		expect(combobox()).toHaveAttribute("aria-invalid", "true");
 	});
 
+	it("[ISSUE-3510-ITEM-7] a record dropped by onLoadError is not shown as 'Loading…' when the parent keeps selected", async () => {
+		const { model, connector } = peopleModel();
+		render(
+			ui({
+				model,
+				selected: "9",
+				onLoadError: () => null,
+				disableRequestBatching: true,
+			}),
+		);
+		await flush();
+		expect(connector.log).toContain("read:9");
+		expect(combobox().value).toBe("");
+	});
+
 	it("[ISSUE-3510-ITEM-8] a new selection replaces the shown entry: fields the new entry leaves out are not kept", async () => {
 		const rows: Row[] = [
 			{ id: "1", name: "Alice", tip: "Inactive since 2020" },

@@ -126,7 +126,8 @@ export type BackendMultiSelectProps<
 		 * matching `additionalOptions` entry (never looked up, never dropped by
 		 * `onLoadError`), an `initialData` record or an entry picked in this field without a
 		 * request, otherwise loaded through `modelFetch`; until then it is listed as a
-		 * translated "Loading…" entry.
+		 * translated "Loading…" entry. An id `onLoadError` dropped is not listed, also while
+		 * `selected` keeps it.
 		 */
 		selected: string[];
 		/**
@@ -151,7 +152,10 @@ export type BackendMultiSelectProps<
 		 * @return string Label for entry which failed loading
 		 * @return null To remove the entry: `onSelect` reports the current selection without
 		 *         its id, so a pick or removal made while it loaded is kept (an id picked
-		 *         again meanwhile stays). Not reported once the field has unmounted.
+		 *         again meanwhile stays). Not reported once the field has unmounted. The id
+		 *         is then no longer listed, also while `selected` keeps it (without
+		 *         `onSelect`, or a parent that does not apply the report), so the next change
+		 *         the user makes reports the selection without it.
 		 * @remarks Without it, the entry is labelled "Unknown entry" if the backend did not
 		 *          return its record, else "Error while fetching data". While an entry
 		 *          that failed to load is listed, with either label, the field is marked as
@@ -162,7 +166,8 @@ export type BackendMultiSelectProps<
 
 interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
 	/**
-	 * The currently selected entries
+	 * The entries listed for the selected ids: a "Loading…" one for an id still loading,
+	 * none for an id `onLoadError` dropped
 	 */
 	selected: DataT[];
 	/**
@@ -208,6 +213,11 @@ export const useSelectedCache = <
 	const modelFetch = props.modelFetch ?? model;
 
 	const [selectedCache, setSelectedCache] = useState<Record<string, DataT>>({});
+	// the ids onLoadError dropped: not listed while they are selected without an entry,
+	// also when the selection is not updated (no onSelect, or a parent that keeps them)
+	const [droppedIds, setDroppedIds] = useState<ReadonlySet<string>>(
+		() => new Set(),
+	);
 
 	// the selection, entries and handler of the latest render: a drop by onLoadError
 	// removes its ids from this selection, not from the one its lookup started with
@@ -314,6 +324,8 @@ export const useSelectedCache = <
 			}
 
 			setSelectedCache((oldCache) => Object.assign({}, oldCache, newCache));
+			if (dropped.length > 0)
+				setDroppedIds((oldDropped) => new Set([...oldDropped, ...dropped]));
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selected]);
@@ -321,15 +333,23 @@ export const useSelectedCache = <
 	// stable identity: a new array on every render makes the selector reset its search
 	const selectedData = useMemo(
 		(): DataT[] =>
-			selected.map(
-				(value) =>
-					selectedCache[value] ??
-					(makeLoadingPlaceholder(
-						value,
-						t("backend-components.selector.loading"),
-					) as DataT),
-			),
-		[selected, selectedCache, t],
+			selected
+				// an id onLoadError dropped is left out until it has an entry: a pick from
+				// the list, or a later lookup that loads or labels it
+				.filter((value) => {
+					if (!droppedIds.has(value)) return true;
+					const entry = selectedCache[value] as DataT | undefined;
+					return entry !== undefined && !isLoadingPlaceholder(entry);
+				})
+				.map(
+					(value) =>
+						selectedCache[value] ??
+						(makeLoadingPlaceholder(
+							value,
+							t("backend-components.selector.loading"),
+						) as DataT),
+				),
+		[selected, selectedCache, droppedIds, t],
 	);
 
 	return {

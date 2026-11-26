@@ -396,6 +396,64 @@ describe("BackendMultiSelect bugs", () => {
 		expect(lookups(connector)).toEqual(["index::ids=2"]);
 	});
 
+	it("[ISSUE-3510-ITEM-7] an id dropped by onLoadError is not listed as 'Loading…' when the selection cannot be updated", async () => {
+		const { model, connector } = peopleModel();
+		connector.fail["1"] = new Error("gone");
+		render(
+			ui({
+				model,
+				selected: ["1", "2"],
+				onLoadError: () => null,
+				disableRequestBatching: true,
+			}),
+		);
+		await waitFor(() => expect(removeButtons()).toContain("Remove Bob"));
+		expect(removeButtons()).toEqual(["Remove Bob"]);
+	});
+
+	it("[ISSUE-3510-ITEM-7] a removal after a drop the parent did not apply reports the selection without the dropped id", async () => {
+		const { model, connector } = peopleModel();
+		connector.fail["1"] = new Error("gone");
+		const onSelect = vi.fn();
+		render(
+			ui({
+				model,
+				selected: ["1", "2"],
+				onLoadError: () => null,
+				onSelect,
+				disableRequestBatching: true,
+			}),
+		);
+		await waitFor(() => expect(onSelect).toHaveBeenCalled());
+		fireEvent.click(screen.getByRole("button", { name: "Remove Bob" }));
+		await flush();
+		expect(onSelect.mock.calls).toEqual([
+			[["2"], [{ value: "2", label: "Bob" }]],
+			[[], []],
+		]);
+	});
+
+	it("[ISSUE-3510-ITEM-7] BackendMultipleSelect: an id dropped by onLoadError is not listed as 'Loading…' when the selection cannot be updated", async () => {
+		const { model, connector } = peopleModel();
+		connector.fail["1"] = new Error("gone");
+		render(
+			<Framework>
+				<BackendMultipleSelect<ModelUnknown, MultiSelectorData>
+					model={model}
+					modelToSelectorData={conv}
+					label={"Departments"}
+					searchDebounceTime={0}
+					selected={["1", "2"]}
+					onLoadError={() => null}
+					disableRequestBatching
+				/>
+			</Framework>,
+		);
+		await flush();
+		expect(connector.log).toContain("read:1");
+		expect(combobox().value.trim()).toBe("Bob");
+	});
+
 	it("[ISSUE-3510-ITEM-20] onSelect's raw does not pass a 'Loading…' placeholder off as an entry", async () => {
 		const { model, connector } = peopleModel();
 		const release = connector.hold("1");

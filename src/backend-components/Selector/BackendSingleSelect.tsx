@@ -110,8 +110,9 @@ export type BackendSingleSelectProps<M extends ModelUnknown> = DistributiveOmit<
 		 * record, otherwise loaded through `modelFetch`. Until the record of this id is there,
 		 * the field shows the translated "Loading…" (`backend-components.selector.loading`), never
 		 * the record of an earlier id, and a lookup of an earlier id that finishes later is
-		 * discarded (also its error: no `onLoadError`, no `onSelect(null)`). Not shown while
-		 * `selectedFreeSolo` is a non-empty string.
+		 * discarded (also its error: no `onLoadError`, no `onSelect(null)`). An id
+		 * `onLoadError` dropped is not shown, also while `selected` keeps it: the field is
+		 * empty instead. Not shown while `selectedFreeSolo` is a non-empty string.
 		 */
 		selected: string | null;
 		/**
@@ -131,7 +132,9 @@ export type BackendSingleSelectProps<M extends ModelUnknown> = DistributiveOmit<
 		 * @param error The error that has been raised while loading
 		 * @return string Label for entry which failed loading
 		 * @return null To remove the entry: `onSelect(null)`, unless `selected` changed
-		 *         meanwhile (a pick, a clear) or the field has unmounted.
+		 *         meanwhile (a pick, a clear) or the field has unmounted. The field is then
+		 *         empty, also while `selected` keeps the id (without `onSelect`, or a parent
+		 *         that does not apply `null`).
 		 * @remarks Without it, the entry is labelled "Unknown entry" if the backend did not
 		 *          return its record, else "Error while fetching data". While an entry
 		 *          that failed to load is shown, with either label, the field is marked as
@@ -208,6 +211,11 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 	const [picked, setPicked] = useState<BaseSelectorData | null>(null);
 	const [selectedCache, setSelectedCache] = useState<BaseSelectorData | null>(
 		null,
+	);
+	// the ids onLoadError dropped: while one is selected without an entry, the field is
+	// empty, also when the parent keeps it (no onSelect, or one that does not apply null)
+	const [droppedIds, setDroppedIds] = useState<ReadonlySet<string>>(
+		() => new Set(),
 	);
 
 	const { t } = useCCTranslations();
@@ -328,6 +336,7 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 					// if we should drop the record...
 					if (!label) {
 						// unselect it
+						setDroppedIds((oldDropped) => new Set(oldDropped).add(selected));
 						if (onSelect) onSelect(null);
 						return;
 					}
@@ -347,7 +356,8 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 
 	// the entry of selected: the cached one only while it is this id's, else one that
 	// is known without loading it (just picked, or an additionalOptions entry; the
-	// effect above caches it), else null while it loads
+	// effect above caches it), else null while it loads (shown as "Loading…") or after
+	// onLoadError dropped it (shown as an empty field)
 	const selectedEntry =
 		selected == null
 			? null
@@ -380,12 +390,12 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 			selected={
 				selectedFreeSolo
 					? { value: selectedFreeSolo, label: selectedFreeSolo, freeSolo: true }
-					: selected != null
+					: selected != null && !droppedIds.has(selected)
 						? (selectedEntry ?? {
 								value: selected,
 								label: t("backend-components.selector.loading"),
 							})
-						: null
+						: selectedEntry
 			}
 			lru={lruConfig}
 		/>
