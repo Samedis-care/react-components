@@ -1,4 +1,4 @@
-import type { QueryKey } from "@tanstack/react-query";
+import { hashKey, type QueryKey } from "@tanstack/react-query";
 import { CacheOptions } from "../backend-integration/Model/Model";
 import ModelDataStore from "../backend-integration/Store/index";
 import debouncePromise from "../utils/debouncePromise";
@@ -124,7 +124,11 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 	/**
 	 * Set value of key on server
 	 * @param key The key
-	 * @param value The value
+	 * @param value The value, or null to delete what is stored under the key
+	 * @returns A promise which resolves once the server has stored the value,
+	 *          and rejects when the write fails. The next write of the key waits
+	 *          for it to settle, so the writes of one key never overlap, and a
+	 *          promise which never settles holds back the key's later writes.
 	 * @protected
 	 */
 	protected abstract setItemOnServer(
@@ -181,7 +185,12 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 	 * @param value The value, or null to delete what is stored under the key
 	 * @returns A promise which resolves once the value is on the server, and
 	 *          rejects with setItemOnServer's error when the write fails
-	 * @remarks The next read answers the value written last, also before it
+	 * @remarks The writes of a key reach the server one after another, in the
+	 *          order they were made: a write waits until the key's write before
+	 *          it has succeeded or failed, so the server keeps the value written
+	 *          last also when it answers an earlier write late. Writes of other
+	 *          keys don't wait for each other.
+	 *          The next read answers the value written last, also before it
 	 *          reaches the server, as long as the cache holds it fresh (see
 	 *          getItem); a read already on its way to the server answers it
 	 *          too. When the write fails, the value is invalidated in the
@@ -211,10 +220,14 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 					this.lastWrites.delete(key);
 					return true;
 				};
+				const mutationKey: QueryKey = ["cc-css-mt", key];
 				return ModelDataStore.getMutationCache()
 					.build(ModelDataStore, {
 						mutationFn: () => this.setItemOnServer(key, value),
-						mutationKey: ["cc-css-mt", key],
+						mutationKey,
+						// the key's writes reach the server one after another: one the
+						// server answers late cannot replace a newer value there
+						scope: { id: hashKey(mutationKey) },
 						onSuccess: () => {
 							if (forgetIfLast())
 								ModelDataStore.setQueryData(["cc-css", key], () => value);

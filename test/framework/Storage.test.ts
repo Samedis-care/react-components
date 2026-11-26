@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { focusManager } from "@tanstack/react-query";
 import {
 	CachedServerStorageProvider,
 	LocalStorageProvider,
@@ -458,6 +459,116 @@ describe("CachedServerStorageProvider", () => {
 			await second;
 			expect(provider.getItem("key")).toBe("second");
 			expect(provider.readFromServer).not.toHaveBeenCalled();
+		});
+
+		/**
+		 * Lets the server keep a value when it answers its write: the first write
+		 * is answered when the test calls the returned function, the others at once
+		 */
+		const answerFirstWriteLater = (provider: WritingProvider) => {
+			const server: { stored: string | null; answerFirst: () => void } = {
+				stored: null,
+				answerFirst: () => undefined,
+			};
+			provider.writeToServer
+				.mockImplementationOnce(
+					(_key, value) =>
+						new Promise((resolve) => {
+							server.answerFirst = () => {
+								server.stored = value;
+								resolve();
+							};
+						}),
+				)
+				.mockImplementation((_key, value) => {
+					server.stored = value;
+					return Promise.resolve();
+				});
+			return server;
+		};
+
+		it("[ISSUE-3496-ITEM-28] a write waits for the key's write on its way to the server, so the server keeps the value written last although it answers the first write last", async () => {
+			const provider = new WritingProvider();
+			const server = answerFirstWriteLater(provider);
+			const first = provider.setItem("key", "first");
+			await vi.advanceTimersByTimeAsync(1000);
+			expect(provider.writeToServer).toHaveBeenCalledExactlyOnceWith(
+				"key",
+				"first",
+			);
+
+			// written while the first write is on its way to the server
+			const second = provider.setItem("key", "second");
+			await vi.advanceTimersByTimeAsync(1000);
+			expect(provider.writeToServer).toHaveBeenCalledTimes(1);
+
+			server.answerFirst();
+			await first;
+			await second;
+			expect(provider.writeToServer).toHaveBeenCalledTimes(2);
+			expect(provider.writeToServer).toHaveBeenLastCalledWith("key", "second");
+			expect(server.stored).toBe("second");
+			expect(provider.getItem("key")).toBe("second");
+		});
+
+		it("[ISSUE-3496-ITEM-28] a write waiting for the key's write is sent once that write fails, and the server keeps it", async () => {
+			const provider = new WritingProvider();
+			let failFirst: (error: Error) => void = () => undefined;
+			provider.writeToServer.mockReturnValueOnce(
+				new Promise((_resolve, reject) => {
+					failFirst = reject;
+				}),
+			);
+			const first = provider.setItem("key", "first");
+			const firstFailed = expect(first).rejects.toThrow("offline");
+			await vi.advanceTimersByTimeAsync(1000);
+
+			const second = provider.setItem("key", "second");
+			await vi.advanceTimersByTimeAsync(1000);
+			expect(provider.writeToServer).toHaveBeenCalledTimes(1);
+
+			failFirst(new Error("offline"));
+			await firstFailed;
+			await second;
+			expect(provider.writeToServer).toHaveBeenCalledTimes(2);
+			expect(provider.writeToServer).toHaveBeenLastCalledWith("key", "second");
+			expect(provider.getItem("key")).toBe("second");
+		});
+
+		it("[ISSUE-3496-ITEM-28] a write waiting for the key's write is sent once that write is answered, also while the page is in the background", async () => {
+			const provider = new WritingProvider();
+			const server = answerFirstWriteLater(provider);
+			const first = provider.setItem("key", "first");
+			await vi.advanceTimersByTimeAsync(1000);
+			const second = provider.setItem("key", "second");
+			await vi.advanceTimersByTimeAsync(1000);
+
+			// the user switched to another tab
+			focusManager.setFocused(false);
+			try {
+				server.answerFirst();
+				await first;
+				await second;
+				expect(server.stored).toBe("second");
+			} finally {
+				focusManager.setFocused(undefined);
+			}
+		});
+
+		it("[ISSUE-3496-ITEM-28] a write of another key does not wait for a key's write on its way to the server", async () => {
+			const provider = new WritingProvider();
+			const server = answerFirstWriteLater(provider);
+			const first = provider.setItem("a", "first");
+			await vi.advanceTimersByTimeAsync(1000);
+
+			const other = provider.setItem("b", "other");
+			await vi.advanceTimersByTimeAsync(1000);
+			expect(provider.writeToServer).toHaveBeenCalledTimes(2);
+			expect(provider.writeToServer).toHaveBeenLastCalledWith("b", "other");
+			await other;
+
+			server.answerFirst();
+			await first;
 		});
 	});
 });
