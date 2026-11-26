@@ -1393,6 +1393,84 @@ describe("persisted format bugs", () => {
 		expect(Object.getPrototypeOf(result.columnState)).toBe(Object.prototype);
 	});
 
+	it.each([
+		[
+			"v2",
+			{
+				v: DATA_GRID_PERSIST_VERSION,
+				sort: { constructor: [1, 1], name: [-1, 2] },
+				filter: { constructor: filter("x"), name: filter("bob") },
+			},
+		],
+		[
+			"legacy",
+			{
+				columnState: {
+					constructor: { sort: 1, sortOrder: 1, filter: filter("x") },
+					name: { sort: -1, sortOrder: 2, filter: filter("bob") },
+				},
+			},
+		],
+	])(
+		"[ISSUE-3496-ITEM-25] %s: a stored record with an entry named constructor keeps the columns' entries next to it",
+		(_, stored) => {
+			const result = decodePersistedState(
+				JSON.parse(JSON.stringify(stored)) as never,
+				COLUMNS,
+				defaults(),
+				undefined,
+			);
+			expect(dataGridPrepareFiltersAndSorts(result.columnState)).toEqual([
+				[{ field: "name", direction: -1 }],
+				{ name: filter("bob") },
+			]);
+		},
+	);
+
+	it("[ISSUE-3496-ITEM-25] a column named constructor restores its stored sort and filter", () => {
+		const columns = [...COLUMNS, col("constructor")];
+		const result = decodePersistedState(
+			JSON.parse(
+				JSON.stringify({
+					v: DATA_GRID_PERSIST_VERSION,
+					sort: { constructor: [1, 1] },
+					filter: { constructor: filter("x") },
+				}),
+			) as never,
+			columns,
+			defaults(columns),
+			undefined,
+		);
+		expect(dataGridPrepareFiltersAndSorts(result.columnState)).toEqual([
+			[{ field: "constructor", direction: 1 }],
+			{ constructor: filter("x") },
+		]);
+	});
+
+	it("[ISSUE-3496-ITEM-25] a grid with a column named constructor gets its stored sort, filter and widths back", () => {
+		const columns = [...COLUMNS, col("constructor")];
+		const defs = defaults(columns);
+		const stored = encode(
+			{},
+			{
+				...defs,
+				constructor: { sort: 1 as const, sortOrder: 1, filter: filter("x") },
+			},
+			{ columns, width: { constructor: 120, name: 80 } },
+		);
+		const result = decodePersistedState(
+			JSON.parse(JSON.stringify(stored)) as DataGridPersistentState,
+			columns,
+			defs,
+			undefined,
+		);
+		expect(dataGridPrepareFiltersAndSorts(result.columnState)).toEqual([
+			[{ field: "constructor", direction: 1 }],
+			{ constructor: filter("x") },
+		]);
+		expect(result.columnWidth).toEqual({ constructor: 120, name: 80 });
+	});
+
 	// the column filters are stored as a whole, like the sort: defaultFilter
 	// applies when nothing is stored, and on a reset
 
