@@ -973,6 +973,114 @@ describe("RoutedMenu: a group only shows and hides its entries", () => {
 	});
 });
 
+describe("RoutedMenu: entries hidden with shouldRender", () => {
+	/** "Projects" is shown, the detail page "Capture" is kept out of the menu */
+	const PROJECTS = [
+		leaf("Home", "/"),
+		group("Devices", [
+			leaf("Projects", "/projects"),
+			leaf("Review", "/projects/:id/review"),
+			leaf("Capture", "/projects/:id/capture", { shouldRender: false }),
+		]),
+	];
+	/** "Admin" has no shown entry for the page of "Secret" */
+	const ADMIN = [
+		leaf("Home", "/"),
+		group("Admin", [
+			leaf("Public", "/admin/public"),
+			leaf("Secret", "/admin/secret", { shouldRender: false }),
+		]),
+	];
+	/** A HistoryRouter of `history` around the hook */
+	const inRouter = (history: History) =>
+		function InRouter({ children }: { children: React.ReactNode }) {
+			return <HistoryRouter history={history}>{children}</HistoryRouter>;
+		};
+	/** Each entry as `id current containsCurrent forceExpand`, depth first */
+	const flags = (entries: UseRoutedMenuLogicResult["definition"]): string[] =>
+		entries.flatMap((entry) => [
+			`${entry.menuItemId} ${entry.current} ${entry.containsCurrent} ${entry.forceExpand}`,
+			...flags(entry.children ?? []),
+		]);
+
+	it("[ISSUE-3498-ITEM-11] on the page of a hidden entry, the shown entry whose route matches the URL as a prefix is highlighted, and the params still come from the hidden entry's route", () => {
+		const { history } = mount(PROJECTS, "/projects/7/capture");
+		expect(selected()).toEqual(["Projects"]);
+		expect(chevron(entry("Devices"))).toBe("less");
+		fireEvent.click(entry("Review"));
+		expect(history.location.pathname).toBe("/projects/7/review");
+	});
+	it("[ISSUE-3498-ITEM-11] an entry inside a hidden group is hidden too and loses to a shown entry", () => {
+		mount(
+			[
+				leaf("Projects", "/projects"),
+				group("Tools", [leaf("Capture", "/projects/:id/capture")], {
+					shouldRender: false,
+				}),
+			],
+			"/projects/7/capture",
+		);
+		expect(titles()).toEqual(["Projects"]);
+		expect(selected()).toEqual(["Projects"]);
+	});
+	it("[ISSUE-3498-ITEM-11] on a page that only a hidden entry matches, nothing is highlighted and its group is not held open", () => {
+		mount(ADMIN, "/admin/secret");
+		expect(selected()).toEqual([]);
+		const admin = entry("Admin");
+		expect(admin).toHaveAttribute("aria-expanded", "false");
+		fireEvent.click(admin);
+		expect(admin).toHaveAttribute("aria-expanded", "true");
+		fireEvent.click(admin);
+		expect(admin).toHaveAttribute("aria-expanded", "false");
+	});
+	it("[ISSUE-3498-ITEM-11] an entry hidden because the URL lacks its param loses to a shown entry too", () => {
+		// General is hidden (and reported in development): the hidden import page
+		// reads "new" as a literal, so the URL has no value for :application
+		vi.spyOn(console, "error").mockImplementation(() => undefined);
+		mount(
+			[
+				leaf("Apps", "/apps"),
+				leaf("General", "/apps/:application"),
+				leaf("Import", "/apps/new/import", { shouldRender: false }),
+			],
+			"/apps/new/import",
+		);
+		expect(titles()).toEqual(["Apps"]);
+		expect(selected()).toEqual(["Apps"]);
+	});
+	it("[ISSUE-3498-ITEM-11] useRoutedMenuLogic: a shown match is the current entry; with none, the hidden match stays the active id and marks its groups without forcing them open", () => {
+		const history = createMemoryHistory({
+			initialEntries: ["/projects/7/capture"],
+		});
+		const { result } = renderHook(
+			() => useRoutedMenuLogic({ definition: PROJECTS }),
+			{ wrapper: inRouter(history) },
+		);
+		expect(result.current.controlledState[0]).toBe("Devices@Projects");
+		expect(flags(result.current.definition)).toEqual([
+			"Home false false false",
+			"Devices false true true",
+			"Devices@Projects true false false",
+			"Devices@Review false false false",
+			"Devices@Capture false false false",
+		]);
+
+		const adminHistory = createMemoryHistory({
+			initialEntries: ["/admin/secret"],
+		});
+		const admin = renderHook(() => useRoutedMenuLogic({ definition: ADMIN }), {
+			wrapper: inRouter(adminHistory),
+		});
+		expect(admin.result.current.controlledState[0]).toBe("Admin@Secret");
+		expect(flags(admin.result.current.definition)).toEqual([
+			"Home false false false",
+			"Admin false true false",
+			"Admin@Public false false false",
+			"Admin@Secret true false false",
+		]);
+	});
+});
+
 describe("RoutedMenu: params with reserved characters", () => {
 	it("[ISSUE-3475-ITEM-11] fills a param with an encoded slash, space or percent sign into the targets encoded", () => {
 		const open = vi.spyOn(window, "open").mockImplementation(() => null);

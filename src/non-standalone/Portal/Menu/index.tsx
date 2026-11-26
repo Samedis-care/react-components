@@ -66,17 +66,29 @@ export interface IRoutedMenuItemDefinition extends Omit<
 	 * URL only: on a path that no entry matches, nothing is highlighted, and an
 	 * entry without `route` (an action such as "Log out") is never highlighted.
 	 *
+	 * Only an entry the menu shows is highlighted. An entry is hidden by its
+	 * own `shouldRender: false`, by that of a group above it, and while the
+	 * current URL has no value for one of its params (see below). On the page
+	 * of a hidden entry, the most specific shown entry that matches is
+	 * highlighted: "Projects" (`/projects`) on `/projects/7/capture`, the page
+	 * of a hidden `/projects/:id/capture`. On a page that only hidden entries
+	 * match, nothing is highlighted and no group is expanded, but the best of
+	 * them is still the entry of the current URL for useRoutedMenuLogic: its
+	 * active id, and `containsCurrent` on the groups above it, so a menu the
+	 * app renders can mark the section the page belongs to.
+	 *
 	 * Its `:name` params are filled from the current URL, read with the route
-	 * of that best-matching entry: on `/projects/42/review`,
-	 * `/projects/:id/capture` navigates to `/projects/42/capture`. The values
-	 * go in percent-encoded, so a value with "/" stays one segment. While the
-	 * current URL has no value for one of its params, the entry is hidden
-	 * (with its children), as if `shouldRender` were false, and in development
-	 * a `console.error` names the entry and the param (once per menu, entry
-	 * and param). An entry meant only for pages that provide its params gets
-	 * `shouldRender: false` on the other pages from the app. The part of a
-	 * relative route that stands for the enclosing Route is taken from the
-	 * current URL as that Route matched it.
+	 * that matches it best, a hidden entry's too: on `/projects/42/capture`,
+	 * the page of a hidden `/projects/:id/capture`, `/projects/:id/review`
+	 * navigates to `/projects/42/review`. The values go in percent-encoded, so
+	 * a value with "/" stays one segment. While the current URL has no value
+	 * for one of its params, the entry is hidden (with its children), as if
+	 * `shouldRender` were false, and in development a `console.error` names
+	 * the entry and the param (once per menu, entry and param). An entry meant
+	 * only for pages that provide its params gets `shouldRender: false` on the
+	 * other pages from the app. The part of a relative route that stands for
+	 * the enclosing Route is taken from the current URL as that Route matched
+	 * it.
 	 *
 	 * Not for a group (an entry with `children`): a group only shows and hides
 	 * its entries, and its `route` is ignored. Give the group's page an entry
@@ -86,8 +98,9 @@ export interface IRoutedMenuItemDefinition extends Omit<
 	/**
 	 * Keeps the group expanded on every page
 	 *
-	 * Default `false`: RoutedMenu expands a group by itself while the entry of
-	 * the current URL is inside it. With `true` the group is expanded on the
+	 * Default `false`: RoutedMenu expands a group by itself while the
+	 * highlighted entry of the current URL is inside it (not for an entry the
+	 * menu hides, see `route`). With `true` the group is expanded on the
 	 * other pages too. While a group is expanded this way, a click on it does
 	 * not collapse it (MenuBase). No effect on an entry without children.
 	 */
@@ -140,9 +153,10 @@ export interface IRoutedMenuEntry extends Omit<
 	onAuxClick: React.MouseEventHandler;
 	/**
 	 * Keep the group expanded: `true` for the groups above the entry of the
-	 * current URL (`containsCurrent`) and for an entry whose definition sets
-	 * `forceExpand`. MenuBase keeps such a group expanded; a menu rendered by
-	 * the app does the same, or ignores it for groups that open as a popup.
+	 * current URL (`containsCurrent`) while the menu shows that entry, and for
+	 * an entry whose definition sets `forceExpand`. MenuBase keeps such a group
+	 * expanded; a menu rendered by the app does the same, or ignores it for
+	 * groups that open as a popup.
 	 */
 	forceExpand: boolean;
 	/**
@@ -162,18 +176,19 @@ export interface IRoutedMenuEntry extends Omit<
 	 */
 	href: string | undefined;
 	/**
-	 * Is this the entry of the current URL, the one whose route matches it
-	 * best (see IRoutedMenuItemDefinition's `route`)? Put
+	 * Is this the entry of the current URL, the shown entry whose route
+	 * matches it best (see IRoutedMenuItemDefinition's `route`)? Put
 	 * `aria-current="page"` on its element, so screen readers announce it as
-	 * the current page. Also `true` for an entry hidden with
-	 * `shouldRender: false`. Always `false` for a group, and for every entry
-	 * on a URL that no entry matches.
+	 * the current page. A hidden entry is `true` only on a page that no shown
+	 * entry matches; it is not rendered then. Always `false` for a group, and
+	 * for every entry on a URL that no entry matches.
 	 */
 	current: boolean;
 	/**
 	 * Does this group contain the entry of the current URL, at any depth? For
-	 * a visual mark on the groups above the current page. `false` for the
-	 * current entry itself and for entries without children.
+	 * a visual mark on the groups above the current page, also when that entry
+	 * is hidden (`current`). `false` for the current entry itself and for
+	 * entries without children.
 	 */
 	containsCurrent: boolean;
 	/**
@@ -200,7 +215,7 @@ export interface IRoutedMenuProps extends Omit<
 }
 
 /**
- * The entry of the menu tree that matches the current path best
+ * The entry of the current URL (resolveLocation) and the params of the URL
  */
 interface MenuRouteMatch {
 	/**
@@ -212,8 +227,15 @@ interface MenuRouteMatch {
 	 */
 	groups: string[];
 	/**
-	 * The params read from the path with the entry's route, percent-encoded
-	 * again to fill the routes of the entries
+	 * Does the menu show the entry? false for a hidden entry, which is the
+	 * entry of the current URL only while no shown entry matches; it is not
+	 * highlighted and expands no group
+	 */
+	shown: boolean;
+	/**
+	 * The params read from the path with the route of the entry that matches
+	 * it best, hidden entries included, percent-encoded again to fill the
+	 * routes of the entries
 	 */
 	params: Record<string, string>;
 }
@@ -305,28 +327,60 @@ const getPageRoute = (
 		: definition.route;
 
 /**
+ * An entry of the menu tree that has a page route (flattenRoutes)
+ */
+interface RoutedEntry {
+	/**
+	 * The entry's menu item id
+	 */
+	id: string;
+	/**
+	 * The menu item ids of the groups above the entry, outermost first
+	 */
+	groups: string[];
+	/**
+	 * Does MenuBase render the entry: `shouldRender` of the entry and of every
+	 * group above it?
+	 */
+	rendered: boolean;
+	/**
+	 * The entry's route, read by resolveRoute
+	 */
+	route: ResolvedRoute;
+}
+
+/**
  * The entries of the menu tree that have a page route (getPageRoute), depth
  * first in definition order, with their menu item ids
  * @param definitions The menu item definitions
  * @param groups The menu item ids of the groups above `definitions`
+ * @param rendered Are the groups above `definitions` rendered?
  * @param base What a relative route is resolved against
- * @return Each entry's id, the ids of the groups above it and the path
- * pattern of its route (resolveRoute)
+ * @return The entries, see RoutedEntry
  */
 const flattenRoutes = (
 	definitions: IRoutedMenuItemDefinition[],
 	groups: string[],
+	rendered: boolean,
 	base: RouteBase,
-): { id: string; groups: string[]; pattern: string }[] =>
+): RoutedEntry[] =>
 	definitions.flatMap((def) => {
 		const id = getItemId(groups[groups.length - 1] ?? null, def.title);
 		const route = getPageRoute(def);
+		const entryRendered = rendered && def.shouldRender;
 		return [
 			...(route
-				? [{ id, groups, pattern: resolveRoute(route, base).pattern }]
+				? [
+						{
+							id,
+							groups,
+							rendered: entryRendered,
+							route: resolveRoute(route, base),
+						},
+					]
 				: []),
 			...(def.children
-				? flattenRoutes(def.children, [...groups, id], base)
+				? flattenRoutes(def.children, [...groups, id], entryRendered, base)
 				: []),
 		];
 	});
@@ -347,49 +401,97 @@ const encodeRouteParameters = (
 	);
 
 /**
- * The entry of the whole menu tree whose route matches the path best: of all
- * entries whose route matches the path as a prefix, the most specific one
+ * An entry whose route matches the current path (resolveLocation)
+ */
+interface RouteCandidate {
+	/**
+	 * The entry
+	 */
+	entry: RoutedEntry;
+	/**
+	 * The params read from the path with the entry's route (decoded)
+	 */
+	params: Record<string, string>;
+	/**
+	 * How specific the entry's route is (getRouteSpecificity)
+	 */
+	specificity: RouteSpecificity;
+}
+
+/**
+ * The candidate whose route matches the path best: the most specific one
  * (compareRouteSpecificity), of equally specific ones the deepest in the menu
- * tree; on a full tie the earlier one in definition order.
- * Its id is the active menu item, its groups are expanded, and its params fill
- * the routes of all entries. Entries with `shouldRender: false` take part.
+ * tree; on a full tie the earlier one in definition order
+ * @param candidates The entries whose route matches the path, in definition
+ * order
+ * @return The best one, or null for no candidates
+ */
+const getBestCandidate = (
+	candidates: RouteCandidate[],
+): RouteCandidate | null =>
+	candidates.reduce<RouteCandidate | null>(
+		(best, candidate) =>
+			best &&
+			(compareRouteSpecificity(candidate.specificity, best.specificity) ||
+				best.entry.groups.length - candidate.entry.groups.length) >= 0
+				? best
+				: candidate,
+		null,
+	);
+
+/**
+ * The entry of the current URL and the params of the URL. Of all entries
+ * whose route matches the path as a prefix (getBestCandidate ranks them):
+ * - the best one, hidden entries included, provides the params that fill the
+ *   routes of all entries;
+ * - the best one the menu shows is the entry of the current URL: highlighted,
+ *   and the groups above it are expanded. An entry is shown when it and every
+ *   group above it have `shouldRender` and the params can fill its route.
+ * When no shown entry matches, the best hidden one is the entry of the current
+ * URL: the active id, and the groups above it contain it, but it is not
+ * rendered and expands no group (`shown: false`).
  * @param definitions The menu item definitions (the top level)
  * @param path The current location.pathname
  * @param base What a relative route is resolved against
- * @return The best match, or null if no entry matches
+ * @return The entry of the current URL and the params, or null if no entry
+ * matches
  */
 const resolveLocation = (
 	definitions: IRoutedMenuItemDefinition[],
 	path: string,
 	base: RouteBase,
 ): MenuRouteMatch | null => {
-	let best: {
-		match: MenuRouteMatch;
-		specificity: RouteSpecificity;
-		depth: number;
-	} | null = null;
-	for (const entry of flattenRoutes(definitions, [], base)) {
-		const match = matchPath({ path: entry.pattern, end: false }, path);
-		if (!match) continue;
-		const specificity = getRouteSpecificity(entry.pattern);
-		const depth = entry.groups.length;
-		if (
-			best &&
-			(compareRouteSpecificity(specificity, best.specificity) ||
-				best.depth - depth) >= 0
-		)
-			continue;
-		best = {
-			match: {
-				id: entry.id,
-				groups: entry.groups,
-				params: encodeRouteParameters(match.params),
-			},
-			specificity,
-			depth,
-		};
-	}
-	return best ? best.match : null;
+	const candidates = flattenRoutes(definitions, [], true, base).flatMap(
+		(entry): RouteCandidate[] => {
+			const match = matchPath({ path: entry.route.pattern, end: false }, path);
+			return match
+				? [
+						{
+							entry,
+							params: match.params,
+							specificity: getRouteSpecificity(entry.route.pattern),
+						},
+					]
+				: [];
+		},
+	);
+	const best = getBestCandidate(candidates);
+	if (!best) return null;
+	const params = encodeRouteParameters(best.params);
+	const bestShown = getBestCandidate(
+		candidates.filter(
+			({ entry }) =>
+				entry.rendered &&
+				getMissingRouteParameters(entry.route.path, params).length === 0,
+		),
+	);
+	const current = bestShown ?? best;
+	return {
+		id: current.entry.id,
+		groups: current.entry.groups,
+		shown: !!bestShown,
+		params,
+	};
 };
 
 /**
@@ -525,7 +627,9 @@ const convertDefinition = (
 		// an entry whose route the current URL cannot fill has nowhere to go
 		shouldRender: definition.shouldRender && target !== null,
 		// the entry's own flag, and the groups above the entry of the current URL
-		forceExpand: !!definition.forceExpand || containsCurrent,
+		// while the menu shows it: a hidden entry has nothing to keep in view
+		forceExpand:
+			!!definition.forceExpand || (containsCurrent && !!current?.shown),
 		href,
 		current: current?.id === id,
 		containsCurrent,
@@ -582,9 +686,9 @@ export interface UseRoutedMenuLogicResult {
 	definition: IRoutedMenuEntry[];
 	/**
 	 * For MenuBase's `customState` or a `MenuContext.Provider`: the menu item
-	 * id of the entry of the current URL (`""` when no entry matches the URL)
-	 * and a setter that does nothing, because the active entry follows the URL
-	 * only
+	 * id of the entry of the current URL (see IRoutedMenuEntry's `current`;
+	 * `""` when no entry matches the URL) and a setter that does nothing,
+	 * because the active entry follows the URL only
 	 */
 	controlledState: [string, Dispatch<SetStateAction<string>>];
 }
@@ -692,8 +796,8 @@ export const useRoutedMenuLogic = (
 };
 
 /**
- * A MenuBase driven by the URL: the entry whose `route` matches the current
- * path best is highlighted and the groups above it are expanded (see
+ * A MenuBase driven by the URL: the shown entry whose `route` matches the
+ * current path best is highlighted and the groups above it are expanded (see
  * IRoutedMenuItemDefinition's `route`; groups with `forceExpand` are
  * expanded on every page), and a click on an entry runs its
  * `onClick` and navigates to its route. A click on a group only expands or
