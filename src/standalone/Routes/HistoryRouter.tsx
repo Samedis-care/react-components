@@ -5,6 +5,8 @@ import { LocationContext } from "./useLocation";
 import DocumentTitleProvider, { DocumentTitleFormatter } from "./DocumentTitle";
 import NavigationFocus from "./NavigationFocus";
 import { NavigationFocusManager } from "./NavigationFocusManager";
+import { RouteContext } from "./Route";
+import RoutesEntryContext from "./RoutesEntryContext";
 
 /**
  * Props of {@link HistoryRouter}
@@ -19,7 +21,8 @@ export interface HistoryRouterProps {
 	history: History;
 	/**
 	 * The routed content: `Routes`, `Route`, `Link` and everything that uses
-	 * the routing hooks
+	 * the routing hooks. Their routes resolve from "/", also when this
+	 * HistoryRouter is rendered inside a `Route` of another one.
 	 */
 	children: React.ReactNode;
 	/**
@@ -32,7 +35,9 @@ export interface HistoryRouterProps {
 	 * set.
 	 * The router changes the document title only once a page title is set, and
 	 * sets the app title again when it unmounts. A HistoryRouter inside another
-	 * one hands its page titles to the outer one and ignores this prop.
+	 * one hands its page titles to the outer one and ignores this prop: inside a
+	 * `Route` of the outer one, its page titles count as titles set in that
+	 * `Route`, those of its own routes as titles of routes nested in it.
 	 */
 	formatDocumentTitle?: DocumentTitleFormatter;
 }
@@ -98,6 +103,13 @@ const resetPageScroll = () => {
  * effect, shows right away, not only after the next navigation; so does the
  * location of a history passed after mount.
  *
+ * It starts a fresh routing scope: its `Routes` and `Route`s match their paths
+ * from "/" against its own location, also when it is rendered inside a `Route`
+ * of another HistoryRouter, e.g. a wizard on a `createMemoryHistory()` inside
+ * a page under "/devices/*" routes its steps as "/step1", "/step2". Inside it,
+ * outside of its own routes, `useRouteInfo` throws and `useParams` returns no
+ * params, as outside of every Route.
+ *
  * After a push or back/forward navigation (not after a replace), it keeps the
  * keyboard focus and screen readers with the new page:
  * - When the focus is on no element (the focused link was part of the content
@@ -137,8 +149,14 @@ const HistoryRouter = (props: HistoryRouterProps) => {
 	return (
 		<HistoryRouterContext.Provider value={ctx}>
 			<LocationContext.Provider value={location}>
+				{/* outside of the fresh routing scope: it ranks the page titles
+				    from the Route this router is rendered in */}
 				<DocumentTitleProvider formatDocumentTitle={formatDocumentTitle}>
-					{children}
+					<RouteContext.Provider value={null}>
+						<RoutesEntryContext.Provider value={null}>
+							{children}
+						</RoutesEntryContext.Provider>
+					</RouteContext.Provider>
 					<NavigationFocus manager={navigationFocus} location={location} />
 				</DocumentTitleProvider>
 			</LocationContext.Provider>

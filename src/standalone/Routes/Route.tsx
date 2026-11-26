@@ -7,8 +7,9 @@ import RoutesEntryContext from "./RoutesEntryContext";
 
 export interface RouteProps {
 	/**
-	 * Path of the route. Nested in another Route it is relative to that
-	 * Route's path: "info" under "/devices/*" or "/devices" is "/devices/info".
+	 * Path of the route. Nested in another Route of the same HistoryRouter it is
+	 * relative to that Route's path: "info" under "/devices/*" or "/devices" is
+	 * "/devices/info".
 	 * A `:name` param named like a param of a Route around it hides that
 	 * Route's value in `useParams` below this Route.
 	 */
@@ -32,7 +33,9 @@ export interface RouteContextType {
 	 */
 	url: string;
 	/**
-	 * How many routes this route is nested in, 0 for a top-level route
+	 * How many routes of its HistoryRouter this route is nested in, 0 for a
+	 * top-level route (also in a HistoryRouter rendered inside a Route of
+	 * another one)
 	 */
 	depth: number;
 	/**
@@ -50,7 +53,9 @@ export interface RouteContextType {
 }
 
 /**
- * The nearest matched Route, null outside of every Route. Read it with
+ * The nearest matched Route, null outside of every Route. A HistoryRouter
+ * starts a fresh routing scope: inside it, outside of its own routes, it is
+ * null also within a Route of an outer HistoryRouter. Read it with
  * {@link useRouteInfo}, or with `useContext` where null is a valid case.
  */
 export const RouteContext = React.createContext<RouteContextType | null>(null);

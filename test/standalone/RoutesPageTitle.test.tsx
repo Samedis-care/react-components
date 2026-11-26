@@ -341,6 +341,49 @@ describe("formatDocumentTitle", () => {
 		unmount();
 		expect(document.title).toBe("Test App");
 	});
+
+	it("[ISSUE-3475-ITEM-13] ranks the titles of a HistoryRouter inside a route as titles of that route, those of its own routes deeper", () => {
+		render(
+			<HistoryRouter
+				history={mem("/wizard")}
+				formatDocumentTitle={(titles, appTitle) =>
+					[...titles, appTitle].join(" / ")
+				}
+			>
+				<Routes>
+					{[
+						<Route
+							key="wizard"
+							path="/wizard/*"
+							element={
+								<>
+									<HistoryRouter history={mem("/step2")}>
+										<Titled title="Wizard step" />
+										<Routes>
+											{[
+												<Route
+													key="step2"
+													path="/step2"
+													element={<Titled title="Step 2" />}
+												/>,
+											]}
+										</Routes>
+									</HistoryRouter>
+									<Titled title="Wizard" />
+								</>
+							}
+						/>,
+					]}
+				</Routes>
+				<Titled title="Outside" />
+			</HistoryRouter>,
+		);
+		// set in this order: "Wizard step", "Step 2", "Wizard", "Outside"; of
+		// equally specific titles the one set last comes first
+		expect(document.title).toBe(
+			"Step 2 / Wizard / Wizard step / Outside / Test App",
+		);
+	});
 });
 
 describe("Framework", () => {

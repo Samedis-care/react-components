@@ -452,3 +452,105 @@ export const Issue3475Item22BackMovesTheFocusToo: Story = {
 		).toHaveFocus();
 	},
 };
+
+// ─── A HistoryRouter inside a Route ─────────────────────────────────────────
+
+const WIZARD_NAV_SX = { display: "flex", gap: 2, my: 1 };
+
+/** a path of the router it is rendered in, with a label */
+const LabelledPath = (props: { label: string }) => (
+	<Typography variant="body2">
+		{props.label}: <strong>{useLocation().pathname}</strong>
+	</Typography>
+);
+
+/** a wizard that routes its steps with a memory history of its own */
+const Wizard = () => {
+	const history = useStoryHistory("/step1");
+	return (
+		<HistoryRouter history={history}>
+			<Box component="nav" aria-label="Wizard steps" sx={WIZARD_NAV_SX}>
+				<MuiLink component={Link} to="/step1">
+					Step 1
+				</MuiLink>
+				<MuiLink component={Link} to="/step2">
+					Step 2
+				</MuiLink>
+			</Box>
+			<LabelledPath label="Wizard path" />
+			<Routes>
+				{[
+					<Route
+						key="step1"
+						path="/step1"
+						element={
+							<Typography variant="h6" component="h2">
+								Step 1 of 2
+							</Typography>
+						}
+					/>,
+					<Route
+						key="step2"
+						path="/step2"
+						element={
+							<Typography variant="h6" component="h2">
+								Step 2 of 2
+							</Typography>
+						}
+					/>,
+				]}
+			</Routes>
+		</HistoryRouter>
+	);
+};
+
+const DevicePage = () => {
+	const { id } = useParams<"id">();
+	return (
+		<Page title={`Device ${id ?? ""}`}>
+			<LabelledPath label="Page path" />
+			<Wizard />
+		</Page>
+	);
+};
+
+const NestedRouterDemo = () => {
+	const history = useStoryHistory("/devices/5");
+	return (
+		<HistoryRouter history={history}>
+			<Box sx={FRAME_SX}>
+				<Routes>
+					{[<Route key="d" path="/devices/:id/*" element={<DevicePage />} />]}
+				</Routes>
+			</Box>
+		</HistoryRouter>
+	);
+};
+
+export const Issue3475Item13HistoryRouterInsideARoute: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3475-ITEM-13: a page under "/devices/:id/*" renders a wizard with a HistoryRouter of its own on a memory history. The wizard routes its steps from "/" ("/step1", "/step2") against its own location, while the page stays at "/devices/5".',
+			},
+		},
+	},
+	render: () => <NestedRouterDemo />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await expect(
+			await canvas.findByRole("heading", { name: "Step 1 of 2" }),
+		).toBeVisible();
+		await userEvent.click(canvas.getByRole("link", { name: "Step 2" }));
+		await expect(
+			await canvas.findByRole("heading", { name: "Step 2 of 2" }),
+		).toBeVisible();
+		await expect(canvas.getByText("/step2")).toBeVisible();
+		await expect(canvas.getByText("/devices/5")).toBeVisible();
+		await expect(
+			canvas.getByRole("heading", { name: "Device 5" }),
+		).toBeVisible();
+	},
+};

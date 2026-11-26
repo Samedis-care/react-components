@@ -1,13 +1,15 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-import React from "react";
+import React, { useContext } from "react";
 import { render, screen, act, cleanup } from "@testing-library/react";
 import { createBrowserHistory, createMemoryHistory } from "history";
 import HistoryRouter from "../../src/standalone/Routes/HistoryRouter";
 import Routes from "../../src/standalone/Routes/Routes";
 import Route, {
+	RouteContext,
 	useRouteInfo,
 	useRoutePrefix,
 } from "../../src/standalone/Routes/Route";
+import useLocation from "../../src/standalone/Routes/useLocation";
 import useParams from "../../src/standalone/Routes/useParams";
 
 // Which child Routes renders, what RouteContext and useParams report, and how
@@ -48,6 +50,8 @@ const infoOf = (id: string) =>
 		params: Record<string, string>;
 		prefix: string;
 	};
+
+const ShowPath = () => <div data-testid="path">{useLocation().pathname}</div>;
 
 describe("Routes: nesting", () => {
 	it("[ISSUE-3475-ITEM-5] resolves a relative child under a parent path without /*", () => {
@@ -376,6 +380,107 @@ describe("Routes: invalid children", () => {
 			</Routes>,
 		);
 		// the not-found route would stay mounted at /undefined/x
+		expect(screen.getByTestId("renders-at")).toHaveTextContent("true");
+	});
+});
+
+describe("HistoryRouter nested in a Route", () => {
+	it("[ISSUE-3475-ITEM-13] starts a fresh routing scope for its own routes", () => {
+		const inner = mem("/step1");
+		renderAt(
+			"/devices/5",
+			<Routes>
+				{[
+					<Route
+						key="d"
+						path="/devices/*"
+						element={
+							<HistoryRouter history={inner}>
+								<ShowPath />
+								<Routes>
+									{[<Route key="s" path="/step1" element={<div>STEP1</div>} />]}
+								</Routes>
+							</HistoryRouter>
+						}
+					/>,
+				]}
+			</Routes>,
+		);
+		expect(screen.getByTestId("path")).toHaveTextContent("/step1");
+		expect(screen.getByText("STEP1")).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3475-ITEM-13] gives its content no route and no params of the outer router", () => {
+		const Scope = () => (
+			<div data-testid="scope">
+				{JSON.stringify({
+					route: useContext(RouteContext),
+					params: useParams(),
+				})}
+			</div>
+		);
+		renderAt(
+			"/devices/5/wizard",
+			<Routes>
+				{[
+					<Route
+						key="d"
+						path="/devices/:id/*"
+						element={
+							<HistoryRouter history={mem("/step/1")}>
+								<Scope />
+								<Routes>
+									{[
+										<Route
+											key="s"
+											path="/step/:n"
+											element={<Info id="inner" />}
+										/>,
+									]}
+								</Routes>
+							</HistoryRouter>
+						}
+					/>,
+				]}
+			</Routes>,
+		);
+		expect(JSON.parse(screen.getByTestId("scope").textContent ?? "")).toEqual({
+			route: null,
+			params: {},
+		});
+		expect(infoOf("inner")).toEqual({
+			url: "/step/1",
+			path: "/step/:n",
+			depth: 0,
+			params: { n: "1" },
+			prefix: "/step/:n",
+		});
+	});
+
+	it("[ISSUE-3475-ITEM-13] answers rendersAt for its own routes, not for the Routes of the outer router", () => {
+		const RendersAt = () => (
+			<div data-testid="renders-at">
+				{String(useRouteInfo().rendersAt("/step1"))}
+			</div>
+		);
+		renderAt(
+			"/devices/5",
+			<Routes>
+				{[
+					<Route
+						key="d"
+						path="/devices/*"
+						element={
+							<HistoryRouter history={mem("/step1")}>
+								<Route path="/step1" element={<RendersAt />} />
+							</HistoryRouter>
+						}
+					/>,
+				]}
+			</Routes>,
+		);
+		// /step1 is a location of the inner router: the outer Routes, which would
+		// render nothing there, has no say in it
 		expect(screen.getByTestId("renders-at")).toHaveTextContent("true");
 	});
 });

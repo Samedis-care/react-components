@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useLayoutEffect, useState } from "react";
+import { RouteContext } from "./Route";
 
 /**
  * Builds the document title (the title of the browser tab, the window and the
@@ -31,7 +32,8 @@ interface PageTitleEntry {
 	title: string;
 	/**
 	 * How specific the title is, the highest wins: the depth of the route the
-	 * title is set in, -1 outside of any route
+	 * title is set in, -1 outside of any route. Counted across nested
+	 * HistoryRouters, see PageRankOffsetContext.
 	 */
 	rank: number;
 }
@@ -164,6 +166,14 @@ const PageTitleRegistryContext = React.createContext<PageTitleRegistry | null>(
 );
 
 /**
+ * What the HistoryRouter adds to the rank of the page titles and headings set
+ * inside it. A HistoryRouter starts a fresh routing scope, in which the depth
+ * of the routes counts from 0 again; inside another one, its titles have to
+ * rank as titles of the place it is rendered at. 0 in the outermost one.
+ */
+const PageRankOffsetContext = React.createContext(0);
+
+/**
  * The registry of the page titles and headings that the nearest HistoryRouter
  * writes the document title from (the outermost one's, when HistoryRouters
  * are nested), null outside of every HistoryRouter
@@ -176,13 +186,15 @@ export const usePageTitleRegistry = (): PageTitleRegistry | null =>
  * Sets a page title while the calling component is mounted. Used by
  * usePageTitle.
  * @param title The page title; null, undefined or "" set none
- * @param rank How specific the title is, see PageTitleEntry
+ * @param depth The depth of the calling component's route within its
+ * HistoryRouter, -1 outside of every route
  */
 export const useRegisterPageTitle = (
 	title: string | null | undefined,
-	rank: number,
+	depth: number,
 ): void => {
 	const registry = useContext(PageTitleRegistryContext);
+	const rank = useContext(PageRankOffsetContext) + depth;
 	const [key] = useState(() => ({}));
 	useEffect(() => {
 		if (!registry || !title) return;
@@ -196,13 +208,15 @@ export const useRegisterPageTitle = (
  * after a navigation that leaves the focus on no element or out of view, the
  * focus moves to the most specific page heading. Used by PageTitle.
  * @param heading A ref to the heading element, null for none
- * @param rank How specific the heading is, see PageTitleEntry
+ * @param depth The depth of the calling component's route within its
+ * HistoryRouter, -1 outside of every route
  */
 export const useRegisterPageHeading = (
 	heading: React.RefObject<HTMLElement | null> | null,
-	rank: number,
+	depth: number,
 ): void => {
 	const registry = useContext(PageTitleRegistryContext);
+	const rank = useContext(PageRankOffsetContext) + depth;
 	const [key] = useState(() => ({}));
 	// a layout effect: the heading of a page counts in the commit that mounts
 	// it, before the router looks for it after the navigation
@@ -226,13 +240,20 @@ export interface DocumentTitleProviderProps {
 
 /**
  * Writes the document title from the page titles of its children. Rendered by
- * HistoryRouter. Inside another one it hands the titles to the outer one and
- * ignores its formatDocumentTitle.
+ * HistoryRouter, outside of the fresh routing scope it starts. Inside another
+ * one it hands the titles to the outer one and ignores its
+ * formatDocumentTitle; the titles and headings of its children rank as those
+ * of the Route it is rendered in, those of their routes deeper.
  * @param props The props
  */
 const DocumentTitleProvider = (props: DocumentTitleProviderProps) => {
 	const { formatDocumentTitle, children } = props;
 	const outer = useContext(PageTitleRegistryContext);
+	// the rank of a title set where this router is rendered, plus one: a title
+	// of its children outside of their routes (depth -1) ranks as that one
+	const route = useContext(RouteContext);
+	const rankOffset =
+		useContext(PageRankOffsetContext) + (route ? route.depth : -1) + 1;
 	const [registry] = useState(
 		() =>
 			new PageTitleRegistry(
@@ -251,7 +272,9 @@ const DocumentTitleProvider = (props: DocumentTitleProviderProps) => {
 	}, [outer, registry]);
 	return (
 		<PageTitleRegistryContext.Provider value={outer ?? registry}>
-			{children}
+			<PageRankOffsetContext.Provider value={rankOffset}>
+				{children}
+			</PageRankOffsetContext.Provider>
 		</PageTitleRegistryContext.Provider>
 	);
 };
