@@ -26,8 +26,10 @@ export type BackendSingleSelectLruOptions<DataT extends BaseSelectorData> =
  */
 export type BackendSingleSelectSwitchProps = {
 	/**
-	 * Whether the switch is on when the field mounts with `switchFilterName`; later
-	 * changes are ignored, from then on the user sets it.
+	 * Whether the switch is on when it appears: when the field mounts with
+	 * `switchFilterName`, and each time `switchFilterName` is set after none. Changes
+	 * while the switch is shown are ignored; from then on the user sets it. Removing
+	 * `switchFilterName` turns the switch off.
 	 * @default false
 	 */
 	defaultSwitchValue?: boolean;

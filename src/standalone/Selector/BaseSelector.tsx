@@ -157,7 +157,8 @@ export interface BaseSelectorLoadResult<DataT extends BaseSelectorData> {
 /**
  * Data load handler
  * @param search The user search input
- * @param switchValue The value of switch input
+ * @param switchValue The value of the selector's switch (`displaySwitch`). BaseSelector
+ * passes `false` while its switch is hidden.
  */
 export type BaseSelectorLoadHandler<DataT extends BaseSelectorData> = (
 	search: string,
@@ -288,17 +289,27 @@ export type BaseSelectorVariants<
  * MultiSelectWithoutGroup, and MultiSelectWithTags through it, show the switch on a row
  * of its own between the search field and the chips instead: at the right end, with its
  * label before it.
+ *
+ * BaseSelector's switch (and so that of SingleSelect, MultiSelect and the backend
+ * selectors built on them) is uncontrolled. Hiding it (`displaySwitch` turned off) turns
+ * it off, so `onLoad` gets `switchValue` `false` and the options are loaded again
+ * without its filter; showing it again starts it at `defaultSwitchValue`.
+ * MultiSelectWithTags does the same, while MultiSelectWithoutGroup's switch is set by
+ * its parent (`switchValue`).
  */
 export type BaseSelectorSwitchProps = {
 	/**
-	 * Default value for switch position
+	 * Whether the switch is on when it appears: at mount with `displaySwitch`, and each
+	 * time `displaySwitch` is turned on after that. Changes while the switch is shown are
+	 * ignored; from then on the user sets it.
 	 * @default false
 	 */
 	defaultSwitchValue?: boolean;
 } & (
 	| {
 			/**
-			 * Display switch control?
+			 * Display switch control? Hiding the switch turns it off (see
+			 * BaseSelectorSwitchProps).
 			 * @default false
 			 */
 			displaySwitch?: false;
@@ -775,10 +786,17 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 	const generatedId = useId();
 	const inputId = autocompleteId || generatedId;
 
-	const defaultSwitchValue = !!(
-		props.displaySwitch && props.defaultSwitchValue
-	);
+	const switchShown = !!props.displaySwitch;
+	const defaultSwitchValue = !!(switchShown && props.defaultSwitchValue);
 	const [switchValue, setSwitchValue] = useState<boolean>(defaultSwitchValue);
+	// hiding the switch turns its filter off, and showing it starts it at
+	// defaultSwitchValue again. Reset while rendering, not in an effect, so the loads this
+	// render starts (e.g. for a new selection) already get the new value.
+	const [switchWasShown, setSwitchWasShown] = useState(switchShown);
+	if (switchWasShown !== switchShown) {
+		setSwitchWasShown(switchShown);
+		setSwitchValue(defaultSwitchValue);
+	}
 	const { t } = useCCTranslations();
 	const [open, setOpen] = useState(false);
 	const actualAddNewLabel = addNewLabel || t("standalone.selector.add-new");

@@ -6,6 +6,7 @@ import {
 	fireEvent,
 	render,
 	screen,
+	waitFor,
 } from "@testing-library/react";
 import { createTheme, styled, Theme, ThemeProvider } from "@mui/material";
 import InlineSwitch, {
@@ -382,6 +383,139 @@ describe("InlineSwitch inside BaseSelector (displaySwitch)", () => {
 		await flush();
 		expect(sw).not.toBeChecked();
 		expect(onLoad).not.toHaveBeenCalledWith("", true);
+	});
+
+	it("[ISSUE-3465-ITEM-6] hiding the switch turns its filter off: later loads get switchValue false", async () => {
+		const onLoad = loadSpy();
+		const ui = (show: boolean) => (
+			<ThemeProvider theme={theme}>
+				<BaseSelector<BaseSelectorData, false>
+					label="Device type"
+					selected={null}
+					onSelect={() => {}}
+					onLoad={onLoad}
+					displaySwitch={show}
+					switchLabel="Show inactive"
+				/>
+			</ThemeProvider>
+		);
+		const { rerender } = render(ui(true));
+		fireEvent.click(screen.getByRole("switch", { name: "Show inactive" }));
+		await flush();
+		await waitFor(() => expect(onLoad).toHaveBeenLastCalledWith("", true));
+		rerender(ui(false));
+		expect(screen.queryByRole("switch")).toBeNull();
+		onLoad.mockClear();
+		const combobox = screen.getByRole("combobox");
+		fireEvent.mouseDown(combobox);
+		await flush();
+		fireEvent.change(combobox, { target: { value: "x" } });
+		await flush();
+		await waitFor(() =>
+			expect(onLoad).toHaveBeenCalledWith("x", expect.any(Boolean)),
+		);
+		expect(
+			onLoad.mock.calls.filter(([, switchValue]) => switchValue),
+			"loads that still ask for the switched-on options",
+		).toEqual([]);
+	});
+
+	describe("the switch's value when it is hidden and shown", () => {
+		const INACTIVE: BaseSelectorData = { value: "c", label: "Gamma" };
+		/** lists Gamma only while the switch is on */
+		const filteringLoad = () =>
+			vi.fn<BaseSelectorLoadHandler<BaseSelectorData>>((search, switchValue) =>
+				selectorLocalLoadHandler(
+					switchValue ? [...OPTIONS, INACTIVE] : OPTIONS,
+				)(search),
+			);
+		const ui = (
+			onLoad: BaseSelectorLoadHandler<BaseSelectorData>,
+			show: boolean,
+			{
+				defaultOn,
+				selected = null,
+			}: { defaultOn?: boolean; selected?: BaseSelectorData | null } = {},
+		) => (
+			<ThemeProvider theme={theme}>
+				<BaseSelector<BaseSelectorData, false>
+					label="Device type"
+					selected={selected}
+					onSelect={() => {}}
+					onLoad={onLoad}
+					displaySwitch={show}
+					defaultSwitchValue={defaultOn}
+					switchLabel="Show inactive"
+				/>
+			</ThemeProvider>
+		);
+		const showInactive = () =>
+			screen.getByRole("switch", { name: "Show inactive" });
+
+		it("[ISSUE-3465-ITEM-6] hiding the switch while it is on lists the options without its filter", async () => {
+			const onLoad = filteringLoad();
+			const { rerender } = render(ui(onLoad, true));
+			fireEvent.click(showInactive());
+			await flush();
+			rerender(ui(onLoad, false));
+			await flush();
+			fireEvent.mouseDown(screen.getByRole("combobox"));
+			await flush();
+			expect(
+				await screen.findByRole("option", { name: "Alpha" }),
+			).toBeInTheDocument();
+			expect(screen.queryByRole("option", { name: "Gamma" })).toBeNull();
+		});
+
+		it("[ISSUE-3465-ITEM-6] a switch hidden while on is off when it is shown again", async () => {
+			const onLoad = loadSpy();
+			const { rerender } = render(ui(onLoad, true));
+			fireEvent.click(showInactive());
+			await flush();
+			expect(showInactive()).toBeChecked();
+			rerender(ui(onLoad, false));
+			await flush();
+			rerender(ui(onLoad, true));
+			await flush();
+			expect(showInactive()).not.toBeChecked();
+			expect(onLoad).toHaveBeenLastCalledWith("", false);
+		});
+
+		it("[ISSUE-3465-ITEM-6] a switch shown after mount starts at defaultSwitchValue, and loads get it", async () => {
+			const onLoad = loadSpy();
+			const { rerender } = render(ui(onLoad, false, { defaultOn: true }));
+			await flush();
+			expect(onLoad).toHaveBeenCalled();
+			expect(
+				onLoad.mock.calls.filter(([, switchValue]) => switchValue),
+				"loads with the hidden switch on",
+			).toEqual([]);
+			rerender(ui(onLoad, true, { defaultOn: true }));
+			await flush();
+			expect(showInactive()).toBeChecked();
+			expect(onLoad).toHaveBeenLastCalledWith("", true);
+			rerender(ui(onLoad, false, { defaultOn: true }));
+			await flush();
+			expect(onLoad).toHaveBeenLastCalledWith("", false);
+			rerender(ui(onLoad, true, { defaultOn: true }));
+			await flush();
+			expect(showInactive()).toBeChecked();
+		});
+
+		it("[ISSUE-3465-ITEM-6] hiding the switch in the render that selects a record loads nothing with the switch on", async () => {
+			const onLoad = loadSpy();
+			const { rerender } = render(ui(onLoad, true));
+			fireEvent.click(showInactive());
+			await flush();
+			onLoad.mockClear();
+			rerender(ui(onLoad, false, { selected: OPTIONS[0] }));
+			await flush();
+			expect(onLoad).toHaveBeenCalled();
+			expect(
+				onLoad.mock.calls.filter(([, switchValue]) => switchValue),
+				"loads that still ask for the switched-on options",
+			).toEqual([]);
+		});
 	});
 });
 
