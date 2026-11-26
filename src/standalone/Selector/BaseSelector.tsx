@@ -729,10 +729,23 @@ export interface BaseSelectorContextType {
 export const BaseSelectorContext =
 	React.createContext<BaseSelectorContextType | null>(null);
 
-const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
-	inProps: BaseSelectorProps<DataT, Multi>,
+const BaseSelector = <
+	DataT extends BaseSelectorData,
+	// without `multiple` the selector is a single select. Were Multi `boolean` there, the
+	// props would be checked against both variants, and a `displaySwitch` that is a
+	// boolean (not the literal true) would fail on the multi select's `multiple: true`.
+	Multi extends boolean = false,
+>(
+	// TypeScript cannot infer Multi from BaseSelectorVariants (a conditional type);
+	// `multiple?: Multi` lets it infer Multi from the `multiple` prop
+	inProps: BaseSelectorProps<DataT, Multi> & { multiple?: Multi },
 ) => {
-	const props = useThemeProps({ props: inProps, name: "CcBaseSelector" });
+	// typed without the `multiple?: Multi` above, so that `multiple` still narrows
+	// `selected` and `onSelect` to the single or the multi select's types below
+	const props: BaseSelectorProps<DataT, Multi> = useThemeProps({
+		props: inProps,
+		name: "CcBaseSelector",
+	});
 	const {
 		variant,
 		refreshToken,

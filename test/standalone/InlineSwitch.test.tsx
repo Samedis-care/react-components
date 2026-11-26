@@ -609,6 +609,95 @@ describe("InlineSwitch inside BaseSelector (displaySwitch)", () => {
 		expect(first).toHaveAccessibleDescription(/Device type/);
 		expect(second).toHaveAccessibleDescription(/Responsible person/);
 	});
+
+	it("[ISSUE-3465-ITEM-21] a boolean displaySwitch compiles without multiple, like a literal one", () => {
+		// checked by tsc (tsconfig-test.json): `show` is a boolean, not the literal true,
+		// and neither `multiple` nor type arguments are given
+		const ui = (show: boolean) => (
+			<ThemeProvider theme={theme}>
+				<BaseSelector
+					selected={null}
+					onSelect={() => {}}
+					onLoad={selectorLocalLoadHandler(OPTIONS)}
+					displaySwitch={show}
+					switchLabel="Show inactive"
+				/>
+			</ThemeProvider>
+		);
+		const { rerender } = render(ui(true));
+		expect(
+			screen.getByRole("switch", { name: "Show inactive" }),
+		).toBeInTheDocument();
+		rerender(ui(false));
+		expect(screen.queryByRole("switch")).toBeNull();
+	});
+
+	it("[ISSUE-3465-ITEM-21] without type arguments, a selector without multiple is a single select and one with multiple a multi select", () => {
+		// checked by tsc (tsconfig-test.json): the type onSelect's argument is inferred as
+		const single = (show: boolean) => (
+			<BaseSelector
+				selected={OPTIONS[0]}
+				onSelect={(value) => {
+					expectTypeOf(value).toEqualTypeOf<BaseSelectorData | null>();
+				}}
+				onLoad={selectorLocalLoadHandler(OPTIONS)}
+				displaySwitch={show}
+				switchLabel="Single: show inactive"
+			/>
+		);
+		const multi = (show: boolean) => (
+			<BaseSelector
+				multiple
+				selected={[OPTIONS[0]]}
+				onSelect={(value) => {
+					expectTypeOf(value).toEqualTypeOf<BaseSelectorData[]>();
+				}}
+				onLoad={selectorLocalLoadHandler(OPTIONS)}
+				displaySwitch={show}
+				switchLabel="Multi: show inactive"
+			/>
+		);
+		renderSwitch(
+			<>
+				{single(true)}
+				{multi(true)}
+			</>,
+		);
+		expect(
+			screen.getByRole("switch", { name: "Single: show inactive" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("switch", { name: "Multi: show inactive" }),
+		).toBeInTheDocument();
+	});
+
+	it("[ISSUE-3465-ITEM-21] a switch without switchLabel still does not compile, with a literal or a boolean displaySwitch", () => {
+		// checked by tsc (tsconfig-test.json)
+		const withLiteral = () => (
+			// @ts-expect-error displaySwitch needs switchLabel: it is the switch's visible text and its name
+			<BaseSelector
+				selected={null}
+				onSelect={() => {}}
+				onLoad={selectorLocalLoadHandler(OPTIONS)}
+				displaySwitch
+			/>
+		);
+		const withBoolean = (show: boolean) => (
+			// @ts-expect-error a displaySwitch that can be true needs switchLabel too
+			<BaseSelector
+				selected={null}
+				onSelect={() => {}}
+				onLoad={selectorLocalLoadHandler(OPTIONS)}
+				displaySwitch={show}
+			/>
+		);
+		renderSwitch(
+			<>
+				{withLiteral()}
+				{withBoolean(true)}
+			</>,
+		);
+	});
 });
 
 describe("InlineSwitch in the selectors", () => {
