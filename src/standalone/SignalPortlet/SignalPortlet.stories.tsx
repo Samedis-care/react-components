@@ -6,6 +6,10 @@ import { createMemoryHistory } from "history";
 import { expect, fn, userEvent, waitFor } from "storybook/test";
 import SignalPortlet from "./index";
 import { HistoryRouter } from "../Routes";
+import {
+	edgesPast,
+	pageScrollsSideways,
+} from "../../stories/test-utils/hiddenTextLayout";
 
 const meta: Meta<typeof SignalPortlet> = {
 	title: "Standalone/SignalPortlet",
@@ -340,5 +344,33 @@ export const Issue3469Item14ThemeFocusVisibleRing: Story = {
 			row: rowRing,
 			refresh: getComputedStyle(refresh).outlineColor,
 		}).toEqual({ row: "rgb(0, 128, 0)", refresh: "rgb(0, 128, 0)" });
+	},
+};
+
+export const Issue3473Item16HiddenFullCountStaysInside: Story = {
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		layout: "fullscreen",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3473-ITEM-16: at 320px in a right-to-left part of a left-to-right page, the visually hidden full number of a count shown as "999+" lies inside the box it is placed in (the nearest positioned ancestor), so it never makes the page scroll sideways. With MUI\'s visually hidden style, its -1px margin put it 1px past the top and start edges of its container wherever it began the container.',
+			},
+		},
+	},
+	render: () => (
+		<Box dir={"rtl"}>
+			<WithRouter>
+				<SignalPortlet
+					title="High Volume"
+					items={[{ count: 1500, text: "Total Records" }]}
+				/>
+			</WithRouter>
+		</Box>
+	),
+	play: async ({ canvas }) => {
+		await expect(edgesPast(canvas.getByText("1500"))).toEqual([]);
+		await expect(pageScrollsSideways()).toBe(false);
 	},
 };

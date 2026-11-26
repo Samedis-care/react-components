@@ -3,6 +3,7 @@ import { ButtonBase, styled, useThemeProps } from "@mui/material";
 import combineClassNames from "../../../utils/combineClassNames";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import focusRing from "../../../utils/internal/focusRing";
+import visuallyHidden from "../../../utils/internal/visuallyHidden";
 
 export interface ImageDotsProps {
 	/**
@@ -98,18 +99,7 @@ const Counter = styled("div", { name: "CcImageDots", slot: "counter" })(
 const CounterLabel = styled("span", {
 	name: "CcImageDots",
 	slot: "counterLabel",
-})({
-	// visually hidden, as MUI's visuallyHidden
-	border: 0,
-	clipPath: "inset(50%)",
-	height: 1,
-	margin: -1,
-	overflow: "hidden",
-	padding: 0,
-	position: "absolute",
-	whiteSpace: "nowrap",
-	width: 1,
-});
+})(visuallyHidden);
 
 export type ImageDotsClassKey =
 	"root" | "container" | "imageDot" | "counter" | "counterLabel";

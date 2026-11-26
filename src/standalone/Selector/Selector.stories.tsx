@@ -14,8 +14,13 @@ import {
 	SingleSelect,
 } from "./index";
 import type { MultiSelectorData } from "./MultiSelect";
+import { Box } from "@mui/material";
 import debouncePromise from "../../utils/debouncePromise";
 import { PartialExcept } from "../../utils/distributiveOmit";
+import {
+	edgesPast,
+	pageScrollsSideways,
+} from "../../stories/test-utils/hiddenTextLayout";
 
 // ---------------------------------------------------------------------------
 // Shared sample data
@@ -1369,5 +1374,48 @@ export const Issue3465Item1DisabledSelectorDisablesItsSwitch: StoryObj = {
 		await expect(canvas.getByRole("button", { name: "After" })).toHaveFocus();
 		await userEvent.click(canvas.getByText("Show inactive"));
 		await expect(sw).not.toBeChecked();
+	},
+};
+
+export const Issue3473Item16HiddenGroupLabelStaysInside: StoryObj = {
+	name: "MultiSelectWithTags — ISSUE-3473-ITEM-16 hidden group label, right to left",
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		layout: "fullscreen",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-16: at 320px in a right-to-left part of a left-to-right page, the visually hidden label of the group field lies inside the box it is placed in (the nearest positioned ancestor), so it never makes the page scroll sideways. With MUI's visually hidden style, its -1px margin put it 1px past the top and start edges of its container wherever it began the container.",
+			},
+		},
+	},
+	render: () => {
+		const [selected, setSelected] = useState<MultiSelectorData[]>([]);
+		const loadGroupOptions = useMemo(
+			() => selectorLocalLoadHandler(CATEGORIES),
+			[],
+		);
+		const loadDataOptions = useMemo(() => selectorLocalLoadHandler(FRUITS), []);
+		const loadGroupEntries = (group: BaseSelectorData) =>
+			FRUITS.filter((fruit) => fruit.group?.toLowerCase() === group.value);
+		return (
+			<Box dir={"rtl"}>
+				<MultiSelectWithTags<MultiSelectorData, BaseSelectorData>
+					title="Fruits by category"
+					selected={selected}
+					onChange={setSelected}
+					loadGroupOptions={loadGroupOptions}
+					loadDataOptions={loadDataOptions}
+					loadGroupEntries={loadGroupEntries}
+					searchInputLabel="Search individual fruits"
+				/>
+			</Box>
+		);
+	},
+	play: async ({ canvasElement }) => {
+		const label = within(canvasElement).getByText("Add all entries of a group");
+		await expect(edgesPast(label)).toEqual([]);
+		await expect(pageScrollsSideways()).toBe(false);
 	},
 };

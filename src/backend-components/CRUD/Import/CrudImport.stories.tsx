@@ -10,6 +10,10 @@ import DefaultErrorComponent from "../../Form/DefaultErrorComponent";
 import createTestModel from "../../../stories/test-utils/TestModel";
 import { ModelUnknown } from "../../../backend-integration";
 import { ValidationResult } from "../../Form";
+import {
+	edgesPast,
+	pageScrollsSideways,
+} from "../../../stories/test-utils/hiddenTextLayout";
 
 const FrameworkDecorator = (Story: React.ComponentType) => (
 	<Framework>
@@ -365,5 +369,41 @@ export const Issue3508Item28PendingScriptCheckHasAName: StoryObj = {
 		// a spinner screen readers reach needs a name
 		if (canvas.queryByRole("progressbar"))
 			await expect(spinner).toHaveAccessibleName();
+	},
+};
+
+export const Issue3473Item16HiddenScriptStatusStaysInside: StoryObj = {
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-16: at 320px in a right-to-left part of a left-to-right page, the visually hidden status of each script's check on Connect data lies inside the card of its field, the box it is placed in, so it never makes the page scroll sideways. With MUI's visually hidden style, its -1px margin put it 1px past the top and start edges of its container wherever it began the container.",
+			},
+		},
+	},
+	render: () => (
+		<div dir={"rtl"}>
+			<ImporterStory guided={false} />
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await canvas.findByText("Upload data", undefined, LOAD);
+		const next = () => canvas.getByRole("button", { name: "Next" });
+		await pickFile(canvasElement);
+		await waitFor(() => expect(next()).toBeEnabled(), LOAD);
+		await userEvent.click(next());
+		await canvas.findByText('record["First name"]', undefined, LOAD);
+		const statuses = canvasElement.querySelectorAll<HTMLElement>(
+			'[class*="CcCrudImportStep2-statusText"]',
+		);
+		await expect(statuses.length).toBeGreaterThan(0);
+		// each in the card of its field, not in a corner of the page
+		for (const status of statuses)
+			await expect(edgesPast(status, status.closest(".MuiCard-root"))).toEqual(
+				[],
+			);
+		await expect(pageScrollsSideways()).toBe(false);
 	},
 };

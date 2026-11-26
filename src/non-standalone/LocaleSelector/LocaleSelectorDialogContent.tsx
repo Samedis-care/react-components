@@ -28,6 +28,7 @@ import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 import useListFocusKeeper, {
 	ListFocusKeeperContext,
 } from "./useListFocusKeeper";
+import visuallyHidden from "../../utils/internal/visuallyHidden";
 
 export interface LocaleSelectorDialogContentProps extends LocaleSelectorDialogCommonProps {
 	/**
@@ -94,18 +95,7 @@ const NoLocalesMessage = styled("div", {
 const SearchStatus = styled("div", {
 	name: "CcLocaleSelectorDialogContent",
 	slot: "searchStatus",
-})({
-	// visually hidden, as MUI's visuallyHidden
-	border: 0,
-	clipPath: "inset(50%)",
-	height: 1,
-	margin: -1,
-	overflow: "hidden",
-	padding: 0,
-	position: "absolute",
-	whiteSpace: "nowrap",
-	width: 1,
-});
+})(visuallyHidden);
 
 /**
  * Theme style slots of LocaleSelectorDialogContent

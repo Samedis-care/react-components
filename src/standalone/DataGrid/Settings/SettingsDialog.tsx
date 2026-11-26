@@ -22,6 +22,7 @@ import {
 import useCCTranslations from "../../../utils/useCCTranslations";
 import focusRing from "../../../utils/internal/focusRing";
 import SettingsCheckbox from "./SettingsCheckbox";
+import visuallyHidden from "../../../utils/internal/visuallyHidden";
 
 export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
 	/**
@@ -80,18 +81,7 @@ const StyledTableCell = styled(TableCell, {
 const StyledStatus = styled("span", {
 	name: "CcDataGrid",
 	slot: "settingsStatus",
-})({
-	// visually hidden, as MUI's visuallyHidden
-	border: 0,
-	clipPath: "inset(50%)",
-	height: 1,
-	margin: -1,
-	overflow: "hidden",
-	padding: 0,
-	position: "absolute",
-	whiteSpace: "nowrap",
-	width: 1,
-});
+})(visuallyHidden);
 
 // "Close": MUI shows keyboard focus on a contained button only as a ripple and
 // a deeper shadow (unless the theme sets its focusVisible ring), which forced

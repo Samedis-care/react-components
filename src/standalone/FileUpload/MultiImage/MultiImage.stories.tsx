@@ -4,6 +4,10 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import MultiImage, { MultiImageImage, MultiImageProps } from "./MultiImage";
 import ImageBox from "./ImageBox";
+import {
+	edgesPast,
+	pageScrollsSideways,
+} from "../../../stories/test-utils/hiddenTextLayout";
 
 const svg = (width: number, height: number, body: string) =>
 	"data:image/svg+xml;base64," +
@@ -781,5 +785,35 @@ export const Issue3491Item29EditDialogEntriesFormAList: Story = {
 		await expect(last.left).toBeGreaterThan(first.right);
 		await expect(tile.top).toBe(first.top);
 		await expect(tile.left).toBeGreaterThan(last.right);
+	},
+};
+
+export const Issue3473Item16HiddenCounterLabelStaysInside: Story = {
+	args: {
+		readOnly: true,
+		initialImages: makeImages(80),
+		initialPrimary: "img-25",
+		box: { width: "100%" },
+	},
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		layout: "fullscreen",
+		...AXE_GATE,
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-16: at 320px in a right-to-left part of a left-to-right page, the visually hidden text of the image counter shown when the dots do not fit lies inside the box it is placed in (the nearest positioned ancestor), so it never makes the page scroll sideways. With MUI's visually hidden style, its -1px margin put it 1px past the top and start edges of its container wherever it began the container.",
+			},
+		},
+	},
+	render: (args) => (
+		<div dir={"rtl"}>
+			<Owner {...args} />
+		</div>
+	),
+	play: async ({ canvas }) => {
+		const label = await canvas.findByText("Image 26 of 80");
+		await expect(edgesPast(label)).toEqual([]);
+		await expect(pageScrollsSideways()).toBe(false);
 	},
 };

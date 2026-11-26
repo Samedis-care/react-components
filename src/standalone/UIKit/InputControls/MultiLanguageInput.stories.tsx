@@ -5,6 +5,10 @@ import { expect, fn, waitFor } from "storybook/test";
 import { Box, Button, decomposeColor, getContrastRatio } from "@mui/material";
 import ccI18n from "../../../i18n";
 import MultiLanguageInput from "./MultiLanguageInput";
+import {
+	edgesPast,
+	pageScrollsSideways,
+} from "../../../stories/test-utils/hiddenTextLayout";
 
 type Props = React.ComponentProps<typeof MultiLanguageInput>;
 
@@ -338,5 +342,31 @@ export const Issue3486Item12ToggleFocusRingIsAnOutline: Story = {
 		const style = getComputedStyle(toggle);
 		await expect(style.outlineStyle).toBe("solid");
 		await expect(parseFloat(style.outlineWidth)).toBeGreaterThanOrEqual(2);
+	},
+};
+
+export const Issue3473Item16HiddenLanguageNameStaysInside: Story = {
+	args: { variant: "outlined" },
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-16: at 320px in a right-to-left part of a left-to-right page, the visually hidden language name in the label, and in the label's copy in the outline's gap, lies inside the box it is placed in (the nearest positioned ancestor), so it never makes the page scroll sideways. With MUI's visually hidden style, its -1px margin put it 1px past the top and start edges of its container wherever it began the container.",
+			},
+		},
+	},
+	decorators: [
+		(Story) => (
+			<Box dir={"rtl"}>
+				<Story />
+			</Box>
+		),
+	],
+	play: async ({ canvas }) => {
+		const names = await canvas.findAllByText(/\(English\)/);
+		for (const name of names) await expect(edgesPast(name)).toEqual([]);
+		await expect(pageScrollsSideways()).toBe(false);
 	},
 };

@@ -23,6 +23,7 @@ import combineClassNames from "../../utils/combineClassNames";
 import { labelWithDirtyMarker } from "../UIKit/MuiFieldState";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { DistributiveOmit } from "../../utils/distributiveOmit";
+import visuallyHidden from "../../utils/internal/visuallyHidden";
 
 export type MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,
@@ -130,18 +131,7 @@ const Root = styled("div", { name: "CcMultiSelectWithTags", slot: "root" })({
 const GroupInputLabel = styled("label", {
 	name: "CcMultiSelectWithTags",
 	slot: "groupInputLabel",
-})({
-	// visually hidden, as MUI's visuallyHidden
-	border: 0,
-	clipPath: "inset(50%)",
-	height: 1,
-	margin: -1,
-	overflow: "hidden",
-	padding: 0,
-	position: "absolute",
-	whiteSpace: "nowrap",
-	width: 1,
-});
+})(visuallyHidden);
 
 const LoadOverlay = styled("div", {
 	name: "CcMultiSelectWithTags",

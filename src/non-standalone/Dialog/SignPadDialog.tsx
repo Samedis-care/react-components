@@ -25,6 +25,7 @@ import { showConfirmDialogBool } from "./Utils";
 import combineClassNames from "../../utils/combineClassNames";
 import trimCanvas from "trim-canvas";
 import { isTouchDevice } from "../../utils";
+import visuallyHidden from "../../utils/internal/visuallyHidden";
 
 export interface SignPadDialogProps extends IDialogConfigSign {
 	/**
@@ -64,18 +65,7 @@ const StyledCloseButton = styled(IconButton, {
 const Instructions = styled("div", {
 	name: "CcSignPadDialog",
 	slot: "instructions",
-})({
-	// visually hidden, as MUI's visuallyHidden
-	border: 0,
-	clipPath: "inset(50%)",
-	height: 1,
-	margin: -1,
-	overflow: "hidden",
-	padding: 0,
-	position: "absolute",
-	whiteSpace: "nowrap",
-	width: 1,
-});
+})(visuallyHidden);
 
 const SignDiv = styled("div", {
 	name: "CcSignPadDialog",

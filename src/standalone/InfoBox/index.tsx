@@ -22,6 +22,7 @@ import { TypographyVariant } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import combineClassNames from "../../utils/combineClassNames";
 import ccI18n from "../../i18n";
+import visuallyHidden from "../../utils/internal/visuallyHidden";
 
 /**
  * InfoBox never suspended, and the status it reads out is only heard: while
@@ -119,18 +120,7 @@ const SummaryHeading = styled(Typography, {
 const StatusName = styled("span", {
 	name: "CcInfoBox",
 	slot: "statusName",
-})({
-	// visually hidden, as MUI's visuallyHidden
-	border: 0,
-	clipPath: "inset(50%)",
-	height: 1,
-	margin: -1,
-	overflow: "hidden",
-	padding: 0,
-	position: "absolute",
-	whiteSpace: "nowrap",
-	width: 1,
-});
+})(visuallyHidden);
 
 const SpanIconButton = styled("span", {
 	name: "CcInfoBox",

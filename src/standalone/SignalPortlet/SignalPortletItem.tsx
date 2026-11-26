@@ -14,6 +14,7 @@ import Loader from "../Loader";
 import useNavigate from "../Routes/useNavigate";
 import combineClassNames from "../../utils/combineClassNames";
 import focusRing from "../../utils/internal/focusRing";
+import visuallyHidden from "../../utils/internal/visuallyHidden";
 
 export interface SignalPortletItemProps {
 	/**
@@ -87,18 +88,7 @@ const CountCapped = styled("span", {
 const CountFull = styled("span", {
 	name: "CcSignalPortletItem",
 	slot: "countFull",
-})({
-	// visually hidden, as MUI's visuallyHidden
-	border: 0,
-	clipPath: "inset(50%)",
-	height: 1,
-	margin: -1,
-	overflow: "hidden",
-	padding: 0,
-	position: "absolute",
-	whiteSpace: "nowrap",
-	width: 1,
-});
+})(visuallyHidden);
 const ListText = styled(ListItemText, {
 	name: "CcSignalPortletItem",
 	slot: "listText",

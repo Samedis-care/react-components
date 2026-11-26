@@ -1,9 +1,13 @@
 import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Button, createTheme, Stack, ThemeProvider } from "@mui/material";
+import { Box, Button, createTheme, Stack, ThemeProvider } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, waitFor } from "storybook/test";
 import InfoBox, { InfoBoxProps } from "./index";
+import {
+	edgesPast,
+	pageScrollsSideways,
+} from "../../stories/test-utils/hiddenTextLayout";
 
 const meta: Meta<typeof InfoBox> = {
 	title: "Standalone/InfoBox",
@@ -467,5 +471,31 @@ export const Issue3464Item6FocusRingInEveryStatusAndTheme: Story = {
 				parseFloat(cs.outlineOffset) + parseFloat(cs.outlineWidth),
 			).toBeLessThanOrEqual(0);
 		}
+	},
+};
+
+export const Issue3473Item16HiddenStatusNameStaysInside: Story = {
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		layout: "fullscreen",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-16: at 320px in a right-to-left part of a left-to-right page, the visually hidden status name read before the heading lies inside the box it is placed in (the nearest positioned ancestor), so it never makes the page scroll sideways. With MUI's visually hidden style, its -1px margin put it 1px past the top and start edges of its container wherever it began the container.",
+			},
+		},
+	},
+	// error: white on MUI's warning orange is below 4.5:1 (see
+	// Issue3464Item6FocusRingInEveryStatusAndTheme)
+	args: { status: "error", heading: "Please review" },
+	render: (args) => (
+		<Box dir={"rtl"}>
+			<InfoBox {...args} />
+		</Box>
+	),
+	play: async ({ canvas }) => {
+		await expect(edgesPast(canvas.getByText("Error:"))).toEqual([]);
+		await expect(pageScrollsSideways()).toBe(false);
 	},
 };

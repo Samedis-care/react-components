@@ -17,6 +17,10 @@ import buildDateColumns from "./buildDateColumns";
 import { matrixClasses, matrixVars } from "./matrixClasses";
 import { MATRIX_TILE_DIM_OPACITY } from "./matrixTileDim";
 import {
+	edgesPast,
+	pageScrollsSideways,
+} from "../../stories/test-utils/hiddenTextLayout";
+import {
 	MatrixCellContext,
 	MatrixColumn,
 	MatrixExtraRow,
@@ -1623,5 +1627,38 @@ export const Issue3481Item26LeftOutEntriesAreMarked: Story = {
 		const tooltip = await within(document.body).findByRole("tooltip");
 		await expect(within(tooltip).getByText("RD")).toBeInTheDocument();
 		await expect(within(tooltip).getByText("On call")).toBeInTheDocument();
+	},
+};
+
+export const Issue3473Item16HiddenNamesStayInside: Story = {
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	parameters: {
+		layout: "fullscreen",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-16: at 320px in a right-to-left part of a left-to-right page, the visually hidden names of the add chips and of the markers of left-out entries lie inside the box they are placed in (the nearest positioned ancestor), so they never make the page scroll sideways. With MUI's visually hidden style, their -1px margin put them 1px past the top and start edges of their container wherever they began the container.",
+			},
+		},
+	},
+	render: (args) => (
+		<Box dir={"rtl"}>
+			<TileRoster
+				onSelectRange={args.onSelectRange}
+				onItemClick={args.onItemClick}
+				rows={LEFT_OUT_ROWS}
+			/>
+		</Box>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const chipNames = canvas.getAllByText(/^Add, /);
+		const markerNames = canvas.getAllByText(/ more: /);
+		await expect(chipNames.length).toBeGreaterThan(0);
+		await expect(markerNames.length).toBeGreaterThan(0);
+		for (const name of [...chipNames, ...markerNames])
+			await expect(edgesPast(name), name.textContent ?? "").toEqual([]);
+		await expect(pageScrollsSideways()).toBe(false);
 	},
 };

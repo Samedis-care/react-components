@@ -21,6 +21,10 @@ import type {
 import type { IDataGridExporter } from "./Header";
 
 // ─── Sample data ────────────────────────────────────────────────────────────
+import {
+	edgesPast,
+	pageScrollsSideways,
+} from "../../stories/test-utils/hiddenTextLayout";
 
 const PEOPLE = [
 	"Alice Müller",
@@ -1211,5 +1215,39 @@ export const Issue3495Item22PhoneFooterInGermanFits: Story = {
 			canvas.getByRole("button", { name: "Bearbeiten" }),
 		).toBeVisible();
 		await expectFooterLayout(canvasElement, 11.5, 3);
+	},
+};
+
+export const Issue3473Item16HiddenSettingsStatusStaysInside: Story = {
+	args: { columns: COLUMNS, loadData: loadPeople },
+	globals: PHONE,
+	decorators: [
+		(Story) => (
+			<Box dir={"rtl"} sx={{ height: "100%" }}>
+				<Story />
+			</Box>
+		),
+	],
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-16: at 320px in a right-to-left part of a left-to-right page, the visually hidden status region of the column settings lies inside the box it is placed in (the nearest positioned ancestor), so it never makes the page scroll sideways. With MUI's visually hidden style, its -1px margin put it 1px past the top and start edges of its container wherever it began the container.",
+			},
+		},
+	},
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		await userEvent.click(canvas.getByRole("button", { name: "Columns" }));
+		await expect(
+			await canvas.findByRole("button", { name: "Close" }),
+		).toBeVisible();
+		const status = canvasElement.querySelector<HTMLElement>(
+			'[class*="CcDataGrid-settingsStatus"]',
+		);
+		if (!status) throw new Error("the settings have no status region");
+		// the panel opens with a transition
+		await waitFor(() => expect(edgesPast(status)).toEqual([]));
+		await expect(pageScrollsSideways()).toBe(false);
 	},
 };

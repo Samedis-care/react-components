@@ -19,6 +19,10 @@ import { setFrameworkHistory } from "../../framework/History";
 import { createMemoryHistory } from "history";
 import ccI18n from "../../i18n";
 import supportedLanguages from "../../assets/data/supported-languages.json";
+import {
+	edgesPast,
+	rightToLeftPage,
+} from "../../stories/test-utils/hiddenTextLayout";
 
 setFrameworkHistory(createMemoryHistory());
 
@@ -895,5 +899,32 @@ export const Issue3499Item17PaperSlotOnPhone: Story = {
 			0,
 			document.documentElement.clientWidth,
 		]);
+	},
+};
+
+/** A few locales (module level: a stable reference) */
+const FEW_LOCALES = ["de", "en", "fr"];
+
+export const Issue3473Item16HiddenSearchStatusStaysInside: Story = {
+	args: { supportedLocales: FEW_LOCALES },
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	beforeEach: rightToLeftPage,
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-16: at 320px in a right-to-left page, the visually hidden status region of the search lies inside the box it is placed in (the nearest positioned ancestor), so it never makes the dialog scroll sideways. With MUI's visually hidden style, its -1px margin put it 1px past the top and start edges of its container wherever it began the container.",
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ canvasElement }) => {
+		await reset();
+		const dialog = await openDialog(canvasElement);
+		const status = within(dialog).getByText(/^Results: /);
+		await expect(edgesPast(status)).toEqual([]);
+		// the dialog, not the page behind it, scrolls
+		await expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth);
 	},
 };

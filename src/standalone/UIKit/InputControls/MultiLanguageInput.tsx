@@ -18,6 +18,7 @@ import { useCurrentLanguage } from "../../../utils/useCurrentLocale";
 import { Translate } from "@mui/icons-material";
 import { TextFieldCC } from "../MuiFieldState";
 import focusRing from "../../../utils/internal/focusRing";
+import visuallyHidden from "../../../utils/internal/visuallyHidden";
 
 // src/assets/data/languages.json
 export type MultiLanguageInputSupportedLanguages =
@@ -331,18 +332,7 @@ const TranslateButton = styled(IconButton)(({ theme }) => ({
 }));
 
 /** The field's language name, read with its label but not shown */
-const LabelLanguageName = styled("span")({
-	// visually hidden, as MUI's visuallyHidden
-	border: 0,
-	clipPath: "inset(50%)",
-	height: 1,
-	margin: -1,
-	overflow: "hidden",
-	padding: 0,
-	position: "absolute",
-	whiteSpace: "nowrap",
-	width: 1,
-});
+const LabelLanguageName = styled("span")(visuallyHidden);
 
 const LanguageLabelInputAdornment = styled(Typography, {
 	name: "CcMultiLanguageInput",

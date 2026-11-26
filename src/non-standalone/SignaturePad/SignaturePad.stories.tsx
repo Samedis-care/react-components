@@ -7,6 +7,10 @@ import DialogContextProvider from "../../framework/DialogContextProvider";
 import SignaturePadCanvas, { SignaturePadCanvasProps } from "./SignaturePad";
 import { setFrameworkHistory } from "../../framework/History";
 import { createMemoryHistory } from "history";
+import {
+	edgesPast,
+	rightToLeftPage,
+} from "../../stories/test-utils/hiddenTextLayout";
 
 setFrameworkHistory(createMemoryHistory());
 
@@ -872,5 +876,34 @@ export const Issue3467Item17LabelledRequiredFields: Story = {
 				name: "More information Trainee signature",
 			}),
 		).toBeVisible();
+	},
+};
+
+export const Issue3473Item16HiddenInstructionsStayInside: Story = {
+	globals: { viewport: { value: "mobile1", isRotated: false } },
+	beforeEach: rightToLeftPage,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-16: at 320px in a right-to-left page, the visually hidden instructions of the sign dialog lie inside the box they are placed in (the nearest positioned ancestor), the dialog. With MUI's visually hidden style, their -1px margin put them 1px past the top and start edges of their container wherever they began the container.",
+			},
+		},
+	},
+	play: async ({ canvasElement }) => {
+		tileIn(canvasElement).click();
+		const dialog = await waitFor(() => {
+			const open = dialogEl();
+			if (!open) throw new Error("the sign dialog is not open");
+			return open;
+		});
+		const instructions = document.getElementById(
+			dialog.getAttribute("aria-describedby") ?? "",
+		);
+		if (!instructions) throw new Error("the dialog has no instructions");
+		await expect(edgesPast(instructions)).toEqual([]);
+		// whether the dialog scrolls sideways is not checked here: right to left, the
+		// hidden blur target (the hiddenDiv slot, 500px left of the sign area) makes
+		// it scroll
 	},
 };

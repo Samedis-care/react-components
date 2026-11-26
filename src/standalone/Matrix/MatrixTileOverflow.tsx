@@ -8,6 +8,7 @@ import { highlightRing } from "./matrixTints";
 import { tileColors } from "./matrixTileDim";
 import { useMatrixCellTileProps } from "./MatrixCellTileContext";
 import { MatrixTileItem } from "./types";
+import visuallyHidden from "../../utils/internal/visuallyHidden";
 
 /**
  * The "+N" marker: a small badge in the tile's top right corner, where the
@@ -42,18 +43,8 @@ export const MatrixTileOverflowRoot = styled("div", {
 	},
 }));
 
-/** What the marker says to a screen reader: visually hidden, as MUI's visuallyHidden */
-const OverflowName = styled("span")({
-	border: 0,
-	clipPath: "inset(50%)",
-	height: 1,
-	margin: -1,
-	overflow: "hidden",
-	padding: 0,
-	position: "absolute",
-	whiteSpace: "nowrap",
-	width: 1,
-});
+/** What the marker says to a screen reader, visually hidden */
+const OverflowName = styled("span")(visuallyHidden);
 
 /** The tooltip's list of the entries left out, one per line */
 const OverflowList = styled("div")({

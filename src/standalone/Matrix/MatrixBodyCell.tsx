@@ -22,6 +22,7 @@ import {
 } from "./MatrixInteractionContext";
 import { columnNameOf, isNamePart } from "./matrixNames";
 import { MatrixCellContext, MatrixColumn, MatrixRow } from "./types";
+import visuallyHidden from "../../utils/internal/visuallyHidden";
 
 export const MatrixBodyCellRoot = styled("div", {
 	name: "CcMatrixGrid",
@@ -165,18 +166,7 @@ export const MatrixAddChip = styled("div", {
 export const MatrixAddChipLabel = styled("span", {
 	name: "CcMatrixGrid",
 	slot: "addChipLabel",
-})({
-	// visually hidden, as MUI's visuallyHidden
-	border: 0,
-	clipPath: "inset(50%)",
-	height: 1,
-	margin: -1,
-	overflow: "hidden",
-	padding: 0,
-	position: "absolute",
-	whiteSpace: "nowrap",
-	width: 1,
-});
+})(visuallyHidden);
 
 export interface MatrixBodyCellProps<TCell> {
 	/**
