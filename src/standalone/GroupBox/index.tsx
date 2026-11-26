@@ -105,7 +105,17 @@ export type GroupBoxHTMLProps = Omit<
  */
 export interface GroupBoxProps extends GroupBoxHTMLProps {
 	/**
-	 * The label of the box
+	 * Title drawn as the `<legend>` in the frame's top border, already
+	 * translated. It is also the group's accessible name.
+	 *
+	 * The values React renders as nothing, `null`, `undefined`, `false`,
+	 * `true` and `""`, render no legend: the frame has no title and the
+	 * group no name (name it with `aria-label` or `aria-labelledby`). Pass
+	 * `null` for a frame without a title, as `undefined` is replaced by a
+	 * `label` from the theme's `defaultProps`. Any other value is the legend,
+	 * as React renders it: `0` shows "0", `NaN` shows "NaN". An element always
+	 * renders a legend, even one that renders nothing, so a label that is only
+	 * the dirty marker of `labelWithDirtyMarker("", true)` keeps its legend.
 	 */
 	label: React.ReactNode;
 	/**
@@ -140,6 +150,10 @@ export interface GroupBoxProps extends GroupBoxHTMLProps {
 	sx?: SxProps<Theme>;
 }
 
+/** whether React renders the label as nothing, so that no legend is drawn */
+const isEmptyLabel = (label: React.ReactNode) =>
+	label == null || typeof label === "boolean" || label === "";
+
 const GroupBox = React.forwardRef(function GroupBox(
 	inProps: GroupBoxProps,
 	ref: React.ForwardedRef<HTMLFieldSetElement>,
@@ -161,7 +175,7 @@ const GroupBox = React.forwardRef(function GroupBox(
 			smallLabel={smallLabel}
 			className={combineClassNames([className, classes?.root])}
 		>
-			{label && (
+			{!isEmptyLabel(label) && (
 				<GroupBoxLegend
 					className={combineClassNames([
 						classes?.legend,

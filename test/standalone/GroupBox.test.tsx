@@ -3,6 +3,7 @@ import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { ThemeProvider, createTheme, Theme } from "@mui/material";
 import GroupBox from "../../src/standalone/GroupBox";
+import { labelWithDirtyMarker } from "../../src/standalone/UIKit/MuiFieldState";
 
 afterEach(cleanup);
 
@@ -357,6 +358,82 @@ describe("GroupBox", () => {
 			expect(legend).toHaveClass("l2");
 			expect(legend).not.toHaveClass("l");
 			expect(legend).not.toHaveClass("s");
+		});
+
+		it("[ISSUE-3462-ITEM-5] shows label={0} as the legend, not as stray text in the box", () => {
+			const { container } = renderGroupBox(
+				<GroupBox label={0}>
+					<span>c</span>
+				</GroupBox>,
+			);
+			const fieldset = fieldsetOf(container);
+			const strayText = Array.from(fieldset.childNodes).filter(
+				(node) => node.nodeType === Node.TEXT_NODE,
+			);
+			expect(strayText).toHaveLength(0);
+			expect(screen.getByRole("group", { name: "0" })).toBe(fieldset);
+		});
+
+		it("[ISSUE-3462-ITEM-5] shows label={NaN} as the legend, and follows a label changing between 0, nothing and text after mount", () => {
+			const { container, rerender } = renderGroupBox(
+				<GroupBox label={NaN}>
+					<span>c</span>
+				</GroupBox>,
+			);
+			const fieldset = fieldsetOf(container);
+			expect(fieldset.firstElementChild?.tagName).toBe("LEGEND");
+			expect(fieldset.firstChild).toBe(fieldset.firstElementChild);
+			expect(screen.getByRole("group", { name: "NaN" })).toBe(fieldset);
+
+			const relabel = (label: React.ReactNode) =>
+				rerender(
+					<ThemeProvider theme={theme}>
+						<GroupBox label={label}>
+							<span>c</span>
+						</GroupBox>
+					</ThemeProvider>,
+				);
+			relabel(null);
+			expect(fieldset.querySelector("legend")).toBeNull();
+			expect(fieldset.childNodes).toHaveLength(1);
+			relabel(0);
+			expect(fieldset.firstChild).toBe(fieldset.querySelector("legend"));
+			expect(fieldset).toHaveAccessibleName("0");
+			relabel("Files");
+			expect(fieldset).toHaveAccessibleName("Files");
+		});
+
+		it.each([
+			["true", true],
+			["false", false],
+			["null", null],
+			["undefined", undefined],
+			["an empty string", ""],
+		])(
+			"[ISSUE-3462-ITEM-5] renders no legend and no text before the children for label %s",
+			(_name, label) => {
+				const { container } = renderGroupBox(
+					<GroupBox label={label}>
+						<span>c</span>
+					</GroupBox>,
+				);
+				const fieldset = fieldsetOf(container);
+				expect(fieldset.querySelector("legend")).toBeNull();
+				expect(fieldset.childNodes).toHaveLength(1);
+				expect(fieldset.firstChild).toHaveTextContent("c");
+			},
+		);
+
+		it("[ISSUE-3462-ITEM-5] renders a legend for a label that is only the dirty marker", async () => {
+			renderGroupBox(
+				<GroupBox label={labelWithDirtyMarker("", true)}>
+					<span>c</span>
+				</GroupBox>,
+			);
+			// the marker's text suspends until the library's translations load
+			const legend = (await screen.findByRole("group")).firstElementChild;
+			expect(legend?.tagName).toBe("LEGEND");
+			expect(legend?.querySelector("[aria-hidden='true']")).toBeTruthy();
 		});
 
 		it("[ISSUE-3462-ITEM-8] passes aria-describedby, aria-labelledby, data-* and ref to the fieldset", () => {

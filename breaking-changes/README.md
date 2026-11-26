@@ -31,6 +31,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-26 | [The default error-reporting policy judges a PartialApplyError by the errors it wraps](2026-11-26-partial-apply-error-reporting.md) | behavior |
 | 2026-11-26 | [Hiding a selector's switch turns it off, and showing it starts it at defaultSwitchValue](2026-11-26-selector-hidden-switch-turns-off.md) | behavior |
 | 2026-11-26 | [The locale selector's picked row keeps its element, focus and tab stop while the language loads](2026-11-26-locale-selector-picked-row-keeps-focus.md) | behavior |
+| 2026-11-26 | [A GroupBox label of `0` is its legend, and `label={true}` draws none](2026-11-26-group-box-zero-label-is-the-legend.md) | behavior |
 | 2026-11-26 | [InfiniteScroll fills its container again when it grows, and `dynamicallySized` is removed](2026-11-26-infinite-scroll-observes-its-size.md) | behavior, type |
 | 2026-11-26 | [HowToBox takes any fieldset attribute, `sx` and `ref`, and its list gets an id from `id`](2026-11-26-how-to-box-html-attributes.md) | behavior, type |
 | 2026-11-26 | [A Form's save names the files and images the backend refused](2026-11-26-file-controls-name-refused-queued-writes.md) | behavior |
