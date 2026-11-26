@@ -4,6 +4,7 @@ import { sentryHandleNavigation } from "./SentryRoutingInstrumentation";
 import { LocationContext } from "./useLocation";
 import DocumentTitleProvider, { DocumentTitleFormatter } from "./DocumentTitle";
 import NavigationFocus from "./NavigationFocus";
+import NavigationScroll from "./NavigationScroll";
 import { NavigationFocusManager } from "./NavigationFocusManager";
 import { RouteContext } from "./Route";
 import RoutesEntryContext from "./RoutesEntryContext";
@@ -97,6 +98,20 @@ export const useHistoryRouterContext = (): HistoryRouterContextType => {
  * - Other scroll containers keep their position, so that DataGrid can
  *   restore its own.
  *
+ * A push or replace to a location with a hash ("#details"), e.g. a skip link
+ * or the entry of a table of contents, then scrolls the element with that id
+ * into view (the window and the scroll containers around it) and moves the
+ * keyboard focus to it, as a link to a fragment does in a browser, so the
+ * next Tab goes on after it. An element that is not focusable gets
+ * `tabindex="-1"`, which makes it focusable without adding it to the tab
+ * order. This happens once the location has rendered, so the element may be
+ * part of the new page, but not one that renders later (a lazy route, a
+ * record that is still loading). When the hash is all the navigation
+ * changes (the same pathname and search), nothing scrolls to the top first,
+ * and a hash that names no element leaves the page where it is, except
+ * "#top", which scrolls to the top. A navigation started with
+ * `preventScrollReset` scrolls to no element and leaves the focus alone.
+ *
  * A navigation its children make while it mounts, e.g. a redirect in a mount
  * effect, shows right away, not only after the next navigation; so does the
  * location of a history passed after mount.
@@ -118,10 +133,11 @@ export const useHistoryRouterContext = (): HistoryRouterContextType => {
  *   focusable without adding it to the tab order. A `PageTitle` that renders
  *   later (a lazy route, a record that is still loading) gets the focus then,
  *   unless the user clicked, typed or scrolled meanwhile.
- * - When the focus stays on an element in view (a navigation menu, a tab),
- *   the new page title (see `usePageTitle`) is announced in a visually hidden
- *   polite live region, which the router renders after its children, if it
- *   differs from the one before.
+ * - When the focus stays on an element in view (a navigation menu, a tab, or
+ *   the element of a hash, which got it as described above), the new page
+ *   title (see `usePageTitle`) is announced in a visually hidden polite live
+ *   region, which the router renders after its children, if it differs from
+ *   the one before.
  * @param props The props
  */
 const HistoryRouter = (props: HistoryRouterProps) => {
@@ -158,6 +174,9 @@ const HistoryRouter = (props: HistoryRouterProps) => {
 							</NavigationScrollContext.Provider>
 						</RoutesEntryContext.Provider>
 					</RouteContext.Provider>
+					{/* before NavigationFocus: the focus check finds the focus on the
+					    element a hash names */}
+					<NavigationScroll manager={navigationScroll} location={location} />
 					<NavigationFocus manager={navigationFocus} location={location} />
 				</DocumentTitleProvider>
 			</LocationContext.Provider>

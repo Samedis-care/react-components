@@ -25,7 +25,10 @@ export interface NavigateOptions {
 	 * to the top. For a navigation that keeps the user on the page, such as a
 	 * tab switch or a filter kept in the URL; RoutedTabs uses it. Also applies
 	 * when a blocker holds the navigation back and lets it go ahead later.
-	 * Default: false (the navigation scrolls them to the top)
+	 * A target with a hash then scrolls to no element, and the focus stays
+	 * where it is.
+	 * Default: false (the navigation scrolls them to the top, or to the
+	 * element the hash of the target names)
 	 */
 	preventScrollReset?: boolean;
 }
@@ -53,6 +56,11 @@ export interface NavigateFunction {
  * with `useResetScrollOnNavigation` (PortalLayout's main pane), unless the
  * call passes `preventScrollReset`. A navigation that a blocker cancels keeps
  * the scroll position.
+ *
+ * A target with a hash ("#details", "/devices/5#notes") then scrolls the
+ * element with that id into view and moves the keyboard focus to it, as a
+ * link to a fragment does in a browser; when the hash is all it changes,
+ * nothing scrolls to the top first. See `HistoryRouter`.
  */
 const useNavigate = (): NavigateFunction => {
 	const { history } = useHistoryRouterContext();

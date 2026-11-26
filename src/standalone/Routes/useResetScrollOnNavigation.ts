@@ -10,8 +10,10 @@ export const NavigationScrollContext =
 /**
  * Scrolls an element to the top after each navigation that scrolls the window
  * to the top: a push or replace of the nearest HistoryRouter, but not a
- * back/forward navigation, a navigation a blocker cancels, or one started with
- * `preventScrollReset` (see `useNavigate`; RoutedTabs' tab switches).
+ * back/forward navigation, a navigation a blocker cancels, one started with
+ * `preventScrollReset` (see `useNavigate`; RoutedTabs' tab switches), or one
+ * that changes only the hash. A navigation to a hash then scrolls the element
+ * with that id into view, inside the container too.
  *
  * For a scroll container that stays on screen while the pages in it change,
  * such as the main pane of a layout: without it, the next page opens at the

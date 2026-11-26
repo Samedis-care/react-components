@@ -31,6 +31,9 @@ export interface LinkProps extends Omit<
 	 * `hash` drops them, as a push does: at "/devices?page=1",
 	 * `{ search: "?page=2" }` and "?page=2" link to "/devices?page=2", and
 	 * `{ hash: "#notes" }` and "#notes" to "/devices#notes".
+	 * A target with a hash scrolls the element with that id into view and
+	 * moves the keyboard focus to it, as a link to a fragment does in a
+	 * browser: `to="#main"` makes a skip link, see `HistoryRouter`.
 	 * A URL with a scheme ("https://…", "mailto:…") makes a plain link that
 	 * the browser follows; `replace` and `state` don't apply to it.
 	 */
@@ -51,8 +54,10 @@ export interface LinkProps extends Omit<
 	 * Keep the scroll position when the link navigates: the window and the
 	 * scroll containers of the HistoryRouter stay where they are, for a link
 	 * that keeps the user on the page (a tab, a filter). See the
-	 * `preventScrollReset` option of `useNavigate`.
-	 * Default: false (the navigation scrolls them to the top)
+	 * `preventScrollReset` option of `useNavigate`. A target with a hash then
+	 * scrolls to no element, and the focus stays on the link.
+	 * Default: false (the navigation scrolls them to the top, or to the
+	 * element the hash of `to` names)
 	 */
 	preventScrollReset?: boolean;
 	/**
@@ -158,9 +163,11 @@ const opensElsewhere = (anchor: HTMLAnchorElement): boolean => {
  * of pushing a second one, as the browser does for a plain `<a>` and as
  * react-router's Link does (see `replace`). Clicks with Ctrl, Meta, Shift or
  * Alt are left to the browser, and so is every click on a link with a
- * `target` other than `_self` or with `download`. With `markCurrent`, the
- * link to the current page gets `aria-current="page"`. Also works as the
- * `component` of MUI's Link and ButtonBase components
+ * `target` other than `_self` or with `download`. A link to a hash, such as
+ * the skip link `to="#main"`, scrolls the element with that id into view and
+ * moves the focus to it, as a plain `<a href="#main">` does. With
+ * `markCurrent`, the link to the current page gets `aria-current="page"`.
+ * Also works as the `component` of MUI's Link and ButtonBase components
  * (`<Button component={Link} to="/x">`, ListItemButton, MenuItem, Tab,
  * IconButton), which pass an `onClick` of their own.
  * @param props The props

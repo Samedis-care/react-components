@@ -306,6 +306,107 @@ export const Issue3475Item22FocusedLinkStaysInView: Story = {
 	},
 };
 
+const FragmentDemo = () => {
+	const history = useStoryHistory("/page");
+	return (
+		<HistoryRouter history={history}>
+			<Box component="main" sx={{ p: 2 }}>
+				<Page title="Long page">
+					<MuiLink component={Link} to="#details">
+						Skip to details
+					</MuiLink>
+					<Box sx={LONG_PAGE_SPACER_SX} />
+					<Typography variant="h6" component="h2" id="details" tabIndex={-1}>
+						Details
+					</Typography>
+				</Page>
+			</Box>
+		</HistoryRouter>
+	);
+};
+
+export const Issue3475Item24FragmentLinkReachesItsTarget: Story = {
+	parameters: {
+		layout: "fullscreen",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3475-ITEM-24: a link to an anchor on the same page (`to="#details"`, e.g. a skip link) neither scrolls to the target nor moves the focus there; the navigation scrolls the window to the top instead (WCAG 2.4.1, 2.4.3).',
+			},
+		},
+	},
+	render: () => <FragmentDemo />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const target = canvas.getByRole("heading", { name: "Details" });
+		await expect(inViewport(target)).toBe(false);
+		canvas.getByRole("link", { name: "Skip to details" }).focus();
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() => expect(inViewport(target)).toBe(true));
+	},
+};
+
+const SkipLinkDemo = () => {
+	const history = useStoryHistory("/page");
+	return (
+		<HistoryRouter history={history}>
+			<Box component="main" sx={{ p: 2 }}>
+				<Page title="Long page">
+					<MuiLink component={Link} to="#details">
+						Skip to details
+					</MuiLink>
+					<Box sx={LONG_PAGE_SPACER_SX} />
+					<section id="details" aria-labelledby="details-heading">
+						<Typography variant="h6" component="h2" id="details-heading">
+							Details
+						</Typography>
+						<Button>Edit details</Button>
+					</section>
+					<Box sx={LONG_PAGE_SPACER_SX} />
+					<MuiLink component={Link} to="#top">
+						Back to top
+					</MuiLink>
+				</Page>
+			</Box>
+		</HistoryRouter>
+	);
+};
+
+export const Issue3475Item24FragmentLinkMovesTheFocus: Story = {
+	parameters: {
+		layout: "fullscreen",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3475-ITEM-24: a skip link moves the keyboard focus to its target, also to a `<section>` that is not focusable by itself, so the next Tab goes on after the target; "#top" scrolls back to the top, where the focus moves to the page heading.',
+			},
+		},
+	},
+	render: () => <SkipLinkDemo />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const target = canvas.getByRole("region", { name: "Details" });
+		canvas.getByRole("link", { name: "Skip to details" }).focus();
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() => expect(document.activeElement).toBe(target));
+		await expect(target).toHaveAttribute("tabindex", "-1");
+		await expect(inViewport(target)).toBe(true);
+		await userEvent.tab();
+		await expect(document.activeElement).toBe(
+			canvas.getByRole("button", { name: "Edit details" }),
+		);
+		const backToTop = canvas.getByRole("link", { name: "Back to top" });
+		backToTop.focus();
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() => expect(window.scrollY).toBe(0));
+		await expect(document.activeElement).toBe(
+			canvas.getByRole("heading", { name: "Long page" }),
+		);
+	},
+};
+
 /** A page that names itself with usePageTitle and shows the title as its heading */
 const TitledPage = (props: { title: string }) => {
 	usePageTitle(props.title);
