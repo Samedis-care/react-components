@@ -173,9 +173,14 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 	 * records first, then the others), and that load: its query and refresh token. A tick
 	 * or an untick does not reload the grid, so the pages it loads later must be split
 	 * like the loaded ones to continue where they stopped; a new query or refresh token
-	 * starts a new load, split by the selection of its time.
+	 * starts a new load, split by the selection of its time. selectedMatches is how many
+	 * of those records match the load's query, null until a page of the load counted them.
 	 */
-	const loadSplit = useRef<{ load: string; selected: string[] } | null>(null);
+	const loadSplit = useRef<{
+		load: string;
+		selected: string[];
+		selectedMatches: number | null;
+	} | null>(null);
 
 	// developer warning
 	useEffect(() => {
@@ -224,51 +229,61 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 						forceRefreshToken,
 					]);
 					if (loadSplit.current?.load !== load)
-						loadSplit.current = { load, selected };
-					const split = loadSplit.current.selected;
-					const [relationshipRecordsFiltered, relationshipRecordFilteredMeta] =
-						split.length > 0
-							? await model.index({
-									...params,
-									fieldFilter: {
-										...params.fieldFilter,
-										id: {
-											type: "inSet",
-											value1: split.join(","),
-											value2: "",
-										},
-									},
-								})
-							: [[], { totalRows: 0 }];
-					const relationshipRecordFilteredCount =
-						relationshipRecordFilteredMeta.filteredRows ??
-						relationshipRecordFilteredMeta.totalRows;
-					const requestedOffset =
-						(params.page - 1) * params.rows - relationshipRecordFilteredCount;
+						loadSplit.current = { load, selected, selectedMatches: null };
+					const split = loadSplit.current;
+					// the grid lists the selected matches, then the others: a page shows
+					// the selected matches that fall on its rows (the inSet query, paged
+					// like the grid) and fills the rest of its rows with the others, from
+					// where the pages above it stopped
+					const firstRow = (params.page - 1) * params.rows;
+					let selectedRecords: ModelRecord<M>[] = [];
+					let selectedMatches =
+						split.selected.length > 0 ? split.selectedMatches : 0;
+					// a page below the selected matches holds none of them: once a page
+					// of this load counted them, it asks no inSet query
+					if (selectedMatches == null || firstRow < selectedMatches) {
+						const [records, meta] = await model.index({
+							...params,
+							fieldFilter: {
+								...params.fieldFilter,
+								id: {
+									type: "inSet",
+									value1: split.selected.join(","),
+									value2: "",
+								},
+							},
+						});
+						selectedRecords = records;
+						selectedMatches = split.selectedMatches =
+							meta.filteredRows ?? meta.totalRows;
+					}
+					const selectedOnPage = Math.min(
+						Math.max(selectedMatches - firstRow, 0),
+						params.rows,
+					);
 					const [dataRecords, dataMeta] = await model.index2({
 						...params,
 						fieldFilter: {
 							...params.fieldFilter,
 							id: {
 								type: "notInSet",
-								value1: split.join(","),
+								value1: split.selected.join(","),
 								value2: "",
 							},
 						},
-						offset: Math.max(requestedOffset, 0),
-						rows: Math.max(requestedOffset + params.rows, 0),
+						offset: Math.max(firstRow - selectedMatches, 0),
+						rows: params.rows - selectedOnPage,
 					});
 					// a connector that reports filteredRows counts the whole collection (the
 					// selected records included) in totalRows and the other matches in
 					// filteredRows; one that doesn't counts the other matches in totalRows
 					const reportsFiltered = dataMeta.filteredRows != null;
 					const matchCount =
-						relationshipRecordFilteredCount +
-						(dataMeta.filteredRows ?? dataMeta.totalRows);
+						selectedMatches + (dataMeta.filteredRows ?? dataMeta.totalRows);
 					return {
 						rowsTotal: reportsFiltered ? dataMeta.totalRows : matchCount,
 						rowsFiltered: reportsFiltered ? matchCount : undefined,
-						rows: [...relationshipRecordsFiltered, ...dataRecords].map(
+						rows: [...selectedRecords, ...dataRecords].map(
 							renderDataGridRecordUsingModel(model, refreshGrid),
 						),
 					};

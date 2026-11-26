@@ -4,8 +4,8 @@
  * the selection, and the row counts it gives the grid.
  *
  * DataGrid is wrapped so the test can read its props (store.props) and call its loadData
- * like the grid does; with store.real the real grid renders as well. MultiGrid (the cells)
- * is not rendered in jsdom.
+ * like the grid does (page slots, see replayPages); with store.real the real grid renders
+ * as well. MultiGrid (the cells) is not rendered in jsdom.
  */
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -126,6 +126,20 @@ const query = (
 
 const idsOf = (data: DataGridData) => data.rows.map((row) => row.id);
 
+/**
+ * Loads pages 1..pages like DataGrid does: a page whose first slot is filled is skipped,
+ * and every returned row is stored at pageIndex * 10 + i
+ */
+const replayPages = async (pages: number) => {
+	const slots: Record<number, string> = {};
+	for (let pageIndex = 0; pageIndex < pages; pageIndex++) {
+		if (pageIndex * 10 in slots) continue;
+		const data = await gridProps().loadData(query(pageIndex + 1));
+		data.rows.forEach((row, i) => (slots[pageIndex * 10 + i] = row.id));
+	}
+	return slots;
+};
+
 const mount = async (props: Props) => {
 	store.props = null;
 	store.real = false;
@@ -181,6 +195,91 @@ const StatefulField = (props: Props & { initial: string[] }) => {
 // ---------------------------------------------------------------------------
 
 describe("BackendDataGridMultiSelect bugs", () => {
+	it("[ISSUE-3510-ITEM-4] scrolling through the pages lists every record exactly once", async () => {
+		const { model, connector } = gridModel();
+		await mount({ model, selected: ["3", "23"] });
+		const slots = await replayPages(3);
+		const listed = Object.values(slots);
+		expect(listed).toHaveLength(30);
+		expect(new Set(listed).size).toBe(30);
+		connector.log
+			.filter((entry) => entry.startsWith("index2:"))
+			.forEach((entry) => {
+				const rows = Number(/\+(\d+)/.exec(entry)![1]);
+				expect(rows).toBeLessThanOrEqual(10);
+			});
+	});
+
+	it("[ISSUE-3510-ITEM-4] with more selected records than a page holds, every record is listed once, and only the pages with selected rows ask for them", async () => {
+		const { model, connector } = gridModel();
+		// 2, 4, .., 24: page 1 holds ten of them, page 2 the last two
+		const selected = Array.from({ length: 12 }, (_, index) =>
+			String(2 * (index + 1)),
+		);
+		const ids = selected.join(",");
+		await mount({ model, selected });
+		const slots = await replayPages(3);
+		expect(Object.values(slots)).toEqual([
+			// page 1 and the first two rows of page 2
+			...selected,
+			// the rest of page 2 and page 3
+			...["1", "3", "5", "7", "9", "11", "13", "15", "17", "19", "21", "23"],
+			...["25", "26", "27", "28", "29", "30"],
+		]);
+		expect(connector.log).toEqual([
+			"index::ids=" + ids,
+			"index2:0+0:not=" + ids,
+			"index::ids=" + ids,
+			"index2:0+8:not=" + ids,
+			"index2:8+10:not=" + ids,
+		]);
+	});
+
+	it("[ISSUE-3510-ITEM-4] a page loaded before the pages above it counts the selected records first, and asks for its own rows", async () => {
+		const { model, connector } = gridModel();
+		await mount({ model, selected: ["3", "23"] });
+		// e.g. a refresh while the grid shows the last page
+		const page3 = await gridProps().loadData(query(3));
+		expect(idsOf(page3)).toEqual([
+			"20",
+			"21",
+			"22",
+			"24",
+			"25",
+			"26",
+			"27",
+			"28",
+			"29",
+			"30",
+		]);
+		expect(page3.rowsFiltered).toBe(30);
+		expect(connector.log).toEqual(["index::ids=3,23", "index2:18+10:not=3,23"]);
+	});
+
+	it("[ISSUE-3510-ITEM-4] 'Select all' over three pages selects every record once", async () => {
+		const { model } = gridModel();
+		store.real = true;
+		render(
+			<StatefulField
+				model={model}
+				initial={["3", "23"]}
+				enableSelectAll
+				rowsPerPage={10}
+			/>,
+		);
+		const all = await screen.findByRole("checkbox", { name: "All" });
+		await flush();
+		act(() => all.click());
+		// the grid loads pages 2 and 3, then reports the ids
+		await waitFor(() =>
+			expect(gridProps().selection![1].length).toBeGreaterThan(2),
+		);
+		const ids = gridProps().selection![1];
+		expect(ids).toHaveLength(30);
+		expect(new Set(ids).size).toBe(30);
+		expect(screen.getByRole("status")).toHaveTextContent("Selected: 30");
+	});
+
 	it("[ISSUE-3510-ITEM-10] with a connector that reports filteredRows, the counts are the collection and the matches", async () => {
 		const { model } = gridModel();
 		await mount({ model, selected: ["3", "23"] });
