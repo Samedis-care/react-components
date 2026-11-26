@@ -1957,6 +1957,65 @@ describe("only the grids wait for the stored state", () => {
 		}
 	});
 
+	it("[ISSUE-3496-ITEM-27] a grid whose filters bucket is on a CachedServerStorageProvider opens with the filter changed on the previous visit, also when that visit ended before the change reached the server", async () => {
+		/** A server storage with an in-memory "server" which counts its reads */
+		const server = new (class extends CachedServerStorageProvider {
+			data: Record<string, string> = {};
+			reads = 0;
+			protected getItemFromServer(key: string): Promise<string | null> {
+				this.reads++;
+				return Promise.resolve(this.data[key] ?? null);
+			}
+			protected setItemOnServer(key: string, value: string | null) {
+				if (value == null) delete this.data[key];
+				else this.data[key] = value;
+				return Promise.resolve();
+			}
+			protected clearFromServer() {
+				this.data = {};
+				return Promise.resolve();
+			}
+		})();
+		const filtersKey = keyOf(FILTERS, { model: "a" });
+		server.data[filtersKey] = JSON.stringify(STORED);
+		StorageManager.configure((id, keys) => [
+			id === FILTERS ? server : LocalStorageProviderInstance,
+			keys,
+		]);
+		try {
+			const firstVisit = render(smp({ model: "a" }));
+			await gridIdle();
+			expect(grid!.state.search).toBe("stored");
+
+			// the provider writes to the server after a second without further writes
+			vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+			act(() => grid!.setState((prev) => ({ ...prev, search: "changed" })));
+			firstVisit.unmount();
+			grid = null;
+			expect(persisted(server.data[filtersKey]).search).toBe("stored");
+
+			// the next visit, within that second
+			render(smp({ model: "a" }));
+			expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+			expect(grid!.state.search).toBe("changed");
+			expect(gridSearch()).toHaveValue("changed");
+			expect(server.reads).toBe(1);
+
+			// the server gets the change afterwards
+			await act(async () => {
+				await vi.advanceTimersByTimeAsync(1000);
+			});
+			expect(persisted(server.data[filtersKey]).search).toBe("changed");
+		} finally {
+			// drops the cached reads together with their garbage collection timers
+			ModelDataStore.clear();
+			// the grid's and the provider's timers, among them the one which
+			// forgets the key's debounce after 5 minutes
+			vi.clearAllTimers();
+			vi.useRealTimers();
+		}
+	});
+
 	it("[ISSUE-3496-ITEM-16] a StorageManagerPersist storageKeys change mounts only the grids again: what else is inside keeps its state", async () => {
 		const storage = new HeldProvider();
 		storage.data[keyOf(FILTERS, { model: "b" })] = JSON.stringify(STORED);

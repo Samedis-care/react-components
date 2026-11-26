@@ -102,6 +102,11 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 		(value: StorageValueType) => Promise<void>
 	> = {};
 	protected cleanupTable: Record<StorageKeyType, number> = {};
+	/**
+	 * Per key, the write setItem made last, until it has reached the server or
+	 * failed
+	 */
+	private lastWrites = new Map<StorageKeyType, { value: StorageValueType }>();
 
 	/**
 	 * Receive value of key from server
@@ -168,23 +173,64 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 		return ModelDataStore.fetchQuery(options);
 	}
 
+	/**
+	 * Writes the value of key: into the react-query cache at once, and to the
+	 * server after a second without further writes to the key, which sends the
+	 * value written last
+	 * @param key The key to write
+	 * @param value The value, or null to delete what is stored under the key
+	 * @returns A promise which resolves once the value is on the server, and
+	 *          rejects with setItemOnServer's error when the write fails
+	 * @remarks The next read answers the value written last, also before it
+	 *          reaches the server, as long as the cache holds it fresh (see
+	 *          getItem); a read already on its way to the server answers it
+	 *          too. When the write fails, the value is invalidated in the
+	 *          cache, so the next read asks the server what it holds. A write
+	 *          which settles after a newer value was written leaves the newer
+	 *          value in the cache.
+	 */
 	async setItem(key: StorageKeyType, value: StorageValueType): Promise<void> {
+		const queryKey: QueryKey = ["cc-css", key];
+		// a read on its way to the server would put the value from before back
+		// into the cache: cancelled, it answers what the cache holds instead,
+		// which is the value written
+		void ModelDataStore.cancelQueries({ queryKey, exact: true });
+		ModelDataStore.setQueryData(queryKey, () => value);
+		this.lastWrites.set(key, { value });
 		if (key in this.debounceTable) {
 			window.clearTimeout(this.cleanupTable[key]);
 		} else {
-			this.debounceTable[key] = debouncePromise(
-				(value: StorageValueType) =>
-					ModelDataStore.getMutationCache()
-						.build(ModelDataStore, {
-							mutationFn: () => this.setItemOnServer(key, value),
-							mutationKey: ["cc-css-mt", key],
-							onSuccess: () => {
+			this.debounceTable[key] = debouncePromise((value: StorageValueType) => {
+				// this sends the value setItem wrote last
+				const write = this.lastWrites.get(key);
+				// only the write made last updates the cache once it settles: a
+				// newer value is in the cache already. Forgets the write if it is
+				// the last one, and tells whether it was.
+				const forgetIfLast = () => {
+					if (this.lastWrites.get(key) !== write) return false;
+					this.lastWrites.delete(key);
+					return true;
+				};
+				return ModelDataStore.getMutationCache()
+					.build(ModelDataStore, {
+						mutationFn: () => this.setItemOnServer(key, value),
+						mutationKey: ["cc-css-mt", key],
+						onSuccess: () => {
+							if (forgetIfLast())
 								ModelDataStore.setQueryData(["cc-css", key], () => value);
-							},
-						})
-						.execute({}),
-				1000,
-			);
+						},
+						onError: () => {
+							// what the server holds is unknown, so the next read asks it
+							if (forgetIfLast())
+								void ModelDataStore.invalidateQueries({
+									queryKey: ["cc-css", key],
+									exact: true,
+									refetchType: "none",
+								});
+						},
+					})
+					.execute({});
+			}, 1000);
 		}
 		this.cleanupTable[key] = window.setTimeout(
 			this.cleanDebounce.bind(this),

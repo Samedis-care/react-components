@@ -294,4 +294,170 @@ describe("CachedServerStorageProvider", () => {
 			vi.useRealTimers();
 		}
 	});
+
+	describe("a value written with setItem", () => {
+		/** A provider whose server reads and writes the test controls */
+		class WritingProvider extends CachedServerStorageProvider {
+			readFromServer = vi.fn<(key: StorageKeyType) => Promise<string | null>>();
+			writeToServer = vi
+				.fn<(key: StorageKeyType, value: string | null) => Promise<void>>()
+				.mockResolvedValue(undefined);
+
+			protected getItemFromServer(key: StorageKeyType): Promise<string | null> {
+				return this.readFromServer(key);
+			}
+
+			protected setItemOnServer(
+				key: StorageKeyType,
+				value: string | null,
+			): Promise<void> {
+				return this.writeToServer(key, value);
+			}
+
+			protected clearFromServer(): Promise<void> {
+				return Promise.resolve();
+			}
+		}
+
+		beforeEach(() => {
+			// setItem writes to the server after a second without further writes
+			vi.useFakeTimers();
+		});
+		afterEach(() => {
+			ModelDataStore.clear();
+			// the timer which forgets the key's debounce after 5 minutes
+			vi.clearAllTimers();
+			vi.useRealTimers();
+		});
+
+		it("[ISSUE-3496-ITEM-27] is answered at once by the next read, also before the write reaches the server, instead of the value the cache held before", async () => {
+			const provider = new WritingProvider();
+			provider.readFromServer.mockResolvedValue("old");
+			await expect(provider.getItem("key")).resolves.toBe("old");
+
+			const written = provider.setItem("key", "new");
+			expect(provider.getItem("key")).toBe("new");
+			expect(provider.writeToServer).not.toHaveBeenCalled();
+
+			await vi.advanceTimersByTimeAsync(1000);
+			await written;
+			expect(provider.writeToServer).toHaveBeenCalledExactlyOnceWith(
+				"key",
+				"new",
+			);
+			expect(provider.getItem("key")).toBe("new");
+			expect(provider.readFromServer).toHaveBeenCalledTimes(1);
+		});
+
+		it("[ISSUE-3496-ITEM-27] a deletion (null) is answered at once by the next read, as null", async () => {
+			const provider = new WritingProvider();
+			provider.readFromServer.mockResolvedValue("old");
+			await expect(provider.getItem("key")).resolves.toBe("old");
+
+			const deleted = provider.setItem("key", null);
+			expect(provider.getItem("key")).toBeNull();
+
+			await vi.advanceTimersByTimeAsync(1000);
+			await deleted;
+			expect(provider.writeToServer).toHaveBeenCalledExactlyOnceWith(
+				"key",
+				null,
+			);
+			expect(provider.getItem("key")).toBeNull();
+		});
+
+		it("[ISSUE-3496-ITEM-27] when its write fails, setItem rejects and the next read asks the server again, through a promise", async () => {
+			const provider = new WritingProvider();
+			provider.readFromServer.mockResolvedValue("old");
+			await expect(provider.getItem("key")).resolves.toBe("old");
+			const error = new Error("500 Internal Server Error");
+			provider.writeToServer.mockRejectedValueOnce(error);
+
+			const written = provider.setItem("key", "new");
+			const failed = expect(written).rejects.toBe(error);
+			await vi.advanceTimersByTimeAsync(1000);
+			await failed;
+
+			const answer = provider.getItem("key");
+			expect(answer).toBeInstanceOf(Promise);
+			await expect(answer).resolves.toBe("old");
+			expect(provider.readFromServer).toHaveBeenCalledTimes(2);
+		});
+
+		it("[ISSUE-3496-ITEM-27] a read on its way to the server when the value is written answers the written value, and does not put the value from before back into the cache", async () => {
+			const provider = new WritingProvider();
+			let answerRead: (value: string | null) => void = () => undefined;
+			provider.readFromServer.mockReturnValueOnce(
+				new Promise((resolve) => {
+					answerRead = resolve;
+				}),
+			);
+			const reading = provider.getItem("key");
+			expect(reading).toBeInstanceOf(Promise);
+
+			const written = provider.setItem("key", "new");
+			answerRead("old");
+			await expect(reading).resolves.toBe("new");
+			expect(provider.getItem("key")).toBe("new");
+
+			await vi.advanceTimersByTimeAsync(1000);
+			await written;
+			expect(provider.getItem("key")).toBe("new");
+			expect(provider.readFromServer).toHaveBeenCalledTimes(1);
+		});
+
+		it("[ISSUE-3496-ITEM-27] a write that succeeds after a newer value was written leaves the newer value in the cache", async () => {
+			const provider = new WritingProvider();
+			provider.readFromServer.mockResolvedValue(null);
+			let finishFirst: () => void = () => undefined;
+			provider.writeToServer.mockReturnValueOnce(
+				new Promise((resolve) => {
+					finishFirst = resolve;
+				}),
+			);
+			const first = provider.setItem("key", "first");
+			await vi.advanceTimersByTimeAsync(1000);
+			expect(provider.writeToServer).toHaveBeenCalledExactlyOnceWith(
+				"key",
+				"first",
+			);
+
+			// written while the first write is on its way to the server
+			const second = provider.setItem("key", "second");
+			finishFirst();
+			await first;
+			expect(provider.getItem("key")).toBe("second");
+
+			await vi.advanceTimersByTimeAsync(1000);
+			await second;
+			expect(provider.writeToServer).toHaveBeenLastCalledWith("key", "second");
+			expect(provider.getItem("key")).toBe("second");
+			expect(provider.readFromServer).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3496-ITEM-27] a write that fails after a newer value was written leaves the newer value in the cache", async () => {
+			const provider = new WritingProvider();
+			provider.readFromServer.mockResolvedValue(null);
+			let failFirst: (error: Error) => void = () => undefined;
+			provider.writeToServer.mockReturnValueOnce(
+				new Promise((_resolve, reject) => {
+					failFirst = reject;
+				}),
+			);
+			const first = provider.setItem("key", "first");
+			const firstFailed = expect(first).rejects.toThrow("offline");
+			await vi.advanceTimersByTimeAsync(1000);
+
+			// written while the first write is on its way to the server
+			const second = provider.setItem("key", "second");
+			failFirst(new Error("offline"));
+			await firstFailed;
+			expect(provider.getItem("key")).toBe("second");
+
+			await vi.advanceTimersByTimeAsync(1000);
+			await second;
+			expect(provider.getItem("key")).toBe("second");
+			expect(provider.readFromServer).not.toHaveBeenCalled();
+		});
+	});
 });
