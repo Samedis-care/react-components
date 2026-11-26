@@ -94,10 +94,19 @@ export enum IndexEnhancementLevel {
 
 /**
  * Forwards all read calls (index, read) to the real connector directly but queues all writing calls (create, update, delete) which can be fired at once
- * @remarks Does not support relations, enhances read/index calls with locally updated data
+ * @remarks Does not support relations, enhances read/index calls with locally updated data.
+ *          With fakeReads, reads do not reach the real connector at all.
  */
 class LazyConnector extends Connector {
 	public realConnector: ApiConnector;
+	/**
+	 * Serve reads from the queue alone, without asking the backend
+	 * @remarks For a collection whose parent record is not saved yet, so the backend has
+	 *          nothing under it (and the real connector's endpoint names no parent):
+	 *          index lists only the queued creates and updates, and read rejects for any
+	 *          other record. useLazyCrudConnector sets it for a new record and clears it
+	 *          when the save sends the queue.
+	 */
 	public fakeReads: boolean;
 	public indexEnhancement = IndexEnhancementLevel.Basic;
 	private queue: QueuedFunction[] = [];
@@ -251,9 +260,11 @@ class LazyConnector extends Connector {
 	 * @returns A record whose create is queued: what the queue will create. A record with a
 	 *          queued update: the backend's record with the update's fields laid over it
 	 *          (with fakeReads the update alone, as index lists it). Any other record: the
-	 *          backend's. A record from the backend carries the id index lists it by, which
-	 *          for a record created through this connector stays its fake id after the
-	 *          queue was worked, whichever of its ids it was read by.
+	 *          backend's; with fakeReads a rejection ("Record not found"), as index lists
+	 *          no record of the backend then, and the backend is not asked. A record from
+	 *          the backend carries the id index lists it by, which for a record created
+	 *          through this connector stays its fake id after the queue was worked,
+	 *          whichever of its ids it was read by.
 	 * @throws {Error} The record's delete is queued
 	 */
 	read(
@@ -266,7 +277,15 @@ class LazyConnector extends Connector {
 				(entry) => entry.id === id || (entry.deleteIds?.includes(id) ?? false),
 			),
 		);
-		if (!localData) return this.readFromBackend(id, model);
+		if (!localData) {
+			if (this.fakeReads)
+				return Promise.reject(
+					new Error(
+						`[Components-Care] [LazyConnector] Record not found: ${id}`,
+					),
+				);
+			return this.readFromBackend(id, model);
+		}
 		const queued = localData.result;
 		if (!queued) throw new Error("data has been deleted");
 		if (localData.type === "create" || this.fakeReads) return queued;

@@ -897,3 +897,43 @@ describe("LazyConnector after a first save", () => {
 		expect(request).toStrictEqual([false, [fakeId]]);
 	});
 });
+
+describe("LazyConnector read", () => {
+	/**
+	 * A new record's connector: fakeReads is set, and the real connector points at the
+	 * endpoint built for the parent id "null", where a request is answered for whatever
+	 * it asks
+	 */
+	const makeNewRecordConnector = () => {
+		const { connector } = makeRealConnector();
+		const backendRead = vi.fn((id: string) => Promise.resolve([{ id }, {}]));
+		(connector as unknown as Record<"read", Mock>).read = backendRead;
+		return { lazy: new LazyConnector(connector, true), backendRead };
+	};
+
+	it("[ISSUE-3505-ITEM-30] with fakeReads, a read of a record that is not queued rejects as not found, without asking the backend", async () => {
+		const { lazy, backendRead } = makeNewRecordConnector();
+		// a create dropped again leaves nothing queued under its fake id
+		const [dropped] = lazy.create({ name: "a" }, undefined);
+		const droppedId = (dropped as Record<"id", string>).id;
+		lazy.delete(droppedId, undefined);
+
+		await expect(lazy.read("unknown", undefined)).rejects.toThrow(
+			"Record not found: unknown",
+		);
+		await expect(lazy.read(droppedId, undefined)).rejects.toThrow(
+			`Record not found: ${droppedId}`,
+		);
+		expect(backendRead).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3505-ITEM-30] once fakeReads is cleared, as the save of the new record does, a record that is not queued is read from the backend", async () => {
+		const { lazy, backendRead } = makeNewRecordConnector();
+
+		lazy.fakeReads = false;
+		const [read] = await lazy.read("b", undefined);
+
+		expect(read).toStrictEqual({ id: "b" });
+		expect(backendRead).toHaveBeenCalledWith("b", undefined);
+	});
+});
