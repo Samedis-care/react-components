@@ -1,8 +1,5 @@
 export * from "./FileUpload";
-export * from "./Form/FormLoaderOverlay";
-export { default as FormLoaderOverlay } from "./Form/FormLoaderOverlay";
-export * from "./Form/FormPageLayout";
-export { default as FormPageLayout } from "./Form/FormPageLayout";
+export * from "./Form";
 export { default as InfiniteScroll } from "./InfiniteScroll";
 export * from "./InlineSwitch";
 export { default as InlineSwitch } from "./InlineSwitch";

@@ -1,58 +1,101 @@
 import React, { useId, useLayoutEffect, useRef } from "react";
-import { circularProgressClasses, styled, useThemeProps } from "@mui/material";
+import {
+	alpha,
+	circularProgressClasses,
+	styled,
+	useThemeProps,
+} from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Loader from "../Loader";
 import ccI18n from "../../i18n";
+import combineClassNames from "../../utils/combineClassNames";
+import visuallyHidden from "../../utils/internal/visuallyHidden";
 
-export interface FormLoaderOverlayRootOwnerState {
-	visible: boolean;
-}
+/**
+ * State class of the root while the overlay is visible
+ */
+const VISIBLE_CLASS = "CcFormLoaderOverlay-visible";
+
+/**
+ * How long the wash stays transparent after every show before it fades in, in ms: a
+ * busy phase shorter than that never paints it
+ */
+const SHOW_DELAY = 1000;
+
+/**
+ * Props of the root slot: `visible`, so that theme `variants` can match it (it does not
+ * reach the DOM)
+ */
+type FormLoaderOverlayRootProps = Pick<FormLoaderOverlayProps, "visible">;
+
+/**
+ * What MUI keeps off the DOM of a root slot, plus the overlay's `visible`
+ */
+const ROOT_PROPS_NOT_FORWARDED = new Set<PropertyKey>([
+	"visible",
+	"ownerState",
+	"theme",
+	"sx",
+	"as",
+	"classes",
+]);
 
 const FormLoaderOverlayRoot = styled("div", {
 	name: "CcFormLoaderOverlay",
 	slot: "root",
-})<{ ownerState: FormLoaderOverlayRootOwnerState }>(
-	({ theme, ownerState: { visible } }) => ({
-		position: "absolute",
-		top: 0,
-		left: 0,
-		right: 0,
-		bottom: 0,
-		// above the content it covers, also content with a z-index of its own, and below
-		// the lowest of the theme's app-level layers (mobile stepper, fab, speed dial,
-		// app bar, drawer, modal, snackbar, tooltip), so that dialogs, menus, snackbars
-		// and tooltips opened while it is shown stay above the wash and can be used
-		zIndex: theme.zIndex.mobileStepper - 1,
-		// the spinner's line (loaderAnchor) rests in the middle; the padding, half the
-		// Loader's height (a 40px spinner with theme.spacing(2) above and below), keeps
-		// the spinner inside the wash wherever the line is moved to
-		display: "flex",
-		flexDirection: "column",
-		justifyContent: "center",
-		padding: `calc(${theme.spacing(2)} + 20px) 0`,
-		backgroundColor: "rgba(255,255,255,.3)",
-		// keyboard focus that the overlay takes from the content it wraps; inside the
-		// wash, so that a container that clips its overflow does not cut it off
-		"&:focus-visible": {
-			outline: `2px solid ${theme.palette.primary.main}`,
-			outlineOffset: -2,
-		},
-		...(visible
-			? {
-					// shown, the wash blocks the pointer at once and fades in after 1s, so
-					// that a busy phase shorter than that never paints it. Every show starts
-					// from transparent: the shown state alone has the transition, so hiding
-					// drops the wash at once and a show right after it fades in late again,
-					// and @starting-style gives the transition its start on an overlay
-					// mounted shown (a browser without it shows that one at once)
-					visibility: "visible",
-					opacity: 1,
-					transition: "opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) 1000ms",
-					"@starting-style": { opacity: 0 },
-				}
-			: { visibility: "hidden", opacity: 0 }),
-	}),
-);
+	shouldForwardProp: (prop) => !ROOT_PROPS_NOT_FORWARDED.has(prop),
+})<FormLoaderOverlayRootProps>(({ theme }) => ({
+	position: "absolute",
+	top: 0,
+	left: 0,
+	right: 0,
+	bottom: 0,
+	// above the content it covers, also content with a z-index of its own, and below
+	// the lowest of the theme's app-level layers (mobile stepper, fab, speed dial,
+	// app bar, drawer, modal, snackbar, tooltip), so that dialogs, menus, snackbars
+	// and tooltips opened while it is shown stay above the wash and can be used
+	zIndex: theme.zIndex.mobileStepper - 1,
+	// the spinner's line (loaderAnchor) rests in the middle; the padding, half the
+	// Loader's height (a 40px spinner with theme.spacing(2) above and below), keeps
+	// the spinner inside the wash wherever the line is moved to
+	display: "flex",
+	flexDirection: "column",
+	justifyContent: "center",
+	padding: `calc(${theme.spacing(2)} + 20px) 0`,
+	// the page's surface, see-through: it lightens the content of a light theme and
+	// dims that of a dark one
+	backgroundColor: alpha(theme.palette.background.paper, 0.3),
+	// keyboard focus that the overlay takes from the content it wraps; inside the
+	// wash, so that a container that clips its overflow does not cut it off
+	"&:focus-visible": {
+		outline: `2px solid ${theme.palette.primary.main}`,
+		outlineOffset: -2,
+	},
+	// The hidden and the shown state. :where() keeps their rules at zero specificity,
+	// so that the theme's styleOverrides and variants (keyed on `visible`) win over
+	// them, as over the root's other styles. The leading * stops emotion from reading
+	// the selector as a pseudo-class of the root.
+	[`*:where(&:not(.${VISIBLE_CLASS}))`]: {
+		visibility: "hidden",
+		opacity: 0,
+	},
+	// Shown, the wash blocks the pointer at once and fades in after SHOW_DELAY, so
+	// that a shorter busy phase never paints it. Every show starts from transparent:
+	// the shown state alone has the transition, so hiding drops the wash at once and a
+	// show right after it fades in late again, and @starting-style gives the
+	// transition its start on an overlay mounted shown (a browser without it shows
+	// that one at once)
+	[`*:where(&.${VISIBLE_CLASS})`]: {
+		visibility: "visible",
+		opacity: 1,
+		transition: theme.transitions.create("opacity", {
+			duration: theme.transitions.duration.enteringScreen,
+			easing: theme.transitions.easing.easeInOut,
+			delay: SHOW_DELAY,
+		}),
+		"@starting-style": { opacity: 0 },
+	},
+}));
 
 const FormLoaderOverlayLoaderAnchor = styled("div", {
 	name: "CcFormLoaderOverlay",
@@ -104,27 +147,13 @@ const FormLoaderOverlayContent = styled("div", {
 // the status message: outside the wash, which is `visibility: hidden` while the overlay
 // is idle and would take it out of the accessibility tree, so that it stays the same
 // element in the tree and only its text changes (a live region that appears together
-// with its text is not announced by every screen reader)
+// with its text is not announced by every screen reader). Visually hidden inside the
+// area the wash covers, in its top left corner, so that it makes no page scroll in
+// either direction
 const FormLoaderOverlayStatus = styled("div", {
 	name: "CcFormLoaderOverlay",
 	slot: "status",
-})({
-	// visually hidden, as MUI's visuallyHidden, but inside the area the wash covers: in
-	// its top left corner, without visuallyHidden's -1px margin. Where it would follow
-	// the content, that margin put it 1px past the area's start edge, which in a
-	// right-to-left layout on a left-to-right page (the right edge) scrolled the page
-	// sideways
-	border: 0,
-	clipPath: "inset(50%)",
-	height: 1,
-	overflow: "hidden",
-	padding: 0,
-	position: "absolute",
-	top: 0,
-	left: 0,
-	whiteSpace: "nowrap",
-	width: 1,
-});
+})(visuallyHidden);
 
 /**
  * The default status message while the library's translations are still loading
@@ -139,9 +168,11 @@ const TRANSLATION_OPTIONS = { i18n: ccI18n, useSuspense: false };
 
 /**
  * Theme style slots of {@link FormLoaderOverlay}
- * (`components.CcFormLoaderOverlay.styleOverrides.<slot>`):
+ * (`components.CcFormLoaderOverlay.styleOverrides.<slot>`), also the keys of its
+ * `classes` prop:
  * - `root`: the wash over the nearest positioned ancestor (with `children`, over the
- *   container)
+ *   container), the theme's `palette.background.paper` at 30% opacity. While the
+ *   overlay is visible it has the class `CcFormLoaderOverlay-visible`
  * - `loaderAnchor`: a line of zero height inside the wash, `position: sticky` in the
  *   middle of the visible area, that the spinner is centered on
  * - `loader`: the spinner (a Loader). It is no status region of its own
@@ -160,6 +191,13 @@ const TRANSLATION_OPTIONS = { i18n: ccI18n, useSuspense: false };
  *   the wash covers, inside it, so that it makes no page scroll in either direction.
  *   It is rendered also while the overlay is not visible, outside the wash: right
  *   after it, inside the container with `children`
+ *
+ * No slot receives an `ownerState`: a function override is called with the theme. A
+ * theme styles the visible overlay with theme `variants` keyed on `visible`
+ * (`{ props: { visible: true }, style: { … } }`), which apply to the root, or with
+ * the state class in the root's override (`root: { "&.CcFormLoaderOverlay-visible":
+ * { … } }`). The root's own styles of the hidden and the visible state (visibility,
+ * opacity, the fade-in) give way to both, and to any other override of the root.
  */
 export type FormLoaderOverlayClassKey =
 	"root" | "loaderAnchor" | "loader" | "container" | "content" | "status";
@@ -170,17 +208,29 @@ export interface FormLoaderOverlayProps {
 	 *
 	 * Every show fades in late: when the overlay is shown, as `visible` turns true or
 	 * as the overlay is mounted with `visible` already true, the wash blocks the
-	 * pointer at once, stays transparent for 1s and then fades in over 500ms, so that
-	 * a busy phase shorter than 1s never paints it. A show right after a hide starts
-	 * from transparent too. `false` hides the wash at once and removes the spinner.
+	 * pointer at once, stays transparent for 1s and then fades in, so that a busy
+	 * phase shorter than 1s never paints it. A show right after a hide starts from
+	 * transparent too. `false` hides the wash at once and removes the spinner.
+	 *
+	 * The fade-in takes its timing from the theme, like MUI's Fade: it is
+	 * `theme.transitions.create("opacity")` over `transitions.duration.enteringScreen`
+	 * (225ms with MUI's defaults) with `transitions.easing.easeInOut`, delayed by the
+	 * 1s. A theme whose `transitions.create` returns `"none"` shows the wash at once.
 	 * The status message (see `message`) and, with `children`, the `inert` and
 	 * `aria-busy` content follow `visible` at once, not the fade.
 	 */
 	visible: boolean;
 	/**
-	 * custom styles applied to root
+	 * Class name added to the root, the wash (with `classes.root`)
 	 */
 	className?: string;
+	/**
+	 * Class names added to the slots, by slot (see {@link FormLoaderOverlayClassKey}).
+	 * `loaderAnchor` and `loader` are rendered while the overlay is visible only,
+	 * `container` and `content` with `children` only.
+	 * @default undefined (none)
+	 */
+	classes?: Partial<Record<FormLoaderOverlayClassKey, string>>;
 	/**
 	 * The status message that screen readers announce while the overlay is visible,
 	 * already translated, such as "The form is currently being saved" (BasicFormPage)
@@ -214,7 +264,7 @@ export interface FormLoaderOverlayProps {
 
 const FormLoaderOverlay = (inProps: FormLoaderOverlayProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcFormLoaderOverlay" });
-	const { visible, className, message, children } = props;
+	const { visible, className, classes, message, children } = props;
 	const wraps = children !== undefined;
 	const { t, ready } = useTranslation("translation", TRANSLATION_OPTIONS);
 	const statusMessage =
@@ -260,12 +310,20 @@ const FormLoaderOverlay = (inProps: FormLoaderOverlayProps) => {
 		<FormLoaderOverlayRoot
 			ref={rootRef}
 			tabIndex={wraps ? -1 : undefined}
-			ownerState={{ visible }}
-			className={className}
+			visible={visible}
+			className={combineClassNames([
+				className,
+				classes?.root,
+				visible && VISIBLE_CLASS,
+			])}
 		>
 			{visible && (
-				<FormLoaderOverlayLoaderAnchor>
-					<FormLoaderOverlayLoader role={"none"} aria-labelledby={statusId} />
+				<FormLoaderOverlayLoaderAnchor className={classes?.loaderAnchor}>
+					<FormLoaderOverlayLoader
+						role={"none"}
+						aria-labelledby={statusId}
+						className={classes?.loader}
+					/>
 				</FormLoaderOverlayLoaderAnchor>
 			)}
 		</FormLoaderOverlayRoot>
@@ -273,7 +331,12 @@ const FormLoaderOverlay = (inProps: FormLoaderOverlayProps) => {
 	const status = (
 		// not busy itself, so that a screen reader that holds back the messages of a busy
 		// area (an aria-busy form around the overlay) still announces this one
-		<FormLoaderOverlayStatus id={statusId} role={"status"} aria-busy={false}>
+		<FormLoaderOverlayStatus
+			id={statusId}
+			role={"status"}
+			aria-busy={false}
+			className={classes?.status}
+		>
 			{visible ? statusMessage : ""}
 		</FormLoaderOverlayStatus>
 	);
@@ -285,10 +348,11 @@ const FormLoaderOverlay = (inProps: FormLoaderOverlayProps) => {
 			</>
 		);
 	return (
-		<FormLoaderOverlayContainer>
+		<FormLoaderOverlayContainer className={classes?.container}>
 			<FormLoaderOverlayContent
 				ref={contentRef}
 				aria-busy={visible || undefined}
+				className={classes?.content}
 			>
 				{children}
 			</FormLoaderOverlayContent>
@@ -304,10 +368,13 @@ const FormLoaderOverlay = (inProps: FormLoaderOverlayProps) => {
  * BasicFormPage shows it over the form page while the form is submitting, through
  * FormPageLayout's `other`, which makes it cover the form layout.
  *
+ * The wash is the theme's `palette.background.paper` at 30% opacity: it lightens the
+ * content under it in a light theme and dims it in a dark one.
+ *
  * Timing: the wash fades in 1s after every show, also when the overlay is mounted
- * shown, so that a short busy phase never flashes it; hiding is at once (see
- * {@link FormLoaderOverlayProps.visible}). To show a spinner at once, such as the
- * whole content of a view while it loads, use a Loader instead.
+ * shown, so that a short busy phase never flashes it, with the theme's transitions;
+ * hiding is at once (see {@link FormLoaderOverlayProps.visible}). To show a spinner at
+ * once, such as the whole content of a view while it loads, use a Loader instead.
  *
  * Input: the wash alone blocks pointer input only. The controls under it stay
  * reachable with Tab and operable by keyboard: disable them while it is shown, or pass

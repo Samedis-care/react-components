@@ -106,7 +106,7 @@ export const Controllable: OverlayStory = {
 		docs: {
 			description: {
 				story:
-					"Toggling `visible` on a mounted overlay: it blocks the pointer at once but stays transparent for 1s, then fades in over 500ms. Hiding it again is immediate, so a save shorter than 1s never paints the wash.",
+					"Toggling `visible` on a mounted overlay: it blocks the pointer at once but stays transparent for 1s, then fades in over the theme's `transitions.duration.enteringScreen` (225ms with MUI's defaults). Hiding it again is immediate, so a save shorter than 1s never paints the wash.",
 			},
 		},
 	},
@@ -128,7 +128,7 @@ export const Controllable: OverlayStory = {
 		await expect(fade.transitionProperty).toBe("opacity");
 		await expect(fade.effect?.getTiming()).toMatchObject({
 			delay: 1000,
-			duration: 500,
+			duration: 225,
 		});
 
 		// hide before the delay ends: the wash never painted, the pointer goes through
@@ -192,7 +192,7 @@ export const Issue3473Item13MountedShownFadesInLate: OverlayStory = {
 		docs: {
 			description: {
 				story:
-					"ISSUE-3473-ITEM-13: an overlay mounted already shown (`{loading && <FormLoaderOverlay visible />}`) fades in late, as one whose `visible` turns true: it blocks the pointer at once, stays transparent for 1s and then fades in over 500ms, so a load shorter than 1s never paints the wash.",
+					"ISSUE-3473-ITEM-13: an overlay mounted already shown (`{loading && <FormLoaderOverlay visible />}`) fades in late, as one whose `visible` turns true: it blocks the pointer at once, stays transparent for 1s and then fades in, so a load shorter than 1s never paints the wash.",
 			},
 		},
 		a11y: { test: "error" },
@@ -209,7 +209,7 @@ export const Issue3473Item13MountedShownFadesInLate: OverlayStory = {
 			overlay.contains(hitAtCenter(canvas.getByText("Form Content"))),
 		).toBe(true);
 		await expect(transitionsOf(overlay)).toEqual([
-			{ property: "opacity", delay: 1000, duration: 500 },
+			{ property: "opacity", delay: 1000, duration: 225 },
 		]);
 	},
 };
@@ -245,8 +245,87 @@ export const Issue3473Item13ShownAgainFadesInLate: OverlayStory = {
 		await expect(getComputedStyle(overlay).visibility).toBe("visible");
 		await expect(getComputedStyle(overlay).opacity).toBe("0");
 		await expect(transitionsOf(overlay)).toEqual([
-			{ property: "opacity", delay: 1000, duration: 500 },
+			{ property: "opacity", delay: 1000, duration: 225 },
 		]);
+	},
+};
+
+/**
+ * A theme whose transitions differ from MUI's defaults: 400ms to enter the screen, and a
+ * linear easing
+ */
+const slowLinearTheme = createTheme({
+	transitions: {
+		duration: { enteringScreen: 400 },
+		easing: { easeInOut: "linear" },
+	},
+});
+
+export const Issue3473Item14FadeFollowsTheme: OverlayStory = {
+	args: { visible: false },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-14: the wash fades in with the theme's transitions, over `theme.transitions.duration.enteringScreen` with `theme.transitions.easing.easeInOut`, 1s after it is shown. This theme enters the screen in 400ms with a linear easing.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	render: (args) => (
+		<ThemeProvider theme={slowLinearTheme}>
+			<ToggleOverlay {...args} />
+		</ThemeProvider>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const overlay = overlayIn(canvasElement);
+		await userEvent.click(canvas.getByRole("button", { name: "Show overlay" }));
+		await nextFrame();
+		await expect(getComputedStyle(overlay).opacity).toBe("0");
+		await expect(transitionsOf(overlay)).toEqual([
+			{ property: "opacity", delay: 1000, duration: 400 },
+		]);
+		await expect(getComputedStyle(overlay).transitionTimingFunction).toBe(
+			"linear",
+		);
+	},
+};
+
+/**
+ * A theme whose variant for the shown overlay drops the fade-in
+ */
+const washAtOnceTheme = createTheme({
+	components: {
+		CcFormLoaderOverlay: {
+			variants: [{ props: { visible: true }, style: { transition: "none" } }],
+		},
+	},
+});
+
+export const Issue3473Item14ThemeVariantKeyedOnVisible: OverlayStory = {
+	args: { visible: false },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-14: a theme variant keyed on `visible` styles the shown wash, also a property the shown state sets itself: this theme's variant drops the fade-in (`transition: none`), so the wash shows at once.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	render: (args) => (
+		<ThemeProvider theme={washAtOnceTheme}>
+			<ToggleOverlay {...args} />
+		</ThemeProvider>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const overlay = overlayIn(canvasElement);
+		await userEvent.click(canvas.getByRole("button", { name: "Show overlay" }));
+		await nextFrame();
+		await expect(transitionsOf(overlay)).toEqual([]);
+		await expect(getComputedStyle(overlay).opacity).toBe("1");
 	},
 };
 

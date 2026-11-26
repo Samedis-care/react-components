@@ -584,8 +584,11 @@ declare module "@mui/material/styles" {
 		};
 		CcFormLoaderOverlay?: {
 			defaultProps?: ComponentsPropsList["CcFormLoaderOverlay"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcFormLoaderOverlay"];
-			variants?: ComponentsVariants["CcFormLoaderOverlay"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<FormLoaderOverlayClassKey>;
+			// the root gets visible, and none of the other props
+			variants?: VariantsWithoutOwnerState<
+				Pick<FormLoaderOverlayProps, "visible">
+			>;
 		};
 		CcLoader?: {
 			defaultProps?: ComponentsPropsList["CcLoader"];

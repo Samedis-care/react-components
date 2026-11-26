@@ -67,6 +67,12 @@ describe("theme-def", () => {
 						root: ({ ownerState }) => ({ color: ownerState ? "red" : "blue" }),
 					},
 				},
+				CcFormLoaderOverlay: {
+					styleOverrides: {
+						// @ts-expect-error no slot of FormLoaderOverlay receives an ownerState
+						root: ({ ownerState }) => ({ color: ownerState ? "red" : "blue" }),
+					},
+				},
 				CcBackendDataGridMultiSelect: {
 					styleOverrides: {
 						// @ts-expect-error no slot of BackendDataGridMultiSelect receives an ownerState
@@ -382,7 +388,7 @@ describe("theme-def", () => {
 			},
 		});
 		expect(overrideFunctions(theme)).toEqual(
-			Array(55).fill(expect.any(Function)),
+			Array(56).fill(expect.any(Function)),
 		);
 	});
 	it("[ISSUE-3462-ITEM-17] keeps ownerState in the function styleOverrides of the components whose every slot receives one", () => {
@@ -535,6 +541,26 @@ describe("theme-def", () => {
 			},
 		});
 		expect(variants(theme)).toHaveLength(17);
+	});
+	it("[ISSUE-3473-ITEM-14] types the variants of FormLoaderOverlay as matching visible, without an ownerState", () => {
+		const theme = createTheme({
+			components: {
+				CcFormLoaderOverlay: {
+					variants: [
+						{ props: { visible: true }, style: {} },
+						{ props: ({ visible }) => visible === false, style: {} },
+						// @ts-expect-error message does not reach the root
+						{ props: { message: "Saving…" }, style: {} },
+						{
+							// @ts-expect-error FormLoaderOverlay's slots get no ownerState
+							props: ({ ownerState }) => !!ownerState,
+							style: {},
+						},
+					],
+				},
+			},
+		});
+		expect(theme.components?.CcFormLoaderOverlay?.variants).toHaveLength(4);
 	});
 	it("[ISSUE-3465-ITEM-19] a theme cannot show a selector's switch without its switchLabel", () => {
 		// switchLabel is the switch's visible text and its only accessible name, so default

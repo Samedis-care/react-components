@@ -80,45 +80,67 @@ const Body = styled("div", { name: "CcFormPageLayout", slot: "body" })({
 	isolation: "isolate",
 });
 
-const Footer = styled("div", { name: "CcFormPageLayout", slot: "footer" })({
-	// in flow at the bottom of the layout, and held at most as low as 36px above the
-	// bottom of the content area of whatever scrolls (a scrolling dialog content,
-	// panel or main area, or the viewport): while the body is longer than that area,
-	// the body scrolls under the footer; at the end of a long form, or on a short
-	// form whose layout reaches that far down, it rests at that height
-	position: "sticky",
-	bottom: 36,
-	flexShrink: 0,
-	// as wide as its buttons, but never wider than the layout: on a narrow screen the
-	// buttons wrap inside it (FormButtons) instead of the bar sticking out of its
-	// container and making the page scroll sideways
-	alignSelf: "flex-start",
-	maxWidth: "100%",
-	// 30px between the body's content and the footer, plus the up to 36px the footer
-	// is lifted by where the layout ends at the bottom of the visible area
-	margin: "66px 0 0",
-	padding: 0,
-	// a footer that renders nothing (a FormButtons without a button left) keeps no
-	// space below the body
-	"&:empty": {
-		display: "none",
-	},
-	// On a short screen (a phone held sideways, a page zoomed to 400%) a floating footer
-	// would cover much of the little that is visible, so it stays in flow after the body,
-	// where it rests at the end of a long form anyway: 30px below the body's content and
-	// 36px above the end of the layout.
-	"@media (max-height: 480px)": {
-		position: "static",
-		margin: "30px 0 36px",
-	},
-});
+/**
+ * The footer's offset from the bottom of the visible area, in units of `theme.spacing`
+ * (36px with MUI's default spacing)
+ */
+const FOOTER_OFFSET = 4.5;
+
+/**
+ * The space between the body's content and a footer resting at the end of the layout,
+ * in units of `theme.spacing` (30px with MUI's default spacing)
+ */
+const FOOTER_GAP = 3.75;
+
+const Footer = styled("div", { name: "CcFormPageLayout", slot: "footer" })(
+	({ theme }) => ({
+		// in flow at the bottom of the layout, and held at most as low as FOOTER_OFFSET
+		// above the bottom of the content area of whatever scrolls (a scrolling dialog
+		// content, panel or main area, or the viewport): while the body is longer than
+		// that area, the body scrolls under the footer; at the end of a long form, or
+		// on a short form whose layout reaches that far down, it rests at that height
+		position: "sticky",
+		bottom: theme.spacing(FOOTER_OFFSET),
+		flexShrink: 0,
+		// as wide as its buttons, but never wider than the layout: on a narrow screen
+		// the buttons wrap inside it (FormButtons) instead of the bar sticking out of
+		// its container and making the page scroll sideways
+		alignSelf: "flex-start",
+		maxWidth: "100%",
+		// FOOTER_GAP between the body's content and the footer, plus the up to
+		// FOOTER_OFFSET the footer is lifted by where the layout ends at the bottom of
+		// the visible area
+		margin: `calc(${theme.spacing(FOOTER_GAP)} + ${theme.spacing(FOOTER_OFFSET)}) 0 0`,
+		padding: 0,
+		// a footer that renders nothing (a FormButtons without a button left) keeps no
+		// space below the body
+		"&:empty": {
+			display: "none",
+		},
+		// On a short screen (a phone held sideways, a page zoomed to 400%) a floating
+		// footer would cover much of the little that is visible, so it stays in flow
+		// after the body, where it rests at the end of a long form anyway: FOOTER_GAP
+		// below the body's content and FOOTER_OFFSET above the end of the layout.
+		"@media (max-height: 480px)": {
+			position: "static",
+			margin: theme.spacing(FOOTER_GAP, 0, FOOTER_OFFSET),
+		},
+	}),
+);
 
 /**
  * Space left between a focused element and the footer when the element is scrolled out
- * from under the footer: the space between the body's content and a footer resting at
- * the end of the layout
+ * from under the footer, in px: the space between the body's content and a footer
+ * resting at the end of the layout (FOOTER_GAP), its top margin less the height a
+ * floating footer is lifted by
+ * @param footer The footer
  */
-const FOCUS_CLEARANCE = 30;
+const getFocusClearance = (footer: Element) => {
+	const { marginTop, bottom, position } = getComputedStyle(footer);
+	return (
+		parseFloat(marginTop) - (position === "sticky" ? parseFloat(bottom) : 0)
+	);
+};
 
 /**
  * The nearest ancestor of the element that is a scroll container, the one a sticky
@@ -140,9 +162,9 @@ const getScrollContainer = (el: Element): Element | null => {
 
 /**
  * Scrolls the focused element up if the floating footer covers it or it lies below the
- * footer, until it ends FOCUS_CLEARANCE above the footer, but never so far that its top
- * leaves the visible area. The browser scrolls a focused element into view only when it
- * lies outside the visible area, and the footer is inside it.
+ * footer, until it ends the focus clearance above the footer, but never so far that its
+ * top leaves the visible area. The browser scrolls a focused element into view only
+ * when it lies outside the visible area, and the footer is inside it.
  * @param target The focused element, in the body
  * @param footer The footer
  */
@@ -163,7 +185,7 @@ const scrollClearOfFooter = (target: Element, footer: Element) => {
 		? scroller.getBoundingClientRect().top + scroller.clientTop
 		: 0;
 	const distance = Math.min(
-		rect.bottom - footerRect.top + FOCUS_CLEARANCE,
+		rect.bottom - footerRect.top + getFocusClearance(footer),
 		rect.top - visibleTop,
 	);
 	if (distance <= 0) return;
@@ -254,6 +276,11 @@ const FormPageLayout = (inProps: FormPageLayoutProps) => {
  *   36px above the layout's end. That is where a floating footer rests at the end of a
  *   long form and on a short form that fills its parent; on a long form, Save is at
  *   the end.
+ *
+ * The distances are the theme's spacing, given here at MUI's default of 8px: 36px is
+ * `theme.spacing(4.5)`, 30px is `theme.spacing(3.75)` and 66px their sum. A theme with
+ * another spacing scales them all, also the space kept above the footer when the focus
+ * is scrolled clear of it (see below).
  *
  * Horizontally, the footer is as wide as its content, but never wider than the layout
  * (`align-self: flex-start` with `max-width: 100%`), and sits at the layout's start

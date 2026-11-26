@@ -250,4 +250,144 @@ describe("FormLoaderOverlay", () => {
 		expect(root).not.toHaveAttribute("tabindex");
 		expect(container.querySelector("[inert]")).toBeNull();
 	});
+
+	it("[ISSUE-3473-ITEM-14] exports FormLoaderOverlay and FormPageLayout from the Form folder's index", async () => {
+		const folder = (await import("../../src/standalone/Form")) as Record<
+			string,
+			unknown
+		>;
+		const { default: FormPageLayout } =
+			await import("../../src/standalone/Form/FormPageLayout");
+		expect([folder.FormLoaderOverlay, folder.FormPageLayout]).toEqual([
+			FormLoaderOverlay,
+			FormPageLayout,
+		]);
+	});
+
+	it("[ISSUE-3473-ITEM-14] marks the root with CcFormLoaderOverlay-visible while visible, and only then", () => {
+		const { container, rerender } = renderOverlay(
+			<FormLoaderOverlay visible={false} />,
+		);
+		const root = overlayRoot(container);
+		expect(root).not.toHaveClass("CcFormLoaderOverlay-visible");
+		rerender(withTheme(<FormLoaderOverlay visible />));
+		expect(overlayRoot(container)).toBe(root);
+		expect(root).toHaveClass("CcFormLoaderOverlay-visible");
+		rerender(withTheme(<FormLoaderOverlay visible={false} />));
+		expect(root).not.toHaveClass("CcFormLoaderOverlay-visible");
+	});
+
+	it("[ISSUE-3473-ITEM-14] applies the theme's variants keyed on visible to the root", () => {
+		const themed = createTheme({
+			components: {
+				CcFormLoaderOverlay: {
+					variants: [
+						{
+							props: { visible: true },
+							style: { outlineColor: "rgb(1, 2, 3)" },
+						},
+						{
+							props: { visible: false },
+							style: { outlineColor: "rgb(4, 5, 6)" },
+						},
+						{
+							props: ({ visible }) => visible === true,
+							style: { borderTopColor: "rgb(7, 8, 9)" },
+						},
+					],
+				},
+			},
+		});
+		const colorsOf = (el: HTMLElement) => {
+			const style = getComputedStyle(el);
+			return [style.outlineColor, style.borderTopColor === "rgb(7, 8, 9)"];
+		};
+		const { container, rerender } = renderOverlay(
+			<FormLoaderOverlay visible={false} />,
+			themed,
+		);
+		expect(colorsOf(overlayRoot(container))).toEqual(["rgb(4, 5, 6)", false]);
+		rerender(withTheme(<FormLoaderOverlay visible />, themed));
+		expect(colorsOf(overlayRoot(container))).toEqual(["rgb(1, 2, 3)", true]);
+	});
+
+	it("[ISSUE-3473-ITEM-14] calls the theme's style override functions without an ownerState", () => {
+		const themed = createTheme({
+			components: {
+				CcFormLoaderOverlay: {
+					styleOverrides: {
+						root: (props: object) => ({
+							outlineColor:
+								"ownerState" in props && props.ownerState
+									? "rgb(1, 1, 1)"
+									: "rgb(2, 2, 2)",
+						}),
+					},
+				},
+			},
+		});
+		const { container } = renderOverlay(<FormLoaderOverlay visible />, themed);
+		expect(getComputedStyle(overlayRoot(container)).outlineColor).toBe(
+			"rgb(2, 2, 2)",
+		);
+	});
+
+	it("[ISSUE-3473-ITEM-14] adds each key of classes to its slot, and className to the root", () => {
+		const { container } = renderOverlay(
+			<FormLoaderOverlay
+				visible
+				className={"app-overlay"}
+				classes={{
+					root: "app-root",
+					loaderAnchor: "app-loader-anchor",
+					loader: "app-loader",
+					container: "app-container",
+					content: "app-content",
+					status: "app-status",
+				}}
+			>
+				<button>Start</button>
+			</FormLoaderOverlay>,
+		);
+		const only = (className: string) => {
+			const found = container.querySelectorAll<HTMLElement>(`.${className}`);
+			expect(found, className).toHaveLength(1);
+			return found[0];
+		};
+		const root = overlayRoot(container);
+		expect(root).toHaveClass("app-overlay", "app-root");
+		const progressbar = screen.getByRole("progressbar");
+		const anchor = only("app-loader-anchor");
+		const loader = only("app-loader");
+		expect(root).toContainElement(anchor);
+		expect(anchor).toContainElement(loader);
+		expect(loader).toContainElement(progressbar);
+		const box = only("app-container");
+		const content = only("app-content");
+		expect(box).toContainElement(root);
+		expect(box).toContainElement(content);
+		expect(content).toContainElement(
+			screen.getByRole("button", { name: "Start" }),
+		);
+		expect(content).not.toContainElement(root);
+		expect(screen.getByRole("status")).toBe(only("app-status"));
+	});
+
+	it("[ISSUE-3473-ITEM-14] washes the covered content in the theme's paper color, so a dark theme dims it", () => {
+		const washOf = (t: Theme) => {
+			const { container } = renderOverlay(<FormLoaderOverlay visible />, t);
+			const color = getComputedStyle(overlayRoot(container)).backgroundColor;
+			cleanup();
+			return color;
+		};
+		expect([
+			washOf(createTheme()),
+			washOf(createTheme({ palette: { mode: "dark" } })),
+			washOf(createTheme({ palette: { background: { paper: "#faf8f0" } } })),
+		]).toEqual([
+			"rgba(255, 255, 255, 0.3)",
+			"rgba(18, 18, 18, 0.3)",
+			"rgba(250, 248, 240, 0.3)",
+		]);
+	});
 });

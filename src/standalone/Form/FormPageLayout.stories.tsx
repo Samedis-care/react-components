@@ -5,6 +5,7 @@ import {
 	Alert,
 	Box,
 	Button,
+	createTheme,
 	Dialog,
 	DialogContent,
 	DialogTitle,
@@ -12,6 +13,7 @@ import {
 	IconButton,
 	Paper,
 	TextField,
+	ThemeProvider,
 	Typography,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
@@ -1231,5 +1233,88 @@ export const Issue3473Item5FooterWithoutButtonsTakesNoSpace: Story = {
 		await expect(
 			distance(rectOf(bodyIn(mainEl)).bottom, rectOf(mainEl).bottom),
 		).toBeLessThanOrEqual(1);
+	},
+};
+
+const footerIn = (scope: ParentNode) => {
+	const footer = scope.querySelector('[class*="CcFormPageLayout-footer"]');
+	if (!footer) throw new Error("no footer rendered");
+	return footer;
+};
+
+/**
+ * A theme with a spacing unit of 4px, half of MUI's default
+ */
+const halfSpacingTheme = createTheme({ spacing: 4 });
+
+export const Issue3473Item14FooterSpacingFollowsTheme: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-14: the footer's offsets come from `theme.spacing`. With a spacing unit of 4px, the floating Save bar keeps `theme.spacing(4.5)` (18px) to the bottom of the scrolling panel, a field focused under it is scrolled to end `theme.spacing(3.75)` (15px) above it, and at the end of the form the bar rests 15px below the form.",
+			},
+		},
+	},
+	render: () => (
+		<ThemeProvider theme={halfSpacingTheme}>
+			<Box
+				data-testid={"panel"}
+				sx={{
+					position: "relative",
+					overflowY: "auto",
+					width: 400,
+					height: 500,
+					display: "flex",
+					flexDirection: "column",
+				}}
+			>
+				<FormPageLayout
+					body={<Fields count={20} />}
+					footer={<SaveBackButtons />}
+				/>
+			</Box>
+		</ThemeProvider>
+	),
+	play: async ({ canvasElement }) => {
+		const panelEl = within(canvasElement).getByTestId("panel");
+		const panel = rectOf(panelEl);
+		const EPS = 1;
+		await expect(
+			distance(rectOf(footerIn(panelEl)).bottom, panel.bottom - 18),
+			"floating footer to the panel's bottom",
+		).toBeLessThanOrEqual(EPS);
+
+		// a field the footer covers, focused, ends 15px above it
+		const footerTop = rectOf(footerIn(panelEl)).top;
+		const covered = Array.from(panelEl.querySelectorAll("input")).find(
+			(input) => {
+				const r = rectOf(input);
+				return r.bottom > footerTop && r.bottom < panel.bottom;
+			},
+		);
+		if (!covered) throw new Error("no field under the footer");
+		covered.focus();
+		await nextFrame();
+		await nextFrame();
+		await expect(
+			distance(rectOf(covered).bottom, rectOf(footerIn(panelEl)).top - 15),
+			"focused field to the footer",
+		).toBeLessThanOrEqual(EPS);
+
+		// scrolled to the end, the footer rests below the form
+		panelEl.scrollTop = panelEl.scrollHeight;
+		await nextFrame();
+		await expect(
+			distance(
+				rectOf(footerIn(panelEl)).top,
+				rectOf(bodyIn(panelEl)).bottom + 15,
+			),
+			"footer to the end of the form",
+		).toBeLessThanOrEqual(EPS);
+		await expect(
+			distance(rectOf(footerIn(panelEl)).bottom, panel.bottom - 18),
+			"resting footer to the panel's bottom",
+		).toBeLessThanOrEqual(EPS);
 	},
 };
