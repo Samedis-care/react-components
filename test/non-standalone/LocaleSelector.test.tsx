@@ -680,6 +680,30 @@ describe("LocaleSelectorDialog", () => {
 			await flush();
 			expect(currentRows()).toEqual(["United Kingdom"]);
 		});
+
+		it("[ISSUE-3499-ITEM-9] marks the native names with the language they are written in", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={["ru"]} />);
+			const row = await rowBtn("Russia");
+			const langOf = (text: string) =>
+				within(row).getByText(text).closest("[lang]")?.getAttribute("lang");
+			expect([langOf("Россия"), langOf("русский")]).toEqual(["ru", "ru"]);
+		});
+
+		it("[ISSUE-3499-ITEM-9] leaves the names in the UI language in the page's language", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={["ru"]} />);
+			const row = await rowBtn("Russia");
+			// a lang on the row, or on a wrapper of all its names, would mark these too
+			const markedInRow = (text: string) => {
+				const marked = within(row).getByText(text).closest("[lang]");
+				return marked !== null && row.contains(marked);
+			};
+			expect([markedInRow("Russia"), markedInRow("Russian")]).toEqual([
+				false,
+				false,
+			]);
+		});
 	});
 
 	describe("switching", () => {

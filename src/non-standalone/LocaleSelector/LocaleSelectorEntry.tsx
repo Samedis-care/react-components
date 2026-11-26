@@ -109,7 +109,8 @@ const CurrentIcon = styled("span", {
  * - `container`: the flex box of flag and names
  * - `flag`: the flag
  * - `textContainer`: the grid of the names (country column, language column)
- * - `text`: each name; its `title` holds the full text
+ * - `text`: each name; its `title` holds the full text. The names in the row's
+ *   own language (shown when it isn't the UI language) carry its `lang`
  * - `language`: the cell of the language name in the UI language; in the row of
  *   the current locale it also holds the check
  * - `currentIcon`: the check of the current locale's row, at the row's end
@@ -169,8 +170,12 @@ const LocaleSelectorEntry = (
 					</Language>
 					{!sameLang && (
 						<>
-							<Text title={locale.native_country}>{locale.native_country}</Text>
-							<Text title={locale.native_language}>
+							{/* written in the row's language, not the UI's: lang lets a
+							    screen reader speak them with that language's voice */}
+							<Text lang={locale.language_short} title={locale.native_country}>
+								{locale.native_country}
+							</Text>
+							<Text lang={locale.language_short} title={locale.native_language}>
 								{locale.native_language}
 							</Text>
 						</>
