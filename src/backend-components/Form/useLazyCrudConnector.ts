@@ -10,12 +10,14 @@ import { DistributiveOmit } from "../../utils/distributiveOmit";
  * Params of useLazyCrudConnector, which FormCrudMultiSelect, FormCrudFileUpload,
  * FormCrudMultiImage and app wrappers take as props (extractLazyCrudConnectorParams splits
  * them off)
- * @remarks The params are read once: field when the control mounts, the others when the
- *          connector is built, which is the first time a control with this field renders in
- *          its Form. The connector then lives as long as the Form (a Form given another
- *          record starts over), and its reads and every save use what it was built with,
- *          also when a param changes later or the control mounts again with other ones.
- *          Another collection takes another field name and a new mount of the control,
+ * @typeParam ExtraT What extraParams holds: a record, as the default API connector factory
+ *            takes it, or undefined
+ * @remarks The params are read once, except onQueueSent: field when the control mounts, the
+ *          others when the connector is built, which is the first time a control with this
+ *          field renders in its Form. The connector then lives as long as the Form (a Form
+ *          given another record starts over), and its reads and every save use what it was
+ *          built with, also when a param changes later or the control mounts again with other
+ *          ones. Another collection takes another field name and a new mount of the control,
  *          e.g. `key={field}`.
  *
  *          getEndpoint, getConnector and configureConnector build the connector while the
@@ -25,14 +27,21 @@ import { DistributiveOmit } from "../../utils/distributiveOmit";
  *          so these run twice there. onParentIdChange is never called during render: it
  *          gets the id once the control that built the connector has mounted.
  */
-export interface UseLazyCrudConnectorParams<ExtraT = undefined> {
+export interface UseLazyCrudConnectorParams<
+	ExtraT extends Record<string, unknown> | undefined = undefined,
+> {
 	/**
 	 * The control's name in the Form: the Form keeps the control's connector (its custom
-	 * state), its post-submit handler and its custom dirty flag under it. Unique within the
-	 * Form, and not a model field.
+	 * state, `getCustomState<LazyConnector>(field)`), its post-submit handler and its custom
+	 * dirty flag under it. Unique within the Form, and not a model field.
 	 * @remarks Read when the control mounts; a later value is ignored. A control that
 	 *          mounts again under the same name gets that name's connector back, queue
 	 *          included, built from the params of the first mount.
+	 *
+	 *          Two controls with one name in a Form mix up their collections: one that mounts
+	 *          while the other is mounted gets the other's connector and lists its
+	 *          collection, and two that mount together share the dirty flag while the save
+	 *          sends only the queue of the one that mounted last.
 	 */
 	field: string;
 	/**
@@ -49,18 +58,40 @@ export interface UseLazyCrudConnectorParams<ExtraT = undefined> {
 	 * @remarks Read once, when the connector is built: its reads and every save use this
 	 *          function, a later one is never called. Called during render when the
 	 *          connector is built, so it must not set state.
+	 *
+	 *          For a new record the connector is built for getEndpoint("null"), e.g.
+	 *          `v1/orgs/null/roles`, but its list is never requested there: until the save,
+	 *          the control lists what was queued, and the save points the connector at
+	 *          getEndpoint(savedId) before it sends anything.
 	 */
 	getEndpoint: (id: string) => string;
 	/**
-	 * Called with the parent record's id: initialId (the string "null" for a new record)
-	 * once the control that built the connector has mounted, and the saved record's id on
-	 * every save, right before getEndpoint gets it. Never during render, so it may set state.
+	 * Called with the parent record's id once it is known: initialId once the control that
+	 * built the connector has mounted (not for a new record, whose id comes with the save),
+	 * and the saved record's id on every save, right before getEndpoint gets it and before
+	 * the queue is sent. Never during render, so it may set state.
 	 * @param id The parent record id
 	 * @remarks Read once, when the connector is built; a later one is never called. Called
 	 *          with initialId once per connector: not again when the control mounts again
-	 *          under its field, nor when StrictMode runs its effects again.
+	 *          under its field, nor when StrictMode runs its effects again. To act once the
+	 *          save sent the queue, use onQueueSent.
 	 */
 	onParentIdChange?: (id: string) => void;
+	/**
+	 * Called by every save once the control's queue was sent, also when nothing was queued,
+	 * e.g. to store a record's primary image under the server's id of a picked one
+	 * @param id The saved record's id
+	 * @param connector The control's connector: its mapId gives the server's id of a record
+	 *        created through it
+	 * @returns The save waits for it: the Form's "dirty" event and onSubmit come after it,
+	 *          and a rejection fails the submit, although the record and the queue are saved
+	 * @remarks Not called while the backend refuses a write of the queue (the submit
+	 *          rejects with that refusal), and called by the next save that gets it through.
+	 *          Read from the control's latest render, also from a control that mounts again
+	 *          under its field; a control that unmounted with its queue left to the save
+	 *          (without onlySubmitMounted) has the save call the one of its last render.
+	 */
+	onQueueSent?: (id: string, connector: LazyConnector) => Promise<void> | void;
 	/**
 	 * Creates the real connector, which the reads go through and the save sends the queue
 	 * through
@@ -93,12 +124,28 @@ export interface UseLazyCrudConnectorParams<ExtraT = undefined> {
 	initialId: string | null;
 }
 
+/**
+ * What useLazyCrudConnector returns
+ */
 export interface UseLazyCrudConnectorResult {
+	/**
+	 * The connector to give the Crud* control: one per Form, field and record, the same
+	 * instance on every render and for a control that mounts again under its field
+	 * @remarks A record created through it has a client-side id (`fake-id-N`) and keeps it
+	 *          for the connector's life, also after the save: index and read hand it out
+	 *          under that id, and a deserialize of the control gets it as `id`. mapId gives
+	 *          the server's id once the save sent the queue.
+	 */
 	connector: LazyConnector;
 }
 
+/**
+ * Splits a wrapper component's props into the params of useLazyCrudConnector and the rest
+ * @param data The props
+ * @returns The hook's params (every key, absent ones undefined) and every other prop
+ */
 export const extractLazyCrudConnectorParams = <
-	ExtraT,
+	ExtraT extends Record<string, unknown> | undefined,
 	T extends UseLazyCrudConnectorParams<ExtraT>,
 >(
 	data: T,
@@ -112,6 +159,7 @@ export const extractLazyCrudConnectorParams = <
 		getConnector,
 		configureConnector,
 		onParentIdChange,
+		onQueueSent,
 		extraParams,
 		field,
 		...otherProps
@@ -122,6 +170,7 @@ export const extractLazyCrudConnectorParams = <
 		getConnector,
 		configureConnector,
 		onParentIdChange,
+		onQueueSent,
 		extraParams,
 		field,
 	};
@@ -141,7 +190,8 @@ class FormLazyConnector extends LazyConnector {
 	private readonly getEndpoint: (id: string) => string;
 	private readonly onParentIdChange: ((id: string) => void) | undefined;
 	/**
-	 * The parent record id the connector was built for, until onParentIdChange got it
+	 * The parent record id the connector was built for, until onParentIdChange got it; null
+	 * for a new record, whose id comes with the save
 	 */
 	private unreportedParentId: string | null;
 
@@ -151,7 +201,7 @@ class FormLazyConnector extends LazyConnector {
 		onQueueChange: ConstructorParameters<typeof LazyConnector>[2],
 		getEndpoint: (id: string) => string,
 		onParentIdChange: ((id: string) => void) | undefined,
-		parentId: string,
+		parentId: string | null,
 	) {
 		super(connector, fakeReads, onQueueChange);
 		this.getEndpoint = getEndpoint;
@@ -171,7 +221,7 @@ class FormLazyConnector extends LazyConnector {
 
 	/**
 	 * Calls onParentIdChange with the parent record id the connector was built for, unless
-	 * it got an id already
+	 * it got an id already or the record is new
 	 * @remarks Called by the effects of the control that mounts with the connector, so the
 	 *          callback runs once per connector and never during render
 	 */
@@ -191,7 +241,7 @@ class FormLazyConnector extends LazyConnector {
  * @remarks Runs during render: it calls getEndpoint, getConnector and configureConnector,
  *          but not onParentIdChange (see FormLazyConnector.reportParentId)
  */
-const buildConnector = <ExtraT>(
+const buildConnector = <ExtraT extends Record<string, unknown> | undefined>(
 	params: UseLazyCrudConnectorParams<ExtraT>,
 	onQueueChange: ConstructorParameters<typeof LazyConnector>[2],
 ): FormLazyConnector => {
@@ -202,16 +252,10 @@ const buildConnector = <ExtraT>(
 		onParentIdChange,
 		extraParams,
 	} = params;
-	const getConnector = (params.getConnector ?? DefaultConnector.getApi) as
-		| ((
-				initialEndpoint: string,
-				extraParams: ExtraT | undefined,
-		  ) => ApiConnector)
-		| null;
+	const getConnector = params.getConnector ?? DefaultConnector.getApi;
 	if (!getConnector) throw new Error("No default connector set");
 
-	const parentId = initialId ?? "null";
-	const connector = getConnector(getEndpoint(parentId), extraParams);
+	const connector = getConnector(getEndpoint(initialId ?? "null"), extraParams);
 	if (configureConnector) configureConnector(connector);
 	return new FormLazyConnector(
 		connector,
@@ -219,7 +263,7 @@ const buildConnector = <ExtraT>(
 		onQueueChange,
 		getEndpoint,
 		onParentIdChange,
-		parentId,
+		initialId,
 	);
 };
 
@@ -229,31 +273,46 @@ const buildConnector = <ExtraT>(
  * queued and sent to getEndpoint(savedId) after the Form saved its record
  * @param params See UseLazyCrudConnectorParams
  * @returns The connector, one per Form, field and record
+ * @throws Outside a Form ("Form Context not set. Not using form engine?"), and without
+ *         params.getConnector and a default API connector ("No default connector set"),
+ *         both while the control renders. A component that also renders outside a Form
+ *         reads `useContext(FormContext)` and renders a child that calls this hook only
+ *         inside one, rather than catching the error: a hook call in a try block breaks
+ *         the rules of hooks.
  * @remarks
  * - The params are read once (see UseLazyCrudConnectorParams): a later getEndpoint,
  *   onParentIdChange, extraParams, getConnector, configureConnector or field changes
  *   neither the reads nor the save. Another collection takes another field and a new
- *   mount of the control, e.g. `key={field}`.
+ *   mount of the control, e.g. `key={field}`. onQueueSent is read from the latest render.
  * - getEndpoint, getConnector and configureConnector run while the control renders, so they
  *   must not set state; onParentIdChange runs after the control mounted and on every save.
  * - While the queue holds writes the Form is dirty (a custom dirty flag named `field`).
- * - The save sends the queue after the record was saved (LazyConnector.workQueue). A create
- *   or update the backend refuses does not stop it: the creates and updates queued after it
- *   are sent, the deletes queued after it stay queued until it went through. The refused
- *   writes stay queued, so the Form stays dirty, and the submit rejects although the record
- *   was saved, with an error that names them: CrudMultiSelect and CrudMultiSelectWithGroups
- *   name each by its entry's label, CrudFileUpload and CrudMultiImage by its file's or
- *   image's name (a PartialApplyError each); with a control that sets no error factory it is
- *   the backend's refusal, or an AggregateError of several.
+ * - A record created through the connector keeps its client-side id (`fake-id-N`) for the
+ *   connector's life: the control's deserialize gets it as `id` until the save, and after
+ *   it, from the connector's index. Derive nothing but the entry's own id from `id` there,
+ *   and read other ids from the fields serialize returns. The connector's mapId gives the
+ *   server's id once the save sent the queue (see onQueueSent).
+ * - The save sends the queue after the record was saved (LazyConnector.workQueue), then
+ *   calls onQueueSent. A create or update the backend refuses does not stop it: the creates
+ *   and updates queued after it are sent, the deletes queued after it stay queued until it
+ *   went through. The refused writes stay queued, so the Form stays dirty, onQueueSent is
+ *   not called, and the submit rejects although the record was saved, with an error that
+ *   names them: CrudMultiSelect and CrudMultiSelectWithGroups name each by its entry's
+ *   label, CrudFileUpload and CrudMultiImage by its file's or image's name (a
+ *   PartialApplyError each); with a control that sets no error factory it is the backend's
+ *   refusal, or an AggregateError of several.
  * - A Form given another record (id or model) starts over: the control mounts again with a
  *   new connector for that record, and a queue left for the previous record is dropped,
  *   unsent, also when the new record's page does not show the control.
  * - The connector, queue included, is kept in the Form's custom state under `field`, so a
  *   control that unmounts and mounts again gets its queue back, and the Form is dirty again.
  * - Without onlySubmitMounted an unmounted control's queue keeps the Form dirty and is sent
- *   by the next save.
+ *   by the next save, also when the page hides the control because the record no longer
+ *   needs the collection.
  * - With onlySubmitMounted an unmounted control's queue is neither sent nor counted as
- *   dirty, like the value of an unmounted model field, until the control mounts again.
+ *   dirty, like the value of an unmounted model field, until the control mounts again. To
+ *   keep the changes of a control the page hides out of the save, give the Form
+ *   onlySubmitMounted.
  * - What counts is the onlySubmitMounted the Form has when the control unmounts. A mounted
  *   control's queue keeps the Form dirty and is sent by the next save, also when the Form's
  *   onlySubmitMounted changes meanwhile (its prop, or a flow stage config).
@@ -265,7 +324,9 @@ const buildConnector = <ExtraT>(
  *   hidden within its stage, with nothing staged since it mounted, follows
  *   onlySubmitMounted.
  */
-const useLazyCrudConnector = <ExtraT = undefined>(
+const useLazyCrudConnector = <
+	ExtraT extends Record<string, unknown> | undefined = undefined,
+>(
 	params: UseLazyCrudConnectorParams<ExtraT>,
 ): UseLazyCrudConnectorResult => {
 	const {
@@ -293,6 +354,9 @@ const useLazyCrudConnector = <ExtraT = undefined>(
 			});
 	}
 	const connector = uploadConnector.current;
+	// read from the latest render, unlike the params the connector is built from
+	const onQueueSent = useRef(params.onQueueSent);
+	onQueueSent.current = params.onQueueSent;
 	// the parent id the connector was built for goes to onParentIdChange once the control
 	// mounted, not while it renders: a state update there would update another component
 	// during render. Once per connector, also when StrictMode runs the effect again.
@@ -360,7 +424,8 @@ const useLazyCrudConnector = <ExtraT = undefined>(
 			// update API endpoint and disable fakeReads, then send requests
 			connector.realConnector.setApiEndpoint(connector.getParentEndpoint(id));
 			connector.fakeReads = false;
-			return connector.workQueue();
+			await connector.workQueue();
+			await onQueueSent.current?.(id, connector);
 		};
 		setPostSubmitHandler(field, submitHandler);
 		return () => {

@@ -195,8 +195,13 @@ export interface UseCrudSelectResult<
 	 */
 	disabled: boolean;
 	/**
-	 * Conversion function for model data to selection data (handles special case when data comes from CRUD controller)
-	 * @param data The model data
+	 * Makes the entry for a record of the searched model, as the field does for a pick: its
+	 * `deserializeModel` result with the value `"to-create-" + getIdOfData(entry)`. A record
+	 * the connector listed or created (in `initialRawData`) gives its listed entry instead.
+	 * @param data The record
+	 * @remarks An end adornment that picks records itself makes the new entries it hands
+	 *          handleSelect with this, so that they are what a pick in the field is, value
+	 *          included, which `serialize` leaves out of the create.
 	 */
 	modelToSelectorData: (data: ModelRecord<M>) => Promise<DataT>;
 }

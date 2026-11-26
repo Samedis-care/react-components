@@ -1307,12 +1307,13 @@ describe("useLazyCrudConnector: params and record changes after mount", () => {
 		}
 	});
 
-	it('[ISSUE-3505-ITEM-8] onParentIdChange gets "null" once the control of a new record mounted, not again when it mounts again, and the created record\'s id on the save', async () => {
+	it("[ISSUE-3505-ITEM-13] onParentIdChange is not called for a new record before the save, also not when the control mounts again, and gets the created record's id on the save", async () => {
 		const model = makeModel();
 		const env = makeEnv({});
 		const sink: Sink = {};
 		const ref = React.createRef<CrudSelectDispatch<JoinData>>();
 		const onParentIdChange = vi.fn();
+		const onQueueSent = vi.fn<(id: string) => void>();
 		mountForm(
 			model,
 			makePage(sink, () => (
@@ -1321,16 +1322,17 @@ describe("useLazyCrudConnector: params and record changes after mount", () => {
 					{...selectorProps(model, env)}
 					initialId={null}
 					onParentIdChange={onParentIdChange}
+					onQueueSent={onQueueSent}
 				/>
 			)),
 			{ id: null },
 		);
 		await loaded(sink, "");
 		await ready();
-		expect(onParentIdChange.mock.calls).toEqual([["null"]]);
+		expect(onParentIdChange).not.toHaveBeenCalled();
 
 		await hideAndShow();
-		expect(onParentIdChange.mock.calls).toEqual([["null"]]);
+		expect(onParentIdChange).not.toHaveBeenCalled();
 
 		await add(ref);
 		act(() => sink.ctx!.setFieldValue("title", "New"));
@@ -1338,10 +1340,11 @@ describe("useLazyCrudConnector: params and record changes after mount", () => {
 		expect(await trySubmit(sink)).toBeNull();
 		await settle();
 
-		expect(onParentIdChange).toHaveBeenCalledTimes(2);
-		const createdId = onParentIdChange.mock.calls[1][0] as string;
+		expect(onParentIdChange).toHaveBeenCalledTimes(1);
+		const createdId = onParentIdChange.mock.calls[0][0] as string;
 		expect(createdId).not.toBe("null");
 		expect(env.calls).toContain(`create:joins/${createdId}:s2`);
+		expect(onQueueSent.mock.calls.map((call) => call[0])).toEqual([createdId]);
 	});
 });
 
@@ -2175,5 +2178,148 @@ describe("FormCrudMultiSelect: a save the backend refuses in part", () => {
 		} finally {
 			configureErrorReporting(before);
 		}
+	});
+});
+
+describe("useLazyCrudConnector: after the queue was sent", () => {
+	/**
+	 * The test's request log, for callbacks made before mountSelector hands it out
+	 */
+	const log: { env?: Env } = {};
+
+	beforeEach(() => {
+		log.env = undefined;
+	});
+
+	it("[ISSUE-3505-ITEM-13] onQueueSent runs on every save once the queue was sent, with the saved record's id and the connector, which maps a picked entry's client-side id to the server's", async () => {
+		const mapped: string[] = [];
+		let picked = "";
+		const onQueueSent = vi.fn((id: string, connector: LazyConnector) => {
+			log.env!.calls.push(`onQueueSent:${id}`);
+			mapped.push(connector.mapId(picked));
+		});
+		const { env, sink, ref } = await mountSelector(undefined, {
+			onQueueSent,
+		});
+		log.env = env;
+		await add(ref);
+		picked = selected().find((entry) => entry.source_id === "s2")!.value;
+
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+		// a save with nothing queued, of a changed field of the record
+		act(() => sink.ctx!.setFieldValue("title", "Changed"));
+		await settle();
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		expect(picked).toMatch(/^fake-id-/);
+		expect(env.calls).toEqual([
+			"index:joins/1",
+			"setApiEndpoint:joins/1",
+			"create:joins/1:s2",
+			"onQueueSent:1",
+			"setApiEndpoint:joins/1",
+			"onQueueSent:1",
+		]);
+		const created = env.stores["joins/1"].find(
+			(row) => row.source_id === "s2",
+		)!;
+		expect(mapped).toEqual([created.id, created.id]);
+		expect(onQueueSent.mock.calls[0][1]).toBeInstanceOf(LazyConnector);
+	});
+
+	it("[ISSUE-3505-ITEM-13] the save waits for onQueueSent before the Form's onSubmit, and fails when it rejects", async () => {
+		const order: string[] = [];
+		let refuse = false;
+		const onQueueSent = async () => {
+			await Promise.resolve();
+			if (refuse) throw new Error("primary refused");
+			order.push("onQueueSent done");
+		};
+		const { sink, ref } = await mountSelector(
+			undefined,
+			{ onQueueSent },
+			{ onSubmit: () => void order.push("onSubmit") },
+		);
+		await add(ref);
+
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+		refuse = true;
+		act(() => sink.ctx!.setFieldValue("title", "Changed"));
+		await settle();
+		const error = await trySubmit(sink);
+		await settle();
+
+		expect(order).toEqual(["onQueueSent done", "onSubmit"]);
+		expect((error as Error).message).toBe("primary refused");
+	});
+
+	it("[ISSUE-3505-ITEM-13] onQueueSent is not called while the backend refuses a write of the queue", async () => {
+		const onQueueSent = vi.fn<(id: string) => void>();
+		const { env, sink, ref } = await mountSelector(undefined, {
+			onQueueSent,
+		});
+		env.refuse.add("s2");
+		await add(ref);
+
+		expect(await trySubmit(sink)).not.toBeNull();
+		await settle();
+		expect(onQueueSent).not.toHaveBeenCalled();
+
+		env.refuse.clear();
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+		expect(onQueueSent.mock.calls.map((call) => call[0])).toEqual(["1"]);
+	});
+
+	it("[ISSUE-3505-ITEM-13] the save calls the onQueueSent of the control's latest render", async () => {
+		const first = vi.fn<(id: string) => void>();
+		const later = vi.fn<(id: string) => void>();
+		const { sink, ref } = await mountVariants(
+			{ "joins/1": [] },
+			(current, props, ref) => (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					ref={ref}
+					{...props}
+					onQueueSent={current === "a" ? first : later}
+				/>
+			),
+		);
+
+		await switchVariant("b");
+		await add(ref);
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		expect(first).not.toHaveBeenCalled();
+		expect(later.mock.calls.map((call) => call[0])).toEqual(["1"]);
+	});
+
+	it("[ISSUE-3505-ITEM-13] a control mounted again under its field has the save call its own onQueueSent", async () => {
+		const first = vi.fn<(id: string) => void>();
+		const later = vi.fn<(id: string) => void>();
+		const { sink, ref } = await mountVariants(
+			{ "joins/1": [] },
+			(current, props, ref) => (
+				<FormCrudMultiSelect<ModelUnknown, JoinData>
+					key={current}
+					ref={ref}
+					{...props}
+					onQueueSent={current === "a" ? first : later}
+				/>
+			),
+		);
+
+		selSink.ctx = undefined;
+		await switchVariant("b");
+		await ready();
+		await add(ref);
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+
+		expect(first).not.toHaveBeenCalled();
+		expect(later.mock.calls.map((call) => call[0])).toEqual(["1"]);
 	});
 });

@@ -718,7 +718,9 @@ Each builds a `LazyConnector` with `useLazyCrudConnector`, from `field`, `initia
 `getEndpoint` and the hook's other params. Reads go to the endpoint, writes are queued, and the
 queue is sent after the form saved the record, so a new record gets its files too. While
 anything is queued the form is dirty. The connector is kept as the form's custom state of
-`field`.
+`field` (`useFormContext<M>().getCustomState<LazyConnector>(field)`). `field` names the control
+in the form and has to be unique there: two controls with one `field` mix up their
+collections, and the save sends the queue of only one of them.
 
 They take the form's `readOnly` on top of their own, and its `errorComponent`.
 `FormCrudMultiSelect` is read-only in a read-only form, not disabled: it shows its label and
@@ -733,7 +735,10 @@ adornments call, ignores the change. An end adornment reads
 `FormCrudFileUpload` and `FormCrudMultiSelect` also follow the form's `showDirtyState` unless
 their own prop is set.
 Outside a form, use `CrudFileUpload` and `CrudMultiImage` with a connector of your own: they
-do not read the form.
+do not read the form. `useLazyCrudConnector` and the `FormCrud…` controls throw outside a form.
+A component of your own that works in and outside forms reads `useContext(FormContext)` and
+renders a child that calls `useLazyCrudConnector` only inside a form; catching the error
+instead makes the hook call conditional, against the rules of hooks.
 
 Things to know about the queue:
 
@@ -756,19 +761,36 @@ Things to know about the queue:
   `FormCrudMultiImage` by its file's or image's name ("Could not upload bad.txt: File too
   large.", one sentence each), as they do for a refused write through any other connector.
   A refused delete is dropped, as the record may be gone already.
-- An entry created through the queue has a client-side id (`fake-id-N`). It keeps it in
-  `onChange`, and in the multi image's `onPrimaryChange`, also after the save;
-  `LazyConnector.mapId` gives the server's id once the queue is sent. The record is saved
-  before the queue is sent, so storing a new primary image with the record takes a second save
-  with the mapped id.
-- `deserialize` gets a queued entry as `serialize` returned it, with that client-side id: a
-  picked file where the backend would send a URL.
-- A control that unmounts keeps its queue, and lists it again when it mounts again. With
-  `onlySubmitMounted` the queue of an unmounted control is neither saved nor counted as dirty,
-  like the value of an unmounted field, until the control mounts again. What counts is the
-  `onlySubmitMounted` the form has when the control unmounts: while the control is mounted its
-  queue keeps the form dirty and is saved, also when `onlySubmitMounted` changes meanwhile (the
-  form's prop, or the config of a flow stage).
+- An entry created through the queue has a client-side id (`fake-id-N`) as long as the form
+  edits the record. It keeps it in `onChange`, and in the multi image's `onPrimaryChange`, also
+  after the save; `LazyConnector.mapId` gives the server's id once the queue is sent.
+- `deserialize` gets a queued entry as `serialize` returned it, with that client-side id as
+  `id`: a picked file where the backend would send a URL. After the save the connector still
+  lists the created record under that id. So derive nothing but the entry's own id from `id`
+  (the `value` of a `FormCrudMultiSelect` entry), and read other ids, such as the picked
+  record's, from a field `serialize` returns.
+- A `FormCrudMultiSelect` pick has the value `"to-create-<getIdOfData>"` until it is created:
+  `serialize` leaves it out of what the create sends. An end adornment that adds entries
+  builds them with the select context's `modelToSelectorData` (`useCrudSelectContext()`).
+- `onQueueSent(id, connector)` runs on every save once the queue was sent, with the saved
+  record's id, before the form's `onSubmit`. The save waits for it, and a rejection fails the
+  submit. It is not called while the backend refuses a write of the queue. Use it for what has
+  to wait for the server's ids, e.g. storing a new primary image with the record, which was
+  saved before the queue:
+  `onQueueSent={(id, connector) => savePrimary(id, connector.mapId(primaryId))}`.
+- `onParentIdChange` gets the parent record's id before the queue is sent: on every save, and
+  for an existing record once the control mounted. A new record has no id before its save:
+  `getEndpoint` gets the string `"null"` to build the connector, but the list is never
+  requested from that endpoint.
+- A control that unmounts keeps its queue, and lists it again when it mounts again. Without
+  `onlySubmitMounted` the next save sends it. With `onlySubmitMounted` the queue of an
+  unmounted control is neither saved nor counted as dirty, like the value of an unmounted
+  field, until the control mounts again. A page that hides a control when the record no
+  longer needs its collection gives the form `onlySubmitMounted`, or the save sends the
+  hidden control's changes anyway. What counts is the `onlySubmitMounted` the form has when the
+  control unmounts: while the control is mounted its queue keeps the form dirty and is saved,
+  also when `onlySubmitMounted` changes meanwhile (the form's prop, or the config of a flow
+  stage).
 - In a flow form, a submit (`goToStage` makes one before it changes the stage) stages the queue
   of every mounted control, like the values of the mounted fields, until the queue is empty
   again. A control that unmounts with a staged queue, as it does when its stage is left, keeps
