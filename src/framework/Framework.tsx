@@ -82,7 +82,9 @@ const toastOutlet = <ToastOutlet />;
 
 /**
  * Provides:
- * - react-router instance
+ * - a `HistoryRouter` on {@link FrameworkHistory}, the history the app routes with: inside
+ *   Framework `Routes`, `Route`, `Link` and the routing hooks (`useLocation`, `useParams`)
+ *   follow its location, and `Link` and `useNavigate` navigate it
  * - dialog context
  * - one history block for the leave guards of all Forms inside, so that a navigation which
  *   leaves several dirty forms asks once
