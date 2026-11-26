@@ -22,7 +22,9 @@ export interface RoutedTabsProps extends Omit<TabsProps, "value" | "onChange"> {
 	 * `value=""` is the default tab: it is selected at the route's own url,
 	 * and also when no Tab has the segment (a stale link, a Tab that is not
 	 * rendered, a path inside the default panel). Without a default tab, no
-	 * tab is selected then.
+	 * tab is selected then. Opening a Tab navigates to the route's url
+	 * followed by its value (`/settings/security`); the default tab navigates
+	 * to the route's own url (`/settings`, without a trailing "/").
 	 *
 	 * Each Tab gets `disableFocusRipple` unless it sets the prop itself: a
 	 * keyboard-focused tab shows the focus ring, and MUI's pulsating focus
@@ -198,7 +200,8 @@ const withTabProps = (
 
 /**
  * MUI `Tabs` whose selected tab is a segment of the URL (see `children`).
- * Opening a tab pushes its URL and keeps the scroll position of the page
+ * Opening a tab pushes its URL (the route's own url for the default tab, see
+ * `children`) and keeps the scroll position of the page
  * (`preventScrollReset`, see `useNavigate`): the bar, the focused tab and the
  * panel stay where the user is.
  * The bar scrolls when its tabs do not fit, with scroll buttons also on
@@ -233,7 +236,8 @@ const RoutedTabs = (inProps: RoutedTabsProps) => {
 		(_evt: React.ChangeEvent<unknown>, value: string) => {
 			navigate(
 				{
-					pathname: url + "/" + value,
+					// the default tab is the route's own url, without a trailing "/"
+					pathname: value === "" ? url || "/" : url + "/" + value,
 					search,
 					hash,
 				},

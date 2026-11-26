@@ -32,6 +32,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-26 | [A PartialDeleteError is named CcPartialDeleteError, and the default error-reporting policy judges it by its cause](2026-11-26-partial-delete-error-name-and-reporting.md) | behavior |
 | 2026-11-26 | [An id dropped by onLoadError is not shown, also while the selection keeps it](2026-11-26-backend-select-dropped-id-not-shown.md) | behavior |
 | 2026-11-26 | [A selected record that fails to load marks its field as erroneous](2026-11-26-backend-select-load-error-marks-field.md) | behavior |
+| 2026-11-26 | [The default tab of RoutedTabs opens the route's own url, without a trailing "/"](2026-11-26-routed-tabs-default-tab-url-without-trailing-slash.md) | behavior |
 | 2026-11-26 | [A RoutedMenu group only shows and hides its entries; its route is ignored](2026-11-26-routed-menu-group-ignores-route.md) | behavior |
 | 2026-11-26 | [InlineSwitch's colors reach 3:1 and follow the theme's color scheme](2026-11-26-inline-switch-colors-reach-3-to-1.md) | behavior |
 | 2026-11-26 | [The locale selector's list is a listbox: one tab stop, and the arrow, page, Home and End keys move between its rows](2026-11-26-locale-selector-list-is-a-listbox.md) | behavior, theme, type |

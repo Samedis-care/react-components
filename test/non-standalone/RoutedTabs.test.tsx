@@ -107,6 +107,54 @@ const muiErrors = () =>
 		.filter((message) => message.includes("MUI:"));
 
 describe("RoutedTabs: bugs", () => {
+	it("[ISSUE-3500-ITEM-1] the default tab navigates to the route url, without a trailing slash", () => {
+		const h = mem("/settings/security");
+		renderAt(h);
+		fireEvent.click(tabEl("Main"));
+		expect(selected()).toEqual(["Main"]);
+		expect(screen.getByText("MAIN PANEL")).toBeInTheDocument();
+		expect(h.location.pathname).toBe("/settings");
+	});
+
+	it("[ISSUE-3500-ITEM-1] a nested default tab navigates to the outer tab's url, without a trailing slash", () => {
+		const Inner = () => {
+			const tab = useRoutedTabPanel();
+			return (
+				<>
+					<RoutedTabs aria-label="Security">
+						<Tab label="Password" value="" />
+						<Tab label="2FA" value="2fa" />
+					</RoutedTabs>
+					<RoutedTabPanelWrapper>
+						{[tab("2fa", <div>2FA PANEL</div>), tab("", <div>PW PANEL</div>)]}
+					</RoutedTabPanelWrapper>
+				</>
+			);
+		};
+		const h = mem("/settings/security/2fa");
+		renderAt(h, <Demo securityPanel={<Inner />} />);
+		fireEvent.click(tabEl("Password"));
+		expect(h.location.pathname).toBe("/settings/security");
+	});
+
+	it("[ISSUE-3500-ITEM-1] under a Route at /*, the default tab navigates to /, and the tabs keep the query and hash", () => {
+		const h = mem("/security?q=1#x");
+		renderAt(h, <Demo />, "/*");
+		fireEvent.click(tabEl("Main"));
+		expect(h.location).toMatchObject({
+			pathname: "/",
+			search: "?q=1",
+			hash: "#x",
+		});
+		expect(screen.getByText("MAIN PANEL")).toBeInTheDocument();
+		fireEvent.click(tabEl("Notifications"));
+		expect(h.location).toMatchObject({
+			pathname: "/notifications",
+			search: "?q=1",
+			hash: "#x",
+		});
+	});
+
 	it("[ISSUE-3500-ITEM-2] a segment that no tab has selects the default tab, whose panel is shown, without a MUI error", () => {
 		renderAt(mem("/settings/unknown"));
 		expect(screen.getByText("MAIN PANEL")).toBeInTheDocument();
