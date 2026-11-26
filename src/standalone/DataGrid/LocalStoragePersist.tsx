@@ -13,7 +13,14 @@ import {
 export interface LocalStoragePersistProps {
 	/**
 	 * The localStorage key the grids inside read their state from and write it
-	 * to.
+	 * to, used as it is. Grids with different DataGridProps.persist settings
+	 * keep each other's parts of the entry; grids that persist the same part
+	 * share it.
+	 *
+	 * localStorage belongs to the browser profile, not to the signed-in user:
+	 * include the user (and the tenant) in the key when several accounts may
+	 * use one browser, or the search and filters of one account show up for
+	 * the next.
 	 *
 	 * When it changes, the grids inside are mounted again, so they open with
 	 * what is stored under the new key. Everything else inside stays mounted
@@ -36,6 +43,11 @@ export interface LocalStoragePersistProps {
  * A change of storageKey mounts the grids inside again, as a grid reads the
  * persisted state when it mounts only; the rest of the children stay
  * mounted.
+ *
+ * Other tabs are not followed: the entry is read when the provider mounts
+ * and when storageKey changes, and a grid writes the parts it persists as it
+ * has them. So the tab that writes last decides them, also those another
+ * tab changed meanwhile.
  *
  * If the browser blocks localStorage (blocked site data, some sandboxed
  * iframes), the grids open at their defaults and nothing is kept for the next

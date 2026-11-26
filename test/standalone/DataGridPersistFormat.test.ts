@@ -5,6 +5,7 @@ import {
 	DataGridPersistentStateLegacy,
 	decodePersistedState,
 	encodePersistedState,
+	keepStoredParts,
 	mergePersistedState,
 	normalizeFilterDef,
 	splitPersistedState,
@@ -1445,5 +1446,92 @@ describe("persisted format bugs", () => {
 			undefined,
 		);
 		expect(Object.getPrototypeOf(result.columnState)).toBe(Object.prototype);
+	});
+});
+
+describe("keepStoredParts", () => {
+	const STORED: DataGridPersistentState = {
+		v: DATA_GRID_PERSIST_VERSION,
+		shown: ["name"],
+		hidden: ["secret"],
+		pinned: ["name"],
+		width: { name: 200 },
+		initialResize: true,
+		sort: [["name", 1]],
+		filter: { name: { type: "contains", value1: "ann", value2: "" } },
+		search: "stored",
+		customData: { "filter[status]": "open" },
+	};
+
+	it("[ISSUE-3496-ITEM-17] adds the parts the persist config leaves out, as they are stored", () => {
+		const own: DataGridPersistentState = {
+			v: DATA_GRID_PERSIST_VERSION,
+			sort: [["id", -1]],
+		};
+		expect(keepStoredParts(own, STORED, ["sort"])).toStrictEqual({
+			...STORED,
+			sort: [["id", -1]],
+		});
+		expect(
+			keepStoredParts(
+				{ v: DATA_GRID_PERSIST_VERSION, search: "own", customData: {} },
+				STORED,
+				["filters"],
+			),
+		).toStrictEqual({
+			v: DATA_GRID_PERSIST_VERSION,
+			shown: ["name"],
+			hidden: ["secret"],
+			pinned: ["name"],
+			width: { name: 200 },
+			initialResize: true,
+			sort: [["name", 1]],
+			search: "own",
+			customData: {},
+		});
+		expect(
+			keepStoredParts({ v: DATA_GRID_PERSIST_VERSION }, STORED, []),
+		).toStrictEqual(STORED);
+	});
+
+	it("[ISSUE-3496-ITEM-17] keeps the parts of legacy data in the current format", () => {
+		const legacy: DataGridPersistentStateLegacy = {
+			columnState: {
+				name: { sort: 1, sortOrder: 1, filter: undefined },
+			},
+			state: { search: "legacy", hiddenColumns: [], lockedColumns: [] },
+		};
+		expect(
+			keepStoredParts({ v: DATA_GRID_PERSIST_VERSION }, legacy, ["columns"]),
+		).toStrictEqual({
+			v: DATA_GRID_PERSIST_VERSION,
+			sort: [["name", 1]],
+			filter: { name: null },
+			search: "legacy",
+		});
+	});
+
+	it("[ISSUE-3496-ITEM-17] keeps nothing of data in a newer format, nor when nothing is stored", () => {
+		const own: DataGridPersistentState = {
+			v: DATA_GRID_PERSIST_VERSION,
+			search: "own",
+		};
+		expect(
+			keepStoredParts(own, { ...STORED, v: DATA_GRID_PERSIST_VERSION + 1 }, [
+				"filters",
+			]),
+		).toStrictEqual(own);
+		expect(keepStoredParts(own, undefined, ["filters"])).toStrictEqual(own);
+	});
+
+	it("[ISSUE-3496-ITEM-17] adds nothing when the grid persists every part", () => {
+		const own: DataGridPersistentState = {
+			v: DATA_GRID_PERSIST_VERSION,
+			search: "own",
+		};
+		expect(keepStoredParts(own, STORED, undefined)).toBe(own);
+		expect(keepStoredParts(own, STORED, ["filters", "sort", "columns"])).toBe(
+			own,
+		);
 	});
 });

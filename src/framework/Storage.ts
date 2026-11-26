@@ -199,6 +199,7 @@ export const SessionStorageProviderInstance = new SessionStorageProvider();
  * @param keys Identifiers which separate storage (think namespaces, such as tenant id)
  * @returns The storage provider to use and the keys to use to create the final key used in the storage provider
  * @remarks You can add/remove keys to your liking. For example, you can add a tenant ID to make the record tenant specific.
+ *          The record is stored under the id and the JSON of the keys, so their order is part of it: `{ a, b }` and `{ b, a }` are two records.
  */
 export type GetStorageProviderCallback = (
 	id: string,

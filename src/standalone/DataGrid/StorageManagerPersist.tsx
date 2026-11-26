@@ -18,6 +18,11 @@ export interface StorageManagerPersistProps {
 	 * The storage keys to use for persisting. When they change (compared as
 	 * JSON), the grids inside are mounted again, with the state stored under
 	 * the new keys.
+	 *
+	 * The order of the keys is part of the key a bucket is stored under (see
+	 * GetStorageProviderCallback): `{ tenant, model }` and
+	 * `{ model, tenant }` are two different stored states. Build the object in
+	 * the same order everywhere.
 	 */
 	storageKeys: Record<string, string>;
 	/**
@@ -208,6 +213,11 @@ const loadBuckets = (
  * to the Loader meanwhile, and then to the same control of the grid mounted
  * again (to its first control, if that one is not there), unless focus was
  * moved elsewhere in between.
+ *
+ * Other tabs and devices are not followed: the buckets are read when the
+ * provider mounts and when the storage keys change, and a grid writes the
+ * parts it persists as it has them. So the tab that writes last decides
+ * them, also those another tab changed meanwhile.
  * @remarks The data it provides is what was written last, so a grid mounted
  *          later (or anything else reading the context) starts from the
  *          current state, not from the state loaded on mount

@@ -15,6 +15,7 @@ import {
 	decodePersistedState,
 	encodePersistedState,
 	isNewerPersistedState,
+	keepStoredParts,
 } from "./PersistFormat";
 
 export type {
@@ -25,10 +26,19 @@ export type {
 	DataGridPersistentStateLegacy,
 } from "./PersistFormat";
 
+/**
+ * What a persistence provider hands the grids inside it
+ * (DataGridPersistentStateContext): the persisted data and its setter
+ */
 export type DataGridPersistentStateContextType = [
 	/**
 	 * The persisted data, in whichever format it was written: what the setter
-	 * got last, or what was stored before
+	 * got last, or what was stored before. undefined: nothing is stored.
+	 *
+	 * A grid reads it when it mounts only: data handed out later (a load that
+	 * finishes after the grid opened) does not reach that grid. A provider
+	 * that loads the data asynchronously says that it is loading through
+	 * DataGridPersistMountContext, which holds the grids back until then.
 	 * @remarks This is the state a grid restores, not necessarily the one it
 	 *          shows: an override (DataGridProps.overrideFilter,
 	 *          overrideCustomData, overrideSearch) isn't persisted. What a
@@ -50,6 +60,14 @@ export type DataGridPersistentStateContextType = [
 	 * first auto-fit of the column widths does not write it either: only one
 	 * of the other changes does, in this version's format.
 	 *
+	 * The data is a new object of JSON values, the JSON form of the grid's
+	 * state (a Date in the custom data is its ISO string, an undefined value
+	 * is left out), so a provider that hands it out hands out what its
+	 * storage gives back after a reload. It is the whole state: the parts the
+	 * grid persists (DataGridProps.persist), and the others as the provider
+	 * handed them out (legacy data in the current format; nothing of data in
+	 * a newer format).
+	 *
 	 * Throw, or return a promise which rejects, when the data could not be
 	 * stored. The grid logs the error to the console and calls the setter
 	 * again with its next state update (a page of rows loaded, a selection,
@@ -58,6 +76,20 @@ export type DataGridPersistentStateContextType = [
 	 */
 	(data: DataGridPersistentState) => Promise<void> | void,
 ];
+/**
+ * The persistence provider of the grids inside: undefined for none, so the
+ * grids open at their defaults and persist nothing.
+ * DataGridLocalStoragePersist and DataGridStorageManagerPersist provide it,
+ * DataGridNoPersist clears it.
+ *
+ * A custom provider provides a memoized DataGridPersistentStateContextType,
+ * and hands out what the setter got last, so a grid mounted again starts
+ * from the current state. A grid reads the data when it mounts only, and
+ * takes undefined as "nothing stored". So a provider that loads the data
+ * asynchronously also provides DataGridPersistMountContext, loading until
+ * the data is there: a grid mounted while the data loads opens at its
+ * defaults, and its first change writes them over the stored state.
+ */
 export const DataGridPersistentStateContext = React.createContext<
 	DataGridPersistentStateContextType | undefined
 >(undefined);
@@ -105,7 +137,7 @@ const withColumnFilter = (
  */
 const StatePersistence = () => {
 	const persistedContext = useContext(DataGridPersistentStateContext);
-	const [, setPersisted] = persistedContext || [];
+	const [stored, setPersisted] = persistedContext || [];
 	const [state] = useDataGridState();
 	const [columnState] = useDataGridColumnState();
 	const [columnWidthState] = useDataGridColumnsWidthState();
@@ -209,11 +241,19 @@ const StatePersistence = () => {
 		if (keepNewer.current && autoFit) return;
 		keepNewer.current = false;
 
+		// the parts this grid does not persist stay as they are stored. The
+		// provider gets the data as JSON values, so what it hands out is what
+		// its storage gives back after a reload (a Date as its ISO string)
+		const whole = keepStoredParts(data, stored, config);
+		const payload = JSON.parse(
+			whole === data ? serialized : JSON.stringify(whole),
+		) as DataGridPersistentState;
+
 		// the setter may throw or reject: the storage is full, the server fails.
 		// What is stored is unknown then, also when a newer write has started
 		// since: that one may have left a part to this one (as
 		// DataGridStorageManagerPersist skips a bucket being written already)
-		new Promise<void>((resolve) => resolve(setPersisted(data))).catch(
+		new Promise<void>((resolve) => resolve(setPersisted(payload))).catch(
 			(err: unknown) => {
 				// eslint-disable-next-line no-console
 				console.error("[Components-Care] [DataGrid] Persist: ", err);
@@ -222,6 +262,7 @@ const StatePersistence = () => {
 		);
 	}, [
 		setPersisted,
+		stored,
 		state,
 		columnState,
 		columnWidthState,

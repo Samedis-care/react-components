@@ -38,6 +38,8 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-26 | [HowToBox shows its default title only for an omitted `titleLabel`; `null` and `""` show no title](2026-11-26-how-to-box-null-hides-title.md) | behavior, type |
 | 2026-11-26 | [InfiniteScroll fills its container again when it grows, and `dynamicallySized` is removed](2026-11-26-infinite-scroll-observes-its-size.md) | behavior, type |
 | 2026-11-26 | [HowToBox takes any fieldset attribute, `sx` and `ref`, and its list gets an id from `id`](2026-11-26-how-to-box-html-attributes.md) | behavior, type |
+| 2026-11-26 | [A grid leaves the stored parts its `persist` leaves out as they are](2026-11-26-data-grid-persist-keeps-left-out-parts.md) | behavior |
+| 2026-11-26 | [A persistence provider gets the JSON form of a grid's state](2026-11-26-data-grid-persist-json-form.md) | behavior |
 | 2026-11-26 | [A Form's save names the files and images the backend refused](2026-11-26-file-controls-name-refused-queued-writes.md) | behavior |
 | 2026-11-26 | [The busy overlay's shown state is a class, and the form layout takes its colors, timing and offsets from the theme](2026-11-26-form-layout-theme-values.md) | type, behavior, theme |
 | 2026-11-26 | [Routes takes any JSX children, and a key on a child takes effect](2026-11-26-routes-children-and-keys.md) | behavior, type |

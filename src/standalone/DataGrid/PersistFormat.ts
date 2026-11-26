@@ -468,6 +468,70 @@ const migrateLegacyPersistedState = (
 };
 
 /**
+ * A part of the grid's state that DataGridProps.persist names
+ */
+type DataGridPersistPart = NonNullable<DataGridProps["persist"]>[number];
+
+/**
+ * The keys of the persisted format that hold each part
+ */
+const PERSIST_PART_KEYS: Record<
+	DataGridPersistPart,
+	(keyof DataGridPersistentState)[]
+> = {
+	columns: ["shown", "hidden", "pinned", "width", "initialResize"],
+	sort: ["sort"],
+	filters: ["filter", "search", "customData"],
+};
+
+/**
+ * Sets a key of the target to the source's value
+ * @param target The object to change
+ * @param source The object to read
+ * @param key The key
+ */
+const copyKey = <T, K extends keyof T>(target: T, source: T, key: K) => {
+	target[key] = source[key];
+};
+
+/**
+ * Adds the parts of the state that a grid does not persist (those
+ * DataGridProps.persist leaves out) to the data it persists, as they are
+ * stored: a grid leaves what is stored for them as it is.
+ *
+ * Legacy data is migrated to the current format first. Data in a newer
+ * format (see isNewerPersistedState) gives nothing: this version cannot tell
+ * where that format keeps a part.
+ * @param data The data the grid persists (encodePersistedState)
+ * @param stored The persisted data, as the persistence provider hands it out
+ * @param config What the grid persists (DataGridProps.persist)
+ * @returns A new object with the stored parts which the config leaves out,
+ *          or data itself when there is nothing to add
+ */
+export const keepStoredParts = (
+	data: DataGridPersistentState,
+	stored: DataGridPersistedData | undefined,
+	config: DataGridProps["persist"],
+): DataGridPersistentState => {
+	const cfg = config ?? DEFAULT_PERSIST_CONFIG;
+	const left = (Object.keys(PERSIST_PART_KEYS) as DataGridPersistPart[]).filter(
+		(part) => !cfg.includes(part),
+	);
+	if (!left.length || !stored || typeof stored !== "object") return data;
+	if (isNewerPersistedState(stored)) return data;
+	const current = isLegacy(stored)
+		? migrateLegacyPersistedState(stored)
+		: stored;
+	const result: DataGridPersistentState = { ...data };
+	for (const part of left) {
+		for (const key of PERSIST_PART_KEYS[part]) {
+			if (current[key] !== undefined) copyKey(result, current, key);
+		}
+	}
+	return result;
+};
+
+/**
  * The runtime state a grid starts out with when nothing was persisted
  * @param columns The column definitions
  * @param defaultColumnState The column state the grid would start out with

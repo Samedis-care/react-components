@@ -105,6 +105,11 @@ export interface DataGridProps
 	 *   column filter. What an override (overrideCustomData, overrideFilter,
 	 *   overrideSearch) replaced stays persisted as it was stored until the
 	 *   filters are reset.
+	 *
+	 * A part left out is neither restored nor written: what is stored for it
+	 * stays as it is. So grids with different settings under one provider (or
+	 * storage key) keep each other's parts, and `[]` leaves what is stored as
+	 * it is.
 	 * @default ["columns", "sort", "filters"]
 	 */
 	persist?: ("columns" | "sort" | "filters")[];
@@ -270,7 +275,9 @@ export interface IDataGridCallbacks {
 	 */
 	defaultCustomData?: Record<string, unknown>;
 	/**
-	 * Forced initial values for custom data (overwrites persisted custom data)
+	 * Forced initial values for custom data (overwrites persisted custom data).
+	 * The stored search still applies: pass overrideSearch too ("" for none)
+	 * to show the rows of these values alone, e.g. for a link from a chart.
 	 * @remarks They are not persisted: until the user resets the filters, the
 	 *          grid keeps persisting the custom data which was stored
 	 */
@@ -497,7 +504,9 @@ export interface IDataGridColumnProps {
 	 */
 	defaultFilter?: DataGridFilterSetting[];
 	/**
-	 * The column filter settings override (disables all filters if set)
+	 * The column filter settings override (disables all filters if set).
+	 * The stored search still applies: pass overrideSearch too ("" for none)
+	 * to show the rows of these filters alone, e.g. for a link from a chart.
 	 * @remarks It is not persisted: until the user resets the filters, the
 	 *          grid keeps persisting the column filters which were stored
 	 */
@@ -670,11 +679,12 @@ export type DataGridRowData = { id: string } & Record<
  * keyed by the app. getAdditionalFilters turns it into filters.
  *
  * When the grid persists its filters (DataGridProps.persist "filters", the
- * default), DataGridLocalStoragePersist and DataGridStorageManagerPersist
- * store it as JSON. So set JSON values only: strings, finite numbers,
- * booleans, null, and arrays and plain objects of these. A grid that restores
- * them from storage (on the next visit) gets them back as they were set. Any
- * other value comes back in its JSON form:
+ * default), it hands the custom data to its persistence provider as JSON
+ * (see DataGridPersistentStateContextType). So set JSON values only:
+ * strings, finite numbers, booleans, null, and arrays and plain objects of
+ * these. A grid that restores them (on the next visit, or mounted again
+ * under the same provider) gets them back as they were set. Any other value
+ * comes back in its JSON form:
  * - a Date as its ISO string, an object with a toJSON method (a Moment, a
  *   Dayjs) as what that returns
  * - a Map or a Set as an empty object
@@ -686,8 +696,8 @@ export type DataGridRowData = { id: string } & Record<
  * Keep such a value in a JSON form (a date as an ISO string, a set as an
  * array) and convert it where it is used: in getAdditionalFilters and in the
  * filter bar's controls.
- * @remarks Only the storage turns the values into JSON: a grid mounted again
- *          while its provider stays mounted gets them as they were set.
+ * @remarks The open grid keeps the values as they were set; only what it
+ *          restores is in the JSON form.
  */
 export type DataGridCustomDataType = Record<string, unknown>;
 

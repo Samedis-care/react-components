@@ -1,4 +1,11 @@
-import React, { StrictMode, useContext, useMemo, useState } from "react";
+import React, {
+	StrictMode,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useState,
+} from "react";
 import {
 	afterEach,
 	beforeAll,
@@ -44,7 +51,13 @@ import {
 	DATA_GRID_PERSIST_VERSION,
 	DataGridPersistedData,
 	DataGridPersistentState,
+	splitPersistedState,
 } from "../../src/standalone/DataGrid/PersistFormat";
+// as an app imports it: from the package's DataGrid exports
+import {
+	DataGridPersistMountContext,
+	type DataGridPersistMountContextType,
+} from "../../src/standalone/DataGrid";
 import {
 	DefaultGetStorageProviderCallback,
 	LocalStorageProviderInstance,
@@ -1316,6 +1329,55 @@ describe("custom data on the next visit", () => {
 			});
 		},
 	);
+
+	it.each(providers)(
+		"[ISSUE-3496-ITEM-17] %s: a grid mounted again under the same provider gets the custom data in its JSON form, as on the next visit",
+		async (_name, setUp) => {
+			const wrap = setUp();
+			const { rerender } = render(wrap(<Grid key={"first"} />));
+			await gridIdle();
+			act(() =>
+				grid!.setState((prev) => ({
+					...prev,
+					customData: {
+						date: new Date("2026-01-02T00:00:00.000Z"),
+						undef: undefined,
+						status: "open",
+					},
+				})),
+			);
+			// the provider stays mounted, the grid is mounted again
+			rerender(wrap(<Grid key={"second"} />));
+			await gridIdle();
+			expect(grid!.state.customData).toStrictEqual({
+				date: "2026-01-02T00:00:00.000Z",
+				status: "open",
+			});
+		},
+	);
+
+	it("[ISSUE-3496-ITEM-17] a custom provider's setter gets the custom data in its JSON form, while the grid keeps it as it was set", async () => {
+		const save = vi.fn();
+		render(
+			<ValueProvider stored={undefined} save={save}>
+				<Grid />
+			</ValueProvider>,
+		);
+		await gridIdle();
+		const date = new Date("2026-01-02T00:00:00.000Z");
+		act(() =>
+			grid!.setState((prev) => ({
+				...prev,
+				customData: { date, undef: undefined },
+			})),
+		);
+		expect(save).toHaveBeenCalledTimes(1);
+		const [data] = save.mock.calls[0] as [DataGridPersistentState];
+		expect(data.customData).toStrictEqual({
+			date: "2026-01-02T00:00:00.000Z",
+		});
+		expect(grid!.state.customData).toStrictEqual({ date, undef: undefined });
+	});
 });
 
 describe("StorageManagerPersist bucket writes", () => {
@@ -1936,5 +1998,253 @@ describe("only the grids wait for the stored state", () => {
 		expect(searches).toHaveLength(2);
 		expect(searches).not.toContain(second);
 		expect(searches[1]).toHaveFocus();
+	});
+});
+
+// ─── Custom providers and partial persistence ────────────────────────────────
+
+describe("a custom persistence provider", () => {
+	/**
+	 * A provider written the natural way: it loads the stored data in an
+	 * effect and renders its children at once. It tells the grids inside that
+	 * it is loading through DataGridPersistMountContext, as the built-in
+	 * providers do.
+	 */
+	const AsyncProvider = (props: {
+		storageKey: string;
+		load: (storageKey: string) => Promise<DataGridPersistedData | undefined>;
+		save: (data: DataGridPersistentState) => void;
+		children: React.ReactNode;
+	}) => {
+		const { storageKey, load, save, children } = props;
+		// what was loaded, and for which key
+		const [loaded, setLoaded] = useState<
+			[string, DataGridPersistedData | undefined] | null
+		>(null);
+		// what was written since, and for which key
+		const [written, setWritten] = useState<
+			[string, DataGridPersistentState] | null
+		>(null);
+		useEffect(() => {
+			let current = true;
+			void load(storageKey).then((data) => {
+				if (current) setLoaded([storageKey, data]);
+			});
+			return () => {
+				current = false;
+			};
+		}, [load, storageKey]);
+		const setData = useCallback(
+			(data: DataGridPersistentState) => {
+				setWritten([storageKey, data]);
+				save(data);
+			},
+			[save, storageKey],
+		);
+		const isLoading = loaded?.[0] !== storageKey;
+		const mountCtx = useMemo(
+			(): DataGridPersistMountContextType => ({
+				loading: isLoading,
+				mount: storageKey,
+			}),
+			[isLoading, storageKey],
+		);
+		const persistCtx = useMemo(
+			(): DataGridPersistentStateContextType | undefined =>
+				!loaded || isLoading
+					? undefined
+					: [written?.[0] === storageKey ? written[1] : loaded[1], setData],
+			[loaded, isLoading, written, storageKey, setData],
+		);
+		return (
+			<DataGridPersistMountContext.Provider value={mountCtx}>
+				<DataGridPersistentStateContext.Provider value={persistCtx}>
+					{children}
+				</DataGridPersistentStateContext.Provider>
+			</DataGridPersistMountContext.Provider>
+		);
+	};
+
+	it("[ISSUE-3496-ITEM-17] a custom provider that loads in an effect holds the grid back through DataGridPersistMountContext, and the grid opens with the stored state", async () => {
+		let resolve: (data: DataGridPersistedData | undefined) => void = () => {};
+		const load = () =>
+			new Promise<DataGridPersistedData | undefined>((done) => {
+				resolve = done;
+			});
+		const save = vi.fn();
+		render(
+			<AsyncProvider storageKey={"a"} load={load} save={save}>
+				<h1>People</h1>
+				<Grid />
+			</AsyncProvider>,
+		);
+		expect(screen.getByRole("heading", { name: "People" })).toBeVisible();
+		expect(screen.getByRole("progressbar")).toBeInTheDocument();
+		expect(grid).toBeNull();
+
+		await act(async () => {
+			resolve(STORED);
+			await Promise.resolve();
+		});
+		await gridIdle();
+		expect(grid!.state.search).toBe("stored");
+		expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+		expect(save).not.toHaveBeenCalled();
+
+		act(() => grid!.setState((prev) => ({ ...prev, search: "typed" })));
+		expect(save).toHaveBeenCalledTimes(1);
+		expect(save.mock.calls[0][0]).toMatchObject({ search: "typed" });
+	});
+
+	it("[ISSUE-3496-ITEM-17] a custom provider that has the data of every key at hand mounts the grid again for a new key through DataGridPersistMountContext", async () => {
+		const store: Record<string, DataGridPersistedData> = {
+			a: STORED,
+			b: { v: DATA_GRID_PERSIST_VERSION, search: "b's search" },
+		};
+		const save = vi.fn();
+		/** never loads: the data of every key is in store */
+		const AtHandProvider = (props: {
+			storageKey: string;
+			children: React.ReactNode;
+		}) => {
+			const { storageKey, children } = props;
+			const mountCtx = useMemo(
+				(): DataGridPersistMountContextType => ({
+					loading: false,
+					mount: storageKey,
+				}),
+				[storageKey],
+			);
+			const persistCtx = useMemo(
+				(): DataGridPersistentStateContextType => [store[storageKey], save],
+				[storageKey],
+			);
+			return (
+				<DataGridPersistMountContext.Provider value={mountCtx}>
+					<DataGridPersistentStateContext.Provider value={persistCtx}>
+						{children}
+					</DataGridPersistentStateContext.Provider>
+				</DataGridPersistMountContext.Provider>
+			);
+		};
+		const { rerender } = render(
+			<AtHandProvider storageKey={"a"}>
+				<Grid />
+			</AtHandProvider>,
+		);
+		await gridIdle();
+		expect(grid!.state.search).toBe("stored");
+
+		rerender(
+			<AtHandProvider storageKey={"b"}>
+				<Grid />
+			</AtHandProvider>,
+		);
+		await gridIdle();
+		expect(grid!.state.search).toBe("b's search");
+		expect(save).not.toHaveBeenCalled();
+	});
+});
+
+describe("persist leaves what it leaves out as it is stored", () => {
+	/** a grid's whole state, as a grid which persists everything stores it */
+	const FULL: DataGridPersistentState = {
+		v: DATA_GRID_PERSIST_VERSION,
+		shown: ["name", "role"],
+		hidden: ["secret"],
+		width: { name: 200 },
+		initialResize: true,
+		sort: [["role", -1]],
+		filter: { name: { type: "contains", value1: "ann", value2: "" } },
+		search: "stored",
+		customData: { "filter[status]": "open" },
+	};
+	const lsp = (storageKey: string, child: React.ReactElement) => (
+		<LocalStoragePersist storageKey={storageKey}>{child}</LocalStoragePersist>
+	);
+	const smp = (keys: Record<string, string>, child: React.ReactElement) => (
+		<ThemeProvider theme={theme}>
+			<StorageManagerPersist storageKeys={keys}>{child}</StorageManagerPersist>
+		</ThemeProvider>
+	);
+	const hideRole = () =>
+		act(() =>
+			grid!.setState((prev) => ({
+				...prev,
+				columnHidden: { ...prev.columnHidden, role: true },
+			})),
+		);
+	/** unmounts everything, as a navigation away does */
+	const leave = () => {
+		cleanup();
+		grid = null;
+	};
+
+	it("[ISSUE-3496-ITEM-17] a grid that persists its columns only keeps the stored sort, filters, search and custom data when it writes", async () => {
+		localStorage.setItem("grid", JSON.stringify(FULL));
+		render(lsp("grid", <Grid persist={["columns"]} />));
+		await gridIdle();
+		hideRole();
+		const entry = persisted(localStorage.getItem("grid"));
+		expect(entry.hidden).toContain("role");
+		expect(entry).toMatchObject({
+			sort: FULL.sort,
+			filter: FULL.filter,
+			search: FULL.search,
+			customData: FULL.customData,
+		});
+	});
+
+	it("[ISSUE-3496-ITEM-17] a grid with persist={[]} leaves what is stored as it is", async () => {
+		const entry = JSON.stringify(FULL);
+		localStorage.setItem("grid", entry);
+		render(lsp("grid", <Grid persist={[]} />));
+		await gridIdle();
+		act(() => grid!.setState((prev) => ({ ...prev, search: "typed" })));
+		hideRole();
+		act(() => grid!.setWidths((prev) => ({ ...prev, name: 321 })));
+		expect(localStorage.getItem("grid")).toBe(entry);
+	});
+
+	it("[ISSUE-3496-ITEM-17] grids with different persist settings on one storage key keep each other's parts", async () => {
+		render(lsp("shared", <Grid persist={["filters"]} />));
+		await gridIdle();
+		act(() => grid!.setState((prev) => ({ ...prev, search: "mine" })));
+		leave();
+
+		render(lsp("shared", <Grid persist={["columns", "sort"]} />));
+		await gridIdle();
+		expect(grid!.state.search).toBe("");
+		hideRole();
+		leave();
+
+		render(lsp("shared", <Grid persist={["filters"]} />));
+		await gridIdle();
+		expect(grid!.state.search).toBe("mine");
+		leave();
+
+		render(lsp("shared", <Grid persist={["columns", "sort"]} />));
+		await gridIdle();
+		expect(grid!.state.columnHidden.role).toBe(true);
+	});
+
+	it("[ISSUE-3496-ITEM-17] under StorageManagerPersist, a grid that does not persist its filters keeps the stored filters, search and custom data in the filters bucket", async () => {
+		const server = new MemoryProvider();
+		StorageManager.configure((_id, keys) => [server, keys]);
+		const keys = { model: "m" };
+		const [sizing, rest] = splitPersistedState(FULL);
+		server.data[keyOf(SIZING, keys)] = JSON.stringify(sizing);
+		server.data[keyOf(FILTERS, keys)] = JSON.stringify(rest);
+		render(smp(keys, <Grid persist={["columns", "sort"]} />));
+		await gridIdle();
+		hideRole();
+		expect(server.writes.map(([key]) => key)).toContain(keyOf(FILTERS, keys));
+		const filters = persisted(server.data[keyOf(FILTERS, keys)]);
+		expect(filters.hidden).toContain("role");
+		expect(filters).toMatchObject({
+			filter: FULL.filter,
+			search: FULL.search,
+			customData: FULL.customData,
+		});
 	});
 });
