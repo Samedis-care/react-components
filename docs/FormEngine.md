@@ -592,7 +592,8 @@ never inherits the marks of the form around it.
 - `useFormContext().dirtyFields` — what the form engine computed, one entry per model
   field, regardless of what is displayed. Custom fields are not in there: a custom field is
   the thing calling `setCustomFieldDirty`, so it already holds its own dirty state; what
-  the form does with it is fold it into the form-wide `dirty` flag.
+  the form does with it is fold it into the form-wide `dirty` flag. In a flow form, changes
+  set `"staged"` (a nested form whose stage was left) go into `stagedDirty` instead.
 - `showDirtyState` on both the full and the lite form context — was the form asked to mark
   its modified fields? This is the form-wide switch, for a control which holds dirty state
   of its own and wants to display it on the same terms as the model fields. Whether a given

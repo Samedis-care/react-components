@@ -339,6 +339,18 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
 	 * Nested form name
 	 * Enables nested form mode if set to non-empty string
 	 * Form is submitted with main form submit. Does not support multiple layers of nesting
+	 * @remarks While its values differ from its record the parent is dirty (a custom dirty
+	 *          field named after it, see FormContextData.setCustomFieldDirty). A nested form
+	 *          that unmounts keeps its edits in the parent and gets them back when it mounts
+	 *          again; they keep the parent dirty and are saved by the parent's save, unless
+	 *          the parent has onlySubmitMounted or this form has onlySubmitNestedIfMounted.
+	 * @remarks In a flow form (the parent's flowEngine), a submit that only stages
+	 *          (goToStage without submitToServer) stages the nested form's edits along with
+	 *          the values of the shown stage and sends nothing. A nested form that unmounts
+	 *          with staged edits, as it does when its stage is left, keeps them for the
+	 *          flow's save: they count toward the parent's stagedDirty, and the next submit
+	 *          to the server submits the nested form. One hidden within its stage, with
+	 *          nothing staged since it mounted, follows the parent's onlySubmitMounted.
 	 */
 	nestedFormName?: string;
 	/**
@@ -351,6 +363,8 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
 	 * Submit nested form before parent instead of after
 	 * @remarks only affects nested forms. Use when the child record must exist before the parent is saved.
 	 * The `id` passed to `nestedFormPreSubmitHandler` will be the parent's pre-submit id (null on create).
+	 * In a flow form a submit that only stages does not submit the nested form, the flow's
+	 * save does (see nestedFormName).
 	 * @default false
 	 */
 	nestedSubmitBeforeParent?: boolean;
@@ -550,11 +564,18 @@ export interface FormContextData<
 	/**
 	 * Set custom field dirty state
 	 * @param field The unique field name
-	 * @param dirty The dirty state
+	 * @param dirty The dirty state: true while the field holds changes the form's save
+	 *              saves, false once it holds none. "staged" in a flow form
+	 *              (FormProps.flowEngine): the changes belong to a stage that was left and
+	 *              wait for the flow's save, so they count toward stagedDirty instead of
+	 *              dirty, as the staged values of that stage's fields do. Without flowEngine
+	 *              "staged" counts like true.
 	 * @remarks The same function for the life of the Form, so an effect that lists it (and
 	 *          clears its field in the cleanup) doesn't re-run when the Form re-renders.
+	 * @remarks The field keeps the last state set until it is set again: whatever sets it
+	 *          clears it once its changes are saved or undone.
 	 */
-	setCustomFieldDirty: (field: string, dirty: boolean) => void;
+	setCustomFieldDirty: (field: string, dirty: boolean | "staged") => void;
 	/**
 	 * Set form read only
 	 * @param ident A unique identifier triggering the read-only state
@@ -586,7 +607,8 @@ export interface FormContextData<
 	removeEventListener: FormEventTarget["removeEventListener"];
 	/**
 	 * Is the form dirty? Do the values it submits differ from the server record, is a custom
-	 * field dirty (setCustomFieldDirty), or is the record deleted on submit (deleteOnSubmit)?
+	 * field dirty (setCustomFieldDirty with true), or is the record deleted on submit
+	 * (deleteOnSubmit)?
 	 *
 	 * In flow mode (FormProps.flowEngine) the values are those the shown stage submits: the
 	 * fields it renders, alwaysSubmitFields and hidden fields, or every field when its stage
@@ -604,8 +626,10 @@ export interface FormContextData<
 	dirty: boolean;
 	/**
 	 * Flow mode (FormProps.flowEngine): do the values that stages staged (goToStage without
-	 * submitToServer) differ from the server record? They are what the next save sends besides
-	 * the values of the shown stage, also while the stage that renders them is not shown.
+	 * submitToServer) differ from the server record, or does a custom field hold staged
+	 * changes (setCustomFieldDirty with "staged", e.g. a nested form in a stage that was left)?
+	 * They are what the next save sends besides the values of the shown stage, also while the
+	 * stage that renders them is not shown.
 	 *
 	 * Set from the moment a stage change stages an edit until the flow saves it (goToStage
 	 * with submitToServer, FlowEngineSaveButton, submit with submitToServer), or until the
@@ -1103,6 +1127,27 @@ export type FormClassKey = "root";
 const asModelRecord = <M extends ModelUnknown>(data: Record<string, unknown>) =>
 	data as ModelRecord<M>;
 
+/**
+ * The custom fields that hold changes the form has not saved, by name, with the dirty state
+ * FormContextData.setCustomFieldDirty set (true or "staged")
+ */
+type CustomDirtyFields = Record<string, true | "staged">;
+
+/**
+ * Does a custom field hold changes that count toward the given flag?
+ * @param fields The custom fields that hold changes
+ * @param flowEngine Is the form a flow form? Without it "staged" counts toward dirty
+ * @param staged true: the flag stagedDirty, false: the flag dirty
+ */
+const hasCustomDirty = (
+	fields: CustomDirtyFields,
+	flowEngine: boolean,
+	staged: boolean,
+) =>
+	Object.values(fields).some(
+		(state) => (flowEngine && state === "staged") === staged,
+	);
+
 const Form = <M extends ModelUnknown, CustomPropsT>(
 	props: FormProps<M, CustomPropsT>,
 ) => {
@@ -1168,9 +1213,11 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 	const formEvents = formEventsRef.current;
 
 	// custom fields - dirty state
-	const { get: getCustomDirtyFields, set: setCustomDirtyFields } = useRefState<
-		string[]
-	>([]);
+	const {
+		get: getCustomDirtyFields,
+		set: setCustomDirtyFields,
+		state: customDirtyFields,
+	} = useRefState<CustomDirtyFields>({});
 	// setCustomFieldDirty lives further down, next to the dirty state events it announces
 
 	// custom fields - pre submit handlers
@@ -1539,19 +1586,22 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 	const getDirty = useCallback(
 		(formDirty: boolean) =>
 			formDirty ||
-			getCustomDirtyFields().length > 0 ||
+			hasCustomDirty(getCustomDirtyFields(), !!flowEngine, false) ||
 			!!(id && !getDeleted() && deleteOnSubmit),
-		[getCustomDirtyFields, getDeleted, deleteOnSubmit, id],
+		[getCustomDirtyFields, flowEngine, getDeleted, deleteOnSubmit, id],
 	);
 	const dirty = getDirty(formDirty);
 	/**
-	 * Do the staged values differ from the baseline? Compares the fields the flow's save
-	 * sends, as the save picks them: those a stage staged as modified, alwaysSubmitFields and
-	 * hidden fields, every field of a new record
+	 * Do the staged values differ from the baseline, or does a custom field hold staged
+	 * changes? Compares the fields the flow's save sends, as the save picks them: those a
+	 * stage staged as modified, alwaysSubmitFields and hidden fields, every field of a new
+	 * record
 	 * @param staged The staged values
 	 * @param stagedModified The fields a stage staged as modified
 	 * @param baseline The server record (initialValues), undefined before it loaded
-	 * @returns false without flowEngine and before the baseline and the default record loaded
+	 * @param customFields The custom fields that hold changes
+	 * @returns false without flowEngine; before the baseline and the default record loaded
+	 *          only a custom field counts
 	 * @see FormContextData.stagedDirty
 	 */
 	const getStagedDirty = useCallback(
@@ -1559,8 +1609,11 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 			staged: Record<string, unknown>,
 			stagedModified: Record<string, boolean>,
 			baseline: Record<string, unknown> | undefined,
+			customFields: CustomDirtyFields,
 		): boolean => {
-			if (!flowEngine || !baseline || !defaultRecord) return false;
+			if (!flowEngine) return false;
+			if (hasCustomDirty(customFields, true, true)) return true;
+			if (!baseline || !defaultRecord) return false;
 			const config: DirtyDetectionConfig = {
 				ignoreFields: dirtyIgnoreFields,
 				model,
@@ -1590,11 +1643,22 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 	 * @see FormContextData.stagedDirty
 	 */
 	const stagedDirty = useMemo(
-		// the baseline is passed as the state, like for dirtyFields, so that replacing it
-		// after a save or a refetch recomputes the flag
+		// the baseline and the custom fields are passed as the state, like for dirtyFields, so
+		// that replacing them (after a save, a refetch, a custom field's change) recomputes it
 		() =>
-			getStagedDirty(valuesStaged, valuesStagedModified, initialValuesState),
-		[getStagedDirty, valuesStaged, valuesStagedModified, initialValuesState],
+			getStagedDirty(
+				valuesStaged,
+				valuesStagedModified,
+				initialValuesState,
+				customDirtyFields,
+			),
+		[
+			getStagedDirty,
+			valuesStaged,
+			valuesStagedModified,
+			initialValuesState,
+			customDirtyFields,
+		],
 	);
 
 	// main form handling - dirty state events
@@ -1632,6 +1696,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 				valuesStagedRef.current,
 				valuesStagedModifiedRef.current,
 				getInitialValues(),
+				getCustomDirtyFields(),
 			),
 		);
 	}, [
@@ -1640,6 +1705,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 		getFormDirty,
 		getStagedDirty,
 		getInitialValues,
+		getCustomDirtyFields,
 	]);
 	// catch-all for every dirty change that isn't announced by an explicit syncDirtyState
 	useEffect(() => {
@@ -1653,12 +1719,16 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 	 * @see FormContextData.setCustomFieldDirty
 	 */
 	const setCustomFieldDirty = useCallback(
-		(field: string, dirty: boolean) => {
+		(field: string, dirty: boolean | "staged") => {
 			setCustomDirtyFields((prev) => {
-				const prevDirty = prev.includes(field);
-				if (prevDirty == dirty) return prev; // no changes
-				if (dirty) return [...prev, field];
-				else return prev.filter((candidate) => candidate !== field);
+				const prevDirty = Object.prototype.hasOwnProperty.call(prev, field)
+					? prev[field]
+					: false;
+				if (prevDirty === dirty) return prev; // no changes
+				const next = { ...prev };
+				if (dirty) next[field] = dirty;
+				else delete next[field];
+				return next;
 			});
 			// a custom field is the one dirty source the form engine doesn't compute itself,
 			// so announce it here - a caller which clears its field and then navigates away
@@ -1887,7 +1957,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 		postSubmitHandlers.current = {};
 		customValidationHandlers.current = {};
 		customWarningHandlers.current = {};
-		setCustomDirtyFields([]);
+		setCustomDirtyFields({});
 		setErrors({});
 		setWarnings({});
 		setUpdateError(null);
@@ -2369,6 +2439,32 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 		deleted,
 	]);
 
+	// nested forms - staged by the parent's flow
+	/**
+	 * Has a submit of the parent's flow staged this form's edits since the form mounted?
+	 * @remarks Set by every submit of a flow parent (goToStage makes one before it changes
+	 *          the stage), as it stages the values of the shown stage; cleared once this form
+	 *          saved
+	 */
+	const nestedStagedRef = useRef(false);
+	/**
+	 * What becomes of this form's edits when it unmounts, as of the latest render
+	 * @returns "staged": they wait for the save of the parent's flow, which staged them (its
+	 *          stage was left). "dropped": they are neither counted nor saved (the parent's
+	 *          onlySubmitMounted, onlySubmitNestedIfMounted, disableNestedSubmit). "kept": they
+	 *          keep the parent dirty and are saved by its save.
+	 * @see FormProps.nestedFormName
+	 */
+	const nestedLeftOnUnmount = (): "staged" | "dropped" | "kept" => {
+		if (disableNestedSubmit || onlySubmitNestedIfMounted) return "dropped";
+		if (parentFormContext?.flowEngine && nestedStagedRef.current && dirty)
+			return "staged";
+		return parentFormContext?.onlySubmitMounted ? "dropped" : "kept";
+	};
+	// read when the form unmounts, which renders nothing more
+	const nestedLeftOnUnmountRef = useRef(nestedLeftOnUnmount);
+	nestedLeftOnUnmountRef.current = nestedLeftOnUnmount;
+
 	// nested forms - dirty state
 	useEffect(() => {
 		if (!parentFormContext || !nestedFormName) return;
@@ -2377,24 +2473,22 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 			nestedFormName,
 			dirty && !disableNestedSubmit,
 		);
-		return () => {
-			if (
-				disableNestedSubmit ||
-				onlySubmitNestedIfMounted ||
-				parentFormContext.onlySubmitMounted
-			) {
-				parentFormContext.setCustomFieldDirty(nestedFormName, false);
-			}
-		};
 		// parentFormContext omitted from deps: its identity changes often (formContextData useMemo), but setCustomFieldDirty is stable
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [
-		dirty,
-		disableNestedSubmit,
-		onlySubmitNestedIfMounted,
-		nestedFormName,
-		parentFormContext?.onlySubmitMounted,
-	]);
+	}, [dirty, disableNestedSubmit, nestedFormName]);
+	// what the form's unmount leaves of its dirty state, in one call: staged edits move from
+	// the parent's dirty to its stagedDirty without the parent looking clean in between
+	useEffect(() => {
+		if (!parentFormContext || !nestedFormName) return;
+		const { setCustomFieldDirty } = parentFormContext;
+		return () => {
+			const left = nestedLeftOnUnmountRef.current();
+			if (left === "staged") setCustomFieldDirty(nestedFormName, "staged");
+			else if (left === "dropped") setCustomFieldDirty(nestedFormName, false);
+		};
+		// setCustomFieldDirty is stable, see above
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [nestedFormName]);
 
 	// nested forms - submitting blocker
 	useEffect(() => {
@@ -2432,8 +2526,24 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 				);
 			}
 			await submitForm(params);
+			nestedStagedRef.current = false;
 			parentFormContext.setCustomFieldDirty(nestedFormName, false);
 		};
+		const flowParent = parentFormContext.flowEngine;
+		const preSubmitNestedForm = async (
+			id: string | null,
+			params: FormSubmitOptions,
+		) => {
+			if (flowParent) {
+				// a submit of the parent's flow stages the values of the shown stage, and this
+				// form's edits with them. One that only stages sends nothing: the edits wait
+				// for the flow's save
+				nestedStagedRef.current = true;
+				if (!params.submitToServer) return;
+			}
+			if (nestedSubmitBeforeParent) await submitNestedForm(id, params);
+		};
+		const hasPreSubmitHandler = nestedSubmitBeforeParent || flowParent;
 
 		if (!disableNestedSubmit) {
 			parentFormContext.setCustomValidationHandler(
@@ -2444,9 +2554,13 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 				nestedFormName,
 				validateNestedFormWarn,
 			);
-			if (nestedSubmitBeforeParent) {
-				parentFormContext.setPreSubmitHandler(nestedFormName, submitNestedForm);
-			} else {
+			if (hasPreSubmitHandler) {
+				parentFormContext.setPreSubmitHandler(
+					nestedFormName,
+					preSubmitNestedForm,
+				);
+			}
+			if (!nestedSubmitBeforeParent) {
 				parentFormContext.setPostSubmitHandler(
 					nestedFormName,
 					submitNestedForm,
@@ -2463,14 +2577,17 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 				parentFormContext.removeCustomValidationHandler(nestedFormName);
 				parentFormContext.removeCustomWarningHandler(nestedFormName);
 			}
+			// staged edits are saved by the flow's save, also once the form unmounted
 			if (
-				parentFormContext.onlySubmitMounted ||
-				onlySubmitNestedIfMounted ||
-				disableNestedSubmit
+				nestedLeftOnUnmountRef.current() !== "staged" &&
+				(parentFormContext.onlySubmitMounted ||
+					onlySubmitNestedIfMounted ||
+					disableNestedSubmit)
 			) {
-				if (nestedSubmitBeforeParent) {
+				if (hasPreSubmitHandler) {
 					parentFormContext.removePreSubmitHandler(nestedFormName);
-				} else {
+				}
+				if (!nestedSubmitBeforeParent) {
 					parentFormContext.removePostSubmitHandler(nestedFormName);
 				}
 			}
@@ -2481,6 +2598,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 		parentFormContext?.setCustomWarningHandler,
 		parentFormContext?.onlyValidateMounted,
 		parentFormContext?.onlySubmitMounted,
+		parentFormContext?.flowEngine,
 		parentFormContext?.setCustomFieldDirty,
 		validateForm,
 		disableValidation,
@@ -2516,7 +2634,10 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 				"Form Dirty State:",
 				toComparisonJson(localData) !== toComparisonJson(remoteData),
 			);
-			console.log("Custom Dirty State:", getCustomDirtyFields().length > 0);
+			console.log(
+				"Custom Dirty State:",
+				hasCustomDirty(getCustomDirtyFields(), !!flowEngine, false),
+			);
 			console.log("Custom Dirty Fields:", getCustomDirtyFields());
 			console.log(
 				"Staged Dirty State:",
@@ -2524,6 +2645,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 					valuesStagedRef.current,
 					valuesStagedModifiedRef.current,
 					getInitialValues(),
+					getCustomDirtyFields(),
 				),
 			);
 
@@ -2558,6 +2680,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 			getNormalizedData,
 			getDirtyFields,
 			getCustomDirtyFields,
+			flowEngine,
 			getStagedDirty,
 			getInitialValues,
 			model.fields,

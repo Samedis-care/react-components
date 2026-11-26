@@ -22,7 +22,7 @@ import {
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { createMemoryHistory } from "history";
 import FormField from "../../../src/backend-components/Form/Field";
-import {
+import Form, {
 	PageProps,
 	useFormContext,
 } from "../../../src/backend-components/Form/Form";
@@ -36,6 +36,7 @@ import FlowEngineFormPage from "../../../src/backend-components/Form/FlowEngine/
 import FlowEngineSaveButton from "../../../src/backend-components/Form/FlowEngine/FlowEngineSaveButton";
 import FlowEngineBackButton from "../../../src/backend-components/Form/FlowEngine/FlowEngineBackButton";
 import { FormDirtyEvent } from "../../../src/backend-components/Form/FormEvents";
+import DefaultErrorComponent from "../../../src/backend-components/Form/DefaultErrorComponent";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import { ModelUnknown } from "../../../src/backend-integration";
 import {
@@ -565,6 +566,200 @@ describe("FlowEngine: bugs", () => {
 		await wait(50);
 		expect(sink.ctx!.values.title).toBe("T-server");
 		expect(sink.ctx!.dirty).toBe(false);
+	});
+	/**
+	 * A nested Form (record "2" of its own connector, nestedFormName "child") in stage a
+	 */
+	const nestedSetup = (nestedSubmitBeforeParent: boolean) => {
+		const childConnector = new MockConnector(recordData());
+		const childUpdate = vi.spyOn(childConnector, "update");
+		const childModel = makeModel({}, childConnector);
+		const child: Sink = {};
+		const ChildPage = () => {
+			child.ctx = useFormContext<ModelUnknown>();
+			return <FormField name={"title"} />;
+		};
+		const Nested = () => (
+			<Form
+				model={childModel}
+				id={"2"}
+				nestedFormName={"child"}
+				errorComponent={DefaultErrorComponent}
+				customProps={undefined}
+				nestedSubmitBeforeParent={nestedSubmitBeforeParent}
+			>
+				{ChildPage}
+			</Form>
+		);
+		const parent = setup({
+			a: () => (
+				<>
+					<FormField name={"title"} />
+					<Nested />
+				</>
+			),
+			b: NOTE,
+		});
+		return { ...parent, child, childUpdate };
+	};
+
+	it("[ISSUE-3504-ITEM-3] the edits of a nested form in a stage that was left keep the form dirty and are saved by the flow's save", async () => {
+		const { sink, flow, update, child, childUpdate } = nestedSetup(false);
+		await loaded(sink);
+		await waitFor(() => expect(child.ctx?.values.title).toBe("T2"));
+		await set(child, "title", "child edit");
+		expect(sink.ctx!.dirty).toBe(true);
+		expect(await go(flow, "b", false)).toBeNull();
+		// staged with stage a, like the values of its fields: stage b's own values are unchanged
+		expect(sink.ctx!.stagedDirty, "the parent after leaving the stage").toBe(
+			true,
+		);
+		expect(sink.ctx!.dirty, "the values of stage b").toBe(false);
+
+		await set(sink, "note", "n");
+		expect(await go(flow, "c", true)).toBeNull();
+		expect(sent(update)).toEqual([{ id: "1", note: "n" }]);
+		expect(sent(childUpdate), "the nested form's save").toEqual([
+			expect.objectContaining({ id: "2", title: "child edit" }),
+		]);
+		expect(sink.ctx!.stagedDirty, "after the save").toBe(false);
+		expect(sink.ctx!.dirty, "after the save").toBe(false);
+	});
+
+	it("[ISSUE-3504-ITEM-3] with nestedSubmitBeforeParent, a stage change that only stages saves nothing", async () => {
+		const { sink, flow, child, childUpdate } = nestedSetup(true);
+		await loaded(sink);
+		await waitFor(() => expect(child.ctx?.values.title).toBe("T2"));
+		await set(child, "title", "child edit");
+		expect(await go(flow, "b", false)).toBeNull();
+		expect(
+			childUpdate,
+			"requests sent by goToStage(b, false)",
+		).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3504-ITEM-3] with nestedSubmitBeforeParent, the flow's save saves the nested form of a stage that was left, before the parent", async () => {
+		const { sink, flow, update, child, childUpdate } = nestedSetup(true);
+		await loaded(sink);
+		await waitFor(() => expect(child.ctx?.values.title).toBe("T2"));
+		await set(child, "title", "child edit");
+		expect(await go(flow, "b", false)).toBeNull();
+		expect(sink.ctx!.stagedDirty, "after leaving the stage").toBe(true);
+
+		await set(sink, "note", "n");
+		expect(await go(flow, "c", true)).toBeNull();
+		expect(sent(childUpdate)).toEqual([
+			expect.objectContaining({ id: "2", title: "child edit" }),
+		]);
+		expect(sent(update)).toEqual([{ id: "1", note: "n" }]);
+		expect(
+			childUpdate.mock.invocationCallOrder[0],
+			"the nested form's save, compared to the parent's",
+		).toBeLessThan(update.mock.invocationCallOrder[0]);
+		expect(sink.ctx!.stagedDirty, "after the save").toBe(false);
+	});
+
+	it("[ISSUE-3504-ITEM-3] leaving the stage moves the nested form's edits from dirty to stagedDirty, and the form never looks clean in between", async () => {
+		const events: FormDirtyEvent[] = [];
+		const { sink, flow, child } = nestedSetup(false);
+		await loaded(sink);
+		await waitFor(() => expect(child.ctx?.values.title).toBe("T2"));
+		await set(child, "title", "child edit");
+		sink.ctx!.addEventListener("dirty", (event) => events.push(event));
+		expect(await go(flow, "b", false)).toBeNull();
+		expect(events.at(-1)).toEqual({ dirty: false, stagedDirty: true });
+		expect(events, "the dirty events of the stage change").not.toContainEqual({
+			dirty: false,
+			stagedDirty: false,
+		});
+	});
+
+	it('[ISSUE-3504-ITEM-3] a custom field set "staged" counts toward stagedDirty in a flow form', async () => {
+		const { sink } = setup({ a: TITLE, b: NOTE });
+		await loaded(sink);
+		act(() => sink.ctx!.setCustomFieldDirty("queue", "staged"));
+		await settle();
+		expect(sink.ctx!.stagedDirty).toBe(true);
+		expect(sink.ctx!.dirty).toBe(false);
+		act(() => sink.ctx!.setCustomFieldDirty("queue", true));
+		await settle();
+		expect(sink.ctx!.dirty, "set true").toBe(true);
+		expect(sink.ctx!.stagedDirty, "set true").toBe(false);
+		act(() => sink.ctx!.setCustomFieldDirty("queue", false));
+		await settle();
+		expect(sink.ctx!.dirty || sink.ctx!.stagedDirty, "set false").toBe(false);
+	});
+
+	it('[ISSUE-3504-ITEM-3] without flowEngine a custom field set "staged" counts toward dirty', async () => {
+		const sink: Sink = {};
+		mountForm(makeModel(), () => {
+			sink.ctx = useFormContext<ModelUnknown>();
+			return <FormField name={"title"} />;
+		});
+		await loaded(sink);
+		act(() => sink.ctx!.setCustomFieldDirty("queue", "staged"));
+		await settle();
+		expect(sink.ctx!.dirty).toBe(true);
+		expect(sink.ctx!.stagedDirty).toBe(false);
+	});
+
+	it("[ISSUE-3504-ITEM-3] a nested form shown again gets its edits back, counts toward dirty again and is saved once", async () => {
+		const { sink, flow, child, childUpdate } = nestedSetup(false);
+		await loaded(sink);
+		await waitFor(() => expect(child.ctx?.values.title).toBe("T2"));
+		await set(child, "title", "child edit");
+		expect(await go(flow, "b", false)).toBeNull();
+		expect(await go(flow, "a", false)).toBeNull();
+		await waitFor(() => expect(child.ctx?.values.title).toBe("child edit"));
+		expect(sink.ctx!.dirty, "the shown stage's nested form").toBe(true);
+		expect(sink.ctx!.stagedDirty).toBe(false);
+
+		expect(await go(flow, "b", true)).toBeNull();
+		expect(sent(childUpdate)).toEqual([
+			expect.objectContaining({ id: "2", title: "child edit" }),
+		]);
+		expect(sink.ctx!.dirty || sink.ctx!.stagedDirty, "after the save").toBe(
+			false,
+		);
+	});
+
+	it("[ISSUE-3504-ITEM-3] a nested form hidden within its stage, with nothing staged, follows onlySubmitMounted", async () => {
+		const childConnector = new MockConnector(recordData());
+		const childUpdate = vi.spyOn(childConnector, "update");
+		const childModel = makeModel({}, childConnector);
+		const child: Sink = {};
+		const toggle: { setShow?: (show: boolean) => void } = {};
+		const ChildPage = () => {
+			child.ctx = useFormContext<ModelUnknown>();
+			return <FormField name={"title"} />;
+		};
+		const Toggled = () => {
+			const [show, setShow] = useState(true);
+			toggle.setShow = setShow;
+			return show ? (
+				<Form
+					model={childModel}
+					id={"2"}
+					nestedFormName={"child"}
+					errorComponent={DefaultErrorComponent}
+					customProps={undefined}
+				>
+					{ChildPage}
+				</Form>
+			) : null;
+		};
+		const { sink, flow } = setup({ a: () => <Toggled />, b: NOTE });
+		await loaded(sink);
+		await waitFor(() => expect(child.ctx?.values.title).toBe("T2"));
+		await set(child, "title", "child edit");
+		expect(sink.ctx!.dirty).toBe(true);
+
+		act(() => toggle.setShow!(false));
+		await settle();
+		expect(sink.ctx!.dirty, "with the nested form hidden").toBe(false);
+		expect(sink.ctx!.stagedDirty, "with the nested form hidden").toBe(false);
+		expect(await go(flow, "b", true)).toBeNull();
+		expect(childUpdate).not.toHaveBeenCalled();
 	});
 	it("[ISSUE-3504-ITEM-9] a read-only FlowEngineSaveButton says why it is disabled", async () => {
 		const { sink } = setup(
