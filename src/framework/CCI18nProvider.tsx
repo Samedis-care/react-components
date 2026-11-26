@@ -5,6 +5,8 @@ import getCurrentLocale, {
 	getCurrentLanguage,
 } from "../utils/getCurrentLocale";
 import moment from "moment";
+import applyMomentLocale from "./applyMomentLocale";
+import MomentLocaleContext from "./MomentLocaleContext";
 
 export interface CCI18nProviderProps {
 	/**
@@ -27,11 +29,24 @@ export interface CCI18nProviderProps {
  * Keeps moment's global locale and, unless disabled, `<html lang>` on
  * `ComponentsCareI18n`'s language, and re-renders its children once a
  * language change is applied. The `Framework` renders it.
+ *
+ * Moment's short date format (`L`), the one the date pickers take and show
+ * dates in, is the one the date renderers display dates in (Intl's, with
+ * `ToDateLocaleStringOptions`), so a date can be typed as it is shown: moment
+ * has no locale for most regions and falls back to the language's (en-ZA and
+ * en-NG to en's MM/DD/YYYY, where the renderers show 2026/12/31 and
+ * 31/12/2026), and some of its own differ (es-US). Such a region gets a moment
+ * locale of its own name (`en-za`), based on the language's, with the
+ * renderers' order of day, month and year and the text between them; where
+ * moment has the region, its `L` is changed. Moment's other formats (`LT`,
+ * `LL`, …) stay moment's. The `Framework`'s date pickers follow the moment
+ * locale once it is applied, also those already shown.
  */
 const CCI18nProvider = (props: CCI18nProviderProps) => {
 	const { disableHtmlLanguageAttributeSetter } = props;
 	const [updating, setUpdating] = useState(false);
-	const [, setMomentLocale] = useState(getCurrentLocale(ccI18n));
+	// the moment locale of the update applied last, null until the first one applies
+	const [momentLocale, setMomentLocale] = useState<string | null>(null);
 	// the language of the update applied last, null until the first one applies
 	const [appliedLanguage, setAppliedLanguage] = useState<string | null>(null);
 
@@ -64,8 +79,8 @@ const CCI18nProvider = (props: CCI18nProviderProps) => {
 					moment.locale(appliedLocale);
 					return;
 				}
-				appliedLocale = moment.locale(lang);
-				setMomentLocale(lang);
+				appliedLocale = applyMomentLocale(lang);
+				setMomentLocale(appliedLocale);
 				setAppliedLanguage(language);
 				setUpdating(false);
 			})();
@@ -85,18 +100,20 @@ const CCI18nProvider = (props: CCI18nProviderProps) => {
 	}, [appliedLanguage, disableHtmlLanguageAttributeSetter]);
 
 	return (
-		<I18nextProvider
-			i18n={getI18n() ?? ccI18n}
-			// defaultNS used to force refresh
-			defaultNS={
-				updating
-					? (((getI18n() ?? ccI18n).options.defaultNS || "") as
-							string | string[])
-					: undefined
-			}
-		>
-			{props.children}
-		</I18nextProvider>
+		<MomentLocaleContext.Provider value={momentLocale}>
+			<I18nextProvider
+				i18n={getI18n() ?? ccI18n}
+				// defaultNS used to force refresh
+				defaultNS={
+					updating
+						? (((getI18n() ?? ccI18n).options.defaultNS || "") as
+								string | string[])
+						: undefined
+				}
+			>
+				{props.children}
+			</I18nextProvider>
+		</MomentLocaleContext.Provider>
 	);
 };
 
