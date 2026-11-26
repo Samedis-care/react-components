@@ -35,6 +35,12 @@ const header = (heading: string) =>
 
 type OnChange = (event: React.SyntheticEvent, expanded: boolean) => void;
 
+/** the state classes of status and alwaysExpanded on an element of the box */
+const stateClassesOf = (el: Element | null) =>
+	Array.from(el?.classList ?? []).filter((name) =>
+		/^CcInfoBox-(status|alwaysExpanded)/.test(name),
+	);
+
 /** what an svg draws, its viewBox and path data: tells the icons apart */
 const glyphOf = (svg: SVGSVGElement | null | undefined) => ({
 	viewBox: svg?.getAttribute("viewBox"),
@@ -303,6 +309,174 @@ describe("InfoBox", () => {
 			expect(header("Closed")).toHaveAttribute("aria-expanded", "true");
 			fireEvent.click(header("Open"));
 			expect(header("Open")).toHaveAttribute("aria-expanded", "false");
+		});
+
+		it("[ISSUE-3464-ITEM-4] marks the root and the header with the state classes of status and alwaysExpanded", () => {
+			const classes = { root: "r", summary: "s" };
+			const { container, rerender } = renderInfoBox(
+				<InfoBox
+					heading="H"
+					message="M"
+					status="error"
+					alwaysExpanded
+					className="c"
+					classes={classes}
+				/>,
+			);
+			const root = container.firstElementChild;
+			expect(root).toHaveClass("MuiAccordion-root", "c", "r");
+			const summary = header("H");
+			expect(summary).toHaveClass("s");
+			for (const el of [root, summary]) {
+				expect(stateClassesOf(el)).toEqual([
+					"CcInfoBox-statusError",
+					"CcInfoBox-alwaysExpanded",
+				]);
+			}
+
+			for (const [status, statusClass] of [
+				["warning", "CcInfoBox-statusWarning"],
+				["success", "CcInfoBox-statusSuccess"],
+				["info", "CcInfoBox-statusInfo"],
+				[undefined, "CcInfoBox-statusInfo"],
+			] as const) {
+				rerender(
+					themed(
+						<InfoBox
+							heading="H"
+							message="M"
+							status={status}
+							alwaysExpanded={false}
+							className="c"
+							classes={classes}
+						/>,
+					),
+				);
+				expect(container.firstElementChild).toBe(root);
+				expect(header("H")).toBe(summary);
+				expect(root).toHaveClass("c", "r");
+				expect(summary).toHaveClass("s");
+				for (const el of [root, summary]) {
+					expect(stateClassesOf(el), String(status)).toEqual([statusClass]);
+				}
+			}
+		});
+
+		it("[ISSUE-3464-ITEM-4] a theme styles one status through its state class, with function overrides for every slot", () => {
+			const red = "rgb(255, 0, 0)";
+			const t = createTheme({
+				components: {
+					CcInfoBox: {
+						styleOverrides: {
+							root: ({ theme: th }) => ({
+								paddingTop: th.spacing(1),
+								"&.CcInfoBox-statusError": { outlineStyle: "dotted" },
+							}),
+							summary: ({ theme: th }) => ({
+								paddingBottom: th.spacing(1),
+								"&.CcInfoBox-statusError": { outlineColor: red },
+								"&.CcInfoBox-alwaysExpanded": { outlineWidth: "3px" },
+							}),
+							summaryRoot: ({ theme: th }) => ({ paddingRight: th.spacing(2) }),
+							iconButton: ({ theme: th }) => ({ marginRight: th.spacing(3) }),
+							heading: ({ theme: th }) => ({ marginLeft: th.spacing(4) }),
+							statusName: ({ theme: th }) => ({ marginTop: th.spacing(5) }),
+							details: ({ theme: th }) => ({ marginBottom: th.spacing(6) }),
+							detailsText: ({ theme: th }) => ({ paddingLeft: th.spacing(7) }),
+						},
+					},
+				},
+			});
+			const { container } = renderInfoBox(
+				<>
+					<InfoBox heading="E" message="M" alwaysExpanded status="error" />
+					<InfoBox heading="I" message="M" expanded status="info" />
+				</>,
+				t,
+			);
+			const [errorBox, infoBox] = Array.from(container.children);
+			expect(getComputedStyle(errorBox).outlineStyle).toBe("dotted");
+			expect(getComputedStyle(infoBox).outlineStyle).not.toBe("dotted");
+			expect(getComputedStyle(errorBox).paddingTop).toBe("8px");
+			expect(getComputedStyle(header("E")).outlineColor).toBe(red);
+			expect(getComputedStyle(header("I")).outlineColor).not.toBe(red);
+			expect(getComputedStyle(header("E")).outlineWidth).toBe("3px");
+			expect(getComputedStyle(header("I")).outlineWidth).not.toBe("3px");
+			expect(getComputedStyle(header("I")).paddingBottom).toBe("8px");
+			const slot = (box: Element, selector: string) => {
+				const el = box.querySelector(selector);
+				if (!el) throw new Error(`${selector} missing`);
+				return getComputedStyle(el);
+			};
+			const summaryRoot = header("E").querySelector(
+				".MuiAccordionSummary-content > div",
+			);
+			if (!summaryRoot) throw new Error("summaryRoot missing");
+			expect(getComputedStyle(summaryRoot).paddingRight).toBe("16px");
+			const icon = summaryRoot.firstElementChild;
+			if (!icon) throw new Error("iconButton missing");
+			expect(getComputedStyle(icon).marginRight).toBe("24px");
+			expect(slot(errorBox, ".MuiTypography-root").marginLeft).toBe("32px");
+			expect(
+				getComputedStyle(screen.getByText("Error:", { exact: false }))
+					.marginTop,
+			).toBe("40px");
+			expect(slot(errorBox, ".MuiAccordionDetails-root").marginBottom).toBe(
+				"48px",
+			);
+			expect(
+				slot(errorBox, ".MuiAccordionDetails-root > div").paddingLeft,
+			).toBe("56px");
+		});
+
+		it("[ISSUE-3464-ITEM-4] a theme's summary background replaces the color of every status, and a rule for a status class that of one", () => {
+			const green = "rgb(0, 128, 0)";
+			const custom = "rgb(1, 2, 3)";
+			const t = createTheme({
+				components: {
+					CcInfoBox: {
+						styleOverrides: {
+							summary: {
+								backgroundColor: green,
+								"&.CcInfoBox-statusError": { backgroundColor: custom },
+							},
+						},
+					},
+				},
+			});
+			renderInfoBox(
+				<>
+					<InfoBox heading="E" message="M" status="error" />
+					<InfoBox heading="W" message="M" status="warning" />
+					<InfoBox heading="I" message="M" />
+				</>,
+				t,
+			);
+			expect(getComputedStyle(header("E")).backgroundColor).toBe(custom);
+			expect(getComputedStyle(header("W")).backgroundColor).toBe(green);
+			expect(getComputedStyle(header("I")).backgroundColor).toBe(green);
+		});
+
+		it("[ISSUE-3464-ITEM-4] types function styleOverrides without an ownerState and offers no variants, which nothing would match", () => {
+			const t = createTheme({
+				components: {
+					CcInfoBox: {
+						styleOverrides: {
+							// @ts-expect-error InfoBox's slots get no ownerState; the root and the header have state classes
+							summary: ({ ownerState }) => ({
+								outlineColor: ownerState ? "red" : "blue",
+							}),
+						},
+						// @ts-expect-error InfoBox has no theme variants; the root and the header have state classes
+						variants: [
+							{ props: { status: "error" }, style: { outlineStyle: "dotted" } },
+						],
+					},
+				},
+			});
+			expect(t.components?.CcInfoBox?.styleOverrides?.summary).toEqual(
+				expect.any(Function),
+			);
 		});
 
 		it.each([

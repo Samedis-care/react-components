@@ -47,57 +47,66 @@ const AccordionStyled = styled(Accordion, { name: "CcInfoBox", slot: "root" })(
 	}),
 );
 
+// state classes of the root and the header, see InfoBoxClassKey
+const STATUS_CLASSES: Record<NonNullable<InfoBoxProps["status"]>, string> = {
+	info: "CcInfoBox-statusInfo",
+	warning: "CcInfoBox-statusWarning",
+	success: "CcInfoBox-statusSuccess",
+	error: "CcInfoBox-statusError",
+};
+const ALWAYS_EXPANDED_CLASS = "CcInfoBox-alwaysExpanded";
+
+// The header's colors, set by its status class. The header's own declarations
+// read them, so a background or color in the theme's summary override, which
+// comes after them, replaces them for every status.
+const HEADER_BACKGROUND = "--cc-info-box-header-background";
+const HEADER_COLOR = "--cc-info-box-header-color";
+
 /**
- * The header's colors for one status. A keyboard-focused header
- * (`Mui-focusVisible`) keeps them, where MUI's AccordionSummary would replace
- * the background with `palette.action.focus`, and shows a 2px outline in the
- * text color, 2px inside its edges: the text color contrasts with the status
- * color as the heading does (`palette.primary.main` would vanish on the info
- * header), the status color around it sets it off from the page, the root's
- * `overflow: hidden` cannot clip it, and forced colors keep outlines. It also
- * replaces the ring of the theme's `focusVisible` option, which the root
- * would clip.
+ * The header's colors for one status
  * @param color The palette color of the status
- * @returns The header's color styles
+ * @returns The custom properties the header's colors read
  */
 const headerColors = (color: PaletteColor): CSSObject => ({
-	backgroundColor: color.main,
-	borderColor: color.main,
-	color: color.contrastText,
-	[`&.${accordionSummaryClasses.focusVisible}`]: {
-		backgroundColor: color.main,
-		outline: "2px solid currentColor",
-		outlineOffset: -4,
-	},
+	[HEADER_BACKGROUND]: color.main,
+	[HEADER_COLOR]: color.contrastText,
 });
 
-export interface InfoBoxSummaryOwnerState {
-	status?: "info" | "warning" | "success" | "error";
-	alwaysExpanded: boolean;
-}
 const AccordionSummaryStyled = styled(AccordionSummary, {
 	name: "CcInfoBox",
 	slot: "summary",
-})<{ ownerState: InfoBoxSummaryOwnerState }>(
-	({ theme, ownerState: { status, alwaysExpanded } }) => ({
-		// a stacking context for the icon column (zIndex -1), so the focus ring
-		// is drawn over the column instead of under its shade
-		isolation: "isolate",
-		minHeight: 48,
-		...(alwaysExpanded && {
+})(({ theme }) => ({
+	// a stacking context for the icon column (zIndex -1), so the focus ring
+	// is drawn over the column instead of under its shade
+	isolation: "isolate",
+	minHeight: 48,
+	backgroundColor: `var(${HEADER_BACKGROUND})`,
+	color: `var(${HEADER_COLOR})`,
+	// A keyboard-focused header keeps its status color, where MUI's
+	// AccordionSummary would replace the background with
+	// `palette.action.focus`, and shows a 2px outline in the text color, 2px
+	// inside its edges: the text color contrasts with the status color as the
+	// heading does (`palette.primary.main` would vanish on the info header),
+	// the status color around it sets it off from the page, the root's
+	// `overflow: hidden` cannot clip it, and forced colors keep outlines. It
+	// also replaces the ring of the theme's `focusVisible` option, which the
+	// root would clip.
+	[`&.${accordionSummaryClasses.focusVisible}`]: {
+		backgroundColor: `var(${HEADER_BACKGROUND})`,
+		outline: "2px solid currentColor",
+		outlineOffset: -4,
+	},
+	[`&.${ALWAYS_EXPANDED_CLASS}`]: {
+		cursor: "default",
+		"&:hover:not(.Mui-disabled)": {
 			cursor: "default",
-			"&:hover:not(.Mui-disabled)": {
-				cursor: "default",
-			},
-		}),
-
-		...((status == null || status === "info") &&
-			headerColors(theme.palette.primary)),
-		...(status === "error" && headerColors(theme.palette.error)),
-		...(status === "warning" && headerColors(theme.palette.warning)),
-		...(status === "success" && headerColors(theme.palette.success)),
-	}),
-);
+		},
+	},
+	[`&.${STATUS_CLASSES.info}`]: headerColors(theme.palette.primary),
+	[`&.${STATUS_CLASSES.error}`]: headerColors(theme.palette.error),
+	[`&.${STATUS_CLASSES.warning}`]: headerColors(theme.palette.warning),
+	[`&.${STATUS_CLASSES.success}`]: headerColors(theme.palette.success),
+}));
 
 const SummaryRoot = styled("div", { name: "CcInfoBox", slot: "summaryRoot" })(
 	({ theme }) => ({
@@ -153,6 +162,36 @@ const DetailsText = styled("div", { name: "CcInfoBox", slot: "detailsText" })(
 	{},
 );
 
+/**
+ * Keys of the theme's `components.CcInfoBox.styleOverrides`, also the keys of
+ * the `classes` prop:
+ * - `root`: the MUI `Accordion` around everything
+ * - `summary`: the header button (`AccordionSummary`), filled with the
+ *   status color
+ * - `summaryRoot`: the header content, the icon column and the heading
+ * - `iconButton`: the column with the status icon at the header's left edge
+ * - `heading`: the heading `Typography`
+ * - `statusName`: the visually hidden status name read before the heading
+ * - `details`: the bordered message panel (`AccordionDetails`)
+ * - `detailsText`: the `<div>` around `message`
+ *
+ * No slot receives an `ownerState`, and the theme has no `variants` for
+ * InfoBox: a function override is called with the theme. The props are state
+ * classes on the root and on the header instead: `CcInfoBox-statusInfo`
+ * (`status` `info` or not set), `CcInfoBox-statusWarning`,
+ * `CcInfoBox-statusSuccess` or `CcInfoBox-statusError`, and
+ * `CcInfoBox-alwaysExpanded` while `alwaysExpanded` is `true`; an open box
+ * also has MUI's `Mui-expanded` there. A theme styles a state with a
+ * selector, e.g. `summary: { "&.CcInfoBox-statusError": { … } }`, or reaches
+ * the other slots from the root, e.g.
+ * `root: { "&.CcInfoBox-statusError .MuiAccordionDetails-root": { … } }`.
+ *
+ * A header background set for a status class stays while the header has
+ * keyboard focus. One set for the header alone
+ * (`summary: { backgroundColor }`) replaces the status colors, but the
+ * focused header (`Mui-focusVisible`) shows the status color unless the
+ * theme sets the background for `"&.Mui-focusVisible"` too.
+ */
 export type InfoBoxClassKey =
 	| "root"
 	| "summary"
@@ -204,6 +243,8 @@ export interface InfoBoxProps {
 	 * it is no longer `true`, the box shows `expanded`, or, without it, the
 	 * state the user last toggled to (initially `defaultExpanded`), and the
 	 * user can toggle it again.
+	 * While it is `true`, the root and the header have the class
+	 * `CcInfoBox-alwaysExpanded`.
 	 * @default false
 	 */
 	alwaysExpanded?: boolean;
@@ -241,6 +282,11 @@ export interface InfoBoxProps {
 	 * out with it (e.g. "Warning: Please review"), so the status is not
 	 * conveyed by color and icon alone. `info` and an unset status announce
 	 * nothing: they are the neutral default.
+	 *
+	 * The root and the header have the state class of the status:
+	 * `CcInfoBox-statusInfo` (also while it is not set),
+	 * `CcInfoBox-statusWarning`, `CcInfoBox-statusSuccess` or
+	 * `CcInfoBox-statusError`.
 	 */
 	status?: "info" | "warning" | "success" | "error";
 }
@@ -320,6 +366,12 @@ const InfoBox = (inProps: InfoBoxProps) => {
 		name: "InfoBox",
 		state: "expanded",
 	});
+	// the state classes of the root and the header, see InfoBoxClassKey
+	const stateClasses = combineClassNames([
+		STATUS_CLASSES[status ?? "info"],
+		alwaysExpanded && ALWAYS_EXPANDED_CLASS,
+	]);
+
 	const handleChange = useCallback(
 		(event: React.SyntheticEvent, newExpanded: boolean) => {
 			setExpanded(newExpanded);
@@ -330,7 +382,7 @@ const InfoBox = (inProps: InfoBoxProps) => {
 
 	return (
 		<AccordionStyled
-			className={combineClassNames([className, classes?.root])}
+			className={combineClassNames([className, classes?.root, stateClasses])}
 			// opening the box keeps the header at 48px and adds no margin around
 			// the box, where MUI's gutters grow both
 			disableGutters
@@ -338,8 +390,7 @@ const InfoBox = (inProps: InfoBoxProps) => {
 			onChange={handleChange}
 		>
 			<AccordionSummaryStyled
-				ownerState={{ status, alwaysExpanded: !!alwaysExpanded }}
-				className={classes?.summary}
+				className={combineClassNames([classes?.summary, stateClasses])}
 			>
 				<SummaryRoot className={classes?.summaryRoot}>
 					<SpanIconButton className={classes?.iconButton}>

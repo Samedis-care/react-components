@@ -729,10 +729,13 @@ declare module "@mui/material/styles" {
 				Pick<HowToBoxProps, "titleLabel" | "labels">
 			>;
 		};
+		// No variants: MUI matches them against the root's own props and
+		// ownerState, which hold none of InfoBox's props. A theme reaches the
+		// props through the state classes of the root and the header (see
+		// InfoBoxClassKey).
 		CcInfoBox?: {
 			defaultProps?: ComponentsPropsList["CcInfoBox"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcInfoBox"];
-			variants?: ComponentsVariants["CcInfoBox"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<InfoBoxClassKey>;
 		};
 		// No variants: MUI matches them against the root's own props, which
 		// hold none of FormPageLayout's props.

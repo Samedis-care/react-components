@@ -399,10 +399,18 @@ describe("theme-def", () => {
 						root: ({ ownerState }) => ({ color: ownerState ? "red" : "blue" }),
 					},
 				},
+				CcInfoBox: {
+					styleOverrides: {
+						// @ts-expect-error no slot of InfoBox receives an ownerState
+						summary: ({ ownerState }) => ({
+							color: ownerState ? "red" : "blue",
+						}),
+					},
+				},
 			},
 		});
 		expect(overrideFunctions(theme)).toEqual(
-			Array(56).fill(expect.any(Function)),
+			Array(57).fill(expect.any(Function)),
 		);
 	});
 	it("[ISSUE-3462-ITEM-17] keeps ownerState in the function styleOverrides of the components whose every slot receives one", () => {

@@ -499,3 +499,152 @@ export const Issue3473Item16HiddenStatusNameStaysInside: Story = {
 		await expect(pageScrollsSideways()).toBe(false);
 	},
 };
+
+/** the computed form of a CSS color, e.g. rgb(25, 118, 210) for #1976d2 */
+const cssColor = (color: string) => {
+	const el = document.createElement("div");
+	el.style.color = color;
+	document.body.append(el);
+	const computed = getComputedStyle(el).color;
+	el.remove();
+	return computed;
+};
+
+const defaultTheme = createTheme();
+
+/** each status, the palette color of its header and its state class */
+const STATUS_STATES = [
+	[undefined, "primary", "CcInfoBox-statusInfo"],
+	["info", "primary", "CcInfoBox-statusInfo"],
+	["warning", "warning", "CcInfoBox-statusWarning"],
+	["success", "success", "CcInfoBox-statusSuccess"],
+	["error", "error", "CcInfoBox-statusError"],
+] as const;
+
+export const Issue3464Item4StatusStateClasses: Story = {
+	parameters: {
+		a11y: {
+			test: "error",
+			config: {
+				rules: [
+					// white on MUI's default warning orange is below 4.5:1 (see
+					// Issue3464Item6FocusRingInEveryStatusAndTheme); this story is
+					// about the state classes and the colors they select
+					{ id: "color-contrast", enabled: false },
+				],
+			},
+		},
+		docs: {
+			description: {
+				story:
+					"ISSUE-3464-ITEM-4: the box and its header carry the state class of the status (`CcInfoBox-statusInfo` also for an unset status), and of `alwaysExpanded` (`CcInfoBox-alwaysExpanded`). The header takes its colors from its status class: the palette color's main and contrast text.",
+			},
+		},
+	},
+	render: () => (
+		<ThemeProvider theme={defaultTheme}>
+			<div style={{ width: 400 }}>
+				{STATUS_STATES.map(([status]) => (
+					<InfoBox
+						key={String(status)}
+						status={status}
+						heading={`Status ${String(status)}`}
+						message={"Message"}
+					/>
+				))}
+				<InfoBox
+					status={"success"}
+					heading={"Forced open"}
+					message={"Message"}
+					alwaysExpanded
+				/>
+			</div>
+		</ThemeProvider>
+	),
+	play: async ({ canvas }) => {
+		for (const [status, color, statusClass] of STATUS_STATES) {
+			const header = canvas.getByRole("button", {
+				name: new RegExp(`Status ${String(status)}$`),
+			});
+			const box = header.closest(".MuiAccordion-root");
+			await expect(header).toHaveClass(statusClass);
+			await expect(box).toHaveClass(statusClass);
+			await expect(header).not.toHaveClass("CcInfoBox-alwaysExpanded");
+			await expect(box).not.toHaveClass("CcInfoBox-alwaysExpanded");
+			const cs = getComputedStyle(header);
+			await expect([cs.backgroundColor, cs.color, cs.cursor]).toEqual([
+				cssColor(defaultTheme.palette[color].main),
+				cssColor(defaultTheme.palette[color].contrastText),
+				"pointer",
+			]);
+		}
+		const forced = canvas.getByRole("button", { name: /Forced open$/ });
+		await expect(forced).toHaveClass(
+			"CcInfoBox-statusSuccess",
+			"CcInfoBox-alwaysExpanded",
+		);
+		await expect(forced.closest(".MuiAccordion-root")).toHaveClass(
+			"CcInfoBox-statusSuccess",
+			"CcInfoBox-alwaysExpanded",
+		);
+		await expect(getComputedStyle(forced).cursor).toBe("default");
+	},
+};
+
+const PURPLE = "rgb(106, 27, 154)";
+
+/** a theme that recolors the error header, and styles every message panel */
+const errorRecolorTheme = createTheme({
+	components: {
+		CcInfoBox: {
+			styleOverrides: {
+				summary: {
+					"&.CcInfoBox-statusError": { backgroundColor: PURPLE },
+				},
+				details: ({ theme }) => ({ borderColor: theme.palette.divider }),
+			},
+		},
+	},
+});
+
+export const Issue3464Item4ThemeRecolorsOneStatus: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3464-ITEM-4: a theme recolors the error header through its state class (`summary: { "&.CcInfoBox-statusError": { backgroundColor } }`), and the header keeps that color while it has keyboard focus. The info header keeps its palette color, and a function override of the theme styles every message panel.',
+			},
+		},
+	},
+	render: () => (
+		<ThemeProvider theme={errorRecolorTheme}>
+			<div style={{ width: 400 }}>
+				<InfoBox status={"error"} heading={"Upload failed"} message={"M"} />
+				<InfoBox status={"info"} heading={"Did you know?"} message={"M"} />
+			</div>
+		</ThemeProvider>
+	),
+	play: async ({ canvas, userEvent }) => {
+		const error = canvas.getByRole("button", { name: /Upload failed/ });
+		const info = canvas.getByRole("button", { name: /Did you know/ });
+		await expect(getComputedStyle(error).backgroundColor).toBe(PURPLE);
+		await expect(getComputedStyle(info).backgroundColor).toBe(
+			cssColor(errorRecolorTheme.palette.primary.main),
+		);
+		await expect(
+			getComputedStyle(elementOf(canvas.getAllByText("M")[0].parentElement))
+				.borderTopColor,
+		).toBe(cssColor(errorRecolorTheme.palette.divider));
+
+		await userEvent.tab();
+		await expect(error).toHaveFocus();
+		await expect(error).toHaveClass("Mui-focusVisible");
+		await transitionsDone(error);
+		const cs = getComputedStyle(error);
+		await expect([cs.backgroundColor, cs.outlineStyle]).toEqual([
+			PURPLE,
+			"solid",
+		]);
+	},
+};
