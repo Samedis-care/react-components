@@ -28,11 +28,12 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 * top.
 	 *
 	 * Called while the container is scrolled to its top (an offset less than
-	 * 1px counts as the top):
-	 * - once the content first fills the container: after mount, after the
-	 *   list became short again (e.g. it was emptied), after the container was
-	 *   hidden, and when `loadMoreTop` is passed after mount. So a list opens
-	 *   at its first row with a page already loaded above it;
+	 * 1px counts as the top), whatever the `threshold`:
+	 * - once the content first fills the container (overflows it by more than
+	 *   `threshold`): after mount, after the list became short again (e.g. it
+	 *   was emptied), after the container was hidden, and when `loadMoreTop`
+	 *   is passed after mount. So a list opens at its first row with a page
+	 *   already loaded above it;
 	 * - when a scroll event finds the container at its top;
 	 * - to fill a short list that has no `loadMoreBottom` (see there).
 	 *
@@ -48,8 +49,12 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 *
 	 * A call that waits for `callBackDebounce` is only made if, once the wait
 	 * is over, the content still does not fill the container or the container
-	 * is still at its top; it is not made while the container is hidden. The
-	 * return value is ignored.
+	 * is still at its top; it is not made while the container is hidden, and
+	 * waits while `loading` is set.
+	 *
+	 * The return value is ignored: a promise it returns is not awaited, so an
+	 * async callback handles its own errors. Pass `loading` while the load
+	 * runs.
 	 */
 	loadMoreTop?: () => void;
 	/**
@@ -57,24 +62,68 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 * loading at the bottom, e.g. for a list that only grows upwards (a chat
 	 * history) or once there is nothing more below.
 	 *
-	 * Called when the container is scrolled to the bottom. An offset less than
-	 * 1px from the bottom counts as the bottom, because browsers can report a
-	 * fractional `scrollTop` there, e.g. inside an ancestor with CSS `zoom`.
-	 *
-	 * Also fills the container: after mount and after every render with new
-	 * `children`, it is called while the content does not overflow the
-	 * container by more than 24px. Without `loadMoreBottom` the container is
-	 * filled through `loadMoreTop` instead.
+	 * Called while `threshold` px (250px by default) or less of content are
+	 * left below the visible part of the container, so the next items are
+	 * usually there before the user reaches the end. A distance less than 1px
+	 * more counts too, because browsers can report a fractional `scrollTop`,
+	 * e.g. inside an ancestor with CSS `zoom`. This is checked:
+	 * - when the container is scrolled;
+	 * - after mount and after every render with new `children`. This also
+	 *   fills the container: a list whose content does not overflow it by more
+	 *   than `threshold` is extended until it does. Without `loadMoreBottom`
+	 *   the container is filled through `loadMoreTop` instead.
 	 *
 	 * A call that waits for `callBackDebounce` is only made if, once the wait is
-	 * over, the content still does not fill the container or the container is
-	 * still scrolled to the bottom.
+	 * over, `threshold` px or less are still left below the visible part; it
+	 * waits while `loading` is set.
 	 *
 	 * Not called while the container is hidden by `display: none` on it or an
 	 * ancestor (e.g. an inactive tab that stays mounted): the container is
 	 * filled once it is shown.
+	 *
+	 * The return value is ignored: a promise it returns is not awaited, so an
+	 * async callback handles its own errors. Pass `loading` while the load
+	 * runs.
 	 */
 	loadMoreBottom?: () => void;
+	/**
+	 * Is a load running? Set it to `true` in the update that starts loading
+	 * (in `loadMoreTop` or `loadMoreBottom`, or when the list is loaded or
+	 * started over by other means, e.g. after a filter change), and to `false`
+	 * in the update that adds the loaded items, or when the load fails or its
+	 * result is discarded.
+	 *
+	 * While it is `true`:
+	 * - neither `loadMoreTop` nor `loadMoreBottom` is called, so the callbacks
+	 *   need no guard of their own against a second call. A call that comes
+	 *   up meanwhile (a scroll to an end, new `children` that leave the list
+	 *   short, e.g. a list emptied for a new filter) is made once `loading`
+	 *   turns `false`, if the content still needs it then;
+	 * - the scroll container is marked `aria-busy`, unless `aria-busy` is
+	 *   passed.
+	 *
+	 * A load that ends without new items while no call came up is not
+	 * repeated, so a request that fails does not loop. Offer a retry (e.g. a
+	 * button that loads again), and set the callback to `undefined` once there
+	 * is nothing more to load.
+	 *
+	 * Nothing is announced: render the loading and end-of-list status
+	 * yourself, as text in a polite live region (`role="status"`) outside the
+	 * container.
+	 * @default false
+	 */
+	loading?: boolean;
+	/**
+	 * How much content is kept ready below the visible part of the container,
+	 * in CSS pixels: `loadMoreBottom` is called while this much or less is
+	 * left below it, and the container is filled until its content overflows
+	 * it by more than this. `0` loads at the very bottom only. A negative
+	 * number or `NaN` counts as `0`. Can be changed after mount.
+	 *
+	 * `loadMoreTop` is called at the top, whatever this value.
+	 * @default 250
+	 */
+	threshold?: number;
 	/**
 	 * Debounce wait in milliseconds for `loadMoreTop` and `loadMoreBottom`: a
 	 * burst of triggers results in one call, made `callBackDebounce` ms after
@@ -111,23 +160,36 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
  */
 type LoadCallbackName = "loadMoreTop" | "loadMoreBottom";
 
-/**
- * Does the content overflow the scroll container by more than 24px? Until it
- * does, the container is filled through `loadMoreBottom`, or `loadMoreTop`
- * without it.
- */
-const isFilled = (wrapper: HTMLElement): boolean =>
-	wrapper.scrollHeight > wrapper.clientHeight + 24;
+const LOAD_CALLBACK_NAMES: readonly LoadCallbackName[] = [
+	"loadMoreTop",
+	"loadMoreBottom",
+];
 
 /**
- * Is the scroll container scrolled to the bottom? `scrollTop` can be
- * fractional (e.g. inside an ancestor with CSS `zoom`) while `scrollHeight`
- * and `clientHeight` are rounded to whole pixels, so at the bottom it can be a
- * fraction of a pixel short of their difference or past it. An offset less
- * than 1px short of the difference, or past it, counts as the bottom.
+ * The default `threshold`, in CSS pixels
  */
-const isAtBottom = (wrapper: HTMLElement): boolean =>
-	wrapper.scrollHeight - wrapper.clientHeight - wrapper.scrollTop < 1;
+const DEFAULT_THRESHOLD = 250;
+
+/**
+ * Does the content overflow the scroll container by more than `threshold`?
+ * Until it does, the container is filled through `loadMoreBottom`, or
+ * `loadMoreTop` without it.
+ */
+const isFilled = (wrapper: HTMLElement, threshold: number): boolean =>
+	wrapper.scrollHeight > wrapper.clientHeight + threshold;
+
+/**
+ * Are `threshold` px or less of content left below the visible part of the
+ * scroll container? `scrollTop` can be fractional (e.g. inside an ancestor
+ * with CSS `zoom`) while `scrollHeight` and `clientHeight` are rounded to
+ * whole pixels, so at the bottom it can be a fraction of a pixel short of
+ * their difference or past it. A distance less than 1px more than `threshold`
+ * counts too, so with `threshold` 0 a container less than 1px from the bottom
+ * is at the bottom.
+ */
+const isNearBottom = (wrapper: HTMLElement, threshold: number): boolean =>
+	wrapper.scrollHeight - wrapper.clientHeight - wrapper.scrollTop <
+	threshold + 1;
 
 /**
  * Is the scroll container scrolled to its top? An offset less than 1px counts,
@@ -237,6 +299,11 @@ const ScrollContainer = styled("div")(({ theme }) => ({
  * Provides infinite scrolling to whatever is inside it. The scroll container
  * is a tab stop (see `tabIndex`) and takes the props of a `div`, such as a
  * role and an accessible name.
+ *
+ * It renders no loader, end-of-list or error row and announces nothing:
+ * render those inside or around it, with the status as text in a polite live
+ * region (`role="status"`) outside the container, and pass `loading` while a
+ * load runs.
  */
 class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 	public wrapper: HTMLElement | null = null;
@@ -286,6 +353,14 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 	 * list that is at its top gets the rows above it.
 	 */
 	private topLoadDue = true;
+	/**
+	 * The calls that came up while `loading` was set, per callback; they are
+	 * requested again once `loading` turns false
+	 */
+	private heldLoads: Record<LoadCallbackName, boolean> = {
+		loadMoreTop: false,
+		loadMoreBottom: false,
+	};
 
 	constructor(props: InfiniteScrollProps) {
 		super(props);
@@ -300,6 +375,7 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 
 		// StrictMode mounts the same instance again after unmounting it
 		this.topLoadDue = true;
+		this.heldLoads = { loadMoreTop: false, loadMoreBottom: false };
 
 		this.wrapper.addEventListener("scroll", this.handleScroll);
 		this.handleResize();
@@ -349,9 +425,13 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 		if (
 			prevProps.children !== this.props.children ||
 			!prevProps.loadMoreTop !== !this.props.loadMoreTop ||
-			!prevProps.loadMoreBottom !== !this.props.loadMoreBottom
+			!prevProps.loadMoreBottom !== !this.props.loadMoreBottom ||
+			!Object.is(prevProps.threshold, this.props.threshold)
 		) {
 			this.handleResize();
+		}
+		if (prevProps.loading && !this.props.loading) {
+			this.requestHeldLoads();
 		}
 		if (!!prevProps.dynamicallySized !== !!this.props.dynamicallySized) {
 			this.observeSize();
@@ -378,12 +458,16 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 			callBackDebounce,
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			dynamicallySized,
+			loading,
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			threshold,
 			tabIndex,
 			...containerProps
 		} = this.props;
 		return (
 			<ScrollContainer
 				{...containerProps}
+				aria-busy={containerProps["aria-busy"] ?? (loading || undefined)}
 				tabIndex={tabIndex ?? 0}
 				ref={this.setScrollerRef}
 			>
@@ -523,20 +607,50 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 	};
 
 	/**
+	 * Requests the calls held while `loading` was set (see `callLoad`) again,
+	 * now that it turned false
+	 */
+	private requestHeldLoads = (): void => {
+		for (const name of LOAD_CALLBACK_NAMES) {
+			if (!this.heldLoads[name]) continue;
+			this.heldLoads[name] = false;
+			this.requestLoad(name);
+		}
+	};
+
+	/**
+	 * The `threshold` prop, with its default; a negative number or NaN counts
+	 * as 0
+	 */
+	private getThreshold = (): number => {
+		const threshold = this.props.threshold ?? DEFAULT_THRESHOLD;
+		return threshold > 0 ? threshold : 0;
+	};
+
+	/**
 	 * Makes a call requested by `requestLoad`. The callback is read from the
 	 * props now, so it is the one of the latest render. A call is only made if
 	 * the content still needs it: a request made while the content was short,
-	 * or while the container was at that end, is dropped once content that
+	 * or while the container was near that end, is dropped once content that
 	 * arrived in the meantime fills the container and moves that end away, and
 	 * one is not made while the container is hidden (`pauseFillWhileHidden`).
-	 * A fill call that is dropped because the content now fills the container
-	 * (rows that grew on their own) lets the due `loadMoreTop` follow.
+	 * While `loading` is set, the call is held and requested again once it
+	 * turns false. A fill call that is dropped because the content now fills
+	 * the container (rows that grew on their own) lets the due `loadMoreTop`
+	 * follow.
 	 */
 	private callLoad = (name: LoadCallbackName): void => {
 		if (!this.wrapper || this.pauseFillWhileHidden()) return;
+		if (this.props.loading) {
+			this.heldLoads[name] = true;
+			return;
+		}
+		const threshold = this.getThreshold();
 		const atEnd =
-			name === "loadMoreTop" ? isAtTop(this.wrapper) : isAtBottom(this.wrapper);
-		if (isFilled(this.wrapper) && !atEnd) {
+			name === "loadMoreTop"
+				? isAtTop(this.wrapper)
+				: isNearBottom(this.wrapper, threshold);
+		if (isFilled(this.wrapper, threshold) && !atEnd) {
 			this.loadTopIfDue();
 			return;
 		}
@@ -545,22 +659,28 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 	};
 
 	/**
-	 * The fill check, run after mount, after every render with new `children`
-	 * or a callback that was added or removed, and on size changes that are
-	 * observed: requests a fill call (`loadMoreBottom`, or `loadMoreTop`
-	 * without it) while the content does not fill the container, and the due
-	 * `loadMoreTop` once it does.
+	 * The fill check, run after mount, after every render with new `children`,
+	 * a callback that was added or removed or a new `threshold`, and on size
+	 * changes that are observed: requests `loadMoreBottom` while `threshold`
+	 * px or less are left below the visible part (which includes content that
+	 * does not fill the container), or `loadMoreTop` without it while the
+	 * content does not fill the container, and the due `loadMoreTop` once it
+	 * does.
 	 */
 	handleResize = (): void => {
 		if (!this.wrapper || this.pauseFillWhileHidden()) return;
 
-		if (isFilled(this.wrapper)) {
-			this.loadTopIfDue();
-			return;
+		const threshold = this.getThreshold();
+		const filled = isFilled(this.wrapper, threshold);
+		if (!filled) this.topLoadDue = true;
+		if (this.props.loadMoreBottom) {
+			if (isNearBottom(this.wrapper, threshold)) {
+				this.requestLoad("loadMoreBottom");
+			}
+		} else if (!filled && this.props.loadMoreTop) {
+			this.requestLoad("loadMoreTop");
 		}
-		this.topLoadDue = true;
-		if (this.props.loadMoreBottom) this.requestLoad("loadMoreBottom");
-		else if (this.props.loadMoreTop) this.requestLoad("loadMoreTop");
+		if (filled) this.loadTopIfDue();
 	};
 
 	handleScroll = (): void => {
@@ -572,7 +692,10 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps> {
 		if (this.props.loadMoreTop && isAtTop(this.wrapper)) {
 			this.requestLoad("loadMoreTop");
 		}
-		if (this.props.loadMoreBottom && isAtBottom(this.wrapper)) {
+		if (
+			this.props.loadMoreBottom &&
+			isNearBottom(this.wrapper, this.getThreshold())
+		) {
 			this.requestLoad("loadMoreBottom");
 		}
 	};

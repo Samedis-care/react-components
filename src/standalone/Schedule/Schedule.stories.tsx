@@ -476,12 +476,12 @@ const currentWeekOf = (scroller: HTMLElement) => {
 	)?.number;
 };
 /**
- * no week is loading, and the weeks overflow the list by more than the 24px
- * up to which InfiniteScroll keeps filling it
+ * no week is loading, and the weeks overflow the list by more than the 250px
+ * up to which InfiniteScroll keeps filling it (its default threshold)
  */
 const isFull = (scroller: HTMLElement) =>
 	!scroller.querySelector(".MuiCircularProgress-root") &&
-	scroller.scrollHeight > scroller.clientHeight + 24;
+	scroller.scrollHeight > scroller.clientHeight + 250;
 /** waits until the initial fill is done: the weeks have loaded and overflow */
 const waitForFill = async (
 	canvasElement: HTMLElement,

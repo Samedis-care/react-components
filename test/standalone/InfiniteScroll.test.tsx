@@ -1,4 +1,10 @@
-import React, { useCallback, useState } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import {
 	describe,
 	it,
@@ -241,6 +247,62 @@ const StateGuardedList = ({
 				</div>
 			))}
 			{loading && <div>Loading</div>}
+		</InfiniteScroll>
+	);
+};
+
+/**
+ * A list whose rows depend on a filter, loaded page by page without a guard in
+ * the callback: its loading state goes to InfiniteScroll as `loading`. A new
+ * filter empties the list, also while a page of the previous filter is still
+ * loading; that page is discarded when it arrives. The rows are memoized, so a
+ * render that changes nothing else passes the same children.
+ */
+const FilteredList = ({
+	filter,
+	fetchPage,
+}: {
+	filter: string;
+	fetchPage: (filter: string, offset: number) => Promise<string[]>;
+}) => {
+	const [rows, setRows] = useState<string[]>([]);
+	const [rowsFilter, setRowsFilter] = useState(filter);
+	const [loading, setLoading] = useState(false);
+	const currentFilter = useRef(filter);
+	useEffect(() => {
+		currentFilter.current = filter;
+	}, [filter]);
+	// a new filter starts the list over
+	if (rowsFilter !== filter) {
+		setRowsFilter(filter);
+		setRows([]);
+	}
+	const loadMore = useCallback(() => {
+		setLoading(true);
+		void fetchPage(filter, rows.length)
+			.then((page) => {
+				// a page of a previous filter is discarded
+				if (currentFilter.current !== filter) return;
+				setRows((prev) => [...prev, ...page]);
+			})
+			.finally(() => setLoading(false));
+	}, [filter, rows.length, fetchPage]);
+	const children = useMemo(
+		() =>
+			rows.map((row) => (
+				<div className="row" key={row}>
+					{row}
+				</div>
+			)),
+		[rows],
+	);
+	return (
+		<InfiniteScroll
+			className={SCROLLER}
+			loadMoreBottom={loadMore}
+			loading={loading}
+		>
+			{children}
 		</InfiniteScroll>
 	);
 };
@@ -1338,6 +1400,399 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 					</InfiniteScroll>,
 				);
 				expect(getScroller(container).scrollTop).toBe(0);
+			});
+		});
+
+		describe("loading and threshold", () => {
+			it("[ISSUE-3471-ITEM-7] passes neither loading nor threshold to the scroll container", () => {
+				// React reports a DOM prop it cannot render with console.error, once per
+				// name: this test passes `loading` before any other
+				const consoleError = vi.spyOn(console, "error");
+				const { container } = render(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreBottom={vi.fn()}
+						loading={false}
+						threshold={100}
+					>
+						<div>Row 1</div>
+					</InfiniteScroll>,
+				);
+				expect(getScroller(container).getAttributeNames().sort()).toEqual([
+					"class",
+					"tabindex",
+				]);
+				expect(consoleError).not.toHaveBeenCalled();
+			});
+
+			it("[ISSUE-3471-ITEM-7] makes no call while loading, and makes the fill call that came up meanwhile once loading turns false", () => {
+				scrollHeightOf = () => 300;
+				const bottom = vi.fn();
+				const children = <div>page 1</div>;
+				const { rerender } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom} loading>
+						{children}
+					</InfiniteScroll>,
+				);
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+				// the load ends without new rows, e.g. its result was discarded
+				rerender(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreBottom={bottom}
+						loading={false}
+					>
+						{children}
+					</InfiniteScroll>,
+				);
+				advance(200);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-7] makes no call for scrolls to the bottom while loading, and none after the page that moves the bottom away", () => {
+				let height = 1000;
+				scrollHeightOf = () => height;
+				const bottom = vi.fn();
+				const { container, rerender } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom} loading>
+						<div>page 1</div>
+					</InfiniteScroll>,
+				);
+				const scroller = getScroller(container);
+				for (let i = 0; i < 3; i++) {
+					scrollTo(scroller, 700);
+					advance(200);
+				}
+				expect(bottom).not.toHaveBeenCalled();
+				height = 1300;
+				rerender(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreBottom={bottom}
+						loading={false}
+					>
+						<div>pages 1 and 2</div>
+					</InfiniteScroll>,
+				);
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+			});
+
+			it("[ISSUE-3471-ITEM-7] makes the call for a scroll to the bottom during a load once the load ends without new rows", () => {
+				const bottom = vi.fn();
+				const children = <div>page 1</div>;
+				const { container, rerender } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom} loading>
+						{children}
+					</InfiniteScroll>,
+				);
+				scrollTo(getScroller(container), 700);
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+				rerender(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreBottom={bottom}
+						loading={false}
+					>
+						{children}
+					</InfiniteScroll>,
+				);
+				advance(200);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-7] does not repeat a load that ends without new rows when no call came up while it ran", () => {
+				scrollHeightOf = () => 300;
+				const bottom = vi.fn();
+				const children = <div>page 1</div>;
+				const { rerender } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						{children}
+					</InfiniteScroll>,
+				);
+				advance(200);
+				expect(bottom).toHaveBeenCalledTimes(1);
+				// the consumer marks the load as running, and it fails
+				rerender(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom} loading>
+						{children}
+					</InfiniteScroll>,
+				);
+				rerender(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreBottom={bottom}
+						loading={false}
+					>
+						{children}
+					</InfiniteScroll>,
+				);
+				advance(1000);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-7] holds loadMoreTop while loading, and calls it once loading ends with the list at its top", () => {
+				const top = vi.fn();
+				const bottom = vi.fn();
+				const children = <div />;
+				const { container, rerender } = render(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreTop={top}
+						loadMoreBottom={bottom}
+						loading
+					>
+						{children}
+					</InfiniteScroll>,
+				);
+				const scroller = getScroller(container);
+				advance(200);
+				scrollTo(scroller, 300);
+				scrollTo(scroller, 0);
+				advance(200);
+				expect(top).not.toHaveBeenCalled();
+				rerender(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreTop={top}
+						loadMoreBottom={bottom}
+						loading={false}
+					>
+						{children}
+					</InfiniteScroll>,
+				);
+				advance(200);
+				expect(top).toHaveBeenCalledTimes(1);
+				expect(bottom).not.toHaveBeenCalled();
+			});
+
+			it("[ISSUE-3471-ITEM-7] fills a list that was emptied while a load ran once that load ends, with one request at a time", async () => {
+				scrollHeightOf = (el) => el.querySelectorAll(".row").length * 30;
+				const requests: string[] = [];
+				let running = 0;
+				let mostRunning = 0;
+				const fetchPage = (filter: string, offset: number) => {
+					requests.push(`${filter} ${offset}`);
+					running++;
+					mostRunning = Math.max(mostRunning, running);
+					return new Promise<string[]>((resolve) =>
+						setTimeout(() => {
+							running--;
+							// 20 rows of 30px fill the container
+							resolve(Array.from({ length: 20 }, (_, i) => `${filter}${i}`));
+						}, 300),
+					);
+				};
+				const { rerender } = render(
+					<FilteredList filter="a" fetchPage={fetchPage} />,
+				);
+				// the first page of filter "a" is loading, until 400ms
+				await advanceInStepsAsync(150);
+				expect(requests).toEqual(["a 0"]);
+				// the emptied list asks to be filled while that page loads
+				rerender(<FilteredList filter="b" fetchPage={fetchPage} />);
+				await advanceInStepsAsync(1500);
+				expect(requests).toEqual(["a 0", "b 0"]);
+				expect(mostRunning).toBe(1);
+				expect(screen.getByText("b19")).toBeInTheDocument();
+				expect(screen.queryByText("a0")).not.toBeInTheDocument();
+			});
+
+			it("[ISSUE-3471-ITEM-7] marks the scroll container busy while loading", () => {
+				const bottom = vi.fn();
+				const { container, rerender } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom} loading>
+						<div>Row 1</div>
+					</InfiniteScroll>,
+				);
+				const scroller = getScroller(container);
+				expect(scroller).toHaveAttribute("aria-busy", "true");
+				rerender(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreBottom={bottom}
+						loading={false}
+					>
+						<div>Row 1</div>
+					</InfiniteScroll>,
+				);
+				expect(scroller).not.toHaveAttribute("aria-busy");
+			});
+
+			it("[ISSUE-3471-ITEM-7] calls loadMoreBottom once 250px or less are left below the view", () => {
+				const bottom = vi.fn();
+				const { container } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						<div />
+					</InfiniteScroll>,
+				);
+				const scroller = getScroller(container);
+				// 1000 - 300 - 449 = 251px below the view
+				scrollTo(scroller, 449);
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+				scrollTo(scroller, 450);
+				advance(200);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-7] fills the container until its content overflows it by more than 250px", () => {
+				let height = 551;
+				scrollHeightOf = () => height;
+				const bottom = vi.fn();
+				const { rerender } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						<div>page 1</div>
+					</InfiniteScroll>,
+				);
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+				// e.g. a row that shrank
+				height = 550;
+				rerender(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						<div>page 1, shorter</div>
+					</InfiniteScroll>,
+				);
+				advance(200);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-7] calls loadMoreBottom again after new rows that leave 250px or less below the view", () => {
+				let height = 1000;
+				scrollHeightOf = () => height;
+				const bottom = vi.fn();
+				const { container, rerender } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						<div>page 1</div>
+					</InfiniteScroll>,
+				);
+				scrollTo(getScroller(container), 700);
+				advance(200);
+				expect(bottom).toHaveBeenCalledTimes(1);
+				// the page adds 100px, so 100px are below the view
+				height = 1100;
+				rerender(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						<div>pages 1 and 2</div>
+					</InfiniteScroll>,
+				);
+				advance(200);
+				expect(bottom).toHaveBeenCalledTimes(2);
+			});
+
+			it("[ISSUE-3471-ITEM-7] with threshold 0, fills only a list that does not overflow, and loads less than 1px from the bottom", () => {
+				let height = 301;
+				scrollHeightOf = () => height;
+				const bottom = vi.fn();
+				const { container, rerender } = render(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreBottom={bottom}
+						threshold={0}
+					>
+						<div>page 1</div>
+					</InfiniteScroll>,
+				);
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+				height = 1000;
+				rerender(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreBottom={bottom}
+						threshold={0}
+					>
+						<div>pages 1 and 2</div>
+					</InfiniteScroll>,
+				);
+				const scroller = getScroller(container);
+				scrollTo(scroller, 699);
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+				scrollTo(scroller, 699.5);
+				advance(200);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-7] applies a threshold changed after mount at once", () => {
+				// the content overflows the container by 300px
+				scrollHeightOf = () => 600;
+				const bottom = vi.fn();
+				const children = <div>page 1</div>;
+				const { rerender } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						{children}
+					</InfiniteScroll>,
+				);
+				advance(200);
+				expect(bottom).not.toHaveBeenCalled();
+				rerender(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreBottom={bottom}
+						threshold={300}
+					>
+						{children}
+					</InfiniteScroll>,
+				);
+				advance(200);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-7] fills a list that does not overflow with a negative or NaN threshold, as with 0", () => {
+				scrollHeightOf = () => 300;
+				const negative = vi.fn();
+				const notANumber = vi.fn();
+				render(
+					<>
+						<InfiniteScroll
+							className={SCROLLER}
+							loadMoreBottom={negative}
+							threshold={-50}
+						>
+							<div>Row 1</div>
+						</InfiniteScroll>
+						<InfiniteScroll
+							className={SCROLLER}
+							loadMoreBottom={notANumber}
+							threshold={NaN}
+						>
+							<div>Row 1</div>
+						</InfiniteScroll>
+					</>,
+				);
+				advance(200);
+				expect({
+					negative: negative.mock.calls.length,
+					notANumber: notANumber.mock.calls.length,
+				}).toEqual({ negative: 1, notANumber: 1 });
+			});
+
+			it("[ISSUE-3471-ITEM-7] calls loadMoreTop only at the top", () => {
+				const top = vi.fn();
+				const { container } = render(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreTop={top}
+						loadMoreBottom={vi.fn()}
+					>
+						<div />
+					</InfiniteScroll>,
+				);
+				advance(200);
+				// the list opens at its top
+				expect(top).toHaveBeenCalledTimes(1);
+				const scroller = getScroller(container);
+				scrollTo(scroller, 300);
+				scrollTo(scroller, 100);
+				advance(200);
+				expect(top).toHaveBeenCalledTimes(1);
+				scrollTo(scroller, 0);
+				advance(200);
+				expect(top).toHaveBeenCalledTimes(2);
 			});
 		});
 

@@ -34,15 +34,16 @@ import type {
 // ─── Harness ──────────────────────────────────────────────────────────────────
 // jsdom has no layout. Elements with class SCROLLER get clientHeight 300 and a
 // scrollHeight computed from the weeks in the list: a loaded week (its
-// "Week N, …" label) counts WEEK_PX, so InfiniteScroll's fill check loads
-// exactly weeks 0 and 1, and then week -1 above them, as the list is at its
-// top once they fill it. A pending week (spinner) and a failed week (one text
+// "Week N, …" label) counts WEEK_PX, so InfiniteScroll's fill check (until the
+// content overflows by more than its default threshold of 250px) loads exactly
+// weeks 0 and 1, and then week -1 above them, as the list is at its top once
+// they fill it. A pending week (spinner) and a failed week (one text
 // line) count WEEK_PX too, unless a test sets geometry.pendingPx/errorPx to the
 // heights they have in a browser. scrollTop is writable per element. Today's
 // day label (the jumpToToday target) reports offsetTop TODAY_TOP.
 const SCROLLER = "sched";
 
-const WEEK_PX = 200;
+const WEEK_PX = 300;
 
 const TODAY_TOP = 777;
 

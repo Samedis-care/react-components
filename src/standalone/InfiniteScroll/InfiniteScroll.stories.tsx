@@ -1,6 +1,12 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Box, Paper, Typography, styled } from "@mui/material";
+import {
+	Box,
+	CircularProgress,
+	Paper,
+	Typography,
+	styled,
+} from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import InfiniteScroll from "./index";
@@ -59,9 +65,12 @@ const getScroller = (canvasElement: HTMLElement, firstRowText: string) => {
 	return scroller;
 };
 
-/** Has the fill check stopped, i.e. does the content overflow by more than 24px? */
+/**
+ * Has the fill check stopped, i.e. does the content overflow by more than the
+ * default threshold of 250px?
+ */
 const isFilled = (scroller: HTMLElement) =>
-	scroller.scrollHeight > scroller.clientHeight + 24;
+	scroller.scrollHeight > scroller.clientHeight + 250;
 
 // ─── Stories ──────────────────────────────────────────────────────────────────
 
@@ -501,7 +510,7 @@ export const Issue3471Item6FillsAListThatOnlyLoadsOnTop: Story = {
 		docs: {
 			description: {
 				story:
-					"A list that only grows upwards, like a chat history: it has `loadMoreTop` and no `loadMoreBottom`. It starts with the five newest rows, which do not fill the container, so it is filled through `loadMoreTop`; the rows in view stay where they are, so the newest row stays in view at the bottom.",
+					"A list that only grows upwards, like a chat history: it has `loadMoreTop` and no `loadMoreBottom`. It starts with the five newest rows, which do not fill the container, so it is filled through `loadMoreTop` until the rows overflow it by more than the default `threshold` of 250px, which takes two pages; the rows in view stay where they are, so the newest row stays in view at the bottom.",
 			},
 		},
 		a11y: { test: "error" },
@@ -509,12 +518,157 @@ export const Issue3471Item6FillsAListThatOnlyLoadsOnTop: Story = {
 	play: async ({ args, canvasElement }) => {
 		const canvas = within(canvasElement);
 		const scroller = canvas.getByRole("region", { name: "Rows" });
-		await waitFor(() => expect(isFilled(scroller)).toBe(true));
-		await expect(args.loadMoreTop).toHaveBeenCalledTimes(1);
+		await waitFor(() => expect(isFilled(scroller)).toBe(true), {
+			timeout: 3000,
+		});
+		await expect(args.loadMoreTop).toHaveBeenCalledTimes(2);
 		const newest = canvas.getByText("Row 100").getBoundingClientRect();
 		const view = getViewEdges(scroller);
 		await expect(newest.top).toBeGreaterThanOrEqual(view.top);
 		await expect(newest.bottom).toBeLessThanOrEqual(view.bottom);
+	},
+};
+
+// ─── Loading state and threshold ──────────────────────────────────────────────
+
+export const Issue3471Item7LoadsBeforeTheBottom: Story = {
+	args: { loadMoreBottom: fn() },
+	render: (args) => <BottomScrollStory onLoadBottom={args.loadMoreBottom} />,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"20 rows of 30px in a 300px container. Scrolling down 60px leaves 240px of rows below the view, less than the default `threshold` of 250px, so `loadMoreBottom` is called before the user reaches the bottom.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ args, canvasElement }) => {
+		const scroller = getScroller(canvasElement, "Item 1");
+		// precondition: the 20 rows overflow the container by more than 250px
+		await expect(scroller.scrollHeight - scroller.clientHeight).toBe(300);
+		await expect(args.loadMoreBottom).not.toHaveBeenCalled();
+		scroller.scrollTop = 60;
+		await waitFor(() => expect(args.loadMoreBottom).toHaveBeenCalledTimes(1), {
+			timeout: 3000,
+		});
+		await expect(scroller.scrollTop).toBe(60);
+	},
+};
+
+/** The async list runs out of data after this many rows */
+const ASYNC_DATA_SIZE = 60;
+const ASYNC_PAGE_SIZE = 20;
+/** How long a page takes to load, in ms */
+const ASYNC_LOAD_TIME = 300;
+
+const LoaderRow = styled(Row)({
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+});
+
+/**
+ * Loads pages of 20 rows that take 300ms each, passes its loading state as
+ * `loading`, shows a loader row while a page loads, and tells screen readers
+ * in a polite status line outside the list what is happening
+ */
+const AsyncLoadingStory = ({ onLoadBottom }: { onLoadBottom?: () => void }) => {
+	const [items, setItems] = useState<number[]>([]);
+	const [loading, setLoading] = useState(false);
+	const headingId = useId();
+	const timer = useRef(0);
+	useEffect(() => () => window.clearTimeout(timer.current), []);
+	const done = items.length >= ASYNC_DATA_SIZE;
+
+	const loadMoreBottom = useCallback(() => {
+		onLoadBottom?.();
+		setLoading(true);
+		timer.current = window.setTimeout(() => {
+			setItems((prev) => [
+				...prev,
+				...makeItems(prev.length + 1, ASYNC_PAGE_SIZE),
+			]);
+			setLoading(false);
+		}, ASYNC_LOAD_TIME);
+	}, [onLoadBottom]);
+
+	return (
+		<Box sx={{ width: 300 }}>
+			<Typography
+				id={headingId}
+				variant="caption"
+				sx={{ display: "block", mb: 1 }}
+			>
+				Rows
+			</Typography>
+			<Scroller
+				className=""
+				role="region"
+				aria-labelledby={headingId}
+				loadMoreBottom={done ? undefined : loadMoreBottom}
+				loading={loading}
+			>
+				{renderItems(items)}
+				{loading && (
+					<LoaderRow aria-hidden>
+						<CircularProgress size={16} />
+					</LoaderRow>
+				)}
+			</Scroller>
+			<Typography role="status" variant="caption" sx={{ display: "block" }}>
+				{loading
+					? "Loading more rows…"
+					: done
+						? `All ${ASYNC_DATA_SIZE} rows are loaded.`
+						: ""}
+			</Typography>
+		</Box>
+	);
+};
+
+export const Issue3471Item7BusyWhileLoading: Story = {
+	args: { loadMoreBottom: fn() },
+	render: (args) => <AsyncLoadingStory onLoadBottom={args.loadMoreBottom} />,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"A list that loads pages of 20 rows, which take 300ms each, and passes its loading state as `loading`. While a page loads, the list is `aria-busy` and `loadMoreBottom` is not called again, however often the list is scrolled; a polite status line below the list says what is happening. After 60 rows `loadMoreBottom` is `undefined`.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ args, canvasElement }) => {
+		const canvas = within(canvasElement);
+		const scroller = canvas.getByRole("region", { name: "Rows" });
+		const status = canvas.getByRole("status");
+		// the empty list is filled with one page, and is busy meanwhile
+		await waitFor(() => expect(scroller).toHaveAttribute("aria-busy", "true"), {
+			timeout: 3000,
+		});
+		await expect(status).toHaveTextContent("Loading more rows…");
+		await canvas.findByText("Item 20", undefined, { timeout: 3000 });
+		await expect(scroller).not.toHaveAttribute("aria-busy");
+		await expect(args.loadMoreBottom).toHaveBeenCalledTimes(1);
+
+		scroller.scrollTop = scroller.scrollHeight;
+		await waitFor(() => expect(scroller).toHaveAttribute("aria-busy", "true"), {
+			timeout: 3000,
+		});
+		// more scroll events at the bottom while the page loads
+		scroller.dispatchEvent(new Event("scroll"));
+		scroller.dispatchEvent(new Event("scroll"));
+		await canvas.findByText("Item 40", undefined, { timeout: 3000 });
+		await expect(scroller).not.toHaveAttribute("aria-busy");
+		await expect(args.loadMoreBottom).toHaveBeenCalledTimes(2);
+
+		scroller.scrollTop = scroller.scrollHeight;
+		await waitFor(
+			() => expect(status).toHaveTextContent("All 60 rows are loaded."),
+			{ timeout: 3000 },
+		);
+		await expect(args.loadMoreBottom).toHaveBeenCalledTimes(3);
 	},
 };
 
