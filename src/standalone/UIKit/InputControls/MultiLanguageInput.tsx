@@ -220,17 +220,36 @@ export type MultiLanguageInputProps = Omit<
 > & {
 	/**
 	 * The languages that can be edited: the default language first, then the
-	 * others in this order. The default language is the components-care UI
-	 * language when it is in this list and `ignoreI18nLocale` is not set,
-	 * otherwise the first entry; it is the labelled and required field, and it
-	 * follows later changes of this list and of the UI language. In multiline
-	 * mode the textarea shows the default language until another language's
-	 * button below it is pressed, and again when that language is no longer in
-	 * this list.
+	 * others in this order. The default language is `defaultLanguage` when it is
+	 * in this list; otherwise the components-care UI language when it is in this
+	 * list and `ignoreI18nLocale` is not set; otherwise the first entry. It is
+	 * the labelled and required field, and it follows later changes of these
+	 * props and of the UI language.
+	 *
+	 * In single-line mode the other languages' fields are shown below the
+	 * default one while the translate button is pressed. Until the user presses
+	 * it or types, they are also shown while the default language has no text
+	 * and another language has, so a text kept in another language is not
+	 * hidden. In multiline mode the textarea shows the default language until
+	 * another language's button below it is pressed, and again when that
+	 * language is no longer in this list.
 	 */
 	enabledLanguages: MultiLanguageInputSupportedLanguages[];
 	/**
-	 * Ignore i18n locale settings when determining default language
+	 * The language the record has to be filled in, e.g. the language its
+	 * backend keeps the main text in: the default language, whatever the UI
+	 * language. Its field is shown first, labelled and marked `required` for
+	 * every viewer. Ignored while it is `null` or `undefined` or not in
+	 * `enabledLanguages`; the default language is then the UI language or
+	 * `enabledLanguages[0]` (see `enabledLanguages`). Wins over
+	 * `ignoreI18nLocale`.
+	 * @default undefined
+	 */
+	defaultLanguage?: MultiLanguageInputSupportedLanguages | null;
+	/**
+	 * Make `enabledLanguages[0]` the default language instead of the UI
+	 * language. `defaultLanguage` wins over it.
+	 * @default false
 	 */
 	ignoreI18nLocale?: boolean;
 	/**
@@ -269,7 +288,14 @@ export type MultiLanguageInputProps = Omit<
 	 */
 	name?: string;
 	/**
-	 * Is the default language required
+	 * Marks the default language's field as required: an asterisk after the
+	 * label and the native `required` attribute (in multiline mode while the
+	 * default language is shown). Display only, like MUI's `required`: nothing
+	 * is validated. Pair it with a validator that checks the same language,
+	 * e.g. `validateLocalizedPresenceFor([language])` with `defaultLanguage`
+	 * set to that language; without `defaultLanguage` the required field is the
+	 * viewer's UI language, which differs from viewer to viewer.
+	 * @default false
 	 */
 	required?: boolean;
 	/**
@@ -331,6 +357,12 @@ const TranslateButton = styled(IconButton)(({ theme }) => ({
 	"&.Mui-focusVisible": focusRing(theme, 0),
 }));
 
+/**
+ * Whether a language's text is more than whitespace
+ * @param text The language's entry in `values`
+ */
+const hasText = (text: string | null | undefined) => !!text?.trim();
+
 /** The field's language name, read with its label but not shown */
 const LabelLanguageName = styled("span")(visuallyHidden);
 
@@ -371,6 +403,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 		label,
 		disableIncompleteMarker,
 		required,
+		defaultLanguage: recordLanguage,
 		ignoreI18nLocale,
 		warning,
 		dirty,
@@ -381,14 +414,26 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 	const { t: tCC } = useCCTranslations();
 	const language = useCurrentLanguage();
 
-	// determine default language
-	let defaultLanguage = language as MultiLanguageInputSupportedLanguages;
-	const i18nLang = defaultLanguage;
-	if (ignoreI18nLocale || !enabledLanguages.includes(defaultLanguage)) {
-		defaultLanguage = enabledLanguages[0];
-	}
+	// determine default language: the record's, the UI's, the first enabled
+	const i18nLang = language as MultiLanguageInputSupportedLanguages;
+	const defaultLanguage =
+		recordLanguage && enabledLanguages.includes(recordLanguage)
+			? recordLanguage
+			: !ignoreI18nLocale && enabledLanguages.includes(i18nLang)
+				? i18nLang
+				: enabledLanguages[0];
 
-	const [expanded, setExpanded] = useState(false); // if normal text field
+	// single-line: whether the other languages' fields are shown, fixed once
+	// the user presses the translate button or types; null before that
+	const [userExpanded, setUserExpanded] = useState<boolean | null>(null);
+	// until then they are shown while only other languages have text, so a
+	// text kept in another language is not hidden behind the toggle
+	const onlyOthersFilled =
+		!hasText(values[defaultLanguage]) &&
+		enabledLanguages.some(
+			(lng) => lng !== defaultLanguage && hasText(values[lng]),
+		);
+	const expanded = userExpanded ?? onlyOthersFilled;
 	// the language code clicked in the multiline label, null until one is
 	const [pickedLanguage, setPickedLanguage] =
 		useState<MultiLanguageInputSupportedLanguages | null>(null);
@@ -400,7 +445,10 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 		enabledLanguages.includes(pickedLanguage)
 			? pickedLanguage
 			: defaultLanguage;
-	const toggleExpanded = useCallback(() => setExpanded((prev) => !prev), []);
+	const toggleExpanded = useCallback(
+		() => setUserExpanded((prev) => !(prev ?? onlyOthersFilled)),
+		[onlyOthersFilled],
+	);
 	// names the fields the toggle shows, for its aria-controls; unique per
 	// instance, so two fields on a form don't claim the same id
 	const otherLanguagesId = useId();
@@ -432,9 +480,13 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 				[lang]: evt.target.value,
 			};
 			if (!evt.target.value) delete newValue[lang];
+			// the fields stay as they are while the user types: emptying the
+			// default language does not show the others, filling it does not
+			// hide them
+			setUserExpanded((prev) => prev ?? onlyOthersFilled);
 			onChange(newValue);
 		},
-		[enabledLanguages, onChange, values],
+		[enabledLanguages, onChange, values, onlyOthersFilled],
 	);
 
 	const getLanguageName = (lang: string) =>

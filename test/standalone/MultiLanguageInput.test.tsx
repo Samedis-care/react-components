@@ -147,8 +147,10 @@ describe("bugs", () => {
 		render(<Controlled initial={{ en: "Hello" }} />);
 		expect(field("title-en")).toHaveValue("Hello");
 		await setLanguage("de");
-		expect(fieldNames()).toEqual(["title-de"]);
+		// the English text now shows below the empty default field (ISSUE-3486-ITEM-18)
+		expect(fieldNames()).toEqual(["title-de", "title-en", "title-fr"]);
 		expect(field("title-de")).toHaveValue("");
+		expect(field("title-en")).toHaveValue("Hello");
 	});
 	it("[ISSUE-3486-ITEM-1] empties a field when the parent removes its language from values", () => {
 		const props = {
@@ -558,5 +560,154 @@ describe("bugs", () => {
 		expect(screen.getByRole("button")).toHaveAccessibleName(
 			"Übersetzungen für Title anzeigen",
 		);
+	});
+
+	it("[ISSUE-3486-ITEM-18] makes defaultLanguage the first, labelled and required field, whatever the UI language", async () => {
+		render(
+			<MultiLanguageInput
+				enabledLanguages={["en", "de", "fr"]}
+				defaultLanguage="fr"
+				label="Title"
+				name="title"
+				required
+				values={{ en: "Pump", de: "Pumpe", fr: "Pompe" }}
+				onChange={noop}
+			/>,
+		);
+		expect(fieldNames()).toEqual(["title-fr"]);
+		expect(field("title-fr")).toBeRequired();
+		expect(field("title-fr")).toHaveAccessibleName(
+			labelledName("Title", "French"),
+		);
+		fireEvent.click(toggle());
+		expect(fieldNames()).toEqual(["title-fr", "title-en", "title-de"]);
+		expect(field("title-en")).not.toBeRequired();
+		// a viewer with a German UI gets the same required field
+		await setLanguage("de");
+		expect(fieldNames()).toEqual(["title-fr", "title-en", "title-de"]);
+		expect(field("title-fr")).toBeRequired();
+		expect(field("title-de")).not.toBeRequired();
+	});
+
+	it("[ISSUE-3486-ITEM-18] makes defaultLanguage the first and required language of a multiline field", () => {
+		render(
+			<MultiLanguageInput
+				enabledLanguages={["en", "de", "fr"]}
+				defaultLanguage="fr"
+				label="Footer"
+				name="footer"
+				multiline
+				required
+				values={{ en: "Regards" }}
+				onChange={noop}
+			/>,
+		);
+		expect(fieldNames()).toEqual(["footer-fr"]);
+		expect(field("footer-fr")).toBeRequired();
+		expect(
+			Array.from(document.querySelectorAll("button[data-lang]")).map((button) =>
+				button.getAttribute("data-lang"),
+			),
+		).toEqual(["fr", "en", "de"]);
+		expect(labelCode("fr")).toHaveAttribute("aria-pressed", "true");
+	});
+
+	it("[ISSUE-3486-ITEM-18] prefers defaultLanguage over ignoreI18nLocale", () => {
+		render(
+			<MultiLanguageInput
+				enabledLanguages={["en", "de"]}
+				ignoreI18nLocale
+				defaultLanguage="de"
+				label="Title"
+				name="title"
+				required
+				values={{}}
+				onChange={noop}
+			/>,
+		);
+		expect(fieldNames()).toEqual(["title-de"]);
+		expect(field("title-de")).toBeRequired();
+	});
+
+	it("[ISSUE-3486-ITEM-18] keeps the UI language as the default while defaultLanguage is null or not enabled, and follows it when it arrives", () => {
+		const props = {
+			enabledLanguages: ["en", "de", "fr"] as Lang[],
+			label: "Title",
+			name: "title",
+			required: true,
+			values: {},
+			onChange: noop,
+		};
+		const { rerender } = render(
+			<MultiLanguageInput {...props} defaultLanguage={null} />,
+		);
+		expect(fieldNames()).toEqual(["title-en"]);
+		rerender(<MultiLanguageInput {...props} defaultLanguage="nl" />);
+		expect(fieldNames()).toEqual(["title-en"]);
+		expect(field("title-en")).toBeRequired();
+		rerender(<MultiLanguageInput {...props} defaultLanguage="de" />);
+		expect(fieldNames()).toEqual(["title-de"]);
+		expect(field("title-de")).toBeRequired();
+	});
+
+	it("[ISSUE-3486-ITEM-18] shows the other languages while the default language is empty and another one has text", () => {
+		render(<Controlled initial={{ de: "Infusionspumpe" }} required />);
+		expect(fieldNames()).toEqual(["title-en", "title-de", "title-fr"]);
+		expect(field("title-de")).toHaveValue("Infusionspumpe");
+		expect(toggle()).toHaveAttribute("aria-expanded", "true");
+		// the toggle still hides them
+		fireEvent.click(toggle());
+		expect(fieldNames()).toEqual(["title-en"]);
+		expect(toggle()).toHaveAttribute("aria-expanded", "false");
+		fireEvent.click(toggle());
+		expect(fieldNames()).toEqual(["title-en", "title-de", "title-fr"]);
+	});
+
+	it("[ISSUE-3486-ITEM-18] keeps the other languages hidden while the default language has text or no language has", () => {
+		const props = {
+			enabledLanguages: ["en", "de", "fr"] as Lang[],
+			label: "Title",
+			name: "title",
+			onChange: noop,
+		};
+		const { rerender } = render(
+			<MultiLanguageInput {...props} values={{ en: "Pump", de: "Pumpe" }} />,
+		);
+		expect(fieldNames()).toEqual(["title-en"]);
+		rerender(<MultiLanguageInput {...props} values={{}} />);
+		expect(fieldNames()).toEqual(["title-en"]);
+		// whitespace is no text, as for the incomplete marker
+		rerender(<MultiLanguageInput {...props} values={{ en: "", de: "  " }} />);
+		expect(fieldNames()).toEqual(["title-en"]);
+		expect(toggle()).toHaveAttribute("aria-expanded", "false");
+	});
+
+	it("[ISSUE-3486-ITEM-18] shows the other languages when a record with text only in them arrives after mount", () => {
+		const props = {
+			enabledLanguages: ["en", "de", "fr"] as Lang[],
+			label: "Title",
+			name: "title",
+			onChange: noop,
+		};
+		const { rerender } = render(<MultiLanguageInput {...props} values={{}} />);
+		expect(fieldNames()).toEqual(["title-en"]);
+		rerender(
+			<MultiLanguageInput {...props} values={{ de: "Infusionspumpe" }} />,
+		);
+		expect(fieldNames()).toEqual(["title-en", "title-de", "title-fr"]);
+	});
+
+	it("[ISSUE-3486-ITEM-18] keeps the other languages shown while the user fills the default language", () => {
+		render(<Controlled initial={{ de: "Infusionspumpe" }} />);
+		type(field("title-en"), "I");
+		expect(field("title-en")).toHaveValue("I");
+		expect(fieldNames()).toEqual(["title-en", "title-de", "title-fr"]);
+	});
+
+	it("[ISSUE-3486-ITEM-18] does not show the other languages while the user empties the default language", () => {
+		render(<Controlled initial={{ en: "Pump", de: "Pumpe" }} />);
+		type(field("title-en"), "Pum");
+		type(field("title-en"), "");
+		expect(fieldNames()).toEqual(["title-en"]);
 	});
 });

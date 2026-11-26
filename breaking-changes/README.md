@@ -36,6 +36,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-26 | [The default tab of RoutedTabs opens the route's own url, without a trailing "/"](2026-11-26-routed-tabs-default-tab-url-without-trailing-slash.md) | behavior |
 | 2026-11-26 | [A forced InfoBox has a static header: no button, no tab stop, no onChange](2026-11-26-info-box-forced-header-static.md) | behavior, theme |
 | 2026-11-26 | [InfoBox breaks long words in its heading and message](2026-11-26-info-box-breaks-long-words.md) | behavior |
+| 2026-11-26 | [MultiLanguageInput shows the other languages while only they have text, and `defaultLanguage` sets the required language](2026-11-26-multi-language-input-default-language.md) | behavior |
 | 2026-11-26 | [A RoutedMenu group only shows and hides its entries; its route is ignored](2026-11-26-routed-menu-group-ignores-route.md) | behavior |
 | 2026-11-26 | [InlineSwitch's colors reach 3:1 and follow the theme's color scheme](2026-11-26-inline-switch-colors-reach-3-to-1.md) | behavior |
 | 2026-11-26 | [The locale selector's list is a listbox: one tab stop, and the arrow, page, Home and End keys move between its rows](2026-11-26-locale-selector-list-is-a-listbox.md) | behavior, theme, type |

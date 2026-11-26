@@ -57,12 +57,16 @@ const BetweenButtons = function BetweenButtons(props: Props) {
  * Every field is named with the label and its language ("Title (German)"),
  * and the fields are a group named by the label.
  *
- * The default language is the components-care UI language when it is in
- * `enabledLanguages` and `ignoreI18nLocale` is not set, otherwise
- * `enabledLanguages[0]`. The stories set `ignoreI18nLocale`, so `en` comes
- * first. Apps render it with `variant="standard"` (the theme default in SCF
- * and IMF); the stories pass it. The stories hold the values in state, as a
- * form would; `values` in the controls sets the starting values.
+ * The default language is `defaultLanguage` (the language the record has to
+ * be filled in) when it is in `enabledLanguages`; otherwise the components-care
+ * UI language when it is in `enabledLanguages` and `ignoreI18nLocale` is not
+ * set; otherwise `enabledLanguages[0]`. The stories set `ignoreI18nLocale`, so
+ * `en` comes first unless a story sets `defaultLanguage`. While the default
+ * language is empty and another language has text, a single-line field shows
+ * the other languages' fields until the user presses the translate button or
+ * types. Apps render it with `variant="standard"` (their themes' default);
+ * the stories pass it. The stories hold the values in state, as a form would;
+ * `values` in the controls sets the starting values.
  */
 const meta: Meta<typeof MultiLanguageInput> = {
 	title: "Standalone/UIKit/InputControls/MultiLanguageInput",
@@ -93,12 +97,18 @@ const meta: Meta<typeof MultiLanguageInput> = {
 	argTypes: {
 		enabledLanguages: {
 			description:
-				"The editable languages, in display order; non-empty, no duplicates. enabledLanguages[0] is the default language unless the UI language is listed (and ignoreI18nLocale is not set)",
+				"The editable languages, in display order; non-empty, no duplicates. The default language is defaultLanguage when listed, else the UI language when listed (and ignoreI18nLocale is not set), else enabledLanguages[0]",
 			control: "object",
+		},
+		defaultLanguage: {
+			description:
+				"The language the record has to be filled in: the first, labelled and required field for every viewer, whatever the UI language; ignored while null or not enabled",
+			control: "select",
+			options: ["en", "de", "fr"],
 		},
 		ignoreI18nLocale: {
 			description:
-				"Always make enabledLanguages[0] the default language, whatever the UI language",
+				"Make enabledLanguages[0] the default language instead of the UI language; defaultLanguage wins over it",
 			control: "boolean",
 		},
 		values: {
@@ -126,7 +136,7 @@ const meta: Meta<typeof MultiLanguageInput> = {
 		},
 		required: {
 			description:
-				"Marks the default language's field required (asterisk, native required); validates nothing",
+				"Marks the default language's field required (asterisk, native required); validates nothing, pair it with validateLocalizedPresenceFor([defaultLanguage])",
 			control: "boolean",
 		},
 		disableIncompleteMarker: {
@@ -368,5 +378,62 @@ export const Issue3473Item16HiddenLanguageNameStaysInside: Story = {
 		const names = await canvas.findAllByText(/\(English\)/);
 		for (const name of names) await expect(edgesPast(name)).toEqual([]);
 		await expect(pageScrollsSideways()).toBe(false);
+	},
+};
+
+export const Issue3486Item18RecordLanguageIsRequired: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3486-ITEM-18: `defaultLanguage` is the language the record has to be filled in. Its field comes first, labelled and required, whatever the viewer's UI language.",
+			},
+		},
+	},
+	args: {
+		defaultLanguage: "de",
+		required: true,
+		values: { en: "Infusion pump", de: "Infusionspumpe" },
+	},
+	play: async ({ canvas }) => {
+		const german = await canvas.findByRole("textbox", {
+			name: "Title (German)",
+		});
+		await expect(german).toBeRequired();
+		await expect(german).toHaveValue("Infusionspumpe");
+		await expect(
+			canvas.queryByRole("textbox", { name: "Title (English)" }),
+		).toBeNull();
+	},
+};
+
+export const Issue3486Item18TextInAnotherLanguageIsShown: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3486-ITEM-18: a record with text only in a language other than the default one shows the other languages' fields, so the text is not hidden behind the translate button.",
+			},
+		},
+	},
+	args: {
+		required: true,
+		values: { de: "Infusionspumpe" },
+	},
+	play: async ({ canvas, userEvent }) => {
+		await expect(
+			await canvas.findByRole("textbox", { name: "Title (German)" }),
+		).toHaveValue("Infusionspumpe");
+		await expect(
+			canvas.getByRole("textbox", { name: "Title (English)" }),
+		).toBeRequired();
+		const toggle = canvas.getByRole("button", { name: TOGGLE });
+		await expect(toggle).toHaveAttribute("aria-expanded", "true");
+		await userEvent.click(toggle);
+		await waitFor(() =>
+			expect(
+				canvas.queryByRole("textbox", { name: "Title (German)" }),
+			).toBeNull(),
+		);
 	},
 };
