@@ -48,6 +48,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-26 | [InfoBox breaks long words in its heading and message](2026-11-26-info-box-breaks-long-words.md) | behavior |
 | 2026-11-26 | [MultiLanguageInput shows the other languages while only they have text, and `defaultLanguage` sets the required language](2026-11-26-multi-language-input-default-language.md) | behavior |
 | 2026-11-26 | [A date picker's field follows ampm, views and format, as MUI's does](2026-11-26-picker-field-follows-ampm-views-format.md) | behavior, type |
+| 2026-11-26 | [The date-time picker's open button names the time too](2026-11-26-date-time-picker-open-button-names-time.md) | behavior, i18n |
 | 2026-11-26 | [A RoutedMenu group only shows and hides its entries; its route is ignored](2026-11-26-routed-menu-group-ignores-route.md) | behavior |
 | 2026-11-26 | [InlineSwitch's colors reach 3:1 and follow the theme's color scheme](2026-11-26-inline-switch-colors-reach-3-to-1.md) | behavior |
 | 2026-11-26 | [The locale selector's list is a listbox: one tab stop, and the arrow, page, Home and End keys move between its rows](2026-11-26-locale-selector-list-is-a-listbox.md) | behavior, theme, type |

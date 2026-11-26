@@ -36,6 +36,8 @@
 			}
 		},
 		"date-picker": {
+			"open-date-time": "Sana va vaqtni tanlang",
+			"open-date-time-selected": "Sana va vaqtni tanlang, tanlangan sana va vaqt: {{DATE}} {{TIME}}",
 			"error": {
 				"invalid": "To'g'ri sanani kiriting",
 				"min-date": "{{DATE}} yoki undan keyingi sanani kiriting",

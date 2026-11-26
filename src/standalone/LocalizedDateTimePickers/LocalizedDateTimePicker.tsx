@@ -1,10 +1,15 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
 	DateTimePicker,
 	DateTimePickerProps,
 	LocalizationProvider,
 	PickersTextFieldProps,
 	usePickerAdapter,
+} from "@mui/x-date-pickers";
+import type {
+	DateTimeValidationError,
+	PickerChangeHandlerContext,
+	PickerValidDate,
 } from "@mui/x-date-pickers";
 import { withMuiFieldState } from "../UIKit";
 import { TextFieldProps } from "@mui/material";
@@ -21,6 +26,7 @@ import withReportWhenDone from "./withReportWhenDone";
 import calendarNameSlotProps from "./calendarNameSlotProps";
 import calendarFocusRingSlotProps from "./calendarFocusRingSlotProps";
 import OpenPickerButton from "./OpenPickerButton";
+import useDateTimeOpenPickerName from "./useDateTimeOpenPickerName";
 
 /**
  * When the picker opens its desktop popup rather than MUI's mobile dialog: with
@@ -63,6 +69,14 @@ const DESKTOP_MODE_MEDIA_QUERY =
  * the default `slots.openPickerButton`, which a caller's own button replaces,
  * and goes into `slotProps.layout.sx`, which keeps a caller's layout slot
  * props and puts a caller's `sx` after it.
+ *
+ * The button that opens the calendar is named after the date and the time the
+ * field shows, in the components-care language: "Choose date and time,
+ * selected date and time is Aug 1, 2026 10:30 AM", or "Choose date and time"
+ * while the field is empty. MUI names it after the date alone. The name goes
+ * into `slotProps.openPickerButton`, so it also names a caller's own
+ * `slots.openPickerButton`, and an `aria-label` the caller sets there takes
+ * its place.
  */
 export interface LocalizedDateTimePickerProps extends DateTimePickerProps {
 	/**
@@ -224,6 +238,28 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 	});
 	const withFieldBlur = useFieldBlur();
 
+	// the date an uncontrolled picker shows, which MUI keeps: its defaultValue,
+	// then each change it reports
+	const isControlled = otherProps.value !== undefined;
+	const [uncontrolledValue, setUncontrolledValue] = useState<
+		PickerValidDate | null | undefined
+	>(() => otherProps.defaultValue);
+	const { onChange: draftOnChange } = draft;
+	const handleChange = useCallback(
+		(
+			value: PickerValidDate | null,
+			context: PickerChangeHandlerContext<DateTimeValidationError>,
+		) => {
+			if (!isControlled) setUncontrolledValue(value);
+			draftOnChange(value, context);
+		},
+		[isControlled, draftOnChange],
+	);
+	const openPickerName = useDateTimeOpenPickerName(
+		isControlled ? draft.value : uncontrolledValue,
+		otherProps.timezone,
+	);
+
 	const { settle } = draft;
 	const consumerOnOpen = otherProps.onOpen;
 	const handleOpen = useCallback(() => {
@@ -244,7 +280,7 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 			<DateTimePicker
 				{...otherProps}
 				value={draft.value}
-				onChange={draft.onChange}
+				onChange={handleChange}
 				onOpen={handleOpen}
 				// reports a date the calendar accepted at once, and passes what is
 				// reported to the caller's onAccept, see onAccept
@@ -264,6 +300,15 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 							localeText?.dateTimePickerToolbarTitle,
 					}),
 					...calendarFocusRingSlotProps(otherProps.slotProps),
+					// MUI names the button after the date alone; an aria-label the
+					// caller gives comes after this one and wins
+					openPickerButton: (ownerState) => ({
+						"aria-label": openPickerName,
+						...accessSlotProps(
+							ownerState,
+							otherProps.slotProps?.openPickerButton,
+						),
+					}),
 					textField: (ownerState) => {
 						const orgSlotProps = accessSlotProps(
 							ownerState,

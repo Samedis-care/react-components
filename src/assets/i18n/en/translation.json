@@ -36,6 +36,8 @@
 			}
 		},
 		"date-picker": {
+			"open-date-time": "Choose date and time",
+			"open-date-time-selected": "Choose date and time, selected date and time is {{DATE}} {{TIME}}",
 			"error": {
 				"invalid": "Enter a valid date",
 				"min-date": "Enter a date on or after {{DATE}}",

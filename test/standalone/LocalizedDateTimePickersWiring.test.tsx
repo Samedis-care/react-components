@@ -8,11 +8,16 @@ import {
 	screen,
 	waitFor,
 } from "@testing-library/react";
-import { createTheme, ThemeProvider } from "@mui/material";
+import {
+	createTheme,
+	IconButton,
+	type IconButtonProps,
+	ThemeProvider,
+} from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import moment, { type Moment } from "moment";
-import ccI18n from "../../src/i18n";
+import ccI18n, { langs } from "../../src/i18n";
 import LocalizedKeyboardDatePicker from "../../src/standalone/LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
 import LocalizedDatePicker from "../../src/standalone/LocalizedDateTimePickers/LocalizedDatePicker";
 import LocalizedDateTimePicker from "../../src/standalone/LocalizedDateTimePickers/LocalizedDateTimePicker";
@@ -228,6 +233,18 @@ describe("accessibility", () => {
 		const year = screen.getByRole("spinbutton", { name: "Year" });
 		focus(year);
 		expect(year).toHaveAttribute("aria-invalid", "true");
+	});
+
+	it("[ISSUE-3474-ITEM-23] names the time in a DateTimePicker's open-picker button", () => {
+		render(
+			<Wrap>
+				<LocalizedDateTimePicker
+					value={moment("2026-08-01T10:30")}
+					onChange={vi.fn()}
+				/>
+			</Wrap>,
+		);
+		expect(openButton()).toHaveAccessibleName(/10:30/);
 	});
 
 	it.each([
@@ -1214,4 +1231,182 @@ describe("picker texts", () => {
 			}
 		},
 	);
+});
+
+/** A caller's own open-picker button */
+const CallerButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
+	function CallerButton(props, ref) {
+		return <IconButton ref={ref} data-caller-button="" {...props} />;
+	},
+);
+
+describe("date and time picker's open button", () => {
+	const AT = "2026-08-01T10:30";
+	const NAME =
+		"Choose date and time, selected date and time is Aug 1, 2026 10:30 AM";
+	/** Moves the hour section one hour on */
+	const nextHour = () => {
+		const hour = screen.getByRole("spinbutton", { name: "Hours" });
+		focus(hour);
+		act(() => {
+			fireEvent.keyDown(hour, { key: "ArrowUp" });
+		});
+	};
+
+	it("[ISSUE-3474-ITEM-23] names the date and the time the field shows", () => {
+		render(
+			<Wrap>
+				<LocalizedDateTimePicker value={moment(AT)} onChange={vi.fn()} />
+			</Wrap>,
+		);
+		expect(openButton()).toHaveAccessibleName(NAME);
+	});
+
+	it.each([
+		["empty", null],
+		["invalid", moment(null)],
+	])(
+		"[ISSUE-3474-ITEM-23] names the button of an %s field after date and time",
+		(_name, value) => {
+			render(
+				<Wrap>
+					<LocalizedDateTimePicker value={value} onChange={vi.fn()} />
+				</Wrap>,
+			);
+			expect(openButton()).toHaveAccessibleName("Choose date and time");
+		},
+	);
+
+	it("[ISSUE-3474-ITEM-23] follows a value handed in after mount", () => {
+		const { rerender } = render(
+			<Wrap>
+				<LocalizedDateTimePicker value={null} onChange={vi.fn()} />
+			</Wrap>,
+		);
+		rerender(
+			<Wrap>
+				<LocalizedDateTimePicker value={moment(AT)} onChange={vi.fn()} />
+			</Wrap>,
+		);
+		expect(openButton()).toHaveAccessibleName(NAME);
+	});
+
+	it("[ISSUE-3474-ITEM-23] follows the time typed into the field before it is reported", () => {
+		const onChange = vi.fn();
+		render(
+			<Wrap>
+				<LocalizedDateTimePicker value={moment(AT)} onChange={onChange} />
+			</Wrap>,
+		);
+		nextHour();
+		expect(onChange).not.toHaveBeenCalled();
+		expect(openButton()).toHaveAccessibleName(/ 11:30 AM$/);
+	});
+
+	it("[ISSUE-3474-ITEM-23] names the date and time an uncontrolled picker shows", () => {
+		render(
+			<Wrap>
+				<LocalizedDateTimePicker defaultValue={moment(AT)} />
+			</Wrap>,
+		);
+		expect(openButton()).toHaveAccessibleName(NAME);
+		nextHour();
+		expect(openButton()).toHaveAccessibleName(/ 11:30 AM$/);
+	});
+
+	it("[ISSUE-3474-ITEM-23] names the time in the timezone the field shows", () => {
+		// 08:30 UTC is 10:30 in Berlin
+		vi.stubEnv("TZ", "Europe/Berlin");
+		try {
+			render(
+				<Wrap>
+					<LocalizedDateTimePicker
+						value={moment("2026-08-01T08:30:00Z")}
+						timezone="UTC"
+						onChange={vi.fn()}
+					/>
+				</Wrap>,
+			);
+			expect(
+				screen.getByRole("spinbutton", { name: "Hours" }),
+			).toHaveTextContent("08");
+			expect(openButton()).toHaveAccessibleName(/ 08:30 AM$/);
+		} finally {
+			vi.unstubAllEnvs();
+		}
+	});
+
+	it.each([
+		["an object", { "aria-label": "Pick the due date" }],
+		["a function", () => ({ "aria-label": "Pick the due date" })],
+	])(
+		"[ISSUE-3474-ITEM-23] keeps an aria-label the caller sets in slotProps.openPickerButton as %s",
+		(_name, openPickerButton) => {
+			render(
+				<Wrap>
+					<LocalizedDateTimePicker
+						value={moment(AT)}
+						onChange={vi.fn()}
+						slotProps={{ openPickerButton }}
+					/>
+				</Wrap>,
+			);
+			expect(
+				screen.getByRole("button", { name: "Pick the due date" }),
+			).toBeInTheDocument();
+		},
+	);
+
+	it("[ISSUE-3474-ITEM-23] names a button the caller passes in slots.openPickerButton", () => {
+		render(
+			<Wrap>
+				<LocalizedDateTimePicker
+					value={moment(AT)}
+					onChange={vi.fn()}
+					slots={{ openPickerButton: CallerButton }}
+				/>
+			</Wrap>,
+		);
+		expect(openButton()).toHaveAccessibleName(NAME);
+		expect(openButton()).toHaveAttribute("data-caller-button");
+	});
+
+	it("[ISSUE-3474-ITEM-23] names the button in the library language", async () => {
+		await act(async () => {
+			await ccI18n.changeLanguage("de");
+		});
+		render(
+			<Wrap>
+				<LocalizedDateTimePicker value={moment(AT)} onChange={vi.fn()} />
+			</Wrap>,
+		);
+		expect(
+			screen.getByRole("button", { name: /^Datum und Uhrzeit auswählen/ }),
+		).toHaveAccessibleName(
+			"Datum und Uhrzeit auswählen, gewählt ist der Aug 1, 2026 um 10:30 AM",
+		);
+	});
+
+	it("[ISSUE-3474-ITEM-23] has the button's names in every locale, with their placeholders", async () => {
+		await ccI18n.loadLanguages(langs);
+		const missing = langs.flatMap((lng) => {
+			const text = (key: string) =>
+				ccI18n.getResource(
+					lng.split("-")[0],
+					"translation",
+					`standalone.date-picker.${key}`,
+				) as unknown;
+			const empty = text("open-date-time");
+			const selected = text("open-date-time-selected");
+			return [
+				typeof empty === "string" && empty !== "" ? null : `${lng}: empty`,
+				typeof selected === "string" &&
+				selected.includes("{{DATE}}") &&
+				selected.includes("{{TIME}}")
+					? null
+					: `${lng}: selected`,
+			].filter((entry) => entry != null);
+		});
+		expect(missing).toEqual([]);
+	});
 });

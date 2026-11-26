@@ -36,6 +36,8 @@
 			}
 		},
 		"date-picker": {
+			"open-date-time": "Kies datum en tijd",
+			"open-date-time-selected": "Kies datum en tijd, geselecteerde datum en tijd zijn {{DATE}} {{TIME}}",
 			"error": {
 				"invalid": "Voer een geldige datum in",
 				"min-date": "Voer een datum in op of na {{DATE}}",

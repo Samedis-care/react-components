@@ -36,6 +36,8 @@
 			}
 		},
 		"date-picker": {
+			"open-date-time": "Выберите дату и время",
+			"open-date-time-selected": "Выберите дату и время, выбраны дата и время {{DATE}} {{TIME}}",
 			"error": {
 				"invalid": "Введите корректную дату",
 				"min-date": "Введите дату не ранее {{DATE}}",
