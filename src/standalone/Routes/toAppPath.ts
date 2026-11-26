@@ -22,7 +22,8 @@ const LEADING_SLASHES = /^[/\\]{2,}/;
  * newlines and leading spaces and control characters.
  * @param to The navigation target, a path or a location object
  * @returns The target, with leading slashes collapsed, or null if it has a
- *          scheme. A target that needs no change is returned as it is.
+ *          scheme. A target that needs no change is returned as it is, also
+ *          the empty "", which keeps the current path: compare with null.
  */
 const toAppPath = (to: To): To | null => {
 	const pathname =

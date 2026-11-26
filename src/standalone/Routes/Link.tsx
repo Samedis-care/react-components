@@ -27,10 +27,11 @@ export interface LinkProps extends Omit<
 	 * Target location: a path of the app or a location object. Leading slashes
 	 * collapse into one, as with `useNavigate`: "//7" links to "/7".
 	 * A target that leaves out `pathname` (a location object, or a string such
-	 * as "?page=2") keeps the current one; a target that leaves out `search` or
-	 * `hash` drops them, as a push does: at "/devices?page=1",
-	 * `{ search: "?page=2" }` and "?page=2" link to "/devices?page=2", and
-	 * `{ hash: "#notes" }` and "#notes" to "/devices#notes".
+	 * as "?page=2" or the empty "") keeps the current one; a target that leaves
+	 * out `search` or `hash` drops them, as a push does: at "/devices?page=1",
+	 * `{ search: "?page=2" }` and "?page=2" link to "/devices?page=2",
+	 * `{ hash: "#notes" }` and "#notes" to "/devices#notes", and "" to
+	 * "/devices".
 	 * A target with a hash scrolls the element with that id into view and
 	 * moves the keyboard focus to it, as a link to a fragment does in a
 	 * browser: `to="#main"` makes a skip link, see `HistoryRouter`.
@@ -194,13 +195,14 @@ const Link = React.forwardRef(function Link(
 	// the aria-current token of the link to the current page
 	const currentToken = markCurrent === true ? "page" : markCurrent || undefined;
 	const isCurrent = useMemo(
-		() => !!currentToken && !!target && leadsToCurrentPage(location, target),
+		() =>
+			!!currentToken && target !== null && leadsToCurrentPage(location, target),
 		[currentToken, location, target],
 	);
 	// the current location completes a target without pathname, search or hash
 	const href = useMemo(
 		() =>
-			target
+			target !== null
 				? navigationHref(history, location, target)
 				: typeof to === "string"
 					? to
@@ -213,7 +215,7 @@ const Link = React.forwardRef(function Link(
 			if (evt.defaultPrevented) return;
 			if (evt.ctrlKey || evt.metaKey || evt.shiftKey || evt.altKey) return;
 			if (opensElsewhere(evt.currentTarget)) return;
-			if (!target) return;
+			if (target === null) return;
 			evt.preventDefault();
 			navigate(target, {
 				// history.location: the one the push completes the target from

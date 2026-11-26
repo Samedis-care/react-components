@@ -46,9 +46,12 @@ export interface NavigateFunction {
  *
  * The target is a path of the app (or a location object): leading slashes
  * collapse into one, so `${useRouteInfo().url}/7` goes to "/7" also under a
- * route that matches at the root. A target with a scheme ("https://…",
- * "mailto:…", "javascript:…") throws an Error and nothing happens; leave the
- * app with `window.location` instead.
+ * route that matches at the root. A target without a pathname ("?page=2",
+ * "#notes", `{ search: "?page=2" }` or the empty "") keeps the current one
+ * and, as `history.push` does, drops the search and hash it leaves out: at
+ * "/devices?page=1", "" goes to "/devices". A target with a scheme
+ * ("https://…", "mailto:…", "javascript:…") throws an Error and nothing
+ * happens; leave the app with `window.location` instead.
  *
  * Blockers on the history apply (inside Framework: a form with unsaved
  * changes). Once the navigation happens, the HistoryRouter scrolls the page
@@ -68,7 +71,7 @@ const useNavigate = (): NavigateFunction => {
 	return useCallback(
 		(to: To, options?: NavigateOptions) => {
 			const target = toAppPath(to);
-			if (!target)
+			if (target === null)
 				throw new Error(
 					`useNavigate: ${JSON.stringify(to)} is not a path of this app, use window.location to leave the app`,
 				);

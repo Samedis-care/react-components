@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-26 | [An empty navigation target keeps the current path](2026-11-26-empty-navigation-target-keeps-current-path.md) | behavior |
 | 2026-11-26 | [CachedServerStorageProvider answers a fresh cached value synchronously](2026-11-26-cached-server-storage-answers-fresh-values-at-once.md) | type, behavior |
 | 2026-11-26 | [A navigation to a hash scrolls to the element with that id and focuses it](2026-11-26-hash-navigation-scrolls-to-its-element.md) | behavior |
 | 2026-11-26 | [The delete confirmation counts with plural forms](2026-11-26-data-grid-delete-confirmation-plurals.md) | behavior, i18n |

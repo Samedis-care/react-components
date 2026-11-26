@@ -342,6 +342,19 @@ describe("useNavigate", () => {
 		expect(location()).toBe("/b//c||#h|null");
 	});
 
+	it("[ISSUE-3475-ITEM-28] navigates to an empty target without throwing and keeps the current path, as history.push does", () => {
+		const history = mem("/devices");
+		const { ref } = renderNavigate(history);
+		expect(() => act(() => ref.navigate!(""))).not.toThrow();
+		expect(location()).toBe("/devices|||null");
+		expect(history.index).toBe(1);
+		// search and hash are dropped, state is stored
+		act(() => ref.navigate!("?page=2#notes"));
+		act(() => ref.navigate!("", { replace: true, state: { s: 1 } }));
+		expect(location()).toBe('/devices|||{"s":1}');
+		expect(history.index).toBe(2);
+	});
+
 	it.each([
 		"https://other.example/",
 		"javascript:alert(1)",

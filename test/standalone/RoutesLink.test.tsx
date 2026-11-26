@@ -501,6 +501,42 @@ describe("Link: targets", () => {
 		act(() => history.push("/settings"));
 		expect(next).toHaveAttribute("href", "/settings?page=2");
 	});
+
+	it("[ISSUE-3475-ITEM-28] routes a click on a link to an empty target, which keeps the current path", () => {
+		const { history } = renderAt("/devices", <Link to="">this page</Link>);
+		const link = screen.getByRole("link", { name: "this page" });
+		expect(link).toHaveAttribute("href", "/devices");
+		// a click left to the browser would reload the page
+		expect(fireEvent.click(link)).toBe(false);
+		expect(renderedPath()).toBe("/devices");
+		// the current location: replaced, as a native <a href=""> does
+		expect(history.index).toBe(0);
+	});
+
+	it("[ISSUE-3475-ITEM-28] drops the search and hash for an empty target, as history.push does", () => {
+		const { history } = renderAt(
+			"/devices?page=1#notes",
+			<Link to="">this page</Link>,
+		);
+		const link = screen.getByRole("link", { name: "this page" });
+		expect(link).toHaveAttribute("href", "/devices");
+		expect(fireEvent.click(link)).toBe(false);
+		expect(createPath(history.location)).toBe("/devices");
+		expect(history.index).toBe(1);
+	});
+
+	it("[ISSUE-3475-ITEM-28] marks a link to an empty target as the current page", () => {
+		renderAt(
+			"/devices?page=1",
+			<Link to="" markCurrent>
+				this page
+			</Link>,
+		);
+		expect(screen.getByRole("link", { name: "this page" })).toHaveAttribute(
+			"aria-current",
+			"page",
+		);
+	});
 });
 
 describe("Link: a link to the current location", () => {
