@@ -28,6 +28,22 @@ const elementOf = (el: Element | null | undefined): HTMLElement => {
 	return el;
 };
 
+/** WCAG relative luminance contrast ratio of two computed rgb() colors */
+const contrast = (a: string, b: string) => {
+	const lum = (rgb: string) => {
+		const [r, g, bl] = (rgb.match(/[\d.]+/g) ?? [])
+			.slice(0, 3)
+			.map(Number)
+			.map((v) => {
+				const c = v / 255;
+				return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+			});
+		return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
+	};
+	const [x, y] = [lum(a), lum(b)];
+	return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+};
+
 export const Unchecked: Story = {
 	args: {
 		value: false,
@@ -408,5 +424,230 @@ export const Issue3465Item11SwitchMovesOnlyWhenTheLabelDoesNotFit: Story = {
 		await expect(page.scrollWidth, "no sideways scroll").toBeLessThanOrEqual(
 			page.clientWidth,
 		);
+	},
+};
+
+const darkTheme = createTheme({ palette: { mode: "dark" } });
+
+export const Issue3465Item13SwitchColorsMeet3To1: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3465-ITEM-13: the unchecked thumb and the track border are `grey[500]` on white (2.68:1); in the dark palette the checked thumb is white on `primary.main` (1.75:1) and the unchecked track stays white. Expected: 3:1 for the thumb against the track and for the track's edge against the page (WCAG 1.4.11).",
+			},
+		},
+	},
+	render: () => (
+		<div style={{ display: "flex", gap: 16 }}>
+			<div data-testid="light" style={{ background: "#fff", padding: 16 }}>
+				<InlineSwitch value={false} onChange={() => {}} visible label="Off" />
+			</div>
+			<ThemeProvider theme={darkTheme}>
+				<div
+					data-testid="dark"
+					style={{
+						background: darkTheme.palette.background.default,
+						padding: 16,
+					}}
+				>
+					<InlineSwitch value onChange={() => {}} visible label="On" />
+				</div>
+			</ThemeProvider>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const part = (id: string, selector: string) =>
+			getComputedStyle(
+				elementOf(
+					canvasElement.querySelector(`[data-testid=${id}] ${selector}`),
+				),
+			);
+		const lightTrack = part("light", ".MuiSwitch-track");
+		await expect(
+			contrast(
+				part("light", ".MuiSwitch-thumb").backgroundColor,
+				lightTrack.backgroundColor,
+			),
+			"light, off: thumb vs track",
+		).toBeGreaterThanOrEqual(3);
+		await expect(
+			contrast(lightTrack.borderTopColor, "rgb(255, 255, 255)"),
+			"light, off: track border vs page",
+		).toBeGreaterThanOrEqual(3);
+		await expect(
+			contrast(
+				part("dark", ".MuiSwitch-thumb").backgroundColor,
+				part("dark", ".MuiSwitch-track").backgroundColor,
+			),
+			"dark, on: thumb vs track",
+		).toBeGreaterThanOrEqual(3);
+	},
+};
+
+const SWITCH_STATES = [
+	["off", false, false],
+	["on", true, false],
+	["off-disabled", false, true],
+	["on-disabled", true, true],
+] as const;
+
+/** The switch in every state, on a page of the given colors */
+const SwitchStates = (props: {
+	id: string;
+	background: string;
+	color: string;
+	className?: string;
+}) => (
+	<div
+		data-testid={props.id}
+		className={props.className}
+		style={{
+			background: props.background,
+			color: props.color,
+			padding: 16,
+			width: 220,
+		}}
+	>
+		{SWITCH_STATES.map(([state, value, disabled]) => (
+			<div key={state} data-state={state} style={{ display: "flow-root" }}>
+				<InlineSwitch
+					value={value}
+					disabled={disabled}
+					onChange={() => {}}
+					visible
+					label={`${props.id} ${state}`}
+				/>
+			</div>
+		))}
+	</div>
+);
+
+/** The parts of the switch in the given state of the given SwitchStates */
+const switchParts = (canvasElement: HTMLElement, id: string, state: string) => {
+	const box = elementOf(canvasElement.querySelector(`[data-testid="${id}"]`));
+	const row = elementOf(box.querySelector(`[data-state="${state}"]`));
+	const style = (selector: string) =>
+		getComputedStyle(elementOf(row.querySelector(selector)));
+	return {
+		page: getComputedStyle(box),
+		track: style(".MuiSwitch-track"),
+		thumb: style(".MuiSwitch-thumb"),
+		label: style(".CcInlineSwitch-switchWrapper"),
+	};
+};
+
+/** The rgb() color a computed rgb()/rgba() color shows over an opaque one */
+const over = (color: string, background: string) => {
+	const [r, g, b, alpha = 1] = (color.match(/[\d.]+/g) ?? []).map(Number);
+	const under = (background.match(/[\d.]+/g) ?? []).map(Number);
+	const mix = (c: number, i: number) => c * alpha + under[i] * (1 - alpha);
+	return `rgb(${mix(r, 0)}, ${mix(g, 1)}, ${mix(b, 2)})`;
+};
+
+export const Issue3465Item13EveryStateMeets3To1: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3465-ITEM-13: off and on, in the light and the dark palette, the thumb is at least 3:1 against the track and the track's edge at least 3:1 against the page, with semi-transparent colors blended over what lies under them (WCAG 1.4.11). Disabled switches are exempt.",
+			},
+		},
+	},
+	render: () => (
+		<div style={{ display: "flex" }}>
+			<SwitchStates id="light" background="#fff" color="rgba(0, 0, 0, 0.87)" />
+			<ThemeProvider theme={darkTheme}>
+				<SwitchStates
+					id="dark"
+					background={darkTheme.palette.background.default}
+					color={darkTheme.palette.text.primary}
+				/>
+			</ThemeProvider>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		for (const id of ["light", "dark"]) {
+			for (const state of ["off", "on"]) {
+				const { page, track, thumb } = switchParts(canvasElement, id, state);
+				await expect(track.opacity).toBe("1");
+				const fill = over(track.backgroundColor, page.backgroundColor);
+				await expect(
+					contrast(over(thumb.backgroundColor, fill), fill),
+					`${id}, ${state}: thumb vs track`,
+				).toBeGreaterThanOrEqual(3);
+				// the border is drawn over the track's own background
+				await expect(
+					contrast(
+						over(over(track.borderTopColor, fill), page.backgroundColor),
+						page.backgroundColor,
+					),
+					`${id}, ${state}: track edge vs page`,
+				).toBeGreaterThanOrEqual(3);
+			}
+		}
+	},
+};
+
+// CSS variables with both color schemes; an element with the class
+// `scheme-dark` gives its subtree the dark scheme's variables
+const cssVarsTheme = createTheme({
+	cssVariables: { colorSchemeSelector: ".scheme-%s" },
+	colorSchemes: { light: true, dark: true },
+});
+// keep the provider's color scheme off the page and out of the storage; MUI types
+// colorSchemeNode only for apps that declare their CSS variables in its types
+const SCHEME_IN_STORY_ONLY = { colorSchemeNode: null, storageManager: null };
+
+export const Issue3465Item13ColorsFollowTheColorScheme: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3465-ITEM-13: with a theme of CSS variables, the switch takes its colors from the variables, so in the dark color scheme (right) it looks as with the dark palette (left), not as in the light scheme.",
+			},
+		},
+	},
+	render: () => (
+		<div style={{ display: "flex" }}>
+			<ThemeProvider theme={darkTheme}>
+				<SwitchStates
+					id="palette"
+					background={darkTheme.palette.background.default}
+					color={darkTheme.palette.text.primary}
+				/>
+			</ThemeProvider>
+			<ThemeProvider theme={cssVarsTheme} {...SCHEME_IN_STORY_ONLY}>
+				<SwitchStates
+					id="scheme"
+					className="scheme-dark"
+					background="var(--mui-palette-background-default)"
+					color="var(--mui-palette-text-primary)"
+				/>
+			</ThemeProvider>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		for (const [state] of SWITCH_STATES) {
+			const palette = switchParts(canvasElement, "palette", state);
+			const scheme = switchParts(canvasElement, "scheme", state);
+			await expect(scheme.page.backgroundColor).toBe(
+				palette.page.backgroundColor,
+			);
+			for (const [part, property] of [
+				["thumb", "backgroundColor"],
+				["track", "backgroundColor"],
+				["track", "borderTopColor"],
+				["track", "opacity"],
+				["label", "color"],
+			] as const) {
+				await expect(
+					scheme[part][property],
+					`${state}: ${part} ${property}`,
+				).toBe(palette[part][property]);
+			}
+		}
 	},
 };

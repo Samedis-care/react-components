@@ -100,22 +100,30 @@ const AntSwitch = styled(Switch, { name: "CcInlineSwitch", slot: "switch" })(
 		overflow: "visible",
 		"& .MuiSwitch-switchBase": {
 			padding: 2,
-			color: theme.palette.grey[500],
+			// the thumb, the only cue of the off state, in the color of MUI's unchecked
+			// Checkbox: at least 3:1 against the track. Colors are read through the CSS
+			// variables if the theme has them, so they follow a color scheme switch
+			color: (theme.vars || theme).palette.text.secondary,
 			// MUI widens the input past the thumb and lets the root clip it to the
 			// track; the root no longer clips, so the input covers just the track
 			"& .MuiSwitch-input": { left: 0, width: 35 },
 			"&.Mui-checked": {
 				transform: "translateX(18px)",
-				color: theme.palette.common.white,
+				// the color for content on primary.main: at least 3:1 against the track
+				color: (theme.vars || theme).palette.primary.contrastText,
 				"& .MuiSwitch-input": { left: -18 },
 				"& + .MuiSwitch-track": {
 					opacity: 1,
-					backgroundColor: theme.palette.primary.main,
-					borderColor: theme.palette.primary.main,
+					backgroundColor: (theme.vars || theme).palette.primary.main,
+					borderColor: (theme.vars || theme).palette.primary.main,
 				},
 				// as faint as the unchecked track while disabled, like MUI's Switch
 				"&.Mui-disabled + .MuiSwitch-track": {
-					opacity: theme.palette.mode === "light" ? 0.12 : 0.2,
+					opacity: theme.vars
+						? theme.vars.opacity.switchTrackDisabled
+						: theme.palette.mode === "light"
+							? 0.12
+							: 0.2,
 				},
 			},
 			// keyboard focus: with the theme's focusVisible MUI draws its own ring on
@@ -133,10 +141,11 @@ const AntSwitch = styled(Switch, { name: "CcInlineSwitch", slot: "switch" })(
 			boxShadow: "none",
 		},
 		"& .MuiSwitch-track": {
-			border: `1px solid ${theme.palette.grey[500]}`,
+			// the track's edge: at least 3:1 against the page
+			border: `1px solid ${(theme.vars || theme).palette.text.secondary}`,
 			borderRadius: 16 / 2,
 			opacity: 1,
-			backgroundColor: theme.palette.common.white,
+			backgroundColor: (theme.vars || theme).palette.background.paper,
 		},
 	}),
 );
@@ -160,7 +169,7 @@ const StyledSwitchWrapper = styled(Typography, {
 	lineHeight: "30px",
 	float: "right",
 	[`&.${DISABLED_CLASS}`]: {
-		color: theme.palette.text.disabled,
+		color: (theme.vars || theme).palette.text.disabled,
 	},
 })) as typeof Typography;
 
@@ -281,5 +290,11 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
  *
  * The switch is controlled: pass `value` and `onChange`. The root has a 15px
  * top margin (`styled(InlineSwitch)` or `styleOverrides.root` can change it).
+ *
+ * The switch takes its colors from the theme's palette, through its CSS
+ * variables if it has them: off, a `text.secondary` thumb on a
+ * `background.paper` track with a `text.secondary` edge; on, a
+ * `primary.contrastText` thumb on a `primary.main` track. `styleOverrides.switch`
+ * can change them.
  */
 export default React.memo(InlineSwitch) as typeof InlineSwitch;
