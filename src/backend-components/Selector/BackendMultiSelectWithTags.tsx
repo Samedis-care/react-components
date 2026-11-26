@@ -25,7 +25,8 @@ import { DistributiveOmit } from "../../utils/distributiveOmit";
 /**
  * The switch of a backend multiselect with tags. `switchLabel` is required while
  * `switchFilterNameGroup` or `switchFilterNameData` shows the switch: the visible label
- * is its accessible name.
+ * is its accessible name. The switch has a row of its own between the search field for
+ * entries and the chips, at the right end, with its label before it.
  */
 export type BackendMultiSelectWithTagsSwitchProps =
 	| {

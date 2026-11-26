@@ -15,9 +15,9 @@ Each slot of InlineSwitch has a static class name, as MUI's slots have their
 
 Before, the slots had only emotion's generated class names, so a rule for one of these
 classes, in a stylesheet, a `styled(InlineSwitch)` style or a theme override of a
-component around the switch, matched nothing. Such a rule applies now. The switch of
-BaseSelector and of the selectors built on it looks as before; MultiSelectWithoutGroup's
-own rule for its switch row applies now, see
+component around the switch, matched nothing. Such a rule applies now. BaseSelector's
+switch looks as before. MultiSelectWithoutGroup's own rule for its switch row applies now,
+which also changes the selectors built on it, see
 [MultiSelectWithoutGroup's switch has a row of its own above the chips](2026-11-26-multi-select-without-group-switch-row.md).
 
 ## Why

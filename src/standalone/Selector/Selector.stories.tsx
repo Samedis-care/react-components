@@ -2,12 +2,25 @@ import React, { useMemo, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, waitFor, within } from "storybook/test";
-import { BaseSelector, BaseSelectorData, BaseSelectorLoadResult, MultiSelect, MultiSelectWithoutGroup, MultiSelectWithTags, selectorLocalLoadHandler, SelectorLruOptions, SingleSelect } from "./index";
+import {
+	BaseSelector,
+	BaseSelectorData,
+	BaseSelectorLoadResult,
+	MultiSelect,
+	MultiSelectWithoutGroup,
+	MultiSelectWithTags,
+	selectorLocalLoadHandler,
+	SelectorLruOptions,
+	SingleSelect,
+} from "./index";
 import type { MultiSelectorData } from "./MultiSelect";
 import { Box } from "@mui/material";
 import debouncePromise from "../../utils/debouncePromise";
 import { PartialExcept } from "../../utils/distributiveOmit";
-import { edgesPast, pageScrollsSideways } from "../../stories/test-utils/hiddenTextLayout";
+import {
+	edgesPast,
+	pageScrollsSideways,
+} from "../../stories/test-utils/hiddenTextLayout";
 
 // ---------------------------------------------------------------------------
 // Shared sample data

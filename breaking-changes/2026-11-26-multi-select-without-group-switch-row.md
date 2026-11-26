@@ -2,7 +2,10 @@
 
 - **Date:** 2026-11-26
 - **Kind:** behavior
-- **Scope:** `standalone/MultiSelectWithoutGroup` with `displaySwitch`
+- **Scope:** `standalone/MultiSelectWithoutGroup` with `displaySwitch`, and so
+  `standalone/MultiSelectWithTags` with `displaySwitch` and
+  `backend-components/BackendMultiSelectWithTags` with `switchFilterNameGroup` or
+  `switchFilterNameData`, whose search field for entries is a MultiSelectWithoutGroup
 
 ## What changed
 
@@ -24,8 +27,8 @@ The chips get the field's full width, and the switch no longer pushes them aroun
 
 ## Migration
 
-Nothing required. Expect the new row in screenshots of a MultiSelectWithoutGroup with a
-switch. A theme that wants the switch beside the chips, with its label after it, overrides
+Nothing required. Expect the new row in screenshots of these selectors with a switch. A
+theme that wants the switch beside the chips, with its label after it, overrides
 the row:
 
 ```ts

@@ -284,6 +284,10 @@ export type BaseSelectorVariants<
  * does not fit beside it (a long label, a narrow field, a phone), the switch keeps that
  * row to itself and the label starts on the next one, so the label is never cut shorter
  * than it is without a switch.
+ *
+ * MultiSelectWithoutGroup, and MultiSelectWithTags through it, show the switch on a row
+ * of its own between the search field and the chips instead: at the right end, with its
+ * label before it.
  */
 export type BaseSelectorSwitchProps = {
 	/**
