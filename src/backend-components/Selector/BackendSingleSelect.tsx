@@ -322,7 +322,6 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 					if (!label) {
 						// unselect it
 						if (onSelect) onSelect(null);
-						newCache = null;
 						return;
 					}
 					newCache = {
@@ -332,7 +331,9 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 				}
 			}
 			if (discarded) return;
-			setSelectedCache((oldCache) => Object.assign({}, oldCache, newCache));
+			// the entry of the new id replaces the previous one: a field the new entry
+			// leaves out (titleTooltip, icon, …) must not keep the previous record's value
+			setSelectedCache(newCache);
 		})();
 		return () => {
 			discarded = true;

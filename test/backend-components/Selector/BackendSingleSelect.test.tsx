@@ -18,6 +18,7 @@ import BackendSingleSelect, {
 	BackendSingleSelectProps,
 } from "../../../src/backend-components/Selector/BackendSingleSelect";
 import type { ModelUnknown } from "../../../src/backend-integration";
+import type { BaseSelectorData } from "../../../src/standalone";
 import { PartialExcept } from "../../../src/utils/distributiveOmit";
 import { setupFormTests } from "../Form/formFixture";
 import {
@@ -287,6 +288,74 @@ describe("BackendSingleSelect bugs", () => {
 		expect(onSelect.mock.calls).toEqual([["9"]]);
 		expect(combobox().value).toBe("Zoe");
 		expect(lookups(connector)).toEqual([]);
+	});
+
+	it("[ISSUE-3510-ITEM-8] a new selection replaces the shown entry: fields the new entry leaves out are not kept", async () => {
+		const rows: Row[] = [
+			{ id: "1", name: "Alice", tip: "Inactive since 2020" },
+			{ id: "2", name: "Bob" },
+		];
+		const connector = new SelectorTestConnector(rows);
+		const model = makeSelectorModel(connector);
+		const withTip = (record: Row): BaseSelectorData => ({
+			...conv(record),
+			...(record.tip ? { titleTooltip: record.tip as string } : {}),
+		});
+		const { rerender } = render(
+			ui({
+				model,
+				selected: "1",
+				modelToSelectorData: withTip,
+				disableRequestBatching: true,
+			}),
+		);
+		await waitFor(() =>
+			expect(combobox()).toHaveAttribute("title", "Inactive since 2020"),
+		);
+		rerender(
+			ui({
+				model,
+				selected: "2",
+				modelToSelectorData: withTip,
+				disableRequestBatching: true,
+			}),
+		);
+		await waitFor(() => expect(combobox().value).toBe("Bob"));
+		expect(combobox()).not.toHaveAttribute("title", "Inactive since 2020");
+	});
+
+	it("[ISSUE-3510-ITEM-8] a new selection replaces the shown entry: the previous record's icon is not kept", async () => {
+		const rows: Row[] = [
+			{ id: "1", name: "Alice", tip: "Inactive since 2020" },
+			{ id: "2", name: "Bob" },
+		];
+		const model = makeSelectorModel(new SelectorTestConnector(rows));
+		const withIcon = (record: Row): BaseSelectorData => ({
+			...conv(record),
+			...(record.tip ? { icon: <span data-testid={"inactive-icon"} /> } : {}),
+		});
+		const { rerender } = render(
+			ui({
+				model,
+				selected: "1",
+				modelToSelectorData: withIcon,
+				enableIcons: true,
+				disableRequestBatching: true,
+			}),
+		);
+		await waitFor(() => expect(combobox().value).toBe("Alice"));
+		expect(screen.getByTestId("inactive-icon")).toBeInTheDocument();
+		rerender(
+			ui({
+				model,
+				selected: "2",
+				modelToSelectorData: withIcon,
+				enableIcons: true,
+				disableRequestBatching: true,
+			}),
+		);
+		await waitFor(() => expect(combobox().value).toBe("Bob"));
+		expect(screen.queryByTestId("inactive-icon")).toBeNull();
 	});
 });
 
