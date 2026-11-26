@@ -2,6 +2,7 @@ import React from "react";
 import {
 	Box,
 	Button,
+	buttonClasses,
 	ButtonProps,
 	CSSObject,
 	darken,
@@ -106,7 +107,9 @@ const StyledButton = styled(Button, {
 		backgroundColor: color ? undefined : primaryFill,
 		color: color ? undefined : primary.contrastText,
 		textTransform: "unset",
-		justifyContent: "flex-start",
+		// the icon of a small button sits in its middle, also when fullWidth
+		// stretches it
+		justifyContent: small ? "center" : "flex-start",
 		"&:hover": {
 			backgroundColor: color
 				? undefined
@@ -127,7 +130,9 @@ const StyledButton = styled(Button, {
 		minWidth: small ? 0 : undefined,
 		paddingLeft: small ? theme.spacing(3) : undefined,
 		paddingRight: small ? theme.spacing(3) : undefined,
-		"&.MuiButton-startIcon": {
+		// MUI's margins space the icon from a label; without one they would push
+		// the icon of a small button off centre
+		[`& > .${buttonClasses.startIcon}`]: {
 			margin: small ? 0 : undefined,
 		},
 		"&.MuiButton-outlined": {
@@ -145,10 +150,6 @@ const StyledButton = styled(Button, {
 			},
 			paddingLeft: small ? theme.spacing(3) : undefined,
 			paddingRight: small ? theme.spacing(3) : undefined,
-		},
-		"&.MuiButton-label": {
-			padding: 0,
-			justifyContent: small ? "center" : "flex-start",
 		},
 		// the label of a small button: visually hidden, as MUI's visuallyHidden,
 		// so it names the button while only the icon shows
@@ -176,10 +177,10 @@ export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
 	 */
 	fullWidth?: boolean;
 	/**
-	 * Show only the icon, for a compact button. The label (`children`) stays
-	 * in the button as visually hidden text, which names it in every state,
-	 * and shows as a tooltip on hover and on keyboard focus (not while
-	 * disabled). Use it with `icon`. `"true"` is the same as `true`.
+	 * Show only the icon, centred, for a compact button. The label
+	 * (`children`) stays in the button as visually hidden text, which names it
+	 * in every state, and shows as a tooltip on hover and on keyboard focus
+	 * (not while disabled). Use it with `icon`. `"true"` is the same as `true`.
 	 * @default false
 	 */
 	small?: boolean | "true";

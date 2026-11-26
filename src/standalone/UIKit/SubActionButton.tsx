@@ -69,9 +69,6 @@ const StyledButton = styled(Button, {
 		},
 		// inside the row: the rows fill their menu, which may clip an outer ring
 		"&.Mui-focusVisible": focusRing(theme, -2),
-		"&.MuiButton-label": {
-			justifyContent: "flex-start",
-		},
 		// the label of a small button: visually hidden, as MUI's visuallyHidden,
 		// so it names the button while only the icon shows
 		[`& > .${HIDDEN_LABEL_CLASS}`]: {

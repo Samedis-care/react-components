@@ -7,6 +7,9 @@ import {
 	Delete as DeleteIcon,
 	Cancel as CancelIcon,
 	Home as HomeIcon,
+	Add as AddIcon,
+	Undo as UndoIcon,
+	Redo as RedoIcon,
 } from "@mui/icons-material";
 import ActionButton from "./ActionButton";
 import SubActionButton from "./SubActionButton";
@@ -534,6 +537,117 @@ export const Issue3482Item8ReadableFills: ActionButtonStory = {
 				getLuminance(hover.backgroundColor),
 				`${name}'s hover fill is darker than its resting fill`,
 			).toBeLessThan(getLuminance(rest.backgroundColor));
+		}
+	},
+};
+
+// how far the centre of a button's icon is from the button's centre, in px
+const iconOffset = (button: HTMLElement) => {
+	const icon = button.querySelector("svg");
+	if (!icon) throw new Error(`${button.textContent} has no icon`);
+	const box = button.getBoundingClientRect();
+	const glyph = icon.getBoundingClientRect();
+	return {
+		x: (glyph.left + glyph.right - box.left - box.right) / 2,
+		y: (glyph.top + glyph.bottom - box.top - box.bottom) / 2,
+	};
+};
+
+export const Issue3482Item20SmallIconCentred: ActionButtonStory = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3482-ITEM-20: the icon of a `small` button is centred in the button, with as much space on its left as on its right.",
+			},
+		},
+	},
+	args: {
+		children: "Save",
+		icon: <SaveIcon />,
+		small: true,
+	},
+	play: async ({ canvas }) => {
+		const button = canvas.getByRole("button", { name: "Save" });
+		await expect(Math.abs(iconOffset(button).x)).toBeLessThanOrEqual(1);
+	},
+};
+
+export const Issue3482Item20SmallIconCentredInEveryState: ActionButtonStory = {
+	parameters: {
+		layout: "padded",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3482-ITEM-20: the icon of a `small` button is centred in every state: disabled, in a palette `color`, in MUI's `size`s, and stretched by `fullWidth`. A small SubActionButton for comparison.",
+			},
+		},
+	},
+	render: (args) => (
+		<Box
+			sx={{ display: "flex", flexWrap: "wrap", gap: 2, alignItems: "center" }}
+		>
+			<ActionButton small icon={<SaveIcon />} onClick={args.onClick}>
+				Save
+			</ActionButton>
+			<ActionButton small disabled icon={<CancelIcon />}>
+				Discard
+			</ActionButton>
+			<ActionButton
+				small
+				color="error"
+				icon={<DeleteIcon />}
+				onClick={args.onClick}
+			>
+				Delete
+			</ActionButton>
+			<ActionButton
+				small
+				size="small"
+				icon={<UndoIcon />}
+				onClick={args.onClick}
+			>
+				Undo
+			</ActionButton>
+			<ActionButton
+				small
+				size="large"
+				icon={<RedoIcon />}
+				onClick={args.onClick}
+			>
+				Redo
+			</ActionButton>
+			<Box sx={{ width: 200 }}>
+				<ActionButton small fullWidth icon={<AddIcon />} onClick={args.onClick}>
+					Add
+				</ActionButton>
+			</Box>
+			<SubActionButton small icon={<HomeIcon />} onClick={args.onClick}>
+				Go home
+			</SubActionButton>
+		</Box>
+	),
+	play: async ({ canvas }) => {
+		for (const name of [
+			"Save",
+			"Discard",
+			"Delete",
+			"Undo",
+			"Redo",
+			"Add",
+			"Go home",
+		]) {
+			const offset = iconOffset(canvas.getByRole("button", { name }));
+			await expect(
+				Math.abs(offset.x),
+				`${name}'s icon is off centre sideways`,
+			).toBeLessThanOrEqual(1);
+			await expect(
+				Math.abs(offset.y),
+				`${name}'s icon is off centre vertically`,
+			).toBeLessThanOrEqual(1);
 		}
 	},
 };
