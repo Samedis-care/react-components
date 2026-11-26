@@ -72,6 +72,11 @@ const Parent = ({
 	});
 };
 
+const lookups = (connector: SelectorTestConnector) =>
+	connector.log.filter(
+		(entry) => entry.startsWith("read:") || entry.includes(":ids="),
+	);
+
 /**
  * Records the titles the input gets from now on (its title is the shown entry's label);
  * the returned function stops recording and lists every title committed in between, in
@@ -222,6 +227,66 @@ describe("BackendSingleSelect bugs", () => {
 		unmount();
 		await release();
 		expect(onSelect).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3510-ITEM-3] a pick from the list does not look the picked record up again", async () => {
+		const { model, connector } = peopleModel();
+		render(
+			<Framework>
+				<Parent model={model} disableRequestBatching />
+			</Framework>,
+		);
+		await flush();
+		await openList();
+		await pickOption("Bob");
+		await flush();
+		expect(combobox().value).toBe("Bob");
+		expect(lookups(connector)).toEqual([]);
+	});
+
+	it("[ISSUE-3510-ITEM-3] a failing lookup of the picked record does not undo the pick", async () => {
+		const { model, connector } = peopleModel();
+		connector.fail["2"] = new Error("403 Forbidden");
+		const onSelect = vi.fn();
+		render(
+			<Framework>
+				<Parent
+					model={model}
+					onSelect={onSelect}
+					onLoadError={() => null}
+					disableRequestBatching
+				/>
+			</Framework>,
+		);
+		await flush();
+		await openList();
+		await pickOption("Bob");
+		await flush();
+		expect(onSelect.mock.calls).toEqual([["2"]]);
+		expect(combobox().value).toBe("Bob");
+	});
+
+	it("[ISSUE-3510-ITEM-3] the entry onAddNew returns is shown as picked, without a lookup", async () => {
+		const { model, connector } = peopleModel();
+		const onSelect = vi.fn();
+		render(
+			<Framework>
+				<Parent
+					model={model}
+					onSelect={onSelect}
+					onAddNew={() => ({ value: "9", label: "Zoe" })}
+					onLoadError={() => null}
+					disableRequestBatching
+				/>
+			</Framework>,
+		);
+		await flush();
+		await openList();
+		await pickOption("Create");
+		await flush();
+		expect(onSelect.mock.calls).toEqual([["9"]]);
+		expect(combobox().value).toBe("Zoe");
+		expect(lookups(connector)).toEqual([]);
 	});
 });
 

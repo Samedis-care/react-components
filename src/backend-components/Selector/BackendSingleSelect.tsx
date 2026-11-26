@@ -98,10 +98,11 @@ export type BackendSingleSelectProps<M extends ModelUnknown> = DistributiveOmit<
 		 */
 		onSelect?: (value: string | null) => void;
 		/**
-		 * The id of the selected record, or null (undefined counts as null). Shown from a
-		 * matching `additionalOptions` entry or `initialData` record without a request,
-		 * otherwise loaded through `modelFetch`. Until the record of this id is there, the
-		 * field shows the translated "Loading…" (`backend-components.selector.loading`), never
+		 * The id of the selected record, or null (undefined counts as null). Shown without a
+		 * request from the entry just picked in the field (from the list, or the one
+		 * `onAddNew` created), a matching `additionalOptions` entry or an `initialData`
+		 * record, otherwise loaded through `modelFetch`. Until the record of this id is there,
+		 * the field shows the translated "Loading…" (`backend-components.selector.loading`), never
 		 * the record of an earlier id, and a lookup of an earlier id that finishes later is
 		 * discarded (also its error: no `onLoadError`, no `onSelect(null)`). Not shown while
 		 * `selectedFreeSolo` is a non-empty string.
@@ -277,10 +278,12 @@ const BackendSingleSelect = <M extends ModelUnknown>(
 			return;
 		}
 
-		// if this comes from selection no need to fetch it either
+		// a pick from the list (or the entry onAddNew created) is shown as picked, without
+		// looking it up again
 		if (picked && picked.value === selected) {
 			setSelectedCache(picked);
 			setPicked(null);
+			return;
 		}
 
 		// set when selected changes again or the field unmounts: what is loaded for this
