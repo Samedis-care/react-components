@@ -101,6 +101,8 @@ export type BackendMultiSelectProps<
 		/**
 		 * Callback that converts the model data to the actual data displayed in the selector
 		 * @param modelData The model data
+		 * @remarks One that throws or rejects for a selected record, loaded or from
+		 *          `initialData`, lists it like a record that failed to load (see `onLoadError`).
 		 */
 		modelToSelectorData: (modelData: ModelRecord<M>) => Promise<DataT> | DataT;
 		/**
@@ -124,7 +126,10 @@ export type BackendMultiSelectProps<
 		 */
 		selected: string[];
 		/**
-		 * Initial data (model format) used for selected cache
+		 * Records (model format) of selected ids, which are then shown without a request: a
+		 * selected id with a record here is converted from it by `modelToSelectorData` once it
+		 * is selected, not loaded through `modelFetch`. A conversion that fails lists the id
+		 * like a record that failed to load (see `onLoadError`), without a lookup.
 		 */
 		initialData?: ModelRecord<M>[];
 		/**
@@ -137,7 +142,8 @@ export type BackendMultiSelectProps<
 		lru?: BackendMultiSelectLruOptions<DataT>;
 		/**
 		 * Load error event
-		 * @param error The error that has been raised while loading
+		 * @param error The error that has been raised while loading, or by `modelToSelectorData`
+		 *        while converting the loaded or `initialData` record
 		 * @return string Label for entry which failed loading
 		 * @return null To remove the entry: `onSelect` reports the current selection without
 		 *         its id, so a pick or removal made while it loaded is kept (an id picked
@@ -232,21 +238,6 @@ export const useSelectedCache = <
 	useEffect(() => {
 		void (async () => {
 			const newCache: Record<string, DataT | MultiSelectorData> = {};
-			if (initialData) {
-				// process initial data
-				await Promise.all(
-					initialData
-						.filter(
-							(record) =>
-								!((record as Record<"id", string>).id in selectedCache),
-						)
-						.map(
-							async (record) =>
-								(newCache[(record as Record<"id", string>).id] =
-									await modelToSelectorData(record)),
-						),
-				);
-			}
 			// an additionalOptions entry is not a record: listed as it is, never looked up
 			additionalOptions?.forEach((option) => {
 				if (selected.includes(option.value) && !(option.value in selectedCache))
@@ -257,10 +248,18 @@ export const useSelectedCache = <
 			await Promise.all(
 				selected.filter(isIdNotInCache).map(async (value) => {
 					try {
-						const data = await modelFetch.getCached(value, {
-							batch: !disableRequestBatching,
-						});
-						newCache[value] = await modelToSelectorData(data[0]);
+						// an id with an initialData record is converted from it, any other loaded;
+						// a conversion that fails is a failed load either way
+						const record =
+							initialData?.find(
+								(record) => (record as Record<"id", string>).id === value,
+							) ??
+							(
+								await modelFetch.getCached(value, {
+									batch: !disableRequestBatching,
+								})
+							)[0];
+						newCache[value] = await modelToSelectorData(record);
 					} catch (e) {
 						const label = getSelectedLoadErrorLabel(
 							value,

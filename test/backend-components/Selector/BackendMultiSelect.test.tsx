@@ -7,7 +7,13 @@
 import "../../../src/standalone";
 import React, { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { Framework } from "../../../src/framework";
 import BackendMultiSelect, {
 	BackendMultiSelectProps,
@@ -81,6 +87,59 @@ const lookups = (connector: SelectorTestConnector) =>
 	connector.log.filter(
 		(entry) => entry.startsWith("read:") || entry.includes(":ids="),
 	);
+
+/** conv, but throws for a record without a name, as a modelToSelectorData can for a record it cannot read */
+const convNamed = (record: Record<string, unknown>) => {
+	if (typeof record.name !== "string")
+		throw new Error(`Record ${record.id as string} has no name`);
+	return conv(record);
+};
+
+/**
+ * Alice, Bob and Carol, Bob without his name: convNamed fails for this record of Bob, not
+ * for the one the backend has
+ */
+const initialWithoutBobsName = () => [
+	{ id: "1", name: "Alice" },
+	{ id: "2" },
+	{ id: "3", name: "Carol" },
+];
+
+/** The part of Node's process collectUnhandled uses (the test config has no Node types) */
+interface RejectionEvents {
+	listeners(event: "unhandledRejection"): ((reason: unknown) => void)[];
+	removeAllListeners(event: "unhandledRejection"): void;
+	on(event: "unhandledRejection", listener: (reason: unknown) => void): void;
+	off(event: "unhandledRejection", listener: (reason: unknown) => void): void;
+}
+
+const nodeProcess = (globalThis as unknown as { process: RejectionEvents })
+	.process;
+
+/**
+ * Runs `body` and returns the rejections it left unhandled, collected instead of failing
+ * the whole run
+ */
+const collectUnhandled = async (
+	body: () => Promise<void>,
+): Promise<unknown[]> => {
+	const vitestHandlers = nodeProcess.listeners("unhandledRejection");
+	nodeProcess.removeAllListeners("unhandledRejection");
+	const unhandled: unknown[] = [];
+	const collect = (reason: unknown) => void unhandled.push(reason);
+	nodeProcess.on("unhandledRejection", collect);
+	try {
+		await body();
+		// unhandled rejections are reported on a later macrotask
+		await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+	} finally {
+		nodeProcess.off("unhandledRejection", collect);
+		vitestHandlers.forEach((handler) =>
+			nodeProcess.on("unhandledRejection", handler),
+		);
+	}
+	return unhandled;
+};
 
 // ---------------------------------------------------------------------------
 // Bugs (each test asserts the correct behavior and fails until it is fixed)
@@ -406,5 +465,140 @@ describe("BackendMultiSelect bugs", () => {
 			[["1", "2"], [{ value: "2", label: "Bob" }]],
 		]);
 		expect(removeButtons()).toEqual(["Remove Alice", "Remove Bob"]);
+	});
+
+	it("[ISSUE-3510-ITEM-24] an initialData record whose modelToSelectorData rejects gets the load-error label, the others are shown, and nothing is left unhandled", async () => {
+		const { model, connector } = peopleModel();
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+		const unhandled = await collectUnhandled(async () => {
+			render(
+				ui({
+					model,
+					selected: ["1", "2", "3"],
+					initialData: initialWithoutBobsName(),
+					modelToSelectorData: (record) =>
+						Promise.resolve().then(() => convNamed(record)),
+				}),
+			);
+			await flush();
+		});
+		expect({
+			unhandled: unhandled.map(String),
+			entries: removeButtons(),
+			lookups: lookups(connector),
+		}).toEqual({
+			unhandled: [],
+			entries: [
+				"Remove Alice",
+				"Remove Error while fetching data",
+				"Remove Carol",
+			],
+			lookups: [],
+		});
+		expect(warn).toHaveBeenCalledWith(
+			expect.stringContaining("record 2"),
+			expect.objectContaining({ message: "Record 2 has no name" }),
+		);
+	});
+
+	it("[ISSUE-3510-ITEM-24] onLoadError gets the conversion error of an initialData record, and its null drops the id without a lookup", async () => {
+		const { model, connector } = peopleModel();
+		vi.spyOn(console, "warn").mockImplementation(() => {});
+		const onLoadError = vi.fn<(error: Error) => string | null>(() => null);
+		const { Parent, state } = makeParent();
+		render(
+			<Framework>
+				<Parent
+					model={model}
+					initial={["1", "2", "3"]}
+					initialData={initialWithoutBobsName()}
+					modelToSelectorData={convNamed}
+					onLoadError={onLoadError}
+				/>
+			</Framework>,
+		);
+		await flush();
+		expect({
+			selection: state.current,
+			entries: removeButtons(),
+			lookups: lookups(connector),
+			errors: onLoadError.mock.calls.map(([error]) => error.message),
+		}).toEqual({
+			selection: ["1", "3"],
+			entries: ["Remove Alice", "Remove Carol"],
+			lookups: [],
+			errors: ["Record 2 has no name"],
+		});
+	});
+
+	it("[ISSUE-3510-ITEM-24] an initialData record is converted when its id is selected: one that fails while nobody selected it is not reported", async () => {
+		const { model, connector } = peopleModel();
+		vi.spyOn(console, "warn").mockImplementation(() => {});
+		const onLoadError = vi.fn<(error: Error) => string | null>(
+			() => "Bob is unreadable",
+		);
+		const props = {
+			model,
+			initialData: initialWithoutBobsName().slice(0, 2),
+			modelToSelectorData: convNamed,
+			onLoadError,
+		};
+		const { rerender } = render(ui({ ...props, selected: ["1"] }));
+		await flush();
+		expect({
+			entries: removeButtons(),
+			errors: onLoadError.mock.calls.length,
+		}).toEqual({ entries: ["Remove Alice"], errors: 0 });
+		rerender(ui({ ...props, selected: ["1", "2"] }));
+		await flush();
+		expect({
+			entries: removeButtons(),
+			lookups: lookups(connector),
+			errors: onLoadError.mock.calls.length,
+		}).toEqual({
+			entries: ["Remove Alice", "Remove Bob is unreadable"],
+			lookups: [],
+			errors: 1,
+		});
+	});
+
+	it("[ISSUE-3510-ITEM-24] BackendMultiSelectWithTags: an initialData record whose convData throws gets the load-error label, the others are shown", async () => {
+		const group = peopleModel([{ id: "A", name: "Team A" }]);
+		const data = peopleModel();
+		vi.spyOn(console, "warn").mockImplementation(() => {});
+		render(
+			<Framework>
+				<BackendMultiSelectWithTags<
+					ModelUnknown,
+					ModelUnknown,
+					MultiSelectorData,
+					MultiSelectorData
+				>
+					title={"Members"}
+					searchInputLabel={"Add a person"}
+					groupModel={group.model}
+					dataModel={data.model}
+					convGroup={conv}
+					convData={convNamed}
+					getGroupDataEntries={() => []}
+					groupSearchDebounceTime={0}
+					dataSearchDebounceTime={0}
+					initialData={initialWithoutBobsName()}
+					selected={["1", "2", "3"]}
+				/>
+			</Framework>,
+		);
+		await flush();
+		expect({
+			entries: removeButtons(),
+			lookups: lookups(data.connector),
+		}).toEqual({
+			entries: [
+				"Remove Alice",
+				"Remove Error while fetching data",
+				"Remove Carol",
+			],
+			lookups: [],
+		});
 	});
 });

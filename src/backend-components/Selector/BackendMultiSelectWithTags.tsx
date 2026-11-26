@@ -94,7 +94,10 @@ export type BackendMultiSelectWithTagsProps<
 		 */
 		onChange?: (selected: string[], raw: DataDataT[]) => void;
 		/**
-		 * Initial data (model format) used for selected cache
+		 * Records (model format) of selected ids, which are then shown without a request: a
+		 * selected id with a record here is converted from it by `convData` once it is
+		 * selected, not loaded through `dataModel`. A conversion that fails lists the id as
+		 * "Error while fetching data", like a record that failed to load, without a lookup.
 		 */
 		initialData?: ModelRecord<DataModelT>[];
 		/**
@@ -127,7 +130,9 @@ export type BackendMultiSelectWithTagsProps<
 		 * Callback that converts a model entry to a multi selector entry
 		 * @param data The record data (overview)
 		 * @returns Selector data
-		 * @remarks Selector data value must be set to ID
+		 * @remarks Selector data value must be set to ID. One that throws or rejects for a
+		 *          selected record, loaded or from `initialData`, lists it as "Error while
+		 *          fetching data", like a record that failed to load.
 		 */
 		convData: (data: ModelRecord<DataModelT>) => Promise<DataDataT> | DataDataT;
 		/**
