@@ -47,11 +47,20 @@ export default meta;
 
 type Story = StoryObj<typeof InfoBox>;
 
+const MOBILE = { viewport: { value: "mobile1", isRotated: false } };
+
 const WHITE = "rgb(255, 255, 255)";
 
 const elementOf = (el: Element | null): HTMLElement => {
 	if (!(el instanceof HTMLElement)) throw new Error("element missing");
 	return el;
+};
+
+/** the rect of the text itself, not of its (possibly wider or narrower) box */
+const textRectOf = (el: Element) => {
+	const range = document.createRange();
+	range.selectNodeContents(el);
+	return range.getBoundingClientRect();
 };
 
 /** waits until no CSS transition runs in or below el (the header's colors, the Collapse) */
@@ -387,6 +396,136 @@ export const Issue3464Item7HeaderStatusIsVisuallyHidden: Story = {
 			"1px",
 			"absolute",
 		]);
+	},
+};
+
+const LONG_URL =
+	"https://example.com/download/staff_import.de.xlsx?version=2026-10-17&token=0123456789abcdef";
+
+export const Issue3464Item8LongWordWrapsOnPhone: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"ISSUE-3464-ITEM-8: at 320px a long word or URL in the heading or the message is cut off at the box's edge instead of wrapping; the rest cannot be read or scrolled to.",
+			},
+		},
+	},
+	decorators: [
+		(Story) => (
+			<div style={{ padding: "0 16px" }}>
+				<Story />
+			</div>
+		),
+	],
+	args: {
+		heading: "Medizinproduktebetreiberverordnungskonformitätsbescheinigung",
+		message: "Template: " + LONG_URL,
+		defaultExpanded: true,
+	},
+	play: async ({ canvasElement }) => {
+		const root = elementOf(
+			canvasElement.querySelector(".MuiAccordion-root"),
+		).getBoundingClientRect();
+		await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(320);
+		const message = textRectOf(
+			elementOf(canvasElement.querySelector("[class*=CcInfoBox-detailsText]")),
+		);
+		await expect(message.right).toBeLessThanOrEqual(root.right);
+		const heading = textRectOf(
+			elementOf(canvasElement.querySelector("[class*=CcInfoBox-heading]")),
+		);
+		await expect(heading.right).toBeLessThanOrEqual(root.right);
+	},
+};
+
+export const Issue3464Item8LongWordWrapsInFlexRow: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"ISSUE-3464-ITEM-8: at 320px, in a flex row whose item keeps the default `min-width: auto`, a long word or URL in the heading and the message still wraps inside the box: the box does not widen the row or the page.",
+			},
+		},
+	},
+	decorators: [
+		(Story) => (
+			<div style={{ display: "flex", padding: "0 16px" }}>
+				<div>
+					<Story />
+				</div>
+			</div>
+		),
+	],
+	args: {
+		heading: "Medizinproduktebetreiberverordnungskonformitätsbescheinigung",
+		message: "Template: " + LONG_URL,
+		defaultExpanded: true,
+	},
+	play: async ({ canvasElement }) => {
+		const root = elementOf(
+			canvasElement.querySelector(".MuiAccordion-root"),
+		).getBoundingClientRect();
+		// the box stays inside the row's 16px gutter
+		await expect(root.right).toBeLessThanOrEqual(
+			document.documentElement.clientWidth - 16,
+		);
+		await expect(pageScrollsSideways()).toBe(false);
+		const message = textRectOf(
+			elementOf(canvasElement.querySelector("[class*=CcInfoBox-detailsText]")),
+		);
+		await expect(message.right).toBeLessThanOrEqual(root.right);
+		const heading = textRectOf(
+			elementOf(canvasElement.querySelector("[class*=CcInfoBox-heading]")),
+		);
+		await expect(heading.right).toBeLessThanOrEqual(root.right);
+	},
+};
+
+export const Issue3464Item8HeadingThatCannotWrapKeepsItsStart: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"ISSUE-3464-ITEM-8: at 320px a heading whose content cannot wrap (here a `white-space: nowrap` span) starts next to the icon column and runs past the end of the header only. The header button centers content wider than itself, so such a heading used to stick out on both sides, its start cut off and under the icon column.",
+			},
+		},
+	},
+	decorators: [
+		(Story) => (
+			<div style={{ padding: "0 16px" }}>
+				<Story />
+			</div>
+		),
+	],
+	args: {
+		heading: (
+			<span style={{ whiteSpace: "nowrap" }}>
+				Medizinproduktebetreiberverordnungskonformitätsbescheinigung
+			</span>
+		),
+		message: "Message",
+	},
+	play: async ({ canvas, canvasElement }) => {
+		const header = canvas.getByRole("button").getBoundingClientRect();
+		const icon = elementOf(
+			canvasElement.querySelector("[class*=CcInfoBox-iconButton]"),
+		).getBoundingClientRect();
+		const heading = textRectOf(
+			elementOf(canvasElement.querySelector("[class*=CcInfoBox-heading]")),
+		);
+		await expect(heading.left).toBeGreaterThanOrEqual(icon.right);
+		// the header content (summaryRoot slot) stays inside the header
+		const content = elementOf(
+			canvasElement.querySelector("[class*=CcInfoBox-summaryRoot]"),
+		).getBoundingClientRect();
+		await expect(content.right).toBeLessThanOrEqual(header.right);
 	},
 };
 

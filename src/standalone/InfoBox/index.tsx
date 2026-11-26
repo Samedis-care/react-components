@@ -82,6 +82,15 @@ const AccordionSummaryStyled = styled(AccordionSummary, {
 	minHeight: 48,
 	backgroundColor: `var(${HEADER_BACKGROUND})`,
 	color: `var(${HEADER_COLOR})`,
+	// MUI's content wrapper (and the summaryRoot in it) is never wider than
+	// the header: the heading wraps anywhere, and heading content that cannot
+	// wrap (e.g. `white-space: nowrap`) runs past the header's end, where the
+	// root clips it. Otherwise the wrapper grew to that content's width, and
+	// the header button, which centers its content, cut off the heading's
+	// start under the icon column.
+	[`& .${accordionSummaryClasses.content}`]: {
+		minWidth: 0,
+	},
 	// A keyboard-focused header keeps its status color, where MUI's
 	// AccordionSummary would replace the background with
 	// `palette.action.focus`, and shows a 2px outline in the text color, 2px
@@ -112,13 +121,19 @@ const SummaryRoot = styled("div", { name: "CcInfoBox", slot: "summaryRoot" })(
 	({ theme }) => ({
 		margin: 0,
 		paddingLeft: theme.spacing(5),
+		// never wider than the header, see the summary's content wrapper
+		minWidth: 0,
 	}),
 );
 
 const SummaryHeading = styled(Typography, {
 	name: "CcInfoBox",
 	slot: "heading",
-})({});
+})({
+	// a word wider than the header (a long compound, a file name or a URL on a
+	// phone) breaks inside, so it stays in the box, which clips its content
+	overflowWrap: "anywhere",
+});
 
 /**
  * The status name in front of the heading, with the separator the translation
@@ -156,6 +171,10 @@ const AccordionDetailsStyled = styled(AccordionDetails, {
 	borderRadius: `0px 0px ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
 	padding: "8px 24px",
 	whiteSpace: "pre-line",
+	// a word wider than the panel (a long compound, a file name or a URL on a
+	// phone) breaks inside, so it stays in the box, which clips its content,
+	// also where the box sits in a flex row or a grid cell
+	overflowWrap: "anywhere",
 }));
 
 const DetailsText = styled("div", { name: "CcInfoBox", slot: "detailsText" })(
@@ -168,11 +187,16 @@ const DetailsText = styled("div", { name: "CcInfoBox", slot: "detailsText" })(
  * - `root`: the MUI `Accordion` around everything
  * - `summary`: the header button (`AccordionSummary`), filled with the
  *   status color
- * - `summaryRoot`: the header content, the icon column and the heading
+ * - `summaryRoot`: the header content, the icon column and the heading. It
+ *   has `min-width: 0`, as has MUI's content wrapper around it, so it never
+ *   grows wider than the header
  * - `iconButton`: the column with the status icon at the header's left edge
- * - `heading`: the heading `Typography`
+ * - `heading`: the heading `Typography`. It sets `overflow-wrap: anywhere`,
+ *   so a word wider than the header breaks inside it
  * - `statusName`: the visually hidden status name read before the heading
- * - `details`: the bordered message panel (`AccordionDetails`)
+ * - `details`: the bordered message panel (`AccordionDetails`). It sets
+ *   `white-space: pre-line` and `overflow-wrap: anywhere`, which the message
+ *   inherits
  * - `detailsText`: the `<div>` around `message`
  *
  * No slot receives an `ownerState`, and the theme has no `variants` for
@@ -214,6 +238,12 @@ export interface InfoBoxProps {
 	 * For a `warning`, `success` or `error` status the translated status is
 	 * read before it (e.g. "Warning: Please review"), so don't repeat the
 	 * status here.
+	 *
+	 * The heading wraps at spaces. A word wider than the header, such as a
+	 * long compound, a file name or a URL, breaks between any two characters,
+	 * so it stays inside the box on a phone. Content that cannot wrap (e.g. an
+	 * element with `white-space: nowrap`) runs past the header's end and is
+	 * cut off there.
 	 */
 	heading: React.ReactNode;
 	/**
@@ -255,7 +285,12 @@ export interface InfoBoxProps {
 	 */
 	alwaysExpanded?: boolean;
 	/**
-	 * The message inside the info box
+	 * The message inside the info box: text or any node. It wraps at spaces.
+	 * A word wider than the panel, such as a long compound, a file name or a
+	 * URL, breaks between any two characters, so it stays inside the box on a
+	 * phone, also where the box sits in a flex row or a grid cell. A `"\n"` in
+	 * text starts a new line (the panel has `white-space: pre-line`). Both
+	 * rules are inherited by nested elements.
 	 */
 	message: React.ReactNode;
 	/**
