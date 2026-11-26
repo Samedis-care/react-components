@@ -119,6 +119,11 @@ export type RoutedTabsClassKey = "root";
  * `CcRoutedTabs-fullWidth` is a scrollable bar whose tabs share its width
  * equally, as MUI's `fullWidth` tabs do, but no tab gets narrower than its
  * longest word.
+ *
+ * In forced-colors mode (Windows contrast themes) the selection indicator is
+ * drawn in the system's selection color (`Highlight`). Forced colors would
+ * paint its background in the canvas color and give every label the same
+ * text color, so nothing would show which tab is open.
  */
 const RoutedTabsRoot = styled(Tabs, { name: "CcRoutedTabs", slot: "root" })(
 	({ theme }) => ({
@@ -140,6 +145,12 @@ const RoutedTabsRoot = styled(Tabs, { name: "CcRoutedTabs", slot: "root" })(
 			flexBasis: 0,
 			maxWidth: "none",
 			minWidth: "min-content",
+		},
+		"@media (forced-colors: active)": {
+			[`& .${tabsClasses.indicator}`]: {
+				forcedColorAdjust: "none",
+				backgroundColor: "Highlight",
+			},
 		},
 	}),
 );
@@ -276,9 +287,12 @@ const getTabValueWarning = (
  * tab can be reached at 320px.
  * A keyboard-focused tab shows a 2px focus ring inside its edge, in the
  * primary color, or in the tab's text color with `textColor="inherit"` (tabs
- * on an AppBar); MUI's own ring when the theme sets `focusVisible`. The
- * theme sets default props under `CcRoutedTabs.defaultProps` and styles it
- * under `CcRoutedTabs` (`root` is the Tabs root).
+ * on an AppBar); MUI's own ring when the theme sets `focusVisible`. In
+ * forced-colors mode (Windows contrast themes) the selection indicator under
+ * the open tab is drawn in the system's selection color (`Highlight`), so it
+ * stays visible there. The theme sets default props under
+ * `CcRoutedTabs.defaultProps` and styles it under `CcRoutedTabs` (`root` is
+ * the Tabs root).
  * @param inProps The props
  */
 const RoutedTabs = (inProps: RoutedTabsProps) => {

@@ -595,6 +595,161 @@ export const Issue3500Item8FocusDoesNotPulse: Story = {
 	},
 };
 
+export const Issue3500Item9SelectedTabVisibleInForcedColors: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3500-ITEM-9: the selected tab differs from the others by the indicator (a background-colored span) and the label color. Forced-colors mode (Windows contrast themes) replaces both, so every tab looks the same. Expected: a cue that survives forced colors, e.g. the indicator with `forced-color-adjust: none` and a system color, or a border. The runner cannot emulate forced colors, so the test reads the computed styles and looks for a `@media (forced-colors: active)` rule that styles the indicator or only the selected tab.",
+			},
+		},
+	},
+	render: (args) => (
+		<Host at="/settings/security">
+			<SettingsTabs tabsProps={args} />
+		</Host>
+	),
+	play: async ({ canvasElement }) => {
+		const [general, security] = tabsOf(canvasElement);
+		await expect(security).toHaveAttribute("aria-selected", "true");
+		const indicator = canvasElement.querySelector<HTMLElement>(
+			".MuiTabs-indicator",
+		) as HTMLElement;
+		const line = getComputedStyle(indicator);
+		/** what marks a tab apart from colors and backgrounds */
+		const cue = (el: HTMLElement) => {
+			const cs = getComputedStyle(el);
+			return [
+				cs.borderBottomStyle,
+				cs.borderBottomWidth,
+				cs.outlineStyle,
+				cs.textDecorationLine,
+				cs.fontWeight,
+			].join(" | ");
+		};
+		const indicatorSurvives =
+			line.forcedColorAdjust === "none" ||
+			(line.borderBottomStyle !== "none" &&
+				parseFloat(line.borderBottomWidth) > 0);
+		/**
+		 * whether a `@media (forced-colors: active)` rule styles `el` (and not
+		 * `other`): the runner cannot emulate forced colors, so a fix scoped to
+		 * that media query is found in the style sheets
+		 */
+		const forcedColorsRule = (el: HTMLElement, other?: HTMLElement) => {
+			const matches = (target: HTMLElement, selector: string) => {
+				try {
+					return target.matches(selector);
+				} catch {
+					return false; // e.g. a pseudo-element selector
+				}
+			};
+			const walk = (rules: CSSRuleList, forced: boolean): boolean =>
+				Array.from(rules).some((rule) => {
+					if (rule instanceof CSSMediaRule)
+						return walk(
+							rule.cssRules,
+							forced || rule.conditionText.includes("forced-colors"),
+						);
+					if (!(rule instanceof CSSStyleRule)) return false;
+					if (
+						forced &&
+						matches(el, rule.selectorText) &&
+						!(other && matches(other, rule.selectorText))
+					)
+						return true;
+					return walk(rule.cssRules, forced);
+				});
+			return Array.from(document.styleSheets).some((sheet) => {
+				try {
+					return walk(sheet.cssRules, false);
+				} catch {
+					return false; // a cross-origin sheet
+				}
+			});
+		};
+		const forcedRule =
+			forcedColorsRule(indicator) || forcedColorsRule(security, general);
+		await expect(
+			indicatorSurvives || forcedRule || cue(security) !== cue(general),
+			`indicator: forced-color-adjust ${line.forcedColorAdjust}, border ${line.borderBottomStyle} ${line.borderBottomWidth}; forced-colors rule: ${forcedRule}; selected tab: ${cue(security)}; other tab: ${cue(general)}`,
+		).toBe(true);
+	},
+};
+
+export const Issue3500Item9IndicatorInHighlightOnEveryBar: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3500-ITEM-9: in forced-colors mode the selection indicator keeps its own colors (`forced-color-adjust: none`) and is drawn in the system's selection color, `Highlight`: with the primary and the secondary `indicatorColor`, and in a vertical bar. The runner cannot emulate forced colors, so the test reads the declarations of the `@media (forced-colors: active)` rules that style the indicator.",
+			},
+		},
+	},
+	render: () => (
+		<>
+			<Bar name="Page" />
+			<Bar
+				name="Secondary"
+				tabsProps={{ textColor: "secondary", indicatorColor: "secondary" }}
+			/>
+			<Bar name="Vertical" tabsProps={{ orientation: "vertical" }} />
+		</>
+	),
+	play: async ({ canvasElement }) => {
+		/** the declarations of the forced-colors rules that style `el` */
+		const forcedDeclarations = (el: HTMLElement) => {
+			const found: CSSStyleDeclaration[] = [];
+			const walk = (rules: CSSRuleList, forced: boolean) => {
+				Array.from(rules).forEach((rule) => {
+					if (rule instanceof CSSMediaRule) {
+						walk(
+							rule.cssRules,
+							forced || rule.conditionText.includes("forced-colors"),
+						);
+					} else if (rule instanceof CSSStyleRule) {
+						let matches = false;
+						try {
+							matches = el.matches(rule.selectorText);
+						} catch {
+							// e.g. a pseudo-element selector
+						}
+						if (forced && matches) found.push(rule.style);
+						walk(rule.cssRules, forced);
+					}
+				});
+			};
+			Array.from(document.styleSheets).forEach((sheet) => {
+				try {
+					walk(sheet.cssRules, false);
+				} catch {
+					// a cross-origin sheet
+				}
+			});
+			return found;
+		};
+		for (const name of ["Page", "Secondary", "Vertical"]) {
+			const bar = within(canvasElement)
+				.getByRole("tablist", { name })
+				.closest(".MuiTabs-root") as HTMLElement;
+			const indicator = bar.querySelector<HTMLElement>(
+				".MuiTabs-indicator",
+			) as HTMLElement;
+			const declarations = forcedDeclarations(indicator);
+			await expect(
+				declarations.map((style) => style.forcedColorAdjust),
+				name,
+			).toContain("none");
+			await expect(
+				declarations.map((style) => style.backgroundColor),
+				name,
+			).toContain("highlight");
+		}
+	},
+};
+
 export const Issue3500Item10AllTabsReachableOnPhone: Story = {
 	globals: { viewport: { value: "mobile1", isRotated: false } },
 	args: { "aria-label": "Benutzer" },
