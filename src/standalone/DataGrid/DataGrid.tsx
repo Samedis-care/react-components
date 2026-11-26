@@ -700,6 +700,12 @@ export type DataGridRowData = { id: string } & Record<
  * Keep such a value in a JSON form (a date as an ISO string, a set as an
  * array) and convert it where it is used: in getAdditionalFilters and in the
  * filter bar's controls.
+ *
+ * A BigInt, and an object that refers back to itself (a model record with
+ * back references, a DOM node), have no JSON form. While the custom data
+ * holds one, the grid persists nothing, no other change either: it logs that
+ * to the console and reports it (captureError), once, and writes its state
+ * again once the custom data holds JSON values only.
  * @remarks The open grid keeps the values as they were set; only what it
  *          restores is in the JSON form.
  */

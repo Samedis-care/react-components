@@ -66,6 +66,12 @@ import {
 	StorageProvider,
 } from "../../src/framework/Storage";
 import ModelDataStore from "../../src/backend-integration/Store";
+import {
+	configureErrorReporting,
+	ErrorReporterCallback,
+	ErrorReportingConfig,
+	getErrorReportingConfig,
+} from "../../src/framework/ErrorReporting";
 
 // MultiGrid renders the cells and reports the rendered rows; the grid tests
 // below only need the state the grid restores and writes
@@ -1430,6 +1436,219 @@ describe("custom data on the next visit", () => {
 			date: "2026-01-02T00:00:00.000Z",
 		});
 		expect(grid!.state.customData).toStrictEqual({ date, undef: undefined });
+	});
+});
+
+describe("custom data without a JSON form", () => {
+	type Wrap = (child: React.ReactElement) => React.ReactElement;
+	/** A provider as an app sets it up, and what reached its storage */
+	interface ProviderUnderTest {
+		wrap: Wrap;
+		/** how many writes reached the storage */
+		writes: () => number;
+		/** the state with the search and the custom data, as stored last */
+		stored: () => DataGridPersistentState | undefined;
+	}
+	const providers: [name: string, setUp: () => ProviderUnderTest][] = [
+		[
+			"LocalStoragePersist",
+			() => {
+				const setItem = vi.spyOn(Storage.prototype, "setItem");
+				return {
+					wrap: (child) => (
+						<LocalStoragePersist storageKey={"grid"}>
+							{child}
+						</LocalStoragePersist>
+					),
+					writes: () => setItem.mock.calls.length,
+					stored: () => {
+						const entry = localStorage.getItem("grid");
+						return entry == null ? undefined : persisted(entry);
+					},
+				};
+			},
+		],
+		[
+			"StorageManagerPersist",
+			() => {
+				const server = new MemoryProvider();
+				StorageManager.configure((_id, keys) => [server, keys]);
+				return {
+					wrap: (child) => (
+						<StorageManagerPersist storageKeys={{ model: "m" }}>
+							{child}
+						</StorageManagerPersist>
+					),
+					writes: () => server.writes.length,
+					stored: () => {
+						const bucket = server.data[keyOf(FILTERS, { model: "m" })];
+						return bucket == null ? undefined : persisted(bucket);
+					},
+				};
+			},
+		],
+		[
+			"a custom provider",
+			() => {
+				const save = vi.fn<DataGridPersistentStateContextType[1]>();
+				return {
+					wrap: (child) => (
+						<ValueProvider stored={undefined} save={save}>
+							{child}
+						</ValueProvider>
+					),
+					writes: () => save.mock.calls.length,
+					stored: () => save.mock.lastCall?.[0],
+				};
+			},
+		],
+	];
+	/** values JSON has no form for: [name, a new one] */
+	const withoutJson: [name: string, value: () => unknown][] = [
+		["a BigInt", () => BigInt(1)],
+		[
+			"an object that refers back to itself",
+			() => {
+				// like a model record with back references
+				const record: Record<string, unknown> = { id: "1" };
+				record.owner = { id: "2", records: [record] };
+				return record;
+			},
+		],
+	];
+	/** default custom data without a JSON form, the same object on every render */
+	const DEFAULT_WITHOUT_JSON = { "filter[owner]": BigInt(1) };
+	const cases = providers.flatMap(([name, setUp]) =>
+		withoutJson.map(([valueName, value]) => [name, valueName, setUp, value]),
+	) as [string, string, () => ProviderUnderTest, () => unknown][];
+
+	const report = vi.fn<ErrorReporterCallback>();
+	let configBefore: ErrorReportingConfig;
+	beforeEach(() => {
+		configBefore = { ...getErrorReportingConfig() };
+		report.mockClear();
+		configureErrorReporting({ report });
+	});
+	afterEach(() => {
+		// the config is a module level singleton, so it leaks between tests
+		configureErrorReporting(configBefore);
+	});
+
+	/** what the grid logged as a persist error, as it logs a failed write */
+	const persistErrors = (log: { mock: { calls: unknown[][] } }) =>
+		log.mock.calls
+			.filter(([prefix]) => prefix === "[Components-Care] [DataGrid] Persist: ")
+			.map(([, error]) => error as Error);
+
+	it.each(cases)(
+		"[ISSUE-3496-ITEM-24] %s: custom data holding %s keeps the grid working, logs and reports one persist error, and writes nothing",
+		async (_name, _valueName, setUp, value) => {
+			const log = vi.spyOn(console, "error").mockImplementation(() => {});
+			const provider = setUp();
+			render(provider.wrap(<Grid />));
+			await gridIdle();
+			const customData = { "filter[owner]": value() };
+			act(() => grid!.setState((prev) => ({ ...prev, customData })));
+			// a state update that changes nothing persisted, like a page of rows loaded
+			act(() => grid!.setState((prev) => ({ ...prev })));
+			await act(async () => {});
+			expect(screen.getByRole("textbox")).toBeInTheDocument();
+			expect(grid!.state.customData).toBe(customData);
+			const errors = persistErrors(log);
+			expect(errors).toHaveLength(1);
+			expect(errors[0].cause).toBeInstanceOf(TypeError);
+			expect(report).toHaveBeenCalledTimes(1);
+			expect(report).toHaveBeenCalledWith(errors[0], {
+				source: "DataGrid.persist",
+			});
+			expect(provider.writes()).toBe(0);
+		},
+	);
+
+	it.each(providers)(
+		"[ISSUE-3496-ITEM-24] %s: once the custom data holds JSON values again, the grid writes its state with the changes made meanwhile",
+		async (_name, setUp) => {
+			const log = vi.spyOn(console, "error").mockImplementation(() => {});
+			const provider = setUp();
+			render(provider.wrap(<Grid />));
+			await gridIdle();
+			act(() =>
+				grid!.setState((prev) => ({
+					...prev,
+					customData: { "filter[owner]": BigInt(1) },
+				})),
+			);
+			act(() => grid!.setState((prev) => ({ ...prev, search: "q" })));
+			await act(async () => {});
+			expect(provider.writes()).toBe(0);
+			expect(persistErrors(log)).toHaveLength(1);
+			act(() =>
+				grid!.setState((prev) => ({
+					...prev,
+					customData: { "filter[owner]": "1" },
+				})),
+			);
+			await waitFor(() =>
+				expect(provider.stored()).toMatchObject({
+					search: "q",
+					customData: { "filter[owner]": "1" },
+				}),
+			);
+		},
+	);
+
+	it("[ISSUE-3496-ITEM-24] a grid that opens with default custom data without a JSON form writes the first change after which it has one", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const save = vi.fn<DataGridPersistentStateContextType[1]>();
+		render(
+			<ValueProvider stored={undefined} save={save}>
+				<Grid defaultCustomData={DEFAULT_WITHOUT_JSON} />
+			</ValueProvider>,
+		);
+		await gridIdle();
+		expect(report).toHaveBeenCalledTimes(1);
+		act(() =>
+			grid!.setState((prev) => ({
+				...prev,
+				customData: { "filter[owner]": "1" },
+			})),
+		);
+		expect(save).toHaveBeenCalledTimes(1);
+		expect(save.mock.calls[0][0].customData).toStrictEqual({
+			"filter[owner]": "1",
+		});
+	});
+
+	it("[ISSUE-3496-ITEM-24] a part without a JSON form which a custom provider hands out keeps the grid working: logged and reported once, nothing written", async () => {
+		const log = vi.spyOn(console, "error").mockImplementation(() => {});
+		const save = vi.fn<DataGridPersistentStateContextType[1]>();
+		const stored: DataGridPersistentState = {
+			v: DATA_GRID_PERSIST_VERSION,
+			search: "stored",
+			customData: { "filter[owner]": BigInt(1) },
+		};
+		// the grid keeps the filters it does not persist as they are stored
+		render(
+			<ValueProvider stored={stored} save={save}>
+				<Grid persist={["columns", "sort"]} />
+			</ValueProvider>,
+		);
+		await gridIdle();
+		act(() =>
+			grid!.setState((prev) => ({
+				...prev,
+				columnHidden: { ...prev.columnHidden, role: true },
+			})),
+		);
+		act(() => grid!.setWidths((prev) => ({ ...prev, name: 321 })));
+		await act(async () => {});
+		expect(screen.getByRole("textbox")).toBeInTheDocument();
+		expect(grid!.state.columnHidden.role).toBe(true);
+		const errors = persistErrors(log);
+		expect(errors).toHaveLength(1);
+		expect(errors[0].cause).toBeInstanceOf(TypeError);
+		expect(report).toHaveBeenCalledTimes(1);
+		expect(save).not.toHaveBeenCalled();
 	});
 });
 

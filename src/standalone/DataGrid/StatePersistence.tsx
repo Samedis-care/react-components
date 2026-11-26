@@ -17,6 +17,7 @@ import {
 	isNewerPersistedState,
 	keepStoredParts,
 } from "./PersistFormat";
+import { captureError } from "../../framework/ErrorReporting";
 
 export type {
 	DataGridPersistedData,
@@ -68,6 +69,12 @@ export type DataGridPersistentStateContextType = [
 	 * grid persists (DataGridProps.persist), and the others as the provider
 	 * handed them out (legacy data in the current format; nothing of data in
 	 * a newer format).
+	 *
+	 * While the state has no JSON form (a BigInt, or an object that refers
+	 * back to itself, in the custom data or in a part the provider handed
+	 * out), the grid does not call the setter: it logs that to the console and
+	 * reports it (captureError, source "DataGrid.persist"), once per error,
+	 * and calls the setter again once the state has a JSON form.
 	 *
 	 * Throw, or return a promise which rejects, when the data could not be
 	 * stored. The grid logs the error to the console and calls the setter
@@ -193,8 +200,14 @@ const StatePersistence = () => {
 	// stored. It is the baseline, not written: writing it would only replace
 	// what this visit could not read (a column it doesn't have, a newer format).
 	// null after a failed write: what is stored is unknown then, so the next
-	// run writes, whether the data changed or not
+	// run writes, whether the data changed or not. A state without a JSON form
+	// is neither the baseline nor written
 	const lastWritten = useRef<string | null>(undefined);
+
+	// the error last reported for a state without a JSON form, so that neither
+	// the next state update (a page of rows loaded) nor StrictMode's second
+	// effect run reports it again
+	const reported = useRef<string | null>(null);
 
 	// data a newer library version wrote may keep the column widths where this
 	// version doesn't look. The auto-fit then fills them in, and writing that
@@ -224,7 +237,31 @@ const StatePersistence = () => {
 			columns,
 			config,
 		);
-		const serialized = JSON.stringify(data);
+		// a BigInt, or an object that refers back to itself, has no JSON form:
+		// the state is not written then, and that is logged and reported once
+		const notWritten = (err: unknown) => {
+			const key = String(err);
+			if (reported.current === key) return;
+			reported.current = key;
+			const error = new Error(
+				"The DataGrid state has no JSON form, so it is not persisted. Keep the custom data to JSON values (see DataGridCustomDataType)",
+				{ cause: err },
+			);
+			// eslint-disable-next-line no-console
+			console.error("[Components-Care] [DataGrid] Persist: ", error);
+			captureError(error, { source: "DataGrid.persist" });
+		};
+		let serialized: string;
+		try {
+			serialized = JSON.stringify(data);
+		} catch (err) {
+			notWritten(err);
+			// what is stored stays what was written last. A grid that opened
+			// with this state has no baseline: its first state with a JSON form
+			// is a change, and written
+			if (lastWritten.current === undefined) lastWritten.current = null;
+			return;
+		}
 		const autoFit = state.initialResize && !lastInitialResize.current;
 		lastInitialResize.current = state.initialResize;
 		if (lastWritten.current === undefined) {
@@ -240,9 +277,18 @@ const StatePersistence = () => {
 		// provider gets the data as JSON values, so what it hands out is what
 		// its storage gives back after a reload (a Date as its ISO string)
 		const whole = keepStoredParts(data, stored, config);
-		const payload = JSON.parse(
-			whole === data ? serialized : JSON.stringify(whole),
-		) as DataGridPersistentState;
+		let payload: DataGridPersistentState;
+		try {
+			payload = JSON.parse(
+				whole === data ? serialized : JSON.stringify(whole),
+			) as DataGridPersistentState;
+		} catch (err) {
+			// a part the provider handed out has no JSON form: nothing is
+			// written, so the next run tries again
+			notWritten(err);
+			lastWritten.current = null;
+			return;
+		}
 
 		// the setter may throw or reject: the storage is full, the server fails.
 		// What is stored is unknown then, also when a newer write has started
