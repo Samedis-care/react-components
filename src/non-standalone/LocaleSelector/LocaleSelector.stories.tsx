@@ -82,7 +82,7 @@ const reset = async () => {
 const waitForRows = async (dialog: HTMLElement) => {
 	await waitFor(
 		() => {
-			if (!dialog.querySelector('[role="listitem"]'))
+			if (!dialog.querySelector('[role="option"]'))
 				throw new Error("no rows rendered");
 		},
 		{ timeout: 10000 },
@@ -97,10 +97,10 @@ const openDialog = async (canvasElement: HTMLElement) => {
 	return dialog;
 };
 
-/** the row control at the given 1-based position of the filtered list */
+/** the row (an option) at the given 1-based position of the filtered list */
 const rowButton = (dialog: HTMLElement, position: number) => {
 	const button = dialog.querySelector<HTMLElement>(
-		`[role="listitem"][aria-posinset="${position}"] [role="button"]`,
+		`[role="option"][aria-posinset="${position}"]`,
 	);
 	if (!button) throw new Error(`no row at position ${position}`);
 	return button;
@@ -242,7 +242,7 @@ export const Issue3499Item4LongNamesWrapWithTextSpacing: Story = {
 				await frames(4);
 				const cut: string[] = [];
 				for (const row of dialog.querySelectorAll<HTMLElement>(
-					'[role="listitem"] [role="button"]',
+					'[role="option"]',
 				)) {
 					const box = row.getBoundingClientRect();
 					for (const span of row.querySelectorAll<HTMLElement>("span[title]")) {
@@ -371,7 +371,7 @@ export const Issue3499Item6FocusStaysInListWhenScrolled: Story = {
 	play: async ({ canvasElement }) => {
 		await reset();
 		const dialog = await openDialog(canvasElement);
-		const list = within(dialog).getByRole("list");
+		const list = within(dialog).getByRole("listbox");
 		const row = rowButton(dialog, 1);
 		row.focus();
 		await expect(row).toHaveFocus();
@@ -391,10 +391,14 @@ export const Issue3499Item6FocusStaysInListWhenScrolled: Story = {
  * @returns The list and the first row's (now removed) control
  */
 const scrollFocusedRowAway = async (dialog: HTMLElement) => {
-	const list = within(dialog).getByRole("list");
+	const list = within(dialog).getByRole("listbox");
 	const row = rowButton(dialog, 1);
 	row.focus();
 	await expect(row).toHaveFocus();
+	// a scroll to the row (Tab back into the list) settles over a few frames, as
+	// react-window measures the rows: a script's scroll would be undone meanwhile
+	// (the wheel, a touch or a key stops it)
+	await frames(4);
 	list.scrollTop = 2000;
 	await waitFor(() => expect(row.isConnected).toBe(false));
 	await waitFor(() => expect(list).toHaveFocus());
@@ -417,7 +421,8 @@ export const Issue3499Item6FocusReturnsToRowWhenScrolledBack: Story = {
 		await reset();
 		const dialog = await openDialog(canvasElement);
 		const { list, row } = await scrollFocusedRowAway(dialog);
-		await expect(list).toHaveAttribute("tabindex", "-1");
+		// while its active row is scrolled away, the list is its tab stop
+		await expect(list).toHaveAttribute("tabindex", "0");
 		const ring = getComputedStyle(list);
 		await expect(`${ring.outlineStyle} ${ring.outlineWidth}`).toBe("solid 2px");
 		const country = row.textContent ?? "";
@@ -436,7 +441,7 @@ export const Issue3499Item6TabFromListGoesToRows: Story = {
 		docs: {
 			description: {
 				story:
-					"ISSUE-3499-ITEM-6: while the list holds focus for a row that is scrolled away, Shift+Tab goes back to the search box, and Tab goes on to the rows, not back to the close button.",
+					"ISSUE-3499-ITEM-6: while the list holds focus for a row that is scrolled away, Shift+Tab goes back to the search box, and Tab from there goes back to that row, scrolled into view again (ISSUE-3499-ITEM-10: the list is one tab stop). Tab from the list leaves it, to the close button.",
 			},
 		},
 	},
@@ -444,17 +449,16 @@ export const Issue3499Item6TabFromListGoesToRows: Story = {
 	play: async ({ canvasElement }) => {
 		await reset();
 		const dialog = await openDialog(canvasElement);
-		let { list } = await scrollFocusedRowAway(dialog);
+		await scrollFocusedRowAway(dialog);
 		await userEvent.tab({ shift: true });
 		await expect(within(dialog).getByRole("textbox")).toHaveFocus();
-		list.scrollTop = 0;
-		await waitFor(() => rowButton(dialog, 1));
-		({ list } = await scrollFocusedRowAway(dialog));
 		await userEvent.tab();
-		const focused = document.activeElement as HTMLElement | null;
-		await expect(list).toContainElement(focused);
-		await expect(focused).not.toBe(list);
-		await expect(focused).toHaveAttribute("role", "button");
+		await waitFor(() => expect(rowButton(dialog, 1)).toHaveFocus());
+		await scrollFocusedRowAway(dialog);
+		await userEvent.tab();
+		await expect(
+			within(dialog).getByRole("button", { name: "Close" }),
+		).toHaveFocus();
 	},
 };
 
@@ -491,7 +495,7 @@ export const Issue3499Item7PickedRowKeepsFocusWhileLoading: Story = {
 		docs: {
 			description: {
 				story:
-					"ISSUE-3499-ITEM-7: Tab to the second row and press Enter while the language loads (held here until the play function ends). The row keeps its node, keyboard focus and its focus ring, and stays the list's tab stop, marked `aria-disabled`; the other rows are disabled.",
+					"ISSUE-3499-ITEM-7: Tab to the first row, ArrowDown to the second, and press Enter while the language loads (held here until the play function ends). The row keeps its node, keyboard focus and its focus ring, and stays the list's tab stop, marked `aria-disabled`; the other rows are disabled.",
 			},
 		},
 	},
@@ -502,7 +506,7 @@ export const Issue3499Item7PickedRowKeepsFocusWhileLoading: Story = {
 		await userEvent.tab(); // close button
 		await userEvent.tab(); // search box
 		await userEvent.tab(); // first row
-		await userEvent.tab(); // second row
+		await userEvent.keyboard("{ArrowDown}"); // second row
 		const row = rowButton(dialog, 2);
 		await expect(row).toHaveFocus();
 		let release = () => {};
@@ -540,7 +544,7 @@ export const Issue3499Item7PickedRowKeepsFocusWhileLoading: Story = {
 
 /**
  * Opens the dialog with the UI in `locale` and checks the marked row: the only one
- * with `aria-current`, MUI's selected class, and a check of at least 3:1 against
+ * with `aria-selected="true"`, MUI's selected class, and a check of at least 3:1 against
  * the tint that neither covers the language name nor leaves the row. The language
  * column stays where the other rows have it. `place` then checks where the check
  * is, while the dialog is still open.
@@ -555,7 +559,7 @@ const checkCurrentRow = async (
 	await ccI18n.changeLanguage(locale);
 	try {
 		const dialog = await openDialog(canvasElement);
-		const marked = dialog.querySelectorAll('[aria-current="true"]');
+		const marked = dialog.querySelectorAll('[aria-selected="true"]');
 		await expect(marked).toHaveLength(1);
 		const row = marked[0] as HTMLElement;
 		await expect(row).toHaveTextContent(new RegExp("^" + country));
@@ -590,9 +594,9 @@ const checkCurrentRow = async (
 			contrast(over(rgba(checkColor), behind), behind),
 			`${checkColor} on ${getComputedStyle(row).backgroundColor}`,
 		).toBeGreaterThanOrEqual(3);
-		const other = Array.from(
-			dialog.querySelectorAll('[role="listitem"] [role="button"]'),
-		).find((button) => button !== row);
+		const other = Array.from(dialog.querySelectorAll('[role="option"]')).find(
+			(button) => button !== row,
+		);
 		if (!other) throw new Error("no other row");
 		await expect(name.left).toBe(
 			other.querySelectorAll("span[title]")[1].getBoundingClientRect().left,
@@ -610,7 +614,7 @@ export const Issue3499Item8CurrentRowMarked: Story = {
 		docs: {
 			description: {
 				story:
-					"ISSUE-3499-ITEM-8: with the UI in de-AT, the Österreich row is marked as the current one: MUI's selected tint, a check at the row's end (at least 3:1 against the tint, so not by color alone) and `aria-current`. The check sits in the language column after the name, so the other rows keep their room and the columns stay aligned.",
+					"ISSUE-3499-ITEM-8: with the UI in de-AT, the Österreich row is marked as the current one: MUI's selected tint, a check at the row's end (at least 3:1 against the tint, so not by color alone) and `aria-selected`. The check sits in the language column after the name, so the other rows keep their room and the columns stay aligned.",
 			},
 		},
 	},
@@ -689,16 +693,16 @@ export const Issue3499Item8OpensAtCurrentRow: Story = {
 		await ccI18n.changeLanguage("de-AT");
 		try {
 			const dialog = await openDialog(canvasElement);
-			const list = within(dialog).getByRole("list");
+			const list = within(dialog).getByRole("listbox");
 			const current = () => {
-				const row = list.querySelector<HTMLElement>('[aria-current="true"]');
+				const row = list.querySelector<HTMLElement>('[aria-selected="true"]');
 				if (!row) throw new Error("the current row is not rendered");
 				return row;
 			};
 			await waitFor(() => expectInView(list, current()));
 			await expect(current()).toHaveTextContent(/^Österreich/);
 			// it keeps its place, far below the first rows
-			const item = current().closest('[role="listitem"]');
+			const item = current().closest('[role="option"]');
 			await expect(Number(item?.getAttribute("aria-posinset"))).toBeGreaterThan(
 				20,
 			);
@@ -726,7 +730,7 @@ export const Issue3499Item8SearchShowsMatchesFromTop: Story = {
 	play: async ({ canvasElement }) => {
 		await reset();
 		const dialog = await openDialog(canvasElement);
-		const list = within(dialog).getByRole("list");
+		const list = within(dialog).getByRole("listbox");
 		const input = within(dialog).getByRole("textbox");
 		const scrollDown = async () => {
 			list.scrollTop = 2000;
@@ -737,7 +741,7 @@ export const Issue3499Item8SearchShowsMatchesFromTop: Story = {
 		// precondition: the matches are still far more than the list shows
 		await expect(
 			Number(
-				list.querySelector('[role="listitem"]')?.getAttribute("aria-setsize"),
+				list.querySelector('[role="option"]')?.getAttribute("aria-setsize"),
 			),
 		).toBeGreaterThan(50);
 		await waitFor(() => expect(list.scrollTop).toBe(0));
@@ -747,6 +751,133 @@ export const Issue3499Item8SearchShowsMatchesFromTop: Story = {
 		await waitFor(() => expect(list.scrollTop).toBe(0));
 		await expectInView(list, rowButton(dialog, 1));
 		await expect(input).toHaveFocus();
+	},
+};
+
+/** the 1-based positions of the list's tab stops, `"list"` for the list itself */
+const tabStops = (list: HTMLElement) =>
+	[list, ...list.querySelectorAll<HTMLElement>('[role="option"]')]
+		.filter((element) => element.getAttribute("tabindex") === "0")
+		.map((element) =>
+			element === list ? "list" : element.getAttribute("aria-posinset"),
+		);
+
+export const Issue3499Item10ListIsOneTabStop: Story = {
+	args: { supportedLocales: SCF },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3499-ITEM-10: the list is a listbox named "Select your country and language", and one tab stop: Tab from the search box goes to the active row (when the dialog opens, the current locale\'s row), the next Tab leaves the list, and Shift+Tab comes back to the same row.',
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ canvasElement }) => {
+		await reset();
+		const dialog = await openDialog(canvasElement);
+		const list = within(dialog).getByRole("listbox", {
+			name: "Select your country and language",
+		});
+		await expect(tabStops(list)).toEqual(["1"]);
+		await userEvent.tab(); // close button
+		await userEvent.tab(); // search box
+		await userEvent.tab(); // the active row
+		const row = rowButton(dialog, 1);
+		await expect(row).toHaveFocus();
+		await expect(row).toHaveAttribute("aria-selected", "true");
+		const close = within(dialog).getByRole("button", { name: "Close" });
+		await userEvent.tab();
+		await expect(close).toHaveFocus();
+		await userEvent.tab({ shift: true });
+		await expect(row).toHaveFocus();
+	},
+};
+
+export const Issue3499Item10KeysMoveBetweenRows: Story = {
+	args: { supportedLocales: SCF },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-10: ArrowDown and ArrowUp move focus to the next and previous row, PageDown and PageUp by the rows in view, End and Home to the last and first of the 220 rows. The list scrolls the focused row into view, and that row is the list's tab stop.",
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ canvasElement }) => {
+		await reset();
+		const dialog = await openDialog(canvasElement);
+		const list = within(dialog).getByRole("listbox");
+		await userEvent.tab(); // close button
+		await userEvent.tab(); // search box
+		await userEvent.tab(); // first row
+		/** presses the key and waits for the row at that position to have focus */
+		const step = async (key: string, position: number) => {
+			await userEvent.keyboard(`{${key}}`);
+			await waitFor(() => expect(rowButton(dialog, position)).toHaveFocus());
+			await frames(2);
+			const row = rowButton(dialog, position);
+			await expect(row).toHaveClass("Mui-focusVisible");
+			await waitFor(() => expectInView(list, row));
+			await expect(tabStops(list), key).toEqual([String(position)]);
+		};
+		await step("ArrowDown", 2);
+		await step("End", 220);
+		await step("ArrowUp", 219);
+		await step("Home", 1);
+		await step("PageDown", 1 + pageOf(list));
+		await step("PageUp", 1);
+	},
+};
+
+/** the rows in view of the list less one: the rows a page key moves */
+const pageOf = (list: HTMLElement) => {
+	const view = list.getBoundingClientRect();
+	const inView = Array.from(
+		list.querySelectorAll<HTMLElement>('[role="option"]'),
+	).filter((row) => {
+		const box = row.getBoundingClientRect();
+		return box.bottom > view.top && box.top < view.bottom;
+	});
+	return inView.length - 1;
+};
+
+export const Issue3499Item10TabReturnsToScrolledAwayRow: Story = {
+	args: { supportedLocales: SCF },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-10: ArrowDown to the third row, Shift+Tab to the search box, then the list is scrolled far down (the wheel), so the third row is no longer rendered. The list itself is the tab stop meanwhile: Tab goes back to the third row and scrolls it into view.",
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ canvasElement }) => {
+		await reset();
+		const dialog = await openDialog(canvasElement);
+		const list = within(dialog).getByRole("listbox");
+		await userEvent.tab(); // close button
+		await userEvent.tab(); // search box
+		await userEvent.tab(); // first row
+		await userEvent.keyboard("{ArrowDown}{ArrowDown}");
+		const third = rowButton(dialog, 3);
+		await expect(third).toHaveFocus();
+		const country = third.textContent ?? "";
+		await userEvent.tab({ shift: true });
+		await expect(within(dialog).getByRole("textbox")).toHaveFocus();
+		list.scrollTop = 4000;
+		await waitFor(() => expect(third.isConnected).toBe(false));
+		await waitFor(() => expect(tabStops(list)).toEqual(["list"]));
+		await userEvent.tab();
+		await waitFor(() => expect(rowButton(dialog, 3)).toHaveFocus());
+		await expect(rowButton(dialog, 3)).toHaveTextContent(country);
+		await waitFor(() => expectInView(list, rowButton(dialog, 3)));
+		await expect(tabStops(list)).toEqual(["3"]);
 	},
 };
 
@@ -768,11 +899,11 @@ export const Issue3466Item8FlagsOutlined: Story = {
 		// the flags load with the first one shown
 		await waitFor(() =>
 			expect(
-				dialog.querySelectorAll('[role="listitem"] img').length,
+				dialog.querySelectorAll('[role="option"] img').length,
 			).toBeGreaterThan(3),
 		);
 		const imgs = Array.from(
-			dialog.querySelectorAll<HTMLImageElement>('[role="listitem"] img'),
+			dialog.querySelectorAll<HTMLImageElement>('[role="option"] img'),
 		);
 		await waitFor(
 			() =>

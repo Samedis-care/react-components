@@ -191,7 +191,7 @@ const hasTexts = (locale: string) => {
  * (or else whose language) is in the browser's `navigator.languages` come first, in
  * the order of that list, then the rest by number of speakers. The row of the
  * current locale stays in its place and is marked: MUI's selected tint, a check at
- * its end and `aria-current="true"` (a locale without a region, e.g. `"de"`, marks
+ * its end and `aria-selected="true"` (a locale without a region, e.g. `"de"`, marks
  * the row of its most likely region, `de-DE`). The dialog opens with the list
  * scrolled to that row, in the list's middle, as MUI's Select opens its menu at the
  * selected option; a row in view at the top leaves the list as it is. Keyboard focus
@@ -199,18 +199,26 @@ const hasTexts = (locale: string) => {
  * names and locale code, ignoring case; every change of the query shows the matches
  * from the top of the list.
  *
+ * Keyboard: the list is a listbox named by the dialog's title, its rows are options,
+ * and it is one tab stop, as in MUI's Select menu. Tab reaches its active row: the
+ * row focused last; when the dialog opens, the current locale's row (else the first);
+ * after a search, the first match. ArrowDown and ArrowUp move focus to the next and
+ * previous row, PageDown and PageUp by the rows in view, End and Home to the last and
+ * first row (no wrapping); the list scrolls the focused row into view. Enter or Space
+ * picks the focused row. The next Tab leaves the list.
+ *
  * The list renders only the rows in view. When the row with keyboard focus is
- * scrolled away (the wheel, a swipe, or the arrow, page, Home and End keys, which
- * scroll the list), the list itself takes focus and shows a focus ring: the keys
- * keep scrolling it, Tab goes on to the rows and Shift+Tab back to the search box.
- * Scrolled back to that row, the row gets focus back, unless focus moved elsewhere
- * meanwhile.
+ * scrolled away (the wheel, a swipe or the scrollbar), the list itself takes focus
+ * and shows a focus ring, and is the tab stop meanwhile: the keys move on from that
+ * row, Tab leaves the list and Shift+Tab goes back to the search box, and Tab back
+ * into the list brings that row into view and focuses it. Scrolled back to that row,
+ * the row gets focus back, unless focus moved elsewhere meanwhile.
  *
  * Picking a row calls `ComponentsCareI18n.changeLanguage("<lang>-<COUNTRY>")`
  * (regional: the country also decides date and number formats). While the language
  * loads, the rows are disabled (the picked row keeps keyboard focus and its tab
- * stop, marked `aria-disabled`), and the close button, Escape and a backdrop click
- * are ignored. Once it is applied, the dialog calls `onChange` with the locale and
+ * stop, marked `aria-disabled`, and the arrow, page, Home and End keys stay on it),
+ * and the close button, Escape and a backdrop click are ignored. Once it is applied, the dialog calls `onChange` with the locale and
  * closes. A language whose texts fail to load is not applied: an error dialog shows,
  * the previous language stays, and the dialog stays open. The i18next language
  * detector stores the choice in `localStorage.i18nextLng`.

@@ -104,20 +104,19 @@ const flush = async () => {
 /** all mounted dialogs, including the ones a dialog on top hides */
 const dialogEls = () =>
 	Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]'));
+/** the rendered rows: the options of the list */
 const rows = () =>
-	Array.from(document.querySelectorAll<HTMLElement>('[role="listitem"]'));
+	Array.from(document.querySelectorAll<HTMLElement>('[role="option"]'));
 /** the rows appear after the lazy content chunk and the locale-switcher namespace */
 const waitRows = () =>
 	waitFor(() => {
 		if (!rows().length) throw new Error("no rows rendered");
 		return rows();
 	});
-/** the row control (role=button) whose texts include the given text */
+/** the row (role=option) whose texts include the given text */
 const rowBtn = (text: string) =>
 	waitFor(() => {
-		const button = rows()
-			.map((row) => row.querySelector<HTMLElement>('[role="button"]'))
-			.find((el) => el?.textContent?.includes(text));
+		const button = rows().find((el) => el.textContent?.includes(text));
 		if (!button) throw new Error("no row " + text);
 		return button;
 	});
@@ -640,7 +639,7 @@ describe("LocaleSelectorDialog", () => {
 		const currentRows = () =>
 			Array.from(
 				document.querySelectorAll<HTMLElement>(
-					'[role="listitem"] [aria-current="true"]',
+					'[role="option"][aria-selected="true"]',
 				),
 			).map((el) => el.querySelector("span[title]")?.textContent);
 
@@ -655,7 +654,7 @@ describe("LocaleSelectorDialog", () => {
 			expect(checks(us)[0]).toHaveAttribute("aria-hidden", "true");
 			expect(checks(uk)).toHaveLength(0);
 			// the check adds nothing to the name, the row's texts; the state is
-			// aria-current
+			// aria-selected
 			expect(us).toHaveAccessibleName(/^United States\s*English$/);
 		});
 
@@ -914,6 +913,168 @@ describe("LocaleSelectorDialog", () => {
 			await search("");
 			expect(status.textContent).toBe(`Results: ${all}`);
 			expect(searchStatus()).toBe(status);
+		});
+
+		it("[ISSUE-3499-ITEM-10] the list is a single tab stop, and ArrowDown moves to the next row", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			await waitRows();
+			const list = screen.getByRole("listbox");
+			expect(
+				list.querySelectorAll('[tabindex="0"]').length,
+			).toBeLessThanOrEqual(1);
+			const first = rows()[0];
+			act(() => first.focus());
+			fireEvent.keyDown(document.activeElement!, { key: "ArrowDown" });
+			await flush();
+			// the active row: the focused one, or the one aria-activedescendant names
+			const focused = document.activeElement!;
+			const activeId = focused.getAttribute("aria-activedescendant");
+			const active = activeId ? document.getElementById(activeId) : focused;
+			expect(
+				active?.closest("[aria-posinset]")?.getAttribute("aria-posinset"),
+			).toBe("2");
+		});
+	});
+
+	describe("keyboard", () => {
+		/** the 1-based positions of the rendered rows that are tab stops */
+		const tabStops = () =>
+			rows()
+				.filter((row) => row.getAttribute("tabindex") === "0")
+				.map((row) => row.getAttribute("aria-posinset"));
+		/** the 1-based position of the focused row */
+		const focusedPosition = () =>
+			document.activeElement?.getAttribute("aria-posinset");
+		/** presses a key on the focused element; false when it was prevented */
+		const press = (key: string) =>
+			fireEvent.keyDown(document.activeElement!, { key });
+
+		it("[ISSUE-3499-ITEM-10] the list is a listbox named by the dialog's title, and each row is an option with its position", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			await waitRows();
+			const list = screen.getByRole("listbox");
+			expect(list).toHaveAccessibleName("Select your country and language");
+			expect(within(list).getAllByRole("option")).toEqual(rows());
+			expect(rows()[0]).toHaveAttribute("aria-posinset", "1");
+			expect(rows()[0]).toHaveAttribute("aria-setsize", "11");
+			expect(screen.queryByRole("list")).toBeNull();
+			expect(screen.queryByRole("listitem")).toBeNull();
+		});
+
+		it("[ISSUE-3499-ITEM-10] the current locale's row is selected and the tab stop when the dialog opens", async () => {
+			await act(async () => {
+				await ccI18n.changeLanguage("en-GB");
+			});
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={["en-US", "en-GB"]} />);
+			const us = await rowBtn("United States");
+			const uk = await rowBtn("United Kingdom");
+			// precondition: not the first row, which is the tab stop otherwise
+			expect(uk).toHaveAttribute("aria-posinset", "2");
+			expect(uk).toHaveAttribute("aria-selected", "true");
+			expect(us).toHaveAttribute("aria-selected", "false");
+			expect(uk).not.toHaveAttribute("aria-current");
+			expect(tabStops()).toEqual(["2"]);
+		});
+
+		it("[ISSUE-3499-ITEM-10] the first row is the tab stop when the current locale has no row", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			await waitRows();
+			expect(tabStops()).toEqual(["1"]);
+		});
+
+		it("[ISSUE-3499-ITEM-10] ArrowUp, ArrowDown, Home, End, PageUp and PageDown move focus between the rows, without wrapping, and the focused row becomes the tab stop", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			await waitRows();
+			act(() => rows()[0].focus());
+			// 600px show rows 1-9 (8.6 of them): a page is 8 rows
+			const steps: [string, string][] = [
+				["ArrowUp", "1"],
+				["ArrowDown", "2"],
+				["End", "11"],
+				["ArrowDown", "11"],
+				["PageUp", "3"],
+				["ArrowUp", "2"],
+				["Home", "1"],
+				["PageDown", "9"],
+				["PageDown", "11"],
+				["PageUp", "3"],
+				["PageUp", "1"],
+			];
+			const seen: string[] = [];
+			for (const [key] of steps) {
+				// the list handles the key, the browser doesn't scroll
+				expect(press(key), key).toBe(false);
+				await flush();
+				seen.push(`${key} ${focusedPosition()} ${tabStops().join()}`);
+			}
+			expect(seen).toEqual(
+				steps.map(([key, position]) => `${key} ${position} ${position}`),
+			);
+		});
+
+		it("[ISSUE-3499-ITEM-10] the keys with a modifier and other keys are left alone", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			await waitRows();
+			act(() => rows()[0].focus());
+			for (const init of [
+				{ key: "ArrowDown", shiftKey: true },
+				{ key: "End", ctrlKey: true },
+				{ key: "ArrowDown", altKey: true },
+				{ key: "a" },
+			])
+				expect(fireEvent.keyDown(document.activeElement!, init)).toBe(true);
+			await flush();
+			expect(focusedPosition()).toBe("1");
+		});
+
+		it("[ISSUE-3499-ITEM-10] a row that gets focus otherwise, e.g. by a click, becomes the tab stop", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			const austria = await rowBtn("Austria");
+			act(() => austria.focus());
+			await flush();
+			expect(tabStops()).toEqual([austria.getAttribute("aria-posinset")]);
+			press("ArrowDown");
+			await flush();
+			expect(focusedPosition()).toBe(
+				String(Number(austria.getAttribute("aria-posinset")) + 1),
+			);
+		});
+
+		it("[ISSUE-3499-ITEM-10] after a search, the first match is the tab stop", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			await waitRows();
+			const last = rows()[10];
+			act(() => last.focus());
+			await flush();
+			expect(tabStops()).toEqual(["11"]);
+			const country = last.textContent;
+			// every row's locale, de-…, matches: the focused row keeps its place
+			await search("de");
+			expect(rows()[10]).toHaveTextContent(country);
+			expect(tabStops()).toEqual(["1"]);
+		});
+
+		it("[ISSUE-3499-ITEM-10] while the picked language loads, the keys keep focus on the picked row", async () => {
+			holdSwitch();
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			const austria = await rowBtn("Austria");
+			act(() => austria.focus());
+			fireEvent.keyDown(austria, { key: "Enter" });
+			await flush();
+			for (const key of ["ArrowDown", "ArrowUp", "End", "Home", "PageDown"])
+				expect(press(key), key).toBe(false);
+			await flush();
+			expect(austria).toHaveFocus();
+			expect(tabStops()).toEqual([austria.getAttribute("aria-posinset")]);
 		});
 	});
 });

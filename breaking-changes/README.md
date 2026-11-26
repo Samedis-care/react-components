@@ -22,6 +22,7 @@ One file per change, so this never grows into a single unreadable log.
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
 | 2026-11-26 | [A RoutedMenu group only shows and hides its entries; its route is ignored](2026-11-26-routed-menu-group-ignores-route.md) | behavior |
 | 2026-11-26 | [InlineSwitch's colors reach 3:1 and follow the theme's color scheme](2026-11-26-inline-switch-colors-reach-3-to-1.md) | behavior |
+| 2026-11-26 | [The locale selector's list is a listbox: one tab stop, and the arrow, page, Home and End keys move between its rows](2026-11-26-locale-selector-list-is-a-listbox.md) | behavior, theme, type |
 | 2026-11-26 | [An empty navigation target keeps the current path](2026-11-26-empty-navigation-target-keeps-current-path.md) | behavior |
 | 2026-11-26 | [A data grid's stored column filters are its whole column filters; defaultFilter only applies when nothing is stored](2026-11-26-data-grid-stored-filters-are-whole.md) | behavior, type |
 | 2026-11-26 | [A selector's switch is described by the selector's label](2026-11-26-selector-switch-described-by-label.md) | behavior |

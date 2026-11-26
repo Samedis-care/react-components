@@ -339,7 +339,7 @@ describe("CountryFlags", () => {
 			const { container } = renderEntry(germany);
 			expect(container.querySelector("img")).toHaveAttribute("alt", "");
 			expect(within(container).queryByRole("img")).toBeNull();
-			expect(within(container).getByRole("button")).not.toHaveAccessibleName(
+			expect(within(container).getByRole("option")).not.toHaveAccessibleName(
 				/^Germany\s*Germany/,
 			);
 		});

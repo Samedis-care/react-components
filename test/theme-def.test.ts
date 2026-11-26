@@ -1255,16 +1255,17 @@ describe("theme-def", () => {
 				),
 			),
 		);
-		const outline = (name: RegExp) =>
-			getComputedStyle(screen.getByRole("button", { name })).outlineColor;
+		// the menu items are buttons, the locale rows options
+		const outline = (name: RegExp, role: "button" | "option" = "button") =>
+			getComputedStyle(screen.getByRole(role, { name })).outlineColor;
 		expect(outline(/Material devices/)).toBe("rgb(1, 2, 3)");
 		expect(outline(/Material home/)).not.toBe("rgb(1, 2, 3)");
 		expect(outline(/Light devices/)).toBe("rgb(4, 5, 6)");
 		expect(outline(/Light home/)).not.toBe("rgb(4, 5, 6)");
 		expect(outline(/Dark devices/)).toBe("rgb(7, 8, 9)");
 		expect(outline(/Dark home/)).not.toBe("rgb(7, 8, 9)");
-		expect(outline(/DE/)).not.toBe("rgb(10, 11, 12)");
-		expect(outline(/AT/)).toBe("rgb(10, 11, 12)");
+		expect(outline(/DE/, "option")).not.toBe("rgb(10, 11, 12)");
+		expect(outline(/AT/, "option")).toBe("rgb(10, 11, 12)");
 	});
 	it("[ISSUE-3462-ITEM-18] applies the variants of WeekView, matched against its className", async () => {
 		const emptyWeek = () => Array.from({ length: 7 }, () => []);

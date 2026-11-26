@@ -29,6 +29,11 @@ export interface LocaleSelectorRowData {
 	 * disabled, it keeps keyboard focus and its tab stop
 	 */
 	activated: string | null;
+	/**
+	 * The locale of the list's active row, its one tab stop, or `null` while the
+	 * list shows no rows
+	 */
+	activeKey: string | null;
 }
 
 /**
@@ -37,6 +42,10 @@ export interface LocaleSelectorRowData {
  * rows by the component's identity, so a component created during render would
  * replace every row with a new node, and focus with it, each time it changes.
  * react-window memoizes it itself (shallowly, by its props).
+ *
+ * The row's element only places the row; the option inside it (the entry's
+ * button) carries the row's role, position and number of rows, so that the
+ * listbox owns its options directly.
  */
 const LocaleSelectorRow = (props: RowComponentProps<LocaleSelectorRowData>) => {
 	const {
@@ -48,11 +57,12 @@ const LocaleSelectorRow = (props: RowComponentProps<LocaleSelectorRowData>) => {
 		handleSwitch,
 		disabled,
 		activated,
+		activeKey,
 	} = props;
 	const locale = entries[index];
 
 	return (
-		<div style={style} {...ariaAttributes}>
+		<div style={style}>
 			<Suspense fallback={<Loader />}>
 				<LocaleSelectorEntry
 					locale={locale}
@@ -60,6 +70,9 @@ const LocaleSelectorRow = (props: RowComponentProps<LocaleSelectorRowData>) => {
 					handleSwitch={handleSwitch}
 					disabled={disabled}
 					focusableWhenDisabled={locale.locale === activated}
+					active={locale.locale === activeKey}
+					position={ariaAttributes["aria-posinset"]}
+					count={ariaAttributes["aria-setsize"]}
 					key={locale.locale}
 				/>
 			</Suspense>
