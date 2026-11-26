@@ -806,8 +806,8 @@ Independently of what your error component displays, Components-Care forwards un
 error tracker. If `@sentry/react` is installed it is used automatically, otherwise nothing happens.
 By default a `ValidationError` and a `NetworkError` are **not** reported (neither is actionable —
 one is a normal part of the form flow, the other is usually the user's connection), while a
-`BackendError` and code errors (`Error`, `TypeError`, ...) are. A `PartialApplyError` is judged by
-the errors it wraps (see below).
+`BackendError` and code errors (`Error`, `TypeError`, ...) are. A `PartialApplyError` and a
+`PartialDeleteError` are judged by the errors they wrap (see below).
 
 Both the policy and the destination are configurable from your application's startup code:
 
@@ -840,6 +840,7 @@ boundaries. `CcErrorNames` holds the names of every error class the library rais
 | `CcErrorNames.RequestBatchingError` | `RequestBatchingError` | yes                       |
 | `CcErrorNames.ImageLoadError`       | `CcImageLoadError`     | yes                       |
 | `CcErrorNames.PartialApplyError`    | `CcPartialApplyError`  | if one of its failures is |
+| `CcErrorNames.PartialDeleteError`   | `CcPartialDeleteError` | if its `cause` is         |
 
 An `ImageLoadError` is raised when the browser can't decode an image the user selected — an
 unsupported format (HEIC, TIFF) or a corrupt file. The user is always shown a message for it, so if
@@ -853,3 +854,9 @@ not if none would: when all of them are `NetworkError`s because the connection d
 queue was sent, or names in the call site's `ignoreNames`. A failure whose error is no `Error`
 counts as reported. A custom `shouldReport` gets the `PartialApplyError` itself; read its
 `failures` to filter by the errors inside, or hand it to `defaultShouldReportError`.
+
+A `PartialDeleteError` is what a connector's `deleteMultiple` rejects with when it deleted some
+of the records and not others: `failedIds` names the ones still there, and `cause` is the error
+their deletes failed with. The default policy judges it by that `cause` the same way: reported if
+the cause would be reported on its own, not if it is a `NetworkError` or a name in the call site's
+`ignoreNames`. One without a cause, or whose cause is no `Error`, is reported.

@@ -57,6 +57,11 @@ export const CcErrorNames = {
 	 */
 	PartialApplyError: "CcPartialApplyError",
 	/**
+	 * @see PartialDeleteError
+	 * @remarks the name is prefixed, to avoid collisions with app error classes
+	 */
+	PartialDeleteError: "CcPartialDeleteError",
+	/**
 	 * @see RequestBatchingError
 	 */
 	RequestBatchingError: "RequestBatchingError",
@@ -122,13 +127,16 @@ export const DefaultUnreportedErrorNames: string[] = [
 ];
 
 /**
- * The errors of the failed writes a PartialApplyError lists, read by its name and its
- * `failures`, so one from another copy of the library counts too
+ * The errors of the failed writes an error of the library wraps, read by its name, so one
+ * from another copy of the library counts too: a PartialApplyError's `failures[].error`,
+ * a PartialDeleteError's `cause`
  * @param error The error to read
- * @returns The errors, one per failure; null if it is no PartialApplyError or lists no
+ * @returns The errors, one per failure (a PartialDeleteError's one cause, also an absent
+ *          one); null if it is neither of them, or a PartialApplyError that lists no
  *          failures
  */
 const failedWriteErrorsOf = (error: Error): unknown[] | null => {
+	if (error.name === CcErrorNames.PartialDeleteError) return [error.cause];
 	if (error.name !== CcErrorNames.PartialApplyError) return null;
 	const failures = (error as Error & Partial<Record<"failures", unknown>>)
 		.failures;
@@ -146,7 +154,10 @@ const failedWriteErrorsOf = (error: Error): unknown[] | null => {
  *          its failed writes: it is reported if at least one of them would be reported on
  *          its own, and not if none would, e.g. when all are NetworkErrors because the
  *          connection dropped while a Form's save sent a lazy control's queue. A failure
- *          whose error is no Error counts as reported.
+ *          whose error is no Error counts as reported. A PartialDeleteError
+ *          (CcErrorNames.PartialDeleteError) is judged the same way by its `cause`, the
+ *          error its deletes failed with; one without a cause, or whose cause is no
+ *          Error, is reported.
  * @see DefaultUnreportedErrorNames
  */
 export const defaultShouldReportError: ShouldReportErrorCallback = (

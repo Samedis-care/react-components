@@ -10,6 +10,7 @@ import {
 import PartialApplyError, {
 	PartialApplyFailure,
 } from "../../src/backend-components/Form/PartialApplyError";
+import PartialDeleteError from "../../src/backend-integration/Connector/PartialDeleteError";
 
 const namedError = (name: string): Error => {
 	const e = new Error(`test ${name}`);
@@ -157,6 +158,75 @@ describe("defaultShouldReportError: a PartialApplyError", () => {
 		).toBe(true);
 		expect(
 			defaultShouldReportError(partialApplyError(undefined), {
+				source: "test",
+			}),
+		).toBe(true);
+	});
+});
+
+describe("defaultShouldReportError: a PartialDeleteError", () => {
+	/** A PartialDeleteError of a deleteMultiple whose deletes failed with `cause` */
+	const partialDeleteError = (cause?: unknown) =>
+		new PartialDeleteError("test", ["2"], cause);
+
+	it("[ISSUE-3505-ITEM-28] CcErrorNames.PartialDeleteError is the name of a PartialDeleteError", () => {
+		expect(CcErrorNames.PartialDeleteError).toBe(
+			partialDeleteError(new Error("boom")).name,
+		);
+	});
+
+	it("[ISSUE-3505-ITEM-28] its name has the library's Cc prefix", () => {
+		expect(partialDeleteError(new Error("boom")).name).toBe(
+			"CcPartialDeleteError",
+		);
+	});
+
+	it("[ISSUE-3505-ITEM-28] doesn't report one whose deletes failed with a NetworkError", () => {
+		expect(
+			defaultShouldReportError(
+				partialDeleteError(namedError(CcErrorNames.NetworkError)),
+				{ source: "test" },
+			),
+		).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-28] reports one whose deletes failed with an error reported on its own", () => {
+		expect(
+			defaultShouldReportError(
+				partialDeleteError(namedError(CcErrorNames.BackendError)),
+				{ source: "test" },
+			),
+		).toBe(true);
+		expect(
+			defaultShouldReportError(partialDeleteError(new TypeError("boom")), {
+				source: "test",
+			}),
+		).toBe(true);
+	});
+
+	it("[ISSUE-3505-ITEM-28] judges its cause by context.ignoreNames too", () => {
+		expect(
+			defaultShouldReportError(
+				partialDeleteError(namedError(CcErrorNames.BackendError)),
+				{ source: "test", ignoreNames: [CcErrorNames.BackendError] },
+			),
+		).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-28] judges one from another copy of the library by its name and cause", () => {
+		const copy = new Error("test", {
+			cause: namedError(CcErrorNames.NetworkError),
+		});
+		copy.name = CcErrorNames.PartialDeleteError;
+		expect(defaultShouldReportError(copy, { source: "test" })).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-28] reports one without a cause, or whose cause is no Error", () => {
+		expect(
+			defaultShouldReportError(partialDeleteError(), { source: "test" }),
+		).toBe(true);
+		expect(
+			defaultShouldReportError(partialDeleteError("offline"), {
 				source: "test",
 			}),
 		).toBe(true);
