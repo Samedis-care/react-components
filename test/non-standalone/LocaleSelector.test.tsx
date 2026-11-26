@@ -816,6 +816,69 @@ describe("LocaleSelectorDialog", () => {
 			await release();
 			expect(dialogEls().map((el) => el.textContent)).toEqual(["Below"]);
 		});
+
+		it("[ISSUE-3499-ITEM-7] the activated row keeps its node and keyboard focus while the language loads", async () => {
+			holdSwitch();
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			const target = await rowBtn("Austria");
+			act(() => target.focus());
+			expect(target).toHaveFocus();
+			fireEvent.keyDown(target, { key: "Enter" });
+			await flush();
+			expect(target.isConnected).toBe(true);
+			expect(target).toHaveFocus();
+		});
+
+		it("[ISSUE-3499-ITEM-7] while the language loads, the activated row stays a tab stop marked aria-disabled, and the other rows are disabled", async () => {
+			const { spy } = holdSwitch();
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			const target = await rowBtn("Austria");
+			act(() => target.focus());
+			fireEvent.keyDown(target, { key: "Enter" });
+			await flush();
+			expect(target).toHaveAttribute("aria-disabled", "true");
+			expect(target).toHaveAttribute("tabindex", "0");
+			const other = await rowBtn("Germany");
+			expect(other).toHaveAttribute("aria-disabled", "true");
+			expect(other).toHaveAttribute("tabindex", "-1");
+			// it says it is disabled, and does nothing
+			fireEvent.keyDown(target, { key: "Enter" });
+			fireEvent.click(target);
+			expect(spy.mock.calls).toEqual([["de-AT"]]);
+		});
+
+		it("[ISSUE-3499-ITEM-7] a language that fails to load: the rows keep their nodes, and focus goes back to the activated row once the error is acknowledged", async () => {
+			vi.spyOn(ccI18n, "changeLanguage").mockRejectedValue(new Error("boom"));
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			const target = await rowBtn("Austria");
+			const other = await rowBtn("Germany");
+			act(() => target.focus());
+			fireEvent.keyDown(target, { key: "Enter" });
+			await waitFor(() => expect(dialogEls()).toHaveLength(2));
+			fireEvent.click(
+				within(dialogEls()[1]).getByRole("button", { name: "OK" }),
+			);
+			await waitFor(() => expect(dialogEls()).toHaveLength(1));
+			await flush();
+			expect(target.isConnected).toBe(true);
+			expect(other.isConnected).toBe(true);
+			expect(target).toHaveFocus();
+			expect(target).not.toHaveAttribute("aria-disabled");
+		});
+
+		it("[ISSUE-3499-ITEM-7] the rows keep their nodes when the language changes while the dialog is open", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			const before = await rowBtn("Austria");
+			await act(async () => {
+				await ccI18n.changeLanguage("de-DE");
+			});
+			await flush();
+			expect(await rowBtn("Österreich")).toBe(before);
+		});
 	});
 
 	describe("accessibility", () => {

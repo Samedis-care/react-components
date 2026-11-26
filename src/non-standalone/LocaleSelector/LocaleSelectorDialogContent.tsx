@@ -1,5 +1,4 @@
 import React, {
-	Suspense,
 	useCallback,
 	useLayoutEffect,
 	useMemo,
@@ -13,15 +12,10 @@ import {
 	styled,
 	useThemeProps,
 } from "@mui/material";
-import {
-	List,
-	RowComponentProps,
-	useDynamicRowHeight,
-	useListRef,
-} from "react-window";
+import { List, useDynamicRowHeight, useListRef } from "react-window";
 import supportedLanguages from "../../assets/data/supported-languages.json";
 import countryLanguages from "../../assets/data/country-languages.json";
-import LocaleSelectorEntry from "./LocaleSelectorEntry";
+import LocaleSelectorRow, { LocaleSelectorRowData } from "./LocaleSelectorRow";
 import { Search as SearchIcon } from "@mui/icons-material";
 import useCCTranslations, {
 	useCCLocaleSwitcherTranslations,
@@ -31,7 +25,6 @@ import useCurrentLocale, {
 } from "../../utils/useCurrentLocale";
 import sortByLocaleRelevance from "../../utils/sortByLocaleRelevance";
 import TextFieldWithHelp from "../../standalone/UIKit/TextFieldWithHelp";
-import Loader from "../../standalone/Loader";
 import { LocaleSelectorDialogCommonProps } from "./LocaleSelectorDialog";
 import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 import useListFocusKeeper, {
@@ -48,7 +41,8 @@ export interface LocaleSelectorDialogContentProps extends LocaleSelectorDialogCo
 	handleSwitch: (locale: string) => void;
 	/**
 	 * Whether a picked language loads: the rows are disabled, and a loader covers
-	 * the list
+	 * the list. The row picked last keeps keyboard focus and its tab stop
+	 * (`aria-disabled`)
 	 */
 	switching: boolean;
 	className?: string;
@@ -229,25 +223,27 @@ const LocaleSelectorDialogContent = (
 		[data, lowercaseFilter],
 	);
 
-	const LocaleEntryRenderer = useCallback(
-		(entryProps: RowComponentProps<{ filteredData: typeof filteredData }>) => {
-			const locale = entryProps.filteredData[entryProps.index];
-
-			return (
-				<div style={entryProps.style} {...entryProps.ariaAttributes}>
-					<Suspense fallback={<Loader />}>
-						<LocaleSelectorEntry
-							locale={locale}
-							currentLanguage={currentLang}
-							handleSwitch={handleSwitch}
-							disabled={switching}
-							key={locale.locale}
-						/>
-					</Suspense>
-				</div>
-			);
+	// the row activated last: while the language it picked loads, it keeps
+	// keyboard focus and its tab stop, the other rows are disabled
+	const [activated, setActivated] = useState<string | null>(null);
+	const handleRowSwitch = useCallback(
+		(locale: string) => {
+			setActivated(locale);
+			handleSwitch(locale);
 		},
-		[currentLang, handleSwitch, switching],
+		[handleSwitch],
+	);
+	// the rows get all they show through rowProps: react-window re-renders them
+	// when one changes, and keeps their nodes
+	const rowProps = useMemo<LocaleSelectorRowData>(
+		() => ({
+			entries: filteredData,
+			currentLanguage: currentLang,
+			handleSwitch: handleRowSwitch,
+			disabled: switching,
+			activated,
+		}),
+		[filteredData, currentLang, handleRowSwitch, switching, activated],
 	);
 
 	// names wrap, so each row is as tall as its text: react-window measures the
@@ -340,8 +336,8 @@ const LocaleSelectorDialogContent = (
 							overscanCount={2}
 							rowCount={filteredData.length}
 							rowHeight={rowHeight}
-							rowComponent={LocaleEntryRenderer}
-							rowProps={{ filteredData }}
+							rowComponent={LocaleSelectorRow}
+							rowProps={rowProps}
 						/>
 					</ListFocusKeeperContext.Provider>
 				)}

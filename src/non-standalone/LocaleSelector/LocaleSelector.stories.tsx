@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, fn, userEvent, waitFor, within } from "storybook/test";
+import { expect, fn, spyOn, userEvent, waitFor, within } from "storybook/test";
 import {
 	Button,
 	createTheme,
@@ -481,6 +481,60 @@ export const Issue3499Item6FocusMovedOnStaysWhenScrolledBack: Story = {
 		await waitFor(() => expect(rowButton(dialog, 1)).toBeVisible());
 		await frames(2);
 		await expect(input).toHaveFocus();
+	},
+};
+
+export const Issue3499Item7PickedRowKeepsFocusWhileLoading: Story = {
+	args: { supportedLocales: ["fr", "ru", "de", "en", "nl"] },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-7: Tab to the second row and press Enter while the language loads (held here until the play function ends). The row keeps its node, keyboard focus and its focus ring, and stays the list's tab stop, marked `aria-disabled`; the other rows are disabled.",
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ canvasElement }) => {
+		await reset();
+		const dialog = await openDialog(canvasElement);
+		await userEvent.tab(); // close button
+		await userEvent.tab(); // search box
+		await userEvent.tab(); // first row
+		await userEvent.tab(); // second row
+		const row = rowButton(dialog, 2);
+		await expect(row).toHaveFocus();
+		let release = () => {};
+		const load = spyOn(ccI18n, "changeLanguage").mockImplementation(
+			(() =>
+				new Promise<void>((resolve) => {
+					release = resolve;
+				})) as unknown as typeof ccI18n.changeLanguage,
+		);
+		try {
+			await userEvent.keyboard("{Enter}");
+			await waitFor(() =>
+				expect(rowButton(dialog, 1)).toHaveClass("Mui-disabled"),
+			);
+			await frames(2);
+			await expect(rowButton(dialog, 2)).toBe(row);
+			await expect(row).toHaveFocus();
+			await expect(row).toHaveClass("Mui-focusVisible");
+			await expect(row).toHaveAttribute("aria-disabled", "true");
+			// the other rows are no tab stops: Shift+Tab goes to the search box, and
+			// Tab back to the picked row
+			await userEvent.tab({ shift: true });
+			await expect(within(dialog).getByRole("textbox")).toHaveFocus();
+			await userEvent.tab();
+			await expect(row).toHaveFocus();
+		} finally {
+			release();
+			load.mockRestore();
+		}
+		// the held pick finishes, and the dialog closes
+		await waitFor(() => expect(page().queryByRole("dialog")).toBeNull());
+		await reset();
 	},
 };
 

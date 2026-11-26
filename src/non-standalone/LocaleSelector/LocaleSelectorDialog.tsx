@@ -208,7 +208,8 @@ const hasTexts = (locale: string) => {
  *
  * Picking a row calls `ComponentsCareI18n.changeLanguage("<lang>-<COUNTRY>")`
  * (regional: the country also decides date and number formats). While the language
- * loads, the rows are disabled, and the close button, Escape and a backdrop click
+ * loads, the rows are disabled (the picked row keeps keyboard focus and its tab
+ * stop, marked `aria-disabled`), and the close button, Escape and a backdrop click
  * are ignored. Once it is applied, the dialog calls `onChange` with the locale and
  * closes. A language whose texts fail to load is not applied: an error dialog shows,
  * the previous language stays, and the dialog stays open. The i18next language

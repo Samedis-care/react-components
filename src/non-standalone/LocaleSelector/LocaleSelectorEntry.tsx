@@ -19,6 +19,14 @@ export interface LocaleSelectorEntryProps extends Omit<
 	currentLanguage: string;
 	handleSwitch: (lang: string) => void;
 	disabled: boolean;
+	/**
+	 * Whether the row stays focusable while it is `disabled`: it keeps keyboard
+	 * focus and its tab stop, says it is disabled with `aria-disabled`, and
+	 * ignores Enter, Space and clicks. It keeps the look of an enabled row, so that
+	 * its focus ring keeps its contrast. The list sets it on the row picked last,
+	 * while that language loads. Default: `false`
+	 */
+	focusableWhenDisabled?: boolean;
 }
 
 const ListItemRoot = styled(ListItemButton, {
@@ -131,15 +139,26 @@ const LocaleSelectorEntry = (
 		props: inProps,
 		name: "CcLocaleSelectorEntry",
 	});
-	const { locale, currentLanguage, handleSwitch, disabled, className } = props;
+	const {
+		locale,
+		currentLanguage,
+		handleSwitch,
+		disabled,
+		focusableWhenDisabled = false,
+		className,
+	} = props;
 	const sameLang = locale.language_short === currentLanguage;
 	const currentLocale = useCurrentLocale();
 	const currentRow = useMemo(() => rowLocaleOf(currentLocale), [currentLocale]);
 	const current = locale.locale.toLowerCase() === currentRow;
 
 	const handleClick = useCallback(() => {
+		if (disabled) return;
 		handleSwitch(locale.locale);
-	}, [locale, handleSwitch]);
+	}, [disabled, locale, handleSwitch]);
+	// a focusable row is disabled for assistive technology only (aria-disabled,
+	// which MUI sets on the other disabled rows), so that it keeps keyboard focus
+	const focusable = disabled && focusableWhenDisabled;
 	// keyboard focus waits on the list while this row is scrolled away
 	const focusRef = useListFocusTarget(locale.locale);
 
@@ -147,7 +166,8 @@ const LocaleSelectorEntry = (
 		<ListItemRoot
 			ref={focusRef}
 			onClick={handleClick}
-			disabled={disabled}
+			disabled={disabled && !focusable}
+			aria-disabled={disabled || undefined}
 			// MUI's look of a selected row, the check and aria-current mark the
 			// current locale, so neither color nor sight alone tells it
 			selected={current}
