@@ -1,16 +1,34 @@
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Box, List, ListItem, Typography } from "@mui/material";
+import {
+	Box,
+	Collapse,
+	List,
+	ListItem,
+	ListItemButton,
+	ListItemText,
+	Typography,
+} from "@mui/material";
 import { createMemoryHistory } from "history";
-import { Home, Info, Settings } from "@mui/icons-material";
+import {
+	ExpandLess,
+	ExpandMore,
+	Home,
+	Info,
+	Settings,
+} from "@mui/icons-material";
 // eslint-disable-next-line import/no-unresolved
-import { expect, userEvent, waitFor } from "storybook/test";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import HistoryRouter from "../../standalone/Routes/HistoryRouter";
 import Routes from "../../standalone/Routes/Routes";
 import Route from "../../standalone/Routes/Route";
 import useLocation from "../../standalone/Routes/useLocation";
 import { MaterialMenuItem } from "../../standalone/Portal/MenuItem";
-import RoutedMenu, { IRoutedMenuItemDefinition } from "./Menu";
+import RoutedMenu, {
+	IRoutedMenuEntry,
+	IRoutedMenuItemDefinition,
+	useRoutedMenuLogic,
+} from "./Menu";
 
 const meta: Meta = {
 	title: "non-standalone/Portal/RoutedMenu",
@@ -304,5 +322,226 @@ export const Issue3498Item8FocusStaysWhenTheMenuIsSwapped: StoryObj = {
 		);
 		await expect(currentPath()).toBe("/apps");
 		await expect(document.activeElement).not.toBe(document.body);
+	},
+};
+
+// ─── A menu the app renders itself, from links ───────────────────────────────
+
+// the title of a group that contains the current entry
+const BOLD_TITLE = { primary: { sx: { fontWeight: 700 } } };
+
+/**
+ * One entry of a menu rendered from useRoutedMenuLogic: a link to the entry's
+ * target, a button for an action without route, and a disclosure button
+ * (`aria-expanded`) with a nested list for a group
+ */
+const LinkMenuEntry = (props: { entry: IRoutedMenuEntry; depth: number }) => {
+	const { entry, depth } = props;
+	const forceExpand = !!entry.forceExpand;
+	const [open, setOpen] = useState(forceExpand);
+	// the hook keeps the group of the current page expanded
+	if (forceExpand && !open) setOpen(true);
+	const toggle = useCallback(
+		() => setOpen((prev) => forceExpand || !prev),
+		[forceExpand],
+	);
+	const indent = useMemo(() => ({ pl: 2 + depth * 2 }), [depth]);
+
+	if (entry.children) {
+		return (
+			<ListItem disablePadding sx={{ display: "block" }}>
+				<ListItemButton aria-expanded={open} onClick={toggle} sx={indent}>
+					<ListItemText
+						primary={entry.title}
+						// the group of the current page
+						slotProps={entry.containsCurrent ? BOLD_TITLE : undefined}
+					/>
+					{open ? <ExpandLess /> : <ExpandMore />}
+				</ListItemButton>
+				<Collapse in={open}>
+					<List disablePadding>
+						{entry.children.map(
+							(child) =>
+								child.shouldRender && (
+									<LinkMenuEntry
+										key={child.menuItemId}
+										entry={child}
+										depth={depth + 1}
+									/>
+								),
+						)}
+					</List>
+				</Collapse>
+			</ListItem>
+		);
+	}
+	return (
+		<ListItem disablePadding>
+			{entry.href ? (
+				// with an href, ListItemButton renders a link
+				<ListItemButton
+					href={entry.href}
+					onClick={entry.onClick}
+					onAuxClick={entry.onAuxClick}
+					selected={entry.current}
+					aria-current={entry.current ? "page" : undefined}
+					sx={indent}
+				>
+					<ListItemText primary={entry.title} />
+				</ListItemButton>
+			) : (
+				// an action
+				<ListItemButton onClick={entry.onClick} sx={indent}>
+					<ListItemText primary={entry.title} />
+				</ListItemButton>
+			)}
+		</ListItem>
+	);
+};
+
+/**
+ * A navigation menu the app renders itself from useRoutedMenuLogic, with
+ * links instead of MenuBase's entries
+ */
+const LinkMenu = (props: { definition: IRoutedMenuItemDefinition[] }) => {
+	const { definition } = useRoutedMenuLogic(props);
+	return (
+		<Box
+			component="nav"
+			aria-label="Project menu"
+			sx={{ width: 250, borderRight: "1px solid #ccc" }}
+		>
+			<List>
+				{definition.map(
+					(entry) =>
+						entry.shouldRender && (
+							<LinkMenuEntry key={entry.menuItemId} entry={entry} depth={0} />
+						),
+				)}
+			</List>
+		</Box>
+	);
+};
+
+interface LinkMenuDemoArgs {
+	/**
+	 * The URL the story starts on (a memory history), below
+	 * `/projects/:project`
+	 */
+	initialPath: string;
+	/**
+	 * onClick of the "Log out" entry, an action without route
+	 */
+	onLogOut: () => void;
+}
+
+const LinkMenuPage = (props: LinkMenuDemoArgs) => {
+	const { onLogOut } = props;
+	// relative routes are resolved against the Route the menu is rendered in
+	const definition = useMemo(
+		(): IRoutedMenuItemDefinition[] => [
+			{ title: "Tasks", route: "tasks", shouldRender: true },
+			{ title: "Devices", route: "devices", shouldRender: true },
+			{
+				title: "Reports",
+				route: "/projects/:project/reports",
+				shouldRender: true,
+			},
+			{
+				title: "Settings",
+				shouldRender: true,
+				children: [
+					{ title: "General", route: "settings/general", shouldRender: true },
+					{ title: "Members", route: "settings/members", shouldRender: true },
+				],
+			},
+			{ title: "Log out", shouldRender: true, onClick: onLogOut },
+		],
+		[onLogOut],
+	);
+	return (
+		<Box sx={{ display: "flex", height: "100vh" }}>
+			<LinkMenu definition={definition} />
+			<Box component="main" sx={{ flex: 1 }}>
+				<Page title="Project" />
+			</Box>
+		</Box>
+	);
+};
+
+const LinkMenuDemo = (props: LinkMenuDemoArgs) => {
+	const [history] = useState(() =>
+		createMemoryHistory({ initialEntries: [props.initialPath] }),
+	);
+	return (
+		<HistoryRouter history={history}>
+			<Routes>
+				{[
+					<Route
+						key="project"
+						path="/projects/:project/*"
+						element={<LinkMenuPage {...props} />}
+					/>,
+				]}
+			</Routes>
+		</HistoryRouter>
+	);
+};
+
+export const Issue3498Item9CustomMenuOfLinks: StoryObj<LinkMenuDemoArgs> = {
+	name: "Custom menu of links (useRoutedMenuLogic)",
+	args: {
+		initialPath: "/projects/42/tasks",
+		onLogOut: fn(),
+	},
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'A menu the app renders itself from `useRoutedMenuLogic`: each entry with a route is a link (`href`, with the params filled in and as the history writes it) that is marked `aria-current="page"` while it is the entry of the current URL (`current`); a plain click navigates in the app, a Ctrl, Shift or middle click opens the link in a new tab as the browser does. An action is a button; a group is a disclosure button with `aria-expanded`, in bold while it contains the current entry (`containsCurrent`).',
+			},
+		},
+	},
+	render: (args) => <LinkMenuDemo {...args} />,
+	play: async ({ args, canvas }) => {
+		const nav = canvas.getByRole("navigation", { name: "Project menu" });
+		const tasks = within(nav).getByRole("link", { name: "Tasks" });
+		await expect(tasks).toHaveAttribute("href", "/projects/42/tasks");
+		await expect(tasks).toHaveAttribute("aria-current", "page");
+		await expect(
+			within(nav).getByRole("link", { name: "Reports" }),
+		).toHaveAttribute("href", "/projects/42/reports");
+
+		// Tab reaches the links; Enter follows one in the app
+		tasks.focus();
+		await userEvent.tab();
+		const devices = within(nav).getByRole("link", { name: "Devices" });
+		await expect(devices).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() => expect(currentPath()).toBe("/projects/42/devices"));
+		await expect(devices).toHaveAttribute("aria-current", "page");
+		await expect(tasks).not.toHaveAttribute("aria-current");
+
+		// a group is a disclosure button; its entries are links too
+		const settings = within(nav).getByRole("button", { name: "Settings" });
+		await expect(settings).toHaveAttribute("aria-expanded", "false");
+		await userEvent.click(settings);
+		await expect(settings).toHaveAttribute("aria-expanded", "true");
+		const members = await within(nav).findByRole("link", { name: "Members" });
+		await expect(members).toHaveAttribute(
+			"href",
+			"/projects/42/settings/members",
+		);
+		await userEvent.click(members);
+		await waitFor(() =>
+			expect(currentPath()).toBe("/projects/42/settings/members"),
+		);
+		await expect(members).toHaveAttribute("aria-current", "page");
+
+		// an action is a button
+		await userEvent.click(within(nav).getByRole("button", { name: "Log out" }));
+		await expect(args.onLogOut).toHaveBeenCalledTimes(1);
+		await expect(currentPath()).toBe("/projects/42/settings/members");
 	},
 };

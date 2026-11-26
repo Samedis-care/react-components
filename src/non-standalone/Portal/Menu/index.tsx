@@ -99,6 +99,88 @@ export interface IRoutedMenuItemDefinition extends Omit<
 	children?: IRoutedMenuItemDefinition[];
 }
 
+/**
+ * An entry of useRoutedMenuLogic's `definition`: the routed menu item
+ * definition, converted for MenuBase, with what a menu that the app renders
+ * itself needs to render the entry as a link and to mark the current page.
+ * Every field of the definition is kept, `route` too (still the pattern), and
+ * so are fields an app adds to IMenuItemDefinition through module
+ * augmentation.
+ */
+export interface IRoutedMenuEntry extends Omit<
+	IRoutedMenuItemDefinition,
+	"onClick" | "onAuxClick" | "forceExpand" | "children"
+> {
+	/**
+	 * Runs the definition's `onClick`, then navigates to the entry's target
+	 * (`href`) in the app. Put it on the element that renders the entry.
+	 *
+	 * On a link (an `<a>` with `href`): a plain click is kept from loading the
+	 * href as a new page and navigates in the app; a click with Ctrl, Meta,
+	 * Shift or Alt is left to the browser, which opens the link in a new tab or
+	 * window. On any other element (a button): a click with Ctrl, Meta or Shift
+	 * opens `href` in a new tab, any other click navigates in the app. An entry
+	 * without target only runs the definition's `onClick`.
+	 */
+	onClick: React.MouseEventHandler;
+	/**
+	 * For the middle button only (browsers fire `auxclick` for the right
+	 * button too): runs the definition's `onAuxClick`, then, on an element
+	 * other than a link, opens `href` in a new tab. A link is opened in a new
+	 * tab by the browser.
+	 */
+	onAuxClick: React.MouseEventHandler;
+	/**
+	 * Keep the group expanded: `true` for the groups above the entry of the
+	 * current URL (`containsCurrent`) and for an entry whose definition sets
+	 * `forceExpand`. MenuBase keeps such a group expanded; a menu rendered by
+	 * the app does the same, or ignores it for groups that open as a popup.
+	 */
+	forceExpand: boolean;
+	/**
+	 * The URL of the entry's target, as the router's history writes it
+	 * (`history.createHref`): the route with its params filled in from the
+	 * current URL, without a trailing `/*`, below the enclosing Route for a
+	 * relative route, with the route's search and hash, e.g.
+	 * `/projects/42/review`, or `#/users` with a hash history. The URL a click
+	 * navigates to and a new tab opens. `undefined` for an entry without
+	 * `route` (an action or a group) and for an entry hidden because the
+	 * current URL has no value for one of its params.
+	 *
+	 * Render an entry with an `href` as a link (`<a href>`, or MUI's
+	 * `ListItemButton`, which renders a link when it gets an `href`) with the
+	 * entry's `onClick` and `onAuxClick` on it; render an entry without one as
+	 * a button.
+	 */
+	href: string | undefined;
+	/**
+	 * Is this the entry of the current URL, the one whose route matches it
+	 * best (see IRoutedMenuItemDefinition's `route`)? Put
+	 * `aria-current="page"` on its element, so screen readers announce it as
+	 * the current page. Also `true` for a group whose own route matches best,
+	 * and for an entry hidden with `shouldRender: false`. `false` for every
+	 * entry on a URL that no entry matches.
+	 */
+	current: boolean;
+	/**
+	 * Does this group contain the entry of the current URL, at any depth? For
+	 * a visual mark on the groups above the current page. `false` for the
+	 * current entry itself and for entries without children.
+	 */
+	containsCurrent: boolean;
+	/**
+	 * The entry's menu item id: its title and the titles of the groups above
+	 * it, from the top level, joined by `@` ("Settings@Profile"), as MenuBase
+	 * builds it and as `controlledState` holds the id of the current entry.
+	 * Sibling entries with the same title share one. A stable React `key`.
+	 */
+	menuItemId: string;
+	/**
+	 * The converted children of this entry
+	 */
+	children?: IRoutedMenuEntry[];
+}
+
 export interface IRoutedMenuProps extends Omit<
 	MenuProps,
 	"definition" | "customState"
@@ -356,71 +438,104 @@ const getUnresolvedEntries = (
 	});
 
 /**
- * Converts the routed menu item definitions to normal menu item definitions
- * @param params The params of the current URL (resolveLocation)
- * @param expanded The menu item ids of the groups the current URL expands:
- * the groups above the entry of the current URL (resolveLocation). A group
- * with its own `forceExpand` is expanded too
- * @param base What a relative route is resolved against
+ * Is the element a link that the browser follows by itself, an `<a>` with an
+ * `href`? A menu rendered by the app may put an entry's handlers on one: the
+ * browser then opens the new tab for a modified or middle click, and a plain
+ * click must not load the href as a new page.
+ * @param element The element the handler runs on (the event's
+ * currentTarget; missing on an event an app makes up)
+ */
+const isLink = (element: EventTarget | null | undefined): boolean =>
+	element instanceof HTMLAnchorElement && element.hasAttribute("href");
+
+/**
+ * What the conversion reads for every entry of the menu
+ */
+interface ConversionContext {
+	/**
+	 * The entry of the current URL (resolveLocation), null when no entry
+	 * matches
+	 */
+	current: MenuRouteMatch | null;
+	/**
+	 * The params of the current URL (resolveLocation)
+	 */
+	params: Record<string, string>;
+	/**
+	 * What a relative route is resolved against
+	 */
+	base: RouteBase;
+	/**
+	 * The navigate function of the HistoryRouter
+	 */
+	navigate: NavigateFunction;
+	/**
+	 * The router's history, which writes the URL of a target
+	 */
+	history: History;
+}
+
+/**
+ * Converts a routed menu item definition to an entry for MenuBase or a menu
+ * rendered by the app
+ * @param context The current URL's entry and params, and the router
  * @param definition The routed menu item definition
  * @param id The menu item id of the definition
- * @param navigate The react-router navigate function
- * @param history The router's history, which writes the URL a new tab opens
- * @return a normal menu item definition
+ * @return The entry, see IRoutedMenuEntry
  */
 const convertDefinition = (
-	params: Record<string, string>,
-	expanded: string[],
-	base: RouteBase,
+	context: ConversionContext,
 	definition: IRoutedMenuItemDefinition,
 	id: string,
-	navigate: NavigateFunction,
-	history: History,
-): IMenuItemDefinition => ({
-	...definition,
-	// an entry whose route the current URL cannot fill has nowhere to go
-	shouldRender:
-		definition.shouldRender && getTarget(definition, params, base) !== null,
-	// the entry's own flag, and the groups above the entry of the current URL
-	forceExpand:
-		definition.forceExpand || (definition.children && expanded.includes(id)),
-	children: definition.children?.map((entry) =>
-		convertDefinition(
-			params,
-			expanded,
-			base,
-			entry,
-			getItemId(id, entry.title),
-			navigate,
-			history,
+): IRoutedMenuEntry => {
+	const { current, params, base, navigate, history } = context;
+	// keep URL parameters
+	const target = getTarget(definition, params, base);
+	const href = target
+		? (getTargetHref(history, target) ?? undefined)
+		: undefined;
+	const containsCurrent =
+		!!definition.children && !!current?.groups.includes(id);
+	return {
+		...definition,
+		// an entry whose route the current URL cannot fill has nowhere to go
+		shouldRender: definition.shouldRender && target !== null,
+		// the entry's own flag, and the groups above the entry of the current URL
+		forceExpand: !!definition.forceExpand || containsCurrent,
+		href,
+		current: current?.id === id,
+		containsCurrent,
+		menuItemId: id,
+		children: definition.children?.map((entry) =>
+			convertDefinition(context, entry, getItemId(id, entry.title)),
 		),
-	),
-	onClick: (evt) => {
-		if (definition.onClick) {
-			definition.onClick(evt);
-		}
-		// keep URL parameters
-		const target = getTarget(definition, params, base);
-		if (!target) return;
-		if (evt.ctrlKey || evt.metaKey || evt.shiftKey) {
-			const href = getTargetHref(history, target);
-			if (href) window.open(href, "_blank");
-		} else navigate(target);
-	},
-	onAuxClick: (evt) => {
-		// the middle button only: browsers fire auxclick for the right button too.
-		// MenuBase filters as well, but useRoutedMenuLogic's handlers also go to
-		// an app's own elements
-		if (evt.button !== 1) return;
-		if (definition.onAuxClick) {
-			definition.onAuxClick(evt);
-		}
-		// keep URL parameters
-		const target = getTarget(definition, params, base);
-		const href = target ? getTargetHref(history, target) : null;
-		if (href) window.open(href);
-	},
-});
+		onClick: (evt) => {
+			if (definition.onClick) {
+				definition.onClick(evt);
+			}
+			if (!target) return;
+			if (isLink(evt.currentTarget)) {
+				// the browser opens a new tab or window for a modified click
+				if (evt.ctrlKey || evt.metaKey || evt.shiftKey || evt.altKey) return;
+				evt.preventDefault();
+				navigate(target);
+			} else if (evt.ctrlKey || evt.metaKey || evt.shiftKey) {
+				if (href) window.open(href, "_blank");
+			} else navigate(target);
+		},
+		onAuxClick: (evt) => {
+			// the middle button only: browsers fire auxclick for the right button
+			// too. MenuBase filters as well, but useRoutedMenuLogic's handlers also
+			// go to an app's own elements
+			if (evt.button !== 1) return;
+			if (definition.onAuxClick) {
+				definition.onAuxClick(evt);
+			}
+			// the browser opens a link in a new tab itself
+			if (href && !isLink(evt.currentTarget)) window.open(href);
+		},
+	};
+};
 
 /**
  * The setter of useRoutedMenuLogic's active id. MenuBase calls it with the id
@@ -430,24 +545,54 @@ const convertDefinition = (
 const ignoreActiveChange: Dispatch<SetStateAction<string>> = () => undefined;
 
 /**
+ * What useRoutedMenuLogic returns
+ */
+export interface UseRoutedMenuLogicResult {
+	/**
+	 * The entries converted for MenuBase's `definition` or for a menu rendered
+	 * by the app, in definition order: each with handlers that navigate to its
+	 * route, the URL of that route (`href`), whether it is the entry of the
+	 * current URL (`current`) or a group above it (`containsCurrent`, which
+	 * also sets `forceExpand`), and its menu item id. See IRoutedMenuEntry.
+	 */
+	definition: IRoutedMenuEntry[];
+	/**
+	 * For MenuBase's `customState` or a `MenuContext.Provider`: the menu item
+	 * id of the entry of the current URL (`""` when no entry matches the URL)
+	 * and a setter that does nothing, because the active entry follows the URL
+	 * only
+	 */
+	controlledState: [string, Dispatch<SetStateAction<string>>];
+}
+
+/**
  * The routing logic of RoutedMenu, for a menu the app renders itself. Must be
  * called inside a HistoryRouter; called inside a Route, the routes without a
  * leading slash are relative to that Route (see IRoutedMenuItemDefinition's
  * `route`).
- * @param props The menu definition
- * @return `definition`: the entries converted for MenuBase, with
- * `forceExpand` set on the groups above the entry of the current URL (and
- * kept on the entries that set it themselves) and handlers that navigate to
- * the entries' routes, or, on a Ctrl, Meta or Shift click and a middle click,
- * open the URL of that navigation in a new tab. `controlledState`: for
- * MenuBase's `customState` or a `MenuContext.Provider`, the id of the entry
- * of the current URL (the titles from the top level joined by `@`, `""` when
- * no entry matches the URL) and a setter that does nothing, because the
- * active entry follows the URL only.
+ *
+ * Render each entry of `definition` with `shouldRender` (an entry the
+ * current URL cannot fill the params of has it `false`):
+ * - with an `href` as a link: `href`, `onClick` and `onAuxClick` on an `<a>`
+ *   (or on MUI's `ListItemButton`, which then renders one), and
+ *   `aria-current="page"` while it is `current`. A plain click navigates in
+ *   the app, and the browser offers what it offers for any link: open it in a
+ *   new tab with a modified or middle click, copy its address.
+ * - without `href` (an action) as a button with its `onClick`.
+ * - a group as a button that shows and hides its children, with
+ *   `aria-expanded` from the menu's own state, kept expanded while
+ *   `forceExpand` is set.
+ *
+ * Entries rendered as buttons that call `onClick` work too: a Ctrl, Meta or
+ * Shift click and a middle click open `href` in a new tab.
+ * @param props The menu definition; keep it referentially stable, the
+ * entries are converted again whenever it changes
+ * @return The converted entries and the menu state, see
+ * UseRoutedMenuLogicResult
  */
 export const useRoutedMenuLogic = (
 	props: Pick<IRoutedMenuProps, "definition">,
-) => {
+): UseRoutedMenuLogicResult => {
 	const location = useLocation();
 	const path = location.pathname;
 	const navigate = useNavigate();
@@ -482,21 +627,18 @@ export const useRoutedMenuLogic = (
 
 	// convert routed menu definitions to normal menu definitions
 	const params = React.useMemo(() => current?.params ?? {}, [current]);
-	const definition = React.useMemo(
-		() =>
-			rawDef.map((entry) =>
-				convertDefinition(
-					params,
-					current?.groups ?? [],
-					base,
-					entry,
-					getItemId(null, entry.title),
-					navigate,
-					history,
-				),
-			),
-		[rawDef, params, current, base, navigate, history],
-	);
+	const definition = React.useMemo(() => {
+		const context: ConversionContext = {
+			current,
+			params,
+			base,
+			navigate,
+			history,
+		};
+		return rawDef.map((entry) =>
+			convertDefinition(context, entry, getItemId(null, entry.title)),
+		);
+	}, [rawDef, params, current, base, navigate, history]);
 
 	// development: name the entries hidden for a param the URL lacks, once per
 	// menu instance, entry and param

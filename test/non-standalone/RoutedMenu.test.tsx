@@ -26,6 +26,7 @@ import RoutedMenu, {
 	IRoutedMenuItemDefinition,
 	IRoutedMenuProps,
 	useRoutedMenuLogic,
+	UseRoutedMenuLogicResult,
 } from "../../src/non-standalone/Portal/Menu";
 
 beforeEach(() => {
@@ -731,6 +732,186 @@ describe("RoutedMenu: one reading of a route for the highlight and the navigatio
 			search: "?sort=name",
 		});
 		expect(selected()).toEqual(["Users"]);
+	});
+});
+
+describe("useRoutedMenuLogic: what a menu rendered by the app needs", () => {
+	/** A HistoryRouter of `history` around the hook */
+	const inRouter = (history: History) =>
+		function InRouter({ children }: { children: React.ReactNode }) {
+			return <HistoryRouter history={history}>{children}</HistoryRouter>;
+		};
+
+	const LINK_TARGETS = [
+		leaf("Home", "/"),
+		group("Project", [
+			leaf("Review", "/projects/:id/review"),
+			leaf("Capture", "/projects/:id/capture"),
+		]),
+		leaf("Open tasks", "/tasks?tab=open#list"),
+		leaf("Devices", "/devices/*"),
+		leaf("Log out", undefined, { onClick: () => undefined }),
+		leaf("Tenant page", "/:tenant/page"),
+	];
+	it("[ISSUE-3498-ITEM-9] each entry has the URL of its target as the history writes it, with the params filled in", () => {
+		// Tenant page is hidden (and reported in development): no :tenant here
+		vi.spyOn(console, "error").mockImplementation(() => undefined);
+		const history = createMemoryHistory({
+			initialEntries: ["/projects/42/review"],
+		});
+		// a history whose URLs lie below a base path
+		vi.spyOn(history, "createHref").mockImplementation(
+			(to) => `/base${typeof to === "string" ? to : createPath(to)}`,
+		);
+		const { result } = renderHook(
+			() => useRoutedMenuLogic({ definition: LINK_TARGETS }),
+			{ wrapper: inRouter(history) },
+		);
+		const [home, project, tasks, devices, logout, tenant] =
+			result.current.definition;
+		expect(home.href).toBe("/base/");
+		// a group without route and an action have no target
+		expect(project.href).toBeUndefined();
+		expect(project.children?.map((entry) => entry.href)).toEqual([
+			"/base/projects/42/review",
+			"/base/projects/42/capture",
+		]);
+		expect(tasks.href).toBe("/base/tasks?tab=open#list");
+		expect(devices.href).toBe("/base/devices");
+		expect(logout.href).toBeUndefined();
+		expect(tenant.shouldRender).toBe(false);
+		expect(tenant.href).toBeUndefined();
+	});
+
+	const CURRENT_TREE = [
+		leaf("Home", "/"),
+		group(
+			"Settings",
+			[
+				leaf("Profile", "/settings/profile"),
+				group("Advanced", [leaf("Expert", "/settings/advanced/expert")]),
+			],
+			{ route: "/settings" },
+		),
+		leaf("Users", "/users"),
+	];
+	/** Each entry as `id current containsCurrent`, depth first */
+	const flags = (entries: UseRoutedMenuLogicResult["definition"]): string[] =>
+		entries.flatMap((entry) => [
+			`${entry.menuItemId} ${entry.current} ${entry.containsCurrent}`,
+			...flags(entry.children ?? []),
+		]);
+	it("[ISSUE-3498-ITEM-9] the entry of the current URL is current, the groups above it contain it, and each entry has its menu item id", () => {
+		const history = createMemoryHistory({
+			initialEntries: ["/settings/advanced/expert/7"],
+		});
+		const { result } = renderHook(
+			() => useRoutedMenuLogic({ definition: CURRENT_TREE }),
+			{ wrapper: inRouter(history) },
+		);
+		expect(flags(result.current.definition)).toEqual([
+			"Home false false",
+			"Settings false true",
+			"Settings@Profile false false",
+			"Settings@Advanced false true",
+			"Settings@Advanced@Expert true false",
+			"Users false false",
+		]);
+		// a group whose own route matches best is the current entry itself
+		act(() => history.push("/settings/other"));
+		expect(flags(result.current.definition)).toEqual([
+			"Home false false",
+			"Settings true false",
+			"Settings@Profile false false",
+			"Settings@Advanced false false",
+			"Settings@Advanced@Expert false false",
+			"Users false false",
+		]);
+		act(() => history.push("/elsewhere"));
+		expect(
+			flags(result.current.definition).filter((f) => f.includes("true")),
+		).toEqual([]);
+	});
+
+	/** A menu of links, as an app renders it from the hook */
+	const LinkMenu = (props: { definition: IRoutedMenuItemDefinition[] }) => {
+		const { definition } = useRoutedMenuLogic(props);
+		return (
+			<nav>
+				{definition.map((entry) => (
+					<a
+						key={entry.menuItemId}
+						href={entry.href}
+						onClick={entry.onClick}
+						onAuxClick={entry.onAuxClick}
+						aria-current={entry.current ? "page" : undefined}
+					>
+						{entry.title}
+					</a>
+				))}
+			</nav>
+		);
+	};
+	it("[ISSUE-3498-ITEM-9] an entry rendered as a link navigates in the app on a plain click and leaves the new-tab gestures to the browser", () => {
+		const open = vi.spyOn(window, "open").mockImplementation(() => null);
+		const onClick = vi.fn();
+		const onAuxClick = vi.fn();
+		// what reaches the browser after the handlers: whether it would follow the
+		// link; then keep jsdom from following it
+		const followed: boolean[] = [];
+		const browser = (evt: Event) => {
+			followed.push(!evt.defaultPrevented);
+			evt.preventDefault();
+		};
+		window.addEventListener("click", browser);
+		window.addEventListener("auxclick", browser);
+		try {
+			const history = createMemoryHistory({ initialEntries: ["/profile"] });
+			render(
+				<HistoryRouter history={history}>
+					<LinkMenu
+						definition={[
+							leaf("Profile", "/profile"),
+							leaf("Users", "/users", { onClick, onAuxClick }),
+						]}
+					/>
+				</HistoryRouter>,
+			);
+			const users = screen.getByRole("link", { name: "Users" });
+			expect(users).toHaveAttribute("href", "/users");
+			for (const modifier of ["ctrlKey", "metaKey", "shiftKey", "altKey"])
+				fireEvent.click(users, { [modifier]: true });
+			fireEvent(
+				users,
+				new MouseEvent("auxclick", {
+					bubbles: true,
+					cancelable: true,
+					button: 1,
+				}),
+			);
+			expect(followed).toEqual([true, true, true, true, true]);
+			expect(open).not.toHaveBeenCalled();
+			expect(history.location.pathname).toBe("/profile");
+			expect(onClick).toHaveBeenCalledTimes(4);
+			expect(onAuxClick).toHaveBeenCalledTimes(1);
+			// a plain click stays in the app
+			fireEvent.click(users);
+			expect(followed).toHaveLength(6);
+			expect(followed[5]).toBe(false);
+			expect(history.location.pathname).toBe("/users");
+			expect(history.index).toBe(1);
+			expect(onClick).toHaveBeenCalledTimes(5);
+			expect(screen.getByRole("link", { name: "Users" })).toHaveAttribute(
+				"aria-current",
+				"page",
+			);
+			expect(screen.getByRole("link", { name: "Profile" })).not.toHaveAttribute(
+				"aria-current",
+			);
+		} finally {
+			window.removeEventListener("click", browser);
+			window.removeEventListener("auxclick", browser);
+		}
 	});
 });
 
