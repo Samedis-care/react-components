@@ -22,12 +22,14 @@ import {
 import {
 	BaseSelectorClassKey,
 	BaseSelectorData,
+	BaseSelectorIconOwnerState,
 	BaseSelectorThemeProps,
 	HowToBoxClassKey,
 	HowToBoxProps,
 	MultiSelectClassKey,
 	MultiSelectorData,
 	MultiSelectProps,
+	MultiSelectSelectorOwnerState,
 	MultiSelectWithoutGroupClassKey,
 	MultiSelectWithoutGroupProps,
 	MultiSelectWithTagsClassKey,
@@ -35,6 +37,7 @@ import {
 	PopupMenuClassKey,
 	PopupMenuProps,
 	PortalLayoutClassKey,
+	PortalLayoutContainerOwnerState,
 	PortalLayoutProps,
 } from "./standalone";
 import {
@@ -87,13 +90,7 @@ import {
 	SignalPortletClassKey,
 	SignalPortletProps,
 } from "./standalone/SignalPortlet";
-import {
-	CheckboxProps,
-	ComponentsOverrides,
-	ComponentsVariants,
-	Interpolation,
-	Theme as MuiTheme,
-} from "@mui/material";
+import { CheckboxProps, Interpolation, Theme as MuiTheme } from "@mui/material";
 import { LoaderClassKey, LoaderProps } from "./standalone/Loader";
 import {
 	FormLoaderOverlayClassKey,
@@ -113,6 +110,7 @@ import {
 } from "./standalone/CountryFlag";
 import {
 	MultiLanguageInputClassKey,
+	MultiLanguageInputLanguageLabelOwnerState,
 	MultiLanguageInputProps,
 } from "./standalone/UIKit/InputControls/MultiLanguageInput";
 import {
@@ -131,7 +129,9 @@ import {
 } from "./standalone/InlineSwitch";
 import {
 	MultiSelectEntryClassKey,
+	MultiSelectEntryImageOwnerState,
 	MultiSelectEntryProps,
+	MultiSelectEntrySelectedOwnerState,
 } from "./standalone/Selector/MultiSelectEntry";
 import {
 	ImageDotsClassKey,
@@ -140,6 +140,8 @@ import {
 import {
 	ImageBoxClassKey,
 	ImageBoxProps,
+	ImageBoxRootOwnerState,
+	ImageBoxStyledImageOwnerState,
 } from "./standalone/FileUpload/MultiImage/ImageBox";
 import {
 	ImageDialogEntryClassKey,
@@ -217,6 +219,7 @@ import {
 } from "./standalone/Notifications";
 import { ToastClassKey, ToastProps } from "./standalone/Toast";
 import {
+	DayContentsButtonOwnerState,
 	DayContentsClassKey,
 	DayContentsProps,
 } from "./standalone/Schedule/Common/DayContents";
@@ -328,6 +331,23 @@ type StyleOverridesWithOwnerState<
 	OwnerState,
 > = Partial<
 	Record<ClassKey, Interpolation<{ theme: Theme; ownerState: OwnerState }>>
+>;
+
+/**
+ * `styleOverrides` of a component that passes an `ownerState` to some of its
+ * slots only. MUI calls each function in it while styling every slot of the
+ * component, with that slot's props: `ownerState` holds the flags of the slot
+ * being styled (`OwnerState` combines those of every slot that gets one), and
+ * is undefined while a slot without one is styled.
+ */
+type StyleOverridesWithOptionalOwnerState<
+	ClassKey extends string,
+	OwnerState,
+> = Partial<
+	Record<
+		ClassKey,
+		Interpolation<{ theme: Theme; ownerState?: Partial<OwnerState> }>
+	>
 >;
 
 /**
@@ -557,15 +577,17 @@ declare module "@mui/material/styles" {
 	}
 
 	interface Components {
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of SignalPortlet's props.
 		CcSignalPortlet?: {
 			defaultProps?: ComponentsPropsList["CcSignalPortlet"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcSignalPortlet"];
-			variants?: ComponentsVariants["CcSignalPortlet"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<SignalPortletClassKey>;
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of SignalPortletItem's props.
 		CcSignalPortletItem?: {
 			defaultProps?: ComponentsPropsList["CcSignalPortletItem"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcSignalPortletItem"];
-			variants?: ComponentsVariants["CcSignalPortletItem"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<SignalPortletItemClassKey>;
 		};
 		/**
 		 * ActionButton. Recolor it with `defaultProps.color` (a palette color):
@@ -670,10 +692,15 @@ declare module "@mui/material/styles" {
 				Omit<CountryFlagProps, "className" | "classes" | "style">
 			>;
 		};
+		// No variants: MUI applies them to the root slot, and MultiLanguageInput
+		// has none.
 		CcMultiLanguageInput?: {
 			defaultProps?: ComponentsPropsList["CcMultiLanguageInput"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcMultiLanguageInput"];
-			variants?: ComponentsVariants["CcMultiLanguageInput"];
+			// only languageLabel gets an ownerState
+			styleOverrides?: StyleOverridesWithOptionalOwnerState<
+				MultiLanguageInputClassKey,
+				MultiLanguageInputLanguageLabelOwnerState
+			>;
 		};
 		// No variants: MUI matches them against the root's own props, which
 		// hold none of FormButtons' props.
@@ -765,20 +792,35 @@ declare module "@mui/material/styles" {
 		CcBackendDataGridMultiSelect?: {
 			styleOverrides?: StyleOverridesWithoutOwnerState<BackendDataGridMultiSelectClassKey>;
 		};
+		// No variants: MUI applies them to the root slot, and BaseSelector has
+		// none.
 		CcBaseSelector?: {
 			defaultProps?: ComponentsPropsList["CcBaseSelector"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcBaseSelector"];
-			variants?: ComponentsVariants["CcBaseSelector"];
+			// only icon gets an ownerState
+			styleOverrides?: StyleOverridesWithOptionalOwnerState<
+				BaseSelectorClassKey,
+				BaseSelectorIconOwnerState
+			>;
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of MultiSelectEntry's props.
 		CcMultiSelectEntry?: {
 			defaultProps?: ComponentsPropsList["CcMultiSelectEntry"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcMultiSelectEntry"];
-			variants?: ComponentsVariants["CcMultiSelectEntry"];
+			// only selected and image get an ownerState, each its own
+			styleOverrides?: StyleOverridesWithOptionalOwnerState<
+				MultiSelectEntryClassKey,
+				MultiSelectEntrySelectedOwnerState & MultiSelectEntryImageOwnerState
+			>;
 		};
+		// No variants: MUI matches them against the root's own props, which
+		// hold none of MultiSelect's props.
 		CcMultiSelect?: {
 			defaultProps?: ComponentsPropsList["CcMultiSelect"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcMultiSelect"];
-			variants?: ComponentsVariants["CcMultiSelect"];
+			// only selector gets an ownerState
+			styleOverrides?: StyleOverridesWithOptionalOwnerState<
+				MultiSelectClassKey,
+				MultiSelectSelectorOwnerState
+			>;
 		};
 		// No variants: MUI matches them against the root's own props, which
 		// hold none of ImageDots' props.
@@ -788,8 +830,16 @@ declare module "@mui/material/styles" {
 		};
 		CcImageBox?: {
 			defaultProps?: ComponentsPropsList["CcImageBox"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcImageBox"];
-			variants?: ComponentsVariants["CcImageBox"];
+			// only root and image get an ownerState, each its own
+			styleOverrides?: StyleOverridesWithOptionalOwnerState<
+				ImageBoxClassKey,
+				ImageBoxRootOwnerState & ImageBoxStyledImageOwnerState
+			>;
+			// the root gets its flags as ownerState, and none of the props
+			variants?: VariantsWithOwnerState<
+				Pick<ImageBoxProps, never>,
+				ImageBoxRootOwnerState
+			>;
 		};
 		// No variants: MUI matches them against the root's own props, which
 		// hold none of ImageDialogEntry's props.
@@ -897,10 +947,11 @@ declare module "@mui/material/styles" {
 				Pick<PortalMenuItemProps, "onClick" | "onAuxClick">
 			>;
 		};
+		// No variants: MUI applies them to the root slot, and
+		// LocalizedKeyboardDatePicker has none.
 		CcLocalizedKeyboardDatePicker?: {
 			defaultProps?: ComponentsPropsList["CcLocalizedKeyboardDatePicker"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcLocalizedKeyboardDatePicker"];
-			variants?: ComponentsVariants["CcLocalizedKeyboardDatePicker"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<LocalizedKeyboardDatePickerClassKey>;
 		};
 		CcComponentWithLabel?: {
 			defaultProps?: ComponentsPropsList["CcComponentWithLabel"];
@@ -984,20 +1035,29 @@ declare module "@mui/material/styles" {
 		CcFilesGrid?: {
 			styleOverrides?: StyleOverridesWithoutOwnerState<FilesGridClassKey>;
 		};
+		// No variants: MUI applies them to the root slot, and PortalLayout has
+		// none.
 		CcPortalLayout?: {
 			defaultProps?: ComponentsPropsList["CcPortalLayout"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcPortalLayout"];
-			variants?: ComponentsVariants["CcPortalLayout"];
+			styleOverrides?: StyleOverridesWithOwnerState<
+				PortalLayoutClassKey,
+				PortalLayoutContainerOwnerState
+			>;
 		};
+		// No variants: MUI applies them to the root slot, and Notifications has
+		// none.
 		CcNotifications?: {
 			defaultProps?: ComponentsPropsList["CcNotifications"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcNotifications"];
-			variants?: ComponentsVariants["CcNotifications"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<NotificationsClassKey>;
 		};
 		CcToast?: {
 			defaultProps?: ComponentsPropsList["CcToast"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcToast"];
-			variants?: ComponentsVariants["CcToast"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<ToastClassKey>;
+			// the root gets open, anchorOrigin and autoHideDuration (the default
+			// of each when it is not set), and none of the other props
+			variants?: VariantsWithoutOwnerState<
+				Pick<ToastProps, "open" | "anchorOrigin" | "autoHideDuration">
+			>;
 		};
 		// No variants: MUI matches them against the root's own props, which
 		// hold none of MultiSelectWithTags' props.
@@ -1011,10 +1071,13 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcMultiSelectWithoutGroup"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<MultiSelectWithoutGroupClassKey>;
 		};
+		// No variants: MUI applies them to the root slot, and DayContents has none.
 		CcDayContents?: {
 			defaultProps?: ComponentsPropsList["CcDayContents"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcDayContents"];
-			variants?: ComponentsVariants["CcDayContents"];
+			styleOverrides?: StyleOverridesWithOwnerState<
+				DayContentsClassKey,
+				DayContentsButtonOwnerState
+			>;
 		};
 		// No variants: MUI applies them to the root slot, and WeekViewDay has none.
 		CcWeekViewDay?: {

@@ -21,6 +21,9 @@ import MenuItemJumboReactLight from "../src/standalone/Portal/MenuItem/JumboReac
 import MenuItemJumboReactDark from "../src/standalone/Portal/MenuItem/JumboReact/Dark";
 import LocaleSelectorEntry from "../src/non-standalone/LocaleSelector/LocaleSelectorEntry";
 import WeekView from "../src/standalone/Schedule/Weekly";
+import { Toast, ToastProps } from "../src/standalone/Toast";
+import ImageBox from "../src/standalone/FileUpload/MultiImage/ImageBox";
+import DayContents from "../src/standalone/Schedule/Common/DayContents";
 
 /** the style override functions of every slot of every component in the theme */
 const overrideFunctions = (theme: Theme) =>
@@ -646,10 +649,6 @@ describe("theme-def", () => {
 			components: {
 				CcBaseSelector: {
 					defaultProps: { displaySwitch: true, switchLabel },
-					// a variant only matches props, so the switch alone selects it
-					variants: [
-						{ props: { displaySwitch: true }, style: { marginTop: 8 } },
-					],
 				},
 				CcMultiSelect: {
 					defaultProps: { confirmDelete: true },
@@ -1299,5 +1298,467 @@ describe("theme-def", () => {
 		).not.toBe("rgb(1, 2, 3)");
 		// lets the weeks' loads settle
 		await act(async () => {});
+	});
+	it("[ISSUE-3462-ITEM-19] types function styleOverrides without an ownerState for SignalPortlet, SignalPortletItem, Notifications and Toast, whose slots receive none", () => {
+		const theme = createTheme({
+			components: {
+				CcSignalPortlet: {
+					styleOverrides: {
+						// @ts-expect-error no slot of SignalPortlet receives an ownerState
+						root: ({ ownerState }) => ({ color: ownerState ? "red" : "blue" }),
+					},
+				},
+				CcSignalPortletItem: {
+					styleOverrides: {
+						// @ts-expect-error no slot of SignalPortletItem receives an ownerState
+						root: ({ ownerState }) => ({ color: ownerState ? "red" : "blue" }),
+					},
+				},
+				CcNotifications: {
+					styleOverrides: {
+						// @ts-expect-error no slot of Notifications receives an ownerState
+						header: ({ ownerState }) => ({
+							color: ownerState ? "red" : "blue",
+						}),
+					},
+				},
+				CcToast: {
+					styleOverrides: {
+						// @ts-expect-error no slot of Toast receives an ownerState
+						alert: ({ ownerState }) => ({ color: ownerState ? "red" : "blue" }),
+					},
+				},
+			},
+		});
+		expect(overrideFunctions(theme)).toEqual(
+			Array(4).fill(expect.any(Function)),
+		);
+	});
+	it("[ISSUE-3462-ITEM-19] types the ownerState of PortalLayout and DayContents, whose every slot receives one, as the flags it holds", () => {
+		const flags = createTheme({
+			components: {
+				CcPortalLayout: {
+					styleOverrides: {
+						container: ({ ownerState }) => {
+							const mobile: boolean = ownerState.mobile;
+							return { color: mobile ? "red" : "blue" };
+						},
+					},
+				},
+				CcDayContents: {
+					styleOverrides: {
+						button: ({ ownerState }) => {
+							const altBorder: boolean = ownerState.altBorder;
+							const unClickable: boolean = ownerState.unClickable;
+							return { color: altBorder || unClickable ? "red" : "blue" };
+						},
+					},
+				},
+			},
+		});
+		const props = createTheme({
+			components: {
+				CcPortalLayout: {
+					styleOverrides: {
+						container: ({ ownerState }) => ({
+							// @ts-expect-error the container gets the layout's flags, not its props
+							color: ownerState.headerContent ? "red" : "blue",
+						}),
+					},
+				},
+				CcDayContents: {
+					styleOverrides: {
+						button: ({ ownerState }) => ({
+							// @ts-expect-error the button gets its flags, not the props
+							color: ownerState.data ? "red" : "blue",
+						}),
+					},
+				},
+			},
+		});
+		expect([...overrideFunctions(flags), ...overrideFunctions(props)]).toEqual(
+			Array(4).fill(expect.any(Function)),
+		);
+	});
+	it("[ISSUE-3462-ITEM-19] types the ownerState of the components that pass one to some of their slots as optional flags", () => {
+		// MUI calls every function of a component's styleOverrides while styling each
+		// of its slots: ownerState holds the flags of the slot being styled, and is
+		// undefined while a slot without one is styled
+		const flags = createTheme({
+			components: {
+				CcMultiLanguageInput: {
+					styleOverrides: {
+						languageLabel: ({ ownerState }) => {
+							const active: boolean | undefined = ownerState?.active;
+							return { fontWeight: active ? 700 : 400 };
+						},
+					},
+				},
+				CcBaseSelector: {
+					styleOverrides: {
+						icon: ({ ownerState }) => {
+							const iconSize: number | undefined = ownerState?.iconSize;
+							return { borderRadius: iconSize ? iconSize / 2 : 0 };
+						},
+					},
+				},
+				CcMultiSelectEntry: {
+					styleOverrides: {
+						selected: ({ ownerState }) => {
+							const ignore: boolean | undefined = ownerState?.ignore;
+							const unClickable: boolean | undefined = ownerState?.unClickable;
+							return { color: ignore || unClickable ? "red" : "blue" };
+						},
+						image: ({ ownerState }) => {
+							const iconSize: number | undefined = ownerState?.iconSize;
+							return { borderRadius: iconSize ? iconSize / 2 : 0 };
+						},
+					},
+				},
+				CcMultiSelect: {
+					styleOverrides: {
+						selector: ({ ownerState }) => {
+							const selected: boolean | undefined = ownerState?.selected;
+							return { color: selected ? "red" : "blue" };
+						},
+					},
+				},
+				CcImageBox: {
+					styleOverrides: {
+						root: ({ ownerState }) => {
+							const dragging: boolean | undefined = ownerState?.dragging;
+							const clickable: boolean | undefined = ownerState?.clickable;
+							const background: boolean | undefined = ownerState?.background;
+							return {
+								color: dragging || clickable || background ? "red" : "blue",
+							};
+						},
+						image: ({ ownerState }) => {
+							const swipeLeft: boolean | undefined = ownerState?.swipeLeft;
+							const swipeRight: boolean | undefined = ownerState?.swipeRight;
+							const imageDots: boolean | undefined = ownerState?.imageDots;
+							return {
+								color: swipeLeft || swipeRight || imageDots ? "red" : "blue",
+							};
+						},
+					},
+				},
+			},
+		});
+		const required = createTheme({
+			components: {
+				CcMultiLanguageInput: {
+					styleOverrides: {
+						languageLabel: ({ ownerState }) => ({
+							// @ts-expect-error the language switcher and the adornment get no ownerState
+							fontWeight: ownerState.active ? 700 : 400,
+						}),
+					},
+				},
+				CcBaseSelector: {
+					styleOverrides: {
+						icon: ({ ownerState }) => ({
+							// @ts-expect-error only the icon gets an ownerState
+							width: ownerState.iconSize,
+						}),
+					},
+				},
+				CcMultiSelectEntry: {
+					styleOverrides: {
+						selected: ({ ownerState }) => ({
+							// @ts-expect-error only the row and the image get an ownerState
+							color: ownerState.ignore ? "red" : "blue",
+						}),
+					},
+				},
+				CcMultiSelect: {
+					styleOverrides: {
+						selector: ({ ownerState }) => ({
+							// @ts-expect-error only the selector gets an ownerState
+							color: ownerState.selected ? "red" : "blue",
+						}),
+					},
+				},
+				CcImageBox: {
+					styleOverrides: {
+						root: ({ ownerState }) => ({
+							// @ts-expect-error only the root and the image get an ownerState
+							color: ownerState.dragging ? "red" : "blue",
+						}),
+					},
+				},
+			},
+		});
+		const props = createTheme({
+			components: {
+				CcMultiLanguageInput: {
+					styleOverrides: {
+						languageLabel: ({ ownerState }) => ({
+							// @ts-expect-error the language button gets its flags, not the props
+							color: ownerState?.enabledLanguages ? "red" : "blue",
+						}),
+					},
+				},
+				CcBaseSelector: {
+					styleOverrides: {
+						icon: ({ ownerState }) => ({
+							// @ts-expect-error the icon gets its flags, not the props
+							color: ownerState?.disabled ? "red" : "blue",
+						}),
+					},
+				},
+				CcMultiSelectEntry: {
+					styleOverrides: {
+						selected: ({ ownerState }) => ({
+							// @ts-expect-error the row gets its flags, not the props
+							color: ownerState?.changeState ? "red" : "blue",
+						}),
+					},
+				},
+				CcMultiSelect: {
+					styleOverrides: {
+						selector: ({ ownerState }) => ({
+							// @ts-expect-error the selector gets its flags, not the props
+							color: ownerState?.readOnly ? "red" : "blue",
+						}),
+					},
+				},
+				CcImageBox: {
+					styleOverrides: {
+						root: ({ ownerState }) => ({
+							// @ts-expect-error the root gets its flags, not the props
+							color: ownerState?.disableBackground ? "red" : "blue",
+						}),
+					},
+				},
+			},
+		});
+		expect([
+			...overrideFunctions(flags),
+			...overrideFunctions(required),
+			...overrideFunctions(props),
+		]).toEqual(Array(17).fill(expect.any(Function)));
+	});
+	it("[ISSUE-3462-ITEM-19] types the variants of Toast and ImageBox as what their root gets, and offers none to the components whose root gets none of their props", () => {
+		const variants = (theme: Theme) =>
+			Object.values(theme.components ?? {}).flatMap(
+				(component) => (component as { variants?: unknown[] }).variants ?? [],
+			);
+		const theme = createTheme({
+			components: {
+				CcToast: {
+					variants: [
+						{ props: { open: true, autoHideDuration: null }, style: {} },
+						{
+							props: ({ anchorOrigin }) => anchorOrigin?.vertical === "top",
+							style: {},
+						},
+						// @ts-expect-error the severity reaches the alert, not the root
+						{ props: { severity: "error" }, style: {} },
+						// @ts-expect-error no slot of Toast gets an ownerState
+						{ props: ({ ownerState }) => !!ownerState, style: {} },
+					],
+				},
+				CcImageBox: {
+					variants: [
+						{ props: { dragging: true, background: false }, style: {} },
+						{ props: ({ ownerState }) => ownerState.clickable, style: {} },
+						{ props: ({ clickable }) => clickable, style: {} },
+						// @ts-expect-error the root gets its own flags, not the image's
+						{ props: { swipeLeft: true }, style: {} },
+						// @ts-expect-error fileName does not reach the root
+						{ props: { fileName: "photo.jpg" }, style: {} },
+					],
+				},
+			},
+		});
+		expect(variants(theme)).toHaveLength(9);
+
+		// the roots of these get none of their component's props, or there is no root
+		const withoutVariants = createTheme({
+			components: {
+				CcSignalPortlet: {
+					// @ts-expect-error the root gets none of SignalPortlet's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcSignalPortletItem: {
+					// @ts-expect-error the root gets none of SignalPortletItem's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcMultiLanguageInput: {
+					// @ts-expect-error MultiLanguageInput has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcBaseSelector: {
+					// @ts-expect-error BaseSelector has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcMultiSelectEntry: {
+					// @ts-expect-error the root gets none of MultiSelectEntry's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcMultiSelect: {
+					// @ts-expect-error the root gets none of MultiSelect's props
+					variants: [{ props: {}, style: {} }],
+				},
+				CcLocalizedKeyboardDatePicker: {
+					// @ts-expect-error LocalizedKeyboardDatePicker has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcPortalLayout: {
+					// @ts-expect-error PortalLayout has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcNotifications: {
+					// @ts-expect-error Notifications has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+				CcDayContents: {
+					// @ts-expect-error DayContents has no root slot
+					variants: [{ props: {}, style: {} }],
+				},
+			},
+		});
+		expect(variants(withoutVariants)).toHaveLength(10);
+	});
+	it("[ISSUE-3462-ITEM-19] applies the variants of Toast, matched against open, anchorOrigin and autoHideDuration with their defaults", async () => {
+		const theme = createTheme({
+			components: {
+				CcToast: {
+					variants: [
+						{
+							props: ({ anchorOrigin }) => anchorOrigin?.vertical === "top",
+							style: { outlineColor: "rgb(1, 2, 3)" },
+						},
+						{
+							props: { autoHideDuration: null },
+							style: { borderTopColor: "rgb(4, 5, 6)" },
+						},
+						{
+							props: { open: true, autoHideDuration: 6000 },
+							style: { borderBottomColor: "rgb(7, 8, 9)" },
+						},
+					],
+				},
+			},
+		});
+		const toast = (message: string, props: Partial<ToastProps>) =>
+			createElement(Toast, {
+				open: true,
+				message,
+				onClose: () => {},
+				...props,
+			});
+		render(
+			createElement(
+				ThemeProvider,
+				{ theme },
+				toast("Saved", {
+					anchorOrigin: { vertical: "top", horizontal: "center" },
+				}),
+				toast("Kept", { autoHideDuration: null }),
+				toast("Failed", { severity: "error" }),
+			),
+		);
+		const root = async (message: string) =>
+			getComputedStyle(
+				(await screen.findByText(message)).closest(
+					".MuiSnackbar-root",
+				) as HTMLElement,
+			);
+		expect((await root("Saved")).outlineColor).toBe("rgb(1, 2, 3)");
+		expect((await root("Kept")).outlineColor).not.toBe("rgb(1, 2, 3)");
+		expect((await root("Kept")).borderTopColor).toBe("rgb(4, 5, 6)");
+		expect((await root("Saved")).borderTopColor).not.toBe("rgb(4, 5, 6)");
+		// an error toast hides after 6 s by default
+		expect((await root("Failed")).borderBottomColor).toBe("rgb(7, 8, 9)");
+		expect((await root("Saved")).borderBottomColor).not.toBe("rgb(7, 8, 9)");
+	});
+	it("[ISSUE-3462-ITEM-19] styles ImageBox from its flags: variants match the root's, and style override functions get each slot's", () => {
+		const theme = createTheme({
+			components: {
+				CcImageBox: {
+					variants: [
+						{
+							props: { background: false },
+							style: { outlineColor: "rgb(1, 2, 3)" },
+						},
+					],
+					styleOverrides: {
+						root: ({ ownerState }) =>
+							ownerState?.clickable ? { borderTopColor: "rgb(4, 5, 6)" } : {},
+						image: ({ ownerState }) =>
+							ownerState?.swipeRight
+								? { borderBottomColor: "rgb(7, 8, 9)" }
+								: {},
+					},
+				},
+			},
+		});
+		// jsdom has no layout and no Element.scrollTo; ImageBox centres its swipe pane with it
+		(Element.prototype as unknown as { scrollTo: unknown }).scrollTo ??= () =>
+			undefined;
+		const image = "data:image/gif;base64,R0lGODlhAQABAAAAACw=";
+		const { container } = render(
+			createElement(
+				ThemeProvider,
+				{ theme },
+				createElement(ImageBox, {
+					image,
+					className: "plain",
+					onClick: null,
+				}),
+				createElement(ImageBox, {
+					image,
+					className: "styled",
+					onClick: () => {},
+					onNextImage: () => {},
+					disableBackground: true,
+				}),
+			),
+		);
+		const plain = container.querySelector(".plain") as HTMLElement;
+		const styled = container.querySelector(".styled") as HTMLElement;
+		expect(getComputedStyle(plain).outlineColor).not.toBe("rgb(1, 2, 3)");
+		expect(getComputedStyle(styled).outlineColor).toBe("rgb(1, 2, 3)");
+		expect(getComputedStyle(plain).borderTopColor).not.toBe("rgb(4, 5, 6)");
+		expect(getComputedStyle(styled).borderTopColor).toBe("rgb(4, 5, 6)");
+		const img = (root: HTMLElement) =>
+			getComputedStyle(root.querySelector("img") as HTMLElement);
+		expect(img(plain).borderBottomColor).not.toBe("rgb(7, 8, 9)");
+		expect(img(styled).borderBottomColor).toBe("rgb(7, 8, 9)");
+	});
+	it("[ISSUE-3462-ITEM-19] calls DayContents' style override functions with the flags every slot gets", () => {
+		const theme = createTheme({
+			components: {
+				CcDayContents: {
+					styleOverrides: {
+						button: ({ ownerState }) =>
+							ownerState.unClickable ? { outlineColor: "rgb(1, 2, 3)" } : {},
+					},
+				},
+			},
+		});
+		render(
+			createElement(
+				ThemeProvider,
+				{ theme },
+				createElement(DayContents, {
+					data: [
+						{ id: "1", title: "Inspection", onClick: () => {} },
+						{ id: "2", title: "Holiday" },
+					],
+				}),
+			),
+		);
+		expect(
+			getComputedStyle(screen.getByRole("button", { name: "Inspection" }))
+				.outlineColor,
+		).not.toBe("rgb(1, 2, 3)");
+		expect(
+			getComputedStyle(
+				screen.getByText("Holiday").closest("button") as HTMLElement,
+			).outlineColor,
+		).toBe("rgb(1, 2, 3)");
 	});
 });
