@@ -265,6 +265,9 @@ class LazyConnector extends Connector {
 	 *          the backend carries the id index lists it by, which for a record created
 	 *          through this connector stays its fake id after the queue was worked,
 	 *          whichever of its ids it was read by.
+	 *          A fake id whose create was dropped before the queue was worked (the record
+	 *          was removed again, or its create undone) rejects as not found as well: the
+	 *          backend cannot have that record, so it is not asked.
 	 * @throws {Error} The record's delete is queued
 	 */
 	read(
@@ -295,17 +298,24 @@ class LazyConnector extends Connector {
 
 	/**
 	 * Reads a record from the backend, as index lists it
-	 * @param id The record's id as the backend knows it
+	 * @param id The record's id as mapId gives it: the id the backend knows it by, or a
+	 *           fake id that maps to no real id
 	 * @param model The model performing the request
 	 * @param update The fields of a queued update of the record, laid over it
 	 * @returns The record under the id index lists it by: its fake id, if it was created
-	 *          through this connector
+	 *          through this connector. A fake id that maps to no real id rejects as not
+	 *          found without asking the backend: its create was dropped before it was sent,
+	 *          so the backend cannot have the record.
 	 */
 	private async readFromBackend(
 		id: string,
 		model: ModelUnknown | undefined,
 		update?: Record<string, unknown>,
 	): Promise<ModelGetResponse<ModelUnknown>> {
+		if (id.startsWith(this.FAKE_ID_PREFIX))
+			throw new Error(
+				`[Components-Care] [LazyConnector] Record not found: ${id}`,
+			);
 		const [backendRecord, ...rest] = await this.realConnector.read(id, model);
 		return [
 			{

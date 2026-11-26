@@ -936,4 +936,36 @@ describe("LazyConnector read", () => {
 		expect(read).toStrictEqual({ id: "b" });
 		expect(backendRead).toHaveBeenCalledWith("b", undefined);
 	});
+
+	/**
+	 * The ways a create is dropped before the save, which leaves nothing queued under the
+	 * fake id it handed out
+	 */
+	const dropCreate: [string, (lazy: LazyConnector, id: string) => void][] = [
+		["removed", (lazy, id) => lazy.delete(id, undefined)],
+		[
+			"removed with another record",
+			(lazy, id) => lazy.deleteMultiple([id, "b"], undefined),
+		],
+		["undone", (lazy, id) => void lazy.cancelQueuedOperation(id)],
+	];
+
+	it.each(dropCreate)(
+		"[ISSUE-3505-ITEM-31] in an existing record's connector, a fake id whose create was %s before the save rejects as not found, without asking the backend",
+		async (_, drop) => {
+			const { connector } = makeRealConnector();
+			const backendRead = vi.fn((id: string) => Promise.resolve([{ id }, {}]));
+			(connector as unknown as Record<"read", Mock>).read = backendRead;
+			// fakeReads false: a record that is not queued is read from the backend
+			const lazy = new LazyConnector(connector, false);
+			const [dropped] = lazy.create({ name: "a" }, undefined);
+			const droppedId = (dropped as Record<"id", string>).id;
+			drop(lazy, droppedId);
+
+			await expect(lazy.read(droppedId, undefined)).rejects.toThrow(
+				`Record not found: ${droppedId}`,
+			);
+			expect(backendRead).not.toHaveBeenCalled();
+		},
+	);
 });
