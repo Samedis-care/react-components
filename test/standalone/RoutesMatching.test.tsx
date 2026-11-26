@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { render, screen, act, cleanup } from "@testing-library/react";
 import { createBrowserHistory, createMemoryHistory } from "history";
 import HistoryRouter from "../../src/standalone/Routes/HistoryRouter";
@@ -483,6 +483,154 @@ describe("HistoryRouter nested in a Route", () => {
 		// /step1 is a location of the inner router: the outer Routes, which would
 		// render nothing there, has no say in it
 		expect(screen.getByTestId("renders-at")).toHaveTextContent("true");
+	});
+});
+
+describe("Route context identity", () => {
+	it("[ISSUE-3475-ITEM-26] keeps the RouteContext value while the route's url and path stay the same", () => {
+		const seen: unknown[] = [];
+		const Consumer = () => {
+			// re-renders on every navigation, as most readers of the context do
+			useLocation();
+			seen.push(useContext(RouteContext));
+			return null;
+		};
+		const { history } = renderAt(
+			"/devices/1",
+			<Routes>
+				{[
+					<Route
+						key="d"
+						path="/devices/*"
+						element={
+							<>
+								<Consumer />
+								<Routes>
+									{[<Route key="i" path=":id" element={<div />} />]}
+								</Routes>
+							</>
+						}
+					/>,
+				]}
+			</Routes>,
+		);
+		act(() => history.push("/devices/2"));
+		expect(seen.length).toBeGreaterThan(1);
+		// url "/devices" and path "/devices/*" did not change
+		expect(seen[seen.length - 1]).toBe(seen[0]);
+	});
+
+	it("[ISSUE-3475-ITEM-26] returns the same useParams object while the params do not change", () => {
+		const seen: unknown[] = [];
+		let rerender!: () => void;
+		const Consumer = () => {
+			const [, setN] = useState(0);
+			rerender = () => setN((n) => n + 1);
+			seen.push(useParams());
+			return null;
+		};
+		renderAt(
+			"/devices/1",
+			<Routes>
+				{[<Route key="d" path="/devices/:id" element={<Consumer />} />]}
+			</Routes>,
+		);
+		act(() => rerender());
+		expect(seen).toHaveLength(2);
+		expect(seen[1]).toEqual({ id: "1" });
+		expect(seen[1]).toBe(seen[0]);
+	});
+
+	it("[ISSUE-3475-ITEM-26] re-renders a component that reads only its route and params when the route's url changes, not on every navigation", () => {
+		let renders = 0;
+		const Consumer = () => {
+			renders++;
+			const { url } = useRouteInfo();
+			const { id } = useParams<"id">();
+			return <div data-testid="route">{`${url} ${id}`}</div>;
+		};
+		const { history } = renderAt(
+			"/devices/1",
+			<Routes>
+				{[<Route key="d" path="/devices/:id/*" element={<Consumer />} />]}
+			</Routes>,
+		);
+		act(() => history.push("/devices/1/edit"));
+		expect(renders).toBe(1);
+		act(() => history.push("/devices/2"));
+		expect(renders).toBe(2);
+		expect(screen.getByTestId("route")).toHaveTextContent("/devices/2 2");
+	});
+
+	it("[ISSUE-3475-ITEM-26] runs an effect that depends on useParams when a param of its route changes, not on every navigation", () => {
+		const effectRuns: unknown[] = [];
+		const Tenant = () => {
+			// re-renders on every navigation, as most route elements do
+			useLocation();
+			const params = useParams<"tenantId">();
+			useEffect(() => {
+				effectRuns.push(params);
+			}, [params]);
+			return (
+				<Routes>
+					{[<Route key="i" path="devices/:id" element={<div />} />]}
+				</Routes>
+			);
+		};
+		const { history } = renderAt(
+			"/t/T1/devices/1",
+			<Routes>
+				{[<Route key="t" path="/t/:tenantId/*" element={<Tenant />} />]}
+			</Routes>,
+		);
+		act(() => history.push("/t/T1/devices/2"));
+		expect(effectRuns).toEqual([{ tenantId: "T1" }]);
+		act(() => history.push("/t/T2/devices/2"));
+		expect(effectRuns).toEqual([{ tenantId: "T1" }, { tenantId: "T2" }]);
+	});
+
+	it("[ISSUE-3475-ITEM-26] re-renders no route element on a navigation within its route, also when its route list is built from useParams", () => {
+		let pageRenders = 0;
+		const Page = () => {
+			pageRenders++;
+			return null;
+		};
+		let listRenders = 0;
+		const DeviceRoutes = () => {
+			listRenders++;
+			const { tenantId } = useParams<"tenantId">();
+			return (
+				<Routes>
+					{[
+						<Route
+							key="d"
+							path="devices/*"
+							element={<Page key={tenantId} />}
+						/>,
+					]}
+				</Routes>
+			);
+		};
+		const { history } = renderAt(
+			"/t/T1/devices/1",
+			<Routes>
+				{[<Route key="t" path="/t/:tenantId/*" element={<DeviceRoutes />} />]}
+			</Routes>,
+		);
+		act(() => history.push("/t/T1/devices/2"));
+		expect(listRenders).toBe(1);
+		expect(pageRenders).toBe(1);
+	});
+
+	it("[ISSUE-3475-ITEM-26] useParams throws outside a HistoryRouter, naming Framework and HistoryRouter", () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const ReadParams = () => {
+			useParams();
+			return null;
+		};
+		expect(() => render(<ReadParams />)).toThrow(
+			"did you forget to add Components-Care Framework or HistoryRouter?",
+		);
 	});
 });
 

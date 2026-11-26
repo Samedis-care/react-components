@@ -1,6 +1,6 @@
-import useLocation from "./useLocation";
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { RouteContext } from "./Route";
+import { useHistoryRouterContext } from "./HistoryRouter";
 import matchPath from "./matchPath";
 
 /**
@@ -17,15 +17,27 @@ import matchPath from "./matchPath";
  * (`:tenantId`) to read it in the record page.
  * Each value is percent-decoded: "foo bar" at "foo%20bar", see
  * `PathMatch.params`.
+ * It returns the same object while the url and path of the nearest Route stay
+ * the same, so an effect or memo that depends on it runs again when a param
+ * changes, not on every navigation: "/devices/1" to "/devices/1/edit" under
+ * "/devices/:id/*" keeps it. Outside of every Route it returns `{}`.
+ * Throws outside a HistoryRouter; Framework renders one.
  */
 const useParams = <T extends string = string>(): Partial<Record<T, string>> => {
-	const location = useLocation();
+	// throws outside a HistoryRouter; unlike the location, it stays the same on a navigation
+	useHistoryRouterContext();
 	const route = useContext(RouteContext);
-	if (!route) return {};
-	return (
-		(matchPath({ path: route.path }, location.pathname)?.params as Partial<
-			Record<T, string>
-		>) ?? {}
+	const path = route ? route.path : null;
+	const url = route ? route.url : null;
+	// the params come from the segments the route matches, which are its url: the rest of the
+	// location doesn't change them
+	return useMemo(
+		(): Partial<Record<T, string>> =>
+			path === null || url === null
+				? {}
+				: ((matchPath({ path }, url)?.params as
+						Partial<Record<T, string>> | undefined) ?? {}),
+		[path, url],
 	);
 };
 

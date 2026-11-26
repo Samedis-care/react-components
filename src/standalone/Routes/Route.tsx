@@ -80,6 +80,10 @@ export interface RouteContextType {
  * starts a fresh routing scope: inside it, outside of its own routes, it is
  * null also within a Route of an outer HistoryRouter. Read it with
  * {@link useRouteInfo}, or with `useContext` where null is a valid case.
+ * The value stays the same object while the route's url, path and rendersAt
+ * do, so a navigation within the route ("/devices/1" to "/devices/2" under
+ * "/devices/*") doesn't re-render the components that read it, unless they
+ * read the location too.
  */
 export const RouteContext = React.createContext<RouteContextType | null>(null);
 /**
@@ -129,11 +133,16 @@ const Route = (props: RouteProps) => {
 			(!parentRendersAt || parentRendersAt(target)),
 		[pattern, entryRenderedAt, parentRendersAt],
 	);
-	const ctx = useMemo((): RouteContextType | null => {
-		const match = matchPath(pattern, pathname);
-		if (!match) return null; // this one is about to be unmounted
-		return { url: match.url, path: pattern.path, depth, rendersAt };
-	}, [pattern, pathname, depth, rendersAt]);
+	// null: this one is about to be unmounted
+	const url = matchPath(pattern, pathname)?.url ?? null;
+	// on the url, not the pathname: a navigation within the route ("/devices/1" to
+	// "/devices/2" under "/devices/*") keeps the value, so its consumers don't re-render
+	const routePath = pattern.path;
+	const ctx = useMemo(
+		(): RouteContextType | null =>
+			url === null ? null : { url, path: routePath, depth, rendersAt },
+		[url, routePath, depth, rendersAt],
+	);
 
 	// every location, not only every route change: a navigation within this route needs its name too
 	useEffect(() => {
