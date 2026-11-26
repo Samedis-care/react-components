@@ -281,7 +281,10 @@ export const Issue3497Item16RejectedValueIsDescribed: StoryObj<InputDialogArgs> 
 			await expect(input).toHaveFocus();
 			await expect(input).toHaveAttribute("aria-invalid", "true");
 			await expect(input).toHaveAccessibleDescription("Enter a name");
-			await expect(page().getByText("Enter a name")).toBeVisible();
+			// the dialog may still be fading in under load (opacity below 1 counts as not visible)
+			await waitFor(() =>
+				expect(page().getByText("Enter a name")).toBeVisible(),
+			);
 			await expect(args.onYes).not.toHaveBeenCalled();
 		},
 	};
