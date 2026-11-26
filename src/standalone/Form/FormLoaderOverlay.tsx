@@ -31,7 +31,6 @@ const FormLoaderOverlayRoot = styled("div", {
 		justifyContent: "center",
 		padding: `calc(${theme.spacing(2)} + 20px) 0`,
 		backgroundColor: "rgba(255,255,255,.3)",
-		transition: "opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) 1000ms",
 		// keyboard focus that the overlay takes from the content it wraps; inside the
 		// wash, so that a container that clips its overflow does not cut it off
 		"&:focus-visible": {
@@ -39,7 +38,18 @@ const FormLoaderOverlayRoot = styled("div", {
 			outlineOffset: -2,
 		},
 		...(visible
-			? { visibility: "visible", opacity: 1 }
+			? {
+					// shown, the wash blocks the pointer at once and fades in after 1s, so
+					// that a busy phase shorter than that never paints it. Every show starts
+					// from transparent: the shown state alone has the transition, so hiding
+					// drops the wash at once and a show right after it fades in late again,
+					// and @starting-style gives the transition its start on an overlay
+					// mounted shown (a browser without it shows that one at once)
+					visibility: "visible",
+					opacity: 1,
+					transition: "opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) 1000ms",
+					"@starting-style": { opacity: 0 },
+				}
 			: { visibility: "hidden", opacity: 0 }),
 	}),
 );
@@ -156,7 +166,15 @@ export type FormLoaderOverlayClassKey =
 
 export interface FormLoaderOverlayProps {
 	/**
-	 * should the overlay be shown? will trigger fade-in, set to isSubmitting
+	 * Whether the overlay is shown, such as a form's `isSubmitting`. Required.
+	 *
+	 * Every show fades in late: when the overlay is shown, as `visible` turns true or
+	 * as the overlay is mounted with `visible` already true, the wash blocks the
+	 * pointer at once, stays transparent for 1s and then fades in over 500ms, so that
+	 * a busy phase shorter than 1s never paints it. A show right after a hide starts
+	 * from transparent too. `false` hides the wash at once and removes the spinner.
+	 * The status message (see `message`) and, with `children`, the `inert` and
+	 * `aria-busy` content follow `visible` at once, not the fade.
 	 */
 	visible: boolean;
 	/**
@@ -285,6 +303,11 @@ const FormLoaderOverlay = (inProps: FormLoaderOverlayProps) => {
  * ancestor (`position: absolute`, `inset: 0`), or, with `children`, over them.
  * BasicFormPage shows it over the form page while the form is submitting, through
  * FormPageLayout's `other`, which makes it cover the form layout.
+ *
+ * Timing: the wash fades in 1s after every show, also when the overlay is mounted
+ * shown, so that a short busy phase never flashes it; hiding is at once (see
+ * {@link FormLoaderOverlayProps.visible}). To show a spinner at once, such as the
+ * whole content of a view while it loads, use a Loader instead.
  *
  * Input: the wash alone blocks pointer input only. The controls under it stay
  * reachable with Tab and operable by keyboard: disable them while it is shown, or pass

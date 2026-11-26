@@ -70,6 +70,15 @@ const hitAtCenter = (el: Element) => {
 		(r.top + r.bottom) / 2,
 	);
 };
+const nextFrame = () =>
+	new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+const overlayIn = (scope: ParentNode) => {
+	const el = scope.querySelector<HTMLElement>(
+		'[class*="CcFormLoaderOverlay-root"]',
+	);
+	if (!el) throw new Error("overlay not rendered");
+	return el;
+};
 
 export const Visible: OverlayStory = {
 	args: { visible: true },
@@ -79,8 +88,166 @@ export const Hidden: OverlayStory = {
 	args: { visible: false },
 };
 
+const ToggleOverlay = (props: FormLoaderOverlayProps) => {
+	const [visible, setVisible] = useState(props.visible);
+	return (
+		<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+			<Button variant={"outlined"} onClick={() => setVisible((v) => !v)}>
+				{visible ? "Hide overlay" : "Show overlay"}
+			</Button>
+			<WrappedFormLoaderOverlay {...props} visible={visible} />
+		</Box>
+	);
+};
+
 export const Controllable: OverlayStory = {
 	args: { visible: false },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"Toggling `visible` on a mounted overlay: it blocks the pointer at once but stays transparent for 1s, then fades in over 500ms. Hiding it again is immediate, so a save shorter than 1s never paints the wash.",
+			},
+		},
+	},
+	render: (args) => <ToggleOverlay {...args} />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const overlay = overlayIn(canvasElement);
+		const content = canvas.getByText("Form Content");
+
+		// show: click shield at once, wash still transparent, fade-in scheduled
+		await userEvent.click(canvas.getByRole("button", { name: "Show overlay" }));
+		await nextFrame();
+		await expect(getComputedStyle(overlay).visibility).toBe("visible");
+		await expect(getComputedStyle(overlay).opacity).toBe("0");
+		await expect(overlay.contains(hitAtCenter(content))).toBe(true);
+		const fades = overlay.getAnimations();
+		await expect(fades).toHaveLength(1);
+		const fade = fades[0] as CSSTransition;
+		await expect(fade.transitionProperty).toBe("opacity");
+		await expect(fade.effect?.getTiming()).toMatchObject({
+			delay: 1000,
+			duration: 500,
+		});
+
+		// hide before the delay ends: the wash never painted, the pointer goes through
+		await userEvent.click(canvas.getByRole("button", { name: "Hide overlay" }));
+		await nextFrame();
+		await expect(getComputedStyle(overlay).visibility).toBe("hidden");
+		await expect(getComputedStyle(overlay).opacity).toBe("0");
+		await expect(canvas.queryByRole("progressbar")).toBeNull();
+		await expect(hitAtCenter(content)).toBe(content);
+
+		// show again and let the fade-in finish
+		await userEvent.click(canvas.getByRole("button", { name: "Show overlay" }));
+		await nextFrame();
+		overlay.getAnimations().forEach((animation) => animation.finish());
+		await expect(getComputedStyle(overlay).opacity).toBe("1");
+		await expect(within(overlay).getAllByRole("progressbar")).toHaveLength(1);
+
+		await userEvent.click(canvas.getByRole("button", { name: "Hide overlay" }));
+		await nextFrame();
+		await expect(getComputedStyle(overlay).visibility).toBe("hidden");
+		await expect(canvas.queryByRole("progressbar")).toBeNull();
+	},
+};
+
+/**
+ * The transitions running on the wash, by property, delay and duration
+ */
+const transitionsOf = (overlay: HTMLElement) =>
+	overlay.getAnimations().map((animation) => {
+		const timing = animation.effect?.getTiming();
+		return {
+			property: (animation as CSSTransition).transitionProperty,
+			delay: timing?.delay,
+			duration: timing?.duration,
+		};
+	});
+
+/**
+ * An area that is loaded on a click and shows the overlay while it loads by mounting
+ * it already shown, as `{loading && <FormLoaderOverlay visible />}` does
+ */
+const LoadOnClick = (props: FormLoaderOverlayProps) => {
+	const [loading, setLoading] = useState(false);
+	const load = useCallback(() => setLoading(true), []);
+	return (
+		<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+			<Button variant={"outlined"} onClick={load}>
+				Load
+			</Button>
+			{loading ? (
+				<WrappedFormLoaderOverlay {...props} visible />
+			) : (
+				<Typography>Not loaded yet</Typography>
+			)}
+		</Box>
+	);
+};
+
+export const Issue3473Item13MountedShownFadesInLate: OverlayStory = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-13: an overlay mounted already shown (`{loading && <FormLoaderOverlay visible />}`) fades in late, as one whose `visible` turns true: it blocks the pointer at once, stays transparent for 1s and then fades in over 500ms, so a load shorter than 1s never paints the wash.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	render: (args) => <LoadOnClick {...args} />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		await userEvent.click(canvas.getByRole("button", { name: "Load" }));
+		await nextFrame();
+		const overlay = overlayIn(canvasElement);
+		await expect(getComputedStyle(overlay).visibility).toBe("visible");
+		await expect(getComputedStyle(overlay).opacity).toBe("0");
+		await expect(
+			overlay.contains(hitAtCenter(canvas.getByText("Form Content"))),
+		).toBe(true);
+		await expect(transitionsOf(overlay)).toEqual([
+			{ property: "opacity", delay: 1000, duration: 500 },
+		]);
+	},
+};
+
+export const Issue3473Item13ShownAgainFadesInLate: OverlayStory = {
+	args: { visible: false },
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3473-ITEM-13: an overlay that had faded in and is shown again right after it was hidden (a second save, a busy reason that comes back) fades in late again: hiding drops the wash at once, so the next show starts from transparent.",
+			},
+		},
+		a11y: { test: "error" },
+	},
+	render: (args) => <ToggleOverlay {...args} />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const overlay = overlayIn(canvasElement);
+
+		// shown and faded in, then hidden
+		await userEvent.click(canvas.getByRole("button", { name: "Show overlay" }));
+		await nextFrame();
+		overlay.getAnimations().forEach((animation) => animation.finish());
+		await expect(getComputedStyle(overlay).opacity).toBe("1");
+		await userEvent.click(canvas.getByRole("button", { name: "Hide overlay" }));
+		await nextFrame();
+		await expect(getComputedStyle(overlay).visibility).toBe("hidden");
+
+		// shown again at once
+		await userEvent.click(canvas.getByRole("button", { name: "Show overlay" }));
+		await nextFrame();
+		await expect(getComputedStyle(overlay).visibility).toBe("visible");
+		await expect(getComputedStyle(overlay).opacity).toBe("0");
+		await expect(transitionsOf(overlay)).toEqual([
+			{ property: "opacity", delay: 1000, duration: 500 },
+		]);
+	},
 };
 
 export const Issue3473Item3DialogAboveBusyOverlay: OverlayStory = {
