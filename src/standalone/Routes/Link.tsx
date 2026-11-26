@@ -1,5 +1,11 @@
 import React, { useCallback, useMemo } from "react";
-import { createPath, type History, type Location, type To } from "history";
+import {
+	createPath,
+	parsePath,
+	type History,
+	type Location,
+	type To,
+} from "history";
 import { useHistoryRouterContext } from "./HistoryRouter";
 import useNavigate from "./useNavigate";
 import useLocation from "./useLocation";
@@ -69,6 +75,28 @@ export interface LinkProps extends Omit<
 	 * modifier key to let Ctrl-click still open the href in a new tab.
 	 */
 	onClick?: React.MouseEventHandler<HTMLAnchorElement>;
+	/**
+	 * Marks the link with `aria-current` while it leads to the current page, so
+	 * screen readers announce it as the current one and styles can select it
+	 * (`&[aria-current="page"]`): for the links of a navigation or a
+	 * breadcrumb trail. `true` and `"page"` set `aria-current="page"`;
+	 * `"step"` (a step of a process) and `"location"` (a part of the page, such
+	 * as an entry of a table of contents that links to `#notes`) set that token
+	 * instead.
+	 * The link leads to the current page while the location has the pathname
+	 * of the target (completed as described at `to`), the search params the
+	 * target names, with the same values, and the hash the target names, if
+	 * it names one. A target without search or hash leaves them out of the
+	 * comparison. At "/devices?page=2&sort=name#notes", "/devices",
+	 * "/devices?page=2", "?page=2" and "#notes" are marked, but "/devices/5",
+	 * "/" (pages below and above it), "/devices?page=1" and "/devices#other"
+	 * are not. Pathname, search and hash are compared as the URL parser reads
+	 * them, as for `replace`. A URL with a scheme is never marked. The mark
+	 * follows the location.
+	 * An `aria-current` passed to the link is used instead.
+	 * Default: `false` (no `aria-current` unless one is passed)
+	 */
+	markCurrent?: boolean | "page" | "step" | "location";
 }
 
 /**
@@ -93,6 +121,25 @@ const isCurrentLocation = (location: Location, to: To): boolean =>
 	normalizedUrl(navigationTarget(location, to)) === normalizedUrl(location);
 
 /**
+ * Does the link lead to the current page, for `markCurrent`? The location has
+ * the target's pathname, the search params the target names (each with the
+ * same value) and the hash the target names, if it names one. Compared as
+ * the URL parser reads them, as in {@link isCurrentLocation}.
+ * @param location The current location
+ * @param to The target, with leading slashes already collapsed
+ */
+const leadsToCurrentPage = (location: Location, to: To): boolean => {
+	const named = typeof to === "string" ? parsePath(to) : to;
+	const target = new URL(normalizedUrl(navigationTarget(location, to)));
+	const current = new URL(normalizedUrl(location));
+	if (target.pathname !== current.pathname) return false;
+	if (named.hash && target.hash !== current.hash) return false;
+	for (const [name, value] of target.searchParams)
+		if (!current.searchParams.getAll(name).includes(value)) return false;
+	return true;
+};
+
+/**
  * Does the browser open the link in another tab or window, or download it?
  * A target that is empty or "_self" (in any case) is the current tab, as in
  * the HTML standard.
@@ -111,7 +158,8 @@ const opensElsewhere = (anchor: HTMLAnchorElement): boolean => {
  * of pushing a second one, as the browser does for a plain `<a>` and as
  * react-router's Link does (see `replace`). Clicks with Ctrl, Meta, Shift or
  * Alt are left to the browser, and so is every click on a link with a
- * `target` other than `_self` or with `download`. Also works as the
+ * `target` other than `_self` or with `download`. With `markCurrent`, the
+ * link to the current page gets `aria-current="page"`. Also works as the
  * `component` of MUI's Link and ButtonBase components
  * (`<Button component={Link} to="/x">`, ListItemButton, MenuItem, Tab,
  * IconButton), which pass an `onClick` of their own.
@@ -121,13 +169,27 @@ const Link = React.forwardRef(function Link(
 	props: LinkProps,
 	ref: React.ForwardedRef<HTMLAnchorElement>,
 ) {
-	const { to, replace, state, preventScrollReset, onClick, ...anchorProps } =
-		props;
+	const {
+		to,
+		replace,
+		state,
+		preventScrollReset,
+		onClick,
+		markCurrent,
+		"aria-current": ariaCurrent,
+		...anchorProps
+	} = props;
 	const { history } = useHistoryRouterContext();
 	const location = useLocation();
 	const navigate = useNavigate();
 	// null for a URL with a scheme, which the browser follows
 	const target = useMemo(() => toAppPath(to), [to]);
+	// the aria-current token of the link to the current page
+	const currentToken = markCurrent === true ? "page" : markCurrent || undefined;
+	const isCurrent = useMemo(
+		() => !!currentToken && !!target && leadsToCurrentPage(location, target),
+		[currentToken, location, target],
+	);
 	// the current location completes a target without pathname, search or hash
 	const href = useMemo(
 		() =>
@@ -155,7 +217,15 @@ const Link = React.forwardRef(function Link(
 		},
 		[history, navigate, onClick, replace, state, preventScrollReset, target],
 	);
-	return <a ref={ref} href={href} onClick={handleNav} {...anchorProps} />;
+	return (
+		<a
+			ref={ref}
+			href={href}
+			onClick={handleNav}
+			aria-current={ariaCurrent ?? (isCurrent ? currentToken : undefined)}
+			{...anchorProps}
+		/>
+	);
 });
 
 export default React.memo(Link);

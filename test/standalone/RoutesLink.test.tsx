@@ -16,6 +16,7 @@ import {
 	type History,
 } from "history";
 import {
+	Breadcrumbs,
 	Button,
 	IconButton,
 	Link as MuiLink,
@@ -606,5 +607,223 @@ describe("Link: a link to the current location", () => {
 		fireEvent.click(screen.getByRole("link", { name: "current page" }));
 		fireEvent.click(screen.getByRole("link", { name: "other page" }));
 		expect(actions).toEqual([Action.Replace, Action.Push]);
+	});
+});
+
+describe("Link: markCurrent", () => {
+	it('[ISSUE-3475-ITEM-25] marks the link to the current page with aria-current="page", only with markCurrent', () => {
+		renderAt(
+			"/devices",
+			<>
+				<Link to="/devices" markCurrent>
+					Devices
+				</Link>
+				<Link to="/settings" markCurrent>
+					Settings
+				</Link>
+				<Link to="/devices">Devices, not marked</Link>
+			</>,
+		);
+		expect(screen.getByRole("link", { name: "Devices" })).toHaveAttribute(
+			"aria-current",
+			"page",
+		);
+		expect(screen.getByRole("link", { name: "Settings" })).not.toHaveAttribute(
+			"aria-current",
+		);
+		expect(
+			screen.getByRole("link", { name: "Devices, not marked" }),
+		).not.toHaveAttribute("aria-current");
+	});
+
+	it("[ISSUE-3475-ITEM-25] moves the mark with the location", () => {
+		const { history } = renderAt(
+			"/devices",
+			<>
+				<Link to="/devices" markCurrent>
+					Devices
+				</Link>
+				<Link to="/settings" markCurrent>
+					Settings
+				</Link>
+			</>,
+		);
+		const devices = screen.getByRole("link", { name: "Devices" });
+		const settings = screen.getByRole("link", { name: "Settings" });
+		fireEvent.click(settings);
+		expect(renderedPath()).toBe("/settings");
+		expect(settings).toHaveAttribute("aria-current", "page");
+		expect(devices).not.toHaveAttribute("aria-current");
+		act(() => history.back());
+		expect(devices).toHaveAttribute("aria-current", "page");
+		expect(settings).not.toHaveAttribute("aria-current");
+	});
+
+	it.each([
+		["/devices", true],
+		["//devices", true],
+		["/devices?page=2", true],
+		["/devices?sort=name&page=2", true],
+		["/devices?page=2&sort=name#notes", true],
+		["?page=2", true],
+		[{ search: "?page=2" }, true],
+		["#notes", true],
+		[{ hash: "#notes" }, true],
+		["/devices?page=1", false],
+		["/devices?page=2&q=x", false],
+		["/devices#other", false],
+		["?page=2#other", false],
+		["/devices/5", false],
+		["/", false],
+		["/settings", false],
+	])(
+		"[ISSUE-3475-ITEM-25] compares the pathname, and the search params and hash the target names: at /devices?page=2&sort=name#notes, a link to %j is current: %s",
+		(to, current) => {
+			renderAt(
+				"/devices?page=2&sort=name#notes",
+				<Link to={to} markCurrent>
+					go
+				</Link>,
+			);
+			const link = screen.getByRole("link", { name: "go" });
+			if (current) expect(link).toHaveAttribute("aria-current", "page");
+			else expect(link).not.toHaveAttribute("aria-current");
+		},
+	);
+
+	it.each([
+		[true, "page"],
+		["page", "page"],
+		["step", "step"],
+		["location", "location"],
+	] as const)(
+		"[ISSUE-3475-ITEM-25] with markCurrent=%j, the link to the current location gets aria-current=%j",
+		(markCurrent, token) => {
+			renderAt(
+				"/wizard/2",
+				<>
+					<Link to="/wizard/2" markCurrent={markCurrent}>
+						current
+					</Link>
+					<Link to="/wizard/3" markCurrent={markCurrent}>
+						other
+					</Link>
+				</>,
+			);
+			expect(screen.getByRole("link", { name: "current" })).toHaveAttribute(
+				"aria-current",
+				token,
+			);
+			expect(screen.getByRole("link", { name: "other" })).not.toHaveAttribute(
+				"aria-current",
+			);
+		},
+	);
+
+	it("[ISSUE-3475-ITEM-25] marks nothing with markCurrent={false}", () => {
+		renderAt(
+			"/devices",
+			<Link to="/devices" markCurrent={false}>
+				Devices
+			</Link>,
+		);
+		expect(screen.getByRole("link", { name: "Devices" })).not.toHaveAttribute(
+			"aria-current",
+		);
+	});
+
+	it("[ISSUE-3475-ITEM-25] keeps an aria-current passed to the link", () => {
+		renderAt(
+			"/devices",
+			<>
+				<Link to="/devices" markCurrent aria-current="step">
+					current, step
+				</Link>
+				<Link to="/devices" markCurrent aria-current={false}>
+					current, false
+				</Link>
+				<Link to="/settings" markCurrent aria-current="page">
+					other, page
+				</Link>
+				<Link to="/devices" markCurrent aria-current={undefined}>
+					current, undefined
+				</Link>
+			</>,
+		);
+		const link = (name: string) => screen.getByRole("link", { name });
+		expect(link("current, step")).toHaveAttribute("aria-current", "step");
+		expect(link("current, false")).toHaveAttribute("aria-current", "false");
+		expect(link("other, page")).toHaveAttribute("aria-current", "page");
+		expect(link("current, undefined")).toHaveAttribute("aria-current", "page");
+	});
+
+	it("[ISSUE-3475-ITEM-25] never marks a link to a URL with a scheme", () => {
+		window.history.replaceState(null, "", "/devices");
+		const history = createBrowserHistory();
+		render(
+			<HistoryRouter history={history}>
+				<Link to={window.location.href} markCurrent>
+					absolute
+				</Link>
+				<Link to="mailto:help@example.com" markCurrent>
+					mail
+				</Link>
+			</HistoryRouter>,
+		);
+		expect(screen.getByRole("link", { name: "absolute" })).not.toHaveAttribute(
+			"aria-current",
+		);
+		expect(screen.getByRole("link", { name: "mail" })).not.toHaveAttribute(
+			"aria-current",
+		);
+	});
+
+	it("[ISSUE-3475-ITEM-25] recognizes the current page in a browser history, which keeps it percent-encoded", () => {
+		window.history.replaceState(null, "", "/search/foo bar/über?q=a b#c d");
+		const history = createBrowserHistory();
+		render(
+			<HistoryRouter history={history}>
+				<Link to="/search/foo bar/über" markCurrent>
+					path
+				</Link>
+				<Link to="/search/foo bar/über?q=a b#c d" markCurrent>
+					full
+				</Link>
+				<Link to="/search/foo bar/über?q=a" markCurrent>
+					other search
+				</Link>
+			</HistoryRouter>,
+		);
+		expect(screen.getByRole("link", { name: "path" })).toHaveAttribute(
+			"aria-current",
+			"page",
+		);
+		expect(screen.getByRole("link", { name: "full" })).toHaveAttribute(
+			"aria-current",
+			"page",
+		);
+		expect(
+			screen.getByRole("link", { name: "other search" }),
+		).not.toHaveAttribute("aria-current");
+	});
+
+	it("[ISSUE-3475-ITEM-25] marks the current crumb as the component of MUI's Link and keeps markCurrent out of the DOM", () => {
+		renderAt(
+			"/devices",
+			<Breadcrumbs aria-label="breadcrumb">
+				<MuiLink component={Link} to="/" markCurrent="page">
+					Home
+				</MuiLink>
+				<MuiLink component={Link} to="/devices" markCurrent="page">
+					Devices
+				</MuiLink>
+			</Breadcrumbs>,
+		);
+		const home = screen.getByRole("link", { name: "Home" });
+		const devices = screen.getByRole("link", { name: "Devices" });
+		expect(devices).toHaveAttribute("aria-current", "page");
+		expect(home).not.toHaveAttribute("aria-current");
+		for (const link of [home, devices])
+			expect(link).not.toHaveAttribute("markcurrent");
 	});
 });

@@ -554,3 +554,70 @@ export const Issue3475Item13HistoryRouterInsideARoute: Story = {
 		).toBeVisible();
 	},
 };
+
+// ─── The link to the current page ───────────────────────────────────────────
+
+/** the link to the current page: bold and not underlined, not only a color */
+const CURRENT_LINK_SX = {
+	'&[aria-current="page"]': {
+		color: "text.primary",
+		fontWeight: "bold",
+		textDecoration: "none",
+	},
+};
+const CURRENT_NAV_SX = { display: "flex", gap: 2, mb: 2 };
+const CURRENT_NAV_ENTRIES = [
+	{ to: "/", label: "Home" },
+	{ to: "/devices", label: "Devices" },
+	{ to: "/settings", label: "Settings" },
+];
+
+const CurrentPageDemo = () => {
+	const history = useStoryHistory("/devices");
+	return (
+		<HistoryRouter history={history}>
+			<Box sx={FRAME_SX}>
+				<Box component="nav" aria-label="Main" sx={CURRENT_NAV_SX}>
+					{CURRENT_NAV_ENTRIES.map((entry) => (
+						<MuiLink
+							key={entry.to}
+							component={Link}
+							to={entry.to}
+							markCurrent
+							sx={CURRENT_LINK_SX}
+						>
+							{entry.label}
+						</MuiLink>
+					))}
+				</Box>
+				<CurrentPath />
+			</Box>
+		</HistoryRouter>
+	);
+};
+
+export const Issue3475Item25LinkMarksTheCurrentPage: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3475-ITEM-25: the links of a navigation set `markCurrent`, so the link to the current page gets `aria-current="page"`: screen readers announce it as the current page, and the styles select it (`&[aria-current="page"]`: bold, not underlined, in the text color). A click on another link moves the mark.',
+			},
+		},
+	},
+	render: () => <CurrentPageDemo />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const devices = canvas.getByRole("link", { name: "Devices" });
+		const settings = canvas.getByRole("link", { name: "Settings" });
+		await expect(devices).toHaveAttribute("aria-current", "page");
+		await expect(settings).not.toHaveAttribute("aria-current");
+		await userEvent.click(settings);
+		await expect(settings).toHaveAttribute("aria-current", "page");
+		await expect(devices).not.toHaveAttribute("aria-current");
+		await expect(
+			canvas.getByRole("link", { name: "Home" }),
+		).not.toHaveAttribute("aria-current");
+	},
+};
