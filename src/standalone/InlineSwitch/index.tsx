@@ -26,7 +26,9 @@ export interface InlineSwitchProps {
 	/**
 	 * Label for switch control (only used if visible is truthy). It is also the
 	 * switch's accessible name; without a label, name the switch with `aria-label`
-	 * or `aria-labelledby`.
+	 * or `aria-labelledby`. A label too long for the space beside the switch wraps
+	 * there, at a space or, inside a word longer than that space, at any character;
+	 * its first line is centered beside the switch.
 	 */
 	label?: React.ReactNode;
 	/**
@@ -62,7 +64,9 @@ export interface InlineSwitchProps {
 	 * several children or a fragment; `false`, `null` and `undefined` render
 	 * nothing, so a conditional child is written `{show && <List />}`. The switch
 	 * and its label float at the top right of the content, so inline content flows
-	 * to their left.
+	 * to their left. They are never wider than the container: with a label too long
+	 * for the space, they take the container's width and the content starts below
+	 * them.
 	 * @default none
 	 */
 	children?: React.ReactNode;
@@ -162,12 +166,40 @@ const StyledRoot = styled("div", { name: "CcInlineSwitch", slot: "root" })({
 	marginTop: 15,
 });
 
+// the height of the switch's row: the switch and the first line of its label are
+// centered in it
+const ROW_HEIGHT = 30;
+
 const StyledSwitchWrapper = styled(Typography, {
 	name: "CcInlineSwitch",
 	slot: "switchWrapper",
 })(({ theme }) => ({
-	lineHeight: "30px",
 	float: "right",
+	// the row of switch and label (the `<label>`, a Grid that does not wrap): a label
+	// too long for the space beside the switch wraps there, at a space or, inside a
+	// word longer than that space, at any character, so the float is never wider than
+	// the root and the switch never leaves it. Both start at the row's top
+	"& > .MuiGrid-container": {
+		alignItems: "flex-start",
+	},
+	// the switch keeps its width, centered in the row's height
+	"& > .MuiGrid-container > :first-of-type": {
+		display: "flex",
+		alignItems: "center",
+		flexShrink: 0,
+		height: ROW_HEIGHT,
+	},
+	// the label's lines have the caption's line height; the first one is centered in
+	// the row's height, beside the switch
+	"& > .MuiGrid-container > :last-child": {
+		overflowWrap: "anywhere",
+		paddingBlock: `calc((${ROW_HEIGHT}px - 1lh) / 2)`,
+	},
+	// without a label (a switch named by `aria-label`) the row is as high as the switch
+	"& > .MuiGrid-container:has(> :last-child:empty) > *": {
+		height: "auto",
+		paddingBlock: 0,
+	},
 	[`&.${DISABLED_CLASS}`]: {
 		color: (theme.vars || theme).palette.text.disabled,
 	},
@@ -256,12 +288,7 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 					])}
 					variant={"caption"}
 				>
-					<Grid
-						component="label"
-						container
-						sx={{ alignItems: "center" }}
-						spacing={1}
-					>
+					<Grid component="label" container wrap="nowrap" spacing={1}>
 						<Grid>
 							<AntSwitch
 								className={combineClassNames([SWITCH_CLASS, classes?.switch])}

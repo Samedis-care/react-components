@@ -120,7 +120,6 @@ const StyledInlineSwitch = styled(InlineSwitch, {
 	// the switch gets a row of its own above the chips, at the right end, with its label
 	// before it
 	"& .CcInlineSwitch-switchWrapper": {
-		lineHeight: "30px",
 		width: "100%",
 		direction: "rtl",
 		// the label's text keeps the direction of its own words, so punctuation at its

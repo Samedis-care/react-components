@@ -6,6 +6,8 @@ import { fn, expect, waitFor } from "storybook/test";
 import InlineSwitch from "./index";
 import BaseSelector, { BaseSelectorData } from "../Selector/BaseSelector";
 import { selectorLocalLoadHandler } from "../Selector";
+import MultiSelectWithoutGroup from "../Selector/MultiSelectWithoutGroup";
+import type { MultiSelectorData } from "../Selector/MultiSelect";
 
 const meta: Meta<typeof InlineSwitch> = {
 	title: "Standalone/InlineSwitch",
@@ -649,5 +651,200 @@ export const Issue3465Item13ColorsFollowTheColorScheme: Story = {
 				).toBe(palette[part][property]);
 			}
 		}
+	},
+};
+
+const LONG_COMPOUND =
+	"Medizinproduktebetreiberverordnungskonformitätsbescheinigungen anzeigen";
+
+export const Issue3465Item14LongLabelStaysOnScreenOnPhone: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"ISSUE-3465-ITEM-14: at 320px a label with a word longer than the row widens the floated switch row past the left edge of the screen, so the switch cannot be seen or scrolled to; a long label also drops below the switch. Expected: the label wraps beside the switch and everything stays on screen.",
+			},
+		},
+	},
+	args: { label: LONG_COMPOUND },
+	render: (args) => (
+		<div style={{ padding: "0 16px" }}>
+			<InlineSwitch {...args}>
+				<div>Device list</div>
+			</InlineSwitch>
+		</div>
+	),
+	play: async ({ canvas, canvasElement }) => {
+		const sw = canvas.getByRole("switch", { name: LONG_COMPOUND });
+		const switchRect = elementOf(
+			sw.closest(".MuiSwitch-root"),
+		).getBoundingClientRect();
+		const range = document.createRange();
+		range.selectNodeContents(canvas.getByText(LONG_COMPOUND));
+		const text = range.getBoundingClientRect();
+		const viewport = canvasElement.ownerDocument.documentElement.clientWidth;
+		await expect(switchRect.left, "switch left edge").toBeGreaterThanOrEqual(0);
+		await expect(text.left, "label left edge").toBeGreaterThanOrEqual(0);
+		await expect(text.right, "label right edge").toBeLessThanOrEqual(viewport);
+		await expect(
+			Math.abs(text.top - switchRect.top),
+			"label starts on the switch's row",
+		).toBeLessThanOrEqual(8);
+	},
+};
+
+const LONG_SENTENCE =
+	"Show inactive entries of all departments and their locations";
+const LONG_SENTENCE_RTL = "הצג רשומות לא פעילות של כל המחלקות והמיקומים שלהן";
+const NO_ENTRIES: MultiSelectorData[] = [];
+const loadNoEntries = selectorLocalLoadHandler(NO_ENTRIES);
+const ignore = () => {};
+
+/** one InlineSwitch per case, each in a box that contains its float */
+const WrapCases = () => (
+	<div style={{ padding: "0 16px" }}>
+		{[
+			{ id: "short", label: "Show inactive" },
+			{ id: "long", label: LONG_SENTENCE },
+			{ id: "rtl", label: LONG_SENTENCE_RTL, dir: "rtl" },
+		].map(({ id, label, dir }) => (
+			<div key={id} data-testid={id} dir={dir} style={{ display: "flow-root" }}>
+				<InlineSwitch value={false} visible label={label} />
+			</div>
+		))}
+		<div data-testid="nolabel" style={{ display: "flow-root" }}>
+			<InlineSwitch value={false} visible aria-label="Show archived" />
+		</div>
+		<div data-testid="multi" style={{ display: "flow-root" }}>
+			<MultiSelectWithoutGroup<MultiSelectorData>
+				label="Departments"
+				selected={NO_ENTRIES}
+				onSelect={ignore}
+				loadDataOptions={loadNoEntries}
+				displaySwitch
+				switchLabel={`${LONG_SENTENCE}?`}
+				switchValue={false}
+				setSwitchValue={ignore}
+			/>
+		</div>
+	</div>
+);
+
+export const Issue3465Item14LabelWrapsBesideTheSwitch: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3465-ITEM-14: at 320px a label too long for the space beside the switch wraps there, in lines of the caption's line height, and its first line stays centered beside the switch, as a short label is. The same in a right-to-left page and in MultiSelectWithoutGroup's switch row, whose label comes before the switch. Without a label the row stays as high as the switch.",
+			},
+		},
+	},
+	render: () => <WrapCases />,
+	play: async ({ canvasElement }) => {
+		const parts = (id: string) => {
+			const box = elementOf(
+				canvasElement.querySelector(`[data-testid="${id}"]`),
+			);
+			const sw = elementOf(
+				box.querySelector(".MuiSwitch-root"),
+			).getBoundingClientRect();
+			const label = elementOf(
+				box.querySelector(".CcInlineSwitch-switchWrapper label > :last-child"),
+			);
+			const range = document.createRange();
+			range.selectNodeContents(label);
+			const lines = Array.from(range.getClientRects()).filter(
+				(line, index, all) => index === 0 || line.top - all[index - 1].top > 1,
+			);
+			return {
+				sw,
+				text: range.getBoundingClientRect(),
+				// the distance of the first two lines' tops, 0 for one line
+				pitch: lines.length > 1 ? lines[1].top - lines[0].top : 0,
+				// how far the first line's middle is from the switch's middle
+				offset: Math.abs(
+					(lines[0].top + lines[0].bottom) / 2 - (sw.top + sw.bottom) / 2,
+				),
+			};
+		};
+		const viewport = canvasElement.ownerDocument.documentElement.clientWidth;
+
+		const short = parts("short");
+		await expect(short.pitch, "short: one line").toBe(0);
+		await expect(short.text.left, "short: after the switch").toBeGreaterThan(
+			short.sw.right,
+		);
+		await expect(
+			short.offset,
+			"short: centered beside the switch",
+		).toBeLessThan(1.5);
+
+		const long = parts("long");
+		await expect(long.text.left, "long: after the switch").toBeGreaterThan(
+			long.sw.right,
+		);
+		await expect(long.text.right, "long: on screen").toBeLessThanOrEqual(
+			viewport,
+		);
+		await expect(
+			long.offset,
+			"long: first line beside the switch",
+		).toBeLessThan(1.5);
+		await expect(long.pitch, "long: wraps").toBeGreaterThan(0);
+		await expect(
+			long.pitch,
+			"long: lines of the caption's height",
+		).toBeLessThan(24);
+
+		const rtl = parts("rtl");
+		await expect(rtl.sw.right, "rtl: switch on screen").toBeLessThanOrEqual(
+			viewport,
+		);
+		await expect(rtl.text.right, "rtl: before the switch").toBeLessThan(
+			rtl.sw.left,
+		);
+		await expect(rtl.text.left, "rtl: on screen").toBeGreaterThanOrEqual(0);
+		await expect(rtl.offset, "rtl: first line beside the switch").toBeLessThan(
+			1.5,
+		);
+		await expect(rtl.pitch, "rtl: wraps").toBeGreaterThan(0);
+
+		const multi = parts("multi");
+		await expect(multi.text.right, "multi: before the switch").toBeLessThan(
+			multi.sw.left,
+		);
+		await expect(
+			multi.offset,
+			"multi: first line beside the switch",
+		).toBeLessThan(1.5);
+		await expect(multi.pitch, "multi: wraps").toBeGreaterThan(0);
+		await expect(
+			multi.pitch,
+			"multi: lines of the caption's height",
+		).toBeLessThan(24);
+
+		const noLabel = elementOf(
+			canvasElement.querySelector('[data-testid="nolabel"]'),
+		);
+		await expect(
+			elementOf(
+				noLabel.querySelector(".CcInlineSwitch-switchWrapper"),
+			).getBoundingClientRect().height,
+			"no label: the row is as high as the switch",
+		).toBe(
+			elementOf(
+				noLabel.querySelector(".MuiSwitch-root"),
+			).getBoundingClientRect().height,
+		);
+
+		const page = canvasElement.ownerDocument.documentElement;
+		await expect(page.scrollWidth, "no sideways scroll").toBeLessThanOrEqual(
+			page.clientWidth,
+		);
 	},
 };
