@@ -607,6 +607,95 @@ export const Issue3499Item8CurrentRowMarkedOnPhone: Story = {
 	},
 };
 
+/** an app's languages: English and French have many rows with more speakers */
+const APP_LANGUAGES = ["fr", "ru", "de", "en", "nl"];
+
+/** fails unless the element is fully inside the list's visible box */
+const expectInView = async (list: HTMLElement, element: HTMLElement) => {
+	const box = element.getBoundingClientRect();
+	const view = list.getBoundingClientRect();
+	await expect(box.top).toBeGreaterThanOrEqual(view.top);
+	await expect(box.bottom).toBeLessThanOrEqual(view.bottom);
+};
+
+export const Issue3499Item8OpensAtCurrentRow: Story = {
+	args: { supportedLocales: APP_LANGUAGES },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-8: with the UI in de-AT, Österreich is far down the list, below the rows of the browser's languages and those with more speakers. The dialog opens with the list scrolled to it, as MUI's Select opens its menu at the selected option. The order stays the same, and keyboard focus stays on the dialog: the list only scrolls.",
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ canvasElement }) => {
+		await reset();
+		await ccI18n.changeLanguage("de-AT");
+		try {
+			const dialog = await openDialog(canvasElement);
+			const list = within(dialog).getByRole("list");
+			const current = () => {
+				const row = list.querySelector<HTMLElement>('[aria-current="true"]');
+				if (!row) throw new Error("the current row is not rendered");
+				return row;
+			};
+			await waitFor(() => expectInView(list, current()));
+			await expect(current()).toHaveTextContent(/^Österreich/);
+			// it keeps its place, far below the first rows
+			const item = current().closest('[role="listitem"]');
+			await expect(Number(item?.getAttribute("aria-posinset"))).toBeGreaterThan(
+				20,
+			);
+			await expect(list).not.toContainElement(
+				document.activeElement as HTMLElement | null,
+			);
+		} finally {
+			await reset();
+		}
+	},
+};
+
+export const Issue3499Item8SearchShowsMatchesFromTop: Story = {
+	args: { supportedLocales: APP_LANGUAGES },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-8: the list is scrolled down (by the user, or because the dialog opened at the current row). Typing in the search box shows the matches from the top, and so does clearing it. Focus stays in the search box.",
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ canvasElement }) => {
+		await reset();
+		const dialog = await openDialog(canvasElement);
+		const list = within(dialog).getByRole("list");
+		const input = within(dialog).getByRole("textbox");
+		const scrollDown = async () => {
+			list.scrollTop = 2000;
+			await waitFor(() => expect(list.scrollTop).toBe(2000));
+		};
+		await scrollDown();
+		await userEvent.type(input, "e");
+		// precondition: the matches are still far more than the list shows
+		await expect(
+			Number(
+				list.querySelector('[role="listitem"]')?.getAttribute("aria-setsize"),
+			),
+		).toBeGreaterThan(50);
+		await waitFor(() => expect(list.scrollTop).toBe(0));
+		await expectInView(list, rowButton(dialog, 1));
+		await scrollDown();
+		await userEvent.clear(input);
+		await waitFor(() => expect(list.scrollTop).toBe(0));
+		await expectInView(list, rowButton(dialog, 1));
+		await expect(input).toHaveFocus();
+	},
+};
+
 export const Issue3466Item8FlagsOutlined: Story = {
 	args: { supportedLocales: SCF },
 	parameters: {

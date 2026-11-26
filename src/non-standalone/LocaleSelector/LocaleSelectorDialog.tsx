@@ -192,8 +192,12 @@ const hasTexts = (locale: string) => {
  * the order of that list, then the rest by number of speakers. The row of the
  * current locale stays in its place and is marked: MUI's selected tint, a check at
  * its end and `aria-current="true"` (a locale without a region, e.g. `"de"`, marks
- * the row of its most likely region, `de-DE`). A search box filters the rows by
- * their names and locale code, ignoring case.
+ * the row of its most likely region, `de-DE`). The dialog opens with the list
+ * scrolled to that row, in the list's middle, as MUI's Select opens its menu at the
+ * selected option; a row in view at the top leaves the list as it is. Keyboard focus
+ * stays on the dialog, the list only scrolls. A search box filters the rows by their
+ * names and locale code, ignoring case; every change of the query shows the matches
+ * from the top of the list.
  *
  * The list renders only the rows in view. When the row with keyboard focus is
  * scrolled away (the wheel, a swipe, or the arrow, page, Home and End keys, which

@@ -1,4 +1,11 @@
-import React, { Suspense, useCallback, useMemo, useState } from "react";
+import React, {
+	Suspense,
+	useCallback,
+	useLayoutEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import {
 	Box,
 	Grid,
@@ -19,7 +26,9 @@ import { Search as SearchIcon } from "@mui/icons-material";
 import useCCTranslations, {
 	useCCLocaleSwitcherTranslations,
 } from "../../utils/useCCTranslations";
-import { useCurrentLanguage } from "../../utils/useCurrentLocale";
+import useCurrentLocale, {
+	useCurrentLanguage,
+} from "../../utils/useCurrentLocale";
 import sortByLocaleRelevance from "../../utils/sortByLocaleRelevance";
 import TextFieldWithHelp from "../../standalone/UIKit/TextFieldWithHelp";
 import Loader from "../../standalone/Loader";
@@ -29,6 +38,7 @@ import useListFocusKeeper, {
 	ListFocusKeeperContext,
 } from "./useListFocusKeeper";
 import visuallyHidden from "../../utils/internal/visuallyHidden";
+import rowLocaleOf from "./rowLocaleOf";
 
 export interface LocaleSelectorDialogContentProps extends LocaleSelectorDialogCommonProps {
 	/**
@@ -144,11 +154,19 @@ const LocaleSelectorDialogContent = (
 	const { t } = useCCTranslations();
 	const { t: tLocale } = useCCLocaleSwitcherTranslations();
 	const currentLang = useCurrentLanguage();
+	const currentLocale = useCurrentLocale();
+	const listRef = useListRef(null);
+	// true once the list was scrolled to the current row, or the user searched before
+	const openedAtCurrentRow = useRef(false);
 	const handleFilterChange = useCallback(
 		(evt: React.ChangeEvent<HTMLInputElement>) => {
 			setFilter(evt.target.value);
+			// a changed query shows its matches from the top, wherever the list was
+			// scrolled (to the current row on open, or by the user)
+			openedAtCurrentRow.current = true;
+			listRef.current?.scrollToRow({ index: 0, align: "start" });
 		},
-		[setFilter],
+		[listRef],
 	);
 
 	const supportedLangs = supportedLanguages;
@@ -244,9 +262,27 @@ const LocaleSelectorDialogContent = (
 		key: rowHeightKey,
 	});
 
+	// the dialog opens with the list scrolled to the current locale's row, as MUI's
+	// Select opens its menu at the selected option; focus stays where it is. It
+	// waits for the list's height, so that a row already in view at the top leaves
+	// the list as it is
+	const [listSized, setListSized] = useState(false);
+	const handleListResize = useCallback((size: { height: number }) => {
+		if (size.height > 0) setListSized(true);
+	}, []);
+	const currentRow = useMemo(() => rowLocaleOf(currentLocale), [currentLocale]);
+	useLayoutEffect(() => {
+		if (!listSized || openedAtCurrentRow.current) return;
+		openedAtCurrentRow.current = true;
+		const index = filteredData.findIndex(
+			(entry) => entry.locale_lower === currentRow,
+		);
+		// "smart": not at all while the row is in view, else to the list's middle
+		if (index > 0) listRef.current?.scrollToRow({ index, align: "smart" });
+	}, [listSized, filteredData, currentRow, listRef]);
+
 	// react-window renders only the rows in view: keyboard focus waits on the list
 	// while the focused row is scrolled away, and goes back to it once it is there
-	const listRef = useListRef(null);
 	const getListElement = useCallback(
 		() => listRef.current?.element ?? null,
 		[listRef],
@@ -300,6 +336,7 @@ const LocaleSelectorDialogContent = (
 							tabIndex={-1}
 							onFocus={handleListFocus}
 							onBlur={handleListBlur}
+							onResize={handleListResize}
 							overscanCount={2}
 							rowCount={filteredData.length}
 							rowHeight={rowHeight}
