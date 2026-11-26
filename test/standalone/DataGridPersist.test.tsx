@@ -31,6 +31,7 @@ import DataGrid, {
 import type { IDataGridFilterBarProps } from "../../src/standalone/DataGrid/Header/FilterBar";
 import { applyColumnWidthLimits } from "../../src/standalone/DataGrid/Content/ColumnHeader";
 import LocalStoragePersist from "../../src/standalone/DataGrid/LocalStoragePersist";
+import NoPersist from "../../src/standalone/DataGrid/NoPersist";
 import StorageManagerPersist, {
 	DATA_GRID_STORAGE_KEY_COLUMN_SIZING,
 	DATA_GRID_STORAGE_KEY_FILTERS,
@@ -1480,9 +1481,9 @@ describe("StorageManagerPersist bucket writes", () => {
 		});
 		server.writes = [];
 		rerender(probe(a));
-		// the Loader stands in for the children until a is read
-		expect(screen.queryByTestId("a")).not.toBeInTheDocument();
-		await screen.findByTestId("a");
+		// the provider provides nothing until a is read
+		expect(write).toBeNull();
+		await waitFor(() => expect(write).not.toBeNull());
 		await act(async () => {
 			await write!(WRITTEN);
 		});
@@ -1735,5 +1736,197 @@ describe("keyboard focus across a storage key change", () => {
 		rerender(lsp("b", <Grid filterBar={AutoFocus} />));
 		expect(await nextSearch(search)).not.toHaveFocus();
 		expect(screen.getByRole("button", { name: "Mine" })).toHaveFocus();
+	});
+});
+
+describe("only the grids wait for the stored state", () => {
+	/** A storage whose reads wait for release() while it is held */
+	class HeldProvider extends MemoryProvider {
+		held = false;
+		waiting: (() => void)[] = [];
+		getItem(key: string): Promise<string | null> {
+			if (!this.held) return super.getItem(key);
+			return new Promise((resolve) => {
+				this.waiting.push(() => resolve(this.data[key] ?? null));
+			});
+		}
+		release() {
+			this.held = false;
+			this.waiting.splice(0).forEach((resume) => resume());
+		}
+	}
+
+	const smp = (keys: Record<string, string>, child = <Grid />) => (
+		<ThemeProvider theme={theme}>
+			<StorageManagerPersist storageKeys={keys}>
+				<h1>People</h1>
+				<input aria-label={"Note"} />
+				{child}
+			</StorageManagerPersist>
+		</ThemeProvider>
+	);
+	const lsp = (storageKey: string, child = <Grid />) => (
+		<ThemeProvider theme={theme}>
+			<LocalStoragePersist storageKey={storageKey}>
+				<h1>People</h1>
+				<input aria-label={"Note"} />
+				{child}
+			</LocalStoragePersist>
+		</ThemeProvider>
+	);
+	/** types into the note next to the grid */
+	const typeNote = (text: string) => {
+		const note = screen.getByRole<HTMLInputElement>("textbox", {
+			name: "Note",
+		});
+		fireEvent.change(note, { target: { value: text } });
+		return note;
+	};
+	/** the search fields of the grids: the text boxes other than the note */
+	const gridSearches = () =>
+		screen
+			.getAllByRole<HTMLInputElement>("textbox")
+			.filter((box) => box.getAttribute("aria-label") !== "Note");
+	/** the grid's search field */
+	const gridSearch = () => {
+		const [search] = gridSearches();
+		expect(search).toBeDefined();
+		return search;
+	};
+
+	it("[ISSUE-3496-ITEM-16] what is inside StorageManagerPersist renders while the stored state loads, with a Loader in the grid's place", async () => {
+		const storage = new HeldProvider();
+		storage.data[keyOf(FILTERS, { model: "a" })] = JSON.stringify(STORED);
+		storage.held = true;
+		StorageManager.configure((_id, keys) => [storage, keys]);
+		render(smp({ model: "a" }));
+		await waitFor(() => expect(storage.waiting).toHaveLength(2));
+
+		expect(screen.getByRole("heading", { name: "People" })).toBeVisible();
+		expect(screen.getByRole("textbox", { name: "Note" })).toBeVisible();
+		expect(screen.getByRole("progressbar")).toBeInTheDocument();
+		expect(grid).toBeNull();
+
+		await act(async () => {
+			storage.release();
+			await Promise.resolve();
+		});
+		await gridIdle();
+		expect(grid!.state.search).toBe("stored");
+		expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+	});
+
+	it("[ISSUE-3496-ITEM-16] a grid under StorageManagerPersist opens in the first render when both buckets answer synchronously", () => {
+		localStorage.setItem(
+			localKeyOf(FILTERS, { model: "a" }),
+			JSON.stringify(STORED),
+		);
+		render(smp({ model: "a" }));
+		expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+		expect(grid!.state.search).toBe("stored");
+		expect(gridSearch()).toHaveValue("stored");
+	});
+
+	it("[ISSUE-3496-ITEM-16] in StrictMode, a grid under StorageManagerPersist opens in the first render when both buckets answer synchronously, and writes nothing when it opens", async () => {
+		localStorage.setItem(
+			localKeyOf(FILTERS, { model: "a" }),
+			JSON.stringify(STORED),
+		);
+		const setItem = vi.spyOn(LocalStorageProviderInstance, "setItem");
+		render(<StrictMode>{smp({ model: "a" })}</StrictMode>);
+		expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+		expect(grid!.state.search).toBe("stored");
+		await gridIdle();
+		expect(setItem).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3496-ITEM-16] a StorageManagerPersist storageKeys change mounts only the grids again: what else is inside keeps its state", async () => {
+		const storage = new HeldProvider();
+		storage.data[keyOf(FILTERS, { model: "b" })] = JSON.stringify(STORED);
+		StorageManager.configure((_id, keys) => [storage, keys]);
+		const { rerender } = render(smp({ model: "a" }));
+		await gridIdle();
+		const note = typeNote("Call back");
+		const search = gridSearch();
+
+		storage.held = true;
+		grid = null;
+		rerender(smp({ model: "b" }));
+		await waitFor(() => expect(storage.waiting).toHaveLength(2));
+		expect(screen.getByRole("progressbar")).toBeInTheDocument();
+		expect(search).not.toBeInTheDocument();
+		await act(async () => {
+			storage.release();
+			await Promise.resolve();
+		});
+		await gridIdle();
+		expect(grid!.state.search).toBe("stored");
+		expect(screen.getByRole("textbox", { name: "Note" })).toBe(note);
+		expect(note).toHaveValue("Call back");
+	});
+
+	it("[ISSUE-3496-ITEM-16] a LocalStoragePersist storageKey change mounts only the grids again: what else is inside keeps its state", async () => {
+		localStorage.setItem("grid-b", JSON.stringify(STORED));
+		const { rerender } = render(lsp("grid-a"));
+		await gridIdle();
+		const note = typeNote("Call back");
+		const search = gridSearch();
+
+		grid = null;
+		rerender(lsp("grid-b"));
+		await gridIdle();
+		expect(search).not.toBeInTheDocument();
+		expect(grid!.state.search).toBe("stored");
+		expect(screen.getByRole("textbox", { name: "Note" })).toBe(note);
+		expect(note).toHaveValue("Call back");
+	});
+
+	it("[ISSUE-3496-ITEM-16] a grid under DataGridNoPersist inside StorageManagerPersist opens while the provider loads, and stays mounted when its storage keys change", async () => {
+		const storage = new HeldProvider();
+		storage.held = true;
+		StorageManager.configure((_id, keys) => [storage, keys]);
+		const unpersisted = (
+			<NoPersist>
+				<Grid />
+			</NoPersist>
+		);
+		const { rerender } = render(smp({ model: "a" }, unpersisted));
+		await waitFor(() => expect(storage.waiting).toHaveLength(2));
+		expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+		await gridIdle();
+		act(() => grid!.setState((prev) => ({ ...prev, search: "typed" })));
+		const search = gridSearch();
+
+		rerender(smp({ model: "b" }, unpersisted));
+		await waitFor(() => expect(storage.waiting).toHaveLength(4));
+		expect(gridSearch()).toBe(search);
+		expect(grid!.state.search).toBe("typed");
+		await act(async () => {
+			storage.release();
+			await Promise.resolve();
+		});
+		expect(gridSearch()).toBe(search);
+		expect(storage.writes).toEqual([]);
+	});
+
+	it("[ISSUE-3496-ITEM-16] keyboard focus in the second of two grids moves to the second grid mounted for the new storage keys", async () => {
+		const twoGrids = (
+			<>
+				<Grid />
+				<Grid />
+			</>
+		);
+		const { rerender } = render(lsp("grid-a", twoGrids));
+		await gridIdle();
+		const [, second] = gridSearches();
+		act(() => second.focus());
+		expect(second).toHaveFocus();
+
+		rerender(lsp("grid-b", twoGrids));
+		await gridIdle();
+		const searches = gridSearches();
+		expect(searches).toHaveLength(2);
+		expect(searches).not.toContain(second);
+		expect(searches[1]).toHaveFocus();
 	});
 });

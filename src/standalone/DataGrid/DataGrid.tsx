@@ -53,6 +53,7 @@ import StatePersistence, {
 } from "./StatePersistence";
 import { decodePersistedState, normalizeFilterDef } from "./PersistFormat";
 import { useDataGridFocusHandoff } from "./FocusHandoff";
+import { withDataGridPersistGate } from "./PersistGate";
 import { IDataGridContentSelectRowViewProps } from "./Content/SelectRowView";
 import combineClassNames from "../../utils/combineClassNames";
 import Checkbox from "../UIKit/Checkbox";
@@ -699,6 +700,12 @@ export type DataGridRowUpdate =
 	| Partial<Omit<DataGridRowData, "id">>
 	| ((row: DataGridRowData) => Partial<Omit<DataGridRowData, "id">>);
 
+/**
+ * What the grid's ref holds. Inside a persistence provider that is still
+ * loading the stored state, the ref is null until the grid opens. When the
+ * provider's storage keys change, the ref is set anew, for the grid mounted
+ * for them.
+ */
 export interface DataGridDispatch {
 	/**
 	 * Update the data of a loaded row, without asking loadData for it again
@@ -1890,4 +1897,6 @@ const DataGrid = (
 	);
 };
 
-export default React.memo(React.forwardRef(DataGrid));
+// a persistence provider holds the grid back while it loads the stored
+// state, and mounts it again for other storage keys
+export default React.memo(withDataGridPersistGate(React.forwardRef(DataGrid)));

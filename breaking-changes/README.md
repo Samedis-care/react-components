@@ -23,6 +23,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-26 | [The busy overlay fades in late on every show, also when it is mounted shown](2026-11-26-form-loader-overlay-every-show-fades-in-late.md) | behavior |
 | 2026-11-26 | [InfiniteScroll loads before the bottom, and holds its calls while `loading` is set](2026-11-26-infinite-scroll-loading-and-threshold.md) | behavior |
 | 2026-11-26 | [A HistoryRouter inside a Route starts a fresh routing scope: its routes resolve from "/"](2026-11-26-history-router-fresh-routing-scope.md) | behavior |
+| 2026-11-26 | [The persistence providers hold back and mount again only their grids](2026-11-26-data-grid-persist-holds-back-only-the-grids.md) | behavior |
 | 2026-11-25 | [A routed menu entry opens a new tab at the URL a click navigates to](2026-11-25-routed-menu-new-tab-opens-history-href.md) | behavior |
 | 2026-11-25 | [On phones the DataGrid moves header and footer buttons into their menus, so both fit 320px](2026-11-25-data-grid-phone-header-footer-fit.md) | behavior |
 | 2026-11-25 | [HowToBox entries break long words](2026-11-25-how-to-box-breaks-long-words.md) | behavior |

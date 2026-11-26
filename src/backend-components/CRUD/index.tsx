@@ -279,7 +279,8 @@ export interface CrudDispatch {
 	/**
 	 * The query the grid currently shows
 	 * @returns The query, see DataGridDispatch.getQuery, or undefined while the
-	 *          grid isn't mounted (disableBackgroundGrid with a form open) or
+	 *          grid isn't mounted (disableBackgroundGrid with a form open),
+	 *          while it waits for the state its persistence provider loads, or
 	 *          if the gridComponent doesn't pass its ref on
 	 */
 	getGridQuery: () => DataGridQuery | undefined;

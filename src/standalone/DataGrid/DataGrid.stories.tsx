@@ -2,7 +2,14 @@ import React, { useCallback, useContext, useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, mocked, userEvent, waitFor, within } from "storybook/test";
-import { Box, Button, Dialog, DialogContent } from "@mui/material";
+import {
+	Box,
+	Button,
+	Dialog,
+	DialogContent,
+	TextField,
+	Typography,
+} from "@mui/material";
 import {
 	Mail as MailIcon,
 	PlaylistAdd as PlaylistAddIcon,
@@ -1221,6 +1228,119 @@ export const Issue3496Item15StorageKeyChangeKeepsFocus: Story = {
 				{ timeout: 3000 },
 			),
 		).toHaveFocus();
+	},
+};
+
+/** A storage like DelayedStorage, whose reads wait for release() while held */
+class HeldStorage extends DelayedStorage {
+	held = false;
+	private waiting: (() => void)[] = [];
+	getItem(key: string): Promise<string | null> {
+		if (!this.held) return super.getItem(key);
+		return new Promise((resolve) => {
+			this.waiting.push(() => resolve(super.getItem(key)));
+		});
+	}
+	release() {
+		this.held = false;
+		this.waiting.splice(0).forEach((answer) => answer());
+	}
+}
+const pageStorage = new HeldStorage();
+
+/**
+ * ISSUE-3496-ITEM-16: a page whose title, note and tenant switch sit inside
+ * DataGridStorageManagerPersist together with its grid, as in a CRUD page.
+ * The storage answers like a server, and holds its first answer here until
+ * the play function has looked at the page. The page shows at once: only the
+ * grid waits for its stored state, with a Loader in its place. Switching the
+ * tenant mounts the grid again for the new storage keys (South's search is
+ * "Bo"), while the note keeps what was typed into it.
+ */
+export const Issue3496Item16OnlyTheGridWaits: Story = {
+	parameters: {
+		a11y: {
+			test: "error",
+			config: {
+				rules: [
+					// the virtualized rows have no cells (ISSUE-3472-ITEM-11)
+					{ id: "aria-required-children", enabled: false },
+				],
+			},
+		},
+	},
+	beforeEach: () => {
+		pageStorage.clear();
+		pageStorage.held = true;
+		pageStorage.data[
+			DATA_GRID_STORAGE_KEY_FILTERS + "-" + JSON.stringify(tenantKeys("South"))
+		] = JSON.stringify({ v: DATA_GRID_PERSIST_VERSION, search: "Bo" });
+		StorageManager.configure((_id, keys) => [pageStorage, keys]);
+		return () => {
+			pageStorage.release();
+			StorageManager.configure(DefaultGetStorageProviderCallback);
+		};
+	},
+	render: () => {
+		const [tenant, setTenant] = useState(0);
+		const nextTenant = useCallback(
+			() => setTenant((prev) => (prev + 1) % TENANTS.length),
+			[],
+		);
+		const name = TENANTS[tenant];
+		const storageKeys = React.useMemo(() => tenantKeys(name), [name]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		const loadData = useCallback(makeLoadData(), []);
+		return (
+			<DataGridStorageManagerPersist storageKeys={storageKeys}>
+				<Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
+					<Typography variant={"h6"} component={"h1"} sx={{ flexGrow: 1 }}>
+						People
+					</Typography>
+					<TextField size={"small"} label={"Note"} />
+					<Button variant={"outlined"} onClick={nextTenant}>
+						Tenant: {name}
+					</Button>
+				</Box>
+				<DataGrid
+					columns={COLUMNS}
+					loadData={loadData}
+					searchPlaceholder={"Search people"}
+				/>
+			</DataGridStorageManagerPersist>
+		);
+	},
+	play: async ({ canvas }) => {
+		// the page shows while the stored state loads, a Loader stands in for
+		// the grid
+		await expect(canvas.getByRole("heading", { name: "People" })).toBeVisible();
+		await expect(canvas.getByRole("progressbar")).toBeVisible();
+		await expect(
+			canvas.queryByPlaceholderText("Search people"),
+		).not.toBeInTheDocument();
+		const note = canvas.getByRole("textbox", { name: "Note" });
+		await userEvent.type(note, "Call back");
+		pageStorage.release();
+		await expect(
+			await canvas.findByText("Alice Müller", undefined, { timeout: 3000 }),
+		).toBeVisible();
+
+		// the grid is mounted again for South's keys, the note keeps its text
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Tenant: North" }),
+		);
+		await waitFor(
+			() => expect(canvas.queryByText("Alice Müller")).not.toBeInTheDocument(),
+			{ timeout: 3000 },
+		);
+		await expect(
+			await canvas.findByText("Bob Smith", undefined, { timeout: 3000 }),
+		).toBeVisible();
+		await expect(canvas.getByPlaceholderText("Search people")).toHaveValue(
+			"Bo",
+		);
+		await expect(canvas.getByRole("textbox", { name: "Note" })).toBe(note);
+		await expect(note).toHaveValue("Call back");
 	},
 };
 

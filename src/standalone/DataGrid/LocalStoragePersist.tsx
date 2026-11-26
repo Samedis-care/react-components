@@ -1,10 +1,4 @@
-import React, {
-	useCallback,
-	useLayoutEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
 	DataGridPersistedData,
 	DataGridPersistentState,
@@ -12,21 +6,20 @@ import {
 	DataGridPersistentStateContextType,
 } from "./StatePersistence";
 import {
-	DataGridFocusHandoff,
-	DataGridFocusHandoffContext,
-	DataGridFocusHandoffContextType,
-} from "./FocusHandoff";
+	DataGridPersistMountContext,
+	DataGridPersistMountContextType,
+} from "./PersistGate";
 
 export interface LocalStoragePersistProps {
 	/**
 	 * The localStorage key the grids inside read their state from and write it
 	 * to.
 	 *
-	 * When it changes, the children are mounted again, so the grids open with
-	 * what is stored under the new key. Everything else inside is mounted
-	 * again as well and loses its state. Keyboard focus in a grid moves to
-	 * the same control of the grid mounted again (to its first control, if
-	 * that one is not there); focus elsewhere inside falls back to the page.
+	 * When it changes, the grids inside are mounted again, so they open with
+	 * what is stored under the new key. Everything else inside stays mounted
+	 * and keeps its state. Keyboard focus in a grid moves to the same control
+	 * of the grid mounted again (to its first control, if that one is not
+	 * there).
 	 */
 	storageKey: string;
 	/**
@@ -40,8 +33,9 @@ export interface LocalStoragePersistProps {
  * Uses localStorage for storage.
  * Wrap around DataGrid component to archive persistence
  *
- * A change of storageKey mounts the children again, as a grid reads the
- * persisted state when it mounts only.
+ * A change of storageKey mounts the grids inside again, as a grid reads the
+ * persisted state when it mounts only; the rest of the children stay
+ * mounted.
  *
  * If the browser blocks localStorage (blocked site data, some sandboxed
  * iframes), the grids open at their defaults and nothing is kept for the next
@@ -117,22 +111,16 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 		return data;
 	}, [storageKey]);
 
-	// where focus was in a grid mounted for the previous key, until the grid
-	// mounted for this one takes it over (see DataGridFocusHandoffContext)
-	const focusHandoff = useRef<DataGridFocusHandoff | null>(null);
-	// the children are mounted anew for each key
-	const focusCtx = useMemo(
-		(): DataGridFocusHandoffContextType => ({
-			handoff: focusHandoff,
+	// a grid reads the persisted state when it mounts: one mounted for the
+	// previous key would keep showing that key's state, and write it under
+	// this one, so the grids are mounted anew for each key
+	const mountCtx = useMemo(
+		(): DataGridPersistMountContextType => ({
+			loading: false,
 			mount: storageKey,
 		}),
 		[storageKey],
 	);
-	// layout effects of the children run first: the grids mounted for this key
-	// have taken focus over; what is left had no grid to take it
-	useLayoutEffect(() => {
-		focusHandoff.current = null;
-	}, [storageKey]);
 
 	const persistCtx = useMemo(
 		() =>
@@ -143,15 +131,12 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 		[written, storageKey, stored, setData],
 	);
 
-	// a grid reads the persisted state when it mounts: one mounted for the
-	// previous key would keep showing that key's state, and write it under
-	// this one
 	return (
-		<DataGridFocusHandoffContext.Provider value={focusCtx}>
+		<DataGridPersistMountContext.Provider value={mountCtx}>
 			<DataGridPersistentStateContext.Provider value={persistCtx}>
-				<React.Fragment key={storageKey}>{children}</React.Fragment>
+				{children}
 			</DataGridPersistentStateContext.Provider>
-		</DataGridFocusHandoffContext.Provider>
+		</DataGridPersistMountContext.Provider>
 	);
 };
 

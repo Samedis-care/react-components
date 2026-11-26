@@ -22,36 +22,38 @@ export interface DataGridFocusHandoff {
 	 */
 	type: string | null;
 	/**
-	 * The mount of the provider's children the grid belonged to
-	 * (DataGridFocusHandoffContextType.mount)
+	 * The mount the grid belonged to (DataGridFocusHandoffContextType.mount)
 	 */
 	mount: unknown;
 }
 
 /**
- * What a persistence provider provides to hand keyboard focus over
+ * What the persistence gate of a grid (withDataGridPersistGate) provides to
+ * hand keyboard focus over
  */
 export interface DataGridFocusHandoffContextType {
 	/**
 	 * Where focus was in a grid that unmounted, until a grid mounts in its
 	 * place and takes it over (null when there is nothing to hand over). The
-	 * same ref in every mount of the provider's children.
+	 * same ref in every mount of the grid, for as long as the app shows it.
 	 */
 	handoff: { current: DataGridFocusHandoff | null };
 	/**
-	 * Identifies the provider's current mount of its children (compared with
-	 * `===`): another value once the provider mounts them again for new storage
-	 * keys. A grid takes focus over from a grid of another mount only, not from
-	 * one that the app unmounted and shows again (CRUD's grid while a form is
-	 * open), which takes focus as it would without a provider.
+	 * Identifies the grid's current mount (compared with `===`): the storage
+	 * keys of the provider it is mounted for. A grid takes focus over from a
+	 * grid of another mount only, not from an earlier run of its own effects
+	 * (StrictMode). A grid that the app unmounts and shows again (CRUD's grid
+	 * while a form is open) comes with a new ref, so it takes focus as it
+	 * would without a provider.
 	 */
 	mount: unknown;
 }
 
 /**
  * Hands keyboard focus from a grid to the grid mounted in its place. The
- * persistence providers provide it, as they mount their children again when
- * their storage keys change; outside of one (null), focus is not handed over.
+ * persistence gate of the grid provides it, as it mounts the grid again when
+ * the storage keys of its provider change; outside of a provider (null),
+ * focus is not handed over.
  */
 export const DataGridFocusHandoffContext =
 	React.createContext<DataGridFocusHandoffContextType | null>(null);
@@ -66,7 +68,7 @@ const FOCUSABLE =
  * Where an element is in the grid
  * @param root The grid's root element
  * @param element The element, inside the root
- * @param mount The mount of the provider's children the grid belongs to
+ * @param mount The mount the grid belongs to
  * @returns Its place and what it is
  */
 const locate = (
