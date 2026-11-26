@@ -1080,8 +1080,8 @@ describe("phone layout", () => {
 		const buttons = onAddNew();
 		render(<Grid filterBar={undefined} onAddNew={buttons} />);
 		await screen.findByRole("button", { name: "Search" });
-		// the first one stays: its name is its tooltip's (ActionButton small)
-		expect(headerButtons()).toEqual(["Search", "More options", ""]);
+		// the first one stays, named by its label (ActionButton small, ISSUE-3482-ITEM-1)
+		expect(headerButtons()).toEqual(["Search", "More options", "New"]);
 		await openMenu("More options");
 		const menu = await screen.findByRole("menu");
 		expect(
@@ -1121,7 +1121,7 @@ describe("phone layout", () => {
 			<Grid filterBar={undefined} onAddNew={vi.fn<() => void>()} />,
 		);
 		await screen.findByRole("button", { name: "Search" });
-		expect(headerButtons()).toEqual(["Search", "Columns", "Reset", ""]);
+		expect(headerButtons()).toEqual(["Search", "Columns", "Reset", "New"]);
 
 		rerender(
 			<Grid
@@ -1130,7 +1130,7 @@ describe("phone layout", () => {
 				exporters={[makeExporter()]}
 			/>,
 		);
-		expect(headerButtons()).toEqual(["Search", "More options", ""]);
+		expect(headerButtons()).toEqual(["Search", "More options", "New"]);
 
 		// without an add button all four fit
 		rerender(
