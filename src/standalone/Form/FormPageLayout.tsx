@@ -2,10 +2,22 @@ import { styled, useThemeProps } from "@mui/material";
 import React, { useCallback, useEffect, useRef } from "react";
 import combineClassNames from "../../utils/combineClassNames";
 
+/**
+ * Props of {@link FormPageLayout}, and of every replacement layout set through
+ * `components.CcBasicFormPage.defaultProps.formPageLayoutComponent`.
+ *
+ * BasicFormPage (and so DefaultFormPage, EditOnlyFormPage and FlowEngineFormPage)
+ * passes only `body`, `footer` and `other`, never `className` or `classes`. While a
+ * nested form page is open inside `body`, it passes `footer={null}` and
+ * `other={undefined}`, so that only the innermost page shows its buttons and busy
+ * overlay.
+ */
 export interface FormPageLayoutProps {
 	/**
 	 * Page content, usually the form. A flex column that grows to fill the layout's
-	 * height above the footer.
+	 * height above the footer: every child, including a bare text run, becomes its own
+	 * row and is stretched to the full width (wrap inline content and buttons in a Box
+	 * or Grid), and a child with `flexGrow: 1` fills the remaining height.
 	 */
 	body: React.ReactNode;
 	/**
@@ -29,16 +41,24 @@ export interface FormPageLayoutProps {
 	/**
 	 * Rendered inside the root after body and footer. The root is positioned, so an
 	 * absolutely positioned `other`, like the busy overlay (`FormLoaderOverlay`) that
-	 * BasicFormPage passes here, covers the whole layout and nothing outside it.
+	 * BasicFormPage passes here, covers the whole layout and nothing outside it. A
+	 * replacement layout (`formPageLayoutComponent`) has to render it, or form pages
+	 * show no busy overlay. In-flow content ends up after the body and the footer, at
+	 * the end of the layout.
 	 * @default undefined (nothing)
 	 */
 	other?: React.ReactNode;
 	/**
-	 * class name to apply to root
+	 * Class name added to the root (with `classes.root`). BasicFormPage does not set
+	 * it: style form pages through the theme
+	 * (`components.CcFormPageLayout.styleOverrides`).
 	 */
 	className?: string;
 	/**
-	 * custom CSS classes
+	 * Class names added to the slots, by slot (see {@link FormPageLayoutClassKey});
+	 * `footer` only while there is a footer. BasicFormPage does not set them. Theme
+	 * `defaultProps.classes` are replaced, not merged, by this prop.
+	 * @default undefined (none)
 	 */
 	classes?: Partial<Record<FormPageLayoutClassKey, string>>;
 }
@@ -192,6 +212,22 @@ const scrollClearOfFooter = (target: Element, footer: Element) => {
 	(scroller ?? footer.ownerDocument.defaultView)?.scrollBy({ top: distance });
 };
 
+/**
+ * Theme style slots of {@link FormPageLayout}
+ * (`components.CcFormPageLayout.styleOverrides.<slot>`), also the keys of its
+ * `classes` prop:
+ * - `root`: the outer flex column, `position: relative`, the containing block of
+ *   `other`. It fills the height of its parent and has no padding of its own
+ * - `wrapper`: the flex column holding body and footer
+ * - `body`: the content area, a flex column that grows, and a stacking context of its
+ *   own (`isolation: isolate`), so that the footer paints above all of its content
+ * - `footer`: the button bar, `position: sticky` with `bottom: theme.spacing(4.5)`.
+ *   Rendered only with a `footer`, and hidden while it renders nothing (`:empty`)
+ *
+ * These overrides style FormPageLayout only: a theme that replaces the layout of form
+ * pages through `components.CcBasicFormPage.defaultProps.formPageLayoutComponent`
+ * leaves them without effect there.
+ */
 export type FormPageLayoutClassKey = "root" | "wrapper" | "body" | "footer";
 
 const FormPageLayout = (inProps: FormPageLayoutProps) => {
@@ -248,7 +284,8 @@ const FormPageLayout = (inProps: FormPageLayoutProps) => {
 /**
  * The page layout of every form page: BasicFormPage, and so DefaultFormPage,
  * EditOnlyFormPage and FlowEngineFormPage, renders the form as `body`, its buttons
- * as `footer` and its busy overlay (FormLoaderOverlay) as `other`.
+ * as `footer` and its busy overlay (FormLoaderOverlay) as `other`. It can also be
+ * used on its own, such as for a page with a floating action bar that is no form.
  *
  * Layout: the root is `position: relative` and does not scroll itself; whatever
  * scrolls around it (a FormDialog's content, a scrolling panel, drawer or main area,
@@ -308,5 +345,26 @@ const FormPageLayout = (inProps: FormPageLayoutProps) => {
  *
  * An absolutely positioned `other` covers the whole layout, however far it is
  * scrolled: the busy overlay covers the form, not the page or dialog around it.
+ *
+ * The layout adds no role, landmark or tab stop: keyboard focus goes through the
+ * body, then the footer, then `other`.
+ *
+ * Theme: `components.CcFormPageLayout.styleOverrides` per
+ * {@link FormPageLayoutClassKey} slot. To replace the layout of every form page, set
+ * `components.CcBasicFormPage.defaultProps.formPageLayoutComponent` to a component
+ * that takes {@link FormPageLayoutProps}.
+ *
+ * @example
+ * <FormDialog dialogTitle={t("import.title")}>
+ * 	<FormPageLayout
+ * 		body={<ImportSteps />}
+ * 		footer={
+ * 			<FormButtons>
+ * 				<ActionButton onClick={next}>{t("import.next")}</ActionButton>
+ * 			</FormButtons>
+ * 		}
+ * 		other={<FormLoaderOverlay visible={busy} message={t("import.busy")} />}
+ * 	/>
+ * </FormDialog>
  */
 export default React.memo(FormPageLayout);

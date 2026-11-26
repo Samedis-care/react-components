@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import React from "react";
 import { describe, it, expect, expectTypeOf, afterEach } from "vitest";
-import { render, cleanup, within, screen } from "@testing-library/react";
+import { render, cleanup, within, screen, act } from "@testing-library/react";
 import { ThemeProvider, createTheme, Theme } from "@mui/material";
 import FormLoaderOverlay, {
 	FormLoaderOverlayClassKey,
@@ -31,6 +31,107 @@ const overlayRoot = (container: HTMLElement) => {
 };
 
 describe("FormLoaderOverlay", () => {
+	it("is rendered but hidden, unpainted and without a spinner while not visible", () => {
+		const { container } = renderOverlay(<FormLoaderOverlay visible={false} />);
+		const root = overlayRoot(container);
+		expect(getComputedStyle(root).visibility).toBe("hidden");
+		// the wash's color is transparent, where every fade-in starts
+		expect(getComputedStyle(root).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+		expect(root.querySelector('[role="progressbar"]')).toBeNull();
+		expect(screen.queryByRole("progressbar")).toBeNull();
+	});
+
+	it("shows one spinner over the whole nearest positioned ancestor while visible", () => {
+		const { container } = renderOverlay(<FormLoaderOverlay visible />);
+		const root = overlayRoot(container);
+		const style = getComputedStyle(root);
+		expect(style.visibility).toBe("visible");
+		expect(style.position).toBe("absolute");
+		expect([style.top, style.right, style.bottom, style.left]).toEqual([
+			"0px",
+			"0px",
+			"0px",
+			"0px",
+		]);
+		expect(within(root).getAllByRole("progressbar")).toHaveLength(1);
+		expect(screen.getAllByRole("progressbar")).toHaveLength(1);
+	});
+
+	it("keeps its root element across visibility changes and settles on the last value", () => {
+		const { container, rerender } = renderOverlay(
+			<FormLoaderOverlay visible={false} />,
+		);
+		const root = overlayRoot(container);
+		act(() => {
+			for (let i = 0; i < 10; i++) {
+				rerender(withTheme(<FormLoaderOverlay visible={i % 2 === 0} />));
+			}
+		});
+		// the loop ends on visible={false}
+		expect(overlayRoot(container)).toBe(root);
+		expect(getComputedStyle(root).visibility).toBe("hidden");
+		expect(screen.queryByRole("progressbar")).toBeNull();
+
+		rerender(withTheme(<FormLoaderOverlay visible />));
+		expect(overlayRoot(container)).toBe(root);
+		expect(getComputedStyle(root).visibility).toBe("visible");
+		expect(screen.getAllByRole("progressbar")).toHaveLength(1);
+	});
+
+	it("leaves focus where it is and contains nothing focusable", () => {
+		const ui = (visible: boolean) =>
+			withTheme(
+				<div style={{ position: "relative" }}>
+					<input aria-label={"Name"} />
+					<FormLoaderOverlay visible={visible} />
+				</div>,
+			);
+		const { container, rerender } = render(ui(false));
+		const input = screen.getByRole("textbox", { name: "Name" });
+		input.focus();
+
+		rerender(ui(true));
+		expect(input).toHaveFocus();
+		expect(
+			overlayRoot(container).querySelectorAll(
+				"a[href], button, input, select, textarea, [tabindex]",
+			),
+		).toHaveLength(0);
+
+		rerender(ui(false));
+		expect(input).toHaveFocus();
+	});
+
+	it("passes className to its root and follows changes", () => {
+		const { container, rerender } = renderOverlay(
+			<FormLoaderOverlay visible={false} className={"a"} />,
+		);
+		const root = overlayRoot(container);
+		expect(root).toHaveClass("a");
+
+		rerender(withTheme(<FormLoaderOverlay visible className={"b"} />));
+		expect(root).toHaveClass("b");
+		expect(root).not.toHaveClass("a");
+
+		rerender(withTheme(<FormLoaderOverlay visible />));
+		expect(root).not.toHaveClass("b");
+		expect(root.className).not.toMatch(/\b(undefined|null|false)\b/);
+	});
+
+	it("applies the theme's root styleOverrides", () => {
+		const themed = createTheme({
+			components: {
+				CcFormLoaderOverlay: {
+					styleOverrides: { root: { backgroundColor: "rgb(1, 2, 3)" } },
+				},
+			},
+		});
+		const { container } = renderOverlay(<FormLoaderOverlay visible />, themed);
+		expect(getComputedStyle(overlayRoot(container)).backgroundColor).toBe(
+			"rgb(1, 2, 3)",
+		);
+	});
+
 	it("[ISSUE-3461-ITEM-7] applies the theme's loader slot override to the box around the spinner", () => {
 		const themed = createTheme({
 			components: {

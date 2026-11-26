@@ -26,6 +26,7 @@ import FormLoaderOverlay, { FormLoaderOverlayProps } from "./FormLoaderOverlay";
 
 const WrappedFormLoaderOverlay = (props: FormLoaderOverlayProps) => (
 	<Box
+		data-testid={"box"}
 		sx={{
 			position: "relative",
 			width: 300,
@@ -44,13 +45,35 @@ const WrappedFormLoaderOverlay = (props: FormLoaderOverlayProps) => (
 const overlayMeta: Meta<typeof WrappedFormLoaderOverlay> = {
 	title: "Standalone/Form/FormLoaderOverlay",
 	component: WrappedFormLoaderOverlay,
-	parameters: { layout: "centered" },
+	parameters: {
+		layout: "centered",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				component:
+					"A busy overlay: a translucent wash with a spinner on a disc of its own over the nearest positioned ancestor (the stories use a `position: relative` box), or, with `children`, over them. The wash alone blocks pointer input only; content passed as `children` is inert while the overlay is shown. Every show blocks clicks at once, stays transparent for 1s and then fades in, so a busy phase shorter than that never flashes a spinner; hiding is immediate. While visible, the overlay is a polite status message for screen readers (`message`).",
+			},
+		},
+	},
 	argTypes: {
-		visible: { control: "boolean" },
+		visible: {
+			control: "boolean",
+			description:
+				"Whether the overlay is shown, e.g. `visible={isSubmitting}`. Every show blocks the pointer at once and fades the wash in after 1s; `false` hides it at once.",
+		},
 		message: {
 			control: "text",
 			description:
 				'The status message screen readers announce while the overlay is visible, already translated; not shown on screen. "Loading…" (translated) without it.',
+		},
+		className: {
+			control: "text",
+			description: "Class name added to the root (the wash).",
+		},
+		classes: {
+			control: "object",
+			description:
+				"Class names per slot: `root`, `loaderAnchor`, `loader`, `container`, `content`, `status`.",
 		},
 	},
 };
@@ -112,10 +135,38 @@ const fadesIn = (overlay: HTMLElement) =>
 
 export const Visible: OverlayStory = {
 	args: { visible: true },
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const overlay = overlayIn(canvasElement);
+		// covers the positioned ancestor's padding box (inside its border)
+		const box = canvas.getByTestId("box");
+		const outer = rectOf(box);
+		const top = outer.top + box.clientTop;
+		const left = outer.left + box.clientLeft;
+		await expect(rectOf(overlay)).toEqual({
+			top,
+			left,
+			bottom: top + box.clientHeight,
+			right: left + box.clientWidth,
+		});
+		await expect(within(overlay).getAllByRole("progressbar")).toHaveLength(1);
+		// the content below does not get the pointer
+		await expect(
+			overlay.contains(hitAtCenter(canvas.getByText("Form Content"))),
+		).toBe(true);
+	},
 };
 
 export const Hidden: OverlayStory = {
 	args: { visible: false },
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const overlay = overlayIn(canvasElement);
+		await expect(getComputedStyle(overlay).visibility).toBe("hidden");
+		await expect(canvas.queryByRole("progressbar")).toBeNull();
+		const content = canvas.getByText("Form Content");
+		await expect(hitAtCenter(content)).toBe(content);
+	},
 };
 
 const ToggleOverlay = (props: FormLoaderOverlayProps) => {

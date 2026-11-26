@@ -228,6 +228,12 @@ const TRANSLATION_OPTIONS = { i18n: ccI18n, useSuspense: false };
 export type FormLoaderOverlayClassKey =
 	"root" | "loaderAnchor" | "loader" | "container" | "content" | "status";
 
+/**
+ * Props of {@link FormLoaderOverlay} (theme `defaultProps` take a `Partial` of them).
+ * Other attributes, such as `aria-*` and `data-*`, type-check, as hyphenated JSX
+ * attributes always do, but are not passed on: the overlay's status message is
+ * `message`.
+ */
 export interface FormLoaderOverlayProps {
 	/**
 	 * Whether the overlay is shown, such as a form's `isSubmitting`. Required.
@@ -451,6 +457,9 @@ const FormLoaderOverlay = (inProps: FormLoaderOverlayProps) => {
  * used. Content of the covered area with a z-index of 999 or more can show above
  * the wash, unless it is in a stacking context of its own (`isolation: isolate` on
  * its container), as the body of FormPageLayout is.
+ *
+ * Theme: `components.CcFormLoaderOverlay.styleOverrides` per slot, and `variants`
+ * keyed on `visible` (see {@link FormLoaderOverlayClassKey}).
  *
  * @example
  * // the import form is inert while it is busy; the steps' buttons below stay usable

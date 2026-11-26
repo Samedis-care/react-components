@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 import { describe, it, expect, afterEach, beforeAll, vi } from "vitest";
-import React from "react";
+import React, { useState } from "react";
 import {
 	render,
 	screen,
@@ -18,6 +18,8 @@ import Form, { PageProps } from "../../../src/backend-components/Form/Form";
 import FormField from "../../../src/backend-components/Form/Field";
 import DefaultFormPage from "../../../src/backend-components/Form/DefaultFormPage";
 import DefaultErrorComponent from "../../../src/backend-components/Form/DefaultErrorComponent";
+import FormLoaderOverlay from "../../../src/standalone/Form/FormLoaderOverlay";
+import type { FormPageLayoutProps } from "../../../src/standalone/Form/FormPageLayout";
 import createTestModel from "../../../src/stories/test-utils/TestModel";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 
@@ -139,6 +141,192 @@ const editAndSave = async (input: HTMLElement) => {
 };
 
 describe("FormPageLayout and FormLoaderOverlay in a form page", () => {
+	it("shows the busy overlay while a save is pending and hides it afterwards", async () => {
+		const model = createTestModel();
+		const updates = holdUpdates(model);
+		renderPage(model);
+		const input = await screen.findByDisplayValue("Alice", undefined, LOAD);
+
+		expect(getComputedStyle(onlyOverlay()).visibility).toBe("hidden");
+		expect(screen.queryByRole("progressbar")).toBeNull();
+
+		await editAndSave(input);
+		await waitFor(() =>
+			expect(within(onlyOverlay()).getByRole("progressbar")).toBeVisible(),
+		);
+		expect(getComputedStyle(onlyOverlay()).visibility).toBe("visible");
+		// Save stays a focusable button while saving, marked aria-disabled, and a second
+		// click sends nothing
+		expect(saveButton()).toHaveAttribute("aria-disabled", "true");
+		expect(screen.getByDisplayValue("AliceX")).toBeDisabled();
+		fireEvent.click(saveButton());
+		expect(updates.spy).toHaveBeenCalledTimes(1);
+
+		updates.release();
+		await act(async () => {});
+		await waitFor(() =>
+			expect(within(onlyOverlay()).queryByRole("progressbar")).toBeNull(),
+		);
+		expect(getComputedStyle(onlyOverlay()).visibility).toBe("hidden");
+		expect(screen.getByDisplayValue("AliceX")).toBeEnabled();
+		expect(updates.spy).toHaveBeenCalledTimes(1);
+	});
+
+	it("hides the busy overlay and unlocks the form when the save fails", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const model = createTestModel();
+		const updates = holdUpdates(model);
+		renderPage(model);
+		const input = await screen.findByDisplayValue("Alice", undefined, LOAD);
+
+		await editAndSave(input);
+		await waitFor(() =>
+			expect(within(onlyOverlay()).getByRole("progressbar")).toBeVisible(),
+		);
+
+		updates.fail(new Error("Server said no"));
+		await act(async () => {});
+		await waitFor(() =>
+			expect(within(onlyOverlay()).queryByRole("progressbar")).toBeNull(),
+		);
+		expect(getComputedStyle(onlyOverlay()).visibility).toBe("hidden");
+		// shown form-level, in an error dialog
+		const dialog = await screen.findByRole("dialog");
+		expect(dialog).toHaveTextContent("Server said no");
+		fireEvent.click(within(dialog).getByRole("button"));
+		await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+		expect(screen.getByDisplayValue("AliceX")).toBeEnabled();
+		expect(saveButton()).not.toHaveAttribute("aria-disabled");
+	});
+
+	it("renders the theme's formPageLayoutComponent with body, footer and the busy overlay", async () => {
+		const layout = vi.fn((p: FormPageLayoutProps) => (
+			<div data-testid={"custom-layout"}>
+				<div data-testid={"custom-body"}>{p.body}</div>
+				<div data-testid={"custom-footer"}>{p.footer}</div>
+				{p.other}
+			</div>
+		));
+		const CustomLayout = (p: FormPageLayoutProps) => layout(p);
+		const model = createTestModel();
+		const updates = holdUpdates(model);
+		renderPage(model, () => ({
+			components: {
+				CcBasicFormPage: {
+					defaultProps: { formPageLayoutComponent: CustomLayout },
+				},
+			},
+		}));
+		const input = await screen.findByDisplayValue("Alice", undefined, LOAD);
+
+		expect(
+			document.querySelector('[class*="CcFormPageLayout-root"]'),
+		).toBeNull();
+		expect(screen.getByTestId("custom-body")).toContainElement(input);
+		expect(screen.getByTestId("custom-footer")).toContainElement(saveButton());
+		const props = layout.mock.calls.at(-1)![0];
+		expect(Object.keys(props).sort()).toEqual(["body", "footer", "other"]);
+		const other = props.other as React.ReactElement<{ visible: boolean }>;
+		expect(other.type).toBe(FormLoaderOverlay);
+		expect(other.props.visible).toBe(false);
+
+		await editAndSave(input);
+		await waitFor(() =>
+			expect(
+				(
+					layout.mock.calls.at(-1)![0].other as React.ReactElement<{
+						visible: boolean;
+					}>
+				).props.visible,
+			).toBe(true),
+		);
+		expect(
+			within(screen.getByTestId("custom-layout")).getByRole("progressbar"),
+		).toBeInTheDocument();
+		updates.release();
+		await act(async () => {});
+		await waitFor(() => expect(screen.queryByRole("progressbar")).toBeNull());
+	});
+
+	it("a nested form page hides the parent's footer and busy overlay until it unmounts", async () => {
+		const innerModel = createTestModel();
+		const InnerPage = makePage("last_name");
+		const Toggle = () => {
+			const [shown, setShown] = useState(false);
+			return (
+				<Grid size={12}>
+					<button type={"button"} onClick={() => setShown((s) => !s)}>
+						Toggle inner page
+					</button>
+					{shown && (
+						<Form
+							model={innerModel}
+							id={"2"}
+							errorComponent={DefaultErrorComponent}
+							customProps={{ goBack: () => {} }}
+							disableRouting
+						>
+							{InnerPage}
+						</Form>
+					)}
+				</Grid>
+			);
+		};
+		const OuterPage = makePage("first_name", <Toggle />);
+		render(
+			<Framework>
+				<Form
+					model={createTestModel()}
+					id={"1"}
+					errorComponent={DefaultErrorComponent}
+					customProps={{ goBack: () => {} }}
+					disableRouting
+				>
+					{OuterPage}
+				</Form>
+			</Framework>,
+		);
+		const outerInput = await screen.findByDisplayValue(
+			"Alice",
+			undefined,
+			LOAD,
+		);
+		const outerRoot = document.querySelector<HTMLElement>(
+			'[class*="CcFormPageLayout-root"]',
+		)!;
+		const outerBody = outerRoot.querySelector<HTMLElement>(
+			'[class*="CcFormPageLayout-body"]',
+		)!;
+		// the outer layout's own footer, not the one of a page nested in its body
+		const outerFooter = () =>
+			outerRoot.querySelector<HTMLElement>(
+				':scope > [class*="CcFormPageLayout-wrapper"] > [class*="CcFormPageLayout-footer"]',
+			);
+		expect(outerFooter()).toContainElement(saveButton());
+		expect(onlyOverlay().parentElement).toBe(outerRoot);
+
+		fireEvent.change(outerInput, { target: { value: "AliceX" } });
+		outerInput.focus();
+		fireEvent.click(screen.getByRole("button", { name: "Toggle inner page" }));
+		await screen.findByDisplayValue("Smith", undefined, LOAD);
+
+		// one button bar and one overlay: the inner page's, inside the outer body. The
+		// inner page hides the parent's from an effect, so wait for the re-render.
+		await waitFor(() =>
+			expect(screen.getAllByRole("button", { name: /save/i })).toHaveLength(1),
+		);
+		expect(outerBody).toContainElement(saveButton());
+		expect(outerBody).toContainElement(onlyOverlay());
+		// no footer element, not an empty one
+		expect(outerFooter()).toBeNull();
+
+		fireEvent.click(screen.getByRole("button", { name: "Toggle inner page" }));
+		await waitFor(() => expect(screen.queryByDisplayValue("Smith")).toBeNull());
+		await waitFor(() => expect(outerFooter()).toContainElement(saveButton()));
+		expect(onlyOverlay().parentElement).toBe(outerRoot);
+		expect(screen.getByDisplayValue("AliceX")).toBe(outerInput);
+	});
+
 	it("[ISSUE-3473-ITEM-7] announces the save in a status region while the form is submitting", async () => {
 		const model = createTestModel();
 		const updates = holdUpdates(model);

@@ -30,6 +30,37 @@ const meta: Meta<typeof FormPageLayout> = {
 	parameters: {
 		layout: "centered",
 		a11y: { test: "error" },
+		docs: {
+			description: {
+				component:
+					"The page layout of every form page (`DefaultFormPage`, `EditOnlyFormPage`, `FlowEngineFormPage`): `body` in normal flow, a `footer` (the form buttons) after it, and `other` for overlays (the busy overlay). The layout does not scroll itself: whatever scrolls around it (a dialog's content, a panel, the app's main area or the document) scrolls the form. The footer is `position: sticky`, so on a long form it stays 36px above the bottom of the visible area while the body scrolls under it, and on a screen at most 480px tall it stays in flow after the body. The root is `position: relative`, so an absolutely positioned `other` covers the whole layout and nothing outside it. `Default` and `WithOther` place the layout in a scrolling box.",
+			},
+		},
+	},
+	argTypes: {
+		body: {
+			control: false,
+			description:
+				"Page content, usually the form. A flex column: each child is its own row, stretched to the full width. It grows to fill the layout's height above the footer.",
+		},
+		footer: {
+			control: false,
+			description:
+				"Button bar, usually `<FormButtons>`. Floats 36px above the bottom of the visible area while the body is longer than that area. `null`, `undefined` or `false` for no buttons (BasicFormPage passes `null` while a nested form page is open): no footer element, and no space kept for one.",
+		},
+		other: {
+			control: false,
+			description:
+				"Rendered after body and footer, for absolutely positioned overlays, which cover the whole layout; BasicFormPage passes its busy overlay (`FormLoaderOverlay`) here.",
+		},
+		className: {
+			control: "text",
+			description: "Class name added to the root.",
+		},
+		classes: {
+			control: "object",
+			description: "Class names per slot: `root`, `wrapper`, `body`, `footer`.",
+		},
 	},
 };
 export default meta;
@@ -110,6 +141,59 @@ export const WithOther: Story = {
 	),
 };
 
+export const TabOrder: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"Keyboard focus follows the document order: the body's controls, then the footer's buttons, then `other`. The layout itself adds no tab stop.",
+			},
+		},
+	},
+	render: () => (
+		<Box sx={{ position: "relative", width: 500, height: 400 }}>
+			<FormPageLayout
+				body={
+					<Box sx={{ padding: 2 }}>
+						<TextField label="A" fullWidth sx={{ mb: 2 }} />
+						<TextField label="B" fullWidth />
+					</Box>
+				}
+				footer={
+					<FormButtons>
+						<ActionButton>Save</ActionButton>
+						<ActionButton>Back</ActionButton>
+					</FormButtons>
+				}
+				other={
+					<Box sx={{ position: "absolute", top: 8, right: 8 }}>
+						<Button>Extra</Button>
+					</Box>
+				}
+			/>
+		</Box>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const order = [
+			canvas.getByRole("textbox", { name: "A" }),
+			canvas.getByRole("textbox", { name: "B" }),
+			canvas.getByRole("button", { name: "Save" }),
+			canvas.getByRole("button", { name: "Back" }),
+			canvas.getByRole("button", { name: "Extra" }),
+		];
+		order[0].focus();
+		for (const next of order.slice(1)) {
+			await userEvent.tab();
+			await expect(next).toHaveFocus();
+		}
+		for (const previous of order.slice(0, -1).reverse()) {
+			await userEvent.tab({ shift: true });
+			await expect(previous).toHaveFocus();
+		}
+	},
+};
+
 /**
  * Outlined fields with values: their shrunk labels have z-index 1, like in every
  * DefaultFormPage.
@@ -187,7 +271,7 @@ export const Issue3473Item1FooterAboveFieldLabels: Story = {
 		docs: {
 			description: {
 				story:
-					"ISSUE-3473-ITEM-1: the footer has no z-index, so an outlined field's label (z-index 1) scrolled under the Save button is painted over it and takes the click.",
+					"ISSUE-3473-ITEM-1: an outlined field's label (z-index 1) scrolled under the Save button stays below it: the body is a stacking context of its own, so the footer paints above it and gets the click.",
 			},
 		},
 	},
@@ -297,7 +381,7 @@ export const Issue3473Item2FooterAndOverlayStayInScrollingPanel: Story = {
 		docs: {
 			description: {
 				story:
-					"ISSUE-3473-ITEM-2: in a positioned scroll container (a Drawer's paper, a side panel with `position: relative; overflow: auto`) the footer and the busy overlay are placed against the scrolling content. Scrolled to the end, the Save bar has scrolled out of view and the overlay covers only the first screen.",
+					"ISSUE-3473-ITEM-2: in a positioned scroll container (a Drawer's paper, a side panel with `position: relative; overflow: auto`), scrolled to the end, the Save bar is in view at the bottom of the panel and the busy overlay covers what the panel shows.",
 			},
 		},
 	},
@@ -645,7 +729,7 @@ export const Issue3473Item8CoveredControlsAreNotOperable: Story = {
 		docs: {
 			description: {
 				story:
-					"ISSUE-3473-ITEM-8: in a page without a positioned ancestor the busy overlay covers the whole app. The header's Menu button is behind it, so a mouse cannot reach it, but it stays enabled: Tab reaches it and Enter activates it while the form is saving.",
+					"ISSUE-3473-ITEM-8: in an app shell without a positioned ancestor the busy overlay covers the form page, not the app around it: the header's Menu button is not under the wash, and no enabled control lies under it that the keyboard could reach and the pointer could not.",
 			},
 		},
 	},
@@ -765,7 +849,7 @@ export const Issue3473Item9FocusedFieldNotUnderFooter: Story = {
 		docs: {
 			description: {
 				story:
-					"ISSUE-3473-ITEM-9: tabbing through a dialog form, fields that are inside the scroll area but behind the floating footer get focus without being scrolled into view, so the focused field is hidden (WCAG 2.4.11).",
+					"ISSUE-3473-ITEM-9: tabbing through a dialog form, a field that gets focus behind the floating footer is scrolled up until it ends above the footer, so the focused field is never hidden (WCAG 2.4.11).",
 			},
 		},
 	},
@@ -1020,7 +1104,7 @@ export const Issue3473Item11FooterFitsPhoneDialog: Story = {
 		docs: {
 			description: {
 				story:
-					"ISSUE-3473-ITEM-11: at 320px the footer is shifted 36px to the right and sticks out of the dialog paper, which then scrolls sideways (WCAG 1.4.10).",
+					"ISSUE-3473-ITEM-11: at 320px the footer of a form in a dialog stays within the layout, and the dialog content does not scroll sideways (WCAG 1.4.10).",
 			},
 		},
 	},
@@ -1066,7 +1150,7 @@ export const Issue3473Item11FooterFitsPhonePage: Story = {
 		docs: {
 			description: {
 				story:
-					"ISSUE-3473-ITEM-11: a page whose document scrolls, with Speichern, Exportieren and Zurück at 320px. The footer is as wide as its buttons and shifted 36px to the right, so it reaches past the layout, and focusing the last button scrolls the whole page sideways (WCAG 1.4.10).",
+					"ISSUE-3473-ITEM-11: a page whose document scrolls, with Speichern, Exportieren and Zurück at 320px. The footer starts at the layout's edge and is never wider than the layout, so it stays within it, and focusing the last button does not scroll the page sideways (WCAG 1.4.10).",
 			},
 		},
 	},
@@ -1093,7 +1177,7 @@ export const Issue3473Item11FooterFitsPhonePageRtl: Story = {
 		docs: {
 			description: {
 				story:
-					"ISSUE-3473-ITEM-11: the same page in a right-to-left layout: the 36px shift moves the footer further right, past the layout's right edge, so the footer sticks out and the page scrolls sideways (WCAG 1.4.10).",
+					"ISSUE-3473-ITEM-11: the same page in a right-to-left layout: the footer starts at the layout's right edge and stays within the layout, and the page does not scroll sideways (WCAG 1.4.10).",
 			},
 		},
 	},
@@ -1115,7 +1199,7 @@ export const Issue3473Item11FooterButtonsWrap: Story = {
 		docs: {
 			description: {
 				story:
-					"ISSUE-3473-ITEM-11: a form in a dialog at 320px with a third button. The footer has no width limit and FormButtons keeps its buttons on one line, so the bar is wider than the dialog content and the content scrolls sideways (WCAG 1.4.10).",
+					"ISSUE-3473-ITEM-11: a form in a dialog at 320px with a third button. The footer is never wider than the layout and FormButtons wraps its buttons onto more than one line, so every button stays within the layout and the dialog content does not scroll sideways (WCAG 1.4.10).",
 			},
 		},
 	},
