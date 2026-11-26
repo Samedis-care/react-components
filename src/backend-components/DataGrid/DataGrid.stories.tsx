@@ -21,6 +21,7 @@ import {
 	ModelVisibilityGridView,
 	PageVisibility,
 } from "../../backend-integration";
+import ccI18n from "../../i18n";
 
 const FrameworkDecorator = (Story: React.ComponentType) => (
 	<Framework>
@@ -502,5 +503,32 @@ export const Issue3506Item13FilesMenuByKeyboard: StoryObj = {
 		await expect(cells()[0].scrollTop, "the cell scrolled").toBe(0);
 		// the menu grows in
 		await waitFor(() => expect(reopened).toBeVisible());
+	},
+};
+
+const StableModelStory = () => {
+	const model = useMemo(
+		() => makeModel("language", new MockConnector(PEOPLE)),
+		[],
+	);
+	return <BackendDataGrid model={model} />;
+};
+
+/**
+ * ISSUE-3506-ITEM-4: after a language switch the cells keep the language they were
+ * loaded in ("Yes" instead of "Ja") until the next reload
+ */
+export const Issue3506Item4CellsFollowLanguageSwitch: StoryObj = {
+	render: () => <StableModelStory />,
+	play: async ({ canvas }) => {
+		await expect((await canvas.findAllByText("Yes")).length).toBe(2);
+		try {
+			await ccI18n.changeLanguage("de");
+			await expect(
+				(await canvas.findAllByText("Ja", {}, { timeout: 2000 })).length,
+			).toBe(2);
+		} finally {
+			await ccI18n.changeLanguage("en");
+		}
 	},
 };

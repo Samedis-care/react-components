@@ -23,7 +23,9 @@ import deepAssign from "../../utils/deepAssign";
 import deepClone from "../../utils/deepClone";
 import isPlainObject from "../../utils/isPlainObject";
 import InlineEditCell from "./InlineEditCell";
+import ModelCell from "./ModelCell";
 import renderModelCell from "./renderModelCell";
+import ccI18n from "../../i18n";
 
 export interface BackendDataGridProps<M extends ModelUnknown> extends Omit<
 	DataGridProps,
@@ -31,6 +33,11 @@ export interface BackendDataGridProps<M extends ModelUnknown> extends Omit<
 > {
 	/**
 	 * The model to use
+	 * @remarks The cells follow components-care's language: they render again in the
+	 *          current language when it changes. The column headers are read from the
+	 *          model's labels (getLabel, getHeaderName, getColumnLabel) once per model
+	 *          instance, so a model whose labels change, e.g. with the language, has to
+	 *          be a new instance, such as one memoized on useTranslation's t.
 	 */
 	model: M;
 	/**
@@ -321,21 +328,15 @@ export const useBackendDataGridDeleteHandler = <M extends ModelUnknown>(
 ) => useBackendDataGridDelete(props, refreshGrid).handleDelete;
 
 /**
- * A cell's change handler where the cell has no editor: its overview visibility is
- * not editable, so its renderer shows no control that could call it
- */
-const notEditableInGrid = () => {
-	throw new Error("Not editable in Grid");
-};
-
-/**
  * Turns a record from model.index into a grid row: `row.id` is the record's id,
  * `row[field]` the rendered cell of each model field and `row[field + "_raw"]` its
- * value. A field with an editable overview visibility (ModelVisibilityGridEdit) is
- * edited in its cell, which saves every change at once through the model's mutation
- * (useModelMutation, so the model's cache, hooks and "mutate" listeners hear of it), then
- * calls refreshGrid; a refused save is shown in an error dialog (the cell needs the
- * Framework), and refreshGrid is called as well. The cell's control is named after its
+ * value. A cell renders again in components-care's current language when it changes
+ * (ModelCell), since the renderers translate while they render ("Yes", enum labels,
+ * formatted dates). A field with an editable overview visibility
+ * (ModelVisibilityGridEdit) is edited in its cell, which saves every change at once
+ * through the model's mutation (useModelMutation, so the model's cache, hooks and
+ * "mutate" listeners hear of it), then calls refreshGrid; a refused save is shown in an
+ * error dialog (the cell needs the Framework), and refreshGrid is called as well. The cell's control is named after its
  * field and the row ("Active, example.com"), since a grid cell has no label element to
  * name it (InlineEditCell).
  * @param model The model the record belongs to
@@ -371,9 +372,10 @@ export const renderDataGridRecordUsingModel =
 						];
 					}
 
-					// rendered for an editable field too, so that a renderer without a grid
-					// editor fails the load ("Not supported") instead of the grid's render
-					const cell = renderModelCell(model, key, entry, notEditableInGrid);
+					// rendered while loading, for an editable field too, so that a renderer
+					// without a grid editor fails the load ("Not supported") instead of the
+					// grid's render
+					const cell = renderModelCell(model, key, entry);
 					return [
 						[
 							key,
@@ -385,7 +387,14 @@ export const renderDataGridRecordUsingModel =
 									refreshGrid={refreshGrid}
 								/>
 							) : (
-								cell
+								<ModelCell
+									model={model}
+									field={key}
+									record={entry}
+									language={ccI18n.language}
+								>
+									{cell}
+								</ModelCell>
 							),
 						],
 						[key + "_raw", value],

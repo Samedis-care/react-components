@@ -8,6 +8,7 @@
 import React from "react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import {
+	act,
 	cleanup,
 	fireEvent,
 	render,
@@ -252,6 +253,33 @@ describe("renderDataGridRecordUsingModel", () => {
 		cleanup();
 		const second = renderCell((await rowOf(model, vi.fn(), 1)).flag);
 		expect(second.container).toHaveTextContent(/^No$/);
+	});
+
+	it("[ISSUE-3506-ITEM-4] a cell renders again in the new language when the language changes", async () => {
+		const { model } = makeModel();
+		const row = await rowOf(model);
+		const { container } = renderCell(row.flag);
+		expect(container).toHaveTextContent(/^Yes$/);
+		try {
+			await act(() => ccI18n.changeLanguage("de"));
+			expect(container).toHaveTextContent(/^Ja$/);
+			await act(() => ccI18n.changeLanguage("en"));
+			expect(container).toHaveTextContent(/^Yes$/);
+		} finally {
+			await act(() => ccI18n.changeLanguage("en"));
+		}
+	});
+
+	it("[ISSUE-3506-ITEM-4] a cell that mounts after a language switch, e.g. in a row scrolled into view, shows the new language", async () => {
+		const { model } = makeModel();
+		const row = await rowOf(model);
+		try {
+			await ccI18n.changeLanguage("de");
+			const { container } = renderCell(row.flag);
+			expect(container).toHaveTextContent(/^Ja$/);
+		} finally {
+			await act(() => ccI18n.changeLanguage("en"));
+		}
 	});
 
 	it("renders a column hidden by default (GridViewHidden) with its value, for when the user shows it", async () => {
