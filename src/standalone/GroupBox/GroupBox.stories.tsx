@@ -337,3 +337,57 @@ export const Issue3462Item6EnclosesContentInMaxHeightParent: Story = {
 		await expect(after.top).toBeGreaterThanOrEqual(content.bottom);
 	},
 };
+
+export const Issue3462Item7WidthWithoutBorderBox: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3462-ITEM-7: where `box-sizing` is `content-box` (a page without MUI's CssBaseline), the frame is its parent's width plus 18px of padding and border, and sticks out on the right.",
+			},
+		},
+	},
+	render: () => (
+		<div
+			data-testid={"parent"}
+			style={{ width: 300, boxSizing: "content-box" }}
+		>
+			<GroupBox id={"gb"} label={"Label"}>
+				<span>content</span>
+			</GroupBox>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const parent = rectOf(canvasElement.querySelector("[data-testid=parent]"));
+		const box = rectOf(canvasElement.querySelector("#gb"));
+		await expect(box.right).toBeLessThanOrEqual(parent.right + 0.5);
+		await expectNear(box.width, parent.width);
+	},
+};
+
+export const Issue3462Item7HeightWithoutBorderBox: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3462-ITEM-7: where `box-sizing` is `content-box`, the frame as the only child of a 200px tall parent is taller than the parent by its padding and border, and sticks out at the bottom.",
+			},
+		},
+	},
+	render: () => (
+		<div
+			data-testid={"parent"}
+			style={{ width: 300, height: 200, boxSizing: "content-box" }}
+		>
+			<GroupBox id={"gb"} label={"Label"}>
+				<span>content</span>
+			</GroupBox>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const parent = rectOf(canvasElement.querySelector("[data-testid=parent]"));
+		const box = rectOf(canvasElement.querySelector("#gb"));
+		await expectNear(box.top, parent.top);
+		await expectNear(box.bottom, parent.bottom);
+	},
+};

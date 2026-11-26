@@ -46,6 +46,10 @@ const GroupBoxRoot = styled("fieldset", {
 	marginRight: 0,
 	minWidth: 0,
 	width: "100%",
+	// The width and the only-child height include padding and border, so the
+	// frame fits its parent also where box-sizing is content-box (a page
+	// without CssBaseline, or a subtree that resets it).
+	boxSizing: "border-box",
 }));
 
 /**
@@ -194,10 +198,13 @@ const GroupBox = React.forwardRef(function GroupBox(
  * A frame with an optional title: a native `<fieldset>` whose `label` is drawn
  * as a `<legend>` in its top border.
  *
- * The frame is as wide as its parent. When it is its parent's only element
- * child, it is also as tall as the parent wherever the parent's height is
- * definite, e.g. a Grid item stretched to its row, so frames in one Grid row
- * are equally tall. Next to other elements (a heading above it, helper text
+ * The frame is as wide as its parent. Its width and height include its
+ * padding and border (`box-sizing: border-box`), so it fits its parent also
+ * where `box-sizing` is `content-box`, e.g. on a page without MUI's
+ * `CssBaseline`. When it is its parent's only element child, it is also as
+ * tall as the parent wherever the parent's height is definite, e.g. a Grid
+ * item stretched to its row, so frames in one Grid row are equally tall.
+ * Next to other elements (a heading above it, helper text
  * below it) it is as tall as its content, and the siblings stay inside the
  * parent. A `height` set by the theme or a `styled(GroupBox)` wrapper
  * replaces this rule. A `max-height` on the parent does not limit the frame:
