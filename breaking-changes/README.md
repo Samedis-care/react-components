@@ -27,6 +27,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-26 | [BackendSingleSelect shows a picked record as picked, without looking it up](2026-11-26-backend-single-select-pick-not-looked-up.md) | behavior |
 | 2026-11-26 | [Model.index2 reports an unexpected error, as index does](2026-11-26-model-index2-reports-errors.md) | behavior |
 | 2026-11-26 | [The busy overlay's focus ring shows at once; what fades in is the wash's color and its spinner](2026-11-26-form-loader-overlay-focus-ring-at-once.md) | behavior, theme |
+| 2026-11-26 | [Tab switches keep the scroll position, and PortalLayout's main pane scrolls to the top after a navigation](2026-11-26-scroll-reset-tabs-and-scroll-containers.md) | behavior |
 | 2026-11-26 | [InfiniteScroll fills its container again when it grows, and `dynamicallySized` is removed](2026-11-26-infinite-scroll-observes-its-size.md) | behavior, type |
 | 2026-11-26 | [HowToBox takes any fieldset attribute, `sx` and `ref`, and its list gets an id from `id`](2026-11-26-how-to-box-html-attributes.md) | behavior, type |
 | 2026-11-26 | [A Form's save names the files and images the backend refused](2026-11-26-file-controls-name-refused-queued-writes.md) | behavior |

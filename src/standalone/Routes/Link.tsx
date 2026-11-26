@@ -1,16 +1,10 @@
 import React, { useCallback, useMemo } from "react";
-import {
-	createPath,
-	parsePath,
-	type History,
-	type Location,
-	type Path,
-	type To,
-} from "history";
+import { createPath, type History, type Location, type To } from "history";
 import { useHistoryRouterContext } from "./HistoryRouter";
 import useNavigate from "./useNavigate";
 import useLocation from "./useLocation";
 import toAppPath from "./toAppPath";
+import { navigationTarget, normalizedUrl } from "./navigationTarget";
 
 /**
  * Props of {@link Link}: the target and every `<a>` attribute except `href`,
@@ -48,6 +42,14 @@ export interface LinkProps extends Omit<
 	 */
 	state?: unknown;
 	/**
+	 * Keep the scroll position when the link navigates: the window and the
+	 * scroll containers of the HistoryRouter stay where they are, for a link
+	 * that keeps the user on the page (a tab, a filter). See the
+	 * `preventScrollReset` option of `useNavigate`.
+	 * Default: false (the navigation scrolls them to the top)
+	 */
+	preventScrollReset?: boolean;
+	/**
 	 * Where the browser opens the link. A target other than `_self`
 	 * (`_blank`, a window name) leaves a click to the browser, which opens the
 	 * href there; `replace` and `state` don't apply. An empty target or
@@ -70,22 +72,6 @@ export interface LinkProps extends Omit<
 }
 
 /**
- * The location a click navigates to. A target that leaves out `pathname`,
- * `search` or `hash` is completed from the current location the way
- * `history.push` completes it: a missing pathname stays the current one, a
- * missing search and hash become empty.
- * @param location The current location
- * @param to The target, with leading slashes already collapsed
- * @returns The completed target
- */
-const navigationTarget = (location: Location, to: To): Partial<Path> => ({
-	pathname: location.pathname,
-	search: "",
-	hash: "",
-	...(typeof to === "string" ? parsePath(to) : to),
-});
-
-/**
  * The href a click navigates to, see {@link navigationTarget}.
  * `history.createHref` alone fills a missing pathname with "/".
  * @param history The router's history
@@ -95,17 +81,6 @@ const navigationTarget = (location: Location, to: To): Partial<Path> => ({
  */
 const navigationHref = (history: History, location: Location, to: To): string =>
 	history.createHref(navigationTarget(location, to));
-
-/**
- * A path as the URL parser reads it, percent-encoded: a browser history keeps
- * the location encoded ("/%C3%BCber"), a memory history as it was pushed
- * ("/über"). The path goes after a fixed origin and a slash, so no part of it
- * is read as a host.
- * @param path A path, with search and hash
- * @returns The URL of the path
- */
-const normalizedUrl = (path: Partial<Path>): string =>
-	new URL(`http://localhost/${createPath(path)}`).href;
 
 /**
  * Does a click on the target stay at the current location? Pathname, search
@@ -146,7 +121,8 @@ const Link = React.forwardRef(function Link(
 	props: LinkProps,
 	ref: React.ForwardedRef<HTMLAnchorElement>,
 ) {
-	const { to, replace, state, onClick, ...anchorProps } = props;
+	const { to, replace, state, preventScrollReset, onClick, ...anchorProps } =
+		props;
 	const { history } = useHistoryRouterContext();
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -174,9 +150,10 @@ const Link = React.forwardRef(function Link(
 				// history.location: the one the push completes the target from
 				replace: replace ?? isCurrentLocation(history.location, target),
 				state,
+				preventScrollReset,
 			});
 		},
-		[history, navigate, onClick, replace, state, target],
+		[history, navigate, onClick, replace, state, preventScrollReset, target],
 	);
 	return <a ref={ref} href={href} onClick={handleNav} {...anchorProps} />;
 });

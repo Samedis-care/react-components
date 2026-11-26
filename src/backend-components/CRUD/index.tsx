@@ -438,10 +438,12 @@ const CRUD = <M extends ModelUnknown>(
 					.slice(1);
 				// the Form stays (skipNextFormIdReset), so this moves the form page rather than
 				// leaving it, and its leave guard lets it pass: a control's own dirty state may
-				// not have caught up with the saved record yet
+				// not have caught up with the saved record yet. The user stays where they are
+				// on the page, so the scroll position stays too.
 				navigate([`${routeUrl}/${id}`, ...subPath].join("/"), {
 					replace: true,
 					state: FORM_PAGE_MOVE_STATE,
+					preventScrollReset: true,
 				});
 			}
 

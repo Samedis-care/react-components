@@ -316,6 +316,47 @@ export const Issue3500Item6PanelTakesFocus: Story = {
 	},
 };
 
+export const Issue3500Item7FocusedTabStaysInView: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3500-ITEM-7: the tab bar sits below a 1400px record header. Scroll to it, focus a tab and press Enter: the navigation scrolls the window to the top, so the focused tab and the opened panel leave the viewport. Expected: the focused tab stays in view.",
+			},
+		},
+	},
+	render: (args) => (
+		<Host at="/settings">
+			<SettingsTabs
+				tabsProps={args}
+				before={
+					<Box sx={{ height: 1400, p: 2 }}>
+						<Typography>Record header</Typography>
+					</Box>
+				}
+			/>
+		</Host>
+	),
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const [general, security] = tabsOf(canvasElement);
+		general.scrollIntoView({ block: "center" });
+		await waitFor(() => expect(window.scrollY).toBeGreaterThan(0));
+		general.focus();
+		await userEvent.keyboard("{ArrowRight}");
+		await expect(security).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		await expect(canvas.getByText("URL: /settings/security")).toBeVisible();
+		await expect(security).toHaveFocus();
+		const box = security.getBoundingClientRect();
+		await expect(
+			box.top >= 0 && box.bottom <= window.innerHeight,
+			`focused tab at ${Math.round(box.top)}..${Math.round(box.bottom)} in a ${window.innerHeight}px viewport (scrollY ${window.scrollY})`,
+		).toBe(true);
+	},
+};
+
 export const Issue3500Item8FocusShowsVisibleRing: Story = {
 	parameters: {
 		a11y: { test: "error" },

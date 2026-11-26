@@ -198,6 +198,9 @@ const withTabProps = (
 
 /**
  * MUI `Tabs` whose selected tab is a segment of the URL (see `children`).
+ * Opening a tab pushes its URL and keeps the scroll position of the page
+ * (`preventScrollReset`, see `useNavigate`): the bar, the focused tab and the
+ * panel stay where the user is.
  * The bar scrolls when its tabs do not fit, with scroll buttons also on
  * phones (see `variant`, `centered` and `allowScrollButtonsMobile`), so every
  * tab can be reached at 320px.
@@ -228,11 +231,15 @@ const RoutedTabs = (inProps: RoutedTabsProps) => {
 	const navigate = useNavigate();
 	const handleChange = useCallback(
 		(_evt: React.ChangeEvent<unknown>, value: string) => {
-			navigate({
-				pathname: url + "/" + value,
-				search,
-				hash,
-			});
+			navigate(
+				{
+					pathname: url + "/" + value,
+					search,
+					hash,
+				},
+				// the user stays on the page, with the bar and the focused tab in view
+				{ preventScrollReset: true },
+			);
 		},
 		[navigate, url, search, hash],
 	);

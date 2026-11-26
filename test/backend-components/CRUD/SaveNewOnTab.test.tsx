@@ -155,3 +155,24 @@ describe("routed CRUD: the first save of a new record", () => {
 		expect(h.index).toBe(index);
 	});
 });
+
+describe("routed CRUD: the scroll position at the first save", () => {
+	it("[ISSUE-3475-ITEM-20] saving a new record keeps the page where it is", async () => {
+		const h = createMemoryHistory({ initialEntries: ["/rec/new"] });
+		renderRouted(h, crudEl(peopleModel(), {}, undefined, TabbedPage));
+		await fillCreateForm();
+		const scrollTo = vi
+			.spyOn(window, "scrollTo")
+			.mockImplementation(() => undefined);
+		document.documentElement.scrollTop = 300;
+		try {
+			fireEvent.click(saveButton());
+			await savedAs("9");
+			expect(h.location.pathname).toBe("/rec/9");
+			expect(scrollTo).not.toHaveBeenCalled();
+			expect(document.documentElement.scrollTop).toBe(300);
+		} finally {
+			document.documentElement.scrollTop = 0;
+		}
+	});
+});

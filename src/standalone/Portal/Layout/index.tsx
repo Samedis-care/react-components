@@ -6,6 +6,7 @@ import React, {
 	useContext,
 	useId,
 	useMemo,
+	useRef,
 	useState,
 } from "react";
 import Header, { PortalLayoutHeaderProps } from "./Header";
@@ -22,6 +23,7 @@ import {
 import { Close as CloseIcon } from "@mui/icons-material";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import focusRing from "../focusRing";
+import useResetScrollOnNavigation from "../../Routes/useResetScrollOnNavigation";
 
 interface PortalLayoutBasic {
 	/**
@@ -67,6 +69,11 @@ interface PortalLayoutPropsBase {
 	menuContent: React.ReactNode;
 	/**
 	 * Main content
+	 *
+	 * It scrolls in a pane of its own (the `main` slot). Inside a HistoryRouter
+	 * (Framework renders one), a navigation scrolls the pane to the top as it
+	 * scrolls the window, unless the navigation keeps the scroll position
+	 * (`preventScrollReset` of `useNavigate`, e.g. a RoutedTabs tab switch).
 	 */
 	content: React.ReactNode;
 	/**
@@ -237,6 +244,9 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 	const [menuOpen, setMenuOpen] = useState(false);
 	// the mobile drawer's paper, named by the burger's aria-controls
 	const drawerId = useId();
+	// the pane the pages scroll in: a navigation starts the next page at its top
+	const mainRef = useRef<HTMLDivElement>(null);
+	useResetScrollOnNavigation(mainRef);
 	const { t } = useCCTranslations();
 
 	const toggleMenu = useCallback(
@@ -301,7 +311,9 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 					/>
 				)}
 			</RenderLayoutMenu>
-			<RenderLayoutMain id={props.mainId}>{content}</RenderLayoutMain>
+			<RenderLayoutMain id={props.mainId} ref={mainRef}>
+				{content}
+			</RenderLayoutMain>
 		</PortalLayoutContext.Provider>
 	);
 };

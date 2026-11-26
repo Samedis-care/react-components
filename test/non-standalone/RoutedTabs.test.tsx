@@ -34,7 +34,7 @@ import {
 let errSpy: MockInstance<typeof console.error>;
 
 beforeEach(() => {
-	// useNavigate scrolls the window to the top on every tab click; jsdom does not implement it
+	// a navigation scrolls the window to the top; jsdom does not implement it
 	vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
 	errSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
 });
@@ -590,4 +590,35 @@ describe("RoutedTabs: bugs", () => {
 			delete (HTMLElement.prototype as Partial<HTMLElement>).scrollIntoView;
 		}
 	});
+});
+
+describe("RoutedTabs: scroll position", () => {
+	it.each([
+		["a click", false],
+		["an arrow key with selectionFollowsFocus", true],
+	])(
+		"[ISSUE-3475-ITEM-20] opening a tab with %s keeps the page where it is",
+		(_how, selectionFollowsFocus) => {
+			const history = mem("/settings");
+			renderAt(history, <Demo tabsProps={{ selectionFollowsFocus }} />);
+			const scrollTo = vi
+				.spyOn(window, "scrollTo")
+				.mockImplementation(() => undefined);
+			document.documentElement.scrollTop = 300;
+			try {
+				if (selectionFollowsFocus) {
+					act(() => tabEl("Main").focus());
+					fireEvent.keyDown(tabEl("Main"), { key: "ArrowRight" });
+				} else {
+					fireEvent.click(tabEl("Security"));
+				}
+				expect(history.location.pathname).toBe("/settings/security");
+				expect(selected()).toEqual(["Security"]);
+				expect(scrollTo).not.toHaveBeenCalled();
+				expect(document.documentElement.scrollTop).toBe(300);
+			} finally {
+				document.documentElement.scrollTop = 0;
+			}
+		},
+	);
 });

@@ -1,5 +1,5 @@
 import React, { useContext, useLayoutEffect, useMemo, useState } from "react";
-import { Action, History, Location } from "history";
+import { History, Location } from "history";
 import { sentryHandleNavigation } from "./SentryRoutingInstrumentation";
 import { LocationContext } from "./useLocation";
 import DocumentTitleProvider, { DocumentTitleFormatter } from "./DocumentTitle";
@@ -7,6 +7,8 @@ import NavigationFocus from "./NavigationFocus";
 import { NavigationFocusManager } from "./NavigationFocusManager";
 import { RouteContext } from "./Route";
 import RoutesEntryContext from "./RoutesEntryContext";
+import { NavigationScrollManager } from "./NavigationScrollManager";
+import { NavigationScrollContext } from "./useResetScrollOnNavigation";
 
 /**
  * Props of {@link HistoryRouter}
@@ -74,18 +76,6 @@ export const useHistoryRouterContext = (): HistoryRouterContextType => {
 };
 
 /**
- * Scrolls the window and the document to the top. Only these: other scroll
- * containers keep their position, so that DataGrid can restore its own.
- */
-const resetPageScroll = () => {
-	window.scrollTo(0, 0);
-	document.documentElement.scrollTop = 0;
-	document.documentElement.scrollLeft = 0;
-	document.body.scrollTop = 0;
-	document.body.scrollLeft = 0;
-};
-
-/**
  * Provides the current location and the history to `Routes`, `Route`, `Link`
  * and the routing hooks (`useLocation`, `useNavigate`, `useParams`), and
  * re-renders them on every navigation of the history. Each push and
@@ -93,11 +83,19 @@ const resetPageScroll = () => {
  * `componentsCareBrowserTracingIntegration` is set up.
  *
  * A push or replace navigation (`useNavigate`, `Link`, or `history.push` and
- * `history.replace` called directly) scrolls the window and the document to
- * the top once the location has changed: a navigation that a blocker cancels,
- * e.g. the unsaved-changes guard of a form when the user stays, leaves the
- * page where it is. Back/forward navigations leave the scroll position to the
- * browser. Other scroll containers keep their position.
+ * `history.replace` called directly) scrolls the window, the document and the
+ * scroll containers registered with `useResetScrollOnNavigation` (the main
+ * pane of PortalLayout) to the top once the location has changed:
+ * - A navigation that a blocker cancels, e.g. the unsaved-changes guard of a
+ *   form when the user stays, leaves the page where it is.
+ * - A navigation started with `preventScrollReset` (see `useNavigate` and
+ *   `Link`) keeps the scroll positions, also when a blocker holds it back and
+ *   lets it go ahead later. RoutedTabs' tab switches and CRUD's move from the
+ *   create form to the record it has saved use it, so the user stays where
+ *   they are on the page.
+ * - Back/forward navigations leave the scroll position to the browser.
+ * - Other scroll containers keep their position, so that DataGrid can
+ *   restore its own.
  *
  * A navigation its children make while it mounts, e.g. a redirect in a mount
  * effect, shows right away, not only after the next navigation; so does the
@@ -131,12 +129,13 @@ const HistoryRouter = (props: HistoryRouterProps) => {
 	const [location, setLocation] = useState<Location>(history.location);
 	const ctx = useMemo((): HistoryRouterContextType => ({ history }), [history]);
 	const [navigationFocus] = useState(() => new NavigationFocusManager());
+	const [navigationScroll] = useState(() => new NavigationScrollManager());
 	// a layout effect, so the router listens before the passive effects of its
 	// children run (a redirect in a mount effect)
 	useLayoutEffect(() => {
 		const unlisten = history.listen((update) => {
 			// only now: a blocked navigation never gets here
-			if (update.action !== Action.Pop) resetPageScroll();
+			navigationScroll.navigated(update);
 			setLocation(update.location);
 			sentryHandleNavigation(update);
 			navigationFocus.navigated(update.action);
@@ -145,7 +144,7 @@ const HistoryRouter = (props: HistoryRouterProps) => {
 		// navigated already; no re-render if the location is unchanged
 		setLocation(history.location);
 		return unlisten;
-	}, [history, navigationFocus]);
+	}, [history, navigationFocus, navigationScroll]);
 	return (
 		<HistoryRouterContext.Provider value={ctx}>
 			<LocationContext.Provider value={location}>
@@ -154,7 +153,9 @@ const HistoryRouter = (props: HistoryRouterProps) => {
 				<DocumentTitleProvider formatDocumentTitle={formatDocumentTitle}>
 					<RouteContext.Provider value={null}>
 						<RoutesEntryContext.Provider value={null}>
-							{children}
+							<NavigationScrollContext.Provider value={navigationScroll}>
+								{children}
+							</NavigationScrollContext.Provider>
 						</RoutesEntryContext.Provider>
 					</RouteContext.Provider>
 					<NavigationFocus manager={navigationFocus} location={location} />

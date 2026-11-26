@@ -17,6 +17,7 @@ export { LocationContext } from "./useLocation";
 export { default as useNavigate } from "./useNavigate";
 export type { NavigateOptions, NavigateFunction } from "./useNavigate";
 export { default as useParams } from "./useParams";
+export { default as useResetScrollOnNavigation } from "./useResetScrollOnNavigation";
 export { default as usePageTitle } from "./usePageTitle";
 export type { DocumentTitleFormatter } from "./DocumentTitle";
 export { default as Link } from "./Link";

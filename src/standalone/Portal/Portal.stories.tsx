@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
 	BarChart as BarChartIcon,
@@ -6,7 +6,7 @@ import {
 	People as PeopleIcon,
 	Settings as SettingsIcon,
 } from "@mui/icons-material";
-import { Button, List, Paper, Typography } from "@mui/material";
+import { Box, Button, List, Paper, Typography } from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import PortalLayout, { PortalLayoutContext, PortalLayoutProps } from "./Layout";
@@ -18,6 +18,11 @@ import {
 	MaterialMenuItem,
 } from "./MenuItem";
 import type { IMenuItemDefinition, MenuItemComponent } from "./Menu";
+import { createMemoryHistory } from "history";
+import HistoryRouter from "../Routes/HistoryRouter";
+import Routes from "../Routes/Routes";
+import Route from "../Routes/Route";
+import Link from "../Routes/Link";
 
 // Provide a PortalLayoutContext so CollapsibleMenu doesn't throw
 const MockPortalLayoutProvider = ({
@@ -1003,5 +1008,84 @@ export const Issue3479Item14BurgerControlsDrawer: LayoutStory = {
 		await waitFor(() => expect(drawerRoot()).toHaveAttribute("aria-hidden"));
 		await expect(burger).toHaveAttribute("aria-expanded", "false");
 		await expect(document.getElementById(id!)).toBe(drawerPaper());
+	},
+};
+
+/** A page longer than the pane, with a link to another page at its end */
+const LongPage = (props: { name: string; to: string; link: string }) => (
+	<Box sx={{ p: 3 }}>
+		<Typography variant="h4" component="h1">
+			{props.name}
+		</Typography>
+		{Array.from({ length: 30 }, (_, index) => (
+			<Typography key={index} sx={{ py: 2 }}>
+				{props.name}, paragraph {index + 1}
+			</Typography>
+		))}
+		<Link to={props.to}>{props.link}</Link>
+	</Box>
+);
+
+/** PortalLayout with two long pages routed in its main pane */
+const RoutedPortal = () => {
+	const [history] = useState(() =>
+		createMemoryHistory({ initialEntries: ["/a"] }),
+	);
+	return (
+		<HistoryRouter history={history}>
+			<div style={fullHeight}>
+				<PortalLayout
+					variant="no-top-left"
+					headerContent={pageTitle("App")}
+					menuContent={<Typography sx={{ p: 2 }}>Menu</Typography>}
+					mainId="main-pane"
+					content={
+						<Routes>
+							{[
+								<Route
+									key="a"
+									path="/a"
+									element={<LongPage name="Page A" to="/b" link="Next page" />}
+								/>,
+								<Route
+									key="b"
+									path="/b"
+									element={<LongPage name="Page B" to="/a" link="Back to A" />}
+								/>,
+							]}
+						</Routes>
+					}
+				/>
+			</div>
+		</HistoryRouter>
+	);
+};
+
+export const Issue3475Item20NavigationScrollsMainPaneToTop: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3475-ITEM-20: the pages scroll in the layout's main pane, not in the window. Scroll to the end of page A and follow its link: page B opens at its top, not at the offset page A was scrolled to.",
+			},
+		},
+	},
+	render: () => <RoutedPortal />,
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const pane = document.getElementById("main-pane")!;
+		const link = canvas.getByRole("link", { name: "Next page" });
+		link.scrollIntoView({ block: "center" });
+		await waitFor(() => expect(pane.scrollTop).toBeGreaterThan(0));
+		await userEvent.click(link);
+		const heading = await canvas.findByRole("heading", { name: "Page B" });
+		await expect(pane.scrollTop).toBe(0);
+		const box = heading.getBoundingClientRect();
+		const paneBox = pane.getBoundingClientRect();
+		await expect(
+			box.top >= paneBox.top && box.bottom <= paneBox.bottom,
+			`heading at ${Math.round(box.top)}..${Math.round(box.bottom)} in a pane at ${Math.round(paneBox.top)}..${Math.round(paneBox.bottom)}`,
+		).toBe(true);
 	},
 };

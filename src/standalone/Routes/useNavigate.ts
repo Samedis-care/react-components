@@ -1,7 +1,8 @@
 import { useHistoryRouterContext } from "./HistoryRouter";
 import type { To } from "history";
-import { useCallback } from "react";
+import { useCallback, useContext } from "react";
 import toAppPath from "./toAppPath";
+import { NavigationScrollContext } from "./useResetScrollOnNavigation";
 
 /**
  * Options of a {@link NavigateFunction} call
@@ -17,6 +18,16 @@ export interface NavigateOptions {
 	 * `useLocation().state`. Default: none (the state is null)
 	 */
 	state?: unknown;
+	/**
+	 * Keep the scroll position: the navigation leaves the window, the document
+	 * and the scroll containers of the HistoryRouter (see
+	 * `useResetScrollOnNavigation`) where they are, instead of scrolling them
+	 * to the top. For a navigation that keeps the user on the page, such as a
+	 * tab switch or a filter kept in the URL; RoutedTabs uses it. Also applies
+	 * when a blocker holds the navigation back and lets it go ahead later.
+	 * Default: false (the navigation scrolls them to the top)
+	 */
+	preventScrollReset?: boolean;
 }
 
 /**
@@ -38,10 +49,14 @@ export interface NavigateFunction {
  *
  * Blockers on the history apply (inside Framework: a form with unsaved
  * changes). Once the navigation happens, the HistoryRouter scrolls the page
- * to the top; a navigation that a blocker cancels keeps the scroll position.
+ * to the top: the window, the document and the scroll containers registered
+ * with `useResetScrollOnNavigation` (PortalLayout's main pane), unless the
+ * call passes `preventScrollReset`. A navigation that a blocker cancels keeps
+ * the scroll position.
  */
 const useNavigate = (): NavigateFunction => {
 	const { history } = useHistoryRouterContext();
+	const navigationScroll = useContext(NavigationScrollContext);
 	return useCallback(
 		(to: To, options?: NavigateOptions) => {
 			const target = toAppPath(to);
@@ -50,10 +65,15 @@ const useNavigate = (): NavigateFunction => {
 					`useNavigate: ${JSON.stringify(to)} is not a path of this app, use window.location to leave the app`,
 				);
 			options ??= {};
+			navigationScroll?.navigating(
+				history,
+				target,
+				!!options.preventScrollReset,
+			);
 			if (options.replace) history.replace(target, options.state);
 			else history.push(target, options.state);
 		},
-		[history],
+		[history, navigationScroll],
 	);
 };
 
