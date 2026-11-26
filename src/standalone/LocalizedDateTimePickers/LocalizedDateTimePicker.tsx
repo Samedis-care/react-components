@@ -33,8 +33,10 @@ const DESKTOP_MODE_MEDIA_QUERY =
 	"@media (pointer: fine) and (min-width: 600px)";
 
 /**
- * Props of a date and time picker (MUI's `DateTimePicker` with the `L LT`
- * format of the current language).
+ * Props of a date and time picker: MUI's `DateTimePicker`, whose field writes
+ * the date and time as MUI's does, in the format for its `views` and `ampm`
+ * in the adapter's locale (`L hh:mm A` or `L HH:mm` with moment for the
+ * default views), or in `format`.
  *
  * While the picker's own validation rejects the date and time the field shows
  * (`minDate`, `maxDate`, `minDateTime`, `maxDateTime`, `minTime`, `maxTime`,
@@ -62,10 +64,24 @@ const DESKTOP_MODE_MEDIA_QUERY =
  * and goes into `slotProps.layout.sx`, which keeps a caller's layout slot
  * props and puts a caller's `sx` after it.
  */
-export interface LocalizedDateTimePickerProps extends Omit<
-	DateTimePickerProps,
-	"format"
-> {
+export interface LocalizedDateTimePickerProps extends DateTimePickerProps {
+	/**
+	 * How the field writes the date and time: a format string of the date
+	 * adapter, such as `"YYYY-MM-DD HH:mm"` with moment. Default: MUI's for the
+	 * `views` and `ampm`, in the adapter's locale: with moment and the default
+	 * views `L hh:mm A` on a 12-hour clock (`08/01/2026 03:30 PM` in English)
+	 * and `L HH:mm` on a 24-hour one (`01.08.2026 15:30` in German), with
+	 * seconds when `views` has them. The picker's message writes its limits
+	 * with a date and a time in it too.
+	 */
+	format?: DateTimePickerProps["format"];
+	/**
+	 * Whether the time is on a 12-hour clock with AM/PM, in the field and in
+	 * the calendar's time columns. Default: the clock of the adapter's locale
+	 * (12 hours in English, 24 in German), as in MUI. The picker's message
+	 * writes its time limits on the same clock.
+	 */
+	ampm?: DateTimePickerProps["ampm"];
 	/**
 	 * Marks the field required: an asterisk after the label, `required` on the
 	 * hidden input and `aria-required` on every section, so screen readers
@@ -195,6 +211,8 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 		disablePast: otherProps.disablePast,
 		disableFuture: otherProps.disableFuture,
 		withTime: true,
+		format: otherProps.format,
+		ampm: otherProps.ampm,
 		// the timezone the field shows the date in, as MUI picks it
 		timezone:
 			otherProps.timezone ||
@@ -224,7 +242,6 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 	return (
 		<LocalizationProvider localeText={localeText}>
 			<DateTimePicker
-				format={"L LT"}
 				{...otherProps}
 				value={draft.value}
 				onChange={draft.onChange}

@@ -20,8 +20,9 @@ import calendarFocusRingSlotProps from "./calendarFocusRingSlotProps";
 import OpenPickerButton from "./OpenPickerButton";
 
 /**
- * Props of a date picker (MUI's `DatePicker` with the `L` format of the
- * current language).
+ * Props of a date picker: MUI's `DatePicker`, whose field writes the date as
+ * MUI's does, in the format for its `views` in the adapter's locale (`L` with
+ * moment for the default views), or in `format`.
  *
  * While the picker's own validation rejects the date the field shows
  * (`minDate`, `maxDate`, `disablePast`, `disableFuture`, `shouldDisableDate`,
@@ -46,10 +47,16 @@ import OpenPickerButton from "./OpenPickerButton";
  * and goes into `slotProps.layout.sx`, which keeps a caller's layout slot
  * props and puts a caller's `sx` after it.
  */
-export interface LocalizedDatePickerProps extends Omit<
-	DatePickerProps,
-	"format"
-> {
+export interface LocalizedDatePickerProps extends DatePickerProps {
+	/**
+	 * How the field writes the date: a format string of the date adapter, such
+	 * as `"YYYY-MM-DD"` with moment. Default: MUI's for the `views`, in the
+	 * adapter's locale: `L` with moment for the default views (`08/01/2026` in
+	 * English, `01.08.2026` in German), the month and the year for
+	 * `["month", "year"]` (`August 2026`). The picker's message writes its date
+	 * limits in it too.
+	 */
+	format?: DatePickerProps["format"];
 	/**
 	 * Called once the user is done with the date: when focus leaves the field
 	 * (right before `onBlur`), on Enter in the field, and when the calendar
@@ -128,6 +135,7 @@ const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
 	const errorMessage = usePickerErrorMessage(validation.shownError, {
 		minDate: otherProps.minDate,
 		maxDate: otherProps.maxDate,
+		format: otherProps.format,
 	});
 	const withFieldBlur = useFieldBlur();
 
@@ -150,7 +158,6 @@ const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
 	return (
 		<LocalizationProvider localeText={localeText}>
 			<DatePicker
-				format={"L"}
 				{...otherProps}
 				value={draft.value}
 				onChange={draft.onChange}

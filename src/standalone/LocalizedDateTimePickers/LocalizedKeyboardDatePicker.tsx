@@ -22,8 +22,10 @@ import calendarFocusRingSlotProps from "./calendarFocusRingSlotProps";
 import OpenPickerButton from "./OpenPickerButton";
 
 /**
- * Props of a date picker typed into with the keyboard (MUI's `DatePicker`
- * with the `L` format of the current language).
+ * Props of a date picker typed into with the keyboard: MUI's `DatePicker`,
+ * whose field writes the date as MUI's does, in the format for its `views` in
+ * the adapter's locale (`L` with moment for the default views), or in
+ * `format`.
  *
  * While the picker's own validation rejects the date the field shows
  * (`minDate`, `maxDate`, `disablePast`, `disableFuture`, `shouldDisableDate`,
@@ -48,13 +50,20 @@ import OpenPickerButton from "./OpenPickerButton";
  * props and puts a caller's `sx` after it.
  */
 export interface LocalizedKeyboardDatePickerProps
-	extends
-		Omit<DatePickerProps, "format">,
-		Pick<TextFieldWithHelpProps, "disableClearable"> {
+	extends DatePickerProps, Pick<TextFieldWithHelpProps, "disableClearable"> {
 	/**
 	 * Boolean flag to hide Calendar Icon (only used if disabled is truthy)
 	 */
 	hideDisabledIcon?: boolean;
+	/**
+	 * How the field writes the date: a format string of the date adapter, such
+	 * as `"YYYY-MM-DD"` with moment. Default: MUI's for the `views`, in the
+	 * adapter's locale: `L` with moment for the default views (`08/01/2026` in
+	 * English, `01.08.2026` in German), the month and the year for
+	 * `["month", "year"]` (`August 2026`). The picker's message writes its date
+	 * limits in it too.
+	 */
+	format?: DatePickerProps["format"];
 	/**
 	 * The accessible name of the picker, for a picker without a visible
 	 * `label`, such as the translated purpose of the date ("From", "To"). It
@@ -193,6 +202,7 @@ const LocalizedKeyboardDatePicker = (
 	const errorMessage = usePickerErrorMessage(validation.shownError, {
 		minDate: otherProps.minDate,
 		maxDate: otherProps.maxDate,
+		format: otherProps.format,
 	});
 	const withFieldBlur = useFieldBlur();
 
@@ -208,7 +218,6 @@ const LocalizedKeyboardDatePicker = (
 	return (
 		<LocalizationProvider localeText={localeText}>
 			<DatePicker
-				format={"L"}
 				{...otherProps}
 				value={draft.value}
 				onChange={draft.onChange}

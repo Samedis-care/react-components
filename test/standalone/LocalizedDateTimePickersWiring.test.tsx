@@ -1014,6 +1014,165 @@ describe("leaving the field", () => {
 	);
 });
 
+describe("field format", () => {
+	it("[ISSUE-3474-ITEM-6] follows ampm={false} on a DateTimePicker", () => {
+		render(
+			<Wrap>
+				<LocalizedDateTimePicker
+					value={moment("2026-08-01T15:30")}
+					onChange={vi.fn()}
+					ampm={false}
+				/>
+			</Wrap>,
+		);
+		expect(screen.queryByRole("spinbutton", { name: "Meridiem" })).toBeNull();
+		expect(screen.getByRole("spinbutton", { name: "Hours" })).toHaveTextContent(
+			"15",
+		);
+	});
+
+	it("[ISSUE-3474-ITEM-6] leaves out the day section for views={['month', 'year']}", () => {
+		render(
+			<Wrap>
+				<LocalizedKeyboardDatePicker
+					value={moment(STORED)}
+					onChange={vi.fn()}
+					views={["month", "year"]}
+				/>
+			</Wrap>,
+		);
+		expect(screen.queryByRole("spinbutton", { name: "Day" })).toBeNull();
+	});
+
+	it.each([
+		["LocalizedKeyboardDatePicker", LocalizedKeyboardDatePicker, "08|01|2026"],
+		["LocalizedDatePicker", LocalizedDatePicker, "08|01|2026"],
+		["LocalizedDateTimePicker", LocalizedDateTimePicker, "08|01|2026|03|30|PM"],
+	] as const)(
+		"[ISSUE-3474-ITEM-6] writes the value of a %s in the locale's format by default",
+		(_name, Picker, shown) => {
+			render(
+				<Wrap>
+					<Picker value={moment("2026-08-01T15:30")} onChange={vi.fn()} />
+				</Wrap>,
+			);
+			expect(fieldText()).toBe(shown);
+		},
+	);
+
+	it.each([
+		[
+			"LocalizedKeyboardDatePicker",
+			LocalizedKeyboardDatePicker,
+			"YYYY-MM-DD",
+			"2026|08|01",
+		],
+		["LocalizedDatePicker", LocalizedDatePicker, "YYYY-MM-DD", "2026|08|01"],
+		[
+			"LocalizedDateTimePicker",
+			LocalizedDateTimePicker,
+			"YYYY-MM-DD HH:mm",
+			"2026|08|01|15|30",
+		],
+	] as const)(
+		"[ISSUE-3474-ITEM-6] writes the value of a %s in the format the caller passes",
+		(_name, Picker, format, shown) => {
+			render(
+				<Wrap>
+					<Picker
+						value={moment("2026-08-01T15:30")}
+						onChange={vi.fn()}
+						format={format}
+					/>
+				</Wrap>,
+			);
+			expect(fieldText()).toBe(shown);
+		},
+	);
+
+	it.each([
+		["LocalizedKeyboardDatePicker", LocalizedKeyboardDatePicker],
+		["LocalizedDatePicker", LocalizedDatePicker],
+	] as const)(
+		"[ISSUE-3474-ITEM-6] writes the month and the year of a %s for views={['month', 'year']}",
+		(_name, Picker) => {
+			render(
+				<Wrap>
+					<Picker
+						value={moment(STORED)}
+						onChange={vi.fn()}
+						views={["month", "year"]}
+					/>
+				</Wrap>,
+			);
+			expect(fieldText()).toBe("August|2026");
+		},
+	);
+
+	it("[ISSUE-3474-ITEM-6] adds a seconds section for a seconds view on a DateTimePicker", () => {
+		render(
+			<Wrap>
+				<LocalizedDateTimePicker
+					value={moment("2026-08-01T15:30:45")}
+					onChange={vi.fn()}
+					views={["year", "day", "hours", "minutes", "seconds"]}
+				/>
+			</Wrap>,
+		);
+		expect(fieldText()).toBe("08|01|2026|03|30|45|PM");
+	});
+
+	it("[ISSUE-3474-ITEM-6] follows ampm when it changes after mount", () => {
+		const picker = (ampm: boolean) => (
+			<Wrap>
+				<LocalizedDateTimePicker
+					value={moment("2026-08-01T15:30")}
+					onChange={vi.fn()}
+					ampm={ampm}
+				/>
+			</Wrap>
+		);
+		const { rerender } = render(picker(true));
+		expect(fieldText()).toBe("08|01|2026|03|30|PM");
+		rerender(picker(false));
+		expect(fieldText()).toBe("08|01|2026|15|30");
+	});
+
+	it("[ISSUE-3474-ITEM-6] follows views and ampm set in the theme's default props of MUI's pickers", () => {
+		// computed keys: the MUI X theme augmentation is not loaded here
+		const [datePicker, dateTimePicker] = ["MuiDatePicker", "MuiDateTimePicker"];
+		const themed = createTheme({
+			components: {
+				[datePicker]: { defaultProps: { views: ["month", "year"] } },
+				[dateTimePicker]: { defaultProps: { ampm: false } },
+			},
+		});
+		const { unmount } = render(
+			<ThemeProvider theme={themed}>
+				<LocalizationProvider dateAdapter={AdapterMoment}>
+					<LocalizedKeyboardDatePicker
+						value={moment(STORED)}
+						onChange={vi.fn()}
+					/>
+				</LocalizationProvider>
+			</ThemeProvider>,
+		);
+		expect(fieldText()).toBe("August|2026");
+		unmount();
+		render(
+			<ThemeProvider theme={themed}>
+				<LocalizationProvider dateAdapter={AdapterMoment}>
+					<LocalizedDateTimePicker
+						value={moment("2026-08-01T15:30")}
+						onChange={vi.fn()}
+					/>
+				</LocalizationProvider>
+			</ThemeProvider>,
+		);
+		expect(fieldText()).toBe("08|01|2026|15|30");
+	});
+});
+
 describe("picker texts", () => {
 	it("[ISSUE-3474-ITEM-7] use MUI's Italian texts for the library language it", async () => {
 		await act(async () => {

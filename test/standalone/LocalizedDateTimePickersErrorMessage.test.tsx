@@ -823,3 +823,85 @@ describe("LocalizedDateTimePicker", () => {
 		expect(missing).toEqual([]);
 	});
 });
+
+describe("limits as the field writes them", () => {
+	it.each(PICKERS)(
+		"[ISSUE-3474-ITEM-6] writes the date limit of a %s in the format the caller passes",
+		(_name, Picker) => {
+			render(
+				<Wrap>
+					<Picker
+						label="Valid from"
+						value={moment("1999-06-15")}
+						minDate={moment("2020-01-01")}
+						onChange={vi.fn()}
+						format="YYYY-MM-DD"
+					/>
+				</Wrap>,
+			);
+			expect(helperText()).toBe("Enter a date on or after 2020-01-01");
+		},
+	);
+
+	it.each([
+		[
+			"minTime",
+			{ value: at("08:00"), minTime: at("09:00") },
+			"Enter a time at or after 09:00",
+		],
+		[
+			"maxDateTime",
+			{ value: at("19:00"), maxDateTime: at("18:00") },
+			"Enter a date and time on or before 08/01/2026 18:00",
+		],
+	])(
+		"[ISSUE-3474-ITEM-6] writes the %s limit of a DateTimePicker on the 24-hour clock of ampm={false}",
+		(_reason, props, message) => {
+			render(
+				<Wrap>
+					<LocalizedDateTimePicker
+						label="Starts"
+						onChange={vi.fn()}
+						ampm={false}
+						{...props}
+					/>
+				</Wrap>,
+			);
+			expect(helperText()).toBe(message);
+		},
+	);
+
+	it.each([
+		[
+			"maxDateTime",
+			{ value: at("19:00"), maxDateTime: at("18:00") },
+			"Enter a date and time on or before 2026-08-01 18:00",
+		],
+		// a date alone and a time alone keep the adapter's formats
+		[
+			"minDate",
+			{ value: moment("2019-12-31T12:00"), minDate: moment("2020-01-01") },
+			"Enter a date on or after 01/01/2020",
+		],
+		[
+			"minTime",
+			{ value: at("08:00"), minTime: at("09:00") },
+			"Enter a time at or after 09:00 AM",
+		],
+	])(
+		"[ISSUE-3474-ITEM-6] writes the %s limit of a DateTimePicker with the format the caller passes",
+		(_reason, props, message) => {
+			render(
+				<Wrap>
+					<LocalizedDateTimePicker
+						label="Starts"
+						onChange={vi.fn()}
+						format="YYYY-MM-DD HH:mm"
+						{...props}
+					/>
+				</Wrap>,
+			);
+			expect(helperText()).toBe(message);
+		},
+	);
+});

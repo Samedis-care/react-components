@@ -40,6 +40,20 @@ export interface PickerErrorMessageLimits {
 	 */
 	withTime?: boolean;
 	/**
+	 * The picker's `format`, if the caller set one: a limit of the kind the
+	 * field shows, a date on a date picker and a date and time with
+	 * `withTime`, is then written in it, as the field writes its value. A date
+	 * alone and a time alone on a date-time picker keep the adapter's formats.
+	 * Default: none, every limit in the adapter's formats.
+	 */
+	format?: string;
+	/**
+	 * Whether the field shows the time on a 12-hour clock with AM/PM: a
+	 * date-time picker's `ampm`. Default: the clock of the adapter's locale, as
+	 * in MUI.
+	 */
+	ampm?: boolean;
+	/**
 	 * The timezone the field shows its value in: MUI's `timezone`, else the
 	 * value's own, else `referenceDate`'s, else `"default"`. A limit that has a
 	 * date is written in it, as the user enters dates there; a time of day alone
@@ -95,9 +109,10 @@ const DEFAULT_MAX_DATE = "2099-12-31T00:00:00.000";
  * 09:00 AM", … A limit is written as the field writes it, in the adapter's
  * locale: a date in the adapter's `keyboardDate` format (`L` with moment), a
  * time and a date and time in its `fullTime` and `keyboardDateTime` formats
- * for the locale's 12- or 24-hour clock (`hh:mm A`, `L hh:mm A` in English),
- * with the leading zeros MUI's field adds. An unset `minDate` or `maxDate` is
- * MUI's default.
+ * for the field's 12- or 24-hour clock (`ampm`, by default the locale's:
+ * `hh:mm A`, `L hh:mm A` in English), with the leading zeros MUI's field
+ * adds; a limit of the kind the field shows in the caller's `format`, if set.
+ * An unset `minDate` or `maxDate` is MUI's default.
  *
  * With `withTime`, it follows MUI's date-time validation: `minDateTime` is the
  * `minDate` and the `minTime`, so either error asks for a date and time on or
@@ -115,17 +130,22 @@ const usePickerErrorMessage = (
 	const { t } = useCCTranslations();
 	const adapter = usePickerAdapter();
 	if (error == null) return null;
-	const { withTime, timezone } = limits;
+	const { withTime, timezone, format } = limits;
 	const inFieldTimezone = (date: PickerValidDate) =>
 		timezone ? adapter.setTimezone(date, timezone) : date;
-	const twelveHours = adapter.is12HourCycleInCurrentLocale();
+	const twelveHours = limits.ampm ?? adapter.is12HourCycleInCurrentLocale();
 	const formatDate = (date: PickerValidDate) =>
-		adapter.format(inFieldTimezone(date), "keyboardDate");
+		format && !withTime
+			? adapter.formatByString(inFieldTimezone(date), format)
+			: adapter.format(inFieldTimezone(date), "keyboardDate");
+	// only a date-time picker's errors name a date and time
 	const formatDateTime = (date: PickerValidDate) =>
-		adapter.format(
-			inFieldTimezone(date),
-			twelveHours ? "keyboardDateTime12h" : "keyboardDateTime24h",
-		);
+		format
+			? adapter.formatByString(inFieldTimezone(date), format)
+			: adapter.format(
+					inFieldTimezone(date),
+					twelveHours ? "keyboardDateTime12h" : "keyboardDateTime24h",
+				);
 	const formatTime = (date: PickerValidDate) =>
 		adapter.format(date, twelveHours ? "fullTime12h" : "fullTime24h");
 	// as MUI's date-time validation, which compares minTime and maxTime with

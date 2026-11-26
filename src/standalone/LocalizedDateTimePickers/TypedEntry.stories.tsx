@@ -66,7 +66,7 @@ const typeSlowly = async (
 	}
 };
 
-/** The field sections, in the order the `L` / `L LT` formats render them for `en` */
+/** The field sections, in the order the default formats render them for `en` */
 const sections = (canvas: PlayContext["canvas"]) => {
 	const found = canvas.getAllByRole("spinbutton");
 	return { month: found[0], day: found[1], year: found[2] };
