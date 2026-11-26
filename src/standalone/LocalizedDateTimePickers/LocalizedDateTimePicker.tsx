@@ -119,10 +119,26 @@ export interface LocalizedDateTimePickerProps extends Omit<
 	 */
 	onChange?: DateTimePickerProps["onChange"];
 	/**
+	 * Called with every date reported to `onChange`, right after it and with
+	 * the same arguments: once the user is done with the date (see `onChange`),
+	 * with a date the picker accepts or `null` for an empty field. Unlike MUI's
+	 * `onAccept`, it is not called for every change of the field, so it gets
+	 * neither the dates the field passes through while the user types (the
+	 * years 0002, 0020 and 0203 on the way to 2030) nor an entry the picker
+	 * rejects (see `onError`). With `publishIntermediateValues` it is MUI's
+	 * `onAccept`: called for every change of the field and for a date the
+	 * calendar accepts, entries the picker rejects included, with their reason
+	 * in `context.validationError`.
+	 * @param value The date, or `null`
+	 * @param context MUI's context: `validationError` (`null`, the date being
+	 * accepted) and `source`
+	 */
+	onAccept?: DateTimePickerProps["onAccept"];
+	/**
 	 * Report every change at once, rather than a date once the user is done
 	 * with it (see `onChange`): every keystroke, entries the picker rejects
-	 * included, as MUI's own picker does. Default `false`. See
-	 * {@link usePickerDraft}.
+	 * included, to `onChange` and `onAccept`, as MUI's own picker does. Default
+	 * `false`. See {@link usePickerDraft}.
 	 */
 	publishIntermediateValues?: boolean;
 	/**
@@ -164,6 +180,7 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 		otherProps.onChange,
 		publishIntermediateValues,
 		otherProps.defaultValue,
+		otherProps.onAccept,
 	);
 	const validation = usePickerValidationError(otherProps.onError);
 	const adapter = usePickerAdapter();
@@ -189,7 +206,7 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 	});
 	const withFieldBlur = useFieldBlur();
 
-	const { settle, accept } = draft;
+	const { settle } = draft;
 	const consumerOnOpen = otherProps.onOpen;
 	const handleOpen = useCallback(() => {
 		// the calendar renders from the value it is given, so a half-typed date
@@ -197,16 +214,6 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 		settle();
 		consumerOnOpen?.();
 	}, [settle, consumerOnOpen]);
-	const consumerOnAccept = otherProps.onAccept;
-	const handleAccept: NonNullable<DateTimePickerProps["onAccept"]> =
-		useCallback(
-			(value, context) => {
-				// a date the calendar accepted is reported at once, see onChange
-				accept(value, context);
-				consumerOnAccept?.(value, context);
-			},
-			[accept, consumerOnAccept],
-		);
 	const consumerSlots = otherProps.slots;
 	// the caller's slots come after the open button with its focus ring, so a
 	// button it passes wins
@@ -222,7 +229,9 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 				value={draft.value}
 				onChange={draft.onChange}
 				onOpen={handleOpen}
-				onAccept={handleAccept}
+				// reports a date the calendar accepted at once, and passes what is
+				// reported to the caller's onAccept, see onAccept
+				onAccept={draft.accept}
 				onError={validation.onError}
 				desktopModeMediaQuery={
 					otherProps.desktopModeMediaQuery ?? DESKTOP_MODE_MEDIA_QUERY

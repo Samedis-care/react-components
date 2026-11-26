@@ -809,6 +809,17 @@ describe.each(PICKERS)("%s wiring", (_name, Picker) => {
 		});
 	});
 
+	it("[ISSUE-3474-ITEM-5] does not pass a rejected value to onAccept", () => {
+		const onAccept = vi.fn();
+		render(
+			<Wrap>
+				<Controlled onAccept={onAccept} />
+			</Wrap>,
+		);
+		makeDraft();
+		expect(onAccept).not.toHaveBeenCalled();
+	});
+
 	it("[ISSUE-3474-ITEM-1] renders an invalid value instead of looping", () => {
 		const consoleError = vi
 			.spyOn(console, "error")

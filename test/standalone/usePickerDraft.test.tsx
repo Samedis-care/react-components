@@ -510,4 +510,108 @@ describe("usePickerDraft", () => {
 
 		expect(reportedDays(onChange)).toEqual(["2026-08-01", "2026-08-20"]);
 	});
+	it("[ISSUE-3474-ITEM-5] passes each report to onAccept, right after onChange and with the same arguments, and nothing else", () => {
+		const log: string[] = [];
+		const day = (value: Moment | null) => value?.format("YYYY-MM-DD") ?? "null";
+		const { result } = renderHook(
+			() =>
+				usePickerDraft(
+					moment("2026-08-05"),
+					(value: Moment | null, context) => {
+						log.push(`onChange ${day(value)} ${context.source}`);
+					},
+					false,
+					undefined,
+					(value: Moment | null, context) => {
+						log.push(`onAccept ${day(value)} ${context.source}`);
+					},
+				),
+			{ wrapper },
+		);
+
+		// MUI hands each change of the field to onAccept too, rejected ones included
+		for (const [year, context] of [
+			["0002", INVALID],
+			["0020", INVALID],
+			["0203", INVALID],
+			["2030", FROM_FIELD],
+		] as const) {
+			emit(result, moment(`${year}-08-05`), context);
+			accept(result, moment(`${year}-08-05`), context);
+		}
+		accept(result, moment("2026-08-20"), {
+			validationError: "maxDate",
+			source: "view",
+		});
+		const whileTyping = [...log];
+		finish(result);
+		emit(result, moment("2026-08-20"), FROM_VIEW);
+		accept(result, moment("2026-08-20"), FROM_VIEW);
+
+		expect({ whileTyping, inAll: log }).toEqual({
+			whileTyping: [],
+			inAll: [
+				"onChange 2030-08-05 unknown",
+				"onAccept 2030-08-05 unknown",
+				"onChange 2026-08-20 view",
+				"onAccept 2026-08-20 view",
+			],
+		});
+	});
+
+	it("[ISSUE-3474-ITEM-5] calls the onAccept of the latest render", () => {
+		const first = vi.fn();
+		const second = vi.fn();
+		// the same onChange throughout, so only onAccept differs between the renders
+		const onChange = vi.fn();
+		const { result, rerender } = renderHook(
+			(props: { onAccept: () => void }) =>
+				usePickerDraft(
+					moment("2026-08-05"),
+					onChange,
+					false,
+					undefined,
+					props.onAccept,
+				),
+			{ wrapper, initialProps: { onAccept: first } },
+		);
+
+		emit(result, moment("2026-08-12"), FROM_FIELD);
+		rerender({ onAccept: second });
+		finish(result);
+
+		expect({
+			first: first.mock.calls.length,
+			second: second.mock.calls.length,
+		}).toEqual({
+			first: 0,
+			second: 1,
+		});
+	});
+
+	it("[ISSUE-3474-ITEM-5] passes everything MUI accepts to onAccept as it comes when publishIntermediateValues is set", () => {
+		const onAccept = vi.fn();
+		const { result } = renderHook(
+			() =>
+				usePickerDraft(
+					moment("2026-08-05"),
+					vi.fn(),
+					true,
+					undefined,
+					onAccept,
+				),
+			{ wrapper },
+		);
+
+		accept(result, moment("0020-08-05"), INVALID);
+		accept(result, moment("2026-08-01"), FROM_FIELD);
+		accept(result, moment("2026-08-20"), FROM_VIEW);
+		finish(result);
+
+		expect(onAccept.mock.calls).toEqual([
+			[moment("0020-08-05"), INVALID],
+			[moment("2026-08-01"), FROM_FIELD],
+			[moment("2026-08-20"), FROM_VIEW],
+		]);
+	});
 });

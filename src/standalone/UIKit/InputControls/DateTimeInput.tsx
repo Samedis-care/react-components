@@ -34,6 +34,13 @@ export interface DateTimeInputProps extends UIInputProps {
 	 */
 	onChange?: LocalizedDateTimePickerProps["onChange"];
 	/**
+	 * Called with every date and time reported to `onChange`, right after it
+	 * and with the same arguments, so never with a value the field passes
+	 * through while the user types or one the picker rejects. See
+	 * `LocalizedDateTimePickerProps.onAccept`.
+	 */
+	onAccept?: LocalizedDateTimePickerProps["onAccept"];
+	/**
 	 * full width?
 	 */
 	fullWidth?: LocalizedDateTimePickerProps["fullWidth"];

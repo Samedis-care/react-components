@@ -116,13 +116,16 @@ export interface DateInputProps extends Omit<
 	 */
 	shouldDisableYear?: (year: Date) => boolean;
 	/**
-	 * Called when MUI accepts a value: a day picked in the calendar, and every
-	 * change typed into the field while the calendar is closed. Unlike
-	 * `onChange`, it also gets entries the picker rejects; their reason is in
-	 * `context.validationError`.
-	 * @param value the accepted day as a date-only value (12:00 UTC), or `null`
-	 *              for an empty field or an entry that is no valid day
-	 * @param context MUI's context: `validationError` and `source`
+	 * Called with every day the picker reports to `onChange`, right after it:
+	 * once the user is done with the day (see `onChange`), with a day the
+	 * picker accepts or `null` for an empty field. It gets neither the days the
+	 * field passes through while the user types nor an entry the picker
+	 * rejects (see `onError`). The touch Clear button reports `null` to
+	 * `onChange` only. See `LocalizedKeyboardDatePickerProps.onAccept`.
+	 * @param value the day as a date-only value (12:00 UTC), or `null` for an
+	 *              empty field
+	 * @param context MUI's context: `validationError` (`null`, the day being
+	 *                accepted) and `source`
 	 */
 	onAccept?: (
 		value: Date | null,

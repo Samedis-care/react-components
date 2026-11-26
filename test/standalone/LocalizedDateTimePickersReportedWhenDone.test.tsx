@@ -10,7 +10,10 @@ import {
 	within,
 } from "@testing-library/react";
 import { createTheme, ThemeProvider } from "@mui/material";
-import { LocalizationProvider } from "@mui/x-date-pickers";
+import {
+	LocalizationProvider,
+	type PickerChangeHandlerContext,
+} from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import moment, { type Moment } from "moment";
 import LocalizedKeyboardDatePicker from "../../src/standalone/LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
@@ -76,12 +79,30 @@ const leaveField = () => {
 	});
 };
 const openButton = () => screen.getByRole("button", { name: /choose date/i });
+/**
+ * Types into a field section one digit at a time, as MUI's field reads it: from
+ * the section's text after the browser's input event
+ */
+const typeDigits = (index: number, digits: string) => {
+	act(() => {
+		sections()[index].focus();
+	});
+	for (const digit of digits) {
+		act(() => {
+			const section = sections()[index];
+			section.textContent = digit;
+			fireEvent.input(section);
+		});
+	}
+};
 
 describe.each(PICKERS)("%s", (_name, Picker) => {
 	/** A consumer that stores what it hears, as a form or a filter does */
 	const Stored = (props: {
 		onChange: (value: Moment | null) => void;
 		maxDate?: Moment;
+		onAccept?: (value: Moment | null, context: unknown) => void;
+		publishIntermediateValues?: boolean;
 	}) => {
 		const [value, setValue] = useState<Moment | null>(() => moment(STORED));
 		return (
@@ -95,6 +116,8 @@ describe.each(PICKERS)("%s", (_name, Picker) => {
 							setValue(newValue);
 							props.onChange(newValue);
 						}}
+						onAccept={props.onAccept}
+						publishIntermediateValues={props.publishIntermediateValues}
 					/>
 					<button type="button">outside</button>
 				</LocalizationProvider>
@@ -302,6 +325,107 @@ describe.each(PICKERS)("%s", (_name, Picker) => {
 			whileInField: [],
 			inAll: ["2026-08-02"],
 		});
+	});
+	/**
+	 * Renders a stored picker and returns what reached its `onChange` and its
+	 * `onAccept`, in order: "onAccept <day> <context.validationError>"
+	 */
+	const renderLogged = (
+		options: { maxDate?: Moment; publishIntermediateValues?: boolean } = {},
+	) => {
+		const log: string[] = [];
+		const day = (value: Moment | null) => value?.format("YYYY-MM-DD") ?? "null";
+		render(
+			<Stored
+				{...options}
+				onChange={(value) => log.push(`onChange ${day(value)}`)}
+				onAccept={(value, context) =>
+					log.push(
+						`onAccept ${day(value)} ${String(
+							(context as PickerChangeHandlerContext<unknown>).validationError,
+						)}`,
+					)
+				}
+			/>,
+		);
+		return log;
+	};
+
+	it("[ISSUE-3474-ITEM-5] passes a typed year to onAccept once focus leaves, right after onChange, not the years on the way", () => {
+		const log = renderLogged();
+		typeDigits(2, "2030");
+		const whileInField = [...log];
+		leaveField();
+		expect({ shown: shownDate(), whileInField, inAll: log }).toEqual({
+			shown: "08|01|2030",
+			whileInField: [],
+			inAll: ["onChange 2030-08-01", "onAccept 2030-08-01 null"],
+		});
+	});
+
+	it("[ISSUE-3474-ITEM-5] passes the date to onAccept on Enter, not the dates on the way, and not again when focus leaves", () => {
+		const log = renderLogged();
+		focusDay();
+		press("ArrowUp");
+		press("ArrowUp");
+		const beforeEnter = [...log];
+		press("Enter");
+		const onEnter = [...log];
+		leaveField();
+		expect({ beforeEnter, onEnter, inAll: log }).toEqual({
+			beforeEnter: [],
+			onEnter: ["onChange 2026-08-03", "onAccept 2026-08-03 null"],
+			inAll: ["onChange 2026-08-03", "onAccept 2026-08-03 null"],
+		});
+	});
+
+	it("[ISSUE-3474-ITEM-5] passes a day picked in the mobile dialog to onAccept once, on OK", async () => {
+		stubMobile();
+		const log = renderLogged();
+		act(() => {
+			fireEvent.click(openButton());
+		});
+		const dialog = await screen.findByRole("dialog");
+		act(() => {
+			fireEvent.click(within(dialog).getByRole("gridcell", { name: "5" }));
+		});
+		const beforeOk = [...log];
+		// the date/time picker leads through its time views with Next first
+		for (let step = 0; step < 4; step++) {
+			const action = within(dialog).getByRole("button", {
+				name: /^(OK|Next)$/,
+			});
+			const isOk = action.textContent === "OK";
+			act(() => {
+				fireEvent.click(action);
+			});
+			if (isOk) break;
+		}
+		await waitFor(() => {
+			expect(screen.queryByRole("dialog")).toBeNull();
+		});
+		leaveField();
+		expect({ beforeOk, inAll: log }).toEqual({
+			beforeOk: [],
+			inAll: ["onChange 2026-08-05", "onAccept 2026-08-05 null"],
+		});
+	});
+
+	it("[ISSUE-3474-ITEM-5] passes every change to onAccept at once with publishIntermediateValues, a rejected one included, as MUI does", () => {
+		const log = renderLogged({
+			publishIntermediateValues: true,
+			maxDate: moment(STORED).add(1, "day").endOf("day"),
+		});
+		focusDay();
+		// Aug 2 passes maxDate, Aug 3 does not
+		press("ArrowUp");
+		press("ArrowUp");
+		expect(log).toEqual([
+			"onChange 2026-08-02",
+			"onAccept 2026-08-02 null",
+			"onChange 2026-08-03",
+			"onAccept 2026-08-03 maxDate",
+		]);
 	});
 });
 
