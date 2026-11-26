@@ -476,6 +476,57 @@ describe("persistence provider bugs", () => {
 		});
 		expect(persisted(localStorage.getItem("grid-A")).search).toBe("A's search");
 	});
+	/**
+	 * Opens a grid under storageKey A and changes its search and columns,
+	 * switches to storageKey B, has another tab change what is stored under
+	 * A, and switches back to A
+	 */
+	const backToKeyChangedElsewhere = async () => {
+		const ui = (storageKey: string) => (
+			<LocalStoragePersist storageKey={storageKey}>
+				<Grid />
+			</LocalStoragePersist>
+		);
+		const { rerender } = render(ui("grid-A"));
+		await gridIdle();
+		act(() =>
+			grid!.setState((prev) => ({
+				...prev,
+				search: "written",
+				columnHidden: { ...prev.columnHidden, role: true },
+			})),
+		);
+		grid = null;
+		rerender(ui("grid-B"));
+		await gridIdle();
+
+		// meanwhile another tab changes what is stored under A
+		localStorage.setItem(
+			"grid-A",
+			JSON.stringify({
+				v: DATA_GRID_PERSIST_VERSION,
+				search: "elsewhere",
+				shown: ["name", "role"],
+				hidden: ["secret"],
+			}),
+		);
+		grid = null;
+		rerender(ui("grid-A"));
+		await gridIdle();
+	};
+	it("[ISSUE-3496-ITEM-29] a grid under a storageKey that comes back opens with what is stored under it then, not with what it wrote for it before", async () => {
+		await backToKeyChangedElsewhere();
+		expect(grid!.state.search).toBe("elsewhere");
+		expect(grid!.state.columnHidden).toMatchObject({ role: false });
+	});
+	it("[ISSUE-3496-ITEM-29] the next change of a grid under a storageKey that comes back keeps what is stored under it then", async () => {
+		await backToKeyChangedElsewhere();
+		act(() => grid!.setWidths((prev) => ({ ...prev, name: 321 })));
+		const entry = persisted(localStorage.getItem("grid-A"));
+		expect(entry.width).toMatchObject({ name: 321 });
+		expect(entry.search).toBe("elsewhere");
+		expect(entry.hidden).not.toContain("role");
+	});
 	it("[ISSUE-3496-ITEM-6] a grid that opens on what is stored does not write it again", async () => {
 		const first = vi.fn<DataGridPersistentStateContextType[1]>();
 		render(

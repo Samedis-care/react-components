@@ -35,6 +35,11 @@ export interface LocalStoragePersistProps {
 	children: React.ReactNode;
 }
 
+/** One read of the localStorage entry: what it held, parsed */
+interface StoredEntry {
+	data: DataGridPersistedData | undefined;
+}
+
 /**
  * A persistence provider for DataGrid.
  * Uses localStorage for storage.
@@ -52,37 +57,27 @@ export interface LocalStoragePersistProps {
  * If the browser blocks localStorage (blocked site data, some sandboxed
  * iframes), the grids open at their defaults and nothing is kept for the next
  * visit; the failed reads and writes are logged to the console.
- * @remarks The data it provides is what was written last, so a grid mounted
- *          later (or anything else reading the context) starts from the
- *          current state, not from the state loaded on mount
+ * @remarks The data it provides is what was written last since the entry
+ *          was read, so a grid mounted later (or anything else reading the
+ *          context) starts from the current state, not from the state loaded
+ *          on mount. A storage key that comes back is read again, and its
+ *          grids start from what is stored under it then, not from what was
+ *          written under it before.
  */
 const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 	const { storageKey, children } = props;
 
 	// localStorage is only read once per storage key, so what was written since
-	// is kept here, together with the key it was written for
+	// is kept here, together with the read it follows: a storage key read again
+	// starts from what is stored under it then, which another tab may have
+	// changed meanwhile
 	const [written, setWritten] = useState<
-		[string, DataGridPersistentState] | null
+		[read: StoredEntry, state: DataGridPersistentState] | null
 	>(null);
 
-	const setData = useCallback(
-		(data: DataGridPersistentState) => {
-			setWritten([storageKey, data]);
-			try {
-				localStorage?.setItem(storageKey, JSON.stringify(data));
-			} catch (e) {
-				// eslint-disable-next-line no-console
-				console.error(
-					"[Components-Care] Failed to persist DataGrid config in localStorage." +
-						storageKey,
-					e,
-				);
-			}
-		},
-		[storageKey],
-	);
-
-	const stored = useMemo(() => {
+	// read while rendering, once per storage key: each read is a new object,
+	// which tells what was written since it from what was written before
+	const read = useMemo((): StoredEntry => {
 		let dataStr: string | null | undefined;
 		try {
 			// reading window.localStorage throws, too, when the browser blocks it
@@ -94,7 +89,7 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 					storageKey,
 				e,
 			);
-			return undefined;
+			return { data: undefined };
 		}
 		let data: DataGridPersistedData | undefined;
 		if (dataStr) {
@@ -120,8 +115,25 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 				}
 			}
 		}
-		return data;
+		return { data };
 	}, [storageKey]);
+
+	const setData = useCallback(
+		(data: DataGridPersistentState) => {
+			setWritten([read, data]);
+			try {
+				localStorage?.setItem(storageKey, JSON.stringify(data));
+			} catch (e) {
+				// eslint-disable-next-line no-console
+				console.error(
+					"[Components-Care] Failed to persist DataGrid config in localStorage." +
+						storageKey,
+					e,
+				);
+			}
+		},
+		[storageKey, read],
+	);
 
 	// a grid reads the persisted state when it mounts: one mounted for the
 	// previous key would keep showing that key's state, and write it under
@@ -137,10 +149,11 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 	const persistCtx = useMemo(
 		() =>
 			[
-				written?.[0] === storageKey ? written[1] : stored,
+				// what was written since this read of the entry, else what it holds
+				written?.[0] === read ? written[1] : read.data,
 				setData,
 			] as DataGridPersistentStateContextType,
-		[written, storageKey, stored, setData],
+		[written, read, setData],
 	);
 
 	return (
