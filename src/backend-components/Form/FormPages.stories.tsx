@@ -465,6 +465,143 @@ export const Issue3503Item18OpenInNewIsAButton: StoryObj<OpenInNewArgs> = {
 };
 
 /**
+ * Checks that the floating labels of the first row of fields start inside the dialog's
+ * content, which cuts off what lies above its top edge
+ * @param dialog The dialog (its paper)
+ */
+const expectFirstRowLabelsInside = async (dialog: HTMLElement) => {
+	await within(dialog).findByDisplayValue("Alice", undefined, LOAD);
+	const content = dialog.querySelector(".MuiDialogContent-root");
+	const top = content?.getBoundingClientRect().top;
+	for (const name of ["First Name", "Last Name"]) {
+		const label = within(dialog).getByText(new RegExp("^" + name), {
+			selector: "label",
+		});
+		await expect(
+			label.getBoundingClientRect().top,
+			`the ${name} label starts above the top edge of the dialog content`,
+		).toBeGreaterThanOrEqual(top ?? Infinity);
+	}
+};
+
+/**
+ * A button "Edit person" that pushes a FullFormDialog titled "Edit person" with the person form
+ */
+const DialogOpener = (props: { goBack?: () => void }) => {
+	const [pushDialog, popDialog] = useDialogContext();
+	const model = useMemo(makeModel, []);
+	const open = () =>
+		pushDialog(
+			<FullFormDialog dialogTitle={"Edit person"}>
+				<Form
+					model={model}
+					id={"1"}
+					errorComponent={DefaultErrorComponent}
+					customProps={{ goBack: props.goBack ?? popDialog }}
+					disableRouting
+				>
+					{PersonPage}
+				</Form>
+			</FullFormDialog>,
+		);
+	return <Button onClick={open}>Edit person</Button>;
+};
+
+/**
+ * ISSUE-3503-ITEM-19: in a FullFormDialog the content has no top padding, so the floating labels of
+ * the first row of outlined fields are cut in half.
+ */
+export const Issue3503Item19DialogFieldLabelsNotClipped: StoryObj = {
+	parameters: { a11y: { test: "error" } },
+	render: () => <DialogOpener />,
+	play: async ({ canvas, userEvent }) => {
+		await userEvent.click(canvas.getByRole("button", { name: "Edit person" }));
+		// the dialog is in a portal, outside the story's canvas
+		const dialog = await within(document.body).findByRole("dialog", {
+			name: /Edit person/,
+		});
+		await expectFirstRowLabelsInside(dialog);
+	},
+};
+
+interface LabelDialogArgs extends PageArgs {
+	/**
+	 * FullFormDialog's dialogTitle; none for a dialog without a title, named by its aria-label
+	 */
+	dialogTitle?: string;
+	/**
+	 * FullFormDialog's useCustomClasses: the content is 80vh tall
+	 */
+	useCustomClasses: boolean;
+}
+
+/**
+ * The person form in a FullFormDialog named "Edit person", rendered without pushDialog
+ */
+const PersonFormDialog = (props: LabelDialogArgs) => {
+	const { dialogTitle, useCustomClasses, goBack } = props;
+	const model = useMemo(makeModel, []);
+	const customProps = useMemo(() => ({ goBack }), [goBack]);
+	return (
+		<FullFormDialog
+			dialogTitle={dialogTitle}
+			aria-label={"Edit person"}
+			useCustomClasses={useCustomClasses}
+		>
+			<Form
+				model={model}
+				id={"1"}
+				errorComponent={DefaultErrorComponent}
+				customProps={customProps}
+				disableRouting
+			>
+				{PersonPage}
+			</Form>
+		</FullFormDialog>
+	);
+};
+
+/**
+ * ISSUE-3503-ITEM-19: without a title the content starts at the top edge of the dialog, and the
+ * floating labels of its first row of fields start inside it too.
+ */
+export const Issue3503Item19UntitledDialogFieldLabelsNotClipped: StoryObj<LabelDialogArgs> =
+	{
+		args: { goBack: fn(), useCustomClasses: false },
+		parameters: { a11y: { test: "error" } },
+		render: (args) => <PersonFormDialog {...args} />,
+		play: async () => {
+			// the dialog is in a portal, outside the story's canvas
+			const dialog = await within(document.body).findByRole(
+				"dialog",
+				{ name: "Edit person" },
+				LOAD,
+			);
+			await expectFirstRowLabelsInside(dialog);
+		},
+	};
+
+/**
+ * ISSUE-3503-ITEM-19: the tall content of `useCustomClasses` keeps the labels of its first row of
+ * fields inside it too.
+ */
+export const Issue3503Item19TallDialogFieldLabelsNotClipped: StoryObj<LabelDialogArgs> =
+	{
+		args: { goBack: fn(), dialogTitle: "Edit person", useCustomClasses: true },
+		parameters: { a11y: { test: "error" } },
+		render: (args) => <PersonFormDialog {...args} />,
+		play: async () => {
+			// the dialog is in a portal, outside the story's canvas
+			const dialog = await within(document.body).findByRole(
+				"dialog",
+				{ name: "Edit person" },
+				LOAD,
+			);
+			await expectFirstRowLabelsInside(dialog);
+		},
+	};
+
+/**
  * The people connector, whose read answers after `delay` milliseconds
  */
 class SlowReadConnector extends MockConnector {

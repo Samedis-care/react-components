@@ -25,6 +25,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [Notifications: the bell's name includes the unread count](2026-11-27-notifications-bell-name-has-unread-count.md) | behavior, i18n |
 | 2026-11-27 | [A model's color field refuses text that is no color](2026-11-27-color-type-validates-the-color.md) | behavior |
 | 2026-11-27 | [InlineSwitch requires onChange unless it is disabled](2026-11-27-inline-switch-on-change-required-unless-disabled.md) | type |
+| 2026-11-27 | [FullFormDialog's content keeps a top padding, with or without a title](2026-11-27-full-form-dialog-content-top-padding.md) | behavior |
 | 2026-11-26 | [A localized value without text in the UI language shows another language's text](2026-11-26-localized-string-falls-back-to-another-language.md) | behavior |
 | 2026-11-26 | [A HistoryRouter inside another one leaves the page's scroll position and focus alone](2026-11-26-nested-history-router-keeps-page-scroll-and-focus.md) | behavior |
 | 2026-11-26 | [isPlainObject tells a plain object by its prototype; a record with an entry named constructor counts](2026-11-26-is-plain-object-by-prototype.md) | behavior |

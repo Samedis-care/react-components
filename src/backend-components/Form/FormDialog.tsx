@@ -108,7 +108,19 @@ export interface FormDialogProps {
 	renderer?: React.ComponentType<FormDialogRendererProps>;
 }
 
-const TallDialogContent = styled(DialogContent, {
+/**
+ * The content, with a top padding. The floating label of an outlined field sits 9px above the
+ * field, and the content scrolls, so it cuts off what lies above its top edge. MUI's
+ * DialogContent has no top padding right after a title, and DialogTitle's row takes it away
+ * without a title too, where the content starts at the paper's top edge: the labels of a form's
+ * first row of fields would be cut in half.
+ */
+const Content = styled(DialogContent)(({ theme }) => ({
+	// four classes outrank the title row's rule, which has three
+	"&&&&": { paddingTop: theme.spacing(2) },
+}));
+
+const TallDialogContent = styled(Content, {
 	name: "CcFormDialog",
 	slot: "content",
 })({
@@ -131,8 +143,9 @@ const OpenInNewIcon = styled(OpenInNew, {
 
 /**
  * Slot names of `CcFormDialog`, for theme `styleOverrides`: `content` (the
- * content area with useCustomClasses), `openInNewButton` (the "Open in new tab"
- * button) and `openInNewIcon` (its icon)
+ * content area with useCustomClasses; its top padding is set under `&&&&`, so
+ * an override of it needs four classes too), `openInNewButton` (the "Open in
+ * new tab" button) and `openInNewIcon` (its icon)
  */
 export type FormDialogClassKey =
 	"content" | "openInNewButton" | "openInNewIcon";
@@ -275,7 +288,8 @@ const useTitleActionFocusFallback = (
 /**
  * The dialog FullFormDialog renders by default (its `renderer`): an MUI `Dialog` with a
  * `DialogTitle` (the title, then in its `action` the content's controls (`titleAction`) and the
- * open-in-new button, and the close button) and the content. The title names the dialog, else
+ * open-in-new button, and the close button) and the content, which has a top padding of
+ * `theme.spacing(2)` with or without a title. The title names the dialog, else
  * `aria-label` does. A title that shows only after the dialog opened takes the keyboard focus if
  * it is still on the dialog itself, so screen readers read it (see `FullFormDialog`). When a
  * control of the title row goes away while it holds the focus, the dialog gets the focus. A
@@ -296,7 +310,7 @@ export const FormDialogDefaultRenderer = (props: FormDialogRendererProps) => {
 		"aria-label": ariaLabel,
 	} = props;
 	const { t } = useCCTranslations();
-	const ContentComp = useCustomClasses ? TallDialogContent : DialogContent;
+	const ContentComp = useCustomClasses ? TallDialogContent : Content;
 	const { paperRef, onPaperFocus } = useLateTitleFocus(!!dialogTitle);
 	// the paper is the element with role="dialog"; a shown title names it through MUI's
 	// aria-labelledby, which wins over aria-label
@@ -357,7 +371,8 @@ export const FormDialogDefaultRenderer = (props: FormDialogRendererProps) => {
 /**
  * A dialog for a form page or other content, opened with `pushDialog`: a title bar with the
  * title, optional controls (`titleAction`), an optional "Open in new tab" button and the close
- * button, and the content below.
+ * button, and the content below. The content keeps a top padding (`theme.spacing(2)`) with or
+ * without a title, so the floating labels of a form's first row of outlined fields show in full.
  * The content can set the title (`useSetFormDialogTitle`, `PageTitle`) and controls beside it
  * (`useSetFormDialogTitleAction`), guard closing while it has unsaved changes, and close the
  * dialog (`useCloseThisDialog`).
