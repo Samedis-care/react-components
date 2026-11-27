@@ -545,6 +545,395 @@ const flush = async () => {
 // ---------------------------------------------------------------------------
 
 describe("useCrudSelect bugs", () => {
+	it("[ISSUE-3509-ITEM-1] two picks made while the first create is in flight are both listed", async () => {
+		const be = makeBackend();
+		const { result } = mountJoins(be);
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		const release = be.hold("create");
+		let first!: Promise<void>;
+		let second!: Promise<void>;
+		act(() => {
+			first = result.current.handleSelect(["to-create-s1"], [pick("s1")]);
+		});
+		// the field does not list s1 yet, so the next pick reports only s2
+		act(() => {
+			second = result.current.handleSelect(["to-create-s2"], [pick("s2")]);
+		});
+		release();
+		await act(async () => {
+			await first;
+			await second;
+		});
+		expect(be.calls).toEqual(["create:s1", "create:s2"]);
+		expect(
+			result.current.selected.map((entry) => entry.source_id).sort(),
+		).toEqual(["s1", "s2"]);
+	});
+
+	it("[ISSUE-3509-ITEM-1] removing a second entry while the first removal is in flight does not bring the first back", async () => {
+		const be = makeBackend([
+			{ id: "j1", source_id: "s1" },
+			{ id: "j2", source_id: "s2" },
+			{ id: "j3", source_id: "s3" },
+		]);
+		const { result } = mountJoins(be);
+		await waitFor(() => expect(result.current.selected).toHaveLength(3));
+		const [j1, j2, j3] = result.current.selected;
+		const release = be.hold("delete");
+		let first!: Promise<void>;
+		let second!: Promise<void>;
+		act(() => {
+			first = result.current.handleSelect(["j2", "j3"], [j2, j3]);
+		});
+		// the field still lists j1 while its delete is pending
+		act(() => {
+			second = result.current.handleSelect(["j1", "j3"], [j1, j3]);
+		});
+		release();
+		await act(async () => {
+			await first;
+			await second;
+		});
+		expect(Array.from(be.rows.keys())).toEqual(["j3"]);
+		expect(values(result.current.selected)).toEqual(["j3"]);
+	});
+
+	it("[ISSUE-3509-ITEM-1] a removal reported twice while its delete is in flight deletes the row once and shows no error", async () => {
+		const be = makeBackend([
+			{ id: "j1", source_id: "s1" },
+			{ id: "j2", source_id: "s2" },
+		]);
+		const { result } = mountJoins(be);
+		await waitFor(() => expect(result.current.selected).toHaveLength(2));
+		const [, j2] = result.current.selected;
+		const release = be.hold("delete");
+		let first!: Promise<void>;
+		let second!: Promise<void>;
+		// a double click on the remove button of j1
+		act(() => {
+			first = result.current.handleSelect(["j2"], [j2]);
+		});
+		act(() => {
+			second = result.current.handleSelect(["j2"], [j2]);
+		});
+		release();
+		await act(async () => {
+			await first;
+			await second;
+		});
+		expect(be.calls).toEqual(["delete:j1"]);
+		expect(values(result.current.selected)).toEqual(["j2"]);
+		expect(result.current.error).toBeNull();
+	});
+
+	it("[ISSUE-3509-ITEM-1] the same option picked twice before its create returns is created once", async () => {
+		const be = makeBackend();
+		const { result } = mountJoins(be);
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		const release = be.hold("create");
+		let first!: Promise<void>;
+		let second!: Promise<void>;
+		act(() => {
+			first = result.current.handleSelect(["to-create-s1"], [pick("s1")]);
+		});
+		// the field still offers s1, and it is picked again
+		act(() => {
+			second = result.current.handleSelect(["to-create-s1"], [pick("s1")]);
+		});
+		release();
+		await act(async () => {
+			await first;
+			await second;
+		});
+		expect(be.calls).toEqual(["create:s1"]);
+		expect(values(result.current.selected)).toEqual(["100"]);
+		expect(result.current.error).toBeNull();
+	});
+
+	it("[ISSUE-3509-ITEM-1] a removal made while a pick is being created keeps the pick, and the pick keeps the removal", async () => {
+		const be = makeBackend([
+			{ id: "j1", source_id: "s1" },
+			{ id: "j2", source_id: "s2" },
+		]);
+		const { result } = mountJoins(be);
+		await waitFor(() => expect(result.current.selected).toHaveLength(2));
+		const [j1, j2] = result.current.selected;
+		const release = be.hold("create");
+		let first!: Promise<void>;
+		let second!: Promise<void>;
+		act(() => {
+			first = result.current.handleSelect(
+				["j1", "j2", "to-create-s3"],
+				[j1, j2, pick("s3")],
+			);
+		});
+		// the field does not list s3 yet when j1 is removed
+		act(() => {
+			second = result.current.handleSelect(["j2"], [j2]);
+		});
+		release();
+		await act(async () => {
+			await first;
+			await second;
+		});
+		expect(Array.from(be.rows.keys())).toEqual(["j2", "100"]);
+		expect(values(result.current.selected)).toEqual(["j2", "100"]);
+	});
+
+	it("[ISSUE-3509-ITEM-1] addToSelection while a pick is in flight lists both, and does not create the picked record again", async () => {
+		const be = makeBackend();
+		const { ref, result } = mountJoins(be);
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		const release = be.hold("create");
+		let picked!: Promise<void>;
+		act(() => {
+			picked = result.current.handleSelect(["to-create-s2"], [pick("s2")]);
+		});
+		const added = startAdd(ref, pick("s1"));
+		const addedAgain = startAdd(ref, pick("s2"));
+		release();
+		await act(async () => {
+			await picked;
+		});
+		await added;
+		await addedAgain;
+		await flush();
+		expect([...be.calls].sort()).toEqual(["create:s1", "create:s2"]);
+		expect(
+			result.current.selected.map((entry) => entry.source_id).sort(),
+		).toEqual(["s1", "s2"]);
+	});
+
+	it("[ISSUE-3509-ITEM-1] an update that a change made before it was applied reports again is written once, and that change's removal goes through", async () => {
+		const be = makeBackend([
+			{ id: "j1", source_id: "s1", note: "a" },
+			{ id: "j2", source_id: "s2" },
+		]);
+		const { result } = mountJoins(be);
+		await waitFor(() => expect(result.current.selected).toHaveLength(2));
+		const [j1, j2] = result.current.selected;
+		const edited = { ...j1, note: "b" };
+		let first!: Promise<void>;
+		let second!: Promise<void>;
+		act(() => {
+			first = result.current.handleSelect(["j1", "j2"], [edited, j2]);
+			// the field lists its edited copy at once, and j2 is removed from there
+			second = result.current.handleSelect(["j1"], [{ ...edited }]);
+		});
+		await act(async () => {
+			await first;
+			await second;
+		});
+		expect(be.calls).toEqual(["update:j1:b", "delete:j2"]);
+		expect(values(result.current.selected)).toEqual(["j1"]);
+		expect(result.current.selected[0].note).toBe("b");
+		expect(result.current.error).toBeNull();
+	});
+
+	it("[ISSUE-3509-ITEM-1] a removal reported twice while its delete is in flight is sent once when the backend refuses it, and its error stays", async () => {
+		const be = makeBackend([
+			{ id: "j1", source_id: "s1" },
+			{ id: "j2", source_id: "s2" },
+		]);
+		const { result } = mountJoins(be);
+		await waitFor(() => expect(result.current.selected).toHaveLength(2));
+		const [, j2] = result.current.selected;
+		let refuse!: () => void;
+		const refusal = new Promise<void>((resolve) => (refuse = resolve));
+		be.del.mockImplementationOnce(async (id: string) => {
+			await refusal;
+			be.calls.push("delete:" + id);
+			throw new Error("in use");
+		});
+		let first!: Promise<void>;
+		let second!: Promise<void>;
+		act(() => {
+			first = result.current.handleSelect(["j2"], [j2]);
+		});
+		act(() => {
+			second = result.current.handleSelect(["j2"], [j2]);
+		});
+		refuse();
+		await act(async () => {
+			await first;
+			await second;
+		});
+		expect(be.calls).toEqual(["delete:j1"]);
+		expect(values(result.current.selected)).toEqual(["j1", "j2"]);
+		expect(result.current.error?.message).toBe("Ls1: in use");
+	});
+
+	it("[ISSUE-3509-ITEM-1] a pick reported twice while its create is in flight is sent once when the backend refuses it", async () => {
+		const be = makeBackend();
+		const { result } = mountJoins(be);
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		let refuse!: () => void;
+		const refusal = new Promise<void>((resolve) => (refuse = resolve));
+		be.create.mockImplementationOnce(async (data: Record<string, unknown>) => {
+			await refusal;
+			be.calls.push("create:" + String(data.source_id));
+			throw new Error("duplicate_key_error");
+		});
+		let first!: Promise<void>;
+		let second!: Promise<void>;
+		act(() => {
+			first = result.current.handleSelect(["to-create-s1"], [pick("s1")]);
+		});
+		act(() => {
+			second = result.current.handleSelect(["to-create-s1"], [pick("s1")]);
+		});
+		refuse();
+		await act(async () => {
+			await first;
+			await second;
+		});
+		expect(be.calls).toEqual(["create:s1"]);
+		expect(result.current.selected).toEqual([]);
+		expect(result.current.error?.message).toBe("Ls1: duplicate_key_error");
+	});
+
+	it("[ISSUE-3509-ITEM-1] a pick and a removal reported again from a render before they settled write nothing", async () => {
+		const be = makeBackend([{ id: "j1", source_id: "s1" }]);
+		const { result } = mountJoins(be);
+		await waitFor(() => expect(result.current.selected).toHaveLength(1));
+		const [j1] = result.current.selected;
+		// the field's handler of this render, which lists j1 only
+		const stale = result.current.handleSelect;
+		await act(async () => {
+			await result.current.handleSelect(
+				["j1", "to-create-s2"],
+				[j1, pick("s2")],
+			);
+		});
+		await act(async () => {
+			await result.current.handleSelect(["100"], [result.current.selected[1]]);
+		});
+		await act(async () => {
+			await stale(["j1", "to-create-s2"], [j1, pick("s2")]);
+		});
+		await act(async () => {
+			await stale([], []);
+		});
+		expect(be.calls).toEqual(["create:s2", "delete:j1"]);
+		expect(values(result.current.selected)).toEqual(["100"]);
+		expect(result.current.error).toBeNull();
+	});
+
+	it("[ISSUE-3509-ITEM-1] with a LazyConnector and a deserialize that waits, as in a Form, picks and removals made meanwhile are all listed, and a removal reported twice is listed as removed once", async () => {
+		const be = makeBackend([
+			{ id: "j1", source_id: "s1" },
+			{ id: "j2", source_id: "s2" },
+		]);
+		const lazy = new LazyConnector(
+			be.connector as unknown as ApiConnector,
+			false,
+		);
+		let reading: Promise<void> | null = null;
+		const { result } = renderHook(() =>
+			useCrudSelect(
+				joinParams(lazy, {
+					deserialize: async (record) => {
+						if (reading) await reading;
+						return joinDeserialize(record);
+					},
+				}),
+				{ current: null },
+			),
+		);
+		await waitFor(() => expect(result.current.selected).toHaveLength(2));
+		const [j1, j2] = result.current.selected;
+		let read!: () => void;
+		reading = new Promise<void>((resolve) => (read = resolve));
+		let changes!: Promise<void>[];
+		// each made in the field before the one before it is listed
+		act(() => {
+			changes = [
+				result.current.handleSelect(
+					["j1", "j2", "to-create-s3"],
+					[j1, j2, pick("s3")],
+				),
+				result.current.handleSelect(
+					["j1", "j2", "to-create-s4"],
+					[j1, j2, pick("s4")],
+				),
+				result.current.handleSelect(["j2"], [j2]),
+				result.current.handleSelect(["j2"], [j2]),
+			];
+		});
+		reading = null;
+		read();
+		await act(async () => {
+			await Promise.all(changes);
+		});
+		expect(result.current.selected.map((entry) => entry.source_id)).toEqual([
+			"s2",
+			"s3",
+			"s4",
+		]);
+		expect(result.current.added).toHaveLength(2);
+		expect(values(result.current.removed)).toEqual(["j1"]);
+		// nothing is sent before the Form saves
+		expect(be.calls).toEqual([]);
+	});
+
+	it("[ISSUE-3509-ITEM-1] a change waiting for the one before it writes nothing if writes are blocked when its turn comes", async () => {
+		const be = makeBackend();
+		const ref = React.createRef<CrudSelectDispatch<SourceJoinData>>();
+		const { result, rerender } = renderHook(
+			({ blockWrites }: { blockWrites: boolean }) =>
+				useCrudSelect(joinParams(be.connector, { blockWrites }), ref),
+			{ initialProps: { blockWrites: false } },
+		);
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		const release = be.hold("create");
+		let first!: Promise<void>;
+		let second!: Promise<void>;
+		act(() => {
+			first = result.current.handleSelect(["to-create-s1"], [pick("s1")]);
+		});
+		// its create is sent
+		await flush();
+		act(() => {
+			second = result.current.handleSelect(["to-create-s2"], [pick("s2")]);
+		});
+		// a Form's save starts while the first pick is written
+		rerender({ blockWrites: true });
+		release();
+		await act(async () => {
+			await first;
+			await second;
+		});
+		expect(be.calls).toEqual(["create:s1"]);
+		expect(values(result.current.selected)).toEqual(["100"]);
+	});
+
+	it("[ISSUE-3509-ITEM-1] a change whose turn comes once the control has unmounted writes nothing, and addToSelection rejects", async () => {
+		const be = makeBackend();
+		const { ref, result, unmount } = mountJoins(be);
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		const release = be.hold("create");
+		let first!: Promise<void>;
+		let second!: Promise<void>;
+		act(() => {
+			first = result.current.handleSelect(["to-create-s1"], [pick("s1")]);
+		});
+		// its create is sent
+		await flush();
+		act(() => {
+			second = result.current.handleSelect(["to-create-s2"], [pick("s2")]);
+		});
+		const added = startAdd(ref, pick("s3")).then(
+			() => null,
+			(e: unknown) => e,
+		);
+		unmount();
+		release();
+		await first;
+		await second;
+		expect(await added).toBeInstanceOf(Error);
+		expect(be.calls).toEqual(["create:s1"]);
+	});
+
 	it("[ISSUE-3509-ITEM-3] a create that went through stays listed when deserializing its response fails", async () => {
 		const be = makeBackend();
 		let failDeserialize = false;

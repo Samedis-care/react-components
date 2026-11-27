@@ -179,11 +179,29 @@ export interface UseCrudSelectResult<
 	 * @param newSelected The new selected entries. A listed entry whose id is in `ids` but
 	 *        that is missing here stays as it is, in its place: BackendMultiSelect reports
 	 *        an entry that is still loading by its id only.
-	 * @remarks Ignores the change while the control is disabled. Creates the entries that
-	 *          are not listed yet, deletes the listed ones that are left out, and updates a
-	 *          listed entry only when `serialize` returns something else for it than for
-	 *          the listed entry. An entry of `removed` added back is restored: its queued
-	 *          delete is cancelled, nothing is created.
+	 * @returns Resolves once the change is applied, after the changes made before it
+	 * @remarks Ignores the change while the control is disabled. The change is the
+	 *          difference between `selected` of the render this handler comes from and
+	 *          `newSelected`: it creates the entries that are not listed yet, deletes the
+	 *          listed ones that are left out, and updates a listed entry only when
+	 *          `serialize` returns something else for it than for the listed entry. An entry
+	 *          of `removed` added back is restored: its queued delete is cancelled, nothing
+	 *          is created.
+	 *
+	 *          The changes, and `addToSelection` with them, are applied one after another in
+	 *          the order they were made: a change waits until the writes of the ones before
+	 *          it have settled, then applies only its own difference to the selection they
+	 *          left, so a change made in a render before they settled does not undo them.
+	 *          Its deleted entries leave the selection, its updated ones are replaced in
+	 *          their place, and its created and restored ones are added at the end; a refused
+	 *          removal or update leaves the entry as and where it is. Left out of a change,
+	 *          as the same gesture reported again (a second click on a remove button, a pick
+	 *          made before the field lists the first one): the removal of an entry that a
+	 *          change before is deleting or has deleted, the pick of a record (by
+	 *          `getIdOfData`) that a change before is creating or has linked, and an update a
+	 *          change before has written. A change that writes nothing leaves `error` as it
+	 *          is, and one whose turn comes while the control is disabled, or once it has
+	 *          unmounted, writes nothing.
 	 */
 	handleSelect: (ids: string[], newSelected: DataT[]) => Promise<void>;
 	/**
@@ -214,8 +232,11 @@ export interface CrudSelectDispatch<DataT extends BaseSelectorData> {
 	 *   if it failed. Rejects with a PartialApplyError whose failure has the action
 	 *   `read` if `deserialize` failed after the create went through: the entry is
 	 *   selected then, as it was passed in, with the row's `id` as `value`. Rejects without
-	 *   a write if the control is disabled when the entry's turn comes.
-	 * @remarks Does not update existing record
+	 *   a write if the control is disabled when the entry's turn comes, or has unmounted.
+	 * @remarks The entry's turn comes once the selection has loaded and the changes made
+	 *          before the call (handleSelect, addToSelection) are applied; nothing is created
+	 *          if a selected entry has its `getIdOfData` then. Does not update existing
+	 *          record
 	 */
 	addToSelection: (entry: DataT) => Promise<void>;
 }
@@ -271,10 +292,21 @@ const createEntry = async <DataT extends BaseSelectorData>(
 	}
 };
 
-let ticketCounter = 0;
-const nextTicket = () => {
-	ticketCounter = (ticketCounter + 1) % Number.MAX_SAFE_INTEGER;
-	return ticketCounter;
+const noop = () => undefined;
+
+/**
+ * Queues a change of the selection behind the changes queued before it
+ * @param queue The queue: settles once the last change queued so far has
+ * @param change The change, started once the changes before it have settled
+ * @returns What the change returns. One that rejects does not stop the ones after it.
+ */
+const queueChange = <T>(
+	queue: { current: Promise<void> | null },
+	change: () => Promise<T>,
+): Promise<T> => {
+	const run = (queue.current ?? Promise.resolve()).then(change);
+	queue.current = run.then(noop, noop);
+	return run;
 };
 
 const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
@@ -304,6 +336,24 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 	// Only a queued write is pending: a LazyConnector sends it when the Form saves, any other
 	// connector has written it by the time it returns.
 	const lazyConnector = connector instanceof LazyConnector ? connector : null;
+	// what a change works with once its turn comes: the connector and callbacks of the latest
+	// render, not those of the render it was made in
+	const latest = useRef({
+		connector,
+		lazyConnector,
+		serialize,
+		deserialize,
+		prepareNewEntry,
+		getIdOfData,
+	});
+	latest.current = {
+		connector,
+		lazyConnector,
+		serialize,
+		deserialize,
+		prepareNewEntry,
+		getIdOfData,
+	};
 	const [removed, setRemoved] = useState<DataT[]>([]);
 	// The queue is not React state: this counts its changes, so that what is read from it
 	// is read again. A removal that left the queue was sent, or cancelled by a restore,
@@ -336,7 +386,9 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 		[lazyConnector, selected, queueVersion],
 	);
 	const pendingChanges = !!lazyConnector && !lazyConnector.isQueueEmpty();
-	const currentSelected = useRef<DataT[]>([]); // current state of selected, always set this and then use setSelected(currentSelected.current)
+	// the selection as the changes applied so far left it, ahead of the render that shows it:
+	// always set this and then use setSelected(currentSelected.current)
+	const currentSelected = useRef<DataT[]>([]);
 	// A write the LazyConnector's queue sends later (a Form's save) and the backend refuses
 	// is named like a write through any other connector: by the label of the entry it was
 	// for, in a PartialApplyError. The entry is found by its value, the record's id; if one
@@ -363,258 +415,329 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 	// the entries listed for created rows whose deserialize failed, by row: the field
 	// shows these instead of deserializing the row again
 	const readFallbacks = useRef(new WeakMap<Record<string, unknown>, DataT>());
-	// async processing of add to selection
-	const addToSelectionResults = useRef<
-		Record<string, [resolve: () => void, reject: (err: Error) => void]>
-	>({});
-	const addToSelectionInputs = useRef<Record<string, DataT>>({});
-	const [addToSelectionQueue, setAddToSelectionQueue] = useState<string[]>([]);
+
+	// The changes of the selection (handleSelect, addToSelection) are applied one after
+	// another, in the order they were made, once the selection has loaded: each waits until
+	// the writes of the ones before it have settled, and changes the selection they left.
+	const openChanges = useRef<() => void>(noop);
+	const changeQueue = useRef<Promise<void> | null>(null);
+	changeQueue.current ??= new Promise<void>((resolve) => {
+		openChanges.current = resolve;
+	});
+	const loadFailed = useRef(false);
+	// a change whose turn comes once the control has unmounted writes nothing
+	const mounted = useRef(false);
+	useEffect(() => {
+		mounted.current = true;
+		return () => {
+			mounted.current = false;
+		};
+	}, []);
+	// What the changes made and not applied yet are going to write: a later change leaves it
+	// out, as it is the same gesture reported again (a second click on a remove button, a
+	// pick reported before the field lists the first one). Removals by the entry's value,
+	// picks by getIdOfData.
+	const removing = useRef(new Set<string>());
+	const picking = useRef(new Set<string>());
 
 	useImperativeHandle<CrudSelectDispatch<DataT>, CrudSelectDispatch<DataT>>(
 		ref,
 		() => ({
-			addToSelection: async (entry) => {
-				// create ticket and add for async processing
-				const ticket = nextTicket().toString(16) + ":" + Date.now().toString();
-				const result = new Promise<void>((resolve, reject) => {
-					addToSelectionResults.current[ticket] = [resolve, reject];
-				});
-				addToSelectionInputs.current[ticket] = entry;
-				setAddToSelectionQueue((prev) => [...prev, ticket]);
-				return result;
-			},
+			addToSelection: (entry) =>
+				queueChange(changeQueue, async () => {
+					if (!mounted.current) throw new Error("CrudSelect was unmounted");
+					if (loadFailed.current) throw new Error("CrudSelect loading failed");
+					if (disabledRef.current) throw new Error("CrudSelect is disabled");
+					const { connector, serialize, deserialize, getIdOfData } =
+						latest.current;
+					const id = getIdOfData(entry);
+					if (
+						currentSelected.current.some(
+							(selEntry) => getIdOfData(selEntry) === id,
+						)
+					)
+						return;
+
+					const created = await createEntry(
+						connector,
+						serialize,
+						deserialize,
+						entry,
+					);
+					if (created.readError)
+						readFallbacks.current.set(created.record, created.entry);
+					// store record in cache
+					setInitialRawData((oldRawData) => [...oldRawData, created.record]);
+
+					currentSelected.current = [...currentSelected.current, created.entry];
+					setSelected(currentSelected.current);
+					if (created.readError)
+						throw toPartialApplyError([
+							{
+								entry: created.entry,
+								action: "read",
+								error: created.readError,
+							},
+						]);
+				}),
 		}),
+		[],
 	);
-
-	// async processing of add to selection
-	const fetchingAddSelection = useRef(false);
-	useEffect(() => {
-		if (loading) return;
-		if (addToSelectionQueue.length === 0) return;
-		if (fetchingAddSelection.current) return; // don't run this code twice
-		fetchingAddSelection.current = true;
-		const ticket = addToSelectionQueue[0];
-		const entry = addToSelectionInputs.current[ticket];
-		// if entry is undefined here we already started working on this, thus just wait and keep retrying
-		if (entry === undefined) {
-			// this happens when fetchingAddSelection is set to false before selection queue is updated (removed first entry) in finally handler of async code
-			// this usually happens when addToSelection keeps getting called
-			fetchingAddSelection.current = false; // allow retry
-			return;
-		}
-		delete addToSelectionInputs.current[ticket];
-		const [resolve, reject] = addToSelectionResults.current[ticket];
-		delete addToSelectionResults.current[ticket];
-		(async () => {
-			if (loadError) throw new Error("CrudSelect loading failed");
-			if (disabledRef.current) throw new Error("CrudSelect is disabled");
-			const existing = currentSelected.current.find(
-				(selEntry) => getIdOfData(selEntry) === getIdOfData(entry),
-			);
-			if (existing) return;
-
-			const created = await createEntry(
-				connector,
-				serialize,
-				deserialize,
-				entry,
-			);
-			if (created.readError)
-				readFallbacks.current.set(created.record, created.entry);
-			// store record in cache
-			setInitialRawData((oldRawData) => [...oldRawData, created.record]);
-
-			currentSelected.current = [...currentSelected.current, created.entry];
-			setSelected(currentSelected.current);
-			if (created.readError)
-				throw toPartialApplyError([
-					{ entry: created.entry, action: "read", error: created.readError },
-				]);
-		})()
-			.then(resolve)
-			.catch(reject)
-			.finally(() => {
-				fetchingAddSelection.current = false;
-				// state update re-triggers useEffect
-				setAddToSelectionQueue((prev) =>
-					prev.filter((queueTicket) => queueTicket !== ticket),
-				);
-			});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [loading, addToSelectionQueue]);
 
 	const handleSelect = useCallback(
 		async (ids: string[], reported: DataT[]) => {
 			if (disabledRef.current) return;
+			const { getIdOfData } = latest.current;
+			// The change is the difference between the selection the field lists, the one of
+			// this render, and the one it reports. Only that difference is applied, to the
+			// selection as the changes before it leave it: one reported from a render that
+			// predates them does not undo them.
+			const listed = selected;
+			const listedEntry = (entry: DataT) =>
+				listed.find((selEntry) => selEntry.value === entry.value);
 			// an id reported without its entry (still loading in the field) keeps its entry
-			const kept = selected.filter(
+			const kept = listed.filter(
 				(entry) =>
 					ids.includes(entry.value) &&
 					!reported.some((other) => other.value === entry.value),
 			);
-			let newSelected =
-				kept.length === 0
-					? reported
-					: [...reported, ...kept].sort(
-							(a, b) => ids.indexOf(a.value) - ids.indexOf(b.value),
-						);
+			const newSelected = [...reported, ...kept];
 			// find new entries: one whose removal is still queued is restored, not created
 			const isQueuedRemoval = (entry: DataT) =>
-				lazyConnector?.getQueuedOperation(entry.value) === "delete";
-			const addedEntries = newSelected.filter(
-				(entry) => !selected.find((selEntry) => selEntry.value === entry.value),
-			);
+				latest.current.lazyConnector?.getQueuedOperation(entry.value) ===
+				"delete";
+			const addedEntries = newSelected.filter((entry) => !listedEntry(entry));
 			const restoredEntries = addedEntries.filter(isQueuedRemoval);
+			// a pick of a record that a change before is creating is that pick reported again
 			const newEntries = addedEntries.filter(
-				(entry) => !isQueuedRemoval(entry),
-			);
-			// remove new entries from array
-			newSelected = newSelected.filter((entry) =>
-				selected.find((selEntry) => selEntry.value === entry.value),
-			);
-
-			// An entry is updated only when what it would send differs from what the listed
-			// entry sends. The field hands back copies of the listed entries (BackendMultiSelect
-			// deserializes the rows itself), so neither a deserialize that builds a new object,
-			// array or Date per call nor a field serialize leaves out (label, titleTooltip,
-			// freeSolo, onClick, …) may turn an untouched entry into a write. A serialize that
-			// fails counts as a change, so the update reports it.
-			const isChanged = async (entry: DataT): Promise<boolean> => {
-				const oldEntry = selected.find(
-					(selEntry) => selEntry.value === entry.value,
-				);
-				if (!oldEntry || oldEntry === entry) return false;
-				try {
-					const [oldData, newData] = await Promise.all([
-						serialize(oldEntry),
-						serialize(entry),
-					]);
-					return toComparisonJson(oldData) !== toComparisonJson(newData);
-				} catch {
-					return true;
-				}
-			};
-			const changed = await Promise.all(newSelected.map(isChanged));
-			const changedEntries = newSelected.filter(
-				(_entry, index) => changed[index],
-			);
-			const deletedEntries = selected.filter(
 				(entry) =>
-					!newSelected.find((selEntry) => selEntry.value === entry.value),
+					!isQueuedRemoval(entry) && !picking.current.has(getIdOfData(entry)),
 			);
+			// the same for a removal of an entry that a change before is deleting
+			const deletedEntries = listed.filter(
+				(entry) =>
+					!newSelected.some((selEntry) => selEntry.value === entry.value) &&
+					!removing.current.has(entry.value),
+			);
+			const keptEntries = newSelected.filter(listedEntry);
+			const pickedIds = newEntries.map(getIdOfData);
+			pickedIds.forEach((id) => picking.current.add(id));
+			deletedEntries.forEach((entry) => removing.current.add(entry.value));
 
-			// Every write settles on its own, rather than the first failure taking the
-			// rest with it: the backend keeps what went through either way, so the
-			// selection has to as well. Otherwise a record which was created is not
-			// shown, and picking it again creates it a second time.
-			const failures: PartialApplyFailure<DataT>[] = [];
-			const settle = async <T>(
-				action: PartialApplyFailure<DataT>["action"],
-				entries: DataT[],
-				write: (entry: DataT) => Promise<T>,
-			): Promise<PromiseSettledResult<T>[]> => {
-				const results = await Promise.allSettled(entries.map(write));
-				results.forEach((result, index) => {
-					if (result.status === "rejected")
-						failures.push({
-							entry: entries[index],
-							action,
-							error: result.reason as Error,
-						});
+			const applyChange = async () => {
+				const {
+					connector,
+					lazyConnector,
+					serialize,
+					deserialize,
+					prepareNewEntry,
+					getIdOfData,
+				} = latest.current;
+				const current = currentSelected.current;
+				const currentEntry = (entry: DataT) =>
+					current.find((selEntry) => selEntry.value === entry.value);
+				// What the changes before did meanwhile: an entry they deleted is gone, and a
+				// record they linked is a pick reported from a render before they settled.
+				const toDelete = deletedEntries.filter(currentEntry);
+				const linkedMeanwhile = new Set(
+					current
+						.filter((entry) => !listedEntry(entry))
+						.map((entry) => getIdOfData(entry)),
+				);
+				const toCreate = newEntries.filter(
+					(entry) => !linkedMeanwhile.has(getIdOfData(entry)),
+				);
+				const toRestore = restoredEntries.filter(
+					(entry) => !currentEntry(entry),
+				);
+
+				// An entry is updated only when what it would send differs from what the listed
+				// entry sends. The field hands back copies of the listed entries (BackendMultiSelect
+				// deserializes the rows itself), so neither a deserialize that builds a new object,
+				// array or Date per call nor a field serialize leaves out (label, titleTooltip,
+				// freeSolo, onClick, …) may turn an untouched entry into a write. A serialize that
+				// fails counts as a change, so the update reports it. What a change before wrote
+				// meanwhile is not written again.
+				const differs = async (oldEntry: DataT, entry: DataT) => {
+					if (oldEntry === entry) return false;
+					try {
+						const [oldData, newData] = await Promise.all([
+							serialize(oldEntry),
+							serialize(entry),
+						]);
+						return toComparisonJson(oldData) !== toComparisonJson(newData);
+					} catch {
+						return true;
+					}
+				};
+				const updateCandidates = keptEntries.filter(currentEntry);
+				const changed = await Promise.all(
+					updateCandidates.map(async (entry) => {
+						const before = listedEntry(entry);
+						const now = currentEntry(entry);
+						if (!before || !now) return false;
+						return (
+							(await differs(before, entry)) &&
+							(now === before || (await differs(now, entry)))
+						);
+					}),
+				);
+				const changedEntries = updateCandidates.filter(
+					(_entry, index) => changed[index],
+				);
+
+				// Every write settles on its own, rather than the first failure taking the
+				// rest with it: the backend keeps what went through either way, so the
+				// selection has to as well. Otherwise a record which was created is not
+				// shown, and picking it again creates it a second time.
+				const failures: PartialApplyFailure<DataT>[] = [];
+				const settle = async <T>(
+					action: PartialApplyFailure<DataT>["action"],
+					entries: DataT[],
+					write: (entry: DataT) => Promise<T>,
+				): Promise<PromiseSettledResult<T>[]> => {
+					const results = await Promise.allSettled(entries.map(write));
+					results.forEach((result, index) => {
+						if (result.status === "rejected")
+							failures.push({
+								entry: entries[index],
+								action,
+								error: result.reason as Error,
+							});
+					});
+					return results;
+				};
+
+				// call backend (updates/removals are independent of prepareNewEntry, fire eagerly)
+				const updatePromise = settle("update", changedEntries, async (entry) =>
+					connector.update(await serialize(entry)),
+				);
+				const deletePromise = settle("delete", toDelete, async (entry) =>
+					connector.delete(
+						((await serialize(entry)) as Record<"id", string>).id,
+					),
+				);
+
+				// prepare new entries (collect extra join-record data / allow cancel).
+				// run sequentially so simultaneous adds don't stack dialogs.
+				const entriesToCreate: DataT[] = [];
+				for (const entry of toCreate) {
+					if (!prepareNewEntry) {
+						entriesToCreate.push(entry);
+						continue;
+					}
+					try {
+						const prepared = await prepareNewEntry(entry);
+						// null/undefined => cancel this addition cleanly (no create, no error)
+						if (prepared == null) continue;
+						entriesToCreate.push(prepared);
+					} catch (e) {
+						failures.push({ entry, action: "create", error: e as Error });
+					}
+				}
+
+				// wait for response
+				const created = (
+					await settle("create", entriesToCreate, (entry) =>
+						createEntry(connector, serialize, deserialize, entry),
+					)
+				)
+					.filter((result) => result.status === "fulfilled")
+					.map((result) => result.value);
+				created.forEach(({ record, entry, readError }) => {
+					if (!readError) return;
+					readFallbacks.current.set(record, entry);
+					failures.push({ entry, action: "read", error: readError });
 				});
-				return results;
+				const updated = await updatePromise;
+				const deleted = await deletePromise;
+				// a removal the LazyConnector queued is listed until it is sent or restored
+				const queuedRemovals = toDelete.filter(
+					(entry, index) =>
+						deleted[index].status === "fulfilled" && isQueuedRemoval(entry),
+				);
+				// Cancelled here, next to the state updates below, so that the entry leaves
+				// `removed` (the queue listener) in the render it is selected again. A delete the
+				// Form sent meanwhile cannot be cancelled: that entry stays removed.
+				const restored = toRestore.filter(
+					(entry) => lazyConnector?.cancelQueuedOperation(entry.value) ?? false,
+				);
+
+				// Apply the difference: a deleted entry leaves the selection, an updated one is
+				// replaced in its place, and the restored and created ones are added at the end.
+				// A refused removal or update leaves the entry as and where it is. A kept entry
+				// that was not written takes what the field reported for it, unless a change
+				// before replaced it meanwhile.
+				const deletedValues = new Set(
+					toDelete
+						.filter((_entry, index) => deleted[index].status === "fulfilled")
+						.map((entry) => entry.value),
+				);
+				const replacementOf = (entry: DataT): DataT => {
+					const reportedEntry = keptEntries.find(
+						(other) => other.value === entry.value,
+					);
+					if (!reportedEntry) return entry;
+					const index = changedEntries.indexOf(reportedEntry);
+					if (index !== -1)
+						return updated[index].status === "fulfilled"
+							? reportedEntry
+							: entry;
+					return entry === listedEntry(entry) ? reportedEntry : entry;
+				};
+				const merged = currentSelected.current
+					.filter((entry) => !deletedValues.has(entry.value))
+					.map(replacementOf);
+				const finalSelected = [
+					...merged,
+					...restored,
+					...created.map(({ entry }) => entry),
+				];
+
+				// reflect changes
+				if (created.length > 0)
+					setInitialRawData((oldRawData) => [
+						...oldRawData,
+						...created.map(({ record }) => record),
+					]);
+				if (
+					finalSelected.length !== currentSelected.current.length ||
+					finalSelected.some(
+						(entry, index) => entry !== currentSelected.current[index],
+					)
+				) {
+					currentSelected.current = finalSelected;
+					setSelected(currentSelected.current);
+				}
+				if (queuedRemovals.length > 0)
+					setRemoved((prev) => [...prev, ...queuedRemovals]);
+				// the outcome of a change that wrote or tried to: one that went through clears
+				// the error of a change before, one with nothing to write leaves it
+				const wrote =
+					toDelete.length +
+						changedEntries.length +
+						entriesToCreate.length +
+						toRestore.length >
+					0;
+				if (wrote || failures.length > 0)
+					setError(failures.length > 0 ? toPartialApplyError(failures) : null);
 			};
 
-			// call backend (updates/removals are independent of prepareNewEntry, fire eagerly)
-			const updatePromise = settle("update", changedEntries, async (entry) =>
-				connector.update(await serialize(entry)),
-			);
-			const deletePromise = settle("delete", deletedEntries, async (entry) =>
-				connector.delete(((await serialize(entry)) as Record<"id", string>).id),
-			);
-
-			// prepare new entries (collect extra join-record data / allow cancel).
-			// run sequentially so simultaneous adds don't stack dialogs.
-			const entriesToCreate: DataT[] = [];
-			for (const entry of newEntries) {
-				if (!prepareNewEntry) {
-					entriesToCreate.push(entry);
-					continue;
-				}
+			await queueChange(changeQueue, async () => {
 				try {
-					const prepared = await prepareNewEntry(entry);
-					// null/undefined => cancel this addition cleanly (no create, no error)
-					if (prepared == null) continue;
-					entriesToCreate.push(prepared);
-				} catch (e) {
-					failures.push({ entry, action: "create", error: e as Error });
-				}
-			}
-
-			// wait for response
-			const created = (
-				await settle("create", entriesToCreate, (entry) =>
-					createEntry(connector, serialize, deserialize, entry),
-				)
-			)
-				.filter((result) => result.status === "fulfilled")
-				.map((result) => result.value);
-			created.forEach(({ record, entry, readError }) => {
-				if (!readError) return;
-				readFallbacks.current.set(record, entry);
-				failures.push({ entry, action: "read", error: readError });
-			});
-			const updated = await updatePromise;
-			const deleted = await deletePromise;
-			// a removal the LazyConnector queued is listed until it is sent or restored
-			const queuedRemovals = deletedEntries.filter(
-				(entry, index) =>
-					deleted[index].status === "fulfilled" && isQueuedRemoval(entry),
-			);
-			// Cancelled here, next to the state updates below, so that the entry leaves
-			// `removed` (the queue listener) in the render it is selected again. A delete the
-			// Form sent meanwhile cannot be cancelled: that entry stays removed.
-			const restored = restoredEntries.filter(
-				(entry) => lazyConnector?.cancelQueuedOperation(entry.value) ?? false,
-			);
-
-			// create final values: a refused update keeps the entry as it was, a
-			// refused removal keeps the entry selected
-			const finalSelected = [
-				...newSelected.map((entry) => {
-					const index = changedEntries.indexOf(entry);
-					if (index === -1 || updated[index].status === "fulfilled")
-						return entry;
-					return (
-						selected.find((selEntry) => selEntry.value === entry.value) ?? entry
+					// a change whose turn comes while the control is disabled, or once it has
+					// unmounted, writes nothing
+					if (!mounted.current || disabledRef.current) return;
+					await applyChange();
+				} finally {
+					pickedIds.forEach((id) => picking.current.delete(id));
+					deletedEntries.forEach((entry) =>
+						removing.current.delete(entry.value),
 					);
-				}),
-				...deletedEntries.filter(
-					(_entry, index) => deleted[index].status === "rejected",
-				),
-				...restored,
-				...created.map(({ entry }) => entry),
-			];
-
-			// reflect changes
-			setInitialRawData((oldRawData) => [
-				...oldRawData,
-				...created.map(({ record }) => record),
-			]);
-			currentSelected.current = finalSelected;
-			setSelected(currentSelected.current);
-			if (queuedRemovals.length > 0)
-				setRemoved((prev) => [...prev, ...queuedRemovals]);
-			setError(failures.length > 0 ? toPartialApplyError(failures) : null);
+				}
+			});
 		},
-		[
-			connector,
-			deserialize,
-			lazyConnector,
-			prepareNewEntry,
-			selected,
-			serialize,
-		],
+		[selected],
 	);
 
 	const modelToSelectorData = useCallback(
@@ -671,9 +794,11 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 					"[Components-Care] [CrudSelect] Could not load the selected entries:",
 					e,
 				);
+				loadFailed.current = true;
 				setLoadError(e as Error);
 			} finally {
 				setLoading(false);
+				openChanges.current();
 			}
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
