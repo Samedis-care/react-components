@@ -260,9 +260,10 @@ You need to define all additional fields required for your model yourself. A fie
 
 A visibility with `required: true`, such as `ModelVisibilityEditRequired`, marks the field as
 required with MUI's `required`: its label gets an asterisk and, on most controls, its input
-is required. Like MUI's `required`, it doesn't validate. A required field without a
-`validate` of its own can be saved empty. To refuse an empty value, give the field a
-validator next to the visibility:
+is required. A files or image field, which has no input of its own, gets the asterisk on its
+frame's title, and its frame is described as "Required". Like MUI's `required`, it doesn't
+validate. A required field without a `validate` of its own can be saved empty. To refuse an
+empty value, give the field a validator next to the visibility:
 
 ```typescript
 title: {

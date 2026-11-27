@@ -345,3 +345,84 @@ describe("FileUpload — keyboard focus when a file's button goes away", () => {
 		expect(document.activeElement).toBe(elsewhere);
 	});
 });
+
+describe("FileUpload — required", () => {
+	it.each(["classic", "modern"] as const)(
+		"[ISSUE-3462-ITEM-11] %s: a required field's frame shows the asterisk and is described as required, before the description of slotProps.root",
+		async (variant) => {
+			const upload = (required?: boolean) => (
+				<Framework>
+					<FileUpload
+						previewSize={24}
+						handleError={() => {}}
+						label={"Attachments"}
+						variant={variant}
+						required={required}
+						slotProps={{ root: { "aria-describedby": "files-error" } }}
+					/>
+					<p id={"files-error"}>At least one file is required</p>
+				</Framework>
+			);
+			const { rerender } = render(upload(true));
+			const group = await screen.findByRole("group", { name: "Attachments" });
+			expect(group.querySelector("legend")?.textContent).toBe(
+				"Attachments\u2009*",
+			);
+			expect(
+				group.querySelector("legend > [aria-hidden='true']"),
+			).toHaveTextContent("*");
+			expect(group).toHaveAccessibleDescription(
+				"Required At least one file is required",
+			);
+
+			rerender(upload(false));
+			expect(group.querySelector("legend")?.textContent).toBe("Attachments");
+			expect(group).toHaveAccessibleDescription(
+				"At least one file is required",
+			);
+		},
+	);
+	it.each(["classic", "modern"] as const)(
+		"[ISSUE-3462-ITEM-11] %s: a modified required field draws the dot after the asterisk, as a MUI field does",
+		async (variant) => {
+			render(
+				<Framework>
+					<FileUpload
+						previewSize={24}
+						handleError={() => {}}
+						label={"Attachments"}
+						variant={variant}
+						required
+						dirty
+					/>
+				</Framework>,
+			);
+			const group = await screen.findByRole("group", {
+				name: "Attachments (modified)",
+			});
+			const marks = group.querySelectorAll("legend [aria-hidden='true']");
+			expect(marks).toHaveLength(2);
+			expect(marks[0]).toHaveTextContent("*");
+			expect(marks[1]).toBeEmptyDOMElement();
+		},
+	);
+	it("[ISSUE-3462-ITEM-11] a custom variant gets required", () => {
+		const seen: (boolean | undefined)[] = [];
+		const Variant = (props: FileUploadRendererProps) => {
+			seen.push(props.required);
+			return null;
+		};
+		render(
+			<Framework>
+				<FileUpload
+					previewSize={24}
+					handleError={() => {}}
+					variant={Variant}
+					required
+				/>
+			</Framework>,
+		);
+		expect(seen.length).toBeGreaterThan(0);
+		expect(seen.every((required) => required === true)).toBe(true);
+	});
+});

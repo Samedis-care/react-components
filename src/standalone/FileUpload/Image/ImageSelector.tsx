@@ -21,7 +21,6 @@ import ImagePreviewDialog from "./ImagePreviewDialog";
 import combineClassNames from "../../../utils/combineClassNames";
 import processImage, { IDownscaleProps } from "../../../utils/processImage";
 import GroupBox from "../../GroupBox";
-import { labelWithDirtyMarker } from "../../UIKit/MuiFieldState";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { ImageFileIcon } from "../FileIcons";
 import replaceFileExt from "../../../utils/replaceFileExt";
@@ -70,9 +69,22 @@ export interface ImageSelectorProps {
 	label?: string;
 	/**
 	 * Does the value differ from the server-side value?
-	 * @remarks Marks the label. Set by the form engine from `RenderParams.dirty`.
+	 * @remarks normal and modern: marks the frame with GroupBox's `dirty`, a dot after the
+	 *          label (after the asterisk of a required field) and "(modified)" in the
+	 *          frame's name. Set by the form engine from `RenderParams.dirty`.
+	 *          profile_picture shows no label and ignores it.
 	 */
 	dirty?: boolean;
+	/**
+	 * Is an image required?
+	 * @remarks normal and modern: marks the frame with GroupBox's `required`, an asterisk
+	 *          after the label and "Required" as the frame's description. Display only: it
+	 *          neither validates nor stops a change. Set by the form engine from
+	 *          `RenderParams.visibility.required`. profile_picture shows no label and
+	 *          ignores it.
+	 * @default false
+	 */
+	required?: boolean;
 	/**
 	 * The alt text of the image
 	 */
@@ -352,7 +364,6 @@ export type ImageSelectorClassKey =
 
 const ImageSelector = (inProps: ImageSelectorProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcImageSelector" });
-	const boxLabel = labelWithDirtyMarker(props.label, props.dirty);
 	const {
 		convertImagesTo,
 		downscale,
@@ -531,8 +542,10 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 	if (variant === "normal") {
 		return (
 			<Frame
-				label={boxLabel}
+				label={props.label}
 				smallLabel={props.smallLabel}
+				required={props.required}
+				dirty={props.dirty}
 				className={className}
 			>
 				<RootClassic
@@ -627,8 +640,10 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 			<>
 				{previewDialog}
 				<Frame
-					label={boxLabel}
+					label={props.label}
 					smallLabel={props.smallLabel}
+					required={props.required}
+					dirty={props.dirty}
 					className={className}
 				>
 					<RootModern

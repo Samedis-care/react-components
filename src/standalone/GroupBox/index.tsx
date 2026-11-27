@@ -1,14 +1,16 @@
 import React from "react";
 import combineClassNames from "../../utils/combineClassNames";
 import { styled, SxProps, Theme, useThemeProps } from "@mui/material";
+import GroupBoxRequiredText from "./GroupBoxRequiredText";
+import { DirtyMarker } from "../UIKit/MuiFieldState";
 
 /**
  * The props the root slot gets besides the fieldset's attributes: GroupBox's
- * `label` and `smallLabel`, so that theme `variants` can match them. They do
- * not reach the DOM.
+ * `label`, `smallLabel`, `required` and `dirty`, so that theme `variants` can
+ * match them. They do not reach the DOM.
  */
 type GroupBoxRootProps = Pick<GroupBoxProps, "label"> &
-	Required<Pick<GroupBoxProps, "smallLabel">>;
+	Required<Pick<GroupBoxProps, "smallLabel" | "required" | "dirty">>;
 
 /**
  * What MUI keeps off the DOM of a root slot, plus GroupBox's own props
@@ -16,6 +18,8 @@ type GroupBoxRootProps = Pick<GroupBoxProps, "label"> &
 const ROOT_PROPS_NOT_FORWARDED = new Set<PropertyKey>([
 	"label",
 	"smallLabel",
+	"required",
+	"dirty",
 	"ownerState",
 	"theme",
 	"sx",
@@ -85,6 +89,20 @@ const GroupBoxLegend = styled("legend", {
 });
 
 /**
+ * Class of the asterisk of a required frame's legend
+ */
+const ASTERISK_CLASS = "CcGroupBox-asterisk";
+
+/**
+ * The asterisk after a required frame's title. It has no style of its own, as
+ * MUI's FormLabel asterisk, and takes the legend's font and colour.
+ */
+const GroupBoxAsterisk = styled("span", {
+	name: "CcGroupBox",
+	slot: "asterisk",
+})({});
+
+/**
  * Keys of the theme's `components.CcGroupBox.styleOverrides`, also the keys
  * of the `classes` prop:
  * - `root`: the `<fieldset>` frame
@@ -92,12 +110,14 @@ const GroupBoxLegend = styled("legend", {
  *   word wider than the frame breaks inside it.
  * - `smallLabel`: the legend while `smallLabel` is set. Its theme overrides
  *   apply after those of `legend`.
+ * - `asterisk`: the asterisk after the title while `required` is set, a
+ *   `<span>` in the legend with the class `CcGroupBox-asterisk`
  *
  * No slot receives an `ownerState`: a function override is called with the
  * theme. The small legend has the class `CcGroupBox-smallLabel`, so a
  * `legend` override can also style it with `"&.CcGroupBox-smallLabel"`.
  */
-export type GroupBoxClassKey = "root" | "legend" | "smallLabel";
+export type GroupBoxClassKey = "root" | "legend" | "smallLabel" | "asterisk";
 
 /**
  * The HTML attributes of the GroupBox's fieldset, e.g. `aria-busy` or `aria-describedby`
@@ -124,7 +144,8 @@ export interface GroupBoxProps extends GroupBoxHTMLProps {
 	 * `label` from the theme's `defaultProps`. Any other value is the legend,
 	 * as React renders it: `0` shows "0", `NaN` shows "NaN". An element always
 	 * renders a legend, even one that renders nothing, so a label that is only
-	 * the dirty marker of `labelWithDirtyMarker("", true)` keeps its legend.
+	 * the dirty marker of `labelWithDirtyMarker("", true)` keeps its legend, as
+	 * does a frame without a title while `dirty` is set.
 	 *
 	 * A title wider than the frame wraps at spaces. A word wider than the
 	 * frame, such as a long compound, a file name or a URL, breaks between any
@@ -142,6 +163,37 @@ export interface GroupBoxProps extends GroupBoxHTMLProps {
 	 */
 	smallLabel?: boolean;
 	/**
+	 * Marks the frame as the frame of a required field, as MUI's `required` marks
+	 * a FormLabel: an asterisk after the title (`classes.asterisk`), hidden from
+	 * assistive technology like MUI's, and a hidden "Required" in the user's
+	 * language that the fieldset's `aria-describedby` names before the ids passed
+	 * in `aria-describedby`, so a screen reader hears it when focus enters the
+	 * group. ARIA allows `aria-required` on neither a group nor a button, so the
+	 * frame says it this way. A frame without a title gets the description but no
+	 * asterisk. The text is a translation of the library, which suspends the frame
+	 * until it has loaded (the Framework's `Suspense` shows its fallback meanwhile).
+	 *
+	 * It is display only, like MUI's `required`: it neither validates nor blocks a
+	 * submit. Theme `variants` keyed on `required` match, with `required` `false`
+	 * when it is not set.
+	 * @default false
+	 */
+	required?: boolean;
+	/**
+	 * Marks the frame as the frame of a modified field, one whose value differs
+	 * from the server-side value: the library's dirty marker, a dot after the
+	 * title, and "(modified)" in the user's language in the group's name
+	 * ("Attachments (modified)"), as `labelWithDirtyMarker` adds them to a
+	 * label. The dot follows the asterisk of a required frame, as on a MUI field
+	 * with `dirty`. A frame without a title gets a legend with only the dot.
+	 * Pass the plain title in `label`: a label from `labelWithDirtyMarker` would
+	 * draw a second dot. Restyle the dot through the `CcDirtyMarker` theme
+	 * component. Theme `variants` keyed on `dirty` match, with `dirty` `false`
+	 * when it is not set.
+	 * @default false
+	 */
+	dirty?: boolean;
+	/**
 	 * Box contents
 	 */
 	children?: React.ReactNode;
@@ -151,8 +203,9 @@ export interface GroupBoxProps extends GroupBoxHTMLProps {
 	className?: string;
 	/**
 	 * Additional class names per {@link GroupBoxClassKey}: `root` is added to
-	 * the `<fieldset>`, `legend` to the `<legend>`, and `smallLabel` to the
-	 * legend while `smallLabel` is set. As on MUI components, a `classes` prop
+	 * the `<fieldset>`, `legend` to the `<legend>`, `smallLabel` to the
+	 * legend while `smallLabel` is set, and `asterisk` to the asterisk of a
+	 * required frame. As on MUI components, a `classes` prop
 	 * replaces the `classes` of the theme's `defaultProps` rather than adding
 	 * to them.
 	 */
@@ -177,19 +230,35 @@ const GroupBox = React.forwardRef(function GroupBox(
 		label,
 		children,
 		smallLabel = false,
+		required = false,
+		dirty = false,
 		className,
 		classes,
 		...fieldsetProps
 	} = props;
+	const generatedId = React.useId();
+	const requiredId = `${fieldsetProps.id ?? generatedId}-required`;
+	const describedBy = fieldsetProps["aria-describedby"];
+	const hasTitle = !isEmptyLabel(label);
 	return (
 		<GroupBoxRoot
 			{...fieldsetProps}
+			// "Required" first, then what the caller describes the frame with
+			aria-describedby={
+				required
+					? describedBy
+						? `${requiredId} ${describedBy}`
+						: requiredId
+					: describedBy
+			}
 			ref={ref}
 			label={label}
 			smallLabel={smallLabel}
+			required={required}
+			dirty={dirty}
 			className={combineClassNames([className, classes?.root])}
 		>
-			{!isEmptyLabel(label) && (
+			{(hasTitle || dirty) && (
 				<GroupBoxLegend
 					className={combineClassNames([
 						classes?.legend,
@@ -198,8 +267,18 @@ const GroupBox = React.forwardRef(function GroupBox(
 					])}
 				>
 					{label}
+					{required && hasTitle && (
+						<GroupBoxAsterisk
+							aria-hidden={"true"}
+							className={combineClassNames([ASTERISK_CLASS, classes?.asterisk])}
+						>
+							{"\u2009*"}
+						</GroupBoxAsterisk>
+					)}
+					{dirty && <DirtyMarker />}
 				</GroupBoxLegend>
 			)}
+			{required && <GroupBoxRequiredText id={requiredId} />}
 			{children}
 		</GroupBoxRoot>
 	);
@@ -223,19 +302,28 @@ const GroupBox = React.forwardRef(function GroupBox(
  *
  * Every other HTML attribute, `sx` and `ref` reach the fieldset. A framed
  * form control ties its error to the group with `aria-describedby`: screen
- * readers read it when focus enters the group. A frame without a title can be
- * named by a heading inside it with `aria-labelledby`.
+ * readers read it when focus enters the group. It marks a required field with
+ * `required` and a modified one with `dirty`, drawn after the title in the
+ * order of a MUI field: "Attachments *" and then the dirty marker's dot. A
+ * frame without a title can be named by a heading inside it with
+ * `aria-labelledby`.
  *
  * Theme: `components.CcGroupBox.defaultProps` ({@link GroupBoxProps}),
  * `styleOverrides` per {@link GroupBoxClassKey} slot, and `variants`, which
- * apply to the fieldset. A variant's `props` match `label`, `smallLabel` and
- * the fieldset's HTML attributes after the theme's default props, with
- * `smallLabel` `false` when it is not set. A `props` function gets these
+ * apply to the fieldset. A variant's `props` match `label`, `smallLabel`,
+ * `required`, `dirty` and the fieldset's HTML attributes after the theme's
+ * default props, with `smallLabel`, `required` and `dirty` `false` when they
+ * are not set. A `props` function gets these
  * props directly: there is no `ownerState`. A variant reaches the legend
  * through a nested selector.
  *
  * @example
- * <GroupBox label={t("files")} aria-describedby={"files-error"}>…</GroupBox>
+ * <GroupBox
+ *   label={t("files")}
+ *   required
+ *   dirty={dirty}
+ *   aria-describedby={"files-error"}
+ * >…</GroupBox>
  * <FormHelperTextCC id={"files-error"} error>{errorMsg}</FormHelperTextCC>
  *
  * @example

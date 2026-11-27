@@ -13,7 +13,7 @@ import {
 import { expect, within } from "storybook/test";
 import GroupBox from "./index";
 import ImageSelector from "../FileUpload/Image/ImageSelector";
-import { FormHelperTextCC } from "../UIKit/MuiFieldState";
+import { FormHelperTextCC, TextFieldCC } from "../UIKit/MuiFieldState";
 // the theme augmentation that types components.CcGroupBox
 import type {} from "../../theme-def";
 
@@ -23,6 +23,9 @@ const meta: Meta<typeof GroupBox> = {
 	parameters: { layout: "centered", a11y: { test: "error" } },
 	args: {
 		label: "Group Label",
+		smallLabel: false,
+		required: false,
+		dirty: false,
 	},
 };
 export default meta;
@@ -459,5 +462,52 @@ export const Issue3462Item9LongWordLabelWrapsInFlexRow: Story = {
 		await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
 			viewport,
 		);
+	},
+};
+
+export const Issue3462Item11RequiredAndModified: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3462-ITEM-11: a required frame shows MUI's asterisk after its title, and its group is described as required before its error. A modified one shows the dirty marker's dot after the asterisk, as the outlined field above it does.",
+			},
+		},
+	},
+	render: () => (
+		<div style={{ width: 400, display: "grid", gap: 16 }}>
+			<TextFieldCC label={"Title"} required dirty fullWidth />
+			<div>
+				<GroupBox
+					label={"Attachments"}
+					required
+					dirty
+					aria-describedby={"attachments-error"}
+				>
+					<Button variant={"contained"}>Upload</Button>
+				</GroupBox>
+				<FormHelperTextCC id={"attachments-error"} error>
+					At least one file is required
+				</FormHelperTextCC>
+			</div>
+		</div>
+	),
+	play: async ({ canvas }) => {
+		const group = await canvas.findByRole("group", {
+			name: "Attachments (modified)",
+		});
+		await expect(group).toHaveAccessibleDescription(
+			"Required At least one file is required",
+		);
+		const asterisk = group.querySelector("legend > .CcGroupBox-asterisk");
+		await expect(asterisk).toBeVisible();
+		await expect(asterisk).toHaveAttribute("aria-hidden", "true");
+		// the dot follows the asterisk on the title's line, as on the text field
+		const dot = asterisk?.nextElementSibling ?? null;
+		await expect(dot).toBeVisible();
+		await expect(rectOf(dot).left).toBeGreaterThanOrEqual(
+			rectOf(asterisk).right,
+		);
+		await expect(rectOf(dot).top).toBeLessThan(rectOf(asterisk).bottom);
 	},
 };

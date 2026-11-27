@@ -254,6 +254,9 @@
 			"zoom-out": "Verkleinern",
 			"reset-zoom": "Zoom zurücksetzen"
 		},
+		"group-box": {
+			"required": "Erforderlich"
+		},
 		"phone-number": {
 			"invalid": "Korrekte Rufnummer eingeben"
 		},

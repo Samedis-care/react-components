@@ -21,7 +21,6 @@ import FilePreview, { FileChangeState, getFileIconOrDefault } from "./File";
 import { FileSelectorError } from "./Errors";
 import processImage, { IDownscaleProps } from "../../../utils/processImage";
 import GroupBox, { GroupBoxHTMLProps } from "../../GroupBox";
-import { labelWithDirtyMarker } from "../../UIKit/MuiFieldState";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import isTouchDevice from "../../../utils/isTouchDevice";
 import combineClassNames from "../../../utils/combineClassNames";
@@ -169,9 +168,20 @@ export interface FileUploadProps {
 	label?: string;
 	/**
 	 * Does the value differ from the server-side value?
-	 * @remarks Marks the label. Set by the form engine from `RenderParams.dirty`.
+	 * @remarks Marks the frame with GroupBox's `dirty`: a dot after the label (after the
+	 *          asterisk of a required field), and "(modified)" in the frame's name. Set by
+	 *          the form engine from `RenderParams.dirty`.
 	 */
 	dirty?: boolean;
+	/**
+	 * Is a file required?
+	 * @remarks Marks the frame with GroupBox's `required`: an asterisk after the label,
+	 *          and "Required" at the start of the frame's description. Display only: it
+	 *          neither validates nor stops a pick or a removal. Set by the form engine
+	 *          from `RenderParams.visibility.required`. A custom variant gets it as well.
+	 * @default false
+	 */
+	required?: boolean;
 	/**
 	 * Is the field busy, e.g. writing its changes?
 	 * @remarks Sets `aria-busy` on the field. While it is false, the `aria-busy` of
@@ -556,6 +566,7 @@ const FileUpload = (
 		onRestoreFile,
 		label,
 		dirty,
+		required,
 		busy,
 		slotProps,
 		smallLabel,
@@ -567,7 +578,6 @@ const FileUpload = (
 		classes,
 	} = props;
 	const variant = props.variant ?? "classic";
-	const boxLabel = labelWithDirtyMarker(label, dirty);
 	const loadInitialFiles = () =>
 		(props.files || props.defaultFiles || []).map((meta) => ({
 			canBeUploaded: false,
@@ -947,8 +957,10 @@ const FileUpload = (
 			<StyledGroupBox
 				{...slotProps?.root}
 				aria-busy={busy || slotProps?.root?.["aria-busy"]}
-				label={boxLabel}
+				label={label}
 				smallLabel={smallLabel}
+				required={required}
+				dirty={dirty}
 				className={combineClassNames([
 					className,
 					classes?.root,
@@ -1056,8 +1068,10 @@ const FileUpload = (
 			<StyledGroupBox
 				{...slotProps?.root}
 				aria-busy={busy || slotProps?.root?.["aria-busy"]}
-				label={boxLabel}
+				label={label}
 				smallLabel={smallLabel}
+				required={required}
+				dirty={dirty}
 				className={combineClassNames([
 					className,
 					classes?.root,

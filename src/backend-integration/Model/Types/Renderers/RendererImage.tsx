@@ -9,6 +9,8 @@ import ObjectUrlImage from "../../../../standalone/FileUpload/Image/ObjectUrlIma
 
 /**
  * Renders an image selector
+ * @remarks In a form, a required visibility marks the field's frame (ImageSelector's
+ *          `required`): an asterisk after the label, and "Required" as its description.
  */
 class RendererImage extends TypeImage {
 	render(params: ModelRenderParams<string | Blob>): React.ReactElement {
@@ -48,6 +50,7 @@ class RendererImage extends TypeImage {
 						placeholder={placeholder}
 						label={label}
 						dirty={dirty}
+						required={visibility.required}
 						readOnly={visibility.readOnly}
 						onChange={(name, value) => {
 							handleChange(name, value);

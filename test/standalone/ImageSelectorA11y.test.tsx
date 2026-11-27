@@ -373,3 +373,45 @@ describe("ImageSelector — placeholder", () => {
 		).toHaveFocus();
 	});
 });
+
+describe("ImageSelector — required", () => {
+	it.each(["normal", "modern"] as const)(
+		"[ISSUE-3462-ITEM-11] %s: a required field's frame shows the asterisk and is described as required",
+		(variant) => {
+			const { rerender } = renderSel({ variant, required: true });
+			const group = screen.getByRole("group", { name: "Photo" });
+			expect(group.querySelector("legend")?.textContent).toBe("Photo\u2009*");
+			expect(
+				group.querySelector("legend > [aria-hidden='true']"),
+			).toHaveTextContent("*");
+			expect(group).toHaveAccessibleDescription("Required");
+
+			rerender(
+				<ThemeProvider theme={theme}>
+					<ImageSelector
+						name={"photo"}
+						value={PIXEL}
+						capture={false}
+						alt={"Employee photo"}
+						label={"Photo"}
+						readOnly={false}
+						variant={variant}
+					/>
+				</ThemeProvider>,
+			);
+			expect(group.querySelector("legend")?.textContent).toBe("Photo");
+			expect(group).toHaveAccessibleDescription("");
+		},
+	);
+	it.each(["normal", "modern"] as const)(
+		"[ISSUE-3462-ITEM-11] %s: a modified required field draws the dot after the asterisk, as a MUI field does",
+		(variant) => {
+			renderSel({ variant, required: true, dirty: true });
+			const group = screen.getByRole("group", { name: "Photo (modified)" });
+			const marks = group.querySelectorAll("legend [aria-hidden='true']");
+			expect(marks).toHaveLength(2);
+			expect(marks[0]).toHaveTextContent("*");
+			expect(marks[1]).toBeEmptyDOMElement();
+		},
+	);
+});

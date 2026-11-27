@@ -1,9 +1,10 @@
 import React from "react";
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, beforeAll } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { ThemeProvider, createTheme, Theme } from "@mui/material";
 import GroupBox from "../../src/standalone/GroupBox";
 import { labelWithDirtyMarker } from "../../src/standalone/UIKit/MuiFieldState";
+import ccI18n, { langs } from "../../src/i18n";
 
 afterEach(cleanup);
 
@@ -481,6 +482,221 @@ describe("GroupBox", () => {
 			expect(getComputedStyle(box).padding).toBe("24px");
 			expect(getComputedStyle(box).marginTop).toBe("8px");
 			expect(getComputedStyle(box).color).toBe("rgb(0, 0, 255)");
+		});
+
+		describe("[ISSUE-3462-ITEM-11] required", () => {
+			// the "Required" text suspends until the library's translations load
+			beforeAll(async () => {
+				await ccI18n.loadNamespaces("translation");
+			});
+
+			const asteriskOf = (group: HTMLElement) =>
+				group.querySelector("legend > .CcGroupBox-asterisk");
+
+			it("[ISSUE-3462-ITEM-11] a required frame shows an asterisk after its title, hidden from assistive technology, and is described as required before its other description", () => {
+				renderGroupBox(
+					<>
+						<GroupBox
+							label="Attachments"
+							required
+							aria-describedby="files-error"
+						>
+							<button>Upload</button>
+						</GroupBox>
+						<p id="files-error">At least one file is required</p>
+					</>,
+				);
+				const group = screen.getByRole("group", { name: "Attachments" });
+				// MUI's asterisk: a thin space and a star after the title
+				expect(group.querySelector("legend")?.textContent).toBe(
+					"Attachments\u2009*",
+				);
+				expect(asteriskOf(group)).toHaveAttribute("aria-hidden", "true");
+				expect(asteriskOf(group)).toHaveTextContent("*");
+				expect(group).toHaveAccessibleDescription(
+					"Required At least one file is required",
+				);
+				// ARIA allows aria-required on neither a group nor a button
+				expect(group).not.toHaveAttribute("aria-required");
+				expect(screen.getByRole("button")).not.toHaveAttribute("aria-required");
+				expect(screen.getByText("Required")).not.toBeVisible();
+			});
+
+			it("[ISSUE-3462-ITEM-11] follows required changing after mount, and adds its description only while required", () => {
+				const box = (required?: boolean, describedBy?: string) => (
+					<ThemeProvider theme={theme}>
+						<GroupBox
+							label="Attachments"
+							required={required}
+							aria-describedby={describedBy}
+						>
+							<button>Upload</button>
+						</GroupBox>
+						<p id="files-error">At least one file is required</p>
+					</ThemeProvider>
+				);
+				const { rerender } = render(box(false, "files-error"));
+				const group = screen.getByRole("group", { name: "Attachments" });
+				expect(asteriskOf(group)).toBeNull();
+				expect(group.querySelector("legend")?.textContent).toBe("Attachments");
+				expect(group).toHaveAccessibleDescription(
+					"At least one file is required",
+				);
+
+				rerender(box(true, "files-error"));
+				expect(screen.getByRole("group", { name: "Attachments" })).toBe(group);
+				expect(asteriskOf(group)).not.toBeNull();
+				expect(group).toHaveAccessibleDescription(
+					"Required At least one file is required",
+				);
+
+				rerender(box(true));
+				expect(group).toHaveAccessibleDescription("Required");
+
+				rerender(box(undefined));
+				expect(asteriskOf(group)).toBeNull();
+				expect(group).not.toHaveAttribute("aria-describedby");
+				expect(screen.queryByText("Required")).toBeNull();
+			});
+
+			it("[ISSUE-3462-ITEM-11] a required frame without a title shows no asterisk and is still described as required", () => {
+				renderGroupBox(
+					<GroupBox label={null} required aria-labelledby="device-title">
+						<h2 id="device-title">Device X</h2>
+					</GroupBox>,
+				);
+				const group = screen.getByRole("group", { name: "Device X" });
+				expect(group.querySelector("legend")).toBeNull();
+				expect(group).not.toHaveTextContent("*");
+				expect(group).toHaveAccessibleDescription("Required");
+			});
+
+			it("[ISSUE-3462-ITEM-11] a modified required frame draws the dot after the asterisk, as a MUI field does, and its name says modified", () => {
+				renderGroupBox(
+					<GroupBox label="Attachments" required dirty>
+						<button>Upload</button>
+					</GroupBox>,
+				);
+				const group = screen.getByRole("group", {
+					name: "Attachments (modified)",
+				});
+				const legend = group.querySelector("legend")!;
+				// the title's text, then the asterisk, then the dot
+				expect(legend.firstChild?.textContent).toBe("Attachments");
+				const marks = legend.querySelectorAll("[aria-hidden='true']");
+				expect(marks).toHaveLength(2);
+				expect(marks[0]).toHaveClass("CcGroupBox-asterisk");
+				expect(marks[1]).not.toHaveClass("CcGroupBox-asterisk");
+				expect(marks[1]).toBeEmptyDOMElement();
+				expect(group).toHaveAccessibleDescription("Required");
+			});
+
+			it("[ISSUE-3462-ITEM-11] a modified frame without a title keeps a legend with only the dot, and shows no asterisk there", () => {
+				const { container } = renderGroupBox(
+					<GroupBox label={null} dirty required>
+						<span>c</span>
+					</GroupBox>,
+				);
+				const legend = fieldsetOf(container).querySelector("legend");
+				expect(legend).not.toBeNull();
+				expect(legend?.querySelector(".CcGroupBox-asterisk")).toBeNull();
+				expect(legend?.querySelectorAll("[aria-hidden='true']")).toHaveLength(
+					1,
+				);
+				expect(fieldsetOf(container)).toHaveAccessibleName("(modified)");
+			});
+
+			it("[ISSUE-3462-ITEM-11] the asterisk takes classes.asterisk and the theme's asterisk overrides, and sits in the small legend too", () => {
+				const themed = createTheme({
+					components: {
+						CcGroupBox: {
+							styleOverrides: { asterisk: { color: "rgb(255, 0, 0)" } },
+						},
+					},
+				});
+				renderGroupBox(
+					<>
+						<GroupBox
+							label="Normal"
+							required
+							classes={{ asterisk: "my-star" }}
+						/>
+						<GroupBox label="Small" required smallLabel />
+					</>,
+					themed,
+				);
+				const normal = asteriskOf(
+					screen.getByRole("group", { name: "Normal" }),
+				);
+				expect(normal).toHaveClass("my-star");
+				expect(getComputedStyle(normal!).color).toBe("rgb(255, 0, 0)");
+				const small = asteriskOf(screen.getByRole("group", { name: "Small" }));
+				expect(small?.parentElement).toHaveClass("CcGroupBox-smallLabel");
+				expect(small).not.toHaveClass("my-star");
+			});
+
+			it("[ISSUE-3462-ITEM-11] theme variants match required and dirty, false when not set, and neither reaches the fieldset", () => {
+				const themed = createTheme({
+					components: {
+						CcGroupBox: {
+							variants: [
+								{
+									props: { required: true },
+									style: { outlineStyle: "dotted" },
+								},
+								{
+									props: { required: false },
+									style: { borderTopStyle: "dashed" },
+								},
+								{
+									props: { dirty: true },
+									style: { borderBottomStyle: "double" },
+								},
+								{
+									props: { dirty: false },
+									style: { borderLeftStyle: "groove" },
+								},
+							],
+						},
+					},
+				});
+				const { container } = renderGroupBox(
+					<>
+						<GroupBox label="Optional" />
+						<GroupBox label="Required" required />
+						<GroupBox label="Modified" dirty />
+					</>,
+					themed,
+				);
+				const [optional, required, modified] = Array.from(
+					container.querySelectorAll("fieldset"),
+				);
+				expect(getComputedStyle(optional).outlineStyle).not.toBe("dotted");
+				expect(getComputedStyle(optional).borderTopStyle).toBe("dashed");
+				expect(getComputedStyle(optional).borderBottomStyle).toBe("solid");
+				expect(getComputedStyle(optional).borderLeftStyle).toBe("groove");
+				expect(getComputedStyle(required).outlineStyle).toBe("dotted");
+				expect(getComputedStyle(required).borderTopStyle).toBe("solid");
+				expect(getComputedStyle(modified).borderBottomStyle).toBe("double");
+				expect(getComputedStyle(modified).borderLeftStyle).toBe("solid");
+				for (const fieldset of [optional, required, modified]) {
+					expect(fieldset).not.toHaveAttribute("required");
+					expect(fieldset).not.toHaveAttribute("dirty");
+				}
+			});
+
+			it("[ISSUE-3462-ITEM-11] every locale says that a frame is required", async () => {
+				await ccI18n.loadLanguages(langs);
+				const missing = langs.filter(
+					(lng) =>
+						!ccI18n.getResource(
+							lng.split("-")[0],
+							"translation",
+							"standalone.group-box.required",
+						),
+				);
+				expect(missing, "locales without the text").toEqual([]);
+			});
 		});
 	});
 });

@@ -254,6 +254,9 @@
 			"zoom-out": "Uitzoomen",
 			"reset-zoom": "Zoom herstellen"
 		},
+		"group-box": {
+			"required": "Verplicht"
+		},
 		"phone-number": {
 			"invalid": "Voer het juiste telefoonnummer in"
 		},

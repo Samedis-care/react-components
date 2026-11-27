@@ -22,6 +22,7 @@ import {
 	ModelDataTypeEnumSelectRenderer,
 	ModelDataTypeEnumSelectRendererMUI,
 	ModelDataTypeFilesRenderer,
+	ModelDataTypeImageRenderer,
 	ModelDataTypeIntegerRendererCC,
 	ModelDataTypeStringArrayRendererCC,
 	ModelDataTypeStringRendererCC,
@@ -29,6 +30,10 @@ import {
 	ModelFieldDefinitionUnknown,
 } from "../../../src/backend-integration";
 import validatePresence from "../../../src/utils/validations/validatePresence";
+import {
+	ModelVisibilityDisabled,
+	ModelVisibilityEdit,
+} from "../../../src/backend-integration/Model/Visibilities";
 import {
 	capture,
 	editRequired,
@@ -171,8 +176,48 @@ describe("Form accessibility: bugs", () => {
 		const control = await submitProbe(new ModelDataTypeFilesRenderer());
 		expect(control).toHaveRole("group");
 		expect(control).toHaveAccessibleName("Probe");
-		expect(control).toHaveAccessibleDescription("Probe is wrong");
+		// the probe is required, which the group says first (ISSUE-3462-ITEM-11)
+		expect(control).toHaveAccessibleDescription("Required Probe is wrong");
 	});
+
+	it.each([
+		["a files field", () => new ModelDataTypeFilesRenderer()],
+		["an image field", () => new ModelDataTypeImageRenderer()],
+	] as const)(
+		"[ISSUE-3462-ITEM-11] %s shows on its frame whether its visibility is required",
+		async (_, type) => {
+			const optional = {
+				overview: ModelVisibilityDisabled,
+				edit: ModelVisibilityEdit,
+				create: ModelVisibilityEdit,
+			};
+			for (const [visibility, required] of [
+				[editRequired, true],
+				[optional, false],
+			] as const) {
+				const sink: Sink = {};
+				const { unmount } = mountForm(
+					makeModel({}, undefined, {
+						probe: {
+							type: type(),
+							getLabel: () => "Probe",
+							visibility,
+							customData: null,
+						},
+					}),
+					capture(sink, () => <FormField name={"probe"} />),
+					{ id: null },
+				);
+				await loaded(sink, "");
+				const group = await screen.findByRole("group", { name: "Probe" });
+				expect(group.querySelector("legend")?.textContent).toBe(
+					required ? "Probe\u2009*" : "Probe",
+				);
+				expect(group).toHaveAccessibleDescription(required ? "Required" : "");
+				unmount();
+			}
+		},
+	);
 
 	it("[ISSUE-3501-ITEM-13] a required radio group is exposed as required", async () => {
 		const control = await submitProbe(

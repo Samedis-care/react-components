@@ -259,6 +259,9 @@
 				"image-position": "Immagine {{INDEX}} di {{TOTAL}}"
 			}
 		},
+		"group-box": {
+			"required": "Obbligatorio"
+		},
 		"phone-number": {
 			"invalid": "Inserisci un numero di telefono corretto"
 		},

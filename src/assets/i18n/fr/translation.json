@@ -255,6 +255,9 @@
 			"zoom-out": "Zoom arrière",
 			"reset-zoom": "Réinitialiser le zoom"
 		},
+		"group-box": {
+			"required": "Obligatoire"
+		},
 		"phone-number": {
 			"invalid": "Entrez le numéro de téléphone correct"
 		},

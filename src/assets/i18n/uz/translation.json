@@ -254,6 +254,9 @@
 			"zoom-out": "Kichiklashtirish",
 			"reset-zoom": "Masshtabni tiklash"
 		},
+		"group-box": {
+			"required": "Majburiy"
+		},
 		"phone-number": {
 			"invalid": "To'g'ri telefon raqamini kiriting"
 		},
