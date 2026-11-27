@@ -1,6 +1,8 @@
 export { default as ModelDataTypeString } from "./TypeString";
 export { default as ModelDataTypeStringNullable } from "./TypeStringNullable";
 export { default as ModelDataTypeStringArray } from "./TypeStringArray";
+export { default as ModelDataTypeNumber } from "./TypeNumber";
+export { default as ModelDataTypeCurrency } from "./TypeCurrency";
 export { default as ModelDataTypeColor } from "./TypeColor";
 export { default as ModelDataTypeId } from "./TypeId";
 export { default as ModelDataTypeIds } from "./TypeIds";
@@ -18,6 +20,7 @@ export type {
 	TypeImagePlaceholderFunction,
 } from "./TypeImage";
 export { default as ModelDataTypeSignature } from "./TypeSignature";
+export { default as ModelDataTypeLocalizedString } from "./TypeLocalizedString";
 export type { TypeLocalizedStringText } from "./TypeLocalizedString";
 
 export * from "./Renderers";
