@@ -148,7 +148,6 @@ describe("Form accessibility: bugs", () => {
 			self,
 		],
 		["a color field", new ModelDataTypeColorRendererCC(), self],
-		["a list of strings", new ModelDataTypeStringArrayRendererCC(), inputs],
 		["a checkbox", new ModelDataTypeBooleanCheckboxRendererMUI(), self],
 		["a UIKit checkbox", new ModelDataTypeBooleanCheckboxRendererCC(), self],
 		["a switch", new ModelDataTypeBooleanSwitchRendererMUI(), self],
@@ -172,6 +171,17 @@ describe("Form accessibility: bugs", () => {
 		},
 	);
 
+	it("[ISSUE-3501-ITEM-13] a list of strings: after a failed submit its message is its description and it is marked invalid", async () => {
+		const control = await submitProbe(new ModelDataTypeStringArrayRendererCC());
+		// the probe is required, which the list's group says first (ISSUE-3462-ITEM-20)
+		expect(control).toHaveAccessibleDescription("Required Probe is wrong");
+		const marked = inputs(control);
+		expect(marked.length).toBeGreaterThan(0);
+		marked.forEach((element) =>
+			expect(element).toHaveAttribute("aria-invalid", "true"),
+		);
+	});
+
 	it("[ISSUE-3462-ITEM-8] a files field: after a failed submit its message is the description of its group", async () => {
 		const control = await submitProbe(new ModelDataTypeFilesRenderer());
 		expect(control).toHaveRole("group");
@@ -180,44 +190,57 @@ describe("Form accessibility: bugs", () => {
 		expect(control).toHaveAccessibleDescription("Required Probe is wrong");
 	});
 
+	/**
+	 * Mounts a create form with a field "probe" of the given type, once with a required and
+	 * once with an optional visibility, and expects the field's frame to show the asterisk
+	 * after its title and its group to be described as "Required" only while it is required
+	 * @param type Creates the field's type
+	 */
+	const expectFrameShowsRequired = async (
+		type: () => ModelFieldDefinitionUnknown["type"],
+	) => {
+		const optional = {
+			overview: ModelVisibilityDisabled,
+			edit: ModelVisibilityEdit,
+			create: ModelVisibilityEdit,
+		};
+		for (const [visibility, required] of [
+			[editRequired, true],
+			[optional, false],
+		] as const) {
+			const sink: Sink = {};
+			const { unmount } = mountForm(
+				makeModel({}, undefined, {
+					probe: {
+						type: type(),
+						getLabel: () => "Probe",
+						visibility,
+						customData: null,
+					},
+				}),
+				capture(sink, () => <FormField name={"probe"} />),
+				{ id: null },
+			);
+			await loaded(sink, "");
+			const group = await screen.findByRole("group", { name: "Probe" });
+			expect(group.querySelector("legend")?.textContent).toBe(
+				required ? "Probe\u2009*" : "Probe",
+			);
+			expect(group).toHaveAccessibleDescription(required ? "Required" : "");
+			unmount();
+		}
+	};
+
 	it.each([
 		["a files field", () => new ModelDataTypeFilesRenderer()],
 		["an image field", () => new ModelDataTypeImageRenderer()],
 	] as const)(
 		"[ISSUE-3462-ITEM-11] %s shows on its frame whether its visibility is required",
-		async (_, type) => {
-			const optional = {
-				overview: ModelVisibilityDisabled,
-				edit: ModelVisibilityEdit,
-				create: ModelVisibilityEdit,
-			};
-			for (const [visibility, required] of [
-				[editRequired, true],
-				[optional, false],
-			] as const) {
-				const sink: Sink = {};
-				const { unmount } = mountForm(
-					makeModel({}, undefined, {
-						probe: {
-							type: type(),
-							getLabel: () => "Probe",
-							visibility,
-							customData: null,
-						},
-					}),
-					capture(sink, () => <FormField name={"probe"} />),
-					{ id: null },
-				);
-				await loaded(sink, "");
-				const group = await screen.findByRole("group", { name: "Probe" });
-				expect(group.querySelector("legend")?.textContent).toBe(
-					required ? "Probe\u2009*" : "Probe",
-				);
-				expect(group).toHaveAccessibleDescription(required ? "Required" : "");
-				unmount();
-			}
-		},
+		(_, type) => expectFrameShowsRequired(type),
 	);
+
+	it("[ISSUE-3462-ITEM-20] a list of strings shows on its frame whether its visibility is required", () =>
+		expectFrameShowsRequired(() => new ModelDataTypeStringArrayRendererCC()));
 
 	it("[ISSUE-3501-ITEM-13] a required radio group is exposed as required", async () => {
 		const control = await submitProbe(

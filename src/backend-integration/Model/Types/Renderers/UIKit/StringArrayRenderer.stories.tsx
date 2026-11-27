@@ -134,3 +134,26 @@ export const Issue3501Item45RequiredOnlyWhileEmpty: StoryObj = {
 		).not.toBeRequired();
 	},
 };
+
+export const Issue3462Item20RequiredFrame: StoryObj = {
+	render: () => <StringListDemo required />,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					'ISSUE-3462-ITEM-20: a required string list shows an asterisk after its frame\'s title, and its group is described as "Required", also while it has entries and none of its inputs is required.',
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ canvas }) => {
+		const group = await canvas.findByRole("group", { name: "Colors" });
+		await expect(group.querySelector("legend")?.textContent).toBe(
+			"Colors\u2009*",
+		);
+		await expect(group).toHaveAccessibleDescription("Required");
+		for (const input of canvas.getAllByRole("textbox")) {
+			await expect(input).not.toBeRequired();
+		}
+	},
+};

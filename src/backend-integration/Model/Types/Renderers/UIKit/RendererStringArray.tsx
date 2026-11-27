@@ -33,6 +33,9 @@ export type ModelDataTypeStringArrayRendererCCParams = Omit<
  *
  * A required field needs at least one entry: while the list is empty, its only
  * input, the one for a new entry, is required; once it has entries, no input is.
+ * Its frame shows that it is required, with or without entries (GroupBox's
+ * `required`): an asterisk after the label, and "Required" before the message in
+ * the group's description.
  */
 class RendererStringArray extends TypeStringArray {
 	props?: ModelDataTypeStringArrayRendererCCParams;
@@ -139,7 +142,12 @@ const RendererStringArrayComponent = (
 	);
 
 	return (
-		<GroupBox label={label} id={id} aria-describedby={describedBy}>
+		<GroupBox
+			label={label}
+			id={id}
+			aria-describedby={describedBy}
+			required={visibility.required}
+		>
 			{value.map((_, idx) => textField(idx)).concat(textField(value.length))}
 			<FormHelperTextCC
 				id={messageId}

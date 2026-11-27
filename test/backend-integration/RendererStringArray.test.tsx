@@ -174,4 +174,38 @@ describe("ModelDataTypeStringArrayRendererCC", () => {
 			screen.getByRole("textbox", { name: "Tags: new entry" }),
 		).toBeRequired();
 	});
+
+	/**
+	 * Expects the list's frame to show an asterisk after its title and its group to be
+	 * described as "Required" where `required` is set, and neither where it is not
+	 */
+	const expectFrameRequired = (required: boolean) => {
+		const group = screen.getByRole("group", { name: "Tags" });
+		expect(group.querySelector("legend")?.textContent).toBe(
+			required ? "Tags\u2009*" : "Tags",
+		);
+		expect(group).toHaveAccessibleDescription(required ? "Required" : "");
+	};
+
+	it("[ISSUE-3462-ITEM-20] a required list shows the asterisk after its frame's title and its group is described as required, with entries and without", () => {
+		render(<StringList initial={["a", "b"]} required />);
+		expectFrameRequired(true);
+		cleanup();
+		render(<StringList initial={[]} required />);
+		expectFrameRequired(true);
+	});
+
+	it("[ISSUE-3462-ITEM-20] an optional list shows no asterisk and its group has no description", () => {
+		render(<StringList initial={["a"]} />);
+		expectFrameRequired(false);
+	});
+
+	it("[ISSUE-3462-ITEM-20] the frame follows a change of the visibility's required", () => {
+		const { rerender } = render(<StringList initial={["a"]} />);
+		expectFrameRequired(false);
+		rerender(<StringList initial={["a"]} required />);
+		expectFrameRequired(true);
+		rerender(<StringList initial={["a"]} />);
+		expectFrameRequired(false);
+	});
 });
