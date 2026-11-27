@@ -131,6 +131,27 @@ describe("DialogTitle", () => {
 		expect(dialogLabel()).toHaveTextContent("My Title");
 	});
 
+	it("[ISSUE-3497-ITEM-11] calls onClose without arguments", () => {
+		const onClose = vi.fn();
+		render(<DialogTitle onClose={onClose}>My Title</DialogTitle>);
+		fireEvent.click(closeButton());
+		expect(onClose).toHaveBeenCalledWith();
+	});
+
+	it("[ISSUE-3497-ITEM-11] calls the onClose passed last", () => {
+		const first = vi.fn();
+		const second = vi.fn();
+		const { rerender } = render(
+			<DialogTitle onClose={first}>My Title</DialogTitle>,
+		);
+		rerender(<DialogTitle onClose={second}>My Title</DialogTitle>);
+		fireEvent.click(closeButton());
+		expect({ first: first.mock.calls, second: second.mock.calls }).toEqual({
+			first: [],
+			second: [[]],
+		});
+	});
+
 	it("[ISSUE-3497-ITEM-13] the element naming the dialog holds only the title: no close button, no second heading", () => {
 		render(
 			<Dialog open>

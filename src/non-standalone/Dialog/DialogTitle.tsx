@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
 	DialogTitle as MuiDialogTitle,
 	dialogContentClasses,
@@ -30,9 +30,9 @@ export interface DialogTitleProps {
 	children: React.ReactNode;
 	/**
 	 * When set, a close (X) button is shown next to the heading, named by
-	 * `non-standalone.dialog.dialog-title.close`, and this is called when it is
-	 * clicked. DialogTitle closes nothing itself: pass e.g. the function
-	 * `useCloseThisDialog` returns.
+	 * `non-standalone.dialog.dialog-title.close`, and this is called without
+	 * arguments when it is clicked. DialogTitle closes nothing itself: pass e.g.
+	 * the function `useCloseThisDialog` returns.
 	 */
 	onClose?: () => void;
 	/**
@@ -157,6 +157,8 @@ const DialogTitleRaw = (inProps: DialogTitleProps) => {
 	const { id, children, onClose, action, noTitle, className, classes } = props;
 
 	const { t } = useCCTranslations();
+	// onClose takes no arguments: it doesn't get the click event
+	const handleClose = useCallback(() => onClose?.(), [onClose]);
 
 	return (
 		<Root
@@ -183,7 +185,7 @@ const DialogTitleRaw = (inProps: DialogTitleProps) => {
 						<CloseButton
 							aria-label={t("non-standalone.dialog.dialog-title.close")}
 							className={classes?.closeButton}
-							onClick={onClose}
+							onClick={handleClose}
 							size="large"
 						>
 							<Close />
