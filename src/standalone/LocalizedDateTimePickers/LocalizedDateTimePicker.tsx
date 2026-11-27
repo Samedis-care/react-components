@@ -1,3 +1,8 @@
+// MUI types every date of the props as its PickerValidDate, which stays `any`
+// in a program that loads no date adapter's types. This loads AdapterMoment's,
+// and keeps the reference in the declaration file the library ships, so an
+// app that imports the picker gets its dates typed as Moment.
+/// <reference types="@mui/x-date-pickers/AdapterMoment" preserve="true" />
 import React, { useCallback, useMemo, useState } from "react";
 import {
 	DateTimePicker,
@@ -11,7 +16,7 @@ import type {
 	PickerChangeHandlerContext,
 	PickerValidDate,
 } from "@mui/x-date-pickers";
-import { withMuiFieldState } from "../UIKit";
+import { MuiFieldStateProps, withMuiFieldState } from "../UIKit/MuiFieldState";
 import { TextFieldProps } from "@mui/material";
 import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
@@ -77,6 +82,15 @@ const DESKTOP_MODE_MEDIA_QUERY =
  * into `slotProps.openPickerButton`, so it also names a caller's own
  * `slots.openPickerButton`, and an `aria-label` the caller sets there takes
  * its place.
+ *
+ * Every date the picker takes or reports is a `Moment`, or `null` for no
+ * date: `value`, `defaultValue`, `referenceDate`, `minDate`, `maxDate`,
+ * `minDateTime`, `maxDateTime`, `minTime`, `maxTime`, and the dates
+ * `onChange`, `onAccept`, `shouldDisableDate` and `shouldDisableTime` get.
+ * MUI types them as its `PickerValidDate`; importing the picker loads the
+ * types of MUI's `AdapterMoment`, the adapter `Framework` provides, which
+ * make that a `Moment` in the whole program, for MUI's own pickers too. The
+ * `ref` is the field's root `div`.
  */
 export interface LocalizedDateTimePickerProps extends DateTimePickerProps {
 	/**
@@ -194,7 +208,10 @@ export interface LocalizedDateTimePickerProps extends DateTimePickerProps {
 	desktopModeMediaQuery?: DateTimePickerProps["desktopModeMediaQuery"];
 }
 
-const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
+const LocalizedDateTimePicker = (
+	props: LocalizedDateTimePickerProps,
+	ref: React.ForwardedRef<HTMLDivElement>,
+) => {
 	const {
 		required,
 		error,
@@ -279,6 +296,7 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 		<LocalizationProvider localeText={localeText}>
 			<DateTimePicker
 				{...otherProps}
+				ref={ref}
 				value={draft.value}
 				onChange={handleChange}
 				onOpen={handleOpen}
@@ -347,4 +365,15 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 	);
 };
 
-export default React.memo(withMuiFieldState(LocalizedDateTimePicker));
+// withMuiFieldState hands the ref on to the picker, and the picker to MUI's,
+// which puts it on the field's root div, but it types its result as a plain
+// component type, whose ref would be a class instance
+const LocalizedDateTimePickerWithFieldState = withMuiFieldState(
+	React.forwardRef(LocalizedDateTimePicker),
+) as React.ForwardRefExoticComponent<
+	LocalizedDateTimePickerProps &
+		MuiFieldStateProps &
+		React.RefAttributes<HTMLDivElement>
+>;
+
+export default React.memo(LocalizedDateTimePickerWithFieldState);

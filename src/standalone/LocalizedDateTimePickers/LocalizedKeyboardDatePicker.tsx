@@ -1,3 +1,8 @@
+// MUI types every date of the props as its PickerValidDate, which stays `any`
+// in a program that loads no date adapter's types. This loads AdapterMoment's,
+// and keeps the reference in the declaration file the library ships, so an
+// app that imports the picker gets its dates typed as Moment.
+/// <reference types="@mui/x-date-pickers/AdapterMoment" preserve="true" />
 import React, { useCallback, useMemo } from "react";
 import {
 	DatePicker,
@@ -5,7 +10,7 @@ import {
 	LocalizationProvider,
 } from "@mui/x-date-pickers";
 import { TextFieldProps, useThemeProps } from "@mui/material";
-import { withMuiFieldState } from "../UIKit/MuiFieldState";
+import { MuiFieldStateProps, withMuiFieldState } from "../UIKit/MuiFieldState";
 import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
@@ -48,6 +53,14 @@ import OpenPickerButton from "./OpenPickerButton";
  * the default `slots.openPickerButton`, which a caller's own button replaces,
  * and goes into `slotProps.layout.sx`, which keeps a caller's layout slot
  * props and puts a caller's `sx` after it.
+ *
+ * Every date the picker takes or reports is a `Moment`, or `null` for no
+ * date: `value`, `defaultValue`, `referenceDate`, `minDate`, `maxDate`, and
+ * the dates `onChange`, `onAccept` and `shouldDisableDate` get. MUI types
+ * them as its `PickerValidDate`; importing the picker loads the types of
+ * MUI's `AdapterMoment`, the adapter `Framework` provides, which make that a
+ * `Moment` in the whole program, for MUI's own pickers too. The `ref` is the
+ * field's root `div`.
  */
 export interface LocalizedKeyboardDatePickerProps
 	extends DatePickerProps, Pick<TextFieldWithHelpProps, "disableClearable"> {
@@ -162,6 +175,7 @@ const NoIcon = () => {
 
 const LocalizedKeyboardDatePicker = (
 	inProps: LocalizedKeyboardDatePickerProps,
+	ref: React.ForwardedRef<HTMLDivElement>,
 ) => {
 	const props = useThemeProps({
 		props: inProps,
@@ -219,6 +233,7 @@ const LocalizedKeyboardDatePicker = (
 		<LocalizationProvider localeText={localeText}>
 			<DatePicker
 				{...otherProps}
+				ref={ref}
 				value={draft.value}
 				onChange={draft.onChange}
 				onOpen={handleOpen}
@@ -280,4 +295,15 @@ const LocalizedKeyboardDatePicker = (
 	);
 };
 
-export default React.memo(withMuiFieldState(LocalizedKeyboardDatePicker));
+// withMuiFieldState hands the ref on to the picker, and the picker to MUI's,
+// which puts it on the field's root div, but it types its result as a plain
+// component type, whose ref would be a class instance
+const LocalizedKeyboardDatePickerWithFieldState = withMuiFieldState(
+	React.forwardRef(LocalizedKeyboardDatePicker),
+) as React.ForwardRefExoticComponent<
+	LocalizedKeyboardDatePickerProps &
+		MuiFieldStateProps &
+		React.RefAttributes<HTMLDivElement>
+>;
+
+export default React.memo(LocalizedKeyboardDatePickerWithFieldState);
