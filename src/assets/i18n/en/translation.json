@@ -427,6 +427,11 @@
 			"read-only": {
 				"submitting": "The form is currently being saved"
 			},
+			"auto-save": {
+				"saving": "Saving…",
+				"saved": "Saved",
+				"failed": "Could not save"
+			},
 			"tab": {
 				"invalid": "Contains invalid fields.",
 				"modified": "Contains modified fields."

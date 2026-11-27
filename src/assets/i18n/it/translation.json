@@ -432,6 +432,11 @@
 			"read-only": {
 				"submitting": "Il modulo è in fase di salvataggio"
 			},
+			"auto-save": {
+				"saving": "Salvataggio…",
+				"saved": "Salvato",
+				"failed": "Impossibile salvare"
+			},
 			"tab": {
 				"invalid": "Contiene campi non validi.",
 				"modified": "Contiene campi modificati."

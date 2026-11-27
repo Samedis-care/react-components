@@ -427,6 +427,11 @@
 			"read-only": {
 				"submitting": "Das Formular wird gerade gespeichert"
 			},
+			"auto-save": {
+				"saving": "Wird gespeichert…",
+				"saved": "Gespeichert",
+				"failed": "Speichern fehlgeschlagen"
+			},
 			"tab": {
 				"invalid": "Enthält ungültige Felder.",
 				"modified": "Enthält geänderte Felder."

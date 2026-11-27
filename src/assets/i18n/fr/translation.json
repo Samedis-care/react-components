@@ -432,6 +432,11 @@
 			"read-only": {
 				"submitting": "Le formulaire est en cours d'enregistrement"
 			},
+			"auto-save": {
+				"saving": "Enregistrement…",
+				"saved": "Enregistré",
+				"failed": "Échec de l'enregistrement"
+			},
 			"tab": {
 				"invalid": "Contient des champs non valides.",
 				"modified": "Contient des champs modifiés."

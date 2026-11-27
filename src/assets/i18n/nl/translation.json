@@ -427,6 +427,11 @@
 			"read-only": {
 				"submitting": "Het formulier wordt momenteel opgeslagen"
 			},
+			"auto-save": {
+				"saving": "Opslaan…",
+				"saved": "Opgeslagen",
+				"failed": "Opslaan mislukt"
+			},
 			"tab": {
 				"invalid": "Bevat ongeldige velden.",
 				"modified": "Bevat gewijzigde velden."

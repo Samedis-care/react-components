@@ -13,7 +13,9 @@ import { Form } from "./index";
 import FormField from "./Field";
 import DefaultFormPage from "./DefaultFormPage";
 import DefaultErrorComponent from "./DefaultErrorComponent";
-import createTestModel from "../../stories/test-utils/TestModel";
+import createTestModel, {
+	sampleData,
+} from "../../stories/test-utils/TestModel";
 import createMixedControlModel from "../../stories/test-utils/MixedControlModel";
 import MockConnector from "../../stories/test-utils/MockConnector";
 import {
@@ -27,6 +29,7 @@ import {
 } from "../../backend-integration";
 import { PageProps } from "./Form";
 import DirtyStateProvider from "./DirtyStateProvider";
+import FormAutoSave from "./FormAutoSave";
 import { DirtyStateMarks } from "./DirtyStateContext";
 
 type TestModel = ReturnType<typeof createTestModel>;
@@ -601,5 +604,205 @@ export const Issue3501Item47EnumMultiCheckboxThemeRing: StoryObj = {
 				{ style: ring.style, color: ring.color },
 				`the theme's ring around the box of the focused option ${ring.option}`,
 			).toEqual({ style: "solid", color: "rgb(0, 128, 0)" });
+	},
+};
+
+/**
+ * A connector whose saves take saveDelay milliseconds, and are refused with failSaves
+ */
+class AutoSaveConnector extends MockConnector {
+	private readonly saveDelay: number;
+	private readonly failSaves: boolean;
+
+	constructor(saveDelay: number, failSaves: boolean) {
+		super(sampleData);
+		this.saveDelay = saveDelay;
+		this.failSaves = failSaves;
+	}
+
+	// a promise, which MockConnector's synchronous type does not declare
+	update(data: Record<string, unknown>) {
+		return new Promise((resolve, reject) => {
+			setTimeout(() => {
+				if (this.failSaves)
+					reject(new Error("The server could not be reached"));
+				else resolve(super.update(data));
+			}, this.saveDelay);
+		}) as never;
+	}
+}
+
+interface AutoSaveStoryArgs {
+	/**
+	 * FormAutoSave's debounceTime
+	 */
+	debounceTime: number;
+	/**
+	 * FormAutoSave's showStatus
+	 */
+	showStatus: boolean;
+	/**
+	 * How long a save takes, in ms
+	 */
+	saveDelay: number;
+	/**
+	 * Whether the server refuses every save
+	 */
+	failSaves: boolean;
+}
+
+const AutoSaveFormContent = (
+	props: PageProps<TestModel, AutoSaveStoryArgs>,
+) => (
+	<Grid container spacing={2}>
+		<Grid size={{ xs: 6 }}>
+			<FormField name="first_name" />
+		</Grid>
+		<Grid size={{ xs: 6 }}>
+			<FormField name="last_name" />
+		</Grid>
+		<Grid size={{ xs: 12 }}>
+			<FormAutoSave
+				debounceTime={props.customProps.debounceTime}
+				showStatus={props.customProps.showStatus}
+			/>
+		</Grid>
+		<Grid size={{ xs: 6 }}>
+			<FormField name="email" />
+		</Grid>
+	</Grid>
+);
+
+let autoSaveModelCounter = 0;
+
+const AutoSaveFormStory = (props: AutoSaveStoryArgs) => {
+	const { saveDelay, failSaves } = props;
+	const model = useMemo(
+		() =>
+			new Model(
+				"auto-save-story-" + String(autoSaveModelCounter++),
+				createTestModel().fields,
+				new AutoSaveConnector(saveDelay, failSaves),
+			),
+		[saveDelay, failSaves],
+	);
+	return (
+		<Form
+			model={model}
+			id="1"
+			errorComponent={DefaultErrorComponent}
+			customProps={props}
+			disableRouting
+			key={model.modelId}
+		>
+			{AutoSaveFormContent}
+		</Form>
+	);
+};
+
+/**
+ * Types into First Name and waits until the auto-save has started
+ */
+const typeAndAwaitSave = async ({
+	canvas,
+	userEvent,
+}: Parameters<NonNullable<StoryObj["play"]>>[0]) => {
+	const input = await canvas.findByDisplayValue("Alice", undefined, {
+		timeout: 10000,
+	});
+	const status = canvas.getByRole("status");
+	await expect(status).toHaveTextContent(/^$/);
+	await userEvent.type(input, "x");
+	await waitFor(
+		async () => {
+			await expect(status).toHaveTextContent("Saving…");
+		},
+		{ timeout: 5000 },
+	);
+	return status;
+};
+
+const AUTO_SAVE_ARGS: AutoSaveStoryArgs = {
+	debounceTime: 300,
+	showStatus: true,
+	saveDelay: 800,
+	failSaves: false,
+};
+
+/**
+ * `FormAutoSave` saves the form once the user pauses (`debounceTime`). Its status region
+ * tells the outcome: "Saving…", then "Saved", or "Could not save" (`failSaves`). With
+ * `showStatus` it is a caption line where FormAutoSave is placed, one line high also
+ * while it is empty, so the fields below it do not move.
+ */
+export const AutoSave: StoryObj<AutoSaveStoryArgs> = {
+	args: AUTO_SAVE_ARGS,
+	render: (args) => <AutoSaveFormStory {...args} />,
+	parameters: { a11y: { test: "error" } },
+	play: async (context) => {
+		const email = await context.canvas.findByDisplayValue(
+			"alice@example.com",
+			undefined,
+			{ timeout: 10000 },
+		);
+		const emailTop = email.getBoundingClientRect().top;
+		const status = await typeAndAwaitSave(context);
+		const lineHeight = status.getBoundingClientRect().height;
+		await expect(lineHeight).toBeGreaterThan(12);
+		await waitFor(
+			async () => {
+				await expect(status).toHaveTextContent("Saved");
+			},
+			{ timeout: 5000 },
+		);
+		await expect({
+			statusHeight: status.getBoundingClientRect().height,
+			emailTop: email.getBoundingClientRect().top,
+		}).toEqual({ statusHeight: lineHeight, emailTop });
+	},
+};
+
+/**
+ * A save the server refuses: the form's error component reports it, and the status says
+ * "Could not save" in the theme's error color until the form has no changes left.
+ */
+export const AutoSaveFailed: StoryObj<AutoSaveStoryArgs> = {
+	args: { ...AUTO_SAVE_ARGS, failSaves: true },
+	render: (args) => <AutoSaveFormStory {...args} />,
+	parameters: { a11y: { test: "error" } },
+	play: async (context) => {
+		const status = await typeAndAwaitSave(context);
+		const dialog = await within(document.body).findByRole("dialog", undefined, {
+			timeout: 5000,
+		});
+		await context.userEvent.click(within(dialog).getByRole("button"));
+		await waitFor(async () => {
+			await expect(status).toHaveTextContent("Could not save");
+		});
+		await expect(getComputedStyle(status).color).toBe("rgb(211, 47, 47)");
+	},
+};
+
+/**
+ * Without `showStatus` (the default) the status region is visually hidden: screen readers
+ * announce the outcome, and FormAutoSave takes no room in the layout.
+ */
+export const AutoSaveStatusHidden: StoryObj<AutoSaveStoryArgs> = {
+	args: { ...AUTO_SAVE_ARGS, showStatus: false },
+	render: (args) => <AutoSaveFormStory {...args} />,
+	parameters: { a11y: { test: "error" } },
+	play: async (context) => {
+		const status = await typeAndAwaitSave(context);
+		await waitFor(
+			async () => {
+				await expect(status).toHaveTextContent("Saved");
+			},
+			{ timeout: 5000 },
+		);
+		const box = status.getBoundingClientRect();
+		await expect({ width: box.width, height: box.height }).toEqual({
+			width: 1,
+			height: 1,
+		});
 	},
 };

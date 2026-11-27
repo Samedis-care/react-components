@@ -427,6 +427,11 @@
 			"read-only": {
 				"submitting": "Shakl hozir saqlanmoqda"
 			},
+			"auto-save": {
+				"saving": "Saqlanmoqda…",
+				"saved": "Saqlandi",
+				"failed": "Saqlab boʻlmadi"
+			},
 			"tab": {
 				"invalid": "Notoʻgʻri maydonlar bor.",
 				"modified": "Oʻzgartirilgan maydonlar bor."

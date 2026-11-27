@@ -261,6 +261,10 @@ import {
 import { CrudClassKey } from "./backend-components/CRUD";
 import { FormTabClassKey } from "./backend-components/Form/FormTab";
 import {
+	FormAutoSaveClassKey,
+	FormAutoSaveProps,
+} from "./backend-components/Form/FormAutoSave";
+import {
 	RoutedTabsClassKey,
 	RoutedTabsProps,
 } from "./non-standalone/RoutedTabs/RoutedTabs";
@@ -454,6 +458,7 @@ declare module "@mui/material/styles" {
 		CcFieldState: FieldStateClassKey;
 		CcDirtyMarker: DirtyMarkerClassKey;
 		CcFormTab: FormTabClassKey;
+		CcFormAutoSave: FormAutoSaveClassKey;
 		CcCrud: CrudClassKey;
 		CcRoutedTabs: RoutedTabsClassKey;
 		CcRoutedTabPanelWrapper: RoutedTabPanelWrapperClassKey;
@@ -572,6 +577,7 @@ declare module "@mui/material/styles" {
 			"switchFilterName" | "switchLabel"
 		>;
 		CcBasicFormPage: Partial<BasicFormPageProps<never, never>>;
+		CcFormAutoSave: Partial<FormAutoSaveProps>;
 		CcFlowEngine: Partial<FlowEngineThemeProps>;
 		CcRoutedTabs: Partial<RoutedTabsProps>;
 	}
@@ -1144,6 +1150,12 @@ declare module "@mui/material/styles" {
 		};
 		CcFormTab?: {
 			styleOverrides?: StyleOverridesWithoutOwnerState<FormTabClassKey>;
+		};
+		// No variants: MUI matches them against the root's own props, and the root
+		// gets none of FormAutoSave's.
+		CcFormAutoSave?: {
+			defaultProps?: ComponentsPropsList["CcFormAutoSave"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<FormAutoSaveClassKey>;
 		};
 		CcBasicFormPage?: {
 			defaultProps?: ComponentsPropsList["CcBasicFormPage"];

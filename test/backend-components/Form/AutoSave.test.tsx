@@ -4,7 +4,7 @@
  */
 import { describe, expect, it, vi } from "vitest";
 import React from "react";
-import { act, waitFor } from "@testing-library/react";
+import { act, screen, waitFor } from "@testing-library/react";
 import FormAutoSave from "../../../src/backend-components/Form/FormAutoSave";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import {
@@ -12,6 +12,7 @@ import {
 	loaded,
 	makeModel,
 	mountForm,
+	mountNested,
 	recordData,
 	settle,
 	setupFormTests,
@@ -155,5 +156,126 @@ describe("FormAutoSave: bugs", () => {
 		act(() => sink.ctx!.setFieldValue("title", "second"));
 		await waitFor(() => expect(update).toHaveBeenCalledTimes(2));
 		expect(update.mock.calls[1][0].title).toBe("second");
+	});
+
+	it("[ISSUE-3502-ITEM-19] the outcome of an auto-save is announced in a status region", async () => {
+		const connector = new MockConnector(recordData());
+		const update = vi.spyOn(connector, "update");
+		const sink: Sink = {};
+		mountForm(
+			makeModel({}, connector),
+			capture(sink, () => <FormAutoSave debounceTime={0} />),
+		);
+		await loaded(sink);
+		act(() => sink.ctx!.setFieldValue("title", "x"));
+		await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+		await settle();
+		expect(screen.queryByRole("status")?.textContent ?? "").not.toBe("");
+	});
+
+	it("[ISSUE-3502-ITEM-19] the status region says Saving… while the save runs and Saved once it is done, as the same element", async () => {
+		const connector = new MockConnector(recordData());
+		const original = connector.update.bind(connector);
+		let release = () => {};
+		// held until the test releases it
+		vi.spyOn(connector, "update").mockImplementation(
+			(data) =>
+				new Promise((resolve) => {
+					release = () => resolve(original(data));
+				}) as never,
+		);
+		const sink: Sink = {};
+		mountForm(
+			makeModel({}, connector),
+			capture(sink, () => <FormAutoSave debounceTime={0} />),
+		);
+		await loaded(sink);
+		const status = screen.getByRole("status");
+		expect(status.textContent).toBe("");
+		act(() => sink.ctx!.setFieldValue("title", "x"));
+		await waitFor(() => expect(status.textContent).toBe("Saving…"));
+		// the form around it is busy while it saves, the region is not: a screen reader holds
+		// back the messages of a busy area
+		expect(status.closest("form")).toHaveAttribute("aria-busy", "true");
+		expect(status).toHaveAttribute("aria-busy", "false");
+		await act(async () => {
+			release();
+			await Promise.resolve();
+		});
+		await waitFor(() => expect(status.textContent).toBe("Saved"));
+		expect(screen.getByRole("status")).toBe(status);
+	});
+
+	it("[ISSUE-3502-ITEM-19] a failed auto-save of a nested form says Could not save until the form has no changes left", async () => {
+		const connector = new MockConnector(recordData());
+		const update = vi
+			.spyOn(connector, "update")
+			.mockRejectedValueOnce(new Error("offline"));
+		const { child } = mountNested(
+			makeModel({}, connector),
+			makeModel(),
+			{},
+			() => <FormAutoSave debounceTime={0} />,
+		);
+		await loaded(child, "T2");
+		act(() => child.ctx!.setFieldValue("title", "x"));
+		await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+		await settle();
+		const status = screen.getByRole("status");
+		expect(status.textContent).toBe("Could not save");
+		// the user discards the changes: nothing is left unsaved, nothing is wrong any more
+		act(() => child.ctx!.resetForm());
+		await settle();
+		expect({ dirty: child.ctx!.dirty, status: status.textContent }).toEqual({
+			dirty: false,
+			status: "",
+		});
+	});
+
+	it("[ISSUE-3502-ITEM-19] Saved is emptied once the form has changes again", async () => {
+		const connector = new MockConnector(recordData());
+		const update = vi.spyOn(connector, "update");
+		const sink: Sink = {};
+		mountForm(
+			makeModel({}, connector),
+			capture(sink, () => <FormAutoSave debounceTime={40} />),
+		);
+		await loaded(sink);
+		act(() => sink.ctx!.setFieldValue("title", "x"));
+		const status = screen.getByRole("status");
+		await waitFor(() => expect(status.textContent).toBe("Saved"));
+		act(() => sink.ctx!.setFieldValue("title", "y"));
+		await settle();
+		// not saved yet: the pause is not over
+		expect({
+			saves: update.mock.calls.length,
+			status: status.textContent,
+		}).toEqual({
+			saves: 1,
+			status: "",
+		});
+		await waitFor(() => expect(update).toHaveBeenCalledTimes(2));
+		await waitFor(() => expect(status.textContent).toBe("Saved"));
+	});
+
+	it("[ISSUE-3502-ITEM-19] a save the form's preSubmit cancels tells nothing", async () => {
+		const connector = new MockConnector(recordData());
+		const update = vi.spyOn(connector, "update");
+		const preSubmit = vi.fn(() => true);
+		const sink: Sink = {};
+		mountForm(
+			makeModel({}, connector),
+			capture(sink, () => <FormAutoSave debounceTime={0} />),
+			{ preSubmit },
+		);
+		await loaded(sink);
+		act(() => sink.ctx!.setFieldValue("title", "x"));
+		await waitFor(() => expect(preSubmit).toHaveBeenCalledTimes(1));
+		await settle();
+		expect({
+			saves: update.mock.calls.length,
+			dirty: sink.ctx!.dirty,
+			status: screen.getByRole("status").textContent,
+		}).toEqual({ saves: 0, dirty: true, status: "" });
 	});
 });

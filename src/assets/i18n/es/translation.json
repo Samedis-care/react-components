@@ -432,6 +432,11 @@
 			"read-only": {
 				"submitting": "El formulario se está guardando"
 			},
+			"auto-save": {
+				"saving": "Guardando…",
+				"saved": "Guardado",
+				"failed": "No se pudo guardar"
+			},
 			"tab": {
 				"invalid": "Contiene campos no válidos.",
 				"modified": "Contiene campos modificados."

@@ -1,8 +1,36 @@
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
+import { styled, useThemeProps } from "@mui/material";
 import { useFormContext } from "./Form";
 import debounce from "../../utils/debounce";
 import toComparisonJson from "../../utils/toComparisonJson";
 import { ModelUnknown } from "../../backend-integration";
+import useCCTranslations from "../../utils/useCCTranslations";
+import combineClassNames from "../../utils/combineClassNames";
+import visuallyHidden from "../../utils/internal/visuallyHidden";
+
+/**
+ * Theme style slots of {@link FormAutoSave}
+ * (`components.CcFormAutoSave.styleOverrides.<slot>`), also the keys of its `classes`
+ * prop:
+ * - `root`: the status region (`role="status"`) whose text is the outcome of the last
+ *   auto-save. Visually hidden, unless `showStatus` is set: then it has the class
+ *   `CcFormAutoSave-visible` and is a line of the theme's `typography.caption` in
+ *   `palette.text.secondary`, one line high also while it is empty. While it has a
+ *   text, it has the class of its status: `CcFormAutoSave-saving`,
+ *   `CcFormAutoSave-saved` or `CcFormAutoSave-failed`; the failed one is
+ *   `palette.error.main`
+ *
+ * No slot receives an `ownerState`, and the root receives none of the props: theme
+ * `variants` match nothing, style the states with their classes
+ * (`root: { "&.CcFormAutoSave-saved": { … } }`).
+ */
+export type FormAutoSaveClassKey = "root";
 
 export interface FormAutoSaveProps {
 	/**
@@ -11,13 +39,47 @@ export interface FormAutoSaveProps {
 	 * @default 5000; 0 saves on every change, without waiting (once the form is idle)
 	 */
 	debounceTime?: number;
+	/**
+	 * Shows the status on screen, as a caption line where FormAutoSave is placed: "Saving…"
+	 * while an auto-save runs, "Saved" once it is done, "Could not save" when it failed.
+	 * Without it, the status is visually hidden and only read out by screen readers, and
+	 * FormAutoSave takes no room in the layout.
+	 * @default false
+	 */
+	showStatus?: boolean;
+	/**
+	 * Class name added to the status region (the root, with `classes.root`)
+	 * @default undefined (none)
+	 */
+	className?: string;
+	/**
+	 * Class names added to the slots, by slot (see {@link FormAutoSaveClassKey})
+	 * @default undefined (none)
+	 */
+	classes?: Partial<Record<FormAutoSaveClassKey, string>>;
 }
+
+/**
+ * What the status region says: nothing, or the outcome of the last auto-save
+ */
+type FormAutoSaveStatus = "idle" | "saving" | "saved" | "failed";
+
+/**
+ * State class of the root with showStatus
+ */
+const VISIBLE_CLASS = "CcFormAutoSave-visible";
+
+/**
+ * State class of the root while it says "Could not save"
+ */
+const FAILED_CLASS = "CcFormAutoSave-failed";
 
 /**
  * Helper to implement auto save in forms
  * @param debounceTime The debounce time (time between changes for save to trigger)
+ * @returns The status to show: the outcome of the last save started here while it holds
  */
-const useFormAutoSave = (debounceTime = 5000) => {
+const useFormAutoSave = (debounceTime = 5000): FormAutoSaveStatus => {
 	const { safeSubmit, submitting, dirty, values } =
 		useFormContext<ModelUnknown>();
 	const dataStr = toComparisonJson(values);
@@ -29,11 +91,28 @@ const useFormAutoSave = (debounceTime = 5000) => {
 	// once the form is idle
 	const submittingRef = useRef(submitting);
 	submittingRef.current = submitting;
+	// the outcome of the last save started here
+	const [outcome, setOutcome] = useState<Exclude<FormAutoSaveStatus, "idle">>();
+	// the outcome of a save that ends after the form has unmounted is dropped
+	const mountedRef = useRef(false);
+	useEffect(() => {
+		mountedRef.current = true;
+		return () => {
+			mountedRef.current = false;
+		};
+	}, []);
+	// counts the saves started here: only the last one's outcome is shown
+	const saveCountRef = useRef(0);
 	const save = useCallback(
 		(data: string) => {
 			if (submittingRef.current) return;
 			triedRef.current = data;
-			void safeSubmit();
+			const saveNumber = ++saveCountRef.current;
+			setOutcome("saving");
+			void safeSubmit().then((succeeded) => {
+				if (!mountedRef.current || saveNumber !== saveCountRef.current) return;
+				setOutcome(succeeded ? "saved" : "failed");
+			});
 		},
 		[safeSubmit],
 	);
@@ -56,11 +135,56 @@ const useFormAutoSave = (debounceTime = 5000) => {
 		if (debouncedSave) debouncedSave(dataStr);
 		else save(dataStr);
 	}, [dataStr, dirty, submitting, debouncedSave, save]);
+	// an outcome is told while it holds: "Saved" while the form has no changes, and "Could
+	// not save" while it has (those it failed on or later ones). A submit that succeeds
+	// without saving, as one the form's preSubmit cancels, leaves the form dirty: it tells
+	// nothing
+	if (!outcome) return "idle";
+	if (outcome === "saved" && dirty) return "idle";
+	if (outcome === "failed" && !dirty) return "idle";
+	return outcome;
 };
+
+const FormAutoSaveRoot = styled("span", {
+	name: "CcFormAutoSave",
+	slot: "root",
+})(({ theme }) => ({
+	...theme.typography.caption,
+	color: theme.palette.text.secondary,
+	[`&.${FAILED_CLASS}`]: {
+		color: theme.palette.error.main,
+	},
+	// shown: a line of its own, one line high also while it is empty, so that the layout
+	// does not move when its text comes and goes
+	[`&.${VISIBLE_CLASS}`]: {
+		display: "block",
+		minHeight: "1lh",
+	},
+	// hidden from sight, kept for screen readers: a 1px box in the top left corner of the
+	// nearest positioned ancestor, out of the layout's flow
+	[`&:not(.${VISIBLE_CLASS})`]: visuallyHidden,
+}));
 
 /**
  * Saves the form (safeSubmit) once it is dirty and idle and its values have not changed for
- * debounceTime milliseconds. Renders nothing: put it anywhere in the form's page.
+ * debounceTime milliseconds. Put it anywhere in the form's page where a `span` can go (not
+ * directly in a table, a table row or a list).
+ *
+ * It renders a polite status region (`role="status"`, slot `root`) that tells the outcome
+ * of its saves: "Saving…" while one runs, "Saved" once it went through, "Could not save"
+ * when it failed, in the library's current language. "Saved" is emptied when the form has
+ * changes again, "Could not save" once the form has none (saved or reset by other means).
+ * The region is mounted once and only its text changes, so screen readers announce each
+ * outcome; an emptied text is not announced. It is not busy itself (`aria-busy="false"`):
+ * the form around it is while it saves, and a screen reader holds back the messages of a
+ * busy area. A save that the form's `preSubmit` cancels tells nothing.
+ *
+ * The region is visually hidden, and takes no room in the layout (a 1px box in the top left
+ * corner of the nearest positioned ancestor), unless `showStatus` is set: then it is a
+ * caption line where FormAutoSave is placed (see {@link FormAutoSaveClassKey}).
+ *
+ * Theme: `components.CcFormAutoSave` takes `defaultProps` (such as `showStatus` for every
+ * form) and `styleOverrides` of the `root` slot.
  * @remarks A change made while the form is busy (a busy reason, or a save in progress) is
  *          saved once the form is idle again. A form that turns dirty without a change of
  *          its values (setCustomFieldDirty, e.g. a nested form or a queued upload) is saved
@@ -69,10 +193,29 @@ const useFormAutoSave = (debounceTime = 5000) => {
  *          saved.
  * @remarks A save still waiting for the pause does not run once the form has unmounted.
  *          When debounceTime changes, it waits for the new time.
+ * @remarks Only the saves FormAutoSave starts itself are told, not those of a save button.
  */
-const FormAutoSave = (props: FormAutoSaveProps) => {
-	useFormAutoSave(props.debounceTime);
-	return <React.Fragment />;
+const FormAutoSave = (inProps: FormAutoSaveProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcFormAutoSave" });
+	const { debounceTime, showStatus, className, classes } = props;
+	const status = useFormAutoSave(debounceTime);
+	const { t } = useCCTranslations();
+	return (
+		<FormAutoSaveRoot
+			role={"status"}
+			aria-busy={false}
+			className={combineClassNames([
+				className,
+				classes?.root,
+				showStatus && VISIBLE_CLASS,
+				status !== "idle" && `CcFormAutoSave-${status}`,
+			])}
+		>
+			{status === "idle"
+				? ""
+				: t(`backend-components.form.auto-save.${status}`)}
+		</FormAutoSaveRoot>
+	);
 };
 
 export default React.memo(FormAutoSave);
