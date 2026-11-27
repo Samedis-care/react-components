@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-27 | [useFormState reads the Form's lite context, so its component does not render again on every change of a form value](2026-11-27-use-form-state-reads-lite-form-context.md) | behavior |
 | 2026-11-27 | [The status region under a CRUD select stays in the page, and says "Loading…" once the load takes 100ms](2026-11-27-crud-select-status-region-stays.md) | behavior |
 | 2026-11-27 | [A date picker at its own width grows to fit its date](2026-11-27-picker-field-fits-its-date.md) | behavior |
 | 2026-11-27 | [RoutedTabs needs a name: `aria-label` or `aria-labelledby`](2026-11-27-routed-tabs-name-required.md) | type |

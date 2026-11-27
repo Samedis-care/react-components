@@ -1,10 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import React, { useState } from "react";
-import { act, screen } from "@testing-library/react";
+import { act, fireEvent, screen } from "@testing-library/react";
 import { useFormContext } from "../../../src/backend-components/Form/Form";
+import FormField from "../../../src/backend-components/Form/Field";
 import useFormState from "../../../src/backend-components/Form/useFormState";
 import { ModelUnknown } from "../../../src/backend-integration";
 import {
+	inputOf,
 	loaded,
 	makeModel,
 	mountForm,
@@ -111,5 +113,54 @@ describe("useFormState", () => {
 		expect(screen.getByTestId("state").textContent).toBe("changed a");
 		// one setter for the life of the component, like useState's
 		expect(setters.size).toBe(1);
+	});
+
+	it("[ISSUE-3501-ITEM-56] a component that keeps state with it does not render again while the user types into another field", async () => {
+		const sink: Sink = {};
+		const onRender = vi.fn();
+		const control = { setValue: (() => {}) as (value: string) => void };
+		const Stateful = () => {
+			const [value, setValue] = useFormState("kept", "initial");
+			control.setValue = setValue;
+			return <span data-testid={"state"}>{value}</span>;
+		};
+		// made once: a render of it while the user types can only come from a context it reads
+		const stateful = <Stateful />;
+		const Capture = () => {
+			sink.ctx = useFormContext<ModelUnknown>();
+			return null;
+		};
+		// reads nothing of the form, so the form does not render it again either
+		const Page = () => (
+			<>
+				<Capture />
+				<FormField name={"note"} />
+				<React.Profiler id={"stateful"} onRender={onRender}>
+					{stateful}
+				</React.Profiler>
+			</>
+		);
+		const { container } = mountForm(makeModel(), Page);
+		await loaded(sink);
+		const type = async (value: string) => {
+			fireEvent.change(inputOf(container, "note"), { target: { value } });
+			await settle();
+		};
+		// the first keystroke makes the form dirty, which the lite context carries
+		await type("a");
+		expect(sink.ctx!.dirty).toBe(true);
+		onRender.mockClear();
+
+		await type("ab");
+		await type("abc");
+		await type("abcd");
+		expect(sink.ctx!.values.note).toBe("abcd");
+		expect(onRender).not.toHaveBeenCalled();
+
+		// the state still works and is still kept in the form
+		act(() => control.setValue("changed"));
+		await settle();
+		expect(screen.getByTestId("state").textContent).toBe("changed");
+		expect(sink.ctx!.getCustomState("kept")).toBe("changed");
 	});
 });
