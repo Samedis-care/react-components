@@ -3,7 +3,6 @@ import React, {
 	useCallback,
 	useContext,
 	useEffect,
-	useRef,
 	useState,
 } from "react";
 import {
@@ -12,7 +11,6 @@ import {
 	PageProps,
 	useFormContextLite,
 } from "../Form";
-import { FormDirtyEvent } from "./FormEvents";
 import { FormPageGuardContext } from "./FormPageGuard";
 import { useDialogContext } from "../../framework/DialogContextProvider";
 import { captureError } from "../../framework/ErrorReporting";
@@ -74,7 +72,10 @@ export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<
 
 export type EnhancedGoBackType = {
 	/**
-	 * Closes the form page, asking the user for confirmation if the form is dirty
+	 * Closes the form page, asking the user for confirmation if the form holds unsaved changes
+	 * (dirty or, in flow mode, stagedDirty) at the call, as the form engine sees them: also
+	 * right after a save resolved, before React re-rendered, and for a change a control made in
+	 * its mount effect
 	 * @param forceRefresh Force a refresh of the CRUD data grid after navigating back? (default false)
 	 * @param forceNavigate Skip the unsaved changes confirmation dialog and navigate back immediately? (default false).
 	 *                      Has no effect if the form isn't dirty or is read-only for a reason other than a
@@ -156,27 +157,13 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 		...otherProps
 	} = props;
 	const { t } = useCCTranslations();
-	const { readOnly, readOnlyReasons, addEventListener, removeEventListener } =
-		useFormContextLite<ModelUnknown>();
+	const { readOnly, readOnlyReasons } = useFormContextLite<ModelUnknown>();
 	// a save makes the form read-only too, but its changes are unsaved until it succeeds and
 	// a failed save is shown in the form, so goBack asks while the form saves, like the
 	// Form's leave guard. A form which is read-only for another reason is left without asking.
 	const readOnlyBesidesSaving = Object.keys(readOnlyReasons).some(
 		(reason) => reason !== FORM_SUBMITTING_READ_ONLY_REASON,
 	);
-	// the dirty props are one render behind the form engine, which breaks "submit, then
-	// go back": the record is saved, but goBack below would still see a dirty form.
-	// The dirty event fires as soon as the form engine sees the change, so this ref is
-	// current even while a re-render is still pending. The changes goBack asks about are the
-	// shown values and, in flow mode, the staged ones.
-	const dirtyRef = useRef(dirty || stagedDirty);
-	useEffect(() => {
-		const handleDirtyChange = (event: FormDirtyEvent) => {
-			dirtyRef.current = event.dirty || event.stagedDirty;
-		};
-		addEventListener("dirty", handleDirtyChange);
-		return () => removeEventListener("dirty", handleDirtyChange);
-	}, [addEventListener, removeEventListener]);
 	const [childActiveCount, setChildActiveCount] = useState(0);
 	const childActive = childActiveCount > 0;
 	const setChildActive = useCallback((active: boolean) => {
@@ -218,12 +205,17 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 		(customPropsWithGoBack as EnhancedGoBackType).goBack =
 			typeof orgGoBack === "function"
 				? async (forceRefresh?: boolean, forceNavigate?: boolean) => {
+						// the changes goBack asks about are the shown values and, in flow mode, the
+						// staged ones, as the form engine sees them now. The dirty props are one render
+						// behind it, which breaks "submit, then go back" (the record is saved, but they
+						// still say dirty). The Form's leave guard follows the engine's dirty event,
+						// also for a change a control in this page announced in its mount effect,
+						// before this page's own effects ran.
+						const unsaved = pageGuard
+							? pageGuard.isUnsaved()
+							: dirty || stagedDirty;
 						try {
-							if (
-								dirtyRef.current &&
-								!readOnlyBesidesSaving &&
-								!forceNavigate
-							) {
+							if (unsaved && !readOnlyBesidesSaving && !forceNavigate) {
 								await showConfirmDialog(pushDialog, {
 									title: t("backend-components.form.back-on-dirty.title"),
 									message: t("backend-components.form.back-on-dirty.message"),

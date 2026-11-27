@@ -38,6 +38,14 @@ export interface FormPageGuard {
 	 * @param go Starts the navigation, synchronously
 	 */
 	leave: (go: () => void) => void;
+	/**
+	 * Does the form hold unsaved changes (dirty or, in flow mode, stagedDirty) right now, as
+	 * the form engine sees them? Current before React re-renders (a save that has just
+	 * resolved), and also for a change the form engine announced before the asking component
+	 * mounted (a control's mount effect in a form page that mounts after the Form)
+	 * @returns true while the form is dirty or holds staged changes
+	 */
+	isUnsaved: () => boolean;
 }
 
 /**
@@ -147,7 +155,10 @@ const useFormPageGuard = (params: UseFormPageGuardParams): FormPageGuard => {
 	// the rendered dirty state is one render behind the form engine, which breaks "submit,
 	// then navigate away": the record is saved, but the guards below still see a dirty form.
 	// The dirty event fires as soon as the form engine sees the change, so this ref is
-	// current even while a re-render is still pending.
+	// current even while a re-render is still pending. The Form subscribes when it mounts,
+	// before it renders its pages (its loader comes first), so the ref also has what a page's
+	// controls announce in their mount effects, which run before the page's own effects could
+	// subscribe (FormPageGuard.isUnsaved).
 	const dirtyRef = useRef(unsaved);
 	useEffect(() => {
 		const handleDirtyChange = (event: FormDirtyEvent) => {
@@ -278,7 +289,12 @@ const useFormPageGuard = (params: UseFormPageGuardParams): FormPageGuard => {
 		[navigationGuard],
 	);
 
-	return useMemo((): FormPageGuard => ({ enable, leave }), [enable, leave]);
+	const isUnsaved = useCallback(() => dirtyRef.current, []);
+
+	return useMemo(
+		(): FormPageGuard => ({ enable, leave, isUnsaved }),
+		[enable, leave, isUnsaved],
+	);
 };
 
 export default useFormPageGuard;

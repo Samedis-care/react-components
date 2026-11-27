@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/vitest";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { describe, it, expect, vi } from "vitest";
 import {
 	act,
@@ -428,6 +428,97 @@ describe("Form page leave guard", () => {
 		await navigate("/rec/1/more");
 		expect(history.location.pathname).toBe("/rec/1/more");
 		expect(history.index, "one history entry was added").toBe(1);
+		expect(leavePrompts()).toHaveLength(0);
+	});
+
+	it("[ISSUE-3503-ITEM-4] a form made dirty by a child's mount effect is guarded", async () => {
+		const MarkDirtyOnMount = () => {
+			const { setCustomFieldDirty } = useFormContext<ModelUnknown>();
+			useEffect(() => {
+				setCustomFieldDirty("pending-upload", true);
+			}, [setCustomFieldDirty]);
+			return null;
+		};
+		const Page = makePage({}, <MarkDirtyOnMount />);
+		const { history } = mountPage(Page);
+		await screen.findByDisplayValue("Alice", undefined, LOAD);
+		await waitFor(() => expect(saveButton()).toBeEnabled());
+		expect(unloadIsBlocked(), "closing the tab is not guarded").toBe(true);
+		await navigate("/other");
+		expect(history.location.pathname).toBe("/page");
+		expect(leavePrompts()).toHaveLength(1);
+	});
+
+	it("[ISSUE-3503-ITEM-4] the footer's Back on a form made dirty by a child's mount effect asks first", async () => {
+		const MarkDirtyOnMount = () => {
+			const { setCustomFieldDirty } = useFormContext<ModelUnknown>();
+			useEffect(() => {
+				setCustomFieldDirty("pending-upload", true);
+			}, [setCustomFieldDirty]);
+			return null;
+		};
+		const Page = makePage({}, <MarkDirtyOnMount />);
+		const { goBack } = mountPage(Page);
+		await screen.findByDisplayValue("Alice", undefined, LOAD);
+		await waitFor(() =>
+			expect(saveButton()).not.toHaveAttribute("aria-disabled"),
+		);
+		fireEvent.click(backButton());
+		fireEvent.click(
+			within(await findLeavePrompt()).getByRole("button", { name: "No" }),
+		);
+		await waitFor(() => expect(leavePrompts()).toHaveLength(0));
+		expect(goBack).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3503-ITEM-4] a form page that mounts on a dirty form which a child's mount effect makes clean is left without asking", async () => {
+		const PendingUpload = () => {
+			const { setCustomFieldDirty } = useFormContext<ModelUnknown>();
+			// a control which drops its pending changes when it mounts again
+			useEffect(() => {
+				setCustomFieldDirty("pending-upload", false);
+			}, [setCustomFieldDirty]);
+			return (
+				<button
+					type={"button"}
+					onClick={() => setCustomFieldDirty("pending-upload", true)}
+				>
+					Add pending upload
+				</button>
+			);
+		};
+		const InnerPage = makePage({}, <PendingUpload />);
+		const Page = (props: PageProps<PeopleModel, TestCustomProps>) => {
+			const [shown, setShown] = useState(true);
+			return (
+				<>
+					<button type={"button"} onClick={() => setShown((prev) => !prev)}>
+						Toggle page
+					</button>
+					{shown && <InnerPage {...props} />}
+				</>
+			);
+		};
+		const { goBack, history } = mountPage(Page);
+		await screen.findByDisplayValue("Alice", undefined, LOAD);
+		fireEvent.click(screen.getByRole("button", { name: "Add pending upload" }));
+		await waitFor(() =>
+			expect(saveButton()).not.toHaveAttribute("aria-disabled"),
+		);
+		fireEvent.click(screen.getByRole("button", { name: "Toggle page" }));
+		await waitFor(() => expect(screen.queryByDisplayValue("Alice")).toBeNull());
+		// the page mounts on the dirty form, and the control's mount effect makes it clean
+		fireEvent.click(screen.getByRole("button", { name: "Toggle page" }));
+		await screen.findByDisplayValue("Alice");
+		await waitFor(() =>
+			expect(saveButton()).toHaveAttribute("aria-disabled", "true"),
+		);
+		expect(unloadIsBlocked(), "closing the tab is guarded").toBe(false);
+		fireEvent.click(backButton());
+		await waitFor(() => expect(goBack).toHaveBeenCalledTimes(1));
+		expect(leavePrompts()).toHaveLength(0);
+		await navigate("/other");
+		expect(history.location.pathname).toBe("/other");
 		expect(leavePrompts()).toHaveLength(0);
 	});
 
