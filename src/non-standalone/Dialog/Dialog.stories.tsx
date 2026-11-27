@@ -449,6 +449,81 @@ export const Issue3497Item10FormDialogBusyKeepsFocus: StoryObj<FormDialogBusyArg
 		},
 	};
 
+interface FormDialogFailedSaveArgs {
+	onSave: () => Promise<void>;
+}
+
+export const Issue3497Item3FailedSaveShowsError: StoryObj<FormDialogFailedSaveArgs> =
+	{
+		args: {
+			onSave: fn(() =>
+				Promise.reject(
+					new Error("The server could not save the name. Try again later."),
+				),
+			),
+		},
+		parameters: {
+			a11y: { test: "error" },
+			docs: {
+				description: {
+					story:
+						"ISSUE-3497-ITEM-3: Save's handler rejects. The error shows in an error dialog over the form dialog, with focus on its OK button. OK closes it; the form dialog is still open with the name as typed, its buttons are enabled again, and focus is back on Save. ErrorDialog, InfoDialog and ConfirmDialog handle a failed handler the same way.",
+				},
+			},
+		},
+		render: (args) => (
+			<Opener
+				label="Open form dialog"
+				dialog={
+					<FormDialog
+						title="Rename device"
+						message="Enter the new name of the device."
+						inputs={
+							<TextField
+								label="Name"
+								defaultValue="Infusion pump 3"
+								fullWidth
+								sx={{ mt: 1 }}
+							/>
+						}
+						buttons={[
+							{ text: "Save", onClick: args.onSave },
+							{ text: "Cancel", color: "secondary" },
+						]}
+					/>
+				}
+			/>
+		),
+		play: async ({ args, canvas }) => {
+			await userEvent.click(
+				canvas.getByRole("button", { name: "Open form dialog" }),
+			);
+			const dialog = await page().findByRole("dialog", {
+				name: "Rename device",
+			});
+			const name = within(dialog).getByRole("textbox", { name: "Name" });
+			await userEvent.clear(name);
+			await userEvent.type(name, "Infusion pump 4");
+			const save = within(dialog).getByRole("button", { name: "Save" });
+			await userEvent.click(save);
+			const error = await page().findByRole("dialog", {
+				name: "An error occurred",
+			});
+			await expect(error).toHaveAccessibleDescription(
+				"The server could not save the name. Try again later.",
+			);
+			const ok = within(error).getByRole("button", { name: "OK" });
+			await waitFor(() => expect(ok).toHaveFocus());
+			await userEvent.keyboard("{Enter}");
+			await waitFor(() => expect(error).not.toBeInTheDocument());
+			await waitFor(() => expect(save).toHaveFocus());
+			await expect(dialog).toBeInTheDocument();
+			await expect(name).toHaveValue("Infusion pump 4");
+			await expect(save).not.toHaveAttribute("aria-disabled");
+			await expect(args.onSave).toHaveBeenCalledTimes(1);
+		},
+	};
+
 // ─── DialogTitle ─────────────────────────────────────────────────────────────
 
 interface DialogTitleArgs {

@@ -488,8 +488,8 @@ describe("[ISSUE-3497-ITEM-27] a button's onClick gets the dialog's close", () =
 	});
 
 	it("[ISSUE-3497-ITEM-27] a handler that fails after close() still has onClose called, so a helper's promise settles", async () => {
-		// the handler's failure stays an unhandled rejection, as before: collect it here
-		// instead of letting it fail the run
+		// collect unhandled rejections instead of letting them fail the run: the handler's
+		// failure is not one, it shows in an error dialog
 		const nodeProcess = (
 			globalThis as unknown as {
 				process: {
@@ -532,9 +532,10 @@ describe("[ISSUE-3497-ITEM-27] a button's onClick gets the dialog's close", () =
 			await flush();
 			// unhandled rejections are reported on a later macrotask
 			await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-			expect(openTitles()).toEqual([]);
+			expect(openTitles()).toEqual(["An error occurred"]);
+			expect(screen.getByRole("dialog")).toHaveTextContent("printer offline");
 			expect(seen).toEqual([["resolved", undefined]]);
-			expect(rejections).toEqual([failure]);
+			expect(rejections).toEqual([]);
 		} finally {
 			nodeProcess.removeListener("unhandledRejection", collect);
 			saved.forEach((listener) =>

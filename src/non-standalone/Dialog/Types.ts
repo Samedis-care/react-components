@@ -10,10 +10,15 @@ export interface IDialogButtonConfig {
 	text: React.ReactNode;
 	/**
 	 * Called when the button is clicked. A returned promise is awaited. Unless `dontClose` is
-	 * set, the dialog closes and calls its `onClose` afterwards (FormDialog closes before the
-	 * handler runs, and calls `onClose` afterwards). While the promise is pending, the dialog
-	 * ignores clicks on its buttons, Escape and the backdrop, so the handler runs once per
-	 * activation, and an open dialog shows the button as busy.
+	 * set, the dialog closes and calls its `onClose` afterwards. While the promise is pending,
+	 * the dialog ignores clicks on its buttons, Escape and the backdrop, so the handler runs
+	 * once per activation, and an open dialog shows the button as busy.
+	 *
+	 * If it throws or its promise rejects, the dialog stays open with its buttons enabled
+	 * again, so the user can try again or cancel, and `onClose` is not called (unless the
+	 * handler closed the dialog with `close`). The error is reported through captureError
+	 * (see configureErrorReporting) and shown in an error dialog over the dialog, as
+	 * showErrorDialog shows it. To show something else, catch the error in the handler.
 	 * @param close Closes the dialog this button belongs to, at once, and only that one, also
 	 *              while dialogs pushed after it are open, e.g. before work the dialog should
 	 *              not wait for. It does not call the dialog's `onClose`: the dialog calls it
@@ -98,7 +103,9 @@ export interface IDialogConfigConfirm {
 	 */
 	textButtonYes: React.ReactNode;
 	/**
-	 * The callback for the yes button (the dialog closes automatically)
+	 * The callback for the yes button (the dialog closes automatically). If it throws or
+	 * returns a promise that rejects, the dialog stays open and shows the error, as a
+	 * button's `onClick` (IDialogButtonConfig) does.
 	 */
 	handlerButtonYes: () => void;
 	/**
@@ -106,7 +113,9 @@ export interface IDialogConfigConfirm {
 	 */
 	textButtonNo: React.ReactNode;
 	/**
-	 * The callback for the no button (the dialog closes automatically)
+	 * The callback for the no button (the dialog closes automatically). If it throws or
+	 * returns a promise that rejects, the dialog stays open and shows the error, as a
+	 * button's `onClick` (IDialogButtonConfig) does.
 	 */
 	handlerButtonNo: () => void;
 }

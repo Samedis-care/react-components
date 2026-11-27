@@ -13,6 +13,7 @@ import useRefState from "../../utils/useRefState";
 import { dialogButtonClose } from "./dialogButtonClose";
 import FocusRingButton from "../../utils/internal/FocusRingButton";
 import ForcedColorsEdgeDialog from "../../utils/internal/ForcedColorsEdgeDialog";
+import { useReportButtonError } from "./useReportButtonError";
 
 // shown before the label of the button whose handler runs; the button's aria-disabled and
 // the dialog's aria-busy tell assistive technology
@@ -36,6 +37,7 @@ const FormDialogRaw = (props: IDialogConfigForm) => {
 	const busy = busyButton !== null;
 	// the message is the dialog's description
 	const messageId = useId();
+	const reportButtonError = useReportButtonError("FormDialog.onClick");
 
 	// Escape and the backdrop, ignored while a button's handler runs
 	const removeDialog = React.useCallback(() => {
@@ -74,7 +76,6 @@ const FormDialogRaw = (props: IDialogConfigForm) => {
 								closeThisDialog,
 								onClose,
 							);
-							if (!btn.dontClose) close();
 							try {
 								if (btn.onClick) {
 									setBusyButton(index);
@@ -84,10 +85,17 @@ const FormDialogRaw = (props: IDialogConfigForm) => {
 										setBusyButton(null);
 									}
 								}
+							} catch (error) {
+								// the dialog stays open with its inputs, unless the handler closed it, so
+								// the user can try again; the error shows in an error dialog over it
+								reportButtonError(error);
+								return;
 							} finally {
-								// report the close once the handler has ended, also when it failed
+								// the handler closed the dialog: report it closed, also when the handler
+								// failed, as nothing can close the dialog anymore
 								end();
 							}
+							if (!btn.dontClose) close();
 						}}
 						color={btn.color || "primary"}
 						autoFocus={btn.autoFocus}
@@ -109,17 +117,21 @@ const FormDialogRaw = (props: IDialogConfigForm) => {
  * Message dialog with `inputs` under the message and a row of buttons. Not the model form
  * dialog, which is `FullFormDialog`. Show it with `pushDialog(<FormDialog … />)`.
  *
- * A button closes the dialog (unless `dontClose`), awaits its `onClick`, then calls `onClose`
- * (unless `dontClose`), also when the handler failed. `onClick` gets a `close` that closes the
- * dialog at once; with `dontClose`, `onClose` is then called once the handler has ended.
- * Escape and a backdrop click close it and call `onClose`.
+ * A button runs its `onClick` while the dialog is open, then, unless `dontClose`, closes the
+ * dialog and calls `onClose`, as ErrorDialog does. `onClick` gets a `close` that closes the
+ * dialog at once; `onClose` is then called once the handler has ended, also with
+ * `dontClose`. Escape and a backdrop click close it and call `onClose`.
  *
  * While a returned promise is awaited, the dialog ignores clicks on its buttons, Escape and
- * the backdrop, so a handler runs once per activation. If the dialog is still shown then (a
- * `dontClose` button, or a dialog rendered without pushDialog), it is `aria-busy`, its
- * buttons are `aria-disabled` with MUI's disabled look, and the pressed one shows a progress
- * spinner before its label. The buttons stay focusable, so keyboard focus stays on the
- * pressed button.
+ * the backdrop, so a handler runs once per activation. If the dialog is still shown then
+ * (the handler did not call `close`), it is `aria-busy`, its buttons are `aria-disabled` with
+ * MUI's disabled look, and the pressed one shows a progress spinner before its label. The
+ * buttons stay focusable, so keyboard focus stays on the pressed button.
+ *
+ * If `onClick` throws or its promise rejects, the dialog stays open with its inputs and its
+ * buttons enabled again, and `onClose` is not called (unless the handler called `close`);
+ * the error is reported (captureError, source `"FormDialog.onClick"`) and shown in an error
+ * dialog over the dialog, as showErrorDialog shows it.
  *
  * It closes the dialog it was pushed in, and only that one, also when dialogs were pushed
  * after it. Rendered without pushDialog, it is always open: it closes through `onClose`,

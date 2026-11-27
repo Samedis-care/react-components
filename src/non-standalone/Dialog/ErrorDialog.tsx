@@ -13,6 +13,7 @@ import useRefState from "../../utils/useRefState";
 import { dialogButtonClose } from "./dialogButtonClose";
 import FocusRingButton from "../../utils/internal/FocusRingButton";
 import ForcedColorsEdgeDialog from "../../utils/internal/ForcedColorsEdgeDialog";
+import { useReportButtonError } from "./useReportButtonError";
 
 // shown before the label of the button whose handler runs; the button's aria-disabled and
 // the dialog's aria-busy tell assistive technology
@@ -36,6 +37,7 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 	const busy = busyButton !== null;
 	// the message is the dialog's description
 	const messageId = useId();
+	const reportButtonError = useReportButtonError("ErrorDialog.onClick");
 
 	const removeDialog = React.useCallback(() => {
 		closeThisDialog?.();
@@ -84,6 +86,11 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 										setBusyButton(null);
 									}
 								}
+							} catch (error) {
+								// the dialog stays open, unless the handler closed it, so the user can try
+								// again; the error shows in an error dialog over it
+								reportButtonError(error);
+								return;
 							} finally {
 								// the handler closed the dialog: report it closed, also when the handler
 								// failed, as nothing can close the dialog anymore
@@ -119,6 +126,10 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
  * keyboard focus stays on the pressed button. `onClick` gets a `close` that closes the dialog
  * at once; `onClose` is then called once the handler has ended, also with `dontClose`. Escape
  * and a backdrop click close it and call `onClose`.
+ * If `onClick` throws or its promise rejects, the dialog stays open with its buttons enabled
+ * again and `onClose` is not called (unless the handler called `close`); the error is
+ * reported (captureError, source `"ErrorDialog.onClick"`) and shown in an error dialog over
+ * the dialog, as showErrorDialog shows it.
  * It closes the dialog it was pushed in, and only that one, also when dialogs were pushed
  * after it. Rendered without pushDialog, it is always open: it closes through `onClose`,
  * which has to stop rendering it.

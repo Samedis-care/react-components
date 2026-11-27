@@ -42,6 +42,10 @@ import type { IDialogConfigInput } from "../../src/non-standalone/Dialog/Types";
 import FullFormDialog from "../../src/backend-components/Form/FormDialog";
 import { runInNewContext } from "node:vm";
 import ValidationError from "../../src/backend-components/Form/ValidationError";
+import {
+	configureErrorReporting,
+	getErrorReportingConfig,
+} from "../../src/framework/ErrorReporting";
 
 let history: MemoryHistory;
 
@@ -294,6 +298,232 @@ describe("ErrorDialog / InfoDialog buttons", () => {
 			}).toEqual({ path: "/target", alerts: 0, open: 0 });
 		},
 	);
+});
+
+/** The part of Node's process this file uses (the test config has no Node types) */
+interface RejectionEvents {
+	listeners(event: "unhandledRejection"): ((reason: unknown) => void)[];
+	removeAllListeners(event: "unhandledRejection"): void;
+	on(event: "unhandledRejection", listener: (reason: unknown) => void): void;
+	off(event: "unhandledRejection", listener: (reason: unknown) => void): void;
+}
+const nodeProcess = (globalThis as unknown as { process: RejectionEvents })
+	.process;
+
+describe("rejected button handlers", () => {
+	let rejections: unknown[] = [];
+	let savedListeners: ((reason: unknown) => void)[] = [];
+	const collectRejection = (reason: unknown) => {
+		rejections.push(reason);
+	};
+	beforeEach(() => {
+		// the unhandled rejections are the bug: collect them instead of letting
+		// Vitest fail the whole run with them
+		rejections = [];
+		savedListeners = nodeProcess.listeners("unhandledRejection");
+		nodeProcess.removeAllListeners("unhandledRejection");
+		nodeProcess.on("unhandledRejection", collectRejection);
+	});
+	afterEach(async () => {
+		await new Promise((resolve) => setTimeout(resolve, 0));
+		nodeProcess.off("unhandledRejection", collectRejection);
+		savedListeners.forEach((listener) =>
+			nodeProcess.on("unhandledRejection", listener),
+		);
+	});
+	/** Node reports unhandled rejections once the microtask queue is empty */
+	const settleRejections = () =>
+		act(() => new Promise((resolve) => setTimeout(resolve, 20)));
+
+	it("[ISSUE-3497-ITEM-3] a rejecting InfoDialog button handler keeps the dialog open and is not an unhandled rejection", async () => {
+		mount();
+		const onClose = vi.fn();
+		push(
+			<InfoDialog
+				title="T"
+				message="M"
+				onClose={onClose}
+				buttons={[
+					{
+						text: "Save",
+						onClick: () => Promise.reject(new Error("save failed")),
+					},
+				]}
+			/>,
+		);
+		fireEvent.click(btn("Save"));
+		await flush();
+		await settleRejections();
+		// the error shows in an error dialog over the dialog
+		expect(openTitles()).toEqual(["T", "An error occurred"]);
+		expect(screen.getByRole("dialog")).toHaveTextContent("save failed");
+		fireEvent.click(btn("OK"));
+		await flush();
+		expect({
+			open: dialogCount(),
+			enabled: !btn("Save").hasAttribute("aria-disabled"),
+			onClose: onClose.mock.calls.length,
+			unhandled: rejections.map(String),
+		}).toEqual({ open: 1, enabled: true, onClose: 0, unhandled: [] });
+	});
+
+	it("[ISSUE-3497-ITEM-3] a rejecting FormDialog button handler is not an unhandled rejection", async () => {
+		mount();
+		push(
+			<FormDialog
+				title="T"
+				message="M"
+				inputs={null}
+				onClose={vi.fn()}
+				buttons={[
+					{
+						text: "Save",
+						onClick: () => Promise.reject(new Error("save failed")),
+					},
+				]}
+			/>,
+		);
+		fireEvent.click(btn("Save"));
+		await flush();
+		await settleRejections();
+		expect(rejections.map(String)).toEqual([]);
+	});
+
+	it("[ISSUE-3497-ITEM-3] a rejecting FormDialog button handler keeps the dialog open with its inputs and shows the error over it", async () => {
+		mount();
+		const onClose = vi.fn();
+		push(
+			<FormDialog
+				title="T"
+				message="M"
+				inputs={<input aria-label="Name" defaultValue="Pump" />}
+				onClose={onClose}
+				buttons={[
+					{
+						text: "Save",
+						onClick: () => Promise.reject(new Error("save failed")),
+					},
+				]}
+			/>,
+		);
+		fireEvent.change(screen.getByRole("textbox", { name: "Name" }), {
+			target: { value: "Pump 2" },
+		});
+		fireEvent.click(btn("Save"));
+		await flush();
+		await settleRejections();
+		expect(openTitles()).toEqual(["T", "An error occurred"]);
+		expect(screen.getByRole("dialog")).toHaveTextContent("save failed");
+		fireEvent.click(btn("OK"));
+		await flush();
+		expect({
+			open: openTitles(),
+			value: screen.getByRole<HTMLInputElement>("textbox", { name: "Name" })
+				.value,
+			enabled: !btn("Save").hasAttribute("aria-disabled"),
+			onClose: onClose.mock.calls.length,
+		}).toEqual({
+			open: ["T"],
+			value: "Pump 2",
+			enabled: true,
+			onClose: 0,
+		});
+	});
+
+	it("[ISSUE-3497-ITEM-3] a ConfirmDialog handler that throws keeps the dialog open and shows the error over it", async () => {
+		mount();
+		push(
+			<ConfirmDialog
+				{...confirmProps}
+				handlerButtonYes={() => {
+					throw new Error("no permission");
+				}}
+				handlerButtonNo={() => {}}
+			/>,
+		);
+		fireEvent.click(btn("Yes"));
+		await flush();
+		await settleRejections();
+		expect({
+			open: openTitles(),
+			unhandled: rejections.map(String),
+		}).toEqual({
+			open: ["Delete records?", "An error occurred"],
+			unhandled: [],
+		});
+		expect(screen.getByRole("dialog")).toHaveTextContent("no permission");
+	});
+
+	it.each([
+		[
+			"ErrorDialog",
+			"ErrorDialog.onClick",
+			(onClick: () => Promise<void>) => (
+				<ErrorDialog
+					title="T"
+					message="M"
+					buttons={[{ text: "Save", onClick }]}
+				/>
+			),
+		],
+		[
+			"FormDialog",
+			"FormDialog.onClick",
+			(onClick: () => Promise<void>) => (
+				<FormDialog
+					title="T"
+					message="M"
+					inputs={null}
+					buttons={[{ text: "Save", onClick }]}
+				/>
+			),
+		],
+	])(
+		"[ISSUE-3497-ITEM-3] %s reports a rejected handler's error to the error reporter",
+		async (_label, source, make) => {
+			const configBefore = { ...getErrorReportingConfig() };
+			const report = vi.fn();
+			configureErrorReporting({ report, shouldReport: () => true });
+			try {
+				mount();
+				const failure = new Error("save failed");
+				push(make(() => Promise.reject(failure)));
+				fireEvent.click(btn("Save"));
+				await flush();
+				expect(report.mock.calls).toEqual([
+					[failure, expect.objectContaining({ source })],
+				]);
+			} finally {
+				configureErrorReporting(configBefore);
+			}
+		},
+	);
+
+	it("[ISSUE-3497-ITEM-3] rendered outside a DialogContext, a rejected handler's error is logged to the console", async () => {
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => {});
+		const failure = new Error("save failed");
+		render(
+			<ErrorDialog
+				title="T"
+				message="M"
+				onClose={vi.fn()}
+				buttons={[{ text: "Save", onClick: () => Promise.reject(failure) }]}
+			/>,
+		);
+		fireEvent.click(btn("Save"));
+		await flush();
+		await settleRejections();
+		expect(consoleError).toHaveBeenCalledWith(
+			"[Components-Care] [ErrorDialog.onClick]",
+			failure,
+		);
+		expect({
+			open: openTitles(),
+			unhandled: rejections.map(String),
+		}).toEqual({ open: ["T"], unhandled: [] });
+	});
 });
 
 describe("InputDialog and showInputDialog", () => {
@@ -825,6 +1055,38 @@ describe("FormDialog", () => {
 			open: dialogCount(),
 			onClose: onClose.mock.calls.length,
 		}).toEqual({ calls: 1, open: 1, onClose: 0 });
+	});
+
+	it("[ISSUE-3497-ITEM-3] keeps the dialog open and busy while a button's handler runs, then closes it and calls onClose", async () => {
+		mount();
+		const onClose = vi.fn();
+		let finish: () => void = () => {};
+		const onClick = () =>
+			new Promise<void>((resolve) => {
+				finish = resolve;
+			});
+		push(
+			<FormDialog
+				title="T"
+				message="M"
+				inputs={null}
+				onClose={onClose}
+				buttons={[{ text: "Save", onClick }]}
+			/>,
+		);
+		fireEvent.click(btn("Save"));
+		await flush();
+		expect({
+			open: dialogCount(),
+			busy: screen.getByRole("dialog").getAttribute("aria-busy"),
+			onClose: onClose.mock.calls.length,
+		}).toEqual({ open: 1, busy: "true", onClose: 0 });
+		act(() => finish());
+		await flush();
+		expect({
+			open: dialogCount(),
+			onClose: onClose.mock.calls.length,
+		}).toEqual({ open: 0, onClose: 1 });
 	});
 
 	/** a handler whose promise the test settles with `finish` */
