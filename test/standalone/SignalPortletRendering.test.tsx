@@ -255,6 +255,23 @@ describe("SignalPortlet: footer", () => {
 			`Last refresh: ${timestampToAge(new Date(fetchedAt))}`,
 		);
 	});
+
+	it("[ISSUE-3469-ITEM-7] calls onRefresh without arguments", () => {
+		const onRefresh = vi.fn();
+		renderP({ title: "T", items: [], onRefresh });
+		fireEvent.click(refreshButton() as HTMLElement);
+		expect(onRefresh).toHaveBeenCalledWith();
+	});
+
+	it("[ISSUE-3469-ITEM-7] calls an onRefresh replaced after mount, and only that one, without arguments", () => {
+		const first = vi.fn();
+		const second = vi.fn();
+		const { rerenderP } = renderP({ title: "T", items: [], onRefresh: first });
+		rerenderP({ title: "T", items: [], onRefresh: second });
+		fireEvent.click(refreshButton() as HTMLElement);
+		expect(first).not.toHaveBeenCalled();
+		expect(second.mock.calls).toEqual([[]]);
+	});
 });
 
 describe("SignalPortlet: theme and classes", () => {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import SignalPortletItem, { SignalPortletItemProps } from "./SignalPortletItem";
 import {
 	buttonBaseClasses,
@@ -43,7 +43,10 @@ export interface SignalPortletProps {
 	 */
 	updatedAt?: number | Date | null | undefined;
 	/**
-	 * Refresh handler
+	 * Shows a refresh icon button (named "Refresh") at the end of the footer,
+	 * and is called without arguments on every click or keyboard activation of
+	 * it. So a function whose parameters are optional, such as react-query's
+	 * `refetch`, can be passed as it is. Omit it to hide the button.
 	 */
 	onRefresh?: () => void;
 	/**
@@ -133,6 +136,9 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 	const hasUpdatedAt = Number.isFinite(updatedTime) && updatedTime !== 0;
 	// re-renders the card while the "Last refresh" age below can change
 	useAgeTick(hasUpdatedAt ? updatedTime : null);
+	const { onRefresh } = props;
+	// onRefresh takes no arguments: it doesn't get the click event
+	const handleRefresh = useCallback(() => onRefresh?.(), [onRefresh]);
 
 	return (
 		<SignalPortletRoot
@@ -204,7 +210,7 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 							{props.onRefresh && (
 								<Grid>
 									<SignalPortletRefreshIconButton
-										onClick={props.onRefresh}
+										onClick={handleRefresh}
 										disableFocusRipple
 										size={"small"}
 										color={"primary"}
