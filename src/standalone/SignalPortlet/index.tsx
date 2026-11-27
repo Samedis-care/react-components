@@ -50,7 +50,8 @@ export interface SignalPortletProps {
 	 */
 	onRefresh?: () => void;
 	/**
-	 * Custom CSS classes
+	 * Class names per slot, see {@link SignalPortletClassKey}. Each one is
+	 * added to its slot's element, next to the slot's theme `styleOverrides`.
 	 */
 	classes?: Partial<Record<SignalPortletClassKey, string>>;
 	/**
@@ -112,6 +113,24 @@ const SignalPortletLastUpdatedAt = styled("span", {
 	slot: "lastUpdatedAt",
 })({});
 
+/**
+ * Slots of SignalPortlet, for its `classes` and for the theme's
+ * `components.CcSignalPortlet.styleOverrides`:
+ * - `root`: the outer `div`, which also gets `className`
+ * - `paper`: the MUI Paper in it
+ * - `innerContainer`: the column Grid container in the Paper, with the title,
+ *   divider and list at the top and the footer at the bottom
+ * - `titleWrapper`: the Grid item around the title
+ * - `title`: the title Typography (`<h5>`)
+ * - `divider`: the Grid item around the MUI Divider
+ * - `list`: the MUI List (`<ul>`)
+ * - `item`: the `<li>` of every row, the element of CcSignalPortletItem's
+ *   `root` slot
+ * - `lastUpdatedAt`: the `span` with the "Last refresh" text, shown while
+ *   `updatedAt` holds a time
+ * - `refreshIconButton`: the Refresh IconButton, shown with `onRefresh`
+ * - `refreshIcon`: the refresh icon (`svg`) in that button
+ */
 export type SignalPortletClassKey =
 	| "root"
 	| "paper"
@@ -199,7 +218,9 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 							{hasUpdatedAt && (
 								<Grid>
 									<Tooltip title={new Date(updatedTime).toLocaleString(locale)}>
-										<SignalPortletLastUpdatedAt>
+										<SignalPortletLastUpdatedAt
+											className={props.classes?.lastUpdatedAt}
+										>
 											{t("standalone.signal-portlet.last-updated", {
 												AGE: timestampToAge(new Date(updatedTime)),
 											})}
@@ -211,12 +232,15 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 								<Grid>
 									<SignalPortletRefreshIconButton
 										onClick={handleRefresh}
+										className={props.classes?.refreshIconButton}
 										disableFocusRipple
 										size={"small"}
 										color={"primary"}
 										aria-label={t("standalone.signal-portlet.refresh")}
 									>
-										<SignalPortletRefreshIcon />
+										<SignalPortletRefreshIcon
+											className={props.classes?.refreshIcon}
+										/>
 									</SignalPortletRefreshIconButton>
 								</Grid>
 							)}

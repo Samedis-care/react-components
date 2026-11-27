@@ -319,6 +319,80 @@ describe("SignalPortlet: theme and classes", () => {
 		expect(within(plain as HTMLElement).queryByRole("link")).toBeNull();
 	});
 
+	it("[ISSUE-3469-ITEM-4] applies classes.lastUpdatedAt, refreshIconButton and refreshIcon, and an item's classes.listText", () => {
+		renderP({
+			title: "T",
+			items: [{ count: 1, text: "row", classes: { listText: "i-listText" } }],
+			updatedAt: Date.now(),
+			onRefresh: vi.fn(),
+			classes: {
+				lastUpdatedAt: "c-last",
+				refreshIconButton: "c-btn",
+				refreshIcon: "c-icon",
+			},
+		});
+		const btn = refreshButton() as HTMLElement;
+		expect({
+			lastUpdatedAt: ageLabel()?.classList.contains("c-last"),
+			refreshIconButton: btn.classList.contains("c-btn"),
+			refreshIcon: btn.querySelector("svg")?.classList.contains("c-icon"),
+			listText: screen
+				.getByText("row")
+				.closest(".MuiListItemText-root")
+				?.classList.contains("i-listText"),
+		}).toEqual({
+			lastUpdatedAt: true,
+			refreshIconButton: true,
+			refreshIcon: true,
+			listText: true,
+		});
+	});
+
+	it("[ISSUE-3469-ITEM-4] keeps the theme's styleOverrides of those slots next to their classes", () => {
+		const t = createTheme({
+			components: {
+				CcSignalPortlet: {
+					styleOverrides: {
+						lastUpdatedAt: { columnGap: "1px" },
+						refreshIconButton: { columnGap: "2px" },
+						refreshIcon: { columnGap: "3px" },
+					},
+				},
+				CcSignalPortletItem: {
+					styleOverrides: { listText: { columnGap: "4px" } },
+				},
+			},
+		});
+		renderP(
+			{
+				title: "T",
+				items: [{ count: 1, text: "row", classes: { listText: "i-listText" } }],
+				updatedAt: Date.now(),
+				onRefresh: vi.fn(),
+				classes: {
+					lastUpdatedAt: "c-last",
+					refreshIconButton: "c-btn",
+					refreshIcon: "c-icon",
+				},
+			},
+			{ theme: t },
+		);
+		const label = ageLabel() as HTMLElement;
+		const btn = refreshButton() as HTMLElement;
+		const icon = btn.querySelector("svg") as SVGElement;
+		const text = screen
+			.getByText("row")
+			.closest(".MuiListItemText-root") as HTMLElement;
+		expect(label).toHaveClass("c-last");
+		expect(getComputedStyle(label).columnGap).toBe("1px");
+		expect(btn).toHaveClass("c-btn");
+		expect(getComputedStyle(btn).columnGap).toBe("2px");
+		expect(icon).toHaveClass("c-icon");
+		expect(getComputedStyle(icon).columnGap).toBe("3px");
+		expect(text).toHaveClass("i-listText");
+		expect(getComputedStyle(text).columnGap).toBe("4px");
+	});
+
 	it("[ISSUE-3469-ITEM-5] keeps classes.item on a row that has its own className", () => {
 		renderP({
 			title: "T",

@@ -60,7 +60,12 @@ export interface SignalPortletItemProps {
 	 */
 	className?: string;
 	/**
-	 * Custom CSS styles
+	 * Class names per slot, see {@link SignalPortletItemClassKey}. Each one is
+	 * added to its slot's element while the row renders it: `root`,
+	 * `listAvatar` and `listText` always, one of `itemColorLoading`,
+	 * `itemColorActive` and `itemColorInactive` for the current count,
+	 * `countCapped` and `countFull` for a count above 999, and `rootBtn` in a
+	 * row with `link`.
 	 */
 	classes?: Partial<Record<SignalPortletItemClassKey, string>>;
 }
@@ -204,7 +209,12 @@ const SignalPortletItem = (inProps: SignalPortletItemProps) => {
 					)}
 				</AvatarComponent>
 			</ListAvatar>
-			<ListText slotProps={{ primary: textTypographyProps }}>{text}</ListText>
+			<ListText
+				className={classes?.listText}
+				slotProps={{ primary: textTypographyProps }}
+			>
+				{text}
+			</ListText>
 		</>
 	);
 	// every row is a list item; a linked row puts its link inside, as in
