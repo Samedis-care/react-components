@@ -17,7 +17,7 @@ import { Framework } from "../../../src/framework";
 import BackendSingleSelect, {
 	BackendSingleSelectProps,
 } from "../../../src/backend-components/Selector/BackendSingleSelect";
-import type { ModelUnknown } from "../../../src/backend-integration";
+import { Model, type ModelUnknown } from "../../../src/backend-integration";
 import type { BaseSelectorData } from "../../../src/standalone";
 import { PartialExcept } from "../../../src/utils/distributiveOmit";
 import { setupFormTests } from "../Form/formFixture";
@@ -418,6 +418,28 @@ describe("BackendSingleSelect bugs", () => {
 		await waitFor(() => expect(combobox().value).toBe("Bob"));
 		expect(screen.queryByTestId("inactive-icon")).toBeNull();
 	});
+
+	it("[ISSUE-3510-ITEM-9] a new modelToSelectorData (e.g. after a language switch) is applied to the shown selection", async () => {
+		const { model } = peopleModel();
+		const upper = (record: Row): BaseSelectorData => ({
+			value: record.id as string,
+			label: (record.name as string).toUpperCase(),
+		});
+		const { rerender } = render(
+			ui({ model, selected: "2", disableRequestBatching: true }),
+		);
+		await waitFor(() => expect(combobox().value).toBe("Bob"));
+		rerender(
+			ui({
+				model,
+				selected: "2",
+				modelToSelectorData: upper,
+				disableRequestBatching: true,
+			}),
+		);
+		await flush();
+		expect(combobox().value).toBe("BOB");
+	});
 });
 
 describe("BackendSingleSelect bugs (debounced search)", () => {
@@ -577,5 +599,185 @@ describe("BackendSingleSelect bugs (switch filter)", () => {
 		);
 		await flush();
 		expect(screen.queryByRole("switch")).toBeNull();
+	});
+});
+
+describe("BackendSingleSelect: the shown entry follows modelToSelectorData, modelFetch and refreshToken", () => {
+	/** conv, but with the name in capitals: a modelToSelectorData for another language */
+	const upper = (record: Row): BaseSelectorData => ({
+		value: record.id as string,
+		label: (record.name as string).toUpperCase(),
+	});
+
+	it("[ISSUE-3510-ITEM-9] a new modelToSelectorData converts a picked entry again, without a request", async () => {
+		const { model, connector } = peopleModel();
+		const { rerender } = render(
+			<Framework>
+				<Parent model={model} disableRequestBatching />
+			</Framework>,
+		);
+		await openList();
+		await pickOption("Bob");
+		expect(combobox().value).toBe("Bob");
+		rerender(
+			<Framework>
+				<Parent
+					model={model}
+					modelToSelectorData={upper}
+					disableRequestBatching
+				/>
+			</Framework>,
+		);
+		await flush();
+		expect(combobox().value).toBe("BOB");
+		expect(lookups(connector)).toEqual([]);
+	});
+
+	it("[ISSUE-3510-ITEM-9] a new modelToSelectorData converts an initialData entry again, without a request", async () => {
+		const { model, connector } = peopleModel();
+		const initialData = [{ id: "2", name: "Bob" }];
+		const { rerender } = render(
+			ui({ model, selected: "2", initialData, disableRequestBatching: true }),
+		);
+		await waitFor(() => expect(combobox().value).toBe("Bob"));
+		rerender(
+			ui({
+				model,
+				selected: "2",
+				initialData,
+				modelToSelectorData: upper,
+				disableRequestBatching: true,
+			}),
+		);
+		await flush();
+		expect(combobox().value).toBe("BOB");
+		expect(lookups(connector)).toEqual([]);
+	});
+
+	it("[ISSUE-3510-ITEM-9] an additionalOptions entry is neither converted nor loaded again", async () => {
+		const { model, connector } = peopleModel();
+		const additionalOptions = [{ value: "nobody", label: "Nobody" }];
+		const { rerender } = render(
+			ui({ model, selected: "nobody", additionalOptions }),
+		);
+		await flush();
+		expect(combobox().value).toBe("Nobody");
+		rerender(
+			ui({
+				model,
+				selected: "nobody",
+				additionalOptions,
+				modelToSelectorData: upper,
+				refreshToken: "refreshed",
+			}),
+		);
+		await flush();
+		expect(combobox().value).toBe("Nobody");
+		expect(lookups(connector)).toEqual([]);
+	});
+
+	it("[ISSUE-3510-ITEM-9] a new refreshToken after a rename loads the shown record again, and the field keeps the old name until it has loaded", async () => {
+		const { model, connector } = peopleModel();
+		const { rerender } = render(
+			ui({ model, selected: "2", disableRequestBatching: true }),
+		);
+		await waitFor(() => expect(combobox().value).toBe("Bob"));
+		// renamed in a dialog: the app invalidates the model's queries and refreshes
+		connector.rows[1].name = "Bobby";
+		await act(() => model.invalidateQueries());
+		const release = connector.hold("2");
+		rerender(
+			ui({
+				model,
+				selected: "2",
+				disableRequestBatching: true,
+				refreshToken: "renamed",
+			}),
+		);
+		await flush();
+		expect(combobox().value).toBe("Bob");
+		await release();
+		expect(combobox().value).toBe("Bobby");
+		expect(lookups(connector)).toEqual(["read:2", "read:2"]);
+	});
+
+	it("[ISSUE-3510-ITEM-9] a record that is gone when the field loads it again is dropped like one that cannot be loaded", async () => {
+		const { model, connector } = peopleModel();
+		const onSelect = vi.fn();
+		const props = {
+			model,
+			selected: "2",
+			onSelect,
+			onLoadError: () => null,
+			disableRequestBatching: true,
+		};
+		const { rerender } = render(ui(props));
+		await waitFor(() => expect(combobox().value).toBe("Bob"));
+		connector.rows.splice(1, 1);
+		await act(() => model.invalidateQueries());
+		rerender(ui({ ...props, refreshToken: "deleted" }));
+		await flush();
+		expect(onSelect).toHaveBeenCalledWith(null);
+		// the parent keeps "2": the field no longer shows Bob
+		expect(combobox().value).toBe("");
+	});
+
+	it("[ISSUE-3510-ITEM-9] an id onLoadError dropped while the parent keeps it is not looked up again for a new modelToSelectorData", async () => {
+		const { model, connector } = peopleModel();
+		const props = {
+			model,
+			selected: "9",
+			onLoadError: () => null,
+			disableRequestBatching: true,
+		};
+		const { rerender } = render(ui(props));
+		await flush();
+		expect(lookups(connector)).toEqual(["read:9"]);
+		rerender(ui({ ...props, modelToSelectorData: upper }));
+		await flush();
+		expect(lookups(connector)).toEqual(["read:9"]);
+		expect(combobox().value).toBe("");
+	});
+
+	it("[ISSUE-3510-ITEM-9] a modelFetch with other cache keys loads the shown record again through it; a new instance of the same model does not", async () => {
+		const { model, connector } = peopleModel();
+		// records that go stale at once: every load through this model reaches the connector
+		const options = { cacheOptions: { staleTime: 0 } };
+		const fetchModel = (
+			connector: SelectorTestConnector,
+			cacheKeys?: unknown,
+		): ModelUnknown =>
+			new Model(model.modelId, model.fields, connector, cacheKeys, options);
+		const props = { model, selected: "2", disableRequestBatching: true };
+		const { rerender } = render(
+			ui({ ...props, modelFetch: fetchModel(connector) }),
+		);
+		await waitFor(() => expect(combobox().value).toBe("Bob"));
+		// rebuilt on a render (or a language switch): same model id, same cache keys
+		rerender(ui({ ...props, modelFetch: fetchModel(connector) }));
+		await flush();
+		expect(lookups(connector)).toEqual(["read:2"]);
+		// another scope: other cache keys, whose record of 2 has another name
+		const scoped = new SelectorTestConnector(
+			people().map((row) => (row.id === "2" ? { ...row, name: "Bobby" } : row)),
+		);
+		rerender(ui({ ...props, modelFetch: fetchModel(scoped, ["other scope"]) }));
+		await waitFor(() => expect(combobox().value).toBe("Bobby"));
+		expect(lookups(scoped)).toEqual(["read:2"]);
+		expect(lookups(connector)).toEqual(["read:2"]);
+	});
+
+	it("[ISSUE-3510-ITEM-9] a modelToSelectorData passed anew while the record loads loads it once, and the last one converts it", async () => {
+		const { model, connector } = peopleModel();
+		const release = connector.hold("3");
+		const props = { model, selected: "3", disableRequestBatching: true };
+		const { rerender } = render(ui(props));
+		await flush();
+		rerender(ui({ ...props, modelToSelectorData: (record) => conv(record) }));
+		await flush();
+		rerender(ui({ ...props, modelToSelectorData: upper }));
+		await release();
+		expect(combobox().value).toBe("CAROL");
+		expect(lookups(connector)).toEqual(["read:3"]);
 	});
 });

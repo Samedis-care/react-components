@@ -56,6 +56,7 @@ const BackendMultipleSelect = <
 	const {
 		model,
 		disableRequestBatching,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		modelToSelectorData,
 		searchResultLimit,
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -73,7 +74,8 @@ const BackendMultipleSelect = <
 	} = props;
 	const modelFetch = props.modelFetch ?? model;
 
-	const { selected, handleSelect, loadError } = useSelectedCache(props);
+	const { selected, handleSelect, loadError, convert } =
+		useSelectedCache(props);
 
 	const handleLoad = useCallback(
 		async (
@@ -90,13 +92,11 @@ const BackendMultipleSelect = <
 					: undefined,
 			});
 			return {
-				options: await Promise.all(
-					records.map((data) => Promise.resolve(modelToSelectorData(data))),
-				),
+				options: await Promise.all(records.map(convert)),
 				total: meta.filteredRows ?? meta.totalRows,
 			};
 		},
-		[model, modelToSelectorData, searchResultLimit, sort, switchFilterName],
+		[model, convert, searchResultLimit, sort, switchFilterName],
 	);
 
 	const handleLoadLruRecord = useCallback(
@@ -105,9 +105,9 @@ const BackendMultipleSelect = <
 				batch: !disableRequestBatching,
 				dontReportNotFoundInBatch: true,
 			});
-			return modelToSelectorData(data);
+			return convert(data);
 		},
-		[disableRequestBatching, modelFetch, modelToSelectorData],
+		[disableRequestBatching, modelFetch, convert],
 	);
 
 	const lruConfig: SelectorLruOptions<DataT> | undefined = useMemo(

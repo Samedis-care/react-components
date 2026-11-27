@@ -20,6 +20,7 @@ import {
 import useCCTranslations from "../../utils/useCCTranslations";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 import getSelectedLoadErrorLabel from "./getSelectedLoadErrorLabel";
+import getSelectedLoadKey from "./getSelectedLoadKey";
 import {
 	isSelectedLoadErrorEntry,
 	makeSelectedLoadErrorEntry,
@@ -91,6 +92,9 @@ export type BackendMultiSelectProps<
 		model: M;
 		/**
 		 * The model to use for fetch requests (to enable request batching)
+		 * @remarks One with other react-query keys than the previous one (another model id
+		 *          or cache keys) loads the listed records again through it. A new instance
+		 *          of the same model (same keys) does not: it loads the same records.
 		 */
 		modelFetch?: M;
 		/**
@@ -107,6 +111,10 @@ export type BackendMultiSelectProps<
 		 * @param modelData The model data
 		 * @remarks One that throws or rejects for a selected record, loaded or from
 		 *          `initialData`, lists it like a record that failed to load (see `onLoadError`).
+		 *          A new function converts the listed entries again from their records,
+		 *          without a request (labels built with `t` follow a language switch). Pass a
+		 *          stable one (module level, or useCallback/useMemo on what it reads): a new
+		 *          one on every render converts the listed entries on every render.
 		 */
 		modelToSelectorData: (modelData: ModelRecord<M>) => Promise<DataT> | DataT;
 		/**
@@ -128,6 +136,15 @@ export type BackendMultiSelectProps<
 		 * request, otherwise loaded through `modelFetch`; until then it is listed as a
 		 * translated "Loading…" entry. An id `onLoadError` dropped is not listed, also while
 		 * `selected` keeps it.
+		 *
+		 * The listed entries follow the props: a new `modelToSelectorData` converts them
+		 * again from the records this field listed or loaded for their ids, without a
+		 * request (`additionalOptions` entries, and entries of ids whose record it has not
+		 * listed, such as a group pick may add, are listed as they are); a `modelFetch`
+		 * with other react-query keys or a new `refreshToken` loads them again through
+		 * `modelFetch.getCached` (not `additionalOptions` entries), so an app that changed a
+		 * record invalidates the model's queries before it changes `refreshToken`. They
+		 * stay listed meanwhile.
 		 */
 		selected: string[];
 		/**
@@ -164,7 +181,28 @@ export type BackendMultiSelectProps<
 		onLoadError?: (error: Error) => string | null;
 	};
 
-interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
+/**
+ * What an entry listed for a selected id was made with
+ */
+interface EntryOrigin<M extends ModelUnknown> {
+	/**
+	 * The modelToSelectorData that converted it from the id's record. Null for an entry not
+	 * converted from a record (an additionalOptions entry, one that failed to load, one
+	 * picked for an id whose record the field has not listed, such as a group pick may add):
+	 * a new modelToSelectorData leaves it as it is.
+	 */
+	convertedBy: ((modelData: ModelRecord<M>) => unknown) | null;
+	/**
+	 * The load key (getSelectedLoadKey) when it was made: another one loads the entry again.
+	 * Null for an additionalOptions entry, which is never loaded.
+	 */
+	loadKey: string | null;
+}
+
+interface UseSelectedCacheResult<
+	M extends ModelUnknown,
+	DataT extends MultiSelectorData,
+> {
 	/**
 	 * The entries listed for the selected ids: a "Loading…" one for an id still loading,
 	 * none for an id `onLoadError` dropped
@@ -181,6 +219,12 @@ interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
 	 * to be marked as erroneous
 	 */
 	loadError: boolean;
+	/**
+	 * Converts a record for the list (an option, an LRU entry) with modelToSelectorData and
+	 * keeps the record, so a pick of its entry is converted again by a new
+	 * modelToSelectorData
+	 */
+	convert: (record: ModelRecord<M>) => Promise<DataT>;
 }
 
 export const useSelectedCache = <
@@ -198,8 +242,9 @@ export const useSelectedCache = <
 		| "initialData"
 		| "onLoadError"
 		| "additionalOptions"
+		| "refreshToken"
 	>,
-): UseSelectedCacheResult<DataT> => {
+): UseSelectedCacheResult<M, DataT> => {
 	const {
 		model,
 		disableRequestBatching,
@@ -209,8 +254,14 @@ export const useSelectedCache = <
 		initialData,
 		onLoadError,
 		additionalOptions,
+		refreshToken,
 	} = props;
 	const modelFetch = props.modelFetch ?? model;
+	const loadKey = getSelectedLoadKey(
+		modelFetch,
+		!disableRequestBatching,
+		refreshToken,
+	);
 
 	const [selectedCache, setSelectedCache] = useState<Record<string, DataT>>({});
 	// the ids onLoadError dropped: not listed while they are selected without an entry,
@@ -218,11 +269,49 @@ export const useSelectedCache = <
 	const [droppedIds, setDroppedIds] = useState<ReadonlySet<string>>(
 		() => new Set(),
 	);
+	// the record of each id this field listed, loaded or converted, by id: a new
+	// modelToSelectorData converts the listed entries again from them, without a request
+	const recordsById = useRef(new Map<string, ModelRecord<M>>());
+	// what each entry in the cache was made with; "Loading…" placeholders have no origin
+	const origins = useRef(new WeakMap<MultiSelectorData, EntryOrigin<M>>());
+	// counts the lookups that listed an entry made with props that changed while it
+	// loaded: the effect below then makes it again
+	const [revision, setRevision] = useState(0);
+	// the selection and load key the effect below last ran for: ids without an entry are
+	// looked up for a new selection or load key; when only modelToSelectorData (or the
+	// revision) changed, they are loading already or onLoadError dropped them
+	const lastRun = useRef<{ selected: string[]; loadKey: string } | null>(null);
 
-	// the selection, entries and handler of the latest render: a drop by onLoadError
-	// removes its ids from this selection, not from the one its lookup started with
-	const latest = useRef({ selected, selectedCache, onSelect });
-	latest.current = { selected, selectedCache, onSelect };
+	// the selection, entries, handler and props of the latest render: a drop by
+	// onLoadError removes its ids from this selection, not from the one its lookup
+	// started with
+	const latest = useRef({
+		selected,
+		selectedCache,
+		onSelect,
+		additionalOptions,
+		modelToSelectorData,
+		loadKey,
+	});
+	latest.current = {
+		selected,
+		selectedCache,
+		onSelect,
+		additionalOptions,
+		modelToSelectorData,
+		loadKey,
+	};
+	// whether an entry was made with the current modelToSelectorData and load key, as far
+	// as they concern it (an entry without origin is a placeholder: it is being loaded)
+	const isCurrent = useCallback((entry: MultiSelectorData): boolean => {
+		const origin = origins.current.get(entry);
+		return (
+			!origin ||
+			((origin.convertedBy === null ||
+				origin.convertedBy === latest.current.modelToSelectorData) &&
+				(origin.loadKey === null || origin.loadKey === latest.current.loadKey))
+		);
+	}, []);
 	// lookups that end after unmount neither report a drop nor fill the cache
 	const mounted = useRef(false);
 	useEffect(() => {
@@ -234,8 +323,34 @@ export const useSelectedCache = <
 
 	const { t } = useCCTranslations();
 
+	const convert = useCallback(
+		async (record: ModelRecord<M>): Promise<DataT> => {
+			const entry = await modelToSelectorData(record);
+			recordsById.current.set(entry.value, record);
+			return entry;
+		},
+		[modelToSelectorData],
+	);
+
 	const handleSelect = useCallback(
 		(selected: DataT[]) => {
+			// a picked entry is made with the current props: one from the list was converted
+			// from a record listed here, an additionalOptions entry is never loaded
+			selected.forEach((entry) => {
+				if (isLoadingPlaceholder(entry) || origins.current.has(entry)) return;
+				const { additionalOptions, modelToSelectorData, loadKey } =
+					latest.current;
+				const isOption = !!additionalOptions?.some(
+					(option) => option.value === entry.value,
+				);
+				origins.current.set(entry, {
+					convertedBy:
+						!isOption && recordsById.current.has(entry.value)
+							? modelToSelectorData
+							: null,
+					loadKey: isOption ? null : loadKey,
+				});
+			});
 			setSelectedCache((cache) => {
 				const newCache = { ...cache };
 				selected.forEach((entry) => {
@@ -256,58 +371,113 @@ export const useSelectedCache = <
 		[onSelect],
 	);
 
-	// fetch missing data entries
+	// fetch missing data entries, convert the entries made with another
+	// modelToSelectorData again and load those made with another load key again
 	useEffect(() => {
+		const loadMissing =
+			lastRun.current?.selected !== selected ||
+			lastRun.current.loadKey !== loadKey;
+		lastRun.current = { selected, loadKey };
 		void (async () => {
 			const newCache: Record<string, DataT | MultiSelectorData> = {};
 			// an additionalOptions entry is not a record: listed as it is, never looked up
 			additionalOptions?.forEach((option) => {
-				if (selected.includes(option.value) && !(option.value in selectedCache))
+				if (
+					selected.includes(option.value) &&
+					!(option.value in selectedCache)
+				) {
+					origins.current.set(option, { convertedBy: null, loadKey: null });
 					newCache[option.value] = option;
+				}
 			});
 			const isIdNotInCache = (value: string): boolean =>
 				!(value in selectedCache) && !(value in newCache);
-			await Promise.all(
-				selected.filter(isIdNotInCache).map(async (value) => {
+			const missing = loadMissing ? selected.filter(isIdNotInCache) : [];
+			// listed entries made with props that changed since
+			const outdated = selected.filter(
+				(value) => value in selectedCache && !isCurrent(selectedCache[value]),
+			);
+			// the ids among them whose record cannot be loaded again and onLoadError dropped
+			const droppedListed: string[] = [];
+			const lookUp = async (value: string) =>
+				(
+					await modelFetch.getCached(value, {
+						batch: !disableRequestBatching,
+					})
+				)[0];
+			const convertSelected = async (
+				value: string,
+				record: ModelRecord<M>,
+			): Promise<DataT> => {
+				const entry = await modelToSelectorData(record);
+				recordsById.current.set(value, record);
+				origins.current.set(entry, {
+					convertedBy: modelToSelectorData,
+					loadKey,
+				});
+				return entry;
+			};
+			// the entry of an id whose record failed to load, or null to drop the id
+			const failedEntry = (value: string, e: unknown) => {
+				const label = getSelectedLoadErrorLabel(
+					value,
+					e as Error,
+					onLoadError,
+					t,
+				);
+				if (!label) return null;
+				const entry = makeSelectedLoadErrorEntry(value, label);
+				origins.current.set(entry, { convertedBy: null, loadKey });
+				return entry;
+			};
+			await Promise.all([
+				...missing.map(async (value) => {
 					try {
 						// an id with an initialData record is converted from it, any other loaded;
 						// a conversion that fails is a failed load either way
 						const record =
 							initialData?.find(
 								(record) => (record as Record<"id", string>).id === value,
-							) ??
-							(
-								await modelFetch.getCached(value, {
-									batch: !disableRequestBatching,
-								})
-							)[0];
-						newCache[value] = await modelToSelectorData(record);
+							) ?? (await lookUp(value));
+						newCache[value] = await convertSelected(value, record);
 					} catch (e) {
-						const label = getSelectedLoadErrorLabel(
-							value,
-							e as Error,
-							onLoadError,
-							t,
-						);
+						const entry = failedEntry(value, e);
 						// if we should drop the record return here and don't create a record in cache
-						if (!label) {
-							return;
-						}
-						newCache[value] = makeSelectedLoadErrorEntry(value, label);
+						if (entry) newCache[value] = entry;
 					}
 				}),
-			);
+				...outdated.map(async (value) => {
+					const origin = origins.current.get(selectedCache[value]);
+					const reload = origin?.loadKey != null && origin.loadKey !== loadKey;
+					try {
+						// converted again from its record, unless it is loaded again
+						const record =
+							(!reload && recordsById.current.get(value)) ||
+							(await lookUp(value));
+						newCache[value] = await convertSelected(value, record);
+					} catch (e) {
+						const entry = failedEntry(value, e);
+						if (entry) newCache[value] = entry;
+						else droppedListed.push(value);
+					}
+				}),
+			]);
 
 			if (!mounted.current) return;
 
 			// the ids onLoadError dropped leave the current selection, so a pick or removal
-			// made while they loaded is kept; an id picked again meanwhile has an entry and stays
-			const dropped = selected.filter(isIdNotInCache);
+			// made while they loaded is kept; an id picked again meanwhile has a new entry and
+			// stays
+			const dropped = [...missing.filter(isIdNotInCache), ...droppedListed];
 			const current = latest.current;
 			const newSelection = current.selected.filter((id) => {
 				if (!dropped.includes(id)) return true;
 				const entry = current.selectedCache[id] as DataT | undefined;
-				return entry !== undefined && !isLoadingPlaceholder(entry);
+				return (
+					entry !== undefined &&
+					!isLoadingPlaceholder(entry) &&
+					entry !== selectedCache[id]
+				);
 			});
 			if (current.onSelect && newSelection.length < current.selected.length) {
 				// a second drop before the parent has rendered this one starts from it
@@ -323,12 +493,41 @@ export const useSelectedCache = <
 				);
 			}
 
-			setSelectedCache((oldCache) => Object.assign({}, oldCache, newCache));
+			// the entries the dropped ids had when their lookup started
+			const droppedEntries = droppedListed.map(
+				(id) => [id, selectedCache[id]] as const,
+			);
+			setSelectedCache((oldCache) => {
+				const nextCache: Record<string, DataT | MultiSelectorData> = {
+					...oldCache,
+				};
+				Object.entries(newCache).forEach(([id, entry]) => {
+					// an entry made with props that changed while it loaded does not replace
+					// one made with the current props (it does replace "Loading…")
+					const old = nextCache[id];
+					if (
+						old &&
+						!isLoadingPlaceholder(old) &&
+						isCurrent(old) &&
+						!isCurrent(entry)
+					)
+						return;
+					nextCache[id] = entry;
+				});
+				// a dropped entry is no longer listed, unless it was picked again meanwhile
+				droppedEntries.forEach(([id, entry]) => {
+					if (nextCache[id] === entry) delete nextCache[id];
+				});
+				return nextCache as Record<string, DataT>;
+			});
 			if (dropped.length > 0)
 				setDroppedIds((oldDropped) => new Set([...oldDropped, ...dropped]));
+			// an entry made with props that changed while it loaded is made again
+			if (Object.values(newCache).some((entry) => !isCurrent(entry)))
+				setRevision((oldRevision) => oldRevision + 1);
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [selected]);
+	}, [selected, modelToSelectorData, loadKey, revision]);
 
 	// stable identity: a new array on every render makes the selector reset its search
 	const selectedData = useMemo(
@@ -356,6 +555,7 @@ export const useSelectedCache = <
 		selected: selectedData,
 		handleSelect,
 		loadError: selectedData.some(isSelectedLoadErrorEntry),
+		convert,
 	};
 };
 
@@ -392,6 +592,7 @@ const BackendMultiSelect = <
 	const {
 		model,
 		disableRequestBatching,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		modelToSelectorData,
 		searchResultLimit,
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -409,7 +610,8 @@ const BackendMultiSelect = <
 	} = props;
 	const modelFetch = props.modelFetch ?? model;
 
-	const { selected, handleSelect, loadError } = useSelectedCache(props);
+	const { selected, handleSelect, loadError, convert } =
+		useSelectedCache(props);
 
 	const handleLoad = useCallback(
 		async (
@@ -426,13 +628,11 @@ const BackendMultiSelect = <
 					: undefined,
 			});
 			return {
-				options: await Promise.all(
-					records.map((value) => Promise.resolve(modelToSelectorData(value))),
-				),
+				options: await Promise.all(records.map(convert)),
 				total: meta.filteredRows ?? meta.totalRows,
 			};
 		},
-		[model, modelToSelectorData, searchResultLimit, sort, switchFilterName],
+		[model, convert, searchResultLimit, sort, switchFilterName],
 	);
 
 	const handleLoadLruRecord = useCallback(
@@ -441,9 +641,9 @@ const BackendMultiSelect = <
 				batch: !disableRequestBatching,
 				dontReportNotFoundInBatch: true,
 			});
-			return modelToSelectorData(data);
+			return convert(data);
 		},
-		[disableRequestBatching, modelFetch, modelToSelectorData],
+		[disableRequestBatching, modelFetch, convert],
 	);
 
 	const lruConfig: SelectorLruOptions<DataT> | undefined = useMemo(

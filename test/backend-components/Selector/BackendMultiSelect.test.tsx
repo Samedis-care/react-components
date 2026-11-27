@@ -725,3 +725,192 @@ describe("BackendMultiSelect bugs", () => {
 		});
 	});
 });
+
+describe("BackendMultiSelect: the listed entries follow modelToSelectorData, modelFetch and refreshToken", () => {
+	/** conv, but with the name in capitals: a modelToSelectorData for another language */
+	const upper = (record: Record<string, unknown>): MultiSelectorData => ({
+		value: record.id as string,
+		label: (record.name as string).toUpperCase(),
+	});
+
+	it("[ISSUE-3510-ITEM-9] a new modelToSelectorData converts the listed entries again, loaded and picked, without a request", async () => {
+		const { model, connector } = peopleModel();
+		const { Parent } = makeParent();
+		const { rerender } = render(
+			<Framework>
+				<Parent model={model} initial={["1"]} disableRequestBatching />
+			</Framework>,
+		);
+		await waitFor(() => expect(removeButtons()).toEqual(["Remove Alice"]));
+		await openList();
+		await typeText("Bo");
+		await pickOption("Bob");
+		expect(removeButtons()).toEqual(["Remove Alice", "Remove Bob"]);
+		rerender(
+			<Framework>
+				<Parent
+					model={model}
+					initial={["1"]}
+					modelToSelectorData={upper}
+					disableRequestBatching
+				/>
+			</Framework>,
+		);
+		await flush();
+		expect(removeButtons()).toEqual(["Remove ALICE", "Remove BOB"]);
+		expect(lookups(connector)).toEqual(["read:1"]);
+	});
+
+	it("[ISSUE-3510-ITEM-9] an entry still loading when modelToSelectorData changes is listed converted by the new one", async () => {
+		const { model, connector } = peopleModel();
+		const release = connector.hold("3");
+		const { Parent } = makeParent();
+		const { rerender } = render(
+			<Framework>
+				<Parent model={model} initial={["3"]} disableRequestBatching />
+			</Framework>,
+		);
+		await flush();
+		// the pick hands Carol's "Loading…" back with Bob
+		await openList();
+		await typeText("Bo");
+		await pickOption("Bob");
+		rerender(
+			<Framework>
+				<Parent
+					model={model}
+					initial={["3"]}
+					modelToSelectorData={upper}
+					disableRequestBatching
+				/>
+			</Framework>,
+		);
+		await flush();
+		expect(removeButtons()).toEqual(["Remove Loading…", "Remove BOB"]);
+		await release();
+		expect(removeButtons()).toEqual(["Remove CAROL", "Remove BOB"]);
+		expect(lookups(connector)).toEqual(["read:3"]);
+	});
+
+	it("[ISSUE-3510-ITEM-9] a new refreshToken after a rename loads the listed records again, and they stay listed until they have loaded", async () => {
+		const { model, connector } = peopleModel();
+		const { rerender } = render(ui({ model, selected: ["1", "2"] }));
+		await waitFor(() =>
+			expect(removeButtons()).toEqual(["Remove Alice", "Remove Bob"]),
+		);
+		// renamed in a dialog: the app invalidates the model's queries and refreshes
+		connector.rows[1].name = "Bobby";
+		await act(() => model.invalidateQueries());
+		const release = connector.hold("2");
+		rerender(ui({ model, selected: ["1", "2"], refreshToken: "renamed" }));
+		// the batch goes out after its debounce
+		await waitFor(() =>
+			expect(lookups(connector)).toEqual(["index::ids=1,2", "index::ids=1,2"]),
+		);
+		await flush();
+		expect(removeButtons()).toEqual(["Remove Alice", "Remove Bob"]);
+		await release();
+		await waitFor(() =>
+			expect(removeButtons()).toEqual(["Remove Alice", "Remove Bobby"]),
+		);
+	});
+
+	it("[ISSUE-3510-ITEM-9] a record that is gone when the field loads it again is dropped like one that cannot be loaded", async () => {
+		const { model, connector } = peopleModel();
+		const onSelect = vi.fn();
+		const props = {
+			model,
+			selected: ["1", "2"],
+			onSelect,
+			onLoadError: () => null,
+			disableRequestBatching: true,
+		};
+		const { rerender } = render(ui(props));
+		await waitFor(() =>
+			expect(removeButtons()).toEqual(["Remove Alice", "Remove Bob"]),
+		);
+		connector.rows.splice(1, 1);
+		await act(() => model.invalidateQueries());
+		rerender(ui({ ...props, refreshToken: "deleted" }));
+		await flush();
+		expect(onSelect.mock.calls).toEqual([
+			[["1"], [{ value: "1", label: "Alice" }]],
+		]);
+		// the parent keeps "2": Bob is no longer listed
+		expect(removeButtons()).toEqual(["Remove Alice"]);
+	});
+
+	it("[ISSUE-3510-ITEM-9] an id onLoadError dropped while the parent keeps it is not looked up again for a new modelToSelectorData", async () => {
+		const { model, connector } = peopleModel();
+		const props = {
+			model,
+			selected: ["1", "9"],
+			onLoadError: () => null,
+			disableRequestBatching: true,
+		};
+		const { rerender } = render(ui(props));
+		await waitFor(() => expect(removeButtons()).toEqual(["Remove Alice"]));
+		expect(lookups(connector)).toEqual(["read:1", "read:9"]);
+		rerender(ui({ ...props, modelToSelectorData: upper }));
+		await flush();
+		expect(removeButtons()).toEqual(["Remove ALICE"]);
+		expect(lookups(connector)).toEqual(["read:1", "read:9"]);
+	});
+
+	it("[ISSUE-3510-ITEM-9] BackendMultiSelectWithTags: a new convData converts a picked entry again, without a request; an entry a group pick added for a record the field has not listed stays as it is", async () => {
+		const group = peopleModel([{ id: "A", name: "Team A" }]);
+		const data = peopleModel();
+		// Dave is not among the people the data list shows
+		const getGroupDataEntries = () => [{ value: "6", label: "Dave (Team A)" }];
+		const Field = ({
+			convData,
+		}: {
+			convData: (record: Record<string, unknown>) => MultiSelectorData;
+		}) => {
+			const [selected, setSelected] = useState<string[]>([]);
+			return (
+				<BackendMultiSelectWithTags<
+					ModelUnknown,
+					ModelUnknown,
+					MultiSelectorData,
+					MultiSelectorData
+				>
+					title={"Members"}
+					searchInputLabel={"Add a person"}
+					groupModel={group.model}
+					dataModel={data.model}
+					convGroup={conv}
+					convData={convData}
+					getGroupDataEntries={getGroupDataEntries}
+					groupSearchDebounceTime={0}
+					dataSearchDebounceTime={0}
+					selected={selected}
+					onChange={setSelected}
+				/>
+			);
+		};
+		const { rerender } = render(
+			<Framework>
+				<Field convData={conv} />
+			</Framework>,
+		);
+		await flush();
+		const [groupInput, dataInput] =
+			screen.getAllByRole<HTMLInputElement>("combobox");
+		await openList(dataInput);
+		await typeText("Bob", dataInput);
+		await pickOption("Bob");
+		await openList(groupInput);
+		await typeText("Team", groupInput);
+		await pickOption(/Team A/);
+		expect(removeButtons()).toEqual(["Remove Bob", "Remove Dave (Team A)"]);
+		rerender(
+			<Framework>
+				<Field convData={upper} />
+			</Framework>,
+		);
+		await flush();
+		expect(removeButtons()).toEqual(["Remove BOB", "Remove Dave (Team A)"]);
+		expect(lookups(data.connector)).toEqual([]);
+	});
+});
