@@ -1,6 +1,13 @@
 import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Box, Button, createTheme, Stack, ThemeProvider } from "@mui/material";
+import {
+	Box,
+	Button,
+	createTheme,
+	Stack,
+	ThemeProvider,
+	Typography,
+} from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, waitFor } from "storybook/test";
 import InfoBox, { InfoBoxProps } from "./index";
@@ -40,6 +47,10 @@ const meta: Meta<typeof InfoBox> = {
 				"h6",
 				"inherit",
 			],
+		},
+		headingComponent: {
+			control: "select",
+			options: ["h2", "h3", "h4", "h5", "h6", "div"],
 		},
 	},
 };
@@ -962,5 +973,72 @@ export const Issue3464Item9FocusStaysWhenTheBoxBecomesForced: Story = {
 			cs.color,
 		]);
 		await expect(parseFloat(cs.outlineOffset)).toBe(-4);
+	},
+};
+
+export const Issue3464Item11HeadingVariantAddsNoHeading: Story = {
+	parameters: {
+		a11y: {
+			test: "error",
+			options: { runOnly: { type: "rule", values: ["heading-order"] } },
+		},
+		docs: {
+			description: {
+				story:
+					'ISSUE-3464-ITEM-11: `headingVariant="h6"` renders an `<h6>` inside the button inside the box\'s `<h3>`: the outline jumps from level 3 to 6 and lists the heading twice (axe `heading-order`).',
+			},
+		},
+	},
+	render: () => (
+		<div style={{ width: 600 }}>
+			<Typography variant={"h5"} component={"h2"}>
+				Device
+			</Typography>
+			<InfoBox
+				heading={"Maintenance due"}
+				message={"The next inspection is due in March."}
+				expanded
+				headingVariant={"h6"}
+			/>
+		</div>
+	),
+};
+
+export const Issue3464Item11HeadingLevelFitsThePage: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3464-ITEM-11: right below the page\'s `<h1>`, `headingComponent="h2"` makes the box a heading of level 2, so the outline skips no level (axe `heading-order`). The forced box below uses `"div"`: it is no heading, so it does not appear in the outline.',
+			},
+		},
+	},
+	render: () => (
+		<Stack spacing={1} style={{ width: 600 }}>
+			<Typography variant={"h4"} component={"h1"}>
+				Import
+			</Typography>
+			<InfoBox
+				heading={"File format"}
+				message={"Upload a CSV file with a header row."}
+				headingComponent={"h2"}
+			/>
+			<InfoBox
+				heading={"Existing devices are kept"}
+				message={"The import only adds devices."}
+				alwaysExpanded
+				headingComponent={"div"}
+			/>
+		</Stack>
+	),
+	play: async ({ canvas }) => {
+		await expect(canvas.getAllByRole("heading").map((h) => h.tagName)).toEqual([
+			"H1",
+			"H2",
+		]);
+		await expect(
+			canvas.getByRole("heading", { level: 2, name: "File format" }),
+		).toBeVisible();
 	},
 };

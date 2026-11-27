@@ -29,6 +29,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [An inline edit in BackendDataGrid updates its row in place instead of reloading the grid, and `renderDataGridRecordUsingModel` takes the model only](2026-11-27-data-grid-inline-edit-updates-row-in-place.md) | behavior, type |
 | 2026-11-27 | [Lazy controls and CrudMultiSelect's validation read the Form's lite context, which carries the custom-field callbacks](2026-11-27-lazy-controls-read-lite-form-context.md) | type, behavior |
 | 2026-11-27 | [`LazyConnector.read` of a record whose delete is queued rejects instead of throwing](2026-11-27-lazy-connector-read-rejects-for-queued-delete.md) | behavior |
+| 2026-11-27 | [InfoBox's headingVariant sets only the look, and headingComponent sets the box's heading](2026-11-27-info-box-heading-variant-only-styles.md) | behavior |
 | 2026-11-27 | [InfiniteScroll scrolls by default, and the theme styles it through `CcInfiniteScroll`](2026-11-27-infinite-scroll-scrolls-by-default-theme-slot.md) | behavior |
 | 2026-11-27 | [A required string list shows an asterisk and is described as required](2026-11-27-required-string-list-marked.md) | behavior |
 | 2026-11-27 | [InfiniteScroll: a negative or NaN `callBackDebounce` calls at once, as `0` does](2026-11-27-infinite-scroll-negative-debounce-calls-at-once.md) | behavior |

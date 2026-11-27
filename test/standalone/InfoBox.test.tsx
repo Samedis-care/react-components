@@ -653,6 +653,112 @@ describe("InfoBox", () => {
 			rerender(box(false));
 			expect(header("Notice")).toHaveFocus();
 		});
+
+		it("[ISSUE-3464-ITEM-11] headingVariant changes only the look: one heading per box and only phrasing content in the header button", () => {
+			renderInfoBox(
+				<>
+					<InfoBox
+						heading="Variant h6"
+						message="M"
+						expanded
+						headingVariant="h6"
+					/>
+					<InfoBox
+						heading="Variant body1"
+						message="M"
+						expanded
+						headingVariant="body1"
+					/>
+				</>,
+			);
+			expect(screen.getAllByRole("heading").map((h) => h.textContent)).toEqual([
+				"Variant h6",
+				"Variant body1",
+			]);
+			for (const btn of screen.getAllByRole("button")) {
+				expect(
+					Array.from(
+						btn.querySelectorAll("div, p, h1, h2, h3, h4, h5, h6"),
+					).map((el) => el.tagName),
+				).toEqual([]);
+			}
+		});
+
+		it("[ISSUE-3464-ITEM-11] headingVariant keeps its look: the heading has the variant's class", () => {
+			renderInfoBox(
+				<InfoBox heading="Variant h6" message="M" headingVariant="h6" />,
+			);
+			const text = screen.getByText("Variant h6");
+			expect(text.tagName).toBe("SPAN");
+			expect(text).toHaveClass("MuiTypography-h6");
+		});
+
+		it("[ISSUE-3464-ITEM-11] headingComponent sets the level of the box's heading, in the toggle and in a forced box", () => {
+			renderInfoBox(
+				<>
+					<InfoBox heading="Toggle" message="M" headingComponent="h2" />
+					<InfoBox
+						heading="Forced"
+						message="M"
+						alwaysExpanded
+						headingComponent="h4"
+					/>
+					<InfoBox heading="Default" message="M" />
+				</>,
+			);
+			expect(
+				screen
+					.getAllByRole("heading")
+					.map((h) => [h.textContent, h.tagName, h.className]),
+			).toEqual([
+				["Toggle", "H2", expect.stringContaining("MuiAccordion-heading")],
+				["Forced", "H4", expect.stringContaining("MuiAccordion-heading")],
+				["Default", "H3", expect.stringContaining("MuiAccordion-heading")],
+			]);
+			// the toggle stays the button inside the heading
+			expect(
+				screen.getByRole("heading", { level: 2, name: "Toggle" }),
+			).toContainElement(header("Toggle"));
+			expect(staticHeader("Forced").parentElement?.tagName).toBe("H4");
+		});
+
+		it("[ISSUE-3464-ITEM-11] headingComponent another element than a heading leaves the box out of the outline", () => {
+			renderInfoBox(
+				<>
+					<InfoBox heading="Toggle" message="M" headingComponent="div" />
+					<InfoBox
+						heading="Forced"
+						message="M"
+						alwaysExpanded
+						headingComponent="div"
+					/>
+				</>,
+			);
+			expect(screen.queryAllByRole("heading")).toEqual([]);
+			expect(header("Toggle")).toHaveAttribute("aria-expanded", "false");
+			expect(screen.getByText("Forced")).toBeVisible();
+		});
+
+		it("[ISSUE-3464-ITEM-11] a theme's defaultProps set the heading's element of every box, and a change after mount takes effect", () => {
+			const box = (level?: "h2" | "h5") => (
+				<InfoBox heading="Notice" message="M" headingComponent={level} />
+			);
+			const t = createTheme({
+				components: { CcInfoBox: { defaultProps: { headingComponent: "h4" } } },
+			});
+			const { rerender } = render(themed(box(), t));
+			expect(screen.getByRole("heading", { name: "Notice" }).tagName).toBe(
+				"H4",
+			);
+			rerender(themed(box("h2"), t));
+			expect(screen.getByRole("heading", { name: "Notice" }).tagName).toBe(
+				"H2",
+			);
+			rerender(themed(box("h5"), t));
+			expect(screen.getByRole("heading", { name: "Notice" }).tagName).toBe(
+				"H5",
+			);
+		});
 	});
 });
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import {
 	ErrorOutlined,
 	InfoOutlined,
@@ -16,7 +16,6 @@ import {
 	styled,
 	Theme,
 	Typography,
-	typographyClasses,
 	TypographyProps,
 	useThemeProps,
 } from "@mui/material";
@@ -137,10 +136,10 @@ const AccordionSummaryStyled = styled(AccordionSummary, {
  * button, so it is no tab stop, has no `aria-expanded`, and the heading can be
  * selected and copied. It lays out its content as MUI's `AccordionSummary`
  * and its content wrapper do: 16px at the sides, at least 12px above and
- * below, centered vertically. A `span`, as the box's `<h3>` around it takes
- * phrasing content. It is focusable but no tab stop (`tabIndex` -1), so it
- * can take over the keyboard focus from the toggle when the box becomes
- * forced.
+ * below, centered vertically. A `span`, as the box's heading element around
+ * it (`headingComponent`) takes phrasing content. It is focusable but no tab
+ * stop (`tabIndex` -1), so it can take over the keyboard focus from the
+ * toggle when the box becomes forced.
  */
 const StaticHeader = styled("span", { name: "CcInfoBox", slot: "summary" })(
 	({ theme }) => ({
@@ -153,18 +152,14 @@ const StaticHeader = styled("span", { name: "CcInfoBox", slot: "summary" })(
 		padding: theme.spacing(1.5, 2),
 		textAlign: "start",
 		"&:focus-visible": HEADER_FOCUS_RING,
-		// The heading's lines are as high as its variant's line height, as in
-		// the toggle. Inline, it would share each line with the header's
-		// content (summaryRoot), whose line height is the page's (e.g. 24px
-		// under CssBaseline): the toggle's content has the button's smaller one.
-		[`& > * > .${typographyClasses.root}`]: {
-			display: "block",
-		},
 	}),
 );
 
-const SummaryRoot = styled("div", { name: "CcInfoBox", slot: "summaryRoot" })(
+// A `span`, as all of the header's content: the toggle is a button, which
+// holds only phrasing content
+const SummaryRoot = styled("span", { name: "CcInfoBox", slot: "summaryRoot" })(
 	({ theme }) => ({
+		display: "block",
 		margin: 0,
 		paddingLeft: theme.spacing(5),
 		// never wider than the header, see the summary's content wrapper
@@ -172,10 +167,21 @@ const SummaryRoot = styled("div", { name: "CcInfoBox", slot: "summaryRoot" })(
 	}),
 );
 
+/**
+ * The heading's text. It is a `span` in every Typography variant (see
+ * `headingVariant`), as the header's content takes phrasing content only and
+ * the box's heading is the element around the header. The `component` it
+ * takes is passed on to `Typography`.
+ */
 const SummaryHeading = styled(Typography, {
 	name: "CcInfoBox",
 	slot: "heading",
-})({
+})<{ component: "span" }>({
+	// a block in every variant: its lines are as high as its variant's line
+	// height, in both headers. Inline, it would share each line with the
+	// header's content (summaryRoot), whose line height is the page's in the
+	// static header (e.g. 24px under CssBaseline).
+	display: "block",
 	// a word wider than the header (a long compound, a file name or a URL on a
 	// phone) breaks inside, so it stays in the box, which clips its content
 	overflowWrap: "anywhere",
@@ -235,12 +241,13 @@ const DetailsText = styled("div", { name: "CcInfoBox", slot: "detailsText" })(
  *   (`AccordionSummary`), or, while `alwaysExpanded` is `true`, a static
  *   `<span>` that looks the same, without MUI's `MuiAccordionSummary-*` and
  *   `MuiButtonBase-root` classes
- * - `summaryRoot`: the header content, the icon column and the heading. It
- *   has `min-width: 0`, as has MUI's content wrapper around it, so it never
- *   grows wider than the header
+ * - `summaryRoot`: the header content, the icon column and the heading, a
+ *   `<span>` with `display: block`. It has `min-width: 0`, as has MUI's
+ *   content wrapper around it, so it never grows wider than the header
  * - `iconButton`: the column with the status icon at the header's left edge
- * - `heading`: the heading `Typography`. It sets `overflow-wrap: anywhere`,
- *   so a word wider than the header breaks inside it
+ * - `heading`: the heading `Typography`, a `<span>` with `display: block` in
+ *   every `headingVariant`. It sets `overflow-wrap: anywhere`, so a word
+ *   wider than the header breaks inside it
  * - `statusName`: the visually hidden status name read before the heading
  * - `details`: the bordered message panel (`AccordionDetails`). It sets
  *   `white-space: pre-line` and `overflow-wrap: anywhere`, which the message
@@ -320,11 +327,11 @@ export interface InfoBoxProps {
 	defaultExpanded?: boolean;
 	/**
 	 * `true` keeps the box open: the message is shown and the user cannot
-	 * collapse it. The header is static then: the heading, still the box's
-	 * `<h3>`, without a toggle button, so it has no `aria-expanded`, is no
-	 * tab stop, its text can be selected and copied, and a click on it calls
-	 * no `onChange`. For a box the user may close, pass `expanded` with
-	 * `onChange`, or `defaultExpanded`, instead.
+	 * collapse it. The header is static then: the heading, still in the box's
+	 * heading element (`headingComponent`), without a toggle button, so it has
+	 * no `aria-expanded`, is no tab stop, its text can be selected and copied,
+	 * and a click on it calls no `onChange`. For a box the user may close,
+	 * pass `expanded` with `onChange`, or `defaultExpanded`, instead.
 	 *
 	 * `false` is the same as not set: the box shows `expanded`, or, without
 	 * it, the user opens and closes it starting at `defaultExpanded`, so a
@@ -361,10 +368,31 @@ export interface InfoBoxProps {
 	/**
 	 * Typography variant of the heading: any variant MUI's `Typography`
 	 * takes, including `"inherit"` and the variants a theme adds through
-	 * `TypographyPropsVariantOverrides`.
+	 * `TypographyPropsVariantOverrides`. It sets only the look (font, size,
+	 * weight, line height): the heading is a `<span>` in every variant, with
+	 * the variant's class (`MuiTypography-<variant>`), and the box's heading
+	 * element and level are set by `headingComponent`. So `"h6"` does not
+	 * make a second heading of level 6, and `"body1"` puts no `<p>` into the
+	 * header button.
 	 * @default "caption"
 	 */
 	headingVariant?: TypographyProps["variant"];
+	/**
+	 * The element of the box's heading, which holds the header (the toggle
+	 * button, or the static header while `alwaysExpanded` is `true`), like
+	 * the `component` of MUI Accordion's `heading` slot. `"h1"` to `"h6"` set
+	 * the heading's level: pick the one that fits the page's outline, e.g.
+	 * `"h2"` for a box right below the page's `<h1>`. Any other element, e.g.
+	 * `"div"`, makes the header no heading, for a box that should not appear
+	 * in the page's outline. It holds the header button, so it must not be
+	 * interactive itself (no `button` or `a`).
+	 *
+	 * The look does not depend on it: MUI's heading slot resets every style
+	 * of the element (`all: unset`), and `headingVariant` sets the heading's
+	 * font.
+	 * @default "h3"
+	 */
+	headingComponent?: React.ElementType;
 	/**
 	 * custom class name to apply to root
 	 */
@@ -433,6 +461,7 @@ const InfoBox = (inProps: InfoBoxProps) => {
 		message,
 		status,
 		headingVariant,
+		headingComponent = "h3",
 		className,
 		classes,
 	} = props;
@@ -499,6 +528,12 @@ const InfoBox = (inProps: InfoBoxProps) => {
 		headerElement.current = null;
 	}, []);
 
+	// the element of MUI's heading slot, which holds the header
+	const accordionSlotProps = useMemo(
+		() => ({ heading: { component: headingComponent } }),
+		[headingComponent],
+	);
+
 	const headerClassName = combineClassNames([classes?.summary, stateClasses]);
 	const headerContent = (
 		<SummaryRoot className={classes?.summaryRoot}>
@@ -507,6 +542,8 @@ const InfoBox = (inProps: InfoBoxProps) => {
 			</SpanIconButton>
 			<SummaryHeading
 				variant={headingVariant ?? "caption"}
+				// the variant sets only the look, see headingVariant
+				component={"span"}
 				className={classes?.heading}
 			>
 				{statusLabel && (
@@ -529,6 +566,7 @@ const InfoBox = (inProps: InfoBoxProps) => {
 			disableGutters
 			expanded={!!alwaysExpanded || !!expanded}
 			onChange={handleChange}
+			slotProps={accordionSlotProps}
 		>
 			{alwaysExpanded ? (
 				// a forced box has nothing to toggle: its header is no button
