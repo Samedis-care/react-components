@@ -462,13 +462,15 @@ describe("RoutedTabs in a form", () => {
 		expect(screen.queryByText("MORE PANEL")).toBeNull();
 		expect(screen.getByDisplayValue("AliceX")).toBeInTheDocument();
 
-		// No stays on the tab with the edit
+		// No stays on the tab with the edit. The prompt leaves the DOM first and hands the
+		// page back (aria-hidden) in an effect after that, so wait for the tabs too
 		fireEvent.click(within(prompt).getByRole("button", { name: "No" }));
-		await waitFor(() =>
+		await waitFor(() => {
 			expect(
 				screen.queryByRole("dialog", { name: "Leave form page?" }),
-			).toBeNull(),
-		);
+			).toBeNull();
+			expect(tabEl("More")).toBeInTheDocument();
+		});
 		expect(h.location.pathname).toBe("/rec");
 		expect(screen.getByDisplayValue("AliceX")).toBeInTheDocument();
 
