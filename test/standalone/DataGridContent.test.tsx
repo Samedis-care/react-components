@@ -218,14 +218,19 @@ const resizerOfLabel = (c: HTMLElement, label: string) =>
 	Array.from(c.querySelectorAll<HTMLElement>(".CcDataGrid-headerCell"))
 		.find((cell) => within(cell).queryByText(label))!
 		.querySelector<HTMLElement>(".probe-resizer")!;
-/** jsdom has no layout: let auto-fit's measuring div report 20px per character */
-const mockMeasureWidth = () =>
+/**
+ * jsdom has no layout (every box is 0px): let auto-fit's measurement report a
+ * data cell's width as 20px per character plus its 2 x 16px padding. A header
+ * cell stays 0px, or with `headers` measures as a data cell with its text does.
+ */
+const mockMeasureWidth = (headers = false) =>
 	vi
-		.spyOn(HTMLElement.prototype, "clientWidth", "get")
-		.mockImplementation(function (this: HTMLElement) {
-			return this.style.left === "-99999px"
-				? (this.textContent ?? "").length * 20
-				: 0;
+		.spyOn(Element.prototype, "getBoundingClientRect")
+		.mockImplementation(function (this: Element) {
+			return this.matches(".CcDataGrid-dataCell") ||
+				(headers && this.matches(".CcDataGrid-headerCell"))
+				? new DOMRect(0, 0, (this.textContent ?? "").length * 20 + 32, 0)
+				: new DOMRect();
 		});
 
 describe("Cell / SelectRow: selection", () => {
@@ -752,6 +757,110 @@ describe("Content / ColumnHeader: widths", () => {
 		// "Al": 2 * 20 + 32; "Alexandra": 9 * 20 + 32
 		expect(probe!.widths.first).toBe(72);
 		expect(probe!.widths["first name"]).toBe(212);
+	});
+
+	it("[ISSUE-3493-ITEM-5] a double click on the resizer of an empty grid keeps the column's width", async () => {
+		mockMeasureWidth();
+		const cols: IDataGridColumnDef[] = [
+			{
+				field: "name",
+				headerName: "Name",
+				type: "string",
+				filterable: true,
+				width: [0, 9999, 300],
+			},
+			{ field: "role", headerName: "Role", type: "string" },
+		];
+		const { container } = render(
+			<Grid columns={cols} loadData={() => ({ rowsTotal: 0, rows: [] })} />,
+		);
+		await screen.findByText("The list does not contain any data.");
+		await sized();
+		fireEvent.doubleClick(resizer(container, "name"));
+		// nothing to measure: no reason to collapse the column to its minimum
+		expect(probe!.widths.name).toBe(300);
+	});
+
+	it("[ISSUE-3493-ITEM-5] a double click on the resizer fits the column to its header where that is wider than the values", async () => {
+		mockMeasureWidth(true);
+		const cols: IDataGridColumnDef[] = [
+			{
+				field: "short",
+				headerName: "A long header",
+				type: "string",
+				width: [0, 9999, 400],
+			},
+			{
+				field: "long",
+				headerName: "Head",
+				type: "string",
+				width: [0, 9999, 400],
+			},
+		];
+		const { container } = render(
+			<Grid
+				columns={cols}
+				loadData={() => ({
+					rowsTotal: 2,
+					rows: [
+						{ id: "1", short: "x1", long: "A long value" },
+						{ id: "2", short: "x2", long: "Value" },
+					],
+				})}
+			/>,
+		);
+		await screen.findByText("A long value");
+		await sized();
+		fireEvent.doubleClick(resizer(container, "short"));
+		fireEvent.doubleClick(resizer(container, "long"));
+		// "A long header": 13 * 20 + 32, wider than "x1"
+		expect(probe!.widths.short).toBe(292);
+		// "A long value": 12 * 20 + 32, wider than "Head"
+		expect(probe!.widths.long).toBe(272);
+	});
+
+	it("[ISSUE-3493-ITEM-5] a double click on the resizer rounds the measured width up to the next pixel", async () => {
+		vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
+			function (this: Element) {
+				return new DOMRect(
+					0,
+					0,
+					this.matches(".CcDataGrid-dataCell") ? 133.25 : 0,
+					0,
+				);
+			},
+		);
+		const { container } = render(<Grid />);
+		await screen.findByText("Alice");
+		await sized();
+		fireEvent.doubleClick(resizer(container, "role"));
+		// 133px would cut the value's last quarter pixel off
+		expect(probe!.widths.role).toBe(134);
+	});
+
+	it("[ISSUE-3493-ITEM-5] a double click on the resizer while the rendered rows are still loading keeps the column's width", async () => {
+		mockMeasureWidth(true);
+		const cols: IDataGridColumnDef[] = [
+			{
+				field: "name",
+				headerName: "Name",
+				type: "string",
+				width: [0, 9999, 300],
+			},
+		];
+		// 40 rows, none of them loaded yet: every rendered row is a skeleton
+		const { container } = render(
+			<Grid columns={cols} loadData={() => ({ rowsTotal: 40, rows: [] })} />,
+		);
+		await sized();
+		await waitFor(() =>
+			expect(
+				container.querySelector(".CcDataGrid-dataCell .MuiSkeleton-root"),
+			).not.toBeNull(),
+		);
+		fireEvent.doubleClick(resizer(container, "name"));
+		// the header alone is no reason to change the width
+		expect(probe!.widths.name).toBe(300);
 	});
 });
 

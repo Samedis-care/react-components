@@ -1398,6 +1398,119 @@ export const Issue3492Item1SearchKeepsControlledSelection: Story = {
 	},
 };
 
+/** The header content of a column (`column-header-<field>`) */
+const headerOf = (root: HTMLElement, field: string) =>
+	root.querySelector<HTMLElement>(`[class~="column-header-${field}"]`)!;
+
+const LONG_VALUE = "A very long value that needs quite a lot of room to show";
+const AUTO_FIT_COLUMNS: IDataGridColumnDef[] = [
+	{
+		field: "value",
+		headerName: "Value",
+		type: "string",
+		width: [0, 2000, 150],
+	},
+	{
+		field: "short",
+		headerName: "A rather long column header text",
+		type: "string",
+		width: [0, 2000, 400],
+	},
+];
+const loadAutoFitRows = (): DataGridData => ({
+	rowsTotal: 3,
+	rows: ["1", "2", "3"].map((id) => ({
+		id,
+		value: id === "1" ? LONG_VALUE : `Value ${id}`,
+		short: `x${id}`,
+	})),
+});
+const AUTO_FIT_CLASSES = {
+	columnHeaderResizer: "story-resizer",
+	columnHeaderLabel: "story-header-label",
+};
+/** The width of a column's header cell, in px */
+const columnWidth = (root: HTMLElement, field: string) =>
+	parseFloat(
+		headerOf(root, field).closest<HTMLElement>(".CcDataGrid-headerCell")!.style
+			.width,
+	);
+
+/**
+ * ISSUE-3493-ITEM-5: a double click on a resize handle fits the column to its
+ * header and its widest value. "A rather long column header text" (values
+ * "x1"…) keeps room for its header, and the long value shows in full, without
+ * an ellipsis.
+ */
+export const Issue3493Item5AutoFitFitsHeaderAndValues: Story = {
+	args: {
+		columns: AUTO_FIT_COLUMNS,
+		loadData: loadAutoFitRows,
+		classes: AUTO_FIT_CLASSES,
+	},
+	play: async ({ canvas, canvasElement }) => {
+		const cell = (await canvas.findByText(LONG_VALUE)).closest<HTMLElement>(
+			".CcDataGrid-dataCell",
+		)!;
+		const fit = async (field: string, before: number) => {
+			await userEvent.dblClick(
+				headerOf(canvasElement, field).querySelector(".story-resizer")!,
+			);
+			await waitFor(() =>
+				expect(columnWidth(canvasElement, field)).not.toBe(before),
+			);
+		};
+		await fit("short", 400);
+		// the label's text, which cuts itself off with an ellipsis
+		const label = within(headerOf(canvasElement, "short")).getByText(
+			"A rather long column header text",
+		);
+		await expect(
+			label.scrollWidth,
+			"the fitted header is cut off",
+		).toBeLessThanOrEqual(label.clientWidth);
+		await fit("value", 150);
+		await expect(
+			cell.scrollWidth,
+			"the fitted value is cut off",
+		).toBeLessThanOrEqual(cell.clientWidth);
+	},
+};
+
+/**
+ * ISSUE-3493-ITEM-5: the fit makes room for the whole header of a sorted,
+ * filterable column: its label, sort arrow, sort priority and filter button
+ */
+export const Issue3493Item5AutoFitFitsSortedFilterableHeader: Story = {
+	args: {
+		columns: AUTO_FIT_COLUMNS.map((column) =>
+			column.field === "short"
+				? { ...column, sortable: true, filterable: true }
+				: column,
+		),
+		loadData: loadAutoFitRows,
+		classes: AUTO_FIT_CLASSES,
+		defaultSort: [{ field: "short", direction: 1 }],
+	},
+	play: async ({ canvas, canvasElement }) => {
+		await canvas.findByText(LONG_VALUE);
+		const header = headerOf(canvasElement, "short");
+		await expect(within(header).getByText("1")).toBeVisible();
+		await userEvent.dblClick(header.querySelector(".story-resizer")!);
+		await waitFor(() =>
+			expect(columnWidth(canvasElement, "short")).not.toBe(400),
+		);
+		// the label is the one part of the header that gives way to the others
+		const label = within(header).getByRole("button", {
+			name: "A rather long column header text",
+		});
+		await expect(
+			label.scrollWidth,
+			"the fitted header is cut off",
+		).toBeLessThanOrEqual(label.clientWidth);
+	},
+};
+
 /**
  * ISSUE-3493-ITEM-13: every row checkbox is named after its row ("Select Alice Müller"),
  * so a screen reader user can tell which row it selects. axe's label rule runs on

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef } from "react";
+import { skeletonClasses } from "@mui/material";
 import isTouchDevice from "../../../utils/isTouchDevice";
 import combineClassNames from "../../../utils/combineClassNames";
 import {
@@ -34,6 +35,30 @@ export const applyColumnWidthLimits = (
 	targetWidth = Math.min(targetWidth, wishMaxWidth);
 	return targetWidth;
 };
+
+/**
+ * Measures the width each cell needs to show its content in full: the cell's
+ * border box, padding and border included, with the content at its
+ * max-content width. The cells get `width: max-content` for one layout pass
+ * and their own widths back before the browser paints.
+ * @param cells The cells to measure
+ * @returns The widths in px, unrounded, in the order of `cells`
+ */
+const measureContentWidths = (cells: HTMLElement[]): number[] => {
+	const widths = cells.map((cell) => cell.style.width);
+	cells.forEach((cell) => (cell.style.width = "max-content"));
+	const measured = cells.map((cell) => cell.getBoundingClientRect().width);
+	cells.forEach((cell, index) => (cell.style.width = widths[index]));
+	return measured;
+};
+
+/**
+ * Does a data cell show a value? A row that is still loading shows a
+ * skeleton instead (see Cell).
+ * @param cell The data cell
+ */
+const showsValue = (cell: HTMLElement): boolean =>
+	!cell.firstElementChild?.classList.contains(skeletonClasses.root);
 
 const FallbackColumnState: IDataGridColumnState = {
 	sort: 0,
@@ -211,35 +236,38 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 		(newFilter: IFilterDef) => onFilterChange(field, newFilter),
 		[field, onFilterChange],
 	);
-	const autoResize = useCallback(() => {
-		const root = gridRoot.current;
-		if (!root) return;
+	// fits the column to its header (label, sort arrow and priority, filter
+	// button) and its values in the rendered rows; rows scrolled out of view
+	// are not rendered, so they don't count
+	const autoResize = useCallback(
+		(evt: React.MouseEvent<HTMLElement>) => {
+			const root = gridRoot.current;
+			if (!root) return;
 
-		let width = 0;
+			// the column's rendered data cells that show a value, by their
+			// data-field (see Cell). A string comparison, not a selector built from
+			// the field: a field may contain dots, spaces, quotes and other
+			// characters selectors treat specially
+			const cells = Array.from(
+				root.querySelectorAll<HTMLElement>(".CcDataGrid-dataCell"),
+			).filter((cell) => cell.dataset.field === field && showsValue(cell));
+			// no values (an empty grid, rows still loading): nothing to fit the
+			// column to, so its width stays
+			if (cells.length === 0) return;
+			const header = evt.currentTarget.closest<HTMLElement>(
+				".CcDataGrid-headerCell",
+			);
+			if (header) cells.push(header);
 
-		// the column's rendered data cells, by their data-field (see Cell). A
-		// string comparison, not a selector built from the field: a field may
-		// contain dots, spaces, quotes and other characters selectors treat specially
-		const cells = Array.from(
-			root.querySelectorAll<HTMLElement>(".CcDataGrid-dataCell"),
-		).filter((cell) => cell.dataset.field === field);
-		cells.forEach((entry) => {
-			const widthMeasurement = document.createElement("div");
-			widthMeasurement.style.display = "inline";
-			widthMeasurement.style.position = "absolute";
-			widthMeasurement.style.left = "-99999px";
-			widthMeasurement.style.height = getComputedStyle(entry).height;
-			widthMeasurement.innerHTML = entry.innerHTML;
-			document.body.appendChild(widthMeasurement);
-			const entryWidth = widthMeasurement.clientWidth + HEADER_PADDING;
-			document.body.removeChild(widthMeasurement);
-			width = Math.max(width, entryWidth);
-		});
-		setColumnWidthState((prevState) => ({
-			...prevState,
-			[field]: applyColumnWidthLimits(column, width),
-		}));
-	}, [column, field, gridRoot, setColumnWidthState]);
+			// rounded up: a width cut to the pixel below ends the text in an ellipsis
+			const width = Math.ceil(Math.max(...measureContentWidths(cells)));
+			setColumnWidthState((prevState) => ({
+				...prevState,
+				[field]: applyColumnWidthLimits(column, width),
+			}));
+		},
+		[column, field, gridRoot, setColumnWidthState],
+	);
 
 	useEffect(() => {
 		document.addEventListener("mousemove", onDrag);

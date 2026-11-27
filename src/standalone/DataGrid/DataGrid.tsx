@@ -664,7 +664,13 @@ export interface IDataGridColumnDef {
 	 */
 	isLocked?: boolean;
 	/**
-	 * Column width configuration
+	 * Column width configuration, in px. The user resizes a column by dragging
+	 * the handle at the right edge of its header, within minWidth and maxWidth
+	 * (and to at least 64px, 96px when filterable, unless maxWidth is less).
+	 * A double click on the handle fits the column to its header and to its
+	 * values in the rendered rows (rows scrolled out of view are not rendered,
+	 * so they don't count); with no values to fit (an empty grid, rows still
+	 * loading) the width stays.
 	 */
 	width?: [minWidth: number, maxWidth: number, initialWidth?: number];
 }

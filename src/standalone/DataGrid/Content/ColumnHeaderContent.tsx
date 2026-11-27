@@ -41,9 +41,11 @@ export interface IDataGridContentColumnHeaderContentProps {
 	 */
 	startDrag: (evt: React.MouseEvent) => void;
 	/**
-	 * Automatic resize callback
+	 * Called on a double click on the resize handle: fits the column to its
+	 * content
+	 * @param evt The double click event; its currentTarget is the handle
 	 */
-	autoResize: () => void;
+	autoResize: (evt: React.MouseEvent<HTMLElement>) => void;
 	/**
 	 * Can the column be sorted? The label is then a sort button, else a tab
 	 * stop when it is a string.
