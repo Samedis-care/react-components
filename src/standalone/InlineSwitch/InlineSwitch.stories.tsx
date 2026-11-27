@@ -711,11 +711,16 @@ const WrapCases = () => (
 			{ id: "rtl", label: LONG_SENTENCE_RTL, dir: "rtl" },
 		].map(({ id, label, dir }) => (
 			<div key={id} data-testid={id} dir={dir} style={{ display: "flow-root" }}>
-				<InlineSwitch value={false} visible label={label} />
+				<InlineSwitch value={false} visible label={label} onChange={ignore} />
 			</div>
 		))}
 		<div data-testid="nolabel" style={{ display: "flow-root" }}>
-			<InlineSwitch value={false} visible aria-label="Show archived" />
+			<InlineSwitch
+				value={false}
+				visible
+				aria-label="Show archived"
+				onChange={ignore}
+			/>
 		</div>
 		<div data-testid="multi" style={{ display: "flow-root" }}>
 			<MultiSelectWithoutGroup<MultiSelectorData>
@@ -846,39 +851,5 @@ export const Issue3465Item14LabelWrapsBesideTheSwitch: Story = {
 		await expect(page.scrollWidth, "no sideways scroll").toBeLessThanOrEqual(
 			page.clientWidth,
 		);
-	},
-};
-
-const WithoutOnChangeDemo = () => (
-	<div style={{ width: 300 }}>
-		<button type="button">Before</button>
-		<InlineSwitch value visible label="Without onChange" />
-		<div style={{ clear: "both" }} />
-		<button type="button">After</button>
-	</div>
-);
-
-export const Issue3465Item15WithoutOnChangeIsDisabled: StoryObj<
-	typeof WithoutOnChangeDemo
-> = {
-	parameters: {
-		a11y: { test: "error" },
-		docs: {
-			description: {
-				story:
-					"ISSUE-3465-ITEM-15: a switch without `onChange` is disabled, as with `disabled`: switch and label are greyed out, Tab skips the switch, and a click on its label leaves it as it is. It still shows its state.",
-			},
-		},
-	},
-	render: () => <WithoutOnChangeDemo />,
-	play: async ({ canvas, userEvent }) => {
-		const sw = canvas.getByRole("switch", { name: "Without onChange" });
-		await expect(sw).toBeDisabled();
-		await expect(sw).toBeChecked();
-		canvas.getByRole("button", { name: "Before" }).focus();
-		await userEvent.tab();
-		await expect(canvas.getByRole("button", { name: "After" })).toHaveFocus();
-		await userEvent.click(canvas.getByText("Without onChange"));
-		await expect(sw).toBeChecked();
 	},
 };

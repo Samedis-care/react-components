@@ -32,6 +32,9 @@ const theme = createTheme();
 const renderSwitch = (ui: React.ReactElement, t: Theme = theme) =>
 	render(<ThemeProvider theme={t}>{ui}</ThemeProvider>);
 
+/** the handler of a switch whose toggles the test does not look at */
+const ignore = () => {};
+
 /** lets the promises started by the last event (option loads) settle */
 const flush = () => act(() => Promise.resolve());
 
@@ -51,28 +54,46 @@ const switchRootOf = (container: HTMLElement) => {
 describe("InlineSwitch", () => {
 	it("renders without crashing", () => {
 		const { container } = renderSwitch(
-			<InlineSwitch value={false} visible={true} />,
+			<InlineSwitch value={false} visible={true} onChange={ignore} />,
 		);
 		expect(container.firstChild).toBeInTheDocument();
 	});
 
 	it("renders the switch input when visible=true", () => {
-		renderSwitch(<InlineSwitch value={false} visible={true} label="Toggle" />);
+		renderSwitch(
+			<InlineSwitch
+				value={false}
+				visible={true}
+				label="Toggle"
+				onChange={ignore}
+			/>,
+		);
 		expect(screen.getByRole("switch")).toBeInTheDocument();
 	});
 
 	it("does not render the switch when visible=false", () => {
-		renderSwitch(<InlineSwitch value={false} visible={false} label="Toggle" />);
+		renderSwitch(
+			<InlineSwitch
+				value={false}
+				visible={false}
+				label="Toggle"
+				onChange={ignore}
+			/>,
+		);
 		expect(screen.queryByRole("switch")).not.toBeInTheDocument();
 	});
 
 	it("reflects checked state when value=true", () => {
-		renderSwitch(<InlineSwitch value={true} visible={true} />);
+		renderSwitch(
+			<InlineSwitch value={true} visible={true} onChange={ignore} />,
+		);
 		expect(screen.getByRole("switch")).toBeChecked();
 	});
 
 	it("reflects unchecked state when value=false", () => {
-		renderSwitch(<InlineSwitch value={false} visible={true} />);
+		renderSwitch(
+			<InlineSwitch value={false} visible={true} onChange={ignore} />,
+		);
 		expect(screen.getByRole("switch")).not.toBeChecked();
 	});
 
@@ -98,14 +119,19 @@ describe("InlineSwitch", () => {
 
 	it("renders the label text", () => {
 		renderSwitch(
-			<InlineSwitch value={false} visible={true} label="Feature flag" />,
+			<InlineSwitch
+				value={false}
+				visible={true}
+				label="Feature flag"
+				onChange={ignore}
+			/>,
 		);
 		expect(screen.getByText("Feature flag")).toBeInTheDocument();
 	});
 
 	it("renders children", () => {
 		renderSwitch(
-			<InlineSwitch value={true} visible={true}>
+			<InlineSwitch value={true} visible={true} onChange={ignore}>
 				<span data-testid="child-content">Child</span>
 			</InlineSwitch>,
 		);
@@ -116,7 +142,12 @@ describe("InlineSwitch", () => {
 	// take any React node, as on any MUI container
 	it("[ISSUE-3465-ITEM-8] a conditional child is rendered while its condition holds, and the content stays empty while it does not", () => {
 		const Entries = ({ show }: { show: boolean }) => (
-			<InlineSwitch value={false} visible label="Show inactive">
+			<InlineSwitch
+				value={false}
+				visible
+				label="Show inactive"
+				onChange={ignore}
+			>
 				{show && (
 					<ul aria-label="Entries">
 						<li>Alpha</li>
@@ -142,20 +173,20 @@ describe("InlineSwitch", () => {
 	it("[ISSUE-3465-ITEM-8] takes text, a number, several sibling elements, null and undefined as children", () => {
 		const { container } = renderSwitch(
 			<>
-				<InlineSwitch value={false} visible={false}>
+				<InlineSwitch value={false} visible={false} onChange={ignore}>
 					No entries
 				</InlineSwitch>
-				<InlineSwitch value={false} visible={false}>
+				<InlineSwitch value={false} visible={false} onChange={ignore}>
 					{3}
 				</InlineSwitch>
-				<InlineSwitch value={false} visible={false}>
+				<InlineSwitch value={false} visible={false} onChange={ignore}>
 					<span>Alpha</span>
 					<span>Beta</span>
 				</InlineSwitch>
-				<InlineSwitch value={false} visible={false}>
+				<InlineSwitch value={false} visible={false} onChange={ignore}>
 					{null}
 				</InlineSwitch>
-				<InlineSwitch value={false} visible={false}>
+				<InlineSwitch value={false} visible={false} onChange={ignore}>
 					{undefined}
 				</InlineSwitch>
 			</>,
@@ -174,7 +205,7 @@ describe("InlineSwitch", () => {
 	});
 
 	it("does not throw when onChange is undefined and switch is clicked", () => {
-		renderSwitch(<InlineSwitch value={false} visible={true} />);
+		renderSwitch(<InlineSwitch value={false} visible={true} disabled />);
 		expect(() => fireEvent.click(screen.getByRole("switch"))).not.toThrow();
 	});
 });
@@ -199,6 +230,7 @@ describe("InlineSwitch label and name", () => {
 			<>
 				<span id="switch-help">Only inactive entries are listed</span>
 				<InlineSwitch
+					onChange={ignore}
 					value={false}
 					visible
 					slotProps={{
@@ -227,7 +259,13 @@ describe("InlineSwitch label and name", () => {
 		renderSwitch(
 			<>
 				<span id="switch-help">Only inactive entries are listed</span>
-				<InlineSwitch value={false} visible {...name} {...description} />
+				<InlineSwitch
+					value={false}
+					visible
+					{...name}
+					{...description}
+					onChange={ignore}
+				/>
 			</>,
 		);
 		const sw = screen.getByRole("switch");
@@ -266,66 +304,80 @@ describe("InlineSwitch label and name", () => {
 });
 
 describe("InlineSwitch controlled value", () => {
-	it("[ISSUE-3465-ITEM-15] without onChange the switch is disabled instead of an operable-looking control that ignores input", () => {
-		renderSwitch(<InlineSwitch value={false} visible label="Inert" />);
-		expect(screen.getByRole("switch", { name: "Inert" })).toBeDisabled();
-	});
-
-	it("[ISSUE-3465-ITEM-15] without onChange the label is greyed out as a disabled switch's, while the root's disabled class still follows only disabled", () => {
-		const { container } = renderSwitch(
-			<InlineSwitch value visible label="Inert" />,
+	it("[ISSUE-3465-ITEM-15] a switch without onChange does not compile unless it is disabled, so no switch looks operable while it ignores every toggle", () => {
+		// checked by tsc (tsconfig-test.json)
+		const withoutOnChange = () => (
+			// @ts-expect-error a switch the user can toggle needs onChange
+			<InlineSwitch value={false} visible label="No handler" />
 		);
-		expect(rootOf(container).firstElementChild).toHaveClass(
-			"CcInlineSwitch-disabled",
+		const notDisabled = () => (
+			// @ts-expect-error disabled={false} still needs onChange
+			<InlineSwitch
+				value={false}
+				visible
+				label="Not disabled"
+				disabled={false}
+			/>
 		);
-		expect(rootOf(container)).not.toHaveClass("CcInlineSwitch-disabled");
-		// the state is still shown
-		expect(screen.getByRole("switch", { name: "Inert" })).toBeChecked();
-	});
-
-	it("[ISSUE-3465-ITEM-15] an onChange given after mount enables the switch, and taking it away disables it again", () => {
-		const onChange = vi.fn();
-		const ui = (handler?: (checked: boolean) => void) => (
-			<ThemeProvider theme={theme}>
-				<InlineSwitch value={false} visible label="L" onChange={handler} />
-			</ThemeProvider>
+		const maybeDisabled = (disabled: boolean) => (
+			// @ts-expect-error a boolean disabled can be false, so it still needs onChange
+			<InlineSwitch value={false} visible label="Maybe" disabled={disabled} />
 		);
-		const { rerender } = render(ui());
-		const sw = screen.getByRole("switch", { name: "L" });
-		expect(sw).toBeDisabled();
-
-		rerender(ui(onChange));
-		expect(sw).toBeEnabled();
-		fireEvent.click(sw);
-		expect(onChange).toHaveBeenCalledExactlyOnceWith(true);
-
-		rerender(ui());
-		expect(sw).toBeDisabled();
-	});
-
-	it("[ISSUE-3465-ITEM-15] MultiSelectWithoutGroup's switch is disabled without setSwitchValue, and enabled with it", () => {
-		const shared = {
-			label: "Departments",
-			selected: [],
-			onSelect: () => {},
-			loadDataOptions: selectorLocalLoadHandler([]),
-			displaySwitch: true as const,
-			switchValue: false,
-		};
+		const Parent = styled(InlineSwitch)({});
+		const styledWithoutOnChange = () => (
+			// @ts-expect-error a styled InlineSwitch needs onChange too
+			<Parent value={false} visible label="Styled" />
+		);
+		expectTypeOf<{
+			value: boolean;
+			visible: boolean;
+		}>().not.toExtend<InlineSwitchProps>();
+		expectTypeOf<{
+			value: boolean;
+			visible: boolean;
+			disabled: true;
+		}>().toExtend<InlineSwitchProps>();
+		expectTypeOf<{
+			value: boolean;
+			visible: boolean;
+			disabled: boolean;
+			onChange: (checked: boolean) => void;
+		}>().toExtend<InlineSwitchProps>();
 		renderSwitch(
 			<>
-				<MultiSelectWithoutGroup {...shared} switchLabel="Without setter" />
-				<MultiSelectWithoutGroup
-					{...shared}
-					switchLabel="With setter"
-					setSwitchValue={() => {}}
-				/>
+				{withoutOnChange()}
+				{notDisabled()}
+				{maybeDisabled(false)}
+				{styledWithoutOnChange()}
 			</>,
 		);
-		expect(
-			screen.getByRole("switch", { name: "Without setter" }),
-		).toBeDisabled();
-		expect(screen.getByRole("switch", { name: "With setter" })).toBeEnabled();
+	});
+
+	it("[ISSUE-3465-ITEM-15] a disabled switch needs no onChange: it shows its value and cannot be toggled, and a switch with a boolean disabled and onChange toggles while enabled", () => {
+		const onChange = vi.fn();
+		const withFlag = (disabled: boolean) => (
+			<InlineSwitch
+				value={false}
+				visible
+				label="With handler"
+				disabled={disabled}
+				onChange={onChange}
+			/>
+		);
+		renderSwitch(
+			<>
+				<InlineSwitch value visible label="Read only" disabled />
+				{withFlag(false)}
+			</>,
+		);
+		const readOnly = screen.getByRole("switch", { name: "Read only" });
+		expect(readOnly).toBeDisabled();
+		expect(readOnly).toBeChecked();
+		fireEvent.click(screen.getByText("Read only"));
+		expect(readOnly).toBeChecked();
+
+		fireEvent.click(screen.getByRole("switch", { name: "With handler" }));
+		expect(onChange).toHaveBeenCalledExactlyOnceWith(true);
 	});
 });
 
@@ -333,6 +385,7 @@ describe("InlineSwitch styling and theme", () => {
 	it("[ISSUE-3465-ITEM-3] classes.switch lands on the switch", () => {
 		const { container } = renderSwitch(
 			<InlineSwitch
+				onChange={ignore}
 				value={false}
 				visible
 				label="L"
@@ -344,7 +397,7 @@ describe("InlineSwitch styling and theme", () => {
 
 	it("[ISSUE-3465-ITEM-2] the slots carry static CcInlineSwitch-root, -switchWrapper and -switch classes", () => {
 		const { container } = renderSwitch(
-			<InlineSwitch value={false} visible label="L" />,
+			<InlineSwitch value={false} visible label="L" onChange={ignore} />,
 		);
 		expect(rootOf(container)).toHaveClass("CcInlineSwitch-root");
 		expect(rootOf(container).firstElementChild).toHaveClass(
@@ -359,7 +412,7 @@ describe("InlineSwitch styling and theme", () => {
 			"& .CcInlineSwitch-switch": { marginLeft: 6 },
 		});
 		const { container } = renderSwitch(
-			<Parent value={false} visible label="L" />,
+			<Parent value={false} visible label="L" onChange={ignore} />,
 		);
 		const wrapper = rootOf(container).firstElementChild!;
 		expect(getComputedStyle(wrapper).paddingLeft).toBe("5px");
@@ -390,6 +443,7 @@ describe("InlineSwitch styling and theme", () => {
 		rerender(
 			<ThemeProvider theme={theme}>
 				<InlineSwitch
+					onChange={ignore}
 					value={false}
 					visible={false}
 					className="c"
@@ -422,8 +476,8 @@ describe("InlineSwitch styling and theme", () => {
 		});
 		const { container } = renderSwitch(
 			<>
-				<InlineSwitch value={true} visible label="On" />
-				<InlineSwitch value={false} visible={false} />
+				<InlineSwitch value={true} visible label="On" onChange={ignore} />
+				<InlineSwitch value={false} visible={false} onChange={ignore} />
 				<InlineSwitch value={false} visible disabled label="Off" />
 			</>,
 			t,

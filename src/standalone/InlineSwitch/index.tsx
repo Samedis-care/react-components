@@ -6,22 +6,17 @@ import addSlotAttributes from "../../utils/internal/addSlotAttributes";
 /**
  * Props of {@link InlineSwitch}. Theme defaults go in
  * `theme.components.CcInlineSwitch.defaultProps`.
+ *
+ * `onChange` is required unless `disabled` is true: a switch without a handler
+ * has to be disabled, or it would look and be announced as operable while it
+ * ignores every toggle.
  */
-export interface InlineSwitchProps {
+export type InlineSwitchProps = {
 	/**
 	 * Value for switch position. While true, the root has the class
 	 * `CcInlineSwitch-checked`.
 	 */
 	value: boolean;
-	/**
-	 * Called when the user toggles the switch (a click on the switch or its label,
-	 * or Space while it has focus), with the new state; not called when `value`
-	 * changes. Without it the switch is disabled, as with `disabled`: nothing would
-	 * take its toggles, so it does not offer them.
-	 * @param checked The new state of the switch (`!value`)
-	 * @default none: the switch is disabled
-	 */
-	onChange?: (checked: boolean) => void;
 	/**
 	 * Display switch control? While true, the root has the class
 	 * `CcInlineSwitch-visible`.
@@ -54,15 +49,6 @@ export interface InlineSwitchProps {
 	 * @default none
 	 */
 	"aria-describedby"?: string;
-	/**
-	 * Disables the switch: it cannot be focused or toggled, also not through
-	 * its label, `onChange` is not called, and switch and label are greyed out.
-	 * While true, the root and the switch wrapper have the class
-	 * `CcInlineSwitch-disabled`. A switch without `onChange` is disabled in the
-	 * same way; there only the switch wrapper has the class.
-	 * @default false
-	 */
-	disabled?: boolean;
 	/**
 	 * Content of the container, rendered in a `<div>` whether or not `visible` is
 	 * set. Any React node, as on MUI's containers: an element, text, a number,
@@ -97,7 +83,41 @@ export interface InlineSwitchProps {
 	slotProps?: {
 		input?: React.InputHTMLAttributes<HTMLInputElement>;
 	};
-}
+} & (
+	| {
+			/**
+			 * Called when the user toggles the switch (a click on the switch or its
+			 * label, or Space while it has focus), with the new state; not called when
+			 * `value` changes. Required unless `disabled` is true.
+			 * @param checked The new state of the switch (`!value`)
+			 */
+			onChange: (checked: boolean) => void;
+			/**
+			 * Disables the switch: it cannot be focused or toggled, also not through
+			 * its label, `onChange` is not called, and switch and label are greyed out.
+			 * While true, the root and the switch wrapper have the class
+			 * `CcInlineSwitch-disabled`.
+			 * @default false
+			 */
+			disabled?: boolean;
+	  }
+	| {
+			/**
+			 * Called when the user toggles the switch, with the new state. Optional while
+			 * `disabled` is true, as a disabled switch is not toggled.
+			 * @param checked The new state of the switch (`!value`)
+			 * @default none
+			 */
+			onChange?: (checked: boolean) => void;
+			/**
+			 * Disables the switch: it cannot be focused or toggled, also not through
+			 * its label, and switch and label are greyed out. The root and the switch
+			 * wrapper have the class `CcInlineSwitch-disabled`. A switch without
+			 * `onChange` must be disabled.
+			 */
+			disabled: true;
+	  }
+);
 
 const AntSwitch = styled(Switch, { name: "CcInlineSwitch", slot: "switch" })(
 	({ theme }) => ({
@@ -228,9 +248,8 @@ const StyledSwitchWrapper = styled(Typography, {
  * state classes on the root instead: `CcInlineSwitch-checked` while `value`
  * is true, `CcInlineSwitch-visible` while `visible` is true and
  * `CcInlineSwitch-disabled` while `disabled` is true (the switch wrapper has
- * that one too, also while the switch is disabled for want of `onChange`). A
- * theme styles a state with a selector in the root's override, e.g.
- * `root: { "&.CcInlineSwitch-checked": { … } }`.
+ * that one too). A theme styles a state with a selector in the root's
+ * override, e.g. `root: { "&.CcInlineSwitch-checked": { … } }`.
  */
 export type InlineSwitchClassKey = "switch" | "root" | "switchWrapper";
 
@@ -264,15 +283,11 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 		[slotProps, ariaLabel, ariaLabelledBy, ariaDescribedBy],
 	);
 
-	// a switch whose toggles nothing takes would look and be announced as operable
-	// while ignoring them: without onChange it is disabled
-	const switchDisabled = !!disabled || !onChange;
-
 	const handleSwitchChange = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
 			// a click event dispatched on the disabled input by a script can still reach React
-			if (disabled || !onChange) return;
-			onChange(event.target.checked);
+			if (disabled) return;
+			if (onChange) onChange(event.target.checked);
 		},
 		[onChange, disabled],
 	);
@@ -294,7 +309,7 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 					className={combineClassNames([
 						SWITCH_WRAPPER_CLASS,
 						classes?.switchWrapper,
-						switchDisabled && DISABLED_CLASS,
+						disabled && DISABLED_CLASS,
 					])}
 					variant={"caption"}
 				>
@@ -304,7 +319,7 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 								className={combineClassNames([SWITCH_CLASS, classes?.switch])}
 								checked={value}
 								onChange={handleSwitchChange}
-								disabled={switchDisabled}
+								disabled={disabled}
 								// the focus ring shows focus; the ripple would pulse under it endlessly
 								disableFocusRipple
 								slotProps={switchSlotProps}
@@ -325,9 +340,9 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
  * inside one (its `displaySwitch`/`switchLabel`), and `MultiSelectWithoutGroup`
  * one around its chips, mostly with `visible={false}`.
  *
- * The switch is controlled: pass `value` and `onChange`; without `onChange` it
- * is disabled. The root has a 15px top margin (`styled(InlineSwitch)` or
- * `styleOverrides.root` can change it).
+ * The switch is controlled: pass `value` and `onChange`, or `disabled` for a
+ * switch the user cannot toggle. The root has a 15px top margin
+ * (`styled(InlineSwitch)` or `styleOverrides.root` can change it).
  *
  * The switch takes its colors from the theme's palette, through its CSS
  * variables if it has them: off, a `text.secondary` thumb on a

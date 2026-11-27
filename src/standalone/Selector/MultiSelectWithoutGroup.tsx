@@ -61,10 +61,8 @@ export type MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> =
 		 */
 		switchValue?: boolean;
 		/**
-		 * Called when the user toggles the switch (`displaySwitch`), with its new state.
-		 * Without it the switch is disabled.
-		 * @param checked The new state of the switch (`!switchValue`)
-		 * @default none: the switch is disabled
+		 * Set value for switch position
+		 * @param checked The value of switch input
 		 */
 		setSwitchValue?: (checked: boolean) => void;
 		/**
