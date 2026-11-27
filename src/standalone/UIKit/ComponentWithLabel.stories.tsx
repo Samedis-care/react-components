@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect } from "storybook/test";
+import { expect, fn } from "storybook/test";
 import { Box, IconButton } from "@mui/material";
 import {
 	Build as BuildIcon,
@@ -28,6 +28,7 @@ const meta: Meta<typeof ComponentWithLabel> = {
 	args: {
 		labelText: "Export",
 		labelPlacement: "bottom",
+		onClick: fn(),
 		control: (
 			<IconButton aria-label={"Export"} color={"primary"}>
 				<ExportIcon />
@@ -61,6 +62,27 @@ export const WithCheckbox: Story = {
 		await expect(box).toBeChecked();
 		await userEvent.click(canvas.getByText("Show archived"));
 		await expect(box).not.toBeChecked();
+	},
+};
+
+export const Issue3482Item14OnClickOncePerClick: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3482-ITEM-14: `onClick` runs once for a click on the caption, which the label forwards to the button, once for a click on the button and once for Enter on it.",
+			},
+		},
+	},
+	play: async ({ args, canvas, userEvent }) => {
+		await userEvent.click(canvas.getByText("Export"));
+		await expect(args.onClick).toHaveBeenCalledOnce();
+		const button = canvas.getByRole("button", { name: "Export" });
+		await userEvent.click(button);
+		await expect(args.onClick).toHaveBeenCalledTimes(2);
+		await expect(button).toHaveFocus();
+		await userEvent.keyboard("{Enter}");
+		await expect(args.onClick).toHaveBeenCalledTimes(3);
 	},
 };
 

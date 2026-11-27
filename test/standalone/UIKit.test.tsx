@@ -7,8 +7,15 @@ import {
 	isInaccessible,
 	render,
 	screen,
+	within,
 } from "@testing-library/react";
-import { Button, createTheme, Theme, ThemeProvider } from "@mui/material";
+import {
+	Button,
+	createTheme,
+	IconButton,
+	Theme,
+	ThemeProvider,
+} from "@mui/material";
 import { Home as HomeIcon, Save as SaveIcon } from "@mui/icons-material";
 import ActionButton from "../../src/standalone/UIKit/ActionButton";
 import SubActionButton from "../../src/standalone/UIKit/SubActionButton";
@@ -23,6 +30,7 @@ import { TextFieldCC } from "../../src/standalone/UIKit/MuiFieldState";
 import DecimalInputField from "../../src/standalone/UIKit/InputControls/DecimalInputField";
 import CurrencyInput from "../../src/standalone/UIKit/InputControls/CurrencyInput";
 import IntegerInputField from "../../src/standalone/UIKit/InputControls/IntegerInputField";
+import ActionBarView from "../../src/standalone/DataGrid/Header/ActionBarView";
 import ccI18n from "../../src/i18n";
 import {
 	configureErrorReporting,
@@ -93,6 +101,23 @@ const applied = (el: Element, property: string): string[] => {
 	}
 	return values;
 };
+
+/** md and up, where the DataGrid header uses ComponentWithLabel */
+const stubWideScreen = () =>
+	vi.stubGlobal(
+		"matchMedia",
+		(query: string) =>
+			({
+				matches: true,
+				media: query,
+				onchange: null,
+				addListener: () => {},
+				removeListener: () => {},
+				addEventListener: () => {},
+				removeEventListener: () => {},
+				dispatchEvent: () => false,
+			}) as MediaQueryList,
+	);
 
 describe("UIKit", () => {
 	describe("ActionButton", () => {
@@ -906,6 +931,150 @@ describe("UIKit", () => {
 				border: systemColor("GrayText"),
 				tick: systemColor("GrayText"),
 			});
+		});
+	});
+
+	describe("ComponentWithLabel", () => {
+		it("runs the control's own onClick once per click on the caption", () => {
+			// the DataGrid footer pattern
+			const onClick = vi.fn();
+			wrap(
+				<ComponentWithLabel
+					control={
+						<IconButton aria-label={"Export"} onClick={onClick}>
+							<HomeIcon />
+						</IconButton>
+					}
+					labelText={"Export"}
+					labelPlacement={"bottom"}
+				/>,
+			);
+			fireEvent.click(screen.getByText("Export"));
+			expect(onClick).toHaveBeenCalledOnce();
+		});
+
+		it("[ISSUE-3482-ITEM-14] runs an onClick on the wrapper once per click on the caption", () => {
+			const onClick = vi.fn();
+			wrap(
+				<ComponentWithLabel
+					control={
+						<IconButton aria-label={"Settings"}>
+							<HomeIcon />
+						</IconButton>
+					}
+					labelText={"Settings"}
+					labelPlacement={"bottom"}
+					onClick={onClick}
+				/>,
+			);
+			fireEvent.click(screen.getByText("Settings"));
+			expect(onClick).toHaveBeenCalledOnce();
+		});
+
+		it("[ISSUE-3482-ITEM-14] DataGrid header: a click on the Import caption runs onImport once", () => {
+			stubWideScreen();
+			const onImport = vi.fn();
+			const noop = () => {};
+			wrap(
+				<ActionBarView
+					handleImport={onImport}
+					hasCustomFilterBar={false}
+					hideReset
+					refresh={noop}
+					resetFilter={noop}
+					resetSort={noop}
+					resetColumn={noop}
+					resetWidth={noop}
+					resetAll={noop}
+				/>,
+			);
+			const button = screen.getByRole("button", { name: "Import" });
+			fireEvent.click(within(button.closest("label")!).getByText("Import"));
+			expect(onImport).toHaveBeenCalledOnce();
+		});
+
+		it("[ISSUE-3482-ITEM-14] runs an onClick on the wrapper once per click on a checkbox's caption, which still toggles the checkbox", () => {
+			const onClick = vi.fn();
+			wrap(
+				<ComponentWithLabel
+					control={<Checkbox />}
+					labelText={"Archived"}
+					onClick={onClick}
+				/>,
+			);
+			fireEvent.click(screen.getByText("Archived"));
+			expect(onClick).toHaveBeenCalledOnce();
+			expect(screen.getByRole("checkbox", { name: "Archived" })).toBeChecked();
+		});
+
+		it("[ISSUE-3482-ITEM-14] runs an onClick on the wrapper once per click on the control", () => {
+			const onClick = vi.fn();
+			wrap(
+				<ComponentWithLabel
+					control={
+						<IconButton aria-label={"Settings"}>
+							<HomeIcon />
+						</IconButton>
+					}
+					labelText={"Settings"}
+					labelPlacement={"bottom"}
+					onClick={onClick}
+				/>,
+			);
+			fireEvent.click(screen.getByRole("button", { name: "Settings" }));
+			expect(onClick).toHaveBeenCalledOnce();
+		});
+
+		it("[ISSUE-3482-ITEM-14] stops the click the label forwards where the wrapper's onClick stopped the click on the caption", () => {
+			// keeps a clickable ancestor, e.g. a list row, from seeing the click
+			const onRowClick = vi.fn();
+			const onClick = vi.fn((evt: React.MouseEvent) => evt.stopPropagation());
+			wrap(
+				<div onClick={onRowClick}>
+					<ComponentWithLabel
+						control={<Checkbox />}
+						labelText={"Archived"}
+						onClick={onClick}
+					/>
+				</div>,
+			);
+			fireEvent.click(screen.getByText("Archived"));
+			expect(onClick).toHaveBeenCalledOnce();
+			expect(onRowClick).not.toHaveBeenCalled();
+			expect(screen.getByRole("checkbox", { name: "Archived" })).toBeChecked();
+		});
+
+		it("[ISSUE-3482-ITEM-14] runs an onClick on the wrapper for a later click on the control when the label forwarded no click", () => {
+			vi.useFakeTimers();
+			try {
+				const onClick = vi.fn();
+				const preventDefault = (evt: React.MouseEvent) => evt.preventDefault();
+				wrap(
+					// cancels the click on the caption after the wrapper's onClick
+					<div onClick={preventDefault}>
+						<ComponentWithLabel
+							control={
+								<IconButton aria-label={"Settings"}>
+									<HomeIcon />
+								</IconButton>
+							}
+							labelText={"Settings"}
+							labelPlacement={"bottom"}
+							onClick={onClick}
+						/>
+					</div>,
+				);
+				fireEvent.click(screen.getByText("Settings"));
+				expect(onClick).toHaveBeenCalledOnce();
+				// the next click comes in a later task
+				act(() => {
+					vi.runOnlyPendingTimers();
+				});
+				fireEvent.click(screen.getByRole("button", { name: "Settings" }));
+				expect(onClick).toHaveBeenCalledTimes(2);
+			} finally {
+				vi.useRealTimers();
+			}
 		});
 	});
 	describe("MuiFieldState (withMuiFieldState HOC)", () => {

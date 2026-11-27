@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
 	FormControlLabel,
 	FormControlLabelProps,
@@ -39,6 +39,16 @@ export interface ComponentWithLabelProps extends Omit<
 	 * Custom styles
 	 */
 	classes?: Partial<Record<ComponentWithLabelClassKey, string>>;
+	/**
+	 * Called once per click on the control or on its caption (a keyboard
+	 * activation of the control is a click too), with that click; its
+	 * `currentTarget` is the `<label>` root. For a click on the caption, the
+	 * label then forwards a click to the control (it toggles a checkbox, it
+	 * clicks a button): that click doesn't call `onClick` again and is stopped
+	 * at the label if `onClick` stopped the first one. `preventDefault()` keeps
+	 * the label from forwarding the click.
+	 */
+	onClick?: React.MouseEventHandler<HTMLLabelElement>;
 }
 
 const StyledFormControlLabel = styled(FormControlLabel, {
@@ -68,10 +78,58 @@ const Label = styled(Typography, {
  */
 export type ComponentWithLabelClassKey = "root" | "label";
 
+/** What the click on the caption did, for the click the label forwards */
+interface ForwardedClick {
+	/**
+	 * `onClick` stopped the click on the caption, so the forwarded click
+	 * stops at the label as well
+	 */
+	stopped: boolean;
+}
+
 const ComponentWithLabel = (
 	inProps: ComponentWithLabelProps | FormControlLabelProps,
 ) => {
 	let props = useThemeProps({ props: inProps, name: "CcComponentWithLabel" });
+	const { onClick } = props;
+
+	// A click on the caption reaches the <label> twice: as itself, and as the
+	// click the label's activation behavior then sends to its control, which
+	// bubbles back up. onClick gets the first one only. The browser sends the
+	// second click in the same task, but after the microtasks of the first
+	// one's handlers have run, so the mark is dropped by a timeout.
+	const forwardedClick = useRef<ForwardedClick | null>(null);
+	const forwardedClickTimeout = useRef<number | undefined>(undefined);
+	useEffect(() => () => window.clearTimeout(forwardedClickTimeout.current), []);
+	const handleClick = useCallback(
+		(evt: React.MouseEvent<HTMLLabelElement>) => {
+			const label = evt.currentTarget;
+			const control = label.control;
+			const forwarded = forwardedClick.current;
+			if (forwarded && evt.target === control) {
+				forwardedClick.current = null;
+				if (forwarded.stopped) evt.stopPropagation();
+				return;
+			}
+			onClick?.(evt);
+			if (
+				control &&
+				label.contains(control) &&
+				!control.contains(evt.target as Node) &&
+				!evt.isDefaultPrevented()
+			) {
+				// the label forwards this click to the control, unless a later
+				// handler cancels it, the control is disabled or the click is on
+				// other interactive content in the label
+				forwardedClick.current = { stopped: evt.isPropagationStopped() };
+				window.clearTimeout(forwardedClickTimeout.current);
+				forwardedClickTimeout.current = window.setTimeout(() => {
+					forwardedClick.current = null;
+				});
+			}
+		},
+		[onClick],
+	);
 
 	let label: FormControlLabelProps["label"];
 
@@ -115,6 +173,7 @@ const ComponentWithLabel = (
 			{...props}
 			className={combineClassNames([props.className, props.classes?.root])}
 			label={label}
+			onClick={onClick && handleClick}
 		/>
 	);
 };
