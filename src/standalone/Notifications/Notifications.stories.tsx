@@ -460,9 +460,11 @@ export const Issue3471Item6OpensAtTheFirstNotification: StoryObj<
 		const list = body().getByRole("region", { name: "Notifications" });
 		await body().findByText("Newer notification 1");
 		await nextFrames();
-		const first = Array.from(list.children).find((row) =>
-			row.textContent?.includes(olderNotifications[0].message as string),
-		);
+		const first = within(list)
+			.getAllByRole("listitem")
+			.find((row) =>
+				row.textContent?.includes(olderNotifications[0].message as string),
+			);
 		if (!first) throw new Error("first notification not found");
 		const listTop = list.getBoundingClientRect().top + list.clientTop;
 		// measured while the transition scaled the list: allow subpixel rounding
@@ -544,5 +546,45 @@ export const Issue3468Item24AnnouncesNewNotifications: Story = {
 		);
 		await expect(bell).toHaveAccessibleName("Notifications, 3 unread");
 		await expect(status).toHaveTextContent(/^1 new notification$/);
+	},
+};
+
+export const Issue3468Item13UnreadRowsSayUnread: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3468-ITEM-13: the rows are a list, so screen readers say how many there are and move from one to the next, and an unread row of the default renderer starts with the visually hidden text "Unread". It sits inside its row, not in a corner of the popover.',
+			},
+		},
+	},
+	play: async ({ canvas }) => {
+		await userEvent.click(canvas.getByRole("button"));
+		const paper = await openPaper();
+		const list = within(paper).getByRole("list");
+		const items = within(list).getAllByRole("listitem");
+		await expect(items).toHaveLength(4);
+		for (const [i, item] of items.entries()) {
+			const unread = !sampleNotifications[i].read;
+			const label = within(item).queryByText("Unread");
+			await expect(item, `row ${i + 1}`).toHaveTextContent(
+				unread ? /^Unread \S/ : /^(?!Unread)/,
+			);
+			if (!label) continue;
+			const box = label.getBoundingClientRect();
+			const row = item.getBoundingClientRect();
+			await expect(
+				[box.width, box.height],
+				`the label of row ${i + 1} is visually hidden`,
+			).toEqual([1, 1]);
+			await expect(
+				box.top >= row.top &&
+					box.bottom <= row.bottom &&
+					box.left >= row.left &&
+					box.right <= row.right,
+				`the label of row ${i + 1} lies inside its row`,
+			).toBe(true);
+		}
 	},
 };

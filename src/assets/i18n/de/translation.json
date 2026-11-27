@@ -61,7 +61,8 @@
 			"bell-label_one": "Benachrichtigungen, {{count}} ungelesen",
 			"bell-label_other": "Benachrichtigungen, {{count}} ungelesen",
 			"announce-new_one": "{{count}} neue Benachrichtigung",
-			"announce-new_other": "{{count}} neue Benachrichtigungen"
+			"announce-new_other": "{{count}} neue Benachrichtigungen",
+			"unread": "Ungelesen"
 		},
 		"how-it-works": {
 			"title": "Wie es funktioniert"

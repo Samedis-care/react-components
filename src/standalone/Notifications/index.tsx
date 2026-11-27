@@ -57,7 +57,9 @@ export interface Notification {
 	 */
 	expires?: Date;
 	/**
-	 * Has the user already read the notification?
+	 * Has the user already read the notification? The default row dims a read
+	 * one, and starts an unread one with the visually hidden text "Unread"
+	 * (translated), so screen readers say which notifications are new.
 	 */
 	read: boolean;
 }
@@ -151,7 +153,16 @@ export interface NotificationsProps {
 	 */
 	refreshInterval?: number;
 	/**
-	 * A custom notification renderer (optional)
+	 * A custom notification renderer (optional): renders one row, the content
+	 * of a list item. Notifications renders the rows as a list, each in an
+	 * `<li>` (theme slot `listItem`) of a `<ul>` (`list`), so the renderer
+	 * returns flow content, not an `<li>` of its own. The list item is
+	 * `position: relative`: it is the containing block of what the row
+	 * positions absolutely.
+	 *
+	 * A renderer that shows whether a notification is read (dimmed, bold, a
+	 * dot) has to say it in text too, as the default row does: e.g. a visually
+	 * hidden "Unread" at the start of an unread row.
 	 * @param notification The notification to render
 	 */
 	notificationRenderer?: React.ComponentType<Notification>;
@@ -271,14 +282,26 @@ const readStyle: CSSProperties = {
 	opacity: 0.7,
 };
 
+/**
+ * The default row's "Unread", which only screen readers read: the row's dimmed
+ * look is not seen by them. It sits in the top left corner of the list item.
+ */
+const UnreadLabel = styled("span")(visuallyHidden);
+
 const DefaultRenderer = (notification: Notification): React.ReactElement => {
 	const locale = useCurrentLocale();
+	const { t } = useCCTranslations();
 	return (
 		<Box
 			sx={{ p: 2 }}
 			style={notification.read ? readStyle : unreadStyle}
 			key={notification.id}
 		>
+			{!notification.read && (
+				// the space parts it from the message where text is joined
+				// without layout, e.g. when the popover's text is copied
+				<UnreadLabel>{`${t("standalone.notifications.unread")} `}</UnreadLabel>
+			)}
 			<Grid container spacing={2}>
 				<Grid size="grow">
 					{notification.image && (
@@ -320,6 +343,27 @@ const StyledInfiniteScroll = styled(InfiniteScroll, {
 	overflow: "auto",
 });
 
+// the rows as a list: screen readers say how many there are and move from row
+// to row. Without markers, as MUI's List: role="list" keeps the list role,
+// which WebKit drops from a list styled list-style: none.
+const StyledList = styled("ul", {
+	name: "CcNotifications",
+	slot: "list",
+})({
+	listStyle: "none",
+	margin: 0,
+	padding: 0,
+});
+
+// a row, positioned as MUI's ListItem is, so what the row positions
+// absolutely (the default row's visually hidden "Unread") stays in it
+const StyledListItem = styled("li", {
+	name: "CcNotifications",
+	slot: "listItem",
+})({
+	position: "relative",
+});
+
 const StyledHeader = styled(Typography, {
 	name: "CcNotifications",
 	slot: "header",
@@ -336,13 +380,18 @@ const StyledAnnouncement = styled("span", {
  * Theme style slots of Notifications
  * (`components.CcNotifications.styleOverrides.<slot>`), and the keys of its
  * `classes` prop:
- * - `notificationArea`: the scrolling list of notifications in the popover
+ * - `notificationArea`: the scroll container in the popover, which holds the
+ *   list
+ * - `list`: the list of notifications, a `<ul>` without markers, margin or
+ *   padding. Not rendered while there are no notifications.
+ * - `listItem`: each row's `<li>`, `position: relative`. It holds the row
+ *   the default or a custom renderer (`notificationRenderer`) renders.
  * - `header`: the popover's "Notifications" heading
  * - `announcement`: the visually hidden status region that announces new
  *   notifications (see `disableAnnouncement`)
  */
 export type NotificationsClassKey =
-	"notificationArea" | "header" | "announcement";
+	"notificationArea" | "list" | "listItem" | "header" | "announcement";
 
 /** An announcement of new notifications */
 interface Announcement {
@@ -556,9 +605,18 @@ const Notifications = (inProps: NotificationsProps) => {
 								role={"region"}
 								aria-labelledby={headerId}
 							>
-								{notifications.map((notification) => (
-									<Renderer key={notification.id} {...notification} />
-								))}
+								{notifications.length > 0 && (
+									<StyledList role={"list"} className={classes?.list}>
+										{notifications.map((notification) => (
+											<StyledListItem
+												key={notification.id}
+												className={classes?.listItem}
+											>
+												<Renderer {...notification} />
+											</StyledListItem>
+										))}
+									</StyledList>
+								)}
 							</StyledInfiniteScroll>
 						</Grid>
 					</Grid>

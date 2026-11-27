@@ -61,7 +61,8 @@
 			"bell-label_one": "Meldingen, {{count}} ongelezen",
 			"bell-label_other": "Meldingen, {{count}} ongelezen",
 			"announce-new_one": "{{count}} nieuwe melding",
-			"announce-new_other": "{{count}} nieuwe meldingen"
+			"announce-new_other": "{{count}} nieuwe meldingen",
+			"unread": "Ongelezen"
 		},
 		"how-it-works": {
 			"title": "Hoe werkt het"

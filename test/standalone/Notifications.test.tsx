@@ -9,6 +9,7 @@ import {
 	cleanup,
 	waitFor,
 	act,
+	within,
 } from "@testing-library/react";
 import { ThemeProvider, createTheme, Theme } from "@mui/material";
 import Notifications, {
@@ -297,6 +298,7 @@ const renderN = (props: NotificationsProps, t: Theme = theme) => {
 
 const badgeOf = (container: HTMLElement) =>
 	container.querySelector(".MuiBadge-badge") as HTMLElement;
+const paperEl = () => document.querySelector(".MuiPopover-paper");
 const advance = (ms: number) =>
 	act(() => {
 		vi.advanceTimersByTime(ms);
@@ -451,6 +453,28 @@ describe("Notifications: accessibility", () => {
 		expect(bell).toHaveAccessibleName(/\b2\b/);
 	});
 
+	it("[ISSUE-3468-ITEM-13] exposes the rows as a list and says in text which ones are unread", () => {
+		const { bell } = renderN(
+			base({
+				notifications: [
+					mk({ id: "1" }),
+					mk({ id: "2" }),
+					mk({ id: "3", read: true }),
+					mk({ id: "4", read: true }),
+				],
+			}),
+		);
+		fireEvent.click(bell);
+		const paper = paperEl() as HTMLElement;
+		const items = [
+			...within(paper).queryAllByRole("listitem"),
+			...within(paper).queryAllByRole("article"),
+		];
+		expect(items, "rows exposed as listitem or article").toHaveLength(4);
+		expect(items[0]).toHaveTextContent(/\b(unread|new)\b/i);
+		expect(items[2]).not.toHaveTextContent(/\b(unread|new)\b/i);
+	});
+
 	it("[ISSUE-3468-ITEM-12] names the bell with the unread count while anything is unread, and follows the count", () => {
 		const props = base({
 			notifications: [
@@ -535,6 +559,58 @@ describe("Notifications: accessibility", () => {
 			"aria-labelledby",
 			"other-name",
 		);
+	});
+
+	it("[ISSUE-3468-ITEM-13] puts each row of a custom renderer into a list item, and adds no text to it", () => {
+		const CustomRow = (notification: Notification) => (
+			<p>{notification.message}</p>
+		);
+		const { bell } = renderN(
+			base({
+				notifications: [mk({ id: "1" }), mk({ id: "2", read: true })],
+				notificationRenderer: CustomRow,
+			}),
+		);
+		fireEvent.click(bell);
+		const list = within(paperEl() as HTMLElement).getByRole("list");
+		expect(
+			within(list)
+				.getAllByRole("listitem")
+				.map((item) => item.innerHTML),
+		).toEqual(["<p>Message 1</p>", "<p>Message 2</p>"]);
+	});
+
+	it("[ISSUE-3468-ITEM-13] renders no empty list while there are no notifications", () => {
+		const { bell } = renderN(base());
+		fireEvent.click(bell);
+		expect(within(paperEl() as HTMLElement).queryByRole("list")).toBeNull();
+	});
+
+	it("[ISSUE-3468-ITEM-13] applies classes and the theme's style overrides to the list and its items", () => {
+		const themed = createTheme({
+			components: {
+				CcNotifications: {
+					styleOverrides: {
+						list: { paddingTop: 7 },
+						listItem: { marginBottom: 3 },
+					},
+				},
+			},
+		});
+		const { bell } = renderN(
+			base({
+				notifications: [mk({ id: "1" })],
+				classes: { list: "app-list", listItem: "app-list-item" },
+			}),
+			themed,
+		);
+		fireEvent.click(bell);
+		const list = within(paperEl() as HTMLElement).getByRole("list");
+		expect(list).toHaveClass("app-list");
+		expect(list).toHaveStyle({ listStyle: "none", paddingTop: "7px" });
+		const item = within(list).getByRole("listitem");
+		expect(item).toHaveClass("app-list-item");
+		expect(item).toHaveStyle({ position: "relative", marginBottom: "3px" });
 	});
 });
 
@@ -792,6 +868,41 @@ describe("Notifications: translations", () => {
 					)
 					.map((category) => `${entry.name}: announce-new_${category}`);
 			});
+		expect(missing).toEqual([]);
+	});
+
+	it("[ISSUE-3468-ITEM-13] starts an unread row with Unread in the current language", async () => {
+		await act(async () => {
+			await ccI18n.changeLanguage("de");
+		});
+		const { bell } = renderN(
+			base({
+				notifications: [mk({ id: "1" }), mk({ id: "2", read: true })],
+			}),
+		);
+		fireEvent.click(bell);
+		const items = within(paperEl() as HTMLElement).getAllByRole("listitem");
+		expect(items[0]).toHaveTextContent(/^Ungelesen Message 1/);
+		expect(items[1]).not.toHaveTextContent(/Ungelesen/);
+	});
+
+	it("[ISSUE-3468-ITEM-13] has the unread row's label in every locale", () => {
+		const i18nDir = path.resolve(__dirname, "../../src/assets/i18n");
+		const missing = fs
+			.readdirSync(i18nDir, { withFileTypes: true })
+			.filter((entry) => entry.isDirectory())
+			.filter((entry) => {
+				const translation = JSON.parse(
+					fs.readFileSync(
+						path.join(i18nDir, entry.name, "translation.json"),
+						"utf8",
+					),
+				) as {
+					standalone: { notifications: Record<string, string | undefined> };
+				};
+				return !translation.standalone.notifications.unread?.trim();
+			})
+			.map((entry) => entry.name);
 		expect(missing).toEqual([]);
 	});
 });

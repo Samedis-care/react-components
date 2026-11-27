@@ -65,7 +65,8 @@
 			"bell-label_one": "Notifications, {{count}} unread",
 			"bell-label_other": "Notifications, {{count}} unread",
 			"announce-new_one": "{{count}} new notification",
-			"announce-new_other": "{{count}} new notifications"
+			"announce-new_other": "{{count}} new notifications",
+			"unread": "Unread"
 		},
 		"how-it-works": {
 			"title": "How it works"

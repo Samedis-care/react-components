@@ -67,7 +67,8 @@
 			"bell-label_other": "Notifiche, {{count}} non lette",
 			"announce-new_one": "{{count}} nuova notifica",
 			"announce-new_many": "{{count}} nuove notifiche",
-			"announce-new_other": "{{count}} nuove notifiche"
+			"announce-new_other": "{{count}} nuove notifiche",
+			"unread": "Non letta"
 		},
 		"how-it-works": {
 			"title": "Come funziona"

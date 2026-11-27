@@ -61,7 +61,8 @@
 			"bell-label_one": "Bildirishnomalar, {{count}} ta o'qilmagan",
 			"bell-label_other": "Bildirishnomalar, {{count}} ta o'qilmagan",
 			"announce-new_one": "{{count}} ta yangi bildirishnoma",
-			"announce-new_other": "{{count}} ta yangi bildirishnoma"
+			"announce-new_other": "{{count}} ta yangi bildirishnoma",
+			"unread": "O'qilmagan"
 		},
 		"how-it-works": {
 			"title": "U qanday ishlaydi"

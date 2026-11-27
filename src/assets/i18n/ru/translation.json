@@ -65,7 +65,8 @@
 			"announce-new_one": "{{count}} новое уведомление",
 			"announce-new_few": "{{count}} новых уведомления",
 			"announce-new_many": "{{count}} новых уведомлений",
-			"announce-new_other": "{{count}} нового уведомления"
+			"announce-new_other": "{{count}} нового уведомления",
+			"unread": "Непрочитанное"
 		},
 		"how-it-works": {
 			"title": "Как это устроено"
