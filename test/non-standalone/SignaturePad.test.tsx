@@ -583,3 +583,67 @@ describe("SignDialog with props changing while open", () => {
 		expect(screen.queryByRole("dialog")).toBeNull();
 	});
 });
+
+describe("SignDialog backdrop clicks", () => {
+	beforeEach(() => {
+		// only performance.now(), which dates the dialog's opening; MUI's timers stay real
+		vi.useFakeTimers({ toFake: ["performance"] });
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	/** a click on the container around the dialog box; MUI closes when mousedown and click both land there */
+	const clickBackdrop = (detail = 1) => {
+		const container = document.querySelector(".MuiDialog-container");
+		if (!container) throw new Error("dialog container missing");
+		fireEvent.mouseDown(container, { detail });
+		fireEvent.click(container, { detail });
+	};
+
+	it("[ISSUE-3467-ITEM-7] a backdrop click right after opening, the second click of a double-click on the tile, keeps the dialog open; a later one closes it without saving", () => {
+		const set = vi.fn();
+		withDialogs(<SignaturePad signature="" setSignature={set} />);
+		openPad();
+		vi.advanceTimersByTime(100);
+		clickBackdrop();
+		expect(
+			screen.queryByRole("dialog"),
+			"the dialog after a backdrop click 100ms after opening",
+		).toBeInTheDocument();
+		vi.advanceTimersByTime(500);
+		clickBackdrop();
+		expect(
+			screen.queryByRole("dialog"),
+			"the dialog after a backdrop click 600ms after opening",
+		).toBeNull();
+		expect(set).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3467-ITEM-7] a backdrop click the browser counts as the second click of a double-click keeps the dialog open also later, on a slow double-click", () => {
+		withDialogs(<SignaturePad signature="" />);
+		openPad();
+		vi.advanceTimersByTime(2000);
+		clickBackdrop(2);
+		expect(
+			screen.queryByRole("dialog"),
+			"the dialog after a backdrop click with detail 2",
+		).toBeInTheDocument();
+		clickBackdrop(1);
+		expect(
+			screen.queryByRole("dialog"),
+			"the dialog after a single backdrop click",
+		).toBeNull();
+	});
+
+	it("[ISSUE-3467-ITEM-7] a pushed SignDialog keeps ignoring the second click of the double-click that opened it, and closes on a later backdrop click", () => {
+		withDialogs(<Opener signature="" />);
+		fireEvent.click(screen.getByText("open"));
+		clickBackdrop();
+		expect(screen.queryByRole("dialog")).toBeInTheDocument();
+		vi.advanceTimersByTime(600);
+		clickBackdrop();
+		expect(screen.queryByRole("dialog")).toBeNull();
+	});
+});

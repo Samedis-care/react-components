@@ -859,6 +859,34 @@ export const Issue3467Item4StoredSignaturesScaledAndCentered: Story = {
 	},
 };
 
+export const Issue3467Item7DoubleClickKeepsDialogOpen: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3467-ITEM-7: a double-click on the tile opens the dialog with the first click; when the tile lies outside the area the centered dialog box covers, the second click lands on the dialog's backdrop container and closes it again (on non-touch devices). Expected: a click right after opening does not close the dialog.",
+			},
+		},
+	},
+	play: async ({ canvasElement, args, userEvent }) => {
+		await userEvent.click(tileIn(canvasElement));
+		await waitFor(() => expect(dialogEl()).not.toBeNull());
+		// the second click of the double-click on a tile outside the dialog box's
+		// area: MUI closes on mousedown + click that both target the container
+		// around the box (dispatched there, since synthetic events skip hit testing)
+		const container = document.querySelector(".MuiDialog-container")!;
+		container.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+		container.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+		await new Promise((resolve) => requestAnimationFrame(resolve));
+		await expect(
+			dialogEl(),
+			"the dialog after the second click of a double-click",
+		).not.toBeNull();
+		await closeDialog();
+		await expect(args.setSignature).not.toHaveBeenCalled();
+	},
+};
+
 /** a signature field as a Form renders it: a label, the pad and its message, tied by ids */
 const LabelledField = ({
 	fieldId,

@@ -1,6 +1,7 @@
 import React, {
 	useCallback,
 	useContext,
+	useEffect,
 	useId,
 	useMemo,
 	useRef,
@@ -147,6 +148,23 @@ const isBlankTrim = (trimmed: HTMLCanvasElement): boolean =>
 	trimmed.height === 1 &&
 	trimmed.getContext("2d")?.getImageData(0, 0, 1, 1).data[3] === 0;
 
+/**
+ * How long after opening (ms) a backdrop click is taken for the second click
+ * of the double-click that opened the dialog: Windows' default double-click
+ * time
+ */
+const DOUBLE_CLICK_TIME = 500;
+
+/**
+ * Whether a click continues a double- or triple-click, as the browser counts
+ * them (the event's `detail`): by position and the system's double-click time,
+ * whatever element the first click hit
+ * @param event The click event MUI's Dialog passes to onClose
+ * @returns true for the second and every later click of a multi-click
+ */
+const isRepeatedClick = (event: object): boolean =>
+	"detail" in event && typeof event.detail === "number" && event.detail > 1;
+
 export type SignPadDialogClassKey =
 	| "root"
 	| "dialogTitle"
@@ -239,9 +257,28 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 		closeThisDialog?.();
 	}, [setSignature, closeThisDialog, signature, resetCanvas]);
 
+	// when the dialog opened (performance.now()). A double-click on the tile
+	// opens it with the first click; when the tile lies outside the centered
+	// dialog box, the second click lands on the backdrop
+	const openedAt = useRef(0);
+	useEffect(() => {
+		openedAt.current = performance.now();
+	}, []);
+
 	const closeCanvas = useCallback(
-		(_: object, reason: "escapeKeyDown" | "backdropClick" | "closeBtn") => {
+		(event: object, reason: "escapeKeyDown" | "backdropClick" | "closeBtn") => {
 			if (reason === "backdropClick" && isTouchDevice()) return; // prevent accidential close by hand palm when signing with pen
+			// the second click of the double-click that opened the dialog: one the
+			// browser counts as such (also a slow one, on a long system
+			// double-click time), or one right after opening, which the browser
+			// counts as a new click when the hand moved a few pixels or the
+			// system's double-click time is shorter
+			if (
+				reason === "backdropClick" &&
+				(isRepeatedClick(event) ||
+					performance.now() - openedAt.current < DOUBLE_CLICK_TIME)
+			)
+				return;
 			hiddenRef.current?.focus();
 			hiddenRef.current?.blur();
 			closeThisDialog?.();
