@@ -120,13 +120,14 @@ const FormCrudMultiSelect = <
 	);
 };
 
-export const ForwardedCrudMultiSelect = React.forwardRef(
-	FormCrudMultiSelect,
-) as <M extends ModelUnknown, DataT extends MultiSelectorData>(
+const ForwardedFormCrudMultiSelect = React.forwardRef(FormCrudMultiSelect) as <
+	M extends ModelUnknown,
+	DataT extends MultiSelectorData,
+>(
 	props: FormCrudMultiSelectProps<M, DataT> &
 		RefAttributes<CrudSelectDispatch<DataT>>,
 ) => React.ReactElement;
 
 export default React.memo(
-	ForwardedCrudMultiSelect,
-) as typeof ForwardedCrudMultiSelect;
+	ForwardedFormCrudMultiSelect,
+) as typeof ForwardedFormCrudMultiSelect;

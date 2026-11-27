@@ -195,15 +195,18 @@ class FormLazyConnector extends LazyConnector {
 	 */
 	private unreportedParentId: string | null;
 
+	/**
+	 * @remarks Built without a queue change handler: the control that mounts with the
+	 *          connector sets it (setQueueChangeHandler), and counts what was queued before
+	 */
 	constructor(
 		connector: ApiConnector,
 		fakeReads: boolean,
-		onQueueChange: ConstructorParameters<typeof LazyConnector>[2],
 		getEndpoint: (id: string) => string,
 		onParentIdChange: ((id: string) => void) | undefined,
 		parentId: string | null,
 	) {
-		super(connector, fakeReads, onQueueChange);
+		super(connector, fakeReads);
 		this.getEndpoint = getEndpoint;
 		this.onParentIdChange = onParentIdChange;
 		this.unreportedParentId = parentId;
@@ -236,14 +239,12 @@ class FormLazyConnector extends LazyConnector {
 /**
  * Builds the connector of a field from the params of its first render
  * @param params The hook's params
- * @param onQueueChange Called with the queue whenever it changes
  * @throws "No default connector set" without params.getConnector and a default API connector
  * @remarks Runs during render: it calls getEndpoint, getConnector and configureConnector,
  *          but not onParentIdChange (see FormLazyConnector.reportParentId)
  */
 const buildConnector = <ExtraT extends Record<string, unknown> | undefined>(
 	params: UseLazyCrudConnectorParams<ExtraT>,
-	onQueueChange: ConstructorParameters<typeof LazyConnector>[2],
 ): FormLazyConnector => {
 	const {
 		getEndpoint,
@@ -260,7 +261,6 @@ const buildConnector = <ExtraT extends Record<string, unknown> | undefined>(
 	return new FormLazyConnector(
 		connector,
 		initialId === null,
-		onQueueChange,
 		getEndpoint,
 		onParentIdChange,
 		initialId,
@@ -348,10 +348,7 @@ const useLazyCrudConnector = <
 	const uploadConnector = useRef<FormLazyConnector | null>(null);
 	if (!uploadConnector.current) {
 		uploadConnector.current =
-			getCustomState<FormLazyConnector>(field) ??
-			buildConnector(params, (queue) => {
-				setCustomFieldDirty(field, queue.length !== 0);
-			});
+			getCustomState<FormLazyConnector>(field) ?? buildConnector(params);
 	}
 	const connector = uploadConnector.current;
 	// read from the latest render, unlike the params the connector is built from
@@ -388,15 +385,18 @@ const useLazyCrudConnector = <
 			(staged.current && !connector.isQueueEmpty()),
 		[connector],
 	);
-	// the connector's queue change handler belongs to the mounted control: it keeps the
-	// Form's dirty flag and the staged state. The dependencies are pinned or stable, so this
-	// runs when the control mounts and unmounts, not when onlySubmitMounted changes.
+	// the connector's queue change handler belongs to the mounted control, and only this sets
+	// it: it keeps the Form's dirty flag and the staged state. The dependencies are pinned or
+	// stable, so this runs when the control mounts and unmounts, not when onlySubmitMounted
+	// changes.
 	useEffect(() => {
 		connector.setQueueChangeHandler((queue) => {
 			if (queue.length === 0) staged.current = false;
 			setCustomFieldDirty(field, queue.length !== 0);
 		});
-		// a queue kept from an earlier mount is listed again, and the next save sends it
+		// what is queued already counts: a queue kept from an earlier mount, which is listed
+		// again and sent by the next save, and the writes of a child's mount effect, which
+		// runs before this one
 		setCustomFieldDirty(field, !connector.isQueueEmpty());
 		return () => {
 			// a queue the save leaves out does not keep the Form dirty either

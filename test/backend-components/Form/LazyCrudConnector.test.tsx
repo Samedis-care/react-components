@@ -8,7 +8,7 @@
  * went to: "index:joins/1", "setApiEndpoint:joins/1", "create:joins/1:s2" (by source_id),
  * "delete:joins/1:j1" (by id), "update:joins/1:j1:<note>".
  */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { afterAll, beforeEach, describe, expect, it, Mock, vi } from "vitest";
 import {
 	act,
@@ -37,6 +37,7 @@ import {
 import FormCrudMultiSelect, {
 	FormCrudMultiSelectProps,
 } from "../../../src/backend-components/Form/CrudControls/FormCrudMultiSelect";
+import useLazyCrudConnector from "../../../src/backend-components/Form/useLazyCrudConnector";
 import ApiConnector from "../../../src/backend-integration/Connector/ApiConnector";
 import LazyConnector from "../../../src/backend-integration/Connector/LazyConnector";
 import type { ResponseMeta } from "../../../src/backend-integration/Connector/Connector";
@@ -837,6 +838,43 @@ describe("useLazyCrudConnector: re-renders of the form", () => {
 
 		expect(renders).toBeLessThan(10);
 		expect(sink.ctx!.dirty).toBe(true);
+	});
+});
+
+describe("useLazyCrudConnector: writes queued while the control mounts", () => {
+	it("[ISSUE-3505-ITEM-18] a write a child queues in its mount effect, before the hook's own effects ran, makes the form dirty and is sent by the save", async () => {
+		const model = makeModel();
+		const env = makeEnv({ "joins/1": [] });
+		const sink: Sink = {};
+		// a child's effects run before those of the component that calls the hook
+		const QueueAtMount = (props: { connector: LazyConnector }) => {
+			const { connector } = props;
+			useEffect(() => {
+				connector.create({ source_id: "s2" }, undefined);
+			}, [connector]);
+			return null;
+		};
+		const Control = () => {
+			const { connector } = useLazyCrudConnector({
+				field: "joins",
+				initialId: "1",
+				getEndpoint: (id: string) => `joins/${id}`,
+				getConnector: env.getConnector,
+			});
+			return <QueueAtMount connector={connector} />;
+		};
+		mountForm(
+			model,
+			makePage(sink, () => <Control />),
+		);
+		await loaded(sink);
+		await settle();
+		expect(sink.ctx!.dirty).toBe(true);
+
+		expect(await trySubmit(sink)).toBeNull();
+		await settle();
+		expect(env.calls).toContain("create:joins/1:s2");
+		expect(sink.ctx!.dirty).toBe(false);
 	});
 });
 

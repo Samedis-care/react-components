@@ -27,6 +27,21 @@ describe("useLazyCrudConnector and FormCrudMultiSelect: the API apps build on", 
 		>().toEqualTypeOf<CrudSelectDispatch<MultiSelectorData>>();
 	});
 
+	it("[ISSUE-3505-ITEM-18] FormCrudMultiSelect's module exports only the memoized control, the one of the package root", async () => {
+		const own =
+			(await import("../../../src/backend-components/Form/CrudControls/FormCrudMultiSelect")) as Record<
+				string,
+				unknown
+			>;
+		expect(Object.keys(own)).toEqual(["default"]);
+		// React.memo components have $$typeof set to Symbol(react.memo)
+		expect((own.default as { $$typeof?: symbol }).$$typeof).toBe(
+			Symbol.for("react.memo"),
+		);
+		const root = (await import("../../../src")) as Record<string, unknown>;
+		expect(root.FormCrudMultiSelect).toBe(own.default);
+	}, 90000);
+
 	it("[ISSUE-3505-ITEM-13] extraParams take a record, as the default connector factory does", () => {
 		expectTypeOf(useLazyCrudConnector<{ variant: string }>).toBeFunction();
 		expectTypeOf(useLazyCrudConnector<undefined>).toBeFunction();
