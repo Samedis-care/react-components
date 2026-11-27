@@ -40,6 +40,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [A Matrix entry draws what does not fit it smaller, and a stacked pair puts its secondary label beside the label](2026-11-27-matrix-labels-fit-their-entries.md) | behavior |
 | 2026-11-27 | [A Matrix entry says its state and its arrow, its ring stands out, and forced colors keep its shape](2026-11-27-matrix-entry-states-in-words-and-forced-colors.md) | behavior |
 | 2026-11-27 | [DialogTitle calls onClose without arguments](2026-11-27-dialog-title-on-close-without-arguments.md) | behavior |
+| 2026-11-27 | [While a FormDialog button's handler runs, the dialog ignores its buttons, Escape and the backdrop](2026-11-27-form-dialog-busy-while-handler-runs.md) | behavior |
 | 2026-11-26 | [A localized value without text in the UI language shows another language's text](2026-11-26-localized-string-falls-back-to-another-language.md) | behavior |
 | 2026-11-26 | [A HistoryRouter inside another one leaves the page's scroll position and focus alone](2026-11-26-nested-history-router-keeps-page-scroll-and-focus.md) | behavior |
 | 2026-11-26 | [isPlainObject tells a plain object by its prototype; a record with an entry named constructor counts](2026-11-26-is-plain-object-by-prototype.md) | behavior |

@@ -97,6 +97,15 @@ const openTitles = () =>
 			document.getElementById(d.getAttribute("aria-labelledby") ?? "")
 				?.textContent,
 	);
+const escape = () =>
+	fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+/** MUI counts a click as a backdrop click when mousedown hit the same element */
+const backdrop = () => {
+	const container = document.querySelector(".MuiDialog-container");
+	if (!container) throw new Error("no dialog container");
+	fireEvent.mouseDown(container);
+	fireEvent.click(container);
+};
 
 const confirmProps = {
 	title: "Delete records?",
@@ -497,6 +506,40 @@ describe("rendered without pushDialog", () => {
 		expect(error).not.toHaveBeenCalled();
 	});
 
+	it("[ISSUE-3497-ITEM-10] a FormDialog button runs its handler once and keeps the dialog while it runs, Escape included; onClose follows the handler once", async () => {
+		let finish: () => void = () => {};
+		const onSave = vi.fn(
+			() =>
+				new Promise<void>((resolve) => {
+					finish = resolve;
+				}),
+		);
+		const closed = vi.fn();
+		mountInline((onClose) => (
+			<FormDialog
+				title="Inline"
+				message="m"
+				inputs={null}
+				onClose={() => {
+					closed();
+					onClose();
+				}}
+				buttons={[{ text: "Save", onClick: onSave }]}
+			/>
+		));
+		fireEvent.click(btn("Save"));
+		fireEvent.click(btn("Save"));
+		escape();
+		await flush();
+		expect(onSave).toHaveBeenCalledTimes(1);
+		expect(openTitles()).toEqual(["Inline"]);
+		expect(closed).not.toHaveBeenCalled();
+		act(() => finish());
+		await flush();
+		expect(openTitles()).toEqual([]);
+		expect(closed).toHaveBeenCalledTimes(1);
+	});
+
 	it("[ISSUE-3497-ITEM-1] in the content of a pushed FullFormDialog, an InfoDialog closes through its onClose, not the FullFormDialog", async () => {
 		const ContentWithInfo = () => {
 			const [open, setOpen] = useState(true);
@@ -754,6 +797,123 @@ describe("FormDialog", () => {
 			/>,
 		);
 		expect(btn("Cancel")).toHaveClass("MuiButton-colorSecondary");
+	});
+
+	it("[ISSUE-3497-ITEM-10] runs an async handler once per activation and keeps the dialog while it runs", async () => {
+		mount();
+		const onClose = vi.fn();
+		const onClick = vi.fn(() => new Promise<void>(() => {}));
+		push(
+			<FormDialog
+				title="T"
+				message="M"
+				inputs={null}
+				onClose={onClose}
+				buttons={[{ text: "Save", dontClose: true, onClick }]}
+			/>,
+		);
+		const save = btn("Save");
+		act(() => {
+			save.click();
+			save.click();
+		});
+		escape();
+		await flush();
+		expect({
+			calls: onClick.mock.calls.length,
+			open: dialogCount(),
+			onClose: onClose.mock.calls.length,
+		}).toEqual({ calls: 1, open: 1, onClose: 0 });
+	});
+
+	/** a handler whose promise the test settles with `finish` */
+	const pendingHandler = () => {
+		let resolve: () => void = () => {};
+		const handler = vi.fn(
+			() =>
+				new Promise<void>((res) => {
+					resolve = res;
+				}),
+		);
+		return { handler, finish: () => act(() => resolve()) };
+	};
+	const spinner = (name: string) =>
+		btn(name).querySelector('[role="progressbar"]');
+
+	it("[ISSUE-3497-ITEM-10] while a handler runs, the dialog is aria-busy, its buttons are aria-disabled but not disabled, and the pressed one shows a hidden spinner", async () => {
+		mount();
+		const save = pendingHandler();
+		push(
+			<FormDialog
+				title="T"
+				message="M"
+				inputs={null}
+				buttons={[
+					{ text: "Save", dontClose: true, onClick: save.handler },
+					{ text: "Cancel" },
+				]}
+			/>,
+		);
+		const dialog = screen.getByRole("dialog");
+		expect(dialog).not.toHaveAttribute("aria-busy");
+		expect(btn("Save")).not.toHaveAttribute("aria-disabled");
+		expect(spinner("Save")).toBeNull();
+		fireEvent.click(btn("Save"));
+		await flush();
+		expect(dialog).toHaveAttribute("aria-busy", "true");
+		for (const name of ["Save", "Cancel"]) {
+			expect(btn(name)).toHaveAttribute("aria-disabled", "true");
+			expect(btn(name)).not.toBeDisabled();
+			expect(btn(name)).toHaveClass("Mui-disabled");
+		}
+		expect(spinner("Save")).toHaveAttribute("aria-hidden", "true");
+		expect(spinner("Cancel")).toBeNull();
+		expect(btn("Save")).toHaveAccessibleName("Save");
+		save.finish();
+		await flush();
+		expect(dialog).not.toHaveAttribute("aria-busy");
+		for (const name of ["Save", "Cancel"]) {
+			expect(btn(name)).not.toHaveAttribute("aria-disabled");
+			expect(btn(name)).not.toHaveClass("Mui-disabled");
+		}
+		expect(spinner("Save")).toBeNull();
+		// the next activation runs the handler again
+		fireEvent.click(btn("Save"));
+		await flush();
+		expect(save.handler).toHaveBeenCalledTimes(2);
+	});
+
+	it("[ISSUE-3497-ITEM-10] while a handler runs, the other buttons and the backdrop are ignored; once it has ended, the backdrop closes the dialog", async () => {
+		mount();
+		const onClose = vi.fn();
+		const onCancel = vi.fn();
+		const save = pendingHandler();
+		push(
+			<FormDialog
+				title="T"
+				message="M"
+				inputs={null}
+				onClose={onClose}
+				buttons={[
+					{ text: "Save", dontClose: true, onClick: save.handler },
+					{ text: "Cancel", onClick: onCancel },
+				]}
+			/>,
+		);
+		fireEvent.click(btn("Save"));
+		await flush();
+		fireEvent.click(btn("Cancel"));
+		backdrop();
+		await flush();
+		expect(onCancel).not.toHaveBeenCalled();
+		expect(dialogCount()).toBe(1);
+		expect(onClose).not.toHaveBeenCalled();
+		save.finish();
+		await flush();
+		backdrop();
+		await flush();
+		expect(dialogCount()).toBe(0);
+		expect(onClose).toHaveBeenCalledTimes(1);
 	});
 });
 

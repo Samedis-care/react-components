@@ -11,7 +11,9 @@ export interface IDialogButtonConfig {
 	/**
 	 * Called when the button is clicked. A returned promise is awaited. Unless `dontClose` is
 	 * set, the dialog closes and calls its `onClose` afterwards (FormDialog closes before the
-	 * handler runs, and calls `onClose` afterwards).
+	 * handler runs, and calls `onClose` afterwards). While the promise is pending, the dialog
+	 * ignores clicks on its buttons, Escape and the backdrop, so the handler runs once per
+	 * activation, and an open dialog shows the button as busy.
 	 * @param close Closes the dialog this button belongs to, at once, and only that one, also
 	 *              while dialogs pushed after it are open, e.g. before work the dialog should
 	 *              not wait for. It does not call the dialog's `onClose`: the dialog calls it

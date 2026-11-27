@@ -324,6 +324,91 @@ export const FormDialogStory: StoryObj = {
 	render: () => <FormDialogDemo />,
 };
 
+interface FormDialogBusyArgs {
+	onSave: () => Promise<void>;
+	onCancel: () => void;
+}
+
+export const Issue3497Item10FormDialogBusyKeepsFocus: StoryObj<FormDialogBusyArgs> =
+	{
+		args: {
+			// never settles: the story ends with the dialog busy, so axe checks that state
+			onSave: fn(() => new Promise<void>(() => {})),
+			onCancel: fn(),
+		},
+		parameters: {
+			a11y: { test: "error" },
+			docs: {
+				description: {
+					story:
+						"ISSUE-3497-ITEM-10: Enter on Save (an async `dontClose` button) starts a handler that does not end. While it runs, the dialog is `aria-busy`, its buttons are `aria-disabled` and ignore Enter, Save shows a spinner before its label, and Escape does nothing. Focus stays on Save, and Tab still moves between the busy buttons.",
+				},
+			},
+		},
+		render: (args) => (
+			<Opener
+				label="Open busy form dialog"
+				dialog={
+					<FormDialog
+						title="Rename device"
+						message="Enter the new name of the device."
+						inputs={
+							<TextField
+								label="Name"
+								defaultValue="Infusion pump 3"
+								fullWidth
+								sx={{ mt: 1 }}
+							/>
+						}
+						buttons={[
+							{
+								text: "Save",
+								autoFocus: true,
+								dontClose: true,
+								onClick: args.onSave,
+							},
+							{ text: "Cancel", color: "secondary", onClick: args.onCancel },
+						]}
+					/>
+				}
+			/>
+		),
+		play: async ({ args, canvas }) => {
+			await userEvent.click(
+				canvas.getByRole("button", { name: "Open busy form dialog" }),
+			);
+			const dialog = await page().findByRole("dialog", {
+				name: "Rename device",
+			});
+			const save = within(dialog).getByRole("button", { name: "Save" });
+			const cancel = within(dialog).getByRole("button", { name: "Cancel" });
+			await waitFor(() => expect(save).toHaveFocus());
+			await userEvent.keyboard("{Enter}");
+			await expect(args.onSave).toHaveBeenCalledTimes(1);
+			await waitFor(() => expect(dialog).toHaveAttribute("aria-busy", "true"));
+			// two rendering updates: the browser's focus fixup for a disabled
+			// button has run
+			await nextFrame();
+			await nextFrame();
+			await expect(save).toHaveFocus();
+			await expect(save).toHaveAttribute("aria-disabled", "true");
+			await expect(
+				within(save).queryByRole("progressbar", { hidden: true }),
+			).not.toBeNull();
+			await userEvent.keyboard("{Enter}");
+			await userEvent.tab();
+			await expect(cancel).toHaveFocus();
+			await expect(cancel).toHaveAttribute("aria-disabled", "true");
+			await userEvent.keyboard("{Enter}");
+			await userEvent.keyboard("{Escape}");
+			await nextFrame();
+			await expect(args.onSave).toHaveBeenCalledTimes(1);
+			await expect(args.onCancel).not.toHaveBeenCalled();
+			await expect(dialog).toBeInTheDocument();
+			await expect(cancel).toHaveFocus();
+		},
+	};
+
 // ─── DialogTitle ─────────────────────────────────────────────────────────────
 
 interface DialogTitleArgs {
