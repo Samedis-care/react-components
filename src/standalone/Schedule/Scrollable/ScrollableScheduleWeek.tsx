@@ -51,7 +51,11 @@ export interface IProps extends WithTranslation {
 
 interface IState {
 	data: IDayData[][] | null;
-	loadError: Error | null;
+	/**
+	 * The last load failed: the text shown below the error's title (see
+	 * getErrorText), "" when the failure has none. null while no load failed.
+	 */
+	loadError: string | null;
 	/**
 	 * The user asked to load the failed week again and that load is pending:
 	 * the week shows its week line and a spinner instead of the error
@@ -72,11 +76,33 @@ const WeekHeading = styled(Grid)({
 }) as typeof Grid;
 
 /**
+ * The text a failed load shows below the error's title "Week N could not be
+ * loaded": the `message` of an Error, or of any other object with a string
+ * `message`, and a string as it is. Any other value (`undefined`, `null`, a
+ * number, an object without a message such as a fetch Response) has none, so
+ * the alert shows its title only.
+ * @param reason What loadWeekCallback rejected with or threw
+ */
+const getErrorText = (reason: unknown): string => {
+	if (typeof reason === "string") return reason;
+	if (
+		typeof reason === "object" &&
+		reason !== null &&
+		"message" in reason &&
+		typeof reason.message === "string"
+	) {
+		return reason.message;
+	}
+	return "";
+};
+
+/**
  * One week of ScrollableSchedule: a spinner while it loads, then its week line
  * and its day rows. The week line is an `h3` heading, "Week N, DD MMM -
  * DD MMM YYYY" (both years for a week that runs into the next one). When the
- * load fails, the week line stays and an alert names the week and shows the
- * error's message, with a Retry button that loads the week again.
+ * load fails, whatever it rejects with, the week line stays and an alert names
+ * the week and shows the error's message (see getErrorText), with a Retry
+ * button that loads the week again.
  */
 class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 	/**
@@ -134,7 +160,7 @@ class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 				if (loadId !== this.loadId) return;
 				this.setState({
 					data: null,
-					loadError: e as Error,
+					loadError: getErrorText(e),
 					retrying: false,
 				});
 			}
@@ -169,7 +195,7 @@ class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 		const { data, loadError, retrying } = this.state;
 		const { t, idPrefix } = this.props;
 
-		if (!data && !loadError) {
+		if (!data && loadError === null) {
 			return this.renderProgress();
 		}
 
@@ -246,7 +272,7 @@ class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 									WEEK: firstDay.week(),
 								})}
 							</AlertTitle>
-							{loadError?.message}
+							{loadError}
 						</Alert>
 					</Grid>
 				)}

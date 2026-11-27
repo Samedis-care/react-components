@@ -494,6 +494,115 @@ describe("language change", () => {
 	});
 });
 
+describe("loading results", () => {
+	it("[ISSUE-3478-ITEM-5] a rejection that is not an Error still shows an error text", async () => {
+		render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) =>
+					o === 0
+						? // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- the case under test
+							Promise.reject("Server down")
+						: week("w" + o)
+				}
+			/>,
+		);
+		await advance(400);
+		// the alert's title and text describe its Retry button
+		const alert = screen.getByRole("alert");
+		expect(
+			within(alert).getByRole("button", { name: "Retry" }),
+		).toHaveAccessibleDescription("Week 42 could not be loaded Server down");
+		expect(screen.queryAllByRole("progressbar")).toHaveLength(0);
+	});
+
+	it("[ISSUE-3478-ITEM-5] a rejection without a value ends the loading state", async () => {
+		render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) =>
+					o === 0
+						? // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- the case under test
+							Promise.reject(undefined)
+						: week("w" + o)
+				}
+			/>,
+		);
+		await advance(400);
+		expect(screen.queryAllByRole("progressbar")).toHaveLength(0);
+	});
+
+	it.each([
+		["undefined", undefined],
+		["null", null],
+		["0", 0],
+		["an object without a message", { status: 503 }],
+	])(
+		"[ISSUE-3478-ITEM-5] a rejection with %s shows the week's error title only",
+		async (_, reason) => {
+			render(
+				<ScrollableSchedule
+					wrapperClass={SCROLLER}
+					loadWeekCallback={(o) =>
+						o === 0
+							? // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- the case under test
+								Promise.reject(reason)
+							: week("w" + o)
+					}
+				/>,
+			);
+			await advance(400);
+			const alert = screen.getByRole("alert");
+			expect(
+				within(alert).getByRole("button", { name: "Retry" }),
+			).toHaveAccessibleDescription("Week 42 could not be loaded");
+			expect(alert).toHaveTextContent(/^Week 42 could not be loadedRetry$/);
+		},
+	);
+
+	it("[ISSUE-3478-ITEM-5] a rejection with an object that is not an Error shows its message", async () => {
+		render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) =>
+					o === 0
+						? // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- the case under test
+							Promise.reject({ status: 429, message: "Too many requests" })
+						: week("w" + o)
+				}
+			/>,
+		);
+		await advance(400);
+		expect(
+			within(screen.getByRole("alert")).getByRole("button", { name: "Retry" }),
+		).toHaveAccessibleDescription(
+			"Week 42 could not be loaded Too many requests",
+		);
+	});
+
+	it("[ISSUE-3478-ITEM-5] Retry after a rejection without a value loads the week", async () => {
+		let fail = true;
+		const { container } = render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) =>
+					o === 0 && fail
+						? // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- the case under test
+							Promise.reject(undefined)
+						: week("w" + o)
+				}
+			/>,
+		);
+		await advance(400);
+		fail = false;
+		fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+		await advance(400);
+		expect(screen.queryByRole("alert")).toBeNull();
+		expect(screen.queryAllByRole("progressbar")).toHaveLength(0);
+		expect(allEntries(container)).toContain("w0-idx0");
+	});
+});
+
 describe("accessibility", () => {
 	it("[ISSUE-3478-ITEM-16] a failed week keeps its week label and announces the error", async () => {
 		const { container } = render(

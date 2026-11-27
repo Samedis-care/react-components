@@ -37,8 +37,12 @@ import throwError from "../../../utils/throwError";
  * @param weekOffset The week relative to the current week of year
  * 					 Example: -1 for last week, 0 for this week, 1 for next week
  * @param filter The filter selected by the user
- * @returns A promise containing the data for the days of the week, may throw an
- * 			error. Format: IDayData[weekday starting Monday][n]
+ * @returns A promise containing the data for the days of the week, may reject
+ * 			or throw. Format: IDayData[weekday starting Monday][n]. A failed week
+ * 			shows an alert "Week N could not be loaded" with a Retry button, and
+ * 			below its title the `message` of the Error (or of any other object
+ * 			with a string `message`) or the string it rejected with; any other
+ * 			value (`undefined`, a fetch Response, …) shows the title only.
  */
 export type LoadWeekCallback = (
 	weekOffset: number,
