@@ -1,4 +1,4 @@
-import React, { useCallback, useId, useState } from "react";
+import React, { useCallback, useId, useMemo, useState } from "react";
 import {
 	Grid,
 	IconButton,
@@ -19,6 +19,7 @@ import { Translate } from "@mui/icons-material";
 import { TextFieldCC } from "../MuiFieldState";
 import focusRing from "../../../utils/internal/focusRing";
 import visuallyHidden from "../../../utils/internal/visuallyHidden";
+import uniqueArray from "../../../utils/uniqueArray";
 
 // src/assets/data/languages.json
 export type MultiLanguageInputSupportedLanguages =
@@ -233,6 +234,12 @@ export type MultiLanguageInputProps = Omit<
 	 * hidden. In multiline mode the textarea shows the default language until
 	 * another language's button below it is pressed, and again when that
 	 * language is no longer in this list.
+	 *
+	 * A language listed twice is shown once, at its first position. While the
+	 * list is empty, e.g. while an app loads its languages, the field shows
+	 * disabled with its label (and the asterisk of `required`), without a
+	 * language code, translate button or language buttons, until a language
+	 * arrives.
 	 */
 	enabledLanguages: MultiLanguageInputSupportedLanguages[];
 	/**
@@ -413,15 +420,21 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 	const { t } = useCCLanguagesTranslations();
 	const { t: tCC } = useCCTranslations();
 	const language = useCurrentLanguage();
+	// a language listed twice gets one field (and one button)
+	const languages = useMemo(
+		() => uniqueArray(enabledLanguages),
+		[enabledLanguages],
+	);
 
-	// determine default language: the record's, the UI's, the first enabled
+	// determine default language: the record's, the UI's, the first enabled;
+	// null while no language is enabled, which shows a disabled field
 	const i18nLang = language as MultiLanguageInputSupportedLanguages;
-	const defaultLanguage =
-		recordLanguage && enabledLanguages.includes(recordLanguage)
+	const defaultLanguage: MultiLanguageInputSupportedLanguages | null =
+		recordLanguage && languages.includes(recordLanguage)
 			? recordLanguage
-			: !ignoreI18nLocale && enabledLanguages.includes(i18nLang)
+			: !ignoreI18nLocale && languages.includes(i18nLang)
 				? i18nLang
-				: enabledLanguages[0];
+				: (languages[0] ?? null);
 
 	// single-line: whether the other languages' fields are shown, fixed once
 	// the user presses the translate button or types; null before that
@@ -429,10 +442,8 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 	// until then they are shown while only other languages have text, so a
 	// text kept in another language is not hidden behind the toggle
 	const onlyOthersFilled =
-		!hasText(values[defaultLanguage]) &&
-		enabledLanguages.some(
-			(lng) => lng !== defaultLanguage && hasText(values[lng]),
-		);
+		!hasText(defaultLanguage && values[defaultLanguage]) &&
+		languages.some((lng) => lng !== defaultLanguage && hasText(values[lng]));
 	const expanded = userExpanded ?? onlyOthersFilled;
 	// the language code clicked in the multiline label, null until one is
 	const [pickedLanguage, setPickedLanguage] =
@@ -442,7 +453,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 	const activeLanguage =
 		textFieldProps.multiline &&
 		pickedLanguage &&
-		enabledLanguages.includes(pickedLanguage)
+		languages.includes(pickedLanguage)
 			? pickedLanguage
 			: defaultLanguage;
 	const toggleExpanded = useCallback(
@@ -463,8 +474,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 	const incomplete =
 		!textFieldProps.disabled &&
 		!disableIncompleteMarker &&
-		enabledLanguages.map((lng) => (values[lng] ?? "").trim()).find((e) => !e) !=
-			null;
+		languages.map((lng) => (values[lng] ?? "").trim()).find((e) => !e) != null;
 
 	const handleChange = useCallback(
 		(evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -472,7 +482,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 			const lang = nameSplit[
 				nameSplit.length - 1
 			] as MultiLanguageInputSupportedLanguages;
-			if (!enabledLanguages.includes(lang)) {
+			if (!languages.includes(lang)) {
 				throw new Error("Language not supported");
 			}
 			const newValue = {
@@ -486,7 +496,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 			setUserExpanded((prev) => prev ?? onlyOthersFilled);
 			onChange(newValue);
 		},
-		[enabledLanguages, onChange, values, onlyOthersFilled],
+		[languages, onChange, values, onlyOthersFilled],
 	);
 
 	const getLanguageName = (lang: string) =>
@@ -511,20 +521,24 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 	);
 
 	// a field's language in the UI language, e.g. "German"
-	const getFieldLanguageName = (lang: MultiLanguageInputSupportedLanguages) =>
-		lang ? t(lang, { defaultValue: lang }) : "";
+	const getFieldLanguageName = (
+		lang: MultiLanguageInputSupportedLanguages | null,
+	) => (lang ? t(lang, { defaultValue: lang }) : "");
 
 	// the default language's field and the textarea show the label; the other
 	// languages' fields show only their code, so their name is an aria-label
-	const showsLabel = (lang: MultiLanguageInputSupportedLanguages) =>
+	const showsLabel = (lang: MultiLanguageInputSupportedLanguages | null) =>
 		!!label && (!!textFieldProps.multiline || lang === defaultLanguage);
 
+	// lang null: no language is enabled, so the field is shown disabled, with
+	// nothing to name it after, save to or switch to
 	const renderLanguage = (
-		lang: MultiLanguageInputSupportedLanguages,
+		lang: MultiLanguageInputSupportedLanguages | null,
 		focus: boolean,
 	) => (
 		<TextFieldCC
 			{...textFieldProps}
+			disabled={lang ? textFieldProps.disabled : true}
 			warning={warning}
 			dirty={dirty}
 			autoFocus={focus}
@@ -547,9 +561,9 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 					? required
 					: undefined
 			}
-			value={values[lang] ?? ""}
-			onChange={handleChange}
-			name={`${name ?? "mli"}-${lang}`}
+			value={(lang && values[lang]) ?? ""}
+			onChange={lang ? handleChange : undefined}
+			name={lang ? `${name ?? "mli"}-${lang}` : undefined}
 			slotProps={{
 				inputLabel: {
 					...textFieldProps.slotProps?.inputLabel,
@@ -566,20 +580,21 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 								: getFieldLanguageName(lang) || undefined,
 						},
 				input: {
-					startAdornment: !textFieldProps.multiline ? (
-						<InputAdornment position={"start"}>
-							<Tooltip title={getLanguageName(lang)}>
-								<LanguageLabelInputAdornment
-									variant={"caption"}
-									color={"textSecondary"}
-								>
-									{lang}
-								</LanguageLabelInputAdornment>
-							</Tooltip>
-						</InputAdornment>
-					) : undefined,
+					startAdornment:
+						lang && !textFieldProps.multiline ? (
+							<InputAdornment position={"start"}>
+								<Tooltip title={getLanguageName(lang)}>
+									<LanguageLabelInputAdornment
+										variant={"caption"}
+										color={"textSecondary"}
+									>
+										{lang}
+									</LanguageLabelInputAdornment>
+								</Tooltip>
+							</InputAdornment>
+						) : undefined,
 					endAdornment:
-						defaultLanguage === lang && !textFieldProps.multiline ? (
+						lang && lang === defaultLanguage && !textFieldProps.multiline ? (
 							<InputAdornment position={"end"}>
 								<Tooltip title={toggleLabel}>
 									<TranslateButton
@@ -617,7 +632,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 					textFieldProps.multiline ? activeLanguage : defaultLanguage,
 					!!autoFocus,
 				)}
-				{textFieldProps.multiline && (
+				{textFieldProps.multiline && defaultLanguage && (
 					<LanguageSwitcher
 						exclusive
 						size="small"
@@ -633,7 +648,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 					>
 						{[
 							defaultLanguage,
-							...enabledLanguages.filter((lang) => lang !== defaultLanguage),
+							...languages.filter((lang) => lang !== defaultLanguage),
 						].map((lang) => (
 							<Tooltip key={lang} title={getLanguageName(lang)}>
 								<LanguageLabel
@@ -651,7 +666,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 			{!textFieldProps.multiline && (
 				<OtherLanguages id={otherLanguagesId}>
 					{expanded &&
-						enabledLanguages
+						languages
 							.filter((lang) => lang !== defaultLanguage)
 							.map((lang) => (
 								<Grid key={lang} size={12}>

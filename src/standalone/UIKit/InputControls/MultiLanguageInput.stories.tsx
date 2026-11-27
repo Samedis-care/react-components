@@ -97,7 +97,7 @@ const meta: Meta<typeof MultiLanguageInput> = {
 	argTypes: {
 		enabledLanguages: {
 			description:
-				"The editable languages, in display order; non-empty, no duplicates. The default language is defaultLanguage when listed, else the UI language when listed (and ignoreI18nLocale is not set), else enabledLanguages[0]",
+				"The editable languages, in display order; a repeated one shows once, and while the list is empty (languages still loading) the field shows disabled. The default language is defaultLanguage when listed, else the UI language when listed (and ignoreI18nLocale is not set), else enabledLanguages[0]",
 			control: "object",
 		},
 		defaultLanguage: {
@@ -192,6 +192,28 @@ const focusRing = (el: Element) => {
 		return { outline: style.outlineColor };
 	if (style.boxShadow !== "none") return { shadow: style.boxShadow };
 	return null;
+};
+
+export const Issue3486Item3NoLanguagesYet: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3486-ITEM-3: while `enabledLanguages` is empty, e.g. while an app loads its languages, the field shows disabled with its label. The language code and the translate button appear with the languages.",
+			},
+		},
+	},
+	args: {
+		enabledLanguages: [],
+		required: true,
+		values: {},
+	},
+	play: async ({ canvas }) => {
+		await expect(
+			await canvas.findByRole("textbox", { name: "Title" }),
+		).toBeDisabled();
+		await expect(canvas.queryByRole("button")).toBeNull();
+	},
 };
 
 export const Issue3486Item9MultilineLanguageByKeyboard: Story = {

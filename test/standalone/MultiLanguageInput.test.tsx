@@ -318,6 +318,109 @@ describe("bugs", () => {
 		expect(field("desc-fr")).toHaveValue("Bonjour");
 	});
 
+	it("[ISSUE-3486-ITEM-3] raises no error when typing while no language is enabled", () => {
+		const caught = collectWindowErrors();
+		try {
+			render(
+				<MultiLanguageInput
+					enabledLanguages={[]}
+					label="Title"
+					name="title"
+					values={{}}
+					onChange={noop}
+				/>,
+			);
+			// the field may be hidden or disabled; if it can be typed in, typing must not throw
+			const input = document.querySelector<HTMLInputElement>(
+				"input[name]:not(:disabled)",
+			);
+			if (input) type(input, "x");
+		} finally {
+			caught.stop();
+		}
+		expect(caught.errors).toEqual([]);
+	});
+
+	it("[ISSUE-3486-ITEM-3] renders one field per language when enabledLanguages repeats one", () => {
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => {});
+		render(
+			<MultiLanguageInput
+				enabledLanguages={["en", "de", "de"]}
+				label="Title"
+				name="title"
+				values={{}}
+				onChange={noop}
+			/>,
+		);
+		fireEvent.click(toggle());
+		expect(fieldNames()).toEqual(["title-en", "title-de"]);
+		expect(
+			consoleError.mock.calls.filter((call) =>
+				/same key/.test(call.map(String).join(" ")),
+			),
+		).toEqual([]);
+	});
+	it("[ISSUE-3486-ITEM-3] shows the field disabled with its label while no language is enabled, and editable once the languages arrive", () => {
+		const spy = vi.fn();
+		const props = {
+			label: "Title",
+			name: "title",
+			required: true,
+			values: {},
+			onChange: spy,
+		};
+		const { rerender } = render(
+			<MultiLanguageInput {...props} enabledLanguages={[]} />,
+		);
+		const input = screen.getByRole("textbox", { name: "Title" });
+		expect(input).toBeDisabled();
+		expect(input).toBeRequired();
+		expect(fieldNames()).toEqual([]);
+		// no translate button: there is nothing to translate into
+		expect(screen.queryAllByRole("button")).toEqual([]);
+		rerender(<MultiLanguageInput {...props} enabledLanguages={["en", "de"]} />);
+		expect(fieldNames()).toEqual(["title-en"]);
+		expect(field("title-en")).toBeEnabled();
+		expect(field("title-en")).toBeRequired();
+		type(field("title-en"), "Pump");
+		expect(spy).toHaveBeenLastCalledWith({ en: "Pump" });
+		expect(toggle()).toBeInTheDocument();
+	});
+	it("[ISSUE-3486-ITEM-3] shows a multiline field disabled and without language buttons while no language is enabled", () => {
+		render(
+			<MultiLanguageInput
+				enabledLanguages={[]}
+				label="Desc"
+				name="desc"
+				multiline
+				values={{}}
+				onChange={noop}
+			/>,
+		);
+		expect(screen.getByRole("textbox", { name: "Desc" })).toBeDisabled();
+		expect(screen.queryAllByRole("button")).toEqual([]);
+	});
+	it("[ISSUE-3486-ITEM-3] shows one multiline language button per language when enabledLanguages repeats one", () => {
+		render(
+			<MultiLanguageInput
+				enabledLanguages={["en", "de", "de"]}
+				label="Desc"
+				name="desc"
+				multiline
+				values={{}}
+				onChange={noop}
+			/>,
+		);
+		expect(
+			Array.from(
+				document.querySelectorAll<HTMLElement>("button[data-lang]"),
+				(button) => button.dataset.lang,
+			),
+		).toEqual(["en", "de"]);
+	});
+
 	it("[ISSUE-3486-ITEM-9] exposes the multiline language codes as focusable controls with the active one marked", () => {
 		render(
 			<MultiLanguageInput
