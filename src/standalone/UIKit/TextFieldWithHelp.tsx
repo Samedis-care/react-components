@@ -53,9 +53,27 @@ export interface TextFieldWithHelpProps extends UIInputProps {
 export const UiKitTextFieldWithState = withMuiFieldState(
 	UiKitTextField,
 ) as typeof UiKitTextField;
+
+/**
+ * What MUI calls `onChange` with: the event, and in a non-native `select` the element of
+ * the chosen option, as MUI's `Select` does. `TextFieldProps` declares the event only.
+ */
+type ChangeHandlerArgs = [
+	event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+	...rest: unknown[],
+];
+
 /**
  * MUI's `TextField` with an optional info button, a Clear button on touch devices and the
  * field states of {@link withMuiFieldState} (`warning`, `dirty`).
+ *
+ * Every entry of `slotProps` (`root`, `input`, `inputLabel`, `htmlInput`,
+ * `formHelperText`, `select`), as an object or a function, reaches MUI's `TextField`. Three
+ * of them are extended: `input` gets the field's end adornment, `htmlInput` the helper
+ * text's id (see below) and the ref the Clear button uses, `inputLabel` `shrink: true`,
+ * which the caller's own `shrink` overrides. `onChange` gets every argument MUI calls it
+ * with: in a non-native `select` the chosen option's element follows the event, as from
+ * MUI's `Select`.
  *
  * An `aria-describedby` in `slotProps.htmlInput` describes the input after the helper text,
  * where MUI's `TextField` would let it replace the helper text's id.
@@ -131,9 +149,11 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 	// keep "uncontrolledValue" up to date
 
 	const handleChange = useCallback(
-		(evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-			if (onChange) onChange(evt);
-			setUncontrolledValue(evt.target.value);
+		(...args: ChangeHandlerArgs) => {
+			const forward: ((...args: ChangeHandlerArgs) => void) | undefined =
+				onChange;
+			if (forward) forward(...args);
+			setUncontrolledValue(args[0].target.value);
 		},
 		[onChange],
 	);
@@ -156,6 +176,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 			dirty={dirty}
 			onChange={handleChange}
 			slotProps={{
+				...muiProps.slotProps,
 				input: (props) => {
 					const orgSlotProps: InputProps = {
 						...accessSlotProps(props, muiProps.slotProps?.input),

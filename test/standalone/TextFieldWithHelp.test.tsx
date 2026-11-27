@@ -288,6 +288,104 @@ describe("TextFieldWithHelp", () => {
 			expect(custom).toHaveBeenCalledTimes(1);
 		});
 	});
+
+	describe("refs and slotProps", () => {
+		it("[ISSUE-3483-ITEM-10] passes slotProps.formHelperText on to the helper text", async () => {
+			wrap(
+				<TextFieldWithHelp
+					label="Name"
+					value=""
+					onChange={noop}
+					helperText="hint"
+					slotProps={{ formHelperText: { role: "status" } }}
+				/>,
+			);
+			await screen.findByRole("textbox", { name: "Name" });
+			expect(screen.getByRole("status")).toHaveTextContent("hint");
+		});
+
+		it("[ISSUE-3483-ITEM-10] passes slotProps.select on to the select", async () => {
+			wrap(
+				<TextFieldWithHelp
+					label="Status"
+					select
+					value="a"
+					onChange={noop}
+					disableClearable
+					slotProps={{ select: { native: true } }}
+				>
+					<option value="a">A</option>
+					<option value="b">B</option>
+				</TextFieldWithHelp>,
+			);
+			await screen.findAllByText("Status");
+			expect(document.querySelectorAll("select")).toHaveLength(1);
+		});
+
+		it("[ISSUE-3483-ITEM-10] passes slotProps.root on to the root", async () => {
+			wrap(
+				<TextFieldWithHelp
+					label="Name"
+					value=""
+					onChange={noop}
+					dirty
+					slotProps={{ root: { className: "mine" } }}
+				/>,
+			);
+			await screen.findByRole("textbox", { name: /^Name/ });
+			const root = document.querySelector(".MuiFormControl-root");
+			expect(root).toHaveClass("mine");
+			// the field's own root props stay
+			expect(root).toHaveAttribute("data-cc-dirty", "true");
+		});
+
+		it("[ISSUE-3483-ITEM-10] passes a slot given as a function on, called with the field's state", async () => {
+			wrap(
+				<TextFieldWithHelp
+					label="Name"
+					value=""
+					onChange={noop}
+					helperText="hint"
+					error
+					slotProps={{
+						formHelperText: (state) => ({
+							role: state.error ? "alert" : "status",
+						}),
+					}}
+				/>,
+			);
+			await screen.findByRole("textbox", { name: "Name" });
+			expect(screen.getByRole("alert")).toHaveTextContent("hint");
+		});
+
+		it("[ISSUE-3483-ITEM-10] passes the chosen option on to a select's onChange, as MUI's Select does", async () => {
+			const onChange = vi.fn();
+			wrap(
+				<TextFieldWithHelp
+					label="Status"
+					select
+					name="status"
+					value="active"
+					onChange={onChange}
+				>
+					<MenuItem value="active">Active</MenuItem>
+					<MenuItem value="retired">Retired</MenuItem>
+				</TextFieldWithHelp>,
+			);
+			fireEvent.mouseDown(
+				await screen.findByRole("combobox", { name: "Status" }),
+			);
+			fireEvent.click(await screen.findByRole("option", { name: "Retired" }));
+			expect(onChange).toHaveBeenCalledTimes(1);
+			const [event, child] = onChange.mock.calls[0] as [
+				React.ChangeEvent<HTMLInputElement>,
+				React.ReactElement<{ value: string }>,
+			];
+			expect(event.target).toMatchObject({ name: "status", value: "retired" });
+			expect(React.isValidElement(child)).toBe(true);
+			expect(child.props.value).toBe("retired");
+		});
+	});
 });
 
 describe("TextFieldWithHelp: the input's description", () => {
