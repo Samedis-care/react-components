@@ -94,6 +94,32 @@ describe("ModelDataTypeLocalizedStringRenderer: stringify", () => {
 		expect(type.stringify({ de: "Pumpe", fr: "" })).toBe("Pumpe");
 	});
 
+	it("[ISSUE-3486-ITEM-23] the field's defaultLanguage is the first fallback, ahead of the first enabled language", () => {
+		const type = new ModelDataTypeLocalizedStringRenderer({
+			enabledLanguages: ["en", "fr", "de"],
+			defaultLanguage: "de",
+		});
+		expect(type.stringify({ fr: "Pompe", de: "Pumpe" })).toBe("Pumpe");
+		// without text of its own, the first enabled language with text
+		expect(type.stringify({ fr: "Pompe", de: " " })).toBe("Pompe");
+		// the UI language still comes first
+		expect(type.stringify({ en: "Pump", de: "Pumpe" })).toBe("Pump");
+	});
+
+	it("[ISSUE-3486-ITEM-23] a defaultLanguage that is null or not enabled is ignored", () => {
+		const notEnabled = new ModelDataTypeLocalizedStringRenderer({
+			enabledLanguages: ["en", "fr"],
+			defaultLanguage: "de",
+		});
+		expect(notEnabled.stringify({ fr: "Pompe", de: "Pumpe" })).toBe("Pompe");
+		expect(notEnabled.stringify({ de: "Pumpe" })).toBe("");
+		const unset = new ModelDataTypeLocalizedStringRenderer({
+			enabledLanguages: ["en", "fr", "de"],
+			defaultLanguage: null,
+		});
+		expect(unset.stringify({ fr: "Pompe", de: "Pumpe" })).toBe("Pompe");
+	});
+
 	it("[ISSUE-3486-ITEM-23] a language that is not enabled is no fallback", () => {
 		const type = new ModelDataTypeLocalizedStringRenderer({
 			enabledLanguages: ["en", "de"],
@@ -135,6 +161,23 @@ describe("ModelDataTypeLocalizedStringRenderer: grid and read-only view", () => 
 				renderParams({ de: "Infusionspumpe" }, ModelVisibilityGridView),
 			),
 		);
+		expect(screen.getByText("Infusionspumpe")).toHaveAttribute("lang", "de");
+	});
+
+	it("[ISSUE-3486-ITEM-23] a grid cell shows the defaultLanguage's text ahead of the first enabled language's, marked with its language", () => {
+		const type = new ModelDataTypeLocalizedStringRenderer({
+			enabledLanguages: ["en", "fr", "de"],
+			defaultLanguage: "de",
+		});
+		const { container } = render(
+			type.render(
+				renderParams(
+					{ fr: "Pompe à perfusion", de: "Infusionspumpe" },
+					ModelVisibilityGridView,
+				),
+			),
+		);
+		expect(container).not.toHaveTextContent("Pompe à perfusion");
 		expect(screen.getByText("Infusionspumpe")).toHaveAttribute("lang", "de");
 	});
 

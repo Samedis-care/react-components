@@ -15,8 +15,8 @@ import { TypeSettings } from "../../Type";
  * @param value The value
  * @param values The record's values, those named in getFallbackLabelValues
  * included
- * @returns The text; an empty string to show the first enabled language that
- * has text instead
+ * @returns The text; an empty string to show the text of `defaultLanguage`
+ * or of the first enabled language that has text instead
  */
 export type ModelDataTypeLocalizedStringRendererGetFallbackLabel = (
 	value: Partial<Record<MultiLanguageInputSupportedLanguages, string>>,
@@ -27,10 +27,12 @@ export interface ModelDataTypeLocalizedStringRendererParamsExtra {
 	/**
 	 * The text a grid cell or read-only field shows while the value has no text
 	 * in the components-care UI language (or only whitespace); not called while
-	 * it has. Without it, or while it returns an empty string, the text of the
-	 * first language in `enabledLanguages` that has text shows, marked with its
-	 * language (`lang`), as `stringify` returns it.
-	 * @default none: the first enabled language that has text
+	 * it has. Without it, or while it returns an empty string, the text of
+	 * `defaultLanguage` shows (while it is in `enabledLanguages` and has text),
+	 * otherwise the text of the first language in `enabledLanguages` that has
+	 * text, marked with its language (`lang`), as `stringify` returns it.
+	 * @default none: the default language's or the first enabled language's
+	 * text
 	 */
 	getFallbackLabel?: ModelDataTypeLocalizedStringRendererGetFallbackLabel;
 	/**
@@ -57,8 +59,8 @@ export type ModelDataTypeLocalizedStringRendererParams = Omit<
 
 /**
  * Renders a localized string: a MultiLanguageInput when editable, otherwise
- * its text in the UI language, falling back to the first enabled language that
- * has text (see getFallbackLabel)
+ * its text in the UI language, falling back to `defaultLanguage` and then to
+ * the first enabled language that has text (see getFallbackLabel)
  */
 class RendererLocalizedString extends TypeLocalizedString {
 	props: Omit<
@@ -69,7 +71,11 @@ class RendererLocalizedString extends TypeLocalizedString {
 	extra: ModelDataTypeLocalizedStringRendererParamsExtra;
 
 	constructor(props: ModelDataTypeLocalizedStringRendererParams) {
-		super(props?.multiline, props?.enabledLanguages ?? null);
+		super(
+			props?.multiline,
+			props?.enabledLanguages ?? null,
+			props?.defaultLanguage ?? null,
+		);
 
 		const { getFallbackLabel, getFallbackLabelValues, ...other } = props;
 		this.props = other;

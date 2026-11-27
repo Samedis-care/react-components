@@ -8,15 +8,18 @@
 ## What changed
 
 When a localized value has no text in the components-care UI language, a grid cell, a
-read-only field and `stringify` show the text of the first language in the field's
+read-only field and `stringify` show the text of the field's `defaultLanguage` (while it
+is in `enabledLanguages` and has text), otherwise the text of the first language in
 `enabledLanguages` that has text. A record `{ de: "Infusionspumpe" }` in an English UI
 shows "Infusionspumpe"; before, the cell and the field were empty unless the field had a
-`getFallbackLabel`. Grid cells and read-only fields mark that text with its language
+`getFallbackLabel`. With `defaultLanguage: "de"`, a record
+`{ fr: "Pompe à perfusion", de: "Infusionspumpe" }` shows the German text, although `fr`
+comes first in `enabledLanguages`. Grid cells and read-only fields mark that text with its language
 (`<span lang="de">`), so screen readers read it in that language.
 
 `getFallbackLabel` still comes first: while the UI language has no text, its text shows,
-and the first enabled language with text only shows while it returns an empty string (or
-`null`/`undefined`). It is not called while the UI language has text, as before.
+and the default language's or first enabled language's text only shows while it returns
+an empty string (or `null`/`undefined`). It is not called while the UI language has text, as before.
 
 Text of only whitespace counts as no text: it no longer hides the fallback, and
 `stringify` returns `""` when no language has text other than whitespace.
@@ -36,4 +39,5 @@ it has a text, so it could not be told apart from a record without one.
 ## Migration
 
 Nothing to do. A `getFallbackLabel` that only picks another language's text from the
-value can be removed.
+value can be removed; to show the record's own language first, pass it as
+`defaultLanguage`.

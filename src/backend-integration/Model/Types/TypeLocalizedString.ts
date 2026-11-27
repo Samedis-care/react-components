@@ -30,22 +30,35 @@ abstract class TypeLocalizedString implements Type<
 	protected multiline: boolean;
 	/**
 	 * The languages whose text shows, in this order, when the UI language has
-	 * none; null for every language the value holds, in the value's order
+	 * none: the default language, then the other enabled languages; null for
+	 * every language the value holds, in the value's order
 	 */
 	protected fallbackLanguages: MultiLanguageInputSupportedLanguages[] | null;
 
 	/**
 	 * @param multiline Whether the text is edited in a textarea
-	 * @param fallbackLanguages The languages whose text shows, in this order,
-	 * when the UI language has none (the field's enabled languages); null or
-	 * omitted for every language the value holds, in the value's order
+	 * @param enabledLanguages The field's languages: when the UI language has
+	 * no text, the first of them that has text shows. Null or omitted for every
+	 * language the value holds, in the value's order
+	 * @param defaultLanguage The language the record is filled in
+	 * (MultiLanguageInput's `defaultLanguage`): tried before the other enabled
+	 * languages. Ignored while null, omitted or not in `enabledLanguages`
 	 */
 	constructor(
 		multiline = false,
-		fallbackLanguages: MultiLanguageInputSupportedLanguages[] | null = null,
+		enabledLanguages: MultiLanguageInputSupportedLanguages[] | null = null,
+		defaultLanguage: MultiLanguageInputSupportedLanguages | null = null,
 	) {
 		this.multiline = multiline;
-		this.fallbackLanguages = fallbackLanguages;
+		this.fallbackLanguages =
+			enabledLanguages &&
+			defaultLanguage &&
+			enabledLanguages.includes(defaultLanguage)
+				? [
+						defaultLanguage,
+						...enabledLanguages.filter((lang) => lang !== defaultLanguage),
+					]
+				: enabledLanguages;
 	}
 
 	abstract render(
@@ -105,8 +118,9 @@ abstract class TypeLocalizedString implements Type<
 	}
 
 	/**
-	 * The text shown when the UI language has none: the first fallback language
-	 * (see the constructor) that has text
+	 * The text shown when the UI language has none: the default language's when
+	 * it has text, otherwise the first other enabled language's that has text
+	 * (see the constructor)
 	 * @param value The value
 	 * @returns The language and its text, null if no fallback language has text
 	 */
@@ -122,7 +136,8 @@ abstract class TypeLocalizedString implements Type<
 
 	/**
 	 * The text in the UI language; when it has none (or only whitespace), the
-	 * text of the first fallback language that has text (see the constructor)
+	 * default language's when it has text, otherwise the first other enabled
+	 * language's that has text (see the constructor)
 	 * @param value The value
 	 * @returns The text as stored, an empty string if no language has text
 	 */
