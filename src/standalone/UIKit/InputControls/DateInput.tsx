@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
 	DatePickerProps,
 	DateValidationError,
@@ -30,9 +30,14 @@ export interface DateInputProps extends Omit<
 	 * `null` at once when the touch Clear button is pressed. Only a day the
 	 * picker accepts, or `null` for an empty field, is reported, and only when
 	 * it differs from the day reported last or handed in as `value` since; the
-	 * days the field passes through while the user types are not.
+	 * days the field passes through while the user types are not. With
+	 * `publishIntermediateValues` (set through the theme's
+	 * `CcLocalizedKeyboardDatePicker` default props) it is called for every
+	 * change instead, and with `null` for an entry that is no valid day, such as
+	 * 02/31: the field keeps showing that entry, marked invalid (see `onError`),
+	 * as long as `value` is the `null` reported for it.
 	 * @param date new value, as a date-only value (12:00 UTC, see normalizeDate),
-	 * or `null`
+	 * or `null`; never an Invalid Date
 	 */
 	onChange: (date: Date | null) => void;
 	/**
@@ -289,6 +294,23 @@ const DateInput = (
 		() => (value ? toPickerDay(value) : null),
 		[value],
 	);
+	// The entry that is no valid day (02/31) the picker reported last, which
+	// only `publishIntermediateValues` passes on: the consumer gets `null` for
+	// it, and the field gets the entry back in place of that `null`, as if the
+	// consumer held it. Handed the `null`, the field would lose the next
+	// keystroke that makes another such entry (02/30 to 02/31), as its value
+	// would not change.
+	const [invalidEntry, setInvalidEntry] = useState<Moment | null>(null);
+	// a day handed in replaces it, so a `null` handed in later empties the field
+	if (invalidEntry && value) setInvalidEntry(null);
+	const fieldValue = value ? pickerValue : invalidEntry;
+	const handleChange = useCallback(
+		(date: Moment | null) => {
+			setInvalidEntry(date?.isValid() === false ? date : null);
+			onChange(fromPickerValue(date));
+		},
+		[onChange],
+	);
 	const pickerMinDate = usePickerDay(minDate);
 	const pickerMaxDate = usePickerDay(maxDate);
 	const pickerReferenceDate = usePickerDay(referenceDate);
@@ -320,10 +342,8 @@ const DateInput = (
 	return (
 		<LocalizedKeyboardDatePicker
 			{...muiProps}
-			value={pickerValue}
-			onChange={(date) =>
-				date ? onChange(fromPickerDay(date)) : onChange(null)
-			}
+			value={fieldValue}
+			onChange={handleChange}
 			minDate={pickerMinDate}
 			maxDate={pickerMaxDate}
 			referenceDate={pickerReferenceDate}
@@ -362,7 +382,7 @@ const DateInput = (
 						// only the field that reads it gets it; another one would pass it on
 						// to the DOM and React would log an error
 						...(textField === PickersTextFieldWithHelp
-							? { customHandleClear: () => onChange(null) }
+							? { customHandleClear: () => handleChange(null) }
 							: {}),
 						...textFieldSlotPropsProp,
 						// only where the caller gave one, so a helper text passed through

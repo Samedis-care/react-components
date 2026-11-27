@@ -565,6 +565,113 @@ describe("DateInput bugs", () => {
 		expectTypeOf<DateInputProps>().not.toHaveProperty("timezone");
 	});
 
+	it("[ISSUE-3485-ITEM-6] never reports an Invalid Date, also with intermediate values published", async () => {
+		const published = createTheme({
+			components: {
+				CcLocalizedKeyboardDatePicker: {
+					defaultProps: { publishIntermediateValues: true },
+				},
+			},
+		});
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const report = vi.fn();
+		wrap(
+			<DateHost
+				initial={new Date("2026-01-31T12:00:00.000Z")}
+				report={report}
+			/>,
+			published,
+		);
+		await screen.findByRole("button", { name: /choose date/i });
+		press(0, "ArrowUp");
+		for (const [date] of report.mock.calls as [Date | null][]) {
+			expect(date === null || !Number.isNaN(date.getTime()), String(date)).toBe(
+				true,
+			);
+		}
+	});
+
+	/** A theme that sets publishIntermediateValues for every date picker */
+	const publishing = () =>
+		createTheme({
+			components: {
+				CcLocalizedKeyboardDatePicker: {
+					defaultProps: { publishIntermediateValues: true },
+				},
+			},
+		});
+
+	it("[ISSUE-3485-ITEM-6] reports null for an entry that is no valid day and keeps showing it, also for the next one", async () => {
+		const report = vi.fn();
+		wrap(
+			<DateHost
+				initial={new Date("2026-01-30T12:00:00.000Z")}
+				report={report}
+			/>,
+			publishing(),
+		);
+		await screen.findByRole("button", { name: /choose date/i });
+		press(0, "ArrowUp");
+		expect(sections()).toBe("02|30|2026");
+		expect(reported(report)).toEqual([null]);
+		// another entry that is no valid day, while the host holds null
+		press(1, "ArrowUp");
+		expect(sections()).toBe("02|31|2026");
+		press(1, "ArrowDown");
+		press(1, "ArrowDown");
+		press(1, "ArrowDown");
+		expect(sections()).toBe("02|28|2026");
+		expect(reported(report)).toEqual([null, "2026-02-28T12:00:00.000Z"]);
+	});
+
+	it("[ISSUE-3485-ITEM-6] empties the field over an entry that is no valid day with the touch Clear button", async () => {
+		const report = vi.fn();
+		wrap(
+			<DateHost
+				initial={new Date("2026-01-31T12:00:00.000Z")}
+				report={report}
+			/>,
+			publishing(),
+		);
+		await screen.findByRole("button", { name: /choose date/i });
+		press(0, "ArrowUp");
+		expect(sections()).toBe("02|31|2026");
+		fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+		expect(sections()).toBe("MM|DD|YYYY");
+		expect(reported(report)).toEqual([null, null]);
+	});
+
+	it("[ISSUE-3485-ITEM-6] shows a day handed in over an entry that is no valid day, and no entry for a null handed in after it", async () => {
+		const Host = () => {
+			const [value, setValue] = useState<Date | null>(
+				new Date("2026-01-31T12:00:00.000Z"),
+			);
+			return (
+				<>
+					<button type="button" onClick={() => setValue(DAY)}>
+						Set
+					</button>
+					<button type="button" onClick={() => setValue(null)}>
+						Reset
+					</button>
+					<DateInput label="Day" value={value} onChange={setValue} />
+				</>
+			);
+		};
+		wrap(<Host />, publishing());
+		await screen.findByRole("button", { name: /choose date/i });
+		press(0, "ArrowUp");
+		expect(sections()).toBe("02|31|2026");
+		const field = screen.getByRole("group", { name: "Day" });
+		expect(field).toHaveAttribute("aria-invalid", "true");
+		fireEvent.click(screen.getByRole("button", { name: "Set" }));
+		expect(sections()).toBe("08|13|2026");
+		expect(field).toHaveAttribute("aria-invalid", "false");
+		fireEvent.click(screen.getByRole("button", { name: "Reset" }));
+		expect(sections()).toBe("MM|DD|YYYY");
+		expect(field).toHaveAttribute("aria-invalid", "false");
+	});
+
 	it("[ISSUE-3485-ITEM-13] links a helperText prop to the field group", async () => {
 		wrap(
 			<DateInput
