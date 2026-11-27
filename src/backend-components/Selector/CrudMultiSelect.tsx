@@ -93,6 +93,7 @@ const CrudMultiSelect = <
 		added,
 		removed,
 		pendingChanges,
+		writing,
 		initialRawData,
 		handleSelect,
 		modelToSelectorData,
@@ -118,7 +119,7 @@ const CrudMultiSelect = <
 			// for creating dialogs inside end adornment of selector with access to selector data
 			>
 				{error && <ErrorComponent error={error} />}
-				<div aria-busy={loading}>
+				<div aria-busy={loading || writing}>
 					<BackendMultiSelect
 						{...props}
 						disabled={props.disabled || locked}
@@ -140,6 +141,7 @@ const CrudMultiSelect = <
 					loading={loading}
 					loadError={loadError}
 					label={props.label}
+					writing={writing}
 				/>
 			</DialogContextProvider>
 		</CrudSelectContext.Provider>

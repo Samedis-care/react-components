@@ -433,6 +433,7 @@
 		},
 		"selector": {
 			"loading": "Loading…",
+			"saving": "Saving…",
 			"loading-error": "Error while fetching data",
 			"unknown-entry": "Unknown entry",
 			"selected-count": "Selected: {{COUNT}}",

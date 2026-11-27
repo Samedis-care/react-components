@@ -85,6 +85,7 @@ const CrudMultiSelectWithGroups = <
 		added,
 		removed,
 		pendingChanges,
+		writing,
 		initialRawData,
 		handleSelect,
 		modelToSelectorData,
@@ -99,7 +100,7 @@ const CrudMultiSelectWithGroups = <
 	return (
 		<>
 			{error && <ErrorComponent error={error} />}
-			<div aria-busy={loading}>
+			<div aria-busy={loading || writing}>
 				<BackendMultiSelectWithTags<
 					GroupModelT,
 					DataModelT,
@@ -122,6 +123,7 @@ const CrudMultiSelectWithGroups = <
 				loading={loading}
 				loadError={loadError}
 				label={props.title}
+				writing={writing}
 			/>
 		</>
 	);

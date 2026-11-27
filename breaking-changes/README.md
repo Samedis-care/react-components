@@ -28,6 +28,8 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [FullFormDialog's content keeps a top padding, with or without a title](2026-11-27-full-form-dialog-content-top-padding.md) | behavior |
 | 2026-11-27 | [A form page's Back reports and shows an error thrown by the Form's goBack](2026-11-27-form-page-back-reports-go-back-errors.md) | behavior |
 | 2026-11-27 | [A form page's Back asks about a change a control made when it mounted](2026-11-27-form-page-back-follows-mount-changes.md) | behavior |
+| 2026-11-27 | [CRUD selects are busy and say "Saving…" while a change is being written](2026-11-27-crud-select-busy-while-writing.md) | behavior, type |
+| 2026-11-27 | [CrudSelect applies a change made while another one is written after it, and only what it changed](2026-11-27-crud-select-applies-changes-in-order.md) | behavior |
 | 2026-11-26 | [A localized value without text in the UI language shows another language's text](2026-11-26-localized-string-falls-back-to-another-language.md) | behavior |
 | 2026-11-26 | [A HistoryRouter inside another one leaves the page's scroll position and focus alone](2026-11-26-nested-history-router-keeps-page-scroll-and-focus.md) | behavior |
 | 2026-11-26 | [isPlainObject tells a plain object by its prototype; a record with an entry named constructor counts](2026-11-26-is-plain-object-by-prototype.md) | behavior |

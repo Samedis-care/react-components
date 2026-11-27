@@ -433,6 +433,7 @@
 		},
 		"selector": {
 			"loading": "Laadt…",
+			"saving": "Slaat op…",
 			"loading-error": "Fout bij het ophalen van gegevens",
 			"unknown-entry": "Onbekend item",
 			"selected-count": "Geselecteerd: {{COUNT}}",

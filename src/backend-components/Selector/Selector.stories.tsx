@@ -39,11 +39,15 @@ import type CrudMultiSelectWithGroupsType from "./CrudMultiSelectWithGroups";
 
 // Lazy-import to avoid circular dependency at module evaluation time
 const BackendSingleSelect = lazy(() => import("./BackendSingleSelect"));
+
 const BackendMultiSelect = lazy(() => import("./BackendMultiSelect"));
+
 const CrudMultiSelect = lazy(() => import("./CrudMultiSelect"));
+
 const CrudMultiSelectWithGroups = lazy(
 	() => import("./CrudMultiSelectWithGroups"),
 ) as unknown as typeof CrudMultiSelectWithGroupsType;
+
 const BackendDataGridMultiSelect = lazy(
 	() => import("./BackendDataGridMultiSelect"),
 ) as unknown as typeof BackendDataGridMultiSelectType;
@@ -710,22 +714,27 @@ const serializeMember = (data: MemberData) => ({
 	person_id: data.person_id,
 	label: data.label,
 });
+
 const deserializeMember = (record: Record<string, unknown>): MemberData => ({
 	value: record.id as string,
 	label: record.label as string,
 	person_id: record.person_id as string,
 });
+
 const deserializeMemberModel = (record: ModelRecord<ModelUnknown>) => ({
 	label: `${record.first_name as string} ${record.last_name as string}`,
 	person_id: record.id as string,
 });
+
 const getIdOfMember = (data: MemberData) => data.person_id;
+
 const convDepartment = (
 	record: ModelRecord<ModelUnknown>,
 ): BaseSelectorData => ({
 	value: record.id as string,
 	label: record.department as string,
 });
+
 const getDepartmentMembers = ([
 	department,
 ]: ModelGetResponse<ModelUnknown>): MemberData[] =>
@@ -973,5 +982,143 @@ export const Issue3510Item5UnloadableRecordMarksField: StoryObj = {
 		await expect(
 			canvas.getByRole("button", { name: "Remove Bob Smith" }),
 		).toBeVisible();
+	},
+};
+
+// ---------------------------------------------------------------------------
+// CrudMultiSelect on a backend that answers its writes late
+// ---------------------------------------------------------------------------
+
+/** MemberConnector whose creates, updates and deletes wait until `answer` is called */
+class HeldMemberConnector extends MemberConnector {
+	private held: (() => void)[] = [];
+
+	constructor(
+		rows: Record<string, unknown>[],
+		private onHeldChange: (count: number) => void,
+	) {
+		super(rows, () => undefined);
+	}
+
+	/** answers every write that waits */
+	answer(): void {
+		const held = this.held;
+		this.held = [];
+		this.onHeldChange(0);
+		held.forEach((release) => release());
+	}
+
+	private hold(): Promise<void> {
+		return new Promise((resolve) => {
+			this.held.push(resolve);
+			this.onHeldChange(this.held.length);
+		});
+	}
+
+	async create(
+		data: Record<string, unknown>,
+	): Promise<ModelGetResponse<ModelUnknown>> {
+		await this.hold();
+		return super.create(data);
+	}
+
+	async update(
+		data: Record<string, unknown>,
+	): Promise<ModelGetResponse<ModelUnknown>> {
+		await this.hold();
+		return super.update(data);
+	}
+
+	async delete(id: string): Promise<void> {
+		await this.hold();
+		return super.delete(id);
+	}
+}
+
+/** the lazy CrudMultiSelect with its generics, which lazy() drops */
+const TypedCrudMultiSelect =
+	CrudMultiSelect as unknown as typeof import("./CrudMultiSelect").default;
+
+/**
+ * A team written at once, by a backend that answers only when "Answer the requests" is
+ * clicked: a slow network, for as long as you like
+ */
+const SlowBackendStory = () => {
+	const model = useMemo(createTestModel, []);
+	const [waiting, setWaiting] = useState(0);
+	const connector = useMemo(
+		() =>
+			new HeldMemberConnector(
+				[
+					{ id: "1", person_id: "3", label: "Carol Jones" },
+					{ id: "2", person_id: "4", label: "Dave Brown" },
+				],
+				setWaiting,
+			),
+		[],
+	);
+	const answer = useCallback(() => connector.answer(), [connector]);
+	return (
+		<>
+			<TypedCrudMultiSelect<ModelUnknown, MemberData>
+				label={"Team"}
+				model={model}
+				connector={connector}
+				errorComponent={ErrorComponent}
+				serialize={serializeMember}
+				deserialize={deserializeMember}
+				deserializeModel={deserializeMemberModel}
+				getIdOfData={getIdOfMember}
+				searchDebounceTime={0}
+			/>
+			<p>
+				Requests waiting for the backend:{" "}
+				<span data-testid={"waiting"}>{waiting}</span>
+			</p>
+			<Button type={"button"} variant={"outlined"} onClick={answer}>
+				Answer the requests
+			</Button>
+		</>
+	);
+};
+
+/**
+ * ISSUE-3509-ITEM-16: while a pick or a removal is being written, the field is busy
+ * (`aria-busy`) and says "Saving…" under it. The change is listed once the backend has
+ * answered.
+ */
+export const Issue3509Item16WritesInFlightAreBusy: StoryObj = {
+	parameters: { a11y: { test: "error" } },
+	render: () => <SlowBackendStory />,
+	play: async ({ canvas, canvasElement, userEvent }) => {
+		const remove = await canvas.findByRole(
+			"button",
+			{ name: "Remove Carol Jones" },
+			{ timeout: 5000 },
+		);
+		await expect(canvas.queryByRole("status")).toBeNull();
+
+		await userEvent.click(remove);
+		await waitFor(() =>
+			expect(canvas.getByTestId("waiting")).toHaveTextContent("1"),
+		);
+		await expect(canvas.getByRole("status")).toHaveTextContent("Saving…");
+		await expect(
+			canvasElement.querySelector('[aria-busy="true"]'),
+		).not.toBeNull();
+		await expect(
+			canvas.getByRole("button", { name: "Remove Carol Jones" }),
+		).toBeVisible();
+
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Answer the requests" }),
+		);
+		await waitFor(() =>
+			expect(
+				canvas.queryByRole("button", { name: "Remove Carol Jones" }),
+			).toBeNull(),
+		);
+		await expect(canvas.queryByRole("status")).toBeNull();
+		await expect(canvasElement.querySelector('[aria-busy="true"]')).toBeNull();
 	},
 };

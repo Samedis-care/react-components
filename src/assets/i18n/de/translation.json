@@ -433,6 +433,7 @@
 		},
 		"selector": {
 			"loading": "Lädt…",
+			"saving": "Speichert…",
 			"loading-error": "Fehler beim Abrufen der Daten",
 			"unknown-entry": "Unbekannter Eintrag",
 			"selected-count": "Ausgewählt: {{COUNT}}",

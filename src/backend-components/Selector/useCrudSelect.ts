@@ -170,6 +170,17 @@ export interface UseCrudSelectResult<
 	 */
 	pendingChanges: boolean;
 	/**
+	 * Is a change of the selection being written: has the connector not answered one of its
+	 * creates, updates or deletes yet? Meanwhile CrudMultiSelect and
+	 * CrudMultiSelectWithGroups mark the field busy (`aria-busy`) and say "Saving…" under it,
+	 * and the change is not listed yet: a pick is listed, a removed entry leaves the list,
+	 * once its write has settled.
+	 * @remarks A change waiting for the one before it, or for `prepareNewEntry`, is not being
+	 *          written yet. A LazyConnector only queues the writes (see `pendingChanges`), so
+	 *          with one it is true only while `serialize` and `deserialize` run.
+	 */
+	writing: boolean;
+	/**
 	 * The records the connector listed or created (raw data), including those of `removed`
 	 */
 	initialRawData: Record<string, unknown>[];
@@ -386,6 +397,9 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 		[lazyConnector, selected, queueVersion],
 	);
 	const pendingChanges = !!lazyConnector && !lazyConnector.isQueueEmpty();
+	// the groups of connector writes (a change's creates, updates or deletes, a create of
+	// addToSelection) that have not settled yet: while there are any, the field is busy
+	const [writes, setWrites] = useState(0);
 	// the selection as the changes applied so far left it, ahead of the render that shows it:
 	// always set this and then use setSelected(currentSelected.current)
 	const currentSelected = useRef<DataT[]>([]);
@@ -458,12 +472,13 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 					)
 						return;
 
+					setWrites((count) => count + 1);
 					const created = await createEntry(
 						connector,
 						serialize,
 						deserialize,
 						entry,
-					);
+					).finally(() => setWrites((count) => count - 1));
 					if (created.readError)
 						readFallbacks.current.set(created.record, created.entry);
 					// store record in cache
@@ -596,7 +611,10 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 					entries: DataT[],
 					write: (entry: DataT) => Promise<T>,
 				): Promise<PromiseSettledResult<T>[]> => {
+					const counted = entries.length > 0;
+					if (counted) setWrites((count) => count + 1);
 					const results = await Promise.allSettled(entries.map(write));
+					if (counted) setWrites((count) => count - 1);
 					results.forEach((result, index) => {
 						if (result.status === "rejected")
 							failures.push({
@@ -853,6 +871,7 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 		added,
 		removed,
 		pendingChanges,
+		writing: writes > 0,
 		initialRawData,
 		handleSelect,
 		modelToSelectorData,

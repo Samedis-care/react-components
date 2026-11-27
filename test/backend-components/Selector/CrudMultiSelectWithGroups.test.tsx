@@ -216,6 +216,45 @@ describe("CrudMultiSelectWithGroups", () => {
 		// j1 is listed from its row once the field has built its entry
 		expect(removeButtons()[0]).toBe("Remove L1");
 	});
+
+	it("[ISSUE-3509-ITEM-16] marks the field busy and says that a removal is being saved until its delete settled", async () => {
+		let release!: () => void;
+		const held = new Promise<void>((resolve) => (release = resolve));
+		const remove = vi.fn(() => held);
+		const connector = {
+			index: vi.fn(() =>
+				Promise.resolve([
+					[
+						{ id: "j1", source_id: "1" },
+						{ id: "j2", source_id: "2" },
+					],
+					{ totalRows: 2, filteredRows: 2 },
+				]),
+			),
+			create: vi.fn(),
+			update: vi.fn(),
+			delete: remove,
+		} as unknown as Connector;
+		const { container } = mountGroups(connector);
+		const button = await screen.findByRole("button", { name: "Remove L1" });
+		await settle();
+		expect(screen.queryByRole("status")).toBeNull();
+
+		fireEvent.click(button);
+		await settle();
+		expect(remove).toHaveBeenCalledWith("j1");
+		expect(screen.getByRole("status")).toHaveTextContent("Saving…");
+		expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
+
+		await act(async () => {
+			release();
+			await Promise.resolve();
+		});
+		await settle();
+		expect(removeButtons()).toEqual(["Remove L2"]);
+		expect(screen.queryByRole("status")).toBeNull();
+		expect(container.querySelector('[aria-busy="true"]')).toBeNull();
+	});
 });
 
 describe("CrudMultiSelectWithGroups with a LazyConnector", () => {

@@ -433,6 +433,7 @@
 		},
 		"selector": {
 			"loading": "Yuklanmoqda…",
+			"saving": "Saqlanmoqda…",
 			"loading-error": "Ma'lumotlarni olishda xatolik yuz berdi",
 			"unknown-entry": "Noma'lum yozuv",
 			"selected-count": "Tanlangan: {{COUNT}}",

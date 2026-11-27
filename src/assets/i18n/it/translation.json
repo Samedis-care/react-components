@@ -438,6 +438,7 @@
 		},
 		"selector": {
 			"loading": "Caricamento…",
+			"saving": "Salvataggio…",
 			"loading-error": "Errore durante il recupero dei dati",
 			"unknown-entry": "Voce sconosciuta",
 			"selected-count": "Selezionati: {{COUNT}}",

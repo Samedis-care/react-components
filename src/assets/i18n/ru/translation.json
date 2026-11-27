@@ -443,6 +443,7 @@
 		},
 		"selector": {
 			"loading": "Загружается…",
+			"saving": "Сохраняется…",
 			"loading-error": "Ошибка при получении данных",
 			"unknown-entry": "Неизвестная запись",
 			"selected-count": "Выбрано: {{COUNT}}",
