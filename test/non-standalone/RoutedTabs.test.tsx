@@ -784,6 +784,63 @@ describe("RoutedTabs: bugs", () => {
 			delete (HTMLElement.prototype as Partial<HTMLElement>).scrollIntoView;
 		}
 	});
+
+	it("[ISSUE-3500-ITEM-12] a bar without aria-label or aria-labelledby does not compile (checked by tsc -p tsconfig-test.json)", () => {
+		const tabs = <Tab label="Main" value="" />;
+		const bars = [
+			// @ts-expect-error the tablist needs a name: aria-label or aria-labelledby
+			<RoutedTabs key="none">{tabs}</RoutedTabs>,
+			// @ts-expect-error an aria-label that may be undefined names nothing
+			<RoutedTabs key="undefined" aria-label={undefined}>
+				{tabs}
+			</RoutedTabs>,
+			<RoutedTabs key="label" aria-label="Settings">
+				{tabs}
+			</RoutedTabs>,
+			<RoutedTabs key="labelledby" aria-labelledby="heading">
+				{tabs}
+			</RoutedTabs>,
+			<RoutedTabs key="both" aria-label="Settings" aria-labelledby="heading">
+				{tabs}
+			</RoutedTabs>,
+		];
+		// @ts-expect-error RoutedTabsProps holds the name too
+		const props: RoutedTabsProps = { children: tabs };
+		for (const bar of bars) expect(bar.type).toBe(RoutedTabs);
+		expect(props.children).toBe(tabs);
+	});
+
+	it("[ISSUE-3500-ITEM-12] aria-label or aria-labelledby names the tablist, and with both the element it points at does", () => {
+		renderAt(mem("/settings"));
+		expect(screen.getByRole("tablist")).toHaveAccessibleName("Settings");
+		cleanup();
+		const Labelled = (props: { tabsProps: Partial<RoutedTabsProps> }) => (
+			<>
+				<h2 id="settings-heading">Account settings</h2>
+				<Demo tabsProps={props.tabsProps} />
+			</>
+		);
+		renderAt(
+			mem("/settings"),
+			<Labelled
+				tabsProps={{
+					"aria-label": undefined,
+					"aria-labelledby": "settings-heading",
+				}}
+			/>,
+		);
+		expect(screen.getByRole("tablist")).toHaveAccessibleName(
+			"Account settings",
+		);
+		cleanup();
+		renderAt(
+			mem("/settings"),
+			<Labelled tabsProps={{ "aria-labelledby": "settings-heading" }} />,
+		);
+		const tablist = screen.getByRole("tablist");
+		expect(tablist).toHaveAccessibleName("Account settings");
+		expect(tablist).toHaveAttribute("aria-label", "Settings");
+	});
 });
 
 describe("RoutedTabs: scroll position", () => {

@@ -16,7 +16,56 @@ import focusRing from "../../utils/internal/focusRing";
 import combineClassNames from "../../utils/combineClassNames";
 import { getTabId, getTabPanelId } from "./tabPanelIds";
 
-export interface RoutedTabsProps extends Omit<TabsProps, "value" | "onChange"> {
+/**
+ * The name of the tablist (`role="tablist"`), which every `RoutedTabs` needs:
+ * screen readers announce it when they enter the bar and list it among the
+ * page's widgets, so it says what the tabs switch between. Pass
+ * `aria-label`, `aria-labelledby`, or both; a bar without either does not
+ * compile.
+ */
+export type RoutedTabsNameProps =
+	| {
+			/**
+			 * The tablist's name: a translated text that says what the tabs switch
+			 * between, e.g. "User details" for a user's Main, Roles and Permissions
+			 * tabs. Set on the `role="tablist"` element. Required unless
+			 * `aria-labelledby` is set, which takes precedence when both are.
+			 */
+			"aria-label": string;
+			/**
+			 * The id of the element that names the tablist, such as a visible
+			 * heading above the bar, or several ids separated by spaces. Set on the
+			 * `role="tablist"` element. Takes precedence over `aria-label`.
+			 * Default: none, the tablist is named by `aria-label`.
+			 */
+			"aria-labelledby"?: string;
+	  }
+	| {
+			/**
+			 * The tablist's name: a translated text that says what the tabs switch
+			 * between. Optional next to `aria-labelledby`, which takes precedence:
+			 * screen readers then ignore it. Default: none.
+			 */
+			"aria-label"?: string;
+			/**
+			 * The id of the element that names the tablist, such as a visible
+			 * heading above the bar (the record's title above a record form's tabs),
+			 * or several ids separated by spaces. Set on the `role="tablist"`
+			 * element. Required unless `aria-label` is set.
+			 */
+			"aria-labelledby": string;
+	  };
+
+/**
+ * The props of {@link RoutedTabs} besides its name ({@link RoutedTabsNameProps}):
+ * MUI's `TabsProps` without `value` and `onChange`, which come from the URL.
+ * To derive a wrapper's props, extend this interface and intersect the result
+ * with `RoutedTabsNameProps`, or use `DistributiveOmit<RoutedTabsProps, …>`.
+ */
+export interface RoutedTabsBaseProps extends Omit<
+	TabsProps,
+	"value" | "onChange" | "aria-label" | "aria-labelledby"
+> {
 	/**
 	 * The MUI `Tab` elements. Each Tab's `value` is one path segment, a string
 	 * without "/", equal to the `name` of its panel in
@@ -100,6 +149,14 @@ export interface RoutedTabsProps extends Omit<TabsProps, "value" | "onChange"> {
 	 */
 	allowScrollButtonsMobile?: boolean;
 }
+
+/**
+ * The props of {@link RoutedTabs}: {@link RoutedTabsBaseProps} and the
+ * tablist's name, `aria-label` or `aria-labelledby` (required, see
+ * {@link RoutedTabsNameProps}). A union, so an interface cannot extend it, and
+ * a plain `Omit` of it loses the requirement: use `DistributiveOmit`.
+ */
+export type RoutedTabsProps = RoutedTabsBaseProps & RoutedTabsNameProps;
 
 export type RoutedTabsClassKey = "root";
 
@@ -278,6 +335,8 @@ const getTabValueWarning = (
 
 /**
  * MUI `Tabs` whose selected tab is a segment of the URL (see `children`).
+ * Every bar is named, by `aria-label` or `aria-labelledby` (see
+ * `RoutedTabsNameProps`): `<RoutedTabs aria-label={t("tabs.label")}>`.
  * Opening a tab pushes its URL (the route's own url for the default tab, see
  * `children`) and keeps the scroll position of the page
  * (`preventScrollReset`, see `useNavigate`): the bar, the focused tab and the

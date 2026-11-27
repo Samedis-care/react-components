@@ -20,8 +20,9 @@ import useLocation from "../../standalone/Routes/useLocation";
 import RoutedTabs, { RoutedTabsProps } from "./RoutedTabs";
 import RoutedTabPanelWrapper from "./RoutedTabPanelWrapper";
 import useRoutedTabPanel from "./useRoutedTabPanel";
+import { DistributiveOmit } from "../../utils/distributiveOmit";
 
-type Args = Omit<RoutedTabsProps, "children">;
+type Args = DistributiveOmit<RoutedTabsProps, "children">;
 
 const meta: Meta<Args> = {
 	title: "non-standalone/RoutedTabs",
@@ -32,7 +33,9 @@ const meta: Meta<Args> = {
 };
 
 export default meta;
-type Story = StoryObj<Args>;
+// from the meta: StoryObj<Args> takes Args, which has MUI's `component` prop,
+// for a meta and leaves the render args untyped
+type Story = StoryObj<typeof meta>;
 
 // ─── Tab content components ──────────────────────────────────────────────────
 
@@ -63,7 +66,7 @@ const TabsDemo = () => {
 	const createTab = useRoutedTabPanel();
 	return (
 		<Box sx={{ width: "100%" }}>
-			<RoutedTabs>
+			<RoutedTabs aria-label="Settings">
 				<Tab label="General" value="general" />
 				<Tab label="Security" value="security" />
 				<Tab label="Notifications" value="notifications" />
