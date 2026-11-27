@@ -806,8 +806,21 @@ const FOOTER_LAYOUT_PARAMETERS = {
 };
 
 /**
+ * ISSUE-3495-ITEM-21: whether an element is visually hidden: a box of 1px that clips what it
+ * holds, so its text is only read out
+ */
+const isVisuallyHidden = (element: Element) => {
+	const box = element.getBoundingClientRect();
+	return (
+		box.width <= 1 &&
+		box.height <= 1 &&
+		getComputedStyle(element).overflow === "hidden"
+	);
+};
+
+/**
  * FOLLOWUP-DATAGRID-FOOTER-LAYOUT: what the user sees of an element: the boxes of its button
- * or checkbox and of its text, one per line
+ * or checkbox and of its text, one per line (none of a visually hidden text)
  */
 const visibleBoxes = (element: Element): DOMRect[] => {
 	const boxes: DOMRect[] = [];
@@ -816,6 +829,7 @@ const visibleBoxes = (element: Element): DOMRect[] => {
 	const range = document.createRange();
 	const texts = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
 	for (let text = texts.nextNode(); text; text = texts.nextNode()) {
+		if (isVisuallyHidden(text.parentElement!)) continue;
 		range.selectNodeContents(text);
 		boxes.push(...Array.from(range.getClientRects()));
 	}
@@ -1211,8 +1225,9 @@ export const Issue3495Item22PhoneFooterWithoutSelectAllFits: Story = {
 		await expect(
 			footer.getByRole("button", { name: "Einweisung dokumentieren" }),
 		).toBeVisible();
-		const count = canvasElement.querySelector(".story-count")!;
-		await expect(count.textContent).toMatch(/^#567\/1\D?234$/);
+		const count = canvasElement.querySelector<HTMLElement>(".story-count")!;
+		// what it shows; assistive technology reads the words (ISSUE-3495-ITEM-21)
+		await expect(within(count).getByText(/^#567\/1\D?234$/)).toBeVisible();
 		await expect(lineCount(count)).toBe(2);
 		await expectFooterLayout(canvasElement, 11.5, 2);
 	},
@@ -1280,6 +1295,36 @@ export const Issue3473Item16HiddenSettingsStatusStaysInside: Story = {
 		if (!status) throw new Error("the settings have no status region");
 		// the panel opens with a transition
 		await waitFor(() => expect(edgesPast(status)).toEqual([]));
+		await expect(pageScrollsSideways()).toBe(false);
+	},
+};
+
+/**
+ * ISSUE-3495-ITEM-21: on a 320px phone the count shows "#567/1,234" and holds the words of
+ * the wider layouts for assistive technology, visually hidden: a 1px box inside the footer,
+ * which does not make the page scroll sideways
+ */
+export const Issue3495Item21PhoneCountInWords: Story = {
+	args: {
+		columns: COLUMNS,
+		loadData: loadPeople,
+		onEdit: fn(),
+		onDelete: fn(),
+		classes: FOOTER_LAYOUT_CLASSES,
+	},
+	globals: PHONE,
+	parameters: FOOTER_LAYOUT_PARAMETERS,
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		const count = within(
+			canvasElement.querySelector<HTMLElement>(".story-count")!,
+		);
+		await expect(count.getByText(/^#567\/1\D?234$/)).toBeVisible();
+		const words = count.getByText("Filtered: 567 Total: 1,234");
+		await expect(isVisuallyHidden(words)).toBe(true);
+		await expect(
+			edgesPast(words, canvasElement.querySelector(".story-footer")),
+		).toEqual([]);
 		await expect(pageScrollsSideways()).toBe(false);
 	},
 };

@@ -12,6 +12,7 @@ import {
 	act,
 	cleanup,
 	fireEvent,
+	isInaccessible,
 	render,
 	screen,
 	waitFor,
@@ -1262,6 +1263,33 @@ describe("row counts", () => {
 		await idle();
 		expect(screen.getByText("#1,234/12,345")).toBeVisible();
 	});
+
+	it("[ISSUE-3495-ITEM-21] on a phone the counts are also given in words", async () => {
+		stubViewport(320);
+		render(<Grid loadData={counts(10, 3)} classes={CLASSES} />);
+		await idle();
+		expect(footer().textContent).toMatch(/Filtered: 3.*Total: 10/);
+	});
+
+	it("[ISSUE-3495-ITEM-21] on a phone assistive technology reads the words in the count, not #filtered/total", async () => {
+		stubViewport(320);
+		render(<Grid loadData={counts(10, 3)} classes={CLASSES} />);
+		await idle();
+		expect(isInaccessible(screen.getByText("#3/10"))).toBe(true);
+		const words = screen.getByText("Filtered: 3 Total: 10");
+		expect(isInaccessible(words)).toBe(false);
+		expect(footer().querySelector(".my-count")).toContainElement(words);
+	});
+
+	it("[ISSUE-3495-ITEM-21] on a phone assistive technology reads the total alone in words, in the user's language", async () => {
+		stubViewport(320);
+		render(<Grid loadData={counts(10)} classes={CLASSES} />);
+		await idle();
+		expect(isInaccessible(screen.getByText("#10"))).toBe(true);
+		expect(isInaccessible(screen.getByText("Total: 10"))).toBe(false);
+		await act(() => ccI18n.changeLanguage("de"));
+		expect(isInaccessible(screen.getByText("Gesamt: 10"))).toBe(false);
+	});
 });
 
 describe("select all", () => {
@@ -1478,8 +1506,10 @@ describe("phone layout", () => {
 			/>,
 		);
 		await idle();
-		const count = footer().querySelector(".my-count")!;
-		expect(count.textContent).toBe("#567/1,234");
+		// what it shows; assistive technology reads the words (ISSUE-3495-ITEM-21)
+		const count = within(footer().querySelector(".my-count")!).getByText(
+			"#567/1,234",
+		);
 		expect(count.innerHTML).toBe("#567/<wbr>1,234");
 	});
 });
