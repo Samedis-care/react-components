@@ -32,6 +32,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [CrudSelect applies a change made while another one is written after it, and only what it changed](2026-11-27-crud-select-applies-changes-in-order.md) | behavior |
 | 2026-11-27 | [Localized numbers are read without the format's symbols, so the . of "Cg." is no separator](2026-11-27-localized-numbers-without-format-symbols.md) | behavior |
 | 2026-11-27 | [DecimalInputField reads the typed text with its `format`, so a percentage keeps its value](2026-11-27-decimal-input-reads-its-format.md) | behavior, type |
+| 2026-11-27 | [A toast breaks a word too long for a line and stays within the screen](2026-11-27-toast-breaks-long-words.md) | behavior |
 | 2026-11-26 | [A localized value without text in the UI language shows another language's text](2026-11-26-localized-string-falls-back-to-another-language.md) | behavior |
 | 2026-11-26 | [A HistoryRouter inside another one leaves the page's scroll position and focus alone](2026-11-26-nested-history-router-keeps-page-scroll-and-focus.md) | behavior |
 | 2026-11-26 | [isPlainObject tells a plain object by its prototype; a record with an entry named constructor counts](2026-11-26-is-plain-object-by-prototype.md) | behavior |

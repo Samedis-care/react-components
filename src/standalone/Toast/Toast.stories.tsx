@@ -8,6 +8,8 @@ import { Toast, ToastProps } from "./Toast";
 // The toast renders in a portal, so query from the document body
 const body = within(document.body);
 
+const MOBILE = { viewport: { value: "mobile1", isRotated: false } };
+
 const meta: Meta<typeof Toast> = {
 	title: "Standalone/Toast",
 	component: Toast,
@@ -44,6 +46,12 @@ const meta: Meta<typeof Toast> = {
 export default meta;
 
 type Story = StoryObj<typeof Toast>;
+
+const elementOf = (el: Element | null | undefined): HTMLElement => {
+	// TypeError: the Error story below shadows the global Error in this module
+	if (!(el instanceof HTMLElement)) throw new TypeError("element missing");
+	return el;
+};
 
 /** waits until the toast's enter animation (scale and fade in) has finished */
 const entered = (alert: HTMLElement) =>
@@ -472,4 +480,99 @@ export const Issue3470Item11CloseButtonKeepsThemeFocusRing: Story = {
 			</ThemeProvider>
 		),
 	],
+};
+
+const LONG_WORD = "Gerätestammdatenverwaltungseinstellungsübersicht";
+const LONG_URL =
+	"https://example.com/download/staff_import.de.xlsx?token=" +
+	"0123456789abcdef".repeat(8);
+
+export const Issue3470Item12LongWordWrapsOnPhone: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"At 320px a word longer than a line of the toast (here a German compound) breaks where it has to: the toast stays within the screen, with its icon and the whole text in view.",
+			},
+		},
+	},
+	args: {
+		severity: "error",
+		message: `${LONG_WORD} could not be loaded.`,
+	},
+	play: async () => {
+		const toast = await body.findByRole("alert");
+		await entered(toast);
+		const r = toast.getBoundingClientRect();
+		await expect(
+			{ left: r.left >= 0, right: r.right <= window.innerWidth },
+			`toast from ${r.left} to ${r.right}px on a ${window.innerWidth}px screen`,
+		).toEqual({ left: true, right: true });
+	},
+};
+
+export const Issue3470Item12LongUrlWrapsOnDesktop: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"On a wide screen a long URL in the message wraps at the toast's 560px maximum, without a horizontal scrollbar in the message.",
+			},
+		},
+	},
+	args: {
+		severity: "error",
+		message: `Download failed: ${LONG_URL}`,
+	},
+	play: async () => {
+		const toast = await body.findByRole("alert");
+		await entered(toast);
+		const message = elementOf(toast.querySelector(".MuiAlert-message"));
+		await expect(
+			message.scrollWidth - message.clientWidth,
+			"message wider than its box (px)",
+		).toBe(0);
+	},
+};
+
+/** inline content that cannot wrap, e.g. a line of preformatted output */
+const NO_WRAP_SX = { whiteSpace: "nowrap" } as const;
+
+export const Issue3470Item12UnwrappableContentStaysOnPhone: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		// the line scrolls in MUI's message box, which has no focusable content
+		// to scroll it with the keyboard (as on wider screens); this story checks
+		// only that the toast stays within the screen
+		a11y: {
+			test: "error",
+			config: {
+				rules: [{ id: "scrollable-region-focusable", enabled: false }],
+			},
+		},
+		docs: {
+			description: {
+				story:
+					"At 320px a message with content that cannot wrap (here a line of server output in a `nowrap` element) still keeps the toast within the screen: that line scrolls sideways inside the message.",
+			},
+		},
+	},
+	render: (args) => (
+		<Toast
+			{...args}
+			severity={"error"}
+			message={
+				<>
+					Request failed:{" "}
+					<Box component={"code"} sx={NO_WRAP_SX}>
+						POST /api/v1/devices/0123456789abcdef0123456789abcdef
+					</Box>
+				</>
+			}
+		/>
+	),
+	play: Issue3470Item12LongWordWrapsOnPhone.play,
 };

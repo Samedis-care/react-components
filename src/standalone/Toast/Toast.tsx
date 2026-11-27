@@ -37,7 +37,9 @@ export interface ToastProps {
 	 */
 	title?: React.ReactNode;
 	/**
-	 * The message. Shown through the ToastContext, the title and message
+	 * The message. Its text and the title wrap within the toast; a word too
+	 * long for a line (a URL, an id) breaks where it has to, so the toast stays
+	 * within the screen. Shown through the ToastContext, the title and message
 	 * render where the ToastContextProvider renders its toasts, not where
 	 * showToast was called (see useToastContext)
 	 */
@@ -149,10 +151,21 @@ const Root = styled(Snackbar, { name: "CcToast", slot: "root" })({});
 const ToastAlert = styled(Alert, { name: "CcToast", slot: "alert" })(
 	({ theme }) => ({
 		flexGrow: 1,
+		// below sm the toast spans the screen: content that cannot wrap (an
+		// image, preformatted text) scrolls inside the message, as on wider
+		// screens, instead of pushing the toast past the screen's edge
+		minWidth: 0,
 		[theme.breakpoints.up("sm")]: {
 			flexGrow: "initial",
 			minWidth: 288,
 			maxWidth: 560,
+		},
+		// a word too long for a line (a German compound, a URL, an id in a
+		// server error) breaks where it has to instead of making the message
+		// scroll sideways. "break-word" would not lower the toast's minimum
+		// width, which on a phone pushed it past the screen's left edge
+		[`& .${alertClasses.message}`]: {
+			overflowWrap: "anywhere",
 		},
 		// the keyboard-focused close button: MUI shows only its focus ripple,
 		// faint and gone in forced colors. The ring takes the toast's text
