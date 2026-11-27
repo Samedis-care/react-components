@@ -208,6 +208,9 @@ const dayRows = (container: HTMLElement) =>
 		),
 	);
 
+const entriesOf = (row: HTMLElement) =>
+	Array.from(row.querySelectorAll("button")).map((b) => b.textContent);
+
 const allEntries = (container: HTMLElement) =>
 	Array.from(scrollerOf(container).querySelectorAll("button")).map(
 		(b) => b.textContent,
@@ -220,6 +223,23 @@ const todayRow = (container: HTMLElement) =>
 const ONE_CHECKBOX: Record<string, ScheduleFilterDefinition> = {
 	f: { type: "checkbox", label: "F", defaultValue: true },
 };
+
+/** catches render errors so a crash is observable instead of an unhandled error */
+class Boundary extends React.Component<
+	{ onError: (error: unknown) => void; children: React.ReactNode },
+	{ crashed: boolean }
+> {
+	state = { crashed: false };
+	static getDerivedStateFromError() {
+		return { crashed: true };
+	}
+	componentDidCatch(error: unknown) {
+		this.props.onError(error);
+	}
+	render() {
+		return this.state.crashed ? <p>crashed</p> : this.props.children;
+	}
+}
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
@@ -600,6 +620,135 @@ describe("loading results", () => {
 		expect(screen.queryByRole("alert")).toBeNull();
 		expect(screen.queryAllByRole("progressbar")).toHaveLength(0);
 		expect(allEntries(container)).toContain("w0-idx0");
+	});
+
+	it("[ISSUE-3478-ITEM-6] a null result ends the loading state", async () => {
+		render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={() => null as unknown as IDayData[][]}
+			/>,
+		);
+		await advance(400);
+		expect(screen.queryAllByRole("progressbar")).toHaveLength(0);
+	});
+
+	const NOT_7_DAYS = "ScrollableSchedule: loadWeekCallback must return 7 days";
+	/** results for week 0 that are not 7 days, and the text of their error */
+	const NOT_A_WEEK: [string, () => unknown, string][] = [
+		[
+			"a result of 5 days",
+			() => week("w0").slice(0, 5),
+			`${NOT_7_DAYS}, got 5`,
+		],
+		["a result of 8 days", () => [...week("w0"), []], `${NOT_7_DAYS}, got 8`],
+		["a null result", () => null, `${NOT_7_DAYS}, got null`],
+		["an undefined result", () => undefined, `${NOT_7_DAYS}, got undefined`],
+		[
+			"an object keyed by day",
+			() => ({ ...week("w0") }),
+			`${NOT_7_DAYS}, got an object`,
+		],
+		[
+			"7 days, one of them null",
+			() => week("w0").map((day, i) => (i === 2 ? null : day)),
+			`${NOT_7_DAYS}, each an array of entries, got null at index 2`,
+		],
+	];
+	it.each(
+		NOT_A_WEEK.flatMap(([what, result, text]) => [
+			[
+				what,
+				"returned directly",
+				((o) => (o === 0 ? result() : week("w" + o))) as LoadWeekCallback,
+				text,
+			],
+			[
+				what,
+				"from a promise",
+				((o) =>
+					Promise.resolve(
+						o === 0 ? result() : week("w" + o),
+					)) as LoadWeekCallback,
+				text,
+			],
+		]),
+	)(
+		"[ISSUE-3478-ITEM-6] %s (%s) fails the week: its alert says why and offers Retry; the other weeks show their days",
+		async (_, __, loadWeekCallback, text) => {
+			const errors: unknown[] = [];
+			vi.spyOn(console, "error").mockImplementation(() => {});
+			const { container } = render(
+				<Boundary onError={(e) => errors.push(e)}>
+					<ScrollableSchedule
+						wrapperClass={SCROLLER}
+						loadWeekCallback={loadWeekCallback}
+					/>
+				</Boundary>,
+			);
+			await advance(400);
+			expect(errors).toEqual([]);
+			expect(screen.queryAllByRole("progressbar")).toHaveLength(0);
+			const alert = screen.getByRole("alert");
+			expect(alert).toHaveTextContent(text);
+			expect(
+				within(alert).getByRole("button", { name: "Retry" }),
+			).toHaveAccessibleDescription(`Week 42 could not be loaded ${text}`);
+			const entries = allEntries(container);
+			expect(entries.filter((e) => e?.startsWith("w0-"))).toEqual([]);
+			expect(entries).toEqual(expect.arrayContaining(["w-1-idx0", "w1-idx0"]));
+		},
+	);
+
+	it("[ISSUE-3478-ITEM-6] Retry after a result that is not 7 days loads the week, whose 7 days show", async () => {
+		let fail = true;
+		const { container } = render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) =>
+					o === 0 && fail ? week("w0").slice(0, 5) : week("w" + o)
+				}
+			/>,
+		);
+		await advance(400);
+		fail = false;
+		fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+		await advance(400);
+		expect(screen.queryByRole("alert")).toBeNull();
+		expect(allEntries(container).filter((e) => e?.startsWith("w0-"))).toEqual(
+			week("w0").map(([entry]) => entry.title),
+		);
+	});
+
+	it("[ISSUE-3478-ITEM-6] a week of 7 days without entries shows its 7 days, empty", async () => {
+		const { container } = render(
+			<ScrollableSchedule
+				wrapperClass={SCROLLER}
+				loadWeekCallback={(o) =>
+					o === 0 ? Array.from({ length: 7 }, () => []) : week("w" + o)
+				}
+			/>,
+		);
+		await advance(400);
+		expect(screen.queryByRole("alert")).toBeNull();
+		// week 0's rows, from its Sunday on (week -1 is loaded above it)
+		const rows = dayRows(container);
+		const sunday = rows.findIndex(
+			(row) => computeAccessibleName(row) === "Sunday, October 11, 2026",
+		);
+		expect(sunday).toBeGreaterThanOrEqual(0);
+		expect(rows.slice(sunday, sunday + 7).map(entriesOf)).toEqual([
+			[],
+			[],
+			[],
+			[],
+			[],
+			[],
+			[],
+		]);
+		expect(computeAccessibleName(rows[sunday + 6])).toBe(
+			"Saturday, October 17, 2026",
+		);
 	});
 });
 

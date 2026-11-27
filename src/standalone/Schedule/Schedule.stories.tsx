@@ -197,7 +197,7 @@ const meta: Meta<ScrollableScheduleStoryProps> = {
 		loadWeekCallback: {
 			control: false,
 			description:
-				"`(weekOffset, filters) => IDayData[][] | Promise<IDayData[][]>`. Called once per week as it is added: on open for week 0, 1, … until the list is full, then for -1, -2, … at the top and the following weeks at the bottom; again after a filter or language change, which starts the list over as on open. Returns 7 arrays, [0] = the first day of the locale's week. A rejection shows an alert in place of the week's rows that names the week, with the error's `message` (or the string rejected with) and a Retry button.",
+				"`(weekOffset, filters) => IDayData[][] | Promise<IDayData[][]>`. Called once per week as it is added: on open for week 0, 1, … until the list is full, then for -1, -2, … at the top and the following weeks at the bottom; again after a filter or language change, which starts the list over as on open. Returns 7 arrays, [0] = the first day of the locale's week. A rejection shows an alert in place of the week's rows that names the week, with the error's `message` (or the string rejected with) and a Retry button. A result that is not exactly 7 arrays (fewer, more, `null`) fails the week the same way, with an error that says what it got.",
 		},
 		filters: {
 			control: false,

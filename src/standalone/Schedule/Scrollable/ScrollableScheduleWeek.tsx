@@ -97,12 +97,50 @@ const getErrorText = (reason: unknown): string => {
 };
 
 /**
+ * What a value is, for the error of a result that is not a week: `null`,
+ * `undefined`, "an object", "a string", …
+ * @param value The value
+ */
+const describeValue = (value: unknown): string => {
+	if (value === null || value === undefined) return String(value);
+	return typeof value === "object" ? "an object" : `a ${typeof value}`;
+};
+
+/**
+ * Checks a result of loadWeekCallback: a week is an array of exactly 7 days,
+ * each an array of entries. Anything else (fewer or more days, `null`,
+ * `undefined`, an object, a day that is not an array) throws an Error that says
+ * what the result is instead, so the week's load fails with it.
+ * @param result What loadWeekCallback returned or its promise resolved with
+ * @returns The result, which is a week
+ * @throws Error "ScrollableSchedule: loadWeekCallback must return 7 days, got …"
+ */
+const checkWeek = (result: unknown): IDayData[][] => {
+	const expected = "ScrollableSchedule: loadWeekCallback must return 7 days";
+	if (!Array.isArray(result)) {
+		throw new Error(`${expected}, got ${describeValue(result)}`);
+	}
+	const days: unknown[] = result;
+	if (days.length !== 7) {
+		throw new Error(`${expected}, got ${days.length}`);
+	}
+	const badDay = days.findIndex((day) => !Array.isArray(day));
+	if (badDay !== -1) {
+		throw new Error(
+			`${expected}, each an array of entries, got ${describeValue(days[badDay])} at index ${badDay}`,
+		);
+	}
+	return days as IDayData[][];
+};
+
+/**
  * One week of ScrollableSchedule: a spinner while it loads, then its week line
  * and its day rows. The week line is an `h3` heading, "Week N, DD MMM -
  * DD MMM YYYY" (both years for a week that runs into the next one). When the
- * load fails, whatever it rejects with, the week line stays and an alert names
- * the week and shows the error's message (see getErrorText), with a Retry
- * button that loads the week again.
+ * load fails, whatever it rejects with, or its result is not 7 days (see
+ * checkWeek), the week line stays and an alert names the week and shows the
+ * error's message (see getErrorText), with a Retry button that loads the week
+ * again.
  */
 class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 	/**
@@ -149,7 +187,10 @@ class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 		const { loadWeekCallback, weekOffset, filterValues } = this.props;
 		void (async () => {
 			try {
-				const data = await loadWeekCallback(weekOffset, filterValues);
+				// a result that is not a week fails the load like a rejection
+				const data = checkWeek(
+					await loadWeekCallback(weekOffset, filterValues),
+				);
 				if (loadId !== this.loadId) return;
 				this.setState({
 					data,

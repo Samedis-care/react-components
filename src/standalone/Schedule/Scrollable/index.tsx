@@ -38,11 +38,17 @@ import throwError from "../../../utils/throwError";
  * 					 Example: -1 for last week, 0 for this week, 1 for next week
  * @param filter The filter selected by the user
  * @returns A promise containing the data for the days of the week, may reject
- * 			or throw. Format: IDayData[weekday starting Monday][n]. A failed week
- * 			shows an alert "Week N could not be loaded" with a Retry button, and
- * 			below its title the `message` of the Error (or of any other object
- * 			with a string `message`) or the string it rejected with; any other
- * 			value (`undefined`, a fetch Response, …) shows the title only.
+ * 			or throw. Format: IDayData[weekday starting Monday][n]: an array of
+ * 			exactly 7 days, each an array of entries (empty for a day without
+ * 			entries). A failed week shows an alert "Week N could not be loaded"
+ * 			with a Retry button, and below its title the `message` of the Error
+ * 			(or of any other object with a string `message`) or the string it
+ * 			rejected with; any other value (`undefined`, a fetch Response, …)
+ * 			shows the title only. A result in any other format (fewer or more
+ * 			than 7 days, `null`, `undefined`, an object keyed by day, a day that
+ * 			is not an array) fails the week the same way, with the Error
+ * 			"ScrollableSchedule: loadWeekCallback must return 7 days, got …",
+ * 			which says what the result was instead.
  */
 export type LoadWeekCallback = (
 	weekOffset: number,
