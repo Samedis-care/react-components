@@ -211,9 +211,12 @@ const StyledSwitchWrapper = styled(Typography, {
 	// the row of switch and label (the `<label>`, a Grid that does not wrap): a label
 	// too long for the space beside the switch wraps there, at a space or, inside a
 	// word longer than that space, at any character, so the float is never wider than
-	// the root and the switch never leaves it. Both start at the row's top
+	// the root and the switch never leaves it. Both start at the row's top. A click
+	// anywhere on it toggles the switch, so it shows the pointer cursor, as MUI's
+	// FormControlLabel does
 	"& > .MuiGrid-container": {
 		alignItems: "flex-start",
+		cursor: "pointer",
 	},
 	// the switch keeps its width, centered in the row's height
 	"& > .MuiGrid-container > :first-of-type": {
@@ -235,6 +238,9 @@ const StyledSwitchWrapper = styled(Typography, {
 	},
 	[`&.${DISABLED_CLASS}`]: {
 		color: (theme.vars || theme).palette.text.disabled,
+		"& > .MuiGrid-container": {
+			cursor: "default",
+		},
 	},
 })) as typeof Typography;
 
@@ -347,6 +353,15 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
  * at the top right of `children`. `BaseSelector` renders every selector field
  * inside one (its `displaySwitch`/`switchLabel`), and `MultiSelectWithoutGroup`
  * one around its chips, mostly with `visible={false}`.
+ *
+ * It is the selectors' filter switch: the switch and its caption-sized label are
+ * small enough to share the row of a field's label, beside the content they
+ * filter. For a labeled switch of its own, in a filter bar, a toolbar or a form,
+ * use MUI's `FormControlLabel` with a `Switch` (`size="small"` for a compact one).
+ *
+ * A click anywhere on the label toggles the switch, and the label shows the
+ * pointer cursor (the default one while `disabled`), as MUI's
+ * `FormControlLabel` does.
  *
  * The switch is controlled: pass `value` and `onChange`, or `disabled` for a
  * switch the user cannot toggle.

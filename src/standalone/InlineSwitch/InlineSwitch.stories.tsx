@@ -998,3 +998,42 @@ export const Issue3465Item16NoMarginAbove: StoryObj<typeof NoMarginDemo> = {
 		).toBe(0);
 	},
 };
+
+const CursorDemo = () => (
+	<div style={{ width: 320 }}>
+		<InlineSwitch value={false} visible label="Enabled" onChange={ignore} />
+		<InlineSwitch value={false} visible label="Disabled" disabled />
+	</div>
+);
+
+export const Issue3465Item17LabelShowsPointerCursor: StoryObj<
+	typeof CursorDemo
+> = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3465-ITEM-17: a click on the label toggles the switch, so the label shows the pointer cursor over its text and beside the switch, as MUI's FormControlLabel does; while disabled it shows the default cursor.",
+			},
+		},
+	},
+	render: () => <CursorDemo />,
+	play: async ({ canvas }) => {
+		const cursors = (name: string) => {
+			const label = elementOf(
+				canvas.getByRole("switch", { name }).closest("label"),
+			);
+			const text = elementOf(canvas.getByText(name));
+			return [getComputedStyle(label).cursor, getComputedStyle(text).cursor];
+		};
+		await expect(cursors("Enabled"), "enabled: label, text").toEqual([
+			"pointer",
+			"pointer",
+		]);
+		await expect(cursors("Disabled"), "disabled: label, text").toEqual([
+			"default",
+			"default",
+		]);
+	},
+};
