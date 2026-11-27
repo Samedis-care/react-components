@@ -9,6 +9,7 @@ import {
 	within,
 } from "@testing-library/react";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import WeekView from "../../src/standalone/Schedule/Weekly";
 import type { IDayData } from "../../src/standalone/Schedule/Common/DayContents";
 
@@ -51,6 +52,7 @@ const setNow = (date: Date) => {
 const WED = new Date(2026, 9, 14, 12);
 
 beforeAll(async () => {
+	await waitForCcI18n();
 	await ccI18n.changeLanguage("en");
 });
 

@@ -20,6 +20,7 @@ import {
 import { computeAccessibleName } from "dom-accessibility-api";
 import moment from "moment";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import ScrollableSchedule from "../../src/standalone/Schedule/Scrollable";
 import type { LoadWeekCallback } from "../../src/standalone/Schedule/Scrollable";
 import type {
@@ -75,6 +76,7 @@ const listHeight = (scroller: Element) => {
 const MOMENT_DE = "moment/locale/de";
 
 beforeAll(async () => {
+	await waitForCcI18n();
 	await import(/* @vite-ignore */ MOMENT_DE);
 	moment.locale("en");
 	await ccI18n.changeLanguage("en");

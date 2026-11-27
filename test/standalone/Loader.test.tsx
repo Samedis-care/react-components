@@ -1,11 +1,24 @@
 import React from "react";
-import { describe, it, expect, afterEach, vi, assertType } from "vitest";
+import {
+	describe,
+	it,
+	expect,
+	afterEach,
+	beforeAll,
+	vi,
+	assertType,
+} from "vitest";
 import { render, screen, cleanup, act } from "@testing-library/react";
 import { ThemeProvider, createTheme, Theme, styled } from "@mui/material";
 import Loader from "../../src/standalone/Loader";
 import FormLoaderOverlay from "../../src/standalone/Form/FormLoaderOverlay";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import type { LoaderClassKey, LoaderProps } from "../../src";
+
+beforeAll(async () => {
+	await waitForCcI18n();
+});
 
 afterEach(() => {
 	cleanup();

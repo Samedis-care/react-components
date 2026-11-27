@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import React from "react";
 import { act, cleanup, render, screen } from "@testing-library/react";
 import {
@@ -9,6 +9,7 @@ import {
 	ThemeProvider,
 } from "@mui/material";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import TextFieldWithHelp from "../../src/standalone/UIKit/TextFieldWithHelp";
 import SingleSelect from "../../src/standalone/Selector/SingleSelect";
 import { selectorLocalLoadHandler } from "../../src/standalone/Selector/BaseSelector";
@@ -33,6 +34,10 @@ const Wrap = ({ children }: { children: React.ReactNode }) => (
 );
 const wrap = (ui: React.ReactNode, withTheme: Theme = theme) =>
 	render(<ThemeProvider theme={withTheme}>{ui}</ThemeProvider>);
+
+beforeAll(async () => {
+	await waitForCcI18n();
+});
 
 afterEach(async () => {
 	cleanup();

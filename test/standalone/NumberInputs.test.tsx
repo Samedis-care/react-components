@@ -1,5 +1,6 @@
 import {
 	afterEach,
+	beforeAll,
 	describe,
 	expect,
 	expectTypeOf,
@@ -21,6 +22,7 @@ import DecimalInputField, {
 	type DecimalInputFieldProps,
 } from "../../src/standalone/UIKit/InputControls/DecimalInputField";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import userEvent from "@testing-library/user-event";
 import IntegerInputField from "../../src/standalone/UIKit/InputControls/IntegerInputField";
 
@@ -32,6 +34,10 @@ const env = vi.hoisted(() => ({ touch: false }));
 vi.mock("../../src/utils/isTouchDevice", () => ({
 	default: () => env.touch,
 }));
+
+beforeAll(async () => {
+	await waitForCcI18n();
+});
 
 afterEach(async () => {
 	cleanup();

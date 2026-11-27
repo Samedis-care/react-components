@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import React, { useState } from "react";
 import {
 	act,
@@ -18,6 +18,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import moment, { type Moment } from "moment";
 import ccI18n, { langs } from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import LocalizedKeyboardDatePicker from "../../src/standalone/LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
 import LocalizedDatePicker from "../../src/standalone/LocalizedDateTimePickers/LocalizedDatePicker";
 import LocalizedDateTimePicker from "../../src/standalone/LocalizedDateTimePickers/LocalizedDateTimePicker";
@@ -39,6 +40,10 @@ const Wrap = ({ children }: { children: React.ReactNode }) => (
 		</LocalizationProvider>
 	</ThemeProvider>
 );
+
+beforeAll(async () => {
+	await waitForCcI18n();
+});
 
 afterEach(async () => {
 	cleanup();

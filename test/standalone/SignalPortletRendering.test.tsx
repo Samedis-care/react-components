@@ -15,6 +15,7 @@ import SignalPortlet, {
 } from "../../src/standalone/SignalPortlet";
 import HistoryRouter from "../../src/standalone/Routes/HistoryRouter";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import timestampToAge from "../../src/utils/timestampToAge";
 
 // The component-level tests. SignalPortlet.test.ts next to this file mocks the
@@ -54,6 +55,7 @@ const ageLabel = () => screen.queryByText(/^Last refresh: /);
 const refreshButton = () => screen.queryByRole("button", { name: "Refresh" });
 
 beforeAll(async () => {
+	await waitForCcI18n();
 	await ccI18n.changeLanguage("en");
 });
 

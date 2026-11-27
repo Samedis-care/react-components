@@ -14,6 +14,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import moment, { type Moment } from "moment";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import LocalizedKeyboardDatePicker from "../../src/standalone/LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
 import LocalizedDatePicker from "../../src/standalone/LocalizedDateTimePickers/LocalizedDatePicker";
 import LocalizedDateTimePicker from "../../src/standalone/LocalizedDateTimePickers/LocalizedDateTimePicker";
@@ -42,6 +43,7 @@ const Wrap = (props: { children: React.ReactNode; locale?: string }) => (
 // a side-effect import of a moment locale has no type declarations (TS2882)
 const MOMENT_DE = "moment/locale/de";
 beforeAll(async () => {
+	await waitForCcI18n();
 	await import(/* @vite-ignore */ MOMENT_DE);
 	// defining a locale also makes it the global one
 	moment.locale("en");

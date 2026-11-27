@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import {
 	act,
 	cleanup,
@@ -15,6 +15,7 @@ import {
 } from "../../src/standalone/Selector/BaseSelector";
 import SingleSelect from "../../src/standalone/Selector/SingleSelect";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import {
 	DistributiveOmit,
 	PartialExcept,
@@ -23,6 +24,10 @@ import {
 // jsdom has "ontouchstart" on window, so TextFieldWithHelp would add its touch
 // Clear button next to Autocomplete's own one
 vi.mock("../../src/utils/isTouchDevice", () => ({ default: () => false }));
+
+beforeAll(async () => {
+	await waitForCcI18n();
+});
 
 afterEach(async () => {
 	cleanup();

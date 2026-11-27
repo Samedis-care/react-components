@@ -28,6 +28,7 @@ import {
 	getErrorReportingConfig,
 } from "../../src/framework/ErrorReporting";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import ToastContextProvider, {
 	ToastContextType,
 	useToastContext,
@@ -77,6 +78,7 @@ const advance = (ms: number, step = 50) => {
 };
 
 beforeAll(async () => {
+	await waitForCcI18n();
 	await ccI18n.changeLanguage("en");
 });
 

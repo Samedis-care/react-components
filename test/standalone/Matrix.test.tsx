@@ -1,4 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vitest";
 import React from "react";
 import fs from "node:fs";
 import path from "node:path";
@@ -43,6 +51,11 @@ import {
 import { decomposeColor, getContrastRatio } from "@mui/material/styles";
 import type { MatrixCellTileProps } from "../../src/standalone/Matrix/MatrixCellTileContext";
 import ccI18n from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
+
+beforeAll(async () => {
+	await waitForCcI18n();
+});
 
 afterEach(() => {
 	cleanup();

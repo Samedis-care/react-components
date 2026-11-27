@@ -1,4 +1,4 @@
-import { afterEach, describe, it, expect } from "vitest";
+import { afterEach, beforeAll, describe, it, expect } from "vitest";
 import { act, cleanup, renderHook } from "@testing-library/react";
 
 // ---------------------------------------------------------------------------
@@ -18,6 +18,7 @@ import {
 } from "@mui/x-date-pickers/locales";
 import * as muiLocales from "@mui/x-date-pickers/locales";
 import ccI18n, { langs } from "../../src/i18n";
+import { waitForCcI18n } from "../waitForCcI18n";
 import useMuiLocaleData from "../../src/standalone/LocalizedDateTimePickers/useMuiLocaleData";
 
 type MuiLocale = typeof enUS;
@@ -36,6 +37,10 @@ const getLocaleData = async (language: string) => {
 	await switchLanguage(language);
 	return renderHook(() => useMuiLocaleData()).result.current;
 };
+
+beforeAll(async () => {
+	await waitForCcI18n();
+});
 
 afterEach(async () => {
 	cleanup();
