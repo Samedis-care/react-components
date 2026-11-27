@@ -722,7 +722,7 @@ export const Issue3476Item11ArrowKeys: Story = {
 		await expect(row("root")).toHaveFocus();
 		await userEvent.keyboard("{ArrowDown}{ArrowDown}");
 		await expect(row("public")).toHaveFocus();
-		await expect(tabStopsOf(canvasElement)).toEqual(["public"]);
+		await waitFor(() => expect(tabStopsOf(canvasElement)).toEqual(["public"]));
 		// one tab stop: Tab leaves the tree, Shift+Tab comes back to the same row
 		await userEvent.tab();
 		await expect(
@@ -819,10 +819,10 @@ export const Issue3476Item11KeepsFocusedRowInView: Story = {
 		await waitFor(() =>
 			expect(rowById(canvasElement, "leaf 99")).toHaveFocus(),
 		);
-		await expectInView(scroller, focused());
+		await waitFor(() => expectInView(scroller, focused()));
 		await userEvent.keyboard("{Home}");
 		await waitFor(() => expect(rowById(canvasElement, "root")).toHaveFocus());
-		await expectInView(scroller, focused());
+		await waitFor(() => expectInView(scroller, focused()));
 		// PageDown and PageUp: by the rows in view, less one (8 of 8.3 in 200px)
 		await userEvent.keyboard("{PageDown}");
 		await waitFor(() => expect(rowById(canvasElement, "leaf 7")).toHaveFocus());
@@ -830,10 +830,10 @@ export const Issue3476Item11KeepsFocusedRowInView: Story = {
 		await waitFor(() =>
 			expect(rowById(canvasElement, "leaf 15")).toHaveFocus(),
 		);
-		await expectInView(scroller, focused());
+		await waitFor(() => expectInView(scroller, focused()));
 		await userEvent.keyboard("{PageUp}");
 		await waitFor(() => expect(rowById(canvasElement, "leaf 7")).toHaveFocus());
-		await expectInView(scroller, focused());
+		await waitFor(() => expectInView(scroller, focused()));
 		// the row focused last scrolled away: the list is the tab stop
 		await userEvent.tab();
 		await expect(
@@ -844,8 +844,10 @@ export const Issue3476Item11KeepsFocusedRowInView: Story = {
 		await waitFor(() => expect(tabStopsOf(canvasElement)).toEqual(["tree"]));
 		await userEvent.tab({ shift: true });
 		await waitFor(() => expect(rowById(canvasElement, "leaf 7")).toHaveFocus());
-		await expectInView(scroller, focused());
-		await expect(tabStopsOf(canvasElement)).toEqual(["leaf 7"]);
+		await waitFor(() => expectInView(scroller, focused()));
+		// the list stops being a tab stop once react-window reports the rows it
+		// rendered, an effect after the row got focus
+		await waitFor(() => expect(tabStopsOf(canvasElement)).toEqual(["leaf 7"]));
 	},
 };
 
