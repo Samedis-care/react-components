@@ -45,6 +45,15 @@ export interface DateInputProps extends Omit<
 	 */
 	hideDisabledIcon?: boolean;
 	/**
+	 * The accessible name of the input, for one without a visible `label`,
+	 * such as the translated purpose of the date ("From", "To"). It names the
+	 * field (its `role="group"`, which a screen reader announces when focus
+	 * enters a section) and the open calendar dialog. A visible `label` takes
+	 * its place, as in MUI. Default: none, so an input without a `label` has an
+	 * unnamed field. See `LocalizedKeyboardDatePickerProps["aria-label"]`.
+	 */
+	"aria-label"?: LocalizedKeyboardDatePickerProps["aria-label"];
+	/**
 	 * required flag passed to text field
 	 */
 	required?: LocalizedKeyboardDatePickerProps["required"];

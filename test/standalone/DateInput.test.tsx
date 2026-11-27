@@ -11,7 +11,9 @@ import {
 import { ThemeProvider, createTheme } from "@mui/material";
 import { LocalizationProvider, PickersTextField } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
-import DateInput from "../../src/standalone/UIKit/InputControls/DateInput";
+import DateInput, {
+	type DateInputProps as DateInputOwnProps,
+} from "../../src/standalone/UIKit/InputControls/DateInput";
 
 /**
  * DateInput deals in date-only values (12:00 UTC, UTC parts carry the date).
@@ -714,5 +716,19 @@ describe("DateInput bugs", () => {
 		expect(
 			screen.getByRole("group", { name: "Due" }),
 		).toHaveAccessibleDescription("Day of delivery");
+	});
+
+	it("[ISSUE-3485-ITEM-25] declares aria-label in DateInputProps", () => {
+		expectTypeOf<DateInputOwnProps>().toHaveProperty("aria-label");
+		expectTypeOf<DateInputOwnProps["aria-label"]>().toEqualTypeOf<
+			string | undefined
+		>();
+	});
+
+	it("[ISSUE-3485-ITEM-25] names the field and the open calendar after aria-label", async () => {
+		wrap(<DateInput aria-label="Due" value={DAY} onChange={noop} />);
+		expect(screen.getByRole("group")).toHaveAccessibleName("Due");
+		await openCalendar();
+		expect(screen.getByRole("dialog")).toHaveAccessibleName("Due");
 	});
 });

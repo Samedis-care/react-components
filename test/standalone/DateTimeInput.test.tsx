@@ -1,11 +1,19 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 import React from "react";
-import { cleanup, render, screen } from "@testing-library/react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+} from "@testing-library/react";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import moment from "moment";
-import DateTimeInput from "../../src/standalone/UIKit/InputControls/DateTimeInput";
+import DateTimeInput, {
+	type DateTimeInputProps,
+} from "../../src/standalone/UIKit/InputControls/DateTimeInput";
 
 /**
  * DateTimeInput: LocalizedDateTimePicker with PickersTextFieldWithHelp as its
@@ -212,6 +220,31 @@ describe("DateTimeInput", () => {
 			expect(
 				screen.getByRole("group", { name: "At" }),
 			).toHaveAccessibleDescription("Local time");
+		});
+
+		it("[ISSUE-3485-ITEM-25] declares aria-label in DateTimeInputProps", () => {
+			expectTypeOf<DateTimeInputProps>().toHaveProperty("aria-label");
+			expectTypeOf<DateTimeInputProps["aria-label"]>().toEqualTypeOf<
+				string | undefined
+			>();
+		});
+
+		it("[ISSUE-3485-ITEM-25] names the field and the open calendar after aria-label", async () => {
+			wrap(
+				<DateTimeInput
+					aria-label="Starts at"
+					value={moment(AT)}
+					onChange={noop}
+				/>,
+			);
+			const button = await openButton();
+			expect(screen.getByRole("group")).toHaveAccessibleName("Starts at");
+			act(() => {
+				fireEvent.click(button);
+			});
+			expect(await screen.findByRole("dialog")).toHaveAccessibleName(
+				"Starts at",
+			);
 		});
 	});
 });

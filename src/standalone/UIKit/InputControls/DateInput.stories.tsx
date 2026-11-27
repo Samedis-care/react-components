@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, fn, type Mock } from "storybook/test";
+import { expect, fn, type Mock, within } from "storybook/test";
 import i18next from "i18next";
 import MuiPickerUtils from "../../../framework/MuiPickerUtils";
 import DateInput from "./DateInput";
@@ -223,5 +223,51 @@ export const DateTimeInputFieldProps: StoryObj<{
 		);
 		await userEvent.click(document.body);
 		await expect(args.onBlur).toHaveBeenCalled();
+	},
+};
+
+/** A DateInput and a DateTimeInput without a visible label */
+const InputsNamedByAriaLabel = () => {
+	const [day, setDay] = useState<Date | null>(STORED);
+	const [startsAt, setStartsAt] = useState<Moment | null>(() =>
+		moment("2026-08-01T10:30:00"),
+	);
+	return (
+		<div style={{ display: "flex", gap: 16 }}>
+			<DateInput aria-label="Due date" value={day} onChange={setDay} />
+			<DateTimeInput
+				aria-label="Starts at"
+				value={startsAt}
+				onChange={setStartsAt}
+			/>
+		</div>
+	);
+};
+
+export const Issue3485Item25NamedByAriaLabel: StoryObj = {
+	name: "ISSUE-3485-ITEM-25: aria-label names an input without a label",
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3485-ITEM-25: `aria-label` names a DateInput or DateTimeInput that shows no label, such as one in a table row or a filter ("From", "To"): a screen reader announces the field group by it when focus enters a section, and the open calendar is a dialog named after it. A visible `label` takes its place, as in MUI.',
+			},
+		},
+	},
+	render: () => <InputsNamedByAriaLabel />,
+	play: async ({ canvas, userEvent }) => {
+		const due = canvas.getByRole("group", { name: "Due date" });
+		await expect(
+			canvas.getByRole("group", { name: "Starts at" }),
+		).toBeInTheDocument();
+
+		await userEvent.click(
+			within(due.parentElement!).getByRole("button", { name: /choose date/i }),
+		);
+		// axe runs after this, with the calendar open
+		await expect(
+			await within(document.body).findByRole("dialog"),
+		).toHaveAccessibleName("Due date");
 	},
 };
