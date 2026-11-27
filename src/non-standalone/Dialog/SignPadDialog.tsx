@@ -315,15 +315,18 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 							NAME: signerName,
 						})
 					: t("standalone.signature-pad.dialog.title")}
-				<StyledCloseButton
-					aria-label={t("standalone.signature-pad.dialog.close")}
-					className={classes?.closeButton}
-					onClick={closeCanvasBtn}
-					size="large"
-				>
-					<Close />
-				</StyledCloseButton>
 			</StyledDialogTitle>
+			{/* beside the heading, not in it: the Dialog is named by the heading's
+			    content, which would include the button's name. Positioned on the
+			    dialog's paper, it still shows in the title row */}
+			<StyledCloseButton
+				aria-label={t("standalone.signature-pad.dialog.close")}
+				className={classes?.closeButton}
+				onClick={closeCanvasBtn}
+				size="large"
+			>
+				<Close />
+			</StyledCloseButton>
 			<Instructions id={instructionsId} className={classes?.instructions}>
 				{resetCanvas
 					? t("standalone.signature-pad.dialog.instructions-signed")

@@ -500,6 +500,18 @@ describe("SignDialog accessibility", () => {
 			});
 		expect(missing).toEqual([]);
 	});
+	it("[ISSUE-3467-ITEM-19] the dialog's name comes from the title text alone, without the close button", () => {
+		withDialogs(<SignaturePad signature="" signerName="Bob" />);
+		openPad();
+		const labelledBy = dialog().getAttribute("aria-labelledby")!;
+		const label = document.getElementById(labelledBy)!;
+		// jsdom leaves the button out of the name; Chromium says "Sign here (Bob) Close"
+		expect(
+			label.querySelector("button"),
+			"the element naming the dialog contains the close button",
+		).toBeNull();
+		expect(label.textContent).toBe("Sign here (Bob)");
+	});
 });
 
 describe("SignDialog with props changing while open", () => {
