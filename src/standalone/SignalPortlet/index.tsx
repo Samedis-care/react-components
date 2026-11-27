@@ -26,7 +26,8 @@ export interface SignalPortletProps {
 	 */
 	title: React.ReactNode;
 	/**
-	 * The portlet items
+	 * The portlet items, one row each, in order. An item's `className` is
+	 * added to `classes.item`, which every row gets.
 	 */
 	items: SignalPortletItemProps[];
 	/**
@@ -169,8 +170,11 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 								{props.items.map((item, index) => (
 									<SignalPortletItemStyled
 										key={index.toString()}
-										className={props.classes?.item}
 										{...item}
+										className={combineClassNames([
+											props.classes?.item,
+											item.className,
+										])}
 									/>
 								))}
 							</SignalPortletList>

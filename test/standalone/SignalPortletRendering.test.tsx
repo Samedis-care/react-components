@@ -299,6 +299,20 @@ describe("SignalPortlet: theme and classes", () => {
 		// a row without link has no link
 		expect(within(plain as HTMLElement).queryByRole("link")).toBeNull();
 	});
+
+	it("[ISSUE-3469-ITEM-5] keeps classes.item on a row that has its own className", () => {
+		renderP({
+			title: "T",
+			classes: { item: "c-item" },
+			items: [
+				{ count: 1, text: "own", className: "own-class" },
+				{ count: 1, text: "plain" },
+			],
+		});
+		const [own, plain] = Array.from(screen.getByRole("list").children);
+		expect(plain).toHaveClass("c-item");
+		expect(own).toHaveClass("own-class", "c-item");
+	});
 });
 
 describe("SignalPortlet: accessibility", () => {
