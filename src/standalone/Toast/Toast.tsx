@@ -21,6 +21,7 @@ import {
 import combineClassNames from "../../utils/combineClassNames";
 import focusRing from "../../utils/internal/focusRing";
 import readableFill from "../../utils/internal/readableFill";
+import useLiveRegionText from "../../utils/internal/useLiveRegionText";
 import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface ToastProps {
@@ -35,7 +36,8 @@ export interface ToastProps {
 	 */
 	severity?: AlertColor;
 	/**
-	 * Optional bold title above the message
+	 * Optional bold title above the message. Like the message, it is rendered a
+	 * frame after the toast opens (see Toast)
 	 */
 	title?: React.ReactNode;
 	/**
@@ -43,7 +45,9 @@ export interface ToastProps {
 	 * long for a line (a URL, an id) breaks where it has to, so the toast stays
 	 * within the screen. Shown through the ToastContext, the title and message
 	 * render where the ToastContextProvider renders its toasts, not where
-	 * showToast was called (see useToastContext)
+	 * showToast was called (see useToastContext). It is rendered a frame after
+	 * the toast opens, and rendered anew (its components mount again) each time
+	 * the toast opens and when a new severity switches its role (see Toast)
 	 */
 	message: React.ReactNode;
 	/**
@@ -216,6 +220,13 @@ const ToastRaw = (inProps: ToastProps) => {
 	const { t } = useCCTranslations();
 	const theme = useTheme();
 
+	const role =
+		severity === "error" || severity === "warning" ? "alert" : "status";
+	// the alert element is the live region: the title and message go into it a
+	// frame after it is in the page (and after each opening and role change),
+	// so screen readers announce them
+	const [regionRef, textShown] = useLiveRegionText(open, role);
+
 	// below sm MUI's Snackbar spans the screen's width: there only the
 	// vertical position counts, and it is phoneVertical's
 	const phone = useMediaQuery(theme.breakpoints.down("sm"));
@@ -300,22 +311,35 @@ const ToastRaw = (inProps: ToastProps) => {
 				className={combineClassNames([className, classes?.root])}
 			>
 				<ToastAlert
+					ref={regionRef}
 					severity={severity}
 					variant={variant}
-					role={
-						severity === "error" || severity === "warning" ? "alert" : "status"
-					}
+					role={role}
 					closeText={t("standalone.toast.close")}
 					onClose={onClose}
 					onKeyDown={handleKeyDown}
 					className={classes?.alert}
 				>
-					{title && <AlertTitle>{title}</AlertTitle>}
-					{message}
+					{textShown && title && <AlertTitle>{title}</AlertTitle>}
+					{textShown && message}
 				</ToastAlert>
 			</Root>
 		</Portal>
 	);
 };
 
+/**
+ * A short, non-blocking notice: a MUI Alert in a Snackbar, rendered in a portal
+ * at the end of the page. Apps usually show it through useToastContext.
+ *
+ * Screen readers announce it: errors and warnings at once (role="alert"),
+ * success and info when the user is idle (role="status"). They announce the
+ * text written into such a live region after it is in the page, and often
+ * skip a region that appears with its text already in it. So the toast's title
+ * and message are written into it a frame after the toast is in the page (it is
+ * still fading in), and written anew each time the toast opens and when a new
+ * severity switches it between the two roles. A test that finds the toast by
+ * its role waits for its text, e.g.
+ * `await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Saved."))`.
+ */
 export const Toast = React.memo(ToastRaw);

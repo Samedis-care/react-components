@@ -8,6 +8,7 @@ import {
 	fireEvent,
 	renderHook,
 	screen,
+	waitFor,
 	within,
 } from "@testing-library/react";
 import { Framework } from "../../../src/framework";
@@ -383,8 +384,9 @@ describe("useBackendDataGridDeleteHandler announcement", () => {
 		const { handleDelete } = renderDeleteHandler({});
 
 		await act(() => handleDelete(false, ["1", "2"], FILTER));
-		expect(await screen.findByRole("status")).toHaveTextContent(
-			"2 entries deleted",
+		// the toast's text is written into it a frame after the toast
+		await waitFor(() =>
+			expect(screen.getByRole("status")).toHaveTextContent("2 entries deleted"),
 		);
 	});
 
@@ -392,8 +394,9 @@ describe("useBackendDataGridDeleteHandler announcement", () => {
 		const { handleDelete } = renderDeleteHandler({});
 
 		await act(() => handleDelete(false, ["1"], FILTER));
-		expect(await screen.findByRole("status")).toHaveTextContent(
-			"1 entry deleted",
+		// the toast's text is written into it a frame after the toast
+		await waitFor(() =>
+			expect(screen.getByRole("status")).toHaveTextContent("1 entry deleted"),
 		);
 	});
 
@@ -408,8 +411,11 @@ describe("useBackendDataGridDeleteHandler announcement", () => {
 
 		await act(() => handleDelete(true, ["1"], FILTER));
 		expect(deleteAdvanced).toHaveBeenCalledOnce();
-		expect(await screen.findByRole("status")).toHaveTextContent(
-			"The selected entries have been deleted",
+		// the toast's text is written into it a frame after the toast
+		await waitFor(() =>
+			expect(screen.getByRole("status")).toHaveTextContent(
+				"The selected entries have been deleted",
+			),
 		);
 	});
 

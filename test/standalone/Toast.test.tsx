@@ -77,6 +77,28 @@ const advance = (ms: number, step = 50) => {
 	for (let left = ms; left > 0; left -= step) tick(Math.min(step, left));
 };
 
+/**
+ * With fake timers: lets the two animation frames pass after which a toast's
+ * title and message are in its live region (they are written into it a frame
+ * after the region is in the page)
+ */
+const nextFrames = () => tick(50);
+
+/**
+ * With real timers: waits until a toast's title and message (or what stands in
+ * for them while they load) are in its live region
+ * @param role The toast's role: alert for errors and warnings, else status
+ * @returns The toast's live region
+ */
+const textWritten = async (role: "status" | "alert" = "status") => {
+	await waitFor(() =>
+		expect(
+			screen.getByRole(role).querySelector(`.${alertClasses.message}`),
+		).not.toBeEmptyDOMElement(),
+	);
+	return screen.getByRole(role);
+};
+
 beforeAll(async () => {
 	await waitForCcI18n();
 	await ccI18n.changeLanguage("en");
@@ -93,29 +115,29 @@ afterEach(async () => {
 	}
 });
 
-describe("Toast: toasts shown in one update", () => {
-	/**
-	 * Renders a ToastContextProvider
-	 * @returns its showToast and closeToast
-	 */
-	const renderToasts = (strict = false): ToastContextType => {
-		const actions: { current?: ToastContextType } = {};
-		const Capture = () => {
-			actions.current = useToastContext();
-			return null;
-		};
-		const tree = (
-			<ThemeProvider theme={theme}>
-				<ToastContextProvider>
-					<Capture />
-				</ToastContextProvider>
-			</ThemeProvider>
-		);
-		render(strict ? <React.StrictMode>{tree}</React.StrictMode> : tree);
-		if (!actions.current) throw new Error("no ToastContext");
-		return actions.current;
+/**
+ * Renders a ToastContextProvider
+ * @returns its showToast and closeToast
+ */
+const renderToasts = (strict = false): ToastContextType => {
+	const actions: { current?: ToastContextType } = {};
+	const Capture = () => {
+		actions.current = useToastContext();
+		return null;
 	};
+	const tree = (
+		<ThemeProvider theme={theme}>
+			<ToastContextProvider>
+				<Capture />
+			</ToastContextProvider>
+		</ThemeProvider>
+	);
+	render(strict ? <React.StrictMode>{tree}</React.StrictMode> : tree);
+	if (!actions.current) throw new Error("no ToastContext");
+	return actions.current;
+};
 
+describe("Toast: toasts shown in one update", () => {
 	/**
 	 * The text of every toast in the page: errors and warnings are alerts, the
 	 * others statuses
@@ -145,6 +167,7 @@ describe("Toast: toasts shown in one update", () => {
 					autoHideDuration: null,
 				});
 			});
+			nextFrames();
 			// the warning is dropped without ever being in the page
 			expect(toastTexts()).toEqual(["Device saved."]);
 
@@ -169,6 +192,7 @@ describe("Toast: toasts shown in one update", () => {
 		act(() => {
 			showToast({ message: "Device saved.", autoHideDuration: null });
 		});
+		nextFrames();
 		expect(toastTexts()).toEqual(["Device saved."]);
 	});
 
@@ -205,6 +229,7 @@ describe("Toast: toasts shown in one update", () => {
 
 			// shown, then closed: its close transition calls it
 			rerender(toast(true, "Label printed."));
+			nextFrames();
 			expect(screen.getByRole("status")).toHaveTextContent("Label printed.");
 			rerender(toast(false, "Label printed."));
 			expect(onExited).toHaveBeenCalledTimes(1);
@@ -294,7 +319,8 @@ describe("Toast: bugs", () => {
 		fireEvent.click(await screen.findByRole("button", { name: "Save device" }));
 		await waitFor(() =>
 			expect(
-				screen.queryByRole("status") ?? screen.queryByText(/^App crashed/),
+				screen.queryByRole("button", { name: "Details" }) ??
+					screen.queryByText(/^App crashed/),
 			).not.toBeNull(),
 		);
 		expect(screen.queryByText(/^App crashed/)).toBeNull();
@@ -335,7 +361,7 @@ describe("Toast: bugs", () => {
 		);
 		expect(screen.queryByText(/^App crashed/)).toBeNull();
 		fireEvent.click(screen.getByRole("button", { name: "Copy link" }));
-		expect(await screen.findByRole("status")).toHaveTextContent("Link copied.");
+		expect(await textWritten()).toHaveTextContent("Link copied.");
 	});
 
 	it("[ISSUE-3470-ITEM-3] a toast whose content throws is dropped and reported, and the app and the next toasts carry on", async () => {
@@ -366,6 +392,8 @@ describe("Toast: bugs", () => {
 			fireEvent.click(
 				await screen.findByRole("button", { name: "Save broken" }),
 			);
+			// the message renders once it is written into the toast
+			await waitFor(() => expect(report).toHaveBeenCalled());
 			expect(screen.queryByText(/^App crashed/)).toBeNull();
 			expect(report).toHaveBeenCalledTimes(1);
 			expect(report).toHaveBeenCalledWith(
@@ -375,9 +403,7 @@ describe("Toast: bugs", () => {
 			expect(screen.queryByRole("status")).toBeNull();
 
 			fireEvent.click(screen.getByRole("button", { name: "Save" }));
-			expect(await screen.findByRole("status")).toHaveTextContent(
-				"Device saved.",
-			);
+			expect(await textWritten()).toHaveTextContent("Device saved.");
 		});
 	});
 
@@ -417,17 +443,17 @@ describe("Toast: bugs", () => {
 		await withErrorReports(async (report) => {
 			renderInFramework(<SaveDevices />);
 			fireEvent.click(await screen.findByRole("button", { name: "Save A" }));
-			await screen.findByRole("status");
+			await textWritten();
 			// A closes to make way for B, which waits until A has left
 			fireEvent.click(screen.getByRole("button", { name: "Save B" }));
 			fireEvent.click(screen.getByRole("button", { name: "Break" }));
 			expect(screen.queryByText(/^App crashed/)).toBeNull();
 			expect(report).toHaveBeenCalledTimes(1);
-			expect(await screen.findByRole("status")).toHaveTextContent("B saved.");
+			expect(await textWritten()).toHaveTextContent("B saved.");
 		});
 	});
 
-	it("[ISSUE-3470-ITEM-3] with disableDefaultOutlet the toast renders at the ToastOutlet, inside the providers around it", () => {
+	it("[ISSUE-3470-ITEM-3] with disableDefaultOutlet the toast renders at the ToastOutlet, inside the providers around it", async () => {
 		const DeviceName = React.createContext("no device");
 		const ShowName = () => <>{useContext(DeviceName)}</>;
 		const SaveDevice = () => {
@@ -457,6 +483,7 @@ describe("Toast: bugs", () => {
 			</ThemeProvider>,
 		);
 		fireEvent.click(screen.getByRole("button", { name: "Save device" }));
+		await textWritten();
 		expect(screen.getAllByRole("status").map((el) => el.textContent)).toEqual([
 			"Device 1042 saved.",
 		]);
@@ -483,6 +510,37 @@ describe("Toast: bugs", () => {
 		expect(screen.getAllByRole("status")).toHaveLength(1);
 	});
 
+	it("[ISSUE-3470-ITEM-15] writes the toast's text into a live region that already exists", async () => {
+		// the records delivered while the test waits, and those still queued
+		const records: MutationRecord[] = [];
+		const observer = new MutationObserver((delivered) => {
+			records.push(...delivered);
+		});
+		observer.observe(document.body, {
+			subtree: true,
+			childList: true,
+			characterData: true,
+		});
+		renderToast({ message: "Saved." });
+		const region = screen.getByRole("status");
+		await waitFor(() => expect(region).toHaveTextContent("Saved."));
+		records.push(...observer.takeRecords());
+		observer.disconnect();
+		// a region inserted together with its text is often not announced
+		const writtenIntoRegion = records.some(
+			(r) =>
+				region.contains(r.target) &&
+				(r.type === "characterData" ||
+					Array.from(r.addedNodes).some((n) =>
+						n.textContent?.includes("Saved."),
+					)),
+		);
+		expect(
+			writtenIntoRegion,
+			"the status element was inserted with its text already in it",
+		).toBe(true);
+	});
+
 	it("[ISSUE-3470-ITEM-26] a toast whose message suspends leaves the app's content visible, and its message shows once loaded", async () => {
 		vi.spyOn(console, "error").mockImplementation(() => undefined);
 		const details = lazyLater();
@@ -505,6 +563,7 @@ describe("Toast: bugs", () => {
 		renderInFramework(<SaveDevice />);
 		const save = await screen.findByRole("button", { name: "Save device" });
 		fireEvent.click(save);
+		await textWritten();
 		expect(save).toBeVisible();
 		expect(screen.queryByRole("progressbar")).toBeNull();
 
@@ -536,6 +595,7 @@ describe("Toast: bugs", () => {
 		renderInFramework(<SaveDevice />);
 		const save = await screen.findByRole("button", { name: "Save device" });
 		fireEvent.click(save);
+		await textWritten();
 		expect(save).toBeVisible();
 
 		await deviceName.load(() => <>Device 1042</>);
@@ -587,6 +647,7 @@ describe("Toast: bugs", () => {
 			vi.useFakeTimers();
 			if (afterAnother) {
 				fireEvent.click(screen.getByRole("button", { name: "Save A" }));
+				nextFrames();
 				expect(screen.getByRole("status")).toHaveTextContent("A saved.");
 			}
 			fireEvent.click(screen.getByRole("button", { name: "Save B" }));
@@ -619,6 +680,7 @@ describe("Toast: bugs", () => {
 			renderInFramework(<SaveDevice />);
 			const save = await screen.findByRole("button", { name: "Save device" });
 			fireEvent.click(save);
+			await textWritten();
 			expect(save).toBeVisible();
 
 			const failure = new Error("Loading chunk DeviceDetails failed");
@@ -653,7 +715,7 @@ describe("Toast: bugs", () => {
 		};
 		renderInFramework(<SaveDevice />);
 		fireEvent.click(await screen.findByRole("button", { name: "Save device" }));
-		const toast = screen.getByRole("status");
+		const toast = await textWritten();
 		const title = () => toast.querySelector(`.${alertTitleClasses.root}`);
 		// the Alert's message slot holds the title too
 		const messageLines = () =>
@@ -710,6 +772,7 @@ describe("Toast: bugs", () => {
 		const saveB = await screen.findByRole("button", { name: "Save B" });
 		vi.useFakeTimers();
 		fireEvent.click(screen.getByRole("button", { name: "Save A" }));
+		nextFrames();
 		const toast = screen.getByRole("status");
 		expect(toast).toHaveTextContent("A saved.");
 
@@ -724,6 +787,139 @@ describe("Toast: bugs", () => {
 		expect(toast).toHaveTextContent("B saved.");
 		expect(skeletonLines(toast)).toHaveLength(0);
 		expect(screen.getByRole("status")).toBe(toast);
+	});
+});
+
+describe("Toast: live region", () => {
+	/** The slot of a toast's live region that holds its title and message */
+	const textSlotOf = (region: HTMLElement) =>
+		region.querySelector(`.${alertClasses.message}`);
+
+	it.each([
+		["", false],
+		[", also in StrictMode", true],
+	])(
+		"[ISSUE-3470-ITEM-15] the first context toast, and one after the toasts before have left, get their text in a live region already in the page%s",
+		(_name, strict) => {
+			vi.useFakeTimers();
+			const [showToast, closeToast] = renderToasts(strict);
+			act(() => {
+				showToast({
+					severity: "error",
+					message: "Device not saved.",
+					autoHideDuration: null,
+				});
+			});
+			const alert = screen.getByRole("alert");
+			expect(textSlotOf(alert)).toBeEmptyDOMElement();
+			nextFrames();
+			expect(screen.getByRole("alert")).toBe(alert);
+			expect(alert).toHaveTextContent("Device not saved.");
+
+			act(() => {
+				closeToast();
+			});
+			advance(EXIT_MS + 300);
+			expect(screen.queryByRole("alert")).toBeNull();
+
+			act(() => {
+				showToast({ message: "Device saved.", autoHideDuration: null });
+			});
+			const status = screen.getByRole("status");
+			expect(textSlotOf(status)).toBeEmptyDOMElement();
+			nextFrames();
+			expect(screen.getByRole("status")).toBe(status);
+			expect(status).toHaveTextContent("Device saved.");
+		},
+	);
+
+	it("[ISSUE-3470-ITEM-15] a context toast that replaces one of another severity gets the region's new role before its text", () => {
+		vi.useFakeTimers();
+		const [showToast] = renderToasts();
+		act(() => {
+			showToast({
+				severity: "success",
+				message: "Device saved.",
+				autoHideDuration: null,
+			});
+		});
+		nextFrames();
+		const region = screen.getByRole("status");
+		expect(region).toHaveTextContent("Device saved.");
+
+		act(() => {
+			showToast({
+				severity: "error",
+				message: "Label not printed.",
+				autoHideDuration: null,
+			});
+		});
+		// the saved toast closes with its text, then the error takes the region
+		for (let ms = 0; ms < EXIT_MS + 300; ms += 10) {
+			if (region.getAttribute("role") === "alert") break;
+			tick(10);
+		}
+		expect(region).toHaveAttribute("role", "alert");
+		expect(
+			textSlotOf(region),
+			"the text came with the new role",
+		).toBeEmptyDOMElement();
+		nextFrames();
+		expect(screen.getByRole("alert")).toBe(region);
+		expect(region).toHaveTextContent("Label not printed.");
+	});
+
+	it("[ISSUE-3470-ITEM-15] a context toast that replaces one with the same text writes the text anew", () => {
+		vi.useFakeTimers();
+		const [showToast] = renderToasts();
+		const save = () =>
+			act(() => {
+				showToast({ message: "Device saved.", autoHideDuration: null });
+			});
+		save();
+		nextFrames();
+		const region = screen.getByRole("status");
+		expect(region).toHaveTextContent("Device saved.");
+
+		save();
+		// the first toast closes with its text, then the second one opens
+		for (let ms = 0; ms < EXIT_MS + 300; ms += 10) {
+			if (!textSlotOf(region)?.hasChildNodes()) break;
+			tick(10);
+		}
+		expect(
+			textSlotOf(region),
+			"the second toast's text was never written into the region",
+		).toBeEmptyDOMElement();
+		nextFrames();
+		expect(screen.getByRole("status")).toBe(region);
+		expect(region).toHaveTextContent("Device saved.");
+	});
+
+	it("[ISSUE-3470-ITEM-15] a toast whose severity changes its role while it is shown gets its text after the new role, and its close button keeps focus", () => {
+		vi.useFakeTimers();
+		const { rerenderToast } = renderToast({
+			severity: "info",
+			message: "Saving device…",
+			autoHideDuration: null,
+		});
+		nextFrames();
+		const region = screen.getByRole("status");
+		const close = within(region).getByRole("button", { name: "Close" });
+		act(() => {
+			close.focus();
+		});
+
+		rerenderToast({ severity: "error", message: "Device not saved." });
+		expect(region).toHaveAttribute("role", "alert");
+		expect(
+			textSlotOf(region),
+			"the text came with the new role",
+		).toBeEmptyDOMElement();
+		nextFrames();
+		expect(screen.getByRole("alert")).toBe(region);
+		expect(region).toHaveTextContent("Device not saved.");
+		expect(close).toHaveFocus();
 	});
 });
 

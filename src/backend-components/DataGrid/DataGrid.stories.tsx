@@ -396,10 +396,13 @@ export const Issue3506Item11DeleteProgressIsAnnounced: StoryObj = {
 		await waitFor(() => expect(canvas.queryByText("Alice")).toBeNull(), {
 			timeout: 5000,
 		});
-		await expect(
-			statusTexts().some((text) => text.trim() && !before.includes(text)),
-			"a status message once the delete is done",
-		).toBe(true);
+		// a toast's text is written into it a frame after the toast
+		await waitFor(() =>
+			expect(
+				statusTexts().some((text) => text.trim() && !before.includes(text)),
+				"a status message once the delete is done",
+			).toBe(true),
+		);
 	},
 };
 

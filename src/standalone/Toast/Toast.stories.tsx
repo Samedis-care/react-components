@@ -100,8 +100,9 @@ const contrast = (a: Rgba, b: Rgba) => {
 export const Info: Story = {
 	play: async ({ args, userEvent }) => {
 		const toast = await body.findByRole("status");
-		await expect(toast).toHaveTextContent(
-			"3 devices were added to the project.",
+		// the text is written into the toast a frame after the toast is shown
+		await waitFor(() =>
+			expect(toast).toHaveTextContent("3 devices were added to the project."),
 		);
 		// bottom right unless the theme says otherwise
 		await expect(toast.parentElement).toHaveClass(
@@ -126,8 +127,8 @@ export const Warning: Story = {
 		message: "Device 1042 is still open and can be finished later.",
 	},
 	play: async () => {
-		await expect(await body.findByRole("alert")).toHaveTextContent(
-			"Device left open",
+		await waitFor(() =>
+			expect(body.getByRole("alert")).toHaveTextContent("Device left open"),
 		);
 	},
 };
@@ -138,8 +139,10 @@ export const Error: Story = {
 		message: "This label belongs to another project.",
 	},
 	play: async () => {
-		await expect(await body.findByRole("alert")).toHaveTextContent(
-			"This label belongs to another project.",
+		await waitFor(() =>
+			expect(body.getByRole("alert")).toHaveTextContent(
+				"This label belongs to another project.",
+			),
 		);
 	},
 };

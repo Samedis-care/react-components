@@ -73,12 +73,17 @@ export const Default: StoryObj = {
 	render: () => <ToastDemo />,
 	play: async ({ canvas, userEvent }) => {
 		await userEvent.click(canvas.getByRole("button", { name: "Show success" }));
-		await expect(await body.findByRole("status")).toHaveTextContent("Saved.");
+		// the text is written into the toast a frame after the toast is shown
+		await waitFor(() =>
+			expect(body.getByRole("status")).toHaveTextContent("Saved."),
+		);
 
 		// a new toast replaces the one shown
 		await userEvent.click(canvas.getByRole("button", { name: "Show error" }));
-		await expect(await body.findByRole("alert")).toHaveTextContent(
-			"The server refused the change.",
+		await waitFor(() =>
+			expect(body.getByRole("alert")).toHaveTextContent(
+				"The server refused the change.",
+			),
 		);
 		await waitFor(() => expect(body.queryByRole("status")).toBeNull());
 
@@ -133,8 +138,8 @@ export const FromADialog: StoryObj = {
 			within(dialog).getByRole("button", { name: "Copy link" }),
 		);
 		// the dialog hides the app from screen readers, the toast stays reachable
-		await expect(await body.findByRole("status")).toHaveTextContent(
-			"Link copied.",
+		await waitFor(() =>
+			expect(body.getByRole("status")).toHaveTextContent("Link copied."),
 		);
 	},
 };
@@ -314,7 +319,7 @@ export const AtAnOutlet: StoryObj = {
 	play: async ({ canvas, userEvent }) => {
 		await userEvent.click(canvas.getByRole("button", { name: "Save device" }));
 		const toast = await body.findByRole("status");
-		await expect(toast).toHaveTextContent("Device saved.");
+		await waitFor(() => expect(toast).toHaveTextContent("Device saved."));
 		await userEvent.click(
 			within(toast).getByRole("button", { name: "Details" }),
 		);
@@ -402,10 +407,13 @@ export const Issue3470Item26LoadingContent: StoryObj = {
 	play: async ({ canvas, userEvent }) => {
 		await userEvent.click(canvas.getByRole("button", { name: "Save device" }));
 		const toast = await body.findByRole("status");
+		// written into the toast a frame after the toast is shown
+		await waitFor(() =>
+			expect(toast.querySelectorAll(".MuiSkeleton-root")).toHaveLength(3),
+		);
 		const lines = Array.from(
 			toast.querySelectorAll<HTMLElement>(".MuiSkeleton-root"),
 		);
-		await expect(lines).toHaveLength(3);
 		await expect(toast.textContent).toBe("");
 
 		// MUI's skeleton tint (11% of the text color), of the toast's text color
