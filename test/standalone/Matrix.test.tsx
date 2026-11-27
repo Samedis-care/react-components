@@ -2242,6 +2242,109 @@ describe("MatrixCellTile entries", () => {
 			});
 		});
 
+		it("[ISSUE-3481-ITEM-19] tells assistive technology what the ring, the fade and the arrow mean", () => {
+			const onItemClick = vi.fn();
+			const spoken = (overrides: Partial<MatrixTileItem>) => {
+				render(tile({ items: [entry(overrides)], onItemClick }));
+				const text = announced(screen.getByRole("button"));
+				cleanup();
+				return text;
+			};
+			const plain = spoken({});
+			expect(spoken({ highlighted: true }), "highlighted").not.toBe(plain);
+			expect(spoken({ dimmed: true }), "dimmed").not.toBe(plain);
+			// "F ICU" loses the direction: assigned to, handed over to, ...
+			expect(spoken({ secondaryLabel: "ICU" }), "arrow").not.toBe("F ICU");
+		});
+
+		it("[ISSUE-3481-ITEM-19] says a highlighted and a dimmed entry's state after its label, and its arrow in a word", () => {
+			const name = (overrides: Partial<MatrixTileItem>) => {
+				render(tile({ items: [entry(overrides)], onItemClick: vi.fn() }));
+				const text = computeAccessibleName(screen.getByRole("button"));
+				cleanup();
+				return text;
+			};
+			expect(name({})).toBe("F");
+			expect(name({ highlighted: true })).toBe("F, highlighted");
+			expect(name({ dimmed: true })).toBe("F, dimmed");
+			expect(name({ highlighted: true, dimmed: true })).toBe(
+				"F, highlighted, dimmed",
+			);
+			expect(name({ secondaryLabel: "ICU" })).toBe("F to ICU");
+			expect(name({ secondaryLabel: "ICU", flow: "horizontal" })).toBe(
+				"F to ICU",
+			);
+		});
+
+		it("[ISSUE-3481-ITEM-19] says the state of each half of a diagonal pair after its label", () => {
+			render(
+				tile({
+					items: [entry({ highlighted: true }), second({ dimmed: true })],
+					pairLayout: "diagonal",
+					onItemClick: vi.fn(),
+				}),
+			);
+			expect(computeAccessibleName(screen.getByRole("button"))).toBe(
+				"F, highlighted S, dimmed",
+			);
+		});
+
+		it("[ISSUE-3481-ITEM-19] reads the state and the arrow of a read-only entry with its label", () => {
+			// a grid cell is named by what it contains, as a screen reader reads it
+			render(
+				<div role={"gridcell"}>
+					{tile({
+						items: [
+							entry({ highlighted: true, secondaryLabel: "ICU" }),
+							second({ dimmed: true }),
+						],
+					})}
+				</div>,
+			);
+			expect(computeAccessibleName(screen.getByRole("gridcell"))).toBe(
+				"F to ICU, highlighted S, dimmed",
+			);
+		});
+
+		it("[ISSUE-3481-ITEM-19] says the state and the arrow in the language of the page", async () => {
+			await act(() => ccI18n.changeLanguage("de"));
+			try {
+				render(
+					tile({
+						items: [
+							entry({ highlighted: true, dimmed: true, secondaryLabel: "ICU" }),
+						],
+						onItemClick: vi.fn(),
+					}),
+				);
+				expect(computeAccessibleName(screen.getByRole("button"))).toBe(
+					"F nach ICU, hervorgehoben, abgeschwächt",
+				);
+			} finally {
+				await act(() => ccI18n.changeLanguage("en"));
+			}
+		});
+
+		it("[ISSUE-3481-ITEM-19] has the words for the arrow and the states in every locale", () => {
+			const i18nDir = path.resolve(__dirname, "../../src/assets/i18n");
+			const keys = ["tile-arrow", "tile-highlighted", "tile-dimmed"];
+			const missing = fs
+				.readdirSync(i18nDir, { withFileTypes: true })
+				.filter((locale) => locale.isDirectory())
+				.flatMap((locale) => {
+					const translation = JSON.parse(
+						fs.readFileSync(
+							path.join(i18nDir, locale.name, "translation.json"),
+							"utf8",
+						),
+					) as { standalone?: { matrix?: Record<string, string> } };
+					return keys
+						.filter((key) => !translation.standalone?.matrix?.[key]?.trim())
+						.map((key) => `${locale.name}: ${key}`);
+				});
+			expect(missing).toEqual([]);
+		});
+
 		it("[ISSUE-3481-ITEM-7] lets mousedown reach a renderItem wrapper of a clickable entry", () => {
 			const onMouseDown = vi.fn();
 			render(
@@ -2316,6 +2419,20 @@ describe("MatrixCellTile entries", () => {
 			);
 		});
 
+		it("[ISSUE-3481-ITEM-19] says the state of each entry it leaves out", () => {
+			inCell({
+				items: [
+					entry(),
+					second(),
+					third({ highlighted: true, tooltip: "Night shift" }),
+					fourth({ dimmed: true }),
+				],
+			});
+			expect(computeAccessibleName(screen.getByRole("gridcell"))).toBe(
+				"F S 2 more: N, highlighted (Night shift), RD, dimmed",
+			);
+		});
+
 		it("[ISSUE-3481-ITEM-26] shows the entries it leaves out in the marker's tooltip", () => {
 			vi.useFakeTimers();
 			const { container } = render(
@@ -2349,22 +2466,20 @@ describe("MatrixCellTile entries", () => {
 		});
 
 		it("[ISSUE-3481-ITEM-26] rings the marker when an entry it leaves out is highlighted", () => {
-			const { container } = render(
-				tile({ items: [entry(), second(), third({ highlighted: true })] }),
-			);
-			const [ringed] = slotsOf(container, "overflow");
-			expect(getComputedStyle(ringed).boxShadow).toContain(
-				theme.palette.warning.main,
-			);
-			cleanup();
 			// a highlighted entry that is drawn rings itself, not the marker
 			const { container: drawn } = render(
 				tile({ items: [entry({ highlighted: true }), second(), third()] }),
 			);
+			const ring = getComputedStyle(slotsOf(drawn, "highlight")[0]).boxShadow;
+			expect(ring).not.toBe("");
 			const [plain] = slotsOf(drawn, "overflow");
-			expect(getComputedStyle(plain).boxShadow).not.toContain(
-				theme.palette.warning.main,
+			expect(getComputedStyle(plain).boxShadow).not.toBe(ring);
+			cleanup();
+			const { container } = render(
+				tile({ items: [entry(), second(), third({ highlighted: true })] }),
 			);
+			const [ringed] = slotsOf(container, "overflow");
+			expect(getComputedStyle(ringed).boxShadow).toBe(ring);
 		});
 
 		it("[ISSUE-3481-ITEM-26] says how many are left out in the language of the page", async () => {
@@ -2622,8 +2737,9 @@ describe("MatrixCellTile", () => {
 		);
 	});
 	it("renders the highlight ring with a palette color of any format", () => {
+		// dark enough for 3:1 on today's column, so the ring takes it as it is
 		const rgbTheme = createTheme({
-			palette: { warning: { main: "rgb(237, 108, 2)" } },
+			palette: { warning: { main: "rgb(200, 80, 0)" } },
 		});
 		const { container } = render(
 			<ThemeProvider theme={rgbTheme}>
@@ -2633,8 +2749,8 @@ describe("MatrixCellTile", () => {
 		const ring = container.querySelector("[class*=highlight]") as HTMLElement;
 		const shadow = getComputedStyle(ring).boxShadow;
 		expect(shadow).not.toBe("");
-		expect(shadow).toContain("rgb(237, 108, 2)");
-		expect(shadow).toContain("rgba(237, 108, 2, 0.5)");
+		expect(shadow).toContain("rgb(200, 80, 0)");
+		expect(shadow).toContain("rgba(200, 80, 0, 0.5)");
 	});
 	it("renders a placeholder of zero", () => {
 		wrap(<MatrixCellTile items={[]} placeholder={0} />);

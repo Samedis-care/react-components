@@ -301,6 +301,9 @@
 		},
 		"matrix": {
 			"tile-more": "ещё {{count}}:",
+			"tile-arrow": "в",
+			"tile-highlighted": "выделено",
+			"tile-dimmed": "приглушено",
 			"extra-cell-add": "Добавить"
 		}
 	},

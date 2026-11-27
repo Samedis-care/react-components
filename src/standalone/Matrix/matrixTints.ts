@@ -63,6 +63,49 @@ const stickyBackground = (
 /** WCAG 2 AA for normal-size text; the header label is 0.8rem bold */
 const LABEL_CONTRAST = 4.5;
 
+/** WCAG 2 AA for what identifies a state (1.4.11 Non-text Contrast) */
+const RING_CONTRAST = 3;
+
+/**
+ * A color with a contrast ratio on the background of a variant's sticky
+ * header: the given color if it has it, else the color darkened (on a dark
+ * background: lightened) just enough, so it keeps its hue.
+ * @param theme The theme
+ * @param variant The column variant whose background the color is shown on
+ * @param color The color meant to be shown
+ * @param ratio The contrast ratio it needs
+ * @returns A CSS color
+ */
+const readableOnSticky = (
+	theme: Theme,
+	variant: "current" | "accent",
+	color: string,
+	ratio: number,
+): string => {
+	try {
+		const background = stickyBackground(theme, variant);
+		if (!background) return color;
+		const toward =
+			getContrastRatio("#000", background) >=
+			getContrastRatio("#fff", background)
+				? darken
+				: lighten;
+		// in steps of 5%: at 100% the color is black (or white), which has
+		// at least 4.58:1 on any background it was picked for
+		let shown = color;
+		for (
+			let step = 1;
+			step <= 20 && getContrastRatio(shown, background) < ratio;
+			step++
+		)
+			shown = toward(color, step / 20);
+		return shown;
+	} catch {
+		// a color MUI cannot decompose: keep it rather than fail the grid
+		return color;
+	}
+};
+
 /**
  * A label color for a sticky header of a variant: the given color if it has
  * LABEL_CONTRAST on that header's background, else the color darkened (on a
@@ -76,30 +119,7 @@ const readableStickyLabel = (
 	theme: Theme,
 	variant: "current" | "accent",
 	color: string,
-): string => {
-	try {
-		const background = stickyBackground(theme, variant);
-		if (!background) return color;
-		const toward =
-			getContrastRatio("#000", background) >=
-			getContrastRatio("#fff", background)
-				? darken
-				: lighten;
-		// in steps of 5%: at 100% the color is black (or white), which has
-		// at least 4.58:1 on any background it was picked for
-		let label = color;
-		for (
-			let step = 1;
-			step <= 20 && getContrastRatio(label, background) < LABEL_CONTRAST;
-			step++
-		)
-			label = toward(color, step / 20);
-		return label;
-	} catch {
-		// a color MUI cannot decompose: keep it rather than fail the grid
-		return color;
-	}
-};
+): string => readableOnSticky(theme, variant, color, LABEL_CONTRAST);
 
 /**
  * The label colors of the "current" and "accent" column headers, as the
@@ -165,19 +185,40 @@ export const cellBorders = (theme: Theme) => ({
 
 /**
  * The attention ring around a highlighted entry, and around the "+N" marker
- * when an entry it stands for is highlighted.
+ * when an entry it stands for is highlighted, as the styles of the element it
+ * is drawn around.
+ *
+ * The ring is warning.main, darkened (on a dark theme: lightened) until it has
+ * 3:1 (WCAG 1.4.11) on today's column, whose tint is its own color. A line of
+ * the grid's background between the element and the ring keeps the ring apart
+ * from the element's fill, whatever its color (an orange entry in an orange
+ * ring).
+ * Forced colors drop box shadows: there the ring is an outline in the
+ * Highlight system color.
  * @remarks A STATIC ring on purpose: an infinite CSS animation keeps the
  * compositor awake and drains battery on tablets as long as the grid is open.
  * A solid ring highlights just as clearly at zero cost.
  */
-export const highlightRing = (theme: Theme): string =>
+export const highlightRing = (theme: Theme) => {
+	const ring = readableOnSticky(
+		theme,
+		"current",
+		theme.palette.warning.main,
+		RING_CONTRAST,
+	);
 	// alpha(), not a hex-alpha suffix: the palette value can be rgb(), hsl() or
 	// a CSS variable, and appending to those invalidates the whole declaration
 	// — which would drop the ring entirely instead of just its glow.
-	`0 0 0 3px ${theme.palette.warning.main}, 0 0 6px 1px ${alpha(
-		theme.palette.warning.main,
-		0.5,
-	)}`;
+	return {
+		boxShadow: `0 0 0 1px ${theme.palette.background.paper}, 0 0 0 3px ${ring}, 0 0 6px 1px ${alpha(
+			ring,
+			0.5,
+		)}`,
+		"@media (forced-colors: active)": {
+			outline: "3px solid Highlight",
+		},
+	};
+};
 
 /**
  * The focus ring of an entry (a split entry or a diagonal pair). It lies just

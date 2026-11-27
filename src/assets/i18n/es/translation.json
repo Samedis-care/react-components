@@ -300,6 +300,9 @@
 		},
 		"matrix": {
 			"tile-more": "{{count}} más:",
+			"tile-arrow": "a",
+			"tile-highlighted": "resaltado",
+			"tile-dimmed": "atenuado",
 			"extra-cell-add": "Añadir"
 		}
 	},

@@ -1,12 +1,13 @@
 import React, { useCallback, useMemo } from "react";
 import { styled, Tooltip, useTheme } from "@mui/material";
-import { ArrowDownward, ArrowRightAlt } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
 import { tileColors } from "./matrixTileDim";
 import { useMatrixCellTileProps } from "./MatrixCellTileContext";
 import { entryFocusRing } from "./matrixTints";
 import MatrixTileCorners from "./MatrixTileCorners";
+import MatrixTileFlowArrow from "./MatrixTileFlowArrow";
+import MatrixTileStateText from "./MatrixTileStateText";
 import useMatrixActivation from "./useMatrixActivation";
 import { MatrixTileItem as MatrixTileItemData } from "./types";
 
@@ -32,6 +33,13 @@ export const MatrixTileItemRoot = styled("div", {
 		cursor: "pointer",
 		"&:focus-visible": entryFocusRing(theme),
 	},
+	// Forced colors paint every fill in the canvas color: a border keeps the
+	// entries apart, dashed where the fade would have set one apart
+	"@media (forced-colors: active)": {
+		boxSizing: "border-box",
+		border: "1px solid CanvasText",
+		[`&.${matrixClasses.itemDimmed}`]: { borderStyle: "dashed" },
+	},
 }));
 
 export const MatrixTileItemContent = styled("div", {
@@ -54,9 +62,6 @@ export const MatrixTileItemContent = styled("div", {
 		fontSize: cssVar(matrixVars.tileSecondaryFontSize),
 	},
 });
-
-const FlowArrowVertical = styled(ArrowDownward)({ fontSize: 13 });
-const FlowArrowHorizontal = styled(ArrowRightAlt)({ fontSize: 16 });
 
 /**
  * Font size for a short code: the shorter it is, the bigger it can be. Only a
@@ -91,7 +96,8 @@ const MatrixTileItem = (props: MatrixTileItemProps) => {
 		onItemClick?.(item);
 	}, [onItemClick, item]);
 	// An entry one can click has to be one a keyboard can reach too. The name
-	// comes from the label it renders; the tooltip is its description. Its
+	// comes from the label it renders, with the arrow and the state in words
+	// (visually hidden); the tooltip is its description. Its
 	// role is also what keeps a press on it from starting a range in the grid
 	// below (the cell skips presses inside [role=button]), so the press still
 	// reaches the consumer's renderItem and renderCellWrapper wrappers.
@@ -143,11 +149,17 @@ const MatrixTileItem = (props: MatrixTileItemProps) => {
 				<span>{item.label}</span>
 				{item.secondaryLabel != null && (
 					<>
-						{horizontal ? <FlowArrowHorizontal /> : <FlowArrowVertical />}
+						<MatrixTileFlowArrow horizontal={horizontal} />
 						<span className={"CcMatrixCellTile-secondaryLabel"}>
 							{item.secondaryLabel}
 						</span>
 					</>
+				)}
+				{(item.highlighted || item.dimmed) && (
+					<MatrixTileStateText
+						highlighted={item.highlighted}
+						dimmed={item.dimmed}
+					/>
 				)}
 			</MatrixTileItemContent>
 			<MatrixTileCorners item={item} className={classes?.corner} />

@@ -39,7 +39,7 @@ export const MatrixTileHighlight = styled("div", {
 	width: "100%",
 	height: "100%",
 	borderRadius: theme.shape.borderRadius,
-	boxShadow: highlightRing(theme),
+	...highlightRing(theme),
 }));
 
 export const MatrixTilePlaceholder = styled("div", {

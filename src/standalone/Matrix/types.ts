@@ -182,7 +182,10 @@ export interface MatrixTileItem {
 	label: React.ReactNode;
 	/**
 	 * A second label, rendered after an arrow ("A -> B"). Use it for an entry
-	 * that points somewhere: an assignment, a hand-over, a target.
+	 * that points somewhere: an assignment, a hand-over, a target. Screen
+	 * readers say the arrow as a word, in the page's language: "A to B". An
+	 * icon as secondaryLabel is said only if it has a name of its own
+	 * (titleAccess on a MUI icon).
 	 * @remarks Not rendered in a diagonal pair, see MatrixCellTileProps.pairLayout.
 	 */
 	secondaryLabel?: React.ReactNode;
@@ -213,13 +216,19 @@ export interface MatrixTileItem {
 	 */
 	textColor?: string;
 	/**
-	 * Render the entry de-emphasized (it is informational, not actionable):
-	 * its fill is faded to MATRIX_TILE_DIM_OPACITY, in a split and a diagonal
+	 * Render the entry de-emphasized (someone else's, informational): its
+	 * fill is faded to MATRIX_TILE_DIM_OPACITY, in a split and a diagonal
 	 * pair alike. The label, the secondary label and the corners are not
 	 * faded. The label is black or white, whichever has the higher contrast
 	 * with the faded fill as it shows over the theme's
 	 * palette.background.paper (at least 4.5:1); textColor, meant for the
-	 * full fill, is not used.
+	 * full fill, is not used. Screen readers say "dimmed", in the page's
+	 * language, after the entry's label. In forced-colors mode, which draws
+	 * no fills, a dimmed entry outside a diagonal pair has a dashed border
+	 * instead of a solid one.
+	 *
+	 * Dimming changes nothing else: with MatrixCellTileProps.onItemClick a
+	 * dimmed entry is a button like any other.
 	 * @remarks A backgroundColor that cannot be resolved (a var()) is not
 	 * faded, and keeps textColor.
 	 * @default false
@@ -227,7 +236,13 @@ export interface MatrixTileItem {
 	dimmed?: boolean;
 	/**
 	 * Ring the entry to draw attention to it (recently created, matching a
-	 * search, ...)
+	 * search, ...). The ring is the theme's palette.warning.main, darkened (in
+	 * a dark theme: lightened) where it needs that for 3:1 on today's column,
+	 * with a line of palette.background.paper between it and the entry's
+	 * fill. In forced-colors mode it is an outline in the Highlight system
+	 * color. Screen readers say "highlighted", in the page's language, after
+	 * the entry's label.
+	 * @default false
 	 */
 	highlighted?: boolean;
 	/**

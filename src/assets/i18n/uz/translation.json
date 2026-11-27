@@ -299,6 +299,9 @@
 		},
 		"matrix": {
 			"tile-more": "yana {{count}} ta:",
+			"tile-arrow": "manzil:",
+			"tile-highlighted": "ajratib ko'rsatilgan",
+			"tile-dimmed": "xiralashtirilgan",
 			"extra-cell-add": "Qo'shish"
 		}
 	},

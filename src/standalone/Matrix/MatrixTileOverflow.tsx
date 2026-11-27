@@ -7,6 +7,7 @@ import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
 import { highlightRing } from "./matrixTints";
 import { tileColors } from "./matrixTileDim";
 import { useMatrixCellTileProps } from "./MatrixCellTileContext";
+import { tileStateText } from "./MatrixTileStateText";
 import { MatrixTileItem } from "./types";
 import visuallyHidden from "../../utils/internal/visuallyHidden";
 
@@ -38,9 +39,7 @@ export const MatrixTileOverflowRoot = styled("div", {
 	fontSize: 10,
 	fontWeight: 700,
 	lineHeight: 1,
-	[`&.${matrixClasses.overflowHighlighted}`]: {
-		boxShadow: highlightRing(theme),
-	},
+	[`&.${matrixClasses.overflowHighlighted}`]: highlightRing(theme),
 }));
 
 /** What the marker says to a screen reader, visually hidden */
@@ -99,9 +98,9 @@ export interface MatrixTileOverflowProps {
 /**
  * Stands for the entries a MatrixCellTile has no room for: draws "+N", shows
  * them on hover (each by its label, in its colors, and its tooltip), says them
- * to screen readers ("2 more: N (Night shift), RD") and is ringed when one of
- * them is highlighted. Not a control: it opens nothing, and a press on it is a
- * press on the cell.
+ * to screen readers, each with its state ("2 more: N, highlighted (Night
+ * shift), RD") and is ringed when one of them is highlighted. Not a control:
+ * it opens nothing, and a press on it is a press on the cell.
  */
 const MatrixTileOverflow = (props: MatrixTileOverflowProps) => {
 	const { items } = props;
@@ -157,6 +156,7 @@ const MatrixTileOverflow = (props: MatrixTileOverflowProps) => {
 						<React.Fragment key={item.key}>
 							{index > 0 ? ", " : " "}
 							{item.label}
+							{tileStateText(t, item.highlighted, item.dimmed)}
 							{item.tooltip && ` (${item.tooltip})`}
 						</React.Fragment>
 					))}

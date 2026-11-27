@@ -299,6 +299,9 @@
 		},
 		"matrix": {
 			"tile-more": "noch {{count}}:",
+			"tile-arrow": "nach",
+			"tile-highlighted": "hervorgehoben",
+			"tile-dimmed": "abgeschwächt",
 			"extra-cell-add": "Hinzufügen"
 		}
 	},

@@ -1548,6 +1548,124 @@ export const Issue3481Item17OverlayHintIsReadableInBothThemes: Story = {
 	},
 };
 
+/** ISSUE-3481-ITEM-19: an orange entry in each column variant, highlighted */
+const HIGHLIGHT_COLUMNS: MatrixColumn[] = [
+	{ key: "h1", label: 1 },
+	{ key: "h2", label: 2, variant: "current" },
+	{ key: "h3", label: 3, variant: "accent" },
+	{ key: "h4", label: 4, variant: "muted" },
+];
+
+const HIGHLIGHTED_ON_CALL: MatrixTileItem = {
+	key: "onCall",
+	label: "RD",
+	backgroundColor: "#ef6c00",
+	textColor: "#000000",
+	highlighted: true,
+};
+
+const HIGHLIGHT_ROWS: MatrixRow<TileCell>[] = [
+	{
+		key: "a",
+		label: "Alice Weber",
+		cells: Object.fromEntries(
+			HIGHLIGHT_COLUMNS.map((column) => [
+				column.key,
+				{ items: [HIGHLIGHTED_ON_CALL] },
+			]),
+		),
+	},
+];
+
+/** a stable selector for the ring around an entry */
+const HIGHLIGHT_TILE_CLASSES = { highlight: "tile-highlight" };
+
+const renderHighlightCell = (cell: TileCell | undefined) => (
+	<MatrixCellTile items={cell?.items ?? []} classes={HIGHLIGHT_TILE_CLASSES} />
+);
+
+const ITEM_19_THEMES = [createTheme(), DARK_THEME];
+
+/** ISSUE-3481-ITEM-19: the highlight ring stands out from the cell it lies on, 1.01:1 from an orange entry and 2.67:1 in today's column before. */
+export const Issue3481Item19HighlightRingStandsOut: Story = {
+	parameters: { a11y: { test: "error" } },
+	render: () => (
+		<>
+			{ITEM_19_THEMES.map((theme, index) => (
+				<ThemeProvider key={index} theme={theme}>
+					<Box
+						data-palette={index}
+						sx={{
+							bgcolor: "background.default",
+							color: "text.primary",
+							p: 1,
+						}}
+					>
+						<MatrixGrid<TileCell>
+							columns={HIGHLIGHT_COLUMNS}
+							rows={HIGHLIGHT_ROWS}
+							label={`${TILE_LABEL} ${theme.palette.mode}`}
+							corner={"Ward C"}
+							classes={TILE_CLASSES}
+							selectable={false}
+							renderRowHeader={renderTileRowHeader}
+							renderCell={renderHighlightCell}
+						/>
+					</Box>
+				</ThemeProvider>
+			))}
+		</>
+	),
+	play: async ({ canvasElement }) => {
+		const palettes = Array.from(
+			canvasElement.querySelectorAll<HTMLElement>("[data-palette]"),
+		);
+		await expect(palettes).toHaveLength(ITEM_19_THEMES.length);
+		for (const palette of palettes) {
+			const grid = backgroundOf(within(palette).getByRole("region"));
+			const cells = Array.from(
+				palette.querySelectorAll<HTMLElement>(`.${TILE_CLASSES.cell}`),
+			);
+			await expect(cells).toHaveLength(HIGHLIGHT_COLUMNS.length);
+			for (const [index, cell] of cells.entries()) {
+				const name = `palette ${palette.dataset.palette}, column ${index + 1}`;
+				const ring = cell.querySelector<HTMLElement>(
+					`.${HIGHLIGHT_TILE_CLASSES.highlight}`,
+				);
+				if (!ring) throw new Error(`${name}: no ring`);
+				// the solid lines of the box shadow, from the inside out
+				const lines = Array.from(
+					getComputedStyle(ring).boxShadow.matchAll(
+						/(rgba?\([^)]+\)) -?[\d.]+px -?[\d.]+px ([\d.]+)px (-?[\d.]+)px/g,
+					),
+				)
+					.filter(([, , blur]) => parseFloat(blur) === 0)
+					.map(([, color, , spread]) => ({
+						color: parseColor(color),
+						spread: parseFloat(spread),
+					}))
+					.sort((a, b) => a.spread - b.spread);
+				await expect(lines.length, name).toBeGreaterThanOrEqual(2);
+				const behind = backgroundOver(cell, grid);
+				const outer = lines[lines.length - 1];
+				// the ring on the cell it lies on
+				await expect(
+					contrast(outer.color, behind),
+					name,
+				).toBeGreaterThanOrEqual(3);
+				// and a line between the ring and the entry that sets the
+				// ring apart from the entry's fill, whatever its color
+				const inner = lines[0];
+				await expect(inner.spread, name).toBeLessThan(outer.spread);
+				await expect(
+					contrast(outer.color, over(inner.color, behind)),
+					name,
+				).toBeGreaterThanOrEqual(3);
+			}
+		}
+	},
+};
+
 /** ISSUE-3481-ITEM-26: a third entry in a cell disappears without a trace. */
 const NIGHT: MatrixTileItem = {
 	key: "night",
