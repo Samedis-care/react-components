@@ -206,7 +206,13 @@ export interface MatrixGridProps<TCell> {
 	 * set, the whole row header becomes one tap target calling it (the consumer
 	 * opens a menu listing what the header's buttons do on a desktop), and the
 	 * hover hint on cells is turned off. Desktop is unaffected.
-	 * @remarks Give the rows a label so that button has an accessible name.
+	 * @remarks The button is named by the row's label (MatrixRow.label) and
+	 * described by "Opens the actions for this row." (in the current language)
+	 * followed by everything the header renders. Without a label, what the
+	 * header renders is the name, an avatar's initial and the like included,
+	 * and that sentence alone is the description: give the rows a label. The
+	 * button has no aria-haspopup, since what a tap opens (a menu, a dialog,
+	 * the one action there is) is up to you.
 	 */
 	onRowHeaderActions?: (rowKey: string) => void;
 	/**

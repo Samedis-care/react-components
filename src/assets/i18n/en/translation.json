@@ -304,6 +304,7 @@
 			"label": "Loading…"
 		},
 		"matrix": {
+			"row-header-actions": "Opens the actions for this row.",
 			"tile-more": "{{count}} more:",
 			"tile-arrow": "to",
 			"tile-highlighted": "highlighted",

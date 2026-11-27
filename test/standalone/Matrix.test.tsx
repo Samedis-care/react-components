@@ -1454,6 +1454,98 @@ describe("MatrixGrid", () => {
 			).not.toBeInTheDocument();
 			expect(touchOf).toEqual({ r1: false, r2: false });
 		});
+		describe("what the row header button says", () => {
+			const ACTIONS_HINT = "Opens the actions for this row.";
+			// More than the row's name: who it is and what they are
+			const renderNameAndRole = (row: MatrixRow<TestCell>) => (
+				<>
+					<div>{row.label ?? "Eva Sommer"}</div>
+					<div>{"guest"}</div>
+				</>
+			);
+			it("[ISSUE-3480-ITEM-20] keeps the rest of a touch row header's content for assistive technology", () => {
+				render(
+					gridElement({
+						renderRowHeader: renderNameAndRole,
+						onRowHeaderActions: vi.fn(),
+					}),
+				);
+				// named after the row, described by what it does and by
+				// everything the header shows
+				const header = screen.getByRole("button", { name: "Row one" });
+				expect(computeAccessibleDescription(header)).toBe(
+					`${ACTIONS_HINT} Row one guest`,
+				);
+			});
+			it("[ISSUE-3480-ITEM-20] names a touch row header without a label by its content and says what it does", () => {
+				render(
+					gridElement({
+						rows: [{ key: "r1", cells: {} }],
+						renderRowHeader: renderNameAndRole,
+						onRowHeaderActions: vi.fn(),
+					}),
+				);
+				const header = screen.getByRole("button", {
+					name: "Eva Sommer guest",
+				});
+				expect(computeAccessibleDescription(header)).toBe(ACTIONS_HINT);
+			});
+			it("[ISSUE-3480-ITEM-20] describes the row header only while it is a button", () => {
+				const { rerender } = render(
+					gridElement({
+						renderRowHeader: renderNameAndRole,
+						onRowHeaderActions: vi.fn(),
+					}),
+				);
+				const rowHeader = screen.getAllByRole("rowheader")[0];
+				expect(
+					computeAccessibleDescription(
+						screen.getByRole("button", { name: "Row one" }),
+					),
+				).toBe(`${ACTIONS_HINT} Row one guest`);
+				// onRowHeaderActions taken away after mount: a plain header again
+				rerender(gridElement({ renderRowHeader: renderNameAndRole }));
+				expect(screen.queryByRole("button", { name: "Row one" })).toBeNull();
+				expect(screen.queryByText(ACTIONS_HINT)).toBeNull();
+				expect(rowHeader.querySelector("[aria-describedby]")).toBeNull();
+				expect(computeAccessibleName(rowHeader)).toBe("Row one guest");
+			});
+			it("[ISSUE-3480-ITEM-20] says what the row header button does in the language of the page", async () => {
+				await act(() => ccI18n.changeLanguage("de"));
+				try {
+					render(
+						gridElement({
+							renderRowHeader: renderNameAndRole,
+							onRowHeaderActions: vi.fn(),
+						}),
+					);
+					expect(
+						computeAccessibleDescription(
+							screen.getByRole("button", { name: "Row one" }),
+						),
+					).toBe("Öffnet die Aktionen für diese Zeile. Row one guest");
+				} finally {
+					await act(() => ccI18n.changeLanguage("en"));
+				}
+			});
+			it("[ISSUE-3480-ITEM-20] has what the row header button does in every locale", () => {
+				const i18nDir = path.resolve(__dirname, "../../src/assets/i18n");
+				const missing = fs
+					.readdirSync(i18nDir, { withFileTypes: true })
+					.filter((locale) => locale.isDirectory())
+					.filter((locale) => {
+						const translation = JSON.parse(
+							fs.readFileSync(
+								path.join(i18nDir, locale.name, "translation.json"),
+								"utf8",
+							),
+						) as { standalone?: { matrix?: Record<string, string> } };
+						return !translation.standalone?.matrix?.["row-header-actions"];
+					})
+					.map((locale) => locale.name);
+				expect(missing).toEqual([]);
+			});
+		});
 	});
 	describe("scrolling to a column", () => {
 		let writes: number[] = [];

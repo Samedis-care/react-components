@@ -55,9 +55,9 @@ export interface MatrixRow<TCell> {
 	 * Accessible name of the row (a person's name). The add chips of the row's
 	 * cells say it in their accessible name (see MatrixGridProps.addLabel), and
 	 * it names the row header when that becomes a single button in touch mode
-	 * (see MatrixGridProps.onRowHeaderActions). Without it, the chips do not
-	 * say their row, and that button is announced by whatever the header
-	 * renders.
+	 * (see MatrixGridProps.onRowHeaderActions); everything the header renders
+	 * is then part of the button's description. Without it, the chips do not
+	 * say their row, and that button is named by whatever the header renders.
 	 */
 	label?: string;
 	/**

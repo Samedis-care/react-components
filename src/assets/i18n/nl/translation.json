@@ -304,6 +304,7 @@
 			"label": "Laadt…"
 		},
 		"matrix": {
+			"row-header-actions": "Opent de acties voor deze rij.",
 			"tile-more": "nog {{count}}:",
 			"tile-arrow": "naar",
 			"tile-highlighted": "gemarkeerd",

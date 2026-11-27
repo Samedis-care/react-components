@@ -304,6 +304,7 @@
 			"label": "Lädt…"
 		},
 		"matrix": {
+			"row-header-actions": "Öffnet die Aktionen für diese Zeile.",
 			"tile-more": "noch {{count}}:",
 			"tile-arrow": "nach",
 			"tile-highlighted": "hervorgehoben",

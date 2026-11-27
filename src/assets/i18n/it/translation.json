@@ -306,6 +306,7 @@
 			"label": "Caricamento…"
 		},
 		"matrix": {
+			"row-header-actions": "Apre le azioni di questa riga.",
 			"tile-more": "{{count}} in più:",
 			"tile-arrow": "verso",
 			"tile-highlighted": "evidenziato",

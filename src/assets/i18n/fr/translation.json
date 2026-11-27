@@ -306,6 +306,7 @@
 			"label": "Chargement…"
 		},
 		"matrix": {
+			"row-header-actions": "Ouvre les actions de cette ligne.",
 			"tile-more": "{{count}} de plus :",
 			"tile-arrow": "vers",
 			"tile-highlighted": "mis en évidence",

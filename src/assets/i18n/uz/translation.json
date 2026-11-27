@@ -304,6 +304,7 @@
 			"label": "Yuklanmoqda…"
 		},
 		"matrix": {
+			"row-header-actions": "Ushbu qator uchun amallarni ochadi.",
 			"tile-more": "yana {{count}} ta:",
 			"tile-arrow": "manzil:",
 			"tile-highlighted": "ajratib ko'rsatilgan",

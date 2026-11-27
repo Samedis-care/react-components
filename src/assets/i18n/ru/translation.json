@@ -308,6 +308,7 @@
 			"label": "Загрузка…"
 		},
 		"matrix": {
+			"row-header-actions": "Открывает действия для этой строки.",
 			"tile-more": "ещё {{count}}:",
 			"tile-arrow": "в",
 			"tile-highlighted": "выделено",
