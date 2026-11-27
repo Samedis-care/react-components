@@ -18,6 +18,8 @@ export type MatrixGridClassKey =
 	| "rowHeader"
 	| "cell"
 	| "addHint"
+	| "addHintLabel"
+	| "addHintIcon"
 	| "addChip"
 	| "addChipLabel"
 	| "extraRowHeader"
@@ -170,6 +172,12 @@ export interface MatrixGridProps<TCell> {
 	 * name ("Add, Alice Weber, Thursday, March 5, 2026"), and a screen reader
 	 * user hears which cell each chip adds to (see MatrixRow.label and
 	 * MatrixColumn.name).
+	 *
+	 * The hint shows it on one line where it fits whole, in a box 19px
+	 * narrower than the column (37px at the default columnWidth of 56). Where
+	 * it does not fit, the hint shows a "+" in its place, which shows it as
+	 * its tooltip when the pointer rests on it; the label stays in the hint as
+	 * its text.
 	 * @remarks Pass a string where you can: the chip then shows its name as its
 	 * tooltip too. A node (a <Trans> element) names the chip as well, but
 	 * renders once more, hidden, in every chip, and the chip has no tooltip.

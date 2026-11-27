@@ -1881,6 +1881,261 @@ export const Issue3481Item22LongerCodesAreDrawnSmaller: Story = {
 	},
 };
 
+/** ISSUE-3481-ITEM-23: a long addLabel is cut on both sides of the hint ("zufüg"). */
+export const Issue3481Item23HintKeepsTheStartOfItsLabel: Story = {
+	render: (args) => (
+		<TileRoster
+			onSelectRange={args.onSelectRange}
+			onItemClick={args.onItemClick}
+			addLabel={"Hinzufügen"}
+		/>
+	),
+	play: async ({ canvasElement }) => {
+		const blank = tileCell(canvasElement, 1, 3);
+		await userEvent.hover(blank);
+		const hint = tileSlotIn(blank, "addHint");
+		await expect(hint).toHaveTextContent("Hinzufügen");
+		const range = document.createRange();
+		range.selectNodeContents(hint);
+		await expect(range.getBoundingClientRect().left).toBeGreaterThanOrEqual(
+			hint.getBoundingClientRect().left,
+		);
+	},
+};
+
+/** an entry in the first column (the overlay hint), the second one blank */
+const HINT_COLUMNS: MatrixColumn[] = [
+	{ key: "h1", label: 1 },
+	{ key: "h2", label: 2 },
+];
+const HINT_ROWS: MatrixRow<TileCell>[] = [
+	{ key: "a", label: "Alice Weber", cells: { h1: { items: [EARLY] } } },
+];
+const HINT_CLASSES = {
+	...TILE_CLASSES,
+	addHintLabel: "tile-add-hint-label",
+	addHintIcon: "tile-add-hint-icon",
+};
+const renderHintCell = (cell: TileCell | undefined) => (
+	<MatrixCellTile items={cell?.items ?? []} />
+);
+
+interface HintRosterProps {
+	/** Text of the hint */
+	addLabel: string;
+	/** Width of the columns in px */
+	columnWidth: number;
+	/** Reported by a press on a hint */
+	onSelectRange?: (selection: MatrixRangeSelection) => void;
+}
+
+/** A grid of two columns, the hint over an entry in the first, on a blank cell in the second */
+const HintRoster = (props: HintRosterProps) => (
+	<Box data-hint={`${props.addLabel} ${props.columnWidth}`} sx={{ mb: 2 }}>
+		<MatrixGrid<TileCell>
+			columns={HINT_COLUMNS}
+			rows={HINT_ROWS}
+			label={`${props.addLabel}, ${props.columnWidth}px`}
+			columnWidth={props.columnWidth}
+			classes={HINT_CLASSES}
+			selectable
+			addLabel={props.addLabel}
+			occupiedAddAffordance={"overlay"}
+			isCellSelectable={acceptEveryCell}
+			onSelectRange={props.onSelectRange}
+			renderRowHeader={renderTileRowHeader}
+			renderCell={renderHintCell}
+		/>
+	</Box>
+);
+
+/** the hint of a HintRoster's cell, hovered, and what it is made of */
+const hoverHint = async (
+	canvasElement: HTMLElement,
+	addLabel: string,
+	columnWidth: number,
+	column: number,
+) => {
+	const roster = canvasElement.querySelector<HTMLElement>(
+		`[data-hint="${addLabel} ${columnWidth}"]`,
+	);
+	if (!roster) throw new Error(`no roster for ${addLabel} ${columnWidth}`);
+	const cell = tileCell(roster, 0, column);
+	await userEvent.hover(cell);
+	const hint = tileSlotIn(cell, "addHint");
+	const part = (slot: "addHintLabel" | "addHintIcon") => {
+		const found = hint.querySelector<HTMLElement>(`.${HINT_CLASSES[slot]}`);
+		if (!found) throw new Error(`no ${slot} in the hint`);
+		return found;
+	};
+	const label = part("addHintLabel");
+	const plus = part("addHintIcon");
+	const text = document.createRange();
+	text.selectNodeContents(label);
+	const box = hint.getBoundingClientRect();
+	// what the hint shows: inside its dashed border, which is 2px wide
+	const shown = {
+		left: box.left + 2,
+		right: box.right - 2,
+		top: box.top + 2,
+		bottom: box.bottom - 2,
+	};
+	const middle = {
+		x: (box.left + box.right) / 2,
+		y: (box.top + box.bottom) / 2,
+	};
+	return { cell, hint, label, plus, text, shown, middle };
+};
+
+const centerOf = (rect: DOMRect) => ({
+	x: (rect.left + rect.right) / 2,
+	y: (rect.top + rect.bottom) / 2,
+});
+
+/** ISSUE-3481-ITEM-23: the hint shows its label where the label fits whole, and only a "+" where it does not; nothing is cut. */
+export const Issue3481Item23HintShowsTheLabelOnlyWhereItFits: Story = {
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<>
+			<HintRoster
+				addLabel={"Add"}
+				columnWidth={56}
+				onSelectRange={args.onSelectRange}
+			/>
+			<HintRoster
+				addLabel={"Hinzufügen"}
+				columnWidth={56}
+				onSelectRange={args.onSelectRange}
+			/>
+			<HintRoster
+				addLabel={"Hinzufügen"}
+				columnWidth={128}
+				onSelectRange={args.onSelectRange}
+			/>
+		</>
+	),
+	play: async ({ canvasElement }) => {
+		const cases: [string, number, boolean][] = [
+			["Add", 56, true],
+			["Hinzufügen", 56, false],
+			["Hinzufügen", 128, true],
+		];
+		for (const [addLabel, columnWidth, fits] of cases)
+			for (const column of [0, 1]) {
+				// the overlay hint over an entry, and the blank-cell hint
+				const where = `${addLabel} at ${columnWidth}px, column ${column}`;
+				const { cell, hint, plus, text, shown, middle } = await hoverHint(
+					canvasElement,
+					addLabel,
+					columnWidth,
+					column,
+				);
+				// the label stays the hint's text either way
+				await expect(hint, where).toHaveTextContent(addLabel);
+				const line = text.getBoundingClientRect();
+				const hit = document.elementFromPoint(middle.x, middle.y);
+				if (fits) {
+					// whole, inside the border, in the middle
+					await expect(line.left, where).toBeGreaterThanOrEqual(shown.left);
+					await expect(line.right, where).toBeLessThanOrEqual(shown.right);
+					await expect(line.top, where).toBeGreaterThanOrEqual(shown.top);
+					await expect(line.bottom, where).toBeLessThanOrEqual(shown.bottom);
+					await expect(
+						Math.abs(centerOf(line).x - middle.x),
+						where,
+					).toBeLessThan(1);
+					await expect(
+						Math.abs(centerOf(line).y - middle.y),
+						where,
+					).toBeLessThan(2);
+					// no "+" beside it, and nothing there for a pointer to find
+					await expect(plus.getBoundingClientRect().width, where).toBeLessThan(
+						0.01,
+					);
+					await expect(plus.contains(hit), where).toBe(false);
+				} else {
+					// none of the label shows: it lies above what the hint shows
+					await expect(line.bottom, where).toBeLessThanOrEqual(shown.top);
+					// the "+", whole and in the middle
+					const glyph = plus.querySelector("svg") as SVGElement;
+					const drawn = glyph.getBoundingClientRect();
+					await expect(drawn.left, where).toBeGreaterThanOrEqual(shown.left);
+					await expect(drawn.right, where).toBeLessThanOrEqual(shown.right);
+					// it may fill the height of the overlay hint of a low row
+					await expect(drawn.top, where).toBeGreaterThanOrEqual(
+						shown.top - 0.1,
+					);
+					await expect(drawn.bottom, where).toBeLessThanOrEqual(
+						shown.bottom + 0.1,
+					);
+					await expect(
+						Math.abs(centerOf(drawn).x - middle.x),
+						where,
+					).toBeLessThan(1);
+					await expect(
+						Math.abs(centerOf(drawn).y - middle.y),
+						where,
+					).toBeLessThan(1);
+					// it catches the pointer anywhere inside the border, for its tooltip
+					const area = plus.getBoundingClientRect();
+					await expect(area.top, where).toBeCloseTo(shown.top, 0);
+					await expect(area.bottom, where).toBeCloseTo(shown.bottom, 0);
+					await expect(plus.contains(hit), where).toBe(true);
+				}
+				await userEvent.unhover(cell);
+			}
+	},
+};
+
+/** ISSUE-3481-ITEM-23: the "+" of a label that does not fit shows the label as its tooltip on hover. */
+export const Issue3481Item23PlusShowsTheLabelAsItsTooltip: Story = {
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<HintRoster
+			addLabel={"Hinzufügen"}
+			columnWidth={56}
+			onSelectRange={args.onSelectRange}
+		/>
+	),
+	play: async ({ canvasElement, args }) => {
+		const body = within(canvasElement.ownerDocument.body);
+		for (const column of [1, 0]) {
+			// the blank-cell hint, and the overlay hint over an entry
+			const { cell, hint, plus } = await hoverHint(
+				canvasElement,
+				"Hinzufügen",
+				56,
+				column,
+			);
+			await userEvent.hover(plus);
+			const tooltip = await body.findByRole("tooltip");
+			await expect(tooltip).toHaveTextContent("Hinzufügen");
+			// the pointer can move onto the tooltip: both stay
+			await userEvent.hover(tooltip);
+			await expect(body.getByRole("tooltip")).toBe(tooltip);
+			await expect(hint).toBeInTheDocument();
+			// Escape hides the hint, and with it its tooltip
+			await userEvent.keyboard("{Escape}");
+			await expect(hint).not.toBeInTheDocument();
+			await waitFor(() =>
+				expect(body.queryByRole("tooltip")).not.toBeInTheDocument(),
+			);
+			await userEvent.unhover(cell);
+		}
+		// a press on the "+" adds to its cell, as one on the hint does (the
+		// hint is gone once the press begins, so the release is on the cell)
+		const { cell, plus } = await hoverHint(canvasElement, "Hinzufügen", 56, 1);
+		await userEvent.setup().pointer([
+			{ target: plus, keys: "[MouseLeft>]" },
+			{ target: cell, keys: "[/MouseLeft]" },
+		]);
+		await expect(args.onSelectRange).toHaveBeenCalledTimes(1);
+		await expect(args.onSelectRange).toHaveBeenCalledWith(
+			expect.objectContaining({ rowKey: "a", columnKeys: ["h2"] }),
+		);
+	},
+};
+
 /** ISSUE-3481-ITEM-26: a third entry in a cell disappears without a trace. */
 const NIGHT: MatrixTileItem = {
 	key: "night",

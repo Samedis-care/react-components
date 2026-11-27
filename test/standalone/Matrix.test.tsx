@@ -316,6 +316,10 @@ const cellOf = (rowKey: string, columnKey: string) =>
 		.getByTestId(`cell-${rowKey}-${columnKey}`)
 		.closest("[class*=CcMatrixGrid-cell]") as HTMLElement;
 
+/** the add hint showing `text`, which is in the hint's label */
+const hintWith = (text: string) =>
+	screen.getByText(text).parentElement as HTMLElement;
+
 // Stable render props and classes, so a rerender changes only what a test
 // passes; the classes give each slot a selector that does not depend on
 // emotion's dev-only labels.
@@ -773,7 +777,7 @@ describe("MatrixGrid", () => {
 			onSelectRange,
 		});
 		fireEvent.mouseOver(cellOf("r1", "c1")); // blank: the whole-cell hint
-		const hint = screen.getByText("Add");
+		const hint = hintWith("Add");
 		expect(getComputedStyle(hint).pointerEvents).toBe("none");
 		fireEvent.mouseOut(cellOf("r1", "c1"));
 		// holds an entry: a chip that is its own button, so what is drawn and
@@ -833,7 +837,7 @@ describe("MatrixGrid", () => {
 		});
 		fireEvent.mouseOver(cellOf("r1", "c2")); // holds an entry
 		// same look as on a blank cell, and no chip
-		const hint = screen.getByText("Add");
+		const hint = hintWith("Add");
 		expect(hint.className).toContain(matrixClasses.addHintHalf);
 		expect(
 			screen.queryByRole("button", { name: "Add, Row one, 2" }),
@@ -854,7 +858,7 @@ describe("MatrixGrid", () => {
 			occupiedAddAffordance: "overlay",
 		});
 		fireEvent.mouseOver(cellOf("r1", "c1")); // blank
-		const hint = screen.getByText("Add");
+		const hint = hintWith("Add");
 		expect(hint.className).not.toContain(matrixClasses.addHintHalf);
 		expect(getComputedStyle(hint).pointerEvents).toBe("none");
 	});
@@ -1864,6 +1868,57 @@ describe("MatrixGrid body cells", () => {
 			fireEvent.mouseOut(cell, { relatedTarget: document.body });
 			fireEvent.mouseOver(cell, { relatedTarget: document.body });
 			expect(hintIn(cell)).toBeInTheDocument();
+		});
+
+		it('[ISSUE-3481-ITEM-23] holds the label and the "+" in elements of their own that take classes.addHintLabel and classes.addHintIcon', () => {
+			render(
+				grid({
+					...busy,
+					addLabel: <span>{"Add"}</span>, // e.g. a <Trans> element
+					classes: {
+						...CELL_CLASSES,
+						addHintLabel: "u-hint-label",
+						addHintIcon: "u-hint-icon",
+					},
+				}),
+			);
+			for (const column of [1, 0]) {
+				// the overlay hint and the blank-cell hint
+				const cell = cellAt(0, column);
+				fireEvent.mouseOver(cell);
+				const hint = hintIn(cell) as HTMLElement;
+				const label = hint.querySelector(".u-hint-label");
+				expect(label).toHaveTextContent("Add");
+				// the label is all the text the hint has, and the "+" is hidden
+				// from assistive technology
+				expect(hint).toHaveTextContent(/^Add$/);
+				const plus = hint.querySelector(".u-hint-icon");
+				expect(plus).toHaveAttribute("aria-hidden", "true");
+				expect(plus?.querySelector("svg")).toBeInTheDocument();
+			}
+		});
+
+		it('[ISSUE-3481-ITEM-23] starts a range on the cell when the hint\'s "+" is pressed', () => {
+			const onSelectRange = vi.fn();
+			render(
+				grid({
+					...busy,
+					onSelectRange,
+					classes: { ...CELL_CLASSES, addHintIcon: "u-hint-icon" },
+				}),
+			);
+			for (const column of [1, 0]) {
+				// the overlay hint and the blank-cell hint
+				const cell = cellAt(0, column);
+				fireEvent.mouseOver(cell);
+				const plus = hintIn(cell)?.querySelector(".u-hint-icon") as Element;
+				fireEvent.mouseDown(plus);
+				fireEvent.mouseUp(window);
+				expect(onSelectRange).toHaveBeenLastCalledWith(
+					expect.objectContaining({ columnKeys: [`c${column + 1}`] }),
+				);
+			}
+			expect(onSelectRange).toHaveBeenCalledTimes(2);
 		});
 	});
 	const painted = (row: number, columns = 4) =>

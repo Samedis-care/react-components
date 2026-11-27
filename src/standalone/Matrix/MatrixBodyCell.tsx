@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useSyncExternalStore } from "react";
-import { alpha, styled } from "@mui/material";
+import { alpha, styled, Tooltip } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 import {
@@ -63,6 +63,14 @@ export const MatrixBodyCellRoot = styled("div", {
 /**
  * The hover hint on a cell that can start a range: a dashed box saying what a
  * click would do. Escape hides it until the pointer moves to another cell.
+ *
+ * It shows addLabel (MatrixAddHintLabel) where the label fits on one line, and
+ * a "+" (MatrixAddHintIcon) in its place where it does not. Layout decides,
+ * nothing is measured: the label and the "+" are the items of a wrapping flex
+ * line, and the hint shows only its last line. A label that fits shares the
+ * line with the "+", which has no width there; a longer one is left alone on
+ * a line above, hidden, and the "+" takes the whole last line. The label stays
+ * in the hint either way, so it remains the hint's text.
  */
 export const MatrixAddHint = styled("div", {
 	name: "CcMatrixGrid",
@@ -78,8 +86,13 @@ export const MatrixAddHint = styled("div", {
 		inset: 5,
 		pointerEvents: "none",
 		display: "flex",
+		flexWrap: "wrap",
+		// the last line at the bottom, the hint's whole height; a line above it
+		// (a label that did not fit) is clipped
+		alignContent: "flex-end",
 		alignItems: "center",
-		justifyContent: "center",
+		// room between the dashed border and a label that only just fits
+		paddingInline: 2,
 		borderRadius: theme.shape.borderRadius,
 		border: `2px dashed ${theme.palette.success.main}`,
 		backgroundColor: tint,
@@ -89,7 +102,6 @@ export const MatrixAddHint = styled("div", {
 				: theme.palette.success.dark,
 		fontSize: "0.8rem",
 		fontWeight: 600,
-		whiteSpace: "nowrap",
 		overflow: "hidden",
 		// The cell has contents, and occupiedAddAffordance says "overlay": the
 		// hint takes the lower half and CATCHES the pointer there, so a press
@@ -109,6 +121,48 @@ export const MatrixAddHint = styled("div", {
 			backgroundImage: `linear-gradient(${tint}, ${tint})`,
 		},
 	};
+});
+
+/**
+ * The text of the add hint (addLabel), on one line. It takes all the room its
+ * line has and centers itself in it, so the "+" next to it gets none, and it
+ * never shrinks: a label wider than the hint does not fit next to the "+", and
+ * leaves the "+" a line of its own (see MatrixAddHint).
+ */
+export const MatrixAddHintLabel = styled("span", {
+	name: "CcMatrixGrid",
+	slot: "addHintLabel",
+})({
+	// any share of the free space the "+" got would show it beside the label
+	flex: "1000000 0 auto",
+	whiteSpace: "nowrap",
+	textAlign: "center",
+});
+
+/**
+ * The "+" of the add hint, shown where addLabel does not fit (see
+ * MatrixAddHint). Of no width of its own: beside a label that fits it gets no
+ * room and is not seen; alone on the hint's last line it takes all of it, the
+ * glyph in the middle.
+ *
+ * Its tooltip is addLabel, so it catches the pointer even in the blank-cell
+ * hint, which lets presses through to the cell: a press on it still reaches
+ * the cell and starts a range there, as one on the hint does.
+ */
+export const MatrixAddHintIcon = styled("span", {
+	name: "CcMatrixGrid",
+	slot: "addHintIcon",
+})({
+	flex: "1 0 0",
+	minWidth: 0,
+	height: "100%",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	overflow: "hidden",
+	pointerEvents: "auto",
+	// the overlay hint of a low row is lower than the glyph: smaller, not cut
+	"& .MuiSvgIcon-root": { maxHeight: "100%" },
 });
 
 /**
@@ -328,7 +382,21 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 						overlay && matrixClasses.addHintHalf,
 					])}
 				>
-					{addLabel}
+					<MatrixAddHintLabel className={classes?.addHintLabel}>
+						{addLabel}
+					</MatrixAddHintLabel>
+					{/* As the entries' tooltips: the same delay, so a pointer
+					passing over a row of free cells does not flash one in each,
+					and describeChild, as a role-less element cannot carry the
+					aria-label a name would be. The label is the hint's text. */}
+					<Tooltip title={addLabel} enterDelay={400} describeChild>
+						<MatrixAddHintIcon
+							className={classes?.addHintIcon}
+							aria-hidden={true}
+						>
+							<Add fontSize={"small"} />
+						</MatrixAddHintIcon>
+					</Tooltip>
 				</MatrixAddHint>
 			)}
 		</MatrixBodyCellRoot>
