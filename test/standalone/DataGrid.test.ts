@@ -438,4 +438,56 @@ describe("dataGridLoadFirstRows", () => {
 			signal: controller.signal,
 		});
 	});
+
+	it.each<[string, Record<number, DataGridRowData>, number[]]>([
+		["it loads", {}, [1, 2, 3]],
+		["the grid has loaded", loaded(0), [2, 3]],
+	])(
+		"[ISSUE-3492-ITEM-33] selects the row a shifted page repeats once and reads on until it has the limit in distinct rows (page 1 %s)",
+		async (_source, gridRows, requested) => {
+			// a record added in front after page 1 was read shifts the rows back
+			// by one: page 2 starts with the last row of page 1
+			const shifted = [{ id: "new" }, ...ROWS];
+			const loadData = vi.fn((params: IDataGridLoadDataParameters) => {
+				const source = params.page === 1 ? ROWS : shifted;
+				return {
+					rowsTotal: source.length,
+					rows: source.slice(
+						(params.page - 1) * params.rows,
+						params.page * params.rows,
+					),
+				};
+			});
+			const result = await dataGridLoadFirstRows(
+				loadData,
+				QUERY,
+				5,
+				gridRows,
+				10,
+				undefined,
+			);
+			expect(ids(result.rows)).toEqual(ids(ROWS.slice(0, 10)));
+			expect(loadData.mock.calls.map(([params]) => params.page)).toEqual(
+				requested,
+			);
+		},
+	);
+
+	it("[ISSUE-3492-ITEM-33] ends at a page which only repeats rows it has read, as from a backend which ignores the page", async () => {
+		const loadData = vi.fn((params: IDataGridLoadDataParameters) => {
+			// fails the test instead of requesting pages forever
+			if (params.page > 3) throw new Error(`requested page ${params.page}`);
+			return { rowsTotal: 5, rows: ROWS.slice(0, 5) };
+		});
+		const result = await dataGridLoadFirstRows(
+			loadData,
+			QUERY,
+			5,
+			{},
+			12,
+			undefined,
+		);
+		expect(ids(result.rows)).toEqual(ids(ROWS.slice(0, 5)));
+		expect(loadData).toHaveBeenCalledTimes(2);
+	});
 });

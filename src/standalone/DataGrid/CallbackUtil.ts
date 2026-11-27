@@ -92,7 +92,8 @@ export const dataGridGetQuery = (
 
 export interface DataGridFirstRows {
 	/**
-	 * The first selectable rows, in the grid's order, at most the limit
+	 * The first selectable rows, in the grid's order, at most the limit, each
+	 * id once
 	 */
 	rows: DataGridRowData[];
 	/**
@@ -117,7 +118,11 @@ export interface DataGridFirstRows {
  *          rejects, or with the signal's reason (an AbortError) where the
  *          load would request a page after the abort
  * @remarks Loads one page after the other, until the limit is reached or a
- *          page with less than rowsPerPage rows (the last one) was read
+ *          page with less than rowsPerPage rows (the last one) was read.
+ *          A row whose id it has read already is skipped: a record added in
+ *          front between two page loads shifts the rows back, so the next
+ *          page repeats the last row of the page before. A page with nothing
+ *          but such rows ends the load too (a backend which ignores the page)
  */
 export const dataGridLoadFirstRows = async (
 	loadData: IDataGridCallbacks["loadData"],
@@ -130,6 +135,8 @@ export const dataGridLoadFirstRows = async (
 ): Promise<DataGridFirstRows> => {
 	const selectable: DataGridRowData[] = [];
 	const loadedRows: Record<number, DataGridRowData> = {};
+	// the ids read so far, selectable or not: the first occurrence decides
+	const read = new Set<string>();
 	for (let page = 0; selectable.length < limit; page++) {
 		const start = page * rowsPerPage;
 		let pageRows: DataGridRowData[];
@@ -149,11 +156,14 @@ export const dataGridLoadFirstRows = async (
 				loadedRows[start + offset] = row;
 			});
 		}
+		const readBefore = read.size;
 		for (const row of pageRows) {
 			if (selectable.length >= limit) break;
+			if (read.has(row.id)) continue;
+			read.add(row.id);
 			if (!canSelectRow || canSelectRow(row)) selectable.push(row);
 		}
-		if (pageRows.length < rowsPerPage) break;
+		if (pageRows.length < rowsPerPage || read.size === readBefore) break;
 	}
 	return { rows: selectable, loadedRows };
 };

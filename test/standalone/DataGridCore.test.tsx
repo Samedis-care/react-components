@@ -861,3 +861,36 @@ describe("limited select all: the signal", () => {
 		);
 	});
 });
+
+describe("limited select all: repeated rows", () => {
+	it("[ISSUE-3492-ITEM-33] a record added after the grid loaded page 1 makes page 2 repeat a row, which select all selects once, and it still selects the limit", async () => {
+		const onSelectionChange = vi.fn();
+		const before = Array.from({ length: 75 }, (_, i) => ({ id: String(i) }));
+		// added in front once the grid has page 1: page 2 starts with its last row
+		const after = [{ id: "new" }, ...before];
+		const loadData = vi.fn((p: IDataGridLoadDataParameters): DataGridData => {
+			const source = p.page === 1 ? before : after;
+			return {
+				rowsTotal: source.length,
+				rows: source.slice((p.page - 1) * p.rows, p.page * p.rows),
+			};
+		});
+		render(
+			<Grid
+				loadData={loadData}
+				rowsPerPage={25}
+				enableSelectAll
+				limitSelectAll={50}
+				onSelectionChange={onSelectionChange}
+			/>,
+		);
+		await idle();
+		const selectAll = screen.getByRole("checkbox", { name: "First 50" });
+		fireEvent.click(selectAll);
+		await waitFor(() => expect(probe!.state.selectedRows).toHaveLength(50));
+		const first50 = before.slice(0, 50).map((row) => row.id);
+		expect(probe!.state.selectedRows).toEqual(first50);
+		expect(onSelectionChange).toHaveBeenLastCalledWith(false, first50);
+		expect(selectAll).toBeChecked();
+	});
+});
