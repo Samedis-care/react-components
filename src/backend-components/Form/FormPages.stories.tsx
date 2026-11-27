@@ -3,10 +3,14 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fireEvent, fn, waitFor, within } from "storybook/test";
 import {
+	Box,
 	Button,
 	createTheme,
 	CssBaseline,
+	decomposeColor,
+	getContrastRatio,
 	Grid,
+	hexToRgb,
 	IconButton,
 	ThemeProvider,
 	Typography,
@@ -34,6 +38,10 @@ import {
 	ModelUnknown,
 } from "../../backend-integration";
 import FullFormDialog from "./FormDialog";
+import {
+	BackActionButton,
+	BackButtonDefaultColorClass,
+} from "./DefaultFormPageButtons";
 import useSetFormDialogTitle from "./useSetFormDialogTitle";
 import useSetFormDialogTitleAction from "./useSetFormDialogTitleAction";
 import { PageTitle } from "../../non-standalone/PageTitle";
@@ -334,6 +342,195 @@ export const Issue3503Item16DisabledBackLooksLikeDisabledSave: StoryObj<PageArgs
 			);
 		},
 	};
+
+// Synthetic pointer events never match :hover; hoverLook gives the button this class instead
+const FORCED_HOVER = "story-forced-hover";
+
+/**
+ * The background and text of a button under a pointer: every `:hover` rule of the page is
+ * copied right after itself with `:hover` replaced by a class the button gets for the reading,
+ * so the cascade stays as it is. The copies are removed again.
+ */
+const hoverLook = (button: HTMLElement) => {
+	const copies: [CSSStyleSheet | CSSGroupingRule, CSSRule][] = [];
+	const copyHoverRules = (parent: CSSStyleSheet | CSSGroupingRule) => {
+		for (let index = parent.cssRules.length - 1; index >= 0; index--) {
+			const rule = parent.cssRules[index];
+			if (
+				rule instanceof CSSStyleRule &&
+				rule.selectorText.includes(":hover")
+			) {
+				parent.insertRule(
+					rule.cssText.replaceAll(":hover", `.${FORCED_HOVER}`),
+					index + 1,
+				);
+				copies.push([parent, parent.cssRules[index + 1]]);
+			} else if (rule instanceof CSSGroupingRule) copyHoverRules(rule);
+		}
+	};
+	for (const sheet of Array.from(document.styleSheets)) copyHoverRules(sheet);
+	// MUI's transition would report the color it starts from
+	button.style.transition = "none";
+	button.classList.add(FORCED_HOVER);
+	const look = buttonLook(button);
+	button.classList.remove(FORCED_HOVER);
+	buttonLook(button); // back at rest before the transition returns
+	button.style.transition = "";
+	for (const [parent, copy] of copies)
+		parent.deleteRule(Array.from(parent.cssRules).indexOf(copy));
+	return look;
+};
+
+/**
+ * The contrast of a button's text, also a translucent one, laid over its background
+ */
+const textContrast = ({
+	background,
+	text,
+}: {
+	background: string;
+	text: string;
+}) => {
+	const [r, g, b, a = 1] = decomposeColor(text).values;
+	const fill = decomposeColor(background).values;
+	const shown = [r, g, b].map((channel, i) =>
+		Math.round(channel * a + fill[i] * (1 - a)),
+	);
+	return getContrastRatio(`rgb(${shown.join(", ")})`, background);
+};
+
+/**
+ * Checks the default Back of a loaded PersonPage under the pointer: filled `hover` (MUI's
+ * contained `color="inherit"` hover grey), not its resting grey, with readable text
+ */
+const expectBackHover = async (back: HTMLElement, hover: string) => {
+	const rest = buttonLook(back);
+	const hovered = hoverLook(back);
+	await expect(
+		hovered.background,
+		"Back looks the same under the pointer as at rest",
+	).not.toBe(rest.background);
+	await expect(hovered.background, "Back's hover fill").toBe(hexToRgb(hover));
+	await expect(
+		textContrast(hovered),
+		"Back's text on its hover fill",
+	).toBeGreaterThanOrEqual(4.5);
+};
+
+/**
+ * ISSUE-3503-ITEM-28: under a pointer the default Back button turns MUI's hover grey for a
+ * contained button without a palette color (`grey.A100`), as Save next to it shows its own
+ * hover, and its text stays readable.
+ */
+export const Issue3503Item28BackButtonHover: StoryObj<PageArgs> = {
+	args: { goBack: fn() },
+	parameters: { a11y: { test: "error" } },
+	render: (args) => <PageStory page={PersonPage} goBack={args.goBack} />,
+	play: async ({ canvas }) => {
+		await canvas.findByDisplayValue("Alice", undefined, LOAD);
+		await expectBackHover(
+			canvas.getByRole("button", { name: "Back" }),
+			createTheme().palette.grey.A100,
+		);
+	},
+};
+
+/**
+ * ISSUE-3503-ITEM-28: in the dark palette the default Back button turns `grey[700]` under a
+ * pointer, MUI's hover grey there, and its text stays readable.
+ */
+export const Issue3503Item28BackButtonHoverDark: StoryObj<PageArgs> = {
+	args: { goBack: fn() },
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<ThemeProvider theme={DARK_THEME}>
+			<CssBaseline />
+			<PageStory page={PersonPage} goBack={args.goBack} />
+		</ThemeProvider>
+	),
+	play: async ({ canvas }) => {
+		await canvas.findByDisplayValue("Alice", undefined, LOAD);
+		await expectBackHover(
+			canvas.getByRole("button", { name: "Back" }),
+			DARK_THEME.palette.grey[700],
+		);
+	},
+};
+
+/**
+ * An app theme that paints the default Back button primary, with its own hover fill when
+ * `hover` is set
+ */
+const primaryBackTheme = (hover: boolean) =>
+	createTheme({
+		components: {
+			CcDefaultFormPageButtons: {
+				styleOverrides: {
+					backButton: ({ theme }) => ({
+						[`&.${BackButtonDefaultColorClass}:not(.Mui-disabled)`]: {
+							backgroundColor: theme.palette.primary.main,
+							color: theme.palette.primary.contrastText,
+							...(hover && {
+								"&:hover": { backgroundColor: theme.palette.primary.dark },
+							}),
+						},
+					}),
+				},
+			},
+		},
+	});
+const PRIMARY_BACK = primaryBackTheme(false);
+const PRIMARY_BACK_WITH_HOVER = primaryBackTheme(true);
+
+interface BackButtonArgs {
+	/**
+	 * Called by each Back button
+	 */
+	onClick: () => void;
+}
+
+/**
+ * ISSUE-3503-ITEM-28: a theme that restyles the default Back button with
+ * `&.${BackButtonDefaultColorClass}:not(.Mui-disabled)` in
+ * `CcDefaultFormPageButtons.styleOverrides.backButton` keeps its fill and text under the
+ * pointer (left, never the grey hover under its own text), and a `&:hover` in that rule gives
+ * it a hover of its own (right).
+ */
+export const Issue3503Item28ThemedBackButtonHover: StoryObj<BackButtonArgs> = {
+	args: { onClick: fn() },
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<Box sx={{ display: "flex", gap: 2 }}>
+			<ThemeProvider theme={PRIMARY_BACK}>
+				<BackActionButton fullWidth={false} onClick={args.onClick}>
+					Back
+				</BackActionButton>
+			</ThemeProvider>
+			<ThemeProvider theme={PRIMARY_BACK_WITH_HOVER}>
+				<BackActionButton fullWidth={false} onClick={args.onClick}>
+					Cancel
+				</BackActionButton>
+			</ThemeProvider>
+		</Box>
+	),
+	play: async ({ canvas }) => {
+		const { primary } = PRIMARY_BACK.palette;
+		const back = canvas.getByRole("button", { name: "Back" });
+		await expect(buttonLook(back), "the themed Back at rest").toEqual({
+			background: hexToRgb(primary.main),
+			text: hexToRgb(primary.contrastText),
+		});
+		await expect(
+			hoverLook(back),
+			"the themed Back without a hover of its own keeps its look",
+		).toEqual(buttonLook(back));
+		const cancel = canvas.getByRole("button", { name: "Cancel" });
+		await expect(hoverLook(cancel), "the theme's own hover").toEqual({
+			background: hexToRgb(primary.dark),
+			text: hexToRgb(primary.contrastText),
+		});
+	},
+};
 
 /**
  * Tooltips appear at once and, when they close, stay fully opaque for a minute before they
