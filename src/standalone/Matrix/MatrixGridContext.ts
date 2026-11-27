@@ -122,7 +122,10 @@ export interface MatrixGridProps<TCell> {
 	/**
 	 * Let the user sweep a range of cells in one row (press, drag, release) and
 	 * report it via onSelectRange. A plain click reports a single cell.
-	 * @remarks Left button only.
+	 * @remarks Left button only. Letting go of the button away from the grid
+	 * aborts the press: while the pointer is off the grid the range is not
+	 * painted, and coming back with the button still held paints it again.
+	 * Escape and another mouse button abort a held press too.
 	 */
 	selectable?: boolean;
 	/**
@@ -150,7 +153,10 @@ export interface MatrixGridProps<TCell> {
 		context: MatrixCellContext<TCell>,
 	) => boolean;
 	/**
-	 * Called when the user finishes sweeping a range
+	 * Called with the finished range: when the left button is let go over the
+	 * grid after a sweep or a plain click, and when the add chip of an
+	 * occupied cell is activated (one cell). A press let go of away from the
+	 * grid reports nothing.
 	 */
 	onSelectRange?: (selection: MatrixRangeSelection) => void;
 	/**

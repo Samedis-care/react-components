@@ -18,8 +18,8 @@ export interface MatrixInteractionConfig {
 }
 
 /**
- * Holds the pointer state of one grid (the range being swept, the hovered
- * cell) outside of React state.
+ * Holds the pointer state of one grid (the range being swept, whether the
+ * pointer is still on the grid, the hovered cell) outside of React state.
  *
  * A sweep changes the state of a handful of cells but would re-render the whole
  * grid if it lived in the grid's own state — with the documented 400 column cap
@@ -56,6 +56,8 @@ export class MatrixInteractionStore {
 	private hoverColumnKey: string | null = null;
 	/** Escape hid the add hint of the hovered cell, see dismissHint() */
 	private hintDismissed = false;
+	/** the pointer left the grid while the button is held, see leaveGrid() */
+	private away = false;
 
 	/**
 	 * Publishes the current props to the store. Called by the grid on every
@@ -92,7 +94,12 @@ export class MatrixInteractionStore {
 	 */
 	getCellState = (rowKey: string, columnKey: string): number => {
 		let state = 0;
-		if (this.dragging && this.rowKey === rowKey && this.from >= 0) {
+		if (
+			this.dragging &&
+			!this.away &&
+			this.rowKey === rowKey &&
+			this.from >= 0
+		) {
 			const index = this.indexByKey.get(columnKey) ?? -1;
 			if (index >= this.from && index <= this.to) state |= MATRIX_CELL_SELECTED;
 		}
@@ -169,6 +176,7 @@ export class MatrixInteractionStore {
 	begin(rowKey: string, columnKey: string): void {
 		if (!this.indexByKey.has(columnKey)) return;
 		this.dragging = true;
+		this.away = false;
 		this.rowKey = rowKey;
 		this.anchorKey = columnKey;
 		this.focusKey = columnKey;
@@ -210,6 +218,27 @@ export class MatrixInteractionStore {
 	}
 
 	/**
+	 * The pointer left the grid. A held press stays, but is neither painted
+	 * nor reported while the pointer is away: letting go there aborts it, as a
+	 * button pressed and let go of elsewhere does not click (WCAG 2.5.2), and
+	 * what is painted stays what a release reports.
+	 * @remarks The range is kept, so coming back with the button still held
+	 * (see enterGrid) paints it again and the sweep goes on.
+	 */
+	leaveGrid(): void {
+		if (!this.dragging || this.away) return;
+		this.away = true;
+		this.notify();
+	}
+
+	/** The pointer came back onto the grid: a held press is painted again. */
+	enterGrid(): void {
+		if (!this.away) return;
+		this.away = false;
+		this.notify();
+	}
+
+	/**
 	 * Hides the add hint of the hovered cell (Escape), until the pointer
 	 * enters another cell, or leaves this one and comes back.
 	 * @remarks The hint appears on hover, and in overlay mode it lies on the
@@ -243,6 +272,7 @@ export class MatrixInteractionStore {
 	cancel(): void {
 		if (!this.dragging) return;
 		this.dragging = false;
+		this.away = false;
 		this.rowKey = null;
 		this.anchorKey = null;
 		this.focusKey = null;
@@ -251,8 +281,9 @@ export class MatrixInteractionStore {
 	}
 
 	/**
-	 * Ends a range and reports it. The hover is left alone: the pointer is
-	 * still on the cell it was released over.
+	 * Ends a range and reports it, unless the pointer is away from the grid
+	 * (see leaveGrid). The hover is left alone: the pointer is still on the
+	 * cell it was released over.
 	 */
 	commit(): void {
 		if (!this.dragging) return;
@@ -261,9 +292,13 @@ export class MatrixInteractionStore {
 		// every configure(): a column that disappeared mid-press, a press cell
 		// or a cell in between that filled up, or a row that was opted out while
 		// the button was down and the pointer stood still are already in them.
+		// Away from the grid nothing is painted, so nothing is reported.
 		const columnKeys =
-			this.from < 0 ? [] : this.config.columnKeys.slice(this.from, this.to + 1);
+			this.from < 0 || this.away
+				? []
+				: this.config.columnKeys.slice(this.from, this.to + 1);
 		this.dragging = false;
+		this.away = false;
 		this.rowKey = null;
 		this.anchorKey = null;
 		this.focusKey = null;

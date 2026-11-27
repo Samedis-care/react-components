@@ -444,6 +444,31 @@ export const SweepARange: Story = {
 	},
 };
 
+/**
+ * ISSUE-3481-ITEM-21: sliding off the grid aborts a press. While the pointer
+ * is away the sweep is not painted, and letting go there adds nothing.
+ */
+export const Issue3481Item21ReleaseAwayFromTheGridAddsNothing: Story = {
+	play: async ({ canvasElement, args }) => {
+		const canvas = within(canvasElement);
+		const start = canvas.getByTestId("cell-u1-2026-03-06");
+		const end = canvas.getByTestId("cell-u1-2026-03-08");
+		const startCell = start.closest("[role=gridcell]");
+		const away = canvasElement.ownerDocument.body;
+		// one instance, so the button stays held from one call to the next
+		const user = userEvent.setup();
+		await user.pointer([
+			{ target: start, keys: "[MouseLeft>]" },
+			{ target: end },
+		]);
+		await expect(startCell).toHaveClass(matrixClasses.cellSelected);
+		await user.pointer({ target: away });
+		await expect(startCell).not.toHaveClass(matrixClasses.cellSelected);
+		await user.pointer({ target: away, keys: "[/MouseLeft]" });
+		await expect(args.onSelectRange).not.toHaveBeenCalled();
+	},
+};
+
 // ---- Grid structure ---------------------------------------------------------
 // The stories below render MatrixGrid directly, with plain text cells and no
 // MatrixCellTile, so what they check is the grid itself: the scroll target,

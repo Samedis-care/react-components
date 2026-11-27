@@ -1602,6 +1602,7 @@ describe("MatrixGrid body cells", () => {
 		];
 	const chipIn = (cell: HTMLElement) =>
 		cell.querySelector<HTMLElement>(`.${CELL_CLASSES.addChip}`);
+	const outside = () => screen.getByText("outside");
 	describe("the add chip", () => {
 		it("[ISSUE-3481-ITEM-15] has a name when addLabel is not a string", () => {
 			render(
@@ -1830,6 +1831,69 @@ describe("MatrixGrid body cells", () => {
 				onItemMouseDown.mockClear();
 				onCellMouseDown.mockClear();
 			}
+		});
+
+		it("[ISSUE-3481-ITEM-21] adds nothing when the button is let go away from the grid", () => {
+			const onSelectRange = vi.fn();
+			render(grid({ selectable: true, onSelectRange }));
+			fireEvent.mouseOver(cellAt(0, 0));
+			fireEvent.mouseDown(cellAt(0, 0), { button: 0 });
+			// the user changes their mind: slides off the grid and lets go there
+			fireEvent.mouseOut(cellAt(0, 0), { relatedTarget: outside() });
+			fireEvent.mouseUp(outside(), { button: 0 });
+			expect(onSelectRange).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3481-ITEM-21] paints nothing while the pointer is off the grid, and the sweep again once it is back", () => {
+			const onSelectRange = vi.fn<(selection: MatrixRangeSelection) => void>();
+			render(grid({ selectable: true, onSelectRange }));
+			fireEvent.mouseDown(cellAt(0, 0), { button: 0 });
+			fireEvent.mouseOver(cellAt(0, 2));
+			expect(painted(0)).toEqual([0, 1, 2]);
+			fireEvent.mouseOut(cellAt(0, 2), { relatedTarget: outside() });
+			expect(painted(0)).toEqual([]);
+			// back onto the grid, the button still held: the sweep goes on
+			fireEvent.mouseOut(outside(), { relatedTarget: cellAt(0, 3) });
+			fireEvent.mouseOver(cellAt(0, 3), { relatedTarget: outside() });
+			expect(painted(0)).toEqual([0, 1, 2, 3]);
+			fireEvent.mouseUp(cellAt(0, 3), { button: 0 });
+			expect(
+				onSelectRange.mock.calls.map(([selection]) => selection.columnKeys),
+			).toEqual([["c1", "c2", "c3", "c4"]]);
+		});
+
+		it("[ISSUE-3481-ITEM-21] reports nothing for a sweep that overshoots the grid and is let go of past it, and the next press reports again", () => {
+			const onSelectRange = vi.fn<(selection: MatrixRangeSelection) => void>();
+			render(grid({ selectable: true, onSelectRange }));
+			fireEvent.mouseDown(cellAt(0, 0), { button: 0 });
+			fireEvent.mouseOver(cellAt(0, 3));
+			fireEvent.mouseOut(cellAt(0, 3), { relatedTarget: document.body });
+			fireEvent.mouseUp(document.body, { button: 0 });
+			expect(onSelectRange).not.toHaveBeenCalled();
+			// nothing of the aborted press is left over for the next one
+			fireEvent.mouseDown(cellAt(1, 1), { button: 0 });
+			fireEvent.mouseUp(cellAt(1, 1), { button: 0 });
+			expect(
+				onSelectRange.mock.calls.map(([selection]) => [
+					selection.rowKey,
+					selection.columnKeys,
+				]),
+			).toEqual([["r2", ["c2"]]]);
+		});
+
+		it("[ISSUE-3481-ITEM-21] still reports a press let go of over the grid outside its row", () => {
+			const onSelectRange = vi.fn<(selection: MatrixRangeSelection) => void>();
+			render(grid({ selectable: true, onSelectRange }));
+			fireEvent.mouseDown(cellAt(0, 0), { button: 0 });
+			fireEvent.mouseOver(cellAt(0, 1));
+			// a sweep that drifts into the next row is still on the grid
+			fireEvent.mouseOut(cellAt(0, 1), { relatedTarget: cellAt(1, 2) });
+			fireEvent.mouseOver(cellAt(1, 2), { relatedTarget: cellAt(0, 1) });
+			expect(painted(0)).toEqual([0, 1]);
+			fireEvent.mouseUp(cellAt(1, 2), { button: 0 });
+			expect(
+				onSelectRange.mock.calls.map(([selection]) => selection.columnKeys),
+			).toEqual([["c1", "c2"]]);
 		});
 	});
 });

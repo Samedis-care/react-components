@@ -209,6 +209,16 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 		};
 	}, [store, selectable]);
 
+	// A press let go of away from the grid reports nothing: sliding off is how
+	// a pointer aborts it, as with a button. The store stops painting the range
+	// while the pointer is away and paints it again if it comes back.
+	const handleMouseLeave = useCallback(() => {
+		store.leaveGrid();
+	}, [store]);
+	const handleMouseEnter = useCallback(() => {
+		store.enterGrid();
+	}, [store]);
+
 	// Scroll the marked column just past the sticky row header column.
 	// The fallback also catches a scrollToColumn that is no longer in the set —
 	// a consumer holding a key in state while the window rolls past it would
@@ -291,6 +301,8 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 					tabIndex={0}
 					role={label ? "region" : undefined}
 					aria-label={label}
+					onMouseLeave={selectable ? handleMouseLeave : undefined}
+					onMouseEnter={selectable ? handleMouseEnter : undefined}
 				>
 					<MatrixGridRoot
 						className={classes?.grid}
