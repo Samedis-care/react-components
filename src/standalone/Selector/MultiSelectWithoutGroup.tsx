@@ -112,6 +112,8 @@ const ChangeState = styled(Chip, {
 	backgroundColor: theme.palette.background.paper,
 }));
 
+// typed as InlineSwitch: with options, MUI's typing of styled() merges the members of
+// a union of props, and InlineSwitch's "onChange unless disabled" would go unchecked
 const StyledInlineSwitch = styled(InlineSwitch, {
 	name: "CcMultiSelectWithoutGroup",
 	slot: "switch",
@@ -127,7 +129,7 @@ const StyledInlineSwitch = styled(InlineSwitch, {
 			unicodeBidi: "plaintext",
 		},
 	},
-});
+}) as typeof InlineSwitch;
 
 /**
  * Slots of MultiSelectWithoutGroup (theme `CcMultiSelectWithoutGroup`, `classes`):
@@ -141,6 +143,10 @@ export type MultiSelectWithoutGroupClassKey =
 	"outlined" | "changeState" | "switch";
 
 const NO_ENTRIES: never[] = [];
+
+// the switch's handler without setSwitchValue: its state (switchValue) is its parent's,
+// so without a setter a toggle changes nothing
+const ignoreSwitchToggle = () => {};
 
 /**
  * An entry as MultiSelectWithoutGroup lists it: a selected or a removed one
@@ -301,7 +307,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 			<StyledInlineSwitch
 				visible={!!props.displaySwitch}
 				value={!!switchValue}
-				onChange={props.setSwitchValue}
+				onChange={props.setSwitchValue ?? ignoreSwitchToggle}
 				label={props.switchLabel}
 				// the switch filters the search field's options, so the field's label describes it
 				aria-describedby={otherProps.label ? `${fieldId}-label` : undefined}

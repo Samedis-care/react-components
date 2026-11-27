@@ -582,10 +582,12 @@ const StyledAutocomplete = styled(Autocomplete, {
 	},
 }) as typeof Autocomplete;
 
+// typed as InlineSwitch: with options, MUI's typing of styled() merges the members of
+// a union of props, and InlineSwitch's "onChange unless disabled" would go unchecked
 const StyledInlineSwitch = styled(InlineSwitch, {
 	name: "CcBaseSelector",
 	slot: "inlineSwitch",
-})({});
+})({}) as typeof InlineSwitch;
 
 // the selector renders its label as a sibling of the Autocomplete rather than inside
 // the text field, so the dirty marker has to be attached here: withMuiFieldState matches
