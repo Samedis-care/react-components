@@ -256,9 +256,9 @@ const LocaleSelectorDialogContent = (
 		[filteredData, activeKey],
 	);
 
-	const handleFilterChange = useCallback(
-		(evt: React.ChangeEvent<HTMLInputElement>) => {
-			setFilter(evt.target.value);
+	const changeFilter = useCallback(
+		(value: string) => {
+			setFilter(value);
 			// a changed query shows its matches from the top, wherever the list was
 			// scrolled (to the current row on open, or by the user), and the first
 			// match is the list's tab stop
@@ -267,6 +267,27 @@ const LocaleSelectorDialogContent = (
 			listRef.current?.scrollToRow({ index: 0, align: "start" });
 		},
 		[listRef],
+	);
+	const handleFilterChange = useCallback(
+		(evt: React.ChangeEvent<HTMLInputElement>) => {
+			changeFilter(evt.target.value);
+		},
+		[changeFilter],
+	);
+	// Escape in the search box clears its query first, as MUI's Autocomplete does
+	// with clearOnEscape; with the box empty, it reaches the dialog, which closes
+	const handleSearchKeyDown = useCallback(
+		(evt: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+			// 229: the key ends an IME composition, which MUI's Dialog leaves alone too
+			if (evt.key !== "Escape" || evt.keyCode === 229) return;
+			if (evt.currentTarget.value === "") return;
+			// the dialog closes on an Escape that reaches it; the browser's own
+			// Escape action (leaving full screen) stays undone, as in the Autocomplete
+			evt.stopPropagation();
+			evt.preventDefault();
+			changeFilter("");
+		},
+		[changeFilter],
 	);
 
 	// the row activated last: while the language it picked loads, it keeps
@@ -450,9 +471,9 @@ const LocaleSelectorDialogContent = (
 	const searchSlotProps = useMemo(
 		() => ({
 			input: SearchInputProps,
-			htmlInput: { "aria-label": searchLabel },
+			htmlInput: { "aria-label": searchLabel, onKeyDown: handleSearchKeyDown },
 		}),
-		[searchLabel],
+		[searchLabel, handleSearchKeyDown],
 	);
 
 	return (

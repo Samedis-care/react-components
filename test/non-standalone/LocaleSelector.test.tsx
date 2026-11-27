@@ -1174,5 +1174,63 @@ describe("LocaleSelectorDialog", () => {
 			expect(rows()).toHaveLength(1);
 			expect(rows()[0]).toHaveTextContent("Uzbekistan");
 		});
+
+		it("[ISSUE-3499-ITEM-15] Escape in the search box clears its query and the dialog stays open; the next Escape closes it", async () => {
+			const onClose = vi.fn();
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} onClose={onClose} />);
+			await waitRows();
+			const unfiltered = result();
+			await search("xyz");
+			// precondition: the query hides every row
+			expect(rows()).toHaveLength(0);
+			fireEvent.keyDown(searchInput(), { key: "Escape" });
+			await flush();
+			expect(searchInput()).toHaveValue("");
+			expect(result()).toEqual(unfiltered);
+			expect(dialogEls()).toHaveLength(1);
+			expect(onClose).not.toHaveBeenCalled();
+			fireEvent.keyDown(searchInput(), { key: "Escape" });
+			await waitFor(() => expect(dialogEls()).toHaveLength(0));
+			await flush();
+			expect(onClose).toHaveBeenCalledTimes(1);
+		});
+
+		it("[ISSUE-3499-ITEM-15] a query of blanks counts as one: Escape clears it first", async () => {
+			const onClose = vi.fn();
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} onClose={onClose} />);
+			await waitRows();
+			await search("  ");
+			fireEvent.keyDown(searchInput(), { key: "Escape" });
+			await flush();
+			expect(searchInput()).toHaveValue("");
+			expect(dialogEls()).toHaveLength(1);
+			expect(onClose).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3499-ITEM-15] Escape that ends an IME composition in the search box leaves its query", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			await waitRows();
+			await search("xyz");
+			// 229: the key ends the composition; MUI's Dialog leaves it alone too
+			fireEvent.keyDown(searchInput(), { key: "Escape", keyCode: 229 });
+			await flush();
+			expect(searchInput()).toHaveValue("xyz");
+			expect(dialogEls()).toHaveLength(1);
+		});
+
+		it("[ISSUE-3499-ITEM-15] Escape on a row closes the dialog at once, also while the search box has a query", async () => {
+			const onClose = vi.fn();
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} onClose={onClose} />);
+			await waitRows();
+			await search("austria");
+			fireEvent.keyDown(await rowBtn("Austria"), { key: "Escape" });
+			await waitFor(() => expect(dialogEls()).toHaveLength(0));
+			await flush();
+			expect(onClose).toHaveBeenCalledTimes(1);
+		});
 	});
 });

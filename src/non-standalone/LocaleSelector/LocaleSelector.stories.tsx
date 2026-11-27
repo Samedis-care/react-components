@@ -881,6 +881,56 @@ export const Issue3499Item10TabReturnsToScrolledAwayRow: Story = {
 	},
 };
 
+export const Issue3499Item15EscapeClearsSearchFirst: Story = {
+	args: { supportedLocales: SCF, onClose: fn() },
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3499-ITEM-15: in the search box, the first Escape clears the query: focus stays in the search box, and the list shows every row again from the top. The next Escape closes the dialog, and focus returns to the button that opened it. Escape on a row closes the dialog at once, also while the search box has a query.",
+			},
+		},
+	},
+	render: (args) => <Opener {...args} />,
+	play: async ({ args, canvasElement }) => {
+		await reset();
+		let dialog = await openDialog(canvasElement);
+		let input = within(dialog).getByRole("textbox");
+		await userEvent.type(input, "xyz");
+		// precondition: the query hides every row
+		await waitFor(() =>
+			expect(within(dialog).queryByRole("listbox")).toBeNull(),
+		);
+		await userEvent.keyboard("{Escape}");
+		await expect(input).toHaveValue("");
+		await expect(input).toHaveFocus();
+		await waitFor(() => expect(rowButton(dialog, 1)).toBeVisible());
+		const status = within(dialog)
+			.getAllByRole("status")
+			.find((region) => region.textContent !== "");
+		await expect(status).toHaveTextContent(/^Results: 220$/);
+		await expect(page().getByRole("dialog")).toBe(dialog);
+		await expect(args.onClose).not.toHaveBeenCalled();
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() => expect(page().queryByRole("dialog")).toBeNull());
+		await expect(args.onClose).toHaveBeenCalledTimes(1);
+		await waitFor(() => expect(opener(canvasElement)).toHaveFocus());
+
+		dialog = await openDialog(canvasElement);
+		input = within(dialog).getByRole("textbox");
+		await userEvent.type(input, "Austria");
+		await waitFor(() =>
+			expect(rowButton(dialog, 1)).toHaveTextContent(/Austria/),
+		);
+		await userEvent.tab();
+		await expect(rowButton(dialog, 1)).toHaveFocus();
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() => expect(page().queryByRole("dialog")).toBeNull());
+		await expect(args.onClose).toHaveBeenCalledTimes(2);
+	},
+};
+
 export const Issue3466Item8FlagsOutlined: Story = {
 	args: { supportedLocales: SCF },
 	parameters: {

@@ -135,7 +135,8 @@ export interface LocaleSelectorDialogProps extends LocaleSelectorDialogCommonPro
 	onChange?: (locale: string) => void;
 	/**
 	 * Called when the dialog closes: by its close button, Escape or a backdrop click,
-	 * or once a picked locale is applied (after `onChange`). It gets no arguments;
+	 * or once a picked locale is applied (after `onChange`). Escape in the search box
+	 * clears its query first; the next Escape closes the dialog. It gets no arguments;
 	 * `onChange` tells which locale was picked. While a picked language loads, the
 	 * close button, Escape and a backdrop click are ignored.
 	 * - Shown with `pushDialog`, the dialog closes itself, then calls it.
@@ -205,7 +206,10 @@ const hasTexts = (locale: string) => {
  * after a search, the first match. ArrowDown and ArrowUp move focus to the next and
  * previous row, PageDown and PageUp by the rows in view, End and Home to the last and
  * first row (no wrapping); the list scrolls the focused row into view. Enter or Space
- * picks the focused row. The next Tab leaves the list.
+ * picks the focused row. The next Tab leaves the list. Escape closes the dialog, except
+ * in a search box that holds a query: there the first Escape clears the query (focus
+ * stays in the box, and the list shows every row from the top), as MUI's Autocomplete
+ * does with `clearOnEscape`, and the next one closes the dialog.
  *
  * The list renders only the rows in view. When the row with keyboard focus is
  * scrolled away (the wheel, a swipe or the scrollbar), the list itself takes focus
