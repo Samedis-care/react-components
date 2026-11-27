@@ -14,6 +14,8 @@ import {
 	SnackbarProps,
 	styled,
 	Theme,
+	useMediaQuery,
+	useTheme,
 	useThemeProps,
 } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
@@ -55,12 +57,24 @@ export interface ToastProps {
 	 */
 	autoHideDurations?: Partial<Record<AlertColor, number | null>>;
 	/**
-	 * Where the toast is shown, e.g. at the top where the bottom of the screen
-	 * holds controls the toast must not cover
+	 * Where the toast is shown from the sm breakpoint up, e.g. at the top where
+	 * the bottom of the screen holds controls the toast must not cover. Below
+	 * sm the toast spans the screen's width and phoneVertical sets whether it
+	 * is at the top or the bottom
 	 * @default { vertical: "bottom", horizontal: "right" }
 	 * @remarks The theme's default props set it app-wide, this per toast
 	 */
 	anchorOrigin?: SnackbarOrigin;
+	/**
+	 * Where the toast is shown below the sm breakpoint (phones, and wider
+	 * windows zoomed in), where it spans the screen's width: at the top or at
+	 * the bottom edge. At the top it keeps clear of the action bars and dialog
+	 * buttons at the bottom of the screen, which the full-width toast would
+	 * otherwise cover; it covers the top of the page (e.g. an app bar) instead
+	 * @default "top"
+	 * @remarks The theme's default props set it app-wide, this per toast
+	 */
+	phoneVertical?: SnackbarOrigin["vertical"];
 	/**
 	 * The alert variant
 	 * @default "filled"
@@ -76,8 +90,11 @@ export interface ToastProps {
 	 */
 	variant?: AlertProps["variant"];
 	/**
-	 * Called when the toast times out or the user closes it (close button, or
-	 * Escape while the toast has focus)
+	 * Called when the toast times out or the user closes it: with its close
+	 * button, or with Escape, wherever focus is, unless something else used
+	 * that Escape (an open dialog, menu or autocomplete closes instead, as
+	 * does anything that prevents the key's default). A click elsewhere does
+	 * not call it
 	 */
 	onClose: () => void;
 	/**
@@ -189,6 +206,7 @@ const ToastRaw = (inProps: ToastProps) => {
 		autoHideDuration,
 		autoHideDurations,
 		anchorOrigin = DEFAULT_ANCHOR_ORIGIN,
+		phoneVertical = "top",
 		variant = "filled",
 		onClose,
 		onExited,
@@ -196,6 +214,18 @@ const ToastRaw = (inProps: ToastProps) => {
 		classes,
 	} = props;
 	const { t } = useCCTranslations();
+	const theme = useTheme();
+
+	// below sm MUI's Snackbar spans the screen's width: there only the
+	// vertical position counts, and it is phoneVertical's
+	const phone = useMediaQuery(theme.breakpoints.down("sm"));
+	const placement = useMemo(
+		() =>
+			phone && anchorOrigin.vertical !== phoneVertical
+				? { vertical: phoneVertical, horizontal: anchorOrigin.horizontal }
+				: anchorOrigin,
+		[phone, anchorOrigin, phoneVertical],
+	);
 
 	const duration =
 		autoHideDuration !== undefined
@@ -206,8 +236,11 @@ const ToastRaw = (inProps: ToastProps) => {
 
 	const handleSnackbarClose = useCallback(
 		(_evt: unknown, reason: SnackbarCloseReason) => {
-			// a click elsewhere or Escape outside the toast belong to the page
-			if (reason !== "timeout") return;
+			// a click elsewhere belongs to the page. Escape anywhere closes the
+			// toast, as MUI's Snackbar does: its document listener skips an
+			// Escape whose default was prevented, and a dialog or menu stops
+			// the Escape that closes it before it gets there
+			if (reason === "clickaway") return;
 			onClose();
 		},
 		[onClose],
@@ -215,7 +248,11 @@ const ToastRaw = (inProps: ToastProps) => {
 
 	const handleKeyDown = useCallback(
 		(evt: React.KeyboardEvent) => {
-			if (evt.key === "Escape") onClose();
+			if (evt.key !== "Escape") return;
+			// handled: the Snackbar's document listener skips it, so onClose is
+			// called once
+			evt.preventDefault();
+			onClose();
 		},
 		[onClose],
 	);
@@ -257,7 +294,7 @@ const ToastRaw = (inProps: ToastProps) => {
 			<Root
 				open={open}
 				autoHideDuration={duration}
-				anchorOrigin={anchorOrigin}
+				anchorOrigin={placement}
 				onClose={handleSnackbarClose}
 				slotProps={slotProps}
 				className={combineClassNames([className, classes?.root])}

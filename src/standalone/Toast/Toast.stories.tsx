@@ -1,6 +1,14 @@
 import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Box, Button, createTheme, ThemeProvider } from "@mui/material";
+import {
+	Box,
+	Button,
+	createTheme,
+	Dialog,
+	DialogActions,
+	DialogTitle,
+	ThemeProvider,
+} from "@mui/material";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, waitFor, within } from "storybook/test";
 import { Toast, ToastProps } from "./Toast";
@@ -146,17 +154,83 @@ export const ClosesAfterTimeout: Story = {
 	},
 };
 
-export const EscapeOnlyWhenFocused: Story = {
-	play: async ({ args, userEvent }) => {
+export const Issue3470Item14EscapeClosesFromAnywhere: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"Escape closes the toast wherever focus is, as MUI's Snackbar does: a keyboard user can uncover a control the toast covers without moving focus. On the toast itself it closes it once per press.",
+			},
+		},
+	},
+	render: (args) => (
+		<>
+			<Button variant={"contained"}>Save form</Button>
+			<Toast {...args} />
+		</>
+	),
+	play: async ({ args, canvas, userEvent }) => {
 		const toast = await body.findByRole("status");
-
-		// Escape elsewhere (e.g. closing a dialog) leaves the toast alone
-		await userEvent.keyboard("{Escape}");
-		await expect(args.onClose).not.toHaveBeenCalled();
-
-		within(toast).getByRole("button", { name: "Close" }).focus();
+		const save = canvas.getByRole("button", { name: "Save form" });
+		save.focus();
 		await userEvent.keyboard("{Escape}");
 		await expect(args.onClose).toHaveBeenCalledTimes(1);
+		await expect(save).toHaveFocus();
+
+		// the story keeps the toast open, so a second Escape closes it again
+		within(toast).getByRole("button", { name: "Close" }).focus();
+		await userEvent.keyboard("{Escape}");
+		await expect(args.onClose).toHaveBeenCalledTimes(2);
+	},
+};
+
+/** A dialog opened over the toast */
+const ToastUnderDialog = (props: Pick<ToastProps, "onClose">) => {
+	const { onClose } = props;
+	const [dialogOpen, setDialogOpen] = useState(true);
+	const closeDialog = useCallback(() => setDialogOpen(false), []);
+	return (
+		<>
+			<Toast
+				open
+				severity={"success"}
+				message={"Saved."}
+				autoHideDuration={null}
+				onClose={onClose}
+			/>
+			<Dialog open={dialogOpen} onClose={closeDialog}>
+				<DialogTitle>Discard changes?</DialogTitle>
+				<DialogActions>
+					<Button onClick={closeDialog}>Keep editing</Button>
+				</DialogActions>
+			</Dialog>
+		</>
+	);
+};
+
+export const Issue3470Item14EscapeInDialogClosesOnlyTheDialog: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"Escape in an open dialog closes the dialog, not the toast: the dialog uses that Escape, so the toast stays.",
+			},
+		},
+	},
+	render: (args) => <ToastUnderDialog onClose={args.onClose} />,
+	play: async ({ args, userEvent }) => {
+		await body.findByRole("status");
+		// the dialog's focus trap has moved focus into the dialog (onto its
+		// container, around the element with the dialog role)
+		const modal = elementOf(
+			(await body.findByRole("dialog")).closest(".MuiDialog-root"),
+		);
+		await waitFor(() =>
+			expect(modal).toContainElement(elementOf(document.activeElement)),
+		);
+		await userEvent.keyboard("{Escape}");
+		await waitFor(() => expect(body.queryByRole("dialog")).toBeNull());
+		await expect(args.onClose).not.toHaveBeenCalled();
 	},
 };
 
@@ -575,4 +649,141 @@ export const Issue3470Item12UnwrappableContentStaysOnPhone: Story = {
 		/>
 	),
 	play: Issue3470Item12LongWordWrapsOnPhone.play,
+};
+
+const BOTTOM_BAR_SX = {
+	position: "fixed",
+	left: 0,
+	right: 0,
+	bottom: 0,
+	height: 56,
+	display: "flex",
+	justifyContent: "flex-end",
+	alignItems: "center",
+	gap: 1,
+	px: 2,
+	// a grey bar would put the text button below 4.5:1 and fail axe on its own
+	bgcolor: "background.paper",
+	borderTop: 1,
+	borderColor: "divider",
+} as const;
+
+/** The part of el's box that the rect covers, 0 to 1 */
+const coverage = (el: Element, rect: DOMRect) => {
+	const r = el.getBoundingClientRect();
+	const w = Math.max(
+		0,
+		Math.min(r.right, rect.right) - Math.max(r.left, rect.left),
+	);
+	const h = Math.max(
+		0,
+		Math.min(r.bottom, rect.bottom) - Math.max(r.top, rect.top),
+	);
+	return (w * h) / (r.width * r.height);
+};
+
+export const Issue3470Item14FocusedBottomBarNotHidden: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					'On a phone the toast is at the top of the screen, clear of the bottom 56px where pages put their action bars: a keyboard user who tabs to "Save form" sees it, and a tap on the button reaches it.',
+			},
+		},
+	},
+	render: (args) => (
+		<>
+			<Box sx={BOTTOM_BAR_SX}>
+				<Button>Cancel</Button>
+				<Button variant={"contained"}>Save form</Button>
+			</Box>
+			<Toast
+				{...args}
+				severity={"success"}
+				message={"Device saved."}
+				autoHideDuration={null}
+			/>
+		</>
+	),
+	play: async ({ canvas }) => {
+		const toast = await body.findByRole("status");
+		await entered(toast);
+		const save = canvas.getByRole("button", { name: "Save form" });
+		save.focus();
+		await expect(save).toHaveFocus();
+		const r = save.getBoundingClientRect();
+		const hit = document.elementFromPoint(
+			r.left + r.width / 2,
+			r.top + r.height / 2,
+		);
+		const covered = coverage(save, toast.getBoundingClientRect());
+		await expect(
+			{
+				fullyHidden: covered === 1,
+				tapReachesButton: !!hit && save.contains(hit),
+			},
+			`${Math.round(covered * 100)}% of the focused button under the toast`,
+		).toEqual({ fullyHidden: false, tapReachesButton: true });
+	},
+};
+
+export const Issue3470Item14PhonesShowItAtTheTop: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					"On a phone the toast is at the top, also where `anchorOrigin` puts it at the bottom: that applies from the sm breakpoint up.",
+			},
+		},
+	},
+	args: {
+		anchorOrigin: { vertical: "bottom", horizontal: "left" },
+	},
+	play: async () => {
+		const toast = await body.findByRole("status");
+		await entered(toast);
+		await expect(
+			toast.getBoundingClientRect().top,
+			"px between the top edge and the toast",
+		).toBe(8);
+	},
+};
+
+/** An app that keeps toasts at the bottom on phones */
+const bottomOnPhonesTheme = createTheme({
+	components: {
+		CcToast: { defaultProps: { phoneVertical: "bottom" } },
+	},
+});
+
+export const Issue3470Item14ThemeKeepsPhonesAtTheBottom: Story = {
+	globals: MOBILE,
+	parameters: {
+		layout: "fullscreen",
+		docs: {
+			description: {
+				story:
+					'The theme\'s `phoneVertical: "bottom"` (`components.CcToast.defaultProps`) shows toasts at the bottom on phones.',
+			},
+		},
+	},
+	decorators: [
+		(Story) => (
+			<ThemeProvider theme={bottomOnPhonesTheme}>
+				<Story />
+			</ThemeProvider>
+		),
+	],
+	play: async () => {
+		const toast = await body.findByRole("status");
+		await entered(toast);
+		await expect(
+			window.innerHeight - toast.getBoundingClientRect().bottom,
+			"px between the toast and the bottom edge",
+		).toBe(8);
+	},
 };

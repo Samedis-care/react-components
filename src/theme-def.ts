@@ -1054,7 +1054,8 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcToast"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<ToastClassKey>;
 			// the root gets open, anchorOrigin and autoHideDuration (the default
-			// of each when it is not set), and none of the other props
+			// of each when it is not set; below sm, anchorOrigin with
+			// phoneVertical as its vertical), and none of the other props
 			variants?: VariantsWithoutOwnerState<
 				Pick<ToastProps, "open" | "anchorOrigin" | "autoHideDuration">
 			>;

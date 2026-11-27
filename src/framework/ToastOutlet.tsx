@@ -128,6 +128,7 @@ const ToastOutlet = () => {
 				message={suspensefulMessage}
 				autoHideDuration={toast.autoHideDuration}
 				anchorOrigin={toast.anchorOrigin}
+				phoneVertical={toast.phoneVertical}
 				onClose={outlet.close}
 				onExited={outlet.exited}
 			/>

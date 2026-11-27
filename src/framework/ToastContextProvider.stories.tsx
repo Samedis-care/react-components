@@ -196,6 +196,60 @@ export const Placed: StoryObj = {
 	},
 };
 
+const MOBILE = { viewport: { value: "mobile1", isRotated: false } };
+
+const PlacedOnPhonesDemo = () => {
+	const [showToast] = useToastContext();
+	const showAtBottom = useCallback(
+		() => showToast({ message: "Label scanned.", phoneVertical: "bottom" }),
+		[showToast],
+	);
+	const showDefault = useCallback(
+		() => showToast({ message: "Saved." }),
+		[showToast],
+	);
+	return (
+		<Stack direction={"row"} spacing={2}>
+			<Button variant={"contained"} onClick={showAtBottom}>
+				Show at the bottom
+			</Button>
+			<Button variant={"outlined"} onClick={showDefault}>
+				Show where the theme says
+			</Button>
+		</Stack>
+	);
+};
+
+/**
+ * On a phone a toast can be placed at the bottom with phoneVertical, e.g. on a
+ * screen whose controls sit at the top. The next toast without a placement of
+ * its own is shown where the theme says again: at the top by default.
+ */
+export const Issue3470Item14PlacedOnPhones: StoryObj = {
+	globals: MOBILE,
+	render: () => <PlacedOnPhonesDemo />,
+	play: async ({ canvas, userEvent }) => {
+		const snackbarOf = (element: HTMLElement) =>
+			element.closest(".MuiSnackbar-root");
+
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Show at the bottom" }),
+		);
+		const bottom = snackbarOf(await body.findByRole("status"));
+		await expect(bottom).toHaveClass("MuiSnackbar-anchorOriginBottomRight");
+
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Show where the theme says" }),
+		);
+		await waitFor(() =>
+			expect(body.getByRole("status")).toHaveTextContent("Saved."),
+		);
+		await expect(snackbarOf(body.getByRole("status"))).toHaveClass(
+			"MuiSnackbar-anchorOriginTopRight",
+		);
+	},
+};
+
 const DeviceDialog = () => {
 	const close = useCloseThisDialog();
 	return (

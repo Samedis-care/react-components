@@ -5,7 +5,12 @@ import type { ToastProps } from "../standalone/Toast";
  */
 export type ToastConfig = Pick<
 	ToastProps,
-	"severity" | "title" | "message" | "autoHideDuration" | "anchorOrigin"
+	| "severity"
+	| "title"
+	| "message"
+	| "autoHideDuration"
+	| "anchorOrigin"
+	| "phoneVertical"
 >;
 
 export interface ToastState {
