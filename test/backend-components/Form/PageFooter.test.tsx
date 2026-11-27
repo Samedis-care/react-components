@@ -1,28 +1,64 @@
 import "@testing-library/jest-dom/vitest";
 import React, { useState } from "react";
 import { describe, it, expect, vi } from "vitest";
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
+import {
+	configureErrorReporting,
+	defaultErrorReporter,
+} from "../../../src/framework/ErrorReporting";
 import { PageProps } from "../../../src/backend-components/Form/Form";
 import FormField from "../../../src/backend-components/Form/Field";
+import BasicFormPage, {
+	BasicFormPageRendererProps,
+	EnhancedCustomProps,
+} from "../../../src/backend-components/Form/BasicFormPage";
 import DefaultFormPage from "../../../src/backend-components/Form/DefaultFormPage";
 import {
+	backButton,
 	buttonNames,
 	connectorOf,
+	findLeavePrompt,
+	leavePrompts,
 	LOAD,
+	makeDirty,
 	makePage,
 	makePeopleModel,
 	mountPage,
 	PeopleModel,
 	setupPageTests,
 	TestCustomProps,
+	wait,
 } from "./pageFixture";
 
 setupPageTests();
 
+const FieldPage = makePage();
 const RelabeledPage = makePage({
 	textButtonSave: "Create",
 	textButtonBack: "Cancel",
 });
+
+const NO_FOOTER_PROPS = {};
+
+type FooterProps = BasicFormPageRendererProps<
+	EnhancedCustomProps<TestCustomProps>
+>;
+
+/**
+ * A BasicFormPage around the first name with the given footer component
+ */
+const makeBasicPage = (Footer: React.ComponentType<FooterProps>) => {
+	const Page = (props: PageProps<PeopleModel, TestCustomProps>) => (
+		<BasicFormPage
+			{...props}
+			form={<FormField name="first_name" />}
+			childrenProps={NO_FOOTER_PROPS}
+		>
+			{Footer}
+		</BasicFormPage>
+	);
+	return Page;
+};
 
 /**
  * A DefaultFormPage whose extra button switches the labels between unset and
@@ -92,5 +128,115 @@ describe("DefaultFormPage footer", () => {
 		await waitFor(() =>
 			expect(buttonNames()).toEqual(["Save", "Relabel", "Back"]),
 		);
+	});
+
+	it("[ISSUE-3503-ITEM-9] an error thrown by goBack is reported, not swallowed", async () => {
+		const report = vi.fn();
+		configureErrorReporting({ report });
+		try {
+			const goBack = vi.fn(() => {
+				throw new Error("boom from goBack");
+			});
+			mountPage(FieldPage, { goBack });
+			await screen.findByDisplayValue("Alice", undefined, LOAD);
+			fireEvent.click(backButton());
+			await waitFor(() => expect(goBack).toHaveBeenCalledTimes(1));
+			await wait(50);
+			expect(report).toHaveBeenCalledWith(
+				expect.objectContaining({ message: "boom from goBack" }),
+				expect.anything(),
+			);
+		} finally {
+			configureErrorReporting({ report: defaultErrorReporter });
+		}
+	});
+
+	it("[ISSUE-3503-ITEM-9] an error thrown by goBack after Yes on the leave prompt is reported and shown, and the edit stays", async () => {
+		const report = vi.fn();
+		configureErrorReporting({ report });
+		try {
+			const goBack = vi.fn(() => {
+				throw new Error("boom from goBack");
+			});
+			mountPage(FieldPage, { goBack });
+			const input = await makeDirty();
+			fireEvent.click(backButton());
+			fireEvent.click(
+				within(await findLeavePrompt()).getByRole("button", { name: "Yes" }),
+			);
+			const dialog = await screen.findByRole("dialog", {
+				name: "An error occurred",
+			});
+			expect(dialog).toHaveTextContent("boom from goBack");
+			expect(report).toHaveBeenCalledTimes(1);
+			expect(report).toHaveBeenCalledWith(
+				expect.objectContaining({ message: "boom from goBack" }),
+				expect.objectContaining({ source: "BasicFormPage.goBack" }),
+			);
+			fireEvent.click(within(dialog).getByRole("button", { name: "OK" }));
+			await waitFor(() =>
+				expect(
+					screen.queryByRole("dialog", { name: "An error occurred" }),
+				).toBeNull(),
+			);
+			expect(input).toHaveValue("AliceX");
+		} finally {
+			configureErrorReporting({ report: defaultErrorReporter });
+		}
+	});
+
+	it("[ISSUE-3503-ITEM-9] No on the leave prompt cancels: goBack is not called, and nothing is reported or shown", async () => {
+		const report = vi.fn();
+		configureErrorReporting({ report });
+		try {
+			const { goBack } = mountPage(FieldPage);
+			await makeDirty();
+			fireEvent.click(backButton());
+			fireEvent.click(
+				within(await findLeavePrompt()).getByRole("button", { name: "No" }),
+			);
+			await waitFor(() => expect(leavePrompts()).toHaveLength(0));
+			await wait(50);
+			expect(goBack).not.toHaveBeenCalled();
+			expect(report).not.toHaveBeenCalled();
+			expect(
+				screen.queryByRole("dialog", { name: "An error occurred" }),
+			).toBeNull();
+		} finally {
+			configureErrorReporting({ report: defaultErrorReporter });
+		}
+	});
+});
+
+describe("BasicFormPage with its own footer", () => {
+	it("[ISSUE-3503-ITEM-9] the confirming goBack resolves, not rejects, once the error dialog of a throwing goBack is closed", async () => {
+		const settled: string[] = [];
+		const Footer = (p: FooterProps) => (
+			<button
+				type={"button"}
+				onClick={() => {
+					void Promise.resolve(p.customProps.goBack()).then(
+						() => settled.push("resolved"),
+						() => settled.push("rejected"),
+					);
+				}}
+			>
+				Go back
+			</button>
+		);
+		const goBack = vi.fn(() => {
+			throw new Error("boom from goBack");
+		});
+		mountPage(makeBasicPage(Footer), { goBack });
+		await screen.findByDisplayValue("Alice", undefined, LOAD);
+		fireEvent.click(screen.getByRole("button", { name: "Go back" }));
+		const dialog = await screen.findByRole("dialog", {
+			name: "An error occurred",
+		});
+		expect(dialog).toHaveTextContent("boom from goBack");
+		await wait(50);
+		expect(settled).toEqual([]);
+		fireEvent.click(within(dialog).getByRole("button", { name: "OK" }));
+		await waitFor(() => expect(settled).toEqual(["resolved"]));
 	});
 });

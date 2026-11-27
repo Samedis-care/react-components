@@ -16,7 +16,7 @@ import { useDialogContext } from "../../framework/DialogContextProvider";
 import { captureError } from "../../framework/ErrorReporting";
 import { ModelUnknown } from "../../backend-integration/Model/Model";
 import {
-	showConfirmDialog,
+	showConfirmDialogBool,
 	showErrorDialog,
 } from "../../non-standalone/Dialog/Utils";
 import FormPageLayout, {
@@ -81,7 +81,10 @@ export type EnhancedGoBackType = {
 	 *                      Has no effect if the form isn't dirty or is read-only for a reason other than a
 	 *                      pending save, as no dialog is shown then.
 	 * @returns A promise which resolves once the user confirmed (or the dialog was skipped) and navigation happened.
-	 *          Resolves without navigating if the user cancelled the confirmation dialog.
+	 *          Resolves without navigating if the user cancelled the confirmation dialog (No, Escape, a
+	 *          backdrop click). An error thrown by the Form's goBack does not reject it: the error is
+	 *          reported (captureError, source "BasicFormPage.goBack") and shown in an error dialog,
+	 *          and the promise resolves once that dialog is closed.
 	 * @remarks Enhances CrudFormProps.goBack, which only takes forceRefresh and shows no confirmation dialog.
 	 *          A navigation the Form's goBack starts synchronously (CRUD's goBack does) passes without
 	 *          asking about this form again; it asks once about other dirty forms it leaves. A
@@ -216,19 +219,24 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 							: dirty || stagedDirty;
 						try {
 							if (unsaved && !readOnlyBesidesSaving && !forceNavigate) {
-								await showConfirmDialog(pushDialog, {
+								const leave = await showConfirmDialogBool(pushDialog, {
 									title: t("backend-components.form.back-on-dirty.title"),
 									message: t("backend-components.form.back-on-dirty.message"),
 									textButtonYes: t("backend-components.form.back-on-dirty.yes"),
 									textButtonNo: t("backend-components.form.back-on-dirty.no"),
 								});
+								// the user stays on the form page
+								if (!leave) return;
 							}
 							// the navigation goBack starts does not ask about this form again, and
 							// the form stays guarded if goBack does not leave it
 							if (pageGuard) pageGuard.leave(() => orgGoBack(forceRefresh));
 							else orgGoBack(forceRefresh);
-						} catch {
-							// user cancelled
+						} catch (e) {
+							// only the user's "No" cancels: an error of goBack (or of the prompt) is
+							// reported, and shown, so that Back never fails without a word
+							captureError(e, { source: "BasicFormPage.goBack" });
+							await showErrorDialog(pushDialog, e);
 						}
 					}
 				: orgGoBack;
