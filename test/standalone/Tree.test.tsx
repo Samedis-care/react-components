@@ -18,6 +18,7 @@ import type {
 	TreeData,
 	TreeDataFlat,
 	TreeViewDispatch,
+	TreeViewRenderer,
 	TreeViewRendererProps,
 } from "../../src/standalone/Tree/TreeView";
 
@@ -1069,5 +1070,409 @@ describe("TreeView data and rendering bugs", () => {
 		// the same id again is a new request
 		act(() => ref.current?.scrollTo("n50"));
 		expect(scrollTo).toHaveBeenCalledTimes(2);
+	});
+});
+
+// ─── Keyboard ────────────────────────────────────────────────────────────────
+
+/** The entry with every `expanded` taken from the set, children included */
+const withExpanded = (entry: TreeData, expanded: Set<string>): TreeData => ({
+	...entry,
+	expanded: expanded.has(entry.id),
+	children: entry.children?.map((child) => withExpanded(child, expanded)),
+});
+
+interface ControlledTreeProps {
+	tree: TreeData;
+	/** The ids expanded (for the checkbox renderer's leaves: selected) at first */
+	initial: string[];
+	renderer?: TreeViewRenderer;
+	onToggleExpanded?: (id: string) => void;
+	onLoadChildren?: (id: string) => Promise<void> | void;
+}
+
+/** A tree whose expanded state follows onToggleExpanded, as an app keeps it */
+const ControlledTree = (props: ControlledTreeProps) => {
+	const { tree, initial, renderer, onToggleExpanded, onLoadChildren } = props;
+	const [expanded, setExpanded] = React.useState(() => new Set(initial));
+	const handleToggle = React.useCallback(
+		(id: string) => {
+			onToggleExpanded?.(id);
+			setExpanded((prev) => {
+				const next = new Set(prev);
+				if (next.has(id)) next.delete(id);
+				else next.add(id);
+				return next;
+			});
+		},
+		[onToggleExpanded],
+	);
+	const data = React.useMemo(
+		() => withExpanded(tree, expanded),
+		[tree, expanded],
+	);
+	return (
+		<TreeView
+			data={data}
+			renderer={renderer}
+			onToggleExpanded={handleToggle}
+			onLoadChildren={onLoadChildren ?? noopAsync}
+		/>
+	);
+};
+
+/** The row element (treeitem) of the entry with the given id */
+const rowOf = (id: string): HTMLElement => {
+	const row = document.querySelector<HTMLElement>(
+		`[role="treeitem"][data-id="${id}"]`,
+	);
+	if (!row) throw new Error(`no row for ${id}`);
+	return row;
+};
+
+/** The ids of the rows in the Tab order, and "tree" for the list itself */
+const tabStops = (): string[] => [
+	...(screen.getByRole("tree").tabIndex === 0 ? ["tree"] : []),
+	...screen
+		.getAllByRole("treeitem")
+		.filter((row) => row.tabIndex === 0)
+		.map((row) => row.dataset.id ?? ""),
+];
+
+/** Presses the key on the element that has focus */
+const press = (key: string, init?: KeyboardEventInit) => {
+	const focused = document.activeElement;
+	if (!focused) throw new Error("nothing has focus");
+	fireEvent.keyDown(focused, { key, ...init });
+};
+
+const focusedId = () =>
+	(document.activeElement as HTMLElement | null)?.dataset.id;
+
+describe("TreeView keyboard", () => {
+	/**
+	 * root > folder > [x], leaf, locked-folder (expanded) > [y],
+	 * closed-locked (collapsed) > [z]
+	 */
+	const TREE = node("root", {
+		hasChildren: true,
+		children: [
+			node("folder", { hasChildren: true, children: [node("x")] }),
+			node("leaf"),
+			node("locked-folder", {
+				hasChildren: true,
+				expandLocked: true,
+				children: [node("y")],
+			}),
+			node("closed-locked", {
+				hasChildren: true,
+				expandLocked: true,
+				children: [node("z")],
+			}),
+		],
+	});
+
+	it("[ISSUE-3476-ITEM-11] makes the first row the tree's only tab stop, then the row focused last", () => {
+		render(<ControlledTree tree={TREE} initial={["root"]} />);
+		expect(tabStops()).toEqual(["root"]);
+		// a click focuses the row
+		act(() => rowOf("leaf").focus());
+		expect(tabStops()).toEqual(["leaf"]);
+	});
+
+	it("[ISSUE-3476-ITEM-11] gives an empty tree no tab stop", () => {
+		render(
+			<TreeView data={[]} onToggleExpanded={noop} onLoadChildren={noopAsync} />,
+		);
+		expect(screen.getByRole("tree")).not.toHaveAttribute("tabindex");
+	});
+
+	it("[ISSUE-3476-ITEM-11] moves focus with ArrowDown, ArrowUp, Home and End, without wrapping", () => {
+		render(<ControlledTree tree={TREE} initial={["root", "locked-folder"]} />);
+		act(() => rowOf("root").focus());
+		const visit = (key: string) => {
+			press(key);
+			return focusedId();
+		};
+		expect(
+			["ArrowDown", "ArrowDown", "ArrowUp", "End", "ArrowDown"].map(visit),
+		).toEqual(["folder", "leaf", "folder", "closed-locked", "closed-locked"]);
+		expect(["Home", "ArrowUp"].map(visit)).toEqual(["root", "root"]);
+		expect(tabStops()).toEqual(["root"]);
+		// keys with a modifier are the app's or the browser's
+		press("ArrowDown", { ctrlKey: true });
+		press("End", { shiftKey: true });
+		expect(focusedId()).toBe("root");
+	});
+
+	it("[ISSUE-3476-ITEM-11] expands with ArrowRight and collapses with ArrowLeft, and moves between parent and child", () => {
+		const onToggleExpanded = vi.fn();
+		render(
+			<ControlledTree
+				tree={TREE}
+				initial={["root"]}
+				onToggleExpanded={onToggleExpanded}
+			/>,
+		);
+		act(() => rowOf("root").focus());
+		// expanded: to the first child
+		press("ArrowRight");
+		expect(focusedId()).toBe("folder");
+		// collapsed: expanded, focus stays
+		press("ArrowRight");
+		expect(onToggleExpanded).toHaveBeenLastCalledWith("folder");
+		expect(rowOf("folder")).toHaveAttribute("aria-expanded", "true");
+		expect(focusedId()).toBe("folder");
+		press("ArrowRight");
+		expect(focusedId()).toBe("x");
+		// a leaf: nothing
+		press("ArrowRight");
+		expect(focusedId()).toBe("x");
+		// a leaf: to its parent
+		press("ArrowLeft");
+		expect(focusedId()).toBe("folder");
+		// expanded: collapsed, focus stays
+		press("ArrowLeft");
+		expect(rowOf("folder")).toHaveAttribute("aria-expanded", "false");
+		expect(focusedId()).toBe("folder");
+		// collapsed: to its parent
+		press("ArrowLeft");
+		expect(focusedId()).toBe("root");
+		// a root has no parent
+		press("ArrowLeft");
+		expect(rowOf("root")).toHaveAttribute("aria-expanded", "false");
+		press("ArrowLeft");
+		expect(focusedId()).toBe("root");
+		expect(onToggleExpanded.mock.calls).toEqual([
+			["folder"],
+			["folder"],
+			["root"],
+		]);
+	});
+
+	it("[ISSUE-3476-ITEM-11] loads an entry's children before ArrowRight expands it", async () => {
+		const onToggleExpanded = vi.fn();
+		const onLoadChildren = vi.fn(() => Promise.resolve());
+		render(
+			<ControlledTree
+				tree={node("root", {
+					hasChildren: true,
+					children: [node("lazy", { hasChildren: true, children: null })],
+				})}
+				initial={["root"]}
+				onToggleExpanded={onToggleExpanded}
+				onLoadChildren={onLoadChildren}
+			/>,
+		);
+		act(() => rowOf("lazy").focus());
+		await settle(() => press("ArrowRight"));
+		expect(onLoadChildren).toHaveBeenCalledExactlyOnceWith("lazy");
+		expect(onToggleExpanded).toHaveBeenCalledExactlyOnceWith("lazy");
+	});
+
+	it("[ISSUE-3476-ITEM-11] leaves an entry with expandLocked expanded or collapsed", () => {
+		const onToggleExpanded = vi.fn();
+		render(
+			<ControlledTree
+				tree={TREE}
+				initial={["root", "locked-folder"]}
+				onToggleExpanded={onToggleExpanded}
+			/>,
+		);
+		act(() => rowOf("closed-locked").focus());
+		press("ArrowRight");
+		press("Enter");
+		expect(focusedId()).toBe("closed-locked");
+		// expanded: ArrowLeft goes on to the parent, ArrowRight into the entry
+		act(() => rowOf("locked-folder").focus());
+		press("Enter");
+		press("ArrowLeft");
+		expect(focusedId()).toBe("root");
+		act(() => rowOf("locked-folder").focus());
+		press("ArrowRight");
+		expect(focusedId()).toBe("y");
+		expect(onToggleExpanded).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3476-ITEM-11] calls the entry's onClick on Enter, with a click on its row", () => {
+		const onToggleExpanded = vi.fn();
+		const clicks: unknown[][] = [];
+		// React clears currentTarget once the handler returned
+		const onClick = vi.fn((event: React.MouseEvent) => {
+			clicks.push([
+				event.type,
+				event.detail,
+				event.ctrlKey,
+				(event.currentTarget as HTMLElement).dataset.id,
+			]);
+		});
+		const tree = node("root", {
+			hasChildren: true,
+			children: [
+				node("folder", { hasChildren: true, onClick, children: [node("x")] }),
+				node("leaf", { onClick }),
+			],
+		});
+		render(
+			<ControlledTree
+				tree={tree}
+				initial={["root"]}
+				onToggleExpanded={onToggleExpanded}
+			/>,
+		);
+		act(() => rowOf("leaf").focus());
+		press("Enter");
+		act(() => rowOf("folder").focus());
+		press("Enter", { ctrlKey: true });
+		expect(clicks).toEqual([
+			["click", 0, false, "leaf"],
+			["click", 0, true, "folder"],
+		]);
+		// a folder with onClick is activated, not expanded
+		expect(onToggleExpanded).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3476-ITEM-11] activates an entry for a click without a pointer on its row element only", () => {
+		const onClick = vi.fn();
+		render(
+			<ControlledTree
+				tree={node("root", { onClick })}
+				initial={[]}
+				renderer={createCapture().renderer}
+			/>,
+		);
+		// a mouse click: the renderer's business
+		fireEvent.click(rowOf("root"), { detail: 1 });
+		fireEvent.click(screen.getByTestId("row"));
+		expect(onClick).not.toHaveBeenCalled();
+		// assistive technology clicks the row element itself
+		fireEvent.click(rowOf("root"));
+		expect(onClick).toHaveBeenCalledTimes(1);
+	});
+
+	it("[ISSUE-3476-ITEM-11] expands a folder without onClick on Enter, and leaves Space to the checkbox renderer", () => {
+		const onToggleExpanded = vi.fn();
+		render(
+			<ControlledTree
+				tree={TREE}
+				initial={["root"]}
+				onToggleExpanded={onToggleExpanded}
+			/>,
+		);
+		act(() => rowOf("folder").focus());
+		press("Enter");
+		expect(rowOf("folder")).toHaveAttribute("aria-expanded", "true");
+		press(" ");
+		act(() => rowOf("leaf").focus());
+		press("Enter");
+		press(" ");
+		expect(onToggleExpanded).toHaveBeenCalledExactlyOnceWith("folder");
+	});
+
+	it("[ISSUE-3476-ITEM-11] selects a checkbox renderer's leaf with Space and Enter, unless it is locked", () => {
+		const onToggleExpanded = vi.fn();
+		const tree = node("root", {
+			hasChildren: true,
+			children: [
+				node("folder", { hasChildren: true, children: [node("x")] }),
+				node("leaf"),
+				node("locked-leaf", { expandLocked: true }),
+			],
+		});
+		render(
+			<ControlledTree
+				tree={tree}
+				initial={["root"]}
+				renderer={TreeViewCheckboxSelectionRenderer}
+				onToggleExpanded={onToggleExpanded}
+			/>,
+		);
+		act(() => rowOf("leaf").focus());
+		press(" ");
+		expect(rowOf("leaf")).toHaveAttribute("aria-checked", "true");
+		press("Enter");
+		expect(rowOf("leaf")).toHaveAttribute("aria-checked", "false");
+		act(() => rowOf("locked-leaf").focus());
+		press(" ");
+		press("Enter");
+		// Space on a folder: nothing, it is not selectable
+		act(() => rowOf("folder").focus());
+		press(" ");
+		expect(onToggleExpanded.mock.calls).toEqual([["leaf"], ["leaf"]]);
+		// the row is the tab stop, not the checkboxes
+		for (const checkbox of screen.getAllByRole("checkbox"))
+			expect(checkbox).toHaveAttribute("tabindex", "-1");
+	});
+
+	it("[ISSUE-3476-ITEM-11] leaves Enter and Space to a control in the row, and every key to a text field", () => {
+		const onToggleExpanded = vi.fn();
+		const onClick = vi.fn();
+		const ControlsRenderer = (props: TreeViewRendererProps) => (
+			<div>
+				<button tabIndex={-1}>{props.label} action</button>
+				<input aria-label={`${props.label} note`} tabIndex={-1} />
+			</div>
+		);
+		const tree = node("root", {
+			hasChildren: true,
+			expanded: true,
+			children: [node("a", { onClick }), node("b", { onClick })],
+		});
+		render(
+			<ControlledTree
+				tree={tree}
+				initial={["root"]}
+				renderer={Object.assign(ControlsRenderer, { checkableLeaves: true })}
+				onToggleExpanded={onToggleExpanded}
+			/>,
+		);
+		const button = screen.getByRole("button", { name: "a action" });
+		act(() => button.focus());
+		// a control that got focus makes its row the tab stop
+		expect(tabStops()).toEqual(["a"]);
+		press("Enter");
+		press(" ");
+		expect(onClick).not.toHaveBeenCalled();
+		expect(onToggleExpanded).not.toHaveBeenCalled();
+		// the arrow keys still move between the rows
+		press("ArrowDown");
+		expect(focusedId()).toBe("b");
+		const note = screen.getByRole("textbox", { name: "b note" });
+		act(() => note.focus());
+		press("ArrowUp");
+		press("Home");
+		press("Enter");
+		expect(note).toHaveFocus();
+		expect(onClick).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3476-ITEM-11] keeps the tab stop on the row focused last when rows change above it, and on its place when it is gone", () => {
+		const tree = (children: TreeData[]) =>
+			node("root", { hasChildren: true, expanded: true, children });
+		const { rerender } = render(
+			<TreeView
+				data={tree([node("a"), node("b"), node("c")])}
+				onToggleExpanded={noop}
+				onLoadChildren={noopAsync}
+			/>,
+		);
+		act(() => rowOf("b").focus());
+		rerender(
+			<TreeView
+				data={tree([node("new"), node("a"), node("b"), node("c")])}
+				onToggleExpanded={noop}
+				onLoadChildren={noopAsync}
+			/>,
+		);
+		expect(tabStops()).toEqual(["b"]);
+		// b, the third row when it got focus, is gone: the third row now
+		rerender(
+			<TreeView
+				data={tree([node("a"), node("c")])}
+				onToggleExpanded={noop}
+				onLoadChildren={noopAsync}
+			/>,
+		);
+		expect(tabStops()).toEqual(["c"]);
 	});
 });

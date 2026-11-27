@@ -6,6 +6,7 @@ import React, {
 	useRef,
 	useState,
 } from "react";
+import { styled } from "@mui/material";
 import TreeViewDefaultRenderer from "./TreeViewDefaultRenderer";
 import { List, ListImperativeAPI, RowComponentProps } from "react-window";
 import { captureError } from "../../framework/ErrorReporting";
@@ -24,7 +25,15 @@ export interface TreeData {
 	 */
 	label: string;
 	/**
-	 * Click event handler
+	 * Called when the user activates the entry. The built-in renderers call it
+	 * for a click on the icon or the label.
+	 *
+	 * Enter on the entry's focused row calls it too, with a click event that
+	 * TreeView dispatches on the row element (`role="treeitem"`, the event's
+	 * `currentTarget`), which carries the entry's id in `data-id`. The event's
+	 * `detail` is 0, and its `ctrlKey`, `shiftKey` and `metaKey` are those of
+	 * the key press. A click that assistive technology sends to the row element
+	 * calls it the same way.
 	 */
 	onClick?: React.MouseEventHandler;
 	/**
@@ -36,7 +45,11 @@ export interface TreeData {
 	 */
 	expanded: boolean;
 	/**
-	 * Entry expanded toggleable?
+	 * When true, the user cannot expand or collapse the entry, nor select a leaf
+	 * whose checkbox shows `expanded` (`TreeViewCheckboxSelectionRenderer`). The
+	 * keys TreeView handles leave it alone; for clicks, the renderer has to check
+	 * it, as the built-in ones do.
+	 * @default false
 	 */
 	expandLocked?: boolean;
 	/**
@@ -139,6 +152,14 @@ export interface TreeViewRendererProps extends TreeDataForRenderer {
  * entry's level, position among its siblings and, for an entry with
  * `hasChildren`, its expanded state. The renderer draws only what is inside
  * that element and must not add tree roles of its own.
+ *
+ * That element is also the row's keyboard focus target, and TreeView handles
+ * the tree's keys on it (see {@link TreeViewProps}). So a renderer's own
+ * controls should stay out of the Tab order (`tabIndex={-1}`), as
+ * `TreeViewCheckboxSelectionRenderer`'s checkboxes do. The arrow, Home, End
+ * and page keys also work while such a control has focus, unless it is a text
+ * field or another control that uses them itself; Enter and Space are left to
+ * the control.
  */
 export type TreeViewRenderer = React.ComponentType<TreeViewRendererProps> & {
 	/**
@@ -156,6 +177,33 @@ export type TreeViewRendererCallbacks = Pick<
 	TreeViewRendererProps,
 	"onToggleExpanded"
 >;
+/**
+ * Props of {@link TreeView}.
+ *
+ * The tree is one tab stop, and its keys follow the WAI-ARIA Authoring
+ * Practices tree pattern. Only one row is in the Tab order: the row focused
+ * last, at first the first row. While that row is scrolled out of the rendered
+ * range, the list element takes its place, and Tab into it focuses the row.
+ * On a focused row:
+ *
+ * - ArrowDown and ArrowUp move focus to the next and the previous row, PageDown
+ *   and PageUp by the rows in view, Home and End to the first and the last row.
+ *   The list scrolls the focused row into view.
+ * - ArrowRight expands a collapsed entry with `hasChildren` (through
+ *   `onLoadChildren` first, where its children are not in `data`), and moves
+ *   from an expanded one to its first child.
+ * - ArrowLeft collapses an expanded entry, and moves from any other entry to
+ *   its parent.
+ * - Enter activates the entry: it calls the entry's `onClick` (see
+ *   {@link TreeData.onClick}), and without one expands or collapses an entry
+ *   with `hasChildren`, or selects or deselects a leaf of a renderer with
+ *   `checkableLeaves`.
+ * - Space selects or deselects a leaf of a renderer with `checkableLeaves`,
+ *   such as `TreeViewCheckboxSelectionRenderer`.
+ *
+ * None of them expands, collapses or selects an entry with `expandLocked`.
+ * Expanding, collapsing, selecting and deselecting call `onToggleExpanded`.
+ */
 export interface TreeViewProps extends TreeViewRendererCallbacks {
 	/**
 	 * The tree view contents: a single root node or a forest of them.
@@ -322,7 +370,25 @@ export interface TreeViewContextType {
 	renderer: TreeViewRenderer;
 	rendererProps: TreeViewRendererCallbacks;
 	data: TreeDataForRenderer[];
+	/**
+	 * The index of the row that is the tree's tab stop, -1 without rows
+	 */
+	activeIndex: number;
+	/**
+	 * Called with a row's element once it is rendered, and with null when it
+	 * is unrendered
+	 */
+	registerRow: (index: number, element: HTMLElement | null) => void;
 }
+
+const TreeItem = styled("div")(({ theme }) => ({
+	// inside the row: the rows touch each other, and the list clips the first
+	// and the last one
+	"&:focus-visible": {
+		outline: `2px solid ${theme.palette.primary.main}`,
+		outlineOffset: -2,
+	},
+}));
 
 const RendererWrapper = (props: RowComponentProps<TreeViewContextType>) => {
 	const {
@@ -331,28 +397,93 @@ const RendererWrapper = (props: RowComponentProps<TreeViewContextType>) => {
 		renderer: Renderer,
 		rendererProps,
 		data: itemData,
+		activeIndex,
+		registerRow,
 	} = props;
 	const entry = itemData[index];
+	const { onToggleExpanded } = rendererProps;
+	const checkable = !!Renderer.checkableLeaves && !entry.hasChildren;
+
+	const ref = useCallback(
+		(element: HTMLElement | null) => registerRow(index, element),
+		[registerRow, index],
+	);
+
+	// Enter (TreeView dispatches a click on the row element) and assistive
+	// technology activate the entry. A click on what the renderer draws is the
+	// renderer's, and so is a click a pointer made (detail >= 1).
+	const handleClick = useCallback(
+		(event: React.MouseEvent<HTMLElement>) => {
+			if (event.target !== event.currentTarget || event.detail !== 0) return;
+			if (entry.onClick) {
+				entry.onClick(event);
+				return;
+			}
+			if (entry.expandLocked || !(entry.hasChildren || checkable)) return;
+			onToggleExpanded(entry.id);
+		},
+		[entry, checkable, onToggleExpanded],
+	);
+
 	// a treeitem instead of react-window's listitem (its `ariaAttributes`), whose
 	// position and set size count all visible rows instead of the siblings
 	return (
-		<div
+		<TreeItem
+			ref={ref}
 			style={style}
 			role="treeitem"
+			data-id={entry.id}
+			// a roving tabindex: the tree is one tab stop
+			tabIndex={index === activeIndex ? 0 : -1}
+			onClick={handleClick}
 			aria-level={entry.depth + 1}
 			aria-posinset={entry.siblingIndex + 1}
 			aria-setsize={entry.siblingCount}
 			aria-expanded={entry.hasChildren ? entry.expanded : undefined}
-			aria-checked={
-				Renderer.checkableLeaves && !entry.hasChildren
-					? entry.expanded
-					: undefined
-			}
+			aria-checked={checkable ? entry.expanded : undefined}
 		>
 			<Renderer {...rendererProps} {...entry} />
-		</div>
+		</TreeItem>
 	);
 };
+
+/**
+ * Whether the element uses keys TreeView would otherwise handle: a text field,
+ * a select, a slider and the like. The tree's keys leave such a control in a
+ * row alone.
+ */
+const usesOwnKeys = (element: Element) => {
+	if (element instanceof HTMLInputElement)
+		return !["button", "checkbox", "image", "reset", "submit"].includes(
+			element.type,
+		);
+	return (
+		element instanceof HTMLTextAreaElement ||
+		element instanceof HTMLSelectElement ||
+		(element instanceof HTMLElement && element.isContentEditable) ||
+		["slider", "spinbutton", "radio", "combobox", "listbox"].includes(
+			element.getAttribute("role") ?? "",
+		)
+	);
+};
+
+/**
+ * Whether the element shows a keyboard focus ring, that is it got focus from
+ * the keyboard rather than from a click
+ */
+const isFocusVisible = (element: HTMLElement) => {
+	try {
+		return element.matches(":focus-visible");
+	} catch {
+		// a browser without :focus-visible
+		return true;
+	}
+};
+
+interface RowRange {
+	startIndex: number;
+	stopIndex: number;
+}
 
 /**
  * Imperative handle of {@link TreeView}, received through its `ref`
@@ -421,16 +552,253 @@ const TreeView = React.forwardRef(function TreeView(
 		},
 		[enhancedData, onLoadChildren, onToggleExpanded],
 	);
+	const Renderer: TreeViewRenderer = renderer ?? TreeViewDefaultRenderer;
+
+	// keyboard focus: the row of the active entry is the tree's one tab stop (a
+	// roving tabindex). It is the row focused last, at first the first row.
+	const [active, setActive] = useState<{ id: string; index: number } | null>(
+		null,
+	);
+	const activeIndex = useMemo(() => {
+		if (enhancedData.length === 0) return -1;
+		if (active === null) return 0;
+		if (enhancedData[active.index]?.id === active.id) return active.index;
+		const index = enhancedData.findIndex((entry) => entry.id === active.id);
+		// gone (removed, or under a collapsed parent): the row in its place
+		return index >= 0 ? index : Math.min(active.index, enhancedData.length - 1);
+	}, [active, enhancedData]);
+
+	// the rendered rows' elements by index, and the row that is to get focus
+	// once it is rendered
+	const rowElements = useRef(new Map<number, HTMLElement>());
+	const wantedRow = useRef<number | null>(null);
+	const focusRow = useCallback((element: HTMLElement) => {
+		wantedRow.current = null;
+		const doc = element.ownerDocument;
+		const focused = doc.activeElement;
+		// focus moved on meanwhile, out of the tree
+		const list = listRef.current?.element;
+		if (focused && focused !== doc.body && !list?.contains(focused)) return;
+		element.focus({ preventScroll: true });
+	}, []);
+	const registerRow = useCallback(
+		(index: number, element: HTMLElement | null) => {
+			if (!element) {
+				rowElements.current.delete(index);
+				return;
+			}
+			rowElements.current.set(index, element);
+			if (wantedRow.current === index) focusRow(element);
+		},
+		[focusRow],
+	);
+	const rowIndexOf = useCallback((target: EventTarget) => {
+		if (!(target instanceof Node)) return -1;
+		for (const [index, element] of rowElements.current)
+			if (element.contains(target)) return index;
+		return -1;
+	}, []);
+
+	// the rows react-window renders (with the overscan), and the ones in view
+	const [renderedRows, setRenderedRows] = useState<RowRange | null>(null);
+	const visibleRows = useRef<RowRange>({ startIndex: 0, stopIndex: 0 });
+	const handleRowsRendered = useCallback((visible: RowRange, all: RowRange) => {
+		visibleRows.current = visible;
+		setRenderedRows((prev) =>
+			prev?.startIndex === all.startIndex && prev.stopIndex === all.stopIndex
+				? prev
+				: all,
+		);
+	}, []);
+	// while the active row is scrolled out of the rendered range, the list is
+	// the tab stop and passes focus on to the row
+	const activeRendered =
+		renderedRows !== null &&
+		activeIndex >= renderedRows.startIndex &&
+		activeIndex <= renderedRows.stopIndex;
+
+	/**
+	 * Makes the row the active one, scrolls it into view and focuses it, at once
+	 * or once it is rendered. Until then, the list holds focus.
+	 */
+	const moveTo = useCallback(
+		(index: number) => {
+			const entry = enhancedData[index];
+			const list = listRef.current;
+			if (!entry || !list) return;
+			setActive({ id: entry.id, index });
+			list.scrollToRow({ index, align: "auto" });
+			const element = rowElements.current.get(index);
+			if (element) {
+				focusRow(element);
+				return;
+			}
+			wantedRow.current = index;
+			list.element?.focus({ preventScroll: true });
+		},
+		[enhancedData, focusRow],
+	);
+
+	const handleListFocus = useCallback(
+		(event: React.FocusEvent<HTMLElement>) => {
+			const index = rowIndexOf(event.target);
+			if (index >= 0) {
+				// a row or a control in it got focus (the keys, a click): it is the
+				// active one
+				wantedRow.current = null;
+				const id = enhancedData[index]?.id;
+				if (id === undefined) return;
+				setActive((prev) =>
+					prev?.id === id && prev.index === index ? prev : { id, index },
+				);
+				return;
+			}
+			if (event.target !== event.currentTarget) return;
+			// the list itself, the tab stop while the active row is scrolled away,
+			// was reached with Tab or Shift+Tab: the active row takes focus. Not
+			// when TreeView focused it (from a row) or a window got focus back
+			// (from nothing), nor for a click on its empty part or its scrollbar
+			const from = event.relatedTarget;
+			if (!(from instanceof Node) || event.currentTarget.contains(from)) return;
+			if (!isFocusVisible(event.currentTarget)) return;
+			moveTo(activeIndex);
+		},
+		[rowIndexOf, enhancedData, moveTo, activeIndex],
+	);
+	// focus left the tree: no row waits for it anymore
+	const handleListBlur = useCallback((event: React.FocusEvent<HTMLElement>) => {
+		const next = event.relatedTarget;
+		if (next instanceof Node && !event.currentTarget.contains(next))
+			wantedRow.current = null;
+	}, []);
+
+	// the keys of the WAI-ARIA tree pattern, see TreeViewProps
+	const handleListKeyDown = useCallback(
+		(event: React.KeyboardEvent<HTMLElement>) => {
+			if (event.defaultPrevented || event.altKey) return;
+			const target = event.target;
+			if (!(target instanceof Element)) return;
+			// the list itself has focus while a row is waited for, and after a click
+			// on its empty part: the keys act on the active row
+			const onList = target === event.currentTarget;
+			const index = onList ? activeIndex : rowIndexOf(target);
+			const entry = enhancedData[index];
+			if (!entry) return;
+			const row = onList ? null : rowElements.current.get(index);
+			const onRow = row != null && target === row;
+			if (!onList && !onRow && usesOwnKeys(target)) return;
+			const checkable = !!Renderer.checkableLeaves && !entry.hasChildren;
+
+			// Enter and Space on a control in the row are the control's
+			if (event.key === "Enter") {
+				if (!row || !onRow) return;
+				event.preventDefault();
+				// activates the entry, see RendererWrapper's handleClick
+				row.dispatchEvent(
+					new MouseEvent("click", {
+						bubbles: true,
+						cancelable: true,
+						ctrlKey: event.ctrlKey,
+						shiftKey: event.shiftKey,
+						metaKey: event.metaKey,
+					}),
+				);
+				return;
+			}
+			if (event.key === " ") {
+				if (!onRow) return;
+				// it would scroll the list
+				event.preventDefault();
+				if (checkable && !entry.expandLocked) hookOnToggleExpanded(entry.id);
+				return;
+			}
+
+			if (event.ctrlKey || event.metaKey || event.shiftKey) return;
+			const last = enhancedData.length - 1;
+			// the rows in view, less one, so that a row of the last page stays in view
+			const page = Math.max(
+				1,
+				visibleRows.current.stopIndex - visibleRows.current.startIndex,
+			);
+			let next: number | null = null;
+			switch (event.key) {
+				case "ArrowDown":
+					next = index + 1;
+					break;
+				case "ArrowUp":
+					next = index - 1;
+					break;
+				case "PageDown":
+					next = index + page;
+					break;
+				case "PageUp":
+					next = index - page;
+					break;
+				case "Home":
+					next = 0;
+					break;
+				case "End":
+					next = last;
+					break;
+				case "ArrowRight":
+					if (!entry.hasChildren) break;
+					if (!entry.expanded) {
+						if (!entry.expandLocked) hookOnToggleExpanded(entry.id);
+						break;
+					}
+					// the first child, if it is shown
+					if (enhancedData[index + 1]?.depth === entry.depth + 1)
+						next = index + 1;
+					break;
+				case "ArrowLeft":
+					if (entry.hasChildren && entry.expanded && !entry.expandLocked) {
+						hookOnToggleExpanded(entry.id);
+						break;
+					}
+					// the parent: the closest row above that is one level up
+					for (let i = index - 1; i >= 0 && entry.depth > 0; i--) {
+						if (enhancedData[i].depth === entry.depth - 1) {
+							next = i;
+							break;
+						}
+					}
+					break;
+				default:
+					return;
+			}
+			// the keys move focus between the rows, they don't scroll the list
+			event.preventDefault();
+			if (next !== null) moveTo(Math.min(Math.max(next, 0), last));
+		},
+		[
+			activeIndex,
+			rowIndexOf,
+			enhancedData,
+			Renderer,
+			hookOnToggleExpanded,
+			moveTo,
+		],
+	);
+
 	const itemData = useMemo(
 		(): TreeViewContextType => ({
-			renderer: renderer ?? TreeViewDefaultRenderer,
+			renderer: Renderer,
 			data: enhancedData,
 			rendererProps: {
 				...rendererProps,
 				onToggleExpanded: hookOnToggleExpanded,
 			},
+			activeIndex,
+			registerRow,
 		}),
-		[renderer, enhancedData, rendererProps, hookOnToggleExpanded],
+		[
+			Renderer,
+			enhancedData,
+			rendererProps,
+			hookOnToggleExpanded,
+			activeIndex,
+			registerRow,
+		],
 	);
 
 	// controlled scrolling: a request waits until its entry is visible and
@@ -467,13 +835,20 @@ const TreeView = React.forwardRef(function TreeView(
 		<List<TreeViewContextType>
 			// react-window spreads these after its own role="list"
 			role="tree"
-			aria-multiselectable={itemData.renderer.checkableLeaves || undefined}
+			aria-multiselectable={Renderer.checkableLeaves || undefined}
+			// focusable, to hold focus while a row is waited for; the tab stop only
+			// while the active row is scrolled out of the rendered range
+			tabIndex={enhancedData.length === 0 ? undefined : activeRendered ? -1 : 0}
+			onFocus={handleListFocus}
+			onBlur={handleListBlur}
+			onKeyDown={handleListKeyDown}
 			listRef={listRef}
 			rowComponent={RendererWrapper}
 			rowHeight={itemHeight}
 			rowCount={enhancedData.length}
 			rowProps={itemData}
 			onResize={handleResize}
+			onRowsRendered={handleRowsRendered}
 		/>
 	);
 });

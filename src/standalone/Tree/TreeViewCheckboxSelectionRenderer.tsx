@@ -95,6 +95,8 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 						checked={expanded}
 						// a locked leaf cannot be toggled, so its checkbox says so
 						disabled={expandLocked}
+						// the row is the tab stop, and Space on it toggles the leaf
+						tabIndex={-1}
 						slotProps={checkboxSlotProps}
 					/>
 				)}
