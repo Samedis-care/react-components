@@ -474,7 +474,9 @@ export interface IDataGridColumnProps {
 	 * the filter, in the grid's sort order. They are selected by their ids, as
 	 * if the user had ticked them: the selection isn't inverted, so delete and
 	 * every custom data action button handle it. loadData loads the pages of them the grid hasn't loaded
-	 * yet, and rows canSelectRow refuses are skipped.
+	 * yet, and rows canSelectRow refuses are skipped. A change of the limit
+	 * while select all still loads its rows ends that load: the grid requests
+	 * no further page, aborts loadData's signal and selects nothing.
 	 * @remarks While more rows match the filter than the limit, the checkbox is
 	 *          labelled "First" and the limit instead of "All"
 	 * @default undefined (select all selects every row)

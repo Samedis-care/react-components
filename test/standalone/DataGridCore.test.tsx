@@ -939,6 +939,101 @@ describe("limited select all: the signal", () => {
 			expect(selectAll).not.toHaveAttribute("aria-busy");
 		},
 	);
+
+	it.each([
+		["10", 10, "First 10"],
+		["undefined", undefined, "All"],
+	])(
+		"[ISSUE-3492-ITEM-36] limitSelectAll changed to %s while the limited select all loads aborts its request, and what it loads selects nothing",
+		async (_limit, limitSelectAll, label) => {
+			const { loadData, release } = holdPage2();
+			const onSelectionChange = vi.fn();
+			const { rerender } = render(
+				<Grid
+					loadData={loadData}
+					enableSelectAll
+					limitSelectAll={60}
+					onSelectionChange={onSelectionChange}
+				/>,
+			);
+			const signal = await selectFirst60(loadData);
+			onSelectionChange.mockClear();
+			rerender(
+				<Grid
+					loadData={loadData}
+					enableSelectAll
+					limitSelectAll={limitSelectAll}
+					onSelectionChange={onSelectionChange}
+				/>,
+			);
+			expect(signal.aborted).toBe(true);
+			const selectAll = screen.getByRole("checkbox", { name: label });
+			expect(selectAll).not.toBeChecked();
+			expect(selectAll).not.toHaveAttribute("aria-busy");
+			await release();
+			expect(requestedPage3(loadData)).toBe(false);
+			expect(probe!.state.selectAll).toBe(false);
+			expect(probe!.state.selectedRows).toEqual([]);
+			expect(probe!.state.limitedSelectAll).toBeNull();
+			expect(onSelectionChange).not.toHaveBeenCalled();
+			expect(selectAll).not.toBeChecked();
+		},
+	);
+
+	it("[ISSUE-3492-ITEM-36] a click after limitSelectAll changed while the limited select all loaded selects the first rows by the new limit", async () => {
+		const { loadData, release } = holdPage2();
+		const { rerender } = render(
+			<Grid loadData={loadData} enableSelectAll limitSelectAll={60} />,
+		);
+		await selectFirst60(loadData);
+		rerender(<Grid loadData={loadData} enableSelectAll limitSelectAll={10} />);
+		await release();
+		const selectAll = screen.getByRole("checkbox", { name: "First 10" });
+		fireEvent.click(selectAll);
+		await waitFor(() => expect(probe!.state.selectedRows).toHaveLength(10));
+		expect(probe!.state.selectedRows).toEqual(
+			Array.from({ length: 10 }, (_, i) => String(i)),
+		);
+		expect(selectAll).toBeChecked();
+		expect(selectAll).not.toHaveAttribute("aria-busy");
+	});
+
+	it("[ISSUE-3492-ITEM-36] limitSelectAll changed and changed back while the limited select all loads leaves it ended: the checkbox shows the selection as it is", async () => {
+		const { loadData, release } = holdPage2();
+		const { rerender } = render(
+			<Grid loadData={loadData} enableSelectAll limitSelectAll={60} />,
+		);
+		const signal = await selectFirst60(loadData);
+		rerender(<Grid loadData={loadData} enableSelectAll limitSelectAll={10} />);
+		rerender(<Grid loadData={loadData} enableSelectAll limitSelectAll={60} />);
+		expect(signal.aborted).toBe(true);
+		const selectAll = screen.getByRole("checkbox", { name: "First 60" });
+		expect(selectAll).not.toBeChecked();
+		expect(selectAll).not.toHaveAttribute("aria-busy");
+		await release();
+		expect(requestedPage3(loadData)).toBe(false);
+		expect(probe!.state.selectedRows).toEqual([]);
+		expect(selectAll).not.toBeChecked();
+	});
+
+	it("[ISSUE-3492-ITEM-36] a rerender with the same limitSelectAll keeps the limited select all loading, which selects the first rows", async () => {
+		const { loadData, release } = holdPage2();
+		const { rerender } = render(
+			<Grid loadData={loadData} enableSelectAll limitSelectAll={60} />,
+		);
+		const signal = await selectFirst60(loadData);
+		rerender(<Grid loadData={loadData} enableSelectAll limitSelectAll={60} />);
+		expect(signal.aborted).toBe(false);
+		const selectAll = screen.getByRole("checkbox", { name: "First 60" });
+		expect(selectAll).toHaveAttribute("aria-busy", "true");
+		await release();
+		await waitFor(() => expect(probe!.state.selectedRows).toHaveLength(60));
+		expect(probe!.state.selectedRows).toEqual(
+			Array.from({ length: 60 }, (_, i) => String(i)),
+		);
+		expect(selectAll).toBeChecked();
+		expect(selectAll).not.toHaveAttribute("aria-busy");
+	});
 });
 
 describe("limited select all: repeated rows", () => {

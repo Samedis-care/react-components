@@ -23,13 +23,17 @@ export interface DataGridSelectAllProviderProps {
 }
 
 /**
- * A limited select all loading its rows: the selection and the query it
- * started from, and what ends its load
+ * A limited select all loading its rows: the selection, the query and the
+ * limit it started from, and what ends its load
  */
 interface LimitedSelectAllLoad extends Pick<
 	IDataGridState,
 	"selectAll" | "selectedRows" | "refreshDataInstance"
 > {
+	/**
+	 * How many rows it selects (DataGridProps.limitSelectAll when clicked)
+	 */
+	limitSelectAll: number;
 	/**
 	 * Aborts the load: it requests no further page, and the signal loadData
 	 * got aborts
@@ -75,6 +79,10 @@ const SelectAllProvider = (props: DataGridSelectAllProviderProps) => {
 	// render shows it after that, and turning select all on again doesn't
 	// bring it back
 	if (disabled && loading) setLoading(null);
+	// so does a changed limitSelectAll: the load picks the first rows by the
+	// limit of the click, and changing it back doesn't bring the load back
+	if (loading && !Object.is(loading.limitSelectAll, limitSelectAll))
+		setLoading(null);
 	// that load while it is for the query the grid shows
 	const load =
 		loading?.refreshDataInstance === refreshDataInstance ? loading : null;
@@ -99,6 +107,7 @@ const SelectAllProvider = (props: DataGridSelectAllProviderProps) => {
 					selectAll,
 					selectedRows,
 					refreshDataInstance,
+					limitSelectAll,
 					controller,
 				};
 				setLoading(from);
