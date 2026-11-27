@@ -23,6 +23,7 @@ import LazyConnector from "../../../src/backend-integration/Connector/LazyConnec
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import Connector from "../../../src/backend-integration/Connector/Connector";
 import type ApiConnector from "../../../src/backend-integration/Connector/ApiConnector";
+import { CcErrorNames } from "../../../src/framework/ErrorReporting";
 
 import type {
 	FileData,
@@ -2299,6 +2300,49 @@ describe("CrudFileUpload: bugs", () => {
 		});
 		expect(backend.deleteCalls).toEqual(["1"]);
 		expect(await onServer(backend)).toEqual(["image.png", "notes.txt"]);
+	});
+	it("[ISSUE-3505-ITEM-33] a PartialDeleteError that is not this copy's class keeps only its failed ids marked, and names its cause", async () => {
+		// a connector built against another copy of the library: its PartialDeleteError
+		// has the name and fields of this copy's, but another class
+		class ForeignPartialDeleteConnector extends StrictConnector {
+			async deleteMultiple(ids: string[]) {
+				const failedIds: string[] = [];
+				let cause: unknown;
+				for (const id of ids) {
+					try {
+						await this.delete(id);
+					} catch (e) {
+						failedIds.push(id);
+						cause ??= e;
+					}
+				}
+				if (failedIds.length === 0) return;
+				throw Object.assign(
+					new Error(`${failedIds.length} of ${ids.length} deletes refused`, {
+						cause,
+					}),
+					{ name: CcErrorNames.PartialDeleteError, failedIds },
+				);
+			}
+		}
+		const connector = new ForeignPartialDeleteConnector(SERVER_FILES);
+		connector.rejectDeletes.add("1");
+		const ui = renderUpload({ connector });
+		await loaded(ui);
+		await ui.remove("document.pdf");
+		await waitFor(() => expect(ui.errorText()).toContain("refused"));
+
+		// the change carries the retry of 1 (refused again) and the delete of 2 (done)
+		await ui.remove("image.png");
+		await ui.settle();
+
+		expect(connector.deleteCalls).toEqual(["1", "1", "2"]);
+		expect(await onServer(connector)).toEqual(["document.pdf"]);
+		expect(ui.names()).toEqual(["document.pdf"]);
+		expect(ui.changeOf("document.pdf")).toBe("removed");
+		expect(ui.errorText()).toBe(
+			"Could not remove document.pdf: delete of 1 refused.",
+		);
 	});
 });
 

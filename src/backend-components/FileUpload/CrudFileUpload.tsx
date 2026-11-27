@@ -16,7 +16,7 @@ import FileUpload, {
 } from "../../standalone/FileUpload/Generic";
 import { Connector } from "../../backend-integration";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
-import PartialDeleteError from "../../backend-integration/Connector/PartialDeleteError";
+import { isPartialDeleteError } from "../../backend-integration/Connector/PartialDeleteError";
 import PartialApplyError, {
 	PartialApplyFailure,
 } from "../Form/PartialApplyError";
@@ -415,13 +415,11 @@ const CrudFileUpload = (
 				await connector.deleteMultiple(deletedIds);
 			} catch (e) {
 				// only a PartialDeleteError says which ids went through, and its cause why
-				refusedIds = new Set(
-					e instanceof PartialDeleteError ? e.failedIds : deletedIds,
-				);
+				const partial =
+					e instanceof Error && isPartialDeleteError(e) ? e : null;
+				refusedIds = new Set(partial ? partial.failedIds : deletedIds);
 				const reason =
-					e instanceof PartialDeleteError && e.cause instanceof Error
-						? e.cause
-						: (e as Error);
+					partial?.cause instanceof Error ? partial.cause : (e as Error);
 				newFiles.forEach((file) => {
 					if (file.delete && refusedIds.has((file.file as BackendFileMeta).id))
 						failures.push({ entry: file, action: "delete", error: reason });

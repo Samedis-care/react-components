@@ -23,6 +23,7 @@ import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import Connector from "../../../src/backend-integration/Connector/Connector";
 import LazyConnector from "../../../src/backend-integration/Connector/LazyConnector";
 import type ApiConnector from "../../../src/backend-integration/Connector/ApiConnector";
+import { CcErrorNames } from "../../../src/framework/ErrorReporting";
 import ccI18n from "../../../src/i18n";
 
 // jsdom has no canvas, so the image pipeline itself is replaced (as in
@@ -917,6 +918,46 @@ describe("CrudMultiImage: bugs", () => {
 		// the additional images come first
 		expect(within(entries(dialog)[0]).queryByLabelText(remove)).toBe(null);
 		expect(within(entries(dialog)[1]).queryByLabelText(remove)).not.toBe(null);
+	});
+	it("[ISSUE-3505-ITEM-33] a refused removal reported by a PartialDeleteError that is not this copy's class names its cause", async () => {
+		// a connector built against another copy of the library, whose backend names
+		// the ids it refused: its PartialDeleteError has the name and fields of this
+		// copy's, but another class
+		class ForeignPartialDeleteBackend extends Backend {
+			async deleteMultiple(ids: string[]) {
+				const failedIds: string[] = [];
+				let cause: unknown;
+				for (const id of ids) {
+					try {
+						await this.delete(id);
+					} catch (e) {
+						failedIds.push(id);
+						cause ??= e;
+					}
+				}
+				if (failedIds.length === 0) return;
+				throw Object.assign(
+					new Error(`${failedIds.length} of ${ids.length} deletes refused`, {
+						cause,
+					}),
+					{ name: CcErrorNames.PartialDeleteError, failedIds },
+				);
+			}
+		}
+		const backend = new ForeignPartialDeleteBackend(OWN);
+		backend.rejectDeletes.add("1");
+		const { container } = renderMI({ connector: backend });
+		await ready(container);
+		const dialog = openEdit();
+
+		await removeEntry(dialog, 0);
+		await waitFor(() => expect(backend.deleteCalls).toEqual(["1"]));
+		await settle();
+
+		expect(screen.getByTestId("error")).toHaveTextContent(
+			"Could not remove a: delete of 1 refused.",
+		);
+		expect(srcs(dialog)).toEqual(["a.png", "b.png"]);
 	});
 });
 

@@ -13,7 +13,7 @@ import {
 } from "../../standalone/FileUpload/MultiImage/MultiImage";
 import { Connector } from "../../backend-integration";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
-import PartialDeleteError from "../../backend-integration/Connector/PartialDeleteError";
+import { isPartialDeleteError } from "../../backend-integration/Connector/PartialDeleteError";
 import PartialApplyError, {
 	PartialApplyFailure,
 } from "../Form/PartialApplyError";
@@ -314,11 +314,11 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 			if (deleteResult.status === "rejected") {
 				const e = deleteResult.reason as unknown;
 				// only a PartialDeleteError says which ids went through, and its cause why
-				refusedIds = e instanceof PartialDeleteError ? e.failedIds : removedIds;
+				const partial =
+					e instanceof Error && isPartialDeleteError(e) ? e : null;
+				refusedIds = partial ? partial.failedIds : removedIds;
 				const reason =
-					e instanceof PartialDeleteError && e.cause instanceof Error
-						? e.cause
-						: (e as Error);
+					partial?.cause instanceof Error ? partial.cause : (e as Error);
 				refusedIds.forEach((id) => {
 					const img = latestById.get(id);
 					if (img)

@@ -1,7 +1,10 @@
 import { describe, it, expect } from "vitest";
 import NetworkError from "../../src/backend-integration/Connector/NetworkError";
 import BackendError from "../../src/backend-integration/Connector/BackendError";
-import PartialDeleteError from "../../src/backend-integration/Connector/PartialDeleteError";
+import PartialDeleteError, {
+	isPartialDeleteError,
+} from "../../src/backend-integration/Connector/PartialDeleteError";
+import { CcErrorNames } from "../../src/framework/ErrorReporting";
 import Connector from "../../src/backend-integration/Connector/Connector";
 
 describe("NetworkError", () => {
@@ -193,4 +196,31 @@ describe("Connector.deleteMultiple", () => {
 		expect(error).not.toBeInstanceOf(PartialDeleteError);
 		expect((error as Error).message).toBe("delete of 1 refused");
 	});
+});
+
+describe("isPartialDeleteError", () => {
+	it("[ISSUE-3505-ITEM-33] recognizes a PartialDeleteError by its name, also one that is not this copy's class", () => {
+		// what a connector built against another copy of the library throws: the same
+		// name and fields, another class
+		const foreign = Object.assign(new Error("1 of 2 deletes refused"), {
+			name: CcErrorNames.PartialDeleteError,
+			failedIds: ["1"],
+		});
+
+		expect(isPartialDeleteError(new PartialDeleteError("x", ["1"]))).toBe(true);
+		expect(isPartialDeleteError(foreign)).toBe(true);
+		expect(isPartialDeleteError(new Error("delete of 1 refused"))).toBe(false);
+		expect(
+			isPartialDeleteError(
+				Object.assign(new Error("x"), { name: CcErrorNames.PartialApplyError }),
+			),
+		).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-33] is exported from the package root", async () => {
+		const root = (await import("../../src")) as Record<string, unknown>;
+
+		expect(root.isPartialDeleteError).toBeTypeOf("function");
+		expect(root.isPartialDeleteError).toBe(isPartialDeleteError);
+	}, 90000);
 });
