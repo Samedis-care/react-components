@@ -1,7 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import React from "react";
 import { act, cleanup, render, screen } from "@testing-library/react";
-import { createTheme, Theme, ThemeProvider } from "@mui/material";
+import {
+	Checkbox,
+	createTheme,
+	FormControlLabel,
+	Theme,
+	ThemeProvider,
+} from "@mui/material";
 import ccI18n from "../../src/i18n";
 import TextFieldWithHelp from "../../src/standalone/UIKit/TextFieldWithHelp";
 import SingleSelect from "../../src/standalone/Selector/SingleSelect";
@@ -194,5 +200,126 @@ describe("withMuiFieldState", () => {
 		// the root of the text field the combobox is in, which MUI's TextField puts
 		// its classes.root on
 		expect(input.closest(".MuiTextField-root")).toHaveClass("x-selector-root");
+	});
+});
+
+describe("dirty marker in forced colors", () => {
+	/**
+	 * Splits a selector list at its top-level commas, leaving those inside `:not()`
+	 * and the like alone
+	 */
+	const selectorsOf = (list: string): string[] => {
+		const selectors: string[] = [];
+		let depth = 0;
+		let start = 0;
+		for (let i = 0; i < list.length; ++i) {
+			if (list[i] === "(") ++depth;
+			else if (list[i] === ")") --depth;
+			else if (list[i] === "," && depth === 0) {
+				selectors.push(list.slice(start, i).trim());
+				start = i + 1;
+			}
+		}
+		selectors.push(list.slice(start).trim());
+		return selectors;
+	};
+
+	/**
+	 * What the page's `@media (forced-colors: active)` rules declare for `element`, or
+	 * for its `::after`, a later rule overriding an earlier one (specificity is not
+	 * weighed). jsdom matches no media feature, so they are read from the style sheets.
+	 * Forced colors paint every background in the page's background colour, so these
+	 * rules are what keeps a dot drawn as a background visible.
+	 */
+	const forcedColors = (element: Element, pseudo: "" | "::after" = "") => {
+		const declared: Record<string, string> = {};
+		const rules = Array.from(document.styleSheets)
+			.flatMap((sheet) => Array.from(sheet.cssRules))
+			.filter(
+				(rule): rule is CSSMediaRule =>
+					rule instanceof window.CSSMediaRule &&
+					rule.media.mediaText.includes("forced-colors: active"),
+			)
+			.flatMap((rule) => Array.from(rule.cssRules))
+			.filter(
+				(rule): rule is CSSStyleRule => rule instanceof window.CSSStyleRule,
+			);
+		for (const rule of rules) {
+			const applies = selectorsOf(rule.selectorText).some((selector) =>
+				pseudo
+					? selector.endsWith(pseudo) &&
+						element.matches(selector.slice(0, -pseudo.length))
+					: !selector.includes("::") && element.matches(selector),
+			);
+			if (!applies) continue;
+			for (const name of Array.from(rule.style))
+				declared[name] = rule.style.getPropertyValue(name);
+		}
+		return {
+			forcedColorAdjust: declared["forced-color-adjust"],
+			backgroundColor: declared["background-color"]?.toLowerCase(),
+		};
+	};
+
+	it.each([
+		[
+			"a standard text field",
+			<TextFieldCC
+				key={"field"}
+				label="Serial"
+				value="x"
+				variant="standard"
+				dirty
+			/>,
+			".MuiInputLabel-root",
+		],
+		[
+			"an outlined text field",
+			<TextFieldCC
+				key={"field"}
+				label="Serial"
+				value="x"
+				variant="outlined"
+				dirty
+			/>,
+			".MuiInputLabel-root",
+		],
+		[
+			"a label component",
+			<FormLabelCC key={"field"} dirty>
+				Serial
+			</FormLabelCC>,
+			".MuiFormLabel-root",
+		],
+		[
+			"a checkbox",
+			<FormControlCC key={"field"} dirty>
+				<FormControlLabel control={<Checkbox />} label="Serial" />
+			</FormControlCC>,
+			".MuiFormControlLabel-label",
+		],
+	] as const)(
+		"[ISSUE-3483-ITEM-21] keeps the dot after the label of %s in forced colors, in the text colour of the user's palette rather than its background colour",
+		(_name, field, labelSelector) => {
+			const { container } = wrap(field);
+			const label = container.querySelector(labelSelector)!;
+			expect(label).not.toBeNull();
+			expect(forcedColors(label, "::after")).toEqual({
+				forcedColorAdjust: "none",
+				backgroundColor: "canvastext",
+			});
+		},
+	);
+
+	it("[ISSUE-3483-ITEM-21] keeps the dot of labelWithDirtyMarker in forced colors, in the text colour of the user's palette rather than its background colour", () => {
+		const { container } = wrap(
+			<span>{labelWithDirtyMarker("Photos", true)}</span>,
+		);
+		const dot = container.querySelector("[aria-hidden='true']")!;
+		expect(dot).not.toBeNull();
+		expect(forcedColors(dot)).toEqual({
+			forcedColorAdjust: "none",
+			backgroundColor: "canvastext",
+		});
 	});
 });

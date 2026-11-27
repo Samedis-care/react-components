@@ -69,6 +69,13 @@ const dirtyMarkerBase = (theme: Theme): CSSObject => ({
 	borderRadius: "50%",
 	verticalAlign: "middle",
 	backgroundColor: theme.palette.info.main,
+	// forced colors (e.g. Windows high contrast) paint every background in the
+	// palette's background colour, which would hide the dot: there it is drawn in
+	// the palette's text colour instead, in a light palette and a dark one alike
+	"@media (forced-colors: active)": {
+		forcedColorAdjust: "none",
+		backgroundColor: "CanvasText",
+	},
 });
 
 /**
@@ -89,6 +96,11 @@ const dirtyMarkerBase = (theme: Theme): CSSObject => ({
  *
  * That leaves {@link DirtyMarkerText} in the label, so the field's name still says it is
  * modified; it has a theme slot of its own.
+ *
+ * In forced colors mode (e.g. Windows high contrast), which paints every background in
+ * the palette's background colour, the dot is drawn in the palette's text colour
+ * (`CanvasText`) instead. A theme that recolours the dot gives it a system colour for
+ * forced colors in the same rule, under `@media (forced-colors: active)`.
  */
 export const dirtyMarkerStyles = (theme: Theme): CSSObject => ({
 	content: '""',

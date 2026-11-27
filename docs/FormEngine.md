@@ -663,6 +663,12 @@ createTheme({
 
 </details>
 
+In forced colors mode (Windows high contrast), which paints every background in the
+palette's background colour, the stock dot is drawn in the palette's text colour
+(`CanvasText`) instead, in a light palette and a dark one alike. A theme that recolours the
+dot gives it a system colour for forced colors in the same rule, under
+`@media (forced-colors: active)`.
+
 One thing to know if you replace the dot with something wider: an outlined input sizes the
 gap in its border from a second copy of the label that a pseudo element cannot reach, so
 the stock styles widen that gap by the width of the dot. A wider marker has to widen it
