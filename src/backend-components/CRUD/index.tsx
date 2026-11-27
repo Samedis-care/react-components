@@ -24,6 +24,7 @@ import {
 import { CrudImportProps, CrudImportType } from "./Import";
 import Loader from "../../standalone/Loader";
 import throwError from "../../utils/throwError";
+import focusContainer from "../../utils/internal/focusContainer";
 import {
 	DataGridDispatch,
 	DataGridQuery,
@@ -413,26 +414,6 @@ const isFocusLost = (target: HTMLElement, hidden: HTMLElement | null) => {
 	const active = target.ownerDocument.activeElement;
 	if (active === target) return false;
 	return !active || active.contains(target) || !!hidden?.contains(active);
-};
-
-/**
- * Moves the keyboard focus to a container, which is not focusable otherwise: it gets
- * `tabindex="-1"` for as long as it has the focus, so the next Tab goes to its first
- * control. A click inside takes that away first, so the click leaves the focus where it
- * would without the container, and the next Tab goes on from the point clicked.
- * @param container The container
- */
-const focusContainer = (container: HTMLElement) => {
-	const release = () => {
-		container.removeAttribute("tabindex");
-		container.removeEventListener("blur", release);
-		container.removeEventListener("pointerdown", release, true);
-	};
-	container.setAttribute("tabindex", "-1");
-	container.addEventListener("blur", release);
-	container.addEventListener("pointerdown", release, true);
-	container.focus({ preventScroll: true });
-	if (container.ownerDocument.activeElement !== container) release();
 };
 
 const CRUD = <M extends ModelUnknown>(
