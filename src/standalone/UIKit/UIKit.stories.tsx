@@ -27,10 +27,14 @@ import {
 	decomposeColor,
 	getContrastRatio,
 	getLuminance,
+	hexToRgb,
 	PaletteColor,
 	recomposeColor,
 	ThemeProvider,
 } from "@mui/material";
+
+// the palette of the Storybook preview theme
+const palette = createTheme().palette;
 
 // ---- ActionButton ----
 
@@ -848,6 +852,137 @@ export const Issue3482Item12SmallSubActionButtonHoverContrast: ActionButtonStory
 			}
 		},
 	};
+
+export const Issue3482Item23SubActionButtonColor: ActionButtonStory = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					'ISSUE-3482-ITEM-23: `color="error"` changes nothing, and an icon\'s own color is repainted primary.',
+			},
+		},
+	},
+	render: (args) => (
+		<Box sx={{ width: 300 }}>
+			<SubActionButton
+				color={"error"}
+				icon={<DeleteIcon />}
+				onClick={args.onClick}
+			>
+				Delete
+			</SubActionButton>
+			<SubActionButton
+				icon={<DeleteIcon color={"error"} />}
+				onClick={args.onClick}
+			>
+				Remove
+			</SubActionButton>
+		</Box>
+	),
+	play: async ({ canvas }) => {
+		const error = hexToRgb(palette.error.main);
+		const remove = canvas.getByRole("button", { name: "Remove" });
+		const icon = remove.querySelector("svg");
+		if (!icon) throw new Error("the button has no icon");
+		await expect(
+			getComputedStyle(icon).fill,
+			"the icon's own color is repainted",
+		).toBe(error);
+		const del = canvas.getByRole("button", { name: "Delete" });
+		await expect(
+			getComputedStyle(del).color,
+			'color="error" does not reach the label',
+		).toBe(error);
+	},
+};
+
+// an app theme that gives every SubActionButton a color
+const SECONDARY_SUB_ACTION_BUTTONS = createTheme({
+	components: { CcSubActionButton: { defaultProps: { color: "secondary" } } },
+});
+
+export const Issue3482Item23SubActionButtonColorStates: ActionButtonStory = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3482-ITEM-23: without `color` the label is `text.primary` and the icon `primary.main`; a disabled button is `text.disabled` with or without `color`; the hover of a `small` button fills the cell with the light shade of its color; the theme's `CcSubActionButton.defaultProps.color` colors every SubActionButton.",
+			},
+		},
+	},
+	render: (args) => (
+		<Box sx={{ width: 300 }}>
+			<SubActionButton icon={<HomeIcon />} onClick={args.onClick}>
+				Home
+			</SubActionButton>
+			<SubActionButton
+				color={"error"}
+				disabled
+				icon={<DeleteIcon />}
+				onClick={args.onClick}
+			>
+				Retire
+			</SubActionButton>
+			<SubActionButton
+				small
+				color={"error"}
+				icon={<DeleteIcon />}
+				onClick={args.onClick}
+			>
+				Delete
+			</SubActionButton>
+			<ThemeProvider theme={SECONDARY_SUB_ACTION_BUTTONS}>
+				<SubActionButton icon={<SaveIcon />} onClick={args.onClick}>
+					Save
+				</SubActionButton>
+			</ThemeProvider>
+		</Box>
+	),
+	play: async ({ canvas }) => {
+		const colors = (name: string) => {
+			const button = canvas.getByRole("button", { name });
+			const icon = button.querySelector("svg");
+			if (!icon) throw new Error(`${name} has no icon`);
+			return {
+				label: getComputedStyle(button).color,
+				icon: getComputedStyle(icon).fill,
+			};
+		};
+		await expect(colors("Home"), "the colors without color").toEqual({
+			label: computed(palette.text.primary),
+			icon: computed(palette.primary.main),
+		});
+		await expect(colors("Retire"), "the colors while disabled").toEqual({
+			label: computed(palette.text.disabled),
+			icon: computed(palette.text.disabled),
+		});
+		const secondary = computed(palette.secondary.main);
+		await expect(colors("Save"), "the theme's default color").toEqual({
+			label: secondary,
+			icon: secondary,
+		});
+		const del = canvas.getByRole("button", { name: "Delete" });
+		const unhover = forceHover(del);
+		try {
+			await Promise.all(
+				del
+					.getAnimations({ subtree: true })
+					.map((animation) => animation.finished),
+			);
+			const background = getComputedStyle(del).backgroundColor;
+			await expect(background, "the hover fill of a small button").toBe(
+				computed(palette.error.light),
+			);
+			await expect(
+				colors("Delete").icon,
+				"the icon on the hover fill of a small button",
+			).toBe(computed(palette.getContrastText(palette.error.light)));
+		} finally {
+			unhover();
+		}
+	},
+};
 
 export const FormButtonsSaveCancelDelete: ActionButtonStory = {
 	render: () => (

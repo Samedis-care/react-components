@@ -315,6 +315,38 @@ describe("UIKit", () => {
 				expect(button).toHaveAccessibleName(name);
 			},
 		);
+
+		it("[ISSUE-3482-ITEM-23] renders the icon in a span of class CcSubActionButton-icon, and no span without an icon", () => {
+			wrap(
+				<>
+					<SubActionButton icon={<SaveIcon data-testid="sub-icon" />}>
+						Save
+					</SubActionButton>
+					<SubActionButton>Delete</SubActionButton>
+				</>,
+			);
+			expect(screen.getByTestId("sub-icon").parentElement).toHaveClass(
+				"CcSubActionButton-icon",
+			);
+			expect(
+				screen
+					.getByRole("button", { name: "Delete" })
+					.querySelector(".CcSubActionButton-icon"),
+			).toBeNull();
+		});
+
+		it("[ISSUE-3482-ITEM-23] keeps the className passed in, with and without color", () => {
+			wrap(
+				<>
+					<SubActionButton className={"mine"}>Plain</SubActionButton>
+					<SubActionButton className={"mine"} color={"error"}>
+						Colored
+					</SubActionButton>
+				</>,
+			);
+			for (const name of ["Plain", "Colored"])
+				expect(screen.getByRole("button", { name })).toHaveClass("mine");
+		});
 	});
 	describe("FormButtons", () => {
 		it("renders children", () => {
