@@ -47,6 +47,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [An item's `className` in SignalPortlet adds to `classes.item`](2026-11-27-signal-portlet-item-class-name-adds-to-classes-item.md) | behavior |
 | 2026-11-27 | [The field-state controls and TextFieldWithHelp apply their `classes`](2026-11-27-field-state-controls-apply-classes.md) | behavior |
 | 2026-11-27 | [A warning's label keeps its colour while the field is focused or disabled](2026-11-27-warning-label-kept-on-focus.md) | behavior |
+| 2026-11-27 | [TreeView takes a name, an id, a className and sx for the tree, and hands no other props to its rows](2026-11-27-tree-view-name-and-props-reach-the-tree.md) | behavior |
 | 2026-11-27 | [TreeView is one tab stop, and its rows are expanded, collapsed, selected and activated with the keys of a tree](2026-11-27-tree-view-keyboard.md) | behavior, type |
 | 2026-11-27 | [ComponentWithLabel's onClick runs once per click on the caption](2026-11-27-component-with-label-on-click-once.md) | behavior |
 | 2026-11-27 | [A disabled ActionButton is filled with `action.disabled`](2026-11-27-action-button-disabled-fill.md) | behavior |

@@ -266,6 +266,7 @@ const DefaultTreeStory = () => {
 				data={tree}
 				onToggleExpanded={handleToggle}
 				onLoadChildren={handleLoadChildren}
+				aria-label={"Project files"}
 			/>
 		</Box>
 	);

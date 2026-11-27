@@ -6,7 +6,7 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import { styled } from "@mui/material";
+import { styled, SxProps, Theme } from "@mui/material";
 import TreeViewDefaultRenderer from "./TreeViewDefaultRenderer";
 import { List, ListImperativeAPI, RowComponentProps } from "react-window";
 import { captureError } from "../../framework/ErrorReporting";
@@ -245,6 +245,44 @@ export interface TreeViewProps extends TreeViewRendererCallbacks {
 	 * nothing for a synchronous load
 	 */
 	onLoadChildren: (id: string) => Promise<void> | void;
+	/**
+	 * The tree's accessible name, set as `aria-label` on the list element
+	 * (`role="tree"`). A tree needs a name: pass this, or `aria-labelledby`
+	 * where a visible heading or label names the tree.
+	 * @default undefined (no name)
+	 */
+	"aria-label"?: string;
+	/**
+	 * The id of the element that names the tree, such as its visible heading,
+	 * or several ids separated by spaces. Set as `aria-labelledby` on the list
+	 * element; it takes precedence over `aria-label`.
+	 * @default undefined
+	 */
+	"aria-labelledby"?: string;
+	/**
+	 * The id of the element that describes the tree, such as a help text, or
+	 * several ids separated by spaces. Set as `aria-describedby` on the list
+	 * element.
+	 * @default undefined
+	 */
+	"aria-describedby"?: string;
+	/**
+	 * The id of the list element (`role="tree"`)
+	 * @default undefined
+	 */
+	id?: string;
+	/**
+	 * A class name for the list element (`role="tree"`), the scroll container
+	 * that holds the rows
+	 * @default undefined
+	 */
+	className?: string;
+	/**
+	 * Styles for the list element (`role="tree"`), the scroll container that
+	 * holds the rows. See MUI's `sx` prop.
+	 * @default undefined
+	 */
+	sx?: SxProps<Theme>;
 }
 
 const enhanceData = (
@@ -381,6 +419,9 @@ export interface TreeViewContextType {
 	registerRow: (index: number, element: HTMLElement | null) => void;
 }
 
+// the list element, for the caller's sx
+const TreeList = styled(List<TreeViewContextType>)({});
+
 const TreeItem = styled("div")(({ theme }) => ({
 	// inside the row: the rows touch each other, and the list clips the first
 	// and the last one
@@ -513,7 +554,12 @@ const TreeView = React.forwardRef(function TreeView(
 		rendererItemHeight,
 		onLoadChildren,
 		onToggleExpanded,
-		...rendererProps
+		"aria-label": ariaLabel,
+		"aria-labelledby": ariaLabelledBy,
+		"aria-describedby": ariaDescribedBy,
+		id,
+		className,
+		sx,
 	} = props;
 	const listRef = useRef<ListImperativeAPI>(null);
 	const itemHeight = rendererItemHeight ?? 24;
@@ -784,21 +830,11 @@ const TreeView = React.forwardRef(function TreeView(
 		(): TreeViewContextType => ({
 			renderer: Renderer,
 			data: enhancedData,
-			rendererProps: {
-				...rendererProps,
-				onToggleExpanded: hookOnToggleExpanded,
-			},
+			rendererProps: { onToggleExpanded: hookOnToggleExpanded },
 			activeIndex,
 			registerRow,
 		}),
-		[
-			Renderer,
-			enhancedData,
-			rendererProps,
-			hookOnToggleExpanded,
-			activeIndex,
-			registerRow,
-		],
+		[Renderer, enhancedData, hookOnToggleExpanded, activeIndex, registerRow],
 	);
 
 	// controlled scrolling: a request waits until its entry is visible and
@@ -832,9 +868,15 @@ const TreeView = React.forwardRef(function TreeView(
 	);
 
 	return (
-		<List<TreeViewContextType>
+		<TreeList
+			id={id}
+			className={className}
+			sx={sx}
 			// react-window spreads these after its own role="list"
 			role="tree"
+			aria-label={ariaLabel}
+			aria-labelledby={ariaLabelledBy}
+			aria-describedby={ariaDescribedBy}
 			aria-multiselectable={Renderer.checkableLeaves || undefined}
 			// focusable, to hold focus while a row is waited for; the tab stop only
 			// while the active row is scrolled out of the rendered range

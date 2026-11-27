@@ -812,6 +812,83 @@ describe("TreeView accessibility bugs", () => {
 		expect(onToggleExpanded).not.toHaveBeenCalled();
 		expect(locked).toBeDisabled();
 	});
+
+	it("[ISSUE-3476-ITEM-14] names the list from aria-label instead of handing it to every row", () => {
+		const capture = createCapture();
+		render(
+			<TreeView
+				data={[node("a"), node("b")]}
+				renderer={capture.renderer}
+				onToggleExpanded={vi.fn()}
+				onLoadChildren={vi.fn()}
+				// not part of TreeViewProps today
+				{...({ "aria-label": "Device tree" } as object)}
+			/>,
+		);
+		const list = screen.getByLabelText("Device tree");
+		expect(list.querySelectorAll("[data-react-window-index]")).toHaveLength(2);
+		expect(Object.keys(capture.row("a"))).not.toContain("aria-label");
+	});
+
+	it("[ISSUE-3476-ITEM-14] names the tree from aria-labelledby and describes it from aria-describedby", () => {
+		render(
+			<>
+				<h2 id={"tree-heading"}>Devices</h2>
+				<p id={"tree-help"}>Expand a device to see its parts</p>
+				<TreeView
+					data={[node("a"), node("b")]}
+					onToggleExpanded={vi.fn()}
+					onLoadChildren={vi.fn()}
+					aria-label={"Ignored"}
+					aria-labelledby={"tree-heading"}
+					aria-describedby={"tree-help"}
+				/>
+			</>,
+		);
+		const tree = screen.getByRole("tree");
+		expect(tree).toHaveAccessibleName("Devices");
+		expect(tree).toHaveAccessibleDescription(
+			"Expand a device to see its parts",
+		);
+	});
+
+	it("[ISSUE-3476-ITEM-14] puts id, className and sx on the list element, and none of TreeView's props on the rows", () => {
+		const capture = createCapture();
+		render(
+			<TreeView
+				data={[node("a"), node("b")]}
+				renderer={capture.renderer}
+				onToggleExpanded={vi.fn()}
+				onLoadChildren={vi.fn()}
+				aria-label={"Device tree"}
+				id={"device-tree"}
+				className={"app-tree"}
+				sx={{ backgroundColor: "rgb(1, 2, 3)" }}
+				// an attribute TreeView does not declare
+				{...({ "data-testid": "tree" } as object)}
+			/>,
+		);
+		const tree = screen.getByRole("tree", { name: "Device tree" });
+		expect(tree).toHaveAttribute("id", "device-tree");
+		expect(tree).toHaveClass("app-tree");
+		expect(tree).toHaveStyle({ backgroundColor: "rgb(1, 2, 3)" });
+		// the rows get their entry and onToggleExpanded, nothing given to TreeView
+		expect(capture.rows().map((row) => row.id)).toEqual(["a", "b"]);
+		const ownProps = [
+			"aria-label",
+			"className",
+			"sx",
+			"data-testid",
+			"data",
+			"renderer",
+			"rendererItemHeight",
+			"onLoadChildren",
+		];
+		for (const row of capture.rows())
+			expect(Object.keys(row).filter((key) => ownProps.includes(key))).toEqual(
+				[],
+			);
+	});
 });
 
 /** Runs fn inside an async act, so the toggle's promise chain settles before the asserts */
