@@ -362,6 +362,55 @@ describe("SignDialog in a dialog stack", () => {
 	});
 });
 
+describe("SignDialog name and onBlur", () => {
+	it.each([
+		["Save", () => fireEvent.click(button("Save Changes"))],
+		["the close button", () => fireEvent.click(button("Close"))],
+		["Escape", () => fireEvent.keyDown(dialog(), { key: "Escape" })],
+	])("[ISSUE-3467-ITEM-9] calls onBlur once when closed by %s", (_, close) => {
+		// what a Form's handleBlur reads: the name or data-name of currentTarget
+		// (React clears currentTarget after dispatch, so record it in the handler)
+		const names: (string | null)[] = [];
+		const onBlur = vi.fn((evt: React.FocusEvent<HTMLElement>) => {
+			names.push(
+				evt.currentTarget.getAttribute("name") ??
+					evt.currentTarget.getAttribute("data-name"),
+			);
+		});
+		withDialogs(<Opener signature={SIG} name="sig" onBlur={onBlur} />);
+		fireEvent.click(screen.getByText("open"));
+		close();
+		expect(screen.queryByRole("dialog")).toBeNull();
+		expect(onBlur, "onBlur calls per close").toHaveBeenCalledTimes(1);
+		expect(names).toEqual(["sig"]);
+	});
+
+	it("[ISSUE-3467-ITEM-9] the blur reported on close holds the field's value after it: the unchanged one, or the one Save just stored", async () => {
+		const values: string[] = [];
+		const onBlur = vi.fn((evt: React.FocusEvent<HTMLInputElement>) => {
+			values.push(evt.currentTarget.value);
+		});
+		const set = vi.fn();
+		// pushed, so the dialog's signature prop keeps the value it opened with
+		withDialogs(
+			<Opener signature={SIG} name="sig" setSignature={set} onBlur={onBlur} />,
+		);
+		fireEvent.click(screen.getByText("open"));
+		fireEvent.click(button("Close"));
+		fireEvent.click(screen.getByText("open"));
+		fireEvent.click(button("Clear signature"));
+		fireEvent.click(await screen.findByRole("button", { name: "Yes" }));
+		await waitFor(() => expect(canvasIn(dialog())).not.toBeNull());
+		fireEvent.click(button("Save Changes"));
+		expect(set).toHaveBeenCalledExactlyOnceWith("");
+		expect(screen.queryByRole("dialog")).toBeNull();
+		expect(values, "input values of the blurs reported on close").toEqual([
+			SIG,
+			"",
+		]);
+	});
+});
+
 describe("SignDialog accessibility", () => {
 	it("[ISSUE-3467-ITEM-16] Tab from the close button goes to Save Changes, and the off-screen input is hidden from assistive technology", async () => {
 		const user = userEvent.setup();

@@ -185,7 +185,8 @@ export interface IDialogConfigForm extends IDialogConfigSimple {
  */
 export interface IDialogConfigSign {
 	/**
-	 * The name of the input
+	 * The field's name, for a Form's blur handling: the name of the off-screen
+	 * input whose blur `onBlur` receives. Default: none
 	 */
 	name?: string;
 	/**
@@ -208,7 +209,13 @@ export interface IDialogConfigSign {
 	 */
 	signerName?: string | null;
 	/**
-	 * Blur event
+	 * Called once each time the user closes the dialog: by Save, the close
+	 * button, Escape or a backdrop click that closes it. The event is the blur
+	 * of an off-screen input in the dialog (its `target` and `currentTarget`),
+	 * which carries `name` and, as its value, the field's value after the
+	 * close: what Save passed to `setSignature`, else the unchanged `signature`
+	 * (`""` for `null`). Not called while the user signs, nor when the dialog
+	 * is closed from outside (e.g. SignaturePad's field unmounts).
 	 */
 	onBlur?: React.FocusEventHandler<HTMLInputElement>;
 }

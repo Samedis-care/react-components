@@ -78,6 +78,7 @@ const meta: Meta<typeof PadHost> = {
 	args: {
 		initial: "",
 		setSignature: fn(),
+		onBlur: fn(),
 	},
 	argTypes: {
 		initial: {
@@ -106,7 +107,11 @@ const meta: Meta<typeof PadHost> = {
 		name: {
 			control: "text",
 			description:
-				"Field name for a Form's blur handling: set on the dialog's hidden input and as `data-name` on its sign area while the dialog is open.",
+				"Field name for a Form's blur handling: the name of the dialog's off-screen input, whose blur `onBlur` receives.",
+		},
+		onBlur: {
+			description:
+				"Called once each time the user closes the dialog (Save, the close button, Escape or a backdrop click), with the blur of the dialog's off-screen input, which carries `name` and the field's value after the close.",
 		},
 		openInfo: {
 			description:

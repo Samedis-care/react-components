@@ -54,9 +54,13 @@ export interface SignPadProps {
 	 */
 	openSignPad?: () => void;
 	/**
-	 * Blur event
+	 * For SignaturePad, which passes it to its dialog: called once each time
+	 * the user closes the dialog (Save, the close button, Escape or a backdrop
+	 * click), with the blur of an off-screen input that carries SignaturePad's
+	 * `name` and the field's value after the close (see SignDialog's `onBlur`).
+	 * The tile itself never calls it.
 	 */
-	onBlur?: React.FocusEventHandler<HTMLDivElement>;
+	onBlur?: React.FocusEventHandler<HTMLInputElement>;
 	/**
 	 * The id of the tile's button, for a label or link of your own that points
 	 * to it. Default: an id generated per tile. The info button gets the id

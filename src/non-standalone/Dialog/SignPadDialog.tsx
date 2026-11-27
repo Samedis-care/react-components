@@ -210,6 +210,20 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 		return merged as unknown as WrapperCanvasProps;
 	}, [t, canvasPropsProp]);
 	const hiddenRef = useRef<HTMLInputElement>(null);
+	/**
+	 * Reports a close to onBlur: as the blur of the off-screen input, which
+	 * carries the field's name and, set here, the field's value after the close
+	 * (the dialog's props may still hold the value it opened with)
+	 * @param value The value Save passed to setSignature, else the unchanged
+	 * signature
+	 */
+	const reportClose = useCallback((value: string) => {
+		const input = hiddenRef.current;
+		if (!input) return;
+		input.value = value;
+		input.focus();
+		input.blur();
+	}, []);
 	const clearCanvas = useCallback(async () => {
 		if (
 			!(await showConfirmDialogBool(pushDialog, {
@@ -232,6 +246,7 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 	}, [pushDialog, signerName, t]);
 
 	const saveCanvas = useCallback(() => {
+		let newSignature: string;
 		if (
 			signCanvas.current &&
 			!signCanvas.current.isEmpty() &&
@@ -245,17 +260,14 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 			const trimmed = trimCanvas(copy);
 			// isEmpty() counts strokes, not pixels: a canvas whose bitmap was
 			// lost still has its strokes, and must not save a blank image
-			const newSignature = isBlankTrim(trimmed)
-				? ""
-				: trimmed.toDataURL("image/png");
-			if (setSignature) setSignature(newSignature);
+			newSignature = isBlankTrim(trimmed) ? "" : trimmed.toDataURL("image/png");
 		} else {
-			if (setSignature) setSignature(resetCanvas ? (signature ?? "") : "");
+			newSignature = resetCanvas ? (signature ?? "") : "";
 		}
-		hiddenRef.current?.focus();
-		hiddenRef.current?.blur();
+		if (setSignature) setSignature(newSignature);
+		reportClose(newSignature);
 		closeThisDialog?.();
-	}, [setSignature, closeThisDialog, signature, resetCanvas]);
+	}, [setSignature, reportClose, closeThisDialog, signature, resetCanvas]);
 
 	// when the dialog opened (performance.now()). A double-click on the tile
 	// opens it with the first click; when the tile lies outside the centered
@@ -279,11 +291,10 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 					performance.now() - openedAt.current < DOUBLE_CLICK_TIME)
 			)
 				return;
-			hiddenRef.current?.focus();
-			hiddenRef.current?.blur();
+			reportClose(signature ?? "");
 			closeThisDialog?.();
 		},
-		[closeThisDialog],
+		[reportClose, closeThisDialog, signature],
 	);
 	const closeCanvasBtn = useCallback(
 		() => closeCanvas({}, "closeBtn"),
@@ -318,7 +329,7 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 					? t("standalone.signature-pad.dialog.instructions-signed")
 					: t("standalone.signature-pad.dialog.instructions")}
 			</Instructions>
-			<SignDiv className={classes?.signDiv} data-name={name} onBlur={onBlur}>
+			<SignDiv className={classes?.signDiv}>
 				{!resetCanvas ? (
 					<SignaturePad
 						ref={signCanvas}
@@ -343,13 +354,12 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 					</ImageDiv>
 				)}
 				<HiddenDiv className={classes?.hiddenDiv}>
-					{/* only the target of the blur the dialog reports when it closes,
-					    carrying the field's name: not a control, so it is out of the
-					    tab order and hidden from assistive technology, as MUI
-					    Select's native input is */}
+					{/* only the target of the blur the dialog reports when it closes
+					    (reportClose), carrying the field's name and value: not a
+					    control, so it is out of the tab order and hidden from
+					    assistive technology, as MUI Select's native input is */}
 					<input
 						type="text"
-						value={signature ?? ""}
 						readOnly
 						ref={hiddenRef}
 						name={name}
