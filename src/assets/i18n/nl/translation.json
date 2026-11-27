@@ -59,7 +59,9 @@
 		"notifications": {
 			"title": "Meldingen",
 			"bell-label_one": "Meldingen, {{count}} ongelezen",
-			"bell-label_other": "Meldingen, {{count}} ongelezen"
+			"bell-label_other": "Meldingen, {{count}} ongelezen",
+			"announce-new_one": "{{count}} nieuwe melding",
+			"announce-new_other": "{{count}} nieuwe meldingen"
 		},
 		"how-it-works": {
 			"title": "Hoe werkt het"

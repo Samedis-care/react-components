@@ -29,6 +29,7 @@ import InfiniteScroll, { InfiniteScrollProps } from "../InfiniteScroll";
 import timestampToAge from "../../utils/timestampToAge";
 import useCCTranslations from "../../utils/useCCTranslations";
 import useCurrentLocale from "../../utils/useCurrentLocale";
+import visuallyHidden from "../../utils/internal/visuallyHidden";
 
 export interface Notification {
 	/**
@@ -128,10 +129,17 @@ export interface NotificationsProps {
 	 */
 	loadUnread: InfiniteScrollProps["loadMoreTop"] | undefined;
 	/**
-	 * Load the latest notifications
-	 * called at refreshInterval or on page focus
+	 * Load the latest notifications. Called on mount, at `refreshInterval` and
+	 * on window focus.
+	 *
+	 * Return the promise of the load (an async function does): the unread
+	 * count the first load (the call on mount) brings is then not announced
+	 * as new notifications (see `disableAnnouncement`). A function that
+	 * returns nothing counts as done on mount, so a count it brings later is
+	 * announced. The component does not catch a rejection of the promise:
+	 * handle errors inside `loadLatest`.
 	 */
-	loadLatest: () => void;
+	loadLatest: () => void | Promise<unknown>;
 	/**
 	 * Delay between `loadLatest` calls in ms: a positive number up to 2^31 - 1
 	 * (about 24.8 days, the longest timer delay browsers support). `0`
@@ -155,9 +163,33 @@ export interface NotificationsProps {
 	 * Number of unread notifications, shown by the badge and part of the bell's
 	 * accessible name ("Notifications, 2 unread"). When omitted, the number of
 	 * the non-expired `notifications` with `read: false`. `0` hides the badge
-	 * and leaves the name "Notifications".
+	 * and leaves the name "Notifications". A rise is announced as new
+	 * notifications (see `disableAnnouncement`).
 	 */
 	unreadCount?: number;
+	/**
+	 * Switches off the announcement of new notifications.
+	 *
+	 * By default, when the unread count rises, a visually hidden polite status
+	 * region (`role="status"`, theme slot `announcement`) says by how much,
+	 * e.g. "1 new notification" (translated, with the language's plural
+	 * forms): screen-reader users learn of a notification that arrives while
+	 * they work elsewhere on the page, as sighted users see the badge change.
+	 * The text is removed after a few seconds. Not announced: the count on
+	 * mount, the count the first `loadLatest` brings (when it returns the
+	 * load's promise), a falling count, and a rise while this is set.
+	 *
+	 * The component only sees the count, so any rise is announced, also one
+	 * that brings no new notification (e.g. an `unreadCount` that changes from
+	 * the number of loaded notifications to the server's total after the
+	 * first load). While the popover is open, the page behind it, the status
+	 * region included, is hidden from assistive technology.
+	 *
+	 * Set it for every Notifications in the theme's
+	 * `CcNotifications.defaultProps`.
+	 * @default false
+	 */
+	disableAnnouncement?: boolean;
 	/**
 	 * Event handler which fires when the user opens the notifications
 	 */
@@ -175,6 +207,12 @@ export interface NotificationsProps {
 /** The longest delay browsers support for a timer (about 24.8 days) */
 const MAX_TIMER_DELAY = 2 ** 31 - 1;
 const DEFAULT_REFRESH_INTERVAL = 60000;
+/**
+ * How long the announcement of new notifications stays in the status region:
+ * then it is removed, so the region holds no outdated text and the next
+ * announcement is a new text, also when it reads the same.
+ */
+const ANNOUNCEMENT_DURATION = 7000;
 
 /**
  * The delay of the polling interval for a `refreshInterval`, or `null` for no
@@ -287,7 +325,32 @@ const StyledHeader = styled(Typography, {
 	slot: "header",
 })({}) as typeof Typography;
 
-export type NotificationsClassKey = "notificationArea" | "header";
+// announces new notifications (a live region must exist before its text
+// changes, so it is rendered while announcements are on)
+const StyledAnnouncement = styled("span", {
+	name: "CcNotifications",
+	slot: "announcement",
+})(visuallyHidden);
+
+/**
+ * Theme style slots of Notifications
+ * (`components.CcNotifications.styleOverrides.<slot>`), and the keys of its
+ * `classes` prop:
+ * - `notificationArea`: the scrolling list of notifications in the popover
+ * - `header`: the popover's "Notifications" heading
+ * - `announcement`: the visually hidden status region that announces new
+ *   notifications (see `disableAnnouncement`)
+ */
+export type NotificationsClassKey =
+	"notificationArea" | "header" | "announcement";
+
+/** An announcement of new notifications */
+interface Announcement {
+	/** By how much the unread count rose */
+	count: number;
+	/** Tells announcements apart: each one is a new element */
+	id: number;
+}
 
 const Notifications = (inProps: NotificationsProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcNotifications" });
@@ -304,6 +367,7 @@ const Notifications = (inProps: NotificationsProps) => {
 		loadUnread,
 		refreshInterval,
 		unreadCount,
+		disableAnnouncement,
 		classes,
 		className,
 		IconButtonProps,
@@ -356,7 +420,7 @@ const Notifications = (inProps: NotificationsProps) => {
 	}, [setAnchor]);
 
 	const handleLoadLatest = useCallback(() => {
-		loadLatest();
+		void loadLatest();
 	}, [loadLatest]);
 
 	const pollingDelay = getPollingDelay(refreshInterval);
@@ -371,9 +435,24 @@ const Notifications = (inProps: NotificationsProps) => {
 			window.clearInterval(intervalHandle);
 		};
 	}, [handleLoadLatest, pollingDelay]);
+	// the first load: the count it brings is not announced
+	const [firstLoadDone, setFirstLoadDone] = useState(false);
 	useEffect(() => {
-		// initial load
-		handleLoadLatest();
+		let mounted = true;
+		const done = () => {
+			if (mounted) setFirstLoadDone(true);
+		};
+		const load = loadLatest();
+		// React renders the state the app sets before its promise settles
+		// together with firstLoadDone (its render waits for the promise
+		// callbacks), so counting starts from the first load's count. A
+		// rejection stays unhandled, as on every other call: the promise
+		// finally() returns rejects with it.
+		if (load instanceof Promise) void load.finally(done);
+		else done();
+		return () => {
+			mounted = false;
+		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -382,6 +461,31 @@ const Notifications = (inProps: NotificationsProps) => {
 		(not) => !not.expires || not.expires > new Date(),
 	);
 	const unread = unreadCount ?? notifications.filter((not) => !not.read).length;
+
+	// the unread count as the announcement counts it: null until the first
+	// load is done and while announcements are off, 0 for a negative count or
+	// NaN. A rise from the count of the render before is announced.
+	const counted =
+		firstLoadDone && !disableAnnouncement ? (unread > 0 ? unread : 0) : null;
+	const [lastCounted, setLastCounted] = useState<number | null>(null);
+	const [announcement, setAnnouncement] = useState<Announcement | null>(null);
+	if (lastCounted !== counted) {
+		setLastCounted(counted);
+		if (counted === null) {
+			setAnnouncement(null);
+		} else if (lastCounted !== null && counted > lastCounted) {
+			const count = counted - lastCounted;
+			setAnnouncement((prev) => ({ count, id: (prev?.id ?? 0) + 1 }));
+		}
+	}
+	useEffect(() => {
+		if (!announcement) return;
+		const timeout = window.setTimeout(
+			() => setAnnouncement(null),
+			ANNOUNCEMENT_DURATION,
+		);
+		return () => window.clearTimeout(timeout);
+	}, [announcement]);
 
 	return (
 		<div className={className}>
@@ -408,6 +512,17 @@ const Notifications = (inProps: NotificationsProps) => {
 					<NotificationsIcon />
 				</Badge>
 			</IconButton>
+			{!disableAnnouncement && (
+				<StyledAnnouncement role={"status"} className={classes?.announcement}>
+					{announcement && (
+						<span key={announcement.id}>
+							{t("standalone.notifications.announce-new", {
+								count: announcement.count,
+							})}
+						</span>
+					)}
+				</StyledAnnouncement>
+			)}
 			<Popover
 				open={open}
 				anchorEl={anchor}

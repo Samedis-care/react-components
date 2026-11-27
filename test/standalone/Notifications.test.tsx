@@ -538,6 +538,127 @@ describe("Notifications: accessibility", () => {
 	});
 });
 
+describe("Notifications: announcing new notifications", () => {
+	afterEach(() => {
+		cleanup();
+		vi.useRealTimers();
+		vi.restoreAllMocks();
+	});
+
+	it("[ISSUE-3468-ITEM-24] announces a rising unread count in a polite status region", () => {
+		const props = base({ unreadCount: 1 });
+		const { rerenderN } = renderN(props);
+		const status = screen.getByRole("status");
+		expect(status, "on mount").toHaveTextContent(/^$/);
+		rerenderN({ ...props, unreadCount: 2 });
+		expect(status).toHaveTextContent(/^1 new notification$/);
+		rerenderN({ ...props, unreadCount: 5 });
+		expect(status).toHaveTextContent(/^3 new notifications$/);
+	});
+
+	it("[ISSUE-3468-ITEM-24] announces a new unread notification without an unreadCount", () => {
+		const props = base({ notifications: [mk({ id: "1", read: true })] });
+		const { rerenderN } = renderN(props);
+		rerenderN({
+			...props,
+			notifications: [mk({ id: "2" }), mk({ id: "1", read: true })],
+		});
+		expect(screen.getByRole("status")).toHaveTextContent(
+			/^1 new notification$/,
+		);
+	});
+
+	it("[ISSUE-3468-ITEM-24] does not announce the count on mount, nor a falling count", () => {
+		const props = base({ unreadCount: 3 });
+		const { rerenderN } = renderN(props);
+		const status = screen.getByRole("status");
+		expect(status, "on mount").toHaveTextContent(/^$/);
+		rerenderN({ ...props, unreadCount: 2 });
+		expect(status, "3 -> 2").toHaveTextContent(/^$/);
+		rerenderN({ ...props, unreadCount: 0 });
+		expect(status, "2 -> 0").toHaveTextContent(/^$/);
+		rerenderN({ ...props, unreadCount: 1 });
+		expect(status, "0 -> 1").toHaveTextContent(/^1 new notification$/);
+	});
+
+	it("[ISSUE-3468-ITEM-24] announces each of two rises of the same size", () => {
+		const props = base({ unreadCount: 1 });
+		const { rerenderN } = renderN(props);
+		const status = screen.getByRole("status");
+		rerenderN({ ...props, unreadCount: 2 });
+		const first = status.firstElementChild;
+		expect(first).toHaveTextContent(/^1 new notification$/);
+		rerenderN({ ...props, unreadCount: 3 });
+		// the same text again changes nothing a screen reader would read out:
+		// the announcement is a new element
+		expect(status).toHaveTextContent(/^1 new notification$/);
+		expect(status.firstElementChild).not.toBe(first);
+	});
+
+	it("[ISSUE-3468-ITEM-24] does not announce the count the first load brings", async () => {
+		let finishLoad = () => {};
+		const firstLoad = new Promise<void>((resolve) => {
+			finishLoad = resolve;
+		});
+		// as an app does: the count is 0 until loadLatest has the server's
+		const AppHeader = ({ arrived }: { arrived: number }) => {
+			const [serverCount, setServerCount] = React.useState(0);
+			const loadLatest = React.useCallback(async () => {
+				await firstLoad;
+				setServerCount(3);
+			}, []);
+			return (
+				<Notifications
+					{...base({ loadLatest })}
+					unreadCount={serverCount + arrived}
+				/>
+			);
+		};
+		const { rerender } = render(<AppHeader arrived={0} />);
+		const status = screen.getByRole("status");
+		const bell = screen.getByRole("button");
+		rerender(<AppHeader arrived={1} />);
+		expect(status, "a rise while the first load runs").toHaveTextContent(/^$/);
+		await act(async () => {
+			finishLoad();
+			await firstLoad;
+		});
+		expect(bell).toHaveAccessibleName("Notifications, 4 unread");
+		expect(status, "the first load").toHaveTextContent(/^$/);
+		rerender(<AppHeader arrived={2} />);
+		expect(status, "a rise after it").toHaveTextContent(/^1 new notification$/);
+	});
+
+	it("[ISSUE-3468-ITEM-24] announces nothing with disableAnnouncement, also not a rise while it was set", () => {
+		const props = base({ unreadCount: 1, disableAnnouncement: true });
+		const { rerenderN } = renderN(props);
+		rerenderN({ ...props, unreadCount: 2 });
+		expect(screen.queryByRole("status")).toBeNull();
+		rerenderN({ ...props, unreadCount: 2, disableAnnouncement: false });
+		const status = screen.getByRole("status");
+		expect(status, "switched on").toHaveTextContent(/^$/);
+		rerenderN({ ...props, unreadCount: 3, disableAnnouncement: false });
+		expect(status).toHaveTextContent(/^1 new notification$/);
+		rerenderN({ ...props, unreadCount: 3, disableAnnouncement: true });
+		expect(screen.queryByRole("status"), "switched off").toBeNull();
+	});
+
+	it("[ISSUE-3468-ITEM-24] removes the announcement after a few seconds, and leaves no timer behind", () => {
+		vi.useFakeTimers();
+		const props = base({ unreadCount: 1, refreshInterval: 0 });
+		const { rerenderN, unmount } = renderN(props);
+		const status = screen.getByRole("status");
+		rerenderN({ ...props, unreadCount: 2 });
+		advance(6_000);
+		expect(status).toHaveTextContent(/^1 new notification$/);
+		advance(1_000);
+		expect(status).toHaveTextContent(/^$/);
+		rerenderN({ ...props, unreadCount: 3 });
+		unmount();
+		expect(vi.getTimerCount(), "timers after unmount").toBe(0);
+	});
+});
+
 describe("Notifications: translations", () => {
 	afterEach(async () => {
 		cleanup();
@@ -627,6 +748,49 @@ describe("Notifications: translations", () => {
 							!texts[`bell-label_${category}`]?.includes("{{count}}"),
 					)
 					.map((category) => `${entry.name}: bell-label_${category}`);
+			});
+		expect(missing).toEqual([]);
+	});
+
+	it("[ISSUE-3468-ITEM-24] announces new notifications with the plural form of the count", async () => {
+		await act(async () => {
+			await ccI18n.changeLanguage("ru");
+		});
+		const { rerenderN } = renderN(base({ unreadCount: 0 }));
+		const status = screen.getByRole("status");
+		const texts = [1, 3, 8].map((unreadCount) => {
+			rerenderN(base({ unreadCount }));
+			return status.textContent;
+		});
+		expect(texts).toEqual([
+			"1 новое уведомление",
+			"2 новых уведомления",
+			"5 новых уведомлений",
+		]);
+	});
+
+	it("[ISSUE-3468-ITEM-24] has the announcement of new notifications with the count in every locale, for each of its plural forms", () => {
+		const i18nDir = path.resolve(__dirname, "../../src/assets/i18n");
+		const missing = fs
+			.readdirSync(i18nDir, { withFileTypes: true })
+			.filter((entry) => entry.isDirectory())
+			.flatMap((entry) => {
+				const translation = JSON.parse(
+					fs.readFileSync(
+						path.join(i18nDir, entry.name, "translation.json"),
+						"utf8",
+					),
+				) as {
+					standalone: { notifications: Record<string, string | undefined> };
+				};
+				const texts = translation.standalone.notifications;
+				return new Intl.PluralRules(entry.name)
+					.resolvedOptions()
+					.pluralCategories.filter(
+						(category) =>
+							!texts[`announce-new_${category}`]?.includes("{{count}}"),
+					)
+					.map((category) => `${entry.name}: announce-new_${category}`);
 			});
 		expect(missing).toEqual([]);
 	});

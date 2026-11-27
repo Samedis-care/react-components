@@ -61,7 +61,11 @@
 			"bell-label_one": "Уведомления, {{count}} непрочитанное",
 			"bell-label_few": "Уведомления, {{count}} непрочитанных",
 			"bell-label_many": "Уведомления, {{count}} непрочитанных",
-			"bell-label_other": "Уведомления, {{count}} непрочитанного"
+			"bell-label_other": "Уведомления, {{count}} непрочитанного",
+			"announce-new_one": "{{count}} новое уведомление",
+			"announce-new_few": "{{count}} новых уведомления",
+			"announce-new_many": "{{count}} новых уведомлений",
+			"announce-new_other": "{{count}} нового уведомления"
 		},
 		"how-it-works": {
 			"title": "Как это устроено"

@@ -64,7 +64,10 @@
 			"title": "Notificaciones",
 			"bell-label_one": "Notificaciones, {{count}} sin leer",
 			"bell-label_many": "Notificaciones, {{count}} sin leer",
-			"bell-label_other": "Notificaciones, {{count}} sin leer"
+			"bell-label_other": "Notificaciones, {{count}} sin leer",
+			"announce-new_one": "{{count}} notificación nueva",
+			"announce-new_many": "{{count}} notificaciones nuevas",
+			"announce-new_other": "{{count}} notificaciones nuevas"
 		},
 		"how-it-works": {
 			"title": "Cómo funciona"

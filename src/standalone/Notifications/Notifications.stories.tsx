@@ -2,6 +2,7 @@ import React, { useCallback, useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
 	Box,
+	Button,
 	createTheme,
 	Grow,
 	ThemeProvider,
@@ -467,5 +468,81 @@ export const Issue3471Item6OpensAtTheFirstNotification: StoryObj<
 		// measured while the transition scaled the list: allow subpixel rounding
 		await expect(first.getBoundingClientRect().top).toBeCloseTo(listTop, 0);
 		await expect(args.onLoadUnread).toHaveBeenCalledTimes(1);
+	},
+};
+
+// ─── Announcing new notifications ─────────────────────────────────────────────
+
+/**
+ * An app's header: the unread count is 0 until the first loadLatest has the
+ * server's (after 200 ms); "Deliver a notification" stands for an export that
+ * is delivered as a notification while the user works on the page.
+ */
+const HeaderWithArrivals = (
+	args: Omit<
+		NotificationsProps,
+		"notifications" | "unreadCount" | "loadLatest"
+	>,
+) => {
+	const [rows, setRows] = useState<Notification[]>([]);
+	const [unreadCount, setUnreadCount] = useState(0);
+	const loadLatest = useCallback(async () => {
+		await new Promise((resolve) => setTimeout(resolve, 200));
+		setRows(sampleNotifications);
+		setUnreadCount(sampleNotifications.filter((row) => !row.read).length);
+	}, []);
+	const deliver = useCallback(() => {
+		setRows((prev) => [
+			{
+				id: `export-${prev.length}`,
+				message: "Your export is ready",
+				origin: "Exports",
+				created: new Date(),
+				read: false,
+			},
+			...prev,
+		]);
+		setUnreadCount((prev) => prev + 1);
+	}, []);
+	return (
+		<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+			<Button variant={"outlined"} onClick={deliver}>
+				Deliver a notification
+			</Button>
+			<Notifications
+				{...args}
+				notifications={rows}
+				unreadCount={unreadCount}
+				loadLatest={loadLatest}
+			/>
+		</Box>
+	);
+};
+
+export const Issue3468Item24AnnouncesNewNotifications: Story = {
+	render: (args) => <HeaderWithArrivals {...args} />,
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3468-ITEM-24: a rising unread count is announced in a visually hidden polite status region, "1 new notification", so screen-reader users learn of a notification that arrives while they work elsewhere on the page. The count the first load brings (here 2, after 200 ms) is not announced. `disableAnnouncement` switches it off.',
+			},
+		},
+	},
+	play: async ({ canvas }) => {
+		const bell = await canvas.findByRole(
+			"button",
+			{ name: "Notifications, 2 unread" },
+			{ timeout: 5000 },
+		);
+		const status = canvas.getByRole("status");
+		await nextFrames();
+		await expect(status, "the first load").toHaveTextContent(/^$/);
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Deliver a notification" }),
+		);
+		await expect(bell).toHaveAccessibleName("Notifications, 3 unread");
+		await expect(status).toHaveTextContent(/^1 new notification$/);
 	},
 };

@@ -60,7 +60,10 @@
 			"title": "Notifications",
 			"bell-label_one": "Notifications, {{count}} non lue",
 			"bell-label_many": "Notifications, {{count}} non lues",
-			"bell-label_other": "Notifications, {{count}} non lues"
+			"bell-label_other": "Notifications, {{count}} non lues",
+			"announce-new_one": "{{count}} nouvelle notification",
+			"announce-new_many": "{{count}} nouvelles notifications",
+			"announce-new_other": "{{count}} nouvelles notifications"
 		},
 		"how-it-works": {
 			"title": "Comment ça fonctionne"
