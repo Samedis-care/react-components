@@ -29,8 +29,9 @@ const StatefulColorInput = function StatefulColorInput(props: Props) {
  * open picker is a dialog named after the field; it takes focus, and shows a
  * focus ring when the keyboard opened it. Typed text is
  * reported as typed, on every keystroke; the picker reports lowercase
- * `#rrggbb`. Nothing is validated. A blur is reported once focus leaves the
- * field, the open picker counting as part of it. The stories hold the value in
+ * `#rrggbb`. ColorInput checks nothing (a model form's color field does). A
+ * blur is reported once focus leaves the field, the open picker counting as
+ * part of it. The stories hold the value in
  * state, as a form would; `value` in the controls sets the starting color.
  *
  * Apps render TextFieldWithHelp with `variant="standard"` (theme default in SCF

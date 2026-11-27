@@ -15,6 +15,7 @@ import {
 	recordData,
 	settle,
 	setupFormTests,
+	trySubmit,
 } from "./formFixture";
 
 setupFormTests();
@@ -81,5 +82,49 @@ describe("Form with a color field", () => {
 			expect.stringContaining("without name"),
 			expect.anything(),
 		);
+	});
+
+	it("[ISSUE-3485-ITEM-19] flags a typo as it is typed and refuses to save it, and takes a stored color in another format", async () => {
+		const [first, ...rest] = recordData();
+		const connector = new MockConnector([
+			{ ...first, color: "rgb(8, 105, 179)" },
+			...rest,
+		]);
+		const update = vi.spyOn(connector, "update");
+		const model = makeModel({}, connector, {
+			color: {
+				type: new ModelDataTypeColorRendererCC(),
+				getLabel: () => "Color",
+				visibility: editRequired,
+				customData: null,
+			},
+		});
+		const sink: Sink = {};
+		const { container } = mountForm(
+			model,
+			capture(sink, () => <FormField name={"color"} />),
+		);
+		await loaded(sink);
+		const input = inputOf(container, "color");
+		expect(input).toHaveValue("rgb(8, 105, 179)");
+		expect(input).toHaveAttribute("aria-invalid", "false");
+
+		fireEvent.change(input, { target: { value: "zzz" } });
+		await settle();
+		expect(input).toHaveAttribute("aria-invalid", "true");
+		expect(input).toHaveAccessibleDescription(
+			"Please enter a valid color, such as #336699",
+		);
+		expect(await trySubmit(sink)).not.toBeNull();
+		await settle();
+		expect(update).not.toHaveBeenCalled();
+
+		fireEvent.change(input, { target: { value: "#336699" } });
+		await settle();
+		expect(input).toHaveAttribute("aria-invalid", "false");
+		expect(input).not.toHaveAccessibleDescription(/color/);
+		expect(await trySubmit(sink)).toBeNull();
+		expect(update).toHaveBeenCalledTimes(1);
+		expect(update.mock.calls[0][0]).toMatchObject({ color: "#336699" });
 	});
 });

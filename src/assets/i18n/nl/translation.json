@@ -364,6 +364,9 @@
 				"boolean": {
 					"true": "Ja",
 					"false": "Nee"
+				},
+				"color": {
+					"validation-error": "Gelieve een correcte kleur in te voeren, bijvoorbeeld #336699"
 				}
 			}
 		}

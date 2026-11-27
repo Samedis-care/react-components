@@ -366,6 +366,9 @@
 				"boolean": {
 					"true": "Sì",
 					"false": "No"
+				},
+				"color": {
+					"validation-error": "Inserisci un colore valido, ad es. #336699"
 				}
 			}
 		}

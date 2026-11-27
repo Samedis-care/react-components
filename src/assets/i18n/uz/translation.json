@@ -364,6 +364,9 @@
 				"boolean": {
 					"true": "Ha",
 					"false": "Yo'q"
+				},
+				"color": {
+					"validation-error": "Iltimos, to'g'ri rangni kiriting, masalan #336699"
 				}
 			}
 		}

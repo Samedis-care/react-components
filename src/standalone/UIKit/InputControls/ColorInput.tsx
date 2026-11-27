@@ -33,8 +33,12 @@ export type ColorInputProps = TextFieldWithHelpProps &
 		"onChange" | "value" | "onClick" | "multiline" | "onBlur"
 	> & {
 		/**
-		 * On Change event handler
-		 * @param newColor The new color or empty string
+		 * Called with the new color text: per keystroke with the text as typed,
+		 * per change in the picker with lowercase `#rrggbb`, and with `""` from
+		 * the Clear button on touch devices. The text is not checked, as in
+		 * MUI's TextField: pass `error` and `helperText` for text that is no
+		 * color. A model form's color field (`TypeColor`) does.
+		 * @param newColor The new color, or an empty string
 		 */
 		onChange: (newColor: string) => void;
 		/**
