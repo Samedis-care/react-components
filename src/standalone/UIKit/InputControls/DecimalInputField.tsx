@@ -20,23 +20,33 @@ export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 	value: number | null;
 	/**
 	 * `Intl.NumberFormatOptions` for the shown text, e.g.
-	 * `{ maximumFractionDigits: 2 }`. Read on every render.
+	 * `{ maximumFractionDigits: 2 }`. Read on every render. The typed text is
+	 * read with the same options, so the field reads its own text back: with
+	 * `{ style: "percent" }` the value 0.75 shows as "75%", and a typed "80%"
+	 * or "80" is 0.8; the symbols of a currency, unit or percent format may be
+	 * typed or left out. Takes no `notation`, `compactDisplay` or
+	 * `currencySign`: their text ("1.2K", "($5.00)") does not read back as the
+	 * number.
 	 * @default undefined (at most 3 fraction digits, grouped)
 	 */
-	format?: Intl.NumberFormatOptions;
+	format?: Omit<
+		Intl.NumberFormatOptions,
+		"notation" | "compactDisplay" | "currencySign"
+	>;
 	/**
-	 * Called on the blur after the user edited the text, with the parsed text,
-	 * and on Enter after an edit, before a form around the field submits (the
-	 * field then shows the value the parent keeps, as after a blur, and the
-	 * next blur calls it only after a further edit). Typing alone, and a blur
-	 * or Enter without an edit, never call it. Not called when the text does
-	 * not parse (a separator without a digit, such as `"."`): the field keeps
-	 * the text and the previous value, and shows a message in place of
-	 * `helperText` until a valid edit or a new `value`.
+	 * Called on the blur after the user edited the text, with the number the
+	 * text shows in `format`, and on Enter after an edit, before a form around
+	 * the field submits (the field then shows the value the parent keeps, as
+	 * after a blur, and the next blur calls it only after a further edit).
+	 * Typing alone, and a blur or Enter without an edit, never call it. Not
+	 * called when the text does not parse (a separator without a digit, such
+	 * as `"."`): the field keeps the text and the previous value, and shows a
+	 * message in place of `helperText` until a valid edit or a new `value`.
 	 * @param evt The blur event, or the keydown event of Enter, although typed
 	 * as a change event; `evt.target` is the input, so `evt.target.name` is its
 	 * `name`
-	 * @param value The number; `null` for an empty field or text without a digit
+	 * @param value The number; `null` for an empty field, or one with nothing
+	 * but the symbols of `format` (such as `"%"`)
 	 */
 	onChange?: (
 		evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
@@ -78,7 +88,7 @@ const DecimalInputField = (
 			},
 		) => {
 			if (draft === null || !onChange) return;
-			const parsed = parseLocalizedNumber(event.target.value);
+			const parsed = parseLocalizedNumber(event.target.value, format);
 			if (parsed !== null && Number.isNaN(parsed)) {
 				// keeps the text, and with it the previous value, until a valid edit
 				setParseError(true);
@@ -92,7 +102,7 @@ const DecimalInputField = (
 				parsed,
 			);
 		},
-		[draft, onChange],
+		[draft, format, onChange],
 	);
 
 	const handleBlur = useCallback(

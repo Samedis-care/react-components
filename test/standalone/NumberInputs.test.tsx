@@ -1,4 +1,12 @@
-import { afterEach, describe, expect, it, type Mock, vi } from "vitest";
+import {
+	afterEach,
+	describe,
+	expect,
+	expectTypeOf,
+	it,
+	type Mock,
+	vi,
+} from "vitest";
 import React, { useState } from "react";
 import {
 	act,
@@ -8,7 +16,9 @@ import {
 	screen,
 } from "@testing-library/react";
 import CurrencyInput from "../../src/standalone/UIKit/InputControls/CurrencyInput";
-import DecimalInputField from "../../src/standalone/UIKit/InputControls/DecimalInputField";
+import DecimalInputField, {
+	type DecimalInputFieldProps,
+} from "../../src/standalone/UIKit/InputControls/DecimalInputField";
 import ccI18n from "../../src/i18n";
 import userEvent from "@testing-library/user-event";
 import IntegerInputField from "../../src/standalone/UIKit/InputControls/IntegerInputField";
@@ -44,6 +54,11 @@ const setLanguage = (lng: string) =>
 const EUR: Intl.NumberFormatOptions = { style: "currency", currency: "EUR" };
 
 const JPY: Intl.NumberFormatOptions = { style: "currency", currency: "JPY" };
+
+const PERCENT: Intl.NumberFormatOptions = {
+	style: "percent",
+	maximumFractionDigits: 1,
+};
 
 /** expected text, built with Intl so the non-breaking spaces match */
 const fmt = (locale: string, num: number, options?: Intl.NumberFormatOptions) =>
@@ -939,6 +954,83 @@ describe("DecimalInputField", () => {
 			fireEvent.change(field("Hours"), { target: { value: "15" } });
 			fireEvent.blur(field("Hours"));
 			expect(field("Hours")).toHaveValue("10");
+		});
+
+		it("[ISSUE-3484-ITEM-9] keeps a percentage on a blur", () => {
+			const onValue: ValueSpy = vi.fn();
+			render(
+				<Controlled initial={0.75} onValue={onValue}>
+					{(value, onChange) => (
+						<DecimalInputField
+							label="Rate"
+							value={value}
+							onChange={onChange}
+							format={{ style: "percent" }}
+						/>
+					)}
+				</Controlled>,
+			);
+			expect(field("Rate")).toHaveValue("75%");
+			tabThrough(field("Rate"));
+			expect(reported(onValue).filter((value) => value !== 0.75)).toEqual([]);
+		});
+
+		/** a percentage field, holding its value as a form does */
+		const Rate = (props: { initial: number | null; onValue: ValueSpy }) => (
+			<Controlled {...props}>
+				{(value, onChange) => (
+					<DecimalInputField
+						label="Rate"
+						value={value}
+						onChange={onChange}
+						format={PERCENT}
+					/>
+				)}
+			</Controlled>
+		);
+
+		it("[ISSUE-3484-ITEM-9] reads an edited percentage back as the fraction it shows", () => {
+			const onValue: ValueSpy = vi.fn();
+			render(<Rate initial={0.75} onValue={onValue} />);
+			fireEvent.change(field("Rate"), { target: { value: "80%" } });
+			fireEvent.blur(field("Rate"));
+			expect(field("Rate")).toHaveValue("80%");
+			// the percent sign may be left out
+			fireEvent.change(field("Rate"), { target: { value: "12.5" } });
+			fireEvent.blur(field("Rate"));
+			expect(field("Rate")).toHaveValue("12.5%");
+			expect(reported(onValue)).toEqual([0.8, 0.125]);
+		});
+
+		it("[ISSUE-3484-ITEM-9] reads an edited percentage in the CC language", async () => {
+			await setLanguage("de");
+			const onValue: ValueSpy = vi.fn();
+			render(<Rate initial={0.75} onValue={onValue} />);
+			expect(field("Rate")).toHaveValue(fmt("de", 0.75, PERCENT));
+			fireEvent.change(field("Rate"), { target: { value: "1.234,5 %" } });
+			fireEvent.blur(field("Rate"));
+			expect(reported(onValue)).toEqual([12.345]);
+			expect(field("Rate")).toHaveValue(fmt("de", 12.345, PERCENT));
+		});
+
+		it("[ISSUE-3484-ITEM-9] reads a field left with nothing but the percent sign as empty", () => {
+			const onValue: ValueSpy = vi.fn();
+			render(<Rate initial={0.75} onValue={onValue} />);
+			// the digits deleted, the sign left
+			fireEvent.change(field("Rate"), { target: { value: "%" } });
+			fireEvent.blur(field("Rate"));
+			expect(reported(onValue)).toEqual([null]);
+			expect(field("Rate")).toHaveValue("");
+			expect(field("Rate")).not.toHaveAttribute("aria-invalid", "true");
+		});
+
+		it("[ISSUE-3484-ITEM-9] takes no format whose text does not read back as its number", () => {
+			type Format = NonNullable<DecimalInputFieldProps["format"]>;
+			// "1.2K" and "1.2E3" would be read as 1.2, "($5.00)" as 5
+			expectTypeOf<Format>().not.toHaveProperty("notation");
+			expectTypeOf<Format>().not.toHaveProperty("compactDisplay");
+			expectTypeOf<Format>().not.toHaveProperty("currencySign");
+			expectTypeOf<Format>().toHaveProperty("style");
 		});
 
 		it("[ISSUE-3484-ITEM-4] shows the value again after a commit of text that parses to it", () => {

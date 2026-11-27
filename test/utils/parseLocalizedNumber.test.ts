@@ -4,6 +4,7 @@ import parseLocalizedNumber from "../../src/utils/parseLocalizedNumber";
 import getNumberSeparator from "../../src/utils/getNumberSeparator";
 
 const initialLanguage = ccI18n.language;
+
 afterAll(async () => {
 	await ccI18n.changeLanguage(initialLanguage);
 });
@@ -81,11 +82,9 @@ describe("parseLocalizedNumber", () => {
 			});
 		});
 	}
-
 	// the number inputs commit what they show, so every language CC offers must
 	// read its own grouped numbers back
 	const GROUPED = [10000, 12345, 99999, 123456, 1234567.5];
-
 	it.each(["ru", "fr", "de", "uz", "en", "nl", "de-AT", "de-CH", "it-CH"])(
 		"reads back the grouped numbers %s formats",
 		async (locale) => {
@@ -96,7 +95,6 @@ describe("parseLocalizedNumber", () => {
 			}
 		},
 	);
-
 	// es and it leave 4-digit numbers ungrouped (minimumGroupingDigits 2)
 	it.each(["es", "es-ES", "it", "it-IT"])(
 		"[ISSUE-3484-ITEM-1] reads back the grouped numbers %s formats",
@@ -108,7 +106,6 @@ describe("parseLocalizedNumber", () => {
 			}
 		},
 	);
-
 	it.each([
 		"ru",
 		"fr",
@@ -214,10 +211,8 @@ describe("parseLocalizedNumber", () => {
 			expect(parseLocalizedNumber(text, options)).toBe(expected);
 		},
 	);
-
 	// the Caribbean guilder's symbol "Cg." contains a dot, the decimal separator of en
 	const XCG: Intl.NumberFormatOptions = { style: "currency", currency: "XCG" };
-
 	it.each(["de", "en", "es", "fr", "it", "nl", "ru", "uz", "en-IN"])(
 		"[ISSUE-3484-ITEM-11] reads back the XCG amounts %s formats",
 		async (locale) => {
@@ -241,6 +236,43 @@ describe("parseLocalizedNumber", () => {
 		async (locale, text, expected) => {
 			await ccI18n.changeLanguage(locale);
 			expect(parseLocalizedNumber(text, XCG)).toBe(expected);
+		},
+	);
+	const PERCENT: Intl.NumberFormatOptions = {
+		style: "percent",
+		maximumFractionDigits: 1,
+	};
+
+	it.each<[string, string, number | null, Intl.NumberFormatOptions]>([
+		["en", "75%", 0.75, PERCENT],
+		// the percent sign may be left out
+		["en", "75", 0.75, PERCENT],
+		["en", "-5%", -0.05, PERCENT],
+		["en", "-0%", 0, PERCENT],
+		["en", "1,234.5%", 12.345, PERCENT],
+		// the number closest to the typed one, which 1.1 / 100 is not
+		["en", "1.1%", 0.011, PERCENT],
+		["de", "75\u00a0%", 0.75, PERCENT],
+		["de", "12,5 %", 0.125, PERCENT],
+		["de", "1.234.5 %", NaN, PERCENT],
+		["en", "%", null, PERCENT],
+		// a percent unit shows the number itself
+		["en", "75%", 75, { style: "unit", unit: "percent" }],
+	])(
+		"[ISSUE-3484-ITEM-9] reads %s text %j as %s",
+		async (locale, text, expected, options) => {
+			await ccI18n.changeLanguage(locale);
+			expect(parseLocalizedNumber(text, options)).toBe(expected);
+		},
+	);
+	it.each(["ru", "fr", "de", "it", "es", "uz", "en", "nl", "de-CH"])(
+		"[ISSUE-3484-ITEM-9] reads back the percentages %s formats",
+		async (locale) => {
+			await ccI18n.changeLanguage(locale);
+			for (const num of [0, 0.05, 0.75, 0.125, 1.5, 12.345, -0.25, 1234.567]) {
+				const formatted = num.toLocaleString(locale, PERCENT);
+				expect(parseLocalizedNumber(formatted, PERCENT), formatted).toBe(num);
+			}
 		},
 	);
 });
