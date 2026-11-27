@@ -541,6 +541,97 @@ export const Issue3482Item8ReadableFills: ActionButtonStory = {
 	},
 };
 
+const DARK = createTheme({ palette: { mode: "dark" } });
+// an app theme that gives disabled ActionButtons a fill of its own
+const OWN_DISABLED_FILL = createTheme({
+	components: {
+		CcActionButton: {
+			styleOverrides: {
+				button: { "&.Mui-disabled": { backgroundColor: "#bcbdbf" } },
+			},
+		},
+	},
+});
+
+/** Disabled ActionButtons without and with a palette color, and a small one */
+const DisabledActionButtons = () => (
+	<Box
+		sx={{
+			display: "flex",
+			gap: 2,
+			alignItems: "center",
+			p: 2,
+			bgcolor: "background.paper",
+		}}
+	>
+		<ActionButton disabled fullWidth={false} icon={<SaveIcon />}>
+			Save
+		</ActionButton>
+		<ActionButton
+			disabled
+			fullWidth={false}
+			color="error"
+			icon={<DeleteIcon />}
+		>
+			Delete
+		</ActionButton>
+		<ActionButton disabled small icon={<CancelIcon />}>
+			Discard
+		</ActionButton>
+	</Box>
+);
+
+export const Issue3482Item19DisabledFill: ActionButtonStory = {
+	parameters: {
+		layout: "padded",
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3482-ITEM-19: a disabled ActionButton is filled with `palette.action.disabled` and its label and icon are `background.paper`, with or without `color`, in the light and the dark palette. A theme that sets `&.Mui-disabled` in `CcActionButton.styleOverrides.button` paints its own fill (bottom).",
+			},
+		},
+	},
+	render: () => (
+		<Box sx={{ display: "grid", gap: 2 }}>
+			<Box data-testid="light">
+				<DisabledActionButtons />
+			</Box>
+			<ThemeProvider theme={DARK}>
+				<Box data-testid="dark">
+					<DisabledActionButtons />
+				</Box>
+			</ThemeProvider>
+			<ThemeProvider theme={OWN_DISABLED_FILL}>
+				<Box data-testid="themed">
+					<DisabledActionButtons />
+				</Box>
+			</ThemeProvider>
+		</Box>
+	),
+	play: async ({ canvas }) => {
+		const rows = [
+			["light", createTheme().palette.action.disabled],
+			["dark", DARK.palette.action.disabled],
+			["themed", "#bcbdbf"],
+		] as const;
+		for (const [row, fill] of rows) {
+			const paper = (row === "dark" ? DARK : createTheme()).palette.background
+				.paper;
+			for (const name of ["Save", "Delete", "Discard"]) {
+				const button = within(canvas.getByTestId(row)).getByRole("button", {
+					name,
+				});
+				const { backgroundColor, color } = colorsOf(button);
+				await expect(backgroundColor, `${row} ${name}'s fill`).toBe(
+					computed(fill),
+				);
+				await expect(color, `${row} ${name}'s text`).toBe(computed(paper));
+			}
+		}
+	},
+};
+
 // how far the centre of a button's icon is from the button's centre, in px
 const iconOffset = (button: HTMLElement) => {
 	const icon = button.querySelector("svg");

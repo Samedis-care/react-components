@@ -12,6 +12,7 @@ import {
 import {
 	Button,
 	createTheme,
+	hexToRgb,
 	IconButton,
 	Theme,
 	ThemeProvider,
@@ -119,6 +120,15 @@ const stubWideScreen = () =>
 			}) as MediaQueryList,
 	);
 
+// jsdom's CSSOM serialises colors as rgb(), emotion's text nodes keep the source form
+const isColor = (values: string[], color: string) => {
+	const source = color.toLowerCase();
+	return (
+		values.includes(source) ||
+		(source.startsWith("#") && values.includes(hexToRgb(source)))
+	);
+};
+
 describe("UIKit", () => {
 	describe("ActionButton", () => {
 		it("renders with text", () => {
@@ -169,7 +179,6 @@ describe("UIKit", () => {
 			);
 			expect(screen.getByRole("button", { name: "Save" })).toBeTruthy();
 		});
-
 		it("[ISSUE-3482-ITEM-1] names an icon-only ActionButton by its label, also while disabled", () => {
 			wrap(
 				<>
@@ -186,7 +195,6 @@ describe("UIKit", () => {
 			expect(screen.queryByRole("button", { name: "Save" })).not.toBeNull();
 			expect(screen.queryByRole("button", { name: "Discard" })).not.toBeNull();
 		});
-
 		it.each([
 			{
 				what: "a small ActionButton",
@@ -217,6 +225,15 @@ describe("UIKit", () => {
 				expect(button).toHaveAccessibleName(name);
 			},
 		);
+		it("[ISSUE-3482-ITEM-19] paints a disabled button in action.disabled", () => {
+			wrap(<ActionButton disabled>Save</ActionButton>);
+			expect(
+				isColor(
+					applied(screen.getByRole("button"), "background-color"),
+					theme.palette.action.disabled,
+				),
+			).toBe(true);
+		});
 	});
 	describe("SubActionButton", () => {
 		it("renders with text", () => {
@@ -933,7 +950,6 @@ describe("UIKit", () => {
 			});
 		});
 	});
-
 	describe("ComponentWithLabel", () => {
 		it("runs the control's own onClick once per click on the caption", () => {
 			// the DataGrid footer pattern

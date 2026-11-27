@@ -41,7 +41,7 @@ const BackActionButtonRoot = styled(ActionButton, {
 			? theme.palette.grey[300]
 			: theme.palette.grey[800];
 	return {
-		// not while disabled: it would outrank the disabled look ActionButton takes from MUI
+		// not while disabled: it would outrank ActionButton's disabled look
 		[`&.${BackButtonDefaultColorClass}:not(.Mui-disabled)`]: {
 			backgroundColor: background,
 			color: theme.palette.getContrastText(background),

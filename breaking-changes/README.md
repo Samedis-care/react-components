@@ -49,6 +49,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [A warning's label keeps its colour while the field is focused or disabled](2026-11-27-warning-label-kept-on-focus.md) | behavior |
 | 2026-11-27 | [TreeView is one tab stop, and its rows are expanded, collapsed, selected and activated with the keys of a tree](2026-11-27-tree-view-keyboard.md) | behavior, type |
 | 2026-11-27 | [ComponentWithLabel's onClick runs once per click on the caption](2026-11-27-component-with-label-on-click-once.md) | behavior |
+| 2026-11-27 | [A disabled ActionButton is filled with `action.disabled`](2026-11-27-action-button-disabled-fill.md) | behavior |
 | 2026-11-26 | [A localized value without text in the UI language shows another language's text](2026-11-26-localized-string-falls-back-to-another-language.md) | behavior |
 | 2026-11-26 | [A HistoryRouter inside another one leaves the page's scroll position and focus alone](2026-11-26-nested-history-router-keeps-page-scroll-and-focus.md) | behavior |
 | 2026-11-26 | [isPlainObject tells a plain object by its prototype; a record with an entry named constructor counts](2026-11-26-is-plain-object-by-prototype.md) | behavior |

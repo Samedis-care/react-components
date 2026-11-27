@@ -122,7 +122,7 @@ const StyledButton = styled(Button, {
 					),
 		},
 		...(color && readableColorFills(theme)),
-		"&:.Mui-disabled": {
+		"&.Mui-disabled": {
 			backgroundColor: theme.palette.action.disabled,
 		},
 		// outside the button: drawn on its own fill, the ring would not show
@@ -219,6 +219,11 @@ export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
  * used as it is: the text keeps primary's `contrastText` and the hover turns
  * the button primary. An override that paints its own fill sets `color` and
  * the `&:hover` fill as well.
+ *
+ * Disabled, it is filled with `palette.action.disabled` and its label and
+ * icon are `background.paper`, with or without `color`. A theme gives
+ * disabled ActionButtons a fill of its own with `&.Mui-disabled` in
+ * `styleOverrides.button`.
  */
 const ActionButton = (inProps: ActionButtonProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcActionButton" });
