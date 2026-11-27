@@ -1077,4 +1077,101 @@ describe("LocaleSelectorDialog", () => {
 			expect(tabStops()).toEqual([austria.getAttribute("aria-posinset")]);
 		});
 	});
+
+	describe("search", () => {
+		/** the result the search announces and the texts of the rendered rows */
+		const result = () => [
+			searchStatus().textContent,
+			...rows().map((row) => row.textContent),
+		];
+		/** the result for each query, in the order given */
+		const resultsOf = async (queries: string[]) => {
+			const results: string[][] = [];
+			for (const query of queries) {
+				await search(query);
+				results.push(result());
+			}
+			return results;
+		};
+
+		it("[ISSUE-3499-ITEM-14] a query without accents finds the names written with them", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={["de", "fr", "es"]} />);
+			await waitRows();
+			for (const [plain, accented] of [
+				["osterreich", "Österreich"],
+				["francais", "français"],
+				["espanol", "español"],
+			]) {
+				const [withAccents, withoutAccents] = await resultsOf([
+					accented,
+					plain,
+				]);
+				// precondition: the names with the accents are rows of the list
+				expect(withAccents[0], accented).not.toBe(noLocalesText());
+				expect(withoutAccents, plain).toEqual(withAccents);
+			}
+			await search("osterreich");
+			expect(rows()).toHaveLength(1);
+			expect(rows()[0]).toHaveTextContent("Austria");
+		});
+
+		it("[ISSUE-3499-ITEM-14] a query with accents or in another case still finds the name, also typed as letter plus combining accent", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={DE} />);
+			await waitRows();
+			for (const query of [
+				"Österreich",
+				"ÖSTERREICH",
+				"Österreich".normalize("NFD"),
+				"Ósterreich",
+			]) {
+				await search(query);
+				expect(
+					rows().map((row) => row.textContent?.includes("Austria")),
+					query,
+				).toEqual([true]);
+			}
+		});
+
+		it("[ISSUE-3499-ITEM-14] blanks around the query are ignored, and blanks inside it count as one", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={["en"]} />);
+			await waitRows();
+			const [exact, ...padded] = await resultsOf([
+				"united states",
+				"united states ",
+				"  united states",
+				"\tunited states\u00a0",
+				"united   states",
+			]);
+			// precondition: the query finds a row
+			expect(exact[0]).toBe("Results: 1");
+			for (const [i, padding] of padded.entries())
+				expect(padding, String(i)).toEqual(exact);
+			const [all, blank] = await resultsOf(["", "   "]);
+			expect(blank).toEqual(all);
+		});
+
+		it("[ISSUE-3499-ITEM-14] the apostrophe of the keyboard finds the names written with a typographic one or the Uzbek letter ʻ", async () => {
+			mount();
+			open(<LocaleSelectorDialog supportedLocales={["uz", "de"]} />);
+			await waitRows();
+			// native_language "o‘zbek" (U+2018) on every Uzbek row, native_country
+			// "Oʻzbekiston" (U+02BB) on Uzbekistan's
+			const [language, ...variants] = await resultsOf([
+				"o\u2018zbek",
+				"o'zbek",
+				"o\u2019zbek",
+				"o\u02bczbek",
+				"o`zbek",
+			]);
+			expect(language[0]).toBe("Results: 4");
+			for (const [i, variant] of variants.entries())
+				expect(variant, String(i)).toEqual(language);
+			await search("o'zbekiston");
+			expect(rows()).toHaveLength(1);
+			expect(rows()[0]).toHaveTextContent("Uzbekistan");
+		});
+	});
 });

@@ -32,6 +32,7 @@ import useListFocusKeeper, {
 } from "./useListFocusKeeper";
 import visuallyHidden from "../../utils/internal/visuallyHidden";
 import rowLocaleOf from "./rowLocaleOf";
+import searchKey from "../../utils/internal/searchKey";
 
 export interface LocaleSelectorDialogContentProps extends LocaleSelectorDialogCommonProps {
 	/**
@@ -60,11 +61,14 @@ export interface LocaleSelectorEntryData {
 }
 
 interface LocaleSelectorEntryFilterData extends LocaleSelectorEntryData {
+	/**
+	 * The locale in lower case, as `rowLocaleOf` gives the current one
+	 */
 	locale_lower: string;
-	country_lower: string;
-	language_lower: string;
-	native_country_lower: string;
-	native_language_lower: string;
+	/**
+	 * The locale and the four names as the search compares them (`searchKey`)
+	 */
+	search_keys: string[];
 }
 
 const LocaleList = styled(Grid, {
@@ -166,7 +170,9 @@ const LocaleSelectorDialogContent = (
 	} = props;
 
 	const [filter, setFilter] = useState("");
-	const lowercaseFilter = filter.toLowerCase();
+	// the query as the search compares it: without the blanks around it, in lower
+	// case, without accents and with one kind of apostrophe
+	const query = searchKey(filter);
 	const { t } = useCCTranslations();
 	const { t: tLocale } = useCCLocaleSwitcherTranslations();
 	const currentLang = useCurrentLanguage();
@@ -213,10 +219,13 @@ const LocaleSelectorDialogContent = (
 				.map((entry) => ({
 					...entry,
 					locale_lower: entry.locale.toLowerCase(),
-					country_lower: entry.country.toLowerCase(),
-					language_lower: entry.language.toLowerCase(),
-					native_country_lower: entry.native_country.toLowerCase(),
-					native_language_lower: entry.native_language.toLowerCase(),
+					search_keys: [
+						entry.locale,
+						entry.country,
+						entry.language,
+						entry.native_country,
+						entry.native_language,
+					].map(searchKey),
 				}))
 				.sort((a, b) => sortByLocaleRelevance(a.locale, b.locale)),
 		[countryLanguageMapping, supported, supportedLangs, tLocale],
@@ -224,15 +233,10 @@ const LocaleSelectorDialogContent = (
 
 	const filteredData = useMemo(
 		() =>
-			data.filter(
-				(entry) =>
-					entry.locale_lower.includes(lowercaseFilter) ||
-					entry.country_lower.includes(lowercaseFilter) ||
-					entry.language_lower.includes(lowercaseFilter) ||
-					entry.native_country_lower.includes(lowercaseFilter) ||
-					entry.native_language_lower.includes(lowercaseFilter),
+			data.filter((entry) =>
+				entry.search_keys.some((key) => key.includes(query)),
 			),
-		[data, lowercaseFilter],
+		[data, query],
 	);
 
 	const currentRow = useMemo(() => rowLocaleOf(currentLocale), [currentLocale]);
