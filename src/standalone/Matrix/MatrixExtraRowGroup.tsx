@@ -36,8 +36,9 @@ const MatrixExtraRowGroup = (props: MatrixExtraRowGroupProps) => {
 		defaultValue: "Add",
 	});
 	const [activeKey, setActiveKey] = useState<string | null>(null);
-	// only true right after an arrow key, so the row does not steal the focus
-	// when it renders
+	// True from an arrow key until the cell it moved to took the focus (that
+	// cell clears it through focusColumn), so the row never takes the focus
+	// unasked when it renders or its cells mount again.
 	const [pullFocus, setPullFocus] = useState(false);
 	// The remembered cell only while its column is on screen: after the
 	// columns change under it (paging to another range), the row falls back

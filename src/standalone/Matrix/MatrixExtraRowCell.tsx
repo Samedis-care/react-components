@@ -79,7 +79,8 @@ export interface MatrixExtraRowCellProps {
 	 */
 	tabStop: boolean;
 	/**
-	 * Take the focus now (an arrow key moved it here)
+	 * Take the focus now (an arrow key moved it here). Once it has, the cell
+	 * calls onFocusColumn, which ends the request.
 	 */
 	pullFocus: boolean;
 	/**
@@ -90,7 +91,8 @@ export interface MatrixExtraRowCellProps {
 		to: "previous" | "next" | "first" | "last",
 	) => void;
 	/**
-	 * This cell took the focus, so its row remembers it as the tab stop
+	 * This cell took the focus, by a focus event or by answering pullFocus, so
+	 * its row remembers it as the tab stop and ends a pending pullFocus
 	 */
 	onFocusColumn: (columnKey: string) => void;
 	/**
@@ -134,8 +136,14 @@ const MatrixExtraRowCell = (props: MatrixExtraRowCellProps) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const { tabStop, pullFocus, onNavigate, onFocusColumn } = props;
 	useEffect(() => {
-		if (pullFocus) ref.current?.focus();
-	}, [pullFocus]);
+		if (!pullFocus) return;
+		ref.current?.focus();
+		// Report it even when no focus event fired (the cell had the focus
+		// already, as after ArrowRight on the last cell): that ends the
+		// request, which would otherwise stay open and pull the focus to this
+		// cell whenever it mounts again, e.g. after paging away and back.
+		onFocusColumn(column.key);
+	}, [pullFocus, onFocusColumn, column.key]);
 	const handleFocus = useCallback(() => {
 		onFocusColumn(column.key);
 	}, [onFocusColumn, column.key]);

@@ -1156,6 +1156,47 @@ describe("MatrixGrid", () => {
 			]);
 			expect(document.activeElement).toBe(outside);
 		});
+		it("[ISSUE-3480-ITEM-13] does not take the focus later after an arrow key at the end of the row", () => {
+			const extra = demandRow();
+			const { rerender } = render(
+				gridElement({ columns: keysOf("c"), extraRows: extra }),
+			);
+			const last = screen.getByRole("button", { name: "Open demand on c4" });
+			act(() => last.focus());
+			fireEvent.keyDown(last, { key: "ArrowRight" }); // already the last one
+			expect(document.activeElement).toBe(last);
+			act(() => screen.getByRole("button", { name: "outside" }).focus());
+			// page away and back (or a refetch rendering no columns for a moment)
+			rerender(gridElement({ columns: keysOf("d"), extraRows: extra }));
+			rerender(gridElement({ columns: keysOf("c"), extraRows: extra }));
+			expect(document.activeElement).toBe(
+				screen.getByRole("button", { name: "outside" }),
+			);
+		});
+		it.each([
+			["End", "c4"],
+			["ArrowLeft", "c1"],
+			["Home", "c1"],
+		] as const)(
+			"[ISSUE-3480-ITEM-13] does not take the focus later after %s on %s, which has it already",
+			(key, columnKey) => {
+				const extra = demandRow();
+				const { rerender } = render(
+					gridElement({ columns: keysOf("c"), extraRows: extra }),
+				);
+				const cell = screen.getByRole("button", {
+					name: `Open demand on ${columnKey}`,
+				});
+				act(() => cell.focus());
+				fireEvent.keyDown(cell, { key });
+				expect(document.activeElement).toBe(cell);
+				const outside = screen.getByRole("button", { name: "outside" });
+				act(() => outside.focus());
+				rerender(gridElement({ columns: [], extraRows: extra }));
+				rerender(gridElement({ columns: keysOf("c"), extraRows: extra }));
+				expect(document.activeElement).toBe(outside);
+			},
+		);
 
 		it("[ISSUE-3480-ITEM-11] puts a cell's badge into what the cell is announced as", () => {
 			render(gridElement({ extraRows: demandRow() }));
