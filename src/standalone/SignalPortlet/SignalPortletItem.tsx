@@ -86,8 +86,23 @@ const AvatarInactive = styled(Avatar, {
 	name: "CcSignalPortletItem",
 	slot: "itemColorInactive",
 })(({ theme }) => ({
-	color: theme.palette.getContrastText(theme.palette.action.disabled),
-	backgroundColor: theme.palette.action.disabled,
+	// the grey of MUI's Avatar without an image, with the text color for it:
+	// the count is content, not a disabled control, and needs 4.5:1. The dark
+	// palette's colors apply in the dark scheme of a theme of CSS variables
+	// too. A scheme sets only these properties, so a theme's color and
+	// backgroundColor for this slot apply in every scheme
+	"--cc-signal-portlet-inactive-color": theme.palette.getContrastText(
+		theme.palette.grey[400],
+	),
+	"--cc-signal-portlet-inactive-background": theme.palette.grey[400],
+	...theme.applyStyles("dark", {
+		"--cc-signal-portlet-inactive-color": theme.palette.getContrastText(
+			theme.palette.grey[600],
+		),
+		"--cc-signal-portlet-inactive-background": theme.palette.grey[600],
+	}),
+	color: "var(--cc-signal-portlet-inactive-color)",
+	backgroundColor: "var(--cc-signal-portlet-inactive-background)",
 }));
 const CountCapped = styled("span", {
 	name: "CcSignalPortletItem",
@@ -130,7 +145,11 @@ const ListRootButton = styled(ListItemButton, {
  * - `listAvatar`: the ListItemAvatar around the count
  * - `itemColorLoading`, `itemColorActive`, `itemColorInactive`: the 40px
  *   Avatar while the count is `null` or `undefined`, when it is non-zero, and
- *   when it is 0
+ *   when it is 0. The active one is `palette.primary.main` with its
+ *   `contrastText`. The inactive one is `palette.grey[400]`, `grey[600]` in a
+ *   dark palette or the dark scheme of a theme of CSS variables, with
+ *   `palette.getContrastText` of that grey as its text color; a `color` and
+ *   `backgroundColor` set for it in the theme apply in every scheme
  * - `countCapped`: the visible "999+" of a count above 999, hidden from
  *   assistive technology
  * - `countFull`: the visually hidden full number of a count above 999, read

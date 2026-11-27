@@ -41,6 +41,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [A Matrix entry says its state and its arrow, its ring stands out, and forced colors keep its shape](2026-11-27-matrix-entry-states-in-words-and-forced-colors.md) | behavior |
 | 2026-11-27 | [DialogTitle calls onClose without arguments](2026-11-27-dialog-title-on-close-without-arguments.md) | behavior |
 | 2026-11-27 | [While a FormDialog button's handler runs, the dialog ignores its buttons, Escape and the backdrop](2026-11-27-form-dialog-busy-while-handler-runs.md) | behavior |
+| 2026-11-27 | [A SignalPortlet zero count is readable](2026-11-27-signal-portlet-zero-count-readable.md) | behavior |
 | 2026-11-27 | [A linked SignalPortlet row is a link](2026-11-27-signal-portlet-linked-rows-are-links.md) | behavior |
 | 2026-11-27 | [An item's `className` in SignalPortlet adds to `classes.item`](2026-11-27-signal-portlet-item-class-name-adds-to-classes-item.md) | behavior |
 | 2026-11-26 | [A localized value without text in the UI language shows another language's text](2026-11-26-localized-string-falls-back-to-another-language.md) | behavior |

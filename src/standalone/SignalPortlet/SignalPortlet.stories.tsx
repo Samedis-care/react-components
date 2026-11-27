@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Box, createTheme, ThemeProvider } from "@mui/material";
+import { Box, createTheme, Grid, ThemeProvider } from "@mui/material";
 import { createMemoryHistory } from "history";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, userEvent, waitFor } from "storybook/test";
@@ -21,6 +21,10 @@ export default meta;
 type Story = StoryObj<typeof SignalPortlet>;
 
 const MINUTE = 60 * 1000;
+
+const ROW_SX = { width: 720 };
+
+const darkTheme = createTheme({ palette: { mode: "dark" } });
 
 const WithRouter = ({ children }: { children: React.ReactNode }) => {
 	const history = useMemo(() => createMemoryHistory(), []);
@@ -262,6 +266,184 @@ const luminance = ({ r, g, b }: Rgba) =>
 const contrast = (a: Rgba, b: Rgba) => {
 	const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
 	return (hi + 0.05) / (lo + 0.05);
+};
+
+/** The Paper's color, including the elevation overlay of the dark palette */
+const paperColor = (paper: Element | null): Rgba => {
+	if (!paper) throw new Error("no Paper");
+	const cs = getComputedStyle(paper);
+	const base = over(parseRgba(cs.backgroundColor), {
+		r: 255,
+		g: 255,
+		b: 255,
+		a: 1,
+	});
+	const overlay = cs.backgroundImage.match(/rgba?\([^)]+\)/);
+	return overlay ? over(parseRgba(overlay[0]), base) : base;
+};
+
+const ZERO_CARD = {
+	title: "Zero",
+	items: [
+		{ count: 0, text: "Nothing to do" },
+		{ count: 3, text: "Open" },
+	],
+};
+
+export const Issue3469Item15ZeroCountIsReadable: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3469-ITEM-15: the "0" of a zero count is white on a translucent grey, 1.88:1 on the default light Paper; in the dark palette it is 3.16:1. Expected: at least 4.5:1 in both palettes. The non-zero avatar next to it passes.',
+			},
+		},
+	},
+	render: () => (
+		<Box sx={ROW_SX}>
+			<Grid container spacing={2}>
+				<Grid size={6} data-palette="light">
+					<SignalPortlet {...ZERO_CARD} />
+				</Grid>
+				<ThemeProvider theme={darkTheme}>
+					<Grid size={6} data-palette="dark">
+						<SignalPortlet {...ZERO_CARD} />
+					</Grid>
+				</ThemeProvider>
+			</Grid>
+		</Box>
+	),
+	play: async ({ canvasElement }) => {
+		const ratios = Array.from(
+			canvasElement.querySelectorAll("[data-palette]"),
+		).flatMap((cell) => {
+			const paper = paperColor(cell.querySelector(".MuiPaper-root"));
+			return Array.from(cell.querySelectorAll(".MuiAvatar-root")).map((av) => {
+				const cs = getComputedStyle(av);
+				const bg = over(parseRgba(cs.backgroundColor), paper);
+				const fg = over(parseRgba(cs.color), bg);
+				return `${cell.getAttribute("data-palette")} ${av.textContent}: ${
+					contrast(fg, bg) >= 4.5 ? "ok" : contrast(fg, bg).toFixed(2)
+				}`;
+			});
+		});
+		await expect(ratios, "count contrast below 4.5:1").toEqual([
+			"light 0: ok",
+			"light 3: ok",
+			"dark 0: ok",
+			"dark 3: ok",
+		]);
+	},
+};
+
+// CSS variables with both color schemes; an element with the class
+// `scheme-dark` gives its subtree the dark scheme's variables
+const cssVarsTheme = createTheme({
+	cssVariables: { colorSchemeSelector: ".scheme-%s" },
+	colorSchemes: { light: true, dark: true },
+});
+// keep the provider's color scheme off the page and out of the storage; MUI types
+// colorSchemeNode only for apps that declare their CSS variables in its types
+const SCHEME_IN_STORY_ONLY = { colorSchemeNode: null, storageManager: null };
+
+/** The text and background color of the zero count in the cell `data-cell={id}` */
+const zeroCountColors = (canvasElement: HTMLElement, id: string) => {
+	const avatar = Array.from(
+		canvasElement.querySelectorAll(`[data-cell="${id}"] .MuiAvatar-root`),
+	).find((av) => av.textContent === "0");
+	if (!avatar) throw new Error(`no zero count in ${id}`);
+	const cs = getComputedStyle(avatar);
+	return { color: cs.color, backgroundColor: cs.backgroundColor };
+};
+
+/**
+ * With a theme of CSS variables, the zero count in the dark color scheme
+ * (right) has the colors of the dark palette (left)
+ */
+export const Issue3469Item15ZeroCountFollowsTheColorScheme: Story = {
+	parameters: { a11y: { test: "error" } },
+	render: () => (
+		<Box sx={ROW_SX}>
+			<Grid container spacing={2}>
+				<ThemeProvider theme={darkTheme}>
+					<Grid size={6} data-cell="palette">
+						<SignalPortlet {...ZERO_CARD} />
+					</Grid>
+				</ThemeProvider>
+				<ThemeProvider theme={cssVarsTheme} {...SCHEME_IN_STORY_ONLY}>
+					<Grid size={6} data-cell="scheme" className="scheme-dark">
+						<SignalPortlet {...ZERO_CARD} />
+					</Grid>
+				</ThemeProvider>
+			</Grid>
+		</Box>
+	),
+	play: async ({ canvasElement }) => {
+		const palette = zeroCountColors(canvasElement, "palette");
+		await expect(palette).toEqual({
+			color: "rgb(255, 255, 255)",
+			backgroundColor: "rgb(117, 117, 117)",
+		});
+		await expect(zeroCountColors(canvasElement, "scheme")).toEqual(palette);
+	},
+};
+
+// an app's own colors for the zero count, in its theme
+const INACTIVE_OVERRIDE = {
+	components: {
+		CcSignalPortletItem: {
+			styleOverrides: {
+				itemColorInactive: {
+					color: "rgb(255, 255, 255)",
+					backgroundColor: "rgb(89, 86, 85)",
+				},
+			},
+		},
+	},
+};
+const darkOverrideTheme = createTheme({
+	palette: { mode: "dark" },
+	...INACTIVE_OVERRIDE,
+});
+const cssVarsOverrideTheme = createTheme({
+	cssVariables: { colorSchemeSelector: ".scheme-%s" },
+	colorSchemes: { light: true, dark: true },
+	...INACTIVE_OVERRIDE,
+});
+
+/**
+ * A theme's `styleOverrides.itemColorInactive` sets the zero count's colors
+ * in a dark palette and in the dark scheme of a theme of CSS variables too
+ */
+export const Issue3469Item15ThemeOverridesZeroCountColors: Story = {
+	parameters: { a11y: { test: "error" } },
+	render: () => (
+		<Box sx={ROW_SX}>
+			<Grid container spacing={2}>
+				<ThemeProvider theme={darkOverrideTheme}>
+					<Grid size={6} data-cell="palette">
+						<SignalPortlet {...ZERO_CARD} />
+					</Grid>
+				</ThemeProvider>
+				<ThemeProvider theme={cssVarsOverrideTheme} {...SCHEME_IN_STORY_ONLY}>
+					<Grid size={6} data-cell="scheme" className="scheme-dark">
+						<SignalPortlet {...ZERO_CARD} />
+					</Grid>
+				</ThemeProvider>
+			</Grid>
+		</Box>
+	),
+	play: async ({ canvasElement }) => {
+		const override = {
+			color: "rgb(255, 255, 255)",
+			backgroundColor: "rgb(89, 86, 85)",
+		};
+		await expect({
+			palette: zeroCountColors(canvasElement, "palette"),
+			scheme: zeroCountColors(canvasElement, "scheme"),
+		}).toEqual({ palette: override, scheme: override });
+	},
 };
 
 const focusStyle = (el: Element) => {
