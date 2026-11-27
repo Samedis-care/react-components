@@ -1,12 +1,13 @@
 import React, { useCallback, useLayoutEffect, useRef } from "react";
-import { styled } from "@mui/material";
+import { styled, SxProps, Theme, useThemeProps } from "@mui/material";
 import { useForkRef } from "@mui/material/utils";
 import ScrollContent from "./ScrollContent";
 
 /**
- * The props of InfiniteScroll. Every prop of a `div` that is not listed here
- * (`role`, `aria-label`, `aria-labelledby`, `id`, `style`, event handlers, …)
- * is passed to the scroll container.
+ * The props of InfiniteScroll, also the type of the theme's
+ * `components.CcInfiniteScroll.defaultProps`. Every prop of a `div` that is
+ * not listed here (`role`, `aria-label`, `aria-labelledby`, `id`, `style`,
+ * event handlers, …) is passed to the scroll container.
  */
 export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement> {
 	/**
@@ -16,17 +17,13 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 */
 	children: React.ReactNode;
 	/**
-	 * The CSS class to apply, must bound the container's height (`height`,
-	 * `max-height`, or `flex: 1` inside a flex column of bounded height) and
-	 * set `overflow: auto`. Without a bounded height the content never
-	 * overflows, so `loadMoreBottom` is called again after every page until
-	 * it stops changing `children`.
-	 *
-	 * The height may change after mount without a render, e.g. `50vh` on a
-	 * window resize or device rotation: the container's size is observed, and
-	 * a container that grows past its content is filled again.
+	 * CSS class names for the scroll container. The styles of an emotion
+	 * class, such as the one `styled(InfiniteScroll)` passes, come after the
+	 * container's `root` styles and the theme's, so they win over them. One
+	 * way to give the container the bounded height it needs (see the
+	 * component).
 	 */
-	className: string;
+	className?: string;
 	/**
 	 * Loads more items above the current ones. Leave it `undefined` to disable
 	 * loading on top, and set it to `undefined` once there is nothing more
@@ -179,7 +176,18 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 * @default 0
 	 */
 	tabIndex?: number;
+	/**
+	 * System styles for the scroll container, as on MUI components
+	 */
+	sx?: SxProps<Theme>;
 }
+
+/**
+ * Theme style slots of InfiniteScroll
+ * (`components.CcInfiniteScroll.styleOverrides.<slot>`): `root` is the
+ * scroll container.
+ */
+export type InfiniteScrollClassKey = "root";
 
 /**
  * The load callbacks, by prop name
@@ -781,11 +789,15 @@ const handleUpdate = (
 };
 
 /**
- * The scroll container. It is a tab stop, so it shows the library's focus
- * ring while it has keyboard focus, drawn inside its edge because an
- * ancestor may clip it.
+ * The scroll container (the `root` slot). It scrolls its content. It is a tab
+ * stop, so it shows the library's focus ring while it has keyboard focus,
+ * drawn inside its edge because an ancestor may clip it.
  */
-const ScrollContainer = styled("div")(({ theme }) => ({
+const InfiniteScrollRoot = styled("div", {
+	name: "CcInfiniteScroll",
+	slot: "root",
+})(({ theme }) => ({
+	overflow: "auto",
 	"&:focus-visible": {
 		outline: `2px solid ${theme.palette.primary.main}`,
 		outlineOffset: -2,
@@ -797,6 +809,23 @@ const ScrollContainer = styled("div")(({ theme }) => ({
  * is a tab stop (see `tabIndex`) and takes the props of a `div`, such as a
  * role and an accessible name.
  *
+ * The scroll container scrolls (`overflow: auto`) and needs a bounded
+ * height: `height`, `max-height`, or `flex: 1` inside a flex column of
+ * bounded height, set through `className`, `styled(InfiniteScroll)`, `sx`,
+ * `style` or the theme. Without one the content never overflows, so
+ * `loadMoreBottom` is called again after every page until it stops changing
+ * `children`. The height may change after mount without a render, e.g.
+ * `50vh` on a window resize or device rotation: the container's size is
+ * observed, and a container that grows past its content is filled again.
+ *
+ * Theme: `components.CcInfiniteScroll.defaultProps` (see
+ * `InfiniteScrollProps`), `styleOverrides.root` (see
+ * `InfiniteScrollClassKey`), and `variants`, which apply to the scroll
+ * container and match the `div` props it gets after the theme's default
+ * props: the ones passed, `tabIndex` and `aria-busy` (`true` while `loading`,
+ * unless passed). InfiniteScroll's own props (`loading`, `threshold`, the
+ * callbacks, …) do not reach it.
+ *
  * It renders no loader, end-of-list or error row and announces nothing:
  * render those inside or around it, with the status as text in a polite live
  * region (`role="status"`) outside the container, and pass `loading` while a
@@ -807,13 +836,16 @@ const ScrollContainer = styled("div")(({ theme }) => ({
  * an item; a scroll to an end loads more, as a scroll by the user does.
  * Scrolling moves the view, not the focus: to move the keyboard there too,
  * focus the item.
- * @param props The props, see `InfiniteScrollProps`
+ * @param inProps The props, see `InfiniteScrollProps`
  * @param ref The ref to the scroll container element
  */
 const InfiniteScroll = React.forwardRef(function InfiniteScroll(
-	props: InfiniteScrollProps,
+	inProps: InfiniteScrollProps,
 	ref: React.ForwardedRef<HTMLDivElement>,
 ) {
+	// the listeners, observers and timers read these, the theme's default
+	// props included
+	const props = useThemeProps({ props: inProps, name: "CcInfiniteScroll" });
 	const {
 		children,
 		loadMoreTop,
@@ -892,7 +924,7 @@ const InfiniteScroll = React.forwardRef(function InfiniteScroll(
 	});
 
 	return (
-		<ScrollContainer
+		<InfiniteScrollRoot
 			{...containerProps}
 			aria-busy={containerProps["aria-busy"] ?? (loading || undefined)}
 			tabIndex={tabIndex ?? 0}
@@ -904,7 +936,7 @@ const InfiniteScroll = React.forwardRef(function InfiniteScroll(
 			>
 				{children}
 			</ScrollContent>
-		</ScrollContainer>
+		</InfiniteScrollRoot>
 	);
 });
 

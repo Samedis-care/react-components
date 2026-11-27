@@ -214,6 +214,10 @@ import {
 	PageTitleProps,
 } from "./non-standalone/PageTitle/PageTitle";
 import {
+	InfiniteScrollClassKey,
+	InfiniteScrollProps,
+} from "./standalone/InfiniteScroll";
+import {
 	NotificationsClassKey,
 	NotificationsProps,
 } from "./standalone/Notifications";
@@ -438,6 +442,7 @@ declare module "@mui/material/styles" {
 		CcPopupMenu: PopupMenuClassKey;
 		CcFilesGrid: FilesGridClassKey;
 		CcPortalLayout: PortalLayoutClassKey;
+		CcInfiniteScroll: InfiniteScrollClassKey;
 		CcNotifications: NotificationsClassKey;
 		CcToast: ToastClassKey;
 		CcMultiSelectWithTags: MultiSelectWithTagsClassKey;
@@ -550,6 +555,7 @@ declare module "@mui/material/styles" {
 		CcPageTitle: Partial<PageTitleProps>;
 		CcPopupMenu: Partial<PopupMenuProps>;
 		CcPortalLayout: Partial<PortalLayoutProps>;
+		CcInfiniteScroll: Partial<InfiniteScrollProps>;
 		CcNotifications: Partial<NotificationsProps>;
 		CcToast: Partial<ToastProps>;
 		CcMultiSelectWithTags: PartialExcept<
@@ -1048,6 +1054,23 @@ declare module "@mui/material/styles" {
 			styleOverrides?: StyleOverridesWithOwnerState<
 				PortalLayoutClassKey,
 				PortalLayoutContainerOwnerState
+			>;
+		};
+		CcInfiniteScroll?: {
+			defaultProps?: ComponentsPropsList["CcInfiniteScroll"];
+			styleOverrides?: StyleOverridesWithoutOwnerState<InfiniteScrollClassKey>;
+			// the root gets the div's props (aria-busy while loading), and none
+			// of InfiniteScroll's own
+			variants?: VariantsWithoutOwnerState<
+				Omit<
+					InfiniteScrollProps,
+					| "children"
+					| "loadMoreTop"
+					| "loadMoreBottom"
+					| "loading"
+					| "threshold"
+					| "callBackDebounce"
+				>
 			>;
 		};
 		// No variants: MUI applies them to the root slot, and Notifications has

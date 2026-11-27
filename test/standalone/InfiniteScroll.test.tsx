@@ -17,6 +17,7 @@ import {
 	type Mock,
 } from "vitest";
 import { act, cleanup, render, screen } from "@testing-library/react";
+import { ThemeProvider, createTheme, styled } from "@mui/material";
 import InfiniteScroll from "../../src/standalone/InfiniteScroll/index";
 
 // jsdom doesn't implement ResizeObserver; provide a class-based stub
@@ -118,6 +119,134 @@ describe("InfiniteScroll", () => {
 				</InfiniteScroll>,
 			),
 		).not.toThrow();
+	});
+});
+
+describe("[ISSUE-3471-ITEM-10] InfiniteScroll theme slot and styling", () => {
+	afterEach(cleanup);
+
+	it("[ISSUE-3471-ITEM-10] renders without a className, and its scroll container scrolls (overflow: auto) by default", () => {
+		const { container } = render(
+			<InfiniteScroll>
+				<div>Row</div>
+			</InfiniteScroll>,
+		);
+		const scroller = container.firstElementChild as HTMLElement;
+		expect(scroller).toHaveTextContent("Row");
+		expect(getComputedStyle(scroller).overflow).toBe("auto");
+	});
+
+	it("[ISSUE-3471-ITEM-10] takes its default props from the theme's CcInfiniteScroll, and the props passed win over them", () => {
+		const themed = createTheme({
+			components: {
+				CcInfiniteScroll: {
+					defaultProps: {
+						className: "from-theme",
+						tabIndex: -1,
+						"aria-label": "Rows",
+					},
+				},
+			},
+		});
+		const { container } = render(
+			<ThemeProvider theme={themed}>
+				<InfiniteScroll>
+					<div />
+				</InfiniteScroll>
+				<InfiniteScroll className="from-props" tabIndex={0}>
+					<div />
+				</InfiniteScroll>
+			</ThemeProvider>,
+		);
+		const [fromTheme, fromProps] = Array.from(container.children);
+		expect(fromTheme).toHaveClass("from-theme");
+		expect(fromTheme).toHaveAttribute("tabindex", "-1");
+		expect(fromTheme).toHaveAccessibleName("Rows");
+		expect(fromProps).toHaveClass("from-props");
+		expect(fromProps).not.toHaveClass("from-theme");
+		expect(fromProps).toHaveAttribute("tabindex", "0");
+	});
+
+	it("[ISSUE-3471-ITEM-10] applies a function in the theme's CcInfiniteScroll styleOverrides.root to the scroll container", () => {
+		const themed = createTheme({
+			components: {
+				CcInfiniteScroll: {
+					styleOverrides: {
+						root: ({ theme }) => ({ padding: theme.spacing(2) }),
+					},
+				},
+			},
+		});
+		const { container } = render(
+			<ThemeProvider theme={themed}>
+				<InfiniteScroll>
+					<div />
+				</InfiniteScroll>
+			</ThemeProvider>,
+		);
+		expect(
+			getComputedStyle(container.firstElementChild as Element).padding,
+		).toBe("16px");
+	});
+
+	it("[ISSUE-3471-ITEM-10] applies the theme's CcInfiniteScroll variants, matched against the div props the scroll container gets, aria-busy while loading included", () => {
+		const themed = createTheme({
+			components: {
+				CcInfiniteScroll: {
+					variants: [
+						{ props: { "aria-busy": true }, style: { opacity: 0.5 } },
+						{ props: { role: "feed" }, style: { marginTop: 4 } },
+					],
+				},
+			},
+		});
+		const { container } = render(
+			<ThemeProvider theme={themed}>
+				<InfiniteScroll loading>
+					<div />
+				</InfiniteScroll>
+				<InfiniteScroll role="feed">
+					<div />
+				</InfiniteScroll>
+			</ThemeProvider>,
+		);
+		const [loading, feed] = Array.from(container.children);
+		expect(getComputedStyle(loading).opacity).toBe("0.5");
+		expect(getComputedStyle(loading).marginTop).not.toBe("4px");
+		expect(getComputedStyle(feed).opacity).not.toBe("0.5");
+		expect(getComputedStyle(feed).marginTop).toBe("4px");
+	});
+
+	it("[ISSUE-3471-ITEM-10] takes sx for the scroll container", () => {
+		const { container } = render(
+			<InfiniteScroll sx={{ height: 120 }}>
+				<div />
+			</InfiniteScroll>,
+		);
+		expect(
+			getComputedStyle(container.firstElementChild as Element).height,
+		).toBe("120px");
+	});
+
+	it("[ISSUE-3471-ITEM-10] can be styled with styled() without passing a className, and those styles win over its own and the theme's", () => {
+		const themed = createTheme({
+			components: {
+				CcInfiniteScroll: {
+					styleOverrides: { root: { overflow: "scroll", padding: 4 } },
+				},
+			},
+		});
+		const StyledScroll = styled(InfiniteScroll)({ overflow: "hidden" });
+		const { container } = render(
+			<ThemeProvider theme={themed}>
+				<StyledScroll>
+					<div />
+				</StyledScroll>
+			</ThemeProvider>,
+		);
+		const style = getComputedStyle(container.firstElementChild as Element);
+		expect(style.overflow).toBe("hidden");
+		expect(style.padding).toBe("4px");
 	});
 });
 
@@ -342,6 +471,34 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 		vi.useRealTimers();
 		vi.unstubAllGlobals();
 		vi.restoreAllMocks();
+	});
+
+	describe("[ISSUE-3471-ITEM-10] theme default props", () => {
+		it("[ISSUE-3471-ITEM-10] loads with the threshold and callBackDebounce of the theme's CcInfiniteScroll default props", () => {
+			const themed = createTheme({
+				components: {
+					CcInfiniteScroll: {
+						defaultProps: { threshold: 0, callBackDebounce: 0 },
+					},
+				},
+			});
+			const bottom = vi.fn();
+			const { container } = render(
+				<ThemeProvider theme={themed}>
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						<div />
+					</InfiniteScroll>
+				</ThemeProvider>,
+			);
+			const scroller = getScroller(container);
+			// 200px left below the visible part: within the default 250px, not within 0
+			scrollTo(scroller, 500);
+			advance(100);
+			expect(bottom).not.toHaveBeenCalled();
+			// at the bottom, called at once
+			scrollTo(scroller, 700);
+			expect(bottom).toHaveBeenCalledTimes(1);
+		});
 	});
 
 	describe("known bugs", () => {

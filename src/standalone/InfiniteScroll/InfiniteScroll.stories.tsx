@@ -29,19 +29,17 @@ const makeItems = (start: number, count: number) =>
 	Array.from({ length: count }, (_, i) => start + i);
 
 /**
- * The scroll container needs a bounded height and overflow: auto. Styling it
- * with styled() still requires the className prop, hence className="".
+ * The scroll container needs a bounded height; it scrolls (overflow: auto) by
+ * default
  */
 const Scroller = styled(InfiniteScroll)({
 	height: 300,
 	width: 300,
-	overflow: "auto",
 });
 
 const ZoomedScroller = styled(InfiniteScroll)({
 	height: 301,
 	width: 300,
-	overflow: "auto",
 });
 
 const Row = styled("div")({
@@ -87,9 +85,7 @@ const BottomScrollStory = ({ onLoadBottom }: { onLoadBottom?: () => void }) => {
 			<Typography variant="caption" sx={{ display: "block", mb: 1 }}>
 				Scroll to the bottom to load more items. Total: {items.length}
 			</Typography>
-			<Scroller className="" loadMoreBottom={loadMoreBottom}>
-				{renderItems(items)}
-			</Scroller>
+			<Scroller loadMoreBottom={loadMoreBottom}>{renderItems(items)}</Scroller>
 		</Box>
 	);
 };
@@ -307,7 +303,7 @@ const ZoomedStory = ({ onLoadBottom }: { onLoadBottom?: () => void }) => {
 	const loadMoreBottom = useCallback(() => onLoadBottom?.(), [onLoadBottom]);
 	return (
 		<Box sx={{ zoom: 1.25 }}>
-			<ZoomedScroller className="" loadMoreBottom={loadMoreBottom}>
+			<ZoomedScroller loadMoreBottom={loadMoreBottom}>
 				{makeItems(1, 40).map((n) => (
 					<FractionalRow key={n}>Item {n}</FractionalRow>
 				))}
@@ -605,7 +601,6 @@ const AsyncLoadingStory = ({ onLoadBottom }: { onLoadBottom?: () => void }) => {
 				Rows
 			</Typography>
 			<Scroller
-				className=""
 				role="region"
 				aria-labelledby={headingId}
 				loadMoreBottom={done ? undefined : loadMoreBottom}
@@ -827,7 +822,6 @@ const FocusableRowsStory = ({
 		<Box sx={{ width: 300 }}>
 			<button type="button">Before the list</button>
 			<Scroller
-				className=""
 				role="region"
 				aria-label="Items"
 				loadMoreBottom={loadMoreBottom}

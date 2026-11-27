@@ -552,7 +552,7 @@ const Notifications = (inProps: NotificationsProps) => {
 							<StyledInfiniteScroll
 								loadMoreBottom={loadRead}
 								loadMoreTop={loadUnread}
-								className={classes?.notificationArea ?? ""}
+								className={classes?.notificationArea}
 								role={"region"}
 								aria-labelledby={headerId}
 							>
