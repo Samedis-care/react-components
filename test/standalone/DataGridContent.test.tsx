@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useContext, useEffect } from "react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import {
 	act,
@@ -20,6 +20,7 @@ import DataGrid, {
 	DataGridData,
 	DataGridProps,
 	DataGridRowData,
+	DataGridUpdateRowContext,
 	IDataGridColumnDef,
 	IDataGridColumnsState,
 	IDataGridLoadDataParameters,
@@ -886,6 +887,48 @@ describe("Cell: ARIA structure", () => {
 		expect(
 			headerWrapper(container, "name").closest("[role='gridcell']"),
 		).not.toBeNull();
+	});
+});
+
+describe("Cell: content that updates its row (DataGridUpdateRowContext)", () => {
+	/** A control in a cell that renames its row, as a saved inline edit does */
+	const Rename = (props: { id: string }) => {
+		const updateRow = useContext(DataGridUpdateRowContext);
+		const rename = useCallback(
+			() => updateRow?.(props.id, { name: "Alicia" }),
+			[updateRow, props.id],
+		);
+		return (
+			<button type="button" onClick={rename}>
+				Rename
+			</button>
+		);
+	};
+
+	it("[ISSUE-3506-ITEM-10] the row changes in place: nothing reloads, the selection and the focused control stay", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		const loadData = loadSpy(() => ({
+			rowsTotal: ROWS.length,
+			rows: [{ ...ROWS[0], note: <Rename id="1" /> }, ROWS[1], ROWS[2]],
+		}));
+		const { container } = render(<Grid loadData={loadData} />);
+		await idle();
+		fireEvent.click(rowCheckbox(container, "Bob")!);
+		expect(rowCheckbox(container, "Bob")).toBeChecked();
+		const button = screen.getByRole("button", { name: "Rename" });
+		button.focus();
+
+		fireEvent.click(button);
+
+		expect(await within(container).findByText("Alicia")).toBeInTheDocument();
+		passDebounce();
+		await idle();
+		expect({
+			loads: loadData.mock.calls.length,
+			bobSelected: rowCheckbox(container, "Bob")?.checked,
+			sameButton: screen.getByRole("button", { name: "Rename" }) === button,
+		}).toEqual({ loads: 1, bobSelected: true, sameButton: true });
+		expect(button).toHaveFocus();
 	});
 });
 

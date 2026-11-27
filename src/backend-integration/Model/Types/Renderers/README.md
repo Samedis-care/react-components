@@ -131,4 +131,4 @@ is none): give it to the control as `aria-label`, i.e. `gridCellLabel ?? label`.
 field's label and the row's label ("Active, Carol Jones"), so a screen reader user can tell
 the rows apart.
 
-If you implement an editable grid control you need to make sure that handleChange is only called when needed. Calling handleChange will send a update request to the backend and refresh the grid.
+If you implement an editable grid control you need to make sure that handleChange is only called when needed. Calling handleChange sends an update request to the backend: the control shows the new value at once, and once it is saved, the grid row shows the saved record.

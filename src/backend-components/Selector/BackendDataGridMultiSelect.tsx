@@ -1,11 +1,4 @@
-import React, {
-	useCallback,
-	useEffect,
-	useId,
-	useReducer,
-	useRef,
-	useState,
-} from "react";
+import React, { useEffect, useId, useReducer, useRef, useState } from "react";
 import { FormLabel, styled } from "@mui/material";
 import { ModelRecord, ModelUnknown } from "../../backend-integration";
 import DataGrid, {
@@ -175,19 +168,12 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 	const getRowLabel = useBackendDataGridRowLabel(model, getRecordLabel);
 	const { t } = useCCTranslations();
 	const statusId = useId();
-	const [refreshToken, setRefreshToken] = useState("");
-	const refreshGrid = useCallback(
-		() => setRefreshToken(new Date().toISOString()),
-		[],
-	);
 	const [initialSelectionChangeReceived, setInitialSelectionChangeReceived] =
 		useState(false);
 	// renders the field again, which hands the grid `selected` again: a new selection
 	// array, which the grid applies when its own selection differs
 	const [, showSelected] = useReducer((renders: number) => renders + 1, 0);
-	const forceRefreshToken = `${
-		gridProps.forceRefreshToken || "undefined"
-	}${refreshToken}`;
+	const { forceRefreshToken } = gridProps;
 	/**
 	 * The selection the pages of the grid's current load are split by (the selected
 	 * records first, then the others), and that load: its query and refresh token. A tick
@@ -315,7 +301,7 @@ const BackendDataGridMultiSelect = <M extends ModelUnknown>(
 						rowsTotal: reportsFiltered ? dataMeta.totalRows : matchCount,
 						rowsFiltered: reportsFiltered ? matchCount : undefined,
 						rows: [...selectedRecords, ...dataRecords].map(
-							renderDataGridRecordUsingModel(model, refreshGrid),
+							renderDataGridRecordUsingModel(model),
 						),
 					};
 				}}

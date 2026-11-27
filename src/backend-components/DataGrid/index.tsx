@@ -366,21 +366,20 @@ export const useBackendDataGridDeleteHandler = <M extends ModelUnknown>(
  * value. A cell renders again in components-care's current language when it changes
  * (ModelCell), since the renderers translate while they render ("Yes", enum labels,
  * formatted dates). A field with an editable overview visibility
- * (ModelVisibilityGridEdit) is edited in its cell, which saves every change at once
- * through the model's mutation (useModelMutation, so the model's cache, hooks and
- * "mutate" listeners hear of it), then calls refreshGrid; a refused save is shown in an
- * error dialog (the cell needs the Framework), and refreshGrid is called as well. The cell's control is named after its
- * field and the row ("Active, example.com"), since a grid cell has no label element to
- * name it (InlineEditCell).
+ * (ModelVisibilityGridEdit) is edited in its cell (InlineEditCell), which needs the
+ * Framework: the control shows a change at once and saves it through the model's
+ * mutation (useModelMutation, so the model's cache, hooks and "mutate" listeners hear of
+ * it). Once saved, the DataGrid the row is in replaces the row with the row of the saved
+ * record, without a reload, so the selection and the focused control stay; a refused
+ * save is shown in an error dialog, and the control shows the row's value again. The
+ * cell's control is named after its field and the row ("Active, example.com"), since a
+ * grid cell has no label element to name it.
  * @param model The model the record belongs to
- * @param refreshGrid Called after an inline edit was saved or refused, to reload the
- *                    rows
  * @returns A function that builds the row of one record. It throws "Not supported"
  *          for an editable field whose renderer has no grid editor.
  */
-export const renderDataGridRecordUsingModel =
-	(model: ModelUnknown, refreshGrid: () => void) =>
-	(
+export const renderDataGridRecordUsingModel = (model: ModelUnknown) => {
+	const renderRow = (
 		entry: ModelRecord<ModelUnknown>,
 	): { id: string } & Record<string, string | null> =>
 		Object.fromEntries(
@@ -417,7 +416,7 @@ export const renderDataGridRecordUsingModel =
 									model={model}
 									field={key}
 									record={entry}
-									refreshGrid={refreshGrid}
+									renderRow={renderRow}
 								/>
 							) : (
 								<ModelCell
@@ -435,6 +434,8 @@ export const renderDataGridRecordUsingModel =
 				})
 				.flat(),
 		) as { id: string } & Record<string, string | null>;
+	return renderRow;
+};
 
 /**
  * The record a row of renderDataGridRecordUsingModel was rendered from: the
@@ -498,10 +499,10 @@ const BackendDataGrid = <M extends ModelUnknown>(
 			return {
 				rowsTotal: meta.totalRows,
 				rowsFiltered: meta.filteredRows,
-				rows: result.map(renderDataGridRecordUsingModel(model, refreshGrid)),
+				rows: result.map(renderDataGridRecordUsingModel(model)),
 			};
 		},
-		[model, refreshGrid],
+		[model],
 	);
 
 	const addNewButtons = useBackendDataGridAddNewButtons(props);

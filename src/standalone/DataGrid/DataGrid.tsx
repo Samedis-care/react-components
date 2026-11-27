@@ -949,6 +949,17 @@ export const useDataGridColumnsWidthState = (): DataGridColumnsWidthState => {
 	return ctx;
 };
 
+/**
+ * Updates a loaded row in place (DataGridDispatch.updateRow), for the content of the
+ * grid's cells: e.g. a control that saved its row's record shows the saved record
+ * without a reload, which would clear the selection and replace the focused control.
+ * Stable for the grid's life.
+ * @remarks undefined outside a DataGrid's cells
+ */
+export const DataGridUpdateRowContext = React.createContext<
+	DataGridDispatch["updateRow"] | undefined
+>(undefined);
+
 export const DataGridRootRefContext = React.createContext<
 	React.RefObject<HTMLDivElement | null> | undefined
 >(undefined);
@@ -1926,12 +1937,18 @@ const DataGrid = (
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [resetView, search, columnStateHash, customData, forceRefreshToken]);
 
+	// manual row updates: through the ref and, for the cells, DataGridUpdateRowContext
+	const updateRow = useCallback<DataGridDispatch["updateRow"]>(
+		(id, update) =>
+			setState((prevState) => dataGridApplyRowUpdate(prevState, id, update)),
+		[setState],
+	);
+
 	// manual row updates, reading the query
 	useImperativeHandle<DataGridDispatch, DataGridDispatch>(
 		ref,
 		() => ({
-			updateRow: (id, update) =>
-				setState((prevState) => dataGridApplyRowUpdate(prevState, id, update)),
+			updateRow,
 			getQuery: () =>
 				dataGridGetQuery(
 					{ search, customData },
@@ -1939,7 +1956,7 @@ const DataGrid = (
 					getAdditionalFilters,
 				),
 		}),
-		[setState, search, customData, columnsState, getAdditionalFilters],
+		[updateRow, search, customData, columnsState, getAdditionalFilters],
 	);
 
 	// selection change event
@@ -1984,13 +2001,15 @@ const DataGrid = (
 									<ContentWrapper size={"grow"} className={classes?.content}>
 										<Settings columns={columns} />
 										<CustomFilterDialog />
-										<Content
-											columns={visibleColumns}
-											rowsPerPage={rowsPerPage}
-											disableSelection={disableSelection}
-											headerHeight={headerHeight}
-											globalScrollListener={globalScrollListener}
-										/>
+										<DataGridUpdateRowContext.Provider value={updateRow}>
+											<Content
+												columns={visibleColumns}
+												rowsPerPage={rowsPerPage}
+												disableSelection={disableSelection}
+												headerHeight={headerHeight}
+												globalScrollListener={globalScrollListener}
+											/>
+										</DataGridUpdateRowContext.Provider>
 									</ContentWrapper>
 									{!disableFooter && (
 										<FooterWrapper

@@ -35,6 +35,11 @@ import {
 	PageVisibility,
 } from "../../../src/backend-integration";
 import { RowLabelContext } from "../../../src/standalone/DataGrid/Content/RowLabel";
+import {
+	DataGridDispatch,
+	DataGridRowData,
+	DataGridUpdateRowContext,
+} from "../../../src/standalone/DataGrid/DataGrid";
 import BackendError from "../../../src/backend-integration/Connector/BackendError";
 import MockConnector from "../../../src/stories/test-utils/MockConnector";
 import ccI18n from "../../../src/i18n";
@@ -183,16 +188,12 @@ const makeModel = () => {
 };
 
 /** The grid row BackendDataGrid builds for the record at the given index */
-const rowOf = async (
-	model: ModelUnknown,
-	refreshGrid: () => void = vi.fn(),
-	index = 0,
-) => {
+const rowOf = async (model: ModelUnknown, index = 0) => {
 	const [records] = await model.index({ page: 1, rows: 25 });
-	return renderDataGridRecordUsingModel(
-		model,
-		refreshGrid,
-	)(records[index]) as Record<string, unknown>;
+	return renderDataGridRecordUsingModel(model)(records[index]) as Record<
+		string,
+		unknown
+	>;
 };
 
 /** Renders one cell of a row the way the grid does: inside the Framework */
@@ -208,6 +209,82 @@ const renderCellWithRowLabel = (cell: unknown, rowLabel: string) =>
 			</RowLabelContext.Provider>
 		</Framework>,
 	);
+
+/**
+ * Renders one cell of a row inside a stand-in for the DataGrid: it holds the row and gives
+ * the cell its updateRow (DataGridUpdateRowContext), as the grid does, so a save shows in
+ * the cell. updateRow is a spy of the calls; show(false) unmounts the cell, as the grid
+ * does with a row scrolled out of view, and show(true) mounts it again.
+ */
+const renderCellInRow = (row: Record<string, unknown>, field: string) => {
+	const updateRow = vi.fn<DataGridDispatch["updateRow"]>();
+	let setShown!: (shown: boolean) => void;
+	const InRow = () => {
+		const [current, setCurrent] = React.useState(row as DataGridRowData);
+		const [shown, setShownState] = React.useState(true);
+		setShown = setShownState;
+		const update = React.useCallback<DataGridDispatch["updateRow"]>(
+			(id, change) => {
+				updateRow(id, change);
+				setCurrent((prev) =>
+					prev.id === id
+						? {
+								...prev,
+								...(typeof change === "function" ? change(prev) : change),
+								id: prev.id,
+							}
+						: prev,
+				);
+			},
+			[],
+		);
+		return (
+			<DataGridUpdateRowContext.Provider value={update}>
+				{shown && (current[field] as React.ReactElement)}
+			</DataGridUpdateRowContext.Provider>
+		);
+	};
+	const result = render(
+		<Framework>
+			<InRow />
+		</Framework>,
+	);
+	return {
+		...result,
+		updateRow,
+		show: (shown: boolean) => act(() => setShown(shown)),
+	};
+};
+
+/** The row an updateRow call put in place of the old one */
+const rowPut = (updateRow: ReturnType<typeof vi.fn>, call = 0) =>
+	updateRow.mock.calls[call][1] as Record<string, unknown>;
+
+/**
+ * Lets the test answer each connector.update when it wants: requests[i].resolve answers
+ * the i-th request with the data it sent (the record as the connector stores it, without
+ * the fields it was not sent), reject refuses it
+ */
+const holdUpdates = (connector: MockConnector) => {
+	const requests: {
+		data: Record<string, unknown>;
+		resolve: () => Promise<void>;
+		reject: (error: Error) => Promise<void>;
+	}[] = [];
+	const update = vi.spyOn(connector, "update").mockImplementation(
+		(data) =>
+			new Promise((resolve, reject) => {
+				requests.push({
+					data,
+					resolve: () =>
+						act(() => Promise.resolve().then(() => resolve([data, {}]))),
+					reject: (error) =>
+						act(() => Promise.resolve().then(() => reject(error))),
+				});
+			}) as never,
+	);
+	return { update, requests };
+};
 
 /** The part of Node's process this file uses (the test config has no Node types) */
 interface RejectionEvents {
@@ -252,7 +329,7 @@ describe("renderDataGridRecordUsingModel", () => {
 		const { container } = renderCell((await rowOf(model)).flag);
 		expect(container).toHaveTextContent(/^Yes$/);
 		cleanup();
-		const second = renderCell((await rowOf(model, vi.fn(), 1)).flag);
+		const second = renderCell((await rowOf(model, 1)).flag);
 		expect(second.container).toHaveTextContent(/^No$/);
 	});
 
@@ -290,15 +367,14 @@ describe("renderDataGridRecordUsingModel", () => {
 		expect(container.querySelector("input[type=hidden]")).toBeNull();
 	});
 
-	it("saves an inline edit through the connector with the record's id, then refreshes the grid", async () => {
+	it("saves an inline edit through the connector with the record's id, then updates its row", async () => {
 		const { model, connector } = makeModel();
 		const update = vi.spyOn(connector, "update");
-		const refreshGrid = vi.fn();
-		renderCell((await rowOf(model, refreshGrid)).active);
+		const { updateRow } = renderCellInRow(await rowOf(model), "active");
 
 		fireEvent.click(screen.getByRole("checkbox"));
 
-		await waitFor(() => expect(refreshGrid).toHaveBeenCalledTimes(1));
+		await waitFor(() => expect(updateRow).toHaveBeenCalledTimes(1));
 		expect(update).toHaveBeenCalledTimes(1);
 		expect(update.mock.calls[0][0]).toEqual({ id: "1", active: false });
 		expect(connector.read("1")[0].active).toBe(false);
@@ -307,12 +383,14 @@ describe("renderDataGridRecordUsingModel", () => {
 	it("saves an inline edit of a dotted field as the nested object", async () => {
 		const { model, connector } = makeModel();
 		const update = vi.spyOn(connector, "update");
-		const refreshGrid = vi.fn();
-		renderCell((await rowOf(model, refreshGrid))["settings.active"]);
+		const { updateRow } = renderCellInRow(
+			await rowOf(model),
+			"settings.active",
+		);
 
 		fireEvent.click(screen.getByRole("checkbox"));
 
-		await waitFor(() => expect(refreshGrid).toHaveBeenCalledTimes(1));
+		await waitFor(() => expect(updateRow).toHaveBeenCalledTimes(1));
 		expect(update.mock.calls[0][0]).toEqual({
 			id: "1",
 			settings: { active: false },
@@ -352,13 +430,15 @@ describe("renderDataGridRecordUsingModel", () => {
 		}
 	});
 
-	it("[ISSUE-3506-ITEM-1] the error dialog names the field and the error, and the grid reloads the stored value", async () => {
+	it("[ISSUE-3506-ITEM-1] the error dialog names the field and the error, and the cell shows the stored value again", async () => {
 		const { model, connector } = makeModel();
 		vi.spyOn(connector, "update").mockRejectedValue(
 			new BackendError("Request failed with status code 403", "forbidden"),
 		);
-		const refreshGrid = vi.fn();
-		renderCell((await rowOf(model, refreshGrid))["settings.active"]);
+		const { updateRow } = renderCellInRow(
+			await rowOf(model),
+			"settings.active",
+		);
 
 		fireEvent.click(screen.getByRole("checkbox"));
 
@@ -366,7 +446,8 @@ describe("renderDataGridRecordUsingModel", () => {
 		expect(dialog).toHaveAccessibleDescription(
 			'The change to "Enabled" was not saved: Request failed with status code 403',
 		);
-		expect(refreshGrid).toHaveBeenCalledTimes(1);
+		expect(screen.getByRole("checkbox", { hidden: true })).toBeChecked();
+		expect(updateRow).not.toHaveBeenCalled();
 		fireEvent.click(within(dialog).getByRole("button", { name: "OK" }));
 		await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 	});
@@ -374,20 +455,20 @@ describe("renderDataGridRecordUsingModel", () => {
 	it("[ISSUE-3506-ITEM-1] a change the model cannot serialize is reported the same way", async () => {
 		const { model, connector } = makeModel();
 		const update = vi.spyOn(connector, "update");
-		const refreshGrid = vi.fn();
-		const row = await rowOf(model, refreshGrid);
+		const row = await rowOf(model);
 		// model.index deserializes with it as well, so it fails only from here on
 		vi.spyOn(model, "applySerialization").mockRejectedValue(
 			new Error("cannot serialize"),
 		);
-		renderCell(row.active);
+		const { updateRow } = renderCellInRow(row, "active");
 
 		fireEvent.click(screen.getByRole("checkbox"));
 
 		expect(await screen.findByRole("dialog")).toHaveAccessibleDescription(
 			'The change to "Active" was not saved: cannot serialize',
 		);
-		expect(refreshGrid).toHaveBeenCalledTimes(1);
+		expect(screen.getByRole("checkbox", { hidden: true })).toBeChecked();
+		expect(updateRow).not.toHaveBeenCalled();
 		expect(update).not.toHaveBeenCalled();
 	});
 
@@ -422,11 +503,10 @@ describe("renderDataGridRecordUsingModel", () => {
 			// a form opened the record before
 			const [before] = await model.getCached("1");
 			expect(before.active).toBe(true);
-			const refreshGrid = vi.fn();
-			renderCell((await rowOf(model, refreshGrid)).active);
+			const { updateRow } = renderCellInRow(await rowOf(model), "active");
 
 			fireEvent.click(screen.getByRole("checkbox"));
-			await waitFor(() => expect(refreshGrid).toHaveBeenCalledTimes(1));
+			await waitFor(() => expect(updateRow).toHaveBeenCalledTimes(1));
 
 			// what a form opened now shows
 			const [after] = await model.getCached("1");
@@ -450,11 +530,13 @@ describe("renderDataGridRecordUsingModel", () => {
 		const { model } = makeModel();
 		const onCreateOrUpdate = vi.fn();
 		model.hooks.onCreateOrUpdate = onCreateOrUpdate;
-		const refreshGrid = vi.fn();
-		renderCell((await rowOf(model, refreshGrid))["settings.active"]);
+		const { updateRow } = renderCellInRow(
+			await rowOf(model),
+			"settings.active",
+		);
 
 		fireEvent.click(screen.getByRole("checkbox"));
-		await waitFor(() => expect(refreshGrid).toHaveBeenCalledTimes(1));
+		await waitFor(() => expect(updateRow).toHaveBeenCalledTimes(1));
 
 		// the record the connector returned, not only the edited value
 		expect(onCreateOrUpdate).toHaveBeenCalledExactlyOnceWith([
@@ -501,15 +583,197 @@ describe("renderDataGridRecordUsingModel", () => {
 			connector,
 		);
 		const update = vi.spyOn(connector, "update");
-		const refreshGrid = vi.fn();
-		renderCell((await rowOf(model, refreshGrid)).active);
+		const { updateRow } = renderCellInRow(await rowOf(model), "active");
 
 		fireEvent.click(screen.getByRole("checkbox"));
-		await waitFor(() => expect(refreshGrid).toHaveBeenCalledTimes(1));
+		await waitFor(() => expect(updateRow).toHaveBeenCalledTimes(1));
 
 		expect(update.mock.calls[0][0]).toEqual({ id: "1", active: false });
 		const [cached] = await model.getCached("1");
 		expect(cached.active).toBe(false);
+	});
+
+	it("[ISSUE-3506-ITEM-10] an inline checkbox shows the click at once, or that it is saving", async () => {
+		const { model, connector } = makeModel();
+		let finish!: () => void;
+		vi.spyOn(connector, "update").mockImplementation(
+			(data) =>
+				new Promise((resolve) => {
+					finish = () => resolve([data, {}]);
+				}) as never,
+		);
+		renderCell((await rowOf(model)).active);
+
+		fireEvent.click(screen.getByRole("checkbox"));
+		await act(async () => {});
+
+		const box = screen.getByRole<HTMLInputElement>("checkbox");
+		const saving = box.disabled || box.closest("[aria-busy=true]") !== null;
+		expect(
+			!box.checked || saving,
+			"the checkbox still looks as before the click, while the save runs",
+		).toBe(true);
+		await act(() => Promise.resolve().then(finish));
+	});
+
+	it("[ISSUE-3506-ITEM-10] a saved inline edit replaces its row with the row of the saved record, and the focused checkbox stays", async () => {
+		const { model } = makeModel();
+		const { updateRow } = renderCellInRow(await rowOf(model), "active");
+		const box = screen.getByRole<HTMLInputElement>("checkbox");
+		box.focus();
+
+		fireEvent.click(box);
+		await waitFor(() => expect(updateRow).toHaveBeenCalledTimes(1));
+
+		const row = rowPut(updateRow);
+		expect(updateRow.mock.calls[0][0]).toBe("1");
+		expect(React.isValidElement(row.active)).toBe(true);
+		expect(React.isValidElement(row.title)).toBe(true);
+		expect({
+			id: row.id,
+			active: row.active_raw,
+			enabled: row["settings.active_raw"],
+			title: row.title_raw,
+			city: row["address.city_raw"],
+			kept: row.kept_raw,
+		}).toEqual({
+			id: "1",
+			active: false,
+			enabled: true,
+			title: "One",
+			city: "Berlin",
+			kept: "k1",
+		});
+		// the same control, not one rendered anew
+		expect(screen.getByRole("checkbox")).toBe(box);
+		expect(box).not.toBeChecked();
+		expect(box).toHaveFocus();
+	});
+
+	it("[ISSUE-3506-ITEM-10] the row takes the values the save returned, and keeps its own where the response has none", async () => {
+		const { model, connector } = makeModel();
+		vi.spyOn(connector, "update").mockImplementation(
+			(data) =>
+				Promise.resolve([
+					// the server changed the title too, and returned neither kept nor the city
+					{ id: data.id, active: data.active, title: "One (checked)" },
+					{},
+				]) as never,
+		);
+		const { updateRow, unmount } = renderCellInRow(
+			await rowOf(model),
+			"active",
+		);
+
+		fireEvent.click(screen.getByRole("checkbox"));
+		await waitFor(() => expect(updateRow).toHaveBeenCalledTimes(1));
+
+		const row = rowPut(updateRow);
+		expect({
+			active: row.active_raw,
+			title: row.title_raw,
+			city: row["address.city_raw"],
+			kept: row.kept_raw,
+			hidden: row.hid_raw,
+		}).toEqual({
+			active: false,
+			title: "One (checked)",
+			city: "Berlin",
+			kept: "k1",
+			hidden: "h1",
+		});
+		unmount();
+		expect(renderCell(row.title).container).toHaveTextContent(
+			/^One \(checked\)$/,
+		);
+	});
+
+	it("[ISSUE-3506-ITEM-10] a click while a save runs shows at once and is saved after it, the last of several only", async () => {
+		const { model, connector } = makeModel();
+		const { update, requests } = holdUpdates(connector);
+		const { updateRow } = renderCellInRow(await rowOf(model), "active");
+		const box = screen.getByRole<HTMLInputElement>("checkbox");
+
+		fireEvent.click(box);
+		await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+		fireEvent.click(box);
+		expect(box).toBeChecked();
+		fireEvent.click(box);
+		expect(box).not.toBeChecked();
+		fireEvent.click(box);
+		expect(box).toBeChecked();
+		// one request at a time
+		expect(update).toHaveBeenCalledTimes(1);
+
+		await requests[0].resolve();
+		await waitFor(() => expect(update).toHaveBeenCalledTimes(2));
+		expect(update.mock.calls.map((call) => call[0])).toEqual([
+			{ id: "1", active: false },
+			{ id: "1", active: true },
+		]);
+		// the first save's row is in place, the box still shows the last click
+		expect(rowPut(updateRow, 0).active_raw).toBe(false);
+		expect(box).toBeChecked();
+
+		await requests[1].resolve();
+		await waitFor(() => expect(updateRow).toHaveBeenCalledTimes(2));
+		expect(rowPut(updateRow, 1).active_raw).toBe(true);
+		expect(box).toBeChecked();
+		expect(update).toHaveBeenCalledTimes(2);
+	});
+
+	it("[ISSUE-3506-ITEM-10] a click back to the value being saved is not sent again", async () => {
+		const { model, connector } = makeModel();
+		const { update, requests } = holdUpdates(connector);
+		const { updateRow } = renderCellInRow(await rowOf(model), "active");
+		const box = screen.getByRole<HTMLInputElement>("checkbox");
+
+		fireEvent.click(box);
+		await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+		fireEvent.click(box);
+		fireEvent.click(box);
+		expect(box).not.toBeChecked();
+
+		await requests[0].resolve();
+		await waitFor(() => expect(updateRow).toHaveBeenCalledTimes(1));
+		expect(box).not.toBeChecked();
+		expect(update).toHaveBeenCalledTimes(1);
+	});
+
+	it("[ISSUE-3506-ITEM-10] a refused save drops the clicks made while it ran, and the cell shows the stored value", async () => {
+		const { model, connector } = makeModel();
+		const { update, requests } = holdUpdates(connector);
+		const { updateRow } = renderCellInRow(await rowOf(model), "active");
+		const box = screen.getByRole<HTMLInputElement>("checkbox");
+
+		fireEvent.click(box);
+		await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+		fireEvent.click(box);
+		fireEvent.click(box);
+		expect(box).not.toBeChecked();
+
+		await requests[0].reject(new BackendError("refused", "refused"));
+		expect(await screen.findByRole("dialog")).toHaveAccessibleDescription(
+			'The change to "Active" was not saved: refused',
+		);
+		expect(box).toBeChecked();
+		expect(update).toHaveBeenCalledTimes(1);
+		expect(updateRow).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3506-ITEM-10] a save that ends after its row was scrolled out of view still updates the row", async () => {
+		const { model, connector } = makeModel();
+		const { update, requests } = holdUpdates(connector);
+		const { updateRow, show } = renderCellInRow(await rowOf(model), "active");
+
+		fireEvent.click(screen.getByRole("checkbox"));
+		await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+		show(false);
+		await requests[0].resolve();
+		await waitFor(() => expect(updateRow).toHaveBeenCalledTimes(1));
+		show(true);
+
+		expect(screen.getByRole("checkbox")).not.toBeChecked();
 	});
 
 	it("[ISSUE-3506-ITEM-9] names an inline checkbox by its field's label", async () => {
@@ -589,7 +853,7 @@ describe("renderDataGridRecordUsingModel: image cells", () => {
 		);
 		cleanup();
 
-		const missing = renderCell((await rowOf(model, vi.fn(), 1)).logo);
+		const missing = renderCell((await rowOf(model, 1)).logo);
 		const placeholder = missing.container.querySelector("img");
 		expect(placeholder).toHaveAttribute("src", PLACEHOLDER);
 		expect(

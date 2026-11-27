@@ -214,6 +214,80 @@ export const Issue3506Item9InlineCheckboxIsNamed: StoryObj = {
 };
 
 /**
+ * ISSUE-3506-ITEM-10: an inline edit reloads the whole grid: the row the user had ticked
+ * for a bulk action is unticked, and focus falls to the page
+ */
+export const Issue3506Item10InlineEditKeepsSelectionAndFocus: StoryObj = {
+	render: () => <InlineEditStory />,
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice")).toBeVisible();
+		await waitFor(() => expect(selectBoxes(canvasElement)).toHaveLength(3));
+		await userEvent.click(selectBoxes(canvasElement)[1]);
+		await expect(selectBoxes(canvasElement)[1]).toBeChecked();
+		await userEvent.click(inlineBoxes(canvasElement)[0]);
+		// the save is shown once the grid reloaded
+		await waitFor(
+			() => expect(inlineBoxes(canvasElement)[0]).not.toBeChecked(),
+			{ timeout: 3000 },
+		);
+		await expect({
+			bobSelected: selectBoxes(canvasElement)[1].checked,
+			focusOnThePage: document.activeElement === document.body,
+		}).toEqual({ bobSelected: true, focusOnThePage: false });
+	},
+};
+
+/**
+ * A connector whose update also sets "Flag" to the new "Active": a save may change more
+ * of the record than the edited field
+ */
+class FlagFollowsActiveConnector extends MockConnector {
+	update(data: Record<string, unknown>) {
+		return super.update(
+			"active" in data ? { ...data, flag: data.active } : data,
+		);
+	}
+}
+
+const SavedRecordStory = () => {
+	const model = useMemo(
+		() =>
+			makeModel("saved-record", new FlagFollowsActiveConnector(PEOPLE), {
+				active: true,
+			}),
+		[],
+	);
+	return <BackendDataGrid model={model} />;
+};
+
+/**
+ * ISSUE-3506-ITEM-10: Space on an inline checkbox shows the change at once; the saved
+ * record then shows in its row (here the server also changed "Flag"), while the row
+ * ticked for a bulk action stays ticked and focus stays on the checkbox
+ */
+export const Issue3506Item10SavedRecordShowsInItsRow: StoryObj = {
+	render: () => <SavedRecordStory />,
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice")).toBeVisible();
+		await waitFor(() => expect(inlineBoxes(canvasElement)).toHaveLength(3));
+		const aliceFlag = () =>
+			canvasElement.querySelector(".CcDataGrid-dataCell.column-flag");
+		await expect(aliceFlag()).toHaveTextContent("Yes");
+		await userEvent.click(selectBoxes(canvasElement)[1]);
+		const box = inlineBoxes(canvasElement)[0];
+		box.focus();
+		await userEvent.keyboard(" ");
+		await expect(box).not.toBeChecked();
+		await waitFor(() => expect(aliceFlag()).toHaveTextContent("No"));
+		await expect(selectBoxes(canvasElement)[1]).toBeChecked();
+		// the same checkbox, still focused: the row was not rendered anew
+		await expect(inlineBoxes(canvasElement)[0]).toBe(box);
+		await expect(box).not.toBeChecked();
+		await expect(box).toHaveFocus();
+	},
+};
+
+/**
  * ISSUE-3506-ITEM-12: Tab to an inline checkbox: MUI marks it focus-visible, but the only
  * cue is the ripple's faint tint
  */
