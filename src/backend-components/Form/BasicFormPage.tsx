@@ -3,6 +3,8 @@ import React, {
 	useCallback,
 	useContext,
 	useEffect,
+	useMemo,
+	useRef,
 	useState,
 } from "react";
 import {
@@ -97,10 +99,53 @@ export type EnhancedGoBackType = {
 		forceNavigate?: boolean,
 	) => Promise<void> | void;
 };
+/**
+ * The Form's customProps as BasicFormPage's footer gets them. Without a goBack function they
+ * are the Form's customProps object itself. With one, they are a copy whose goBack is the
+ * confirming one (EnhancedGoBackType): the copy has the prototype of the Form's customProps
+ * (a class instance's methods stay), and their own properties, getters as getters. The copy is
+ * made again when the Form's customProps change, and its goBack stays the same function for
+ * the life of the page: when called, it calls the goBack of the Form's latest customProps, as
+ * their method (a goBack method keeps its this).
+ */
 export type EnhancedCustomProps<T> =
 	T extends Pick<CrudFormProps, "goBack">
 		? Omit<T, "goBack"> & EnhancedGoBackType
 		: T;
+
+/**
+ * Do the customProps have a goBack function to replace?
+ */
+const hasGoBack = (
+	customProps: unknown,
+): customProps is Pick<CrudFormProps, "goBack"> =>
+	typeof customProps === "object" &&
+	customProps !== null &&
+	typeof (customProps as Partial<CrudFormProps>).goBack === "function";
+
+/**
+ * The customProps with their goBack replaced, or themselves when they have no goBack function
+ * @param customProps The Form's customProps
+ * @param goBack The goBack replacing theirs
+ * @returns A copy with the prototype and the own properties of customProps and the given
+ *          goBack, or customProps themselves
+ */
+const replaceGoBack = <CustomPropsT,>(
+	customProps: CustomPropsT,
+	goBack: EnhancedGoBackType["goBack"],
+): EnhancedCustomProps<CustomPropsT> => {
+	if (!hasGoBack(customProps))
+		return customProps as EnhancedCustomProps<CustomPropsT>;
+	return Object.create(Object.getPrototypeOf(customProps) as object | null, {
+		...Object.getOwnPropertyDescriptors(customProps),
+		goBack: {
+			value: goBack,
+			writable: true,
+			enumerable: true,
+			configurable: true,
+		},
+	}) as EnhancedCustomProps<CustomPropsT>;
+};
 
 export interface BasicFormPageProps<
 	RendererPropsT,
@@ -189,58 +234,67 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 		pageGuard?.enable();
 	}, [pageGuard]);
 
-	// go back confirm dialog if form is dirty
-	const customPropsWithGoBack:
-		EnhancedCustomProps<CustomPropsT> | CustomPropsT =
-		typeof originalCustomProps === "object"
-			? ({
-					...(typeof originalCustomProps === "object"
-						? originalCustomProps
-						: null),
-				} as CustomPropsT)
-			: originalCustomProps;
-	if (
-		typeof originalCustomProps === "object" &&
-		originalCustomProps &&
-		"goBack" in originalCustomProps
-	) {
-		const orgGoBack = (originalCustomProps as unknown as CrudFormProps).goBack;
-		(customPropsWithGoBack as EnhancedGoBackType).goBack =
-			typeof orgGoBack === "function"
-				? async (forceRefresh?: boolean, forceNavigate?: boolean) => {
-						// the changes goBack asks about are the shown values and, in flow mode, the
-						// staged ones, as the form engine sees them now. The dirty props are one render
-						// behind it, which breaks "submit, then go back" (the record is saved, but they
-						// still say dirty). The Form's leave guard follows the engine's dirty event,
-						// also for a change a control in this page announced in its mount effect,
-						// before this page's own effects ran.
-						const unsaved = pageGuard
-							? pageGuard.isUnsaved()
-							: dirty || stagedDirty;
-						try {
-							if (unsaved && !readOnlyBesidesSaving && !forceNavigate) {
-								const leave = await showConfirmDialogBool(pushDialog, {
-									title: t("backend-components.form.back-on-dirty.title"),
-									message: t("backend-components.form.back-on-dirty.message"),
-									textButtonYes: t("backend-components.form.back-on-dirty.yes"),
-									textButtonNo: t("backend-components.form.back-on-dirty.no"),
-								});
-								// the user stays on the form page
-								if (!leave) return;
-							}
-							// the navigation goBack starts does not ask about this form again, and
-							// the form stays guarded if goBack does not leave it
-							if (pageGuard) pageGuard.leave(() => orgGoBack(forceRefresh));
-							else orgGoBack(forceRefresh);
-						} catch (e) {
-							// only the user's "No" cancels: an error of goBack (or of the prompt) is
-							// reported, and shown, so that Back never fails without a word
-							captureError(e, { source: "BasicFormPage.goBack" });
-							await showErrorDialog(pushDialog, e);
-						}
-					}
-				: orgGoBack;
-	}
+	// the confirming goBack reads the page's state and the Form's goBack of the latest render
+	// when it is called, so it stays the same function for the life of the page
+	const pageState = {
+		customProps: originalCustomProps,
+		dirty,
+		stagedDirty,
+		readOnlyBesidesSaving,
+		pageGuard,
+		pushDialog,
+		t,
+	};
+	const latest = useRef(pageState);
+	latest.current = pageState;
+	const confirmingGoBack = useCallback(
+		async (forceRefresh?: boolean, forceNavigate?: boolean) => {
+			const page = latest.current;
+			// the changes goBack asks about are the shown values and, in flow mode, the
+			// staged ones, as the form engine sees them now. The dirty props are one render
+			// behind it, which breaks "submit, then go back" (the record is saved, but they
+			// still say dirty). The Form's leave guard follows the engine's dirty event,
+			// also for a change a control in this page announced in its mount effect,
+			// before this page's own effects ran.
+			const unsaved = page.pageGuard
+				? page.pageGuard.isUnsaved()
+				: page.dirty || page.stagedDirty;
+			try {
+				if (unsaved && !page.readOnlyBesidesSaving && !forceNavigate) {
+					const leave = await showConfirmDialogBool(page.pushDialog, {
+						title: page.t("backend-components.form.back-on-dirty.title"),
+						message: page.t("backend-components.form.back-on-dirty.message"),
+						textButtonYes: page.t("backend-components.form.back-on-dirty.yes"),
+						textButtonNo: page.t("backend-components.form.back-on-dirty.no"),
+					});
+					// the user stays on the form page
+					if (!leave) return;
+				}
+				// the goBack of the customProps of the latest render, called on them, so that
+				// a method keeps its this
+				const go = () => {
+					const { customProps } = latest.current;
+					if (hasGoBack(customProps)) customProps.goBack(forceRefresh);
+				};
+				// the navigation goBack starts does not ask about this form again, and
+				// the form stays guarded if goBack does not leave it
+				const guard = latest.current.pageGuard;
+				if (guard) guard.leave(go);
+				else go();
+			} catch (e) {
+				// only the user's "No" cancels: an error of goBack (or of the prompt) is
+				// reported, and shown, so that Back never fails without a word
+				captureError(e, { source: "BasicFormPage.goBack" });
+				await showErrorDialog(latest.current.pushDialog, e);
+			}
+		},
+		[],
+	);
+	// the Form's customProps themselves, or a copy with the confirming goBack
+	const footerCustomProps = useMemo(
+		() => replaceGoBack(originalCustomProps, confirmingGoBack),
+		[originalCustomProps, confirmingGoBack],
+	);
 
 	const handleSubmit = useCallback(async () => {
 		await submit();
@@ -289,12 +343,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 							disableRouting={disableRouting}
 							submit={handleSubmit}
 							safeSubmit={handleSafeSubmit}
-							customProps={
-								(typeof originalCustomProps === "object" &&
-								originalCustomProps != null
-									? customPropsWithGoBack
-									: originalCustomProps) as EnhancedCustomProps<CustomPropsT>
-							}
+							customProps={footerCustomProps}
 						/>
 					)
 				}

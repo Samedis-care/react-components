@@ -1,18 +1,26 @@
 import "@testing-library/jest-dom/vitest";
 import React, { useState } from "react";
 import { describe, it, expect, vi } from "vitest";
-import { fireEvent, screen, waitFor, within } from "@testing-library/react";
+import {
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	within,
+} from "@testing-library/react";
+import { Framework } from "../../../src/framework";
 import {
 	configureErrorReporting,
 	defaultErrorReporter,
 } from "../../../src/framework/ErrorReporting";
-import { PageProps } from "../../../src/backend-components/Form/Form";
+import Form, { PageProps } from "../../../src/backend-components/Form/Form";
 import FormField from "../../../src/backend-components/Form/Field";
 import BasicFormPage, {
 	BasicFormPageRendererProps,
 	EnhancedCustomProps,
 } from "../../../src/backend-components/Form/BasicFormPage";
 import DefaultFormPage from "../../../src/backend-components/Form/DefaultFormPage";
+import DefaultErrorComponent from "../../../src/backend-components/Form/DefaultErrorComponent";
 import {
 	backButton,
 	buttonNames,
@@ -238,5 +246,182 @@ describe("BasicFormPage with its own footer", () => {
 		expect(settled).toEqual([]);
 		fireEvent.click(within(dialog).getByRole("button", { name: "OK" }));
 		await waitFor(() => expect(settled).toEqual(["resolved"]));
+	});
+
+	it("[ISSUE-3503-ITEM-10] the footer gets the methods of a class instance passed as customProps", async () => {
+		class PersonActions {
+			goBack = vi.fn();
+			describe() {
+				return "Person actions";
+			}
+		}
+		const Footer = (
+			p: BasicFormPageRendererProps<EnhancedCustomProps<PersonActions>>,
+		) => (
+			<span data-testid={"footer"}>
+				{typeof p.customProps.describe === "function"
+					? p.customProps.describe()
+					: "describe() is missing"}
+			</span>
+		);
+		const Page = (props: PageProps<PeopleModel, PersonActions>) => (
+			<BasicFormPage
+				{...props}
+				form={<FormField name="first_name" />}
+				childrenProps={NO_FOOTER_PROPS}
+			>
+				{Footer}
+			</BasicFormPage>
+		);
+		render(
+			<Framework>
+				<Form
+					model={makePeopleModel()}
+					id={"1"}
+					errorComponent={DefaultErrorComponent}
+					customProps={new PersonActions()}
+					disableRouting
+				>
+					{Page}
+				</Form>
+			</Framework>,
+		);
+		await screen.findByDisplayValue("Alice", undefined, LOAD);
+		expect(screen.getByTestId("footer")).toHaveTextContent("Person actions");
+	});
+
+	it("[ISSUE-3503-ITEM-10] without a goBack the footer gets the Form's customProps object itself", async () => {
+		interface LabelProps {
+			label: string;
+		}
+		const seen: LabelProps[] = [];
+		const Recorder = (p: BasicFormPageRendererProps<LabelProps>) => {
+			seen.push(p.customProps);
+			return null;
+		};
+		const Page = (props: PageProps<PeopleModel, LabelProps>) => (
+			<BasicFormPage
+				{...props}
+				form={<FormField name="first_name" />}
+				childrenProps={NO_FOOTER_PROPS}
+			>
+				{Recorder}
+			</BasicFormPage>
+		);
+		const customProps: LabelProps = { label: "no goBack" };
+		render(
+			<Framework>
+				<Form
+					model={makePeopleModel()}
+					id={"1"}
+					errorComponent={DefaultErrorComponent}
+					customProps={customProps}
+					disableRouting
+				>
+					{Page}
+				</Form>
+			</Framework>,
+		);
+		await screen.findByDisplayValue("Alice", undefined, LOAD);
+		expect(seen.length).toBeGreaterThan(0);
+		for (const props of seen) expect(props).toBe(customProps);
+	});
+
+	it("[ISSUE-3503-ITEM-10] the footer's customProps keep their identity while the page re-renders", async () => {
+		const seen: FooterProps["customProps"][] = [];
+		const Recorder = (p: FooterProps) => {
+			seen.push(p.customProps);
+			return null;
+		};
+		mountPage(makeBasicPage(Recorder));
+		const input = await screen.findByDisplayValue("Alice", undefined, LOAD);
+		const rendersBefore = seen.length;
+		// the page re-renders as the form turns dirty
+		fireEvent.change(input, { target: { value: "AliceX" } });
+		await waitFor(() => expect(seen.length).toBeGreaterThan(rendersBefore));
+		expect(new Set(seen).size).toBe(1);
+	});
+
+	it("[ISSUE-3503-ITEM-10] the confirming goBack keeps its identity when the Form gets new customProps, and calls the goBack passed last", async () => {
+		const goBacks: FooterProps["customProps"]["goBack"][] = [];
+		const Footer = (p: FooterProps) => {
+			goBacks.push(p.customProps.goBack);
+			return (
+				<button type={"button"} onClick={() => void p.customProps.goBack()}>
+					Go back
+				</button>
+			);
+		};
+		const Page = makeBasicPage(Footer);
+		const model = makePeopleModel();
+		const mount = (goBack: TestCustomProps["goBack"]) => (
+			<Framework>
+				<Form
+					model={model}
+					id={"1"}
+					errorComponent={DefaultErrorComponent}
+					customProps={{ goBack }}
+					disableRouting
+				>
+					{Page}
+				</Form>
+			</Framework>
+		);
+		const first = vi.fn();
+		const last = vi.fn();
+		const { rerender } = render(mount(first));
+		await screen.findByDisplayValue("Alice", undefined, LOAD);
+		const rendersBefore = goBacks.length;
+		rerender(mount(last));
+		await waitFor(() => expect(goBacks.length).toBeGreaterThan(rendersBefore));
+		expect(new Set(goBacks).size).toBe(1);
+		fireEvent.click(screen.getByRole("button", { name: "Go back" }));
+		await waitFor(() => expect(last).toHaveBeenCalledTimes(1));
+		expect(first).not.toHaveBeenCalled();
+	});
+
+	it("[ISSUE-3503-ITEM-10] a goBack method of a class instance is called on the instance", async () => {
+		class Navigation {
+			steps = 0;
+			goBack() {
+				this.steps += 1;
+			}
+		}
+		const navigation = new Navigation();
+		const Footer = (
+			p: BasicFormPageRendererProps<EnhancedCustomProps<Navigation>>,
+		) => (
+			<button type={"button"} onClick={() => void p.customProps.goBack()}>
+				Go back
+			</button>
+		);
+		const Page = (props: PageProps<PeopleModel, Navigation>) => (
+			<BasicFormPage
+				{...props}
+				form={<FormField name="first_name" />}
+				childrenProps={NO_FOOTER_PROPS}
+			>
+				{Footer}
+			</BasicFormPage>
+		);
+		render(
+			<Framework>
+				<Form
+					model={makePeopleModel()}
+					id={"1"}
+					errorComponent={DefaultErrorComponent}
+					customProps={navigation}
+					disableRouting
+				>
+					{Page}
+				</Form>
+			</Framework>,
+		);
+		await screen.findByDisplayValue("Alice", undefined, LOAD);
+		fireEvent.click(screen.getByRole("button", { name: "Go back" }));
+		await waitFor(() => expect(navigation.steps).toBe(1));
+		expect(
+			screen.queryByRole("dialog", { name: "An error occurred" }),
+		).toBeNull();
 	});
 });
