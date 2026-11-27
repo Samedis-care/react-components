@@ -13,6 +13,7 @@ import {
 	Theme,
 } from "@mui/material";
 import readableTextColor from "../../utils/internal/readableTextColor";
+import wrapperRootShouldForwardProp from "../../utils/internal/wrapperRootShouldForwardProp";
 import useCCTranslations from "../../utils/useCCTranslations";
 
 /**
@@ -255,8 +256,9 @@ export type MuiFieldStateLabelProp = "label" | "children";
  * goes through {@link labelWithDirtyText} where it is rendered.
  * @remarks MUI covers error, required and disabled; warning and dirty are ours, and both
  * are presentational, so they are applied here rather than in every control. The wrapper
- * swallows both props so neither reaches the DOM, and forwards everything else including
- * the ref, which the date pickers use to anchor their popup.
+ * swallows both props so neither reaches the DOM, and forwards everything else to the
+ * wrapped component, `classes` included, and the ref, which the date pickers use to
+ * anchor their popup.
  *
  * Every wrapped component shares the `CcFieldState` theme slot, which is the one place to
  * restyle or remove either state for a whole application.
@@ -293,9 +295,12 @@ export const withMuiFieldState = <T extends MuiFieldStateSourceProps>(
 			);
 		},
 	) as unknown as React.ComponentType<T & MuiFieldStateProps>;
-	return styled(FieldState, { name: "CcFieldState", slot: "root" })<
-		T & MuiFieldStateProps
-	>(({ theme, warning, dirty }) => ({
+	return styled(FieldState, {
+		name: "CcFieldState",
+		slot: "root",
+		// the wrapped component applies `classes`, which a root slot would keep back
+		shouldForwardProp: wrapperRootShouldForwardProp,
+	})<T & MuiFieldStateProps>(({ theme, warning, dirty }) => ({
 		...(dirty && {
 			// the label of a text field, and the legend of a fieldset based control
 			"& > .MuiFormLabel-root::after": dirtyMarkerStyles(theme),

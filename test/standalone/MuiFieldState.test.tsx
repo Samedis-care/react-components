@@ -1,9 +1,14 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import React from "react";
 import { act, cleanup, render, screen } from "@testing-library/react";
-import { createTheme, ThemeProvider } from "@mui/material";
+import { createTheme, Theme, ThemeProvider } from "@mui/material";
 import ccI18n from "../../src/i18n";
+import TextFieldWithHelp from "../../src/standalone/UIKit/TextFieldWithHelp";
+import SingleSelect from "../../src/standalone/Selector/SingleSelect";
+import { selectorLocalLoadHandler } from "../../src/standalone/Selector/BaseSelector";
 import {
+	FormControlCC,
+	FormHelperTextCC,
 	FormLabelCC,
 	labelWithDirtyMarker,
 	labelWithDirtyText,
@@ -20,6 +25,8 @@ const theme = createTheme();
 const Wrap = ({ children }: { children: React.ReactNode }) => (
 	<ThemeProvider theme={theme}>{children}</ThemeProvider>
 );
+const wrap = (ui: React.ReactNode, withTheme: Theme = theme) =>
+	render(<ThemeProvider theme={withTheme}>{ui}</ThemeProvider>);
 
 afterEach(async () => {
 	cleanup();
@@ -140,4 +147,52 @@ describe("dirty state in the field's name", () => {
 			expect(mark("Files", undefined)).toBe("Files");
 		},
 	);
+});
+
+describe("withMuiFieldState", () => {
+	it("[ISSUE-3483-ITEM-11] passes the classes prop on to the wrapped control", async () => {
+		wrap(
+			<>
+				<TextFieldCC label="T" classes={{ root: "x-tf-root" }} />
+				<FormControlCC classes={{ root: "x-fc-root" }}>
+					<FormLabelCC required classes={{ asterisk: "x-asterisk" }}>
+						L
+					</FormLabelCC>
+					<FormHelperTextCC classes={{ root: "x-ht-root" }}>h</FormHelperTextCC>
+				</FormControlCC>
+				<TextFieldWithHelp label="W" classes={{ root: "x-tfwh-root" }} />
+			</>,
+		);
+		await screen.findByRole("textbox", { name: "W" });
+		const found = [
+			"x-tf-root",
+			"x-fc-root",
+			"x-asterisk",
+			"x-ht-root",
+			"x-tfwh-root",
+		].filter((name) => document.getElementsByClassName(name).length === 1);
+		expect(found).toEqual([
+			"x-tf-root",
+			"x-fc-root",
+			"x-asterisk",
+			"x-ht-root",
+			"x-tfwh-root",
+		]);
+	});
+
+	it("[ISSUE-3483-ITEM-11] passes a selector's textFieldClasses on to its text field", async () => {
+		wrap(
+			<SingleSelect
+				label="Country"
+				onLoad={selectorLocalLoadHandler([])}
+				selected={null}
+				onSelect={vi.fn()}
+				textFieldClasses={{ root: "x-selector-root" }}
+			/>,
+		);
+		const input = await screen.findByRole("combobox", { name: "Country" });
+		// the root of the text field the combobox is in, which MUI's TextField puts
+		// its classes.root on
+		expect(input.closest(".MuiTextField-root")).toHaveClass("x-selector-root");
+	});
 });

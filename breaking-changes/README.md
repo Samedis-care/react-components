@@ -45,6 +45,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [A linked SignalPortlet row is a link](2026-11-27-signal-portlet-linked-rows-are-links.md) | behavior |
 | 2026-11-27 | [SignalPortlet calls onRefresh without arguments](2026-11-27-signal-portlet-on-refresh-without-arguments.md) | behavior |
 | 2026-11-27 | [An item's `className` in SignalPortlet adds to `classes.item`](2026-11-27-signal-portlet-item-class-name-adds-to-classes-item.md) | behavior |
+| 2026-11-27 | [The field-state controls and TextFieldWithHelp apply their `classes`](2026-11-27-field-state-controls-apply-classes.md) | behavior |
 | 2026-11-27 | [A warning's label keeps its colour while the field is focused or disabled](2026-11-27-warning-label-kept-on-focus.md) | behavior |
 | 2026-11-26 | [A localized value without text in the UI language shows another language's text](2026-11-26-localized-string-falls-back-to-another-language.md) | behavior |
 | 2026-11-26 | [A HistoryRouter inside another one leaves the page's scroll position and focus alone](2026-11-26-nested-history-router-keeps-page-scroll-and-focus.md) | behavior |

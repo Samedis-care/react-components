@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import React from "react";
 import { PickersTextField, PickersTextFieldProps } from "@mui/x-date-pickers";
+import wrapperRootShouldForwardProp from "../../utils/internal/wrapperRootShouldForwardProp";
 
 export interface UIInputProps {
 	warning?: boolean;
@@ -56,6 +57,8 @@ export const UiKitTextField: React.ComponentType<UiKitTextFieldProps> = styled(
 	{
 		name: "CcUiKitTextField",
 		slot: "root",
+		// TextField applies `classes`, which a root slot would keep back
+		shouldForwardProp: wrapperRootShouldForwardProp,
 	},
 )<UiKitTextFieldProps>(({ theme }) => ({
 	"& .MuiInput-root": inputStyles({ theme }),
