@@ -144,10 +144,21 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 */
 	threshold?: number;
 	/**
-	 * Debounce wait in milliseconds for `loadMoreTop` and `loadMoreBottom`: a
-	 * burst of triggers results in one call, made `callBackDebounce` ms after
-	 * the last trigger. `0` calls the callbacks synchronously. Can be changed
-	 * after mount.
+	 * The wait in milliseconds before `loadMoreTop` or `loadMoreBottom` is
+	 * called: a trigger (a scroll near that end, the fill check after new
+	 * `children` or a size change, focus on the last row) starts the wait, and
+	 * the triggers that come while it runs join it without restarting it. So
+	 * the call is made `callBackDebounce` ms after the first trigger, also
+	 * while the user keeps scrolling: a steady scroll into the last `threshold`
+	 * px gets its call before it reaches the bottom.
+	 * While the triggers go on, e.g. a scroll that stays near the bottom while
+	 * the page loads, the first trigger after the call starts the next wait, so
+	 * the callback is called again every `callBackDebounce` ms: pass `loading`
+	 * while a load runs, so that no call is made until it ends.
+	 *
+	 * `0` calls the callbacks synchronously. Can be changed after mount; it
+	 * applies to the waits that start after the change, and with `0` the next
+	 * trigger calls at once.
 	 *
 	 * A call is made with the callback of the latest render: a callback that is
 	 * replaced or removed while a call waits is not called. A call that still
@@ -415,7 +426,8 @@ interface ScrollState {
 	 */
 	sizeObserver: ResizeObserver | null;
 	/**
-	 * Timer of the pending debounced call per callback, 0 while none is pending
+	 * Timer of the call that waits for `callBackDebounce`, per callback; 0
+	 * while none waits
 	 */
 	loadTimers: Record<LoadCallbackName, number>;
 	/**
@@ -575,16 +587,20 @@ const cancelLoad = (scroll: ScrollState, name: LoadCallbackName): void => {
 };
 
 /**
- * Requests a call of the `loadMoreTop` or `loadMoreBottom` prop: debounced by
- * `callBackDebounce` (a request replaces the pending one), or right away for 0
+ * Requests a call of the `loadMoreTop` or `loadMoreBottom` prop:
+ * `callBackDebounce` ms from now, or right away for 0. A request made while a
+ * call waits joins it and does not restart the wait, so triggers that keep
+ * coming (a steady scroll near an end, new `children` one after another) do
+ * not postpone the call; the first request after the call starts a new wait.
  */
 const requestLoad = (scroll: ScrollState, name: LoadCallbackName): void => {
-	cancelLoad(scroll, name);
 	const wait = scroll.props.callBackDebounce ?? 100;
 	if (wait === 0) {
+		cancelLoad(scroll, name);
 		callLoad(scroll, name);
 		return;
 	}
+	if (scroll.loadTimers[name]) return;
 	scroll.loadTimers[name] = window.setTimeout(() => {
 		scroll.loadTimers[name] = 0;
 		callLoad(scroll, name);

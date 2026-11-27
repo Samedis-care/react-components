@@ -449,6 +449,10 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 				</InfiniteScroll>,
 			);
 			const scroller = getScroller(container);
+			// the call on top that the mount requested, as the list opens at its
+			// top; a call that waits keeps its wait when callBackDebounce changes
+			advance(100);
+			expect(top).toHaveBeenCalledTimes(1);
 
 			rerender(
 				<InfiniteScroll
@@ -463,9 +467,9 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 			scrollTo(scroller, 0);
 			scrollTo(scroller, 0);
 			advance(249);
-			expect(top).toHaveBeenCalledTimes(0);
-			advance(1);
 			expect(top).toHaveBeenCalledTimes(1);
+			advance(1);
+			expect(top).toHaveBeenCalledTimes(2);
 			scrollTo(scroller, 700);
 			scrollTo(scroller, 700);
 			advance(249);
@@ -484,7 +488,7 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 				</InfiniteScroll>,
 			);
 			scrollTo(scroller, 0);
-			expect(top).toHaveBeenCalledTimes(2);
+			expect(top).toHaveBeenCalledTimes(3);
 			scrollTo(scroller, 700);
 			expect(bottom).toHaveBeenCalledTimes(2);
 		});
@@ -2200,6 +2204,135 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 					"focusin",
 					expect.any(Function),
 				);
+			});
+		});
+
+		describe("triggers that keep coming while a call waits", () => {
+			/**
+			 * Scrolls the container from `from` to `to` by `step` px every 50ms, as
+			 * a wheel or touch scroll that does not pause
+			 */
+			const scrollSteadily = (
+				scroller: HTMLElement,
+				from: number,
+				to: number,
+				step: number,
+			) => {
+				for (let top = from; top <= to; top += step) {
+					scrollTo(scroller, top);
+					advance(50);
+				}
+			};
+
+			/**
+			 * Sets `loading` when loadMoreBottom is called, and keeps it set: the
+			 * load runs until the test ends
+			 */
+			const LoadingList = ({ onLoad }: { onLoad: () => void }) => {
+				const [loading, setLoading] = useState(false);
+				const loadMore = useCallback(() => {
+					onLoad();
+					setLoading(true);
+				}, [onLoad]);
+				return (
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreBottom={loadMore}
+						loading={loading}
+					>
+						<div />
+					</InfiniteScroll>
+				);
+			};
+
+			it("[ISSUE-3471-ITEM-13] calls loadMoreBottom callBackDebounce ms after a steady scroll comes within the threshold of the bottom, while the scroll goes on", () => {
+				const start = Date.now();
+				const callTimes: number[] = [];
+				const bottom = vi.fn(() => {
+					callTimes.push(Date.now() - start);
+				});
+				const { container } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						<div />
+					</InfiniteScroll>,
+				);
+				// 1000px of content in a 300px container: 250px or less are left
+				// below the view from 450 on. The scroll passes 455 150ms in and
+				// reaches the bottom (700) 500ms in.
+				scrollSteadily(getScroller(container), 350, 700, 35);
+				advance(200);
+				expect(callTimes[0]).toBe(250);
+				// nothing was loaded, so the list stays near the bottom: the scroll
+				// events that follow request the call again, one per 100ms
+				expect(callTimes).toEqual([250, 350, 450, 550]);
+			});
+
+			it("[ISSUE-3471-ITEM-13] makes one call during a steady scroll near the bottom while the load it started runs", () => {
+				const onLoad = vi.fn();
+				const { container } = render(<LoadingList onLoad={onLoad} />);
+				scrollSteadily(getScroller(container), 350, 700, 35);
+				expect(onLoad).toHaveBeenCalledTimes(1);
+				advance(200);
+				expect(onLoad).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-13] does not postpone a waiting fill call when new children arrive before the wait is over", () => {
+				scrollHeightOf = () => 300;
+				const bottom = vi.fn();
+				const { rerender } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						<div>Row 1</div>
+					</InfiniteScroll>,
+				);
+				advance(50);
+				// e.g. the data of a row that arrives, which leaves the list short
+				rerender(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						<div>Row 1, loaded</div>
+					</InfiniteScroll>,
+				);
+				advance(50);
+				expect(bottom).toHaveBeenCalledTimes(1);
+			});
+
+			it("[ISSUE-3471-ITEM-13] keeps the wait of a waiting call when callBackDebounce changes, and makes the call at the next trigger once it is 0", () => {
+				const bottom = vi.fn();
+				const children = <div />;
+				const { container, rerender } = render(
+					<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+						{children}
+					</InfiniteScroll>,
+				);
+				const scroller = getScroller(container);
+				scrollTo(scroller, 700);
+				rerender(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreBottom={bottom}
+						callBackDebounce={250}
+					>
+						{children}
+					</InfiniteScroll>,
+				);
+				scrollTo(scroller, 700);
+				advance(100);
+				expect(bottom).toHaveBeenCalledTimes(1);
+
+				// this one waits 250ms
+				scrollTo(scroller, 700);
+				rerender(
+					<InfiniteScroll
+						className={SCROLLER}
+						loadMoreBottom={bottom}
+						callBackDebounce={0}
+					>
+						{children}
+					</InfiniteScroll>,
+				);
+				scrollTo(scroller, 700);
+				expect(bottom).toHaveBeenCalledTimes(2);
+				advance(250);
+				expect(bottom).toHaveBeenCalledTimes(2);
 			});
 		});
 	});

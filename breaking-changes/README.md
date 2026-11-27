@@ -21,6 +21,7 @@ One file per change, so this never grows into a single unreadable log.
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
 | 2026-11-27 | [The Matrix add hint shows a "+" where its label does not fit](2026-11-27-matrix-add-hint-plus-where-label-does-not-fit.md) | behavior |
+| 2026-11-27 | [InfiniteScroll calls loadMoreBottom during a steady scroll, not only once the scroll stops](2026-11-27-infinite-scroll-loads-during-steady-scroll.md) | behavior |
 | 2026-11-27 | [A required file or image field shows an asterisk and is described as required](2026-11-27-required-file-and-image-fields-marked.md) | behavior, i18n |
 | 2026-11-27 | [The default error-reporting policy judges an AggregateError by the errors it wraps](2026-11-27-aggregate-error-reporting.md) | behavior |
 | 2026-11-27 | [FlowEngine's stage container is focusable only while it holds the focus](2026-11-27-flow-engine-stage-container-focusable-only-while-focused.md) | behavior |
