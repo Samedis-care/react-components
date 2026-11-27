@@ -56,6 +56,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [With sortLimit 0 a plain header click sorts the grid](2026-11-27-data-grid-sort-limit-0-plain-click-sorts.md) | behavior |
 | 2026-11-27 | [SubActionButton takes `color`, and an icon keeps its own color](2026-11-27-sub-action-button-color.md) | behavior, DOM |
 | 2026-11-27 | [A running export entry is unavailable, and a ready or failed export is announced](2026-11-27-data-grid-export-progress-and-results-announced.md) | behavior |
+| 2026-11-27 | [DataGrid applies `classes.settingsTable`](2026-11-27-data-grid-classes-settings-table.md) | behavior, theme |
 | 2026-11-26 | [A localized value without text in the UI language shows another language's text](2026-11-26-localized-string-falls-back-to-another-language.md) | behavior |
 | 2026-11-26 | [A HistoryRouter inside another one leaves the page's scroll position and focus alone](2026-11-26-nested-history-router-keeps-page-scroll-and-focus.md) | behavior |
 | 2026-11-26 | [isPlainObject tells a plain object by its prototype; a record with an entry named constructor counts](2026-11-26-is-plain-object-by-prototype.md) | behavior |

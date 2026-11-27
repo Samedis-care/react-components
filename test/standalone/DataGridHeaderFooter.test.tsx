@@ -561,6 +561,11 @@ describe("column settings", () => {
 		// the box keeps what was typed
 		expect(searchBox()).toHaveValue("   ");
 	});
+	it("[ISSUE-3495-ITEM-10] applies classes.settingsTable to the settings table", async () => {
+		render(<Grid classes={{ settingsTable: "my-table" }} />);
+		await idle();
+		expect(document.querySelector("table.my-table")).not.toBeNull();
+	});
 	it("[ISSUE-3495-ITEM-13] each checkbox is named with its column, and the column name is the row header", async () => {
 		const columns: IDataGridColumnDef[] = [
 			...COLUMNS,

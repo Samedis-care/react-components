@@ -118,6 +118,7 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 			<StyledTable
 				stickyHeader
 				aria-label={t("standalone.data-grid.header.settings")}
+				className={classes?.settingsTable}
 			>
 				<StyledTableHead className={classes?.settingsTableHead}>
 					<StyledTableRow className={classes?.settingsTableRow}>
