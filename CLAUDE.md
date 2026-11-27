@@ -18,7 +18,7 @@ pnpm run docgen          # Generate TypeDoc documentation
 
 ## Architecture
 
-This is a Material-UI v7 based React component library published as `components-care`. It's organized into five tiers that build on each other:
+This is a Material-UI v9 based React component library published as `components-care`. It's organized into five tiers that build on each other:
 
 1. **`src/standalone/`** — Controlled UI components with no external dependencies; the pure view layer
 2. **`src/framework/`** — Application framework wiring: i18n (i18next), theming (MUI), data fetching (React Query), permissions, dialogs, error tracking (Sentry optional)

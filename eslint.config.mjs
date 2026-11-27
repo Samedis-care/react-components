@@ -46,7 +46,11 @@ export default [
 					jsx: true,
 				},
 
-				project: ["./tsconfig.json", "./tsconfig-test.json", "./tsconfig-stories.json"],
+				// One program for src, its stories and test: typed linting keeps a TypeScript
+				// program and type checker per tsconfig, and the test and story programs each
+				// load all of src and the MUI types again (three of them ran out of node's
+				// default 4 GB heap). tsc still checks each part with its own tsconfig.
+				project: ["./tsconfig-eslint.json"],
 			},
 		},
 
@@ -54,6 +58,11 @@ export default [
 			react: {
 				version: "detect",
 			},
+			// eslint-plugin-import parses every imported module to list its exports. The
+			// typescript package resolves to a 9 MB CommonJS bundle: parsing it takes over
+			// 1 GB of heap, and the plugin then drops the result, as it lists the exports
+			// of ES modules only.
+			"import/ignore": ["node_modules/typescript/"],
 		},
 
 		rules: {
