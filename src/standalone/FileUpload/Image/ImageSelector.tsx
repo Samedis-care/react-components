@@ -164,11 +164,22 @@ export interface ImageSelectorProps {
 }
 
 /**
- * The frame of the normal and modern variants. It takes over its parent's `max-height`, so
- * that in a parent with a max-height the frame stops there and the picture shrinks to fit it.
+ * The frame of the normal and modern variants. As its parent's only element child it fills
+ * the parent wherever the parent's height is definite (a sized box, a Grid item stretched to
+ * its row), and the picture is shrunk to the space in it. It takes over its parent's
+ * `max-height`, so that in a parent with a max-height the frame stops there and the picture
+ * shrinks to fit it.
  */
 const Frame = styled(GroupBox)({
 	maxHeight: "inherit",
+	// Only as the only child: a full-height frame would push helper text next
+	// to it out of the parent. :where() keeps the rule at zero specificity, so
+	// a height from the theme or a styled() wrapper wins. The leading * stops
+	// emotion from reading the selector as a pseudo-class of the frame (which
+	// would add the frame's class again).
+	"*:where(&:only-child)": {
+		height: "100%",
+	},
 });
 
 const RootClassic = styled(Grid, {

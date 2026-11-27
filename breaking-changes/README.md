@@ -25,6 +25,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [InlineSwitch's switch row is a `<label>` of spans, not a MUI Grid](2026-11-27-inline-switch-label-row-without-grid.md) | behavior |
 | 2026-11-27 | [HowToBoxTranslate is removed; `translatedStrings` turns a translated list into entries](2026-11-27-how-to-box-translate-removed.md) | type |
 | 2026-11-27 | [A click on the RoutedMenu entry of the current location replaces the history entry](2026-11-27-routed-menu-current-location-replaces.md) | behavior |
+| 2026-11-27 | [A GroupBox is as tall as its content in every parent](2026-11-27-group-box-sizes-to-content.md) | behavior |
 | 2026-11-27 | [InfiniteScroll scrolls by default, and the theme styles it through `CcInfiniteScroll`](2026-11-27-infinite-scroll-scrolls-by-default-theme-slot.md) | behavior |
 | 2026-11-27 | [A required string list shows an asterisk and is described as required](2026-11-27-required-string-list-marked.md) | behavior |
 | 2026-11-27 | [InfiniteScroll: a negative or NaN `callBackDebounce` calls at once, as `0` does](2026-11-27-infinite-scroll-negative-debounce-calls-at-once.md) | behavior |

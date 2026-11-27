@@ -4,6 +4,7 @@ import {
 	Button,
 	createTheme,
 	Grid,
+	Paper,
 	styled,
 	TextField,
 	ThemeProvider,
@@ -42,6 +43,9 @@ const rectOf = (el: Element | null) => {
 /** a and b differ by less than half a pixel */
 const expectNear = async (a: number, b: number) =>
 	expect(Math.abs(a - b)).toBeLessThan(0.5);
+
+/** the sx that makes a frame fill a parent of definite height */
+const FILL = { height: "100%" };
 
 export const Default: Story = {
 	args: {
@@ -122,7 +126,7 @@ export const EqualHeightInGridRow: Story = {
 		docs: {
 			description: {
 				story:
-					"Each frame fills its Grid item, so frames in one row are as tall as the row's tallest content (the read-only viewer layout).",
+					'With `sx={{ height: "100%" }}` each frame fills its Grid item, which is stretched to its row, so frames in one row are as tall as the row\'s tallest content (the read-only viewer layout).',
 			},
 		},
 	},
@@ -130,12 +134,12 @@ export const EqualHeightInGridRow: Story = {
 		<div style={{ width: 600 }}>
 			<Grid container spacing={2}>
 				<Grid size={6} data-testid={"item-short"}>
-					<GroupBox id={"short"} label={"Service information"}>
+					<GroupBox id={"short"} label={"Service information"} sx={FILL}>
 						<div style={{ height: 40 }}>Interval: 12 months</div>
 					</GroupBox>
 				</Grid>
 				<Grid size={6} data-testid={"item-tall"}>
-					<GroupBox id={"tall"} label={"Videos"}>
+					<GroupBox id={"tall"} label={"Videos"} sx={FILL}>
 						<div style={{ height: 200 }}>No videos</div>
 					</GroupBox>
 				</Grid>
@@ -161,13 +165,13 @@ export const FullHeightChild: Story = {
 		docs: {
 			description: {
 				story:
-					"In a parent with a definite height the frame fills it, and a child with `height: 100%` fills the space below the legend.",
+					'With `sx={{ height: "100%" }}` the frame fills a parent with a definite height, and a child with `height: 100%` fills the space below the legend.',
 			},
 		},
 	},
 	render: () => (
 		<div data-testid={"parent"} style={{ width: 400, height: 400 }}>
-			<GroupBox id={"gb"} label={"Device types"}>
+			<GroupBox id={"gb"} label={"Device types"} sx={FILL}>
 				<div data-testid={"child"} style={{ height: "100%" }}>
 					tree
 				</div>
@@ -261,9 +265,9 @@ export const Issue3462Item1HeadingAboveKeepsFrameInGridItem: Story = {
 	},
 };
 
-const FitContentGroupBox = styled(GroupBox)({ height: "fit-content" });
-const autoHeightTheme = createTheme({
-	components: { CcGroupBox: { styleOverrides: { root: { height: "auto" } } } },
+const FullHeightGroupBox = styled(GroupBox)({ height: "100%" });
+const fullHeightTheme = createTheme({
+	components: { CcGroupBox: { styleOverrides: { root: { height: "100%" } } } },
 });
 
 export const Issue3462Item1HeightOverrideWinsAsOnlyChild: Story = {
@@ -271,25 +275,21 @@ export const Issue3462Item1HeightOverrideWinsAsOnlyChild: Story = {
 		docs: {
 			description: {
 				story:
-					"A height from a `styled(GroupBox)` wrapper or from the theme's `styleOverrides.root` replaces the stretch: each frame is the only child of a 200px tall parent and is as tall as its content.",
+					"A height from a `styled(GroupBox)` wrapper or from the theme's `styleOverrides.root` applies to the frame: with `height: 100%` from either, each frame fills its 200px tall parent.",
 			},
 		},
 	},
 	render: () => (
 		<div style={{ width: 400 }}>
-			<div style={{ height: 200 }}>
-				<FitContentGroupBox id={"styled"} label={"Styled"}>
-					<div data-testid={"styled-content"} style={{ height: 40 }}>
-						content
-					</div>
-				</FitContentGroupBox>
+			<div data-testid={"styled-parent"} style={{ height: 200 }}>
+				<FullHeightGroupBox id={"styled"} label={"Styled"}>
+					<div style={{ height: 40 }}>content</div>
+				</FullHeightGroupBox>
 			</div>
-			<ThemeProvider theme={autoHeightTheme}>
-				<div style={{ height: 200 }}>
+			<ThemeProvider theme={fullHeightTheme}>
+				<div data-testid={"themed-parent"} style={{ height: 200 }}>
 					<GroupBox id={"themed"} label={"Themed"}>
-						<div data-testid={"themed-content"} style={{ height: 40 }}>
-							content
-						</div>
+						<div style={{ height: 40 }}>content</div>
 					</GroupBox>
 				</div>
 			</ThemeProvider>
@@ -298,10 +298,11 @@ export const Issue3462Item1HeightOverrideWinsAsOnlyChild: Story = {
 	play: async ({ canvasElement }) => {
 		for (const name of ["styled", "themed"]) {
 			const box = rectOf(canvasElement.querySelector("#" + name));
-			const content = rectOf(
-				canvasElement.querySelector(`[data-testid=${name}-content]`),
+			const parent = rectOf(
+				canvasElement.querySelector(`[data-testid=${name}-parent]`),
 			);
-			await expectNear(box.bottom - content.bottom, 9);
+			await expectNear(box.top, parent.top);
+			await expectNear(box.bottom, parent.bottom);
 		}
 	},
 };
@@ -375,7 +376,7 @@ export const Issue3462Item7HeightWithoutBorderBox: Story = {
 		docs: {
 			description: {
 				story:
-					"ISSUE-3462-ITEM-7: where `box-sizing` is `content-box`, the frame as the only child of a 200px tall parent is taller than the parent by its padding and border, and sticks out at the bottom.",
+					'ISSUE-3462-ITEM-7: where `box-sizing` is `content-box`, a frame with `sx={{ height: "100%" }}` in a 200px tall parent is as tall as the parent: its height includes its padding and border.',
 			},
 		},
 	},
@@ -384,7 +385,7 @@ export const Issue3462Item7HeightWithoutBorderBox: Story = {
 			data-testid={"parent"}
 			style={{ width: 300, height: 200, boxSizing: "content-box" }}
 		>
-			<GroupBox id={"gb"} label={"Label"}>
+			<GroupBox id={"gb"} label={"Label"} sx={FILL}>
 				<span>content</span>
 			</GroupBox>
 		</div>
@@ -509,5 +510,95 @@ export const Issue3462Item11RequiredAndModified: Story = {
 			rectOf(asterisk).right,
 		);
 		await expect(rectOf(dot).top).toBeLessThan(rectOf(asterisk).bottom);
+	},
+};
+
+export const Issue3462Item12SizesToContentInTallParent: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3462-ITEM-12: a frame is as tall as its content in every parent, as MUI's `Card` and `Paper` are: in a side panel stretched to the height of a 400px tall form (left) and as the only child of a 300px tall parent (right).",
+			},
+		},
+	},
+	render: () => (
+		<div style={{ width: 800, display: "flex", gap: 16 }}>
+			<Grid container spacing={2} sx={{ flex: 1 }}>
+				<Grid size={8}>
+					<div style={{ height: 400 }}>form</div>
+				</Grid>
+				<Grid size={4}>
+					<Paper
+						data-testid={"panel"}
+						sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+					>
+						<GroupBox id={"side"} label={"Information"}>
+							<div data-testid={"side-content"} style={{ height: 60 }}>
+								Created yesterday
+							</div>
+						</GroupBox>
+					</Paper>
+				</Grid>
+			</Grid>
+			<div style={{ width: 200, height: 300 }}>
+				<GroupBox id={"alone"} label={"Notes"}>
+					<div data-testid={"alone-content"} style={{ height: 60 }}>
+						none
+					</div>
+				</GroupBox>
+			</div>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		// the panel is stretched to the form's height
+		const panel = rectOf(canvasElement.querySelector("[data-testid=panel]"));
+		await expect(panel.height).toBeGreaterThan(390);
+		for (const name of ["side", "alone"]) {
+			const box = rectOf(canvasElement.querySelector("#" + name));
+			const content = rectOf(
+				canvasElement.querySelector(`[data-testid=${name}-content]`),
+			);
+			// 8px padding and the 1px border below the content
+			await expectNear(box.bottom - content.bottom, 9);
+		}
+	},
+};
+
+export const Issue3462Item12EqualHeightInFlexGridItems: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3462-ITEM-12: frames in Grid items with `display: flex` stretch to the row as flex items, so they are equally tall without a height of their own.",
+			},
+		},
+	},
+	render: () => (
+		<div style={{ width: 600 }}>
+			<Grid container spacing={2}>
+				<Grid size={6} sx={{ display: "flex" }} data-testid={"item-short"}>
+					<GroupBox id={"short"} label={"Password"}>
+						<div style={{ height: 40 }}>Changed a year ago</div>
+					</GroupBox>
+				</Grid>
+				<Grid size={6} sx={{ display: "flex" }}>
+					<GroupBox id={"tall"} label={"Two-factor authentication"}>
+						<div style={{ height: 200 }}>Not set up</div>
+					</GroupBox>
+				</Grid>
+			</Grid>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const short = rectOf(canvasElement.querySelector("#short"));
+		const tall = rectOf(canvasElement.querySelector("#tall"));
+		const item = rectOf(
+			canvasElement.querySelector("[data-testid=item-short]"),
+		);
+		await expectNear(short.top, tall.top);
+		await expectNear(short.bottom, tall.bottom);
+		await expectNear(short.bottom, item.bottom);
+		await expectNear(short.width, item.width);
 	},
 };

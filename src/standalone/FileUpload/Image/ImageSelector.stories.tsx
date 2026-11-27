@@ -357,3 +357,41 @@ export const Issue3462Item6FitsMaxHeightParent: Story = {
 		}
 	},
 };
+
+/**
+ * In a 300 × 200 parent, the normal (left) and the modern field (right) fill it: the frame is
+ * as tall as the parent, and the 600px tall picture is shrunk to the space in it.
+ */
+export const Issue3462Item12FillsSizedParent: Story = {
+	args: { value: TALL_PICTURE },
+	parameters: { a11y: { test: "error" } },
+	render: (args) => (
+		<div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+			<Controlled {...args} box={{ width: 300, height: 200 }} />
+			<Controlled
+				{...args}
+				variant={"modern"}
+				box={{ width: 300, height: 200 }}
+			/>
+		</div>
+	),
+	play: async ({ canvasElement }) => {
+		const fields = Array.from(canvasElement.querySelectorAll("fieldset"));
+		await expect(fields).toHaveLength(2);
+		for (const field of fields) {
+			const img = field.querySelector("img");
+			const parent = field.parentElement;
+			if (!img || !parent) throw new Error("no picture or parent");
+			await img.decode();
+			const parentRect = parent.getBoundingClientRect();
+			const fieldRect = field.getBoundingClientRect();
+			const imgRect = img.getBoundingClientRect();
+			await expect(Math.abs(fieldRect.top - parentRect.top)).toBeLessThan(0.5);
+			await expect(Math.abs(fieldRect.bottom - parentRect.bottom)).toBeLessThan(
+				0.5,
+			);
+			await expect(imgRect.top).toBeGreaterThan(fieldRect.top);
+			await expect(imgRect.height).toBeLessThan(200);
+		}
+	},
+};

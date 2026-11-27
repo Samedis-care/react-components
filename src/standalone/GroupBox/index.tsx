@@ -38,20 +38,14 @@ const GroupBoxRoot = styled("fieldset", {
 	borderRadius: theme.shape.borderRadius,
 	borderWidth: 1,
 	position: "relative",
-	// Fills the parent only as its only child: a full-height frame would push
-	// a heading or helper text next to it out of the parent. :where() keeps
-	// the rule at zero specificity, so a height from the theme or a styled()
-	// wrapper wins. The leading * stops emotion from reading the selector as
-	// a pseudo-class of the frame (which would add the frame's class again).
-	"*:where(&:only-child)": {
-		height: "100%",
-	},
+	// No height: the frame is as tall as its content in every parent, as
+	// MUI's Card and Paper are. A caller stretches it with a height of its own.
 	marginLeft: 0,
 	marginRight: 0,
 	minWidth: 0,
 	width: "100%",
-	// The width and the only-child height include padding and border, so the
-	// frame fits its parent also where box-sizing is content-box (a page
+	// The width and a height set by the caller include padding and border, so
+	// the frame fits its parent also where box-sizing is content-box (a page
 	// without CssBaseline, or a subtree that resets it).
 	boxSizing: "border-box",
 }));
@@ -212,7 +206,8 @@ export interface GroupBoxProps extends GroupBoxHTMLProps {
 	classes?: Partial<Record<GroupBoxClassKey, string>>;
 	/**
 	 * System styles for the `<fieldset>`, as on MUI components. They apply after
-	 * GroupBox's own styles and the theme's `styleOverrides.root`.
+	 * GroupBox's own styles and the theme's `styleOverrides.root`. E.g.
+	 * `{ height: "100%" }` makes the frame fill a parent of definite height.
 	 */
 	sx?: SxProps<Theme>;
 }
@@ -288,17 +283,18 @@ const GroupBox = React.forwardRef(function GroupBox(
  * A frame with an optional title: a native `<fieldset>` whose `label` is drawn
  * as a `<legend>` in its top border.
  *
- * The frame is as wide as its parent. Its width and height include its
+ * The frame is as wide as its parent and as tall as its content, in every
+ * parent, as MUI's `Card` and `Paper` are: a frame in a side panel that is
+ * stretched to the height of the form next to it ends below its last line.
+ * To make it fill its parent, give it a height, as a `Card`:
+ * `sx={{ height: "100%" }}` fills a parent of definite height, such as a Grid
+ * item, which is stretched to its row, so frames in one Grid row are equally
+ * tall. In a Grid item with `display: "flex"` the frame is stretched as a flex
+ * item, without a height of its own. Its width and height include its
  * padding and border (`box-sizing: border-box`), so it fits its parent also
  * where `box-sizing` is `content-box`, e.g. on a page without MUI's
- * `CssBaseline`. When it is its parent's only element child, it is also as
- * tall as the parent wherever the parent's height is definite, e.g. a Grid
- * item stretched to its row, so frames in one Grid row are equally tall.
- * Next to other elements (a heading above it, helper text
- * below it) it is as tall as its content, and the siblings stay inside the
- * parent. A `height` set by the theme or a `styled(GroupBox)` wrapper
- * replaces this rule. A `max-height` on the parent does not limit the frame:
- * it encloses its content, and a parent with `overflow: auto` scrolls.
+ * `CssBaseline`. A `max-height` on the parent does not limit the frame: it
+ * encloses its content, and a parent with `overflow: auto` scrolls.
  *
  * Every other HTML attribute, `sx` and `ref` reach the fieldset. A framed
  * form control ties its error to the group with `aria-describedby`: screen
@@ -325,6 +321,17 @@ const GroupBox = React.forwardRef(function GroupBox(
  *   aria-describedby={"files-error"}
  * >…</GroupBox>
  * <FormHelperTextCC id={"files-error"} error>{errorMsg}</FormHelperTextCC>
+ *
+ * @example
+ * // frames of equal height in one Grid row
+ * <Grid container spacing={2}>
+ *   <Grid size={{ xs: 12, md: 6 }}>
+ *     <GroupBox label={t("service")} sx={{ height: "100%" }}>…</GroupBox>
+ *   </Grid>
+ *   <Grid size={{ xs: 12, md: 6 }}>
+ *     <GroupBox label={t("contract")} sx={{ height: "100%" }}>…</GroupBox>
+ *   </Grid>
+ * </Grid>
  *
  * @example
  * // a theme that gives frames with a small legend a tighter frame
