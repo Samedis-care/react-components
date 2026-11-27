@@ -9,7 +9,14 @@
  */
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	within,
+} from "@testing-library/react";
 import CrudMultiSelect, {
 	CrudMultiSelectProps,
 	useCrudSelectContext,
@@ -140,9 +147,12 @@ const removeButtons = () =>
 		.queryAllByRole("button", { name: /^Remove / })
 		.map((button) => button.getAttribute("aria-label"));
 
-/** the texts of the status messages on the page */
+/** the texts of the status messages on the page (an empty status region says nothing) */
 const statuses = () =>
-	screen.queryAllByRole("status").map((status) => status.textContent);
+	screen
+		.queryAllByRole("status")
+		.map((status) => status.textContent)
+		.filter((text) => text !== "");
 
 /** whether anything on the page is marked busy */
 const busy = (container: HTMLElement) =>
@@ -450,5 +460,94 @@ describe("CrudMultiSelect bugs", () => {
 		await settle();
 		expect(removeButtons()).toEqual(["Remove L1", "Remove L2"]);
 		expect(statuses()).toEqual([]);
+	});
+
+	it("[ISSUE-3509-ITEM-24] the status region is in the page, empty, when the selection starts loading, and then says Loading… and nothing again as the same element", async () => {
+		const be = makeBackend();
+		let answer!: () => void;
+		const answered = new Promise<void>((resolve) => (answer = resolve));
+		// the page as the load starts: a screen reader announces a change of a live
+		// region's text, not a region that comes with its text
+		let statusAtLoadStart: HTMLElement | null = null;
+		let textAtLoadStart: string | null = null;
+		be.index.mockImplementationOnce(async () => {
+			statusAtLoadStart = screen.queryByRole("status");
+			textAtLoadStart = statusAtLoadStart?.textContent ?? null;
+			await answered;
+			return [
+				[{ id: "j1", source_id: "1" }],
+				{ totalRows: 1, filteredRows: 1 },
+			];
+		});
+		mount(be);
+		const status = screen.getByRole("status");
+		expect(statusAtLoadStart).toBe(status);
+		expect(textAtLoadStart).toBe("");
+
+		await waitFor(() => expect(status).toHaveTextContent(/^Loading…$/));
+		expect(screen.getByRole("status")).toBe(status);
+
+		await act(async () => {
+			answer();
+			await Promise.resolve();
+		});
+		expect(
+			await screen.findByRole("button", { name: "Remove L1" }),
+		).toBeInTheDocument();
+		expect(screen.getByRole("status")).toBe(status);
+		expect(status).toHaveTextContent(/^$/);
+	});
+
+	it("[ISSUE-3509-ITEM-24] a removal says Saving… in the status region that was there before, which stays in the page, empty, once it is saved", async () => {
+		const be = makeBackend([
+			{ id: "j1", source_id: "1" },
+			{ id: "j2", source_id: "2" },
+		]);
+		mount(be);
+		const remove = await screen.findByRole("button", { name: "Remove L1" });
+		await settle();
+		const status = screen.getByRole("status");
+		expect(status).toHaveTextContent(/^$/);
+
+		const release = be.hold("delete");
+		fireEvent.click(remove);
+		await settle();
+		expect(screen.getByRole("status")).toBe(status);
+		expect(status).toHaveTextContent(/^Saving…$/);
+
+		await act(async () => {
+			release();
+			await Promise.resolve();
+		});
+		await settle();
+		expect(removeButtons()).toEqual(["Remove L2"]);
+		expect(screen.getByRole("status")).toBe(status);
+		expect(status).toHaveTextContent(/^$/);
+	});
+
+	it("[ISSUE-3509-ITEM-24] a failed load empties the status region and announces the failure in an alert of its own", async () => {
+		vi.spyOn(console, "warn").mockImplementation(() => {});
+		const be = makeBackend();
+		let fail!: (error: Error) => void;
+		be.index.mockImplementationOnce(
+			() =>
+				new Promise((_resolve, reject: (error: Error) => void) => {
+					fail = reject;
+				}),
+		);
+		mount(be);
+		const status = screen.getByRole("status");
+		await waitFor(() => expect(status).toHaveTextContent(/^Loading…$/));
+
+		await act(async () => {
+			fail(new Error("403 Forbidden"));
+			await Promise.resolve();
+		});
+		await settle();
+		const alert = screen.getByRole("alert");
+		expect(alert).toHaveTextContent(/^Members could not be loaded\.$/);
+		expect(screen.getByRole("status")).toBe(status);
+		expect(status).toHaveTextContent(/^$/);
+		expect(status).not.toContainElement(alert);
 	});
 });

@@ -1221,7 +1221,7 @@ export const Issue3509Item16WritesInFlightAreBusy: StoryObj = {
 			{ name: "Remove Carol Jones" },
 			{ timeout: 5000 },
 		);
-		await expect(canvas.queryByRole("status")).toBeNull();
+		await expect(canvas.getByRole("status")).toHaveTextContent(/^$/);
 
 		await userEvent.click(remove);
 		await waitFor(() =>
@@ -1243,7 +1243,45 @@ export const Issue3509Item16WritesInFlightAreBusy: StoryObj = {
 				canvas.queryByRole("button", { name: "Remove Carol Jones" }),
 			).toBeNull(),
 		);
-		await expect(canvas.queryByRole("status")).toBeNull();
+		await expect(canvas.getByRole("status")).toHaveTextContent(/^$/);
 		await expect(canvasElement.querySelector('[aria-busy="true"]')).toBeNull();
+	},
+};
+
+/**
+ * ISSUE-3509-ITEM-24: the status region under the field is in the page from the start,
+ * empty and without height, so that a screen reader announces "Saving…" as a change of its
+ * text. The same element says "Saving…" while a removal is written, and nothing once the
+ * backend has answered.
+ */
+export const Issue3509Item24StatusRegionStaysInPlace: StoryObj = {
+	parameters: { a11y: { test: "error" } },
+	render: () => <SlowBackendStory />,
+	play: async ({ canvas, userEvent }) => {
+		const remove = await canvas.findByRole(
+			"button",
+			{ name: "Remove Carol Jones" },
+			{ timeout: 5000 },
+		);
+		const status = canvas.getByRole("status");
+		await expect(status).toHaveTextContent(/^$/);
+		await expect(status.getBoundingClientRect().height).toBe(0);
+
+		await userEvent.click(remove);
+		await waitFor(() => expect(status).toHaveTextContent(/^Saving…$/));
+		await expect(canvas.getByRole("status")).toBe(status);
+		await expect(status.getBoundingClientRect().height).toBeGreaterThan(0);
+
+		await userEvent.click(
+			canvas.getByRole("button", { name: "Answer the requests" }),
+		);
+		await waitFor(() =>
+			expect(
+				canvas.queryByRole("button", { name: "Remove Carol Jones" }),
+			).toBeNull(),
+		);
+		await expect(canvas.getByRole("status")).toBe(status);
+		await expect(status).toHaveTextContent(/^$/);
+		await expect(status.getBoundingClientRect().height).toBe(0);
 	},
 };

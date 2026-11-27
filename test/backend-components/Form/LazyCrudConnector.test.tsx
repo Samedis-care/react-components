@@ -1560,7 +1560,9 @@ describe("FormCrudMultiSelect: the form's state", () => {
 		await settle();
 
 		expect(screen.getByRole("combobox")).toBeDisabled();
-		expect(screen.getByRole("status")).toHaveTextContent("Loading…");
+		await waitFor(() =>
+			expect(screen.getByRole("status")).toHaveTextContent("Loading…"),
+		);
 		expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
 		// the end adornment works on the selection: it waits until that is loaded
 		expect(selSink.ctx).toBeUndefined();
@@ -1579,7 +1581,7 @@ describe("FormCrudMultiSelect: the form's state", () => {
 		expect(
 			screen.getByRole("button", { name: "Remove Ls1" }),
 		).toBeInTheDocument();
-		expect(screen.queryByRole("status")).toBeNull();
+		expect(screen.getByRole("status")).toHaveTextContent(/^$/);
 		expect(container.querySelector('[aria-busy="true"]')).toBeNull();
 	});
 	it("[ISSUE-3505-ITEM-15] a failed load is announced in words that name the field, the error itself goes to the console, and the field stays locked", async () => {
@@ -1616,7 +1618,7 @@ describe("FormCrudMultiSelect: the form's state", () => {
 		expect(screen.queryByText(/403 Forbidden/)).toBeNull();
 		expect(warn).toHaveBeenCalledWith(expect.any(String), failure);
 		expect(screen.getByRole("combobox")).toBeDisabled();
-		expect(screen.queryByRole("status")).toBeNull();
+		expect(screen.getByRole("status")).toHaveTextContent(/^$/);
 		expect(container.querySelector('[aria-busy="true"]')).toBeNull();
 		expect(selSink.ctx).toBeUndefined();
 	});
@@ -1832,6 +1834,7 @@ describe("FormCrudMultiSelect: the form's state", () => {
 		);
 		await loaded(sink);
 		await settle();
+		await screen.findByText("Loading…");
 		const whileLoading = {
 			field: screen.queryByRole<HTMLInputElement>("combobox")?.disabled,
 			status: screen.queryByRole("status")?.textContent,

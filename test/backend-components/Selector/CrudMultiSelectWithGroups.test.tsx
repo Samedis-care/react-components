@@ -5,7 +5,13 @@
  */
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import CrudMultiSelectWithGroups from "../../../src/backend-components/Selector/CrudMultiSelectWithGroups";
 import type { ErrorComponentProps } from "../../../src/backend-components/Form";
 import type { Connector, ModelUnknown } from "../../../src/backend-integration";
@@ -134,7 +140,9 @@ describe("CrudMultiSelectWithGroups", () => {
 
 		expect(screen.getByText("Members")).toBeInTheDocument();
 		expect(groupSearchDisabled()).toBe(true);
-		expect(screen.getByRole("status")).toHaveTextContent("Loading…");
+		await waitFor(() =>
+			expect(screen.getByRole("status")).toHaveTextContent("Loading…"),
+		);
 		expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
 
 		await act(async () => {
@@ -145,7 +153,7 @@ describe("CrudMultiSelectWithGroups", () => {
 
 		expect(await screen.findByText("L1")).toBeInTheDocument();
 		expect(groupSearchDisabled()).toBe(false);
-		expect(screen.queryByRole("status")).toBeNull();
+		expect(screen.getByRole("status")).toHaveTextContent(/^$/);
 		expect(container.querySelector('[aria-busy="true"]')).toBeNull();
 	});
 
@@ -238,7 +246,7 @@ describe("CrudMultiSelectWithGroups", () => {
 		const { container } = mountGroups(connector);
 		const button = await screen.findByRole("button", { name: "Remove L1" });
 		await settle();
-		expect(screen.queryByRole("status")).toBeNull();
+		expect(screen.getByRole("status")).toHaveTextContent(/^$/);
 
 		fireEvent.click(button);
 		await settle();
@@ -252,8 +260,29 @@ describe("CrudMultiSelectWithGroups", () => {
 		});
 		await settle();
 		expect(removeButtons()).toEqual(["Remove L2"]);
-		expect(screen.queryByRole("status")).toBeNull();
+		expect(screen.getByRole("status")).toHaveTextContent(/^$/);
 		expect(container.querySelector('[aria-busy="true"]')).toBeNull();
+	});
+
+	it("[ISSUE-3509-ITEM-24] the status region is in the page, empty, as the field mounts, and then says Loading… and nothing again as the same element", async () => {
+		const be = makeDeferredBackend();
+		mountGroups(be.connector);
+		// a screen reader announces a change of a live region's text, not a region that
+		// comes with its text
+		const status = screen.getByRole("status");
+		expect(status).toHaveTextContent(/^$/);
+
+		await waitFor(() => expect(status).toHaveTextContent(/^Loading…$/));
+		expect(screen.getByRole("status")).toBe(status);
+
+		await act(async () => {
+			be.resolve([{ id: "j1", source_id: "1" }]);
+			await Promise.resolve();
+		});
+		expect(await screen.findByText("L1")).toBeInTheDocument();
+		await settle();
+		expect(screen.getByRole("status")).toBe(status);
+		expect(status).toHaveTextContent(/^$/);
 	});
 });
 
