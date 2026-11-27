@@ -58,7 +58,10 @@
 			"refresh": "Actualizar"
 		},
 		"notifications": {
-			"title": "Notificaciones"
+			"title": "Notificaciones",
+			"bell-label_one": "Notificaciones, {{count}} sin leer",
+			"bell-label_many": "Notificaciones, {{count}} sin leer",
+			"bell-label_other": "Notificaciones, {{count}} sin leer"
 		},
 		"how-it-works": {
 			"title": "Cómo funciona"

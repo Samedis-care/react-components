@@ -54,7 +54,9 @@
 			}
 		},
 		"notifications": {
-			"title": "Benachrichtigungen"
+			"title": "Benachrichtigungen",
+			"bell-label_one": "Benachrichtigungen, {{count}} ungelesen",
+			"bell-label_other": "Benachrichtigungen, {{count}} ungelesen"
 		},
 		"how-it-works": {
 			"title": "Wie es funktioniert"

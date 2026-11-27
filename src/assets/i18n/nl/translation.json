@@ -54,7 +54,9 @@
 			}
 		},
 		"notifications": {
-			"title": "Meldingen"
+			"title": "Meldingen",
+			"bell-label_one": "Meldingen, {{count}} ongelezen",
+			"bell-label_other": "Meldingen, {{count}} ongelezen"
 		},
 		"how-it-works": {
 			"title": "Hoe werkt het"

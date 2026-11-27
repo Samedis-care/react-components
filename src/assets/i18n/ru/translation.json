@@ -54,7 +54,11 @@
 			}
 		},
 		"notifications": {
-			"title": "Уведомления"
+			"title": "Уведомления",
+			"bell-label_one": "Уведомления, {{count}} непрочитанное",
+			"bell-label_few": "Уведомления, {{count}} непрочитанных",
+			"bell-label_many": "Уведомления, {{count}} непрочитанных",
+			"bell-label_other": "Уведомления, {{count}} непрочитанного"
 		},
 		"how-it-works": {
 			"title": "Как это устроено"

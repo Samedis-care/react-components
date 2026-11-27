@@ -54,7 +54,10 @@
 			}
 		},
 		"notifications": {
-			"title": "Notifications"
+			"title": "Notifications",
+			"bell-label_one": "Notifications, {{count}} non lue",
+			"bell-label_many": "Notifications, {{count}} non lues",
+			"bell-label_other": "Notifications, {{count}} non lues"
 		},
 		"how-it-works": {
 			"title": "Comment ça fonctionne"

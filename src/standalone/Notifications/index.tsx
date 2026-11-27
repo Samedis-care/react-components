@@ -63,7 +63,9 @@ export interface Notification {
 
 export interface NotificationsProps {
 	/**
-	 * Properties to pass to the notification count badge
+	 * Properties to pass to the notification count badge. A `badgeContent` of
+	 * your own changes only what the badge shows: the bell's accessible name
+	 * keeps the unread count (see `IconButtonProps`).
 	 */
 	BadgeProps?: BadgeProps;
 	/**
@@ -99,6 +101,12 @@ export interface NotificationsProps {
 	 * Props to pass to the icon button. `aria-haspopup`, `aria-expanded` and
 	 * `aria-controls` are managed internally: the bell says that it opens a
 	 * dialog, whether that is open, and while it is, which element it is.
+	 *
+	 * The bell's accessible name is "Notifications" and, while anything is
+	 * unread, the unread count: "Notifications, 2 unread" (translated, with
+	 * the language's plural forms). It gives the exact count, also above 99
+	 * where the badge shows "99+". An `aria-label` of your own replaces the
+	 * whole name, the badge's number included: put the count into it.
 	 */
 	IconButtonProps?: Omit<
 		IconButtonProps,
@@ -144,7 +152,10 @@ export interface NotificationsProps {
 	 */
 	notifications: Notification[];
 	/**
-	 * Total number of unread notifications (if not provided inferred from notifications)
+	 * Number of unread notifications, shown by the badge and part of the bell's
+	 * accessible name ("Notifications, 2 unread"). When omitted, the number of
+	 * the non-expired `notifications` with `read: false`. `0` hides the badge
+	 * and leaves the name "Notifications".
 	 */
 	unreadCount?: number;
 	/**
@@ -370,12 +381,18 @@ const Notifications = (inProps: NotificationsProps) => {
 	const notifications = props.notifications.filter(
 		(not) => !not.expires || not.expires > new Date(),
 	);
+	const unread = unreadCount ?? notifications.filter((not) => !not.read).length;
 
 	return (
 		<div className={className}>
 			<IconButton
 				size="large"
-				aria-label={t("standalone.notifications.title")}
+				// the label replaces the button's content, the badge's number included
+				aria-label={
+					unread > 0
+						? t("standalone.notifications.bell-label", { count: unread })
+						: t("standalone.notifications.title")
+				}
 				{...IconButtonProps}
 				onClick={onIconClick}
 				aria-haspopup="dialog"
@@ -383,9 +400,7 @@ const Notifications = (inProps: NotificationsProps) => {
 				aria-controls={open ? dialogId : undefined}
 			>
 				<Badge
-					badgeContent={
-						unreadCount ?? notifications.filter((not) => !not.read).length
-					}
+					badgeContent={unread}
 					max={99}
 					color={"error"}
 					{...props.BadgeProps}

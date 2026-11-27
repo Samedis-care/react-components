@@ -58,7 +58,9 @@
 			"refresh": "Refresh"
 		},
 		"notifications": {
-			"title": "Notifications"
+			"title": "Notifications",
+			"bell-label_one": "Notifications, {{count}} unread",
+			"bell-label_other": "Notifications, {{count}} unread"
 		},
 		"how-it-works": {
 			"title": "How it works"

@@ -58,7 +58,10 @@
 			"refresh": "Aggiorna"
 		},
 		"notifications": {
-			"title": "Notifiche"
+			"title": "Notifiche",
+			"bell-label_one": "Notifiche, {{count}} non letta",
+			"bell-label_many": "Notifiche, {{count}} non lette",
+			"bell-label_other": "Notifiche, {{count}} non lette"
 		},
 		"how-it-works": {
 			"title": "Come funziona"

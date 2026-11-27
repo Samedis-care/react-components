@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React from "react";
+import fs from "node:fs";
+import path from "node:path";
 import {
 	render,
 	screen,
@@ -293,6 +295,8 @@ const renderN = (props: NotificationsProps, t: Theme = theme) => {
 	};
 };
 
+const badgeOf = (container: HTMLElement) =>
+	container.querySelector(".MuiBadge-badge") as HTMLElement;
 const advance = (ms: number) =>
 	act(() => {
 		vi.advanceTimersByTime(ms);
@@ -433,6 +437,57 @@ describe("Notifications: accessibility", () => {
 		expect(bell).toHaveAttribute("aria-controls", dialog.id);
 	});
 
+	it("[ISSUE-3468-ITEM-12] includes the unread count in the bell's accessible name", () => {
+		const { bell, container } = renderN(
+			base({
+				notifications: [
+					mk({ id: "1" }),
+					mk({ id: "2" }),
+					mk({ id: "3", read: true }),
+				],
+			}),
+		);
+		expect(badgeOf(container)).toHaveTextContent("2");
+		expect(bell).toHaveAccessibleName(/\b2\b/);
+	});
+
+	it("[ISSUE-3468-ITEM-12] names the bell with the unread count while anything is unread, and follows the count", () => {
+		const props = base({
+			notifications: [
+				mk({ id: "1" }),
+				mk({ id: "2" }),
+				mk({ id: "3", read: true }),
+				mk({ id: "4", expires: new Date(Date.now() - 1000) }),
+			],
+		});
+		const { bell, container, rerenderN } = renderN(props);
+		expect(bell).toHaveAccessibleName("Notifications, 2 unread");
+		rerenderN({ ...props, unreadCount: 1 });
+		expect(bell).toHaveAccessibleName("Notifications, 1 unread");
+		rerenderN({ ...props, unreadCount: 150 });
+		expect(badgeOf(container), "the badge caps").toHaveTextContent("99+");
+		expect(bell, "the name does not").toHaveAccessibleName(
+			"Notifications, 150 unread",
+		);
+		rerenderN({ ...props, unreadCount: 0 });
+		expect(bell).toHaveAccessibleName("Notifications");
+		rerenderN({
+			...props,
+			notifications: [mk({ id: "3", read: true })],
+		});
+		expect(bell).toHaveAccessibleName("Notifications");
+	});
+
+	it("[ISSUE-3468-ITEM-12] lets an aria-label of the app's own replace the bell's name", () => {
+		const { bell } = renderN(
+			base({
+				notifications: [mk({ id: "1" })],
+				IconButtonProps: { "aria-label": "Open the inbox" },
+			}),
+		);
+		expect(bell).toHaveAccessibleName("Open the inbox");
+	});
+
 	it("[ISSUE-3468-ITEM-11] moves focus to the dialog when it opens, and the bell reports it closed again after Escape", async () => {
 		const { bell } = renderN(base({ notifications: [mk({ id: "1" })] }));
 		bell.focus();
@@ -538,5 +593,41 @@ describe("Notifications: translations", () => {
 		expect(timestampToAge(new Date(Date.now() + 2 * 3_600_000))).not.toBe(
 			"just now",
 		);
+	});
+
+	it("[ISSUE-3468-ITEM-12] names the bell with the plural form of the unread count", async () => {
+		await act(async () => {
+			await ccI18n.changeLanguage("ru");
+		});
+		const { bell, rerenderN } = renderN(base({ unreadCount: 1 }));
+		expect(bell).toHaveAccessibleName("Уведомления, 1 непрочитанное");
+		rerenderN(base({ unreadCount: 5 }));
+		expect(bell).toHaveAccessibleName("Уведомления, 5 непрочитанных");
+	});
+
+	it("[ISSUE-3468-ITEM-12] has the bell's name with the count in every locale, for each of its plural forms", () => {
+		const i18nDir = path.resolve(__dirname, "../../src/assets/i18n");
+		const missing = fs
+			.readdirSync(i18nDir, { withFileTypes: true })
+			.filter((entry) => entry.isDirectory())
+			.flatMap((entry) => {
+				const translation = JSON.parse(
+					fs.readFileSync(
+						path.join(i18nDir, entry.name, "translation.json"),
+						"utf8",
+					),
+				) as {
+					standalone: { notifications: Record<string, string | undefined> };
+				};
+				const texts = translation.standalone.notifications;
+				return new Intl.PluralRules(entry.name)
+					.resolvedOptions()
+					.pluralCategories.filter(
+						(category) =>
+							!texts[`bell-label_${category}`]?.includes("{{count}}"),
+					)
+					.map((category) => `${entry.name}: bell-label_${category}`);
+			});
+		expect(missing).toEqual([]);
 	});
 });

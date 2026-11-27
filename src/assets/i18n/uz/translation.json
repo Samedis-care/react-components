@@ -54,7 +54,9 @@
 			}
 		},
 		"notifications": {
-			"title": "Bildirishnomalar"
+			"title": "Bildirishnomalar",
+			"bell-label_one": "Bildirishnomalar, {{count}} ta o'qilmagan",
+			"bell-label_other": "Bildirishnomalar, {{count}} ta o'qilmagan"
 		},
 		"how-it-works": {
 			"title": "U qanday ishlaydi"
