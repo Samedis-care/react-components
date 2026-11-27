@@ -7,15 +7,45 @@ import ccI18n from "../../../i18n";
 import { getCurrentLanguage } from "../../../utils/getCurrentLocale";
 
 /**
- * Type to handle localized strings
+ * One language's text of a localized value
+ */
+export interface TypeLocalizedStringText {
+	/**
+	 * The language the text is in
+	 */
+	language: MultiLanguageInputSupportedLanguages;
+	/**
+	 * The text, as stored
+	 */
+	text: string;
+}
+
+/**
+ * Type to handle localized strings: one text per language, keyed by language
+ * code, e.g. `{ en: "Pump", de: "Pumpe" }`
  */
 abstract class TypeLocalizedString implements Type<
 	Partial<Record<MultiLanguageInputSupportedLanguages, string>>
 > {
 	protected multiline: boolean;
+	/**
+	 * The languages whose text shows, in this order, when the UI language has
+	 * none; null for every language the value holds, in the value's order
+	 */
+	protected fallbackLanguages: MultiLanguageInputSupportedLanguages[] | null;
 
-	constructor(multiline = false) {
+	/**
+	 * @param multiline Whether the text is edited in a textarea
+	 * @param fallbackLanguages The languages whose text shows, in this order,
+	 * when the UI language has none (the field's enabled languages); null or
+	 * omitted for every language the value holds, in the value's order
+	 */
+	constructor(
+		multiline = false,
+		fallbackLanguages: MultiLanguageInputSupportedLanguages[] | null = null,
+	) {
 		this.multiline = multiline;
+		this.fallbackLanguages = fallbackLanguages;
 	}
 
 	abstract render(
@@ -38,14 +68,70 @@ abstract class TypeLocalizedString implements Type<
 		return {};
 	}
 
+	/**
+	 * The text of the first of the languages that has text; text of only
+	 * whitespace counts as none
+	 * @param value The value; null, undefined and a non-object have no text
+	 * @param languages The languages to look at, in order
+	 * @returns The language and its text, null if none of them has text
+	 */
+	private static findText(
+		value: Partial<Record<MultiLanguageInputSupportedLanguages, string>>,
+		languages: readonly string[],
+	): TypeLocalizedStringText | null {
+		if (!value || typeof value !== "object") return null;
+		for (const language of languages) {
+			const text: unknown =
+				value[language as MultiLanguageInputSupportedLanguages];
+			if (typeof text === "string" && text.trim())
+				return {
+					language: language as MultiLanguageInputSupportedLanguages,
+					text,
+				};
+		}
+		return null;
+	}
+
+	/**
+	 * The text in the components-care UI language
+	 * @param value The value
+	 * @returns The UI language and its text, null if it has no text (or only
+	 * whitespace)
+	 */
+	protected getUiLanguageText(
+		value: Partial<Record<MultiLanguageInputSupportedLanguages, string>>,
+	): TypeLocalizedStringText | null {
+		return TypeLocalizedString.findText(value, [getCurrentLanguage(ccI18n)]);
+	}
+
+	/**
+	 * The text shown when the UI language has none: the first fallback language
+	 * (see the constructor) that has text
+	 * @param value The value
+	 * @returns The language and its text, null if no fallback language has text
+	 */
+	protected getFallbackText(
+		value: Partial<Record<MultiLanguageInputSupportedLanguages, string>>,
+	): TypeLocalizedStringText | null {
+		return TypeLocalizedString.findText(
+			value,
+			this.fallbackLanguages ??
+				(value && typeof value === "object" ? Object.keys(value) : []),
+		);
+	}
+
+	/**
+	 * The text in the UI language; when it has none (or only whitespace), the
+	 * text of the first fallback language that has text (see the constructor)
+	 * @param value The value
+	 * @returns The text as stored, an empty string if no language has text
+	 */
 	stringify(
 		value: Partial<Record<MultiLanguageInputSupportedLanguages, string>>,
 	): string {
-		if (!value) return "";
-		const currentLang = getCurrentLanguage(
-			ccI18n,
-		) as MultiLanguageInputSupportedLanguages;
-		return value[currentLang] ?? "";
+		return (
+			(this.getUiLanguageText(value) ?? this.getFallbackText(value))?.text ?? ""
+		);
 	}
 
 	deserialize = (

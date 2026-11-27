@@ -18,5 +18,6 @@ export type {
 	TypeImagePlaceholderFunction,
 } from "./TypeImage";
 export { default as ModelDataTypeSignature } from "./TypeSignature";
+export type { TypeLocalizedStringText } from "./TypeLocalizedString";
 
 export * from "./Renderers";

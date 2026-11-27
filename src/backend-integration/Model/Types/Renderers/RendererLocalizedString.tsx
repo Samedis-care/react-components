@@ -9,6 +9,15 @@ import TypeLocalizedString from "../TypeLocalizedString";
 import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiFieldState";
 import { TypeSettings } from "../../Type";
 
+/**
+ * Gives the text a grid cell or read-only field shows while the value has no
+ * text in the UI language
+ * @param value The value
+ * @param values The record's values, those named in getFallbackLabelValues
+ * included
+ * @returns The text; an empty string to show the first enabled language that
+ * has text instead
+ */
 export type ModelDataTypeLocalizedStringRendererGetFallbackLabel = (
 	value: Partial<Record<MultiLanguageInputSupportedLanguages, string>>,
 	values: Record<string, unknown>,
@@ -16,7 +25,12 @@ export type ModelDataTypeLocalizedStringRendererGetFallbackLabel = (
 
 export interface ModelDataTypeLocalizedStringRendererParamsExtra {
 	/**
-	 * fallback label for data-grid view
+	 * The text a grid cell or read-only field shows while the value has no text
+	 * in the components-care UI language (or only whitespace); not called while
+	 * it has. Without it, or while it returns an empty string, the text of the
+	 * first language in `enabledLanguages` that has text shows, marked with its
+	 * language (`lang`), as `stringify` returns it.
+	 * @default none: the first enabled language that has text
 	 */
 	getFallbackLabel?: ModelDataTypeLocalizedStringRendererGetFallbackLabel;
 	/**
@@ -42,7 +56,9 @@ export type ModelDataTypeLocalizedStringRendererParams = Omit<
 	ModelDataTypeLocalizedStringRendererParamsExtra;
 
 /**
- * Renders a text field
+ * Renders a localized string: a MultiLanguageInput when editable, otherwise
+ * its text in the UI language, falling back to the first enabled language that
+ * has text (see getFallbackLabel)
  */
 class RendererLocalizedString extends TypeLocalizedString {
 	props: Omit<
@@ -53,7 +69,7 @@ class RendererLocalizedString extends TypeLocalizedString {
 	extra: ModelDataTypeLocalizedStringRendererParamsExtra;
 
 	constructor(props: ModelDataTypeLocalizedStringRendererParams) {
-		super(props?.multiline);
+		super(props?.multiline, props?.enabledLanguages ?? null);
 
 		const { getFallbackLabel, getFallbackLabelValues, ...other } = props;
 		this.props = other;
@@ -127,13 +143,21 @@ class RendererLocalizedString extends TypeLocalizedString {
 				</>
 			);
 		}
+		const uiLanguageText = this.getUiLanguageText(value);
+		const fallbackLabel = uiLanguageText
+			? ""
+			: (this.extra.getFallbackLabel?.(value, params.values) ?? "");
+		const fallbackText =
+			uiLanguageText || fallbackLabel ? null : this.getFallbackText(value);
 		return (
 			<Typography noWrap={visibility.grid}>
 				{!visibility.grid && `${label}: `}
-				{this.stringify(value) ||
-					(this.extra.getFallbackLabel
-						? this.extra.getFallbackLabel(value, params.values)
-						: "")}
+				{fallbackText ? (
+					// another language than the page's, for screen readers
+					<span lang={fallbackText.language}>{fallbackText.text}</span>
+				) : (
+					(uiLanguageText?.text ?? fallbackLabel)
+				)}
 			</Typography>
 		);
 	}
