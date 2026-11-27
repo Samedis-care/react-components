@@ -213,9 +213,11 @@ export interface IDataGridLoadDataParameters {
 	 * query (search, filters, sort, custom data or forceRefreshToken changed)
 	 * or the grid unmounted, and for a page the limited select all
 	 * (DataGridProps.limitSelectAll) loads, also when the select all checkbox
-	 * is clicked again. Pass it on to the request (fetch's `signal`) to
-	 * cancel it. The grid ignores what a call resolves or rejects with after
-	 * its signal aborted, so an abort is never shown as a load error.
+	 * is clicked again or select all is turned off (enableSelectAll false,
+	 * prohibitMultiSelect or disableSelection). Pass it on to the request
+	 * (fetch's `signal`) to cancel it. The grid ignores what a call resolves or
+	 * rejects with after its signal aborted, so an abort is never shown as a
+	 * load error.
 	 * @remarks Set on every call of the grid. BackendDataGrid hands it on to
 	 *          the connector's index as params.signal.
 	 */
@@ -247,7 +249,9 @@ export interface IDataGridCallbacks {
 	 * changed) or the unmount ends the load of the old query: the grid
 	 * requests none of its remaining pages and aborts params.signal. The
 	 * limited select all (DataGridProps.limitSelectAll) ends its load the same
-	 * way, and also when its checkbox is clicked again.
+	 * way, and also when its checkbox is clicked again or select all is turned
+	 * off (enableSelectAll false, prohibitMultiSelect or disableSelection). A
+	 * load ended so selects nothing.
 	 * @param params The load data parameters
 	 * @returns The loaded data (resolve) or an error (reject)
 	 */

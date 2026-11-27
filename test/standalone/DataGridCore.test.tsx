@@ -860,6 +860,85 @@ describe("limited select all: the signal", () => {
 			expect.anything(),
 		);
 	});
+
+	/** the props that turn select all off: each disables its checkbox */
+	const SELECT_ALL_OFF: [string, Partial<DataGridProps>][] = [
+		["enableSelectAll false", { enableSelectAll: false }],
+		["disableSelection", { disableSelection: true }],
+		["prohibitMultiSelect", { prohibitMultiSelect: true }],
+	];
+
+	it.each(SELECT_ALL_OFF)(
+		"[ISSUE-3492-ITEM-35] %s while the limited select all loads aborts its request, and what it loads selects nothing",
+		async (_prop, off) => {
+			const { loadData, release } = holdPage2();
+			const onSelectionChange = vi.fn();
+			const { rerender } = render(
+				<Grid
+					loadData={loadData}
+					enableSelectAll
+					limitSelectAll={60}
+					onSelectionChange={onSelectionChange}
+				/>,
+			);
+			const signal = await selectFirst60(loadData);
+			onSelectionChange.mockClear();
+			rerender(
+				<Grid
+					loadData={loadData}
+					enableSelectAll
+					limitSelectAll={60}
+					onSelectionChange={onSelectionChange}
+					{...off}
+				/>,
+			);
+			expect(signal.aborted).toBe(true);
+			await release();
+			expect(requestedPage3(loadData)).toBe(false);
+			expect(probe!.state.selectAll).toBe(false);
+			expect(probe!.state.selectedRows).toEqual([]);
+			expect(probe!.state.limitedSelectAll).toBeNull();
+			expect(onSelectionChange).not.toHaveBeenCalled();
+		},
+	);
+
+	it.each(SELECT_ALL_OFF)(
+		"[ISSUE-3492-ITEM-35] select all on again after %s shows the selection as it is, and a click selects the first rows",
+		async (_prop, off) => {
+			const { loadData, release } = holdPage2();
+			const { rerender } = render(
+				<Grid loadData={loadData} enableSelectAll limitSelectAll={60} />,
+			);
+			const signal = await selectFirst60(loadData);
+			rerender(
+				<Grid
+					loadData={loadData}
+					enableSelectAll
+					limitSelectAll={60}
+					{...off}
+				/>,
+			);
+			rerender(
+				<Grid loadData={loadData} enableSelectAll limitSelectAll={60} />,
+			);
+			expect(signal.aborted).toBe(true);
+			const selectAll = screen.getByRole("checkbox", { name: "First 60" });
+			expect(selectAll).toBeEnabled();
+			expect(selectAll).not.toBeChecked();
+			expect(selectAll).not.toHaveAttribute("aria-busy");
+			await release();
+			expect(probe!.state.selectedRows).toEqual([]);
+			expect(selectAll).not.toBeChecked();
+
+			fireEvent.click(selectAll);
+			await waitFor(() => expect(probe!.state.selectedRows).toHaveLength(60));
+			expect(probe!.state.selectedRows).toEqual(
+				Array.from({ length: 60 }, (_, i) => String(i)),
+			);
+			expect(selectAll).toBeChecked();
+			expect(selectAll).not.toHaveAttribute("aria-busy");
+		},
+	);
 });
 
 describe("limited select all: repeated rows", () => {
