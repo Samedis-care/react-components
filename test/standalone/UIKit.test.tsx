@@ -895,6 +895,19 @@ describe("UIKit", () => {
 			expect(input.indeterminate).toBe(false);
 		});
 
+		it("[ISSUE-3482-ITEM-17] renders no duplicate ids", () => {
+			const { container } = wrap(
+				<>
+					<Checkbox />
+					<Checkbox checked readOnly />
+				</>,
+			);
+			const ids = Array.from(container.querySelectorAll("[id]")).map(
+				(el) => el.id,
+			);
+			expect(ids.filter((id, i) => ids.indexOf(id) !== i)).toEqual([]);
+		});
+
 		/**
 		 * The colors the page's styles give `element` in forced colors. jsdom
 		 * matches no media feature, so the rules of every

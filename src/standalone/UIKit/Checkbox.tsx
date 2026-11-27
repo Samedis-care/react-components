@@ -58,7 +58,6 @@ export type CheckboxClassKey = "root";
 const _uncheckedIcon = (
 	<SvgIcon viewBox="-3.5 -4.5 24 24">
 		<polyline
-			id="check"
 			fill="transparent"
 			stroke="transparent"
 			strokeWidth="3.5"
@@ -69,7 +68,6 @@ const _uncheckedIcon = (
 const _checkedIcon = (
 	<SvgIcon viewBox="-3.5 -4.5 24 24">
 		<polyline
-			id="check"
 			fill="transparent"
 			stroke="currentColor"
 			strokeWidth="3.5"
