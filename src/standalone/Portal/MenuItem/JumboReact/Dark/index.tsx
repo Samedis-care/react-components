@@ -52,6 +52,11 @@ const Dot = styled("div", { name: "CcMenuItemJumboReactDark", slot: "dot" })(
 		backgroundColor: theme.palette.getContrastText(theme.palette.primary.main),
 		borderRadius: "50%",
 		top: "50%",
+		// forced colors paint the background in the canvas color, which hides the
+		// dot, the active entry's only mark there: draw it in the text color
+		"@media (forced-colors: active)": {
+			backgroundColor: "CanvasText",
+		},
 	}),
 );
 

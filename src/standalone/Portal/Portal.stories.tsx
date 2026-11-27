@@ -175,6 +175,14 @@ const A11Y_OPEN_DRAWER_EXCEPTION = {
 	},
 } as const;
 
+// ISSUE-3479-ITEM-19: with MUI List as the wrapper the entries are `ul > div[role=button]`
+// (axe "list"). Issue3479Item19MenuListMarkup checks this rule and fails until it is fixed;
+// drop this exception with the fix.
+const A11Y_LIST_EXCEPTION = {
+	test: "error",
+	config: { rules: [{ id: "list", enabled: false }] },
+} as const;
+
 const meta: Meta<typeof PortalLayout> = {
 	title: "Standalone/Portal/PortalLayout",
 	component: PortalLayout,
@@ -673,6 +681,242 @@ export const Issue3479Item15FocusedButtonsHaveOutline: Story = {
 		const collapse = canvas.getByRole("button", { name: "Collapse menu" });
 		await expect(document.activeElement).toBe(collapse);
 		await expectFocusRing(collapse);
+	},
+};
+
+export const Issue3479Item17ActiveEntryNotColorOnly: Story = {
+	parameters: {
+		a11y: A11Y_LIST_EXCEPTION,
+		docs: {
+			description: {
+				story:
+					"ISSUE-3479-ITEM-17: the active `MaterialMenuItem` differs from the others only by an 8% primary tint (about 1.1:1), which forced-colors mode removes.",
+			},
+		},
+	},
+	render: () => (
+		<Paper sx={lightSurface}>
+			<SimpleWrapper>
+				<MaterialMenuItem
+					title="Active"
+					expandable={false}
+					active={true}
+					onClick={noop}
+					onAuxClick={noop}
+					depth={0}
+				/>
+				<MaterialMenuItem
+					title="Inactive"
+					expandable={false}
+					active={false}
+					onClick={noop}
+					onAuxClick={noop}
+					depth={0}
+				/>
+			</SimpleWrapper>
+		</Paper>
+	),
+	play: async ({ canvas }) => {
+		// everything that marks an entry apart from colors
+		const cue = (entry: HTMLElement) => {
+			const box = getComputedStyle(entry);
+			const text = getComputedStyle(
+				entry.querySelector(".MuiListItemText-primary")!,
+			);
+			return [
+				box.borderLeftStyle,
+				box.borderLeftWidth,
+				box.outlineStyle,
+				box.boxShadow,
+				text.fontWeight,
+				text.textDecorationLine,
+			].join(" | ");
+		};
+		await expect(cue(canvas.getByRole("button", { name: "Active" }))).not.toBe(
+			cue(canvas.getByRole("button", { name: "Inactive" })),
+		);
+	},
+};
+
+// the styles of `el` in forced-colors mode: the rules of every
+// `@media (forced-colors: active)` block are applied as if it matched
+// (forced colors also replace the other colors, which this does not)
+const forcedColorsStyle = (el: Element) => {
+	const rules = Array.from(document.styleSheets)
+		.flatMap((sheet) => Array.from(sheet.cssRules))
+		.filter(
+			(rule): rule is CSSMediaRule =>
+				rule instanceof CSSMediaRule &&
+				rule.media.mediaText.includes("forced-colors: active"),
+		)
+		.flatMap((rule) => Array.from(rule.cssRules, (inner) => inner.cssText));
+	const sheet = document.createElement("style");
+	sheet.textContent = rules.join("\n");
+	document.head.append(sheet);
+	try {
+		const { backgroundColor } = getComputedStyle(el);
+		return { backgroundColor };
+	} finally {
+		sheet.remove();
+	}
+};
+
+// a CSS system color, as getComputedStyle resolves it
+const systemColor = (name: string) => {
+	const probe = document.createElement("div");
+	probe.style.color = name;
+	document.body.append(probe);
+	try {
+		return getComputedStyle(probe).color;
+	} finally {
+		probe.remove();
+	}
+};
+
+export const Issue3479Item17MaterialActiveEntryBar: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3479-ITEM-17: the active `MaterialMenuItem` has, besides MUI's selected tint, a bar in the primary color on its left edge, at least 3:1 against the menu, and a medium-weight title. The bar is a border, which forced-colors mode keeps (it replaces background tints), drawn over the entry, so the active entry's icon and title stay in line with the others'.",
+			},
+		},
+	},
+	render: () => (
+		<Paper sx={lightSurface}>
+			<NavWrapper>
+				<MaterialMenuItem
+					title="Active"
+					icon={DashboardIcon}
+					expandable={false}
+					active={true}
+					onClick={noop}
+					onAuxClick={noop}
+					depth={0}
+				/>
+				<MaterialMenuItem
+					title="Inactive"
+					icon={SettingsIcon}
+					expandable={false}
+					active={false}
+					onClick={noop}
+					onAuxClick={noop}
+					depth={0}
+				/>
+			</NavWrapper>
+		</Paper>
+	),
+	play: async ({ canvas }) => {
+		const active = canvas.getByRole("button", { name: "Active" });
+		const inactive = canvas.getByRole("button", { name: "Inactive" });
+		const barOf = (entry: HTMLElement) => getComputedStyle(entry, "::before");
+		const titleOf = (entry: HTMLElement) =>
+			entry.querySelector<HTMLElement>(".MuiListItemText-primary")!;
+		const iconOf = (entry: HTMLElement) =>
+			entry.querySelector<HTMLElement>(".MuiListItemIcon-root svg")!;
+
+		// a solid bar of at least 3px along the active entry's whole left edge
+		const bar = barOf(active);
+		await expect(bar.borderLeftStyle).toBe("solid");
+		await expect(parseFloat(bar.borderLeftWidth)).toBeGreaterThanOrEqual(3);
+		await expect(bar.position).toBe("absolute");
+		await expect(bar.left).toBe("0px");
+		await expect(parseFloat(bar.height)).toBeCloseTo(
+			active.getBoundingClientRect().height,
+			0,
+		);
+		await expect(
+			contrast(bar.borderLeftColor, backgroundBehind(active)),
+		).toBeGreaterThanOrEqual(3);
+		// none on an inactive entry
+		const other = barOf(inactive);
+		await expect(`${other.borderLeftStyle} ${other.borderLeftWidth}`).toBe(
+			"none 0px",
+		);
+
+		// a medium-weight title on the active entry only
+		await expect(
+			Number(getComputedStyle(titleOf(active)).fontWeight),
+		).toBeGreaterThanOrEqual(500);
+		await expect(
+			Number(getComputedStyle(titleOf(inactive)).fontWeight),
+		).toBeLessThan(500);
+
+		// the active entry's icon and title start where the others' do
+		for (const part of [iconOf, titleOf])
+			await expect(part(active).getBoundingClientRect().left).toBeCloseTo(
+				part(inactive).getBoundingClientRect().left,
+				0,
+			);
+	},
+};
+
+export const Issue3479Item17JumboDotInForcedColors: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3479-ITEM-17: forced-colors mode replaces the active Jumbo entry's primary background and paints its dot, the only other mark, in the canvas color (white on white). There the dot is drawn in the text color (`CanvasText`) in both Jumbo renderers.",
+			},
+		},
+	},
+	render: () => (
+		<Paper sx={lightSurface}>
+			<NavWrapper>
+				<JumboReactLightMenuItem
+					title="Jumbo light active"
+					expandable={false}
+					active={true}
+					onClick={noop}
+					onAuxClick={noop}
+					depth={0}
+				/>
+				<JumboReactLightMenuItem
+					title="Jumbo light"
+					expandable={false}
+					active={false}
+					onClick={noop}
+					onAuxClick={noop}
+					depth={0}
+				/>
+				<Paper sx={darkSurface}>
+					<JumboReactDarkMenuItem
+						title="Jumbo dark active"
+						expandable={false}
+						active={true}
+						onClick={noop}
+						onAuxClick={noop}
+						depth={0}
+					/>
+					<JumboReactDarkMenuItem
+						title="Jumbo dark"
+						expandable={false}
+						active={false}
+						onClick={noop}
+						onAuxClick={noop}
+						depth={0}
+					/>
+				</Paper>
+			</NavWrapper>
+		</Paper>
+	),
+	play: async ({ canvas }) => {
+		// the dot: the entry's only element besides its icon and its title
+		const dotOf = (entry: HTMLElement) =>
+			entry.querySelector<HTMLElement>(
+				":scope > div:not(.MuiListItemIcon-root):not(.MuiListItemText-root)",
+			);
+		for (const name of ["Jumbo light active", "Jumbo dark active"]) {
+			const dot = dotOf(canvas.getByRole("button", { name }));
+			await expect(dot).not.toBeNull();
+			await expect(forcedColorsStyle(dot!).backgroundColor).toBe(
+				systemColor("CanvasText"),
+			);
+		}
+		for (const name of ["Jumbo light", "Jumbo dark"])
+			await expect(dotOf(canvas.getByRole("button", { name }))).toBeNull();
 	},
 };
 
