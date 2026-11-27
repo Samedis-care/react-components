@@ -31,7 +31,7 @@ interface QueuedFunction {
 	 * For a delete: the records it last hid from an index call
 	 * @remarks Filled by index, read through getQueuedDeleteRecords. A caller which shows
 	 *          a queued delete as pending and undoable cannot get the record anywhere
-	 *          else: index no longer lists it, and read throws for it.
+	 *          else: index no longer lists it, and read rejects for it.
 	 */
 	deletedRecords?: Record<string, unknown>[];
 	/**
@@ -268,7 +268,10 @@ class LazyConnector extends Connector {
 	 *          A fake id whose create was dropped before the queue was worked (the record
 	 *          was removed again, or its create undone) rejects as not found as well: the
 	 *          backend cannot have that record, so it is not asked.
-	 * @throws {Error} The record's delete is queued
+	 *          A record whose delete is queued: a rejection ("data has been deleted"), as
+	 *          index no longer lists it; the backend is not asked.
+	 * @remarks Every failure is a rejection of the returned promise, never a synchronous
+	 *          throw, so a caller can handle it on the promise alone.
 	 */
 	read(
 		id: string,
@@ -290,7 +293,7 @@ class LazyConnector extends Connector {
 			return this.readFromBackend(id, model);
 		}
 		const queued = localData.result;
-		if (!queued) throw new Error("data has been deleted");
+		if (!queued) return Promise.reject(new Error("data has been deleted"));
 		if (localData.type === "create" || this.fakeReads) return queued;
 		// an update may carry only the fields it changes
 		return this.readFromBackend(id, model, queued[0]);

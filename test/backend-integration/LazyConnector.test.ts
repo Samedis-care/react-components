@@ -780,7 +780,9 @@ describe("LazyConnector after a first save", () => {
 		expect(lazy.getQueuedDeleteRecords()).toStrictEqual([
 			{ id: fakeId, name: "a" },
 		]);
-		expect(() => lazy.read(fakeId, undefined)).toThrow("data has been deleted");
+		await expect(lazy.read(fakeId, undefined)).rejects.toThrow(
+			"data has been deleted",
+		);
 		expect(lazy.getQueuedOperation(fakeId)).toBe("delete");
 		await lazy.workQueue();
 		expect(calls).toStrictEqual(["delete:real-a"]);
@@ -997,6 +999,37 @@ describe("LazyConnector read", () => {
 
 			await expect(lazy.read(droppedId, undefined)).rejects.toThrow(
 				`Record not found: ${droppedId}`,
+			);
+			expect(backendRead).not.toHaveBeenCalled();
+		},
+	);
+
+	/**
+	 * The ways a delete of a record the backend has is queued
+	 */
+	const queueDelete: [string, (lazy: LazyConnector, id: string) => void][] = [
+		["alone", (lazy, id) => lazy.delete(id, undefined)],
+		[
+			"with another record",
+			(lazy, id) => lazy.deleteMultiple([id, "b"], undefined),
+		],
+	];
+
+	it.each(queueDelete)(
+		"[ISSUE-3505-ITEM-32] a read of a record whose delete is queued %s rejects, as a read of a record that is not there does, rather than throwing",
+		async (_, queue) => {
+			const { connector } = makeRealConnector();
+			const backendRead = vi.fn((id: string) => Promise.resolve([{ id }, {}]));
+			(connector as unknown as Record<"read", Mock>).read = backendRead;
+			const lazy = new LazyConnector(connector, false);
+			queue(lazy, "a");
+			const onError = vi.fn();
+
+			// a caller that handles the failure on the promise read hands back
+			await Promise.resolve(lazy.read("a", undefined)).catch(onError);
+
+			expect(onError).toHaveBeenCalledWith(
+				expect.objectContaining({ message: "data has been deleted" }),
 			);
 			expect(backendRead).not.toHaveBeenCalled();
 		},
