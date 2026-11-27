@@ -8,6 +8,7 @@ import {
 	vi,
 } from "vitest";
 import React, { useState } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import {
 	act,
 	cleanup,
@@ -875,6 +876,54 @@ describe("CurrencyInput", () => {
 });
 
 describe("DecimalInputField", () => {
+	describe("display", () => {
+		it("[ISSUE-3484-ITEM-13] treats an undefined value like null instead of throwing", () => {
+			vi.spyOn(console, "error").mockImplementation(noop);
+			expect(() =>
+				render(
+					<DecimalInputField
+						label="Hours"
+						value={undefined as unknown as null}
+					/>,
+				),
+			).not.toThrow();
+		});
+
+		it("[ISSUE-3484-ITEM-13] shows an undefined value as an empty field, and keeps the typed text when it turns into null", () => {
+			const onValue: ValueSpy = vi.fn();
+			const handleChange: NumberChange = (evt, value) =>
+				onValue(value, evt.target.name);
+			const { rerender } = render(
+				<DecimalInputField
+					label="Hours"
+					value={undefined as unknown as null}
+					onChange={handleChange}
+				/>,
+			);
+			expect(field("Hours")).toHaveValue("");
+			fireEvent.focus(field("Hours"));
+			fireEvent.change(field("Hours"), { target: { value: "7.5" } });
+			rerender(
+				<DecimalInputField
+					label="Hours"
+					value={null}
+					onChange={handleChange}
+				/>,
+			);
+			expect(field("Hours")).toHaveValue("7.5");
+			fireEvent.blur(field("Hours"));
+			expect(reported(onValue)).toEqual([7.5]);
+		});
+
+		it("[ISSUE-3484-ITEM-13] has the value in its first render", () => {
+			// jsdom flushes the effect that fills the field before anyone looks, so
+			// the empty first commit shows only in server markup
+			expect(
+				renderToStaticMarkup(<DecimalInputField label="Hours" value={5} />),
+			).toMatch(/<input[^>]*value="5"/);
+		});
+	});
+
 	describe("locale and format changes", () => {
 		it("[ISSUE-3484-ITEM-1] keeps a whole number the Italian locale shows grouped", async () => {
 			await setLanguage("it");

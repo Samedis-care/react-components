@@ -10,8 +10,9 @@ import useCommitOnEnter from "../../../utils/internal/useCommitOnEnter";
 
 export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 	/**
-	 * The number, or `null` for an empty field. While the user is not editing
-	 * the text, the field shows this value formatted with `format` in the
+	 * The number, or `null` for an empty field (`undefined`, which untyped data
+	 * can hold, is taken as `null`). While the user is not editing the text,
+	 * the field shows this value formatted with `format` in the
 	 * components-care language, and follows every change of the three. After a
 	 * commit it shows the value the parent keeps, which can differ from the
 	 * typed text (a clamped or rounded number). A new value also replaces text
@@ -57,7 +58,16 @@ export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 const DecimalInputField = (
 	props: DecimalInputFieldProps & Omit<TextFieldProps, "onChange" | "value">,
 ) => {
-	const { value, onChange, onBlur, onKeyDown, format, ...muiProps } = props;
+	const {
+		value: valueProp,
+		onChange,
+		onBlur,
+		onKeyDown,
+		format,
+		...muiProps
+	} = props;
+	// undefined is an empty field, as null: a switch between the two is no new value
+	const value = valueProp ?? null;
 	const { t } = useCCTranslations();
 	const locale = useCurrentLocale();
 	// the text typed since the last commit, or null while the field is not edited. Only
