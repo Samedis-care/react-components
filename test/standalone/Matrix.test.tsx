@@ -425,7 +425,8 @@ describe("MatrixGrid", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({ selectable: true, onSelectRange });
 		fireEvent.mouseDown(cellOf("r1", "c4"));
-		fireEvent.mouseOver(cellOf("r1", "c3"));
+		// buttons: the left button is still held, as in any real sweep
+		fireEvent.mouseOver(cellOf("r1", "c3"), { buttons: 1 });
 		fireEvent.mouseUp(window);
 		expect(onSelectRange).toHaveBeenCalledWith({
 			rowKey: "r1",
@@ -460,7 +461,7 @@ describe("MatrixGrid", () => {
 			rows: [{ key: "r1", cells: {} }],
 		});
 		fireEvent.mouseDown(cellOf("r1", "c1"));
-		fireEvent.mouseOver(cellOf("r1", "c2"));
+		fireEvent.mouseOver(cellOf("r1", "c2"), { buttons: 1 });
 		fireEvent.mouseUp(window, { button: 2 });
 		expect(onSelectRange).not.toHaveBeenCalled();
 		expect(cellOf("r1", "c1").className).not.toContain(
@@ -491,7 +492,7 @@ describe("MatrixGrid", () => {
 		// c2 holds a cell -> not selectable under the default predicate
 		renderGrid({ selectable: true, onSelectRange });
 		fireEvent.mouseDown(cellOf("r1", "c1"));
-		fireEvent.mouseOver(cellOf("r1", "c3"));
+		fireEvent.mouseOver(cellOf("r1", "c3"), { buttons: 1 });
 		// the swept-over c2 is neither reported nor painted
 		expect(cellOf("r1", "c2").className).not.toContain(
 			matrixClasses.cellSelected,
@@ -514,7 +515,7 @@ describe("MatrixGrid", () => {
 		// c2 is occupied: pressing c1 and landing on c4 without ever entering
 		// c2 or c3 still stops the range in front of c2
 		fireEvent.mouseDown(cellOf("r1", "c1"));
-		fireEvent.mouseOver(cellOf("r1", "c4"));
+		fireEvent.mouseOver(cellOf("r1", "c4"), { buttons: 1 });
 		fireEvent.mouseUp(window);
 		expect(onSelectRange).toHaveBeenCalledWith({
 			rowKey: "r1",
@@ -531,7 +532,7 @@ describe("MatrixGrid", () => {
 			rows: [{ key: "r1", cells: {} }],
 		});
 		fireEvent.mouseDown(cellOf("r1", "c1"));
-		fireEvent.mouseOver(cellOf("r1", "c4")); // skips c2 and c3
+		fireEvent.mouseOver(cellOf("r1", "c4"), { buttons: 1 }); // skips c2 and c3
 		fireEvent.mouseUp(window);
 		expect(onSelectRange).toHaveBeenCalledWith(
 			expect.objectContaining({ columnKeys: ["c1", "c2", "c3", "c4"] }),
@@ -545,8 +546,8 @@ describe("MatrixGrid", () => {
 			rows: [{ key: "r1", cells: {} }],
 		});
 		fireEvent.mouseDown(cellOf("r1", "c1"));
-		fireEvent.mouseOver(cellOf("r1", "c3"));
-		fireEvent.mouseOver(cellOf("r1", "c1")); // all the way back
+		fireEvent.mouseOver(cellOf("r1", "c3"), { buttons: 1 });
+		fireEvent.mouseOver(cellOf("r1", "c1"), { buttons: 1 }); // all the way back
 		expect(cellOf("r1", "c2").className).not.toContain(
 			matrixClasses.cellSelected,
 		);
@@ -561,7 +562,7 @@ describe("MatrixGrid", () => {
 	it("paints exactly the cells of the range", () => {
 		renderGrid({ selectable: true, onSelectRange: vi.fn() });
 		fireEvent.mouseDown(cellOf("r1", "c3"));
-		fireEvent.mouseOver(cellOf("r1", "c4"));
+		fireEvent.mouseOver(cellOf("r1", "c4"), { buttons: 1 });
 		expect(cellOf("r1", "c3").className).toContain(matrixClasses.cellSelected);
 		expect(cellOf("r1", "c4").className).toContain(matrixClasses.cellSelected);
 		expect(cellOf("r1", "c1").className).not.toContain(
@@ -612,9 +613,9 @@ describe("MatrixGrid", () => {
 		);
 		expect(renderCell).toHaveBeenCalledTimes(4);
 		fireEvent.mouseDown(cells[0]);
-		fireEvent.mouseOver(cells[1]);
-		fireEvent.mouseOver(cells[2]);
-		fireEvent.mouseOver(cells[3]);
+		fireEvent.mouseOver(cells[1], { buttons: 1 });
+		fireEvent.mouseOver(cells[2], { buttons: 1 });
+		fireEvent.mouseOver(cells[3], { buttons: 1 });
 		fireEvent.mouseUp(window);
 		expect(renderCell).toHaveBeenCalledTimes(4);
 		expect(cells[3].className).not.toContain(matrixClasses.cellSelected);
@@ -635,7 +636,7 @@ describe("MatrixGrid", () => {
 			/>,
 		);
 		fireEvent.mouseDown(cellOf("r1", "c1"));
-		fireEvent.mouseOver(cellOf("r1", "c4"));
+		fireEvent.mouseOver(cellOf("r1", "c4"), { buttons: 1 });
 		// a refetch fills c2 while the button is still down; the pointer does
 		// not move again, so only the release can catch it
 		rerender(
@@ -704,7 +705,7 @@ describe("MatrixGrid", () => {
 		);
 		const { rerender } = render(grid([{ key: "r1", cells: {} }]));
 		fireEvent.mouseDown(cellOf("r1", "c1"));
-		fireEvent.mouseOver(cellOf("r1", "c3"));
+		fireEvent.mouseOver(cellOf("r1", "c3"), { buttons: 1 });
 		rerender(grid([{ key: "r1", cells: {}, selectable: false }]));
 		fireEvent.mouseUp(window);
 		expect(onSelectRange).not.toHaveBeenCalled();
@@ -1944,7 +1945,7 @@ describe("MatrixGrid body cells", () => {
 			const props = { selectable: true, onSelectRange };
 			const { rerender } = render(grid(props));
 			fireEvent.mouseDown(cellAt(0, 0), { button: 0 });
-			fireEvent.mouseOver(cellAt(0, 2));
+			fireEvent.mouseOver(cellAt(0, 2), { buttons: 1 });
 			// a refetch fills c2 while the button is held
 			rerender(
 				grid({
@@ -1952,7 +1953,7 @@ describe("MatrixGrid body cells", () => {
 					rows: [{ key: "r1", cells: { c2: { text: "busy" } } }, FREE[1]],
 				}),
 			);
-			fireEvent.mouseOver(cellAt(1, 3)); // a notification that moves nothing
+			fireEvent.mouseOver(cellAt(1, 3), { buttons: 1 }); // a notification that moves nothing
 			expect(painted(0)).toEqual([0]);
 			fireEvent.mouseUp(window, { button: 0 });
 			expect(onSelectRange.mock.calls[0][0].columnKeys).toEqual(["c1"]);
@@ -1963,7 +1964,7 @@ describe("MatrixGrid body cells", () => {
 			const props = { selectable: true, onSelectRange };
 			const { rerender } = render(grid(props));
 			fireEvent.mouseDown(cellAt(0, 0), { button: 0 });
-			fireEvent.mouseOver(cellAt(0, 1));
+			fireEvent.mouseOver(cellAt(0, 1), { buttons: 1 });
 			// a refetch fills the press cell while the button is held
 			rerender(
 				grid({
@@ -1971,9 +1972,96 @@ describe("MatrixGrid body cells", () => {
 					rows: [{ key: "r1", cells: { c1: { text: "busy" } } }, FREE[1]],
 				}),
 			);
-			fireEvent.mouseOver(cellAt(0, 2)); // the sweep moves on
+			fireEvent.mouseOver(cellAt(0, 2), { buttons: 1 }); // the sweep moves on
 			expect(painted(0)).toEqual([]);
 			fireEvent.mouseUp(window, { button: 0 });
+			expect(onSelectRange).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3481-ITEM-3] drops a press whose release it did not hear once the pointer moves without a button", () => {
+			const onSelectRange = vi.fn<(selection: MatrixRangeSelection) => void>();
+			render(
+				grid({
+					selectable: true,
+					onSelectRange,
+					renderCell: () => (
+						<span onMouseUp={(event) => event.stopPropagation()}>{"x"}</span>
+					),
+				}),
+			);
+			const content = cellAt(0, 0).firstElementChild as HTMLElement;
+			fireEvent.mouseDown(content, { button: 0 });
+			// the cell's content swallows the release: the window never hears it
+			fireEvent.mouseUp(content, { button: 0 });
+			fireEvent.mouseOver(cellAt(0, 2), { buttons: 0 });
+			expect(painted(0)).toEqual([]);
+			fireEvent.mouseUp(outside(), { button: 0 }); // a click on the toolbar
+			expect(
+				onSelectRange.mock.calls.map(([selection]) => selection.columnKeys),
+			).not.toContainEqual(["c1", "c2", "c3"]);
+		});
+
+		it("[ISSUE-3481-ITEM-3] reports a press on content that keeps its release to itself when it is let go of", () => {
+			const onSelectRange = vi.fn<(selection: MatrixRangeSelection) => void>();
+			render(
+				grid({
+					selectable: true,
+					onSelectRange,
+					renderCell: () => (
+						<span onMouseUp={(event) => event.stopPropagation()}>{"x"}</span>
+					),
+				}),
+			);
+			const content = cellAt(0, 1).firstElementChild as HTMLElement;
+			fireEvent.mouseDown(content, { button: 0 });
+			fireEvent.mouseUp(content, { button: 0 });
+			expect(
+				onSelectRange.mock.calls.map(([selection]) => selection.columnKeys),
+			).toEqual([["c2"]]);
+			expect(painted(0)).toEqual([]);
+		});
+
+		it("[ISSUE-3481-ITEM-3] drops a press whose release never reached the page once the pointer is on a cell without a button", () => {
+			const onSelectRange = vi.fn();
+			render(grid({ selectable: true, onSelectRange }));
+			fireEvent.mouseDown(cellAt(0, 0), { button: 0 });
+			fireEvent.mouseOver(cellAt(0, 1), { buttons: 1 });
+			expect(painted(0)).toEqual([0, 1]);
+			// let go of where no mouseup reaches the page, then on to the next
+			// cell, without leaving the grid
+			fireEvent.mouseOut(cellAt(0, 1), {
+				relatedTarget: cellAt(0, 2),
+				buttons: 0,
+			});
+			fireEvent.mouseOver(cellAt(0, 2), {
+				relatedTarget: cellAt(0, 1),
+				buttons: 0,
+			});
+			expect(painted(0)).toEqual([]);
+			// a hover again: the cell under the pointer offers to add
+			expect(
+				cellAt(0, 2).querySelector(`.${CELL_CLASSES.addHint}`),
+			).toBeInTheDocument();
+			fireEvent.mouseUp(outside(), { button: 0 }); // a click on the toolbar
+			expect(onSelectRange).not.toHaveBeenCalled();
+		});
+
+		it("[ISSUE-3481-ITEM-3] drops such a press when the pointer comes back onto the grid outside a cell, rather than painting it again", () => {
+			const onSelectRange = vi.fn();
+			render(grid({ selectable: true, onSelectRange }));
+			fireEvent.mouseDown(cellAt(0, 0), { button: 0 });
+			fireEvent.mouseOver(cellAt(0, 1), { buttons: 1 });
+			fireEvent.mouseOut(cellAt(0, 1), {
+				relatedTarget: outside(),
+				buttons: 1,
+			});
+			// let go of off the grid where no mouseup reaches the page, then
+			// back over a column header
+			const header = screen.getByRole("columnheader", { name: "4" });
+			fireEvent.mouseOut(outside(), { relatedTarget: header, buttons: 0 });
+			fireEvent.mouseOver(header, { relatedTarget: outside(), buttons: 0 });
+			expect(painted(0)).toEqual([]);
+			fireEvent.mouseUp(header, { button: 0 }); // a click on the header
 			expect(onSelectRange).not.toHaveBeenCalled();
 		});
 
@@ -2020,7 +2108,7 @@ describe("MatrixGrid body cells", () => {
 				// the press is the entry's: no range starts, and sweeping on from
 				// the entry extends none
 				expect(painted(0), pairLayout).toEqual([]);
-				fireEvent.mouseOver(cellAt(0, 2));
+				fireEvent.mouseOver(cellAt(0, 2), { buttons: 1 });
 				expect(painted(0), pairLayout).toEqual([]);
 				fireEvent.mouseUp(window, { button: 0 });
 				fireEvent.click(target);
@@ -2049,13 +2137,19 @@ describe("MatrixGrid body cells", () => {
 			const onSelectRange = vi.fn<(selection: MatrixRangeSelection) => void>();
 			render(grid({ selectable: true, onSelectRange }));
 			fireEvent.mouseDown(cellAt(0, 0), { button: 0 });
-			fireEvent.mouseOver(cellAt(0, 2));
+			fireEvent.mouseOver(cellAt(0, 2), { buttons: 1 });
 			expect(painted(0)).toEqual([0, 1, 2]);
 			fireEvent.mouseOut(cellAt(0, 2), { relatedTarget: outside() });
 			expect(painted(0)).toEqual([]);
 			// back onto the grid, the button still held: the sweep goes on
-			fireEvent.mouseOut(outside(), { relatedTarget: cellAt(0, 3) });
-			fireEvent.mouseOver(cellAt(0, 3), { relatedTarget: outside() });
+			fireEvent.mouseOut(outside(), {
+				relatedTarget: cellAt(0, 3),
+				buttons: 1,
+			});
+			fireEvent.mouseOver(cellAt(0, 3), {
+				relatedTarget: outside(),
+				buttons: 1,
+			});
 			expect(painted(0)).toEqual([0, 1, 2, 3]);
 			fireEvent.mouseUp(cellAt(0, 3), { button: 0 });
 			expect(
@@ -2067,7 +2161,7 @@ describe("MatrixGrid body cells", () => {
 			const onSelectRange = vi.fn<(selection: MatrixRangeSelection) => void>();
 			render(grid({ selectable: true, onSelectRange }));
 			fireEvent.mouseDown(cellAt(0, 0), { button: 0 });
-			fireEvent.mouseOver(cellAt(0, 3));
+			fireEvent.mouseOver(cellAt(0, 3), { buttons: 1 });
 			fireEvent.mouseOut(cellAt(0, 3), { relatedTarget: document.body });
 			fireEvent.mouseUp(document.body, { button: 0 });
 			expect(onSelectRange).not.toHaveBeenCalled();
@@ -2086,10 +2180,16 @@ describe("MatrixGrid body cells", () => {
 			const onSelectRange = vi.fn<(selection: MatrixRangeSelection) => void>();
 			render(grid({ selectable: true, onSelectRange }));
 			fireEvent.mouseDown(cellAt(0, 0), { button: 0 });
-			fireEvent.mouseOver(cellAt(0, 1));
+			fireEvent.mouseOver(cellAt(0, 1), { buttons: 1 });
 			// a sweep that drifts into the next row is still on the grid
-			fireEvent.mouseOut(cellAt(0, 1), { relatedTarget: cellAt(1, 2) });
-			fireEvent.mouseOver(cellAt(1, 2), { relatedTarget: cellAt(0, 1) });
+			fireEvent.mouseOut(cellAt(0, 1), {
+				relatedTarget: cellAt(1, 2),
+				buttons: 1,
+			});
+			fireEvent.mouseOver(cellAt(1, 2), {
+				relatedTarget: cellAt(0, 1),
+				buttons: 1,
+			});
 			expect(painted(0)).toEqual([0, 1]);
 			fireEvent.mouseUp(cellAt(1, 2), { button: 0 });
 			expect(

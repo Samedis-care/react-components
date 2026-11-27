@@ -290,9 +290,12 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 		},
 		[store, row.key, column.key],
 	);
-	const handleMouseEnter = useCallback(() => {
-		store.enter(row.key, column.key);
-	}, [store, row.key, column.key]);
+	const handleMouseEnter = useCallback(
+		(event: React.MouseEvent) => {
+			store.enter(row.key, column.key, event.buttons);
+		},
+		[store, row.key, column.key],
+	);
 	const handleMouseLeave = useCallback(() => {
 		store.leave(row.key, column.key);
 	}, [store, row.key, column.key]);

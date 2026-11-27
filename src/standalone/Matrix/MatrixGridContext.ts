@@ -131,7 +131,10 @@ export interface MatrixGridProps<TCell> {
 	 * @remarks Left button only. Letting go of the button away from the grid
 	 * aborts the press: while the pointer is off the grid the range is not
 	 * painted, and coming back with the button still held paints it again.
-	 * Escape and another mouse button abort a held press too.
+	 * Escape and another mouse button abort a held press too. The grid hears
+	 * the release even where the cell's content stops its propagation; a
+	 * press whose release never reaches the page is dropped, unreported, once
+	 * the pointer moves onto the grid or one of its cells with no button down.
 	 */
 	selectable?: boolean;
 	/**

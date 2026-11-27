@@ -185,16 +185,37 @@ export class MatrixInteractionStore {
 	}
 
 	/**
+	 * Drops a press whose release the page never heard: the pointer entered
+	 * the grid or one of its cells while a press is in progress, but the
+	 * primary button is no longer down. It is not reported, as nothing says
+	 * where it was let go of; from here on the pointer hovers, rather than
+	 * sweeping a range that the next click anywhere would report.
+	 * @param buttons The `buttons` of the mouse event that brought the pointer
+	 * here, a bit mask in which 1 is the primary button
+	 * @returns Whether a press was dropped (and the cells notified)
+	 */
+	private dropUnheard(buttons: number): boolean {
+		if (!this.dragging || buttons & 1) return false;
+		this.cancel();
+		return true;
+	}
+
+	/**
 	 * Moves the pointer onto a cell: extends (or shrinks) the range if one is
 	 * being swept, and remembers the hover for the add hint (and shows it
 	 * again, if Escape hid it).
+	 * @param buttons The `buttons` of the mouse event: without the primary
+	 * button a press still in progress was let go of unheard and is dropped
+	 * (see dropUnheard)
 	 * @remarks A range stops at the first cell canSelect rejects, so what is
 	 * highlighted is exactly what gets reported.
 	 */
-	enter(rowKey: string, columnKey: string): void {
+	enter(rowKey: string, columnKey: string, buttons: number): void {
 		this.hoverRowKey = rowKey;
 		this.hoverColumnKey = columnKey;
 		this.hintDismissed = false;
+		// dropping notifies, the new hover included
+		if (this.dropUnheard(buttons)) return;
 		if (this.dragging && this.rowKey === rowKey) {
 			const anchor = this.indexOf(this.anchorKey);
 			const target = this.indexOf(columnKey);
@@ -231,8 +252,14 @@ export class MatrixInteractionStore {
 		this.notify();
 	}
 
-	/** The pointer came back onto the grid: a held press is painted again. */
-	enterGrid(): void {
+	/**
+	 * The pointer came back onto the grid: a held press is painted again.
+	 * @param buttons The `buttons` of the mouse event: without the primary
+	 * button the press was let go of unheard and is dropped (see dropUnheard),
+	 * rather than painted again for a click on a header to report
+	 */
+	enterGrid(buttons: number): void {
+		if (this.dropUnheard(buttons)) return;
 		if (!this.away) return;
 		this.away = false;
 		this.notify();

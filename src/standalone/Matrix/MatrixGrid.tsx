@@ -189,15 +189,22 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 			store.cancel();
 			store.dismissHint();
 		};
-		window.addEventListener("mouseup", onUp);
+		// In the capture phase: content that stops the release on its way up
+		// (an onMouseUp calling stopPropagation) would otherwise keep it from
+		// the grid, as React stops the native event at its root, and leave the
+		// press armed for the next click anywhere to report.
+		window.addEventListener("mouseup", onUp, true);
 		window.addEventListener("keydown", onKey);
 		// A press that ends outside the window, in a context menu, or as a
-		// cancelled touch never produces a mouseup we would hear.
+		// cancelled touch never produces a mouseup we would hear. One whose
+		// mouseup never reaches the page at all is dropped as soon as the
+		// pointer enters the grid or a cell with no button down (see
+		// MatrixInteractionStore.enter).
 		window.addEventListener("blur", cancel);
 		window.addEventListener("contextmenu", cancel);
 		window.addEventListener("pointercancel", cancel);
 		return () => {
-			window.removeEventListener("mouseup", onUp);
+			window.removeEventListener("mouseup", onUp, true);
 			window.removeEventListener("keydown", onKey);
 			window.removeEventListener("blur", cancel);
 			window.removeEventListener("contextmenu", cancel);
@@ -215,9 +222,12 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 	const handleMouseLeave = useCallback(() => {
 		store.leaveGrid();
 	}, [store]);
-	const handleMouseEnter = useCallback(() => {
-		store.enterGrid();
-	}, [store]);
+	const handleMouseEnter = useCallback(
+		(event: React.MouseEvent) => {
+			store.enterGrid(event.buttons);
+		},
+		[store],
+	);
 
 	// Scroll the marked column just past the sticky row header column.
 	// The fallback also catches a scrollToColumn that is no longer in the set —
