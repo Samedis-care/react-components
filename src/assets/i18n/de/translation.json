@@ -273,6 +273,7 @@
 				"instructions-signed": "Die gespeicherte Unterschrift wird angezeigt. Um neu zu unterschreiben, setze sie zuerst zurück."
 			},
 			"sign-here": "Hier digital unterschreiben",
+			"not-signed": "Nicht unterschrieben",
 			"required": "Erforderlich"
 		},
 		"signal-portlet": {

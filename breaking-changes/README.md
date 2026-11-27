@@ -21,6 +21,7 @@ One file per change, so this never grows into a single unreadable log.
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
 | 2026-11-27 | [SignaturePad's className, classes and canvasProps reach the element they name](2026-11-27-signature-pad-props-reach-their-element.md) | behavior, type |
+| 2026-11-27 | [A disabled, unsigned SignPad tile says "Not signed"](2026-11-27-sign-pad-disabled-unsigned-says-not-signed.md) | behavior, i18n |
 | 2026-11-26 | [A HistoryRouter inside another one leaves the page's scroll position and focus alone](2026-11-26-nested-history-router-keeps-page-scroll-and-focus.md) | behavior |
 | 2026-11-26 | [isPlainObject tells a plain object by its prototype; a record with an entry named constructor counts](2026-11-26-is-plain-object-by-prototype.md) | behavior |
 | 2026-11-26 | [A long InlineSwitch label wraps beside the switch, and the switch stays on screen](2026-11-26-inline-switch-long-label-wraps.md) | behavior |

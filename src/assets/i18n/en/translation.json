@@ -277,6 +277,7 @@
 				"instructions-signed": "The saved signature is shown. To sign again, clear it first."
 			},
 			"sign-here": "Sign here digitally",
+			"not-signed": "Not signed",
 			"required": "Required"
 		},
 		"toast": {

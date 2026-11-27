@@ -47,9 +47,9 @@ describe("SignPad tile", () => {
 		const { container, rerender } = render(
 			<SignPad signature={null} disabled openSignPad={open} openInfo={info} />,
 		);
-		const button = screen.getByRole("button", { name: prompt() });
+		const button = screen.getByRole("button", { name: "Not signed" });
 		await user.click(button);
-		await user.click(screen.getByText(prompt()));
+		await user.click(screen.getByText("Not signed"));
 		button.focus();
 		await user.keyboard("{Enter}");
 		await user.keyboard(" ");
@@ -389,6 +389,54 @@ describe("SignPad tile", () => {
 		);
 		expect(button).toHaveAccessibleDescription("");
 		expect(screen.queryByText("Required")).toBeNull();
+	});
+	it("[ISSUE-3467-ITEM-26] a disabled, unsigned tile says it is not signed instead of asking to sign, in its text and in its button's name", () => {
+		const { rerender } = render(<SignPad signature={null} disabled />);
+		const button = screen.getByRole("button");
+		expect(button).toHaveTextContent("Not signed");
+		expect(screen.queryByText(prompt()), "the prompt").toBeNull();
+		expect(button).toHaveAccessibleName("Not signed");
+
+		rerender(<SignPad signature="" signerName=" Alice Müller " disabled />);
+		expect(button).toHaveTextContent("Not signed");
+		expect(button).toHaveAccessibleName("Not signed (Alice Müller)");
+
+		// enabled again, it asks to sign
+		rerender(<SignPad signature="" signerName="Alice Müller" />);
+		expect(button).not.toHaveTextContent("Not signed");
+		expect(button).toHaveTextContent(prompt());
+		expect(button).toHaveAccessibleName(`${prompt()} (Alice Müller)`);
+
+		// a signed tile says neither, disabled or not
+		rerender(<SignPad signature={SIG} signerName="Alice Müller" disabled />);
+		expect(button).toHaveTextContent("");
+		expect(button).toHaveAccessibleName("Signature (Alice Müller)");
+	});
+	it("[ISSUE-3467-ITEM-26] a tile disabled by the theme's default props says it is not signed, after the field's label", () => {
+		const theme = createTheme({
+			components: { CcSignPad: { defaultProps: { disabled: true } } },
+		});
+		render(
+			<ThemeProvider theme={theme}>
+				<span id="sig-label">Trainer signature</span>
+				<SignPad signature={null} aria-labelledby="sig-label" />
+			</ThemeProvider>,
+		);
+		const button = screen.getByRole("button");
+		expect(button).toHaveTextContent("Not signed");
+		expect(button).toHaveAccessibleName("Trainer signature Not signed");
+	});
+	it("[ISSUE-3467-ITEM-26] every locale says that a tile is not signed", async () => {
+		await ccI18n.loadLanguages(langs);
+		const missing = langs.filter(
+			(lng) =>
+				!ccI18n.getResource(
+					lng.split("-")[0],
+					"translation",
+					"standalone.signature-pad.not-signed",
+				),
+		);
+		expect(missing, "locales without the text").toEqual([]);
 	});
 	it("[ISSUE-3467-ITEM-17] every locale says that a signature is required", async () => {
 		await ccI18n.loadLanguages(langs);

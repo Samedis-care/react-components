@@ -273,6 +273,7 @@
 				"close": "Закрыть"
 			},
 			"sign-here": "Цифровая подпись здесь",
+			"not-signed": "Не подписан",
 			"required": "Обязательно"
 		},
 		"signal-portlet": {

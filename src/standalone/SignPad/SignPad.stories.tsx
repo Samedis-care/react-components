@@ -237,6 +237,45 @@ export const Issue3467Item6DisabledTileOpensNothing: Story = {
 	},
 };
 
+export const Issue3467Item26DisabledUnsignedSaysNotSigned: Story = {
+	args: {
+		signature: "",
+		signerName: "Alice Müller",
+		disabled: true,
+		openInfo: fn(),
+		openSignPad: fn(),
+	},
+	parameters: {
+		docs: {
+			description: {
+				story:
+					'ISSUE-3467-ITEM-26: a disabled, unsigned tile, such as a read-only signature field, cannot be signed, so it says "Not signed" instead of asking to sign, in readable text (4.5:1) and in its button\'s name, under the default cursor.',
+			},
+		},
+		a11y: { test: "error" },
+	},
+	play: async ({ canvas, canvasElement }) => {
+		const tile = canvas.getByRole("button", {
+			name: "Not signed (Alice Müller)",
+		});
+		await expect(canvas.queryByText("Sign here digitally")).toBeNull();
+		const text = canvas.getByText("Not signed");
+		await expect(text).toBeVisible();
+		await expect(tile).toContainElement(text);
+		const root = tileIn(canvasElement);
+		await expect(getComputedStyle(root).cursor).toBe("default");
+		const background = over(
+			parseColor(getComputedStyle(root).backgroundColor),
+			WHITE,
+		);
+		const color = getComputedStyle(text).color;
+		await expect(
+			contrast(over(parseColor(color), background), background),
+			`"Not signed" in ${color} on the tile`,
+		).toBeGreaterThanOrEqual(4.5);
+	},
+};
+
 export const Issue3467Item12TileAddsNoGapBelow: Story = {
 	parameters: {
 		docs: {

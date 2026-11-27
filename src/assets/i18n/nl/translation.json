@@ -273,6 +273,7 @@
 				"instructions-signed": "De opgeslagen handtekening wordt getoond. Verwijder de handtekening eerst om opnieuw te tekenen."
 			},
 			"sign-here": "Teken hier digitaal",
+			"not-signed": "Niet ondertekend",
 			"required": "Verplicht"
 		},
 		"signal-portlet": {

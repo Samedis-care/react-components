@@ -273,6 +273,7 @@
 				"instructions-signed": "La signature enregistrée est affichée. Pour signer à nouveau, effacez-la d'abord."
 			},
 			"sign-here": "Signez ici numériquement",
+			"not-signed": "Pas signé",
 			"required": "Obligatoire"
 		},
 		"signal-portlet": {

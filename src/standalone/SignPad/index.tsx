@@ -15,7 +15,9 @@ export interface SignPadProps {
 	 * Disables the tile: neither a click nor Enter or Space calls
 	 * `openSignPad`, the cursor is the default one instead of a pointer, the
 	 * pen icon is greyed and the button is marked `aria-disabled`, so
-	 * assistive technology announces it as unavailable. The button stays
+	 * assistive technology announces it as unavailable. An unsigned tile says
+	 * "Not signed" (`standalone.signature-pad.not-signed`) instead of asking
+	 * to sign, in its text and in its button's name. The button stays
 	 * focusable, so a focused tile that gets disabled keeps the focus, and the
 	 * info button keeps working. While disabled, the root has the class
 	 * `CcSignPad-disabled`. Set in the theme's
@@ -31,7 +33,7 @@ export interface SignPadProps {
 	 * Name of the signer, trimmed; blank means unknown. The tile does not show
 	 * it, but adds it to the name its button has for assistive technology,
 	 * e.g. "Signature (Alice Müller)". SignaturePad also shows it in the
-	 * dialog title.
+	 * dialog title. To show it on the page, put it in the field's label.
 	 */
 	signerName?: string | null;
 	/**
@@ -73,7 +75,8 @@ export interface SignPadProps {
 	 * name, so it still tells whether the field is signed: e.g.
 	 * "Trainer signature Signature (Alice Müller)". The info button is named
 	 * "More information" followed by them. Default: none, the button's name
-	 * is its own (the prompt, or "Signature", with the signer).
+	 * is its own (the prompt, "Not signed" while `disabled`, or "Signature",
+	 * with the signer).
 	 */
 	"aria-labelledby"?: string;
 	/**
@@ -218,12 +221,16 @@ const SignPad = (inProps: SignPadProps) => {
 			.filter(Boolean)
 			.join(" ") || undefined;
 	const signerName = signerNameUntrim?.trim();
-	const prompt = t("standalone.signature-pad.sign-here");
-	// what the tile holds (it starts with the visible prompt while unsigned),
+	// the visible text of an unsigned tile: the prompt, or, as nothing can be
+	// signed while disabled, that it is not signed
+	const unsigned = disabled
+		? t("standalone.signature-pad.not-signed")
+		: t("standalone.signature-pad.sign-here");
+	// what the tile holds (it starts with the visible text while unsigned),
 	// then whose signature it is
 	const state = signature
 		? t("standalone.signature-pad.dialog.signature")
-		: prompt;
+		: unsigned;
 	const label = signerName
 		? t("standalone.signature-pad.with-signer", {
 				LABEL: state,
@@ -261,7 +268,7 @@ const SignPad = (inProps: SignPadProps) => {
 			>
 				<SignTextDiv className={classes?.signTextDiv}>
 					<SignIcon color={disabled ? "disabled" : "primary"} />
-					{!signature && <span>{prompt}</span>}
+					{!signature && <span>{unsigned}</span>}
 				</SignTextDiv>
 				<ImageDiv className={classes?.imageDiv}>
 					{signature && (

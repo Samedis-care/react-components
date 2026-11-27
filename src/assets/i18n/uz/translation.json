@@ -273,6 +273,7 @@
 				"instructions-signed": "Saqlangan imzo ko'rsatilgan. Qayta imzolash uchun avval uni tozalang."
 			},
 			"sign-here": "Bu yerda raqamli imzolang",
+			"not-signed": "Imzo qo'yilmagan",
 			"required": "Majburiy"
 		},
 		"signal-portlet": {

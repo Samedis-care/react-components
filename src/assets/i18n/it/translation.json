@@ -277,6 +277,7 @@
 				"instructions-signed": "Viene mostrata la firma salvata. Per firmare di nuovo, cancellala prima."
 			},
 			"sign-here": "Firma qui digitalmente",
+			"not-signed": "Non firmato",
 			"required": "Obbligatorio"
 		},
 		"toast": {

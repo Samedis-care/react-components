@@ -277,6 +277,7 @@
 				"instructions-signed": "Se muestra la firma guardada. Para volver a firmar, bórrela primero."
 			},
 			"sign-here": "Firme aquí digitalmente",
+			"not-signed": "Sin firmar",
 			"required": "Obligatorio"
 		},
 		"toast": {
