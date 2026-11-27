@@ -33,10 +33,11 @@ export interface MuiFieldStateProps {
 	 *          colour, darkened (lightened on a dark background) just enough to
 	 *          reach the 4.5:1 that text needs against `palette.background`. The
 	 *          underline of a standard or filled field is drawn like an error's:
-	 *          1px at rest and while hovered, 2px only while focused. Yields
-	 *          to `error` where both are set. It is a colour only, so show what the
-	 *          warning is about as text too, e.g. as the helper text, as the
-	 *          library's model renderers do with their warning message.
+	 *          1px at rest and while hovered, 2px only while focused. Hovering
+	 *          and focusing the field keep the colour, as they keep an error's.
+	 *          Yields to `error` where both are set. It is a colour only, so show
+	 *          what the warning is about as text too, e.g. as the helper text, as
+	 *          the library's model renderers do with their warning message.
 	 */
 	warning?: boolean;
 	/**
@@ -335,18 +336,17 @@ export const withMuiFieldState = <T extends MuiFieldStateSourceProps>(
 				},
 		}),
 		...(warning && {
-			"& > .MuiFormLabel-root": {
-				color: warningTextColor(theme),
-			},
-			"&.MuiFormLabel-root": {
-				color: warningTextColor(theme),
-			},
-			"& > .MuiFormLabel-root.Mui-error": {
-				color: theme.palette.error.main,
-			},
-			"&.MuiFormLabel-root.Mui-error": {
-				color: theme.palette.error.main,
-			},
+			// The label and helper text outrank their own focus and disabled colours, as
+			// MUI's error colour does. Without that, the warning rule and MUI's would
+			// weigh the same, and the one emotion inserted last would win: on a page whose
+			// first field already has a warning, the label's own styles come after these,
+			// so focus would turn the label to the primary colour, and disabled both to
+			// grey. `:not(.Mui-error)` leaves an error to MUI's own colour, so a field
+			// with both looks as one with the error only.
+			"& > .MuiFormLabel-root:not(.Mui-error), &.MuiFormLabel-root:not(.Mui-error)":
+				{
+					color: warningTextColor(theme),
+				},
 			// standard and filled inputs are drawn as MUI draws an error: the idle 1px
 			// underline and the 2px focus underline take the colour, the latter still
 			// only while focused, so focus stays visible. With an error MUI's own
@@ -366,18 +366,11 @@ export const withMuiFieldState = <T extends MuiFieldStateSourceProps>(
 				{
 					borderBottom: `1px solid ${theme.palette.warning.main}`,
 				},
-			"& > .MuiFormHelperText-root": {
-				color: warningTextColor(theme),
-			},
-			"&.MuiFormHelperText-root": {
-				color: warningTextColor(theme),
-			},
-			"& > .MuiFormHelperText-root.Mui-error": {
-				color: theme.palette.error.main,
-			},
-			"&.MuiFormHelperText-root.Mui-error": {
-				color: theme.palette.error.main,
-			},
+			// as the label above
+			"& > .MuiFormHelperText-root:not(.Mui-error), &.MuiFormHelperText-root:not(.Mui-error)":
+				{
+					color: warningTextColor(theme),
+				},
 			// Outranks the input's own focus and hover rules, as MUI's error rule
 			// outranks its colour variants. Without that, the warning rule and MUI's
 			// focus rule would weigh the same, and the one emotion inserted last would

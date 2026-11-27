@@ -11,7 +11,10 @@ import {
 	MenuItem,
 	TextField,
 } from "@mui/material";
+import { CacheProvider } from "@emotion/react";
+import createCache from "@emotion/cache";
 import TextFieldWithHelp from "./TextFieldWithHelp";
+import readableTextColor from "../../utils/internal/readableTextColor";
 import DateInput from "./InputControls/DateInput";
 import MuiPickerUtils from "../../framework/MuiPickerUtils";
 
@@ -391,6 +394,127 @@ export const Issue3483Item17WarningUnderlineDrawnLikeError: Story = {
 				transform: "matrix(1, 0, 0, 1, 0, 0)",
 			}),
 		);
+	},
+};
+
+/**
+ * Its own emotion cache, so the field's styles are inserted in the order a page
+ * gets them when the first outlined field it renders already has a warning
+ */
+const freshCache = createCache({ key: "bug-outlined-warning" });
+
+export const Issue3483Item6OutlinedWarningKeptOnFocus: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3483-ITEM-6: an outlined field that has its warning at first render keeps the orange outline while it is focused or hovered, whatever the page rendered before: the warning rule outranks MUI's focus and hover rules instead of tying with them.",
+			},
+		},
+	},
+	render: () => (
+		<CacheProvider value={freshCache}>
+			<Box sx={{ width: 300 }}>
+				<TextFieldWithHelp
+					variant="outlined"
+					label="Serial"
+					value="x"
+					warning
+				/>
+			</Box>
+		</CacheProvider>
+	),
+	play: async ({ canvas, canvasElement, userEvent }) => {
+		const input = await canvas.findByRole("textbox", { name: "Serial" });
+		const outline = () =>
+			getComputedStyle(
+				canvasElement.querySelector(".MuiOutlinedInput-notchedOutline")!,
+			).borderColor;
+		// not checked while idle: the test browser's resting pointer may sit on the
+		// field, so an idle reading could be a hovered one
+		await userEvent.click(input);
+		await expect(input).toHaveFocus();
+		await expect(outline(), "focused").toBe(WARNING);
+	},
+};
+
+/** Another fresh cache, for the same first-render insertion order */
+const freshLabelCache = createCache({ key: "bug-warning-label" });
+
+/** The colour of a warning's label and helper text in the preview's theme */
+const WARNING_TEXT = readableTextColor(createTheme(), palette.warning.main);
+const ERROR = hexToRgb(palette.error.main);
+
+export const Issue3483Item6WarningLabelKeptOnFocus: Story = {
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3483-ITEM-6: the label of a field that has its warning at first render keeps the warning colour while the field is focused, and the label and helper text keep it while the field is disabled, as an error's do, whatever the page rendered before. With `error` as well they are red.",
+			},
+		},
+	},
+	render: () => (
+		<CacheProvider value={freshLabelCache}>
+			<Box sx={{ width: 300, display: "grid", gap: 4 }}>
+				<TextFieldWithHelp
+					variant="outlined"
+					label="Serial"
+					value="x"
+					warning
+					helperText="Serial looks unusual"
+				/>
+				<TextFieldWithHelp
+					variant="outlined"
+					label="Batch"
+					value="x"
+					warning
+					disabled
+					helperText="Batch looks unusual"
+				/>
+				<TextFieldWithHelp
+					variant="outlined"
+					label="Lot"
+					value="x"
+					warning
+					error
+					helperText="Lot is invalid"
+				/>
+			</Box>
+		</CacheProvider>
+	),
+	play: async ({ canvas, userEvent }) => {
+		const input = await canvas.findByRole<HTMLInputElement>("textbox", {
+			name: "Serial",
+		});
+		/** The settled colour of an element: after the transition MUI gives a label */
+		const color = async (el: Element) => {
+			await Promise.all(el.getAnimations().map((anim) => anim.finished));
+			return getComputedStyle(el).color;
+		};
+		const label = (name: string) =>
+			canvas.getByRole<HTMLInputElement>("textbox", { name }).labels![0];
+
+		await userEvent.click(input);
+		await expect(input).toHaveFocus();
+		await expect(await color(label("Serial")), "focused").toBe(WARNING_TEXT);
+		await expect(
+			await color(canvas.getByText("Serial looks unusual")),
+			"helper text",
+		).toBe(WARNING_TEXT);
+
+		await expect(await color(label("Batch")), "disabled").toBe(WARNING_TEXT);
+		await expect(
+			await color(canvas.getByText("Batch looks unusual")),
+			"disabled helper text",
+		).toBe(WARNING_TEXT);
+
+		// error wins
+		await expect(await color(label("Lot")), "error").toBe(ERROR);
+		await expect(
+			await color(canvas.getByText("Lot is invalid")),
+			"error helper text",
+		).toBe(ERROR);
 	},
 };
 
