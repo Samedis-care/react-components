@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React from "react";
 import {
 	Avatar,
 	ListItem,
@@ -11,7 +11,7 @@ import {
 	useThemeProps,
 } from "@mui/material";
 import Loader from "../Loader";
-import useNavigate from "../Routes/useNavigate";
+import Link from "../Routes/Link";
 import combineClassNames from "../../utils/combineClassNames";
 import focusRing from "../../utils/internal/focusRing";
 import visuallyHidden from "../../utils/internal/visuallyHidden";
@@ -31,7 +31,9 @@ export interface SignalPortletItemProps {
 	 */
 	count: number | null | undefined;
 	/**
-	 * The text of the portlet item
+	 * The label next to the count. With the count it names the row; in a row
+	 * with `link` it is part of the link, so it must not contain interactive
+	 * content (links, buttons, inputs), which a link cannot hold.
 	 */
 	text: React.ReactNode;
 	/**
@@ -39,7 +41,16 @@ export interface SignalPortletItemProps {
 	 */
 	textTypographyProps?: TypographyProps;
 	/**
-	 * The url the portlet item links to onClick
+	 * Where the row links to: a path of the app, with an optional `?query` and
+	 * `#hash`, as the `to` of the library's `Link`, which needs a
+	 * HistoryRouter above it. The row is then a link, an `<a>` with this
+	 * href, named by its count and text: a click or Enter navigates in the
+	 * app. A click with Ctrl, Meta, Shift or Alt and a middle click are left
+	 * to the browser, which opens the href in a new tab or window, as for any
+	 * other link. A URL with a scheme ("https://…") makes a plain link that
+	 * the browser follows.
+	 * Default: none (no link, also for an empty string): the row is a plain,
+	 * non-interactive list item.
 	 */
 	link?: string;
 	/**
@@ -104,17 +115,18 @@ const ListRootButton = styled(ListItemButton, {
 	// MUI marks the keyboard-focused row with a faint tint only, which forced
 	// colors drop; inside the row, which spans the card from edge to edge
 	[`&.${listItemButtonClasses.focusVisible}`]: focusRing(theme, -2),
-}));
+})) as typeof ListItemButton; // styled() drops the typing of `component`
 
 /**
  * Slots of a SignalPortlet row, for an item's `classes` and for the theme's
  * `components.CcSignalPortletItem.styleOverrides`:
  * - `root`: the ListItem (`<li>`) of every row. A row with link has no
  *   padding here (MUI's `disablePadding`), its ListItemButton has it.
- * - `rootBtn`: the ListItemButton (a `div` with role button) inside the
- *   `<li>` of a row with link. Keyboard focus draws a 2px outline in
- *   `palette.primary.main` inside its edges, or the ring of the theme's
- *   `focusVisible` option when the theme sets one.
+ * - `rootBtn`: the ListItemButton inside the `<li>` of a row with link,
+ *   rendered as the link itself: an `<a>` with the link's href. Keyboard
+ *   focus draws a 2px outline in `palette.primary.main` inside its edges,
+ *   or the ring of the theme's `focusVisible` option when the theme sets
+ *   one.
  * - `listAvatar`: the ListItemAvatar around the count
  * - `itemColorLoading`, `itemColorActive`, `itemColorInactive`: the 40px
  *   Avatar while the count is `null` or `undefined`, when it is non-zero, and
@@ -142,13 +154,6 @@ const MAX_COUNT = 999;
 const SignalPortletItem = (inProps: SignalPortletItemProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcSignalPortletItem" });
 	const { count, link, text, textTypographyProps, className, classes } = props;
-	const navigate = useNavigate();
-
-	const handleClick = useCallback(() => {
-		if (link) {
-			navigate(link);
-		}
-	}, [navigate, link]);
 
 	const AvatarComponent =
 		count == null ? AvatarLoading : count ? AvatarActive : AvatarInactive;
@@ -183,7 +188,7 @@ const SignalPortletItem = (inProps: SignalPortletItemProps) => {
 			<ListText slotProps={{ primary: textTypographyProps }}>{text}</ListText>
 		</>
 	);
-	// every row is a list item; a linked row puts its button inside, as in
+	// every row is a list item; a linked row puts its link inside, as in
 	// MUI's ListItem disablePadding + ListItemButton pattern
 	return (
 		<ListRoot
@@ -191,7 +196,7 @@ const SignalPortletItem = (inProps: SignalPortletItemProps) => {
 			className={combineClassNames([className, classes?.root])}
 		>
 			{link ? (
-				<ListRootButton onClick={handleClick} className={classes?.rootBtn}>
+				<ListRootButton component={Link} to={link} className={classes?.rootBtn}>
 					{content}
 				</ListRootButton>
 			) : (

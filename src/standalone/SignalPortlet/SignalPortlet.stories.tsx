@@ -5,7 +5,7 @@ import { createMemoryHistory } from "history";
 // eslint-disable-next-line import/no-unresolved
 import { expect, fn, userEvent, waitFor } from "storybook/test";
 import SignalPortlet from "./index";
-import { HistoryRouter } from "../Routes";
+import { HistoryRouter, useLocation } from "../Routes";
 import {
 	edgesPast,
 	pageScrollsSideways,
@@ -29,6 +29,12 @@ const WithRouter = ({ children }: { children: React.ReactNode }) => {
 			<Box sx={{ width: 320 }}>{children}</Box>
 		</HistoryRouter>
 	);
+};
+
+/** The current path and search of the story's router */
+const CurrentPath = () => {
+	const { pathname, search } = useLocation();
+	return <p data-testid="path">{pathname + search}</p>;
 };
 
 export const Default: Story = {
@@ -153,7 +159,40 @@ export const Issue3469Item1CappedCountFitsItsAvatar: Story = {
 };
 
 /**
- * Every row is a list item: a linked row's button sits inside its `<li>`,
+ * A linked row is a link to its path, named by its count and text: Tab
+ * reaches it, and Enter opens the page in the app. Space, which activates
+ * buttons, does nothing on a link
+ */
+export const Issue3469Item12RowIsALink: Story = {
+	render: () => (
+		<WithRouter>
+			<SignalPortlet
+				title="Linked Items"
+				items={[
+					{ count: 7, text: "Active Users", link: "/users?state=active" },
+				]}
+			/>
+			<CurrentPath />
+		</WithRouter>
+	),
+	parameters: { a11y: { test: "error" } },
+	play: async ({ canvas }) => {
+		const row = canvas.getByRole("link", { name: "7 Active Users" });
+		await expect(row).toHaveAttribute("href", "/users?state=active");
+		const path = canvas.getByTestId("path");
+		await userEvent.tab();
+		await expect(row).toHaveFocus();
+		await userEvent.keyboard(" ");
+		await expect(path).toHaveTextContent(/^\/$/);
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() =>
+			expect(path).toHaveTextContent(/^\/users\?state=active$/),
+		);
+	},
+};
+
+/**
+ * Every row is a list item: a linked row's link sits inside its `<li>`,
  * fills it and is laid out like a plain row
  */
 export const Issue3469Item13RowsAreListItems: Story = {
@@ -173,8 +212,8 @@ export const Issue3469Item13RowsAreListItems: Story = {
 		const rows = canvas.getAllByRole("listitem");
 		await expect(rows).toHaveLength(2);
 		const [linked, plain] = rows;
-		// the button fills its list item, so the whole row reacts to hover and focus
-		const btn = canvas.getByRole("button", { name: "7 Active Users" });
+		// the link fills its list item, so the whole row reacts to hover and focus
+		const btn = canvas.getByRole("link", { name: "7 Active Users" });
 		const rowBox = linked.getBoundingClientRect();
 		const btnBox = btn.getBoundingClientRect();
 		await expect([btnBox.width, btnBox.height]).toEqual([
@@ -331,7 +370,7 @@ export const Issue3469Item14ThemeFocusVisibleRing: Story = {
 		</ThemeProvider>
 	),
 	play: async ({ canvas }) => {
-		const row = canvas.getByRole("button", { name: "5 Open" });
+		const row = canvas.getByRole("link", { name: "5 Open" });
 		const refresh = canvas.getByRole("button", { name: "Refresh" });
 		await userEvent.tab();
 		await expect(row).toHaveFocus();

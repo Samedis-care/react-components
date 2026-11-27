@@ -1,6 +1,13 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import React from "react";
-import { act, cleanup, render, screen, within } from "@testing-library/react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	within,
+} from "@testing-library/react";
 import { createTheme, Theme, ThemeProvider } from "@mui/material";
 import { createMemoryHistory, MemoryHistory } from "history";
 import SignalPortlet, {
@@ -96,7 +103,7 @@ describe("SignalPortlet: content", () => {
 			expect(within(avatar).getByText(full)).not.toHaveAttribute("aria-hidden");
 		}
 		expect(
-			screen.getByRole("button", { name: "1000 Records" }),
+			screen.getByRole("link", { name: "1000 Records" }),
 		).toBeInTheDocument();
 
 		// a count that drops to 999 or below shows as it is again
@@ -109,7 +116,7 @@ describe("SignalPortlet: content", () => {
 		});
 		expect(avatars(container).map((a) => a.textContent)).toEqual(["999", "12"]);
 		expect(
-			screen.getByRole("button", { name: "999 Records" }),
+			screen.getByRole("link", { name: "999 Records" }),
 		).toBeInTheDocument();
 		expect(screen.queryByText("999+")).toBeNull();
 	});
@@ -251,7 +258,7 @@ describe("SignalPortlet: footer", () => {
 });
 
 describe("SignalPortlet: theme and classes", () => {
-	it("[ISSUE-3469-ITEM-13] puts a row's className, classes.item and root on its <li>, and rootBtn on the button of a linked row", () => {
+	it("[ISSUE-3469-ITEM-13] puts a row's className, classes.item and root on its <li>, and rootBtn on the link of a linked row", () => {
 		const t = createTheme({
 			components: {
 				CcSignalPortlet: { styleOverrides: { item: { columnGap: "8px" } } },
@@ -282,19 +289,64 @@ describe("SignalPortlet: theme and classes", () => {
 			expect(getComputedStyle(row).columnGap).toBe("8px");
 			expect(getComputedStyle(row).rowGap).toBe("6px");
 		}
-		const btn = screen.getByRole("button", { name: "1 linked" });
+		const btn = screen.getByRole("link", { name: "1 linked" });
 		expect(btn.parentElement).toBe(linked);
 		expect(btn).toHaveClass("i-btn");
 		expect(btn).not.toHaveClass("c-item");
 		expect(btn).not.toHaveClass("i-root");
 		expect(getComputedStyle(btn).rowGap).toBe("7px");
 		expect(getComputedStyle(btn).columnGap).not.toBe("8px");
-		// a row without link has no button
-		expect(within(plain as HTMLElement).queryByRole("button")).toBeNull();
+		// a row without link has no link
+		expect(within(plain as HTMLElement).queryByRole("link")).toBeNull();
 	});
 });
 
 describe("SignalPortlet: accessibility", () => {
+	it("[ISSUE-3469-ITEM-12] exposes a linked row as a link to its path, and leaves modified clicks to the browser", () => {
+		const { history } = renderP({
+			title: "T",
+			items: [{ count: 5, text: "Open", link: "/a?x=1" }],
+		});
+		const link = screen.getByRole("link", { name: "5 Open" });
+		expect(link).toHaveAttribute("href", "/a?x=1");
+		fireEvent.click(link, { ctrlKey: true });
+		expect(history.location.pathname).toBe("/");
+	});
+
+	it("[ISSUE-3469-ITEM-12] routes a plain click on a linked row in the app, and follows a changed link", () => {
+		vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+		const { history, rerenderP } = renderP({
+			title: "T",
+			items: [
+				{ count: 5, text: "Open", link: "/a?x=1" },
+				{ count: 2, text: "Plain" },
+			],
+		});
+		// no button left: the linked row is the link, the plain row is static
+		expect(screen.queryByRole("button")).toBeNull();
+		const link = screen.getByRole("link", { name: "5 Open" });
+		// a plain click goes through the history instead of loading the href
+		expect(fireEvent.click(link), "default prevented").toBe(false);
+		expect(history.location).toMatchObject({ pathname: "/a", search: "?x=1" });
+
+		rerenderP({ title: "T", items: [{ count: 5, text: "Open", link: "/b" }] });
+		expect(screen.getByRole("link", { name: "5 Open" })).toHaveAttribute(
+			"href",
+			"/b",
+		);
+	});
+
+	it("[ISSUE-3469-ITEM-12] links a row to a URL with a scheme as a plain link", () => {
+		renderP({
+			title: "T",
+			items: [{ count: 1, text: "Docs", link: "https://example.com/docs" }],
+		});
+		expect(screen.getByRole("link", { name: "1 Docs" })).toHaveAttribute(
+			"href",
+			"https://example.com/docs",
+		);
+	});
+
 	it("[ISSUE-3469-ITEM-13] renders every row, linked or not, as a list item", () => {
 		renderP({
 			title: "T",
