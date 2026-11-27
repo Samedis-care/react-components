@@ -2,6 +2,7 @@ import React, {
 	useCallback,
 	useEffect,
 	useImperativeHandle,
+	useLayoutEffect,
 	useMemo,
 	useRef,
 	useState,
@@ -160,6 +161,13 @@ export interface TreeViewRendererProps extends TreeDataForRenderer {
  * and page keys also work while such a control has focus, unless it is a text
  * field or another control that uses them itself; Enter and Space are left to
  * the control.
+ *
+ * TreeView keys the rows by the entry's `id`, so a renderer instance keeps
+ * its state when an update inserts or removes rows above its entry. As in any
+ * virtualized list, an instance unmounts when its row leaves the rendered
+ * range, and starts with fresh state when the row is rendered again. That
+ * includes a row that an update pushes past the last rendered row: the list
+ * renders the rows it gained one commit later.
  */
 export type TreeViewRenderer = React.ComponentType<TreeViewRendererProps> & {
 	/**
@@ -203,6 +211,10 @@ export type TreeViewRendererCallbacks = Pick<
  *
  * None of them expands, collapses or selects an entry with `expandLocked`.
  * Expanding, collapsing, selecting and deselecting call `onToggleExpanded`.
+ *
+ * Focus stays with its entry when an update to `data` inserts or removes rows
+ * above it. When an update removes the focused entry, or hides it under a
+ * collapsed ancestor, focus moves to the row in its place.
  */
 export interface TreeViewProps extends TreeViewRendererCallbacks {
 	/**
@@ -402,6 +414,21 @@ const getRoots = (data: TreeViewProps["data"]): TreeData[] => {
 		);
 	}
 	return entries;
+};
+
+/**
+ * The React key of each row: its entry's id, preceded by the number of rows
+ * above with the same id, so that duplicate ids still get keys of their own
+ * @param rows The rows, in display order
+ * @returns The keys, by row index
+ */
+const getRowKeys = (rows: TreeDataForRenderer[]): string[] => {
+	const seen = new Map<string, number>();
+	return rows.map(({ id }) => {
+		const count = seen.get(id) ?? 0;
+		seen.set(id, count + 1);
+		return `${count}:${id}`;
+	});
 };
 
 export interface TreeViewContextType {
@@ -618,6 +645,9 @@ const TreeView = React.forwardRef(function TreeView(
 	// once it is rendered
 	const rowElements = useRef(new Map<number, HTMLElement>());
 	const wantedRow = useRef<number | null>(null);
+	// set while a commit takes a row that holds focus away from its index: it
+	// unmounts, or it moves to another index
+	const focusedRowDetached = useRef(false);
 	const focusRow = useCallback((element: HTMLElement) => {
 		wantedRow.current = null;
 		const doc = element.ownerDocument;
@@ -630,6 +660,9 @@ const TreeView = React.forwardRef(function TreeView(
 	const registerRow = useCallback(
 		(index: number, element: HTMLElement | null) => {
 			if (!element) {
+				const row = rowElements.current.get(index);
+				if (row?.contains(row.ownerDocument.activeElement))
+					focusedRowDetached.current = true;
 				rowElements.current.delete(index);
 				return;
 			}
@@ -684,6 +717,23 @@ const TreeView = React.forwardRef(function TreeView(
 		},
 		[enhancedData, focusRow],
 	);
+
+	// The rows are keyed by entry, so a row that holds focus stays mounted when
+	// rows are inserted or removed above it. It unmounts when an update hides or
+	// removes its entry, or moves it past the last row react-window rendered
+	// before: react-window renders the rows of a longer list one commit later.
+	// Focus then goes to the active row, the same entry at its new index or the
+	// row in its place, rather than to the page. A row the user scrolls away
+	// unmounts without a change of the rows, and is left alone here.
+	useLayoutEffect(() => {
+		if (!focusedRowDetached.current) return;
+		const doc = listRef.current?.element?.ownerDocument;
+		if (!doc || (doc.activeElement && doc.activeElement !== doc.body)) return;
+		moveTo(activeIndex);
+	}, [enhancedData, activeIndex, moveTo]);
+	useLayoutEffect(() => {
+		focusedRowDetached.current = false;
+	});
 
 	const handleListFocus = useCallback(
 		(event: React.FocusEvent<HTMLElement>) => {
@@ -836,6 +886,10 @@ const TreeView = React.forwardRef(function TreeView(
 		}),
 		[Renderer, enhancedData, hookOnToggleExpanded, activeIndex, registerRow],
 	);
+	// rows keyed by their entry, not by their index: when rows are inserted or
+	// removed above, focus and a renderer's state stay with their entry
+	const rowKeys = useMemo(() => getRowKeys(enhancedData), [enhancedData]);
+	const rowKey = useCallback((index: number) => rowKeys[index], [rowKeys]);
 
 	// controlled scrolling: a request waits until its entry is visible and
 	// react-window has measured the list, which it does in a ResizeObserver after
@@ -889,6 +943,7 @@ const TreeView = React.forwardRef(function TreeView(
 			rowHeight={itemHeight}
 			rowCount={enhancedData.length}
 			rowProps={itemData}
+			rowKey={rowKey}
 			onResize={handleResize}
 			onRowsRendered={handleRowsRendered}
 		/>

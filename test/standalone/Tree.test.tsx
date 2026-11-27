@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import {
 	act,
@@ -1147,6 +1147,60 @@ describe("TreeView data and rendering bugs", () => {
 		// the same id again is a new request
 		act(() => ref.current?.scrollTo("n50"));
 		expect(scrollTo).toHaveBeenCalledTimes(2);
+	});
+
+	it("[ISSUE-3476-ITEM-15] keeps a renderer's state with its entry when rows are inserted above it", () => {
+		const Stateful = (props: TreeViewRendererProps) => {
+			const [mountedFor] = useState(props.id);
+			return <div data-testid={"row"}>{`${mountedFor}|${props.id}`}</div>;
+		};
+		const { rerender, container } = render(
+			<TreeView
+				data={[node("a"), node("b")]}
+				renderer={Stateful}
+				onToggleExpanded={vi.fn()}
+				onLoadChildren={vi.fn()}
+			/>,
+		);
+		rerender(
+			<TreeView
+				data={[node("x"), node("a"), node("b")]}
+				renderer={Stateful}
+				onToggleExpanded={vi.fn()}
+				onLoadChildren={vi.fn()}
+			/>,
+		);
+		expect(labelsInDom(container)).toEqual(["x|x", "a|a", "b|b"]);
+	});
+
+	it("[ISSUE-3476-ITEM-15] renders every row of entries that share an id", () => {
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
+		const Label = (props: TreeViewRendererProps) => (
+			<div data-testid={"row"}>{props.label}</div>
+		);
+		const first = node("dup", { label: "first" });
+		const second = node("dup", { label: "second" });
+		const { rerender, container } = render(
+			<TreeView
+				data={[first, second]}
+				renderer={Label}
+				onToggleExpanded={vi.fn()}
+				onLoadChildren={vi.fn()}
+			/>,
+		);
+		rerender(
+			<TreeView
+				data={[node("x"), first, second]}
+				renderer={Label}
+				onToggleExpanded={vi.fn()}
+				onLoadChildren={vi.fn()}
+			/>,
+		);
+		expect(labelsInDom(container)).toEqual(["x", "first", "second"]);
+		// React reports two rows with the same key
+		expect(consoleError).not.toHaveBeenCalled();
 	});
 });
 

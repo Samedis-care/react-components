@@ -1,8 +1,16 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-// eslint-disable-next-line import/no-unresolved
-import { expect, fn, userEvent, waitFor } from "storybook/test";
-import { Box } from "@mui/material";
+/* eslint-disable import/no-unresolved */
+import {
+	expect,
+	fireEvent,
+	fn,
+	userEvent,
+	waitFor,
+	within,
+} from "storybook/test";
+/* eslint-enable import/no-unresolved */
+import { Box, Button } from "@mui/material";
 import { Folder, FolderOpen, InsertDriveFile } from "@mui/icons-material";
 import TreeView from "./TreeView";
 import type {
@@ -159,6 +167,14 @@ const applyExpanded = (entry: TreeData, expanded: Set<string>): TreeData => ({
 	children: entry.children?.map((child) => applyExpanded(child, expanded)),
 });
 
+/** The row element that shows the given label */
+const rowWithText = (canvasElement: HTMLElement, text: string): HTMLElement => {
+	const label = within(canvasElement).getByText(text);
+	const row = label.closest<HTMLElement>("[data-react-window-index]");
+	if (!row) throw new Error(`no row for ${text}`);
+	return row;
+};
+
 /** The scroll container of the tree (react-window's List element) */
 const scrollerOf = (canvasElement: HTMLElement): HTMLElement => {
 	const scroller = canvasElement.querySelector(
@@ -166,6 +182,16 @@ const scrollerOf = (canvasElement: HTMLElement): HTMLElement => {
 	)?.parentElement;
 	if (!scroller) throw new Error("no scroller");
 	return scroller;
+};
+
+/** The checkbox input of the row that shows the given label */
+const checkboxOf = (
+	canvasElement: HTMLElement,
+	text: string,
+): HTMLInputElement => {
+	const input = rowWithText(canvasElement, text).querySelector("input");
+	if (!input) throw new Error(`no checkbox for ${text}`);
+	return input;
 };
 
 /** root (expanded) > src (collapsed) > [main.ts], public (collapsed) > [index.html], package.json */
@@ -515,6 +541,93 @@ export const Issue3476Item12CheckboxesHaveNames: Story = {
 			await canvas.findByText("package.json", {}, { timeout: 5000 }),
 		).toBeVisible();
 		await expect(canvas.getAllByRole("checkbox")).toHaveLength(1);
+	},
+};
+
+const FocusFollowsIndexStory = () => {
+	const [expanded, toggle] = useToggleSet(["root"]);
+	const data = useMemo(() => applyExpanded(SMALL_TREE, expanded), [expanded]);
+	const expandPublic = useCallback(() => toggle("public"), [toggle]);
+	const handleLoad = useCallback(() => undefined, []);
+	return (
+		<div>
+			<Button onClick={expandPublic}>Expand public</Button>
+			<Box sx={{ width: 320, height: 300, border: "1px solid #ccc" }}>
+				<TreeView
+					data={data}
+					renderer={TreeViewCheckboxSelectionRenderer}
+					onToggleExpanded={toggle}
+					onLoadChildren={handleLoad}
+				/>
+			</Box>
+		</div>
+	);
+};
+
+export const Issue3476Item15FocusStaysWithItsEntry: Story = {
+	render: () => <FocusFollowsIndexStory />,
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"ISSUE-3476-ITEM-15: rows are keyed by their list index. With focus on the `package.json` checkbox, an update that expands `public` above it (a lazy load finishing, a refetch) leaves focus on the same row position, which now shows `index.html`; Space would select the wrong entry.",
+			},
+		},
+	},
+	play: async ({ canvas, canvasElement }) => {
+		await canvas.findByText("package.json", {}, { timeout: 5000 });
+		checkboxOf(canvasElement, "package.json").focus();
+		// a data update that does not move focus (fireEvent does not focus the button)
+		await fireEvent.click(
+			canvas.getByRole("button", { name: "Expand public" }),
+		);
+		await canvas.findByText("index.html");
+		const row = document.activeElement?.closest("[data-react-window-index]");
+		await expect(row).toHaveTextContent("package.json");
+	},
+};
+
+/** SMALL_TREE with root and src expanded, and a button that collapses src */
+const CollapsedFromOutsideStory = () => {
+	const [expanded, toggle] = useToggleSet(["root", "src"]);
+	const data = useMemo(() => applyExpanded(SMALL_TREE, expanded), [expanded]);
+	const collapseSrc = useCallback(() => toggle("src"), [toggle]);
+	const handleLoad = useCallback(() => undefined, []);
+	return (
+		<div>
+			<Button onClick={collapseSrc}>Collapse src</Button>
+			<Box sx={{ width: 320, height: 300, border: "1px solid #ccc" }}>
+				<TreeView
+					aria-label="Files"
+					data={data}
+					renderer={TreeViewCheckboxSelectionRenderer}
+					onToggleExpanded={toggle}
+					onLoadChildren={handleLoad}
+				/>
+			</Box>
+		</div>
+	);
+};
+
+export const Issue3476Item15FocusMovesOnWhenItsEntryIsHidden: Story = {
+	render: () => <CollapsedFromOutsideStory />,
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3476-ITEM-15: the rows are keyed by entry, so an update that hides the focused entry (here: its folder collapses) unmounts its row. Focus then moves to the row in its place, which becomes the tree's tab stop, instead of falling to the page.",
+			},
+		},
+	},
+	play: async ({ canvas, canvasElement }) => {
+		await canvas.findByText("package.json", {}, { timeout: 5000 });
+		rowById(canvasElement, "main.ts").focus();
+		// a data update that does not move focus (fireEvent does not focus the button)
+		await fireEvent.click(canvas.getByRole("button", { name: "Collapse src" }));
+		await waitFor(() => expect(canvas.queryByText("main.ts")).toBeNull());
+		await expect(rowById(canvasElement, "public")).toHaveFocus();
+		await waitFor(() => expect(tabStopsOf(canvasElement)).toEqual(["public"]));
 	},
 };
 
