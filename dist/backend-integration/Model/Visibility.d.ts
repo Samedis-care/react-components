@@ -17,7 +17,10 @@ export interface Visibility {
     readOnly: boolean;
     /**
      * Is the field required? Renderers mark it with MUI's `required`: an asterisk after the
-     * label and, on most controls, a required input.
+     * label and, on most controls, a required input. The files, image and string list
+     * renderers put the asterisk on their frame's title and describe the frame as "Required"
+     * (GroupBox's `required`); a string list also requires its input for a new entry while
+     * it has no entries.
      * @remarks Display only, like MUI's `required`: the form engine doesn't validate it, so a
      *          required field without a `validate` of its own can be saved empty. To refuse an
      *          empty value, give the field a validator next to the visibility, e.g.

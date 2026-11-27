@@ -67,6 +67,8 @@ export declare const matrixVars: {
     readonly tileForegroundB: "--cc-matrix-tile-fg-b";
     readonly tileFontSize: "--cc-matrix-tile-font-size";
     readonly tileSecondaryFontSize: "--cc-matrix-tile-secondary-font-size";
+    /** the scale an entry's content is drawn at to fit the entry; unset: 1 */
+    readonly tileFit: "--cc-matrix-tile-fit";
 };
 /** `var(--x)`, for use inside a styled() slot. */
 export declare const cssVar: (name: string) => string;

@@ -11,6 +11,14 @@ const PortalLayoutHeader = (props) => {
     const { mobile, customClasses, toggleMenu, contents, drawerId } = props;
     const { t } = useCCTranslations();
     const { menuOpen } = usePortalLayoutContext();
-    return (_jsx(AppBar, { position: "relative", classes: customClasses?.appBar, children: _jsxs(Toolbar, { classes: customClasses?.toolbar, children: [mobile && (_jsx(MenuButton, { onClick: toggleMenu, size: "large", "aria-label": t("standalone.portal.menu-toggle"), "aria-expanded": menuOpen, "aria-controls": drawerId, children: _jsx(MenuIcon, {}) })), contents] }) }));
+    return (_jsx(AppBar, { position: "relative", classes: customClasses?.appBar, children: _jsxs(Toolbar, { classes: customClasses?.toolbar, children: [mobile && (_jsx(MenuButton
+                // the AppBar's text color, as in MUI's AppBar examples: IconButton's
+                // action color or a theme's default IconButton color can fall below
+                // 3:1 on the AppBar's background
+                , { 
+                    // the AppBar's text color, as in MUI's AppBar examples: IconButton's
+                    // action color or a theme's default IconButton color can fall below
+                    // 3:1 on the AppBar's background
+                    color: "inherit", onClick: toggleMenu, size: "large", "aria-label": t("standalone.portal.menu-toggle"), "aria-expanded": menuOpen, "aria-controls": drawerId, children: _jsx(MenuIcon, {}) })), contents] }) }));
 };
 export default React.memo(PortalLayoutHeader);

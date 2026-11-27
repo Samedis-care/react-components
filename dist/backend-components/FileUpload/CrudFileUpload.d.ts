@@ -15,6 +15,10 @@ export interface CrudFileUploadProps extends Omit<FileUploadProps, "files" | "de
      *          the two apart with `instanceof LazyConnector`, so a connector that wraps a
      *          LazyConnector counts as written at once.
      *
+     *          While the control is mounted, the queue of a LazyConnector rejects for the
+     *          uploads the backend refused (a Form's save) with a PartialApplyError that
+     *          names each by its file, as a change through any other connector does.
+     *
      *          Null renders a read-only control that lists `additionalFiles`. Read once:
      *          the first connector passed (after null, if any) is listed and written for
      *          as long as the control is mounted, and a later one is ignored. To show
@@ -27,6 +31,8 @@ export interface CrudFileUploadProps extends Omit<FileUploadProps, "files" | "de
      *          failed file, a refused selection (wrong type, too many or too large files,
      *          an image that cannot be read) as an Error with the translated message. The
      *          outcome of the next change replaces it: one that goes through clears it.
+     *
+     *          Outside a Form, DefaultErrorComponent shows each new error in a dialog.
      */
     errorComponent: React.ComponentType<ErrorComponentProps>;
     /**
@@ -59,6 +65,9 @@ export interface CrudFileUploadProps extends Omit<FileUploadProps, "files" | "de
      * @returns The file data which can be used by the control. Set `file.id`, and the
      *          `file.downloadLink` key even where it is undefined: a removal drops an
      *          entry without that key from the list instead of deleting its record.
+     *          Leave `canBeUploaded` and `delete` unset or false: a file listed with
+     *          either is shown added or removed, and the next change uploads it again or
+     *          deletes it.
      * @remarks With `maxTotalFileSize`, set `file.size`: every file the control lists
      *          comes from here, a picked one too once its upload is created, and one
      *          without a size counts as 0 bytes.

@@ -2,7 +2,7 @@ import type { ToastProps } from "../standalone/Toast";
 /**
  * A toast as shown through the ToastContext
  */
-export type ToastConfig = Pick<ToastProps, "severity" | "title" | "message" | "autoHideDuration" | "anchorOrigin">;
+export type ToastConfig = Pick<ToastProps, "severity" | "title" | "message" | "autoHideDuration" | "anchorOrigin" | "phoneVertical">;
 export interface ToastState {
     /**
      * The toast that is shown or closing

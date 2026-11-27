@@ -1,9 +1,10 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React from "react";
-import { DialogTitle as MuiDialogTitle, dialogContentClasses, IconButton, styled, useThemeProps, } from "@mui/material";
+import React, { useCallback } from "react";
+import { buttonBaseClasses, DialogTitle as MuiDialogTitle, dialogContentClasses, IconButton, styled, useThemeProps, } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 import useCCTranslations from "../../utils/useCCTranslations";
+import focusRing from "../../utils/internal/focusRing";
 const Root = styled("div", { name: "CcDialogTitle", slot: "root" })(({ theme }) => ({
     display: "flex",
     alignItems: "center",
@@ -49,9 +50,15 @@ const CloseButton = styled(IconButton, {
     name: "CcDialogTitle",
     slot: "closeButton",
 })(({ theme }) => ({
-    color: theme.palette.grey[500],
+    // the color of MUI's default IconButton, 3:1 and more on the dialog's paper
+    // in MUI's light and dark palettes, also where a theme gives IconButtons
+    // another default color
+    color: (theme.vars || theme).palette.action.active,
     padding: `calc(${theme.spacing(1)} / 2)`,
     zIndex: 1,
+    // a focus ring around the circle, as on FullFormDialog's open-in-new button
+    // beside it: the focus ripple alone is too faint, and forced colors drop it
+    [`&.${buttonBaseClasses.focusVisible}`]: focusRing(theme, 0),
 }));
 // the action and the close button, which stays beside it when the action
 // moves below the title or wraps
@@ -73,12 +80,14 @@ const DialogTitleRaw = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcDialogTitle" });
     const { id, children, onClose, action, noTitle, className, classes } = props;
     const { t } = useCCTranslations();
+    // onClose takes no arguments: it doesn't get the click event
+    const handleClose = useCallback(() => onClose?.(), [onClose]);
     return (_jsxs(Root, { className: combineClassNames([
             className,
             classes?.root,
             noTitle && "CcDialogTitle-noTitle",
             !!action && "CcDialogTitle-withAction",
-        ]), children: [_jsx(TextWrapper, { className: classes?.textWrapper, children: noTitle ? (children) : (_jsx(Text, { id: id, className: classes?.text, children: children })) }), (action || onClose) && (_jsxs(Controls, { className: classes?.controls, children: [action && _jsx(Action, { className: classes?.action, children: action }), onClose && (_jsx(CloseButton, { "aria-label": t("non-standalone.dialog.dialog-title.close"), className: classes?.closeButton, onClick: onClose, size: "large", children: _jsx(Close, {}) }))] }))] }));
+        ]), children: [_jsx(TextWrapper, { className: classes?.textWrapper, children: noTitle ? (children) : (_jsx(Text, { id: id, className: classes?.text, children: children })) }), (action || onClose) && (_jsxs(Controls, { className: classes?.controls, children: [action && _jsx(Action, { className: classes?.action, children: action }), onClose && (_jsx(CloseButton, { "aria-label": t("non-standalone.dialog.dialog-title.close"), className: classes?.closeButton, onClick: handleClose, size: "large", children: _jsx(Close, {}) }))] }))] }));
 };
 /**
  * Title row for an MUI `Dialog`: a heading with the title, optional controls

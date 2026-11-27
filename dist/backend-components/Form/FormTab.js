@@ -22,9 +22,7 @@ const Label = styled("span", { name: "CcFormTab", slot: "label" })({
  */
 const ON_COLORED_BAR = `.${tabClasses.textColorInherit} &`;
 /**
- * The library's modified marker (`CcDirtyMarker`), as on the fields. Forced
- * colors would paint its background in the canvas color, which hides the dot,
- * so there it is drawn in the text color.
+ * The library's modified marker (`CcDirtyMarker`), as on the fields
  */
 const TabDirtyMarker = styled(DirtyMarker, {
     name: "CcFormTab",
@@ -32,10 +30,6 @@ const TabDirtyMarker = styled(DirtyMarker, {
 })({
     flexShrink: 0,
     [ON_COLORED_BAR]: { backgroundColor: "currentColor" },
-    "@media (forced-colors: active)": {
-        forcedColorAdjust: "none",
-        backgroundColor: "CanvasText",
-    },
 });
 const StyledErrorIcon = styled(ErrorIcon, {
     name: "CcFormTab",

@@ -1,4 +1,7 @@
 import React from "react";
+/**
+ * Props of DataGridNoPersist
+ */
 export interface NoPersistProps {
     /**
      * The children to render

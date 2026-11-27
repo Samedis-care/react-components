@@ -13,7 +13,8 @@
 			"menu-toggle": "Attiva/disattiva menu",
 			"collapse-menu": "Comprimi menu",
 			"expand-menu": "Espandi menu",
-			"close-menu": "Chiudi menu"
+			"close-menu": "Chiudi menu",
+			"main-menu": "Menu principale"
 		},
 		"uikit": {
 			"info": "Ulteriori informazioni",
@@ -36,13 +37,23 @@
 			}
 		},
 		"date-picker": {
+			"open-date-time": "Scegli la data e l'ora",
+			"open-date-time-selected": "Scegli la data e l'ora, la data e l'ora selezionate sono {{DATE}} {{TIME}}",
 			"error": {
 				"invalid": "Inserisci una data valida",
 				"min-date": "Inserisci una data uguale o successiva al {{DATE}}",
 				"max-date": "Inserisci una data uguale o precedente al {{DATE}}",
 				"past": "Inserisci la data di oggi o una successiva",
 				"future": "Inserisci la data di oggi o una precedente",
-				"unavailable": "Inserisci una data selezionabile"
+				"unavailable": "Inserisci una data selezionabile",
+				"min-date-time": "Inserisci una data e un'ora uguali o successive al {{DATE}}",
+				"max-date-time": "Inserisci una data e un'ora uguali o precedenti al {{DATE}}",
+				"min-time": "Inserisci un'ora uguale o successiva alle {{TIME}}",
+				"max-time": "Inserisci un'ora uguale o precedente alle {{TIME}}",
+				"past-date-time": "Inserisci la data e l'ora attuali o un momento successivo",
+				"future-date-time": "Inserisci la data e l'ora attuali o un momento precedente",
+				"unavailable-time": "Inserisci un'ora selezionabile",
+				"minutes-step": "Inserisci i minuti a intervalli di {{STEP}}"
 			}
 		},
 		"signal-portlet": {
@@ -50,7 +61,14 @@
 			"refresh": "Aggiorna"
 		},
 		"notifications": {
-			"title": "Notifiche"
+			"title": "Notifiche",
+			"bell-label_one": "Notifiche, {{count}} non letta",
+			"bell-label_many": "Notifiche, {{count}} non lette",
+			"bell-label_other": "Notifiche, {{count}} non lette",
+			"announce-new_one": "{{count}} nuova notifica",
+			"announce-new_many": "{{count}} nuove notifiche",
+			"announce-new_other": "{{count}} nuove notifiche",
+			"unread": "Non letta"
 		},
 		"how-it-works": {
 			"title": "Come funziona"
@@ -245,6 +263,9 @@
 				"image-position": "Immagine {{INDEX}} di {{TOTAL}}"
 			}
 		},
+		"group-box": {
+			"required": "Obbligatorio"
+		},
 		"phone-number": {
 			"invalid": "Inserisci un numero di telefono corretto"
 		},
@@ -269,6 +290,7 @@
 				"instructions-signed": "Viene mostrata la firma salvata. Per firmare di nuovo, cancellala prima."
 			},
 			"sign-here": "Firma qui digitalmente",
+			"not-signed": "Non firmato",
 			"required": "Obbligatorio"
 		},
 		"toast": {
@@ -285,7 +307,11 @@
 			"label": "Caricamento…"
 		},
 		"matrix": {
+			"row-header-actions": "Apre le azioni di questa riga.",
 			"tile-more": "{{count}} in più:",
+			"tile-arrow": "verso",
+			"tile-highlighted": "evidenziato",
+			"tile-dimmed": "attenuato",
 			"extra-cell-add": "Aggiungi"
 		}
 	},
@@ -354,6 +380,9 @@
 				"boolean": {
 					"true": "Sì",
 					"false": "No"
+				},
+				"color": {
+					"validation-error": "Inserisci un colore valido, ad es. #336699"
 				}
 			}
 		}
@@ -363,8 +392,12 @@
 			"delete": {
 				"confirm-dialog": {
 					"title": "Elimina",
-					"message": "Vuoi davvero eliminare {{NUM}} voci?",
-					"messageInverted": "Vuoi davvero eliminare tutto tranne {{NUM}} voci?",
+					"message_one": "Vuoi davvero eliminare {{count}} voce?",
+					"message_many": "Vuoi davvero eliminare {{count}} voci?",
+					"message_other": "Vuoi davvero eliminare {{count}} voci?",
+					"messageInverted_one": "Vuoi davvero eliminare tutto tranne {{count}} voce?",
+					"messageInverted_many": "Vuoi davvero eliminare tutto tranne {{count}} voci?",
+					"messageInverted_other": "Vuoi davvero eliminare tutto tranne {{count}} voci?",
 					"buttons": {
 						"yes": "Sì",
 						"no": "No"
@@ -407,6 +440,11 @@
 			"read-only": {
 				"submitting": "Il modulo è in fase di salvataggio"
 			},
+			"auto-save": {
+				"saving": "Salvataggio…",
+				"saved": "Salvato",
+				"failed": "Impossibile salvare"
+			},
 			"tab": {
 				"invalid": "Contiene campi non validi.",
 				"modified": "Contiene campi modificati."
@@ -417,6 +455,7 @@
 		},
 		"selector": {
 			"loading": "Caricamento…",
+			"saving": "Salvataggio…",
 			"loading-error": "Errore durante il recupero dei dati",
 			"unknown-entry": "Voce sconosciuta",
 			"selected-count": "Selezionati: {{COUNT}}",

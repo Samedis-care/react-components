@@ -1,11 +1,13 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useState } from "react";
+import { useForkRef } from "@mui/material/utils";
 import TextFieldWithHelp from "../TextFieldWithHelp";
 import useInputCursorFix from "../../../utils/useInputCursorFix";
 import useCurrentLocale from "../../../utils/useCurrentLocale";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import getNumberSeparator from "../../../utils/getNumberSeparator";
 import isNegativeNumberText from "../../../utils/internal/isNegativeNumberText";
+import addSlotAttributes from "../../../utils/internal/addSlotAttributes";
 /**
  * Reads the whole number in a text the user typed into an IntegerInputField
  * @param text The text
@@ -70,6 +72,9 @@ const IntegerInputField = (props) => {
         }
     }
     const { handleCursorChange, cursorInputRef } = useInputCursorFix(shownText);
+    // the caret fix's ref joins the caller's inputRef; a ref in slotProps.htmlInput
+    // reaches the input through TextFieldWithHelp, which sets it next to its own
+    const inputRef = useForkRef(cursorInputRef, muiProps.inputRef);
     // on change handling
     const handleChange = useCallback((event) => {
         handleCursorChange(event);
@@ -90,18 +95,13 @@ const IntegerInputField = (props) => {
             onBlur(event);
     }, [onBlur, outOfRange]);
     // component rendering
-    return (_jsx(TextFieldWithHelp, { ...muiProps, value: shownText, onChange: handleChange, onBlur: handleBlur, error: outOfRange || muiProps.error, helperText: outOfRange
+    return (_jsx(TextFieldWithHelp, { ...muiProps, inputRef: inputRef, value: shownText, onChange: handleChange, onBlur: handleBlur, error: outOfRange || muiProps.error, helperText: outOfRange
             ? t("standalone.uikit.number-input.out-of-range", {
                 MIN: format(Number.MIN_SAFE_INTEGER),
                 MAX: format(Number.MAX_SAFE_INTEGER),
             })
-            : muiProps.helperText, slotProps: {
-            ...muiProps.slotProps,
-            htmlInput: {
-                ...muiProps.slotProps?.htmlInput,
-                ref: cursorInputRef,
-                inputMode: "numeric",
-            },
-        }, inputMode: "numeric" }));
+            : muiProps.helperText, slotProps: addSlotAttributes(muiProps.slotProps, "htmlInput", {
+            inputMode: "numeric",
+        }), inputMode: "numeric" }));
 };
 export default React.memo(IntegerInputField);

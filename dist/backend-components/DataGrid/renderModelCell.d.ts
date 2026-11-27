@@ -7,12 +7,13 @@ import type ModelRenderParams from "../../backend-integration/Model/RenderParams
  * @param model The model the record belongs to
  * @param field The field, a key of model.fields (dotted for a nested value)
  * @param record The record of the row, as model.index returned it
- * @param handleChange The change handler the renderer's control calls
+ * @param handleChange The change handler the renderer's control calls; by default one
+ *                     that throws, for a cell without a control
  * @param gridCellLabel The accessible name of the cell's control: the field's label and
  *                      the row's label (see ModelRenderParams.gridCellLabel)
  * @returns The cell
  * @throws Error "Not supported" from a renderer that has no grid editor, for an
  *         editable overview visibility
  */
-declare const renderModelCell: (model: ModelUnknown, field: ModelFieldName, record: ModelRecord<ModelUnknown>, handleChange: ModelRenderParams<unknown>["handleChange"], gridCellLabel?: string) => React.ReactElement;
+declare const renderModelCell: (model: ModelUnknown, field: ModelFieldName, record: ModelRecord<ModelUnknown>, handleChange?: ModelRenderParams<unknown>["handleChange"], gridCellLabel?: string) => React.ReactElement;
 export default renderModelCell;

@@ -1,19 +1,21 @@
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState, } from "react";
 import { MultiImageNewIdPrefix, } from "../../standalone/FileUpload/MultiImage/MultiImage";
-import PartialDeleteError from "../../backend-integration/Connector/PartialDeleteError";
+import LazyConnector from "../../backend-integration/Connector/LazyConnector";
+import { isPartialDeleteError } from "../../backend-integration/Connector/PartialDeleteError";
 import PartialApplyError from "../Form/PartialApplyError";
 import describeWriteFailures from "./describeWriteFailures";
+import namedQueueErrorFactory from "./namedQueueErrorFactory";
 import describeFrameBy from "./describeFrameBy";
 import { MultiImage } from "../../standalone";
 import CrudLoadStatus from "./CrudLoadStatus";
 /**
  * A MultiImage over a collection of image records behind `connector`, one record per image
- * @remarks It lists `connector.index` through `deserialize`, and writes each change of the
- *          user after the one before it: an added image is created, a replaced one
- *          updated, each through `serialize` and `deserialize`, and a removed one goes to
- *          `connector.deleteMultiple`. What went through is listed, what was refused is
- *          reported through `errorComponent`.
+ * @remarks It lists every record of `connector.index`, in one request, through
+ *          `deserialize`, and writes each change of the user after the one before it: an
+ *          added image is created, a replaced one updated, each through `serialize` and
+ *          `deserialize`, and a removed one goes to `connector.deleteMultiple`. What went
+ *          through is listed, what was refused is reported through `errorComponent`.
  *
  *          With a LazyConnector the writes are queued, but nothing marks them: there are
  *          no pending marks, no restore and no dirty marker. With any other connector a
@@ -69,6 +71,15 @@ const CrudMultiImage = (props) => {
     // the changes handed in that have not settled yet: while there are any, the field is
     // busy
     const [writing, setWriting] = useState(0);
+    // A write the queue sends later (a Form's save) and the backend refuses is named by
+    // its image, as the control lists it under the record's id (the client-side one of a
+    // queued upload)
+    const lazyConnector = connector instanceof LazyConnector ? connector : null;
+    useEffect(() => {
+        if (!lazyConnector)
+            return;
+        return lazyConnector.setQueueErrorFactory(namedQueueErrorFactory((id) => imagesRef.current.find((img) => img.id === id), (img) => img.name));
+    }, [lazyConnector]);
     const applyChange = useCallback(async ({ removed, replaced, added }) => {
         if (!connector)
             return;
@@ -117,10 +128,9 @@ const CrudMultiImage = (props) => {
         if (deleteResult.status === "rejected") {
             const e = deleteResult.reason;
             // only a PartialDeleteError says which ids went through, and its cause why
-            refusedIds = e instanceof PartialDeleteError ? e.failedIds : removedIds;
-            const reason = e instanceof PartialDeleteError && e.cause instanceof Error
-                ? e.cause
-                : e;
+            const partial = e instanceof Error && isPartialDeleteError(e) ? e : null;
+            refusedIds = partial ? partial.failedIds : removedIds;
+            const reason = partial?.cause instanceof Error ? partial.cause : e;
             refusedIds.forEach((id) => {
                 const img = latestById.get(id);
                 if (img)

@@ -87,7 +87,8 @@ export interface BaseSelectorLoadResult<DataT extends BaseSelectorData> {
 /**
  * Data load handler
  * @param search The user search input
- * @param switchValue The value of switch input
+ * @param switchValue The value of the selector's switch (`displaySwitch`). BaseSelector
+ * passes `false` while its switch is hidden.
  */
 export type BaseSelectorLoadHandler<DataT extends BaseSelectorData> = (search: string, switchValue: boolean) => BaseSelectorLoadResult<DataT> | Promise<BaseSelectorLoadResult<DataT>>;
 /**
@@ -171,20 +172,39 @@ export type BaseSelectorVariants<DataT extends BaseSelectorData, Multi extends b
  * shows the switch: the visible label is the switch's only accessible name, and a switch
  * without one is unnamed for everyone.
  *
+ * The selector's `label` is the switch's accessible description (`aria-describedby`), so
+ * it says which field it filters: two selectors with a "Show inactive" switch are
+ * announced as "Show inactive, switch, off, Device type" and "…, Responsible person".
+ * Without a `label` the switch has no description.
+ *
  * The switch sits at the right end of the row of the selector's `label`. When the label
  * does not fit beside it (a long label, a narrow field, a phone), the switch keeps that
  * row to itself and the label starts on the next one, so the label is never cut shorter
  * than it is without a switch.
+ *
+ * MultiSelectWithoutGroup, and MultiSelectWithTags through it, show the switch on a row
+ * of its own between the search field and the chips instead: at the right end, with its
+ * label before it.
+ *
+ * BaseSelector's switch (and so that of SingleSelect, MultiSelect and the backend
+ * selectors built on them) is uncontrolled. Hiding it (`displaySwitch` turned off) turns
+ * it off, so `onLoad` gets `switchValue` `false` and the options are loaded again
+ * without its filter; showing it again starts it at `defaultSwitchValue`.
+ * MultiSelectWithTags does the same, while MultiSelectWithoutGroup's switch is set by
+ * its parent (`switchValue`).
  */
 export type BaseSelectorSwitchProps = {
     /**
-     * Default value for switch position
+     * Whether the switch is on when it appears: at mount with `displaySwitch`, and each
+     * time `displaySwitch` is turned on after that. Changes while the switch is shown are
+     * ignored; from then on the user sets it.
      * @default false
      */
     defaultSwitchValue?: boolean;
 } & ({
     /**
-     * Display switch control?
+     * Display switch control? Hiding the switch turns it off (see
+     * BaseSelectorSwitchProps).
      * @default false
      */
     displaySwitch?: false;
@@ -202,6 +222,7 @@ export type BaseSelectorSwitchProps = {
     displaySwitch: true;
     /**
      * Label for switch control: the switch's visible text and its accessible name.
+     * The selector's `label` describes the switch (see BaseSelectorSwitchProps).
      */
     switchLabel: React.ReactNode;
 });
@@ -431,6 +452,8 @@ export interface BaseSelectorContextType {
     addToLru: (...ids: string[]) => void;
 }
 export declare const BaseSelectorContext: React.Context<BaseSelectorContextType | null>;
-declare const BaseSelector: <DataT extends BaseSelectorData, Multi extends boolean>(inProps: BaseSelectorProps<DataT, Multi>) => React.JSX.Element;
+declare const BaseSelector: <DataT extends BaseSelectorData, Multi extends boolean = false>(inProps: BaseSelectorProps<DataT, Multi> & {
+    multiple?: Multi;
+}) => React.JSX.Element;
 declare const _default: typeof BaseSelector;
 export default _default;

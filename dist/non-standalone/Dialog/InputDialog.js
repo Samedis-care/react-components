@@ -2,7 +2,9 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useContext, useId, useRef, useState, } from "react";
 import { PushedDialogCloseContext } from "../../framework/PushedDialogCloseContext";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, } from "@mui/material";
+import { DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, } from "@mui/material";
+import FocusRingButton from "../../utils/internal/FocusRingButton";
+import ForcedColorsEdgeDialog from "../../utils/internal/ForcedColorsEdgeDialog";
 const InputDialogRaw = (props) => {
     const { onClose, handlerButtonNo, handlerButtonYes, textFieldValidator, textFieldErrorText, } = props;
     const { t } = useCCTranslations();
@@ -40,10 +42,10 @@ const InputDialogRaw = (props) => {
             inputRef.current?.focus();
         }
     }, [value, handlerButtonYes, textFieldValidator, closeThisDialog, setValid]);
-    return (_jsxs(Dialog, { open: true, onClose: removeDialog, "aria-describedby": messageId, children: [_jsx(DialogTitle, { children: props.title }), _jsxs(DialogContent, { children: [_jsx(DialogContentText, { component: "div", id: messageId, children: props.message }), _jsx(TextField, { autoFocus: true, margin: "dense", label: props.textFieldLabel, placeholder: props.textFieldPlaceholder, type: "text", value: value, onChange: updateValue, inputRef: inputRef, error: !valid, helperText: valid
+    return (_jsxs(ForcedColorsEdgeDialog, { open: true, onClose: removeDialog, "aria-describedby": messageId, children: [_jsx(DialogTitle, { children: props.title }), _jsxs(DialogContent, { children: [_jsx(DialogContentText, { component: "div", id: messageId, children: props.message }), _jsx(TextField, { autoFocus: true, margin: "dense", label: props.textFieldLabel, placeholder: props.textFieldPlaceholder, type: "text", value: value, onChange: updateValue, inputRef: inputRef, error: !valid, helperText: valid
                             ? undefined
                             : textFieldErrorText ||
-                                t("non-standalone.dialog.input-dialog.invalid"), fullWidth: true })] }), _jsxs(DialogActions, { children: [_jsx(Button, { onClick: handleNo, color: "primary", children: props.textButtonNo }), _jsx(Button, { onClick: handleYes, color: "primary", children: props.textButtonYes })] })] }));
+                                t("non-standalone.dialog.input-dialog.invalid"), fullWidth: true })] }), _jsxs(DialogActions, { children: [_jsx(FocusRingButton, { onClick: handleNo, color: "primary", children: props.textButtonNo }), _jsx(FocusRingButton, { onClick: handleYes, color: "primary", children: props.textButtonYes })] })] }));
 };
 /**
  * Text prompt with a title, a message, a text field and the buttons `textButtonNo` and

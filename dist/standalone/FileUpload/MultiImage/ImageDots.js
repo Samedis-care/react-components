@@ -4,6 +4,7 @@ import { ButtonBase, styled, useThemeProps } from "@mui/material";
 import combineClassNames from "../../../utils/combineClassNames";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import focusRing from "../../../utils/internal/focusRing";
+import visuallyHidden from "../../../utils/internal/visuallyHidden";
 const Root = styled("div", { name: "CcImageDots", slot: "root" })({
     position: "relative",
     // the row of dots that does not fit is cut off, the focus ring above and below is not
@@ -60,18 +61,7 @@ const Counter = styled("div", { name: "CcImageDots", slot: "counter" })(({ theme
 const CounterLabel = styled("span", {
     name: "CcImageDots",
     slot: "counterLabel",
-})({
-    // visually hidden, as MUI's visuallyHidden
-    border: 0,
-    clipPath: "inset(50%)",
-    height: 1,
-    margin: -1,
-    overflow: "hidden",
-    padding: 0,
-    position: "absolute",
-    whiteSpace: "nowrap",
-    width: 1,
-});
+})(visuallyHidden);
 /**
  * Whether every dot lies inside the container (the row of dots fits), in either direction
  * @param container The container of the dots

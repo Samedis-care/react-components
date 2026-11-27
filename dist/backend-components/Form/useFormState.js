@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, } from "react";
-import { useFormContext } from "./Form";
+import { useFormContextLite } from "./Form";
 /**
  * useState, but persisted in the form state so it survives remounts
  * @param name A unique name, the state is stored under it. Another name is another state:
@@ -10,7 +10,9 @@ import { useFormContext } from "./Form";
  *        other value.
  * @returns The state and its setter, like useState. The setter is the same function for
  *          the life of the component and sets the state of the current name.
- * @see useFormContext => getCustomState, setCustomState, hasCustomState
+ * @see useFormContextLite => getCustomState, setCustomState, hasCustomState
+ * @remarks Reads the form's lite context, which does not change with the form's values,
+ *          so the component does not render again while the user types into a field.
  * @remarks This is only to be used to survive remounts, this does not work to sync the state of two components!
  * @remarks The name shares one namespace with getCustomState / setCustomState and with
  *          the nestedFormName of nested forms: don't reuse those names.
@@ -18,7 +20,7 @@ import { useFormContext } from "./Form";
  *          changes.
  */
 const useFormState = (name, initialState) => {
-    const { getCustomState, setCustomState, hasCustomState } = useFormContext();
+    const { getCustomState, setCustomState, hasCustomState } = useFormContextLite();
     const restore = () => hasCustomState(name)
         ? getCustomState(name)
         : typeof initialState === "function"

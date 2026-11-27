@@ -14,8 +14,8 @@ const BackendMultiSelectWithTags = (inProps) => {
         props: inProps,
         name: "CcBackendMultiSelectWithTags",
     });
-    const { groupModel, convGroup, getGroupDataEntries, dataModel, convData, switchFilterNameData, switchFilterNameGroup, initialData, onChange, groupSearchDebounceTime, dataSearchDebounceTime, selected: selectedIds, dataSort, groupSort, lruGroup, lruData, ...selectorProps } = props;
-    const { handleSelect, selected } = useSelectedCache({
+    const { groupModel, convGroup, getGroupDataEntries, dataModel, convData, switchFilterNameData, switchFilterNameGroup, initialData, onChange, groupSearchDebounceTime, dataSearchDebounceTime, selected: selectedIds, dataSort, groupSort, lruGroup, lruData, error, ...selectorProps } = props;
+    const { handleSelect, selected, loadError, convert } = useSelectedCache({
         model: dataModel,
         modelToSelectorData: convData,
         initialData,
@@ -49,10 +49,10 @@ const BackendMultiSelectWithTags = (inProps) => {
                 : undefined,
         });
         return {
-            options: await Promise.all(records.map((record) => Promise.resolve(convData(record)))),
+            options: await Promise.all(records.map(convert)),
             total: meta.filteredRows ?? meta.totalRows,
         };
-    }, [convData, dataModel, dataSort, switchFilterNameData]);
+    }, [convert, dataModel, dataSort, switchFilterNameData]);
     const handleLoadGroupRecord = useCallback(async (id) => {
         const [data] = await groupModel.getCached(id);
         return convGroup(data);
@@ -65,8 +65,8 @@ const BackendMultiSelectWithTags = (inProps) => {
         : undefined, [lruGroup, handleLoadGroupRecord]);
     const handleLoadDataRecord = useCallback(async (id) => {
         const [data] = await dataModel.getCached(id);
-        return convData(data);
-    }, [dataModel, convData]);
+        return convert(data);
+    }, [dataModel, convert]);
     const lruDataConfig = useMemo(() => lruData
         ? {
             ...lruData,
@@ -75,7 +75,7 @@ const BackendMultiSelectWithTags = (inProps) => {
         : undefined, [lruData, handleLoadDataRecord]);
     const debouncedGroupLoad = useDebouncedLoad(loadGroupOptions, groupSearchDebounceTime ?? 500);
     const debouncedDataLoad = useDebouncedLoad(loadDataOptions, dataSearchDebounceTime ?? 500);
-    return (_jsx(MultiSelectWithTags, { ...selectorProps, onChange: handleSelect, selected: selected, loadGroupEntries: loadGroupEntries, loadDataOptions: debouncedDataLoad, loadGroupOptions: debouncedGroupLoad, ...(switchFilterNameGroup || switchFilterNameData
+    return (_jsx(MultiSelectWithTags, { ...selectorProps, error: error || loadError, onChange: handleSelect, selected: selected, loadGroupEntries: loadGroupEntries, loadDataOptions: debouncedDataLoad, loadGroupOptions: debouncedGroupLoad, ...(switchFilterNameGroup || switchFilterNameData
             ? { displaySwitch: true, switchLabel: props.switchLabel }
             : { displaySwitch: false }), lruGroup: lruGroupConfig, lruData: lruDataConfig }));
 };

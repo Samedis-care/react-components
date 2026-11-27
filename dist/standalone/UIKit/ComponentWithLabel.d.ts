@@ -27,6 +27,16 @@ export interface ComponentWithLabelProps extends Omit<FormControlLabelProps, "la
      * Custom styles
      */
     classes?: Partial<Record<ComponentWithLabelClassKey, string>>;
+    /**
+     * Called once per click on the control or on its caption (a keyboard
+     * activation of the control is a click too), with that click; its
+     * `currentTarget` is the `<label>` root. For a click on the caption, the
+     * label then forwards a click to the control (it toggles a checkbox, it
+     * clicks a button): that click doesn't call `onClick` again and is stopped
+     * at the label if `onClick` stopped the first one. `preventDefault()` keeps
+     * the label from forwarding the click.
+     */
+    onClick?: React.MouseEventHandler<HTMLLabelElement>;
 }
 /**
  * Keys of the theme's `components.CcComponentWithLabel.styleOverrides`, also

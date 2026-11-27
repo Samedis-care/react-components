@@ -41,8 +41,10 @@ const Content = (props) => {
     const hoverState = useState(null);
     const { pages } = state;
     const onSectionRendered = useCallback((visibleCells) => {
-        const pageStart = (visibleCells.rowStartIndex / rowsPerPage) | 0;
-        const pageEnd = (visibleCells.rowStopIndex / rowsPerPage) | 0;
+        // MultiGrid reports grid rows, whose row 0 is the header; the pages
+        // hold data rows, and grid row n shows data row n - 1 (see Cell)
+        const pageStart = ((visibleCells.rowStartIndex - 1) / rowsPerPage) | 0;
+        const pageEnd = ((visibleCells.rowStopIndex - 1) / rowsPerPage) | 0;
         if (pageStart !== pages[0] || pageEnd !== pages[1]) {
             setState((prevState) => ({
                 ...prevState,

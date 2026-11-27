@@ -2,6 +2,7 @@ import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-run
 import React from "react";
 import { FormControl, FormHelperText, FormLabel, styled, TextField, } from "@mui/material";
 import readableTextColor from "../../utils/internal/readableTextColor";
+import wrapperRootShouldForwardProp from "../../utils/internal/wrapperRootShouldForwardProp";
 import useCCTranslations from "../../utils/useCCTranslations";
 /**
  * The dot itself, shared by the pseudo element and the element version
@@ -14,6 +15,13 @@ const dirtyMarkerBase = (theme) => ({
     borderRadius: "50%",
     verticalAlign: "middle",
     backgroundColor: theme.palette.info.main,
+    // forced colors (e.g. Windows high contrast) paint every background in the
+    // palette's background colour, which would hide the dot: there it is drawn in
+    // the palette's text colour instead, in a light palette and a dark one alike
+    "@media (forced-colors: active)": {
+        forcedColorAdjust: "none",
+        backgroundColor: "CanvasText",
+    },
 });
 /**
  * The marker for a field whose value differs from the server-side value: a small dot
@@ -33,6 +41,11 @@ const dirtyMarkerBase = (theme) => ({
  *
  * That leaves {@link DirtyMarkerText} in the label, so the field's name still says it is
  * modified; it has a theme slot of its own.
+ *
+ * In forced colors mode (e.g. Windows high contrast), which paints every background in
+ * the palette's background colour, the dot is drawn in the palette's text colour
+ * (`CanvasText`) instead. A theme that recolours the dot gives it a system colour for
+ * forced colors in the same rule, under `@media (forced-colors: active)`.
  */
 export const dirtyMarkerStyles = (theme) => ({
     content: '""',
@@ -130,8 +143,9 @@ const DIRTY_MARKER_WIDTH = 10;
  * goes through {@link labelWithDirtyText} where it is rendered.
  * @remarks MUI covers error, required and disabled; warning and dirty are ours, and both
  * are presentational, so they are applied here rather than in every control. The wrapper
- * swallows both props so neither reaches the DOM, and forwards everything else including
- * the ref, which the date pickers use to anchor their popup.
+ * swallows both props so neither reaches the DOM, and forwards everything else to the
+ * wrapped component, `classes` included, and the ref, which the date pickers use to
+ * anchor their popup.
  *
  * Every wrapped component shares the `CcFieldState` theme slot, which is the one place to
  * restyle or remove either state for a whole application.
@@ -157,7 +171,12 @@ export const withMuiFieldState = (Component, labelProp = "label") => {
                     : {}),
             } }));
     });
-    return styled(FieldState, { name: "CcFieldState", slot: "root" })(({ theme, warning, dirty }) => ({
+    return styled(FieldState, {
+        name: "CcFieldState",
+        slot: "root",
+        // the wrapped component applies `classes`, which a root slot would keep back
+        shouldForwardProp: wrapperRootShouldForwardProp,
+    })(({ theme, warning, dirty }) => ({
         ...(dirty && {
             // the label of a text field, and the legend of a fieldset based control
             "& > .MuiFormLabel-root::after": dirtyMarkerStyles(theme),
@@ -196,17 +215,15 @@ export const withMuiFieldState = (Component, labelProp = "label") => {
             },
         }),
         ...(warning && {
-            "& > .MuiFormLabel-root": {
+            // The label and helper text outrank their own focus and disabled colours, as
+            // MUI's error colour does. Without that, the warning rule and MUI's would
+            // weigh the same, and the one emotion inserted last would win: on a page whose
+            // first field already has a warning, the label's own styles come after these,
+            // so focus would turn the label to the primary colour, and disabled both to
+            // grey. `:not(.Mui-error)` leaves an error to MUI's own colour, so a field
+            // with both looks as one with the error only.
+            "& > .MuiFormLabel-root:not(.Mui-error), &.MuiFormLabel-root:not(.Mui-error)": {
                 color: warningTextColor(theme),
-            },
-            "&.MuiFormLabel-root": {
-                color: warningTextColor(theme),
-            },
-            "& > .MuiFormLabel-root.Mui-error": {
-                color: theme.palette.error.main,
-            },
-            "&.MuiFormLabel-root.Mui-error": {
-                color: theme.palette.error.main,
             },
             // standard and filled inputs are drawn as MUI draws an error: the idle 1px
             // underline and the 2px focus underline take the colour, the latter still
@@ -225,17 +242,9 @@ export const withMuiFieldState = (Component, labelProp = "label") => {
             "& > .MuiInput-underline:hover:not(.Mui-disabled, .Mui-error)::before, & > .MuiFilledInput-underline:hover:not(.Mui-disabled, .Mui-error)::before, & > .MuiPickersInputBase-root:not(.MuiPickersOutlinedInput-root):hover:not(.Mui-disabled, .Mui-error)::before": {
                 borderBottom: `1px solid ${theme.palette.warning.main}`,
             },
-            "& > .MuiFormHelperText-root": {
+            // as the label above
+            "& > .MuiFormHelperText-root:not(.Mui-error), &.MuiFormHelperText-root:not(.Mui-error)": {
                 color: warningTextColor(theme),
-            },
-            "&.MuiFormHelperText-root": {
-                color: warningTextColor(theme),
-            },
-            "& > .MuiFormHelperText-root.Mui-error": {
-                color: theme.palette.error.main,
-            },
-            "&.MuiFormHelperText-root.Mui-error": {
-                color: theme.palette.error.main,
             },
             // Outranks the input's own focus and hover rules, as MUI's error rule
             // outranks its colour variants. Without that, the warning rule and MUI's

@@ -15,8 +15,8 @@ export interface MatrixInteractionConfig {
     onSelectRange?: (selection: MatrixRangeSelection) => void;
 }
 /**
- * Holds the pointer state of one grid (the range being swept, the hovered
- * cell) outside of React state.
+ * Holds the pointer state of one grid (the range being swept, whether the
+ * pointer is still on the grid, the hovered cell) outside of React state.
  *
  * A sweep changes the state of a handful of cells but would re-render the whole
  * grid if it lived in the grid's own state — with the documented 400 column cap
@@ -49,6 +49,8 @@ export declare class MatrixInteractionStore {
     private hoverColumnKey;
     /** Escape hid the add hint of the hovered cell, see dismissHint() */
     private hintDismissed;
+    /** the pointer left the grid while the button is held, see leaveGrid() */
+    private away;
     /**
      * Publishes the current props to the store. Called by the grid on every
      * render, so a pointer event always sees the columns on screen.
@@ -84,15 +86,45 @@ export declare class MatrixInteractionStore {
     /** Begins a range on a cell. */
     begin(rowKey: string, columnKey: string): void;
     /**
+     * Drops a press whose release the page never heard: the pointer entered
+     * the grid or one of its cells while a press is in progress, but the
+     * primary button is no longer down. It is not reported, as nothing says
+     * where it was let go of; from here on the pointer hovers, rather than
+     * sweeping a range that the next click anywhere would report.
+     * @param buttons The `buttons` of the mouse event that brought the pointer
+     * here, a bit mask in which 1 is the primary button
+     * @returns Whether a press was dropped (and the cells notified)
+     */
+    private dropUnheard;
+    /**
      * Moves the pointer onto a cell: extends (or shrinks) the range if one is
      * being swept, and remembers the hover for the add hint (and shows it
      * again, if Escape hid it).
+     * @param buttons The `buttons` of the mouse event: without the primary
+     * button a press still in progress was let go of unheard and is dropped
+     * (see dropUnheard)
      * @remarks A range stops at the first cell canSelect rejects, so what is
      * highlighted is exactly what gets reported.
      */
-    enter(rowKey: string, columnKey: string): void;
+    enter(rowKey: string, columnKey: string, buttons: number): void;
     /** The pointer left a cell. */
     leave(rowKey: string, columnKey: string): void;
+    /**
+     * The pointer left the grid. A held press stays, but is neither painted
+     * nor reported while the pointer is away: letting go there aborts it, as a
+     * button pressed and let go of elsewhere does not click (WCAG 2.5.2), and
+     * what is painted stays what a release reports.
+     * @remarks The range is kept, so coming back with the button still held
+     * (see enterGrid) paints it again and the sweep goes on.
+     */
+    leaveGrid(): void;
+    /**
+     * The pointer came back onto the grid: a held press is painted again.
+     * @param buttons The `buttons` of the mouse event: without the primary
+     * button the press was let go of unheard and is dropped (see dropUnheard),
+     * rather than painted again for a click on a header to report
+     */
+    enterGrid(buttons: number): void;
     /**
      * Hides the add hint of the hovered cell (Escape), until the pointer
      * enters another cell, or leaves this one and comes back.
@@ -110,8 +142,9 @@ export declare class MatrixInteractionStore {
     /** Drops the range without reporting it (Escape, a lost press, unmount). */
     cancel(): void;
     /**
-     * Ends a range and reports it. The hover is left alone: the pointer is
-     * still on the cell it was released over.
+     * Ends a range and reports it, unless the pointer is away from the grid
+     * (see leaveGrid). The hover is left alone: the pointer is still on the
+     * cell it was released over.
      */
     commit(): void;
 }

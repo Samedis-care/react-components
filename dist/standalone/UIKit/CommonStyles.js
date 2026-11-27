@@ -1,5 +1,6 @@
 import { Input, OutlinedInput, styled, TextField, } from "@mui/material";
 import { PickersTextField } from "@mui/x-date-pickers";
+import wrapperRootShouldForwardProp from "../../utils/internal/wrapperRootShouldForwardProp";
 const inputStyles = ({ theme }) => ({
     paddingTop: 0,
     paddingRight: theme.spacing(2),
@@ -23,6 +24,8 @@ export const UiKitInputOutlined = styled(OutlinedInput, {
 export const UiKitTextField = styled(TextField, {
     name: "CcUiKitTextField",
     slot: "root",
+    // TextField applies `classes`, which a root slot would keep back
+    shouldForwardProp: wrapperRootShouldForwardProp,
 })(({ theme }) => ({
     "& .MuiInput-root": inputStyles({ theme }),
 }));

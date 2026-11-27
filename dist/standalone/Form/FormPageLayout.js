@@ -36,44 +36,60 @@ const Body = styled("div", { name: "CcFormPageLayout", slot: "body" })({
     // leaves the footer below the busy overlay (`other`) and app-level layers.
     isolation: "isolate",
 });
-const Footer = styled("div", { name: "CcFormPageLayout", slot: "footer" })({
-    // in flow at the bottom of the layout, and held at most as low as 36px above the
-    // bottom of the content area of whatever scrolls (a scrolling dialog content,
-    // panel or main area, or the viewport): while the body is longer than that area,
-    // the body scrolls under the footer; at the end of a long form, or on a short
-    // form whose layout reaches that far down, it rests at that height
+/**
+ * The footer's offset from the bottom of the visible area, in units of `theme.spacing`
+ * (36px with MUI's default spacing)
+ */
+const FOOTER_OFFSET = 4.5;
+/**
+ * The space between the body's content and a footer resting at the end of the layout,
+ * in units of `theme.spacing` (30px with MUI's default spacing)
+ */
+const FOOTER_GAP = 3.75;
+const Footer = styled("div", { name: "CcFormPageLayout", slot: "footer" })(({ theme }) => ({
+    // in flow at the bottom of the layout, and held at most as low as FOOTER_OFFSET
+    // above the bottom of the content area of whatever scrolls (a scrolling dialog
+    // content, panel or main area, or the viewport): while the body is longer than
+    // that area, the body scrolls under the footer; at the end of a long form, or
+    // on a short form whose layout reaches that far down, it rests at that height
     position: "sticky",
-    bottom: 36,
+    bottom: theme.spacing(FOOTER_OFFSET),
     flexShrink: 0,
-    // as wide as its buttons, but never wider than the layout: on a narrow screen the
-    // buttons wrap inside it (FormButtons) instead of the bar sticking out of its
-    // container and making the page scroll sideways
+    // as wide as its buttons, but never wider than the layout: on a narrow screen
+    // the buttons wrap inside it (FormButtons) instead of the bar sticking out of
+    // its container and making the page scroll sideways
     alignSelf: "flex-start",
     maxWidth: "100%",
-    // 30px between the body's content and the footer, plus the up to 36px the footer
-    // is lifted by where the layout ends at the bottom of the visible area
-    margin: "66px 0 0",
+    // FOOTER_GAP between the body's content and the footer, plus the up to
+    // FOOTER_OFFSET the footer is lifted by where the layout ends at the bottom of
+    // the visible area
+    margin: `calc(${theme.spacing(FOOTER_GAP)} + ${theme.spacing(FOOTER_OFFSET)}) 0 0`,
     padding: 0,
     // a footer that renders nothing (a FormButtons without a button left) keeps no
     // space below the body
     "&:empty": {
         display: "none",
     },
-    // On a short screen (a phone held sideways, a page zoomed to 400%) a floating footer
-    // would cover much of the little that is visible, so it stays in flow after the body,
-    // where it rests at the end of a long form anyway: 30px below the body's content and
-    // 36px above the end of the layout.
+    // On a short screen (a phone held sideways, a page zoomed to 400%) a floating
+    // footer would cover much of the little that is visible, so it stays in flow
+    // after the body, where it rests at the end of a long form anyway: FOOTER_GAP
+    // below the body's content and FOOTER_OFFSET above the end of the layout.
     "@media (max-height: 480px)": {
         position: "static",
-        margin: "30px 0 36px",
+        margin: theme.spacing(FOOTER_GAP, 0, FOOTER_OFFSET),
     },
-});
+}));
 /**
  * Space left between a focused element and the footer when the element is scrolled out
- * from under the footer: the space between the body's content and a footer resting at
- * the end of the layout
+ * from under the footer, in px: the space between the body's content and a footer
+ * resting at the end of the layout (FOOTER_GAP), its top margin less the height a
+ * floating footer is lifted by
+ * @param footer The footer
  */
-const FOCUS_CLEARANCE = 30;
+const getFocusClearance = (footer) => {
+    const { marginTop, bottom, position } = getComputedStyle(footer);
+    return (parseFloat(marginTop) - (position === "sticky" ? parseFloat(bottom) : 0));
+};
 /**
  * The nearest ancestor of the element that is a scroll container, the one a sticky
  * element sticks to, or `null` for the viewport
@@ -90,9 +106,9 @@ const getScrollContainer = (el) => {
 };
 /**
  * Scrolls the focused element up if the floating footer covers it or it lies below the
- * footer, until it ends FOCUS_CLEARANCE above the footer, but never so far that its top
- * leaves the visible area. The browser scrolls a focused element into view only when it
- * lies outside the visible area, and the footer is inside it.
+ * footer, until it ends the focus clearance above the footer, but never so far that its
+ * top leaves the visible area. The browser scrolls a focused element into view only
+ * when it lies outside the visible area, and the footer is inside it.
  * @param target The focused element, in the body
  * @param footer The footer
  */
@@ -111,7 +127,7 @@ const scrollClearOfFooter = (target, footer) => {
     const visibleTop = scroller
         ? scroller.getBoundingClientRect().top + scroller.clientTop
         : 0;
-    const distance = Math.min(rect.bottom - footerRect.top + FOCUS_CLEARANCE, rect.top - visibleTop);
+    const distance = Math.min(rect.bottom - footerRect.top + getFocusClearance(footer), rect.top - visibleTop);
     if (distance <= 0)
         return;
     (scroller ?? footer.ownerDocument.defaultView)?.scrollBy({ top: distance });
@@ -148,7 +164,8 @@ const FormPageLayout = (inProps) => {
 /**
  * The page layout of every form page: BasicFormPage, and so DefaultFormPage,
  * EditOnlyFormPage and FlowEngineFormPage, renders the form as `body`, its buttons
- * as `footer` and its busy overlay (FormLoaderOverlay) as `other`.
+ * as `footer` and its busy overlay (FormLoaderOverlay) as `other`. It can also be
+ * used on its own, such as for a page with a floating action bar that is no form.
  *
  * Layout: the root is `position: relative` and does not scroll itself; whatever
  * scrolls around it (a FormDialog's content, a scrolling panel, drawer or main area,
@@ -177,6 +194,11 @@ const FormPageLayout = (inProps) => {
  *   long form and on a short form that fills its parent; on a long form, Save is at
  *   the end.
  *
+ * The distances are the theme's spacing, given here at MUI's default of 8px: 36px is
+ * `theme.spacing(4.5)`, 30px is `theme.spacing(3.75)` and 66px their sum. A theme with
+ * another spacing scales them all, also the space kept above the footer when the focus
+ * is scrolled clear of it (see below).
+ *
  * Horizontally, the footer is as wide as its content, but never wider than the layout
  * (`align-self: flex-start` with `max-width: 100%`), and sits at the layout's start
  * edge: the left edge, or the right edge in a right-to-left layout. A footer whose
@@ -203,5 +225,26 @@ const FormPageLayout = (inProps) => {
  *
  * An absolutely positioned `other` covers the whole layout, however far it is
  * scrolled: the busy overlay covers the form, not the page or dialog around it.
+ *
+ * The layout adds no role, landmark or tab stop: keyboard focus goes through the
+ * body, then the footer, then `other`.
+ *
+ * Theme: `components.CcFormPageLayout.styleOverrides` per
+ * {@link FormPageLayoutClassKey} slot. To replace the layout of every form page, set
+ * `components.CcBasicFormPage.defaultProps.formPageLayoutComponent` to a component
+ * that takes {@link FormPageLayoutProps}.
+ *
+ * @example
+ * <FormDialog dialogTitle={t("import.title")}>
+ * 	<FormPageLayout
+ * 		body={<ImportSteps />}
+ * 		footer={
+ * 			<FormButtons>
+ * 				<ActionButton onClick={next}>{t("import.next")}</ActionButton>
+ * 			</FormButtons>
+ * 		}
+ * 		other={<FormLoaderOverlay visible={busy} message={t("import.busy")} />}
+ * 	/>
+ * </FormDialog>
  */
 export default React.memo(FormPageLayout);

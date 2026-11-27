@@ -155,6 +155,13 @@ const StyledFormDiv = styled("div", { name: "CcForm", slot: "root" })({});
  * and the values built from it
  */
 const asModelRecord = (data) => data;
+/**
+ * Does a custom field hold changes that count toward the given flag?
+ * @param fields The custom fields that hold changes
+ * @param flowEngine Is the form a flow form? Without it "staged" counts toward dirty
+ * @param staged true: the flag stagedDirty, false: the flag dirty
+ */
+const hasCustomDirty = (fields, flowEngine, staged) => Object.values(fields).some((state) => (flowEngine && state === "staged") === staged);
 const Form = (props) => {
     const { model: formModel, id, children, onSubmit, onSubmitUserInteractive, customProps, onlyWarnMounted, onlyWarnChanged, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedSubmitBeforeParent, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, formClass, preSubmit, dirtyIgnoreFields, showDirtyState, flowEngine, renderFormAsDiv: renderFormAsDivProp, errorRenderer: ErrorRenderer, } = props;
     // the form engine itself works with any model, the typing is for the props and the context
@@ -186,7 +193,7 @@ const Form = (props) => {
     }
     const formEvents = formEventsRef.current;
     // custom fields - dirty state
-    const { get: getCustomDirtyFields, set: setCustomDirtyFields } = useRefState([]);
+    const { get: getCustomDirtyFields, set: setCustomDirtyFields, state: customDirtyFields, } = useRefState({});
     // setCustomFieldDirty lives further down, next to the dirty state events it announces
     // custom fields - pre submit handlers
     const preSubmitHandlers = useRef({});
@@ -330,20 +337,20 @@ const Form = (props) => {
     }, []);
     // main form handling - dirty state
     const { get: getInitialValues, set: setInitialValues, state: initialValuesState, } = useRefState(undefined);
-    // single source of truth for a record's initial form values: the server data
-    // plus initialRecord for new records (records without an id). Used both for the
-    // dirty baseline and to seed the form data, so the two can never diverge.
-    // initialRecord is applied when the server data loads, not when it changes: the
-    // form data was seeded from it then, and after a save the baseline is the saved
-    // record, which a re-rendered initialRecord must not replace.
-    // data is the react-query cache entry (for a new record, the model's default record
-    // that every create form starts from), so initialRecord is merged into a copy of it
+    // the dirty baseline is the server record: for a new record (a record without an id) the
+    // model's default record. It is a copy, as the server data is the react-query cache entry
+    // that every create form of the model starts from
+    useEffect(() => {
+        setInitialValues(serverData ? deepClone(serverData[0]) : undefined);
+    }, [serverData, setInitialValues]);
+    // the values a record's form starts with: the server record, plus initialRecord for a new
+    // record. initialRecord is a change to the new record, not a part of its baseline, so the
+    // fields it sets to other values than the model's defaults make the form dirty.
+    // initialRecord is applied when the server data loads, not when it changes: the form
+    // data was seeded from it then
     const initialRecordRef = useRef(initialRecord);
     initialRecordRef.current = initialRecord;
-    const buildInitialValues = useCallback((data) => deepAssign(deepClone(data), data.id || !initialRecordRef.current ? {} : initialRecordRef.current), []);
-    useEffect(() => {
-        setInitialValues(serverData ? buildInitialValues(serverData[0]) : undefined);
-    }, [serverData, buildInitialValues, setInitialValues]);
+    const seedValues = useCallback((data) => deepAssign(deepClone(data), data.id || !initialRecordRef.current ? {} : initialRecordRef.current), []);
     const alwaysSubmitFields = useMemo(() => uniqueArray([
         ...(props.alwaysSubmitFields ?? []),
         ...(flowEngineConfig.current.alwaysSubmitFields ?? []),
@@ -436,21 +443,28 @@ const Form = (props) => {
     // refetch — actually recomputes the map
     () => getDirtyFields(values, initialValuesState), [getDirtyFields, values, initialValuesState]);
     const getDirty = useCallback((formDirty) => formDirty ||
-        getCustomDirtyFields().length > 0 ||
-        !!(id && !getDeleted() && deleteOnSubmit), [getCustomDirtyFields, getDeleted, deleteOnSubmit, id]);
+        hasCustomDirty(getCustomDirtyFields(), !!flowEngine, false) ||
+        !!(id && !getDeleted() && deleteOnSubmit), [getCustomDirtyFields, flowEngine, getDeleted, deleteOnSubmit, id]);
     const dirty = getDirty(formDirty);
     /**
-     * Do the staged values differ from the baseline? Compares the fields the flow's save
-     * sends, as the save picks them: those a stage staged as modified, alwaysSubmitFields and
-     * hidden fields, every field of a new record
+     * Do the staged values differ from the baseline, or does a custom field hold staged
+     * changes? Compares the fields the flow's save sends, as the save picks them: those a
+     * stage staged as modified, alwaysSubmitFields and hidden fields, every field of a new
+     * record
      * @param staged The staged values
      * @param stagedModified The fields a stage staged as modified
      * @param baseline The server record (initialValues), undefined before it loaded
-     * @returns false without flowEngine and before the baseline and the default record loaded
+     * @param customFields The custom fields that hold changes
+     * @returns false without flowEngine; before the baseline and the default record loaded
+     *          only a custom field counts
      * @see FormContextData.stagedDirty
      */
-    const getStagedDirty = useCallback((staged, stagedModified, baseline) => {
-        if (!flowEngine || !baseline || !defaultRecord)
+    const getStagedDirty = useCallback((staged, stagedModified, baseline, customFields) => {
+        if (!flowEngine)
+            return false;
+        if (hasCustomDirty(customFields, true, true))
+            return true;
+        if (!baseline || !defaultRecord)
             return false;
         const config = {
             ignoreFields: dirtyIgnoreFields,
@@ -477,9 +491,15 @@ const Form = (props) => {
      * @see FormContextData.stagedDirty
      */
     const stagedDirty = useMemo(
-    // the baseline is passed as the state, like for dirtyFields, so that replacing it
-    // after a save or a refetch recomputes the flag
-    () => getStagedDirty(valuesStaged, valuesStagedModified, initialValuesState), [getStagedDirty, valuesStaged, valuesStagedModified, initialValuesState]);
+    // the baseline and the custom fields are passed as the state, like for dirtyFields, so
+    // that replacing them (after a save, a refetch, a custom field's change) recomputes it
+    () => getStagedDirty(valuesStaged, valuesStagedModified, initialValuesState, customDirtyFields), [
+        getStagedDirty,
+        valuesStaged,
+        valuesStagedModified,
+        initialValuesState,
+        customDirtyFields,
+    ]);
     // main form handling - dirty state events
     // dirty is derived from state, so a listener relying on the rendered flag only learns
     // about a change one render late. That's too late for "submit, then navigate away":
@@ -504,13 +524,14 @@ const Form = (props) => {
      *          notify listeners without waiting for the re-render.
      */
     const syncDirtyState = useCallback(() => {
-        dispatchDirtyEvent(getDirty(getFormDirty(valuesRef.current)), getStagedDirty(valuesStagedRef.current, valuesStagedModifiedRef.current, getInitialValues()));
+        dispatchDirtyEvent(getDirty(getFormDirty(valuesRef.current)), getStagedDirty(valuesStagedRef.current, valuesStagedModifiedRef.current, getInitialValues(), getCustomDirtyFields()));
     }, [
         dispatchDirtyEvent,
         getDirty,
         getFormDirty,
         getStagedDirty,
         getInitialValues,
+        getCustomDirtyFields,
     ]);
     // catch-all for every dirty change that isn't announced by an explicit syncDirtyState
     useEffect(() => {
@@ -525,13 +546,17 @@ const Form = (props) => {
      */
     const setCustomFieldDirty = useCallback((field, dirty) => {
         setCustomDirtyFields((prev) => {
-            const prevDirty = prev.includes(field);
-            if (prevDirty == dirty)
+            const prevDirty = Object.prototype.hasOwnProperty.call(prev, field)
+                ? prev[field]
+                : false;
+            if (prevDirty === dirty)
                 return prev; // no changes
+            const next = { ...prev };
             if (dirty)
-                return [...prev, field];
+                next[field] = dirty;
             else
-                return prev.filter((candidate) => candidate !== field);
+                delete next[field];
+            return next;
         });
         // a custom field is the one dirty source the form engine doesn't compute itself,
         // so announce it here - a caller which clears its field and then navigates away
@@ -695,7 +720,7 @@ const Form = (props) => {
         postSubmitHandlers.current = {};
         customValidationHandlers.current = {};
         customWarningHandlers.current = {};
-        setCustomDirtyFields([]);
+        setCustomDirtyFields({});
         setErrors({});
         setWarnings({});
         setUpdateError(null);
@@ -710,7 +735,7 @@ const Form = (props) => {
         if (initializedRef.current || !serverData || !serverData[0])
             return;
         initializedRef.current = true;
-        valuesRef.current = deepClone(buildInitialValues(serverData[0]));
+        valuesRef.current = deepClone(seedValues(serverData[0]));
         setValues(valuesRef.current);
         touchedRef.current = getDefaultTouched();
         setTouched(touchedRef.current);
@@ -1052,28 +1077,57 @@ const Form = (props) => {
         nestedFormName,
         deleted,
     ]);
+    // nested forms - staged by the parent's flow
+    /**
+     * Has a submit of the parent's flow staged this form's edits since the form mounted?
+     * @remarks Set by every submit of a flow parent (goToStage makes one before it changes
+     *          the stage), as it stages the values of the shown stage; cleared once this form
+     *          saved
+     */
+    const nestedStagedRef = useRef(false);
+    /**
+     * What becomes of this form's edits when it unmounts, as of the latest render
+     * @returns "staged": they wait for the save of the parent's flow, which staged them (its
+     *          stage was left). "dropped": they are neither counted nor saved (the parent's
+     *          onlySubmitMounted, onlySubmitNestedIfMounted, disableNestedSubmit). "kept": they
+     *          keep the parent dirty and are saved by its save.
+     * @see FormProps.nestedFormName
+     */
+    const nestedLeftOnUnmount = () => {
+        if (disableNestedSubmit || onlySubmitNestedIfMounted)
+            return "dropped";
+        if (parentFormContext?.flowEngine && nestedStagedRef.current && dirty)
+            return "staged";
+        return parentFormContext?.onlySubmitMounted ? "dropped" : "kept";
+    };
+    // read when the form unmounts, which renders nothing more
+    const nestedLeftOnUnmountRef = useRef(nestedLeftOnUnmount);
+    nestedLeftOnUnmountRef.current = nestedLeftOnUnmount;
     // nested forms - dirty state
     useEffect(() => {
         if (!parentFormContext || !nestedFormName)
             return;
         // a nested form the parent doesn't submit has nothing the parent's save could save
         parentFormContext.setCustomFieldDirty(nestedFormName, dirty && !disableNestedSubmit);
-        return () => {
-            if (disableNestedSubmit ||
-                onlySubmitNestedIfMounted ||
-                parentFormContext.onlySubmitMounted) {
-                parentFormContext.setCustomFieldDirty(nestedFormName, false);
-            }
-        };
         // parentFormContext omitted from deps: its identity changes often (formContextData useMemo), but setCustomFieldDirty is stable
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        dirty,
-        disableNestedSubmit,
-        onlySubmitNestedIfMounted,
-        nestedFormName,
-        parentFormContext?.onlySubmitMounted,
-    ]);
+    }, [dirty, disableNestedSubmit, nestedFormName]);
+    // what the form's unmount leaves of its dirty state, in one call: staged edits move from
+    // the parent's dirty to its stagedDirty without the parent looking clean in between
+    useEffect(() => {
+        if (!parentFormContext || !nestedFormName)
+            return;
+        const { setCustomFieldDirty } = parentFormContext;
+        return () => {
+            const left = nestedLeftOnUnmountRef.current();
+            if (left === "staged")
+                setCustomFieldDirty(nestedFormName, "staged");
+            else if (left === "dropped")
+                setCustomFieldDirty(nestedFormName, false);
+        };
+        // setCustomFieldDirty is stable, see above
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [nestedFormName]);
     // nested forms - submitting blocker
     useEffect(() => {
         if (!parentFormContext || !nestedFormName || !submittingBlocked)
@@ -1102,15 +1156,30 @@ const Form = (props) => {
                 await nestedFormPreSubmitHandler(id, formModel, getFieldValue, setFieldValueLite);
             }
             await submitForm(params);
+            nestedStagedRef.current = false;
             parentFormContext.setCustomFieldDirty(nestedFormName, false);
         };
+        const flowParent = parentFormContext.flowEngine;
+        const preSubmitNestedForm = async (id, params) => {
+            if (flowParent) {
+                // a submit of the parent's flow stages the values of the shown stage, and this
+                // form's edits with them. One that only stages sends nothing: the edits wait
+                // for the flow's save
+                nestedStagedRef.current = true;
+                if (!params.submitToServer)
+                    return;
+            }
+            if (nestedSubmitBeforeParent)
+                await submitNestedForm(id, params);
+        };
+        const hasPreSubmitHandler = nestedSubmitBeforeParent || flowParent;
         if (!disableNestedSubmit) {
             parentFormContext.setCustomValidationHandler(nestedFormName, validateNestedForm);
             parentFormContext.setCustomWarningHandler(nestedFormName, validateNestedFormWarn);
-            if (nestedSubmitBeforeParent) {
-                parentFormContext.setPreSubmitHandler(nestedFormName, submitNestedForm);
+            if (hasPreSubmitHandler) {
+                parentFormContext.setPreSubmitHandler(nestedFormName, preSubmitNestedForm);
             }
-            else {
+            if (!nestedSubmitBeforeParent) {
                 parentFormContext.setPostSubmitHandler(nestedFormName, submitNestedForm);
             }
         }
@@ -1122,13 +1191,15 @@ const Form = (props) => {
                 parentFormContext.removeCustomValidationHandler(nestedFormName);
                 parentFormContext.removeCustomWarningHandler(nestedFormName);
             }
-            if (parentFormContext.onlySubmitMounted ||
-                onlySubmitNestedIfMounted ||
-                disableNestedSubmit) {
-                if (nestedSubmitBeforeParent) {
+            // staged edits are saved by the flow's save, also once the form unmounted
+            if (nestedLeftOnUnmountRef.current() !== "staged" &&
+                (parentFormContext.onlySubmitMounted ||
+                    onlySubmitNestedIfMounted ||
+                    disableNestedSubmit)) {
+                if (hasPreSubmitHandler) {
                     parentFormContext.removePreSubmitHandler(nestedFormName);
                 }
-                else {
+                if (!nestedSubmitBeforeParent) {
                     parentFormContext.removePostSubmitHandler(nestedFormName);
                 }
             }
@@ -1139,6 +1210,7 @@ const Form = (props) => {
         parentFormContext?.setCustomWarningHandler,
         parentFormContext?.onlyValidateMounted,
         parentFormContext?.onlySubmitMounted,
+        parentFormContext?.flowEngine,
         parentFormContext?.setCustomFieldDirty,
         validateForm,
         disableValidation,
@@ -1165,9 +1237,9 @@ const Form = (props) => {
         console.log("Form Dirty Flag State:");
         console.log("Form Dirty State (exact):", toComparisonJson(localData) !== toComparisonJson(remoteData));
         console.log("Form Dirty State:", toComparisonJson(localData) !== toComparisonJson(remoteData));
-        console.log("Custom Dirty State:", getCustomDirtyFields().length > 0);
+        console.log("Custom Dirty State:", hasCustomDirty(getCustomDirtyFields(), !!flowEngine, false));
         console.log("Custom Dirty Fields:", getCustomDirtyFields());
-        console.log("Staged Dirty State:", getStagedDirty(valuesStagedRef.current, valuesStagedModifiedRef.current, getInitialValues()));
+        console.log("Staged Dirty State:", getStagedDirty(valuesStagedRef.current, valuesStagedModifiedRef.current, getInitialValues(), getCustomDirtyFields()));
         console.log("Server Data:", remoteData);
         console.log("Form Data:", localData);
         console.log("Staged Data:", valuesStagedRef.current);
@@ -1187,6 +1259,7 @@ const Form = (props) => {
         getNormalizedData,
         getDirtyFields,
         getCustomDirtyFields,
+        flowEngine,
         getStagedDirty,
         getInitialValues,
         model.fields,
@@ -1350,6 +1423,18 @@ const Form = (props) => {
         setFieldTouchedLite,
         setCustomReadOnly,
         removeCustomReadOnly,
+        setCustomValidationHandler,
+        removeCustomValidationHandler,
+        setCustomWarningHandler,
+        removeCustomWarningHandler,
+        setPreSubmitHandler,
+        removePreSubmitHandler,
+        setPostSubmitHandler,
+        removePostSubmitHandler,
+        getCustomState,
+        setCustomState,
+        hasCustomState,
+        setCustomFieldDirty,
         addEventListener: formEvents.addEventListener,
         removeEventListener: formEvents.removeEventListener,
         flowEngine: !!flowEngine,
@@ -1379,6 +1464,18 @@ const Form = (props) => {
         setFieldTouchedLite,
         setCustomReadOnly,
         removeCustomReadOnly,
+        setCustomValidationHandler,
+        removeCustomValidationHandler,
+        setCustomWarningHandler,
+        removeCustomWarningHandler,
+        setPreSubmitHandler,
+        removePreSubmitHandler,
+        setPostSubmitHandler,
+        removePostSubmitHandler,
+        getCustomState,
+        setCustomState,
+        hasCustomState,
+        setCustomFieldDirty,
         formEvents,
         flowEngine,
         submitFormReferenced,

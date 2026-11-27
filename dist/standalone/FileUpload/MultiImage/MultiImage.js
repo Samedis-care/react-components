@@ -15,6 +15,13 @@ const Root = styled("div", {
     name: "CcMultiImage",
     slot: "root",
 })({});
+/**
+ * The frame. It takes over the root's `max-height`, so that with a max-height on the root
+ * the frame stops there and the picture shrinks to fit it.
+ */
+const Frame = styled(GroupBox)({
+    maxHeight: "inherit",
+});
 const UploadInput = styled("input", {
     name: "CcMultiImage",
     slot: "uploadInput",
@@ -214,7 +221,7 @@ const MultiImage = (inProps) => {
             return;
         onPrimaryChange(name, id);
     }, [onPrimaryChange, name]);
-    return (_jsxs(Root, { className: combineClassNames([className, classes?.root]), children: [_jsx(GroupBox, { ...slotProps?.groupBox, "aria-busy": busy || slotProps?.groupBox?.["aria-busy"], label: label, children: _jsxs(RootContainer, { container: true, spacing: 1, className: classes?.rootContainer, children: [_jsx(ImageItem, { size: 12, className: classes?.imageItem, children: _jsx(ImageBox, { image: images[currentImage]?.image ?? placeholderImage ?? uploadImage, fileName: images[currentImage]?.name, onPrevImage: currentImage <= 0 ? undefined : showPrevImage, onNextImage: currentImage < images.length - 1 ? showNextImage : undefined, onFilesDropped: readOnly ? undefined : handlePreviewDrop, onClick: images[currentImage] ? undefined : readOnly ? null : startUpload, classes: subClasses?.imageBox, disableRotation: disableRotation, imageDots: {
+    return (_jsxs(Root, { className: combineClassNames([className, classes?.root]), children: [_jsx(Frame, { ...slotProps?.groupBox, "aria-busy": busy || slotProps?.groupBox?.["aria-busy"], label: label, children: _jsxs(RootContainer, { container: true, spacing: 1, className: classes?.rootContainer, children: [_jsx(ImageItem, { size: 12, className: classes?.imageItem, children: _jsx(ImageBox, { image: images[currentImage]?.image ?? placeholderImage ?? uploadImage, fileName: images[currentImage]?.name, onPrevImage: currentImage <= 0 ? undefined : showPrevImage, onNextImage: currentImage < images.length - 1 ? showNextImage : undefined, onFilesDropped: readOnly ? undefined : handlePreviewDrop, onClick: images[currentImage] ? undefined : readOnly ? null : startUpload, classes: subClasses?.imageBox, disableRotation: disableRotation, imageDots: {
                                     total: images.length,
                                     active: currentImage,
                                     setActive: setCurrentImage,

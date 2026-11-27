@@ -9,9 +9,9 @@ export interface MatrixCellTileProps {
      * The entries after them are not lost: a "+N" marker in the tile's top
      * right corner counts them. It lies over the topRight corner of the entry
      * beneath it. Pointing at it shows them in a tooltip (each by its label,
-     * in its colors, and its tooltip), screen readers read them with the cell
-     * ("2 more: N (Night shift), RD"), and it is ringed when one of them is
-     * highlighted. They cannot be clicked or dragged in the tile: to offer
+     * in its colors, and its tooltip), screen readers read them with the cell,
+     * each with its state ("2 more: N, highlighted (Night shift), RD"), and it
+     * is ringed when one of them is highlighted. They cannot be clicked or dragged in the tile: to offer
      * that, or to show them differently, collapse them yourself and pass at
      * most two.
      */
@@ -23,20 +23,28 @@ export interface MatrixCellTileProps {
      * The diagonal layout trades detail for space: the pair is ONE click target
      * and one drag handle (onItemClick reports it, and renderItem wraps it, as
      * the first entry). Of each entry it keeps the label, the colors (fill,
-     * textColor, dimmed) and the tooltip (the pair's tooltip joins both with
-     * " / "); a highlighted entry rings the whole pair. secondaryLabel, flow
-     * and every corner but the first entry's bottomLeft are dropped. Switching
-     * this in the theme therefore hides props a consumer supplied.
+     * textColor, dimmed), its state in words after its label (see highlighted
+     * and dimmed) and the tooltip (the pair's tooltip joins both with
+     * " / "); a highlighted entry rings the whole pair. In forced-colors mode
+     * the pair has a border and its cut is a line; a dimmed half is set apart
+     * only by what screen readers say. secondaryLabel, flow and every corner
+     * but the first entry's bottomLeft are dropped. Switching this in the
+     * theme therefore hides props a consumer supplied.
      * @default "split"
      */
     pairLayout?: "split" | "diagonal";
     /**
-     * Which way a split pair is stacked
+     * Which way a split pair is stacked: "row" side by side, "column" one
+     * above the other. An entry of a "column" pair puts its secondaryLabel
+     * beside its label, whatever its flow says (see MatrixTileItem.flow).
      * @remarks Each entry of a split pair is half of the tile less 3px in this
      * direction (2px of padding on either side and 2px between the two), so
      * clickable entries of at least 24x24px (WCAG 2.5.8 Target Size) need a
      * tile of 54px or more in this direction. In a MatrixGrid the tile is 1px
      * less than columnWidth and rowHeight (the cell's border).
+     *
+     * A label that does not fit its entry is drawn smaller, down to 8px (see
+     * MatrixTileItem.label).
      * @default "row"
      */
     splitDirection?: "row" | "column";

@@ -5,7 +5,7 @@ import { Add } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 import { columnVariantClass, cssVar, matrixClasses, matrixVars, } from "./matrixClasses";
 import { cellBorders, columnTintStyles } from "./matrixTints";
-import { useMatrixConfig } from "./MatrixGridContext";
+import { ownEntryOf, useMatrixConfig } from "./MatrixGridContext";
 import MatrixContents from "./MatrixContents";
 import useMatrixActivation from "./useMatrixActivation";
 import { columnNameOf, extraRowNameOf, isNamePart } from "./matrixNames";
@@ -64,7 +64,7 @@ const MatrixExtraRowCell = (props) => {
         onCellClick?.(column.key);
     }, [onCellClick, column.key]);
     // Zero is a value: only a missing (or null) badge means "nothing known".
-    const badge = extraRow.badges?.[column.key];
+    const badge = ownEntryOf(extraRow.badges, column.key);
     const hasBadge = badge != null;
     // The cell in words: getCellLabel, else the row's and the column's names
     // ("Open demand, Thursday, March 5, 2026"), so that the cells of a row do
@@ -85,9 +85,15 @@ const MatrixExtraRowCell = (props) => {
     const ref = useRef(null);
     const { tabStop, pullFocus, onNavigate, onFocusColumn } = props;
     useEffect(() => {
-        if (pullFocus)
-            ref.current?.focus();
-    }, [pullFocus]);
+        if (!pullFocus)
+            return;
+        ref.current?.focus();
+        // Report it even when no focus event fired (the cell had the focus
+        // already, as after ArrowRight on the last cell): that ends the
+        // request, which would otherwise stay open and pull the focus to this
+        // cell whenever it mounts again, e.g. after paging away and back.
+        onFocusColumn(column.key);
+    }, [pullFocus, onFocusColumn, column.key]);
     const handleFocus = useCallback(() => {
         onFocusColumn(column.key);
     }, [onFocusColumn, column.key]);

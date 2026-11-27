@@ -1,5 +1,6 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useContext, useEffect, useLayoutEffect, useState } from "react";
+import { RouteContext } from "./Route";
 /**
  * The default {@link DocumentTitleFormatter}: the most specific page title and
  * the app title, joined by " – ", e.g. "Device 4711 – Samedis.care"; the app
@@ -23,10 +24,18 @@ Array.from(entries.values())
 /**
  * Collects the page titles and the page headings of one HistoryRouter and
  * writes the document title from the titles. Owned by one
- * DocumentTitleProvider instance.
+ * DocumentTitleProvider instance. The registry of a HistoryRouter inside
+ * another one hands each title and heading on to the outer one's, which
+ * writes the document title; it keeps them for its own router, which moves
+ * the focus only to a heading set inside it.
  */
 export class PageTitleRegistry {
     appTitle;
+    /**
+     * The registry of the HistoryRouter around the one this registry belongs
+     * to, null in the outermost one
+     */
+    outer;
     entries = new Map();
     headings = new Map();
     listeners = new Set();
@@ -35,19 +44,32 @@ export class PageTitleRegistry {
     active = false;
     // the document title is left alone until the first page title is set
     wrote = false;
-    constructor(appTitle) {
+    /**
+     * @param appTitle The document's title when the HistoryRouter mounted
+     * @param outer The registry of the HistoryRouter around the one this
+     * registry belongs to, which gets every title and heading set here too;
+     * null in the outermost one
+     */
+    constructor(appTitle, outer) {
         this.appTitle = appTitle;
+        this.outer = outer;
     }
+    /**
+     * Sets or removes a page title, here and in the outer registries
+     * @param key The component that sets it
+     * @param entry The title, null to remove it
+     */
     set(key, entry) {
         if (entry)
             this.entries.set(key, entry);
         else
             this.entries.delete(key);
+        this.outer?.set(key, entry);
         this.write();
         this.notify();
     }
     /**
-     * Sets or removes the heading of a page
+     * Sets or removes the heading of a page, here and in the outer registries
      * @param key The component that sets it
      * @param entry The heading, null to remove it
      */
@@ -56,17 +78,20 @@ export class PageTitleRegistry {
             this.headings.set(key, entry);
         else
             this.headings.delete(key);
+        this.outer?.setHeading(key, entry);
         this.notify();
     }
     /**
-     * The page title: the most specific one, as the document title shows it
+     * The page title: the most specific one set inside the HistoryRouter, as
+     * the document title shows it
      * @returns The title, null when none is set
      */
     pageTitle() {
         return mostSpecificFirst(this.entries)[0]?.title ?? null;
     }
     /**
-     * The headings of the pages, the most specific first
+     * The headings of the pages set inside the HistoryRouter, the most
+     * specific first
      * @returns The heading elements that are mounted
      */
     pageHeadings() {
@@ -110,9 +135,16 @@ export class PageTitleRegistry {
 }
 const PageTitleRegistryContext = React.createContext(null);
 /**
- * The registry of the page titles and headings that the nearest HistoryRouter
- * writes the document title from (the outermost one's, when HistoryRouters
- * are nested), null outside of every HistoryRouter
+ * What the HistoryRouter adds to the rank of the page titles and headings set
+ * inside it. A HistoryRouter starts a fresh routing scope, in which the depth
+ * of the routes counts from 0 again; inside another one, its titles have to
+ * rank as titles of the place it is rendered at. 0 in the outermost one.
+ */
+const PageRankOffsetContext = React.createContext(0);
+/**
+ * The registry of the page titles and headings of the nearest HistoryRouter,
+ * null outside of every HistoryRouter. Inside another HistoryRouter, it hands
+ * them on to the outer one's, which writes the document title.
  * @returns The registry
  */
 export const usePageTitleRegistry = () => useContext(PageTitleRegistryContext);
@@ -120,10 +152,12 @@ export const usePageTitleRegistry = () => useContext(PageTitleRegistryContext);
  * Sets a page title while the calling component is mounted. Used by
  * usePageTitle.
  * @param title The page title; null, undefined or "" set none
- * @param rank How specific the title is, see PageTitleEntry
+ * @param depth The depth of the calling component's route within its
+ * HistoryRouter, -1 outside of every route
  */
-export const useRegisterPageTitle = (title, rank) => {
+export const useRegisterPageTitle = (title, depth) => {
     const registry = useContext(PageTitleRegistryContext);
+    const rank = useContext(PageRankOffsetContext) + depth;
     const [key] = useState(() => ({}));
     useEffect(() => {
         if (!registry || !title)
@@ -137,10 +171,12 @@ export const useRegisterPageTitle = (title, rank) => {
  * after a navigation that leaves the focus on no element or out of view, the
  * focus moves to the most specific page heading. Used by PageTitle.
  * @param heading A ref to the heading element, null for none
- * @param rank How specific the heading is, see PageTitleEntry
+ * @param depth The depth of the calling component's route within its
+ * HistoryRouter, -1 outside of every route
  */
-export const useRegisterPageHeading = (heading, rank) => {
+export const useRegisterPageHeading = (heading, depth) => {
     const registry = useContext(PageTitleRegistryContext);
+    const rank = useContext(PageRankOffsetContext) + depth;
     const [key] = useState(() => ({}));
     // a layout effect: the heading of a page counts in the commit that mounts
     // it, before the router looks for it after the navigation
@@ -153,14 +189,22 @@ export const useRegisterPageHeading = (heading, rank) => {
 };
 /**
  * Writes the document title from the page titles of its children. Rendered by
- * HistoryRouter. Inside another one it hands the titles to the outer one and
- * ignores its formatDocumentTitle.
+ * HistoryRouter, outside of the fresh routing scope it starts. Inside another
+ * one it hands the titles to the outer one and ignores its
+ * formatDocumentTitle; the titles and headings of its children rank as those
+ * of the Route it is rendered in, those of their routes deeper.
  * @param props The props
  */
 const DocumentTitleProvider = (props) => {
     const { formatDocumentTitle, children } = props;
     const outer = useContext(PageTitleRegistryContext);
-    const [registry] = useState(() => new PageTitleRegistry(typeof document === "undefined" ? "" : document.title));
+    // the rank of a title set where this router is rendered, plus one: a title
+    // of its children outside of their routes (depth -1) ranks as that one
+    const route = useContext(RouteContext);
+    const rankOffset = useContext(PageRankOffsetContext) + (route ? route.depth : -1) + 1;
+    // the outer registry is the same for as long as this one is mounted: an
+    // ancestor's own registry, which never changes
+    const [registry] = useState(() => new PageTitleRegistry(typeof document === "undefined" ? "" : document.title, outer));
     // a layout effect: in place before the children's effects write with it
     useLayoutEffect(() => {
         registry.setFormat(formatDocumentTitle ?? defaultFormatDocumentTitle);
@@ -172,6 +216,6 @@ const DocumentTitleProvider = (props) => {
         registry.activate();
         return () => registry.deactivate();
     }, [outer, registry]);
-    return (_jsx(PageTitleRegistryContext.Provider, { value: outer ?? registry, children: children }));
+    return (_jsx(PageTitleRegistryContext.Provider, { value: registry, children: _jsx(PageRankOffsetContext.Provider, { value: rankOffset, children: children }) }));
 };
 export default React.memo(DocumentTitleProvider);

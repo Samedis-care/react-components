@@ -17,6 +17,12 @@ export interface PartialApplyFailure<EntryT = unknown> {
      */
     error: Error;
 }
+/**
+ * Whether `e` is a PartialApplyError, also one from another copy of the library (checks the
+ * name, `CcPartialApplyError`, not the class)
+ * @param e The error to check
+ * @returns true for a PartialApplyError
+ */
 export declare const isPartialApplyError: (e: Error) => e is PartialApplyError;
 /**
  * The writes of a CRUD control's change that did not go through, or whose result could
@@ -25,7 +31,12 @@ export declare const isPartialApplyError: (e: Error) => e is PartialApplyError;
  * @remarks Handed to `errorComponent` by CrudMultiSelect, CrudMultiSelectWithGroups,
  *          CrudFileUpload and CrudMultiImage. The message says what failed and why, as
  *          the control words it; `failures` lists the writes for a component that wants
- *          to show them its own way.
+ *          to show them its own way. While one of them is mounted on a LazyConnector, it
+ *          is also what the connector's `workQueue`, and with it a Form's save, rejects
+ *          with for the queued writes the backend refused. Its name is
+ *          `CcErrorNames.PartialApplyError`; the default error-reporting policy reports it
+ *          only if one of its failures' errors would be reported on its own (see
+ *          defaultShouldReportError).
  */
 export default class PartialApplyError<EntryT = unknown> extends Error {
     failures: PartialApplyFailure<EntryT>[];

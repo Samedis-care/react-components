@@ -1,14 +1,16 @@
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { styled, Tooltip, useTheme } from "@mui/material";
-import { ArrowDownward, ArrowRightAlt } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
 import { tileColors } from "./matrixTileDim";
 import { useMatrixCellTileProps } from "./MatrixCellTileContext";
 import { entryFocusRing } from "./matrixTints";
 import MatrixTileCorners from "./MatrixTileCorners";
+import MatrixTileFlowArrow from "./MatrixTileFlowArrow";
+import MatrixTileStateText from "./MatrixTileStateText";
 import useMatrixActivation from "./useMatrixActivation";
+import useMatrixTileFit from "./useMatrixTileFit";
 export const MatrixTileItemRoot = styled("div", {
     name: "CcMatrixCellTile",
     slot: "item",
@@ -31,6 +33,13 @@ export const MatrixTileItemRoot = styled("div", {
         cursor: "pointer",
         "&:focus-visible": entryFocusRing(theme),
     },
+    // Forced colors paint every fill in the canvas color: a border keeps the
+    // entries apart, dashed where the fade would have set one apart
+    "@media (forced-colors: active)": {
+        boxSizing: "border-box",
+        border: "1px solid CanvasText",
+        [`&.${matrixClasses.itemDimmed}`]: { borderStyle: "dashed" },
+    },
 }));
 export const MatrixTileItemContent = styled("div", {
     name: "CcMatrixCellTile",
@@ -42,7 +51,11 @@ export const MatrixTileItemContent = styled("div", {
     justifyContent: "center",
     fontWeight: 700,
     lineHeight: 1,
-    minWidth: 0,
+    // Its natural size, never shrunk to the entry's: the entry measures it,
+    // and content that does not fit is scaled down (useMatrixTileFit). A
+    // scale, not a smaller font, so the layout and the measurement stay put.
+    flexShrink: 0,
+    scale: `var(${matrixVars.tileFit}, none)`,
     fontSize: cssVar(matrixVars.tileFontSize),
     [`&.${matrixClasses.flowHorizontal}`]: {
         flexDirection: "row",
@@ -52,13 +65,12 @@ export const MatrixTileItemContent = styled("div", {
         fontSize: cssVar(matrixVars.tileSecondaryFontSize),
     },
 });
-const FlowArrowVertical = styled(ArrowDownward)({ fontSize: 13 });
-const FlowArrowHorizontal = styled(ArrowRightAlt)({ fontSize: 16 });
 /**
  * Font size for a short code: the shorter it is, the bigger it can be. Only a
  * plain string or a number can be measured this way — a number counts as the
  * digits React writes for it, so 1234 is sized like "1234". Any other
- * ReactNode keeps the default.
+ * ReactNode keeps the default. Where the entry has less room than that size
+ * needs, it draws its content smaller still (useMatrixTileFit).
  * @param label The label to size
  * @returns The font size in px: 14 up to two characters, 12 for three, 10
  * for more
@@ -71,46 +83,58 @@ export const labelFontSize = (label) => {
         return 14;
     return text.length <= 2 ? 14 : text.length === 3 ? 12 : 10;
 };
+/**
+ * The smallest font size, in px, an entry's content is scaled down to so it
+ * fits its entry (useMatrixTileFit). Content that does not fit at it is cut.
+ */
+const MATRIX_TILE_MIN_FONT_SIZE = 8;
 const MatrixTileItem = (props) => {
-    const { item } = props;
+    const { item, stacked } = props;
     const { onItemClick, classes } = useMatrixCellTileProps();
     const theme = useTheme();
     const activate = useCallback(() => {
         onItemClick?.(item);
     }, [onItemClick, item]);
     // An entry one can click has to be one a keyboard can reach too. The name
-    // comes from the label it renders; the tooltip is its description. Its
+    // comes from the label it renders, with the arrow and the state in words
+    // (visually hidden); the tooltip is its description. Its
     // role is also what keeps a press on it from starting a range in the grid
     // below (the cell skips presses inside [role=button]), so the press still
     // reaches the consumer's renderItem and renderCellWrapper wrappers.
     const activation = useMatrixActivation(onItemClick ? activate : undefined);
-    const horizontal = (item.flow ?? "vertical") === "horizontal";
+    const horizontal = stacked || (item.flow ?? "vertical") === "horizontal";
+    const fontSize = labelFontSize(item.label);
+    // never above the primary label: the arrow points AT this, it is not the
+    // headline (see MatrixTileItem.secondaryLabel)
+    const secondaryFontSize = Math.min(fontSize, labelFontSize(item.secondaryLabel));
+    const rootRef = useRef(null);
+    const contentRef = useRef(null);
+    useMatrixTileFit(rootRef, contentRef, MATRIX_TILE_MIN_FONT_SIZE /
+        (item.secondaryLabel != null ? secondaryFontSize : fontSize));
     const style = useMemo(() => {
         const colors = tileColors(theme, item.backgroundColor, item.textColor, item.dimmed);
         return {
             [matrixVars.tileBackground]: colors.fill,
             [matrixVars.tileForeground]: colors.label,
-            [matrixVars.tileFontSize]: `${labelFontSize(item.label)}px`,
-            // never above the primary label: the arrow points AT this, it is
-            // not the headline (see MatrixTileItem.secondaryLabel)
-            [matrixVars.tileSecondaryFontSize]: `${Math.min(labelFontSize(item.label), labelFontSize(item.secondaryLabel))}px`,
+            [matrixVars.tileFontSize]: `${fontSize}px`,
+            [matrixVars.tileSecondaryFontSize]: `${secondaryFontSize}px`,
         };
     }, [
         theme,
         item.backgroundColor,
         item.textColor,
         item.dimmed,
-        item.label,
-        item.secondaryLabel,
+        fontSize,
+        secondaryFontSize,
     ]);
-    const entry = (_jsxs(MatrixTileItemRoot, { className: combineClassNames([
+    const entry = (_jsxs(MatrixTileItemRoot, { ref: rootRef, className: combineClassNames([
             classes?.item,
             item.dimmed && matrixClasses.itemDimmed,
             onItemClick && matrixClasses.itemClickable,
-        ]), style: style, ...activation, children: [_jsxs(MatrixTileItemContent, { className: combineClassNames([
+        ]), style: style, ...activation, children: [_jsxs(MatrixTileItemContent, { ref: contentRef, className: combineClassNames([
                     classes?.itemContent,
                     horizontal && matrixClasses.flowHorizontal,
-                ]), children: [_jsx("span", { children: item.label }), item.secondaryLabel != null && (_jsxs(_Fragment, { children: [horizontal ? _jsx(FlowArrowHorizontal, {}) : _jsx(FlowArrowVertical, {}), _jsx("span", { className: "CcMatrixCellTile-secondaryLabel", children: item.secondaryLabel })] }))] }), _jsx(MatrixTileCorners, { item: item, className: classes?.corner })] }));
+                ]), children: [_jsx("span", { children: item.label }), item.secondaryLabel != null && (_jsxs(_Fragment, { children: [_jsx(MatrixTileFlowArrow, { horizontal: horizontal }), _jsx("span", { className: "CcMatrixCellTile-secondaryLabel", children: item.secondaryLabel })] })), (item.highlighted || item.dimmed) && (_jsx(MatrixTileStateText, { highlighted: item.highlighted, dimmed: item.dimmed }))] }), _jsx(MatrixTileCorners, { item: item, className: classes?.corner })] }));
     // No tooltip, no Tooltip: one per cell entry adds up over a whole grid.
     // describeChild: the tooltip describes the entry instead of naming it, so
     // the label stays the name, and a read-only entry (a div without a role)

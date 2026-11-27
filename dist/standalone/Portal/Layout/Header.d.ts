@@ -10,7 +10,9 @@ export interface PortalLayoutHeaderProps {
      *
      * true renders the burger button, which tells assistive technology whether
      * the drawer is open (`aria-expanded`, from the layout's `menuOpen`) and
-     * which element the drawer is (`aria-controls`, `drawerId`).
+     * which element the drawer is (`aria-controls`, `drawerId`). Its icon has
+     * the AppBar's text color (`color="inherit"`), whatever color the theme
+     * gives IconButtons.
      */
     mobile: boolean;
     /**

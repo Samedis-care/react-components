@@ -338,11 +338,21 @@ class Model {
     /**
      * Loads a list of data entries by the given search params. Works with offsets rather than pages
      * @param params The search params, the connector gets a copy of them
+     * @remarks A failure is reported as index reports it, with the source "Model.index2",
+     *          unless the request was aborted (params.signal aborted). The caller gets the
+     *          rejection either way.
      * @see index
      */
     async index2(params) {
-        const [rawData, meta, userData] = await this.connector.index2(deepClone(params), this.asModelUnknown);
-        return [await this.deserializeIndexRecords(rawData), meta, userData];
+        try {
+            const [rawData, meta, userData] = await this.connector.index2(deepClone(params), this.asModelUnknown);
+            return [await this.deserializeIndexRecords(rawData), meta, userData];
+        }
+        catch (err) {
+            // an abort is not a failure: the caller dropped the request (params.signal)
+            reportUnexpectedError(err, "Model.index2", this.modelId, params?.signal);
+            throw err;
+        }
     }
     /**
      * Deserializes index records with the overview visibility and caches them for batched requests

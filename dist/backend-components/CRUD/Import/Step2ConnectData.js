@@ -6,6 +6,7 @@ import { Check as CheckIcon, ErrorOutlined as ErrorIcon, HelpOutlined as Unknown
 import uniqueArray from "../../../utils/uniqueArray";
 import debouncePromise from "../../../utils/debouncePromise";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import visuallyHidden from "../../../utils/internal/visuallyHidden";
 const ScriptInput = styled(TextField, {
     name: "CcCrudImportStep2",
     slot: "scriptInput",
@@ -24,6 +25,9 @@ const StyledCardContent = styled(CardContent, {
     name: "CcCrudImportStep2",
     slot: "cardContent",
 })({
+    // the box the visually hidden status of the script's check is placed in, so the
+    // status stays in its card
+    position: "relative",
     paddingBottom: 4,
     "&:last-child": {
         paddingBottom: 4,
@@ -32,18 +36,7 @@ const StyledCardContent = styled(CardContent, {
 const StatusText = styled("span", {
     name: "CcCrudImportStep2",
     slot: "statusText",
-})({
-    // visually hidden, as MUI's visuallyHidden
-    border: 0,
-    clipPath: "inset(50%)",
-    height: 1,
-    margin: -1,
-    overflow: "hidden",
-    padding: 0,
-    position: "absolute",
-    whiteSpace: "nowrap",
-    width: 1,
-});
+})(visuallyHidden);
 /**
  * The text of each state of a script's check (no script yet, being checked, passed, failed)
  */

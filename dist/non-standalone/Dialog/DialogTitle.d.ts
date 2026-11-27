@@ -19,9 +19,12 @@ export interface DialogTitleProps {
     children: React.ReactNode;
     /**
      * When set, a close (X) button is shown next to the heading, named by
-     * `non-standalone.dialog.dialog-title.close`, and this is called when it is
-     * clicked. DialogTitle closes nothing itself: pass e.g. the function
-     * `useCloseThisDialog` returns.
+     * `non-standalone.dialog.dialog-title.close`, and this is called without
+     * arguments when it is clicked. DialogTitle closes nothing itself: pass e.g.
+     * the function `useCloseThisDialog` returns. The X has the palette's
+     * `action.active` color, the color of MUI's default IconButton, whatever
+     * color a theme gives IconButtons; a theme changes it in
+     * `CcDialogTitle.styleOverrides.closeButton`.
      */
     onClose?: () => void;
     /**

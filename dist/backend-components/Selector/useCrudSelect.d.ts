@@ -6,6 +6,10 @@ import { BackendMultiSelectProps } from "./BackendMultiSelect";
 export interface UseCrudSelectParams<M extends ModelUnknown, DataT extends BaseSelectorData> {
     /**
      * The backend connector used as CRUD interface
+     * @remarks A LazyConnector queues the writes until its queue is sent (a Form's save). If
+     *          the backend refuses a write of the queue while the control is mounted, the
+     *          queue rejects with a PartialApplyError that names it by the entry's label, as
+     *          a refused write is named in `error` with any other connector.
      */
     connector: Connector;
     /**
@@ -134,6 +138,17 @@ export interface UseCrudSelectResult<M extends ModelUnknown, DataT extends BaseS
      */
     pendingChanges: boolean;
     /**
+     * Is a change of the selection being written: has the connector not answered one of its
+     * creates, updates or deletes yet? Meanwhile CrudMultiSelect and
+     * CrudMultiSelectWithGroups mark the field busy (`aria-busy`) and say "Saving…" under it,
+     * and the change is not listed yet: a pick is listed, a removed entry leaves the list,
+     * once its write has settled.
+     * @remarks A change waiting for the one before it, or for `prepareNewEntry`, is not being
+     *          written yet. A LazyConnector only queues the writes (see `pendingChanges`), so
+     *          with one it is true only while `serialize` and `deserialize` run.
+     */
+    writing: boolean;
+    /**
      * The records the connector listed or created (raw data), including those of `removed`
      */
     initialRawData: Record<string, unknown>[];
@@ -143,11 +158,29 @@ export interface UseCrudSelectResult<M extends ModelUnknown, DataT extends BaseS
      * @param newSelected The new selected entries. A listed entry whose id is in `ids` but
      *        that is missing here stays as it is, in its place: BackendMultiSelect reports
      *        an entry that is still loading by its id only.
-     * @remarks Ignores the change while the control is disabled. Creates the entries that
-     *          are not listed yet, deletes the listed ones that are left out, and updates a
-     *          listed entry only when `serialize` returns something else for it than for
-     *          the listed entry. An entry of `removed` added back is restored: its queued
-     *          delete is cancelled, nothing is created.
+     * @returns Resolves once the change is applied, after the changes made before it
+     * @remarks Ignores the change while the control is disabled. The change is the
+     *          difference between `selected` of the render this handler comes from and
+     *          `newSelected`: it creates the entries that are not listed yet, deletes the
+     *          listed ones that are left out, and updates a listed entry only when
+     *          `serialize` returns something else for it than for the listed entry. An entry
+     *          of `removed` added back is restored: its queued delete is cancelled, nothing
+     *          is created.
+     *
+     *          The changes, and `addToSelection` with them, are applied one after another in
+     *          the order they were made: a change waits until the writes of the ones before
+     *          it have settled, then applies only its own difference to the selection they
+     *          left, so a change made in a render before they settled does not undo them.
+     *          Its deleted entries leave the selection, its updated ones are replaced in
+     *          their place, and its created and restored ones are added at the end; a refused
+     *          removal or update leaves the entry as and where it is. Left out of a change,
+     *          as the same gesture reported again (a second click on a remove button, a pick
+     *          made before the field lists the first one): the removal of an entry that a
+     *          change before is deleting or has deleted, the pick of a record (by
+     *          `getIdOfData`) that a change before is creating or has linked, and an update a
+     *          change before has written. A change that writes nothing leaves `error` as it
+     *          is, and one whose turn comes while the control is disabled, or once it has
+     *          unmounted, writes nothing.
      */
     handleSelect: (ids: string[], newSelected: DataT[]) => Promise<void>;
     /**
@@ -159,8 +192,13 @@ export interface UseCrudSelectResult<M extends ModelUnknown, DataT extends BaseS
      */
     disabled: boolean;
     /**
-     * Conversion function for model data to selection data (handles special case when data comes from CRUD controller)
-     * @param data The model data
+     * Makes the entry for a record of the searched model, as the field does for a pick: its
+     * `deserializeModel` result with the value `"to-create-" + getIdOfData(entry)`. A record
+     * the connector listed or created (in `initialRawData`) gives its listed entry instead.
+     * @param data The record
+     * @remarks An end adornment that picks records itself makes the new entries it hands
+     *          handleSelect with this, so that they are what a pick in the field is, value
+     *          included, which `serialize` leaves out of the create.
      */
     modelToSelectorData: (data: ModelRecord<M>) => Promise<DataT>;
 }
@@ -172,8 +210,11 @@ export interface CrudSelectDispatch<DataT extends BaseSelectorData> {
      *   if it failed. Rejects with a PartialApplyError whose failure has the action
      *   `read` if `deserialize` failed after the create went through: the entry is
      *   selected then, as it was passed in, with the row's `id` as `value`. Rejects without
-     *   a write if the control is disabled when the entry's turn comes.
-     * @remarks Does not update existing record
+     *   a write if the control is disabled when the entry's turn comes, or has unmounted.
+     * @remarks The entry's turn comes once the selection has loaded and the changes made
+     *          before the call (handleSelect, addToSelection) are applied; nothing is created
+     *          if a selected entry has its `getIdOfData` then. Does not update existing
+     *          record
      */
     addToSelection: (entry: DataT) => Promise<void>;
 }

@@ -1,5 +1,6 @@
 import React from "react";
 import { ModelFieldName, ModelRecord, ModelUnknown } from "../../backend-integration/Model/Model";
+import { DataGridRowData } from "../../standalone/DataGrid/DataGrid";
 export interface InlineEditCellProps {
     /**
      * The model the record belongs to
@@ -10,13 +11,16 @@ export interface InlineEditCellProps {
      */
     field: ModelFieldName;
     /**
-     * The record of the row, as model.index returned it
+     * The record of the row, as model.index returned it, or as the last save in one of
+     * the row's cells left it
      */
     record: ModelRecord<ModelUnknown>;
     /**
-     * Called once a change was saved or refused, to reload the rows
+     * Builds the grid row of a record, as the cell's row was built
+     * (renderDataGridRecordUsingModel): a save replaces the row with the row of the
+     * saved record
      */
-    refreshGrid: () => void;
+    renderRow: (record: ModelRecord<ModelUnknown>) => DataGridRowData;
 }
 declare const _default: React.MemoExoticComponent<(props: InlineEditCellProps) => React.ReactElement<unknown, string | React.JSXElementConstructor<any>>>;
 export default _default;

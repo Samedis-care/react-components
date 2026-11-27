@@ -52,6 +52,10 @@ const isSameValue = (adapter, a, b) => {
  * reported as `null`. A day picked in the mobile dialog waits for OK, and Cancel,
  * which hands the old date back, reports nothing.
  *
+ * The consumer's `onAccept` gets each report too, right after `onChange` and
+ * with the same arguments. MUI calls `onAccept` for every change of the field,
+ * so it would get the half-typed and rejected dates that `onChange` is spared.
+ *
  * An entry the picker rejects stays in the field, as in MUI's own field, also
  * once focus leaves it: marked invalid, with the picker's `onError` reporting
  * the error, until the user changes it, the consumer hands in another date, or
@@ -72,12 +76,14 @@ const isSameValue = (adapter, a, b) => {
  * @param value The value held by the consumer
  * @param onChange The consumer's change handler
  * @param publishIntermediateValues Escape hatch: report every change at once,
- * rejected ones included, i.e. the raw picker behaviour
+ * rejected ones included, i.e. the raw picker behaviour, to `onChange` and to
+ * `onAccept`
  * @param defaultValue The initial value of an uncontrolled picker, which counts
  * as reported
+ * @param onAccept The consumer's accept handler, called with every report
  * @returns The value and handlers to hand to the picker
  */
-const usePickerDraft = (value, onChange, publishIntermediateValues, defaultValue) => {
+const usePickerDraft = (value, onChange, publishIntermediateValues, defaultValue, onAccept) => {
     const adapter = usePickerAdapter();
     // An uncontrolled picker renders from the field's own state, which nothing
     // reverts, so it needs no draft to render from — and handing it one would turn
@@ -120,7 +126,8 @@ const usePickerDraft = (value, onChange, publishIntermediateValues, defaultValue
         if (isSameValue(adapter, committed ?? null, newValue))
             return;
         onChange?.(newValue, context);
-    }, [adapter, committed, onChange]);
+        onAccept?.(newValue, context);
+    }, [adapter, committed, onChange, onAccept]);
     // reads held from this render: focus leaving the field and Enter come after
     // the change that set it has rendered
     const finish = useCallback(() => {
@@ -129,13 +136,17 @@ const usePickerDraft = (value, onChange, publishIntermediateValues, defaultValue
         report(held.value, held.context);
     }, [held, report]);
     const accept = useCallback((newValue, context) => {
+        if (publishIntermediateValues) {
+            onAccept?.(newValue, context);
+            return;
+        }
         // MUI accepts each change of the field too; those wait for finish
-        if (publishIntermediateValues || context.source !== "view")
+        if (context.source !== "view")
             return;
         if (context.validationError)
             return;
         report(newValue, context);
-    }, [publishIntermediateValues, report]);
+    }, [publishIntermediateValues, report, onAccept]);
     const settle = useCallback(() => {
         setState((prev) => ({
             ...prev,

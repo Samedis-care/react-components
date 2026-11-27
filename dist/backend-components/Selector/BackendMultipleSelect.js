@@ -13,15 +13,17 @@ const BackendMultipleSelect = (inProps) => {
         props: inProps,
         name: "CcBackendMultipleSelect",
     });
-    const { model, disableRequestBatching, modelToSelectorData, searchResultLimit, 
+    const { model, disableRequestBatching, 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    modelToSelectorData, searchResultLimit, 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onSelect, 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     selected: selectedIds, 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    initialData, searchDebounceTime, sort, switchFilterName, lru, ...otherProps } = props;
+    initialData, searchDebounceTime, sort, switchFilterName, lru, error, ...otherProps } = props;
     const modelFetch = props.modelFetch ?? model;
-    const { selected, handleSelect } = useSelectedCache(props);
+    const { selected, handleSelect, loadError, convert } = useSelectedCache(props);
     const handleLoad = useCallback(async (search, switchValue) => {
         const [records, meta] = await model.index({
             page: 1,
@@ -33,17 +35,17 @@ const BackendMultipleSelect = (inProps) => {
                 : undefined,
         });
         return {
-            options: await Promise.all(records.map((data) => Promise.resolve(modelToSelectorData(data)))),
+            options: await Promise.all(records.map(convert)),
             total: meta.filteredRows ?? meta.totalRows,
         };
-    }, [model, modelToSelectorData, searchResultLimit, sort, switchFilterName]);
+    }, [model, convert, searchResultLimit, sort, switchFilterName]);
     const handleLoadLruRecord = useCallback(async (id) => {
         const [data] = await modelFetch.getCached(id, {
             batch: !disableRequestBatching,
             dontReportNotFoundInBatch: true,
         });
-        return modelToSelectorData(data);
-    }, [disableRequestBatching, modelFetch, modelToSelectorData]);
+        return convert(data);
+    }, [disableRequestBatching, modelFetch, convert]);
     const lruConfig = useMemo(() => lru
         ? {
             ...lru,
@@ -51,7 +53,7 @@ const BackendMultipleSelect = (inProps) => {
         }
         : undefined, [lru, handleLoadLruRecord]);
     const debouncedLoad = useDebouncedLoad(handleLoad, searchDebounceTime ?? 500);
-    return (_jsx(BaseSelector, { multiple: true, ...otherProps, onLoad: debouncedLoad, onSelect: handleSelect, selected: selected, ...(switchFilterName
+    return (_jsx(BaseSelector, { multiple: true, ...otherProps, error: error || loadError, onLoad: debouncedLoad, onSelect: handleSelect, selected: selected, ...(switchFilterName
             ? { displaySwitch: true, switchLabel: props.switchLabel }
             : { displaySwitch: false }), lru: lruConfig }));
 };

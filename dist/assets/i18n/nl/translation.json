@@ -13,7 +13,8 @@
 			"menu-toggle": "Menu wisselen",
 			"collapse-menu": "Menu inklappen",
 			"expand-menu": "Menu uitklappen",
-			"close-menu": "Menu sluiten"
+			"close-menu": "Menu sluiten",
+			"main-menu": "Hoofdmenu"
 		},
 		"uikit": {
 			"info": "Meer informatie",
@@ -36,17 +37,32 @@
 			}
 		},
 		"date-picker": {
+			"open-date-time": "Kies datum en tijd",
+			"open-date-time-selected": "Kies datum en tijd, geselecteerde datum en tijd zijn {{DATE}} {{TIME}}",
 			"error": {
 				"invalid": "Voer een geldige datum in",
 				"min-date": "Voer een datum in op of na {{DATE}}",
 				"max-date": "Voer een datum in op of vóór {{DATE}}",
 				"past": "Voer de datum van vandaag of een latere datum in",
 				"future": "Voer de datum van vandaag of een eerdere datum in",
-				"unavailable": "Voer een datum in die geselecteerd kan worden"
+				"unavailable": "Voer een datum in die geselecteerd kan worden",
+				"min-date-time": "Voer een datum en tijd in op of na {{DATE}}",
+				"max-date-time": "Voer een datum en tijd in op of vóór {{DATE}}",
+				"min-time": "Voer een tijd in vanaf {{TIME}}",
+				"max-time": "Voer een tijd in tot en met {{TIME}}",
+				"past-date-time": "Voer de huidige datum en tijd of een later tijdstip in",
+				"future-date-time": "Voer de huidige datum en tijd of een eerder tijdstip in",
+				"unavailable-time": "Voer een tijd in die geselecteerd kan worden",
+				"minutes-step": "Voer de minuten in stappen van {{STEP}} in"
 			}
 		},
 		"notifications": {
-			"title": "Meldingen"
+			"title": "Meldingen",
+			"bell-label_one": "Meldingen, {{count}} ongelezen",
+			"bell-label_other": "Meldingen, {{count}} ongelezen",
+			"announce-new_one": "{{count}} nieuwe melding",
+			"announce-new_other": "{{count}} nieuwe meldingen",
+			"unread": "Ongelezen"
 		},
 		"how-it-works": {
 			"title": "Hoe werkt het"
@@ -241,6 +257,9 @@
 			"zoom-out": "Uitzoomen",
 			"reset-zoom": "Zoom herstellen"
 		},
+		"group-box": {
+			"required": "Verplicht"
+		},
 		"phone-number": {
 			"invalid": "Voer het juiste telefoonnummer in"
 		},
@@ -265,6 +284,7 @@
 				"instructions-signed": "De opgeslagen handtekening wordt getoond. Verwijder de handtekening eerst om opnieuw te tekenen."
 			},
 			"sign-here": "Teken hier digitaal",
+			"not-signed": "Niet ondertekend",
 			"required": "Verplicht"
 		},
 		"signal-portlet": {
@@ -285,7 +305,11 @@
 			"label": "Laadt…"
 		},
 		"matrix": {
+			"row-header-actions": "Opent de acties voor deze rij.",
 			"tile-more": "nog {{count}}:",
+			"tile-arrow": "naar",
+			"tile-highlighted": "gemarkeerd",
+			"tile-dimmed": "gedimd",
 			"extra-cell-add": "Toevoegen"
 		}
 	},
@@ -353,6 +377,9 @@
 				"boolean": {
 					"true": "Ja",
 					"false": "Nee"
+				},
+				"color": {
+					"validation-error": "Gelieve een correcte kleur in te voeren, bijvoorbeeld #336699"
 				}
 			}
 		}
@@ -362,15 +389,17 @@
 			"delete": {
 				"confirm-dialog": {
 					"title": "Verwijderen",
-					"message": "Wilt u echt {{NUM}} items verwijderen?",
-					"messageInverted": "Wilt u echt alles verwijderen, behalve {{NUM}} items?",
+					"message_one": "Wilt u echt {{count}} item verwijderen?",
+					"message_other": "Wilt u echt {{count}} items verwijderen?",
+					"messageInverted_one": "Wilt u echt alles verwijderen, behalve {{count}} item?",
+					"messageInverted_other": "Wilt u echt alles verwijderen, behalve {{count}} items?",
 					"buttons": {
 						"yes": "Ja",
 						"no": "Nee"
 					}
 				},
 				"error-dialog": {
-					"title": "Error",
+					"title": "Fout",
 					"message": "Kan de geselecteerde items niet verwijderen: {{ERROR}}",
 					"buttons": {
 						"okay": "OK"
@@ -405,6 +434,11 @@
 			"read-only": {
 				"submitting": "Het formulier wordt momenteel opgeslagen"
 			},
+			"auto-save": {
+				"saving": "Opslaan…",
+				"saved": "Opgeslagen",
+				"failed": "Opslaan mislukt"
+			},
 			"tab": {
 				"invalid": "Bevat ongeldige velden.",
 				"modified": "Bevat gewijzigde velden."
@@ -415,6 +449,7 @@
 		},
 		"selector": {
 			"loading": "Laadt…",
+			"saving": "Slaat op…",
 			"loading-error": "Fout bij het ophalen van gegevens",
 			"unknown-entry": "Onbekend item",
 			"selected-count": "Geselecteerd: {{COUNT}}",

@@ -1,9 +1,10 @@
 /**
  * Removes group separators from the given value and replaces the decimal separator with a dot for
- * usage with parseFloat(...). Returns an empty string if value is empty, and "NaN" if it is no
- * number:
- * - text without a digit that is not empty ("abc", ".", "-"); blanks and the format's own symbols
- *   ("€" of a currency format) count as empty (see isEmptyWithoutDigits)
+ * usage with parseFloat(...). The symbols the format writes around a number ("€" of a currency
+ * format, "Cg." of XCG) are no part of it (see removeFormatSymbols). Returns an empty string if
+ * value is empty, and "NaN" if it is no number:
+ * - text without a digit that is not empty ("abc", ".", "-"); blanks and the format's own symbols,
+ *   which is what is left when the user deletes the digits of a formatted number, count as empty
  * - a value whose . and , don't fit the locale's format (see fitsLocaleFormat), so that a typo
  *   such as "1.234.5" in de is not read as another number.
  *

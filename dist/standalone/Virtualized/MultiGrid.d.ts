@@ -11,6 +11,17 @@ export interface MultiGridProps {
     columnWidth: (column: number) => number;
     rowCount: number;
     rowHeight: (row: number) => number;
+    /**
+     * Called after the scrolling (bottom-right) pane rendered a different range
+     * of cells, and again with the current range when this callback changes.
+     * The first argument is the visible range, the second the range including
+     * the overscan (3 rows and columns on each side). Both are inclusive and use
+     * grid-wide indices, as `children` does: row 0 is the first pinned row and
+     * column 0 the first pinned column, so `rowStartIndex >= fixedRowCount` and
+     * `columnStartIndex >= fixedColumnCount`. Subtract `fixedRowCount` to get
+     * the index of a data row. Only the scrolling pane reports, and it does not
+     * exist while there are no data rows.
+     */
     onCellsRendered?: GridProps<object>["onCellsRendered"];
     fixedColumnCount: number;
     fixedRowCount: number;

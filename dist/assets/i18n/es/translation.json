@@ -13,7 +13,8 @@
 			"menu-toggle": "Alternar menú",
 			"collapse-menu": "Contraer menú",
 			"expand-menu": "Expandir menú",
-			"close-menu": "Cerrar menú"
+			"close-menu": "Cerrar menú",
+			"main-menu": "Menú principal"
 		},
 		"uikit": {
 			"info": "Más información",
@@ -36,13 +37,23 @@
 			}
 		},
 		"date-picker": {
+			"open-date-time": "Elige fecha y hora",
+			"open-date-time-selected": "Elige fecha y hora, la fecha y hora elegidas son {{DATE}} {{TIME}}",
 			"error": {
 				"invalid": "Introduzca una fecha válida",
 				"min-date": "Introduzca una fecha igual o posterior al {{DATE}}",
 				"max-date": "Introduzca una fecha igual o anterior al {{DATE}}",
 				"past": "Introduzca la fecha de hoy o una posterior",
 				"future": "Introduzca la fecha de hoy o una anterior",
-				"unavailable": "Introduzca una fecha que se pueda seleccionar"
+				"unavailable": "Introduzca una fecha que se pueda seleccionar",
+				"min-date-time": "Introduzca una fecha y hora iguales o posteriores al {{DATE}}",
+				"max-date-time": "Introduzca una fecha y hora iguales o anteriores al {{DATE}}",
+				"min-time": "Introduzca una hora igual o posterior a las {{TIME}}",
+				"max-time": "Introduzca una hora igual o anterior a las {{TIME}}",
+				"past-date-time": "Introduzca la fecha y hora actuales o un momento posterior",
+				"future-date-time": "Introduzca la fecha y hora actuales o un momento anterior",
+				"unavailable-time": "Introduzca una hora que se pueda seleccionar",
+				"minutes-step": "Introduzca los minutos en pasos de {{STEP}}"
 			}
 		},
 		"signal-portlet": {
@@ -50,7 +61,14 @@
 			"refresh": "Actualizar"
 		},
 		"notifications": {
-			"title": "Notificaciones"
+			"title": "Notificaciones",
+			"bell-label_one": "Notificaciones, {{count}} sin leer",
+			"bell-label_many": "Notificaciones, {{count}} sin leer",
+			"bell-label_other": "Notificaciones, {{count}} sin leer",
+			"announce-new_one": "{{count}} notificación nueva",
+			"announce-new_many": "{{count}} notificaciones nuevas",
+			"announce-new_other": "{{count}} notificaciones nuevas",
+			"unread": "Sin leer"
 		},
 		"how-it-works": {
 			"title": "Cómo funciona"
@@ -245,6 +263,9 @@
 				"image-position": "Imagen {{INDEX}} de {{TOTAL}}"
 			}
 		},
+		"group-box": {
+			"required": "Obligatorio"
+		},
 		"phone-number": {
 			"invalid": "Introduzca un número de teléfono correcto"
 		},
@@ -269,6 +290,7 @@
 				"instructions-signed": "Se muestra la firma guardada. Para volver a firmar, bórrela primero."
 			},
 			"sign-here": "Firme aquí digitalmente",
+			"not-signed": "Sin firmar",
 			"required": "Obligatorio"
 		},
 		"toast": {
@@ -285,7 +307,11 @@
 			"label": "Cargando…"
 		},
 		"matrix": {
+			"row-header-actions": "Abre las acciones de esta fila.",
 			"tile-more": "{{count}} más:",
+			"tile-arrow": "a",
+			"tile-highlighted": "resaltado",
+			"tile-dimmed": "atenuado",
 			"extra-cell-add": "Añadir"
 		}
 	},
@@ -354,6 +380,9 @@
 				"boolean": {
 					"true": "Sí",
 					"false": "No"
+				},
+				"color": {
+					"validation-error": "Introduzca un color válido, p. ej. #336699"
 				}
 			}
 		}
@@ -363,8 +392,12 @@
 			"delete": {
 				"confirm-dialog": {
 					"title": "Eliminar",
-					"message": "¿Desea realmente eliminar {{NUM}} entradas?",
-					"messageInverted": "¿Desea realmente eliminar todo excepto {{NUM}} entradas?",
+					"message_one": "¿Desea realmente eliminar {{count}} entrada?",
+					"message_many": "¿Desea realmente eliminar {{count}} entradas?",
+					"message_other": "¿Desea realmente eliminar {{count}} entradas?",
+					"messageInverted_one": "¿Desea realmente eliminar todo excepto {{count}} entrada?",
+					"messageInverted_many": "¿Desea realmente eliminar todo excepto {{count}} entradas?",
+					"messageInverted_other": "¿Desea realmente eliminar todo excepto {{count}} entradas?",
 					"buttons": {
 						"yes": "Sí",
 						"no": "No"
@@ -407,6 +440,11 @@
 			"read-only": {
 				"submitting": "El formulario se está guardando"
 			},
+			"auto-save": {
+				"saving": "Guardando…",
+				"saved": "Guardado",
+				"failed": "No se pudo guardar"
+			},
 			"tab": {
 				"invalid": "Contiene campos no válidos.",
 				"modified": "Contiene campos modificados."
@@ -417,6 +455,7 @@
 		},
 		"selector": {
 			"loading": "Cargando…",
+			"saving": "Guardando…",
 			"loading-error": "Error al obtener los datos",
 			"unknown-entry": "Entrada desconocida",
 			"selected-count": "Seleccionados: {{COUNT}}",

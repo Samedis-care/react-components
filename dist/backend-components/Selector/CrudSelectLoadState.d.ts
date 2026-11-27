@@ -13,6 +13,10 @@ export interface CrudSelectLoadStateProps {
      * a label
      */
     label: string | undefined;
+    /**
+     * Whether a change of the loaded selection is being written (UseCrudSelectResult.writing)
+     */
+    writing: boolean;
 }
-declare const _default: React.MemoExoticComponent<(props: CrudSelectLoadStateProps) => React.JSX.Element | null>;
+declare const _default: React.MemoExoticComponent<(props: CrudSelectLoadStateProps) => React.JSX.Element>;
 export default _default;

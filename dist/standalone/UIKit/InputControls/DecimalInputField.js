@@ -5,8 +5,11 @@ import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
 import useCurrentLocale from "../../../utils/useCurrentLocale";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import useCommitOnEnter from "../../../utils/internal/useCommitOnEnter";
+import addSlotAttributes from "../../../utils/internal/addSlotAttributes";
 const DecimalInputField = (props) => {
-    const { value, onChange, onBlur, onKeyDown, format, ...muiProps } = props;
+    const { value: valueProp, onChange, onBlur, onKeyDown, format, ...muiProps } = props;
+    // undefined is an empty field, as null: a switch between the two is no new value
+    const value = valueProp ?? null;
     const { t } = useCCTranslations();
     const locale = useCurrentLocale();
     // the text typed since the last commit, or null while the field is not edited. Only
@@ -31,7 +34,7 @@ const DecimalInputField = (props) => {
     const commit = useCallback((event) => {
         if (draft === null || !onChange)
             return;
-        const parsed = parseLocalizedNumber(event.target.value);
+        const parsed = parseLocalizedNumber(event.target.value, format);
         if (parsed !== null && Number.isNaN(parsed)) {
             // keeps the text, and with it the previous value, until a valid edit
             setParseError(true);
@@ -41,7 +44,7 @@ const DecimalInputField = (props) => {
         // shows the value the parent keeps from here on, even when it does not change
         setDraft(null);
         onChange(event, parsed);
-    }, [draft, onChange]);
+    }, [draft, format, onChange]);
     const handleBlur = useCallback((event) => {
         if (onBlur)
             onBlur(event);
@@ -56,12 +59,8 @@ const DecimalInputField = (props) => {
             ? t("standalone.uikit.number-input.invalid", {
                 EXAMPLE: (1234.56).toLocaleString(locale, format),
             })
-            : muiProps.helperText, slotProps: {
-            ...muiProps.slotProps,
-            htmlInput: {
-                ...muiProps.slotProps?.htmlInput,
-                inputMode: "decimal",
-            },
-        }, inputMode: "decimal" }));
+            : muiProps.helperText, slotProps: addSlotAttributes(muiProps.slotProps, "htmlInput", {
+            inputMode: "decimal",
+        }), inputMode: "decimal" }));
 };
 export default React.memo(DecimalInputField);

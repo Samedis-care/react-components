@@ -30,7 +30,12 @@ export interface BackendDataGridMultiSelectProps<M extends ModelUnknown> extends
      */
     label?: React.ReactNode;
     /**
-     * Selection read only?
+     * Is the selection read-only? Then the grid shows it, but no row can be ticked or
+     * unticked: the row checkboxes are disabled, a click on a row ticks nothing (the
+     * grid's canSelectRow is not used), there is no select all checkbox
+     * (enableSelectAll) and onChange is never called. The search, the filters, the
+     * sorting and the scrolling still work, to read the selection.
+     * @default false
      */
     readOnly?: boolean;
     /**
@@ -41,11 +46,29 @@ export interface BackendDataGridMultiSelectProps<M extends ModelUnknown> extends
      */
     selected: string[];
     /**
-     * Selection change handler
-     * @param selected The new selected IDS
-     * @remarks May return the same ID array in a different array instance to force re-rendering (only read-only mode)
+     * Called when the user ticks or unticks a row or the select all checkbox (ticked, once
+     * the records it selects are loaded). Not called in read-only mode (readOnly).
+     * @param selected The ids of the selected records
      */
     onChange: (selected: string[]) => void;
+    /**
+     * Show the select all checkbox, in the grid's footer and in the header of its
+     * selection column. Ticked, it selects every record matching the search and the
+     * filters by its id: the grid loads the pages it hasn't loaded yet, one after another,
+     * and then calls onChange with the ids of all of them (limitSelectAll bounds this).
+     * Selected records that don't match are unselected. Unticked, it clears the
+     * selection. Not shown in read-only mode (readOnly).
+     * @default false
+     */
+    enableSelectAll?: boolean;
+    /**
+     * Make the select all checkbox (enableSelectAll) select only this many records (a
+     * positive integer): the first ones matching the search and the filters, in the
+     * grid's order (the records selected when it loaded first). While more records match,
+     * the checkbox is labelled "First" and the limit instead of "All".
+     * @default undefined (select all selects every matching record)
+     */
+    limitSelectAll?: number;
 }
 /**
  * Multi selection as a DataGrid over a model, with a checkbox per row: a fieldset with the

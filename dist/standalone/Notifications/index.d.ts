@@ -27,13 +27,17 @@ export interface Notification {
      */
     expires?: Date;
     /**
-     * Has the user already read the notification?
+     * Has the user already read the notification? The default row dims a read
+     * one, and starts an unread one with the visually hidden text "Unread"
+     * (translated), so screen readers say which notifications are new.
      */
     read: boolean;
 }
 export interface NotificationsProps {
     /**
-     * Properties to pass to the notification count badge
+     * Properties to pass to the notification count badge. A `badgeContent` of
+     * your own changes only what the badge shows: the bell's accessible name
+     * keeps the unread count (see `IconButtonProps`).
      */
     BadgeProps?: BadgeProps;
     /**
@@ -69,6 +73,12 @@ export interface NotificationsProps {
      * Props to pass to the icon button. `aria-haspopup`, `aria-expanded` and
      * `aria-controls` are managed internally: the bell says that it opens a
      * dialog, whether that is open, and while it is, which element it is.
+     *
+     * The bell's accessible name is "Notifications" and, while anything is
+     * unread, the unread count: "Notifications, 2 unread" (translated, with
+     * the language's plural forms). It gives the exact count, also above 99
+     * where the badge shows "99+". An `aria-label` of your own replaces the
+     * whole name, the badge's number included: put the count into it.
      */
     IconButtonProps?: Omit<IconButtonProps, "onClick" | "aria-haspopup" | "aria-expanded" | "aria-controls">;
     /**
@@ -87,10 +97,17 @@ export interface NotificationsProps {
      */
     loadUnread: InfiniteScrollProps["loadMoreTop"] | undefined;
     /**
-     * Load the latest notifications
-     * called at refreshInterval or on page focus
+     * Load the latest notifications. Called on mount, at `refreshInterval` and
+     * on window focus.
+     *
+     * Return the promise of the load (an async function does): the unread
+     * count the first load (the call on mount) brings is then not announced
+     * as new notifications (see `disableAnnouncement`). A function that
+     * returns nothing counts as done on mount, so a count it brings later is
+     * announced. The component does not catch a rejection of the promise:
+     * handle errors inside `loadLatest`.
      */
-    loadLatest: () => void;
+    loadLatest: () => void | Promise<unknown>;
     /**
      * Delay between `loadLatest` calls in ms: a positive number up to 2^31 - 1
      * (about 24.8 days, the longest timer delay browsers support). `0`
@@ -102,7 +119,16 @@ export interface NotificationsProps {
      */
     refreshInterval?: number;
     /**
-     * A custom notification renderer (optional)
+     * A custom notification renderer (optional): renders one row, the content
+     * of a list item. Notifications renders the rows as a list, each in an
+     * `<li>` (theme slot `listItem`) of a `<ul>` (`list`), so the renderer
+     * returns flow content, not an `<li>` of its own. The list item is
+     * `position: relative`: it is the containing block of what the row
+     * positions absolutely.
+     *
+     * A renderer that shows whether a notification is read (dimmed, bold, a
+     * dot) has to say it in text too, as the default row does: e.g. a visually
+     * hidden "Unread" at the start of an unread row.
      * @param notification The notification to render
      */
     notificationRenderer?: React.ComponentType<Notification>;
@@ -111,9 +137,36 @@ export interface NotificationsProps {
      */
     notifications: Notification[];
     /**
-     * Total number of unread notifications (if not provided inferred from notifications)
+     * Number of unread notifications, shown by the badge and part of the bell's
+     * accessible name ("Notifications, 2 unread"). When omitted, the number of
+     * the non-expired `notifications` with `read: false`. `0` hides the badge
+     * and leaves the name "Notifications". A rise is announced as new
+     * notifications (see `disableAnnouncement`).
      */
     unreadCount?: number;
+    /**
+     * Switches off the announcement of new notifications.
+     *
+     * By default, when the unread count rises, a visually hidden polite status
+     * region (`role="status"`, theme slot `announcement`) says by how much,
+     * e.g. "1 new notification" (translated, with the language's plural
+     * forms): screen-reader users learn of a notification that arrives while
+     * they work elsewhere on the page, as sighted users see the badge change.
+     * The text is removed after a few seconds. Not announced: the count on
+     * mount, the count the first `loadLatest` brings (when it returns the
+     * load's promise), a falling count, and a rise while this is set.
+     *
+     * The component only sees the count, so any rise is announced, also one
+     * that brings no new notification (e.g. an `unreadCount` that changes from
+     * the number of loaded notifications to the server's total after the
+     * first load). While the popover is open, the page behind it, the status
+     * region included, is hidden from assistive technology.
+     *
+     * Set it for every Notifications in the theme's
+     * `CcNotifications.defaultProps`.
+     * @default false
+     */
+    disableAnnouncement?: boolean;
     /**
      * Event handler which fires when the user opens the notifications
      */
@@ -127,6 +180,20 @@ export interface NotificationsProps {
      */
     classes?: Partial<Record<NotificationsClassKey, string>>;
 }
-export type NotificationsClassKey = "notificationArea" | "header";
+/**
+ * Theme style slots of Notifications
+ * (`components.CcNotifications.styleOverrides.<slot>`), and the keys of its
+ * `classes` prop:
+ * - `notificationArea`: the scroll container in the popover, which holds the
+ *   list
+ * - `list`: the list of notifications, a `<ul>` without markers, margin or
+ *   padding. Not rendered while there are no notifications.
+ * - `listItem`: each row's `<li>`, `position: relative`. It holds the row
+ *   the default or a custom renderer (`notificationRenderer`) renders.
+ * - `header`: the popover's "Notifications" heading
+ * - `announcement`: the visually hidden status region that announces new
+ *   notifications (see `disableAnnouncement`)
+ */
+export type NotificationsClassKey = "notificationArea" | "list" | "listItem" | "header" | "announcement";
 declare const _default: React.MemoExoticComponent<(inProps: NotificationsProps) => React.JSX.Element>;
 export default _default;

@@ -1,6 +1,6 @@
 import React from "react";
 import { MatrixCellContext, MatrixColumn, MatrixExtraRow, MatrixRangeSelection, MatrixRow, MatrixRowHeaderContext } from "./types";
-export type MatrixGridClassKey = "root" | "grid" | "corner" | "columnHeader" | "columnHeaderLabel" | "columnHeaderSubLabel" | "rowHeader" | "cell" | "addHint" | "addChip" | "addChipLabel" | "extraRowHeader" | "extraCell" | "badge" | "extraCellAddHint";
+export type MatrixGridClassKey = "root" | "grid" | "corner" | "columnHeader" | "columnHeaderLabel" | "columnHeaderSubLabel" | "rowHeader" | "cell" | "addHint" | "addHintLabel" | "addHintIcon" | "addChip" | "addChipLabel" | "extraRowHeader" | "extraCell" | "badge" | "extraCellAddHint";
 export interface MatrixGridProps<TCell> {
     /**
      * The columns, left to right. Their keys address the cells of every row.
@@ -43,7 +43,9 @@ export interface MatrixGridProps<TCell> {
      * @remarks Two entries side by side in a cell (a MatrixCellTile split pair
      * with splitDirection "row") are half of the column less 3.5px wide each:
      * 24.5px at 56px, and narrower than the 24px a clickable target needs
-     * (WCAG 2.5.8 Target Size) below 55px.
+     * (WCAG 2.5.8 Target Size) below 55px. The labels of a MatrixCellTile that
+     * do not fit its entries are drawn smaller, down to 8px (see
+     * MatrixTileItem.label).
      * @default 56
      */
     columnWidth?: number;
@@ -52,7 +54,9 @@ export interface MatrixGridProps<TCell> {
      * @remarks Two entries stacked in a cell (a MatrixCellTile split pair with
      * splitDirection "column") are half of the row less 3.5px high each:
      * 25.5px at 58px, and lower than the 24px a clickable target needs (WCAG
-     * 2.5.8 Target Size) below 55px.
+     * 2.5.8 Target Size) below 55px. The labels of a MatrixCellTile that do
+     * not fit its entries are drawn smaller, down to 8px (see
+     * MatrixTileItem.label).
      * @default 58
      */
     rowHeight?: number;
@@ -89,7 +93,13 @@ export interface MatrixGridProps<TCell> {
     /**
      * Let the user sweep a range of cells in one row (press, drag, release) and
      * report it via onSelectRange. A plain click reports a single cell.
-     * @remarks Left button only.
+     * @remarks Left button only. Letting go of the button away from the grid
+     * aborts the press: while the pointer is off the grid the range is not
+     * painted, and coming back with the button still held paints it again.
+     * Escape and another mouse button abort a held press too. The grid hears
+     * the release even where the cell's content stops its propagation; a
+     * press whose release never reaches the page is dropped, unreported, once
+     * the pointer moves onto the grid or one of its cells with no button down.
      */
     selectable?: boolean;
     /**
@@ -111,7 +121,10 @@ export interface MatrixGridProps<TCell> {
      */
     isCellOccupied?: (cell: TCell | undefined, context: MatrixCellContext<TCell>) => boolean;
     /**
-     * Called when the user finishes sweeping a range
+     * Called with the finished range: when the left button is let go over the
+     * grid after a sweep or a plain click, and when the add chip of an
+     * occupied cell is activated (one cell). A press let go of away from the
+     * grid reports nothing.
      */
     onSelectRange?: (selection: MatrixRangeSelection) => void;
     /**
@@ -121,6 +134,12 @@ export interface MatrixGridProps<TCell> {
      * name ("Add, Alice Weber, Thursday, March 5, 2026"), and a screen reader
      * user hears which cell each chip adds to (see MatrixRow.label and
      * MatrixColumn.name).
+     *
+     * The hint shows it on one line where it fits whole, in a box 19px
+     * narrower than the column (37px at the default columnWidth of 56). Where
+     * it does not fit, the hint shows a "+" in its place, which shows it as
+     * its tooltip when the pointer rests on it; the label stays in the hint as
+     * its text.
      * @remarks Pass a string where you can: the chip then shows its name as its
      * tooltip too. A node (a <Trans> element) names the chip as well, but
      * renders once more, hidden, in every chip, and the chip has no tooltip.
@@ -157,7 +176,13 @@ export interface MatrixGridProps<TCell> {
      * set, the whole row header becomes one tap target calling it (the consumer
      * opens a menu listing what the header's buttons do on a desktop), and the
      * hover hint on cells is turned off. Desktop is unaffected.
-     * @remarks Give the rows a label so that button has an accessible name.
+     * @remarks The button is named by the row's label (MatrixRow.label) and
+     * described by "Opens the actions for this row." (in the current language)
+     * followed by everything the header renders. Without a label, what the
+     * header renders is the name, an avatar's initial and the like included,
+     * and that sentence alone is the description: give the rows a label. The
+     * button has no aria-haspopup, since what a tap opens (a menu, a dialog,
+     * the one action there is) is up to you.
      */
     onRowHeaderActions?: (rowKey: string) => void;
     /**
@@ -225,6 +250,13 @@ export interface MatrixGridConfig<TCell> {
 }
 export declare const defaultIsCellSelectable: (cell: unknown) => boolean;
 export declare const defaultIsCellOccupied: (cell: unknown) => boolean;
+/**
+ * The record's own entry for a column key (a row's cell, an aggregate row's
+ * badge), undefined without one. Column keys are the consumer's ids, so a key
+ * named like an Object.prototype member ("constructor", "toString") is a plain
+ * key: it must not find the inherited member.
+ */
+export declare const ownEntryOf: <T>(record: Record<string, T> | undefined, key: string) => T | undefined;
 /**
  * May a range start on, or run through, this cell? The one implementation: the
  * store clamps and paints with it, and the cell decides with it whether to

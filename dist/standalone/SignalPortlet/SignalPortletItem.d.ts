@@ -15,7 +15,9 @@ export interface SignalPortletItemProps {
      */
     count: number | null | undefined;
     /**
-     * The text of the portlet item
+     * The label next to the count. With the count it names the row; in a row
+     * with `link` it is part of the link, so it must not contain interactive
+     * content (links, buttons, inputs), which a link cannot hold.
      */
     text: React.ReactNode;
     /**
@@ -23,7 +25,16 @@ export interface SignalPortletItemProps {
      */
     textTypographyProps?: TypographyProps;
     /**
-     * The url the portlet item links to onClick
+     * Where the row links to: a path of the app, with an optional `?query` and
+     * `#hash`, as the `to` of the library's `Link`, which needs a
+     * HistoryRouter above it. The row is then a link, an `<a>` with this
+     * href, named by its count and text: a click or Enter navigates in the
+     * app. A click with Ctrl, Meta, Shift or Alt and a middle click are left
+     * to the browser, which opens the href in a new tab or window, as for any
+     * other link. A URL with a scheme ("https://…") makes a plain link that
+     * the browser follows.
+     * Default: none (no link, also for an empty string): the row is a plain,
+     * non-interactive list item.
      */
     link?: string;
     /**
@@ -33,7 +44,12 @@ export interface SignalPortletItemProps {
      */
     className?: string;
     /**
-     * Custom CSS styles
+     * Class names per slot, see {@link SignalPortletItemClassKey}. Each one is
+     * added to its slot's element while the row renders it: `root`,
+     * `listAvatar` and `listText` always, one of `itemColorLoading`,
+     * `itemColorActive` and `itemColorInactive` for the current count,
+     * `countCapped` and `countFull` for a count above 999, and `rootBtn` in a
+     * row with `link`.
      */
     classes?: Partial<Record<SignalPortletItemClassKey, string>>;
 }
@@ -42,14 +58,19 @@ export interface SignalPortletItemProps {
  * `components.CcSignalPortletItem.styleOverrides`:
  * - `root`: the ListItem (`<li>`) of every row. A row with link has no
  *   padding here (MUI's `disablePadding`), its ListItemButton has it.
- * - `rootBtn`: the ListItemButton (a `div` with role button) inside the
- *   `<li>` of a row with link. Keyboard focus draws a 2px outline in
- *   `palette.primary.main` inside its edges, or the ring of the theme's
- *   `focusVisible` option when the theme sets one.
+ * - `rootBtn`: the ListItemButton inside the `<li>` of a row with link,
+ *   rendered as the link itself: an `<a>` with the link's href. Keyboard
+ *   focus draws a 2px outline in `palette.primary.main` inside its edges,
+ *   or the ring of the theme's `focusVisible` option when the theme sets
+ *   one.
  * - `listAvatar`: the ListItemAvatar around the count
  * - `itemColorLoading`, `itemColorActive`, `itemColorInactive`: the 40px
  *   Avatar while the count is `null` or `undefined`, when it is non-zero, and
- *   when it is 0
+ *   when it is 0. The active one is `palette.primary.main` with its
+ *   `contrastText`. The inactive one is `palette.grey[400]`, `grey[600]` in a
+ *   dark palette or the dark scheme of a theme of CSS variables, with
+ *   `palette.getContrastText` of that grey as its text color; a `color` and
+ *   `backgroundColor` set for it in the theme apply in every scheme
  * - `countCapped`: the visible "999+" of a count above 999, hidden from
  *   assistive technology
  * - `countFull`: the visually hidden full number of a count above 999, read

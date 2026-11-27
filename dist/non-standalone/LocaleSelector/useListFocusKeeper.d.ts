@@ -24,26 +24,33 @@ export declare const ListFocusKeeperContext: React.Context<ListFocusKeeper | nul
 /**
  * Keeps keyboard focus in a virtualized list, whose rows are unrendered when
  * they leave the rendered range. When the row that has focus is unrendered
- * (the list scrolled: the wheel, a swipe, or the arrow and page keys, which
- * scroll it natively), the browser drops focus to the page. The list takes it
- * instead, without scrolling, so the keys keep scrolling the list. When that
+ * (the list scrolled: the wheel, a swipe or the scrollbar), the browser drops
+ * focus to the page. The list takes it instead, without scrolling. When that
  * row is rendered again while the list still has focus, the row gets it back.
  * A row that is rendered anew in the same update (a new element for the same
  * key) takes it over at once. Focus that moved on meanwhile (to another row, or
  * out of the list) stays where it is.
  *
+ * `focusRow` moves focus to a row that may not be rendered yet (the list
+ * scrolls to it): it gets focus once it is rendered, as long as focus stays in
+ * the list.
+ *
  * The rows report their focusable element with {@link useListFocusTarget},
  * under {@link ListFocusKeeperContext} with the returned `keeper`.
  * @param getList Returns the list's element, or null while it is not rendered.
- * The element must be focusable (`tabindex="-1"`), and get the returned
- * `onFocus` and `onBlur`.
- * @return The keeper for {@link ListFocusKeeperContext}, and the focus handlers
- * for the list's element
+ * The element must be focusable (`tabindex="-1"` or `"0"`), and get the
+ * returned `onFocus` and `onBlur`.
+ * @return The keeper for {@link ListFocusKeeperContext}; the focus handlers for
+ * the list's element; `focusRow(key)`, which focuses the row with that key now
+ * or once it is rendered; and `rowKeyOf(element)`, the key of the rendered row
+ * whose element is or contains `element`, else `null`
  */
 declare const useListFocusKeeper: (getList: () => HTMLElement | null) => {
     keeper: ListFocusKeeper;
     onFocus: (evt: React.FocusEvent<HTMLElement>) => void;
     onBlur: (evt: React.FocusEvent<HTMLElement>) => void;
+    focusRow: (key: string) => void;
+    rowKeyOf: (element: EventTarget | null) => string | null;
 };
 /**
  * The ref callback for a row's focusable element, which reports it to the list

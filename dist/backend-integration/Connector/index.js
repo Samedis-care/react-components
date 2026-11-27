@@ -7,6 +7,7 @@ export { default as JsonApiClient } from "./JsonApiClient";
 export { default as RailsApiClient } from "./RailsApiClient";
 export { default as NetworkError } from "./NetworkError";
 export { default as BackendError } from "./BackendError";
+export * from "./PartialDeleteError";
 export { default as PartialDeleteError } from "./PartialDeleteError";
 export * from "./DefaultConnector";
 export { default as DefaultConnector } from "./DefaultConnector";

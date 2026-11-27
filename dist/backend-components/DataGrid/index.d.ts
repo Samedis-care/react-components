@@ -3,9 +3,47 @@ import { DataGridDispatch, DataGridFilterParameters, DataGridProps, IDataGridAdd
 import { ModelRecord, ModelUnknown } from "../../backend-integration/Model/Model";
 export interface BackendDataGridProps<M extends ModelUnknown> extends Omit<DataGridProps, "loadData" | "columns" | "exporters" | "onDelete" | "deleting" | "getRowLabel"> {
     /**
-     * The model to use
+     * The model: its fields give the columns, its index loads the rows, and its
+     * connector deletes (Delete) and exports (Export).
+     *
+     * A new instance applies at once to the columns (headers, filters, sorting), to
+     * Delete, to Export and to the loads from then on, but the rows already loaded
+     * stay and nothing is requested: they load through the new instance at the next
+     * reload (a search, filter or sort change, or forceRefreshToken). That suits a
+     * new instance for the same data, e.g. a model rebuilt on useTranslation's t
+     * after a language change: its headers show without a request.
+     *
+     * A model for other data (another tenant, parent record or fixed filter) needs
+     * the grid remounted with a key that names it (e.g. the tenant's id), or a
+     * forceRefreshToken change in the same render. A key shows none of the old rows:
+     * the grid opens with what its persist provider stores (or the defaults), and
+     * the selection and the scroll position start over. A forceRefreshToken change
+     * keeps the search, filters and sort, and the old rows show until the reload
+     * starts (after the grid's reload delay, as for a search). Without either, the
+     * old rows stay under the new model: Delete sends their ids to the new model's
+     * connector, an edit in one of their cells saves through the old model, and
+     * Export and the pages loaded on scrolling come from the new model's data. A
+     * selection passed through the selection prop stays in every case: clear it
+     * when the data changes.
+     * @remarks Pass a stable instance, memoized on what it depends on (e.g. a tenant
+     *          and useTranslation's t): every new instance computes the columns
+     *          again. The column headers are read from the model's labels (getLabel,
+     *          getHeaderName, getColumnLabel) once per model instance, so a model
+     *          whose labels change, e.g. with the language, has to be a new instance.
+     *          The loaded rows' cells render through the model they were loaded
+     *          with: they render again in components-care's current language when it
+     *          changes, but a text that model takes from the app, e.g. an enum label
+     *          translated with useTranslation's t, keeps the language of the load
+     *          until the next reload.
      */
     model: M;
+    /**
+     * Changing it reloads the rows through the model's index, as a search change
+     * does (DataGridProps.forceRefreshToken): the search, filters and sort stay.
+     * Change it after the records changed outside the grid, and in the same render
+     * as a model for other data (see model).
+     */
+    forceRefreshToken?: string;
     /**
      * The text that identifies a row to assistive technology, e.g. a person's
      * name: the row's checkbox is named after it ("Select Carol Jones"), a
@@ -35,7 +73,8 @@ export interface BackendDataGridProps<M extends ModelUnknown> extends Omit<DataG
      */
     customDeleteConfirm?: (inverted: boolean, ids: string[], filter?: DataGridFilterParameters) => Promise<void> | void;
     /**
-     * Additional buttons next to new button
+     * Additional buttons next to new button. On phones (xs) they are entries
+     * of the header's "More options" menu (see DataGridProps.onAddNew).
      */
     additionalNewButtons?: IDataGridAddButton[];
     /**
@@ -90,20 +129,22 @@ export declare const useBackendDataGridDeleteHandler: <M extends ModelUnknown>(p
 /**
  * Turns a record from model.index into a grid row: `row.id` is the record's id,
  * `row[field]` the rendered cell of each model field and `row[field + "_raw"]` its
- * value. A field with an editable overview visibility (ModelVisibilityGridEdit) is
- * edited in its cell, which saves every change at once through the model's mutation
- * (useModelMutation, so the model's cache, hooks and "mutate" listeners hear of it), then
- * calls refreshGrid; a refused save is shown in an error dialog (the cell needs the
- * Framework), and refreshGrid is called as well. The cell's control is named after its
- * field and the row ("Active, example.com"), since a grid cell has no label element to
- * name it (InlineEditCell).
+ * value. A cell renders again in components-care's current language when it changes
+ * (ModelCell), since the renderers translate while they render ("Yes", enum labels,
+ * formatted dates). A field with an editable overview visibility
+ * (ModelVisibilityGridEdit) is edited in its cell (InlineEditCell), which needs the
+ * Framework: the control shows a change at once and saves it through the model's
+ * mutation (useModelMutation, so the model's cache, hooks and "mutate" listeners hear of
+ * it). Once saved, the DataGrid the row is in replaces the row with the row of the saved
+ * record, without a reload, so the selection and the focused control stay; a refused
+ * save is shown in an error dialog, and the control shows the row's value again. The
+ * cell's control is named after its field and the row ("Active, example.com"), since a
+ * grid cell has no label element to name it.
  * @param model The model the record belongs to
- * @param refreshGrid Called after an inline edit was saved or refused, to reload the
- *                    rows
  * @returns A function that builds the row of one record. It throws "Not supported"
  *          for an editable field whose renderer has no grid editor.
  */
-export declare const renderDataGridRecordUsingModel: (model: ModelUnknown, refreshGrid: () => void) => (entry: ModelRecord<ModelUnknown>) => {
+export declare const renderDataGridRecordUsingModel: (model: ModelUnknown) => (entry: ModelRecord<ModelUnknown>) => {
     id: string;
 } & Record<string, string | null>;
 /**

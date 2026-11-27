@@ -5,7 +5,6 @@ import { AttachFile } from "@mui/icons-material";
 import FilePreview, { getFileIconOrDefault } from "./File";
 import processImage from "../../../utils/processImage";
 import GroupBox from "../../GroupBox";
-import { labelWithDirtyMarker } from "../../UIKit/MuiFieldState";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import isTouchDevice from "../../../utils/isTouchDevice";
 import combineClassNames from "../../../utils/combineClassNames";
@@ -147,9 +146,8 @@ const ModernUploadLabel = styled("span", {
 }));
 const FileUpload = (inProps, ref) => {
     const props = useThemeProps({ props: inProps, name: "CcFileUpload" });
-    const { name, convertImagesTo, imageDownscaleOptions, previewImages, previewSize, maxFiles, minFileSize, maxFileSize, maxTotalFileSize, handleError, accept, acceptLabel, onChange, onDelete, onRestoreFile, label, dirty, busy, slotProps, smallLabel, readOnly, onBlur, uploadLabel, allowDuplicates, className, classes, } = props;
+    const { name, convertImagesTo, imageDownscaleOptions, previewImages, previewSize, maxFiles, minFileSize, maxFileSize, maxTotalFileSize, handleError, accept, acceptLabel, onChange, onDelete, onRestoreFile, label, dirty, required, busy, slotProps, smallLabel, readOnly, onBlur, uploadLabel, allowDuplicates, className, classes, } = props;
     const variant = props.variant ?? "classic";
-    const boxLabel = labelWithDirtyMarker(label, dirty);
     const loadInitialFiles = () => (props.files || props.defaultFiles || []).map((meta) => ({
         canBeUploaded: false,
         delete: false,
@@ -436,7 +434,7 @@ const FileUpload = (inProps, ref) => {
     }
     const fileKeys = getFileKeys(files);
     if (variant === "classic") {
-        return (_jsx(StyledGroupBox, { ...slotProps?.root, "aria-busy": busy || slotProps?.root?.["aria-busy"], label: boxLabel, smallLabel: smallLabel, className: combineClassNames([
+        return (_jsx(StyledGroupBox, { ...slotProps?.root, "aria-busy": busy || slotProps?.root?.["aria-busy"], label: label, smallLabel: smallLabel, required: required, dirty: dirty, className: combineClassNames([
                 className,
                 classes?.root,
                 slotProps?.root?.className,
@@ -456,7 +454,7 @@ const FileUpload = (inProps, ref) => {
     }
     else if (variant === "modern") {
         const acceptFiles = accept ? accept.split(",") : [];
-        return (_jsx(StyledGroupBox, { ...slotProps?.root, "aria-busy": busy || slotProps?.root?.["aria-busy"], label: boxLabel, smallLabel: smallLabel, className: combineClassNames([
+        return (_jsx(StyledGroupBox, { ...slotProps?.root, "aria-busy": busy || slotProps?.root?.["aria-busy"], label: label, smallLabel: smallLabel, required: required, dirty: dirty, className: combineClassNames([
                 className,
                 classes?.root,
                 slotProps?.root?.className,

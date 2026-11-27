@@ -9,7 +9,9 @@ import { Dispatch, SetStateAction } from "react";
  *        other value.
  * @returns The state and its setter, like useState. The setter is the same function for
  *          the life of the component and sets the state of the current name.
- * @see useFormContext => getCustomState, setCustomState, hasCustomState
+ * @see useFormContextLite => getCustomState, setCustomState, hasCustomState
+ * @remarks Reads the form's lite context, which does not change with the form's values,
+ *          so the component does not render again while the user types into a field.
  * @remarks This is only to be used to survive remounts, this does not work to sync the state of two components!
  * @remarks The name shares one namespace with getCustomState / setCustomState and with
  *          the nestedFormName of nested forms: don't reuse those names.

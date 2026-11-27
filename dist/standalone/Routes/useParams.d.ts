@@ -12,6 +12,11 @@
  * (`:tenantId`) to read it in the record page.
  * Each value is percent-decoded: "foo bar" at "foo%20bar", see
  * `PathMatch.params`.
+ * It returns the same object while the url and path of the nearest Route stay
+ * the same, so an effect or memo that depends on it runs again when a param
+ * changes, not on every navigation: "/devices/1" to "/devices/1/edit" under
+ * "/devices/:id/*" keeps it. Outside of every Route it returns `{}`.
+ * Throws outside a HistoryRouter; Framework renders one.
  */
 declare const useParams: <T extends string = string>() => Partial<Record<T, string>>;
 export default useParams;

@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction } from "react";
-import { Box, Collapse, Divider, Grid, IconButton, ListItem, Paper, SvgIconProps, Theme, Typography } from "@mui/material";
+import { Box, ButtonBase, Collapse, Divider, Grid, IconButton, ListItem, Paper, SvgIconProps, Theme, Typography } from "@mui/material";
 import { Apps as AppsIcon, FilterAlt as FilterAltIcon, FilterAltOutlined as FilterAltOutlinedIcon, Search as SearchIcon } from "@mui/icons-material";
 import { IDataGridHeaderProps } from "./Header";
 import { FilterType, IFilterDef } from "./Content/FilterEntry";
@@ -20,9 +20,10 @@ export interface DataGridProps extends IDataGridHeaderProps, IDataGridColumnProp
      */
     classes?: Partial<Record<DataGridClassKey, string>>;
     /**
-     * Custom data action buttons
-     * Rendered next to delete.
-     * Max 1 extra button to fit on mobile screens
+     * Custom data action buttons, in the footer after Delete. On phones (xs)
+     * they are the entries of the footer's "More" menu instead when there are
+     * two or more of them, or when select all, Edit and Delete are in the
+     * footer too.
      */
     customDataActionButtons?: DataGridCustomDataActionButton[];
     /**
@@ -48,6 +49,11 @@ export interface DataGridProps extends IDataGridHeaderProps, IDataGridColumnProp
      *   column filter. What an override (overrideCustomData, overrideFilter,
      *   overrideSearch) replaced stays persisted as it was stored until the
      *   filters are reset.
+     *
+     * A part left out is neither restored nor written: what is stored for it
+     * stays as it is. So grids with different settings under one provider (or
+     * storage key) keep each other's parts, and `[]` leaves what is stored as
+     * it is.
      * @default ["columns", "sort", "filters"]
      */
     persist?: ("columns" | "sort" | "filters")[];
@@ -68,6 +74,9 @@ export interface DataGridCustomDataActionButton {
      * 										0 => none
      * 									  1 => one
      * 									  2 => multiple
+     *                    With select all it is the number of rows matching
+     *                    the filter minus the ids, capped at 2, and 0 while
+     *                    the grid has no row count (a load runs or failed).
      */
     isDisabled: (numSelected: 0 | 1 | 2) => boolean;
     /**
@@ -94,7 +103,9 @@ export interface DataGridSelectionDetails {
      */
     filter: DataGridFilterParameters;
     /**
-     * How many rows are selected
+     * How many rows are selected. With select all: the rows matching the
+     * filter minus the ids, 0 while the grid has no row count (a load runs or
+     * failed).
      */
     count: number;
     /**
@@ -135,9 +146,11 @@ export interface IDataGridLoadDataParameters {
      * query (search, filters, sort, custom data or forceRefreshToken changed)
      * or the grid unmounted, and for a page the limited select all
      * (DataGridProps.limitSelectAll) loads, also when the select all checkbox
-     * is clicked again. Pass it on to the request (fetch's `signal`) to
-     * cancel it. The grid ignores what a call resolves or rejects with after
-     * its signal aborted, so an abort is never shown as a load error.
+     * is clicked again, select all is turned off (enableSelectAll false,
+     * prohibitMultiSelect or disableSelection) or limitSelectAll changes. Pass
+     * it on to the request (fetch's `signal`) to cancel it. The grid ignores
+     * what a call resolves or rejects with after its signal aborted, so an
+     * abort is never shown as a load error.
      * @remarks Set on every call of the grid. BackendDataGrid hands it on to
      *          the connector's index as params.signal.
      */
@@ -160,7 +173,9 @@ export interface IDataGridCallbacks {
      * changed) or the unmount ends the load of the old query: the grid
      * requests none of its remaining pages and aborts params.signal. The
      * limited select all (DataGridProps.limitSelectAll) ends its load the same
-     * way, and also when its checkbox is clicked again.
+     * way, and also when its checkbox is clicked again, select all is turned
+     * off (enableSelectAll false, prohibitMultiSelect or disableSelection) or
+     * limitSelectAll changes. A load ended so selects nothing.
      * @param params The load data parameters
      * @returns The loaded data (resolve) or an error (reject)
      */
@@ -193,7 +208,9 @@ export interface IDataGridCallbacks {
      */
     defaultCustomData?: Record<string, unknown>;
     /**
-     * Forced initial values for custom data (overwrites persisted custom data)
+     * Forced initial values for custom data (overwrites persisted custom data).
+     * The stored search still applies: pass overrideSearch too ("" for none)
+     * to show the rows of these values alone, e.g. for a link from a chart.
      * @remarks They are not persisted: until the user resets the filters, the
      *          grid keeps persisting the custom data which was stored
      */
@@ -311,11 +328,15 @@ export interface IDataGridColumnProps {
      */
     searchPlaceholder?: string;
     /**
-     * Add new handler(s), do not specify to disable add new button(s). Set to string to show disabled add new button with hint
+     * Add new handler(s), do not specify to disable add new button(s). Set to string to show disabled add new button with hint.
+     * On phones (xs) the header shows the first add button only: the others
+     * are entries of its "More options" menu.
      */
     onAddNew?: (() => void) | string | IDataGridAddButton[];
     /**
-     * Edit handler
+     * Shows Edit in the footer, which calls this with the selected row's id.
+     * Edit is enabled while exactly one row is selected; with select all,
+     * only once that row is loaded, as the grid doesn't know its id before.
      * @param id The id to edit
      */
     onEdit?: (id: string) => void;
@@ -364,11 +385,13 @@ export interface IDataGridColumnProps {
     enableSelectAll?: boolean;
     /**
      * Make the select all checkbox (enableSelectAll) select only this many rows
-     * (a positive integer): the first ones matching the filter, in the grid's
-     * sort order. They are selected by their ids, as if the user had ticked
-     * them: the selection isn't inverted, so delete and every custom data action
-     * button handle it. loadData loads the pages of them the grid hasn't loaded
-     * yet, and rows canSelectRow refuses are skipped.
+     * (a positive integer, or Infinity for every row): the first ones matching
+     * the filter, in the grid's sort order. They are selected by their ids, as
+     * if the user had ticked them: the selection isn't inverted, so delete and
+     * every custom data action button handle it. loadData loads the pages of them the grid hasn't loaded
+     * yet, and rows canSelectRow refuses are skipped. A change of the limit
+     * while select all still loads its rows ends that load: the grid requests
+     * no further page, aborts loadData's signal and selects nothing.
      * @remarks While more rows match the filter than the limit, the checkbox is
      *          labelled "First" and the limit instead of "All"
      * @default undefined (select all selects every row)
@@ -387,8 +410,13 @@ export interface IDataGridColumnProps {
      */
     filterLimit?: number;
     /**
-     * Limits the amount of active sorts
+     * Limits the amount of active sorts the user can set with the column
+     * headers. A plain header click makes its column the only sort, which
+     * every limit allows; a Shift+click that would add a sort over the limit
+     * is refused and changes nothing. A defaultSort or stored sort is used as
+     * it is.
      * @remarks This is zero-indexed, so max 1 sorts means pass 0, max 2 sorts => 1, etc
+     * @default undefined (the number of sorts is not limited)
      */
     sortLimit?: number;
     /**
@@ -398,7 +426,7 @@ export interface IDataGridColumnProps {
     /**
      * Hides the selection column: the row checkboxes and the select all
      * checkbox in its header. The footer's select all checkbox is hidden too
-     * (it keeps its place) and disabled.
+     * (it keeps its place, except on phones) and disabled.
      */
     disableSelection?: boolean;
     /**
@@ -409,11 +437,17 @@ export interface IDataGridColumnProps {
      */
     defaultSort?: DataGridSortSetting[];
     /**
-     * The default column filter settings
+     * The column filters a grid opens with when nothing is stored for it (see
+     * DataGridPersistentStateContext), and what "Reset filter", "Clear
+     * filters" and "Reset all" go back to. Stored column filters are used as
+     * they are: a default filter added or changed later does not change them.
+     * To force column filters whatever is stored, use overrideFilter.
      */
     defaultFilter?: DataGridFilterSetting[];
     /**
-     * The column filter settings override (disables all filters if set)
+     * The column filter settings override (disables all filters if set).
+     * The stored search still applies: pass overrideSearch too ("" for none)
+     * to show the rows of these filters alone, e.g. for a link from a chart.
      * @remarks It is not persisted: until the user resets the filters, the
      *          grid keeps persisting the column filters which were stored
      */
@@ -494,7 +528,13 @@ export interface IDataGridColumnDef {
     headerName: string;
     /**
      * Optional label override for column header
-     * @remarks You should supply a string unless you want to customize this
+     * @remarks You should supply a string unless you want to customize this.
+     * In a sortable column the label is the content of the header's sort
+     * button (a `<button>`), so it may hold phrasing content only: text,
+     * `<br>`, spans, icons; no links, buttons or other controls. In a column
+     * that does not sort, a string label is a tab stop, so keyboard focus
+     * shows its tooltip; an element is rendered as it is, and a link or button
+     * in it shows the tooltip when it has keyboard focus.
      */
     headerLabel?: NonNullable<React.ReactNode>;
     /**
@@ -517,7 +557,11 @@ export interface IDataGridColumnDef {
      */
     filterable?: boolean;
     /**
-     * Can the column be sorted?
+     * Can the column be sorted? Its header label is then a sort button. A
+     * click on the header, or Enter or Space on the button, steps the column
+     * from unsorted to ascending (and makes it the only sort), to descending,
+     * to unsorted. Shift+click and Shift+Enter add the column as a further
+     * sort, or remove it from the sort.
      */
     sortable?: boolean;
     /**
@@ -533,7 +577,13 @@ export interface IDataGridColumnDef {
      */
     isLocked?: boolean;
     /**
-     * Column width configuration
+     * Column width configuration, in px. The user resizes a column by dragging
+     * the handle at the right edge of its header, within minWidth and maxWidth
+     * (and to at least 64px, 96px when filterable, unless maxWidth is less).
+     * A double click on the handle fits the column to its header and to its
+     * values in the rendered rows (rows scrolled out of view are not rendered,
+     * so they don't count); with no values to fit (an empty grid, rows still
+     * loading) the width stays.
      */
     width?: [minWidth: number, maxWidth: number, initialWidth?: number];
 }
@@ -576,11 +626,12 @@ export type DataGridRowData = {
  * keyed by the app. getAdditionalFilters turns it into filters.
  *
  * When the grid persists its filters (DataGridProps.persist "filters", the
- * default), DataGridLocalStoragePersist and DataGridStorageManagerPersist
- * store it as JSON. So set JSON values only: strings, finite numbers,
- * booleans, null, and arrays and plain objects of these. A grid that restores
- * them from storage (on the next visit) gets them back as they were set. Any
- * other value comes back in its JSON form:
+ * default), it hands the custom data to its persistence provider as JSON
+ * (see DataGridPersistentStateContextType). So set JSON values only:
+ * strings, finite numbers, booleans, null, and arrays and plain objects of
+ * these. A grid that restores them (on the next visit, or mounted again
+ * under the same provider) gets them back as they were set. Any other value
+ * comes back in its JSON form:
  * - a Date as its ISO string, an object with a toJSON method (a Moment, a
  *   Dayjs) as what that returns
  * - a Map or a Set as an empty object
@@ -592,8 +643,14 @@ export type DataGridRowData = {
  * Keep such a value in a JSON form (a date as an ISO string, a set as an
  * array) and convert it where it is used: in getAdditionalFilters and in the
  * filter bar's controls.
- * @remarks Only the storage turns the values into JSON: a grid mounted again
- *          while its provider stays mounted gets them as they were set.
+ *
+ * A BigInt, and an object that refers back to itself (a model record with
+ * back references, a DOM node), have no JSON form. While the custom data
+ * holds one, the grid persists nothing, no other change either: it logs that
+ * to the console and reports it (captureError), once, and writes its state
+ * again once the custom data holds JSON values only.
+ * @remarks The open grid keeps the values as they were set; only what it
+ *          restores is in the JSON form.
  */
 export type DataGridCustomDataType = Record<string, unknown>;
 /**
@@ -602,6 +659,12 @@ export type DataGridCustomDataType = Record<string, unknown>;
  * @remarks The fields are merged into the row, so anything left out stays as it is
  */
 export type DataGridRowUpdate = Partial<Omit<DataGridRowData, "id">> | ((row: DataGridRowData) => Partial<Omit<DataGridRowData, "id">>);
+/**
+ * What the grid's ref holds. Inside a persistence provider that is still
+ * loading the stored state, the ref is null until the grid opens. When the
+ * provider's storage keys change, the ref is set anew, for the grid mounted
+ * for them.
+ */
 export interface DataGridDispatch {
     /**
      * Update the data of a loaded row, without asking loadData for it again
@@ -749,6 +812,14 @@ export type DataGridColumnsWidthState = [
 ];
 export declare const DataGridColumnsWidthStateContext: React.Context<DataGridColumnsWidthState | undefined>;
 export declare const useDataGridColumnsWidthState: () => DataGridColumnsWidthState;
+/**
+ * Updates a loaded row in place (DataGridDispatch.updateRow), for the content of the
+ * grid's cells: e.g. a control that saved its row's record shows the saved record
+ * without a reload, which would clear the selection and replace the focused control.
+ * Stable for the grid's life.
+ * @remarks undefined outside a DataGrid's cells
+ */
+export declare const DataGridUpdateRowContext: React.Context<((id: string, update: DataGridRowUpdate) => void) | undefined>;
 export declare const DataGridRootRefContext: React.Context<React.RefObject<HTMLDivElement | null> | undefined>;
 export declare const useDataGridRootRef: () => React.RefObject<HTMLDivElement | null>;
 export interface DataGridSelectAll {
@@ -811,7 +882,26 @@ export declare const DataGridIdFilterContainer: typeof Grid;
 export declare const DataGridFilterBarGrid: typeof Grid;
 export declare const DataGridFilterBarBox: typeof Box;
 export declare const DataGridFilterClearButton: typeof IconButton;
+/**
+ * Theme slot `columnHeaderLabel`: the label's place in a column's header. It
+ * holds the sort button (`columnHeaderSortButton`) of a sortable column, else
+ * the label's text (`columnHeaderLabelText`); either cuts a long label off
+ * with an ellipsis.
+ */
 export declare const DataGridColumnHeaderLabel: typeof Grid;
+/**
+ * Theme slot `columnHeaderSortButton`: the label of a sortable column, as a
+ * `<button>` named with the label's text. Enter and Space sort the column,
+ * Shift+Enter adds it as a further sort (see IDataGridColumnDef.sortable);
+ * keyboard focus shows the label's tooltip and a focus ring.
+ */
+export declare const DataGridColumnHeaderSortButton: typeof ButtonBase;
+/**
+ * Theme slot `columnHeaderLabelText`: the label of a column that does not
+ * sort. A string label is a tab stop, so keyboard focus shows its tooltip
+ * (and the full text of a label cut off) and a focus ring.
+ */
+export declare const DataGridColumnHeaderLabelText: React.ComponentType<React.HTMLAttributes<HTMLSpanElement>>;
 export declare const DataGridColumnHeaderResizer: typeof Grid;
 export declare const DataGridColumnHeaderSortIcon: typeof Grid;
 export declare const DataGridColumnHeaderContentWrapper: React.ComponentType<React.HTMLAttributes<HTMLDivElement>>;
@@ -836,7 +926,7 @@ export declare const DataGridColumnHeaderFilterActiveIcon: typeof FilterAltIcon;
 export declare const DataGridColumnHeaderFilterButton: typeof IconButton;
 export declare const DataGridQuickFilterIcon: typeof SearchIcon;
 export declare const DataGridCustomFilterIcon: typeof AppsIcon;
-export type DataGridClassKey = "root" | "header" | "content" | "footer" | "contentOverlayCollapse" | "contentOverlayPaper" | "contentOverlayClosed" | "customFilterContainer" | "selectCheckbox" | "selectAllCheckbox" | "selectAllHeader" | "selectAllWrapper" | "paginationText" | "setFilterListDivider" | "setFilterListItemDivider" | "setFilterListItem" | "setFilterContainer" | "idFilterContainer" | "filterCombinator" | "filterBarGrid" | "filterBarBox" | "filterClearBtn" | "columnHeaderLabel" | "columnHeaderResizer" | "columnHeaderSortIcon" | "columnHeaderContentWrapper" | "cell" | "columnHeaderFilterPopup" | "columnHeaderFilterPopupEnum" | "columnHeaderFilterPopupId" | "columnHeaderFilterPopupDateTime" | "columnHeaderFilterIcon" | "columnHeaderFilterActiveIcon" | "columnHeaderFilterButton" | "quickFilterIcon" | "customFilterIcon" | "customFilterMulti" | "customFilterMultiBackend" | "customFilterSingle" | "customFilterSingleBackend" | "centeredStickyTypography" | "settingsTableCell" | "settingsTable" | "settingsTableRow" | "settingsTableHead" | "settingsTableBody" | "settingsStatus" | "customFilterContainerHeader" | "search";
+export type DataGridClassKey = "root" | "header" | "content" | "footer" | "contentOverlayCollapse" | "contentOverlayPaper" | "contentOverlayClosed" | "customFilterContainer" | "selectCheckbox" | "selectAllCheckbox" | "selectAllHeader" | "selectAllWrapper" | "paginationText" | "setFilterListDivider" | "setFilterListItemDivider" | "setFilterListItem" | "setFilterContainer" | "idFilterContainer" | "filterCombinator" | "filterBarGrid" | "filterBarBox" | "filterClearBtn" | "columnHeaderLabel" | "columnHeaderSortButton" | "columnHeaderLabelText" | "columnHeaderResizer" | "columnHeaderSortIcon" | "columnHeaderContentWrapper" | "cell" | "columnHeaderFilterPopup" | "columnHeaderFilterPopupEnum" | "columnHeaderFilterPopupId" | "columnHeaderFilterPopupDateTime" | "columnHeaderFilterIcon" | "columnHeaderFilterActiveIcon" | "columnHeaderFilterButton" | "quickFilterIcon" | "customFilterIcon" | "customFilterMulti" | "customFilterMultiBackend" | "customFilterSingle" | "customFilterSingleBackend" | "centeredStickyTypography" | "settingsTableCell" | "settingsTable" | "settingsTableRow" | "settingsTableHead" | "settingsTableBody" | "settingsStatus" | "customFilterContainerHeader" | "search";
 export declare const isDataGridColumnPinned: (column: IDataGridColumnDef, columnPinned: Record<string, boolean>) => boolean;
 export declare const getActiveDataGridColumns: (columns: IDataGridColumnDef[], columnHidden: Record<string, boolean>, columnPinned: Record<string, boolean>) => IDataGridColumnDef[];
 export declare const getDefaultColumnWidths: (columns: IDataGridColumnDef[], theme: Theme) => Record<string, number>;

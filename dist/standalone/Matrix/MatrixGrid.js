@@ -129,15 +129,22 @@ const MatrixGrid = (inProps) => {
             store.cancel();
             store.dismissHint();
         };
-        window.addEventListener("mouseup", onUp);
+        // In the capture phase: content that stops the release on its way up
+        // (an onMouseUp calling stopPropagation) would otherwise keep it from
+        // the grid, as React stops the native event at its root, and leave the
+        // press armed for the next click anywhere to report.
+        window.addEventListener("mouseup", onUp, true);
         window.addEventListener("keydown", onKey);
         // A press that ends outside the window, in a context menu, or as a
-        // cancelled touch never produces a mouseup we would hear.
+        // cancelled touch never produces a mouseup we would hear. One whose
+        // mouseup never reaches the page at all is dropped as soon as the
+        // pointer enters the grid or a cell with no button down (see
+        // MatrixInteractionStore.enter).
         window.addEventListener("blur", cancel);
         window.addEventListener("contextmenu", cancel);
         window.addEventListener("pointercancel", cancel);
         return () => {
-            window.removeEventListener("mouseup", onUp);
+            window.removeEventListener("mouseup", onUp, true);
             window.removeEventListener("keydown", onKey);
             window.removeEventListener("blur", cancel);
             window.removeEventListener("contextmenu", cancel);
@@ -148,6 +155,15 @@ const MatrixGrid = (inProps) => {
             store.cancel();
         };
     }, [store, selectable]);
+    // A press let go of away from the grid reports nothing: sliding off is how
+    // a pointer aborts it, as with a button. The store stops painting the range
+    // while the pointer is away and paints it again if it comes back.
+    const handleMouseLeave = useCallback(() => {
+        store.leaveGrid();
+    }, [store]);
+    const handleMouseEnter = useCallback((event) => {
+        store.enterGrid(event.buttons);
+    }, [store]);
     // Scroll the marked column just past the sticky row header column.
     // The fallback also catches a scrollToColumn that is no longer in the set —
     // a consumer holding a key in state while the window rolls past it would
@@ -201,7 +217,7 @@ const MatrixGrid = (inProps) => {
     return (_jsx(MatrixConfigContext.Provider, { value: config, children: _jsx(MatrixInteractionContext.Provider, { value: store, children: _jsx(MatrixGridScroller, { ref: scrollRef, className: combineClassNames([className, classes?.root]), style: rootStyle, 
                 // the grid scrolls further than one screen: without this it
                 // is unreachable past the first columns without a pointer
-                tabIndex: 0, role: label ? "region" : undefined, "aria-label": label, children: _jsxs(MatrixGridRoot, { className: classes?.grid, style: gridStyle, role: "grid", "aria-label": label || undefined, children: [_jsxs(MatrixContents, { role: "row", children: [_jsx(MatrixCorner, { className: classes?.corner, 
+                tabIndex: 0, role: label ? "region" : undefined, "aria-label": label, onMouseLeave: selectable ? handleMouseLeave : undefined, onMouseEnter: selectable ? handleMouseEnter : undefined, children: _jsxs(MatrixGridRoot, { className: classes?.grid, style: gridStyle, role: "grid", "aria-label": label || undefined, children: [_jsxs(MatrixContents, { role: "row", children: [_jsx(MatrixCorner, { className: classes?.corner, 
                                     // heads the row header column; without contents it
                                     // would be an empty column header
                                     role: hasCorner ? "columnheader" : "gridcell", children: corner }), columns.map((column) => (_jsx(MatrixColumnHeader, { column: column, innerRef: column.key === target ? scrollTargetRef : undefined }, column.key)))] }), extraRowsPosition === "top" && extra, rows.map((row) => (_jsx(MatrixDataRow, { row: row }, row.key))), extraRowsPosition === "bottom" && extra] }) }) }) }));

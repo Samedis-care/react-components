@@ -2,9 +2,10 @@ import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-run
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState, } from "react";
 import FileUpload from "../../standalone/FileUpload/Generic";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
-import PartialDeleteError from "../../backend-integration/Connector/PartialDeleteError";
+import { isPartialDeleteError } from "../../backend-integration/Connector/PartialDeleteError";
 import PartialApplyError from "../Form/PartialApplyError";
 import describeWriteFailures from "./describeWriteFailures";
+import namedQueueErrorFactory from "./namedQueueErrorFactory";
 import describeFrameBy from "./describeFrameBy";
 import CrudLoadStatus from "./CrudLoadStatus";
 /**
@@ -23,16 +24,19 @@ const ADDITIONAL_FILE = Symbol("CcCrudFileUpload.additionalFile");
 const isAdditionalFile = (file) => ADDITIONAL_FILE in file;
 /**
  * A FileUpload over a collection of file records behind `connector`, one record per file
- * @remarks It lists `connector.index` through `deserialize`, and writes each change of the
- *          user after the one before it: a picked file goes through `serialize`,
- *          `connector.create` and `deserialize`, and a removed file, or a stored one that
- *          a pick of the same name replaces, goes to `connector.deleteMultiple`.
+ * @remarks It lists every record of `connector.index`, in one request, through
+ *          `deserialize`, and writes each change of the user after the one before it: a
+ *          picked file goes through `serialize`, `connector.create` and `deserialize`,
+ *          and a removed file, or a stored one that a pick of the same name replaces,
+ *          goes to `connector.deleteMultiple`.
  *
  *          With a LazyConnector the writes are queued: a queued upload is marked added, a
  *          queued removal stays listed struck through and can be restored, and
  *          `showDirtyState` and `onDirtyChange` follow the queue. With any other
  *          connector a removal deletes the file at once and cannot be undone; `onDelete`
- *          can ask first.
+ *          can ask first. Through such a connector, an upload the backend refuses leaves
+ *          the list; a file whose delete it refuses stays listed as removed, and the next
+ *          change sends the delete again.
  *
  *          It does not read the Form it is in: in a Form, use FormCrudFileUpload, which
  *          builds the LazyConnector and takes the Form's `readOnly`, `errorComponent`
@@ -97,6 +101,15 @@ const CrudFileUpload = (props, ref) => {
                 return changed ? next : prev;
             });
         });
+    }, [lazyConnector]);
+    // An upload the queue sends later (a Form's save) and the backend refuses is named by
+    // its file, as the control lists it under the client-side id of the queued upload
+    const filesRef = useRef(files);
+    filesRef.current = files;
+    useEffect(() => {
+        if (!lazyConnector)
+            return;
+        return lazyConnector.setQueueErrorFactory(namedQueueErrorFactory((id) => filesRef.current.find((file) => file.file.id === id), (file) => file.file.name));
     }, [lazyConnector]);
     // What each picked file became once it was uploaded, until the control lists that
     // instead. The list handed to handleChange comes from the standalone control, which
@@ -216,10 +229,9 @@ const CrudFileUpload = (props, ref) => {
         }
         catch (e) {
             // only a PartialDeleteError says which ids went through, and its cause why
-            refusedIds = new Set(e instanceof PartialDeleteError ? e.failedIds : deletedIds);
-            const reason = e instanceof PartialDeleteError && e.cause instanceof Error
-                ? e.cause
-                : e;
+            const partial = e instanceof Error && isPartialDeleteError(e) ? e : null;
+            refusedIds = new Set(partial ? partial.failedIds : deletedIds);
+            const reason = partial?.cause instanceof Error ? partial.cause : e;
             newFiles.forEach((file) => {
                 if (file.delete && refusedIds.has(file.file.id))
                     failures.push({ entry: file, action: "delete", error: reason });
@@ -292,8 +304,12 @@ const CrudFileUpload = (props, ref) => {
         // `delete` or `canBeUploaded` of another control's list means nothing to this
         // connector, where its id may even be a different record.
         const ownFiles = newFiles.filter((file) => !isAdditionalFile(file));
-        // the picks the user has now, whichever change uploads them
-        pendingPicks.current = ownFiles.filter((file) => file.canBeUploaded);
+        // The picks the user has now that no change has uploaded yet, whichever change
+        // uploads them. One an earlier change has uploaded comes back as a pick until
+        // the standalone control has been handed that upload, which `files` lists
+        // already. Only the change that uploads a pick drops it from here, so carried
+        // along again it would be listed a second time, for good.
+        pendingPicks.current = ownFiles.filter((file) => file.canBeUploaded && !uploadedPicks.current.has(file.file));
         setWriting((count) => count + 1);
         const change = pendingChange.current.then(() => applyChange(ownFiles));
         // a failed change must not stop the ones after it

@@ -56,15 +56,12 @@ const StyledAutocomplete = styled(Autocomplete, {
         },
     },
 });
+// typed as InlineSwitch: with options, MUI's typing of styled() merges the members of
+// a union of props, and InlineSwitch's "onChange unless disabled" would go unchecked
 const StyledInlineSwitch = styled(InlineSwitch, {
     name: "CcBaseSelector",
     slot: "inlineSwitch",
-})({
-    marginTop: 0,
-    "& .CcInlineSwitch-switchWrapper": {
-        marginTop: -30,
-    },
-});
+})({});
 // the selector renders its label as a sibling of the Autocomplete rather than inside
 // the text field, so the dirty marker has to be attached here: withMuiFieldState matches
 // the label itself ("&.MuiFormLabel-root::after"), adds the text that says the field is
@@ -153,8 +150,16 @@ const GrowPopper = React.forwardRef(function GrowPopperImpl(props, ref) {
 });
 const autocompleteSlots = { popper: GrowPopper };
 export const BaseSelectorContext = React.createContext(null);
-const BaseSelector = (inProps) => {
-    const props = useThemeProps({ props: inProps, name: "CcBaseSelector" });
+const BaseSelector = (
+// TypeScript cannot infer Multi from BaseSelectorVariants (a conditional type);
+// `multiple?: Multi` lets it infer Multi from the `multiple` prop
+inProps) => {
+    // typed without the `multiple?: Multi` above, so that `multiple` still narrows
+    // `selected` and `onSelect` to the single or the multi select's types below
+    const props = useThemeProps({
+        props: inProps,
+        name: "CcBaseSelector",
+    });
     const { variant, refreshToken, onSelect, multiple, selected, label, disabled, required, error, warning, dirty, autoFocus, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, additionalOptions, enableIcons, noOptionsText, loadingText, startTypingToSearchText, disableTruncationNotice, truncatedLabel, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, forceQuery, defaultQuery, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, iconSize, classes, className, } = props;
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
@@ -162,8 +167,17 @@ const BaseSelector = (inProps) => {
     // MUI's Autocomplete names its list (aria-labelledby `<id>-label`)
     const generatedId = useId();
     const inputId = autocompleteId || generatedId;
-    const defaultSwitchValue = !!(props.displaySwitch && props.defaultSwitchValue);
+    const switchShown = !!props.displaySwitch;
+    const defaultSwitchValue = !!(switchShown && props.defaultSwitchValue);
     const [switchValue, setSwitchValue] = useState(defaultSwitchValue);
+    // hiding the switch turns its filter off, and showing it starts it at
+    // defaultSwitchValue again. Reset while rendering, not in an effect, so the loads this
+    // render starts (e.g. for a new selection) already get the new value.
+    const [switchWasShown, setSwitchWasShown] = useState(switchShown);
+    if (switchWasShown !== switchShown) {
+        setSwitchWasShown(switchShown);
+        setSwitchValue(defaultSwitchValue);
+    }
     const { t } = useCCTranslations();
     const [open, setOpen] = useState(false);
     const actualAddNewLabel = addNewLabel || t("standalone.selector.add-new");
@@ -537,7 +551,7 @@ const BaseSelector = (inProps) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lruIds.join(",")]);
     const filterOptions = useCallback((options) => options, []);
-    return (_jsx(StyledInlineSwitch, { visible: !!props.displaySwitch, value: switchValue, onChange: setSwitchValue, label: switchLabel, disabled: disabled, className: combineClassNames([className, classes?.inlineSwitch]), children: _jsxs(BaseSelectorContext.Provider, { value: context, children: [label && (_jsx(StyledLabel, { id: `${inputId}-label`, htmlFor: inputId, shrink: true, disableAnimation: true, disabled: disabled, className: classes?.label, required: !!required, error: !!error, dirty: dirty, children: label })), _jsx(Wrapper, { elevation: 0, className: classes?.wrapper, children: _jsx(StyledAutocomplete, { id: inputId, className: classes?.autocomplete, multiple: multiple, disableCloseOnSelect: multiple, open: open, onOpen: handleOpen, onClose: () => {
+    return (_jsx(StyledInlineSwitch, { visible: !!props.displaySwitch, value: switchValue, onChange: setSwitchValue, label: switchLabel, "aria-describedby": label ? `${inputId}-label` : undefined, disabled: disabled, className: combineClassNames([className, classes?.inlineSwitch]), children: _jsxs(BaseSelectorContext.Provider, { value: context, children: [label && (_jsx(StyledLabel, { id: `${inputId}-label`, htmlFor: inputId, shrink: true, disableAnimation: true, disabled: disabled, className: classes?.label, required: !!required, error: !!error, dirty: dirty, children: label })), _jsx(Wrapper, { elevation: 0, className: classes?.wrapper, children: _jsx(StyledAutocomplete, { id: inputId, className: classes?.autocomplete, multiple: multiple, disableCloseOnSelect: multiple, open: open, onOpen: handleOpen, onClose: () => {
                             setOpen(false);
                         }, disableClearable: disableClearable, loading: !!loading, loadingText: loadingText ?? t("standalone.selector.base-selector.loading-text"), autoComplete: true, disabled: disabled, selectOnFocus: !disableSearch, options: (() => {
                             let options = [];

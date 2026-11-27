@@ -462,6 +462,9 @@ declare class Model<FieldsT extends ModelFields = ModelFields, KeyT extends Mode
     /**
      * Loads a list of data entries by the given search params. Works with offsets rather than pages
      * @param params The search params, the connector gets a copy of them
+     * @remarks A failure is reported as index reports it, with the source "Model.index2",
+     *          unless the request was aborted (params.signal aborted). The caller gets the
+     *          rejection either way.
      * @see index
      */
     index2(params: ConnectorIndex2Params): Promise<ModelIndexResponse<this>>;

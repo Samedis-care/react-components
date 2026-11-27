@@ -13,6 +13,14 @@ export const UiKitTextFieldWithState = withMuiFieldState(UiKitTextField);
  * MUI's `TextField` with an optional info button, a Clear button on touch devices and the
  * field states of {@link withMuiFieldState} (`warning`, `dirty`).
  *
+ * Every entry of `slotProps` (`root`, `input`, `inputLabel`, `htmlInput`,
+ * `formHelperText`, `select`), as an object or a function, reaches MUI's `TextField`. Three
+ * of them are extended: `input` gets the field's end adornment, `htmlInput` the helper
+ * text's id (see below) and the ref the Clear button uses, `inputLabel` `shrink: true`,
+ * which the caller's own `shrink` overrides. `onChange` gets every argument MUI calls it
+ * with: in a non-native `select` the chosen option's element follows the event, as from
+ * MUI's `Select`.
+ *
  * An `aria-describedby` in `slotProps.htmlInput` describes the input after the helper text,
  * where MUI's `TextField` would let it replace the helper text's id.
  */
@@ -55,10 +63,11 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
         inputRef.current.focus();
     }, [muiProps.multiline, customHandleClear]);
     // keep "uncontrolledValue" up to date
-    const handleChange = useCallback((evt) => {
-        if (onChange)
-            onChange(evt);
-        setUncontrolledValue(evt.target.value);
+    const handleChange = useCallback((...args) => {
+        const forward = onChange;
+        if (forward)
+            forward(...args);
+        setUncontrolledValue(args[0].target.value);
     }, [onChange]);
     // render
     const canClear = isTouchDevice() &&
@@ -68,6 +77,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
         // neither (its htmlInput ref holds MUI's handle), so it needs a handler
         (!muiProps.select || !!customHandleClear);
     return (_jsx(UiKitTextFieldWithState, { ref: ref, ...muiProps, id: id, warning: warning, dirty: dirty, onChange: handleChange, slotProps: {
+            ...muiProps.slotProps,
             input: (props) => {
                 const orgSlotProps = {
                     ...accessSlotProps(props, muiProps.slotProps?.input),

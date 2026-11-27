@@ -2,12 +2,19 @@ import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useContext, useEffect, useMemo } from "react";
 import useLocation from "./useLocation";
 import matchPath from "./matchPath";
-import joinRoutePath from "./joinRoutePath";
+import routePattern from "./routePattern";
 import { sentrySetRoutePath } from "./SentryRoutingInstrumentation";
 import RoutesEntryContext from "./RoutesEntryContext";
+import NestedHistoryRouterContext from "./NestedHistoryRouterContext";
 /**
- * The nearest matched Route, null outside of every Route. Read it with
+ * The nearest matched Route, null outside of every Route. A HistoryRouter
+ * starts a fresh routing scope: inside it, outside of its own routes, it is
+ * null also within a Route of an outer HistoryRouter. Read it with
  * {@link useRouteInfo}, or with `useContext` where null is a valid case.
+ * The value stays the same object while the route's url, path and rendersAt
+ * do, so a navigation within the route ("/devices/1" to "/devices/2" under
+ * "/devices/*") doesn't re-render the components that read it, unless they
+ * read the location too.
  */
 export const RouteContext = React.createContext(null);
 /**
@@ -34,29 +41,31 @@ export const useRoutePrefix = () => {
     return routeCtx ? routeCtx.path.replace(/\/\*$/, "/") : "/";
 };
 const Route = (props) => {
-    const { path, element } = props;
+    const { path, end, element } = props;
     const location = useLocation();
     const { pathname } = location;
     const routePrefix = useRoutePrefix();
     const parentCtx = useContext(RouteContext);
     const depth = parentCtx ? parentCtx.depth + 1 : 0;
-    const finalPath = joinRoutePath(routePrefix, path);
+    const pattern = useMemo(() => routePattern(routePrefix, path, end), [routePrefix, path, end]);
     const parentRendersAt = parentCtx ? parentCtx.rendersAt : null;
     const entryRenderedAt = useContext(RoutesEntryContext);
-    const rendersAt = useCallback((target) => !!matchPath({ path: finalPath }, target) &&
+    const rendersAt = useCallback((target) => !!matchPath(pattern, target) &&
         (!entryRenderedAt || entryRenderedAt(target)) &&
-        (!parentRendersAt || parentRendersAt(target)), [finalPath, entryRenderedAt, parentRendersAt]);
-    const ctx = useMemo(() => {
-        const match = matchPath({ path: finalPath }, pathname);
-        if (!match)
-            return null; // this one is about to be unmounted
-        return { url: match.url, path: finalPath, depth, rendersAt };
-    }, [finalPath, pathname, depth, rendersAt]);
+        (!parentRendersAt || parentRendersAt(target)), [pattern, entryRenderedAt, parentRendersAt]);
+    // null: this one is about to be unmounted
+    const url = matchPath(pattern, pathname)?.url ?? null;
+    // on the url, not the pathname: a navigation within the route ("/devices/1" to
+    // "/devices/2" under "/devices/*") keeps the value, so its consumers don't re-render
+    const routePath = pattern.path;
+    const ctx = useMemo(() => url === null ? null : { url, path: routePath, depth, rendersAt }, [url, routePath, depth, rendersAt]);
+    // the routes of a HistoryRouter inside another one leave the Sentry name to the outer one's routes
+    const nestedRouter = useContext(NestedHistoryRouterContext);
     // every location, not only every route change: a navigation within this route needs its name too
     useEffect(() => {
-        if (ctx)
+        if (ctx && !nestedRouter)
             sentrySetRoutePath(ctx.path, ctx.depth, location);
-    }, [ctx, location]);
+    }, [ctx, location, nestedRouter]);
     if (!ctx)
         return _jsx(React.Fragment, {});
     return _jsx(RouteContext.Provider, { value: ctx, children: element });

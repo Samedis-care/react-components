@@ -10,8 +10,10 @@ export type BackendSingleSelectLruOptions<DataT extends BaseSelectorData> = Omit
  */
 export type BackendSingleSelectSwitchProps = {
     /**
-     * Whether the switch is on when the field mounts with `switchFilterName`; later
-     * changes are ignored, from then on the user sets it.
+     * Whether the switch is on when it appears: when the field mounts with
+     * `switchFilterName`, and each time `switchFilterName` is set after none. Changes
+     * while the switch is shown are ignored; from then on the user sets it. Removing
+     * `switchFilterName` turns the switch off.
      * @default false
      */
     defaultSwitchValue?: boolean;
@@ -44,6 +46,9 @@ export type BackendSingleSelectProps<M extends ModelUnknown> = DistributiveOmit<
     model: M;
     /**
      * The model to use for fetch requests (to enable request batching)
+     * @remarks One with other react-query keys than the previous one (another model id
+     *          or cache keys) loads the shown record again through it. A new instance
+     *          of the same model (same keys) does not: it loads the same records.
      */
     modelFetch?: M;
     /**
@@ -54,6 +59,10 @@ export type BackendSingleSelectProps<M extends ModelUnknown> = DistributiveOmit<
     /**
      * Callback that converts the model data to the actual data displayed in the selector
      * @param modelData The model data
+     * @remarks A new function converts the shown entry again from its record, without a
+     *          request (labels built with `t` follow a language switch). Pass a stable
+     *          one (module level, or useCallback/useMemo on what it reads): a new one on
+     *          every render converts the shown entry on every render.
      */
     modelToSelectorData: (modelData: ModelRecord<M>) => Promise<BaseSelectorData> | BaseSelectorData;
     /**
@@ -66,13 +75,24 @@ export type BackendSingleSelectProps<M extends ModelUnknown> = DistributiveOmit<
      */
     onSelect?: (value: string | null) => void;
     /**
-     * The id of the selected record, or null (undefined counts as null). Shown from a
-     * matching `additionalOptions` entry or `initialData` record without a request,
-     * otherwise loaded through `modelFetch`. Until the record of this id is there, the
-     * field shows the translated "Loading…" (`backend-components.selector.loading`), never
+     * The id of the selected record, or null (undefined counts as null). Shown without a
+     * request from the entry just picked in the field (from the list, or the one
+     * `onAddNew` created), a matching `additionalOptions` entry or an `initialData`
+     * record, otherwise loaded through `modelFetch`. Until the record of this id is there,
+     * the field shows the translated "Loading…" (`backend-components.selector.loading`), never
      * the record of an earlier id, and a lookup of an earlier id that finishes later is
-     * discarded (also its error: no `onLoadError`, no `onSelect(null)`). Not shown while
-     * `selectedFreeSolo` is a non-empty string.
+     * discarded (also its error: no `onLoadError`, no `onSelect(null)`). An id
+     * `onLoadError` dropped is not shown, also while `selected` keeps it: the field is
+     * empty instead. Not shown while `selectedFreeSolo` is a non-empty string.
+     *
+     * The shown entry follows the props: a new `modelToSelectorData` converts it again
+     * from the record the field listed or loaded for the id, without a request (an
+     * `additionalOptions` entry, and one `onAddNew` returned for a record the field has
+     * not listed, are shown as they are); a `modelFetch` with other react-query keys or
+     * a new `refreshToken` loads it again through `modelFetch.getCached` (not an
+     * `additionalOptions` entry), so an app that changed the record invalidates the
+     * model's queries before it changes `refreshToken`. The field keeps showing the
+     * entry meanwhile.
      */
     selected: string | null;
     /**
@@ -92,9 +112,13 @@ export type BackendSingleSelectProps<M extends ModelUnknown> = DistributiveOmit<
      * @param error The error that has been raised while loading
      * @return string Label for entry which failed loading
      * @return null To remove the entry: `onSelect(null)`, unless `selected` changed
-     *         meanwhile (a pick, a clear) or the field has unmounted.
+     *         meanwhile (a pick, a clear) or the field has unmounted. The field is then
+     *         empty, also while `selected` keeps the id (without `onSelect`, or a parent
+     *         that does not apply `null`).
      * @remarks Without it, the entry is labelled "Unknown entry" if the backend did not
-     *          return its record, else "Error while fetching data".
+     *          return its record, else "Error while fetching data". While an entry
+     *          that failed to load is shown, with either label, the field is marked as
+     *          erroneous (`error`, so `aria-invalid="true"`).
      */
     onLoadError?: (error: Error) => string | null;
     /**

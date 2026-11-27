@@ -7,6 +7,15 @@ export interface MatrixRowHeaderProps<TCell> {
      */
     row: MatrixRow<TCell>;
 }
+/**
+ * The sticky first cell of a data row, with what renderRowHeader renders.
+ *
+ * In touch mode with onRowHeaderActions set, the whole cell is one button:
+ * named by the row's label (by what the header renders without one), and
+ * described by what it does and then by what the header renders, so a label
+ * does not hide the rest of the header from assistive technology.
+ * @remarks Memoized on the row object.
+ */
 declare const MatrixRowHeader: <TCell>(props: MatrixRowHeaderProps<TCell>) => React.JSX.Element;
 declare const _default: typeof MatrixRowHeader;
 export default _default;

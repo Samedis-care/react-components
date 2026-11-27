@@ -6,7 +6,7 @@ import { NavigationGuard, NavigationGuardContext, } from "../../framework/Naviga
 import { useDialogContext } from "../../framework/DialogContextProvider";
 import { showConfirmDialogBool } from "../../non-standalone/Dialog/Utils";
 import { RouteContext } from "../../standalone/Routes/Route";
-import matchPath from "../../standalone/Routes/matchPath";
+import matchPath, { decodeSegment } from "../../standalone/Routes/matchPath";
 import useCCTranslations from "../../utils/useCCTranslations";
 /**
  * The leave guard of the Form a form page is rendered in; null outside of a Form's page
@@ -22,15 +22,31 @@ export const FORM_PAGE_MOVE_STATE = Object.freeze({
     formPageMove: true,
 });
 /**
+ * Do two urls of a Route name the same location, whatever their percent-encoding? A browser
+ * history keeps its location encoded (/%C3%BCber/a%20b), while the target of a navigation is
+ * the path as the app wrote it (/über/a b). Compared segment by segment, each decoded as
+ * matchPath decodes it, so an encoded slash stays inside its segment (a%2Fb is not a/b).
+ * @param a A Route's url, as matchPath gives it (no empty segments)
+ * @param b Another url of the same Route
+ * @returns true if both have the same segments once decoded
+ */
+const isSameUrl = (a, b) => {
+    const aSegments = a.split("/");
+    const bSegments = b.split("/");
+    return (aSegments.length === bSegments.length &&
+        aSegments.every((segment, index) => decodeSegment(segment) === decodeSegment(bSegments[index])));
+};
+/**
  * Does a navigation to pathname stay inside the form page (routed tab panels, a routed
  * stepper)? It does when the Form's nearest Route is still rendered at pathname, so the
  * Form stays mounted, with the same url: the url itself or a path below it
  * (/rec/1 → /rec/1/more), not one that only starts with the same characters (/rec/10,
- * /rec/1-archive).
+ * /rec/1-archive). The url is the same whatever its percent-encoding: under a browser history
+ * at /%C3%BCber/1, a navigation to /über/1/more stays inside the page.
  * A Route "/" renders only at "/", so every other path leaves the page. A Route "/*", such
  * as the default panel of routed tabs (tab("", …)), renders at every path below its parent,
- * except where the Routes it is an entry of renders an entry listed before it: opening
- * another tab unmounts a Form in the default panel, so that leaves the page.
+ * except where the Routes it is an entry of renders a more specific entry: opening another
+ * tab unmounts a Form in the default panel, so that leaves the page.
  * The nearest Route of a disableRouting Form is the one of the page around it, as the Form
  * has no url of its own; it stays mounted all the same while that Route is rendered, e.g.
  * when routed tabs in its form page switch. A Form outside of every Route has none, so
@@ -40,8 +56,12 @@ export const FORM_PAGE_MOVE_STATE = Object.freeze({
  * @param routeRendersAt Is the Route rendered at a pathname (RouteContext rendersAt)
  * @param pathname The navigation's target
  */
-const isInsideFormPage = (routePath, routeUrl, routeRendersAt, pathname) => routeRendersAt(pathname) &&
-    matchPath({ path: routePath }, pathname)?.url === routeUrl;
+const isInsideFormPage = (routePath, routeUrl, routeRendersAt, pathname) => {
+    if (!routeRendersAt(pathname))
+        return false;
+    const match = matchPath({ path: routePath }, pathname);
+    return !!match && isSameUrl(match.url, routeUrl);
+};
 /**
  * The leave guard of a Form's unsaved changes: while the form is dirty or, in flow mode,
  * holds staged changes (FormContextData.stagedDirty), a navigation asks
@@ -76,7 +96,10 @@ const useFormPageGuard = (params) => {
     // the rendered dirty state is one render behind the form engine, which breaks "submit,
     // then navigate away": the record is saved, but the guards below still see a dirty form.
     // The dirty event fires as soon as the form engine sees the change, so this ref is
-    // current even while a re-render is still pending.
+    // current even while a re-render is still pending. The Form subscribes when it mounts,
+    // before it renders its pages (its loader comes first), so the ref also has what a page's
+    // controls announce in their mount effects, which run before the page's own effects could
+    // subscribe (FormPageGuard.isUnsaved).
     const dirtyRef = useRef(unsaved);
     useEffect(() => {
         const handleDirtyChange = (event) => {
@@ -201,6 +224,7 @@ const useFormPageGuard = (params) => {
         applyGuardsRef.current?.(dirtyRef.current);
     }, []);
     const leave = useCallback((go) => navigationGuard.leave(entryRef.current, go), [navigationGuard]);
-    return useMemo(() => ({ enable, leave }), [enable, leave]);
+    const isUnsaved = useCallback(() => dirtyRef.current, []);
+    return useMemo(() => ({ enable, leave, isUnsaved }), [enable, leave, isUnsaved]);
 };
 export default useFormPageGuard;

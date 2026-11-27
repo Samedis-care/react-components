@@ -1,11 +1,16 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useContext, useLayoutEffect, useMemo, useState } from "react";
-import { Action } from "history";
 import { sentryHandleNavigation } from "./SentryRoutingInstrumentation";
 import { LocationContext } from "./useLocation";
 import DocumentTitleProvider from "./DocumentTitle";
 import NavigationFocus from "./NavigationFocus";
+import NavigationScroll from "./NavigationScroll";
 import { NavigationFocusManager } from "./NavigationFocusManager";
+import { RouteContext } from "./Route";
+import RoutesEntryContext from "./RoutesEntryContext";
+import NestedHistoryRouterContext from "./NestedHistoryRouterContext";
+import { NavigationScrollManager } from "./NavigationScrollManager";
+import { NavigationScrollContext } from "./useResetScrollOnNavigation";
 /**
  * The history of the nearest HistoryRouter, null outside of one. Read it with
  * {@link useHistoryRouterContext}.
@@ -24,33 +29,58 @@ export const useHistoryRouterContext = () => {
     return ctx;
 };
 /**
- * Scrolls the window and the document to the top. Only these: other scroll
- * containers keep their position, so that DataGrid can restore its own.
- */
-const resetPageScroll = () => {
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.documentElement.scrollLeft = 0;
-    document.body.scrollTop = 0;
-    document.body.scrollLeft = 0;
-};
-/**
  * Provides the current location and the history to `Routes`, `Route`, `Link`
  * and the routing hooks (`useLocation`, `useNavigate`, `useParams`), and
  * re-renders them on every navigation of the history. Each push and
  * back/forward navigation also starts a Sentry navigation span when
- * `componentsCareBrowserTracingIntegration` is set up.
+ * `componentsCareBrowserTracingIntegration` is set up. A HistoryRouter inside
+ * another one starts none, and its routes leave the Sentry transaction name
+ * to those of the outer one: errors and spans on a page with, e.g., a wizard
+ * on a memory history are named after the page's route, not the wizard's.
  *
  * A push or replace navigation (`useNavigate`, `Link`, or `history.push` and
- * `history.replace` called directly) scrolls the window and the document to
- * the top once the location has changed: a navigation that a blocker cancels,
- * e.g. the unsaved-changes guard of a form when the user stays, leaves the
- * page where it is. Back/forward navigations leave the scroll position to the
- * browser. Other scroll containers keep their position.
+ * `history.replace` called directly) scrolls the window, the document and the
+ * scroll containers registered with `useResetScrollOnNavigation` (the main
+ * pane of PortalLayout) to the top once the location has changed:
+ * - A navigation that a blocker cancels, e.g. the unsaved-changes guard of a
+ *   form when the user stays, leaves the page where it is.
+ * - A navigation started with `preventScrollReset` (see `useNavigate` and
+ *   `Link`) keeps the scroll positions, also when a blocker holds it back and
+ *   lets it go ahead later. RoutedTabs' tab switches and CRUD's move from the
+ *   create form to the record it has saved use it, so the user stays where
+ *   they are on the page.
+ * - Back/forward navigations leave the scroll position to the browser.
+ * - Other scroll containers keep their position, so that DataGrid can
+ *   restore its own.
+ * - A HistoryRouter inside another one, e.g. a wizard on a memory history,
+ *   scrolls only the scroll containers registered with it (inside it) to the
+ *   top: its navigations leave the window, the document and the scroll
+ *   containers of the outer one where they are.
+ *
+ * A push or replace to a location with a hash ("#details"), e.g. a skip link
+ * or the entry of a table of contents, then scrolls the element with that id
+ * into view (the window and the scroll containers around it) and moves the
+ * keyboard focus to it, as a link to a fragment does in a browser, so the
+ * next Tab goes on after it. An element that is not focusable gets
+ * `tabindex="-1"`, which makes it focusable without adding it to the tab
+ * order. This happens once the location has rendered, so the element may be
+ * part of the new page, but not one that renders later (a lazy route, a
+ * record that is still loading). When the hash is all the navigation
+ * changes (the same pathname and search), nothing scrolls to the top first,
+ * and a hash that names no element leaves the page where it is, except
+ * "#top", which scrolls to the top. A navigation started with
+ * `preventScrollReset` scrolls to no element and leaves the focus alone.
  *
  * A navigation its children make while it mounts, e.g. a redirect in a mount
  * effect, shows right away, not only after the next navigation; so does the
  * location of a history passed after mount.
+ *
+ * It starts a fresh routing scope: its `Routes` and `Route`s match their paths
+ * from "/" against its own location, also when it is rendered inside a `Route`
+ * of another HistoryRouter, e.g. a wizard on a `createMemoryHistory()` inside
+ * a page under "/devices/*" routes its steps as "/step1", "/step2". Inside it,
+ * outside of its own routes, `useRouteInfo` throws and `useParams` returns no
+ * params, as outside of every Route.
  *
  * After a push or back/forward navigation (not after a replace), it keeps the
  * keyboard focus and screen readers with the new page:
@@ -62,33 +92,43 @@ const resetPageScroll = () => {
  *   focusable without adding it to the tab order. A `PageTitle` that renders
  *   later (a lazy route, a record that is still loading) gets the focus then,
  *   unless the user clicked, typed or scrolled meanwhile.
- * - When the focus stays on an element in view (a navigation menu, a tab),
- *   the new page title (see `usePageTitle`) is announced in a visually hidden
- *   polite live region, which the router renders after its children, if it
- *   differs from the one before.
+ *   A HistoryRouter inside another one moves the focus only to a `PageTitle`
+ *   rendered inside it, e.g. one on the last step of a wizard, never to the
+ *   page's heading outside of it; without one, the focus stays where it is.
+ * - When the focus stays on an element in view (a navigation menu, a tab, or
+ *   the element of a hash, which got it as described above), the new page
+ *   title (see `usePageTitle`) is announced in a visually hidden polite live
+ *   region, which the router renders after its children, if it differs from
+ *   the one before. For a HistoryRouter inside another one, that is the
+ *   title set inside it.
  * @param props The props
  */
 const HistoryRouter = (props) => {
     const { history, children, formatDocumentTitle } = props;
+    // inside another HistoryRouter, e.g. a wizard on a page: only the outermost
+    // one reports to Sentry; this one leaves the window where it is and moves
+    // the focus only to a heading inside it
+    const nested = useContext(HistoryRouterContext) !== null;
     const [location, setLocation] = useState(history.location);
     const ctx = useMemo(() => ({ history }), [history]);
     const [navigationFocus] = useState(() => new NavigationFocusManager());
+    const [navigationScroll] = useState(() => new NavigationScrollManager());
     // a layout effect, so the router listens before the passive effects of its
     // children run (a redirect in a mount effect)
     useLayoutEffect(() => {
         const unlisten = history.listen((update) => {
             // only now: a blocked navigation never gets here
-            if (update.action !== Action.Pop)
-                resetPageScroll();
+            navigationScroll.navigated(update, nested);
             setLocation(update.location);
-            sentryHandleNavigation(update);
+            if (!nested)
+                sentryHandleNavigation(update);
             navigationFocus.navigated(update.action);
         });
         // the layout effects of the children ran before this one and may have
         // navigated already; no re-render if the location is unchanged
         setLocation(history.location);
         return unlisten;
-    }, [history, navigationFocus]);
-    return (_jsx(HistoryRouterContext.Provider, { value: ctx, children: _jsx(LocationContext.Provider, { value: location, children: _jsxs(DocumentTitleProvider, { formatDocumentTitle: formatDocumentTitle, children: [children, _jsx(NavigationFocus, { manager: navigationFocus, location: location })] }) }) }));
+    }, [history, navigationFocus, navigationScroll, nested]);
+    return (_jsx(HistoryRouterContext.Provider, { value: ctx, children: _jsx(LocationContext.Provider, { value: location, children: _jsxs(DocumentTitleProvider, { formatDocumentTitle: formatDocumentTitle, children: [_jsx(RouteContext.Provider, { value: null, children: _jsx(RoutesEntryContext.Provider, { value: null, children: _jsx(NavigationScrollContext.Provider, { value: navigationScroll, children: _jsx(NestedHistoryRouterContext.Provider, { value: nested, children: children }) }) }) }), _jsx(NavigationScroll, { manager: navigationScroll, location: location, nested: nested }), _jsx(NavigationFocus, { manager: navigationFocus, location: location, nested: nested })] }) }) }));
 };
 export default React.memo(HistoryRouter);

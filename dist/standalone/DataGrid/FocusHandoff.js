@@ -1,8 +1,9 @@
 import React, { useContext, useLayoutEffect } from "react";
 /**
  * Hands keyboard focus from a grid to the grid mounted in its place. The
- * persistence providers provide it, as they mount their children again when
- * their storage keys change; outside of one (null), focus is not handed over.
+ * persistence gate of the grid provides it, as it mounts the grid again when
+ * the storage keys of its provider change; outside of a provider (null),
+ * focus is not handed over.
  */
 export const DataGridFocusHandoffContext = React.createContext(null);
 /**
@@ -13,7 +14,7 @@ const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([t
  * Where an element is in the grid
  * @param root The grid's root element
  * @param element The element, inside the root
- * @param mount The mount of the provider's children the grid belongs to
+ * @param mount The mount the grid belongs to
  * @returns Its place and what it is
  */
 const locate = (root, element, mount) => {

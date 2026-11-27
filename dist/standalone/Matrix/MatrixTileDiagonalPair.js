@@ -7,6 +7,7 @@ import { tileColors } from "./matrixTileDim";
 import { useMatrixCellTileProps } from "./MatrixCellTileContext";
 import { entryFocusRing } from "./matrixTints";
 import MatrixTileCorners from "./MatrixTileCorners";
+import MatrixTileStateText from "./MatrixTileStateText";
 import useMatrixActivation from "./useMatrixActivation";
 export const MatrixTileDiagonalRoot = styled("div", {
     name: "CcMatrixCellTile",
@@ -21,6 +22,22 @@ export const MatrixTileDiagonalRoot = styled("div", {
     [`&.${matrixClasses.itemClickable}`]: {
         cursor: "pointer",
         "&:focus-visible": entryFocusRing(theme),
+    },
+    // Forced colors paint the fill in the canvas color and drop the gradient
+    // that cuts it: a border keeps the pair apart from its neighbors, and a
+    // line in the text color draws the cut. Only that line keeps its colors
+    // (forced-color-adjust), so the labels still take the forced ones.
+    "@media (forced-colors: active)": {
+        boxSizing: "border-box",
+        border: "1px solid CanvasText",
+        "&::after": {
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            forcedColorAdjust: "none",
+            background: "linear-gradient(to bottom right, transparent calc(50% - 1px), CanvasText calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px))",
+        },
     },
 }));
 export const MatrixTileDiagonalLabel = styled("div", {
@@ -59,9 +76,9 @@ const DIAGONAL_CORNERS = ["bottomLeft"];
 /**
  * Two entries as one diagonally cut box: space-saving, but one click target and
  * one drag handle (MatrixCellTile passes it to renderItem as the first entry),
- * and of each entry only the label, the colors and the tooltip survive, plus
- * the first entry's bottomLeft corner, in that entry's text color (see
- * MatrixCellTileProps.pairLayout).
+ * and of each entry only the label, the colors, the state (said after its
+ * label) and the tooltip survive, plus the first entry's bottomLeft corner, in
+ * that entry's text color (see MatrixCellTileProps.pairLayout).
  */
 const MatrixTileDiagonalPair = (props) => {
     const { a, b } = props;
@@ -95,15 +112,15 @@ const MatrixTileDiagonalPair = (props) => {
     const pair = (_jsxs(MatrixTileDiagonalRoot, { className: combineClassNames([
             classes?.diagonal,
             onItemClick && matrixClasses.itemClickable,
-        ]), style: style, ...activation, children: [_jsx(MatrixTileDiagonalLabel, { className: combineClassNames([
+        ]), style: style, ...activation, children: [_jsxs(MatrixTileDiagonalLabel, { className: combineClassNames([
                     classes?.diagonalLabel,
                     matrixClasses.diagonalLabelStart,
                     a.dimmed && matrixClasses.diagonalLabelDimmed,
-                ]), children: a.label }), _jsx(MatrixTileDiagonalLabel, { className: combineClassNames([
+                ]), children: [a.label, (a.highlighted || a.dimmed) && (_jsx(MatrixTileStateText, { highlighted: a.highlighted, dimmed: a.dimmed }))] }), _jsxs(MatrixTileDiagonalLabel, { className: combineClassNames([
                     classes?.diagonalLabel,
                     matrixClasses.diagonalLabelEnd,
                     b.dimmed && matrixClasses.diagonalLabelDimmed,
-                ]), children: b.label }), _jsx(MatrixTileDiagonalCorners, { children: _jsx(MatrixTileCorners, { item: a, only: DIAGONAL_CORNERS, className: classes?.corner }) })] }));
+                ]), children: [b.label, (b.highlighted || b.dimmed) && (_jsx(MatrixTileStateText, { highlighted: b.highlighted, dimmed: b.dimmed }))] }), _jsx(MatrixTileDiagonalCorners, { children: _jsx(MatrixTileCorners, { item: a, only: DIAGONAL_CORNERS, className: classes?.corner }) })] }));
     // describeChild: both tooltips describe the pair, named by both labels
     // (see MatrixTileItem)
     return tooltip ? (_jsx(Tooltip, { title: tooltip, enterDelay: 400, describeChild: true, children: pair })) : (pair);

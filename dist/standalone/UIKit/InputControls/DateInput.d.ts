@@ -14,15 +14,29 @@ export interface DateInputProps extends Omit<PickersTextFieldWithHelpProps, "cus
      * `null` at once when the touch Clear button is pressed. Only a day the
      * picker accepts, or `null` for an empty field, is reported, and only when
      * it differs from the day reported last or handed in as `value` since; the
-     * days the field passes through while the user types are not.
+     * days the field passes through while the user types are not. With
+     * `publishIntermediateValues` (set through the theme's
+     * `CcLocalizedKeyboardDatePicker` default props) it is called for every
+     * change instead, and with `null` for an entry that is no valid day, such as
+     * 02/31: the field keeps showing that entry, marked invalid (see `onError`),
+     * as long as `value` is the `null` reported for it.
      * @param date new value, as a date-only value (12:00 UTC, see normalizeDate),
-     * or `null`
+     * or `null`; never an Invalid Date
      */
     onChange: (date: Date | null) => void;
     /**
      * Boolean flag to hide Calendar Icon (only used if disabled is truthy)
      */
     hideDisabledIcon?: boolean;
+    /**
+     * The accessible name of the input, for one without a visible `label`,
+     * such as the translated purpose of the date ("From", "To"). It names the
+     * field (its `role="group"`, which a screen reader announces when focus
+     * enters a section) and the open calendar dialog. A visible `label` takes
+     * its place, as in MUI. Default: none, so an input without a `label` has an
+     * unnamed field. See `LocalizedKeyboardDatePickerProps["aria-label"]`.
+     */
+    "aria-label"?: LocalizedKeyboardDatePickerProps["aria-label"];
     /**
      * required flag passed to text field
      */
@@ -100,13 +114,16 @@ export interface DateInputProps extends Omit<PickersTextFieldWithHelpProps, "cus
      */
     shouldDisableYear?: (year: Date) => boolean;
     /**
-     * Called when MUI accepts a value: a day picked in the calendar, and every
-     * change typed into the field while the calendar is closed. Unlike
-     * `onChange`, it also gets entries the picker rejects; their reason is in
-     * `context.validationError`.
-     * @param value the accepted day as a date-only value (12:00 UTC), or `null`
-     *              for an empty field or an entry that is no valid day
-     * @param context MUI's context: `validationError` and `source`
+     * Called with every day the picker reports to `onChange`, right after it:
+     * once the user is done with the day (see `onChange`), with a day the
+     * picker accepts or `null` for an empty field. It gets neither the days the
+     * field passes through while the user types nor an entry the picker
+     * rejects (see `onError`). The touch Clear button reports `null` to
+     * `onChange` only. See `LocalizedKeyboardDatePickerProps.onAccept`.
+     * @param value the day as a date-only value (12:00 UTC), or `null` for an
+     *              empty field
+     * @param context MUI's context: `validationError` (`null`, the day being
+     *                accepted) and `source`
      */
     onAccept?: (value: Date | null, context: PickerChangeHandlerContext<DateValidationError>) => void;
     /**

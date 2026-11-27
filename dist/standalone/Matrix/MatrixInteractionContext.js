@@ -4,8 +4,8 @@ export const MATRIX_CELL_SELECTED = 1;
 /** Bit of the cell state: the cell shows the "add" hint. */
 export const MATRIX_CELL_ADD_HINT = 2;
 /**
- * Holds the pointer state of one grid (the range being swept, the hovered
- * cell) outside of React state.
+ * Holds the pointer state of one grid (the range being swept, whether the
+ * pointer is still on the grid, the hovered cell) outside of React state.
  *
  * A sweep changes the state of a handful of cells but would re-render the whole
  * grid if it lived in the grid's own state — with the documented 400 column cap
@@ -42,6 +42,8 @@ export class MatrixInteractionStore {
     hoverColumnKey = null;
     /** Escape hid the add hint of the hovered cell, see dismissHint() */
     hintDismissed = false;
+    /** the pointer left the grid while the button is held, see leaveGrid() */
+    away = false;
     /**
      * Publishes the current props to the store. Called by the grid on every
      * render, so a pointer event always sees the columns on screen.
@@ -71,7 +73,10 @@ export class MatrixInteractionStore {
      */
     getCellState = (rowKey, columnKey) => {
         let state = 0;
-        if (this.dragging && this.rowKey === rowKey && this.from >= 0) {
+        if (this.dragging &&
+            !this.away &&
+            this.rowKey === rowKey &&
+            this.from >= 0) {
             const index = this.indexByKey.get(columnKey) ?? -1;
             if (index >= this.from && index <= this.to)
                 state |= MATRIX_CELL_SELECTED;
@@ -140,6 +145,7 @@ export class MatrixInteractionStore {
         if (!this.indexByKey.has(columnKey))
             return;
         this.dragging = true;
+        this.away = false;
         this.rowKey = rowKey;
         this.anchorKey = columnKey;
         this.focusKey = columnKey;
@@ -147,16 +153,38 @@ export class MatrixInteractionStore {
         this.notify();
     }
     /**
+     * Drops a press whose release the page never heard: the pointer entered
+     * the grid or one of its cells while a press is in progress, but the
+     * primary button is no longer down. It is not reported, as nothing says
+     * where it was let go of; from here on the pointer hovers, rather than
+     * sweeping a range that the next click anywhere would report.
+     * @param buttons The `buttons` of the mouse event that brought the pointer
+     * here, a bit mask in which 1 is the primary button
+     * @returns Whether a press was dropped (and the cells notified)
+     */
+    dropUnheard(buttons) {
+        if (!this.dragging || buttons & 1)
+            return false;
+        this.cancel();
+        return true;
+    }
+    /**
      * Moves the pointer onto a cell: extends (or shrinks) the range if one is
      * being swept, and remembers the hover for the add hint (and shows it
      * again, if Escape hid it).
+     * @param buttons The `buttons` of the mouse event: without the primary
+     * button a press still in progress was let go of unheard and is dropped
+     * (see dropUnheard)
      * @remarks A range stops at the first cell canSelect rejects, so what is
      * highlighted is exactly what gets reported.
      */
-    enter(rowKey, columnKey) {
+    enter(rowKey, columnKey, buttons) {
         this.hoverRowKey = rowKey;
         this.hoverColumnKey = columnKey;
         this.hintDismissed = false;
+        // dropping notifies, the new hover included
+        if (this.dropUnheard(buttons))
+            return;
         if (this.dragging && this.rowKey === rowKey) {
             const anchor = this.indexOf(this.anchorKey);
             const target = this.indexOf(columnKey);
@@ -176,6 +204,34 @@ export class MatrixInteractionStore {
             this.hoverColumnKey = null;
             this.notify();
         }
+    }
+    /**
+     * The pointer left the grid. A held press stays, but is neither painted
+     * nor reported while the pointer is away: letting go there aborts it, as a
+     * button pressed and let go of elsewhere does not click (WCAG 2.5.2), and
+     * what is painted stays what a release reports.
+     * @remarks The range is kept, so coming back with the button still held
+     * (see enterGrid) paints it again and the sweep goes on.
+     */
+    leaveGrid() {
+        if (!this.dragging || this.away)
+            return;
+        this.away = true;
+        this.notify();
+    }
+    /**
+     * The pointer came back onto the grid: a held press is painted again.
+     * @param buttons The `buttons` of the mouse event: without the primary
+     * button the press was let go of unheard and is dropped (see dropUnheard),
+     * rather than painted again for a click on a header to report
+     */
+    enterGrid(buttons) {
+        if (this.dropUnheard(buttons))
+            return;
+        if (!this.away)
+            return;
+        this.away = false;
+        this.notify();
     }
     /**
      * Hides the add hint of the hovered cell (Escape), until the pointer
@@ -213,6 +269,7 @@ export class MatrixInteractionStore {
         if (!this.dragging)
             return;
         this.dragging = false;
+        this.away = false;
         this.rowKey = null;
         this.anchorKey = null;
         this.focusKey = null;
@@ -220,8 +277,9 @@ export class MatrixInteractionStore {
         this.notify();
     }
     /**
-     * Ends a range and reports it. The hover is left alone: the pointer is
-     * still on the cell it was released over.
+     * Ends a range and reports it, unless the pointer is away from the grid
+     * (see leaveGrid). The hover is left alone: the pointer is still on the
+     * cell it was released over.
      */
     commit() {
         if (!this.dragging)
@@ -231,8 +289,12 @@ export class MatrixInteractionStore {
         // every configure(): a column that disappeared mid-press, a press cell
         // or a cell in between that filled up, or a row that was opted out while
         // the button was down and the pointer stood still are already in them.
-        const columnKeys = this.from < 0 ? [] : this.config.columnKeys.slice(this.from, this.to + 1);
+        // Away from the grid nothing is painted, so nothing is reported.
+        const columnKeys = this.from < 0 || this.away
+            ? []
+            : this.config.columnKeys.slice(this.from, this.to + 1);
         this.dragging = false;
+        this.away = false;
         this.rowKey = null;
         this.anchorKey = null;
         this.focusKey = null;

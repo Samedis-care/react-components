@@ -28,7 +28,8 @@ export declare const dataGridGetFilterParameters: (state: Pick<IDataGridState, "
 export declare const dataGridGetQuery: (state: Pick<IDataGridState, "search" | "customData">, columnsState: IDataGridColumnsState, getAdditionalFilters: IDataGridCallbacks["getAdditionalFilters"]) => DataGridQuery;
 export interface DataGridFirstRows {
     /**
-     * The first selectable rows, in the grid's order, at most the limit
+     * The first selectable rows, in the grid's order, at most the limit, each
+     * id once
      */
     rows: DataGridRowData[];
     /**
@@ -52,7 +53,11 @@ export interface DataGridFirstRows {
  *          rejects, or with the signal's reason (an AbortError) where the
  *          load would request a page after the abort
  * @remarks Loads one page after the other, until the limit is reached or a
- *          page with less than rowsPerPage rows (the last one) was read
+ *          page with less than rowsPerPage rows (the last one) was read.
+ *          A row whose id it has read already is skipped: a record added in
+ *          front between two page loads shifts the rows back, so the next
+ *          page repeats the last row of the page before. A page with nothing
+ *          but such rows ends the load too (a backend which ignores the page)
  */
 export declare const dataGridLoadFirstRows: (loadData: IDataGridCallbacks["loadData"], query: DataGridQuery, rowsPerPage: number, rows: Record<number, DataGridRowData>, limit: number, canSelectRow: IDataGridCallbacks["canSelectRow"], signal?: AbortSignal) => Promise<DataGridFirstRows>;
 /**

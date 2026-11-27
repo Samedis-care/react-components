@@ -14,6 +14,13 @@ export interface ModelDataTypeDecimalCurrencyRendererCCParams extends Omit<Curre
      * List the fields used in the callback (dependencies) in here using dot notation
      */
     currencyUpdateFields?: string[];
+    /**
+     * Don't report a currency that `Intl` rejects (missing or not three
+     * letters), for a field whose currency may be missing on purpose: neither
+     * the CurrencyInput while the field is editable nor the NumberFormatter
+     * otherwise reports it (see their `disableErrorReporting`). Default `false`.
+     */
+    disableErrorReporting?: boolean;
 }
 /**
  * Renders a text field

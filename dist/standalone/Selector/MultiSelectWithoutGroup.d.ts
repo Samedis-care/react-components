@@ -34,7 +34,9 @@ export type MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> = Dist
      */
     removed?: DataT[];
     /**
-     * State of the switch control
+     * State of the switch control (`displaySwitch`). The switch has a row of its own
+     * between the search field and the chips, at the right end, with its label
+     * (`switchLabel`) before it.
      */
     switchValue?: boolean;
     /**
@@ -66,7 +68,8 @@ export type MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> = Dist
  * - `outlined`: a chip of a selected or removed entry; a removed entry's chip also has the
  *   class `CcMultiSelectWithoutGroup-removed`, an added entry's `CcMultiSelectWithoutGroup-added`
  * - `changeState`: the text of a change that is not saved yet ("Added", "Removed") in a chip
- * - `switch`: the switch beside the chips
+ * - `switch`: the InlineSwitch around the chips; its switch (`displaySwitch`) has a row of
+ *   its own above them, at the right end, with its label before it
  */
 export type MultiSelectWithoutGroupClassKey = "outlined" | "changeState" | "switch";
 declare const MultiSelectWithoutGroup: <DataT extends MultiSelectorData>(inProps: MultiSelectWithoutGroupProps<DataT>) => React.JSX.Element;

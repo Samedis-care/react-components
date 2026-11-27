@@ -70,6 +70,6 @@ const ToastOutlet = () => {
     const suspensefulMessage = useMemo(() => _jsx(Suspense, { fallback: messageFallback, children: message }), [message]);
     if (!outlet || !toast)
         return null;
-    return (_jsx(ToastErrorBoundary, { onError: outlet.exited, resetKey: outlet.state, children: _jsx(Toast, { open: outlet.state.open, severity: toast.severity, title: suspensefulTitle, message: suspensefulMessage, autoHideDuration: toast.autoHideDuration, anchorOrigin: toast.anchorOrigin, onClose: outlet.close, onExited: outlet.exited }) }));
+    return (_jsx(ToastErrorBoundary, { onError: outlet.exited, resetKey: outlet.state, children: _jsx(Toast, { open: outlet.state.open, severity: toast.severity, title: suspensefulTitle, message: suspensefulMessage, autoHideDuration: toast.autoHideDuration, anchorOrigin: toast.anchorOrigin, phoneVertical: toast.phoneVertical, onClose: outlet.close, onExited: outlet.exited }) }));
 };
 export default React.memo(ToastOutlet);

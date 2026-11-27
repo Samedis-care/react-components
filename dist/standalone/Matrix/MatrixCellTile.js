@@ -33,7 +33,7 @@ export const MatrixTileHighlight = styled("div", {
     width: "100%",
     height: "100%",
     borderRadius: theme.shape.borderRadius,
-    boxShadow: highlightRing(theme),
+    ...highlightRing(theme),
 }));
 export const MatrixTilePlaceholder = styled("div", {
     name: "CcMatrixCellTile",
@@ -64,9 +64,10 @@ const MatrixCellTile = (inProps) => {
             placeholder != null ? (_jsx(MatrixTilePlaceholder, { className: classes?.placeholder, children: placeholder })) : null;
     }
     else if (items.length === 1 || pairLayout === "split") {
+        const stacked = items.length > 1 && splitDirection === "column";
         content = items
             .slice(0, 2)
-            .map((item) => (_jsx(React.Fragment, { children: wrap(item, _jsx(MatrixTileItem, { item: item })) }, item.key)));
+            .map((item) => (_jsx(React.Fragment, { children: wrap(item, _jsx(MatrixTileItem, { item: item, stacked: stacked })) }, item.key)));
     }
     else {
         // One box: one ring if either entry is highlighted, and one renderItem

@@ -3,6 +3,7 @@ import React, { useCallback, useContext, useLayoutEffect, useMemo, useRef, useSt
 import { styled, useThemeProps } from "@mui/material";
 import { useFormContextLite } from "../Form";
 import { captureError } from "../../../framework/ErrorReporting";
+import focusContainer from "../../../utils/internal/focusContainer";
 export const FlowStageContext = React.createContext(null);
 /**
  * The stage API of the nearest FlowEngine, for components below a stage (a stepper,
@@ -130,7 +131,7 @@ const FlowEngine = (inProps) => {
         // in the new stage or elsewhere outside the flow stays where it is
         if (active && !active.contains(root))
             return;
-        root.focus({ preventScroll: true });
+        focusContainer(root);
         if (isStartScrolledAway(root))
             root.scrollIntoView({ block: "start" });
     }, [stage, disableAutoFocus]);
@@ -138,6 +139,6 @@ const FlowEngine = (inProps) => {
     if (!StageComp)
         throw unknownStageError(stage);
     const stageLabel = stageLabels?.[stage];
-    return (_jsx(FlowStageContext.Provider, { value: context, children: _jsx(FlowEngineRoot, { ref: rootRef, tabIndex: -1, role: stageLabel ? "group" : undefined, "aria-label": stageLabel, children: _jsx(StageComp, { formProps: formProps, goToStage: goToStage, safeGoToStage: safeGoToStage, stage: stage }) }) }));
+    return (_jsx(FlowStageContext.Provider, { value: context, children: _jsx(FlowEngineRoot, { ref: rootRef, role: stageLabel ? "group" : undefined, "aria-label": stageLabel, children: _jsx(StageComp, { formProps: formProps, goToStage: goToStage, safeGoToStage: safeGoToStage, stage: stage }) }) }));
 };
 export default React.memo(FlowEngine);

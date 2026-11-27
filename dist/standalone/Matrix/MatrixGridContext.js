@@ -2,13 +2,24 @@ import React, { useContext } from "react";
 export const defaultIsCellSelectable = (cell) => cell === undefined;
 export const defaultIsCellOccupied = (cell) => cell !== undefined;
 /**
+ * The record's own entry for a column key (a row's cell, an aggregate row's
+ * badge), undefined without one. Column keys are the consumer's ids, so a key
+ * named like an Object.prototype member ("constructor", "toString") is a plain
+ * key: it must not find the inherited member.
+ */
+export const ownEntryOf = (record, key) => record != null && Object.hasOwn(record, key) ? record[key] : undefined;
+/**
  * May a range start on, or run through, this cell? The one implementation: the
  * store clamps and paints with it, and the cell decides with it whether to
  * listen for a press at all.
  */
 export const isCellSelectableIn = (config, row, column, columnIndex) => config.selectable &&
     row.selectable !== false &&
-    config.isCellSelectable(row.cells[column.key], { row, column, columnIndex });
+    config.isCellSelectable(ownEntryOf(row.cells, column.key), {
+        row,
+        column,
+        columnIndex,
+    });
 export const MatrixConfigContext = React.createContext(undefined);
 export const useMatrixConfig = () => {
     const ctx = useContext(MatrixConfigContext);

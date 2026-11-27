@@ -6,9 +6,16 @@ import InfiniteScroll from "../InfiniteScroll";
 import timestampToAge from "../../utils/timestampToAge";
 import useCCTranslations from "../../utils/useCCTranslations";
 import useCurrentLocale from "../../utils/useCurrentLocale";
+import visuallyHidden from "../../utils/internal/visuallyHidden";
 /** The longest delay browsers support for a timer (about 24.8 days) */
 const MAX_TIMER_DELAY = 2 ** 31 - 1;
 const DEFAULT_REFRESH_INTERVAL = 60000;
+/**
+ * How long the announcement of new notifications stays in the status region:
+ * then it is removed, so the region holds no outdated text and the next
+ * announcement is a new text, also when it reads the same.
+ */
+const ANNOUNCEMENT_DURATION = 7000;
 /**
  * The delay of the polling interval for a `refreshInterval`, or `null` for no
  * polling. Browsers convert a delay to a 32-bit integer: they run `0`, `NaN`,
@@ -59,9 +66,15 @@ const readStyle = {
     ...unreadStyle,
     opacity: 0.7,
 };
+/**
+ * The default row's "Unread", which only screen readers read: the row's dimmed
+ * look is not seen by them. It sits in the top left corner of the list item.
+ */
+const UnreadLabel = styled("span")(visuallyHidden);
 const DefaultRenderer = (notification) => {
     const locale = useCurrentLocale();
-    return (_jsx(Box, { sx: { p: 2 }, style: notification.read ? readStyle : unreadStyle, children: _jsxs(Grid, { container: true, spacing: 2, children: [_jsx(Grid, { size: "grow", children: notification.image && (_jsx("img", { style: defaultImageStyle, src: notification.image, alt: "" })) }), _jsx(Grid, { size: 9, children: _jsx(Box, { sx: { py: 2 }, children: _jsxs(Grid, { container: true, spacing: 2, children: [_jsx(Grid, { size: 12, children: _jsx(Typography, { children: notification.message }) }), _jsx(Grid, { size: 12, children: _jsxs(Typography, { variant: "body2", children: [_jsx(React.Fragment, { children: notification.origin && _jsxs(_Fragment, { children: [notification.origin, " "] }) }), _jsx(Tooltip, { title: notification.created.toLocaleString(locale), children: _jsx("span", { children: timestampToAge(notification.created) }) })] }) })] }) }) }), _jsx(Grid, { size: 12, children: _jsx(Divider, {}) })] }) }, notification.id));
+    const { t } = useCCTranslations();
+    return (_jsxs(Box, { sx: { p: 2 }, style: notification.read ? readStyle : unreadStyle, children: [!notification.read && (_jsx(UnreadLabel, { children: `${t("standalone.notifications.unread")} ` })), _jsxs(Grid, { container: true, spacing: 2, children: [_jsx(Grid, { size: "grow", children: notification.image && (_jsx("img", { style: defaultImageStyle, src: notification.image, alt: "" })) }), _jsx(Grid, { size: 9, children: _jsx(Box, { sx: { py: 2 }, children: _jsxs(Grid, { container: true, spacing: 2, children: [_jsx(Grid, { size: 12, children: _jsx(Typography, { children: notification.message }) }), _jsx(Grid, { size: 12, children: _jsxs(Typography, { variant: "body2", children: [_jsx(React.Fragment, { children: notification.origin && _jsxs(_Fragment, { children: [notification.origin, " "] }) }), _jsx(Tooltip, { title: notification.created.toLocaleString(locale), children: _jsx("span", { children: timestampToAge(notification.created) }) })] }) })] }) }) }), _jsx(Grid, { size: 12, children: _jsx(Divider, {}) })] })] }, notification.id));
 };
 const StyledInfiniteScroll = styled(InfiniteScroll, {
     name: "CcNotifications",
@@ -70,10 +83,35 @@ const StyledInfiniteScroll = styled(InfiniteScroll, {
     height: "50vh",
     overflow: "auto",
 });
+// the rows as a list: screen readers say how many there are and move from row
+// to row. Without markers, as MUI's List: role="list" keeps the list role,
+// which WebKit drops from a list styled list-style: none.
+const StyledList = styled("ul", {
+    name: "CcNotifications",
+    slot: "list",
+})({
+    listStyle: "none",
+    margin: 0,
+    padding: 0,
+});
+// a row, positioned as MUI's ListItem is, so what the row positions
+// absolutely (the default row's visually hidden "Unread") stays in it
+const StyledListItem = styled("li", {
+    name: "CcNotifications",
+    slot: "listItem",
+})({
+    position: "relative",
+});
 const StyledHeader = styled(Typography, {
     name: "CcNotifications",
     slot: "header",
 })({});
+// announces new notifications (a live region must exist before its text
+// changes, so it is rendered while announcements are on)
+const StyledAnnouncement = styled("span", {
+    name: "CcNotifications",
+    slot: "announcement",
+})(visuallyHidden);
 const Notifications = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcNotifications" });
     const { t } = useCCTranslations();
@@ -81,7 +119,7 @@ const Notifications = (inProps) => {
     const dialogId = useId();
     const [anchor, setAnchor] = useState(null);
     const open = anchor !== null;
-    const { onOpen, loadLatest, loadRead, loadUnread, refreshInterval, unreadCount, classes, className, IconButtonProps, PopoverProps: popoverProps, } = props;
+    const { onOpen, loadLatest, loadRead, loadUnread, refreshInterval, unreadCount, disableAnnouncement, classes, className, IconButtonProps, PopoverProps: popoverProps, } = props;
     const customPopoverSlots = popoverProps?.slots;
     const popoverSlots = useMemo(() => ({
         ...customPopoverSlots,
@@ -118,7 +156,7 @@ const Notifications = (inProps) => {
         setAnchor(null);
     }, [setAnchor]);
     const handleLoadLatest = useCallback(() => {
-        loadLatest();
+        void loadLatest();
     }, [loadLatest]);
     const pollingDelay = getPollingDelay(refreshInterval);
     useEffect(() => {
@@ -131,13 +169,58 @@ const Notifications = (inProps) => {
             window.clearInterval(intervalHandle);
         };
     }, [handleLoadLatest, pollingDelay]);
+    // the first load: the count it brings is not announced
+    const [firstLoadDone, setFirstLoadDone] = useState(false);
     useEffect(() => {
-        // initial load
-        handleLoadLatest();
+        let mounted = true;
+        const done = () => {
+            if (mounted)
+                setFirstLoadDone(true);
+        };
+        const load = loadLatest();
+        // React renders the state the app sets before its promise settles
+        // together with firstLoadDone (its render waits for the promise
+        // callbacks), so counting starts from the first load's count. A
+        // rejection stays unhandled, as on every other call: the promise
+        // finally() returns rejects with it.
+        if (load instanceof Promise)
+            void load.finally(done);
+        else
+            done();
+        return () => {
+            mounted = false;
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     const Renderer = props.notificationRenderer || DefaultRenderer;
     const notifications = props.notifications.filter((not) => !not.expires || not.expires > new Date());
-    return (_jsxs("div", { className: className, children: [_jsx(IconButton, { size: "large", "aria-label": t("standalone.notifications.title"), ...IconButtonProps, onClick: onIconClick, "aria-haspopup": "dialog", "aria-expanded": open, "aria-controls": open ? dialogId : undefined, children: _jsx(Badge, { badgeContent: unreadCount ?? notifications.filter((not) => !not.read).length, max: 99, color: "error", ...props.BadgeProps, children: _jsx(NotificationsIcon, {}) }) }), _jsx(Popover, { open: open, anchorEl: anchor, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onClose: onClose, ...popoverProps, slots: popoverSlots, slotProps: popoverSlotProps, children: _jsx(Box, { sx: { p: 2 }, children: _jsxs(Grid, { container: true, spacing: 2, children: [_jsx(Grid, { size: 12, children: _jsx(StyledHeader, { component: "h2", variant: "h6", className: classes?.header, id: headerId, children: t("standalone.notifications.title") }) }), _jsx(Grid, { size: 12, children: _jsx(Divider, {}) }), _jsx(Grid, { size: 12, children: _jsx(StyledInfiniteScroll, { loadMoreBottom: loadRead, loadMoreTop: loadUnread, className: classes?.notificationArea ?? "", role: "region", "aria-labelledby": headerId, children: notifications.map((notification) => (_jsx(Renderer, { ...notification }, notification.id))) }) })] }) }) })] }));
+    const unread = unreadCount ?? notifications.filter((not) => !not.read).length;
+    // the unread count as the announcement counts it: null until the first
+    // load is done and while announcements are off, 0 for a negative count or
+    // NaN. A rise from the count of the render before is announced.
+    const counted = firstLoadDone && !disableAnnouncement ? (unread > 0 ? unread : 0) : null;
+    const [lastCounted, setLastCounted] = useState(null);
+    const [announcement, setAnnouncement] = useState(null);
+    if (lastCounted !== counted) {
+        setLastCounted(counted);
+        if (counted === null) {
+            setAnnouncement(null);
+        }
+        else if (lastCounted !== null && counted > lastCounted) {
+            const count = counted - lastCounted;
+            setAnnouncement((prev) => ({ count, id: (prev?.id ?? 0) + 1 }));
+        }
+    }
+    useEffect(() => {
+        if (!announcement)
+            return;
+        const timeout = window.setTimeout(() => setAnnouncement(null), ANNOUNCEMENT_DURATION);
+        return () => window.clearTimeout(timeout);
+    }, [announcement]);
+    return (_jsxs("div", { className: className, children: [_jsx(IconButton, { size: "large", "aria-label": unread > 0
+                    ? t("standalone.notifications.bell-label", { count: unread })
+                    : t("standalone.notifications.title"), ...IconButtonProps, onClick: onIconClick, "aria-haspopup": "dialog", "aria-expanded": open, "aria-controls": open ? dialogId : undefined, children: _jsx(Badge, { badgeContent: unread, max: 99, color: "error", ...props.BadgeProps, children: _jsx(NotificationsIcon, {}) }) }), !disableAnnouncement && (_jsx(StyledAnnouncement, { role: "status", className: classes?.announcement, children: announcement && (_jsx("span", { children: t("standalone.notifications.announce-new", {
+                        count: announcement.count,
+                    }) }, announcement.id)) })), _jsx(Popover, { open: open, anchorEl: anchor, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onClose: onClose, ...popoverProps, slots: popoverSlots, slotProps: popoverSlotProps, children: _jsx(Box, { sx: { p: 2 }, children: _jsxs(Grid, { container: true, spacing: 2, children: [_jsx(Grid, { size: 12, children: _jsx(StyledHeader, { component: "h2", variant: "h6", className: classes?.header, id: headerId, children: t("standalone.notifications.title") }) }), _jsx(Grid, { size: 12, children: _jsx(Divider, {}) }), _jsx(Grid, { size: 12, children: _jsx(StyledInfiniteScroll, { loadMoreBottom: loadRead, loadMoreTop: loadUnread, className: classes?.notificationArea, role: "region", "aria-labelledby": headerId, children: notifications.length > 0 && (_jsx(StyledList, { role: "list", className: classes?.list, children: notifications.map((notification) => (_jsx(StyledListItem, { className: classes?.listItem, children: _jsx(Renderer, { ...notification }) }, notification.id))) })) }) })] }) }) })] }));
 };
 export default React.memo(Notifications);

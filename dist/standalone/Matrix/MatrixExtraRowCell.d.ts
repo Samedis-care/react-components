@@ -17,7 +17,8 @@ export interface MatrixExtraRowCellProps {
      */
     tabStop: boolean;
     /**
-     * Take the focus now (an arrow key moved it here)
+     * Take the focus now (an arrow key moved it here). Once it has, the cell
+     * calls onFocusColumn, which ends the request.
      */
     pullFocus: boolean;
     /**
@@ -25,7 +26,8 @@ export interface MatrixExtraRowCellProps {
      */
     onNavigate: (fromColumnKey: string, to: "previous" | "next" | "first" | "last") => void;
     /**
-     * This cell took the focus, so its row remembers it as the tab stop
+     * This cell took the focus, by a focus event or by answering pullFocus, so
+     * its row remembers it as the tab stop and ends a pending pullFocus
      */
     onFocusColumn: (columnKey: string) => void;
     /**

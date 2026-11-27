@@ -1,5 +1,6 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useRef } from "react";
+import { skeletonClasses } from "@mui/material";
 import isTouchDevice from "../../../utils/isTouchDevice";
 import combineClassNames from "../../../utils/combineClassNames";
 import { DataGridColumnHeaderContentWrapper, useDataGridColumnState, useDataGridColumnsWidthState, useDataGridProps, useDataGridRootRef, } from "../DataGrid";
@@ -14,6 +15,27 @@ export const applyColumnWidthLimits = (column, targetWidth) => {
     targetWidth = Math.min(targetWidth, wishMaxWidth);
     return targetWidth;
 };
+/**
+ * Measures the width each cell needs to show its content in full: the cell's
+ * border box, padding and border included, with the content at its
+ * max-content width. The cells get `width: max-content` for one layout pass
+ * and their own widths back before the browser paints.
+ * @param cells The cells to measure
+ * @returns The widths in px, unrounded, in the order of `cells`
+ */
+const measureContentWidths = (cells) => {
+    const widths = cells.map((cell) => cell.style.width);
+    cells.forEach((cell) => (cell.style.width = "max-content"));
+    const measured = cells.map((cell) => cell.getBoundingClientRect().width);
+    cells.forEach((cell, index) => (cell.style.width = widths[index]));
+    return measured;
+};
+/**
+ * Does a data cell show a value? A row that is still loading shows a
+ * skeleton instead (see Cell).
+ * @param cell The data cell
+ */
+const showsValue = (cell) => !cell.firstElementChild?.classList.contains(skeletonClasses.root);
 const FallbackColumnState = {
     sort: 0,
     sortOrder: undefined,
@@ -92,17 +114,19 @@ const ColumnHeader = (props) => {
                 }
             }
             else {
+                // this column becomes the only sort, which every sortLimit
+                // allows. The other columns get new objects: prevState's
+                // stay as they are
                 for (const key in newColumnState) {
                     if (key === field)
                         continue;
-                    newColumnState[key].sort = 0;
-                    newColumnState[key].sortOrder = undefined;
+                    newColumnState[key] = {
+                        ...newColumnState[key],
+                        sort: 0,
+                        sortOrder: undefined,
+                    };
                 }
                 newColumnState[field].sortOrder = 1;
-                // if sortLimit is null we cancel the operation
-                if (typeof sortLimit === "number" && sortLimit === 0) {
-                    return prevState;
-                }
             }
             return newColumnState;
         });
@@ -156,27 +180,27 @@ const ColumnHeader = (props) => {
         onColumnSortChange(true);
     }, [onColumnSortChange]);
     const internalOnFilterChange = useCallback((newFilter) => onFilterChange(field, newFilter), [field, onFilterChange]);
-    const autoResize = useCallback(() => {
+    // fits the column to its header (label, sort arrow and priority, filter
+    // button) and its values in the rendered rows; rows scrolled out of view
+    // are not rendered, so they don't count
+    const autoResize = useCallback((evt) => {
         const root = gridRoot.current;
         if (!root)
             return;
-        let width = 0;
-        // the column's rendered data cells, by their data-field (see Cell). A
-        // string comparison, not a selector built from the field: a field may
-        // contain dots, spaces, quotes and other characters selectors treat specially
-        const cells = Array.from(root.querySelectorAll(".CcDataGrid-dataCell")).filter((cell) => cell.dataset.field === field);
-        cells.forEach((entry) => {
-            const widthMeasurement = document.createElement("div");
-            widthMeasurement.style.display = "inline";
-            widthMeasurement.style.position = "absolute";
-            widthMeasurement.style.left = "-99999px";
-            widthMeasurement.style.height = getComputedStyle(entry).height;
-            widthMeasurement.innerHTML = entry.innerHTML;
-            document.body.appendChild(widthMeasurement);
-            const entryWidth = widthMeasurement.clientWidth + HEADER_PADDING;
-            document.body.removeChild(widthMeasurement);
-            width = Math.max(width, entryWidth);
-        });
+        // the column's rendered data cells that show a value, by their
+        // data-field (see Cell). A string comparison, not a selector built from
+        // the field: a field may contain dots, spaces, quotes and other
+        // characters selectors treat specially
+        const cells = Array.from(root.querySelectorAll(".CcDataGrid-dataCell")).filter((cell) => cell.dataset.field === field && showsValue(cell));
+        // no values (an empty grid, rows still loading): nothing to fit the
+        // column to, so its width stays
+        if (cells.length === 0)
+            return;
+        const header = evt.currentTarget.closest(".CcDataGrid-headerCell");
+        if (header)
+            cells.push(header);
+        // rounded up: a width cut to the pixel below ends the text in an ellipsis
+        const width = Math.ceil(Math.max(...measureContentWidths(cells)));
         setColumnWidthState((prevState) => ({
             ...prevState,
             [field]: applyColumnWidthLimits(column, width),
@@ -194,6 +218,6 @@ const ColumnHeader = (props) => {
             classes?.columnHeaderContentWrapper,
             filterable && "CcDataGrid-columnHeaderFilterable",
             "column-header-" + column.field,
-        ]), children: _jsx(ColumnHeaderContent, { field: props.column.field, headerName: props.column.headerLabel ?? props.column.headerName, enableResize: true, startDrag: startDrag, autoResize: autoResize, sort: sort, sortOrder: sortOrder, filterable: !!filterable, filter: filter, onFilterChange: internalOnFilterChange, columnType: props.column.type, filterData: props.column.filterData }) }));
+        ]), children: _jsx(ColumnHeaderContent, { field: props.column.field, headerName: props.column.headerLabel ?? props.column.headerName, enableResize: true, startDrag: startDrag, autoResize: autoResize, sortable: !!sortable, onSort: onColumnSortChange, sort: sort, sortOrder: sortOrder, filterable: !!filterable, filter: filter, onFilterChange: internalOnFilterChange, columnType: props.column.type, filterData: props.column.filterData }) }));
 };
 export default React.memo(ColumnHeader);

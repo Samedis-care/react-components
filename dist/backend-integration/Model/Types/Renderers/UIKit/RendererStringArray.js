@@ -10,6 +10,9 @@ import addSlotAttributes from "../../../../../utils/internal/addSlotAttributes";
  *
  * A required field needs at least one entry: while the list is empty, its only
  * input, the one for a new entry, is required; once it has entries, no input is.
+ * Its frame shows that it is required, with or without entries (GroupBox's
+ * `required`): an asterisk after the label, and "Required" before the message in
+ * the group's description.
  */
 class RendererStringArray extends TypeStringArray {
     props;
@@ -55,6 +58,6 @@ const RendererStringArrayComponent = (props) => {
                 ? t("backend-integration.model.types.renderers.string-array.new-entry", { LABEL: label })
                 : t("backend-integration.model.types.renderers.string-array.entry", { LABEL: label, NUM: idx + 1 }),
         }) }, "input_" + idx));
-    return (_jsxs(GroupBox, { label: label, id: id, "aria-describedby": describedBy, children: [value.map((_, idx) => textField(idx)).concat(textField(value.length)), _jsx(FormHelperTextCC, { id: messageId, error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
+    return (_jsxs(GroupBox, { label: label, id: id, "aria-describedby": describedBy, required: visibility.required, children: [value.map((_, idx) => textField(idx)).concat(textField(value.length)), _jsx(FormHelperTextCC, { id: messageId, error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
 };
 export default RendererStringArray;

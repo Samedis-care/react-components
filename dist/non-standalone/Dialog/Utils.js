@@ -37,7 +37,10 @@ export const showInputDialog = (pushDialog, props) => pushDialogPromise(pushDial
 /**
  * Shows an info dialog
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
- * @param props The dialog properties (with buttons optional, defaults to an Okay button)
+ * @param props The dialog properties (with buttons optional, defaults to an Okay button).
+ *              `onClose` is called when the dialog has closed, in each of the ways that
+ *              resolve the promise (see `@returns`), once, and before the code awaiting the
+ *              promise continues.
  * @returns A DialogPromise that resolves when the dialog is closed: by a button once its
  *          handler has ended, by Escape or a backdrop click. Its `close()` closes the dialog
  *          and resolves it at once.
@@ -55,13 +58,24 @@ export const showInputDialog = (pushDialog, props) => pushDialogPromise(pushDial
  * info.close();
  */
 export const showInfoDialog = (pushDialog, props) => {
-    const { title, message, buttons } = props;
+    const { title, message, buttons, onClose } = props;
+    // whether onClose was called: the promise's close() can follow the dialog's own close,
+    // or come first while a button's handler still runs, which then closes it again
+    let closed = false;
+    /** resolves the promise and, the first time the dialog closes, calls onClose */
+    const handleClose = (resolve) => {
+        resolve();
+        if (closed)
+            return;
+        closed = true;
+        onClose?.();
+    };
     return pushDialogPromise(pushDialog, (resolve) => (_jsx(InfoDialog, { title: title, message: message, buttons: buttons ?? [
             {
                 text: i18n.t("non-standalone.dialog.okay"),
                 autoFocus: true,
             },
-        ], onClose: resolve })), (resolve) => resolve());
+        ], onClose: () => handleClose(resolve) })), handleClose);
 };
 /** whether `e` is an Error, also one from another realm (an iframe, a VM context) */
 const isError = (e) => e instanceof Error || Object.prototype.toString.call(e) === "[object Error]";

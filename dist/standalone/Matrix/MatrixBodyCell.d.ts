@@ -4,8 +4,34 @@ export declare const MatrixBodyCellRoot: import("@emotion/styled").StyledCompone
 /**
  * The hover hint on a cell that can start a range: a dashed box saying what a
  * click would do. Escape hides it until the pointer moves to another cell.
+ *
+ * It shows addLabel (MatrixAddHintLabel) where the label fits on one line, and
+ * a "+" (MatrixAddHintIcon) in its place where it does not. Layout decides,
+ * nothing is measured: the label and the "+" are the items of a wrapping flex
+ * line, and the hint shows only its last line. A label that fits shares the
+ * line with the "+", which has no width there; a longer one is left alone on
+ * a line above, hidden, and the "+" takes the whole last line. The label stays
+ * in the hint either way, so it remains the hint's text.
  */
 export declare const MatrixAddHint: import("@emotion/styled").StyledComponent<import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof React.ClassAttributes<HTMLDivElement> | keyof React.HTMLAttributes<HTMLDivElement>>, {}>;
+/**
+ * The text of the add hint (addLabel), on one line. It takes all the room its
+ * line has and centers itself in it, so the "+" next to it gets none, and it
+ * never shrinks: a label wider than the hint does not fit next to the "+", and
+ * leaves the "+" a line of its own (see MatrixAddHint).
+ */
+export declare const MatrixAddHintLabel: import("@emotion/styled").StyledComponent<import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>, keyof React.ClassAttributes<HTMLSpanElement> | keyof React.HTMLAttributes<HTMLSpanElement>>, {}>;
+/**
+ * The "+" of the add hint, shown where addLabel does not fit (see
+ * MatrixAddHint). Of no width of its own: beside a label that fits it gets no
+ * room and is not seen; alone on the hint's last line it takes all of it, the
+ * glyph in the middle.
+ *
+ * Its tooltip is addLabel, so it catches the pointer even in the blank-cell
+ * hint, which lets presses through to the cell: a press on it still reaches
+ * the cell and starts a range there, as one on the hint does.
+ */
+export declare const MatrixAddHintIcon: import("@emotion/styled").StyledComponent<import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>, keyof React.ClassAttributes<HTMLSpanElement> | keyof React.HTMLAttributes<HTMLSpanElement>>, {}>;
 /**
  * The add affordance on a cell that is selectable but not blank.
  *

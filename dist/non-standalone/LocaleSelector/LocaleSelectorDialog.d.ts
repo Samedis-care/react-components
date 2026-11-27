@@ -67,7 +67,8 @@ export interface LocaleSelectorDialogProps extends LocaleSelectorDialogCommonPro
     onChange?: (locale: string) => void;
     /**
      * Called when the dialog closes: by its close button, Escape or a backdrop click,
-     * or once a picked locale is applied (after `onChange`). It gets no arguments;
+     * or once a picked locale is applied (after `onChange`). Escape in the search box
+     * clears its query first; the next Escape closes the dialog. It gets no arguments;
      * `onChange` tells which locale was picked. While a picked language loads, the
      * close button, Escape and a backdrop click are ignored.
      * - Shown with `pushDialog`, the dialog closes itself, then calls it.

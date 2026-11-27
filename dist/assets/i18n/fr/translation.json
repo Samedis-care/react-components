@@ -13,7 +13,8 @@
 			"menu-toggle": "Basculer le menu",
 			"collapse-menu": "Réduire le menu",
 			"expand-menu": "Développer le menu",
-			"close-menu": "Fermer le menu"
+			"close-menu": "Fermer le menu",
+			"main-menu": "Menu principal"
 		},
 		"uikit": {
 			"info": "Plus d'informations",
@@ -36,17 +37,34 @@
 			}
 		},
 		"date-picker": {
+			"open-date-time": "Choisir la date et l'heure",
+			"open-date-time-selected": "Choisir la date et l'heure, la date et l'heure sélectionnées sont le {{DATE}} à {{TIME}}",
 			"error": {
 				"invalid": "Entrez une date valide",
 				"min-date": "Entrez une date égale ou postérieure au {{DATE}}",
 				"max-date": "Entrez une date égale ou antérieure au {{DATE}}",
 				"past": "Entrez la date du jour ou une date ultérieure",
 				"future": "Entrez la date du jour ou une date antérieure",
-				"unavailable": "Entrez une date qui peut être sélectionnée"
+				"unavailable": "Entrez une date qui peut être sélectionnée",
+				"min-date-time": "Entrez une date et une heure égales ou postérieures au {{DATE}}",
+				"max-date-time": "Entrez une date et une heure égales ou antérieures au {{DATE}}",
+				"min-time": "Entrez une heure égale ou postérieure à {{TIME}}",
+				"max-time": "Entrez une heure égale ou antérieure à {{TIME}}",
+				"past-date-time": "Entrez la date et l'heure actuelles ou un moment ultérieur",
+				"future-date-time": "Entrez la date et l'heure actuelles ou un moment antérieur",
+				"unavailable-time": "Entrez une heure qui peut être sélectionnée",
+				"minutes-step": "Entrez les minutes par pas de {{STEP}}"
 			}
 		},
 		"notifications": {
-			"title": "Notifications"
+			"title": "Notifications",
+			"bell-label_one": "Notifications, {{count}} non lue",
+			"bell-label_many": "Notifications, {{count}} non lues",
+			"bell-label_other": "Notifications, {{count}} non lues",
+			"announce-new_one": "{{count}} nouvelle notification",
+			"announce-new_many": "{{count}} nouvelles notifications",
+			"announce-new_other": "{{count}} nouvelles notifications",
+			"unread": "Non lue"
 		},
 		"how-it-works": {
 			"title": "Comment ça fonctionne"
@@ -241,6 +259,9 @@
 			"zoom-out": "Zoom arrière",
 			"reset-zoom": "Réinitialiser le zoom"
 		},
+		"group-box": {
+			"required": "Obligatoire"
+		},
 		"phone-number": {
 			"invalid": "Entrez le numéro de téléphone correct"
 		},
@@ -265,6 +286,7 @@
 				"instructions-signed": "La signature enregistrée est affichée. Pour signer à nouveau, effacez-la d'abord."
 			},
 			"sign-here": "Signez ici numériquement",
+			"not-signed": "Pas signé",
 			"required": "Obligatoire"
 		},
 		"signal-portlet": {
@@ -285,7 +307,11 @@
 			"label": "Chargement…"
 		},
 		"matrix": {
+			"row-header-actions": "Ouvre les actions de cette ligne.",
 			"tile-more": "{{count}} de plus :",
+			"tile-arrow": "vers",
+			"tile-highlighted": "mis en évidence",
+			"tile-dimmed": "atténué",
 			"extra-cell-add": "Ajouter"
 		}
 	},
@@ -317,7 +343,7 @@
 			"types": {
 				"renderers": {
 					"boolean": {
-						"true": "Qui",
+						"true": "Oui",
 						"false": "Non"
 					},
 					"date": {
@@ -354,6 +380,9 @@
 				"boolean": {
 					"true": "Oui",
 					"false": "Non"
+				},
+				"color": {
+					"validation-error": "Veuillez entrer une couleur valide, par exemple #336699"
 				}
 			}
 		}
@@ -363,16 +392,20 @@
 			"delete": {
 				"confirm-dialog": {
 					"title": "Supprimer",
-					"message": "Souhaitez-vous vraiment supprimer les entrées {{NUM}} ?",
-					"messageInverted": "Voulez-vous vraiment tout supprimer sauf les entrées {{NUM}} ?",
+					"message_one": "Souhaitez-vous vraiment supprimer {{count}} entrée ?",
+					"message_many": "Souhaitez-vous vraiment supprimer {{count}} entrées ?",
+					"message_other": "Souhaitez-vous vraiment supprimer {{count}} entrées ?",
+					"messageInverted_one": "Voulez-vous vraiment tout supprimer sauf {{count}} entrée ?",
+					"messageInverted_many": "Voulez-vous vraiment tout supprimer sauf {{count}} entrées ?",
+					"messageInverted_other": "Voulez-vous vraiment tout supprimer sauf {{count}} entrées ?",
 					"buttons": {
-						"yes": "Qui",
+						"yes": "Oui",
 						"no": "Non"
 					}
 				},
 				"error-dialog": {
 					"title": "Erreur",
-					"message": "Echec de la suppression des entrées sélectionnées : {{ERROR}}",
+					"message": "Échec de la suppression des entrées sélectionnées : {{ERROR}}",
 					"buttons": {
 						"okay": "OK"
 					}
@@ -407,6 +440,11 @@
 			"read-only": {
 				"submitting": "Le formulaire est en cours d'enregistrement"
 			},
+			"auto-save": {
+				"saving": "Enregistrement…",
+				"saved": "Enregistré",
+				"failed": "Échec de l'enregistrement"
+			},
 			"tab": {
 				"invalid": "Contient des champs non valides.",
 				"modified": "Contient des champs modifiés."
@@ -417,6 +455,7 @@
 		},
 		"selector": {
 			"loading": "Chargement…",
+			"saving": "Enregistrement…",
 			"loading-error": "Erreur lors de la récupération des données",
 			"unknown-entry": "Entrée inconnue",
 			"selected-count": "Sélectionnés : {{COUNT}}",

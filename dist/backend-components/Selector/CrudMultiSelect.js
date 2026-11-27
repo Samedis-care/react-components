@@ -15,7 +15,7 @@ const CrudMultiSelect = (props, ref) => {
     const { errorComponent: ErrorComponent } = props;
     // a read-only control writes nothing either
     const crudSelect = useCrudSelect({ ...props, blockWrites: props.blockWrites || props.readOnly }, ref);
-    const { loading, error, loadError, selected, added, removed, pendingChanges, initialRawData, handleSelect, modelToSelectorData, } = crudSelect;
+    const { loading, error, loadError, selected, added, removed, pendingChanges, writing, initialRawData, handleSelect, modelToSelectorData, } = crudSelect;
     // an explicit prop wins, as over the other states the field takes from its props
     const dirty = props.dirty ?? (props.showDirtyState ? pendingChanges : undefined);
     // until the selection is loaded nothing can be picked or removed, and the components
@@ -23,11 +23,11 @@ const CrudMultiSelect = (props, ref) => {
     const locked = loading || !!loadError;
     return (_jsx(CrudSelectContext.Provider, { value: crudSelect, children: _jsxs(DialogContextProvider
         // for creating dialogs inside end adornment of selector with access to selector data
-        , { children: [error && _jsx(ErrorComponent, { error: error }), _jsx("div", { "aria-busy": loading, children: _jsx(BackendMultiSelect, { ...props, disabled: props.disabled || locked, 
+        , { children: [error && _jsx(ErrorComponent, { error: error }), _jsx("div", { "aria-busy": loading || writing, children: _jsx(BackendMultiSelect, { ...props, disabled: props.disabled || locked, 
                         // until the selection is loaded there is nothing to list
                         readOnly: props.readOnly && !locked, endAdornment: locked ? undefined : props.endAdornment, endAdornmentLeft: locked ? undefined : props.endAdornmentLeft, selected: selected.map((entry) => entry.value), added: added, removed: removed, dirty: dirty, onSelect: handleSelect, modelToSelectorData: modelToSelectorData, 
                         // the connector's records seed the selected cache: modelToSelectorData tells them apart
-                        initialData: initialRawData }) }), _jsx(CrudSelectLoadState, { loading: loading, loadError: loadError, label: props.label })] }) }));
+                        initialData: initialRawData }) }), _jsx(CrudSelectLoadState, { loading: loading, loadError: loadError, label: props.label, writing: writing })] }) }));
 };
 const ForwardedCrudMultiSelect = forwardRef(CrudMultiSelect);
 const MemoizedCrudMultiSelect = React.memo(ForwardedCrudMultiSelect);

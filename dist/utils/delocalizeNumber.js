@@ -92,30 +92,27 @@ const FORMAT_SYMBOL_PARTS = [
     "literal",
 ];
 /**
- * Whether a value without a digit is empty: nothing but blanks and the symbols the format writes
- * around a number ("€", "%", "kr", "Cg."), which is what is left when the user deletes the
- * digits of a formatted number. Anything else, such as "abc", a separator or a minus sign, is text
- * typed in place of a number.
- * @param value The value, without a digit
+ * Removes the symbols the format writes around a number from a value: "€", "%", "kr", "Cg." and
+ * the blanks between them and the number. A . or , in a symbol is no separator: "Cg. 1,234.50"
+ * (XCG in en) becomes "1,234.50", whose only . is the decimal separator.
+ * @param value The value
  * @param options The number formatting options used to format the number
  */
-const isEmptyWithoutDigits = (value, options) => {
-    if (value.trim() === "")
-        return true;
-    const symbols = Intl.NumberFormat(getCurrentLocale(ccI18n), options)
-        .formatToParts(1)
-        .filter((part) => FORMAT_SYMBOL_PARTS.includes(part.type))
-        .map((part) => part.value);
-    return (symbols
-        .reduce((rest, symbol) => rest.split(symbol).join(""), value)
-        .trim() === "");
-};
+const removeFormatSymbols = (value, options) => Intl.NumberFormat(getCurrentLocale(ccI18n), options)
+    .formatToParts(1)
+    .filter((part) => FORMAT_SYMBOL_PARTS.includes(part.type))
+    .map((part) => part.value)
+    // a symbol that contains another one goes first: "US dollars" (currencyDisplay "name")
+    // contains the blank the format writes before it
+    .sort((a, b) => b.length - a.length)
+    .reduce((rest, symbol) => rest.split(symbol).join(""), value);
 /**
  * Removes group separators from the given value and replaces the decimal separator with a dot for
- * usage with parseFloat(...). Returns an empty string if value is empty, and "NaN" if it is no
- * number:
- * - text without a digit that is not empty ("abc", ".", "-"); blanks and the format's own symbols
- *   ("€" of a currency format) count as empty (see isEmptyWithoutDigits)
+ * usage with parseFloat(...). The symbols the format writes around a number ("€" of a currency
+ * format, "Cg." of XCG) are no part of it (see removeFormatSymbols). Returns an empty string if
+ * value is empty, and "NaN" if it is no number:
+ * - text without a digit that is not empty ("abc", ".", "-"); blanks and the format's own symbols,
+ *   which is what is left when the user deletes the digits of a formatted number, count as empty
  * - a value whose . and , don't fit the locale's format (see fitsLocaleFormat), so that a typo
  *   such as "1.234.5" in de is not read as another number.
  *
@@ -126,15 +123,17 @@ const isEmptyWithoutDigits = (value, options) => {
  * @param options The number formatting options used to format the number
  */
 const delocalizeNumber = (value, options) => {
-    if (!/[0-9]/.test(value)) {
-        return isEmptyWithoutDigits(value, options) ? "" : "NaN";
-    }
-    if (!fitsLocaleFormat(value, options))
+    if (value.trim() === "")
+        return "";
+    const number = removeFormatSymbols(value, options);
+    if (!/[0-9]/.test(number))
+        return number.trim() === "" ? "" : "NaN";
+    if (!fitsLocaleFormat(number, options))
         return "NaN";
-    const decimal = getDecimalSeparator(value, options);
-    const unsigned = value
+    const decimal = getDecimalSeparator(number, options);
+    const unsigned = number
         .replace(new RegExp("[^0-9\\" + decimal + "]", "g"), "")
         .replace(new RegExp("\\" + decimal, "g"), ".");
-    return isNegativeNumberText(value) ? "-" + unsigned : unsigned;
+    return isNegativeNumberText(number) ? "-" + unsigned : unsigned;
 };
 export default delocalizeNumber;

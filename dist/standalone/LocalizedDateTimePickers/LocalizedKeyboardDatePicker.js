@@ -1,4 +1,9 @@
 import { Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
+// MUI types every date of the props as its PickerValidDate, which stays `any`
+// in a program that loads no date adapter's types. This loads AdapterMoment's,
+// and keeps the reference in the declaration file the library ships, so an
+// app that imports the picker gets its dates typed as Moment.
+/// <reference types="@mui/x-date-pickers/AdapterMoment" preserve="true" />
 import React, { useCallback, useMemo } from "react";
 import { DatePicker, LocalizationProvider, } from "@mui/x-date-pickers";
 import { useThemeProps } from "@mui/material";
@@ -12,14 +17,16 @@ import withAccessibleError from "./withAccessibleError";
 import withRequiredSections from "./withRequiredSections";
 import useFieldBlur from "./useFieldBlur";
 import withFieldName from "./withFieldName";
+import withFittingSections from "./withFittingSections";
 import withReportWhenDone from "./withReportWhenDone";
 import calendarNameSlotProps from "./calendarNameSlotProps";
 import calendarFocusRingSlotProps from "./calendarFocusRingSlotProps";
 import OpenPickerButton from "./OpenPickerButton";
+import usePickerOpen from "./usePickerOpen";
 const NoIcon = () => {
     return _jsx(_Fragment, {});
 };
-const LocalizedKeyboardDatePicker = (inProps) => {
+const LocalizedKeyboardDatePicker = (inProps, ref) => {
     const props = useThemeProps({
         props: inProps,
         name: "CcLocalizedKeyboardDatePicker",
@@ -35,14 +42,15 @@ const LocalizedKeyboardDatePicker = (inProps) => {
         ...(hideIcon && { openPickerIcon: NoIcon }),
     }), [consumerSlots, hideIcon]);
     const localeText = useMuiLocaleData();
-    const draft = usePickerDraft(otherProps.value, otherProps.onChange, publishIntermediateValues, otherProps.defaultValue);
+    const draft = usePickerDraft(otherProps.value, otherProps.onChange, publishIntermediateValues, otherProps.defaultValue, otherProps.onAccept);
     const validation = usePickerValidationError(otherProps.onError);
     const errorMessage = usePickerErrorMessage(validation.shownError, {
         minDate: otherProps.minDate,
         maxDate: otherProps.maxDate,
+        format: otherProps.format,
     });
     const withFieldBlur = useFieldBlur();
-    const { settle, accept } = draft;
+    const { settle } = draft;
     const consumerOnOpen = otherProps.onOpen;
     const handleOpen = useCallback(() => {
         // the calendar renders from the value it is given, so a half-typed date
@@ -50,13 +58,20 @@ const LocalizedKeyboardDatePicker = (inProps) => {
         settle();
         consumerOnOpen?.();
     }, [settle, consumerOnOpen]);
-    const consumerOnAccept = otherProps.onAccept;
-    const handleAccept = useCallback((value, context) => {
-        // a date the calendar accepted is reported at once, see onChange
-        accept(value, context);
-        consumerOnAccept?.(value, context);
-    }, [accept, consumerOnAccept]);
-    return (_jsx(LocalizationProvider, { localeText: localeText, children: _jsx(DatePicker, { format: "L", ...otherProps, value: draft.value, onChange: draft.onChange, onOpen: handleOpen, onAccept: handleAccept, onError: validation.onError, slots: slots, slotProps: {
+    // closes the calendar when the picker gets disabled or read-only
+    const openState = usePickerOpen({
+        open: otherProps.open,
+        onOpen: handleOpen,
+        onClose: otherProps.onClose,
+        // reports the date picked in the calendar, as a click outside does
+        onDismiss: draft.finish,
+        disabled: otherProps.disabled,
+        readOnly: otherProps.readOnly,
+    });
+    return (_jsx(LocalizationProvider, { localeText: localeText, children: _jsx(DatePicker, { ...otherProps, ref: ref, value: draft.value, onChange: draft.onChange, open: openState.open, onOpen: openState.onOpen, onClose: openState.onClose, 
+            // reports a date the calendar accepted at once, and passes what is
+            // reported to the caller's onAccept, see onAccept
+            onAccept: draft.accept, onError: validation.onError, slots: slots, slotProps: {
                 ...otherProps.slotProps,
                 ...calendarNameSlotProps(otherProps.slotProps, {
                     name: ariaLabel,
@@ -86,11 +101,15 @@ const LocalizedKeyboardDatePicker = (inProps) => {
                         // for ours is not handed a prop it would pass on to the DOM.
                         ...(disableClearable === undefined ? {} : { disableClearable }),
                     }), errorMessage);
-                    return withFieldBlur(ownerState, withFieldName(withReportWhenDone(fieldProps, draft), ariaLabel), {
+                    return withFieldBlur(ownerState, withFieldName(withFittingSections(withReportWhenDone(fieldProps, draft)), ariaLabel), {
                         name: otherProps.name,
                         onFieldFocus: validation.onFieldFocus,
                     });
                 },
             } }) }));
 };
-export default React.memo(withMuiFieldState(LocalizedKeyboardDatePicker));
+// withMuiFieldState hands the ref on to the picker, and the picker to MUI's,
+// which puts it on the field's root div, but it types its result as a plain
+// component type, whose ref would be a class instance
+const LocalizedKeyboardDatePickerWithFieldState = withMuiFieldState(React.forwardRef(LocalizedKeyboardDatePicker));
+export default React.memo(LocalizedKeyboardDatePickerWithFieldState);

@@ -20,6 +20,175 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-11-27 | [useFormState reads the Form's lite context, so its component does not render again on every change of a form value](2026-11-27-use-form-state-reads-lite-form-context.md) | behavior |
+| 2026-11-27 | [The status region under a CRUD select stays in the page, and says "Loading…" once the load takes 100ms](2026-11-27-crud-select-status-region-stays.md) | behavior |
+| 2026-11-27 | [A date picker at its own width grows to fit its date](2026-11-27-picker-field-fits-its-date.md) | behavior |
+| 2026-11-27 | [RoutedTabs needs a name: `aria-label` or `aria-labelledby`](2026-11-27-routed-tabs-name-required.md) | type |
+| 2026-11-27 | [A toast's title and message are written into it a frame after it appears](2026-11-27-toast-text-written-a-frame-later.md) | behavior |
+| 2026-11-27 | [TextFieldWithHelp passes on all of its slotProps and every onChange argument](2026-11-27-text-field-with-help-passes-all-slot-props.md) | behavior |
+| 2026-11-27 | [DialogTitle's close icon has the color of MUI's default IconButton](2026-11-27-dialog-title-close-icon-action-color.md) | behavior |
+| 2026-11-27 | [InfiniteScroll loads more on top when focus reaches its first row](2026-11-27-infinite-scroll-loads-on-focus-of-first-row.md) | behavior |
+| 2026-11-27 | [SignDialog's heading holds only the title; the close button sits beside it](2026-11-27-sign-dialog-close-button-beside-title.md) | behavior |
+| 2026-11-27 | [SignalPortlet applies `classes.lastUpdatedAt`, `refreshIconButton` and `refreshIcon`, and an item's `classes.listText`](2026-11-27-signal-portlet-all-classes-applied.md) | behavior |
+| 2026-11-27 | [InlineSwitch's theme defaults leave out `visible`](2026-11-27-inline-switch-theme-default-props-no-visible.md) | type |
+| 2026-11-27 | [Notifications renders its rows as a list, and the default row says "Unread"](2026-11-27-notifications-rows-are-a-list.md) | behavior |
+| 2026-11-27 | [A dialog button whose handler fails shows the error in an error dialog](2026-11-27-dialog-button-handler-errors-shown.md) | behavior |
+| 2026-11-27 | [FormDialog closes after its button's handler, as the other message dialogs do](2026-11-27-form-dialog-closes-after-handler.md) | behavior |
+| 2026-11-27 | [The number inputs pass on a function-form `slotProps.htmlInput` and its ref](2026-11-27-number-inputs-html-input-slot-props.md) | behavior |
+| 2026-11-27 | [A RoutedTabs panel that suspends shows a loader inside the panel, and the tab bar stays](2026-11-27-routed-tabs-panel-loads-inside-panel.md) | behavior |
+| 2026-11-27 | [The default Back button shows a hover](2026-11-27-default-back-button-hover.md) | behavior |
+| 2026-11-27 | [MultiLanguageInput shows a disabled field while `enabledLanguages` is empty, and a repeated language once](2026-11-27-multi-language-input-empty-and-repeated-languages.md) | behavior |
+| 2026-11-27 | [Escape in the locale selector's search box clears the query before it closes the dialog](2026-11-27-locale-selector-escape-clears-search.md) | behavior |
+| 2026-11-27 | [The date pickers close their calendar when they get disabled or read-only](2026-11-27-picker-calendar-closes-when-disabled.md) | behavior |
+| 2026-11-27 | [InfiniteScroll: a `callBackDebounce` above 2^31 - 1 or `Infinity` makes no call](2026-11-27-infinite-scroll-endless-debounce-holds-calls.md) | behavior |
+| 2026-11-27 | [InlineSwitch's theme defaults leave out the props of a single switch](2026-11-27-inline-switch-theme-default-props.md) | type |
+| 2026-11-27 | [InlineSwitch's switch row is a `<label>` of spans, not a MUI Grid](2026-11-27-inline-switch-label-row-without-grid.md) | behavior |
+| 2026-11-27 | [HowToBoxTranslate is removed; `translatedStrings` turns a translated list into entries](2026-11-27-how-to-box-translate-removed.md) | type |
+| 2026-11-27 | [A click on the RoutedMenu entry of the current location replaces the history entry](2026-11-27-routed-menu-current-location-replaces.md) | behavior |
+| 2026-11-27 | [A GroupBox is as tall as its content in every parent](2026-11-27-group-box-sizes-to-content.md) | behavior |
+| 2026-11-27 | [An inline edit in BackendDataGrid updates its row in place instead of reloading the grid, and `renderDataGridRecordUsingModel` takes the model only](2026-11-27-data-grid-inline-edit-updates-row-in-place.md) | behavior, type |
+| 2026-11-27 | [Lazy controls and CrudMultiSelect's validation read the Form's lite context, which carries the custom-field callbacks](2026-11-27-lazy-controls-read-lite-form-context.md) | type, behavior |
+| 2026-11-27 | [`LazyConnector.read` of a record whose delete is queued rejects instead of throwing](2026-11-27-lazy-connector-read-rejects-for-queued-delete.md) | behavior |
+| 2026-11-27 | [InfoBox's headingVariant sets only the look, and headingComponent sets the box's heading](2026-11-27-info-box-heading-variant-only-styles.md) | behavior |
+| 2026-11-27 | [The backend selectors convert their shown entries again for a new `modelToSelectorData`, and load them again for another `modelFetch` or a new `refreshToken`](2026-11-27-backend-selectors-shown-entries-follow-props.md) | behavior |
+| 2026-11-27 | [SignaturePad's props type is `SignaturePadProps`, exported from the package root](2026-11-27-signature-pad-props-type-renamed.md) | type |
+| 2026-11-27 | [InfiniteScroll scrolls by default, and the theme styles it through `CcInfiniteScroll`](2026-11-27-infinite-scroll-scrolls-by-default-theme-slot.md) | behavior |
+| 2026-11-27 | [A required string list shows an asterisk and is described as required](2026-11-27-required-string-list-marked.md) | behavior |
+| 2026-11-27 | [InfiniteScroll: a negative or NaN `callBackDebounce` calls at once, as `0` does](2026-11-27-infinite-scroll-negative-debounce-calls-at-once.md) | behavior |
+| 2026-11-27 | [InlineSwitch's label shows the pointer cursor](2026-11-27-inline-switch-label-pointer-cursor.md) | behavior |
+| 2026-11-27 | [HowToBox entries stand 4px apart, and a single entry shows without a bullet](2026-11-27-how-to-box-entry-gap-and-single-entry.md) | behavior |
+| 2026-11-27 | [The Matrix add hint shows a "+" where its label does not fit](2026-11-27-matrix-add-hint-plus-where-label-does-not-fit.md) | behavior |
+| 2026-11-27 | [InfiniteScroll calls loadMoreBottom during a steady scroll, not only once the scroll stops](2026-11-27-infinite-scroll-loads-during-steady-scroll.md) | behavior |
+| 2026-11-27 | [ScrollableSchedule: a week result that is not 7 days fails the week](2026-11-27-scrollable-schedule-week-must-be-7-days.md) | behavior |
+| 2026-11-27 | [A required file or image field shows an asterisk and is described as required](2026-11-27-required-file-and-image-fields-marked.md) | behavior, i18n |
+| 2026-11-27 | [The default error-reporting policy judges an AggregateError by the errors it wraps](2026-11-27-aggregate-error-reporting.md) | behavior |
+| 2026-11-27 | [FlowEngine's stage container is focusable only while it holds the focus](2026-11-27-flow-engine-stage-container-focusable-only-while-focused.md) | behavior |
+| 2026-11-27 | [Notifications announces new notifications](2026-11-27-notifications-announce-new.md) | behavior, i18n, type |
+| 2026-11-27 | [The date pickers' dates are typed as Moment, and their ref as the field's root div](2026-11-27-picker-dates-typed-as-moment.md) | type, behavior |
+| 2026-11-27 | [A create form is dirty by the fields its initialRecord sets](2026-11-27-initial-record-makes-create-form-dirty.md) | behavior |
+| 2026-11-27 | [SignaturePad's className, classes and canvasProps reach the element they name](2026-11-27-signature-pad-props-reach-their-element.md) | behavior, type |
+| 2026-11-27 | [A disabled, unsigned SignPad tile says "Not signed"](2026-11-27-sign-pad-disabled-unsigned-says-not-signed.md) | behavior, i18n |
+| 2026-11-27 | [Notifications: the bell's name includes the unread count](2026-11-27-notifications-bell-name-has-unread-count.md) | behavior, i18n |
+| 2026-11-27 | [A model's color field refuses text that is no color](2026-11-27-color-type-validates-the-color.md) | behavior |
+| 2026-11-27 | [InlineSwitch requires onChange unless it is disabled](2026-11-27-inline-switch-on-change-required-unless-disabled.md) | type |
+| 2026-11-27 | [FullFormDialog's content keeps a top padding, with or without a title](2026-11-27-full-form-dialog-content-top-padding.md) | behavior |
+| 2026-11-27 | [A form page's Back reports and shows an error thrown by the Form's goBack](2026-11-27-form-page-back-reports-go-back-errors.md) | behavior |
+| 2026-11-27 | [A form page's Back asks about a change a control made when it mounted](2026-11-27-form-page-back-follows-mount-changes.md) | behavior |
+| 2026-11-27 | [CRUD selects are busy and say "Saving…" while a change is being written](2026-11-27-crud-select-busy-while-writing.md) | behavior, type |
+| 2026-11-27 | [CrudSelect applies a change made while another one is written after it, and only what it changed](2026-11-27-crud-select-applies-changes-in-order.md) | behavior |
+| 2026-11-27 | [Localized numbers are read without the format's symbols, so the . of "Cg." is no separator](2026-11-27-localized-numbers-without-format-symbols.md) | behavior |
+| 2026-11-27 | [DecimalInputField reads the typed text with its `format`, so a percentage keeps its value](2026-11-27-decimal-input-reads-its-format.md) | behavior, type |
+| 2026-11-27 | [Escape closes a toast wherever focus is](2026-11-27-toast-escape-closes-from-anywhere.md) | behavior |
+| 2026-11-27 | [On phones a toast shows at the top of the screen](2026-11-27-toast-top-on-phones.md) | behavior, type |
+| 2026-11-27 | [A toast breaks a word too long for a line and stays within the screen](2026-11-27-toast-breaks-long-words.md) | behavior |
+| 2026-11-27 | [showInfoDialog calls the onClose it is given](2026-11-27-show-info-dialog-calls-on-close.md) | behavior |
+| 2026-11-27 | [A Matrix press let go of away from the grid adds nothing](2026-11-27-matrix-release-away-from-grid-adds-nothing.md) | behavior |
+| 2026-11-27 | [A Matrix entry draws what does not fit it smaller, and a stacked pair puts its secondary label beside the label](2026-11-27-matrix-labels-fit-their-entries.md) | behavior |
+| 2026-11-27 | [A Matrix entry says its state and its arrow, its ring stands out, and forced colors keep its shape](2026-11-27-matrix-entry-states-in-words-and-forced-colors.md) | behavior |
+| 2026-11-27 | [DialogTitle calls onClose without arguments](2026-11-27-dialog-title-on-close-without-arguments.md) | behavior |
+| 2026-11-27 | [While a FormDialog button's handler runs, the dialog ignores its buttons, Escape and the backdrop](2026-11-27-form-dialog-busy-while-handler-runs.md) | behavior |
+| 2026-11-27 | [A SignalPortlet zero count is readable](2026-11-27-signal-portlet-zero-count-readable.md) | behavior |
+| 2026-11-27 | [A linked SignalPortlet row is a link](2026-11-27-signal-portlet-linked-rows-are-links.md) | behavior |
+| 2026-11-27 | [SignalPortlet calls onRefresh without arguments](2026-11-27-signal-portlet-on-refresh-without-arguments.md) | behavior |
+| 2026-11-27 | [An item's `className` in SignalPortlet adds to `classes.item`](2026-11-27-signal-portlet-item-class-name-adds-to-classes-item.md) | behavior |
+| 2026-11-27 | [The field-state controls and TextFieldWithHelp apply their `classes`](2026-11-27-field-state-controls-apply-classes.md) | behavior |
+| 2026-11-27 | [A warning's label keeps its colour while the field is focused or disabled](2026-11-27-warning-label-kept-on-focus.md) | behavior |
+| 2026-11-27 | [TreeView takes a name, an id, a className and sx for the tree, and hands no other props to its rows](2026-11-27-tree-view-name-and-props-reach-the-tree.md) | behavior |
+| 2026-11-27 | [TreeView is one tab stop, and its rows are expanded, collapsed, selected and activated with the keys of a tree](2026-11-27-tree-view-keyboard.md) | behavior, type |
+| 2026-11-27 | [ComponentWithLabel's onClick runs once per click on the caption](2026-11-27-component-with-label-on-click-once.md) | behavior |
+| 2026-11-27 | [A disabled ActionButton is filled with `action.disabled`](2026-11-27-action-button-disabled-fill.md) | behavior |
+| 2026-11-27 | [A CRUD moves the keyboard focus into the view it opens, and back to the list's opener](2026-11-27-crud-view-switch-moves-focus.md) | behavior, theme |
+| 2026-11-27 | [A CRUD serves its importer only where the app enables it: `import` with enableUserImport, `devimport` with enableDevImport](2026-11-27-crud-import-views-need-enable.md) | behavior |
+| 2026-11-27 | [A create form left while it saves no longer pulls the user back to the saved record](2026-11-27-crud-save-new-left-during-save.md) | behavior |
+| 2026-11-27 | [DataGrid column header labels are tab stops: a sortable column's label is its sort button](2026-11-27-data-grid-header-labels-are-tab-stops.md) | behavior |
+| 2026-11-27 | [With sortLimit 0 a plain header click sorts the grid](2026-11-27-data-grid-sort-limit-0-plain-click-sorts.md) | behavior |
+| 2026-11-27 | [SubActionButton takes `color`, and an icon keeps its own color](2026-11-27-sub-action-button-color.md) | behavior, DOM |
+| 2026-11-27 | [A running export entry is unavailable, and a ready or failed export is announced](2026-11-27-data-grid-export-progress-and-results-announced.md) | behavior |
+| 2026-11-27 | [DataGrid applies `classes.settingsTable`](2026-11-27-data-grid-classes-settings-table.md) | behavior, theme |
+| 2026-11-27 | [On phones the DataGrid footer's row counts are read out in words](2026-11-27-data-grid-phone-counts-in-words.md) | behavior |
+| 2026-11-27 | [ScrollableSchedule's week lines are headings with the year, and its days are named groups](2026-11-27-scrollable-schedule-week-headings-and-day-groups.md) | behavior, theme |
+| 2026-11-27 | [PortalLayout renders a main and a navigation landmark](2026-11-27-portal-layout-landmarks.md) | behavior, i18n |
+| 2026-11-27 | [PortalLayout's burger has the AppBar's text color](2026-11-27-portal-burger-app-bar-text-color.md) | behavior |
+| 2026-11-27 | [The active Portal menu entry is marked by more than its color](2026-11-27-portal-active-menu-entry-mark.md) | behavior |
+| 2026-11-27 | [FormAutoSave announces the outcome of its saves in a status region](2026-11-27-form-auto-save-status-region.md) | behavior, theme |
+| 2026-11-27 | [The locale selector's search ignores accents, apostrophe variants and blanks around the query](2026-11-27-locale-selector-search-ignores-accents.md) | behavior |
+| 2026-11-27 | [FormCrudMultiSelect's module no longer exports ForwardedCrudMultiSelect](2026-11-27-forwarded-crud-multi-select-removed.md) | type |
+| 2026-11-27 | [The simple dialogs and DialogTitle's close button draw a keyboard focus ring; the dialogs keep their edge in forced colors](2026-11-27-dialog-focus-ring-forced-colors-edge.md) | behavior |
+| 2026-11-27 | [A touch row header in MatrixGrid says what it opens and everything it shows](2026-11-27-matrix-touch-row-header-description.md) | behavior |
+| 2026-11-26 | [InlineSwitch has no top margin](2026-11-26-inline-switch-no-top-margin.md) | behavior |
+| 2026-11-26 | [An InlineSwitch is as high as its switch row and its children](2026-11-26-inline-switch-holds-its-floats.md) | behavior |
+| 2026-11-26 | [A localized value without text in the UI language shows another language's text](2026-11-26-localized-string-falls-back-to-another-language.md) | behavior |
+| 2026-11-26 | [A HistoryRouter inside another one leaves the page's scroll position and focus alone](2026-11-26-nested-history-router-keeps-page-scroll-and-focus.md) | behavior |
+| 2026-11-26 | [isPlainObject tells a plain object by its prototype; a record with an entry named constructor counts](2026-11-26-is-plain-object-by-prototype.md) | behavior |
+| 2026-11-26 | [A long InlineSwitch label wraps beside the switch, and the switch stays on screen](2026-11-26-inline-switch-long-label-wraps.md) | behavior |
+| 2026-11-26 | [On the page of a hidden entry, RoutedMenu highlights the closest shown entry](2026-11-26-routed-menu-hidden-entries-rank-last.md) | behavior |
+| 2026-11-26 | [A lazy control of a new record no longer reports the parent id "null"](2026-11-26-lazy-crud-connector-parent-id-not-null.md) | behavior |
+| 2026-11-26 | [useLazyCrudConnector's extraParams are a record](2026-11-26-lazy-crud-connector-extra-params-record.md) | type |
+| 2026-11-26 | [A GroupBox's title breaks long words](2026-11-26-group-box-legend-breaks-long-words.md) | behavior |
+| 2026-11-26 | [A GroupBox's width and height include its padding and border](2026-11-26-group-box-border-box.md) | behavior |
+| 2026-11-26 | [A GroupBox in a parent with a max-height encloses its content](2026-11-26-group-box-encloses-content-in-max-height-parent.md) | behavior |
+| 2026-11-26 | [A PartialDeleteError is named CcPartialDeleteError, and the default error-reporting policy judges it by its cause](2026-11-26-partial-delete-error-name-and-reporting.md) | behavior |
+| 2026-11-26 | [An id dropped by onLoadError is not shown, also while the selection keeps it](2026-11-26-backend-select-dropped-id-not-shown.md) | behavior |
+| 2026-11-26 | [A selected record that fails to load marks its field as erroneous](2026-11-26-backend-select-load-error-marks-field.md) | behavior |
+| 2026-11-26 | [RoutedTabs reads the URL's segment as its panels do, so the Tab whose panel is shown is selected](2026-11-26-routed-tabs-select-tab-like-panels.md) | behavior |
+| 2026-11-26 | [The default tab of RoutedTabs opens the route's own url, without a trailing "/"](2026-11-26-routed-tabs-default-tab-url-without-trailing-slash.md) | behavior |
+| 2026-11-26 | [A forced InfoBox has a static header: no button, no tab stop, no onChange](2026-11-26-info-box-forced-header-static.md) | behavior, theme |
+| 2026-11-26 | [InfoBox breaks long words in its heading and message](2026-11-26-info-box-breaks-long-words.md) | behavior |
+| 2026-11-26 | [MultiLanguageInput shows the other languages while only they have text, and `defaultLanguage` sets the required language](2026-11-26-multi-language-input-default-language.md) | behavior |
+| 2026-11-26 | [A date picker's field follows ampm, views and format, as MUI's does](2026-11-26-picker-field-follows-ampm-views-format.md) | behavior, type |
+| 2026-11-26 | [The date-time picker's open button names the time too](2026-11-26-date-time-picker-open-button-names-time.md) | behavior, i18n |
+| 2026-11-26 | [InfiniteScroll is a function component, and a ref to it is the scroll container element](2026-11-26-infinite-scroll-function-component.md) | type |
+| 2026-11-26 | [A read-only BackendDataGridMultiSelect has disabled checkboxes and calls no onChange](2026-11-26-data-grid-multi-select-read-only-refuses-ticks.md) | behavior |
+| 2026-11-26 | [The date pickers take dates in the order the date renderers show them](2026-11-26-date-pickers-take-dates-as-shown.md) | behavior |
+| 2026-11-26 | [A RoutedMenu group only shows and hides its entries; its route is ignored](2026-11-26-routed-menu-group-ignores-route.md) | behavior |
+| 2026-11-26 | [InlineSwitch's colors reach 3:1 and follow the theme's color scheme](2026-11-26-inline-switch-colors-reach-3-to-1.md) | behavior |
+| 2026-11-26 | [The locale selector's list is a listbox: one tab stop, and the arrow, page, Home and End keys move between its rows](2026-11-26-locale-selector-list-is-a-listbox.md) | behavior, theme, type |
+| 2026-11-26 | [An empty navigation target keeps the current path](2026-11-26-empty-navigation-target-keeps-current-path.md) | behavior |
+| 2026-11-26 | [A data grid's stored column filters are its whole column filters; defaultFilter only applies when nothing is stored](2026-11-26-data-grid-stored-filters-are-whole.md) | behavior, type |
+| 2026-11-26 | [A selector's switch is described by the selector's label](2026-11-26-selector-switch-described-by-label.md) | behavior |
+| 2026-11-26 | [A HistoryRouter inside another one reports nothing to Sentry](2026-11-26-nested-history-router-not-reported-to-sentry.md) | behavior |
+| 2026-11-26 | [CachedServerStorageProvider answers a fresh cached value synchronously](2026-11-26-cached-server-storage-answers-fresh-values-at-once.md) | type, behavior |
+| 2026-11-26 | [A navigation to a hash scrolls to the element with that id and focuses it](2026-11-26-hash-navigation-scrolls-to-its-element.md) | behavior |
+| 2026-11-26 | [The delete confirmation counts with plural forms](2026-11-26-data-grid-delete-confirmation-plurals.md) | behavior, i18n |
+| 2026-11-26 | [The remaining CC theme entries offer the ownerState and variants their slots receive](2026-11-26-theme-owner-state-remaining-components.md) | type, theme |
+| 2026-11-26 | [A theme styles InfoBox's status through classes, not ownerState or variants](2026-11-26-info-box-state-classes.md) | type, theme |
+| 2026-11-26 | [A selected initialData record whose conversion fails is listed as a failed load](2026-11-26-backend-multi-select-initial-data-conversion-error.md) | behavior |
+| 2026-11-26 | [The date pickers call `onAccept` with the dates they report to `onChange`](2026-11-26-picker-on-accept-when-done.md) | behavior |
+| 2026-11-26 | [A date-time picker says in text why it rejects a date and time](2026-11-26-date-time-picker-validation-message.md) | behavior, i18n |
+| 2026-11-26 | [Theme variants of most CC components get no ownerState, and match only what their root receives](2026-11-26-theme-variants-without-owner-state.md) | type, theme |
+| 2026-11-26 | [BackendSingleSelect shows a picked record as picked, without looking it up](2026-11-26-backend-single-select-pick-not-looked-up.md) | behavior |
+| 2026-11-26 | [Model.index2 reports an unexpected error, as index does](2026-11-26-model-index2-reports-errors.md) | behavior |
+| 2026-11-26 | [The busy overlay's focus ring shows at once; what fades in is the wash's color and its spinner](2026-11-26-form-loader-overlay-focus-ring-at-once.md) | behavior, theme |
+| 2026-11-26 | [Tab switches keep the scroll position, and PortalLayout's main pane scrolls to the top after a navigation](2026-11-26-scroll-reset-tabs-and-scroll-containers.md) | behavior |
+| 2026-11-26 | [The default error-reporting policy judges a PartialApplyError by the errors it wraps](2026-11-26-partial-apply-error-reporting.md) | behavior |
+| 2026-11-26 | [Hiding a selector's switch turns it off, and showing it starts it at defaultSwitchValue](2026-11-26-selector-hidden-switch-turns-off.md) | behavior |
+| 2026-11-26 | [The locale selector's picked row keeps its element, focus and tab stop while the language loads](2026-11-26-locale-selector-picked-row-keeps-focus.md) | behavior |
+| 2026-11-26 | [A GroupBox label of `0` is its legend, and `label={true}` draws none](2026-11-26-group-box-zero-label-is-the-legend.md) | behavior |
+| 2026-11-26 | [Routes renders the most specific matching route, `""` and `"/"` match only the parent's url, and Route takes `end`](2026-11-26-routes-rank-by-specificity.md) | behavior, type |
+| 2026-11-26 | [InfiniteScroll loads more when focus reaches its last row](2026-11-26-infinite-scroll-loads-on-focus-of-last-row.md) | behavior |
+| 2026-11-26 | [HowToBox shows its default title only for an omitted `titleLabel`; `null` and `""` show no title](2026-11-26-how-to-box-null-hides-title.md) | behavior, type |
+| 2026-11-26 | [InfiniteScroll fills its container again when it grows, and `dynamicallySized` is removed](2026-11-26-infinite-scroll-observes-its-size.md) | behavior, type |
+| 2026-11-26 | [HowToBox takes any fieldset attribute, `sx` and `ref`, and its list gets an id from `id`](2026-11-26-how-to-box-html-attributes.md) | behavior, type |
+| 2026-11-26 | [A grid leaves the stored parts its `persist` leaves out as they are](2026-11-26-data-grid-persist-keeps-left-out-parts.md) | behavior |
+| 2026-11-26 | [A persistence provider gets the JSON form of a grid's state](2026-11-26-data-grid-persist-json-form.md) | behavior |
+| 2026-11-26 | [A Form's save names the files and images the backend refused](2026-11-26-file-controls-name-refused-queued-writes.md) | behavior |
+| 2026-11-26 | [The busy overlay's shown state is a class, and the form layout takes its colors, timing and offsets from the theme](2026-11-26-form-layout-theme-values.md) | type, behavior, theme |
+| 2026-11-26 | [Routes takes any JSX children, and a key on a child takes effect](2026-11-26-routes-children-and-keys.md) | behavior, type |
+| 2026-11-26 | [A nested form in a flow stage that was left keeps its edits for the flow's save; a stage change that only stages sends nothing](2026-11-26-flow-form-nested-form-staged.md) | behavior, type |
+| 2026-11-26 | [Pushed dialogs close when a navigation leads to another path](2026-11-26-dialogs-close-on-navigation.md) | behavior |
+| 2026-11-26 | [The icon of a small ActionButton is centred](2026-11-26-small-action-button-icon-centred.md) | behavior |
+| 2026-11-26 | [The busy overlay fades in late on every show, also when it is mounted shown](2026-11-26-form-loader-overlay-every-show-fades-in-late.md) | behavior |
+| 2026-11-26 | [InfiniteScroll loads before the bottom, and holds its calls while `loading` is set](2026-11-26-infinite-scroll-loading-and-threshold.md) | behavior |
+| 2026-11-26 | [A HistoryRouter inside a Route starts a fresh routing scope: its routes resolve from "/"](2026-11-26-history-router-fresh-routing-scope.md) | behavior |
+| 2026-11-26 | [The persistence providers hold back and mount again only their grids](2026-11-26-data-grid-persist-holds-back-only-the-grids.md) | behavior |
+| 2026-11-26 | [A refused write no longer stops a LazyConnector's queue, and the error names what was refused](2026-11-26-lazy-connector-sends-past-refused-writes.md) | behavior, type |
+| 2026-11-26 | [The locale selector opens at the row of the current locale](2026-11-26-locale-selector-opens-at-current-locale.md) | behavior |
+| 2026-11-26 | [MultiSelectWithoutGroup's switch has a row of its own above the chips, at the right end, with its label before it](2026-11-26-multi-select-without-group-switch-row.md) | behavior |
+| 2026-11-25 | [A routed menu entry opens a new tab at the URL a click navigates to](2026-11-25-routed-menu-new-tab-opens-history-href.md) | behavior |
+| 2026-11-25 | [On phones the DataGrid moves header and footer buttons into their menus, so both fit 320px](2026-11-25-data-grid-phone-header-footer-fit.md) | behavior |
+| 2026-11-25 | [HowToBox entries break long words](2026-11-25-how-to-box-breaks-long-words.md) | behavior |
+| 2026-11-25 | [A small ActionButton or SubActionButton is named by its label in every state](2026-11-25-small-action-button-named-by-label.md) | behavior |
+| 2026-11-25 | [InlineSwitch's slots have static `CcInlineSwitch-*` classes, which rules for those classes now match](2026-11-25-inline-switch-static-slot-classes.md) | behavior |
 | 2026-11-25 | [showErrorDialog lists the messages of a ValidationError only](2026-11-25-show-error-dialog-lists-validation-errors-only.md) | behavior |
 | 2026-11-25 | [The DataGrid no longer takes `enableFilterDialogMediaQuery`](2026-11-25-data-grid-filter-dialog-media-query-removed.md) | type, behavior |
 | 2026-11-25 | [After the last file, focus steps back to the previous file's button; custom variants get the focus handling from useFileActionButtonFocus](2026-11-25-file-upload-focus-after-last-file.md) | behavior |

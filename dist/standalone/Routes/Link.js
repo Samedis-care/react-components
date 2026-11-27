@@ -5,21 +5,7 @@ import { useHistoryRouterContext } from "./HistoryRouter";
 import useNavigate from "./useNavigate";
 import useLocation from "./useLocation";
 import toAppPath from "./toAppPath";
-/**
- * The location a click navigates to. A target that leaves out `pathname`,
- * `search` or `hash` is completed from the current location the way
- * `history.push` completes it: a missing pathname stays the current one, a
- * missing search and hash become empty.
- * @param location The current location
- * @param to The target, with leading slashes already collapsed
- * @returns The completed target
- */
-const navigationTarget = (location, to) => ({
-    pathname: location.pathname,
-    search: "",
-    hash: "",
-    ...(typeof to === "string" ? parsePath(to) : to),
-});
+import { isCurrentLocation, navigationTarget, normalizedUrl, } from "./navigationTarget";
 /**
  * The href a click navigates to, see {@link navigationTarget}.
  * `history.createHref` alone fills a missing pathname with "/".
@@ -30,22 +16,26 @@ const navigationTarget = (location, to) => ({
  */
 const navigationHref = (history, location, to) => history.createHref(navigationTarget(location, to));
 /**
- * A path as the URL parser reads it, percent-encoded: a browser history keeps
- * the location encoded ("/%C3%BCber"), a memory history as it was pushed
- * ("/über"). The path goes after a fixed origin and a slash, so no part of it
- * is read as a host.
- * @param path A path, with search and hash
- * @returns The URL of the path
- */
-const normalizedUrl = (path) => new URL(`http://localhost/${createPath(path)}`).href;
-/**
- * Does a click on the target stay at the current location? Pathname, search
- * and hash are compared as the URL parser reads them, so "/über" is the
- * current location at "/%C3%BCber"; the state is not compared.
+ * Does the link lead to the current page, for `markCurrent`? The location has
+ * the target's pathname, the search params the target names (each with the
+ * same value) and the hash the target names, if it names one. Compared as
+ * the URL parser reads them, as in {@link isCurrentLocation}.
  * @param location The current location
  * @param to The target, with leading slashes already collapsed
  */
-const isCurrentLocation = (location, to) => normalizedUrl(navigationTarget(location, to)) === normalizedUrl(location);
+const leadsToCurrentPage = (location, to) => {
+    const named = typeof to === "string" ? parsePath(to) : to;
+    const target = new URL(normalizedUrl(navigationTarget(location, to)));
+    const current = new URL(normalizedUrl(location));
+    if (target.pathname !== current.pathname)
+        return false;
+    if (named.hash && target.hash !== current.hash)
+        return false;
+    for (const [name, value] of target.searchParams)
+        if (!current.searchParams.getAll(name).includes(value))
+            return false;
+    return true;
+};
 /**
  * Does the browser open the link in another tab or window, or download it?
  * A target that is empty or "_self" (in any case) is the current tab, as in
@@ -65,21 +55,27 @@ const opensElsewhere = (anchor) => {
  * of pushing a second one, as the browser does for a plain `<a>` and as
  * react-router's Link does (see `replace`). Clicks with Ctrl, Meta, Shift or
  * Alt are left to the browser, and so is every click on a link with a
- * `target` other than `_self` or with `download`. Also works as the
- * `component` of MUI's Link and ButtonBase components
+ * `target` other than `_self` or with `download`. A link to a hash, such as
+ * the skip link `to="#main"`, scrolls the element with that id into view and
+ * moves the focus to it, as a plain `<a href="#main">` does. With
+ * `markCurrent`, the link to the current page gets `aria-current="page"`.
+ * Also works as the `component` of MUI's Link and ButtonBase components
  * (`<Button component={Link} to="/x">`, ListItemButton, MenuItem, Tab,
  * IconButton), which pass an `onClick` of their own.
  * @param props The props
  */
 const Link = React.forwardRef(function Link(props, ref) {
-    const { to, replace, state, onClick, ...anchorProps } = props;
+    const { to, replace, state, preventScrollReset, onClick, markCurrent, "aria-current": ariaCurrent, ...anchorProps } = props;
     const { history } = useHistoryRouterContext();
     const location = useLocation();
     const navigate = useNavigate();
     // null for a URL with a scheme, which the browser follows
     const target = useMemo(() => toAppPath(to), [to]);
+    // the aria-current token of the link to the current page
+    const currentToken = markCurrent === true ? "page" : markCurrent || undefined;
+    const isCurrent = useMemo(() => !!currentToken && target !== null && leadsToCurrentPage(location, target), [currentToken, location, target]);
     // the current location completes a target without pathname, search or hash
-    const href = useMemo(() => target
+    const href = useMemo(() => target !== null
         ? navigationHref(history, location, target)
         : typeof to === "string"
             ? to
@@ -92,15 +88,16 @@ const Link = React.forwardRef(function Link(props, ref) {
             return;
         if (opensElsewhere(evt.currentTarget))
             return;
-        if (!target)
+        if (target === null)
             return;
         evt.preventDefault();
         navigate(target, {
             // history.location: the one the push completes the target from
             replace: replace ?? isCurrentLocation(history.location, target),
             state,
+            preventScrollReset,
         });
-    }, [history, navigate, onClick, replace, state, target]);
-    return _jsx("a", { ref: ref, href: href, onClick: handleNav, ...anchorProps });
+    }, [history, navigate, onClick, replace, state, preventScrollReset, target]);
+    return (_jsx("a", { ref: ref, href: href, onClick: handleNav, "aria-current": ariaCurrent ?? (isCurrent ? currentToken : undefined), ...anchorProps }));
 });
 export default React.memo(Link);

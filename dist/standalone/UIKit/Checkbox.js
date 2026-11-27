@@ -39,8 +39,8 @@ const StyledCheckbox = styled(MuiCheckbox, {
         },
     },
 }));
-const _uncheckedIcon = (_jsx(SvgIcon, { viewBox: "-3.5 -4.5 24 24", children: _jsx("polyline", { id: "check", fill: "transparent", stroke: "transparent", strokeWidth: "3.5", points: "1 7 6 12 16.5 1.5" }) }));
-const _checkedIcon = (_jsx(SvgIcon, { viewBox: "-3.5 -4.5 24 24", children: _jsx("polyline", { id: "check", fill: "transparent", stroke: "currentColor", strokeWidth: "3.5", points: "1 7 6 12 16.5 1.5" }) }));
+const _uncheckedIcon = (_jsx(SvgIcon, { viewBox: "-3.5 -4.5 24 24", children: _jsx("polyline", { fill: "transparent", stroke: "transparent", strokeWidth: "3.5", points: "1 7 6 12 16.5 1.5" }) }));
+const _checkedIcon = (_jsx(SvgIcon, { viewBox: "-3.5 -4.5 24 24", children: _jsx("polyline", { fill: "transparent", stroke: "currentColor", strokeWidth: "3.5", points: "1 7 6 12 16.5 1.5" }) }));
 const Checkbox = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcCheckbox" });
     return (_jsx(StyledCheckbox, { color: "primary", icon: _uncheckedIcon, checkedIcon: _checkedIcon, ...props }));

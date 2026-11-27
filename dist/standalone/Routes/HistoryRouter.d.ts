@@ -14,7 +14,8 @@ export interface HistoryRouterProps {
     history: History;
     /**
      * The routed content: `Routes`, `Route`, `Link` and everything that uses
-     * the routing hooks
+     * the routing hooks. Their routes resolve from "/", also when this
+     * HistoryRouter is rendered inside a `Route` of another one.
      */
     children: React.ReactNode;
     /**
@@ -27,7 +28,9 @@ export interface HistoryRouterProps {
      * set.
      * The router changes the document title only once a page title is set, and
      * sets the app title again when it unmounts. A HistoryRouter inside another
-     * one hands its page titles to the outer one and ignores this prop.
+     * one hands its page titles to the outer one and ignores this prop: inside a
+     * `Route` of the outer one, its page titles count as titles set in that
+     * `Route`, those of its own routes as titles of routes nested in it.
      */
     formatDocumentTitle?: DocumentTitleFormatter;
 }

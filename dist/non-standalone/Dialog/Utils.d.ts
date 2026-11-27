@@ -53,7 +53,10 @@ export declare const showInputDialog: (pushDialog: DialogContextType[0], props: 
 /**
  * Shows an info dialog
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
- * @param props The dialog properties (with buttons optional, defaults to an Okay button)
+ * @param props The dialog properties (with buttons optional, defaults to an Okay button).
+ *              `onClose` is called when the dialog has closed, in each of the ways that
+ *              resolve the promise (see `@returns`), once, and before the code awaiting the
+ *              promise continues.
  * @returns A DialogPromise that resolves when the dialog is closed: by a button once its
  *          handler has ended, by Escape or a backdrop click. Its `close()` closes the dialog
  *          and resolves it at once.

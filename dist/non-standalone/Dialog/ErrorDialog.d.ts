@@ -12,6 +12,10 @@ import { IDialogConfigSimple } from "./Types";
  * keyboard focus stays on the pressed button. `onClick` gets a `close` that closes the dialog
  * at once; `onClose` is then called once the handler has ended, also with `dontClose`. Escape
  * and a backdrop click close it and call `onClose`.
+ * If `onClick` throws or its promise rejects, the dialog stays open with its buttons enabled
+ * again and `onClose` is not called (unless the handler called `close`); the error is
+ * reported (captureError, source `"ErrorDialog.onClick"`) and shown in an error dialog over
+ * the dialog, as showErrorDialog shows it.
  * It closes the dialog it was pushed in, and only that one, also when dialogs were pushed
  * after it. Rendered without pushDialog, it is always open: it closes through `onClose`,
  * which has to stop rendering it.

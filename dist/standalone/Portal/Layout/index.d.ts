@@ -29,6 +29,12 @@ interface PortalLayoutPropsBase {
     /**
      * Content displayed in the menu area (usually a Menu)
      *
+     * It is rendered in the page's navigation landmark, a `<nav>` named "Main
+     * menu" (`standalone.portal.main-menu`) that fills the menu paper (a flex
+     * column, so a menu with `height: 100%` fills it and scrolls inside it). Do
+     * not wrap it in a `<nav>` of its own. Falsy: no menu, no `<nav>` and no
+     * burger.
+     *
      * In mobile view it is shown in a drawer that the burger button opens. The
      * burger says whether the drawer is open (`aria-expanded`) and names it
      * (`aria-controls`, an id the layout generates).
@@ -43,6 +49,15 @@ interface PortalLayoutPropsBase {
     menuContent: React.ReactNode;
     /**
      * Main content
+     *
+     * It is rendered in the page's main landmark, a `<main>` element (the `main`
+     * slot), so it must not contain a `<main>` of its own. The `<main>` can take
+     * focus without being a stop of Tab (`tabindex="-1"`), see `mainId`.
+     *
+     * It scrolls in a pane of its own, the `<main>`. Inside a HistoryRouter
+     * (Framework renders one), a navigation scrolls the pane to the top as it
+     * scrolls the window, unless the navigation keeps the scroll position
+     * (`preventScrollReset` of `useNavigate`, e.g. a RoutedTabs tab switch).
      */
     content: React.ReactNode;
     /**
@@ -78,10 +93,21 @@ interface PortalLayoutPropsBase {
     headerId?: string;
     /**
      * ID for the navbar
+     *
+     * Set on the `<nav>` around `menuContent`, in desktop and in mobile view (in
+     * the drawer, which is kept mounted while closed). Not set without
+     * `menuContent`, which renders no `<nav>`.
      */
     menuId?: string;
     /**
      * ID for the main content
+     *
+     * Set on the `<main>` around `content`, the pane the content scrolls in. It
+     * takes focus (`focus()`, e.g. after a client-side navigation, or a skip
+     * link such as `<Link to={"#" + mainId}>`) without being a stop of Tab.
+     * Focused, the arrow and page keys scroll it, and Tab goes on to the first
+     * focusable element of the content; focused from the keyboard, it shows a
+     * 2px focus ring in the primary color inside its edge.
      */
     mainId?: string;
     /**
@@ -98,11 +124,13 @@ export interface PortalLayoutContainerOwnerState {
 export type PortalLayoutClassKey = "container";
 /**
  * Style slots of the layout's areas (theme name `CcPortalRenderLayout`):
- * `header`, `topLeft`, `menu`, `main`; in mobile view, `mobileTopLeft` (the
- * `topLeft` row at the top of the drawer) and `closeMenuButton` (the drawer's
- * close button, shown while it has keyboard focus).
+ * `header`, `topLeft`, `menu` (the menu column), `nav` (the `<nav>` around
+ * `menuContent`, in the menu column or the drawer), `main` (the `<main>` around
+ * `content`); in mobile view, `mobileTopLeft` (the `topLeft` row at the top of
+ * the drawer) and `closeMenuButton` (the drawer's close button, shown while it
+ * has keyboard focus).
  */
-export type PortalRenderLayoutClassKey = "header" | "topLeft" | "menu" | "main" | "mobileTopLeft" | "closeMenuButton";
+export type PortalRenderLayoutClassKey = "header" | "topLeft" | "menu" | "nav" | "main" | "mobileTopLeft" | "closeMenuButton";
 export interface PortalLayoutContextType {
     mobile: boolean;
     menuOpen: boolean;
@@ -110,5 +138,15 @@ export interface PortalLayoutContextType {
 }
 export declare const PortalLayoutContext: React.Context<PortalLayoutContextType | undefined>;
 export declare const usePortalLayoutContext: () => PortalLayoutContextType;
+/**
+ * App shell: a header (an MUI AppBar, the page's banner landmark), a menu (in
+ * the page's navigation landmark) and the content (in the page's main
+ * landmark), laid out as a CSS grid that fills its parent's height.
+ *
+ * Below `collapseBreakpoint`, with `collapseMenu`, or while
+ * `mobileViewCondition` matches, the menu moves into a drawer that a burger
+ * button in the header opens. Descendants read the mode and the drawer state
+ * with {@link usePortalLayoutContext}.
+ */
 declare const _default: React.MemoExoticComponent<(inProps: PortalLayoutProps) => React.JSX.Element>;
 export default _default;

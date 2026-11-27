@@ -16,6 +16,11 @@ export interface DataActionBarViewProps {
      */
     handleEdit?: React.MouseEventHandler;
     /**
+     * Is the edit button disabled? It is unless exactly one row is selected
+     * and the grid knows its id (with select all: that row is loaded)
+     */
+    editDisabled: boolean;
+    /**
      * Callback for delete button.
      * If not defined: Disables delete button
      */
@@ -45,8 +50,9 @@ export interface DataActionBarViewProps {
      */
     handleCustomButtonClick: (label: string) => void;
     /**
-     * Hides the select all checkbox (it keeps its place). It is disabled then
-     * too, see selectAllDisabled
+     * Hides the select all checkbox. It keeps its place, so the actions stay
+     * where they are, except on phones (only xs), where the bar needs the
+     * room. It is disabled then too, see selectAllDisabled
      */
     disableSelection: boolean;
     /**

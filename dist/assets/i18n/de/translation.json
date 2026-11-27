@@ -13,7 +13,8 @@
 			"menu-toggle": "Menü öffnen",
 			"collapse-menu": "Menü einklappen",
 			"expand-menu": "Menü ausklappen",
-			"close-menu": "Menü schließen"
+			"close-menu": "Menü schließen",
+			"main-menu": "Hauptmenü"
 		},
 		"uikit": {
 			"info": "Weitere Informationen",
@@ -36,17 +37,32 @@
 			}
 		},
 		"date-picker": {
+			"open-date-time": "Datum und Uhrzeit auswählen",
+			"open-date-time-selected": "Datum und Uhrzeit auswählen, gewählt ist der {{DATE}} um {{TIME}}",
 			"error": {
 				"invalid": "Gib ein gültiges Datum ein",
 				"min-date": "Gib ein Datum ab dem {{DATE}} ein",
 				"max-date": "Gib ein Datum bis zum {{DATE}} ein",
 				"past": "Gib das heutige oder ein späteres Datum ein",
 				"future": "Gib das heutige oder ein früheres Datum ein",
-				"unavailable": "Gib ein Datum ein, das ausgewählt werden kann"
+				"unavailable": "Gib ein Datum ein, das ausgewählt werden kann",
+				"min-date-time": "Gib ein Datum und eine Uhrzeit ab dem {{DATE}} ein",
+				"max-date-time": "Gib ein Datum und eine Uhrzeit bis zum {{DATE}} ein",
+				"min-time": "Gib eine Uhrzeit ab {{TIME}} ein",
+				"max-time": "Gib eine Uhrzeit bis {{TIME}} ein",
+				"past-date-time": "Gib den aktuellen oder einen späteren Zeitpunkt ein",
+				"future-date-time": "Gib den aktuellen oder einen früheren Zeitpunkt ein",
+				"unavailable-time": "Gib eine Uhrzeit ein, die ausgewählt werden kann",
+				"minutes-step": "Gib die Minuten in Schritten von {{STEP}} ein"
 			}
 		},
 		"notifications": {
-			"title": "Benachrichtigungen"
+			"title": "Benachrichtigungen",
+			"bell-label_one": "Benachrichtigungen, {{count}} ungelesen",
+			"bell-label_other": "Benachrichtigungen, {{count}} ungelesen",
+			"announce-new_one": "{{count}} neue Benachrichtigung",
+			"announce-new_other": "{{count}} neue Benachrichtigungen",
+			"unread": "Ungelesen"
 		},
 		"how-it-works": {
 			"title": "Wie es funktioniert"
@@ -241,6 +257,9 @@
 			"zoom-out": "Verkleinern",
 			"reset-zoom": "Zoom zurücksetzen"
 		},
+		"group-box": {
+			"required": "Erforderlich"
+		},
 		"phone-number": {
 			"invalid": "Korrekte Rufnummer eingeben"
 		},
@@ -265,6 +284,7 @@
 				"instructions-signed": "Die gespeicherte Unterschrift wird angezeigt. Um neu zu unterschreiben, setze sie zuerst zurück."
 			},
 			"sign-here": "Hier digital unterschreiben",
+			"not-signed": "Nicht unterschrieben",
 			"required": "Erforderlich"
 		},
 		"signal-portlet": {
@@ -285,7 +305,11 @@
 			"label": "Lädt…"
 		},
 		"matrix": {
+			"row-header-actions": "Öffnet die Aktionen für diese Zeile.",
 			"tile-more": "noch {{count}}:",
+			"tile-arrow": "nach",
+			"tile-highlighted": "hervorgehoben",
+			"tile-dimmed": "abgeschwächt",
 			"extra-cell-add": "Hinzufügen"
 		}
 	},
@@ -353,6 +377,9 @@
 				"boolean": {
 					"true": "Ja",
 					"false": "Nein"
+				},
+				"color": {
+					"validation-error": "Gib eine gültige Farbe ein, z. B. #336699"
 				}
 			}
 		}
@@ -362,8 +389,10 @@
 			"delete": {
 				"confirm-dialog": {
 					"title": "Löschen",
-					"message": "Wirklich {{NUM}}-Einträge löschen?",
-					"messageInverted": "Wirklich alles außer {{NUM}}-Einträge löschen?",
+					"message_one": "Wirklich {{count}} Eintrag löschen?",
+					"message_other": "Wirklich {{count}} Einträge löschen?",
+					"messageInverted_one": "Wirklich alles außer {{count}} Eintrag löschen?",
+					"messageInverted_other": "Wirklich alles außer {{count}} Einträgen löschen?",
 					"buttons": {
 						"yes": "Ja",
 						"no": "Nein"
@@ -405,6 +434,11 @@
 			"read-only": {
 				"submitting": "Das Formular wird gerade gespeichert"
 			},
+			"auto-save": {
+				"saving": "Wird gespeichert…",
+				"saved": "Gespeichert",
+				"failed": "Speichern fehlgeschlagen"
+			},
 			"tab": {
 				"invalid": "Enthält ungültige Felder.",
 				"modified": "Enthält geänderte Felder."
@@ -415,6 +449,7 @@
 		},
 		"selector": {
 			"loading": "Lädt…",
+			"saving": "Speichert…",
 			"loading-error": "Fehler beim Abrufen der Daten",
 			"unknown-entry": "Unbekannter Eintrag",
 			"selected-count": "Ausgewählt: {{COUNT}}",

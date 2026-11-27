@@ -68,6 +68,8 @@ export const matrixVars = {
     tileForegroundB: "--cc-matrix-tile-fg-b",
     tileFontSize: "--cc-matrix-tile-font-size",
     tileSecondaryFontSize: "--cc-matrix-tile-secondary-font-size",
+    /** the scale an entry's content is drawn at to fit the entry; unset: 1 */
+    tileFit: "--cc-matrix-tile-fit",
 };
 /** `var(--x)`, for use inside a styled() slot. */
 export const cssVar = (name) => `var(${name})`;

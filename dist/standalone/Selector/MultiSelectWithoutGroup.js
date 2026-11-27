@@ -1,5 +1,5 @@
-import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
-import React, { useCallback, useMemo } from "react";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import React, { useCallback, useId, useMemo } from "react";
 import { Cancel as RemoveIcon, RestoreFromTrash as RestoreIcon, Search as SearchIcon, } from "@mui/icons-material";
 import BaseSelector from "./BaseSelector";
 import { SmallIconButton, SmallListItemIcon } from "../Small";
@@ -32,25 +32,38 @@ const ChangeState = styled(Chip, {
     // on the paper rather than the chip's tint, where the text has its contrast
     backgroundColor: theme.palette.background.paper,
 }));
+// typed as InlineSwitch: with options, MUI's typing of styled() merges the members of
+// a union of props, and InlineSwitch's "onChange unless disabled" would go unchecked
 const StyledInlineSwitch = styled(InlineSwitch, {
     name: "CcMultiSelectWithoutGroup",
     slot: "switch",
 })({
-    marginTop: 0,
+    // the switch gets a row of its own above the chips, at the right end, with its label
+    // before it
     "& .CcInlineSwitch-switchWrapper": {
-        lineHeight: "30px",
         width: "100%",
         direction: "rtl",
+        // the label's text keeps the direction of its own words, so punctuation at its
+        // end stays there ("Show inactive?", not "?Show inactive")
+        "& > label > :last-child": {
+            unicodeBidi: "plaintext",
+        },
     },
 });
 const NO_ENTRIES = [];
+// the switch's handler without setSwitchValue: its state (switchValue) is its parent's,
+// so without a setter a toggle changes nothing
+const ignoreSwitchToggle = () => { };
 const MultiSelectWithoutGroup = (inProps) => {
     const props = useThemeProps({
         props: inProps,
         name: "CcMultiSelectWithoutGroup",
     });
-    const { onSelect, selected, added, removed: removedProp, disabled, enableIcons, loadDataOptions, getIdOfData, refreshToken, switchValue, sortCompareFn, classes, className, filterIds, ...otherProps } = props;
+    const { onSelect, selected, added, removed: removedProp, disabled, enableIcons, loadDataOptions, getIdOfData, refreshToken, switchValue, sortCompareFn, classes, className, filterIds, autocompleteId, ...otherProps } = props;
     const { t } = useCCTranslations();
+    // the search field's id, so that its label (`<id>-label`) can describe the switch
+    const generatedId = useId();
+    const fieldId = autocompleteId || generatedId;
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
     const removed = removedProp ?? NO_ENTRIES;
@@ -119,17 +132,17 @@ const MultiSelectWithoutGroup = (inProps) => {
             }),
         };
     }, [getId, loadDataOptions, removedIds, selectedIds, switchValue]);
-    return (_jsxs(Typography, { component: "div", className: className, children: [_jsx(BaseSelector, { ...otherProps, onLoad: onLoad, disabled: disabled, selected: null, onSelect: multiSelectHandler, refreshToken: (refreshToken ?? "") +
+    return (_jsxs(Typography, { component: "div", className: className, children: [_jsx(BaseSelector, { ...otherProps, autocompleteId: fieldId, onLoad: onLoad, disabled: disabled, selected: null, onSelect: multiSelectHandler, refreshToken: (refreshToken ?? "") +
                     selectedIds.join(",") +
-                    (switchValue ?? false).toString(), variant: "standard", startAdornment: _jsx(SearchIcon, { color: disabled ? "disabled" : "primary" }), freeSolo: true, displaySwitch: false, filterIds: combinedFilterIds }), _jsx(StyledInlineSwitch, { visible: !!props.displaySwitch, value: !!switchValue, onChange: props.setSwitchValue, label: props.switchLabel, disabled: disabled, className: classes?.switch, children: _jsx(_Fragment, { children: listed.map(({ data, changeState }, index) => {
-                        // a removed entry is restored where it would be removed
-                        const restorable = changeState === "removed";
-                        return (_jsxs(Outlined, { className: combineClassNames([
-                                classes?.outlined,
-                                changeState && `CcMultiSelectWithoutGroup-${changeState}`,
-                            ]), children: [enableIcons && (_jsx(SmallListItemIcon, { children: data.icon })), _jsx("span", { children: data.label }), changeState && (_jsx(ChangeState, { size: "small", variant: "outlined", color: changeState === "added" ? "success" : "default", label: t(`standalone.selector.multi-select.change.${changeState}`), className: classes?.changeState })), !disabled && (_jsx(SmallIconButton, { edge: "end", name: data.value, disabled: disabled, onClick: restorable ? handleRestore : handleDelete, "aria-label": t(restorable
-                                        ? "standalone.selector.multi-select.restore-item"
-                                        : "standalone.selector.multi-select.remove-item", { ITEM: data.label }), children: restorable ? _jsx(RestoreIcon, {}) : _jsx(RemoveIcon, {}) }))] }, index));
-                    }) }) })] }));
+                    (switchValue ?? false).toString(), variant: "standard", startAdornment: _jsx(SearchIcon, { color: disabled ? "disabled" : "primary" }), freeSolo: true, displaySwitch: false, filterIds: combinedFilterIds }), _jsx(StyledInlineSwitch, { visible: !!props.displaySwitch, value: !!switchValue, onChange: props.setSwitchValue ?? ignoreSwitchToggle, label: props.switchLabel, "aria-describedby": otherProps.label ? `${fieldId}-label` : undefined, disabled: disabled, className: classes?.switch, children: listed.map(({ data, changeState }, index) => {
+                    // a removed entry is restored where it would be removed
+                    const restorable = changeState === "removed";
+                    return (_jsxs(Outlined, { className: combineClassNames([
+                            classes?.outlined,
+                            changeState && `CcMultiSelectWithoutGroup-${changeState}`,
+                        ]), children: [enableIcons && (_jsx(SmallListItemIcon, { children: data.icon })), _jsx("span", { children: data.label }), changeState && (_jsx(ChangeState, { size: "small", variant: "outlined", color: changeState === "added" ? "success" : "default", label: t(`standalone.selector.multi-select.change.${changeState}`), className: classes?.changeState })), !disabled && (_jsx(SmallIconButton, { edge: "end", name: data.value, disabled: disabled, onClick: restorable ? handleRestore : handleDelete, "aria-label": t(restorable
+                                    ? "standalone.selector.multi-select.restore-item"
+                                    : "standalone.selector.multi-select.remove-item", { ITEM: data.label }), children: restorable ? _jsx(RestoreIcon, {}) : _jsx(RemoveIcon, {}) }))] }, index));
+                }) })] }));
 };
 export default React.memo(MultiSelectWithoutGroup);

@@ -9,6 +9,7 @@ export { default as useLocation } from "./useLocation";
 export { LocationContext } from "./useLocation";
 export { default as useNavigate } from "./useNavigate";
 export { default as useParams } from "./useParams";
+export { default as useResetScrollOnNavigation } from "./useResetScrollOnNavigation";
 export { default as usePageTitle } from "./usePageTitle";
 export { default as Link } from "./Link";
 // The types of the history package (v5) that the routing API is written in, so

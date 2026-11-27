@@ -17,10 +17,11 @@ export interface MuiFieldStateProps {
      *          colour, darkened (lightened on a dark background) just enough to
      *          reach the 4.5:1 that text needs against `palette.background`. The
      *          underline of a standard or filled field is drawn like an error's:
-     *          1px at rest and while hovered, 2px only while focused. Yields
-     *          to `error` where both are set. It is a colour only, so show what the
-     *          warning is about as text too, e.g. as the helper text, as the
-     *          library's model renderers do with their warning message.
+     *          1px at rest and while hovered, 2px only while focused. Hovering
+     *          and focusing the field keep the colour, as they keep an error's.
+     *          Yields to `error` where both are set. It is a colour only, so show
+     *          what the warning is about as text too, e.g. as the helper text, as
+     *          the library's model renderers do with their warning message.
      */
     warning?: boolean;
     /**
@@ -57,6 +58,11 @@ export interface MuiFieldStateProps {
  *
  * That leaves {@link DirtyMarkerText} in the label, so the field's name still says it is
  * modified; it has a theme slot of its own.
+ *
+ * In forced colors mode (e.g. Windows high contrast), which paints every background in
+ * the palette's background colour, the dot is drawn in the palette's text colour
+ * (`CanvasText`) instead. A theme that recolours the dot gives it a system colour for
+ * forced colors in the same rule, under `@media (forced-colors: active)`.
  */
 export declare const dirtyMarkerStyles: (theme: Theme) => CSSObject;
 export type DirtyMarkerClassKey = "root" | "text";
@@ -115,8 +121,9 @@ export type MuiFieldStateLabelProp = "label" | "children";
  * goes through {@link labelWithDirtyText} where it is rendered.
  * @remarks MUI covers error, required and disabled; warning and dirty are ours, and both
  * are presentational, so they are applied here rather than in every control. The wrapper
- * swallows both props so neither reaches the DOM, and forwards everything else including
- * the ref, which the date pickers use to anchor their popup.
+ * swallows both props so neither reaches the DOM, and forwards everything else to the
+ * wrapped component, `classes` included, and the ref, which the date pickers use to
+ * anchor their popup.
  *
  * Every wrapped component shares the `CcFieldState` theme slot, which is the one place to
  * restyle or remove either state for a whole application.

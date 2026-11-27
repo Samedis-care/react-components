@@ -12,7 +12,8 @@ import { type To } from "history";
  * newlines and leading spaces and control characters.
  * @param to The navigation target, a path or a location object
  * @returns The target, with leading slashes collapsed, or null if it has a
- *          scheme. A target that needs no change is returned as it is.
+ *          scheme. A target that needs no change is returned as it is, also
+ *          the empty "", which keeps the current path: compare with null.
  */
 declare const toAppPath: (to: To) => To | null;
 export default toAppPath;

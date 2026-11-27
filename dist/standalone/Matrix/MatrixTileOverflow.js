@@ -8,6 +8,8 @@ import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
 import { highlightRing } from "./matrixTints";
 import { tileColors } from "./matrixTileDim";
 import { useMatrixCellTileProps } from "./MatrixCellTileContext";
+import { tileStateText } from "./MatrixTileStateText";
+import visuallyHidden from "../../utils/internal/visuallyHidden";
 /**
  * The "+N" marker: a small badge in the tile's top right corner, where the
  * topRight corner of the entry beneath it would be, so it never lies on a
@@ -36,22 +38,10 @@ export const MatrixTileOverflowRoot = styled("div", {
     fontSize: 10,
     fontWeight: 700,
     lineHeight: 1,
-    [`&.${matrixClasses.overflowHighlighted}`]: {
-        boxShadow: highlightRing(theme),
-    },
+    [`&.${matrixClasses.overflowHighlighted}`]: highlightRing(theme),
 }));
-/** What the marker says to a screen reader: visually hidden, as MUI's visuallyHidden */
-const OverflowName = styled("span")({
-    border: 0,
-    clipPath: "inset(50%)",
-    height: 1,
-    margin: -1,
-    overflow: "hidden",
-    padding: 0,
-    position: "absolute",
-    whiteSpace: "nowrap",
-    width: 1,
-});
+/** What the marker says to a screen reader, visually hidden */
+const OverflowName = styled("span")(visuallyHidden);
 /** The tooltip's list of the entries left out, one per line */
 const OverflowList = styled("div")({
     display: "flex",
@@ -92,9 +82,9 @@ const TRANSLATION_OPTIONS = { i18n: ccI18n, useSuspense: false };
 /**
  * Stands for the entries a MatrixCellTile has no room for: draws "+N", shows
  * them on hover (each by its label, in its colors, and its tooltip), says them
- * to screen readers ("2 more: N (Night shift), RD") and is ringed when one of
- * them is highlighted. Not a control: it opens nothing, and a press on it is a
- * press on the cell.
+ * to screen readers, each with its state ("2 more: N, highlighted (Night
+ * shift), RD") and is ringed when one of them is highlighted. Not a control:
+ * it opens nothing, and a press on it is a press on the cell.
  */
 const MatrixTileOverflow = (props) => {
     const { items } = props;
@@ -117,6 +107,6 @@ const MatrixTileOverflow = (props) => {
             ]), children: [_jsx("span", { "aria-hidden": true, children: `+${count}` }), _jsxs(OverflowName, { children: [t("standalone.matrix.tile-more", {
                             count,
                             defaultValue: "{{count}} more:",
-                        }), items.map((item, index) => (_jsxs(React.Fragment, { children: [index > 0 ? ", " : " ", item.label, item.tooltip && ` (${item.tooltip})`] }, item.key)))] })] }) }));
+                        }), items.map((item, index) => (_jsxs(React.Fragment, { children: [index > 0 ? ", " : " ", item.label, tileStateText(t, item.highlighted, item.dimmed), item.tooltip && ` (${item.tooltip})`] }, item.key)))] })] }) }));
 };
 export default React.memo(MatrixTileOverflow);

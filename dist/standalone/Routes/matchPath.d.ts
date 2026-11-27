@@ -46,6 +46,16 @@ export interface PathMatch {
  */
 export declare const normalizePath: (path: string) => string;
 /**
+ * Percent-decodes a path segment, as {@link matchPath} reads the location's
+ * segments. RoutedTabs reads its segment with it too, so it selects the Tab
+ * whose panel a Route shows, and a Form's leave guard compares its Route's
+ * url with a navigation's target with it. Not exported from the package root.
+ * @param segment The segment of a location pathname
+ * @returns The decoded segment; the segment as it is if it has a malformed
+ * escape
+ */
+export declare const decodeSegment: (segment: string) => string;
+/**
  * match a location to a route
  * The location's segments are percent-decoded before they are compared to the
  * route's literal segments and given as params, so a location matches the same

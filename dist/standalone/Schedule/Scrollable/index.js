@@ -85,7 +85,7 @@ const ScrollableSchedule = (inProps) => {
      * @param changedFilters The filter values to change; the others are kept
      */
     const startOver = useCallback((changedFilters) => {
-        const list = scrollElem.current?.wrapper;
+        const list = scrollElem.current;
         refocusList.current =
             !!list && list.contains(list.ownerDocument.activeElement);
         setState((prev) => ({
@@ -98,7 +98,7 @@ const ScrollableSchedule = (inProps) => {
         if (!refocusList.current)
             return;
         refocusList.current = false;
-        scrollElem.current?.wrapper?.focus();
+        scrollElem.current?.focus();
     }, [state.listKey]);
     useEffect(() => {
         // not startOver itself: i18next passes the language, not filter values
@@ -140,12 +140,9 @@ const ScrollableSchedule = (inProps) => {
         todayElem.current = elem;
     }, []);
     const jumpToToday = useCallback(() => {
-        if (!todayElem.current ||
-            !scrollElem.current ||
-            !scrollElem.current.wrapper) {
+        if (!todayElem.current || !scrollElem.current)
             return;
-        }
-        scrollElem.current.wrapper.scrollTop = todayElem.current.offsetTop;
+        scrollElem.current.scrollTop = todayElem.current.offsetTop;
     }, []);
     const handleFilterChange = useCallback((evt) => {
         const value = evt.target.type === "checkbox" ? evt.target.checked : evt.target.value;

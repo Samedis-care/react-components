@@ -144,35 +144,30 @@ const encodeSort = (columnState) => Object.entries(columnState)
     (b.sortOrder ?? Number.MAX_SAFE_INTEGER))
     .map(([field, entry]) => [field, entry.sort]);
 /**
- * Reduces the column filters to what deviates from the defaults: a filter
- * which is the same condition as the default one (isSameFilterDef) is left
- * out, however the filter popup spelled it
- * @param columnState The current column state
- * @param defaultColumnState The column state the grid would start out with
+ * The filtered columns of a column state, each filter without its conditions
+ * that carry no value (normalizeFilterDef)
+ * @param columnState The column state
  */
-const encodeFilterDiff = (columnState, defaultColumnState) => {
-    const filter = {};
-    for (const field in columnState) {
-        const entry = columnState[field];
+const encodeFilter = (columnState) => {
+    const list = [];
+    for (const [field, entry] of Object.entries(columnState)) {
         if (!isPlainObject(entry))
             continue;
-        const def = defaultColumnState[field];
-        if (!isSameFilterDef(entry.filter, def?.filter)) {
-            filter[field] = normalizeFilterDef(entry.filter) ?? null;
-        }
+        const filter = normalizeFilterDef(entry.filter);
+        if (filter)
+            list.push([field, filter]);
     }
-    return filter;
+    return list;
 };
 /**
  * Encodes the runtime state into the format we persist
  * @param state The grid state
  * @param columnState The column state (sort and filter)
  * @param columnWidth The column widths
- * @param defaultColumnState The column state the grid would start out with
  * @param columns The column definitions
  * @param config What to persist (DataGridProps.persist)
  */
-export const encodePersistedState = (state, columnState, columnWidth, defaultColumnState, columns, config) => {
+export const encodePersistedState = (state, columnState, columnWidth, columns, config) => {
     const cfg = config ?? DEFAULT_PERSIST_CONFIG;
     const result = { v: DATA_GRID_PERSIST_VERSION };
     if (cfg.includes("columns")) {
@@ -204,16 +199,12 @@ export const encodePersistedState = (state, columnState, columnWidth, defaultCol
         result.width = width;
         result.initialResize = state.initialResize;
     }
-    // the whole sort, also when it is the default one: a default sort changed
-    // later must not change what the user has
+    // the whole sort and filters, also when they are the default ones: a
+    // default sort or filter changed later must not change what the user has
     if (cfg.includes("sort"))
         result.sort = encodeSort(columnState);
     if (cfg.includes("filters")) {
-        const filter = encodeFilterDiff(columnState, defaultColumnState);
-        if (Object.keys(filter).length)
-            result.filter = filter;
-    }
-    if (cfg.includes("filters")) {
+        result.filter = encodeFilter(columnState);
         // the default search is always empty, so omitting it is lossless
         if (state.search)
             result.search = state.search;
@@ -238,9 +229,8 @@ export const isNewerPersistedState = (data) => typeof data?.v === "number" && da
  * mention) are exactly that set.
  *
  * The legacy columnState is the whole sort and filter state, not a deviation
- * from the defaults: its sort becomes the whole sort, and every column in it
- * gets a filter entry (an unfiltered one null). Applied to whatever the
- * defaults are when it is read, that gives back exactly the legacy state, so
+ * from the defaults: it becomes the whole sort and the whole column filters.
+ * They are read as they are, whatever the defaults are when they are read, so
  * the migration needs no defaults and a part of the data can be migrated on
  * its own (see mergePersistedState).
  * @param legacy The legacy data
@@ -267,17 +257,11 @@ const migrateLegacyPersistedState = (legacy) => {
             result.pinned = known.filter((field) => lockedColumns.includes(field));
         }
     }
-    const filter = {};
-    for (const field in columnState) {
-        const entry = columnState[field];
-        if (!isPlainObject(entry))
-            continue;
-        filter[field] = normalizeFilterDef(entry.filter) ?? null;
-    }
-    // a column state without a usable entry says nothing about the sort
-    if (Object.keys(filter).length) {
+    // a column state without a usable entry says nothing about the sort and
+    // the filters
+    if (Object.values(columnState).some((entry) => isPlainObject(entry))) {
         result.sort = encodeSort(columnState);
-        result.filter = filter;
+        result.filter = encodeFilter(columnState);
     }
     if (typeof state.search === "string" && state.search)
         result.search = state.search;
@@ -288,6 +272,56 @@ const migrateLegacyPersistedState = (legacy) => {
         result.width = width;
     if (typeof state.initialResize === "boolean")
         result.initialResize = state.initialResize;
+    return result;
+};
+/**
+ * The keys of the persisted format that hold each part
+ */
+const PERSIST_PART_KEYS = {
+    columns: ["shown", "hidden", "pinned", "width", "initialResize"],
+    sort: ["sort"],
+    filters: ["filter", "search", "customData"],
+};
+/**
+ * Sets a key of the target to the source's value
+ * @param target The object to change
+ * @param source The object to read
+ * @param key The key
+ */
+const copyKey = (target, source, key) => {
+    target[key] = source[key];
+};
+/**
+ * Adds the parts of the state that a grid does not persist (those
+ * DataGridProps.persist leaves out) to the data it persists, as they are
+ * stored: a grid leaves what is stored for them as it is.
+ *
+ * Legacy data is migrated to the current format first. Data in a newer
+ * format (see isNewerPersistedState) gives nothing: this version cannot tell
+ * where that format keeps a part.
+ * @param data The data the grid persists (encodePersistedState)
+ * @param stored The persisted data, as the persistence provider hands it out
+ * @param config What the grid persists (DataGridProps.persist)
+ * @returns A new object with the stored parts which the config leaves out,
+ *          or data itself when there is nothing to add
+ */
+export const keepStoredParts = (data, stored, config) => {
+    const cfg = config ?? DEFAULT_PERSIST_CONFIG;
+    const left = Object.keys(PERSIST_PART_KEYS).filter((part) => !cfg.includes(part));
+    if (!left.length || !stored || typeof stored !== "object")
+        return data;
+    if (isNewerPersistedState(stored))
+        return data;
+    const current = isLegacy(stored)
+        ? migrateLegacyPersistedState(stored)
+        : stored;
+    const result = { ...data };
+    for (const part of left) {
+        for (const key of PERSIST_PART_KEYS[part]) {
+            if (current[key] !== undefined)
+                copyKey(result, current, key);
+        }
+    }
     return result;
 };
 /**
@@ -379,8 +413,10 @@ const applySortRecord = (columnState, record) => {
         }
     }
     for (const [field, [direction, order]] of sort) {
-        // sort of a column which no longer exists would be sent to the backend
-        if (!(field in columnState))
+        // sort of a column which no longer exists would be sent to the backend.
+        // Only own entries are columns: toString, __proto__ and the like are in
+        // every object
+        if (!Object.prototype.hasOwnProperty.call(columnState, field))
             continue;
         columnState[field] = {
             ...columnState[field],
@@ -393,6 +429,56 @@ const applySortRecord = (columnState, record) => {
     let priority = 0;
     for (const [field] of encodeSort(columnState)) {
         columnState[field] = { ...columnState[field], sortOrder: ++priority };
+    }
+};
+/**
+ * Applies stored whole column filters (DataGridPersistedFilterList): the
+ * default filters don't apply
+ * @param columnState The column state to change, starting with the defaults
+ * @param list The stored list
+ */
+const applyFilterList = (columnState, list) => {
+    for (const field in columnState) {
+        columnState[field] = { ...columnState[field], filter: undefined };
+    }
+    const listed = new Set();
+    for (const entry of list) {
+        if (!Array.isArray(entry) || typeof entry[0] !== "string")
+            continue;
+        const [field, value] = entry;
+        // a filter for a column which no longer exists would reach the backend.
+        // Only own entries are columns: toString, __proto__ and the like are in
+        // every object
+        if (!Object.prototype.hasOwnProperty.call(columnState, field))
+            continue;
+        // a column listed twice keeps its first entry
+        if (listed.has(field))
+            continue;
+        listed.add(field);
+        columnState[field] = { ...columnState[field], filter: asFilterDef(value) };
+    }
+};
+/**
+ * Applies a stored filter record, as written before the column filters were
+ * stored as a whole: the columns whose filter deviated from the default filter
+ * of that time
+ * @param columnState The column state to change, starting with the defaults
+ * @param record The stored record
+ */
+const applyFilterRecord = (columnState, record) => {
+    const filter = asRecord(record);
+    for (const field in filter) {
+        // see applyFilterList, a filter for a gone column would reach the backend
+        if (!Object.prototype.hasOwnProperty.call(columnState, field))
+            continue;
+        // null is a deliberately cleared default, anything unusable is skipped
+        const value = filter[field];
+        if (value !== null && !isPlainObject(value))
+            continue;
+        columnState[field] = {
+            ...columnState[field],
+            filter: value === null ? undefined : asFilterDef(value),
+        };
     }
 };
 const decode = (persisted, columns, defaultColumnState, config) => {
@@ -432,20 +518,10 @@ const decode = (persisted, columns, defaultColumnState, config) => {
             applySortRecord(result.columnState, data.sort);
     }
     if (cfg.includes("filters")) {
-        const filter = asRecord(data.filter);
-        for (const field in filter) {
-            // see above, a filter for a gone column would reach the backend
-            if (!(field in result.columnState))
-                continue;
-            // null is a deliberately cleared default, anything unusable is skipped
-            const value = filter[field];
-            if (value !== null && !isPlainObject(value))
-                continue;
-            result.columnState[field] = {
-                ...result.columnState[field],
-                filter: value === null ? undefined : asFilterDef(value),
-            };
-        }
+        if (Array.isArray(data.filter))
+            applyFilterList(result.columnState, data.filter);
+        else
+            applyFilterRecord(result.columnState, data.filter);
         if (typeof data.search === "string")
             result.state.search = data.search;
         if (isPlainObject(data.customData))
@@ -495,9 +571,8 @@ export const splitPersistedState = (data) => {
  * Then every legacy part is migrated on its own, and the result is in the
  * current format, with the highest `v` of the parts stored in it, so data of
  * a newer format next to data of this one is not taken for this one's. A
- * migrated part has the whole sort and a filter entry for every column in its
- * legacy columnState, as the legacy format stored the whole state, not
- * deviations from the defaults.
+ * migrated part has the whole sort and the whole column filters, as the
+ * legacy format stored the whole state, not deviations from the defaults.
  * @param parts The parts, in the order they should be merged (a later part's
  *        keys win). Missing parts (undefined, null) are skipped.
  * @returns The merged data, undefined when no part is there. It is in the

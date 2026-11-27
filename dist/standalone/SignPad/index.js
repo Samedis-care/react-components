@@ -1,7 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useId } from "react";
 import { IconButton, InputAdornment, styled, useThemeProps, } from "@mui/material";
-import { SignIcon } from "../../standalone";
+import { SignIcon } from "../Icons";
 import { Info as InfoIcon } from "@mui/icons-material";
 import useCCTranslations from "../../utils/useCCTranslations";
 import combineClassNames from "../../utils/combineClassNames";
@@ -94,12 +94,16 @@ const SignPad = (inProps) => {
         .filter(Boolean)
         .join(" ") || undefined;
     const signerName = signerNameUntrim?.trim();
-    const prompt = t("standalone.signature-pad.sign-here");
-    // what the tile holds (it starts with the visible prompt while unsigned),
+    // the visible text of an unsigned tile: the prompt, or, as nothing can be
+    // signed while disabled, that it is not signed
+    const unsigned = disabled
+        ? t("standalone.signature-pad.not-signed")
+        : t("standalone.signature-pad.sign-here");
+    // what the tile holds (it starts with the visible text while unsigned),
     // then whose signature it is
     const state = signature
         ? t("standalone.signature-pad.dialog.signature")
-        : prompt;
+        : unsigned;
     const label = signerName
         ? t("standalone.signature-pad.with-signer", {
             LABEL: state,
@@ -117,6 +121,16 @@ const SignPad = (inProps) => {
             disabled && DISABLED_CLASS,
         ]), 
         // also gets the button's clicks, Enter and Space included
-        onClick: disabled ? undefined : openSignPad, children: [_jsxs(SignPadButton, { type: "button", id: buttonId, "aria-label": label, "aria-labelledby": buttonLabelledBy, "aria-describedby": describedBy, "aria-invalid": invalid, "aria-disabled": disabled || undefined, className: classes?.button, children: [_jsxs(SignTextDiv, { className: classes?.signTextDiv, children: [_jsx(SignIcon, { color: disabled ? "disabled" : "primary" }), !signature && _jsx("span", { children: prompt })] }), _jsx(ImageDiv, { className: classes?.imageDiv, children: signature && (_jsx(SignPreview, { className: classes?.signPreview, src: signature, alt: "" })) })] }), _jsx(InfoDiv, { className: classes?.infoDiv, children: openInfo && (_jsx(InputAdornment, { position: "end", children: _jsx(IconButton, { id: infoId, onClick: handelOpenInfo, size: "large", "aria-label": t("standalone.uikit.info"), "aria-labelledby": infoLabelledBy, children: _jsx(InfoIcon, { color: "disabled" }) }) })) }), required && (_jsx("span", { id: requiredId, hidden: true, children: t("standalone.signature-pad.required") }))] }));
+        onClick: disabled ? undefined : openSignPad, children: [_jsxs(SignPadButton, { type: "button", id: buttonId, "aria-label": label, "aria-labelledby": buttonLabelledBy, "aria-describedby": describedBy, "aria-invalid": invalid, "aria-disabled": disabled || undefined, className: classes?.button, children: [_jsxs(SignTextDiv, { className: classes?.signTextDiv, children: [_jsx(SignIcon, { color: disabled ? "disabled" : "primary" }), !signature && _jsx("span", { children: unsigned })] }), _jsx(ImageDiv, { className: classes?.imageDiv, children: signature && (_jsx(SignPreview, { className: classes?.signPreview, src: signature, alt: "" })) })] }), _jsx(InfoDiv, { className: classes?.infoDiv, children: openInfo && (_jsx(InputAdornment, { position: "end", children: _jsx(IconButton, { id: infoId, onClick: handelOpenInfo, size: "large", "aria-label": t("standalone.uikit.info"), "aria-labelledby": infoLabelledBy, children: _jsx(InfoIcon, { color: "disabled" }) }) })) }), required && (_jsx("span", { id: requiredId, hidden: true, children: t("standalone.signature-pad.required") }))] }));
 };
+/**
+ * The display tile of a signature field: the stored signature scaled to
+ * fit, or, while unsigned, a pen icon and a prompt to sign. It does not
+ * draw: a click on the tile, or Enter or Space on its button, calls
+ * `openSignPad`, unless `disabled`. For a complete field with the drawing
+ * dialog use SignaturePad.
+ *
+ * The tile fills its parent (100% x 100%, at least 100px tall). Theme name
+ * `CcSignPad`.
+ */
 export default React.memo(SignPad);

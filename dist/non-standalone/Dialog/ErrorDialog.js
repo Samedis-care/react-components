@@ -1,9 +1,12 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useContext, useId, useMemo } from "react";
 import { PushedDialogCloseContext } from "../../framework/PushedDialogCloseContext";
-import { Button, buttonClasses, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, } from "@mui/material";
+import { buttonClasses, CircularProgress, DialogActions, DialogContent, DialogContentText, DialogTitle, } from "@mui/material";
 import useRefState from "../../utils/useRefState";
 import { dialogButtonClose } from "./dialogButtonClose";
+import FocusRingButton from "../../utils/internal/FocusRingButton";
+import ForcedColorsEdgeDialog from "../../utils/internal/ForcedColorsEdgeDialog";
+import { useReportButtonError } from "./useReportButtonError";
 // shown before the label of the button whose handler runs; the button's aria-disabled and
 // the dialog's aria-busy tell assistive technology
 const busyIndicator = (_jsx(CircularProgress, { color: "inherit", size: 16, "aria-hidden": true }));
@@ -19,6 +22,7 @@ const ErrorDialogRaw = (props) => {
     const busy = busyButton !== null;
     // the message is the dialog's description
     const messageId = useId();
+    const reportButtonError = useReportButtonError("ErrorDialog.onClick");
     const removeDialog = React.useCallback(() => {
         closeThisDialog?.();
         if (onClose)
@@ -30,7 +34,7 @@ const ErrorDialogRaw = (props) => {
         removeDialog();
     }, [getBusyButton, removeDialog]);
     const slotProps = useMemo(() => ({ paper: { "aria-busy": busy || undefined } }), [busy]);
-    return (_jsxs(Dialog, { open: true, onClose: handleClose, "aria-describedby": messageId, slotProps: slotProps, children: [_jsx(DialogTitle, { children: props.title }), _jsx(DialogContent, { children: _jsx(DialogContentText, { component: "span", id: messageId, children: props.message }) }), _jsx(DialogActions, { children: props.buttons.map((data, index) => (_jsx(Button, { onClick: async () => {
+    return (_jsxs(ForcedColorsEdgeDialog, { open: true, onClose: handleClose, "aria-describedby": messageId, slotProps: slotProps, children: [_jsx(DialogTitle, { children: props.title }), _jsx(DialogContent, { children: _jsx(DialogContentText, { component: "span", id: messageId, children: props.message }) }), _jsx(DialogActions, { children: props.buttons.map((data, index) => (_jsx(FocusRingButton, { onClick: async () => {
                         if (getBusyButton() !== null)
                             return;
                         const { close, end } = dialogButtonClose(closeThisDialog, onClose);
@@ -44,6 +48,12 @@ const ErrorDialogRaw = (props) => {
                                     setBusyButton(null);
                                 }
                             }
+                        }
+                        catch (error) {
+                            // the dialog stays open, unless the handler closed it, so the user can try
+                            // again; the error shows in an error dialog over it
+                            reportButtonError(error);
+                            return;
                         }
                         finally {
                             // the handler closed the dialog: report it closed, also when the handler
@@ -66,6 +76,10 @@ const ErrorDialogRaw = (props) => {
  * keyboard focus stays on the pressed button. `onClick` gets a `close` that closes the dialog
  * at once; `onClose` is then called once the handler has ended, also with `dontClose`. Escape
  * and a backdrop click close it and call `onClose`.
+ * If `onClick` throws or its promise rejects, the dialog stays open with its buttons enabled
+ * again and `onClose` is not called (unless the handler called `close`); the error is
+ * reported (captureError, source `"ErrorDialog.onClick"`) and shown in an error dialog over
+ * the dialog, as showErrorDialog shows it.
  * It closes the dialog it was pushed in, and only that one, also when dialogs were pushed
  * after it. Rendered without pushDialog, it is always open: it closes through `onClose`,
  * which has to stop rendering it.

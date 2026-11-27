@@ -8,24 +8,14 @@ import Loader from "../Loader";
 import combineClassNames from "../../utils/combineClassNames";
 import { labelWithDirtyMarker } from "../UIKit/MuiFieldState";
 import useCCTranslations from "../../utils/useCCTranslations";
+import visuallyHidden from "../../utils/internal/visuallyHidden";
 const Root = styled("div", { name: "CcMultiSelectWithTags", slot: "root" })({
     position: "relative",
 });
 const GroupInputLabel = styled("label", {
     name: "CcMultiSelectWithTags",
     slot: "groupInputLabel",
-})({
-    // visually hidden, as MUI's visuallyHidden
-    border: 0,
-    clipPath: "inset(50%)",
-    height: 1,
-    margin: -1,
-    overflow: "hidden",
-    padding: 0,
-    position: "absolute",
-    whiteSpace: "nowrap",
-    width: 1,
-});
+})(visuallyHidden);
 const LoadOverlay = styled("div", {
     name: "CcMultiSelectWithTags",
     slot: "loadOverlay",
@@ -49,11 +39,18 @@ const MultiSelectWithTags = (inProps) => {
     const id = useId();
     const titleId = `${id}-title`;
     const groupFieldId = `${autocompleteId || id}-group-select`;
-    const defaultSwitchValue = props.displaySwitch
-        ? (props.defaultSwitchValue ?? false)
-        : false;
+    const switchShown = !!props.displaySwitch;
+    const defaultSwitchValue = !!(switchShown && props.defaultSwitchValue);
     const [selectedGroups, setSelectedGroups] = useState([]);
     const [switchValue, setSwitchValue] = useState(defaultSwitchValue);
+    // hiding the switch turns its filter off, and showing it starts it at
+    // defaultSwitchValue again. Reset while rendering, not in an effect, so the loads this
+    // render starts (e.g. for a new selection) already get the new value.
+    const [switchWasShown, setSwitchWasShown] = useState(switchShown);
+    if (switchWasShown !== switchShown) {
+        setSwitchWasShown(switchShown);
+        setSwitchValue(defaultSwitchValue);
+    }
     const [loadingGroupRecords, setLoadingGroupRecords] = useState(false);
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
@@ -63,11 +60,6 @@ const MultiSelectWithTags = (inProps) => {
     /** the group field gets focus back after a group pick, see handleGroupSelect */
     const keepGroupFocusRef = useRef(false);
     const getGroupInput = useCallback(() => rootRef.current?.ownerDocument.getElementById(groupFieldId) ?? null, [groupFieldId]);
-    // set switch value if switch visibility is toggled
-    useEffect(() => {
-        setSwitchValue(defaultSwitchValue);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [!!props.displaySwitch]);
     // remove selected groups if an item has been unselected
     useEffect(() => {
         const selectedIds = selected.map(getId);

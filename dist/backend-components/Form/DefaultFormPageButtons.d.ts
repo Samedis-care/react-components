@@ -6,17 +6,20 @@ import type { DefaultFormPageProps } from "./DefaultFormPage";
 /**
  * Class BackActionButton sets when it gets no `color`. While the button is enabled, it paints it
  * in MUI's grey for a contained button without a palette color (`grey[300]` in the light palette,
- * `grey[800]` in the dark one) with the palette's contrast text for that grey; a disabled one
+ * `grey[800]` in the dark one) with the palette's contrast text for that grey, and under a
+ * pointer in MUI's hover grey for such a button (`grey.A100`, `grey[700]`); a disabled one
  * (e.g. during a save) looks like every disabled ActionButton, like Save next to it. Restyle it
  * through `CcDefaultFormPageButtons.styleOverrides.backButton` with the selector
  * `&.${BackButtonDefaultColorClass}:not(.Mui-disabled)`, which keeps that disabled look, and set
  * `color` together with `backgroundColor` there, or the text keeps the contrast color of the grey.
+ * That rule replaces the hover grey as well, so the button keeps its fill under a pointer; give it
+ * a hover fill of its own with `&:hover` inside the rule.
  */
 export declare const BackButtonDefaultColorClass = "CcDefaultFormPageButtons-backButtonDefaultColor";
 /**
  * ActionButton styled as the secondary "back" action of a form footer: no shadow, no border, and
- * grey (BackButtonDefaultColorClass) unless a `color` is given; disabled, it looks like any
- * disabled ActionButton. Takes ActionButton's props.
+ * grey (BackButtonDefaultColorClass), a lighter grey under a pointer, unless a `color` is given;
+ * disabled, it looks like any disabled ActionButton. Takes ActionButton's props.
  */
 export declare const BackActionButton: typeof ActionButton;
 export type DefaultFormPageButtonsClassKey = "backButton";

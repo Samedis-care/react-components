@@ -150,9 +150,17 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
      */
     id: string | null;
     /**
-     * Initial record to use (instead of defaults from model)
-     * @remarks Only loaded if ID is null
+     * Values a new record starts with, over the model's defaults (e.g. a record created from a
+     * template or a copy, or a link to the record it is created for)
+     * @remarks Only applied if ID is null
      * @remarks Read when the record loads, later changes are ignored
+     * @remarks The fields it sets are changes to the new record: the form's dirty baseline
+     *          (initialValues) is the model's default record, so a field set to another value
+     *          than its default makes the form dirty from the start. Its Save is enabled, the
+     *          leave guard asks, FormAutoSave saves it, the fields are marked with
+     *          showDirtyState, and a nested form makes its parent dirty. A field set to its
+     *          default, or changed back to it, is not a change. Values that should not count
+     *          as a change belong in the model's defaults (a field's getDefaultValue).
      */
     initialRecord?: ModelRecordPartial<M>;
     /**
@@ -264,6 +272,18 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
      * Nested form name
      * Enables nested form mode if set to non-empty string
      * Form is submitted with main form submit. Does not support multiple layers of nesting
+     * @remarks While its values differ from its record the parent is dirty (a custom dirty
+     *          field named after it, see FormContextData.setCustomFieldDirty). A nested form
+     *          that unmounts keeps its edits in the parent and gets them back when it mounts
+     *          again; they keep the parent dirty and are saved by the parent's save, unless
+     *          the parent has onlySubmitMounted or this form has onlySubmitNestedIfMounted.
+     * @remarks In a flow form (the parent's flowEngine), a submit that only stages
+     *          (goToStage without submitToServer) stages the nested form's edits along with
+     *          the values of the shown stage and sends nothing. A nested form that unmounts
+     *          with staged edits, as it does when its stage is left, keeps them for the
+     *          flow's save: they count toward the parent's stagedDirty, and the next submit
+     *          to the server submits the nested form. One hidden within its stage, with
+     *          nothing staged since it mounted, follows the parent's onlySubmitMounted.
      */
     nestedFormName?: string;
     /**
@@ -276,6 +296,8 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
      * Submit nested form before parent instead of after
      * @remarks only affects nested forms. Use when the child record must exist before the parent is saved.
      * The `id` passed to `nestedFormPreSubmitHandler` will be the parent's pre-submit id (null on create).
+     * In a flow form a submit that only stages does not submit the nested form, the flow's
+     * save does (see nestedFormName).
      * @default false
      */
     nestedSubmitBeforeParent?: boolean;
@@ -454,11 +476,18 @@ export interface FormContextData<M extends ModelUnknown, CustomPropsT = unknown>
     /**
      * Set custom field dirty state
      * @param field The unique field name
-     * @param dirty The dirty state
+     * @param dirty The dirty state: true while the field holds changes the form's save
+     *              saves, false once it holds none. "staged" in a flow form
+     *              (FormProps.flowEngine): the changes belong to a stage that was left and
+     *              wait for the flow's save, so they count toward stagedDirty instead of
+     *              dirty, as the staged values of that stage's fields do. Without flowEngine
+     *              "staged" counts like true.
      * @remarks The same function for the life of the Form, so an effect that lists it (and
      *          clears its field in the cleanup) doesn't re-run when the Form re-renders.
+     * @remarks The field keeps the last state set until it is set again: whatever sets it
+     *          clears it once its changes are saved or undone.
      */
-    setCustomFieldDirty: (field: string, dirty: boolean) => void;
+    setCustomFieldDirty: (field: string, dirty: boolean | "staged") => void;
     /**
      * Set form read only
      * @param ident A unique identifier triggering the read-only state
@@ -490,7 +519,11 @@ export interface FormContextData<M extends ModelUnknown, CustomPropsT = unknown>
     removeEventListener: FormEventTarget["removeEventListener"];
     /**
      * Is the form dirty? Do the values it submits differ from the server record, is a custom
-     * field dirty (setCustomFieldDirty), or is the record deleted on submit (deleteOnSubmit)?
+     * field dirty (setCustomFieldDirty with true), or is the record deleted on submit
+     * (deleteOnSubmit)?
+     *
+     * The server record is initialValues. For a new record that is the model's default record,
+     * so the fields FormProps.initialRecord sets to another value count as changes.
      *
      * In flow mode (FormProps.flowEngine) the values are those the shown stage submits: the
      * fields it renders, alwaysSubmitFields and hidden fields, or every field when its stage
@@ -508,8 +541,10 @@ export interface FormContextData<M extends ModelUnknown, CustomPropsT = unknown>
     dirty: boolean;
     /**
      * Flow mode (FormProps.flowEngine): do the values that stages staged (goToStage without
-     * submitToServer) differ from the server record? They are what the next save sends besides
-     * the values of the shown stage, also while the stage that renders them is not shown.
+     * submitToServer) differ from the server record, or does a custom field hold staged
+     * changes (setCustomFieldDirty with "staged", e.g. a nested form in a stage that was left)?
+     * They are what the next save sends besides the values of the shown stage, also while the
+     * stage that renders them is not shown.
      *
      * Set from the moment a stage change stages an edit until the flow saves it (goToStage
      * with submitToServer, FlowEngineSaveButton, submit with submitToServer), or until the
@@ -647,7 +682,10 @@ export interface FormContextData<M extends ModelUnknown, CustomPropsT = unknown>
      */
     values: ModelRecord<M>;
     /**
-     * The initial form values
+     * The server record the values are compared with (the dirty baseline): the record as
+     * loaded or last saved. For a new record that the form has not saved yet, the model's
+     * default record, without FormProps.initialRecord, which is applied to the values as a
+     * change. Empty before the record loaded.
      */
     initialValues: ModelRecord<M>;
     /**
@@ -750,7 +788,19 @@ export type FormContextModelTypeRequired<M> = [M] extends [never] ? [modelTypeAr
  * @remarks M is not checked against the model the form actually uses
  */
 export declare const useFormContext: <M extends ModelUnknown = never, CustomPropsT = unknown>(..._modelTypeRequired: FormContextModelTypeRequired<M>) => FormContextData<M, CustomPropsT>;
-export type FormContextDataLite<M extends ModelUnknown, CustomPropsT = unknown> = Pick<FormContextData<M, CustomPropsT>, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "initialValues" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly" | "removeCustomReadOnly" | "addEventListener" | "removeEventListener" | "flowEngine" | "submit" | "safeSubmit" | "submitting" | "dirty" | "stagedDirty" | "showDirtyState" | "flowEngineConfig" | "refetchForm">;
+/**
+ * The part of the form context that does not change with the form's values: the record, the
+ * form's state flags and its stable callbacks, among them those of custom fields (custom
+ * state, dirty flag, validation, warning, pre- and post-submit handlers)
+ * @typeParam M The model of the form, ModelUnknown for code that works with any form
+ * @typeParam CustomPropsT The custom props of the form
+ * @remarks Its value changes with id, model, customProps, the read-only reasons, submitting,
+ *          dirty and stagedDirty, but not with a value, an error, a warning or a touched flag,
+ *          so a control that reads only this context (useFormContextLite) does not render
+ *          again while the user types into another field. getFieldValue and getFieldValues
+ *          read the latest values without subscribing to them.
+ */
+export type FormContextDataLite<M extends ModelUnknown, CustomPropsT = unknown> = Pick<FormContextData<M, CustomPropsT>, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "initialValues" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly" | "removeCustomReadOnly" | "setCustomValidationHandler" | "removeCustomValidationHandler" | "setCustomWarningHandler" | "removeCustomWarningHandler" | "setPreSubmitHandler" | "removePreSubmitHandler" | "setPostSubmitHandler" | "removePostSubmitHandler" | "getCustomState" | "setCustomState" | "hasCustomState" | "setCustomFieldDirty" | "addEventListener" | "removeEventListener" | "flowEngine" | "submit" | "safeSubmit" | "submitting" | "dirty" | "stagedDirty" | "showDirtyState" | "flowEngineConfig" | "refetchForm">;
 export declare const FormContextLite: React.Context<FormContextDataLite<ModelUnknown, unknown> | null>;
 /**
  * The lite context of the form this component is rendered in

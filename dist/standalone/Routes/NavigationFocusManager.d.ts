@@ -5,9 +5,14 @@ import type { PageTitleRegistry } from "./DocumentTitle";
  */
 interface NavigationFocusTarget {
     /**
-     * The page titles and headings
+     * The page titles and headings set inside the router
      */
     registry: PageTitleRegistry | null;
+    /**
+     * Is the router inside another one? Then the focus moves only to a
+     * PageTitle of its registry, never to the `<h1>` of the main landmark.
+     */
+    nested: boolean;
     /**
      * Sets the text of the live region
      */

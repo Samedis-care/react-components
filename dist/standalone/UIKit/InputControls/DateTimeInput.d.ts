@@ -5,6 +5,15 @@ import { LocalizedDateTimePickerProps } from "../../../standalone/LocalizedDateT
 export interface DateTimeInputProps extends UIInputProps {
     openInfo?: () => void;
     /**
+     * The accessible name of the input, for one without a visible `label`,
+     * such as the translated purpose of the date ("From", "To"). It names the
+     * field (its `role="group"`, which a screen reader announces when focus
+     * enters a section) and the open calendar dialog. A visible `label` takes
+     * its place, as in MUI. Default: none, so an input without a `label` has an
+     * unnamed field. See `LocalizedDateTimePickerProps["aria-label"]`.
+     */
+    "aria-label"?: LocalizedDateTimePickerProps["aria-label"];
+    /**
      * Set required flag for text field input
      */
     required?: LocalizedDateTimePickerProps["required"];
@@ -26,6 +35,13 @@ export interface DateTimeInputProps extends UIInputProps {
      */
     onChange?: LocalizedDateTimePickerProps["onChange"];
     /**
+     * Called with every date and time reported to `onChange`, right after it
+     * and with the same arguments, so never with a value the field passes
+     * through while the user types or one the picker rejects. See
+     * `LocalizedDateTimePickerProps.onAccept`.
+     */
+    onAccept?: LocalizedDateTimePickerProps["onAccept"];
+    /**
      * full width?
      */
     fullWidth?: LocalizedDateTimePickerProps["fullWidth"];
@@ -34,7 +50,10 @@ export interface DateTimeInputProps extends UIInputProps {
      * @remarks The field group's description (`aria-describedby`), so a screen reader
      *          reads it when the user reaches the field; its color follows `error` and
      *          `warning`. Takes the place of `slotProps.textField.helperText`, which is
-     *          used while this is undefined. Default: none.
+     *          used while this is undefined. While `error` is unset and the picker's own
+     *          validation rejects the value (`minDateTime`, `minTime`, …), the picker's
+     *          message shows in its place (see `LocalizedDateTimePickerProps`). Default:
+     *          none.
      */
     helperText?: PickersTextFieldProps["helperText"];
 }

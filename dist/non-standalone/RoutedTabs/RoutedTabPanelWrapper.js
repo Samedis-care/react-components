@@ -1,11 +1,19 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
+import React, { Suspense, useCallback, useLayoutEffect, useMemo, useRef, useState, } from "react";
 import { styled, useThemeProps } from "@mui/material";
+import Loader from "../../standalone/Loader";
 import Routes from "../../standalone/Routes/Routes";
-import { useRouteInfo, useRoutePrefix, } from "../../standalone/Routes/Route";
+import { useRouteInfo, useRoutePrefix } from "../../standalone/Routes/Route";
 import useLocation from "../../standalone/Routes/useLocation";
 import findMatchingRoute from "../../standalone/Routes/findMatchingRoute";
+import routeEntries from "../../standalone/Routes/routeEntries";
 import { getTabId, getTabPanelId } from "./tabPanelIds";
+import RoutedTabPanelFallback from "./RoutedTabPanelFallback";
+/**
+ * The default `fallback`: a Loader that a screen reader announces inside the
+ * busy panel
+ */
+const DEFAULT_FALLBACK = _jsx(Loader, { "aria-busy": false });
 const Root = styled("div", {
     name: "CcRoutedTabPanelWrapper",
     slot: "root",
@@ -76,11 +84,12 @@ const hasTabbable = (panel) => Array.from(panel.querySelectorAll(FOCUSABLE_CONTE
  */
 const tabValue = (path) => path.replace(/\/\*$/, "").replace(/^\//, "");
 /**
- * Renders the panel of the current tab: the first of its entries whose path
- * matches the URL, nothing when none does. A `div` with `role="tabpanel"`
- * wraps it, named by its tab (`aria-labelledby`), with matching `id` and the
- * `aria-controls` of that tab (see `RoutedTabs`). Place it under the same Route
- * as its `RoutedTabs`.
+ * Renders the panel of the current tab: the entry Routes renders, the most
+ * specific of those whose path matches the URL (another tab's entry before the
+ * default tab's, whatever their order), nothing when none does. A `div` with
+ * `role="tabpanel"` wraps it, named by its tab (`aria-labelledby`), with
+ * matching `id` and the `aria-controls` of that tab (see `RoutedTabs`). Place
+ * it under the same Route as its `RoutedTabs`.
  * - The panel is a tab stop (`tabindex="0"`) while it contains nothing
  *   focusable, as the APG asks: Tab from the selected tab then reaches the
  *   panel. With a focusable control in it, it is no tab stop, so Tab goes from
@@ -90,6 +99,13 @@ const tabValue = (path) => path.replace(/\/\*$/, "").replace(/^\//, "");
  * - While the panel itself has focus it stays a tab stop, so focus is not
  *   dropped to the body when a control appears under it; the flag is
  *   recomputed when it loses focus.
+ * - The panel content renders inside a Suspense boundary of the wrapper's
+ *   own, within the tabpanel: while it suspends (`React.lazy`, a translation
+ *   namespace that is still loading, a suspending query), the panel shows
+ *   `fallback` (a Loader by default) and is `aria-busy="true"`. The tab bar
+ *   above stays, and so does the focus on the tab that opened the panel;
+ *   without this boundary, the nearest one above (a page's, a CRUD form's)
+ *   would hide the bar behind its own fallback.
  * - The panel is a `CcRoutedTabPanelWrapper` root: style it with
  *   `theme.components.CcRoutedTabPanelWrapper.styleOverrides.root` or the
  *   `className` prop. It has no padding or paper of its own: add it to the
@@ -105,14 +121,17 @@ const RoutedTabPanelWrapper = (inProps) => {
         props: inProps,
         name: "CcRoutedTabPanelWrapper",
     });
-    const { children, className } = props;
-    const entries = React.Children.toArray(children).filter((React.isValidElement));
+    const { children, className, fallback = DEFAULT_FALLBACK } = props;
+    const entries = routeEntries(children);
     const { pathname } = useLocation();
     const routePrefix = useRoutePrefix();
     const matched = findMatchingRoute(entries, routePrefix, pathname);
     const { url } = useRouteInfo();
     const panelRef = useRef(null);
     const [hasFocusableContent, setHasFocusableContent] = useState(false);
+    // the Suspense fallback shows: the panel's content is loading
+    const [busy, setBusy] = useState(false);
+    const suspenseFallback = useMemo(() => (_jsx(RoutedTabPanelFallback, { onShownChange: setBusy, children: fallback })), [fallback]);
     const updateTabStop = useCallback(() => {
         const panel = panelRef.current;
         if (panel === null)
@@ -155,6 +174,6 @@ const RoutedTabPanelWrapper = (inProps) => {
     if (!matched)
         return null;
     const value = tabValue(matched.props.path);
-    return (_jsx(Root, { ref: panelRef, role: "tabpanel", id: getTabPanelId(url, value), "aria-labelledby": getTabId(url, value), tabIndex: hasFocusableContent ? undefined : 0, className: className, children: _jsx(Routes, { children: entries }) }));
+    return (_jsx(Root, { ref: panelRef, role: "tabpanel", id: getTabPanelId(url, value), "aria-labelledby": getTabId(url, value), tabIndex: hasFocusableContent ? undefined : 0, "aria-busy": busy || undefined, className: className, children: _jsx(Suspense, { fallback: suspenseFallback, children: _jsx(Routes, { children: entries }) }) }));
 };
 export default React.memo(RoutedTabPanelWrapper);

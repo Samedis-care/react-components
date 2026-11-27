@@ -10,6 +10,12 @@ export interface IDataGridExportMenuEntryProps {
      * Close export menu
      */
     closeMenu: NonNullable<MenuProps["onClose"]>;
+    /**
+     * The element outside the menu that holds the entry's second status region
+     * (see ExportMenuEntry). While it is null (before it mounted) the entry
+     * renders only the region inside the menu.
+     */
+    statusContainer: HTMLElement | null;
 }
 export declare enum DataGridExportStatus {
     Idle = 0,

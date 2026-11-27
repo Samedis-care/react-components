@@ -13,7 +13,8 @@
 			"menu-toggle": "Menyuni ochish",
 			"collapse-menu": "Menyuni yig'ish",
 			"expand-menu": "Menyuni yoyish",
-			"close-menu": "Menyuni yopish"
+			"close-menu": "Menyuni yopish",
+			"main-menu": "Asosiy menyu"
 		},
 		"uikit": {
 			"info": "Qo'shimcha ma'lumot",
@@ -36,17 +37,32 @@
 			}
 		},
 		"date-picker": {
+			"open-date-time": "Sana va vaqtni tanlang",
+			"open-date-time-selected": "Sana va vaqtni tanlang, tanlangan sana va vaqt: {{DATE}} {{TIME}}",
 			"error": {
 				"invalid": "To'g'ri sanani kiriting",
 				"min-date": "{{DATE}} yoki undan keyingi sanani kiriting",
 				"max-date": "{{DATE}} yoki undan oldingi sanani kiriting",
 				"past": "Bugungi yoki undan keyingi sanani kiriting",
 				"future": "Bugungi yoki undan oldingi sanani kiriting",
-				"unavailable": "Tanlash mumkin bo'lgan sanani kiriting"
+				"unavailable": "Tanlash mumkin bo'lgan sanani kiriting",
+				"min-date-time": "{{DATE}} yoki undan keyingi sana va vaqtni kiriting",
+				"max-date-time": "{{DATE}} yoki undan oldingi sana va vaqtni kiriting",
+				"min-time": "{{TIME}} yoki undan keyingi vaqtni kiriting",
+				"max-time": "{{TIME}} yoki undan oldingi vaqtni kiriting",
+				"past-date-time": "Hozirgi yoki undan keyingi sana va vaqtni kiriting",
+				"future-date-time": "Hozirgi yoki undan oldingi sana va vaqtni kiriting",
+				"unavailable-time": "Tanlash mumkin bo'lgan vaqtni kiriting",
+				"minutes-step": "Daqiqalarni {{STEP}} qadam bilan kiriting"
 			}
 		},
 		"notifications": {
-			"title": "Bildirishnomalar"
+			"title": "Bildirishnomalar",
+			"bell-label_one": "Bildirishnomalar, {{count}} ta o'qilmagan",
+			"bell-label_other": "Bildirishnomalar, {{count}} ta o'qilmagan",
+			"announce-new_one": "{{count}} ta yangi bildirishnoma",
+			"announce-new_other": "{{count}} ta yangi bildirishnoma",
+			"unread": "O'qilmagan"
 		},
 		"how-it-works": {
 			"title": "U qanday ishlaydi"
@@ -241,6 +257,9 @@
 			"zoom-out": "Kichiklashtirish",
 			"reset-zoom": "Masshtabni tiklash"
 		},
+		"group-box": {
+			"required": "Majburiy"
+		},
 		"phone-number": {
 			"invalid": "To'g'ri telefon raqamini kiriting"
 		},
@@ -265,6 +284,7 @@
 				"instructions-signed": "Saqlangan imzo ko'rsatilgan. Qayta imzolash uchun avval uni tozalang."
 			},
 			"sign-here": "Bu yerda raqamli imzolang",
+			"not-signed": "Imzo qo'yilmagan",
 			"required": "Majburiy"
 		},
 		"signal-portlet": {
@@ -285,7 +305,11 @@
 			"label": "Yuklanmoqda…"
 		},
 		"matrix": {
+			"row-header-actions": "Ushbu qator uchun amallarni ochadi.",
 			"tile-more": "yana {{count}} ta:",
+			"tile-arrow": "manzil:",
+			"tile-highlighted": "ajratib ko'rsatilgan",
+			"tile-dimmed": "xiralashtirilgan",
 			"extra-cell-add": "Qo'shish"
 		}
 	},
@@ -353,6 +377,9 @@
 				"boolean": {
 					"true": "Ha",
 					"false": "Yo'q"
+				},
+				"color": {
+					"validation-error": "Iltimos, to'g'ri rangni kiriting, masalan #336699"
 				}
 			}
 		}
@@ -362,8 +389,10 @@
 			"delete": {
 				"confirm-dialog": {
 					"title": "O'chirish",
-					"message": "Haqiqatan ham {{NUM}} ta yozuvni o'chirmoqchimisiz?",
-					"messageInverted": "Haqiqatan ham {{NUM}} ta yozuvdan boshqasini o'chirishni xohlaysizmi?",
+					"message_one": "Haqiqatan ham {{count}} ta yozuvni o'chirmoqchimisiz?",
+					"message_other": "Haqiqatan ham {{count}} ta yozuvni o'chirmoqchimisiz?",
+					"messageInverted_one": "Haqiqatan ham {{count}} ta yozuvdan boshqasini o'chirishni xohlaysizmi?",
+					"messageInverted_other": "Haqiqatan ham {{count}} ta yozuvdan boshqasini o'chirishni xohlaysizmi?",
 					"buttons": {
 						"yes": "Ha",
 						"no": "Yo'q"
@@ -373,7 +402,7 @@
 					"title": "Xato",
 					"message": "Tanlangan yozuvlarni o'chirib bo'lmadi: {{ERROR}}",
 					"buttons": {
-						"okay": "xop"
+						"okay": "OK"
 					}
 				},
 				"success-toast": {
@@ -405,6 +434,11 @@
 			"read-only": {
 				"submitting": "Shakl hozir saqlanmoqda"
 			},
+			"auto-save": {
+				"saving": "Saqlanmoqda…",
+				"saved": "Saqlandi",
+				"failed": "Saqlab boʻlmadi"
+			},
 			"tab": {
 				"invalid": "Notoʻgʻri maydonlar bor.",
 				"modified": "Oʻzgartirilgan maydonlar bor."
@@ -415,6 +449,7 @@
 		},
 		"selector": {
 			"loading": "Yuklanmoqda…",
+			"saving": "Saqlanmoqda…",
 			"loading-error": "Ma'lumotlarni olishda xatolik yuz berdi",
 			"unknown-entry": "Noma'lum yozuv",
 			"selected-count": "Tanlangan: {{COUNT}}",

@@ -1,11 +1,12 @@
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { createContext, useCallback, useContext, useId, useMemo, useState, } from "react";
+import React, { createContext, useCallback, useContext, useId, useMemo, useRef, useState, } from "react";
 import Header from "./Header";
 import Menu from "./Menu";
 import { buttonBaseClasses, IconButton, styled, useMediaQuery, useTheme, useThemeProps, } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import focusRing from "../focusRing";
+import useResetScrollOnNavigation from "../../Routes/useResetScrollOnNavigation";
 const Container = styled("div", {
     name: "CcPortalLayout",
     slot: "container",
@@ -32,15 +33,36 @@ const RenderLayoutMenu = styled("div", {
     name: "CcPortalRenderLayout",
     slot: "menu",
 })({ gridArea: "sidebar", minHeight: "100%" });
-const RenderLayoutMain = styled("div", {
+// the page's navigation landmark around menuContent, in the desktop paper and
+// in the drawer. It fills the paper (below the drawer's topLeft row) as
+// menuContent did without it: a flex column that may shrink below its content,
+// so a menu with height 100% fills it and scrolls inside it.
+const RenderLayoutNav = styled("nav", {
+    name: "CcPortalRenderLayout",
+    slot: "nav",
+})({
+    height: "100%",
+    minHeight: 0,
+    display: "flex",
+    flexDirection: "column",
+});
+// the page's main landmark and the pane the pages scroll in
+const RenderLayoutMain = styled("main", {
     name: "CcPortalRenderLayout",
     slot: "main",
-})({
+})(({ theme }) => ({
     gridArea: "main",
     overflow: "auto",
     display: "flex",
     flexDirection: "column",
-});
+    // focused from the keyboard (a skip link), or by a script after keyboard
+    // use: the Portal's focus ring, inside the pane, where the screen's edge
+    // cannot clip it
+    "&:focus-visible": {
+        outline: `2px solid ${(theme.vars || theme).palette.primary.main}`,
+        outlineOffset: -2,
+    },
+}));
 const RenderLayoutMobileTopLeft = styled("div", {
     name: "CcPortalRenderLayout",
     slot: "mobileTopLeft",
@@ -87,6 +109,9 @@ const RenderLayout = (props) => {
     const [menuOpen, setMenuOpen] = useState(false);
     // the mobile drawer's paper, named by the burger's aria-controls
     const drawerId = useId();
+    // the pane the pages scroll in: a navigation starts the next page at its top
+    const mainRef = useRef(null);
+    useResetScrollOnNavigation(mainRef);
     const { t } = useCCTranslations();
     const toggleMenu = useCallback(() => setMenuOpen((prevState) => !prevState), [setMenuOpen]);
     // closes, never toggles: a second click while the drawer slides out keeps it closed
@@ -96,7 +121,7 @@ const RenderLayout = (props) => {
         menuOpen,
         setMenuOpen,
     }), [mobile, menuOpen, setMenuOpen]);
-    return (_jsxs(PortalLayoutContext.Provider, { value: portalContext, children: [!props.mobile && props.variant === "basic" && (_jsx(RenderLayoutTopLeft, { children: props.topLeft })), _jsx(RenderLayoutHeader, { id: props.headerId, children: headerContent && (_jsx(Header, { contents: headerContent, toggleMenu: toggleMenu, mobile: mobile && !!menuContent, drawerId: drawerId, customClasses: props.customClasses?.header })) }), _jsx(RenderLayoutMenu, { id: props.menuId, children: menuContent && (_jsx(Menu, { menuOpen: menuOpen, drawerWidth: drawerWidth, toggleMenu: toggleMenu, mobile: mobile, drawerId: drawerId, items: _jsxs(_Fragment, { children: [mobile && (_jsx(RenderLayoutCloseMenuButton, { onClick: closeMenu, size: "large", "aria-label": t("standalone.portal.close-menu"), children: _jsx(CloseIcon, {}) })), mobile && props.variant === "basic" && (_jsx(RenderLayoutMobileTopLeft, { children: props.topLeft })), menuContent] }) })) }), _jsx(RenderLayoutMain, { id: props.mainId, children: content })] }));
+    return (_jsxs(PortalLayoutContext.Provider, { value: portalContext, children: [!props.mobile && props.variant === "basic" && (_jsx(RenderLayoutTopLeft, { children: props.topLeft })), _jsx(RenderLayoutHeader, { id: props.headerId, children: headerContent && (_jsx(Header, { contents: headerContent, toggleMenu: toggleMenu, mobile: mobile && !!menuContent, drawerId: drawerId, customClasses: props.customClasses?.header })) }), _jsx(RenderLayoutMenu, { children: menuContent && (_jsx(Menu, { menuOpen: menuOpen, drawerWidth: drawerWidth, toggleMenu: toggleMenu, mobile: mobile, drawerId: drawerId, items: _jsxs(_Fragment, { children: [mobile && (_jsx(RenderLayoutCloseMenuButton, { onClick: closeMenu, size: "large", "aria-label": t("standalone.portal.close-menu"), children: _jsx(CloseIcon, {}) })), mobile && props.variant === "basic" && (_jsx(RenderLayoutMobileTopLeft, { children: props.topLeft })), _jsx(RenderLayoutNav, { id: props.menuId, "aria-label": t("standalone.portal.main-menu"), children: menuContent })] }) })) }), _jsx(RenderLayoutMain, { id: props.mainId, ref: mainRef, tabIndex: -1, children: content })] }));
 };
 const RenderLayoutMemo = React.memo(RenderLayout);
 const PortalLayout = (inProps) => {
@@ -114,4 +139,14 @@ const PortalLayout = (inProps) => {
             drawerWidth: props.drawerWidth,
         }, className: className, children: _jsx(RenderLayoutMemo, { mobile: mobile, ...rendererProps }) }));
 };
+/**
+ * App shell: a header (an MUI AppBar, the page's banner landmark), a menu (in
+ * the page's navigation landmark) and the content (in the page's main
+ * landmark), laid out as a CSS grid that fills its parent's height.
+ *
+ * Below `collapseBreakpoint`, with `collapseMenu`, or while
+ * `mobileViewCondition` matches, the menu moves into a drawer that a burger
+ * button in the header opens. Descendants read the mode and the drawer state
+ * with {@link usePortalLayoutContext}.
+ */
 export default React.memo(PortalLayout);

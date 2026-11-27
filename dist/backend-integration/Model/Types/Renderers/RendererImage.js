@@ -7,6 +7,8 @@ import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiFieldState";
 import ObjectUrlImage from "../../../../standalone/FileUpload/Image/ObjectUrlImage";
 /**
  * Renders an image selector
+ * @remarks In a form, a required visibility marks the field's frame (ImageSelector's
+ *          `required`): an asterisk after the label, and "Required" as its description.
  */
 class RendererImage extends TypeImage {
     render(params) {
@@ -20,7 +22,7 @@ class RendererImage extends TypeImage {
         if (visibility.editable) {
             if (visibility.grid)
                 throw new Error("Not supported");
-            return (_jsxs(_Fragment, { children: [_jsx(ImageSelector, { name: field, value: value || "", placeholder: placeholder, label: label, dirty: dirty, readOnly: visibility.readOnly, onChange: (name, value) => {
+            return (_jsxs(_Fragment, { children: [_jsx(ImageSelector, { name: field, value: value || "", placeholder: placeholder, label: label, dirty: dirty, required: visibility.required, readOnly: visibility.readOnly, onChange: (name, value) => {
                             handleChange(name, value);
                         }, onBlur: handleBlur, alt: label, capture: this.params?.capture ?? false, uploadLabel: this.params?.uploadLabel, convertImagesTo: this.params?.convertImagesTo, downscale: this.params?.downscale, variant: this.params?.variant, postEditCallback: this.params?.postEditCallback, disableRotation: this.params?.disableRotation }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
         }

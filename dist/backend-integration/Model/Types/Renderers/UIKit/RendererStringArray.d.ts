@@ -9,6 +9,9 @@ export type ModelDataTypeStringArrayRendererCCParams = Omit<TextFieldProps, "nam
  *
  * A required field needs at least one entry: while the list is empty, its only
  * input, the one for a new entry, is required; once it has entries, no input is.
+ * Its frame shows that it is required, with or without entries (GroupBox's
+ * `required`): an asterisk after the label, and "Required" before the message in
+ * the group's description.
  */
 declare class RendererStringArray extends TypeStringArray {
     props?: ModelDataTypeStringArrayRendererCCParams;

@@ -8,12 +8,15 @@ export const normalizePath = (path) => {
     return path;
 };
 /**
- * Percent-decodes a path segment
+ * Percent-decodes a path segment, as {@link matchPath} reads the location's
+ * segments. RoutedTabs reads its segment with it too, so it selects the Tab
+ * whose panel a Route shows, and a Form's leave guard compares its Route's
+ * url with a navigation's target with it. Not exported from the package root.
  * @param segment The segment of a location pathname
  * @returns The decoded segment; the segment as it is if it has a malformed
  * escape
  */
-const decodeSegment = (segment) => {
+export const decodeSegment = (segment) => {
     if (!segment.includes("%"))
         return segment;
     try {

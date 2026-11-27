@@ -5,6 +5,7 @@ import { DataGridContentOverlayClosed, DataGridContentOverlayPaper, isDataGridCo
 import useCCTranslations from "../../../utils/useCCTranslations";
 import focusRing from "../../../utils/internal/focusRing";
 import SettingsCheckbox from "./SettingsCheckbox";
+import visuallyHidden from "../../../utils/internal/visuallyHidden";
 const StyledTable = styled(Table, {
     name: "CcDataGrid",
     slot: "settingsTable",
@@ -32,18 +33,7 @@ const StyledTableCell = styled(TableCell, {
 const StyledStatus = styled("span", {
     name: "CcDataGrid",
     slot: "settingsStatus",
-})({
-    // visually hidden, as MUI's visuallyHidden
-    border: 0,
-    clipPath: "inset(50%)",
-    height: 1,
-    margin: -1,
-    overflow: "hidden",
-    padding: 0,
-    position: "absolute",
-    whiteSpace: "nowrap",
-    width: 1,
-});
+})(visuallyHidden);
 // "Close": MUI shows keyboard focus on a contained button only as a ripple and
 // a deeper shadow (unless the theme sets its focusVisible ring), which forced
 // colors drop; the ring keeps 2px clear of the filled background, so it stands
@@ -62,7 +52,7 @@ const SettingsDialog = (props) => {
     const columns = useMemo(() => [...props.columns].sort((a, b) => a.headerName.localeCompare(b.headerName)), [props.columns]);
     // the column search matches no column
     const noMatch = columns.length === 0;
-    return (_jsxs(DataGridContentOverlayPaper, { elevation: 0, className: classes?.contentOverlayPaper, children: [_jsxs(StyledTable, { stickyHeader: true, "aria-label": t("standalone.data-grid.header.settings"), children: [_jsx(StyledTableHead, { className: classes?.settingsTableHead, children: _jsxs(StyledTableRow, { className: classes?.settingsTableRow, children: [_jsx(StyledTableCell, { className: classes?.settingsTableCell, children: t("standalone.data-grid.settings.column") }), _jsx(StyledTableCell, { id: visibleHeaderId, className: classes?.settingsTableCell, children: t("standalone.data-grid.settings.show") }), _jsx(StyledTableCell, { id: pinHeaderId, className: classes?.settingsTableCell, children: t("standalone.data-grid.settings.pin") })] }) }), _jsxs(StyledTableBody, { className: classes?.settingsTableBody, children: [columns.map((column, index) => {
+    return (_jsxs(DataGridContentOverlayPaper, { elevation: 0, className: classes?.contentOverlayPaper, children: [_jsxs(StyledTable, { stickyHeader: true, "aria-label": t("standalone.data-grid.header.settings"), className: classes?.settingsTable, children: [_jsx(StyledTableHead, { className: classes?.settingsTableHead, children: _jsxs(StyledTableRow, { className: classes?.settingsTableRow, children: [_jsx(StyledTableCell, { className: classes?.settingsTableCell, children: t("standalone.data-grid.settings.column") }), _jsx(StyledTableCell, { id: visibleHeaderId, className: classes?.settingsTableCell, children: t("standalone.data-grid.settings.show") }), _jsx(StyledTableCell, { id: pinHeaderId, className: classes?.settingsTableCell, children: t("standalone.data-grid.settings.pin") })] }) }), _jsxs(StyledTableBody, { className: classes?.settingsTableBody, children: [columns.map((column, index) => {
                                 const rowHeaderId = `${id}-row-${index}`;
                                 const hidden = !!props.columnHidden[column.field];
                                 // why the column's pin cannot be changed

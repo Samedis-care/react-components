@@ -13,12 +13,15 @@ import { SignDialog } from "../Dialog/SignPadDialog";
  * closes, unsaved, when the field unmounts or becomes `disabled`. Escape,
  * the close button and Save close it too, and focus returns to the tile. The
  * dialog and its Clear confirmation render from the field itself, so no
- * DialogContextProvider is needed above it.
+ * DialogContextProvider is needed above it. `className` and `classes` style
+ * the tile; a theme's `components.CcSignPadDialog` styles the dialog.
  */
-const SignaturePadCanvas = (props) => {
-    const { signature, disabled, openInfo, 
+const SignaturePad = (props) => {
+    const { signature, signerName, disabled, openInfo, className, classes, 
     // the field's id, label, description and states go to the tile's button
-    id, "aria-labelledby": ariaLabelledBy, "aria-describedby": ariaDescribedBy, "aria-invalid": ariaInvalid, required, ...dialogProps } = props;
+    id, "aria-labelledby": ariaLabelledBy, "aria-describedby": ariaDescribedBy, "aria-invalid": ariaInvalid, required, 
+    // the dialog's
+    name, penColor, setSignature, onBlur, canvasProps, } = props;
     const [open, setOpen] = useState(false);
     // a field disabled while its dialog is open (the form turned read-only)
     // closes the dialog, as MUI's Autocomplete closes its popup: nothing drawn
@@ -30,6 +33,6 @@ const SignaturePadCanvas = (props) => {
     const showSignDialog = useCallback(() => setOpen(true), []);
     // what SignDialog closes itself with (Save, Escape, the close button)
     const dialogClose = useMemo(() => ({ close: () => setOpen(false), pushed: true }), []);
-    return (_jsxs(_Fragment, { children: [_jsx(SignPad, { openSignPad: showSignDialog, signature: signature, signerName: dialogProps.signerName, disabled: disabled, openInfo: openInfo, id: id, "aria-labelledby": ariaLabelledBy, "aria-describedby": ariaDescribedBy, "aria-invalid": ariaInvalid, required: required }), open && (_jsx(DialogContextProvider, { children: _jsx(PushedDialogCloseContext.Provider, { value: dialogClose, children: _jsx(Suspense, { children: _jsx(SignDialog, { signature: signature, ...dialogProps }) }) }) }))] }));
+    return (_jsxs(_Fragment, { children: [_jsx(SignPad, { openSignPad: showSignDialog, signature: signature, signerName: signerName, disabled: disabled, openInfo: openInfo, className: className, classes: classes, id: id, "aria-labelledby": ariaLabelledBy, "aria-describedby": ariaDescribedBy, "aria-invalid": ariaInvalid, required: required }), open && (_jsx(DialogContextProvider, { children: _jsx(PushedDialogCloseContext.Provider, { value: dialogClose, children: _jsx(Suspense, { children: _jsx(SignDialog, { signature: signature, signerName: signerName, name: name, penColor: penColor, setSignature: setSignature, onBlur: onBlur, canvasProps: canvasProps }) }) }) }))] }));
 };
-export default React.memo(SignaturePadCanvas);
+export default React.memo(SignaturePad);

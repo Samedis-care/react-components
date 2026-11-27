@@ -28,7 +28,9 @@ const TreeViewCheckboxSelectionRenderer = (props) => {
                                     borderLeft: hasNext ? "1px solid black" : undefined,
                                 } })] })] })), _jsx(Grid, { style: { height: 24 }, onClick: expandLocked ? undefined : handleExpand, children: hasChildren ? (expanded ? (_jsx(ExpandedIcon, {})) : (_jsx(ClosedIcon, {}))) : (_jsx(Checkbox, { style: { padding: 0 }, checked: expanded, 
                     // a locked leaf cannot be toggled, so its checkbox says so
-                    disabled: expandLocked, slotProps: checkboxSlotProps })) }, "expandable"), icon && (_jsx(Grid, { onClick: onClick, onAuxClick: onAuxClick, children: icon }, "icon")), _jsx(Grid, { onClick: onClick, onAuxClick: onAuxClick, size: "grow", children: _jsx(Typography, { noWrap: true, id: labelId, children: label }) }, "label")] }));
+                    disabled: expandLocked, 
+                    // the row is the tab stop, and Space on it toggles the leaf
+                    tabIndex: -1, slotProps: checkboxSlotProps })) }, "expandable"), icon && (_jsx(Grid, { onClick: onClick, onAuxClick: onAuxClick, children: icon }, "icon")), _jsx(Grid, { onClick: onClick, onAuxClick: onAuxClick, size: "grow", children: _jsx(Typography, { noWrap: true, id: labelId, children: label }) }, "label")] }));
 };
 export default Object.assign(React.memo(TreeViewCheckboxSelectionRenderer), {
     // a leaf's checkbox shows its `expanded` flag: TreeView exposes it as aria-checked

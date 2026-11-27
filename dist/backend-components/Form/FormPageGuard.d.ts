@@ -18,6 +18,14 @@ export interface FormPageGuard {
      * @param go Starts the navigation, synchronously
      */
     leave: (go: () => void) => void;
+    /**
+     * Does the form hold unsaved changes (dirty or, in flow mode, stagedDirty) right now, as
+     * the form engine sees them? Current before React re-renders (a save that has just
+     * resolved), and also for a change the form engine announced before the asking component
+     * mounted (a control's mount effect in a form page that mounts after the Form)
+     * @returns true while the form is dirty or holds staged changes
+     */
+    isUnsaved: () => boolean;
 }
 /**
  * The leave guard of the Form a form page is rendered in; null outside of a Form's page

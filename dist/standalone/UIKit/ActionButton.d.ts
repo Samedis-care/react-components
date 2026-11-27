@@ -35,11 +35,18 @@ export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
      */
     fullWidth?: boolean;
     /**
-     * Show the compact version of the button (only icon)
+     * Show only the icon, centred, for a compact button. The label
+     * (`children`) stays in the button as visually hidden text, which names it
+     * in every state, and shows as a tooltip on hover and on keyboard focus
+     * (not while disabled). Use it with `icon`. `"true"` is the same as `true`.
+     * @default false
      */
     small?: boolean | "true";
     /**
-     * The text of the button (used for tooltip if small is true)
+     * The label, already translated: a string or any other node (no
+     * interactive content). It names the button, also with `small`, where it
+     * is visually hidden and shows as a tooltip. An `aria-label` or
+     * `aria-labelledby` replaces that name, also while the tooltip is open.
      */
     children: React.ReactNode;
     /**
@@ -69,6 +76,11 @@ export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
  * used as it is: the text keeps primary's `contrastText` and the hover turns
  * the button primary. An override that paints its own fill sets `color` and
  * the `&:hover` fill as well.
+ *
+ * Disabled, it is filled with `palette.action.disabled` and its label and
+ * icon are `background.paper`, with or without `color`. A theme gives
+ * disabled ActionButtons a fill of its own with `&.Mui-disabled` in
+ * `styleOverrides.button`.
  */
 declare const ActionButton: (inProps: ActionButtonProps) => React.JSX.Element;
 declare const _default: typeof ActionButton;

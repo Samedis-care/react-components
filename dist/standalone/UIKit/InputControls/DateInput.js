@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import PickersTextFieldWithHelp from "../PickersTextFieldWithHelp";
 import { denormalizeDate, normalizeDate } from "../../../utils/dateOnlyUtils";
 import moment from "moment";
@@ -63,6 +63,21 @@ const DateInput = (props) => {
     // the picker compares its value by reference, so building the moment during
     // render would rebuild the field's sections on every unrelated re-render
     const pickerValue = useMemo(() => (value ? toPickerDay(value) : null), [value]);
+    // The entry that is no valid day (02/31) the picker reported last, which
+    // only `publishIntermediateValues` passes on: the consumer gets `null` for
+    // it, and the field gets the entry back in place of that `null`, as if the
+    // consumer held it. Handed the `null`, the field would lose the next
+    // keystroke that makes another such entry (02/30 to 02/31), as its value
+    // would not change.
+    const [invalidEntry, setInvalidEntry] = useState(null);
+    // a day handed in replaces it, so a `null` handed in later empties the field
+    if (invalidEntry && value)
+        setInvalidEntry(null);
+    const fieldValue = value ? pickerValue : invalidEntry;
+    const handleChange = useCallback((date) => {
+        setInvalidEntry(date?.isValid() === false ? date : null);
+        onChange(fromPickerValue(date));
+    }, [onChange]);
     const pickerMinDate = usePickerDay(minDate);
     const pickerMaxDate = usePickerDay(maxDate);
     const pickerReferenceDate = usePickerDay(referenceDate);
@@ -78,7 +93,7 @@ const DateInput = (props) => {
         ((reason, validated) => onError(reason, fromPickerValue(validated))), [onError]);
     // an explicit `textField: undefined` means the default, as it does to MUI
     const textField = muiProps.slots?.textField ?? PickersTextFieldWithHelp;
-    return (_jsx(LocalizedKeyboardDatePicker, { ...muiProps, value: pickerValue, onChange: (date) => date ? onChange(fromPickerDay(date)) : onChange(null), minDate: pickerMinDate, maxDate: pickerMaxDate, referenceDate: pickerReferenceDate, shouldDisableDate: pickerShouldDisableDate, shouldDisableMonth: pickerShouldDisableMonth, shouldDisableYear: pickerShouldDisableYear, onAccept: pickerOnAccept, onError: pickerOnError, onMonthChange: pickerOnMonthChange, onYearChange: pickerOnYearChange, dayOfWeekFormatter: pickerDayOfWeekFormatter, 
+    return (_jsx(LocalizedKeyboardDatePicker, { ...muiProps, value: fieldValue, onChange: handleChange, minDate: pickerMinDate, maxDate: pickerMaxDate, referenceDate: pickerReferenceDate, shouldDisableDate: pickerShouldDisableDate, shouldDisableMonth: pickerShouldDisableMonth, shouldDisableYear: pickerShouldDisableYear, onAccept: pickerOnAccept, onError: pickerOnError, onMonthChange: pickerOnMonthChange, onYearChange: pickerOnYearChange, dayOfWeekFormatter: pickerDayOfWeekFormatter, 
         // the picker's days are local (toPickerDay, fromPickerDay); another
         // timezone, passed in spite of the type or set in the theme's
         // defaultProps, would shift the day shown and the day reported
@@ -97,7 +112,7 @@ const DateInput = (props) => {
                     // only the field that reads it gets it; another one would pass it on
                     // to the DOM and React would log an error
                     ...(textField === PickersTextFieldWithHelp
-                        ? { customHandleClear: () => onChange(null) }
+                        ? { customHandleClear: () => handleChange(null) }
                         : {}),
                     ...textFieldSlotPropsProp,
                     // only where the caller gave one, so a helper text passed through

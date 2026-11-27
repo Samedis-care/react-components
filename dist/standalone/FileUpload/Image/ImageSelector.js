@@ -6,13 +6,30 @@ import ImagePreviewDialog from "./ImagePreviewDialog";
 import combineClassNames from "../../../utils/combineClassNames";
 import processImage from "../../../utils/processImage";
 import GroupBox from "../../GroupBox";
-import { labelWithDirtyMarker } from "../../UIKit/MuiFieldState";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { ImageFileIcon } from "../FileIcons";
 import replaceFileExt from "../../../utils/replaceFileExt";
 import useObjectUrl from "../../../utils/useObjectUrl";
 import getCanImageCapture from "../../../utils/getCanImageCapture";
 import useImageError from "../useImageError";
+/**
+ * The frame of the normal and modern variants. As its parent's only element child it fills
+ * the parent wherever the parent's height is definite (a sized box, a Grid item stretched to
+ * its row), and the picture is shrunk to the space in it. It takes over its parent's
+ * `max-height`, so that in a parent with a max-height the frame stops there and the picture
+ * shrinks to fit it.
+ */
+const Frame = styled(GroupBox)({
+    maxHeight: "inherit",
+    // Only as the only child: a full-height frame would push helper text next
+    // to it out of the parent. :where() keeps the rule at zero specificity, so
+    // a height from the theme or a styled() wrapper wins. The leading * stops
+    // emotion from reading the selector as a pseudo-class of the frame (which
+    // would add the frame's class again).
+    "*:where(&:only-child)": {
+        height: "100%",
+    },
+});
 const RootClassic = styled(Grid, {
     name: "CcImageSelector",
     slot: "rootClassic",
@@ -165,7 +182,6 @@ const ModernUploadControlUpload = styled(IconButton, {
 }));
 const ImageSelector = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcImageSelector" });
-    const boxLabel = labelWithDirtyMarker(props.label, props.dirty);
     const { convertImagesTo, downscale, name, value, readOnly, capture, onChange, postEditCallback, onError, disableRotation, placeholder, classes, className, } = props;
     const variant = props.variant ?? "normal";
     const fileRef = useRef(null);
@@ -294,7 +310,7 @@ const ImageSelector = (inProps) => {
     const previewDialog = variant === "modern" && (_jsx(ImagePreviewDialog, { src: src ?? "", alt: props.alt, open: showPreviewDialog, onClose: handlePreviewDialogClose, disableRotation: disableRotation }));
     // render component
     if (variant === "normal") {
-        return (_jsx(GroupBox, { label: boxLabel, smallLabel: props.smallLabel, className: className, children: _jsxs(RootClassic, { container: true, spacing: 2, sx: {
+        return (_jsx(Frame, { label: props.label, smallLabel: props.smallLabel, required: props.required, dirty: props.dirty, className: className, children: _jsxs(RootClassic, { container: true, spacing: 2, sx: {
                     flexDirection: "column",
                     alignContent: "flex-start",
                     alignItems: "stretch",
@@ -304,7 +320,7 @@ const ImageSelector = (inProps) => {
     }
     else if (variant === "modern") {
         const modernUploadLabel = (_jsx(ModernUploadLabel, { component: "span", variant: "h5", className: classes?.modernUploadLabel, align: "center", children: props.uploadLabel ?? t("standalone.file-upload.upload-modern") ?? "" }));
-        return (_jsxs(_Fragment, { children: [previewDialog, _jsx(GroupBox, { label: boxLabel, smallLabel: props.smallLabel, className: className, children: _jsxs(RootModern, { container: true, spacing: 0, sx: {
+        return (_jsxs(_Fragment, { children: [previewDialog, _jsx(Frame, { label: props.label, smallLabel: props.smallLabel, required: props.required, dirty: props.dirty, className: className, children: _jsxs(RootModern, { container: true, spacing: 0, sx: {
                             flexDirection: "column",
                             alignContent: "flex-start",
                             alignItems: "stretch",

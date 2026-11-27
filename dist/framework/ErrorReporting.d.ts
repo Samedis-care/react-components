@@ -38,6 +38,16 @@ export declare const CcErrorNames: {
      */
     readonly ImageLoadError: "CcImageLoadError";
     /**
+     * @see PartialApplyError
+     * @remarks the name is prefixed, to avoid collisions with app error classes
+     */
+    readonly PartialApplyError: "CcPartialApplyError";
+    /**
+     * @see PartialDeleteError
+     * @remarks the name is prefixed, to avoid collisions with app error classes
+     */
+    readonly PartialDeleteError: "CcPartialDeleteError";
+    /**
      * @see RequestBatchingError
      */
     readonly RequestBatchingError: "RequestBatchingError";
@@ -88,7 +98,18 @@ export type ErrorReporterCallback = (error: Error, context: ErrorReportContext) 
  */
 export declare const DefaultUnreportedErrorNames: string[];
 /**
- * The default reporting policy
+ * The default reporting policy: every error except those named in
+ * DefaultUnreportedErrorNames or in the call site's `ignoreNames`
+ * @remarks A PartialApplyError (CcErrorNames.PartialApplyError) is judged by the errors of
+ *          its failed writes: it is reported if at least one of them would be reported on
+ *          its own, and not if none would, e.g. when all are NetworkErrors because the
+ *          connection dropped while a Form's save sent a lazy control's queue. A failure
+ *          whose error is no Error counts as reported. A PartialDeleteError
+ *          (CcErrorNames.PartialDeleteError) is judged the same way by its `cause`, the
+ *          error its deletes failed with; one without a cause, or whose cause is no
+ *          Error, is reported. An AggregateError is judged the same way by its `errors`,
+ *          e.g. the one LazyConnector's workQueue rejects with when several queued writes
+ *          failed and no queue error factory is set; one without errors is reported.
  * @see DefaultUnreportedErrorNames
  */
 export declare const defaultShouldReportError: ShouldReportErrorCallback;

@@ -1,6 +1,6 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
-import { Box, Button, darken, Tooltip, styled, useThemeProps, } from "@mui/material";
+import { Box, Button, buttonClasses, darken, Tooltip, styled, useThemeProps, } from "@mui/material";
 import { capitalize } from "@mui/material/utils";
 import combineColors from "../../utils/combineColors";
 import focusRing from "../../utils/internal/focusRing";
@@ -46,6 +46,8 @@ const readableColorFills = (theme) => {
     // describes; other schemes keep MUI's fills
     return theme.applyStyles(theme.palette.mode, rules);
 };
+/** Class of the span that holds the label of a small button */
+const HIDDEN_LABEL_CLASS = "CcActionButton-hiddenLabel";
 const StyledButton = styled(Button, {
     name: "CcActionButton",
     slot: "button",
@@ -58,14 +60,16 @@ const StyledButton = styled(Button, {
         backgroundColor: color ? undefined : primaryFill,
         color: color ? undefined : primary.contrastText,
         textTransform: "unset",
-        justifyContent: "flex-start",
+        // the icon of a small button sits in its middle, also when fullWidth
+        // stretches it
+        justifyContent: small ? "center" : "flex-start",
         "&:hover": {
             backgroundColor: color
                 ? undefined
                 : readableFill(`rgba(${combineColors(primaryFill, theme.palette.action.hover).join()})`, primary.contrastText),
         },
         ...(color && readableColorFills(theme)),
-        "&:.Mui-disabled": {
+        "&.Mui-disabled": {
             backgroundColor: theme.palette.action.disabled,
         },
         // outside the button: drawn on its own fill, the ring would not show
@@ -73,7 +77,9 @@ const StyledButton = styled(Button, {
         minWidth: small ? 0 : undefined,
         paddingLeft: small ? theme.spacing(3) : undefined,
         paddingRight: small ? theme.spacing(3) : undefined,
-        "&.MuiButton-startIcon": {
+        // MUI's margins space the icon from a label; without one they would push
+        // the icon of a small button off centre
+        [`& > .${buttonClasses.startIcon}`]: {
             margin: small ? 0 : undefined,
         },
         "&.MuiButton-outlined": {
@@ -92,9 +98,18 @@ const StyledButton = styled(Button, {
             paddingLeft: small ? theme.spacing(3) : undefined,
             paddingRight: small ? theme.spacing(3) : undefined,
         },
-        "&.MuiButton-label": {
+        // the label of a small button: visually hidden, as MUI's visuallyHidden,
+        // so it names the button while only the icon shows
+        [`& > .${HIDDEN_LABEL_CLASS}`]: {
+            border: 0,
+            clipPath: "inset(50%)",
+            height: 1,
+            margin: -1,
+            overflow: "hidden",
             padding: 0,
-            justifyContent: small ? "center" : "flex-start",
+            position: "absolute",
+            whiteSpace: "nowrap",
+            width: 1,
         },
     };
 });
@@ -112,11 +127,16 @@ const StyledButton = styled(Button, {
  * used as it is: the text keeps primary's `contrastText` and the hover turns
  * the button primary. An override that paints its own fill sets `color` and
  * the `&:hover` fill as well.
+ *
+ * Disabled, it is filled with `palette.action.disabled` and its label and
+ * icon are `background.paper`, with or without `color`. A theme gives
+ * disabled ActionButtons a fill of its own with `&.Mui-disabled` in
+ * `styleOverrides.button`.
  */
 const ActionButton = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcActionButton" });
     const { icon, fullWidth, small, children, ...otherProps } = props;
-    const renderButton = () => (_jsx(StyledButton, { variant: "contained", disableElevation: true, fullWidth: fullWidth ?? !small, startIcon: icon, ownerState: { small: Boolean(small), color: Boolean(otherProps.color) }, ...otherProps, children: !small && _jsx(Box, { children: children }) }));
+    const renderButton = () => (_jsx(StyledButton, { variant: "contained", disableElevation: true, fullWidth: fullWidth ?? !small, startIcon: icon, ownerState: { small: Boolean(small), color: Boolean(otherProps.color) }, "aria-label": undefined, "aria-labelledby": undefined, ...otherProps, children: small ? (_jsx("span", { className: HIDDEN_LABEL_CLASS, children: children })) : (_jsx(Box, { children: children })) }));
     if (props.disabled || !small)
         return renderButton();
     return _jsx(Tooltip, { title: _jsx("span", { children: children }), children: renderButton() });

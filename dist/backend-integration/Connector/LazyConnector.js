@@ -14,15 +14,25 @@ export var IndexEnhancementLevel;
 })(IndexEnhancementLevel || (IndexEnhancementLevel = {}));
 /**
  * Forwards all read calls (index, read) to the real connector directly but queues all writing calls (create, update, delete) which can be fired at once
- * @remarks Does not support relations, enhances read/index calls with locally updated data
+ * @remarks Does not support relations, enhances read/index calls with locally updated data.
+ *          With fakeReads, reads do not reach the real connector at all.
  */
 class LazyConnector extends Connector {
     realConnector;
+    /**
+     * Serve reads from the queue alone, without asking the backend
+     * @remarks For a collection whose parent record is not saved yet, so the backend has
+     *          nothing under it (and the real connector's endpoint names no parent):
+     *          index lists only the queued creates and updates, and read rejects for any
+     *          other record. useLazyCrudConnector sets it for a new record and clears it
+     *          when the save sends the queue.
+     */
     fakeReads;
     indexEnhancement = IndexEnhancementLevel.Basic;
     queue = [];
     onQueueChange;
     queueListeners = new Set();
+    queueErrorFactory = null;
     // backend emulation
     FAKE_ID_PREFIX = "fake-id-";
     fakeIdCounter = 0;
@@ -144,19 +154,30 @@ class LazyConnector extends Connector {
      * @returns A record whose create is queued: what the queue will create. A record with a
      *          queued update: the backend's record with the update's fields laid over it
      *          (with fakeReads the update alone, as index lists it). Any other record: the
-     *          backend's. A record from the backend carries the id index lists it by, which
-     *          for a record created through this connector stays its fake id after the
-     *          queue was worked, whichever of its ids it was read by.
-     * @throws {Error} The record's delete is queued
+     *          backend's; with fakeReads a rejection ("Record not found"), as index lists
+     *          no record of the backend then, and the backend is not asked. A record from
+     *          the backend carries the id index lists it by, which for a record created
+     *          through this connector stays its fake id after the queue was worked,
+     *          whichever of its ids it was read by.
+     *          A fake id whose create was dropped before the queue was worked (the record
+     *          was removed again, or its create undone) rejects as not found as well: the
+     *          backend cannot have that record, so it is not asked.
+     *          A record whose delete is queued: a rejection ("data has been deleted"), as
+     *          index no longer lists it; the backend is not asked.
+     * @remarks Every failure is a rejection of the returned promise, never a synchronous
+     *          throw, so a caller can handle it on the promise alone.
      */
     read(id, model) {
         id = this.mapId(id);
         const localData = last(this.queue.filter((entry) => entry.id === id || (entry.deleteIds?.includes(id) ?? false)));
-        if (!localData)
+        if (!localData) {
+            if (this.fakeReads)
+                return Promise.reject(new Error(`[Components-Care] [LazyConnector] Record not found: ${id}`));
             return this.readFromBackend(id, model);
+        }
         const queued = localData.result;
         if (!queued)
-            throw new Error("data has been deleted");
+            return Promise.reject(new Error("data has been deleted"));
         if (localData.type === "create" || this.fakeReads)
             return queued;
         // an update may carry only the fields it changes
@@ -164,13 +185,18 @@ class LazyConnector extends Connector {
     }
     /**
      * Reads a record from the backend, as index lists it
-     * @param id The record's id as the backend knows it
+     * @param id The record's id as mapId gives it: the id the backend knows it by, or a
+     *           fake id that maps to no real id
      * @param model The model performing the request
      * @param update The fields of a queued update of the record, laid over it
      * @returns The record under the id index lists it by: its fake id, if it was created
-     *          through this connector
+     *          through this connector. A fake id that maps to no real id rejects as not
+     *          found without asking the backend: its create was dropped before it was sent,
+     *          so the backend cannot have the record.
      */
     async readFromBackend(id, model, update) {
+        if (id.startsWith(this.FAKE_ID_PREFIX))
+            throw new Error(`[Components-Care] [LazyConnector] Record not found: ${id}`);
         const [backendRecord, ...rest] = await this.realConnector.read(id, model);
         return [
             {
@@ -370,10 +396,48 @@ class LazyConnector extends Connector {
             this.onQueueChange(this.queue);
         this.queueListeners.forEach((listener) => listener(this.queue));
     }
+    /**
+     * Lets the control that lists the records make the error workQueue rejects with when
+     * the backend refused writes
+     * @param factory Makes the error of the refused writes, see QueueErrorFactory
+     * @returns Removes this factory again; a factory set after it stays
+     * @remarks One factory at a time: a later one replaces it. CrudMultiSelect,
+     *          CrudMultiSelectWithGroups, CrudFileUpload and CrudMultiImage set one while
+     *          they are mounted, which names each refused write in a PartialApplyError: by
+     *          its entry's label, or by its file's or image's name.
+     */
+    setQueueErrorFactory(factory) {
+        this.queueErrorFactory = factory;
+        return () => {
+            if (this.queueErrorFactory === factory)
+                this.queueErrorFactory = null;
+        };
+    }
+    /**
+     * Sends the queued writes to the real connector, in the order they were queued
+     * @returns Resolves once every write went through. Rejects if the backend refused a
+     *          create or update: with what the factory of setQueueErrorFactory makes of
+     *          the refused writes, otherwise with the refusal itself, or for several with
+     *          an AggregateError of them whose message joins theirs with "; ".
+     * @remarks
+     * - A refused create or update stays queued and does not stop the others: the creates
+     *   and updates queued after it are sent. The deletes queued after it are not: a
+     *   delete may be the second half of a replacement (a file uploaded again under its
+     *   name), which must not go while its replacement is not stored. They stay queued and
+     *   go once the writes before them went through.
+     * - A refused delete is dropped, as the record may be gone already.
+     * - What was sent leaves the queue, so a retry does not write it again. A write queued
+     *   while this runs stays queued.
+     * - The queue listeners hear of the queue once, when this is done, also when it rejects.
+     */
     workQueue = async () => {
         const sent = new Set();
+        const refused = [];
         try {
             for (const entry of [...this.queue]) {
+                // a delete waits for the writes queued before it, see above
+                if (entry.type === "delete" && refused.length > 0)
+                    continue;
                 try {
                     const res = await entry.func();
                     if (entry.type === "create") {
@@ -383,10 +447,15 @@ class LazyConnector extends Connector {
                     }
                 }
                 catch (e) {
-                    // we ignore failed deletes
                     if (entry.type !== "delete") {
-                        throw e;
+                        refused.push({
+                            id: this.unmapId(entry.id),
+                            operation: entry.type,
+                            error: e,
+                        });
+                        continue;
                     }
+                    // a refused delete is dropped: the record may be gone already
                 }
                 sent.add(entry);
             }
@@ -394,11 +463,20 @@ class LazyConnector extends Connector {
         finally {
             // What has been sent leaves the queue even when something after it threw, so
             // that a caller which fixes the problem and submits again does not write the
-            // same records a second time. The entry which threw stays queued, and so does
+            // same records a second time. A refused write stays queued, and so does
             // anything queued while this was running.
             this.queue = this.queue.filter((entry) => !sent.has(entry));
             this.onAfterOperation();
         }
+        if (refused.length === 0)
+            return;
+        const errors = refused.map((failure) => failure.error);
+        throw (this.queueErrorFactory?.(refused) ??
+            (errors.length === 1
+                ? errors[0]
+                : new AggregateError(errors, errors
+                    .map((error) => error instanceof Error ? error.message : String(error))
+                    .join("; "))));
     };
     /**
      * Maps a potentially fake ID to a real ID

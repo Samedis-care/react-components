@@ -75,8 +75,9 @@ export interface FormDialogProps {
 }
 /**
  * Slot names of `CcFormDialog`, for theme `styleOverrides`: `content` (the
- * content area with useCustomClasses), `openInNewButton` (the "Open in new tab"
- * button) and `openInNewIcon` (its icon)
+ * content area with useCustomClasses; its top padding is set under `&&&&`, so
+ * an override of it needs four classes too), `openInNewButton` (the "Open in
+ * new tab" button) and `openInNewIcon` (its icon)
  */
 export type FormDialogClassKey = "content" | "openInNewButton" | "openInNewIcon";
 export type FormDialogTitlePriorityMode = "prop" | "dispatch";
@@ -108,7 +109,8 @@ export declare const FormDialogDispatchContext: React.Context<FormDialogDispatch
 /**
  * The dialog FullFormDialog renders by default (its `renderer`): an MUI `Dialog` with a
  * `DialogTitle` (the title, then in its `action` the content's controls (`titleAction`) and the
- * open-in-new button, and the close button) and the content. The title names the dialog, else
+ * open-in-new button, and the close button) and the content, which has a top padding of
+ * `theme.spacing(2)` with or without a title. The title names the dialog, else
  * `aria-label` does. A title that shows only after the dialog opened takes the keyboard focus if
  * it is still on the dialog itself, so screen readers read it (see `FullFormDialog`). When a
  * control of the title row goes away while it holds the focus, the dialog gets the focus. A

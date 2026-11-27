@@ -37,6 +37,9 @@ export type BackendMultiSelectProps<M extends ModelUnknown, DataT extends MultiS
     model: M;
     /**
      * The model to use for fetch requests (to enable request batching)
+     * @remarks One with other react-query keys than the previous one (another model id
+     *          or cache keys) loads the listed records again through it. A new instance
+     *          of the same model (same keys) does not: it loads the same records.
      */
     modelFetch?: M;
     /**
@@ -51,6 +54,12 @@ export type BackendMultiSelectProps<M extends ModelUnknown, DataT extends MultiS
     /**
      * Callback that converts the model data to the actual data displayed in the selector
      * @param modelData The model data
+     * @remarks One that throws or rejects for a selected record, loaded or from
+     *          `initialData`, lists it like a record that failed to load (see `onLoadError`).
+     *          A new function converts the listed entries again from their records,
+     *          without a request (labels built with `t` follow a language switch). Pass a
+     *          stable one (module level, or useCallback/useMemo on what it reads): a new
+     *          one on every render converts the listed entries on every render.
      */
     modelToSelectorData: (modelData: ModelRecord<M>) => Promise<DataT> | DataT;
     /**
@@ -70,11 +79,24 @@ export type BackendMultiSelectProps<M extends ModelUnknown, DataT extends MultiS
      * matching `additionalOptions` entry (never looked up, never dropped by
      * `onLoadError`), an `initialData` record or an entry picked in this field without a
      * request, otherwise loaded through `modelFetch`; until then it is listed as a
-     * translated "Loading…" entry.
+     * translated "Loading…" entry. An id `onLoadError` dropped is not listed, also while
+     * `selected` keeps it.
+     *
+     * The listed entries follow the props: a new `modelToSelectorData` converts them
+     * again from the records this field listed or loaded for their ids, without a
+     * request (`additionalOptions` entries, and entries of ids whose record it has not
+     * listed, such as a group pick may add, are listed as they are); a `modelFetch`
+     * with other react-query keys or a new `refreshToken` loads them again through
+     * `modelFetch.getCached` (not `additionalOptions` entries), so an app that changed a
+     * record invalidates the model's queries before it changes `refreshToken`. They
+     * stay listed meanwhile.
      */
     selected: string[];
     /**
-     * Initial data (model format) used for selected cache
+     * Records (model format) of selected ids, which are then shown without a request: a
+     * selected id with a record here is converted from it by `modelToSelectorData` once it
+     * is selected, not loaded through `modelFetch`. A conversion that fails lists the id
+     * like a record that failed to load (see `onLoadError`), without a lookup.
      */
     initialData?: ModelRecord<M>[];
     /**
@@ -87,19 +109,26 @@ export type BackendMultiSelectProps<M extends ModelUnknown, DataT extends MultiS
     lru?: BackendMultiSelectLruOptions<DataT>;
     /**
      * Load error event
-     * @param error The error that has been raised while loading
+     * @param error The error that has been raised while loading, or by `modelToSelectorData`
+     *        while converting the loaded or `initialData` record
      * @return string Label for entry which failed loading
      * @return null To remove the entry: `onSelect` reports the current selection without
      *         its id, so a pick or removal made while it loaded is kept (an id picked
-     *         again meanwhile stays). Not reported once the field has unmounted.
+     *         again meanwhile stays). Not reported once the field has unmounted. The id
+     *         is then no longer listed, also while `selected` keeps it (without
+     *         `onSelect`, or a parent that does not apply the report), so the next change
+     *         the user makes reports the selection without it.
      * @remarks Without it, the entry is labelled "Unknown entry" if the backend did not
-     *          return its record, else "Error while fetching data".
+     *          return its record, else "Error while fetching data". While an entry
+     *          that failed to load is listed, with either label, the field is marked as
+     *          erroneous (`error`, so `aria-invalid="true"`).
      */
     onLoadError?: (error: Error) => string | null;
 };
-interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
+interface UseSelectedCacheResult<M extends ModelUnknown, DataT extends MultiSelectorData> {
     /**
-     * The currently selected entries
+     * The entries listed for the selected ids: a "Loading…" one for an id still loading,
+     * none for an id `onLoadError` dropped
      */
     selected: DataT[];
     /**
@@ -107,8 +136,20 @@ interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
      * their ids and the entries, without the "Loading…" ones
      */
     handleSelect: (selected: DataT[]) => void;
+    /**
+     * Whether a selected entry is listed for a record that failed to load (labelled
+     * "Unknown entry", "Error while fetching data" or by `onLoadError`): the field is then
+     * to be marked as erroneous
+     */
+    loadError: boolean;
+    /**
+     * Converts a record for the list (an option, an LRU entry) with modelToSelectorData and
+     * keeps the record, so a pick of its entry is converted again by a new
+     * modelToSelectorData
+     */
+    convert: (record: ModelRecord<M>) => Promise<DataT>;
 }
-export declare const useSelectedCache: <M extends ModelUnknown, DataT extends MultiSelectorData>(props: Pick<BackendMultiSelectProps<M, DataT>, "model" | "modelFetch" | "disableRequestBatching" | "modelToSelectorData" | "onSelect" | "selected" | "initialData" | "onLoadError" | "additionalOptions">) => UseSelectedCacheResult<DataT>;
+export declare const useSelectedCache: <M extends ModelUnknown, DataT extends MultiSelectorData>(props: Pick<BackendMultiSelectProps<M, DataT>, "model" | "modelFetch" | "disableRequestBatching" | "modelToSelectorData" | "onSelect" | "selected" | "initialData" | "onLoadError" | "additionalOptions" | "refreshToken">) => UseSelectedCacheResult<M, DataT>;
 /**
  * Themable subset of BackendMultiSelectProps (used for theme defaultProps)
  * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)

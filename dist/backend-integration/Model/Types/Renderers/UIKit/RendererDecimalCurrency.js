@@ -36,7 +36,7 @@ class RendererDecimalCurrency extends TypeNumber {
         return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, _jsx(NumberFormatter, { value: value, options: {
                         style: "currency",
                         currency: this.getCurrency(params.values),
-                    } })] }));
+                    }, disableErrorReporting: this.props.disableErrorReporting })] }));
     }
     getCurrency = (params) => {
         if (typeof this.props.currency === "function") {

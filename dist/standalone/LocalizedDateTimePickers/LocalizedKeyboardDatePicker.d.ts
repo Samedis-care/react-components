@@ -1,10 +1,14 @@
+/// <reference types="@mui/x-date-pickers/AdapterMoment" preserve="true" />
 import React from "react";
 import { DatePickerProps } from "@mui/x-date-pickers";
 import { TextFieldProps } from "@mui/material";
+import { MuiFieldStateProps } from "../UIKit/MuiFieldState";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
 /**
- * Props of a date picker typed into with the keyboard (MUI's `DatePicker`
- * with the `L` format of the current language).
+ * Props of a date picker typed into with the keyboard: MUI's `DatePicker`,
+ * whose field writes the date as MUI's does, in the format for its `views` in
+ * the adapter's locale (`L` with moment for the default views), or in
+ * `format`.
  *
  * While the picker's own validation rejects the date the field shows
  * (`minDate`, `maxDate`, `disablePast`, `disableFuture`, `shouldDisableDate`,
@@ -27,12 +31,42 @@ import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
  * the default `slots.openPickerButton`, which a caller's own button replaces,
  * and goes into `slotProps.layout.sx`, which keeps a caller's layout slot
  * props and puts a caller's `sx` after it.
+ *
+ * Without `fullWidth` the field is as wide as its sections need, at least
+ * MUI's 182px: where the date needs more (a long `format`, or the user's
+ * text spacing, WCAG 1.4.12), the field grows rather than cutting off its
+ * end behind the calendar button. With `fullWidth` it takes the width of its
+ * container, as in MUI (see `withFittingSections`).
+ *
+ * The calendar closes when `disabled` or `readOnly` turns on while it is
+ * open, where MUI leaves it open with every day disabled. It closes as a
+ * click outside closes it: the date picked in it is kept and reported (see
+ * `onChange`), and `onClose` is called. It stays closed once both are off
+ * again. A controlled `open` shows the calendar only while neither is set
+ * (see `usePickerOpen`).
+ *
+ * Every date the picker takes or reports is a `Moment`, or `null` for no
+ * date: `value`, `defaultValue`, `referenceDate`, `minDate`, `maxDate`, and
+ * the dates `onChange`, `onAccept` and `shouldDisableDate` get. MUI types
+ * them as its `PickerValidDate`; importing the picker loads the types of
+ * MUI's `AdapterMoment`, the adapter `Framework` provides, which make that a
+ * `Moment` in the whole program, for MUI's own pickers too. The `ref` is the
+ * field's root `div`.
  */
-export interface LocalizedKeyboardDatePickerProps extends Omit<DatePickerProps, "format">, Pick<TextFieldWithHelpProps, "disableClearable"> {
+export interface LocalizedKeyboardDatePickerProps extends DatePickerProps, Pick<TextFieldWithHelpProps, "disableClearable"> {
     /**
      * Boolean flag to hide Calendar Icon (only used if disabled is truthy)
      */
     hideDisabledIcon?: boolean;
+    /**
+     * How the field writes the date: a format string of the date adapter, such
+     * as `"YYYY-MM-DD"` with moment. Default: MUI's for the `views`, in the
+     * adapter's locale: `L` with moment for the default views (`08/01/2026` in
+     * English, `01.08.2026` in German), the month and the year for
+     * `["month", "year"]` (`August 2026`). The picker's message writes its date
+     * limits in it too.
+     */
+    format?: DatePickerProps["format"];
     /**
      * The accessible name of the picker, for a picker without a visible
      * `label`, such as the translated purpose of the date ("From", "To"). It
@@ -63,7 +97,10 @@ export interface LocalizedKeyboardDatePickerProps extends Omit<DatePickerProps, 
      */
     error?: TextFieldProps["error"];
     /**
-     * Set error flag for text field input
+     * Lets the field fill the width of its container. Without it the field is
+     * as wide as its sections need, at least MUI's 182px for them. When set,
+     * also to `false`, it takes precedence over `slotProps.textField.fullWidth`;
+     * leave it undefined to use that (MUI's default: `false`).
      */
     fullWidth?: TextFieldProps["fullWidth"];
     /**
@@ -80,10 +117,11 @@ export interface LocalizedKeyboardDatePickerProps extends Omit<DatePickerProps, 
      * Called once the user is done with the date: when focus leaves the field
      * (right before `onBlur`), on Enter in the field, and when the calendar
      * accepts a date (a day picked in the desktop calendar, OK in the mobile
-     * dialog, or the calendar closed with Escape or a click outside it, which
-     * keeps the date picked in it, as in MUI). It gets the date the field
-     * shows, if the picker accepts it, or `null` for an empty field, and only if
-     * that differs from the date reported last or handed in as `value` since.
+     * dialog, or the calendar closed with Escape, a click outside it or the
+     * picker getting disabled or read-only, which keeps the date picked in it,
+     * as in MUI). It gets the date the field shows, if the picker accepts it,
+     * or `null` for an empty field, and only if that differs from the date
+     * reported last or handed in as `value` since.
      * Not reported are the dates the field passes through while the user types
      * (a half-typed year, the dates on the way while a day, month or year is
      * retyped, the `null` of a section deleted to retype it), an entry the
@@ -99,13 +137,29 @@ export interface LocalizedKeyboardDatePickerProps extends Omit<DatePickerProps, 
      */
     onChange?: DatePickerProps["onChange"];
     /**
+     * Called with every date reported to `onChange`, right after it and with
+     * the same arguments: once the user is done with the date (see `onChange`),
+     * with a date the picker accepts or `null` for an empty field. Unlike MUI's
+     * `onAccept`, it is not called for every change of the field, so it gets
+     * neither the dates the field passes through while the user types (the
+     * years 0002, 0020 and 0203 on the way to 2030) nor an entry the picker
+     * rejects (see `onError`). With `publishIntermediateValues` it is MUI's
+     * `onAccept`: called for every change of the field and for a date the
+     * calendar accepts, entries the picker rejects included, with their reason
+     * in `context.validationError`.
+     * @param value The date, or `null`
+     * @param context MUI's context: `validationError` (`null`, the date being
+     * accepted) and `source`
+     */
+    onAccept?: DatePickerProps["onAccept"];
+    /**
      * Report every change at once, rather than a date once the user is done
      * with it (see `onChange`): every keystroke, entries the picker rejects
-     * included, as MUI's own picker does. Default `false`. See
-     * {@link usePickerDraft}.
+     * included, to `onChange` and `onAccept`, as MUI's own picker does. Default
+     * `false`. See {@link usePickerDraft}.
      */
     publishIntermediateValues?: boolean;
 }
 export type LocalizedKeyboardDatePickerClassKey = never;
-declare const _default: React.MemoExoticComponent<React.ComponentType<LocalizedKeyboardDatePickerProps & import("..").MuiFieldStateProps>>;
+declare const _default: React.NamedExoticComponent<LocalizedKeyboardDatePickerProps & MuiFieldStateProps & React.RefAttributes<HTMLDivElement>>;
 export default _default;

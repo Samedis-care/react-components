@@ -13,7 +13,8 @@
 			"menu-toggle": "Toggle menu",
 			"collapse-menu": "Collapse menu",
 			"expand-menu": "Expand menu",
-			"close-menu": "Close menu"
+			"close-menu": "Close menu",
+			"main-menu": "Main menu"
 		},
 		"uikit": {
 			"info": "More information",
@@ -36,13 +37,23 @@
 			}
 		},
 		"date-picker": {
+			"open-date-time": "Choose date and time",
+			"open-date-time-selected": "Choose date and time, selected date and time is {{DATE}} {{TIME}}",
 			"error": {
 				"invalid": "Enter a valid date",
 				"min-date": "Enter a date on or after {{DATE}}",
 				"max-date": "Enter a date on or before {{DATE}}",
 				"past": "Enter today's date or a later one",
 				"future": "Enter today's date or an earlier one",
-				"unavailable": "Enter a date that can be selected"
+				"unavailable": "Enter a date that can be selected",
+				"min-date-time": "Enter a date and time on or after {{DATE}}",
+				"max-date-time": "Enter a date and time on or before {{DATE}}",
+				"min-time": "Enter a time at or after {{TIME}}",
+				"max-time": "Enter a time at or before {{TIME}}",
+				"past-date-time": "Enter the current date and time or a later one",
+				"future-date-time": "Enter the current date and time or an earlier one",
+				"unavailable-time": "Enter a time that can be selected",
+				"minutes-step": "Enter minutes in steps of {{STEP}}"
 			}
 		},
 		"signal-portlet": {
@@ -50,7 +61,12 @@
 			"refresh": "Refresh"
 		},
 		"notifications": {
-			"title": "Notifications"
+			"title": "Notifications",
+			"bell-label_one": "Notifications, {{count}} unread",
+			"bell-label_other": "Notifications, {{count}} unread",
+			"announce-new_one": "{{count}} new notification",
+			"announce-new_other": "{{count}} new notifications",
+			"unread": "Unread"
 		},
 		"how-it-works": {
 			"title": "How it works"
@@ -245,6 +261,9 @@
 				"image-position": "Image {{INDEX}} of {{TOTAL}}"
 			}
 		},
+		"group-box": {
+			"required": "Required"
+		},
 		"phone-number": {
 			"invalid": "Enter correct phone number"
 		},
@@ -269,6 +288,7 @@
 				"instructions-signed": "The saved signature is shown. To sign again, clear it first."
 			},
 			"sign-here": "Sign here digitally",
+			"not-signed": "Not signed",
 			"required": "Required"
 		},
 		"toast": {
@@ -285,7 +305,11 @@
 			"label": "Loading…"
 		},
 		"matrix": {
+			"row-header-actions": "Opens the actions for this row.",
 			"tile-more": "{{count}} more:",
+			"tile-arrow": "to",
+			"tile-highlighted": "highlighted",
+			"tile-dimmed": "dimmed",
 			"extra-cell-add": "Add"
 		}
 	},
@@ -353,6 +377,9 @@
 				"boolean": {
 					"true": "Yes",
 					"false": "No"
+				},
+				"color": {
+					"validation-error": "Please enter a valid color, such as #336699"
 				}
 			}
 		}
@@ -362,8 +389,10 @@
 			"delete": {
 				"confirm-dialog": {
 					"title": "Delete",
-					"message": "Do you really want to delete {{NUM}} entries?",
-					"messageInverted": "Do you really want to delete everything except {{NUM}} entries?",
+					"message_one": "Do you really want to delete {{count}} entry?",
+					"message_other": "Do you really want to delete {{count}} entries?",
+					"messageInverted_one": "Do you really want to delete everything except {{count}} entry?",
+					"messageInverted_other": "Do you really want to delete everything except {{count}} entries?",
 					"buttons": {
 						"yes": "Yes",
 						"no": "No"
@@ -405,6 +434,11 @@
 			"read-only": {
 				"submitting": "The form is currently being saved"
 			},
+			"auto-save": {
+				"saving": "Saving…",
+				"saved": "Saved",
+				"failed": "Could not save"
+			},
 			"tab": {
 				"invalid": "Contains invalid fields.",
 				"modified": "Contains modified fields."
@@ -415,6 +449,7 @@
 		},
 		"selector": {
 			"loading": "Loading…",
+			"saving": "Saving…",
 			"loading-error": "Error while fetching data",
 			"unknown-entry": "Unknown entry",
 			"selected-count": "Selected: {{COUNT}}",

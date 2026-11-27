@@ -41,9 +41,22 @@ export interface ImageSelectorProps {
     label?: string;
     /**
      * Does the value differ from the server-side value?
-     * @remarks Marks the label. Set by the form engine from `RenderParams.dirty`.
+     * @remarks normal and modern: marks the frame with GroupBox's `dirty`, a dot after the
+     *          label (after the asterisk of a required field) and "(modified)" in the
+     *          frame's name. Set by the form engine from `RenderParams.dirty`.
+     *          profile_picture shows no label and ignores it.
      */
     dirty?: boolean;
+    /**
+     * Is an image required?
+     * @remarks normal and modern: marks the frame with GroupBox's `required`, an asterisk
+     *          after the label and "Required" as the frame's description. Display only: it
+     *          neither validates nor stops a change. Set by the form engine from
+     *          `RenderParams.visibility.required`. profile_picture shows no label and
+     *          ignores it.
+     * @default false
+     */
+    required?: boolean;
     /**
      * The alt text of the image
      */

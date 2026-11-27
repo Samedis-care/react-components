@@ -1,5 +1,6 @@
 import React from "react";
 import { MenuItemProps, MenuProps } from "@mui/material";
+import type { IDataGridAddButton } from "../DataGrid";
 /**
  * The props of the "More options" menu's slots: MUI Menu's `slotProps`, and
  * the "Reset" and "Export" entries
@@ -22,6 +23,13 @@ export interface ActionBarMenuProps {
     openResetDialog?: (evt: React.MouseEvent) => void;
     openExportMenu?: (evt: React.MouseEvent) => void;
     handleImport?: (evt: React.MouseEvent) => void;
+    /**
+     * The add buttons the header has no room for (on phones every one but the
+     * first): an entry each, below the other entries, with its icon (MUI's Add
+     * by default) and label. An entry without onClick is disabled and shows its
+     * disableHint below the label.
+     */
+    addButtons?: IDataGridAddButton[];
     onClose: () => void;
     /**
      * The props of the slots: the menu's (MUI Menu's `slotProps`; `list` gives

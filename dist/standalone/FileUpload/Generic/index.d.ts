@@ -137,9 +137,20 @@ export interface FileUploadProps {
     label?: string;
     /**
      * Does the value differ from the server-side value?
-     * @remarks Marks the label. Set by the form engine from `RenderParams.dirty`.
+     * @remarks Marks the frame with GroupBox's `dirty`: a dot after the label (after the
+     *          asterisk of a required field), and "(modified)" in the frame's name. Set by
+     *          the form engine from `RenderParams.dirty`.
      */
     dirty?: boolean;
+    /**
+     * Is a file required?
+     * @remarks Marks the frame with GroupBox's `required`: an asterisk after the label,
+     *          and "Required" at the start of the frame's description. Display only: it
+     *          neither validates nor stops a pick or a removal. Set by the form engine
+     *          from `RenderParams.visibility.required`. A custom variant gets it as well.
+     * @default false
+     */
+    required?: boolean;
     /**
      * Is the field busy, e.g. writing its changes?
      * @remarks Sets `aria-busy` on the field. While it is false, the `aria-busy` of

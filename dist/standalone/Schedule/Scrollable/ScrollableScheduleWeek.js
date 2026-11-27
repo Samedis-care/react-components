@@ -9,11 +9,73 @@ import focusRing from "../../../utils/internal/focusRing";
 const RetryButton = styled(Button)(({ theme }) => ({
     "&.Mui-focusVisible": focusRing(theme, 2),
 }));
+// the week line is a heading for assistive technology and looks like the text
+// around it; typeof Grid keeps the `component` prop, which styled() drops
+const WeekHeading = styled(Grid)({
+    margin: 0,
+    font: "inherit",
+});
 /**
- * One week of ScrollableSchedule: a spinner while it loads, then a "Week N,
- * DD MMM - DD MMM" line and its day rows. When the load fails, the week line
- * stays and an alert names the week and shows the error's message, with a
- * Retry button that loads the week again.
+ * The text a failed load shows below the error's title "Week N could not be
+ * loaded": the `message` of an Error, or of any other object with a string
+ * `message`, and a string as it is. Any other value (`undefined`, `null`, a
+ * number, an object without a message such as a fetch Response) has none, so
+ * the alert shows its title only.
+ * @param reason What loadWeekCallback rejected with or threw
+ */
+const getErrorText = (reason) => {
+    if (typeof reason === "string")
+        return reason;
+    if (typeof reason === "object" &&
+        reason !== null &&
+        "message" in reason &&
+        typeof reason.message === "string") {
+        return reason.message;
+    }
+    return "";
+};
+/**
+ * What a value is, for the error of a result that is not a week: `null`,
+ * `undefined`, "an object", "a string", …
+ * @param value The value
+ */
+const describeValue = (value) => {
+    if (value === null || value === undefined)
+        return String(value);
+    return typeof value === "object" ? "an object" : `a ${typeof value}`;
+};
+/**
+ * Checks a result of loadWeekCallback: a week is an array of exactly 7 days,
+ * each an array of entries. Anything else (fewer or more days, `null`,
+ * `undefined`, an object, a day that is not an array) throws an Error that says
+ * what the result is instead, so the week's load fails with it.
+ * @param result What loadWeekCallback returned or its promise resolved with
+ * @returns The result, which is a week
+ * @throws Error "ScrollableSchedule: loadWeekCallback must return 7 days, got …"
+ */
+const checkWeek = (result) => {
+    const expected = "ScrollableSchedule: loadWeekCallback must return 7 days";
+    if (!Array.isArray(result)) {
+        throw new Error(`${expected}, got ${describeValue(result)}`);
+    }
+    const days = result;
+    if (days.length !== 7) {
+        throw new Error(`${expected}, got ${days.length}`);
+    }
+    const badDay = days.findIndex((day) => !Array.isArray(day));
+    if (badDay !== -1) {
+        throw new Error(`${expected}, each an array of entries, got ${describeValue(days[badDay])} at index ${badDay}`);
+    }
+    return days;
+};
+/**
+ * One week of ScrollableSchedule: a spinner while it loads, then its week line
+ * and its day rows. The week line is an `h3` heading, "Week N, DD MMM -
+ * DD MMM YYYY" (both years for a week that runs into the next one). When the
+ * load fails, whatever it rejects with, or its result is not 7 days (see
+ * checkWeek), the week line stays and an alert names the week and shows the
+ * error's message (see getErrorText), with a Retry button that loads the week
+ * again.
  */
 class ScrollableScheduleWeek extends PureComponent {
     /**
@@ -52,7 +114,8 @@ class ScrollableScheduleWeek extends PureComponent {
         const { loadWeekCallback, weekOffset, filterValues } = this.props;
         void (async () => {
             try {
-                const data = await loadWeekCallback(weekOffset, filterValues);
+                // a result that is not a week fails the load like a rejection
+                const data = checkWeek(await loadWeekCallback(weekOffset, filterValues));
                 if (loadId !== this.loadId)
                     return;
                 this.setState({
@@ -66,7 +129,7 @@ class ScrollableScheduleWeek extends PureComponent {
                     return;
                 this.setState({
                     data: null,
-                    loadError: e,
+                    loadError: getErrorText(e),
                     retrying: false,
                 });
             }
@@ -91,7 +154,7 @@ class ScrollableScheduleWeek extends PureComponent {
     render() {
         const { data, loadError, retrying } = this.state;
         const { t, idPrefix } = this.props;
-        if (!data && !loadError) {
+        if (!data && loadError === null) {
             return this.renderProgress();
         }
         const firstDay = this.props.today
@@ -112,9 +175,10 @@ class ScrollableScheduleWeek extends PureComponent {
         }
         const errorId = `${idPrefix}-error`;
         const endOfWeek = firstDay.clone().add(6, "days");
-        return (_jsxs(_Fragment, { children: [_jsx(Grid, { size: 12, children: _jsx(Divider, {}) }), _jsx(Grid, { size: 1 }), _jsxs(Grid, { size: 11, ref: this.weekLine, tabIndex: -1, children: [t("standalone.schedule.week"), " ", firstDay.week(), ",", " ", firstDay.format("DD MMM"), " - ", endOfWeek.format("DD MMM")] }), data ? (dayItems) : retrying ? (this.renderProgress()) : (_jsx(Grid, { size: 11, offset: 1, children: _jsxs(Alert, { severity: "error", slotProps: { message: { id: errorId } }, action: _jsx(RetryButton, { color: "inherit", size: "small", onClick: this.retry, "aria-describedby": errorId, children: t("standalone.schedule.retry") }), children: [_jsx(AlertTitle, { children: t("standalone.schedule.week-load-error", {
+        const startFormat = firstDay.year() === endOfWeek.year() ? "DD MMM" : "DD MMM YYYY";
+        return (_jsxs(_Fragment, { children: [_jsx(Grid, { size: 12, children: _jsx(Divider, {}) }), _jsx(Grid, { size: 1 }), _jsxs(WeekHeading, { size: 11, component: "h3", ref: this.weekLine, tabIndex: -1, children: [t("standalone.schedule.week"), " ", firstDay.week(), ",", " ", firstDay.format(startFormat), " - ", endOfWeek.format("DD MMM YYYY")] }), data ? (dayItems) : retrying ? (this.renderProgress()) : (_jsx(Grid, { size: 11, offset: 1, children: _jsxs(Alert, { severity: "error", slotProps: { message: { id: errorId } }, action: _jsx(RetryButton, { color: "inherit", size: "small", onClick: this.retry, "aria-describedby": errorId, children: t("standalone.schedule.retry") }), children: [_jsx(AlertTitle, { children: t("standalone.schedule.week-load-error", {
                                     WEEK: firstDay.week(),
-                                }) }), loadError?.message] }) }))] }));
+                                }) }), loadError] }) }))] }));
     }
 }
 const ScrollableScheduleWeekWithTranslation = (props) => {

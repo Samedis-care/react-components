@@ -25,7 +25,10 @@ export interface CrudMultiImageProps extends Omit<MultiImageProps, "images" | "o
      * The backend connector used as CRUD interface
      * @remarks A LazyConnector queues every write until its queue is written, which a Form
      *          does after saving. Any other connector is written at once. The field looks
-     *          the same either way.
+     *          the same either way. While the control is mounted, the queue of a
+     *          LazyConnector rejects for the writes the backend refused (a Form's save)
+     *          with a PartialApplyError that names each by its image, as a change through
+     *          any other connector does.
      *
      *          Null renders a read-only control that lists `additionalImages`. Read once:
      *          the first connector passed (after null, if any) is listed and written for

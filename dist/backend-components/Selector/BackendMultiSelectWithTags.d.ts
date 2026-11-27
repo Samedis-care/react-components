@@ -8,7 +8,8 @@ import { DistributiveOmit } from "../../utils/distributiveOmit";
 /**
  * The switch of a backend multiselect with tags. `switchLabel` is required while
  * `switchFilterNameGroup` or `switchFilterNameData` shows the switch: the visible label
- * is its accessible name.
+ * is its accessible name. The switch has a row of its own between the search field for
+ * entries and the chips, at the right end, with its label before it.
  */
 export type BackendMultiSelectWithTagsSwitchProps = {
     /**
@@ -56,7 +57,10 @@ export type BackendMultiSelectWithTagsProps<GroupModelT extends ModelUnknown, Da
      */
     onChange?: (selected: string[], raw: DataDataT[]) => void;
     /**
-     * Initial data (model format) used for selected cache
+     * Records (model format) of selected ids, which are then shown without a request: a
+     * selected id with a record here is converted from it by `convData` once it is
+     * selected, not loaded through `dataModel`. A conversion that fails lists the id as
+     * "Error while fetching data", like a record that failed to load, without a lookup.
      */
     initialData?: ModelRecord<DataModelT>[];
     /**
@@ -79,13 +83,23 @@ export type BackendMultiSelectWithTagsProps<GroupModelT extends ModelUnknown, Da
     getGroupDataEntries: (data: ModelGetResponse<GroupModelT>) => Promise<DataDataT[]> | DataDataT[];
     /**
      * The data source for data entries
+     * @remarks One with other react-query keys than the previous one (another model id
+     *          or cache keys) loads the listed records again through it. A new instance
+     *          of the same model (same keys) does not: it loads the same records.
      */
     dataModel: DataModelT;
     /**
      * Callback that converts a model entry to a multi selector entry
      * @param data The record data (overview)
      * @returns Selector data
-     * @remarks Selector data value must be set to ID
+     * @remarks Selector data value must be set to ID. One that throws or rejects for a
+     *          selected record, loaded or from `initialData`, lists it as "Error while
+     *          fetching data", like a record that failed to load. A new function
+     *          converts the listed entries again from the records this field listed or
+     *          loaded for their ids, without a request (an entry a group pick added for
+     *          a record the field has not listed stays as it is). Pass a stable one
+     *          (module level, or useCallback/useMemo on what it reads): a new one on every
+     *          render converts the listed entries on every render.
      */
     convData: (data: ModelRecord<DataModelT>) => Promise<DataDataT> | DataDataT;
     /**

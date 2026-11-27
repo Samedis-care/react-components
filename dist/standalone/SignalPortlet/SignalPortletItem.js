@@ -1,10 +1,11 @@
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
-import React, { useCallback } from "react";
+import React from "react";
 import { Avatar, ListItem, ListItemAvatar, ListItemButton, listItemButtonClasses, ListItemText, styled, useThemeProps, } from "@mui/material";
 import Loader from "../Loader";
-import useNavigate from "../Routes/useNavigate";
+import Link from "../Routes/Link";
 import combineClassNames from "../../utils/combineClassNames";
 import focusRing from "../../utils/internal/focusRing";
+import visuallyHidden from "../../utils/internal/visuallyHidden";
 const ListAvatar = styled(ListItemAvatar, {
     name: "CcSignalPortletItem",
     slot: "listAvatar",
@@ -26,8 +27,19 @@ const AvatarInactive = styled(Avatar, {
     name: "CcSignalPortletItem",
     slot: "itemColorInactive",
 })(({ theme }) => ({
-    color: theme.palette.getContrastText(theme.palette.action.disabled),
-    backgroundColor: theme.palette.action.disabled,
+    // the grey of MUI's Avatar without an image, with the text color for it:
+    // the count is content, not a disabled control, and needs 4.5:1. The dark
+    // palette's colors apply in the dark scheme of a theme of CSS variables
+    // too. A scheme sets only these properties, so a theme's color and
+    // backgroundColor for this slot apply in every scheme
+    "--cc-signal-portlet-inactive-color": theme.palette.getContrastText(theme.palette.grey[400]),
+    "--cc-signal-portlet-inactive-background": theme.palette.grey[400],
+    ...theme.applyStyles("dark", {
+        "--cc-signal-portlet-inactive-color": theme.palette.getContrastText(theme.palette.grey[600]),
+        "--cc-signal-portlet-inactive-background": theme.palette.grey[600],
+    }),
+    color: "var(--cc-signal-portlet-inactive-color)",
+    backgroundColor: "var(--cc-signal-portlet-inactive-background)",
 }));
 const CountCapped = styled("span", {
     name: "CcSignalPortletItem",
@@ -39,18 +51,7 @@ const CountCapped = styled("span", {
 const CountFull = styled("span", {
     name: "CcSignalPortletItem",
     slot: "countFull",
-})({
-    // visually hidden, as MUI's visuallyHidden
-    border: 0,
-    clipPath: "inset(50%)",
-    height: 1,
-    margin: -1,
-    overflow: "hidden",
-    padding: 0,
-    position: "absolute",
-    whiteSpace: "nowrap",
-    width: 1,
-});
+})(visuallyHidden);
 const ListText = styled(ListItemText, {
     name: "CcSignalPortletItem",
     slot: "listText",
@@ -66,18 +67,12 @@ const ListRootButton = styled(ListItemButton, {
     // MUI marks the keyboard-focused row with a faint tint only, which forced
     // colors drop; inside the row, which spans the card from edge to edge
     [`&.${listItemButtonClasses.focusVisible}`]: focusRing(theme, -2),
-}));
+})); // styled() drops the typing of `component`
 /** The highest count shown as it is; higher counts show as "999+" */
 const MAX_COUNT = 999;
 const SignalPortletItem = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcSignalPortletItem" });
     const { count, link, text, textTypographyProps, className, classes } = props;
-    const navigate = useNavigate();
-    const handleClick = useCallback(() => {
-        if (link) {
-            navigate(link);
-        }
-    }, [navigate, link]);
     const AvatarComponent = count == null ? AvatarLoading : count ? AvatarActive : AvatarInactive;
     const avatarClass = classes
         ? count == null
@@ -86,9 +81,9 @@ const SignalPortletItem = (inProps) => {
                 ? classes.itemColorActive
                 : classes.itemColorInactive
         : undefined;
-    const content = (_jsxs(_Fragment, { children: [_jsx(ListAvatar, { className: classes?.listAvatar, children: _jsx(AvatarComponent, { className: avatarClass, children: count == null ? (_jsx(Loader, {})) : count > MAX_COUNT ? (_jsxs(_Fragment, { children: [_jsx(CountCapped, { "aria-hidden": true, className: classes?.countCapped, children: `${MAX_COUNT}+` }), _jsx(CountFull, { className: classes?.countFull, children: count.toString() })] })) : (count.toString()) }) }), _jsx(ListText, { slotProps: { primary: textTypographyProps }, children: text })] }));
-    // every row is a list item; a linked row puts its button inside, as in
+    const content = (_jsxs(_Fragment, { children: [_jsx(ListAvatar, { className: classes?.listAvatar, children: _jsx(AvatarComponent, { className: avatarClass, children: count == null ? (_jsx(Loader, {})) : count > MAX_COUNT ? (_jsxs(_Fragment, { children: [_jsx(CountCapped, { "aria-hidden": true, className: classes?.countCapped, children: `${MAX_COUNT}+` }), _jsx(CountFull, { className: classes?.countFull, children: count.toString() })] })) : (count.toString()) }) }), _jsx(ListText, { className: classes?.listText, slotProps: { primary: textTypographyProps }, children: text })] }));
+    // every row is a list item; a linked row puts its link inside, as in
     // MUI's ListItem disablePadding + ListItemButton pattern
-    return (_jsx(ListRoot, { disablePadding: !!link, className: combineClassNames([className, classes?.root]), children: link ? (_jsx(ListRootButton, { onClick: handleClick, className: classes?.rootBtn, children: content })) : (content) }));
+    return (_jsx(ListRoot, { disablePadding: !!link, className: combineClassNames([className, classes?.root]), children: link ? (_jsx(ListRootButton, { component: Link, to: link, className: classes?.rootBtn, children: content })) : (content) }));
 };
 export default React.memo(SignalPortletItem);

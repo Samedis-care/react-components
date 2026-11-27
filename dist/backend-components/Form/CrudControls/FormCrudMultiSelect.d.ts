@@ -5,6 +5,13 @@ import { UseLazyCrudConnectorParams } from "../useLazyCrudConnector";
 import { MultiSelectorData } from "../../../standalone";
 import { CrudSelectDispatch } from "../../Selector/useCrudSelect";
 import { DistributiveOmit } from "../../../utils/distributiveOmit";
+/**
+ * Props of FormCrudMultiSelect: CrudMultiSelect's props without connector, errorComponent and
+ * field, which the Form and useLazyCrudConnector supply, plus the params of
+ * useLazyCrudConnector (field among them)
+ * @typeParam M The searched model, whose records can be picked (`model`)
+ * @typeParam DataT An entry of the selection, made from a record of the collection
+ */
 export type FormCrudMultiSelectProps<M extends ModelUnknown, DataT extends MultiSelectorData> = DistributiveOmit<CrudMultiSelectProps<M, DataT>, "errorComponent" | "connector" | "field"> & UseLazyCrudConnectorParams<Record<string, unknown>> & {
     /**
      * Disables the control: the search field is disabled, the entries have no remove button,
@@ -32,6 +39,6 @@ export type FormCrudMultiSelectProps<M extends ModelUnknown, DataT extends Multi
      */
     showDirtyState?: boolean;
 };
-export declare const ForwardedCrudMultiSelect: <M extends ModelUnknown, DataT extends MultiSelectorData>(props: FormCrudMultiSelectProps<M, DataT> & RefAttributes<CrudSelectDispatch<DataT>>) => React.ReactElement;
-declare const _default: typeof ForwardedCrudMultiSelect;
+declare const ForwardedFormCrudMultiSelect: <M extends ModelUnknown, DataT extends MultiSelectorData>(props: FormCrudMultiSelectProps<M, DataT> & RefAttributes<CrudSelectDispatch<DataT>>) => React.ReactElement;
+declare const _default: typeof ForwardedFormCrudMultiSelect;
 export default _default;

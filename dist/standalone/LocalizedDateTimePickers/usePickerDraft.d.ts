@@ -22,10 +22,10 @@ export interface PickerDraftResult<TError> {
     /**
      * Reports a date the calendar accepted (a day picked in the desktop
      * calendar, OK, the calendar closed with Escape or a click outside it), if
-     * it differs from the one reported last. To be called from the picker's
-     * `onAccept`, with its arguments; the field's changes, which MUI passes to
-     * `onAccept` as well, are left for `finish`. Does nothing while
-     * `publishIntermediateValues` is set.
+     * it differs from the one reported last. To be handed to the picker as its
+     * `onAccept`; the field's changes, which MUI passes to `onAccept` as well,
+     * are left for `finish`. While `publishIntermediateValues` is set it passes
+     * everything to the consumer's `onAccept` as it comes, as MUI does.
      */
     accept: PickerDraftChangeHandler<TError>;
     /**
@@ -61,6 +61,10 @@ export interface PickerDraftResult<TError> {
  * reported as `null`. A day picked in the mobile dialog waits for OK, and Cancel,
  * which hands the old date back, reports nothing.
  *
+ * The consumer's `onAccept` gets each report too, right after `onChange` and
+ * with the same arguments. MUI calls `onAccept` for every change of the field,
+ * so it would get the half-typed and rejected dates that `onChange` is spared.
+ *
  * An entry the picker rejects stays in the field, as in MUI's own field, also
  * once focus leaves it: marked invalid, with the picker's `onError` reporting
  * the error, until the user changes it, the consumer hands in another date, or
@@ -81,10 +85,12 @@ export interface PickerDraftResult<TError> {
  * @param value The value held by the consumer
  * @param onChange The consumer's change handler
  * @param publishIntermediateValues Escape hatch: report every change at once,
- * rejected ones included, i.e. the raw picker behaviour
+ * rejected ones included, i.e. the raw picker behaviour, to `onChange` and to
+ * `onAccept`
  * @param defaultValue The initial value of an uncontrolled picker, which counts
  * as reported
+ * @param onAccept The consumer's accept handler, called with every report
  * @returns The value and handlers to hand to the picker
  */
-declare const usePickerDraft: <TError>(value: PickerValidDate | null | undefined, onChange: PickerDraftChangeHandler<TError> | undefined, publishIntermediateValues?: boolean, defaultValue?: PickerValidDate | null) => PickerDraftResult<TError>;
+declare const usePickerDraft: <TError>(value: PickerValidDate | null | undefined, onChange: PickerDraftChangeHandler<TError> | undefined, publishIntermediateValues?: boolean, defaultValue?: PickerValidDate | null, onAccept?: PickerDraftChangeHandler<TError>) => PickerDraftResult<TError>;
 export default usePickerDraft;

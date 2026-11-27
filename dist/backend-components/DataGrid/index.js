@@ -11,7 +11,9 @@ import deepAssign from "../../utils/deepAssign";
 import deepClone from "../../utils/deepClone";
 import isPlainObject from "../../utils/isPlainObject";
 import InlineEditCell from "./InlineEditCell";
+import ModelCell from "./ModelCell";
 import renderModelCell from "./renderModelCell";
+import ccI18n from "../../i18n";
 export const useBackendDataGridAddNewButtons = (props) => {
     const { t } = useCCTranslations();
     const addNewButtons = useMemo(() => {
@@ -73,7 +75,7 @@ const useBackendDataGridDelete = (props, refreshGrid) => {
                 await showConfirmDialog(pushDialog, {
                     title: t("backend-components.data-grid.delete.confirm-dialog.title"),
                     message: t("backend-components.data-grid.delete.confirm-dialog." +
-                        (invert ? "messageInverted" : "message"), { NUM: ids.length }),
+                        (invert ? "messageInverted" : "message"), { count: ids.length }),
                     textButtonYes: t("backend-components.data-grid.delete.confirm-dialog.buttons.yes"),
                     textButtonNo: t("backend-components.data-grid.delete.confirm-dialog.buttons.no"),
                 });
@@ -162,58 +164,57 @@ const useBackendDataGridDelete = (props, refreshGrid) => {
  */
 export const useBackendDataGridDeleteHandler = (props, refreshGrid) => useBackendDataGridDelete(props, refreshGrid).handleDelete;
 /**
- * A cell's change handler where the cell has no editor: its overview visibility is
- * not editable, so its renderer shows no control that could call it
- */
-const notEditableInGrid = () => {
-    throw new Error("Not editable in Grid");
-};
-/**
  * Turns a record from model.index into a grid row: `row.id` is the record's id,
  * `row[field]` the rendered cell of each model field and `row[field + "_raw"]` its
- * value. A field with an editable overview visibility (ModelVisibilityGridEdit) is
- * edited in its cell, which saves every change at once through the model's mutation
- * (useModelMutation, so the model's cache, hooks and "mutate" listeners hear of it), then
- * calls refreshGrid; a refused save is shown in an error dialog (the cell needs the
- * Framework), and refreshGrid is called as well. The cell's control is named after its
- * field and the row ("Active, example.com"), since a grid cell has no label element to
- * name it (InlineEditCell).
+ * value. A cell renders again in components-care's current language when it changes
+ * (ModelCell), since the renderers translate while they render ("Yes", enum labels,
+ * formatted dates). A field with an editable overview visibility
+ * (ModelVisibilityGridEdit) is edited in its cell (InlineEditCell), which needs the
+ * Framework: the control shows a change at once and saves it through the model's
+ * mutation (useModelMutation, so the model's cache, hooks and "mutate" listeners hear of
+ * it). Once saved, the DataGrid the row is in replaces the row with the row of the saved
+ * record, without a reload, so the selection and the focused control stay; a refused
+ * save is shown in an error dialog, and the control shows the row's value again. The
+ * cell's control is named after its field and the row ("Active, example.com"), since a
+ * grid cell has no label element to name it.
  * @param model The model the record belongs to
- * @param refreshGrid Called after an inline edit was saved or refused, to reload the
- *                    rows
  * @returns A function that builds the row of one record. It throws "Not supported"
  *          for an editable field whose renderer has no grid editor.
  */
-export const renderDataGridRecordUsingModel = (model, refreshGrid) => (entry) => Object.fromEntries(Object.keys(model.fields)
-    .map((key) => {
-    // we cannot render the ID, this will cause issues with the selection
-    const value = getValueByDot(key, entry);
-    if (key === "id") {
+export const renderDataGridRecordUsingModel = (model) => {
+    const renderRow = (entry) => Object.fromEntries(Object.keys(model.fields)
+        .map((key) => {
+        // we cannot render the ID, this will cause issues with the selection
+        const value = getValueByDot(key, entry);
+        if (key === "id") {
+            return [
+                [key, value],
+                [key + "_raw", value],
+            ];
+        }
+        const field = model.fields[key];
+        // no need to render disabled fields
+        if (field.visibility.overview.disabled) {
+            return [
+                [key, value],
+                [key + "_raw", value],
+            ];
+        }
+        // rendered while loading, for an editable field too, so that a renderer
+        // without a grid editor fails the load ("Not supported") instead of the
+        // grid's render
+        const cell = renderModelCell(model, key, entry);
         return [
-            [key, value],
+            [
+                key,
+                field.visibility.overview.editable ? (_jsx(InlineEditCell, { model: model, field: key, record: entry, renderRow: renderRow })) : (_jsx(ModelCell, { model: model, field: key, record: entry, language: ccI18n.language, children: cell })),
+            ],
             [key + "_raw", value],
         ];
-    }
-    const field = model.fields[key];
-    // no need to render disabled fields
-    if (field.visibility.overview.disabled) {
-        return [
-            [key, value],
-            [key + "_raw", value],
-        ];
-    }
-    // rendered for an editable field too, so that a renderer without a grid
-    // editor fails the load ("Not supported") instead of the grid's render
-    const cell = renderModelCell(model, key, entry, notEditableInGrid);
-    return [
-        [
-            key,
-            field.visibility.overview.editable ? (_jsx(InlineEditCell, { model: model, field: key, record: entry, refreshGrid: refreshGrid })) : (cell),
-        ],
-        [key + "_raw", value],
-    ];
-})
-    .flat());
+    })
+        .flat());
+    return renderRow;
+};
 /**
  * The record a row of renderDataGridRecordUsingModel was rendered from: the
  * values of the model's fields before rendering, put together as the model's
@@ -249,9 +250,9 @@ const BackendDataGrid = (props, ref) => {
         return {
             rowsTotal: meta.totalRows,
             rowsFiltered: meta.filteredRows,
-            rows: result.map(renderDataGridRecordUsingModel(model, refreshGrid)),
+            rows: result.map(renderDataGridRecordUsingModel(model)),
         };
-    }, [model, refreshGrid]);
+    }, [model]);
     const addNewButtons = useBackendDataGridAddNewButtons(props);
     const { handleDelete, deleting } = useBackendDataGridDelete(props, refreshGrid);
     const getRowLabel = useBackendDataGridRowLabel(model, props.getRowLabel);

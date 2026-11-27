@@ -1,6 +1,6 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useContext, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, } from "react";
-import { Box, Collapse, Divider, Grid, IconButton, ListItem, Paper, styled, Typography, useTheme, useThemeProps, } from "@mui/material";
+import { Box, ButtonBase, buttonBaseClasses, Collapse, Divider, Grid, IconButton, ListItem, Paper, styled, Typography, useTheme, useThemeProps, } from "@mui/material";
 import { Apps as AppsIcon, FilterAlt as FilterAltIcon, FilterAltOutlined as FilterAltOutlinedIcon, Search as SearchIcon, } from "@mui/icons-material";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -18,8 +18,10 @@ import SelectAllProvider from "./SelectAllProvider";
 import StatePersistence, { DataGridPersistentStateContext, } from "./StatePersistence";
 import { decodePersistedState, normalizeFilterDef } from "./PersistFormat";
 import { useDataGridFocusHandoff } from "./FocusHandoff";
+import { withDataGridPersistGate } from "./PersistGate";
 import combineClassNames from "../../utils/combineClassNames";
 import Checkbox from "../UIKit/Checkbox";
+import focusRing from "../../utils/internal/focusRing";
 import ComponentWithLabel from "../UIKit/ComponentWithLabel";
 import deepClone from "../../utils/deepClone";
 export const DataGridStateContext = React.createContext(undefined);
@@ -50,6 +52,14 @@ export const useDataGridColumnsWidthState = () => {
         throw new Error("Columns state width context not set");
     return ctx;
 };
+/**
+ * Updates a loaded row in place (DataGridDispatch.updateRow), for the content of the
+ * grid's cells: e.g. a control that saved its row's record shows the saved record
+ * without a reload, which would clear the selection and replace the focused control.
+ * Stable for the grid's life.
+ * @remarks undefined outside a DataGrid's cells
+ */
+export const DataGridUpdateRowContext = React.createContext(undefined);
 export const DataGridRootRefContext = React.createContext(undefined);
 export const useDataGridRootRef = () => {
     const ctx = useContext(DataGridRootRefContext);
@@ -268,18 +278,70 @@ export const DataGridFilterClearButton = styled(IconButton, {
 })({
     padding: 0,
 });
+/**
+ * Theme slot `columnHeaderLabel`: the label's place in a column's header. It
+ * holds the sort button (`columnHeaderSortButton`) of a sortable column, else
+ * the label's text (`columnHeaderLabelText`); either cuts a long label off
+ * with an ellipsis.
+ */
 export const DataGridColumnHeaderLabel = styled(Grid, {
     name: "CcDataGrid",
     slot: "columnHeaderLabel",
 })({
-    textOverflow: "ellipsis",
+    // shrinks below its text's width, which the button or text cuts off: the
+    // label itself clips nothing, so the focus ring around them shows in full
+    minWidth: 0,
     whiteSpace: "nowrap",
-    overflow: "hidden",
     userSelect: "none",
     "&:hover": {
         pointerEvents: "auto",
     },
 });
+// the label's text, as the sort button and as the text of a column that does
+// not sort: cut off with an ellipsis, and 4px wider than the label on both
+// sides, so the focus ring drawn inside its edges keeps clear of the text
+// while the text stays where it is
+const columnHeaderLabelTextStyles = {
+    display: "block",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    padding: "0 4px",
+    margin: "0 -4px",
+};
+/**
+ * Theme slot `columnHeaderSortButton`: the label of a sortable column, as a
+ * `<button>` named with the label's text. Enter and Space sort the column,
+ * Shift+Enter adds it as a further sort (see IDataGridColumnDef.sortable);
+ * keyboard focus shows the label's tooltip and a focus ring.
+ */
+export const DataGridColumnHeaderSortButton = styled(ButtonBase, {
+    name: "CcDataGrid",
+    slot: "columnHeaderSortButton",
+})(({ theme }) => ({
+    ...columnHeaderLabelTextStyles,
+    // a button is only as wide as its content by itself
+    width: "calc(100% + 8px)",
+    // the header's text, as without the button
+    font: "inherit",
+    letterSpacing: "inherit",
+    textAlign: "inherit",
+    textTransform: "inherit",
+    cursor: "inherit",
+    [`&.${buttonBaseClasses.focusVisible}`]: focusRing(theme, -2),
+}));
+/**
+ * Theme slot `columnHeaderLabelText`: the label of a column that does not
+ * sort. A string label is a tab stop, so keyboard focus shows its tooltip
+ * (and the full text of a label cut off) and a focus ring.
+ */
+export const DataGridColumnHeaderLabelText = styled("span", {
+    name: "CcDataGrid",
+    slot: "columnHeaderLabelText",
+})(({ theme }) => ({
+    ...columnHeaderLabelTextStyles,
+    // the sort button's ring: the theme's, else CC's inside the edges
+    "&:focus-visible": focusRing(theme, -2) ?? theme.focusVisible,
+}));
 export const DataGridColumnHeaderResizer = styled(Grid, {
     name: "CcDataGrid",
     slot: "columnHeaderResizer",
@@ -684,11 +746,13 @@ const DataGrid = (inProps, ref) => {
         resetView();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [resetView, search, columnStateHash, customData, forceRefreshToken]);
+    // manual row updates: through the ref and, for the cells, DataGridUpdateRowContext
+    const updateRow = useCallback((id, update) => setState((prevState) => dataGridApplyRowUpdate(prevState, id, update)), [setState]);
     // manual row updates, reading the query
     useImperativeHandle(ref, () => ({
-        updateRow: (id, update) => setState((prevState) => dataGridApplyRowUpdate(prevState, id, update)),
+        updateRow,
         getQuery: () => dataGridGetQuery({ search, customData }, columnsState, getAdditionalFilters),
-    }), [setState, search, customData, columnsState, getAdditionalFilters]);
+    }), [updateRow, search, customData, columnsState, getAdditionalFilters]);
     // selection change event
     useEffect(() => {
         // don't trigger selection update event when triggered by prop update
@@ -703,8 +767,10 @@ const DataGrid = (inProps, ref) => {
             flexDirection: "column",
             justifyContent: "space-between",
             alignItems: "stretch",
-        }, wrap: "nowrap", className: combineClassNames([className, classes?.root]), ref: gridRoot, children: _jsx(DataGridRootRefContext.Provider, { value: gridRoot, children: _jsx(DataGridPropsContext.Provider, { value: props, children: _jsx(DataGridStateContext.Provider, { value: statePack, children: _jsx(DataGridColumnsStateContext.Provider, { value: columnsStatePack, children: _jsx(DataGridColumnsWidthStateContext.Provider, { value: columnWidthStatePack, children: _jsxs(SelectAllProvider, { children: [_jsx(StatePersistence, {}), _jsx(HeaderWrapper, { className: classes?.header, sx: state.showFilterDialog ? { display: "none" } : undefined, children: _jsx(Header, {}) }), _jsxs(ContentWrapper, { size: "grow", className: classes?.content, children: [_jsx(Settings, { columns: columns }), _jsx(CustomFilterDialog, {}), _jsx(Content, { columns: visibleColumns, rowsPerPage: rowsPerPage, disableSelection: disableSelection, headerHeight: headerHeight, globalScrollListener: globalScrollListener })] }), !disableFooter && (_jsx(FooterWrapper, { className: classes?.footer, sx: state.showSettings || state.showFilterDialog
+        }, wrap: "nowrap", className: combineClassNames([className, classes?.root]), ref: gridRoot, children: _jsx(DataGridRootRefContext.Provider, { value: gridRoot, children: _jsx(DataGridPropsContext.Provider, { value: props, children: _jsx(DataGridStateContext.Provider, { value: statePack, children: _jsx(DataGridColumnsStateContext.Provider, { value: columnsStatePack, children: _jsx(DataGridColumnsWidthStateContext.Provider, { value: columnWidthStatePack, children: _jsxs(SelectAllProvider, { children: [_jsx(StatePersistence, {}), _jsx(HeaderWrapper, { className: classes?.header, sx: state.showFilterDialog ? { display: "none" } : undefined, children: _jsx(Header, {}) }), _jsxs(ContentWrapper, { size: "grow", className: classes?.content, children: [_jsx(Settings, { columns: columns }), _jsx(CustomFilterDialog, {}), _jsx(DataGridUpdateRowContext.Provider, { value: updateRow, children: _jsx(Content, { columns: visibleColumns, rowsPerPage: rowsPerPage, disableSelection: disableSelection, headerHeight: headerHeight, globalScrollListener: globalScrollListener }) })] }), !disableFooter && (_jsx(FooterWrapper, { className: classes?.footer, sx: state.showSettings || state.showFilterDialog
                                             ? { display: "none" }
                                             : undefined, children: _jsx(Footer, {}) }))] }) }) }) }) }) }) }));
 };
-export default React.memo(React.forwardRef(DataGrid));
+// a persistence provider holds the grid back while it loads the stored
+// state, and mounts it again for other storage keys
+export default React.memo(withDataGridPersistGate(React.forwardRef(DataGrid)));

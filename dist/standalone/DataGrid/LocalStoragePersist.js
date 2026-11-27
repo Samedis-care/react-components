@@ -1,39 +1,41 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useCallback, useLayoutEffect, useMemo, useRef, useState, } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { DataGridPersistentStateContext, } from "./StatePersistence";
-import { DataGridFocusHandoffContext, } from "./FocusHandoff";
+import { DataGridPersistMountContext, } from "./PersistGate";
 /**
  * A persistence provider for DataGrid.
  * Uses localStorage for storage.
  * Wrap around DataGrid component to archive persistence
  *
- * A change of storageKey mounts the children again, as a grid reads the
- * persisted state when it mounts only.
+ * A change of storageKey mounts the grids inside again, as a grid reads the
+ * persisted state when it mounts only; the rest of the children stay
+ * mounted.
+ *
+ * Other tabs are not followed: the entry is read when the provider mounts
+ * and when storageKey changes, and a grid writes the parts it persists as it
+ * has them. So the tab that writes last decides them, also those another
+ * tab changed meanwhile.
  *
  * If the browser blocks localStorage (blocked site data, some sandboxed
  * iframes), the grids open at their defaults and nothing is kept for the next
  * visit; the failed reads and writes are logged to the console.
- * @remarks The data it provides is what was written last, so a grid mounted
- *          later (or anything else reading the context) starts from the
- *          current state, not from the state loaded on mount
+ * @remarks The data it provides is what was written last since the entry
+ *          was read, so a grid mounted later (or anything else reading the
+ *          context) starts from the current state, not from the state loaded
+ *          on mount. A storage key that comes back is read again, and its
+ *          grids start from what is stored under it then, not from what was
+ *          written under it before.
  */
 const LocalStoragePersist = (props) => {
     const { storageKey, children } = props;
     // localStorage is only read once per storage key, so what was written since
-    // is kept here, together with the key it was written for
+    // is kept here, together with the read it follows: a storage key read again
+    // starts from what is stored under it then, which another tab may have
+    // changed meanwhile
     const [written, setWritten] = useState(null);
-    const setData = useCallback((data) => {
-        setWritten([storageKey, data]);
-        try {
-            localStorage?.setItem(storageKey, JSON.stringify(data));
-        }
-        catch (e) {
-            // eslint-disable-next-line no-console
-            console.error("[Components-Care] Failed to persist DataGrid config in localStorage." +
-                storageKey, e);
-        }
-    }, [storageKey]);
-    const stored = useMemo(() => {
+    // read while rendering, once per storage key: each read is a new object,
+    // which tells what was written since it from what was written before
+    const read = useMemo(() => {
         let dataStr;
         try {
             // reading window.localStorage throws, too, when the browser blocks it
@@ -43,7 +45,7 @@ const LocalStoragePersist = (props) => {
             // eslint-disable-next-line no-console
             console.error("[Components-Care] Failed reading DataGrid config from localStorage." +
                 storageKey, e);
-            return undefined;
+            return { data: undefined };
         }
         let data;
         if (dataStr) {
@@ -64,28 +66,31 @@ const LocalStoragePersist = (props) => {
                 }
             }
         }
-        return data;
+        return { data };
     }, [storageKey]);
-    // where focus was in a grid mounted for the previous key, until the grid
-    // mounted for this one takes it over (see DataGridFocusHandoffContext)
-    const focusHandoff = useRef(null);
-    // the children are mounted anew for each key
-    const focusCtx = useMemo(() => ({
-        handoff: focusHandoff,
-        mount: storageKey,
-    }), [storageKey]);
-    // layout effects of the children run first: the grids mounted for this key
-    // have taken focus over; what is left had no grid to take it
-    useLayoutEffect(() => {
-        focusHandoff.current = null;
-    }, [storageKey]);
-    const persistCtx = useMemo(() => [
-        written?.[0] === storageKey ? written[1] : stored,
-        setData,
-    ], [written, storageKey, stored, setData]);
+    const setData = useCallback((data) => {
+        setWritten([read, data]);
+        try {
+            localStorage?.setItem(storageKey, JSON.stringify(data));
+        }
+        catch (e) {
+            // eslint-disable-next-line no-console
+            console.error("[Components-Care] Failed to persist DataGrid config in localStorage." +
+                storageKey, e);
+        }
+    }, [storageKey, read]);
     // a grid reads the persisted state when it mounts: one mounted for the
     // previous key would keep showing that key's state, and write it under
-    // this one
-    return (_jsx(DataGridFocusHandoffContext.Provider, { value: focusCtx, children: _jsx(DataGridPersistentStateContext.Provider, { value: persistCtx, children: _jsx(React.Fragment, { children: children }, storageKey) }) }));
+    // this one, so the grids are mounted anew for each key
+    const mountCtx = useMemo(() => ({
+        loading: false,
+        mount: storageKey,
+    }), [storageKey]);
+    const persistCtx = useMemo(() => [
+        // what was written since this read of the entry, else what it holds
+        written?.[0] === read ? written[1] : read.data,
+        setData,
+    ], [written, read, setData]);
+    return (_jsx(DataGridPersistMountContext.Provider, { value: mountCtx, children: _jsx(DataGridPersistentStateContext.Provider, { value: persistCtx, children: children }) }));
 };
 export default React.memo(LocalStoragePersist);

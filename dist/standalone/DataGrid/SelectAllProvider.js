@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useLayoutEffect, useMemo, useState } from "react";
 import { DATA_GRID_DEFAULT_ROWS_PER_PAGE, DataGridSelectAllContext, useDataGridColumnState, useDataGridProps, useDataGridState, } from "./DataGrid";
 import { dataGridGetQuery, dataGridLoadFirstRows, } from "./CallbackUtil";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -13,14 +13,28 @@ const SelectAllProvider = (props) => {
     const [columnsState] = useDataGridColumnState();
     const { t } = useCCTranslations();
     const { selectAll, selectedRows, limitedSelectAll, rows, search, customData, refreshDataInstance, } = state;
+    // disableSelection hides the footer's checkbox: hidden, it must not be
+    // focused or ticked either
+    const disabled = !enableSelectAll || !!prohibitMultiSelect || !!disableSelection;
     // the limited select all loading its rows
     const [loading, setLoading] = useState(null);
+    // select all turned off (disabled) ends it for good, while rendering: no
+    // render shows it after that, and turning select all on again doesn't
+    // bring it back
+    if (disabled && loading)
+        setLoading(null);
+    // so does a changed limitSelectAll: the load picks the first rows by the
+    // limit of the click, and changing it back doesn't bring the load back
+    if (loading && !Object.is(loading.limitSelectAll, limitSelectAll))
+        setLoading(null);
     // that load while it is for the query the grid shows
     const load = loading?.refreshDataInstance === refreshDataInstance ? loading : null;
-    // a reload or the unmount ends it, a later click too (onSelect). A row
-    // (un)ticked meanwhile drops only the selection it would make: the rows it
-    // loads still land in the grid
-    useEffect(() => {
+    // a reload, select all turned off or the unmount ends it, a later click too
+    // (onSelect). A row (un)ticked meanwhile drops only the selection it would
+    // make: the rows it loads still land in the grid. A layout effect, so it is
+    // aborted with the render that ends it: a page answering after that render
+    // selects nothing
+    useLayoutEffect(() => {
         if (!load)
             return;
         return () => load.controller.abort();
@@ -35,6 +49,7 @@ const SelectAllProvider = (props) => {
                 selectAll,
                 selectedRows,
                 refreshDataInstance,
+                limitSelectAll,
                 controller,
             };
             setLoading(from);
@@ -126,9 +141,6 @@ const SelectAllProvider = (props) => {
     }, [selectedRows, limitedSelectAll]);
     const checked = busy || (selectAll ? selectedRows.length === 0 : limitedSelected);
     const indeterminate = !checked && selectedRows.length > 0;
-    // disableSelection hides the footer's checkbox: hidden, it must not be
-    // focused or ticked either
-    const disabled = !enableSelectAll || !!prohibitMultiSelect || !!disableSelection;
     const limited = limitSelectAll !== undefined &&
         (state.rowsFiltered ?? state.rowsTotal) > limitSelectAll;
     const label = limited

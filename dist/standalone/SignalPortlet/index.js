@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import React from "react";
+import React, { useCallback } from "react";
 import SignalPortletItem from "./SignalPortletItem";
 import { buttonBaseClasses, Divider, Grid, IconButton, List, Paper, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import { Sync as RefreshIcon } from "@mui/icons-material";
@@ -71,12 +71,18 @@ const SignalPortlet = (inProps) => {
     const hasUpdatedAt = Number.isFinite(updatedTime) && updatedTime !== 0;
     // re-renders the card while the "Last refresh" age below can change
     useAgeTick(hasUpdatedAt ? updatedTime : null);
-    return (_jsx(SignalPortletRoot, { className: combineClassNames([props.className, props.classes?.root]), children: _jsx(SignalPortletPaper, { className: props.classes?.paper, children: _jsxs(SignalPortletInnerContainer, { container: true, spacing: 1, sx: { flexDirection: "column", justifyContent: "space-between" }, wrap: "nowrap", className: props.classes?.innerContainer, children: [_jsxs(Grid, { container: true, spacing: 1, sx: { flexDirection: "column", justifyContent: "flex-start" }, wrap: "nowrap", size: "grow", children: [_jsx(SignalPortletTitleWrapper, { className: props.classes?.titleWrapper, children: _jsx(SignalPortletTitle, { variant: "h5", align: "center", className: props.classes?.title, children: props.title }) }), _jsx(SignalPortletDivider, { className: props.classes?.divider, children: _jsx(Divider, {}) }), _jsx(Grid, { children: _jsx(SignalPortletList, { className: props.classes?.list, children: props.items.map((item, index) => (_jsx(SignalPortletItemStyled, { className: props.classes?.item, ...item }, index.toString()))) }) })] }), (hasUpdatedAt || props.onRefresh) && (_jsxs(Grid, { container: true, spacing: 1, sx: {
+    const { onRefresh } = props;
+    // onRefresh takes no arguments: it doesn't get the click event
+    const handleRefresh = useCallback(() => onRefresh?.(), [onRefresh]);
+    return (_jsx(SignalPortletRoot, { className: combineClassNames([props.className, props.classes?.root]), children: _jsx(SignalPortletPaper, { className: props.classes?.paper, children: _jsxs(SignalPortletInnerContainer, { container: true, spacing: 1, sx: { flexDirection: "column", justifyContent: "space-between" }, wrap: "nowrap", className: props.classes?.innerContainer, children: [_jsxs(Grid, { container: true, spacing: 1, sx: { flexDirection: "column", justifyContent: "flex-start" }, wrap: "nowrap", size: "grow", children: [_jsx(SignalPortletTitleWrapper, { className: props.classes?.titleWrapper, children: _jsx(SignalPortletTitle, { variant: "h5", align: "center", className: props.classes?.title, children: props.title }) }), _jsx(SignalPortletDivider, { className: props.classes?.divider, children: _jsx(Divider, {}) }), _jsx(Grid, { children: _jsx(SignalPortletList, { className: props.classes?.list, children: props.items.map((item, index) => (_jsx(SignalPortletItemStyled, { ...item, className: combineClassNames([
+                                            props.classes?.item,
+                                            item.className,
+                                        ]) }, index.toString()))) }) })] }), (hasUpdatedAt || props.onRefresh) && (_jsxs(Grid, { container: true, spacing: 1, sx: {
                             justifyContent: "flex-end",
                             alignItems: "center",
                             alignContent: "center",
-                        }, children: [hasUpdatedAt && (_jsx(Grid, { children: _jsx(Tooltip, { title: new Date(updatedTime).toLocaleString(locale), children: _jsx(SignalPortletLastUpdatedAt, { children: t("standalone.signal-portlet.last-updated", {
+                        }, children: [hasUpdatedAt && (_jsx(Grid, { children: _jsx(Tooltip, { title: new Date(updatedTime).toLocaleString(locale), children: _jsx(SignalPortletLastUpdatedAt, { className: props.classes?.lastUpdatedAt, children: t("standalone.signal-portlet.last-updated", {
                                             AGE: timestampToAge(new Date(updatedTime)),
-                                        }) }) }) })), props.onRefresh && (_jsx(Grid, { children: _jsx(SignalPortletRefreshIconButton, { onClick: props.onRefresh, disableFocusRipple: true, size: "small", color: "primary", "aria-label": t("standalone.signal-portlet.refresh"), children: _jsx(SignalPortletRefreshIcon, {}) }) }))] }))] }) }) }));
+                                        }) }) }) })), props.onRefresh && (_jsx(Grid, { children: _jsx(SignalPortletRefreshIconButton, { onClick: handleRefresh, className: props.classes?.refreshIconButton, disableFocusRipple: true, size: "small", color: "primary", "aria-label": t("standalone.signal-portlet.refresh"), children: _jsx(SignalPortletRefreshIcon, { className: props.classes?.refreshIcon }) }) }))] }))] }) }) }));
 };
 export default React.memo(SignalPortlet);

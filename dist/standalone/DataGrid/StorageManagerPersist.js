@@ -1,35 +1,135 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React, { useCallback, useId, useLayoutEffect, useMemo, useRef, useState, } from "react";
-import { styled } from "@mui/material";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { DataGridPersistentStateContext, } from "./StatePersistence";
 import { mergePersistedState, splitPersistedState } from "./PersistFormat";
 import { StorageManager } from "../../framework/Storage";
 import useAsyncMemo from "../../utils/useAsyncMemo";
-import Loader from "../Loader";
-import { DataGridFocusHandoffContext, } from "./FocusHandoff";
+import { DataGridPersistMountContext, } from "./PersistGate";
 const DATA_GRID_STORAGE_KEY_BASE = "data-grid-";
 /**
- * The Loader shown while the buckets load. It takes keyboard focus from a
- * grid that it replaces, and shows the library's focus ring then, inside its
- * edge because an ancestor may clip it.
+ * The StorageManager id of the bucket in which DataGridStorageManagerPersist
+ * keeps the column widths and whether their first auto-fit has run (the
+ * sizing part of splitPersistedState).
+ *
+ * StorageManager.configure gets it as the id, to pick the storage of the
+ * bucket and the keys it is stored under. Recommended: localStorage, so the
+ * widths stay with the device; leave out the keys the widths should be shared
+ * across (the tenant, say). Without a configure call, both buckets go to
+ * localStorage.
  */
-const FocusableLoader = styled(Loader)(({ theme }) => ({
-    "&:focus-visible": {
-        outline: `2px solid ${theme.palette.primary.main}`,
-        outlineOffset: -2,
-    },
-}));
-// recommended default: localStorage
 export const DATA_GRID_STORAGE_KEY_COLUMN_SIZING = DATA_GRID_STORAGE_KEY_BASE + "column-sizing";
-// recommended default: server storage
+/**
+ * The StorageManager id of the bucket in which DataGridStorageManagerPersist
+ * keeps everything but the column widths: the columns seen, hidden and
+ * pinned, the sort, the column filters, the search and the custom data (the
+ * rest of splitPersistedState).
+ *
+ * StorageManager.configure gets it as the id, to pick the storage of the
+ * bucket and the keys it is stored under. Recommended: server storage, so the
+ * settings follow the user to other devices. Without a configure call, both
+ * buckets go to localStorage.
+ */
 export const DATA_GRID_STORAGE_KEY_FILTERS = DATA_GRID_STORAGE_KEY_BASE + "filters";
+/**
+ * The buckets, in the order their parts are merged
+ */
+const BUCKETS = [
+    DATA_GRID_STORAGE_KEY_COLUMN_SIZING,
+    DATA_GRID_STORAGE_KEY_FILTERS,
+];
+/**
+ * Asks the storage what a bucket holds. A bucket which cannot be read (the
+ * storage throws or rejects) is logged.
+ * @param storageKey The bucket
+ * @param storageKeys The storage keys
+ * @returns The answer, synchronously if the storage answers synchronously
+ */
+const askBucket = (storageKey, storageKeys) => {
+    const failed = (e) => {
+        // eslint-disable-next-line no-console
+        console.error("[Components-Care] Failed reading DataGrid config from StorageManager." +
+            storageKey, storageKeys, "Not writing it for these storage keys", e);
+        return null;
+    };
+    let answer;
+    try {
+        answer = StorageManager.getItem(storageKey, storageKeys);
+    }
+    catch (e) {
+        return failed(e);
+    }
+    if (typeof answer === "string" || answer === null)
+        return { held: answer };
+    return Promise.resolve(answer).then((held) => ({ held }), failed);
+};
+/**
+ * The part of the state a bucket holds. A bucket which does not parse is
+ * logged and deleted.
+ * @param storageKey The bucket
+ * @param storageKeys The storage keys
+ * @param held What the bucket holds
+ * @returns The part, or undefined if there is none
+ */
+const parseBucket = (storageKey, storageKeys, held) => {
+    if (!held)
+        return undefined;
+    try {
+        return JSON.parse(held);
+    }
+    catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("[Components-Care] Failed parsing DataGrid config from StorageManager." +
+            storageKey, storageKeys, "Removing from server", e);
+        // deleted without waiting for it, the grids can open meanwhile
+        Promise.resolve()
+            .then(() => StorageManager.setItem(storageKey, storageKeys, null))
+            .catch((deleteError) => {
+            // eslint-disable-next-line no-console
+            console.error("[Components-Care] Failed removing DataGrid config from StorageManager." +
+                storageKey, storageKeys, deleteError);
+        });
+        return undefined;
+    }
+};
+/**
+ * Reads both buckets
+ * @param storageKeys The storage keys
+ * @returns What they hold, synchronously if the storage answers both
+ *          synchronously. Never rejects: a bucket which cannot be read is
+ *          reported in `unreadable`.
+ */
+const loadBuckets = (storageKeys) => {
+    const answers = BUCKETS.map((storageKey) => askBucket(storageKey, storageKeys));
+    const combine = (settled) => {
+        const unreadable = [];
+        const read = new Map();
+        const parts = settled.map((answer, index) => {
+            const storageKey = BUCKETS[index];
+            if (!answer) {
+                unreadable.push(storageKey);
+                return undefined;
+            }
+            read.set(storageKey, answer.held);
+            return parseBucket(storageKey, storageKeys, answer.held);
+        });
+        return [mergePersistedState(parts), unreadable, read];
+    };
+    // both answered synchronously, or wait for both
+    const answered = [];
+    for (const answer of answers) {
+        if (answer instanceof Promise)
+            return Promise.all(answers.map((pending) => Promise.resolve(pending))).then(combine);
+        answered.push(answer);
+    }
+    return combine(answered);
+};
 /**
  * A persistence provider for DataGrid.
  * Uses storage manager for storage.
  * Wrap around DataGrid component to archive persistence
  *
  * A bucket that cannot be read (the storage throws or rejects) is logged, and
- * the children render with that bucket's part at the grid defaults. That
+ * the grids open with that bucket's part at the grid defaults. That
  * bucket is not written for these storage keys, so what is stored there is
  * not replaced by the defaults; it is read again when the storage keys change
  * or the provider mounts again. A bucket that does not parse is deleted.
@@ -43,64 +143,58 @@ export const DATA_GRID_STORAGE_KEY_FILTERS = DATA_GRID_STORAGE_KEY_BASE + "filte
  * grid logs it and hands its data over again with its next state update,
  * which writes the failed bucket again.
  *
- * When the storage keys change, a Loader replaces the children until both
- * buckets are loaded for the new keys, and the children mount again then.
- * Keyboard focus in a grid inside moves to the Loader meanwhile, and then to
- * the same control of the grid mounted again (to its first control, if that
- * one is not there), unless focus was moved elsewhere in between.
- * @remarks The data it provides is what was written last, so a grid mounted
- *          later (or anything else reading the context) starts from the
- *          current state, not from the state loaded on mount
+ * The children render at once; only the grids inside wait for the stored
+ * state. A Loader takes the place of each grid until both buckets are
+ * loaded, and the grid opens with what they hold then. A storage that answers
+ * synchronously (localStorage and sessionStorage, StorageManager's default
+ * routing, and a CachedServerStorageProvider whose cache holds the bucket
+ * fresh, as on the next visit) is read while rendering, so the grids open at
+ * once, without a Loader. Until the buckets are loaded,
+ * DataGridPersistentStateContext is undefined inside the provider, as outside
+ * of one.
+ *
+ * When the storage keys change, the grids inside are mounted again for the
+ * new keys, after a Loader in their place while those load; everything else
+ * inside stays mounted and keeps its state. Keyboard focus in a grid moves
+ * to the Loader meanwhile, and then to the same control of the grid mounted
+ * again (to its first control, if that one is not there), unless focus was
+ * moved elsewhere in between.
+ *
+ * Other tabs and devices are not followed: the buckets are read when the
+ * provider mounts and when the storage keys change, and a grid writes the
+ * parts it persists as it has them. So the tab that writes last decides
+ * them, also those another tab changed meanwhile.
+ * @remarks The data it provides is what was written last since the buckets
+ *          were read, so a grid mounted later (or anything else reading the
+ *          context) starts from the current state, not from the state loaded
+ *          on mount. Storage keys that come back are read again, and their
+ *          grids start from what is stored for them then, not from what was
+ *          written for them before.
  */
 const StorageManagerPersist = (props) => {
     const { storageKeys, children } = props;
     const storageKeysJson = JSON.stringify(storageKeys);
     // the storage is only read once per storage keys, so what was written since
-    // is kept here, together with the keys it was written for
+    // is kept here, together with the read it follows: storage keys read again
+    // start from what is stored for them then, which another tab or device may
+    // have changed meanwhile
     const [written, setWritten] = useState(null);
-    // wrapped in a tuple so "loaded, but nothing stored" stays distinguishable
-    // from "still loading" (useAsyncMemo yields null while it runs). The
-    // factory never rejects (a bucket that cannot be read is reported in
-    // `unreadable`), so there is no error to show.
-    const { value: data } = useAsyncMemo(async () => {
-        const unreadable = [];
-        // what each bucket which could be read holds
-        const read = new Map();
-        const resultObjects = await Promise.all([DATA_GRID_STORAGE_KEY_COLUMN_SIZING, DATA_GRID_STORAGE_KEY_FILTERS].map(async (storageKey) => {
-            let dataStr;
-            try {
-                dataStr = await StorageManager.getItem(storageKey, storageKeys);
-                read.set(storageKey, dataStr);
-            }
-            catch (e) {
-                // eslint-disable-next-line no-console
-                console.error("[Components-Care] Failed reading DataGrid config from StorageManager." +
-                    storageKey, storageKeys, "Not writing it for these storage keys", e);
-                unreadable.push(storageKey);
-                return undefined;
-            }
-            if (dataStr) {
-                try {
-                    return JSON.parse(dataStr);
-                }
-                catch (e) {
-                    // eslint-disable-next-line no-console
-                    console.error("[Components-Care] Failed parsing DataGrid config from StorageManager." +
-                        storageKey, storageKeys, "Removing from server", e);
-                    // deleted without waiting for it, the grids can open meanwhile
-                    Promise.resolve()
-                        .then(() => StorageManager.setItem(storageKey, storageKeys, null))
-                        .catch((deleteError) => {
-                        // eslint-disable-next-line no-console
-                        console.error("[Components-Care] Failed removing DataGrid config from StorageManager." +
-                            storageKey, storageKeys, deleteError);
-                    });
-                    return undefined;
-                }
-            }
-        }));
-        return [mergePersistedState(resultObjects), unreadable, read];
-    }, [storageKeysJson]);
+    // read while rendering, once per storage keys: a storage that answers
+    // synchronously has the grids open in the first render
+    const loading = useMemo(() => loadBuckets(storageKeys), 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [storageKeysJson]);
+    // what a storage that answers asynchronously loaded, with the storage keys
+    // it is for: in the render in which they change, this still holds what was
+    // loaded for the previous ones
+    const { value: loaded } = useAsyncMemo(async () => loading instanceof Promise
+        ? [storageKeysJson, await loading]
+        : null, [loading]);
+    const data = loading instanceof Promise
+        ? loaded?.[0] === storageKeysJson
+            ? loaded[1]
+            : null
+        : loading;
     const unreadable = data?.[1];
     const read = data?.[2];
     // per bucket, what it holds as far as this provider knows: what was read,
@@ -108,7 +202,7 @@ const StorageManagerPersist = (props) => {
     // storage keys read again, start from what is stored for them.
     const stored = useRef(null);
     const setData = useCallback(async (data) => {
-        setWritten([storageKeysJson, data]);
+        setWritten([read, data]);
         if (!stored.current || stored.current[0] !== read)
             stored.current = [read, new Map(read)];
         const values = stored.current[1];
@@ -149,52 +243,18 @@ const StorageManagerPersist = (props) => {
     }, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [storageKeysJson, unreadable, read]);
-    // where focus was in a grid that the Loader replaced, until the grid
-    // mounted in its place takes it over (see DataGridFocusHandoffContext)
-    const focusHandoff = useRef(null);
-    // the children are mounted anew for each load
-    const focusCtx = useMemo(() => ({
-        handoff: focusHandoff,
-        mount: data,
-    }), [data]);
-    const loaderId = useId();
-    // layout effects of the children run first: a grid that unmounted for the
-    // Loader has handed focus over, a grid that mounted in place of the Loader
-    // has taken it
-    useLayoutEffect(() => {
-        if (!focusHandoff.current)
-            return;
-        // loaded, or the keys changed while the children are mounted: what is
-        // left (no grid mounted, a grid the app unmounted) is for no later grid
-        if (data) {
-            focusHandoff.current = null;
-            return;
-        }
-        const loader = document.getElementById(loaderId);
-        const active = document.activeElement;
-        // the Loader keeps it while the keys change again
-        if (loader && active === loader)
-            return;
-        // focus that is elsewhere already stays there
-        if (loader && (!active || active === document.body))
-            loader.focus();
-        else
-            focusHandoff.current = null;
-    }, [data, storageKeysJson, loaderId]);
-    const handleLoaderBlur = useCallback((evt) => {
-        const loader = evt.currentTarget;
-        // once the update is done: the Loader is removed when the buckets are
-        // loaded, and the grid takes focus. Focus moved elsewhere (not the
-        // window losing focus) stays there.
-        queueMicrotask(() => {
-            if (loader.isConnected && loader.ownerDocument.activeElement !== loader)
-                focusHandoff.current = null;
-        });
-    }, []);
-    const persistCtx = useMemo(() => [
-        written?.[0] === storageKeysJson ? written[1] : data?.[0],
-        setData,
-    ], [written, storageKeysJson, data, setData]);
-    return (_jsx(DataGridFocusHandoffContext.Provider, { value: focusCtx, children: data ? (_jsx(DataGridPersistentStateContext.Provider, { value: persistCtx, children: children })) : (_jsx(FocusableLoader, { id: loaderId, tabIndex: -1, onBlur: handleLoaderBlur })) }));
+    // the grids inside wait for the data, and are mounted anew for each
+    // storage keys (see DataGridPersistMountContext)
+    const isLoading = !data;
+    const mountCtx = useMemo(() => ({
+        loading: isLoading,
+        mount: storageKeysJson,
+    }), [isLoading, storageKeysJson]);
+    const persistCtx = useMemo(() => 
+    // what was written since this read of the buckets, else what they hold
+    data
+        ? [written?.[0] === data[2] ? written[1] : data[0], setData]
+        : undefined, [written, data, setData]);
+    return (_jsx(DataGridPersistMountContext.Provider, { value: mountCtx, children: _jsx(DataGridPersistentStateContext.Provider, { value: persistCtx, children: children }) }));
 };
 export default React.memo(StorageManagerPersist);

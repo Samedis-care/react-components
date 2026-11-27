@@ -34,6 +34,15 @@ export interface CrudProps<M extends ModelUnknown> {
     model: M;
     /**
      * The properties to pass to form
+     * @remarks `onSubmit` is wrapped. After a successful save of the create form,
+     *          CRUD first moves on to the saved record, if the create form is
+     *          still shown then: routed, it replaces `<url>/new…` with
+     *          `<url>/<id>…` (the location when the save finishes, so a tab
+     *          opened meanwhile stays open); with disableRouting, the "new" view
+     *          becomes the saved id. A user who left the create form while it
+     *          saved (another record, the list, another page, a closed view)
+     *          stays there. Then CRUD reloads the grid and awaits this onSubmit,
+     *          also when the user has left.
      */
     formProps: Omit<FormProps<M, CrudFormProps>, "id" | "model" | "children" | "customProps" | "disableRouting" | "readOnly" | "readOnlyReason"> & {
         /**
@@ -133,12 +142,16 @@ export interface CrudProps<M extends ModelUnknown> {
      */
     disableBackgroundGrid?: boolean;
     /**
-     * If routing is disabled: set the initial view (id, "new", "import" or null), defaults to null
+     * If routing is disabled: set the initial view (id, "new", "import", "devimport" or null), defaults to null
      */
     initialView?: string | null;
     /**
-     * Forbidden page to show if the user navigated to a URL he has no permissions for
-     * If not set: Shows edit form in read-only mode
+     * Forbidden page to show if the user navigated to a URL he has no permissions for,
+     * and for an import view ("import" or "devimport", also with disableRouting) that is
+     * not enabled (enableUserImport, enableDevImport) or that the user may not import in
+     * (see enableUserImport)
+     * If not set: Shows edit form in read-only mode and an enabled import view to every
+     * user; an import view that is not enabled shows nothing
      */
     forbiddenPage?: React.ComponentType;
     /**
@@ -146,9 +159,27 @@ export interface CrudProps<M extends ModelUnknown> {
      */
     routeComponent?: React.ComponentType<RouteProps>;
     /**
-     * Enable Import button in Grid
+     * Enables the import: the grid's Import, for users with newPermission (and
+     * editPermission when importUpdateKey is set), and the view it opens,
+     * `<url>/import` (with disableRouting the view "import"). Without it that
+     * view does not exist: it shows forbiddenPage, or nothing.
+     * @remarks The library's importer is the guided one with importConfig only;
+     *          without importConfig it is the unguided one (see enableDevImport)
+     * @default false
      */
     enableUserImport?: boolean;
+    /**
+     * Enables the unguided developer importer at `<url>/devimport` (with
+     * disableRouting the view "devimport"), for users who may import (see
+     * enableUserImport); the grid offers no button for it. Its Connect data step
+     * runs the JavaScript the user types for each field, and its last step creates
+     * (or updates) the records through the connector: a tool for developers
+     * working out an importConfig, not for end users, e.g.
+     * `enableDevImport={process.env.NODE_ENV === "development"}`. Without it
+     * that view does not exist: it shows forbiddenPage, or nothing.
+     * @default false
+     */
+    enableDevImport?: boolean;
     /**
      * Import config (should be set if enableUserImport set)
      */
@@ -181,7 +212,16 @@ export interface CrudProps<M extends ModelUnknown> {
 export interface CRUDGridVisibilityWrapperOwnerState {
     hidden: boolean;
 }
-export type CrudClassKey = "gridWrapper";
+/**
+ * The theme slots of CRUD (`components.CcCrud.styleOverrides`):
+ * - `gridWrapper`: the element around the grid (and gridWrapper); while another view
+ *   shows it has the class `Mui-hidden` (display: none)
+ * - `view`: the element around the record page or the importer, present while one of
+ *   them shows
+ * Both fill their parent (width and height 100%). When a view switch gives one of them the
+ * keyboard focus, it has `tabindex="-1"` for as long as it keeps the focus, and no outline.
+ */
+export type CrudClassKey = "gridWrapper" | "view";
 export interface CrudDispatch {
     /**
      * Force-refreshes the grid
@@ -201,7 +241,8 @@ export interface CrudDispatch {
     /**
      * The query the grid currently shows
      * @returns The query, see DataGridDispatch.getQuery, or undefined while the
-     *          grid isn't mounted (disableBackgroundGrid with a form open) or
+     *          grid isn't mounted (disableBackgroundGrid with a form open),
+     *          while it waits for the state its persistence provider loads, or
      *          if the gridComponent doesn't pass its ref on
      */
     getGridQuery: () => DataGridQuery | undefined;
@@ -209,5 +250,20 @@ export interface CrudDispatch {
 export declare const useCrudDispatchContext: () => CrudDispatch;
 export declare const CrudSpecialIds: string[];
 export type CrudType = <M extends ModelUnknown>(props: CrudProps<M> & React.RefAttributes<CrudDispatch>) => React.ReactElement | null;
+/**
+ * A model's list (BackendDataGrid) with a record page (a Form whose page component is
+ * `children`) and an importer, each a view of its own: routed (the default) at the
+ * Route's url and below it, with disableRouting in component state.
+ *
+ * The keyboard focus follows a view switch. When a record page (also "new") or the
+ * importer opens and the focus was in the list, which is hidden then, or fell to the page,
+ * the view's container (theme slot `view`) takes it, so the next Tab goes to the view's
+ * first control. Back on the list, the control in it that had the focus last (the Edit,
+ * View, New or Import that opened the view) gets it back; if that is gone or disabled, the
+ * list's container (theme slot `gridWrapper`) takes it. Neither container is a tab stop.
+ * Focus outside the CRUD (e.g. on a button that calls the ref's openView), focus the new
+ * view moved itself (`autoFocus`), and the page heading a HistoryRouter focused after the
+ * navigation stay where they are, and nothing moves on the first render.
+ */
 declare const _default: CrudType;
 export default _default;

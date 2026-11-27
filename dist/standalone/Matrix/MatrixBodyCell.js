@@ -1,14 +1,15 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useMemo, useSyncExternalStore } from "react";
-import { alpha, styled } from "@mui/material";
+import { alpha, styled, Tooltip } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 import { columnVariantClass, cssVar, matrixClasses, matrixVars, } from "./matrixClasses";
 import { cellBorders, columnTintStyles } from "./matrixTints";
-import { isCellSelectableIn, useMatrixConfig } from "./MatrixGridContext";
+import { isCellSelectableIn, ownEntryOf, useMatrixConfig, } from "./MatrixGridContext";
 import useMatrixActivation from "./useMatrixActivation";
 import { MATRIX_CELL_ADD_HINT, MATRIX_CELL_SELECTED, useMatrixInteraction, } from "./MatrixInteractionContext";
 import { columnNameOf, isNamePart } from "./matrixNames";
+import visuallyHidden from "../../utils/internal/visuallyHidden";
 export const MatrixBodyCellRoot = styled("div", {
     name: "CcMatrixGrid",
     slot: "cell",
@@ -43,6 +44,14 @@ export const MatrixBodyCellRoot = styled("div", {
 /**
  * The hover hint on a cell that can start a range: a dashed box saying what a
  * click would do. Escape hides it until the pointer moves to another cell.
+ *
+ * It shows addLabel (MatrixAddHintLabel) where the label fits on one line, and
+ * a "+" (MatrixAddHintIcon) in its place where it does not. Layout decides,
+ * nothing is measured: the label and the "+" are the items of a wrapping flex
+ * line, and the hint shows only its last line. A label that fits shares the
+ * line with the "+", which has no width there; a longer one is left alone on
+ * a line above, hidden, and the "+" takes the whole last line. The label stays
+ * in the hint either way, so it remains the hint's text.
  */
 export const MatrixAddHint = styled("div", {
     name: "CcMatrixGrid",
@@ -55,8 +64,13 @@ export const MatrixAddHint = styled("div", {
         inset: 5,
         pointerEvents: "none",
         display: "flex",
+        flexWrap: "wrap",
+        // the last line at the bottom, the hint's whole height; a line above it
+        // (a label that did not fit) is clipped
+        alignContent: "flex-end",
         alignItems: "center",
-        justifyContent: "center",
+        // room between the dashed border and a label that only just fits
+        paddingInline: 2,
         borderRadius: theme.shape.borderRadius,
         border: `2px dashed ${theme.palette.success.main}`,
         backgroundColor: tint,
@@ -65,7 +79,6 @@ export const MatrixAddHint = styled("div", {
             : theme.palette.success.dark,
         fontSize: "0.8rem",
         fontWeight: 600,
-        whiteSpace: "nowrap",
         overflow: "hidden",
         // The cell has contents, and occupiedAddAffordance says "overlay": the
         // hint takes the lower half and CATCHES the pointer there, so a press
@@ -85,6 +98,46 @@ export const MatrixAddHint = styled("div", {
             backgroundImage: `linear-gradient(${tint}, ${tint})`,
         },
     };
+});
+/**
+ * The text of the add hint (addLabel), on one line. It takes all the room its
+ * line has and centers itself in it, so the "+" next to it gets none, and it
+ * never shrinks: a label wider than the hint does not fit next to the "+", and
+ * leaves the "+" a line of its own (see MatrixAddHint).
+ */
+export const MatrixAddHintLabel = styled("span", {
+    name: "CcMatrixGrid",
+    slot: "addHintLabel",
+})({
+    // any share of the free space the "+" got would show it beside the label
+    flex: "1000000 0 auto",
+    whiteSpace: "nowrap",
+    textAlign: "center",
+});
+/**
+ * The "+" of the add hint, shown where addLabel does not fit (see
+ * MatrixAddHint). Of no width of its own: beside a label that fits it gets no
+ * room and is not seen; alone on the hint's last line it takes all of it, the
+ * glyph in the middle.
+ *
+ * Its tooltip is addLabel, so it catches the pointer even in the blank-cell
+ * hint, which lets presses through to the cell: a press on it still reaches
+ * the cell and starts a range there, as one on the hint does.
+ */
+export const MatrixAddHintIcon = styled("span", {
+    name: "CcMatrixGrid",
+    slot: "addHintIcon",
+})({
+    flex: "1 0 0",
+    minWidth: 0,
+    height: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    pointerEvents: "auto",
+    // the overlay hint of a low row is lower than the glyph: smaller, not cut
+    "& .MuiSvgIcon-root": { maxHeight: "100%" },
 });
 /**
  * The add affordance on a cell that is selectable but not blank.
@@ -140,18 +193,7 @@ export const MatrixAddChip = styled("div", {
 export const MatrixAddChipLabel = styled("span", {
     name: "CcMatrixGrid",
     slot: "addChipLabel",
-})({
-    // visually hidden, as MUI's visuallyHidden
-    border: 0,
-    clipPath: "inset(50%)",
-    height: 1,
-    margin: -1,
-    overflow: "hidden",
-    padding: 0,
-    position: "absolute",
-    whiteSpace: "nowrap",
-    width: 1,
-});
+})(visuallyHidden);
 /**
  * One body cell. Everything but its own row and column comes from the grid's
  * contexts, and its pointer state comes as a bit mask from the interaction
@@ -163,7 +205,7 @@ const MatrixBodyCell = (props) => {
     const config = useMatrixConfig();
     const { renderCell, renderCellWrapper, selectable, addLabel, occupiedAddAffordance, touch, classes, } = config;
     const store = useMatrixInteraction();
-    const cell = row.cells[column.key];
+    const cell = ownEntryOf(row.cells, column.key);
     const context = useMemo(() => ({ row, column, columnIndex }), [row, column, columnIndex]);
     // The same predicate the store clamps and paints with, so what a press can
     // start on cannot drift from what ends up in the range.
@@ -183,8 +225,8 @@ const MatrixBodyCell = (props) => {
         event.preventDefault(); // no text selection while sweeping
         store.begin(row.key, column.key);
     }, [store, row.key, column.key]);
-    const handleMouseEnter = useCallback(() => {
-        store.enter(row.key, column.key);
+    const handleMouseEnter = useCallback((event) => {
+        store.enter(row.key, column.key, event.buttons);
     }, [store, row.key, column.key]);
     const handleMouseLeave = useCallback(() => {
         store.leave(row.key, column.key);
@@ -238,9 +280,9 @@ const MatrixBodyCell = (props) => {
         onMouseEnter: selectable ? handleMouseEnter : undefined, onMouseLeave: selectable ? handleMouseLeave : undefined, children: [content, chip && (_jsxs(MatrixAddChip, { "data-cc-matrix-add-chip": "", className: combineClassNames([
                     classes?.addChip,
                     touch && matrixClasses.touch,
-                ]), title: chipTitle, ...chipActivation, onMouseDown: stopPress, children: [_jsx(Add, { fontSize: "small" }), _jsxs(MatrixAddChipLabel, { className: classes?.addChipLabel, children: [addLabel, isNamePart(addLabel) && chipWhere ? ", " : null, chipWhere] })] })), !chip && cellSelectable && !!(state & MATRIX_CELL_ADD_HINT) && (_jsx(MatrixAddHint, { className: combineClassNames([
+                ]), title: chipTitle, ...chipActivation, onMouseDown: stopPress, children: [_jsx(Add, { fontSize: "small" }), _jsxs(MatrixAddChipLabel, { className: classes?.addChipLabel, children: [addLabel, isNamePart(addLabel) && chipWhere ? ", " : null, chipWhere] })] })), !chip && cellSelectable && !!(state & MATRIX_CELL_ADD_HINT) && (_jsxs(MatrixAddHint, { className: combineClassNames([
                     classes?.addHint,
                     overlay && matrixClasses.addHintHalf,
-                ]), children: addLabel }))] }));
+                ]), children: [_jsx(MatrixAddHintLabel, { className: classes?.addHintLabel, children: addLabel }), _jsx(Tooltip, { title: addLabel, enterDelay: 400, describeChild: true, children: _jsx(MatrixAddHintIcon, { className: classes?.addHintIcon, "aria-hidden": true, children: _jsx(Add, { fontSize: "small" }) }) })] }))] }));
 };
 export default React.memo(MatrixBodyCell);

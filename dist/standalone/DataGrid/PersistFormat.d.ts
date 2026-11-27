@@ -27,11 +27,17 @@ export type DataGridPersistedSort = [direction: -1 | 0 | 1, order?: number];
  */
 export type DataGridPersistedSortList = [field: string, direction: -1 | 1][];
 /**
+ * A grid's whole column filters as persisted: the filtered columns as
+ * [field, filter], each filter without its conditions that carry no value
+ * (see normalizeFilterDef). Empty when no column is filtered.
+ */
+export type DataGridPersistedFilterList = [field: string, filter: IFilterDef][];
+/**
  * The persisted (wire) format of the DataGrid state.
  *
  * This is deliberately not the shape of the runtime state: it is stored per user
- * on a server, so apart from the sort it only carries what deviates from the
- * defaults. Keys are kept
+ * on a server, so apart from the sort and the column filters it only carries
+ * what deviates from the defaults. Keys are kept
  * short-ish and everything optional, which keeps a 70 column grid at well under
  * half the size of the legacy format.
  *
@@ -73,11 +79,19 @@ export interface DataGridPersistentState {
      */
     sort?: DataGridPersistedSortList | Record<string, DataGridPersistedSort>;
     /**
-     * Filter per column, only for columns whose filter is another condition
-     * than the default one (see isSameFilterDef).
-     * null records that the user cleared a filter which is set by default.
+     * The column filters, as a whole (DataGridPersistedFilterList). They are
+     * what the grid opens with: DataGridProps.defaultFilter only applies when
+     * nothing is stored, and on a reset, so a default filter added or changed
+     * later leaves them as they are. The filter of a column which is not
+     * currently defined is dropped on read.
+     * @remarks Data of earlier versions holds a record instead (field ->
+     *          filter) with only the columns whose filter was another
+     *          condition than the default filter of that time (see
+     *          isSameFilterDef), null for a default filter the user cleared,
+     *          and no key at all when every column had its default filter. It
+     *          is read on top of the current default filters.
      */
-    filter?: Record<string, IFilterDef | null>;
+    filter?: DataGridPersistedFilterList | Record<string, IFilterDef | null>;
     /**
      * The quick filter (search) string, omitted when empty
      */
@@ -117,11 +131,28 @@ export interface DataGridPersistentStateLegacy {
  */
 export type DataGridPersistedData = DataGridPersistentState | DataGridPersistentStateLegacy;
 /**
- * The runtime pieces decodePersistedState produces
+ * The runtime pieces decodePersistedState produces. Only the parts the config
+ * passed to it names (DataGridProps.persist) are read from the persisted data,
+ * the others are at their defaults.
  */
 export interface DataGridDecodedState {
+    /**
+     * Per column field, whether the column is hidden and whether it is pinned:
+     * as stored for the columns the user has seen, from the column definition
+     * for the others. The search, the custom data and initialResize are only
+     * there when they are stored.
+     */
     state: Pick<IDataGridState, "columnHidden" | "columnPinned"> & Partial<Pick<IDataGridState, "search" | "customData" | "initialResize">>;
+    /**
+     * Per column field of the default column state passed in, its sort and
+     * filter: as stored (see DataGridPersistentState.sort and .filter), else
+     * as in the default column state
+     */
     columnState: IDataGridColumnsState;
+    /**
+     * Per column field, the stored width in px. A column without a stored
+     * width has no entry.
+     */
     columnWidth: Record<string, number>;
 }
 /**
@@ -153,17 +184,31 @@ export declare const isSameFilterDef: (a: IFilterDef | null | undefined, b: IFil
  * @param state The grid state
  * @param columnState The column state (sort and filter)
  * @param columnWidth The column widths
- * @param defaultColumnState The column state the grid would start out with
  * @param columns The column definitions
  * @param config What to persist (DataGridProps.persist)
  */
-export declare const encodePersistedState: (state: IDataGridState, columnState: IDataGridColumnsState, columnWidth: Record<string, number>, defaultColumnState: IDataGridColumnsState, columns: IDataGridColumnDef[], config: DataGridProps["persist"]) => DataGridPersistentState;
+export declare const encodePersistedState: (state: IDataGridState, columnState: IDataGridColumnsState, columnWidth: Record<string, number>, columns: IDataGridColumnDef[], config: DataGridProps["persist"]) => DataGridPersistentState;
 /**
  * Was the data written by a newer library version, in a format this version
  * does not know (a `v` higher than DATA_GRID_PERSIST_VERSION)?
  * @param data The persisted data, as a provider hands it out
  */
 export declare const isNewerPersistedState: (data: DataGridPersistedData | undefined) => boolean;
+/**
+ * Adds the parts of the state that a grid does not persist (those
+ * DataGridProps.persist leaves out) to the data it persists, as they are
+ * stored: a grid leaves what is stored for them as it is.
+ *
+ * Legacy data is migrated to the current format first. Data in a newer
+ * format (see isNewerPersistedState) gives nothing: this version cannot tell
+ * where that format keeps a part.
+ * @param data The data the grid persists (encodePersistedState)
+ * @param stored The persisted data, as the persistence provider hands it out
+ * @param config What the grid persists (DataGridProps.persist)
+ * @returns A new object with the stored parts which the config leaves out,
+ *          or data itself when there is nothing to add
+ */
+export declare const keepStoredParts: (data: DataGridPersistentState, stored: DataGridPersistedData | undefined, config: DataGridProps["persist"]) => DataGridPersistentState;
 /**
  * Decodes persisted data into the runtime state pieces, applying the column
  * definition defaults to every column this user hasn't seen before.
@@ -192,9 +237,8 @@ export declare const splitPersistedState: (data: DataGridPersistentState) => [si
  * Then every legacy part is migrated on its own, and the result is in the
  * current format, with the highest `v` of the parts stored in it, so data of
  * a newer format next to data of this one is not taken for this one's. A
- * migrated part has the whole sort and a filter entry for every column in its
- * legacy columnState, as the legacy format stored the whole state, not
- * deviations from the defaults.
+ * migrated part has the whole sort and the whole column filters, as the
+ * legacy format stored the whole state, not deviations from the defaults.
  * @param parts The parts, in the order they should be merged (a later part's
  *        keys win). Missing parts (undefined, null) are skipped.
  * @returns The merged data, undefined when no part is there. It is in the

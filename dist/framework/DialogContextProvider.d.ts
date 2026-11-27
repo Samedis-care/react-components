@@ -8,12 +8,13 @@ export type DialogType = React.ReactNode;
  */
 export type DialogContextType = [
     /**
-     * Shows `dialog` above the dialogs that are open already.
+     * Shows `dialog` above the dialogs that are open already. The dialog closes when a
+     * navigation leads to another path, see DialogContextProvider.
      * @returns A function that closes this dialog, and only this one, also while dialogs
      *          pushed after it are open. It is the function useCloseThisDialog returns inside
      *          the dialog, the same one for the life of the dialog. Calling it again, or after
-     *          the dialog was closed another way (popDialog, the dialog's own close), does
-     *          nothing.
+     *          the dialog was closed another way (popDialog, the dialog's own close, a
+     *          navigation), does nothing.
      * @remarks Use the returned function to close the dialog from the code that pushed it
      *          (a timeout, a response, the page that opened it), where useCloseThisDialog is
      *          not available. Inside the dialog, useCloseThisDialog gives the same function.
@@ -24,8 +25,10 @@ export type DialogContextType = [
      * DialogContextProvider around it.
      * @throws Error when no dialog is open
      * @remarks The top-most dialog is a different one when a dialog was pushed after the one
-     *          you mean to close. To close a specific dialog, use the function pushDialog
-     *          returned, or useCloseThisDialog inside the dialog.
+     *          you mean to close, or when a navigation closed that one meanwhile (code that
+     *          runs after an `await`). To close a specific dialog, use the function pushDialog
+     *          returned, or useCloseThisDialog inside the dialog: they do nothing once the
+     *          dialog is closed.
      */
     popDialog: () => void
 ];
