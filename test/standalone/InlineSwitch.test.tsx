@@ -574,9 +574,20 @@ describe("InlineSwitch styling and theme", () => {
 		});
 	});
 
+	it("[ISSUE-3465-ITEM-24] a theme's defaultProps offer no visible: each InlineSwitch passes it, so a theme default would never apply", () => {
+		// checked by tsc (tsconfig-test.json), not at runtime
+		themeWithDefaults({
+			// @ts-expect-error whether a container shows its switch is decided per instance
+			visible: true,
+		});
+		themeWithDefaults({
+			// @ts-expect-error whether a container shows its switch is decided per instance
+			visible: false,
+		});
+	});
+
 	it("[ISSUE-3465-ITEM-18] a theme sets how switches show and what they are called, and the switch takes those defaults", () => {
 		const t = themeWithDefaults({
-			visible: true,
 			disabled: true,
 			label: "From the theme",
 			className: "themed",

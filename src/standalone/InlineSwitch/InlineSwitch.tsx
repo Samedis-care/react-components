@@ -21,7 +21,8 @@ export type InlineSwitchProps = {
 	value: boolean;
 	/**
 	 * Display switch control? While true, the root has the class
-	 * `CcInlineSwitch-visible`.
+	 * `CcInlineSwitch-visible`. Required on each InlineSwitch: a theme cannot set
+	 * it (see {@link InlineSwitchThemeProps}).
 	 */
 	visible: boolean;
 	/**
@@ -131,12 +132,18 @@ export type InlineSwitchProps = {
 /**
  * The InlineSwitch props a theme can set (`components.CcInlineSwitch.defaultProps`,
  * where each is optional): how switches show and what they are called. It leaves out
- * the props of a single switch: its `value` and `onChange`, its `children`, and
+ * the props of a single switch: its `value` and `onChange`, `visible` (whether this
+ * container shows its switch, which each InlineSwitch passes), its `children`, and
  * `aria-labelledby` and `aria-describedby`, the ids of elements next to one switch.
  */
 export type InlineSwitchThemeProps = DistributiveOmit<
 	InlineSwitchProps,
-	"value" | "onChange" | "children" | "aria-labelledby" | "aria-describedby"
+	| "value"
+	| "onChange"
+	| "visible"
+	| "children"
+	| "aria-labelledby"
+	| "aria-describedby"
 >;
 
 const AntSwitch = styled(Switch, { name: "CcInlineSwitch", slot: "switch" })(

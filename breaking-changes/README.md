@@ -29,6 +29,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [InfiniteScroll loads more on top when focus reaches its first row](2026-11-27-infinite-scroll-loads-on-focus-of-first-row.md) | behavior |
 | 2026-11-27 | [SignDialog's heading holds only the title; the close button sits beside it](2026-11-27-sign-dialog-close-button-beside-title.md) | behavior |
 | 2026-11-27 | [SignalPortlet applies `classes.lastUpdatedAt`, `refreshIconButton` and `refreshIcon`, and an item's `classes.listText`](2026-11-27-signal-portlet-all-classes-applied.md) | behavior |
+| 2026-11-27 | [InlineSwitch's theme defaults leave out `visible`](2026-11-27-inline-switch-theme-default-props-no-visible.md) | type |
 | 2026-11-27 | [InfiniteScroll: a `callBackDebounce` above 2^31 - 1 or `Infinity` makes no call](2026-11-27-infinite-scroll-endless-debounce-holds-calls.md) | behavior |
 | 2026-11-27 | [InlineSwitch's theme defaults leave out the props of a single switch](2026-11-27-inline-switch-theme-default-props.md) | type |
 | 2026-11-27 | [InlineSwitch's switch row is a `<label>` of spans, not a MUI Grid](2026-11-27-inline-switch-label-row-without-grid.md) | behavior |
