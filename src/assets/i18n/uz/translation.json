@@ -13,7 +13,8 @@
 			"menu-toggle": "Menyuni ochish",
 			"collapse-menu": "Menyuni yig'ish",
 			"expand-menu": "Menyuni yoyish",
-			"close-menu": "Menyuni yopish"
+			"close-menu": "Menyuni yopish",
+			"main-menu": "Asosiy menyu"
 		},
 		"uikit": {
 			"info": "Qo'shimcha ma'lumot",

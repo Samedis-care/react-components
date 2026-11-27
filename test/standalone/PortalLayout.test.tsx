@@ -316,6 +316,82 @@ describe("PortalLayout: bugs", () => {
 			expect(label, lng).not.toBe(labels.en);
 		}
 	});
+	it("[ISSUE-3479-ITEM-12] desktop: the content is in a main landmark and the menu in a navigation landmark", () => {
+		stubViewport(1200);
+		renderLayout();
+		expect(screen.getByRole("main")).toContainElement(
+			screen.getByTestId("content"),
+		);
+		expect(
+			within(screen.getByRole("navigation")).getByRole("button", {
+				name: "Dashboard",
+			}),
+		).toBeInTheDocument();
+	});
+	it("[ISSUE-3479-ITEM-12] mobile: the open drawer holds the navigation landmark", async () => {
+		renderLayout({ collapseMenu: true });
+		await openDrawer();
+		const nav = within(screen.getByRole("dialog")).getByRole("navigation");
+		expect(
+			within(nav).getByRole("button", { name: "Dashboard" }),
+		).toBeInTheDocument();
+	});
+	it("[ISSUE-3479-ITEM-12] the element with mainId can take focus, e.g. after a client-side navigation", () => {
+		stubViewport(1200);
+		renderLayout({ content: <span>no focusable content</span> });
+		const main = document.getElementById("main")!;
+		act(() => main.focus());
+		expect(document.activeElement).toBe(main);
+	});
+	it("[ISSUE-3479-ITEM-12] menuId is on the navigation landmark in both views, also in the closed drawer; without menuContent there is none", () => {
+		stubViewport(1200);
+		const { rerenderLayout } = renderLayout();
+		const nav = () => document.getElementById("mnu");
+		expect(nav()).toBe(screen.getByRole("navigation"));
+		expect(screen.getAllByRole("main")).toHaveLength(1);
+		resizeTo(600);
+		// the closed drawer is hidden from AT, but kept mounted
+		expect(nav()).toBe(screen.getByRole("navigation", { hidden: true }));
+		expect(screen.getByRole("dialog", { hidden: true })).toContainElement(
+			nav(),
+		);
+		expect(within(nav()!).getByText("Dashboard")).toBeInTheDocument();
+		expect(screen.getAllByRole("main")).toHaveLength(1);
+		rerenderLayout({ menuContent: null });
+		expect(
+			screen.queryByRole("navigation", { hidden: true }),
+		).not.toBeInTheDocument();
+		expect(nav()).toBeNull();
+	});
+	it("[ISSUE-3479-ITEM-12] the navigation landmark is named, in every locale", () => {
+		stubViewport(1200);
+		renderLayout();
+		expect(screen.getByRole("navigation")).toHaveAccessibleName("Main menu");
+		const i18nDir = path.resolve(__dirname, "../../src/assets/i18n");
+		const labels = Object.fromEntries(
+			fs
+				.readdirSync(i18nDir, { withFileTypes: true })
+				.filter((entry) => entry.isDirectory())
+				.map((entry) => {
+					const translation = JSON.parse(
+						fs.readFileSync(
+							path.join(i18nDir, entry.name, "translation.json"),
+							"utf8",
+						),
+					) as {
+						standalone: { portal: Record<string, string | undefined> };
+					};
+					return [entry.name, translation.standalone.portal["main-menu"]];
+				}),
+		);
+		expect(Object.keys(labels)).toHaveLength(8);
+		expect(labels.en).toBe("Main menu");
+		for (const [lng, label] of Object.entries(labels)) {
+			if (lng === "en") continue;
+			expect(label, lng).toMatch(/\S/);
+			expect(label, lng).not.toBe(labels.en);
+		}
+	});
 	it("[ISSUE-3479-ITEM-25] crossing the breakpoint keeps the menu's active entry and expanded groups", async () => {
 		stubViewport(1200);
 		renderLayout();

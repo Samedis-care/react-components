@@ -13,7 +13,8 @@
 			"menu-toggle": "Alternar menú",
 			"collapse-menu": "Contraer menú",
 			"expand-menu": "Expandir menú",
-			"close-menu": "Cerrar menú"
+			"close-menu": "Cerrar menú",
+			"main-menu": "Menú principal"
 		},
 		"uikit": {
 			"info": "Más información",

@@ -786,9 +786,10 @@ export const Issue3479Item25MenuKeepsStateAcrossViews: LayoutStory = {
 		await userEvent.click(canvas.getByRole("button", { name: "Reports" }));
 		const monthly = await canvas.findByRole("button", { name: "Monthly" });
 		await userEvent.click(monthly);
+		// menuId is on the nav inside the menu column's paper
 		const columnPaper = document
 			.getElementById("mnu")!
-			.querySelector<HTMLElement>(".MuiPaper-root")!;
+			.closest<HTMLElement>(".MuiPaper-root")!;
 		await expect(menuRootIn(columnPaper).getBoundingClientRect().height).toBe(
 			columnPaper.getBoundingClientRect().height,
 		);
@@ -1008,6 +1009,97 @@ export const Issue3479Item14BurgerControlsDrawer: LayoutStory = {
 		await waitFor(() => expect(drawerRoot()).toHaveAttribute("aria-hidden"));
 		await expect(burger).toHaveAttribute("aria-expanded", "false");
 		await expect(document.getElementById(id!)).toBe(drawerPaper());
+	},
+};
+
+// Axe in error mode, minus the "list" rule the desktop menu breaks until its item
+// is fixed (drop it with the fix): with MUI List as the wrapper the entries are
+// `ul > div[role=button]` (ISSUE-3479-ITEM-19).
+const A11Y_MENU_LIST_EXCEPTION = {
+	test: "error",
+	config: { rules: [{ id: "list", enabled: false }] },
+} as const;
+
+// a link in the AppBar's text color
+const skipLinkStyle = { color: "inherit", marginInlineEnd: 16 };
+
+/** PortalLayout with a skip link in its header, to its main landmark */
+const PortalWithSkipLink = () => {
+	const [history] = useState(() =>
+		createMemoryHistory({ initialEntries: ["/"] }),
+	);
+	return (
+		<HistoryRouter history={history}>
+			<div style={fullHeight}>
+				<PortalLayout
+					variant="no-top-left"
+					headerContent={
+						<>
+							<Link to="#main-pane" style={skipLinkStyle}>
+								Skip to content
+							</Link>
+							{pageTitle("App")}
+						</>
+					}
+					menuContent={menu()}
+					menuId="menu-nav"
+					mainId="main-pane"
+					content={
+						<Box sx={{ p: 3 }}>
+							<Typography variant="h4" component="h1">
+								Page
+							</Typography>
+							<Button>First action</Button>
+						</Box>
+					}
+				/>
+			</div>
+		</HistoryRouter>
+	);
+};
+
+export const Issue3479Item12LandmarksAndFocusableMain: Story = {
+	parameters: {
+		a11y: A11Y_MENU_LIST_EXCEPTION,
+		docs: {
+			description: {
+				story:
+					'ISSUE-3479-ITEM-12: the content is in the page\'s main landmark (`<main>`, with `mainId`), the menu in its navigation landmark (`<nav>` "Main menu", with `menuId`). The main landmark takes focus without being a stop of Tab: a skip link (here `<Link to="#main-pane">` in the header) moves the focus to it, it shows a focus ring inside its edge, and Tab goes on into the content.',
+			},
+		},
+	},
+	render: () => <PortalWithSkipLink />,
+	play: async ({ canvas }) => {
+		const main = canvas.getByRole("main");
+		await expect(main).toHaveAttribute("id", "main-pane");
+		await expect(main).toContainElement(
+			canvas.getByRole("heading", { name: "Page" }),
+		);
+		const nav = canvas.getByRole("navigation", { name: "Main menu" });
+		await expect(nav).toHaveAttribute("id", "menu-nav");
+		await expect(
+			within(nav).getByRole("button", { name: "Dashboard" }),
+		).toBeVisible();
+
+		canvas.getByRole("link", { name: "Skip to content" }).focus();
+		await userEvent.keyboard("{Enter}");
+		await waitFor(() => expect(document.activeElement).toBe(main));
+		const style = getComputedStyle(main);
+		await expect(style.outlineStyle).toBe("solid");
+		const width = parseFloat(style.outlineWidth);
+		await expect(width).toBeGreaterThanOrEqual(2);
+		await expect(parseFloat(style.outlineOffset)).toBeLessThanOrEqual(-width);
+		await expect(
+			contrast(style.outlineColor, backgroundBehind(main)),
+		).toBeGreaterThanOrEqual(3);
+
+		await userEvent.tab();
+		await expect(document.activeElement).toBe(
+			canvas.getByRole("button", { name: "First action" }),
+		);
+		// the main landmark is no stop of Tab: back to the menu
+		await userEvent.tab({ shift: true });
+		await expect(nav).toContainElement(document.activeElement as HTMLElement);
 	},
 };
 

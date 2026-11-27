@@ -13,7 +13,8 @@
 			"menu-toggle": "Открыть меню",
 			"collapse-menu": "Свернуть меню",
 			"expand-menu": "Развернуть меню",
-			"close-menu": "Закрыть меню"
+			"close-menu": "Закрыть меню",
+			"main-menu": "Главное меню"
 		},
 		"uikit": {
 			"info": "Подробнее",

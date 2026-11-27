@@ -55,6 +55,12 @@ interface PortalLayoutPropsBase {
 	/**
 	 * Content displayed in the menu area (usually a Menu)
 	 *
+	 * It is rendered in the page's navigation landmark, a `<nav>` named "Main
+	 * menu" (`standalone.portal.main-menu`) that fills the menu paper (a flex
+	 * column, so a menu with `height: 100%` fills it and scrolls inside it). Do
+	 * not wrap it in a `<nav>` of its own. Falsy: no menu, no `<nav>` and no
+	 * burger.
+	 *
 	 * In mobile view it is shown in a drawer that the burger button opens. The
 	 * burger says whether the drawer is open (`aria-expanded`) and names it
 	 * (`aria-controls`, an id the layout generates).
@@ -70,7 +76,11 @@ interface PortalLayoutPropsBase {
 	/**
 	 * Main content
 	 *
-	 * It scrolls in a pane of its own (the `main` slot). Inside a HistoryRouter
+	 * It is rendered in the page's main landmark, a `<main>` element (the `main`
+	 * slot), so it must not contain a `<main>` of its own. The `<main>` can take
+	 * focus without being a stop of Tab (`tabindex="-1"`), see `mainId`.
+	 *
+	 * It scrolls in a pane of its own, the `<main>`. Inside a HistoryRouter
 	 * (Framework renders one), a navigation scrolls the pane to the top as it
 	 * scrolls the window, unless the navigation keeps the scroll position
 	 * (`preventScrollReset` of `useNavigate`, e.g. a RoutedTabs tab switch).
@@ -109,10 +119,21 @@ interface PortalLayoutPropsBase {
 	headerId?: string;
 	/**
 	 * ID for the navbar
+	 *
+	 * Set on the `<nav>` around `menuContent`, in desktop and in mobile view (in
+	 * the drawer, which is kept mounted while closed). Not set without
+	 * `menuContent`, which renders no `<nav>`.
 	 */
 	menuId?: string;
 	/**
 	 * ID for the main content
+	 *
+	 * Set on the `<main>` around `content`, the pane the content scrolls in. It
+	 * takes focus (`focus()`, e.g. after a client-side navigation, or a skip
+	 * link such as `<Link to={"#" + mainId}>`) without being a stop of Tab.
+	 * Focused, the arrow and page keys scroll it, and Tab goes on to the first
+	 * focusable element of the content; focused from the keyboard, it shows a
+	 * 2px focus ring in the primary color inside its edge.
 	 */
 	mainId?: string;
 	/**
@@ -168,15 +189,36 @@ const RenderLayoutMenu = styled("div", {
 	name: "CcPortalRenderLayout",
 	slot: "menu",
 })({ gridArea: "sidebar", minHeight: "100%" });
-const RenderLayoutMain = styled("div", {
+// the page's navigation landmark around menuContent, in the desktop paper and
+// in the drawer. It fills the paper (below the drawer's topLeft row) as
+// menuContent did without it: a flex column that may shrink below its content,
+// so a menu with height 100% fills it and scrolls inside it.
+const RenderLayoutNav = styled("nav", {
+	name: "CcPortalRenderLayout",
+	slot: "nav",
+})({
+	height: "100%",
+	minHeight: 0,
+	display: "flex",
+	flexDirection: "column",
+});
+// the page's main landmark and the pane the pages scroll in
+const RenderLayoutMain = styled("main", {
 	name: "CcPortalRenderLayout",
 	slot: "main",
-})({
+})(({ theme }) => ({
 	gridArea: "main",
 	overflow: "auto",
 	display: "flex",
 	flexDirection: "column",
-});
+	// focused from the keyboard (a skip link), or by a script after keyboard
+	// use: the Portal's focus ring, inside the pane, where the screen's edge
+	// cannot clip it
+	"&:focus-visible": {
+		outline: `2px solid ${(theme.vars || theme).palette.primary.main}`,
+		outlineOffset: -2,
+	},
+}));
 const RenderLayoutMobileTopLeft = styled("div", {
 	name: "CcPortalRenderLayout",
 	slot: "mobileTopLeft",
@@ -216,12 +258,20 @@ const RenderLayoutCloseMenuButton = styled(IconButton, {
 );
 /**
  * Style slots of the layout's areas (theme name `CcPortalRenderLayout`):
- * `header`, `topLeft`, `menu`, `main`; in mobile view, `mobileTopLeft` (the
- * `topLeft` row at the top of the drawer) and `closeMenuButton` (the drawer's
- * close button, shown while it has keyboard focus).
+ * `header`, `topLeft`, `menu` (the menu column), `nav` (the `<nav>` around
+ * `menuContent`, in the menu column or the drawer), `main` (the `<main>` around
+ * `content`); in mobile view, `mobileTopLeft` (the `topLeft` row at the top of
+ * the drawer) and `closeMenuButton` (the drawer's close button, shown while it
+ * has keyboard focus).
  */
 export type PortalRenderLayoutClassKey =
-	"header" | "topLeft" | "menu" | "main" | "mobileTopLeft" | "closeMenuButton";
+	| "header"
+	| "topLeft"
+	| "menu"
+	| "nav"
+	| "main"
+	| "mobileTopLeft"
+	| "closeMenuButton";
 
 export interface PortalLayoutContextType {
 	mobile: boolean;
@@ -245,7 +295,7 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 	// the mobile drawer's paper, named by the burger's aria-controls
 	const drawerId = useId();
 	// the pane the pages scroll in: a navigation starts the next page at its top
-	const mainRef = useRef<HTMLDivElement>(null);
+	const mainRef = useRef<HTMLElement>(null);
 	useResetScrollOnNavigation(mainRef);
 	const { t } = useCCTranslations();
 
@@ -281,7 +331,7 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 					/>
 				)}
 			</RenderLayoutHeader>
-			<RenderLayoutMenu id={props.menuId}>
+			<RenderLayoutMenu>
 				{menuContent && (
 					<Menu
 						menuOpen={menuOpen}
@@ -305,13 +355,20 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 										{props.topLeft}
 									</RenderLayoutMobileTopLeft>
 								)}
-								{menuContent}
+								<RenderLayoutNav
+									id={props.menuId}
+									aria-label={t("standalone.portal.main-menu")}
+								>
+									{menuContent}
+								</RenderLayoutNav>
 							</>
 						}
 					/>
 				)}
 			</RenderLayoutMenu>
-			<RenderLayoutMain id={props.mainId} ref={mainRef}>
+			{/* tabIndex -1: focus() and skip links can move the focus to the
+			content, without adding a stop to the Tab order */}
+			<RenderLayoutMain id={props.mainId} ref={mainRef} tabIndex={-1}>
 				{content}
 			</RenderLayoutMain>
 		</PortalLayoutContext.Provider>
@@ -350,4 +407,14 @@ const PortalLayout = (inProps: PortalLayoutProps) => {
 	);
 };
 
+/**
+ * App shell: a header (an MUI AppBar, the page's banner landmark), a menu (in
+ * the page's navigation landmark) and the content (in the page's main
+ * landmark), laid out as a CSS grid that fills its parent's height.
+ *
+ * Below `collapseBreakpoint`, with `collapseMenu`, or while
+ * `mobileViewCondition` matches, the menu moves into a drawer that a burger
+ * button in the header opens. Descendants read the mode and the drawer state
+ * with {@link usePortalLayoutContext}.
+ */
 export default React.memo(PortalLayout);

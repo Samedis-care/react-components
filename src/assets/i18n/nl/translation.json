@@ -13,7 +13,8 @@
 			"menu-toggle": "Menu wisselen",
 			"collapse-menu": "Menu inklappen",
 			"expand-menu": "Menu uitklappen",
-			"close-menu": "Menu sluiten"
+			"close-menu": "Menu sluiten",
+			"main-menu": "Hoofdmenu"
 		},
 		"uikit": {
 			"info": "Meer informatie",
