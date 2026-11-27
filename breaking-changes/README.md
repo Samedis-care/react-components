@@ -23,6 +23,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [InfiniteScroll: a `callBackDebounce` above 2^31 - 1 or `Infinity` makes no call](2026-11-27-infinite-scroll-endless-debounce-holds-calls.md) | behavior |
 | 2026-11-27 | [InlineSwitch's theme defaults leave out the props of a single switch](2026-11-27-inline-switch-theme-default-props.md) | type |
 | 2026-11-27 | [InlineSwitch's switch row is a `<label>` of spans, not a MUI Grid](2026-11-27-inline-switch-label-row-without-grid.md) | behavior |
+| 2026-11-27 | [HowToBoxTranslate is removed; `translatedStrings` turns a translated list into entries](2026-11-27-how-to-box-translate-removed.md) | type |
 | 2026-11-27 | [InfiniteScroll scrolls by default, and the theme styles it through `CcInfiniteScroll`](2026-11-27-infinite-scroll-scrolls-by-default-theme-slot.md) | behavior |
 | 2026-11-27 | [A required string list shows an asterisk and is described as required](2026-11-27-required-string-list-marked.md) | behavior |
 | 2026-11-27 | [InfiniteScroll: a negative or NaN `callBackDebounce` calls at once, as `0` does](2026-11-27-infinite-scroll-negative-debounce-calls-at-once.md) | behavior |

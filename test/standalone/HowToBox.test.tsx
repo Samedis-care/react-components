@@ -1,9 +1,11 @@
 import React from "react";
 import { describe, it, expect, beforeAll, afterEach, vi } from "vitest";
 import { render, screen, cleanup, within } from "@testing-library/react";
-import { ThemeProvider, createTheme, Theme } from "@mui/material";
+import { ThemeProvider, createTheme, Theme, Link } from "@mui/material";
 import i18next, { Resource } from "i18next";
-import HowToBox, { HowToBoxTranslate } from "../../src/standalone/HowToBox";
+import { Trans } from "react-i18next";
+import HowToBox from "../../src/standalone/HowToBox";
+import translatedStrings from "../../src/utils/translatedStrings";
 import GroupBox from "../../src/standalone/GroupBox";
 import ccI18n from "../../src/i18n";
 import { waitForCcI18n } from "../waitForCcI18n";
@@ -95,22 +97,6 @@ describe("HowToBox", () => {
 			expect(container).toBeEmptyDOMElement();
 		});
 
-		it("[ISSUE-3463-ITEM-2] HowToBoxTranslate renders nothing for a key that holds an empty array", async () => {
-			const app = await makeAppI18n({
-				en: { translation: { steps: ["Step one"], none: [] } },
-			});
-			const { container, rerender } = renderHowToBox(
-				<HowToBoxTranslate t={app.t} labels="steps" />,
-			);
-			expect(fieldsetOf(container)).toBeInTheDocument();
-			rerender(withTheme(<HowToBoxTranslate t={app.t} labels="none" />));
-			expect(container).toBeEmptyDOMElement();
-			rerender(withTheme(<HowToBoxTranslate t={app.t} labels="steps" />));
-			expect(
-				screen.getByRole("group", { name: "How it works" }),
-			).toHaveTextContent("Step one");
-		});
-
 		it("[ISSUE-3463-ITEM-3] skips array entries that render nothing", () => {
 			renderHowToBox(
 				<HowToBox
@@ -140,65 +126,6 @@ describe("HowToBox", () => {
 			);
 			expect(container).toBeEmptyDOMElement();
 			rerender(withTheme(<HowToBox labels={true} />));
-			expect(container).toBeEmptyDOMElement();
-		});
-
-		it("[ISSUE-3463-ITEM-3] HowToBoxTranslate skips empty strings in the translated array", async () => {
-			const app = await makeAppI18n({
-				en: { translation: { steps: ["Step one", "", "Step two"] } },
-			});
-			renderHowToBox(<HowToBoxTranslate t={app.t} labels="steps" />);
-			expect(
-				itemTexts(screen.getByRole("group", { name: "How it works" })),
-			).toEqual(["Step one", "Step two"]);
-		});
-
-		it("[ISSUE-3463-ITEM-4] HowToBoxTranslate does not crash when the labels key holds an object", async () => {
-			const app = await makeAppI18n({
-				en: { translation: { steps: { a: "Step A", b: "Step B" } } },
-			});
-			vi.spyOn(console, "error").mockImplementation(() => {});
-			const { container } = renderHowToBox(
-				<HowToBoxTranslate t={app.t} labels="steps" />,
-			);
-			expect(container.textContent).not.toContain("[object Object]");
-		});
-
-		it("[ISSUE-3463-ITEM-4] HowToBoxTranslate shows the values of a key that holds an object as entries, in key order", async () => {
-			const app = await makeAppI18n({
-				en: {
-					translation: {
-						steps: { download: "Download the template", upload: "Upload it" },
-					},
-				},
-			});
-			renderHowToBox(<HowToBoxTranslate t={app.t} labels="steps" />);
-			expect(
-				itemTexts(screen.getByRole("group", { name: "How it works" })),
-			).toEqual(["Download the template", "Upload it"]);
-		});
-
-		it("[ISSUE-3463-ITEM-4] HowToBoxTranslate skips nested groups, so the parent key of a group shows only its own strings", async () => {
-			const app = await makeAppI18n({
-				en: {
-					translation: {
-						import: {
-							title: "Import",
-							steps: ["Step one", "Step two"],
-							more: { a: "Step A" },
-						},
-						mixed: ["first", { a: "Step A" }, ["x", "y"], 3, "last"],
-						groups: { a: { b: "Step B" }, c: ["Step C"] },
-					},
-				},
-			});
-			const { container, rerender } = renderHowToBox(
-				<HowToBoxTranslate t={app.t} labels="import" />,
-			);
-			expect(itemTexts()).toEqual(["Import"]);
-			rerender(withTheme(<HowToBoxTranslate t={app.t} labels="mixed" />));
-			expect(itemTexts()).toEqual(["first", "3", "last"]);
-			rerender(withTheme(<HowToBoxTranslate t={app.t} labels="groups" />));
 			expect(container).toBeEmptyDOMElement();
 		});
 
@@ -318,31 +245,6 @@ describe("HowToBox", () => {
 			expect(getComputedStyle(c).color).toBe("rgb(0, 0, 255)");
 		});
 
-		it("[ISSUE-3463-ITEM-6] matches HowToBoxTranslate's variants against the translated title", async () => {
-			const app = await makeAppI18n({
-				en: { translation: { title: "Import", steps: ["Step one"] } },
-			});
-			const themed = createTheme({
-				components: {
-					CcHowToBox: {
-						variants: [
-							{
-								props: { titleLabel: "Import" },
-								style: { outlineStyle: "dotted" },
-							},
-						],
-					},
-				},
-			});
-			const { container } = renderHowToBox(
-				<HowToBoxTranslate t={app.t} titleLabel="title" labels="steps" />,
-				themed,
-			);
-			expect(getComputedStyle(fieldsetOf(container)).outlineStyle).toBe(
-				"dotted",
-			);
-		});
-
 		it("[ISSUE-3463-ITEM-6] keeps titleLabel and labels off the frame's DOM", () => {
 			const consoleError = vi
 				.spyOn(console, "error")
@@ -433,29 +335,6 @@ describe("HowToBox", () => {
 			expect(fieldset).not.toHaveAttribute("sx");
 		});
 
-		it("[ISSUE-3463-ITEM-8] HowToBoxTranslate passes the id and aria-* to its box", async () => {
-			const app = await makeAppI18n({
-				en: { translation: { steps: ["Download the template"] } },
-			});
-			renderHowToBox(
-				<>
-					<HowToBoxTranslate
-						t={app.t}
-						labels="steps"
-						id="translated"
-						aria-label="Import instructions"
-					/>
-					<button aria-describedby="translated-list">Upload</button>
-				</>,
-			);
-			expect(
-				screen.getByRole("group", { name: "Import instructions" }),
-			).toHaveAttribute("id", "translated");
-			expect(
-				screen.getByRole("button", { name: "Upload" }),
-			).toHaveAccessibleDescription("Download the template");
-		});
-
 		it("[ISSUE-3463-ITEM-9] shows no title for every value that hides GroupBox's label, and the default only for undefined", () => {
 			const noTitle = [null, "", false] as const;
 			for (const titleLabel of noTitle) {
@@ -507,43 +386,6 @@ describe("HowToBox", () => {
 			expect(themedBox).toHaveAccessibleName("Theme title");
 			expect(untitled.querySelector("legend")).toBeNull();
 			expect(untitled).toHaveAccessibleName("");
-		});
-
-		it("[ISSUE-3463-ITEM-9] HowToBoxTranslate shows the default title when titleLabel is omitted and none for '' or null, as HowToBox does", async () => {
-			const app = await makeAppI18n({
-				en: { translation: { title: "Import", steps: ["a"] } },
-			});
-			const { container, rerender } = renderHowToBox(
-				<HowToBoxTranslate t={app.t} labels="steps" />,
-			);
-			expect(screen.getByRole("group")).toHaveAccessibleName("How it works");
-			const noTitle: (string | null)[] = ["", null];
-			for (const titleLabel of noTitle) {
-				rerender(
-					withTheme(
-						<HowToBoxTranslate
-							t={app.t}
-							labels="steps"
-							titleLabel={titleLabel}
-						/>,
-					),
-				);
-				expect(
-					container.querySelector("legend"),
-					JSON.stringify(titleLabel),
-				).toBeNull();
-				expect(
-					screen.getByRole("group"),
-					JSON.stringify(titleLabel),
-				).toHaveAccessibleName("");
-			}
-			rerender(
-				withTheme(
-					<HowToBoxTranslate t={app.t} labels="steps" titleLabel="title" />,
-				),
-			);
-			expect(screen.getByRole("group")).toHaveAccessibleName("Import");
-			expect(itemTexts()).toEqual(["a"]);
 		});
 
 		it("[ISSUE-3463-ITEM-10] styles the title with the theme's styleOverrides.legend over CcGroupBox's legend overrides, which keep styling other GroupBoxes and what the HowToBox override leaves out", () => {
@@ -725,15 +567,6 @@ describe("HowToBox", () => {
 			expect(getComputedStyle(fieldsetOf(plain)).outlineStyle).toBe("dashed");
 		});
 
-		it("[ISSUE-3463-ITEM-11] HowToBoxTranslate numbers its entries with ordered", async () => {
-			const app = await makeAppI18n({
-				en: { translation: { steps: ["Download", "Upload"] } },
-			});
-			renderHowToBox(<HowToBoxTranslate t={app.t} labels="steps" ordered />);
-			expect(screen.getByRole("list").tagName).toBe("OL");
-			expect(itemTexts()).toEqual(["Download", "Upload"]);
-		});
-
 		it("[ISSUE-3463-ITEM-11] gives the list of a single entry the class CcHowToBox-singleEntry, also when the other entries are skipped, and keeps it a one-item list", () => {
 			const { container, rerender } = renderHowToBox(
 				<HowToBox id="tip" labels="This is a single helpful hint." />,
@@ -757,6 +590,42 @@ describe("HowToBox", () => {
 			expect(within(fieldsetOf(container)).getByRole("list")).not.toHaveClass(
 				"CcHowToBox-singleEntry",
 			);
+		});
+
+		it("[ISSUE-3463-ITEM-12] shows a rich entry with markup next to the entries of a translated array, interpolated with the values passed to t", async () => {
+			const app = await makeAppI18n({
+				en: {
+					translation: {
+						link: "Download the <dl>template</dl>",
+						help: ["Fill in at most {{count}} rows", "Upload the file below"],
+					},
+				},
+			});
+			renderHowToBox(
+				<HowToBox
+					labels={[
+						<Trans
+							key="link"
+							i18n={app}
+							t={app.t}
+							i18nKey="link"
+							components={{ dl: <Link href="/template.xlsx" /> }}
+						/>,
+						...translatedStrings(
+							app.t("help", { returnObjects: true, count: 500 }),
+						),
+					]}
+				/>,
+			);
+			const box = screen.getByRole("group", { name: "How it works" });
+			expect(itemTexts(box)).toEqual([
+				"Download the template",
+				"Fill in at most 500 rows",
+				"Upload the file below",
+			]);
+			expect(
+				within(box).getByRole("link", { name: "template" }),
+			).toHaveAttribute("href", "/template.xlsx");
 		});
 	});
 });

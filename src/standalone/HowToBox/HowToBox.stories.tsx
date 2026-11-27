@@ -2,9 +2,12 @@ import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, within } from "storybook/test";
-import { Button, createTheme, ThemeProvider } from "@mui/material";
+import { Button, createTheme, Link, ThemeProvider } from "@mui/material";
+import i18next from "i18next";
+import { Trans } from "react-i18next";
 import HowToBox from "./index";
 import GroupBox from "../GroupBox";
+import translatedStrings from "../../utils/translatedStrings";
 
 // Note: HowToBox internally calls useCCTranslations for the default title.
 // The story relies on i18next being initialised (it is, via the library's ccI18n instance).
@@ -430,5 +433,74 @@ export const Issue3463Item11ThemeStylesTheEntries: Story = {
 		).getByRole("list");
 		await expect(getComputedStyle(tipList).listStyleType).toBe("none");
 		await expect(getComputedStyle(tipList).paddingLeft).toBe("8px");
+	},
+};
+
+/** an app's own i18next instance, with the texts of an import how-to */
+const appI18n = i18next.createInstance();
+void appI18n.init({
+	lng: "en",
+	initAsync: false,
+	resources: {
+		en: {
+			translation: {
+				"import-how-to-link": "Download the <dl>template</dl>",
+				"import-how-to-help": [
+					"Fill in at most {{count}} rows, one per record",
+					"Upload the file below",
+				],
+			},
+		},
+	},
+});
+
+export const Issue3463Item12RichEntryWithTranslatedEntries: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3463-ITEM-12: an app translates the entries with its own `t` and mixes them freely. The first entry is a `<Trans>` with a link for the `<dl>` markup of its translation; the others are the strings of a translated array, `translatedStrings(t("import-how-to-help", { returnObjects: true, count: 500 }))`, interpolated with `count`. `translatedStrings` gives a list for any shape of the key: one entry for a string or a missing key, the values of an object, none for a nested group.',
+			},
+		},
+	},
+	render: (args) => (
+		<div style={{ width: 400 }}>
+			<HowToBox
+				{...args}
+				labels={[
+					<Trans
+						key={"link"}
+						i18n={appI18n}
+						t={appI18n.t}
+						i18nKey={"import-how-to-link"}
+						components={{ dl: <Link href={"#template"} /> }}
+					/>,
+					...translatedStrings(
+						appI18n.t("import-how-to-help", {
+							returnObjects: true,
+							count: 500,
+						}),
+					),
+				]}
+			/>
+		</div>
+	),
+	args: {
+		titleLabel: "How to import",
+		ordered: true,
+	},
+	play: async ({ canvas, canvasElement }) => {
+		const box = await canvas.findByRole("group", { name: "How to import" });
+		await expect(
+			entriesOf(canvasElement).map((entry) => entry.textContent),
+		).toEqual([
+			"Download the template",
+			"Fill in at most 500 rows, one per record",
+			"Upload the file below",
+		]);
+		await expect(
+			within(box).getByRole("link", { name: "template" }),
+		).toHaveAttribute("href", "#template");
 	},
 };

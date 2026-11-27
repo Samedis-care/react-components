@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import GroupBox, { GroupBoxHTMLProps } from "../GroupBox";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { TFunction } from "i18next";
 import { styled, SxProps, Theme, useThemeProps } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 
@@ -59,6 +58,12 @@ export interface HowToBoxProps extends GroupBoxHTMLProps {
 	 * A line break `"\n"` in an entry starts a new line inside the same item,
 	 * which is the only way to break a line in a translated string. Other runs
 	 * of white space collapse to one space, as in normal text.
+	 *
+	 * Translated entries come from the app's own `t`: for a key that holds a
+	 * list, `translatedStrings(t(key, { returnObjects: true }))` gives its
+	 * strings, interpolated with the values passed to `t`, and can be spread
+	 * next to rich entries, such as a `<Trans>` with a link (see the
+	 * examples of HowToBox).
 	 *
 	 * An entry wraps at spaces. A word wider than the entry, such as a long
 	 * compound, a file name or a URL, breaks between any two characters, so it
@@ -260,75 +265,6 @@ const HowToBox = React.forwardRef(function HowToBox(
 	);
 });
 
-export interface HowToBoxTranslateProps extends Omit<
-	HowToBoxProps,
-	"titleLabel" | "labels"
-> {
-	/**
-	 * The i18n t function
-	 */
-	t: TFunction;
-	/**
-	 * Translation key of the title, passed to `t`. Omitted (`undefined`), the
-	 * box shows HowToBox's default title; `null` or `""` shows no title, as
-	 * on HowToBox.
-	 * @default the default title of HowToBox
-	 */
-	titleLabel?: string | null;
-	/**
-	 * i18n key passed to t function, used in combination with return object to obtain array of strings.
-	 * Empty strings in that array are skipped, and a key that holds an empty array renders nothing,
-	 * like the `labels` of HowToBox.
-	 *
-	 * A key that holds an object gives one entry per value, in the object's key order, so a keyed
-	 * list (`"steps": { "download": "…", "upload": "…" }`) works like an array. Only strings and
-	 * numbers become entries: a group nested inside the array or object is skipped, so a key that
-	 * names the parent of a group (`"import"` instead of `"import.steps"`) shows only the parent's
-	 * own strings. A key that holds a string is one entry, and a missing key shows the key itself.
-	 */
-	labels: string;
-}
-
-/** whether a value from the translation resources can be shown as an entry */
-const isTranslatedEntry = (value: unknown): value is string | number =>
-	typeof value === "string" || typeof value === "number";
-
-/**
- * The entries in what `t(key, { returnObjects: true })` returned: the strings
- * and numbers of an array, or of an object's values, in order; a string or
- * number is one entry. Nested groups and anything else are skipped, as React
- * cannot render a plain object.
- */
-const translatedEntries = (value: unknown): (string | number)[] => {
-	if (isTranslatedEntry(value)) return [value];
-	if (value == null || typeof value !== "object") return [];
-	return (Array.isArray(value) ? value : Object.values(value)).filter(
-		isTranslatedEntry,
-	);
-};
-
-/**
- * i18n version of HowToBox. Its other props, such as `id`, `aria-label` or
- * `sx`, reach the HowToBox.
- * @param props The props
- * @see HowToBox
- */
-export const HowToBoxTranslate = (props: HowToBoxTranslateProps) => {
-	const { t, titleLabel, labels, ...other } = props;
-	// memo content because it's an array which gets re-created every render
-	const content = useMemo(
-		() => translatedEntries(t(labels, { returnObjects: true })),
-		[t, labels],
-	);
-	return (
-		<HowToBox
-			{...other}
-			titleLabel={titleLabel ? t(titleLabel) : titleLabel}
-			labels={content}
-		/>
-	);
-};
-
 /**
  * Instructions in a frame: a {@link GroupBox} titled "How it works" (or
  * `titleLabel`, or untitled for `titleLabel={null}`) around a list with one
@@ -349,8 +285,7 @@ export const HowToBoxTranslate = (props: HowToBoxTranslateProps) => {
  * `styleOverrides` per {@link HowToBoxClassKey} slot, and `variants`, which
  * apply to the frame. A variant's `props` match `titleLabel` and `labels` as
  * HowToBox gets them, after the theme's default props, and `ordered` as a
- * boolean; from {@link HowToBoxTranslate} these are the translated title and
- * entries. A `props` function gets these props directly: there is no
+ * boolean. A `props` function gets these props directly: there is no
  * `ownerState`. A variant reaches the list and its entries through nested
  * selectors.
  *
@@ -362,6 +297,18 @@ export const HowToBoxTranslate = (props: HowToBoxTranslateProps) => {
  * @example
  * // numbered steps
  * <HowToBox ordered labels={["Download the template", "Upload it below"]} />
+ *
+ * @example
+ * // translated steps: a link of the app's own, then the strings of the
+ * // translated array "how-to.steps", interpolated with count
+ * <HowToBox
+ *   titleLabel={t("how-to.title")}
+ *   labels={[
+ *     <Trans key={"link"} t={t} i18nKey={"how-to.link"}
+ *       components={{ dl: <Link href={templateUrl} /> }} />,
+ *     ...translatedStrings(t("how-to.steps", { returnObjects: true, count })),
+ *   ]}
+ * />
  *
  * @example
  * // a theme that numbers the entries of every box and wraps them at about
