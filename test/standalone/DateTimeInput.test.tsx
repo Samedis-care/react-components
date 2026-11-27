@@ -6,6 +6,7 @@ import {
 	fireEvent,
 	render,
 	screen,
+	waitFor,
 } from "@testing-library/react";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -173,6 +174,23 @@ describe("DateTimeInput", () => {
 			expect(label).toHaveTextContent("At");
 			expect(label).toHaveAttribute("data-shrink", "true");
 			expect(states).toContainEqual(expect.objectContaining({ label: "At" }));
+		});
+
+		it("[ISSUE-3485-ITEM-7] closes the popup when the field becomes disabled", async () => {
+			const { rerender } = wrap(
+				<DateTimeInput label="At" value={moment(AT)} onChange={noop} />,
+			);
+			fireEvent.click(await openButton());
+			await screen.findByRole("dialog");
+			rerender(
+				<DateTimeInput
+					label="At"
+					value={moment(AT)}
+					onChange={noop}
+					disabled
+				/>,
+			);
+			await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 		});
 
 		it("[ISSUE-3485-ITEM-13] links a helperText prop to the field group", async () => {

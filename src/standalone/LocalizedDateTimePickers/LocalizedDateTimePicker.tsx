@@ -32,6 +32,7 @@ import withReportWhenDone from "./withReportWhenDone";
 import calendarNameSlotProps from "./calendarNameSlotProps";
 import calendarFocusRingSlotProps from "./calendarFocusRingSlotProps";
 import OpenPickerButton from "./OpenPickerButton";
+import usePickerOpen from "./usePickerOpen";
 import useDateTimeOpenPickerName from "./useDateTimeOpenPickerName";
 
 /**
@@ -90,6 +91,13 @@ const DESKTOP_MODE_MEDIA_QUERY =
  * into `slotProps.openPickerButton`, so it also names a caller's own
  * `slots.openPickerButton`, and an `aria-label` the caller sets there takes
  * its place.
+ *
+ * The calendar closes when `disabled` or `readOnly` turns on while it is
+ * open, where MUI leaves it open with every day disabled. It closes as a
+ * click outside closes it: the date picked in it is kept and reported (see
+ * `onChange`), and `onClose` is called. It stays closed once both are off
+ * again. A controlled `open` shows the calendar only while neither is set
+ * (see `usePickerOpen`).
  *
  * Every date the picker takes or reports is a `Moment`, or `null` for no
  * date: `value`, `defaultValue`, `referenceDate`, `minDate`, `maxDate`,
@@ -155,10 +163,11 @@ export interface LocalizedDateTimePickerProps extends DateTimePickerProps {
 	 * Called once the user is done with the date: when focus leaves the field
 	 * (right before `onBlur`), on Enter in the field, and when the calendar
 	 * accepts a date (OK in the desktop popup or the mobile dialog, or the
-	 * calendar closed with Escape or a click outside it, which keeps the date
-	 * picked in it, as in MUI). It gets the date the field shows, if the picker
-	 * accepts it, or `null` for an empty field, and only if that differs from
-	 * the date reported last or handed in as `value` since. Not reported are
+	 * calendar closed with Escape, a click outside it or the picker getting
+	 * disabled or read-only, which keeps the date picked in it, as in MUI). It
+	 * gets the date the field shows, if the picker accepts it, or `null` for an
+	 * empty field, and only if that differs from the date reported last or
+	 * handed in as `value` since. Not reported are
 	 * the dates the field passes through while the user types (a half-typed
 	 * year, the dates on the way while a day, month, year, hour or minute is
 	 * retyped, the `null` of a section deleted to retype it), an entry the
@@ -296,6 +305,16 @@ const LocalizedDateTimePicker = (
 		settle();
 		consumerOnOpen?.();
 	}, [settle, consumerOnOpen]);
+	// closes the calendar when the picker gets disabled or read-only
+	const openState = usePickerOpen({
+		open: otherProps.open,
+		onOpen: handleOpen,
+		onClose: otherProps.onClose,
+		// reports the date picked in the calendar, as a click outside does
+		onDismiss: draft.finish,
+		disabled: otherProps.disabled,
+		readOnly: otherProps.readOnly,
+	});
 	const consumerSlots = otherProps.slots;
 	// the caller's slots come after the open button with its focus ring, so a
 	// button it passes wins
@@ -310,7 +329,9 @@ const LocalizedDateTimePicker = (
 				ref={ref}
 				value={draft.value}
 				onChange={handleChange}
-				onOpen={handleOpen}
+				open={openState.open}
+				onOpen={openState.onOpen}
+				onClose={openState.onClose}
 				// reports a date the calendar accepted at once, and passes what is
 				// reported to the caller's onAccept, see onAccept
 				onAccept={draft.accept}

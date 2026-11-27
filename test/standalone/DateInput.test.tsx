@@ -674,6 +674,18 @@ describe("DateInput bugs", () => {
 		expect(field).toHaveAttribute("aria-invalid", "false");
 	});
 
+	it("[ISSUE-3485-ITEM-7] closes the calendar when the field becomes disabled", async () => {
+		const { rerender } = wrap(
+			<DateInput label="Day" value={DAY} onChange={noop} />,
+		);
+		fireEvent.click(
+			await screen.findByRole("button", { name: /choose date/i }),
+		);
+		await screen.findByRole("dialog");
+		rerender(<DateInput label="Day" value={DAY} onChange={noop} disabled />);
+		await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+	});
+
 	it("[ISSUE-3485-ITEM-13] links a helperText prop to the field group", async () => {
 		wrap(
 			<DateInput

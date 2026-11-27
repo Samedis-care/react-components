@@ -38,6 +38,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [The default Back button shows a hover](2026-11-27-default-back-button-hover.md) | behavior |
 | 2026-11-27 | [MultiLanguageInput shows a disabled field while `enabledLanguages` is empty, and a repeated language once](2026-11-27-multi-language-input-empty-and-repeated-languages.md) | behavior |
 | 2026-11-27 | [Escape in the locale selector's search box clears the query before it closes the dialog](2026-11-27-locale-selector-escape-clears-search.md) | behavior |
+| 2026-11-27 | [The date pickers close their calendar when they get disabled or read-only](2026-11-27-picker-calendar-closes-when-disabled.md) | behavior |
 | 2026-11-27 | [InfiniteScroll: a `callBackDebounce` above 2^31 - 1 or `Infinity` makes no call](2026-11-27-infinite-scroll-endless-debounce-holds-calls.md) | behavior |
 | 2026-11-27 | [InlineSwitch's theme defaults leave out the props of a single switch](2026-11-27-inline-switch-theme-default-props.md) | type |
 | 2026-11-27 | [InlineSwitch's switch row is a `<label>` of spans, not a MUI Grid](2026-11-27-inline-switch-label-row-without-grid.md) | behavior |
