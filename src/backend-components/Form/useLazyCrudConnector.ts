@@ -3,7 +3,7 @@ import DefaultConnector from "../../backend-integration/Connector/DefaultConnect
 import { ModelUnknown } from "../../backend-integration/Model/Model";
 import ApiConnector from "../../backend-integration/Connector/ApiConnector";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
-import { useFormContext } from "./Form";
+import { useFormContextLite } from "./Form";
 import { DistributiveOmit } from "../../utils/distributiveOmit";
 
 /**
@@ -273,13 +273,16 @@ const buildConnector = <ExtraT extends Record<string, unknown> | undefined>(
  * queued and sent to getEndpoint(savedId) after the Form saved its record
  * @param params See UseLazyCrudConnectorParams
  * @returns The connector, one per Form, field and record
- * @throws Outside a Form ("Form Context not set. Not using form engine?"), and without
- *         params.getConnector and a default API connector ("No default connector set"),
- *         both while the control renders. A component that also renders outside a Form
- *         reads `useContext(FormContext)` and renders a child that calls this hook only
- *         inside one, rather than catching the error: a hook call in a try block breaks
+ * @throws Outside a Form ("Form Context (Lite) not set. Not using form engine?"), and
+ *         without params.getConnector and a default API connector ("No default connector
+ *         set"), both while the control renders. A component that also renders outside a
+ *         Form reads `useContext(FormContextLite)` and renders a child that calls this hook
+ *         only inside one, rather than catching the error: a hook call in a try block breaks
  *         the rules of hooks.
  * @remarks
+ * - Reads the Form's lite context (useFormContextLite), not the full one: through this hook
+ *   the control renders again when the Form's state changes (dirty, read-only, submitting,
+ *   …), not when one of its values does.
  * - The params are read once (see UseLazyCrudConnectorParams): a later getEndpoint,
  *   onParentIdChange, extraParams, getConnector, configureConnector or field changes
  *   neither the reads nor the save. Another collection takes another field and a new
@@ -339,7 +342,7 @@ const useLazyCrudConnector = <
 		removePreSubmitHandler,
 		onlySubmitMounted,
 		flowEngine,
-	} = useFormContext<ModelUnknown>();
+	} = useFormContextLite<ModelUnknown>();
 
 	// when updating params, also update extractLazyCrudConnectorParams
 	// the params are read once: field when the control mounts, the others when the

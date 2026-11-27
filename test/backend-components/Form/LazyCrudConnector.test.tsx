@@ -19,6 +19,7 @@ import {
 	within,
 } from "@testing-library/react";
 import {
+	inputOf,
 	loaded,
 	makeModel,
 	mountForm,
@@ -38,10 +39,15 @@ import FormCrudMultiSelect, {
 	FormCrudMultiSelectProps,
 } from "../../../src/backend-components/Form/CrudControls/FormCrudMultiSelect";
 import useLazyCrudConnector from "../../../src/backend-components/Form/useLazyCrudConnector";
+import FormField from "../../../src/backend-components/Form/Field";
+import DefaultErrorComponent from "../../../src/backend-components/Form/DefaultErrorComponent";
 import ApiConnector from "../../../src/backend-integration/Connector/ApiConnector";
 import LazyConnector from "../../../src/backend-integration/Connector/LazyConnector";
 import type { ResponseMeta } from "../../../src/backend-integration/Connector/Connector";
-import { useCrudSelectContext } from "../../../src/backend-components/Selector/CrudMultiSelect";
+import CrudMultiSelect, {
+	CrudMultiSelectProps,
+	useCrudSelectContext,
+} from "../../../src/backend-components/Selector/CrudMultiSelect";
 import type {
 	CrudSelectDispatch,
 	UseCrudSelectResult,
@@ -838,6 +844,121 @@ describe("useLazyCrudConnector: re-renders of the form", () => {
 
 		expect(renders).toBeLessThan(10);
 		expect(sink.ctx!.dirty).toBe(true);
+	});
+});
+
+describe("useLazyCrudConnector and useCrudSelect: typing into another field of the form", () => {
+	/**
+	 * Mounts the form with a FormField "note" next to a control whose renders a Profiler
+	 * counts. The page does not read the form's state and the control is made once, so a
+	 * render of the control while the user types can only come from a context it reads.
+	 * @param makeControl Makes the control, once, before the mount
+	 * @returns The Profiler's onRender, the sink, and type, which types a value into "note"
+	 */
+	const mountBeside = async (
+		makeControl: (model: ModelUnknown, env: Env) => React.ReactNode,
+	) => {
+		const model = makeModel();
+		const env = makeEnv({ "joins/1": [{ id: "j1", source_id: "s1" }] });
+		const sink: Sink = {};
+		const onRender = vi.fn();
+		const control = makeControl(model, env);
+		const Capture = () => {
+			sink.ctx = useFormContext<ModelUnknown>();
+			return null;
+		};
+		const Page = () => (
+			<>
+				<Capture />
+				<FormField name={"note"} />
+				<React.Profiler id={"control"} onRender={onRender}>
+					{control}
+				</React.Profiler>
+			</>
+		);
+		const { container } = mountForm(model, Page);
+		await loaded(sink);
+		const type = async (value: string) => {
+			fireEvent.change(inputOf(container, "note"), { target: { value } });
+			await settle();
+		};
+		return { sink, onRender, type };
+	};
+
+	/**
+	 * Types four characters into "note" and returns the renders of the control the last
+	 * three caused: the first makes the form dirty, which the lite context carries
+	 */
+	const rendersWhileTyping = async (
+		sink: Sink,
+		onRender: Mock,
+		type: (value: string) => Promise<void>,
+	) => {
+		await type("a");
+		expect(sink.ctx!.dirty).toBe(true);
+		onRender.mockClear();
+		await type("ab");
+		await type("abc");
+		await type("abcd");
+		expect(sink.ctx!.values.note).toBe("abcd");
+		return onRender.mock.calls.length;
+	};
+
+	it("[ISSUE-3505-ITEM-17] a control that uses useLazyCrudConnector does not render again", async () => {
+		const { sink, onRender, type } = await mountBeside((_model, env) => {
+			const params = {
+				field: "joins",
+				initialId: "1",
+				getEndpoint: (id: string) => `joins/${id}`,
+				getConnector: env.getConnector,
+			};
+			const Control = () => {
+				useLazyCrudConnector(params);
+				return null;
+			};
+			return <Control />;
+		});
+
+		expect(await rendersWhileTyping(sink, onRender, type)).toBe(0);
+	});
+
+	it("[ISSUE-3505-ITEM-17] a CrudMultiSelect the form validates does not render again, and its validation still runs", async () => {
+		const validate = (data: JoinData[]): Record<string, string> =>
+			data.length > 0 ? { empty: "Leave it empty" } : {};
+		const { sink, onRender, type } = await mountBeside((model, env) => {
+			const props: CrudMultiSelectProps<ModelUnknown, JoinData> = {
+				model,
+				connector: env.getConnector("joins/1"),
+				errorComponent: DefaultErrorComponent,
+				field: "joins",
+				validate,
+				serialize,
+				deserialize,
+				deserializeModel,
+				getIdOfData,
+				label: "Joins",
+				placeholder: "Search joins",
+				endAdornment: <CaptureSelectCtx />,
+			};
+			return <CrudMultiSelect<ModelUnknown, JoinData> {...props} />;
+		});
+		await ready();
+
+		expect(await rendersWhileTyping(sink, onRender, type)).toBe(0);
+		expect(await trySubmit(sink)).not.toBeNull();
+		await settle();
+		expect(sink.ctx!.errors.joins_empty).toBe("Leave it empty");
+	});
+
+	it("[ISSUE-3505-ITEM-17] FormCrudMultiSelect does not render again", async () => {
+		const { sink, onRender, type } = await mountBeside((model, env) => (
+			<FormCrudMultiSelect<ModelUnknown, JoinData>
+				{...selectorProps(model, env)}
+			/>
+		));
+		await ready();
+
+		expect(await rendersWhileTyping(sink, onRender, type)).toBe(0);
 	});
 });
 

@@ -16,7 +16,7 @@ import {
 } from "react";
 import toComparisonJson from "../../utils/toComparisonJson";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
-import { FormContext, ValidationResult } from "../Form";
+import { FormContextLite, ValidationResult } from "../Form";
 import { BackendMultiSelectProps } from "./BackendMultiSelect";
 import PartialApplyError, {
 	PartialApplyFailure,
@@ -827,8 +827,9 @@ const useCrudSelect = <M extends ModelUnknown, DataT extends BaseSelectorData>(
 		if (onChange) onChange(selected);
 	}, [onChange, selected]);
 
-	// validations
-	const formCtx = useContext(FormContext);
+	// validations: the lite context has what they need and does not change with the Form's
+	// values, so a value change elsewhere in the Form does not render the selector again
+	const formCtx = useContext(FormContextLite);
 	useEffect(() => {
 		if (!formCtx || !validate || !field) {
 			if (validate && process.env.NODE_ENV === "development") {

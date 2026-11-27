@@ -763,9 +763,15 @@ Each builds a `LazyConnector` with `useLazyCrudConnector`, from `field`, `initia
 `getEndpoint` and the hook's other params. Reads go to the endpoint, writes are queued, and the
 queue is sent after the form saved the record, so a new record gets its files too. While
 anything is queued the form is dirty. The connector is kept as the form's custom state of
-`field` (`useFormContext<M>().getCustomState<LazyConnector>(field)`). `field` names the control
-in the form and has to be unique there: two controls with one `field` mix up their
+`field` (`useFormContextLite<M>().getCustomState<LazyConnector>(field)`). `field` names the
+control in the form and has to be unique there: two controls with one `field` mix up their
 collections, and the save sends the queue of only one of them.
+
+The hook, and `CrudMultiSelect`'s `validate`, read the lite form context
+(`useFormContextLite`). It carries the callbacks of custom fields (custom state, the dirty
+flag, validation, warning, pre- and post-submit handlers) and does not change with the
+form's values, so typing into another field does not render these controls again. A custom
+field of your own that needs nothing else reads it too, rather than `useFormContext`.
 
 They take the form's `readOnly` on top of their own, and its `errorComponent`.
 `FormCrudMultiSelect` is read-only in a read-only form, not disabled: it shows its label and
@@ -781,8 +787,8 @@ adornments call, ignores the change. An end adornment reads
 their own prop is set.
 Outside a form, use `CrudFileUpload` and `CrudMultiImage` with a connector of your own: they
 do not read the form. `useLazyCrudConnector` and the `FormCrud…` controls throw outside a form.
-A component of your own that works in and outside forms reads `useContext(FormContext)` and
-renders a child that calls `useLazyCrudConnector` only inside a form; catching the error
+A component of your own that works in and outside forms reads `useContext(FormContextLite)`
+and renders a child that calls `useLazyCrudConnector` only inside a form; catching the error
 instead makes the hook call conditional, against the rules of hooks.
 
 Things to know about the queue:

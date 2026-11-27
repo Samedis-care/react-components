@@ -919,6 +919,18 @@ export const useFormContext = <
 	return ctx as unknown as FormContextData<M, CustomPropsT>;
 };
 
+/**
+ * The part of the form context that does not change with the form's values: the record, the
+ * form's state flags and its stable callbacks, among them those of custom fields (custom
+ * state, dirty flag, validation, warning, pre- and post-submit handlers)
+ * @typeParam M The model of the form, ModelUnknown for code that works with any form
+ * @typeParam CustomPropsT The custom props of the form
+ * @remarks Its value changes with id, model, customProps, the read-only reasons, submitting,
+ *          dirty and stagedDirty, but not with a value, an error, a warning or a touched flag,
+ *          so a control that reads only this context (useFormContextLite) does not render
+ *          again while the user types into another field. getFieldValue and getFieldValues
+ *          read the latest values without subscribing to them.
+ */
 export type FormContextDataLite<
 	M extends ModelUnknown,
 	CustomPropsT = unknown,
@@ -942,6 +954,18 @@ export type FormContextDataLite<
 	| "setFieldTouchedLite"
 	| "setCustomReadOnly"
 	| "removeCustomReadOnly"
+	| "setCustomValidationHandler"
+	| "removeCustomValidationHandler"
+	| "setCustomWarningHandler"
+	| "removeCustomWarningHandler"
+	| "setPreSubmitHandler"
+	| "removePreSubmitHandler"
+	| "setPostSubmitHandler"
+	| "removePostSubmitHandler"
+	| "getCustomState"
+	| "setCustomState"
+	| "hasCustomState"
+	| "setCustomFieldDirty"
 	| "addEventListener"
 	| "removeEventListener"
 	| "flowEngine"
@@ -2872,6 +2896,18 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 			setFieldTouchedLite,
 			setCustomReadOnly,
 			removeCustomReadOnly,
+			setCustomValidationHandler,
+			removeCustomValidationHandler,
+			setCustomWarningHandler,
+			removeCustomWarningHandler,
+			setPreSubmitHandler,
+			removePreSubmitHandler,
+			setPostSubmitHandler,
+			removePostSubmitHandler,
+			getCustomState,
+			setCustomState,
+			hasCustomState,
+			setCustomFieldDirty,
 			addEventListener: formEvents.addEventListener,
 			removeEventListener: formEvents.removeEventListener,
 			flowEngine: !!flowEngine,
@@ -2902,6 +2938,18 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 			setFieldTouchedLite,
 			setCustomReadOnly,
 			removeCustomReadOnly,
+			setCustomValidationHandler,
+			removeCustomValidationHandler,
+			setCustomWarningHandler,
+			removeCustomWarningHandler,
+			setPreSubmitHandler,
+			removePreSubmitHandler,
+			setPostSubmitHandler,
+			removePostSubmitHandler,
+			getCustomState,
+			setCustomState,
+			hasCustomState,
+			setCustomFieldDirty,
 			formEvents,
 			flowEngine,
 			submitFormReferenced,
