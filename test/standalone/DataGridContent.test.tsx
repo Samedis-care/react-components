@@ -385,6 +385,109 @@ describe("ColumnHeader: labels", () => {
 	});
 });
 
+describe("ColumnHeader: sorting", () => {
+	it("[ISSUE-3493-ITEM-1] with sortLimit 0 a plain header click replaces the sort", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		const loadData = loadSpy();
+		const { container } = render(
+			<Grid
+				loadData={loadData}
+				sortLimit={0}
+				defaultSort={[{ field: "role", direction: 1 }]}
+			/>,
+		);
+		await idle();
+		loadData.mockClear();
+		fireEvent.click(headerWrapper(container, "name"));
+		passDebounce();
+		await idle();
+		// "max 1 sorts means pass 0": a plain click leaves one sort
+		expect(
+			loadData.mock.calls.at(-1)?.[0].sort,
+			"the click was refused: no reload",
+		).toEqual([{ field: "name", direction: 1 }]);
+		expect(
+			headerWrapper(container, "name").querySelector(
+				'[data-testid="ArrowUpwardIcon"]',
+			),
+		).not.toBeNull();
+	});
+
+	it("[ISSUE-3493-ITEM-1] a refused sort click leaves the sort that loadData gets unchanged", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		const loadData = loadSpy();
+		const { container } = render(
+			<Grid
+				loadData={loadData}
+				sortLimit={0}
+				defaultSort={[{ field: "role", direction: 1 }]}
+			/>,
+		);
+		await idle();
+		fireEvent.click(headerWrapper(container, "name"));
+		passDebounce();
+		await idle();
+		const shown = loadData.mock.calls.at(-1)![0].sort;
+		// the next reload (a search) sends the sort the header shows
+		loadData.mockClear();
+		act(() => probe!.setState((p) => ({ ...p, search: "a" })));
+		passDebounce();
+		await idle();
+		expect(loadData.mock.calls.at(-1)![0].sort).toEqual(shown);
+	});
+
+	it("[ISSUE-3493-ITEM-1] with sortLimit 0 a Shift+click that would add a second sort is refused and changes nothing", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		const loadData = loadSpy();
+		const { container } = render(
+			<Grid
+				loadData={loadData}
+				sortLimit={0}
+				defaultSort={[{ field: "role", direction: 1 }]}
+			/>,
+		);
+		await idle();
+		fireEvent.click(headerWrapper(container, "name"));
+		passDebounce();
+		await idle();
+		const columnState = probe!.columnState;
+		loadData.mockClear();
+		fireEvent.click(headerWrapper(container, "role"), { shiftKey: true });
+		passDebounce();
+		await idle();
+		expect(loadData).not.toHaveBeenCalled();
+		expect(probe!.columnState).toBe(columnState);
+		expect(
+			headerWrapper(container, "role").querySelector("svg[data-testid^=Arrow]"),
+		).toBeNull();
+		// the next reload (a search) still sends the one sort
+		act(() => probe!.setState((p) => ({ ...p, search: "a" })));
+		passDebounce();
+		await idle();
+		expect(loadData.mock.calls.at(-1)![0].sort).toEqual([
+			{ field: "name", direction: 1 },
+		]);
+	});
+
+	it("[ISSUE-3493-ITEM-1] a plain header click leaves the column state it replaces as it was", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
+		const { container } = render(
+			<Grid defaultSort={[{ field: "role", direction: 1 }]} />,
+		);
+		await idle();
+		// the state an app's filter bar got from useDataGridColumnState
+		const before = probe!.columnState;
+		fireEvent.click(headerWrapper(container, "name"));
+		passDebounce();
+		await idle();
+		expect(before.role).toEqual({ sort: 1, sortOrder: 1, filter: undefined });
+		expect(before.name).toMatchObject({ sort: 0 });
+		expect(probe!.columnState.role).toMatchObject({ sort: 0 });
+		expect(probe!.columnState.role.sortOrder).toBeUndefined();
+		expect(probe!.columnState.name).toMatchObject({ sort: 1, sortOrder: 1 });
+	});
+});
+
 describe("Content / ColumnHeader: widths", () => {
 	it("[ISSUE-3493-ITEM-2] a resize that ends over the column's own header does not sort it", async () => {
 		vi.useFakeTimers({ shouldAdvanceTime: true });

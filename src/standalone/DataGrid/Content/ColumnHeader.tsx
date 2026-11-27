@@ -127,17 +127,18 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 						}
 					}
 				} else {
+					// this column becomes the only sort, which every sortLimit
+					// allows. The other columns get new objects: prevState's
+					// stay as they are
 					for (const key in newColumnState) {
 						if (key === field) continue;
-						newColumnState[key].sort = 0;
-						newColumnState[key].sortOrder = undefined;
+						newColumnState[key] = {
+							...newColumnState[key],
+							sort: 0,
+							sortOrder: undefined,
+						};
 					}
 					newColumnState[field].sortOrder = 1;
-
-					// if sortLimit is null we cancel the operation
-					if (typeof sortLimit === "number" && sortLimit === 0) {
-						return prevState;
-					}
 				}
 
 				return newColumnState;

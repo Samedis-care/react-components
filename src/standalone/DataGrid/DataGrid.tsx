@@ -478,8 +478,13 @@ export interface IDataGridColumnProps {
 	 */
 	filterLimit?: number;
 	/**
-	 * Limits the amount of active sorts
+	 * Limits the amount of active sorts the user can set with the column
+	 * headers. A plain header click makes its column the only sort, which
+	 * every limit allows; a Shift+click that would add a sort over the limit
+	 * is refused and changes nothing. A defaultSort or stored sort is used as
+	 * it is.
 	 * @remarks This is zero-indexed, so max 1 sorts means pass 0, max 2 sorts => 1, etc
+	 * @default undefined (the number of sorts is not limited)
 	 */
 	sortLimit?: number;
 	/**
