@@ -813,8 +813,8 @@ Independently of what your error component displays, Components-Care forwards un
 error tracker. If `@sentry/react` is installed it is used automatically, otherwise nothing happens.
 By default a `ValidationError` and a `NetworkError` are **not** reported (neither is actionable —
 one is a normal part of the form flow, the other is usually the user's connection), while a
-`BackendError` and code errors (`Error`, `TypeError`, ...) are. A `PartialApplyError` and a
-`PartialDeleteError` are judged by the errors they wrap (see below).
+`BackendError` and code errors (`Error`, `TypeError`, ...) are. A `PartialApplyError`, a
+`PartialDeleteError` and an `AggregateError` are judged by the errors they wrap (see below).
 
 Both the policy and the destination are configurable from your application's startup code:
 
@@ -867,3 +867,10 @@ of the records and not others: `failedIds` names the ones still there, and `caus
 their deletes failed with. The default policy judges it by that `cause` the same way: reported if
 the cause would be reported on its own, not if it is a `NetworkError` or a name in the call site's
 `ignoreNames`. One without a cause, or whose cause is no `Error`, is reported.
+
+An `AggregateError` (matched by its name, `AggregateError`) is judged by its `errors` the same
+way: reported if at least one of them would be reported on its own, not if none would. A Form's
+save rejects with one when several queued writes of a lazy control that sets no queue error
+factory failed, such as a control of your own on `useLazyCrudConnector`, e.g. all with
+`NetworkError`s because the connection dropped. An entry that is no `Error` counts as reported,
+and an `AggregateError` without errors is reported.

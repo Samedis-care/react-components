@@ -11,6 +11,8 @@ import PartialApplyError, {
 	PartialApplyFailure,
 } from "../../src/backend-components/Form/PartialApplyError";
 import PartialDeleteError from "../../src/backend-integration/Connector/PartialDeleteError";
+import NetworkError from "../../src/backend-integration/Connector/NetworkError";
+import BackendError from "../../src/backend-integration/Connector/BackendError";
 
 const namedError = (name: string): Error => {
 	const e = new Error(`test ${name}`);
@@ -229,6 +231,68 @@ describe("defaultShouldReportError: a PartialDeleteError", () => {
 			defaultShouldReportError(partialDeleteError("offline"), {
 				source: "test",
 			}),
+		).toBe(true);
+	});
+});
+
+describe("defaultShouldReportError: an AggregateError", () => {
+	it("[ISSUE-3505-ITEM-29] doesn't report one whose errors are all NetworkErrors", () => {
+		expect(
+			defaultShouldReportError(
+				new AggregateError([
+					new NetworkError("offline"),
+					new NetworkError("offline"),
+				]),
+				{ source: "test" },
+			),
+		).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-29] reports one with an error reported on its own", () => {
+		expect(
+			defaultShouldReportError(
+				new AggregateError([
+					new NetworkError("offline"),
+					new BackendError("refused"),
+				]),
+				{ source: "test" },
+			),
+		).toBe(true);
+		expect(
+			defaultShouldReportError(new AggregateError([new TypeError("boom")]), {
+				source: "test",
+			}),
+		).toBe(true);
+	});
+
+	it("[ISSUE-3505-ITEM-29] judges its errors by context.ignoreNames too", () => {
+		expect(
+			defaultShouldReportError(
+				new AggregateError([
+					new BackendError("refused"),
+					new NetworkError("offline"),
+				]),
+				{ source: "test", ignoreNames: [CcErrorNames.BackendError] },
+			),
+		).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-29] judges one from another realm by its name and errors", () => {
+		const copy = Object.assign(namedError("AggregateError"), {
+			errors: [namedError(CcErrorNames.NetworkError)],
+		});
+		expect(defaultShouldReportError(copy, { source: "test" })).toBe(false);
+	});
+
+	it("[ISSUE-3505-ITEM-29] reports one without errors, or with an error that is no Error", () => {
+		expect(
+			defaultShouldReportError(new AggregateError([]), { source: "test" }),
+		).toBe(true);
+		expect(
+			defaultShouldReportError(
+				new AggregateError([new NetworkError("offline"), "offline"]),
+				{ source: "test" },
+			),
 		).toBe(true);
 	});
 });

@@ -127,16 +127,20 @@ export const DefaultUnreportedErrorNames: string[] = [
 ];
 
 /**
- * The errors of the failed writes an error of the library wraps, read by its name, so one
- * from another copy of the library counts too: a PartialApplyError's `failures[].error`,
- * a PartialDeleteError's `cause`
+ * The errors an error wraps, read by its name, so one from another copy of the library, or
+ * an AggregateError from another realm, counts too: a PartialApplyError's
+ * `failures[].error`, a PartialDeleteError's `cause`, an AggregateError's `errors`
  * @param error The error to read
  * @returns The errors, one per failure (a PartialDeleteError's one cause, also an absent
- *          one); null if it is neither of them, or a PartialApplyError that lists no
- *          failures
+ *          one); null if it is none of them, or a PartialApplyError that lists no failures,
+ *          or an AggregateError that holds no errors
  */
-const failedWriteErrorsOf = (error: Error): unknown[] | null => {
+const wrappedErrorsOf = (error: Error): unknown[] | null => {
 	if (error.name === CcErrorNames.PartialDeleteError) return [error.cause];
+	if (error.name === "AggregateError") {
+		const errors = (error as Error & Partial<Record<"errors", unknown>>).errors;
+		return Array.isArray(errors) && errors.length > 0 ? errors : null;
+	}
 	if (error.name !== CcErrorNames.PartialApplyError) return null;
 	const failures = (error as Error & Partial<Record<"failures", unknown>>)
 		.failures;
@@ -157,7 +161,9 @@ const failedWriteErrorsOf = (error: Error): unknown[] | null => {
  *          whose error is no Error counts as reported. A PartialDeleteError
  *          (CcErrorNames.PartialDeleteError) is judged the same way by its `cause`, the
  *          error its deletes failed with; one without a cause, or whose cause is no
- *          Error, is reported.
+ *          Error, is reported. An AggregateError is judged the same way by its `errors`,
+ *          e.g. the one LazyConnector's workQueue rejects with when several queued writes
+ *          failed and no queue error factory is set; one without errors is reported.
  * @see DefaultUnreportedErrorNames
  */
 export const defaultShouldReportError: ShouldReportErrorCallback = (
@@ -169,12 +175,12 @@ export const defaultShouldReportError: ShouldReportErrorCallback = (
 		(context.ignoreNames ?? []).includes(error.name)
 	)
 		return false;
-	const failedWriteErrors = failedWriteErrorsOf(error);
-	if (!failedWriteErrors) return true;
-	return failedWriteErrors.some(
-		(failedWriteError) =>
-			!(failedWriteError instanceof Error) ||
-			defaultShouldReportError(failedWriteError, context),
+	const wrappedErrors = wrappedErrorsOf(error);
+	if (!wrappedErrors) return true;
+	return wrappedErrors.some(
+		(wrappedError) =>
+			!(wrappedError instanceof Error) ||
+			defaultShouldReportError(wrappedError, context),
 	);
 };
 

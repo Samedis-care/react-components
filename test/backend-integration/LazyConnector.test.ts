@@ -2,6 +2,9 @@ import { describe, expect, it, vi, type Mock } from "vitest";
 import LazyConnector from "../../src/backend-integration/Connector/LazyConnector";
 import type ApiConnector from "../../src/backend-integration/Connector/ApiConnector";
 import type { AdvancedDeleteRequest } from "../../src/backend-integration/Model/Model";
+import NetworkError from "../../src/backend-integration/Connector/NetworkError";
+import BackendError from "../../src/backend-integration/Connector/BackendError";
+import { defaultShouldReportError } from "../../src/framework/ErrorReporting";
 
 /**
  * The subset of the real connector the queue ever calls, so that a test can see exactly
@@ -422,6 +425,36 @@ describe("LazyConnector workQueue", () => {
 		// asked once, and not after it was removed
 		expect(secondsCalls).toBe(1);
 		expect(second).toHaveBeenCalledTimes(1);
+	});
+
+	it("[ISSUE-3505-ITEM-29] without an error factory, a save whose writes all failed for the connection rejects with an error the default reporting policy doesn't report; one the backend refused too, with one it reports", async () => {
+		/** Queues one create per error, which the real connector fails with */
+		const save = (...errors: Error[]) => {
+			const { connector } = makeRealConnector();
+			errors.forEach((error) =>
+				(connector.create as Mock).mockRejectedValueOnce(error),
+			);
+			const lazy = new LazyConnector(connector, true);
+			errors.forEach((_, index) => lazy.create({ name: index }, undefined));
+			return lazy.workQueue().then(
+				() => null,
+				(e: unknown) => e as Error,
+			);
+		};
+
+		const offline = await save(
+			new NetworkError("offline"),
+			new NetworkError("offline"),
+		);
+		const refused = await save(
+			new NetworkError("offline"),
+			new BackendError("refused"),
+		);
+
+		expect(offline).toBeInstanceOf(AggregateError);
+		expect(defaultShouldReportError(offline!, { source: "test" })).toBe(false);
+		expect(refused).toBeInstanceOf(AggregateError);
+		expect(defaultShouldReportError(refused!, { source: "test" })).toBe(true);
 	});
 
 	it("does not write the same record twice when the submit is retried", async () => {
