@@ -29,6 +29,7 @@ import {
 	IDataGridAddButton,
 } from "../../standalone/DataGrid/DataGrid";
 import useNavigate from "../../standalone/Routes/useNavigate";
+import { useHistoryRouterContext } from "../../standalone/Routes/HistoryRouter";
 import Route, { RouteContext, RouteProps } from "../../standalone/Routes/Route";
 import useLocation from "../../standalone/Routes/useLocation";
 import useParams from "../../standalone/Routes/useParams";
@@ -73,6 +74,15 @@ export interface CrudProps<M extends ModelUnknown> {
 	model: M;
 	/**
 	 * The properties to pass to form
+	 * @remarks `onSubmit` is wrapped. After a successful save of the create form,
+	 *          CRUD first moves on to the saved record, if the create form is
+	 *          still shown then: routed, it replaces `<url>/new…` with
+	 *          `<url>/<id>…` (the location when the save finishes, so a tab
+	 *          opened meanwhile stays open); with disableRouting, the "new" view
+	 *          becomes the saved id. A user who left the create form while it
+	 *          saved (another record, the list, another page, a closed view)
+	 *          stays there. Then CRUD reloads the grid and awaits this onSubmit,
+	 *          also when the user has left.
 	 */
 	formProps: Omit<
 		FormProps<M, CrudFormProps>,
@@ -414,28 +424,50 @@ const CRUD = <M extends ModelUnknown>(
 		[disableRouting, navigate, routeUrl, refreshGrid],
 	);
 
+	// a save resolves long after the render it started in: handleSubmit reads where the user
+	// is then from these, as they may have left the create form while it saved
+	const { history } = useHistoryRouterContext();
+	const viewRef = useRef(id);
+	viewRef.current = id;
+	const mountedRef = useRef(false);
+	useEffect(() => {
+		mountedRef.current = true;
+		return () => {
+			mountedRef.current = false;
+		};
+	}, []);
+
 	const handleSubmit = useCallback(
 		async (
 			data: ModelRecord<M>,
 			submit: ModelRecord<M>,
 			old: ModelRecord<M>,
 		) => {
-			// redirect to edit page
+			// redirect to edit page, if the create form that was saved is still shown. A user
+			// who left it while it saved (another record, the list, another page, a closed
+			// view) stays where they went
 			const { id } = data as Record<"id", string>;
-			skipNextFormIdReset.current = id;
-			if (disableRouting) {
-				setId((oldId) => (oldId === null ? null : id));
+			const { pathname } = history.location;
+			if (!mountedRef.current) {
+				// the CRUD is gone, and the create form with it
+			} else if (disableRouting) {
+				if (viewRef.current === "new") {
+					skipNextFormIdReset.current = id;
+					// a view switch that has not rendered yet keeps its view
+					setId((view) => (view === "new" ? id : view));
+				}
 			} else if (
-				location.pathname.startsWith(routeUrl + "/new") ||
-				location.pathname.startsWith(routeUrl + "/new/")
+				pathname.startsWith(routeUrl + "/new") ||
+				pathname.startsWith(routeUrl + "/new/")
 			) {
-				// the saved record opens where the create form was, e.g. on the same
+				// the saved record opens where the create form is, e.g. on the same
 				// tab: <url>/new/permissions becomes <url>/<id>/permissions
-				const subPath = location.pathname
+				const subPath = pathname
 					.substring(routeUrl.length)
 					.split("/")
 					.filter((segment) => segment)
 					.slice(1);
+				skipNextFormIdReset.current = id;
 				// the Form stays (skipNextFormIdReset), so this moves the form page rather than
 				// leaving it, and its leave guard lets it pass: a control's own dirty state may
 				// not have caught up with the saved record yet. The user stays where they are
@@ -453,14 +485,7 @@ const CRUD = <M extends ModelUnknown>(
 				await props.formProps.onSubmit(data, submit, old);
 			}
 		},
-		[
-			props.formProps,
-			disableRouting,
-			location.pathname,
-			navigate,
-			routeUrl,
-			refreshGrid,
-		],
+		[props.formProps, disableRouting, history, navigate, routeUrl, refreshGrid],
 	);
 
 	const handleImportButton = useCallback(() => {
