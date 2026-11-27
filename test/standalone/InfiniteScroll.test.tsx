@@ -2335,5 +2335,62 @@ describe("InfiniteScroll behavior (stubbed layout)", () => {
 				expect(bottom).toHaveBeenCalledTimes(2);
 			});
 		});
+
+		describe("a negative or NaN callBackDebounce", () => {
+			it.each([-1, Number.NaN])(
+				"[ISSUE-3471-ITEM-15] calls loadMoreTop and loadMoreBottom synchronously with callBackDebounce={%s}, as with 0",
+				(wait) => {
+					const top = vi.fn();
+					const bottom = vi.fn();
+					const { container } = render(
+						<InfiniteScroll
+							className={SCROLLER}
+							loadMoreTop={top}
+							loadMoreBottom={bottom}
+							callBackDebounce={wait}
+						>
+							<div />
+						</InfiniteScroll>,
+					);
+					const scroller = getScroller(container);
+					// the list opens at its top and fills the container: it loads on top at once
+					expect(top).toHaveBeenCalledTimes(1);
+					scrollTo(scroller, 700);
+					expect(bottom).toHaveBeenCalledTimes(1);
+					scrollTo(scroller, 0);
+					expect(top).toHaveBeenCalledTimes(2);
+				},
+			);
+
+			it.each([-1, Number.NaN])(
+				"[ISSUE-3471-ITEM-15] makes the call at the next trigger once callBackDebounce changes to %s, instead of letting it join the call that waits",
+				(wait) => {
+					const bottom = vi.fn();
+					const children = <div />;
+					const { container, rerender } = render(
+						<InfiniteScroll className={SCROLLER} loadMoreBottom={bottom}>
+							{children}
+						</InfiniteScroll>,
+					);
+					const scroller = getScroller(container);
+					// this one waits the default 100ms
+					scrollTo(scroller, 700);
+					rerender(
+						<InfiniteScroll
+							className={SCROLLER}
+							loadMoreBottom={bottom}
+							callBackDebounce={wait}
+						>
+							{children}
+						</InfiniteScroll>,
+					);
+					scrollTo(scroller, 700);
+					expect(bottom).toHaveBeenCalledTimes(1);
+					// the call that waited is dropped, not made a second time
+					advance(100);
+					expect(bottom).toHaveBeenCalledTimes(1);
+				},
+			);
+		});
 	});
 });

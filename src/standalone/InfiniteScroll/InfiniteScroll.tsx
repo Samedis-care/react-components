@@ -156,9 +156,9 @@ export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement
 	 * the callback is called again every `callBackDebounce` ms: pass `loading`
 	 * while a load runs, so that no call is made until it ends.
 	 *
-	 * `0` calls the callbacks synchronously. Can be changed after mount; it
-	 * applies to the waits that start after the change, and with `0` the next
-	 * trigger calls at once.
+	 * `0` calls the callbacks synchronously. A negative number or `NaN` counts
+	 * as `0`. Can be changed after mount; it applies to the waits that start
+	 * after the change, and with `0` the next trigger calls at once.
 	 *
 	 * A call is made with the callback of the latest render: a callback that is
 	 * replaced or removed while a call waits is not called. A call that still
@@ -195,6 +195,11 @@ const LOAD_CALLBACK_NAMES: readonly LoadCallbackName[] = [
  * The default `threshold`, in CSS pixels
  */
 const DEFAULT_THRESHOLD = 250;
+
+/**
+ * The default `callBackDebounce`, in milliseconds
+ */
+const DEFAULT_CALLBACK_DEBOUNCE = 100;
 
 /**
  * Does the content overflow the scroll container by more than `threshold`?
@@ -497,6 +502,15 @@ const getThreshold = (props: InfiniteScrollProps): number => {
 };
 
 /**
+ * The `callBackDebounce` prop, with its default; a negative number or NaN
+ * counts as 0
+ */
+const getCallBackDebounce = (props: InfiniteScrollProps): number => {
+	const wait = props.callBackDebounce ?? DEFAULT_CALLBACK_DEBOUNCE;
+	return wait > 0 ? wait : 0;
+};
+
+/**
  * Stops holding the anchor
  */
 const releaseAnchor = (scroll: ScrollState): void => {
@@ -588,13 +602,14 @@ const cancelLoad = (scroll: ScrollState, name: LoadCallbackName): void => {
 
 /**
  * Requests a call of the `loadMoreTop` or `loadMoreBottom` prop:
- * `callBackDebounce` ms from now, or right away for 0. A request made while a
- * call waits joins it and does not restart the wait, so triggers that keep
- * coming (a steady scroll near an end, new `children` one after another) do
- * not postpone the call; the first request after the call starts a new wait.
+ * `callBackDebounce` ms from now, or right away for 0 (see
+ * `getCallBackDebounce`). A request made while a call waits joins it and does
+ * not restart the wait, so triggers that keep coming (a steady scroll near an
+ * end, new `children` one after another) do not postpone the call; the first
+ * request after the call starts a new wait.
  */
 const requestLoad = (scroll: ScrollState, name: LoadCallbackName): void => {
-	const wait = scroll.props.callBackDebounce ?? 100;
+	const wait = getCallBackDebounce(scroll.props);
 	if (wait === 0) {
 		cancelLoad(scroll, name);
 		callLoad(scroll, name);
