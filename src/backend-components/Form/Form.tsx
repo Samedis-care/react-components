@@ -215,9 +215,17 @@ export interface FormProps<M extends ModelUnknown, CustomPropsT> {
 	 */
 	id: string | null;
 	/**
-	 * Initial record to use (instead of defaults from model)
-	 * @remarks Only loaded if ID is null
+	 * Values a new record starts with, over the model's defaults (e.g. a record created from a
+	 * template or a copy, or a link to the record it is created for)
+	 * @remarks Only applied if ID is null
 	 * @remarks Read when the record loads, later changes are ignored
+	 * @remarks The fields it sets are changes to the new record: the form's dirty baseline
+	 *          (initialValues) is the model's default record, so a field set to another value
+	 *          than its default makes the form dirty from the start. Its Save is enabled, the
+	 *          leave guard asks, FormAutoSave saves it, the fields are marked with
+	 *          showDirtyState, and a nested form makes its parent dirty. A field set to its
+	 *          default, or changed back to it, is not a change. Values that should not count
+	 *          as a change belong in the model's defaults (a field's getDefaultValue).
 	 */
 	initialRecord?: ModelRecordPartial<M>;
 	/**
@@ -610,6 +618,9 @@ export interface FormContextData<
 	 * field dirty (setCustomFieldDirty with true), or is the record deleted on submit
 	 * (deleteOnSubmit)?
 	 *
+	 * The server record is initialValues. For a new record that is the model's default record,
+	 * so the fields FormProps.initialRecord sets to another value count as changes.
+	 *
 	 * In flow mode (FormProps.flowEngine) the values are those the shown stage submits: the
 	 * fields it renders, alwaysSubmitFields and hidden fields, or every field when its stage
 	 * config turns onlySubmitMounted off. What earlier stages staged (goToStage without
@@ -769,7 +780,10 @@ export interface FormContextData<
 	 */
 	values: ModelRecord<M>;
 	/**
-	 * The initial form values
+	 * The server record the values are compared with (the dirty baseline): the record as
+	 * loaded or last saved. For a new record that the form has not saved yet, the model's
+	 * default record, without FormProps.initialRecord, which is applied to the values as a
+	 * change. Empty before the record loaded.
 	 */
 	initialValues: ModelRecord<M>;
 	/**
@@ -1434,17 +1448,20 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 		set: setInitialValues,
 		state: initialValuesState,
 	} = useRefState<Record<string, unknown> | undefined>(undefined);
-	// single source of truth for a record's initial form values: the server data
-	// plus initialRecord for new records (records without an id). Used both for the
-	// dirty baseline and to seed the form data, so the two can never diverge.
-	// initialRecord is applied when the server data loads, not when it changes: the
-	// form data was seeded from it then, and after a save the baseline is the saved
-	// record, which a re-rendered initialRecord must not replace.
-	// data is the react-query cache entry (for a new record, the model's default record
-	// that every create form starts from), so initialRecord is merged into a copy of it
+	// the dirty baseline is the server record: for a new record (a record without an id) the
+	// model's default record. It is a copy, as the server data is the react-query cache entry
+	// that every create form of the model starts from
+	useEffect(() => {
+		setInitialValues(serverData ? deepClone(serverData[0]) : undefined);
+	}, [serverData, setInitialValues]);
+	// the values a record's form starts with: the server record, plus initialRecord for a new
+	// record. initialRecord is a change to the new record, not a part of its baseline, so the
+	// fields it sets to other values than the model's defaults make the form dirty.
+	// initialRecord is applied when the server data loads, not when it changes: the form
+	// data was seeded from it then
 	const initialRecordRef = useRef(initialRecord);
 	initialRecordRef.current = initialRecord;
-	const buildInitialValues = useCallback(
+	const seedValues = useCallback(
 		(data: Record<string, unknown>): Record<string, unknown> =>
 			deepAssign(
 				deepClone(data),
@@ -1452,11 +1469,6 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 			),
 		[],
 	);
-	useEffect(() => {
-		setInitialValues(
-			serverData ? buildInitialValues(serverData[0]) : undefined,
-		);
-	}, [serverData, buildInitialValues, setInitialValues]);
 	const alwaysSubmitFields = useMemo(
 		() =>
 			uniqueArray([
@@ -1973,7 +1985,7 @@ const Form = <M extends ModelUnknown, CustomPropsT>(
 		if (initializedRef.current || !serverData || !serverData[0]) return;
 		initializedRef.current = true;
 
-		valuesRef.current = deepClone(buildInitialValues(serverData[0]));
+		valuesRef.current = deepClone(seedValues(serverData[0]));
 		setValues(valuesRef.current);
 		touchedRef.current = getDefaultTouched();
 		setTouched(touchedRef.current);

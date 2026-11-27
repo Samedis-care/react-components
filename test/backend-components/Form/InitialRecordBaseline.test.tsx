@@ -85,7 +85,7 @@ describe("Form initialRecord", () => {
 		expect(sink.ctx!.dirty).toBe(false);
 	});
 
-	it("is read on load: a later change doesn't make the form dirty", async () => {
+	it("is read on load: a later change is ignored", async () => {
 		const model = createTestModel();
 		const sink: { ctx?: FormContext; setFirstName?: (name: string) => void } =
 			{};
@@ -115,6 +115,11 @@ describe("Form initialRecord", () => {
 		act(() => sink.setFirstName!("John"));
 		await act(async () => {});
 		expect(sink.ctx!.values.first_name).toBe("Jane");
+		// the form stays as it loaded: dirty by the prefill, against the model's default
+		expect(sink.ctx!.initialValues.first_name).toBe("");
+		expect(sink.ctx!.dirty).toBe(true);
+		act(() => sink.ctx!.setFieldValue("first_name", ""));
+		await act(async () => {});
 		expect(sink.ctx!.dirty).toBe(false);
 	});
 

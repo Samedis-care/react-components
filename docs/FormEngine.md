@@ -464,6 +464,42 @@ those resolve to `true`. Stick with `submit` when you need the error object itse
 in nested forms (`nestedFormName`) too: those don't render an error component of their own, and rely
 on the error propagating to the parent form.
 
+### Pre-filling a new record
+
+A create form (`id={null}`) starts with the model's default record: each field's
+`getDefaultValue`, or the default of its type. That record is the form's dirty baseline
+(`initialValues`), so a create form with only the defaults is clean until the user enters
+something, and its Save stays disabled.
+
+`initialRecord` pre-fills a create form over the defaults, e.g. from a template or as a copy
+of another record:
+
+<details>
+	<summary>TypeScript/JavaScript</summary>
+
+```tsx
+<Form
+	model={PersonModel}
+	id={null}
+	initialRecord={{ first_name: copy.first_name, last_name: copy.last_name }}
+	errorComponent={ErrorComponent}
+>
+	{PersonFormPage}
+</Form>
+```
+
+</details>
+
+The fields `initialRecord` sets are changes to the new record, not a part of its baseline: a
+field set to another value than its default makes the form dirty as it opens. Its Save is
+enabled, leaving the untouched form asks first, `FormAutoSave` saves it, `showDirtyState`
+marks the field, and a nested create form makes its parent dirty, so the parent's save
+creates it. A field set to its default, or changed back to it, does not count. A value that
+should not count as a change, such as the id of the record a new one belongs to, belongs in
+the model's defaults instead: build the model with it and return it from the field's
+`getDefaultValue`. `initialRecord` is read when the record loads; later changes to it are
+ignored.
+
 ### Starting in a field
 
 `FormField` takes `autoFocus` to put the cursor in the field a form should start in:

@@ -25,6 +25,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [FlowEngine's stage container is focusable only while it holds the focus](2026-11-27-flow-engine-stage-container-focusable-only-while-focused.md) | behavior |
 | 2026-11-27 | [Notifications announces new notifications](2026-11-27-notifications-announce-new.md) | behavior, i18n, type |
 | 2026-11-27 | [The date pickers' dates are typed as Moment, and their ref as the field's root div](2026-11-27-picker-dates-typed-as-moment.md) | type, behavior |
+| 2026-11-27 | [A create form is dirty by the fields its initialRecord sets](2026-11-27-initial-record-makes-create-form-dirty.md) | behavior |
 | 2026-11-27 | [SignaturePad's className, classes and canvasProps reach the element they name](2026-11-27-signature-pad-props-reach-their-element.md) | behavior, type |
 | 2026-11-27 | [A disabled, unsigned SignPad tile says "Not signed"](2026-11-27-sign-pad-disabled-unsigned-says-not-signed.md) | behavior, i18n |
 | 2026-11-27 | [Notifications: the bell's name includes the unread count](2026-11-27-notifications-bell-name-has-unread-count.md) | behavior, i18n |
