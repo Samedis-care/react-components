@@ -23,6 +23,10 @@ export type ModelDataTypeLocalizedStringRendererGetFallbackLabel = (
 	values: Record<string, unknown>,
 ) => string;
 
+/**
+ * The params of ModelDataTypeLocalizedStringRenderer that are its own, not
+ * props of the MultiLanguageInput it renders
+ */
 export interface ModelDataTypeLocalizedStringRendererParamsExtra {
 	/**
 	 * The text a grid cell or read-only field shows while the value has no text
@@ -42,6 +46,15 @@ export interface ModelDataTypeLocalizedStringRendererParamsExtra {
 	getFallbackLabelValues?: string[];
 }
 
+/**
+ * The params of ModelDataTypeLocalizedStringRenderer: the props of the
+ * MultiLanguageInput it renders while the field is editable (enabledLanguages,
+ * defaultLanguage, multiline and the like), except those it sets from the
+ * field (name, values, label, disabled, required, onChange, onBlur, error,
+ * warning, autoFocus), plus its own params (getFallbackLabel,
+ * getFallbackLabelValues). enabledLanguages and defaultLanguage also choose
+ * the text stringify, a grid cell and a read-only field fall back to.
+ */
 export type ModelDataTypeLocalizedStringRendererParams = Omit<
 	MultiLanguageInputProps,
 	| "name"

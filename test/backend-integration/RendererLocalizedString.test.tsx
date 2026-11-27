@@ -4,6 +4,7 @@ import {
 	beforeEach,
 	describe,
 	expect,
+	expectTypeOf,
 	it,
 	vi,
 } from "vitest";
@@ -14,6 +15,12 @@ import {
 	ModelVisibilityGridView,
 	ModelVisibilityView,
 } from "../../src/backend-integration";
+import type * as PackageRoot from "../../src";
+import type {
+	ModelDataTypeLocalizedStringRendererGetFallbackLabel,
+	ModelDataTypeLocalizedStringRendererParams,
+	ModelDataTypeLocalizedStringRendererParamsExtra,
+} from "../../src/backend-integration/Model/Types/Renderers/RendererLocalizedString";
 import type ModelRenderParams from "../../src/backend-integration/Model/RenderParams";
 import type Visibility from "../../src/backend-integration/Model/Visibility";
 import type { MultiLanguageInputSupportedLanguages } from "../../src/standalone/UIKit/InputControls/MultiLanguageInput";
@@ -254,5 +261,18 @@ describe("ModelDataTypeLocalizedStringRenderer: grid and read-only view", () => 
 		);
 		expect(container).toHaveTextContent("Infusion pump");
 		expect(getFallbackLabel).not.toHaveBeenCalled();
+	});
+});
+
+describe("ModelDataTypeLocalizedStringRenderer: exports", () => {
+	it("[ISSUE-3486-ITEM-24] exports its params types and the getFallbackLabel type from the package root", () => {
+		// checked by tsc (tsconfig-test.json), not at runtime
+		expectTypeOf<PackageRoot.ModelDataTypeLocalizedStringRendererParams>().toEqualTypeOf<ModelDataTypeLocalizedStringRendererParams>();
+		expectTypeOf<PackageRoot.ModelDataTypeLocalizedStringRendererParamsExtra>().toEqualTypeOf<ModelDataTypeLocalizedStringRendererParamsExtra>();
+		expectTypeOf<PackageRoot.ModelDataTypeLocalizedStringRendererGetFallbackLabel>().toEqualTypeOf<ModelDataTypeLocalizedStringRendererGetFallbackLabel>();
+		// the params the package root names are the ones the renderer takes
+		expectTypeOf<PackageRoot.ModelDataTypeLocalizedStringRendererParams>().toEqualTypeOf<
+			ConstructorParameters<typeof ModelDataTypeLocalizedStringRenderer>[0]
+		>();
 	});
 });
