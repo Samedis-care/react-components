@@ -54,6 +54,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [TreeView is one tab stop, and its rows are expanded, collapsed, selected and activated with the keys of a tree](2026-11-27-tree-view-keyboard.md) | behavior, type |
 | 2026-11-27 | [ComponentWithLabel's onClick runs once per click on the caption](2026-11-27-component-with-label-on-click-once.md) | behavior |
 | 2026-11-27 | [A disabled ActionButton is filled with `action.disabled`](2026-11-27-action-button-disabled-fill.md) | behavior |
+| 2026-11-27 | [A CRUD moves the keyboard focus into the view it opens, and back to the list's opener](2026-11-27-crud-view-switch-moves-focus.md) | behavior, theme |
 | 2026-11-27 | [A CRUD serves its importer only where the app enables it: `import` with enableUserImport, `devimport` with enableDevImport](2026-11-27-crud-import-views-need-enable.md) | behavior |
 | 2026-11-27 | [A create form left while it saves no longer pulls the user back to the saved record](2026-11-27-crud-save-new-left-during-save.md) | behavior |
 | 2026-11-27 | [DataGrid column header labels are tab stops: a sortable column's label is its sort button](2026-11-27-data-grid-header-labels-are-tab-stops.md) | behavior |
