@@ -1081,6 +1081,90 @@ describe("RoutedMenu: entries hidden with shouldRender", () => {
 	});
 });
 
+describe("RoutedMenu: an entry with end is highlighted on its own path only", () => {
+	/** A home entry under a base path, with a page kept out of the menu */
+	const TENANT = [
+		leaf("Start", "/tenant/abc/", { end: true }),
+		group("Devices", [
+			leaf("Inventory", "/tenant/abc/devices/inventory"),
+			leaf("Imports", "/tenant/abc/devices/imports", { shouldRender: false }),
+		]),
+	];
+	/** A HistoryRouter of `history` around the hook */
+	const inRouter = (history: History) =>
+		function InRouter({ children }: { children: React.ReactNode }) {
+			return <HistoryRouter history={history}>{children}</HistoryRouter>;
+		};
+	/** Each entry as `id current containsCurrent forceExpand`, depth first */
+	const flags = (entries: UseRoutedMenuLogicResult["definition"]): string[] =>
+		entries.flatMap((entry) => [
+			`${entry.menuItemId} ${entry.current} ${entry.containsCurrent} ${entry.forceExpand}`,
+			...flags(entry.children ?? []),
+		]);
+
+	it("[ISSUE-3498-ITEM-12] a home entry with end under a base path is highlighted on its own path, not on a page without an entry of its own", () => {
+		const { history } = mount(TENANT, "/tenant/abc/profile");
+		expect(selected()).toEqual([]);
+		act(() => history.push("/tenant/abc/"));
+		expect(selected()).toEqual(["Start"]);
+		act(() => history.push("/tenant/abc"));
+		expect(selected()).toEqual(["Start"]);
+		act(() => history.push("/tenant/abc/devices/inventory/5"));
+		expect(selected()).toEqual(["Inventory"]);
+	});
+	it("[ISSUE-3498-ITEM-12] without end, a home entry under a base path matches as a prefix and is highlighted on the pages below it", () => {
+		mount(
+			[
+				leaf("Start", "/tenant/abc/"),
+				leaf("Inventory", "/tenant/abc/inventory"),
+			],
+			"/tenant/abc/profile",
+		);
+		expect(selected()).toEqual(["Start"]);
+	});
+	it("[ISSUE-3498-ITEM-12] on the page of a hidden entry below a home entry with end, nothing is highlighted, and useRoutedMenuLogic marks the hidden entry's group", () => {
+		mount(TENANT, "/tenant/abc/devices/imports");
+		expect(selected()).toEqual([]);
+		expect(entry("Devices")).toHaveAttribute("aria-expanded", "false");
+		cleanup();
+
+		const history = createMemoryHistory({
+			initialEntries: ["/tenant/abc/devices/imports"],
+		});
+		const { result } = renderHook(
+			() => useRoutedMenuLogic({ definition: TENANT }),
+			{ wrapper: inRouter(history) },
+		);
+		expect(result.current.controlledState[0]).toBe("Devices@Imports");
+		expect(flags(result.current.definition)).toEqual([
+			"Start false false false",
+			"Devices false true false",
+			"Devices@Inventory false false false",
+			"Devices@Imports true false false",
+		]);
+	});
+	it("[ISSUE-3498-ITEM-12] an entry with end still reads the params of a page below it for the other entries", () => {
+		const error = vi.spyOn(console, "error").mockImplementation(() => {});
+		const { history } = mount(
+			[
+				leaf("General", "/apps/:app", { end: true }),
+				leaf("Roles", "/apps/:app/roles"),
+			],
+			"/apps/a1/history",
+		);
+		expect(titles()).toEqual(["General", "Roles"]);
+		expect(selected()).toEqual([]);
+		fireEvent.click(entry("Roles"));
+		expect(history.location.pathname).toBe("/apps/a1/roles");
+		expect(selected()).toEqual(["Roles"]);
+		expect(error).not.toHaveBeenCalled();
+	});
+	it("[ISSUE-3498-ITEM-12] a route ending in /* still matches the rest with end, as a Route's path does", () => {
+		mount([leaf("Devices", "/devices/*", { end: true })], "/devices/5/edit");
+		expect(selected()).toEqual(["Devices"]);
+	});
+});
+
 describe("RoutedMenu: params with reserved characters", () => {
 	it("[ISSUE-3475-ITEM-11] fills a param with an encoded slash, space or percent sign into the targets encoded", () => {
 		const open = vi.spyOn(window, "open").mockImplementation(() => null);

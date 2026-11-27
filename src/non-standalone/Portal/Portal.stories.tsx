@@ -620,3 +620,93 @@ export const Issue3498Item9CustomMenuOfLinks: StoryObj<LinkMenuDemoArgs> = {
 		await expect(currentPath()).toBe("/projects/42/settings/members");
 	},
 };
+
+// ─── A home entry under a base path ──────────────────────────────────────────
+
+interface BasePathMenuDemoArgs {
+	/**
+	 * `end` of the entry "Start" (`/tenant/abc/`): with it, "Start" is
+	 * highlighted on its own path only, without it on every page below it
+	 */
+	end: boolean;
+	/**
+	 * The URL the story starts on (a memory history)
+	 */
+	initialPath: string;
+}
+
+const BasePathMenuDemo = (props: BasePathMenuDemoArgs) => {
+	const { end, initialPath } = props;
+	const [history] = useState(() =>
+		createMemoryHistory({ initialEntries: [initialPath] }),
+	);
+	const definition = useMemo(
+		(): IRoutedMenuItemDefinition[] => [
+			{
+				icon: Home,
+				title: "Start",
+				route: "/tenant/abc/",
+				end,
+				shouldRender: true,
+			},
+			{
+				title: "Inventory",
+				route: "/tenant/abc/inventory",
+				shouldRender: true,
+			},
+			{ title: "Tasks", route: "/tenant/abc/tasks", shouldRender: true },
+		],
+		[end],
+	);
+	return (
+		<HistoryRouter history={history}>
+			<RoutedMenu
+				definition={definition}
+				wrapper={NavWrapper}
+				menuItem={MaterialMenuItem}
+			/>
+			<Box component="main">
+				<Page title="Content" />
+			</Box>
+		</HistoryRouter>
+	);
+};
+
+export const Issue3498Item12HomeEntryUnderABasePath: StoryObj<BasePathMenuDemoArgs> =
+	{
+		name: "A home entry under a base path (end)",
+		args: {
+			end: true,
+			initialPath: "/tenant/abc/profile",
+		},
+		parameters: {
+			a11y: { test: "error" },
+			docs: {
+				description: {
+					story:
+						'The home entry "Start" has the route `/tenant/abc/`, which every other route of the menu lies below. Matched as a prefix, it would be highlighted on every page below it that has no entry of its own, such as `/tenant/abc/profile`, where this story starts. With `end` it is highlighted on `/tenant/abc` and `/tenant/abc/` only. Turn `end` off to see the prefix match.',
+				},
+			},
+		},
+		render: (args) => <BasePathMenuDemo {...args} />,
+		play: async ({ canvas }) => {
+			const nav = canvas.getByRole("navigation", { name: "Main menu" });
+			const entries = within(nav).getAllByRole("button");
+			const start = within(nav).getByRole("button", { name: "Start" });
+			const inventory = within(nav).getByRole("button", { name: "Inventory" });
+
+			// a page without an entry of its own: no entry is the current page
+			await expect(currentPath()).toBe("/tenant/abc/profile");
+			for (const button of entries)
+				await expect(button).not.toHaveAttribute("aria-current");
+
+			await userEvent.click(start);
+			await waitFor(() => expect(currentPath()).toBe("/tenant/abc/"));
+			await expect(start).toHaveAttribute("aria-current", "page");
+
+			await userEvent.click(inventory);
+			await waitFor(() => expect(currentPath()).toBe("/tenant/abc/inventory"));
+			await expect(inventory).toHaveAttribute("aria-current", "page");
+			await expect(start).not.toHaveAttribute("aria-current");
+		},
+	};

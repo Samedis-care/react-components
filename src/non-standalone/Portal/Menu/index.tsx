@@ -55,7 +55,9 @@ export interface IRoutedMenuItemDefinition extends Omit<
 	 *   Route it is the same as `/users`.
 	 *
 	 * The route matches the current URL as a prefix: `/devices` matches
-	 * `/devices/5/edit` (`/` matches only `/`). When several entries of the
+	 * `/devices/5/edit` (`/` matches only `/`). A home entry under a base
+	 * path, such as `/tenant/abc/`, therefore matches every page below it:
+	 * give it `end` to match its own path only. When several entries of the
 	 * menu tree match, at any level and in any group, the most specific one is
 	 * highlighted and the groups above it are expanded: an exact match before
 	 * a prefix match, then the route with more segments, then, segment by
@@ -78,7 +80,8 @@ export interface IRoutedMenuItemDefinition extends Omit<
 	 * app renders can mark the section the page belongs to.
 	 *
 	 * Its `:name` params are filled from the current URL, read with the route
-	 * that matches it best, a hidden entry's too: on `/projects/42/capture`,
+	 * that matches it best as a prefix, a hidden entry's and one with `end`
+	 * too: on `/projects/42/capture`,
 	 * the page of a hidden `/projects/:id/capture`, `/projects/:id/review`
 	 * navigates to `/projects/42/review`. The values go in percent-encoded, so
 	 * a value with "/" stays one segment. While the current URL has no value
@@ -95,6 +98,26 @@ export interface IRoutedMenuItemDefinition extends Omit<
 	 * among its children instead, e.g. "Overview" with the route `/settings`.
 	 */
 	route?: string;
+	/**
+	 * Matches `route` with the whole current path only, not as a prefix
+	 *
+	 * Default `false`: the entry is highlighted on its route's path and the
+	 * pages below it (see `route`). With `true`, as a Route with `end`, only on
+	 * its own path: `/tenant/abc/` is highlighted on `/tenant/abc` and
+	 * `/tenant/abc/`, but not on `/tenant/abc/profile`. For a home entry under
+	 * a base path, which every other route of the menu lies below: matched as
+	 * a prefix, it is highlighted on every page below the base path that no
+	 * shown entry matches more specifically. The route `/` matches only `/`
+	 * either way, and a trailing `/*` still matches the rest.
+	 *
+	 * On a page below its route, the entry is not the entry of the current URL
+	 * (neither highlighted nor `current` for useRoutedMenuLogic), but its route
+	 * still reads the params of the URL for the other entries: with `end`,
+	 * `/apps/:app` is not highlighted on `/apps/a1/history`, and
+	 * `/apps/:app/roles` there still navigates to `/apps/a1/roles`. No effect on
+	 * a group (its `route` is ignored) or on an entry without `route`.
+	 */
+	end?: boolean;
 	/**
 	 * Keeps the group expanded on every page
 	 *
@@ -215,7 +238,7 @@ export interface IRoutedMenuProps extends Omit<
 }
 
 /**
- * The entry of the current URL (resolveLocation) and the params of the URL
+ * The entry of the current URL (resolveLocation)
  */
 interface MenuRouteMatch {
 	/**
@@ -232,10 +255,21 @@ interface MenuRouteMatch {
 	 * highlighted and expands no group
 	 */
 	shown: boolean;
+}
+
+/**
+ * What the menu reads from the current URL (resolveLocation)
+ */
+interface MenuLocation {
+	/**
+	 * The entry of the current URL, null when no entry matches it
+	 */
+	current: MenuRouteMatch | null;
 	/**
 	 * The params read from the path with the route of the entry that matches
-	 * it best, hidden entries included, percent-encoded again to fill the
-	 * routes of the entries
+	 * it best as a prefix, hidden entries and entries with `end` included,
+	 * percent-encoded again to fill the routes of the entries; `{}` when no
+	 * route matches
 	 */
 	params: Record<string, string>;
 }
@@ -347,6 +381,11 @@ interface RoutedEntry {
 	 * The entry's route, read by resolveRoute
 	 */
 	route: ResolvedRoute;
+	/**
+	 * The definition's `end`: the entry is the entry of its route's own path
+	 * only
+	 */
+	end: boolean;
 }
 
 /**
@@ -376,6 +415,7 @@ const flattenRoutes = (
 							groups,
 							rendered: entryRendered,
 							route: resolveRoute(route, base),
+							end: !!def.end,
 						},
 					]
 				: []),
@@ -442,25 +482,26 @@ const getBestCandidate = (
 /**
  * The entry of the current URL and the params of the URL. Of all entries
  * whose route matches the path as a prefix (getBestCandidate ranks them):
- * - the best one, hidden entries included, provides the params that fill the
- *   routes of all entries;
+ * - the best one, hidden entries and entries with `end` included, provides
+ *   the params that fill the routes of all entries;
  * - the best one the menu shows is the entry of the current URL: highlighted,
  *   and the groups above it are expanded. An entry is shown when it and every
  *   group above it have `shouldRender` and the params can fill its route.
  * When no shown entry matches, the best hidden one is the entry of the current
  * URL: the active id, and the groups above it contain it, but it is not
- * rendered and expands no group (`shown: false`).
+ * rendered and expands no group (`shown: false`). An entry with `end` is the
+ * entry of the current URL only where its route matches the whole path.
  * @param definitions The menu item definitions (the top level)
  * @param path The current location.pathname
  * @param base What a relative route is resolved against
- * @return The entry of the current URL and the params, or null if no entry
- * matches
+ * @return The entry of the current URL (null if no entry matches) and the
+ * params
  */
 const resolveLocation = (
 	definitions: IRoutedMenuItemDefinition[],
 	path: string,
 	base: RouteBase,
-): MenuRouteMatch | null => {
+): MenuLocation => {
 	const candidates = flattenRoutes(definitions, [], true, base).flatMap(
 		(entry): RouteCandidate[] => {
 			const match = matchPath({ path: entry.route.pattern, end: false }, path);
@@ -476,20 +517,28 @@ const resolveLocation = (
 		},
 	);
 	const best = getBestCandidate(candidates);
-	if (!best) return null;
-	const params = encodeRouteParameters(best.params);
+	const params = best ? encodeRouteParameters(best.params) : {};
+	// an entry with `end` is the entry of its own path only
+	const eligible = candidates.filter(
+		({ entry }) =>
+			!entry.end || !!matchPath({ path: entry.route.pattern, end: true }, path),
+	);
 	const bestShown = getBestCandidate(
-		candidates.filter(
+		eligible.filter(
 			({ entry }) =>
 				entry.rendered &&
 				getMissingRouteParameters(entry.route.path, params).length === 0,
 		),
 	);
-	const current = bestShown ?? best;
+	const current = bestShown ?? getBestCandidate(eligible);
 	return {
-		id: current.entry.id,
-		groups: current.entry.groups,
-		shown: !!bestShown,
+		current: current
+			? {
+					id: current.entry.id,
+					groups: current.entry.groups,
+					shown: !!bestShown,
+				}
+			: null,
 		params,
 	};
 };
@@ -735,9 +784,9 @@ export const useRoutedMenuLogic = (
 		[routePrefix, routeUrl],
 	);
 
-	// the entry of the current URL: the active item, the groups to expand and
-	// the params
-	const current = React.useMemo(
+	// the entry of the current URL (the active item and the groups to expand)
+	// and the params
+	const { current, params } = React.useMemo(
 		() => resolveLocation(rawDef, path, base),
 		[rawDef, path, base],
 	);
@@ -754,7 +803,6 @@ export const useRoutedMenuLogic = (
 	);
 
 	// convert routed menu definitions to normal menu definitions
-	const params = React.useMemo(() => current?.params ?? {}, [current]);
 	const definition = React.useMemo(() => {
 		const context: ConversionContext = {
 			current,
