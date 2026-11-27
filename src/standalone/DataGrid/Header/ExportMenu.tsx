@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import type { IDataGridExporter } from "./index";
-import { MenuProps, PopoverOrigin } from "@mui/material";
+import { MenuProps, PopoverOrigin, styled } from "@mui/material";
 import ExportMenuEntry from "./ExportMenuEntry";
 import PopupMenu from "../../PopupMenu";
+import visuallyHidden from "../../../utils/internal/visuallyHidden";
 
 export interface IDataGridExportMenuProps {
 	/**
@@ -34,25 +35,34 @@ const transformOrigin: PopoverOrigin = {
 	horizontal: "center",
 };
 
+// holds each entry's status region outside the menu (see ExportMenuEntry)
+const ExportStatusContainer = styled("span")(visuallyHidden);
+
 const ExportMenu = (props: IDataGridExportMenuProps) => {
+	const [statusContainer, setStatusContainer] =
+		useState<HTMLSpanElement | null>(null);
 	return (
-		<PopupMenu
-			anchorEl={props.anchorEl}
-			anchorOrigin={anchorOrigin}
-			transformOrigin={transformOrigin}
-			keepMounted
-			open={!!props.anchorEl}
-			onClose={props.onClose}
-			slotProps={props.slotProps}
-		>
-			{props.exporters.map((exporter) => (
-				<ExportMenuEntry
-					key={exporter.id}
-					exporter={exporter}
-					closeMenu={props.onClose}
-				/>
-			))}
-		</PopupMenu>
+		<>
+			<ExportStatusContainer ref={setStatusContainer} />
+			<PopupMenu
+				anchorEl={props.anchorEl}
+				anchorOrigin={anchorOrigin}
+				transformOrigin={transformOrigin}
+				keepMounted
+				open={!!props.anchorEl}
+				onClose={props.onClose}
+				slotProps={props.slotProps}
+			>
+				{props.exporters.map((exporter) => (
+					<ExportMenuEntry
+						key={exporter.id}
+						exporter={exporter}
+						closeMenu={props.onClose}
+						statusContainer={statusContainer}
+					/>
+				))}
+			</PopupMenu>
+		</>
 	);
 };
 

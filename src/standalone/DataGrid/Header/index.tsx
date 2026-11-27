@@ -69,16 +69,24 @@ export interface IDataGridExporter<T> {
 	 */
 	getLabel: () => string;
 	/**
-	 * The label of the export menu entry while waiting for onRequest to complete
+	 * The label of the export menu entry while waiting for onRequest to complete.
+	 * Meanwhile the entry is unavailable (aria-disabled) and keeps keyboard
+	 * focus; its progress indicator is hidden from assistive technology, so this
+	 * label says that the export runs.
 	 */
 	getWorkingLabel: () => string;
 	/**
 	 * The label of the export menu entry after onRequest completed, but before
-	 * onDownload got called
+	 * onDownload got called. A polite status region announces it once the
+	 * entry turns ready, also while the export menu is closed. With
+	 * autoDownload the entry doesn't turn ready (onDownload is called right
+	 * away), so it isn't announced.
 	 */
 	getReadyLabel: () => string;
 	/**
-	 * The label of the export menu entry if an error occurs in onRequest
+	 * The label of the export menu entry if an error occurs in onRequest. A
+	 * polite status region announces it once the export failed, also while the
+	 * export menu is closed.
 	 */
 	getErrorLabel: () => string;
 	/**

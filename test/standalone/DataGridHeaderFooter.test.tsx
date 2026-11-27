@@ -712,6 +712,114 @@ describe("export", () => {
 			{ file: 2 },
 		]);
 	});
+
+	it("[ISSUE-3495-ITEM-15] the working entry is marked unavailable, and the ready entry is announced", async () => {
+		const request = deferred<unknown>();
+		render(
+			<Grid
+				exporters={[makeExporter({ onRequest: vi.fn(() => request.promise) })]}
+			/>,
+		);
+		await idle();
+		await openMenu("Export", "Excel");
+		const working = await screen.findByRole("menuitem", { name: "Working" });
+		expect(working).toHaveAttribute("aria-disabled", "true");
+		await act(async () => {
+			request.resolve({});
+			await request.promise;
+		});
+		await screen.findByRole("menuitem", { name: "Ready" });
+		expect(
+			screen
+				.getAllByRole("status")
+				.some((region) => region.textContent?.includes("Ready")),
+		).toBe(true);
+	});
+
+	it("[ISSUE-3495-ITEM-15] the spinner of the working entry is hidden from assistive technology, its label names the entry", async () => {
+		render(
+			<Grid
+				exporters={[
+					makeExporter({ onRequest: vi.fn(() => new Promise(() => {})) }),
+				]}
+			/>,
+		);
+		await idle();
+		await openMenu("Export", "Excel");
+		const working = await screen.findByRole("menuitem", { name: "Working" });
+		expect(working.querySelector(".MuiCircularProgress-root")).toHaveAttribute(
+			"aria-hidden",
+			"true",
+		);
+		expect(within(working).queryByRole("progressbar")).not.toBeInTheDocument();
+	});
+
+	it("[ISSUE-3495-ITEM-15] an export that turns ready after the menu was closed is announced by a status that was there before, which empties once it is downloaded", async () => {
+		const request = deferred<unknown>();
+		const onDownload = vi.fn();
+		render(
+			<Grid
+				exporters={[
+					makeExporter({ onRequest: vi.fn(() => request.promise), onDownload }),
+				]}
+			/>,
+		);
+		await idle();
+		await openMenu("Export", "Excel");
+		await screen.findByRole("menuitem", { name: "Working" });
+		fireEvent.keyDown(screen.getByRole("menu"), { key: "Escape" });
+		await waitFor(() =>
+			expect(screen.queryByRole("menu")).not.toBeInTheDocument(),
+		);
+		const regions = screen.getAllByRole("status");
+		expect(regions.map((region) => region.textContent)).not.toContain("Ready");
+		await act(async () => {
+			request.resolve({ file: 1 });
+			await request.promise;
+		});
+		expect(screen.getAllByRole("status")).toEqual(regions);
+		expect(regions.map((region) => region.textContent)).toContain("Ready");
+		await openMenu("Export", "Ready");
+		expect(onDownload).toHaveBeenCalledOnce();
+		await waitFor(() =>
+			expect(screen.queryByRole("menu")).not.toBeInTheDocument(),
+		);
+		expect(regions.map((region) => region.textContent)).not.toContain("Ready");
+	});
+
+	it("[ISSUE-3495-ITEM-15] an export that fails after the menu was closed is announced, and the status empties once the failed entry is clicked", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const request = deferred<unknown>();
+		render(
+			<Grid
+				exporters={[makeExporter({ onRequest: vi.fn(() => request.promise) })]}
+			/>,
+		);
+		await idle();
+		await openMenu("Export", "Excel");
+		await screen.findByRole("menuitem", { name: "Working" });
+		fireEvent.keyDown(screen.getByRole("menu"), { key: "Escape" });
+		await waitFor(() =>
+			expect(screen.queryByRole("menu")).not.toBeInTheDocument(),
+		);
+		const regions = screen.getAllByRole("status");
+		await act(async () => {
+			request.reject(new Error("export failed"));
+			await request.promise.catch(() => {});
+		});
+		expect(regions.map((region) => region.textContent)).toContain("Failed");
+		await openMenu("Export", "Failed");
+		expect(
+			await screen.findByRole("menuitem", { name: "Excel" }),
+		).toBeInTheDocument();
+		// the status outside the menu, and the one inside the open menu
+		expect(regions.map((region) => region.textContent)).not.toContain("Failed");
+		expect(
+			screen
+				.getAllByRole("status")
+				.some((region) => region.textContent?.includes("Failed")),
+		).toBe(false);
+	});
 });
 
 describe("header action bar", () => {

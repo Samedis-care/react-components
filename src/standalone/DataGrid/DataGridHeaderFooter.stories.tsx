@@ -90,6 +90,13 @@ const EXCEL: IDataGridExporter<unknown> = {
 	onDownload: () => {},
 };
 
+/** An exporter whose request never finishes */
+const PENDING: IDataGridExporter<unknown> = {
+	...EXCEL,
+	id: "pending",
+	onRequest: () => new Promise(() => {}),
+};
+
 /** A filter bar: on phones it turns the header's buttons into "More options" */
 const SimpleFilterBar = () => (
 	<Grid size={12}>
@@ -318,6 +325,31 @@ export const Issue3495Item14DownloadByKeyboard: Story = {
 		await expect(onDownload).toHaveBeenCalledWith("file.xlsx", undefined);
 		await expect(entry).toHaveAccessibleName("Excel");
 		await expect(entry).toHaveFocus();
+	},
+};
+
+/**
+ * ISSUE-3495-ITEM-15: while an export runs, its menu entry shows an unnamed progressbar
+ */
+export const Issue3495Item15ExportProgressIsNamed: Story = {
+	args: { columns: COLUMNS, loadData: loadPeople, exporters: [PENDING] },
+	parameters: {
+		a11y: {
+			test: "error",
+			context: { include: ["[role=menu]"] },
+			options: {
+				runOnly: { type: "rule", values: ["aria-progressbar-name"] },
+			},
+		},
+	},
+	play: async ({ canvas }) => {
+		const body = within(document.body);
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+		await userEvent.click(canvas.getByRole("button", { name: "Export" }));
+		await userEvent.click(await body.findByRole("menuitem", { name: "Excel" }));
+		await expect(
+			await body.findByRole("menuitem", { name: "Exporting…" }),
+		).toBeVisible();
 	},
 };
 
