@@ -10,6 +10,7 @@ import { styled, useThemeProps } from "@mui/material";
 import { FormSubmitOptions, PageProps, useFormContextLite } from "../Form";
 import { ModelUnknown } from "../../../backend-integration";
 import { captureError } from "../../../framework/ErrorReporting";
+import focusContainer from "../../../utils/internal/focusContainer";
 
 export interface FlowEngineFormProps {
 	buttons: React.ReactNode;
@@ -131,7 +132,9 @@ export interface FlowEngineProps<
 	 * Without it, after a stage change the new stage's container takes the focus (it shows
 	 * no focus ring; the next Tab goes to the first control of the stage), and if the start
 	 * of the new stage is scrolled out of view, it is scrolled to the top of its scroll area
-	 * (the window, a dialog's content). Nothing changes when the new stage focused a control
+	 * (the window, a dialog's content). The container is focusable only while it holds that
+	 * focus: it is never a tab stop, and a click on blank space in the stage does not focus
+	 * it, so the next Tab goes on from the point clicked. Nothing changes when the new stage focused a control
 	 * itself (`autoFocus`) or when the focus is on an element outside the FlowEngine, e.g. a
 	 * stepper around it. The first stage after mount is never focused or scrolled, and
 	 * neither is the shown stage when goToStage stays on it.
@@ -297,7 +300,7 @@ const FlowEngine = <
 		// the focus fell to the page or to a container around the flow (a dialog's); focus
 		// in the new stage or elsewhere outside the flow stays where it is
 		if (active && !active.contains(root)) return;
-		root.focus({ preventScroll: true });
+		focusContainer(root);
 		if (isStartScrolledAway(root)) root.scrollIntoView({ block: "start" });
 	}, [stage, disableAutoFocus]);
 
@@ -310,7 +313,6 @@ const FlowEngine = <
 		>
 			<FlowEngineRoot
 				ref={rootRef}
-				tabIndex={-1}
 				role={stageLabel ? "group" : undefined}
 				aria-label={stageLabel}
 			>

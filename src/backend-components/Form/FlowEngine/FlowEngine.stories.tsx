@@ -142,7 +142,7 @@ const makeLongStage = (
 				</Typography>
 				<FormField name={fields[0]} />
 				<FormField name={fields[1]} />
-				<Filler />
+				<Filler data-testid={"blank-space"} />
 				<ActionButton disabled={formProps.isSubmitting} onClick={go}>
 					{button}
 				</ActionButton>
@@ -366,3 +366,52 @@ export const Issue3504Item9ReadOnlySaveSaysWhy: StoryObj<FlowArgs> = {
 		await expect(tooltip).toHaveTextContent("You may not edit people");
 	},
 };
+
+/**
+ * The container of a stage is focusable only while it holds the focus a stage change gave
+ * it. Tab or a click into the stage takes that away, so a click on blank space after a
+ * field leaves the focus where the browser puts it (the next Tab goes on from the point
+ * clicked), not on the container, from where Tab went back to the stage's first control.
+ */
+export const Issue3504Item21ClickInStageLeavesItsContainer: StoryObj<FlowArgs> =
+	{
+		args: { goBack: fn(), onSubmit: fn() },
+		parameters: { a11y: { test: "error" } },
+		render: (args) => <LongFlowStory {...args} />,
+		play: async ({ canvas, userEvent }) => {
+			await canvas.findByDisplayValue("Alice", undefined, LOAD);
+			const person = canvas.getByRole("group", {
+				name: "Step 1 of 2: Person",
+			});
+			await expect(person, "the first stage").not.toHaveAttribute("tabindex");
+
+			// a stage change by keyboard gives the container the focus; Tab takes it away
+			canvas.getByRole("button", { name: "Next" }).focus();
+			await userEvent.keyboard("{Enter}");
+			const contact = await canvas.findByRole(
+				"group",
+				{ name: "Step 2 of 2: Contact" },
+				LOAD,
+			);
+			await expect(contact).toHaveFocus();
+			await expect(contact).toHaveAttribute("tabindex", "-1");
+			await userEvent.tab();
+			await expect(
+				canvas.getByRole("textbox", { name: "Email" }),
+			).toHaveFocus();
+			await expect(contact).not.toHaveAttribute("tabindex");
+
+			// and so does a click on the blank space after the fields
+			canvas.getByRole("button", { name: "Previous" }).focus();
+			await userEvent.keyboard("{Enter}");
+			const personAgain = await canvas.findByRole(
+				"group",
+				{ name: "Step 1 of 2: Person" },
+				LOAD,
+			);
+			await expect(personAgain).toHaveFocus();
+			await userEvent.click(canvas.getByTestId("blank-space"));
+			await expect(personAgain).not.toHaveFocus();
+			await expect(personAgain).not.toHaveAttribute("tabindex");
+		},
+	};

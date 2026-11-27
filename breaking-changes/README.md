@@ -22,6 +22,7 @@ One file per change, so this never grows into a single unreadable log.
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
 | 2026-11-27 | [A required file or image field shows an asterisk and is described as required](2026-11-27-required-file-and-image-fields-marked.md) | behavior, i18n |
 | 2026-11-27 | [The default error-reporting policy judges an AggregateError by the errors it wraps](2026-11-27-aggregate-error-reporting.md) | behavior |
+| 2026-11-27 | [FlowEngine's stage container is focusable only while it holds the focus](2026-11-27-flow-engine-stage-container-focusable-only-while-focused.md) | behavior |
 | 2026-11-27 | [SignaturePad's className, classes and canvasProps reach the element they name](2026-11-27-signature-pad-props-reach-their-element.md) | behavior, type |
 | 2026-11-27 | [A disabled, unsigned SignPad tile says "Not signed"](2026-11-27-sign-pad-disabled-unsigned-says-not-signed.md) | behavior, i18n |
 | 2026-11-27 | [Notifications: the bell's name includes the unread count](2026-11-27-notifications-bell-name-has-unread-count.md) | behavior, i18n |

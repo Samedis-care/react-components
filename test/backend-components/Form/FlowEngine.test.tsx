@@ -1092,6 +1092,32 @@ describe("FlowEngine: bugs", () => {
 		expect(document.activeElement).toBe(document.body);
 		expect(screen.getByRole("group", { name: "Note step" })).toBeVisible();
 	});
+	it("[ISSUE-3504-ITEM-21] the stage's container is focusable only while it holds the focus a stage change gave it", async () => {
+		const { sink, flow } = setupEngine(
+			{ a: TITLE_AND_NEXT, b: NOTE_ONLY },
+			{ stageLabels: STAGE_LABELS },
+		);
+		await loaded(sink);
+		const container = screen.getByRole("group", { name: "Title step" });
+		expect(container, "on mount").not.toHaveAttribute("tabindex");
+
+		screen.getByRole("button", { name: "Next a" }).focus();
+		await goFromCode(flow, "b");
+		expect(container).toHaveFocus();
+		expect(container).toHaveAttribute("tabindex", "-1");
+		act(() => screen.getByRole("textbox", { name: "Note" }).focus());
+		expect(container, "after the focus moved on").not.toHaveAttribute(
+			"tabindex",
+		);
+
+		// the focus falls to the page when the Note field goes with its stage
+		await goFromCode(flow, "a");
+		expect(container).toHaveFocus();
+		expect(container).toHaveAttribute("tabindex", "-1");
+		// a pointer press on the stage's blank space, before the browser moves the focus
+		fireEvent.pointerDown(container);
+		expect(container, "after a pointer press").not.toHaveAttribute("tabindex");
+	});
 	it("[ISSUE-3504-ITEM-11] FlowEngineSaveButton does not render again on every keystroke", async () => {
 		let renders = 0;
 		const onRender = () => {
