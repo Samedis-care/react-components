@@ -314,3 +314,121 @@ export const Issue3463Item10TitleStyledApartFromFieldLegends: Story = {
 		await expect(getComputedStyle(label).color).toBe("rgba(0, 0, 0, 0.6)");
 	},
 };
+
+/** the gaps between the entries of the frame, in px */
+const gapsOf = (entries: HTMLElement[]) =>
+	entries
+		.slice(1)
+		.map((entry, i) => rectOf(entry).top - rectOf(entries[i]).bottom);
+
+export const Issue3463Item11NumberedStepsWithAGap: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3463-ITEM-11: with `ordered`, the steps of a procedure are an ordered list numbered 1., 2., 3., so a step can be referred to by its number. Entries stand half a spacing unit apart (4px with the default spacing), so an entry of several lines does not run into the next one.",
+			},
+		},
+	},
+	render: (args) => (
+		<div style={{ width: 320 }}>
+			<HowToBox {...args} />
+		</div>
+	),
+	args: {
+		titleLabel: "How to import",
+		ordered: true,
+		labels: [
+			"Download the template",
+			"Create the import file using the template: one row per record, with the required fields filled in",
+			"Upload the import file below",
+		],
+	},
+	play: async ({ canvas, canvasElement }) => {
+		const list = await canvas.findByRole("list");
+		await expect(list.tagName).toBe("OL");
+		await expect(getComputedStyle(list).listStyleType).toBe("decimal");
+		const entries = entriesOf(canvasElement);
+		await expect(entries).toHaveLength(3);
+		await expect(getComputedStyle(entries[0]).marginTop).toBe("0px");
+		await expect(gapsOf(entries)).toEqual([4, 4]);
+	},
+};
+
+export const Issue3463Item11SingleHintWithoutBullet: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					"ISSUE-3463-ITEM-11: a single entry shows without a bullet (or a number with `ordered`) and without the list's indent: a marker in front of the only entry marks nothing. It is still a list of one item for screen readers.",
+			},
+		},
+	},
+	render: (args) => (
+		<div style={{ width: 320 }}>
+			<HowToBox {...args} />
+		</div>
+	),
+	args: {
+		titleLabel: "Tip",
+		labels: "This is a single helpful hint.",
+	},
+	play: async ({ canvas }) => {
+		const list = await canvas.findByRole("list");
+		const [entry] = within(list).getAllByRole("listitem");
+		await expect(getComputedStyle(list).listStyleType).toBe("none");
+		await expect(getComputedStyle(list).paddingLeft).toBe("0px");
+		await expect(rectOf(entry).left).toBe(rectOf(list).left);
+	},
+};
+
+/** a theme that styles the list and the entries of every HowToBox */
+const entriesTheme = createTheme({
+	components: {
+		CcHowToBox: {
+			styleOverrides: {
+				ul: {
+					listStyleType: "square",
+					"&.CcHowToBox-singleEntry": { paddingLeft: "8px" },
+				},
+				li: { marginTop: "8px" },
+			},
+		},
+	},
+});
+
+export const Issue3463Item11ThemeStylesTheEntries: Story = {
+	parameters: {
+		a11y: { test: "error" },
+		docs: {
+			description: {
+				story:
+					'ISSUE-3463-ITEM-11: a theme replaces the gap between the entries with `styleOverrides.li` (here 8px) and their marker with `styleOverrides.ul` (here squares). A single entry keeps no marker; the theme styles it with `"&.CcHowToBox-singleEntry"` in `ul` (here an indent of 8px).',
+			},
+		},
+	},
+	render: () => (
+		<ThemeProvider theme={entriesTheme}>
+			<div style={{ width: 320 }}>
+				<HowToBox
+					titleLabel={"How to import"}
+					labels={["Download the template", "Upload it below"]}
+				/>
+				<HowToBox titleLabel={"Tip"} labels={"A single hint."} />
+			</div>
+		</ThemeProvider>
+	),
+	play: async ({ canvas }) => {
+		const steps = await canvas.findByRole("group", { name: "How to import" });
+		const stepList = within(steps).getByRole("list");
+		await expect(getComputedStyle(stepList).listStyleType).toBe("square");
+		await expect(gapsOf(entriesOf(steps))).toEqual([8]);
+		const tipList = within(
+			canvas.getByRole("group", { name: "Tip" }),
+		).getByRole("list");
+		await expect(getComputedStyle(tipList).listStyleType).toBe("none");
+		await expect(getComputedStyle(tipList).paddingLeft).toBe("8px");
+	},
+};

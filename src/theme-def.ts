@@ -759,7 +759,7 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcHowToBox"];
 			styleOverrides?: StyleOverridesWithoutOwnerState<HowToBoxClassKey>;
 			variants?: VariantsWithoutOwnerState<
-				Pick<HowToBoxProps, "titleLabel" | "labels">
+				Pick<HowToBoxProps, "titleLabel" | "labels" | "ordered">
 			>;
 		};
 		// No variants: MUI matches them against the root's own props and

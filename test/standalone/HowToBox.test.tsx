@@ -634,5 +634,129 @@ describe("HowToBox", () => {
 			expect(own).toHaveClass("theme-legend");
 			expect(own).not.toHaveClass("next-legend");
 		});
+
+		it("[ISSUE-3463-ITEM-11] numbers the entries in an ordered list with ordered, keeps the list's id and classes, and bullets them without it", () => {
+			const consoleError = vi
+				.spyOn(console, "error")
+				.mockImplementation(() => {});
+			const { container, rerender } = renderHowToBox(
+				<HowToBox
+					id="steps"
+					ordered
+					labels={["Download the template", "Upload it below"]}
+					classes={{ ul: "own-list", li: "own-entry" }}
+				/>,
+			);
+			const fieldset = fieldsetOf(container);
+			const list = within(fieldset).getByRole("list");
+			expect(list.tagName).toBe("OL");
+			expect(list).toHaveAttribute("id", "steps-list");
+			expect(list).toHaveClass("own-list");
+			expect(
+				within(list)
+					.getAllByRole("listitem")
+					.map((item) => item.className.includes("own-entry")),
+			).toEqual([true, true]);
+			expect(fieldset).not.toHaveAttribute("ordered");
+			expect(consoleError).not.toHaveBeenCalled();
+			// the prop takes effect after mount, both ways
+			rerender(
+				withTheme(
+					<HowToBox
+						id="steps"
+						labels={["Download the template", "Upload it below"]}
+					/>,
+				),
+			);
+			expect(within(fieldset).getByRole("list").tagName).toBe("UL");
+			rerender(
+				withTheme(
+					<HowToBox
+						id="steps"
+						ordered
+						labels={["Download the template", "Upload it below"]}
+					/>,
+				),
+			);
+			expect(within(fieldset).getByRole("list").tagName).toBe("OL");
+		});
+
+		it("[ISSUE-3463-ITEM-11] lets a theme number every box with defaultProps.ordered, which ordered={false} turns off, and match ordered in its variants", () => {
+			const themed = createTheme({
+				components: {
+					CcHowToBox: {
+						defaultProps: { ordered: true },
+						variants: [
+							{ props: { ordered: true }, style: { outlineStyle: "dotted" } },
+							{ props: { ordered: false }, style: { outlineStyle: "dashed" } },
+						],
+					},
+				},
+			});
+			const { container } = renderHowToBox(
+				<>
+					<HowToBox labels={["a", "b"]} />
+					<HowToBox ordered={false} labels={["c", "d"]} />
+				</>,
+				themed,
+			);
+			const [numbered, bulleted] = Array.from(
+				container.querySelectorAll("fieldset"),
+			);
+			expect(within(numbered).getByRole("list").tagName).toBe("OL");
+			expect(getComputedStyle(numbered).outlineStyle).toBe("dotted");
+			expect(within(bulleted).getByRole("list").tagName).toBe("UL");
+			expect(getComputedStyle(bulleted).outlineStyle).toBe("dashed");
+			// without the theme default, an omitted ordered matches ordered: false
+			cleanup();
+			const plainTheme = createTheme({
+				components: {
+					CcHowToBox: {
+						variants: [
+							{ props: { ordered: false }, style: { outlineStyle: "dashed" } },
+						],
+					},
+				},
+			});
+			const { container: plain } = renderHowToBox(
+				<HowToBox labels={["a", "b"]} />,
+				plainTheme,
+			);
+			expect(getComputedStyle(fieldsetOf(plain)).outlineStyle).toBe("dashed");
+		});
+
+		it("[ISSUE-3463-ITEM-11] HowToBoxTranslate numbers its entries with ordered", async () => {
+			const app = await makeAppI18n({
+				en: { translation: { steps: ["Download", "Upload"] } },
+			});
+			renderHowToBox(<HowToBoxTranslate t={app.t} labels="steps" ordered />);
+			expect(screen.getByRole("list").tagName).toBe("OL");
+			expect(itemTexts()).toEqual(["Download", "Upload"]);
+		});
+
+		it("[ISSUE-3463-ITEM-11] gives the list of a single entry the class CcHowToBox-singleEntry, also when the other entries are skipped, and keeps it a one-item list", () => {
+			const { container, rerender } = renderHowToBox(
+				<HowToBox id="tip" labels="This is a single helpful hint." />,
+			);
+			const list = within(fieldsetOf(container)).getByRole("list");
+			expect(list).toHaveClass("CcHowToBox-singleEntry");
+			expect(list).toHaveAttribute("id", "tip-list");
+			expect(within(list).getAllByRole("listitem")).toHaveLength(1);
+			rerender(
+				withTheme(
+					<HowToBox id="tip" ordered labels={[null, "Only step", ""]} />,
+				),
+			);
+			expect(within(fieldsetOf(container)).getByRole("list")).toHaveClass(
+				"CcHowToBox-singleEntry",
+			);
+			// a second entry after mount takes the class away
+			rerender(
+				withTheme(<HowToBox id="tip" ordered labels={["First", "Second"]} />),
+			);
+			expect(within(fieldsetOf(container)).getByRole("list")).not.toHaveClass(
+				"CcHowToBox-singleEntry",
+			);
+		});
 	});
 });

@@ -63,8 +63,26 @@ export interface HowToBoxProps extends GroupBoxHTMLProps {
 	 * An entry wraps at spaces. A word wider than the entry, such as a long
 	 * compound, a file name or a URL, breaks between any two characters, so it
 	 * stays inside the frame and the page does not scroll sideways on a phone.
+	 *
+	 * Entries stand half a spacing unit apart (`theme.spacing(0.5)`, 4px with
+	 * the default spacing). A single entry (a value that is not an array, or
+	 * an array with one entry left after skipping) shows without a bullet or
+	 * number and without the list's indent; it is still a list of one item.
 	 */
 	labels: string[] | React.ReactNode[] | string | React.ReactNode | undefined;
+	/**
+	 * Numbers the entries, as the steps of a procedure: the list is an `<ol>`
+	 * numbered 1., 2., 3., so a step can be referred to by its number.
+	 * Without it, the list is a `<ul>` with a bullet per entry, for entries
+	 * that are no sequence, such as tips or notes. A single entry shows
+	 * neither.
+	 *
+	 * The theme's `components.CcHowToBox.defaultProps.ordered` numbers every
+	 * box of an app; `ordered={false}` then bullets one box. Theme `variants`
+	 * match it as a boolean, `false` when it is omitted.
+	 * @default false
+	 */
+	ordered?: boolean;
 	/**
 	 * CSS class to apply to the frame, the `<fieldset>`
 	 */
@@ -88,11 +106,12 @@ export interface HowToBoxProps extends GroupBoxHTMLProps {
 }
 
 /**
- * The props the root slot gets besides GroupBox's: HowToBox's `titleLabel`
- * and `labels`, so that theme `variants` can match them. They do not reach
- * the GroupBox.
+ * The props the root slot gets besides GroupBox's: HowToBox's `titleLabel`,
+ * `labels` and `ordered` (`false` when omitted), so that theme `variants` can
+ * match them. They do not reach the GroupBox.
  */
-type HowToBoxRootProps = Pick<HowToBoxProps, "titleLabel" | "labels">;
+type HowToBoxRootProps = Pick<HowToBoxProps, "titleLabel" | "labels"> &
+	Required<Pick<HowToBoxProps, "ordered">>;
 
 /**
  * What MUI keeps off a root slot, plus HowToBox's own props. `classes` is
@@ -101,6 +120,7 @@ type HowToBoxRootProps = Pick<HowToBoxProps, "titleLabel" | "labels">;
 const ROOT_PROPS_NOT_FORWARDED = new Set<PropertyKey>([
 	"titleLabel",
 	"labels",
+	"ordered",
 	"ownerState",
 	"theme",
 	"sx",
@@ -121,17 +141,42 @@ const GroupBoxStyled = styled(GroupBox, {
 	],
 })<HowToBoxRootProps>({});
 
-const UnorderedList = styled("ul", { name: "CcHowToBox", slot: "ul" })({
+/**
+ * State class of the list while it holds a single entry
+ */
+const SINGLE_ENTRY_CLASS = "CcHowToBox-singleEntry";
+
+/**
+ * The list, a `<ul>`, or an `<ol>` (`as`) with `ordered`
+ */
+const List = styled("ul", { name: "CcHowToBox", slot: "ul" })({
 	paddingLeft: "1.5rem",
+	// a marker in front of the only entry marks nothing. As MUI's state
+	// classes, the rule wins over a plain `ul` override (a theme's marker
+	// type or indent), and an override styles it with the same selector.
+	[`&.${SINGLE_ENTRY_CLASS}`]: {
+		listStyleType: "none",
+		paddingLeft: 0,
+	},
 });
 
-const ListItem = styled("li", { name: "CcHowToBox", slot: "li" })({
-	whiteSpace: "pre-line",
-	// a word wider than the entry (a German compound, a file name or a URL on
-	// a phone) breaks inside, so it stays in the frame and does not widen the
-	// page, also where the box sits in a flex row or a grid cell
-	overflowWrap: "anywhere",
-});
+const ListItem = styled("li", { name: "CcHowToBox", slot: "li" })(
+	({ theme }) => ({
+		whiteSpace: "pre-line",
+		// a word wider than the entry (a German compound, a file name or a URL
+		// on a phone) breaks inside, so it stays in the frame and does not
+		// widen the page, also where the box sits in a flex row or a grid cell
+		overflowWrap: "anywhere",
+		// a gap between entries, so an entry of several lines does not run into
+		// the next. :where() keeps the rule at zero specificity, so a margin in
+		// the theme's `li` override or in classes.li replaces it, although
+		// emotion puts nested rules after the plain ones. The leading * stops
+		// emotion from reading the selector as a pseudo-class of the entry.
+		"*:where(&:not(:first-of-type))": {
+			marginTop: theme.spacing(0.5),
+		},
+	}),
+);
 
 /**
  * Keys of the theme's `components.CcHowToBox.styleOverrides`, also the keys
@@ -140,10 +185,16 @@ const ListItem = styled("li", { name: "CcHowToBox", slot: "li" })({
  * - `legend`: the title, the frame's `<legend>`. Its overrides apply over the
  *   GroupBox's legend styles, including the theme's `CcGroupBox` overrides of
  *   `legend`: what they leave out still comes from those.
- * - `ul`: the list
+ * - `ul`: the list, a `<ul>`, or an `<ol>` with `ordered`. It indents the
+ *   entries by 1.5rem for their markers. While it holds a single entry it
+ *   has the class `CcHowToBox-singleEntry`, which removes the marker and the
+ *   indent; an override styles it with `"&.CcHowToBox-singleEntry"`.
  * - `li`: each entry. It sets `white-space: pre-line` and
  *   `overflow-wrap: anywhere`, so a word wider than the entry breaks inside
- *   it.
+ *   it, and half a spacing unit of `margin-top` on every entry but the
+ *   first. A `marginTop` in its override replaces that gap, also on the
+ *   first entry unless the override scopes it to
+ *   `"&:not(:first-of-type)"`.
  *
  * No slot receives an `ownerState`: a function override is called with the
  * theme. To style a box by its props, use theme `variants`, which apply to
@@ -160,7 +211,8 @@ const HowToBox = React.forwardRef(function HowToBox(
 	ref: React.ForwardedRef<HTMLFieldSetElement>,
 ) {
 	const props = useThemeProps({ props: inProps, name: "CcHowToBox" });
-	const { titleLabel, labels, className, classes, ...frameProps } = props;
+	const { titleLabel, labels, ordered, className, classes, ...frameProps } =
+		props;
 	const { t } = useCCTranslations();
 	const legendClass = classes?.legend;
 	// without a class of its own, the GroupBox keeps the classes of its theme's
@@ -181,6 +233,7 @@ const HowToBox = React.forwardRef(function HowToBox(
 			ref={ref}
 			titleLabel={titleLabel}
 			labels={labels}
+			ordered={!!ordered}
 			label={
 				titleLabel === undefined
 					? t("standalone.how-it-works.title")
@@ -189,16 +242,20 @@ const HowToBox = React.forwardRef(function HowToBox(
 			className={combineClassNames([className, classes?.root])}
 			classes={groupBoxClasses}
 		>
-			<UnorderedList
+			<List
+				as={ordered ? "ol" : undefined}
 				id={frameProps.id ? `${frameProps.id}-list` : undefined}
-				className={classes?.ul}
+				className={combineClassNames([
+					classes?.ul,
+					entries.length === 1 && SINGLE_ENTRY_CLASS,
+				])}
 			>
 				{entries.map((entry: React.ReactNode, i: number) => (
 					<ListItem key={i} className={classes?.li}>
 						{entry}
 					</ListItem>
 				))}
-			</UnorderedList>
+			</List>
 		</GroupBoxStyled>
 	);
 });
@@ -274,8 +331,14 @@ export const HowToBoxTranslate = (props: HowToBoxTranslateProps) => {
 
 /**
  * Instructions in a frame: a {@link GroupBox} titled "How it works" (or
- * `titleLabel`, or untitled for `titleLabel={null}`) around a bulleted list
- * with one item per entry of `labels`.
+ * `titleLabel`, or untitled for `titleLabel={null}`) around a list with one
+ * item per entry of `labels`, bulleted, or numbered with `ordered`. A single
+ * entry shows without a marker.
+ *
+ * The box is as wide as its parent and, like MUI's text components, sets no
+ * maximum line length: the page or dialog that holds it sets its width. To
+ * wrap long entries at about 80 characters on a wide page, a theme sets
+ * `styleOverrides.ul: { maxWidth: "80ch" }` (see the examples).
  *
  * Every other HTML attribute, `sx` and `ref` reach the frame's `<fieldset>`,
  * as they reach a {@link GroupBox}: `aria-label` names a box without a title.
@@ -285,15 +348,28 @@ export const HowToBoxTranslate = (props: HowToBoxTranslateProps) => {
  * Theme: `components.CcHowToBox.defaultProps` ({@link HowToBoxProps}),
  * `styleOverrides` per {@link HowToBoxClassKey} slot, and `variants`, which
  * apply to the frame. A variant's `props` match `titleLabel` and `labels` as
- * HowToBox gets them, after the theme's default props; from
- * {@link HowToBoxTranslate} these are the translated title and entries. A
- * `props` function gets these props directly: there is no `ownerState`. A
- * variant reaches the list and its entries through nested selectors.
+ * HowToBox gets them, after the theme's default props, and `ordered` as a
+ * boolean; from {@link HowToBoxTranslate} these are the translated title and
+ * entries. A `props` function gets these props directly: there is no
+ * `ownerState`. A variant reaches the list and its entries through nested
+ * selectors.
  *
  * @example
  * // the upload button is described by the steps above it
  * <HowToBox id={"import-how-to"} labels={steps} />
  * <Button aria-describedby={"import-how-to-list"}>{t("upload")}</Button>
+ *
+ * @example
+ * // numbered steps
+ * <HowToBox ordered labels={["Download the template", "Upload it below"]} />
+ *
+ * @example
+ * // a theme that numbers the entries of every box and wraps them at about
+ * // 80 characters
+ * createTheme({ components: { CcHowToBox: {
+ *   defaultProps: { ordered: true },
+ *   styleOverrides: { ul: { maxWidth: "80ch" } },
+ * } } });
  *
  * @example
  * // a theme that sets the entries of boxes with their own title in bold

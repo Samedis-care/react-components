@@ -23,6 +23,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-11-27 | [A required string list shows an asterisk and is described as required](2026-11-27-required-string-list-marked.md) | behavior |
 | 2026-11-27 | [InfiniteScroll: a negative or NaN `callBackDebounce` calls at once, as `0` does](2026-11-27-infinite-scroll-negative-debounce-calls-at-once.md) | behavior |
 | 2026-11-27 | [InlineSwitch's label shows the pointer cursor](2026-11-27-inline-switch-label-pointer-cursor.md) | behavior |
+| 2026-11-27 | [HowToBox entries stand 4px apart, and a single entry shows without a bullet](2026-11-27-how-to-box-entry-gap-and-single-entry.md) | behavior |
 | 2026-11-27 | [The Matrix add hint shows a "+" where its label does not fit](2026-11-27-matrix-add-hint-plus-where-label-does-not-fit.md) | behavior |
 | 2026-11-27 | [InfiniteScroll calls loadMoreBottom during a steady scroll, not only once the scroll stops](2026-11-27-infinite-scroll-loads-during-steady-scroll.md) | behavior |
 | 2026-11-27 | [ScrollableSchedule: a week result that is not 7 days fails the week](2026-11-27-scrollable-schedule-week-must-be-7-days.md) | behavior |
